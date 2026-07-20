@@ -242,6 +242,81 @@ describe("runner run plan policy", () => {
     );
   });
 
+  it("accepts bounded nonlethal damage when an unknown-ICE probe can no longer reach access", () => {
+    const pump = pumpAction({
+      breakerId: "loony-goon-1",
+      costs: [{ credits: 1 }],
+    });
+    const continueRun = continueAction({
+      encounterWillEndRun: true,
+      unbrokenSubroutineCount: 2,
+    });
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_231_cortical-scrub",
+      iceTitle: "Cortical Scrub",
+      iceStrength: 3,
+      breaker: loonyGoon(),
+      credits: 2,
+      extraRig: [quietPrograms()],
+      subroutines: [
+        {
+          id: "cortical-scrub-core-damage",
+          type: "do_damage",
+          amount: 1,
+          unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+        },
+        {
+          id: "cortical-scrub-etr",
+          type: "end_the_run",
+        },
+      ],
+      legalActions: [pump, continueRun],
+    });
+    input.playerView.own.gripOrHq.push(
+      { instanceId: "grip-1", known: true },
+      { instanceId: "grip-2", known: true },
+      { instanceId: "grip-3", known: true },
+    );
+    const basePlan = runPlan();
+    const probePlan: RunnerRunPlan = {
+      ...basePlan,
+      objective: {
+        kind: "probe_unknown_ice",
+        riskBudget: {
+          maxCreditLoss: 0,
+          maxDamage: 1,
+          allowEndTheRun: true,
+          evidence: [],
+        },
+      },
+      pathQuote: {
+        ...basePlan.pathQuote,
+        quoteStatus: "known_complete",
+        canReachAccess: false,
+        cannotReachReason: "insufficient_credits_after_reserve",
+      },
+      revalidation: {
+        status: "abort_recommended",
+        reasons: ["known_route_no_longer_affordable"],
+        checkedAtStateVersion: input.playerView.stateVersion,
+      },
+    };
+
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: probePlan,
+      choices: [
+        choice(pump, "encounter_survival", 900),
+        choice(continueRun, "simple_run_choice", -2397),
+      ],
+    });
+
+    expect(selected?.action.actionId).toBe(continueRun.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_conserve_credits:true",
+    );
+  });
+
   it("chooses a legal direct break when restricted breaker credits preserve cash reserve", () => {
     const breakSubroutine = breakAction({ costs: [{ credits: 4 }] });
     const continueRun = continueAction({

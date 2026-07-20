@@ -5,7 +5,7 @@ import { evaluateKnownRemoteAccessPayoff } from "../known-remote-access-payoff";
 import {
   bankToolEvidence,
   runnerCreditBankAssessment,
-  runnerHasConvertibleBankRunFundingNeed,
+  runnerConvertibleBankRunFundingConsumer,
 } from "./tactical-plan-bank-tools";
 import { accessCommitmentPlanEvidence } from "./tactical-plan-access-commitment";
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
@@ -766,11 +766,19 @@ export function buildRunnerTacticalPlans(
     ),
   );
   const runnerBankToolEvidence = bankToolEvidence(context, "runner");
+  const runnerBankFundingConsumer =
+    runnerConvertibleBankRunFundingConsumer(context);
+  const genericPlanFundingNeed = runnerHasConcretePlanFundingNeed(input, [
+    ...blockedRemoteRuns,
+    ...blockedCentralRuns,
+  ]);
   const runnerFundingNeed =
-    runnerHasConcretePlanFundingNeed(input, [
-      ...blockedRemoteRuns,
-      ...blockedCentralRuns,
-    ]) || runnerHasConvertibleBankRunFundingNeed(context);
+    genericPlanFundingNeed || runnerBankFundingConsumer !== undefined;
+  const runnerBankFundingEvidence =
+    runnerBankFundingConsumer?.evidence ??
+    (genericPlanFundingNeed
+      ? ["runner_bank_funding_consumer:concrete_legal_action"]
+      : []);
   const runnerBankAssessment = runnerCreditBankAssessment(
     context,
     input.legalActions,
@@ -857,6 +865,7 @@ export function buildRunnerTacticalPlans(
               evidence: [
                 ...runnerBankToolEvidence,
                 ...runnerBankAssessment.evidence,
+                ...runnerBankFundingEvidence,
               ],
             },
           ],
@@ -873,6 +882,7 @@ export function buildRunnerTacticalPlans(
           ),
           ...runnerBankToolEvidence,
           ...runnerBankAssessment.evidence,
+          ...runnerBankFundingEvidence,
           ...runnerGoalEvidence,
         ],
         stateVersion,
@@ -882,9 +892,7 @@ export function buildRunnerTacticalPlans(
   return applyRunnerDrawOverflowAdjustments(context, plans);
 }
 
-function runnerHqSuccessWindowSetup(
-  context: TacticalPlanBuildContext,
-):
+function runnerHqSuccessWindowSetup(context: TacticalPlanBuildContext):
   | {
       hqRunAction: LegalAction;
       sourceDefinitionId: string;
@@ -894,8 +902,7 @@ function runnerHqSuccessWindowSetup(
   | undefined {
   const input = context.input;
   const hqRunAction = input.legalActions.find(
-    (action) =>
-      action.type === "start_run" && actionServerId(action) === "hq",
+    (action) => action.type === "start_run" && actionServerId(action) === "hq",
   );
   if (!hqRunAction) return undefined;
   const setup = runnerHqSuccessWindowSetupAssessment(input, hqRunAction, "hq");

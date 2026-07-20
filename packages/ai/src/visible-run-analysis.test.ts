@@ -314,6 +314,73 @@ describe("visible run analysis runner run credit pools", () => {
       visibleBreakCost: 2,
       creditsAfterPath: 0,
     });
+
+    expect(
+      quoteRunnerRunRoute({
+        path: assessment,
+        availableCredits: 0,
+      }),
+    ).toMatchObject({
+      guaranteedKnownCost: 2,
+      availableCredits: 0,
+      fundingGap: 0,
+    });
+  });
+
+  it("does not expose restricted breaker credits to a visible Trace bid", () => {
+    const rig = [nonNoisyBreakerCreditPool("runner-cloak", 4)];
+    const assessment = assessKnownRezzedIcePath(
+      [fragmentationStormIce("rd-fragmentation")],
+      rig,
+      runnerRunPathCreditBudgetWithVisiblePools(0, rig),
+      [],
+      0,
+    );
+
+    expect(
+      quoteRunnerRunRoute({
+        path: assessment,
+        availableCredits: 0,
+      }),
+    ).toMatchObject({
+      reachability: "conditional_access",
+      guaranteedKnownCost: 4,
+      availableCredits: 0,
+      fundingGap: 4,
+    });
+  });
+
+  it("does not move restricted credits from a paid break to a later Trace", () => {
+    const rig = [
+      codecrackerBreaker("runner-codecracker"),
+      nonNoisyBreakerCreditPool("runner-cloak", 2),
+    ];
+    const assessment = assessKnownRezzedIcePath(
+      [
+        fragmentationStormIce("rd-fragmentation"),
+        classicCodeGateIce("rd-code-gate"),
+      ],
+      rig,
+      runnerRunPathCreditBudgetWithVisiblePools(0, rig),
+      [],
+      0,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      creditsAfterPath: 0,
+      visibleBreakCost: 2,
+    });
+    expect(
+      quoteRunnerRunRoute({
+        path: assessment,
+        availableCredits: 0,
+      }),
+    ).toMatchObject({
+      reachability: "conditional_access",
+      guaranteedKnownCost: 6,
+      fundingGap: 4,
+    });
   });
 
   it("does not spend non-noisy breaker credits through a noisy breaker", () => {

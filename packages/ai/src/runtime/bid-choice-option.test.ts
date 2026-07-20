@@ -153,6 +153,25 @@ describe("selectedBidChoiceOptionId", () => {
       ),
     ).toBe("guess_8");
   });
+
+  it("pays the exact visible Seed-7 trace guarantee when the Corp cannot bid", () => {
+    expect(
+      selectedBidChoiceOptionId(
+        input("runner", "normal", {
+          ownCredits: 6,
+          runnerCredits: 0,
+          encounteredIceDefinitionId: "onr_v1_246_fragmentation-storm",
+        }),
+        bidChoice("trace:seed7.fragmentation-storm", range(0, 6)),
+        {
+          traceStrength: 4,
+          baseTraceStrength: 4,
+          runnerLink: 0,
+          sourceDefinitionId: "onr_v1_246_fragmentation-storm",
+        },
+      ),
+    ).toBe("bid_4");
+  });
 });
 
 function input(

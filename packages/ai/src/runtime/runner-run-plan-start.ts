@@ -74,6 +74,7 @@ export function createRunnerRunPlanForSelectedAction(params: {
     expectedValue,
     expectedAccessCount,
     evaluation: matchingTargetEvaluation,
+    runnerGripCount: input.playerView.own.gripOrHq.length,
   });
   const accessReserve = runnerRunAccessReserveForStealOrTrash({
     input,
@@ -348,8 +349,16 @@ function runnerRunObjectiveFor(params: {
   expectedValue: number;
   expectedAccessCount: number;
   evaluation: RunnerRunTargetEvaluation | undefined;
+  runnerGripCount: number;
 }): RunnerRunObjective {
   const payoff = params.evaluation?.accessPayoff;
+  if (payoff === "trash_affordable" || payoff === "trash_unaffordable") {
+    return {
+      kind: "trash_asset_or_upgrade",
+      maxTrashCost: payoff === "trash_affordable" ? Number.MAX_SAFE_INTEGER : 0,
+      expectedValue: params.expectedValue,
+    };
+  }
   const boundedUnknownProbe =
     params.evaluation?.routeQuote?.reachability === "conditional_access" &&
     (params.evaluation.routeQuote.conditionalReasons.length ?? 0) > 0 &&
@@ -360,15 +369,28 @@ function runnerRunObjectiveFor(params: {
     payoff !== "score_threat" &&
     params.evaluation?.scoreThreat !== true;
   if (boundedUnknownProbe) {
+    const remainingKnownRouteCredits = Math.max(
+      0,
+      params.evaluation?.creditsAfterRun ?? 0,
+    );
+    const modeledUnknownRiskBuffer = Math.max(
+      1,
+      params.evaluation?.unrezzedIceRiskCreditBuffer ?? 0,
+    );
     return {
       kind: "probe_unknown_ice",
       riskBudget: {
-        maxCreditLoss: Math.max(0, params.evaluation?.pathCost ?? 0),
-        maxDamage: 0,
+        maxCreditLoss: Math.min(
+          remainingKnownRouteCredits,
+          modeledUnknownRiskBuffer,
+        ),
+        maxDamage: params.runnerGripCount >= 3 ? 1 : 0,
         allowEndTheRun: true,
         evidence: [
           "run_objective:probe_unknown_ice",
           "run_objective:conditional_unknown_route",
+          `run_objective:probe_remaining_route_credits:${remainingKnownRouteCredits}`,
+          `run_objective:probe_modeled_risk_buffer:${modeledUnknownRiskBuffer}`,
         ],
       },
     };
@@ -402,13 +424,6 @@ function runnerRunObjectiveFor(params: {
       urgency: params.evaluation?.scoreThreat ? 100 : params.expectedValue,
     };
   }
-  if (payoff === "trash_affordable" || payoff === "trash_unaffordable") {
-    return {
-      kind: "trash_asset_or_upgrade",
-      maxTrashCost: payoff === "trash_affordable" ? Number.MAX_SAFE_INTEGER : 0,
-      expectedValue: params.expectedValue,
-    };
-  }
   if (payoff === "access_bonus") {
     return {
       kind: "run_card_effect",
@@ -419,8 +434,11 @@ function runnerRunObjectiveFor(params: {
   return {
     kind: "probe_unknown_ice",
     riskBudget: {
-      maxCreditLoss: Math.max(0, params.evaluation?.pathCost ?? 0),
-      maxDamage: 0,
+      maxCreditLoss: Math.min(
+        Math.max(0, params.evaluation?.creditsAfterRun ?? 0),
+        Math.max(1, params.evaluation?.unrezzedIceRiskCreditBuffer ?? 0),
+      ),
+      maxDamage: params.runnerGripCount >= 3 ? 1 : 0,
       allowEndTheRun: true,
       evidence: ["run_objective:probe_unknown_ice"],
     },

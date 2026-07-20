@@ -24,6 +24,28 @@ describe("runner run release", () => {
     });
   });
 
+  it("keeps a funded unknown-ICE probe available when full-access guidance says to fund first", () => {
+    const release = runnerRunReleaseForEvaluation(
+      runnerInput(),
+      evaluation({
+        route: "conditional_access",
+        conditionalReasons: ["unknown_ice_on_route"],
+        unknownIceCount: 2,
+        fundingGap: 0,
+        accessPayoff: "score_threat",
+        pathPassability: "blocked_unpayable",
+        recommendation: "gain_credits_first",
+        unrezzedIceRiskUnderfunded: true,
+      }),
+    );
+
+    expect(release).toMatchObject({
+      status: "released_conditional",
+      reason: "bounded_unknown_ice_probe",
+      acceptedRisks: ["conditional:unknown_ice_on_route"],
+    });
+  });
+
   it("blocks a conditional access-bonus run without an explicit probe-only route", () => {
     const release = runnerRunReleaseForEvaluation(
       runnerInput(),
@@ -79,6 +101,8 @@ function evaluation(params: {
   accessPayoff: RunnerRunTargetEvaluation["accessPayoff"];
   unknownIceCount?: number;
   pathPassability?: RunnerRunTargetEvaluation["pathPassability"];
+  recommendation?: RunnerRunTargetEvaluation["recommendation"];
+  unrezzedIceRiskUnderfunded?: boolean;
 }): RunnerRunTargetEvaluation {
   return {
     targetServerId: "rd",
@@ -90,9 +114,9 @@ function evaluation(params: {
     knownAccessState: "unknown",
     pathPassability: params.pathPassability ?? "reachable",
     creditsAfterRun: 3,
-    unrezzedIceRiskUnderfunded: false,
+    unrezzedIceRiskUnderfunded: params.unrezzedIceRiskUnderfunded ?? false,
     scoreThreat: false,
-    recommendation: "run_now",
+    recommendation: params.recommendation ?? "run_now",
     routeQuote: {
       reachability: params.route,
       knownCost: 4,

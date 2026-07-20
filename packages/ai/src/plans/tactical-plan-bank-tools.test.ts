@@ -2,7 +2,10 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import type { DeckCapabilityProfile } from "../deck-capabilities";
-import { runnerCreditBankAssessment } from "./tactical-plan-bank-tools";
+import {
+  runnerConvertibleBankRunFundingConsumer,
+  runnerCreditBankAssessment,
+} from "./tactical-plan-bank-tools";
 import type { TacticalPlanBuildContext } from "./tactical-plan-types";
 
 describe("runnerCreditBankAssessment", () => {
@@ -66,6 +69,91 @@ describe("runnerCreditBankAssessment", () => {
 
     expect(assessment.currentStoredCredits).toBe(0);
     expect(assessment.shouldBuild).toBe(true);
+  });
+
+  it("names the valuable run route that a bank payout can fund", () => {
+    const bankContext = context({
+      credits: 4,
+      storedCredits: 3,
+      cashOutLegal: true,
+    });
+    bankContext.runnerRunTargetEvaluations = [
+      {
+        targetServerId: "remote_2",
+        accessPayoff: "trash_affordable",
+        knownAccessState: "known",
+        pathPassability: "blocked_unpayable",
+        pathCost: 7,
+        creditsAfterRun: 0,
+        scoreThreat: false,
+        score: 420,
+        routeQuote: {
+          reachability: "conditional_access",
+          knownCost: 4,
+          guaranteedKnownCost: 7,
+          availableCredits: 4,
+          fundingGap: 3,
+          unknownIceCount: 0,
+          effects: [],
+          conditionalReasons: [
+            "visible_access_preventing_effect_not_guaranteed",
+          ],
+          evidence: [],
+        },
+      } as unknown as NonNullable<
+        TacticalPlanBuildContext["runnerRunTargetEvaluations"]
+      >[number],
+    ];
+
+    expect(runnerConvertibleBankRunFundingConsumer(bankContext)).toEqual({
+      targetServerId: "remote_2",
+      fundingGap: 3,
+      accessPayoff: "trash_affordable",
+      evidence: [
+        "runner_bank_funding_consumer:run_route",
+        "runner_bank_funding_consumer_server:remote_2",
+        "runner_bank_funding_consumer_gap:3",
+        "runner_bank_funding_consumer_payoff:trash_affordable",
+      ],
+    });
+  });
+
+  it("does not name banking as a solution for a route with no access", () => {
+    const bankContext = context({
+      credits: 4,
+      storedCredits: 6,
+      cashOutLegal: true,
+    });
+    bankContext.runnerRunTargetEvaluations = [
+      {
+        targetServerId: "remote_2",
+        accessPayoff: "agenda",
+        knownAccessState: "known",
+        pathPassability: "blocked_unpayable",
+        pathCost: 7,
+        creditsAfterRun: 0,
+        scoreThreat: true,
+        score: 800,
+        routeQuote: {
+          reachability: "no_access",
+          knownCost: 7,
+          guaranteedKnownCost: 7,
+          availableCredits: 4,
+          fundingGap: 3,
+          unknownIceCount: 0,
+          effects: [],
+          conditionalReasons: [],
+          noAccessReason: "known_unbreakable_ice",
+          evidence: [],
+        },
+      } as unknown as NonNullable<
+        TacticalPlanBuildContext["runnerRunTargetEvaluations"]
+      >[number],
+    ];
+
+    expect(
+      runnerConvertibleBankRunFundingConsumer(bankContext),
+    ).toBeUndefined();
   });
 });
 

@@ -73,6 +73,16 @@ export function quoteRunnerRunRoute(params: {
     ? knownCost
     : baseKnownCost +
       accessGuaranteeCosts.reduce<number>((sum, cost) => sum + (cost ?? 0), 0);
+  const knownRouteCashCost = Math.max(
+    0,
+    availableCredits - params.path.creditsAfterPath,
+  );
+  const provenRestrictedRouteCredits = Math.max(
+    0,
+    knownCost - knownRouteCashCost,
+  );
+  const availableKnownRouteCredits =
+    availableCredits + provenRestrictedRouteCredits;
   const accessPreventingConditionalHazard = hazards.some(
     (hazard) => hazard.preventsAccess && hazard.unavoidable,
   );
@@ -100,7 +110,10 @@ export function quoteRunnerRunRoute(params: {
     : conditionalReasons.length > 0
       ? "conditional_access"
       : "guaranteed_access";
-  const fundingGap = Math.max(0, guaranteedKnownCost - availableCredits);
+  const fundingGap = Math.max(
+    0,
+    guaranteedKnownCost - availableKnownRouteCredits,
+  );
   return {
     reachability,
     knownCost,
@@ -121,6 +134,9 @@ export function quoteRunnerRunRoute(params: {
       `route_known_cost:${knownCost}`,
       `route_guaranteed_known_cost:${guaranteedKnownCost}`,
       `route_available_credits:${availableCredits}`,
+      `route_proven_restricted_credits:${provenRestrictedRouteCredits}`,
+      `route_available_known_route_credits:${availableKnownRouteCredits}`,
+      `route_credits_after_known_path:${params.path.creditsAfterPath}`,
       `route_funding_gap:${fundingGap}`,
       `route_unknown_ice_count:${unknownIceCount}`,
       ...conditionalReasons.map((reason) => `route_conditional:${reason}`),

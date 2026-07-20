@@ -1390,6 +1390,10 @@ function selfplayEntryDetectorFindings(
   );
   const repeatedNoProgressRun =
     previousSameRun !== undefined &&
+    repeatedRunDecisionStateIsStable(
+      summary.actionSequence[previousSameRun],
+      entry,
+    ) &&
     !hasMeaningfulProgressBetween(
       summary.actionSequence,
       previousSameRun + 1,
@@ -1640,6 +1644,45 @@ function selfplayEntryDetectorFindings(
     );
   }
   return findings;
+}
+
+function repeatedRunDecisionStateIsStable(
+  previous: AiSimulationSummary["actionSequence"][number] | undefined,
+  current: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  if (!previous) return false;
+  const previousFingerprint = selfplayEntryStructuredValue(previous, [
+    "runner_run_decision_fingerprint:",
+  ]);
+  const currentFingerprint = selfplayEntryStructuredValue(current, [
+    "runner_run_decision_fingerprint:",
+  ]);
+  if (previousFingerprint && currentFingerprint) {
+    return previousFingerprint === currentFingerprint;
+  }
+  return true;
+}
+
+function selfplayEntryStructuredValue(
+  entry: AiSimulationSummary["actionSequence"][number],
+  prefixes: readonly string[],
+): string | undefined {
+  const normalizedPrefixes = prefixes.map((prefix) =>
+    prefix.toLocaleLowerCase("en-US"),
+  );
+  for (const rawValue of [
+    ...(entry.evidence ?? []),
+    ...(entry.debugFacts ?? []),
+  ]) {
+    const value = rawValue.toLocaleLowerCase("en-US");
+    const prefix = normalizedPrefixes.find((candidate) =>
+      value.startsWith(candidate),
+    );
+    if (!prefix) continue;
+    const structuredValue = value.slice(prefix.length);
+    if (structuredValue.length > 0) return structuredValue;
+  }
+  return undefined;
 }
 
 function selfplaySummaryFinding(

@@ -310,8 +310,14 @@ describe("runner run plan memory", () => {
 
   it("creates an explicit probe objective for a released unknown-ICE route", () => {
     const startRun = action("start_run", { serverId: "rd" });
+    const input = runnerInput({ activeRun: false, legalActions: [startRun] });
+    input.playerView.own.gripOrHq.push(
+      { instanceId: "grip-1", known: true },
+      { instanceId: "grip-2", known: true },
+      { instanceId: "grip-3", known: true },
+    );
     const plan = createRunnerRunPlanForSelectedAction({
-      input: runnerInput({ activeRun: false, legalActions: [startRun] }),
+      input,
       selectedAction: startRun,
       runnerRunTargetEvaluations: [
         runTargetEvaluation(startRun, {
@@ -331,11 +337,48 @@ describe("runner run plan memory", () => {
     });
 
     expect(plan?.objective.kind).toBe("probe_unknown_ice");
+    expect(plan?.objective).toMatchObject({
+      kind: "probe_unknown_ice",
+      riskBudget: { maxCreditLoss: 1, maxDamage: 1 },
+    });
     expect(plan?.commitment).toMatchObject({
       route: { reachability: "conditional_access", unknownIceCount: 1 },
       acceptedRisks: ["conditional:unknown_ice_on_route"],
     });
     expect(plan?.revalidation.status).toBe("valid");
+  });
+
+  it("keeps a known remote trash payoff as the purpose of an unknown-ICE run", () => {
+    const startRun = action("start_run", { serverId: "remote_1" });
+    const plan = createRunnerRunPlanForSelectedAction({
+      input: runnerInput({ activeRun: false, legalActions: [startRun] }),
+      selectedAction: startRun,
+      runnerRunTargetEvaluations: [
+        runTargetEvaluation(startRun, {
+          targetServerId: "remote_1",
+          targetKind: "remote",
+          accessPayoff: "trash_affordable",
+          routeQuote: {
+            reachability: "conditional_access",
+            knownCost: 2,
+            guaranteedKnownCost: 2,
+            availableCredits: 5,
+            fundingGap: 0,
+            unknownIceCount: 1,
+            effects: [],
+            conditionalReasons: ["unknown_ice_on_route"],
+            evidence: [],
+          },
+        }),
+      ],
+    });
+
+    expect(plan?.objective.kind).toBe("trash_asset_or_upgrade");
+    expect(plan?.commitment).toMatchObject({
+      goal: "trash_asset_or_upgrade",
+      route: { reachability: "conditional_access", unknownIceCount: 1 },
+      acceptedRisks: ["conditional:unknown_ice_on_route"],
+    });
   });
 
   it("creates a decline-low-value access intent only for known low-value targets", () => {
@@ -474,6 +517,9 @@ describe("runner run plan memory", () => {
     expect(decision.actionId).toBe("start_run");
     expect(remembered?.runStartActionId).toBe("start_run");
     expect(remembered?.objective.kind).toBe("access_rnd_top");
+    expect(decision.evidence).toContain(
+      `runner_run_decision_fingerprint:${remembered?.commitment?.decisionFingerprint.value}`,
+    );
   });
 });
 

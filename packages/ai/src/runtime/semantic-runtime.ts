@@ -547,6 +547,12 @@ export function chooseSemanticRuntimeAction(
             `runner_run_plan_objective:${updatedRunnerRunPlanMemory.objective.kind}`,
             `runner_run_plan_target:${updatedRunnerRunPlanMemory.targetServer.id}`,
             `runner_run_plan_revalidation:${updatedRunnerRunPlanMemory.revalidation.status}`,
+            ...(updatedRunnerRunPlanMemory.commitment
+              ? [
+                  ...updatedRunnerRunPlanMemory.commitment.evidence,
+                  `runner_run_decision_fingerprint:${updatedRunnerRunPlanMemory.commitment.decisionFingerprint.value}`,
+                ]
+              : []),
           ]
         : []),
       ...(updatedStrategicIntentMemory

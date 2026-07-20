@@ -193,18 +193,17 @@ function runnerRunPlanAccessChoice(params: {
     params.plan.budget.damageSafetyReserve.preventionCreditsReserved,
     params.plan.budget.tagSafetyReserve.minimumCreditsAfterTags,
   );
-  const plannedPositiveTrash =
+  const committedPositiveTrash =
     trashChoice !== undefined &&
     params.plan.objective.kind === "trash_asset_or_upgrade" &&
+    params.plan.objective.expectedValue > 0 &&
     params.plan.accessIntent?.trashPolicy === "trash_if_value_positive" &&
-    trashChoice.score > 0 &&
-    (declineChoice === undefined || trashChoice.score > declineChoice.score) &&
     trashCost <= plannedTrashBudget &&
     trashCost <= params.plan.objective.maxTrashCost;
   const trashBreaksReserve =
     trashChoice !== undefined &&
     params.input.playerView.own.credits - trashCost <
-      (plannedPositiveTrash ? postRunSafetyReserve : reserveTarget);
+      (committedPositiveTrash ? postRunSafetyReserve : reserveTarget);
   const trashPolicy = params.plan.accessIntent?.trashPolicy;
   const declineLowValueChoice =
     declineChoice &&
@@ -220,7 +219,7 @@ function runnerRunPlanAccessChoice(params: {
   const selected =
     trashChoice && trashPolicy === "must_trash_target"
       ? trashChoice
-      : trashChoice && plannedPositiveTrash && !trashBreaksReserve
+      : trashChoice && committedPositiveTrash && !trashBreaksReserve
         ? trashChoice
         : declineChoice && trashBreaksReserve
           ? declineChoice
@@ -235,9 +234,10 @@ function runnerRunPlanAccessChoice(params: {
       `runner_run_plan_access_selected:${selected.action.type}`,
       `runner_run_plan_access_trash_policy:${trashPolicy ?? "none"}`,
       `runner_run_plan_access_reserve:${reserveTarget}`,
-      ...(plannedPositiveTrash
+      ...(committedPositiveTrash
         ? [
             "runner_run_plan_access_trash_spends_planned_reserve:true",
+            "runner_run_plan_access_trash_converts_commitment:true",
             `runner_run_plan_access_trash_budget:${plannedTrashBudget}`,
             `runner_run_plan_access_post_run_safety_reserve:${postRunSafetyReserve}`,
           ]

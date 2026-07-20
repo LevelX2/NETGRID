@@ -176,6 +176,43 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("run-hq-repeat");
   });
 
+  it("flags a repeated run only when the visible decision fingerprint is stable", () => {
+    const stable = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-remote-stable-first",
+        targetServerId: "remote_1",
+        evidence: ["runner_run_decision_fingerprint:v1:stable"],
+      }),
+      selfplayAction("runner", 2, "start_run", {
+        selectedActionId: "run-remote-stable-repeat",
+        targetServerId: "remote_1",
+        evidence: ["runner_run_decision_fingerprint:v1:stable"],
+      }),
+    ]);
+    const changed = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-remote-before-change",
+        targetServerId: "remote_1",
+        evidence: ["runner_run_decision_fingerprint:v1:before"],
+      }),
+      selfplayAction("runner", 2, "gain_credit", {
+        selectedActionId: "gain-credit",
+      }),
+      selfplayAction("runner", 3, "start_run", {
+        selectedActionId: "run-remote-after-change",
+        targetServerId: "remote_1",
+        evidence: ["runner_run_decision_fingerprint:v1:after"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([stable, changed], {
+      detectorIds: ["repeated_no_progress_run"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("run-remote-stable-repeat");
+  });
+
   it("bounds no-legal-action failure errors to structured tokens", () => {
     const positive = {
       ...selfplaySummary([

@@ -43,9 +43,6 @@ export function runnerRunReleaseForEvaluation(
   if (route.effects.some((effect) => effect.canEndGameBeforeAccess)) {
     return blocked("flatline_risk_before_access", baseEvidence);
   }
-  if (!runRecommendationReleasesNow(evaluation)) {
-    return blocked(`recommendation_${evaluation.recommendation}`, baseEvidence);
-  }
   const unknownOnlyProbe =
     route.unknownIceCount > 0 &&
     route.fundingGap === 0 &&
@@ -54,8 +51,10 @@ export function runnerRunReleaseForEvaluation(
       (reason) => reason === "unknown_ice_on_route",
     ) &&
     evaluation.knownAccessState !== "known_no_current_payoff" &&
-    evaluation.unrezzedIceRiskUnderfunded !== true &&
     evaluation.creditsAfterRun >= 0;
+  if (!unknownOnlyProbe && !runRecommendationReleasesNow(evaluation)) {
+    return blocked(`recommendation_${evaluation.recommendation}`, baseEvidence);
+  }
   const agendaRisk =
     (evaluation.accessPayoff === "agenda" ||
       evaluation.accessPayoff === "score_threat" ||

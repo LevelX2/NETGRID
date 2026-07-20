@@ -1,4 +1,5 @@
 import type { LegalAction, Side } from "@netgrid/shared";
+import type { RunnerAccessPayoff } from "../run-analysis/runner-run-target-types";
 import type { TacticalPlanBuildContext } from "./tactical-plan-types";
 
 const RUNNER_BANK_MIN_CRITICAL_CASHOUT = 3;
@@ -21,6 +22,13 @@ export type RunnerCreditBankAssessment = {
     | "concrete_funding_need"
     | "urgent_credit_floor"
     | "value_target";
+  evidence: string[];
+};
+
+export type RunnerConvertibleBankRunFundingConsumer = {
+  targetServerId: string;
+  fundingGap: number;
+  accessPayoff: RunnerAccessPayoff;
   evidence: string[];
 };
 
@@ -111,37 +119,81 @@ export function largestBankPayout(
 export function runnerHasConvertibleBankRunFundingNeed(
   context: TacticalPlanBuildContext,
 ): boolean {
-  if (context.input.side !== "runner") return false;
-  if (context.input.playerView.own.clicks < 2) return false;
+  return runnerConvertibleBankRunFundingConsumer(context) !== undefined;
+}
+
+export function runnerConvertibleBankRunFundingConsumer(
+  context: TacticalPlanBuildContext,
+): RunnerConvertibleBankRunFundingConsumer | undefined {
+  if (context.input.side !== "runner") return undefined;
+  if (context.input.playerView.own.clicks < 2) return undefined;
   const largestPayout = largestBankPayout(context, "runner") ?? 0;
-  if (largestPayout <= 0) return false;
+  if (largestPayout <= 0) return undefined;
   const credits = context.input.playerView.own.credits;
   const evaluations = context.runnerRunTargetEvaluations ?? [];
   const readyPressureAvailable = evaluations.some(
     (evaluation) =>
+      runnerBankRunConsumerHasValue(evaluation) &&
+      (evaluation.routeQuote?.fundingGap ??
+        Math.max(0, evaluation.pathCost - credits)) === 0 &&
       evaluation.pathPassability === "reachable" &&
-      evaluation.creditsAfterRun >= 0 &&
-      (evaluation.scoreThreat ||
-        ["agenda", "score_threat", "trash_affordable", "fresh"].includes(
-          evaluation.accessPayoff,
-        ) ||
-        (evaluation.targetServerId === "rd" &&
-          evaluation.knownAccessState === "unknown")),
+      evaluation.creditsAfterRun >= 0,
   );
-  if (readyPressureAvailable) return false;
-  return Boolean(
-    evaluations.some(
-      (evaluation) =>
-        evaluation.pathPassability === "blocked_unpayable" &&
-        evaluation.pathCost > credits &&
-        evaluation.pathCost <= credits + largestPayout &&
-        (evaluation.scoreThreat ||
-          ["agenda", "score_threat", "trash_affordable", "fresh"].includes(
-            evaluation.accessPayoff,
-          ) ||
-          (evaluation.targetServerId === "rd" &&
-            evaluation.knownAccessState === "unknown")),
-    ),
+  if (readyPressureAvailable) return undefined;
+  const [consumer] = evaluations
+    .flatMap((evaluation) => {
+      const fundingGap =
+        evaluation.routeQuote?.fundingGap ??
+        Math.max(0, evaluation.pathCost - credits);
+      const routeCanBecomeAccess = evaluation.routeQuote
+        ? evaluation.routeQuote.reachability !== "no_access"
+        : evaluation.pathPassability === "blocked_unpayable";
+      if (
+        !runnerBankRunConsumerHasValue(evaluation) ||
+        !routeCanBecomeAccess ||
+        fundingGap <= 0 ||
+        fundingGap > largestPayout
+      ) {
+        return [];
+      }
+      return [
+        {
+          targetServerId: evaluation.targetServerId,
+          fundingGap,
+          accessPayoff: evaluation.accessPayoff,
+          score: evaluation.score,
+          evidence: [
+            `runner_bank_funding_consumer:run_route`,
+            `runner_bank_funding_consumer_server:${evaluation.targetServerId}`,
+            `runner_bank_funding_consumer_gap:${fundingGap}`,
+            `runner_bank_funding_consumer_payoff:${evaluation.accessPayoff}`,
+          ],
+        },
+      ];
+    })
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        left.fundingGap - right.fundingGap ||
+        left.targetServerId.localeCompare(right.targetServerId),
+    );
+  if (!consumer) return undefined;
+  const { score: _score, ...publicConsumer } = consumer;
+  return publicConsumer;
+}
+
+function runnerBankRunConsumerHasValue(
+  evaluation: NonNullable<
+    TacticalPlanBuildContext["runnerRunTargetEvaluations"]
+  >[number],
+): boolean {
+  return (
+    evaluation.scoreThreat ||
+    ["agenda", "score_threat", "trash_affordable", "fresh"].includes(
+      evaluation.accessPayoff,
+    ) ||
+    (evaluation.targetServerId === "rd" &&
+      evaluation.knownAccessState === "unknown")
   );
 }
 

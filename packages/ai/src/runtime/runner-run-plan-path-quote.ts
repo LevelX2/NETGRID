@@ -833,17 +833,21 @@ function sequenceForActions(params: {
     )?.effectiveRunQuote?.subroutines.some(
       isImmediateSafetyThreatSubroutine,
     ) === true;
+  const probeEncounterSafetyExceedsAcceptedDamage =
+    params.plan.objective.kind === "probe_unknown_ice" &&
+    probeSafetyThreatExceedsAcceptedDamage(params.input, params.plan);
   const probeCanConvertToFundedFullPath =
     params.plan.objective.kind === "probe_unknown_ice" &&
     !currentRunRemainingIce(params.input).some(
       (ice) => !ice.known || ice.rezzed !== true,
     ) &&
-    (creditsAfterSequence >= Math.max(2, reserveTarget) ||
-      probeEncounterHasImmediateSafetyThreat);
+    params.plan.pathQuote.canReachAccess &&
+    creditsAfterSequence >= Math.max(2, reserveTarget);
   const violatesProbeRiskBudget =
     params.plan.objective.kind === "probe_unknown_ice" &&
     projectedProbeCreditLoss > params.plan.objective.riskBudget.maxCreditLoss &&
-    !probeCanConvertToFundedFullPath;
+    !probeCanConvertToFundedFullPath &&
+    !probeEncounterSafetyExceedsAcceptedDamage;
   const violatesReserve =
     creditsAfterSequence < reserveTarget || violatesProbeRiskBudget;
   return {
@@ -881,6 +885,7 @@ function sequenceForActions(params: {
             `sequence_probe_credit_loss_projected:${projectedProbeCreditLoss}`,
             `sequence_probe_credit_loss_limit:${params.plan.objective.riskBudget.maxCreditLoss}`,
             `sequence_probe_immediate_safety_threat:${probeEncounterHasImmediateSafetyThreat}`,
+            `sequence_probe_safety_exceeds_accepted_damage:${probeEncounterSafetyExceedsAcceptedDamage}`,
             `sequence_probe_full_path_conversion:${probeCanConvertToFundedFullPath}`,
             `sequence_probe_credit_loss_budget_exceeded:${violatesProbeRiskBudget}`,
           ]
@@ -890,6 +895,47 @@ function sequenceForActions(params: {
         : []),
     ],
   };
+}
+
+function probeSafetyThreatExceedsAcceptedDamage(
+  input: AiDecisionInput,
+  plan: RunnerRunPlan,
+): boolean {
+  if (plan.objective.kind !== "probe_unknown_ice") return false;
+  const immediateThreats =
+    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines.filter(
+      isImmediateSafetyThreatSubroutine,
+    ) ?? [];
+  if (immediateThreats.length === 0) return false;
+  const damageAmounts = immediateThreats.map(directVisibleDamageAmount);
+  if (damageAmounts.some((amount) => amount === undefined)) return true;
+  const totalDamage = damageAmounts.reduce<number>(
+    (sum, amount) => sum + (amount ?? 0),
+    0,
+  );
+  return (
+    totalDamage > plan.objective.riskBudget.maxDamage ||
+    totalDamage >= input.playerView.own.gripOrHq.length
+  );
+}
+
+function directVisibleDamageAmount(
+  subroutine: VisibleEffectiveSubroutine,
+): number | undefined {
+  const type = subroutine.type.toLowerCase();
+  const damageTypeValue = (subroutine as { damageType?: unknown }).damageType;
+  const damageType =
+    typeof damageTypeValue === "string" ? damageTypeValue : undefined;
+  const directDamage =
+    type === "brain_damage" ||
+    type === "core_damage" ||
+    type === "do_brain_damage" ||
+    type === "do_core_damage" ||
+    type === "do_damage" ||
+    damageType === "brain" ||
+    damageType === "core";
+  if (!directDamage) return undefined;
+  return Math.max(1, Math.floor(subroutine.amount ?? 1));
 }
 
 function legalActionRef(action: LegalAction) {

@@ -91,6 +91,7 @@ describe("runner run plan access policy", () => {
     expect(selected?.evidence).toEqual(
       expect.arrayContaining([
         "runner_run_plan_access_trash_spends_planned_reserve:true",
+        "runner_run_plan_access_trash_converts_commitment:true",
         "runner_run_plan_access_trash_budget:2",
         "runner_run_plan_access_post_run_safety_reserve:0",
       ]),
@@ -100,7 +101,7 @@ describe("runner run plan access policy", () => {
     );
   });
 
-  it("does not spend planned trash budget on a nonpositive target", () => {
+  it("converts an unchanged positive trash commitment despite a stale local score", () => {
     const trash = action("trash_accessed_card", { costs: [{ credits: 2 }] });
     const decline = action("decline_trash");
 
@@ -117,9 +118,35 @@ describe("runner run plan access policy", () => {
       choices: [choice(decline, 100), choice(trash, -20)],
     });
 
+    expect(selected?.action.actionId).toBe(trash.actionId);
+    expect(selected?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_run_plan_access_trash_converts_commitment:true",
+        "runner_run_plan_access_trash_spends_planned_reserve:true",
+      ]),
+    );
+  });
+
+  it("does not force trash when the committed target value was nonpositive", () => {
+    const trash = action("trash_accessed_card", { costs: [{ credits: 2 }] });
+    const decline = action("decline_trash");
+
+    const selected = runnerRunPlanSemanticChoice({
+      input: accessInput([decline, trash], { credits: 2 }),
+      plan: runPlan({
+        objective: {
+          kind: "trash_asset_or_upgrade",
+          maxTrashCost: 2,
+          expectedValue: 0,
+        },
+        reserveForStealOrTrash: 2,
+      }),
+      choices: [choice(decline, 100), choice(trash, -20)],
+    });
+
     expect(selected?.action.actionId).toBe(decline.actionId);
-    expect(selected?.evidence).toContain(
-      "runner_run_plan_access_trash_breaks_reserve:true",
+    expect(selected?.evidence).not.toContain(
+      "runner_run_plan_access_trash_converts_commitment:true",
     );
   });
 

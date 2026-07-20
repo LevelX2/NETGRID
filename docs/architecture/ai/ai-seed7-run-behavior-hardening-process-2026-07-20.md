@@ -1,6 +1,6 @@
 # Seed-7-Run-Verhalten der KI härten
 
-Status: aktiv – Paket 3 abgeschlossen
+Status: aktiv – Paket 4 abgeschlossen, finale Verifikation ausstehend
 
 ## Quelle und Zielprüfung
 
@@ -226,7 +226,7 @@ Commit: `test(ai): harden seed7 run execution regressions`
 - Paket 1: abgeschlossen
 - Paket 2: abgeschlossen
 - Paket 3: abgeschlossen
-- Paket 4: ausstehend
+- Paket 4: abgeschlossen
 - Final Verify, Merge und Cleanup: ausstehend
 
 ## Paketnachweis
@@ -302,3 +302,56 @@ Commit: `test(ai): harden seed7 run execution regressions`
   bestanden ist. Dadurch entsteht keine negative globale Blink-Regression.
 - Verifikation: neun fokussierte Testdateien mit 167 Tests, AI-Typecheck und
   `git diff --check` grün.
+
+### Paket 4
+
+- Eine unverändert positive `trash_asset_or_upgrade`-Verpflichtung kann beim
+  Access nicht mehr durch einen abweichenden lokalen Trash-Score auf
+  `decline_trash` zurückfallen. Sie konvertiert den reservierten Trash-Preis,
+  solange Revalidation, Preis und Sicherheitsreserve weiterhin passen. Ein
+  nichtpositives oder invalidiertes Ziel bleibt dagegen frei bewertbar.
+- Der Seed-7-Trace-Gegenfall bietet als Runner bei Trace 4, Link 0, sechs
+  Credits und Corp 0 exakt vier Credits. Die vorhandene Encounter-Route führt
+  weiterhin die im Plan gewählte Break-/Pump-/Trace-Sequenz aus; es wurde
+  keine pauschale Trace- oder Tag-Regel ergänzt.
+- Start-Run-Entscheidungen tragen den kompakten side-sicheren
+  `runner_run_decision_fingerprint` in der redigierten Evidence. Der
+  Diagnose-Detektor `repeated_no_progress_run` meldet bei vorhandenen
+  Fingerprints nur materiell gleiche Entscheidungslagen; Ressourcen-, Rez-,
+  Wissens-, Rig-, Tag-, Root- oder Access-Zieländerungen erzeugen einen neuen
+  Fingerprint. Alte Traces ohne Fingerprint bleiben weiterhin auswertbar.
+- Bank-Cashout für eine blockierte Run-Route benennt Server, Funding-Gap und
+  Payoff als konkreten Verbraucher. Eine `no_access`-Route wird nicht als
+  durch Banking reparierbar klassifiziert; generische Install-/Aktionskosten
+  bleiben als eigener konkreter LegalAction-Verbraucher erkennbar.
+- Der projektweite Checkpoint 9FEF-F04 deckte im Final-Verify eine zu enge
+  Probe-Freigabe auf: Eine vollzugriffsbezogene Empfehlung
+  `gain_credits_first` darf einen unmittelbar legalen Unknown-ICE-Prüfrun
+  nicht sperren, wenn die bekannte Teilroute finanziert ist und der Probe vor
+  dem unbekannten Risiko auschecken kann. Der Unknown-only-Probe bleibt daher
+  freigegeben, ohne daraus eine Access-Garantie abzuleiten; alle 15
+  Match-9FEF-Kontrollen sind wieder grün.
+- Der positive Trapdoor-/Dumpster-Kontrollfall deckte im Final-Verify eine
+  zweite Integrationskante auf: Die Pfadanalyse bezahlte acht Breaker-Kosten
+  korrekt mit sechs allgemeinen und zwei eingeschränkten Credits, während die
+  RouteQuote die acht anschließend nur mit dem Bargeld verglich. Sie rechnet
+  nun ausschließlich die von der konkreten Pfadanalyse nachweislich
+  verwendbaren Restricted Breaker Credits an. Eine Gegenprobe hält dieselben
+  Credits für ein Trace-Gebot gesperrt; der unterfinanzierte Kontrollzustand
+  bleibt ebenfalls gesperrt.
+- Reproduzierbare Seed-7-Gegenprobe über die sechs festen Baseline-Slots,
+  `current_candidate` auf beiden Seiten und 480 Aktionen: sechs Spiele, 1.487
+  Entscheidungen, keine Hard Failures, alle Replays und die gesamte
+  Redaction grün. Im zuvor betroffenen
+  `strategy_panel_net_damage_black_ice` endet das Spiel nach 331 Aktionen
+  statt am Action-Limit; `repeated_no_progress_run` sinkt von sechs auf null.
+  Ein `trash_affordable`-Run auf Remote 2 reserviert sechs Credits und
+  konvertiert bei unverändertem Zustand in `trash_accessed_card`. Eine spätere
+  Wiederholung nach verändertem sichtbarem Zustand bleibt zulässig und
+  konvertiert ebenfalls.
+- Paketnahe Verifikation einschließlich der beiden Final-Verify-Korrekturen:
+  fokussierte Route-, Release-, Encounter- und Entscheidungspunkt-Tests,
+  AI-Typecheck und `git diff --check` grün. Der zuvor betroffene dritte
+  AI-Shard ist mit 138 Dateien und 846 Tests grün. Die vollständigen Shards,
+  Contract-/Hidden-Info-Gates und der unveränderte Standard-Baselinevergleich
+  folgen im Zustand `final_verify`.
