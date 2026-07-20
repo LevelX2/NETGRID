@@ -1,6 +1,6 @@
 # KI-Verhalten für Seed 01, Seed 09 und Seed 02 härten
 
-Status: Paket 4 abgeschlossen, Main-Abgleich und Cleanup offen
+Status: abgeschlossen – lokal in `main` integriert und Cleanup verifiziert
 
 ## Quelle und Zielprüfung
 
@@ -296,4 +296,13 @@ Commit: `docs(ai): close seed01 seed09 seed02 hardening`
     Finding-Rate von 12,48 auf 10,30 und Remote-Contest-Skip-Rate von 0,86 auf
     0,78; die leicht niedrigere Plan-Conversion von 0,72 auf 0,70 erzeugt
     keine dominierte Auswahl und keinen Hard Failure.
-- Main-Merge und Cleanup: offen
+- Main-Merge und Cleanup: abgeschlossen
+  - aktuelles `main` auf Merge-Commit `b8a4fe660` defensiv integriert;
+  - vollständiger Workspace-Typecheck, 23 Kernverträge und 138 geänderte
+    Server-Replay-Verträge auf dem kombinierten Stand grün;
+  - Arbeitsbranch per Fast-forward in `main` übernommen; sieben bereits im
+    Haupt-Worktree vorhandene Replay-/UI-Änderungen hatten keine
+    Pfadüberschneidung und blieben unverändert;
+  - Prozess-Worktree vollständig entfernt, Git-Registrierung bereinigt und
+    gemergten Branch ohne Force gelöscht; der separate bestehende
+    Baseline-Worktree blieb unangetastet.
