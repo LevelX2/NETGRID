@@ -1,6 +1,7 @@
 "use client";
 
 import { Award, BadgeCheck, Bot, RotateCcw, UserRound } from "lucide-react";
+import Link from "next/link";
 import type {
   ApiMatchFormat,
   ApiPlayerIdentityKind,
@@ -176,12 +177,12 @@ function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
             : "Korp-Deck"}
         </span>
         {result.isPublic ? (
-          <a
+          <Link
             className="button"
             href={`/replays?matchId=${encodeURIComponent(result.matchId)}`}
           >
             Replay ansehen
-          </a>
+          </Link>
         ) : null}
       </div>
     </article>
@@ -254,9 +255,11 @@ function RecentSeriesResultCard({ result }: { result: ApiRecentSeriesResult }) {
             </span>
             <span>{shortResultReasonLabel(game.reason)}</span>
             {game.isPublic ? (
-              <a href={`/replays?matchId=${encodeURIComponent(game.matchId)}`}>
+              <Link
+                href={`/replays?matchId=${encodeURIComponent(game.matchId)}`}
+              >
                 Replay ansehen
-              </a>
+              </Link>
             ) : null}
           </li>
         ))}
