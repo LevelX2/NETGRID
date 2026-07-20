@@ -89,8 +89,10 @@ Ein temporäres öffentliches Match deckte die drei produktiven Wege ab:
   Joinablauf mit vorausgewählter Match-ID.
 - `Laufend` öffnete die Zuschaueransicht. Der sichtbare DOM enthielt nur
   Handanzahlen und keine Kartenidentitäten, LegalActions oder Tokens.
-- `Abgeschlossen` öffnete das Replay. Perspektive und das ein-/ausblendbare,
-  mitlaufende Gegnerhandfenster funktionierten wie vorgesehen.
+- `Abgeschlossen` öffnete das Replay in der normalen Spieloberfläche.
+  Runner/Korp-Perspektivwechsel, Einzelschritt und Playback funktionierten
+  ohne Schrittverlust; die jeweilige eigene Hand wurde normal im Board
+  dargestellt.
 
 Das temporäre Match wurde danach exakt identifiziert, entfernt und die
 SQLite-Integrität erneut geprüft. Die Gastansicht von `Meine Spiele` zeigte
@@ -104,7 +106,7 @@ nur den Anmeldehinweis und keine globale Ersatzliste.
 | Reihenfolge Offen, Laufend, Abgeschlossen                 | bestanden |
 | Filter und direkte Aktionen funktionieren                 | bestanden |
 | Live-Zuschauer erhalten keine Hidden Info                 | bestanden |
-| Replay kann beide Hände kontrolliert anzeigen             | bestanden |
+| Replay nutzt das normale Board mit Runner/Korp-Wechsel    | bestanden |
 | `Meine Spiele` ist accountgebunden                        | bestanden |
 | Eigene private und fremde private Partie korrekt getrennt | bestanden |
 | 21/21 Bestandsmatches rückwirkend öffentlich              | bestanden |

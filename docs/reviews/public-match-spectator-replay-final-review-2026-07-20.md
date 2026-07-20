@@ -1,4 +1,4 @@
-# Final Review: öffentliche Matches, Zuschauer und Analyse-Replay
+# Final Review: öffentliche Matches, Zuschauer und Replay
 
 Stand: 2026-07-20
 Status: freigabefähig
@@ -14,11 +14,12 @@ Der freigegebene Produktvertrag ist vollständig umgesetzt:
 - Öffentliche offene Matches können beigetreten, öffentliche aktive Matches
   ohne Hidden Info live angesehen und öffentliche beendete Matches von jedem
   replayt werden.
-- Das Replay startet als Teilnehmer A oder B und zeigt den vollständigen
-  damaligen Boardzustand. Die gegnerische Hand kann als mitlaufendes Fenster
-  geöffnet und wieder geschlossen werden.
-- Beim Perspektivwechsel bleibt der aktuelle Schritt erhalten und das offene
-  Gegnerhandfenster zeigt automatisch die jeweils andere Hand.
+- Das Replay verwendet dieselbe Spieloberfläche wie die laufende Partie und
+  zeigt den damaligen Zustand mit denselben Board-, Server-, Rig-, Hand-,
+  Status- und Kartenvorschau-Komponenten.
+- Oben kann ohne Schrittverlust zwischen Runner und Korp gewechselt werden.
+  Jede Perspektive zeigt ihre normale eigene Hand; ein separates
+  Gegnerhandfenster oder eine künstliche Analysefläche existiert nicht.
 
 Es wurden keine zusätzlichen Consent-, Veröffentlichungs-, Widerrufs-,
 Delay-, Unlisting- oder getrennten Sichtbarkeitsschalter eingeführt.
@@ -34,7 +35,8 @@ Delay-, Unlisting- oder getrennten Sichtbarkeitsschalter eingeführt.
 | Full-Information ist vor Matchende nicht abrufbar             | bestanden              |
 | Beendete öffentliche Matches sind anonym replaybar            | bestanden              |
 | Beide Hände sind im Replay vorhanden                          | bestanden              |
-| Teilnehmer A/B und Gegnerhandfenster funktionieren synchron   | bestanden              |
+| Runner/Korp-Wechsel und normale eigene Hand funktionieren     | bestanden              |
+| Replay verwendet die normale Spieloberfläche                  | bestanden              |
 | Private Negativspur bleibt geschützt                          | bestanden              |
 | Typecheck, Contracts, Webtests, Build und Format-Gates        | bestanden              |
 
@@ -46,6 +48,5 @@ Delay-, Unlisting- oder getrennten Sichtbarkeitsschalter eingeführt.
   `docs/reviews/architecture/public-match-spectator-replay-implementation-review-2026-07-20.md`
 - Dieses Final Review.
 
-Die bekannte fachfremde Server-Testabweichung im Root-Rez-Fenster bleibt als
-separater bestehender Regelfund sichtbar und blockiert diese Produktfunktion
-nicht.
+Der vollständige aktuelle Serverlauf umfasst 198 grüne Tests ohne bekannte
+Replayabweichung.

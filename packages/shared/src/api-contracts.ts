@@ -1,5 +1,4 @@
 import type {
-  CardType,
   LegalAction,
   PlayerView,
   PublicGameEvent,
@@ -48,22 +47,6 @@ export type ApiPublicMatchListEntry = {
   result?: ApiMatchResultSnapshot;
 };
 
-export type ApiReplayAnalysisCard = {
-  instanceId: string;
-  definitionId: string;
-  title: string;
-  cardType: CardType;
-  faceup: boolean;
-  rezzed: boolean;
-  advancementCounters: number;
-};
-
-export type ApiReplayAnalysisParticipant = {
-  side: Side;
-  displayName: string;
-  hand: ApiReplayAnalysisCard[];
-};
-
 export type ApiReplayAnalysisFrame = {
   index: number;
   sourceEventId?: string;
@@ -73,36 +56,7 @@ export type ApiReplayAnalysisFrame = {
   activeSide: Side;
   phase: string;
   timingPoint: string;
-  participants: Record<ApiSeriesPlayerSlot, ApiReplayAnalysisParticipant>;
-  runner: {
-    credits: number;
-    clicks: number;
-    tags: number;
-    deckCount: number;
-    hand: ApiReplayAnalysisCard[];
-    discard: ApiReplayAnalysisCard[];
-    scored: ApiReplayAnalysisCard[];
-    rig: {
-      programs: ApiReplayAnalysisCard[];
-      hardware: ApiReplayAnalysisCard[];
-      resources: ApiReplayAnalysisCard[];
-    };
-  };
-  corp: {
-    credits: number;
-    clicks: number;
-    badPublicity: number;
-    deckCount: number;
-    hand: ApiReplayAnalysisCard[];
-    discard: ApiReplayAnalysisCard[];
-    scored: ApiReplayAnalysisCard[];
-    servers: Array<{
-      id: string;
-      label: string;
-      ice: ApiReplayAnalysisCard[];
-      root: ApiReplayAnalysisCard[];
-    }>;
-  };
+  playerViews: Record<Side, PlayerView>;
 };
 
 export type ApiClientGameMode = ApiMatchMode;

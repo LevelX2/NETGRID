@@ -1,290 +1,330 @@
 "use client";
 
 import type {
-  ApiReplayAnalysisCard,
   ApiReplayAnalysisFrame,
+  LegalAction,
+  Side,
+  VisibleCard,
 } from "@netgrid/shared";
+import { Sparkles } from "lucide-react";
+import { useMemo, useState } from "react";
+import type { CSSProperties } from "react";
 
+import { groupRunnerRigCards } from "../../app/action-board-ui";
+import { CardPreviewPanel } from "../cards/CardPreviewPanel";
 import {
-  opponentParticipant,
-  type ReplayParticipant,
-} from "./replay-player-model";
+  enrichVisibleCard,
+  type DisplayVisibleCard,
+} from "../cards/card-view-model";
+import { ActiveRunnerZoneBoard } from "../game-board/ActiveRunnerZoneBoard";
+import { ActiveServerGrid } from "../game-board/ActiveServerGrid";
+import { ActiveMatchResourceStrip } from "../game-board/ResourceStrip";
+import {
+  RunnerOpponentZonesStrip,
+  RunnerRigStrip,
+  type FieldChoiceCardProps,
+} from "../game-board/RunnerBoardStrips";
+import { RunTimelineOverlay } from "../game-board/RunTimelineOverlay";
+import { OpponentPanel, PlayerPanel } from "../game-board/SideStatusPanels";
+import { SpecialZonesStrip } from "../game-board/SpecialZonesStrip";
+import type { CardDisplayMode } from "../settings/settings-model";
+
+const EMPTY_CARD_DETAILS = {};
+const EMPTY_ACTIONS: LegalAction[] = [];
+const EMPTY_IDS = new Set<string>();
+const CARD_STYLE = { "--cards-min-width": "108px" } as CSSProperties;
+const ZONE_STYLE = { "--zone-card-scale": "1" } as CSSProperties;
+const BOARD_LANE_STYLE = { "--lane-card-scale": "1" } as CSSProperties;
 
 export function ReplayBoard({
   frame,
   perspective,
-  opponentHandOpen,
-  onCloseOpponentHand,
+  displayNames,
 }: {
   frame: ApiReplayAnalysisFrame;
-  perspective: ReplayParticipant;
-  opponentHandOpen: boolean;
-  onCloseOpponentHand(): void;
+  perspective: Side;
+  displayNames: Partial<Record<Side, string>>;
 }) {
-  const viewer = frame.participants[perspective];
-  const opponent = frame.participants[opponentParticipant(perspective)];
+  const view = frame.playerViews[perspective];
+  const [collapsedZones, setCollapsedZones] = useState<Record<string, boolean>>(
+    {},
+  );
+  const [scoreAreaOpen, setScoreAreaOpen] = useState<Record<Side, boolean>>({
+    runner: false,
+    corp: false,
+  });
+  const [focusedCard, setFocusedCard] = useState<{
+    card: DisplayVisibleCard;
+    hiddenSide?: Side;
+  } | null>(null);
+  const [cardDisplayMode, setCardDisplayMode] =
+    useState<CardDisplayMode>("placeholder");
+  const [cardPreviewCollapsed, setCardPreviewCollapsed] = useState(false);
+
+  const enrichCard = (card: VisibleCard): DisplayVisibleCard =>
+    enrichVisibleCard(card, EMPTY_CARD_DETAILS);
+  const focusCard = (card: DisplayVisibleCard, hiddenSide?: Side) =>
+    setFocusedCard({ card, ...(hiddenSide ? { hiddenSide } : {}) });
+  const scoreAreaCardsBySide = (side: Side): VisibleCard[] =>
+    side === view.side ? view.own.scoreArea : view.opponent.scoreArea;
+  const agendaPointsBySide = (side: Side): number =>
+    side === view.side ? view.own.agendaPoints : view.opponent.agendaPoints;
+  const ownRigGroups = useMemo(
+    () =>
+      groupRunnerRigCards(view.own.rig ?? [], {
+        includeEmptyProgramGroup:
+          view.side === "runner" && typeof view.own.memoryLimit === "number",
+      }),
+    [view],
+  );
+  const activeRunIceId =
+    view.run?.encounteredIce?.instanceId ??
+    view.run?.approachedIce?.instanceId ??
+    null;
+
+  const noAction = (_action: LegalAction) => undefined;
+  const noFocusAction = (_card: DisplayVisibleCard, _hiddenSide?: Side) =>
+    undefined;
+  const noFieldChoice = (_card: VisibleCard): FieldChoiceCardProps => ({});
 
   return (
-    <section style={boardShell} aria-label="Replay-Spielbrett">
-      <div style={statusRow}>
-        <strong>
-          Perspektive: {viewer.displayName} · {sideLabel(viewer.side)}
-        </strong>
-        <span>
-          Aktiver Spieler: {sideLabel(frame.activeSide)} · {frame.phase}
-        </span>
-      </div>
-
-      <div style={sideGrid}>
-        <SideSummary
-          label="Corp"
-          values={[
-            `${frame.corp.credits} Credits`,
-            `${frame.corp.clicks} Klicks`,
-            `${frame.corp.badPublicity} Bad Publicity`,
-            `${frame.corp.deckCount} Karten in R&D`,
-          ]}
-          handCount={frame.corp.hand.length}
+    <>
+      {view.run ? (
+        <RunTimelineOverlay
+          view={view}
+          legalActions={EMPTY_ACTIONS}
+          runActions={EMPTY_ACTIONS}
+          cardDetailsById={EMPTY_CARD_DETAILS}
+          actionDisabled
+          corpRunAutoPassActive={false}
+          onAction={noAction}
+          onChoiceOption={() => undefined}
+          onCorpRunAutoPassEnabled={() => undefined}
         />
-        <SideSummary
-          label="Runner"
-          values={[
-            `${frame.runner.credits} Credits`,
-            `${frame.runner.clicks} Klicks`,
-            `${frame.runner.tags} Tags`,
-            `${frame.runner.deckCount} Karten im Stack`,
-          ]}
-          handCount={frame.runner.hand.length}
-        />
-      </div>
-
-      <section style={zonePanel}>
-        <h2 style={heading}>Corp-Server</h2>
-        <div style={serverGrid}>
-          {frame.corp.servers.map((server) => (
-            <article key={server.id} style={serverPanel}>
-              <strong>{server.label}</strong>
-              <CardRow label="ICE" cards={server.ice} empty="Kein ICE" />
-              <CardRow label="Root" cards={server.root} empty="Leer" />
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section style={zonePanel}>
-        <h2 style={heading}>Runner-Rig</h2>
-        <CardRow
-          label="Programme"
-          cards={frame.runner.rig.programs}
-          empty="Keine Programme"
-        />
-        <CardRow
-          label="Hardware"
-          cards={frame.runner.rig.hardware}
-          empty="Keine Hardware"
-        />
-        <CardRow
-          label="Ressourcen"
-          cards={frame.runner.rig.resources}
-          empty="Keine Ressourcen"
-        />
-      </section>
-
-      <section style={zonePanel}>
-        <h2 style={heading}>Deine Hand · {viewer.displayName}</h2>
-        <div style={cardGrid} data-testid="replay-viewer-hand">
-          {viewer.hand.map((card) => (
-            <ReplayCard key={card.instanceId} card={card} />
-          ))}
-          {viewer.hand.length === 0 ? <span>Keine Handkarten</span> : null}
-        </div>
-      </section>
-
-      {opponentHandOpen ? (
-        <aside
-          style={opponentWindow}
-          aria-label={`Gegnerhand von ${opponent.displayName}`}
-          data-testid="replay-opponent-hand-window"
-        >
-          <div style={opponentHeader}>
-            <div>
-              <strong>Gegnerhand</strong>
-              <small style={{ display: "block", opacity: 0.75 }}>
-                {opponent.displayName} · {sideLabel(opponent.side)}
-              </small>
-            </div>
-            <button type="button" onClick={onCloseOpponentHand}>
-              Schließen
-            </button>
-          </div>
-          <div style={cardGrid}>
-            {opponent.hand.map((card) => (
-              <ReplayCard key={card.instanceId} card={card} />
-            ))}
-            {opponent.hand.length === 0 ? <span>Keine Handkarten</span> : null}
-          </div>
-        </aside>
       ) : null}
-    </section>
-  );
-}
 
-function SideSummary({
-  label,
-  values,
-  handCount,
-}: {
-  label: string;
-  values: string[];
-  handCount: number;
-}) {
-  return (
-    <article style={sidePanel}>
-      <h2 style={heading}>{label}</h2>
-      <p style={{ margin: 0 }}>{values.join(" · ")}</p>
-      <small>{handCount} Handkarten</small>
-    </article>
-  );
-}
+      <ActiveMatchResourceStrip
+        view={view}
+        agendaPointsToWin={view.agendaPointsToWin}
+        actionCapacities={{ runner: 4, corp: 3 }}
+        ariaHidden={false}
+        topOffsetPx={58}
+      />
 
-function CardRow({
-  label,
-  cards,
-  empty,
-}: {
-  label: string;
-  cards: ApiReplayAnalysisCard[];
-  empty: string;
-}) {
-  return (
-    <div style={{ display: "grid", gap: 6 }}>
-      <small style={{ opacity: 0.72 }}>{label}</small>
-      <div style={cardGrid}>
-        {cards.map((card) => (
-          <ReplayCard key={card.instanceId} card={card} />
-        ))}
-        {cards.length === 0 ? (
-          <span style={{ opacity: 0.65 }}>{empty}</span>
-        ) : null}
+      <div className="main" data-testid="replay-normal-game-surface">
+        <aside className="column panel sidePanel">
+          <OpponentPanel
+            view={view}
+            {...(displayNames[opponentSide(view.side)]
+              ? {
+                  displayName:
+                    displayNames[opponentSide(view.side)] ??
+                    sideLabel(opponentSide(view.side)),
+                }
+              : {})}
+            scoreAreaCards={scoreAreaCardsBySide(opponentSide(view.side))}
+            scoreAreaOpen={scoreAreaOpen[opponentSide(view.side)]}
+            agendaPointsToWin={view.agendaPointsToWin}
+            scoreAreaHighlighted={false}
+            onToggleScoreArea={() =>
+              setScoreAreaOpen((current) => ({
+                ...current,
+                [opponentSide(view.side)]: !current[opponentSide(view.side)],
+              }))
+            }
+          />
+          <section className="section replayReadOnlyPanel">
+            <strong>Replay</strong>
+            <span>Aufgezeichneter Spielzustand · nur Wiedergabe</span>
+          </section>
+          <PlayerPanel
+            view={view}
+            title={`${displayNames[view.side] ?? sideLabel(view.side)} · ${sideLabel(view.side)}`}
+            scoreAreaCards={scoreAreaCardsBySide(view.side)}
+            agendaPointsToWin={view.agendaPointsToWin}
+            scoreAreaOpen={scoreAreaOpen[view.side]}
+            scoreAreaHighlighted={false}
+            onToggleScoreArea={() =>
+              setScoreAreaOpen((current) => ({
+                ...current,
+                [view.side]: !current[view.side],
+              }))
+            }
+          />
+          <SpecialZonesStrip
+            view={view}
+            cardDetailsById={EMPTY_CARD_DETAILS}
+            displayMode={cardDisplayMode}
+            compact
+            onFocus={focusCard}
+          />
+        </aside>
+
+        <section className="board boardPanel" data-testid="active-board">
+          {view.side === "corp" ? (
+            <section
+              className="opponentRunnerBoardStrip"
+              aria-label="Runner-Bereich"
+            >
+              <RunnerOpponentZonesStrip
+                view={view}
+                cardDetailsById={EMPTY_CARD_DETAILS}
+                displayMode={cardDisplayMode}
+                selectedContext={null}
+                contextualActions={EMPTY_ACTIONS}
+                actionDisabled
+                highlightedZone={null}
+                onFocus={focusCard}
+                onActionContext={noFocusAction}
+                onAction={noAction}
+              />
+              <RunnerRigStrip
+                view={view}
+                cardDetailsById={EMPTY_CARD_DETAILS}
+                displayMode={cardDisplayMode}
+                selectedContext={null}
+                contextualActions={EMPTY_ACTIONS}
+                actionDisabled
+                highlightedZone={null}
+                onFocus={focusCard}
+                onActionContext={noFocusAction}
+                onAction={noAction}
+              />
+            </section>
+          ) : (
+            <RunnerRigStrip
+              view={view}
+              cardDetailsById={EMPTY_CARD_DETAILS}
+              displayMode={cardDisplayMode}
+              selectedContext={null}
+              contextualActions={EMPTY_ACTIONS}
+              actionDisabled
+              onFocus={focusCard}
+              onActionContext={noFocusAction}
+              onAction={noAction}
+            />
+          )}
+
+          {view.winner ? (
+            <div className="runBar">
+              <Sparkles size={18} />
+              <span className="winner">
+                {view.winner === "runner"
+                  ? "Runner"
+                  : view.winner === "corp"
+                    ? "Korp"
+                    : "Unentschieden"}{" "}
+                gewinnt.
+              </span>
+            </div>
+          ) : null}
+
+          <ActiveServerGrid
+            view={view}
+            actionDisabled
+            activeHighlight={null}
+            activeRunTargetIds={view.run ? [view.run.attackedServerId] : []}
+            activeRunIceId={activeRunIceId}
+            viewedApproachIceId={view.run?.approachedIce?.instanceId ?? null}
+            viewedInstalledExposeCardId={null}
+            exposedCardHighlightIds={EMPTY_IDS}
+            selectedActionContext={null}
+            selectedDiscardOptionIdSet={EMPTY_IDS}
+            boardLaneStyle={BOARD_LANE_STYLE}
+            handCardsStyle={CARD_STYLE}
+            zoneCardsStyle={ZONE_STYLE}
+            cardDisplayMode={cardDisplayMode}
+            boardZoneCollapsedFor={(key) => Boolean(collapsedZones[key])}
+            toggleBoardZoneCollapsed={(key) =>
+              setCollapsedZones((current) => ({
+                ...current,
+                [key]: !current[key],
+              }))
+            }
+            runActionForServer={() => null}
+            cardActionsFor={() => EMPTY_ACTIONS}
+            enrichCard={enrichCard}
+            scoreAreaCardsBySide={scoreAreaCardsBySide}
+            discardOptionForCard={() => null}
+            toggleDiscardOption={() => undefined}
+            fieldChoiceCardProps={noFieldChoice}
+            onAction={noAction}
+            onFocus={focusCard}
+            onActionContextSelect={noFocusAction}
+            onSelectActionContext={() => undefined}
+          />
+
+          <section className="section panel boardSection zoneBoardSection">
+            <ActiveRunnerZoneBoard
+              view={view}
+              actionDisabled
+              activeHighlight={null}
+              selectedActionContext={null}
+              selectedDiscardOptionIdSet={EMPTY_IDS}
+              ownRigGroups={ownRigGroups}
+              ownRigCardsStyle={CARD_STYLE}
+              handCardsStyle={CARD_STYLE}
+              zoneCardsStyle={ZONE_STYLE}
+              cardDisplayMode={cardDisplayMode}
+              boardZoneCollapsedFor={(key) => Boolean(collapsedZones[key])}
+              toggleBoardZoneCollapsed={(key) =>
+                setCollapsedZones((current) => ({
+                  ...current,
+                  [key]: !current[key],
+                }))
+              }
+              cardActionsFor={() => EMPTY_ACTIONS}
+              enrichCard={enrichCard}
+              discardOptionForCard={() => null}
+              toggleDiscardOption={() => undefined}
+              fieldChoiceCardProps={noFieldChoice}
+              paymentSupportPreselection={null}
+              onAction={noAction}
+              onFocus={focusCard}
+              onActionContextSelect={noFocusAction}
+              onTogglePaymentSupportAbility={() => undefined}
+            />
+          </section>
+        </section>
+
+        <aside className="log panel rightRail">
+          <CardPreviewPanel
+            card={focusedCard?.card ?? null}
+            displayMode={cardDisplayMode}
+            onDisplayMode={setCardDisplayMode}
+            {...(focusedCard?.hiddenSide
+              ? { hiddenSide: focusedCard.hiddenSide }
+              : {})}
+            collapsed={cardPreviewCollapsed}
+            onCollapsed={setCardPreviewCollapsed}
+          />
+          <section className="section replayStatePanel">
+            <h2>Replay-Stand</h2>
+            <p>
+              {sideLabel(view.activeSide)} am Zug · {phaseLabel(view.phase)}
+            </p>
+            <small>
+              State {frame.stateVersion} · Hash{" "}
+              {frame.stateHashVerified ? "verifiziert" : "abweichend"}
+            </small>
+          </section>
+        </aside>
       </div>
-    </div>
+    </>
   );
 }
 
-function ReplayCard({ card }: { card: ApiReplayAnalysisCard }) {
-  return (
-    <article style={cardStyle} title={card.definitionId}>
-      <strong>{card.title}</strong>
-      <small>
-        {card.cardType}
-        {card.rezzed &&
-        (card.cardType === "ice" ||
-          card.cardType === "asset" ||
-          card.cardType === "upgrade")
-          ? " · rezzed"
-          : ""}
-        {card.advancementCounters > 0
-          ? ` · ${card.advancementCounters} Advancement`
-          : ""}
-      </small>
-    </article>
-  );
+function opponentSide(side: Side): Side {
+  return side === "runner" ? "corp" : "runner";
 }
 
-function sideLabel(side: "runner" | "corp"): string {
-  return side === "runner" ? "Runner" : "Corp";
+function sideLabel(side: Side): string {
+  return side === "runner" ? "Runner" : "Korp";
 }
 
-const boardShell = {
-  display: "grid",
-  gap: 16,
-  border: "1px solid rgba(255,255,255,0.15)",
-  borderRadius: 14,
-  padding: 18,
-  background: "rgba(5,12,24,0.78)",
-} as const;
-
-const statusRow = {
-  display: "flex",
-  flexWrap: "wrap",
-  justifyContent: "space-between",
-  gap: 12,
-} as const;
-
-const sideGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-  gap: 12,
-} as const;
-
-const sidePanel = {
-  border: "1px solid rgba(255,255,255,0.12)",
-  borderRadius: 10,
-  padding: 14,
-  display: "grid",
-  gap: 8,
-} as const;
-
-const zonePanel = {
-  display: "grid",
-  gap: 12,
-  borderTop: "1px solid rgba(255,255,255,0.1)",
-  paddingTop: 14,
-} as const;
-
-const serverGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: 10,
-} as const;
-
-const serverPanel = {
-  display: "grid",
-  gap: 10,
-  border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: 9,
-  padding: 12,
-} as const;
-
-const cardGrid = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: 8,
-} as const;
-
-const cardStyle = {
-  display: "grid",
-  gap: 5,
-  width: 150,
-  minHeight: 66,
-  border: "1px solid rgba(123,206,255,0.35)",
-  borderRadius: 8,
-  padding: 10,
-  background: "rgba(22,50,78,0.72)",
-} as const;
-
-const opponentWindow = {
-  position: "fixed",
-  zIndex: 50,
-  top: 86,
-  right: 22,
-  width: "min(520px, calc(100vw - 44px))",
-  maxHeight: "calc(100vh - 110px)",
-  overflowY: "auto",
-  display: "grid",
-  gap: 14,
-  border: "1px solid rgba(123,206,255,0.7)",
-  borderRadius: 12,
-  padding: 16,
-  background: "rgba(5,12,24,0.97)",
-  boxShadow: "0 20px 60px rgba(0,0,0,0.55)",
-} as const;
-
-const opponentHeader = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "start",
-  gap: 12,
-} as const;
-
-const heading = { margin: 0 } as const;
+function phaseLabel(phase: string): string {
+  return phase
+    .replace(/_/g, " ")
+    .replace(/^corp /, "Korp ")
+    .replace(/^runner /, "Runner ");
+}

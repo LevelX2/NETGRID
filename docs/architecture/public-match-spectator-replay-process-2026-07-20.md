@@ -1,6 +1,6 @@
-# Öffentliche Matches, Zuschauer und Analyse-Replay
+# Öffentliche Matches, Zuschauer und Replay in der Spieloberfläche
 
-Status: Umsetzung abgeschlossen; lokale Integration ausstehend
+Status: abgeschlossen; Replay-Oberfläche am 2026-07-20 korrigiert
 Stand: 2026-07-20
 Arbeitsbranch: `codex/public-replay-spectator`
 Arbeits-Worktree: `C:\Projekte\NETGRID_PUBLIC_REPLAY_SPECTATOR`
@@ -16,8 +16,9 @@ Dieser Prozess setzt den im Chat freigegebenen Gesamtplan um:
 - Öffentliche aktive Matches sind schreibgeschützt zuschaubar.
 - Live-Zuschauer erhalten keine Hände oder andere verdeckte Informationen.
 - Öffentliche beendete Matches besitzen ein öffentliches Full-Information-Replay.
-- Das Replay startet aus Sicht von Teilnehmer A oder B.
-- Die gegnerische Hand kann in einem mitlaufenden Fenster ein- und ausgeblendet werden.
+- Das Replay verwendet dieselbe Spieloberfläche wie eine laufende Partie.
+- Oben kann zwischen Runner- und Korp-Perspektive gewechselt werden; sichtbar
+  ist jeweils die normale eigene Hand dieser Seite.
 - Alle zum Umsetzungszeitpunkt vorhandenen gespeicherten Matches werden rückwirkend öffentlich und replayfähig gemacht.
 
 ## Zielprüfung
@@ -92,13 +93,13 @@ prepared
 
 ## Fortschritt
 
-| Paket   | Status        | Ergebnis                                                                                                                                                                                                                                                                                                                                                                                                                |
-| ------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PUB-001 | abgeschlossen | `isPublic` ersetzt den LAN-Flag, Client und Server verwenden Standard `true`, Recreate und Serien übernehmen den Wert, SQLite normalisiert alle Bestandsmatches einmalig auf öffentlich.                                                                                                                                                                                                                                |
-| PUB-002 | abgeschlossen | Gemeinsame öffentliche Liste für offene, aktive und beendete Matches; statusabhängige Navigation; öffentliche aktive Matches besitzen eine polling-aktualisierte read-only Zuschaueransicht auf Basis der leak-geprüften `SpectatorProjectionV1`.                                                                                                                                                                       |
-| PUB-003 | abgeschlossen | Terminale Matches liefern StateHash-geprüfte Analyseframes mit Boardzustand und beiden Händen sowie A/B-Seitenzuordnung. Öffentliche Replays sind anonym abrufbar; private nur mit Teilnehmersession; aktive Matches liefern über den Requestpfad keine Frames. Eine temporäre Kopie der realen Bestandsdatenbank bestätigte 19/19 terminale Matches mit 4.218 verifizierten Frames und `isPublic: true` nach Backfill. |
-| PUB-004 | abgeschlossen | Visueller read-only Replay-Player mit A/B-Perspektive, Start/Zurück/Play-Pause/Weiter/Ende, Scrubber, 0,5×/1×/2× und dauerhaft zuschaltbarem Gegnerhandfenster. Das Fenster aktualisiert Karten und Gegner automatisch bei Seek, Playback und Perspektivwechsel.                                                                                                                                                        |
-| PUB-005 | abgeschlossen | Ergebnisdialog und Matchhistorie verlinken öffentliche beendete Matches direkt in den Replay-Player. Die öffentliche SQLite-Liste nutzt einen kompakten Metadatenpfad ohne History-Hydrierung. Abschlussreviews, Status, Wissensbasis und Log sind aktualisiert; Kern-, Browser- und Produktgates sind dokumentiert.                                                                                                    |
+| Paket   | Status        | Ergebnis                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| PUB-001 | abgeschlossen | `isPublic` ersetzt den LAN-Flag, Client und Server verwenden Standard `true`, Recreate und Serien übernehmen den Wert, SQLite normalisiert alle Bestandsmatches einmalig auf öffentlich.                                                                                                                                                                                                                           |
+| PUB-002 | abgeschlossen | Gemeinsame öffentliche Liste für offene, aktive und beendete Matches; statusabhängige Navigation; öffentliche aktive Matches besitzen eine polling-aktualisierte read-only Zuschaueransicht auf Basis der leak-geprüften `SpectatorProjectionV1`.                                                                                                                                                                  |
+| PUB-003 | abgeschlossen | Terminale Matches liefern StateHash-geprüfte Frames mit je einer normalen read-only PlayerView für Runner und Korp. Öffentliche Replays sind anonym abrufbar; private nur mit Teilnehmersession; aktive Matches liefern über den Requestpfad keine Frames. Eine temporäre Kopie der realen Bestandsdatenbank bestätigte 19/19 terminale Matches mit 4.218 verifizierten Frames und `isPublic: true` nach Backfill. |
+| PUB-004 | abgeschlossen | Der read-only Replay-Player verwendet die normalen Spielbrett-, Server-, Rig-, Hand-, Status- und Kartenvorschau-Komponenten. Runner/Korp-Wechsel, Einzelschritt, Play/Pause, Scrubber und 0,5×/1×/2× laufen ohne eine getrennte Analysefläche oder ein Gegnerhandfenster.                                                                                                                                         |
+| PUB-005 | abgeschlossen | Ergebnisdialog und Matchhistorie verlinken öffentliche beendete Matches direkt in den Replay-Player. Die öffentliche SQLite-Liste nutzt einen kompakten Metadatenpfad ohne History-Hydrierung. Abschlussreviews, Status, Wissensbasis und Log sind aktualisiert; Kern-, Browser- und Produktgates sind dokumentiert.                                                                                               |
 
 ## Paketfolge
 
@@ -107,7 +108,7 @@ prepared
 | PUB-001 | Öffentlicher Matchvertrag und Bestandsnormalisierung | `feat(server): add public match contract and backfill`    |
 | PUB-002 | Öffentliche Matchliste und Live-Zuschauerpfad        | `feat(server): expose public matches and live spectators` |
 | PUB-003 | Full-Information-Replay-Frames und Zugriff           | `feat(replay): add finished-match analysis frames`        |
-| PUB-004 | Visueller Replay-Player und Gegnerhand               | `feat(web): add visual replay analysis player`            |
+| PUB-004 | Replay in normaler Spieloberfläche                   | `feat(web): reuse normal game surface for replay`         |
 | PUB-005 | Produktintegration, Regression und Abschlussreview   | `test(replay): verify public spectator and replay flow`   |
 
 ## Paketdetails
@@ -186,15 +187,16 @@ Done-Gate:
 
 ### PUB-003 – Full-Information-Replay-Frames und Zugriff
 
-Ziel: Beendete Matches liefern deterministisch verifizierte Analyseframes mit beiden Teilnehmerzuständen.
+Ziel: Beendete Matches liefern deterministisch verifizierte Frames mit den
+normalen side-spezifischen PlayerViews.
 
 Eingangsvoraussetzung: PUB-002 committed.
 
 Arbeit:
 
 - Replayrekonstruktion um Frames pro Aktion erweitern.
-- Teilnehmer A/B auf die damaligen Seiten abbilden.
-- Replay-Anzeigemodell mit beiden Händen und den vollständigen Analyseinformationen erzeugen.
+- Eine read-only PlayerView für Runner und eine für Korp pro Frame erzeugen.
+- LegalActions und offene Choice-Steuerung aus den Replay-PlayerViews entfernen.
 - Öffentlichen Zugriff nur für `isPublic && finished` erlauben.
 - Private Replays nur für vorhandene Teilnehmerberechtigung ausliefern.
 - Alle bestehenden Matches auf Replayfähigkeit prüfen und erkannte Bestandslücken beheben.
@@ -219,20 +221,20 @@ Done-Gate:
 - Öffentliche abgeschlossene Matches sind öffentlich replaybar.
 - Private abgeschlossene Matches bleiben nicht öffentlich.
 
-### PUB-004 – Visueller Replay-Player und Gegnerhand
+### PUB-004 – Replay in normaler Spieloberfläche
 
-Ziel: Das Replay ist als Board aus Sicht von Teilnehmer A oder B abspielbar und besitzt ein dauerhaft zuschaltbares Gegnerhandfenster.
+Ziel: Das Replay sieht wie die normale laufende Partie aus und ist aus
+Runner- oder Korp-Perspektive abspielbar.
 
 Eingangsvoraussetzung: PUB-003 committed.
 
 Arbeit:
 
-- Technische Replayseite zum visuellen Player ausbauen.
-- Perspektivwahl Teilnehmer A/B.
+- Normale Spielbrett-, Status-, Server-, Rig-, Hand- und
+  Kartenvorschau-Komponenten im read-only Pfad wiederverwenden.
+- Perspektivwahl Runner/Korp; der aktuelle Schritt bleibt dabei erhalten.
 - Play/Pause, Schritt vor/zurück, Anfang/Ende, Scrubber und Geschwindigkeiten.
-- Gegnerhandfenster öffnen/schließen und während Wiedergabe/Seek offen halten.
-- Beim Perspektivwechsel automatisch die andere Hand anzeigen.
-- Bestehende Boardkomponenten in einem read-only Pfad wiederverwenden.
+- Keine getrennte Analysefläche und kein zusätzliches Gegnerhandfenster.
 
 Kernartefakte:
 
@@ -242,15 +244,15 @@ Kernartefakte:
 Checks:
 
 - Web-Typecheck und Komponententests.
-- Browser-Smoke für Perspektive, Seek, Playback und Gegnerhand.
+- Browser-Smoke für normale Boarddarstellung, Perspektive, Seek und Playback.
 - Read-only-Negativtest.
 - `git diff --check`.
 
 Done-Gate:
 
-- Beide Perspektiven funktionieren.
-- Gegnerhand entspricht jedem gewählten Schritt.
-- Fensterzustand bleibt bei Playback, Seek und Perspektivwechsel erhalten.
+- Runner- und Korp-Perspektive funktionieren ohne Schrittverlust.
+- Die jeweils eigene Hand entspricht jedem gewählten Schritt.
+- Das Replay enthält keinen mutierenden Aktionspfad.
 
 ### PUB-005 – Produktintegration, Regression und Abschlussreview
 
@@ -298,8 +300,18 @@ Done-Gate:
 
 - PUB-002: Shared-, Server- und Web-Typecheck grün; Projektions-, HTTP- und Navigationshilfstests grün; Web-Produktionsbuild grün.
 - PUB-003: Shared- und Server-Typecheck grün; Replay-Zugriffs-, Frame-, Handänderungs- und StateHash-Tests grün.
-- PUB-004: Web-Typecheck, Player-Modelltests und Produktionsbuild grün. Isolierter Playwright-Smoke auf Ports 8788/3101 bestätigte 9-Schritt-Replay, A/B-Wechsel ohne Schrittverlust, offenes automatisch wechselndes Gegnerhandfenster, Einzelschritt und 2×-Playback bis zu aktualisierten Board-/Handzuständen; Browserkonsole ohne Fehler oder Warnungen. Testprozesse, Browserdaten und temporäre SQLite-Datei wurden anschließend entfernt.
+- PUB-004: Der Korrekturlauf bestätigte im echten lokalen Replay dieselbe
+  Boardstruktur wie im aktiven Spiel, sichtbare Runner-Hand in
+  Runner-Perspektive, sichtbares Korp-HQ in Korp-Perspektive,
+  Perspektivwechsel ohne Schrittverlust, Einzelschritt und Playback. Die alte
+  Analysefläche und das Gegnerhandfenster sind entfernt; die Browserkonsole
+  blieb fehlerfrei.
 - PUB-005: Projektweiter Typecheck grün; Contract-Gates mit 20 Tests grün; sieben gezielte Serverregressionen für Default, Backfill, öffentliche Liste, Live-Redaktion und Replayzugriff grün; 59 Webtestdateien mit 674 Tests grün; Produktionsbuild, `format:changed` und `git diff --check` grün. Ergebnisdialog und Matchhistorie verlinken öffentliche Replays direkt; der häufige öffentliche Listenabruf liest keine Event- oder Snapshothistorien mehr.
+- Replay-Oberflächenkorrektur: projektweiter Typecheck und Contract-Gate,
+  18 Serverdateien mit 198 Tests, 61 Webdateien mit 679 Tests sowie der
+  Produktionsbuild sind grün. Der Browserlauf bestätigte die normale
+  Spieloberfläche, Runner/Korp-Wechsel, Einzelschritt und Playback ohne
+  Konsolenfehler.
 - Bestandsaudit auf einer anschließend gelöschten temporären SQLite-Kopie: 21 Matches insgesamt, 19 terminal, 19/19 aus persistierten StateHash-verifizierten Frames abspielbar, 4.218 Frames erzeugt, alle 21 nach Migration öffentlich. Drei historische Matches lassen sich zusätzlich vollständig mit der aktuellen Engine neu simulieren; die übrigen historischen Partien bleiben über ihre persistierten verifizierten Zustände replaybar und benötigen keine Legacy-Regelkompatibilität.
 - Breiter `multiplayer.test.ts`-Lauf: 136/137 grün. Ein fachfremder, isoliert reproduzierbarer Altfehler bleibt in `advances Corp AI in a root-rez window even when activeSide is runner`: Der Test erwartet keine Runner-`LegalActions`, die aktuelle Engine liefert `jack_out` und `continue_run`. Das Replay-Paket verändert diese Regelspur nicht.
 
