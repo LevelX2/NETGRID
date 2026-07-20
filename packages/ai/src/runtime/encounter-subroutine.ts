@@ -1,4 +1,8 @@
 import { type VisibleCard } from "@netgrid/shared";
+import {
+  isVisibleHardEndRunSubroutine,
+  isVisiblePayEndRunSubroutine,
+} from "../run-analysis/visible-subroutine-semantics";
 
 export type VisibleEncounterSubroutine = NonNullable<
   NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"][number]
@@ -23,7 +27,6 @@ export function isImmediateSafetyThreatSubroutine(
     type === "initiate_trace" ||
     type === "trash_installed_program" ||
     type === "trash_program_unless_runner_pays" ||
-    type === "trash_installed_program_unless_runner_pays" ||
     subroutine.unbrokenRunEffect?.causesDamageOrProgramTrash === true
   );
 }
@@ -44,8 +47,8 @@ export function isEndRunSubroutine(
   subroutine: VisibleEncounterSubroutine,
 ): boolean {
   return (
-    subroutine.type === "end_the_run" ||
-    subroutine.type === "end_the_run_unless_runner_pays"
+    isVisibleHardEndRunSubroutine(subroutine) ||
+    isVisiblePayEndRunSubroutine(subroutine)
   );
 }
 

@@ -1,8 +1,5 @@
 import { traceSuccessEffectCardImplementationQuotesForDefinition } from "@netgrid/engine";
-import {
-  type AiDecisionInput,
-  type CardDefinitionId,
-} from "@netgrid/shared";
+import { type AiDecisionInput, type CardDefinitionId } from "@netgrid/shared";
 
 import { selectEfficientTraceBidOption } from "../trace-bid-efficiency";
 import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
@@ -39,6 +36,10 @@ export function selectedBidChoiceOptionId(
   let desired = 0;
   if (input.side === "corp") {
     desired = corpDesiredBidAmount(input, choice, traceContext, maxBid);
+  } else if (
+    choice.source.startsWith("card_implementation.secret_spend_compare:")
+  ) {
+    desired = maxBid;
   } else {
     const tieBid = Math.max(
       0,
@@ -114,14 +115,10 @@ function runnerRunBudgetPreservingBidOption(
   }
   const cleanupClickOpportunityCost = tagAmount;
   const winningBidPremium = selected.amount - minimumLosingBid.amount;
-  const cleanupEconomicCost =
-    basicTagCleanupCost + cleanupClickOpportunityCost;
+  const cleanupEconomicCost = basicTagCleanupCost + cleanupClickOpportunityCost;
   const selectedPreservesRunBudget =
     credits - selected.amount >= remainingCost + reserve;
-  if (
-    selectedPreservesRunBudget &&
-    winningBidPremium <= cleanupEconomicCost
-  ) {
+  if (selectedPreservesRunBudget && winningBidPremium <= cleanupEconomicCost) {
     return undefined;
   }
   return minimumLosingBid;

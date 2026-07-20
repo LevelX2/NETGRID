@@ -1,6 +1,6 @@
 # ICE-Run-Quote-Reconciliation für die Runner-KI
 
-Status: aktiv – Paket `IRQR-2` in Arbeit
+Status: aktiv – Paket `IRQR-3` in Arbeit
 
 ## Quelle und Zielprüfung
 
@@ -74,13 +74,13 @@ Genau ein Paket ist aktiv. Jedes Paket endet mit fokussierten Checks,
 
 ## Paketfolge
 
-| Paket | Ziel | Done-Gate | Commit |
-| --- | --- | --- | --- |
-| `IRQR-0` | Prozessartefakt und Testmatrix | Scope, Nicht-Ziele, Kandidatenfamilien und Checks dokumentiert; Worktree sauber | `docs(ai): define ice run quote reconciliation` |
-| `IRQR-1` | Öffentliche Quote-Parität | Variable ETR, relative Damage-/Trace-Subroutinen, Homing-Missile-X und Pocket-VR-Trace-Credits side-sicher und encounter-paritätisch quotiert | `fix(engine): quote public dynamic ice effects` |
-| `IRQR-2` | Sichtbare Runner-Semantik | ETR-/Secret-ETR, Kreditverlust, Pay-or-Trash, Coyote, Viral 15 und bekannte Runstart-Schäden fließen differenziert in Zugang, Budget und Alternativen ein | `fix(ai): evaluate visible ice run effects` |
-| `IRQR-3` | Bedingte und zufällige Effekte | Iceberg/Riddler, Brain Drain, Roadblock, Vacuum Link, Positionswechsel und Corp-Credit-Folgen erzeugen nur begründete konditionale Risiko-/Kostenpfade | `feat(ai): model conditional ice run risks` |
-| `IRQR-4` | Evidenz und Abschluss | Familienregressionen, AI-Gates, Hidden-Info-Checks und vergleichbarer Baseline-Lauf grün; Review und Wissenspflege aktualisiert | `test(ai): verify ice run quote reconciliation` |
+| Paket    | Ziel                           | Done-Gate                                                                                                                                                 | Commit                                          |
+| -------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `IRQR-0` | Prozessartefakt und Testmatrix | Scope, Nicht-Ziele, Kandidatenfamilien und Checks dokumentiert; Worktree sauber                                                                           | `docs(ai): define ice run quote reconciliation` |
+| `IRQR-1` | Öffentliche Quote-Parität      | Variable ETR, relative Damage-/Trace-Subroutinen, Homing-Missile-X und Pocket-VR-Trace-Credits side-sicher und encounter-paritätisch quotiert             | `fix(engine): quote public dynamic ice effects` |
+| `IRQR-2` | Sichtbare Runner-Semantik      | ETR-/Secret-ETR, Kreditverlust, Pay-or-Trash, Coyote, Viral 15 und bekannte Runstart-Schäden fließen differenziert in Zugang, Budget und Alternativen ein | `fix(ai): evaluate visible ice run effects`     |
+| `IRQR-3` | Bedingte und zufällige Effekte | Iceberg/Riddler, Brain Drain, Roadblock, Vacuum Link, Positionswechsel und Corp-Credit-Folgen erzeugen nur begründete konditionale Risiko-/Kostenpfade    | `feat(ai): model conditional ice run risks`     |
+| `IRQR-4` | Evidenz und Abschluss          | Familienregressionen, AI-Gates, Hidden-Info-Checks und vergleichbarer Baseline-Lauf grün; Review und Wissenspflege aktualisiert                           | `test(ai): verify ice run quote reconciliation` |
 
 ### IRQR-1: Öffentliche Quote-Parität
 
@@ -191,5 +191,13 @@ dann als complete markieren.`
   und zweckgebundene Encounter-Trace-Credits in die öffentliche Quote.
   Quote- und Encounter-Regressionen sowie Engine-/AI-Typechecks und das
   Engine-Source-Structure-Gate sind grün.
-- `IRQR-2`: aktiv.
-- `IRQR-3` bis `IRQR-4`: offen.
+- `IRQR-2`: abgeschlossen – sichtbare harte ETR-Typen (einschließlich
+  Puzzle), Kreditverlust vor späteren Zahlungen, echte Alternativen beim
+  Programmverlust, die Too-Many-Doors-Gebotsgrenze und die jeweils sichtbare
+  Trace-Kapazität werden getrennt bewertet. Der Coyote-Stornopreis wird im
+  öffentlichen Quote erhalten; Viral 15 bleibt über das bestehende
+  Jack-out-Schutzmodell eine differenzierte, aber keine pauschale
+  Zugangssperre. Fokustests (73 AI, 33 Engine) und beide Typechecks sind
+  grün.
+- `IRQR-3`: aktiv.
+- `IRQR-4`: offen.

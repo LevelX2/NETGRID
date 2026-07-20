@@ -1898,6 +1898,7 @@ export type VisibleEffectiveSubroutine = {
   amount?: number;
   baseTraceStrength?: number;
   traceBidLimit?: number;
+  runFutureStrengthCancelPaymentAmount?: number;
   traceSuccessEffect?: TraceSuccessEffect;
   deflectorTarget?: "archives" | "any_data_fort" | "subsidiary_data_fort";
   deflectorCost?: number;

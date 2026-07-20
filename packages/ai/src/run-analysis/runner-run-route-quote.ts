@@ -90,6 +90,7 @@ export function quoteRunnerRunRoute(params: {
     (effect) => effect.canEndGameBeforeAccess,
   );
   const conditionalReasons = [
+    ...(params.path.conditionalAccessReasons ?? []),
     ...(accessPreventingConditionalHazard
       ? ["visible_access_preventing_effect_not_guaranteed"]
       : []),

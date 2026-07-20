@@ -164,6 +164,7 @@ export type KnownRezzedIcePathAssessment = {
   >;
   hasBypassOrSpecialAccessPlan: boolean;
   reachableAccessReason?: string;
+  conditionalAccessReasons?: string[];
   noAccessReason?:
     | "known_path_unpayable"
     | "known_path_unbreakable"

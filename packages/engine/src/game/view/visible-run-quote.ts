@@ -25,7 +25,11 @@ export function visibleEffectiveIceRunQuote(
   iceId: CardInstanceId,
   visibleIce: VisibleCard,
 ): VisibleEffectiveIceRunQuote | undefined {
-  if (!visibleIce.known || visibleIce.rezzed !== true || !visibleIce.definitionId)
+  if (
+    !visibleIce.known ||
+    visibleIce.rezzed !== true ||
+    !visibleIce.definitionId
+  )
     return undefined;
   const definition = CARD_DEFINITIONS_BY_ID[visibleIce.definitionId];
   if (!definition || definition.type !== "ice") return undefined;
@@ -149,6 +153,12 @@ function visibleEffectiveSubroutine(
     ...(subroutine.traceBidLimit !== undefined
       ? { traceBidLimit: subroutine.traceBidLimit }
       : {}),
+    ...(subroutine.runFutureStrengthCancelPaymentAmount !== undefined
+      ? {
+          runFutureStrengthCancelPaymentAmount:
+            subroutine.runFutureStrengthCancelPaymentAmount,
+        }
+      : {}),
     ...(subroutine.traceSuccessEffect
       ? { traceSuccessEffect: subroutine.traceSuccessEffect }
       : {}),
@@ -160,11 +170,12 @@ function visibleEffectiveSubroutine(
       : {}),
     ...(subroutine.deflectorAutoBreakIfNoTarget !== undefined
       ? {
-          deflectorAutoBreakIfNoTarget:
-            subroutine.deflectorAutoBreakIfNoTarget,
+          deflectorAutoBreakIfNoTarget: subroutine.deflectorAutoBreakIfNoTarget,
         }
       : {}),
-    ...(subroutine.breakTags ? { breakTags: subroutine.breakTags.slice() } : {}),
+    ...(subroutine.breakTags
+      ? { breakTags: subroutine.breakTags.slice() }
+      : {}),
     ...(dynamic
       ? {
           sourceDefinitionId: dynamic.sourceDefinitionId,
@@ -204,7 +215,6 @@ function visibleUnbrokenRunEffectForSubroutine(
     case "set_run_active_ice_program_trash":
     case "do_damage":
     case "trash_installed_program":
-    case "trash_installed_program_unless_runner_pays":
       return { causesDamageOrProgramTrash: true };
     case "set_runner_run_lock_actions":
       return { createsRunLockOrActionTax: Math.max(1, amount) };

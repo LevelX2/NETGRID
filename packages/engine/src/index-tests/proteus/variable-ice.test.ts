@@ -2104,10 +2104,19 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
   });
 
   it("PRO010 lets Runner pay while passing Coyote to cancel future ICE strength", () => {
-    let state = startEncounterAndRezIce(
+    const setup = startEncounterAndRezIce(
       proteusSimpleCorpIceGame("proteus-pro010-coyote-cancel"),
       COYOTE,
-    ).state;
+    );
+    let { state } = setup;
+    expect(effectiveRunQuoteFor(state, "rd", setup.iceId)?.subroutines).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: "set_run_future_strength_bonus",
+          runFutureStrengthCancelPaymentAmount: 2,
+        }),
+      ]),
+    );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 

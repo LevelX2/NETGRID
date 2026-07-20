@@ -60,6 +60,10 @@ import {
   spendRunnerEncounterBreakerCost,
 } from "./runner-encounter-credit-budget";
 import { runnerRunPlanAcceptsConditionalRoute } from "./runner-run-release";
+import {
+  isVisibleSecretSpendEndRunSubroutine,
+  secretSpendAccessPaymentForVisibleCorpCredits,
+} from "../run-analysis/visible-subroutine-semantics";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -451,7 +455,30 @@ function cheapestKnownIceSequence(params: {
   const { input, plan, ice } = params;
   if (!ice.known || ice.rezzed === false || !ice.definitionId) return undefined;
   const requiredSubroutineIndexes = knownRequiredSubroutineIndexes(input, ice);
-  if (requiredSubroutineIndexes.size <= 0) return undefined;
+  if (requiredSubroutineIndexes.size <= 0) {
+    const secretSpendSubroutine = ice.effectiveRunQuote?.subroutines.find(
+      isVisibleSecretSpendEndRunSubroutine,
+    );
+    const secretSpendCost = secretSpendSubroutine
+      ? secretSpendAccessPaymentForVisibleCorpCredits(
+          input.playerView.opponent.credits,
+        )
+      : undefined;
+    return secretSpendCost === undefined
+      ? undefined
+      : sequenceForActions({
+          actions: [],
+          totalCost: secretSpendCost,
+          usesPump: false,
+          usesBreak: false,
+          evidence: [
+            "known_ice_secret_spend_access_payment:true",
+            `secret_spend_access_payment:${secretSpendCost}`,
+          ],
+          plan,
+          input,
+        });
+  }
   const accessThreatCount = requiredSubroutineIndexes.size;
   const assessment = minimumCreditsToBreakEndTheRunSubroutines(
     iceBreakEstimateInput(ice),
@@ -555,7 +582,12 @@ function cheapestTraceAccessSequence(params: {
       remainingGeneralCredits,
     );
     const guarantee = visibleTraceAvoidanceForBaseStrength(
-      baseStrength + Math.max(0, params.input.playerView.opponent.credits),
+      baseStrength +
+        visibleCorpTraceBidCapacity(
+          params.ice.effectiveRunQuote,
+          subroutine,
+          params.input.playerView.opponent.credits,
+        ),
       support,
     ).cheapestAffordableSafe;
     if (!guarantee) {
@@ -588,7 +620,7 @@ function cheapestTraceAccessSequence(params: {
         ? "current_encounter_trace_route:true"
         : "known_ice_estimated_trace_route:true",
       `trace_route_guaranteed_cost:${guaranteedTraceCost}`,
-      `trace_route_visible_corp_credits:${Math.max(0, params.input.playerView.opponent.credits)}`,
+      `trace_route_visible_corp_trace_bid_capacity:${visibleCorpTraceBidCapacity(params.ice.effectiveRunQuote, requiredSubroutines[0]?.subroutine, params.input.playerView.opponent.credits)}`,
       ...acceptedEffectTypes.map(
         (effectType) => `trace_route_accepts_effect:${effectType}`,
       ),
@@ -596,6 +628,20 @@ function cheapestTraceAccessSequence(params: {
     plan: params.plan,
     input: params.input,
   });
+}
+
+function visibleCorpTraceBidCapacity(
+  quote: VisibleCard["effectiveRunQuote"] | undefined,
+  subroutine: VisibleEffectiveSubroutine | undefined,
+  visibleCorpCredits: number,
+): number {
+  const available =
+    Math.max(0, Math.floor(visibleCorpCredits)) +
+    Math.max(0, Math.floor(quote?.encounterTemporaryTraceCredits ?? 0));
+  const bidLimit = subroutine?.traceBidLimit;
+  return bidLimit === undefined
+    ? available
+    : Math.min(available, Math.max(0, Math.floor(bidLimit)));
 }
 
 function traceEffectRequiresAccessGuarantee(
