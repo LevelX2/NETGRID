@@ -187,6 +187,25 @@ Bei einem fehlgeschlagenen Done-Gate bleibt der Zustand beim aktuellen Paket.
 - Verifikation: 83 fokussierte Tests grün, `@netgrid/ai`-Typecheck grün und
   `git diff --check` ohne Befund.
 
+### P2 – abgeschlossen am 20. Juli 2026
+
+- `playerView.publicEvents` bleibt die kanonische vollständige Historie;
+  `eventTail` ist standardmäßig ein echter Suffix der letzten 80 Ereignisse.
+  Historienverbraucher mit Vollverlaufsvertrag lesen weiterhin die
+  zusammengeführte vollständige Historie.
+- DTO-Sanitizing verarbeitet öffentliche Events nur einmal und teilt die
+  bereinigten Eventobjekte zwischen Vollhistorie und Tail. Der Side-Safety-Check
+  traversiert die DTO-Struktur direkt, erkennt verbotene Marker mindestens so
+  streng wie zuvor und verarbeitet geteilte Referenzen nur einmal.
+- Der feste 240-Aktionen-Fall sank gegenüber P1 von 24,866 s auf 22,854 s
+  (weitere 8,1 Prozent) und gegenüber der ursprünglichen Messung von 29,228 s
+  um insgesamt 21,8 Prozent.
+- Vollständige Summary, Findings, Aggregate, ActionSequence und finaler
+  StateHash (`fnv1a:2c327d92`) blieben bitgleich.
+- Verifikation: fokussierter 23-Test-Runtime-Lauf sowie 29 Input-, Hidden-Info-
+  und Redaction-Tests grün, `@netgrid/ai`-Typecheck grün und
+  `git diff --check` ohne Befund.
+
 ## Verifikationsregeln
 
 - Parität wird über ActionSequence, finalen StateHash, Replaystatus,

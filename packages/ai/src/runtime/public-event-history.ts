@@ -26,8 +26,15 @@ export function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
 
 function buildMergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
   const byId = new Map<string, PublicGameEvent>();
-  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
+  const publicEvents = input.playerView.publicEvents ?? [];
+  const eventTail = input.eventTail ?? [];
+  for (const event of publicEvents) {
     byId.set(event.eventId, event);
+  }
+  if (eventTail !== publicEvents) {
+    for (const event of eventTail) {
+      byId.set(event.eventId, event);
+    }
   }
   return [...byId.values()].sort(
     (left, right) => eventVersion(left) - eventVersion(right),

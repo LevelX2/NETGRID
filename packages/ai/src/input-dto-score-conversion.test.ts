@@ -219,6 +219,55 @@ describe("AI input DTO score-conversion contract", () => {
       scoredFromServerId: "remote-1",
     });
   });
+
+  it("sanitizes aliased public history only once", () => {
+    const action = conversionAction();
+    const events = [publicEvent("shared", { actionType: "gain_credit" })];
+    const view = playerView(action);
+    view.publicEvents = events;
+
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: events,
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "shared-history-dto",
+      decisionId: "shared-history-dto:corp:1",
+      actionNumber: 1,
+      profileId: "shared-history-dto-test",
+    });
+
+    expect(input.eventTail).toBe(input.playerView.publicEvents);
+    expect(input.eventTail[0]).not.toBe(events[0]);
+  });
+
+  it("reuses sanitized event objects for a public-history suffix", () => {
+    const action = conversionAction();
+    const events = [
+      publicEvent("one", { actionType: "gain_credit" }),
+      publicEvent("two", { actionType: "click_credit" }),
+      publicEvent("three", { actionType: "end_turn" }),
+    ];
+    const view = playerView(action);
+    view.publicEvents = events;
+
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: events.slice(-2),
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "suffix-history-dto",
+      decisionId: "suffix-history-dto:corp:1",
+      actionNumber: 1,
+      profileId: "suffix-history-dto-test",
+    });
+
+    expect(input.eventTail).toEqual(input.playerView.publicEvents.slice(-2));
+    expect(input.eventTail[0]).toBe(input.playerView.publicEvents[1]);
+    expect(input.eventTail[1]).toBe(input.playerView.publicEvents[2]);
+  });
 });
 
 function publicEvent(

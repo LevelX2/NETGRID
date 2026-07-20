@@ -354,10 +354,17 @@ const ALLOWED_ABILITY_FAMILIES: ReadonlySet<PublicAbilityFamily> = new Set([
 export function buildAiDecisionInputDto(
   params: BuildAiDecisionInputDtoParams,
 ): AiDecisionInput {
+  const sanitizedPublicEvents = params.playerView.publicEvents.map(
+    sanitizePublicGameEvent,
+  );
   return {
     side: params.side,
-    playerView: sanitizePlayerView(params.playerView),
-    eventTail: params.eventTail.map(sanitizePublicGameEvent),
+    playerView: sanitizePlayerView(params.playerView, sanitizedPublicEvents),
+    eventTail: sanitizeEventTail(
+      params.playerView.publicEvents,
+      sanitizedPublicEvents,
+      params.eventTail,
+    ),
     legalActions: params.legalActions.map(sanitizeLegalAction),
     difficulty: params.difficulty,
     seed: params.seed,
@@ -367,7 +374,29 @@ export function buildAiDecisionInputDto(
   };
 }
 
-function sanitizePlayerView(view: PlayerView): PlayerView {
+function sanitizeEventTail(
+  publicEvents: readonly PublicGameEvent[],
+  sanitizedPublicEvents: PublicGameEvent[],
+  eventTail: readonly PublicGameEvent[],
+): PublicGameEvent[] {
+  if (eventTail === publicEvents) return sanitizedPublicEvents;
+  if (eventTail.length === 0) return [];
+  const suffixStart = publicEvents.length - eventTail.length;
+  if (
+    suffixStart >= 0 &&
+    eventTail.every(
+      (event, index) => publicEvents[suffixStart + index] === event,
+    )
+  ) {
+    return sanitizedPublicEvents.slice(suffixStart);
+  }
+  return eventTail.map(sanitizePublicGameEvent);
+}
+
+function sanitizePlayerView(
+  view: PlayerView,
+  publicEvents: PublicGameEvent[],
+): PlayerView {
   return {
     side: view.side,
     stateVersion: view.stateVersion,
@@ -479,7 +508,7 @@ function sanitizePlayerView(view: PlayerView): PlayerView {
     ...(view.pendingChoice
       ? { pendingChoice: sanitizeVisibleChoiceRequest(view.pendingChoice) }
       : {}),
-    publicEvents: view.publicEvents.map(sanitizePublicGameEvent),
+    publicEvents,
     legalActions: view.legalActions.map(sanitizeLegalAction),
     winner: view.winner,
     agendaPointsToWin: view.agendaPointsToWin,

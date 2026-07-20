@@ -3,7 +3,10 @@ import { type AiDecisionInput } from "@netgrid/shared";
 import { reconstructBeliefState } from "../belief-state";
 import { isLowValueKnownAccessCard } from "../runtime/runner-low-value-known-access-card";
 import { roundNumber as round } from "../runtime/number-rounding";
-import { eventMayChangeHqPressure as aiEventMayChangeHqPressure } from "../runtime/public-event-history";
+import {
+  eventMayChangeHqPressure as aiEventMayChangeHqPressure,
+  mergedPublicHistory,
+} from "../runtime/public-event-history";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import {
   agendaPointsForMetrics,
@@ -71,7 +74,7 @@ export function runnerHqMemoryDiagnosticsForMetrics(
     ...(centralRun &&
     centralTarget === "hq" &&
     isRepeatedLowValueCentralRunForMetrics(input, "hq") &&
-    !input.eventTail.some(aiEventMayChangeHqPressure)
+    !mergedPublicHistory(input).some(aiEventMayChangeHqPressure)
       ? { hqRunRepeatedWithoutNewHqInfo: true }
       : {}),
   };
