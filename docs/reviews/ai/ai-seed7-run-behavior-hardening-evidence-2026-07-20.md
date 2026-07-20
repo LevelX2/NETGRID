@@ -1,6 +1,6 @@
 # Seed-7-Run-Verhalten – Umsetzungsevidence
 
-Status: Final Verify grün, lokaler Main-Merge und Cleanup ausstehend
+Status: Final Verify einschließlich aktuellem `main` grün, lokaler Main-Merge und Cleanup ausstehend
 
 ## Geprüfter Fehlerkorridor
 
@@ -108,6 +108,19 @@ Entscheidungen sank. Die `strategicNoProgress`-Rate stieg geringfügig von
 Baseline-Korridors; im betroffenen Seed-7-Spiel blieb
 `repeated_no_progress_run` bei null.
 
+Nach konfliktfreier Integration des aktuellen `main` auf Merge-Commit
+`d9873956e` wurde derselbe Vergleich vollständig wiederholt. Der kombinierte
+Stand ist mit 60 Spielen und 12.323 Entscheidungen weiterhin vergleichbar und
+mit `accepted: true` ohne Hard Failure abgeschlossen. Action-Limit-Spiele,
+Replay-Failures und Hidden-Info-Findings bleiben null. Die Finding-Rate liegt
+bei 6,581 und die `strategicNoProgress`-Rate bei 3,043 pro 100 Entscheidungen;
+beide Werte bleiben im akzeptierten Vergleichskorridor. Der betroffene
+Seed-7-Slot bleibt bei 472 Aktionen und null `repeated_no_progress_run`; der
+Seed-10-Kontrollfall bleibt bei 241 Aktionen. Zusätzlich sind 100 fokussierte
+Tests, 417 AI-Testdateien mit 2.881 Tests, AI-Typecheck, Source-Structure,
+Hint-Metadaten, Contracts, Test-Discovery und 19 Hidden-Info-/Redaction-Tests
+auf dem kombinierten Stand grün.
+
 ## Lokale Rohartefakte
 
 Die vollständigen redigierten Rohdaten bleiben gemäß Baseline-Prozess lokal
@@ -119,6 +132,8 @@ und unversioniert:
   `C:\Projekte\NETGRID_AI_SEED7_RUN_BEHAVIOR_HARDENING\data\local\ai-behavior-baseline-v1-seed07-seed7-hardening-p4-raw.json`
 - Finaler Zehn-Seed-Vergleich:
   `C:\Projekte\NETGRID_AI_SEED7_RUN_BEHAVIOR_HARDENING\data\local\ai-behavior-baseline-v1-seed7-hardening-final-v2-raw.json`
+- Zehn-Seed-Vergleich nach Integration des aktuellen `main`:
+  `C:\Projekte\NETGRID_AI_SEED7_RUN_BEHAVIOR_HARDENING\data\local\ai-behavior-baseline-v1-seed7-hardening-post-main-raw.json`
 
 Die Worktree-lokalen Rohartefakte werden beim verbindlichen Cleanup entfernt;
 die belastbaren Ergebnisse sind in diesem Review dokumentiert.

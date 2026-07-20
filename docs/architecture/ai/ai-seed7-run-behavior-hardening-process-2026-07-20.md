@@ -1,6 +1,6 @@
 # Seed-7-Run-Verhalten der KI härten
 
-Status: aktiv – Final Verify grün, Main-Merge und Cleanup ausstehend
+Status: aktiv – Final Verify einschließlich aktuellem `main` grün, lokaler Main-Merge und Cleanup ausstehend
 
 ## Quelle und Zielprüfung
 
@@ -375,3 +375,14 @@ Commit: `test(ai): harden seed7 run execution regressions`
   Hint-Metadaten, Contract-/Test-Discovery-, Format- und Hidden-Info-/Redaction-
   Gates sind grün. Der vollständige Standard-Baselinevergleich ist akzeptiert
   und vergleichbar.
+- Nach konfliktfreier Integration des aktuellen `main` auf Merge-Commit
+  `d9873956e` wurden die fachlichen und technischen Gates erneut ausgeführt:
+  100 fokussierte Tests, 417 AI-Testdateien mit 2.881 Tests, AI-Typecheck,
+  Source-Structure, Hint-Metadaten, Contracts, Test-Discovery sowie 19
+  Hidden-Info-/Redaction-Tests sind grün. Der unveränderte Standardvergleich
+  umfasst 60 Spiele und 12.323 Entscheidungen, ist zur Referenz `19d8375ed`
+  vergleichbar und mit `accepted: true` ohne Hard Failure abgeschlossen.
+  Action-Limit-Spiele, Replay-Failures und Hidden-Info-Findings bleiben null;
+  der betroffene Seed-7-Slot endet weiterhin nach 472 Aktionen mit null
+  `repeated_no_progress_run`, der Seed-10-Kontrollfall weiterhin nach 241
+  Aktionen.
