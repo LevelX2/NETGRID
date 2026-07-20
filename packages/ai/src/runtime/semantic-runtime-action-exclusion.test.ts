@@ -9,6 +9,52 @@ import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation"
 import { semanticRuntimeActionExclusion } from "./semantic-runtime-action-exclusion";
 
 describe("semanticRuntimeActionExclusion", () => {
+  it("hard-excludes no-access routes before any plan bonus can rank them", () => {
+    const action = runEventAction();
+    const evaluation = {
+      ...reachableBypassEvaluation(action),
+      recommendation: "run_now",
+      accessPayoff: "access_bonus",
+      routeQuote: {
+        reachability: "no_access",
+        knownCost: 4,
+        guaranteedKnownCost: 5,
+        availableCredits: 4,
+        fundingGap: 1,
+        unknownIceCount: 0,
+        effects: [],
+        conditionalReasons: [],
+        evidence: [],
+      },
+    } as RunnerRunTargetEvaluation;
+    const exclusion = semanticRuntimeActionExclusion(
+      runnerInput(action),
+      action,
+      undefined,
+      {
+        planMemoryActionExclusion: () => undefined,
+        corpAdvancementCounterPlacementAssessment: () => undefined,
+        runnerSelfDamageSurvivalExclusion: () => undefined,
+        runnerEncounterActionExclusion: () => undefined,
+        runnerProgramSacrificeExclusion: () => undefined,
+        runnerMultiRunEventExclusion: () => undefined,
+        runnerRunTargetEvaluationForAction: () => evaluation,
+        runnerBlinkRunExclusion: () => undefined,
+        knownCentralPayoffExclusion: () => undefined,
+        runnerArchivesExclusion: () => undefined,
+        runnerEmptyRemoteExclusion: () => undefined,
+        isRemoteServerTarget: (serverId) =>
+          serverId?.startsWith("remote_") === true,
+        knownIcePathReason: () => "not_reached",
+      },
+    );
+
+    expect(exclusion).toMatchObject({
+      key: "runner_run_release_blocked",
+    });
+    expect(exclusion?.reason).toContain("release_reason:route_no_access");
+  });
+
   it("keeps a projected reachable bypass action despite a generically blocked ICE path", () => {
     const action = runEventAction();
     const exclusion = semanticRuntimeActionExclusion(

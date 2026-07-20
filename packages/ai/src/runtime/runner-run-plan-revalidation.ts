@@ -5,6 +5,7 @@ import {
   createRunnerRunDecisionFingerprint,
   rebaseRunnerRunCommitment,
 } from "./runner-run-commitment";
+import { runnerRunPlanAcceptsConditionalRoute } from "./runner-run-release";
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
 import type {
   RunnerRunEncounterStateRef,
@@ -84,7 +85,12 @@ export function revalidateRunnerRunPlan(
           ),
         ]
       : []),
-    ...(!pathQuote.canReachAccess && pathQuote.cannotReachReason
+    ...(runnerRunPlanAcceptsConditionalRoute(currentPlan)
+      ? ["conditional_route_accepted"]
+      : []),
+    ...(!pathQuote.canReachAccess &&
+    !runnerRunPlanAcceptsConditionalRoute(currentPlan) &&
+    pathQuote.cannotReachReason
       ? [`cannot_reach:${pathQuote.cannotReachReason}`]
       : []),
     nextFingerprint,
@@ -95,6 +101,7 @@ export function revalidateRunnerRunPlan(
     encounterChanged,
     fingerprintChanged,
     canReachAccess: pathQuote.canReachAccess,
+    conditionalRouteAccepted: runnerRunPlanAcceptsConditionalRoute(currentPlan),
     knownNoCurrentPayoff: currentAccessPayoff?.knownNoCurrentPayoff === true,
   });
   const nextCommitment = rebaseRunnerRunCommitment({
@@ -123,9 +130,11 @@ function revalidationStatusFor(params: {
   encounterChanged: boolean;
   fingerprintChanged: boolean;
   canReachAccess: boolean;
+  conditionalRouteAccepted: boolean;
   knownNoCurrentPayoff: boolean;
 }): RunnerRunPlanRevalidationStatus {
-  if (!params.canReachAccess) return "abort_recommended";
+  if (!params.canReachAccess && !params.conditionalRouteAccepted)
+    return "abort_recommended";
   if (params.knownNoCurrentPayoff) return "abort_recommended";
   if (
     params.targetChanged ||

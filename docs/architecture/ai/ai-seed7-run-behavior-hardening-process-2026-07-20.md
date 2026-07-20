@@ -1,6 +1,6 @@
 # Seed-7-Run-Verhalten der KI härten
 
-Status: aktiv – Paket 2 abgeschlossen
+Status: aktiv – Paket 3 abgeschlossen
 
 ## Quelle und Zielprüfung
 
@@ -225,7 +225,7 @@ Commit: `test(ai): harden seed7 run execution regressions`
 - Preflight: abgeschlossen (`e51431570`)
 - Paket 1: abgeschlossen
 - Paket 2: abgeschlossen
-- Paket 3: ausstehend
+- Paket 3: abgeschlossen
 - Paket 4: ausstehend
 - Final Verify, Merge und Cleanup: ausstehend
 
@@ -275,4 +275,30 @@ Commit: `test(ai): harden seed7 run execution regressions`
   Verpflichtungen übernehmen die aktuelle Route und bewahren die bewusst
   akzeptierten Risiken.
 - Verifikation: fünf fokussierte Testdateien mit 70 Tests, AI-Typecheck und
+  `git diff --check` grün.
+
+### Paket 3
+
+- `RunnerRunReleaseDecision` ist jetzt das verbindliche Gate vor der
+  semantischen Rangfolge. `no_access` wird hart ausgeschlossen und kann durch
+  Tactical-Plan-, Matchpoint- oder Deckstrategie-Boni nicht wiederbelebt
+  werden. Garantierter Access bleibt zulässig; seine Downside wird weiterhin
+  differenziert über Guidance und Nutzen gewichtet.
+- Konditionale Routen werden nur als finanzierter Unknown-ICE-Probe, als
+  bereits risikogeprüfte probabilistische Breaker-Route oder als ausdrücklich
+  akzeptiertes Agenda-/Score-Threat-Risiko freigegeben. Sichtbare
+  Flatline-Gefahr vor Access bleibt auch bei Agenda-Payoff gesperrt.
+- Ein Unknown-ICE-Probe erhält im RunPlan ein echtes `probe_unknown_ice`-Ziel
+  mit Kreditverlustbudget. Eine akzeptierte konditionale Route wird im
+  Commitment persistiert und von Revalidation sowie Encounter-Quote wieder
+  erkannt; dasselbe bekannte Risiko erzeugt deshalb keinen sofortigen
+  Jack-out.
+- Action-Ziel und RunTargetEvaluation müssen übereinstimmen. Die harte
+  Freigabe betrifft ausschließlich die konkrete Run-Aktion; Economy-, Draw-,
+  Install-, Tutor-, Link- und Prevention-Alternativen bleiben von diesem Gate
+  unberührt.
+- Probabilistische Universal-Breaker-Pfade bleiben als explizit konditionaler
+  Sonderfall erhalten, sofern ihre vorhandene Handbuffer-/Encounter-Prüfung
+  bestanden ist. Dadurch entsteht keine negative globale Blink-Regression.
+- Verifikation: neun fokussierte Testdateien mit 167 Tests, AI-Typecheck und
   `git diff --check` grün.

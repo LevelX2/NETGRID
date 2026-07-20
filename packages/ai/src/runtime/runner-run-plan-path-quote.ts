@@ -59,6 +59,7 @@ import {
   runnerEncounterPaymentForActions,
   spendRunnerEncounterBreakerCost,
 } from "./runner-encounter-credit-budget";
+import { runnerRunPlanAcceptsConditionalRoute } from "./runner-run-release";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -557,7 +558,13 @@ function cheapestTraceAccessSequence(params: {
       baseStrength + Math.max(0, params.input.playerView.opponent.credits),
       support,
     ).cheapestAffordableSafe;
-    if (!guarantee) return undefined;
+    if (!guarantee) {
+      if (!runnerRunPlanAcceptsConditionalRoute(params.plan)) return undefined;
+      if (effect && effect.type !== "none") {
+        acceptedEffectTypes.push(effect.type);
+      }
+      continue;
+    }
     guaranteedTraceCost += guarantee.creditCost;
     remainingGeneralCredits = Math.max(
       0,

@@ -308,6 +308,36 @@ describe("runner run plan memory", () => {
     );
   });
 
+  it("creates an explicit probe objective for a released unknown-ICE route", () => {
+    const startRun = action("start_run", { serverId: "rd" });
+    const plan = createRunnerRunPlanForSelectedAction({
+      input: runnerInput({ activeRun: false, legalActions: [startRun] }),
+      selectedAction: startRun,
+      runnerRunTargetEvaluations: [
+        runTargetEvaluation(startRun, {
+          routeQuote: {
+            reachability: "conditional_access",
+            knownCost: 2,
+            guaranteedKnownCost: 2,
+            availableCredits: 5,
+            fundingGap: 0,
+            unknownIceCount: 1,
+            effects: [],
+            conditionalReasons: ["unknown_ice_on_route"],
+            evidence: [],
+          },
+        }),
+      ],
+    });
+
+    expect(plan?.objective.kind).toBe("probe_unknown_ice");
+    expect(plan?.commitment).toMatchObject({
+      route: { reachability: "conditional_access", unknownIceCount: 1 },
+      acceptedRisks: ["conditional:unknown_ice_on_route"],
+    });
+    expect(plan?.revalidation.status).toBe("valid");
+  });
+
   it("creates a decline-low-value access intent only for known low-value targets", () => {
     const startRun = action("start_run", { serverId: "rd" });
     const plan = createRunnerRunPlanForSelectedAction({
@@ -705,6 +735,7 @@ function runTargetEvaluation(
     targetServerId?: string;
     targetKind?: RunnerRunTargetEvaluation["targetKind"];
     evidence?: string[];
+    routeQuote?: RunnerRunTargetEvaluation["routeQuote"];
   } = {},
 ): RunnerRunTargetEvaluation {
   const accessPayoff = options.accessPayoff ?? "unknown";
@@ -725,6 +756,7 @@ function runTargetEvaluation(
     multiaccessAvailable: false,
     pathPassability: "reachable",
     pathCost: 2,
+    ...(options.routeQuote ? { routeQuote: options.routeQuote } : {}),
     creditsAfterRun: 3,
     stealOrTrashAffordable: "unknown",
     installedRunPayoff: {

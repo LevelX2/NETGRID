@@ -18,6 +18,7 @@ export function createRunnerRunCommitment(params: {
   plan: RunnerRunPlan;
   selectedAction: LegalAction;
   evaluation?: RunnerRunTargetEvaluation;
+  acceptedRisks?: string[];
 }): RunnerRunCommitment {
   const route = routeCommitment(params.plan.pathQuote, params.evaluation);
   const runnerAgendaPoints = visibleAgendaPoints(params.input, "runner");
@@ -33,10 +34,7 @@ export function createRunnerRunCommitment(params: {
     params.plan.budget.reservedCreditsForSteal,
     params.plan.budget.reservedCreditsForTrash,
   );
-  const acceptedRisks =
-    route.reachability === "conditional_access"
-      ? route.conditionalReasons.map((reason) => `conditional:${reason}`)
-      : [];
+  const acceptedRisks = params.acceptedRisks ?? [];
   const commitment: Omit<RunnerRunCommitment, "decisionFingerprint"> = {
     targetServer: params.plan.targetServer.id,
     goal: params.plan.objective.kind,

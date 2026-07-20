@@ -6,6 +6,7 @@ import type {
 } from "@netgrid/shared";
 
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
+import { createRunnerRunCommitment } from "./runner-run-commitment";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 
 describe("runner run plan path quote", () => {
@@ -104,6 +105,58 @@ describe("runner run plan path quote", () => {
       usesBreak: true,
     });
     expect(sequence?.usesTrace).toBeUndefined();
+  });
+
+  it("continues through the same visible risk when the conditional route was explicitly accepted", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_246_fragmentation-storm",
+      iceTitle: "Fragmentation Storm",
+      iceStrength: 4,
+      credits: 4,
+      opponentCredits: 1,
+      rig: [],
+      subroutines: [fragmentationStormTraceSubroutine()],
+      legalActions: [
+        continueAction({
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+    const plan = runPlan();
+    plan.pathQuote = {
+      ...plan.pathQuote,
+      accessStatus: "conditional_access",
+      guaranteedKnownCost: 5,
+      conditionalReasons: ["visible_access_preventing_effect_not_guaranteed"],
+    };
+    plan.commitment = createRunnerRunCommitment({
+      input,
+      plan,
+      selectedAction: input.legalActions[0]!,
+      acceptedRisks: [
+        "conditional:visible_access_preventing_effect_not_guaranteed",
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, plan);
+    const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
+
+    expect(sequence?.steps.map((step) => step.actionType)).toEqual([
+      "continue_run",
+    ]);
+    expect(sequence).toMatchObject({
+      totalCost: 0,
+      usesTrace: true,
+      preservesAccessObjective: true,
+    });
+    expect(sequence?.riskTags).toContain(
+      "accepted_visible_trace_effect:end_run_trash_program_and_run_lock",
+    );
+    expect(quote).toMatchObject({
+      accessStatus: "conditional_access",
+      canReachAccess: true,
+    });
   });
 
   it("quotes direct break as the current access-preserving sequence", () => {

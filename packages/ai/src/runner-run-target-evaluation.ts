@@ -230,12 +230,28 @@ function evaluateRunnerRunTarget(
   const unknownUnrezzedIceCount = projectedServerIce.filter(
     (card) => card.rezzed !== true && card.known === false,
   ).length;
-  const routeQuote = quoteRunnerRunRoute({
+  const baseRouteQuote = quoteRunnerRunRoute({
     path,
     availableCredits: creditsAfterAction,
     unknownIceCount: unknownUnrezzedIceCount,
     runnerGripCount: params.input.playerView.own.gripOrHq.length,
   });
+  const { noAccessReason: _noAccessReason, ...conditionalBaseRouteQuote } =
+    baseRouteQuote;
+  const routeQuote =
+    probabilisticUniversalPathReachable &&
+    baseRouteQuote.reachability === "no_access"
+      ? {
+          ...conditionalBaseRouteQuote,
+          reachability: "conditional_access" as const,
+          conditionalReasons: ["probabilistic_breaker_route"],
+          evidence: [
+            ...baseRouteQuote.evidence,
+            "route_reachability:conditional_access",
+            "route_conditional:probabilistic_breaker_route",
+          ],
+        }
+      : baseRouteQuote;
   const runCommitment =
     unknownUnrezzedIceCount > 0 ? "probe_only" : "full_path";
   const unrezzedIceRisk =
@@ -280,6 +296,7 @@ function evaluateRunnerRunTarget(
     expectedTagsFromVisibleIce,
     unavoidableVisibleIceHazardCount,
     visibleTraceTagHazardUnavoidable,
+    routeQuote,
     unrezzedIceRiskUnderfunded,
     ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
     ...(rankedAccessTarget ? { rankedAccessTarget } : {}),
@@ -870,6 +887,7 @@ function recommendationForRunTarget(params: {
   expectedTagsFromVisibleIce: number;
   unavoidableVisibleIceHazardCount: number;
   visibleTraceTagHazardUnavoidable: boolean;
+  routeQuote: NonNullable<RunnerRunTargetEvaluation["routeQuote"]>;
   unrezzedIceRiskUnderfunded: boolean;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
   rankedAccessTarget?: RankedKnownRemoteAccessCandidate;
@@ -897,7 +915,16 @@ function recommendationForRunTarget(params: {
     return "setup_first";
   }
   if (params.unproductiveVisibleRunPath) {
-    return "do_not_run_now";
+    const explicitConditionalAgendaRisk =
+      params.routeQuote.reachability === "conditional_access" &&
+      (params.accessPayoff === "agenda" ||
+        params.accessPayoff === "score_threat" ||
+        params.scoreThreat) &&
+      !params.routeQuote.effects.some(
+        (effect) => effect.canEndGameBeforeAccess,
+      );
+    if (!explicitConditionalAgendaRisk) return "do_not_run_now";
+    return "run_now";
   }
   if (
     params.visibleTraceTagHazardUnavoidable &&

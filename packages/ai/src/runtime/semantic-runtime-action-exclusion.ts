@@ -9,6 +9,7 @@ import { runnerActionReserveExclusion } from "./runner-action-reserve";
 import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { removesPersistentTraceTagCounter } from "../actions/trace-counter-semantics";
+import { runnerRunReleaseForEvaluation } from "./runner-run-release";
 
 type PlayerViewServer = AiDecisionInput["playerView"]["servers"][number];
 type KnownIcePathAssessment = ReturnType<typeof assessKnownRezzedIcePath>;
@@ -158,17 +159,51 @@ export function semanticRuntimeActionExclusion(
     input,
     action,
   );
+  const actionTargetServerId = semanticRuntimeServerId(action);
+  if (
+    runTargetEvaluation &&
+    actionTargetServerId &&
+    actionTargetServerId !== runTargetEvaluation.targetServerId
+  ) {
+    return {
+      key: "runner_run_target_mismatch",
+      label: "Run-Ziel und Bewertung widersprechen sich",
+      reason: [
+        `action:${action.actionId}`,
+        `action_target:${actionTargetServerId}`,
+        `evaluation_target:${runTargetEvaluation.targetServerId}`,
+      ].join("|"),
+    };
+  }
   const serverId =
     runTargetEvaluation?.targetServerId ?? semanticRuntimeServerId(action);
   const accessServerId = runTargetEvaluation?.accessServerId ?? serverId;
   if (input.side !== "runner" || !serverId || !accessServerId) return undefined;
+  const releaseDecision = runTargetEvaluation
+    ? runnerRunReleaseForEvaluation(input, runTargetEvaluation)
+    : undefined;
+  if (releaseDecision?.status === "blocked") {
+    return {
+      key: "runner_run_release_blocked",
+      label: "Run-Freigabe nicht erfüllt",
+      reason: [
+        `action:${action.actionId}`,
+        `target:${runTargetEvaluation?.targetServerId}`,
+        `release_reason:${releaseDecision.reason}`,
+        ...releaseDecision.evidence,
+      ].join("|"),
+    };
+  }
+  const conditionalRouteReleased =
+    releaseDecision?.status === "released_conditional";
   if (
     runTargetEvaluation &&
     [
       "blocked_missing_coverage",
       "blocked_unpayable",
       "blocked_unbreakable",
-    ].includes(runTargetEvaluation.pathPassability)
+    ].includes(runTargetEvaluation.pathPassability) &&
+    !conditionalRouteReleased
   ) {
     return {
       key: "projected_run_path_no_access",

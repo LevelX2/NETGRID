@@ -23,6 +23,7 @@ import type {
 } from "./runner-run-plan-types";
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
 import { createRunnerRunCommitment } from "./runner-run-commitment";
+import { runnerRunReleaseForEvaluation } from "./runner-run-release";
 
 export function createRunnerRunPlanForSelectedAction(params: {
   input: AiDecisionInput;
@@ -224,6 +225,9 @@ export function createRunnerRunPlanForSelectedAction(params: {
     ...plan,
     pathQuote: quoteRunnerRunPath(input, plan),
   };
+  const releaseDecision = matchingTargetEvaluation
+    ? runnerRunReleaseForEvaluation(input, matchingTargetEvaluation)
+    : undefined;
   return {
     ...quotedPlan,
     commitment: createRunnerRunCommitment({
@@ -233,7 +237,17 @@ export function createRunnerRunPlanForSelectedAction(params: {
       ...(matchingTargetEvaluation
         ? { evaluation: matchingTargetEvaluation }
         : {}),
+      ...(releaseDecision?.acceptedRisks.length
+        ? { acceptedRisks: releaseDecision.acceptedRisks }
+        : {}),
     }),
+    revalidation: {
+      status: releaseDecision?.status === "blocked" ? "invalid" : "valid",
+      reasons: releaseDecision
+        ? [releaseDecision.reason, ...releaseDecision.evidence]
+        : ["run_plan_created_from_selected_run_action"],
+      checkedAtStateVersion: now,
+    },
   };
 }
 
@@ -336,6 +350,29 @@ function runnerRunObjectiveFor(params: {
   evaluation: RunnerRunTargetEvaluation | undefined;
 }): RunnerRunObjective {
   const payoff = params.evaluation?.accessPayoff;
+  const boundedUnknownProbe =
+    params.evaluation?.routeQuote?.reachability === "conditional_access" &&
+    (params.evaluation.routeQuote.conditionalReasons.length ?? 0) > 0 &&
+    params.evaluation.routeQuote.conditionalReasons.every(
+      (reason) => reason === "unknown_ice_on_route",
+    ) &&
+    payoff !== "agenda" &&
+    payoff !== "score_threat" &&
+    params.evaluation?.scoreThreat !== true;
+  if (boundedUnknownProbe) {
+    return {
+      kind: "probe_unknown_ice",
+      riskBudget: {
+        maxCreditLoss: Math.max(0, params.evaluation?.pathCost ?? 0),
+        maxDamage: 0,
+        allowEndTheRun: true,
+        evidence: [
+          "run_objective:probe_unknown_ice",
+          "run_objective:conditional_unknown_route",
+        ],
+      },
+    };
+  }
   if (params.targetKind === "rd") {
     if (params.expectedAccessCount > 1) {
       return {
