@@ -31,6 +31,7 @@ import {
 import {
   isEndRunSubroutine,
   isImmediateSafetyThreatSubroutine,
+  isUnacceptableImmediateSafetyThreatSubroutine,
   isProgramTrashThreatSubroutine,
 } from "./encounter-subroutine";
 import {
@@ -148,7 +149,10 @@ export function quoteRunnerRunPath(
     encounterBudget.runOnlyCredits +
     encounterBudget.icebreakerCredits +
     encounterBudget.nonNoisyIcebreakerCredits +
-    encounterBudget.killerCredits;
+    encounterBudget.killerCredits +
+    Object.values(
+      encounterBudget.hostedIcebreakerCreditsByBreakerInstanceId,
+    ).reduce((sum, amount) => sum + amount, 0);
   const totalKnownCost = Math.max(
     0,
     totalKnownGrossCost -
@@ -1137,7 +1141,7 @@ function threatClassForSubroutine(
   ) {
     return "irrelevant_to_current_plan";
   }
-  if (isImmediateSafetyThreatSubroutine(subroutine)) {
+  if (isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine)) {
     return "must_break_for_survival";
   }
   if (

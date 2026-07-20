@@ -30,6 +30,13 @@ export function runnerRunPathCreditBudgetWithVisiblePools(
             rigBudget.stealthNonNoisyIcebreakerCredits,
         }
       : {}),
+    ...(Object.keys(rigBudget.hostedIcebreakerCreditsByBreakerInstanceId)
+      .length > 0
+      ? {
+          hostedIcebreakerCreditsByBreakerInstanceId:
+            rigBudget.hostedIcebreakerCreditsByBreakerInstanceId,
+        }
+      : {}),
   };
 }
 
@@ -41,6 +48,7 @@ export function visibleRunnerRunPathCreditBudgetForRig(
     nonNoisyIcebreakerCredits: 0,
     killerCredits: 0,
     stealthNonNoisyIcebreakerCredits: 0,
+    hostedIcebreakerCreditsByBreakerInstanceId: {} as Record<string, number>,
   };
   for (const card of rigCards) {
     if (card.known === false) continue;
@@ -49,6 +57,22 @@ export function visibleRunnerRunPathCreditBudgetForRig(
       if (amount <= 0) continue;
       const use = runPathCreditPoolUse(display.creditPool?.uses ?? []);
       if (use) {
+        if (
+          use === "icebreakerCredits" &&
+          display.creditPool?.requireHostedBreakerForIcebreakerUse
+        ) {
+          for (const hostedBreaker of rigCards.filter(
+            (candidate) => candidate.hostedOn === card.instanceId,
+          )) {
+            budget.hostedIcebreakerCreditsByBreakerInstanceId[
+              hostedBreaker.instanceId
+            ] =
+              (budget.hostedIcebreakerCreditsByBreakerInstanceId[
+                hostedBreaker.instanceId
+              ] ?? 0) + amount;
+          }
+          continue;
+        }
         budget[use] += amount;
         if (
           use === "nonNoisyIcebreakerCredits" &&
@@ -64,7 +88,11 @@ export function visibleRunnerRunPathCreditBudgetForRig(
 
 export function runPathCreditPoolUse(
   uses: readonly CounterCreditUse[],
-): keyof Omit<Required<RunnerRunPathCreditBudget>, "credits"> | undefined {
+):
+  | "icebreakerCredits"
+  | "nonNoisyIcebreakerCredits"
+  | "killerCredits"
+  | undefined {
   if (uses.includes("using_icebreaker_during_run")) {
     return "icebreakerCredits";
   }
@@ -85,6 +113,7 @@ export function normalizeRunnerRunPathCreditBudget(
       nonNoisyIcebreakerCredits: 0,
       killerCredits: 0,
       stealthNonNoisyIcebreakerCredits: 0,
+      hostedIcebreakerCreditsByBreakerInstanceId: {},
     };
   }
   return {
@@ -97,13 +126,26 @@ export function normalizeRunnerRunPathCreditBudget(
     stealthNonNoisyIcebreakerCredits: normalizeCreditAmount(
       budget.stealthNonNoisyIcebreakerCredits ?? 0,
     ),
+    hostedIcebreakerCreditsByBreakerInstanceId: Object.fromEntries(
+      Object.entries(
+        budget.hostedIcebreakerCreditsByBreakerInstanceId ?? {},
+      ).map(([breakerId, amount]) => [
+        breakerId,
+        normalizeCreditAmount(amount),
+      ]),
+    ),
   };
 }
 
 export function cloneRunnerRunPathCreditBudget(
   budget: MutableRunnerRunPathCreditBudget,
 ): MutableRunnerRunPathCreditBudget {
-  return { ...budget };
+  return {
+    ...budget,
+    hostedIcebreakerCreditsByBreakerInstanceId: {
+      ...budget.hostedIcebreakerCreditsByBreakerInstanceId,
+    },
+  };
 }
 
 export function normalizeCreditAmount(value: number): number {
@@ -155,8 +197,27 @@ export function spendBreakerCredits(
   breakAssessment: BreakAssessment,
 ): void {
   let remainingCost = normalizeCreditAmount(breakAssessment.cost);
+  const hostedCredits = Math.min(
+    budget.hostedIcebreakerCreditsByBreakerInstanceId[
+      breakAssessment.breakerInstanceId
+    ] ?? 0,
+    remainingCost,
+  );
+  budget.hostedIcebreakerCreditsByBreakerInstanceId[
+    breakAssessment.breakerInstanceId
+  ] = Math.max(
+    0,
+    (budget.hostedIcebreakerCreditsByBreakerInstanceId[
+      breakAssessment.breakerInstanceId
+    ] ?? 0) - hostedCredits,
+  );
+  remainingCost -= hostedCredits;
   const spend = (
-    key: Exclude<keyof MutableRunnerRunPathCreditBudget, "credits">,
+    key:
+      | "icebreakerCredits"
+      | "nonNoisyIcebreakerCredits"
+      | "killerCredits"
+      | "stealthNonNoisyIcebreakerCredits",
   ) => {
     if (key === "stealthNonNoisyIcebreakerCredits") return;
     const amount = Math.min(budget[key], remainingCost);
@@ -204,6 +265,9 @@ export function applicableRestrictedBreakerCredits(
   breakAssessment: BreakAssessment,
 ): number {
   return (
+    (budget.hostedIcebreakerCreditsByBreakerInstanceId[
+      breakAssessment.breakerInstanceId
+    ] ?? 0) +
     budget.icebreakerCredits +
     (breakerCanUseNonNoisyCredits(breakAssessment)
       ? budget.nonNoisyIcebreakerCredits

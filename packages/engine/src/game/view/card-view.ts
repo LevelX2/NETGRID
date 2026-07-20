@@ -27,9 +27,7 @@ import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-
 import { SERVER_DIFFICULTY_UPGRADE_SOURCES } from "../../mechanics/agenda-scoring";
 import type { CardImplementationDefinition } from "../../card-implementations/types";
 import { serverChoiceDisplayLabel } from "./server-view";
-import {
-  temporaryBreakerStrengthBonusUntilEndOfTurn,
-} from "../state/temporary-breaker-strength";
+import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
 
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
@@ -100,13 +98,12 @@ function visibleKnownCardWithReferenceViewer(
     id,
     referenceViewer,
   );
-  const runnerPaymentSupportAbilities =
-    visibleRunnerPaymentSupportAbilities(
-      state,
-      id,
-      definition,
-      referenceViewer,
-    );
+  const runnerPaymentSupportAbilities = visibleRunnerPaymentSupportAbilities(
+    state,
+    id,
+    definition,
+    referenceViewer,
+  );
   return {
     instanceId: id,
     known: true,
@@ -493,6 +490,9 @@ function restrictedPoolCounterDisplays(
           ? {
               capacity: Math.max(0, Math.floor(restrictedSource.capacity)),
               uses: restrictedSource.usableFor.slice(),
+              ...(restrictedSource.requireHostedBreakerForIcebreakerUse
+                ? { requireHostedBreakerForIcebreakerUse: true as const }
+                : {}),
               refresh: {
                 timing: restrictedSource.refresh.timing,
                 behavior: restrictedSource.refresh.mode,
@@ -658,8 +658,7 @@ function specialCounterDisplays(
       : singleCounterDisplay(counters.virus, {
           id: definition.type === "ice" ? "pattel" : "virus",
           displayKind: "virus",
-          label:
-            definition.type === "ice" ? "Pattel-Counter" : "Virus-Counter",
+          label: definition.type === "ice" ? "Pattel-Counter" : "Virus-Counter",
           ariaLabelName:
             definition.type === "ice" ? "Pattel-Counter" : "Virus-Counter",
           counterType: "virus",

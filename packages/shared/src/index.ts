@@ -1875,6 +1875,7 @@ export type CounterCreditPool = {
   kind: CounterCreditPoolKind;
   capacity?: number;
   uses?: readonly CounterCreditUse[];
+  requireHostedBreakerForIcebreakerUse?: true;
   refresh?: {
     timing: CounterCreditRefreshTiming;
     behavior: CounterCreditRefreshBehavior;

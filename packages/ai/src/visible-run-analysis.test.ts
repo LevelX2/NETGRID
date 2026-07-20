@@ -297,6 +297,30 @@ describe("visible run analysis Deflector paths", () => {
 });
 
 describe("visible run analysis runner run credit pools", () => {
+  it("assigns hosted-only Spin Chip credits only to its hosted breaker", () => {
+    const unhostedKrash = krashBreaker("runner-krash");
+    const spinChip = hostedOnlyBreakerCreditPool("runner-spin-chip", 2);
+
+    expect(
+      runnerRunPathCreditBudgetWithVisiblePools(0, [unhostedKrash, spinChip]),
+    ).toMatchObject({ credits: 0 });
+    expect(
+      runnerRunPathCreditBudgetWithVisiblePools(0, [unhostedKrash, spinChip]),
+    ).not.toHaveProperty("icebreakerCredits");
+
+    const hostedKrash = {
+      ...unhostedKrash,
+      hostedOn: spinChip.instanceId,
+    };
+    expect(
+      runnerRunPathCreditBudgetWithVisiblePools(0, [hostedKrash, spinChip]),
+    ).toMatchObject({
+      hostedIcebreakerCreditsByBreakerInstanceId: {
+        "runner-krash": 2,
+      },
+    });
+  });
+
   it("uses visible non-noisy breaker credits for a Codecracker known path", () => {
     const rig = [
       codecrackerBreaker("runner-codecracker"),
@@ -1229,6 +1253,34 @@ function nonNoisyBreakerCreditPool(
         creditPool: {
           kind: "recurring_credit",
           uses: ["using_icebreaker_during_run_non_noisy"],
+        },
+      },
+    ],
+  };
+}
+
+function hostedOnlyBreakerCreditPool(
+  instanceId: string,
+  amount: number,
+): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+    title: "Eurocorpse (TM) Spin Chip",
+    type: "hardware",
+    subtypes: ["chip"],
+    known: true,
+    counterDisplays: [
+      {
+        id: `${instanceId}-restricted`,
+        amount,
+        displayKind: "restricted_pool",
+        label: "Run-Bits",
+        ariaLabel: `${amount} Run-Bits`,
+        creditPool: {
+          kind: "restricted_credit",
+          uses: ["using_icebreaker_during_run"],
+          requireHostedBreakerForIcebreakerUse: true,
         },
       },
     ],

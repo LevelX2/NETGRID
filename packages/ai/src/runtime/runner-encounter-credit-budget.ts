@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import {
   type RunnerRunPathCreditBudget,
@@ -11,7 +15,11 @@ type EncounterCreditBudget = RunnerRunPathCreditBudget & {
   runOnlyCredits?: number;
 };
 
-type MutableEncounterCreditBudget = Required<RunnerRunPathCreditBudget> & {
+type MutableEncounterCreditBudget = Omit<
+  Required<RunnerRunPathCreditBudget>,
+  "hostedIcebreakerCreditsByBreakerInstanceId"
+> & {
+  hostedIcebreakerCreditsByBreakerInstanceId: Record<string, number>;
   runOnlyCredits: number;
 };
 
@@ -40,6 +48,9 @@ export function runnerEncounterCreditBudgetForInput(
     killerCredits: visiblePools.killerCredits,
     stealthNonNoisyIcebreakerCredits:
       visiblePools.stealthNonNoisyIcebreakerCredits,
+    hostedIcebreakerCreditsByBreakerInstanceId: {
+      ...visiblePools.hostedIcebreakerCreditsByBreakerInstanceId,
+    },
   };
 }
 
@@ -126,8 +137,29 @@ export function spendRunnerEncounterBreakerCost(params: {
       params.actionType === "break_subroutine" ||
       params.actionType === "pump_breaker")
   ) {
+    const hostedCredits = Math.min(
+      budget.hostedIcebreakerCreditsByBreakerInstanceId[
+        params.breakerId ?? ""
+      ] ?? 0,
+      remaining,
+    );
+    if (params.breakerId) {
+      budget.hostedIcebreakerCreditsByBreakerInstanceId[params.breakerId] =
+        Math.max(
+          0,
+          (budget.hostedIcebreakerCreditsByBreakerInstanceId[
+            params.breakerId
+          ] ?? 0) - hostedCredits,
+        );
+    }
+    remaining -= hostedCredits;
+    restrictedSpent += hostedCredits;
     const spendRestricted = (
-      key: Exclude<keyof MutableEncounterCreditBudget, "credits">,
+      key:
+        | "icebreakerCredits"
+        | "nonNoisyIcebreakerCredits"
+        | "killerCredits"
+        | "stealthNonNoisyIcebreakerCredits",
     ) => {
       const spent = Math.min(budget[key], remaining);
       budget[key] -= spent;
@@ -175,6 +207,14 @@ function normalizeBudget(
     killerCredits: normalizeCreditAmount(budget.killerCredits ?? 0),
     stealthNonNoisyIcebreakerCredits: normalizeCreditAmount(
       budget.stealthNonNoisyIcebreakerCredits ?? 0,
+    ),
+    hostedIcebreakerCreditsByBreakerInstanceId: Object.fromEntries(
+      Object.entries(
+        budget.hostedIcebreakerCreditsByBreakerInstanceId ?? {},
+      ).map(([breakerId, amount]) => [
+        breakerId,
+        normalizeCreditAmount(amount),
+      ]),
     ),
   };
 }

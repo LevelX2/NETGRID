@@ -4,6 +4,7 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import { runnerHasMeaningfulCreditConversionAlternative } from "./runner-marginal-credit-value";
+import { encounterContinueAcceptsOnlyNonlethalDamageThreats } from "./encounter-subroutine";
 
 export type RunnerBasicActionPenaltyScoreDependencies = {
   encounterActionIsViable: (
@@ -20,8 +21,7 @@ export function runnerBasicActionPenaltyScoreComponents(
   input: AiDecisionInput,
   action: LegalAction,
   scopeId: string,
-  dependencies: RunnerBasicActionPenaltyScoreDependencies =
-    DEFAULT_DEPENDENCIES,
+  dependencies: RunnerBasicActionPenaltyScoreDependencies = DEFAULT_DEPENDENCIES,
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
   if (action.type === "jack_out" && scopeId === "simple_run_choice") {
@@ -37,6 +37,7 @@ export function runnerBasicActionPenaltyScoreComponents(
     scopeId === "simple_run_choice" &&
     action.payload?.encounterWillEndRun === true &&
     action.payload?.encounterSourceWillTrashAtEndOfTurn !== true &&
+    !encounterContinueAcceptsOnlyNonlethalDamageThreats(input) &&
     input.legalActions.some(
       (candidate) =>
         (candidate.type === "break_subroutine" ||

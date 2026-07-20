@@ -24,9 +24,9 @@ describe("runner run release", () => {
     });
   });
 
-  it("keeps a funded unknown-ICE probe available when full-access guidance says to fund first", () => {
+  it("blocks an under-reserved unknown-ICE probe against a rich Corp", () => {
     const release = runnerRunReleaseForEvaluation(
-      runnerInput(),
+      runnerInput(7),
       evaluation({
         route: "conditional_access",
         conditionalReasons: ["unknown_ice_on_route"],
@@ -36,13 +36,34 @@ describe("runner run release", () => {
         pathPassability: "blocked_unpayable",
         recommendation: "gain_credits_first",
         unrezzedIceRiskUnderfunded: true,
+        creditsAfterRun: 0,
+      }),
+    );
+
+    expect(release).toMatchObject({
+      status: "blocked",
+      reason: "recommendation_gain_credits_first",
+    });
+  });
+
+  it("keeps the same score-threat probe available at one visible Corp credit", () => {
+    const release = runnerRunReleaseForEvaluation(
+      runnerInput(1),
+      evaluation({
+        route: "conditional_access",
+        conditionalReasons: ["unknown_ice_on_route"],
+        unknownIceCount: 2,
+        fundingGap: 0,
+        accessPayoff: "score_threat",
+        recommendation: "gain_credits_first",
+        unrezzedIceRiskUnderfunded: true,
+        creditsAfterRun: 0,
       }),
     );
 
     expect(release).toMatchObject({
       status: "released_conditional",
       reason: "bounded_unknown_ice_probe",
-      acceptedRisks: ["conditional:unknown_ice_on_route"],
     });
   });
 
@@ -103,6 +124,7 @@ function evaluation(params: {
   pathPassability?: RunnerRunTargetEvaluation["pathPassability"];
   recommendation?: RunnerRunTargetEvaluation["recommendation"];
   unrezzedIceRiskUnderfunded?: boolean;
+  creditsAfterRun?: number;
 }): RunnerRunTargetEvaluation {
   return {
     targetServerId: "rd",
@@ -113,7 +135,7 @@ function evaluation(params: {
     accessPayoff: params.accessPayoff,
     knownAccessState: "unknown",
     pathPassability: params.pathPassability ?? "reachable",
-    creditsAfterRun: 3,
+    creditsAfterRun: params.creditsAfterRun ?? 3,
     unrezzedIceRiskUnderfunded: params.unrezzedIceRiskUnderfunded ?? false,
     scoreThreat: false,
     recommendation: params.recommendation ?? "run_now",
@@ -131,11 +153,12 @@ function evaluation(params: {
   } as unknown as RunnerRunTargetEvaluation;
 }
 
-function runnerInput(): AiDecisionInput {
+function runnerInput(corpCredits = 0): AiDecisionInput {
   return {
     side: "runner",
     playerView: {
       own: { agendaPoints: 5, scoreArea: [] },
+      opponent: { credits: corpCredits },
       agendaPointsToWin: 7,
     },
   } as unknown as AiDecisionInput;

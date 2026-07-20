@@ -2,7 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 import { actionCreditCost } from "./action-cost";
 import { currentEncounteredIceCard } from "./current-encounter";
-import { isImmediateSafetyThreatSubroutine } from "./encounter-subroutine";
+import { isUnacceptableImmediateSafetyThreatSubroutine } from "./encounter-subroutine";
 import {
   quoteRunnerRunPath,
   runnerRunPlanCurrentEncounterRequiresBreak,
@@ -605,7 +605,9 @@ function currentEncounterHasUnbrokenSafetyThreat(
       : continueAction?.payload?.unbrokenSubroutineCount
         ? subroutines
         : [];
-  return unbrokenSubroutines.some(isImmediateSafetyThreatSubroutine);
+  return unbrokenSubroutines.some((subroutine) =>
+    isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine),
+  );
 }
 
 function annotateRunnerRunPlanChoice(params: {
