@@ -52,6 +52,9 @@ export function activatedAbilityPayload(
   const scoresSourceAsAgenda = ability.effects.some(
     (effect) => effect.kind === "score_source_as_agenda",
   );
+  const makeRunEffect = ability.effects.find(
+    (effect) => effect.kind === "make_run",
+  );
   return {
     cardId,
     cardImplementationAbility: "activated",
@@ -131,6 +134,9 @@ export function activatedAbilityPayload(
           advancementCounterMoveTarget: advancementMove.target,
         }
       : {}),
+    ...(makeRunEffect?.kind === "make_run"
+      ? makeRunLegalActionProjectionPayload(makeRunEffect)
+      : {}),
     ...scoreConversionPayload,
     ...(ability.timing === "runner_cost_penalty_support" &&
     state?.runnerCostPenaltySupportWindow
@@ -142,6 +148,52 @@ export function activatedAbilityPayload(
           costPenaltySupportAmountDue:
             state.runnerCostPenaltySupportWindow.amountDue,
           costPenaltySupportKind: state.runnerCostPenaltySupportWindow.kind,
+        }
+      : {}),
+  };
+}
+
+function makeRunLegalActionProjectionPayload(
+  effect: Extract<CardEffectImplementation, { kind: "make_run" }>,
+): Record<string, string | number | boolean> {
+  const targetServerId =
+    effect.target.kind === "central_server" ? effect.target.server : undefined;
+  return {
+    cardImplementationEffectKind: "make_run",
+    runActionKind: "make_run",
+    ...(targetServerId
+      ? { serverId: targetServerId, runServerId: targetServerId }
+      : { runTargetChoiceRequired: true }),
+    ...(effect.accessServerOverride
+      ? { accessServerId: effect.accessServerOverride }
+      : {}),
+    ...(effect.successfulRunAccessReplacement
+      ? {
+          successfulRunAccessReplacement: effect.successfulRunAccessReplacement,
+        }
+      : {}),
+    ...(effect.successfulRunPrivateLookCount !== undefined
+      ? { successfulRunPrivateLookCount: effect.successfulRunPrivateLookCount }
+      : {}),
+    ...(effect.accessCount !== undefined
+      ? { runAccessCount: effect.accessCount }
+      : {}),
+    ...(effect.bypassFirstIce !== undefined
+      ? { bypassFirstIce: effect.bypassFirstIce }
+      : {}),
+    ...(effect.prohibitNoisyIcebreakers !== undefined
+      ? { noNoisyBreakers: effect.prohibitNoisyIcebreakers }
+      : {}),
+    ...(effect.runTraceLinkBonus !== undefined
+      ? { runTraceLinkBonus: effect.runTraceLinkBonus }
+      : {}),
+    ...(effect.runTemporaryCredits
+      ? { runTemporaryCredits: effect.runTemporaryCredits.amount }
+      : {}),
+    ...(effect.conditionalAccessBonus
+      ? {
+          conditionalAccessBonusKind: effect.conditionalAccessBonus.kind,
+          conditionalAccessBonusAmount: effect.conditionalAccessBonus.amount,
         }
       : {}),
   };

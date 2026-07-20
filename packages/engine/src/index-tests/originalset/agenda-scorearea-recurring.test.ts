@@ -1207,13 +1207,23 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     );
     putCorpCardOnTopOfRd(protocolState, "simple_economy_operation");
     putCorpCardOnTopOfRd(protocolState, "simple_agenda");
-    protocolState = apply(
-      protocolState,
-      "runner",
+    const protocolRunAction = getLegalActions(protocolState, "runner").find(
       (action) =>
         action.type === "activated_card_ability" &&
         sourceDefinition(protocolState, action) ===
           "onr_v1_050_r-and-d-protocol-files",
+    );
+    expect(protocolRunAction?.payload).toMatchObject({
+      cardImplementationEffectKind: "make_run",
+      runActionKind: "make_run",
+      serverId: "rd",
+      successfulRunAccessReplacement: "private_look_top_rd",
+      successfulRunPrivateLookCount: 5,
+    });
+    protocolState = apply(
+      protocolState,
+      "runner",
+      (action) => action.actionId === protocolRunAction?.actionId,
     );
     expect(protocolState.pendingChoice?.source).toContain("p3_33.private_look");
     expect(
@@ -1229,6 +1239,33 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     );
     protocolState = applyChoice(protocolState, "runner", "done");
     expect(protocolState.run).toBeUndefined();
+    const runnerPrivateLookEvent = getPlayerView(protocolState, "runner")
+      .publicEvents.slice()
+      .reverse()
+      .find(
+        (event) =>
+          event.publicPayload.hiddenZoneAction === "p3_33_private_look",
+      );
+    expect(
+      (
+        runnerPrivateLookEvent?.publicPayload.knownRndDefinitionIds as string[]
+      ).slice(0, 2),
+    ).toEqual(["simple_agenda", "simple_economy_operation"]);
+    expect(runnerPrivateLookEvent?.publicPayload).toMatchObject({
+      knownRndTopDefinitionId: "simple_agenda",
+      privateLookZone: "rd",
+      privateLookCount: 5,
+    });
+    const corpPrivateLookEvent = getPlayerView(protocolState, "corp")
+      .publicEvents.slice()
+      .reverse()
+      .find(
+        (event) =>
+          event.publicPayload.hiddenZoneAction === "p3_33_private_look",
+      );
+    expect(JSON.stringify(corpPrivateLookEvent)).not.toMatch(
+      /simple_agenda|simple_economy_operation/,
+    );
 
     let interfaceState = p333State("p3-33-hq-interface", [
       "onr_v1_129_hq-interface",
@@ -1739,7 +1776,9 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     );
     expect(noProgram.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining("p3_38.revealed_stack_program_install_corp_review"),
+      source: expect.stringContaining(
+        "p3_38.revealed_stack_program_install_corp_review",
+      ),
     });
     noProgram = applyChoice(noProgram, "corp", "done");
     expect(noProgram.pendingChoice).toBeUndefined();
@@ -2059,9 +2098,9 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
         action.type === "install_card" &&
         String(action.payload?.cardId) === secondInterface,
     );
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_139_r-and-d-interface"]?.mechanics).toEqual(
-      expect.arrayContaining(["access", "breach", "multiaccess"]),
-    );
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_139_r-and-d-interface"]?.mechanics,
+    ).toEqual(expect.arrayContaining(["access", "breach", "multiaccess"]));
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_139_r-and-d-interface"]?.mechanics,
     ).not.toContain("damage_prevention");

@@ -7,6 +7,36 @@ import {
 } from "./card-implementation-runtime-activated-targets";
 
 describe("activatedAbilityPayload advancement semantics", () => {
+  it("publishes a side-safe run projection for declarative run abilities", () => {
+    const ability: ActivatedCardAbilityImplementation = {
+      kind: "activated",
+      timing: "runner_main",
+      costs: [{ kind: "action", amount: 1 }],
+      effects: [
+        {
+          kind: "make_run",
+          target: { kind: "central_server", server: "rd" },
+          successfulRunAccessReplacement: "private_look_top_rd",
+          successfulRunPrivateLookCount: 5,
+          bypassFirstIce: true,
+          visibility: "public",
+        },
+      ],
+    };
+
+    expect(
+      activatedAbilityPayload("source" as never, ability, 0),
+    ).toMatchObject({
+      cardImplementationEffectKind: "make_run",
+      runActionKind: "make_run",
+      serverId: "rd",
+      runServerId: "rd",
+      successfulRunAccessReplacement: "private_look_top_rd",
+      successfulRunPrivateLookCount: 5,
+      bypassFirstIce: true,
+    });
+  });
+
   it("publishes scoring the visible source as an agenda", () => {
     const ability: ActivatedCardAbilityImplementation = {
       kind: "activated",

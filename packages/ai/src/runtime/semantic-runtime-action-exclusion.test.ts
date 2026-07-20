@@ -6,9 +6,33 @@ import type {
 import { describe, expect, it } from "vitest";
 
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
-import { semanticRuntimeActionExclusion } from "./semantic-runtime-action-exclusion";
+import {
+  semanticRuntimeActionExclusion,
+  type SemanticRuntimeActionExclusionDependencies,
+} from "./semantic-runtime-action-exclusion";
 
 describe("semanticRuntimeActionExclusion", () => {
+  it("fails closed when a structured immediate run has no target evaluation", () => {
+    const action = {
+      ...runEventAction(),
+      type: "activated_card_ability",
+      payload: {
+        cardImplementationEffectKind: "make_run",
+        runActionKind: "make_run",
+        serverId: "rd",
+      },
+    } as LegalAction;
+
+    const exclusion = semanticRuntimeActionExclusion(
+      runnerInput(action),
+      action,
+      undefined,
+      dependencies(undefined),
+    );
+
+    expect(exclusion).toMatchObject({ key: "runner_run_projection_missing" });
+  });
+
   it("hard-excludes no-access routes before any plan bonus can rank them", () => {
     const action = runEventAction();
     const evaluation = {
@@ -83,6 +107,27 @@ describe("semanticRuntimeActionExclusion", () => {
     expect(exclusion).toBeUndefined();
   });
 });
+
+function dependencies(
+  evaluation: RunnerRunTargetEvaluation | undefined,
+): SemanticRuntimeActionExclusionDependencies {
+  return {
+    planMemoryActionExclusion: () => undefined,
+    corpAdvancementCounterPlacementAssessment: () => undefined,
+    runnerSelfDamageSurvivalExclusion: () => undefined,
+    runnerEncounterActionExclusion: () => undefined,
+    runnerProgramSacrificeExclusion: () => undefined,
+    runnerMultiRunEventExclusion: () => undefined,
+    runnerRunTargetEvaluationForAction: () => evaluation,
+    runnerBlinkRunExclusion: () => undefined,
+    knownCentralPayoffExclusion: () => undefined,
+    runnerArchivesExclusion: () => undefined,
+    runnerEmptyRemoteExclusion: () => undefined,
+    isRemoteServerTarget: (serverId: string | undefined) =>
+      serverId?.startsWith("remote_") === true,
+    knownIcePathReason: () => "not_reached",
+  };
+}
 
 function runEventAction(): LegalAction {
   return {

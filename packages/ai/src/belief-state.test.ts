@@ -78,6 +78,161 @@ describe("belief-state revealed opponent ownership", () => {
 });
 
 describe("belief-state R&D top freshness", () => {
+  it("advances a five-card private-look sequence over consecutive Corp draws", () => {
+    const look = rndPrivateLookEvent("evt_rd_look", 1, [
+      "simple_economy_operation",
+      "simple_agenda",
+      "simple_economy_asset",
+      "simple_upgrade",
+      "simple_barrier_ice",
+    ]);
+    const firstDraw = publicEvent("evt_draw_1", "mandatory_draw", 2, {
+      actor: "corp",
+      actionType: "mandatory_draw",
+    });
+    const secondDraw = publicEvent("evt_draw_2", "draw_card", 3, {
+      actor: "corp",
+      actionType: "draw_card",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([look, firstDraw, secondDraw], 2),
+    );
+
+    expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
+      freshness: "stale_known_same_top",
+      knownTopDefinitionId: "simple_economy_asset",
+      knownSequenceDefinitionIds: [
+        "simple_economy_asset",
+        "simple_upgrade",
+        "simple_barrier_ice",
+      ],
+    });
+    expect(belief.runnerOpponentModel?.hqHandMemory?.knownDefinitions).toEqual([
+      "simple_economy_operation",
+      "simple_agenda",
+    ]);
+    expect(belief.runnerOpponentModel?.knownPositionMemory).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          zone: "rd",
+          positionKey: "top",
+          definitionId: "simple_economy_asset",
+        }),
+        expect.objectContaining({
+          zone: "rd",
+          positionKey: "top:1",
+          definitionId: "simple_upgrade",
+        }),
+      ]),
+    );
+  });
+
+  it("keeps the remaining private-look sequence after an accessed top card is removed", () => {
+    const look = rndPrivateLookEvent("evt_rd_look", 1, [
+      "simple_economy_asset",
+      "simple_agenda",
+      "simple_upgrade",
+    ]);
+    const access = publicEvent("evt_access", "access_card", 2, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "rd",
+      cardDefinitionId: "simple_economy_asset",
+    });
+    const trash = publicEvent("evt_trash", "trash_accessed_card", 3, {
+      actor: "runner",
+      actionType: "trash_accessed_card",
+      serverId: "rd",
+      cardDefinitionId: "simple_economy_asset",
+    });
+
+    const belief = reconstructBeliefState(runnerInput([look, access, trash]));
+
+    expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
+      freshness: "stale_known_same_top",
+      knownTopDefinitionId: "simple_agenda",
+      knownSequenceDefinitionIds: ["simple_agenda", "simple_upgrade"],
+      freshenedByRunnerAccess: true,
+    });
+    expect(belief.runnerOpponentModel?.knownPositionMemory).toContainEqual(
+      expect.objectContaining({
+        zone: "rd",
+        positionKey: "top",
+        definitionId: "simple_agenda",
+      }),
+    );
+  });
+
+  it("invalidates R&D order on an R&D shuffle while retaining cards already drawn into HQ", () => {
+    const look = rndPrivateLookEvent("evt_rd_look", 1, [
+      "simple_economy_operation",
+      "simple_agenda",
+      "simple_upgrade",
+    ]);
+    const draw = publicEvent("evt_draw", "mandatory_draw", 2, {
+      actor: "corp",
+      actionType: "mandatory_draw",
+    });
+    const shuffle = publicEvent("evt_rd_shuffle", "resolve_choice", 3, {
+      actor: "corp",
+      actionType: "resolve_choice",
+      serverId: "rd",
+      hiddenZoneAction: "corp_rd_shuffle",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([look, draw, shuffle], 1),
+    );
+
+    expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
+      freshness: "invalidated",
+      knownToRunner: false,
+    });
+    expect(
+      belief.runnerOpponentModel?.knownPositionMemory?.filter(
+        (entry) => entry.zone === "rd",
+      ),
+    ).toEqual([]);
+    expect(belief.runnerOpponentModel?.hqHandMemory?.knownDefinitions).toEqual([
+      "simple_economy_operation",
+    ]);
+  });
+
+  it("invalidates R&D order on an R&D reorder but not on an HQ reorder", () => {
+    const look = rndPrivateLookEvent("evt_rd_look", 1, [
+      "simple_economy_operation",
+      "simple_agenda",
+    ]);
+    const hqReorder = publicEvent("evt_hq_reorder", "resolve_choice", 2, {
+      actor: "corp",
+      actionType: "resolve_choice",
+      serverId: "hq",
+      hiddenZoneAction: "hq_reorder",
+    });
+    const beforeRdReorder = reconstructBeliefState(
+      runnerInput([look, hqReorder]),
+    );
+    const rdReorder = publicEvent("evt_rd_reorder", "resolve_choice", 3, {
+      actor: "corp",
+      actionType: "resolve_choice",
+      serverId: "rd",
+      hiddenZoneAction: "rd_reorder",
+    });
+    const afterRdReorder = reconstructBeliefState(
+      runnerInput([look, hqReorder, rdReorder]),
+    );
+
+    expect(
+      beforeRdReorder.runnerOpponentModel?.rndTopFreshness
+        .knownSequenceDefinitionIds,
+    ).toEqual(["simple_economy_operation", "simple_agenda"]);
+    expect(afterRdReorder.runnerOpponentModel?.rndTopFreshness).toMatchObject({
+      freshness: "invalidated",
+      knownToRunner: false,
+    });
+  });
+
   it("forgets a single known R&D top card after the Runner trashes it with public origin context", () => {
     const accessEvent = publicEvent("evt_1", "access_card", 1, {
       actor: "runner",
@@ -906,6 +1061,22 @@ function hqPrivateLookEvent(
     privateLookZone: "hq",
     privateLookCount: knownHqDefinitionIds.length,
     knownHqDefinitionIds,
+  });
+}
+
+function rndPrivateLookEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  knownRndDefinitionIds: string[],
+): PublicGameEvent {
+  return publicEvent(eventId, "resolve_choice", stateVersionBefore, {
+    actor: "runner",
+    actionType: "resolve_choice",
+    hiddenZoneAction: "p3_33_private_look",
+    privateLookZone: "rd",
+    privateLookCount: knownRndDefinitionIds.length,
+    knownRndDefinitionIds,
+    knownRndTopDefinitionId: knownRndDefinitionIds[0],
   });
 }
 

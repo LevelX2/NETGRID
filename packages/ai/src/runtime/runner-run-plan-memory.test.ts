@@ -146,6 +146,51 @@ describe("runner run plan memory", () => {
     );
   });
 
+  it("creates the same commitment for a selected activated run producer", () => {
+    const activatedRun = {
+      ...action("activated_card_ability", {
+        serverId: "rd",
+        cardImplementationEffectKind: "make_run",
+        runActionKind: "make_run",
+        successfulRunAccessReplacement: "private_look_top_rd",
+        successfulRunPrivateLookCount: 5,
+      }),
+      source: "protocol-installed",
+    } as LegalAction;
+    const evaluation = {
+      ...runTargetEvaluation(activatedRun),
+      accessPayoff: "access_bonus",
+      knownAccessState: "known_payoff",
+      runActionProjection: {
+        ...runTargetEvaluation(activatedRun).runActionProjection,
+        structure: "run_enabler",
+        accessReplacement: "private_look_top_rd",
+        accessReplacementLookCount: 5,
+      },
+    } as RunnerRunTargetEvaluation;
+
+    const plan = createRunnerRunPlanForSelectedAction({
+      input: runnerInput({
+        activeRun: false,
+        legalActions: [activatedRun],
+      }),
+      selectedAction: activatedRun,
+      runnerRunTargetEvaluations: [evaluation],
+    });
+
+    expect(plan).toMatchObject({
+      runStartActionId: "activated_card_ability",
+      targetServer: { id: "rd" },
+      pathQuote: {
+        canReachAccess: true,
+      },
+      commitment: {
+        targetServer: "rd",
+        route: { reachability: "guaranteed_access" },
+      },
+    });
+  });
+
   it("fingerprints decision facts without coupling the run to stateVersion or phase", () => {
     const input = runnerInput({
       activeRun: true,

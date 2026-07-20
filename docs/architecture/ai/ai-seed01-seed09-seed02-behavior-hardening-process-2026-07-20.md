@@ -227,8 +227,24 @@ Commit: `docs(ai): close seed01 seed09 seed02 hardening`
     zusätzlichen Mastiff unmittelbar vor dem Deckout;
   - alle sieben Equivalence-Evidence-Verträge reproduzierbar grün,
     `git diff --check` grün.
-- Paket 1: offen
-- Paket 2: offen
+- Paket 1: abgeschlossen
+  - deklarative `make_run`-Effekte veröffentlichen im actor-sicheren
+    LegalAction-Payload Run-Ziel, Access-Replacement und vorhandene
+    Routenmodifikatoren; der positive AI-DTO-Allowlist-Vertrag lässt nur diese
+    strukturierten Primitive passieren;
+  - strukturierte Sofort-Runs ohne `RunnerRunTargetEvaluation` werden
+    fail-closed ausgeschlossen; erreichbare, bedingt erreichbare Unknown-ICE-
+    und Bypass-Routen bleiben über Route, Release und Commitment möglich;
+  - `private_look_top_rd` wird als Informations-Payoff und nicht als normaler
+    Agenda-Access bewertet; ein bereits vollständig bekannter Blick ist kein
+    neuer Payoff;
+  - die bestehende R&D-Sequenz schiebt bei Corp-Draw und entfernendem Access,
+    überführt bekannte Draws nach HQ und invalidiert zonengenau bei
+    Shuffle/Reorder; Runner- und Corp-Views bleiben getrennt;
+  - Seed 01/196, 278, 347 und Seed 09/290 grün; 188 fokussierte Tests,
+    zusätzliche erreichbare/Unknown-ICE/Bypass/Replacement/Commitment-
+    Gegenproben, Engine- und AI-Typecheck sowie `format:changed` grün.
+- Paket 2: in Arbeit
 - Paket 3: offen
 - Paket 4: offen
 - Main-Merge und Cleanup: offen

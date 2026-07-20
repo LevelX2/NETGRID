@@ -225,6 +225,11 @@ type KnownHqHandEntry = {
   eventId: string;
 };
 
+type KnownRndSequenceEntry = {
+  definitionId: string;
+  eventId: string;
+};
+
 type HqHiddenInstallDepartureMemory = {
   safeEntries: KnownHqHandEntry[];
   candidateGroup?: HqHandCandidateGroupMemory;
@@ -780,8 +785,15 @@ function deriveKnownPositionMemory(
   const memory = new Map<string, KnownPositionMemory>();
 
   for (const classification of classifications) {
-    if (rdTopRemovedByRunnerAccess(classification)) {
-      advanceRndKnownPositionMemory(memory, classification);
+    if (
+      rdTopRemovedByRunnerAccess(classification) ||
+      corpDrawsFromRd(classification)
+    ) {
+      advanceRndKnownPositionMemory(
+        memory,
+        classification,
+        corpDrawsFromRd(classification) ? "corp_draw" : "runner_access",
+      );
       continue;
     }
     for (const key of [...memory.keys()]) {
@@ -893,6 +905,7 @@ function knownPositionSourceKind(
 function advanceRndKnownPositionMemory(
   memory: Map<string, KnownPositionMemory>,
   event: BeliefEventClassification,
+  reason: "corp_draw" | "runner_access",
 ): void {
   const currentTop = memory.get("rd:top");
   if (currentTop) memory.delete("rd:top");
@@ -908,7 +921,7 @@ function advanceRndKnownPositionMemory(
       positionKey: nextPosition,
       invalidatedBy: [
         ...entry.invalidatedBy,
-        `rd_known_top_advanced_after_access:${event.eventId}`,
+        `rd_known_top_advanced_after_${reason}:${event.eventId}`,
       ],
     });
   }
@@ -924,7 +937,7 @@ function deriveKnownHqHandMemory(
   const knownCards: KnownHqHandEntry[] = [];
   const candidateGroups: HqHandCandidateGroupMemory[] = [];
   const invalidationReasons: string[] = [];
-  let knownRndTop: { definitionId: string; eventId: string } | undefined;
+  let knownRndSequence: KnownRndSequenceEntry[] = [];
 
   for (const classification of classifications) {
     const event = eventsById.get(classification.eventId);
@@ -937,6 +950,7 @@ function deriveKnownHqHandMemory(
     const rndTopDefinition = event
       ? rndTopDefinitionFromEvent(event, classification, definitionId)
       : undefined;
+    const privateRndDefinitions = event ? rndPrivateLookDefinitions(event) : [];
 
     if (fullHqRevealDefinitions.length > 0) {
       knownCards.length = 0;
@@ -950,11 +964,21 @@ function deriveKnownHqHandMemory(
       });
       continue;
     }
-    if (rndTopDefinition) {
-      knownRndTop = {
-        definitionId: rndTopDefinition,
+    if (privateRndDefinitions.length > 0) {
+      knownRndSequence = privateRndDefinitions.map((knownDefinitionId) => ({
+        definitionId: knownDefinitionId,
         eventId: classification.eventId,
-      };
+      }));
+    } else if (
+      rndTopDefinition &&
+      knownRndSequence[0]?.definitionId !== rndTopDefinition
+    ) {
+      knownRndSequence = [
+        {
+          definitionId: rndTopDefinition,
+          eventId: classification.eventId,
+        },
+      ];
     }
     if (isRunnerHqAccess(classification) && definitionId) {
       rememberObservedHqAccessDefinitionWithConsistencyCheck(
@@ -975,10 +999,23 @@ function deriveKnownHqHandMemory(
       invalidationReasons,
     );
 
+    if (rdTopRemovedByRunnerAccess(classification)) {
+      knownRndSequence = knownRndSequence.slice(1);
+    }
+    if (
+      (classification.family === "shuffle" ||
+        classification.family === "arrange" ||
+        classification.family === "swap") &&
+      hiddenZoneReorderChangesRd(classification)
+    ) {
+      knownRndSequence = [];
+    }
+
     const adjustment = hqHandMemoryAdjustment(classification, definitionId);
     if (!adjustment) continue;
 
     invalidationReasons.push(`${adjustment.reason}:${classification.eventId}`);
+    const knownRndTop = knownRndSequence[0];
     if (adjustment.kind === "unknown_arrival" && knownRndTop) {
       knownCards.push({
         key: `${classification.eventId}:rnd_top_draw:${knownCards.length}`,
@@ -988,7 +1025,7 @@ function deriveKnownHqHandMemory(
       invalidationReasons.push(
         `known_rnd_top_moved_to_hq:${knownRndTop.eventId}->${classification.eventId}`,
       );
-      knownRndTop = undefined;
+      knownRndSequence = knownRndSequence.slice(1);
       continue;
     }
     if (adjustment.kind === "remove_known" && definitionId) {
@@ -1015,12 +1052,12 @@ function deriveKnownHqHandMemory(
     }
     if (
       adjustment.kind === "unknown_departure" ||
-      adjustment.kind === "hidden_zone_reordered"
+      (adjustment.kind === "hidden_zone_reordered" &&
+        hiddenZoneReorderChangesHq(classification))
     ) {
       knownCards.length = 0;
       candidateGroups.length = 0;
     }
-    if (adjustment.kind === "hidden_zone_reordered") knownRndTop = undefined;
   }
 
   const handCount = input.playerView.opponent.handCount;
@@ -1321,7 +1358,7 @@ function deriveHiddenRemoteCandidateMemory(
   const eventsById = new Map(history.map((event) => [event.eventId, event]));
   const knownCards: KnownHqHandEntry[] = [];
   const memories: HiddenRemoteCandidateMemory[] = [];
-  let knownRndTop: { definitionId: string; eventId: string } | undefined;
+  let knownRndSequence: KnownRndSequenceEntry[] = [];
 
   for (const classification of classifications) {
     const event = eventsById.get(classification.eventId);
@@ -1334,6 +1371,7 @@ function deriveHiddenRemoteCandidateMemory(
     const rndTopDefinition = event
       ? rndTopDefinitionFromEvent(event, classification, definitionId)
       : undefined;
+    const privateRndDefinitions = event ? rndPrivateLookDefinitions(event) : [];
 
     if (fullHqRevealDefinitions.length > 0) {
       knownCards.length = 0;
@@ -1346,11 +1384,21 @@ function deriveHiddenRemoteCandidateMemory(
       });
       continue;
     }
-    if (rndTopDefinition) {
-      knownRndTop = {
-        definitionId: rndTopDefinition,
+    if (privateRndDefinitions.length > 0) {
+      knownRndSequence = privateRndDefinitions.map((knownDefinitionId) => ({
+        definitionId: knownDefinitionId,
         eventId: classification.eventId,
-      };
+      }));
+    } else if (
+      rndTopDefinition &&
+      knownRndSequence[0]?.definitionId !== rndTopDefinition
+    ) {
+      knownRndSequence = [
+        {
+          definitionId: rndTopDefinition,
+          eventId: classification.eventId,
+        },
+      ];
     }
     if (isRunnerHqAccess(classification) && definitionId) {
       rememberObservedHqAccessDefinitionWithConsistencyCheck(
@@ -1368,16 +1416,29 @@ function deriveHiddenRemoteCandidateMemory(
       memories,
     );
 
+    if (rdTopRemovedByRunnerAccess(classification)) {
+      knownRndSequence = knownRndSequence.slice(1);
+    }
+    if (
+      (classification.family === "shuffle" ||
+        classification.family === "arrange" ||
+        classification.family === "swap") &&
+      hiddenZoneReorderChangesRd(classification)
+    ) {
+      knownRndSequence = [];
+    }
+
     const adjustment = hqHandMemoryAdjustment(classification, definitionId);
     if (!adjustment) continue;
 
+    const knownRndTop = knownRndSequence[0];
     if (adjustment.kind === "unknown_arrival" && knownRndTop) {
       knownCards.push({
         key: `${classification.eventId}:rnd_top_draw:${knownCards.length}`,
         definitionId: knownRndTop.definitionId,
         eventId: classification.eventId,
       });
-      knownRndTop = undefined;
+      knownRndSequence = knownRndSequence.slice(1);
       continue;
     }
     if (adjustment.kind === "remove_known" && definitionId) {
@@ -1454,9 +1515,11 @@ function deriveHiddenRemoteCandidateMemory(
       knownCards.length = 0;
       if (departure) knownCards.push(...departure.safeEntries);
     }
-    if (adjustment.kind === "hidden_zone_reordered") {
+    if (
+      adjustment.kind === "hidden_zone_reordered" &&
+      hiddenZoneReorderChangesHq(classification)
+    ) {
       knownCards.length = 0;
-      knownRndTop = undefined;
     }
   }
 
@@ -1486,14 +1549,12 @@ function positionInvalidatesKey(
   key: string,
   event: BeliefEventClassification,
 ): boolean {
-  if (event.family === "draw" && event.actor === "corp")
-    return key.startsWith("rd:");
   if (
     event.family === "shuffle" ||
     event.family === "arrange" ||
     event.family === "swap"
   )
-    return true;
+    return event.serverId ? key.startsWith(`${event.serverId}:`) : true;
   if (event.family === "install" && event.serverId)
     return key.startsWith(`${event.serverId}:`);
   if (rdTopRemovedByRunnerAccess(event) && key.startsWith("rd:")) return false;
@@ -1506,6 +1567,21 @@ function positionInvalidatesKey(
     return event.serverId ? key.startsWith(`${event.serverId}:`) : true;
   }
   return false;
+}
+
+function corpDrawsFromRd(event: BeliefEventClassification): boolean {
+  return (
+    event.actor === "corp" &&
+    (event.actionType === "mandatory_draw" || event.actionType === "draw_card")
+  );
+}
+
+function hiddenZoneReorderChangesHq(event: BeliefEventClassification): boolean {
+  return event.serverId !== "rd";
+}
+
+function hiddenZoneReorderChangesRd(event: BeliefEventClassification): boolean {
+  return event.serverId !== "hq";
 }
 
 function rdTopRemovedByRunnerAccess(event: BeliefEventClassification): boolean {
@@ -1810,6 +1886,7 @@ function hqHandMemoryAdjustment(
     event.family === "arrange" ||
     event.family === "swap"
   ) {
+    if (!hiddenZoneReorderChangesHq(event)) return undefined;
     return {
       kind: "hidden_zone_reordered",
       reason: `${event.family}_changed_hq_hand`,
@@ -2103,8 +2180,26 @@ function deriveRndTopFreshness(
       lastKnownAccessEventId = event.eventId;
       freshness = "fresh";
       freshenedByRunnerAccess = false;
-      knownSequenceDefinitionIds = definitionId ? [definitionId] : [];
+      if (!definitionId || knownSequenceDefinitionIds[0] !== definitionId) {
+        knownSequenceDefinitionIds = definitionId ? [definitionId] : [];
+      }
       invalidationReasons.length = 0;
+      continue;
+    }
+    if (lastKnownAccessEventId && corpDrawsFromRd(event)) {
+      knownSequenceDefinitionIds = knownSequenceDefinitionIds.slice(1);
+      invalidationReasons.push(`rd_known_top_drawn_by_corp:${event.eventId}`);
+      if (knownSequenceDefinitionIds.length > 0) {
+        freshness = "stale_known_same_top";
+        lastKnownAccessEventId = event.eventId;
+        invalidationReasons.push(
+          `rd_known_top_sequence_advanced_after_corp_draw:${event.eventId}`,
+        );
+      } else {
+        freshness = "invalidated";
+        lastKnownAccessEventId = undefined;
+        freshenedByRunnerAccess = false;
+      }
       continue;
     }
     if (lastKnownAccessEventId && rdTopRemovedByRunnerAccess(event)) {
@@ -2112,7 +2207,10 @@ function deriveRndTopFreshness(
         knownSequenceDefinitionIds.length > 1
           ? knownSequenceDefinitionIds.slice(1)
           : [];
-      freshness = "fresh_after_top_removed";
+      freshness =
+        knownSequenceDefinitionIds.length > 0
+          ? "stale_known_same_top"
+          : "fresh_after_top_removed";
       freshenedByRunnerAccess = true;
       invalidationReasons.push(`rd_access_removed_top_card:${event.eventId}`);
       if (knownSequenceDefinitionIds.length > 0)
@@ -2184,14 +2282,12 @@ function accessEventZone(event: BeliefEventClassification): string | undefined {
 function rndInvalidationReason(
   event: BeliefEventClassification,
 ): string | undefined {
-  if (
-    event.actor === "corp" &&
-    (event.actionType === "mandatory_draw" || event.actionType === "draw_card")
-  )
-    return "corp_draw_from_rd";
-  if (event.family === "shuffle") return "shuffle_changed_rd_top";
-  if (event.family === "arrange") return "arrange_changed_rd_top";
-  if (event.family === "swap") return "swap_changed_rd_top";
+  if (event.family === "shuffle" && hiddenZoneReorderChangesRd(event))
+    return "shuffle_changed_rd_top";
+  if (event.family === "arrange" && hiddenZoneReorderChangesRd(event))
+    return "arrange_changed_rd_top";
+  if (event.family === "swap" && hiddenZoneReorderChangesRd(event))
+    return "swap_changed_rd_top";
   const rdMovedCardActionTypeSet = new Set([
     "steal_agenda",
     "trash_accessed_card",
@@ -2401,7 +2497,9 @@ function publicServerId(
     stringValue(event.publicPayload.serverId) ??
     stringValue(event.publicPayload.attackedServerId) ??
     stringValue(event.publicPayload.targetServerId) ??
-    stringValue(event.publicPayload.server);
+    stringValue(event.publicPayload.server) ??
+    stringValue(event.publicPayload.privateLookZone) ??
+    stringValue(event.publicPayload.hiddenZone);
   if (raw) return canonicalStructuredServerId(raw);
   const exposedServerId = stringValue(event.publicPayload.exposedServerId);
   if (exposedServerId) return canonicalStructuredServerId(exposedServerId);

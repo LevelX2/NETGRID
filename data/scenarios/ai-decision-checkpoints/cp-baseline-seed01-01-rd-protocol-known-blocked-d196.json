@@ -819,9 +819,7 @@
               "corp_onr_v1_258_neural-blade_1",
               "corp_onr_v1_257_nerve-labyrinth_1"
             ],
-            "root": [
-              "corp_onr_v1_213_private-cybernet-police_1"
-            ]
+            "root": ["corp_onr_v1_213_private-cybernet-police_1"]
           }
         ]
       },
@@ -876,9 +874,7 @@
           "runner_onr_v1_097_livewires-contacts_2",
           "runner_onr_v1_039_krash_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_191_black-ice-quality-assurance_1"
-        ],
+        "scoreArea": ["corp_onr_v1_191_black-ice-quality-assurance_1"],
         "rig": {
           "programs": [
             "runner_onr_v1_050_r-and-d-protocol-files_2",
@@ -886,9 +882,7 @@
             "runner_onr_v1_016_cyfermaster_1",
             "runner_onr_v1_059_self-modifying-code_1"
           ],
-          "hardware": [
-            "runner_onr_v1_145_wutech-mem-chip_2"
-          ],
+          "hardware": ["runner_onr_v1_145_wutech-mem-chip_2"],
           "resources": [
             "runner_onr_v1_154_broker_1",
             "runner_onr_v1_161_fall-guy_2",
@@ -2282,9 +2276,7 @@
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-0"
               },
@@ -2304,10 +2296,7 @@
                     "choiceId": "setup_mulligan_runner_0",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -2367,9 +2356,7 @@
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-1"
               },
@@ -2389,10 +2376,7 @@
                     "choiceId": "setup_mulligan_corp_1",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -2998,9 +2982,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -3879,9 +3861,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -5625,9 +5605,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -6991,9 +6969,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -7769,9 +7745,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -10936,9 +10910,7 @@
                 "clientKnownStateVersion": 129,
                 "selectedChoices": {
                   "choiceId": "p3_37_search_stack_to_grip_129",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_039_krash_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_039_krash_1"]
                 },
                 "idempotencyKey": "ai-sim-129"
               },
@@ -13354,9 +13326,7 @@
                 "clientKnownStateVersion": 166,
                 "selectedChoices": {
                   "choiceId": "discard_runner_166",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_038_joan-of-arc_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_038_joan-of-arc_1"]
                 },
                 "idempotencyKey": "ai-sim-166"
               },
@@ -15270,9 +15240,7 @@
                 "clientKnownStateVersion": 195,
                 "selectedChoices": {
                   "choiceId": "runner_program_trash_before_install_195",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_039_krash_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_039_krash_1"]
                 },
                 "idempotencyKey": "ai-sim-195"
               },
@@ -20050,9 +20018,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.rnd_pressure",
-          "evidence": [
-            "continued:runner.rnd_pressure"
-          ]
+          "evidence": ["continued:runner.rnd_pressure"]
         },
         "commitment": {
           "strategyId": "runner.rnd_pressure",
@@ -20229,10 +20195,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -20407,10 +20370,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -20495,10 +20455,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -20520,9 +20477,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -20585,10 +20540,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -20607,9 +20559,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -20640,10 +20590,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -20972,10 +20919,23 @@
     }
   },
   "expectation": {
-    "contractKind": "equivalence_only",
-    "acceptableActions": [
+    "contractKind": "correctness",
+    "forbiddenActions": [
       {
-        "actionId": "runner.activated_card_ability.runner_onr_v1_050_r-and-d-protocol-files_2.runner_onr_v1_050_r-and-d-protocol-files_2.activated.0"
+        "type": "activated_card_ability",
+        "sourceDefinitionId": "onr_v1_050_r-and-d-protocol-files",
+        "targetServerId": "rd"
+      }
+    ],
+    "runTargets": [
+      {
+        "actionId": "runner.activated_card_ability.runner_onr_v1_050_r-and-d-protocol-files_2.rd.runner_onr_v1_050_r-and-d-protocol-files_2.activated.0",
+        "targetServerId": "rd",
+        "pathPassability": "blocked_unpayable",
+        "recommendation": "do_not_run_now",
+        "requiredEvidence": [
+          "run_action_projection_access_replacement:private_look_top_rd"
+        ]
       }
     ]
   }

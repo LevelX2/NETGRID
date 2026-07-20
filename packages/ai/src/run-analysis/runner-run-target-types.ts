@@ -75,6 +75,8 @@ export type RunActionProjection = {
   accessServerId?: string;
   structure: RunnerRunActionStructure;
   accessPayoffSignals: string[];
+  accessReplacement?: string;
+  accessReplacementLookCount?: number;
   constraintSignals: string[];
   riskSignals: string[];
   spendLimit?: number;

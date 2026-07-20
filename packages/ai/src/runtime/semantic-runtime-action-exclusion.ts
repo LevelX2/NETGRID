@@ -159,6 +159,17 @@ export function semanticRuntimeActionExclusion(
     input,
     action,
   );
+  if (
+    input.side === "runner" &&
+    structuredImmediateRunAction(action) &&
+    !runTargetEvaluation
+  ) {
+    return {
+      key: "runner_run_projection_missing",
+      label: "Run-Projektion fehlt",
+      reason: `action:${action.actionId}|structured_immediate_run:true`,
+    };
+  }
   const actionTargetServerId = semanticRuntimeServerId(action);
   if (
     runTargetEvaluation &&
@@ -263,10 +274,25 @@ export function semanticRuntimeActionExclusion(
   }
   const blinkRunExclusion = dependencies.runnerBlinkRunExclusion(input, action);
   if (blinkRunExclusion) return blinkRunExclusion;
-  const knownCentralPayoffExclusion = dependencies.knownCentralPayoffExclusion(
-    input,
-    accessServerId,
-  );
+  if (
+    runTargetEvaluation?.runActionProjection.accessReplacement &&
+    runTargetEvaluation.knownAccessState === "known_no_current_payoff"
+  ) {
+    return {
+      key: "runner_access_replacement_no_payoff",
+      label: "Access-Ersatz ohne neuen Payoff",
+      reason: [
+        `action:${action.actionId}`,
+        `target:${runTargetEvaluation.targetServerId}`,
+        `access_replacement:${runTargetEvaluation.runActionProjection.accessReplacement}`,
+        "known_access_state:known_no_current_payoff",
+      ].join("|"),
+    };
+  }
+  const knownCentralPayoffExclusion = runTargetEvaluation?.runActionProjection
+    .accessReplacement
+    ? undefined
+    : dependencies.knownCentralPayoffExclusion(input, accessServerId);
   if (knownCentralPayoffExclusion) return knownCentralPayoffExclusion;
   const server = input.playerView.servers.find(
     (entry) => entry.id === serverId,
@@ -310,6 +336,15 @@ export function semanticRuntimeActionExclusion(
       : "Run-Ziel nicht bezahlbar",
     reason: dependencies.knownIcePathReason(assessment, server.id),
   };
+}
+
+function structuredImmediateRunAction(action: LegalAction): boolean {
+  return (
+    action.type === "start_run" ||
+    action.payload?.cardImplementationEffectKind === "make_run" ||
+    action.payload?.effectKind === "make_run" ||
+    action.payload?.runActionKind === "make_run"
+  );
 }
 
 function runnerAvoidablePersistentTraceCounterRunExclusion(

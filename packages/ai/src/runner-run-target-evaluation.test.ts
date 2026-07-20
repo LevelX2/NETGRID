@@ -73,6 +73,107 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("evaluates a reachable activated R&D private-look run before selection", () => {
+    const protocolRun = activatedPrivateLookRun("protocol-run-rd");
+    const input = aiInput({
+      credits: 6,
+      servers: [server("rd")],
+      legalActions: [protocolRun],
+      rig: [
+        visibleCard("protocol-installed", {
+          definitionId: "onr_v1_050_r-and-d-protocol-files",
+          title: "R&D-Protocol Files",
+          type: "program",
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      actionId: "protocol-run-rd",
+      targetServerId: "rd",
+      pathPassability: "reachable",
+      accessPayoff: "access_bonus",
+      knownAccessState: "known_payoff",
+      recommendation: "run_now",
+      runActionProjection: {
+        sourceKind: "program_ability",
+        accessReplacement: "private_look_top_rd",
+        accessReplacementLookCount: 5,
+      },
+    });
+  });
+
+  it("keeps an activated private-look run conditional through one unknown ICE", () => {
+    const protocolRun = activatedPrivateLookRun("protocol-probe-rd");
+    const input = aiInput({
+      credits: 6,
+      servers: [
+        server("rd", {
+          ice: [
+            visibleCard("unknown-rd-ice", {
+              known: false,
+              type: "ice",
+              rezzed: false,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [protocolRun],
+      rig: [
+        visibleCard("protocol-installed", {
+          definitionId: "onr_v1_050_r-and-d-protocol-files",
+          type: "program",
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      actionId: "protocol-probe-rd",
+      pathPassability: "reachable",
+      unknownUnrezzedIceCount: 1,
+      routeQuote: { reachability: "conditional_access" },
+      accessPayoff: "access_bonus",
+    });
+  });
+
+  it("does not value a private-look replacement as another agenda access when all five positions are known", () => {
+    const protocolRun = activatedPrivateLookRun("protocol-redundant-rd");
+    const input = aiInput({
+      credits: 6,
+      servers: [server("rd")],
+      legalActions: [protocolRun],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithRndTop({
+        freshness: "stale_known_same_top",
+        knownTopDefinitionId: "simple_agenda",
+        knownTopIsAgenda: true,
+        knownSequenceDefinitionIds: [
+          "simple_agenda",
+          "simple_economy_operation",
+          "simple_economy_asset",
+          "simple_upgrade",
+          "simple_barrier_ice",
+        ],
+      }),
+    });
+
+    expect(evaluation).toMatchObject({
+      accessPayoff: "known_low_value",
+      knownAccessState: "known_no_current_payoff",
+      recommendation: "do_not_run_now",
+    });
+    expect(evaluation?.evidence).toContain(
+      "central_access_replacement_redundant:true",
+    );
+  });
+
   it("quotes a run that bypasses the outermost ICE without pricing that ICE", () => {
     const insideJob = {
       ...runAction("inside-job-rd", "rd"),
@@ -2854,6 +2955,29 @@ function runAction(actionId: string, serverId: string): LegalAction {
   };
 }
 
+function activatedPrivateLookRun(actionId: string): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type: "activated_card_ability",
+    label: "Use installed program",
+    source: "protocol-installed",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+    payload: {
+      cardId: "protocol-installed",
+      cardImplementationEffectKind: "make_run",
+      runActionKind: "make_run",
+      serverId: "rd",
+      successfulRunAccessReplacement: "private_look_top_rd",
+      successfulRunPrivateLookCount: 5,
+    },
+  };
+}
+
 function wilsonRunAbilityAction(
   actionId: string,
   serverId: string,
@@ -3188,6 +3312,7 @@ function beliefWithRndTop(params: {
   freshness: RunnerOpponentModel["rndTopFreshness"]["freshness"];
   knownTopDefinitionId?: string;
   knownTopIsAgenda?: boolean;
+  knownSequenceDefinitionIds?: string[];
 }): BeliefState {
   const rndTopFreshness: RunnerOpponentModel["rndTopFreshness"] = {
     lastKnownAccessEventId: "test-access-rd",
@@ -3198,6 +3323,9 @@ function beliefWithRndTop(params: {
       : {}),
     ...(params.knownTopIsAgenda !== undefined
       ? { knownTopIsAgenda: params.knownTopIsAgenda }
+      : {}),
+    ...(params.knownSequenceDefinitionIds
+      ? { knownSequenceDefinitionIds: params.knownSequenceDefinitionIds }
       : {}),
     invalidationReasons: [],
   };

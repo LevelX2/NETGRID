@@ -68,6 +68,52 @@ describe("AI input DTO score-conversion contract", () => {
     expect(input.legalActions[0]?.payload).not.toHaveProperty("privateProbe");
   });
 
+  it("preserves declarative run projection fields and drops unrelated payload data", () => {
+    const action = runnerSemanticAction();
+    action.type = "activated_card_ability";
+    action.payload = {
+      cardId: "runner-program",
+      cardImplementationEffectKind: "make_run",
+      runActionKind: "make_run",
+      serverId: "rd",
+      runServerId: "rd",
+      accessServerId: "rd",
+      successfulRunAccessReplacement: "private_look_top_rd",
+      successfulRunPrivateLookCount: 5,
+      bypassFirstIce: true,
+      privateRunProbe: "must-not-cross-dto",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "runner-run-projection-dto",
+      decisionId: "runner-run-projection-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-run-projection-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      cardImplementationEffectKind: "make_run",
+      runActionKind: "make_run",
+      serverId: "rd",
+      runServerId: "rd",
+      accessServerId: "rd",
+      successfulRunAccessReplacement: "private_look_top_rd",
+      successfulRunPrivateLookCount: 5,
+      bypassFirstIce: true,
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      cardImplementationEffectKind: "make_run",
+      successfulRunAccessReplacement: "private_look_top_rd",
+    });
+    expect(input.legalActions[0]?.payload).not.toHaveProperty(
+      "privateRunProbe",
+    );
+  });
+
   it("preserves actor-visible self-damage costs and prevention status", () => {
     const action = runnerSemanticAction();
     action.payload = {

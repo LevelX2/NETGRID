@@ -174,7 +174,13 @@ function evaluateRunnerRunTarget(
       visibleCorpCredits: params.input.playerView.opponent.credits,
     },
   );
-  const payoff = payoffForTarget(params, accessServerId, accessTargetKind);
+  const payoff =
+    accessReplacementPayoffForTarget(
+      params,
+      projection,
+      accessServerId,
+      accessTargetKind,
+    ) ?? payoffForTarget(params, accessServerId, accessTargetKind);
   const installedRunPayoff = installedRunPayoffForTarget(
     params.input,
     accessTargetKind,
@@ -789,6 +795,61 @@ function payoffForTarget(
     knownAccessState: "unknown",
     scoreAdjustment: 0,
     evidence: [`${targetKind}_payoff:unknown`],
+  };
+}
+
+function accessReplacementPayoffForTarget(
+  params: EvaluateRunnerRunTargetsParams,
+  projection: RunActionProjection,
+  targetServerId: string,
+  targetKind: RunnerRunTargetKind,
+): ReturnType<typeof payoffForTarget> | undefined {
+  if (
+    projection.accessReplacement !== "private_look_top_rd" ||
+    targetServerId !== "rd" ||
+    targetKind !== "rd"
+  ) {
+    return undefined;
+  }
+  const beliefState =
+    params.beliefState ?? reconstructBeliefState(params.input);
+  const knownSequence =
+    beliefState.runnerOpponentModel?.rndTopFreshness
+      ?.knownSequenceDefinitionIds ?? [];
+  const requestedLookCount = Math.max(
+    1,
+    Math.floor(projection.accessReplacementLookCount ?? 1),
+  );
+  const visibleRdCount = Math.max(
+    0,
+    Math.floor(params.input.playerView.opponent.deckCount),
+  );
+  const effectiveLookCount = Math.min(requestedLookCount, visibleRdCount);
+  const addsNewInformation = knownSequence.length < effectiveLookCount;
+  const evidence = [
+    "central_target:rd",
+    "central_access_replacement:private_look_top_rd",
+    `central_access_replacement_look_count:${requestedLookCount}`,
+    `central_access_replacement_effective_count:${effectiveLookCount}`,
+    `central_access_replacement_known_sequence_count:${knownSequence.length}`,
+    `central_access_replacement_adds_information:${addsNewInformation}`,
+  ];
+  if (!addsNewInformation) {
+    return {
+      accessPayoff: "known_low_value",
+      knownAccessState: "known_no_current_payoff",
+      scoreAdjustment: -640,
+      evidence: [...evidence, "central_access_replacement_redundant:true"],
+    };
+  }
+  return {
+    accessPayoff: "access_bonus",
+    knownAccessState: "known_payoff",
+    scoreAdjustment: 0,
+    evidence: [
+      ...evidence,
+      "central_access_replacement_information_payoff:true",
+    ],
   };
 }
 

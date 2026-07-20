@@ -63,6 +63,13 @@ export function projectInternalRunnerRunActions(
       signals,
     );
     const spendLimit = runSpendLimitForAction(action);
+    const accessReplacement = stringPayloadValue(
+      action,
+      "successfulRunAccessReplacement",
+    );
+    const accessReplacementLookCount = numberPayloadValue(action, [
+      "successfulRunPrivateLookCount",
+    ]);
     const baseProjection = {
       action,
       actionId: action.actionId,
@@ -76,6 +83,10 @@ export function projectInternalRunnerRunActions(
         hint,
         signals,
       ),
+      ...(accessReplacement ? { accessReplacement } : {}),
+      ...(accessReplacementLookCount !== undefined
+        ? { accessReplacementLookCount }
+        : {}),
       constraintSignals: constraintSignalsForRunAction(
         action,
         candidate,
@@ -199,6 +210,16 @@ function runActionProjectionEvidence(
       : []),
     ...(projection.spendLimit !== undefined
       ? [`run_action_projection_spend_limit:${projection.spendLimit}`]
+      : []),
+    ...(projection.accessReplacement
+      ? [
+          `run_action_projection_access_replacement:${projection.accessReplacement}`,
+        ]
+      : []),
+    ...(projection.accessReplacementLookCount !== undefined
+      ? [
+          `run_action_projection_access_replacement_look_count:${projection.accessReplacementLookCount}`,
+        ]
       : []),
     `run_action_projection_no_noisy_breakers:${projection.noNoisyBreakers}`,
     `run_action_projection_bypass_first_ice:${projection.bypassFirstIce}`,
@@ -327,6 +348,8 @@ function runActionSignals(
     "runActionSignals",
     "runSignals",
     "accessPayoffSignals",
+    "cardImplementationEffectKind",
+    "runActionKind",
   ]);
   const effectSignals = (hint?.effects ?? []).flatMap((effect) => {
     const target = effectTarget(effect);
@@ -693,6 +716,7 @@ function accessPayoffSignalsForRunAction(
     "runPayoffSignals",
     "payoffSignals",
   ]);
+  const accessReplacementSignals = structuredAccessReplacementSignals(action);
   const semanticSignals = signals.filter(signalShowsRunAccessPayoff);
   const candidateSignals = [
     ...(candidate?.cardContextSignals ?? []),
@@ -703,9 +727,25 @@ function accessPayoffSignalsForRunAction(
   );
   return uniqueStrings([
     ...directSignals,
+    ...accessReplacementSignals,
     ...semanticSignals,
     ...candidateSignals,
     ...effectSignals,
+  ]);
+}
+
+function structuredAccessReplacementSignals(action: LegalAction): string[] {
+  const replacement = stringPayloadValue(
+    action,
+    "successfulRunAccessReplacement",
+  );
+  if (!replacement) return [];
+  return uniqueStrings([
+    "access.replacement",
+    `access.replacement:${replacement}`,
+    ...(replacement === "private_look_top_rd"
+      ? ["access.rnd_topdeck_info"]
+      : []),
   ]);
 }
 
@@ -914,6 +954,14 @@ function numberPayloadValue(
     if (typeof value === "number" && Number.isFinite(value)) return value;
   }
   return undefined;
+}
+
+function stringPayloadValue(
+  action: LegalAction,
+  key: string,
+): string | undefined {
+  const value = payloadRecord(action)[key];
+  return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
 function uniqueStrings(values: readonly string[]): string[] {

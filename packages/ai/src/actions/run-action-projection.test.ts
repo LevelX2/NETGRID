@@ -4,6 +4,38 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { projectRunnerRunActions } from "./run-action-projection";
 
 describe("projectRunnerRunActions", () => {
+  it("projects declarative activated run payloads without reading their label", () => {
+    const activatedRun = action({
+      actionId: "activated-rd-scout",
+      type: "activated_card_ability",
+      label: "Use ability",
+      payload: {
+        cardImplementationEffectKind: "make_run",
+        runActionKind: "make_run",
+        serverId: "rd",
+        successfulRunAccessReplacement: "private_look_top_rd",
+        successfulRunPrivateLookCount: 5,
+        bypassFirstIce: true,
+      },
+    });
+
+    expect(projectRunnerRunActions({ input: input([activatedRun]) })).toEqual([
+      expect.objectContaining({
+        actionId: "activated-rd-scout",
+        targetServerId: "rd",
+        projectionStatus: "concrete_target",
+        accessReplacement: "private_look_top_rd",
+        accessReplacementLookCount: 5,
+        bypassFirstIce: true,
+        accessPayoffSignals: expect.arrayContaining([
+          "access.replacement",
+          "access.replacement:private_look_top_rd",
+          "access.rnd_topdeck_info",
+        ]),
+      }),
+    ]);
+  });
+
   it("uses structured run signals and ignores label-only run text", () => {
     const labelOnly = action({
       actionId: "label-only",
