@@ -3742,7 +3742,10 @@ export default function Page() {
     } catch (error) {
       setOpenLanMatches([]);
       setOpenLanError(
-        serverErrorNotice(error, "Öffentliche Spiele konnten nicht geladen werden."),
+        serverErrorNotice(
+          error,
+          "Öffentliche Spiele konnten nicht geladen werden.",
+        ),
       );
       setOpenLanUpdatedAt(new Date().toISOString());
     } finally {
@@ -6759,6 +6762,14 @@ export default function Page() {
                   if (resultKey) setDismissedResultKey(resultKey);
                 }}
                 onNewMatch={leaveMatch}
+                {...(payload?.isPublic
+                  ? {
+                      onReplay: () =>
+                        window.location.assign(
+                          `/replays?matchId=${encodeURIComponent(session.matchId)}`,
+                        ),
+                    }
+                  : {})}
                 nextSeriesPending={seriesTransitioning}
                 retentionProtected={payload?.retentionProtected === true}
                 onRetentionProtection={setRetentionProtection}

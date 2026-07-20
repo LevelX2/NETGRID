@@ -1,4 +1,11 @@
-import { mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import {
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -7,35 +14,123 @@ import { WebSocket } from "ws";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
-import { beliefStateInvariantSignature, buildAiDecisionInputDto, chooseAiAction as chooseRuntimeAiAction, reconstructBeliefState } from "@netgrid/ai";
+import {
+  beliefStateInvariantSignature,
+  buildAiDecisionInputDto,
+  chooseAiAction as chooseRuntimeAiAction,
+  reconstructBeliefState,
+} from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
-import { computeDeckHash, createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netgrid/decks";
-import { applyAction, applyEffectCommands, checkWinConditions, createGameAfterSetup, CARD_DEFINITIONS_BY_ID, DEMO_DECKS, getLegalActions, hashState } from "@netgrid/engine";
+import {
+  computeDeckHash,
+  createDeckSnapshot,
+  type DeckFormatProfile,
+  type DeckSnapshot,
+  type EditableDeck,
+} from "@netgrid/decks";
+import {
+  applyAction,
+  applyEffectCommands,
+  checkWinConditions,
+  createGameAfterSetup,
+  CARD_DEFINITIONS_BY_ID,
+  DEMO_DECKS,
+  getLegalActions,
+  hashState,
+} from "@netgrid/engine";
 import type { ConnectionAuditEvent } from "./connection-audit";
-import { createConfiguredStorage, createNetgridHttpServer, isMaintenanceClientAddressAllowed, startNetgridServer } from "./http-server";
+import {
+  createConfiguredStorage,
+  createNetgridHttpServer,
+  isMaintenanceClientAddressAllowed,
+  startNetgridServer,
+} from "./http-server";
 import { chronicleTurnContextByEventId } from "./chronicle-turn-context";
-import { InMemoryMaintenanceCredentialStore, MaintenanceAuthService } from "./maintenance-auth";
-import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks } from "./invite-lobby-redaction.test-helper";
-import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
-import { InMemoryMatchStorage, MultiplayerService, type ActionPersistenceLoadInput, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
+import {
+  InMemoryMaintenanceCredentialStore,
+  MaintenanceAuthService,
+} from "./maintenance-auth";
+import {
+  assertInviteLobbyPayloadRedacted,
+  findInviteLobbyPayloadRedactionLeaks,
+} from "./invite-lobby-redaction.test-helper";
+import {
+  FixedWindowRateLimiter,
+  createRateLimiter,
+  loadDeploymentConfig,
+  redactSensitiveText,
+  redactedJoinUrl,
+  type DeploymentConfig,
+} from "./internet-hardening";
+import {
+  InMemoryMatchStorage,
+  MultiplayerService,
+  type ActionPersistenceLoadInput,
+  type EventRecord,
+  type JoinMatchResult,
+  type MatchSettings,
+  type MultiplayerStorage,
+  type SidePayload,
+  type StateSnapshot,
+  type StoredMatch,
+} from "./multiplayer";
 import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
-import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
-import { AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION, AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, type AiDecision, type ApiCreateMatchResponse, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+import {
+  SqliteMatchStorage,
+  StorageError,
+  inspectSqliteStorage,
+  restoreSqliteStorageBackup,
+} from "./storage-sqlite";
+import {
+  AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION,
+  AI_DECISION_DEBUG_SCHEMA_VERSION,
+  CURRENT_RULES_BASELINE,
+  type AiDecision,
+  type ApiCreateMatchResponse,
+  type CardInstanceId,
+  type ChoiceRequest,
+  type DeckDefinition,
+  type GameEvent,
+  type GameState,
+  type LegalAction,
+  type PublicGameEvent,
+  type Side,
+} from "@netgrid/shared";
 
 function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
   expect(state.baseline).toStrictEqual(CURRENT_RULES_BASELINE);
-  expect(state.baseline.engineSchemaVersion).toBe(CURRENT_RULES_BASELINE.engineSchemaVersion);
+  expect(state.baseline.engineSchemaVersion).toBe(
+    CURRENT_RULES_BASELINE.engineSchemaVersion,
+  );
 }
 
 describe("recent match results", () => {
   it("lists the newest fully finished games without session tokens", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "recent-results-test", now: () => "2026-05-27T12:00:00.000Z" });
-    await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", humanSide: "runner", displayName: "Ludwig", identityKind: "account", seed: "recent-results-finished" });
-    await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", humanSide: "runner", displayName: "Offen", seed: "recent-results-active" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "recent-results-test",
+      now: () => "2026-05-27T12:00:00.000Z",
+    });
+    await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      humanSide: "runner",
+      displayName: "Ludwig",
+      identityKind: "account",
+      seed: "recent-results-finished",
+    });
+    await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      humanSide: "runner",
+      displayName: "Offen",
+      seed: "recent-results-active",
+    });
 
     const records = await storage.list();
-    const finished = records.find((record) => record.match.seed === "recent-results-finished");
+    const finished = records.find(
+      (record) => record.match.seed === "recent-results-finished",
+    );
     if (!finished?.gameState) throw new Error("Missing finished test match");
     finished.gameState.winner = "runner";
     finished.match.status = "finished";
@@ -50,10 +145,15 @@ describe("recent match results", () => {
       entryType: "single_game",
       matchId: finished.match.matchId,
       matchStatus: "finished",
+      isPublic: true,
       matchMode: "human_runner_vs_corp_ai",
       winner: "runner",
-      runner: { displayName: "Ludwig", identityKind: "account", matchPoints: 10 },
-      corp: { displayName: "Korp-KI", identityKind: "ai", matchPoints: 0 }
+      runner: {
+        displayName: "Ludwig",
+        identityKind: "account",
+        matchPoints: 10,
+      },
+      corp: { displayName: "Korp-KI", identityKind: "ai", matchPoints: 0 },
     });
     const serialized = JSON.stringify(results[0]);
     expect(serialized).not.toContain("sessionToken");
@@ -63,12 +163,30 @@ describe("recent match results", () => {
 
   it("aggregates finished side-swap series into one recent result with match points", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "recent-series-test", now: () => "2026-05-28T12:00:00.000Z" });
-    await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", humanSide: "runner", displayName: "Ludwig", seed: "recent-series-game-1", settings: { matchFormat: "two_game_side_swap" } });
-    await service.createMatch({ hostSide: "corp", playMode: "human_vs_ai", humanSide: "corp", displayName: "Ludwig", seed: "recent-series-game-2", settings: { matchFormat: "two_game_side_swap" } });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "recent-series-test",
+      now: () => "2026-05-28T12:00:00.000Z",
+    });
+    await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      humanSide: "runner",
+      displayName: "Ludwig",
+      seed: "recent-series-game-1",
+      settings: { matchFormat: "two_game_side_swap" },
+    });
+    await service.createMatch({
+      hostSide: "corp",
+      playMode: "human_vs_ai",
+      humanSide: "corp",
+      displayName: "Ludwig",
+      seed: "recent-series-game-2",
+      settings: { matchFormat: "two_game_side_swap" },
+    });
 
     const [first, second] = await storage.list();
-    if (!first?.gameState || !second?.gameState) throw new Error("Missing series test records");
+    if (!first?.gameState || !second?.gameState)
+      throw new Error("Missing series test records");
     const seriesId = "series_recent_results";
     const gameOne = {
       matchId: first.match.matchId,
@@ -80,7 +198,7 @@ describe("recent match results", () => {
       runnerAgendaPoints: 7,
       corpAgendaPoints: 2,
       finishedAt: "2026-05-28T12:10:00.000Z",
-      finalStateHash: "hash:game-one"
+      finalStateHash: "hash:game-one",
     };
     const gameTwo = {
       matchId: second.match.matchId,
@@ -92,19 +210,37 @@ describe("recent match results", () => {
       runnerAgendaPoints: 3,
       corpAgendaPoints: 1,
       finishedAt: "2026-05-28T12:30:00.000Z",
-      finalStateHash: "hash:game-two"
+      finalStateHash: "hash:game-two",
     };
 
     first.gameState.winner = "runner";
     first.match.status = "finished";
     first.match.winner = "runner";
     first.match.updatedAt = gameOne.finishedAt;
-    first.match.series = { seriesId, mode: "two_game_side_swap", status: "between_games", gameNumber: 1, gamesPlanned: 2, runnerPlayer: "player_a", corpPlayer: "player_b", results: [gameOne] };
+    first.match.series = {
+      seriesId,
+      mode: "two_game_side_swap",
+      status: "between_games",
+      gameNumber: 1,
+      gamesPlanned: 2,
+      runnerPlayer: "player_a",
+      corpPlayer: "player_b",
+      results: [gameOne],
+    };
     second.gameState.winner = "corp";
     second.match.status = "finished";
     second.match.winner = "corp";
     second.match.updatedAt = gameTwo.finishedAt;
-    second.match.series = { seriesId, mode: "two_game_side_swap", status: "finished", gameNumber: 2, gamesPlanned: 2, runnerPlayer: "player_b", corpPlayer: "player_a", results: [gameOne, gameTwo] };
+    second.match.series = {
+      seriesId,
+      mode: "two_game_side_swap",
+      status: "finished",
+      gameNumber: 2,
+      gamesPlanned: 2,
+      runnerPlayer: "player_b",
+      corpPlayer: "player_a",
+      results: [gameOne, gameTwo],
+    };
     await storage.save(first);
     await storage.save(second);
 
@@ -114,18 +250,40 @@ describe("recent match results", () => {
     expect(results[0]).toMatchObject({
       entryType: "series",
       seriesId,
+      isPublic: true,
       status: "finished",
       gamesPlayed: 2,
       gamesPlanned: 2,
       outcome: "player_a",
       players: {
-        player_a: { displayName: "Ludwig", matchPoints: 20, agendaPoints: 8, wins: 2 },
-        player_b: { displayName: "Runner-KI", matchPoints: 5, agendaPoints: 5, wins: 0 }
+        player_a: {
+          displayName: "Ludwig",
+          matchPoints: 20,
+          agendaPoints: 8,
+          wins: 2,
+        },
+        player_b: {
+          displayName: "Runner-KI",
+          matchPoints: 5,
+          agendaPoints: 5,
+          wins: 0,
+        },
       },
       games: [
-        { gameNumber: 1, runnerMatchPoints: 10, corpMatchPoints: 2 },
-        { gameNumber: 2, runnerMatchPoints: 3, corpMatchPoints: 10, reason: "forfeit" }
-      ]
+        {
+          gameNumber: 1,
+          isPublic: true,
+          runnerMatchPoints: 10,
+          corpMatchPoints: 2,
+        },
+        {
+          gameNumber: 2,
+          isPublic: true,
+          runnerMatchPoints: 3,
+          corpMatchPoints: 10,
+          reason: "forfeit",
+        },
+      ],
     });
     const serialized = JSON.stringify(results[0]);
     expect(serialized).not.toContain("sessionToken");
@@ -144,7 +302,9 @@ describe("V1.0.9 private internet hardening", () => {
     process.env.NETGRID_PUBLIC_HOST = "192.0.2.10";
     process.env.NETGRID_ACCOUNT_SQLITE_PATH = join(dir, "netgrid.sqlite");
     process.env.NETGRID_STORAGE_BACKUP_DIR = join(dir, "backups");
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "lan-default-bind" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "lan-default-bind",
+    });
     let handle: Awaited<ReturnType<typeof startNetgridServer>> | undefined;
     try {
       handle = await startNetgridServer({ port: 0, host: "0.0.0.0 ", service });
@@ -162,14 +322,20 @@ describe("V1.0.9 private internet hardening", () => {
   it("normalizes advertised WebSocket URLs from environment-style base URLs", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "trim-ws-url",
-      publicServerBaseUrl: "http://192.0.2.10:8787 "
+      publicServerBaseUrl: "http://192.0.2.10:8787 ",
     });
-    const created = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", seed: "trim-ws-url" });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      seed: "trim-ws-url",
+    });
     expect(created.webSocketUrl).toBe("ws://192.0.2.10:8787/ws");
   });
 
   it("validates local and private internet deployment profiles", () => {
-    const local = loadDeploymentConfig({ NETGRID_DEPLOYMENT_PROFILE: "local" } as NodeJS.ProcessEnv);
+    const local = loadDeploymentConfig({
+      NETGRID_DEPLOYMENT_PROFILE: "local",
+    } as NodeJS.ProcessEnv);
     expect(local.profile).toBe("local");
     expect(local.webBaseUrl).toBe("http://127.0.0.1:3100");
     expect(local.allowedOrigins).toContain("http://127.0.0.1:3100");
@@ -182,8 +348,8 @@ describe("V1.0.9 private internet hardening", () => {
         NETGRID_WEB_BASE_URL: "http://netgrid.example",
         NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
         NETGRID_ALLOWED_ORIGINS: "https://netgrid.example",
-        NETGRID_TOKEN_SALT: "private-test-salt"
-      } as NodeJS.ProcessEnv)
+        NETGRID_TOKEN_SALT: "private-test-salt",
+      } as NodeJS.ProcessEnv),
     ).toThrow(/HTTPS/);
     expect(() =>
       loadDeploymentConfig({
@@ -191,24 +357,28 @@ describe("V1.0.9 private internet hardening", () => {
         NETGRID_WEB_BASE_URL: "https://netgrid.example",
         NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
         NETGRID_ALLOWED_ORIGINS: "https://netgrid.example",
-        NETGRID_TOKEN_SALT: "local-dev-netgrid-token-salt"
-      } as NodeJS.ProcessEnv)
+        NETGRID_TOKEN_SALT: "local-dev-netgrid-token-salt",
+      } as NodeJS.ProcessEnv),
     ).toThrow(/NETGRID_TOKEN_SALT/);
 
     const privateConfig = loadDeploymentConfig({
       NETGRID_DEPLOYMENT_PROFILE: "private_internet",
       NETGRID_WEB_BASE_URL: "https://netgrid.example",
       NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
-      NETGRID_ALLOWED_ORIGINS: "https://netgrid.example,https://tablet.netgrid.example",
-      NETGRID_TOKEN_SALT: "private-test-salt"
+      NETGRID_ALLOWED_ORIGINS:
+        "https://netgrid.example,https://tablet.netgrid.example",
+      NETGRID_TOKEN_SALT: "private-test-salt",
     } as NodeJS.ProcessEnv);
     expect(privateConfig).toMatchObject({
       profile: "private_internet",
       webBaseUrl: "https://netgrid.example",
       serverBaseUrl: "https://api.netgrid.example",
-      rateLimitProfile: "private_internet"
+      rateLimitProfile: "private_internet",
     });
-    expect(privateConfig.allowedOrigins).toEqual(["https://netgrid.example", "https://tablet.netgrid.example"]);
+    expect(privateConfig.allowedOrigins).toEqual([
+      "https://netgrid.example",
+      "https://tablet.netgrid.example",
+    ]);
     expect(privateConfig.maintenanceEnabled).toBe(false);
 
     expect(() =>
@@ -221,8 +391,8 @@ describe("V1.0.9 private internet hardening", () => {
         NETGRID_MAINTENANCE_ENABLED: "true",
         NETGRID_MAINTENANCE_BASE_URL: "http://admin.netgrid.example",
         NETGRID_MAINTENANCE_ALLOWED_ORIGINS: "http://admin.netgrid.example",
-        NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES: "127.0.0.1"
-      } as NodeJS.ProcessEnv)
+        NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES: "127.0.0.1",
+      } as NodeJS.ProcessEnv),
     ).toThrow(/HTTPS/);
 
     const privateMaintenance = loadDeploymentConfig({
@@ -234,13 +404,13 @@ describe("V1.0.9 private internet hardening", () => {
       NETGRID_MAINTENANCE_ENABLED: "true",
       NETGRID_MAINTENANCE_BASE_URL: "https://admin.netgrid.example",
       NETGRID_MAINTENANCE_ALLOWED_ORIGINS: "https://admin.netgrid.example",
-      NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES: "127.0.0.1,::1"
+      NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES: "127.0.0.1,::1",
     } as NodeJS.ProcessEnv);
     expect(privateMaintenance).toMatchObject({
       maintenanceEnabled: true,
       maintenanceBaseUrl: "https://admin.netgrid.example",
       maintenanceAllowedOrigins: ["https://admin.netgrid.example"],
-      maintenanceTrustedProxyAddresses: ["127.0.0.1", "::1"]
+      maintenanceTrustedProxyAddresses: ["127.0.0.1", "::1"],
     });
 
     const legacyPrivateConfig = loadDeploymentConfig({
@@ -248,12 +418,12 @@ describe("V1.0.9 private internet hardening", () => {
       NETGRID_WEB_BASE_URL: "https://legacy.netgrid.example",
       NETGRID_SERVER_BASE_URL: "https://legacy-api.netgrid.example",
       NETGRID_ALLOWED_ORIGINS: "https://legacy.netgrid.example",
-      NETGRID_TOKEN_SALT: "legacy-private-test-salt"
+      NETGRID_TOKEN_SALT: "legacy-private-test-salt",
     } as NodeJS.ProcessEnv);
     expect(legacyPrivateConfig).toMatchObject({
       profile: "private_internet",
       webBaseUrl: "https://legacy.netgrid.example",
-      serverBaseUrl: "https://legacy-api.netgrid.example"
+      serverBaseUrl: "https://legacy-api.netgrid.example",
     });
   });
 
@@ -261,32 +431,51 @@ describe("V1.0.9 private internet hardening", () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "private-health-salt",
       publicWebBaseUrl: "https://netgrid.example",
-      publicServerBaseUrl: "https://api.netgrid.example"
+      publicServerBaseUrl: "https://api.netgrid.example",
     });
-    const handle = createNetgridHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
+    const handle = createNetgridHttpServer(service, {
+      deploymentConfig: privateDeploymentConfig(),
+    });
     const baseUrl = await listen(handle);
     try {
       const preflight = await fetch(`${baseUrl}/api/matches`, {
         method: "OPTIONS",
-        headers: { origin: "https://netgrid.example", "access-control-request-method": "POST" }
+        headers: {
+          origin: "https://netgrid.example",
+          "access-control-request-method": "POST",
+        },
       });
       expect(preflight.status).toBe(204);
-      expect(preflight.headers.get("access-control-allow-origin")).toBe("https://netgrid.example");
-      expect(preflight.headers.get("access-control-allow-methods")).toBe("GET,POST,OPTIONS");
+      expect(preflight.headers.get("access-control-allow-origin")).toBe(
+        "https://netgrid.example",
+      );
+      expect(preflight.headers.get("access-control-allow-methods")).toBe(
+        "GET,POST,OPTIONS",
+      );
 
-      const denied = await fetch(`${baseUrl}/health`, { headers: { origin: "https://evil.example" } });
+      const denied = await fetch(`${baseUrl}/health`, {
+        headers: { origin: "https://evil.example" },
+      });
       const deniedText = await denied.text();
       expect(denied.status).toBe(403);
       expect(deniedText).toContain("origin_not_allowed");
-      expect(deniedText).not.toMatch(/sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i);
+      expect(deniedText).not.toMatch(
+        /sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i,
+      );
 
       const health = await fetch(`${baseUrl}/health`);
-      const body = (await health.json()) as { profile?: string; realtime?: { ready?: boolean }; storage?: { kind?: string; matchCount?: number } };
+      const body = (await health.json()) as {
+        profile?: string;
+        realtime?: { ready?: boolean };
+        storage?: { kind?: string; matchCount?: number };
+      };
       expect(body.profile).toBe("private_internet");
       expect(body.realtime?.ready).toBe(true);
       expect(body.storage?.kind).toBe("memory");
       expect(body.storage?.matchCount).toBeUndefined();
-      expect(JSON.stringify(body)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i);
+      expect(JSON.stringify(body)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i,
+      );
     } finally {
       await handle.close();
     }
@@ -296,14 +485,19 @@ describe("V1.0.9 private internet hardening", () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "observable-ai-vs-ai-http-salt",
       publicWebBaseUrl: "https://netgrid.example",
-      publicServerBaseUrl: "https://api.netgrid.example"
+      publicServerBaseUrl: "https://api.netgrid.example",
     });
-    const handle = createNetgridHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
+    const handle = createNetgridHttpServer(service, {
+      deploymentConfig: privateDeploymentConfig(),
+    });
     const baseUrl = await listen(handle);
     try {
       const response = await fetch(`${baseUrl}/api/matches`, {
         method: "POST",
-        headers: { "content-type": "application/json", origin: "https://netgrid.example" },
+        headers: {
+          "content-type": "application/json",
+          origin: "https://netgrid.example",
+        },
         body: JSON.stringify({
           mode: "ai_vs_ai",
           hostSide: "runner",
@@ -311,8 +505,11 @@ describe("V1.0.9 private internet hardening", () => {
           aiDeckPolicy: "fixed",
           runnerDifficulty: "normal",
           corpDifficulty: "normal",
-          settings: { matchFormat: "two_game_side_swap", playerClock: { mode: "player_clock", startingTimeMs: 1_000 } }
-        })
+          settings: {
+            matchFormat: "two_game_side_swap",
+            playerClock: { mode: "player_clock", startingTimeMs: 1_000 },
+          },
+        }),
       });
       const body = (await response.json()) as ApiCreateMatchResponse;
       expect(response.status).toBe(201);
@@ -321,14 +518,20 @@ describe("V1.0.9 private internet hardening", () => {
         matchStatus: "active",
         hostSide: "runner",
         legalActions: [],
-        aiTurnPresentation: { canAdvanceAi: true }
+        aiTurnPresentation: { canAdvanceAi: true },
       });
       expect(body.playerView).toBeDefined();
       expect(body.joinUrl).toBeUndefined();
-      expect(JSON.stringify(body)).not.toMatch(/cardInstances|privatePayload|decklist|AIInput|FullState/i);
+      expect(JSON.stringify(body)).not.toMatch(
+        /cardInstances|privatePayload|decklist|AIInput|FullState/i,
+      );
       const stored = await service.loadForTest(body.matchId);
       expect(stored?.match.settings.matchFormat).toBe("two_game_side_swap");
-      expect(stored?.match.series).toMatchObject({ gameNumber: 1, runnerPlayer: "player_a", corpPlayer: "player_b" });
+      expect(stored?.match.series).toMatchObject({
+        gameNumber: 1,
+        runnerPlayer: "player_a",
+        corpPlayer: "player_b",
+      });
     } finally {
       await handle.close();
     }
@@ -338,26 +541,46 @@ describe("V1.0.9 private internet hardening", () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "private-ws-salt",
       publicWebBaseUrl: "https://netgrid.example",
-      publicServerBaseUrl: "https://api.netgrid.example"
+      publicServerBaseUrl: "https://api.netgrid.example",
     });
-    const created = await service.createMatch({ hostSide: "runner", seed: "v109-ws-origin" });
-    const handle = createNetgridHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "v109-ws-origin",
+    });
+    const handle = createNetgridHttpServer(service, {
+      deploymentConfig: privateDeploymentConfig(),
+    });
     const baseUrl = await listen(handle);
     const wsUrl = baseUrl.replace(/^http:/, "ws:") + "/ws";
     const deniedMessages: string[] = [];
-    const denied = new WebSocket(wsUrl, { headers: { Origin: "https://evil.example" } });
+    const denied = new WebSocket(wsUrl, {
+      headers: { Origin: "https://evil.example" },
+    });
     try {
       denied.on("message", (raw) => deniedMessages.push(raw.toString()));
       await waitForClosedOrErrored(denied);
       expect(deniedMessages).toEqual([]);
 
-      const allowed = new WebSocket(wsUrl, { headers: { Origin: "https://netgrid.example" } });
+      const allowed = new WebSocket(wsUrl, {
+        headers: { Origin: "https://netgrid.example" },
+      });
       try {
         await waitForOpen(allowed);
-        allowed.send(JSON.stringify({ type: "join_match", payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide } }));
+        allowed.send(
+          JSON.stringify({
+            type: "join_match",
+            payload: {
+              matchId: created.matchId,
+              sessionToken: created.hostSessionToken,
+              side: created.hostSide,
+            },
+          }),
+        );
         const update = await waitForMessage(allowed, "lobby_update");
         expect(messagePayload(update).matchStatus).toBe("pending");
-        expect(JSON.stringify(update)).not.toMatch(/sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i);
+        expect(JSON.stringify(update)).not.toMatch(
+          /sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i,
+        );
       } finally {
         allowed.close();
       }
@@ -371,28 +594,46 @@ describe("V1.0.9 private internet hardening", () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "private-rate-salt",
       publicWebBaseUrl: "https://netgrid.example",
-      publicServerBaseUrl: "https://api.netgrid.example"
+      publicServerBaseUrl: "https://api.netgrid.example",
     });
-    const handle = createNetgridHttpServer(service, { deploymentConfig: privateDeploymentConfig(), rateLimiter: createRateLimiter("test") });
+    const handle = createNetgridHttpServer(service, {
+      deploymentConfig: privateDeploymentConfig(),
+      rateLimiter: createRateLimiter("test"),
+    });
     const baseUrl = await listen(handle);
     try {
       for (let index = 0; index < 2; index += 1) {
         const response = await fetch(`${baseUrl}/api/matches`, {
           method: "POST",
-          headers: { "content-type": "application/json", origin: "https://netgrid.example" },
-          body: JSON.stringify({ hostSide: "runner", seed: `rate-rest-${index}` })
+          headers: {
+            "content-type": "application/json",
+            origin: "https://netgrid.example",
+          },
+          body: JSON.stringify({
+            hostSide: "runner",
+            seed: `rate-rest-${index}`,
+          }),
         });
         expect(response.status).toBe(201);
       }
       const limited = await fetch(`${baseUrl}/api/matches`, {
         method: "POST",
-        headers: { "content-type": "application/json", origin: "https://netgrid.example" },
-        body: JSON.stringify({ hostSide: "runner", seed: "rate-rest-limited", sessionToken: "secret" })
+        headers: {
+          "content-type": "application/json",
+          origin: "https://netgrid.example",
+        },
+        body: JSON.stringify({
+          hostSide: "runner",
+          seed: "rate-rest-limited",
+          sessionToken: "secret",
+        }),
       });
       const limitedText = await limited.text();
       expect(limited.status).toBe(429);
       expect(limitedText).toContain("rate_limited");
-      expect(limitedText).not.toMatch(/secret|sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i);
+      expect(limitedText).not.toMatch(
+        /secret|sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i,
+      );
     } finally {
       await handle.close();
     }
@@ -400,9 +641,12 @@ describe("V1.0.9 private internet hardening", () => {
     const wsService = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "private-ws-rate-salt",
       publicWebBaseUrl: "https://netgrid.example",
-      publicServerBaseUrl: "https://api.netgrid.example"
+      publicServerBaseUrl: "https://api.netgrid.example",
     });
-    const created = await wsService.createMatch({ hostSide: "runner", seed: "v109-ws-rate" });
+    const created = await wsService.createMatch({
+      hostSide: "runner",
+      seed: "v109-ws-rate",
+    });
     const wsLimiter = new FixedWindowRateLimiter({
       create_match: undefined,
       token_probe: undefined,
@@ -410,20 +654,45 @@ describe("V1.0.9 private internet hardening", () => {
       lifecycle: undefined,
       ai_advance: undefined,
       ws_handshake: { limit: 10, windowMs: 60_000 },
-      ws_join: { limit: 1, windowMs: 60_000 }
+      ws_join: { limit: 1, windowMs: 60_000 },
     });
-    const wsHandle = createNetgridHttpServer(wsService, { deploymentConfig: privateDeploymentConfig(), rateLimiter: wsLimiter });
+    const wsHandle = createNetgridHttpServer(wsService, {
+      deploymentConfig: privateDeploymentConfig(),
+      rateLimiter: wsLimiter,
+    });
     const wsBaseUrl = await listen(wsHandle);
     const wsUrl = wsBaseUrl.replace(/^http:/, "ws:") + "/ws";
-    const socket = new WebSocket(wsUrl, { headers: { Origin: "https://netgrid.example" } });
+    const socket = new WebSocket(wsUrl, {
+      headers: { Origin: "https://netgrid.example" },
+    });
     try {
       await waitForOpen(socket);
-      socket.send(JSON.stringify({ type: "join_match", payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide } }));
+      socket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: {
+            matchId: created.matchId,
+            sessionToken: created.hostSessionToken,
+            side: created.hostSide,
+          },
+        }),
+      );
       await waitForMessage(socket, "lobby_update");
-      socket.send(JSON.stringify({ type: "join_match", payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide } }));
+      socket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: {
+            matchId: created.matchId,
+            sessionToken: created.hostSessionToken,
+            side: created.hostSide,
+          },
+        }),
+      );
       const error = await waitForMessage(socket, "error");
       expect(JSON.stringify(error)).toContain("rate_limited");
-      expect(JSON.stringify(error)).not.toMatch(/sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i);
+      expect(JSON.stringify(error)).not.toMatch(
+        /sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i,
+      );
     } finally {
       socket.close();
       await wsHandle.close();
@@ -431,21 +700,30 @@ describe("V1.0.9 private internet hardening", () => {
   });
 
   it("redacts token, hash, join URL and hidden-info diagnostics", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "private-redaction-salt" });
-    const created = await service.createMatch({ hostSide: "runner", seed: "v109-redaction" });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "private-redaction-salt",
+    });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "v109-redaction",
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     expect(joinToken).toBeTruthy();
     const redactedUrl = redactedJoinUrl(created.joinUrl);
     expect(redactedUrl).toContain("joinToken=[redacted]");
     expect(redactedUrl).not.toContain(joinToken ?? "missing");
 
     const text = redactSensitiveText(
-      `joinToken=${joinToken} "sessionToken":"${created.hostSessionToken}" tokenHash=sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef privatePayload cardInstances decklist`
+      `joinToken=${joinToken} "sessionToken":"${created.hostSessionToken}" tokenHash=sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef privatePayload cardInstances decklist`,
     );
     expect(text).toContain("joinToken=[redacted]");
     expect(text).not.toContain(created.hostSessionToken);
     expect(text).not.toContain(joinToken ?? "missing");
-    expect(text).not.toMatch(/sha256:[a-f0-9]{64}|privatePayload|cardInstances|decklist/i);
+    expect(text).not.toMatch(
+      /sha256:[a-f0-9]{64}|privatePayload|cardInstances|decklist/i,
+    );
   });
 });
 
@@ -454,14 +732,15 @@ describe("Invite and lobby redaction harness", () => {
     const leaks = findInviteLobbyPayloadRedactionLeaks({
       sessionToken: "raw-session-token",
       reconnectToken: "raw-reconnect-token",
-      tokenHash: "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      tokenHash:
+        "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       sessionId: "session_private_123",
       decklist: [{ cardId: "onr_v1_001_afreet", quantity: 3 }],
       deckHash: "fnv1a:deadbeef",
       hiddenCard: { definitionId: "simple_agenda" },
       AIInput: { side: "runner" },
       DecisionDebug: { explored: true },
-      url: "http://127.0.0.1:3100/?matchId=match_1&joinToken=raw-join-token"
+      url: "http://127.0.0.1:3100/?matchId=match_1&joinToken=raw-join-token",
     });
     const ruleIds = leaks.map((leak) => leak.ruleId);
 
@@ -475,31 +754,50 @@ describe("Invite and lobby redaction harness", () => {
         "join-token-query-value",
         "token-hash-value",
         "session-id-value",
-        "deck-hash-value"
-      ])
+        "deck-hash-value",
+      ]),
     );
   });
 
   it("accepts current join-info, pending-lobby, and open-lobby metadata surfaces", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "invite-lobby-redaction-harness" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "invite-lobby-redaction-harness",
+    });
     const created = await service.createMatch({
       hostSide: "runner",
       seed: "invite-lobby-redaction-harness",
       mode: "human_vs_human",
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6"
-      }
+        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6",
+      },
     });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
 
-    assertInviteLobbyPayloadRedacted(created.lobby, "createMatch pending lobby");
-    assertInviteLobbyPayloadRedacted(await service.getJoinInfo(created.matchId), "join-info without token");
-    assertInviteLobbyPayloadRedacted(await service.getJoinInfo(created.matchId, joinToken), "join-info with token");
-    assertInviteLobbyPayloadRedacted(await service.listOpenMatches(), "V2.3a open lobby list");
+    assertInviteLobbyPayloadRedacted(
+      created.lobby,
+      "createMatch pending lobby",
+    );
+    assertInviteLobbyPayloadRedacted(
+      await service.getJoinInfo(created.matchId),
+      "join-info without token",
+    );
+    assertInviteLobbyPayloadRedacted(
+      await service.getJoinInfo(created.matchId, joinToken),
+      "join-info with token",
+    );
+    assertInviteLobbyPayloadRedacted(
+      await service.listOpenMatches(),
+      "V2.3a open lobby list",
+    );
 
-    const missingDecks = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Joiner" });
+    const missingDecks = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Joiner",
+    });
     expect("error" in missingDecks).toBe(true);
     assertInviteLobbyPayloadRedacted(missingDecks, "join error payload");
 
@@ -507,13 +805,18 @@ describe("Invite and lobby redaction harness", () => {
       token: joinToken,
       displayName: "Joiner",
       runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
     });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
     assertInviteLobbyPayloadRedacted(joined.lobby, "joinMatch start lobby");
 
-    const hostLobby = await service.bootstrap(created.matchId, created.hostSide, created.hostSessionToken, { allowLobby: true });
+    const hostLobby = await service.bootstrap(
+      created.matchId,
+      created.hostSide,
+      created.hostSessionToken,
+      { allowLobby: true },
+    );
     expect("error" in hostLobby).toBe(false);
     assertInviteLobbyPayloadRedacted(hostLobby, "host bootstrap lobby payload");
   });
@@ -523,7 +826,9 @@ describe("Backend 0.5 private storage maintenance", () => {
   it("allows only loopback transport and never treats private LAN addresses as admin proof", () => {
     expect(isMaintenanceClientAddressAllowed("127.0.0.1")).toBe(true);
     expect(isMaintenanceClientAddressAllowed("::1")).toBe(true);
-    expect(isMaintenanceClientAddressAllowed("::ffff:192.168.178.42")).toBe(false);
+    expect(isMaintenanceClientAddressAllowed("::ffff:192.168.178.42")).toBe(
+      false,
+    );
     expect(isMaintenanceClientAddressAllowed("10.0.0.25")).toBe(false);
     expect(isMaintenanceClientAddressAllowed("172.20.1.5")).toBe(false);
     expect(isMaintenanceClientAddressAllowed("8.8.8.8")).toBe(false);
@@ -556,7 +861,9 @@ describe("Backend 0.5 private storage maintenance", () => {
         .prepare("DELETE FROM storage_meta WHERE key = ?")
         .run("public_match_backfill_v1_completed_at");
       const rows = legacyDb
-        .prepare("SELECT match_id AS matchId, record_json AS recordJson FROM matches")
+        .prepare(
+          "SELECT match_id AS matchId, record_json AS recordJson FROM matches",
+        )
         .all() as Array<{ matchId: string; recordJson: string }>;
       const update = legacyDb.prepare(
         "UPDATE matches SET record_json = ? WHERE match_id = ?",
@@ -582,6 +889,25 @@ describe("Backend 0.5 private storage maintenance", () => {
       ]);
       expect(records?.every((record) => record.match.isPublic)).toBe(true);
 
+      const publicCandidates = await reopened.listPublicMatchCandidates();
+      expect(publicCandidates).toHaveLength(2);
+      expect(publicCandidates.every((record) => record.match.isPublic)).toBe(
+        true,
+      );
+      expect(
+        publicCandidates.every(
+          (record) =>
+            record.eventLog.length === 0 &&
+            record.stateSnapshots.length === 0 &&
+            record.gameState.eventLog.length === 0,
+        ),
+      ).toBe(true);
+
+      const publicService = new MultiplayerService(reopened, {
+        tokenSalt: "public-match-backfill-reopened",
+      });
+      expect(await publicService.listPublicMatches()).toHaveLength(2);
+
       const auditDb = new DatabaseSync(dbPath, { readOnly: true });
       try {
         const rawRows = auditDb
@@ -595,8 +921,7 @@ describe("Backend 0.5 private storage maintenance", () => {
         ).toBe(true);
         expect(
           rawRows.some(
-            (row) =>
-              "discoverableInLan" in JSON.parse(row.recordJson).match,
+            (row) => "discoverableInLan" in JSON.parse(row.recordJson).match,
           ),
         ).toBe(false);
         expect(
@@ -615,11 +940,30 @@ describe("Backend 0.5 private storage maintenance", () => {
 
   it("serves a redacted local SQLite storage summary, match list and match detail", async () => {
     const dir = await tempStorageDir();
-    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups") });
-    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-maintenance" });
-    const active = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Ludwig", seed: "backend-05-active" });
-    await service.createMatch({ hostSide: "corp", displayName: "Korp Host", seed: "backend-05-pending" });
-    const finished = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Archiv", seed: "backend-05-finished" });
+    const storage = new SqliteMatchStorage({
+      dbPath: join(dir, "netgrid.sqlite"),
+      backupDir: join(dir, "backups"),
+    });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "backend-05-maintenance",
+    });
+    const active = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      displayName: "Ludwig",
+      seed: "backend-05-active",
+    });
+    await service.createMatch({
+      hostSide: "corp",
+      displayName: "Korp Host",
+      seed: "backend-05-pending",
+    });
+    const finished = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      displayName: "Archiv",
+      seed: "backend-05-finished",
+    });
     const finishedRecord = await service.loadForTest(finished.matchId);
     if (!finishedRecord) throw new Error("Missing finished record");
     finishedRecord.match.status = "finished";
@@ -633,13 +977,15 @@ describe("Backend 0.5 private storage maintenance", () => {
       stateHash: hashState(finishedRecord.gameState),
       gameState: finishedRecord.gameState,
       createdAt: "2026-04-01T00:00:00.000Z",
-      hiddenInfoBarrier: true
+      hiddenInfoBarrier: true,
     });
     await storage.save(finishedRecord);
 
     const maintenance = await authenticatedMaintenanceServer(service);
     try {
-      const summaryResponse = await maintenance.request("/api/storage/maintenance/summary");
+      const summaryResponse = await maintenance.request(
+        "/api/storage/maintenance/summary",
+      );
       const summary = (await summaryResponse.json()) as {
         backendOpsVersion?: string;
         matchCount?: number;
@@ -653,19 +999,44 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(summary.matchCount).toBe(3);
       expect(summary.terminalCount).toBe(1);
       expect(summary.matchCountsByStatus?.finished).toBe(1);
-      expect(summary.tableSizes?.some((row) => row.key === "matches" && row.approximatePayloadBytes > 0)).toBe(true);
-      expect(JSON.stringify(summary)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+      expect(
+        summary.tableSizes?.some(
+          (row) => row.key === "matches" && row.approximatePayloadBytes > 0,
+        ),
+      ).toBe(true);
+      expect(JSON.stringify(summary)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i,
+      );
 
-      const filteredResponse = await maintenance.request("/api/storage/maintenance/matches?status=finished&terminal=true&olderThanDays=1&mode=human_runner_vs_corp_ai&largerThanBytes=1");
-      const filtered = (await filteredResponse.json()) as { matches?: Array<{ matchId: string; status: string; participants: Array<{ displayName: string }>; sizes: { approximateTotalBytes: number } }> };
+      const filteredResponse = await maintenance.request(
+        "/api/storage/maintenance/matches?status=finished&terminal=true&olderThanDays=1&mode=human_runner_vs_corp_ai&largerThanBytes=1",
+      );
+      const filtered = (await filteredResponse.json()) as {
+        matches?: Array<{
+          matchId: string;
+          status: string;
+          participants: Array<{ displayName: string }>;
+          sizes: { approximateTotalBytes: number };
+        }>;
+      };
       expect(filteredResponse.status).toBe(200);
-      expect(filtered.matches?.map((match) => match.matchId)).toEqual([finished.matchId]);
+      expect(filtered.matches?.map((match) => match.matchId)).toEqual([
+        finished.matchId,
+      ]);
       expect(filtered.matches?.[0]?.status).toBe("finished");
-      expect(filtered.matches?.[0]?.participants[0]?.displayName).toBe("Archiv");
-      expect(filtered.matches?.[0]?.sizes.approximateTotalBytes).toBeGreaterThan(0);
-      expect(JSON.stringify(filtered)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+      expect(filtered.matches?.[0]?.participants[0]?.displayName).toBe(
+        "Archiv",
+      );
+      expect(
+        filtered.matches?.[0]?.sizes.approximateTotalBytes,
+      ).toBeGreaterThan(0);
+      expect(JSON.stringify(filtered)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i,
+      );
 
-      const detailResponse = await maintenance.request(`/api/storage/maintenance/matches/${encodeURIComponent(active.matchId)}`);
+      const detailResponse = await maintenance.request(
+        `/api/storage/maintenance/matches/${encodeURIComponent(active.matchId)}`,
+      );
       const detail = (await detailResponse.json()) as {
         matchId?: string;
         eventCount?: number;
@@ -679,7 +1050,9 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(detail.eventCount).toBeGreaterThan(0);
       expect(detail.tableRows?.events).toBe(detail.eventCount);
       expect(detail.cleanupAssessment?.recommendation).toBe("not_active");
-      expect(JSON.stringify(detail)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+      expect(JSON.stringify(detail)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i,
+      );
     } finally {
       await maintenance.handle.close();
     }
@@ -690,22 +1063,44 @@ describe("Backend 0.5 private storage maintenance", () => {
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
-    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-ai-traces" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "backend-05-ai-traces",
+    });
     const traced = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "backend-05-ai-trace-on",
       corpDifficulty: "normal",
-      aiTraceMode: "detailed"
+      aiTraceMode: "detailed",
     });
     const untraced = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "backend-05-ai-trace-off",
-      corpDifficulty: "normal"
+      corpDifficulty: "normal",
     });
-    const tracedSetup = await submitChoice(service, traced.matchId, { side: "runner", sessionToken: traced.hostSessionToken, reconnectToken: traced.hostReconnectToken }, "keep", "ai-trace-on-setup");
-    const untracedSetup = await submitChoice(service, untraced.matchId, { side: "runner", sessionToken: untraced.hostSessionToken, reconnectToken: untraced.hostReconnectToken }, "keep", "ai-trace-off-setup");
+    const tracedSetup = await submitChoice(
+      service,
+      traced.matchId,
+      {
+        side: "runner",
+        sessionToken: traced.hostSessionToken,
+        reconnectToken: traced.hostReconnectToken,
+      },
+      "keep",
+      "ai-trace-on-setup",
+    );
+    const untracedSetup = await submitChoice(
+      service,
+      untraced.matchId,
+      {
+        side: "runner",
+        sessionToken: untraced.hostSessionToken,
+        reconnectToken: untraced.hostReconnectToken,
+      },
+      "keep",
+      "ai-trace-off-setup",
+    );
     const beforePreview = await service.loadForTest(traced.matchId);
     let previewActionId = "";
     let previewActionType = "";
@@ -714,7 +1109,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       side: "runner",
       sessionToken: traced.hostSessionToken,
       knownStateVersion: tracedSetup.playerView.stateVersion,
-      knownMatchVersion: tracedSetup.matchVersion
+      knownMatchVersion: tracedSetup.matchVersion,
     });
     const afterPreview = await service.loadForTest(traced.matchId);
     expect(preview.ok).toBe(true);
@@ -729,8 +1124,8 @@ describe("Backend 0.5 private storage maintenance", () => {
           selectedActionId: expect.any(String),
           selectedActionType: expect.any(String),
           debugSelectionMatchesApplied: true,
-          actionAlternatives: expect.any(Array)
-        })
+          actionAlternatives: expect.any(Array),
+        }),
       });
       expect(preview.preview.detail.aiPrivateHandPreview).toMatchObject({
         schemaVersion: "ai-private-hand-preview-v1",
@@ -738,51 +1133,99 @@ describe("Backend 0.5 private storage maintenance", () => {
         side: "corp",
         credits: expect.any(Number),
         handCount: expect.any(Number),
-        cards: expect.any(Array)
+        cards: expect.any(Array),
       });
-      const privateHand = preview.preview.detail.aiPrivateHandPreview as { cards?: unknown[] };
+      const privateHand = preview.preview.detail.aiPrivateHandPreview as {
+        cards?: unknown[];
+      };
       expect(privateHand.cards?.length ?? 0).toBeGreaterThan(0);
       expect(privateHand.cards?.[0]).toMatchObject({
         title: expect.any(String),
         definitionId: expect.any(String),
         rulesText: expect.any(String),
         availability: expect.any(String),
-        legalActions: expect.any(Array)
+        legalActions: expect.any(Array),
       });
       previewActionId = preview.preview.actionId;
       previewActionType = preview.preview.actionType;
-      expect(Array.isArray(preview.preview.detail.actionAlternatives) ? preview.preview.detail.actionAlternatives.length : 0).toBeGreaterThan(0);
+      expect(
+        Array.isArray(preview.preview.detail.actionAlternatives)
+          ? preview.preview.detail.actionAlternatives.length
+          : 0,
+      ).toBeGreaterThan(0);
     }
     expect(afterPreview?.eventLog.length).toBe(beforePreview?.eventLog.length);
-    expect(afterPreview?.gameState?.stateVersion).toBe(beforePreview?.gameState?.stateVersion);
-    const tracedAdvanced = await service.advanceAi({ matchId: traced.matchId, side: "runner", sessionToken: traced.hostSessionToken, knownStateVersion: tracedSetup.playerView.stateVersion, mode: "single_step" });
-    const untracedAdvanced = await service.advanceAi({ matchId: untraced.matchId, side: "runner", sessionToken: untraced.hostSessionToken, knownStateVersion: untracedSetup.playerView.stateVersion, mode: "single_step" });
+    expect(afterPreview?.gameState?.stateVersion).toBe(
+      beforePreview?.gameState?.stateVersion,
+    );
+    const tracedAdvanced = await service.advanceAi({
+      matchId: traced.matchId,
+      side: "runner",
+      sessionToken: traced.hostSessionToken,
+      knownStateVersion: tracedSetup.playerView.stateVersion,
+      mode: "single_step",
+    });
+    const untracedAdvanced = await service.advanceAi({
+      matchId: untraced.matchId,
+      side: "runner",
+      sessionToken: untraced.hostSessionToken,
+      knownStateVersion: untracedSetup.playerView.stateVersion,
+      mode: "single_step",
+    });
     expect(tracedAdvanced.ok).toBe(true);
     expect(untracedAdvanced.ok).toBe(true);
     storage.close?.();
 
     const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir });
-    const reopenedService = new MultiplayerService(reopenedStorage, { tokenSalt: "backend-05-ai-traces" });
-    const initialMatches = await reopenedService.storageMaintenanceAiDecisionTraceMatches();
-    expect(initialMatches?.map((match) => match.matchId)).toEqual([traced.matchId]);
+    const reopenedService = new MultiplayerService(reopenedStorage, {
+      tokenSalt: "backend-05-ai-traces",
+    });
+    const initialMatches =
+      await reopenedService.storageMaintenanceAiDecisionTraceMatches();
+    expect(initialMatches?.map((match) => match.matchId)).toEqual([
+      traced.matchId,
+    ]);
     expect(initialMatches?.[0]).toMatchObject({ aiTraceMode: "detailed" });
     expect(initialMatches?.[0]?.traceCount).toBeGreaterThan(0);
-    const enabledLate = await reopenedService.enableStorageMaintenanceAiDecisionTrace(untraced.matchId, "detailed");
-    expect(enabledLate).toMatchObject({ matchId: untraced.matchId, aiTraceMode: "detailed", traceCount: 0 });
-    const matches = await reopenedService.storageMaintenanceAiDecisionTraceMatches();
-    expect(matches?.map((match) => match.matchId)).toEqual(expect.arrayContaining([traced.matchId, untraced.matchId]));
-    const index = await reopenedService.storageMaintenanceAiDecisionTraceIndex(traced.matchId);
+    const enabledLate =
+      await reopenedService.enableStorageMaintenanceAiDecisionTrace(
+        untraced.matchId,
+        "detailed",
+      );
+    expect(enabledLate).toMatchObject({
+      matchId: untraced.matchId,
+      aiTraceMode: "detailed",
+      traceCount: 0,
+    });
+    const matches =
+      await reopenedService.storageMaintenanceAiDecisionTraceMatches();
+    expect(matches?.map((match) => match.matchId)).toEqual(
+      expect.arrayContaining([traced.matchId, untraced.matchId]),
+    );
+    const index = await reopenedService.storageMaintenanceAiDecisionTraceIndex(
+      traced.matchId,
+    );
     expect(index?.[0]).toMatchObject({
       matchId: traced.matchId,
       eventId: expect.any(String),
       side: "corp",
       turn: 1,
       schemaVersion: "ai-decision-trace-v1",
-      meta: expect.objectContaining({ actor: "corp" })
+      meta: expect.objectContaining({ actor: "corp" }),
     });
-    const cursorIndex = await reopenedService.storageMaintenanceAiDecisionTraceIndex(traced.matchId, { afterDecisionIndex: index?.[0]?.decisionIndex ?? 0 });
-    expect(cursorIndex?.some((entry) => entry.traceId === index?.[0]?.traceId)).toBe(false);
-    const details = await Promise.all((index ?? []).map((entry) => reopenedService.storageMaintenanceAiDecisionTraceDetail(entry.traceId)));
+    const cursorIndex =
+      await reopenedService.storageMaintenanceAiDecisionTraceIndex(
+        traced.matchId,
+        { afterDecisionIndex: index?.[0]?.decisionIndex ?? 0 },
+      );
+    expect(
+      cursorIndex?.some((entry) => entry.traceId === index?.[0]?.traceId),
+    ).toBe(false);
+    const details = await Promise.all(
+      (index ?? []).map((entry) =>
+        reopenedService.storageMaintenanceAiDecisionTraceDetail(entry.traceId),
+      ),
+    );
     const detail = details[0];
     const previewExecutionDetail = details.at(-1);
     expect(detail?.selectedActionId).toBeDefined();
@@ -795,33 +1238,62 @@ describe("Backend 0.5 private storage maintenance", () => {
       debugSchemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       selectedActionId: detail?.selectedActionId,
       selectedActionType: detail?.selectedActionType,
-      debugSelectionMatchesApplied: true
+      debugSelectionMatchesApplied: true,
     });
-    expect(await reopenedService.storageMaintenanceAiDecisionTraceIndex(untraced.matchId)).toEqual([]);
-    expect(JSON.stringify({ matches, index, details })).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privatePayload|privateDeckSnapshots|decklist|fullGameState|FullState|AIInput|C:\\Users/i);
+    expect(
+      await reopenedService.storageMaintenanceAiDecisionTraceIndex(
+        untraced.matchId,
+      ),
+    ).toEqual([]);
+    expect(JSON.stringify({ matches, index, details })).not.toMatch(
+      /sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privatePayload|privateDeckSnapshots|decklist|fullGameState|FullState|AIInput|C:\\Users/i,
+    );
 
     const maintenance = await authenticatedMaintenanceServer(reopenedService);
     try {
-      const matchesResponse = await maintenance.request("/api/storage/maintenance/ai-decision-traces/matches");
+      const matchesResponse = await maintenance.request(
+        "/api/storage/maintenance/ai-decision-traces/matches",
+      );
       expect(matchesResponse.status).toBe(200);
-      const enableResponse = await maintenance.request(`/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(untraced.matchId)}/enable`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mode: "detailed" })
-      });
+      const enableResponse = await maintenance.request(
+        `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(untraced.matchId)}/enable`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ mode: "detailed" }),
+        },
+      );
       expect(enableResponse.status).toBe(200);
-      expect(await enableResponse.json()).toMatchObject({ match: { matchId: untraced.matchId, aiTraceMode: "detailed" } });
-      const indexResponse = await maintenance.request(`/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}`);
-      const httpIndex = (await indexResponse.json()) as { traces?: Array<{ traceId: string }> };
+      expect(await enableResponse.json()).toMatchObject({
+        match: { matchId: untraced.matchId, aiTraceMode: "detailed" },
+      });
+      const indexResponse = await maintenance.request(
+        `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}`,
+      );
+      const httpIndex = (await indexResponse.json()) as {
+        traces?: Array<{ traceId: string }>;
+      };
       expect(indexResponse.status).toBe(200);
       expect(httpIndex.traces?.length).toBeGreaterThan(0);
-      const cursorResponse = await maintenance.request(`/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}?afterDecisionIndex=${encodeURIComponent(String(index?.[0]?.decisionIndex ?? 0))}`);
-      const cursorBody = (await cursorResponse.json()) as { traces?: Array<{ traceId: string }> };
+      const cursorResponse = await maintenance.request(
+        `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}?afterDecisionIndex=${encodeURIComponent(String(index?.[0]?.decisionIndex ?? 0))}`,
+      );
+      const cursorBody = (await cursorResponse.json()) as {
+        traces?: Array<{ traceId: string }>;
+      };
       expect(cursorResponse.status).toBe(200);
-      expect(cursorBody.traces?.some((entry) => entry.traceId === httpIndex.traces?.[0]?.traceId)).toBe(false);
-      const detailResponse = await maintenance.request(`/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(httpIndex.traces?.[0]?.traceId ?? "")}`);
+      expect(
+        cursorBody.traces?.some(
+          (entry) => entry.traceId === httpIndex.traces?.[0]?.traceId,
+        ),
+      ).toBe(false);
+      const detailResponse = await maintenance.request(
+        `/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(httpIndex.traces?.[0]?.traceId ?? "")}`,
+      );
       expect(detailResponse.status).toBe(200);
-      expect(JSON.stringify(await detailResponse.json())).not.toMatch(/<html|<div|sessionToken|reconnectToken|joinToken|cardInstances|privatePayload|decklist|AIInput/i);
+      expect(JSON.stringify(await detailResponse.json())).not.toMatch(
+        /<html|<div|sessionToken|reconnectToken|joinToken|cardInstances|privatePayload|decklist|AIInput/i,
+      );
     } finally {
       await maintenance.handle.close();
     }
@@ -839,7 +1311,8 @@ describe("Backend 0.5 private storage maintenance", () => {
         const action = input.legalActions.find(
           (candidate) => candidate.actionId === runtimeDecision.actionId,
         );
-        if (!action) throw new Error("Missing legal action for decision-chain trace test");
+        if (!action)
+          throw new Error("Missing legal action for decision-chain trace test");
         const alternative = input.legalActions[1] ?? action;
         return {
           ...runtimeDecision,
@@ -852,8 +1325,12 @@ describe("Backend 0.5 private storage maintenance", () => {
             decisionChain: {
               schemaVersion: AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION,
               legalActionCount: input.legalActions.length,
-              legalActionIds: input.legalActions.map((candidate) => candidate.actionId),
-              exclusions: [{ actionId: alternative.actionId, key: "test_exclusion" }],
+              legalActionIds: input.legalActions.map(
+                (candidate) => candidate.actionId,
+              ),
+              exclusions: [
+                { actionId: alternative.actionId, key: "test_exclusion" },
+              ],
               rawScoreWinner: { actionId: alternative.actionId, score: 73 },
               planSelection: {
                 planId: "test.plan",
@@ -930,16 +1407,44 @@ describe("Backend 0.5 private storage maintenance", () => {
     const detailedMatchId = await createAndAdvance("detailed");
     const untracedMatchId = await createAndAdvance("off");
 
-    const detailedCorpReplay = await service.loadReplayDiagnostics(detailedMatchId, "corp");
-    const detailedRunnerReplay = await service.loadReplayDiagnostics(detailedMatchId, "runner");
-    const untracedReplay = await service.loadReplayDiagnostics(untracedMatchId, "corp");
+    const detailedCorpReplay = await service.loadReplayDiagnostics(
+      detailedMatchId,
+      "corp",
+    );
+    const detailedRunnerReplay = await service.loadReplayDiagnostics(
+      detailedMatchId,
+      "runner",
+    );
+    const untracedReplay = await service.loadReplayDiagnostics(
+      untracedMatchId,
+      "corp",
+    );
     expect(detailedCorpReplay.ok).toBe(true);
     expect(detailedRunnerReplay.ok).toBe(true);
     expect(untracedReplay.ok).toBe(true);
-    if (!detailedCorpReplay.ok || !detailedRunnerReplay.ok || !untracedReplay.ok) throw new Error("Missing SQLite replay view");
-    expect(detailedCorpReplay.replay.timeline.find((step) => step.decisionDebug)?.decisionDebug).toMatchObject({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, actor: "corp" });
-    expect(detailedRunnerReplay.replay.timeline.find((step) => step.decisionDebug)?.decisionDebug).toMatchObject({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, redacted: true });
-    expect(untracedReplay.replay.timeline.some((step) => step.decisionDebug)).toBe(false);
+    if (
+      !detailedCorpReplay.ok ||
+      !detailedRunnerReplay.ok ||
+      !untracedReplay.ok
+    )
+      throw new Error("Missing SQLite replay view");
+    expect(
+      detailedCorpReplay.replay.timeline.find((step) => step.decisionDebug)
+        ?.decisionDebug,
+    ).toMatchObject({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      actor: "corp",
+    });
+    expect(
+      detailedRunnerReplay.replay.timeline.find((step) => step.decisionDebug)
+        ?.decisionDebug,
+    ).toMatchObject({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      redacted: true,
+    });
+    expect(
+      untracedReplay.replay.timeline.some((step) => step.decisionDebug),
+    ).toBe(false);
     storage.close?.();
 
     const database = new DatabaseSync(dbPath);
@@ -957,9 +1462,15 @@ describe("Backend 0.5 private storage maintenance", () => {
         return JSON.parse(row.traceJson) as Record<string, unknown>;
       };
       const persistedDebugEvents = database
-        .prepare("SELECT COUNT(*) AS count FROM events WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL")
+        .prepare(
+          "SELECT COUNT(*) AS count FROM events WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL",
+        )
         .get() as { count: number };
-      const untracedRows = database.prepare("SELECT COUNT(*) AS count FROM ai_decision_traces WHERE match_id = ?").get(untracedMatchId) as { count: number };
+      const untracedRows = database
+        .prepare(
+          "SELECT COUNT(*) AS count FROM ai_decision_traces WHERE match_id = ?",
+        )
+        .get(untracedMatchId) as { count: number };
       expect(Number(persistedDebugEvents.count)).toBe(0);
       expect(Number(untracedRows.count)).toBe(0);
 
@@ -979,7 +1490,10 @@ describe("Backend 0.5 private storage maintenance", () => {
           },
         },
       });
-      const summaryChain = summaryTrace.decisionChain as Record<string, unknown>;
+      const summaryChain = summaryTrace.decisionChain as Record<
+        string,
+        unknown
+      >;
       expect(summaryChain).not.toHaveProperty("legalActionIds");
       expect(summaryChain).not.toHaveProperty("exclusions");
       expect(
@@ -1015,7 +1529,9 @@ describe("Backend 0.5 private storage maintenance", () => {
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
-    const service = new MultiplayerService(storage, { tokenSalt: "sqlite-ai-undo-trace-prune" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "sqlite-ai-undo-trace-prune",
+    });
     let traceAuditDb: DatabaseSync | undefined;
     try {
       const created = await service.createMatch({
@@ -1023,14 +1539,41 @@ describe("Backend 0.5 private storage maintenance", () => {
         hostSide: "corp",
         seed: "sqlite-ai-undo-trace-prune",
         runnerDifficulty: "normal",
-        aiTraceMode: "detailed"
+        aiTraceMode: "detailed",
       });
-      const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
-      await submitChoice(service, created.matchId, corp, "keep", "sqlite-ai-undo-trace-setup");
-      await submit(service, created.matchId, corp, (action) => action.type === "mandatory_draw", "sqlite-ai-undo-trace-mandatory");
-      const endTurn = await submit(service, created.matchId, corp, (action) => action.type === "end_turn", "sqlite-ai-undo-trace-end-turn");
+      const corp = {
+        side: "corp" as const,
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      };
+      await submitChoice(
+        service,
+        created.matchId,
+        corp,
+        "keep",
+        "sqlite-ai-undo-trace-setup",
+      );
+      await submit(
+        service,
+        created.matchId,
+        corp,
+        (action) => action.type === "mandatory_draw",
+        "sqlite-ai-undo-trace-mandatory",
+      );
+      const endTurn = await submit(
+        service,
+        created.matchId,
+        corp,
+        (action) => action.type === "end_turn",
+        "sqlite-ai-undo-trace-end-turn",
+      );
       const humanReadyPayload = endTurn.actorPayload.playerView.pendingChoice
-        ? await submitFirstChoice(service, created.matchId, corp, "sqlite-ai-undo-trace-discard")
+        ? await submitFirstChoice(
+            service,
+            created.matchId,
+            corp,
+            "sqlite-ai-undo-trace-discard",
+          )
         : endTurn.actorPayload;
 
       traceAuditDb = new DatabaseSync(dbPath);
@@ -1040,9 +1583,16 @@ describe("Backend 0.5 private storage maintenance", () => {
         CREATE TRIGGER audit_ai_traces_update AFTER UPDATE ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('update', NEW.trace_id); END;
         CREATE TRIGGER audit_ai_traces_delete AFTER DELETE ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('delete', OLD.trace_id); END;
       `);
-      const traceAuditCounts = (): Record<string, number> => Object.fromEntries(
-        (traceAuditDb!.prepare("SELECT op, COUNT(*) AS count FROM trace_write_audit GROUP BY op ORDER BY op").all() as Array<{ op: string; count: number }>).map((row) => [row.op, Number(row.count)])
-      );
+      const traceAuditCounts = (): Record<string, number> =>
+        Object.fromEntries(
+          (
+            traceAuditDb!
+              .prepare(
+                "SELECT op, COUNT(*) AS count FROM trace_write_audit GROUP BY op ORDER BY op",
+              )
+              .all() as Array<{ op: string; count: number }>
+          ).map((row) => [row.op, Number(row.count)]),
+        );
       const clearTraceAudit = (): void => {
         traceAuditDb!.prepare("DELETE FROM trace_write_audit").run();
       };
@@ -1052,7 +1602,7 @@ describe("Backend 0.5 private storage maintenance", () => {
         side: "corp",
         sessionToken: created.hostSessionToken,
         knownStateVersion: humanReadyPayload.playerView.stateVersion,
-        mode: "single_step"
+        mode: "single_step",
       });
       expect(advanced.ok).toBe(true);
       if (!advanced.ok) throw new Error(advanced.error.message);
@@ -1062,8 +1612,14 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(traceAuditCounts()).toEqual({ insert: 1 });
       clearTraceAudit();
       const beforeUndo = await storage.load(created.matchId);
-      expect(beforeUndo?.eventLog.some((event) => event.eventId === aiEventId)).toBe(true);
-      expect(beforeUndo?.aiDecisionTraces?.some((trace) => trace.eventId === aiEventId)).toBe(true);
+      expect(
+        beforeUndo?.eventLog.some((event) => event.eventId === aiEventId),
+      ).toBe(true);
+      expect(
+        beforeUndo?.aiDecisionTraces?.some(
+          (trace) => trace.eventId === aiEventId,
+        ),
+      ).toBe(true);
       if (!beforeUndo) throw new Error("Missing AI trace record before undo");
       await storage.save(beforeUndo);
       expect(traceAuditCounts()).toEqual({});
@@ -1073,15 +1629,25 @@ describe("Backend 0.5 private storage maintenance", () => {
         side: "corp",
         sessionToken: created.hostSessionToken,
         targetEventId: aiEventId,
-        reason: "KI-Zug zurücknehmen"
+        reason: "KI-Zug zurücknehmen",
       });
       expect(undo.ok).toBe(true);
       if (!undo.ok) throw new Error(undo.error.message);
 
       const afterUndo = await storage.load(created.matchId);
-      expect(afterUndo?.eventLog.some((event) => event.eventId === aiEventId)).toBe(false);
-      expect(afterUndo?.aiDecisionTraces?.some((trace) => trace.eventId === aiEventId)).toBe(false);
-      expect(afterUndo?.aiDecisionTraces?.every((trace) => afterUndo.eventLog.some((event) => event.eventId === trace.eventId))).toBe(true);
+      expect(
+        afterUndo?.eventLog.some((event) => event.eventId === aiEventId),
+      ).toBe(false);
+      expect(
+        afterUndo?.aiDecisionTraces?.some(
+          (trace) => trace.eventId === aiEventId,
+        ),
+      ).toBe(false);
+      expect(
+        afterUndo?.aiDecisionTraces?.every((trace) =>
+          afterUndo.eventLog.some((event) => event.eventId === trace.eventId),
+        ),
+      ).toBe(true);
       expect(traceAuditCounts()).toEqual({ delete: 1 });
 
       const db = new DatabaseSync(dbPath, { readOnly: true });
@@ -1094,9 +1660,15 @@ describe("Backend 0.5 private storage maintenance", () => {
               (SELECT COUNT(*)
                FROM ai_decision_traces t
                LEFT JOIN events e ON e.match_id = t.match_id AND e.event_id = t.event_id
-               WHERE t.match_id = ? AND e.event_id IS NULL) AS orphanTraceRows`
+               WHERE t.match_id = ? AND e.event_id IS NULL) AS orphanTraceRows`,
           )
-          .get(created.matchId, aiEventId, created.matchId, aiEventId, created.matchId) as {
+          .get(
+            created.matchId,
+            aiEventId,
+            created.matchId,
+            aiEventId,
+            created.matchId,
+          ) as {
           removedEventRows: number;
           removedTraceRows: number;
           orphanTraceRows: number;
@@ -1115,42 +1687,86 @@ describe("Backend 0.5 private storage maintenance", () => {
 
   it("issues a local recovery access from maintenance without listing raw token fields", async () => {
     const dir = await tempStorageDir();
-    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups") });
-    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-recovery-access" });
-    const created = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Ludwig", seed: "backend-05-recovery" });
+    const storage = new SqliteMatchStorage({
+      dbPath: join(dir, "netgrid.sqlite"),
+      backupDir: join(dir, "backups"),
+    });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "backend-05-recovery-access",
+    });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      displayName: "Ludwig",
+      seed: "backend-05-recovery",
+    });
 
     const maintenance = await authenticatedMaintenanceServer(service);
     try {
       const response = await maintenance.request(
         `/api/storage/maintenance/matches/${encodeURIComponent(created.matchId)}/recovery-access`,
-        { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ side: "runner" }) },
-        { sensitive: true }
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ side: "runner" }),
+        },
+        { sensitive: true },
       );
-      const recovery = (await response.json()) as { matchId?: string; side?: Side; access?: string; displayName?: string; matchVersion?: number };
+      const recovery = (await response.json()) as {
+        matchId?: string;
+        side?: Side;
+        access?: string;
+        displayName?: string;
+        matchVersion?: number;
+      };
       expect(response.status).toBe(200);
       expect(recovery.matchId).toBe(created.matchId);
       expect(recovery.side).toBe("runner");
       expect(recovery.displayName).toBe("Ludwig");
       expect(recovery.access).toMatch(/^[A-Za-z0-9_-]{32,}$/);
-      expect(JSON.stringify(recovery)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+      expect(JSON.stringify(recovery)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i,
+      );
 
-      const oldBootstrap = await service.bootstrap(created.matchId, "runner", created.hostSessionToken, { allowLobby: true });
+      const oldBootstrap = await service.bootstrap(
+        created.matchId,
+        "runner",
+        created.hostSessionToken,
+        { allowLobby: true },
+      );
       expect("error" in oldBootstrap).toBe(true);
-      const oldReconnect = await service.reconnectMatch(created.matchId, { side: "runner", reconnectToken: created.hostReconnectToken });
+      const oldReconnect = await service.reconnectMatch(created.matchId, {
+        side: "runner",
+        reconnectToken: created.hostReconnectToken,
+      });
       expect("error" in oldReconnect).toBe(true);
 
-      const reconnectResponse = await fetch(`${maintenance.baseUrl}/api/matches/${encodeURIComponent(created.matchId)}/reconnect`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ side: "runner", reconnectToken: recovery.access })
-      });
-      const reconnected = (await reconnectResponse.json()) as { matchId?: string; side?: Side; sessionToken?: string; reconnectToken?: string; matchVersion?: number };
+      const reconnectResponse = await fetch(
+        `${maintenance.baseUrl}/api/matches/${encodeURIComponent(created.matchId)}/reconnect`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            side: "runner",
+            reconnectToken: recovery.access,
+          }),
+        },
+      );
+      const reconnected = (await reconnectResponse.json()) as {
+        matchId?: string;
+        side?: Side;
+        sessionToken?: string;
+        reconnectToken?: string;
+        matchVersion?: number;
+      };
       expect(reconnectResponse.status).toBe(200);
       expect(reconnected.matchId).toBe(created.matchId);
       expect(reconnected.side).toBe("runner");
       expect(reconnected.sessionToken).toBeTruthy();
       expect(reconnected.reconnectToken).toBeTruthy();
-      expect(reconnected.matchVersion).toBeGreaterThan(recovery.matchVersion ?? 0);
+      expect(reconnected.matchVersion).toBeGreaterThan(
+        recovery.matchVersion ?? 0,
+      );
     } finally {
       await maintenance.handle.close();
     }
@@ -1158,37 +1774,84 @@ describe("Backend 0.5 private storage maintenance", () => {
 
   it("previews only sufficiently old active cleanup candidates and keeps the result redacted", async () => {
     const dir = await tempStorageDir();
-    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups") });
-    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-cleanup-preview" });
-    const oldActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Alt Aktiv", seed: "backend-05-old-active" });
-    const freshActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Frisch Aktiv", seed: "backend-05-fresh-active" });
-    const oldFinished = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Archiv", seed: "backend-05-old-finished" });
+    const storage = new SqliteMatchStorage({
+      dbPath: join(dir, "netgrid.sqlite"),
+      backupDir: join(dir, "backups"),
+    });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "backend-05-cleanup-preview",
+    });
+    const oldActive = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      displayName: "Alt Aktiv",
+      seed: "backend-05-old-active",
+    });
+    const freshActive = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      displayName: "Frisch Aktiv",
+      seed: "backend-05-fresh-active",
+    });
+    const oldFinished = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      displayName: "Archiv",
+      seed: "backend-05-old-finished",
+    });
     const oldActiveRecord = await service.loadForTest(oldActive.matchId);
     const oldFinishedRecord = await service.loadForTest(oldFinished.matchId);
-    if (!oldActiveRecord || !oldFinishedRecord) throw new Error("Missing cleanup fixtures");
-    oldActiveRecord.match.updatedAt = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    if (!oldActiveRecord || !oldFinishedRecord)
+      throw new Error("Missing cleanup fixtures");
+    oldActiveRecord.match.updatedAt = new Date(
+      Date.now() - 2 * 60 * 60 * 1000,
+    ).toISOString();
     oldFinishedRecord.match.status = "finished";
-    oldFinishedRecord.match.updatedAt = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
+    oldFinishedRecord.match.updatedAt = new Date(
+      Date.now() - 3 * 60 * 60 * 1000,
+    ).toISOString();
     await storage.save(oldActiveRecord);
     await storage.save(oldFinishedRecord);
 
     const maintenance = await authenticatedMaintenanceServer(service);
     try {
-      const response = await maintenance.request("/api/storage/maintenance/cleanup/preview", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ statuses: ["active", "finished"], olderThanMinutes: 60, limit: 100 })
-      });
-      const preview = (await response.json()) as { matchCount?: number; previewId?: string; matches?: Array<{ matchId: string; status: string }>; warnings?: string[] };
+      const response = await maintenance.request(
+        "/api/storage/maintenance/cleanup/preview",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            statuses: ["active", "finished"],
+            olderThanMinutes: 60,
+            limit: 100,
+          }),
+        },
+      );
+      const preview = (await response.json()) as {
+        matchCount?: number;
+        previewId?: string;
+        matches?: Array<{ matchId: string; status: string }>;
+        warnings?: string[];
+      };
       expect(response.status).toBe(200);
       expect(preview.matchCount).toBe(2);
       expect(preview.previewId).toMatch(/^[a-f0-9]{16}$/);
-      expect(preview.matches?.map((match) => match.matchId)).toEqual([oldActive.matchId, oldFinished.matchId]);
-      expect(preview.matches?.map((match) => match.status)).toEqual(["active", "finished"]);
-      expect(preview.matches?.map((match) => match.matchId)).not.toContain(freshActive.matchId);
+      expect(preview.matches?.map((match) => match.matchId)).toEqual([
+        oldActive.matchId,
+        oldFinished.matchId,
+      ]);
+      expect(preview.matches?.map((match) => match.status)).toEqual([
+        "active",
+        "finished",
+      ]);
+      expect(preview.matches?.map((match) => match.matchId)).not.toContain(
+        freshActive.matchId,
+      );
       expect(preview.warnings?.join(" ")).toContain("Aktive Matches");
       expect(preview.warnings?.join(" ")).toContain("Finished-Matches");
-      expect(JSON.stringify(preview)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+      expect(JSON.stringify(preview)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i,
+      );
     } finally {
       await maintenance.handle.close();
     }
@@ -1197,33 +1860,75 @@ describe("Backend 0.5 private storage maintenance", () => {
   it("deletes only whole previewed matches after creating a backup", async () => {
     const dir = await tempStorageDir();
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir });
-    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-cleanup-apply" });
-    const oldActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Alt Aktiv", seed: "backend-05-delete-old-active" });
-    const freshActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Frisch Aktiv", seed: "backend-05-keep-fresh-active" });
+    const storage = new SqliteMatchStorage({
+      dbPath: join(dir, "netgrid.sqlite"),
+      backupDir,
+    });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "backend-05-cleanup-apply",
+    });
+    const oldActive = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      displayName: "Alt Aktiv",
+      seed: "backend-05-delete-old-active",
+    });
+    const freshActive = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      displayName: "Frisch Aktiv",
+      seed: "backend-05-keep-fresh-active",
+    });
     const oldRecord = await service.loadForTest(oldActive.matchId);
     if (!oldRecord) throw new Error("Missing old cleanup record");
-    oldRecord.match.updatedAt = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    oldRecord.match.updatedAt = new Date(
+      Date.now() - 2 * 60 * 60 * 1000,
+    ).toISOString();
     await storage.save(oldRecord);
 
     const maintenance = await authenticatedMaintenanceServer(service);
     try {
-      const previewResponse = await maintenance.request("/api/storage/maintenance/cleanup/preview", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ statuses: ["active"], olderThanMinutes: 60, limit: 100 })
-      });
-      const preview = (await previewResponse.json()) as { previewId?: string; matchCount?: number };
+      const previewResponse = await maintenance.request(
+        "/api/storage/maintenance/cleanup/preview",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            statuses: ["active"],
+            olderThanMinutes: 60,
+            limit: 100,
+          }),
+        },
+      );
+      const preview = (await previewResponse.json()) as {
+        previewId?: string;
+        matchCount?: number;
+      };
       expect(previewResponse.status).toBe(200);
       expect(preview.matchCount).toBe(1);
       if (!preview.previewId) throw new Error("Missing cleanup preview id");
 
       const applyResponse = await maintenance.request(
         "/api/storage/maintenance/cleanup/apply",
-        { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ statuses: ["active"], olderThanMinutes: 60, limit: 100, previewId: preview.previewId, createBackup: true }) },
-        { sensitive: true }
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            statuses: ["active"],
+            olderThanMinutes: 60,
+            limit: 100,
+            previewId: preview.previewId,
+            createBackup: true,
+          }),
+        },
+        { sensitive: true },
       );
-      const result = (await applyResponse.json()) as { deletedCount?: number; deletedMatchIds?: string[]; backup?: { backupId?: string; backupDir?: string }; integrityCheck?: string };
+      const result = (await applyResponse.json()) as {
+        deletedCount?: number;
+        deletedMatchIds?: string[];
+        backup?: { backupId?: string; backupDir?: string };
+        integrityCheck?: string;
+      };
       expect(applyResponse.status).toBe(200);
       expect(result.deletedCount).toBe(1);
       expect(result.deletedMatchIds).toEqual([oldActive.matchId]);
@@ -1233,7 +1938,9 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(await storage.load(oldActive.matchId)).toBeUndefined();
       expect(await storage.load(freshActive.matchId)).toBeTruthy();
       expect((await readdir(backupDir)).length).toBeGreaterThan(0);
-      expect(JSON.stringify(result)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+      expect(JSON.stringify(result)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i,
+      );
     } finally {
       await maintenance.handle.close();
     }
@@ -1242,43 +1949,101 @@ describe("Backend 0.5 private storage maintenance", () => {
   it("marks matches as protected and excludes them from automatic cleanup by default without requiring backup", async () => {
     const dir = await tempStorageDir();
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir });
-    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-retention-policy" });
-    const protectedMatch = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Aufheben", seed: "backend-05-protected" });
-    const cleanupMatch = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Weg", seed: "backend-05-auto-delete" });
+    const storage = new SqliteMatchStorage({
+      dbPath: join(dir, "netgrid.sqlite"),
+      backupDir,
+    });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "backend-05-retention-policy",
+    });
+    const protectedMatch = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      displayName: "Aufheben",
+      seed: "backend-05-protected",
+    });
+    const cleanupMatch = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      displayName: "Weg",
+      seed: "backend-05-auto-delete",
+    });
     const oldProtected = await service.loadForTest(protectedMatch.matchId);
     const oldCleanup = await service.loadForTest(cleanupMatch.matchId);
-    if (!oldProtected || !oldCleanup) throw new Error("Missing retention fixtures");
+    if (!oldProtected || !oldCleanup)
+      throw new Error("Missing retention fixtures");
     oldProtected.match.status = "abandoned";
     oldCleanup.match.status = "abandoned";
-    oldProtected.match.updatedAt = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString();
-    oldCleanup.match.updatedAt = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString();
+    oldProtected.match.updatedAt = new Date(
+      Date.now() - 4 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    oldCleanup.match.updatedAt = new Date(
+      Date.now() - 4 * 24 * 60 * 60 * 1000,
+    ).toISOString();
     await storage.save(oldProtected);
     await storage.save(oldCleanup);
 
     const maintenance = await authenticatedMaintenanceServer(service);
     try {
-      const protectResponse = await fetch(`${maintenance.baseUrl}/api/matches/${encodeURIComponent(protectedMatch.matchId)}/retention-protection`, {
-        method: "POST",
-        headers: { "content-type": "application/json", authorization: `Bearer ${protectedMatch.hostSessionToken}` },
-        body: JSON.stringify({ side: protectedMatch.hostSide, protected: true })
-      });
-      const protection = (await protectResponse.json()) as { ok?: boolean; payload?: { retentionProtected?: boolean } };
+      const protectResponse = await fetch(
+        `${maintenance.baseUrl}/api/matches/${encodeURIComponent(protectedMatch.matchId)}/retention-protection`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            authorization: `Bearer ${protectedMatch.hostSessionToken}`,
+          },
+          body: JSON.stringify({
+            side: protectedMatch.hostSide,
+            protected: true,
+          }),
+        },
+      );
+      const protection = (await protectResponse.json()) as {
+        ok?: boolean;
+        payload?: { retentionProtected?: boolean };
+      };
       expect(protectResponse.status).toBe(200);
       expect(protection.ok).toBe(true);
       expect(protection.payload?.retentionProtected).toBe(true);
 
       const policyResponse = await maintenance.request(
         "/api/storage/maintenance/cleanup/policy",
-        { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ enabled: true, statuses: ["active", "abandoned"], olderThanDays: 3, limit: 100, includeProtected: false }) },
-        { sensitive: true }
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            enabled: true,
+            statuses: ["active", "abandoned"],
+            olderThanDays: 3,
+            limit: 100,
+            includeProtected: false,
+          }),
+        },
+        { sensitive: true },
       );
-      const savedPolicy = (await policyResponse.json()) as { statuses?: string[] };
+      const savedPolicy = (await policyResponse.json()) as {
+        statuses?: string[];
+      };
       expect(policyResponse.status).toBe(200);
       expect(savedPolicy.statuses).toEqual(["abandoned"]);
 
-      const runResponse = await maintenance.request("/api/storage/maintenance/cleanup/policy/run", { method: "POST" }, { sensitive: true });
-      const run = (await runResponse.json()) as { applyResult?: { deletedCount?: number; deletedMatchIds?: string[]; backupCreated?: boolean; backup?: { backupId?: string } }; policy?: { lastRun?: { deletedCount?: number; backupCreated?: boolean } } };
+      const runResponse = await maintenance.request(
+        "/api/storage/maintenance/cleanup/policy/run",
+        { method: "POST" },
+        { sensitive: true },
+      );
+      const run = (await runResponse.json()) as {
+        applyResult?: {
+          deletedCount?: number;
+          deletedMatchIds?: string[];
+          backupCreated?: boolean;
+          backup?: { backupId?: string };
+        };
+        policy?: {
+          lastRun?: { deletedCount?: number; backupCreated?: boolean };
+        };
+      };
       expect(runResponse.status).toBe(200);
       expect(run.applyResult?.deletedCount).toBe(1);
       expect(run.applyResult?.deletedMatchIds).toEqual([cleanupMatch.matchId]);
@@ -1287,8 +2052,13 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(run.policy?.lastRun?.deletedCount).toBe(1);
       expect(run.policy?.lastRun?.backupCreated).toBe(false);
       expect(await storage.load(cleanupMatch.matchId)).toBeUndefined();
-      expect((await storage.load(protectedMatch.matchId))?.match.retentionProtection?.protected).toBe(true);
-      expect(JSON.stringify(run)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+      expect(
+        (await storage.load(protectedMatch.matchId))?.match.retentionProtection
+          ?.protected,
+      ).toBe(true);
+      expect(JSON.stringify(run)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i,
+      );
     } finally {
       await maintenance.handle.close();
     }
@@ -1298,16 +2068,23 @@ describe("Backend 0.5 private storage maintenance", () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "backend-05-private-block",
       publicWebBaseUrl: "https://netgrid.example",
-      publicServerBaseUrl: "https://api.netgrid.example"
+      publicServerBaseUrl: "https://api.netgrid.example",
     });
-    const handle = createNetgridHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
+    const handle = createNetgridHttpServer(service, {
+      deploymentConfig: privateDeploymentConfig(),
+    });
     const baseUrl = await listen(handle);
     try {
-      const response = await fetch(`${baseUrl}/api/storage/maintenance/summary`, { headers: { origin: "https://netgrid.example" } });
+      const response = await fetch(
+        `${baseUrl}/api/storage/maintenance/summary`,
+        { headers: { origin: "https://netgrid.example" } },
+      );
       const text = await response.text();
       expect(response.status).toBe(403);
       expect(text).toContain("maintenance_unavailable");
-      expect(text).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i);
+      expect(text).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i,
+      );
     } finally {
       await handle.close();
     }
@@ -1323,12 +2100,16 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     process.env.NETGRID_STORAGE_BACKUP_DIR = join(dir, "backups");
     try {
       const storage = createConfiguredStorage();
-      const service = new MultiplayerService(storage, { tokenSalt: "v108-default-storage" });
+      const service = new MultiplayerService(storage, {
+        tokenSalt: "v108-default-storage",
+      });
       const health = await service.storageHealth();
       expect(health.kind).toBe("sqlite");
       expect(health.schemaVersion).toBe(3);
       expect(health.storageFormat).toBe("netgrid_multiplayer_sqlite");
-      expect(JSON.stringify(health)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
+      expect(JSON.stringify(health)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i,
+      );
       service.closeStorage();
     } finally {
       restoreEnv("NETGRID_SQLITE_STORAGE_PATH", previousSqlite);
@@ -1341,22 +2122,42 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-roundtrip" });
-    const created = await service.createMatch({ hostSide: "runner", seed: "v108-sqlite-roundtrip" });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-sqlite-roundtrip",
+    });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "v108-sqlite-roundtrip",
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Corp",
+    });
     expect("error" in joined).toBe(false);
     const before = await service.loadForTest(created.matchId);
-    expect(before?.privateDeckSnapshots?.participants.player_a.runner.cards.length).toBeGreaterThan(0);
+    expect(
+      before?.privateDeckSnapshots?.participants.player_a.runner.cards.length,
+    ).toBeGreaterThan(0);
     service.closeStorage();
 
     const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir });
     const reopened = await reopenedStorage.load(created.matchId);
     expect(reopened?.match.matchId).toBe(created.matchId);
-    expect(reopened?.tokens.every((token) => token.tokenHash.startsWith("sha256:"))).toBe(true);
-    expect(reopened?.sessions.every((session) => session.sessionTokenHash.startsWith("sha256:"))).toBe(true);
-    expect(reopened?.privateDeckSnapshots?.participants.player_b.corp.cards.length).toBeGreaterThan(0);
+    expect(
+      reopened?.tokens.every((token) => token.tokenHash.startsWith("sha256:")),
+    ).toBe(true);
+    expect(
+      reopened?.sessions.every((session) =>
+        session.sessionTokenHash.startsWith("sha256:"),
+      ),
+    ).toBe(true);
+    expect(
+      reopened?.privateDeckSnapshots?.participants.player_b.corp.cards.length,
+    ).toBeGreaterThan(0);
     expect(reopened?.eventLog.at(0)?.publicPayload.type).toBe("game_created");
     const raw = await readFile(dbPath);
     expect(raw.toString("utf8")).not.toContain(created.hostSessionToken);
@@ -1369,11 +2170,15 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const fixture = await storedMatchFixture("v108-bounded-action-load");
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
+    const storage = new SqliteMatchStorage({
+      dbPath,
+      backupDir: join(dir, "backups"),
+    });
     const record = structuredClone(fixture.record) as StoredMatch;
     const firstPublicEvent = record.eventLog[0];
     const firstEngineEvent = record.gameState.eventLog[0];
-    if (!firstPublicEvent || !firstEngineEvent) throw new Error("Missing initial event");
+    if (!firstPublicEvent || !firstEngineEvent)
+      throw new Error("Missing initial event");
     const addedPublicEvents: EventRecord[] = [];
     const addedEngineEvents: GameEvent[] = [];
     const traces: NonNullable<StoredMatch["aiDecisionTraces"]> = [];
@@ -1390,15 +2195,16 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         publicPayload: {
           actor,
           actionType,
-          marker: index === 1 ? "EARLY_PUBLIC_PAYLOAD_SENTINEL" : `event-${index}`
-        }
+          marker:
+            index === 1 ? "EARLY_PUBLIC_PAYLOAD_SENTINEL" : `event-${index}`,
+        },
       };
       addedPublicEvents.push({
         ...firstPublicEvent,
         eventId,
         stateVersionBefore: index - 1,
         stateVersionAfter: index,
-        publicPayload
+        publicPayload,
       });
       addedEngineEvents.push({
         ...firstEngineEvent,
@@ -1406,7 +2212,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         type: "action_applied",
         stateVersionBefore: index - 1,
         stateVersionAfter: index,
-        publicPayload: { actor, actionType }
+        publicPayload: { actor, actionType },
       } as GameEvent);
       traces.push({
         traceId: `trace_bounded_${index}`,
@@ -1419,7 +2225,9 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         decisionIndex: index,
         createdAt: `2026-07-19T00:00:${String(index % 60).padStart(2, "0")}.000Z`,
         schemaVersion: "ai-decision-trace-v1",
-        traceJson: { marker: index === 1 ? "EARLY_TRACE_SENTINEL" : `trace-${index}` }
+        traceJson: {
+          marker: index === 1 ? "EARLY_TRACE_SENTINEL" : `trace-${index}`,
+        },
       });
     }
     record.eventLog = [firstPublicEvent, ...addedPublicEvents];
@@ -1428,43 +2236,67 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     record.actionReceipts = Array.from({ length: 12 }, (_, index) => ({
       idempotencyKey: `receipt-${index}`,
       matchId: record.match.matchId,
-      side: index % 2 === 0 ? "runner" as const : "corp" as const,
+      side: index % 2 === 0 ? ("runner" as const) : ("corp" as const),
       accepted: true,
       stateVersionBefore: index,
       stateVersionAfter: index + 1,
-      stateHashAfter: `hash-${index}`
+      stateHashAfter: `hash-${index}`,
     }));
     await storage.save(record);
 
     const full = await storage.load(record.match.matchId);
-    const legacyPartial = await storage.load(record.match.matchId, { includeStateSnapshots: false });
-    const bounded = await storage.loadForAction(record.match.matchId, { side: "runner", idempotencyKey: "receipt-4" });
-    if (!full || !legacyPartial || !bounded) throw new Error("Missing bounded-load fixture");
+    const legacyPartial = await storage.load(record.match.matchId, {
+      includeStateSnapshots: false,
+    });
+    const bounded = await storage.loadForAction(record.match.matchId, {
+      side: "runner",
+      idempotencyKey: "receipt-4",
+    });
+    if (!full || !legacyPartial || !bounded)
+      throw new Error("Missing bounded-load fixture");
 
     expect(bounded.eventLog).toHaveLength(full.eventLog.length);
-    expect(bounded.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)).toEqual(full.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT));
-    const fullChronicle = chronicleTurnContextByEventId(full.eventLog.map((event) => event.publicPayload));
-    const boundedChronicle = chronicleTurnContextByEventId(bounded.eventLog.map((event) => event.publicPayload));
-    for (const event of bounded.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)) {
-      expect(boundedChronicle[event.eventId]).toEqual(fullChronicle[event.eventId]);
+    expect(bounded.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)).toEqual(
+      full.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT),
+    );
+    const fullChronicle = chronicleTurnContextByEventId(
+      full.eventLog.map((event) => event.publicPayload),
+    );
+    const boundedChronicle = chronicleTurnContextByEventId(
+      bounded.eventLog.map((event) => event.publicPayload),
+    );
+    for (const event of bounded.eventLog.slice(
+      -SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
+    )) {
+      expect(boundedChronicle[event.eventId]).toEqual(
+        fullChronicle[event.eventId],
+      );
     }
-    expect(JSON.stringify(bounded.eventLog.slice(0, -SIDE_PAYLOAD_EVENT_TAIL_LIMIT))).not.toContain("EARLY_PUBLIC_PAYLOAD_SENTINEL");
+    expect(
+      JSON.stringify(bounded.eventLog.slice(0, -SIDE_PAYLOAD_EVENT_TAIL_LIMIT)),
+    ).not.toContain("EARLY_PUBLIC_PAYLOAD_SENTINEL");
     expect(bounded.gameState.eventLog).toEqual(full.gameState.eventLog);
-    expect(bounded.aiDecisionTraces).toHaveLength(SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
-    expect(JSON.stringify(bounded.aiDecisionTraces)).not.toContain("EARLY_TRACE_SENTINEL");
-    expect(bounded.actionReceipts.map((receipt) => receipt.idempotencyKey)).toEqual(["receipt-4"]);
+    expect(bounded.aiDecisionTraces).toHaveLength(
+      SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
+    );
+    expect(JSON.stringify(bounded.aiDecisionTraces)).not.toContain(
+      "EARLY_TRACE_SENTINEL",
+    );
+    expect(
+      bounded.actionReceipts.map((receipt) => receipt.idempotencyKey),
+    ).toEqual(["receipt-4"]);
     expect(bounded.stateSnapshots).toEqual([]);
     const previousActionHistoryBytes = JSON.stringify({
       events: legacyPartial.eventLog,
       traces: legacyPartial.aiDecisionTraces,
       receipts: legacyPartial.actionReceipts,
-      snapshots: legacyPartial.stateSnapshots
+      snapshots: legacyPartial.stateSnapshots,
     }).length;
     const boundedHistoryBytes = JSON.stringify({
       events: bounded.eventLog,
       traces: bounded.aiDecisionTraces,
       receipts: bounded.actionReceipts,
-      snapshots: bounded.stateSnapshots
+      snapshots: bounded.stateSnapshots,
     }).length;
     expect(boundedHistoryBytes).toBeLessThan(previousActionHistoryBytes);
     expect(bounded.actionPersistenceBaseline).toMatchObject({
@@ -1475,43 +2307,71 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       actionReceiptCount: 12,
       aiDecisionTraceCount: 120,
       loadedActionReceiptCount: 1,
-      loadedAiDecisionTraceCount: SIDE_PAYLOAD_EVENT_TAIL_LIMIT
+      loadedAiDecisionTraceCount: SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
     });
     const service = new MultiplayerService(storage, {
       tokenSalt: "fixture-v108-bounded-action-load",
-      now: () => "2026-07-19T12:00:00.000Z"
+      now: () => "2026-07-19T12:00:00.000Z",
     });
-    const fullPayload = await service.bootstrap(record.match.matchId, "runner", fixture.hostSessionToken);
+    const fullPayload = await service.bootstrap(
+      record.match.matchId,
+      "runner",
+      fixture.hostSessionToken,
+    );
     if ("error" in fullPayload) throw new Error(fullPayload.error.message);
     const duplicate = await service.submitAction({
       matchId: record.match.matchId,
       side: "runner",
       sessionToken: fixture.hostSessionToken,
-      actionId: fullPayload.legalActions[0]?.actionId ?? "duplicate-short-circuit",
+      actionId:
+        fullPayload.legalActions[0]?.actionId ?? "duplicate-short-circuit",
       clientKnownStateVersion: fullPayload.playerView.stateVersion,
-      idempotencyKey: "receipt-4"
+      idempotencyKey: "receipt-4",
     });
     if (!duplicate.ok) throw new Error(duplicate.error.message);
     expect(duplicate.actorPayload.eventTail).toEqual(fullPayload.eventTail);
-    expect(JSON.stringify(duplicate.actorPayload)).not.toMatch(/EARLY_PUBLIC_PAYLOAD_SENTINEL|EARLY_TRACE_SENTINEL/);
-    console.info(`[delta-action-history-probe] ${JSON.stringify({ previousActionHistoryBytes, boundedHistoryBytes })}`);
+    expect(JSON.stringify(duplicate.actorPayload)).not.toMatch(
+      /EARLY_PUBLIC_PAYLOAD_SENTINEL|EARLY_TRACE_SENTINEL/,
+    );
+    console.info(
+      `[delta-action-history-probe] ${JSON.stringify({ previousActionHistoryBytes, boundedHistoryBytes })}`,
+    );
     storage.close();
   });
 
   it("appends action deltas without updating or deleting persisted history prefixes", async () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-delta-append-only" });
-    const created = await service.createMatch({ hostSide: "corp", seed: "v108-delta-append-only" });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const storage = new SqliteMatchStorage({
+      dbPath,
+      backupDir: join(dir, "backups"),
+    });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-delta-append-only",
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "v108-delta-append-only",
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
     if ("error" in joined) throw new Error(joined.error.message);
     await forceSetupComplete(service, created.matchId);
-    const beforePayload = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    const beforePayload = await service.bootstrap(
+      created.matchId,
+      "corp",
+      created.hostSessionToken,
+    );
     if ("error" in beforePayload) throw new Error(beforePayload.error.message);
-    const action = beforePayload.legalActions.find((candidate) => candidate.type === "mandatory_draw");
+    const action = beforePayload.legalActions.find(
+      (candidate) => candidate.type === "mandatory_draw",
+    );
     if (!action) throw new Error("Missing mandatory draw");
     const auditDb = new DatabaseSync(dbPath);
     auditDb.exec(`
@@ -1534,7 +2394,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       sessionToken: created.hostSessionToken,
       actionId: action.actionId,
       clientKnownStateVersion: beforePayload.playerView.stateVersion,
-      idempotencyKey: "delta-append-only"
+      idempotencyKey: "delta-append-only",
     });
     if (!first.ok) throw new Error(first.error.message);
     const duplicate = await service.submitAction({
@@ -1543,7 +2403,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       sessionToken: created.hostSessionToken,
       actionId: action.actionId,
       clientKnownStateVersion: beforePayload.playerView.stateVersion,
-      idempotencyKey: "delta-append-only"
+      idempotencyKey: "delta-append-only",
     });
     if (!duplicate.ok) throw new Error(duplicate.error.message);
 
@@ -1553,11 +2413,17 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       engineEvents: countsBefore.engineEvents + 1,
       receipts: countsBefore.receipts + 1,
       snapshots: countsBefore.snapshots + 1,
-      traces: countsBefore.traces
+      traces: countsBefore.traces,
     });
     const reopened = await storage.load(created.matchId);
-    expect(reopened?.actionReceipts.filter((receipt) => receipt.idempotencyKey === "delta-append-only")).toHaveLength(1);
-    expect(reopened?.gameState.stateVersion).toBe(first.receipt.stateVersionAfter);
+    expect(
+      reopened?.actionReceipts.filter(
+        (receipt) => receipt.idempotencyKey === "delta-append-only",
+      ),
+    ).toHaveLength(1);
+    expect(reopened?.gameState.stateVersion).toBe(
+      first.receipt.stateVersionAfter,
+    );
     auditDb.close();
     storage.close();
   });
@@ -1565,22 +2431,45 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
   it("rolls back the complete action delta when a late history insert fails", async () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-delta-rollback" });
-    const created = await service.createMatch({ hostSide: "corp", seed: "v108-delta-rollback" });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const storage = new SqliteMatchStorage({
+      dbPath,
+      backupDir: join(dir, "backups"),
+    });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-delta-rollback",
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "v108-delta-rollback",
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
     if ("error" in joined) throw new Error(joined.error.message);
     await forceSetupComplete(service, created.matchId);
-    const payload = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    const payload = await service.bootstrap(
+      created.matchId,
+      "corp",
+      created.hostSessionToken,
+    );
     if ("error" in payload) throw new Error(payload.error.message);
-    const action = payload.legalActions.find((candidate) => candidate.type === "mandatory_draw");
+    const action = payload.legalActions.find(
+      (candidate) => candidate.type === "mandatory_draw",
+    );
     if (!action) throw new Error("Missing mandatory draw");
     const auditDb = new DatabaseSync(dbPath);
     const before = {
       counts: actionHistoryCountsForTest(auditDb, created.matchId),
-      match: auditDb.prepare("SELECT match_version AS matchVersion, state_version AS stateVersion FROM matches WHERE match_id = ?").get(created.matchId)
+      match: auditDb
+        .prepare(
+          "SELECT match_version AS matchVersion, state_version AS stateVersion FROM matches WHERE match_id = ?",
+        )
+        .get(created.matchId),
     };
     auditDb.exec(`CREATE TRIGGER fail_delta_receipt BEFORE INSERT ON action_receipts
       WHEN NEW.idempotency_key = 'forced-delta-rollback'
@@ -1590,17 +2479,27 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       observerCalls += 1;
     });
 
-    await expect(service.submitAction({
-      matchId: created.matchId,
-      side: "corp",
-      sessionToken: created.hostSessionToken,
-      actionId: action.actionId,
-      clientKnownStateVersion: payload.playerView.stateVersion,
-      idempotencyKey: "forced-delta-rollback"
-    })).rejects.toThrow("forced_delta_receipt");
+    await expect(
+      service.submitAction({
+        matchId: created.matchId,
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        actionId: action.actionId,
+        clientKnownStateVersion: payload.playerView.stateVersion,
+        idempotencyKey: "forced-delta-rollback",
+      }),
+    ).rejects.toThrow("forced_delta_receipt");
 
-    expect(actionHistoryCountsForTest(auditDb, created.matchId)).toEqual(before.counts);
-    expect(auditDb.prepare("SELECT match_version AS matchVersion, state_version AS stateVersion FROM matches WHERE match_id = ?").get(created.matchId)).toEqual(before.match);
+    expect(actionHistoryCountsForTest(auditDb, created.matchId)).toEqual(
+      before.counts,
+    );
+    expect(
+      auditDb
+        .prepare(
+          "SELECT match_version AS matchVersion, state_version AS stateVersion FROM matches WHERE match_id = ?",
+        )
+        .get(created.matchId),
+    ).toEqual(before.match);
     expect(observerCalls).toBe(0);
     auditDb.close();
     storage.close();
@@ -1609,9 +2508,15 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
   it("rejects a delta baseline after concurrent history drift without partial writes", async () => {
     const fixture = await storedMatchFixture("v108-delta-drift");
     const dir = await tempStorageDir();
-    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups") });
+    const storage = new SqliteMatchStorage({
+      dbPath: join(dir, "netgrid.sqlite"),
+      backupDir: join(dir, "backups"),
+    });
     await storage.save(fixture.record);
-    const bounded = await storage.loadForAction(fixture.record.match.matchId, { side: "runner", idempotencyKey: "drift-target" });
+    const bounded = await storage.loadForAction(fixture.record.match.matchId, {
+      side: "runner",
+      idempotencyKey: "drift-target",
+    });
     const concurrent = await storage.load(fixture.record.match.matchId);
     if (!bounded || !concurrent) throw new Error("Missing drift fixture");
     concurrent.actionReceipts.push({
@@ -1622,7 +2527,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       stateVersionBefore: concurrent.gameState.stateVersion,
       stateVersionAfter: concurrent.gameState.stateVersion,
       stateHashAfter: hashState(concurrent.gameState),
-      errorCode: "stale_state"
+      errorCode: "stale_state",
     });
     await storage.save(concurrent);
     bounded.actionReceipts.push({
@@ -1633,52 +2538,81 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       stateVersionBefore: bounded.gameState.stateVersion,
       stateVersionAfter: bounded.gameState.stateVersion,
       stateHashAfter: hashState(bounded.gameState),
-      errorCode: "stale_state"
+      errorCode: "stale_state",
     });
 
-    await expect(storage.saveActionDelta(bounded)).rejects.toMatchObject({ code: "action_persistence_conflict" });
+    await expect(storage.saveActionDelta(bounded)).rejects.toMatchObject({
+      code: "action_persistence_conflict",
+    });
     const reopened = await storage.load(fixture.record.match.matchId);
-    expect(reopened?.actionReceipts.map((receipt) => receipt.idempotencyKey)).toContain("concurrent-receipt");
-    expect(reopened?.actionReceipts.map((receipt) => receipt.idempotencyKey)).not.toContain("drift-target");
+    expect(
+      reopened?.actionReceipts.map((receipt) => receipt.idempotencyKey),
+    ).toContain("concurrent-receipt");
+    expect(
+      reopened?.actionReceipts.map((receipt) => receipt.idempotencyKey),
+    ).not.toContain("drift-target");
     storage.close();
   });
 
   it("processes synthetic 1, 10 and 25 match action bursts through SQLite", async () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-delta-load-probe" });
+    const storage = new SqliteMatchStorage({
+      dbPath,
+      backupDir: join(dir, "backups"),
+    });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-delta-load-probe",
+    });
     const matches: Array<{ matchId: string; sessionToken: string }> = [];
     for (let index = 0; index < 25; index += 1) {
-      const created = await service.createMatch({ hostSide: "corp", seed: `v108-delta-load-probe-${index}` });
-      const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+      const created = await service.createMatch({
+        hostSide: "corp",
+        seed: `v108-delta-load-probe-${index}`,
+      });
+      const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+        "joinToken",
+      );
       if (!joinToken) throw new Error("Missing join token");
-      const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: `Runner ${index}` });
+      const joined = await service.joinMatch(created.matchId, {
+        token: joinToken,
+        displayName: `Runner ${index}`,
+      });
       if ("error" in joined) throw new Error(joined.error.message);
       await forceSetupComplete(service, created.matchId);
-      matches.push({ matchId: created.matchId, sessionToken: created.hostSessionToken });
+      matches.push({
+        matchId: created.matchId,
+        sessionToken: created.hostSessionToken,
+      });
     }
 
     const probe = async (size: 1 | 10 | 25, round: number): Promise<number> => {
       const startedAt = performance.now();
-      const results = await Promise.all(matches.slice(0, size).map(async (match) => {
-        const payload = await service.bootstrap(match.matchId, "corp", match.sessionToken);
-        if ("error" in payload) throw new Error(payload.error.message);
-        const action = payload.legalActions.find((candidate) =>
-          candidate.type !== "end_turn" &&
-          candidate.targetRequirements.length === 0 &&
-          (candidate.choiceRequirements?.length ?? 0) === 0
-        );
-        if (!action) throw new Error("Missing probe action");
-        return service.submitAction({
-          matchId: match.matchId,
-          side: "corp",
-          sessionToken: match.sessionToken,
-          actionId: action.actionId,
-          clientKnownStateVersion: payload.playerView.stateVersion,
-          idempotencyKey: `delta-load-probe-${round}-${match.matchId}`
-        });
-      }));
+      const results = await Promise.all(
+        matches.slice(0, size).map(async (match) => {
+          const payload = await service.bootstrap(
+            match.matchId,
+            "corp",
+            match.sessionToken,
+          );
+          if ("error" in payload) throw new Error(payload.error.message);
+          const action = payload.legalActions.find(
+            (candidate) =>
+              candidate.type !== "end_turn" &&
+              candidate.targetRequirements.length === 0 &&
+              (candidate.choiceRequirements?.length ?? 0) === 0,
+          );
+          if (!action) throw new Error("Missing probe action");
+          return service.submitAction({
+            matchId: match.matchId,
+            side: "corp",
+            sessionToken: match.sessionToken,
+            actionId: action.actionId,
+            clientKnownStateVersion: payload.playerView.stateVersion,
+            idempotencyKey: `delta-load-probe-${round}-${match.matchId}`,
+          });
+        }),
+      );
       expect(results.every((result) => result.ok)).toBe(true);
       return performance.now() - startedAt;
     };
@@ -1686,11 +2620,17 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const timings = {
       oneMatchMs: await probe(1, 1),
       tenMatchesMs: await probe(10, 2),
-      twentyFiveMatchesMs: await probe(25, 3)
+      twentyFiveMatchesMs: await probe(25, 3),
     };
-    expect(Object.values(timings).every((duration) => Number.isFinite(duration) && duration >= 0)).toBe(true);
+    expect(
+      Object.values(timings).every(
+        (duration) => Number.isFinite(duration) && duration >= 0,
+      ),
+    ).toBe(true);
     const database = new DatabaseSync(dbPath, { readOnly: true });
-    const receiptCount = database.prepare("SELECT COUNT(*) AS count FROM action_receipts").get() as { count: number };
+    const receiptCount = database
+      .prepare("SELECT COUNT(*) AS count FROM action_receipts")
+      .get() as { count: number };
     expect(Number(receiptCount.count)).toBe(36);
     database.close();
     console.info(`[delta-action-load-probe] ${JSON.stringify(timings)}`);
@@ -1704,17 +2644,36 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const record = structuredClone(fixture.record) as StoredMatch;
-    const gameState = createGameAfterSetup({ matchId: record.match.matchId, seed: "v108-duplicate-state-snapshot" });
-    const snapshot = stateSnapshotForTest(record.match.matchId, gameState, record.match.matchVersion, "snap_duplicate");
+    const gameState = createGameAfterSetup({
+      matchId: record.match.matchId,
+      seed: "v108-duplicate-state-snapshot",
+    });
+    const snapshot = stateSnapshotForTest(
+      record.match.matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_duplicate",
+    );
     record.gameState = gameState;
-    record.stateSnapshots = [snapshot, { ...snapshot, matchVersion: snapshot.matchVersion + 1 }];
+    record.stateSnapshots = [
+      snapshot,
+      { ...snapshot, matchVersion: snapshot.matchVersion + 1 },
+    ];
 
     await expect(storage.save(record)).resolves.toBeUndefined();
 
     const reopened = await storage.load(record.match.matchId);
-    expect(reopened?.stateSnapshots.map((candidate) => candidate.snapshotId)).toEqual(["snap_duplicate"]);
+    expect(
+      reopened?.stateSnapshots.map((candidate) => candidate.snapshotId),
+    ).toEqual(["snap_duplicate"]);
     const db = new DatabaseSync(dbPath, { readOnly: true });
-    expect(db.prepare("SELECT COUNT(*) AS count FROM state_snapshots WHERE match_id = ? AND snapshot_id = ?").get(record.match.matchId, "snap_duplicate")).toMatchObject({ count: 1 });
+    expect(
+      db
+        .prepare(
+          "SELECT COUNT(*) AS count FROM state_snapshots WHERE match_id = ? AND snapshot_id = ?",
+        )
+        .get(record.match.matchId, "snap_duplicate"),
+    ).toMatchObject({ count: 1 });
     db.close();
     storage.close();
   });
@@ -1726,30 +2685,61 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const record = structuredClone(fixture.record) as StoredMatch;
-    const gameState = createGameAfterSetup({ matchId: record.match.matchId, seed: "v108-partial-snapshot-load" });
+    const gameState = createGameAfterSetup({
+      matchId: record.match.matchId,
+      seed: "v108-partial-snapshot-load",
+    });
     record.gameState = gameState;
     record.stateSnapshots = [
-      stateSnapshotForTest(record.match.matchId, gameState, record.match.matchVersion, "snap_one"),
-      { ...stateSnapshotForTest(record.match.matchId, gameState, record.match.matchVersion + 1, "snap_two"), stateVersion: gameState.stateVersion + 1 }
+      stateSnapshotForTest(
+        record.match.matchId,
+        gameState,
+        record.match.matchVersion,
+        "snap_one",
+      ),
+      {
+        ...stateSnapshotForTest(
+          record.match.matchId,
+          gameState,
+          record.match.matchVersion + 1,
+          "snap_two",
+        ),
+        stateVersion: gameState.stateVersion + 1,
+      },
     ];
     await storage.save(record);
 
-    const partial = await storage.load(record.match.matchId, { includeStateSnapshots: false });
+    const partial = await storage.load(record.match.matchId, {
+      includeStateSnapshots: false,
+    });
     expect(partial?.stateSnapshots).toEqual([]);
     if (!partial) throw new Error("Missing partial match");
-    partial.stateSnapshots.push({ ...stateSnapshotForTest(record.match.matchId, gameState, record.match.matchVersion + 2, "snap_three"), stateVersion: gameState.stateVersion + 2 });
+    partial.stateSnapshots.push({
+      ...stateSnapshotForTest(
+        record.match.matchId,
+        gameState,
+        record.match.matchVersion + 2,
+        "snap_three",
+      ),
+      stateVersion: gameState.stateVersion + 2,
+    });
     await storage.save(partial);
 
     const reopened = await storage.load(record.match.matchId);
-    expect(reopened?.stateSnapshots.map((candidate) => candidate.snapshotId)).toEqual(["snap_one", "snap_two", "snap_three"]);
+    expect(
+      reopened?.stateSnapshots.map((candidate) => candidate.snapshotId),
+    ).toEqual(["snap_one", "snap_two", "snap_three"]);
     const db = new DatabaseSync(dbPath, { readOnly: true });
     const sizes = db
       .prepare(
         `SELECT
           (SELECT LENGTH(record_json) FROM matches WHERE match_id = ?) AS recordBytes,
-          (SELECT COALESCE(SUM(LENGTH(game_state_json)), 0) FROM state_snapshots WHERE match_id = ?) AS snapshotBytes`
+          (SELECT COALESCE(SUM(LENGTH(game_state_json)), 0) FROM state_snapshots WHERE match_id = ?) AS snapshotBytes`,
       )
-      .get(record.match.matchId, record.match.matchId) as { recordBytes: number; snapshotBytes: number };
+      .get(record.match.matchId, record.match.matchId) as {
+      recordBytes: number;
+      snapshotBytes: number;
+    };
     expect(sizes.recordBytes).toBeLessThan(sizes.snapshotBytes);
     db.close();
     storage.close();
@@ -1760,20 +2750,34 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-engine-events" });
-    const created = await service.createMatch({ hostSide: "corp", seed: "v108-sqlite-engine-events" });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-sqlite-engine-events",
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "v108-sqlite-engine-events",
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
     await forceSetupComplete(service, created.matchId);
     await submit(
       service,
       created.matchId,
-      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       (action) => action.type === "mandatory_draw",
-      "v108-sqlite-engine-events-mandatory"
+      "v108-sqlite-engine-events-mandatory",
     );
 
     const db = new DatabaseSync(dbPath, { readOnly: true });
@@ -1784,17 +2788,27 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
           (SELECT game_state_json FROM game_states WHERE match_id = ?) AS gameStateJson,
           (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEventCount,
           (SELECT COUNT(*) FROM engine_events WHERE match_id = ? AND event_json LIKE '%privatePayload%') AS privateEngineEventCount,
-          (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ? AND game_state_json LIKE '%"eventLog":[{%') AS snapshotsWithEmbeddedEvents`
+          (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ? AND game_state_json LIKE '%"eventLog":[{%') AS snapshotsWithEmbeddedEvents`,
       )
-      .get(created.matchId, created.matchId, created.matchId, created.matchId, created.matchId) as {
+      .get(
+        created.matchId,
+        created.matchId,
+        created.matchId,
+        created.matchId,
+        created.matchId,
+      ) as {
       recordJson: string;
       gameStateJson: string;
       engineEventCount: number;
       privateEngineEventCount: number;
       snapshotsWithEmbeddedEvents: number;
     };
-    expect((JSON.parse(stored.recordJson) as StoredMatch).gameState.eventLog).toEqual([]);
-    expect((JSON.parse(stored.gameStateJson) as GameState).eventLog).toEqual([]);
+    expect(
+      (JSON.parse(stored.recordJson) as StoredMatch).gameState.eventLog,
+    ).toEqual([]);
+    expect((JSON.parse(stored.gameStateJson) as GameState).eventLog).toEqual(
+      [],
+    );
     expect(Number(stored.engineEventCount)).toBeGreaterThan(1);
     expect(Number(stored.privateEngineEventCount)).toBeGreaterThan(0);
     expect(Number(stored.snapshotsWithEmbeddedEvents)).toBe(0);
@@ -1802,10 +2816,20 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     service.closeStorage();
 
     const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir });
-    const replayService = new MultiplayerService(reopenedStorage, { tokenSalt: "v108-sqlite-engine-events" });
+    const replayService = new MultiplayerService(reopenedStorage, {
+      tokenSalt: "v108-sqlite-engine-events",
+    });
     const reopened = await reopenedStorage.load(created.matchId);
-    expect(reopened?.gameState.eventLog.some((event) => Boolean(event.privatePayload))).toBe(true);
-    expect(reopened?.stateSnapshots.some((snapshot) => snapshot.gameState.eventLog.length > 0)).toBe(true);
+    expect(
+      reopened?.gameState.eventLog.some((event) =>
+        Boolean(event.privatePayload),
+      ),
+    ).toBe(true);
+    expect(
+      reopened?.stateSnapshots.some(
+        (snapshot) => snapshot.gameState.eventLog.length > 0,
+      ),
+    ).toBe(true);
     const replay = await replayService.replayMatch(created.matchId);
     expect(replay.ok).toBe(true);
     replayService.closeStorage();
@@ -1816,11 +2840,21 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-legacy-compaction" });
-    const created = await service.createMatch({ hostSide: "corp", seed: "v108-sqlite-legacy-compaction" });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-sqlite-legacy-compaction",
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "v108-sqlite-legacy-compaction",
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
     await forceSetupComplete(service, created.matchId);
@@ -1829,59 +2863,101 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const mandatory = await submit(
       service,
       created.matchId,
-      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       (action) => action.type === "mandatory_draw",
-      "v108-sqlite-legacy-compaction-mandatory"
+      "v108-sqlite-legacy-compaction-mandatory",
     );
 
     const current = await storage.load(created.matchId);
     if (!current) throw new Error("Missing current SQLite match");
     const legacyRecord = structuredClone(current) as StoredMatch;
-    const replayBaseSnapshot = stateSnapshotForTest(created.matchId, beforeMandatory.gameState, beforeMandatory.match.matchVersion, `snap_before_${mandatory.receipt.stateVersionAfter}`);
-    const lastSnapshot = stateSnapshotForTest(created.matchId, current.gameState, current.match.matchVersion, "legacy_embedded_eventlog_current");
+    const replayBaseSnapshot = stateSnapshotForTest(
+      created.matchId,
+      beforeMandatory.gameState,
+      beforeMandatory.match.matchVersion,
+      `snap_before_${mandatory.receipt.stateVersionAfter}`,
+    );
+    const lastSnapshot = stateSnapshotForTest(
+      created.matchId,
+      current.gameState,
+      current.match.matchVersion,
+      "legacy_embedded_eventlog_current",
+    );
     legacyRecord.stateSnapshots = [replayBaseSnapshot, lastSnapshot];
     for (let index = 0; index < 3; index += 1) {
       legacyRecord.stateSnapshots.push({
         ...structuredClone(lastSnapshot),
         snapshotId: `legacy_embedded_eventlog_${index}`,
-        createdAt: `2026-05-21T00:00:0${index}.000Z`
+        createdAt: `2026-05-21T00:00:0${index}.000Z`,
       });
     }
     service.closeStorage();
 
     const db = new DatabaseSync(dbPath);
     try {
-      db.prepare("UPDATE matches SET record_json = ? WHERE match_id = ?").run(JSON.stringify(legacyRecord), created.matchId);
-      db.prepare("UPDATE game_states SET game_state_json = ? WHERE match_id = ?").run(JSON.stringify(legacyRecord.gameState), created.matchId);
-      db.prepare("DELETE FROM state_snapshots WHERE match_id = ?").run(created.matchId);
+      db.prepare("UPDATE matches SET record_json = ? WHERE match_id = ?").run(
+        JSON.stringify(legacyRecord),
+        created.matchId,
+      );
+      db.prepare(
+        "UPDATE game_states SET game_state_json = ? WHERE match_id = ?",
+      ).run(JSON.stringify(legacyRecord.gameState), created.matchId);
+      db.prepare("DELETE FROM state_snapshots WHERE match_id = ?").run(
+        created.matchId,
+      );
       const insertSnapshot = db.prepare(
         `INSERT INTO state_snapshots
           (match_id, snapshot_id, state_version, match_version, state_hash, game_state_json, created_at, hidden_info_barrier)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       );
       for (const snapshot of legacyRecord.stateSnapshots) {
-        insertSnapshot.run(created.matchId, snapshot.snapshotId, snapshot.stateVersion, snapshot.matchVersion, snapshot.stateHash, JSON.stringify(snapshot.gameState), snapshot.createdAt, snapshot.hiddenInfoBarrier ? 1 : 0);
+        insertSnapshot.run(
+          created.matchId,
+          snapshot.snapshotId,
+          snapshot.stateVersion,
+          snapshot.matchVersion,
+          snapshot.stateHash,
+          JSON.stringify(snapshot.gameState),
+          snapshot.createdAt,
+          snapshot.hiddenInfoBarrier ? 1 : 0,
+        );
       }
       const legacyStats = db
         .prepare(
           `SELECT
             (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEventCount,
             (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ? AND game_state_json LIKE '%"eventLog":[{%') AS embeddedSnapshotCount,
-            (SELECT LENGTH(game_state_json) FROM game_states WHERE match_id = ?) AS gameStateBytes`
+            (SELECT LENGTH(game_state_json) FROM game_states WHERE match_id = ?) AS gameStateBytes`,
         )
-        .get(created.matchId, created.matchId, created.matchId) as { engineEventCount: number; embeddedSnapshotCount: number; gameStateBytes: number };
+        .get(created.matchId, created.matchId, created.matchId) as {
+        engineEventCount: number;
+        embeddedSnapshotCount: number;
+        gameStateBytes: number;
+      };
       expect(Number(legacyStats.engineEventCount)).toBeGreaterThan(0);
-      expect(Number(legacyStats.embeddedSnapshotCount)).toBe(legacyRecord.stateSnapshots.length);
+      expect(Number(legacyStats.embeddedSnapshotCount)).toBe(
+        legacyRecord.stateSnapshots.length,
+      );
       expect(Number(legacyStats.gameStateBytes)).toBeGreaterThan(10_000);
     } finally {
       db.close();
     }
 
     const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir });
-    const reopenedService = new MultiplayerService(reopenedStorage, { tokenSalt: "v108-sqlite-legacy-compaction" });
+    const reopenedService = new MultiplayerService(reopenedStorage, {
+      tokenSalt: "v108-sqlite-legacy-compaction",
+    });
     const maintenance = await authenticatedMaintenanceServer(reopenedService);
     try {
-      const response = await maintenance.request("/api/storage/maintenance/snapshot-compaction/apply", { method: "POST" }, { sensitive: true });
+      const response = await maintenance.request(
+        "/api/storage/maintenance/snapshot-compaction/apply",
+        { method: "POST" },
+        { sensitive: true },
+      );
       const result = (await response.json()) as {
         backupCreated?: boolean;
         backup?: { backupId?: string; backupDir?: string };
@@ -1899,10 +2975,16 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       expect(result.matchesScanned).toBe(1);
       expect(result.compactedMatchCount).toBe(1);
       expect(result.gameStateRowsCompacted).toBe(1);
-      expect(result.stateSnapshotRowsCompacted).toBe(legacyRecord.stateSnapshots.length);
+      expect(result.stateSnapshotRowsCompacted).toBe(
+        legacyRecord.stateSnapshots.length,
+      );
       expect(result.integrityCheck).toBe("ok");
-      expect(result.database?.afterPayloadBytes).toBeLessThan(result.database?.beforePayloadBytes ?? 0);
-      expect(JSON.stringify(result)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privatePayload|decklist|game_state_json/i);
+      expect(result.database?.afterPayloadBytes).toBeLessThan(
+        result.database?.beforePayloadBytes ?? 0,
+      );
+      expect(JSON.stringify(result)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privatePayload|decklist|game_state_json/i,
+      );
 
       const manifests = await listBackupManifests(backupDir);
       expect(manifests[0]).toMatchObject({ reason: "pre_compaction" });
@@ -1916,18 +2998,30 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
               (SELECT game_state_json FROM game_states WHERE match_id = ?) AS gameStateJson,
               (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEventCount,
               (SELECT COUNT(*) FROM engine_events WHERE match_id = ? AND event_json LIKE '%privatePayload%') AS privateEngineEventCount,
-              (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ? AND game_state_json LIKE '%"eventLog":[{%') AS snapshotsWithEmbeddedEvents`
+              (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ? AND game_state_json LIKE '%"eventLog":[{%') AS snapshotsWithEmbeddedEvents`,
           )
-          .get(created.matchId, created.matchId, created.matchId, created.matchId, created.matchId) as {
+          .get(
+            created.matchId,
+            created.matchId,
+            created.matchId,
+            created.matchId,
+            created.matchId,
+          ) as {
           recordJson: string;
           gameStateJson: string;
           engineEventCount: number;
           privateEngineEventCount: number;
           snapshotsWithEmbeddedEvents: number;
         };
-        expect((JSON.parse(stored.recordJson) as StoredMatch).gameState.eventLog).toEqual([]);
-        expect((JSON.parse(stored.recordJson) as StoredMatch).stateSnapshots).toEqual([]);
-        expect((JSON.parse(stored.gameStateJson) as GameState).eventLog).toEqual([]);
+        expect(
+          (JSON.parse(stored.recordJson) as StoredMatch).gameState.eventLog,
+        ).toEqual([]);
+        expect(
+          (JSON.parse(stored.recordJson) as StoredMatch).stateSnapshots,
+        ).toEqual([]);
+        expect(
+          (JSON.parse(stored.gameStateJson) as GameState).eventLog,
+        ).toEqual([]);
         expect(Number(stored.engineEventCount)).toBeGreaterThan(0);
         expect(Number(stored.privateEngineEventCount)).toBeGreaterThan(0);
         expect(Number(stored.snapshotsWithEmbeddedEvents)).toBe(0);
@@ -1936,10 +3030,20 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       }
 
       const full = await reopenedStorage.load(created.matchId);
-      expect(full?.gameState.eventLog.some((event) => Boolean(event.privatePayload))).toBe(true);
-      expect(full?.stateSnapshots.length).toBe(legacyRecord.stateSnapshots.length);
-      expect(full?.stateSnapshots.some((snapshot) => snapshot.gameState.eventLog.length > 0)).toBe(true);
-      const partial = await reopenedStorage.load(created.matchId, { includeStateSnapshots: false });
+      expect(
+        full?.gameState.eventLog.some((event) => Boolean(event.privatePayload)),
+      ).toBe(true);
+      expect(full?.stateSnapshots.length).toBe(
+        legacyRecord.stateSnapshots.length,
+      );
+      expect(
+        full?.stateSnapshots.some(
+          (snapshot) => snapshot.gameState.eventLog.length > 0,
+        ),
+      ).toBe(true);
+      const partial = await reopenedStorage.load(created.matchId, {
+        includeStateSnapshots: false,
+      });
       expect(partial?.stateSnapshots).toEqual([]);
       const replay = await reopenedService.replayMatch(created.matchId);
       if (!replay.ok) throw new Error(replay.errors.join("\n"));
@@ -1950,15 +3054,16 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         side: "corp",
         sessionToken: created.hostSessionToken,
         targetEventId: `evt_${mandatory.receipt.stateVersionAfter}`,
-        reason: "Legacy compaction undo"
+        reason: "Legacy compaction undo",
       });
-      if (!undo.ok || !undo.undoRequest) throw new Error(`Expected undo request: ${JSON.stringify(undo)}`);
+      if (!undo.ok || !undo.undoRequest)
+        throw new Error(`Expected undo request: ${JSON.stringify(undo)}`);
       expect(undo.ok).toBe(true);
       const accepted = await reopenedService.acceptUndo({
         matchId: created.matchId,
         side: "runner",
         sessionToken: joined.sessionToken,
-        undoRequestId: undo.undoRequest.undoRequestId
+        undoRequestId: undo.undoRequest.undoRequestId,
       });
       expect(accepted.ok).toBe(true);
       if (!accepted.ok) throw new Error(accepted.error.message);
@@ -1973,27 +3078,47 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-incremental-events" });
-    const created = await service.createMatch({ hostSide: "corp", seed: "v108-sqlite-incremental-events" });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-sqlite-incremental-events",
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "v108-sqlite-incremental-events",
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
     await forceSetupComplete(service, created.matchId);
     await submit(
       service,
       created.matchId,
-      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       (action) => action.type === "mandatory_draw",
-      "v108-sqlite-incremental-mandatory"
+      "v108-sqlite-incremental-mandatory",
     );
 
     const auditDb = new DatabaseSync(dbPath);
-    const auditCounts = (): Record<string, number> => Object.fromEntries(
-      (auditDb.prepare("SELECT table_name || ':' || op AS key, COUNT(*) AS count FROM event_write_audit GROUP BY key ORDER BY key").all() as Array<{ key: string; count: number }>)
-        .map((row) => [row.key, Number(row.count)])
-    );
+    const auditCounts = (): Record<string, number> =>
+      Object.fromEntries(
+        (
+          auditDb
+            .prepare(
+              "SELECT table_name || ':' || op AS key, COUNT(*) AS count FROM event_write_audit GROUP BY key ORDER BY key",
+            )
+            .all() as Array<{ key: string; count: number }>
+        ).map((row) => [row.key, Number(row.count)]),
+      );
     const clearAudit = (): void => {
       auditDb.prepare("DELETE FROM event_write_audit").run();
     };
@@ -2021,11 +3146,19 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       const credit = await submit(
         service,
         created.matchId,
-        { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+        {
+          side: "corp",
+          sessionToken: created.hostSessionToken,
+          reconnectToken: created.hostReconnectToken,
+        },
         (action) => action.type === "gain_credit",
-        "v108-sqlite-incremental-credit"
+        "v108-sqlite-incremental-credit",
       );
-      expect(auditCounts()).toEqual({ "action_receipts:insert": 1, "engine_events:insert": 1, "events:insert": 1 });
+      expect(auditCounts()).toEqual({
+        "action_receipts:insert": 1,
+        "engine_events:insert": 1,
+        "events:insert": 1,
+      });
 
       clearAudit();
       const undo = await service.requestUndo({
@@ -2033,10 +3166,11 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         side: "corp",
         sessionToken: created.hostSessionToken,
         targetEventId: `evt_${credit.receipt.stateVersionAfter}`,
-        reason: "Incremental event write regression"
+        reason: "Incremental event write regression",
       });
       expect(undo.ok).toBe(true);
-      if (!undo.ok || !undo.undoRequest) throw new Error("Expected undo request");
+      if (!undo.ok || !undo.undoRequest)
+        throw new Error("Expected undo request");
       expect(auditCounts()).toEqual({});
 
       clearAudit();
@@ -2044,17 +3178,40 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         matchId: created.matchId,
         side: "runner",
         sessionToken: joined.sessionToken,
-        undoRequestId: undo.undoRequest.undoRequestId
+        undoRequestId: undo.undoRequest.undoRequestId,
       });
       expect(accepted.ok).toBe(true);
       if (!accepted.ok) throw new Error(accepted.error.message);
-      expect(auditCounts()).toEqual({ "action_receipts:delete": 1, "engine_events:delete": 1, "events:delete": 1 });
+      expect(auditCounts()).toEqual({
+        "action_receipts:delete": 1,
+        "engine_events:delete": 1,
+        "events:delete": 1,
+      });
       expect((await service.replayMatch(created.matchId)).ok).toBe(true);
 
-      const queryPlan = (sql: string): string => (auditDb.prepare(`EXPLAIN QUERY PLAN ${sql}`).all(created.matchId) as Array<{ detail: string }>).map((row) => row.detail).join("\n");
-      expect(queryPlan("SELECT event_id FROM events WHERE match_id = ? ORDER BY event_index ASC")).toContain("idx_events_match_event_index");
-      expect(queryPlan("SELECT event_id FROM engine_events WHERE match_id = ? ORDER BY event_index ASC")).toContain("idx_engine_events_match_event_index");
-      expect(queryPlan("SELECT snapshot_id FROM state_snapshots WHERE match_id = ? ORDER BY state_version ASC")).toContain("idx_state_snapshots_match_state");
+      const queryPlan = (sql: string): string =>
+        (
+          auditDb
+            .prepare(`EXPLAIN QUERY PLAN ${sql}`)
+            .all(created.matchId) as Array<{ detail: string }>
+        )
+          .map((row) => row.detail)
+          .join("\n");
+      expect(
+        queryPlan(
+          "SELECT event_id FROM events WHERE match_id = ? ORDER BY event_index ASC",
+        ),
+      ).toContain("idx_events_match_event_index");
+      expect(
+        queryPlan(
+          "SELECT event_id FROM engine_events WHERE match_id = ? ORDER BY event_index ASC",
+        ),
+      ).toContain("idx_engine_events_match_event_index");
+      expect(
+        queryPlan(
+          "SELECT snapshot_id FROM state_snapshots WHERE match_id = ? ORDER BY state_version ASC",
+        ),
+      ).toContain("idx_state_snapshots_match_state");
     } finally {
       auditDb.close();
       service.closeStorage();
@@ -2066,26 +3223,91 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-long-match-guardrail" });
-    const created = await service.createMatch({ hostSide: "corp", seed: "v108-long-match-guardrail" });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-long-match-guardrail",
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "v108-long-match-guardrail",
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
-    const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
-    const runner = { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
+    const corp = {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    };
+    const runner = {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    };
     await forceSetupComplete(service, created.matchId);
 
     for (let turn = 0; turn < 2; turn += 1) {
-      await submit(service, created.matchId, corp, (action) => action.type === "mandatory_draw", `guardrail-corp-mandatory-${turn}`);
-      await submit(service, created.matchId, corp, (action) => action.type === "gain_credit", `guardrail-corp-credit-a-${turn}`);
-      await submit(service, created.matchId, corp, (action) => action.type === "gain_credit", `guardrail-corp-credit-b-${turn}`);
-      await submit(service, created.matchId, corp, (action) => action.type === "end_turn", `guardrail-corp-end-${turn}`);
-      await resolveCorpDiscardIfPending(service, created.matchId, corp, `guardrail-corp-discard-${turn}`);
-      await submit(service, created.matchId, runner, (action) => action.type === "gain_credit", `guardrail-runner-credit-a-${turn}`);
-      await submit(service, created.matchId, runner, (action) => action.type === "gain_credit", `guardrail-runner-credit-b-${turn}`);
-      await submit(service, created.matchId, runner, (action) => action.type === "end_turn", `guardrail-runner-end-${turn}`);
+      await submit(
+        service,
+        created.matchId,
+        corp,
+        (action) => action.type === "mandatory_draw",
+        `guardrail-corp-mandatory-${turn}`,
+      );
+      await submit(
+        service,
+        created.matchId,
+        corp,
+        (action) => action.type === "gain_credit",
+        `guardrail-corp-credit-a-${turn}`,
+      );
+      await submit(
+        service,
+        created.matchId,
+        corp,
+        (action) => action.type === "gain_credit",
+        `guardrail-corp-credit-b-${turn}`,
+      );
+      await submit(
+        service,
+        created.matchId,
+        corp,
+        (action) => action.type === "end_turn",
+        `guardrail-corp-end-${turn}`,
+      );
+      await resolveCorpDiscardIfPending(
+        service,
+        created.matchId,
+        corp,
+        `guardrail-corp-discard-${turn}`,
+      );
+      await submit(
+        service,
+        created.matchId,
+        runner,
+        (action) => action.type === "gain_credit",
+        `guardrail-runner-credit-a-${turn}`,
+      );
+      await submit(
+        service,
+        created.matchId,
+        runner,
+        (action) => action.type === "gain_credit",
+        `guardrail-runner-credit-b-${turn}`,
+      );
+      await submit(
+        service,
+        created.matchId,
+        runner,
+        (action) => action.type === "end_turn",
+        `guardrail-runner-end-${turn}`,
+      );
     }
 
     const hydrated = await storage.load(created.matchId);
@@ -2102,9 +3324,15 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
             (SELECT LENGTH(game_state_json) FROM game_states WHERE match_id = ?) AS gameStateBytes,
             (SELECT COALESCE(MAX(LENGTH(game_state_json)), 0) FROM state_snapshots WHERE match_id = ?) AS maxSnapshotBytes,
             (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ? AND game_state_json LIKE '%"eventLog":[{%') AS snapshotsWithEmbeddedEvents,
-            (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEventCount`
+            (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEventCount`,
         )
-        .get(created.matchId, created.matchId, created.matchId, created.matchId, created.matchId) as {
+        .get(
+          created.matchId,
+          created.matchId,
+          created.matchId,
+          created.matchId,
+          created.matchId,
+        ) as {
         recordBytes: number;
         gameStateBytes: number;
         maxSnapshotBytes: number;
@@ -2113,12 +3341,22 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       };
       const hydratedRecordBytes = JSON.stringify(hydrated).length;
       const hydratedGameStateBytes = JSON.stringify(hydrated.gameState).length;
-      const hydratedMaxSnapshotBytes = Math.max(...hydrated.stateSnapshots.map((snapshot) => JSON.stringify(snapshot.gameState).length));
-      expect(Number(stored.engineEventCount)).toBe(hydrated.gameState.eventLog.length);
+      const hydratedMaxSnapshotBytes = Math.max(
+        ...hydrated.stateSnapshots.map(
+          (snapshot) => JSON.stringify(snapshot.gameState).length,
+        ),
+      );
+      expect(Number(stored.engineEventCount)).toBe(
+        hydrated.gameState.eventLog.length,
+      );
       expect(Number(stored.snapshotsWithEmbeddedEvents)).toBe(0);
       expect(Number(stored.recordBytes)).toBeLessThan(hydratedRecordBytes / 2);
-      expect(Number(stored.gameStateBytes)).toBeLessThan(hydratedGameStateBytes);
-      expect(Number(stored.maxSnapshotBytes)).toBeLessThan(hydratedMaxSnapshotBytes);
+      expect(Number(stored.gameStateBytes)).toBeLessThan(
+        hydratedGameStateBytes,
+      );
+      expect(Number(stored.maxSnapshotBytes)).toBeLessThan(
+        hydratedMaxSnapshotBytes,
+      );
     } finally {
       db.close();
       service.closeStorage();
@@ -2129,14 +3367,32 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dir = await tempStorageDir();
     const newerPath = join(dir, "newer.sqlite");
     const newer = new DatabaseSync(newerPath);
-    newer.exec("CREATE TABLE storage_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL)");
-    newer.prepare("INSERT INTO storage_meta (key, value, updated_at) VALUES ('schema_version', '999', '2026-05-06T00:00:00.000Z')").run();
+    newer.exec(
+      "CREATE TABLE storage_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL)",
+    );
+    newer
+      .prepare(
+        "INSERT INTO storage_meta (key, value, updated_at) VALUES ('schema_version', '999', '2026-05-06T00:00:00.000Z')",
+      )
+      .run();
     newer.close();
 
-    expect(() => new SqliteMatchStorage({ dbPath: newerPath, backupDir: join(dir, "backups") })).toThrow(/neuer/);
+    expect(
+      () =>
+        new SqliteMatchStorage({
+          dbPath: newerPath,
+          backupDir: join(dir, "backups"),
+        }),
+    ).toThrow(/neuer/);
     const corruptPath = join(dir, "corrupt.sqlite");
     await writeFile(corruptPath, "das ist keine sqlite datei", "utf8");
-    expect(() => new SqliteMatchStorage({ dbPath: corruptPath, backupDir: join(dir, "backups") })).toThrow(/Backup/);
+    expect(
+      () =>
+        new SqliteMatchStorage({
+          dbPath: corruptPath,
+          backupDir: join(dir, "backups"),
+        }),
+    ).toThrow(/Backup/);
   });
 
   it("creates validated backups and restores them after a pre-restore backup", async () => {
@@ -2144,23 +3400,50 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-backup-restore" });
-    const first = await service.createMatch({ hostSide: "runner", seed: "v108-backup-first" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-backup-restore",
+    });
+    const first = await service.createMatch({
+      hostSide: "runner",
+      seed: "v108-backup-first",
+    });
     const backup = await service.backupStorageForTest("manual");
     expect(backup.manifest.backupId).toMatch(/^netgrid-storage-/);
-    expect(backup.manifest.files.map((file) => file.name)).toContain("netgrid.sqlite");
-    const second = await service.createMatch({ hostSide: "corp", seed: "v108-backup-second" });
-    expect((await storage.list()).map((record) => record.match.matchId)).toEqual([first.matchId, second.matchId]);
+    expect(backup.manifest.files.map((file) => file.name)).toContain(
+      "netgrid.sqlite",
+    );
+    const second = await service.createMatch({
+      hostSide: "corp",
+      seed: "v108-backup-second",
+    });
+    expect(
+      (await storage.list()).map((record) => record.match.matchId),
+    ).toEqual([first.matchId, second.matchId]);
     service.closeStorage();
 
-    const restored = restoreSqliteStorageBackup({ backupDir: backup.backupDir, targetPath: dbPath, backupRootDir: backupDir });
+    const restored = restoreSqliteStorageBackup({
+      backupDir: backup.backupDir,
+      targetPath: dbPath,
+      backupRootDir: backupDir,
+    });
     expect(restored.preRestoreBackupDir).toBeTruthy();
     const reopened = new SqliteMatchStorage({ dbPath, backupDir });
-    expect((await reopened.list()).map((record) => record.match.matchId)).toEqual([first.matchId]);
+    expect(
+      (await reopened.list()).map((record) => record.match.matchId),
+    ).toEqual([first.matchId]);
     const health = inspectSqliteStorage(dbPath);
-    expect(health).toMatchObject({ kind: "sqlite", schemaVersion: 3, matchCount: 1 });
-    const manifestText = await readFile(join(backup.backupDir, "manifest.json"), "utf8");
-    expect(manifestText).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
+    expect(health).toMatchObject({
+      kind: "sqlite",
+      schemaVersion: 3,
+      matchCount: 1,
+    });
+    const manifestText = await readFile(
+      join(backup.backupDir, "manifest.json"),
+      "utf8",
+    );
+    expect(manifestText).not.toMatch(
+      /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i,
+    );
     reopened.close();
   });
 
@@ -2169,27 +3452,40 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-storage-optimize" });
-    const created = await service.createMatch({ hostSide: "runner", seed: "v108-storage-optimize" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-storage-optimize",
+    });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "v108-storage-optimize",
+    });
 
     const setupDb = new DatabaseSync(dbPath);
     try {
-      const legacyDebug = JSON.stringify({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, aiLevel: 2, summary: "legacy duplicate" });
+      const legacyDebug = JSON.stringify({
+        schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+        aiLevel: 2,
+        summary: "legacy duplicate",
+      });
       const updated = setupDb
         .prepare(
           `UPDATE events
            SET public_payload_json = json_set(public_payload_json, '$.publicPayload.aiDecisionDebug', json(?))
-           WHERE event_id = (SELECT event_id FROM events WHERE match_id = ? ORDER BY event_index ASC LIMIT 1)`
+           WHERE event_id = (SELECT event_id FROM events WHERE match_id = ? ORDER BY event_index ASC LIMIT 1)`,
         )
         .run(legacyDebug, created.matchId);
       expect(Number(updated.changes)).toBe(1);
 
       setupDb.exec("CREATE TABLE optimize_padding (payload TEXT NOT NULL)");
-      const insertPadding = setupDb.prepare("INSERT INTO optimize_padding (payload) VALUES (?)");
+      const insertPadding = setupDb.prepare(
+        "INSERT INTO optimize_padding (payload) VALUES (?)",
+      );
       const padding = "x".repeat(16 * 1024);
       for (let index = 0; index < 320; index += 1) insertPadding.run(padding);
       setupDb.exec("DROP TABLE optimize_padding");
-      const freelist = setupDb.prepare("PRAGMA freelist_count").get() as { freelist_count: number };
+      const freelist = setupDb.prepare("PRAGMA freelist_count").get() as {
+        freelist_count: number;
+      };
       expect(Number(freelist.freelist_count)).toBeGreaterThan(0);
     } finally {
       setupDb.close();
@@ -2203,34 +3499,60 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       backupCreated: true,
       normalizedAiDebugEventRows: 1,
       integrityCheck: "ok",
-      database: { beforeBytes, freelistPagesAfter: 0 }
+      database: { beforeBytes, freelistPagesAfter: 0 },
     });
-    expect(result.database.afterBytes).toBeLessThan(result.database.beforeBytes);
-    expect(result.database.reclaimedBytes).toBe(result.database.beforeBytes - result.database.afterBytes);
+    expect(result.database.afterBytes).toBeLessThan(
+      result.database.beforeBytes,
+    );
+    expect(result.database.reclaimedBytes).toBe(
+      result.database.beforeBytes - result.database.afterBytes,
+    );
 
-    const manifest = JSON.parse(await readFile(join(result.backup.backupDir, "manifest.json"), "utf8")) as { reason?: string; files: Array<{ name: string; sizeBytes: number }> };
+    const manifest = JSON.parse(
+      await readFile(join(result.backup.backupDir, "manifest.json"), "utf8"),
+    ) as { reason?: string; files: Array<{ name: string; sizeBytes: number }> };
     expect(manifest.reason).toBe("pre_optimization");
-    expect(manifest.files.find((file) => file.name === "netgrid.sqlite")?.sizeBytes).toBeLessThan(beforeBytes);
+    expect(
+      manifest.files.find((file) => file.name === "netgrid.sqlite")?.sizeBytes,
+    ).toBeLessThan(beforeBytes);
 
     const optimizedDb = new DatabaseSync(dbPath, { readOnly: true });
     try {
       const row = optimizedDb
-        .prepare("SELECT COUNT(*) AS count FROM events WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL")
+        .prepare(
+          "SELECT COUNT(*) AS count FROM events WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL",
+        )
         .get() as { count: number };
       expect(Number(row.count)).toBe(0);
-      expect((optimizedDb.prepare("PRAGMA integrity_check").get() as { integrity_check: string }).integrity_check).toBe("ok");
+      expect(
+        (
+          optimizedDb.prepare("PRAGMA integrity_check").get() as {
+            integrity_check: string;
+          }
+        ).integrity_check,
+      ).toBe("ok");
     } finally {
       optimizedDb.close();
       service.closeStorage();
     }
 
     const restoredPath = join(dir, "restored.sqlite");
-    restoreSqliteStorageBackup({ backupDir: result.backup.backupDir, targetPath: restoredPath, backupRootDir: backupDir });
-    expect(inspectSqliteStorage(restoredPath)).toMatchObject({ kind: "sqlite", schemaVersion: 3, matchCount: 1 });
+    restoreSqliteStorageBackup({
+      backupDir: result.backup.backupDir,
+      targetPath: restoredPath,
+      backupRootDir: backupDir,
+    });
+    expect(inspectSqliteStorage(restoredPath)).toMatchObject({
+      kind: "sqlite",
+      schemaVersion: 3,
+      matchCount: 1,
+    });
     const restoredDb = new DatabaseSync(restoredPath, { readOnly: true });
     try {
       const restoredLegacyRows = restoredDb
-        .prepare("SELECT COUNT(*) AS count FROM events WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL")
+        .prepare(
+          "SELECT COUNT(*) AS count FROM events WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL",
+        )
         .get() as { count: number };
       expect(Number(restoredLegacyRows.count)).toBe(1);
     } finally {
@@ -2243,25 +3565,58 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-bad-backup" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-bad-backup",
+    });
     await service.createMatch({ hostSide: "runner", seed: "v108-bad-backup" });
     const backup = await service.backupStorageForTest("manual");
     service.closeStorage();
-    await writeFile(join(backup.backupDir, "netgrid.sqlite"), "tampered", "utf8");
-    expect(() => restoreSqliteStorageBackup({ backupDir: backup.backupDir, targetPath: dbPath, backupRootDir: backupDir })).toThrow(/Prüfsumme/);
+    await writeFile(
+      join(backup.backupDir, "netgrid.sqlite"),
+      "tampered",
+      "utf8",
+    );
+    expect(() =>
+      restoreSqliteStorageBackup({
+        backupDir: backup.backupDir,
+        targetPath: dbPath,
+        backupRootDir: backupDir,
+      }),
+    ).toThrow(/Prüfsumme/);
   });
 
   it("does not return a successful action when persistence fails", async () => {
     const storage = new FailingStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-persist-failure" });
-    const created = await service.createMatch({ hostSide: "runner", seed: "v108-persist-failure" });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-persist-failure",
+    });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "v108-persist-failure",
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Corp",
+    });
     expect("error" in joined).toBe(false);
-    const activeSide = (await service.loadForTest(created.matchId))?.gameState.activeSide ?? "runner";
-    const sessionToken = activeSide === "runner" ? created.hostSessionToken : "error" in joined ? "" : joined.sessionToken;
-    const payload = await service.bootstrap(created.matchId, activeSide, sessionToken);
+    const activeSide =
+      (await service.loadForTest(created.matchId))?.gameState.activeSide ??
+      "runner";
+    const sessionToken =
+      activeSide === "runner"
+        ? created.hostSessionToken
+        : "error" in joined
+          ? ""
+          : joined.sessionToken;
+    const payload = await service.bootstrap(
+      created.matchId,
+      activeSide,
+      sessionToken,
+    );
     if ("error" in payload) throw new Error(payload.error.message);
     const action = payload.legalActions[0];
     if (!action) throw new Error("Missing legal action");
@@ -2274,8 +3629,8 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         sessionToken,
         actionId: action.actionId,
         clientKnownStateVersion: payload.playerView.stateVersion,
-        idempotencyKey: "persist-fails"
-      })
+        idempotencyKey: "persist-fails",
+      }),
     ).rejects.toThrow("forced_storage_failure");
     expect(storage.loadCount).toBe(1);
     expect(storage.saveCount).toBe(1);
@@ -2284,16 +3639,33 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
   it("uses the optional action delta capability and notifies observers after persistence", async () => {
     const order: string[] = [];
     const storage = new ActionDeltaTrackingStorage(order);
-    const service = new MultiplayerService(storage, { tokenSalt: "v108-action-delta-capability" });
-    const created = await service.createMatch({ hostSide: "runner", seed: "v108-action-delta-capability" });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v108-action-delta-capability",
+    });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "v108-action-delta-capability",
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Corp",
+    });
     if ("error" in joined) throw new Error(joined.error.message);
     await forceSetupComplete(service, created.matchId);
-    const activeSide = (await service.loadForTest(created.matchId))?.gameState.activeSide ?? "runner";
-    const sessionToken = activeSide === "runner" ? created.hostSessionToken : joined.sessionToken;
-    const payload = await service.bootstrap(created.matchId, activeSide, sessionToken);
+    const activeSide =
+      (await service.loadForTest(created.matchId))?.gameState.activeSide ??
+      "runner";
+    const sessionToken =
+      activeSide === "runner" ? created.hostSessionToken : joined.sessionToken;
+    const payload = await service.bootstrap(
+      created.matchId,
+      activeSide,
+      sessionToken,
+    );
     if ("error" in payload) throw new Error(payload.error.message);
     const action = payload.legalActions[0];
     if (!action) throw new Error("Missing legal action");
@@ -2308,10 +3680,13 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       sessionToken,
       actionId: action.actionId,
       clientKnownStateVersion: payload.playerView.stateVersion,
-      idempotencyKey: "delta-capability"
+      idempotencyKey: "delta-capability",
     });
 
-    if (!result.ok) throw new Error(`Unexpected delta capability result: ${JSON.stringify(result.error)}`);
+    if (!result.ok)
+      throw new Error(
+        `Unexpected delta capability result: ${JSON.stringify(result.error)}`,
+      );
     expect(result.ok).toBe(true);
     expect(storage.actionLoadCount).toBe(1);
     expect(storage.deltaSaveCount).toBe(1);
@@ -2322,47 +3697,83 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
 
 describe("MVP 0.2 multiplayer service", () => {
   it("starts V0.6 matches from validated immutable deck snapshots without exposing opponent decklists", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "deck-v06-service" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "deck-v06-service",
+    });
     const created = await service.createMatch({
       hostSide: "runner",
       seed: "deck-v06-match",
-      participantADecks: { runnerDeckSnapshotId: "demo_runner_004_snapshot_v0_6", corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6" },
-      participantBDecks: { runnerDeckSnapshotId: "demo_runner_004_snapshot_v0_6", corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6" }
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_004_snapshot_v0_6",
+        corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6",
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "demo_runner_004_snapshot_v0_6",
+        corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6",
+      },
     });
     const stored = await service.loadForTest(created.matchId);
 
     expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(created.playerView.deckMetadata?.own.deckHash).toBe("fnv1a:b6bc479a");
-    expect(created.playerView.deckMetadata?.opponent.deckHash).toBe("fnv1a:d77d0873");
-    expect(stored?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_004_snapshot_v0_6");
+    expect(created.playerView.deckMetadata?.own.deckHash).toBe(
+      "fnv1a:b6bc479a",
+    );
+    expect(created.playerView.deckMetadata?.opponent.deckHash).toBe(
+      "fnv1a:d77d0873",
+    );
+    expect(stored?.match.deckSetup.runnerSnapshotId).toBe(
+      "demo_runner_004_snapshot_v0_6",
+    );
     expect(stored?.match.settings.agendaPointsToWin).toBe(7);
     expect(stored?.match.settings.matchFormat).toBe("rules_match");
     expect(JSON.stringify(stored?.match.deckSetup)).not.toContain("cards");
     expect(JSON.stringify(created)).not.toContain("simple_priority_agenda");
     expect(JSON.stringify(created)).not.toContain("cardInstances");
 
-    const invalidSnapshot = structuredClone(snapshotsData.snapshots.find((snapshot) => snapshot.deckSnapshotId === "demo_runner_004_snapshot_v0_6")) as DeckSnapshot | undefined;
+    const invalidSnapshot = structuredClone(
+      snapshotsData.snapshots.find(
+        (snapshot) =>
+          snapshot.deckSnapshotId === "demo_runner_004_snapshot_v0_6",
+      ),
+    ) as DeckSnapshot | undefined;
     if (!invalidSnapshot) throw new Error("Missing runner snapshot");
-    invalidSnapshot.cards.push({ cardId: "catalog_preview_resource_001", quantity: 1 });
+    invalidSnapshot.cards.push({
+      cardId: "catalog_preview_resource_001",
+      quantity: 1,
+    });
     await expect(
       service.createMatch({
         hostSide: "runner",
         seed: "deck-v06-invalid",
-        participantADecks: { runnerDeckSnapshot: invalidSnapshot, corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6" },
-        participantBDecks: { runnerDeckSnapshot: invalidSnapshot, corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6" }
-      })
+        participantADecks: {
+          runnerDeckSnapshot: invalidSnapshot,
+          corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6",
+        },
+        participantBDecks: {
+          runnerDeckSnapshot: invalidSnapshot,
+          corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6",
+        },
+      }),
     ).rejects.toThrow("deck_snapshot_invalid");
   });
 
   it("starts private local O:NR matches from the shared runtime card pool when the overlay is present", async () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_015_codeslinger"]) return;
-    expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.statuses.deck_legal).toBe(true);
-    expect(cardsById["onr_v1_006_black-dahlia"]?.statuses.deck_legal).toBe(true);
+    expect(
+      cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.statuses.deck_legal,
+    ).toBe(true);
+    expect(cardsById["onr_v1_006_black-dahlia"]?.statuses.deck_legal).toBe(
+      true,
+    );
     expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(true);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(
+      true,
+    );
 
-    const profile = (profilesData08.profiles as DeckFormatProfile[]).find((candidate) => candidate.profileId === "local-demo-v0.8");
+    const profile = (profilesData08.profiles as DeckFormatProfile[]).find(
+      (candidate) => candidate.profileId === "local-demo-v0.8",
+    );
     if (!profile) throw new Error("Missing V0.8 deck format profile");
     const context = { cardsById, profile };
     const now = "2026-05-04T19:30:00.000Z";
@@ -2393,10 +3804,10 @@ describe("MVP 0.2 multiplayer service", () => {
         { cardId: "onr_v1_040_loony-goon", quantity: 1 },
         { cardId: "onr_v1_060_shaka", quantity: 1 },
         { cardId: "onr_v1_073_wizards-book", quantity: 1 },
-        { cardId: "simple_economy_event", quantity: 2 }
+        { cardId: "simple_economy_event", quantity: 2 },
       ],
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
     const corpDeck: EditableDeck = {
       deckId: "local_onr_corp_match_smoke",
@@ -2442,14 +3853,22 @@ describe("MVP 0.2 multiplayer service", () => {
         { cardId: "onr_v1_279_wall-of-static", quantity: 1 },
         { cardId: "onr_v1_293_netwatch-credit-voucher", quantity: 1 },
         { cardId: "onr_v1_295_night-shift", quantity: 1 },
-        { cardId: "simple_economy_operation", quantity: 2 }
+        { cardId: "simple_economy_operation", quantity: 2 },
       ],
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
-    const runnerSnapshot = createDeckSnapshot(runnerDeck, context, { snapshotId: "local_onr_runner_match_smoke_snapshot", rulesBaselineId: "rules-baseline-mvp-0.94" });
-    const corpSnapshot = createDeckSnapshot(corpDeck, context, { snapshotId: "local_onr_corp_match_smoke_snapshot", rulesBaselineId: "rules-baseline-mvp-0.94" });
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "onr-local-deck-service" });
+    const runnerSnapshot = createDeckSnapshot(runnerDeck, context, {
+      snapshotId: "local_onr_runner_match_smoke_snapshot",
+      rulesBaselineId: "rules-baseline-mvp-0.94",
+    });
+    const corpSnapshot = createDeckSnapshot(corpDeck, context, {
+      snapshotId: "local_onr_corp_match_smoke_snapshot",
+      rulesBaselineId: "rules-baseline-mvp-0.94",
+    });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "onr-local-deck-service",
+    });
 
     expect(runnerSnapshot.validation.ok).toBe(true);
     expect(corpSnapshot.validation.ok).toBe(true);
@@ -2457,28 +3876,51 @@ describe("MVP 0.2 multiplayer service", () => {
     const created = await service.createMatch({
       hostSide: "runner",
       seed: "onr-local-server-match",
-      participantADecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
-      participantBDecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
-      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
+      participantADecks: {
+        runnerDeckSnapshot: runnerSnapshot,
+        corpDeckSnapshot: corpSnapshot,
+      },
+      participantBDecks: {
+        runnerDeckSnapshot: runnerSnapshot,
+        corpDeckSnapshot: corpSnapshot,
+      },
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" },
     });
     const stored = await service.loadForTest(created.matchId);
 
     expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(created.playerView.deckMetadata?.own.deckName).toBe("O:NR Runner Match Smoke");
-    expect(created.playerView.deckMetadata?.opponent.deckName).toBe("O:NR Corp Match Smoke");
-    expect(stored?.match.deckSetup.runnerSnapshotId).toBe("local_onr_runner_match_smoke_snapshot");
-    expect(stored?.match.deckSetup.corpSnapshotId).toBe("local_onr_corp_match_smoke_snapshot");
+    expect(created.playerView.deckMetadata?.own.deckName).toBe(
+      "O:NR Runner Match Smoke",
+    );
+    expect(created.playerView.deckMetadata?.opponent.deckName).toBe(
+      "O:NR Corp Match Smoke",
+    );
+    expect(stored?.match.deckSetup.runnerSnapshotId).toBe(
+      "local_onr_runner_match_smoke_snapshot",
+    );
+    expect(stored?.match.deckSetup.corpSnapshotId).toBe(
+      "local_onr_corp_match_smoke_snapshot",
+    );
     expect(JSON.stringify(stored?.match.deckSetup)).not.toContain("cards");
-    expect(JSON.stringify(created)).not.toContain("onr_v1_203_hostile-takeover");
+    expect(JSON.stringify(created)).not.toContain(
+      "onr_v1_203_hostile-takeover",
+    );
     expect(JSON.stringify(created)).not.toContain("cardInstances");
 
     expect(created.joinUrl).toBeTruthy();
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing O:NR join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "O:NR Corp" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "O:NR Corp",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
-    expect(joined.playerView.deckMetadata?.own.deckName).toBe("O:NR Corp Match Smoke");
+    expect(joined.playerView.deckMetadata?.own.deckName).toBe(
+      "O:NR Corp Match Smoke",
+    );
     expect(JSON.stringify(joined)).not.toContain("onr_v1_015_codeslinger");
     expect(JSON.stringify(joined)).not.toContain("cardInstances");
 
@@ -2486,14 +3928,24 @@ describe("MVP 0.2 multiplayer service", () => {
       hostSide: "runner",
       mode: "human_runner_vs_corp_ai",
       seed: "onr-local-ai-match",
-      participantADecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
-      participantBDecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
+      participantADecks: {
+        runnerDeckSnapshot: runnerSnapshot,
+        corpDeckSnapshot: corpSnapshot,
+      },
+      participantBDecks: {
+        runnerDeckSnapshot: runnerSnapshot,
+        corpDeckSnapshot: corpSnapshot,
+      },
       aiDeckPolicy: "selected",
-      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" },
     });
     expect(aiCreated.mode).toBe("human_runner_vs_corp_ai");
-    expect(aiCreated.playerView.deckMetadata?.own.deckName).toBe("O:NR Runner Match Smoke");
-    expect(aiCreated.playerView.deckMetadata?.opponent.deckName).toBe("O:NR Corp Match Smoke");
+    expect(aiCreated.playerView.deckMetadata?.own.deckName).toBe(
+      "O:NR Runner Match Smoke",
+    );
+    expect(aiCreated.playerView.deckMetadata?.opponent.deckName).toBe(
+      "O:NR Corp Match Smoke",
+    );
     expect(JSON.stringify(aiCreated)).not.toContain("cardInstances");
   });
 
@@ -2501,75 +3953,171 @@ describe("MVP 0.2 multiplayer service", () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]) return;
 
-    expect(cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.statuses.human_playable).toBe(true);
+    expect(
+      cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.statuses
+        .human_playable,
+    ).toBe(true);
     expect(cardsById["onr_v1_007_blink"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_115_terrorist-reprisal"]?.statuses.human_playable).toBe(true);
+    expect(
+      cardsById["onr_v1_115_terrorist-reprisal"]?.statuses.human_playable,
+    ).toBe(true);
     expect(cardsById["onr_v1_223_banpei"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_275_vacuum-link"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_013_cockroach"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_034_incubator"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_275_vacuum-link"]?.statuses.human_playable).toBe(
+      true,
+    );
+    expect(
+      cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.statuses
+        .ai_supported,
+    ).toBe(true);
+    expect(cardsById["onr_v1_013_cockroach"]?.statuses.human_playable).toBe(
+      true,
+    );
+    expect(cardsById["onr_v1_034_incubator"]?.statuses.human_playable).toBe(
+      true,
+    );
     expect(cardsById["onr_v1_030_grubb"]?.statuses.human_playable).toBe(true);
     expect(cardsById["onr_v1_013_cockroach"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_034_incubator"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_030_grubb"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_076_all-nighter"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_096_kilroy-was-here"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_107_romp-through-hq"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_184_top-runners-conference"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_188_ai-chief-financial-officer"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_211_polymer-breakthrough"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_235_data-naga"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_076_all-nighter"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_096_kilroy-was-here"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_107_romp-through-hq"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_184_top-runners-conference"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_188_ai-chief-financial-officer"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_211_polymer-breakthrough"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_076_all-nighter"]?.statuses.human_playable).toBe(
+      true,
+    );
+    expect(
+      cardsById["onr_v1_096_kilroy-was-here"]?.statuses.human_playable,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_107_romp-through-hq"]?.statuses.human_playable,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_184_top-runners-conference"]?.statuses.human_playable,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_188_ai-chief-financial-officer"]?.statuses
+        .human_playable,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_211_polymer-breakthrough"]?.statuses.human_playable,
+    ).toBe(true);
+    expect(cardsById["onr_v1_235_data-naga"]?.statuses.human_playable).toBe(
+      true,
+    );
+    expect(cardsById["onr_v1_076_all-nighter"]?.statuses.ai_supported).toBe(
+      true,
+    );
+    expect(cardsById["onr_v1_096_kilroy-was-here"]?.statuses.ai_supported).toBe(
+      true,
+    );
+    expect(cardsById["onr_v1_107_romp-through-hq"]?.statuses.ai_supported).toBe(
+      true,
+    );
+    expect(
+      cardsById["onr_v1_184_top-runners-conference"]?.statuses.ai_supported,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_188_ai-chief-financial-officer"]?.statuses.ai_supported,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_211_polymer-breakthrough"]?.statuses.ai_supported,
+    ).toBe(true);
     expect(cardsById["onr_v1_235_data-naga"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_207_netwatch-operations-office"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_213_private-cybernet-police"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_251_jack-attack"]?.statuses.human_playable).toBe(true);
+    expect(
+      cardsById["onr_v1_207_netwatch-operations-office"]?.statuses
+        .human_playable,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_213_private-cybernet-police"]?.statuses.human_playable,
+    ).toBe(true);
+    expect(cardsById["onr_v1_251_jack-attack"]?.statuses.human_playable).toBe(
+      true,
+    );
     expect(cardsById["onr_v1_271_tko-2-0"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_207_netwatch-operations-office"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_213_private-cybernet-police"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_251_jack-attack"]?.statuses.ai_supported).toBe(true);
+    expect(
+      cardsById["onr_v1_207_netwatch-operations-office"]?.statuses.ai_supported,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_213_private-cybernet-police"]?.statuses.ai_supported,
+    ).toBe(true);
+    expect(cardsById["onr_v1_251_jack-attack"]?.statuses.ai_supported).toBe(
+      true,
+    );
     expect(cardsById["onr_v1_271_tko-2-0"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_208_on-call-solo-team"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_217_strike-force-kali"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_208_on-call-solo-team"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_217_strike-force-kali"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_219_superior-net-barriers"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_308_acme-savings-and-loan"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_236_data-raven"]?.statuses.human_playable).toBe(true);
+    expect(
+      cardsById["onr_v1_208_on-call-solo-team"]?.statuses.human_playable,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_217_strike-force-kali"]?.statuses.human_playable,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_208_on-call-solo-team"]?.statuses.ai_supported,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_217_strike-force-kali"]?.statuses.ai_supported,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_219_superior-net-barriers"]?.statuses.human_playable,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_308_acme-savings-and-loan"]?.statuses.human_playable,
+    ).toBe(true);
+    expect(cardsById["onr_v1_236_data-raven"]?.statuses.human_playable).toBe(
+      true,
+    );
     expect(cardsById["onr_v1_001_afreet"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.human_playable).toBe(
+      true,
+    );
     expect(cardsById["onr_v1_019_dropp"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_219_superior-net-barriers"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_308_acme-savings-and-loan"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_236_data-raven"]?.statuses.ai_supported).toBe(true);
+    expect(
+      cardsById["onr_v1_219_superior-net-barriers"]?.statuses.ai_supported,
+    ).toBe(true);
+    expect(
+      cardsById["onr_v1_308_acme-savings-and-loan"]?.statuses.ai_supported,
+    ).toBe(true);
+    expect(cardsById["onr_v1_236_data-raven"]?.statuses.ai_supported).toBe(
+      true,
+    );
     expect(cardsById["onr_v1_001_afreet"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(
+      true,
+    );
     expect(cardsById["onr_v1_019_dropp"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_349_aardvark"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_351_bizarre-encryption-scheme"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_352_chester-mix"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_349_aardvark"]?.statuses.human_playable).toBe(
+      true,
+    );
+    expect(
+      cardsById["onr_v1_351_bizarre-encryption-scheme"]?.statuses
+        .human_playable,
+    ).toBe(true);
+    expect(cardsById["onr_v1_352_chester-mix"]?.statuses.human_playable).toBe(
+      true,
+    );
     expect(cardsById["onr_v1_353_chimera"]?.statuses.human_playable).toBe(true);
     expect(cardsById["onr_v1_349_aardvark"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_351_bizarre-encryption-scheme"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_352_chester-mix"]?.statuses.ai_supported).toBe(true);
+    expect(
+      cardsById["onr_v1_351_bizarre-encryption-scheme"]?.statuses.ai_supported,
+    ).toBe(true);
+    expect(cardsById["onr_v1_352_chester-mix"]?.statuses.ai_supported).toBe(
+      true,
+    );
     expect(cardsById["onr_v1_353_chimera"]?.statuses.ai_supported).toBe(true);
   });
 
   it("creates private matches with hashed tokens and side-filtered bootstrap payloads", async () => {
-    const { service, created, runner, matchId, joinToken } = await joinedMatch();
+    const { service, created, runner, matchId, joinToken } =
+      await joinedMatch();
     const stored = await service.loadForTest(matchId);
 
     expect(stored?.match.status).toBe("active");
     expect(stored?.match.baseline.multiplayerSchemaVersion).toBe("0.99.0");
-    expect(stored?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_008_snapshot_v0_8");
-    expect(stored?.match.deckSetup.corpSnapshotId).toBe("demo_corp_008_snapshot_v0_8");
-    expect(stored?.tokens.every((token) => token.tokenHash.startsWith("sha256:"))).toBe(true);
+    expect(stored?.match.deckSetup.runnerSnapshotId).toBe(
+      "demo_runner_008_snapshot_v0_8",
+    );
+    expect(stored?.match.deckSetup.corpSnapshotId).toBe(
+      "demo_corp_008_snapshot_v0_8",
+    );
+    expect(
+      stored?.tokens.every((token) => token.tokenHash.startsWith("sha256:")),
+    ).toBe(true);
     expect(created.hostSessionToken.length).toBeGreaterThanOrEqual(32);
     expect(created.hostReconnectToken.length).toBeGreaterThanOrEqual(32);
     expect(joinToken.length).toBeGreaterThanOrEqual(32);
@@ -2578,20 +4126,35 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(serializedStorage).not.toContain(created.hostReconnectToken);
     expect(serializedStorage).not.toContain(joinToken);
 
-    const bootstrap = await service.bootstrap(matchId, runner.side, runner.sessionToken);
+    const bootstrap = await service.bootstrap(
+      matchId,
+      runner.side,
+      runner.sessionToken,
+    );
     expect("error" in bootstrap).toBe(false);
     const payload = bootstrap as SidePayload;
     expect(payload.side).toBe("runner");
     expect(JSON.stringify(payload)).not.toContain("Simple Agenda");
-    expect(JSON.stringify(created.playerView)).not.toContain("Simple Economy Event");
+    expect(JSON.stringify(created.playerView)).not.toContain(
+      "Simple Economy Event",
+    );
 
-    const runnerHosted = await service.createMatch({ hostSide: "runner", seed: "runner-host" });
+    const runnerHosted = await service.createMatch({
+      hostSide: "runner",
+      seed: "runner-host",
+    });
     expect(runnerHosted.hostSide).toBe("runner");
-    const randomHosted = await service.createMatch({ hostSide: "random", seed: "random-host" });
+    const randomHosted = await service.createMatch({
+      hostSide: "random",
+      seed: "random-host",
+    });
     expect(["runner", "corp"]).toContain(randomHosted.hostSide);
-    const invalidJoin = await service.joinMatch(runnerHosted.matchId, { token: "definitely-wrong" });
+    const invalidJoin = await service.joinMatch(runnerHosted.matchId, {
+      token: "definitely-wrong",
+    });
     expect("error" in invalidJoin).toBe(true);
-    if (!("error" in invalidJoin)) throw new Error("Expected invalid token rejection");
+    if (!("error" in invalidJoin))
+      throw new Error("Expected invalid token rejection");
     expect(invalidJoin.error.message).not.toContain("runner");
     expect(invalidJoin.error.message).not.toContain("corp");
   });
@@ -2612,29 +4175,68 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(publicMatch.isPublic).toBe(true);
     expect(privateMatch.isPublic).toBe(false);
-    expect((await service.loadForTest(publicMatch.matchId))?.match.isPublic).toBe(true);
-    expect((await service.loadForTest(privateMatch.matchId))?.match.isPublic).toBe(false);
+    expect(
+      (await service.loadForTest(publicMatch.matchId))?.match.isPublic,
+    ).toBe(true);
+    expect(
+      (await service.loadForTest(privateMatch.matchId))?.match.isPublic,
+    ).toBe(false);
 
     const recreated = await service.recreateMatch(privateMatch.matchId, {
       side: privateMatch.hostSide,
       sessionToken: privateMatch.hostSessionToken,
     });
     expect(recreated.ok).toBe(true);
-    if (!recreated.ok || !recreated.newMatch) throw new Error("Expected recreated match");
+    if (!recreated.ok || !recreated.newMatch)
+      throw new Error("Expected recreated match");
     expect(recreated.newMatch.isPublic).toBe(false);
-    expect((await service.loadForTest(recreated.newMatch.matchId))?.match.isPublic).toBe(false);
+    expect(
+      (await service.loadForTest(recreated.newMatch.matchId))?.match.isPublic,
+    ).toBe(false);
   });
 
   it("V23A-T002 V23A-T003 V23A-T004 V23A-T005 lists only pending public matches with safe metadata", async () => {
     let now = "2026-05-10T12:00:00.000Z";
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v23a-open-list", now: () => now });
-    const listed = await service.createMatch({ hostSide: "runner", seed: "v23a-listed", mode: "human_vs_human", displayName: "Host A", isPublic: true });
-    await service.createMatch({ hostSide: "runner", seed: "v23a-hidden", mode: "human_vs_human", displayName: "Hidden Host", isPublic: false });
-    const consumed = await service.createMatch({ hostSide: "corp", seed: "v23a-consumed", mode: "human_vs_human", displayName: "Consumed Host", isPublic: true });
-    await service.createMatch({ hostSide: "runner", seed: "v23a-ai", mode: "human_runner_vs_corp_ai", displayName: "AI Host", isPublic: true });
-    const consumedToken = new URL(consumed.joinUrl ?? "").searchParams.get("joinToken");
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "v23a-open-list",
+      now: () => now,
+    });
+    const listed = await service.createMatch({
+      hostSide: "runner",
+      seed: "v23a-listed",
+      mode: "human_vs_human",
+      displayName: "Host A",
+      isPublic: true,
+    });
+    await service.createMatch({
+      hostSide: "runner",
+      seed: "v23a-hidden",
+      mode: "human_vs_human",
+      displayName: "Hidden Host",
+      isPublic: false,
+    });
+    const consumed = await service.createMatch({
+      hostSide: "corp",
+      seed: "v23a-consumed",
+      mode: "human_vs_human",
+      displayName: "Consumed Host",
+      isPublic: true,
+    });
+    await service.createMatch({
+      hostSide: "runner",
+      seed: "v23a-ai",
+      mode: "human_runner_vs_corp_ai",
+      displayName: "AI Host",
+      isPublic: true,
+    });
+    const consumedToken = new URL(consumed.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!consumedToken) throw new Error("Missing consumed join token");
-    const consumedJoin = await service.joinMatch(consumed.matchId, { token: consumedToken, displayName: "Joiner" });
+    const consumedJoin = await service.joinMatch(consumed.matchId, {
+      token: consumedToken,
+      displayName: "Joiner",
+    });
     expect("error" in consumedJoin).toBe(false);
     now = "2026-05-10T12:01:30.000Z";
     const open = await service.listOpenMatches();
@@ -2645,27 +4247,47 @@ describe("MVP 0.2 multiplayer service", () => {
       mode: "human_vs_human",
       status: "pending",
       createdAt: "2026-05-10T12:00:00.000Z",
-      ageSeconds: 90
+      ageSeconds: 90,
     });
-    expect(Object.keys(open[0] ?? {}).sort()).toEqual(["ageSeconds", "createdAt", "hostDisplayName", "matchId", "mode", "status"]);
+    expect(Object.keys(open[0] ?? {}).sort()).toEqual([
+      "ageSeconds",
+      "createdAt",
+      "hostDisplayName",
+      "matchId",
+      "mode",
+      "status",
+    ]);
     const serialized = JSON.stringify(open);
-    expect(serialized).not.toMatch(/joinToken|sessionToken|reconnectToken|tokenHash|deckHash|deckSnapshot|privateDeck|cardInstances/i);
+    expect(serialized).not.toMatch(
+      /joinToken|sessionToken|reconnectToken|tokenHash|deckHash|deckSnapshot|privateDeck|cardInstances/i,
+    );
   });
 
   it("V23A-T008 V23A-T009 exposes GET /api/matches/open and honors isPublic at create time", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v23a-open-http" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "v23a-open-http",
+    });
     const handle = createNetgridHttpServer(service);
     const baseUrl = await listen(handle);
     try {
       const visibleResponse = await fetch(`${baseUrl}/api/matches`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ hostSide: "runner", mode: "human_vs_human", seed: "v23a-http-visible" })
+        body: JSON.stringify({
+          hostSide: "runner",
+          mode: "human_vs_human",
+          seed: "v23a-http-visible",
+        }),
       });
       const hiddenResponse = await fetch(`${baseUrl}/api/matches`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ hostSide: "runner", mode: "human_vs_human", seed: "v23a-http-hidden", isPublic: false })
+        body: JSON.stringify({
+          hostSide: "runner",
+          mode: "human_vs_human",
+          seed: "v23a-http-hidden",
+          isPublic: false,
+        }),
       });
       expect(visibleResponse.status).toBe(201);
       expect(hiddenResponse.status).toBe(201);
@@ -2673,12 +4295,16 @@ describe("MVP 0.2 multiplayer service", () => {
       const hidden = (await hiddenResponse.json()) as { matchId: string };
       const openResponse = await fetch(`${baseUrl}/api/matches/open`);
       expect(openResponse.status).toBe(200);
-      const openBody = (await openResponse.json()) as { matches?: Array<{ matchId: string }> };
+      const openBody = (await openResponse.json()) as {
+        matches?: Array<{ matchId: string }>;
+      };
       const listedIds = (openBody.matches ?? []).map((entry) => entry.matchId);
       expect(listedIds).toContain(visible.matchId);
       expect(listedIds).not.toContain(hidden.matchId);
       const serialized = JSON.stringify(openBody);
-      expect(serialized).not.toMatch(/joinToken|sessionToken|reconnectToken|tokenHash|deckHash|deckSnapshot|privateDeck|cardInstances/i);
+      expect(serialized).not.toMatch(
+        /joinToken|sessionToken|reconnectToken|tokenHash|deckHash|deckSnapshot|privateDeck|cardInstances/i,
+      );
     } finally {
       await handle.close();
     }
@@ -2686,7 +4312,9 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("lists public open, active and finished matches while excluding private matches", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "public-directory" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "public-directory",
+    });
     const open = await service.createMatch({
       hostSide: "runner",
       mode: "human_vs_human",
@@ -2727,10 +4355,16 @@ describe("MVP 0.2 multiplayer service", () => {
       expect.arrayContaining([
         expect.objectContaining({ matchId: open.matchId, status: "open" }),
         expect.objectContaining({ matchId: active.matchId, status: "active" }),
-        expect.objectContaining({ matchId: finished.matchId, status: "finished", winner: "corp" }),
+        expect.objectContaining({
+          matchId: finished.matchId,
+          status: "finished",
+          winner: "corp",
+        }),
       ]),
     );
-    expect(entries.some((entry) => entry.matchId === privateMatch.matchId)).toBe(false);
+    expect(
+      entries.some((entry) => entry.matchId === privateMatch.matchId),
+    ).toBe(false);
     expect(JSON.stringify(entries)).not.toMatch(
       /joinToken|sessionToken|reconnectToken|tokenHash|deckHash|deckSnapshot|privateDeck|cardInstances|legalActions/i,
     );
@@ -2738,7 +4372,9 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("exposes only the safe public projection for active public spectators", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "public-spectator-http" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "public-spectator-http",
+    });
     const publicMatch = await service.createMatch({
       hostSide: "runner",
       mode: "human_runner_vs_corp_ai",
@@ -2780,7 +4416,8 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(spectatorText).not.toMatch(
         /playerView|legalActions|pendingChoice|joinToken|sessionToken|reconnectToken|tokenHash|cardInstances|privateDeck/i,
       );
-      if (hiddenDefinitionId) expect(spectatorText).not.toContain(hiddenDefinitionId);
+      if (hiddenDefinitionId)
+        expect(spectatorText).not.toContain(hiddenDefinitionId);
       if (hiddenTitle) expect(spectatorText).not.toContain(hiddenTitle);
 
       const privateResponse = await fetch(
@@ -2793,34 +4430,55 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("V23A-T011 V23A-T016 rejects stale tokenless LAN joins after status changes", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v23a-race" });
-    const created = await service.createMatch({ hostSide: "runner", seed: "v23a-race-match", mode: "human_vs_human", isPublic: true });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "v23a-race",
+    });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "v23a-race-match",
+      mode: "human_vs_human",
+      isPublic: true,
+    });
     const initiallyListed = await service.listOpenMatches();
-    expect(initiallyListed.some((entry) => entry.matchId === created.matchId)).toBe(true);
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    expect(
+      initiallyListed.some((entry) => entry.matchId === created.matchId),
+    ).toBe(true);
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing race join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Teilnehmer B" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Teilnehmer B",
+    });
     expect("error" in joined).toBe(false);
-    const staleJoin = await service.joinMatch(created.matchId, { displayName: "Später Join" });
+    const staleJoin = await service.joinMatch(created.matchId, {
+      displayName: "Später Join",
+    });
     expect("error" in staleJoin).toBe(true);
-    if (!("error" in staleJoin)) throw new Error("Expected stale join rejection");
+    if (!("error" in staleJoin))
+      throw new Error("Expected stale join rejection");
     expect(staleJoin.error.message).not.toContain("runner");
     expect(staleJoin.error.message).not.toContain("corp");
     const listedAfter = await service.listOpenMatches();
-    expect(listedAfter.some((entry) => entry.matchId === created.matchId)).toBe(false);
+    expect(listedAfter.some((entry) => entry.matchId === created.matchId)).toBe(
+      false,
+    );
     const stored = await service.loadForTest(created.matchId);
     expect(stored?.match.status).toBe("active");
     expect(stored?.sessions).toHaveLength(2);
   });
 
   it("V23A-T019 keeps open-list reads responsive in small LAN setups", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v23a-performance" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "v23a-performance",
+    });
     for (let index = 0; index < 12; index += 1) {
       await service.createMatch({
         hostSide: index % 2 === 0 ? "runner" : "corp",
         seed: `v23a-perf-${index}`,
         mode: "human_vs_human",
-        isPublic: index % 3 !== 0
+        isPublic: index % 3 !== 0,
       });
     }
     const startedAt = Date.now();
@@ -2832,7 +4490,10 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("keeps normal Human-vs-Human matches in the start lobby until both players are ready", async () => {
     let now = "2026-05-04T20:00:00.000Z";
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "join-deck-handshake", now: () => now });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "join-deck-handshake",
+      now: () => now,
+    });
     const created = await service.createMatch({
       hostSide: "random",
       seed: "join-deck-handshake",
@@ -2841,10 +4502,12 @@ describe("MVP 0.2 multiplayer service", () => {
       settings: { matchFormat: "single_game" },
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6"
-      }
+        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6",
+      },
     });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
     const pending = await service.loadForTest(created.matchId);
 
@@ -2865,16 +4528,20 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(pending?.match.deckSetup)).not.toContain("cards");
     expect(pending?.startLobby?.countdownSeconds).toBe(5);
 
-    const missingDecks = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Joiner" });
+    const missingDecks = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Joiner",
+    });
     expect("error" in missingDecks).toBe(true);
-    if (!("error" in missingDecks)) throw new Error("Expected deck requirement error");
+    if (!("error" in missingDecks))
+      throw new Error("Expected deck requirement error");
     expect(missingDecks.error.code).toBe("join_runner_deck_missing");
 
     const joined = await service.joinMatch(created.matchId, {
       token: joinToken,
       displayName: "Joiner",
       runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
     });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
@@ -2897,28 +4564,56 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(joined)).not.toContain("Simple Priority Agenda");
     expect(JSON.stringify(joined)).not.toContain("cardInstances");
 
-    const chat = await service.sendLobbyChat({ matchId: created.matchId, side: created.hostSide, sessionToken: created.hostSessionToken, text: "  Hallo zum Start <b>  " });
+    const chat = await service.sendLobbyChat({
+      matchId: created.matchId,
+      side: created.hostSide,
+      sessionToken: created.hostSessionToken,
+      text: "  Hallo zum Start <b>  ",
+    });
     expect(chat.ok).toBe(true);
     if (!chat.ok) throw new Error(chat.error.message);
-    expect("startLobby" in chat.actorPayload ? chat.actorPayload.startLobby?.chatMessages.at(-1)?.text : "").toBe("Hallo zum Start <b>");
+    expect(
+      "startLobby" in chat.actorPayload
+        ? chat.actorPayload.startLobby?.chatMessages.at(-1)?.text
+        : "",
+    ).toBe("Hallo zum Start <b>");
     expect(JSON.stringify(chat.actorPayload)).not.toContain("sessionToken");
     expect(JSON.stringify(chat.actorPayload)).not.toContain("deckHash");
 
-    const hostReady = await service.setLobbyReady({ matchId: created.matchId, side: created.hostSide, sessionToken: created.hostSessionToken, ready: true });
+    const hostReady = await service.setLobbyReady({
+      matchId: created.matchId,
+      side: created.hostSide,
+      sessionToken: created.hostSessionToken,
+      ready: true,
+    });
     expect(hostReady.ok).toBe(true);
     if (!hostReady.ok) throw new Error(hostReady.error.message);
-    const joinerReady = await service.setLobbyReady({ matchId: created.matchId, side: joined.side, sessionToken: joined.sessionToken, ready: true });
+    const joinerReady = await service.setLobbyReady({
+      matchId: created.matchId,
+      side: joined.side,
+      sessionToken: joined.sessionToken,
+      ready: true,
+    });
     expect(joinerReady.ok).toBe(true);
     if (!joinerReady.ok) throw new Error(joinerReady.error.message);
     expect(joinerReady.actorPayload.matchStatus).toBe("countdown");
 
     const countdown = await service.loadForTest(created.matchId);
     expect(countdown?.match.status).toBe("countdown");
-    const cancelled = await service.cancelLobbyCountdown({ matchId: created.matchId, side: joined.side, sessionToken: joined.sessionToken });
+    const cancelled = await service.cancelLobbyCountdown({
+      matchId: created.matchId,
+      side: joined.side,
+      sessionToken: joined.sessionToken,
+    });
     expect(cancelled.ok).toBe(true);
     if (!cancelled.ok) throw new Error(cancelled.error.message);
     expect(cancelled.actorPayload.matchStatus).toBe("ready_check");
-    const restarted = await service.setLobbyReady({ matchId: created.matchId, side: joined.side, sessionToken: joined.sessionToken, ready: true });
+    const restarted = await service.setLobbyReady({
+      matchId: created.matchId,
+      side: joined.side,
+      sessionToken: joined.sessionToken,
+      ready: true,
+    });
     expect(restarted.ok).toBe(true);
     if (!restarted.ok) throw new Error(restarted.error.message);
     expect(restarted.actorPayload.matchStatus).toBe("countdown");
@@ -2937,36 +4632,76 @@ describe("MVP 0.2 multiplayer service", () => {
     const pendingCancel = await pending.service.cancelMatch({
       matchId: pending.created.matchId,
       side: pending.created.hostSide,
-      sessionToken: pending.created.hostSessionToken
+      sessionToken: pending.created.hostSessionToken,
     });
     expect(pendingCancel.ok).toBe(true);
     if (!pendingCancel.ok) throw new Error(pendingCancel.error.message);
     expect(pendingCancel.actorPayload.matchStatus).toBe("cancelled");
-    expect(pendingCancel.actorPayload.lifecycleResult).toMatchObject({ status: "cancelled", reason: "cancel", actorSide: pending.created.hostSide });
+    expect(pendingCancel.actorPayload.lifecycleResult).toMatchObject({
+      status: "cancelled",
+      reason: "cancel",
+      actorSide: pending.created.hostSide,
+    });
     expectLifecyclePayloadSafe(pendingCancel.actorPayload);
-    await expectOldTokensRejected(pending.service, pending.created.matchId, pending.created.hostSide, pending.created.hostSessionToken, pending.created.hostReconnectToken);
-    const pendingJoinAfterCancel = await pending.service.joinMatch(pending.created.matchId, { token: pending.joinToken });
+    await expectOldTokensRejected(
+      pending.service,
+      pending.created.matchId,
+      pending.created.hostSide,
+      pending.created.hostSessionToken,
+      pending.created.hostReconnectToken,
+    );
+    const pendingJoinAfterCancel = await pending.service.joinMatch(
+      pending.created.matchId,
+      { token: pending.joinToken },
+    );
     expect("error" in pendingJoinAfterCancel).toBe(true);
 
     const ready = await readyLobby("v104-cancel-ready");
-    const readyCancel = await ready.service.cancelMatch({ matchId: ready.created.matchId, side: ready.created.hostSide, sessionToken: ready.created.hostSessionToken });
+    const readyCancel = await ready.service.cancelMatch({
+      matchId: ready.created.matchId,
+      side: ready.created.hostSide,
+      sessionToken: ready.created.hostSessionToken,
+    });
     expect(readyCancel.ok).toBe(true);
     if (!readyCancel.ok) throw new Error(readyCancel.error.message);
     expect(readyCancel.actorPayload.matchStatus).toBe("cancelled");
     expect(readyCancel.opponentPayload?.matchStatus).toBe("cancelled");
-    expect((await ready.service.loadForTest(ready.created.matchId))?.gameState).toBeFalsy();
-    await expectOldTokensRejected(ready.service, ready.created.matchId, ready.created.hostSide, ready.created.hostSessionToken, ready.created.hostReconnectToken);
-    await expectOldTokensRejected(ready.service, ready.created.matchId, ready.joined.side, ready.joined.sessionToken, ready.joined.reconnectToken);
+    expect(
+      (await ready.service.loadForTest(ready.created.matchId))?.gameState,
+    ).toBeFalsy();
+    await expectOldTokensRejected(
+      ready.service,
+      ready.created.matchId,
+      ready.created.hostSide,
+      ready.created.hostSessionToken,
+      ready.created.hostReconnectToken,
+    );
+    await expectOldTokensRejected(
+      ready.service,
+      ready.created.matchId,
+      ready.joined.side,
+      ready.joined.sessionToken,
+      ready.joined.reconnectToken,
+    );
 
     const countdown = await countdownLobby("v104-cancel-countdown");
-    const countdownCancel = await countdown.service.cancelMatch({ matchId: countdown.created.matchId, side: countdown.created.hostSide, sessionToken: countdown.created.hostSessionToken });
+    const countdownCancel = await countdown.service.cancelMatch({
+      matchId: countdown.created.matchId,
+      side: countdown.created.hostSide,
+      sessionToken: countdown.created.hostSessionToken,
+    });
     expect(countdownCancel.ok).toBe(true);
     if (!countdownCancel.ok) throw new Error(countdownCancel.error.message);
     expect(countdownCancel.actorPayload.matchStatus).toBe("cancelled");
     expect(countdownCancel.opponentPayload?.matchStatus).toBe("cancelled");
-    const activateAfterCancel = await countdown.service.activateLobbyCountdown(countdown.created.matchId);
+    const activateAfterCancel = await countdown.service.activateLobbyCountdown(
+      countdown.created.matchId,
+    );
     expect(activateAfterCancel.ok).toBe(false);
-    expect((await countdown.service.loadForTest(countdown.created.matchId))?.gameState).toBeFalsy();
+    expect(
+      (await countdown.service.loadForTest(countdown.created.matchId))
+        ?.gameState,
+    ).toBeFalsy();
   });
 
   it("keeps the host lobby open when the joiner leaves before game start", async () => {
@@ -2974,76 +4709,118 @@ describe("MVP 0.2 multiplayer service", () => {
     const noServerSessionLeave = await pending.service.leaveMatch({
       matchId: pending.created.matchId,
       side: otherSide(pending.created.hostSide),
-      sessionToken: ""
+      sessionToken: "",
     });
     expect(noServerSessionLeave.ok).toBe(false);
-    expect((await pending.service.loadForTest(pending.created.matchId))?.match.status).toBe("pending");
+    expect(
+      (await pending.service.loadForTest(pending.created.matchId))?.match
+        .status,
+    ).toBe("pending");
 
     const ready = await readyLobby("v104-leave-ready");
-    const readyLeave = await ready.service.leaveMatch({ matchId: ready.created.matchId, side: ready.joined.side, sessionToken: ready.joined.sessionToken });
+    const readyLeave = await ready.service.leaveMatch({
+      matchId: ready.created.matchId,
+      side: ready.joined.side,
+      sessionToken: ready.joined.sessionToken,
+    });
     expect(readyLeave.ok).toBe(true);
     if (!readyLeave.ok) throw new Error(readyLeave.error.message);
     expect(readyLeave.actorPayload.matchStatus).toBe("pending");
     expect(readyLeave.opponentPayload?.matchStatus).toBe("pending");
-    if (!readyLeave.opponentPayload || !("startLobby" in readyLeave.opponentPayload)) throw new Error("Expected host lobby payload");
-    expect(readyLeave.opponentPayload.startLobby?.participants.player_b.connected).toBe(false);
+    if (
+      !readyLeave.opponentPayload ||
+      !("startLobby" in readyLeave.opponentPayload)
+    )
+      throw new Error("Expected host lobby payload");
+    expect(
+      readyLeave.opponentPayload.startLobby?.participants.player_b.connected,
+    ).toBe(false);
     expect(readyLeave.opponentPayload.startLobby?.hostReady).toBe(false);
     expect(readyLeave.actorPayload.lifecycleResult).toBeUndefined();
     expectLifecyclePayloadSafe(readyLeave.actorPayload);
-    await expectOldTokensRejected(ready.service, ready.created.matchId, ready.joined.side, ready.joined.sessionToken, ready.joined.reconnectToken);
+    await expectOldTokensRejected(
+      ready.service,
+      ready.created.matchId,
+      ready.joined.side,
+      ready.joined.sessionToken,
+      ready.joined.reconnectToken,
+    );
     const readyRejoin = await ready.service.joinMatch(ready.created.matchId, {
       token: ready.joinToken,
       displayName: "Joiner mit neuem Deck",
       runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
     });
     expect("error" in readyRejoin).toBe(false);
     if ("error" in readyRejoin) throw new Error(readyRejoin.error.message);
     expect(readyRejoin.matchStatus).toBe("ready_check");
 
     const countdown = await countdownLobby("v104-leave-countdown");
-    const countdownLeave = await countdown.service.leaveMatch({ matchId: countdown.created.matchId, side: countdown.joined.side, sessionToken: countdown.joined.sessionToken });
+    const countdownLeave = await countdown.service.leaveMatch({
+      matchId: countdown.created.matchId,
+      side: countdown.joined.side,
+      sessionToken: countdown.joined.sessionToken,
+    });
     expect(countdownLeave.ok).toBe(true);
     if (!countdownLeave.ok) throw new Error(countdownLeave.error.message);
     expect(countdownLeave.actorPayload.matchStatus).toBe("pending");
     expect(countdownLeave.opponentPayload?.matchStatus).toBe("pending");
-    if (!countdownLeave.opponentPayload || !("startLobby" in countdownLeave.opponentPayload)) throw new Error("Expected host lobby payload");
-    expect(countdownLeave.opponentPayload.startLobby?.countdownEndsAt).toBeUndefined();
-    const activateAfterLeave = await countdown.service.activateLobbyCountdown(countdown.created.matchId);
+    if (
+      !countdownLeave.opponentPayload ||
+      !("startLobby" in countdownLeave.opponentPayload)
+    )
+      throw new Error("Expected host lobby payload");
+    expect(
+      countdownLeave.opponentPayload.startLobby?.countdownEndsAt,
+    ).toBeUndefined();
+    const activateAfterLeave = await countdown.service.activateLobbyCountdown(
+      countdown.created.matchId,
+    );
     expect(activateAfterLeave.ok).toBe(false);
-    expect((await countdown.service.loadForTest(countdown.created.matchId))?.gameState).toBeFalsy();
+    expect(
+      (await countdown.service.loadForTest(countdown.created.matchId))
+        ?.gameState,
+    ).toBeFalsy();
   });
 
   it("exposes player-clock settings in start lobby payloads", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "player-clock-lobby",
       publicWebBaseUrl: "http://127.0.0.1:3100",
-      publicServerBaseUrl: "http://127.0.0.1:8787"
+      publicServerBaseUrl: "http://127.0.0.1:8787",
     });
     const created = await service.createMatch({
       hostSide: "runner",
       seed: "player-clock-lobby",
       mode: "human_vs_human",
-      settings: { playerClock: { mode: "player_clock", startingTimeMs: 20 * 60_000, gracePeriodMs: 15_000 } },
+      settings: {
+        playerClock: {
+          mode: "player_clock",
+          startingTimeMs: 20 * 60_000,
+          gracePeriodMs: 15_000,
+        },
+      },
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6"
-      }
+        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6",
+      },
     });
     expect(created.playerClock).toMatchObject({
       schemaVersion: "player-clock-v1",
       mode: "player_clock",
       startingTimeMs: 20 * 60_000,
       gracePeriodMs: 15_000,
-      warningLevel: "none"
+      warningLevel: "none",
     });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
     const joined = await service.joinMatch(created.matchId, {
       token: joinToken,
       displayName: "Joiner",
       runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
     });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
@@ -3051,27 +4828,46 @@ describe("MVP 0.2 multiplayer service", () => {
       mode: "player_clock",
       startingTimeMs: 20 * 60_000,
       gracePeriodMs: 15_000,
-      warningLevel: "none"
+      warningLevel: "none",
     });
-    expect(JSON.stringify(joined.playerClock)).not.toMatch(/cardInstances|privatePayload|decklist|AIInput|DecisionDebug|FullState/i);
+    expect(JSON.stringify(joined.playerClock)).not.toMatch(
+      /cardInstances|privatePayload|decklist|AIInput|DecisionDebug|FullState/i,
+    );
   });
 
   it("records V1.0.4 forfeit without faking an Engine win or changing replay StateHash", async () => {
     const runnerMatch = await joinedMatch("v104-forfeit-runner");
-    const runnerBefore = await runnerMatch.service.loadForTest(runnerMatch.matchId);
-    if (!runnerBefore?.gameState) throw new Error("Missing runner forfeit state");
+    const runnerBefore = await runnerMatch.service.loadForTest(
+      runnerMatch.matchId,
+    );
+    if (!runnerBefore?.gameState)
+      throw new Error("Missing runner forfeit state");
     const runnerHash = hashState(runnerBefore.gameState);
-    const runnerForfeit = await runnerMatch.service.forfeitMatch({ matchId: runnerMatch.matchId, side: "runner", sessionToken: runnerMatch.runner.sessionToken });
+    const runnerForfeit = await runnerMatch.service.forfeitMatch({
+      matchId: runnerMatch.matchId,
+      side: "runner",
+      sessionToken: runnerMatch.runner.sessionToken,
+    });
     expect(runnerForfeit.ok).toBe(true);
     if (!runnerForfeit.ok) throw new Error(runnerForfeit.error.message);
     const runnerForfeitPayload = expectSidePayload(runnerForfeit.actorPayload);
     expect(runnerForfeitPayload.matchStatus).toBe("forfeited");
-    expect(runnerForfeitPayload.resultSummary).toMatchObject({ reason: "forfeit", winner: "corp", winnerSide: "corp", loserSide: "runner", finalEngineStateHash: runnerHash });
+    expect(runnerForfeitPayload.resultSummary).toMatchObject({
+      reason: "forfeit",
+      winner: "corp",
+      winnerSide: "corp",
+      loserSide: "runner",
+      finalEngineStateHash: runnerHash,
+    });
     expect(runnerForfeitPayload.finalStateHash).toBe(runnerHash);
-    const runnerStored = await runnerMatch.service.loadForTest(runnerMatch.matchId);
+    const runnerStored = await runnerMatch.service.loadForTest(
+      runnerMatch.matchId,
+    );
     expect(runnerStored?.gameState.winner).toBeFalsy();
     expect(runnerStored?.match.winner).toBe("corp");
-    const runnerReplay = await runnerMatch.service.replayMatch(runnerMatch.matchId);
+    const runnerReplay = await runnerMatch.service.replayMatch(
+      runnerMatch.matchId,
+    );
     expect(runnerReplay.ok).toBe(true);
     expect(runnerReplay.finalStateHash).toBe(runnerHash);
     expectLifecyclePayloadSafe(runnerForfeitPayload);
@@ -3080,44 +4876,76 @@ describe("MVP 0.2 multiplayer service", () => {
     const corpBefore = await corpMatch.service.loadForTest(corpMatch.matchId);
     if (!corpBefore?.gameState) throw new Error("Missing corp forfeit state");
     const corpHash = hashState(corpBefore.gameState);
-    const corpForfeit = await corpMatch.service.forfeitMatch({ matchId: corpMatch.matchId, side: "corp", sessionToken: corpMatch.corp.sessionToken });
+    const corpForfeit = await corpMatch.service.forfeitMatch({
+      matchId: corpMatch.matchId,
+      side: "corp",
+      sessionToken: corpMatch.corp.sessionToken,
+    });
     expect(corpForfeit.ok).toBe(true);
     if (!corpForfeit.ok) throw new Error(corpForfeit.error.message);
-    expect(expectSidePayload(corpForfeit.actorPayload).resultSummary).toMatchObject({ reason: "forfeit", winner: "runner", winnerSide: "runner", loserSide: "corp", finalEngineStateHash: corpHash });
-    expect((await corpMatch.service.replayMatch(corpMatch.matchId)).finalStateHash).toBe(corpHash);
+    expect(
+      expectSidePayload(corpForfeit.actorPayload).resultSummary,
+    ).toMatchObject({
+      reason: "forfeit",
+      winner: "runner",
+      winnerSide: "runner",
+      loserSide: "corp",
+      finalEngineStateHash: corpHash,
+    });
+    expect(
+      (await corpMatch.service.replayMatch(corpMatch.matchId)).finalStateHash,
+    ).toBe(corpHash);
   });
 
   it("allows Human-vs-KI forfeit only from the human side and stops AI advance afterwards", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v104-ai-forfeit" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "v104-ai-forfeit",
+    });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "v104-ai-forfeit",
-      corpDifficulty: "normal"
+      corpDifficulty: "normal",
     });
-    const beforeHash = hashState((await service.loadForTest(created.matchId))!.gameState);
-    const aiForfeit = await service.forfeitMatch({ matchId: created.matchId, side: "corp", sessionToken: created.hostSessionToken });
+    const beforeHash = hashState(
+      (await service.loadForTest(created.matchId))!.gameState,
+    );
+    const aiForfeit = await service.forfeitMatch({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+    });
     expect(aiForfeit.ok).toBe(false);
     if (aiForfeit.ok) throw new Error("Expected AI forfeit rejection");
     expect(aiForfeit.error.code).toBe("unauthorized");
 
-    const humanForfeit = await service.forfeitMatch({ matchId: created.matchId, side: "runner", sessionToken: created.hostSessionToken });
+    const humanForfeit = await service.forfeitMatch({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+    });
     expect(humanForfeit.ok).toBe(true);
     if (!humanForfeit.ok) throw new Error(humanForfeit.error.message);
     const humanForfeitPayload = expectSidePayload(humanForfeit.actorPayload);
     expect(humanForfeitPayload.matchStatus).toBe("forfeited");
     expect(humanForfeitPayload.aiTurnPresentation?.canAdvanceAi).toBe(false);
-    expect(humanForfeitPayload.resultSummary).toMatchObject({ reason: "forfeit", winnerSide: "corp", loserSide: "runner", finalEngineStateHash: beforeHash });
+    expect(humanForfeitPayload.resultSummary).toMatchObject({
+      reason: "forfeit",
+      winnerSide: "corp",
+      loserSide: "runner",
+      finalEngineStateHash: beforeHash,
+    });
     const advanceAfterForfeit = await service.advanceAi({
       matchId: created.matchId,
       side: "runner",
       sessionToken: created.hostSessionToken,
       knownStateVersion: created.playerView.stateVersion,
       knownMatchVersion: humanForfeitPayload.matchVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
     expect(advanceAfterForfeit.ok).toBe(false);
-    if (advanceAfterForfeit.ok) throw new Error("Expected advance_ai rejection");
+    if (advanceAfterForfeit.ok)
+      throw new Error("Expected advance_ai rejection");
     expect(advanceAfterForfeit.error.code).toBe("match_not_active");
   });
 
@@ -3128,36 +4956,59 @@ describe("MVP 0.2 multiplayer service", () => {
       tokenSalt: "player-clock-grace",
       publicWebBaseUrl: "http://127.0.0.1:3100",
       publicServerBaseUrl: "http://127.0.0.1:8787",
-      now: () => new Date(nowMs).toISOString()
+      now: () => new Date(nowMs).toISOString(),
     });
     const created = await service.createMatch({
       hostSide: "corp",
       seed: "player-clock-grace",
-      settings: { playerClock: { mode: "player_clock", startingTimeMs: 120_000, gracePeriodMs: 5_000 } }
+      settings: {
+        playerClock: {
+          mode: "player_clock",
+          startingTimeMs: 120_000,
+          gracePeriodMs: 5_000,
+        },
+      },
     });
     expect(created.joinUrl).toBeTruthy();
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
-    const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+    const corp = {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    };
     await forceSetupComplete(service, created.matchId);
 
     const before = await bootstrap(service, created.matchId, corp);
-    const beforeHash = hashState((await service.loadForTest(created.matchId))!.gameState);
+    const beforeHash = hashState(
+      (await service.loadForTest(created.matchId))!.gameState,
+    );
     expect(before.playerClock).toMatchObject({
       schemaVersion: "player-clock-v1",
       mode: "player_clock",
       decisionOwnerSide: "corp",
       remainingMs: { runner: 120_000, corp: 120_000 },
       gracePeriodMs: 5_000,
-      warningLevel: "grace"
+      warningLevel: "grace",
     });
-    const mandatoryDraw = mustAction(before, (action) => action.type === "mandatory_draw");
+    const mandatoryDraw = mustAction(
+      before,
+      (action) => action.type === "mandatory_draw",
+    );
 
     nowMs = startMs + 7_000;
-    const reconnected = await service.reconnectMatch(created.matchId, { side: "corp", reconnectToken: corp.reconnectToken });
+    const reconnected = await service.reconnectMatch(created.matchId, {
+      side: "corp",
+      reconnectToken: corp.reconnectToken,
+    });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
     expect(reconnected.playerClock).toMatchObject({
@@ -3165,9 +5016,11 @@ describe("MVP 0.2 multiplayer service", () => {
       decisionOwnerSide: "corp",
       remainingMs: { runner: 120_000, corp: 118_000 },
       graceRemainingMs: 0,
-      warningLevel: "charging"
+      warningLevel: "charging",
     });
-    expect(JSON.stringify(reconnected.playerClock)).not.toMatch(/cardInstances|privatePayload|decklist|AIInput|DecisionDebug|FullState/i);
+    expect(JSON.stringify(reconnected.playerClock)).not.toMatch(
+      /cardInstances|privatePayload|decklist|AIInput|DecisionDebug|FullState/i,
+    );
 
     nowMs = startMs + 126_000;
     const expired = await service.submitAction({
@@ -3176,25 +5029,33 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: reconnected.sessionToken,
       actionId: mandatoryDraw.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "player-clock-expire"
+      idempotencyKey: "player-clock-expire",
     });
     expect(expired.ok).toBe(false);
     if (expired.ok) throw new Error("Expected time expiry");
     expect(expired.error.code).toBe("time_expired");
     const payload = expectSidePayload(expired.payload);
     expect(payload.matchStatus).toBe("finished");
-    expect(payload.playerClock).toMatchObject({ mode: "player_clock", expiredSide: "corp", warningLevel: "expired" });
+    expect(payload.playerClock).toMatchObject({
+      mode: "player_clock",
+      expiredSide: "corp",
+      warningLevel: "expired",
+    });
     expect(payload.resultSummary).toMatchObject({
       reason: "time_expired",
       winner: "runner",
       winnerSide: "runner",
       loserSide: "corp",
-      finalEngineStateHash: beforeHash
+      finalEngineStateHash: beforeHash,
     });
     expect(payload.eventTail.at(-1)?.publicPayload.type).toBe("time_expired");
     expectLifecyclePayloadSafe(payload);
-    expect((await service.loadForTest(created.matchId))?.gameState.winner).toBeFalsy();
-    expect((await service.replayMatch(created.matchId)).finalStateHash).toBe(beforeHash);
+    expect(
+      (await service.loadForTest(created.matchId))?.gameState.winner,
+    ).toBeFalsy();
+    expect((await service.replayMatch(created.matchId)).finalStateHash).toBe(
+      beforeHash,
+    );
   });
 
   it("moves the displayed player time to the Runner as soon as paced Corp AI finishes", async () => {
@@ -3202,21 +5063,31 @@ describe("MVP 0.2 multiplayer service", () => {
     let nowMs = startMs;
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "player-clock-paced-corp-ai",
-      now: () => new Date(nowMs).toISOString()
+      now: () => new Date(nowMs).toISOString(),
     });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "player-clock-paced-corp-ai",
       corpDifficulty: "normal",
-      aiPacingMode: "paced"
+      aiPacingMode: "paced",
     });
-    const runner = { side: "runner" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
-    const afterSetup = await submitChoice(service, created.matchId, runner, "keep", "player-clock-paced-corp-ai-setup");
+    const runner = {
+      side: "runner" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    };
+    const afterSetup = await submitChoice(
+      service,
+      created.matchId,
+      runner,
+      "keep",
+      "player-clock-paced-corp-ai-setup",
+    );
     expect(afterSetup.playerClock).toMatchObject({
       mode: "none",
       decisionOwnerSide: "corp",
-      consumedMs: { runner: 0, corp: 0 }
+      consumedMs: { runner: 0, corp: 0 },
     });
 
     nowMs = startMs + 2_000;
@@ -3225,7 +5096,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: created.hostSessionToken,
       knownStateVersion: afterSetup.playerView.stateVersion,
-      mode: "until_human"
+      mode: "until_human",
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
@@ -3234,14 +5105,14 @@ describe("MVP 0.2 multiplayer service", () => {
       mode: "none",
       decisionOwnerSide: "runner",
       activityStartedAtMs: nowMs,
-      consumedMs: { runner: 0, corp: 2_000 }
+      consumedMs: { runner: 0, corp: 2_000 },
     });
 
     nowMs = startMs + 5_000;
     const runnerTurn = await bootstrap(service, created.matchId, runner);
     expect(runnerTurn.playerClock).toMatchObject({
       decisionOwnerSide: "runner",
-      consumedMs: { runner: 3_000, corp: 2_000 }
+      consumedMs: { runner: 3_000, corp: 2_000 },
     });
   });
 
@@ -3252,17 +5123,29 @@ describe("MVP 0.2 multiplayer service", () => {
       tokenSalt: "player-clock-none",
       publicWebBaseUrl: "http://127.0.0.1:3100",
       publicServerBaseUrl: "http://127.0.0.1:8787",
-      now: () => new Date(nowMs).toISOString()
+      now: () => new Date(nowMs).toISOString(),
     });
-    const created = await service.createMatch({ hostSide: "corp", seed: "player-clock-none" });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "player-clock-none",
+    });
     expect(created.joinUrl).toBeTruthy();
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
     const matchId = created.matchId;
-    const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+    const corp = {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    };
     await forceSetupComplete(service, matchId);
 
     const before = await bootstrap(service, matchId, corp);
@@ -3271,21 +5154,29 @@ describe("MVP 0.2 multiplayer service", () => {
       mode: "none",
       decisionOwnerSide: "corp",
       consumedMs: { runner: 0, corp: 0 },
-      warningLevel: "none"
+      warningLevel: "none",
     });
-    const mandatoryDraw = mustAction(before, (action) => action.type === "mandatory_draw");
+    const mandatoryDraw = mustAction(
+      before,
+      (action) => action.type === "mandatory_draw",
+    );
 
     nowMs = startMs + 6_000;
-    const reconnected = await service.reconnectMatch(matchId, { side: "corp", reconnectToken: corp.reconnectToken });
+    const reconnected = await service.reconnectMatch(matchId, {
+      side: "corp",
+      reconnectToken: corp.reconnectToken,
+    });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
     expect(reconnected.playerClock).toMatchObject({
       mode: "none",
       decisionOwnerSide: "corp",
       consumedMs: { runner: 0, corp: 6_000 },
-      warningLevel: "none"
+      warningLevel: "none",
     });
-    expect(JSON.stringify(reconnected.playerClock)).not.toMatch(/cardInstances|privatePayload|decklist|AIInput|DecisionDebug|FullState/i);
+    expect(JSON.stringify(reconnected.playerClock)).not.toMatch(
+      /cardInstances|privatePayload|decklist|AIInput|DecisionDebug|FullState/i,
+    );
 
     nowMs = startMs + 126_000;
     const submitted = await service.submitAction({
@@ -3294,14 +5185,14 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: reconnected.sessionToken,
       actionId: mandatoryDraw.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "player-clock-none-action"
+      idempotencyKey: "player-clock-none-action",
     });
     expect(submitted.ok).toBe(true);
     if (!submitted.ok) throw new Error(submitted.error.message);
     expect(submitted.actorPayload.playerClock).toMatchObject({
       mode: "none",
       consumedMs: { runner: 0, corp: 126_000 },
-      warningLevel: "none"
+      warningLevel: "none",
     });
     expect(submitted.actorPayload.matchStatus).toBe("active");
     expect(submitted.actorPayload.resultSummary).toBeUndefined();
@@ -3309,77 +5200,150 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("recreates V1.0.4 matches with new identity, links, seed and tokens while old tokens stop working", async () => {
     const pending = await pendingDeckMatch("v104-recreate-pending");
-    const oldStored = await pending.service.loadForTest(pending.created.matchId);
-    const recreated = await pending.service.recreateMatch(pending.created.matchId, {
-      side: pending.created.hostSide,
-      sessionToken: pending.created.hostSessionToken,
-      displayName: "Host Recreate"
-    });
+    const oldStored = await pending.service.loadForTest(
+      pending.created.matchId,
+    );
+    const recreated = await pending.service.recreateMatch(
+      pending.created.matchId,
+      {
+        side: pending.created.hostSide,
+        sessionToken: pending.created.hostSessionToken,
+        displayName: "Host Recreate",
+      },
+    );
     expect(recreated.ok).toBe(true);
-    if (!recreated.ok || !recreated.newMatch) throw new Error("Expected recreated match");
+    if (!recreated.ok || !recreated.newMatch)
+      throw new Error("Expected recreated match");
     expect(recreated.actorPayload.matchStatus).toBe("cancelled");
     expect(recreated.newMatch.matchId).not.toBe(pending.created.matchId);
     expect(recreated.newMatch.joinUrl).toBeTruthy();
     expect(recreated.newMatch.joinUrl).not.toBe(pending.created.joinUrl);
-    expect(recreated.newMatch.hostSessionToken).not.toBe(pending.created.hostSessionToken);
-    expect(recreated.newMatch.hostReconnectToken).not.toBe(pending.created.hostReconnectToken);
-    const newStored = await pending.service.loadForTest(recreated.newMatch.matchId);
+    expect(recreated.newMatch.hostSessionToken).not.toBe(
+      pending.created.hostSessionToken,
+    );
+    expect(recreated.newMatch.hostReconnectToken).not.toBe(
+      pending.created.hostReconnectToken,
+    );
+    const newStored = await pending.service.loadForTest(
+      recreated.newMatch.matchId,
+    );
     expect(newStored?.match.seed).toBeTruthy();
     expect(newStored?.match.seed).not.toBe(oldStored?.match.seed);
-    expect((await pending.service.loadForTest(pending.created.matchId))?.match.status).toBe("cancelled");
-    await expectOldTokensRejected(pending.service, pending.created.matchId, pending.created.hostSide, pending.created.hostSessionToken, pending.created.hostReconnectToken);
-    const staleJoin = await pending.service.joinMatch(pending.created.matchId, { token: pending.joinToken });
+    expect(
+      (await pending.service.loadForTest(pending.created.matchId))?.match
+        .status,
+    ).toBe("cancelled");
+    await expectOldTokensRejected(
+      pending.service,
+      pending.created.matchId,
+      pending.created.hostSide,
+      pending.created.hostSessionToken,
+      pending.created.hostReconnectToken,
+    );
+    const staleJoin = await pending.service.joinMatch(pending.created.matchId, {
+      token: pending.joinToken,
+    });
     expect("error" in staleJoin).toBe(true);
 
-    const cancelledRecreate = await pending.service.recreateMatch(pending.created.matchId, {
-      side: pending.created.hostSide,
-      sessionToken: pending.created.hostSessionToken,
-      displayName: "Host Again"
-    });
+    const cancelledRecreate = await pending.service.recreateMatch(
+      pending.created.matchId,
+      {
+        side: pending.created.hostSide,
+        sessionToken: pending.created.hostSessionToken,
+        displayName: "Host Again",
+      },
+    );
     expect(cancelledRecreate.ok).toBe(true);
-    if (!cancelledRecreate.ok || !cancelledRecreate.newMatch) throw new Error("Expected terminal recreate");
-    expect(cancelledRecreate.newMatch.matchId).not.toBe(recreated.newMatch.matchId);
+    if (!cancelledRecreate.ok || !cancelledRecreate.newMatch)
+      throw new Error("Expected terminal recreate");
+    expect(cancelledRecreate.newMatch.matchId).not.toBe(
+      recreated.newMatch.matchId,
+    );
   });
 
   it("delivers V1.1.0 setup mulligan choices side-safely through multiplayer and reconnect", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v110-setup-server" });
-    const created = await service.createMatch({ hostSide: "corp", seed: "v110-setup-server" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "v110-setup-server",
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "v110-setup-server",
+    });
     if (!created.joinUrl) throw new Error("Missing join URL");
     const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
 
-    const runner = { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
-    const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+    const runner = {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    };
+    const corp = {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    };
     const runnerView = await bootstrap(service, created.matchId, runner);
     const corpView = await bootstrap(service, created.matchId, corp);
     expect(runnerView.playerView.phase).toBe("setup");
     expect(runnerView.pendingChoice?.source).toBe("setup.mulligan");
-    expect(runnerView.pendingChoice?.options.map((option) => option.id)).toEqual(["keep", "mulligan"]);
+    expect(
+      runnerView.pendingChoice?.options.map((option) => option.id),
+    ).toEqual(["keep", "mulligan"]);
     expect(corpView.pendingChoice).toBeUndefined();
     expect(JSON.stringify(corpView)).not.toContain("Starthand behalten");
     expect(runnerView.playerView.agendaPointsToWin).toBe(7);
 
-    await submitChoice(service, created.matchId, runner, "keep", "v110-runner-keep");
-    const corpReconnect = await service.reconnectMatch(created.matchId, { side: "corp", reconnectToken: corp.reconnectToken });
+    await submitChoice(
+      service,
+      created.matchId,
+      runner,
+      "keep",
+      "v110-runner-keep",
+    );
+    const corpReconnect = await service.reconnectMatch(created.matchId, {
+      side: "corp",
+      reconnectToken: corp.reconnectToken,
+    });
     expect("error" in corpReconnect).toBe(false);
     if ("error" in corpReconnect) throw new Error(corpReconnect.error.message);
     expect(corpReconnect.pendingChoice?.source).toBe("setup.mulligan");
-    expect(corpReconnect.pendingChoice?.options.map((option) => option.id)).toEqual(["keep", "mulligan"]);
+    expect(
+      corpReconnect.pendingChoice?.options.map((option) => option.id),
+    ).toEqual(["keep", "mulligan"]);
 
-    const reconnectedCorp = { ...corp, sessionToken: corpReconnect.sessionToken, reconnectToken: corpReconnect.reconnectToken };
-    await submitChoice(service, created.matchId, reconnectedCorp, "keep", "v110-corp-keep");
+    const reconnectedCorp = {
+      ...corp,
+      sessionToken: corpReconnect.sessionToken,
+      reconnectToken: corpReconnect.reconnectToken,
+    };
+    await submitChoice(
+      service,
+      created.matchId,
+      reconnectedCorp,
+      "keep",
+      "v110-corp-keep",
+    );
     const after = await bootstrap(service, created.matchId, reconnectedCorp);
     expect(after.playerView.phase).toBe("corp_draw_phase");
-    expect(after.legalActions.some((action) => action.type === "mandatory_draw")).toBe(true);
+    expect(
+      after.legalActions.some((action) => action.type === "mandatory_draw"),
+    ).toBe(true);
   });
 
   it("runs actions only through the server pipeline with idempotency and stale-state rejection", async () => {
     const { service, corp, matchId } = await joinedMatch();
     const before = await bootstrap(service, matchId, corp);
-    const mandatory = mustAction(before, (action) => action.type === "mandatory_draw");
+    const mandatory = mustAction(
+      before,
+      (action) => action.type === "mandatory_draw",
+    );
 
     const first = await service.submitAction({
       matchId,
@@ -3387,7 +5351,7 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: corp.sessionToken,
       actionId: mandatory.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "corp-mandatory-1"
+      idempotencyKey: "corp-mandatory-1",
     });
     expect(first.ok).toBe(true);
     if (!first.ok) throw new Error(first.error.message);
@@ -3398,11 +5362,13 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: corp.sessionToken,
       actionId: mandatory.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "corp-mandatory-1"
+      idempotencyKey: "corp-mandatory-1",
     });
     expect(duplicate.ok).toBe(true);
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.receipt.stateVersionAfter).toBe(first.receipt.stateVersionAfter);
+    expect(duplicate.receipt.stateVersionAfter).toBe(
+      first.receipt.stateVersionAfter,
+    );
 
     const stale = await service.submitAction({
       matchId,
@@ -3410,7 +5376,7 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: corp.sessionToken,
       actionId: mandatory.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "corp-mandatory-stale"
+      idempotencyKey: "corp-mandatory-stale",
     });
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale rejection");
@@ -3424,8 +5390,15 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(stored)).not.toContain(corp.sessionToken);
 
     const concurrent = await joinedMatch("concurrent");
-    const concurrentBoot = await bootstrap(concurrent.service, concurrent.matchId, concurrent.corp);
-    const concurrentMandatory = mustAction(concurrentBoot, (action) => action.type === "mandatory_draw");
+    const concurrentBoot = await bootstrap(
+      concurrent.service,
+      concurrent.matchId,
+      concurrent.corp,
+    );
+    const concurrentMandatory = mustAction(
+      concurrentBoot,
+      (action) => action.type === "mandatory_draw",
+    );
     const [firstConcurrent, secondConcurrent] = await Promise.all([
       concurrent.service.submitAction({
         matchId: concurrent.matchId,
@@ -3433,7 +5406,7 @@ describe("MVP 0.2 multiplayer service", () => {
         sessionToken: concurrent.corp.sessionToken,
         actionId: concurrentMandatory.actionId,
         clientKnownStateVersion: 0,
-        idempotencyKey: "concurrent-a"
+        idempotencyKey: "concurrent-a",
       }),
       concurrent.service.submitAction({
         matchId: concurrent.matchId,
@@ -3441,10 +5414,12 @@ describe("MVP 0.2 multiplayer service", () => {
         sessionToken: concurrent.corp.sessionToken,
         actionId: concurrentMandatory.actionId,
         clientKnownStateVersion: 0,
-        idempotencyKey: "concurrent-b"
-      })
+        idempotencyKey: "concurrent-b",
+      }),
     ]);
-    expect([firstConcurrent.ok, secondConcurrent.ok].filter(Boolean)).toHaveLength(1);
+    expect(
+      [firstConcurrent.ok, secondConcurrent.ok].filter(Boolean),
+    ).toHaveLength(1);
   });
 
   it("reconnects a side and restores view, legal actions and event tail", async () => {
@@ -3452,7 +5427,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const reconnected = await service.reconnectMatch(matchId, {
       side: runner.side,
       reconnectToken: runner.reconnectToken,
-      displayName: "Runner Reloaded"
+      displayName: "Runner Reloaded",
     });
 
     expect("error" in reconnected).toBe(false);
@@ -3464,42 +5439,114 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(result.eventTail.length).toBeGreaterThan(0);
 
     const accessMatch = await joinedMatch("mp-win-1");
-    await submit(accessMatch.service, accessMatch.matchId, accessMatch.corp, (action) => action.type === "mandatory_draw", "mandatory");
-    await submit(accessMatch.service, accessMatch.matchId, accessMatch.corp, (action) => action.type === "end_turn", "end-turn");
-    await submitFirstChoice(accessMatch.service, accessMatch.matchId, accessMatch.corp, "discard");
-    await submit(accessMatch.service, accessMatch.matchId, accessMatch.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
-    const accessReconnect = await accessMatch.service.reconnectMatch(accessMatch.matchId, {
-      side: "runner",
-      reconnectToken: accessMatch.runner.reconnectToken
-    });
+    await submit(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.corp,
+      (action) => action.type === "mandatory_draw",
+      "mandatory",
+    );
+    await submit(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.corp,
+      (action) => action.type === "end_turn",
+      "end-turn",
+    );
+    await submitFirstChoice(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.corp,
+      "discard",
+    );
+    await submit(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "run-rd",
+    );
+    const accessReconnect = await accessMatch.service.reconnectMatch(
+      accessMatch.matchId,
+      {
+        side: "runner",
+        reconnectToken: accessMatch.runner.reconnectToken,
+      },
+    );
     expect("error" in accessReconnect).toBe(false);
-    if ("error" in accessReconnect) throw new Error(accessReconnect.error.message);
+    if ("error" in accessReconnect)
+      throw new Error(accessReconnect.error.message);
     expect(accessReconnect.playerView.run?.phase).toBe("access");
 
     const encounterMatch = await joinedMatch("mp-enc-1");
-    await submit(encounterMatch.service, encounterMatch.matchId, encounterMatch.corp, (action) => action.type === "mandatory_draw", "mandatory");
-    await submit(encounterMatch.service, encounterMatch.matchId, encounterMatch.corp, (action) => action.type === "install_card" && action.payload?.serverId === "rd" && String(action.source).includes("ice"), "install-ice");
-    await submit(encounterMatch.service, encounterMatch.matchId, encounterMatch.corp, (action) => action.type === "end_turn", "end-turn");
-    await submit(encounterMatch.service, encounterMatch.matchId, encounterMatch.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
-    await submit(encounterMatch.service, encounterMatch.matchId, encounterMatch.corp, (action) => action.type === "rez_ice", "rez");
-    const encounterReconnect = await encounterMatch.service.reconnectMatch(encounterMatch.matchId, {
-      side: "runner",
-      reconnectToken: encounterMatch.runner.reconnectToken
-    });
+    await submit(
+      encounterMatch.service,
+      encounterMatch.matchId,
+      encounterMatch.corp,
+      (action) => action.type === "mandatory_draw",
+      "mandatory",
+    );
+    await submit(
+      encounterMatch.service,
+      encounterMatch.matchId,
+      encounterMatch.corp,
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.serverId === "rd" &&
+        String(action.source).includes("ice"),
+      "install-ice",
+    );
+    await submit(
+      encounterMatch.service,
+      encounterMatch.matchId,
+      encounterMatch.corp,
+      (action) => action.type === "end_turn",
+      "end-turn",
+    );
+    await submit(
+      encounterMatch.service,
+      encounterMatch.matchId,
+      encounterMatch.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "run-rd",
+    );
+    await submit(
+      encounterMatch.service,
+      encounterMatch.matchId,
+      encounterMatch.corp,
+      (action) => action.type === "rez_ice",
+      "rez",
+    );
+    const encounterReconnect = await encounterMatch.service.reconnectMatch(
+      encounterMatch.matchId,
+      {
+        side: "runner",
+        reconnectToken: encounterMatch.runner.reconnectToken,
+      },
+    );
     expect("error" in encounterReconnect).toBe(false);
-    if ("error" in encounterReconnect) throw new Error(encounterReconnect.error.message);
+    if ("error" in encounterReconnect)
+      throw new Error(encounterReconnect.error.message);
     expect(encounterReconnect.playerView.run?.phase).toBe("encounter_ice");
   });
 
   it("allows undo before hidden information and blocks undo after access", async () => {
     const first = await joinedMatch("undo-safe");
-    const firstAction = await submit(first.service, first.matchId, first.corp, (action) => action.type === "mandatory_draw", "mandatory");
+    const firstAction = await submit(
+      first.service,
+      first.matchId,
+      first.corp,
+      (action) => action.type === "mandatory_draw",
+      "mandatory",
+    );
     const undo = await first.service.requestUndo({
       matchId: first.matchId,
       side: "corp",
       sessionToken: first.corp.sessionToken,
       targetEventId: firstAction.receipt.stateVersionAfter === 1 ? "evt_1" : "",
-      reason: "Misclick"
+      reason: "Misclick",
     });
     expect(undo.ok).toBe(true);
     if (!undo.ok || !undo.undoRequest) throw new Error("Expected undo request");
@@ -3507,7 +5554,7 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: first.matchId,
       side: "runner",
       sessionToken: first.runner.sessionToken,
-      undoRequestId: undo.undoRequest.undoRequestId
+      undoRequestId: undo.undoRequest.undoRequestId,
     });
     expect(accepted.ok).toBe(true);
     if (!accepted.ok) throw new Error(accepted.error.message);
@@ -3516,82 +5563,145 @@ describe("MVP 0.2 multiplayer service", () => {
     const restored = await bootstrap(first.service, first.matchId, first.corp);
     expect(restored.playerView.stateVersion).toBe(0);
     expect(restored.pendingUndo).toBeUndefined();
-    const acceptedReconnect = await first.service.reconnectMatch(first.matchId, {
-      side: "runner",
-      reconnectToken: first.runner.reconnectToken
-    });
+    const acceptedReconnect = await first.service.reconnectMatch(
+      first.matchId,
+      {
+        side: "runner",
+        reconnectToken: first.runner.reconnectToken,
+      },
+    );
     expect("error" in acceptedReconnect).toBe(false);
-    if ("error" in acceptedReconnect) throw new Error(acceptedReconnect.error.message);
+    if ("error" in acceptedReconnect)
+      throw new Error(acceptedReconnect.error.message);
     expect(acceptedReconnect.pendingUndo).toBeUndefined();
 
     const declineMatch = await joinedMatch("undo-decline");
-    const declineAction = await submit(declineMatch.service, declineMatch.matchId, declineMatch.corp, (action) => action.type === "mandatory_draw", "mandatory");
+    const declineAction = await submit(
+      declineMatch.service,
+      declineMatch.matchId,
+      declineMatch.corp,
+      (action) => action.type === "mandatory_draw",
+      "mandatory",
+    );
     const declineRequest = await declineMatch.service.requestUndo({
       matchId: declineMatch.matchId,
       side: "corp",
       sessionToken: declineMatch.corp.sessionToken,
-      targetEventId: `evt_${declineAction.receipt.stateVersionAfter}`
+      targetEventId: `evt_${declineAction.receipt.stateVersionAfter}`,
     });
     expect(declineRequest.ok).toBe(true);
-    if (!declineRequest.ok || !declineRequest.undoRequest) throw new Error("Expected undo request");
+    if (!declineRequest.ok || !declineRequest.undoRequest)
+      throw new Error("Expected undo request");
     const declined = await declineMatch.service.declineUndo({
       matchId: declineMatch.matchId,
       side: "runner",
       sessionToken: declineMatch.runner.sessionToken,
-      undoRequestId: declineRequest.undoRequest.undoRequestId
+      undoRequestId: declineRequest.undoRequest.undoRequestId,
     });
     expect(declined.ok).toBe(true);
     if (!declined.ok) throw new Error(declined.error.message);
     expect(declined.requesterPayload.pendingUndo).toBeUndefined();
     expect(declined.opponentPayload.pendingUndo).toBeUndefined();
-    const declinedRequester = await bootstrap(declineMatch.service, declineMatch.matchId, declineMatch.corp);
-    const declinedResponder = await declineMatch.service.reconnectMatch(declineMatch.matchId, {
-      side: "runner",
-      reconnectToken: declineMatch.runner.reconnectToken
-    });
+    const declinedRequester = await bootstrap(
+      declineMatch.service,
+      declineMatch.matchId,
+      declineMatch.corp,
+    );
+    const declinedResponder = await declineMatch.service.reconnectMatch(
+      declineMatch.matchId,
+      {
+        side: "runner",
+        reconnectToken: declineMatch.runner.reconnectToken,
+      },
+    );
     expect(declinedRequester.pendingUndo).toBeUndefined();
     expect("error" in declinedResponder).toBe(false);
-    if ("error" in declinedResponder) throw new Error(declinedResponder.error.message);
+    if ("error" in declinedResponder)
+      throw new Error(declinedResponder.error.message);
     expect(declinedResponder.pendingUndo).toBeUndefined();
 
     const invalidMatch = await joinedMatch("undo-invalid-cleanup");
-    const invalidAction = await submit(invalidMatch.service, invalidMatch.matchId, invalidMatch.corp, (action) => action.type === "mandatory_draw", "invalid-mandatory");
+    const invalidAction = await submit(
+      invalidMatch.service,
+      invalidMatch.matchId,
+      invalidMatch.corp,
+      (action) => action.type === "mandatory_draw",
+      "invalid-mandatory",
+    );
     const invalidRequest = await invalidMatch.service.requestUndo({
       matchId: invalidMatch.matchId,
       side: "corp",
       sessionToken: invalidMatch.corp.sessionToken,
-      targetEventId: `evt_${invalidAction.receipt.stateVersionAfter}`
+      targetEventId: `evt_${invalidAction.receipt.stateVersionAfter}`,
     });
     expect(invalidRequest.ok).toBe(true);
-    if (!invalidRequest.ok || !invalidRequest.undoRequest) throw new Error("Expected undo request");
-    const invalidRecord = await invalidMatch.service.loadForTest(invalidMatch.matchId);
+    if (!invalidRequest.ok || !invalidRequest.undoRequest)
+      throw new Error("Expected undo request");
+    const invalidRecord = await invalidMatch.service.loadForTest(
+      invalidMatch.matchId,
+    );
     if (!invalidRecord) throw new Error("Missing invalid cleanup match");
     invalidRecord.undoSnapshots = [];
-    await (invalidMatch.service as unknown as { storage: MultiplayerStorage }).storage.save(invalidRecord);
+    await (
+      invalidMatch.service as unknown as { storage: MultiplayerStorage }
+    ).storage.save(invalidRecord);
     const invalidResponse = await invalidMatch.service.acceptUndo({
       matchId: invalidMatch.matchId,
       side: "runner",
       sessionToken: invalidMatch.runner.sessionToken,
-      undoRequestId: invalidRequest.undoRequest.undoRequestId
+      undoRequestId: invalidRequest.undoRequest.undoRequestId,
     });
     expect(invalidResponse.ok).toBe(false);
     if (invalidResponse.ok) throw new Error("Expected invalid undo response");
     expect(invalidResponse.payload?.pendingUndo).toBeUndefined();
-    expect((await invalidMatch.service.loadForTest(invalidMatch.matchId))?.pendingUndo).toBeUndefined();
+    expect(
+      (await invalidMatch.service.loadForTest(invalidMatch.matchId))
+        ?.pendingUndo,
+    ).toBeUndefined();
 
     const second = await joinedMatch("undo-blocked");
-    await submit(second.service, second.matchId, second.corp, (action) => action.type === "mandatory_draw", "mandatory");
-    await submit(second.service, second.matchId, second.corp, (action) => action.type === "end_turn", "end-turn");
-    await submitFirstChoice(second.service, second.matchId, second.corp, "discard");
-    const run = await submit(second.service, second.matchId, second.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
-    await submit(second.service, second.matchId, second.runner, (action) => action.type === "access_card", "access");
+    await submit(
+      second.service,
+      second.matchId,
+      second.corp,
+      (action) => action.type === "mandatory_draw",
+      "mandatory",
+    );
+    await submit(
+      second.service,
+      second.matchId,
+      second.corp,
+      (action) => action.type === "end_turn",
+      "end-turn",
+    );
+    await submitFirstChoice(
+      second.service,
+      second.matchId,
+      second.corp,
+      "discard",
+    );
+    const run = await submit(
+      second.service,
+      second.matchId,
+      second.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "run-rd",
+    );
+    await submit(
+      second.service,
+      second.matchId,
+      second.runner,
+      (action) => action.type === "access_card",
+      "access",
+    );
 
     const blocked = await second.service.requestUndo({
       matchId: second.matchId,
       side: "runner",
       sessionToken: second.runner.sessionToken,
       targetEventId: `evt_${run.receipt.stateVersionAfter}`,
-      reason: "Undo after access"
+      reason: "Undo after access",
     });
     expect(blocked.ok).toBe(false);
     if (blocked.ok) throw new Error("Expected hidden-info barrier");
@@ -3600,54 +5710,120 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("allows undo across hidden information when the local debug option is enabled", async () => {
-    const match = await joinedMatch("undo-local-hidden-debug", undefined, { allowHiddenInfoUndo: true });
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "local-debug-mandatory");
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "local-debug-end-turn");
-    await submitFirstChoice(match.service, match.matchId, match.corp, "local-debug-discard");
-    const run = await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "local-debug-run-rd");
-    const access = await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card", "local-debug-access");
+    const match = await joinedMatch("undo-local-hidden-debug", undefined, {
+      allowHiddenInfoUndo: true,
+    });
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "mandatory_draw",
+      "local-debug-mandatory",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "end_turn",
+      "local-debug-end-turn",
+    );
+    await submitFirstChoice(
+      match.service,
+      match.matchId,
+      match.corp,
+      "local-debug-discard",
+    );
+    const run = await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "local-debug-run-rd",
+    );
+    const access = await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) => action.type === "access_card",
+      "local-debug-access",
+    );
 
     const requested = await match.service.requestUndo({
       matchId: match.matchId,
       side: "runner",
       sessionToken: match.runner.sessionToken,
       targetEventId: `evt_${run.receipt.stateVersionAfter}`,
-      reason: "Lokale Debug-Zurücknahme über Access hinweg"
+      reason: "Lokale Debug-Zurücknahme über Access hinweg",
     });
     expect(requested.ok).toBe(true);
-    if (!requested.ok || !requested.undoRequest) throw new Error("Expected local hidden-info undo request");
+    if (!requested.ok || !requested.undoRequest)
+      throw new Error("Expected local hidden-info undo request");
     const storedWithRequest = await match.service.loadForTest(match.matchId);
-    expect(storedWithRequest?.pendingUndo?.undoRequestId).toBe(requested.undoRequest.undoRequestId);
-    expect(storedWithRequest?.undoSnapshots.find((snapshot) => snapshot.undoRequestId === requested.undoRequest?.undoRequestId)?.hiddenInfoSafe).toBe(false);
+    expect(storedWithRequest?.pendingUndo?.undoRequestId).toBe(
+      requested.undoRequest.undoRequestId,
+    );
+    expect(
+      storedWithRequest?.undoSnapshots.find(
+        (snapshot) =>
+          snapshot.undoRequestId === requested.undoRequest?.undoRequestId,
+      )?.hiddenInfoSafe,
+    ).toBe(false);
 
     const accepted = await match.service.acceptUndo({
       matchId: match.matchId,
       side: "corp",
       sessionToken: match.corp.sessionToken,
-      undoRequestId: requested.undoRequest.undoRequestId
+      undoRequestId: requested.undoRequest.undoRequestId,
     });
     expect(accepted.ok).toBe(true);
     if (!accepted.ok) throw new Error(accepted.error.message);
 
     const afterUndo = await match.service.loadForTest(match.matchId);
-    expect(afterUndo?.eventLog.some((event) => event.eventId === `evt_${run.receipt.stateVersionAfter}`)).toBe(false);
-    expect(afterUndo?.eventLog.some((event) => event.eventId === `evt_${access.receipt.stateVersionAfter}`)).toBe(false);
+    expect(
+      afterUndo?.eventLog.some(
+        (event) => event.eventId === `evt_${run.receipt.stateVersionAfter}`,
+      ),
+    ).toBe(false);
+    expect(
+      afterUndo?.eventLog.some(
+        (event) => event.eventId === `evt_${access.receipt.stateVersionAfter}`,
+      ),
+    ).toBe(false);
   });
 
   it("keeps undo snapshots free of embedded engine event history", async () => {
     const match = await joinedMatch("undo-snapshot-eventlog-free");
-    const mandatory = await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "snapshot-free-mandatory");
-    const credit = await submit(match.service, match.matchId, match.corp, (action) => action.type === "gain_credit", "snapshot-free-credit");
+    const mandatory = await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "mandatory_draw",
+      "snapshot-free-mandatory",
+    );
+    const credit = await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "gain_credit",
+      "snapshot-free-credit",
+    );
     const storedBeforeUndo = await match.service.loadForTest(match.matchId);
     expect(storedBeforeUndo?.gameState.eventLog.length).toBeGreaterThan(2);
-    expect(storedBeforeUndo?.stateSnapshots.find((snapshot) => snapshot.snapshotId === `snap_before_${credit.receipt.stateVersionAfter}`)?.gameState.eventLog).toEqual([]);
+    expect(
+      storedBeforeUndo?.stateSnapshots.find(
+        (snapshot) =>
+          snapshot.snapshotId ===
+          `snap_before_${credit.receipt.stateVersionAfter}`,
+      )?.gameState.eventLog,
+    ).toEqual([]);
 
     const undo = await match.service.requestUndo({
       matchId: match.matchId,
       side: "corp",
       sessionToken: match.corp.sessionToken,
       targetEventId: `evt_${credit.receipt.stateVersionAfter}`,
-      reason: "Snapshot event history regression"
+      reason: "Snapshot event history regression",
     });
     expect(undo.ok).toBe(true);
     if (!undo.ok || !undo.undoRequest) throw new Error("Expected undo request");
@@ -3655,42 +5831,59 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: match.matchId,
       side: "runner",
       sessionToken: match.runner.sessionToken,
-      undoRequestId: undo.undoRequest.undoRequestId
+      undoRequestId: undo.undoRequest.undoRequestId,
     });
     expect(accepted.ok).toBe(true);
     if (!accepted.ok) throw new Error(accepted.error.message);
 
     const storedAfterUndo = await match.service.loadForTest(match.matchId);
-    expect(storedAfterUndo?.gameState.stateVersion).toBe(mandatory.receipt.stateVersionAfter);
-    expect(storedAfterUndo?.gameState.eventLog.map((event) => event.eventId)).toEqual(["evt_0", `evt_${mandatory.receipt.stateVersionAfter}`]);
-    expect(storedAfterUndo?.stateSnapshots.filter((snapshot) => snapshot.snapshotId.startsWith("snap_before_")).every((snapshot) => snapshot.gameState.eventLog.length === 0)).toBe(true);
+    expect(storedAfterUndo?.gameState.stateVersion).toBe(
+      mandatory.receipt.stateVersionAfter,
+    );
+    expect(
+      storedAfterUndo?.gameState.eventLog.map((event) => event.eventId),
+    ).toEqual(["evt_0", `evt_${mandatory.receipt.stateVersionAfter}`]);
+    expect(
+      storedAfterUndo?.stateSnapshots
+        .filter((snapshot) => snapshot.snapshotId.startsWith("snap_before_"))
+        .every((snapshot) => snapshot.gameState.eventLog.length === 0),
+    ).toBe(true);
     expect((await match.service.replayMatch(match.matchId)).ok).toBe(true);
   });
 
   it("auto-accepts undo in Human-vs-KI matches", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "undo-ai-auto-accept" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "undo-ai-auto-accept",
+    });
     const created = await service.createMatch({
       mode: "human_corp_vs_runner_ai",
       hostSide: "corp",
       seed: "undo-ai-auto",
-      runnerDifficulty: "normal"
+      runnerDifficulty: "normal",
     });
 
     const afterSetup = await submitChoice(
       service,
       created.matchId,
-      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       "keep",
-      "undo-ai-setup"
+      "undo-ai-setup",
     );
-    const mandatory = mustAction(afterSetup, (action) => action.type === "mandatory_draw");
+    const mandatory = mustAction(
+      afterSetup,
+      (action) => action.type === "mandatory_draw",
+    );
     const mandatoryResult = await service.submitAction({
       matchId: created.matchId,
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: mandatory.actionId,
       clientKnownStateVersion: afterSetup.playerView.stateVersion,
-      idempotencyKey: "undo-ai-mandatory"
+      idempotencyKey: "undo-ai-mandatory",
     });
     expect(mandatoryResult.ok).toBe(true);
     if (!mandatoryResult.ok) throw new Error(mandatoryResult.error.message);
@@ -3700,12 +5893,14 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: created.hostSessionToken,
       targetEventId: `evt_${mandatoryResult.receipt.stateVersionAfter}`,
-      reason: "Misclick"
+      reason: "Misclick",
     });
     expect(undo.ok).toBe(true);
     if (!undo.ok) throw new Error(undo.error.message);
     expect(undo.requesterPayload.pendingUndo).toBeUndefined();
-    expect(undo.requesterPayload.playerView.stateVersion).toBe(afterSetup.playerView.stateVersion);
+    expect(undo.requesterPayload.playerView.stateVersion).toBe(
+      afterSetup.playerView.stateVersion,
+    );
 
     const stored = await service.loadForTest(created.matchId);
     expect(stored?.pendingUndo).toBeUndefined();
@@ -3715,40 +5910,73 @@ describe("MVP 0.2 multiplayer service", () => {
   it("handles V0.94 Damage through submit, idempotency, reconnect and undo barriers", async () => {
     const match = await joinedV094DamageMatch("mp-v094-damage");
 
-    const run = await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v094-run");
+    const run = await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "v094-run",
+    );
     const duplicate = await match.service.submitAction({
       matchId: match.matchId,
       side: match.runner.side,
       sessionToken: match.runner.sessionToken,
       actionId: run.receipt.idempotencyKey,
       clientKnownStateVersion: run.receipt.stateVersionBefore,
-      idempotencyKey: "v094-run"
+      idempotencyKey: "v094-run",
     });
     expect(duplicate.ok).toBe(true);
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.receipt.stateVersionAfter).toBe(run.receipt.stateVersionAfter);
+    expect(duplicate.receipt.stateVersionAfter).toBe(
+      run.receipt.stateVersionAfter,
+    );
 
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "rez_ice" && action.label.includes("Neural Sentry"), "v094-rez");
-    const beforeDamage = await bootstrap(match.service, match.matchId, match.runner);
-    const continueAction = mustAction(beforeDamage, (action) => action.type === "continue_run");
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) =>
+        action.type === "rez_ice" && action.label.includes("Neural Sentry"),
+      "v094-rez",
+    );
+    const beforeDamage = await bootstrap(
+      match.service,
+      match.matchId,
+      match.runner,
+    );
+    const continueAction = mustAction(
+      beforeDamage,
+      (action) => action.type === "continue_run",
+    );
     const damage = await match.service.submitAction({
       matchId: match.matchId,
       side: match.runner.side,
       sessionToken: match.runner.sessionToken,
       actionId: continueAction.actionId,
       clientKnownStateVersion: beforeDamage.playerView.stateVersion,
-      idempotencyKey: "v094-damage"
+      idempotencyKey: "v094-damage",
     });
 
     expect(damage.ok).toBe(true);
     if (!damage.ok) throw new Error(damage.error.message);
     expect(damage.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
-    expect(damage.publicEvent?.publicPayload).toMatchObject({ damageResolved: true, damageType: "net", cardsTrashed: 1 });
+    expect(damage.publicEvent?.publicPayload).toMatchObject({
+      damageResolved: true,
+      damageType: "net",
+      cardsTrashed: 1,
+    });
     expect(damage.actorPayload.playerView.own.heapOrArchives).toHaveLength(1);
     expect(damage.opponentPayload.playerView.opponent.discardCount).toBe(1);
-    expect(JSON.stringify(damage.opponentPayload)).not.toContain("Simple Fracter");
-    expect(JSON.stringify(damage.opponentPayload)).not.toContain("Simple Decoder");
-    expect(JSON.stringify(damage.opponentPayload)).not.toContain("Simple Killer");
+    expect(JSON.stringify(damage.opponentPayload)).not.toContain(
+      "Simple Fracter",
+    );
+    expect(JSON.stringify(damage.opponentPayload)).not.toContain(
+      "Simple Decoder",
+    );
+    expect(JSON.stringify(damage.opponentPayload)).not.toContain(
+      "Simple Killer",
+    );
 
     const stale = await match.service.submitAction({
       matchId: match.matchId,
@@ -3756,7 +5984,7 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: continueAction.actionId,
       clientKnownStateVersion: beforeDamage.playerView.stateVersion,
-      idempotencyKey: "v094-stale"
+      idempotencyKey: "v094-stale",
     });
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale-state rejection");
@@ -3764,7 +5992,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "corp",
-      reconnectToken: match.corp.reconnectToken
+      reconnectToken: match.corp.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
@@ -3776,7 +6004,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: match.runner.sessionToken,
       targetEventId: `evt_${damage.receipt.stateVersionAfter}`,
-      reason: "Damage undo"
+      reason: "Damage undo",
     });
     expect(blocked.ok).toBe(false);
     if (blocked.ok) throw new Error("Expected Damage hidden-info barrier");
@@ -3784,9 +6012,20 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("handles V1.2.0 Event Modification pending choices through submit, reconnect, idempotency and undo barriers", async () => {
-    const match = await joinedV120EventModificationMatch("mp-v120-event-modification");
-    const beforeOperation = await bootstrap(match.service, match.matchId, match.corp);
-    const operation = mustAction(beforeOperation, (action) => action.type === "play_operation" && action.label.includes("Core Damage"));
+    const match = await joinedV120EventModificationMatch(
+      "mp-v120-event-modification",
+    );
+    const beforeOperation = await bootstrap(
+      match.service,
+      match.matchId,
+      match.corp,
+    );
+    const operation = mustAction(
+      beforeOperation,
+      (action) =>
+        action.type === "play_operation" &&
+        action.label.includes("Core Damage"),
+    );
 
     const opened = await match.service.submitAction({
       matchId: match.matchId,
@@ -3794,14 +6033,21 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.corp.sessionToken,
       actionId: operation.actionId,
       clientKnownStateVersion: beforeOperation.playerView.stateVersion,
-      idempotencyKey: "v120-open-window"
+      idempotencyKey: "v120-open-window",
     });
     expect(opened.ok).toBe(true);
     if (!opened.ok) throw new Error(opened.error.message);
     expect(opened.actorPayload.pendingChoice).toBeUndefined();
-    expect(opened.opponentPayload.pendingChoice?.source).toBe("v120.event_modification.prevent");
-    expect(opened.publicEvent?.publicPayload).toMatchObject({ eventModificationWindowOpened: true, imminentEventType: "damage" });
-    expect(JSON.stringify(opened.actorPayload)).not.toContain("v120_damage_prevent");
+    expect(opened.opponentPayload.pendingChoice?.source).toBe(
+      "v120.event_modification.prevent",
+    );
+    expect(opened.publicEvent?.publicPayload).toMatchObject({
+      eventModificationWindowOpened: true,
+      imminentEventType: "damage",
+    });
+    expect(JSON.stringify(opened.actorPayload)).not.toContain(
+      "v120_damage_prevent",
+    );
 
     const duplicateOpen = await match.service.submitAction({
       matchId: match.matchId,
@@ -3809,20 +6055,30 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.corp.sessionToken,
       actionId: operation.actionId,
       clientKnownStateVersion: beforeOperation.playerView.stateVersion,
-      idempotencyKey: "v120-open-window"
+      idempotencyKey: "v120-open-window",
     });
     expect(duplicateOpen.ok).toBe(true);
     if (!duplicateOpen.ok) throw new Error(duplicateOpen.error.message);
-    expect(duplicateOpen.receipt.stateVersionAfter).toBe(opened.receipt.stateVersionAfter);
+    expect(duplicateOpen.receipt.stateVersionAfter).toBe(
+      opened.receipt.stateVersionAfter,
+    );
 
-    const reconnectedRunner = await match.service.reconnectMatch(match.matchId, {
-      side: "runner",
-      reconnectToken: match.runner.reconnectToken
-    });
+    const reconnectedRunner = await match.service.reconnectMatch(
+      match.matchId,
+      {
+        side: "runner",
+        reconnectToken: match.runner.reconnectToken,
+      },
+    );
     expect("error" in reconnectedRunner).toBe(false);
-    if ("error" in reconnectedRunner) throw new Error(reconnectedRunner.error.message);
-    expect(reconnectedRunner.pendingChoice?.source).toBe("v120.event_modification.prevent");
-    expect(JSON.stringify(reconnectedRunner)).not.toContain("Test-only Damage Prevention");
+    if ("error" in reconnectedRunner)
+      throw new Error(reconnectedRunner.error.message);
+    expect(reconnectedRunner.pendingChoice?.source).toBe(
+      "v120.event_modification.prevent",
+    );
+    expect(JSON.stringify(reconnectedRunner)).not.toContain(
+      "Test-only Damage Prevention",
+    );
 
     const staleChoice = await match.service.submitAction({
       matchId: match.matchId,
@@ -3830,14 +6086,19 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: reconnectedRunner.sessionToken,
       actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
       clientKnownStateVersion: reconnectedRunner.playerView.stateVersion - 1,
-      selectedChoices: { choiceId: reconnectedRunner.pendingChoice?.choiceId, selectedOptionIds: ["pass"] },
-      idempotencyKey: "v120-stale-choice"
+      selectedChoices: {
+        choiceId: reconnectedRunner.pendingChoice?.choiceId,
+        selectedOptionIds: ["pass"],
+      },
+      idempotencyKey: "v120-stale-choice",
     });
     expect(staleChoice.ok).toBe(false);
     if (staleChoice.ok) throw new Error("Expected stale choice rejection");
     expect(staleChoice.error.code).toBe("stale_state");
 
-    const preventOption = reconnectedRunner.pendingChoice?.options.find((option) => option.id !== "pass")?.id;
+    const preventOption = reconnectedRunner.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    )?.id;
     if (!preventOption) throw new Error("Missing prevent option");
     const prevented = await match.service.submitAction({
       matchId: match.matchId,
@@ -3845,13 +6106,20 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: reconnectedRunner.sessionToken,
       actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
       clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
-      selectedChoices: { choiceId: reconnectedRunner.pendingChoice?.choiceId, selectedOptionIds: [preventOption] },
-      idempotencyKey: "v120-prevent"
+      selectedChoices: {
+        choiceId: reconnectedRunner.pendingChoice?.choiceId,
+        selectedOptionIds: [preventOption],
+      },
+      idempotencyKey: "v120-prevent",
     });
     expect(prevented.ok).toBe(true);
     if (!prevented.ok) throw new Error(prevented.error.message);
     expect(prevented.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
-    expect(prevented.publicEvent?.publicPayload).toMatchObject({ eventModificationDecision: "apply", eventModificationOutcome: "prevented", damageAmount: 0 });
+    expect(prevented.publicEvent?.publicPayload).toMatchObject({
+      eventModificationDecision: "apply",
+      eventModificationOutcome: "prevented",
+      damageAmount: 0,
+    });
     expect(prevented.actorPayload.playerView.own.coreDamage).toBe(0);
     expect(prevented.opponentPayload.playerView.opponent.coreDamage).toBe(0);
 
@@ -3861,29 +6129,44 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: reconnectedRunner.sessionToken,
       actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
       clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
-      selectedChoices: { choiceId: reconnectedRunner.pendingChoice?.choiceId, selectedOptionIds: [preventOption] },
-      idempotencyKey: "v120-prevent"
+      selectedChoices: {
+        choiceId: reconnectedRunner.pendingChoice?.choiceId,
+        selectedOptionIds: [preventOption],
+      },
+      idempotencyKey: "v120-prevent",
     });
     expect(duplicatePrevent.ok).toBe(true);
     if (!duplicatePrevent.ok) throw new Error(duplicatePrevent.error.message);
-    expect(duplicatePrevent.receipt.stateVersionAfter).toBe(prevented.receipt.stateVersionAfter);
+    expect(duplicatePrevent.receipt.stateVersionAfter).toBe(
+      prevented.receipt.stateVersionAfter,
+    );
 
     const blocked = await match.service.requestUndo({
       matchId: match.matchId,
       side: "runner",
       sessionToken: reconnectedRunner.sessionToken,
       targetEventId: `evt_${prevented.receipt.stateVersionAfter}`,
-      reason: "Event modification undo"
+      reason: "Event modification undo",
     });
     expect(blocked.ok).toBe(false);
-    if (blocked.ok) throw new Error("Expected Event Modification hidden-info barrier");
+    if (blocked.ok)
+      throw new Error("Expected Event Modification hidden-info barrier");
     expect(blocked.error.code).toBe("undo_blocked");
   });
 
   it("handles V1.2.1 Replacement pending choices without applying original damage twice", async () => {
     const match = await joinedV121ReplacementMatch("mp-v121-replacement");
-    const beforeOperation = await bootstrap(match.service, match.matchId, match.corp);
-    const operation = mustAction(beforeOperation, (action) => action.type === "play_operation" && action.label.includes("Core Damage"));
+    const beforeOperation = await bootstrap(
+      match.service,
+      match.matchId,
+      match.corp,
+    );
+    const operation = mustAction(
+      beforeOperation,
+      (action) =>
+        action.type === "play_operation" &&
+        action.label.includes("Core Damage"),
+    );
 
     const opened = await match.service.submitAction({
       matchId: match.matchId,
@@ -3891,24 +6174,39 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.corp.sessionToken,
       actionId: operation.actionId,
       clientKnownStateVersion: beforeOperation.playerView.stateVersion,
-      idempotencyKey: "v121-open-window"
+      idempotencyKey: "v121-open-window",
     });
     expect(opened.ok).toBe(true);
     if (!opened.ok) throw new Error(opened.error.message);
     expect(opened.actorPayload.pendingChoice).toBeUndefined();
-    expect(opened.opponentPayload.pendingChoice?.source).toBe("v121.replacement.damage");
-    expect(opened.publicEvent?.publicPayload).toMatchObject({ replacementWindowOpened: true, originalEventType: "damage" });
-
-    const reconnectedRunner = await match.service.reconnectMatch(match.matchId, {
-      side: "runner",
-      reconnectToken: match.runner.reconnectToken
+    expect(opened.opponentPayload.pendingChoice?.source).toBe(
+      "v121.replacement.damage",
+    );
+    expect(opened.publicEvent?.publicPayload).toMatchObject({
+      replacementWindowOpened: true,
+      originalEventType: "damage",
     });
-    expect("error" in reconnectedRunner).toBe(false);
-    if ("error" in reconnectedRunner) throw new Error(reconnectedRunner.error.message);
-    expect(reconnectedRunner.pendingChoice?.source).toBe("v121.replacement.damage");
-    expect(JSON.stringify(reconnectedRunner)).not.toContain("Test-only Damage Replacement");
 
-    const replaceOption = reconnectedRunner.pendingChoice?.options.find((option) => option.id !== "pass")?.id;
+    const reconnectedRunner = await match.service.reconnectMatch(
+      match.matchId,
+      {
+        side: "runner",
+        reconnectToken: match.runner.reconnectToken,
+      },
+    );
+    expect("error" in reconnectedRunner).toBe(false);
+    if ("error" in reconnectedRunner)
+      throw new Error(reconnectedRunner.error.message);
+    expect(reconnectedRunner.pendingChoice?.source).toBe(
+      "v121.replacement.damage",
+    );
+    expect(JSON.stringify(reconnectedRunner)).not.toContain(
+      "Test-only Damage Replacement",
+    );
+
+    const replaceOption = reconnectedRunner.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    )?.id;
     if (!replaceOption) throw new Error("Missing replacement option");
     const replaced = await match.service.submitAction({
       matchId: match.matchId,
@@ -3916,8 +6214,11 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: reconnectedRunner.sessionToken,
       actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
       clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
-      selectedChoices: { choiceId: reconnectedRunner.pendingChoice?.choiceId, selectedOptionIds: [replaceOption] },
-      idempotencyKey: "v121-replace"
+      selectedChoices: {
+        choiceId: reconnectedRunner.pendingChoice?.choiceId,
+        selectedOptionIds: [replaceOption],
+      },
+      idempotencyKey: "v121-replace",
     });
     expect(replaced.ok).toBe(true);
     if (!replaced.ok) throw new Error(replaced.error.message);
@@ -3926,7 +6227,7 @@ describe("MVP 0.2 multiplayer service", () => {
       replacementOutcome: "replaced",
       originalEventType: "damage",
       replacementEventType: "add_tag",
-      tagsAdded: 1
+      tagsAdded: 1,
     });
     expect(replaced.actorPayload.playerView.own.coreDamage).toBe(0);
     expect(replaced.actorPayload.playerView.own.tags).toBe(1);
@@ -3939,18 +6240,26 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: reconnectedRunner.sessionToken,
       actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
       clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
-      selectedChoices: { choiceId: reconnectedRunner.pendingChoice?.choiceId, selectedOptionIds: [replaceOption] },
-      idempotencyKey: "v121-replace"
+      selectedChoices: {
+        choiceId: reconnectedRunner.pendingChoice?.choiceId,
+        selectedOptionIds: [replaceOption],
+      },
+      idempotencyKey: "v121-replace",
     });
     expect(duplicateReplace.ok).toBe(true);
     if (!duplicateReplace.ok) throw new Error(duplicateReplace.error.message);
-    expect(duplicateReplace.receipt.stateVersionAfter).toBe(replaced.receipt.stateVersionAfter);
+    expect(duplicateReplace.receipt.stateVersionAfter).toBe(
+      replaced.receipt.stateVersionAfter,
+    );
   });
 
   it("handles V1.2.2 Special Zone submit, reconnect, idempotency, stale rejection and undo barrier side-safely", async () => {
     const match = await joinedV122SpecialZoneMatch("mp-v122-special-zone");
     const before = await bootstrap(match.service, match.matchId, match.runner);
-    const special = mustAction(before, (action) => action.type === "move_to_set_aside");
+    const special = mustAction(
+      before,
+      (action) => action.type === "move_to_set_aside",
+    );
 
     const moved = await match.service.submitAction({
       matchId: match.matchId,
@@ -3958,16 +6267,31 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: special.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v122-set-aside"
+      idempotencyKey: "v122-set-aside",
     });
     expect(moved.ok).toBe(true);
     if (!moved.ok) throw new Error(moved.error.message);
     expect(moved.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
-    expect(moved.publicEvent?.publicPayload).toMatchObject({ actionType: "move_to_set_aside", specialZone: "set_aside", redactedKind: "special_zone" });
-    expect(JSON.stringify(moved.publicEvent?.publicPayload)).not.toContain("Simple Economy Event");
-    expect(moved.actorPayload.playerView.specialZones?.setAside[0]).toMatchObject({ definitionId: "simple_economy_event", controller: "runner" });
-    expect(moved.opponentPayload.playerView.specialZones?.setAside[0]).toMatchObject({ known: false });
-    expect(JSON.stringify(moved.opponentPayload)).not.toContain("Simple Economy Event");
+    expect(moved.publicEvent?.publicPayload).toMatchObject({
+      actionType: "move_to_set_aside",
+      specialZone: "set_aside",
+      redactedKind: "special_zone",
+    });
+    expect(JSON.stringify(moved.publicEvent?.publicPayload)).not.toContain(
+      "Simple Economy Event",
+    );
+    expect(
+      moved.actorPayload.playerView.specialZones?.setAside[0],
+    ).toMatchObject({
+      definitionId: "simple_economy_event",
+      controller: "runner",
+    });
+    expect(
+      moved.opponentPayload.playerView.specialZones?.setAside[0],
+    ).toMatchObject({ known: false });
+    expect(JSON.stringify(moved.opponentPayload)).not.toContain(
+      "Simple Economy Event",
+    );
 
     const duplicate = await match.service.submitAction({
       matchId: match.matchId,
@@ -3975,11 +6299,13 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: special.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v122-set-aside"
+      idempotencyKey: "v122-set-aside",
     });
     expect(duplicate.ok).toBe(true);
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.receipt.stateVersionAfter).toBe(moved.receipt.stateVersionAfter);
+    expect(duplicate.receipt.stateVersionAfter).toBe(
+      moved.receipt.stateVersionAfter,
+    );
 
     const stale = await match.service.submitAction({
       matchId: match.matchId,
@@ -3987,7 +6313,7 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: special.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v122-stale-set-aside"
+      idempotencyKey: "v122-stale-set-aside",
     });
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale rejection");
@@ -3995,49 +6321,78 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnectedCorp = await match.service.reconnectMatch(match.matchId, {
       side: "corp",
-      reconnectToken: match.corp.reconnectToken
+      reconnectToken: match.corp.reconnectToken,
     });
     expect("error" in reconnectedCorp).toBe(false);
-    if ("error" in reconnectedCorp) throw new Error(reconnectedCorp.error.message);
-    expect(reconnectedCorp.playerView.specialZones?.setAside[0]).toMatchObject({ known: false });
-    expect(JSON.stringify(reconnectedCorp)).not.toContain("Simple Economy Event");
+    if ("error" in reconnectedCorp)
+      throw new Error(reconnectedCorp.error.message);
+    expect(reconnectedCorp.playerView.specialZones?.setAside[0]).toMatchObject({
+      known: false,
+    });
+    expect(JSON.stringify(reconnectedCorp)).not.toContain(
+      "Simple Economy Event",
+    );
 
     const blocked = await match.service.requestUndo({
       matchId: match.matchId,
       side: "runner",
       sessionToken: match.runner.sessionToken,
       targetEventId: `evt_${moved.receipt.stateVersionAfter}`,
-      reason: "Special zone undo"
+      reason: "Special zone undo",
     });
     expect(blocked.ok).toBe(false);
-    if (blocked.ok) throw new Error("Expected Special Zone hidden-info barrier");
+    if (blocked.ok)
+      throw new Error("Expected Special Zone hidden-info barrier");
     expect(blocked.error.code).toBe("undo_blocked");
   });
 
   it("starts V1.2.3 decks from snapshots and handles MIT West Tier through reconnect, idempotency and undo barrier", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "mp-v123-card-release" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "mp-v123-card-release",
+    });
     const created = await service.createMatch({
       hostSide: "corp",
       seed: "mp-v123-mit-west-tier",
-      participantADecks: { runnerDeckSnapshotId: "demo_runner_123_snapshot_v1_2_3", corpDeckSnapshotId: "demo_corp_123_snapshot_v1_2_3" },
-      participantBDecks: { runnerDeckSnapshotId: "demo_runner_123_snapshot_v1_2_3", corpDeckSnapshotId: "demo_corp_123_snapshot_v1_2_3" },
-      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_123_snapshot_v1_2_3",
+        corpDeckSnapshotId: "demo_corp_123_snapshot_v1_2_3",
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "demo_runner_123_snapshot_v1_2_3",
+        corpDeckSnapshotId: "demo_corp_123_snapshot_v1_2_3",
+      },
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" },
     });
     expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(created.playerView.deckMetadata?.opponent.deckName).toBe("Runner Demo Deck 1.2.3 - Mechanic Unlock 1");
+    expect(created.playerView.deckMetadata?.opponent.deckName).toBe(
+      "Runner Demo Deck 1.2.3 - Mechanic Unlock 1",
+    );
     expect(JSON.stringify(created)).not.toContain("onr_v1_101_mit-west-tier");
     expect(created.joinUrl).toBeTruthy();
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
 
     await prepareV123MitRunnerTurn(service, created.matchId);
-    const runner = { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
+    const runner = {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    };
     const before = await bootstrap(service, created.matchId, runner);
     expect(before.playerView.deckMetadata?.own.deckHash).toBe("fnv1a:f57f1d98");
-    const mit = mustAction(before, (action) => action.type === "play_event" && action.label.includes("MIT West Tier"));
+    const mit = mustAction(
+      before,
+      (action) =>
+        action.type === "play_event" && action.label.includes("MIT West Tier"),
+    );
 
     const played = await service.submitAction({
       matchId: created.matchId,
@@ -4045,15 +6400,28 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: runner.sessionToken,
       actionId: mit.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v123-mit-west-tier"
+      idempotencyKey: "v123-mit-west-tier",
     });
     expect(played.ok).toBe(true);
     if (!played.ok) throw new Error(played.error.message);
     expect(played.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
-    expect(played.publicEvent?.publicPayload).toMatchObject({ actionType: "play_event", cardDefinitionId: "onr_v1_101_mit-west-tier", hiddenZoneBarrier: true });
-    expect(JSON.stringify(played.publicEvent?.publicPayload)).not.toContain("runner_");
-    expect(played.actorPayload.playerView.specialZones?.removedFromGame[0]).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier", controller: "runner" });
-    expect(played.opponentPayload.playerView.specialZones?.removedFromGame[0]).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier" });
+    expect(played.publicEvent?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_101_mit-west-tier",
+      hiddenZoneBarrier: true,
+    });
+    expect(JSON.stringify(played.publicEvent?.publicPayload)).not.toContain(
+      "runner_",
+    );
+    expect(
+      played.actorPayload.playerView.specialZones?.removedFromGame[0],
+    ).toMatchObject({
+      definitionId: "onr_v1_101_mit-west-tier",
+      controller: "runner",
+    });
+    expect(
+      played.opponentPayload.playerView.specialZones?.removedFromGame[0],
+    ).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier" });
 
     const duplicate = await service.submitAction({
       matchId: created.matchId,
@@ -4061,16 +6429,24 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: runner.sessionToken,
       actionId: mit.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v123-mit-west-tier"
+      idempotencyKey: "v123-mit-west-tier",
     });
     expect(duplicate.ok).toBe(true);
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.receipt.stateVersionAfter).toBe(played.receipt.stateVersionAfter);
+    expect(duplicate.receipt.stateVersionAfter).toBe(
+      played.receipt.stateVersionAfter,
+    );
 
-    const reconnectedCorp = await service.reconnectMatch(created.matchId, { side: "corp", reconnectToken: created.hostReconnectToken });
+    const reconnectedCorp = await service.reconnectMatch(created.matchId, {
+      side: "corp",
+      reconnectToken: created.hostReconnectToken,
+    });
     expect("error" in reconnectedCorp).toBe(false);
-    if ("error" in reconnectedCorp) throw new Error(reconnectedCorp.error.message);
-    expect(reconnectedCorp.playerView.specialZones?.removedFromGame[0]).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier" });
+    if ("error" in reconnectedCorp)
+      throw new Error(reconnectedCorp.error.message);
+    expect(
+      reconnectedCorp.playerView.specialZones?.removedFromGame[0],
+    ).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier" });
     expect(JSON.stringify(reconnectedCorp)).not.toContain("Dwarf");
     expect(JSON.stringify(reconnectedCorp)).not.toContain("Krash");
 
@@ -4079,7 +6455,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: runner.sessionToken,
       targetEventId: `evt_${played.receipt.stateVersionAfter}`,
-      reason: "V1.2.3 hidden-zone shuffle undo"
+      reason: "V1.2.3 hidden-zone shuffle undo",
     });
     expect(blocked.ok).toBe(false);
     if (blocked.ok) throw new Error("Expected MIT hidden-info barrier");
@@ -4089,35 +6465,60 @@ describe("MVP 0.2 multiplayer service", () => {
   it("starts V1.3.0 private local format snapshots and revalidates invalid or AI-unsupported decks server-side", async () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_021_dwarf"]) return;
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "mp-v130-format-foundation" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "mp-v130-format-foundation",
+    });
     const created = await service.createMatch({
       hostSide: "corp",
       seed: "mp-v130-private-local",
-      participantADecks: { runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0", corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0" },
-      participantBDecks: { runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0", corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0" },
-      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
+        corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0",
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
+        corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0",
+      },
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" },
     });
 
     expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(created.playerView.deckMetadata?.opponent.formatProfileId).toBe("netgrid_private_local_v1");
-    expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe("1.3.0");
+    expect(created.playerView.deckMetadata?.opponent.formatProfileId).toBe(
+      "netgrid_private_local_v1",
+    );
+    expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe(
+      "1.3.0",
+    );
     expect(JSON.stringify(created)).not.toContain("onr_v1_021_dwarf");
     expect(JSON.stringify(created)).not.toContain("decklist");
 
     const record = await service.loadForTest(created.matchId);
-    expect(record?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_130_snapshot_v1_3_0");
+    expect(record?.match.deckSetup.runnerSnapshotId).toBe(
+      "demo_runner_130_snapshot_v1_3_0",
+    );
     expect(JSON.stringify(record?.match.deckSetup)).not.toContain("cards");
 
-    const invalidRunner = structuredClone((snapshotsData08.snapshots as DeckSnapshot[]).find((snapshot) => snapshot.deckSnapshotId === "demo_runner_130_snapshot_v1_3_0"));
+    const invalidRunner = structuredClone(
+      (snapshotsData08.snapshots as DeckSnapshot[]).find(
+        (snapshot) =>
+          snapshot.deckSnapshotId === "demo_runner_130_snapshot_v1_3_0",
+      ),
+    );
     if (!invalidRunner) throw new Error("Missing V1.3.0 runner snapshot");
     invalidRunner.cards.push({ cardId: "onr_v1_018_dogcatcher", quantity: 1 });
     await expect(
       service.createMatch({
         hostSide: "runner",
         seed: "mp-v130-invalid-runner",
-        participantADecks: { runnerDeckSnapshot: invalidRunner, corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0" },
-        participantBDecks: { runnerDeckSnapshot: invalidRunner, corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0" }
-      })
+        participantADecks: {
+          runnerDeckSnapshot: invalidRunner,
+          corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0",
+        },
+        participantBDecks: {
+          runnerDeckSnapshot: invalidRunner,
+          corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0",
+        },
+      }),
     ).rejects.toThrow("deck_snapshot_invalid");
 
     const aiCreated = await service.createMatch({
@@ -4126,67 +6527,128 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "mp-v130-ai-supported",
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
       participantBDecks: {
         runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
-        corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0"
+        corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0",
       },
-      aiDeckPolicy: "selected"
+      aiDeckPolicy: "selected",
     });
     expect(aiCreated.mode).toBe("human_corp_vs_runner_ai");
-    expect(aiCreated.playerView.deckMetadata?.opponent.formatProfileId).toBe("netgrid_private_local_v1");
-    expect(aiCreated.playerView.deckMetadata?.opponent.formatProfileVersion).toBe("1.3.0");
+    expect(aiCreated.playerView.deckMetadata?.opponent.formatProfileId).toBe(
+      "netgrid_private_local_v1",
+    );
+    expect(
+      aiCreated.playerView.deckMetadata?.opponent.formatProfileVersion,
+    ).toBe("1.3.0");
     expect(JSON.stringify(aiCreated)).not.toContain("cardInstances");
   });
 
   it("enforces the selected match card pool for Proteus playtest snapshots", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "mp-proteus-card-pool" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "mp-proteus-card-pool",
+    });
     const cardsById = createRuntimeCardsById();
-    expect(cardsById["onr_proteus_001_ai-board-member"]?.statuses).toMatchObject({
+    expect(
+      cardsById["onr_proteus_001_ai-board-member"]?.statuses,
+    ).toMatchObject({
       human_playable: true,
       deck_legal: true,
       format_legal: true,
-      ai_supported: true
+      ai_supported: true,
     });
 
     await expect(
       service.createMatch({
         hostSide: "corp",
         seed: "mp-proteus-blocked-originalset",
-        participantADecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
-        participantBDecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
-        settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset" }
-      })
+        participantADecks: {
+          runnerDeckSnapshotId:
+            "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+          corpDeckSnapshotId:
+            "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+        },
+        participantBDecks: {
+          runnerDeckSnapshotId:
+            "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+          corpDeckSnapshotId:
+            "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+        },
+        settings: {
+          agendaPointsToWin: 7,
+          matchFormat: "rules_match",
+          cardPool: "originalset",
+        },
+      }),
     ).rejects.toThrow("deck_snapshot_card_pool_mismatch");
 
     await expect(
       service.createMatch({
         hostSide: "corp",
         seed: "mp-proteus-blocked-classic-only",
-        participantADecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
-        participantBDecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
-        settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_classic" }
-      })
+        participantADecks: {
+          runnerDeckSnapshotId:
+            "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+          corpDeckSnapshotId:
+            "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+        },
+        participantBDecks: {
+          runnerDeckSnapshotId:
+            "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+          corpDeckSnapshotId:
+            "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+        },
+        settings: {
+          agendaPointsToWin: 7,
+          matchFormat: "rules_match",
+          cardPool: "originalset_classic",
+        },
+      }),
     ).rejects.toThrow("deck_snapshot_card_pool_mismatch");
 
     const classicPoolCreated = await service.createMatch({
       hostSide: "corp",
       seed: "mp-classic-pool-default-decks",
-      settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_classic" }
+      settings: {
+        agendaPointsToWin: 7,
+        matchFormat: "rules_match",
+        cardPool: "originalset_classic",
+      },
     });
-    expect((await service.loadForTest(classicPoolCreated.matchId))?.match.settings.cardPool).toBe("originalset_classic");
+    expect(
+      (await service.loadForTest(classicPoolCreated.matchId))?.match.settings
+        .cardPool,
+    ).toBe("originalset_classic");
 
     const created = await service.createMatch({
       hostSide: "corp",
       seed: "mp-proteus-allowed",
-      participantADecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
-      participantBDecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
-      settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_proteus" }
+      participantADecks: {
+        runnerDeckSnapshotId:
+          "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+        corpDeckSnapshotId:
+          "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId:
+          "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+        corpDeckSnapshotId:
+          "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+      },
+      settings: {
+        agendaPointsToWin: 7,
+        matchFormat: "rules_match",
+        cardPool: "originalset_proteus",
+      },
     });
 
-    expect(created.playerView.deckMetadata?.opponent.formatProfileId).toBe("netgrid_private_local_proteus_playtest_v1");
-    expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe("1.0.0");
+    expect(created.playerView.deckMetadata?.opponent.formatProfileId).toBe(
+      "netgrid_private_local_proteus_playtest_v1",
+    );
+    expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe(
+      "1.0.0",
+    );
     expect(JSON.stringify(created)).not.toContain("onr_proteus_084_crumble");
     const record = await service.loadForTest(created.matchId);
     expect(record?.match.settings.cardPool).toBe("originalset_proteus");
@@ -4194,11 +6656,28 @@ describe("MVP 0.2 multiplayer service", () => {
     const combinedCreated = await service.createMatch({
       hostSide: "corp",
       seed: "mp-classic-proteus-allowed",
-      participantADecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
-      participantBDecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
-      settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_classic_proteus" }
+      participantADecks: {
+        runnerDeckSnapshotId:
+          "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+        corpDeckSnapshotId:
+          "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId:
+          "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+        corpDeckSnapshotId:
+          "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+      },
+      settings: {
+        agendaPointsToWin: 7,
+        matchFormat: "rules_match",
+        cardPool: "originalset_classic_proteus",
+      },
     });
-    expect((await service.loadForTest(combinedCreated.matchId))?.match.settings.cardPool).toBe("originalset_classic_proteus");
+    expect(
+      (await service.loadForTest(combinedCreated.matchId))?.match.settings
+        .cardPool,
+    ).toBe("originalset_classic_proteus");
 
     const proteusAiCreated = await service.createMatch({
       hostSide: "corp",
@@ -4206,44 +6685,83 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "mp-proteus-ai-selected",
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
-        corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0"
+        corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0",
       },
       participantBDecks: {
-        runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
-        corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25"
+        runnerDeckSnapshotId:
+          "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+        corpDeckSnapshotId:
+          "proteus_corp_region_fast_score_snapshot_v2026_05_25",
       },
       aiDeckPolicy: "selected",
-      settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_proteus" }
+      settings: {
+        agendaPointsToWin: 7,
+        matchFormat: "rules_match",
+        cardPool: "originalset_proteus",
+      },
     });
     const proteusAiRecord = await service.loadForTest(proteusAiCreated.matchId);
     expect(proteusAiRecord?.match.deckSetup.aiDeckPolicy).toBe("selected");
-    expect(proteusAiRecord?.match.deckSetup.runnerSnapshotId).toBe("proteus_runner_hq_virus_derez_snapshot_v2026_05_25");
-    expect(proteusAiRecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_130_snapshot_v1_3_0");
-    expect(proteusAiCreated.playerView.deckMetadata?.opponent.deckName).toBe("Proteus Runner - HQ Virus & Derez");
-    expect(JSON.stringify(proteusAiCreated)).not.toMatch(/cardInstances|privatePayload|joinToken|tokenHash/);
+    expect(proteusAiRecord?.match.deckSetup.runnerSnapshotId).toBe(
+      "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+    );
+    expect(proteusAiRecord?.match.deckSetup.corpSnapshotId).toBe(
+      "demo_corp_130_snapshot_v1_3_0",
+    );
+    expect(proteusAiCreated.playerView.deckMetadata?.opponent.deckName).toBe(
+      "Proteus Runner - HQ Virus & Derez",
+    );
+    expect(JSON.stringify(proteusAiCreated)).not.toMatch(
+      /cardInstances|privatePayload|joinToken|tokenHash/,
+    );
   });
 
   it("handles V1.1.1 Discard and Core-Damage status through side-safe multiplayer payloads", async () => {
     const match = await joinedMatch("mp-v111-discard");
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "v111-mandatory");
-    const endTurn = await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "v111-end-turn");
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "mandatory_draw",
+      "v111-mandatory",
+    );
+    const endTurn = await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "end_turn",
+      "v111-end-turn",
+    );
 
     expect(endTurn.actorPayload.pendingChoice?.source).toBe("discard_phase");
     expect(endTurn.actorPayload.pendingChoice?.kind).toBe("select_cards");
     expect(endTurn.opponentPayload.pendingChoice).toBeUndefined();
-    expect(JSON.stringify(endTurn.opponentPayload)).not.toContain(endTurn.actorPayload.pendingChoice?.options[0]?.label ?? "not-present");
+    expect(JSON.stringify(endTurn.opponentPayload)).not.toContain(
+      endTurn.actorPayload.pendingChoice?.options[0]?.label ?? "not-present",
+    );
 
-    const discarded = await submitFirstChoice(match.service, match.matchId, match.corp, "v111-discard");
+    const discarded = await submitFirstChoice(
+      match.service,
+      match.matchId,
+      match.corp,
+      "v111-discard",
+    );
     expect(discarded.playerView.phase).toBe("runner_action_phase");
-    expect(discarded.eventTail.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
-    expect(discarded.eventTail.at(-1)?.publicPayload).toMatchObject({ discardResolved: true, discardSide: "corp", discardCount: 1 });
+    expect(discarded.eventTail.at(-1)?.visibilityClass).toBe(
+      "hidden_info_barrier",
+    );
+    expect(discarded.eventTail.at(-1)?.publicPayload).toMatchObject({
+      discardResolved: true,
+      discardSide: "corp",
+      discardCount: 1,
+    });
 
     const blocked = await match.service.requestUndo({
       matchId: match.matchId,
       side: "corp",
       sessionToken: match.corp.sessionToken,
       targetEventId: `evt_${discarded.playerView.stateVersion}`,
-      reason: "Discard undo"
+      reason: "Discard undo",
     });
     expect(blocked.ok).toBe(false);
     if (blocked.ok) throw new Error("Expected discard undo barrier");
@@ -4252,13 +6770,28 @@ describe("MVP 0.2 multiplayer service", () => {
     const record = await match.service.loadForTest(match.matchId);
     expect(record).toBeTruthy();
     if (!record?.gameState) throw new Error("Missing game state");
-    record.gameState = applyEffectCommands(record.gameState, [{ type: "do_damage", damageType: "core", amount: 1, source: "server_v111_core" }]);
-    record.eventLog = record.gameState.eventLog.map((event) => toEventRecordForTest(match.matchId, event));
-    await (match.service as unknown as { storage: MultiplayerStorage }).storage.save(record);
+    record.gameState = applyEffectCommands(record.gameState, [
+      {
+        type: "do_damage",
+        damageType: "core",
+        amount: 1,
+        source: "server_v111_core",
+      },
+    ]);
+    record.eventLog = record.gameState.eventLog.map((event) =>
+      toEventRecordForTest(match.matchId, event),
+    );
+    await (
+      match.service as unknown as { storage: MultiplayerStorage }
+    ).storage.save(record);
 
-    const reconnectedCorp = await match.service.reconnectMatch(match.matchId, { side: "corp", reconnectToken: match.corp.reconnectToken });
+    const reconnectedCorp = await match.service.reconnectMatch(match.matchId, {
+      side: "corp",
+      reconnectToken: match.corp.reconnectToken,
+    });
     expect("error" in reconnectedCorp).toBe(false);
-    if ("error" in reconnectedCorp) throw new Error(reconnectedCorp.error.message);
+    if ("error" in reconnectedCorp)
+      throw new Error(reconnectedCorp.error.message);
     expect(reconnectedCorp.playerView.opponent.coreDamage).toBe(1);
     expect(reconnectedCorp.playerView.opponent.maxHandSize).toBe(4);
     expect(JSON.stringify(reconnectedCorp)).not.toContain("Simple Fracter");
@@ -4266,8 +6799,15 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("handles V0.95 Resource trash through submit, idempotency, reconnect and undo", async () => {
     const match = await joinedV095ResourceMatch("mp-v095-resource");
-    const beforeTrash = await bootstrap(match.service, match.matchId, match.corp);
-    const trashAction = mustAction(beforeTrash, (action) => action.type === "trash_resource");
+    const beforeTrash = await bootstrap(
+      match.service,
+      match.matchId,
+      match.corp,
+    );
+    const trashAction = mustAction(
+      beforeTrash,
+      (action) => action.type === "trash_resource",
+    );
 
     const trashed = await match.service.submitAction({
       matchId: match.matchId,
@@ -4275,7 +6815,7 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.corp.sessionToken,
       actionId: trashAction.actionId,
       clientKnownStateVersion: beforeTrash.playerView.stateVersion,
-      idempotencyKey: "v095-trash"
+      idempotencyKey: "v095-trash",
     });
 
     expect(trashed.ok).toBe(true);
@@ -4284,11 +6824,17 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(trashed.publicEvent?.publicPayload).toMatchObject({
       actionType: "trash_resource",
       cardDefinitionId: "v095_safehouse_resource",
-      title: "Safehouse Resource"
+      title: "Safehouse Resource",
     });
     expect(trashed.actorPayload.playerView.opponent.discardCount).toBe(1);
-    expect(trashed.opponentPayload.playerView.own.heapOrArchives.some((card) => card.definitionId === "v095_safehouse_resource")).toBe(true);
-    expect(JSON.stringify(trashed.actorPayload)).not.toContain("Simple Fracter");
+    expect(
+      trashed.opponentPayload.playerView.own.heapOrArchives.some(
+        (card) => card.definitionId === "v095_safehouse_resource",
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(trashed.actorPayload)).not.toContain(
+      "Simple Fracter",
+    );
 
     const duplicate = await match.service.submitAction({
       matchId: match.matchId,
@@ -4296,11 +6842,13 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.corp.sessionToken,
       actionId: trashAction.actionId,
       clientKnownStateVersion: beforeTrash.playerView.stateVersion,
-      idempotencyKey: "v095-trash"
+      idempotencyKey: "v095-trash",
     });
     expect(duplicate.ok).toBe(true);
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.receipt.stateVersionAfter).toBe(trashed.receipt.stateVersionAfter);
+    expect(duplicate.receipt.stateVersionAfter).toBe(
+      trashed.receipt.stateVersionAfter,
+    );
 
     const stale = await match.service.submitAction({
       matchId: match.matchId,
@@ -4308,7 +6856,7 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.corp.sessionToken,
       actionId: trashAction.actionId,
       clientKnownStateVersion: beforeTrash.playerView.stateVersion,
-      idempotencyKey: "v095-stale"
+      idempotencyKey: "v095-stale",
     });
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale-state rejection");
@@ -4316,11 +6864,15 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "runner",
-      reconnectToken: match.runner.reconnectToken
+      reconnectToken: match.runner.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
-    expect(reconnected.playerView.own.heapOrArchives.some((card) => card.definitionId === "v095_safehouse_resource")).toBe(true);
+    expect(
+      reconnected.playerView.own.heapOrArchives.some(
+        (card) => card.definitionId === "v095_safehouse_resource",
+      ),
+    ).toBe(true);
     expect(JSON.stringify(reconnected)).not.toContain("Simple Barrier ICE");
 
     const undo = await match.service.requestUndo({
@@ -4328,18 +6880,31 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: reconnected.sessionToken,
       targetEventId: `evt_${trashed.receipt.stateVersionAfter}`,
-      reason: "Resource trash undo"
+      reason: "Resource trash undo",
     });
     expect(undo.ok).toBe(true);
     if (!undo.ok) throw new Error(undo.error.message);
-    expect(undo.undoRequest?.targetEventId).toBe(`evt_${trashed.receipt.stateVersionAfter}`);
+    expect(undo.undoRequest?.targetEventId).toBe(
+      `evt_${trashed.receipt.stateVersionAfter}`,
+    );
   });
 
   it("handles V0.96 Trace bids through submit, idempotency, reconnect and undo", async () => {
     const match = await joinedV096TraceMatch("mp-v096-trace");
-    const corpChoice = await bootstrap(match.service, match.matchId, match.corp);
-    const runnerBefore = await bootstrap(match.service, match.matchId, match.runner);
-    const corpAction = mustAction(corpChoice, (action) => action.type === "resolve_choice");
+    const corpChoice = await bootstrap(
+      match.service,
+      match.matchId,
+      match.corp,
+    );
+    const runnerBefore = await bootstrap(
+      match.service,
+      match.matchId,
+      match.runner,
+    );
+    const corpAction = mustAction(
+      corpChoice,
+      (action) => action.type === "resolve_choice",
+    );
 
     expect(corpChoice.pendingChoice?.kind).toBe("bid_amount");
     expect(runnerBefore.pendingChoice).toBeUndefined();
@@ -4351,8 +6916,11 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.corp.sessionToken,
       actionId: corpAction.actionId,
       clientKnownStateVersion: corpChoice.playerView.stateVersion,
-      selectedChoices: { choiceId: corpChoice.pendingChoice?.choiceId, selectedOptionIds: ["bid_1"] },
-      idempotencyKey: "v096-corp-bid"
+      selectedChoices: {
+        choiceId: corpChoice.pendingChoice?.choiceId,
+        selectedOptionIds: ["bid_1"],
+      },
+      idempotencyKey: "v096-corp-bid",
     });
 
     expect(corpBid.ok).toBe(true);
@@ -4362,7 +6930,7 @@ describe("MVP 0.2 multiplayer service", () => {
       actionType: "resolve_choice",
       traceStep: "corp_bid",
       corpBid: 1,
-      traceStrength: 3
+      traceStrength: 3,
     });
     expect(corpBid.opponentPayload.pendingChoice?.kind).toBe("bid_amount");
 
@@ -4372,12 +6940,17 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.corp.sessionToken,
       actionId: corpAction.actionId,
       clientKnownStateVersion: corpChoice.playerView.stateVersion,
-      selectedChoices: { choiceId: corpChoice.pendingChoice?.choiceId, selectedOptionIds: ["bid_1"] },
-      idempotencyKey: "v096-corp-bid"
+      selectedChoices: {
+        choiceId: corpChoice.pendingChoice?.choiceId,
+        selectedOptionIds: ["bid_1"],
+      },
+      idempotencyKey: "v096-corp-bid",
     });
     expect(duplicate.ok).toBe(true);
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.receipt.stateVersionAfter).toBe(corpBid.receipt.stateVersionAfter);
+    expect(duplicate.receipt.stateVersionAfter).toBe(
+      corpBid.receipt.stateVersionAfter,
+    );
 
     const stale = await match.service.submitAction({
       matchId: match.matchId,
@@ -4385,23 +6958,32 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.corp.sessionToken,
       actionId: corpAction.actionId,
       clientKnownStateVersion: corpChoice.playerView.stateVersion,
-      selectedChoices: { choiceId: corpChoice.pendingChoice?.choiceId, selectedOptionIds: ["bid_1"] },
-      idempotencyKey: "v096-stale"
+      selectedChoices: {
+        choiceId: corpChoice.pendingChoice?.choiceId,
+        selectedOptionIds: ["bid_1"],
+      },
+      idempotencyKey: "v096-stale",
     });
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale-state rejection");
     expect(stale.error.code).toBe("stale_state");
 
-    const reconnectedRunner = await match.service.reconnectMatch(match.matchId, {
-      side: "runner",
-      reconnectToken: match.runner.reconnectToken
-    });
+    const reconnectedRunner = await match.service.reconnectMatch(
+      match.matchId,
+      {
+        side: "runner",
+        reconnectToken: match.runner.reconnectToken,
+      },
+    );
     expect("error" in reconnectedRunner).toBe(false);
-    if ("error" in reconnectedRunner) throw new Error(reconnectedRunner.error.message);
+    if ("error" in reconnectedRunner)
+      throw new Error(reconnectedRunner.error.message);
     expect(reconnectedRunner.pendingChoice?.kind).toBe("bid_amount");
     expect(JSON.stringify(reconnectedRunner)).not.toContain("Simple Agenda");
 
-    const runnerAction = reconnectedRunner.legalActions.find((action) => action.type === "resolve_choice");
+    const runnerAction = reconnectedRunner.legalActions.find(
+      (action) => action.type === "resolve_choice",
+    );
     expect(runnerAction).toBeDefined();
     if (!runnerAction) throw new Error("Missing Runner trace bid action");
     const runnerBid = await match.service.submitAction({
@@ -4410,8 +6992,11 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: reconnectedRunner.sessionToken,
       actionId: runnerAction.actionId,
       clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
-      selectedChoices: { choiceId: reconnectedRunner.pendingChoice?.choiceId, selectedOptionIds: ["bid_0"] },
-      idempotencyKey: "v096-runner-bid"
+      selectedChoices: {
+        choiceId: reconnectedRunner.pendingChoice?.choiceId,
+        selectedOptionIds: ["bid_0"],
+      },
+      idempotencyKey: "v096-runner-bid",
     });
 
     expect(runnerBid.ok).toBe(true);
@@ -4419,7 +7004,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(runnerBid.publicEvent?.publicPayload).toMatchObject({
       traceStep: "runner_bid",
       traceSuccessful: true,
-      tagsAdded: 1
+      tagsAdded: 1,
     });
     expect(runnerBid.actorPayload.playerView.own.tags).toBe(1);
 
@@ -4428,7 +7013,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: reconnectedRunner.sessionToken,
       targetEventId: `evt_${runnerBid.receipt.stateVersionAfter}`,
-      reason: "Trace bid undo"
+      reason: "Trace bid undo",
     });
     expect(undo.ok).toBe(true);
     if (!undo.ok) throw new Error(undo.error.message);
@@ -4437,7 +7022,11 @@ describe("MVP 0.2 multiplayer service", () => {
   it("handles V0.97 Breach multiaccess through submit, idempotency, reconnect and undo barrier", async () => {
     const match = await joinedV097BreachMatch("mp-v097-breach");
     const before = await bootstrap(match.service, match.matchId, match.runner);
-    const deepDive = mustAction(before, (action) => action.type === "play_event" && action.payload?.serverId === "rd");
+    const deepDive = mustAction(
+      before,
+      (action) =>
+        action.type === "play_event" && action.payload?.serverId === "rd",
+    );
 
     expect(JSON.stringify(before)).not.toContain("Simple Agenda");
     expect(JSON.stringify(before)).not.toContain("Simple Economy Operation");
@@ -4448,15 +7037,20 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: deepDive.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v097-deep-dive"
+      idempotencyKey: "v097-deep-dive",
     });
 
     expect(started.ok).toBe(true);
     if (!started.ok) throw new Error(started.error.message);
     expect(started.publicEvent?.visibilityClass).toBe("public");
-    expect(started.actorPayload.playerView.run?.breach).toMatchObject({ serverId: "rd", remainingCount: 2 });
+    expect(started.actorPayload.playerView.run?.breach).toMatchObject({
+      serverId: "rd",
+      remainingCount: 2,
+    });
     expect(JSON.stringify(started.actorPayload)).not.toContain("Simple Agenda");
-    expect(JSON.stringify(started.actorPayload)).not.toContain("Simple Economy Operation");
+    expect(JSON.stringify(started.actorPayload)).not.toContain(
+      "Simple Economy Operation",
+    );
 
     const duplicate = await match.service.submitAction({
       matchId: match.matchId,
@@ -4464,11 +7058,13 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: deepDive.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v097-deep-dive"
+      idempotencyKey: "v097-deep-dive",
     });
     expect(duplicate.ok).toBe(true);
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.receipt.stateVersionAfter).toBe(started.receipt.stateVersionAfter);
+    expect(duplicate.receipt.stateVersionAfter).toBe(
+      started.receipt.stateVersionAfter,
+    );
 
     const stale = await match.service.submitAction({
       matchId: match.matchId,
@@ -4476,7 +7072,7 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: deepDive.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v097-stale"
+      idempotencyKey: "v097-stale",
     });
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale-state rejection");
@@ -4484,15 +7080,19 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "runner",
-      reconnectToken: match.runner.reconnectToken
+      reconnectToken: match.runner.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
     expect(reconnected.playerView.run?.breach?.remainingCount).toBe(2);
     expect(JSON.stringify(reconnected)).not.toContain("Simple Agenda");
-    expect(JSON.stringify(reconnected)).not.toContain("Simple Economy Operation");
+    expect(JSON.stringify(reconnected)).not.toContain(
+      "Simple Economy Operation",
+    );
 
-    const accessAction = reconnected.legalActions.find((action) => action.type === "access_card");
+    const accessAction = reconnected.legalActions.find(
+      (action) => action.type === "access_card",
+    );
     expect(accessAction).toBeDefined();
     if (!accessAction) throw new Error("Missing access action");
     const access = await match.service.submitAction({
@@ -4501,7 +7101,7 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: reconnected.sessionToken,
       actionId: accessAction.actionId,
       clientKnownStateVersion: reconnected.playerView.stateVersion,
-      idempotencyKey: "v097-access-first"
+      idempotencyKey: "v097-access-first",
     });
 
     expect(access.ok).toBe(true);
@@ -4510,9 +7110,11 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(access.publicEvent?.publicPayload).toMatchObject({
       actionType: "access_card",
       cardDefinitionId: "simple_economy_operation",
-      title: "Simple Economy Operation"
+      title: "Simple Economy Operation",
     });
-    expect(JSON.stringify(access.publicEvent?.publicPayload)).not.toContain("Simple Agenda");
+    expect(JSON.stringify(access.publicEvent?.publicPayload)).not.toContain(
+      "Simple Agenda",
+    );
     expect(access.actorPayload.playerView.run?.breach?.remainingCount).toBe(1);
 
     const blocked = await match.service.requestUndo({
@@ -4520,7 +7122,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: reconnected.sessionToken,
       targetEventId: `evt_${access.receipt.stateVersionAfter}`,
-      reason: "Breach access undo"
+      reason: "Breach access undo",
     });
     expect(blocked.ok).toBe(false);
     if (blocked.ok) throw new Error("Expected undo_blocked");
@@ -4536,14 +7138,26 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(before)).not.toContain("Simple Economy Asset");
     expect(JSON.stringify(before)).not.toContain("Simple Agenda");
 
-    const started = await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "archives", "v112-run-archives");
-    expect(started.actorPayload.playerView.run?.breach).toMatchObject({ serverId: "archives", remainingCount: 1 });
-    expect(JSON.stringify(started.actorPayload)).toContain("Simple Economy Asset");
+    const started = await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "archives",
+      "v112-run-archives",
+    );
+    expect(started.actorPayload.playerView.run?.breach).toMatchObject({
+      serverId: "archives",
+      remainingCount: 1,
+    });
+    expect(JSON.stringify(started.actorPayload)).toContain(
+      "Simple Economy Asset",
+    );
     expect(JSON.stringify(started.actorPayload)).toContain("Simple Agenda");
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "runner",
-      reconnectToken: match.runner.reconnectToken
+      reconnectToken: match.runner.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
@@ -4552,9 +7166,21 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(reconnected)).toContain("Simple Economy Asset");
     expect(JSON.stringify(reconnected)).toContain("Simple Agenda");
 
-    const firstAccess = await submit(match.service, match.matchId, { ...match.runner, sessionToken: reconnected.sessionToken }, (action) => action.type === "access_card", "v112-access-agenda");
-    expect(firstAccess.publicEvent?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_agenda", serverLabel: "Archives" });
-    expect(JSON.stringify(firstAccess.actorPayload)).toContain("Simple Economy Asset");
+    const firstAccess = await submit(
+      match.service,
+      match.matchId,
+      { ...match.runner, sessionToken: reconnected.sessionToken },
+      (action) => action.type === "access_card",
+      "v112-access-agenda",
+    );
+    expect(firstAccess.publicEvent?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: "simple_agenda",
+      serverLabel: "Archives",
+    });
+    expect(JSON.stringify(firstAccess.actorPayload)).toContain(
+      "Simple Economy Asset",
+    );
     expect(JSON.stringify(firstAccess.actorPayload)).toContain("Simple Agenda");
 
     const duplicate = await match.service.submitAction({
@@ -4563,18 +7189,20 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: reconnected.sessionToken,
       actionId: firstAccess.receipt.idempotencyKey,
       clientKnownStateVersion: firstAccess.receipt.stateVersionBefore,
-      idempotencyKey: "v112-access-agenda"
+      idempotencyKey: "v112-access-agenda",
     });
     expect(duplicate.ok).toBe(true);
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.receipt.stateVersionAfter).toBe(firstAccess.receipt.stateVersionAfter);
+    expect(duplicate.receipt.stateVersionAfter).toBe(
+      firstAccess.receipt.stateVersionAfter,
+    );
 
     const blocked = await match.service.requestUndo({
       matchId: match.matchId,
       side: "runner",
       sessionToken: reconnected.sessionToken,
       targetEventId: `evt_${started.receipt.stateVersionAfter}`,
-      reason: "Archives reveal undo"
+      reason: "Archives reveal undo",
     });
     expect(blocked.ok).toBe(false);
     if (blocked.ok) throw new Error("Expected undo_blocked");
@@ -4585,7 +7213,12 @@ describe("MVP 0.2 multiplayer service", () => {
   it("handles Off-Site Backups Archives-to-HQ choices through submit and reconnect without hidden leaks", async () => {
     const match = await joinedOffSiteBackupsMatch("mp-off-site-backups");
     const before = await bootstrap(match.service, match.matchId, match.corp);
-    const operation = mustAction(before, (action) => action.type === "play_operation" && action.label.includes("Off-Site Backups"));
+    const operation = mustAction(
+      before,
+      (action) =>
+        action.type === "play_operation" &&
+        action.label.includes("Off-Site Backups"),
+    );
 
     const started = await match.service.submitAction({
       matchId: match.matchId,
@@ -4593,60 +7226,101 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.corp.sessionToken,
       actionId: operation.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "off-site-backups-start"
+      idempotencyKey: "off-site-backups-start",
     });
 
     expect(started.ok).toBe(true);
     if (!started.ok) throw new Error(started.error.message);
     expect(started.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
-    expect(started.actorPayload.pendingChoice?.source).toContain("v1922.corp_archives_to_hq");
-    expect(started.actorPayload.pendingChoice?.options.map((option) => option.label).sort()).toEqual(["Simple Agenda", "Simple Economy Operation"]);
-    expect(started.actorPayload.legalActions.some((action) => action.type === "resolve_choice")).toBe(true);
+    expect(started.actorPayload.pendingChoice?.source).toContain(
+      "v1922.corp_archives_to_hq",
+    );
+    expect(
+      started.actorPayload.pendingChoice?.options
+        .map((option) => option.label)
+        .sort(),
+    ).toEqual(["Simple Agenda", "Simple Economy Operation"]);
+    expect(
+      started.actorPayload.legalActions.some(
+        (action) => action.type === "resolve_choice",
+      ),
+    ).toBe(true);
     expect(started.opponentPayload.pendingChoice).toBeUndefined();
-    expect(JSON.stringify(started.opponentPayload)).not.toContain("Simple Agenda");
-    expect(JSON.stringify(started.publicEvent?.publicPayload)).not.toMatch(/Simple Agenda|cardInstances|privatePayload/);
+    expect(JSON.stringify(started.opponentPayload)).not.toContain(
+      "Simple Agenda",
+    );
+    expect(JSON.stringify(started.publicEvent?.publicPayload)).not.toMatch(
+      /Simple Agenda|cardInstances|privatePayload/,
+    );
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "corp",
-      reconnectToken: match.corp.reconnectToken
+      reconnectToken: match.corp.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
-    expect(reconnected.pendingChoice?.options.some((option) => option.label === "Simple Agenda")).toBe(true);
+    expect(
+      reconnected.pendingChoice?.options.some(
+        (option) => option.label === "Simple Agenda",
+      ),
+    ).toBe(true);
 
-    const choiceAction = reconnected.legalActions.find((action) => action.type === "resolve_choice");
-    const agendaOption = reconnected.pendingChoice?.options.find((option) => option.label === "Simple Agenda");
+    const choiceAction = reconnected.legalActions.find(
+      (action) => action.type === "resolve_choice",
+    );
+    const agendaOption = reconnected.pendingChoice?.options.find(
+      (option) => option.label === "Simple Agenda",
+    );
     expect(choiceAction).toBeDefined();
     expect(agendaOption).toBeDefined();
-    if (!choiceAction || !agendaOption) throw new Error("Missing Off-Site Backups Archives option");
+    if (!choiceAction || !agendaOption)
+      throw new Error("Missing Off-Site Backups Archives option");
     const resolved = await match.service.submitAction({
       matchId: match.matchId,
       side: "corp",
       sessionToken: reconnected.sessionToken,
       actionId: choiceAction.actionId,
       clientKnownStateVersion: reconnected.playerView.stateVersion,
-      selectedChoices: { choiceId: reconnected.pendingChoice?.choiceId, selectedOptionIds: [agendaOption.id] },
-      idempotencyKey: "off-site-backups-resolve"
+      selectedChoices: {
+        choiceId: reconnected.pendingChoice?.choiceId,
+        selectedOptionIds: [agendaOption.id],
+      },
+      idempotencyKey: "off-site-backups-resolve",
     });
 
     expect(resolved.ok).toBe(true);
     if (!resolved.ok) throw new Error(resolved.error.message);
     expect(resolved.actorPayload.pendingChoice).toBeUndefined();
-    expect(resolved.actorPayload.playerView.own.gripOrHq.some((card) => card.definitionId === "simple_agenda")).toBe(true);
+    expect(
+      resolved.actorPayload.playerView.own.gripOrHq.some(
+        (card) => card.definitionId === "simple_agenda",
+      ),
+    ).toBe(true);
     expect(resolved.actorPayload.playerView.own.heapOrArchives).toHaveLength(2);
-    expect(resolved.opponentPayload.playerView.opponent.handCount).toBe(resolved.actorPayload.playerView.own.gripOrHq.length);
-    expect(JSON.stringify(resolved.opponentPayload)).not.toContain("Simple Agenda");
+    expect(resolved.opponentPayload.playerView.opponent.handCount).toBe(
+      resolved.actorPayload.playerView.own.gripOrHq.length,
+    );
+    expect(JSON.stringify(resolved.opponentPayload)).not.toContain(
+      "Simple Agenda",
+    );
     expect(resolved.publicEvent?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      hiddenZoneAction: "v1922_corp_archives_to_hq"
+      hiddenZoneAction: "v1922_corp_archives_to_hq",
     });
-    expect(JSON.stringify(resolved.publicEvent?.publicPayload)).not.toMatch(/Simple Agenda|cardInstances|privatePayload/);
+    expect(JSON.stringify(resolved.publicEvent?.publicPayload)).not.toMatch(
+      /Simple Agenda|cardInstances|privatePayload/,
+    );
   });
 
   it("handles V0.98 Hidden-Zone Search through submit, idempotency, reconnect and undo barrier", async () => {
     const match = await joinedV098HiddenSearchMatch("mp-v098-hidden-search");
     const before = await bootstrap(match.service, match.matchId, match.runner);
-    const searchAction = mustAction(before, (action) => action.type === "play_event" && String(action.source).includes("v098_stack_search_event"));
+    const searchAction = mustAction(
+      before,
+      (action) =>
+        action.type === "play_event" &&
+        String(action.source).includes("v098_stack_search_event"),
+    );
 
     const started = await match.service.submitAction({
       matchId: match.matchId,
@@ -4654,16 +7328,22 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: searchAction.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v098-search-start"
+      idempotencyKey: "v098-search-start",
     });
 
     expect(started.ok).toBe(true);
     if (!started.ok) throw new Error(started.error.message);
     expect(started.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
     expect(started.actorPayload.pendingChoice?.kind).toBe("select_cards");
-    expect(started.actorPayload.pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    expect(
+      started.actorPayload.pendingChoice?.options.some(
+        (option) => option.label === "Simple Decoder",
+      ),
+    ).toBe(true);
     expect(started.opponentPayload.pendingChoice).toBeUndefined();
-    expect(JSON.stringify(started.opponentPayload)).not.toContain("Simple Decoder");
+    expect(JSON.stringify(started.opponentPayload)).not.toContain(
+      "Simple Decoder",
+    );
 
     const duplicate = await match.service.submitAction({
       matchId: match.matchId,
@@ -4671,11 +7351,13 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: searchAction.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v098-search-start"
+      idempotencyKey: "v098-search-start",
     });
     expect(duplicate.ok).toBe(true);
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.receipt.stateVersionAfter).toBe(started.receipt.stateVersionAfter);
+    expect(duplicate.receipt.stateVersionAfter).toBe(
+      started.receipt.stateVersionAfter,
+    );
 
     const stale = await match.service.submitAction({
       matchId: match.matchId,
@@ -4683,7 +7365,7 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: searchAction.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v098-search-stale"
+      idempotencyKey: "v098-search-stale",
     });
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale-state rejection");
@@ -4691,41 +7373,61 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "runner",
-      reconnectToken: match.runner.reconnectToken
+      reconnectToken: match.runner.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
-    expect(reconnected.pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    expect(
+      reconnected.pendingChoice?.options.some(
+        (option) => option.label === "Simple Decoder",
+      ),
+    ).toBe(true);
     expect(JSON.stringify(reconnected)).not.toContain("Simple Agenda");
 
-    const choiceAction = reconnected.legalActions.find((action) => action.type === "resolve_choice");
-    const selectedOptionId = reconnected.pendingChoice?.options.find((option) => option.label === "Simple Decoder")?.id;
+    const choiceAction = reconnected.legalActions.find(
+      (action) => action.type === "resolve_choice",
+    );
+    const selectedOptionId = reconnected.pendingChoice?.options.find(
+      (option) => option.label === "Simple Decoder",
+    )?.id;
     expect(choiceAction).toBeDefined();
     expect(selectedOptionId).toBeDefined();
-    if (!choiceAction || !selectedOptionId) throw new Error("Missing V0.98 search choice");
+    if (!choiceAction || !selectedOptionId)
+      throw new Error("Missing V0.98 search choice");
     const resolved = await match.service.submitAction({
       matchId: match.matchId,
       side: match.runner.side,
       sessionToken: reconnected.sessionToken,
       actionId: choiceAction.actionId,
       clientKnownStateVersion: reconnected.playerView.stateVersion,
-      selectedChoices: { choiceId: reconnected.pendingChoice?.choiceId, selectedOptionIds: [selectedOptionId] },
-      idempotencyKey: "v098-search-resolve"
+      selectedChoices: {
+        choiceId: reconnected.pendingChoice?.choiceId,
+        selectedOptionIds: [selectedOptionId],
+      },
+      idempotencyKey: "v098-search-resolve",
     });
 
     expect(resolved.ok).toBe(true);
     if (!resolved.ok) throw new Error(resolved.error.message);
     expect(resolved.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
-    expect(JSON.stringify(resolved.publicEvent?.publicPayload)).not.toContain("Simple Decoder");
-    expect(resolved.actorPayload.playerView.own.gripOrHq.some((card) => card.definitionId === "simple_decoder")).toBe(true);
-    expect(JSON.stringify(resolved.opponentPayload)).not.toContain("Simple Decoder");
+    expect(JSON.stringify(resolved.publicEvent?.publicPayload)).not.toContain(
+      "Simple Decoder",
+    );
+    expect(
+      resolved.actorPayload.playerView.own.gripOrHq.some(
+        (card) => card.definitionId === "simple_decoder",
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(resolved.opponentPayload)).not.toContain(
+      "Simple Decoder",
+    );
 
     const blocked = await match.service.requestUndo({
       matchId: match.matchId,
       side: "runner",
       sessionToken: reconnected.sessionToken,
       targetEventId: `evt_${started.receipt.stateVersionAfter}`,
-      reason: "Hidden-zone search undo"
+      reason: "Hidden-zone search undo",
     });
     expect(blocked.ok).toBe(false);
     if (blocked.ok) throw new Error("Expected undo_blocked");
@@ -4735,7 +7437,12 @@ describe("MVP 0.2 multiplayer service", () => {
   it("handles V0.99 Hosting through submit, idempotency, reconnect and undo barrier", async () => {
     const match = await joinedV099HostingMatch("mp-v099-hosting");
     const before = await bootstrap(match.service, match.matchId, match.runner);
-    const hostAction = mustAction(before, (action) => action.type === "install_card" && String(action.source).includes("v099_host_resource"));
+    const hostAction = mustAction(
+      before,
+      (action) =>
+        action.type === "install_card" &&
+        String(action.source).includes("v099_host_resource"),
+    );
 
     const started = await match.service.submitAction({
       matchId: match.matchId,
@@ -4743,16 +7450,22 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: hostAction.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v099-host-install"
+      idempotencyKey: "v099-host-install",
     });
 
     expect(started.ok).toBe(true);
     if (!started.ok) throw new Error(started.error.message);
     expect(started.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
     expect(started.actorPayload.pendingChoice?.kind).toBe("select_cards");
-    expect(started.actorPayload.pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    expect(
+      started.actorPayload.pendingChoice?.options.some(
+        (option) => option.label === "Simple Decoder",
+      ),
+    ).toBe(true);
     expect(started.opponentPayload.pendingChoice).toBeUndefined();
-    expect(JSON.stringify(started.opponentPayload)).not.toContain("Simple Decoder");
+    expect(JSON.stringify(started.opponentPayload)).not.toContain(
+      "Simple Decoder",
+    );
 
     const duplicate = await match.service.submitAction({
       matchId: match.matchId,
@@ -4760,11 +7473,13 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: hostAction.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v099-host-install"
+      idempotencyKey: "v099-host-install",
     });
     expect(duplicate.ok).toBe(true);
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.receipt.stateVersionAfter).toBe(started.receipt.stateVersionAfter);
+    expect(duplicate.receipt.stateVersionAfter).toBe(
+      started.receipt.stateVersionAfter,
+    );
 
     const stale = await match.service.submitAction({
       matchId: match.matchId,
@@ -4772,7 +7487,7 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: match.runner.sessionToken,
       actionId: hostAction.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "v099-host-stale"
+      idempotencyKey: "v099-host-stale",
     });
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale-state rejection");
@@ -4780,41 +7495,63 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "runner",
-      reconnectToken: match.runner.reconnectToken
+      reconnectToken: match.runner.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
-    expect(reconnected.pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    expect(
+      reconnected.pendingChoice?.options.some(
+        (option) => option.label === "Simple Decoder",
+      ),
+    ).toBe(true);
     expect(JSON.stringify(reconnected)).not.toContain("Simple Agenda");
 
-    const choiceAction = reconnected.legalActions.find((action) => action.type === "resolve_choice");
-    const selectedOptionId = reconnected.pendingChoice?.options.find((option) => option.label === "Simple Decoder")?.id;
+    const choiceAction = reconnected.legalActions.find(
+      (action) => action.type === "resolve_choice",
+    );
+    const selectedOptionId = reconnected.pendingChoice?.options.find(
+      (option) => option.label === "Simple Decoder",
+    )?.id;
     expect(choiceAction).toBeDefined();
     expect(selectedOptionId).toBeDefined();
-    if (!choiceAction || !selectedOptionId) throw new Error("Missing V0.99 hosting choice");
+    if (!choiceAction || !selectedOptionId)
+      throw new Error("Missing V0.99 hosting choice");
     const resolved = await match.service.submitAction({
       matchId: match.matchId,
       side: match.runner.side,
       sessionToken: reconnected.sessionToken,
       actionId: choiceAction.actionId,
       clientKnownStateVersion: reconnected.playerView.stateVersion,
-      selectedChoices: { choiceId: reconnected.pendingChoice?.choiceId, selectedOptionIds: [selectedOptionId] },
-      idempotencyKey: "v099-host-resolve"
+      selectedChoices: {
+        choiceId: reconnected.pendingChoice?.choiceId,
+        selectedOptionIds: [selectedOptionId],
+      },
+      idempotencyKey: "v099-host-resolve",
     });
 
     expect(resolved.ok).toBe(true);
     if (!resolved.ok) throw new Error(resolved.error.message);
     expect(resolved.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
-    expect(JSON.stringify(resolved.publicEvent?.publicPayload)).not.toContain("Simple Decoder");
-    expect(resolved.actorPayload.playerView.own.rig?.some((card) => card.definitionId === "simple_decoder" && card.hostedOn)).toBe(true);
-    expect(resolved.opponentPayload.playerView.opponent.rig?.some((card) => card.definitionId === "simple_decoder" && card.hostedOn)).toBe(true);
+    expect(JSON.stringify(resolved.publicEvent?.publicPayload)).not.toContain(
+      "Simple Decoder",
+    );
+    expect(
+      resolved.actorPayload.playerView.own.rig?.some(
+        (card) => card.definitionId === "simple_decoder" && card.hostedOn,
+      ),
+    ).toBe(true);
+    expect(
+      resolved.opponentPayload.playerView.opponent.rig?.some(
+        (card) => card.definitionId === "simple_decoder" && card.hostedOn,
+      ),
+    ).toBe(true);
 
     const blocked = await match.service.requestUndo({
       matchId: match.matchId,
       side: "runner",
       sessionToken: reconnected.sessionToken,
       targetEventId: `evt_${started.receipt.stateVersionAfter}`,
-      reason: "Hosting hidden-zone undo"
+      reason: "Hosting hidden-zone undo",
     });
     expect(blocked.ok).toBe(false);
     if (blocked.ok) throw new Error("Expected undo_blocked");
@@ -4822,22 +7559,51 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("reports V0.94 Flatline as a side-safe result reason", async () => {
-    const match = await joinedV094DamageMatch("mp-v094-flatline", { emptyRunnerGrip: true });
+    const match = await joinedV094DamageMatch("mp-v094-flatline", {
+      emptyRunnerGrip: true,
+    });
 
-    await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v094-flatline-run");
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "rez_ice" && action.label.includes("Neural Sentry"), "v094-flatline-rez");
-    const flatline = await submit(match.service, match.matchId, match.runner, (action) => action.type === "continue_run", "v094-flatline-damage");
+    await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "v094-flatline-run",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) =>
+        action.type === "rez_ice" && action.label.includes("Neural Sentry"),
+      "v094-flatline-rez",
+    );
+    const flatline = await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) => action.type === "continue_run",
+      "v094-flatline-damage",
+    );
 
     expect(flatline.actorPayload.winner).toBe("corp");
     expect(flatline.actorPayload.matchStatus).toBe("finished");
-    expect(flatline.actorPayload.resultSummary).toMatchObject({ winner: "corp", reason: "flatline" });
-    expect(JSON.stringify(flatline.opponentPayload)).not.toContain("Simple Killer");
+    expect(flatline.actorPayload.resultSummary).toMatchObject({
+      winner: "corp",
+      reason: "flatline",
+    });
+    expect(JSON.stringify(flatline.opponentPayload)).not.toContain(
+      "Simple Killer",
+    );
     expect(JSON.stringify(flatline.publicEvent)).not.toContain("Simple Killer");
   });
 
   it("projects Bad-Publicity-7+ game end as a side-safe result reason on reconnect", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "mp-bad-publicity-result" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "mp-bad-publicity-result",
+    });
     const created = await service.createMatch({
       hostSide: "runner",
       playMode: "human_vs_ai",
@@ -4879,8 +7645,20 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("replays a multiplayer match to the stored final state hash", async () => {
     const match = await joinedMatch("replay-multiplayer");
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "mandatory");
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "gain_credit", "credit");
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "mandatory_draw",
+      "mandatory",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "gain_credit",
+      "credit",
+    );
 
     const replay = await match.service.replayMatch(match.matchId);
     expect(replay.ok).toBe(true);
@@ -4889,31 +7667,97 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("builds V1.5.0 private replay views with timeline checks and redacted export", async () => {
     const match = await joinedMatch("v150-private-replay");
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "v150-mandatory");
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "install_card", "v150-install");
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "v150-end-turn");
-    await resolveCorpDiscardIfPending(match.service, match.matchId, match.corp, "v150-corp-discard");
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "mandatory_draw",
+      "v150-mandatory",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "install_card",
+      "v150-install",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "end_turn",
+      "v150-end-turn",
+    );
+    await resolveCorpDiscardIfPending(
+      match.service,
+      match.matchId,
+      match.corp,
+      "v150-corp-discard",
+    );
     await putTopCorpAgendaForMatch(match.service, match.matchId);
-    await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v150-rd-run-1");
-    await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card", "v150-rd-access");
-    await submit(match.service, match.matchId, match.runner, (action) => action.type === "steal_agenda", "v150-rd-steal");
-    await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v150-rd-run-2");
+    await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "v150-rd-run-1",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) => action.type === "access_card",
+      "v150-rd-access",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) => action.type === "steal_agenda",
+      "v150-rd-steal",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "v150-rd-run-2",
+    );
 
     const index = await match.service.listReplayIndex();
-    const entry = index.find((candidate) => candidate.matchId === match.matchId);
+    const entry = index.find(
+      (candidate) => candidate.matchId === match.matchId,
+    );
     expect(entry).toBeDefined();
     if (!entry) throw new Error("Missing replay index entry");
     expect(entry.finalStateHash).toMatch(/^fnv1a:/);
     expect(entry.replayCheckStatus).toBe("unchecked");
     expect(entry.replayOk).toBeUndefined();
-    expect(JSON.stringify(entry)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist/i);
+    expect(JSON.stringify(entry)).not.toMatch(
+      /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist/i,
+    );
     const stored = await match.service.loadForTest(match.matchId);
-    expect(stored?.gameState.eventLog.some((event) => Boolean(event.privatePayload))).toBe(true);
-    expect(stored?.eventLog.some((event) => "privatePayload" in event)).toBe(false);
-    expect(stored?.eventLog.every((event) => typeof event.privatePayloadLocalOnly === "boolean")).toBe(true);
-    expect(stored?.eventLog.map((event) => event.eventId)).toEqual(stored?.gameState.eventLog.map((event) => event.eventId));
+    expect(
+      stored?.gameState.eventLog.some((event) => Boolean(event.privatePayload)),
+    ).toBe(true);
+    expect(stored?.eventLog.some((event) => "privatePayload" in event)).toBe(
+      false,
+    );
+    expect(
+      stored?.eventLog.every(
+        (event) => typeof event.privatePayloadLocalOnly === "boolean",
+      ),
+    ).toBe(true);
+    expect(stored?.eventLog.map((event) => event.eventId)).toEqual(
+      stored?.gameState.eventLog.map((event) => event.eventId),
+    );
 
-    const runnerLoaded = await match.service.loadReplayDiagnostics(match.matchId, "runner");
+    const runnerLoaded = await match.service.loadReplayDiagnostics(
+      match.matchId,
+      "runner",
+    );
     expect(runnerLoaded.ok).toBe(true);
     if (!runnerLoaded.ok) throw new Error(runnerLoaded.error.message);
     const runnerReplay = runnerLoaded.replay;
@@ -4922,88 +7766,164 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(runnerReplay.metadata.replayCheckStatus).toBe("verified");
     expect(typeof runnerReplay.metadata.replayOk).toBe("boolean");
     expect(runnerReplay.timeline.length).toBeGreaterThan(0);
-    expect(runnerReplay.timeline.every((step) => typeof step.stateVersionBefore === "number" && typeof step.stateVersionAfter === "number" && typeof step.timingPoint === "string")).toBe(true);
-    expect(runnerReplay.timeline.every((step) => step.stateHashCheck.expected.startsWith("fnv1a:"))).toBe(true);
-    expect(runnerReplay.timeline.some((step) => step.hiddenInfoBarrier)).toBe(true);
+    expect(
+      runnerReplay.timeline.every(
+        (step) =>
+          typeof step.stateVersionBefore === "number" &&
+          typeof step.stateVersionAfter === "number" &&
+          typeof step.timingPoint === "string",
+      ),
+    ).toBe(true);
+    expect(
+      runnerReplay.timeline.every((step) =>
+        step.stateHashCheck.expected.startsWith("fnv1a:"),
+      ),
+    ).toBe(true);
+    expect(runnerReplay.timeline.some((step) => step.hiddenInfoBarrier)).toBe(
+      true,
+    );
     expect(runnerReplay.randomDrawRecords.length).toBeGreaterThan(0);
-    expect(runnerReplay.randomDrawRecords.every((entry) => entry.valueHash.startsWith("fnv1a:"))).toBe(true);
-    expect(JSON.stringify(runnerReplay)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i);
+    expect(
+      runnerReplay.randomDrawRecords.every((entry) =>
+        entry.valueHash.startsWith("fnv1a:"),
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(runnerReplay)).not.toMatch(
+      /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i,
+    );
 
-    const localLoaded = await match.service.loadReplayDiagnostics(match.matchId, "local_analysis");
+    const localLoaded = await match.service.loadReplayDiagnostics(
+      match.matchId,
+      "local_analysis",
+    );
     expect(localLoaded.ok).toBe(true);
     if (!localLoaded.ok) throw new Error(localLoaded.error.message);
     expect(localLoaded.replay.localAnalysis).toBe(true);
-    expect(localLoaded.replay.exploitSuggestions.every((candidate) => candidate.status === "review_suggestion")).toBe(true);
+    expect(
+      localLoaded.replay.exploitSuggestions.every(
+        (candidate) => candidate.status === "review_suggestion",
+      ),
+    ).toBe(true);
 
-    const exported = await match.service.exportReplayDiagnostics(match.matchId, "runner");
+    const exported = await match.service.exportReplayDiagnostics(
+      match.matchId,
+      "runner",
+    );
     expect(exported.ok).toBe(true);
     if (!exported.ok) throw new Error(exported.error.message);
     expect(exported.artifact.version).toBe("1.5.0");
     expect(exported.artifact.perspective).toBe("runner");
-    expect(exported.artifact.baseline.engineSchemaVersion).toBe(exported.artifact.replay.metadata.baseline.engineSchemaVersion);
+    expect(exported.artifact.baseline.engineSchemaVersion).toBe(
+      exported.artifact.replay.metadata.baseline.engineSchemaVersion,
+    );
     expect(exported.artifact.replay.localAnalysis).toBe(false);
     expect(exported.artifact.replay.perspective).toBe("runner");
-    expect(JSON.stringify(exported.artifact)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i);
+    expect(JSON.stringify(exported.artifact)).not.toMatch(
+      /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i,
+    );
 
-    const localExport = await match.service.exportReplayDiagnostics(match.matchId, "local_analysis");
+    const localExport = await match.service.exportReplayDiagnostics(
+      match.matchId,
+      "local_analysis",
+    );
     expect(localExport.ok).toBe(false);
-    if (localExport.ok) throw new Error("Expected local_analysis export to be rejected");
+    if (localExport.ok)
+      throw new Error("Expected local_analysis export to be rejected");
     expect(localExport.error.code).toBe("bad_request");
   });
 
   it("keeps replay DecisionDebug side-safe across runner/corp/local perspectives", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "v150-decision-debug" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "v150-decision-debug",
+    });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "v150-decision-debug",
-      corpDifficulty: "normal"
+      corpDifficulty: "normal",
     });
     const afterSetup = await submitChoice(
       service,
       created.matchId,
-      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       "keep",
-      "v150-setup-keep"
+      "v150-setup-keep",
     );
     const advanced = await service.advanceAi({
       matchId: created.matchId,
       side: "runner",
       sessionToken: created.hostSessionToken,
       knownStateVersion: afterSetup.playerView.stateVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
 
-    const runnerReplayLoaded = await service.loadReplayDiagnostics(created.matchId, "runner");
-    const corpReplayLoaded = await service.loadReplayDiagnostics(created.matchId, "corp");
-    const localReplayLoaded = await service.loadReplayDiagnostics(created.matchId, "local_analysis");
+    const runnerReplayLoaded = await service.loadReplayDiagnostics(
+      created.matchId,
+      "runner",
+    );
+    const corpReplayLoaded = await service.loadReplayDiagnostics(
+      created.matchId,
+      "corp",
+    );
+    const localReplayLoaded = await service.loadReplayDiagnostics(
+      created.matchId,
+      "local_analysis",
+    );
     expect(runnerReplayLoaded.ok).toBe(true);
     expect(corpReplayLoaded.ok).toBe(true);
     expect(localReplayLoaded.ok).toBe(true);
-    if (!runnerReplayLoaded.ok || !corpReplayLoaded.ok || !localReplayLoaded.ok) throw new Error("Replay load failed");
+    if (!runnerReplayLoaded.ok || !corpReplayLoaded.ok || !localReplayLoaded.ok)
+      throw new Error("Replay load failed");
 
-    const runnerDebugStep = runnerReplayLoaded.replay.timeline.find((step) => step.decisionDebug);
-    const corpDebugStep = corpReplayLoaded.replay.timeline.find((step) => step.decisionDebug);
-    const localDebugStep = localReplayLoaded.replay.timeline.find((step) => step.decisionDebug);
+    const runnerDebugStep = runnerReplayLoaded.replay.timeline.find(
+      (step) => step.decisionDebug,
+    );
+    const corpDebugStep = corpReplayLoaded.replay.timeline.find(
+      (step) => step.decisionDebug,
+    );
+    const localDebugStep = localReplayLoaded.replay.timeline.find(
+      (step) => step.decisionDebug,
+    );
     expect(runnerDebugStep).toBeDefined();
     expect(corpDebugStep).toBeDefined();
     expect(localDebugStep).toBeDefined();
-    if (!runnerDebugStep || !corpDebugStep || !localDebugStep) throw new Error("Missing decision debug step");
+    if (!runnerDebugStep || !corpDebugStep || !localDebugStep)
+      throw new Error("Missing decision debug step");
 
     expect(runnerDebugStep.side).toBe("corp");
-    expect(runnerDebugStep.decisionDebug).toMatchObject({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, redacted: true, reason: "side_private_ai_debug" });
-    expect(corpDebugStep.decisionDebug).toMatchObject({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, actor: "corp" });
-    expect((corpDebugStep.decisionDebug as { redacted?: boolean })?.redacted).toBeUndefined();
-    expect(localDebugStep.decisionDebug).toMatchObject({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, actor: "corp" });
-    expect((localDebugStep.decisionDebug as { redacted?: boolean })?.redacted).toBeUndefined();
+    expect(runnerDebugStep.decisionDebug).toMatchObject({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      redacted: true,
+      reason: "side_private_ai_debug",
+    });
+    expect(corpDebugStep.decisionDebug).toMatchObject({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      actor: "corp",
+    });
+    expect(
+      (corpDebugStep.decisionDebug as { redacted?: boolean })?.redacted,
+    ).toBeUndefined();
+    expect(localDebugStep.decisionDebug).toMatchObject({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      actor: "corp",
+    });
+    expect(
+      (localDebugStep.decisionDebug as { redacted?: boolean })?.redacted,
+    ).toBeUndefined();
 
     const stored = await storage.load(created.matchId);
     expect(stored).toBeDefined();
     if (!stored) throw new Error("Missing stored match");
-    const debugRecord = stored.eventLog.find((event) => event.publicPayload.publicPayload.aiDecisionDebug);
+    const debugRecord = stored.eventLog.find(
+      (event) => event.publicPayload.publicPayload.aiDecisionDebug,
+    );
     expect(debugRecord).toBeDefined();
     if (!debugRecord) throw new Error("Missing AI debug record");
     debugRecord.publicPayload.publicPayload.aiDecisionDebug = {
@@ -5016,103 +7936,268 @@ describe("MVP 0.2 multiplayer service", () => {
       opponentModel: {
         visibleSignal: "safe",
         rdContents: ["hidden-deck-card"],
-        sessionToken: "runner-session-secret"
-      }
+        sessionToken: "runner-session-secret",
+      },
     };
     await storage.save(stored);
 
-    const redactedCorpReplayLoaded = await service.loadReplayDiagnostics(created.matchId, "corp");
+    const redactedCorpReplayLoaded = await service.loadReplayDiagnostics(
+      created.matchId,
+      "corp",
+    );
     expect(redactedCorpReplayLoaded.ok).toBe(true);
-    if (!redactedCorpReplayLoaded.ok) throw new Error(redactedCorpReplayLoaded.error.message);
-    const redactedDebugStep = redactedCorpReplayLoaded.replay.timeline.find((step) => step.decisionDebug);
+    if (!redactedCorpReplayLoaded.ok)
+      throw new Error(redactedCorpReplayLoaded.error.message);
+    const redactedDebugStep = redactedCorpReplayLoaded.replay.timeline.find(
+      (step) => step.decisionDebug,
+    );
     expect(redactedDebugStep?.decisionDebug).toMatchObject({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       actor: "corp",
-      facts: ["public_fact:ok", "[redacted-debug-value]"]
+      facts: ["public_fact:ok", "[redacted-debug-value]"],
     });
-    expect(JSON.stringify(redactedCorpReplayLoaded.replay)).not.toMatch(/runner-session-secret|privatePayload|FullState|Hidden Priority Agenda|hidden-deck-card|decklist|sessionToken|reconnectToken|joinToken/i);
+    expect(JSON.stringify(redactedCorpReplayLoaded.replay)).not.toMatch(
+      /runner-session-secret|privatePayload|FullState|Hidden Priority Agenda|hidden-deck-card|decklist|sessionToken|reconnectToken|joinToken/i,
+    );
   });
 
   it("classifies V1.5.0 replay event families for access, damage, trace, replacement and special-zone flows", async () => {
     const accessMatch = await joinedMatch("v150-family-access");
-    await submit(accessMatch.service, accessMatch.matchId, accessMatch.corp, (action) => action.type === "mandatory_draw", "v150-family-access-draw");
-    await submit(accessMatch.service, accessMatch.matchId, accessMatch.corp, (action) => action.type === "install_card", "v150-family-access-install");
-    await submit(accessMatch.service, accessMatch.matchId, accessMatch.corp, (action) => action.type === "end_turn", "v150-family-access-end");
-    await submit(accessMatch.service, accessMatch.matchId, accessMatch.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v150-family-access-run");
-    await submit(accessMatch.service, accessMatch.matchId, accessMatch.runner, (action) => action.type === "access_card" || action.type === "steal_agenda", "v150-family-access-access");
-    const accessReplay = await accessMatch.service.loadReplayDiagnostics(accessMatch.matchId, "local_analysis");
+    await submit(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.corp,
+      (action) => action.type === "mandatory_draw",
+      "v150-family-access-draw",
+    );
+    await submit(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.corp,
+      (action) => action.type === "install_card",
+      "v150-family-access-install",
+    );
+    await submit(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.corp,
+      (action) => action.type === "end_turn",
+      "v150-family-access-end",
+    );
+    await submit(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "v150-family-access-run",
+    );
+    await submit(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.runner,
+      (action) =>
+        action.type === "access_card" || action.type === "steal_agenda",
+      "v150-family-access-access",
+    );
+    const accessReplay = await accessMatch.service.loadReplayDiagnostics(
+      accessMatch.matchId,
+      "local_analysis",
+    );
     expect(accessReplay.ok).toBe(true);
     if (!accessReplay.ok) throw new Error(accessReplay.error.message);
-    expect(accessReplay.replay.timeline.some((step) => step.eventFamily === "run_and_access")).toBe(true);
+    expect(
+      accessReplay.replay.timeline.some(
+        (step) => step.eventFamily === "run_and_access",
+      ),
+    ).toBe(true);
 
     const damageMatch = await joinedV094DamageMatch("v150-family-damage");
-    await submit(damageMatch.service, damageMatch.matchId, damageMatch.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v150-family-damage-run");
-    await submit(damageMatch.service, damageMatch.matchId, damageMatch.corp, (action) => action.type === "rez_ice" && action.label.includes("Neural Sentry"), "v150-family-damage-rez");
-    await submit(damageMatch.service, damageMatch.matchId, damageMatch.runner, (action) => action.type === "continue_run", "v150-family-damage-continue");
-    const damageReplay = await damageMatch.service.loadReplayDiagnostics(damageMatch.matchId, "local_analysis");
+    await submit(
+      damageMatch.service,
+      damageMatch.matchId,
+      damageMatch.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "v150-family-damage-run",
+    );
+    await submit(
+      damageMatch.service,
+      damageMatch.matchId,
+      damageMatch.corp,
+      (action) =>
+        action.type === "rez_ice" && action.label.includes("Neural Sentry"),
+      "v150-family-damage-rez",
+    );
+    await submit(
+      damageMatch.service,
+      damageMatch.matchId,
+      damageMatch.runner,
+      (action) => action.type === "continue_run",
+      "v150-family-damage-continue",
+    );
+    const damageReplay = await damageMatch.service.loadReplayDiagnostics(
+      damageMatch.matchId,
+      "local_analysis",
+    );
     expect(damageReplay.ok).toBe(true);
     if (!damageReplay.ok) throw new Error(damageReplay.error.message);
-    expect(damageReplay.replay.timeline.some((step) => step.eventFamily === "damage_and_survival")).toBe(true);
+    expect(
+      damageReplay.replay.timeline.some(
+        (step) => step.eventFamily === "damage_and_survival",
+      ),
+    ).toBe(true);
 
     const traceMatch = await joinedV096TraceMatch("v150-family-trace");
-    const corpChoice = await bootstrap(traceMatch.service, traceMatch.matchId, traceMatch.corp);
-    const corpBidAction = mustAction(corpChoice, (action) => action.type === "resolve_choice");
+    const corpChoice = await bootstrap(
+      traceMatch.service,
+      traceMatch.matchId,
+      traceMatch.corp,
+    );
+    const corpBidAction = mustAction(
+      corpChoice,
+      (action) => action.type === "resolve_choice",
+    );
     await traceMatch.service.submitAction({
       matchId: traceMatch.matchId,
       side: traceMatch.corp.side,
       sessionToken: traceMatch.corp.sessionToken,
       actionId: corpBidAction.actionId,
       clientKnownStateVersion: corpChoice.playerView.stateVersion,
-      selectedChoices: { choiceId: corpChoice.pendingChoice?.choiceId, selectedOptionIds: ["bid_1"] },
-      idempotencyKey: "v150-family-trace-bid"
+      selectedChoices: {
+        choiceId: corpChoice.pendingChoice?.choiceId,
+        selectedOptionIds: ["bid_1"],
+      },
+      idempotencyKey: "v150-family-trace-bid",
     });
-    const traceReplay = await traceMatch.service.loadReplayDiagnostics(traceMatch.matchId, "local_analysis");
+    const traceReplay = await traceMatch.service.loadReplayDiagnostics(
+      traceMatch.matchId,
+      "local_analysis",
+    );
     expect(traceReplay.ok).toBe(true);
     if (!traceReplay.ok) throw new Error(traceReplay.error.message);
-    expect(traceReplay.replay.timeline.some((step) => step.eventFamily === "trace_and_tags")).toBe(true);
+    expect(
+      traceReplay.replay.timeline.some(
+        (step) => step.eventFamily === "trace_and_tags",
+      ),
+    ).toBe(true);
 
-    const replacementMatch = await joinedV121ReplacementMatch("v150-family-replacement");
-    const beforeOperation = await bootstrap(replacementMatch.service, replacementMatch.matchId, replacementMatch.corp);
-    const replacementOperation = mustAction(beforeOperation, (action) => action.type === "play_operation" && action.label.includes("Core Damage"));
+    const replacementMatch = await joinedV121ReplacementMatch(
+      "v150-family-replacement",
+    );
+    const beforeOperation = await bootstrap(
+      replacementMatch.service,
+      replacementMatch.matchId,
+      replacementMatch.corp,
+    );
+    const replacementOperation = mustAction(
+      beforeOperation,
+      (action) =>
+        action.type === "play_operation" &&
+        action.label.includes("Core Damage"),
+    );
     await replacementMatch.service.submitAction({
       matchId: replacementMatch.matchId,
       side: replacementMatch.corp.side,
       sessionToken: replacementMatch.corp.sessionToken,
       actionId: replacementOperation.actionId,
       clientKnownStateVersion: beforeOperation.playerView.stateVersion,
-      idempotencyKey: "v150-family-replacement-open"
+      idempotencyKey: "v150-family-replacement-open",
     });
-    const replacementReplay = await replacementMatch.service.loadReplayDiagnostics(replacementMatch.matchId, "local_analysis");
+    const replacementReplay =
+      await replacementMatch.service.loadReplayDiagnostics(
+        replacementMatch.matchId,
+        "local_analysis",
+      );
     expect(replacementReplay.ok).toBe(true);
     if (!replacementReplay.ok) throw new Error(replacementReplay.error.message);
-    expect(replacementReplay.replay.timeline.some((step) => step.eventFamily === "replacement_and_prevention")).toBe(true);
+    expect(
+      replacementReplay.replay.timeline.some(
+        (step) => step.eventFamily === "replacement_and_prevention",
+      ),
+    ).toBe(true);
 
-    const specialMatch = await joinedV122SpecialZoneMatch("v150-family-special-zone");
-    const specialBefore = await bootstrap(specialMatch.service, specialMatch.matchId, specialMatch.runner);
-    const specialAction = mustAction(specialBefore, (action) => action.type === "move_to_set_aside");
+    const specialMatch = await joinedV122SpecialZoneMatch(
+      "v150-family-special-zone",
+    );
+    const specialBefore = await bootstrap(
+      specialMatch.service,
+      specialMatch.matchId,
+      specialMatch.runner,
+    );
+    const specialAction = mustAction(
+      specialBefore,
+      (action) => action.type === "move_to_set_aside",
+    );
     await specialMatch.service.submitAction({
       matchId: specialMatch.matchId,
       side: specialMatch.runner.side,
       sessionToken: specialMatch.runner.sessionToken,
       actionId: specialAction.actionId,
       clientKnownStateVersion: specialBefore.playerView.stateVersion,
-      idempotencyKey: "v150-family-special-zone"
+      idempotencyKey: "v150-family-special-zone",
     });
-    const specialReplay = await specialMatch.service.loadReplayDiagnostics(specialMatch.matchId, "local_analysis");
+    const specialReplay = await specialMatch.service.loadReplayDiagnostics(
+      specialMatch.matchId,
+      "local_analysis",
+    );
     expect(specialReplay.ok).toBe(true);
     if (!specialReplay.ok) throw new Error(specialReplay.error.message);
-    expect(specialReplay.replay.timeline.some((step) => step.eventFamily === "special_zones_and_control")).toBe(true);
+    expect(
+      specialReplay.replay.timeline.some(
+        (step) => step.eventFamily === "special_zones_and_control",
+      ),
+    ).toBe(true);
   });
 
   it("plays a private two-player match through to a Runner win", async () => {
-    const match = await joinedMatch("mp-win-1", { agendaPointsToWin: 2, matchFormat: "single_game" });
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "mandatory");
+    const match = await joinedMatch("mp-win-1", {
+      agendaPointsToWin: 2,
+      matchFormat: "single_game",
+    });
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "mandatory_draw",
+      "mandatory",
+    );
     await putTopCorpAgendaForMatch(match.service, match.matchId);
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "end-turn");
-    await resolveCorpDiscardIfPending(match.service, match.matchId, match.corp, "corp-discard-before-run");
-    await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
-    await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card", "access-rd");
-    const steal = await submit(match.service, match.matchId, match.runner, (action) => action.type === "steal_agenda", "steal");
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "end_turn",
+      "end-turn",
+    );
+    await resolveCorpDiscardIfPending(
+      match.service,
+      match.matchId,
+      match.corp,
+      "corp-discard-before-run",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "run-rd",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) => action.type === "access_card",
+      "access-rd",
+    );
+    const steal = await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) => action.type === "steal_agenda",
+      "steal",
+    );
 
     expect(steal.actorPayload.winner).toBe("runner");
     expect(steal.actorPayload.matchStatus).toBe("finished");
@@ -5128,26 +8213,38 @@ describe("MVP 0.2 multiplayer service", () => {
       runCount: 1,
       successfulRunCount: 1,
       stolenAgendaCount: 1,
-      scoredAgendaCount: 0
+      scoredAgendaCount: 0,
     });
-    expect(steal.actorPayload.resultSummary?.actionCount).toBeGreaterThanOrEqual(5);
-    expect(JSON.stringify(steal.actorPayload.resultSummary)).not.toContain("Simple Agenda");
-    expect(JSON.stringify(steal.actorPayload.resultSummary)).not.toContain("cardInstances");
+    expect(
+      steal.actorPayload.resultSummary?.actionCount,
+    ).toBeGreaterThanOrEqual(5);
+    expect(JSON.stringify(steal.actorPayload.resultSummary)).not.toContain(
+      "Simple Agenda",
+    );
+    expect(JSON.stringify(steal.actorPayload.resultSummary)).not.toContain(
+      "cardInstances",
+    );
 
-    const corpPayload = await bootstrap(match.service, match.matchId, match.corp);
+    const corpPayload = await bootstrap(
+      match.service,
+      match.matchId,
+      match.corp,
+    );
     expect(corpPayload.resultSummary?.viewerOutcome).toBe("lost");
     expect(corpPayload.legalActions).toEqual([]);
   });
 
   it("applies the selected, same-as-player, fixed and deterministic random KI deck policies without exposing decklists", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-deck-policy" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-deck-policy",
+    });
     const participantADecks = {
       runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-      corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6"
+      corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6",
     };
     const participantBDecks = {
       runnerDeckSnapshotId: "demo_runner_004_snapshot_v0_6",
-      corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6"
+      corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6",
     };
 
     const selected = await service.createMatch({
@@ -5156,13 +8253,20 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "ai-policy-selected",
       participantADecks,
       participantBDecks,
-      aiDeckPolicy: "selected"
+      aiDeckPolicy: "selected",
     });
     const selectedRecord = await service.loadForTest(selected.matchId);
     expect(selectedRecord?.match.deckSetup.aiDeckPolicy).toBe("selected");
-    expect(selectedRecord?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_b", corpPlayer: "player_a" });
-    expect(selectedRecord?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_004_snapshot_v0_6");
-    expect(selectedRecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_004_snapshot_v0_6");
+    expect(selectedRecord?.match.deckSetup.assignment).toEqual({
+      runnerPlayer: "player_b",
+      corpPlayer: "player_a",
+    });
+    expect(selectedRecord?.match.deckSetup.runnerSnapshotId).toBe(
+      "demo_runner_004_snapshot_v0_6",
+    );
+    expect(selectedRecord?.match.deckSetup.corpSnapshotId).toBe(
+      "demo_corp_004_snapshot_v0_6",
+    );
 
     const sameAsParticipantA = await service.createMatch({
       hostSide: "corp",
@@ -5170,15 +8274,25 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "ai-policy-same-as-participant-a",
       participantADecks,
       participantBDecks,
-      aiDeckPolicy: "same_as_participant_a"
+      aiDeckPolicy: "same_as_participant_a",
     });
-    const sameAsParticipantARecord = await service.loadForTest(sameAsParticipantA.matchId);
-    expect(sameAsParticipantARecord?.match.deckSetup.aiDeckPolicy).toBe("same_as_participant_a");
-    expect(sameAsParticipantARecord?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_008_snapshot_v0_8");
-    expect(sameAsParticipantARecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_004_snapshot_v0_6");
-    expect(sameAsParticipantARecord?.match.deckSetup.participants?.player_b).toMatchObject({
+    const sameAsParticipantARecord = await service.loadForTest(
+      sameAsParticipantA.matchId,
+    );
+    expect(sameAsParticipantARecord?.match.deckSetup.aiDeckPolicy).toBe(
+      "same_as_participant_a",
+    );
+    expect(sameAsParticipantARecord?.match.deckSetup.runnerSnapshotId).toBe(
+      "demo_runner_008_snapshot_v0_8",
+    );
+    expect(sameAsParticipantARecord?.match.deckSetup.corpSnapshotId).toBe(
+      "demo_corp_004_snapshot_v0_6",
+    );
+    expect(
+      sameAsParticipantARecord?.match.deckSetup.participants?.player_b,
+    ).toMatchObject({
       runnerSnapshotId: "demo_runner_008_snapshot_v0_8",
-      corpSnapshotId: "demo_corp_004_snapshot_v0_6"
+      corpSnapshotId: "demo_corp_004_snapshot_v0_6",
     });
     expect(JSON.stringify(sameAsParticipantA)).not.toContain("cardInstances");
 
@@ -5188,15 +8302,19 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "ai-policy-fixed",
       participantADecks,
       participantBDecks,
-      aiDeckPolicy: "fixed"
+      aiDeckPolicy: "fixed",
     });
     const fixedRecord = await service.loadForTest(fixed.matchId);
     expect(fixedRecord?.match.deckSetup.aiDeckPolicy).toBe("fixed");
-    expect(fixedRecord?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_008_snapshot_v0_8");
-    expect(fixedRecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_004_snapshot_v0_6");
+    expect(fixedRecord?.match.deckSetup.runnerSnapshotId).toBe(
+      "demo_runner_008_snapshot_v0_8",
+    );
+    expect(fixedRecord?.match.deckSetup.corpSnapshotId).toBe(
+      "demo_corp_004_snapshot_v0_6",
+    );
     expect(fixedRecord?.match.deckSetup.participants?.player_b).toMatchObject({
       runnerSnapshotId: "demo_runner_008_snapshot_v0_8",
-      corpSnapshotId: "demo_corp_008_snapshot_v0_8"
+      corpSnapshotId: "demo_corp_008_snapshot_v0_8",
     });
 
     const randomOne = await service.createMatch({
@@ -5205,7 +8323,7 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "ai-policy-random-seed",
       participantADecks,
       participantBDecks,
-      aiDeckPolicy: "seeded_random"
+      aiDeckPolicy: "seeded_random",
     });
     const randomTwo = await service.createMatch({
       hostSide: "corp",
@@ -5213,55 +8331,90 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "ai-policy-random-seed",
       participantADecks,
       participantBDecks,
-      aiDeckPolicy: "seeded_random"
+      aiDeckPolicy: "seeded_random",
     });
     const randomRecordOne = await service.loadForTest(randomOne.matchId);
     const randomRecordTwo = await service.loadForTest(randomTwo.matchId);
-    const validRunnerIds = (snapshotsData08.snapshots as DeckSnapshot[]).filter((snapshot) => snapshot.side === "runner" && snapshot.validation.ok).map((snapshot) => snapshot.deckSnapshotId);
-    const validCorpIds = (snapshotsData08.snapshots as DeckSnapshot[]).filter((snapshot) => snapshot.side === "corp" && snapshot.validation.ok).map((snapshot) => snapshot.deckSnapshotId);
+    const validRunnerIds = (snapshotsData08.snapshots as DeckSnapshot[])
+      .filter(
+        (snapshot) => snapshot.side === "runner" && snapshot.validation.ok,
+      )
+      .map((snapshot) => snapshot.deckSnapshotId);
+    const validCorpIds = (snapshotsData08.snapshots as DeckSnapshot[])
+      .filter((snapshot) => snapshot.side === "corp" && snapshot.validation.ok)
+      .map((snapshot) => snapshot.deckSnapshotId);
     expect(randomRecordOne?.match.deckSetup.aiDeckPolicy).toBe("seeded_random");
-    expect(randomRecordOne?.match.deckSetup.participants?.player_b).toEqual(randomRecordTwo?.match.deckSetup.participants?.player_b);
-    expect(validRunnerIds).toContain(randomRecordOne?.match.deckSetup.participants?.player_b.runnerSnapshotId);
-    expect(validCorpIds).toContain(randomRecordOne?.match.deckSetup.participants?.player_b.corpSnapshotId);
-    expect(randomRecordOne?.match.deckSetup.runnerSnapshotId).toBe(randomRecordOne?.match.deckSetup.participants?.player_b.runnerSnapshotId);
-    expect(JSON.stringify(randomRecordOne?.match.deckSetup)).not.toContain("cards");
+    expect(randomRecordOne?.match.deckSetup.participants?.player_b).toEqual(
+      randomRecordTwo?.match.deckSetup.participants?.player_b,
+    );
+    expect(validRunnerIds).toContain(
+      randomRecordOne?.match.deckSetup.participants?.player_b.runnerSnapshotId,
+    );
+    expect(validCorpIds).toContain(
+      randomRecordOne?.match.deckSetup.participants?.player_b.corpSnapshotId,
+    );
+    expect(randomRecordOne?.match.deckSetup.runnerSnapshotId).toBe(
+      randomRecordOne?.match.deckSetup.participants?.player_b.runnerSnapshotId,
+    );
+    expect(JSON.stringify(randomRecordOne?.match.deckSetup)).not.toContain(
+      "cards",
+    );
     expect(JSON.stringify(randomOne)).not.toContain("cardInstances");
   });
 
   it("starts Human-Korp-vs-Runner-KI with the King of the Road Runner AI snapshot", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "kotr-runner-ai-start" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "kotr-runner-ai-start",
+    });
     const created = await service.createMatch({
       hostSide: "corp",
       mode: "human_corp_vs_runner_ai",
       seed: "kotr-runner-ai-start",
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
       participantBDecks: {
         runnerDeckSnapshotId: "king_of_the_road_runner_ai_snapshot_v1",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
       aiDeckPolicy: "selected",
-      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" },
     });
     const record = await service.loadForTest(created.matchId);
 
     expect(created.hostSide).toBe("corp");
     expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(record?.match.deckSetup.aiDeckPolicy).toBe("selected");
-    expect(record?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_b", corpPlayer: "player_a" });
-    expect(record?.match.deckSetup.runnerSnapshotId).toBe("king_of_the_road_runner_ai_snapshot_v1");
-    expect(record?.match.deckSetup.corpSnapshotId).toBe("demo_corp_008_snapshot_v0_8");
-    expect(record?.match.deckSetup.participants?.player_b.runnerSnapshotId).toBe("king_of_the_road_runner_ai_snapshot_v1");
-    expect(record?.match.deckSetup.participants?.player_b.corpSnapshotId).toBe("demo_corp_008_snapshot_v0_8");
-    expect(created.playerView.deckMetadata?.opponent.deckName).toBe("King of the Road");
+    expect(record?.match.deckSetup.assignment).toEqual({
+      runnerPlayer: "player_b",
+      corpPlayer: "player_a",
+    });
+    expect(record?.match.deckSetup.runnerSnapshotId).toBe(
+      "king_of_the_road_runner_ai_snapshot_v1",
+    );
+    expect(record?.match.deckSetup.corpSnapshotId).toBe(
+      "demo_corp_008_snapshot_v0_8",
+    );
+    expect(
+      record?.match.deckSetup.participants?.player_b.runnerSnapshotId,
+    ).toBe("king_of_the_road_runner_ai_snapshot_v1");
+    expect(record?.match.deckSetup.participants?.player_b.corpSnapshotId).toBe(
+      "demo_corp_008_snapshot_v0_8",
+    );
+    expect(created.playerView.deckMetadata?.opponent.deckName).toBe(
+      "King of the Road",
+    );
     expect(JSON.stringify(record?.match.deckSetup)).not.toContain("cards");
-    expect(JSON.stringify(created)).not.toMatch(/onr_v1_006_black-dahlia|onr_v1_108_score|cardInstances|privatePayload|joinToken|tokenHash/);
+    expect(JSON.stringify(created)).not.toMatch(
+      /onr_v1_006_black-dahlia|onr_v1_108_score|cardInstances|privatePayload|joinToken|tokenHash/,
+    );
   });
 
   it("accepts O:NR origins AI runner and corp snapshots in selected KI deck mode", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "onr-origins-ai-start" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "onr-origins-ai-start",
+    });
 
     const runnerAiCreated = await service.createMatch({
       hostSide: "corp",
@@ -5269,17 +8422,21 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "onr-origins-runner-ai",
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
       participantBDecks: {
         runnerDeckSnapshotId: "onr_origin_runner_ai_snapshot_v1",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
-      aiDeckPolicy: "selected"
+      aiDeckPolicy: "selected",
     });
     const runnerAiRecord = await service.loadForTest(runnerAiCreated.matchId);
-    expect(runnerAiRecord?.match.deckSetup.runnerSnapshotId).toBe("onr_origin_runner_ai_snapshot_v1");
-    expect(runnerAiCreated.playerView.deckMetadata?.opponent.deckName).toBe("Runner Origins AI - Probe Pressure");
+    expect(runnerAiRecord?.match.deckSetup.runnerSnapshotId).toBe(
+      "onr_origin_runner_ai_snapshot_v1",
+    );
+    expect(runnerAiCreated.playerView.deckMetadata?.opponent.deckName).toBe(
+      "Runner Origins AI - Probe Pressure",
+    );
 
     const corpAiCreated = await service.createMatch({
       hostSide: "runner",
@@ -5287,18 +8444,24 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "onr-origins-corp-ai",
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
       participantBDecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "onr_origin_corp_ai_snapshot_v1"
+        corpDeckSnapshotId: "onr_origin_corp_ai_snapshot_v1",
       },
-      aiDeckPolicy: "selected"
+      aiDeckPolicy: "selected",
     });
     const corpAiRecord = await service.loadForTest(corpAiCreated.matchId);
-    expect(corpAiRecord?.match.deckSetup.corpSnapshotId).toBe("onr_origin_corp_ai_snapshot_v1");
-    expect(corpAiCreated.playerView.deckMetadata?.opponent.deckName).toBe("Corp Origins AI - Tax & Punish");
-    expect(JSON.stringify(corpAiCreated)).not.toMatch(/onr_v1_203_hostile-takeover|onr_v1_297_overtime-incentives|cardInstances|privatePayload|joinToken|tokenHash/);
+    expect(corpAiRecord?.match.deckSetup.corpSnapshotId).toBe(
+      "onr_origin_corp_ai_snapshot_v1",
+    );
+    expect(corpAiCreated.playerView.deckMetadata?.opponent.deckName).toBe(
+      "Corp Origins AI - Tax & Punish",
+    );
+    expect(JSON.stringify(corpAiCreated)).not.toMatch(
+      /onr_v1_203_hostile-takeover|onr_v1_297_overtime-incentives|cardInstances|privatePayload|joinToken|tokenHash/,
+    );
 
     const runnerVariantCreated = await service.createMatch({
       hostSide: "corp",
@@ -5306,15 +8469,17 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "onr-origins-runner-ai-variant",
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
       participantBDecks: {
         runnerDeckSnapshotId: "onr_origin_runner_ai_event_pressure_snapshot_v1",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
-      aiDeckPolicy: "selected"
+      aiDeckPolicy: "selected",
     });
-    expect(runnerVariantCreated.playerView.deckMetadata?.opponent.deckName).toBe("Runner Origins AI - Event Pressure");
+    expect(
+      runnerVariantCreated.playerView.deckMetadata?.opponent.deckName,
+    ).toBe("Runner Origins AI - Event Pressure");
 
     const corpVariantCreated = await service.createMatch({
       hostSide: "runner",
@@ -5322,19 +8487,23 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "onr-origins-corp-ai-variant",
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
       participantBDecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "onr_origin_corp_ai_tag_ops_snapshot_v1"
+        corpDeckSnapshotId: "onr_origin_corp_ai_tag_ops_snapshot_v1",
       },
-      aiDeckPolicy: "selected"
+      aiDeckPolicy: "selected",
     });
-    expect(corpVariantCreated.playerView.deckMetadata?.opponent.deckName).toBe("Corp Origins AI - Tag Ops Control");
+    expect(corpVariantCreated.playerView.deckMetadata?.opponent.deckName).toBe(
+      "Corp Origins AI - Tag Ops Control",
+    );
   });
 
   it("derives Human-vs-KI random side assignment server-side from the seed", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-random-side" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-random-side",
+    });
     const first = await service.createMatch({
       hostSide: "random",
       playMode: "human_vs_ai",
@@ -5342,9 +8511,9 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "human-ai-random-side",
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
-      aiDeckPolicy: "fixed"
+      aiDeckPolicy: "fixed",
     });
     const second = await service.createMatch({
       hostSide: "random",
@@ -5353,14 +8522,16 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "human-ai-random-side",
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
-      aiDeckPolicy: "fixed"
+      aiDeckPolicy: "fixed",
     });
 
     expect(first.hostSide).toBe(second.hostSide);
     expect(first.mode).toBe(second.mode);
-    expect(["human_runner_vs_corp_ai", "human_corp_vs_runner_ai"]).toContain(first.mode);
+    expect(["human_runner_vs_corp_ai", "human_corp_vs_runner_ai"]).toContain(
+      first.mode,
+    );
     expect(first.matchStatus).toBe("active");
     expect(first.aiTurnPresentation?.pacingMode).toBe("paced");
     expect(JSON.stringify(first)).not.toContain("cardInstances");
@@ -5368,38 +8539,56 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("creates match series with a validated length between two and six games", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "series-length-selection" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "series-length-selection",
+    });
     const created = await service.createMatch({
       hostSide: "runner",
       mode: "human_runner_vs_corp_ai",
       seed: "series-length-five",
-      settings: { agendaPointsToWin: 7, matchFormat: "two_game_side_swap", seriesGamesPlanned: 5 },
+      settings: {
+        agendaPointsToWin: 7,
+        matchFormat: "two_game_side_swap",
+        seriesGamesPlanned: 5,
+      },
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
-      aiDeckPolicy: "fixed"
+      aiDeckPolicy: "fixed",
     });
     const stored = await storage.load(created.matchId);
 
     expect(stored?.match.settings.seriesGamesPlanned).toBe(5);
-    expect(stored?.match.series).toMatchObject({ gameNumber: 1, gamesPlanned: 5, status: "active" });
+    expect(stored?.match.series).toMatchObject({
+      gameNumber: 1,
+      gamesPlanned: 5,
+      status: "active",
+    });
 
     const bounded = await service.createMatch({
       hostSide: "runner",
       mode: "human_runner_vs_corp_ai",
       seed: "series-length-bounded",
-      settings: { agendaPointsToWin: 7, matchFormat: "two_game_side_swap", seriesGamesPlanned: 99 },
+      settings: {
+        agendaPointsToWin: 7,
+        matchFormat: "two_game_side_swap",
+        seriesGamesPlanned: 99,
+      },
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
       },
-      aiDeckPolicy: "fixed"
+      aiDeckPolicy: "fixed",
     });
-    expect((await storage.load(bounded.matchId))?.match.series?.gamesPlanned).toBe(6);
+    expect(
+      (await storage.load(bounded.matchId))?.match.series?.gamesPlanned,
+    ).toBe(6);
 
     const httpStorage = new InMemoryMatchStorage();
-    const httpService = new MultiplayerService(httpStorage, { tokenSalt: "series-length-http" });
+    const httpService = new MultiplayerService(httpStorage, {
+      tokenSalt: "series-length-http",
+    });
     const handle = createNetgridHttpServer(httpService);
     const baseUrl = await listen(handle);
     try {
@@ -5410,31 +8599,75 @@ describe("MVP 0.2 multiplayer service", () => {
           hostSide: "runner",
           mode: "human_runner_vs_corp_ai",
           seed: "series-length-http-four",
-          settings: { matchFormat: "two_game_side_swap", seriesGamesPlanned: 4 },
+          settings: {
+            matchFormat: "two_game_side_swap",
+            seriesGamesPlanned: 4,
+          },
           participantADecks: {
             runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-            corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+            corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
           },
-          aiDeckPolicy: "fixed"
-        })
+          aiDeckPolicy: "fixed",
+        }),
       });
       expect(response.status).toBe(201);
       const body = (await response.json()) as { matchId: string };
-      expect((await httpStorage.load(body.matchId))?.match.series?.gamesPlanned).toBe(4);
+      expect(
+        (await httpStorage.load(body.matchId))?.match.series?.gamesPlanned,
+      ).toBe(4);
     } finally {
       await handle.close();
     }
   });
 
   it("creates the next private series game with a side swap and side-safe standings", async () => {
-    const match = await joinedMatch("series-side-swap", { agendaPointsToWin: 2, matchFormat: "two_game_side_swap" });
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "mandatory");
+    const match = await joinedMatch("series-side-swap", {
+      agendaPointsToWin: 2,
+      matchFormat: "two_game_side_swap",
+    });
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "mandatory_draw",
+      "mandatory",
+    );
     await putTopCorpAgendaForMatch(match.service, match.matchId);
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "end-turn");
-    await resolveCorpDiscardIfPending(match.service, match.matchId, match.corp, "corp-discard-before-run");
-    await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
-    await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card", "access-rd");
-    const steal = await submit(match.service, match.matchId, match.runner, (action) => action.type === "steal_agenda", "steal");
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "end_turn",
+      "end-turn",
+    );
+    await resolveCorpDiscardIfPending(
+      match.service,
+      match.matchId,
+      match.corp,
+      "corp-discard-before-run",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "run-rd",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) => action.type === "access_card",
+      "access-rd",
+    );
+    const steal = await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) => action.type === "steal_agenda",
+      "steal",
+    );
 
     expect(steal.actorPayload.resultSummary?.series).toMatchObject({
       mode: "two_game_side_swap",
@@ -5448,13 +8681,13 @@ describe("MVP 0.2 multiplayer service", () => {
       opponentMatchPoints: 0,
       viewerSeriesOutcome: "won",
       seriesDecision: "match_points",
-      nextAvailable: true
+      nextAvailable: true,
     });
 
     const next = await match.service.startNextSeriesGame(match.matchId, {
       side: match.runner.side,
       sessionToken: match.runner.sessionToken,
-      displayName: "Runner im Seitenwechsel"
+      displayName: "Runner im Seitenwechsel",
     });
     expect("error" in next).toBe(false);
     if ("error" in next) throw new Error(next.error.message);
@@ -5476,58 +8709,68 @@ describe("MVP 0.2 multiplayer service", () => {
       gamesPlanned: 2,
       runnerPlayer: "player_a",
       corpPlayer: "player_b",
-      previousMatchId: match.matchId
+      previousMatchId: match.matchId,
     });
     expect(nextRecord?.match.series?.results).toHaveLength(1);
 
     const duplicate = await match.service.startNextSeriesGame(match.matchId, {
       side: match.runner.side,
-      sessionToken: match.runner.sessionToken
+      sessionToken: match.runner.sessionToken,
     });
     expect("error" in duplicate).toBe(true);
-    if (!("error" in duplicate)) throw new Error("Expected duplicate series-next rejection");
+    if (!("error" in duplicate))
+      throw new Error("Expected duplicate series-next rejection");
     expect(duplicate.error.code).toBe("series_next_exists");
   });
 
   it.each([
     { requested: "summary" as const, stored: "summary" },
     { requested: "detailed" as const, stored: "detailed" },
-    { requested: "off" as const, stored: undefined }
-  ])("preserves AI trace mode $requested across a private side-swap series", async ({ requested, stored }) => {
-    const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: `series-ai-trace-${requested}` });
-    const created = await service.createMatch({
-      hostSide: "corp",
-      playMode: "human_vs_ai",
-      humanSide: "corp",
-      seed: `series-ai-trace-${requested}`,
-      runnerDifficulty: "hard",
-      aiTraceMode: requested,
-      settings: { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" }
-    });
-    const firstRecord = await service.loadForTest(created.matchId);
-    if (!firstRecord?.gameState) throw new Error("Missing first AI series game");
-    firstRecord.match.status = "finished";
-    firstRecord.gameState.winner = "corp";
-    firstRecord.gameState.gameEndReason = "agenda_points";
-    await storage.save(firstRecord);
+    { requested: "off" as const, stored: undefined },
+  ])(
+    "preserves AI trace mode $requested across a private side-swap series",
+    async ({ requested, stored }) => {
+      const storage = new InMemoryMatchStorage();
+      const service = new MultiplayerService(storage, {
+        tokenSalt: `series-ai-trace-${requested}`,
+      });
+      const created = await service.createMatch({
+        hostSide: "corp",
+        playMode: "human_vs_ai",
+        humanSide: "corp",
+        seed: `series-ai-trace-${requested}`,
+        runnerDifficulty: "hard",
+        aiTraceMode: requested,
+        settings: { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" },
+      });
+      const firstRecord = await service.loadForTest(created.matchId);
+      if (!firstRecord?.gameState)
+        throw new Error("Missing first AI series game");
+      firstRecord.match.status = "finished";
+      firstRecord.gameState.winner = "corp";
+      firstRecord.gameState.gameEndReason = "agenda_points";
+      await storage.save(firstRecord);
 
-    const next = await service.startNextSeriesGame(created.matchId, {
-      side: "corp",
-      sessionToken: created.hostSessionToken,
-      displayName: "Trace-Modus-Seitenwechsel"
-    });
+      const next = await service.startNextSeriesGame(created.matchId, {
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        displayName: "Trace-Modus-Seitenwechsel",
+      });
 
-    expect("error" in next).toBe(false);
-    if ("error" in next) throw new Error(next.error.message);
-    const nextRecord = await service.loadForTest(next.matchId);
-    expect(next.mode).toBe("human_runner_vs_corp_ai");
-    expect(nextRecord?.match.aiControllers?.corp?.difficulty).toBe("hard");
-    expect(nextRecord?.match.aiTraceMode).toBe(stored);
-  });
+      expect("error" in next).toBe(false);
+      if ("error" in next) throw new Error(next.error.message);
+      const nextRecord = await service.loadForTest(next.matchId);
+      expect(next.mode).toBe("human_runner_vs_corp_ai");
+      expect(nextRecord?.match.aiControllers?.corp?.difficulty).toBe("hard");
+      expect(nextRecord?.match.aiTraceMode).toBe(stored);
+    },
+  );
 
   it("treats forfeit in game 1 of a private series as a single-game result and keeps series-next available", async () => {
-    const match = await joinedMatch("series-forfeit-game-1", { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" });
+    const match = await joinedMatch("series-forfeit-game-1", {
+      agendaPointsToWin: 7,
+      matchFormat: "two_game_side_swap",
+    });
     const beforeRecord = await match.service.loadForTest(match.matchId);
     if (!beforeRecord?.gameState) throw new Error("Missing series game state");
     const beforeHash = hashState(beforeRecord.gameState);
@@ -5535,7 +8778,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const forfeited = await match.service.forfeitMatch({
       matchId: match.matchId,
       side: "runner",
-      sessionToken: match.runner.sessionToken
+      sessionToken: match.runner.sessionToken,
     });
     expect(forfeited.ok).toBe(true);
     if (!forfeited.ok) throw new Error(forfeited.error.message);
@@ -5555,8 +8798,8 @@ describe("MVP 0.2 multiplayer service", () => {
         viewerMatchPoints: 0,
         opponentMatchPoints: 10,
         viewerSeriesOutcome: "lost",
-        nextAvailable: true
-      }
+        nextAvailable: true,
+      },
     });
 
     const stored = await match.service.loadForTest(match.matchId);
@@ -5566,26 +8809,35 @@ describe("MVP 0.2 multiplayer service", () => {
       gameNumber: 1,
       winner: "corp",
       reason: "forfeit",
-      finalStateHash: beforeHash
+      finalStateHash: beforeHash,
     });
-    expect((await match.service.replayMatch(match.matchId)).finalStateHash).toBe(beforeHash);
+    expect(
+      (await match.service.replayMatch(match.matchId)).finalStateHash,
+    ).toBe(beforeHash);
 
     const next = await match.service.startNextSeriesGame(match.matchId, {
       side: match.runner.side,
       sessionToken: match.runner.sessionToken,
-      displayName: "Runner nach Aufgabe"
+      displayName: "Runner nach Aufgabe",
     });
     expect("error" in next).toBe(false);
     if ("error" in next) throw new Error(next.error.message);
     expect(next.hostSide).toBe("corp");
     expect(next.matchId).not.toBe(match.matchId);
-    expect((await match.service.loadForTest(match.matchId))?.match.series?.nextMatchId).toBe(next.matchId);
+    expect(
+      (await match.service.loadForTest(match.matchId))?.match.series
+        ?.nextMatchId,
+    ).toBe(next.matchId);
   });
 
   it("closes a private series when the last planned game ends by forfeit", async () => {
-    const match = await joinedMatch("series-forfeit-final-game", { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" });
+    const match = await joinedMatch("series-forfeit-final-game", {
+      agendaPointsToWin: 7,
+      matchFormat: "two_game_side_swap",
+    });
     const record = await match.service.loadForTest(match.matchId);
-    if (!record?.gameState || !record.match.series) throw new Error("Missing active series record");
+    if (!record?.gameState || !record.match.series)
+      throw new Error("Missing active series record");
     record.match.series = {
       ...record.match.series,
       gameNumber: 2,
@@ -5600,17 +8852,19 @@ describe("MVP 0.2 multiplayer service", () => {
           runnerAgendaPoints: 0,
           corpAgendaPoints: 2,
           finishedAt: "2026-05-19T08:00:00.000Z",
-          finalStateHash: "fnv1a:game1"
-        }
-      ]
+          finalStateHash: "fnv1a:game1",
+        },
+      ],
     };
-    await (match.service as unknown as { storage: MultiplayerStorage }).storage.save(record);
+    await (
+      match.service as unknown as { storage: MultiplayerStorage }
+    ).storage.save(record);
 
     const beforeHash = hashState(record.gameState);
     const forfeited = await match.service.forfeitMatch({
       matchId: match.matchId,
       side: "corp",
-      sessionToken: match.corp.sessionToken
+      sessionToken: match.corp.sessionToken,
     });
     expect(forfeited.ok).toBe(true);
     if (!forfeited.ok) throw new Error(forfeited.error.message);
@@ -5630,32 +8884,36 @@ describe("MVP 0.2 multiplayer service", () => {
         opponentMatchPoints: 10,
         viewerSeriesOutcome: "draw",
         seriesDecision: "draw",
-        nextAvailable: false
-      }
+        nextAvailable: false,
+      },
     });
     const stored = await match.service.loadForTest(match.matchId);
     expect(stored?.match.series?.status).toBe("finished");
     expect(stored?.match.series?.results).toHaveLength(2);
     const next = await match.service.startNextSeriesGame(match.matchId, {
       side: match.corp.side,
-      sessionToken: match.corp.sessionToken
+      sessionToken: match.corp.sessionToken,
     });
     expect("error" in next).toBe(true);
-    if (!("error" in next)) throw new Error("Expected finished series rejection");
+    if (!("error" in next))
+      throw new Error("Expected finished series rejection");
     expect(next.error.code).toBe("series_finished");
   });
 
   it("uses 10-point game wins and loser agenda points for private series scoring", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "series-agenda-tiebreak" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "series-agenda-tiebreak",
+    });
     const created = await service.createMatch({
       hostSide: "corp",
       mode: "human_corp_vs_runner_ai",
       seed: "series-agenda-tiebreak",
-      settings: { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" }
+      settings: { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" },
     });
     const record = await storage.load(created.matchId);
-    if (!record?.gameState || !record.match.series) throw new Error("Expected active series record");
+    if (!record?.gameState || !record.match.series)
+      throw new Error("Expected active series record");
 
     record.gameState.winner = "runner";
     record.match.status = "finished";
@@ -5677,7 +8935,7 @@ describe("MVP 0.2 multiplayer service", () => {
           runnerAgendaPoints: 2,
           corpAgendaPoints: 0,
           finishedAt: "2026-05-07T10:00:00.000Z",
-          finalStateHash: "hash-game-1"
+          finalStateHash: "hash-game-1",
         },
         {
           matchId: created.matchId,
@@ -5688,13 +8946,17 @@ describe("MVP 0.2 multiplayer service", () => {
           runnerAgendaPoints: 7,
           corpAgendaPoints: 0,
           finishedAt: "2026-05-07T10:30:00.000Z",
-          finalStateHash: hashState(record.gameState)
-        }
-      ]
+          finalStateHash: hashState(record.gameState),
+        },
+      ],
     };
     await storage.save(record);
 
-    const payload = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    const payload = await service.bootstrap(
+      created.matchId,
+      "corp",
+      created.hostSessionToken,
+    );
     expect("error" in payload).toBe(false);
     if ("error" in payload) throw new Error(payload.error.message);
     expect(payload.resultSummary?.viewerOutcome).toBe("lost");
@@ -5707,7 +8969,7 @@ describe("MVP 0.2 multiplayer service", () => {
       viewerAgendaPoints: 0,
       opponentAgendaPoints: 9,
       viewerSeriesOutcome: "lost",
-      seriesDecision: "match_points"
+      seriesDecision: "match_points",
     });
   });
 
@@ -5715,7 +8977,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "series-personal-decks",
       publicWebBaseUrl: "http://127.0.0.1:3100",
-      publicServerBaseUrl: "http://127.0.0.1:8787"
+      publicServerBaseUrl: "http://127.0.0.1:8787",
     });
     const created = await service.createMatch({
       hostSide: "runner",
@@ -5723,74 +8985,145 @@ describe("MVP 0.2 multiplayer service", () => {
       settings: { agendaPointsToWin: 2, matchFormat: "two_game_side_swap" },
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6"
+        corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6",
       },
       participantBDecks: {
         runnerDeckSnapshotId: "demo_runner_004_snapshot_v0_6",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
-      }
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
+      },
     });
     if (!created.joinUrl) throw new Error("Missing join URL");
     const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp B" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Corp B",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
 
     const firstRecord = await service.loadForTest(created.matchId);
-    expect(firstRecord?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_a", corpPlayer: "player_b" });
-    expect(firstRecord?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_008_snapshot_v0_8");
-    expect(firstRecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_008_snapshot_v0_8");
+    expect(firstRecord?.match.deckSetup.assignment).toEqual({
+      runnerPlayer: "player_a",
+      corpPlayer: "player_b",
+    });
+    expect(firstRecord?.match.deckSetup.runnerSnapshotId).toBe(
+      "demo_runner_008_snapshot_v0_8",
+    );
+    expect(firstRecord?.match.deckSetup.corpSnapshotId).toBe(
+      "demo_corp_008_snapshot_v0_8",
+    );
     expect(firstRecord?.match.deckSetup.participants?.player_a).toMatchObject({
       runnerSnapshotId: "demo_runner_008_snapshot_v0_8",
-      corpSnapshotId: "demo_corp_004_snapshot_v0_6"
+      corpSnapshotId: "demo_corp_004_snapshot_v0_6",
     });
     expect(firstRecord?.match.deckSetup.participants?.player_b).toMatchObject({
       runnerSnapshotId: "demo_runner_004_snapshot_v0_6",
-      corpSnapshotId: "demo_corp_008_snapshot_v0_8"
+      corpSnapshotId: "demo_corp_008_snapshot_v0_8",
     });
     expect(JSON.stringify(firstRecord?.match.deckSetup)).not.toContain("cards");
 
-    const runner = { side: "runner" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
-    const corp = { side: "corp" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
+    const runner = {
+      side: "runner" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    };
+    const corp = {
+      side: "corp" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    };
     await forceSetupComplete(service, created.matchId);
-    await submit(service, created.matchId, corp, (action) => action.type === "mandatory_draw", "mandatory");
+    await submit(
+      service,
+      created.matchId,
+      corp,
+      (action) => action.type === "mandatory_draw",
+      "mandatory",
+    );
     await putTopCorpAgendaForMatch(service, created.matchId);
-    await submit(service, created.matchId, corp, (action) => action.type === "end_turn", "end-turn");
-    await resolveCorpDiscardIfPending(service, created.matchId, corp, "corp-discard-before-run");
-    await submit(service, created.matchId, runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
-    await submit(service, created.matchId, runner, (action) => action.type === "access_card", "access-rd");
-    const steal = await submit(service, created.matchId, runner, (action) => action.type === "steal_agenda", "steal");
+    await submit(
+      service,
+      created.matchId,
+      corp,
+      (action) => action.type === "end_turn",
+      "end-turn",
+    );
+    await resolveCorpDiscardIfPending(
+      service,
+      created.matchId,
+      corp,
+      "corp-discard-before-run",
+    );
+    await submit(
+      service,
+      created.matchId,
+      runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "run-rd",
+    );
+    await submit(
+      service,
+      created.matchId,
+      runner,
+      (action) => action.type === "access_card",
+      "access-rd",
+    );
+    const steal = await submit(
+      service,
+      created.matchId,
+      runner,
+      (action) => action.type === "steal_agenda",
+      "steal",
+    );
     expect(steal.actorPayload.resultSummary?.series).toMatchObject({
       viewerPlayer: "player_a",
       viewerWins: 1,
       opponentWins: 0,
       viewerAgendaPoints: 2,
-      opponentAgendaPoints: 0
+      opponentAgendaPoints: 0,
     });
 
     const next = await service.startNextSeriesGame(created.matchId, {
       side: runner.side,
       sessionToken: runner.sessionToken,
-      displayName: "Teilnehmer A"
+      displayName: "Teilnehmer A",
     });
     expect("error" in next).toBe(false);
     if ("error" in next) throw new Error(next.error.message);
     const nextRecord = await service.loadForTest(next.matchId);
     expect(next.hostSide).toBe("corp");
-    expect(next.playerView.deckMetadata?.own.deckHash).toBe(firstRecord?.match.deckSetup.participants?.player_a.corp.deckHash);
-    expect(next.playerView.deckMetadata?.opponent.deckHash).toBe(firstRecord?.match.deckSetup.participants?.player_b.runner.deckHash);
-    expect(nextRecord?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_b", corpPlayer: "player_a" });
-    expect(nextRecord?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_004_snapshot_v0_6");
-    expect(nextRecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_004_snapshot_v0_6");
-    expect(nextRecord?.privateDeckSnapshots?.participants?.player_a.corp.deckSnapshotId).toBe("demo_corp_004_snapshot_v0_6");
-    expect(nextRecord?.privateDeckSnapshots?.participants?.player_b.runner.deckSnapshotId).toBe("demo_runner_004_snapshot_v0_6");
+    expect(next.playerView.deckMetadata?.own.deckHash).toBe(
+      firstRecord?.match.deckSetup.participants?.player_a.corp.deckHash,
+    );
+    expect(next.playerView.deckMetadata?.opponent.deckHash).toBe(
+      firstRecord?.match.deckSetup.participants?.player_b.runner.deckHash,
+    );
+    expect(nextRecord?.match.deckSetup.assignment).toEqual({
+      runnerPlayer: "player_b",
+      corpPlayer: "player_a",
+    });
+    expect(nextRecord?.match.deckSetup.runnerSnapshotId).toBe(
+      "demo_runner_004_snapshot_v0_6",
+    );
+    expect(nextRecord?.match.deckSetup.corpSnapshotId).toBe(
+      "demo_corp_004_snapshot_v0_6",
+    );
+    expect(
+      nextRecord?.privateDeckSnapshots?.participants?.player_a.corp
+        .deckSnapshotId,
+    ).toBe("demo_corp_004_snapshot_v0_6");
+    expect(
+      nextRecord?.privateDeckSnapshots?.participants?.player_b.runner
+        .deckSnapshotId,
+    ).toBe("demo_runner_004_snapshot_v0_6");
     expect(nextRecord?.match.series?.results[0]).toMatchObject({
       winner: "runner",
       runnerPlayer: "player_a",
       corpPlayer: "player_b",
       runnerAgendaPoints: 2,
-      corpAgendaPoints: 0
+      corpAgendaPoints: 0,
     });
     expect(JSON.stringify(next)).not.toContain("cardInstances");
     expect(JSON.stringify(nextRecord?.match.deckSetup)).not.toContain("cards");
@@ -5801,13 +9134,21 @@ describe("MVP 0.2 multiplayer service", () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ws-test",
       publicWebBaseUrl: "http://127.0.0.1:3100",
-      publicServerBaseUrl: "http://127.0.0.1:0"
+      publicServerBaseUrl: "http://127.0.0.1:0",
     });
-    const created = await service.createMatch({ hostSide: "runner", seed: "ws-bootstrap" });
-    const handle = createNetgridHttpServer(service, { connectionAudit: { record: (event) => auditEvents.push(event) } });
-    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "ws-bootstrap",
+    });
+    const handle = createNetgridHttpServer(service, {
+      connectionAudit: { record: (event) => auditEvents.push(event) },
+    });
+    await new Promise<void>((resolve) =>
+      handle.server.listen(0, "127.0.0.1", resolve),
+    );
     const address = handle.server.address();
-    if (!address || typeof address === "string") throw new Error("Missing server address");
+    if (!address || typeof address === "string")
+      throw new Error("Missing server address");
     const socket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
 
     try {
@@ -5815,8 +9156,12 @@ describe("MVP 0.2 multiplayer service", () => {
       socket.send(
         JSON.stringify({
           type: "join_match",
-          payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide }
-        })
+          payload: {
+            matchId: created.matchId,
+            sessionToken: created.hostSessionToken,
+            side: created.hostSide,
+          },
+        }),
       );
       const update = await waitForMessage(socket, "lobby_update");
       expect(JSON.stringify(update)).not.toContain("hostSessionToken");
@@ -5828,8 +9173,12 @@ describe("MVP 0.2 multiplayer service", () => {
       replacement.send(
         JSON.stringify({
           type: "join_match",
-          payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide }
-        })
+          payload: {
+            matchId: created.matchId,
+            sessionToken: created.hostSessionToken,
+            side: created.hostSide,
+          },
+        }),
       );
       await waitForMessage(replacement, "lobby_update");
       const oldMessage = await oldClosed;
@@ -5837,21 +9186,44 @@ describe("MVP 0.2 multiplayer service", () => {
       socket.close();
       await new Promise((resolve) => setTimeout(resolve, 50));
       const stored = await service.loadForTest(created.matchId);
-      expect(stored?.sessions.find((session) => session.side === created.hostSide)?.connected).toBe(true);
+      expect(
+        stored?.sessions.find((session) => session.side === created.hostSide)
+          ?.connected,
+      ).toBe(true);
       replacement.close();
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       expect(auditEvents).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ event: "ws_open" }),
-          expect.objectContaining({ event: "ws_join_ok", matchId: created.matchId, side: created.hostSide }),
-          expect.objectContaining({ event: "ws_replaced_by_reconnect", matchId: created.matchId, side: created.hostSide, code: 4000 }),
-          expect.objectContaining({ event: "ws_close", matchId: created.matchId, side: created.hostSide, ignoredAsReplaced: true })
-        ])
+          expect.objectContaining({
+            event: "ws_join_ok",
+            matchId: created.matchId,
+            side: created.hostSide,
+          }),
+          expect.objectContaining({
+            event: "ws_replaced_by_reconnect",
+            matchId: created.matchId,
+            side: created.hostSide,
+            code: 4000,
+          }),
+          expect.objectContaining({
+            event: "ws_close",
+            matchId: created.matchId,
+            side: created.hostSide,
+            ignoredAsReplaced: true,
+          }),
+        ]),
       );
-      expect(JSON.stringify(auditEvents)).not.toContain(created.hostSessionToken);
-      expect(JSON.stringify(auditEvents)).not.toContain(created.hostReconnectToken);
-      expect(JSON.stringify(auditEvents)).not.toMatch(/Simple Agenda|cardInstances|privatePayload|decklist/i);
+      expect(JSON.stringify(auditEvents)).not.toContain(
+        created.hostSessionToken,
+      );
+      expect(JSON.stringify(auditEvents)).not.toContain(
+        created.hostReconnectToken,
+      );
+      expect(JSON.stringify(auditEvents)).not.toMatch(
+        /Simple Agenda|cardInstances|privatePayload|decklist/i,
+      );
     } finally {
       socket.close();
       await handle.close();
@@ -5860,12 +9232,21 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("clears pending undo prompts over WebSocket after a response", async () => {
     const match = await joinedMatch("ws-undo-clear");
-    const mandatory = await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "ws-undo-clear-mandatory");
+    const mandatory = await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "mandatory_draw",
+      "ws-undo-clear-mandatory",
+    );
     const targetEventId = `evt_${mandatory.receipt.stateVersionAfter}`;
     const handle = createNetgridHttpServer(match.service);
-    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    await new Promise<void>((resolve) =>
+      handle.server.listen(0, "127.0.0.1", resolve),
+    );
     const address = handle.server.address();
-    if (!address || typeof address === "string") throw new Error("Missing server address");
+    if (!address || typeof address === "string")
+      throw new Error("Missing server address");
     const corpSocket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
     const runnerSocket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
 
@@ -5874,44 +9255,92 @@ describe("MVP 0.2 multiplayer service", () => {
       corpSocket.send(
         JSON.stringify({
           type: "join_match",
-          payload: { matchId: match.matchId, sessionToken: match.corp.sessionToken, side: "corp" }
-        })
+          payload: {
+            matchId: match.matchId,
+            sessionToken: match.corp.sessionToken,
+            side: "corp",
+          },
+        }),
       );
       runnerSocket.send(
         JSON.stringify({
           type: "join_match",
-          payload: { matchId: match.matchId, sessionToken: match.runner.sessionToken, side: "runner" }
-        })
+          payload: {
+            matchId: match.matchId,
+            sessionToken: match.runner.sessionToken,
+            side: "runner",
+          },
+        }),
       );
-      await Promise.all([waitForMessage(corpSocket, "state_update"), waitForMessage(runnerSocket, "state_update")]);
+      await Promise.all([
+        waitForMessage(corpSocket, "state_update"),
+        waitForMessage(runnerSocket, "state_update"),
+      ]);
 
       const corpPendingUpdate = waitForMessage(corpSocket, "state_update");
       const runnerPendingUpdate = waitForMessage(runnerSocket, "state_update");
       const corpUndoRequest = waitForMessage(corpSocket, "undo_request");
       const runnerUndoRequest = waitForMessage(runnerSocket, "undo_request");
-      corpSocket.send(JSON.stringify({ type: "request_undo", payload: { targetEventId, reason: "Misclick" } }));
+      corpSocket.send(
+        JSON.stringify({
+          type: "request_undo",
+          payload: { targetEventId, reason: "Misclick" },
+        }),
+      );
 
-      expect((messagePayload(await corpPendingUpdate) as { pendingUndo?: { needsResponse?: boolean } }).pendingUndo?.needsResponse).toBe(false);
-      expect((messagePayload(await runnerPendingUpdate) as { pendingUndo?: { needsResponse?: boolean } }).pendingUndo?.needsResponse).toBe(true);
-      const runnerUndoMessage = (await runnerUndoRequest) as { payload?: { undoRequestId?: string; needsResponse?: boolean } };
+      expect(
+        (
+          messagePayload(await corpPendingUpdate) as {
+            pendingUndo?: { needsResponse?: boolean };
+          }
+        ).pendingUndo?.needsResponse,
+      ).toBe(false);
+      expect(
+        (
+          messagePayload(await runnerPendingUpdate) as {
+            pendingUndo?: { needsResponse?: boolean };
+          }
+        ).pendingUndo?.needsResponse,
+      ).toBe(true);
+      const runnerUndoMessage = (await runnerUndoRequest) as {
+        payload?: { undoRequestId?: string; needsResponse?: boolean };
+      };
       const runnerUndoPayload = runnerUndoMessage.payload;
       expect(runnerUndoPayload?.needsResponse).toBe(true);
-      expect(JSON.stringify(await corpUndoRequest)).not.toMatch(/Simple Agenda|cardInstances|privatePayload|decklist/i);
+      expect(JSON.stringify(await corpUndoRequest)).not.toMatch(
+        /Simple Agenda|cardInstances|privatePayload|decklist/i,
+      );
       expect(runnerUndoPayload?.undoRequestId).toBeTruthy();
 
       const corpClearedUpdate = waitForMessage(corpSocket, "state_update");
       const runnerClearedUpdate = waitForMessage(runnerSocket, "state_update");
-      runnerSocket.send(JSON.stringify({ type: "accept_undo", payload: { undoRequestId: runnerUndoPayload!.undoRequestId } }));
+      runnerSocket.send(
+        JSON.stringify({
+          type: "accept_undo",
+          payload: { undoRequestId: runnerUndoPayload!.undoRequestId },
+        }),
+      );
 
-      expect((messagePayload(await corpClearedUpdate) as { pendingUndo?: unknown }).pendingUndo).toBeNull();
-      expect((messagePayload(await runnerClearedUpdate) as { pendingUndo?: unknown }).pendingUndo).toBeNull();
-      const corpBootstrap = await match.service.bootstrap(match.matchId, "corp", match.corp.sessionToken);
+      expect(
+        (messagePayload(await corpClearedUpdate) as { pendingUndo?: unknown })
+          .pendingUndo,
+      ).toBeNull();
+      expect(
+        (messagePayload(await runnerClearedUpdate) as { pendingUndo?: unknown })
+          .pendingUndo,
+      ).toBeNull();
+      const corpBootstrap = await match.service.bootstrap(
+        match.matchId,
+        "corp",
+        match.corp.sessionToken,
+      );
       expect("error" in corpBootstrap).toBe(false);
-      if ("error" in corpBootstrap) throw new Error(corpBootstrap.error.message);
+      if ("error" in corpBootstrap)
+        throw new Error(corpBootstrap.error.message);
       expect(corpBootstrap.pendingUndo).toBeUndefined();
       const reconnected = await match.service.reconnectMatch(match.matchId, {
         side: "runner",
-        reconnectToken: match.runner.reconnectToken
+        reconnectToken: match.runner.reconnectToken,
       });
       expect("error" in reconnected).toBe(false);
       if ("error" in reconnected) throw new Error(reconnected.error.message);
@@ -5928,14 +9357,20 @@ describe("MVP 0.2 multiplayer service", () => {
     const service = new MultiplayerService(storage, {
       tokenSalt: "ws-choice-test",
       publicWebBaseUrl: "http://127.0.0.1:3100",
-      publicServerBaseUrl: "http://127.0.0.1:0"
+      publicServerBaseUrl: "http://127.0.0.1:0",
     });
-    const created = await service.createMatch({ hostSide: "runner", seed: "ws-choice" });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "ws-choice",
+    });
     expect(created.joinUrl).toBeTruthy();
     if (!created.joinUrl) throw new Error("Missing join URL");
     const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Corp",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
 
@@ -5945,27 +9380,41 @@ describe("MVP 0.2 multiplayer service", () => {
     stored.gameState.pendingChoice = choiceRequest(stored.gameState, "runner");
     await storage.save(stored);
 
-    const runnerBootstrap = await service.bootstrap(created.matchId, "runner", created.hostSessionToken);
-    const corpBootstrap = await service.bootstrap(created.matchId, "corp", joined.sessionToken);
+    const runnerBootstrap = await service.bootstrap(
+      created.matchId,
+      "runner",
+      created.hostSessionToken,
+    );
+    const corpBootstrap = await service.bootstrap(
+      created.matchId,
+      "corp",
+      joined.sessionToken,
+    );
     expect("error" in runnerBootstrap).toBe(false);
     expect("error" in corpBootstrap).toBe(false);
-    if ("error" in runnerBootstrap || "error" in corpBootstrap) throw new Error("Bootstrap failed");
+    if ("error" in runnerBootstrap || "error" in corpBootstrap)
+      throw new Error("Bootstrap failed");
     expect(runnerBootstrap.pendingChoice?.choiceId).toBe("choice_v093_runner");
     expect(corpBootstrap.pendingChoice).toBeUndefined();
-    expect(JSON.stringify(corpBootstrap)).not.toContain("Runner private option");
+    expect(JSON.stringify(corpBootstrap)).not.toContain(
+      "Runner private option",
+    );
 
     const reconnected = await service.reconnectMatch(created.matchId, {
       side: "runner",
-      reconnectToken: created.hostReconnectToken
+      reconnectToken: created.hostReconnectToken,
     });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
     expect(reconnected.pendingChoice?.choiceId).toBe("choice_v093_runner");
 
     const handle = createNetgridHttpServer(service);
-    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    await new Promise<void>((resolve) =>
+      handle.server.listen(0, "127.0.0.1", resolve),
+    );
     const address = handle.server.address();
-    if (!address || typeof address === "string") throw new Error("Missing server address");
+    if (!address || typeof address === "string")
+      throw new Error("Missing server address");
     const socket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
 
     try {
@@ -5973,11 +9422,24 @@ describe("MVP 0.2 multiplayer service", () => {
       socket.send(
         JSON.stringify({
           type: "join_match",
-          payload: { matchId: created.matchId, sessionToken: reconnected.sessionToken, side: "runner" }
-        })
+          payload: {
+            matchId: created.matchId,
+            sessionToken: reconnected.sessionToken,
+            side: "runner",
+          },
+        }),
       );
       const choiceMessage = await waitForMessage(socket, "choice_request");
-      const choice = (choiceMessage as { payload?: { choice?: { choiceId?: string; options?: Array<{ label?: string }> } | null } }).payload?.choice;
+      const choice = (
+        choiceMessage as {
+          payload?: {
+            choice?: {
+              choiceId?: string;
+              options?: Array<{ label?: string }>;
+            } | null;
+          };
+        }
+      ).payload?.choice;
       expect(choice?.choiceId).toBe("choice_v093_runner");
       expect(choice?.options?.[0]?.label).toBe("Runner private option");
       expect(JSON.stringify(choiceMessage)).not.toContain("hostSessionToken");
@@ -5991,13 +9453,19 @@ describe("MVP 0.2 multiplayer service", () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ws-status-test",
       publicWebBaseUrl: "http://127.0.0.1:3100",
-      publicServerBaseUrl: "http://127.0.0.1:0"
+      publicServerBaseUrl: "http://127.0.0.1:0",
     });
-    const created = await service.createMatch({ hostSide: "corp", seed: "ws-status" });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "ws-status",
+    });
     const handle = createNetgridHttpServer(service);
-    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    await new Promise<void>((resolve) =>
+      handle.server.listen(0, "127.0.0.1", resolve),
+    );
     const address = handle.server.address();
-    if (!address || typeof address === "string") throw new Error("Missing server address");
+    if (!address || typeof address === "string")
+      throw new Error("Missing server address");
     const hostSocket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
     let runnerSocket: WebSocket | undefined;
 
@@ -6006,8 +9474,12 @@ describe("MVP 0.2 multiplayer service", () => {
       hostSocket.send(
         JSON.stringify({
           type: "join_match",
-          payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: "corp" }
-        })
+          payload: {
+            matchId: created.matchId,
+            sessionToken: created.hostSessionToken,
+            side: "corp",
+          },
+        }),
       );
       const waitingUpdate = await waitForMessage(hostSocket, "lobby_update");
       expect(messagePayload(waitingUpdate).matchStatus).toBe("pending");
@@ -6016,7 +9488,10 @@ describe("MVP 0.2 multiplayer service", () => {
       if (!created.joinUrl) throw new Error("Missing join URL");
       const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
       if (!joinToken) throw new Error("Missing join token");
-      const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+      const joined = await service.joinMatch(created.matchId, {
+        token: joinToken,
+        displayName: "Runner",
+      });
       if ("error" in joined) throw new Error(joined.error.message);
 
       runnerSocket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
@@ -6024,8 +9499,12 @@ describe("MVP 0.2 multiplayer service", () => {
       runnerSocket.send(
         JSON.stringify({
           type: "join_match",
-          payload: { matchId: created.matchId, sessionToken: joined.sessionToken, side: "runner" }
-        })
+          payload: {
+            matchId: created.matchId,
+            sessionToken: joined.sessionToken,
+            side: "runner",
+          },
+        }),
       );
       const activeUpdate = await waitForMessage(hostSocket, "state_update");
       expect(messagePayload(activeUpdate).matchStatus).toBe("active");
@@ -6049,33 +9528,58 @@ describe("MVP 0.2 multiplayer service", () => {
       corpSocket.send(
         JSON.stringify({
           type: "join_match",
-          payload: { matchId: match.matchId, sessionToken: match.corp.sessionToken, side: "corp" }
-        })
+          payload: {
+            matchId: match.matchId,
+            sessionToken: match.corp.sessionToken,
+            side: "corp",
+          },
+        }),
       );
       runnerSocket.send(
         JSON.stringify({
           type: "join_match",
-          payload: { matchId: match.matchId, sessionToken: match.runner.sessionToken, side: "runner" }
-        })
+          payload: {
+            matchId: match.matchId,
+            sessionToken: match.runner.sessionToken,
+            side: "runner",
+          },
+        }),
       );
-      await Promise.all([waitForMessage(corpSocket, "state_update"), waitForMessage(runnerSocket, "state_update")]);
+      await Promise.all([
+        waitForMessage(corpSocket, "state_update"),
+        waitForMessage(runnerSocket, "state_update"),
+      ]);
 
       const firstTerminal = waitForMessage(runnerSocket, "match_finished");
-      const response = await fetch(`${baseUrl}/api/matches/${encodeURIComponent(match.matchId)}/forfeit`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ side: "corp", sessionToken: match.corp.sessionToken })
-      });
+      const response = await fetch(
+        `${baseUrl}/api/matches/${encodeURIComponent(match.matchId)}/forfeit`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            side: "corp",
+            sessionToken: match.corp.sessionToken,
+          }),
+        },
+      );
       expect(response.status).toBe(200);
       const firstTerminalPayload = messagePayload(await firstTerminal) as {
         matchStatus?: string;
         winner?: Side | "draw";
-        resultSummary?: { reason?: string; winnerSide?: Side; loserSide?: Side };
+        resultSummary?: {
+          reason?: string;
+          winnerSide?: Side;
+          loserSide?: Side;
+        };
       };
       expect(firstTerminalPayload).toMatchObject({
         matchStatus: "forfeited",
         winner: "runner",
-        resultSummary: { reason: "forfeit", winnerSide: "runner", loserSide: "corp" }
+        resultSummary: {
+          reason: "forfeit",
+          winnerSide: "runner",
+          loserSide: "corp",
+        },
       });
 
       const refreshedTerminal = waitForMessage(runnerSocket, "match_finished");
@@ -6083,12 +9587,20 @@ describe("MVP 0.2 multiplayer service", () => {
       const refreshedPayload = messagePayload(await refreshedTerminal) as {
         matchStatus?: string;
         winner?: Side | "draw";
-        resultSummary?: { reason?: string; winnerSide?: Side; loserSide?: Side };
+        resultSummary?: {
+          reason?: string;
+          winnerSide?: Side;
+          loserSide?: Side;
+        };
       };
       expect(refreshedPayload).toMatchObject({
         matchStatus: "forfeited",
         winner: "runner",
-        resultSummary: { reason: "forfeit", winnerSide: "runner", loserSide: "corp" }
+        resultSummary: {
+          reason: "forfeit",
+          winnerSide: "runner",
+          loserSide: "corp",
+        },
       });
     } finally {
       corpSocket.close();
@@ -6101,7 +9613,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ws-join-deck-lobby",
       publicWebBaseUrl: "http://127.0.0.1:3100",
-      publicServerBaseUrl: "http://127.0.0.1:0"
+      publicServerBaseUrl: "http://127.0.0.1:0",
     });
     const created = await service.createMatch({
       mode: "human_vs_human",
@@ -6111,16 +9623,21 @@ describe("MVP 0.2 multiplayer service", () => {
       settings: { matchFormat: "single_game" },
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6"
-      }
+        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6",
+      },
     });
-    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+      "joinToken",
+    );
     if (!joinToken) throw new Error("Missing join token");
 
     const handle = createNetgridHttpServer(service);
-    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    await new Promise<void>((resolve) =>
+      handle.server.listen(0, "127.0.0.1", resolve),
+    );
     const address = handle.server.address();
-    if (!address || typeof address === "string") throw new Error("Missing server address");
+    if (!address || typeof address === "string")
+      throw new Error("Missing server address");
     const hostSocket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
     let joinerSocket: WebSocket | undefined;
 
@@ -6129,28 +9646,43 @@ describe("MVP 0.2 multiplayer service", () => {
       hostSocket.send(
         JSON.stringify({
           type: "join_match",
-          payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide }
-        })
+          payload: {
+            matchId: created.matchId,
+            sessionToken: created.hostSessionToken,
+            side: created.hostSide,
+          },
+        }),
       );
       const waitingUpdate = await waitForMessage(hostSocket, "lobby_update");
       const waitingPayload = messagePayload(waitingUpdate) as {
         matchStatus?: string;
-        startLobby?: { participants?: { player_b?: { connected?: boolean; runnerDeckReady?: boolean } } };
+        startLobby?: {
+          participants?: {
+            player_b?: { connected?: boolean; runnerDeckReady?: boolean };
+          };
+        };
       };
       expect(waitingPayload.matchStatus).toBe("pending");
-      expect(waitingPayload.startLobby?.participants?.player_b?.connected).toBe(false);
-      expect(waitingPayload.startLobby?.participants?.player_b?.runnerDeckReady).toBe(false);
+      expect(waitingPayload.startLobby?.participants?.player_b?.connected).toBe(
+        false,
+      );
+      expect(
+        waitingPayload.startLobby?.participants?.player_b?.runnerDeckReady,
+      ).toBe(false);
 
-      const joinedResponse = await fetch(`http://127.0.0.1:${address.port}/api/matches/${encodeURIComponent(created.matchId)}/join`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          token: joinToken,
-          displayName: "Teilnehmer B",
-          runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-          corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
-        })
-      });
+      const joinedResponse = await fetch(
+        `http://127.0.0.1:${address.port}/api/matches/${encodeURIComponent(created.matchId)}/join`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            token: joinToken,
+            displayName: "Teilnehmer B",
+            runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+            corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
+          }),
+        },
+      );
       expect(joinedResponse.status).toBe(200);
       const joined = (await joinedResponse.json()) as JoinMatchResult;
       expect(joined.matchStatus).toBe("ready_check");
@@ -6165,17 +9697,29 @@ describe("MVP 0.2 multiplayer service", () => {
       joinerSocket.send(
         JSON.stringify({
           type: "join_match",
-          payload: { matchId: created.matchId, sessionToken: joined.sessionToken, side: joined.side }
-        })
+          payload: {
+            matchId: created.matchId,
+            sessionToken: joined.sessionToken,
+            side: joined.side,
+          },
+        }),
       );
       const hostReadyUpdate = await waitForMessage(hostSocket, "lobby_update");
       const hostPayload = messagePayload(hostReadyUpdate) as {
         matchStatus?: string;
-        startLobby?: { participants?: { player_b?: { runnerDeckReady?: boolean; corpDeckReady?: boolean } } };
+        startLobby?: {
+          participants?: {
+            player_b?: { runnerDeckReady?: boolean; corpDeckReady?: boolean };
+          };
+        };
       };
       expect(hostPayload.matchStatus).toBe("ready_check");
-      expect(hostPayload.startLobby?.participants?.player_b?.runnerDeckReady).toBe(true);
-      expect(hostPayload.startLobby?.participants?.player_b?.corpDeckReady).toBe(true);
+      expect(
+        hostPayload.startLobby?.participants?.player_b?.runnerDeckReady,
+      ).toBe(true);
+      expect(
+        hostPayload.startLobby?.participants?.player_b?.corpDeckReady,
+      ).toBe(true);
       expect(JSON.stringify(hostPayload)).not.toContain("deckHash");
       expect(JSON.stringify(hostPayload)).not.toContain("cardInstances");
     } finally {
@@ -6186,12 +9730,14 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("runs Human Runner vs Corp AI matches without a second player", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-runner-service" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-runner-service",
+    });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "server-corp-ai",
-      corpDifficulty: "normal"
+      corpDifficulty: "normal",
     });
 
     expect(created.mode).toBe("human_runner_vs_corp_ai");
@@ -6200,44 +9746,71 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.playerView.activeSide).toBe("runner");
     expect(created.pendingChoice?.source).toBe("setup.mulligan");
     expect(created.matchVersion).toBe(1);
-    expect(created.aiTurnPresentation).toEqual({ canAdvanceAi: false, pacingMode: "paced" });
-    expect(created.legalActions.some((action) => action.type === "resolve_choice")).toBe(true);
+    expect(created.aiTurnPresentation).toEqual({
+      canAdvanceAi: false,
+      pacingMode: "paced",
+    });
+    expect(
+      created.legalActions.some((action) => action.type === "resolve_choice"),
+    ).toBe(true);
 
     const stored = await service.loadForTest(created.matchId);
     expect(stored?.match.aiControllers?.corp?.type).toBe("ai");
-    expect(stored?.privateDeckSnapshots?.participants.player_b.corp.deckSnapshotId).toBe(stored?.match.deckSetup.corpSnapshotId);
-    expect(stored?.privateDeckSnapshots?.participants.player_b.corp.cards.length).toBeGreaterThan(0);
+    expect(
+      stored?.privateDeckSnapshots?.participants.player_b.corp.deckSnapshotId,
+    ).toBe(stored?.match.deckSetup.corpSnapshotId);
+    expect(
+      stored?.privateDeckSnapshots?.participants.player_b.corp.cards.length,
+    ).toBeGreaterThan(0);
     expect(JSON.stringify(created)).not.toContain("cardInstances");
     expect(JSON.stringify(created)).not.toContain("Simple Agenda");
 
     const afterSetup = await submitChoice(
       service,
       created.matchId,
-      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       "keep",
-      "runner-ai-mode-setup"
+      "runner-ai-mode-setup",
     );
-    expect(afterSetup.aiTurnPresentation).toEqual({ activeAiSide: "corp", canAdvanceAi: true, pacingMode: "paced" });
+    expect(afterSetup.aiTurnPresentation).toEqual({
+      activeAiSide: "corp",
+      canAdvanceAi: true,
+      pacingMode: "paced",
+    });
 
     const advanced = await service.advanceAi({
       matchId: created.matchId,
       side: "runner",
       sessionToken: created.hostSessionToken,
       knownStateVersion: afterSetup.playerView.stateVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
-    expect(advanced.requesterPayload.playerView.stateVersion).toBe(afterSetup.playerView.stateVersion + 1);
-    expect(advanced.requesterPayload.aiTurnPresentation?.activeAiSide).toBe("corp");
+    expect(advanced.requesterPayload.playerView.stateVersion).toBe(
+      afterSetup.playerView.stateVersion + 1,
+    );
+    expect(advanced.requesterPayload.aiTurnPresentation?.activeAiSide).toBe(
+      "corp",
+    );
     expect(advanced.publicEvent?.publicPayload.aiExplanation).toBeTruthy();
-    expect(JSON.stringify(advanced.requesterPayload)).not.toContain("cardInstances");
-    expect(JSON.stringify(advanced.requesterPayload)).not.toContain("Simple Agenda");
+    expect(JSON.stringify(advanced.requesterPayload)).not.toContain(
+      "cardInstances",
+    );
+    expect(JSON.stringify(advanced.requesterPayload)).not.toContain(
+      "Simple Agenda",
+    );
   });
 
   it("runs observable AI-vs-AI matches one persisted step at a time and allows host cancellation", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "observable-ai-vs-ai-service" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "observable-ai-vs-ai-service",
+    });
     const created = await service.createMatch({
       mode: "ai_vs_ai",
       hostSide: "runner",
@@ -6253,9 +9826,9 @@ describe("MVP 0.2 multiplayer service", () => {
         playerClock: {
           mode: "player_clock",
           startingTimeMs: 10 * 60_000,
-          gracePeriodMs: 10_000
-        }
-      }
+          gracePeriodMs: 10_000,
+        },
+      },
     });
 
     expect(created).toMatchObject({
@@ -6266,19 +9839,25 @@ describe("MVP 0.2 multiplayer service", () => {
       aiTurnPresentation: {
         activeAiSide: "runner",
         canAdvanceAi: true,
-        pacingMode: "paced"
-      }
+        pacingMode: "paced",
+      },
     });
     expect(created.joinUrl).toBeUndefined();
 
     const before = await service.loadForTest(created.matchId);
-    if (!before?.gameState) throw new Error("Missing observable AI-vs-AI state");
+    if (!before?.gameState)
+      throw new Error("Missing observable AI-vs-AI state");
     expect(before.match.settings.matchFormat).toBe("two_game_side_swap");
     expect(before.match.playerClock?.mode).toBe("none");
     expect(before.match.aiControllers?.runner?.type).toBe("ai");
     expect(before.match.aiControllers?.corp?.type).toBe("ai");
-    expect(before.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_a", corpPlayer: "player_b" });
-    expect(before.eventLog).toHaveLength(created.playerView.publicEvents.length);
+    expect(before.match.deckSetup.assignment).toEqual({
+      runnerPlayer: "player_a",
+      corpPlayer: "player_b",
+    });
+    expect(before.eventLog).toHaveLength(
+      created.playerView.publicEvents.length,
+    );
     const initialStateVersion = before.gameState.stateVersion;
     const initialEventCount = before.eventLog.length;
 
@@ -6288,10 +9867,11 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       actionId: "observer-must-not-act",
       clientKnownStateVersion: initialStateVersion,
-      idempotencyKey: "observer-must-not-act"
+      idempotencyKey: "observer-must-not-act",
     });
     expect(forbiddenAction.ok).toBe(false);
-    if (forbiddenAction.ok) throw new Error("Expected observer PlayerAction rejection");
+    if (forbiddenAction.ok)
+      throw new Error("Expected observer PlayerAction rejection");
     expect(forbiddenAction.error.code).toBe("ai_action_forbidden");
 
     const advanced = await service.advanceAi({
@@ -6300,14 +9880,15 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       knownStateVersion: initialStateVersion,
       knownMatchVersion: created.matchVersion,
-      mode: "until_human"
+      mode: "until_human",
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
     expect(advanced.requesterPayload.legalActions).toEqual([]);
 
     const afterStep = await service.loadForTest(created.matchId);
-    if (!afterStep?.gameState) throw new Error("Missing stepped observable AI-vs-AI state");
+    if (!afterStep?.gameState)
+      throw new Error("Missing stepped observable AI-vs-AI state");
     expect(afterStep.gameState.stateVersion).toBe(initialStateVersion + 1);
     expect(afterStep.eventLog).toHaveLength(initialEventCount + 1);
     expect(afterStep.aiDecisionTraces).toHaveLength(1);
@@ -6316,25 +9897,33 @@ describe("MVP 0.2 multiplayer service", () => {
     const cancelled = await service.cancelMatch({
       matchId: created.matchId,
       side: "runner",
-      sessionToken: created.hostSessionToken
+      sessionToken: created.hostSessionToken,
     });
     expect(cancelled.ok).toBe(true);
     if (!cancelled.ok) throw new Error(cancelled.error.message);
     const cancelledPayload = expectSidePayload(cancelled.actorPayload);
     expect(cancelledPayload.matchStatus).toBe("cancelled");
     expect(cancelledPayload.winner).toBeUndefined();
-    expect(cancelledPayload.lifecycleResult).toMatchObject({ status: "cancelled", reason: "cancel" });
+    expect(cancelledPayload.lifecycleResult).toMatchObject({
+      status: "cancelled",
+      reason: "cancel",
+    });
 
     const afterCancel = await service.loadForTest(created.matchId);
-    if (!afterCancel?.gameState) throw new Error("Missing cancelled observable AI-vs-AI state");
+    if (!afterCancel?.gameState)
+      throw new Error("Missing cancelled observable AI-vs-AI state");
     expect(hashState(afterCancel.gameState)).toBe(hashBeforeCancel);
     expect(afterCancel.match.winner).toBeUndefined();
-    expect(afterCancel.tokens.every((token) => Boolean(token.revokedAt))).toBe(true);
+    expect(afterCancel.tokens.every((token) => Boolean(token.revokedAt))).toBe(
+      true,
+    );
   });
 
   it("creates the second observable AI-vs-AI series game with side-swapped AI identities", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "observable-ai-vs-ai-series" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "observable-ai-vs-ai-series",
+    });
     const created = await service.createMatch({
       mode: "ai_vs_ai",
       hostSide: "runner",
@@ -6343,12 +9932,18 @@ describe("MVP 0.2 multiplayer service", () => {
       corpDifficulty: "easy",
       aiDeckPolicy: "seeded_random",
       aiTraceMode: "detailed",
-      settings: { agendaPointsToWin: 7, matchFormat: "two_game_side_swap", playerClock: { mode: "none" } }
+      settings: {
+        agendaPointsToWin: 7,
+        matchFormat: "two_game_side_swap",
+        playerClock: { mode: "none" },
+      },
     });
     const firstRecord = await service.loadForTest(created.matchId);
-    if (!firstRecord?.gameState) throw new Error("Missing first observable AI-vs-AI series game");
+    if (!firstRecord?.gameState)
+      throw new Error("Missing first observable AI-vs-AI series game");
     const firstParticipants = firstRecord.match.deckSetup.participants;
-    if (!firstParticipants) throw new Error("Missing AI-vs-AI participant deck pairs");
+    if (!firstParticipants)
+      throw new Error("Missing AI-vs-AI participant deck pairs");
     firstRecord.match.status = "finished";
     firstRecord.gameState.winner = "runner";
     firstRecord.gameState.gameEndReason = "agenda_points";
@@ -6357,7 +9952,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const next = await service.startNextSeriesGame(created.matchId, {
       side: "runner",
       sessionToken: created.hostSessionToken,
-      displayName: "Beobachter"
+      displayName: "Beobachter",
     });
 
     expect("error" in next).toBe(false);
@@ -6367,30 +9962,39 @@ describe("MVP 0.2 multiplayer service", () => {
       hostSide: "runner",
       matchStatus: "active",
       legalActions: [],
-      aiTurnPresentation: { canAdvanceAi: true }
+      aiTurnPresentation: { canAdvanceAi: true },
     });
     expect(next.joinUrl).toBeUndefined();
     const nextRecord = await service.loadForTest(next.matchId);
     expect(nextRecord?.match.settings.matchFormat).toBe("two_game_side_swap");
-    expect(nextRecord?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_b", corpPlayer: "player_a" });
+    expect(nextRecord?.match.deckSetup.assignment).toEqual({
+      runnerPlayer: "player_b",
+      corpPlayer: "player_a",
+    });
     expect(nextRecord?.match.aiControllers?.runner?.difficulty).toBe("easy");
     expect(nextRecord?.match.aiControllers?.corp?.difficulty).toBe("hard");
-    expect(nextRecord?.match.deckSetup.runnerSnapshotId).toBe(firstParticipants.player_b.runnerSnapshotId);
-    expect(nextRecord?.match.deckSetup.corpSnapshotId).toBe(firstParticipants.player_a.corpSnapshotId);
+    expect(nextRecord?.match.deckSetup.runnerSnapshotId).toBe(
+      firstParticipants.player_b.runnerSnapshotId,
+    );
+    expect(nextRecord?.match.deckSetup.corpSnapshotId).toBe(
+      firstParticipants.player_a.corpSnapshotId,
+    );
     expect(nextRecord?.match.deckSetup.aiDeckPolicy).toBe("seeded_random");
     expect(nextRecord?.match.series).toMatchObject({
       gameNumber: 2,
       gamesPlanned: 2,
       runnerPlayer: "player_b",
       corpPlayer: "player_a",
-      previousMatchId: created.matchId
+      previousMatchId: created.matchId,
     });
     expect(nextRecord?.match.series?.results).toHaveLength(1);
   });
 
   it("runs an observable AI-vs-AI match beyond 120 actions to a regular replayable ending", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "observable-ai-vs-ai-long-run-service" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "observable-ai-vs-ai-long-run-service",
+    });
     const created = await service.createMatch({
       mode: "ai_vs_ai",
       hostSide: "runner",
@@ -6399,7 +10003,11 @@ describe("MVP 0.2 multiplayer service", () => {
       corpDifficulty: "normal",
       aiDeckPolicy: "fixed",
       aiTraceMode: "detailed",
-      settings: { agendaPointsToWin: 7, matchFormat: "rules_match", playerClock: { mode: "none" } }
+      settings: {
+        agendaPointsToWin: 7,
+        matchFormat: "rules_match",
+        playerClock: { mode: "none" },
+      },
     });
 
     let sessionToken = created.hostSessionToken;
@@ -6409,7 +10017,8 @@ describe("MVP 0.2 multiplayer service", () => {
     let actions = 0;
     let lastPayload: { winner?: Side | "draw"; matchStatus?: string } = created;
     const initial = await service.loadForTest(created.matchId);
-    if (!initial?.gameState) throw new Error("Missing initial observable AI-vs-AI state");
+    if (!initial?.gameState)
+      throw new Error("Missing initial observable AI-vs-AI state");
     const initialEventCount = initial.eventLog.length;
 
     while (!lastPayload.winner && actions < 400) {
@@ -6419,12 +10028,14 @@ describe("MVP 0.2 multiplayer service", () => {
         sessionToken,
         knownStateVersion: stateVersion,
         knownMatchVersion: matchVersion,
-        mode: "until_human"
+        mode: "until_human",
       });
       expect(advanced.ok).toBe(true);
       if (!advanced.ok) throw new Error(advanced.error.message);
       actions += 1;
-      expect(advanced.requesterPayload.playerView.stateVersion).toBe(stateVersion + 1);
+      expect(advanced.requesterPayload.playerView.stateVersion).toBe(
+        stateVersion + 1,
+      );
       expect(advanced.requesterPayload.legalActions).toEqual([]);
       stateVersion = advanced.requesterPayload.playerView.stateVersion;
       matchVersion = advanced.requesterPayload.matchVersion;
@@ -6435,13 +10046,15 @@ describe("MVP 0.2 multiplayer service", () => {
         expect(lastPayload.winner).toBeUndefined();
         const reconnected = await service.reconnectMatch(created.matchId, {
           side: "runner",
-          reconnectToken
+          reconnectToken,
         });
         expect("error" in reconnected).toBe(false);
         if ("error" in reconnected) throw new Error(reconnected.error.message);
         expect(reconnected.playerView?.stateVersion).toBe(stateVersion);
         expect(reconnected.legalActions).toEqual([]);
-        expect(reconnected.aiTurnPresentation).toMatchObject({ canAdvanceAi: true });
+        expect(reconnected.aiTurnPresentation).toMatchObject({
+          canAdvanceAi: true,
+        });
         sessionToken = reconnected.sessionToken;
         reconnectToken = reconnected.reconnectToken;
         matchVersion = reconnected.matchVersion;
@@ -6453,8 +10066,11 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(lastPayload.matchStatus).toBe("finished");
     expect(lastPayload.winner).toBe("runner");
     const finished = await service.loadForTest(created.matchId);
-    if (!finished?.gameState) throw new Error("Missing completed observable AI-vs-AI state");
-    expect(finished.gameState.stateVersion).toBe(created.playerView.stateVersion + actions);
+    if (!finished?.gameState)
+      throw new Error("Missing completed observable AI-vs-AI state");
+    expect(finished.gameState.stateVersion).toBe(
+      created.playerView.stateVersion + actions,
+    );
     expect(finished.eventLog).toHaveLength(initialEventCount + actions);
     expect(finished.aiDecisionTraces).toHaveLength(actions);
     expect(finished.lifecycleResult).toBeUndefined();
@@ -6464,13 +10080,17 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(replay).toEqual({
       ok: true,
       finalStateHash: hashState(finished.gameState),
-      errors: []
+      errors: [],
     });
   }, 60_000);
 
   it("rejects AI match start when the selected AI snapshot is internally invalid", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-invalid-runtime-snapshot-start" });
-    const invalidCorpSnapshot = deckSnapshotByIdForTest("demo_corp_008_snapshot_v0_8");
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-invalid-runtime-snapshot-start",
+    });
+    const invalidCorpSnapshot = deckSnapshotByIdForTest(
+      "demo_corp_008_snapshot_v0_8",
+    );
     invalidCorpSnapshot.publicMetadata = {
       ...invalidCorpSnapshot.publicMetadata,
       cardPoolSnapshotId: `${invalidCorpSnapshot.publicMetadata.cardPoolSnapshotId}:stale`,
@@ -6486,39 +10106,50 @@ describe("MVP 0.2 multiplayer service", () => {
         seed: "ai-invalid-runtime-snapshot-start",
         participantADecks: {
           runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-          corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+          corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
         },
         participantBDecks: {
           runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-          corpDeckSnapshot: invalidCorpSnapshot
+          corpDeckSnapshot: invalidCorpSnapshot,
         },
         aiDeckPolicy: "selected",
-        corpDifficulty: "normal"
-      })
+        corpDifficulty: "normal",
+      }),
     ).rejects.toThrow(/ai_deck_snapshot_invalid/);
   });
 
   it("rejects AI advance when the stored ownDeckSnapshot is missing", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "ai-missing-runtime-snapshot-advance" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "ai-missing-runtime-snapshot-advance",
+    });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "ai-missing-runtime-snapshot-advance",
-      corpDifficulty: "normal"
+      corpDifficulty: "normal",
     });
     const afterSetup = await submitChoice(
       service,
       created.matchId,
-      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       "keep",
-      "ai-missing-runtime-snapshot-setup"
+      "ai-missing-runtime-snapshot-setup",
     );
     const record = await storage.load(created.matchId);
-    if (!record?.privateDeckSnapshots || !record.gameState) throw new Error("Missing stored AI match");
+    if (!record?.privateDeckSnapshots || !record.gameState)
+      throw new Error("Missing stored AI match");
     const beforeEventCount = record.eventLog.length;
     const beforeStateVersion = record.gameState.stateVersion;
-    delete (record.privateDeckSnapshots.participants.player_b as Partial<typeof record.privateDeckSnapshots.participants.player_b>).corp;
+    delete (
+      record.privateDeckSnapshots.participants.player_b as Partial<
+        typeof record.privateDeckSnapshots.participants.player_b
+      >
+    ).corp;
     await storage.save(record);
 
     const advanced = await service.advanceAi({
@@ -6526,7 +10157,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: created.hostSessionToken,
       knownStateVersion: afterSetup.playerView.stateVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
 
     expect(advanced.ok).toBe(false);
@@ -6539,22 +10170,32 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("rejects AI advance when the stored ownDeckSnapshot is stale", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "ai-stale-runtime-snapshot-advance" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "ai-stale-runtime-snapshot-advance",
+    });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "ai-stale-runtime-snapshot-advance",
-      corpDifficulty: "normal"
+      corpDifficulty: "normal",
     });
     const afterSetup = await submitChoice(
       service,
       created.matchId,
-      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       "keep",
-      "ai-stale-runtime-snapshot-setup"
+      "ai-stale-runtime-snapshot-setup",
     );
     const record = await storage.load(created.matchId);
-    if (!record?.privateDeckSnapshots?.participants.player_b.corp || !record.gameState) throw new Error("Missing stored AI match");
+    if (
+      !record?.privateDeckSnapshots?.participants.player_b.corp ||
+      !record.gameState
+    )
+      throw new Error("Missing stored AI match");
     const beforeEventCount = record.eventLog.length;
     const beforeStateVersion = record.gameState.stateVersion;
     record.privateDeckSnapshots.participants.player_b.corp.deckSnapshotId = `${record.privateDeckSnapshots.participants.player_b.corp.deckSnapshotId}:stale`;
@@ -6565,7 +10206,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: created.hostSessionToken,
       knownStateVersion: afterSetup.playerView.stateVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
 
     expect(advanced.ok).toBe(false);
@@ -6577,59 +10218,87 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("runs Human Corp vs Runner AI through the same action pipeline", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-corp-service" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-corp-service",
+    });
     const created = await service.createMatch({
       mode: "human_corp_vs_runner_ai",
       hostSide: "corp",
       seed: "server-runner-ai",
-      runnerDifficulty: "normal"
+      runnerDifficulty: "normal",
     });
 
-    const before = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    const before = await service.bootstrap(
+      created.matchId,
+      "corp",
+      created.hostSessionToken,
+    );
     expect("error" in before).toBe(false);
     if ("error" in before) throw new Error(before.error.message);
     expect(before.pendingChoice?.source).toBe("setup.mulligan");
     const afterSetup = await submitChoice(
       service,
       created.matchId,
-      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       "keep",
-      "corp-ai-mode-setup"
+      "corp-ai-mode-setup",
     );
-    const mandatory = mustAction(afterSetup, (action) => action.type === "mandatory_draw");
+    const mandatory = mustAction(
+      afterSetup,
+      (action) => action.type === "mandatory_draw",
+    );
     const mandatoryResult = await service.submitAction({
       matchId: created.matchId,
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: mandatory.actionId,
       clientKnownStateVersion: afterSetup.playerView.stateVersion,
-      idempotencyKey: "corp-ai-mode-mandatory"
+      idempotencyKey: "corp-ai-mode-mandatory",
     });
     expect(mandatoryResult.ok).toBe(true);
     if (!mandatoryResult.ok) throw new Error(mandatoryResult.error.message);
 
     const afterMandatory = mandatoryResult.actorPayload;
-    const endTurn = mustAction(afterMandatory, (action) => action.type === "end_turn");
+    const endTurn = mustAction(
+      afterMandatory,
+      (action) => action.type === "end_turn",
+    );
     const endTurnResult = await service.submitAction({
       matchId: created.matchId,
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: endTurn.actionId,
       clientKnownStateVersion: afterMandatory.playerView.stateVersion,
-      idempotencyKey: "corp-ai-mode-end"
+      idempotencyKey: "corp-ai-mode-end",
     });
     expect(endTurnResult.ok).toBe(true);
     if (!endTurnResult.ok) throw new Error(endTurnResult.error.message);
 
-    expect(endTurnResult.actorPayload.playerView.stateVersion).toBe(afterMandatory.playerView.stateVersion + 1);
-    expect(endTurnResult.actorPayload.pendingChoice?.source).toBe("discard_phase");
+    expect(endTurnResult.actorPayload.playerView.stateVersion).toBe(
+      afterMandatory.playerView.stateVersion + 1,
+    );
+    expect(endTurnResult.actorPayload.pendingChoice?.source).toBe(
+      "discard_phase",
+    );
     const afterDiscard = await submitFirstChoice(
       service,
       created.matchId,
-      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-      "corp-ai-mode-discard"
+      {
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
+      "corp-ai-mode-discard",
     );
-    expect(afterDiscard.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
+    expect(afterDiscard.aiTurnPresentation).toEqual({
+      activeAiSide: "runner",
+      canAdvanceAi: true,
+      pacingMode: "paced",
+    });
     expect(afterDiscard.opponentStatus.connected).toBe(true);
     expect(JSON.stringify(afterDiscard)).not.toContain("Simple Fracter");
 
@@ -6638,50 +10307,94 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: created.hostSessionToken,
       knownStateVersion: afterDiscard.playerView.stateVersion,
-      knownMatchVersion: afterDiscard.matchVersion
+      knownMatchVersion: afterDiscard.matchVersion,
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
-    expect(advanced.requesterPayload.playerView.stateVersion).toBeGreaterThan(afterDiscard.playerView.stateVersion);
-    expect(JSON.stringify(advanced.requesterPayload)).not.toContain("Simple Fracter");
+    expect(advanced.requesterPayload.playerView.stateVersion).toBeGreaterThan(
+      afterDiscard.playerView.stateVersion,
+    );
+    expect(JSON.stringify(advanced.requesterPayload)).not.toContain(
+      "Simple Fracter",
+    );
   });
 
   it("waits for an explicit Human Corp rez decision during Runner AI runs", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "ai-runner-rez-window" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "ai-runner-rez-window",
+    });
     const created = await service.createMatch({
       mode: "human_corp_vs_runner_ai",
       hostSide: "corp",
       seed: "server-runner-ai-rez-window",
-      runnerDifficulty: "normal"
+      runnerDifficulty: "normal",
     });
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing stored match");
 
-    let gameState = createGameAfterSetup({ matchId: created.matchId, seed: "server-runner-ai-rez-window" });
+    let gameState = createGameAfterSetup({
+      matchId: created.matchId,
+      seed: "server-runner-ai-rez-window",
+    });
     expectCurrentRulesBaseline(gameState);
-    gameState = applyEngineAction(gameState, "corp", (action) => action.type === "mandatory_draw");
-    gameState = applyEngineAction(gameState, "corp", (action) => action.type === "end_turn");
-    if (gameState.pendingChoice?.source === "discard_phase") gameState = applyEngineChoice(gameState, "corp", [String(gameState.pendingChoice.options[0]?.id)]);
+    gameState = applyEngineAction(
+      gameState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    gameState = applyEngineAction(
+      gameState,
+      "corp",
+      (action) => action.type === "end_turn",
+    );
+    if (gameState.pendingChoice?.source === "discard_phase")
+      gameState = applyEngineChoice(gameState, "corp", [
+        String(gameState.pendingChoice.options[0]?.id),
+      ]);
     putCorpIceOnServerForTest(gameState, "rd", "simple_barrier_ice");
-    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
     expect(gameState.activeSide).toBe("corp");
     expect(gameState.timingPoint).toBe("run.approach_ice");
 
     record.gameState = gameState;
     record.match.baseline = gameState.baseline;
-    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-    record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_ai_rez_window")];
+    record.eventLog = gameState.eventLog.map((event) =>
+      toEventRecordForTest(created.matchId, event),
+    );
+    record.stateSnapshots = [
+      stateSnapshotForTest(
+        created.matchId,
+        gameState,
+        record.match.matchVersion,
+        "snap_ai_rez_window",
+      ),
+    ];
     record.actionReceipts = [];
     record.undoSnapshots = [];
     delete record.pendingUndo;
     await storage.save(record);
 
-    const before = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    const before = await service.bootstrap(
+      created.matchId,
+      "corp",
+      created.hostSessionToken,
+    );
     expect("error" in before).toBe(false);
     if ("error" in before) throw new Error(before.error.message);
-    expect(before.aiTurnPresentation).toEqual({ canAdvanceAi: false, pacingMode: "paced" });
-    expect(before.legalActions.map((action) => action.type).sort()).toEqual(["decline_rez", "rez_ice"]);
+    expect(before.aiTurnPresentation).toEqual({
+      canAdvanceAi: false,
+      pacingMode: "paced",
+    });
+    expect(before.legalActions.map((action) => action.type).sort()).toEqual([
+      "decline_rez",
+      "rez_ice",
+    ]);
 
     const advanced = await service.advanceAi({
       matchId: created.matchId,
@@ -6689,13 +10402,18 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       knownStateVersion: before.playerView.stateVersion,
       knownMatchVersion: before.matchVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
     expect(advanced.ok).toBe(false);
-    if (advanced.ok) throw new Error("Expected advance_ai to wait for the human Corp rez decision");
+    if (advanced.ok)
+      throw new Error(
+        "Expected advance_ai to wait for the human Corp rez decision",
+      );
     expect(advanced.error.code).toBe("ai_not_active");
 
-    const declineRez = before.legalActions.find((action) => action.type === "decline_rez");
+    const declineRez = before.legalActions.find(
+      (action) => action.type === "decline_rez",
+    );
     if (!declineRez) throw new Error("Missing decline rez action");
     const declined = await service.submitAction({
       matchId: created.matchId,
@@ -6703,15 +10421,25 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       actionId: declineRez.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      idempotencyKey: "human-corp-decline-rez"
+      idempotencyKey: "human-corp-decline-rez",
     });
     expect(declined.ok).toBe(true);
     if (!declined.ok) throw new Error(declined.error.message);
     expect(declined.actorPayload.playerView.activeSide).toBe("runner");
-    expect(declined.actorPayload.playerView.timingPoint).toBe("run.jack_out_window");
-    expect(declined.actorPayload.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
-    expect(declined.publicEvent?.publicPayload).toMatchObject({ actionType: "decline_rez" });
-    expect(declined.publicEvent?.publicPayload).not.toHaveProperty("autoPacedPass");
+    expect(declined.actorPayload.playerView.timingPoint).toBe(
+      "run.jack_out_window",
+    );
+    expect(declined.actorPayload.aiTurnPresentation).toEqual({
+      activeAiSide: "runner",
+      canAdvanceAi: true,
+      pacingMode: "paced",
+    });
+    expect(declined.publicEvent?.publicPayload).toMatchObject({
+      actionType: "decline_rez",
+    });
+    expect(declined.publicEvent?.publicPayload).not.toHaveProperty(
+      "autoPacedPass",
+    );
 
     const continued = await service.advanceAi({
       matchId: created.matchId,
@@ -6719,21 +10447,25 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       knownStateVersion: declined.actorPayload.playerView.stateVersion,
       knownMatchVersion: declined.actorPayload.matchVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
     expect(continued.ok).toBe(true);
     if (!continued.ok) throw new Error(continued.error.message);
-    expect(continued.requesterPayload.playerView.stateVersion).toBeGreaterThan(declined.actorPayload.playerView.stateVersion);
+    expect(continued.requesterPayload.playerView.stateVersion).toBeGreaterThan(
+      declined.actorPayload.playerView.stateVersion,
+    );
   });
 
   it("waits for Human Corp Forged Activation Orders response during Runner AI turns", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "ai-runner-forged-response" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "ai-runner-forged-response",
+    });
     const created = await service.createMatch({
       mode: "human_corp_vs_runner_ai",
       hostSide: "corp",
       seed: "server-runner-ai-forged-response",
-      runnerDifficulty: "normal"
+      runnerDifficulty: "normal",
     });
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing stored match");
@@ -6744,72 +10476,109 @@ describe("MVP 0.2 multiplayer service", () => {
       name: "Server Runner AI Forged Runner",
       cards: [
         { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
-        ...DEMO_DECKS.demo_runner_001.cards
-      ]
+        ...DEMO_DECKS.demo_runner_001.cards,
+      ],
     };
     const corpDeck: DeckDefinition = {
       ...DEMO_DECKS.demo_corp_004,
       id: "server_runner_ai_forged_corp",
       name: "Server Runner AI Forged Corp",
-      cards: DEMO_DECKS.demo_corp_004.cards.some((card) => card.id === "simple_barrier_ice")
+      cards: DEMO_DECKS.demo_corp_004.cards.some(
+        (card) => card.id === "simple_barrier_ice",
+      )
         ? DEMO_DECKS.demo_corp_004.cards
         : [
             { id: "simple_barrier_ice", quantity: 1 },
-            ...DEMO_DECKS.demo_corp_004.cards
-          ]
+            ...DEMO_DECKS.demo_corp_004.cards,
+          ],
     };
-    let gameState = toRunnerTurnEngine(createGameAfterSetup({
-      matchId: created.matchId,
-      seed: "server-runner-ai-forged-response-engine",
-      runnerDeck,
-      corpDeck
-    }));
+    let gameState = toRunnerTurnEngine(
+      createGameAfterSetup({
+        matchId: created.matchId,
+        seed: "server-runner-ai-forged-response-engine",
+        runnerDeck,
+        corpDeck,
+      }),
+    );
     gameState.runner.credits = 5;
     gameState.corp.credits = 0;
-    const targetIceId = putCorpIceOnServerForTest(gameState, "hq", "simple_barrier_ice");
-    moveRunnerCardToGripForTest(gameState, "onr_v1_086_forged-activation-orders");
+    const targetIceId = putCorpIceOnServerForTest(
+      gameState,
+      "hq",
+      "simple_barrier_ice",
+    );
+    moveRunnerCardToGripForTest(
+      gameState,
+      "onr_v1_086_forged-activation-orders",
+    );
     gameState = applyEngineAction(
       gameState,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinitionForServerTest(gameState, action) === "onr_v1_086_forged-activation-orders"
+        sourceDefinitionForServerTest(gameState, action) ===
+          "onr_v1_086_forged-activation-orders",
     );
-    const targetOptionId = gameState.pendingChoice?.options.find((option) => option.value === targetIceId)?.id;
-    if (!targetOptionId) throw new Error("Missing Forged Activation Orders target option");
+    const targetOptionId = gameState.pendingChoice?.options.find(
+      (option) => option.value === targetIceId,
+    )?.id;
+    if (!targetOptionId)
+      throw new Error("Missing Forged Activation Orders target option");
     gameState = applyEngineChoice(gameState, "runner", [targetOptionId]);
     expect(gameState.activeSide).toBe("runner");
     expect(gameState.pendingChoice).toMatchObject({
       side: "corp",
       source: expect.stringContaining(
-        "card_implementation.corp_choice_rez_or_trash_ice_decision"
-      )
+        "card_implementation.corp_choice_rez_or_trash_ice_decision",
+      ),
     });
     expect(getLegalActions(gameState, "runner")).toEqual([]);
-    expect(getLegalActions(gameState, "corp").map((action) => action.type)).toEqual(["resolve_choice"]);
+    expect(
+      getLegalActions(gameState, "corp").map((action) => action.type),
+    ).toEqual(["resolve_choice"]);
 
     record.gameState = gameState;
     record.match.baseline = gameState.baseline;
-    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-    record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_ai_forged_response")];
+    record.eventLog = gameState.eventLog.map((event) =>
+      toEventRecordForTest(created.matchId, event),
+    );
+    record.stateSnapshots = [
+      stateSnapshotForTest(
+        created.matchId,
+        gameState,
+        record.match.matchVersion,
+        "snap_ai_forged_response",
+      ),
+    ];
     record.actionReceipts = [];
     record.undoSnapshots = [];
     delete record.pendingUndo;
     await storage.save(record);
 
-    const before = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    const before = await service.bootstrap(
+      created.matchId,
+      "corp",
+      created.hostSessionToken,
+    );
     expect("error" in before).toBe(false);
     if ("error" in before) throw new Error(before.error.message);
     expect(before.playerView.activeSide).toBe("runner");
     expect(before.pendingChoice).toMatchObject({
       side: "corp",
       source: expect.stringContaining(
-        "card_implementation.corp_choice_rez_or_trash_ice_decision"
-      )
+        "card_implementation.corp_choice_rez_or_trash_ice_decision",
+      ),
     });
-    expect(before.pendingChoice?.options.map((option) => option.id)).toEqual(["trash_ice"]);
-    expect(before.aiTurnPresentation).toEqual({ canAdvanceAi: false, pacingMode: "paced" });
-    expect(before.legalActions.map((action) => action.type)).toEqual(["resolve_choice"]);
+    expect(before.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "trash_ice",
+    ]);
+    expect(before.aiTurnPresentation).toEqual({
+      canAdvanceAi: false,
+      pacingMode: "paced",
+    });
+    expect(before.legalActions.map((action) => action.type)).toEqual([
+      "resolve_choice",
+    ]);
 
     const advanced = await service.advanceAi({
       matchId: created.matchId,
@@ -6817,45 +10586,62 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       knownStateVersion: before.playerView.stateVersion,
       knownMatchVersion: before.matchVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
     expect(advanced.ok).toBe(false);
-    if (advanced.ok) throw new Error("Expected advance_ai to wait for Human Corp Forged response");
+    if (advanced.ok)
+      throw new Error(
+        "Expected advance_ai to wait for Human Corp Forged response",
+      );
     expect(advanced.error.code).toBe("ai_not_active");
 
-    const action = mustAction(before, (candidate) => candidate.type === "resolve_choice");
+    const action = mustAction(
+      before,
+      (candidate) => candidate.type === "resolve_choice",
+    );
     const resolved = await service.submitAction({
       matchId: created.matchId,
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: action.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
-      selectedChoices: { choiceId: before.pendingChoice?.choiceId, selectedOptionIds: ["trash_ice"] },
-      idempotencyKey: "human-corp-forged-trash"
+      selectedChoices: {
+        choiceId: before.pendingChoice?.choiceId,
+        selectedOptionIds: ["trash_ice"],
+      },
+      idempotencyKey: "human-corp-forged-trash",
     });
     expect(resolved.ok).toBe(true);
     if (!resolved.ok) throw new Error(resolved.error.message);
     expect(resolved.actorPayload.pendingChoice).toBeUndefined();
-    expect(resolved.actorPayload.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
+    expect(resolved.actorPayload.aiTurnPresentation).toEqual({
+      activeAiSide: "runner",
+      canAdvanceAi: true,
+      pacingMode: "paced",
+    });
     expect(resolved.publicEvent?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       actor: "corp",
-      corpDecision: "trash_ice"
+      corpDecision: "trash_ice",
     });
     expect(resolved.publicEvent?.publicPayload).not.toHaveProperty(
-      "v1922RunnerEventAbility"
+      "v1922RunnerEventAbility",
     );
-    expect(JSON.stringify(resolved.actorPayload)).not.toContain("cardInstances");
+    expect(JSON.stringify(resolved.actorPayload)).not.toContain(
+      "cardInstances",
+    );
   });
 
   it("does not stall Runner AI on Forged Activation Orders without unrezzed ICE", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "ai-runner-forged-no-unrezzed" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "ai-runner-forged-no-unrezzed",
+    });
     const created = await service.createMatch({
       mode: "human_corp_vs_runner_ai",
       hostSide: "corp",
       seed: "server-runner-ai-forged-no-unrezzed",
-      runnerDifficulty: "hard"
+      runnerDifficulty: "hard",
     });
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing stored match");
@@ -6866,8 +10652,8 @@ describe("MVP 0.2 multiplayer service", () => {
       name: "Server Runner AI Forged No Unrezzed Runner",
       cards: [
         { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
-        ...DEMO_DECKS.demo_runner_001.cards
-      ]
+        ...DEMO_DECKS.demo_runner_001.cards,
+      ],
     };
     const corpDeck: DeckDefinition = {
       ...DEMO_DECKS.demo_corp_004,
@@ -6875,46 +10661,72 @@ describe("MVP 0.2 multiplayer service", () => {
       name: "Server Runner AI Forged No Unrezzed Corp",
       cards: [
         { id: "onr_v1_263_reinforced-wall", quantity: 1 },
-        ...DEMO_DECKS.demo_corp_004.cards
-      ]
+        ...DEMO_DECKS.demo_corp_004.cards,
+      ],
     };
-    let gameState = toRunnerTurnEngine(createGameAfterSetup({
-      matchId: created.matchId,
-      seed: "server-runner-ai-forged-no-unrezzed-engine",
-      runnerDeck,
-      corpDeck
-    }));
+    let gameState = toRunnerTurnEngine(
+      createGameAfterSetup({
+        matchId: created.matchId,
+        seed: "server-runner-ai-forged-no-unrezzed-engine",
+        runnerDeck,
+        corpDeck,
+      }),
+    );
     gameState.runner.credits = 1;
     gameState.corp.credits = 5;
-    const rezzedIceId = putCorpIceOnServerForTest(gameState, "hq", "onr_v1_263_reinforced-wall");
+    const rezzedIceId = putCorpIceOnServerForTest(
+      gameState,
+      "hq",
+      "onr_v1_263_reinforced-wall",
+    );
     gameState.cardInstances[rezzedIceId] = {
       ...gameState.cardInstances[rezzedIceId]!,
       rezzed: true,
-      faceup: true
+      faceup: true,
     };
-    moveRunnerCardToGripForTest(gameState, "onr_v1_086_forged-activation-orders");
+    moveRunnerCardToGripForTest(
+      gameState,
+      "onr_v1_086_forged-activation-orders",
+    );
     expect(
       getLegalActions(gameState, "runner").some(
         (action) =>
           action.type === "play_event" &&
           sourceDefinitionForServerTest(gameState, action) ===
-            "onr_v1_086_forged-activation-orders"
-      )
+            "onr_v1_086_forged-activation-orders",
+      ),
     ).toBe(false);
 
     record.gameState = gameState;
     record.match.baseline = gameState.baseline;
-    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-    record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_ai_forged_no_unrezzed")];
+    record.eventLog = gameState.eventLog.map((event) =>
+      toEventRecordForTest(created.matchId, event),
+    );
+    record.stateSnapshots = [
+      stateSnapshotForTest(
+        created.matchId,
+        gameState,
+        record.match.matchVersion,
+        "snap_ai_forged_no_unrezzed",
+      ),
+    ];
     record.actionReceipts = [];
     record.undoSnapshots = [];
     delete record.pendingUndo;
     await storage.save(record);
 
-    const before = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    const before = await service.bootstrap(
+      created.matchId,
+      "corp",
+      created.hostSessionToken,
+    );
     expect("error" in before).toBe(false);
     if ("error" in before) throw new Error(before.error.message);
-    expect(before.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
+    expect(before.aiTurnPresentation).toEqual({
+      activeAiSide: "runner",
+      canAdvanceAi: true,
+      pacingMode: "paced",
+    });
 
     const advanced = await service.advanceAi({
       matchId: created.matchId,
@@ -6922,24 +10734,28 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       knownStateVersion: before.playerView.stateVersion,
       knownMatchVersion: before.matchVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
     expect(JSON.stringify(advanced.publicEvent)).not.toContain(
       "onr_v1_086_forged-activation-orders",
     );
-    expect(advanced.requesterPayload.playerView.stateVersion).toBeGreaterThan(before.playerView.stateVersion);
+    expect(advanced.requesterPayload.playerView.stateVersion).toBeGreaterThan(
+      before.playerView.stateVersion,
+    );
   });
 
   it("waits for Human Corp Mystery Box review before Runner AI installs a shown program", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "ai-runner-mystery-box-review" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "ai-runner-mystery-box-review",
+    });
     const created = await service.createMatch({
       mode: "human_corp_vs_runner_ai",
       hostSide: "corp",
       seed: "server-runner-ai-mystery-box-review",
-      runnerDifficulty: "normal"
+      runnerDifficulty: "normal",
     });
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing stored match");
@@ -6952,8 +10768,8 @@ describe("MVP 0.2 multiplayer service", () => {
       cards: [
         { id: "onr_v1_043_mystery-box", quantity: 1 },
         { id: "simple_decoder", quantity: 1 },
-        { id: "simple_economy_event", quantity: 8 }
-      ]
+        { id: "simple_economy_event", quantity: 8 },
+      ],
     };
     const corpDeck: DeckDefinition = {
       id: "server_runner_ai_mystery_box_corp",
@@ -6962,8 +10778,8 @@ describe("MVP 0.2 multiplayer service", () => {
       identity: "corp_identity_001",
       cards: [
         { id: "simple_agenda", quantity: 3 },
-        { id: "simple_economy_operation", quantity: 6 }
-      ]
+        { id: "simple_economy_operation", quantity: 6 },
+      ],
     };
     let gameState = toRunnerTurnEngine(
       createGameAfterSetup({
@@ -6972,8 +10788,8 @@ describe("MVP 0.2 multiplayer service", () => {
         baseline: CURRENT_RULES_BASELINE,
         runnerDeck,
         corpDeck,
-        agendaPointsToWin: 7
-      })
+        agendaPointsToWin: 7,
+      }),
     );
     expectCurrentRulesBaseline(gameState);
     gameState.runner.credits = 20;
@@ -6984,39 +10800,73 @@ describe("MVP 0.2 multiplayer service", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinitionForServerTest(gameState, action) === "onr_v1_043_mystery-box"
+        sourceDefinitionForServerTest(gameState, action) ===
+          "onr_v1_043_mystery-box",
     );
     putRunnerCardOnTopOfStackForTest(gameState, "simple_economy_event");
-    const decoderId = putRunnerCardOnTopOfStackForTest(gameState, "simple_decoder");
+    const decoderId = putRunnerCardOnTopOfStackForTest(
+      gameState,
+      "simple_decoder",
+    );
     putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
-    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
     gameState = applyEngineAction(
       gameState,
       "runner",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinitionForServerTest(gameState, action) === "onr_v1_043_mystery-box"
+        sourceDefinitionForServerTest(gameState, action) ===
+          "onr_v1_043_mystery-box",
     );
     expect(gameState.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining("p3_38.revealed_stack_program_install_corp_review")
+      source: expect.stringContaining(
+        "p3_38.revealed_stack_program_install_corp_review",
+      ),
     });
 
     record.gameState = gameState;
     record.match.baseline = gameState.baseline;
-    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-    record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_ai_mystery_box_review")];
+    record.eventLog = gameState.eventLog.map((event) =>
+      toEventRecordForTest(created.matchId, event),
+    );
+    record.stateSnapshots = [
+      stateSnapshotForTest(
+        created.matchId,
+        gameState,
+        record.match.matchVersion,
+        "snap_ai_mystery_box_review",
+      ),
+    ];
     record.actionReceipts = [];
     record.undoSnapshots = [];
     delete record.pendingUndo;
     await storage.save(record);
 
-    const beforeReview = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    const beforeReview = await service.bootstrap(
+      created.matchId,
+      "corp",
+      created.hostSessionToken,
+    );
     expect("error" in beforeReview).toBe(false);
     if ("error" in beforeReview) throw new Error(beforeReview.error.message);
-    expect(beforeReview.pendingChoice?.source).toContain("p3_38.revealed_stack_program_install_corp_review");
-    expect(beforeReview.pendingChoice?.options.some((option) => option.value === decoderId)).toBe(true);
-    expect(beforeReview.aiTurnPresentation).toEqual({ canAdvanceAi: false, pacingMode: "paced" });
+    expect(beforeReview.pendingChoice?.source).toContain(
+      "p3_38.revealed_stack_program_install_corp_review",
+    );
+    expect(
+      beforeReview.pendingChoice?.options.some(
+        (option) => option.value === decoderId,
+      ),
+    ).toBe(true);
+    expect(beforeReview.aiTurnPresentation).toEqual({
+      canAdvanceAi: false,
+      pacingMode: "paced",
+    });
 
     const blocked = await service.advanceAi({
       matchId: created.matchId,
@@ -7024,21 +10874,30 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       knownStateVersion: beforeReview.playerView.stateVersion,
       knownMatchVersion: beforeReview.matchVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
     expect(blocked.ok).toBe(false);
-    if (blocked.ok) throw new Error("Expected advance_ai to wait for the human Corp review");
+    if (blocked.ok)
+      throw new Error("Expected advance_ai to wait for the human Corp review");
     expect(blocked.error.code).toBe("ai_not_active");
 
     const afterReview = await submitChoice(
       service,
       created.matchId,
-      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       "done",
-      "human-corp-mystery-box-review"
+      "human-corp-mystery-box-review",
     );
     expect(afterReview.pendingChoice).toBeUndefined();
-    expect(afterReview.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
+    expect(afterReview.aiTurnPresentation).toEqual({
+      activeAiSide: "runner",
+      canAdvanceAi: true,
+      pacingMode: "paced",
+    });
 
     const runnerChoice = await service.advanceAi({
       matchId: created.matchId,
@@ -7046,29 +10905,40 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       knownStateVersion: afterReview.playerView.stateVersion,
       knownMatchVersion: afterReview.matchVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
     expect(runnerChoice.ok).toBe(true);
     if (!runnerChoice.ok) throw new Error(runnerChoice.error.message);
     expect(runnerChoice.publicEvent?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+      hiddenZoneAction:
+        "p3_38_look_top_stack_show_to_corp_then_install_matching",
       installedProgramDefinitionId: "simple_decoder",
-      selfTrashed: true
+      selfTrashed: true,
     });
-    expect(JSON.stringify(runnerChoice.requesterPayload)).not.toContain("cardInstances");
+    expect(JSON.stringify(runnerChoice.requesterPayload)).not.toContain(
+      "cardInstances",
+    );
   });
 
   it("advances Runner AI through Krash breaking Filter into R&D access without post-pass jack-out", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "ai-runner-krash-filter-access" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "ai-runner-krash-filter-access",
+    });
     const created = await service.createMatch({
       mode: "human_corp_vs_runner_ai",
       hostSide: "corp",
       seed: "server-runner-ai-krash-filter-access",
       runnerDifficulty: "normal",
-      participantADecks: { runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0", corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0" },
-      participantBDecks: { runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0", corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0" }
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
+        corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0",
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
+        corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0",
+      },
     });
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing stored match");
@@ -7080,8 +10950,8 @@ describe("MVP 0.2 multiplayer service", () => {
       identity: "runner_identity_001",
       cards: [
         { id: "onr_v1_039_krash", quantity: 1 },
-        { id: "simple_economy_event", quantity: 8 }
-      ]
+        { id: "simple_economy_event", quantity: 8 },
+      ],
     };
     const corpDeck: DeckDefinition = {
       id: "server_runner_ai_krash_filter_corp",
@@ -7092,8 +10962,8 @@ describe("MVP 0.2 multiplayer service", () => {
         { id: "onr_v1_244_filter", quantity: 1 },
         { id: "simple_draw_operation", quantity: 1 },
         { id: "simple_economy_operation", quantity: 3 },
-        { id: "simple_agenda", quantity: 3 }
-      ]
+        { id: "simple_agenda", quantity: 3 },
+      ],
     };
     let gameState = toRunnerTurnEngine(
       createGameAfterSetup({
@@ -7102,42 +10972,64 @@ describe("MVP 0.2 multiplayer service", () => {
         baseline: CURRENT_RULES_BASELINE,
         runnerDeck,
         corpDeck,
-        agendaPointsToWin: 7
-      })
+        agendaPointsToWin: 7,
+      }),
     );
     expectCurrentRulesBaseline(gameState);
     gameState.runner.credits = 5;
     gameState.corp.credits = 5;
     moveRunnerCardToGripForTest(gameState, "onr_v1_039_krash");
+    gameState = applyEngineAction(gameState, "runner", (action) => {
+      const cardId = String(action.payload?.cardId ?? "");
+      return (
+        action.type === "install_card" &&
+        gameState.cardInstances[cardId]?.definitionId === "onr_v1_039_krash"
+      );
+    });
+    putCorpIceOnServerForTest(gameState, "rd", "onr_v1_244_filter");
+    putCorpCardOnTopOfRdForTest(gameState, "simple_draw_operation");
     gameState = applyEngineAction(
       gameState,
       "runner",
-      (action) => {
-        const cardId = String(action.payload?.cardId ?? "");
-        return action.type === "install_card" && gameState.cardInstances[cardId]?.definitionId === "onr_v1_039_krash";
-      }
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
-    putCorpIceOnServerForTest(gameState, "rd", "onr_v1_244_filter");
-    putCorpCardOnTopOfRdForTest(gameState, "simple_draw_operation");
-    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     expect(gameState.activeSide).toBe("corp");
     expect(gameState.timingPoint).toBe("run.approach_ice");
 
     record.gameState = gameState;
     record.match.baseline = gameState.baseline;
-    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-    record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_ai_krash_filter_access")];
+    record.eventLog = gameState.eventLog.map((event) =>
+      toEventRecordForTest(created.matchId, event),
+    );
+    record.stateSnapshots = [
+      stateSnapshotForTest(
+        created.matchId,
+        gameState,
+        record.match.matchVersion,
+        "snap_ai_krash_filter_access",
+      ),
+    ];
     record.actionReceipts = [];
     record.undoSnapshots = [];
     delete record.pendingUndo;
     await storage.save(record);
 
-    const beforeRez = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    const beforeRez = await service.bootstrap(
+      created.matchId,
+      "corp",
+      created.hostSessionToken,
+    );
     expect("error" in beforeRez).toBe(false);
     if ("error" in beforeRez) throw new Error(beforeRez.error.message);
-    expect(beforeRez.legalActions.map((action) => action.type).sort()).toEqual(["decline_rez", "rez_ice"]);
+    expect(beforeRez.legalActions.map((action) => action.type).sort()).toEqual([
+      "decline_rez",
+      "rez_ice",
+    ]);
 
-    const rezAction = beforeRez.legalActions.find((action) => action.type === "rez_ice");
+    const rezAction = beforeRez.legalActions.find(
+      (action) => action.type === "rez_ice",
+    );
     if (!rezAction) throw new Error("Missing rez action");
     const rezzed = await service.submitAction({
       matchId: created.matchId,
@@ -7145,11 +11037,13 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       actionId: rezAction.actionId,
       clientKnownStateVersion: beforeRez.playerView.stateVersion,
-      idempotencyKey: "human-corp-rez-filter-for-runner-ai"
+      idempotencyKey: "human-corp-rez-filter-for-runner-ai",
     });
     expect(rezzed.ok).toBe(true);
     if (!rezzed.ok) throw new Error(rezzed.error.message);
-    expect(rezzed.publicEvent?.publicPayload).toMatchObject({ actionType: "rez_ice" });
+    expect(rezzed.publicEvent?.publicPayload).toMatchObject({
+      actionType: "rez_ice",
+    });
 
     let corpPayload = rezzed.actorPayload;
     const actionTypes: string[] = [];
@@ -7161,7 +11055,7 @@ describe("MVP 0.2 multiplayer service", () => {
         sessionToken: created.hostSessionToken,
         knownStateVersion: corpPayload.playerView.stateVersion,
         knownMatchVersion: corpPayload.matchVersion,
-        mode: "single_step"
+        mode: "single_step",
       });
       expect(result.ok, label).toBe(true);
       if (!result.ok) throw new Error(result.error.message);
@@ -7174,90 +11068,152 @@ describe("MVP 0.2 multiplayer service", () => {
     const breakStep = await advanceRunnerAiStep("break Filter with Krash");
     expect(breakStep.publicEvent?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
-      aiReasonCode: "runner.semantic.encounter_survival"
+      aiReasonCode: "runner.semantic.encounter_survival",
     });
 
-    const passIceStep = await advanceRunnerAiStep("continue after broken Filter");
+    const passIceStep = await advanceRunnerAiStep(
+      "continue after broken Filter",
+    );
     expect(passIceStep.publicEvent?.publicPayload).toMatchObject({
       actionType: "continue_run",
-      encounterContinue: true
+      encounterContinue: true,
     });
 
-    const accessWindowStep = await advanceRunnerAiStep("continue from server movement to access");
-    expect(accessWindowStep.publicEvent?.publicPayload.actionType).toBe("continue_run");
-    expect(["runner.plan.safe_probe_run", "runner.encounter.continue", "runner.semantic.simple_run_choice"]).toContain(
-      accessWindowStep.publicEvent?.publicPayload.aiReasonCode
+    const accessWindowStep = await advanceRunnerAiStep(
+      "continue from server movement to access",
     );
-    expect(JSON.stringify(accessWindowStep.publicEvent?.publicPayload)).not.toMatch(
-      /ambush|simple_economy_operation|privatePayload|cardInstances/i
+    expect(accessWindowStep.publicEvent?.publicPayload.actionType).toBe(
+      "continue_run",
+    );
+    expect([
+      "runner.plan.safe_probe_run",
+      "runner.encounter.continue",
+      "runner.semantic.simple_run_choice",
+    ]).toContain(accessWindowStep.publicEvent?.publicPayload.aiReasonCode);
+    expect(
+      JSON.stringify(accessWindowStep.publicEvent?.publicPayload),
+    ).not.toMatch(
+      /ambush|simple_economy_operation|privatePayload|cardInstances/i,
     );
 
     const accessStep = await advanceRunnerAiStep("access R&D");
     expect(accessStep.publicEvent?.publicPayload).toMatchObject({
       actionType: "access_card",
-      aiReasonCode: "runner.semantic.access_trash_steal"
+      aiReasonCode: "runner.semantic.access_trash_steal",
     });
     expect(actionTypes).toEqual([
       "break_subroutine",
       "continue_run",
       "continue_run",
-      "access_card"
+      "access_card",
     ]);
-    expect(reasonCodes).not.toContain("runner.run.jack_out_before_access_low_value");
+    expect(reasonCodes).not.toContain(
+      "runner.run.jack_out_before_access_low_value",
+    );
     expect(actionTypes).not.toContain("jack_out");
     expect(JSON.stringify(accessStep.requesterPayload)).not.toMatch(
-      /Simple Draw Operation|simple_draw_operation|privatePayload|cardInstances/i
+      /Simple Draw Operation|simple_draw_operation|privatePayload|cardInstances/i,
     );
   });
 
   it("redacts R&D access card identities from Corp payloads", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "central-access-redaction" });
-    const created = await service.createMatch({ hostSide: "corp", seed: "central-access-redaction" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "central-access-redaction",
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "central-access-redaction",
+    });
     if (!created.joinUrl) throw new Error("Missing join URL");
     const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
     if (!joinToken) throw new Error("Missing join token");
-    await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
 
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing record");
-    let gameState = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed: "central-access-redaction-engine" }));
+    let gameState = toRunnerTurnEngine(
+      createGameAfterSetup({
+        matchId: created.matchId,
+        seed: "central-access-redaction-engine",
+      }),
+    );
     putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
-    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "access_card");
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     record.gameState = gameState;
-    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.eventLog = gameState.eventLog.map((event) =>
+      toEventRecordForTest(created.matchId, event),
+    );
     record.match.matchVersion += 1;
     await storage.save(record);
 
-    const corpPayload = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    const corpPayload = await service.bootstrap(
+      created.matchId,
+      "corp",
+      created.hostSessionToken,
+    );
     expect("error" in corpPayload).toBe(false);
     if ("error" in corpPayload) throw new Error(corpPayload.error.message);
-    expect(JSON.stringify(corpPayload.eventTail)).not.toContain("Simple Agenda");
-    expect(JSON.stringify(corpPayload.playerView.publicEvents)).not.toContain("Simple Agenda");
-    expect(corpPayload.eventTail.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", serverLabel: "R&D", redactedKind: "accessed_card" });
+    expect(JSON.stringify(corpPayload.eventTail)).not.toContain(
+      "Simple Agenda",
+    );
+    expect(JSON.stringify(corpPayload.playerView.publicEvents)).not.toContain(
+      "Simple Agenda",
+    );
+    expect(corpPayload.eventTail.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      serverLabel: "R&D",
+      redactedKind: "accessed_card",
+    });
   });
 
   it("redacts active R&D trash choices from Corp live and reconnect payloads", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "rd-upgrade-trash-redaction" });
-    const created = await service.createMatch({ hostSide: "corp", seed: "rd-upgrade-trash-redaction" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "rd-upgrade-trash-redaction",
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "rd-upgrade-trash-redaction",
+    });
     if (!created.joinUrl) throw new Error("Missing join URL");
     const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
-    const runner = { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
+    const runner = {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    };
 
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing record");
-    const gameState = toRunnerTurnEngine(createGameAfterSetup({
-      matchId: created.matchId,
-      seed: "rd-upgrade-trash-redaction-engine",
-      runnerDeckId: "demo_runner_004",
-      corpDeckId: "demo_corp_004"
-    }));
+    const gameState = toRunnerTurnEngine(
+      createGameAfterSetup({
+        matchId: created.matchId,
+        seed: "rd-upgrade-trash-redaction-engine",
+        runnerDeckId: "demo_runner_004",
+        corpDeckId: "demo_corp_004",
+      }),
+    );
     gameState.runner.credits = 10;
     const accessedId = putCorpCardOnTopOfRdForTest(gameState, "simple_upgrade");
     for (const [cardId, card] of Object.entries(gameState.cardInstances)) {
@@ -7268,13 +11224,15 @@ describe("MVP 0.2 multiplayer service", () => {
           ...card,
           zone: { side: "corp", zone: "rd" },
           faceup: false,
-          rezzed: false
+          rezzed: false,
         };
       }
     }
     record.gameState = gameState;
     record.match.baseline = gameState.baseline;
-    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.eventLog = gameState.eventLog.map((event) =>
+      toEventRecordForTest(created.matchId, event),
+    );
     record.match.matchVersion += 1;
     await storage.save(record);
 
@@ -7282,51 +11240,76 @@ describe("MVP 0.2 multiplayer service", () => {
       service,
       created.matchId,
       runner,
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
-      "rd-upgrade-trash-redaction-start"
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "rd-upgrade-trash-redaction-start",
     );
     const accessed = await submit(
       service,
       created.matchId,
       runner,
       (action) => action.type === "access_card",
-      "rd-upgrade-trash-redaction-access"
+      "rd-upgrade-trash-redaction-access",
     );
 
     expect(accessed.actorPayload.playerView.run?.accessedCard).toMatchObject({
       known: true,
       definitionId: "simple_upgrade",
-      title: "Simple Upgrade"
+      title: "Simple Upgrade",
     });
-    expect(accessed.actorPayload.legalActions.map((action) => action.type)).toEqual(
-      expect.arrayContaining(["trash_accessed_card", "decline_trash"])
-    );
+    expect(
+      accessed.actorPayload.legalActions.map((action) => action.type),
+    ).toEqual(expect.arrayContaining(["trash_accessed_card", "decline_trash"]));
 
     const corpLivePayload = accessed.opponentPayload;
-    expect(corpLivePayload.playerView.run?.accessedCard).toMatchObject({ known: false });
-    expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty("definitionId");
-    expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty("title");
-    expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty("type");
-    expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty("trashCost");
+    expect(corpLivePayload.playerView.run?.accessedCard).toMatchObject({
+      known: false,
+    });
+    expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty(
+      "definitionId",
+    );
+    expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty(
+      "title",
+    );
+    expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty(
+      "type",
+    );
+    expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty(
+      "trashCost",
+    );
     expect(corpLivePayload.pendingChoice).toBeUndefined();
     expect(corpLivePayload.legalActions).toEqual([]);
-    expect(JSON.stringify(corpLivePayload)).not.toMatch(/Simple Upgrade|simple_upgrade|trash_accessed_card|decline_trash/i);
-    expect(corpLivePayload.eventTail.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", serverLabel: "R&D", redactedKind: "accessed_card" });
+    expect(JSON.stringify(corpLivePayload)).not.toMatch(
+      /Simple Upgrade|simple_upgrade|trash_accessed_card|decline_trash/i,
+    );
+    expect(corpLivePayload.eventTail.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      serverLabel: "R&D",
+      redactedKind: "accessed_card",
+    });
 
-    const corpBootstrap = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    const corpBootstrap = await service.bootstrap(
+      created.matchId,
+      "corp",
+      created.hostSessionToken,
+    );
     expect("error" in corpBootstrap).toBe(false);
     if ("error" in corpBootstrap) throw new Error(corpBootstrap.error.message);
     const corpReconnect = await service.reconnectMatch(created.matchId, {
       side: "corp",
-      reconnectToken: created.hostReconnectToken
+      reconnectToken: created.hostReconnectToken,
     });
     expect("error" in corpReconnect).toBe(false);
     if ("error" in corpReconnect) throw new Error(corpReconnect.error.message);
     for (const payload of [corpBootstrap, corpReconnect]) {
-      expect(payload.playerView.run?.accessedCard).toMatchObject({ known: false });
+      expect(payload.playerView.run?.accessedCard).toMatchObject({
+        known: false,
+      });
       expect(payload.pendingChoice).toBeUndefined();
       expect(payload.legalActions).toEqual([]);
-      expect(JSON.stringify(payload)).not.toMatch(/Simple Upgrade|simple_upgrade|trash_accessed_card|decline_trash/i);
+      expect(JSON.stringify(payload)).not.toMatch(
+        /Simple Upgrade|simple_upgrade|trash_accessed_card|decline_trash/i,
+      );
     }
 
     const declined = await submit(
@@ -7334,37 +11317,70 @@ describe("MVP 0.2 multiplayer service", () => {
       created.matchId,
       runner,
       (action) => action.type === "decline_trash",
-      "rd-upgrade-trash-redaction-decline"
+      "rd-upgrade-trash-redaction-decline",
     );
-    expect(JSON.stringify(declined.opponentPayload)).not.toMatch(/Simple Upgrade|simple_upgrade/i);
-    expect(JSON.stringify(declined.opponentPayload.eventTail.at(-1)?.publicPayload)).not.toMatch(/Simple Upgrade|simple_upgrade|upgrade|trashCost/i);
+    expect(JSON.stringify(declined.opponentPayload)).not.toMatch(
+      /Simple Upgrade|simple_upgrade/i,
+    );
+    expect(
+      JSON.stringify(declined.opponentPayload.eventTail.at(-1)?.publicPayload),
+    ).not.toMatch(/Simple Upgrade|simple_upgrade|upgrade|trashCost/i);
   });
 
   it("keeps HQ access card identities visible in Corp payloads", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "hq-access-visible" });
-    const created = await service.createMatch({ hostSide: "corp", seed: "hq-access-visible" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "hq-access-visible",
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "hq-access-visible",
+    });
     if (!created.joinUrl) throw new Error("Missing join URL");
     const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
     if (!joinToken) throw new Error("Missing join token");
-    await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
 
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing record");
-    let gameState = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed: "hq-access-visible-engine" }));
+    let gameState = toRunnerTurnEngine(
+      createGameAfterSetup({
+        matchId: created.matchId,
+        seed: "hq-access-visible-engine",
+      }),
+    );
     moveCorpCardToHqForTest(gameState, "simple_economy_operation");
-    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
-    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "access_card");
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     record.gameState = gameState;
-    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.eventLog = gameState.eventLog.map((event) =>
+      toEventRecordForTest(created.matchId, event),
+    );
     record.match.matchVersion += 1;
     await storage.save(record);
 
-    const corpPayload = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    const corpPayload = await service.bootstrap(
+      created.matchId,
+      "corp",
+      created.hostSessionToken,
+    );
     expect("error" in corpPayload).toBe(false);
     if ("error" in corpPayload) throw new Error(corpPayload.error.message);
     const eventTailPayload = corpPayload.eventTail.at(-1)?.publicPayload;
-    const playerViewPayload = corpPayload.playerView.publicEvents.at(-1)?.publicPayload;
+    const playerViewPayload =
+      corpPayload.playerView.publicEvents.at(-1)?.publicPayload;
     expect(eventTailPayload?.actionType).toBe("access_card");
     expect(eventTailPayload?.serverLabel).toBe("HQ");
     expect(typeof eventTailPayload?.title).toBe("string");
@@ -7377,76 +11393,122 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("preserves side-safe central-access belief across reconnect without storage leakage", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "belief-reconnect-rd" });
-    const created = await service.createMatch({ hostSide: "corp", seed: "belief-reconnect-rd" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "belief-reconnect-rd",
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "belief-reconnect-rd",
+    });
     if (!created.joinUrl) throw new Error("Missing join URL");
     const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
     if (!joinToken) throw new Error("Missing join token");
-    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Runner",
+    });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
 
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing record");
-    let gameState = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed: "belief-reconnect-rd-engine" }));
+    let gameState = toRunnerTurnEngine(
+      createGameAfterSetup({
+        matchId: created.matchId,
+        seed: "belief-reconnect-rd-engine",
+      }),
+    );
     putCorpCardOnTopOfRdForTest(gameState, "simple_economy_operation");
     putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
-    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "access_card");
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     record.gameState = gameState;
-    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.eventLog = gameState.eventLog.map((event) =>
+      toEventRecordForTest(created.matchId, event),
+    );
     record.match.matchVersion += 1;
     await storage.save(record);
 
     const storedWithHiddenDecoy = await storage.load(created.matchId);
-    expect(JSON.stringify(storedWithHiddenDecoy?.gameState)).toContain("simple_economy_operation");
+    expect(JSON.stringify(storedWithHiddenDecoy?.gameState)).toContain(
+      "simple_economy_operation",
+    );
 
-    const livePayload = await service.bootstrap(created.matchId, "runner", joined.sessionToken);
+    const livePayload = await service.bootstrap(
+      created.matchId,
+      "runner",
+      joined.sessionToken,
+    );
     expect("error" in livePayload).toBe(false);
     if ("error" in livePayload) throw new Error(livePayload.error.message);
     const reconnected = await service.reconnectMatch(created.matchId, {
       side: "runner",
-      reconnectToken: joined.reconnectToken
+      reconnectToken: joined.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
 
-    const liveBelief = reconstructBeliefState(sidePayloadBeliefInput(livePayload, "runner", "live"));
-    const reconnectBelief = reconstructBeliefState(sidePayloadBeliefInput(reconnected, "runner", "reconnect"));
+    const liveBelief = reconstructBeliefState(
+      sidePayloadBeliefInput(livePayload, "runner", "live"),
+    );
+    const reconnectBelief = reconstructBeliefState(
+      sidePayloadBeliefInput(reconnected, "runner", "reconnect"),
+    );
     const reconnectSerialized = JSON.stringify(reconnected);
     const beliefSerialized = JSON.stringify(reconnectBelief);
 
-    expect(beliefStateInvariantSignature(reconnectBelief)).toBe(beliefStateInvariantSignature(liveBelief));
+    expect(beliefStateInvariantSignature(reconnectBelief)).toBe(
+      beliefStateInvariantSignature(liveBelief),
+    );
     expect(reconnectBelief.knownPositionMemory?.[0]).toMatchObject({
       zone: "rd",
       positionKey: "top",
-      definitionId: "simple_agenda"
+      definitionId: "simple_agenda",
     });
-    expect(reconnectSerialized).not.toMatch(/privatePayload|cardInstances|privateDeckSnapshots|simple_economy_operation/i);
-    expect(beliefSerialized).not.toMatch(/privatePayload|cardInstances|privateDeckSnapshots|simple_economy_operation/i);
+    expect(reconnectSerialized).not.toMatch(
+      /privatePayload|cardInstances|privateDeckSnapshots|simple_economy_operation/i,
+    );
+    expect(beliefSerialized).not.toMatch(
+      /privatePayload|cardInstances|privateDeckSnapshots|simple_economy_operation/i,
+    );
   });
 
   it("rejects advance_ai when the session or version is wrong", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-advance-auth" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-advance-auth",
+    });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "server-corp-ai-auth",
-      corpDifficulty: "normal"
+      corpDifficulty: "normal",
     });
     const afterSetup = await submitChoice(
       service,
       created.matchId,
-      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       "keep",
-      "ai-auth-setup"
+      "ai-auth-setup",
     );
 
     const stale = await service.advanceAi({
       matchId: created.matchId,
       side: "runner",
       sessionToken: created.hostSessionToken,
-      knownStateVersion: afterSetup.playerView.stateVersion + 1
+      knownStateVersion: afterSetup.playerView.stateVersion + 1,
     });
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale rejection");
@@ -7457,7 +11519,7 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: created.matchId,
       side: "runner",
       sessionToken: "wrong",
-      knownStateVersion: afterSetup.playerView.stateVersion
+      knownStateVersion: afterSetup.playerView.stateVersion,
     });
     expect(wrongToken.ok).toBe(false);
     if (wrongToken.ok) throw new Error("Expected token rejection");
@@ -7468,7 +11530,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: created.hostSessionToken,
       knownStateVersion: afterSetup.playerView.stateVersion,
-      mode: "until_human"
+      mode: "until_human",
     });
     expect(first.ok).toBe(true);
     if (!first.ok) throw new Error(first.error.message);
@@ -7482,8 +11544,11 @@ describe("MVP 0.2 multiplayer service", () => {
       chooseAiAction: (input): AiDecision => ({
         actionId: "missing-ai-action",
         reasonCode: "test.invalid_ai_action",
-        explanation: "Test decision references an action outside current LegalActions.",
-        consideredActionIds: input.legalActions.map((action) => action.actionId),
+        explanation:
+          "Test decision references an action outside current LegalActions.",
+        consideredActionIds: input.legalActions.map(
+          (action) => action.actionId,
+        ),
         fallbackUsed: false,
         evidence: ["test_invalid_ai_action"],
         timeoutUsed: false,
@@ -7497,17 +11562,22 @@ describe("MVP 0.2 multiplayer service", () => {
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "ai-invalid-decision-no-substitute",
-      corpDifficulty: "normal"
+      corpDifficulty: "normal",
     });
     const afterSetup = await submitChoice(
       service,
       created.matchId,
-      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       "keep",
-      "invalid-ai-action-setup"
+      "invalid-ai-action-setup",
     );
     const before = await service.loadForTest(created.matchId);
-    if (!before?.gameState) throw new Error("Missing active match before invalid AI decision");
+    if (!before?.gameState)
+      throw new Error("Missing active match before invalid AI decision");
     const beforeEventCount = before.eventLog.length;
     const beforeStateVersion = before.gameState.stateVersion;
 
@@ -7548,7 +11618,8 @@ describe("MVP 0.2 multiplayer service", () => {
       tokenSalt: "ai-engine-action-rejected",
       chooseAiAction: (input): AiDecision => {
         const action = input.legalActions[0];
-        if (!action) throw new Error("Missing legal AI action for rejection test");
+        if (!action)
+          throw new Error("Missing legal AI action for rejection test");
         return {
           actionId: action.actionId,
           reasonCode: "test.engine_rejection",
@@ -7560,23 +11631,23 @@ describe("MVP 0.2 multiplayer service", () => {
           profileId: input.profileId,
           difficulty: input.difficulty,
           confidence: 1,
-          reason: "test.engine_rejection"
+          reason: "test.engine_rejection",
         };
       },
       applyAction: (state) => ({
         ok: false,
         error: {
           code: "ERR_INVALID_TARGET",
-          message: "Private target detail must not reach the opponent."
+          message: "Private target detail must not reach the opponent.",
         },
-        state
-      })
+        state,
+      }),
     });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "ai-engine-action-rejected",
-      corpDifficulty: "normal"
+      corpDifficulty: "normal",
     });
     const afterSetup = await submitChoice(
       service,
@@ -7584,13 +11655,14 @@ describe("MVP 0.2 multiplayer service", () => {
       {
         side: "runner",
         sessionToken: created.hostSessionToken,
-        reconnectToken: created.hostReconnectToken
+        reconnectToken: created.hostReconnectToken,
       },
       "keep",
-      "ai-engine-action-rejected-setup"
+      "ai-engine-action-rejected-setup",
     );
     const before = await service.loadForTest(created.matchId);
-    if (!before?.gameState) throw new Error("Missing active match before rejection");
+    if (!before?.gameState)
+      throw new Error("Missing active match before rejection");
 
     const advanced = await service.advanceAi({
       matchId: created.matchId,
@@ -7598,7 +11670,7 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       knownStateVersion: afterSetup.playerView.stateVersion,
       knownMatchVersion: afterSetup.matchVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
 
     expect(advanced.ok).toBe(false);
@@ -7616,7 +11688,8 @@ describe("MVP 0.2 multiplayer service", () => {
       tokenSalt: "ai-preview-tactical-plan-sections",
       chooseAiAction: (input): AiDecision => {
         const action = input.legalActions[0];
-        if (!action) throw new Error("Missing legal action for AI preview test");
+        if (!action)
+          throw new Error("Missing legal action for AI preview test");
         return {
           actionId: action.actionId,
           reasonCode: "test.preview_tactical_plan",
@@ -7746,40 +11819,79 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("advances Corp AI in a root-rez window even when activeSide is runner", async () => {
     const storage = new InMemoryMatchStorage();
-    const service = new MultiplayerService(storage, { tokenSalt: "server-corp-ai-root-rez-active-runner" });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "server-corp-ai-root-rez-active-runner",
+    });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "server-corp-ai-root-rez-active-runner",
-      corpDifficulty: "normal"
+      corpDifficulty: "normal",
     });
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing stored match");
 
-    let gameState = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed: "server-corp-ai-root-rez-active-runner-engine" }));
+    let gameState = toRunnerTurnEngine(
+      createGameAfterSetup({
+        matchId: created.matchId,
+        seed: "server-corp-ai-root-rez-active-runner-engine",
+      }),
+    );
     gameState.corp.credits = 5;
     putCorpRootInRemoteForTest(gameState, "simple_economy_asset");
     putCorpIceOnServerForTest(gameState, "remote_1", "simple_barrier_ice");
-    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
-    gameState = applyEngineAction(gameState, "corp", (action) => action.type === "decline_rez" && action.payload?.runRootRezPass !== true);
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    gameState = applyEngineAction(
+      gameState,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass !== true,
+    );
     expect(gameState.activeSide).toBe("runner");
     expect(gameState.timingPoint).toBe("run.jack_out_window");
     expect(getLegalActions(gameState, "runner")).toEqual([]);
-    expect(getLegalActions(gameState, "corp").map((action) => action.type).sort()).toEqual(["decline_rez", "rez_card"]);
+    expect(
+      getLegalActions(gameState, "corp")
+        .map((action) => action.type)
+        .sort(),
+    ).toEqual(["decline_rez", "rez_card"]);
 
     record.gameState = gameState;
     record.match.baseline = gameState.baseline;
-    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-    record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_ai_root_rez_active_runner")];
+    record.eventLog = gameState.eventLog.map((event) =>
+      toEventRecordForTest(created.matchId, event),
+    );
+    record.stateSnapshots = [
+      stateSnapshotForTest(
+        created.matchId,
+        gameState,
+        record.match.matchVersion,
+        "snap_ai_root_rez_active_runner",
+      ),
+    ];
     record.actionReceipts = [];
     record.undoSnapshots = [];
     delete record.pendingUndo;
     await storage.save(record);
 
-    const before = await service.bootstrap(created.matchId, "runner", created.hostSessionToken);
+    const before = await service.bootstrap(
+      created.matchId,
+      "runner",
+      created.hostSessionToken,
+    );
     expect("error" in before).toBe(false);
     if ("error" in before) throw new Error(before.error.message);
-    expect(before.aiTurnPresentation).toEqual({ activeAiSide: "corp", canAdvanceAi: true, pacingMode: "paced" });
+    expect(before.aiTurnPresentation).toEqual({
+      activeAiSide: "corp",
+      canAdvanceAi: true,
+      pacingMode: "paced",
+    });
 
     const advanced = await service.advanceAi({
       matchId: created.matchId,
@@ -7787,46 +11899,64 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       knownStateVersion: before.playerView.stateVersion,
       knownMatchVersion: before.matchVersion,
-      mode: "single_step"
+      mode: "single_step",
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
-    expect(["decline_rez", "rez_ice"]).toContain(advanced.publicEvent?.publicPayload.actionType);
-    expect(advanced.requesterPayload.playerView.stateVersion).toBe(before.playerView.stateVersion + 1);
-    expect(JSON.stringify(advanced.requesterPayload)).not.toContain("cardInstances");
+    expect(["decline_rez", "rez_ice"]).toContain(
+      advanced.publicEvent?.publicPayload.actionType,
+    );
+    expect(advanced.requesterPayload.playerView.stateVersion).toBe(
+      before.playerView.stateVersion + 1,
+    );
+    expect(JSON.stringify(advanced.requesterPayload)).not.toContain(
+      "cardInstances",
+    );
   });
 
   it("keeps REST ai-advance responses limited to the requesting human side", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-advance-rest" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-advance-rest",
+    });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
       seed: "server-corp-ai-rest",
-      corpDifficulty: "normal"
+      corpDifficulty: "normal",
     });
     const afterSetup = await submitChoice(
       service,
       created.matchId,
-      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      {
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
       "keep",
-      "ai-rest-setup"
+      "ai-rest-setup",
     );
     const handle = createNetgridHttpServer(service);
-    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    await new Promise<void>((resolve) =>
+      handle.server.listen(0, "127.0.0.1", resolve),
+    );
     const address = handle.server.address();
-    if (!address || typeof address === "string") throw new Error("Missing server address");
+    if (!address || typeof address === "string")
+      throw new Error("Missing server address");
 
     try {
-      const response = await fetch(`http://127.0.0.1:${address.port}/api/matches/${encodeURIComponent(created.matchId)}/ai-advance`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          side: "runner",
-          sessionToken: created.hostSessionToken,
-          knownStateVersion: afterSetup.playerView.stateVersion,
-          mode: "single_step"
-        })
-      });
+      const response = await fetch(
+        `http://127.0.0.1:${address.port}/api/matches/${encodeURIComponent(created.matchId)}/ai-advance`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            side: "runner",
+            sessionToken: created.hostSessionToken,
+            knownStateVersion: afterSetup.playerView.stateVersion,
+            mode: "single_step",
+          }),
+        },
+      );
       const payload = (await response.json()) as {
         ok?: boolean;
         requesterPayload?: SidePayload;
@@ -7848,12 +11978,47 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("exposes finished public replay REST endpoints with verified full-information frames", async () => {
     const match = await joinedMatch("v150-replay-rest");
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "v150-rest-mandatory");
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "install_card", "v150-rest-install");
-    await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "v150-rest-end-turn");
-    await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v150-rest-run");
-    await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card" || action.type === "steal_agenda", "v150-rest-access");
-    const beforeFinish = await match.service.loadReplayView(match.matchId, "runner");
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "mandatory_draw",
+      "v150-rest-mandatory",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "install_card",
+      "v150-rest-install",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.corp,
+      (action) => action.type === "end_turn",
+      "v150-rest-end-turn",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+      "v150-rest-run",
+    );
+    await submit(
+      match.service,
+      match.matchId,
+      match.runner,
+      (action) =>
+        action.type === "access_card" || action.type === "steal_agenda",
+      "v150-rest-access",
+    );
+    const beforeFinish = await match.service.loadReplayView(
+      match.matchId,
+      "runner",
+    );
     expect(beforeFinish.ok).toBe(false);
     const forfeited = await match.service.forfeitMatch({
       matchId: match.matchId,
@@ -7866,12 +12031,20 @@ describe("MVP 0.2 multiplayer service", () => {
     const baseUrl = await listen(handle);
     try {
       const indexResponse = await fetch(`${baseUrl}/api/replays`);
-      const indexPayload = (await indexResponse.json()) as { replays?: Array<{ matchId: string; finalStateHash: string }> };
+      const indexPayload = (await indexResponse.json()) as {
+        replays?: Array<{ matchId: string; finalStateHash: string }>;
+      };
       expect(indexResponse.status).toBe(200);
-      expect(indexPayload.replays?.some((entry) => entry.matchId === match.matchId)).toBe(true);
-      expect(JSON.stringify(indexPayload)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist/i);
+      expect(
+        indexPayload.replays?.some((entry) => entry.matchId === match.matchId),
+      ).toBe(true);
+      expect(JSON.stringify(indexPayload)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist/i,
+      );
 
-      const replayResponse = await fetch(`${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}?perspective=runner`);
+      const replayResponse = await fetch(
+        `${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}?perspective=runner`,
+      );
       const replayPayload = (await replayResponse.json()) as {
         perspective?: string;
         localAnalysis?: boolean;
@@ -7889,31 +12062,57 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(replayResponse.status).toBe(200);
       expect(replayPayload.perspective).toBe("runner");
       expect(replayPayload.localAnalysis).toBe(false);
-      expect(replayPayload.timeline?.some((entry) => entry.hiddenInfoBarrier)).toBe(true);
-      expect(replayPayload.metadata?.participantSides?.player_a).toMatch(/runner|corp/);
-      expect(replayPayload.frames?.length).toBeGreaterThan(1);
-      expect(replayPayload.frames?.every((frame) => frame.stateHashVerified)).toBe(true);
-      expect(replayPayload.frames?.[0]?.participants?.player_a?.hand?.length).toBeGreaterThan(0);
-      expect(replayPayload.frames?.[0]?.participants?.player_b?.hand?.length).toBeGreaterThan(0);
       expect(
-        new Set(replayPayload.frames?.map((frame) => frame.corp?.hand?.length)).size,
+        replayPayload.timeline?.some((entry) => entry.hiddenInfoBarrier),
+      ).toBe(true);
+      expect(replayPayload.metadata?.participantSides?.player_a).toMatch(
+        /runner|corp/,
+      );
+      expect(replayPayload.frames?.length).toBeGreaterThan(1);
+      expect(
+        replayPayload.frames?.every((frame) => frame.stateHashVerified),
+      ).toBe(true);
+      expect(
+        replayPayload.frames?.[0]?.participants?.player_a?.hand?.length,
+      ).toBeGreaterThan(0);
+      expect(
+        replayPayload.frames?.[0]?.participants?.player_b?.hand?.length,
+      ).toBeGreaterThan(0);
+      expect(
+        new Set(replayPayload.frames?.map((frame) => frame.corp?.hand?.length))
+          .size,
       ).toBeGreaterThan(1);
-      expect(JSON.stringify(replayPayload)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist/i);
+      expect(JSON.stringify(replayPayload)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist/i,
+      );
 
-      const badPerspective = await fetch(`${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}?perspective=invalid`);
+      const badPerspective = await fetch(
+        `${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}?perspective=invalid`,
+      );
       expect(badPerspective.status).toBe(400);
 
-      const localExportResponse = await fetch(`${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}/export?perspective=local_analysis`);
-      const localExportPayload = (await localExportResponse.json()) as { error?: { code?: string } };
+      const localExportResponse = await fetch(
+        `${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}/export?perspective=local_analysis`,
+      );
+      const localExportPayload = (await localExportResponse.json()) as {
+        error?: { code?: string };
+      };
       expect(localExportResponse.status).toBe(400);
       expect(localExportPayload.error?.code).toBe("bad_request");
 
-      const exportResponse = await fetch(`${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}/export?perspective=runner`);
-      const exportPayload = (await exportResponse.json()) as { version?: string; perspective?: string };
+      const exportResponse = await fetch(
+        `${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}/export?perspective=runner`,
+      );
+      const exportPayload = (await exportResponse.json()) as {
+        version?: string;
+        perspective?: string;
+      };
       expect(exportResponse.status).toBe(200);
       expect(exportPayload.version).toBe("1.5.0");
       expect(exportPayload.perspective).toBe("runner");
-      expect(JSON.stringify(exportPayload)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i);
+      expect(JSON.stringify(exportPayload)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i,
+      );
     } finally {
       await handle.close();
     }
@@ -7976,29 +12175,52 @@ describe("MVP 0.2 multiplayer service", () => {
       );
       expect(participantResponse.status).toBe(200);
       const participantPayload = (await participantResponse.json()) as {
-        frames?: Array<{ participants?: { player_a?: { hand?: unknown[] }; player_b?: { hand?: unknown[] } } }>;
+        frames?: Array<{
+          participants?: {
+            player_a?: { hand?: unknown[] };
+            player_b?: { hand?: unknown[] };
+          };
+        }>;
       };
-      expect(participantPayload.frames?.[0]?.participants?.player_a?.hand?.length).toBeGreaterThan(0);
-      expect(participantPayload.frames?.[0]?.participants?.player_b?.hand?.length).toBeGreaterThan(0);
+      expect(
+        participantPayload.frames?.[0]?.participants?.player_a?.hand?.length,
+      ).toBeGreaterThan(0);
+      expect(
+        participantPayload.frames?.[0]?.participants?.player_b?.hand?.length,
+      ).toBeGreaterThan(0);
     } finally {
       await handle.close();
     }
   });
 
   it("exposes a side-safe AI-vs-AI simulation API", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-api-service" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-api-service",
+    });
     const handle = createNetgridHttpServer(service);
-    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    await new Promise<void>((resolve) =>
+      handle.server.listen(0, "127.0.0.1", resolve),
+    );
     const address = handle.server.address();
-    if (!address || typeof address === "string") throw new Error("Missing server address");
+    if (!address || typeof address === "string")
+      throw new Error("Missing server address");
 
     try {
-      const response = await fetch(`http://127.0.0.1:${address.port}/api/simulations/ai-vs-ai`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ seed: "server-ai-sim", maxActions: 60 })
-      });
-      const payload = (await response.json()) as { summary?: { finalStateHash?: string; replayOk?: boolean; errors?: string[] } };
+      const response = await fetch(
+        `http://127.0.0.1:${address.port}/api/simulations/ai-vs-ai`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ seed: "server-ai-sim", maxActions: 60 }),
+        },
+      );
+      const payload = (await response.json()) as {
+        summary?: {
+          finalStateHash?: string;
+          replayOk?: boolean;
+          errors?: string[];
+        };
+      };
       expect(response.status).toBe(200);
       expect(payload.summary?.finalStateHash).toMatch(/^fnv1a:/);
       expect(payload.summary?.replayOk).toBe(true);
@@ -8027,8 +12249,8 @@ const V094_RUNNER_DECK: DeckDefinition = {
     { id: "simple_run_event", quantity: 3 },
     { id: "simple_fracter", quantity: 2 },
     { id: "simple_decoder", quantity: 2 },
-    { id: "simple_killer", quantity: 2 }
-  ]
+    { id: "simple_killer", quantity: 2 },
+  ],
 };
 
 const V094_CORP_DECK: DeckDefinition = {
@@ -8041,15 +12263,18 @@ const V094_CORP_DECK: DeckDefinition = {
     { id: "simple_priority_agenda", quantity: 1 },
     { id: "simple_economy_operation", quantity: 3 },
     { id: "v094_neural_sentry_ice", quantity: 3 },
-    { id: "simple_barrier_ice", quantity: 2 }
-  ]
+    { id: "simple_barrier_ice", quantity: 2 },
+  ],
 };
 
 const V111_CORP_DECK: DeckDefinition = {
   ...V094_CORP_DECK,
   id: "demo_corp_111",
   name: "Corp Demo Deck 1.1.1 - Multiplayer Core Damage Harness",
-  cards: [...V094_CORP_DECK.cards, { id: "v111_core_damage_operation", quantity: 2 }]
+  cards: [
+    ...V094_CORP_DECK.cards,
+    { id: "v111_core_damage_operation", quantity: 2 },
+  ],
 };
 
 const V095_RUNNER_DECK: DeckDefinition = {
@@ -8063,8 +12288,8 @@ const V095_RUNNER_DECK: DeckDefinition = {
     { id: "simple_fracter", quantity: 2 },
     { id: "simple_decoder", quantity: 2 },
     { id: "simple_killer", quantity: 2 },
-    { id: "v095_safehouse_resource", quantity: 2 }
-  ]
+    { id: "v095_safehouse_resource", quantity: 2 },
+  ],
 };
 
 const V095_CORP_DECK: DeckDefinition = {
@@ -8078,28 +12303,47 @@ const V095_CORP_DECK: DeckDefinition = {
     { id: "simple_economy_operation", quantity: 3 },
     { id: "simple_economy_asset", quantity: 2 },
     { id: "simple_tag_ice", quantity: 2 },
-    { id: "simple_barrier_ice", quantity: 2 }
-  ]
+    { id: "simple_barrier_ice", quantity: 2 },
+  ],
 };
 
-async function joinedMatch(seed = "service-test", settings?: Partial<MatchSettings>, serviceOptions?: ConstructorParameters<typeof MultiplayerService>[1]) {
+async function joinedMatch(
+  seed = "service-test",
+  settings?: Partial<MatchSettings>,
+  serviceOptions?: ConstructorParameters<typeof MultiplayerService>[1],
+) {
   const service = new MultiplayerService(new InMemoryMatchStorage(), {
     tokenSalt: "test-salt",
     publicWebBaseUrl: "http://127.0.0.1:3100",
     publicServerBaseUrl: "http://127.0.0.1:8787",
-    ...serviceOptions
+    ...serviceOptions,
   });
-  const created = await service.createMatch({ hostSide: "corp", seed, ...(settings ? { settings } : {}) });
+  const created = await service.createMatch({
+    hostSide: "corp",
+    seed,
+    ...(settings ? { settings } : {}),
+  });
   expect(created.joinUrl).toBeTruthy();
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   expect(joinToken).toBeTruthy();
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
-  const runner = { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
-  const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+  const runner = {
+    side: "runner" as const,
+    sessionToken: joined.sessionToken,
+    reconnectToken: joined.reconnectToken,
+  };
+  const corp = {
+    side: "corp" as const,
+    sessionToken: created.hostSessionToken,
+    reconnectToken: created.hostReconnectToken,
+  };
   await forceSetupComplete(service, created.matchId);
   return {
     service,
@@ -8107,11 +12351,14 @@ async function joinedMatch(seed = "service-test", settings?: Partial<MatchSettin
     joinToken,
     matchId: created.matchId,
     corp,
-    runner
+    runner,
   };
 }
 
-async function forceSetupComplete(service: MultiplayerService, matchId: string): Promise<void> {
+async function forceSetupComplete(
+  service: MultiplayerService,
+  matchId: string,
+): Promise<void> {
   const record = await service.loadForTest(matchId);
   if (!record?.gameState) throw new Error("Missing active game state");
   const gameState = structuredClone(record.gameState);
@@ -8120,7 +12367,12 @@ async function forceSetupComplete(service: MultiplayerService, matchId: string):
   gameState.activeSide = "corp";
   gameState.phase = "corp_draw_phase";
   gameState.timingPoint = "corp_draw.mandatory_draw";
-  gameState.setup = { status: "complete", initialHandSize: 5, resolved: { runner: "keep", corp: "keep" }, mulligansTaken: {} };
+  gameState.setup = {
+    status: "complete",
+    initialHandSize: 5,
+    resolved: { runner: "keep", corp: "keep" },
+    mulligansTaken: {},
+  };
   delete gameState.pendingChoice;
   gameState.winner = null;
   delete gameState.gameEndReason;
@@ -8129,46 +12381,83 @@ async function forceSetupComplete(service: MultiplayerService, matchId: string):
     stateHashAfter: hashState({ ...gameState, eventLog: [] } as GameState),
     publicPayload: {
       ...gameState.eventLog[0]!.publicPayload,
-      setupStatus: "complete"
-    }
+      setupStatus: "complete",
+    },
   };
   gameState.eventLog = [event];
   event.stateHashAfter = hashState(gameState);
   gameState.eventLog = [{ ...event, stateHashAfter: hashState(gameState) }];
   record.gameState = gameState;
-  record.eventLog = gameState.eventLog.map((entry) => toEventRecordForTest(matchId, entry));
+  record.eventLog = gameState.eventLog.map((entry) =>
+    toEventRecordForTest(matchId, entry),
+  );
   record.actionReceipts = [];
   record.undoSnapshots = [];
-  record.stateSnapshots = [stateSnapshotForTest(matchId, gameState, record.match.matchVersion, "snap_initial")];
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_initial",
+    ),
+  ];
   delete record.pendingUndo;
-  await (service as unknown as { storage: MultiplayerStorage }).storage.save(record);
+  await (service as unknown as { storage: MultiplayerStorage }).storage.save(
+    record,
+  );
 }
 
-async function putTopCorpAgendaForMatch(service: MultiplayerService, matchId: string): Promise<void> {
+async function putTopCorpAgendaForMatch(
+  service: MultiplayerService,
+  matchId: string,
+): Promise<void> {
   const record = await service.loadForTest(matchId);
   if (!record?.gameState) throw new Error("Missing active game state");
   const gameState = structuredClone(record.gameState);
   const agenda = Object.values(gameState.cardInstances).find((card) => {
     const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
-    return card.zone.side === "corp" && definition?.side === "corp" && definition.type === "agenda";
+    return (
+      card.zone.side === "corp" &&
+      definition?.side === "corp" &&
+      definition.type === "agenda"
+    );
   });
   if (!agenda) throw new Error("Missing corp agenda");
   putCorpCardOnTopOfRdForTest(gameState, agenda.definitionId);
   const latestEventIndex = gameState.eventLog.length - 1;
-  const event = latestEventIndex >= 0 ? gameState.eventLog[latestEventIndex] : undefined;
-  if (event) gameState.eventLog[latestEventIndex] = { ...event, stateHashAfter: hashState(gameState) };
+  const event =
+    latestEventIndex >= 0 ? gameState.eventLog[latestEventIndex] : undefined;
+  if (event)
+    gameState.eventLog[latestEventIndex] = {
+      ...event,
+      stateHashAfter: hashState(gameState),
+    };
   record.gameState = gameState;
-  record.eventLog = gameState.eventLog.map((entry) => toEventRecordForTest(matchId, entry));
-  record.stateSnapshots = [stateSnapshotForTest(matchId, gameState, record.match.matchVersion, "snap_setup_agenda_top")];
+  record.eventLog = gameState.eventLog.map((entry) =>
+    toEventRecordForTest(matchId, entry),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_setup_agenda_top",
+    ),
+  ];
   delete record.pendingUndo;
-  await (service as unknown as { storage: MultiplayerStorage }).storage.save(record);
+  await (service as unknown as { storage: MultiplayerStorage }).storage.save(
+    record,
+  );
 }
 
-async function pendingDeckMatch(seed: string, countdownSeconds: 3 | 5 | 10 = 5) {
+async function pendingDeckMatch(
+  seed: string,
+  countdownSeconds: 3 | 5 | 10 = 5,
+) {
   const service = new MultiplayerService(new InMemoryMatchStorage(), {
     tokenSalt: `v104-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
   });
   const created = await service.createMatch({
     hostSide: "runner",
@@ -8178,10 +12467,12 @@ async function pendingDeckMatch(seed: string, countdownSeconds: 3 | 5 | 10 = 5) 
     settings: { matchFormat: "single_game" },
     participantADecks: {
       runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-      corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6"
-    }
+      corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6",
+    },
   });
-  const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+  const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+    "joinToken",
+  );
   if (!joinToken) throw new Error("Missing join token");
   return { service, created, joinToken };
 }
@@ -8192,7 +12483,7 @@ async function readyLobby(seed: string, countdownSeconds: 3 | 5 | 10 = 5) {
     token: pending.joinToken,
     displayName: "Joiner",
     runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-    corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+    corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
   });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
@@ -8202,20 +12493,41 @@ async function readyLobby(seed: string, countdownSeconds: 3 | 5 | 10 = 5) {
 
 async function countdownLobby(seed: string) {
   const lobby = await readyLobby(seed, 5);
-  const hostReady = await lobby.service.setLobbyReady({ matchId: lobby.created.matchId, side: lobby.created.hostSide, sessionToken: lobby.created.hostSessionToken, ready: true });
+  const hostReady = await lobby.service.setLobbyReady({
+    matchId: lobby.created.matchId,
+    side: lobby.created.hostSide,
+    sessionToken: lobby.created.hostSessionToken,
+    ready: true,
+  });
   expect(hostReady.ok).toBe(true);
   if (!hostReady.ok) throw new Error(hostReady.error.message);
-  const joinerReady = await lobby.service.setLobbyReady({ matchId: lobby.created.matchId, side: lobby.joined.side, sessionToken: lobby.joined.sessionToken, ready: true });
+  const joinerReady = await lobby.service.setLobbyReady({
+    matchId: lobby.created.matchId,
+    side: lobby.joined.side,
+    sessionToken: lobby.joined.sessionToken,
+    ready: true,
+  });
   expect(joinerReady.ok).toBe(true);
   if (!joinerReady.ok) throw new Error(joinerReady.error.message);
   expect(joinerReady.actorPayload.matchStatus).toBe("countdown");
   return lobby;
 }
 
-async function expectOldTokensRejected(service: MultiplayerService, matchId: string, side: Side, sessionToken: string, reconnectToken: string) {
-  const bootstrapResult = await service.bootstrap(matchId, side, sessionToken, { allowLobby: true });
+async function expectOldTokensRejected(
+  service: MultiplayerService,
+  matchId: string,
+  side: Side,
+  sessionToken: string,
+  reconnectToken: string,
+) {
+  const bootstrapResult = await service.bootstrap(matchId, side, sessionToken, {
+    allowLobby: true,
+  });
   expect("error" in bootstrapResult).toBe(true);
-  const reconnectResult = await service.reconnectMatch(matchId, { side, reconnectToken });
+  const reconnectResult = await service.reconnectMatch(matchId, {
+    side,
+    reconnectToken,
+  });
   expect("error" in reconnectResult).toBe(true);
 }
 
@@ -8230,7 +12542,13 @@ function expectLifecyclePayloadSafe(payload: unknown) {
 }
 
 function expectSidePayload(payload: unknown): SidePayload {
-  if (!payload || typeof payload !== "object" || !("playerView" in payload) || !(payload as { playerView?: unknown }).playerView) throw new Error("Expected side payload");
+  if (
+    !payload ||
+    typeof payload !== "object" ||
+    !("playerView" in payload) ||
+    !(payload as { playerView?: unknown }).playerView
+  )
+    throw new Error("Expected side payload");
   return payload as SidePayload;
 }
 
@@ -8238,32 +12556,55 @@ function otherSide(side: Side): Side {
   return side === "runner" ? "corp" : "runner";
 }
 
-async function joinedV094DamageMatch(seed: string, options: { emptyRunnerGrip?: boolean } = {}) {
+async function joinedV094DamageMatch(
+  seed: string,
+  options: { emptyRunnerGrip?: boolean } = {},
+) {
   const storage = new InMemoryMatchStorage();
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
 
   const record = await storage.load(created.matchId);
   if (!record) throw new Error("Missing stored match");
-  let gameState = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed, runnerDeck: V094_RUNNER_DECK, corpDeck: V094_CORP_DECK, agendaPointsToWin: 7 }));
+  let gameState = toRunnerTurnEngine(
+    createGameAfterSetup({
+      matchId: created.matchId,
+      seed,
+      runnerDeck: V094_RUNNER_DECK,
+      corpDeck: V094_CORP_DECK,
+      agendaPointsToWin: 7,
+    }),
+  );
   if (options.emptyRunnerGrip) emptyRunnerGripForTest(gameState);
   putCorpIceOnServerForTest(gameState, "rd", "v094_neural_sentry_ice");
   gameState.corp.credits = 10;
   record.gameState = gameState;
   record.match.baseline = gameState.baseline;
   record.match.settings.agendaPointsToWin = 7;
-  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v094_ready")];
+  record.eventLog = gameState.eventLog.map((event) =>
+    toEventRecordForTest(created.matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      created.matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_v094_ready",
+    ),
+  ];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
@@ -8272,8 +12613,16 @@ async function joinedV094DamageMatch(seed: string, options: { emptyRunnerGrip?: 
   return {
     service,
     matchId: created.matchId,
-    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+    corp: {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    },
+    runner: {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    },
   };
 }
 
@@ -8282,28 +12631,52 @@ async function joinedV120EventModificationMatch(seed: string) {
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
 
   const record = await storage.load(created.matchId);
   if (!record) throw new Error("Missing stored match");
-  const gameState = createGameAfterSetup({ matchId: created.matchId, seed, runnerDeck: V094_RUNNER_DECK, corpDeck: V111_CORP_DECK, agendaPointsToWin: 7 });
-  let ready = applyEngineAction(gameState, "corp", (action) => action.type === "mandatory_draw");
-  ready.eventModificationHarness = { damagePrevention: { side: "runner", preventAmount: 1 } };
+  const gameState = createGameAfterSetup({
+    matchId: created.matchId,
+    seed,
+    runnerDeck: V094_RUNNER_DECK,
+    corpDeck: V111_CORP_DECK,
+    agendaPointsToWin: 7,
+  });
+  let ready = applyEngineAction(
+    gameState,
+    "corp",
+    (action) => action.type === "mandatory_draw",
+  );
+  ready.eventModificationHarness = {
+    damagePrevention: { side: "runner", preventAmount: 1 },
+  };
   moveCorpCardToHqForTest(ready, "v111_core_damage_operation");
   ready.corp.credits = 10;
   record.gameState = ready;
   record.match.baseline = ready.baseline;
   record.match.settings.agendaPointsToWin = 7;
-  record.eventLog = ready.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-  record.stateSnapshots = [stateSnapshotForTest(created.matchId, ready, record.match.matchVersion, "snap_v120_ready")];
+  record.eventLog = ready.eventLog.map((event) =>
+    toEventRecordForTest(created.matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      created.matchId,
+      ready,
+      record.match.matchVersion,
+      "snap_v120_ready",
+    ),
+  ];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
@@ -8312,8 +12685,16 @@ async function joinedV120EventModificationMatch(seed: string) {
   return {
     service,
     matchId: created.matchId,
-    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+    corp: {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    },
+    runner: {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    },
   };
 }
 
@@ -8322,28 +12703,52 @@ async function joinedV121ReplacementMatch(seed: string) {
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
 
   const record = await storage.load(created.matchId);
   if (!record) throw new Error("Missing stored match");
-  const gameState = createGameAfterSetup({ matchId: created.matchId, seed, runnerDeck: V094_RUNNER_DECK, corpDeck: V111_CORP_DECK, agendaPointsToWin: 7 });
-  let ready = applyEngineAction(gameState, "corp", (action) => action.type === "mandatory_draw");
-  ready.eventModificationHarness = { damageReplacement: { side: "runner", tagAmount: 1 } };
+  const gameState = createGameAfterSetup({
+    matchId: created.matchId,
+    seed,
+    runnerDeck: V094_RUNNER_DECK,
+    corpDeck: V111_CORP_DECK,
+    agendaPointsToWin: 7,
+  });
+  let ready = applyEngineAction(
+    gameState,
+    "corp",
+    (action) => action.type === "mandatory_draw",
+  );
+  ready.eventModificationHarness = {
+    damageReplacement: { side: "runner", tagAmount: 1 },
+  };
   moveCorpCardToHqForTest(ready, "v111_core_damage_operation");
   ready.corp.credits = 10;
   record.gameState = ready;
   record.match.baseline = ready.baseline;
   record.match.settings.agendaPointsToWin = 7;
-  record.eventLog = ready.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-  record.stateSnapshots = [stateSnapshotForTest(created.matchId, ready, record.match.matchVersion, "snap_v121_ready")];
+  record.eventLog = ready.eventLog.map((event) =>
+    toEventRecordForTest(created.matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      created.matchId,
+      ready,
+      record.match.matchVersion,
+      "snap_v121_ready",
+    ),
+  ];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
@@ -8352,8 +12757,16 @@ async function joinedV121ReplacementMatch(seed: string) {
   return {
     service,
     matchId: created.matchId,
-    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+    corp: {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    },
+    runner: {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    },
   };
 }
 
@@ -8362,30 +12775,52 @@ async function joinedV122SpecialZoneMatch(seed: string) {
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
 
   const record = await storage.load(created.matchId);
   if (!record) throw new Error("Missing stored match");
-  let ready = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed, agendaPointsToWin: 7 }));
+  let ready = toRunnerTurnEngine(
+    createGameAfterSetup({
+      matchId: created.matchId,
+      seed,
+      agendaPointsToWin: 7,
+    }),
+  );
   const cardId = moveRunnerCardToGripForTest(ready, "simple_economy_event");
   ready.specialZoneHarness = {
     actor: "runner",
     cardInstanceId: cardId,
-    setAside: { visibility: "side_private", visibilitySide: "runner", reason: "mp_v122_side_private_set_aside" }
+    setAside: {
+      visibility: "side_private",
+      visibilitySide: "runner",
+      reason: "mp_v122_side_private_set_aside",
+    },
   };
   record.gameState = ready;
   record.match.baseline = ready.baseline;
   record.match.settings.agendaPointsToWin = 7;
-  record.eventLog = ready.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-  record.stateSnapshots = [stateSnapshotForTest(created.matchId, ready, record.match.matchVersion, "snap_v122_ready")];
+  record.eventLog = ready.eventLog.map((event) =>
+    toEventRecordForTest(created.matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      created.matchId,
+      ready,
+      record.match.matchVersion,
+      "snap_v122_ready",
+    ),
+  ];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
@@ -8394,12 +12829,23 @@ async function joinedV122SpecialZoneMatch(seed: string) {
   return {
     service,
     matchId: created.matchId,
-    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+    corp: {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    },
+    runner: {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    },
   };
 }
 
-async function prepareV123MitRunnerTurn(service: MultiplayerService, matchId: string): Promise<void> {
+async function prepareV123MitRunnerTurn(
+  service: MultiplayerService,
+  matchId: string,
+): Promise<void> {
   const record = await service.loadForTest(matchId);
   if (!record?.gameState) throw new Error("Missing stored V1.2.3 match");
   const gameState = structuredClone(record.gameState);
@@ -8409,20 +12855,40 @@ async function prepareV123MitRunnerTurn(service: MultiplayerService, matchId: st
   gameState.timingPoint = "runner_action.main";
   gameState.runner.clicks = 4;
   gameState.runner.credits = 5;
-  gameState.setup = { status: "complete", initialHandSize: 5, resolved: { runner: "keep", corp: "keep" }, mulligansTaken: {} };
+  gameState.setup = {
+    status: "complete",
+    initialHandSize: 5,
+    resolved: { runner: "keep", corp: "keep" },
+    mulligansTaken: {},
+  };
   delete gameState.pendingChoice;
   moveRunnerCardToGripForTest(gameState, "onr_v1_101_mit-west-tier");
   const latestEventIndex = gameState.eventLog.length - 1;
-  if (latestEventIndex >= 0) gameState.eventLog[latestEventIndex] = { ...gameState.eventLog[latestEventIndex]!, stateHashAfter: hashState(gameState) };
+  if (latestEventIndex >= 0)
+    gameState.eventLog[latestEventIndex] = {
+      ...gameState.eventLog[latestEventIndex]!,
+      stateHashAfter: hashState(gameState),
+    };
   record.gameState = gameState;
   record.match.baseline = gameState.baseline;
   record.match.settings.agendaPointsToWin = 7;
-  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(matchId, event));
-  record.stateSnapshots = [stateSnapshotForTest(matchId, gameState, record.match.matchVersion, "snap_v123_mit_ready")];
+  record.eventLog = gameState.eventLog.map((event) =>
+    toEventRecordForTest(matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_v123_mit_ready",
+    ),
+  ];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
-  await (service as unknown as { storage: MultiplayerStorage }).storage.save(record);
+  await (service as unknown as { storage: MultiplayerStorage }).storage.save(
+    record,
+  );
 }
 
 async function joinedV095ResourceMatch(seed: string) {
@@ -8430,22 +12896,39 @@ async function joinedV095ResourceMatch(seed: string) {
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
 
   const record = await storage.load(created.matchId);
   if (!record) throw new Error("Missing stored match");
-  let gameState = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed, runnerDeck: V095_RUNNER_DECK, corpDeck: V095_CORP_DECK, agendaPointsToWin: 7 }));
+  let gameState = toRunnerTurnEngine(
+    createGameAfterSetup({
+      matchId: created.matchId,
+      seed,
+      runnerDeck: V095_RUNNER_DECK,
+      corpDeck: V095_CORP_DECK,
+      agendaPointsToWin: 7,
+    }),
+  );
   gameState.runner.credits = 6;
   moveRunnerCardToGripForTest(gameState, "v095_safehouse_resource");
-  gameState = applyEngineAction(gameState, "runner", (action) => action.type === "install_card" && action.label.includes("Safehouse Resource"));
+  gameState = applyEngineAction(
+    gameState,
+    "runner",
+    (action) =>
+      action.type === "install_card" &&
+      action.label.includes("Safehouse Resource"),
+  );
   gameState.activeSide = "corp";
   gameState.phase = "corp_action_phase";
   gameState.timingPoint = "corp_action.main";
@@ -8455,8 +12938,17 @@ async function joinedV095ResourceMatch(seed: string) {
   record.gameState = gameState;
   record.match.baseline = gameState.baseline;
   record.match.settings.agendaPointsToWin = 7;
-  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v095_resource_ready")];
+  record.eventLog = gameState.eventLog.map((event) =>
+    toEventRecordForTest(created.matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      created.matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_v095_resource_ready",
+    ),
+  ];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
@@ -8465,8 +12957,16 @@ async function joinedV095ResourceMatch(seed: string) {
   return {
     service,
     matchId: created.matchId,
-    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+    corp: {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    },
+    runner: {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    },
   };
 }
 
@@ -8475,13 +12975,16 @@ async function joinedV096TraceMatch(seed: string) {
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
 
@@ -8493,20 +12996,43 @@ async function joinedV096TraceMatch(seed: string) {
       seed,
       runnerDeckId: "demo_runner_096",
       corpDeckId: "demo_corp_096",
-      agendaPointsToWin: 7
-    })
+      agendaPointsToWin: 7,
+    }),
   );
   putCorpIceOnServerForTest(gameState, "rd", "v096_trace_probe_ice");
   gameState.corp.credits = 8;
   gameState.runner.credits = 5;
-  gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-  gameState = applyEngineAction(gameState, "corp", (action) => action.type === "rez_ice" && action.label.includes("Trace Probe"));
-  gameState = applyEngineAction(gameState, "runner", (action) => action.type === "continue_run");
+  gameState = applyEngineAction(
+    gameState,
+    "runner",
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === "rd",
+  );
+  gameState = applyEngineAction(
+    gameState,
+    "corp",
+    (action) =>
+      action.type === "rez_ice" && action.label.includes("Trace Probe"),
+  );
+  gameState = applyEngineAction(
+    gameState,
+    "runner",
+    (action) => action.type === "continue_run",
+  );
   record.gameState = gameState;
   record.match.baseline = gameState.baseline;
   record.match.settings.agendaPointsToWin = 7;
-  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v096_trace_ready")];
+  record.eventLog = gameState.eventLog.map((event) =>
+    toEventRecordForTest(created.matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      created.matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_v096_trace_ready",
+    ),
+  ];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
@@ -8515,8 +13041,16 @@ async function joinedV096TraceMatch(seed: string) {
   return {
     service,
     matchId: created.matchId,
-    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+    corp: {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    },
+    runner: {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    },
   };
 }
 
@@ -8525,13 +13059,16 @@ async function joinedV097BreachMatch(seed: string) {
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
 
@@ -8543,8 +13080,8 @@ async function joinedV097BreachMatch(seed: string) {
       seed,
       runnerDeckId: "demo_runner_097",
       corpDeckId: "demo_corp_097",
-      agendaPointsToWin: 7
-    })
+      agendaPointsToWin: 7,
+    }),
   );
   gameState.runner.credits = 5;
   moveRunnerCardToGripForTest(gameState, "v097_deep_dive_event");
@@ -8553,8 +13090,17 @@ async function joinedV097BreachMatch(seed: string) {
   record.gameState = gameState;
   record.match.baseline = gameState.baseline;
   record.match.settings.agendaPointsToWin = 7;
-  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v097_breach_ready")];
+  record.eventLog = gameState.eventLog.map((event) =>
+    toEventRecordForTest(created.matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      created.matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_v097_breach_ready",
+    ),
+  ];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
@@ -8563,8 +13109,16 @@ async function joinedV097BreachMatch(seed: string) {
   return {
     service,
     matchId: created.matchId,
-    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+    corp: {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    },
+    runner: {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    },
   };
 }
 
@@ -8573,13 +13127,16 @@ async function joinedV112ArchivesMatch(seed: string) {
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
 
@@ -8591,19 +13148,44 @@ async function joinedV112ArchivesMatch(seed: string) {
       seed,
       runnerDeckId: "demo_runner_097",
       corpDeckId: "demo_corp_097",
-      agendaPointsToWin: 7
-    })
+      agendaPointsToWin: 7,
+    }),
   );
   gameState.runner.credits = 10;
-  const faceupOperation = moveCorpCardToArchivesForTest(gameState, "simple_economy_operation", true);
-  const facedownAsset = moveCorpCardToArchivesForTest(gameState, "simple_economy_asset", false);
-  const facedownAgenda = moveCorpCardToArchivesForTest(gameState, "simple_agenda", false);
-  keepOnlyCorpArchivesCardsForTest(gameState, [faceupOperation, facedownAsset, facedownAgenda]);
+  const faceupOperation = moveCorpCardToArchivesForTest(
+    gameState,
+    "simple_economy_operation",
+    true,
+  );
+  const facedownAsset = moveCorpCardToArchivesForTest(
+    gameState,
+    "simple_economy_asset",
+    false,
+  );
+  const facedownAgenda = moveCorpCardToArchivesForTest(
+    gameState,
+    "simple_agenda",
+    false,
+  );
+  keepOnlyCorpArchivesCardsForTest(gameState, [
+    faceupOperation,
+    facedownAsset,
+    facedownAgenda,
+  ]);
   record.gameState = gameState;
   record.match.baseline = gameState.baseline;
   record.match.settings.agendaPointsToWin = 7;
-  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v112_archives_ready")];
+  record.eventLog = gameState.eventLog.map((event) =>
+    toEventRecordForTest(created.matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      created.matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_v112_archives_ready",
+    ),
+  ];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
@@ -8612,8 +13194,16 @@ async function joinedV112ArchivesMatch(seed: string) {
   return {
     service,
     matchId: created.matchId,
-    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+    corp: {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    },
+    runner: {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    },
   };
 }
 
@@ -8622,13 +13212,16 @@ async function joinedOffSiteBackupsMatch(seed: string) {
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
 
@@ -8640,29 +13233,53 @@ async function joinedOffSiteBackupsMatch(seed: string) {
     name: "Server Off-Site Backups Fixture",
     cards: [
       { id: "onr_v1_296_off-site-backups", quantity: 1 },
-      ...DEMO_DECKS.demo_corp_097.cards
-    ]
+      ...DEMO_DECKS.demo_corp_097.cards,
+    ],
   };
   let gameState = createGameAfterSetup({
     matchId: created.matchId,
     seed,
     runnerDeckId: "demo_runner_097",
     corpDeck,
-    agendaPointsToWin: 7
+    agendaPointsToWin: 7,
   });
-  gameState = applyEngineAction(gameState, "corp", (action) => action.type === "mandatory_draw");
+  gameState = applyEngineAction(
+    gameState,
+    "corp",
+    (action) => action.type === "mandatory_draw",
+  );
   gameState.corp.credits = 10;
   gameState.corp.clicks = 10;
   gameState.corp.maxHandSize = 100;
   moveCorpCardToHqForTest(gameState, "onr_v1_296_off-site-backups");
-  const faceupOperation = moveCorpCardToArchivesForTest(gameState, "simple_economy_operation", true);
-  const facedownAgenda = moveCorpCardToArchivesForTest(gameState, "simple_agenda", false);
-  keepOnlyCorpArchivesCardsForTest(gameState, [faceupOperation, facedownAgenda]);
+  const faceupOperation = moveCorpCardToArchivesForTest(
+    gameState,
+    "simple_economy_operation",
+    true,
+  );
+  const facedownAgenda = moveCorpCardToArchivesForTest(
+    gameState,
+    "simple_agenda",
+    false,
+  );
+  keepOnlyCorpArchivesCardsForTest(gameState, [
+    faceupOperation,
+    facedownAgenda,
+  ]);
   record.gameState = gameState;
   record.match.baseline = gameState.baseline;
   record.match.settings.agendaPointsToWin = 7;
-  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_off_site_backups_ready")];
+  record.eventLog = gameState.eventLog.map((event) =>
+    toEventRecordForTest(created.matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      created.matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_off_site_backups_ready",
+    ),
+  ];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
@@ -8671,8 +13288,16 @@ async function joinedOffSiteBackupsMatch(seed: string) {
   return {
     service,
     matchId: created.matchId,
-    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+    corp: {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    },
+    runner: {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    },
   };
 }
 
@@ -8681,13 +13306,16 @@ async function joinedV098HiddenSearchMatch(seed: string) {
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
 
@@ -8699,16 +13327,25 @@ async function joinedV098HiddenSearchMatch(seed: string) {
       seed,
       runnerDeckId: "demo_runner_098",
       corpDeckId: "demo_corp_098",
-      agendaPointsToWin: 7
-    })
+      agendaPointsToWin: 7,
+    }),
   );
   moveRunnerCardToGripForTest(gameState, "v098_stack_search_event");
   putRunnerCardOnTopOfStackForTest(gameState, "simple_decoder");
   record.gameState = gameState;
   record.match.baseline = gameState.baseline;
   record.match.settings.agendaPointsToWin = 7;
-  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v098_hidden_search_ready")];
+  record.eventLog = gameState.eventLog.map((event) =>
+    toEventRecordForTest(created.matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      created.matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_v098_hidden_search_ready",
+    ),
+  ];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
@@ -8717,8 +13354,16 @@ async function joinedV098HiddenSearchMatch(seed: string) {
   return {
     service,
     matchId: created.matchId,
-    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+    corp: {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    },
+    runner: {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    },
   };
 }
 
@@ -8727,13 +13372,16 @@ async function joinedV099HostingMatch(seed: string) {
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
 
@@ -8745,8 +13393,8 @@ async function joinedV099HostingMatch(seed: string) {
       seed,
       runnerDeckId: "demo_runner_099",
       corpDeckId: "demo_corp_099",
-      agendaPointsToWin: 7
-    })
+      agendaPointsToWin: 7,
+    }),
   );
   gameState.runner.credits = 2;
   moveRunnerCardToGripForTest(gameState, "v099_host_resource");
@@ -8754,8 +13402,17 @@ async function joinedV099HostingMatch(seed: string) {
   record.gameState = gameState;
   record.match.baseline = gameState.baseline;
   record.match.settings.agendaPointsToWin = 7;
-  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
-  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v099_hosting_ready")];
+  record.eventLog = gameState.eventLog.map((event) =>
+    toEventRecordForTest(created.matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      created.matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_v099_hosting_ready",
+    ),
+  ];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
@@ -8764,13 +13421,29 @@ async function joinedV099HostingMatch(seed: string) {
   return {
     service,
     matchId: created.matchId,
-    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+    corp: {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    },
+    runner: {
+      side: "runner" as const,
+      sessionToken: joined.sessionToken,
+      reconnectToken: joined.reconnectToken,
+    },
   };
 }
 
-async function bootstrap(service: MultiplayerService, matchId: string, session: PlayerSession): Promise<SidePayload> {
-  const payload = await service.bootstrap(matchId, session.side, session.sessionToken);
+async function bootstrap(
+  service: MultiplayerService,
+  matchId: string,
+  session: PlayerSession,
+): Promise<SidePayload> {
+  const payload = await service.bootstrap(
+    matchId,
+    session.side,
+    session.sessionToken,
+  );
   expect("error" in payload).toBe(false);
   if ("error" in payload) throw new Error(payload.error.message);
   return payload;
@@ -8779,7 +13452,7 @@ async function bootstrap(service: MultiplayerService, matchId: string, session: 
 function sidePayloadBeliefInput(
   payload: Pick<SidePayload, "playerView" | "eventTail" | "legalActions">,
   side: Side,
-  label: string
+  label: string,
 ) {
   return buildAiDecisionInputDto({
     side,
@@ -8790,53 +13463,92 @@ function sidePayloadBeliefInput(
     seed: `server-belief:${label}`,
     decisionId: `server-belief:${label}:${side}:${payload.playerView.stateVersion}`,
     actionNumber: payload.playerView.stateVersion,
-    profileId: `${side}-ai-v1.4.2-normal`
+    profileId: `${side}-ai-v1.4.2-normal`,
   });
 }
 
 function toRunnerTurnEngine(state: GameState): GameState {
-  let next = applyEngineAction(state, "corp", (action) => action.type === "mandatory_draw");
-  next = applyEngineAction(next, "corp", (action) => action.type === "end_turn");
-  if (next.pendingChoice?.source === "discard_phase" && next.pendingChoice.side === "corp") {
-    next = applyEngineChoice(next, "corp", [String(next.pendingChoice.options[0]?.id)]);
+  let next = applyEngineAction(
+    state,
+    "corp",
+    (action) => action.type === "mandatory_draw",
+  );
+  next = applyEngineAction(
+    next,
+    "corp",
+    (action) => action.type === "end_turn",
+  );
+  if (
+    next.pendingChoice?.source === "discard_phase" &&
+    next.pendingChoice.side === "corp"
+  ) {
+    next = applyEngineChoice(next, "corp", [
+      String(next.pendingChoice.options[0]?.id),
+    ]);
   }
   return next;
 }
 
-async function submitChoice(service: MultiplayerService, matchId: string, session: PlayerSession, optionId: string, key: string): Promise<SidePayload> {
+async function submitChoice(
+  service: MultiplayerService,
+  matchId: string,
+  session: PlayerSession,
+  optionId: string,
+  key: string,
+): Promise<SidePayload> {
   const before = await bootstrap(service, matchId, session);
   const choice = before.playerView.pendingChoice;
   if (!choice) throw new Error("Missing pending choice");
-  const action = mustAction(before, (candidate) => candidate.type === "resolve_choice");
+  const action = mustAction(
+    before,
+    (candidate) => candidate.type === "resolve_choice",
+  );
   const result = await service.submitAction({
     matchId,
     side: session.side,
     sessionToken: session.sessionToken,
     actionId: action.actionId,
     clientKnownStateVersion: before.playerView.stateVersion,
-    selectedChoices: { choiceId: choice.choiceId, selectedOptionIds: [optionId] },
-    idempotencyKey: `${key}-${before.playerView.stateVersion}`
+    selectedChoices: {
+      choiceId: choice.choiceId,
+      selectedOptionIds: [optionId],
+    },
+    idempotencyKey: `${key}-${before.playerView.stateVersion}`,
   });
   expect(result.ok).toBe(true);
   if (!result.ok) throw new Error(result.error.message);
   return result.actorPayload;
 }
 
-async function submitFirstChoice(service: MultiplayerService, matchId: string, session: PlayerSession, key: string): Promise<SidePayload> {
+async function submitFirstChoice(
+  service: MultiplayerService,
+  matchId: string,
+  session: PlayerSession,
+  key: string,
+): Promise<SidePayload> {
   const before = await bootstrap(service, matchId, session);
   const optionId = before.playerView.pendingChoice?.options[0]?.id;
   if (!optionId) throw new Error("Missing first choice option");
   return submitChoice(service, matchId, session, optionId, key);
 }
 
-async function resolveCorpDiscardIfPending(service: MultiplayerService, matchId: string, session: PlayerSession, key: string): Promise<void> {
+async function resolveCorpDiscardIfPending(
+  service: MultiplayerService,
+  matchId: string,
+  session: PlayerSession,
+  key: string,
+): Promise<void> {
   const before = await bootstrap(service, matchId, session);
   if (before.playerView.pendingChoice?.source !== "discard_phase") return;
   if (before.playerView.pendingChoice.side !== "corp") return;
   await submitFirstChoice(service, matchId, session, key);
 }
 
-function applyEngineAction(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {
+function applyEngineAction(
+  state: GameState,
+  side: Side,
+  predicate: (action: LegalAction) => boolean,
+): GameState {
   const selected = getLegalActions(state, side).find(predicate);
   if (!selected) throw new Error(`Missing engine action for ${side}`);
   const result = applyAction(state, {
@@ -8844,102 +13556,190 @@ function applyEngineAction(state: GameState, side: Side, predicate: (action: Leg
     side,
     actionId: selected.actionId,
     clientKnownStateVersion: state.stateVersion,
-    idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}`
+    idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}`,
   });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;
 }
 
-function applyEngineChoice(state: GameState, side: Side, selectedOptionIds: string[]): GameState {
-  const selected = getLegalActions(state, side).find((action) => action.type === "resolve_choice");
+function applyEngineChoice(
+  state: GameState,
+  side: Side,
+  selectedOptionIds: string[],
+): GameState {
+  const selected = getLegalActions(state, side).find(
+    (action) => action.type === "resolve_choice",
+  );
   if (!selected) throw new Error(`Missing engine choice action for ${side}`);
   const result = applyAction(state, {
     matchId: state.matchId,
     side,
     actionId: selected.actionId,
     clientKnownStateVersion: state.stateVersion,
-    selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds },
-    idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}-${selectedOptionIds.join(".")}`
+    selectedChoices: {
+      choiceId: state.pendingChoice?.choiceId,
+      selectedOptionIds,
+    },
+    idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}-${selectedOptionIds.join(".")}`,
   });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;
 }
 
-function sourceDefinitionForServerTest(state: GameState, action: LegalAction): string | undefined {
+function sourceDefinitionForServerTest(
+  state: GameState,
+  action: LegalAction,
+): string | undefined {
   const cardId = String(action.payload?.cardId ?? action.source ?? "");
   return state.cardInstances[cardId]?.definitionId;
 }
 
-function putCorpIceOnServerForTest(state: GameState, serverId: "hq" | "rd" | "archives" | `remote_${number}`, definitionId: string): CardInstanceId {
+function putCorpIceOnServerForTest(
+  state: GameState,
+  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  definitionId: string,
+): CardInstanceId {
   const id = findCardForTest(state, definitionId);
-  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) throw new Error("Missing server");
   removeEverywhereForTest(state, id);
   server.ice.push(id);
-  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "serverIce", serverId }, faceup: false, rezzed: false };
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "corp", zone: "serverIce", serverId },
+    faceup: false,
+    rezzed: false,
+  };
   return id;
 }
 
-function putCorpRootInRemoteForTest(state: GameState, definitionId: string): CardInstanceId {
+function putCorpRootInRemoteForTest(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
   const id = findCardForTest(state, definitionId);
-  let server = state.corp.servers.find((candidate) => candidate.id === "remote_1");
+  let server = state.corp.servers.find(
+    (candidate) => candidate.id === "remote_1",
+  );
   if (!server) {
-    server = { id: "remote_1", kind: "remote", label: "Remote 1", ice: [], root: [] };
+    server = {
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    };
     state.corp.servers.push(server);
   }
   removeEverywhereForTest(state, id);
   server.root.push(id);
-  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" }, faceup: false, rezzed: false };
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    faceup: false,
+    rezzed: false,
+  };
   return id;
 }
 
-function putCorpCardOnTopOfRdForTest(state: GameState, definitionId: string): CardInstanceId {
+function putCorpCardOnTopOfRdForTest(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
   state.corp.rd.unshift(id);
-  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "corp", zone: "rd" },
+    faceup: false,
+    rezzed: false,
+  };
   return id;
 }
 
-function moveCorpCardToHqForTest(state: GameState, definitionId: string): CardInstanceId {
+function moveCorpCardToHqForTest(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
   state.corp.hq.unshift(id);
-  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "hq" }, faceup: false, rezzed: false };
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "corp", zone: "hq" },
+    faceup: false,
+    rezzed: false,
+  };
   return id;
 }
 
-function moveCorpCardToArchivesForTest(state: GameState, definitionId: string, faceup = true): CardInstanceId {
+function moveCorpCardToArchivesForTest(
+  state: GameState,
+  definitionId: string,
+  faceup = true,
+): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
   state.corp.archives.unshift(id);
-  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "archives" }, faceup, rezzed: faceup };
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "corp", zone: "archives" },
+    faceup,
+    rezzed: faceup,
+  };
   return id;
 }
 
-function keepOnlyCorpArchivesCardsForTest(state: GameState, ids: CardInstanceId[]): void {
+function keepOnlyCorpArchivesCardsForTest(
+  state: GameState,
+  ids: CardInstanceId[],
+): void {
   const keep = new Set(ids);
   const movedToRd = state.corp.archives.filter((cardId) => !keep.has(cardId));
   state.corp.archives = ids.slice();
   for (const cardId of movedToRd) {
     state.corp.rd.push(cardId);
-    state.cardInstances[cardId] = { ...state.cardInstances[cardId]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      zone: { side: "corp", zone: "rd" },
+      faceup: false,
+      rezzed: false,
+    };
   }
 }
 
-function moveRunnerCardToGripForTest(state: GameState, definitionId: string): CardInstanceId {
+function moveRunnerCardToGripForTest(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
   state.runner.grip.unshift(id);
-  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "grip" }, faceup: true, rezzed: true };
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "runner", zone: "grip" },
+    faceup: true,
+    rezzed: true,
+  };
   return id;
 }
 
-function putRunnerCardOnTopOfStackForTest(state: GameState, definitionId: string): CardInstanceId {
+function putRunnerCardOnTopOfStackForTest(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
   state.runner.stack.unshift(id);
-  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "stack" }, faceup: true, rezzed: true };
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "runner", zone: "stack" },
+    faceup: true,
+    rezzed: true,
+  };
   return id;
 }
 
@@ -8947,12 +13747,22 @@ function emptyRunnerGripForTest(state: GameState): void {
   for (const id of state.runner.grip.slice()) {
     removeEverywhereForTest(state, id);
     state.runner.heap.push(id);
-    state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "heap" }, faceup: true, rezzed: true };
+    state.cardInstances[id] = {
+      ...state.cardInstances[id]!,
+      zone: { side: "runner", zone: "heap" },
+      faceup: true,
+      rezzed: true,
+    };
   }
 }
 
-function findCardForTest(state: GameState, definitionId: string): CardInstanceId {
-  const entry = Object.entries(state.cardInstances).find(([, card]) => card.definitionId === definitionId);
+function findCardForTest(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
+  const entry = Object.entries(state.cardInstances).find(
+    ([, card]) => card.definitionId === definitionId,
+  );
   if (!entry) throw new Error(`Missing ${definitionId}`);
   return entry[0];
 }
@@ -8970,12 +13780,21 @@ function removeEverywhereForTest(state: GameState, cardId: string): void {
   state.runner.stack = state.runner.stack.filter((id) => id !== cardId);
   state.runner.heap = state.runner.heap.filter((id) => id !== cardId);
   state.runner.scoreArea = state.runner.scoreArea.filter((id) => id !== cardId);
-  state.runner.rig.programs = state.runner.rig.programs.filter((id) => id !== cardId);
-  state.runner.rig.hardware = state.runner.rig.hardware.filter((id) => id !== cardId);
-  state.runner.rig.resources = state.runner.rig.resources.filter((id) => id !== cardId);
+  state.runner.rig.programs = state.runner.rig.programs.filter(
+    (id) => id !== cardId,
+  );
+  state.runner.rig.hardware = state.runner.rig.hardware.filter(
+    (id) => id !== cardId,
+  );
+  state.runner.rig.resources = state.runner.rig.resources.filter(
+    (id) => id !== cardId,
+  );
   if (state.specialZones) {
-    state.specialZones.setAside = state.specialZones.setAside.filter((id) => id !== cardId);
-    state.specialZones.removedFromGame = state.specialZones.removedFromGame.filter((id) => id !== cardId);
+    state.specialZones.setAside = state.specialZones.setAside.filter(
+      (id) => id !== cardId,
+    );
+    state.specialZones.removedFromGame =
+      state.specialZones.removedFromGame.filter((id) => id !== cardId);
   }
 }
 
@@ -8988,11 +13807,16 @@ function toEventRecordForTest(matchId: string, event: GameEvent): EventRecord {
     stateHashAfter: event.stateHashAfter,
     publicPayload: toPublicEventForTest(event),
     privatePayloadLocalOnly: true,
-    hiddenInfoBarrier: false
+    hiddenInfoBarrier: false,
   };
 }
 
-function stateSnapshotForTest(matchId: string, state: GameState, matchVersion: number, snapshotId: string): StateSnapshot {
+function stateSnapshotForTest(
+  matchId: string,
+  state: GameState,
+  matchVersion: number,
+  snapshotId: string,
+): StateSnapshot {
   return {
     snapshotId,
     matchId,
@@ -9001,7 +13825,7 @@ function stateSnapshotForTest(matchId: string, state: GameState, matchVersion: n
     stateHash: hashState(state),
     gameState: structuredClone(state),
     createdAt: "2026-05-04T00:00:00.000Z",
-    hiddenInfoBarrier: false
+    hiddenInfoBarrier: false,
   };
 }
 
@@ -9012,8 +13836,10 @@ function toPublicEventForTest(event: GameEvent): PublicGameEvent {
     stateVersionBefore: event.stateVersionBefore,
     stateVersionAfter: event.stateVersionAfter,
     stateHashAfter: event.stateHashAfter,
-    ...(event.visibilityClass ? { visibilityClass: event.visibilityClass } : {}),
-    publicPayload: event.publicPayload
+    ...(event.visibilityClass
+      ? { visibilityClass: event.visibilityClass }
+      : {}),
+    publicPayload: event.publicPayload,
   };
 }
 
@@ -9028,7 +13854,7 @@ function choiceRequest(state: GameState, side: Side): ChoiceRequest {
     minSelections: 1,
     maxSelections: 1,
     stateVersion: state.stateVersion,
-    visibility: "private_to_side"
+    visibility: "private_to_side",
   };
 }
 
@@ -9037,7 +13863,7 @@ async function submit(
   matchId: string,
   session: PlayerSession,
   predicate: (action: LegalAction) => boolean,
-  idempotencyKey: string
+  idempotencyKey: string,
 ) {
   const payload = await bootstrap(service, matchId, session);
   const action = mustAction(payload, predicate);
@@ -9047,16 +13873,24 @@ async function submit(
     sessionToken: session.sessionToken,
     actionId: action.actionId,
     clientKnownStateVersion: payload.playerView.stateVersion,
-    idempotencyKey
+    idempotencyKey,
   });
   expect(result.ok).toBe(true);
   if (!result.ok) throw new Error(result.error.message);
   return result;
 }
 
-function mustAction(payload: SidePayload, predicate: (action: LegalAction) => boolean): LegalAction {
+function mustAction(
+  payload: SidePayload,
+  predicate: (action: LegalAction) => boolean,
+): LegalAction {
   const selected = payload.legalActions.find(predicate);
-  expect(selected, payload.legalActions.map((action) => `${action.type}:${action.label}`).join(", ")).toBeDefined();
+  expect(
+    selected,
+    payload.legalActions
+      .map((action) => `${action.type}:${action.label}`)
+      .join(", "),
+  ).toBeDefined();
   if (!selected) throw new Error("Missing action");
   return selected;
 }
@@ -9070,7 +13904,10 @@ function waitForOpen(socket: WebSocket): Promise<void> {
 
 function waitForMessage(socket: WebSocket, type: string): Promise<unknown> {
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error(`Timed out waiting for ${type}`)), 5000);
+    const timeout = setTimeout(
+      () => reject(new Error(`Timed out waiting for ${type}`)),
+      5000,
+    );
     socket.on("message", (raw) => {
       const parsed = JSON.parse(raw.toString()) as { type?: string };
       if (parsed.type === type) {
@@ -9093,7 +13930,7 @@ function privateDeploymentConfig(): DeploymentConfig {
     NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
     NETGRID_ALLOWED_ORIGINS: "https://netgrid.example",
     NETGRID_TOKEN_SALT: "private-test-salt",
-    NETGRID_RATE_LIMIT_PROFILE: "private_internet"
+    NETGRID_RATE_LIMIT_PROFILE: "private_internet",
   } as NodeJS.ProcessEnv);
 }
 
@@ -9103,31 +13940,56 @@ const MAINTENANCE_TEST_PASSWORD = "sichere Test-Passphrase";
 type MaintenanceTestClient = {
   handle: ReturnType<typeof createNetgridHttpServer>;
   baseUrl: string;
-  request(path: string, init?: RequestInit, options?: { sensitive?: boolean }): Promise<Response>;
+  request(
+    path: string,
+    init?: RequestInit,
+    options?: { sensitive?: boolean },
+  ): Promise<Response>;
 };
 
-async function authenticatedMaintenanceServer(service: MultiplayerService, deploymentConfig = loadDeploymentConfig({} as NodeJS.ProcessEnv)): Promise<MaintenanceTestClient> {
-  const maintenanceAuth = new MaintenanceAuthService(new InMemoryMaintenanceCredentialStore(), {
-    passwordKdf: { keyLength: 32, cost: 1024, blockSize: 8, parallelization: 1, maxMemory: 8 * 1024 * 1024 }
-  });
+async function authenticatedMaintenanceServer(
+  service: MultiplayerService,
+  deploymentConfig = loadDeploymentConfig({} as NodeJS.ProcessEnv),
+): Promise<MaintenanceTestClient> {
+  const maintenanceAuth = new MaintenanceAuthService(
+    new InMemoryMaintenanceCredentialStore(),
+    {
+      passwordKdf: {
+        keyLength: 32,
+        cost: 1024,
+        blockSize: 8,
+        parallelization: 1,
+        maxMemory: 8 * 1024 * 1024,
+      },
+    },
+  );
   await maintenanceAuth.bootstrapPassword(MAINTENANCE_TEST_PASSWORD);
-  const handle = createNetgridHttpServer(service, { deploymentConfig, maintenanceAuth });
+  const handle = createNetgridHttpServer(service, {
+    deploymentConfig,
+    maintenanceAuth,
+  });
   const baseUrl = await listen(handle);
   const login = await fetch(`${baseUrl}/api/storage/maintenance/auth/login`, {
     method: "POST",
-    headers: { "content-type": "application/json", origin: MAINTENANCE_TEST_ORIGIN },
-    body: JSON.stringify({ password: MAINTENANCE_TEST_PASSWORD })
+    headers: {
+      "content-type": "application/json",
+      origin: MAINTENANCE_TEST_ORIGIN,
+    },
+    body: JSON.stringify({ password: MAINTENANCE_TEST_PASSWORD }),
   });
-  if (!login.ok) throw new Error(`Maintenance test login failed: ${login.status}`);
+  if (!login.ok)
+    throw new Error(`Maintenance test login failed: ${login.status}`);
   const cookie = login.headers.get("set-cookie")?.split(";", 1)[0];
   const loginPayload = (await login.json()) as { csrfToken?: string };
-  if (!cookie || !loginPayload.csrfToken) throw new Error("Maintenance test login returned no session proof");
+  if (!cookie || !loginPayload.csrfToken)
+    throw new Error("Maintenance test login returned no session proof");
   let csrfToken = loginPayload.csrfToken;
   const rawRequest = (path: string, init: RequestInit = {}) => {
     const headers = new Headers(init.headers);
     headers.set("cookie", cookie);
     headers.set("origin", MAINTENANCE_TEST_ORIGIN);
-    if ((init.method ?? "GET") !== "GET") headers.set("x-netgrid-csrf", csrfToken);
+    if ((init.method ?? "GET") !== "GET")
+      headers.set("x-netgrid-csrf", csrfToken);
     return fetch(`${baseUrl}${path}`, { ...init, headers });
   };
   return {
@@ -9135,27 +13997,40 @@ async function authenticatedMaintenanceServer(service: MultiplayerService, deplo
     baseUrl,
     request: async (path, init = {}, options = {}) => {
       if (options.sensitive) {
-        const reauth = await rawRequest("/api/storage/maintenance/auth/reauthenticate", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ password: MAINTENANCE_TEST_PASSWORD })
-        });
-        if (!reauth.ok) throw new Error(`Maintenance test reauthentication failed: ${reauth.status}`);
+        const reauth = await rawRequest(
+          "/api/storage/maintenance/auth/reauthenticate",
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ password: MAINTENANCE_TEST_PASSWORD }),
+          },
+        );
+        if (!reauth.ok)
+          throw new Error(
+            `Maintenance test reauthentication failed: ${reauth.status}`,
+          );
       }
       const response = await rawRequest(path, init);
       if (path === "/api/storage/maintenance/auth/session" && response.ok) {
-        const payload = (await response.clone().json()) as { csrfToken?: string };
+        const payload = (await response.clone().json()) as {
+          csrfToken?: string;
+        };
         if (payload.csrfToken) csrfToken = payload.csrfToken;
       }
       return response;
-    }
+    },
   };
 }
 
-async function listen(handle: ReturnType<typeof createNetgridHttpServer>): Promise<string> {
-  await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+async function listen(
+  handle: ReturnType<typeof createNetgridHttpServer>,
+): Promise<string> {
+  await new Promise<void>((resolve) =>
+    handle.server.listen(0, "127.0.0.1", resolve),
+  );
   const address = handle.server.address();
-  if (!address || typeof address === "string") throw new Error("Missing server address");
+  if (!address || typeof address === "string")
+    throw new Error("Missing server address");
   return `http://127.0.0.1:${address.port}`;
 }
 
@@ -9170,16 +14045,33 @@ async function tempStorageDir(): Promise<string> {
   return mkdtemp(join(tmpdir(), "netgrid-v108-"));
 }
 
-async function storedMatchFixture(seed: string): Promise<{ record: StoredMatch; hostSessionToken: string; hostReconnectToken: string; joinToken: string }> {
-  const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: `fixture-${seed}` });
+async function storedMatchFixture(seed: string): Promise<{
+  record: StoredMatch;
+  hostSessionToken: string;
+  hostReconnectToken: string;
+  joinToken: string;
+}> {
+  const service = new MultiplayerService(new InMemoryMatchStorage(), {
+    tokenSalt: `fixture-${seed}`,
+  });
   const created = await service.createMatch({ hostSide: "runner", seed });
-  const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+  const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+    "joinToken",
+  );
   if (!joinToken) throw new Error("Missing join token");
-  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp" });
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Corp",
+  });
   expect("error" in joined).toBe(false);
   const record = await service.loadForTest(created.matchId);
   if (!record) throw new Error("Missing stored fixture");
-  return { record, hostSessionToken: created.hostSessionToken, hostReconnectToken: created.hostReconnectToken, joinToken };
+  return {
+    record,
+    hostSessionToken: created.hostSessionToken,
+    hostReconnectToken: created.hostReconnectToken,
+    joinToken,
+  };
 }
 
 async function listBackupManifests(backupDir: string) {
@@ -9187,7 +14079,15 @@ async function listBackupManifests(backupDir: string) {
   return Promise.all(
     entries
       .filter((entry) => entry.isDirectory())
-      .map(async (entry) => JSON.parse(await readFile(join(backupDir, entry.name, "manifest.json"), "utf8")) as Record<string, unknown>)
+      .map(
+        async (entry) =>
+          JSON.parse(
+            await readFile(
+              join(backupDir, entry.name, "manifest.json"),
+              "utf8",
+            ),
+          ) as Record<string, unknown>,
+      ),
   );
 }
 
@@ -9196,7 +14096,10 @@ function restoreEnv(key: string, value: string | undefined): void {
   else process.env[key] = value;
 }
 
-function actionHistoryCountsForTest(database: DatabaseSync, matchId: string): {
+function actionHistoryCountsForTest(
+  database: DatabaseSync,
+  matchId: string,
+): {
   events: number;
   engineEvents: number;
   receipts: number;
@@ -9210,21 +14113,24 @@ function actionHistoryCountsForTest(database: DatabaseSync, matchId: string): {
         (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEvents,
         (SELECT COUNT(*) FROM action_receipts WHERE match_id = ?) AS receipts,
         (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ?) AS snapshots,
-        (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = ?) AS traces`
+        (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = ?) AS traces`,
     )
-    .get(matchId, matchId, matchId, matchId, matchId) as Record<string, number | bigint>;
+    .get(matchId, matchId, matchId, matchId, matchId) as Record<
+    string,
+    number | bigint
+  >;
   return {
     events: Number(row.events),
     engineEvents: Number(row.engineEvents),
     receipts: Number(row.receipts),
     snapshots: Number(row.snapshots),
-    traces: Number(row.traces)
+    traces: Number(row.traces),
   };
 }
 
 function deckSnapshotByIdForTest(snapshotId: string): DeckSnapshot {
   const snapshot = (snapshotsData08.snapshots as DeckSnapshot[]).find(
-    (candidate) => candidate.deckSnapshotId === snapshotId
+    (candidate) => candidate.deckSnapshotId === snapshotId,
   );
   if (!snapshot) throw new Error(`Missing test deck snapshot ${snapshotId}`);
   return structuredClone(snapshot) as DeckSnapshot;
@@ -9268,7 +14174,10 @@ class ActionDeltaTrackingStorage implements MultiplayerStorage {
 
   constructor(private readonly order: string[]) {}
 
-  load(matchId: string, options?: { includeStateSnapshots?: boolean }): Promise<StoredMatch | undefined> {
+  load(
+    matchId: string,
+    options?: { includeStateSnapshots?: boolean },
+  ): Promise<StoredMatch | undefined> {
     return this.inner.load(matchId, options);
   }
 
@@ -9277,9 +14186,14 @@ class ActionDeltaTrackingStorage implements MultiplayerStorage {
     await this.inner.save(record);
   }
 
-  async loadForAction(matchId: string, _input: ActionPersistenceLoadInput): Promise<StoredMatch | undefined> {
+  async loadForAction(
+    matchId: string,
+    _input: ActionPersistenceLoadInput,
+  ): Promise<StoredMatch | undefined> {
     this.actionLoadCount += 1;
-    const record = await this.inner.load(matchId, { includeStateSnapshots: false });
+    const record = await this.inner.load(matchId, {
+      includeStateSnapshots: false,
+    });
     if (!record) return undefined;
     record.actionPersistenceBaseline = {
       expectedMatchVersion: record.match.matchVersion,
@@ -9289,14 +14203,17 @@ class ActionDeltaTrackingStorage implements MultiplayerStorage {
       actionReceiptCount: record.actionReceipts.length,
       aiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0,
       loadedActionReceiptCount: record.actionReceipts.length,
-      loadedAiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0
+      loadedAiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0,
     };
     return record;
   }
 
   async saveActionDelta(record: StoredMatch): Promise<void> {
     this.deltaSaveCount += 1;
-    const { actionPersistenceBaseline: _actionPersistenceBaseline, ...persistedRecord } = record;
+    const {
+      actionPersistenceBaseline: _actionPersistenceBaseline,
+      ...persistedRecord
+    } = record;
     await this.inner.save(persistedRecord as StoredMatch);
     this.order.push("delta-save");
   }

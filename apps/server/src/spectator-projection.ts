@@ -85,16 +85,18 @@ export function buildSpectatorProjectionV1(
   const visibleEvents = record.eventLog
     .filter((event) => event.stateVersionAfter <= eventCursor)
     .slice(-(policy.maxEvents ?? 20))
-    .map((event): SpectatorEventV1 => ({
-      eventId: event.eventId,
-      type: event.publicPayload.type,
-      stateVersionBefore: event.stateVersionBefore,
-      stateVersionAfter: event.stateVersionAfter,
-      stateHashAfter: event.stateHashAfter,
-      visibilityClass: event.publicPayload.visibilityClass ?? "public",
-      hiddenInfoBarrier: event.hiddenInfoBarrier,
-      eventFamily: eventFamilyFor(event.publicPayload),
-    }));
+    .map(
+      (event): SpectatorEventV1 => ({
+        eventId: event.eventId,
+        type: event.publicPayload.type,
+        stateVersionBefore: event.stateVersionBefore,
+        stateVersionAfter: event.stateVersionAfter,
+        stateHashAfter: event.stateHashAfter,
+        visibilityClass: event.publicPayload.visibilityClass ?? "public",
+        hiddenInfoBarrier: event.hiddenInfoBarrier,
+        eventFamily: eventFamilyFor(event.publicPayload),
+      }),
+    );
 
   return {
     schemaVersion: SPECTATOR_PROJECTION_V1_SCHEMA,
@@ -155,7 +157,11 @@ function stateForCursor(record: StoredMatch, eventCursor: number): GameState {
   throw new Error("spectator_projection_cursor_snapshot_missing");
 }
 
-function publicInstalledSlotFor(state: GameState, cardId: string, slot: number): PublicInstalledSlotV1 {
+function publicInstalledSlotFor(
+  state: GameState,
+  cardId: string,
+  slot: number,
+): PublicInstalledSlotV1 {
   const card = state.cardInstances[cardId];
   if (!card?.faceup && !card?.rezzed) return { slot, visibility: "hidden" };
   return {
@@ -167,6 +173,7 @@ function publicInstalledSlotFor(state: GameState, cardId: string, slot: number):
 
 function eventFamilyFor(event: PublicGameEvent): string {
   const payloadType = event.publicPayload.actionType;
-  if (typeof payloadType === "string" && payloadType.length > 0) return payloadType;
+  if (typeof payloadType === "string" && payloadType.length > 0)
+    return payloadType;
   return event.type;
 }

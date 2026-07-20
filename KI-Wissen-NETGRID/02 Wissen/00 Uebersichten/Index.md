@@ -37,6 +37,11 @@
   Ergebnisledger und Retention-Vertrag:
   `docs/releases/v2/account-match-statistics-final-review-2026-07-19.md`
   (Quellplan: `docs/releases/v2/account-match-statistics-plan-2026-07-19.md`).
+- Öffentliche Matches, Hidden-Info-sichere Live-Zuschauer und terminale
+  Full-Information-Lern-Replays:
+  `docs/reviews/public-match-spectator-replay-final-review-2026-07-20.md`
+  (Prozess:
+  `docs/architecture/public-match-spectator-replay-process-2026-07-20.md`).
 - Wiederverwendbare Funktionsnamen:
   [[../Architektur/Abstrakte Funktionsnamen und Wiederverwendung]].
 - Projektweiter Cleanup:

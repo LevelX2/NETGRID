@@ -56,8 +56,7 @@ type ReplayView = {
 export default function ReplayPage() {
   const [index, setIndex] = useState<ReplayIndexEntry[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState("");
-  const [perspective, setPerspective] =
-    useState<ReplayParticipant>("player_a");
+  const [perspective, setPerspective] = useState<ReplayParticipant>("player_a");
   const [replay, setReplay] = useState<ReplayView>();
   const [frameIndex, setFrameIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -83,7 +82,8 @@ export default function ReplayPage() {
         };
         if (!response.ok) {
           throw new Error(
-            payload.error?.message ?? "Replay-Liste konnte nicht geladen werden.",
+            payload.error?.message ??
+              "Replay-Liste konnte nicht geladen werden.",
           );
         }
         if (closed) return;
@@ -214,10 +214,13 @@ export default function ReplayPage() {
             onChange={(event) => setSelectedMatchId(event.target.value)}
             disabled={index.length === 0}
           >
-            {index.length === 0 ? <option value="">Keine Replays</option> : null}
+            {index.length === 0 ? (
+              <option value="">Keine Replays</option>
+            ) : null}
             {index.map((entry) => (
               <option key={entry.replayId} value={entry.matchId}>
-                {participantLabel(entry)} · {new Date(entry.updatedAt).toLocaleString("de-DE")}
+                {participantLabel(entry)} ·{" "}
+                {new Date(entry.updatedAt).toLocaleString("de-DE")}
               </option>
             ))}
           </select>
@@ -256,26 +259,49 @@ export default function ReplayPage() {
         </button>
       </section>
 
-      {error ? <p role="alert" style={errorStyle}>{error}</p> : null}
+      {error ? (
+        <p role="alert" style={errorStyle}>
+          {error}
+        </p>
+      ) : null}
       {loading ? <p>Lade Replay …</p> : null}
 
       {currentFrame ? (
         <>
           <section style={playbackPanel} aria-label="Replay-Steuerung">
             <div style={buttonRow}>
-              <button type="button" onClick={() => seek(0)} disabled={frameIndex === 0}>
+              <button
+                type="button"
+                onClick={() => seek(0)}
+                disabled={frameIndex === 0}
+              >
                 Anfang
               </button>
-              <button type="button" onClick={() => seek(frameIndex - 1)} disabled={frameIndex === 0}>
+              <button
+                type="button"
+                onClick={() => seek(frameIndex - 1)}
+                disabled={frameIndex === 0}
+              >
                 Zurück
               </button>
-              <button type="button" onClick={() => setPlaying((value) => !value)}>
+              <button
+                type="button"
+                onClick={() => setPlaying((value) => !value)}
+              >
                 {playing ? "Pause" : "Abspielen"}
               </button>
-              <button type="button" onClick={() => seek(frameIndex + 1)} disabled={frameIndex >= frames.length - 1}>
+              <button
+                type="button"
+                onClick={() => seek(frameIndex + 1)}
+                disabled={frameIndex >= frames.length - 1}
+              >
                 Weiter
               </button>
-              <button type="button" onClick={() => seek(frames.length - 1)} disabled={frameIndex >= frames.length - 1}>
+              <button
+                type="button"
+                onClick={() => seek(frames.length - 1)}
+                disabled={frameIndex >= frames.length - 1}
+              >
                 Ende
               </button>
             </div>
@@ -294,7 +320,10 @@ export default function ReplayPage() {
 
             <label style={fieldStyle}>
               Geschwindigkeit
-              <select value={speed} onChange={(event) => setSpeed(Number(event.target.value))}>
+              <select
+                value={speed}
+                onChange={(event) => setSpeed(Number(event.target.value))}
+              >
                 <option value={0.5}>0,5×</option>
                 <option value={1}>1×</option>
                 <option value={2}>2×</option>
@@ -303,9 +332,12 @@ export default function ReplayPage() {
 
             <div style={stepInfoStyle}>
               <strong>{currentStep?.label ?? "Startzustand"}</strong>
-              <span>{currentStep?.learningHint ?? currentFrame.timingPoint}</span>
+              <span>
+                {currentStep?.learningHint ?? currentFrame.timingPoint}
+              </span>
               <code>
-                State {currentFrame.stateVersion} · Hash {currentFrame.stateHashVerified ? "verifiziert" : "abweichend"}
+                State {currentFrame.stateVersion} · Hash{" "}
+                {currentFrame.stateHashVerified ? "verifiziert" : "abweichend"}
               </code>
             </div>
           </section>

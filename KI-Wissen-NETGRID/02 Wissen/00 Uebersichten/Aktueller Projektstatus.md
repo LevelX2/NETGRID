@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-19
+Stand: 2026-07-20
 
 ## Führender Produktstand
 
@@ -16,6 +16,14 @@ Stand: 2026-07-19
 - Der detaillierte Release-/Phasenstand liegt in `docs/codex/CODEX_STATUS.md`;
   die konsolidierte Folgeplanung liegt unter
   `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`.
+- Matches sind standardmäßig öffentlich und besitzen dafür genau den
+  unveränderlichen Erstellungsflag `isPublic`. Öffentliche offene Matches sind
+  beitretbar, aktive Matches über eine Hidden-Info-sichere read-only
+  Projektion zuschaubar und beendete Matches als Full-Information-Lern-Replay
+  aus Sicht von Teilnehmer A oder B abspielbar. Das optionale mitlaufende
+  Gegnerhandfenster zeigt im Replay die jeweils andere Hand. Alle vorhandenen
+  Matches werden einmalig rückwirkend öffentlich normalisiert; der Auditstand
+  beträgt 21/21 öffentliche und 19/19 replayfähige terminale Matches.
 
 ## Engine und Karten
 

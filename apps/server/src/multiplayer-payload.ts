@@ -38,10 +38,17 @@ export function buildSidePayload(
 ): SidePayload {
   if (!record.gameState) throw new Error("match_not_active");
   const opponentSide = opposite(side);
-  const chronicleTurnContext = chronicleTurnContextByEventId(record.eventLog.map((event) => event.publicPayload));
+  const chronicleTurnContext = chronicleTurnContextByEventId(
+    record.eventLog.map((event) => event.publicPayload),
+  );
   const eventTail = record.eventLog
     .slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)
-    .map((event) => withChronicleTurnContext(redactPublicEventForSide(event.publicPayload, side), chronicleTurnContext[event.eventId]));
+    .map((event) =>
+      withChronicleTurnContext(
+        redactPublicEventForSide(event.publicPayload, side),
+        chronicleTurnContext[event.eventId],
+      ),
+    );
   const playerView = {
     ...getPlayerView(record.gameState, side),
     publicEvents: eventTail,
@@ -65,7 +72,7 @@ export function buildSidePayload(
       ? record.lifecycleResult?.winnerSide
       : record.gameState.winner);
   const finalStateHash = terminalWinner
-    ? lifecycleFinalHash ?? hashState(record.gameState)
+    ? (lifecycleFinalHash ?? hashState(record.gameState))
     : undefined;
   const resultSummary =
     terminalWinner && finalStateHash
@@ -91,15 +98,21 @@ export function buildSidePayload(
       connected: opponentIsAi || (opponent?.connected ?? false),
       ...(opponentDisplayName ? { displayName: opponentDisplayName } : {}),
     },
-    ...(playerView.pendingChoice ? { pendingChoice: playerView.pendingChoice } : {}),
+    ...(playerView.pendingChoice
+      ? { pendingChoice: playerView.pendingChoice }
+      : {}),
     ...(pendingUndo ? { pendingUndo } : {}),
     ...(aiTurnPresentation ? { aiTurnPresentation } : {}),
-    ...(deps.playerClockSnapshot ? { playerClock: deps.playerClockSnapshot } : {}),
+    ...(deps.playerClockSnapshot
+      ? { playerClock: deps.playerClockSnapshot }
+      : {}),
     ...(terminalWinner && finalStateHash
       ? { winner: terminalWinner, finalStateHash }
       : {}),
     ...(resultSummary ? { resultSummary } : {}),
-    ...(record.lifecycleResult ? { lifecycleResult: record.lifecycleResult } : {}),
+    ...(record.lifecycleResult
+      ? { lifecycleResult: record.lifecycleResult }
+      : {}),
     ...deps.retentionProtectionPayload,
   };
 }

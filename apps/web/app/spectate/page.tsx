@@ -93,7 +93,9 @@ export default function SpectatePage() {
 
   return (
     <main style={{ maxWidth: 1180, margin: "0 auto", padding: 24 }}>
-      <header style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
+      <header
+        style={{ display: "flex", justifyContent: "space-between", gap: 16 }}
+      >
         <div>
           <p style={{ margin: 0, opacity: 0.7 }}>Live-Zuschaueransicht</p>
           <h1 style={{ marginTop: 4 }}>Öffentliches Spiel</h1>
@@ -119,10 +121,12 @@ export default function SpectatePage() {
         <>
           <section style={{ ...panelStyle, marginTop: 24 }}>
             <strong>
-              Zug: {sideLabel(projection.board.activeSide)} · Phase: {projection.board.phase}
+              Zug: {sideLabel(projection.board.activeSide)} · Phase:{" "}
+              {projection.board.phase}
             </strong>
             <small style={{ display: "block", marginTop: 6, opacity: 0.7 }}>
-              Stand {projection.cursor.stateVersion} · wird automatisch aktualisiert
+              Stand {projection.cursor.stateVersion} · wird automatisch
+              aktualisiert
             </small>
           </section>
 
@@ -168,10 +172,20 @@ function SidePanel({ label, side }: { label: string; side: SideSummary }) {
   return (
     <article style={panelStyle}>
       <h2>{label}</h2>
-      <p>Credits: {side.credits} · Klicks: {side.clicks}</p>
-      <p>Agenda-Punkte: {side.agendaPoints} · Gewertet: {side.scoredCount}</p>
-      <p>Handkarten: {side.hiddenGripOrHqCount} · Nachziehstapel: {side.hiddenDrawPileCount}</p>
-      <p>Ablage: {side.discardCount}{label === "Runner" ? ` · Tags: ${side.tags}` : ""}</p>
+      <p>
+        Credits: {side.credits} · Klicks: {side.clicks}
+      </p>
+      <p>
+        Agenda-Punkte: {side.agendaPoints} · Gewertet: {side.scoredCount}
+      </p>
+      <p>
+        Handkarten: {side.hiddenGripOrHqCount} · Nachziehstapel:{" "}
+        {side.hiddenDrawPileCount}
+      </p>
+      <p>
+        Ablage: {side.discardCount}
+        {label === "Runner" ? ` · Tags: ${side.tags}` : ""}
+      </p>
     </article>
   );
 }

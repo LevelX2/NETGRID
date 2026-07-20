@@ -10,10 +10,7 @@ import {
 
 import type { PublicMatchEntry } from "../../lib/client-api";
 import { DeckSlotSelect } from "../decks/DeckSelectionControls";
-import {
-  formatLobbyTime,
-  shortMatchId,
-} from "./lobby-format";
+import { formatLobbyTime, shortMatchId } from "./lobby-format";
 import {
   publicMatchActionLabel,
   publicMatchParticipantLabel,

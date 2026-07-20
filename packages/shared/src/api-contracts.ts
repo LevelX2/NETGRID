@@ -100,8 +100,15 @@ export type ApiReplayAnalysisFrame = {
 };
 
 export type ApiClientGameMode = ApiMatchMode;
-export type ApiMatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
-export type ApiMatchCardPool = "originalset" | "originalset_classic" | "originalset_proteus" | "originalset_classic_proteus";
+export type ApiMatchFormat =
+  | "single_game"
+  | "rules_match"
+  | "two_game_side_swap";
+export type ApiMatchCardPool =
+  | "originalset"
+  | "originalset_classic"
+  | "originalset_proteus"
+  | "originalset_classic_proteus";
 export type ApiAiPacingMode = "fast" | "paced" | "manual";
 export type ApiSeriesPlayerSlot = "player_a" | "player_b";
 export type ApiSeriesStatus = "active" | "between_games" | "finished";
@@ -185,7 +192,12 @@ export type ApiGameResultSummary = {
 export type ApiPlayerIdentityKind = "account" | "guest" | "ai";
 
 export type ApiAccountStatisticsOutcome = "win" | "loss" | "draw" | "abandoned";
-export type ApiAccountStatisticsFinishKind = "regular" | "forfeit" | "time_expired" | "leave" | "abandon";
+export type ApiAccountStatisticsFinishKind =
+  | "regular"
+  | "forfeit"
+  | "time_expired"
+  | "leave"
+  | "abandon";
 export type ApiAccountStatisticsExclusionReason = "self_play";
 export type ApiAccountStatisticsPeriod = "all" | "30d" | "90d";
 
@@ -264,6 +276,7 @@ export type ApiRecentGameResult = {
   entryType?: "single_game";
   resultId?: string;
   matchId: string;
+  isPublic: boolean;
   matchStatus: Extract<ApiMatchStatus, "finished">;
   matchMode: ApiMatchMode;
   matchFormat: ApiMatchFormat;
@@ -299,6 +312,7 @@ export type ApiRecentGameResult = {
 
 export type ApiRecentSeriesGameResult = {
   matchId: string;
+  isPublic: boolean;
   gameNumber: number;
   finishedAt: string;
   winner: Winner;
@@ -319,6 +333,7 @@ export type ApiRecentSeriesResult = {
   entryType: "series";
   resultId: string;
   seriesId: string;
+  isPublic: boolean;
   mode: "two_game_side_swap";
   status: ApiSeriesStatus;
   matchMode: ApiMatchMode;
@@ -346,7 +361,10 @@ export type ApiRecentSeriesResult = {
 export type ApiRecentResultEntry = ApiRecentGameResult | ApiRecentSeriesResult;
 
 export type ApiLifecycleResultSummary = {
-  status: Extract<ApiMatchStatus, "cancelled" | "abandoned" | "forfeited" | "finished">;
+  status: Extract<
+    ApiMatchStatus,
+    "cancelled" | "abandoned" | "forfeited" | "finished"
+  >;
   reason: "cancel" | "leave" | "forfeit" | "time_expired";
   occurredAt: string;
   actorSide: Side;
@@ -472,7 +490,10 @@ export type ApiServerMessage =
     }
   | { type: "event_log_update"; payload: { events: PublicGameEvent[] } }
   | { type: "opponent_status"; payload: ApiOpponentStatus }
-  | { type: "undo_request"; payload: NonNullable<ApiSidePayload["pendingUndo"]> }
+  | {
+      type: "undo_request";
+      payload: NonNullable<ApiSidePayload["pendingUndo"]>;
+    }
   | { type: "ai_turn"; payload: ApiAiTurnPresentationState | null | undefined }
   | {
       type: "match_finished";
@@ -485,7 +506,12 @@ export type ApiServerMessage =
     }
   | {
       type: "error";
-      payload: { code: string; message: string; currentStateVersion?: number; playerView?: PlayerView };
+      payload: {
+        code: string;
+        message: string;
+        currentStateVersion?: number;
+        playerView?: PlayerView;
+      };
     }
   | {
       type: "action_receipt";
@@ -500,7 +526,10 @@ export type ApiServerMessage =
         stateHashAfter?: string;
       };
     }
-  | { type: "choice_request"; payload: { choice: PlayerView["pendingChoice"] | null } }
+  | {
+      type: "choice_request";
+      payload: { choice: PlayerView["pendingChoice"] | null };
+    }
   | { type: "pong"; payload: { clientTime?: number; serverTime: number } };
 
 export type ApiCreateMatchResponse = {

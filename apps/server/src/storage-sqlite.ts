@@ -1,15 +1,34 @@
 import { createHash, randomBytes } from "node:crypto";
-import { closeSync, copyFileSync, existsSync, mkdirSync, openSync, readFileSync, readSync, statSync, writeFileSync } from "node:fs";
+import {
+  closeSync,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  readSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, basename, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { hashState } from "@netgrid/engine";
 import type { GameEvent, GameState } from "@netgrid/shared";
-import { replayDecisionDebugFromTrace, type ActionPersistenceLoadInput, type AiDecisionTraceRecord, type MatchMode, type MatchStatus, type MultiplayerStorage, type StoredMatch } from "./multiplayer";
+import {
+  replayDecisionDebugFromTrace,
+  type ActionPersistenceLoadInput,
+  type AiDecisionTraceRecord,
+  type MatchMode,
+  type MatchStatus,
+  type MultiplayerStorage,
+  type StoredMatch,
+} from "./multiplayer";
 import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
 
 export const SQLITE_STORAGE_SCHEMA_VERSION = 3;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
-export const DEFAULT_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netgrid.sqlite";
+export const DEFAULT_SQLITE_STORAGE_PATH =
+  "data/runtime/multiplayer/netgrid.sqlite";
 export const DEFAULT_STORAGE_BACKUP_DIR = "data/runtime/backups";
 const PUBLIC_MATCH_BACKFILL_META_KEY = "public_match_backfill_v1_completed_at";
 const PARTIAL_STATE_SNAPSHOTS = Symbol("partialStateSnapshots");
@@ -68,7 +87,12 @@ export type BackupManifest = {
   source: "default_sqlite" | "configured_sqlite" | "pre_restore_sqlite";
   files: Array<{ name: string; sizeBytes: number; sha256: string }>;
   matchCount?: number;
-  reason?: "manual" | "pre_restore" | "pre_cleanup" | "pre_compaction" | "pre_optimization";
+  reason?:
+    | "manual"
+    | "pre_restore"
+    | "pre_cleanup"
+    | "pre_compaction"
+    | "pre_optimization";
 };
 
 export type StorageMaintenanceParticipant = {
@@ -151,12 +175,13 @@ export type StorageMaintenanceCleanupPolicyLastRun = {
   errorCode?: string;
 };
 
-export type StorageMaintenanceCleanupPolicy = StorageMaintenanceCleanupPolicyInput & {
-  backendOpsVersion: "Backend 0.5";
-  intervalMinutes: 60;
-  updatedAt?: string;
-  lastRun?: StorageMaintenanceCleanupPolicyLastRun;
-};
+export type StorageMaintenanceCleanupPolicy =
+  StorageMaintenanceCleanupPolicyInput & {
+    backendOpsVersion: "Backend 0.5";
+    intervalMinutes: 60;
+    updatedAt?: string;
+    lastRun?: StorageMaintenanceCleanupPolicyLastRun;
+  };
 
 export type StorageMaintenanceCleanupPolicyRunResult = {
   backendOpsVersion: "Backend 0.5";
@@ -330,9 +355,10 @@ export type StorageMaintenanceAiDecisionTraceIndexEntry = {
   meta: Record<string, unknown>;
 };
 
-export type StorageMaintenanceAiDecisionTraceDetail = StorageMaintenanceAiDecisionTraceIndexEntry & {
-  detail: Record<string, unknown>;
-};
+export type StorageMaintenanceAiDecisionTraceDetail =
+  StorageMaintenanceAiDecisionTraceIndexEntry & {
+    detail: Record<string, unknown>;
+  };
 
 export class StorageError extends Error {
   constructor(
@@ -345,7 +371,7 @@ export class StorageError extends Error {
       | "backup_invalid"
       | "backup_checksum_mismatch"
       | "backup_schema_unsupported",
-    message: string
+    message: string,
   ) {
     super(message);
     this.name = "StorageError";
@@ -373,20 +399,36 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     } catch (error) {
       openedDb?.close();
       if (error instanceof StorageError) throw error;
-      throw new StorageError("storage_corrupt", "Storage konnte nicht geöffnet werden. Bitte aus einem lokalen Backup wiederherstellen.");
+      throw new StorageError(
+        "storage_corrupt",
+        "Storage konnte nicht geöffnet werden. Bitte aus einem lokalen Backup wiederherstellen.",
+      );
     }
   }
 
-  async load(matchId: string, options: { includeStateSnapshots?: boolean } = {}): Promise<StoredMatch | undefined> {
-    const row = this.db.prepare("SELECT record_json FROM matches WHERE match_id = ?").get(matchId) as { record_json?: string } | undefined;
+  async load(
+    matchId: string,
+    options: { includeStateSnapshots?: boolean } = {},
+  ): Promise<StoredMatch | undefined> {
+    const row = this.db
+      .prepare("SELECT record_json FROM matches WHERE match_id = ?")
+      .get(matchId) as { record_json?: string } | undefined;
     if (!row?.record_json) return undefined;
     return this.recordFromJson(matchId, row.record_json, options);
   }
 
-  async loadForAction(matchId: string, input: ActionPersistenceLoadInput): Promise<StoredMatch | undefined> {
-    const row = this.db.prepare("SELECT record_json FROM matches WHERE match_id = ?").get(matchId) as { record_json?: string } | undefined;
+  async loadForAction(
+    matchId: string,
+    input: ActionPersistenceLoadInput,
+  ): Promise<StoredMatch | undefined> {
+    const row = this.db
+      .prepare("SELECT record_json FROM matches WHERE match_id = ?")
+      .get(matchId) as { record_json?: string } | undefined;
     if (!row?.record_json) return undefined;
-    return this.recordFromJson(matchId, row.record_json, { includeStateSnapshots: false, actionPersistence: input });
+    return this.recordFromJson(matchId, row.record_json, {
+      includeStateSnapshots: false,
+      actionPersistence: input,
+    });
   }
 
   async save(record: StoredMatch): Promise<void> {
@@ -397,25 +439,54 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   async saveActionDelta(record: StoredMatch): Promise<void> {
     validateStoredMatch(record);
     if (!record.actionPersistenceBaseline) {
-      throw new StorageError("stored_match_invalid", "Delta-Persistenz benötigt eine verifizierte Lade-Baseline.");
+      throw new StorageError(
+        "stored_match_invalid",
+        "Delta-Persistenz benötigt eine verifizierte Lade-Baseline.",
+      );
     }
     this.transaction(() => this.saveActionDeltaRecord(record));
   }
 
   async list(): Promise<StoredMatch[]> {
-    const rows = this.db.prepare("SELECT match_id, record_json FROM matches ORDER BY created_at ASC").all() as Array<{ match_id: string; record_json: string }>;
-    return rows.map((row) => this.recordFromJson(row.match_id, row.record_json));
+    const rows = this.db
+      .prepare(
+        "SELECT match_id, record_json FROM matches ORDER BY created_at ASC",
+      )
+      .all() as Array<{ match_id: string; record_json: string }>;
+    return rows.map((row) =>
+      this.recordFromJson(row.match_id, row.record_json),
+    );
   }
 
   async listOpenMatchCandidates(): Promise<StoredMatch[]> {
     const rows = this.db
-      .prepare("SELECT match_id, record_json FROM matches WHERE mode = ? AND status = ? ORDER BY created_at ASC")
-      .all("human_vs_human", "pending") as Array<{ match_id: string; record_json: string }>;
-    return rows.map((row) => this.recordFromJson(row.match_id, row.record_json));
+      .prepare(
+        "SELECT match_id, record_json FROM matches WHERE mode = ? AND status = ? ORDER BY created_at ASC",
+      )
+      .all("human_vs_human", "pending") as Array<{
+      match_id: string;
+      record_json: string;
+    }>;
+    return rows.map((row) =>
+      this.recordFromJson(row.match_id, row.record_json),
+    );
+  }
+
+  async listPublicMatchCandidates(): Promise<StoredMatch[]> {
+    const rows = this.db
+      .prepare(
+        "SELECT record_json AS recordJson FROM matches ORDER BY updated_at DESC",
+      )
+      .all() as Array<{ recordJson: string }>;
+    return rows
+      .map((row) => JSON.parse(row.recordJson) as StoredMatch)
+      .filter((record) => record.match.isPublic);
   }
 
   async health(): Promise<StorageHealth> {
-    const schemaVersion = Number(this.meta("schema_version") ?? SQLITE_STORAGE_SCHEMA_VERSION);
+    const schemaVersion = Number(
+      this.meta("schema_version") ?? SQLITE_STORAGE_SCHEMA_VERSION,
+    );
     return {
       ok: true,
       kind: "sqlite",
@@ -423,32 +494,48 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       storageFormat: this.meta("storage_format") ?? SQLITE_STORAGE_FORMAT,
       matchCount: this.matchCount(),
       database: basename(this.dbPath),
-      ...(this.meta("last_migration_at") ? { lastMigrationAt: this.meta("last_migration_at")! } : {})
+      ...(this.meta("last_migration_at")
+        ? { lastMigrationAt: this.meta("last_migration_at")! }
+        : {}),
     };
   }
 
-  async backup(reason: BackupManifest["reason"] = "manual"): Promise<{ backupDir: string; manifest: BackupManifest }> {
+  async backup(
+    reason: BackupManifest["reason"] = "manual",
+  ): Promise<{ backupDir: string; manifest: BackupManifest }> {
     return createSqliteStorageBackup({
       dbPath: this.dbPath,
       database: this.db,
       backupDir: this.backupDir,
-      schemaVersion: Number(this.meta("schema_version") ?? SQLITE_STORAGE_SCHEMA_VERSION),
+      schemaVersion: Number(
+        this.meta("schema_version") ?? SQLITE_STORAGE_SCHEMA_VERSION,
+      ),
       matchCount: this.matchCount(),
       reason,
-      source: reason === "pre_restore" ? "pre_restore_sqlite" : this.dbPath.endsWith(DEFAULT_SQLITE_STORAGE_PATH) ? "default_sqlite" : "configured_sqlite"
+      source:
+        reason === "pre_restore"
+          ? "pre_restore_sqlite"
+          : this.dbPath.endsWith(DEFAULT_SQLITE_STORAGE_PATH)
+            ? "default_sqlite"
+            : "configured_sqlite",
     });
   }
 
-  async maintenanceSummary(now = new Date()): Promise<StorageMaintenanceSummary> {
+  async maintenanceSummary(
+    now = new Date(),
+  ): Promise<StorageMaintenanceSummary> {
     const matches = this.maintenanceMatchesInternal({}, now);
     const matchCountsByStatus: Partial<Record<MatchStatus, number>> = {};
     const matchCountsByMode: Partial<Record<MatchMode, number>> = {};
     for (const match of matches) {
-      matchCountsByStatus[match.status] = (matchCountsByStatus[match.status] ?? 0) + 1;
+      matchCountsByStatus[match.status] =
+        (matchCountsByStatus[match.status] ?? 0) + 1;
       matchCountsByMode[match.mode] = (matchCountsByMode[match.mode] ?? 0) + 1;
     }
     const terminalCount = matches.filter((match) => match.terminal).length;
-    const oldestMatchCreatedAt = matches.map((match) => match.createdAt).sort()[0];
+    const oldestMatchCreatedAt = matches
+      .map((match) => match.createdAt)
+      .sort()[0];
     const newestMatchUpdatedAt = matches
       .map((match) => match.updatedAt)
       .sort()
@@ -461,9 +548,11 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         fileSizeBytes: existsSync(this.dbPath) ? statSync(this.dbPath).size : 0,
         pageSize: this.pragmaNumber("page_size"),
         pageCount: this.pragmaNumber("page_count"),
-        freelistCount: this.pragmaNumber("freelist_count")
+        freelistCount: this.pragmaNumber("freelist_count"),
       },
-      schemaVersion: Number(this.meta("schema_version") ?? SQLITE_STORAGE_SCHEMA_VERSION),
+      schemaVersion: Number(
+        this.meta("schema_version") ?? SQLITE_STORAGE_SCHEMA_VERSION,
+      ),
       storageFormat: this.meta("storage_format") ?? SQLITE_STORAGE_FORMAT,
       matchCount: matches.length,
       terminalCount,
@@ -473,16 +562,29 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       ...(oldestMatchCreatedAt ? { oldestMatchCreatedAt } : {}),
       ...(newestMatchUpdatedAt ? { newestMatchUpdatedAt } : {}),
       tableSizes: this.maintenanceTableSizes(),
-      largestMatches: [...matches].sort((a, b) => b.sizes.approximateTotalBytes - a.sizes.approximateTotalBytes).slice(0, 8)
+      largestMatches: [...matches]
+        .sort(
+          (a, b) =>
+            b.sizes.approximateTotalBytes - a.sizes.approximateTotalBytes,
+        )
+        .slice(0, 8),
     };
   }
 
-  async maintenanceMatches(filters: StorageMaintenanceMatchFilters = {}, now = new Date()): Promise<StorageMaintenanceMatchEntry[]> {
+  async maintenanceMatches(
+    filters: StorageMaintenanceMatchFilters = {},
+    now = new Date(),
+  ): Promise<StorageMaintenanceMatchEntry[]> {
     return this.maintenanceMatchesInternal(filters, now);
   }
 
-  async maintenanceMatchDetail(matchId: string, now = new Date()): Promise<StorageMaintenanceMatchDetail | undefined> {
-    const entry = this.maintenanceMatchesInternal({}, now).find((match) => match.matchId === matchId);
+  async maintenanceMatchDetail(
+    matchId: string,
+    now = new Date(),
+  ): Promise<StorageMaintenanceMatchDetail | undefined> {
+    const entry = this.maintenanceMatchesInternal({}, now).find(
+      (match) => match.matchId === matchId,
+    );
     if (!entry) return undefined;
     const rows = this.db
       .prepare(
@@ -494,9 +596,18 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           (SELECT COUNT(*) FROM pending_undo WHERE match_id = ?) AS pendingUndo,
           (SELECT COUNT(*) FROM start_lobbies WHERE match_id = ?) AS startLobbies,
           (SELECT COUNT(*) FROM private_deck_snapshots WHERE match_id = ?) AS deckSnapshotsRedacted,
-          (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = ?) AS aiDecisionTraces`
+          (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = ?) AS aiDecisionTraces`,
       )
-      .get(matchId, matchId, matchId, matchId, matchId, matchId, matchId, matchId) as {
+      .get(
+        matchId,
+        matchId,
+        matchId,
+        matchId,
+        matchId,
+        matchId,
+        matchId,
+        matchId,
+      ) as {
       events: number;
       stateSnapshots: number;
       actionReceipts: number;
@@ -516,17 +627,20 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         pendingUndo: Number(rows.pendingUndo),
         startLobbies: Number(rows.startLobbies),
         deckSnapshotsRedacted: Number(rows.deckSnapshotsRedacted),
-        aiDecisionTraces: Number(rows.aiDecisionTraces)
+        aiDecisionTraces: Number(rows.aiDecisionTraces),
       },
       cleanupAssessment: {
         eligibleInReadOnlySlice: false,
         recommendation: "not_active",
-        reason: "Backend 0.5 erster Schnitt ist read-only; echte Löschung bleibt bis Backup-, Dry-Run- und Restore-Tests gesperrt."
-      }
+        reason:
+          "Backend 0.5 erster Schnitt ist read-only; echte Löschung bleibt bis Backup-, Dry-Run- und Restore-Tests gesperrt.",
+      },
     };
   }
 
-  async maintenanceAiDecisionTraceMatches(): Promise<StorageMaintenanceAiDecisionTraceMatchEntry[]> {
+  async maintenanceAiDecisionTraceMatches(): Promise<
+    StorageMaintenanceAiDecisionTraceMatchEntry[]
+  > {
     const rows = this.db
       .prepare(
         `SELECT
@@ -542,56 +656,102 @@ export class SqliteMatchStorage implements MultiplayerStorage {
          FROM matches m
          LEFT JOIN ai_decision_traces t ON t.match_id = m.match_id
          GROUP BY m.match_id
-         ORDER BY COALESCE(lastTraceAt, m.updated_at) DESC, m.updated_at DESC`
+         ORDER BY COALESCE(lastTraceAt, m.updated_at) DESC, m.updated_at DESC`,
       )
-      .all() as Array<{ matchId: string; status: MatchStatus; mode: MatchMode; createdAt: string; updatedAt: string; recordJson: string; traceCount: number; firstTraceAt?: string; lastTraceAt?: string }>;
+      .all() as Array<{
+      matchId: string;
+      status: MatchStatus;
+      mode: MatchMode;
+      createdAt: string;
+      updatedAt: string;
+      recordJson: string;
+      traceCount: number;
+      firstTraceAt?: string;
+      lastTraceAt?: string;
+    }>;
     return rows.flatMap((row) => {
       const record = JSON.parse(row.recordJson) as StoredMatch;
-      const aiTraceMode = record.match.aiTraceMode === "summary" ? "summary" : record.match.aiTraceMode === "detailed" ? "detailed" : undefined;
+      const aiTraceMode =
+        record.match.aiTraceMode === "summary"
+          ? "summary"
+          : record.match.aiTraceMode === "detailed"
+            ? "detailed"
+            : undefined;
       if (!aiTraceMode && Number(row.traceCount) === 0) return [];
-      return [{
-        matchId: row.matchId,
-        status: row.status,
-        mode: row.mode,
-        aiTraceMode: aiTraceMode ?? "detailed",
-        traceCount: Number(row.traceCount),
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-        ...(row.firstTraceAt ? { firstTraceAt: row.firstTraceAt } : {}),
-        ...(row.lastTraceAt ? { lastTraceAt: row.lastTraceAt } : {})
-      }];
+      return [
+        {
+          matchId: row.matchId,
+          status: row.status,
+          mode: row.mode,
+          aiTraceMode: aiTraceMode ?? "detailed",
+          traceCount: Number(row.traceCount),
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+          ...(row.firstTraceAt ? { firstTraceAt: row.firstTraceAt } : {}),
+          ...(row.lastTraceAt ? { lastTraceAt: row.lastTraceAt } : {}),
+        },
+      ];
     });
   }
 
-  async maintenanceAiDecisionTraceIndex(matchId: string, filters: { afterDecisionIndex?: number } = {}): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[]> {
+  async maintenanceAiDecisionTraceIndex(
+    matchId: string,
+    filters: { afterDecisionIndex?: number } = {},
+  ): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[]> {
     if (!this.tableExists("ai_decision_traces")) return [];
-    return this.aiDecisionTraceRecords(matchId, filters).map((trace) => aiDecisionTraceIndexEntry(trace));
+    return this.aiDecisionTraceRecords(matchId, filters).map((trace) =>
+      aiDecisionTraceIndexEntry(trace),
+    );
   }
 
-  async maintenanceAiDecisionTraceDetail(traceId: string): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined> {
+  async maintenanceAiDecisionTraceDetail(
+    traceId: string,
+  ): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined> {
     if (!this.tableExists("ai_decision_traces")) return undefined;
-    const row = this.db.prepare("SELECT match_id AS matchId FROM ai_decision_traces WHERE trace_id = ? LIMIT 1").get(traceId) as { matchId?: string } | undefined;
+    const row = this.db
+      .prepare(
+        "SELECT match_id AS matchId FROM ai_decision_traces WHERE trace_id = ? LIMIT 1",
+      )
+      .get(traceId) as { matchId?: string } | undefined;
     if (!row?.matchId) return undefined;
-    const trace = this.aiDecisionTraceRecords(row.matchId).find((candidate) => candidate.traceId === traceId);
-    return trace ? { ...aiDecisionTraceIndexEntry(trace), detail: trace.traceJson } : undefined;
+    const trace = this.aiDecisionTraceRecords(row.matchId).find(
+      (candidate) => candidate.traceId === traceId,
+    );
+    return trace
+      ? { ...aiDecisionTraceIndexEntry(trace), detail: trace.traceJson }
+      : undefined;
   }
 
-  async maintenanceCleanupPreview(filters: StorageMaintenanceCleanupFilters, now = new Date()): Promise<StorageMaintenanceCleanupPreview> {
+  async maintenanceCleanupPreview(
+    filters: StorageMaintenanceCleanupFilters,
+    now = new Date(),
+  ): Promise<StorageMaintenanceCleanupPreview> {
     return this.maintenanceCleanupPreviewInternal(filters, now);
   }
 
-  async maintenanceCleanupApply(input: StorageMaintenanceCleanupApplyInput, now = new Date()): Promise<StorageMaintenanceCleanupApplyResult> {
+  async maintenanceCleanupApply(
+    input: StorageMaintenanceCleanupApplyInput,
+    now = new Date(),
+  ): Promise<StorageMaintenanceCleanupApplyResult> {
     const preview = this.maintenanceCleanupPreviewInternal(input.filters, now);
-    if (preview.previewId !== input.previewId) throw new Error("maintenance_preview_mismatch");
+    if (preview.previewId !== input.previewId)
+      throw new Error("maintenance_preview_mismatch");
     if (preview.matchCount === 0) throw new Error("maintenance_no_matches");
 
     const beforeBytes = this.databaseSizeBytes();
-    const backup = input.createBackup === true ? await this.backup("pre_cleanup") : undefined;
+    const backup =
+      input.createBackup === true
+        ? await this.backup("pre_cleanup")
+        : undefined;
     const deletedMatchIds = preview.matches.map((match) => match.matchId);
     const deletedCount = this.deleteWholeMatches(deletedMatchIds);
     const afterDeleteBytes = this.databaseSizeBytes();
     const integrityCheck = this.integrityCheck();
-    if (integrityCheck !== "ok") throw new StorageError("storage_corrupt", "Storage-Integritätsprüfung ist fehlgeschlagen.");
+    if (integrityCheck !== "ok")
+      throw new StorageError(
+        "storage_corrupt",
+        "Storage-Integritätsprüfung ist fehlgeschlagen.",
+      );
 
     let afterVacuumBytes: number | undefined;
     if (input.vacuumAfter && deletedCount > 0) {
@@ -613,53 +773,78 @@ export class SqliteMatchStorage implements MultiplayerStorage {
             backup: {
               backupDir: backup.backupDir,
               backupId: backup.manifest.backupId,
-              createdAt: backup.manifest.createdAt
-            }
+              createdAt: backup.manifest.createdAt,
+            },
           }
         : {}),
       integrityCheck,
       vacuum: {
         requested: input.vacuumAfter === true,
-        performed: input.vacuumAfter === true && deletedCount > 0
+        performed: input.vacuumAfter === true && deletedCount > 0,
       },
       database: {
         beforeBytes,
         afterDeleteBytes,
-        ...(afterVacuumBytes !== undefined ? { afterVacuumBytes } : {})
-      }
+        ...(afterVacuumBytes !== undefined ? { afterVacuumBytes } : {}),
+      },
     };
   }
 
-  async maintenanceCompactSnapshots(now = new Date()): Promise<StorageMaintenanceSnapshotCompactionResult> {
+  async maintenanceCompactSnapshots(
+    now = new Date(),
+  ): Promise<StorageMaintenanceSnapshotCompactionResult> {
     const generatedAt = now.toISOString();
     const beforeBytes = this.databaseSizeBytes();
     const beforePayloadBytes = this.compactionPayloadBytes();
     const backup = await this.backup("pre_compaction");
-    const rows = this.db.prepare("SELECT match_id AS matchId, record_json AS recordJson FROM matches ORDER BY created_at ASC").all() as Array<{ matchId: string; recordJson: string }>;
+    const rows = this.db
+      .prepare(
+        "SELECT match_id AS matchId, record_json AS recordJson FROM matches ORDER BY created_at ASC",
+      )
+      .all() as Array<{ matchId: string; recordJson: string }>;
     const result = {
       compactedMatchIds: new Set<string>(),
       recordRowsCompacted: 0,
       gameStateRowsCompacted: 0,
-      stateSnapshotRowsCompacted: 0
+      stateSnapshotRowsCompacted: 0,
     };
 
     this.transaction(() => {
-      const updateMatch = this.db.prepare("UPDATE matches SET record_json = ? WHERE match_id = ?");
-      const updateGameState = this.db.prepare("UPDATE game_states SET game_state_json = ? WHERE match_id = ?");
-      const updateSnapshot = this.db.prepare("UPDATE state_snapshots SET game_state_json = ? WHERE match_id = ? AND snapshot_id = ?");
+      const updateMatch = this.db.prepare(
+        "UPDATE matches SET record_json = ? WHERE match_id = ?",
+      );
+      const updateGameState = this.db.prepare(
+        "UPDATE game_states SET game_state_json = ? WHERE match_id = ?",
+      );
+      const updateSnapshot = this.db.prepare(
+        "UPDATE state_snapshots SET game_state_json = ? WHERE match_id = ? AND snapshot_id = ?",
+      );
       for (const row of rows) {
         const record = JSON.parse(row.recordJson) as StoredMatch;
-        const gameStateRow = this.db.prepare("SELECT game_state_json AS gameStateJson FROM game_states WHERE match_id = ?").get(row.matchId) as { gameStateJson?: string | null } | undefined;
-        const gameState = gameStateRow?.gameStateJson ? (JSON.parse(gameStateRow.gameStateJson) as GameState) : undefined;
+        const gameStateRow = this.db
+          .prepare(
+            "SELECT game_state_json AS gameStateJson FROM game_states WHERE match_id = ?",
+          )
+          .get(row.matchId) as { gameStateJson?: string | null } | undefined;
+        const gameState = gameStateRow?.gameStateJson
+          ? (JSON.parse(gameStateRow.gameStateJson) as GameState)
+          : undefined;
         const snapshotRows = this.db
-          .prepare("SELECT snapshot_id AS snapshotId, game_state_json AS gameStateJson FROM state_snapshots WHERE match_id = ? ORDER BY state_version ASC")
-          .all(row.matchId) as Array<{ snapshotId: string; gameStateJson: string }>;
+          .prepare(
+            "SELECT snapshot_id AS snapshotId, game_state_json AS gameStateJson FROM state_snapshots WHERE match_id = ? ORDER BY state_version ASC",
+          )
+          .all(row.matchId) as Array<{
+          snapshotId: string;
+          gameStateJson: string;
+        }>;
         const snapshots = snapshotRows.map((snapshot) => ({
           snapshotId: snapshot.snapshotId,
-          gameState: JSON.parse(snapshot.gameStateJson) as GameState
+          gameState: JSON.parse(snapshot.gameStateJson) as GameState,
         }));
 
-        const compactRecordJson = JSON.stringify(compactRecordForStorage(record));
+        const compactRecordJson = JSON.stringify(
+          compactRecordForStorage(record),
+        );
         if (compactRecordJson !== row.recordJson) {
           updateMatch.run(compactRecordJson, row.matchId);
           result.recordRowsCompacted += 1;
@@ -667,7 +852,9 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         }
 
         if (gameState && gameStateRow?.gameStateJson) {
-          const compactGameStateJson = JSON.stringify(gameStateForStorage(gameState));
+          const compactGameStateJson = JSON.stringify(
+            gameStateForStorage(gameState),
+          );
           if (compactGameStateJson !== gameStateRow.gameStateJson) {
             updateGameState.run(compactGameStateJson, row.matchId);
             result.gameStateRowsCompacted += 1;
@@ -676,10 +863,18 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         }
 
         for (const snapshot of snapshots) {
-          const original = snapshotRows.find((candidate) => candidate.snapshotId === snapshot.snapshotId);
-          const compactSnapshotJson = JSON.stringify(gameStateForStorage(snapshot.gameState));
+          const original = snapshotRows.find(
+            (candidate) => candidate.snapshotId === snapshot.snapshotId,
+          );
+          const compactSnapshotJson = JSON.stringify(
+            gameStateForStorage(snapshot.gameState),
+          );
           if (original && compactSnapshotJson !== original.gameStateJson) {
-            updateSnapshot.run(compactSnapshotJson, row.matchId, snapshot.snapshotId);
+            updateSnapshot.run(
+              compactSnapshotJson,
+              row.matchId,
+              snapshot.snapshotId,
+            );
             result.stateSnapshotRowsCompacted += 1;
             result.compactedMatchIds.add(row.matchId);
           }
@@ -688,14 +883,18 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     });
 
     const integrityCheck = this.integrityCheck();
-    if (integrityCheck !== "ok") throw new StorageError("storage_corrupt", "Storage-Integritätsprüfung ist fehlgeschlagen.");
+    if (integrityCheck !== "ok")
+      throw new StorageError(
+        "storage_corrupt",
+        "Storage-Integritätsprüfung ist fehlgeschlagen.",
+      );
     return {
       backendOpsVersion: "Backend 0.5",
       generatedAt,
       backup: {
         backupDir: backup.backupDir,
         backupId: backup.manifest.backupId,
-        createdAt: backup.manifest.createdAt
+        createdAt: backup.manifest.createdAt,
       },
       backupCreated: true,
       matchesScanned: rows.length,
@@ -708,12 +907,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         beforeBytes,
         afterRewriteBytes: this.databaseSizeBytes(),
         beforePayloadBytes,
-        afterPayloadBytes: this.compactionPayloadBytes()
-      }
+        afterPayloadBytes: this.compactionPayloadBytes(),
+      },
     };
   }
 
-  async maintenanceOptimize(now = new Date()): Promise<StorageMaintenanceOptimizeResult> {
+  async maintenanceOptimize(
+    now = new Date(),
+  ): Promise<StorageMaintenanceOptimizeResult> {
     const generatedAt = now.toISOString();
     const beforeBytes = this.databaseSizeBytes();
     const pageSize = this.pragmaNumber("page_size");
@@ -725,7 +926,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         .prepare(
           `UPDATE events
            SET public_payload_json = json_remove(public_payload_json, '$.publicPayload.aiDecisionDebug')
-           WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL`
+           WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL`,
         )
         .run();
       return Number(result.changes);
@@ -742,7 +943,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       backup: {
         backupDir: backup.backupDir,
         backupId: backup.manifest.backupId,
-        createdAt: backup.manifest.createdAt
+        createdAt: backup.manifest.createdAt,
       },
       backupCreated: true,
       normalizedAiDebugEventRows,
@@ -753,8 +954,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         reclaimedBytes: Math.max(0, beforeBytes - afterBytes),
         pageSize,
         freelistPagesBefore,
-        freelistPagesAfter: this.pragmaNumber("freelist_count")
-      }
+        freelistPagesAfter: this.pragmaNumber("freelist_count"),
+      },
     };
   }
 
@@ -762,14 +963,27 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     return this.maintenanceCleanupPolicyInternal();
   }
 
-  async setMaintenanceCleanupPolicy(input: StorageMaintenanceCleanupPolicyInput, now = new Date()): Promise<StorageMaintenanceCleanupPolicy> {
+  async setMaintenanceCleanupPolicy(
+    input: StorageMaintenanceCleanupPolicyInput,
+    now = new Date(),
+  ): Promise<StorageMaintenanceCleanupPolicy> {
     const current = this.maintenanceCleanupPolicyInternal();
-    const policy = normalizeCleanupPolicy(input, now.toISOString(), current.lastRun);
-    this.setMeta("maintenance_cleanup_policy_json", JSON.stringify(policy), now.toISOString());
+    const policy = normalizeCleanupPolicy(
+      input,
+      now.toISOString(),
+      current.lastRun,
+    );
+    this.setMeta(
+      "maintenance_cleanup_policy_json",
+      JSON.stringify(policy),
+      now.toISOString(),
+    );
     return policy;
   }
 
-  async runMaintenanceCleanupPolicy(now = new Date()): Promise<StorageMaintenanceCleanupPolicyRunResult> {
+  async runMaintenanceCleanupPolicy(
+    now = new Date(),
+  ): Promise<StorageMaintenanceCleanupPolicyRunResult> {
     const policy = this.maintenanceCleanupPolicyInternal();
     const startedAt = now.toISOString();
     if (!policy.enabled) {
@@ -780,16 +994,23 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         deletedCount: 0,
         approximateBytes: 0,
         backupCreated: false,
-        skippedReason: "disabled"
+        skippedReason: "disabled",
       });
-      return { backendOpsVersion: "Backend 0.5", generatedAt: startedAt, policy: nextPolicy, skippedReason: "disabled" };
+      return {
+        backendOpsVersion: "Backend 0.5",
+        generatedAt: startedAt,
+        policy: nextPolicy,
+        skippedReason: "disabled",
+      };
     }
 
     const filters: StorageMaintenanceCleanupFilters = {
       statuses: policy.statuses,
       olderThanMinutes: policy.olderThanDays * 24 * 60,
       ...(policy.limit !== undefined ? { limit: policy.limit } : {}),
-      ...(policy.includeProtected !== undefined ? { includeProtected: policy.includeProtected } : {})
+      ...(policy.includeProtected !== undefined
+        ? { includeProtected: policy.includeProtected }
+        : {}),
     };
     const preview = this.maintenanceCleanupPreviewInternal(filters, now);
     if (preview.matchCount === 0) {
@@ -801,18 +1022,27 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         deletedCount: 0,
         approximateBytes: 0,
         backupCreated: false,
-        skippedReason: "no_matches"
+        skippedReason: "no_matches",
       });
-      return { backendOpsVersion: "Backend 0.5", generatedAt: finishedAt, policy: nextPolicy, preview, skippedReason: "no_matches" };
+      return {
+        backendOpsVersion: "Backend 0.5",
+        generatedAt: finishedAt,
+        policy: nextPolicy,
+        preview,
+        skippedReason: "no_matches",
+      };
     }
 
     try {
-      const applyResult = await this.maintenanceCleanupApply({
-        filters,
-        previewId: preview.previewId,
-        createBackup: policy.createBackup === true,
-        ...(policy.vacuumAfter === true ? { vacuumAfter: true } : {})
-      }, now);
+      const applyResult = await this.maintenanceCleanupApply(
+        {
+          filters,
+          previewId: preview.previewId,
+          createBackup: policy.createBackup === true,
+          ...(policy.vacuumAfter === true ? { vacuumAfter: true } : {}),
+        },
+        now,
+      );
       const finishedAt = new Date().toISOString();
       const nextPolicy = this.recordCleanupPolicyRun(policy, {
         startedAt,
@@ -821,9 +1051,17 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         deletedCount: applyResult.deletedCount,
         approximateBytes: applyResult.approximateBytes,
         backupCreated: applyResult.backupCreated,
-        ...(applyResult.backup ? { backupId: applyResult.backup.backupId } : {})
+        ...(applyResult.backup
+          ? { backupId: applyResult.backup.backupId }
+          : {}),
       });
-      return { backendOpsVersion: "Backend 0.5", generatedAt: finishedAt, policy: nextPolicy, preview, applyResult };
+      return {
+        backendOpsVersion: "Backend 0.5",
+        generatedAt: finishedAt,
+        policy: nextPolicy,
+        preview,
+        applyResult,
+      };
     } catch (error) {
       const finishedAt = new Date().toISOString();
       const nextPolicy = this.recordCleanupPolicyRun(policy, {
@@ -833,17 +1071,28 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         deletedCount: 0,
         approximateBytes: preview.approximateBytes,
         backupCreated: false,
-        errorCode: error instanceof Error ? error.message : "cleanup_failed"
+        errorCode: error instanceof Error ? error.message : "cleanup_failed",
       });
-      return { backendOpsVersion: "Backend 0.5", generatedAt: finishedAt, policy: nextPolicy, preview };
+      return {
+        backendOpsVersion: "Backend 0.5",
+        generatedAt: finishedAt,
+        policy: nextPolicy,
+        preview,
+      };
     }
   }
 
-  async maintenanceSetRetentionProtection(matchId: string, protectedValue: boolean, now = new Date()): Promise<StorageMaintenanceMatchDetail | undefined> {
+  async maintenanceSetRetentionProtection(
+    matchId: string,
+    protectedValue: boolean,
+    now = new Date(),
+  ): Promise<StorageMaintenanceMatchDetail | undefined> {
     const record = await this.load(matchId);
     if (!record) return undefined;
     const nowIso = now.toISOString();
-    record.match.retentionProtection = protectedValue ? { protected: true, protectedAt: nowIso } : { protected: false };
+    record.match.retentionProtection = protectedValue
+      ? { protected: true, protectedAt: nowIso }
+      : { protected: false };
     record.match.updatedAt = nowIso;
     record.match.matchVersion += 1;
     await this.save(record);
@@ -858,15 +1107,30 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     const hasMeta = this.tableExists("storage_meta");
     if (!hasMeta) {
       if (this.userTableCount() > 0) {
-        throw new StorageError("schema_missing", "Storage-Schema konnte nicht sicher erkannt werden.");
+        throw new StorageError(
+          "schema_missing",
+          "Storage-Schema konnte nicht sicher erkannt werden.",
+        );
       }
       this.createSchema();
       return;
     }
     const version = Number(this.meta("schema_version") ?? 0);
-    if (!Number.isInteger(version)) throw new StorageError("schema_missing", "Storage-Schema konnte nicht sicher erkannt werden.");
-    if (version > SQLITE_STORAGE_SCHEMA_VERSION) throw new StorageError("schema_too_new", "Storage ist neuer als dieser Servercode.");
-    if (version < SQLITE_STORAGE_SCHEMA_VERSION) throw new StorageError("schema_missing", "Storage nutzt nicht das aktuelle Schema.");
+    if (!Number.isInteger(version))
+      throw new StorageError(
+        "schema_missing",
+        "Storage-Schema konnte nicht sicher erkannt werden.",
+      );
+    if (version > SQLITE_STORAGE_SCHEMA_VERSION)
+      throw new StorageError(
+        "schema_too_new",
+        "Storage ist neuer als dieser Servercode.",
+      );
+    if (version < SQLITE_STORAGE_SCHEMA_VERSION)
+      throw new StorageError(
+        "schema_missing",
+        "Storage nutzt nicht das aktuelle Schema.",
+      );
     this.createSchema();
   }
 
@@ -1187,15 +1451,25 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         );
       `);
       const now = new Date().toISOString();
-      this.setMeta("schema_version", String(SQLITE_STORAGE_SCHEMA_VERSION), now);
+      this.setMeta(
+        "schema_version",
+        String(SQLITE_STORAGE_SCHEMA_VERSION),
+        now,
+      );
       this.setMeta("storage_format", SQLITE_STORAGE_FORMAT, now);
       if (!this.meta("created_at")) this.setMeta("created_at", now, now);
-      if (!this.meta("last_migration_at")) this.setMeta("last_migration_at", now, now);
-      if (!this.meta("account_statistics_since")) this.setMeta("account_statistics_since", now, now);
+      if (!this.meta("last_migration_at"))
+        this.setMeta("last_migration_at", now, now);
+      if (!this.meta("account_statistics_since"))
+        this.setMeta("account_statistics_since", now, now);
     });
   }
 
-  private recordFromJson(matchId: string, recordJson: string, options: RecordLoadOptions = {}): StoredMatch {
+  private recordFromJson(
+    matchId: string,
+    recordJson: string,
+    options: RecordLoadOptions = {},
+  ): StoredMatch {
     const record = JSON.parse(recordJson) as StoredMatchWithStorageFlags;
     this.hydrateRecordFromTables(matchId, record, options);
     validateStoredMatch(record);
@@ -1206,9 +1480,13 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     if (this.meta(PUBLIC_MATCH_BACKFILL_META_KEY)) return;
     this.transaction(() => {
       const rows = this.db
-        .prepare("SELECT match_id AS matchId, record_json AS recordJson FROM matches")
+        .prepare(
+          "SELECT match_id AS matchId, record_json AS recordJson FROM matches",
+        )
         .all() as Array<{ matchId: string; recordJson: string }>;
-      const update = this.db.prepare("UPDATE matches SET record_json = ? WHERE match_id = ?");
+      const update = this.db.prepare(
+        "UPDATE matches SET record_json = ? WHERE match_id = ?",
+      );
       for (const row of rows) {
         const record = JSON.parse(row.recordJson) as {
           match?: { isPublic?: unknown; discoverableInLan?: unknown };
@@ -1224,13 +1502,19 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     });
   }
 
-  private hydrateRecordFromTables(matchId: string, record: StoredMatchWithStorageFlags, options: RecordLoadOptions = {}): void {
+  private hydrateRecordFromTables(
+    matchId: string,
+    record: StoredMatchWithStorageFlags,
+    options: RecordLoadOptions = {},
+  ): void {
     if (!this.tableExists("matches")) return;
     let engineEventLog: GameEvent[] | undefined;
 
     if (this.tableExists("sessions")) {
       const sessions = this.db
-        .prepare("SELECT session_id AS sessionId, side, display_name AS displayName, session_token_hash AS sessionTokenHash, reconnect_token_hash AS reconnectTokenHash, connected, created_at AS createdAt, last_seen_at AS lastSeenAt FROM sessions WHERE match_id = ? ORDER BY created_at ASC")
+        .prepare(
+          "SELECT session_id AS sessionId, side, display_name AS displayName, session_token_hash AS sessionTokenHash, reconnect_token_hash AS reconnectTokenHash, connected, created_at AS createdAt, last_seen_at AS lastSeenAt FROM sessions WHERE match_id = ? ORDER BY created_at ASC",
+        )
         .all(matchId) as Array<{
         sessionId: string;
         side: StoredMatch["sessions"][number]["side"];
@@ -1241,19 +1525,34 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         createdAt: string;
         lastSeenAt: string;
       }>;
-      if (sessions.length > 0) record.sessions = sessions.map((session) => ({ ...session, matchId, connected: session.connected === 1 }));
+      if (sessions.length > 0)
+        record.sessions = sessions.map((session) => ({
+          ...session,
+          matchId,
+          connected: session.connected === 1,
+        }));
     }
 
     if (this.tableExists("tokens")) {
       const tokens = this.db
-        .prepare("SELECT token_id AS tokenId, kind, allowed_side AS allowedSide, token_hash AS tokenHash, created_at AS createdAt, expires_at AS expiresAt, revoked_at AS revokedAt, used_at AS usedAt FROM tokens WHERE match_id = ? ORDER BY created_at ASC")
+        .prepare(
+          "SELECT token_id AS tokenId, kind, allowed_side AS allowedSide, token_hash AS tokenHash, created_at AS createdAt, expires_at AS expiresAt, revoked_at AS revokedAt, used_at AS usedAt FROM tokens WHERE match_id = ? ORDER BY created_at ASC",
+        )
         .all(matchId) as Array<StoredMatch["tokens"][number]>;
-      if (tokens.length > 0) record.tokens = tokens.map((token) => ({ ...token, matchId }));
+      if (tokens.length > 0)
+        record.tokens = tokens.map((token) => ({ ...token, matchId }));
     }
 
     if (this.tableExists("game_states")) {
-      const row = this.db.prepare("SELECT game_state_json AS gameStateJson FROM game_states WHERE match_id = ?").get(matchId) as { gameStateJson?: string | null } | undefined;
-      if (row?.gameStateJson) record.gameState = JSON.parse(row.gameStateJson) as StoredMatch["gameState"];
+      const row = this.db
+        .prepare(
+          "SELECT game_state_json AS gameStateJson FROM game_states WHERE match_id = ?",
+        )
+        .get(matchId) as { gameStateJson?: string | null } | undefined;
+      if (row?.gameStateJson)
+        record.gameState = JSON.parse(
+          row.gameStateJson,
+        ) as StoredMatch["gameState"];
     }
 
     if (this.tableExists("events")) {
@@ -1273,9 +1572,13 @@ export class SqliteMatchStorage implements MultiplayerStorage {
                  json_extract(public_payload_json, '$.publicPayload.hiddenZoneAction') AS hiddenZoneAction,
                  private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier
                FROM events, event_total WHERE match_id = ? ORDER BY event_index ASC`
-            : "SELECT event_id AS eventId, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson, NULL AS eventType, NULL AS actor, NULL AS actionType, NULL AS discardResolved, NULL AS hiddenZoneAction, private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier FROM events WHERE match_id = ? ORDER BY event_index ASC"
+            : "SELECT event_id AS eventId, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson, NULL AS eventType, NULL AS actor, NULL AS actionType, NULL AS discardResolved, NULL AS hiddenZoneAction, private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier FROM events WHERE match_id = ? ORDER BY event_index ASC",
         )
-        .all(...(options.actionPersistence ? [matchId, SIDE_PAYLOAD_EVENT_TAIL_LIMIT, matchId] : [matchId])) as Array<{
+        .all(
+          ...(options.actionPersistence
+            ? [matchId, SIDE_PAYLOAD_EVENT_TAIL_LIMIT, matchId]
+            : [matchId]),
+        ) as Array<{
         eventId: string;
         stateVersionBefore: number;
         stateVersionAfter: number;
@@ -1297,20 +1600,26 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           stateVersionAfter: Number(event.stateVersionAfter),
           stateHashAfter: event.stateHashAfter,
           publicPayload: event.publicPayloadJson
-            ? JSON.parse(event.publicPayloadJson) as StoredMatch["eventLog"][number]["publicPayload"]
+            ? (JSON.parse(
+                event.publicPayloadJson,
+              ) as StoredMatch["eventLog"][number]["publicPayload"])
             : actionContextPublicEvent(event),
           privatePayloadLocalOnly: event.privatePayloadLocalOnly === 1,
-          hiddenInfoBarrier: event.hiddenInfoBarrier === 1
+          hiddenInfoBarrier: event.hiddenInfoBarrier === 1,
         }));
       }
     }
 
     if (this.tableExists("engine_events")) {
       const events = this.db
-        .prepare("SELECT event_json AS eventJson FROM engine_events WHERE match_id = ? ORDER BY event_index ASC")
+        .prepare(
+          "SELECT event_json AS eventJson FROM engine_events WHERE match_id = ? ORDER BY event_index ASC",
+        )
         .all(matchId) as Array<{ eventJson: string }>;
       if (events.length > 0) {
-        engineEventLog = events.map((event) => JSON.parse(event.eventJson) as GameEvent);
+        engineEventLog = events.map(
+          (event) => JSON.parse(event.eventJson) as GameEvent,
+        );
         if (record.gameState) record.gameState.eventLog = engineEventLog;
       }
     }
@@ -1327,9 +1636,19 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         .prepare(
           options.actionPersistence
             ? "SELECT idempotency_key AS idempotencyKey, side, accepted, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, error_code AS errorCode FROM action_receipts WHERE match_id = ? AND side = ? AND idempotency_key = ? ORDER BY state_version_after ASC"
-            : "SELECT idempotency_key AS idempotencyKey, side, accepted, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, error_code AS errorCode FROM action_receipts WHERE match_id = ? ORDER BY state_version_after ASC"
+            : "SELECT idempotency_key AS idempotencyKey, side, accepted, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, error_code AS errorCode FROM action_receipts WHERE match_id = ? ORDER BY state_version_after ASC",
         )
-        .all(...(options.actionPersistence?.idempotencyKey ? [matchId, options.actionPersistence.side, options.actionPersistence.idempotencyKey] : options.actionPersistence ? [matchId, options.actionPersistence.side, null] : [matchId]))
+        .all(
+          ...(options.actionPersistence?.idempotencyKey
+            ? [
+                matchId,
+                options.actionPersistence.side,
+                options.actionPersistence.idempotencyKey,
+              ]
+            : options.actionPersistence
+              ? [matchId, options.actionPersistence.side, null]
+              : [matchId]),
+        )
         .map((receipt) => {
           const row = receipt as {
             idempotencyKey: string;
@@ -1348,7 +1667,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
             stateVersionBefore: Number(row.stateVersionBefore),
             stateVersionAfter: Number(row.stateVersionAfter),
             stateHashAfter: row.stateHashAfter,
-            ...(row.errorCode ? { errorCode: row.errorCode } : {})
+            ...(row.errorCode ? { errorCode: row.errorCode } : {}),
           };
         });
     }
@@ -1358,7 +1677,9 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       record[PARTIAL_STATE_SNAPSHOTS] = true;
     } else if (this.tableExists("state_snapshots")) {
       record.stateSnapshots = this.db
-        .prepare("SELECT snapshot_id AS snapshotId, state_version AS stateVersion, match_version AS matchVersion, state_hash AS stateHash, game_state_json AS gameStateJson, created_at AS createdAt, hidden_info_barrier AS hiddenInfoBarrier FROM state_snapshots WHERE match_id = ? ORDER BY state_version ASC")
+        .prepare(
+          "SELECT snapshot_id AS snapshotId, state_version AS stateVersion, match_version AS matchVersion, state_hash AS stateHash, game_state_json AS gameStateJson, created_at AS createdAt, hidden_info_barrier AS hiddenInfoBarrier FROM state_snapshots WHERE match_id = ? ORDER BY state_version ASC",
+        )
         .all(matchId)
         .map((snapshot) => {
           const row = snapshot as {
@@ -1376,16 +1697,23 @@ export class SqliteMatchStorage implements MultiplayerStorage {
             stateVersion: Number(row.stateVersion),
             matchVersion: Number(row.matchVersion),
             stateHash: row.stateHash,
-            gameState: hydrateSnapshotGameState(JSON.parse(row.gameStateJson) as StoredMatch["stateSnapshots"][number]["gameState"], engineEventLog),
+            gameState: hydrateSnapshotGameState(
+              JSON.parse(
+                row.gameStateJson,
+              ) as StoredMatch["stateSnapshots"][number]["gameState"],
+              engineEventLog,
+            ),
             createdAt: row.createdAt,
-            hiddenInfoBarrier: row.hiddenInfoBarrier === 1
+            hiddenInfoBarrier: row.hiddenInfoBarrier === 1,
           };
         });
     }
 
     if (this.tableExists("undo_snapshots")) {
       record.undoSnapshots = this.db
-        .prepare("SELECT undo_request_id AS undoRequestId, target_event_id AS targetEventId, snapshot_id AS snapshotId, requested_by AS requestedBy, status, hidden_info_safe AS hiddenInfoSafe FROM undo_snapshots WHERE match_id = ?")
+        .prepare(
+          "SELECT undo_request_id AS undoRequestId, target_event_id AS targetEventId, snapshot_id AS snapshotId, requested_by AS requestedBy, status, hidden_info_safe AS hiddenInfoSafe FROM undo_snapshots WHERE match_id = ?",
+        )
         .all(matchId)
         .map((snapshot) => {
           const row = snapshot as {
@@ -1401,31 +1729,48 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     }
 
     if (this.tableExists("pending_undo")) {
-      const row = this.db.prepare("SELECT pending_undo_json AS pendingUndoJson FROM pending_undo WHERE match_id = ?").get(matchId) as { pendingUndoJson?: string } | undefined;
+      const row = this.db
+        .prepare(
+          "SELECT pending_undo_json AS pendingUndoJson FROM pending_undo WHERE match_id = ?",
+        )
+        .get(matchId) as { pendingUndoJson?: string } | undefined;
       if (row?.pendingUndoJson) {
-        const pendingUndo = JSON.parse(row.pendingUndoJson) as StoredMatch["pendingUndo"];
+        const pendingUndo = JSON.parse(
+          row.pendingUndoJson,
+        ) as StoredMatch["pendingUndo"];
         if (pendingUndo) record.pendingUndo = pendingUndo;
         else delete record.pendingUndo;
-      }
-      else delete record.pendingUndo;
+      } else delete record.pendingUndo;
     }
 
     if (this.tableExists("private_deck_snapshots")) {
-      const row = this.db.prepare("SELECT private_deck_snapshots_json AS privateDeckSnapshotsJson FROM private_deck_snapshots WHERE match_id = ?").get(matchId) as { privateDeckSnapshotsJson?: string } | undefined;
+      const row = this.db
+        .prepare(
+          "SELECT private_deck_snapshots_json AS privateDeckSnapshotsJson FROM private_deck_snapshots WHERE match_id = ?",
+        )
+        .get(matchId) as { privateDeckSnapshotsJson?: string } | undefined;
       if (row?.privateDeckSnapshotsJson) {
-        const privateDeckSnapshots = JSON.parse(row.privateDeckSnapshotsJson) as StoredMatch["privateDeckSnapshots"];
-        if (privateDeckSnapshots) record.privateDeckSnapshots = privateDeckSnapshots;
+        const privateDeckSnapshots = JSON.parse(
+          row.privateDeckSnapshotsJson,
+        ) as StoredMatch["privateDeckSnapshots"];
+        if (privateDeckSnapshots)
+          record.privateDeckSnapshots = privateDeckSnapshots;
       }
     }
 
     if (this.tableExists("start_lobbies")) {
-      const row = this.db.prepare("SELECT start_lobby_json AS startLobbyJson FROM start_lobbies WHERE match_id = ?").get(matchId) as { startLobbyJson?: string } | undefined;
+      const row = this.db
+        .prepare(
+          "SELECT start_lobby_json AS startLobbyJson FROM start_lobbies WHERE match_id = ?",
+        )
+        .get(matchId) as { startLobbyJson?: string } | undefined;
       if (row?.startLobbyJson) {
-        const startLobby = JSON.parse(row.startLobbyJson) as StoredMatch["startLobby"];
+        const startLobby = JSON.parse(
+          row.startLobbyJson,
+        ) as StoredMatch["startLobby"];
         if (startLobby) record.startLobby = startLobby;
         else delete record.startLobby;
-      }
-      else delete record.startLobby;
+      } else delete record.startLobby;
     }
 
     if (options.actionPersistence) {
@@ -1435,14 +1780,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
              (SELECT COUNT(*) FROM events WHERE match_id = ?) AS publicEventCount,
              (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEventCount,
              (SELECT COUNT(*) FROM action_receipts WHERE match_id = ?) AS actionReceiptCount,
-             (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = ?) AS aiDecisionTraceCount`
+             (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = ?) AS aiDecisionTraceCount`,
         )
         .get(matchId, matchId, matchId, matchId) as {
-          publicEventCount: number;
-          engineEventCount: number;
-          actionReceiptCount: number;
-          aiDecisionTraceCount: number;
-        };
+        publicEventCount: number;
+        engineEventCount: number;
+        actionReceiptCount: number;
+        aiDecisionTraceCount: number;
+      };
       record.actionPersistenceBaseline = {
         expectedMatchVersion: record.match.matchVersion,
         expectedStateVersion: record.gameState.stateVersion,
@@ -1451,7 +1796,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         actionReceiptCount: Number(counts.actionReceiptCount),
         aiDecisionTraceCount: Number(counts.aiDecisionTraceCount),
         loadedActionReceiptCount: record.actionReceipts.length,
-        loadedAiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0
+        loadedAiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0,
       };
     }
   }
@@ -1461,13 +1806,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     const matchId = record.match.matchId;
     const stateVersion = record.gameState?.stateVersion ?? null;
     const stateHash = record.gameState ? hashState(record.gameState) : null;
-    const partialStateSnapshots = (record as StoredMatchWithStorageFlags)[PARTIAL_STATE_SNAPSHOTS] === true;
+    const partialStateSnapshots =
+      (record as StoredMatchWithStorageFlags)[PARTIAL_STATE_SNAPSHOTS] === true;
     this.db
       .prepare(
         `INSERT INTO matches
           (match_id, status, mode, match_version, seed, baseline_json, settings_json, lifecycle_json, record_json, state_version, state_hash, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-          + ` ON CONFLICT(match_id) DO UPDATE SET
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` +
+          ` ON CONFLICT(match_id) DO UPDATE SET
             status = excluded.status,
             mode = excluded.mode,
             match_version = excluded.match_version,
@@ -1478,7 +1824,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
             record_json = excluded.record_json,
             state_version = excluded.state_version,
             state_hash = excluded.state_hash,
-            updated_at = excluded.updated_at`
+            updated_at = excluded.updated_at`,
       )
       .run(
         matchId,
@@ -1493,7 +1839,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         stateVersion,
         stateHash,
         record.match.createdAt,
-        record.match.updatedAt
+        record.match.updatedAt,
       );
 
     for (const table of [
@@ -1502,25 +1848,45 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       "undo_snapshots",
       "pending_undo",
       "private_deck_snapshots",
-      "start_lobbies"
+      "start_lobbies",
     ]) {
       this.db.prepare(`DELETE FROM ${table} WHERE match_id = ?`).run(matchId);
     }
 
     const insertSession = this.db.prepare(
       `INSERT INTO sessions (match_id, session_id, side, display_name, session_token_hash, reconnect_token_hash, connected, created_at, last_seen_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     for (const session of record.sessions) {
-      insertSession.run(matchId, session.sessionId, session.side, session.displayName, session.sessionTokenHash, session.reconnectTokenHash, session.connected ? 1 : 0, session.createdAt, session.lastSeenAt);
+      insertSession.run(
+        matchId,
+        session.sessionId,
+        session.side,
+        session.displayName,
+        session.sessionTokenHash,
+        session.reconnectTokenHash,
+        session.connected ? 1 : 0,
+        session.createdAt,
+        session.lastSeenAt,
+      );
     }
 
     const insertToken = this.db.prepare(
       `INSERT INTO tokens (match_id, token_id, kind, allowed_side, token_hash, created_at, expires_at, revoked_at, used_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     for (const token of record.tokens) {
-      insertToken.run(matchId, token.tokenId, token.kind, token.allowedSide, token.tokenHash, token.createdAt, token.expiresAt ?? null, token.revokedAt ?? null, token.usedAt ?? null);
+      insertToken.run(
+        matchId,
+        token.tokenId,
+        token.kind,
+        token.allowedSide,
+        token.tokenHash,
+        token.createdAt,
+        token.expiresAt ?? null,
+        token.revokedAt ?? null,
+        token.usedAt ?? null,
+      );
     }
 
     this.db
@@ -1530,9 +1896,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
          ON CONFLICT(match_id) DO UPDATE SET
            state_version = excluded.state_version,
            state_hash = excluded.state_hash,
-           game_state_json = excluded.game_state_json`
+           game_state_json = excluded.game_state_json`,
       )
-      .run(matchId, stateVersion, stateHash, toJson(gameStateForStorage(record.gameState)));
+      .run(
+        matchId,
+        stateVersion,
+        stateHash,
+        toJson(gameStateForStorage(record.gameState)),
+      );
 
     this.syncPublicEvents(matchId, record.eventLog);
     this.syncEngineEvents(matchId, record.gameState?.eventLog ?? []);
@@ -1541,35 +1912,85 @@ export class SqliteMatchStorage implements MultiplayerStorage {
 
     const insertStateSnapshot = this.db.prepare(
       `INSERT INTO state_snapshots (match_id, snapshot_id, state_version, match_version, state_hash, game_state_json, created_at, hidden_info_barrier)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     );
-    const maxSnapshotStateVersion = record.stateSnapshots.reduce((max, snapshot) => Math.max(max, snapshot.stateVersion), -1);
-    if (!partialStateSnapshots) this.db.prepare("DELETE FROM state_snapshots WHERE match_id = ? AND state_version > ?").run(matchId, maxSnapshotStateVersion);
+    const maxSnapshotStateVersion = record.stateSnapshots.reduce(
+      (max, snapshot) => Math.max(max, snapshot.stateVersion),
+      -1,
+    );
+    if (!partialStateSnapshots)
+      this.db
+        .prepare(
+          "DELETE FROM state_snapshots WHERE match_id = ? AND state_version > ?",
+        )
+        .run(matchId, maxSnapshotStateVersion);
     const existingSnapshotIds = new Set(
-      (this.db.prepare("SELECT snapshot_id AS snapshotId FROM state_snapshots WHERE match_id = ?").all(matchId) as Array<{ snapshotId: string }>).map((row) => row.snapshotId)
+      (
+        this.db
+          .prepare(
+            "SELECT snapshot_id AS snapshotId FROM state_snapshots WHERE match_id = ?",
+          )
+          .all(matchId) as Array<{ snapshotId: string }>
+      ).map((row) => row.snapshotId),
     );
     for (const snapshot of record.stateSnapshots) {
       if (existingSnapshotIds.has(snapshot.snapshotId)) continue;
-      insertStateSnapshot.run(matchId, snapshot.snapshotId, snapshot.stateVersion, snapshot.matchVersion, snapshot.stateHash, JSON.stringify(gameStateForStorage(snapshot.gameState)), snapshot.createdAt, snapshot.hiddenInfoBarrier ? 1 : 0);
+      insertStateSnapshot.run(
+        matchId,
+        snapshot.snapshotId,
+        snapshot.stateVersion,
+        snapshot.matchVersion,
+        snapshot.stateHash,
+        JSON.stringify(gameStateForStorage(snapshot.gameState)),
+        snapshot.createdAt,
+        snapshot.hiddenInfoBarrier ? 1 : 0,
+      );
     }
 
     const insertUndoSnapshot = this.db.prepare(
       `INSERT INTO undo_snapshots (match_id, undo_request_id, target_event_id, snapshot_id, requested_by, status, hidden_info_safe)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
     );
     for (const snapshot of record.undoSnapshots) {
-      insertUndoSnapshot.run(matchId, snapshot.undoRequestId, snapshot.targetEventId, snapshot.snapshotId, snapshot.requestedBy, snapshot.status, snapshot.hiddenInfoSafe ? 1 : 0);
+      insertUndoSnapshot.run(
+        matchId,
+        snapshot.undoRequestId,
+        snapshot.targetEventId,
+        snapshot.snapshotId,
+        snapshot.requestedBy,
+        snapshot.status,
+        snapshot.hiddenInfoSafe ? 1 : 0,
+      );
     }
 
-    if (record.pendingUndo) this.db.prepare("INSERT INTO pending_undo (match_id, pending_undo_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.pendingUndo));
-    if (record.privateDeckSnapshots) this.db.prepare("INSERT INTO private_deck_snapshots (match_id, private_deck_snapshots_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.privateDeckSnapshots));
-    if (record.startLobby) this.db.prepare("INSERT INTO start_lobbies (match_id, start_lobby_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.startLobby));
+    if (record.pendingUndo)
+      this.db
+        .prepare(
+          "INSERT INTO pending_undo (match_id, pending_undo_json) VALUES (?, ?)",
+        )
+        .run(matchId, JSON.stringify(record.pendingUndo));
+    if (record.privateDeckSnapshots)
+      this.db
+        .prepare(
+          "INSERT INTO private_deck_snapshots (match_id, private_deck_snapshots_json) VALUES (?, ?)",
+        )
+        .run(matchId, JSON.stringify(record.privateDeckSnapshots));
+    if (record.startLobby)
+      this.db
+        .prepare(
+          "INSERT INTO start_lobbies (match_id, start_lobby_json) VALUES (?, ?)",
+        )
+        .run(matchId, JSON.stringify(record.startLobby));
   }
 
   private saveActionDeltaRecord(record: StoredMatch): void {
     dedupeStateSnapshots(record);
     const baseline = record.actionPersistenceBaseline;
-    if (!baseline) throw new StorageError("stored_match_invalid", "Delta-Persistenz benötigt eine verifizierte Lade-Baseline.");
+    if (!baseline)
+      throw new StorageError(
+        "stored_match_invalid",
+        "Delta-Persistenz benötigt eine verifizierte Lade-Baseline.",
+      );
     const matchId = record.match.matchId;
     const engineEvents = record.gameState.eventLog;
     const traces = record.aiDecisionTraces ?? [];
@@ -1579,7 +2000,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       record.actionReceipts.length < baseline.loadedActionReceiptCount ||
       traces.length < baseline.loadedAiDecisionTraceCount
     ) {
-      throw new StorageError("stored_match_invalid", "Delta-Persistenz darf bestehende Historie nicht verkürzen.");
+      throw new StorageError(
+        "stored_match_invalid",
+        "Delta-Persistenz darf bestehende Historie nicht verkürzen.",
+      );
     }
 
     const persisted = this.db
@@ -1589,16 +2013,18 @@ export class SqliteMatchStorage implements MultiplayerStorage {
            (SELECT COUNT(*) FROM engine_events WHERE match_id = m.match_id) AS engineEventCount,
            (SELECT COUNT(*) FROM action_receipts WHERE match_id = m.match_id) AS actionReceiptCount,
            (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = m.match_id) AS aiDecisionTraceCount
-         FROM matches m WHERE m.match_id = ?`
+         FROM matches m WHERE m.match_id = ?`,
       )
-      .get(matchId) as {
-        matchVersion: number;
-        stateVersion: number;
-        publicEventCount: number;
-        engineEventCount: number;
-        actionReceiptCount: number;
-        aiDecisionTraceCount: number;
-      } | undefined;
+      .get(matchId) as
+      | {
+          matchVersion: number;
+          stateVersion: number;
+          publicEventCount: number;
+          engineEventCount: number;
+          actionReceiptCount: number;
+          aiDecisionTraceCount: number;
+        }
+      | undefined;
     if (
       !persisted ||
       Number(persisted.matchVersion) !== baseline.expectedMatchVersion ||
@@ -1608,7 +2034,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       Number(persisted.actionReceiptCount) !== baseline.actionReceiptCount ||
       Number(persisted.aiDecisionTraceCount) !== baseline.aiDecisionTraceCount
     ) {
-      throw new StorageError("action_persistence_conflict", "Matchhistorie wurde seit dem Aktionsload verändert.");
+      throw new StorageError(
+        "action_persistence_conflict",
+        "Matchhistorie wurde seit dem Aktionsload verändert.",
+      );
     }
 
     const stateVersion = record.gameState.stateVersion;
@@ -1618,7 +2047,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         `UPDATE matches SET
            status = ?, mode = ?, match_version = ?, seed = ?, baseline_json = ?, settings_json = ?, lifecycle_json = ?,
            record_json = ?, state_version = ?, state_hash = ?, updated_at = ?
-         WHERE match_id = ? AND match_version = ? AND state_version = ?`
+         WHERE match_id = ? AND match_version = ? AND state_version = ?`,
       )
       .run(
         record.match.status,
@@ -1634,114 +2063,239 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         record.match.updatedAt,
         matchId,
         baseline.expectedMatchVersion,
-        baseline.expectedStateVersion
+        baseline.expectedStateVersion,
       ) as { changes?: number | bigint };
     if (Number(matchUpdate.changes ?? 0) !== 1) {
-      throw new StorageError("action_persistence_conflict", "Matchzustand wurde seit dem Aktionsload verändert.");
+      throw new StorageError(
+        "action_persistence_conflict",
+        "Matchzustand wurde seit dem Aktionsload verändert.",
+      );
     }
     const gameStateUpdate = this.db
       .prepare(
         `UPDATE game_states SET state_version = ?, state_hash = ?, game_state_json = ?
-         WHERE match_id = ? AND state_version = ?`
+         WHERE match_id = ? AND state_version = ?`,
       )
-      .run(stateVersion, stateHash, JSON.stringify(gameStateForStorage(record.gameState)), matchId, baseline.expectedStateVersion) as { changes?: number | bigint };
+      .run(
+        stateVersion,
+        stateHash,
+        JSON.stringify(gameStateForStorage(record.gameState)),
+        matchId,
+        baseline.expectedStateVersion,
+      ) as { changes?: number | bigint };
     if (Number(gameStateUpdate.changes ?? 0) !== 1) {
-      throw new StorageError("action_persistence_conflict", "Engine-Zustand wurde seit dem Aktionsload verändert.");
+      throw new StorageError(
+        "action_persistence_conflict",
+        "Engine-Zustand wurde seit dem Aktionsload verändert.",
+      );
     }
 
     const insertEvent = this.db.prepare(
       `INSERT INTO events
        (match_id, event_id, event_index, state_version_before, state_version_after, state_hash_after, public_payload_json, private_payload_local_only, hidden_info_barrier)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
-    record.eventLog.slice(baseline.publicEventCount).forEach((event, offset) => {
-      insertEvent.run(matchId, event.eventId, baseline.publicEventCount + offset, event.stateVersionBefore, event.stateVersionAfter, event.stateHashAfter, JSON.stringify(publicEventForStorage(event.publicPayload)), event.privatePayloadLocalOnly ? 1 : 0, event.hiddenInfoBarrier ? 1 : 0);
-    });
+    record.eventLog
+      .slice(baseline.publicEventCount)
+      .forEach((event, offset) => {
+        insertEvent.run(
+          matchId,
+          event.eventId,
+          baseline.publicEventCount + offset,
+          event.stateVersionBefore,
+          event.stateVersionAfter,
+          event.stateHashAfter,
+          JSON.stringify(publicEventForStorage(event.publicPayload)),
+          event.privatePayloadLocalOnly ? 1 : 0,
+          event.hiddenInfoBarrier ? 1 : 0,
+        );
+      });
 
     const insertEngineEvent = this.db.prepare(
-      "INSERT INTO engine_events (match_id, event_id, event_index, event_json) VALUES (?, ?, ?, ?)"
+      "INSERT INTO engine_events (match_id, event_id, event_index, event_json) VALUES (?, ?, ?, ?)",
     );
     engineEvents.slice(baseline.engineEventCount).forEach((event, offset) => {
-      insertEngineEvent.run(matchId, event.eventId, baseline.engineEventCount + offset, JSON.stringify(event));
+      insertEngineEvent.run(
+        matchId,
+        event.eventId,
+        baseline.engineEventCount + offset,
+        JSON.stringify(event),
+      );
     });
 
     const insertTrace = this.db.prepare(
       `INSERT INTO ai_decision_traces
        (match_id, trace_id, event_id, state_version, match_version, side, turn, decision_index, selected_action_id, selected_action_type, plan_kind, score, confidence, created_at, schema_version, trace_json)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     for (const trace of traces.slice(baseline.loadedAiDecisionTraceCount)) {
-      insertTrace.run(matchId, trace.traceId, trace.eventId, trace.stateVersion, trace.matchVersion, trace.side, trace.turn, trace.decisionIndex, trace.selectedActionId ?? null, trace.selectedActionType ?? null, trace.planKind ?? null, trace.score ?? null, trace.confidence ?? null, trace.createdAt, trace.schemaVersion, JSON.stringify(trace.traceJson));
+      insertTrace.run(
+        matchId,
+        trace.traceId,
+        trace.eventId,
+        trace.stateVersion,
+        trace.matchVersion,
+        trace.side,
+        trace.turn,
+        trace.decisionIndex,
+        trace.selectedActionId ?? null,
+        trace.selectedActionType ?? null,
+        trace.planKind ?? null,
+        trace.score ?? null,
+        trace.confidence ?? null,
+        trace.createdAt,
+        trace.schemaVersion,
+        JSON.stringify(trace.traceJson),
+      );
     }
 
     const insertReceipt = this.db.prepare(
       `INSERT INTO action_receipts (match_id, idempotency_key, side, accepted, state_version_before, state_version_after, state_hash_after, error_code)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     );
-    for (const receipt of record.actionReceipts.slice(baseline.loadedActionReceiptCount)) {
-      insertReceipt.run(matchId, receipt.idempotencyKey, receipt.side, receipt.accepted ? 1 : 0, receipt.stateVersionBefore, receipt.stateVersionAfter, receipt.stateHashAfter, receipt.errorCode ?? null);
+    for (const receipt of record.actionReceipts.slice(
+      baseline.loadedActionReceiptCount,
+    )) {
+      insertReceipt.run(
+        matchId,
+        receipt.idempotencyKey,
+        receipt.side,
+        receipt.accepted ? 1 : 0,
+        receipt.stateVersionBefore,
+        receipt.stateVersionAfter,
+        receipt.stateHashAfter,
+        receipt.errorCode ?? null,
+      );
     }
 
     const insertStateSnapshot = this.db.prepare(
       `INSERT INTO state_snapshots (match_id, snapshot_id, state_version, match_version, state_hash, game_state_json, created_at, hidden_info_barrier)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     for (const snapshot of record.stateSnapshots) {
-      insertStateSnapshot.run(matchId, snapshot.snapshotId, snapshot.stateVersion, snapshot.matchVersion, snapshot.stateHash, JSON.stringify(gameStateForStorage(snapshot.gameState)), snapshot.createdAt, snapshot.hiddenInfoBarrier ? 1 : 0);
+      insertStateSnapshot.run(
+        matchId,
+        snapshot.snapshotId,
+        snapshot.stateVersion,
+        snapshot.matchVersion,
+        snapshot.stateHash,
+        JSON.stringify(gameStateForStorage(snapshot.gameState)),
+        snapshot.createdAt,
+        snapshot.hiddenInfoBarrier ? 1 : 0,
+      );
     }
 
     const updateToken = this.db.prepare(
       `UPDATE tokens SET kind = ?, allowed_side = ?, token_hash = ?, created_at = ?, expires_at = ?, revoked_at = ?, used_at = ?
-       WHERE match_id = ? AND token_id = ?`
+       WHERE match_id = ? AND token_id = ?`,
     );
     for (const token of record.tokens) {
-      const result = updateToken.run(token.kind, token.allowedSide, token.tokenHash, token.createdAt, token.expiresAt ?? null, token.revokedAt ?? null, token.usedAt ?? null, matchId, token.tokenId) as { changes?: number | bigint };
-      if (Number(result.changes ?? 0) !== 1) throw new StorageError("action_persistence_conflict", "Match-Tokenbestand ist nicht mehr konsistent.");
+      const result = updateToken.run(
+        token.kind,
+        token.allowedSide,
+        token.tokenHash,
+        token.createdAt,
+        token.expiresAt ?? null,
+        token.revokedAt ?? null,
+        token.usedAt ?? null,
+        matchId,
+        token.tokenId,
+      ) as { changes?: number | bigint };
+      if (Number(result.changes ?? 0) !== 1)
+        throw new StorageError(
+          "action_persistence_conflict",
+          "Match-Tokenbestand ist nicht mehr konsistent.",
+        );
     }
 
     this.db.prepare("DELETE FROM pending_undo WHERE match_id = ?").run(matchId);
     if (record.pendingUndo) {
-      this.db.prepare("INSERT INTO pending_undo (match_id, pending_undo_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.pendingUndo));
+      this.db
+        .prepare(
+          "INSERT INTO pending_undo (match_id, pending_undo_json) VALUES (?, ?)",
+        )
+        .run(matchId, JSON.stringify(record.pendingUndo));
     }
   }
 
-  private syncPublicEvents(matchId: string, events: StoredMatch["eventLog"]): void {
+  private syncPublicEvents(
+    matchId: string,
+    events: StoredMatch["eventLog"],
+  ): void {
     const eventIds = events.map((event) => event.eventId);
     this.truncateEventTable("events", matchId, eventIds);
-    const prefixLength = this.existingContiguousEventPrefixLength("events", matchId, eventIds);
+    const prefixLength = this.existingContiguousEventPrefixLength(
+      "events",
+      matchId,
+      eventIds,
+    );
     this.truncateEventTable("events", matchId, eventIds.slice(0, prefixLength));
     const insertEvent = this.db.prepare(
       `INSERT INTO events
        (match_id, event_id, event_index, state_version_before, state_version_after, state_hash_after, public_payload_json, private_payload_local_only, hidden_info_barrier)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     events.slice(prefixLength).forEach((event, offset) => {
       const index = prefixLength + offset;
-      insertEvent.run(matchId, event.eventId, index, event.stateVersionBefore, event.stateVersionAfter, event.stateHashAfter, JSON.stringify(publicEventForStorage(event.publicPayload)), event.privatePayloadLocalOnly ? 1 : 0, event.hiddenInfoBarrier ? 1 : 0);
+      insertEvent.run(
+        matchId,
+        event.eventId,
+        index,
+        event.stateVersionBefore,
+        event.stateVersionAfter,
+        event.stateHashAfter,
+        JSON.stringify(publicEventForStorage(event.publicPayload)),
+        event.privatePayloadLocalOnly ? 1 : 0,
+        event.hiddenInfoBarrier ? 1 : 0,
+      );
     });
   }
 
   private syncEngineEvents(matchId: string, events: GameEvent[]): void {
     const eventIds = events.map((event) => event.eventId);
     this.truncateEventTable("engine_events", matchId, eventIds);
-    const prefixLength = this.existingContiguousEventPrefixLength("engine_events", matchId, eventIds);
-    this.truncateEventTable("engine_events", matchId, eventIds.slice(0, prefixLength));
+    const prefixLength = this.existingContiguousEventPrefixLength(
+      "engine_events",
+      matchId,
+      eventIds,
+    );
+    this.truncateEventTable(
+      "engine_events",
+      matchId,
+      eventIds.slice(0, prefixLength),
+    );
     const insertEngineEvent = this.db.prepare(
       `INSERT INTO engine_events (match_id, event_id, event_index, event_json)
-       VALUES (?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?)`,
     );
     events.slice(prefixLength).forEach((event, offset) => {
       const index = prefixLength + offset;
-      insertEngineEvent.run(matchId, event.eventId, index, JSON.stringify(event));
+      insertEngineEvent.run(
+        matchId,
+        event.eventId,
+        index,
+        JSON.stringify(event),
+      );
     });
   }
 
-  private syncAiDecisionTraces(matchId: string, traces: AiDecisionTraceRecord[]): void {
+  private syncAiDecisionTraces(
+    matchId: string,
+    traces: AiDecisionTraceRecord[],
+  ): void {
     const traceIds = new Set(traces.map((trace) => trace.traceId));
     const existingTraceIds = new Set(
-      (this.db.prepare("SELECT trace_id AS traceId FROM ai_decision_traces WHERE match_id = ?").all(matchId) as Array<{ traceId: string }>).map((row) => row.traceId)
+      (
+        this.db
+          .prepare(
+            "SELECT trace_id AS traceId FROM ai_decision_traces WHERE match_id = ?",
+          )
+          .all(matchId) as Array<{ traceId: string }>
+      ).map((row) => row.traceId),
     );
-    const deleteTrace = this.db.prepare("DELETE FROM ai_decision_traces WHERE match_id = ? AND trace_id = ?");
+    const deleteTrace = this.db.prepare(
+      "DELETE FROM ai_decision_traces WHERE match_id = ? AND trace_id = ?",
+    );
     for (const traceId of existingTraceIds) {
       if (!traceIds.has(traceId)) deleteTrace.run(matchId, traceId);
     }
@@ -1749,7 +2303,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     const insertTrace = this.db.prepare(
       `INSERT INTO ai_decision_traces
        (match_id, trace_id, event_id, state_version, match_version, side, turn, decision_index, selected_action_id, selected_action_type, plan_kind, score, confidence, created_at, schema_version, trace_json)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     for (const trace of traces) {
       if (existingTraceIds.has(trace.traceId)) continue;
@@ -1769,37 +2323,63 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         trace.confidence ?? null,
         trace.createdAt,
         trace.schemaVersion,
-        JSON.stringify(trace.traceJson)
+        JSON.stringify(trace.traceJson),
       );
     }
   }
 
-  private syncActionReceipts(matchId: string, receipts: StoredMatch["actionReceipts"]): void {
-    const receiptKey = (receipt: { idempotencyKey: string; side: string }): string => `${receipt.side}\u0000${receipt.idempotencyKey}`;
+  private syncActionReceipts(
+    matchId: string,
+    receipts: StoredMatch["actionReceipts"],
+  ): void {
+    const receiptKey = (receipt: {
+      idempotencyKey: string;
+      side: string;
+    }): string => `${receipt.side}\u0000${receipt.idempotencyKey}`;
     const receiptKeys = new Set(receipts.map(receiptKey));
     const existingReceipts = this.db
-      .prepare("SELECT idempotency_key AS idempotencyKey, side FROM action_receipts WHERE match_id = ?")
+      .prepare(
+        "SELECT idempotency_key AS idempotencyKey, side FROM action_receipts WHERE match_id = ?",
+      )
       .all(matchId) as Array<{ idempotencyKey: string; side: string }>;
     const existingReceiptKeys = new Set(existingReceipts.map(receiptKey));
-    const deleteReceipt = this.db.prepare("DELETE FROM action_receipts WHERE match_id = ? AND idempotency_key = ? AND side = ?");
+    const deleteReceipt = this.db.prepare(
+      "DELETE FROM action_receipts WHERE match_id = ? AND idempotency_key = ? AND side = ?",
+    );
     for (const receipt of existingReceipts) {
-      if (!receiptKeys.has(receiptKey(receipt))) deleteReceipt.run(matchId, receipt.idempotencyKey, receipt.side);
+      if (!receiptKeys.has(receiptKey(receipt)))
+        deleteReceipt.run(matchId, receipt.idempotencyKey, receipt.side);
     }
 
     const insertReceipt = this.db.prepare(
       `INSERT INTO action_receipts (match_id, idempotency_key, side, accepted, state_version_before, state_version_after, state_hash_after, error_code)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     for (const receipt of receipts) {
       if (existingReceiptKeys.has(receiptKey(receipt))) continue;
-      insertReceipt.run(matchId, receipt.idempotencyKey, receipt.side, receipt.accepted ? 1 : 0, receipt.stateVersionBefore, receipt.stateVersionAfter, receipt.stateHashAfter, receipt.errorCode ?? null);
+      insertReceipt.run(
+        matchId,
+        receipt.idempotencyKey,
+        receipt.side,
+        receipt.accepted ? 1 : 0,
+        receipt.stateVersionBefore,
+        receipt.stateVersionAfter,
+        receipt.stateHashAfter,
+        receipt.errorCode ?? null,
+      );
     }
   }
 
-  private hydrateAiDecisionDebug(events: StoredMatch["eventLog"], traces: AiDecisionTraceRecord[]): void {
-    const tracesByEventId = new Map(traces.map((trace) => [trace.eventId, trace]));
+  private hydrateAiDecisionDebug(
+    events: StoredMatch["eventLog"],
+    traces: AiDecisionTraceRecord[],
+  ): void {
+    const tracesByEventId = new Map(
+      traces.map((trace) => [trace.eventId, trace]),
+    );
     for (const event of events) {
-      if (event.publicPayload.publicPayload.aiDecisionDebug !== undefined) continue;
+      if (event.publicPayload.publicPayload.aiDecisionDebug !== undefined)
+        continue;
       const trace = tracesByEventId.get(event.eventId);
       if (!trace) continue;
       const debug = replayDecisionDebugFromTrace(trace);
@@ -1808,15 +2388,20 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         ...event.publicPayload,
         publicPayload: {
           ...event.publicPayload.publicPayload,
-          aiDecisionDebug: debug
-        }
+          aiDecisionDebug: debug,
+        },
       };
     }
   }
 
-  private aiDecisionTraceRecords(matchId: string, filters: { afterDecisionIndex?: number } = {}): AiDecisionTraceRecord[] {
+  private aiDecisionTraceRecords(
+    matchId: string,
+    filters: { afterDecisionIndex?: number } = {},
+  ): AiDecisionTraceRecord[] {
     if (!this.tableExists("ai_decision_traces")) return [];
-    const afterDecisionIndex = Number.isFinite(filters.afterDecisionIndex) ? Math.floor(filters.afterDecisionIndex!) : undefined;
+    const afterDecisionIndex = Number.isFinite(filters.afterDecisionIndex)
+      ? Math.floor(filters.afterDecisionIndex!)
+      : undefined;
     const rows = this.db
       .prepare(
         `SELECT trace_id AS traceId, event_id AS eventId, state_version AS stateVersion, match_version AS matchVersion, side, turn, decision_index AS decisionIndex,
@@ -1825,13 +2410,19 @@ export class SqliteMatchStorage implements MultiplayerStorage {
          FROM ai_decision_traces
          WHERE match_id = ?
            AND (? IS NULL OR decision_index > ?)
-         ORDER BY decision_index ASC`
+         ORDER BY decision_index ASC`,
       )
-      .all(matchId, afterDecisionIndex ?? null, afterDecisionIndex ?? null) as AiDecisionTraceRow[];
+      .all(
+        matchId,
+        afterDecisionIndex ?? null,
+        afterDecisionIndex ?? null,
+      ) as AiDecisionTraceRow[];
     return rows.map((row) => aiDecisionTraceRecordFromRow(matchId, row));
   }
 
-  private aiDecisionTraceRecordsForAction(matchId: string): AiDecisionTraceRecord[] {
+  private aiDecisionTraceRecordsForAction(
+    matchId: string,
+  ): AiDecisionTraceRecord[] {
     const rows = this.db
       .prepare(
         `SELECT trace_id AS traceId, event_id AS eventId, state_version AS stateVersion, match_version AS matchVersion, side, turn, decision_index AS decisionIndex,
@@ -1842,73 +2433,126 @@ export class SqliteMatchStorage implements MultiplayerStorage {
            AND event_id IN (
              SELECT event_id FROM events WHERE match_id = ? ORDER BY event_index DESC LIMIT ?
            )
-         ORDER BY decision_index ASC`
+         ORDER BY decision_index ASC`,
       )
-      .all(matchId, matchId, SIDE_PAYLOAD_EVENT_TAIL_LIMIT) as AiDecisionTraceRow[];
+      .all(
+        matchId,
+        matchId,
+        SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
+      ) as AiDecisionTraceRow[];
     return rows.map((row) => aiDecisionTraceRecordFromRow(matchId, row));
   }
 
-  private truncateEventTable(table: "events" | "engine_events", matchId: string, eventIds: string[]): void {
-    this.db.prepare(`DELETE FROM ${table} WHERE match_id = ? AND event_index >= ?`).run(matchId, eventIds.length);
+  private truncateEventTable(
+    table: "events" | "engine_events",
+    matchId: string,
+    eventIds: string[],
+  ): void {
+    this.db
+      .prepare(`DELETE FROM ${table} WHERE match_id = ? AND event_index >= ?`)
+      .run(matchId, eventIds.length);
   }
 
-  private existingContiguousEventPrefixLength(table: "events" | "engine_events", matchId: string, eventIds: string[]): number {
+  private existingContiguousEventPrefixLength(
+    table: "events" | "engine_events",
+    matchId: string,
+    eventIds: string[],
+  ): number {
     const rows = this.db
-      .prepare(`SELECT event_id AS eventId, event_index AS eventIndex FROM ${table} WHERE match_id = ? AND event_index < ? ORDER BY event_index ASC`)
-      .all(matchId, eventIds.length) as Array<{ eventId: string; eventIndex: number }>;
+      .prepare(
+        `SELECT event_id AS eventId, event_index AS eventIndex FROM ${table} WHERE match_id = ? AND event_index < ? ORDER BY event_index ASC`,
+      )
+      .all(matchId, eventIds.length) as Array<{
+      eventId: string;
+      eventIndex: number;
+    }>;
     let prefixLength = 0;
     for (const row of rows) {
-      if (Number(row.eventIndex) !== prefixLength || row.eventId !== eventIds[prefixLength]) break;
+      if (
+        Number(row.eventIndex) !== prefixLength ||
+        row.eventId !== eventIds[prefixLength]
+      )
+        break;
       prefixLength += 1;
     }
     return prefixLength;
   }
 
   private tableExists(name: string): boolean {
-    const row = this.db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?").get(name) as { name?: string } | undefined;
+    const row = this.db
+      .prepare(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+      )
+      .get(name) as { name?: string } | undefined;
     return row?.name === name;
   }
 
   private userTableCount(): number {
-    const row = this.db.prepare("SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'").get() as { count: number };
+    const row = this.db
+      .prepare(
+        "SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
+      )
+      .get() as { count: number };
     return Number(row.count);
   }
 
   private meta(key: string): string | undefined {
     if (!this.tableExists("storage_meta")) return undefined;
-    const row = this.db.prepare("SELECT value FROM storage_meta WHERE key = ?").get(key) as { value?: string } | undefined;
+    const row = this.db
+      .prepare("SELECT value FROM storage_meta WHERE key = ?")
+      .get(key) as { value?: string } | undefined;
     return row?.value;
   }
 
   private setMeta(key: string, value: string, now: string): void {
-    this.db.prepare("INSERT OR REPLACE INTO storage_meta (key, value, updated_at) VALUES (?, ?, ?)").run(key, value, now);
+    this.db
+      .prepare(
+        "INSERT OR REPLACE INTO storage_meta (key, value, updated_at) VALUES (?, ?, ?)",
+      )
+      .run(key, value, now);
   }
 
   private matchCount(): number {
     if (!this.tableExists("matches")) return 0;
-    const row = this.db.prepare("SELECT COUNT(*) AS count FROM matches").get() as { count: number };
+    const row = this.db
+      .prepare("SELECT COUNT(*) AS count FROM matches")
+      .get() as { count: number };
     return Number(row.count);
   }
 
   private maintenanceCleanupPolicyInternal(): StorageMaintenanceCleanupPolicy {
     const raw = this.meta("maintenance_cleanup_policy_json");
-    const lastRun = cleanupPolicyLastRunFromMeta(this.meta("maintenance_cleanup_last_run_json"));
+    const lastRun = cleanupPolicyLastRunFromMeta(
+      this.meta("maintenance_cleanup_last_run_json"),
+    );
     if (!raw) return defaultCleanupPolicy(lastRun);
     try {
-      const parsed = JSON.parse(raw) as Partial<StorageMaintenanceCleanupPolicyInput & { updatedAt?: string }>;
+      const parsed = JSON.parse(raw) as Partial<
+        StorageMaintenanceCleanupPolicyInput & { updatedAt?: string }
+      >;
       return normalizeCleanupPolicy(parsed, parsed.updatedAt, lastRun);
     } catch {
       return defaultCleanupPolicy(lastRun);
     }
   }
 
-  private recordCleanupPolicyRun(policy: StorageMaintenanceCleanupPolicy, lastRun: StorageMaintenanceCleanupPolicyLastRun): StorageMaintenanceCleanupPolicy {
+  private recordCleanupPolicyRun(
+    policy: StorageMaintenanceCleanupPolicy,
+    lastRun: StorageMaintenanceCleanupPolicyLastRun,
+  ): StorageMaintenanceCleanupPolicy {
     const now = lastRun.finishedAt;
-    this.setMeta("maintenance_cleanup_last_run_json", JSON.stringify(lastRun), now);
+    this.setMeta(
+      "maintenance_cleanup_last_run_json",
+      JSON.stringify(lastRun),
+      now,
+    );
     return { ...policy, lastRun };
   }
 
-  private maintenanceMatchesInternal(filters: StorageMaintenanceMatchFilters, now: Date): StorageMaintenanceMatchEntry[] {
+  private maintenanceMatchesInternal(
+    filters: StorageMaintenanceMatchFilters,
+    now: Date,
+  ): StorageMaintenanceMatchEntry[] {
     if (!this.tableExists("matches")) return [];
     const rows = this.db
       .prepare(
@@ -1953,7 +2597,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         LEFT JOIN snapshot_sizes ss ON ss.match_id = m.match_id
         LEFT JOIN game_state_sizes gs ON gs.match_id = m.match_id
         LEFT JOIN deck_sizes ds ON ds.match_id = m.match_id
-        ORDER BY m.updated_at DESC`
+        ORDER BY m.updated_at DESC`,
       )
       .all() as Array<{
       matchId: string;
@@ -1974,9 +2618,20 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       deckSnapshotBytes: number;
     }>;
     const participants = this.maintenanceParticipantsByMatch();
-    const olderThanMs = typeof filters.olderThanDays === "number" && Number.isFinite(filters.olderThanDays) ? Math.max(0, filters.olderThanDays) * 24 * 60 * 60 * 1000 : undefined;
-    const largerThanBytes = typeof filters.largerThanBytes === "number" && Number.isFinite(filters.largerThanBytes) ? Math.max(0, filters.largerThanBytes) : undefined;
-    const normalizedLimit = typeof filters.limit === "number" && Number.isFinite(filters.limit) ? Math.max(1, Math.min(10_000, Math.floor(filters.limit))) : undefined;
+    const olderThanMs =
+      typeof filters.olderThanDays === "number" &&
+      Number.isFinite(filters.olderThanDays)
+        ? Math.max(0, filters.olderThanDays) * 24 * 60 * 60 * 1000
+        : undefined;
+    const largerThanBytes =
+      typeof filters.largerThanBytes === "number" &&
+      Number.isFinite(filters.largerThanBytes)
+        ? Math.max(0, filters.largerThanBytes)
+        : undefined;
+    const normalizedLimit =
+      typeof filters.limit === "number" && Number.isFinite(filters.limit)
+        ? Math.max(1, Math.min(10_000, Math.floor(filters.limit)))
+        : undefined;
     const nowMs = now.getTime();
     const entries = rows.map((row): StorageMaintenanceMatchEntry => {
       const sizes = this.maintenanceSizes(row);
@@ -1987,42 +2642,79 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         terminal: isTerminalMaintenanceStatus(row.status),
         mode: row.mode,
         retentionProtected: protection.protected,
-        ...(protection.protectedAt ? { retentionProtectedAt: protection.protectedAt } : {}),
+        ...(protection.protectedAt
+          ? { retentionProtectedAt: protection.protectedAt }
+          : {}),
         matchVersion: Number(row.matchVersion),
-        ...(typeof row.stateVersion === "number" ? { stateVersion: row.stateVersion } : {}),
+        ...(typeof row.stateVersion === "number"
+          ? { stateVersion: row.stateVersion }
+          : {}),
         ...(row.stateHash ? { stateHash: row.stateHash } : {}),
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
-        ageSeconds: Math.max(0, Math.floor((nowMs - new Date(row.updatedAt).getTime()) / 1000)),
+        ageSeconds: Math.max(
+          0,
+          Math.floor((nowMs - new Date(row.updatedAt).getTime()) / 1000),
+        ),
         participants: participants.get(row.matchId) ?? [],
         eventCount: Number(row.eventCount),
         snapshotCount: Number(row.snapshotCount),
-        sizes
+        sizes,
       };
     });
     return entries
-      .filter((entry) => (filters.status ? entry.status === filters.status : true))
-      .filter((entry) => (typeof filters.terminal === "boolean" ? entry.terminal === filters.terminal : true))
+      .filter((entry) =>
+        filters.status ? entry.status === filters.status : true,
+      )
+      .filter((entry) =>
+        typeof filters.terminal === "boolean"
+          ? entry.terminal === filters.terminal
+          : true,
+      )
       .filter((entry) => (filters.mode ? entry.mode === filters.mode : true))
-      .filter((entry) => (olderThanMs === undefined ? true : nowMs - new Date(entry.updatedAt).getTime() >= olderThanMs))
-      .filter((entry) => (largerThanBytes === undefined ? true : entry.sizes.approximateTotalBytes >= largerThanBytes))
+      .filter((entry) =>
+        olderThanMs === undefined
+          ? true
+          : nowMs - new Date(entry.updatedAt).getTime() >= olderThanMs,
+      )
+      .filter((entry) =>
+        largerThanBytes === undefined
+          ? true
+          : entry.sizes.approximateTotalBytes >= largerThanBytes,
+      )
       .slice(0, normalizedLimit ?? entries.length);
   }
 
-  private maintenanceParticipantsByMatch(): Map<string, StorageMaintenanceParticipant[]> {
+  private maintenanceParticipantsByMatch(): Map<
+    string,
+    StorageMaintenanceParticipant[]
+  > {
     const result = new Map<string, StorageMaintenanceParticipant[]>();
     if (!this.tableExists("sessions")) return result;
     const rows = this.db
-      .prepare("SELECT match_id AS matchId, side, display_name AS displayName, connected, last_seen_at AS lastSeenAt FROM sessions ORDER BY created_at ASC")
-      .all() as Array<{ matchId: string; side: "runner" | "corp"; displayName: string; connected: number; lastSeenAt: string }>;
+      .prepare(
+        "SELECT match_id AS matchId, side, display_name AS displayName, connected, last_seen_at AS lastSeenAt FROM sessions ORDER BY created_at ASC",
+      )
+      .all() as Array<{
+      matchId: string;
+      side: "runner" | "corp";
+      displayName: string;
+      connected: number;
+      lastSeenAt: string;
+    }>;
     for (const row of rows) {
       const entries = result.get(row.matchId) ?? [];
-      if (!entries.some((entry) => entry.side === row.side && entry.displayName === row.displayName)) {
+      if (
+        !entries.some(
+          (entry) =>
+            entry.side === row.side && entry.displayName === row.displayName,
+        )
+      ) {
         entries.push({
           side: row.side,
           displayName: row.displayName,
           connected: row.connected === 1,
-          lastSeenAt: row.lastSeenAt
+          lastSeenAt: row.lastSeenAt,
         });
       }
       result.set(row.matchId, entries);
@@ -2048,67 +2740,206 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       eventPayloadBytes,
       stateSnapshotBytes,
       deckSnapshotBytes,
-      approximateTotalBytes: matchRecordBytes + gameStateBytes + eventPayloadBytes + stateSnapshotBytes + deckSnapshotBytes
+      approximateTotalBytes:
+        matchRecordBytes +
+        gameStateBytes +
+        eventPayloadBytes +
+        stateSnapshotBytes +
+        deckSnapshotBytes,
     };
   }
 
   private maintenanceTableSizes(): StorageMaintenanceTableSize[] {
     const definitions = [
-      { key: "matches", label: "Matches", table: "matches", expression: "COALESCE(SUM(LENGTH(record_json) + LENGTH(baseline_json) + LENGTH(settings_json) + COALESCE(LENGTH(lifecycle_json), 0)), 0)" },
-      { key: "state_snapshots", label: "State Snapshots", table: "state_snapshots", expression: "COALESCE(SUM(LENGTH(game_state_json)), 0)" },
-      { key: "game_states", label: "Aktuelle GameStates", table: "game_states", expression: "COALESCE(SUM(LENGTH(game_state_json)), 0)" },
-      { key: "events", label: "Events", table: "events", expression: "COALESCE(SUM(LENGTH(public_payload_json)), 0)" },
-      { key: "engine_events", label: "Engine Events", table: "engine_events", expression: "COALESCE(SUM(LENGTH(event_json)), 0)" },
-      { key: "ai_decision_traces", label: "KI-Entscheidungstraces", table: "ai_decision_traces", expression: "COALESCE(SUM(LENGTH(trace_json)), 0)" },
-      { key: "sessions", label: "Sessions (redigiert)", table: "sessions", expression: "COALESCE(SUM(LENGTH(display_name)), 0)" },
-      { key: "action_receipts", label: "Action Receipts", table: "action_receipts", expression: "COALESCE(SUM(LENGTH(COALESCE(error_code, ''))), 0)" },
-      { key: "undo_snapshots", label: "Undo Snapshots", table: "undo_snapshots", expression: "COUNT(*) * 64" },
-      { key: "pending_undo", label: "Pending Undo", table: "pending_undo", expression: "COALESCE(SUM(LENGTH(pending_undo_json)), 0)" },
-      { key: "deck_snapshots_redacted", label: "Deck-Snapshots (Inhalt redigiert)", table: "private_deck_snapshots", expression: "COALESCE(SUM(LENGTH(private_deck_snapshots_json)), 0)" },
-      { key: "start_lobbies", label: "Start-Lobbys", table: "start_lobbies", expression: "COALESCE(SUM(LENGTH(start_lobby_json)), 0)" },
-      { key: "account_match_participants", label: "Account-Matchbindungen (redigiert)", table: "account_match_participants", expression: "COUNT(*) * 64" },
-      { key: "account_game_results", label: "Account-Spielergebnisse (redigiert)", table: "account_game_results", expression: "COUNT(*) * 160" },
-      { key: "account_series_results", label: "Account-Serienergebnisse (redigiert)", table: "account_series_results", expression: "COUNT(*) * 160" }
+      {
+        key: "matches",
+        label: "Matches",
+        table: "matches",
+        expression:
+          "COALESCE(SUM(LENGTH(record_json) + LENGTH(baseline_json) + LENGTH(settings_json) + COALESCE(LENGTH(lifecycle_json), 0)), 0)",
+      },
+      {
+        key: "state_snapshots",
+        label: "State Snapshots",
+        table: "state_snapshots",
+        expression: "COALESCE(SUM(LENGTH(game_state_json)), 0)",
+      },
+      {
+        key: "game_states",
+        label: "Aktuelle GameStates",
+        table: "game_states",
+        expression: "COALESCE(SUM(LENGTH(game_state_json)), 0)",
+      },
+      {
+        key: "events",
+        label: "Events",
+        table: "events",
+        expression: "COALESCE(SUM(LENGTH(public_payload_json)), 0)",
+      },
+      {
+        key: "engine_events",
+        label: "Engine Events",
+        table: "engine_events",
+        expression: "COALESCE(SUM(LENGTH(event_json)), 0)",
+      },
+      {
+        key: "ai_decision_traces",
+        label: "KI-Entscheidungstraces",
+        table: "ai_decision_traces",
+        expression: "COALESCE(SUM(LENGTH(trace_json)), 0)",
+      },
+      {
+        key: "sessions",
+        label: "Sessions (redigiert)",
+        table: "sessions",
+        expression: "COALESCE(SUM(LENGTH(display_name)), 0)",
+      },
+      {
+        key: "action_receipts",
+        label: "Action Receipts",
+        table: "action_receipts",
+        expression: "COALESCE(SUM(LENGTH(COALESCE(error_code, ''))), 0)",
+      },
+      {
+        key: "undo_snapshots",
+        label: "Undo Snapshots",
+        table: "undo_snapshots",
+        expression: "COUNT(*) * 64",
+      },
+      {
+        key: "pending_undo",
+        label: "Pending Undo",
+        table: "pending_undo",
+        expression: "COALESCE(SUM(LENGTH(pending_undo_json)), 0)",
+      },
+      {
+        key: "deck_snapshots_redacted",
+        label: "Deck-Snapshots (Inhalt redigiert)",
+        table: "private_deck_snapshots",
+        expression: "COALESCE(SUM(LENGTH(private_deck_snapshots_json)), 0)",
+      },
+      {
+        key: "start_lobbies",
+        label: "Start-Lobbys",
+        table: "start_lobbies",
+        expression: "COALESCE(SUM(LENGTH(start_lobby_json)), 0)",
+      },
+      {
+        key: "account_match_participants",
+        label: "Account-Matchbindungen (redigiert)",
+        table: "account_match_participants",
+        expression: "COUNT(*) * 64",
+      },
+      {
+        key: "account_game_results",
+        label: "Account-Spielergebnisse (redigiert)",
+        table: "account_game_results",
+        expression: "COUNT(*) * 160",
+      },
+      {
+        key: "account_series_results",
+        label: "Account-Serienergebnisse (redigiert)",
+        table: "account_series_results",
+        expression: "COUNT(*) * 160",
+      },
     ] as const;
     return definitions
       .filter((definition) => this.tableExists(definition.table))
       .map((definition) => {
-        const rowCount = this.db.prepare(`SELECT COUNT(*) AS count FROM ${definition.table}`).get() as { count: number };
-        const payload = this.db.prepare(`SELECT ${definition.expression} AS bytes FROM ${definition.table}`).get() as { bytes: number | bigint | null };
+        const rowCount = this.db
+          .prepare(`SELECT COUNT(*) AS count FROM ${definition.table}`)
+          .get() as { count: number };
+        const payload = this.db
+          .prepare(
+            `SELECT ${definition.expression} AS bytes FROM ${definition.table}`,
+          )
+          .get() as { bytes: number | bigint | null };
         return {
           key: definition.key,
           label: definition.label,
           rowCount: Number(rowCount.count),
-          approximatePayloadBytes: Number(payload.bytes ?? 0)
+          approximatePayloadBytes: Number(payload.bytes ?? 0),
         };
       });
   }
 
   private compactionPayloadBytes(): number {
-    const recordBytes = this.tableExists("matches") ? scalarNumber(this.db.prepare("SELECT COALESCE(SUM(LENGTH(record_json)), 0) AS value FROM matches").get()) : 0;
-    const gameStateBytes = this.tableExists("game_states") ? scalarNumber(this.db.prepare("SELECT COALESCE(SUM(LENGTH(game_state_json)), 0) AS value FROM game_states").get()) : 0;
-    const snapshotBytes = this.tableExists("state_snapshots") ? scalarNumber(this.db.prepare("SELECT COALESCE(SUM(LENGTH(game_state_json)), 0) AS value FROM state_snapshots").get()) : 0;
-    const engineEventBytes = this.tableExists("engine_events") ? scalarNumber(this.db.prepare("SELECT COALESCE(SUM(LENGTH(event_json)), 0) AS value FROM engine_events").get()) : 0;
+    const recordBytes = this.tableExists("matches")
+      ? scalarNumber(
+          this.db
+            .prepare(
+              "SELECT COALESCE(SUM(LENGTH(record_json)), 0) AS value FROM matches",
+            )
+            .get(),
+        )
+      : 0;
+    const gameStateBytes = this.tableExists("game_states")
+      ? scalarNumber(
+          this.db
+            .prepare(
+              "SELECT COALESCE(SUM(LENGTH(game_state_json)), 0) AS value FROM game_states",
+            )
+            .get(),
+        )
+      : 0;
+    const snapshotBytes = this.tableExists("state_snapshots")
+      ? scalarNumber(
+          this.db
+            .prepare(
+              "SELECT COALESCE(SUM(LENGTH(game_state_json)), 0) AS value FROM state_snapshots",
+            )
+            .get(),
+        )
+      : 0;
+    const engineEventBytes = this.tableExists("engine_events")
+      ? scalarNumber(
+          this.db
+            .prepare(
+              "SELECT COALESCE(SUM(LENGTH(event_json)), 0) AS value FROM engine_events",
+            )
+            .get(),
+        )
+      : 0;
     return recordBytes + gameStateBytes + snapshotBytes + engineEventBytes;
   }
 
-  private maintenanceCleanupPreviewInternal(filters: StorageMaintenanceCleanupFilters, now: Date): StorageMaintenanceCleanupPreview {
+  private maintenanceCleanupPreviewInternal(
+    filters: StorageMaintenanceCleanupFilters,
+    now: Date,
+  ): StorageMaintenanceCleanupPreview {
     const normalized = normalizeCleanupFilters(filters);
     const statuses = new Set(normalized.statuses);
     const olderThanSeconds = normalized.olderThanMinutes * 60;
-    const matches = this.maintenanceMatchesInternal({ limit: normalized.limit ?? 500 }, now)
+    const matches = this.maintenanceMatchesInternal(
+      { limit: normalized.limit ?? 500 },
+      now,
+    )
       .filter((match) => statuses.has(match.status))
       .filter((match) => match.ageSeconds >= olderThanSeconds)
-      .filter((match) => normalized.includeProtected === true || !match.retentionProtected)
+      .filter(
+        (match) =>
+          normalized.includeProtected === true || !match.retentionProtected,
+      )
       .slice(0, normalized.limit ?? 500);
     const statusCounts: Partial<Record<MatchStatus, number>> = {};
-    for (const match of matches) statusCounts[match.status] = (statusCounts[match.status] ?? 0) + 1;
+    for (const match of matches)
+      statusCounts[match.status] = (statusCounts[match.status] ?? 0) + 1;
     const updatedAtValues = matches.map((match) => match.updatedAt).sort();
     const warnings: string[] = [];
-    if (normalized.statuses.includes("active")) warnings.push("Aktive Matches werden nur anhand ihres Alters ausgewählt. Laufende Partien können davon betroffen sein.");
-    if (normalized.statuses.includes("finished")) warnings.push("Finished-Matches sind Replay-/Analyseartefakte und sollten nur bewusst ausgewählt werden.");
-    if (normalized.includeProtected === true) warnings.push("Geschützte Matches sind in dieser Vorschau ausdrücklich eingeschlossen.");
-    if (matches.length === 0) warnings.push("Keine Matches erfüllen die aktuellen Löschfilter.");
+    if (normalized.statuses.includes("active"))
+      warnings.push(
+        "Aktive Matches werden nur anhand ihres Alters ausgewählt. Laufende Partien können davon betroffen sein.",
+      );
+    if (normalized.statuses.includes("finished"))
+      warnings.push(
+        "Finished-Matches sind Replay-/Analyseartefakte und sollten nur bewusst ausgewählt werden.",
+      );
+    if (normalized.includeProtected === true)
+      warnings.push(
+        "Geschützte Matches sind in dieser Vorschau ausdrücklich eingeschlossen.",
+      );
+    if (matches.length === 0)
+      warnings.push("Keine Matches erfüllen die aktuellen Löschfilter.");
     return {
       backendOpsVersion: "Backend 0.5",
       generatedAt: now.toISOString(),
@@ -2116,11 +2947,16 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       filters: normalized,
       matchCount: matches.length,
       statusCounts,
-      approximateBytes: matches.reduce((sum, match) => sum + match.sizes.approximateTotalBytes, 0),
+      approximateBytes: matches.reduce(
+        (sum, match) => sum + match.sizes.approximateTotalBytes,
+        0,
+      ),
       ...(updatedAtValues[0] ? { oldestUpdatedAt: updatedAtValues[0] } : {}),
-      ...(updatedAtValues.at(-1) ? { newestUpdatedAt: updatedAtValues.at(-1)! } : {}),
+      ...(updatedAtValues.at(-1)
+        ? { newestUpdatedAt: updatedAtValues.at(-1)! }
+        : {}),
       matches,
-      warnings
+      warnings,
     };
   }
 
@@ -2128,7 +2964,9 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     if (matchIds.length === 0) return 0;
     let deleted = 0;
     this.transaction(() => {
-      const statement = this.db.prepare("DELETE FROM matches WHERE match_id = ?");
+      const statement = this.db.prepare(
+        "DELETE FROM matches WHERE match_id = ?",
+      );
       for (const matchId of matchIds) {
         const result = statement.run(matchId) as { changes?: number | bigint };
         deleted += Number(result.changes ?? 0);
@@ -2139,8 +2977,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   }
 
   private integrityCheck(): "ok" {
-    const integrity = this.db.prepare("PRAGMA integrity_check").get() as { integrity_check?: string };
-    if (integrity.integrity_check !== "ok") throw new StorageError("storage_corrupt", "Storage-Integritätsprüfung ist fehlgeschlagen.");
+    const integrity = this.db.prepare("PRAGMA integrity_check").get() as {
+      integrity_check?: string;
+    };
+    if (integrity.integrity_check !== "ok")
+      throw new StorageError(
+        "storage_corrupt",
+        "Storage-Integritätsprüfung ist fehlgeschlagen.",
+      );
     return "ok";
   }
 
@@ -2148,8 +2992,13 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     return existsSync(this.dbPath) ? statSync(this.dbPath).size : 0;
   }
 
-  private pragmaNumber(name: "page_size" | "page_count" | "freelist_count"): number {
-    const row = this.db.prepare(`PRAGMA ${name}`).get() as Record<string, number | bigint | undefined>;
+  private pragmaNumber(
+    name: "page_size" | "page_count" | "freelist_count",
+  ): number {
+    const row = this.db.prepare(`PRAGMA ${name}`).get() as Record<
+      string,
+      number | bigint | undefined
+    >;
     return Number(row[name] ?? 0);
   }
 
@@ -2167,23 +3016,50 @@ export class SqliteMatchStorage implements MultiplayerStorage {
 }
 
 function isTerminalMaintenanceStatus(status: MatchStatus): boolean {
-  return status === "finished" || status === "forfeited" || status === "abandoned" || status === "cancelled";
+  return (
+    status === "finished" ||
+    status === "forfeited" ||
+    status === "abandoned" ||
+    status === "cancelled"
+  );
 }
 
-const AUTOMATIC_CLEANUP_STATUSES: MatchStatus[] = ["cancelled", "abandoned", "forfeited", "finished"];
-const MANUAL_CLEANUP_STATUSES: MatchStatus[] = ["active", ...AUTOMATIC_CLEANUP_STATUSES];
+const AUTOMATIC_CLEANUP_STATUSES: MatchStatus[] = [
+  "cancelled",
+  "abandoned",
+  "forfeited",
+  "finished",
+];
+const MANUAL_CLEANUP_STATUSES: MatchStatus[] = [
+  "active",
+  ...AUTOMATIC_CLEANUP_STATUSES,
+];
 
-function normalizeCleanupFilters(filters: StorageMaintenanceCleanupFilters): StorageMaintenanceCleanupFilters {
+function normalizeCleanupFilters(
+  filters: StorageMaintenanceCleanupFilters,
+): StorageMaintenanceCleanupFilters {
   const statuses: MatchStatus[] = [];
   for (const status of filters.statuses ?? []) {
-    if (MANUAL_CLEANUP_STATUSES.includes(status) && !statuses.includes(status)) statuses.push(status);
+    if (MANUAL_CLEANUP_STATUSES.includes(status) && !statuses.includes(status))
+      statuses.push(status);
   }
-  const olderThanMinutes = Number.isFinite(filters.olderThanMinutes) ? Math.max(1, Math.floor(filters.olderThanMinutes)) : 60;
-  const limit = Number.isFinite(filters.limit) ? Math.max(1, Math.min(500, Math.floor(filters.limit ?? 500))) : 500;
-  return { statuses, olderThanMinutes, limit, includeProtected: filters.includeProtected === true };
+  const olderThanMinutes = Number.isFinite(filters.olderThanMinutes)
+    ? Math.max(1, Math.floor(filters.olderThanMinutes))
+    : 60;
+  const limit = Number.isFinite(filters.limit)
+    ? Math.max(1, Math.min(500, Math.floor(filters.limit ?? 500)))
+    : 500;
+  return {
+    statuses,
+    olderThanMinutes,
+    limit,
+    includeProtected: filters.includeProtected === true,
+  };
 }
 
-function defaultCleanupPolicy(lastRun?: StorageMaintenanceCleanupPolicyLastRun): StorageMaintenanceCleanupPolicy {
+function defaultCleanupPolicy(
+  lastRun?: StorageMaintenanceCleanupPolicyLastRun,
+): StorageMaintenanceCleanupPolicy {
   return {
     backendOpsVersion: "Backend 0.5",
     intervalMinutes: 60,
@@ -2194,35 +3070,55 @@ function defaultCleanupPolicy(lastRun?: StorageMaintenanceCleanupPolicyLastRun):
     includeProtected: false,
     vacuumAfter: false,
     createBackup: false,
-    ...(lastRun ? { lastRun } : {})
+    ...(lastRun ? { lastRun } : {}),
   };
 }
 
-function normalizeCleanupPolicy(input: Partial<StorageMaintenanceCleanupPolicyInput>, updatedAt?: string, lastRun?: StorageMaintenanceCleanupPolicyLastRun): StorageMaintenanceCleanupPolicy {
+function normalizeCleanupPolicy(
+  input: Partial<StorageMaintenanceCleanupPolicyInput>,
+  updatedAt?: string,
+  lastRun?: StorageMaintenanceCleanupPolicyLastRun,
+): StorageMaintenanceCleanupPolicy {
   const statuses: MatchStatus[] = [];
   for (const status of input.statuses ?? AUTOMATIC_CLEANUP_STATUSES) {
-    if (AUTOMATIC_CLEANUP_STATUSES.includes(status) && !statuses.includes(status)) statuses.push(status);
+    if (
+      AUTOMATIC_CLEANUP_STATUSES.includes(status) &&
+      !statuses.includes(status)
+    )
+      statuses.push(status);
   }
   return {
     backendOpsVersion: "Backend 0.5",
     intervalMinutes: 60,
     enabled: input.enabled === true,
     statuses: statuses.length > 0 ? statuses : AUTOMATIC_CLEANUP_STATUSES,
-    olderThanDays: Number.isFinite(input.olderThanDays) ? Math.max(1, Math.min(3650, Math.floor(input.olderThanDays ?? 3))) : 3,
-    limit: Number.isFinite(input.limit) ? Math.max(1, Math.min(500, Math.floor(input.limit ?? 500))) : 500,
+    olderThanDays: Number.isFinite(input.olderThanDays)
+      ? Math.max(1, Math.min(3650, Math.floor(input.olderThanDays ?? 3)))
+      : 3,
+    limit: Number.isFinite(input.limit)
+      ? Math.max(1, Math.min(500, Math.floor(input.limit ?? 500)))
+      : 500,
     includeProtected: input.includeProtected === true,
     vacuumAfter: input.vacuumAfter === true,
     createBackup: input.createBackup === true,
     ...(updatedAt ? { updatedAt } : {}),
-    ...(lastRun ? { lastRun } : {})
+    ...(lastRun ? { lastRun } : {}),
   };
 }
 
-function cleanupPolicyLastRunFromMeta(raw: string | undefined): StorageMaintenanceCleanupPolicyLastRun | undefined {
+function cleanupPolicyLastRunFromMeta(
+  raw: string | undefined,
+): StorageMaintenanceCleanupPolicyLastRun | undefined {
   if (!raw) return undefined;
   try {
-    const parsed = JSON.parse(raw) as Partial<StorageMaintenanceCleanupPolicyLastRun>;
-    if (typeof parsed.startedAt !== "string" || typeof parsed.finishedAt !== "string") return undefined;
+    const parsed = JSON.parse(
+      raw,
+    ) as Partial<StorageMaintenanceCleanupPolicyLastRun>;
+    if (
+      typeof parsed.startedAt !== "string" ||
+      typeof parsed.finishedAt !== "string"
+    )
+      return undefined;
     return {
       startedAt: parsed.startedAt,
       finishedAt: parsed.finishedAt,
@@ -2231,8 +3127,11 @@ function cleanupPolicyLastRunFromMeta(raw: string | undefined): StorageMaintenan
       approximateBytes: finiteNonNegative(parsed.approximateBytes),
       backupCreated: parsed.backupCreated === true,
       ...(parsed.backupId ? { backupId: String(parsed.backupId) } : {}),
-      ...(parsed.skippedReason === "disabled" || parsed.skippedReason === "no_matches" ? { skippedReason: parsed.skippedReason } : {}),
-      ...(parsed.errorCode ? { errorCode: String(parsed.errorCode) } : {})
+      ...(parsed.skippedReason === "disabled" ||
+      parsed.skippedReason === "no_matches"
+        ? { skippedReason: parsed.skippedReason }
+        : {}),
+      ...(parsed.errorCode ? { errorCode: String(parsed.errorCode) } : {}),
     };
   } catch {
     return undefined;
@@ -2240,34 +3139,51 @@ function cleanupPolicyLastRunFromMeta(raw: string | undefined): StorageMaintenan
 }
 
 function finiteNonNegative(value: unknown): number {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0;
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? Math.floor(value)
+    : 0;
 }
 
-function retentionProtectionFromRecordJson(recordJson: string): { protected: boolean; protectedAt?: string } {
+function retentionProtectionFromRecordJson(recordJson: string): {
+  protected: boolean;
+  protectedAt?: string;
+} {
   try {
-    const record = JSON.parse(recordJson) as { match?: { retentionProtection?: { protected?: unknown; protectedAt?: unknown } } };
+    const record = JSON.parse(recordJson) as {
+      match?: {
+        retentionProtection?: { protected?: unknown; protectedAt?: unknown };
+      };
+    };
     const protection = record.match?.retentionProtection;
     if (protection?.protected !== true) return { protected: false };
     return {
       protected: true,
-      ...(typeof protection.protectedAt === "string" ? { protectedAt: protection.protectedAt } : {})
+      ...(typeof protection.protectedAt === "string"
+        ? { protectedAt: protection.protectedAt }
+        : {}),
     };
   } catch {
     return { protected: false };
   }
 }
 
-function cleanupPreviewId(filters: StorageMaintenanceCleanupFilters, matches: StorageMaintenanceMatchEntry[]): string {
+function cleanupPreviewId(
+  filters: StorageMaintenanceCleanupFilters,
+  matches: StorageMaintenanceMatchEntry[],
+): string {
   const selectedMatches = matches
     .map((match) => ({
       matchId: match.matchId,
       status: match.status,
       updatedAt: match.updatedAt,
       retentionProtected: match.retentionProtected,
-      approximateBytes: match.sizes.approximateTotalBytes
+      approximateBytes: match.sizes.approximateTotalBytes,
     }))
     .sort((a, b) => a.matchId.localeCompare(b.matchId));
-  return createHash("sha256").update(JSON.stringify({ filters, matches: selectedMatches })).digest("hex").slice(0, 16);
+  return createHash("sha256")
+    .update(JSON.stringify({ filters, matches: selectedMatches }))
+    .digest("hex")
+    .slice(0, 16);
 }
 
 function dedupeStateSnapshots(record: StoredMatch): void {
@@ -2278,7 +3194,8 @@ function dedupeStateSnapshots(record: StoredMatch): void {
     seen.add(snapshot.snapshotId);
     unique.push(snapshot);
   }
-  if (unique.length !== record.stateSnapshots.length) record.stateSnapshots = unique;
+  if (unique.length !== record.stateSnapshots.length)
+    record.stateSnapshots = unique;
 }
 
 export function createSqliteStorageBackup(input: {
@@ -2310,7 +3227,11 @@ export function createSqliteStorageBackup(input: {
     assertSqliteBackupUsable(targetPath);
     files.push(fileManifestEntry(targetDir, targetName));
   }
-  if (files.length === 0) throw new StorageError("backup_invalid", "Backup konnte keine gültigen Storage-Dateien sichern.");
+  if (files.length === 0)
+    throw new StorageError(
+      "backup_invalid",
+      "Backup konnte keine gültigen Storage-Dateien sichern.",
+    );
 
   const manifest: BackupManifest = {
     manifestVersion: 1,
@@ -2321,26 +3242,61 @@ export function createSqliteStorageBackup(input: {
     schemaVersion: input.schemaVersion,
     source: input.source,
     files,
-    ...(typeof input.matchCount === "number" ? { matchCount: input.matchCount } : {}),
-    ...(input.reason ? { reason: input.reason } : {})
+    ...(typeof input.matchCount === "number"
+      ? { matchCount: input.matchCount }
+      : {}),
+    ...(input.reason ? { reason: input.reason } : {}),
   };
-  writeFileSync(join(targetDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  writeFileSync(
+    join(targetDir, "manifest.json"),
+    `${JSON.stringify(manifest, null, 2)}\n`,
+    "utf8",
+  );
   return { backupDir: targetDir, manifest };
 }
 
-export function restoreSqliteStorageBackup(input: { backupDir: string; targetPath: string; backupRootDir: string }): { preRestoreBackupDir?: string; restoredPath: string } {
+export function restoreSqliteStorageBackup(input: {
+  backupDir: string;
+  targetPath: string;
+  backupRootDir: string;
+}): { preRestoreBackupDir?: string; restoredPath: string } {
   const manifestPath = join(input.backupDir, "manifest.json");
-  if (!existsSync(manifestPath)) throw new StorageError("backup_invalid", "Backup-Manifest fehlt oder ist unvollständig.");
-  const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as BackupManifest;
-  if (manifest.manifestVersion !== 1 || manifest.storageKind !== "sqlite") throw new StorageError("backup_invalid", "Backup-Manifest ist nicht gültig.");
-  if (manifest.schemaVersion > SQLITE_STORAGE_SCHEMA_VERSION) throw new StorageError("backup_schema_unsupported", "Backup nutzt ein neueres Storage-Schema.");
+  if (!existsSync(manifestPath))
+    throw new StorageError(
+      "backup_invalid",
+      "Backup-Manifest fehlt oder ist unvollständig.",
+    );
+  const manifest = JSON.parse(
+    readFileSync(manifestPath, "utf8"),
+  ) as BackupManifest;
+  if (manifest.manifestVersion !== 1 || manifest.storageKind !== "sqlite")
+    throw new StorageError(
+      "backup_invalid",
+      "Backup-Manifest ist nicht gültig.",
+    );
+  if (manifest.schemaVersion > SQLITE_STORAGE_SCHEMA_VERSION)
+    throw new StorageError(
+      "backup_schema_unsupported",
+      "Backup nutzt ein neueres Storage-Schema.",
+    );
   for (const file of manifest.files) {
     const fullPath = join(input.backupDir, file.name);
-    if (!existsSync(fullPath)) throw new StorageError("backup_invalid", "Backup ist unvollständig.");
-    if (sha256File(fullPath) !== file.sha256) throw new StorageError("backup_checksum_mismatch", "Backup-Prüfsumme stimmt nicht.");
+    if (!existsSync(fullPath))
+      throw new StorageError("backup_invalid", "Backup ist unvollständig.");
+    if (sha256File(fullPath) !== file.sha256)
+      throw new StorageError(
+        "backup_checksum_mismatch",
+        "Backup-Prüfsumme stimmt nicht.",
+      );
   }
-  const sqliteFile = manifest.files.find((file) => file.name.endsWith(".sqlite"));
-  if (!sqliteFile) throw new StorageError("backup_invalid", "Backup enthält keine SQLite-Datei.");
+  const sqliteFile = manifest.files.find((file) =>
+    file.name.endsWith(".sqlite"),
+  );
+  if (!sqliteFile)
+    throw new StorageError(
+      "backup_invalid",
+      "Backup enthält keine SQLite-Datei.",
+    );
   assertSqliteBackupUsable(join(input.backupDir, sqliteFile.name));
 
   let preRestoreBackupDir: string | undefined;
@@ -2350,21 +3306,39 @@ export function restoreSqliteStorageBackup(input: { backupDir: string; targetPat
       backupDir: input.backupRootDir,
       schemaVersion: SQLITE_STORAGE_SCHEMA_VERSION,
       reason: "pre_restore",
-      source: "pre_restore_sqlite"
+      source: "pre_restore_sqlite",
     }).backupDir;
   }
   mkdirSync(dirname(input.targetPath), { recursive: true });
   copyFileSync(join(input.backupDir, sqliteFile.name), input.targetPath);
-  return { ...(preRestoreBackupDir ? { preRestoreBackupDir } : {}), restoredPath: input.targetPath };
+  return {
+    ...(preRestoreBackupDir ? { preRestoreBackupDir } : {}),
+    restoredPath: input.targetPath,
+  };
 }
 
 export function inspectSqliteStorage(dbPath: string): StorageHealth {
   const db = new DatabaseSync(resolve(dbPath), { open: true, readOnly: true });
   try {
-    const integrity = db.prepare("PRAGMA integrity_check").get() as { integrity_check?: string };
-    if (integrity.integrity_check !== "ok") throw new StorageError("storage_corrupt", "Storage-Integritätsprüfung ist fehlgeschlagen.");
-    const meta = (key: string): string | undefined => (db.prepare("SELECT value FROM storage_meta WHERE key = ?").get(key) as { value?: string } | undefined)?.value;
-    const count = (db.prepare("SELECT COUNT(*) AS count FROM matches").get() as { count: number }).count;
+    const integrity = db.prepare("PRAGMA integrity_check").get() as {
+      integrity_check?: string;
+    };
+    if (integrity.integrity_check !== "ok")
+      throw new StorageError(
+        "storage_corrupt",
+        "Storage-Integritätsprüfung ist fehlgeschlagen.",
+      );
+    const meta = (key: string): string | undefined =>
+      (
+        db.prepare("SELECT value FROM storage_meta WHERE key = ?").get(key) as
+          | { value?: string }
+          | undefined
+      )?.value;
+    const count = (
+      db.prepare("SELECT COUNT(*) AS count FROM matches").get() as {
+        count: number;
+      }
+    ).count;
     const storageFormat = meta("storage_format");
     return {
       ok: true,
@@ -2373,36 +3347,104 @@ export function inspectSqliteStorage(dbPath: string): StorageHealth {
       matchCount: Number(count),
       database: basename(dbPath),
       ...(storageFormat ? { storageFormat } : {}),
-      ...(meta("last_migration_at") ? { lastMigrationAt: meta("last_migration_at")! } : {})
+      ...(meta("last_migration_at")
+        ? { lastMigrationAt: meta("last_migration_at")! }
+        : {}),
     };
   } finally {
     db.close();
   }
 }
 
-export function validateStoredMatch(value: unknown): asserts value is StoredMatch {
-  if (!value || typeof value !== "object") throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
+export function validateStoredMatch(
+  value: unknown,
+): asserts value is StoredMatch {
+  if (!value || typeof value !== "object")
+    throw new StorageError(
+      "stored_match_invalid",
+      "Match-Record ist strukturell ungültig.",
+    );
   const record = value as Partial<StoredMatch>;
   const match = record.match as Partial<StoredMatch["match"]> | undefined;
-  if (!match || typeof match.matchId !== "string" || match.matchId.length === 0) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
-  if (typeof match.matchVersion !== "number" || !Number.isFinite(match.matchVersion) || match.matchVersion < 1) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
-  if (!isMatchStatus(match.status) || !isMatchMode(match.mode)) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
-  if (typeof match.isPublic !== "boolean") throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
-  if (!Array.isArray(record.sessions) || !Array.isArray(record.tokens) || !Array.isArray(record.eventLog) || !Array.isArray(record.actionReceipts) || !Array.isArray(record.undoSnapshots) || !Array.isArray(record.stateSnapshots)) {
-    throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
+  if (!match || typeof match.matchId !== "string" || match.matchId.length === 0)
+    throw new StorageError(
+      "stored_match_invalid",
+      "Match-Record ist strukturell ungültig.",
+    );
+  if (
+    typeof match.matchVersion !== "number" ||
+    !Number.isFinite(match.matchVersion) ||
+    match.matchVersion < 1
+  )
+    throw new StorageError(
+      "stored_match_invalid",
+      "Match-Record ist strukturell ungültig.",
+    );
+  if (!isMatchStatus(match.status) || !isMatchMode(match.mode))
+    throw new StorageError(
+      "stored_match_invalid",
+      "Match-Record ist strukturell ungültig.",
+    );
+  if (typeof match.isPublic !== "boolean")
+    throw new StorageError(
+      "stored_match_invalid",
+      "Match-Record ist strukturell ungültig.",
+    );
+  if (
+    !Array.isArray(record.sessions) ||
+    !Array.isArray(record.tokens) ||
+    !Array.isArray(record.eventLog) ||
+    !Array.isArray(record.actionReceipts) ||
+    !Array.isArray(record.undoSnapshots) ||
+    !Array.isArray(record.stateSnapshots)
+  ) {
+    throw new StorageError(
+      "stored_match_invalid",
+      "Match-Record ist strukturell ungültig.",
+    );
   }
   for (const session of record.sessions) {
-    if (session.matchId !== match.matchId || !isSha256Hash(session.sessionTokenHash) || !isSha256Hash(session.reconnectTokenHash)) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
+    if (
+      session.matchId !== match.matchId ||
+      !isSha256Hash(session.sessionTokenHash) ||
+      !isSha256Hash(session.reconnectTokenHash)
+    )
+      throw new StorageError(
+        "stored_match_invalid",
+        "Match-Record ist strukturell ungültig.",
+      );
   }
   for (const token of record.tokens) {
-    if (token.matchId !== match.matchId || !isSha256Hash(token.tokenHash)) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
+    if (token.matchId !== match.matchId || !isSha256Hash(token.tokenHash))
+      throw new StorageError(
+        "stored_match_invalid",
+        "Match-Record ist strukturell ungültig.",
+      );
   }
   for (const event of record.eventLog) {
-    if (event.matchId !== match.matchId || "privatePayload" in (event as Record<string, unknown>)) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
+    if (
+      event.matchId !== match.matchId ||
+      "privatePayload" in (event as Record<string, unknown>)
+    )
+      throw new StorageError(
+        "stored_match_invalid",
+        "Match-Record ist strukturell ungültig.",
+      );
   }
-  if (record.gameState && record.gameState.matchId !== match.matchId) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
+  if (record.gameState && record.gameState.matchId !== match.matchId)
+    throw new StorageError(
+      "stored_match_invalid",
+      "Match-Record ist strukturell ungültig.",
+    );
   const privateDeckSnapshots = record.privateDeckSnapshots as
-    | { participants?: Partial<Record<"player_a" | "player_b", Partial<Record<"runner" | "corp", unknown>>>> }
+    | {
+        participants?: Partial<
+          Record<
+            "player_a" | "player_b",
+            Partial<Record<"runner" | "corp", unknown>>
+          >
+        >;
+      }
     | undefined;
   if (
     privateDeckSnapshots &&
@@ -2411,7 +3453,10 @@ export function validateStoredMatch(value: unknown): asserts value is StoredMatc
       !privateDeckSnapshots.participants.player_b?.runner ||
       !privateDeckSnapshots.participants.player_b.corp)
   ) {
-    throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
+    throw new StorageError(
+      "stored_match_invalid",
+      "Match-Record ist strukturell ungültig.",
+    );
   }
   rejectClearTokenKeys(record);
 }
@@ -2420,14 +3465,29 @@ function assertSqliteBackupUsable(dbPath: string): void {
   let db: DatabaseSync | undefined;
   try {
     db = new DatabaseSync(dbPath, { open: true, readOnly: true });
-    const integrity = db.prepare("PRAGMA integrity_check").get() as { integrity_check?: string };
-    if (integrity.integrity_check !== "ok") throw new StorageError("storage_corrupt", "Storage-Integritätsprüfung ist fehlgeschlagen.");
-    const row = db.prepare("SELECT value FROM storage_meta WHERE key = 'schema_version'").get() as { value?: string } | undefined;
+    const integrity = db.prepare("PRAGMA integrity_check").get() as {
+      integrity_check?: string;
+    };
+    if (integrity.integrity_check !== "ok")
+      throw new StorageError(
+        "storage_corrupt",
+        "Storage-Integritätsprüfung ist fehlgeschlagen.",
+      );
+    const row = db
+      .prepare("SELECT value FROM storage_meta WHERE key = 'schema_version'")
+      .get() as { value?: string } | undefined;
     const schemaVersion = Number(row?.value ?? 0);
-    if (schemaVersion > SQLITE_STORAGE_SCHEMA_VERSION) throw new StorageError("backup_schema_unsupported", "Backup nutzt ein neueres Storage-Schema.");
+    if (schemaVersion > SQLITE_STORAGE_SCHEMA_VERSION)
+      throw new StorageError(
+        "backup_schema_unsupported",
+        "Backup nutzt ein neueres Storage-Schema.",
+      );
   } catch (error) {
     if (error instanceof StorageError) throw error;
-    throw new StorageError("backup_invalid", "Backup-SQLite-Datei ist nicht lesbar.");
+    throw new StorageError(
+      "backup_invalid",
+      "Backup-SQLite-Datei ist nicht lesbar.",
+    );
   } finally {
     db?.close();
   }
@@ -2436,8 +3496,15 @@ function assertSqliteBackupUsable(dbPath: string): void {
 function rejectClearTokenKeys(value: unknown): void {
   if (!value || typeof value !== "object") return;
   for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
-    if (/^(sessionToken|reconnectToken|joinToken|hostSessionToken|hostReconnectToken)$/.test(key)) {
-      throw new StorageError("stored_match_invalid", "Match-Record enthält unzulässige Token-Felder.");
+    if (
+      /^(sessionToken|reconnectToken|joinToken|hostSessionToken|hostReconnectToken)$/.test(
+        key,
+      )
+    ) {
+      throw new StorageError(
+        "stored_match_invalid",
+        "Match-Record enthält unzulässige Token-Felder.",
+      );
     }
     rejectClearTokenKeys(child);
   }
@@ -2460,16 +3527,28 @@ function isMatchStatus(value: unknown): value is MatchStatus {
 }
 
 function isMatchMode(value: unknown): value is MatchMode {
-  return value === "human_vs_human" || value === "human_runner_vs_corp_ai" || value === "human_corp_vs_runner_ai" || value === "ai_vs_ai";
+  return (
+    value === "human_vs_human" ||
+    value === "human_runner_vs_corp_ai" ||
+    value === "human_corp_vs_runner_ai" ||
+    value === "ai_vs_ai"
+  );
 }
 
 function isSha256Hash(value: unknown): boolean {
   return typeof value === "string" && /^sha256:[a-f0-9]{64}$/.test(value);
 }
 
-function fileManifestEntry(dir: string, name: string): BackupManifest["files"][number] {
+function fileManifestEntry(
+  dir: string,
+  name: string,
+): BackupManifest["files"][number] {
   const fullPath = join(dir, name);
-  return { name, sizeBytes: statSync(fullPath).size, sha256: sha256File(fullPath) };
+  return {
+    name,
+    sizeBytes: statSync(fullPath).size,
+    sha256: sha256File(fullPath),
+  };
 }
 
 function sha256File(path: string): string {
@@ -2498,7 +3577,9 @@ function toJson(value: unknown): string | null {
   return value === undefined ? null : JSON.stringify(value);
 }
 
-function publicEventForStorage(event: StoredMatch["eventLog"][number]["publicPayload"]): StoredMatch["eventLog"][number]["publicPayload"] {
+function publicEventForStorage(
+  event: StoredMatch["eventLog"][number]["publicPayload"],
+): StoredMatch["eventLog"][number]["publicPayload"] {
   if (event.publicPayload.aiDecisionDebug === undefined) return event;
   const publicPayload = { ...event.publicPayload };
   delete publicPayload.aiDecisionDebug;
@@ -2522,9 +3603,11 @@ function actionContextPublicEvent(event: {
   hiddenZoneAction?: string | null;
 }): StoredMatch["eventLog"][number]["publicPayload"] {
   const context: Record<string, unknown> = {};
-  if (event.actor === "runner" || event.actor === "corp") context.actor = event.actor;
+  if (event.actor === "runner" || event.actor === "corp")
+    context.actor = event.actor;
   if (event.actionType) context.actionType = event.actionType;
-  if (event.discardResolved !== null && event.discardResolved !== undefined) context.discardResolved = event.discardResolved === 1;
+  if (event.discardResolved !== null && event.discardResolved !== undefined)
+    context.discardResolved = event.discardResolved === 1;
   if (event.hiddenZoneAction) context.hiddenZoneAction = event.hiddenZoneAction;
   return {
     eventId: event.eventId,
@@ -2532,11 +3615,14 @@ function actionContextPublicEvent(event: {
     stateVersionBefore: Number(event.stateVersionBefore),
     stateVersionAfter: Number(event.stateVersionAfter),
     stateHashAfter: event.stateHashAfter,
-    publicPayload: context
+    publicPayload: context,
   } as StoredMatch["eventLog"][number]["publicPayload"];
 }
 
-function aiDecisionTraceRecordFromRow(matchId: string, row: AiDecisionTraceRow): AiDecisionTraceRecord {
+function aiDecisionTraceRecordFromRow(
+  matchId: string,
+  row: AiDecisionTraceRow,
+): AiDecisionTraceRecord {
   return {
     traceId: row.traceId,
     matchId,
@@ -2547,26 +3633,38 @@ function aiDecisionTraceRecordFromRow(matchId: string, row: AiDecisionTraceRow):
     turn: Number(row.turn),
     decisionIndex: Number(row.decisionIndex),
     ...(row.selectedActionId ? { selectedActionId: row.selectedActionId } : {}),
-    ...(row.selectedActionType ? { selectedActionType: row.selectedActionType } : {}),
+    ...(row.selectedActionType
+      ? { selectedActionType: row.selectedActionType }
+      : {}),
     ...(row.planKind ? { planKind: row.planKind } : {}),
     ...(typeof row.score === "number" ? { score: row.score } : {}),
-    ...(typeof row.confidence === "number" ? { confidence: row.confidence } : {}),
+    ...(typeof row.confidence === "number"
+      ? { confidence: row.confidence }
+      : {}),
     createdAt: row.createdAt,
     schemaVersion: row.schemaVersion,
-    traceJson: JSON.parse(row.traceJson) as Record<string, unknown>
+    traceJson: JSON.parse(row.traceJson) as Record<string, unknown>,
   };
 }
 
-function hydrateSnapshotGameState(state: GameState, eventLog: GameEvent[] | undefined): GameState {
+function hydrateSnapshotGameState(
+  state: GameState,
+  eventLog: GameEvent[] | undefined,
+): GameState {
   if (!eventLog) return state;
   return {
     ...state,
-    eventLog: eventLog.filter((event) => event.stateVersionAfter <= state.stateVersion)
+    eventLog: eventLog.filter(
+      (event) => event.stateVersionAfter <= state.stateVersion,
+    ),
   };
 }
 
 function compactRecordForStorage(record: StoredMatch): StoredMatch {
-  const { actionPersistenceBaseline: _actionPersistenceBaseline, ...persistedRecord } = record;
+  const {
+    actionPersistenceBaseline: _actionPersistenceBaseline,
+    ...persistedRecord
+  } = record;
   return {
     ...persistedRecord,
     gameState: gameStateForStorage(record.gameState),
@@ -2574,11 +3672,13 @@ function compactRecordForStorage(record: StoredMatch): StoredMatch {
     actionReceipts: [],
     undoSnapshots: [],
     stateSnapshots: [],
-    aiDecisionTraces: []
+    aiDecisionTraces: [],
   };
 }
 
-function aiDecisionTraceIndexEntry(trace: AiDecisionTraceRecord): StorageMaintenanceAiDecisionTraceIndexEntry {
+function aiDecisionTraceIndexEntry(
+  trace: AiDecisionTraceRecord,
+): StorageMaintenanceAiDecisionTraceIndexEntry {
   return {
     traceId: trace.traceId,
     matchId: trace.matchId,
@@ -2588,20 +3688,38 @@ function aiDecisionTraceIndexEntry(trace: AiDecisionTraceRecord): StorageMainten
     side: trace.side,
     turn: trace.turn,
     decisionIndex: trace.decisionIndex,
-    ...(trace.selectedActionId ? { selectedActionId: trace.selectedActionId } : {}),
-    ...(trace.selectedActionType ? { selectedActionType: trace.selectedActionType } : {}),
+    ...(trace.selectedActionId
+      ? { selectedActionId: trace.selectedActionId }
+      : {}),
+    ...(trace.selectedActionType
+      ? { selectedActionType: trace.selectedActionType }
+      : {}),
     ...(trace.planKind ? { planKind: trace.planKind } : {}),
     ...(trace.score !== undefined ? { score: trace.score } : {}),
     ...(trace.confidence !== undefined ? { confidence: trace.confidence } : {}),
     createdAt: trace.createdAt,
     schemaVersion: trace.schemaVersion,
-    meta: traceMeta(trace.traceJson)
+    meta: traceMeta(trace.traceJson),
   };
 }
 
-function traceMeta(traceJson: Record<string, unknown>): Record<string, unknown> {
+function traceMeta(
+  traceJson: Record<string, unknown>,
+): Record<string, unknown> {
   const meta: Record<string, unknown> = {};
-  for (const key of ["schemaVersion", "debugSchemaVersion", "actor", "aiLevel", "summary", "planKind", "selectedActionType", "score", "confidence", "fallbackUsed", "timeoutUsed"] as const) {
+  for (const key of [
+    "schemaVersion",
+    "debugSchemaVersion",
+    "actor",
+    "aiLevel",
+    "summary",
+    "planKind",
+    "selectedActionType",
+    "score",
+    "confidence",
+    "fallbackUsed",
+    "timeoutUsed",
+  ] as const) {
     const value = traceJson[key];
     if (value !== undefined) meta[key] = value;
   }

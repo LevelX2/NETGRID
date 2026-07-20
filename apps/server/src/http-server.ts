@@ -2359,9 +2359,8 @@ async function routeHttp(
       return;
     }
 
-    const publicSpectatorRoute = /^\/api\/public\/matches\/([^/]+)\/spectator$/.exec(
-      url.pathname,
-    );
+    const publicSpectatorRoute =
+      /^\/api\/public\/matches\/([^/]+)\/spectator$/.exec(url.pathname);
     if (publicSpectatorRoute && request.method === "GET") {
       const matchId = decodeURIComponent(publicSpectatorRoute[1] ?? "");
       if (

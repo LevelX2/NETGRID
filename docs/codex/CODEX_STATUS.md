@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-19
+Stand: 2026-07-20
 
 ## Einstieg
 
@@ -50,6 +50,26 @@ Bank-/Plan-Arbitration und Mehr-ICE-Bezahlbarkeit besitzen unveränderte
 Decision-Checkpoint-Verträge. Der vollständige Abschlusslauf umfasst 333
 AI-Testdateien und 2253 grüne Tests. Führend ist
 `docs/reviews/ai/ai-match-424a-runner-endgame-remediation-final-2026-07-15.md`.
+
+## Öffentliche Matches, Live-Zuschauer und Lern-Replays
+
+Jedes Match besitzt genau den Erstellungsflag `isPublic`; der Standard ist
+`true`. Öffentliche offene Matches werden ausgeschrieben und können
+beigetreten werden. Öffentliche aktive Matches sind über eine read-only
+Zuschauerprojektion sichtbar, die weder Hände noch andere verdeckte
+Kartenidentitäten, private Choices oder LegalActions enthält.
+
+Nach Matchende liefert ein öffentliches Match ein anonym abrufbares,
+StateHash-verifiziertes Full-Information-Replay. Der visuelle Player wechselt
+zwischen Teilnehmer A und B, spielt und sucht durch die gespeicherten
+Zustände und kann die jeweils gegnerische Hand in einem mitlaufenden Fenster
+anzeigen. Private Matches bleiben aus öffentlichen Listen und anonymen
+Replaypfaden ausgeschlossen. Eine einmalige SQLite-Normalisierung markiert
+alle vorhandenen Matches rückwirkend öffentlich; der Bestandsaudit bestätigte
+21/21 öffentliche Matches und 19/19 replayfähige terminale Matches mit 4.218
+verifizierten Frames. Führend sind
+`docs/architecture/public-match-spectator-replay-process-2026-07-20.md` und
+`docs/reviews/public-match-spectator-replay-final-review-2026-07-20.md`.
 
 ## Geschlossene Account- und Deck-Alpha
 

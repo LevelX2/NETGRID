@@ -73,9 +73,21 @@ export function ReplayBoard({
 
       <section style={zonePanel}>
         <h2 style={heading}>Runner-Rig</h2>
-        <CardRow label="Programme" cards={frame.runner.rig.programs} empty="Keine Programme" />
-        <CardRow label="Hardware" cards={frame.runner.rig.hardware} empty="Keine Hardware" />
-        <CardRow label="Ressourcen" cards={frame.runner.rig.resources} empty="Keine Ressourcen" />
+        <CardRow
+          label="Programme"
+          cards={frame.runner.rig.programs}
+          empty="Keine Programme"
+        />
+        <CardRow
+          label="Hardware"
+          cards={frame.runner.rig.hardware}
+          empty="Keine Hardware"
+        />
+        <CardRow
+          label="Ressourcen"
+          cards={frame.runner.rig.resources}
+          empty="Keine Ressourcen"
+        />
       </section>
 
       <section style={zonePanel}>
@@ -151,7 +163,9 @@ function CardRow({
         {cards.map((card) => (
           <ReplayCard key={card.instanceId} card={card} />
         ))}
-        {cards.length === 0 ? <span style={{ opacity: 0.65 }}>{empty}</span> : null}
+        {cards.length === 0 ? (
+          <span style={{ opacity: 0.65 }}>{empty}</span>
+        ) : null}
       </div>
     </div>
   );
