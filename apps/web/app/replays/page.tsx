@@ -1,6 +1,10 @@
 "use client";
 
-import type { ApiReplayAnalysisFrame, Side } from "@netgrid/shared";
+import type {
+  ApiReplayAnalysisFrame,
+  PublicGameEvent,
+  Side,
+} from "@netgrid/shared";
 import {
   ChevronLeft,
   ChevronRight,
@@ -8,7 +12,6 @@ import {
   Play,
   RotateCcw,
 } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { ReplayBoard } from "../../features/replay/ReplayBoard";
@@ -53,13 +56,13 @@ type ReplayView = {
   matchId: string;
   perspective: Side | "local_analysis";
   metadata: ReplayIndexEntry;
+  publicEvents: PublicGameEvent[];
   timeline: ReplayTimelineStep[];
   frames: ApiReplayAnalysisFrame[];
   replayErrors: string[];
 };
 
 export default function ReplayPage() {
-  const [index, setIndex] = useState<ReplayIndexEntry[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState("");
   const [perspective, setPerspective] = useState<Side>("runner");
   const [replay, setReplay] = useState<ReplayView>();
@@ -70,46 +73,11 @@ export default function ReplayPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let closed = false;
     const requestedMatchId = new URLSearchParams(window.location.search).get(
       "matchId",
     );
-    const loadIndex = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`${SERVER_HTTP}/api/replays`, {
-          cache: "no-store",
-        });
-        const payload = (await response.json()) as {
-          replays?: ReplayIndexEntry[];
-          error?: { message?: string };
-        };
-        if (!response.ok) {
-          throw new Error(
-            payload.error?.message ??
-              "Replay-Liste konnte nicht geladen werden.",
-          );
-        }
-        if (closed) return;
-        const entries = payload.replays ?? [];
-        setIndex(entries);
-        const requested = entries.find(
-          (entry) => entry.matchId === requestedMatchId,
-        );
-        setSelectedMatchId(requested?.matchId ?? entries[0]?.matchId ?? "");
-        if (requestedMatchId && !requested) {
-          setError("Dieses öffentliche Replay ist nicht verfügbar.");
-        }
-      } catch (loadError) {
-        if (!closed) setError(errorMessage(loadError, "Replay-Liste"));
-      } finally {
-        if (!closed) setLoading(false);
-      }
-    };
-    void loadIndex();
-    return () => {
-      closed = true;
-    };
+    if (requestedMatchId) setSelectedMatchId(requestedMatchId);
+    else setError("Kein Replay ausgewählt.");
   }, []);
 
   useEffect(() => {
@@ -164,6 +132,13 @@ export default function ReplayPage() {
       (step) => step.eventId === currentFrame.sourceEventId,
     );
   }, [currentFrame, replay?.timeline]);
+  const currentPublicEvents = useMemo(
+    () =>
+      (replay?.publicEvents ?? []).filter(
+        (event) => event.stateVersionAfter <= (currentFrame?.stateVersion ?? 0),
+      ),
+    [currentFrame?.stateVersion, replay?.publicEvents],
+  );
 
   useEffect(() => {
     if (!playing || frames.length === 0) return;
@@ -197,28 +172,17 @@ export default function ReplayPage() {
     >
       <header className="topbar replayTopbar">
         <div className="replayTopbarIdentity">
-          <Link href="/" className="button replayBackButton">
-            Zurück
-          </Link>
-          <label>
-            <span className="srOnly">Replay auswählen</span>
-            <select
-              value={selectedMatchId}
-              onChange={(event) => setSelectedMatchId(event.target.value)}
-              disabled={index.length === 0}
-              aria-label="Replay auswählen"
-            >
-              {index.length === 0 ? (
-                <option value="">Keine Replays</option>
-              ) : null}
-              {index.map((entry) => (
-                <option key={entry.replayId} value={entry.matchId}>
-                  {participantLabel(entry)} ·{" "}
-                  {new Date(entry.updatedAt).toLocaleString("de-DE")}
-                </option>
-              ))}
-            </select>
-          </label>
+          <button
+            type="button"
+            className="button replayBackButton"
+            onClick={() => {
+              if (window.history.length > 1) window.history.back();
+              else window.location.assign("/");
+            }}
+          >
+            Zur Spieleübersicht
+          </button>
+          {replay ? <strong>{participantLabel(replay.metadata)}</strong> : null}
         </div>
 
         <div className="replayTopbarControls" aria-label="Replay-Steuerung">
@@ -327,6 +291,7 @@ export default function ReplayPage() {
           frame={currentFrame}
           perspective={perspective}
           displayNames={replay?.metadata.participantNames ?? {}}
+          publicEvents={currentPublicEvents}
         />
       ) : null}
     </main>

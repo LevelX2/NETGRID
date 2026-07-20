@@ -69,79 +69,98 @@ export function AccountPanel({
             </button>
           </div>
         </div>
-        <dl className="accountFacts">
-          <div>
-            <dt>Anmeldename</dt>
-            <dd>{accountSession.account.loginName}</dd>
+        <details className="accountSegment" open>
+          <summary>Account</summary>
+          <div className="accountSegmentContent">
+            <dl className="accountFacts">
+              <div>
+                <dt>Anmeldename</dt>
+                <dd>{accountSession.account.loginName}</dd>
+              </div>
+              <div>
+                <dt>Anmeldung</dt>
+                <dd>
+                  {accountSession.session?.authStrength === "password"
+                    ? "Passwort"
+                    : accountSession.session?.authStrength}
+                </dd>
+              </div>
+              <div>
+                <dt>Sitzung gültig bis</dt>
+                <dd>{formatDate(accountSession.session?.expiresAt)}</dd>
+              </div>
+            </dl>
           </div>
-          <div>
-            <dt>Anmeldung</dt>
-            <dd>
-              {accountSession.session?.authStrength === "password"
-                ? "Passwort"
-                : accountSession.session?.authStrength}
-            </dd>
+        </details>
+        <details className="accountSegment" open>
+          <summary>Spielstatistik</summary>
+          <div className="accountSegmentContent">
+            <AccountStatisticsPanel
+              accountId={accountSession.account.accountId}
+            />
           </div>
-          <div>
-            <dt>Sitzung gültig bis</dt>
-            <dd>{formatDate(accountSession.session?.expiresAt)}</dd>
-          </div>
-        </dl>
-        <AccountStatisticsPanel accountId={accountSession.account.accountId} />
+        </details>
         {accountSession.error ? (
           <p className="notice">{accountSession.error}</p>
         ) : null}
-        <div className="accountActions">
-          <button
-            className="button"
-            disabled={accountSession.busy}
-            onClick={() => void accountSession.revokeAll()}
-            type="button"
-          >
-            Alle Geräte abmelden
-          </button>
-        </div>
-        <form
-          className="accountForm"
-          onSubmit={(event) => void submitPassword(event)}
-        >
-          <h3>Passwort ändern</h3>
-          <label>
-            Aktuelles Passwort
-            <input
-              autoComplete="current-password"
-              onChange={(event) => setCurrentPassword(event.target.value)}
-              required
-              type="password"
-              value={currentPassword}
-            />
-          </label>
-          <label>
-            Neues Passwort
-            <input
-              autoComplete="new-password"
-              minLength={15}
-              onChange={(event) => setNewPassword(event.target.value)}
-              required
-              type="password"
-              value={newPassword}
-            />
-          </label>
-          <small>
-            Mindestens 15 Zeichen; nach der Änderung werden alle Sitzungen
-            beendet.
-          </small>
-          <button
-            className="button primary"
-            disabled={accountSession.busy}
-            type="submit"
-          >
-            Passwort ändern
-          </button>
-        </form>
-        {accountSession.account.role === "admin" ? (
-          <div className="accountFormGrid">
+        <details className="accountSegment">
+          <summary>Sicherheit</summary>
+          <div className="accountSegmentContent">
+            <div className="accountActions">
+              <button
+                className="button"
+                disabled={accountSession.busy}
+                onClick={() => void accountSession.revokeAll()}
+                type="button"
+              >
+                Alle Geräte abmelden
+              </button>
+            </div>
             <form
+              className="accountForm"
+              onSubmit={(event) => void submitPassword(event)}
+            >
+              <h3>Passwort ändern</h3>
+              <label>
+                Aktuelles Passwort
+                <input
+                  autoComplete="current-password"
+                  onChange={(event) => setCurrentPassword(event.target.value)}
+                  required
+                  type="password"
+                  value={currentPassword}
+                />
+              </label>
+              <label>
+                Neues Passwort
+                <input
+                  autoComplete="new-password"
+                  minLength={15}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  required
+                  type="password"
+                  value={newPassword}
+                />
+              </label>
+              <small>
+                Mindestens 15 Zeichen; nach der Änderung werden alle Sitzungen
+                beendet.
+              </small>
+              <button
+                className="button primary"
+                disabled={accountSession.busy}
+                type="submit"
+              >
+                Passwort ändern
+              </button>
+            </form>
+          </div>
+        </details>
+        {accountSession.account.role === "admin" ? (
+          <details className="accountSegment">
+            <summary>Administration</summary>
+            <div className="accountSegmentContent accountFormGrid">
+              <form
               className="accountForm"
               onSubmit={(event) => {
                 event.preventDefault();
@@ -179,8 +198,8 @@ export function AccountPanel({
               >
                 Einladungslink erzeugen
               </button>
-            </form>
-            <form
+              </form>
+              <form
               className="accountForm"
               onSubmit={(event) => {
                 event.preventDefault();
@@ -214,8 +233,9 @@ export function AccountPanel({
               >
                 Resetlink erzeugen
               </button>
-            </form>
-          </div>
+              </form>
+            </div>
+          </details>
         ) : null}
         {issuedLink ? (
           <label className="accountIssuedLink">
@@ -249,15 +269,18 @@ export function AccountPanel({
           <h2>Gast oder Account</h2>
         </div>
       </div>
-      <p className="muted">
-        Ohne Anmeldung bleibt NETGRID im lokalen Gastmodus. Mit Account werden
-        in der nächsten Stufe persönliche Server-Decks verfügbar.
-      </p>
       {accountSession.error ? (
         <p className="notice">{accountSession.error}</p>
       ) : null}
-      <div className="accountFormGrid">
-        <form
+      <details className="accountSegment" open>
+        <summary>Gastmodus und Anmeldung</summary>
+        <div className="accountSegmentContent">
+          <p className="muted">
+            Ohne Anmeldung bleibt NETGRID im lokalen Gastmodus. Mit Account
+            stehen persönliche Server-Decks und die eigene Spielstatistik zur
+            Verfügung.
+          </p>
+          <form
           className="accountForm"
           onSubmit={(event) => void submitLogin(event)}
         >
@@ -288,8 +311,13 @@ export function AccountPanel({
           >
             Anmelden
           </button>
-        </form>
-        <form
+          </form>
+        </div>
+      </details>
+      <details className="accountSegment" open={Boolean(inviteToken)}>
+        <summary>Account aktivieren</summary>
+        <div className="accountSegmentContent">
+          <form
           className="accountForm"
           onSubmit={(event) => void submitInvite(event)}
         >
@@ -325,8 +353,13 @@ export function AccountPanel({
           >
             Account aktivieren
           </button>
-        </form>
-        {resetToken ? (
+          </form>
+        </div>
+      </details>
+      {resetToken ? (
+        <details className="accountSegment" open>
+          <summary>Passwort zurücksetzen</summary>
+          <div className="accountSegmentContent">
           <form
             className="accountForm"
             onSubmit={(event) => void submitReset(event)}
@@ -359,9 +392,10 @@ export function AccountPanel({
             >
               Neues Passwort setzen
             </button>
-          </form>
-        ) : null}
-      </div>
+            </form>
+          </div>
+        </details>
+      ) : null}
     </section>
   );
 }

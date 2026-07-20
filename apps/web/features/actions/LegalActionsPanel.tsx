@@ -409,6 +409,28 @@ export function LegalActionsPanel({
   );
 }
 
+export function ReadOnlyTurnActionPanel({
+  view,
+  actionCapacities,
+}: {
+  view: PlayerView;
+  actionCapacities: Record<Side, number>;
+}) {
+  return (
+    <section className="section" data-testid="replay-action-status">
+      <TurnActionHeader
+        view={view}
+        actionCapacities={actionCapacities}
+        priorityWindowHoldEnabled={false}
+        activeAiSide={undefined}
+        onPriorityWindowHoldEnabled={() => undefined}
+        onFloatPanel={undefined}
+        showControls={false}
+      />
+    </section>
+  );
+}
+
 function TurnActionHeader({
   view,
   actionCapacities,
@@ -416,6 +438,7 @@ function TurnActionHeader({
   activeAiSide,
   onPriorityWindowHoldEnabled,
   onFloatPanel,
+  showControls = true,
 }: {
   view: PlayerView;
   actionCapacities: Record<Side, number>;
@@ -423,6 +446,7 @@ function TurnActionHeader({
   activeAiSide: Side | undefined;
   onPriorityWindowHoldEnabled(enabled: boolean): void;
   onFloatPanel: (() => void) | undefined;
+  showControls?: boolean;
 }) {
   const currentTurnSide = turnSideForView(view) ?? view.activeSide;
   const currentTurnClicks =
@@ -439,11 +463,13 @@ function TurnActionHeader({
     <div className={`turnActionHeader side-${currentTurnSide}`}>
       <div className="turnActionHeaderTop">
         <h2>{turnActionHeaderLabel(view, currentTurnSide, activeAiSide)}</h2>
-        <PriorityWindowHoldToggle
-          enabled={priorityWindowHoldEnabled}
-          onToggle={onPriorityWindowHoldEnabled}
-        />
-        {onFloatPanel ? (
+        {showControls ? (
+          <PriorityWindowHoldToggle
+            enabled={priorityWindowHoldEnabled}
+            onToggle={onPriorityWindowHoldEnabled}
+          />
+        ) : null}
+        {showControls && onFloatPanel ? (
           <ActionPanelFloatButton onFloat={onFloatPanel} />
         ) : null}
       </div>

@@ -3,6 +3,7 @@
 import type {
   ApiReplayAnalysisFrame,
   LegalAction,
+  PublicGameEvent,
   Side,
   VisibleCard,
 } from "@netgrid/shared";
@@ -10,7 +11,11 @@ import { Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
-import { groupRunnerRigCards } from "../../app/action-board-ui";
+import {
+  actionSlotCapacityForTurn,
+  groupRunnerRigCards,
+} from "../../app/action-board-ui";
+import { ReadOnlyTurnActionPanel } from "../actions/LegalActionsPanel";
 import { CardPreviewPanel } from "../cards/CardPreviewPanel";
 import {
   enrichVisibleCard,
@@ -27,7 +32,10 @@ import {
 import { RunTimelineOverlay } from "../game-board/RunTimelineOverlay";
 import { OpponentPanel, PlayerPanel } from "../game-board/SideStatusPanels";
 import { SpecialZonesStrip } from "../game-board/SpecialZonesStrip";
+import { ScoredAgendaOverlay } from "../game-board/ScoredAgendaOverlay";
+import { ChroniclePanel } from "../chronicle/ChroniclePanel";
 import type { CardDisplayMode } from "../settings/settings-model";
+import type { OverlayPositionPreference } from "../../lib/overlay-position";
 
 const EMPTY_CARD_DETAILS = {};
 const EMPTY_ACTIONS: LegalAction[] = [];
@@ -40,18 +48,30 @@ export function ReplayBoard({
   frame,
   perspective,
   displayNames,
+  publicEvents,
 }: {
   frame: ApiReplayAnalysisFrame;
   perspective: Side;
   displayNames: Partial<Record<Side, string>>;
+  publicEvents: PublicGameEvent[];
 }) {
-  const view = frame.playerViews[perspective];
+  const baseView = frame.playerViews[perspective];
+  const view = useMemo(
+    () => ({ ...baseView, publicEvents }),
+    [baseView, publicEvents],
+  );
   const [collapsedZones, setCollapsedZones] = useState<Record<string, boolean>>(
     {},
   );
   const [scoreAreaOpen, setScoreAreaOpen] = useState<Record<Side, boolean>>({
     runner: false,
     corp: false,
+  });
+  const [scoreAreaPositions, setScoreAreaPositions] = useState<
+    Record<Side, OverlayPositionPreference>
+  >({
+    runner: { kind: "default" },
+    corp: { kind: "default" },
   });
   const [focusedCard, setFocusedCard] = useState<{
     card: DisplayVisibleCard;
@@ -81,6 +101,21 @@ export function ReplayBoard({
     view.run?.encounteredIce?.instanceId ??
     view.run?.approachedIce?.instanceId ??
     null;
+  const actionCapacities = useMemo(
+    () => ({
+      runner: actionSlotCapacityForTurn(
+        "runner",
+        view.side === "runner" ? view.own.clicks : view.opponent.clicks,
+        publicEvents,
+      ),
+      corp: actionSlotCapacityForTurn(
+        "corp",
+        view.side === "corp" ? view.own.clicks : view.opponent.clicks,
+        publicEvents,
+      ),
+    }),
+    [publicEvents, view],
+  );
 
   const noAction = (_action: LegalAction) => undefined;
   const noFocusAction = (_card: DisplayVisibleCard, _hiddenSide?: Side) =>
@@ -89,6 +124,35 @@ export function ReplayBoard({
 
   return (
     <>
+      {(["corp", "runner"] as const).map((side) => (
+        <ScoredAgendaOverlay
+          key={side}
+          side={side}
+          cards={scoreAreaCardsBySide(side)}
+          agendaPoints={agendaPointsBySide(side)}
+          agendaPointsToWin={view.agendaPointsToWin}
+          open={scoreAreaOpen[side]}
+          position={scoreAreaPositions[side]}
+          cardDisplayMode={cardDisplayMode}
+          enrichCard={enrichCard}
+          cardActionsFor={() => EMPTY_ACTIONS}
+          actionDisabled
+          selectedContext={null}
+          onAction={noAction}
+          onFocus={focusCard}
+          onActionContextSelect={noFocusAction}
+          onClose={() =>
+            setScoreAreaOpen((current) => ({ ...current, [side]: false }))
+          }
+          onPosition={(position) =>
+            setScoreAreaPositions((current) => ({
+              ...current,
+              [side]: position,
+            }))
+          }
+        />
+      ))}
+
       {view.run ? (
         <RunTimelineOverlay
           view={view}
@@ -106,7 +170,7 @@ export function ReplayBoard({
       <ActiveMatchResourceStrip
         view={view}
         agendaPointsToWin={view.agendaPointsToWin}
-        actionCapacities={{ runner: 4, corp: 3 }}
+        actionCapacities={actionCapacities}
         ariaHidden={false}
         topOffsetPx={58}
       />
@@ -133,10 +197,10 @@ export function ReplayBoard({
               }))
             }
           />
-          <section className="section replayReadOnlyPanel">
-            <strong>Replay</strong>
-            <span>Aufgezeichneter Spielzustand · nur Wiedergabe</span>
-          </section>
+          <ReadOnlyTurnActionPanel
+            view={view}
+            actionCapacities={actionCapacities}
+          />
           <PlayerPanel
             view={view}
             title={`${displayNames[view.side] ?? sideLabel(view.side)} · ${sideLabel(view.side)}`}
@@ -297,6 +361,16 @@ export function ReplayBoard({
               : {})}
             collapsed={cardPreviewCollapsed}
             onCollapsed={setCardPreviewCollapsed}
+          />
+          <ChroniclePanel
+            events={publicEvents}
+            turnContextEvents={publicEvents}
+            side={view.side}
+            cardDetailsById={EMPTY_CARD_DETAILS}
+            displayMode={cardDisplayMode}
+            detailMode="full"
+            preferGermanCardImages={false}
+            onFocusCard={focusCard}
           />
           <section className="section replayStatePanel">
             <h2>Replay-Stand</h2>

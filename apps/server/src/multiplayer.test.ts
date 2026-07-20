@@ -12180,7 +12180,12 @@ describe("MVP 0.2 multiplayer service", () => {
         localAnalysis?: boolean;
         metadata?: { participantSides?: { player_a?: Side; player_b?: Side } };
         timeline?: Array<{ hiddenInfoBarrier?: boolean }>;
+        publicEvents?: Array<{
+          eventId?: string;
+          stateVersionAfter?: number;
+        }>;
         frames?: Array<{
+          stateVersion?: number;
           stateHashVerified?: boolean;
           playerViews?: {
             runner?: {
@@ -12202,6 +12207,10 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(
         replayPayload.timeline?.some((entry) => entry.hiddenInfoBarrier),
       ).toBe(true);
+      expect(replayPayload.publicEvents?.length).toBeGreaterThan(0);
+      expect(replayPayload.publicEvents?.at(-1)?.stateVersionAfter).toBe(
+        replayPayload.frames?.at(-1)?.stateVersion,
+      );
       expect(replayPayload.metadata?.participantSides?.player_a).toMatch(
         /runner|corp/,
       );

@@ -543,6 +543,7 @@ export type ReplayView = {
   matchId: string;
   perspective: ReplayPerspective;
   metadata: ReplayIndexEntry;
+  publicEvents: PublicGameEvent[];
   timeline: ReplayTimelineStep[];
   frames: ApiReplayAnalysisFrame[];
   replayErrors: string[];
@@ -3347,9 +3348,10 @@ export class MultiplayerService {
 
     const checks = replayStateHashChecks(record);
     const metadata = replayIndexEntryFor(record, checks);
-    const publicEvents = replayEventsForPerspective(record, perspective);
+    const projectedEvents = replayEventsForPerspective(record, perspective);
+    const publicEvents = projectedEvents.map(replayChronicleEvent);
     const localAnalysis = perspective === "local_analysis";
-    const timeline = publicEvents.map((event, index) =>
+    const timeline = projectedEvents.map((event, index) =>
       replayTimelineStepFor({
         event,
         index,
@@ -3367,6 +3369,7 @@ export class MultiplayerService {
       matchId: metadata.matchId,
       perspective,
       metadata,
+      publicEvents,
       timeline,
       frames: isTerminalStatus(record.match.status)
         ? replayAnalysisFrames(record)
@@ -5262,6 +5265,12 @@ function replayEventsForPerspective(
   perspective: ReplayPerspective,
 ): PublicGameEvent[] {
   return projectReplayEventsForPerspective(record.eventLog, perspective);
+}
+
+function replayChronicleEvent(event: PublicGameEvent): PublicGameEvent {
+  const { aiDecisionDebug: _aiDecisionDebug, ...publicPayload } =
+    event.publicPayload;
+  return { ...event, publicPayload };
 }
 
 function replayStateHashChecks(record: StoredMatch): {
