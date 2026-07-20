@@ -2616,7 +2616,9 @@ async function routeHttp(
         )
       )
         return;
-      sendJson(response, 200, { replays: await service.listReplayIndex() });
+      sendJson(response, 200, {
+        replays: await service.listPublicReplayIndex(),
+      });
       return;
     }
 
@@ -2648,8 +2650,26 @@ async function routeHttp(
         });
         return;
       }
+      const replayAccess = {
+        ...(url.searchParams.get("side") === "runner" ||
+        url.searchParams.get("side") === "corp"
+          ? { side: url.searchParams.get("side") as "runner" | "corp" }
+          : {}),
+        ...(bearerToken(request) || url.searchParams.get("sessionToken")
+          ? {
+              sessionToken:
+                bearerToken(request) ??
+                url.searchParams.get("sessionToken") ??
+                "",
+            }
+          : {}),
+      };
       if (replayRoute[2] === "export") {
-        const exported = await service.exportReplay(matchId, perspective);
+        const exported = await service.exportReplay(
+          matchId,
+          perspective,
+          replayAccess,
+        );
         const status = exported.ok
           ? 200
           : exported.error.code === "bad_request"
@@ -2662,7 +2682,11 @@ async function routeHttp(
         );
         return;
       }
-      const replay = await service.loadReplayView(matchId, perspective);
+      const replay = await service.loadReplayView(
+        matchId,
+        perspective,
+        replayAccess,
+      );
       sendJson(
         response,
         replay.ok ? 200 : 404,

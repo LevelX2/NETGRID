@@ -930,9 +930,9 @@ describe("Backend 0.5 private storage maintenance", () => {
     const detailedMatchId = await createAndAdvance("detailed");
     const untracedMatchId = await createAndAdvance("off");
 
-    const detailedCorpReplay = await service.loadReplayView(detailedMatchId, "corp");
-    const detailedRunnerReplay = await service.loadReplayView(detailedMatchId, "runner");
-    const untracedReplay = await service.loadReplayView(untracedMatchId, "corp");
+    const detailedCorpReplay = await service.loadReplayDiagnostics(detailedMatchId, "corp");
+    const detailedRunnerReplay = await service.loadReplayDiagnostics(detailedMatchId, "runner");
+    const untracedReplay = await service.loadReplayDiagnostics(untracedMatchId, "corp");
     expect(detailedCorpReplay.ok).toBe(true);
     expect(detailedRunnerReplay.ok).toBe(true);
     expect(untracedReplay.ok).toBe(true);
@@ -4913,7 +4913,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(stored?.eventLog.every((event) => typeof event.privatePayloadLocalOnly === "boolean")).toBe(true);
     expect(stored?.eventLog.map((event) => event.eventId)).toEqual(stored?.gameState.eventLog.map((event) => event.eventId));
 
-    const runnerLoaded = await match.service.loadReplayView(match.matchId, "runner");
+    const runnerLoaded = await match.service.loadReplayDiagnostics(match.matchId, "runner");
     expect(runnerLoaded.ok).toBe(true);
     if (!runnerLoaded.ok) throw new Error(runnerLoaded.error.message);
     const runnerReplay = runnerLoaded.replay;
@@ -4929,13 +4929,13 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(runnerReplay.randomDrawRecords.every((entry) => entry.valueHash.startsWith("fnv1a:"))).toBe(true);
     expect(JSON.stringify(runnerReplay)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i);
 
-    const localLoaded = await match.service.loadReplayView(match.matchId, "local_analysis");
+    const localLoaded = await match.service.loadReplayDiagnostics(match.matchId, "local_analysis");
     expect(localLoaded.ok).toBe(true);
     if (!localLoaded.ok) throw new Error(localLoaded.error.message);
     expect(localLoaded.replay.localAnalysis).toBe(true);
     expect(localLoaded.replay.exploitSuggestions.every((candidate) => candidate.status === "review_suggestion")).toBe(true);
 
-    const exported = await match.service.exportReplay(match.matchId, "runner");
+    const exported = await match.service.exportReplayDiagnostics(match.matchId, "runner");
     expect(exported.ok).toBe(true);
     if (!exported.ok) throw new Error(exported.error.message);
     expect(exported.artifact.version).toBe("1.5.0");
@@ -4945,7 +4945,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(exported.artifact.replay.perspective).toBe("runner");
     expect(JSON.stringify(exported.artifact)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i);
 
-    const localExport = await match.service.exportReplay(match.matchId, "local_analysis");
+    const localExport = await match.service.exportReplayDiagnostics(match.matchId, "local_analysis");
     expect(localExport.ok).toBe(false);
     if (localExport.ok) throw new Error("Expected local_analysis export to be rejected");
     expect(localExport.error.code).toBe("bad_request");
@@ -4977,9 +4977,9 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
 
-    const runnerReplayLoaded = await service.loadReplayView(created.matchId, "runner");
-    const corpReplayLoaded = await service.loadReplayView(created.matchId, "corp");
-    const localReplayLoaded = await service.loadReplayView(created.matchId, "local_analysis");
+    const runnerReplayLoaded = await service.loadReplayDiagnostics(created.matchId, "runner");
+    const corpReplayLoaded = await service.loadReplayDiagnostics(created.matchId, "corp");
+    const localReplayLoaded = await service.loadReplayDiagnostics(created.matchId, "local_analysis");
     expect(runnerReplayLoaded.ok).toBe(true);
     expect(corpReplayLoaded.ok).toBe(true);
     expect(localReplayLoaded.ok).toBe(true);
@@ -5021,7 +5021,7 @@ describe("MVP 0.2 multiplayer service", () => {
     };
     await storage.save(stored);
 
-    const redactedCorpReplayLoaded = await service.loadReplayView(created.matchId, "corp");
+    const redactedCorpReplayLoaded = await service.loadReplayDiagnostics(created.matchId, "corp");
     expect(redactedCorpReplayLoaded.ok).toBe(true);
     if (!redactedCorpReplayLoaded.ok) throw new Error(redactedCorpReplayLoaded.error.message);
     const redactedDebugStep = redactedCorpReplayLoaded.replay.timeline.find((step) => step.decisionDebug);
@@ -5040,7 +5040,7 @@ describe("MVP 0.2 multiplayer service", () => {
     await submit(accessMatch.service, accessMatch.matchId, accessMatch.corp, (action) => action.type === "end_turn", "v150-family-access-end");
     await submit(accessMatch.service, accessMatch.matchId, accessMatch.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v150-family-access-run");
     await submit(accessMatch.service, accessMatch.matchId, accessMatch.runner, (action) => action.type === "access_card" || action.type === "steal_agenda", "v150-family-access-access");
-    const accessReplay = await accessMatch.service.loadReplayView(accessMatch.matchId, "local_analysis");
+    const accessReplay = await accessMatch.service.loadReplayDiagnostics(accessMatch.matchId, "local_analysis");
     expect(accessReplay.ok).toBe(true);
     if (!accessReplay.ok) throw new Error(accessReplay.error.message);
     expect(accessReplay.replay.timeline.some((step) => step.eventFamily === "run_and_access")).toBe(true);
@@ -5049,7 +5049,7 @@ describe("MVP 0.2 multiplayer service", () => {
     await submit(damageMatch.service, damageMatch.matchId, damageMatch.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v150-family-damage-run");
     await submit(damageMatch.service, damageMatch.matchId, damageMatch.corp, (action) => action.type === "rez_ice" && action.label.includes("Neural Sentry"), "v150-family-damage-rez");
     await submit(damageMatch.service, damageMatch.matchId, damageMatch.runner, (action) => action.type === "continue_run", "v150-family-damage-continue");
-    const damageReplay = await damageMatch.service.loadReplayView(damageMatch.matchId, "local_analysis");
+    const damageReplay = await damageMatch.service.loadReplayDiagnostics(damageMatch.matchId, "local_analysis");
     expect(damageReplay.ok).toBe(true);
     if (!damageReplay.ok) throw new Error(damageReplay.error.message);
     expect(damageReplay.replay.timeline.some((step) => step.eventFamily === "damage_and_survival")).toBe(true);
@@ -5066,7 +5066,7 @@ describe("MVP 0.2 multiplayer service", () => {
       selectedChoices: { choiceId: corpChoice.pendingChoice?.choiceId, selectedOptionIds: ["bid_1"] },
       idempotencyKey: "v150-family-trace-bid"
     });
-    const traceReplay = await traceMatch.service.loadReplayView(traceMatch.matchId, "local_analysis");
+    const traceReplay = await traceMatch.service.loadReplayDiagnostics(traceMatch.matchId, "local_analysis");
     expect(traceReplay.ok).toBe(true);
     if (!traceReplay.ok) throw new Error(traceReplay.error.message);
     expect(traceReplay.replay.timeline.some((step) => step.eventFamily === "trace_and_tags")).toBe(true);
@@ -5082,7 +5082,7 @@ describe("MVP 0.2 multiplayer service", () => {
       clientKnownStateVersion: beforeOperation.playerView.stateVersion,
       idempotencyKey: "v150-family-replacement-open"
     });
-    const replacementReplay = await replacementMatch.service.loadReplayView(replacementMatch.matchId, "local_analysis");
+    const replacementReplay = await replacementMatch.service.loadReplayDiagnostics(replacementMatch.matchId, "local_analysis");
     expect(replacementReplay.ok).toBe(true);
     if (!replacementReplay.ok) throw new Error(replacementReplay.error.message);
     expect(replacementReplay.replay.timeline.some((step) => step.eventFamily === "replacement_and_prevention")).toBe(true);
@@ -5098,7 +5098,7 @@ describe("MVP 0.2 multiplayer service", () => {
       clientKnownStateVersion: specialBefore.playerView.stateVersion,
       idempotencyKey: "v150-family-special-zone"
     });
-    const specialReplay = await specialMatch.service.loadReplayView(specialMatch.matchId, "local_analysis");
+    const specialReplay = await specialMatch.service.loadReplayDiagnostics(specialMatch.matchId, "local_analysis");
     expect(specialReplay.ok).toBe(true);
     if (!specialReplay.ok) throw new Error(specialReplay.error.message);
     expect(specialReplay.replay.timeline.some((step) => step.eventFamily === "special_zones_and_control")).toBe(true);
@@ -7846,13 +7846,21 @@ describe("MVP 0.2 multiplayer service", () => {
     }
   });
 
-  it("exposes V1.5.0 replay REST endpoints side-safely and blocks local-analysis export", async () => {
+  it("exposes finished public replay REST endpoints with verified full-information frames", async () => {
     const match = await joinedMatch("v150-replay-rest");
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "v150-rest-mandatory");
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "install_card", "v150-rest-install");
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "v150-rest-end-turn");
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v150-rest-run");
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card" || action.type === "steal_agenda", "v150-rest-access");
+    const beforeFinish = await match.service.loadReplayView(match.matchId, "runner");
+    expect(beforeFinish.ok).toBe(false);
+    const forfeited = await match.service.forfeitMatch({
+      matchId: match.matchId,
+      side: match.corp.side,
+      sessionToken: match.corp.sessionToken,
+    });
+    expect(forfeited.ok).toBe(true);
 
     const handle = createNetgridHttpServer(match.service);
     const baseUrl = await listen(handle);
@@ -7864,11 +7872,32 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(JSON.stringify(indexPayload)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist/i);
 
       const replayResponse = await fetch(`${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}?perspective=runner`);
-      const replayPayload = (await replayResponse.json()) as { perspective?: string; localAnalysis?: boolean; timeline?: Array<{ hiddenInfoBarrier?: boolean }> };
+      const replayPayload = (await replayResponse.json()) as {
+        perspective?: string;
+        localAnalysis?: boolean;
+        metadata?: { participantSides?: { player_a?: Side; player_b?: Side } };
+        timeline?: Array<{ hiddenInfoBarrier?: boolean }>;
+        frames?: Array<{
+          stateHashVerified?: boolean;
+          corp?: { hand?: Array<{ title?: string }> };
+          participants?: {
+            player_a?: { hand?: Array<{ title?: string }> };
+            player_b?: { hand?: Array<{ title?: string }> };
+          };
+        }>;
+      };
       expect(replayResponse.status).toBe(200);
       expect(replayPayload.perspective).toBe("runner");
       expect(replayPayload.localAnalysis).toBe(false);
       expect(replayPayload.timeline?.some((entry) => entry.hiddenInfoBarrier)).toBe(true);
+      expect(replayPayload.metadata?.participantSides?.player_a).toMatch(/runner|corp/);
+      expect(replayPayload.frames?.length).toBeGreaterThan(1);
+      expect(replayPayload.frames?.every((frame) => frame.stateHashVerified)).toBe(true);
+      expect(replayPayload.frames?.[0]?.participants?.player_a?.hand?.length).toBeGreaterThan(0);
+      expect(replayPayload.frames?.[0]?.participants?.player_b?.hand?.length).toBeGreaterThan(0);
+      expect(
+        new Set(replayPayload.frames?.map((frame) => frame.corp?.hand?.length)).size,
+      ).toBeGreaterThan(1);
       expect(JSON.stringify(replayPayload)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist/i);
 
       const badPerspective = await fetch(`${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}?perspective=invalid`);
@@ -7885,6 +7914,72 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(exportPayload.version).toBe("1.5.0");
       expect(exportPayload.perspective).toBe("runner");
       expect(JSON.stringify(exportPayload)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i);
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it("blocks full-information frames before match end and protects private finished replays", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "finished-replay-access",
+    });
+    const publicActive = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "public-active-no-replay",
+      isPublic: true,
+    });
+    const privateFinished = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "private-finished-replay",
+      isPublic: false,
+    });
+    const forfeited = await service.forfeitMatch({
+      matchId: privateFinished.matchId,
+      side: privateFinished.hostSide,
+      sessionToken: privateFinished.hostSessionToken,
+    });
+    expect(forfeited.ok).toBe(true);
+
+    const handle = createNetgridHttpServer(service);
+    const baseUrl = await listen(handle);
+    try {
+      const activeResponse = await fetch(
+        `${baseUrl}/api/replays/${publicActive.matchId}?perspective=runner`,
+      );
+      expect(activeResponse.status).toBe(404);
+
+      const indexResponse = await fetch(`${baseUrl}/api/replays`);
+      const indexText = await indexResponse.text();
+      expect(indexText).not.toContain(publicActive.matchId);
+      expect(indexText).not.toContain(privateFinished.matchId);
+
+      const anonymousPrivate = await fetch(
+        `${baseUrl}/api/replays/${privateFinished.matchId}?perspective=runner`,
+      );
+      expect(anonymousPrivate.status).toBe(404);
+
+      const wrongToken = await fetch(
+        `${baseUrl}/api/replays/${privateFinished.matchId}?perspective=runner&side=${privateFinished.hostSide}`,
+        { headers: { authorization: "Bearer wrong-token" } },
+      );
+      expect(wrongToken.status).toBe(404);
+
+      const participantResponse = await fetch(
+        `${baseUrl}/api/replays/${privateFinished.matchId}?perspective=runner&side=${privateFinished.hostSide}`,
+        {
+          headers: {
+            authorization: `Bearer ${privateFinished.hostSessionToken}`,
+          },
+        },
+      );
+      expect(participantResponse.status).toBe(200);
+      const participantPayload = (await participantResponse.json()) as {
+        frames?: Array<{ participants?: { player_a?: { hand?: unknown[] }; player_b?: { hand?: unknown[] } } }>;
+      };
+      expect(participantPayload.frames?.[0]?.participants?.player_a?.hand?.length).toBeGreaterThan(0);
+      expect(participantPayload.frames?.[0]?.participants?.player_b?.hand?.length).toBeGreaterThan(0);
     } finally {
       await handle.close();
     }

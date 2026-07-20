@@ -96,7 +96,7 @@ prepared
 | --- | --- | --- |
 | PUB-001 | abgeschlossen | `isPublic` ersetzt den LAN-Flag, Client und Server verwenden Standard `true`, Recreate und Serien übernehmen den Wert, SQLite normalisiert alle Bestandsmatches einmalig auf öffentlich. |
 | PUB-002 | abgeschlossen | Gemeinsame öffentliche Liste für offene, aktive und beendete Matches; statusabhängige Navigation; öffentliche aktive Matches besitzen eine polling-aktualisierte read-only Zuschaueransicht auf Basis der leak-geprüften `SpectatorProjectionV1`. |
-| PUB-003 | offen | – |
+| PUB-003 | abgeschlossen | Terminale Matches liefern StateHash-geprüfte Analyseframes mit Boardzustand und beiden Händen sowie A/B-Seitenzuordnung. Öffentliche Replays sind anonym abrufbar; private nur mit Teilnehmersession; aktive Matches liefern über den Requestpfad keine Frames. Eine temporäre Kopie der realen Bestandsdatenbank bestätigte 19/19 terminale Matches mit 4.218 verifizierten Frames und `isPublic: true` nach Backfill. |
 | PUB-004 | offen | – |
 | PUB-005 | offen | – |
 
@@ -293,6 +293,13 @@ Done-Gate:
 - Full-Information-Positivtests prüfen mehrere Schritte vor und nach Handänderungen.
 - Bestandsprüfung berichtet Gesamtzahl, normalisierte Matches, replayfähige Matches und konkrete Fehler.
 - Der finale Build und Browser-Flow laufen erst nach grünen Kernverträgen.
+
+## Bisherige Prüfergebnisse
+
+- PUB-002: Shared-, Server- und Web-Typecheck grün; Projektions-, HTTP- und Navigationshilfstests grün; Web-Produktionsbuild grün.
+- PUB-003: Shared- und Server-Typecheck grün; Replay-Zugriffs-, Frame-, Handänderungs- und StateHash-Tests grün.
+- Bestandsaudit auf einer anschließend gelöschten temporären SQLite-Kopie: 21 Matches insgesamt, 19 terminal, 19/19 aus persistierten StateHash-verifizierten Frames abspielbar, 4.218 Frames erzeugt, alle 21 nach Migration öffentlich. Drei historische Matches lassen sich zusätzlich vollständig mit der aktuellen Engine neu simulieren; die übrigen historischen Partien bleiben über ihre persistierten verifizierten Zustände replaybar und benötigen keine Legacy-Regelkompatibilität.
+- Breiter `multiplayer.test.ts`-Lauf: 136/137 grün. Ein fachfremder, isoliert reproduzierbarer Altfehler bleibt in `advances Corp AI in a root-rez window even when activeSide is runner`: Der Test erwartet keine Runner-`LegalActions`, die aktuelle Engine liefert `jack_out` und `continue_run`. Das Replay-Paket verändert diese Regelspur nicht.
 
 ## Worktree-, Git- und Integrationsregeln
 

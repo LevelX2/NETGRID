@@ -43,6 +43,8 @@ import {
   type ApiPendingUndoRequest,
   type ApiPlayerIdentityKind,
   type ApiPublicMatchListEntry,
+  type ApiReplayAnalysisCard,
+  type ApiReplayAnalysisFrame,
   type AiDecision,
   type AiDifficulty,
   type AiDecisionDebug,
@@ -421,6 +423,7 @@ export type ReplayIndexEntry = {
     runner?: string;
     corp?: string;
   };
+  participantSides: Record<SeriesPlayerSlot, Side>;
 };
 
 export type OpenMatchListEntry = {
@@ -482,10 +485,16 @@ export type ReplayView = {
   perspective: ReplayPerspective;
   metadata: ReplayIndexEntry;
   timeline: ReplayTimelineStep[];
+  frames: ApiReplayAnalysisFrame[];
   replayErrors: string[];
   randomDrawRecords: ReplayRandomDrawEntry[];
   exploitSuggestions: ReplayExploitSuggestion[];
   localAnalysis: boolean;
+};
+
+export type ReplayAccessInput = {
+  side?: Side;
+  sessionToken?: string;
 };
 
 export type ReplayExportArtifact = {
@@ -1949,6 +1958,20 @@ export class MultiplayerService {
       .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
   }
 
+  async listPublicReplayIndex(): Promise<ReplayIndexEntry[]> {
+    if (!this.storage.list) return [];
+    const records = await this.storage.list();
+    return records
+      .filter(
+        (record) =>
+          record.match.isPublic &&
+          isTerminalStatus(record.match.status) &&
+          Boolean(record.gameState),
+      )
+      .map((record) => replayIndexEntryFor(record))
+      .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+  }
+
   async listOpenMatches(): Promise<OpenMatchListEntry[]> {
     const records = this.storage.listOpenMatchCandidates ? await this.storage.listOpenMatchCandidates() : this.storage.list ? await this.storage.list() : [];
     const nowIso = this.now();
@@ -2053,7 +2076,10 @@ export class MultiplayerService {
     return entries.sort((left, right) => right.finishedAt.localeCompare(left.finishedAt)).slice(0, cappedLimit);
   }
 
-  async loadReplayView(matchId: string, perspective: ReplayPerspective): Promise<{ ok: true; replay: ReplayView } | { ok: false; error: SafeErrorPayload }> {
+  async loadReplayDiagnostics(
+    matchId: string,
+    perspective: ReplayPerspective,
+  ): Promise<{ ok: true; replay: ReplayView } | { ok: false; error: SafeErrorPayload }> {
     const record = await this.mustLoad(matchId);
     if (!record || !record.gameState) return { ok: false, error: safeError("not_found", "Dieses Replay ist nicht verfügbar.") };
     if (!isReplayPerspective(perspective)) return { ok: false, error: safeError("bad_request", "Die Replay-Perspektive ist ungültig.") };
@@ -2081,6 +2107,9 @@ export class MultiplayerService {
       perspective,
       metadata,
       timeline,
+      frames: isTerminalStatus(record.match.status)
+        ? replayAnalysisFrames(record)
+        : [],
       replayErrors: checks.errors,
       randomDrawRecords: replayRandomDrawEntries(record),
       exploitSuggestions: replayExploitSuggestions(timeline),
@@ -2089,11 +2118,35 @@ export class MultiplayerService {
     return { ok: true, replay };
   }
 
-  async exportReplay(matchId: string, perspective: ReplayPerspective): Promise<{ ok: true; artifact: ReplayExportArtifact } | { ok: false; error: SafeErrorPayload }> {
+  async loadReplayView(
+    matchId: string,
+    perspective: ReplayPerspective,
+    access: ReplayAccessInput = {},
+  ): Promise<{ ok: true; replay: ReplayView } | { ok: false; error: SafeErrorPayload }> {
+    const record = await this.mustLoad(matchId);
+    if (!record || !record.gameState || !isTerminalStatus(record.match.status)) {
+      return { ok: false, error: safeError("not_found", "Dieses Replay ist nicht verfügbar.") };
+    }
+    if (!record.match.isPublic) {
+      const session =
+        access.side && access.sessionToken
+          ? this.authenticateForRecreate(record, access.side, access.sessionToken)
+          : undefined;
+      if (!session) {
+        return { ok: false, error: safeError("not_found", "Dieses Replay ist nicht verfügbar.") };
+      }
+    }
+    return this.loadReplayDiagnostics(matchId, perspective);
+  }
+
+  async exportReplayDiagnostics(
+    matchId: string,
+    perspective: ReplayPerspective,
+  ): Promise<{ ok: true; artifact: ReplayExportArtifact } | { ok: false; error: SafeErrorPayload }> {
     if (perspective === "local_analysis") {
       return { ok: false, error: safeError("bad_request", "Die lokale Analyseperspektive ist nur in der lokalen Replay-Ansicht verfügbar.") };
     }
-    const loaded = await this.loadReplayView(matchId, perspective);
+    const loaded = await this.loadReplayDiagnostics(matchId, perspective);
     if (!loaded.ok) return loaded;
     return {
       ok: true,
@@ -2104,6 +2157,28 @@ export class MultiplayerService {
         perspective,
         replay: loaded.replay
       }
+    };
+  }
+
+  async exportReplay(
+    matchId: string,
+    perspective: ReplayPerspective,
+    access: ReplayAccessInput = {},
+  ): Promise<{ ok: true; artifact: ReplayExportArtifact } | { ok: false; error: SafeErrorPayload }> {
+    if (perspective === "local_analysis") {
+      return { ok: false, error: safeError("bad_request", "Die lokale Analyseperspektive ist nur in der lokalen Replay-Ansicht verfügbar.") };
+    }
+    const loaded = await this.loadReplayView(matchId, perspective, access);
+    if (!loaded.ok) return loaded;
+    return {
+      ok: true,
+      artifact: {
+        version: "1.5.0",
+        exportedAt: this.now(),
+        baseline: loaded.replay.metadata.baseline,
+        perspective,
+        replay: loaded.replay,
+      },
     };
   }
 
@@ -3217,7 +3292,8 @@ function replayIndexEntryFor(
     finalStateHash: hashState(record.gameState),
     replayCheckStatus: checks ? "verified" : "unchecked",
     ...(checks ? { replayOk: checks.errors.length === 0 } : {}),
-    participantNames: names
+    participantNames: names,
+    participantSides: replayParticipantSides(record)
   };
 }
 
@@ -3233,6 +3309,18 @@ function participantNamesForReplay(record: StoredMatch): ReplayIndexEntry["parti
     if (session.side === "corp" && !bySide.corp) bySide.corp = session.displayName;
   }
   return bySide;
+}
+
+function replayParticipantSides(record: StoredMatch): Record<SeriesPlayerSlot, Side> {
+  const assignment = record.match.deckSetup.assignment ?? record.startLobby?.sideAssignment;
+  if (assignment) {
+    return {
+      player_a: assignment.runnerPlayer === "player_a" ? "runner" : "corp",
+      player_b: assignment.runnerPlayer === "player_b" ? "runner" : "corp",
+    };
+  }
+  const playerASide = record.sessions[0]?.side ?? "runner";
+  return { player_a: playerASide, player_b: opposite(playerASide) };
 }
 
 function replayEventsForPerspective(record: StoredMatch, perspective: ReplayPerspective): PublicGameEvent[] {
@@ -3306,6 +3394,130 @@ function replayStateHashChecks(record: StoredMatch): {
   }
 
   return { byEventId, errors };
+}
+
+function replayAnalysisFrames(record: StoredMatch): ApiReplayAnalysisFrame[] {
+  const statesByVersion = new Map<
+    number,
+    { state: GameState; persistedHash?: string }
+  >();
+  for (const snapshot of record.stateSnapshots) {
+    statesByVersion.set(snapshot.stateVersion, {
+      state: snapshot.gameState,
+      persistedHash: snapshot.stateHash,
+    });
+  }
+  statesByVersion.set(record.gameState.stateVersion, {
+    state: record.gameState,
+    persistedHash: hashState(record.gameState),
+  });
+
+  const eventByStateVersion = new Map(
+    record.gameState.eventLog.map((event) => [event.stateVersionAfter, event]),
+  );
+  return [...statesByVersion.values()]
+    .sort((left, right) => left.state.stateVersion - right.state.stateVersion)
+    .map(({ state, persistedHash }, index) => {
+      const event = eventByStateVersion.get(state.stateVersion);
+      const actualHash = hashState(state);
+      return replayAnalysisFrameFor(record, state, {
+        index,
+        ...(event ? { sourceEventId: event.eventId } : {}),
+        stateHashVerified:
+          actualHash === persistedHash &&
+          (!event || actualHash === event.stateHashAfter),
+      });
+    });
+}
+
+function replayAnalysisFrameFor(
+  record: StoredMatch,
+  state: GameState,
+  input: { index: number; sourceEventId?: string; stateHashVerified: boolean },
+): ApiReplayAnalysisFrame {
+  const participantSides = replayParticipantSides(record);
+  const names = participantNamesForReplay(record);
+  const runnerHand = replayCards(state, state.runner.grip);
+  const corpHand = replayCards(state, state.corp.hq);
+
+  const participant = (player: SeriesPlayerSlot) => {
+    const side = participantSides[player];
+    return {
+      side,
+      displayName:
+        names[side] ??
+        (record.match.aiControllers?.[side]
+          ? side === "runner"
+            ? "Runner-KI"
+            : "Corp-KI"
+          : player === "player_a"
+            ? "Teilnehmer A"
+            : "Teilnehmer B"),
+      hand: side === "runner" ? runnerHand : corpHand,
+    };
+  };
+
+  return {
+    index: input.index,
+    ...(input.sourceEventId ? { sourceEventId: input.sourceEventId } : {}),
+    stateVersion: state.stateVersion,
+    stateHash: hashState(state),
+    stateHashVerified: input.stateHashVerified,
+    activeSide: state.activeSide,
+    phase: state.phase,
+    timingPoint: state.timingPoint,
+    participants: {
+      player_a: participant("player_a"),
+      player_b: participant("player_b"),
+    },
+    runner: {
+      credits: state.runner.credits,
+      clicks: state.runner.clicks,
+      tags: state.runner.tags,
+      deckCount: state.runner.stack.length,
+      hand: runnerHand,
+      discard: replayCards(state, state.runner.heap),
+      scored: replayCards(state, state.runner.scoreArea),
+      rig: {
+        programs: replayCards(state, state.runner.rig.programs),
+        hardware: replayCards(state, state.runner.rig.hardware),
+        resources: replayCards(state, state.runner.rig.resources),
+      },
+    },
+    corp: {
+      credits: state.corp.credits,
+      clicks: state.corp.clicks,
+      badPublicity: state.corp.badPublicity,
+      deckCount: state.corp.rd.length,
+      hand: corpHand,
+      discard: replayCards(state, state.corp.archives),
+      scored: replayCards(state, state.corp.scoreArea),
+      servers: state.corp.servers.map((server) => ({
+        id: server.id,
+        label: server.label,
+        ice: replayCards(state, server.ice),
+        root: replayCards(state, server.root),
+      })),
+    },
+  };
+}
+
+function replayCards(state: GameState, cardIds: readonly string[]): ApiReplayAnalysisCard[] {
+  return cardIds.map((cardId) => {
+    const instance = state.cardInstances[cardId];
+    if (!instance) throw new Error(`replay_card_instance_missing:${cardId}`);
+    const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
+    if (!definition) throw new Error(`replay_card_definition_missing:${instance.definitionId}`);
+    return {
+      instanceId: instance.instanceId,
+      definitionId: instance.definitionId,
+      title: definition.title,
+      cardType: definition.type,
+      faceup: instance.faceup,
+      rezzed: instance.rezzed,
+      advancementCounters: instance.advancementCounters,
+    };
+  });
 }
 
 function replayActionFromEvent(event: GameEvent): PlayerAction | undefined {
