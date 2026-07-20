@@ -1,6 +1,6 @@
 # Seed-7-Run-Verhalten – Umsetzungsevidence
 
-Status: Paket 4 grün, finale Gesamtverifikation ausstehend
+Status: Final Verify grün, lokaler Main-Merge und Cleanup ausstehend
 
 ## Geprüfter Fehlerkorridor
 
@@ -36,9 +36,19 @@ nicht konvertierter `trash_affordable`-Begründung.
   finanzieren.
 - Eine Route mit Restricted Breaker Credits bleibt bezahlbar, wenn die
   konkrete Pfadanalyse diese Credits tatsächlich für einen Breaker einsetzen
-  kann. Die Quote rechnet nur diesen nachgewiesenen Betrag an; Trace-Gebote,
-  Trash-Kosten und andere allgemeine Ausgaben erhalten keinen Zugriff auf den
-  Sonderpool.
+  kann. Die Quote leitet den Betrag aus der sequenziellen Pfadzahlung ab; eine
+  gemischte Breaker-/Trace-Gegenprobe belegt, dass der verbleibende
+  Trace-Fehlbetrag nicht aus dem Sonderpool bezahlt wird.
+- Ein bekanntes `trash_affordable`-Remote-Ziel bleibt auch bei unbekanntem ICE
+  der eigentliche Run-Zweck. `probe_unknown_ice` ersetzt dieses Ziel nicht,
+  sondern beschreibt nur Runs ohne höherwertigen bekannten Access-Payoff.
+- Das zusätzliche Kreditrisiko eines Unknown-ICE-Probes wird aus den nach dem
+  bekannten Pfad verbleibenden Credits und dem modellierten Risikopuffer
+  gebildet. Nach einem Rez darf ein `no_access`-Pfad dieses Budget nicht mit
+  einer Safety-Sequenz überschreiten. Ein quantifizierter, nicht tödlicher
+  Damage-Effekt kann bis zum vorher gebundenen Damage-Budget akzeptiert
+  werden; tödlicher Damage, Programmverlust, Trace und Tag behalten ihren
+  Safety-Override.
 
 ## Seed-7-Gegenprobe
 
@@ -56,23 +66,47 @@ Ergebnis:
 | --------------------------------------------- | -------------------------------: | -------: |
 | Spiele in der Seed-7-Matrix                   |                                6 |        6 |
 | Hard Failures                                 | Action-Limit im betroffenen Slot |        0 |
-| Betroffener Slot – Aktionen                   |                              480 |      331 |
+| Betroffener Slot – Aktionen                   |                              480 |      472 |
 | Betroffener Slot – `repeated_no_progress_run` |                                6 |        0 |
 | Replay                                        |                             grün |     grün |
 | Redaction                                     |                             grün |     grün |
 
-Im Kandidaten startet Remote 2 bei StateVersion 283 mit
-`run_commitment_goal:trash_asset_or_upgrade`, reserviert sechs Credits und
-führt bei StateVersion 285 `trash_accessed_card` für sechs Credits aus. Der
-spätere Run bei StateVersion 325 besitzt einen anderen sichtbaren
-Entscheidungsfingerprint und trash’t bei StateVersion 329 erneut. Das belegt
-zugleich, dass produktive Wiederholungsruns nicht pauschal unterdrückt werden.
+Im finalen Kandidaten ist der frühere Start-/Jack-out-Stillstand nicht mehr
+vorhanden. Bei StateVersion 143 rezz’t die Corp stattdessen neues ICE. Die
+Revalidation stuft die Route als `no_access` ein. Die KI verwendet nur zwei
+Credits ihres gebundenen Probe-Puffers und wählt bei StateVersion 145
+`continue_run` mit `runner_run_plan_conserve_credits:true`, statt weitere sechs
+Credits für die nun unerreichbare Route auszugeben. Die Partie endet nach 472
+Aktionen mit Runner-Sieg durch leeres Corp-Deck; alle produktiven späteren
+Runs bleiben zulässig.
+
+Ein zusätzlicher positiver Kontrollfall aus dem Vollvergleich deckte eine
+Zielverwechslung auf: Im Hybrid-Score-Punish-Slot mit Seed 10 muss ein Run auf
+ein bekanntes Economy-Asset trotz unbekanntem ICE weiterhin dem Trash-Ziel
+dienen. Der finale Kandidat führt bei StateVersion 138
+`trash_accessed_card` für vier Credits mit
+`runner_run_plan_access_trash_converts_commitment:true` aus und beendet die
+Partie wie die Referenz nach 241 Aktionen durch Corp-Agenda-Punkte.
 
 Die exakten Zustände 168, 210 und 225 sind zusätzlich als fokussierte
 Routen-/Trace-Gegenproben abgedeckt: Garantie fünf bei vier Credits ist nur
 konditional, Garantie vier bei sechs Credits ist bezahlbar und wird mit dem
 kleinsten Gewinngebot ausgeführt, Garantie sieben bei sechs Credits ist nicht
 garantiert.
+
+## Vollständiger Standardvergleich
+
+Der unveränderte Vergleich über sechs Slots, zehn Standard-Seeds und 480
+Aktionen lief auf Commit `a2791daeb` mit 60 Spielen und 12.306 Entscheidungen.
+Er ist zur Referenz `19d8375ed` vollständig vergleichbar und wurde mit
+`accepted: true` ohne Hard Failure abgeschlossen. Action-Limit-Spiele sanken
+von eins auf null; Replay-Failures und Hidden-Info-Findings blieben jeweils
+null. Die rohe Finding-Anzahl stieg bei 200 zusätzlichen Entscheidungen von
+808 auf 817, während die Finding-Rate leicht von 6,674 auf 6,639 pro 100
+Entscheidungen sank. Die `strategicNoProgress`-Rate stieg geringfügig von
+2,941 auf 3,023 pro 100 Entscheidungen und blieb innerhalb des akzeptierten
+Baseline-Korridors; im betroffenen Seed-7-Spiel blieb
+`repeated_no_progress_run` bei null.
 
 ## Lokale Rohartefakte
 
@@ -83,6 +117,8 @@ und unversioniert:
   `C:\Projekte\NETGRID\data\local\ai-behavior-baseline-v1-candidate-19d8375ed-2026-07-20-raw.json`
 - Paket-4-Gegenprobe:
   `C:\Projekte\NETGRID_AI_SEED7_RUN_BEHAVIOR_HARDENING\data\local\ai-behavior-baseline-v1-seed07-seed7-hardening-p4-raw.json`
+- Finaler Zehn-Seed-Vergleich:
+  `C:\Projekte\NETGRID_AI_SEED7_RUN_BEHAVIOR_HARDENING\data\local\ai-behavior-baseline-v1-seed7-hardening-final-v2-raw.json`
 
-Die vollständige Zehn-Seed-Standardbaseline und alle Gesamtgates werden im
-anschließenden Zustand `final_verify` ausgeführt.
+Die Worktree-lokalen Rohartefakte werden beim verbindlichen Cleanup entfernt;
+die belastbaren Ergebnisse sind in diesem Review dokumentiert.

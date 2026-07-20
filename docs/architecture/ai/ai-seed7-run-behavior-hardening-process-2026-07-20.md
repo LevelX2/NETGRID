@@ -1,6 +1,6 @@
 # Seed-7-Run-Verhalten der KI härten
 
-Status: aktiv – Paket 4 abgeschlossen, finale Verifikation ausstehend
+Status: aktiv – Final Verify grün, Main-Merge und Cleanup ausstehend
 
 ## Quelle und Zielprüfung
 
@@ -227,7 +227,8 @@ Commit: `test(ai): harden seed7 run execution regressions`
 - Paket 2: abgeschlossen
 - Paket 3: abgeschlossen
 - Paket 4: abgeschlossen
-- Final Verify, Merge und Cleanup: ausstehend
+- Final Verify: abgeschlossen
+- Main-Merge und Cleanup: ausstehend
 
 ## Paketnachweis
 
@@ -339,19 +340,38 @@ Commit: `test(ai): harden seed7 run execution regressions`
   verwendbaren Restricted Breaker Credits an. Eine Gegenprobe hält dieselben
   Credits für ein Trace-Gebot gesperrt; der unterfinanzierte Kontrollzustand
   bleibt ebenfalls gesperrt.
-- Reproduzierbare Seed-7-Gegenprobe über die sechs festen Baseline-Slots,
-  `current_candidate` auf beiden Seiten und 480 Aktionen: sechs Spiele, 1.487
-  Entscheidungen, keine Hard Failures, alle Replays und die gesamte
-  Redaction grün. Im zuvor betroffenen
-  `strategy_panel_net_damage_black_ice` endet das Spiel nach 331 Aktionen
-  statt am Action-Limit; `repeated_no_progress_run` sinkt von sechs auf null.
-  Ein `trash_affordable`-Run auf Remote 2 reserviert sechs Credits und
-  konvertiert bei unverändertem Zustand in `trash_accessed_card`. Eine spätere
-  Wiederholung nach verändertem sichtbarem Zustand bleibt zulässig und
-  konvertiert ebenfalls.
-- Paketnahe Verifikation einschließlich der beiden Final-Verify-Korrekturen:
-  fokussierte Route-, Release-, Encounter- und Entscheidungspunkt-Tests,
-  AI-Typecheck und `git diff --check` grün. Der zuvor betroffene dritte
-  AI-Shard ist mit 138 Dateien und 846 Tests grün. Die vollständigen Shards,
-  Contract-/Hidden-Info-Gates und der unveränderte Standard-Baselinevergleich
-  folgen im Zustand `final_verify`.
+- Die Restricted-Credit-Kapazität wird aus der konkreten sequenziellen
+  Pfadzahlung abgeleitet. Eine zusätzliche Mischpfad-Gegenprobe bezahlt einen
+  Breaker aus dem Sonderpool, lässt einen späteren Trace-Fehlbetrag aber
+  vollständig offen; der Pool wird damit nicht als allgemeines Guthaben
+  umgedeutet.
+- Ein bekannter Remote-Payoff `trash_affordable` oder `trash_unaffordable`
+  bleibt auch auf einer Unknown-ICE-Route das Run-Ziel. Dadurch konvertiert
+  der positive Hybrid-Score-Punish-Kontrollfall bei StateVersion 138 den
+  reservierten Vier-Credit-Trash, statt das Ziel durch
+  `probe_unknown_ice` zu ersetzen; die Partie endet wie die Referenz nach 241
+  Aktionen.
+- Unknown-ICE-Probes binden ihr zusätzliches Kreditrisiko nun an die nach dem
+  bekannten Pfad verbleibenden Credits und den modellierten Risikopuffer.
+  Wird die Route nach Rez zu `no_access`, kann eine Safety-Sequenz das Budget
+  nur überschreiten, wenn der sichtbare Effekt das akzeptierte Damage-Budget
+  übersteigt oder eine nicht als einfacher Damage quantifizierbare Gefahr wie
+  Programmverlust, Trace oder Tag vorliegt. Im Seed-7-Kontrollzustand werden
+  deshalb zwei Credits des Puffers eingesetzt und die weiteren sechs Credits
+  konserviert; tödliche Safety-Fälle bleiben unverändert geschützt.
+- Reproduzierbare finale Seed-7-Gegenprobe mit 480 Aktionen: Der zuvor
+  betroffene Slot endet nach 472 Aktionen mit Runner-Sieg statt am
+  Action-Limit; `repeated_no_progress_run` sinkt von sechs auf null, Replay und
+  Redaction bleiben grün. Nach neu gerezztem ICE wird die Route sichtbar als
+  `no_access` revalidiert und die weitere Kredit-Eskalation beendet.
+- Der unveränderte vollständige Standardvergleich über sechs Slots, zehn
+  Seeds und 480 Aktionen lief auf Commit `a2791daeb` mit 60 Spielen und 12.306
+  Entscheidungen. Er ist zur Referenz `19d8375ed` vergleichbar,
+  `accepted: true` und ohne Hard Failures; Action-Limit-Spiele sinken von eins
+  auf null, Replay-Failures und Hidden-Info-Findings bleiben null.
+- Finale Verifikation: 100 fokussierte Route-, Plan-, Encounter- und
+  Entscheidungspunkt-Tests grün; alle drei AI-Shards mit 138 Dateien und
+  1.018, 1.000 sowie 847 Tests grün. AI-Typecheck, Source-Structure,
+  Hint-Metadaten, Contract-/Test-Discovery-, Format- und Hidden-Info-/Redaction-
+  Gates sind grün. Der vollständige Standard-Baselinevergleich ist akzeptiert
+  und vergleichbar.
