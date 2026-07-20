@@ -54,12 +54,15 @@ export type RunnerRunPathCreditBudget = {
   nonNoisyIcebreakerCredits?: number;
   killerCredits?: number;
   stealthNonNoisyIcebreakerCredits?: number;
+  hostedIcebreakerCreditsByBreakerInstanceId?: Readonly<Record<string, number>>;
 };
 
 export type RunnerRunPathCreditBudgetInput = number | RunnerRunPathCreditBudget;
 
 export type MutableRunnerRunPathCreditBudget =
-  Required<RunnerRunPathCreditBudget>;
+  Omit<Required<RunnerRunPathCreditBudget>, "hostedIcebreakerCreditsByBreakerInstanceId"> & {
+    hostedIcebreakerCreditsByBreakerInstanceId: Record<string, number>;
+  };
 
 export type CreditPaymentProjection = {
   affordable: boolean;

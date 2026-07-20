@@ -1535,6 +1535,17 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     state = chipInstall.state;
     const chipId = chipInstall.cardId;
     state.cardInstances[chipId]!.counters = { bit: 2 };
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === chipId,
+      )?.counterDisplays,
+    ).toContainEqual(
+      expect.objectContaining({
+        creditPool: expect.objectContaining({
+          requireHostedBreakerForIcebreakerUse: true,
+        }),
+      }),
+    );
     const hostedId = addInstalledRunnerProgramForTest(
       state,
       "onr_v1_036_jackhammer",

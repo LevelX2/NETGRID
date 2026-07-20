@@ -51,7 +51,9 @@ export function runnerRunReleaseForEvaluation(
       (reason) => reason === "unknown_ice_on_route",
     ) &&
     evaluation.knownAccessState !== "known_no_current_payoff" &&
-    evaluation.creditsAfterRun >= 0;
+    evaluation.creditsAfterRun >= 0 &&
+    (evaluation.unrezzedIceRiskUnderfunded !== true ||
+      visibleCorpCredits(input) <= 1);
   if (!unknownOnlyProbe && !runRecommendationReleasesNow(evaluation)) {
     return blocked(`recommendation_${evaluation.recommendation}`, baseEvidence);
   }
@@ -146,4 +148,9 @@ function visibleRunnerAgendaPoints(input: AiDecisionInput): number {
     (sum, card) => sum + Math.max(0, Math.floor(card.agendaPoints ?? 0)),
     0,
   );
+}
+
+function visibleCorpCredits(input: AiDecisionInput): number {
+  const value = input.playerView.opponent.credits;
+  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 }

@@ -22,7 +22,12 @@ import {
 import type { EncounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
 
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
-type MutableEncounterCreditBudget = Required<RunnerRunPathCreditBudget>;
+type MutableEncounterCreditBudget = Omit<
+  Required<RunnerRunPathCreditBudget>,
+  "hostedIcebreakerCreditsByBreakerInstanceId"
+> & {
+  hostedIcebreakerCreditsByBreakerInstanceId: Record<string, number>;
+};
 
 export type RunnerPumpViabilityContextDependencies = {
   findVisibleCard: (
@@ -329,6 +334,9 @@ function encounterCreditBudget(
     killerCredits: visiblePools.killerCredits,
     stealthNonNoisyIcebreakerCredits:
       visiblePools.stealthNonNoisyIcebreakerCredits,
+    hostedIcebreakerCreditsByBreakerInstanceId: {
+      ...visiblePools.hostedIcebreakerCreditsByBreakerInstanceId,
+    },
   };
 }
 
@@ -341,11 +349,32 @@ function spendIcebreakerCredits(
   budget: MutableEncounterCreditBudget;
   restrictedSpent: number;
 } {
-  const next = { ...budget };
+  const next = {
+    ...budget,
+    hostedIcebreakerCreditsByBreakerInstanceId: {
+      ...budget.hostedIcebreakerCreditsByBreakerInstanceId,
+    },
+  };
   let remaining = normalizeCreditAmount(cost);
   let restrictedSpent = 0;
+  const hostedCredits = Math.min(
+    next.hostedIcebreakerCreditsByBreakerInstanceId[breaker.instanceId] ?? 0,
+    remaining,
+  );
+  next.hostedIcebreakerCreditsByBreakerInstanceId[breaker.instanceId] =
+    Math.max(
+      0,
+      (next.hostedIcebreakerCreditsByBreakerInstanceId[breaker.instanceId] ??
+        0) - hostedCredits,
+    );
+  remaining -= hostedCredits;
+  restrictedSpent += hostedCredits;
   const spendRestricted = (
-    key: Exclude<keyof MutableEncounterCreditBudget, "credits">,
+    key:
+      | "icebreakerCredits"
+      | "nonNoisyIcebreakerCredits"
+      | "killerCredits"
+      | "stealthNonNoisyIcebreakerCredits",
   ) => {
     const spent = Math.min(next[key], remaining);
     next[key] -= spent;

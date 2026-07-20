@@ -600,6 +600,10 @@ export function runnerRunTargetCurrentStep(
     evaluation?.evidence.includes("run_commitment:probe_only") === true;
   const scoreThreatProbeWithoutVisibleCost =
     probeOnly && evaluation?.scoreThreat === true && evaluation.pathCost === 0;
+  const probeFundingRequired =
+    probeOnly &&
+    (evaluation?.pathPassability === "blocked_unpayable" ||
+      evaluation?.unrezzedIceRiskUnderfunded === true);
   const usefulNonFundingActionAvailable =
     (context.input.legalActions ?? []).some(
       (candidate) => candidate.type === "draw_card",
@@ -623,7 +627,7 @@ export function runnerRunTargetCurrentStep(
   }
   if (
     evaluation?.recommendation === "gain_credits_first" &&
-    (!probeOnly || scoreThreatProbeWithoutVisibleCost) &&
+    (!probeOnly || scoreThreatProbeWithoutVisibleCost || probeFundingRequired) &&
     !preserveLastClickForScoreThreat &&
     !preserveReachableMatchpointRun &&
     (concreteEconomyFunding ||
@@ -642,6 +646,9 @@ export function runnerRunTargetCurrentStep(
         `concrete economy funding ${concreteEconomyFunding}`,
         ...(scoreThreatProbeWithoutVisibleCost
           ? ["zero-cost score-threat probe honors funding recommendation"]
+          : []),
+        ...(probeFundingRequired
+          ? ["probe funds known route or visible Corp rez-risk reserve"]
           : []),
         ...runnerRunTargetStepRationale(context, action),
       ],

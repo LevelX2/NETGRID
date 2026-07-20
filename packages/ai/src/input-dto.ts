@@ -611,6 +611,9 @@ function sanitizeCounterCreditPool(
       ? { capacity: creditPool.capacity }
       : {}),
     ...(creditPool.uses !== undefined ? { uses: creditPool.uses.slice() } : {}),
+    ...(creditPool.requireHostedBreakerForIcebreakerUse
+      ? { requireHostedBreakerForIcebreakerUse: true as const }
+      : {}),
     ...(creditPool.refresh !== undefined
       ? {
           refresh: {

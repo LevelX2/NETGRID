@@ -493,6 +493,9 @@ function restrictedPoolCounterDisplays(
           ? {
               capacity: Math.max(0, Math.floor(restrictedSource.capacity)),
               uses: restrictedSource.usableFor.slice(),
+              ...(restrictedSource.requireHostedBreakerForIcebreakerUse
+                ? { requireHostedBreakerForIcebreakerUse: true as const }
+                : {}),
               refresh: {
                 timing: restrictedSource.refresh.timing,
                 behavior: restrictedSource.refresh.mode,
