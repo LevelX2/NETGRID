@@ -32,6 +32,7 @@ import {
   X,
   ZoomIn,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   Fragment,
   useCallback,
@@ -548,6 +549,7 @@ type FocusedCard = {
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 
 export default function Page() {
+  const router = useRouter();
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [activeMatchWorkspace, setActiveMatchWorkspace] =
     useState<ActiveMatchWorkspace>("game");
@@ -6812,7 +6814,7 @@ export default function Page() {
                 {...(payload?.isPublic
                   ? {
                       onReplay: () =>
-                        window.location.assign(
+                        router.push(
                           `/replays?matchId=${encodeURIComponent(session.matchId)}`,
                         ),
                     }

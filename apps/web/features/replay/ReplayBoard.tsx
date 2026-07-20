@@ -18,6 +18,10 @@ import {
 import { ReadOnlyTurnActionPanel } from "../actions/LegalActionsPanel";
 import { CardPreviewPanel } from "../cards/CardPreviewPanel";
 import {
+  useCardImagePreference,
+  useCardScaleSettings,
+} from "../cards/card-display-settings";
+import {
   enrichVisibleCard,
   type DisplayVisibleCard,
 } from "../cards/card-view-model";
@@ -34,26 +38,34 @@ import { OpponentPanel, PlayerPanel } from "../game-board/SideStatusPanels";
 import { SpecialZonesStrip } from "../game-board/SpecialZonesStrip";
 import { ScoredAgendaOverlay } from "../game-board/ScoredAgendaOverlay";
 import { ChroniclePanel } from "../chronicle/ChroniclePanel";
-import type { CardDisplayMode } from "../settings/settings-model";
+import {
+  CARD_SCALE_PERCENT_MIN,
+  type CardDisplayMode,
+  type ChronicleDetailMode,
+} from "../settings/settings-model";
 import type { OverlayPositionPreference } from "../../lib/overlay-position";
 
 const EMPTY_CARD_DETAILS = {};
 const EMPTY_ACTIONS: LegalAction[] = [];
 const EMPTY_IDS = new Set<string>();
-const CARD_STYLE = { "--cards-min-width": "108px" } as CSSProperties;
-const ZONE_STYLE = { "--zone-card-scale": "1" } as CSSProperties;
-const BOARD_LANE_STYLE = { "--lane-card-scale": "1" } as CSSProperties;
+const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 
 export function ReplayBoard({
   frame,
   perspective,
   displayNames,
   publicEvents,
+  cardDisplayMode,
+  chronicleDetailMode,
+  onCardDisplayMode,
 }: {
   frame: ApiReplayAnalysisFrame;
   perspective: Side;
   displayNames: Partial<Record<Side, string>>;
   publicEvents: PublicGameEvent[];
+  cardDisplayMode: CardDisplayMode;
+  chronicleDetailMode: ChronicleDetailMode;
+  onCardDisplayMode(value: CardDisplayMode): void;
 }) {
   const baseView = frame.playerViews[perspective];
   const view = useMemo(
@@ -77,9 +89,47 @@ export function ReplayBoard({
     card: DisplayVisibleCard;
     hiddenSide?: Side;
   } | null>(null);
-  const [cardDisplayMode, setCardDisplayMode] =
-    useState<CardDisplayMode>("placeholder");
   const [cardPreviewCollapsed, setCardPreviewCollapsed] = useState(false);
+  const cardScaleSettings = useCardScaleSettings();
+  const { preferGermanCardImages } = useCardImagePreference();
+  const handCardScale = Math.max(
+    CARD_SCALE_PERCENT_MIN / 100,
+    cardScaleSettings.handPercent / 100,
+  );
+  const rigCardScale = Math.max(
+    CARD_SCALE_PERCENT_MIN / 100,
+    cardScaleSettings.rigPercent / 100,
+  );
+  const zoneCardScale = Math.max(
+    CARD_SCALE_PERCENT_MIN / 100,
+    cardScaleSettings.zonePercent / 100,
+  );
+  const boardCardScale = Math.max(
+    CARD_SCALE_PERCENT_MIN / 100,
+    cardScaleSettings.boardPercent / 100,
+  );
+  const handCardsStyle = useMemo(
+    () =>
+      ({
+        "--cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * handCardScale)}px`,
+      }) as CSSProperties,
+    [handCardScale],
+  );
+  const ownRigCardsStyle = useMemo(
+    () =>
+      ({
+        "--cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * rigCardScale)}px`,
+      }) as CSSProperties,
+    [rigCardScale],
+  );
+  const zoneCardsStyle = useMemo(
+    () => ({ "--zone-card-scale": String(zoneCardScale) }) as CSSProperties,
+    [zoneCardScale],
+  );
+  const boardLaneStyle = useMemo(
+    () => ({ "--lane-card-scale": String(boardCardScale) }) as CSSProperties,
+    [boardCardScale],
+  );
 
   const enrichCard = (card: VisibleCard): DisplayVisibleCard =>
     enrichVisibleCard(card, EMPTY_CARD_DETAILS);
@@ -294,9 +344,9 @@ export function ReplayBoard({
             exposedCardHighlightIds={EMPTY_IDS}
             selectedActionContext={null}
             selectedDiscardOptionIdSet={EMPTY_IDS}
-            boardLaneStyle={BOARD_LANE_STYLE}
-            handCardsStyle={CARD_STYLE}
-            zoneCardsStyle={ZONE_STYLE}
+            boardLaneStyle={boardLaneStyle}
+            handCardsStyle={handCardsStyle}
+            zoneCardsStyle={zoneCardsStyle}
             cardDisplayMode={cardDisplayMode}
             boardZoneCollapsedFor={(key) => Boolean(collapsedZones[key])}
             toggleBoardZoneCollapsed={(key) =>
@@ -326,9 +376,9 @@ export function ReplayBoard({
               selectedActionContext={null}
               selectedDiscardOptionIdSet={EMPTY_IDS}
               ownRigGroups={ownRigGroups}
-              ownRigCardsStyle={CARD_STYLE}
-              handCardsStyle={CARD_STYLE}
-              zoneCardsStyle={ZONE_STYLE}
+              ownRigCardsStyle={ownRigCardsStyle}
+              handCardsStyle={handCardsStyle}
+              zoneCardsStyle={zoneCardsStyle}
               cardDisplayMode={cardDisplayMode}
               boardZoneCollapsedFor={(key) => Boolean(collapsedZones[key])}
               toggleBoardZoneCollapsed={(key) =>
@@ -355,7 +405,7 @@ export function ReplayBoard({
           <CardPreviewPanel
             card={focusedCard?.card ?? null}
             displayMode={cardDisplayMode}
-            onDisplayMode={setCardDisplayMode}
+            onDisplayMode={onCardDisplayMode}
             {...(focusedCard?.hiddenSide
               ? { hiddenSide: focusedCard.hiddenSide }
               : {})}
@@ -368,8 +418,8 @@ export function ReplayBoard({
             side={view.side}
             cardDetailsById={EMPTY_CARD_DETAILS}
             displayMode={cardDisplayMode}
-            detailMode="full"
-            preferGermanCardImages={false}
+            detailMode={chronicleDetailMode}
+            preferGermanCardImages={preferGermanCardImages}
             onFocusCard={focusCard}
           />
           <section className="section replayStatePanel">

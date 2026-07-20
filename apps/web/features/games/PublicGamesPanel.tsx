@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, History, LogIn, RotateCcw, Users } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import type { PublicMatchEntry } from "../../lib/client-api";
@@ -173,10 +174,10 @@ function PublicGameCard({
             {publicMatchActionLabel(entry.status)}
           </button>
         ) : target ? (
-          <a className="button primary" href={target}>
+          <Link className="button primary" href={target}>
             <ActionIcon size={15} />
             {publicMatchActionLabel(entry.status)}
-          </a>
+          </Link>
         ) : null}
       </div>
     </article>
