@@ -483,6 +483,15 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       .filter((record) => record.match.isPublic);
   }
 
+  async listResultSnapshotCandidates(): Promise<StoredMatch[]> {
+    const rows = this.db
+      .prepare(
+        "SELECT record_json AS recordJson FROM matches WHERE status IN ('finished', 'forfeited') ORDER BY updated_at DESC",
+      )
+      .all() as Array<{ recordJson: string }>;
+    return rows.map((row) => JSON.parse(row.recordJson) as StoredMatch);
+  }
+
   async health(): Promise<StorageHealth> {
     const schemaVersion = Number(
       this.meta("schema_version") ?? SQLITE_STORAGE_SCHEMA_VERSION,
@@ -3390,6 +3399,19 @@ export function validateStoredMatch(
       "stored_match_invalid",
       "Match-Record ist strukturell ungültig.",
     );
+  if (record.resultSnapshot) {
+    const resultSnapshot = record.resultSnapshot;
+    if (
+      resultSnapshot.schemaVersion !== "netgrid-match-result-v1" ||
+      resultSnapshot.matchId !== match.matchId ||
+      resultSnapshot.matchStatus !== match.status ||
+      (match.status !== "finished" && match.status !== "forfeited")
+    )
+      throw new StorageError(
+        "stored_match_invalid",
+        "Gespeichertes Match-Ergebnis ist strukturell ungültig.",
+      );
+  }
   if (
     !Array.isArray(record.sessions) ||
     !Array.isArray(record.tokens) ||

@@ -35,6 +35,7 @@ import {
   type ApiMatchCardPool,
   type ApiMatchFormat,
   type ApiMatchMode,
+  type ApiMatchResultSnapshot,
   type ApiMatchStartLobbyPayload,
   type ApiMatchStatus,
   type ApiSeriesPlayerSlot,
@@ -361,6 +362,7 @@ export type StoredMatch = {
   tokens: TokenRecord[];
   gameState: GameState;
   lifecycleResult?: LifecycleResultSummary;
+  resultSnapshot?: ApiMatchResultSnapshot;
   startLobby?: MatchStartLobbyState;
   privateDeckSnapshots?: {
     participants: Record<
@@ -410,6 +412,7 @@ export type MultiplayerStorage = {
   list?(): Promise<StoredMatch[]>;
   listOpenMatchCandidates?(): Promise<StoredMatch[]>;
   listPublicMatchCandidates?(): Promise<StoredMatch[]>;
+  listResultSnapshotCandidates?(): Promise<StoredMatch[]>;
   health?(): Promise<StorageHealth>;
   backup?(
     reason?: BackupManifest["reason"],
@@ -821,11 +824,13 @@ export class MultiplayerService {
   }
 
   private async persist(record: StoredMatch): Promise<void> {
+    ensureMatchResultSnapshot(record);
     await this.storage.save(record);
     for (const observer of this.persistenceObservers) await observer(record);
   }
 
   private async persistAction(record: StoredMatch): Promise<void> {
+    ensureMatchResultSnapshot(record);
     if (record.actionPersistenceBaseline && this.storage.saveActionDelta) {
       await this.storage.saveActionDelta(record);
     } else {
@@ -3239,15 +3244,28 @@ export class MultiplayerService {
   }
 
   async listRecentGameResults(limit = 20): Promise<RecentGameResultEntry[]> {
-    const records = this.storage.list ? await this.storage.list() : [];
+    const candidates = this.storage.listResultSnapshotCandidates
+      ? await this.storage.listResultSnapshotCandidates()
+      : this.storage.list
+        ? await this.storage.list()
+        : [];
+    const records: StoredMatch[] = [];
+    for (const candidate of candidates) {
+      if (candidate.resultSnapshot) {
+        records.push(candidate);
+        continue;
+      }
+      const record = await this.storage.load(candidate.match.matchId);
+      if (!record || !ensureMatchResultSnapshot(record)) continue;
+      await this.storage.save(record);
+      records.push(record);
+    }
     const normalizedLimit = Number.isFinite(limit) ? Math.floor(limit) : 20;
     const cappedLimit = Math.max(1, Math.min(50, normalizedLimit));
     const seriesGroups = new Map<string, StoredMatch[]>();
     const entries: RecentGameResultEntry[] = [];
-    for (const record of records.filter(
-      (candidate) =>
-        candidate.match.status === "finished" &&
-        Boolean(candidate.gameState?.winner),
+    for (const record of records.filter((candidate) =>
+      Boolean(candidate.resultSnapshot),
     )) {
       const seriesId = record.match.series?.seriesId;
       if (seriesId)
@@ -4146,6 +4164,7 @@ export class MultiplayerService {
         finalEngineStateHash,
       ),
     );
+    this.finalizeSeriesGame(record);
     this.revokeAllTokens(record, nowIso);
   }
 
@@ -6099,18 +6118,23 @@ function isHiddenInfoBarrier(event: GameEvent): boolean {
   return isHiddenInfoBarrierEvent(event);
 }
 
-function resultSummaryFor(
+function ensureMatchResultSnapshot(record: StoredMatch): boolean {
+  if (record.resultSnapshot) return false;
+  const snapshot = matchResultSnapshotFor(record);
+  if (!snapshot) return false;
+  record.resultSnapshot = snapshot;
+  return true;
+}
+
+function matchResultSnapshotFor(
   record: StoredMatch,
-  viewerSide: Side,
-  finalStateHash: string,
-): GameResultSummary | undefined {
+): ApiMatchResultSnapshot | undefined {
+  if (record.match.status !== "finished" && record.match.status !== "forfeited")
+    return undefined;
   const state = record.gameState;
   const winner =
-    record.lifecycleResult?.winnerSide ??
-    (record.match.status === "forfeited"
-      ? record.lifecycleResult?.winnerSide
-      : state?.winner);
-  if (!winner) return undefined;
+    record.lifecycleResult?.winnerSide ?? record.match.winner ?? state?.winner;
+  if (!state || !winner) return undefined;
   const runnerAgendaPoints = getPlayerView(state, "runner").own.agendaPoints;
   const corpAgendaPoints = getPlayerView(state, "corp").own.agendaPoints;
   const actionEvents = record.eventLog.filter(
@@ -6118,59 +6142,6 @@ function resultSummaryFor(
   );
   const countType = (type: string) =>
     actionEvents.filter((event) => event.publicPayload.type === type).length;
-  return {
-    winner,
-    ...(record.lifecycleResult?.winnerSide
-      ? { winnerSide: record.lifecycleResult.winnerSide }
-      : {}),
-    ...(record.lifecycleResult?.loserSide
-      ? { loserSide: record.lifecycleResult.loserSide }
-      : {}),
-    viewerOutcome:
-      winner === "draw" ? "draw" : winner === viewerSide ? "won" : "lost",
-    reason:
-      record.lifecycleResult?.reason === "forfeit" ||
-      record.lifecycleResult?.reason === "time_expired"
-        ? record.lifecycleResult.reason
-        : resultReason(
-            state,
-            winner,
-            runnerAgendaPoints,
-            corpAgendaPoints,
-            record.match.settings.agendaPointsToWin,
-          ),
-    matchFormat: record.match.settings.matchFormat,
-    agendaPointsToWin: record.match.settings.agendaPointsToWin,
-    runnerAgendaPoints,
-    corpAgendaPoints,
-    actionCount: actionEvents.length,
-    runCount: countType("start_run"),
-    successfulRunCount: countType("access_card"),
-    stolenAgendaCount: countType("steal_agenda"),
-    scoredAgendaCount: countType("score_agenda"),
-    startedAt: record.match.createdAt,
-    finishedAt: record.match.updatedAt,
-    finalStateHash,
-    ...(record.lifecycleResult?.finalEngineStateHash
-      ? { finalEngineStateHash: record.lifecycleResult.finalEngineStateHash }
-      : {}),
-    ...(record.match.series
-      ? { series: seriesSummaryFor(record, viewerSide) }
-      : {}),
-  };
-}
-
-function recentGameResultEntryFor(
-  record: StoredMatch,
-): RecentGameResultEntry | undefined {
-  const state = record.gameState;
-  const winner = state?.winner;
-  if (!state || !winner || record.match.status !== "finished") return undefined;
-  const runnerAgendaPoints = getPlayerView(state, "runner").own.agendaPoints;
-  const corpAgendaPoints = getPlayerView(state, "corp").own.agendaPoints;
-  const actionEvents = record.eventLog.filter(
-    (event) => event.publicPayload.type !== "game_created",
-  );
   const finalStateHash =
     record.lifecycleResult?.finalEngineStateHash ?? hashState(state);
   const runnerMatchPoints = singleGameMatchPointsFor(
@@ -6183,26 +6154,28 @@ function recentGameResultEntryFor(
     "corp",
     corpAgendaPoints,
   );
+  const lifecycleReason = record.lifecycleResult?.reason;
+  const reason: ApiGameResultReason =
+    lifecycleReason === "forfeit" || lifecycleReason === "time_expired"
+      ? lifecycleReason
+      : resultReason(
+          state,
+          winner,
+          runnerAgendaPoints,
+          corpAgendaPoints,
+          record.match.settings.agendaPointsToWin,
+        );
   return {
     schemaVersion: "netgrid-match-result-v1",
-    entryType: "single_game",
-    resultId: `match:${record.match.matchId}`,
     matchId: record.match.matchId,
-    isPublic: record.match.isPublic,
-    matchStatus: "finished",
+    matchStatus: record.match.status,
     matchMode: record.match.mode,
     matchFormat: record.match.settings.matchFormat,
     finishedAt: record.match.updatedAt,
     startedAt: record.match.createdAt,
     winner,
     ...(winner === "runner" || winner === "corp" ? { winnerSide: winner } : {}),
-    reason: resultReason(
-      state,
-      winner,
-      runnerAgendaPoints,
-      corpAgendaPoints,
-      record.match.settings.agendaPointsToWin,
-    ),
+    reason,
     runner: {
       displayName: publicDisplayNameForSide(record, "runner"),
       identityKind: identityKindForSide(record, "runner"),
@@ -6222,9 +6195,11 @@ function recentGameResultEntryFor(
         : {}),
     },
     actionCount: actionEvents.length,
-    runCount: actionEvents.filter(
-      (event) => event.publicPayload.type === "start_run",
-    ).length,
+    runCount: countType("start_run"),
+    agendaPointsToWin: record.match.settings.agendaPointsToWin,
+    successfulRunCount: countType("access_card"),
+    stolenAgendaCount: countType("steal_agenda"),
+    scoredAgendaCount: countType("score_agenda"),
     finalStateHash,
     ...(record.match.series
       ? {
@@ -6236,6 +6211,59 @@ function recentGameResultEntryFor(
           },
         }
       : {}),
+  };
+}
+
+function resultSummaryFor(
+  record: StoredMatch,
+  viewerSide: Side,
+  finalStateHash: string,
+): GameResultSummary | undefined {
+  ensureMatchResultSnapshot(record);
+  const snapshot = record.resultSnapshot;
+  if (!snapshot) return undefined;
+  const winner = snapshot.winner;
+  return {
+    winner,
+    ...(snapshot.winnerSide ? { winnerSide: snapshot.winnerSide } : {}),
+    ...(record.lifecycleResult?.loserSide
+      ? { loserSide: record.lifecycleResult.loserSide }
+      : {}),
+    viewerOutcome:
+      winner === "draw" ? "draw" : winner === viewerSide ? "won" : "lost",
+    reason: snapshot.reason,
+    matchFormat: snapshot.matchFormat,
+    agendaPointsToWin:
+      snapshot.agendaPointsToWin ?? record.match.settings.agendaPointsToWin,
+    runnerAgendaPoints: snapshot.runner.agendaPoints,
+    corpAgendaPoints: snapshot.corp.agendaPoints,
+    actionCount: snapshot.actionCount,
+    runCount: snapshot.runCount,
+    successfulRunCount: snapshot.successfulRunCount ?? 0,
+    stolenAgendaCount: snapshot.stolenAgendaCount ?? 0,
+    scoredAgendaCount: snapshot.scoredAgendaCount ?? 0,
+    startedAt: snapshot.startedAt,
+    finishedAt: snapshot.finishedAt,
+    finalStateHash: snapshot.finalStateHash || finalStateHash,
+    ...(record.lifecycleResult?.finalEngineStateHash
+      ? { finalEngineStateHash: record.lifecycleResult.finalEngineStateHash }
+      : {}),
+    ...(record.match.series
+      ? { series: seriesSummaryFor(record, viewerSide) }
+      : {}),
+  };
+}
+
+function recentGameResultEntryFor(
+  record: StoredMatch,
+): RecentGameResultEntry | undefined {
+  const snapshot = record.resultSnapshot;
+  if (!snapshot) return undefined;
+  return {
+    ...snapshot,
+    entryType: "single_game",
+    resultId: `match:${record.match.matchId}`,
+    isPublic: record.match.isPublic,
   };
 }
 

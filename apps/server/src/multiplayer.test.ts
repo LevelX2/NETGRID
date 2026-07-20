@@ -159,6 +159,88 @@ describe("recent match results", () => {
     expect(serialized).not.toContain("sessionToken");
     expect(serialized).not.toContain("reconnectToken");
     expect(serialized).not.toContain("tokenHash");
+
+    const cached = await storage.load(finished.match.matchId);
+    expect(cached?.resultSnapshot).toMatchObject({
+      schemaVersion: "netgrid-match-result-v1",
+      matchId: finished.match.matchId,
+      winner: "runner",
+      actionCount: expect.any(Number),
+      finalStateHash: expect.any(String),
+    });
+    let fullLoadCount = 0;
+    const cacheOnlyStorage: MultiplayerStorage = {
+      load: async () => {
+        fullLoadCount += 1;
+        return undefined;
+      },
+      save: async () => undefined,
+      listResultSnapshotCandidates: async () => (cached ? [cached] : []),
+    };
+    const cacheOnlyService = new MultiplayerService(cacheOnlyStorage, {
+      tokenSalt: "recent-results-cache-only",
+    });
+    expect(await cacheOnlyService.listRecentGameResults(20)).toHaveLength(1);
+    expect(fullLoadCount).toBe(0);
+  });
+
+  it("backfills a historical SQLite result once and reuses its compact snapshot", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "netgrid-result-backfill-"));
+    const storage = new SqliteMatchStorage({
+      dbPath: join(dir, "netgrid.sqlite"),
+      backupDir: join(dir, "backups"),
+    });
+    try {
+      const service = new MultiplayerService(storage, {
+        tokenSalt: "result-backfill-test",
+        now: () => "2026-05-27T13:00:00.000Z",
+      });
+      const created = await service.createMatch({
+        hostSide: "runner",
+        playMode: "human_vs_ai",
+        humanSide: "runner",
+        seed: "historical-result-backfill",
+      });
+      const historical = await storage.load(created.matchId);
+      if (!historical?.gameState)
+        throw new Error("Missing historical test match");
+      historical.gameState.winner = "runner";
+      historical.match.status = "finished";
+      historical.match.winner = "runner";
+      historical.match.updatedAt = "2026-05-27T13:10:00.000Z";
+      delete historical.resultSnapshot;
+      await storage.save(historical);
+
+      expect(
+        (await storage.listResultSnapshotCandidates())[0]?.resultSnapshot,
+      ).toBeUndefined();
+      expect(await service.listRecentGameResults(20)).toHaveLength(1);
+
+      const compact = (await storage.listResultSnapshotCandidates())[0];
+      expect(compact?.resultSnapshot).toMatchObject({
+        matchId: created.matchId,
+        matchStatus: "finished",
+        winner: "runner",
+      });
+      expect(compact?.eventLog).toEqual([]);
+
+      let fullLoadCount = 0;
+      const cachedStorage: MultiplayerStorage = {
+        load: async () => {
+          fullLoadCount += 1;
+          return undefined;
+        },
+        save: async () => undefined,
+        listResultSnapshotCandidates: async () => (compact ? [compact] : []),
+      };
+      expect(
+        await new MultiplayerService(cachedStorage).listRecentGameResults(20),
+      ).toHaveLength(1);
+      expect(fullLoadCount).toBe(0);
+    } finally {
+      storage.close();
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 
   it("aggregates finished side-swap series into one recent result with match points", async () => {

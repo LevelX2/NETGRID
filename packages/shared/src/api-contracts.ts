@@ -305,6 +305,10 @@ export type ApiMatchResultSnapshot = {
   };
   actionCount: number;
   runCount: number;
+  agendaPointsToWin?: number;
+  successfulRunCount?: number;
+  stolenAgendaCount?: number;
+  scoredAgendaCount?: number;
   finalStateHash: string;
   series?: {
     seriesId: string;
