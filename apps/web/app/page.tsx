@@ -494,7 +494,14 @@ type AiDeckPolicy =
   | "seeded_random"
   | "same_as_participant_a";
 type AiTraceStartMode = "off" | "detailed";
-type EntryTab = "play" | "games" | "catalog" | "decks" | "recent" | "options" | "account";
+type EntryTab =
+  | "play"
+  | "games"
+  | "catalog"
+  | "decks"
+  | "recent"
+  | "options"
+  | "account";
 type DeckSideFilter = Side | "all";
 type RunOverlayPositionPreference = OverlayPositionPreference;
 

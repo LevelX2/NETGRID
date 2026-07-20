@@ -11973,8 +11973,16 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(gameState.activeSide).toBe("runner");
     expect(gameState.timingPoint).toBe("run.jack_out_window");
-    expect(getLegalActions(gameState, "runner").map((action) => action.type).sort()).toEqual(["continue_run", "jack_out"]);
-    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "continue_run");
+    expect(
+      getLegalActions(gameState, "runner")
+        .map((action) => action.type)
+        .sort(),
+    ).toEqual(["continue_run", "jack_out"]);
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(gameState.activeSide).toBe("corp");
     expect(gameState.timingPoint).toBe("run.movement_rez_window");
     expect(getLegalActions(gameState, "runner")).toEqual([]);

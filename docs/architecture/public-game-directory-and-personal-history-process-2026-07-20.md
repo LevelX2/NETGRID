@@ -1,6 +1,6 @@
 # Öffentliche Spieleübersicht und persönliche Spielhistorie
 
-Status: vorbereitet
+Status: abgeschlossen
 Stand: 2026-07-20
 Arbeitsbranch: `codex/public-game-directory`
 Arbeits-Worktree: `C:\Projekte\NETGRID_PUBLIC_GAME_DIRECTORY`
@@ -317,3 +317,22 @@ Cleanup ab.
 - Branch ist lokal nach `main` integriert.
 - Worktree und Branch sind verifiziert entfernt.
 - Das `/Goal` ist erst danach `complete`.
+
+## Abschlussnachweis
+
+Die Pakete wurden sequenziell mit folgenden Commits umgesetzt:
+
+| Paket    | Commit        | Ergebnis                                                  |
+| -------- | ------------- | --------------------------------------------------------- |
+| GAME-001 | `bd136047e`   | Verträge und Filtersemantik festgelegt                    |
+| GAME-002 | `8558f379f`   | immutable Ergebnis-Snapshots und Backfill umgesetzt       |
+| GAME-003 | `d205ba1ea`   | kompakte öffentliche Spieleübersicht umgesetzt            |
+| GAME-004 | `b3398b1a0`   | accountgebundene persönliche Historie umgesetzt           |
+| GAME-005 | `37c7fd067`   | Spielebereich, Filter und direkte Aktionen umgesetzt      |
+| GAME-006 | dieser Commit | E2E, Performance, Negativspuren und Reviews abgeschlossen |
+
+Der Bestandslauf migrierte 21/21 Matches zu öffentlich und ergänzte 19/19
+fehlende terminale Ergebnis-Snapshots. Nach dem einmaligen kalten Abruf von
+6.789 ms lagen fünf warme Abrufe bei 73, 14, 13, 12 und 12 ms. Details,
+Sicherheitsnachweise und Gates stehen in
+`docs/reviews/public-game-directory-and-personal-history-final-review-2026-07-20.md`.

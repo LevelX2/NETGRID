@@ -71,6 +71,17 @@ verifizierten Frames. Führend sind
 `docs/architecture/public-match-spectator-replay-process-2026-07-20.md` und
 `docs/reviews/public-match-spectator-replay-final-review-2026-07-20.md`.
 
+Der dauerhafte Bereich `Spiele` stellt diese öffentlichen Matches in der
+Reihenfolge Offen, Laufend, Abgeschlossen mit passenden Filtern und direkten
+Aktionen bereit. `Meine Spiele` verwendet dagegen ausschließlich die
+authentifizierte Account-Teilnehmerbindung und darf dadurch auch eigene
+private Matches zeigen, niemals aber fremde. Terminale Ergebnisse werden
+einmal als immutable Snapshots gespeichert; nach dem historischen Backfill
+lesen Listen nur noch kompakte Matchzeilen. Der gemessene Bestandslauf
+ergänzte 19/19 Snapshots, fünf warme öffentliche Abrufe lagen bei 73 bis
+12 ms. Führend ist
+`docs/reviews/public-game-directory-and-personal-history-final-review-2026-07-20.md`.
+
 ## Geschlossene Account- und Deck-Alpha
 
 Die erste V2.0-Benutzerstufe ist als geschlossene Passwort-Alpha umgesetzt.

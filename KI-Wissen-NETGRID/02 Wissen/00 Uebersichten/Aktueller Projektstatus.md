@@ -24,6 +24,14 @@ Stand: 2026-07-20
   Gegnerhandfenster zeigt im Replay die jeweils andere Hand. Alle vorhandenen
   Matches werden einmalig rückwirkend öffentlich normalisiert; der Auditstand
   beträgt 21/21 öffentliche und 19/19 replayfähige terminale Matches.
+- Der globale Bereich `Spiele` ordnet diese öffentlichen Matches als offen,
+  laufend und abgeschlossen, filtert nach diesen Zuständen und führt direkt
+  zu Beitritt, Zuschaueransicht oder Replay. `Meine Spiele` ist davon getrennt
+  und liefert nur serverseitig gebundene Matches des angemeldeten Accounts,
+  einschließlich eigener privater Partien. Abgeschlossene Ergebnisse liegen
+  als immutable Snapshots in der kompakten Matchzeile; warme Listenabrufe
+  hydrieren keine vollständigen Historien mehr. Führend ist
+  `docs/reviews/public-game-directory-and-personal-history-final-review-2026-07-20.md`.
 
 ## Engine und Karten
 
