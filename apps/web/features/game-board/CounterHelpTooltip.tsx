@@ -7,6 +7,7 @@ export function CounterHelpTooltipTrigger({
   className,
   tooltip,
   ariaLabel,
+  onVisibilityChange,
   role,
   "data-testid": testId
 }: {
@@ -14,6 +15,7 @@ export function CounterHelpTooltipTrigger({
   className: string;
   tooltip: string;
   ariaLabel: string;
+  onVisibilityChange?(visible: boolean): void;
   role?: string;
   "data-testid"?: string;
 }) {
@@ -32,10 +34,12 @@ export function CounterHelpTooltipTrigger({
     setTooltipStyle({ left, top, width });
     setPinned(pin);
     setVisible(true);
+    onVisibilityChange?.(true);
   };
   const hideTooltip = () => {
     setPinned(false);
     setVisible(false);
+    onVisibilityChange?.(false);
   };
   return (
     <span
@@ -55,12 +59,17 @@ export function CounterHelpTooltipTrigger({
         showTooltip(event.currentTarget, true);
       }}
       onPointerEnter={(event) => {
+        event.stopPropagation();
         if (event.pointerType !== "touch") showTooltip(event.currentTarget);
       }}
-      onPointerLeave={() => {
-        if (!pinned) setVisible(false);
+      onPointerLeave={(event) => {
+        event.stopPropagation();
+        if (!pinned) hideTooltip();
       }}
-      onFocus={(event) => showTooltip(event.currentTarget)}
+      onFocus={(event) => {
+        event.stopPropagation();
+        showTooltip(event.currentTarget);
+      }}
       onBlur={hideTooltip}
     >
       {children}

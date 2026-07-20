@@ -117,7 +117,15 @@ export function RunStrengthBadge({ strength }: { strength: number }) {
   );
 }
 
-export function CounterDisplayBadge({ display, scoreState }: { display: NonNullable<VisibleCard["counterDisplays"]>[number]; scoreState: boolean }) {
+export function CounterDisplayBadge({
+  display,
+  scoreState,
+  onHelpTooltipVisibilityChange,
+}: {
+  display: NonNullable<VisibleCard["counterDisplays"]>[number];
+  scoreState: boolean;
+  onHelpTooltipVisibilityChange?(visible: boolean): void;
+}) {
   const amount = safeCounterDisplayAmount(display.amount);
   if (amount <= 0) return null;
   if (display.displayKind === "stored_credits") {
@@ -162,6 +170,9 @@ export function CounterDisplayBadge({ display, scoreState }: { display: NonNulla
         ariaLabel={display.ariaLabel}
         data-testid="variable-subroutine-badge"
         tooltip={counterDisplayTooltipText(display)}
+        {...(onHelpTooltipVisibilityChange
+          ? { onVisibilityChange: onHelpTooltipVisibilityChange }
+          : {})}
       >
         <SubroutineIcon />
         <span>{amount}</span>
@@ -199,7 +210,15 @@ export function CounterDisplayBadge({ display, scoreState }: { display: NonNulla
           ? "ablative-counter-badge"
           : "counter-display-badge";
   return (
-    <CounterHelpTooltipTrigger className={className} ariaLabel={display.ariaLabel} data-testid={testId} tooltip={counterDisplayTooltipText(display)}>
+    <CounterHelpTooltipTrigger
+      className={className}
+      ariaLabel={display.ariaLabel}
+      data-testid={testId}
+      tooltip={counterDisplayTooltipText(display)}
+      {...(onHelpTooltipVisibilityChange
+        ? { onVisibilityChange: onHelpTooltipVisibilityChange }
+        : {})}
+    >
       {counterDisplayBadgeText(display, amount)}
     </CounterHelpTooltipTrigger>
   );

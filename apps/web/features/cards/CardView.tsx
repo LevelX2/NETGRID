@@ -374,6 +374,16 @@ export function CardView({
     }, CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS);
   };
 
+  const setCounterHelpTooltipActive = (active: boolean) => {
+    clearTooltipOpenTimer();
+    clearTooltipCloseTimer();
+    setSuppressCardTooltip(active);
+    if (active) {
+      setTooltipHoverVisible(false);
+      setTooltipFocusVisible(false);
+    }
+  };
+
   useEffect(() => {
     tooltipPinnedVisibleRef.current = tooltipPinnedVisible;
   }, [tooltipPinnedVisible]);
@@ -630,6 +640,18 @@ export function CardView({
           if (event.pointerType === "touch") return;
           scheduleTooltipOpen();
         }}
+        onPointerMove={(event) => {
+          if (event.pointerType === "touch") return;
+          const target = event.target;
+          if (target instanceof Element && target.closest(".counterHelpTooltipTrigger")) return;
+          if (suppressCardTooltip) setSuppressCardTooltip(false);
+          if (!tooltipAvailable || tooltipHoverVisible || tooltipOpenTimerRef.current !== null) return;
+          clearTooltipCloseTimer();
+          tooltipOpenTimerRef.current = setTimeout(() => {
+            tooltipOpenTimerRef.current = null;
+            setTooltipHoverVisible(true);
+          }, hoverOpenDelayMs);
+        }}
         onPointerUp={(event) => {
           if (event.pointerType !== "touch" || !canPinTooltip) return;
           const now = Date.now();
@@ -714,7 +736,12 @@ export function CardView({
         {aiBoonRunStrength !== null ? <RunStrengthBadge strength={aiBoonRunStrength} /> : null}
         {strengthModifier !== null ? <StrengthModifierBadge amount={strengthModifier} /> : null}
         {renderedCounterDisplays.map((display) => (
-          <CounterDisplayBadge key={`${card.instanceId}-counter-display-${display.id}`} display={display} scoreState={showScoreStateBadges} />
+          <CounterDisplayBadge
+            key={`${card.instanceId}-counter-display-${display.id}`}
+            display={display}
+            scoreState={showScoreStateBadges}
+            onHelpTooltipVisibilityChange={setCounterHelpTooltipActive}
+          />
         ))}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
       </button>
