@@ -19268,8 +19268,8 @@
     }
   },
   "expectation": {
-    "contractKind": "equivalence_only",
-    "acceptableActions": [
+    "contractKind": "correctness",
+    "forbiddenActions": [
       {
         "actionId": "corp.install_card.corp_onr_v1_191_black-ice-quality-assurance_1.remote_1.corp_onr_v1_191_black-ice-quality-assurance_1"
       }

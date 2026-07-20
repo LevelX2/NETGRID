@@ -487,7 +487,27 @@ export function corpRemoteProtectionPath(
       action.type === "install_card" &&
       action.payload?.placement !== "ice" &&
       source !== undefined &&
-      visibleCorpRootProvidesRemoteProtection(source)
+      visibleCorpRootProvidesRemoteProtection(source, {
+        zone: "root",
+        state: "after_install",
+        ...(server ? { server } : {}),
+        serverId,
+        runnerTags: input.playerView.opponent.tags,
+      })
+    ) {
+      immediateActionIds.push(action.actionId);
+      continue;
+    }
+    if (
+      action.type === "rez_card" &&
+      source !== undefined &&
+      visibleCorpRootProvidesRemoteProtection(source, {
+        zone: "root",
+        state: "after_rez",
+        ...(server ? { server } : {}),
+        serverId,
+        runnerTags: input.playerView.opponent.tags,
+      })
     ) {
       immediateActionIds.push(action.actionId);
     }

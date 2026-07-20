@@ -244,7 +244,21 @@ Commit: `docs(ai): close seed01 seed09 seed02 hardening`
   - Seed 01/196, 278, 347 und Seed 09/290 grün; 188 fokussierte Tests,
     zusätzliche erreichbare/Unknown-ICE/Bypass/Replacement/Commitment-
     Gegenproben, Engine- und AI-Typecheck sowie `format:changed` grün.
-- Paket 2: in Arbeit
-- Paket 3: offen
+- Paket 2: abgeschlossen
+  - der Remote-Schutz-Consumer bewertet Hint-Effekte jetzt mit explizitem
+    Zonen- und Zustandskontext (`root`/`score_area`, aktuell/nach Install/nach
+    Rez) statt zonenblind;
+  - Agenda-Effekte können aus einem installierten Root keine aktive
+    Schutzwirkung liefern; der persistente Modifier von Black Ice Quality
+    Assurance bleibt im Score-Bereich erhalten und sein Hint trägt die
+    bestehende Ontologiebedingung `requires_scored_agenda`;
+  - persistente Asset-/Upgrade-Wirkung zählt erst im aktiven Rez-Zustand,
+    während echte On-Access-Fallen weiterhin unrezzed als defensive Wirkung
+    gelten; advancement- und tagabhängige Voraussetzungen werden dabei
+    geprüft;
+  - Seed 02/181 sowie ungescorte/gescorte Agenda-, Upgrade-, On-Access- und
+    Advancement-Gegenproben grün; 146 fokussierte Tests,
+    Hint-Metadatenvertrag und AI-Typecheck grün.
+- Paket 3: in Arbeit
 - Paket 4: offen
 - Main-Merge und Cleanup: offen

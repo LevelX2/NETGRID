@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 
 import { createAiHintsByCard } from "../ai-hints";
+import type { AiHintStructuredEffect } from "../hint-ontology";
 import { mergedPublicHistory } from "./public-event-history";
 import { rolesMatch } from "./role-match";
 
@@ -12,6 +13,14 @@ type CorpRemoteLike = {
   id: string;
   ice: readonly VisibleCard[];
   root: readonly VisibleCard[];
+};
+
+export type CorpRemoteProtectionActivationContext = {
+  zone: "root" | "score_area";
+  state: "current" | "after_install" | "after_rez";
+  server?: CorpRemoteLike;
+  serverId?: string;
+  runnerTags?: number;
 };
 
 export type CorpObservedRemoteReachability = {
@@ -82,7 +91,17 @@ export function semanticRuntimeCorpObservedRemoteReachability(
       ],
     };
   }
-  if (server.root.some(visibleCorpRootProvidesRemoteProtection)) {
+  if (
+    server.root.some((card) =>
+      visibleCorpRootProvidesRemoteProtection(card, {
+        zone: "root",
+        state: "current",
+        server,
+        serverId,
+        runnerTags: input.playerView.opponent.tags,
+      }),
+    )
+  ) {
     return {
       applies: false,
       successfulAccessEvents: successfulEvents.length,
@@ -108,28 +127,111 @@ export function semanticRuntimeCorpObservedRemoteReachability(
 
 export function visibleCorpRootProvidesRemoteProtection(
   card: VisibleCard,
+  context: CorpRemoteProtectionActivationContext = {
+    zone: "root",
+    state: "current",
+  },
 ): boolean {
   if (card.known === false || !card.definitionId) return false;
   const hint = AI_HINTS_BY_CARD.get(card.definitionId);
-  const roles = [...(hint?.roles ?? []), ...(hint?.planRoles ?? [])];
+  if (!hint) return false;
+  if (!protectionConditionsCanBeMet(card, hint.conditions ?? [], context)) {
+    return false;
+  }
+  if (context.zone === "score_area") {
+    return (
+      card.type === "agenda" &&
+      (hint.effects ?? []).some(
+        (effect) =>
+          effect.kind === "remote_protection" && effect.timing === "persistent",
+      )
+    );
+  }
+  if (card.type === "agenda") return false;
+
+  const effects = hint.effects ?? [];
   if (
+    effects.some((effect) => activeRootProtectionEffect(card, effect, context))
+  ) {
+    return true;
+  }
+  const roles = [...(hint?.roles ?? []), ...(hint?.planRoles ?? [])];
+  return (
+    rootCardIsRezzedAfterTransition(card, context) &&
     rolesMatch(roles, [
       "agenda_steal_tax",
       "remote_agenda_protection",
       "remote_upgrade_tax",
       "protect_remote",
     ])
-  ) {
-    return true;
-  }
-  return (
-    hint?.effects?.some(
-      (effect) =>
-        effect.kind === "remote_protection" ||
-        (effect.kind === "run_tax" && effect.timing === "on_access"),
-    ) === true
   );
 }
+
+function activeRootProtectionEffect(
+  card: VisibleCard,
+  effect: AiHintStructuredEffect,
+  context: CorpRemoteProtectionActivationContext,
+): boolean {
+  if (effect.timing === "on_access") {
+    return accessProtectionEffectKinds.has(effect.kind);
+  }
+  if (effect.kind !== "remote_protection") return false;
+  return rootCardIsRezzedAfterTransition(card, context);
+}
+
+function rootCardIsRezzedAfterTransition(
+  card: VisibleCard,
+  context: CorpRemoteProtectionActivationContext,
+): boolean {
+  return card.rezzed === true || context.state === "after_rez";
+}
+
+function protectionConditionsCanBeMet(
+  card: VisibleCard,
+  conditions: readonly { kind: string }[],
+  context: CorpRemoteProtectionActivationContext,
+): boolean {
+  for (const condition of conditions) {
+    switch (condition.kind) {
+      case "requires_scored_agenda":
+        if (context.zone !== "score_area" || card.type !== "agenda") {
+          return false;
+        }
+        break;
+      case "requires_advancement_counter":
+        if ((card.advancementCounters ?? 0) <= 0) return false;
+        break;
+      case "requires_installed_ice":
+        if (!context.server?.ice.length) return false;
+        break;
+      case "requires_rezzed_ice":
+        if (!context.server?.ice.some((ice) => ice.rezzed === true)) {
+          return false;
+        }
+        break;
+      case "requires_remote_server":
+        if (!context.serverId?.startsWith("remote_")) return false;
+        break;
+      case "requires_runner_tagged":
+        if ((context.runnerTags ?? 0) <= 0) return false;
+        break;
+    }
+  }
+  return true;
+}
+
+const accessProtectionEffectKinds = new Set<AiHintStructuredEffect["kind"]>([
+  "access_punish",
+  "access_replacement",
+  "ambush",
+  "damage",
+  "hardware_trash",
+  "program_trash",
+  "remote_protection",
+  "run_tax",
+  "tag_punish_payoff",
+  "tag_source",
+]);
 
 function remotePathChangeEvent(event: PublicGameEvent): boolean {
   const actionType = publicActionType(event);

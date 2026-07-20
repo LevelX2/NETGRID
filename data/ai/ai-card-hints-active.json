@@ -15837,6 +15837,11 @@
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_191_black-ice-quality-assurance",
       "cardType": "agenda",
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        }
+      ],
       "effects": [
         {
           "amount": 2,
