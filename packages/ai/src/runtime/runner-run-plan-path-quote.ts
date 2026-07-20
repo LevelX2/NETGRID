@@ -2,17 +2,27 @@ import type {
   AiDecisionInput,
   LegalAction,
   VisibleCard,
+  VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
 
 import { createAiHintsByCard } from "../ai-hints";
 import {
+  assessKnownRezzedIcePath,
   canBreakerDefinitionBreakIce,
   cardDefinitionStrength,
   creditsToBreakEndTheRunSubroutinesWithBreaker,
   endTheRunSubroutineCount,
   minimumCreditsToBreakEndTheRunSubroutines,
+  runnerRunPathCreditBudgetWithVisiblePools,
   visibleDeflectorSubroutineCanResolve,
 } from "../visible-run-analysis";
+import { quoteRunnerRunRoute } from "../run-analysis/runner-run-route-quote";
+import {
+  traceBaseStrengthForVisibleSubroutine,
+  traceSuccessEffectForVisibleSubroutine,
+  visibleRunnerTraceSupport,
+  visibleTraceAvoidanceForBaseStrength,
+} from "../run-analysis/visible-run-hazards";
 import { actionCreditCost } from "./action-cost";
 import {
   currentEncounteredIceCard,
@@ -126,8 +136,7 @@ export function quoteRunnerRunPath(
   const encounterBudget = runnerEncounterCreditBudgetForInput(input);
   const restrictedCreditPotential = iceQuotes.reduce(
     (sum, quote) =>
-      sum +
-      (quote.cheapestAccessPreservingSequence?.restrictedCreditCost ?? 0),
+      sum + (quote.cheapestAccessPreservingSequence?.restrictedCreditCost ?? 0),
     0,
   );
   const availableRestrictedCredits =
@@ -156,7 +165,41 @@ export function quoteRunnerRunPath(
         subroutineRequiresBreak(subroutine.threatClass),
       ),
   );
-  const canReachAccess = !blockedQuote && !reserveViolation;
+  const sharedPathIce = currentEncounter
+    ? [
+        currentEncounter,
+        ...serverIce.filter(
+          (ice) => ice.instanceId !== currentEncounter.instanceId,
+        ),
+      ]
+    : serverIce;
+  const unknownIceCount = sharedPathIce.filter(
+    (ice) => !ice.known || ice.rezzed === false,
+  ).length;
+  const sharedPathGeneralCredits =
+    input.playerView.own.credits +
+    Math.max(0, input.playerView.run?.badPublicityCredits ?? 0);
+  const sharedPathAssessment = assessKnownRezzedIcePath(
+    sharedPathIce,
+    input.playerView.own.rig ?? [],
+    runnerRunPathCreditBudgetWithVisiblePools(
+      sharedPathGeneralCredits,
+      input.playerView.own.rig ?? [],
+    ),
+    server?.root ?? [],
+    input.playerView.opponent.credits,
+    visibleDeflectorContextForInput(input),
+  );
+  const routeQuote = quoteRunnerRunRoute({
+    path: sharedPathAssessment,
+    availableCredits: sharedPathGeneralCredits,
+    unknownIceCount,
+    runnerGripCount: input.playerView.own.gripOrHq.length,
+  });
+  const canReachAccess =
+    !blockedQuote &&
+    !reserveViolation &&
+    routeQuote.reachability !== "no_access";
   return {
     server: serverId,
     quoteStatus: unknownVisibleIce ? "partially_known" : "known_complete",
@@ -166,6 +209,10 @@ export function quoteRunnerRunPath(
     expectedRemainingCredits,
     reserveViolation,
     canReachAccess,
+    accessStatus: routeQuote.reachability,
+    guaranteedKnownCost: routeQuote.guaranteedKnownCost,
+    routeEffects: routeQuote.effects,
+    conditionalReasons: routeQuote.conditionalReasons,
     ...(!canReachAccess
       ? {
           cannotReachReason: blockedQuote
@@ -335,7 +382,14 @@ function cheapestCurrentEncounterSequence(params: {
     requiredSubroutineIndexes,
     evidence: futurePathEvidence,
   });
-  return [directBreak, pumpBreak]
+  const traceRoute = cheapestTraceAccessSequence({
+    input,
+    plan,
+    ice,
+    requiredSubroutineIndexes,
+    currentEncounter: true,
+  });
+  return [directBreak, pumpBreak, traceRoute]
     .filter(
       (sequence): sequence is RunnerRunEncounterActionSequence =>
         sequence !== undefined && sequence.preservesAccessObjective,
@@ -395,8 +449,9 @@ function cheapestKnownIceSequence(params: {
 }): RunnerRunEncounterActionSequence | undefined {
   const { input, plan, ice } = params;
   if (!ice.known || ice.rezzed === false || !ice.definitionId) return undefined;
-  const accessThreatCount = accessPreservingThreatCount(input, ice);
-  if (accessThreatCount <= 0) return undefined;
+  const requiredSubroutineIndexes = knownRequiredSubroutineIndexes(input, ice);
+  if (requiredSubroutineIndexes.size <= 0) return undefined;
+  const accessThreatCount = requiredSubroutineIndexes.size;
   const assessment = minimumCreditsToBreakEndTheRunSubroutines(
     iceBreakEstimateInput(ice),
     input.playerView.own.rig ?? [],
@@ -404,21 +459,153 @@ function cheapestKnownIceSequence(params: {
     new Map(),
     ice.effectiveRunQuote?.breakSubroutineAdditionalCostPerSubroutine ?? 0,
   );
-  if (!assessment) return undefined;
-  return sequenceForActions({
-    actions: [],
-    totalCost: assessment.cost,
-    estimatedBreakCost: assessment.cost,
-    estimatedBreakBreakerId: assessment.breakerInstanceId,
-    usesPump: false,
-    usesBreak: true,
-    evidence: [
-      "known_ice_estimated_break_sequence:true",
-      `breaker:${assessment.breakerInstanceId}`,
-    ],
-    plan,
+  const breakRoute = assessment
+    ? sequenceForActions({
+        actions: [],
+        totalCost: assessment.cost,
+        estimatedBreakCost: assessment.cost,
+        estimatedBreakBreakerId: assessment.breakerInstanceId,
+        usesPump: false,
+        usesBreak: true,
+        evidence: [
+          "known_ice_estimated_break_sequence:true",
+          `breaker:${assessment.breakerInstanceId}`,
+        ],
+        plan,
+        input,
+      })
+    : undefined;
+  const traceRoute = cheapestTraceAccessSequence({
     input,
+    plan,
+    ice,
+    requiredSubroutineIndexes,
+    currentEncounter: false,
   });
+  return [breakRoute, traceRoute]
+    .filter(
+      (sequence): sequence is RunnerRunEncounterActionSequence =>
+        sequence !== undefined && sequence.preservesAccessObjective,
+    )
+    .sort(
+      (left, right) =>
+        left.totalCost - right.totalCost ||
+        (left.usesTrace === right.usesTrace ? 0 : left.usesTrace ? 1 : -1),
+    )[0];
+}
+
+function cheapestTraceAccessSequence(params: {
+  input: AiDecisionInput;
+  plan: RunnerRunPlan;
+  ice: VisibleCard;
+  requiredSubroutineIndexes: ReadonlySet<number>;
+  currentEncounter: boolean;
+}): RunnerRunEncounterActionSequence | undefined {
+  const quote = params.ice.effectiveRunQuote;
+  if (!quote || params.requiredSubroutineIndexes.size <= 0) return undefined;
+  const requiredSubroutines = [...params.requiredSubroutineIndexes]
+    .sort((left, right) => left - right)
+    .map((index) => ({ index, subroutine: quote.subroutines[index] }))
+    .filter(
+      (
+        entry,
+      ): entry is {
+        index: number;
+        subroutine: VisibleEffectiveSubroutine;
+      } => entry.subroutine !== undefined,
+    );
+  if (
+    requiredSubroutines.length !== params.requiredSubroutineIndexes.size ||
+    requiredSubroutines.some(
+      ({ subroutine }) => subroutine.type !== "initiate_trace",
+    )
+  ) {
+    return undefined;
+  }
+
+  const continueAction = params.currentEncounter
+    ? encounterContinueAction(params.input)
+    : undefined;
+  if (params.currentEncounter && !continueAction) return undefined;
+  let remainingGeneralCredits =
+    params.input.playerView.own.credits +
+    Math.max(0, params.input.playerView.run?.badPublicityCredits ?? 0);
+  let guaranteedTraceCost = 0;
+  const acceptedEffectTypes: string[] = [];
+  for (const { index, subroutine } of requiredSubroutines) {
+    const effect = traceSuccessEffectForVisibleSubroutine(
+      quote,
+      subroutine,
+      index,
+    );
+    if (!traceEffectRequiresAccessGuarantee(params.input, effect)) {
+      if (effect && effect.type !== "none")
+        acceptedEffectTypes.push(effect.type);
+      continue;
+    }
+    const baseStrength = traceBaseStrengthForVisibleSubroutine(
+      quote,
+      subroutine,
+      index,
+    );
+    if (baseStrength === undefined) return undefined;
+    const support = visibleRunnerTraceSupport(
+      params.input.playerView.own.rig ?? [],
+      remainingGeneralCredits,
+    );
+    const guarantee = visibleTraceAvoidanceForBaseStrength(
+      baseStrength + Math.max(0, params.input.playerView.opponent.credits),
+      support,
+    ).cheapestAffordableSafe;
+    if (!guarantee) return undefined;
+    guaranteedTraceCost += guarantee.creditCost;
+    remainingGeneralCredits = Math.max(
+      0,
+      remainingGeneralCredits - guarantee.creditCost,
+    );
+  }
+  const actions = continueAction ? [continueAction] : [];
+  return sequenceForActions({
+    actions,
+    totalCost:
+      actions.reduce((sum, action) => sum + actionCreditCost(action), 0) +
+      guaranteedTraceCost,
+    usesPump: false,
+    usesBreak: false,
+    usesTrace: true,
+    riskTags: acceptedEffectTypes.map(
+      (effectType) => `accepted_visible_trace_effect:${effectType}`,
+    ),
+    evidence: [
+      params.currentEncounter
+        ? "current_encounter_trace_route:true"
+        : "known_ice_estimated_trace_route:true",
+      `trace_route_guaranteed_cost:${guaranteedTraceCost}`,
+      `trace_route_visible_corp_credits:${Math.max(0, params.input.playerView.opponent.credits)}`,
+      ...acceptedEffectTypes.map(
+        (effectType) => `trace_route_accepts_effect:${effectType}`,
+      ),
+    ],
+    plan: params.plan,
+    input: params.input,
+  });
+}
+
+function traceEffectRequiresAccessGuarantee(
+  input: AiDecisionInput,
+  effect: ReturnType<typeof traceSuccessEffectForVisibleSubroutine>,
+): boolean {
+  if (!effect || effect.type === "none") return false;
+  switch (effect.type) {
+    case "end_run_and_run_lock":
+    case "end_run_trash_program_and_run_lock":
+    case "end_run_trash_hardware_and_unpreventable_meat_damage":
+      return true;
+    case "net_damage":
+      return effect.amount >= input.playerView.own.gripOrHq.length;
+    default:
+      return false;
+  }
 }
 
 function cheapestDirectBreakSequence(params: {
@@ -585,6 +772,7 @@ function sequenceForActions(params: {
   preservesAccessObjective?: boolean;
   usesPump: boolean;
   usesBreak: boolean;
+  usesTrace?: boolean;
   riskTags?: string[];
   evidence: string[];
   plan: RunnerRunPlan;
@@ -659,6 +847,7 @@ function sequenceForActions(params: {
     creditsAfterSequence,
     usesPump: params.usesPump,
     usesBreak: params.usesBreak,
+    ...(params.usesTrace ? { usesTrace: true } : {}),
     usesBypass: false,
     usesPrevention: false,
     preservesAccessObjective:
@@ -1160,6 +1349,32 @@ function accessPreservingThreatCount(
     ).length;
   }
   return ice.definitionId ? endTheRunSubroutineCount(ice.definitionId) : 0;
+}
+
+function knownRequiredSubroutineIndexes(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+): Set<number> {
+  const quoted = ice.effectiveRunQuote?.subroutines;
+  if (quoted?.length) {
+    return new Set(
+      quoted.flatMap((subroutine, index) =>
+        subroutineRequiresBreak(threatClassForSubroutine(input, subroutine))
+          ? [index]
+          : [],
+      ),
+    );
+  }
+  return new Set(
+    Array.from(
+      {
+        length: ice.definitionId
+          ? endTheRunSubroutineCount(ice.definitionId)
+          : 0,
+      },
+      (_, index) => index,
+    ),
+  );
 }
 
 function visibleDeflectorContextForInput(input: AiDecisionInput) {

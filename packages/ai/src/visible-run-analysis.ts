@@ -389,11 +389,16 @@ function assessKnownRezzedIcePathInternal(
       effectIndex,
       { effect, sourceSubroutine },
     ] of runPathEffects.entries()) {
-      const unavoidableTraceRunLock = unbrokenEffectIsUnavoidableTraceRunLock(
-        effect,
-        sourceSubroutine,
-        creditBudget.credits,
-      );
+      const matchingTraceHazard = visibleHazardProjections.find(
+        ({ hazard }) => hazard.subroutineId === sourceSubroutine.id,
+      )?.hazard;
+      const unavoidableTraceRunLock = matchingTraceHazard?.preventsAccess
+        ? matchingTraceHazard.unavoidable
+        : unbrokenEffectIsUnavoidableTraceRunLock(
+            effect,
+            sourceSubroutine,
+            creditBudget.credits,
+          );
       const hardEffectKinds = hardUnbrokenRunEffectKinds(
         effect,
         futureIce.length,
@@ -436,7 +441,7 @@ function assessKnownRezzedIcePathInternal(
           }
           continue;
         }
-        return hardUnbrokenEffectBlockedPathAssessment({
+        const blockedAssessment = hardUnbrokenEffectBlockedPathAssessment({
           visibleBreakCost:
             visibleBreakCost + Math.max(0, breakAssessment?.cost ?? 0),
           creditsAfterPath:
@@ -460,6 +465,13 @@ function assessKnownRezzedIcePathInternal(
                 ? "later_ice_unaffordable_after_prior_ice_cost"
                 : "ice_unaffordable",
         });
+        return {
+          ...blockedAssessment,
+          ...visibleIceRunHazardSummary(
+            visibleIceRunHazards,
+            creditsAfterAvoidingVisibleIceHazards,
+          ),
+        };
       }
       const breakAssessment = options.allowBreakingRunPathEffects
         ? runPathEffectBreakAssessment({

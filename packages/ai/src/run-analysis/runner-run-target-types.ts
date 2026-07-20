@@ -7,6 +7,7 @@ import type { DeckCapabilityProfile } from "../deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/runner-hand-development-types";
 import type { VisibleIceRunHazard } from "./visible-run-analysis-contracts";
+import type { RunnerRunRouteQuote } from "./runner-run-route-quote";
 
 export const RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION =
   "runner-run-target-evaluation-v1" as const;
@@ -266,6 +267,7 @@ export type RunnerRunTargetEvaluation = {
   multiaccessAvailable: boolean;
   pathPassability: RunnerPathPassability;
   pathCost: number;
+  routeQuote?: RunnerRunRouteQuote;
   creditsAfterRun: number;
   unknownUnrezzedIceCount?: number;
   unrezzedIceRisk?: number;

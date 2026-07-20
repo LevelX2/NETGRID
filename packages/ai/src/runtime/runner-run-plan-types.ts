@@ -5,6 +5,10 @@ import type {
   ServerId,
   Side,
 } from "@netgrid/shared";
+import type {
+  RunnerRunRouteEffect,
+  RunnerRunRouteReachability,
+} from "../run-analysis/runner-run-route-quote";
 
 export type RunnerRunPlanServerId = Exclude<ServerId, "new_remote">;
 
@@ -119,6 +123,7 @@ export type RunnerRunEncounterActionSequence = {
   creditsAfterSequence: number;
   usesPump: boolean;
   usesBreak: boolean;
+  usesTrace?: boolean;
   usesBypass: boolean;
   usesPrevention: boolean;
   preservesAccessObjective: boolean;
@@ -200,6 +205,10 @@ export type RunnerRunPathQuote = {
   expectedRemainingCredits: number;
   reserveViolation: boolean;
   canReachAccess: boolean;
+  accessStatus?: RunnerRunRouteReachability;
+  guaranteedKnownCost?: number;
+  routeEffects?: RunnerRunRouteEffect[];
+  conditionalReasons?: string[];
   cannotReachReason?: string;
   requiredSequences: RunnerRunEncounterActionSequence[];
 };

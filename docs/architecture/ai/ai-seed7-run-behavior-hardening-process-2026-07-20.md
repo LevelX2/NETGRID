@@ -1,6 +1,6 @@
 # Seed-7-Run-Verhalten der KI härten
 
-Status: aktiv – Preflight
+Status: aktiv – Paket 1 abgeschlossen
 
 ## Quelle und Zielprüfung
 
@@ -222,9 +222,33 @@ Commit: `test(ai): harden seed7 run execution regressions`
 
 ## Fortschritt
 
-- Preflight: aktiv
-- Paket 1: ausstehend
+- Preflight: abgeschlossen (`e51431570`)
+- Paket 1: abgeschlossen
 - Paket 2: ausstehend
 - Paket 3: ausstehend
 - Paket 4: ausstehend
 - Final Verify, Merge und Cleanup: ausstehend
+
+## Paketnachweis
+
+### Paket 1
+
+- `RunnerRunRouteQuote` klassifiziert bekannte und unbekannte Pfade als
+  `guaranteed_access`, `conditional_access` oder `no_access` und führt
+  garantierte bekannte Kosten, Funding-Gap sowie sichtbare Effekte mit
+  Zeitpunkt und Access-/Flatline-Relevanz.
+- Die sichtbare Trace-Hazard-Projektion kennzeichnet End-the-run-Effekte
+  ausdrücklich. Der Pfad berücksichtigt dabei die maximale sichtbare
+  Corp-Gebotskapazität; die vorherige reine Base-Trace-Prüfung kann einen
+  bekannten Corp-Boost nicht mehr übersehen.
+- Die Plan-/Encounter-Quote vergleicht Breaker- und garantierte Trace-Route
+  und kann am Encounter über `continue_run` in die geplante Trace-Auflösung
+  gehen. Run-Credits werden dabei als während des Runs verfügbare allgemeine
+  Credits berücksichtigt.
+- Gegenproben: Seed-7-Zustand 168 = konditional, Garantie 5 bei 4 Credits;
+  Zustand 210 = bekannte Garantie 4 bei 6 Credits; Zustand 225 = konditional,
+  Garantie 7 bei 6 Credits. Unbekanntes äußeres ICE bleibt ausdrücklich
+  konditional; unvermeidbare Tags blockieren Access nicht pauschal; tödlicher
+  Trace-Schaden bleibt vor Access konditional.
+- Verifikation: vier fokussierte Testdateien mit 132 Tests, AI-Typecheck und
+  `git diff --check` grün.

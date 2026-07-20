@@ -9,6 +9,7 @@ import {
   type KnownRezzedIcePathAssessment,
 } from "./visible-run-analysis";
 import type { PublicGameEvent, VisibleCard } from "@netgrid/shared";
+import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
 
 function knownPathAssessment(
   overrides: Partial<KnownRezzedIcePathAssessment> = {},
@@ -675,6 +676,139 @@ describe("visible run analysis trace hazards", () => {
   });
 });
 
+describe("shared runner run route quote", () => {
+  it.each([
+    {
+      label: "Seed 7 state 168",
+      runnerCredits: 4,
+      corpCredits: 1,
+      expectedReachability: "conditional_access",
+      expectedGuaranteedCost: 5,
+      expectedFundingGap: 1,
+    },
+    {
+      label: "Seed 7 state 210",
+      runnerCredits: 6,
+      corpCredits: 0,
+      expectedReachability: "guaranteed_access",
+      expectedGuaranteedCost: 4,
+      expectedFundingGap: 0,
+    },
+    {
+      label: "Seed 7 state 225",
+      runnerCredits: 6,
+      corpCredits: 3,
+      expectedReachability: "conditional_access",
+      expectedGuaranteedCost: 7,
+      expectedFundingGap: 1,
+    },
+  ] as const)(
+    "quotes the visible Fragmentation Storm route for $label",
+    ({
+      runnerCredits,
+      corpCredits,
+      expectedReachability,
+      expectedGuaranteedCost,
+      expectedFundingGap,
+    }) => {
+      const path = assessKnownRezzedIcePath(
+        [fragmentationStormIce("rd-fragmentation")],
+        [],
+        runnerCredits,
+        [],
+        corpCredits,
+      );
+      const route = quoteRunnerRunRoute({
+        path,
+        availableCredits: runnerCredits,
+        runnerGripCount: 5,
+      });
+
+      expect(route).toMatchObject({
+        reachability: expectedReachability,
+        guaranteedKnownCost: expectedGuaranteedCost,
+        fundingGap: expectedFundingGap,
+      });
+      expect(route.effects[0]).toMatchObject({
+        kind: "end_run_or_deflect",
+        timing: "before_access",
+        preventsAccess: true,
+      });
+    },
+  );
+
+  it("keeps an unknown outer ICE explicit around the payable known inner route", () => {
+    const path = assessKnownRezzedIcePath(
+      [
+        {
+          instanceId: "unknown-outer",
+          known: false,
+          rezzed: false,
+        } as VisibleCard,
+        fragmentationStormIce("known-inner"),
+      ],
+      [],
+      6,
+      [],
+      0,
+    );
+    const route = quoteRunnerRunRoute({
+      path,
+      availableCredits: 6,
+      unknownIceCount: 1,
+      runnerGripCount: 5,
+    });
+
+    expect(route).toMatchObject({
+      reachability: "conditional_access",
+      guaranteedKnownCost: 4,
+      unknownIceCount: 1,
+      conditionalReasons: ["unknown_ice_on_route"],
+    });
+  });
+
+  it("does not turn a pre-access tag into an automatic access block", () => {
+    const path = assessKnownRezzedIcePath(
+      [hunterTraceTagIce("rd-hunter-route")],
+      [],
+      2,
+    );
+    const route = quoteRunnerRunRoute({
+      path,
+      availableCredits: 2,
+      runnerGripCount: 5,
+    });
+
+    expect(route.reachability).toBe("guaranteed_access");
+    expect(route.effects[0]).toMatchObject({
+      kind: "tags",
+      timing: "before_access",
+      preventsAccess: false,
+      canEndGameBeforeAccess: false,
+    });
+  });
+
+  it("keeps lethal visible trace damage conditional before access", () => {
+    const path = assessKnownRezzedIcePath(
+      [traceDamageIce("rd-trace-damage", 3)],
+      [],
+      0,
+    );
+    const route = quoteRunnerRunRoute({
+      path,
+      availableCredits: 0,
+      runnerGripCount: 3,
+    });
+
+    expect(route.reachability).toBe("conditional_access");
+    expect(route.effects[0]).toMatchObject({
+      kind: "damage",
+      timing: "before_access",
+      canEndGameBeforeAccess: true,
+    });
+  });
+});
+
 function classicWallIce(instanceId: string): VisibleCard {
   return {
     instanceId,
@@ -899,6 +1033,66 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
           sourceDefinitionId: "onr_v1_249_hunter",
           sourceTitle: "Hunter",
           amount: 5,
+        },
+      ],
+    },
+  };
+}
+
+function fragmentationStormIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_246_fragmentation-storm",
+    title: "Fragmentation Storm",
+    type: "ice",
+    subtypes: ["sentry", "trace"],
+    known: true,
+    rezzed: true,
+    strength: 4,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_246_fragmentation-storm",
+      effectiveStrength: 4,
+      subroutines: [
+        {
+          id: `${instanceId}_trace`,
+          type: "initiate_trace",
+          sourceDefinitionId: "onr_v1_246_fragmentation-storm",
+          sourceTitle: "Fragmentation Storm",
+          amount: 4,
+          baseTraceStrength: 4,
+          traceSuccessEffect: {
+            type: "end_run_trash_program_and_run_lock",
+            amount: 2,
+          },
+          unbrokenRunEffect: { createsRunLockOrActionTax: 2 },
+        },
+      ],
+    },
+  };
+}
+
+function traceDamageIce(instanceId: string, amount: number): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "test_trace_damage_ice",
+    title: "Trace Damage ICE",
+    type: "ice",
+    subtypes: ["sentry", "trace"],
+    known: true,
+    rezzed: true,
+    strength: 0,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "test_trace_damage_ice",
+      effectiveStrength: 0,
+      subroutines: [
+        {
+          id: `${instanceId}_trace`,
+          type: "initiate_trace",
+          amount: 0,
+          baseTraceStrength: 0,
+          traceSuccessEffect: { type: "net_damage", amount },
         },
       ],
     },

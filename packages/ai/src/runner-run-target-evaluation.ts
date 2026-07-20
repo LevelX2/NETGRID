@@ -68,6 +68,7 @@ import {
   type RunnerRunTargetKind,
   type RunnerRunTargetRecommendation,
 } from "./run-analysis/runner-run-target-types";
+import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
 
 export * from "./run-analysis/runner-run-target-types";
 
@@ -229,6 +230,12 @@ function evaluateRunnerRunTarget(
   const unknownUnrezzedIceCount = projectedServerIce.filter(
     (card) => card.rezzed !== true && card.known === false,
   ).length;
+  const routeQuote = quoteRunnerRunRoute({
+    path,
+    availableCredits: creditsAfterAction,
+    unknownIceCount: unknownUnrezzedIceCount,
+    runnerGripCount: params.input.playerView.own.gripOrHq.length,
+  });
   const runCommitment =
     unknownUnrezzedIceCount > 0 ? "probe_only" : "full_path";
   const unrezzedIceRisk =
@@ -309,7 +316,8 @@ function evaluateRunnerRunTarget(
     knownAccessState: payoff.knownAccessState,
     multiaccessAvailable,
     pathPassability,
-    pathCost: path.visibleBreakCost ?? 0,
+    pathCost: routeQuote.guaranteedKnownCost,
+    routeQuote,
     creditsAfterRun,
     unknownUnrezzedIceCount,
     unrezzedIceRisk,
@@ -348,8 +356,9 @@ function evaluateRunnerRunTarget(
       ...(path.missingCoverage?.length
         ? [`missing_coverage:${path.missingCoverage.join("|")}`]
         : []),
-      `path_cost:${path.visibleBreakCost ?? 0}`,
+      `path_cost:${routeQuote.guaranteedKnownCost}`,
       `visible_break_cost:${path.visibleBreakCost ?? 0}`,
+      ...routeQuote.evidence,
       `run_action_credit_cost:${actionCreditCost}`,
       `credits_after_run_action:${creditsAfterAction}`,
       `credits_after_run:${creditsAfterRun}`,

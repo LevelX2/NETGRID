@@ -1,4 +1,5 @@
 import type {
+  TraceSuccessEffect,
   VisibleEffectiveIceRunQuote,
   VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
@@ -95,6 +96,10 @@ export type VisibleIceRunHazardSeverity = "low" | "medium" | "high";
 export type VisibleIceRunHazard = {
   kind: VisibleIceRunHazardKind;
   severity: VisibleIceRunHazardSeverity;
+  effectType: TraceSuccessEffect["type"];
+  effectTiming: "before_access";
+  preventsAccess: boolean;
+  canCauseFlatlineBeforeAccess: boolean;
   iceIndex: number;
   sourceDefinitionId?: string;
   sourceTitle?: string;

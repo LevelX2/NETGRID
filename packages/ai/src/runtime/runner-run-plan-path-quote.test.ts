@@ -9,6 +9,103 @@ import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 
 describe("runner run plan path quote", () => {
+  it("uses the guaranteed visible Trace route when it is cheaper than breaking", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_246_fragmentation-storm",
+      iceTitle: "Fragmentation Storm",
+      iceStrength: 4,
+      credits: 6,
+      opponentCredits: 0,
+      rig: [],
+      subroutines: [fragmentationStormTraceSubroutine()],
+      legalActions: [
+        continueAction({
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
+
+    expect(sequence?.steps.map((step) => step.actionType)).toEqual([
+      "continue_run",
+    ]);
+    expect(sequence).toMatchObject({
+      totalCost: 4,
+      cashCost: 4,
+      usesTrace: true,
+      preservesAccessObjective: true,
+    });
+    expect(sequence?.evidence).toContain("current_encounter_trace_route:true");
+    expect(quote).toMatchObject({
+      accessStatus: "guaranteed_access",
+      guaranteedKnownCost: 4,
+      canReachAccess: true,
+    });
+  });
+
+  it("does not claim the visible Trace route is guaranteed below Corp max", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_246_fragmentation-storm",
+      iceTitle: "Fragmentation Storm",
+      iceStrength: 4,
+      credits: 4,
+      opponentCredits: 1,
+      rig: [],
+      subroutines: [fragmentationStormTraceSubroutine()],
+      legalActions: [
+        continueAction({
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+
+    expect(
+      quote.iceQuotes[0]?.cheapestAccessPreservingSequence,
+    ).toBeUndefined();
+    expect(quote).toMatchObject({
+      accessStatus: "conditional_access",
+      guaranteedKnownCost: 5,
+      canReachAccess: false,
+      cannotReachReason: "known_ice_unbreakable",
+    });
+  });
+
+  it("prefers a cheaper legal break over the guaranteed Trace bid", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_246_fragmentation-storm",
+      iceTitle: "Fragmentation Storm",
+      iceStrength: 4,
+      credits: 6,
+      opponentCredits: 1,
+      subroutines: [fragmentationStormTraceSubroutine()],
+      legalActions: [
+        breakAction({ costs: [{ credits: 1 }] }),
+        continueAction({
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
+
+    expect(sequence?.steps.map((step) => step.actionType)).toEqual([
+      "break_subroutine",
+    ]);
+    expect(sequence).toMatchObject({
+      totalCost: 1,
+      usesBreak: true,
+    });
+    expect(sequence?.usesTrace).toBeUndefined();
+  });
+
   it("quotes direct break as the current access-preserving sequence", () => {
     const input = runnerEncounterInput({
       iceDefinitionId: "onr_v1_261_quandary",
@@ -519,6 +616,8 @@ function runnerEncounterInput(params: {
   iceTitle: string;
   iceStrength: number;
   credits?: number;
+  opponentCredits?: number;
+  rig?: VisibleCard[];
   breaker?: VisibleCard;
   extraRig?: VisibleCard[];
   breakerStrength?: number;
@@ -547,7 +646,7 @@ function runnerEncounterInput(params: {
         gripOrHq: [],
         heapOrArchives: [],
         scoreArea: [],
-        rig: [
+        rig: params.rig ?? [
           params.breaker ?? {
             instanceId: "codecracker-1",
             known: true,
@@ -571,7 +670,7 @@ function runnerEncounterInput(params: {
         scoreArea: [],
         rig: [],
         clicks: 3,
-        credits: 5,
+        credits: params.opponentCredits ?? 5,
         tags: 0,
         badPublicity: 0,
       },
@@ -757,6 +856,23 @@ function viralProgramTrashSubroutine(): NonNullable<
     id: "viral-15-program-trash",
     type: "set_run_pass_rezzed_ice_program_trash",
     unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+  };
+}
+
+function fragmentationStormTraceSubroutine(): NonNullable<
+  VisibleCard["effectiveRunQuote"]
+>["subroutines"][number] {
+  return {
+    id: "fragmentation-storm-trace",
+    type: "initiate_trace",
+    amount: 4,
+    baseTraceStrength: 4,
+    traceSuccessEffect: {
+      type: "end_run_trash_program_and_run_lock",
+      amount: 2,
+    },
+    breakTags: ["trace"],
+    unbrokenRunEffect: { createsRunLockOrActionTax: 2 },
   };
 }
 

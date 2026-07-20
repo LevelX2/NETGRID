@@ -348,18 +348,30 @@ export function visibleIceRunHazardForTraceEffect(
       return {
         kind: "trace_tag",
         severity: "high",
+        effectType: effect.type,
+        effectTiming: "before_access",
+        preventsAccess: false,
+        canCauseFlatlineBeforeAccess: false,
         expectedTags: Math.max(1, Math.floor(effect.amount)),
       };
     case "add_tags_by_trace_margin_over_runner_link":
       return {
         kind: "trace_tag",
         severity: "high",
+        effectType: effect.type,
+        effectTiming: "before_access",
+        preventsAccess: false,
+        canCauseFlatlineBeforeAccess: false,
         expectedTags: 1,
       };
     case "add_tag_and_counter":
       return {
         kind: "trace_tag_counter",
         severity: "high",
+        effectType: effect.type,
+        effectTiming: "before_access",
+        preventsAccess: false,
+        canCauseFlatlineBeforeAccess: false,
         expectedTags: Math.max(1, Math.floor(effect.tagAmount)),
         expectedCounters: Math.max(1, Math.floor(effect.amount)),
       };
@@ -367,36 +379,60 @@ export function visibleIceRunHazardForTraceEffect(
       return {
         kind: "trace_counter",
         severity: "medium",
+        effectType: effect.type,
+        effectTiming: "before_access",
+        preventsAccess: false,
+        canCauseFlatlineBeforeAccess: false,
         expectedCounters: Math.max(1, Math.floor(effect.amount)),
       };
     case "net_damage":
       return {
         kind: "trace_damage",
         severity: effect.amount >= 3 ? "high" : "medium",
+        effectType: effect.type,
+        effectTiming: "before_access",
+        preventsAccess: false,
+        canCauseFlatlineBeforeAccess: true,
         expectedDamage: Math.max(1, Math.floor(effect.amount)),
       };
     case "end_run_and_run_lock":
       return {
         kind: "trace_run_lock",
         severity: "high",
+        effectType: effect.type,
+        effectTiming: "before_access",
+        preventsAccess: true,
+        canCauseFlatlineBeforeAccess: false,
         actionTax: Math.max(1, Math.floor(effect.amount)),
       };
     case "end_run_trash_program_and_run_lock":
       return {
         kind: "trace_trash",
         severity: "high",
+        effectType: effect.type,
+        effectTiming: "before_access",
+        preventsAccess: true,
+        canCauseFlatlineBeforeAccess: false,
         actionTax: Math.max(1, Math.floor(effect.amount)),
       };
     case "end_run_trash_hardware_and_unpreventable_meat_damage":
       return {
         kind: "trace_damage",
         severity: "high",
+        effectType: effect.type,
+        effectTiming: "before_access",
+        preventsAccess: true,
+        canCauseFlatlineBeforeAccess: true,
         expectedDamage: 2,
       };
     case "trash_runner_resource_and_add_tag":
       return {
         kind: "trace_trash",
         severity: "high",
+        effectType: effect.type,
+        effectTiming: "before_access",
+        preventsAccess: false,
+        canCauseFlatlineBeforeAccess: false,
         expectedTags: 1,
       };
   }
