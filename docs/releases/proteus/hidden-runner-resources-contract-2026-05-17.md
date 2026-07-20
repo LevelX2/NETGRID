@@ -13,7 +13,7 @@ Keine Aussage in diesem Dokument schaltet Proteus-Karten frei. Die Proteus-Daten
 ## Führende Quellen
 
 - `data/rules/proteus-mechanics-coverage-2026-05-17.json`
-- `data/card-import/proteus-card-basis-2026-05-17.json`
+- `data/cards/proteus-cards.json`
 - `docs/source/Proteusspoiler.txt`
 - `docs/source/Netrunner Errata 1.70.md`
 - `docs/releases/mvp/mvp-0-95-resources-tags/resource-tag-interaction-spec.md`

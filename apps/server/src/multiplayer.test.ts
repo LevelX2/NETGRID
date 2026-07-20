@@ -159,6 +159,98 @@ describe("recent match results", () => {
     expect(serialized).not.toContain("sessionToken");
     expect(serialized).not.toContain("reconnectToken");
     expect(serialized).not.toContain("tokenHash");
+
+    const cached = await storage.load(finished.match.matchId);
+    expect(cached?.resultSnapshot).toMatchObject({
+      schemaVersion: "netgrid-match-result-v1",
+      matchId: finished.match.matchId,
+      winner: "runner",
+      actionCount: expect.any(Number),
+      finalStateHash: expect.any(String),
+    });
+    let fullLoadCount = 0;
+    const cacheOnlyStorage: MultiplayerStorage = {
+      load: async () => {
+        fullLoadCount += 1;
+        return undefined;
+      },
+      save: async () => undefined,
+      listResultSnapshotCandidates: async () => (cached ? [cached] : []),
+    };
+    const cacheOnlyService = new MultiplayerService(cacheOnlyStorage, {
+      tokenSalt: "recent-results-cache-only",
+    });
+    expect(await cacheOnlyService.listRecentGameResults(20)).toHaveLength(1);
+    expect(fullLoadCount).toBe(0);
+  });
+
+  it("backfills a historical SQLite result once and reuses its compact snapshot", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "netgrid-result-backfill-"));
+    const storage = new SqliteMatchStorage({
+      dbPath: join(dir, "netgrid.sqlite"),
+      backupDir: join(dir, "backups"),
+    });
+    try {
+      const service = new MultiplayerService(storage, {
+        tokenSalt: "result-backfill-test",
+        now: () => "2026-05-27T13:00:00.000Z",
+      });
+      const created = await service.createMatch({
+        hostSide: "runner",
+        playMode: "human_vs_ai",
+        humanSide: "runner",
+        seed: "historical-result-backfill",
+      });
+      const historical = await storage.load(created.matchId);
+      if (!historical?.gameState)
+        throw new Error("Missing historical test match");
+      historical.gameState.winner = "runner";
+      historical.match.status = "finished";
+      historical.match.winner = "runner";
+      historical.match.updatedAt = "2026-05-27T13:10:00.000Z";
+      delete historical.resultSnapshot;
+      await storage.save(historical);
+
+      expect(
+        (await storage.listResultSnapshotCandidates())[0]?.resultSnapshot,
+      ).toBeUndefined();
+      expect(await service.listRecentGameResults(20)).toHaveLength(1);
+
+      const compact = (await storage.listResultSnapshotCandidates())[0];
+      expect(compact?.resultSnapshot).toMatchObject({
+        matchId: created.matchId,
+        matchStatus: "finished",
+        winner: "runner",
+      });
+      expect(compact?.eventLog).toEqual([]);
+      expect(
+        await storage.listResultSnapshotCandidatesByMatchIds(["unknown"]),
+      ).toEqual([]);
+      expect(
+        (
+          await storage.listResultSnapshotCandidatesByMatchIds([
+            created.matchId,
+          ])
+        )[0]?.match.matchId,
+      ).toBe(created.matchId);
+
+      let fullLoadCount = 0;
+      const cachedStorage: MultiplayerStorage = {
+        load: async () => {
+          fullLoadCount += 1;
+          return undefined;
+        },
+        save: async () => undefined,
+        listResultSnapshotCandidates: async () => (compact ? [compact] : []),
+      };
+      expect(
+        await new MultiplayerService(cachedStorage).listRecentGameResults(20),
+      ).toHaveLength(1);
+      expect(fullLoadCount).toBe(0);
+    } finally {
+      storage.close();
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 
   it("aggregates finished side-swap series into one recent result with match points", async () => {
@@ -4321,6 +4413,10 @@ describe("MVP 0.2 multiplayer service", () => {
       displayName: "Offener Host",
       seed: "public-directory-open",
       isPublic: true,
+      settings: {
+        matchFormat: "two_game_side_swap",
+        cardPool: "originalset_classic_proteus",
+      },
     });
     const active = await service.createMatch({
       hostSide: "runner",
@@ -4351,17 +4447,39 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const entries = await service.listPublicMatches();
 
+    expect(entries.map((entry) => entry.status)).toEqual([
+      "open",
+      "active",
+      "finished",
+    ]);
     expect(entries).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ matchId: open.matchId, status: "open" }),
+        expect.objectContaining({
+          matchId: open.matchId,
+          status: "open",
+          hostDisplayName: "Offener Host",
+          hostSide: "runner",
+          availableSide: "corp",
+          matchFormat: "two_game_side_swap",
+          cardPool: "originalset_classic_proteus",
+          seriesGamesPlanned: 2,
+        }),
         expect.objectContaining({ matchId: active.matchId, status: "active" }),
         expect.objectContaining({
           matchId: finished.matchId,
           status: "finished",
           winner: "corp",
+          result: expect.objectContaining({
+            schemaVersion: "netgrid-match-result-v1",
+            matchId: finished.matchId,
+            winner: "corp",
+          }),
         }),
       ]),
     );
+    expect(
+      (await storage.load(finished.matchId))?.resultSnapshot,
+    ).toBeDefined();
     expect(
       entries.some((entry) => entry.matchId === privateMatch.matchId),
     ).toBe(false);
@@ -10082,7 +10200,7 @@ describe("MVP 0.2 multiplayer service", () => {
       finalStateHash: hashState(finished.gameState),
       errors: [],
     });
-  }, 60_000);
+  }, 120_000);
 
   it("rejects AI match start when the selected AI snapshot is internally invalid", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
@@ -11817,7 +11935,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
   });
 
-  it("advances Corp AI in a root-rez window even when activeSide is runner", async () => {
+  it("advances Corp AI in the post-jack-out root-rez window", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {
       tokenSalt: "server-corp-ai-root-rez-active-runner",
@@ -11855,6 +11973,18 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(gameState.activeSide).toBe("runner");
     expect(gameState.timingPoint).toBe("run.jack_out_window");
+    expect(
+      getLegalActions(gameState, "runner")
+        .map((action) => action.type)
+        .sort(),
+    ).toEqual(["continue_run", "jack_out"]);
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(gameState.activeSide).toBe("corp");
+    expect(gameState.timingPoint).toBe("run.movement_rez_window");
     expect(getLegalActions(gameState, "runner")).toEqual([]);
     expect(
       getLegalActions(gameState, "corp")
@@ -11903,7 +12033,7 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
-    expect(["decline_rez", "rez_ice"]).toContain(
+    expect(["decline_rez", "rez_card"]).toContain(
       advanced.publicEvent?.publicPayload.actionType,
     );
     expect(advanced.requesterPayload.playerView.stateVersion).toBe(

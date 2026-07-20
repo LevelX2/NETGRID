@@ -5,6 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { runnerNoRunEconomyCommitmentScoreComponents as buildRunnerNoRunEconomyCommitmentScoreComponents } from "./runner-economy-commitment-score";
+import { mergedPublicHistory } from "./public-event-history";
 import { rolesMatch } from "./role-match";
 
 type RunnerNoRunEconomyCommitmentStatus =
@@ -239,7 +240,7 @@ export function createRunnerNoRunEconomyContext(
   ): number {
     if (!definitionId) return 0;
     let realized = 0;
-    for (const event of input.eventTail) {
+    for (const event of mergedPublicHistory(input)) {
       const resolvedEffects = event.publicPayload?.resolvedEffects;
       if (!Array.isArray(resolvedEffects)) continue;
       for (const effect of resolvedEffects) {

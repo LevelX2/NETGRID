@@ -21,44 +21,50 @@ export function RecentGamesPanel({
   loading,
   error,
   updatedAt,
+  accountMode,
   onRefresh,
 }: {
   results: ApiRecentResultEntry[];
   loading: boolean;
   error: string;
   updatedAt: string | null;
+  accountMode: boolean;
   onRefresh: () => void;
 }) {
   return (
     <section
       className="recentGamesPanel"
-      aria-label="Letzte Spiele"
+      aria-label="Meine Spiele"
       data-testid="recent-games-panel"
     >
       <div className="recentGamesHeader">
         <div>
-          <p className="eyebrow">Letzte Spiele</p>
-          <h2>Abgeschlossene Ergebnisse</h2>
+          <p className="eyebrow">Meine Spiele</p>
+          <h2>Meine abgeschlossenen Ergebnisse</h2>
         </div>
         <button
           className="button"
           onClick={onRefresh}
           type="button"
-          disabled={loading}
+          disabled={loading || !accountMode}
           data-testid="refresh-recent-games"
         >
           <RotateCcw size={14} />
           Aktualisieren
         </button>
       </div>
-      {error ? (
+      {!accountMode ? (
+        <p className="recentGamesEmpty">
+          Melde dich an, um deine abgeschlossenen Spiele zu sehen.
+        </p>
+      ) : error ? (
         <p className="notice recentGamesNotice" role="status">
           {error}
         </p>
       ) : null}
-      {results.length === 0 ? (
+      {accountMode && results.length === 0 ? (
         <p className="recentGamesEmpty">{recentResultsEmptyText(loading)}</p>
-      ) : (
+      ) : accountMode ? (
         <ol className="recentGamesList">
           {results.map((result) => (
             <li
@@ -77,8 +83,8 @@ export function RecentGamesPanel({
             </li>
           ))}
         </ol>
-      )}
-      {updatedAt ? (
+      ) : null}
+      {accountMode && updatedAt ? (
         <p className="recentGamesTimestamp">
           Zuletzt aktualisiert: {formatLobbyTime(updatedAt)}
         </p>

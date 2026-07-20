@@ -475,12 +475,40 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   async listPublicMatchCandidates(): Promise<StoredMatch[]> {
     const rows = this.db
       .prepare(
-        "SELECT record_json AS recordJson FROM matches ORDER BY updated_at DESC",
+        `SELECT record_json AS recordJson
+         FROM matches
+         WHERE json_extract(record_json, '$.match.isPublic') = 1
+           AND status IN ('pending', 'active', 'finished', 'forfeited')
+         ORDER BY updated_at DESC`,
       )
       .all() as Array<{ recordJson: string }>;
-    return rows
-      .map((row) => JSON.parse(row.recordJson) as StoredMatch)
-      .filter((record) => record.match.isPublic);
+    return rows.map((row) => JSON.parse(row.recordJson) as StoredMatch);
+  }
+
+  async listResultSnapshotCandidates(): Promise<StoredMatch[]> {
+    const rows = this.db
+      .prepare(
+        "SELECT record_json AS recordJson FROM matches WHERE status IN ('finished', 'forfeited') ORDER BY updated_at DESC",
+      )
+      .all() as Array<{ recordJson: string }>;
+    return rows.map((row) => JSON.parse(row.recordJson) as StoredMatch);
+  }
+
+  async listResultSnapshotCandidatesByMatchIds(
+    matchIds: readonly string[],
+  ): Promise<StoredMatch[]> {
+    if (matchIds.length === 0) return [];
+    const placeholders = matchIds.map(() => "?").join(", ");
+    const rows = this.db
+      .prepare(
+        `SELECT record_json AS recordJson
+         FROM matches
+         WHERE match_id IN (${placeholders})
+           AND status IN ('finished', 'forfeited')
+         ORDER BY updated_at DESC`,
+      )
+      .all(...matchIds) as Array<{ recordJson: string }>;
+    return rows.map((row) => JSON.parse(row.recordJson) as StoredMatch);
   }
 
   async health(): Promise<StorageHealth> {
@@ -3390,6 +3418,19 @@ export function validateStoredMatch(
       "stored_match_invalid",
       "Match-Record ist strukturell ungültig.",
     );
+  if (record.resultSnapshot) {
+    const resultSnapshot = record.resultSnapshot;
+    if (
+      resultSnapshot.schemaVersion !== "netgrid-match-result-v1" ||
+      resultSnapshot.matchId !== match.matchId ||
+      resultSnapshot.matchStatus !== match.status ||
+      (match.status !== "finished" && match.status !== "forfeited")
+    )
+      throw new StorageError(
+        "stored_match_invalid",
+        "Gespeichertes Match-Ergebnis ist strukturell ungültig.",
+      );
+  }
   if (
     !Array.isArray(record.sessions) ||
     !Array.isArray(record.tokens) ||

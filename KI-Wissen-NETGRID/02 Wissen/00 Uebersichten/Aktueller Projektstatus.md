@@ -24,6 +24,14 @@ Stand: 2026-07-20
   Gegnerhandfenster zeigt im Replay die jeweils andere Hand. Alle vorhandenen
   Matches werden einmalig rückwirkend öffentlich normalisiert; der Auditstand
   beträgt 21/21 öffentliche und 19/19 replayfähige terminale Matches.
+- Der globale Bereich `Spiele` ordnet diese öffentlichen Matches als offen,
+  laufend und abgeschlossen, filtert nach diesen Zuständen und führt direkt
+  zu Beitritt, Zuschaueransicht oder Replay. `Meine Spiele` ist davon getrennt
+  und liefert nur serverseitig gebundene Matches des angemeldeten Accounts,
+  einschließlich eigener privater Partien. Abgeschlossene Ergebnisse liegen
+  als immutable Snapshots in der kompakten Matchzeile; warme Listenabrufe
+  hydrieren keine vollständigen Historien mehr. Führend ist
+  `docs/reviews/public-game-directory-and-personal-history-final-review-2026-07-20.md`.
 
 ## Engine und Karten
 
@@ -34,6 +42,10 @@ Stand: 2026-07-20
 - Proteus ist mit 154/154 Karten engine-/human-playable. Technisches
   `ai_supported` ist von Play-Strength-Readiness und Default-/Random-Pool-
   Promotion getrennt.
+- Die einmalige Proteus-Spoiler-Importpipeline und ihre blockierte
+  Planungskopie sind entfernt. Aktuell führend sind die unveränderte
+  Spoilerquelle, `data/cards/proteus-cards.json`, das Supportmanifest und die
+  Runtime-Implementierungen.
 - Kartenimplementierungen, PlayerViews, PublicEvents, Replay und StateHash
   werden durch paketnahe Engine- und Visibilitytests abgesichert.
 - Normale Creditgewinne von Runner und Korp verwenden eine zentrale,
@@ -96,6 +108,9 @@ Stand: 2026-07-20
   Benchmarks liegen unter `@netgrid/ai/simulation`.
 - Alte Corp-/Runner-Planer, Baseline-Selectoren, Shadow-/META-/Readiness-
   Runtime, Kill-Switches und der frühere AI-Monolithtest sind entfernt.
+- Ein Repository-Gesamtcheck hat zusätzlich elf verwaiste Helfermodule der
+  früheren KI-Baseline-/Legacy-Bewertung entfernt; der anschließende
+  Importscan enthält keine ungenutzten App-/Package-Module mehr.
 - Der Coverage-Restpfad ist fail-closed und darf nur ausdrücklich sichere
   Engine-Fortsetzungen auswählen.
 - Der produktive Auswahlweg ist über `AiDecisionDebug.decisionChain`
@@ -165,6 +180,29 @@ Stand: 2026-07-20
   zwei Aktionslimits im Hybrid-Score/Punish-Slot sind grün. Führend sind
   `docs/architecture/ai/ai-behavior-baseline-v1-process-2026-07-12.md` und
   `docs/reviews/ai/ai-behavior-baseline-v1-initial-run-review-2026-07-12.md`.
+- Selfplay- und Testspiel-Laufzeiten sind ohne fachliche Abstriche gehärtet:
+  semantische Ableitungen werden nur innerhalb einer Entscheidung
+  wiederverwendet, Vollhistorie und echter 80-Ereignis-Tail teilen bereinigte
+  Eventobjekte, und Side-Safety arbeitet strukturell ohne Vollstringkopie. Der
+  feste 240-Aktionen-Fall sank bei bitgleicher Summary, ActionSequence und
+  StateHash um 21,8 Prozent. Baseline-Slots laufen ab vier Slots konservativ in
+  isolierten Prozessen; vollständige Raw-Evidence wird atomar gestreamt und
+  optional verlustfrei als `.gz` geschrieben. Führend sind
+  `docs/architecture/ai/ai-selfplay-performance-optimization-process-2026-07-20.md`
+  und
+  `docs/reviews/ai/ai-selfplay-performance-optimization-final-review-2026-07-20.md`.
+- Das anschließende Profil der eigentlichen KI-Kernlaufzeit hat identische
+  Runner-Run-Target-, Handentwicklungs- und Install-Fit-Ableitungen innerhalb
+  einer Entscheidung sowie allokationsintensive Markerprüfungen als weitere
+  Schwerpunkte bestätigt und optimiert. Der bereits optimierte feste
+  240-Aktionen-Lauf sank bei bitgleichen kompakten und vollständigen
+  Raw-Artefakten nochmals von 22,854 auf 18,512 Sekunden; die profiliert
+  gemessene KI-Entscheidungszeit sank von 11,664 auf 5,051 Sekunden. Der
+  Standard-Benchmark profitiert automatisch über seinen öffentlichen
+  `chooseAiAction`-Pfad. Führend sind
+  `docs/architecture/ai/ai-core-runtime-performance-followup-process-2026-07-20.md`
+  und
+  `docs/reviews/ai/ai-core-runtime-performance-followup-final-review-2026-07-20.md`.
 - Der Runner-Survival-Progress-Vertrag bindet Basic Credits jetzt an eine
   sichtbare konkrete Reaktions- oder Prevention-Lücke. Ohne Handgewinn,
   Risikoreduktion oder verringerte Reservelücke verliert der Plan seine TTL

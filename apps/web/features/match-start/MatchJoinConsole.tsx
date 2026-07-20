@@ -1,20 +1,8 @@
 "use client";
 
-import {
-  BadgeCheck,
-  Keyboard,
-  Link2,
-  RotateCcw,
-  UserRound,
-} from "lucide-react";
+import { BadgeCheck, Keyboard, Link2, UserRound } from "lucide-react";
 
-import type { PublicMatchEntry } from "../../lib/client-api";
 import { DeckSlotSelect } from "../decks/DeckSelectionControls";
-import { formatLobbyTime, shortMatchId } from "./lobby-format";
-import {
-  publicMatchActionLabel,
-  publicMatchParticipantLabel,
-} from "./public-match-navigation";
 
 type DeckSlotSource = "snapshot" | "local" | "random_standard";
 
@@ -30,10 +18,6 @@ type JoinLocalDeck = {
 };
 
 export function MatchJoinConsole({
-  openLanMatches,
-  openLanLoading,
-  openLanError,
-  openLanUpdatedAt,
   joinMatchIdTrimmed,
   joinTokenTrimmed,
   joinLinkInput,
@@ -51,8 +35,6 @@ export function MatchJoinConsole({
   joinMatchId,
   joinToken,
   canSubmitJoin,
-  onRefreshOpenLanMatches,
-  onSelectOpenLanMatch,
   onJoinLinkInput,
   onDisplayName,
   onParticipantBRunnerDeckSource,
@@ -65,10 +47,6 @@ export function MatchJoinConsole({
   onJoinToken,
   onJoinMatch,
 }: {
-  openLanMatches: PublicMatchEntry[];
-  openLanLoading: boolean;
-  openLanError: string;
-  openLanUpdatedAt: string | null;
   joinMatchIdTrimmed: string;
   joinTokenTrimmed: string;
   joinLinkInput: string;
@@ -86,8 +64,6 @@ export function MatchJoinConsole({
   joinMatchId: string;
   joinToken: string;
   canSubmitJoin: boolean;
-  onRefreshOpenLanMatches(): void;
-  onSelectOpenLanMatch(entry: PublicMatchEntry): void;
   onJoinLinkInput(value: string): void;
   onDisplayName(value: string): void;
   onParticipantBRunnerDeckSource(source: DeckSlotSource): void;
@@ -102,65 +78,6 @@ export function MatchJoinConsole({
 }) {
   return (
     <div className="matchStartConsole joinConsole">
-      <section
-        className="openLanMatchesPanel"
-        aria-label="Öffentliche Spiele"
-        data-testid="open-lan-panel"
-      >
-        <div className="openLanMatchesHeader">
-          <p className="eyebrow">Öffentliche Spiele</p>
-          <button
-            className="button"
-            onClick={onRefreshOpenLanMatches}
-            type="button"
-            disabled={openLanLoading}
-            data-testid="refresh-open-lan"
-          >
-            <RotateCcw size={14} />
-            Aktualisieren
-          </button>
-        </div>
-        <p className="openLanNotice" data-testid="open-lan-scope-note">
-          Offenen Spielen kannst du beitreten, laufende Spiele beobachten und
-          beendete Spiele als Replay ansehen.
-        </p>
-        {openLanError ? (
-          <p className="notice openLanNotice" role="status">
-            {openLanError}
-          </p>
-        ) : null}
-        {openLanMatches.length === 0 ? (
-          <p className="openLanEmpty">
-            {openLanLoading
-              ? "Lade offene Spiele ..."
-              : "Keine öffentlichen Spiele gefunden."}
-          </p>
-        ) : (
-          <ul className="openLanList" data-testid="open-lan-list">
-            {openLanMatches.map((entry) => (
-              <li key={entry.matchId}>
-                <button
-                  className={`openLanEntry ${joinMatchIdTrimmed === entry.matchId && joinTokenTrimmed.length === 0 ? "selected" : ""}`}
-                  onClick={() => onSelectOpenLanMatch(entry)}
-                  type="button"
-                >
-                  <strong>{shortMatchId(entry.matchId)}</strong>
-                  <small>
-                    {publicMatchParticipantLabel(entry)}
-                    {" · "}
-                    {publicMatchActionLabel(entry.status)}
-                  </small>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-        {openLanUpdatedAt ? (
-          <p className="openLanTimestamp">
-            Zuletzt aktualisiert: {formatLobbyTime(openLanUpdatedAt)}
-          </p>
-        ) : null}
-      </section>
       <label className="joinLinkField">
         Join-Link
         <input

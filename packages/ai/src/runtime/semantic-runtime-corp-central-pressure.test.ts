@@ -2,8 +2,27 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
+import { withDecisionDerivedCache } from "./decision-derived-cache";
 
 describe("semanticRuntimeCorpCentralPressureAssessment", () => {
+  it("reuses the immutable assessment within one decision only", () => {
+    const input = corpInput({
+      eventTail: [publicCentralEvent("rd-run-cache", "start_run", "rd")],
+    });
+
+    const withinDecision = withDecisionDerivedCache(() => [
+      semanticRuntimeCorpCentralPressureAssessment(input, "rd"),
+      semanticRuntimeCorpCentralPressureAssessment(input, "rd"),
+    ]);
+    const nextDecision = withDecisionDerivedCache(() =>
+      semanticRuntimeCorpCentralPressureAssessment(input, "rd"),
+    );
+
+    expect(withinDecision[1]).toBe(withinDecision[0]);
+    expect(nextDecision).not.toBe(withinDecision[0]);
+    expect(nextDecision).toEqual(withinDecision[0]);
+  });
+
   it("treats visible R&D virus payoff as central pressure after R&D probing", () => {
     const input = corpInput({
       runnerRig: [rdVirusCard("garbage-in")],

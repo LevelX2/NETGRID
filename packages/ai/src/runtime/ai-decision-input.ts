@@ -78,6 +78,15 @@ export const FORBIDDEN_AI_INPUT_FIELDS = [
   "fullGameState",
 ];
 
+export const AI_DECISION_EVENT_TAIL_LIMIT = 80;
+
+export function aiDecisionEventTail(
+  publicEvents: PublicGameEvent[],
+): PublicGameEvent[] {
+  if (publicEvents.length <= AI_DECISION_EVENT_TAIL_LIMIT) return publicEvents;
+  return publicEvents.slice(-AI_DECISION_EVENT_TAIL_LIMIT);
+}
+
 export function buildAiDecisionInput(
   state: GameState,
   side: Side,
@@ -114,7 +123,8 @@ export function buildAiDecisionInput(
   const input = buildAiDecisionInputDto({
     side,
     playerView,
-    eventTail: options?.eventTail ?? playerView.publicEvents,
+    eventTail:
+      options?.eventTail ?? aiDecisionEventTail(playerView.publicEvents),
     legalActions,
     difficulty,
     seed: state.seed,

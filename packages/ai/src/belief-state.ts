@@ -7,6 +7,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
+import { decisionDerivedValue } from "./runtime/decision-derived-cache";
 import { rolesMatch } from "./runtime/role-match";
 
 export type BeliefKnowledgeKind =
@@ -230,8 +231,15 @@ type HqHiddenInstallDepartureMemory = {
 };
 
 const BELIEF_UNCERTAINTY_SCORE_PER_SIGNAL = -25;
+const BELIEF_STATE_DECISION_CACHE_KEY = Symbol("belief-state");
 
 export function reconstructBeliefState(input: AiDecisionInput): BeliefState {
+  return decisionDerivedValue(input, BELIEF_STATE_DECISION_CACHE_KEY, () =>
+    buildBeliefState(input),
+  );
+}
+
+function buildBeliefState(input: AiDecisionInput): BeliefState {
   const history = beliefHistory(input);
   const classifications = history.map(classifyBeliefEvent);
   const invalidationLog = deriveInvalidationLog(classifications);

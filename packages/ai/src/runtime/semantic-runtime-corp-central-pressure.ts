@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
+import { decisionDerivedValue } from "./decision-derived-cache";
 import { rolesMatch } from "./role-match";
 
 export type CorpCentralServerId = "hq" | "rd";
@@ -36,8 +37,27 @@ type HintEffectWithTarget = {
 };
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
+const CENTRAL_PRESSURE_ASSESSMENT_DECISION_CACHE_KEYS = {
+  hq: Symbol("corp-central-pressure-assessment-hq"),
+  rd: Symbol("corp-central-pressure-assessment-rd"),
+} as const;
+const CENTRAL_PRESSURE_EVENTS_DECISION_CACHE_KEYS = {
+  hq: Symbol("corp-central-pressure-events-hq"),
+  rd: Symbol("corp-central-pressure-events-rd"),
+} as const;
 
 export function semanticRuntimeCorpCentralPressureAssessment(
+  input: AiDecisionInput,
+  serverId: CorpCentralServerId,
+): CorpCentralPressureAssessment {
+  return decisionDerivedValue(
+    input,
+    CENTRAL_PRESSURE_ASSESSMENT_DECISION_CACHE_KEYS[serverId],
+    () => buildSemanticRuntimeCorpCentralPressureAssessment(input, serverId),
+  );
+}
+
+function buildSemanticRuntimeCorpCentralPressureAssessment(
   input: AiDecisionInput,
   serverId: CorpCentralServerId,
 ): CorpCentralPressureAssessment {
@@ -172,6 +192,17 @@ export function semanticRuntimeCorpCentralServerIdFromPayload(
 }
 
 function semanticRuntimeCorpCentralEvents(
+  input: AiDecisionInput,
+  serverId: CorpCentralServerId,
+): PublicGameEvent[] {
+  return decisionDerivedValue(
+    input,
+    CENTRAL_PRESSURE_EVENTS_DECISION_CACHE_KEYS[serverId],
+    () => buildSemanticRuntimeCorpCentralEvents(input, serverId),
+  );
+}
+
+function buildSemanticRuntimeCorpCentralEvents(
   input: AiDecisionInput,
   serverId: CorpCentralServerId,
 ): PublicGameEvent[] {

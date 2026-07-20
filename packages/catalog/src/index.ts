@@ -36,26 +36,6 @@ export type {
   CatalogStatuses,
   CatalogValidationResult,
 } from "./catalog-types";
-export {
-  createProteusCardBasisSnapshot,
-  createProteusSpoilerImportReport,
-  parseProteusSpoilerSource,
-  proteusRarityCodes,
-  readProjectProteusSpoilerSource,
-  PROTEUS_CARD_BASIS_SNAPSHOT_ID,
-  PROTEUS_EXPECTED_TOTAL,
-  PROTEUS_SET_ID,
-  PROTEUS_SET_NAME,
-  PROTEUS_SOURCE_ID,
-  PROTEUS_SOURCE_REGISTRY_ID,
-} from "./proteus-spoiler";
-export type {
-  ProteusNonNormalizableField,
-  ProteusParsedCard,
-  ProteusSpoilerImportReport,
-  ProteusSpoilerParseResult,
-} from "./proteus-spoiler";
-
 export type RuntimeCardPool = {
   snapshot: CardSnapshot;
   snapshotHash: string;

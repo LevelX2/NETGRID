@@ -28,7 +28,9 @@ describe("semantic-redaction", () => {
   });
 
   it("redacts unsafe report strings and preserves safe strings", () => {
-    expect(redactSemanticString("privatePayload_bad_reason")).toBe("[redacted]");
+    expect(redactSemanticString("privatePayload_bad_reason")).toBe(
+      "[redacted]",
+    );
     expect(redactSemanticString("PRIvatePAYload_bad_reason")).toBe(
       "[redacted]",
     );
@@ -76,5 +78,17 @@ describe("semantic-redaction", () => {
         "SemanticTrace",
       ),
     ).not.toThrow();
+  });
+
+  it("scans shared objects once without weakening marker detection", () => {
+    const safeShared = { evidence: ["server_kind:remote"] };
+    expect(
+      findForbiddenSemanticPath({ first: safeShared, second: safeShared }),
+    ).toBeUndefined();
+
+    const unsafeShared = { evidence: ["visible/joinToken/value"] };
+    expect(
+      findForbiddenSemanticPath({ first: unsafeShared, second: unsafeShared }),
+    ).toBe("value.first.evidence[0]");
   });
 });

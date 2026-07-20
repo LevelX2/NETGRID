@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 
 import { createAiHintsByCard } from "../ai-hints";
+import { mergedPublicHistory } from "./public-event-history";
 import { rolesMatch } from "./role-match";
 
 type CorpRemoteLike = {
@@ -152,19 +153,6 @@ const remotePathChangeActionTypes = new Set([
   "trash_ice",
   "derez_ice",
 ]);
-
-function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
-  const byId = new Map<string, PublicGameEvent>();
-  for (const event of [
-    ...(input.playerView.publicEvents ?? []),
-    ...(input.eventTail ?? []),
-  ]) {
-    byId.set(event.eventId, event);
-  }
-  return [...byId.values()].sort(
-    (left, right) => left.stateVersionAfter - right.stateVersionAfter,
-  );
-}
 
 function publicActionType(event: PublicGameEvent): string {
   return stringPayload(event.publicPayload, "actionType") ?? event.type;

@@ -10,9 +10,9 @@ Dieser Plan schneidet die 154 importierten Proteus-Karten in kleine bis mittlere
 
 Führende Quellen:
 
-- `docs/releases/proteus/spoiler-import-report.md`
 - `docs/releases/proteus/mechanics-coverage-analysis.md`
-- `data/card-import/proteus-card-basis-2026-05-17.json`
+- `docs/source/Proteusspoiler.txt`
+- `data/cards/proteus-cards.json`
 - `docs/releases/proteus/variable-ice-contract.md`
 - `docs/releases/proteus/hidden-runner-resources-contract-2026-05-17.md`
 - `docs/releases/proteus/bad-publicity-loss-gate-contract.md`

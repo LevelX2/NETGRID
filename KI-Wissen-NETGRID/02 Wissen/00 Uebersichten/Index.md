@@ -42,6 +42,11 @@
   `docs/reviews/public-match-spectator-replay-final-review-2026-07-20.md`
   (Prozess:
   `docs/architecture/public-match-spectator-replay-process-2026-07-20.md`).
+- Globale öffentliche Spieleübersicht, accountgebundene persönliche
+  Spielhistorie und persistierte terminale Ergebnis-Snapshots:
+  `docs/reviews/public-game-directory-and-personal-history-final-review-2026-07-20.md`
+  (Prozess:
+  `docs/architecture/public-game-directory-and-personal-history-process-2026-07-20.md`).
 - Wiederverwendbare Funktionsnamen:
   [[../Architektur/Abstrakte Funktionsnamen und Wiederverwendung]].
 - Projektweiter Cleanup:

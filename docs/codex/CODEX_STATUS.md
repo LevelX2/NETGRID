@@ -36,6 +36,15 @@ Der vorhandene SQLite-KI-Trace persistiert die Kette im normalen
 `summary`-Modus kompakt und im erweiterten `detailed`-Modus vollständig unter
 demselben `trace_json`-Pfad.
 
+Die aktuelle Semantic Runtime verwendet reine abgeleitete Run-Target-,
+Handentwicklungs- und Install-Fit-Ergebnisse innerhalb genau einer synchronen
+Entscheidung wieder. Allokationsarme Redaction- und Side-Safety-Prüfungen
+erhalten denselben Hidden-Info-Vertrag. Der feste 240-Aktionen-Fall sank vom
+bereits optimierten Stand 22,854 auf 18,512 Sekunden und blieb in kompakter
+Baseline sowie vollständigen Raw-Slots bitgleich. Der Standard-Benchmark
+profitiert ohne zusätzlichen Schalter. Führend ist
+`docs/reviews/ai/ai-core-runtime-performance-followup-final-review-2026-07-20.md`.
+
 Choice-Ranking, Scoring-Window, Corp-Score, Board-Triage und Cutover-Tests
 besitzen fachliche Owner- oder Vertragsgrenzen; der produktive Importgraph
 bleibt frei von Laufzeit- und Typzyklen. Das AI-Source-Structure-Gate schützt
@@ -70,6 +79,17 @@ alle vorhandenen Matches rückwirkend öffentlich; der Bestandsaudit bestätigte
 verifizierten Frames. Führend sind
 `docs/architecture/public-match-spectator-replay-process-2026-07-20.md` und
 `docs/reviews/public-match-spectator-replay-final-review-2026-07-20.md`.
+
+Der dauerhafte Bereich `Spiele` stellt diese öffentlichen Matches in der
+Reihenfolge Offen, Laufend, Abgeschlossen mit passenden Filtern und direkten
+Aktionen bereit. `Meine Spiele` verwendet dagegen ausschließlich die
+authentifizierte Account-Teilnehmerbindung und darf dadurch auch eigene
+private Matches zeigen, niemals aber fremde. Terminale Ergebnisse werden
+einmal als immutable Snapshots gespeichert; nach dem historischen Backfill
+lesen Listen nur noch kompakte Matchzeilen. Der gemessene Bestandslauf
+ergänzte 19/19 Snapshots, fünf warme öffentliche Abrufe lagen bei 73 bis
+12 ms. Führend ist
+`docs/reviews/public-game-directory-and-personal-history-final-review-2026-07-20.md`.
 
 ## Geschlossene Account- und Deck-Alpha
 
@@ -131,6 +151,11 @@ ausführbare Verträge.
   dokumentiert und ausführbar.
 - Lokalisierte Kartenassets versionieren Art-Quellen und Full-PNGs; Review-
   Derivate bleiben lokal.
+- Der Repository-Gesamtcheck vom 20.07.2026 hat 19 verwaiste Code-/Barrel-
+  Dateien, neun abgeschlossene TODO-Abnahmelisten und die fünfteilige alte
+  Proteus-Importkette entfernt. Der erneute Import-/Dependency-Scan enthält
+  keine verwaisten App-/Package-Module. Führend ist
+  `docs/reviews/architecture/dead-source-todo-artifact-cleanup-final-review-2026-07-20.md`.
 - ARC-001 ersetzt private-LAN-basierte Maintenance-Freigabe durch eine
   eigenständige Passwort-/Session-/CSRF-/Reauth-Control-Plane. Lokales HTTP
   ist Loopback-only; Remote Maintenance ist standardmäßig aus und verlangt
