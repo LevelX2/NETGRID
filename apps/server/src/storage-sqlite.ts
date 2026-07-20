@@ -11,6 +11,7 @@ export const SQLITE_STORAGE_SCHEMA_VERSION = 3;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
 export const DEFAULT_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netgrid.sqlite";
 export const DEFAULT_STORAGE_BACKUP_DIR = "data/runtime/backups";
+const PUBLIC_MATCH_BACKFILL_META_KEY = "public_match_backfill_v1_completed_at";
 const PARTIAL_STATE_SNAPSHOTS = Symbol("partialStateSnapshots");
 
 type StoredMatchWithStorageFlags = StoredMatch & {
@@ -368,6 +369,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       this.db.exec("PRAGMA foreign_keys = ON");
       this.db.exec("PRAGMA journal_mode = DELETE");
       this.ensureSchema();
+      this.backfillExistingMatchesAsPublic();
     } catch (error) {
       openedDb?.close();
       if (error instanceof StorageError) throw error;
@@ -1198,6 +1200,28 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     this.hydrateRecordFromTables(matchId, record, options);
     validateStoredMatch(record);
     return record;
+  }
+
+  private backfillExistingMatchesAsPublic(): void {
+    if (this.meta(PUBLIC_MATCH_BACKFILL_META_KEY)) return;
+    this.transaction(() => {
+      const rows = this.db
+        .prepare("SELECT match_id AS matchId, record_json AS recordJson FROM matches")
+        .all() as Array<{ matchId: string; recordJson: string }>;
+      const update = this.db.prepare("UPDATE matches SET record_json = ? WHERE match_id = ?");
+      for (const row of rows) {
+        const record = JSON.parse(row.recordJson) as {
+          match?: { isPublic?: unknown; discoverableInLan?: unknown };
+        };
+        if (!record.match) continue;
+        record.match.isPublic = true;
+        delete record.match.discoverableInLan;
+        update.run(JSON.stringify(record), row.matchId);
+      }
+      const now = new Date().toISOString();
+      this.setMeta(PUBLIC_MATCH_BACKFILL_META_KEY, now, now);
+      this.setMeta("last_migration_at", now, now);
+    });
   }
 
   private hydrateRecordFromTables(matchId: string, record: StoredMatchWithStorageFlags, options: RecordLoadOptions = {}): void {
@@ -2363,6 +2387,7 @@ export function validateStoredMatch(value: unknown): asserts value is StoredMatc
   if (!match || typeof match.matchId !== "string" || match.matchId.length === 0) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
   if (typeof match.matchVersion !== "number" || !Number.isFinite(match.matchVersion) || match.matchVersion < 1) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
   if (!isMatchStatus(match.status) || !isMatchMode(match.mode)) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
+  if (typeof match.isPublic !== "boolean") throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
   if (!Array.isArray(record.sessions) || !Array.isArray(record.tokens) || !Array.isArray(record.eventLog) || !Array.isArray(record.actionReceipts) || !Array.isArray(record.undoSnapshots) || !Array.isArray(record.stateSnapshots)) {
     throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
   }

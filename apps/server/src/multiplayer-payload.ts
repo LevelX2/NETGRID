@@ -78,6 +78,7 @@ export function buildSidePayload(
     matchId: record.match.matchId,
     matchStatus: record.match.status,
     matchVersion: record.match.matchVersion,
+    isPublic: record.match.isPublic,
     side,
     playerView,
     legalActions:

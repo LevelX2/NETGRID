@@ -530,6 +530,89 @@ describe("Backend 0.5 private storage maintenance", () => {
     expect(isMaintenanceClientAddressAllowed("203.0.113.10")).toBe(false);
   });
 
+  it("marks every legacy SQLite match public exactly once during the rollout backfill", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "public-match-backfill",
+    });
+    const first = await service.createMatch({
+      hostSide: "runner",
+      seed: "legacy-public-first",
+      isPublic: false,
+    });
+    const second = await service.createMatch({
+      hostSide: "corp",
+      seed: "legacy-public-second",
+      isPublic: false,
+    });
+    storage.close?.();
+
+    const legacyDb = new DatabaseSync(dbPath);
+    try {
+      legacyDb
+        .prepare("DELETE FROM storage_meta WHERE key = ?")
+        .run("public_match_backfill_v1_completed_at");
+      const rows = legacyDb
+        .prepare("SELECT match_id AS matchId, record_json AS recordJson FROM matches")
+        .all() as Array<{ matchId: string; recordJson: string }>;
+      const update = legacyDb.prepare(
+        "UPDATE matches SET record_json = ? WHERE match_id = ?",
+      );
+      for (const row of rows) {
+        const record = JSON.parse(row.recordJson) as {
+          match: { isPublic?: boolean; discoverableInLan?: boolean };
+        };
+        delete record.match.isPublic;
+        record.match.discoverableInLan = false;
+        update.run(JSON.stringify(record), row.matchId);
+      }
+    } finally {
+      legacyDb.close();
+    }
+
+    const reopened = new SqliteMatchStorage({ dbPath, backupDir });
+    try {
+      const records = await reopened.list?.();
+      expect(records?.map((record) => record.match.matchId)).toEqual([
+        first.matchId,
+        second.matchId,
+      ]);
+      expect(records?.every((record) => record.match.isPublic)).toBe(true);
+
+      const auditDb = new DatabaseSync(dbPath, { readOnly: true });
+      try {
+        const rawRows = auditDb
+          .prepare("SELECT record_json AS recordJson FROM matches")
+          .all() as Array<{ recordJson: string }>;
+        expect(rawRows).toHaveLength(2);
+        expect(
+          rawRows.every(
+            (row) => JSON.parse(row.recordJson).match.isPublic === true,
+          ),
+        ).toBe(true);
+        expect(
+          rawRows.some(
+            (row) =>
+              "discoverableInLan" in JSON.parse(row.recordJson).match,
+          ),
+        ).toBe(false);
+        expect(
+          auditDb
+            .prepare("SELECT value FROM storage_meta WHERE key = ?")
+            .get("public_match_backfill_v1_completed_at"),
+        ).toBeDefined();
+      } finally {
+        auditDb.close();
+      }
+    } finally {
+      reopened.close?.();
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   it("serves a redacted local SQLite storage summary, match list and match detail", async () => {
     const dir = await tempStorageDir();
     const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups") });
@@ -2513,13 +2596,42 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(invalidJoin.error.message).not.toContain("corp");
   });
 
-  it("V23A-T002 V23A-T003 V23A-T004 V23A-T005 lists only pending discoverable LAN matches with safe metadata", async () => {
+  it("defaults new matches to public and preserves an explicit private choice", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "public-match-default",
+    });
+    const publicMatch = await service.createMatch({
+      hostSide: "runner",
+      seed: "public-match-default-true",
+    });
+    const privateMatch = await service.createMatch({
+      hostSide: "corp",
+      seed: "public-match-explicit-false",
+      isPublic: false,
+    });
+
+    expect(publicMatch.isPublic).toBe(true);
+    expect(privateMatch.isPublic).toBe(false);
+    expect((await service.loadForTest(publicMatch.matchId))?.match.isPublic).toBe(true);
+    expect((await service.loadForTest(privateMatch.matchId))?.match.isPublic).toBe(false);
+
+    const recreated = await service.recreateMatch(privateMatch.matchId, {
+      side: privateMatch.hostSide,
+      sessionToken: privateMatch.hostSessionToken,
+    });
+    expect(recreated.ok).toBe(true);
+    if (!recreated.ok || !recreated.newMatch) throw new Error("Expected recreated match");
+    expect(recreated.newMatch.isPublic).toBe(false);
+    expect((await service.loadForTest(recreated.newMatch.matchId))?.match.isPublic).toBe(false);
+  });
+
+  it("V23A-T002 V23A-T003 V23A-T004 V23A-T005 lists only pending public matches with safe metadata", async () => {
     let now = "2026-05-10T12:00:00.000Z";
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v23a-open-list", now: () => now });
-    const listed = await service.createMatch({ hostSide: "runner", seed: "v23a-listed", mode: "human_vs_human", displayName: "Host A", discoverableInLan: true });
-    await service.createMatch({ hostSide: "runner", seed: "v23a-hidden", mode: "human_vs_human", displayName: "Hidden Host", discoverableInLan: false });
-    const consumed = await service.createMatch({ hostSide: "corp", seed: "v23a-consumed", mode: "human_vs_human", displayName: "Consumed Host", discoverableInLan: true });
-    await service.createMatch({ hostSide: "runner", seed: "v23a-ai", mode: "human_runner_vs_corp_ai", displayName: "AI Host", discoverableInLan: true });
+    const listed = await service.createMatch({ hostSide: "runner", seed: "v23a-listed", mode: "human_vs_human", displayName: "Host A", isPublic: true });
+    await service.createMatch({ hostSide: "runner", seed: "v23a-hidden", mode: "human_vs_human", displayName: "Hidden Host", isPublic: false });
+    const consumed = await service.createMatch({ hostSide: "corp", seed: "v23a-consumed", mode: "human_vs_human", displayName: "Consumed Host", isPublic: true });
+    await service.createMatch({ hostSide: "runner", seed: "v23a-ai", mode: "human_runner_vs_corp_ai", displayName: "AI Host", isPublic: true });
     const consumedToken = new URL(consumed.joinUrl ?? "").searchParams.get("joinToken");
     if (!consumedToken) throw new Error("Missing consumed join token");
     const consumedJoin = await service.joinMatch(consumed.matchId, { token: consumedToken, displayName: "Joiner" });
@@ -2540,7 +2652,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(serialized).not.toMatch(/joinToken|sessionToken|reconnectToken|tokenHash|deckHash|deckSnapshot|privateDeck|cardInstances/i);
   });
 
-  it("V23A-T008 V23A-T009 exposes GET /api/matches/open and honors discoverableInLan at create time", async () => {
+  it("V23A-T008 V23A-T009 exposes GET /api/matches/open and honors isPublic at create time", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v23a-open-http" });
     const handle = createNetgridHttpServer(service);
     const baseUrl = await listen(handle);
@@ -2553,7 +2665,7 @@ describe("MVP 0.2 multiplayer service", () => {
       const hiddenResponse = await fetch(`${baseUrl}/api/matches`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ hostSide: "runner", mode: "human_vs_human", seed: "v23a-http-hidden", discoverableInLan: false })
+        body: JSON.stringify({ hostSide: "runner", mode: "human_vs_human", seed: "v23a-http-hidden", isPublic: false })
       });
       expect(visibleResponse.status).toBe(201);
       expect(hiddenResponse.status).toBe(201);
@@ -2574,7 +2686,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("V23A-T011 V23A-T016 rejects stale tokenless LAN joins after status changes", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v23a-race" });
-    const created = await service.createMatch({ hostSide: "runner", seed: "v23a-race-match", mode: "human_vs_human", discoverableInLan: true });
+    const created = await service.createMatch({ hostSide: "runner", seed: "v23a-race-match", mode: "human_vs_human", isPublic: true });
     const initiallyListed = await service.listOpenMatches();
     expect(initiallyListed.some((entry) => entry.matchId === created.matchId)).toBe(true);
     const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
@@ -2600,7 +2712,7 @@ describe("MVP 0.2 multiplayer service", () => {
         hostSide: index % 2 === 0 ? "runner" : "corp",
         seed: `v23a-perf-${index}`,
         mode: "human_vs_human",
-        discoverableInLan: index % 3 !== 0
+        isPublic: index % 3 !== 0
       });
     }
     const startedAt = Date.now();
@@ -5248,6 +5360,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(oldRecord?.match.series?.nextMatchId).toBe(next.matchId);
     expect(nextRecord?.match.settings.matchFormat).toBe("two_game_side_swap");
     expect(nextRecord?.match.settings.agendaPointsToWin).toBe(2);
+    expect(nextRecord?.match.isPublic).toBe(oldRecord?.match.isPublic);
     expect(nextRecord?.match.series).toMatchObject({
       seriesId: oldRecord?.match.series?.seriesId,
       status: "active",

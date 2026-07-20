@@ -78,7 +78,7 @@ export function MatchHostConsole({
   hasAiOpponent,
   humanSideSelection,
   countdownSeconds,
-  discoverableInLan,
+  isPublic,
   playerClockMode,
   playerClockMinutes,
   playerClockGraceSeconds,
@@ -111,7 +111,7 @@ export function MatchHostConsole({
   onCreateMatch,
   onHumanSideSelection,
   onCountdownSeconds,
-  onDiscoverableInLan,
+  onIsPublic,
   onPlayerClockMode,
   onPlayerClockMinutes,
   onPlayerClockGraceSeconds,
@@ -153,7 +153,7 @@ export function MatchHostConsole({
   hasAiOpponent: boolean;
   humanSideSelection: HumanSideSelection;
   countdownSeconds: 3 | 5 | 10;
-  discoverableInLan: boolean;
+  isPublic: boolean;
   playerClockMode: MatchStartPlayerClockMode;
   playerClockMinutes: MatchStartPlayerClockMinutes;
   playerClockGraceSeconds: MatchStartPlayerClockGraceSeconds;
@@ -189,7 +189,7 @@ export function MatchHostConsole({
   onCreateMatch(): void;
   onHumanSideSelection(selection: HumanSideSelection): void;
   onCountdownSeconds(seconds: 3 | 5 | 10): void;
-  onDiscoverableInLan(discoverable: boolean): void;
+  onIsPublic(isPublic: boolean): void;
   onPlayerClockMode(mode: MatchStartPlayerClockMode): void;
   onPlayerClockMinutes(minutes: MatchStartPlayerClockMinutes): void;
   onPlayerClockGraceSeconds(seconds: MatchStartPlayerClockGraceSeconds): void;
@@ -370,7 +370,7 @@ export function MatchHostConsole({
         matchCardPool={matchCardPool}
         humanAiSideSelection={humanAiSideSelection}
         countdownSeconds={countdownSeconds}
-        discoverableInLan={discoverableInLan}
+        isPublic={isPublic}
         playerClockMode={playerClockMode}
         playerClockMinutes={playerClockMinutes}
         playerClockGraceSeconds={playerClockGraceSeconds}
@@ -398,7 +398,7 @@ export function MatchHostConsole({
         }
         aiSlotDisabled={aiSlotDisabled}
         onCountdownSeconds={onCountdownSeconds}
-        onDiscoverableInLan={onDiscoverableInLan}
+        onIsPublic={onIsPublic}
         onPlayerClockMode={onPlayerClockMode}
         onPlayerClockMinutes={onPlayerClockMinutes}
         onPlayerClockGraceSeconds={onPlayerClockGraceSeconds}

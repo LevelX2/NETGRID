@@ -2424,8 +2424,8 @@ async function routeHttp(
         createInput.aiPacingMode = body.aiPacingMode;
       if (isAiDecisionTraceMode(body.aiTraceMode))
         createInput.aiTraceMode = body.aiTraceMode;
-      if (typeof body.discoverableInLan === "boolean")
-        createInput.discoverableInLan = body.discoverableInLan;
+      if (typeof body.isPublic === "boolean")
+        createInput.isPublic = body.isPublic;
       Object.assign(createInput, deckSelectionFromBody(body));
       if (typeof body.settings === "object" && body.settings) {
         const settings = body.settings as Record<string, unknown>;

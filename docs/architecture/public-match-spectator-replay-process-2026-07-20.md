@@ -90,6 +90,16 @@ prepared
   -> complete
 ```
 
+## Fortschritt
+
+| Paket | Status | Ergebnis |
+| --- | --- | --- |
+| PUB-001 | abgeschlossen | `isPublic` ersetzt den LAN-Flag, Client und Server verwenden Standard `true`, Recreate und Serien übernehmen den Wert, SQLite normalisiert alle Bestandsmatches einmalig auf öffentlich. |
+| PUB-002 | offen | – |
+| PUB-003 | offen | – |
+| PUB-004 | offen | – |
+| PUB-005 | offen | – |
+
 ## Paketfolge
 
 | Paket | Titel | Commit-Vorschlag |

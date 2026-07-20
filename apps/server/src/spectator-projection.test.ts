@@ -150,6 +150,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
       status: "active",
       mode: "human_vs_human",
       matchVersion: 5,
+      isPublic: true,
       seed: "spectator-projection-v1",
       baseline: futureState.baseline,
       settings: {

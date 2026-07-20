@@ -35,6 +35,7 @@ function storedMatchWithEvents(count: number): StoredMatch {
       status: "active",
       mode: "human_vs_human",
       matchVersion: 1,
+      isPublic: true,
       baseline: CURRENT_RULES_BASELINE,
       settings: { agendaPointsToWin: 7, matchFormat: "single_game" },
       deckSetup: {

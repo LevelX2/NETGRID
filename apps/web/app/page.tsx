@@ -576,7 +576,7 @@ export default function Page() {
   const [joinLinkInput, setJoinLinkInput] = useState("");
   const [joinMatchId, setJoinMatchId] = useState("");
   const [joinToken, setJoinToken] = useState("");
-  const [discoverableInLan, setDiscoverableInLan] = useState(true);
+  const [isPublic, setIsPublic] = useState(true);
   const [openLanMatches, setOpenLanMatches] = useState<OpenMatchEntry[]>([]);
   const [openLanLoading, setOpenLanLoading] = useState(false);
   const [openLanError, setOpenLanError] = useState("");
@@ -3481,7 +3481,7 @@ export default function Page() {
           ? { aiTraceMode: aiTraceStartMode }
           : {}),
         ...(isHumanVsHuman ? { countdownSeconds } : {}),
-        ...(isHumanVsHuman ? { discoverableInLan } : {}),
+        isPublic,
         settings: {
           matchFormat: effectiveStartMatchFormat,
           ...(effectiveStartMatchFormat === "two_game_side_swap"
@@ -5316,6 +5316,7 @@ export default function Page() {
                   matchId,
                   matchStatus: message.payload.matchStatus,
                   matchVersion: message.payload.matchVersion,
+                  isPublic: currentLobby?.isPublic ?? true,
                   side,
                   playerView: message.payload.playerView,
                   ...(message.payload.playerClock
@@ -5703,7 +5704,7 @@ export default function Page() {
                           hasAiOpponent={hasAiOpponent}
                           humanSideSelection={humanSideSelection}
                           countdownSeconds={countdownSeconds}
-                          discoverableInLan={discoverableInLan}
+                          isPublic={isPublic}
                           playerClockMode={playerClockMode}
                           playerClockMinutes={playerClockMinutes}
                           playerClockGraceSeconds={playerClockGraceSeconds}
@@ -5756,7 +5757,7 @@ export default function Page() {
                           onCreateMatch={createMatch}
                           onHumanSideSelection={setHumanSideSelection}
                           onCountdownSeconds={setCountdownSeconds}
-                          onDiscoverableInLan={setDiscoverableInLan}
+                          onIsPublic={setIsPublic}
                           onPlayerClockMode={setPlayerClockMode}
                           onPlayerClockMinutes={setPlayerClockMinutes}
                           onPlayerClockGraceSeconds={setPlayerClockGraceSeconds}

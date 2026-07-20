@@ -341,6 +341,7 @@ export type ApiSidePayload = {
   matchId: string;
   matchStatus: ApiMatchStatus;
   matchVersion: number;
+  isPublic: boolean;
   side: Side;
   playerView: PlayerView;
   legalActions: LegalAction[];
@@ -362,6 +363,7 @@ export type ApiLobbyPayload = {
   matchId: string;
   matchStatus: ApiMatchStatus;
   matchVersion: number;
+  isPublic: boolean;
   side: Side;
   eventTail: PublicGameEvent[];
   opponentStatus: ApiOpponentStatus;
@@ -430,6 +432,7 @@ export type ApiServerMessage =
 export type ApiCreateMatchResponse = {
   matchId: string;
   matchStatus?: ApiMatchStatus;
+  isPublic: boolean;
   pendingDeckHandshake?: boolean;
   hostSide: Side;
   hostSessionToken: string;
@@ -453,6 +456,7 @@ export type ApiCreateMatchResponse = {
 
 export type ApiJoinMatchResponse = {
   matchId: string;
+  isPublic: boolean;
   side: Side;
   sessionToken: string;
   reconnectToken: string;

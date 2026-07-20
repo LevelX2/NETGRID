@@ -43,7 +43,7 @@ export function MatchStartAdvancedOptions({
   matchCardPool,
   humanAiSideSelection,
   countdownSeconds,
-  discoverableInLan,
+  isPublic,
   playerClockMode,
   playerClockMinutes,
   playerClockGraceSeconds,
@@ -65,7 +65,7 @@ export function MatchStartAdvancedOptions({
   selectedParticipantBCorpLocalDeckId,
   aiSlotDisabled,
   onCountdownSeconds,
-  onDiscoverableInLan,
+  onIsPublic,
   onPlayerClockMode,
   onPlayerClockMinutes,
   onPlayerClockGraceSeconds,
@@ -90,7 +90,7 @@ export function MatchStartAdvancedOptions({
   matchCardPool: MatchCardPoolSelection;
   humanAiSideSelection: HumanAiSideSelection;
   countdownSeconds: 3 | 5 | 10;
-  discoverableInLan: boolean;
+  isPublic: boolean;
   playerClockMode: MatchStartPlayerClockMode;
   playerClockMinutes: MatchStartPlayerClockMinutes;
   playerClockGraceSeconds: MatchStartPlayerClockGraceSeconds;
@@ -112,7 +112,7 @@ export function MatchStartAdvancedOptions({
   selectedParticipantBCorpLocalDeckId: string;
   aiSlotDisabled: boolean;
   onCountdownSeconds(seconds: 3 | 5 | 10): void;
-  onDiscoverableInLan(discoverable: boolean): void;
+  onIsPublic(isPublic: boolean): void;
   onPlayerClockMode(mode: MatchStartPlayerClockMode): void;
   onPlayerClockMinutes(minutes: MatchStartPlayerClockMinutes): void;
   onPlayerClockGraceSeconds(seconds: MatchStartPlayerClockGraceSeconds): void;
@@ -155,18 +155,14 @@ export function MatchStartAdvancedOptions({
             </select>
           </label>
         ) : null}
-        {isHumanVsHuman ? (
-          <label
-            className={`deckBuilderToggle ${discoverableInLan ? "checked" : ""}`}
-          >
-            <input
-              checked={discoverableInLan}
-              onChange={(event) => onDiscoverableInLan(event.target.checked)}
-              type="checkbox"
-            />
-            In LAN-Liste sichtbar
-          </label>
-        ) : null}
+        <label className={`deckBuilderToggle ${isPublic ? "checked" : ""}`}>
+          <input
+            checked={isPublic}
+            onChange={(event) => onIsPublic(event.target.checked)}
+            type="checkbox"
+          />
+          Öffentliches Spiel
+        </label>
         <label>
           Spielerzeit
           <select

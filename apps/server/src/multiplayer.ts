@@ -218,7 +218,7 @@ export type MatchRecord = {
   aiPacingMode?: AiPacingMode;
   aiTraceMode?: AiDecisionTraceMode;
   participantIdentities?: Partial<Record<SeriesPlayerSlot, Exclude<ApiPlayerIdentityKind, "ai">>>;
-  discoverableInLan?: boolean;
+  isPublic: boolean;
   series?: MatchSeriesState;
   retentionProtection?: {
     protected: boolean;
@@ -502,6 +502,7 @@ export type SafeErrorPayload = {
 export type CreateMatchResult = {
   matchId: string;
   matchStatus: MatchStatus;
+  isPublic: boolean;
   pendingDeckHandshake?: boolean;
   hostSide: Side;
   hostSessionToken: string;
@@ -524,6 +525,7 @@ export type CreateMatchResult = {
 
 export type JoinMatchResult = {
   matchId: string;
+  isPublic: boolean;
   sessionToken: string;
   reconnectToken: string;
   side: Side;
@@ -773,7 +775,7 @@ export class MultiplayerService {
     corpDifficulty?: AiDifficulty;
     aiPacingMode?: AiPacingMode;
     aiTraceMode?: AiDecisionTraceMode;
-    discoverableInLan?: boolean;
+    isPublic?: boolean;
   } & MatchDeckSelectionInput): Promise<CreateMatchResult> {
     const seed = input.seed?.trim() || `match-${randomId("seed")}`;
     const matchId = randomId("match");
@@ -788,7 +790,7 @@ export class MultiplayerService {
     const aiDeckPolicy = aiPlayer ? input.aiDeckPolicy ?? "selected" : undefined;
     const aiPacingMode = input.aiPacingMode ?? (aiPlayer ? "paced" : undefined);
     const aiTraceMode = normalizeAiDecisionTraceMode(input.aiTraceMode);
-    const discoverableInLan = mode === "human_vs_human" ? input.discoverableInLan !== false : false;
+    const isPublic = input.isPublic !== false;
     const now = this.now();
     const hostSessionToken = generateToken();
     const hostReconnectToken = generateToken();
@@ -861,7 +863,7 @@ export class MultiplayerService {
                 }
               }
             : {}),
-          discoverableInLan,
+          isPublic,
           createdAt: now,
           updatedAt: now
         },
@@ -900,6 +902,7 @@ export class MultiplayerService {
       return {
         matchId,
         matchStatus: record.match.status,
+        isPublic: record.match.isPublic,
         pendingDeckHandshake: true,
         hostSide,
         hostSessionToken,
@@ -993,7 +996,7 @@ export class MultiplayerService {
               }
             }
           : {}),
-        discoverableInLan,
+        isPublic,
         ...(settings.matchFormat === "two_game_side_swap"
           ? {
               series: input.series
@@ -1047,6 +1050,7 @@ export class MultiplayerService {
     return {
       matchId,
       matchStatus: record.match.status,
+      isPublic: record.match.isPublic,
       hostSide,
       hostSessionToken,
       hostReconnectToken,
@@ -1117,7 +1121,7 @@ export class MultiplayerService {
           : {}),
         ...(record.match.aiPacingMode ? { aiPacingMode: record.match.aiPacingMode } : {}),
         ...(record.match.aiTraceMode ? { aiTraceMode: record.match.aiTraceMode } : {}),
-        ...(typeof record.match.discoverableInLan === "boolean" ? { discoverableInLan: record.match.discoverableInLan } : {}),
+        isPublic: record.match.isPublic,
         ...(record.match.deckSetup.aiDeckPolicy ? { aiDeckPolicy: record.match.deckSetup.aiDeckPolicy } : {}),
         settings: record.match.settings,
         participantADecks: participantDecks.player_a,
@@ -1210,6 +1214,7 @@ export class MultiplayerService {
       const lobbyPayload = this.lobbyPayloadFor(record, tokenRecord.allowedSide);
       return {
         matchId,
+        isPublic: record.match.isPublic,
         sessionToken,
         reconnectToken,
         side: tokenRecord.allowedSide,
@@ -1226,6 +1231,7 @@ export class MultiplayerService {
     const payload = this.payloadFor(record, tokenRecord.allowedSide);
     return {
       matchId,
+      isPublic: record.match.isPublic,
       sessionToken,
       reconnectToken,
       side: tokenRecord.allowedSide,
@@ -1276,6 +1282,7 @@ export class MultiplayerService {
     const payload = this.shouldUseLobbyPayload(record) ? this.lobbyPayloadFor(record, input.side) : this.payloadFor(record, input.side);
     return {
       matchId,
+      isPublic: record.match.isPublic,
       sessionToken,
       reconnectToken,
       side: input.side,
@@ -1943,7 +1950,7 @@ export class MultiplayerService {
     const nowIso = this.now();
     const nowMs = Date.parse(nowIso);
     return records
-      .filter((record) => record.match.mode === "human_vs_human" && record.match.status === "pending" && record.match.discoverableInLan !== false)
+      .filter((record) => record.match.mode === "human_vs_human" && record.match.status === "pending" && record.match.isPublic)
       .map((record) => {
         const openJoinToken = this.openJoinToken(record);
         if (!openJoinToken) return undefined;
@@ -2341,7 +2348,7 @@ export class MultiplayerService {
       ...(includeOpponentDecks ? { participantBDecks: participants[opponentPlayer] } : {}),
       ...(record.match.deckSetup.aiDeckPolicy ? { aiDeckPolicy: record.match.deckSetup.aiDeckPolicy } : {}),
       ...(record.match.aiPacingMode ? { aiPacingMode: record.match.aiPacingMode } : {}),
-      ...(typeof record.match.discoverableInLan === "boolean" ? { discoverableInLan: record.match.discoverableInLan } : {}),
+      isPublic: record.match.isPublic,
       ...(runnerDifficulty ? { runnerDifficulty } : {}),
       ...(corpDifficulty ? { corpDifficulty } : {})
     };
@@ -2560,6 +2567,7 @@ export class MultiplayerService {
       matchId: record.match.matchId,
       matchStatus: record.match.status,
       matchVersion: record.match.matchVersion,
+      isPublic: record.match.isPublic,
       side,
       eventTail: [],
       opponentStatus: {
@@ -2912,7 +2920,7 @@ export class MultiplayerService {
   private resolveJoinTokenForJoinInput(record: StoredMatch, token: string | undefined): TokenRecord | undefined {
     const candidate = token?.trim();
     if (candidate) return this.findToken(record, candidate, "join");
-    if (record.match.mode !== "human_vs_human" || record.match.status !== "pending" || record.match.discoverableInLan === false) return undefined;
+    if (record.match.mode !== "human_vs_human" || record.match.status !== "pending" || !record.match.isPublic) return undefined;
     return this.openJoinToken(record);
   }
 
