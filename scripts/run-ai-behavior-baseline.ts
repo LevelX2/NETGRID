@@ -12,16 +12,15 @@ import { pathToFileURL } from "node:url";
 import {
   listMatchProgressionBenchmarkDeckSlots,
   type AiBenchmarkDeckSlotDefinition,
-  type AiSelfplayTraceMiningResult,
 } from "../packages/ai/src/simulation";
 import {
   compareAiBehaviorBaselines,
   createAiBehaviorBaseline,
   formatAiBehaviorBaselineReport,
   type AiBehaviorBaselineResult,
-  type AiBehaviorBaselineSlotDescriptor,
   type AiBehaviorBaselineSlotResult,
 } from "../packages/ai/src/simulation/ai-behavior-baseline";
+import { writeAiBehaviorBaselineRawArtifact } from "./ai-behavior-baseline-raw-artifact";
 import { runAiBehaviorBaselineSlot } from "./ai-behavior-baseline-slot";
 import { mapWithConcurrencyInOrder } from "./ordered-worker-pool";
 
@@ -132,19 +131,11 @@ try {
   const comparison = baseline
     ? compareAiBehaviorBaselines(baseline, result)
     : undefined;
-  const rawSlots = workerSlots.map(
-    (worker) =>
-      JSON.parse(readFileSync(worker.rawPath, "utf8")) as {
-        descriptor: AiBehaviorBaselineSlotDescriptor;
-        trace: AiSelfplayTraceMiningResult;
-      },
-  );
-
   writeJson(args.outJson, result);
-  writeJson(args.rawOut, {
-    schemaVersion: "ai-behavior-baseline-v1-raw",
+  await writeAiBehaviorBaselineRawArtifact({
+    outputPath: resolve(repoRoot, args.rawOut),
     result,
-    slots: rawSlots,
+    slotFragmentPaths: workerSlots.map((worker) => worker.rawPath),
   });
   writeText(args.outMd, formatAiBehaviorBaselineReport(result, comparison));
 

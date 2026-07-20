@@ -229,6 +229,24 @@ Bei einem fehlgeschlagenen Done-Gate bleibt der Zustand beim aktuellen Paket.
 - Verifikation: drei Pool-/Fehlerpfadtests grün, `check:ai` grün,
   seriell/parallel identische Raw-Evidence und `git diff --check` ohne Befund.
 
+### P4 – abgeschlossen am 20. Juli 2026
+
+- Der Parent-Prozess hält nicht mehr alle Raw-Traces gleichzeitig als
+  deserialisierte Objekte. Er streamt die Worker-Fragmente direkt in ein
+  kompaktes JSON-Endartefakt.
+- Geschrieben wird zunächst in eine eindeutige Nachbardatei; erst nach
+  vollständigem Erfolg wird atomar auf den Zielpfad umbenannt. Bei Fehlern
+  bleibt ein vorhandenes Endartefakt unverändert und die temporäre Datei wird
+  entfernt.
+- Endet `--raw-out` auf `.gz`, wird derselbe JSON-Datenstrom verlustfrei mit
+  Gzip komprimiert. Ein Reader unterstützt beide Formate; Schema und kompakte
+  Baseline-Ausgaben bleiben unverändert.
+- Der feste 40-Aktionen-Roundtrip war nach dem Einlesen feldgleich. Die
+  Raw-Größe sank von 336.576 Byte als JSON auf 27.131 Byte als Gzip, also um
+  91,9 Prozent.
+- Verifikation: drei Roundtrip-, Kompressions- und Abbruchtests grün, realer
+  JSON/Gzip-Simulationsvergleich bitgleich und `git diff --check` ohne Befund.
+
 ## Verifikationsregeln
 
 - Parität wird über ActionSequence, finalen StateHash, Replaystatus,
