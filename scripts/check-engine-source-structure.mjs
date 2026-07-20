@@ -32,7 +32,6 @@ const forbiddenRuntimeDelegateFiles = [
 const allowedLayerDebt = new Set([
   "ability-engine/active-modifiers.ts -> game/state/temporary-breaker-strength.ts",
   "ability-engine/card-implementation-runtime-activated-costs.ts -> game/payment/runner-payment-support.ts",
-  "ability-engine/cost-pipeline.ts -> game/payment/index.ts",
 ]);
 const runtimePortContractFiles = [
   "access-flow-runtime-port.ts",

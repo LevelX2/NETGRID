@@ -7,7 +7,7 @@ Stand: 2026-05-17
 
 Dieses Artefakt beschreibt den engen Planungsvertrag fuer Proteus-ICE aus `data/rules/proteus-mechanics-coverage-2026-05-17.json`, insbesondere die Cluster `variable_rez_cost_strength_subroutines`, `installed_ice_relative_counting`, `pass_trigger_uninstall_ice` und `ice_repositioning`.
 
-Der Vertrag ist planning-only. Er erzeugt keine Runtime-Implementierung, keine Proteus-Kartenpromotion, keine Decklegalität, keine Formatlegalität und keine AI-Unterstützung. Proteus-Quelltexte aus `data/card-import/proteus-card-basis-2026-05-17.json` bleiben display-only Planungsinput.
+Der Vertrag war planning-only. Die ursprünglichen Proteus-Quelltexte stehen in `docs/source/Proteusspoiler.txt`; der aktuelle Kartenstand steht in `data/cards/proteus-cards.json`.
 
 ## Kartenliste
 

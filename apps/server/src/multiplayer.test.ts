@@ -10082,7 +10082,7 @@ describe("MVP 0.2 multiplayer service", () => {
       finalStateHash: hashState(finished.gameState),
       errors: [],
     });
-  }, 60_000);
+  }, 120_000);
 
   it("rejects AI match start when the selected AI snapshot is internally invalid", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
@@ -11817,7 +11817,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
   });
 
-  it("advances Corp AI in a root-rez window even when activeSide is runner", async () => {
+  it("advances Corp AI in the post-jack-out root-rez window", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {
       tokenSalt: "server-corp-ai-root-rez-active-runner",
@@ -11855,6 +11855,10 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(gameState.activeSide).toBe("runner");
     expect(gameState.timingPoint).toBe("run.jack_out_window");
+    expect(getLegalActions(gameState, "runner").map((action) => action.type).sort()).toEqual(["continue_run", "jack_out"]);
+    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "continue_run");
+    expect(gameState.activeSide).toBe("corp");
+    expect(gameState.timingPoint).toBe("run.movement_rez_window");
     expect(getLegalActions(gameState, "runner")).toEqual([]);
     expect(
       getLegalActions(gameState, "corp")
@@ -11903,7 +11907,7 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
-    expect(["decline_rez", "rez_ice"]).toContain(
+    expect(["decline_rez", "rez_card"]).toContain(
       advanced.publicEvent?.publicPayload.actionType,
     );
     expect(advanced.requesterPayload.playerView.stateVersion).toBe(

@@ -9,7 +9,9 @@ Dieses Artefakt schneidet den Proteus-Cluster `virus_antibody_counter_family` au
 
 Lokale Quellen:
 
-- `data/card-import/proteus-card-basis-2026-05-17.json`
+- `data/cards/proteus-cards.json`
+- `data/manifests/proteus-card-support.json`
+- `docs/source/Proteusspoiler.txt`
 - `data/rules/proteus-mechanics-coverage-2026-05-17.json`
 - `docs/releases/proteus/mechanics-coverage-analysis.md`
 - `docs/releases/mvp/mvp-0-99-hosting-virus-counters/counter-hosting-spec.md`

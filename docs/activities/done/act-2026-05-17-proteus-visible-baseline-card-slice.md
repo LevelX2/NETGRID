@@ -46,7 +46,7 @@ Der erste Proteus-Kartenslice soll eine kleine sichtbare Baseline aus `covered`-
 - `docs/releases/proteus/release-slicing-plan.md`
 - `docs/releases/proteus/mechanics-coverage-analysis.md`
 - `data/rules/proteus-mechanics-coverage-2026-05-17.json`
-- `docs/releases/proteus/spoiler-import-report.md`
+- `docs/source/Proteusspoiler.txt`
 
 ## Scope
 

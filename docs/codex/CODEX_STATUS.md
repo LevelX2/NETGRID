@@ -131,6 +131,11 @@ ausführbare Verträge.
   dokumentiert und ausführbar.
 - Lokalisierte Kartenassets versionieren Art-Quellen und Full-PNGs; Review-
   Derivate bleiben lokal.
+- Der Repository-Gesamtcheck vom 20.07.2026 hat 19 verwaiste Code-/Barrel-
+  Dateien, neun abgeschlossene TODO-Abnahmelisten und die fünfteilige alte
+  Proteus-Importkette entfernt. Der erneute Import-/Dependency-Scan enthält
+  keine verwaisten App-/Package-Module. Führend ist
+  `docs/reviews/architecture/dead-source-todo-artifact-cleanup-final-review-2026-07-20.md`.
 - ARC-001 ersetzt private-LAN-basierte Maintenance-Freigabe durch eine
   eigenständige Passwort-/Session-/CSRF-/Reauth-Control-Plane. Lokales HTTP
   ist Loopback-only; Remote Maintenance ist standardmäßig aus und verlangt

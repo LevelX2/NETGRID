@@ -4,7 +4,7 @@ Datum: 2026-05-17
 
 ## Ergebnis
 
-Alle 154 Proteus-Karten aus `data/card-import/proteus-card-basis-2026-05-17.json` haben eine erste Mechanikabdeckungs-Einschätzung. Diese Analyse ist Planungsinput; sie implementiert keine Karte, erzeugt keine Decklegalität und erstellt keine AI-Hints.
+Alle 154 Proteus-Karten aus `docs/source/Proteusspoiler.txt` erhielten hier ihre erste Mechanikabdeckungs-Einschätzung. Der aktuelle Kartenstand steht in `data/cards/proteus-cards.json`; diese Analyse bleibt historischer Planungsinput.
 
 Maschinenlesbare Matrix: `data/rules/proteus-mechanics-coverage-2026-05-17.json`
 

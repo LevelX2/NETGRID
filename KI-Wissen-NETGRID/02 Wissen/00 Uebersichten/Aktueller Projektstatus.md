@@ -34,6 +34,10 @@ Stand: 2026-07-20
 - Proteus ist mit 154/154 Karten engine-/human-playable. Technisches
   `ai_supported` ist von Play-Strength-Readiness und Default-/Random-Pool-
   Promotion getrennt.
+- Die einmalige Proteus-Spoiler-Importpipeline und ihre blockierte
+  Planungskopie sind entfernt. Aktuell führend sind die unveränderte
+  Spoilerquelle, `data/cards/proteus-cards.json`, das Supportmanifest und die
+  Runtime-Implementierungen.
 - Kartenimplementierungen, PlayerViews, PublicEvents, Replay und StateHash
   werden durch paketnahe Engine- und Visibilitytests abgesichert.
 - Normale Creditgewinne von Runner und Korp verwenden eine zentrale,
@@ -96,6 +100,9 @@ Stand: 2026-07-20
   Benchmarks liegen unter `@netgrid/ai/simulation`.
 - Alte Corp-/Runner-Planer, Baseline-Selectoren, Shadow-/META-/Readiness-
   Runtime, Kill-Switches und der frühere AI-Monolithtest sind entfernt.
+- Ein Repository-Gesamtcheck hat zusätzlich elf verwaiste Helfermodule der
+  früheren KI-Baseline-/Legacy-Bewertung entfernt; der anschließende
+  Importscan enthält keine ungenutzten App-/Package-Module mehr.
 - Der Coverage-Restpfad ist fail-closed und darf nur ausdrücklich sichere
   Engine-Fortsetzungen auswählen.
 - Der produktive Auswahlweg ist über `AiDecisionDebug.decisionChain`
