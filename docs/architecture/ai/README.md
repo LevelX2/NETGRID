@@ -123,6 +123,13 @@
   Debugvertrag.
 - `ai-simulation-test-matrix.md`: aktuelle Sicherheits- und
   Simulationsgrenzen.
+- `ai-behavior-baseline-v1-process-2026-07-12.md`: aktives Runbook für den
+  festen Standard-Benchmark, vergleichbare Kandidatenläufe, automatische
+  Workerwahl und vollständige Raw-Evidence als JSON oder Gzip.
+- `ai-core-runtime-performance-followup-process-2026-07-20.md` und
+  `docs/reviews/ai/ai-core-runtime-performance-followup-final-review-2026-07-20.md`:
+  aktuelles Post-Optimization-Profil, entscheidungslokale Runner-Ableitungen,
+  allokationsarme Markerprüfung und Paritäts-/Laufzeitnachweis.
 - `ai-hints-structure-decision-2026-05-15.md`: Struktur der aktiven AI-Hints.
 - `taktiksignale-strategieanker-guide-2026-06-02-v3.md`: aktuelle Begriffe für
   Taktiksignale, Strategieanker, TargetProfiles, Conditions und Constraints.

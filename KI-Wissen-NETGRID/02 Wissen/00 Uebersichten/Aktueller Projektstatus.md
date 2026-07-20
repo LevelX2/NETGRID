@@ -191,6 +191,18 @@ Stand: 2026-07-20
   `docs/architecture/ai/ai-selfplay-performance-optimization-process-2026-07-20.md`
   und
   `docs/reviews/ai/ai-selfplay-performance-optimization-final-review-2026-07-20.md`.
+- Das anschließende Profil der eigentlichen KI-Kernlaufzeit hat identische
+  Runner-Run-Target-, Handentwicklungs- und Install-Fit-Ableitungen innerhalb
+  einer Entscheidung sowie allokationsintensive Markerprüfungen als weitere
+  Schwerpunkte bestätigt und optimiert. Der bereits optimierte feste
+  240-Aktionen-Lauf sank bei bitgleichen kompakten und vollständigen
+  Raw-Artefakten nochmals von 22,854 auf 18,512 Sekunden; die profiliert
+  gemessene KI-Entscheidungszeit sank von 11,664 auf 5,051 Sekunden. Der
+  Standard-Benchmark profitiert automatisch über seinen öffentlichen
+  `chooseAiAction`-Pfad. Führend sind
+  `docs/architecture/ai/ai-core-runtime-performance-followup-process-2026-07-20.md`
+  und
+  `docs/reviews/ai/ai-core-runtime-performance-followup-final-review-2026-07-20.md`.
 - Der Runner-Survival-Progress-Vertrag bindet Basic Credits jetzt an eine
   sichtbare konkrete Reaktions- oder Prevention-Lücke. Ohne Handgewinn,
   Risikoreduktion oder verringerte Reservelücke verliert der Plan seine TTL

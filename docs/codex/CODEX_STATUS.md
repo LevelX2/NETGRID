@@ -36,6 +36,15 @@ Der vorhandene SQLite-KI-Trace persistiert die Kette im normalen
 `summary`-Modus kompakt und im erweiterten `detailed`-Modus vollständig unter
 demselben `trace_json`-Pfad.
 
+Die aktuelle Semantic Runtime verwendet reine abgeleitete Run-Target-,
+Handentwicklungs- und Install-Fit-Ergebnisse innerhalb genau einer synchronen
+Entscheidung wieder. Allokationsarme Redaction- und Side-Safety-Prüfungen
+erhalten denselben Hidden-Info-Vertrag. Der feste 240-Aktionen-Fall sank vom
+bereits optimierten Stand 22,854 auf 18,512 Sekunden und blieb in kompakter
+Baseline sowie vollständigen Raw-Slots bitgleich. Der Standard-Benchmark
+profitiert ohne zusätzlichen Schalter. Führend ist
+`docs/reviews/ai/ai-core-runtime-performance-followup-final-review-2026-07-20.md`.
+
 Choice-Ranking, Scoring-Window, Corp-Score, Board-Triage und Cutover-Tests
 besitzen fachliche Owner- oder Vertragsgrenzen; der produktive Importgraph
 bleibt frei von Laufzeit- und Typzyklen. Das AI-Source-Structure-Gate schützt

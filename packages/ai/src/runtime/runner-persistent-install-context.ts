@@ -9,6 +9,7 @@ import {
   runnerPersistentInstallFitScoreComponent,
   runnerPersistentInstallLegacyScoreDelta,
 } from "./runner-persistent-install-fit-score";
+import { decisionDerivedValue } from "./decision-derived-cache";
 
 type RunnerPersistentInstallEvaluation = {
   stackabilityClass: string;
@@ -65,15 +66,34 @@ export function createRunnerPersistentInstallContext<
     TStrategicIntent
   >,
 ): RunnerPersistentInstallContext {
+  const handDevelopmentCacheKey = {};
+  const actionEvaluationCacheKey = {};
+
   function evaluationForAction(
     input: AiDecisionInput,
     action: LegalAction,
   ): RunnerPersistentInstallEvaluation | undefined {
-    return runnerPersistentInstallEvaluationForAction(input, action, {
-      deckCapabilities: dependencies.deckCapabilities,
-      strategicIntent: dependencies.strategicIntent,
-      handDevelopmentEvaluations: dependencies.handDevelopmentEvaluations,
-    });
+    const cache = decisionDerivedValue(
+      input,
+      actionEvaluationCacheKey,
+      () =>
+        new WeakMap<LegalAction, RunnerPersistentInstallEvaluation | null>(),
+    );
+    if (cache.has(action)) return cache.get(action) ?? undefined;
+    const evaluation = runnerPersistentInstallEvaluationForAction(
+      input,
+      action,
+      {
+        deckCapabilities: dependencies.deckCapabilities,
+        strategicIntent: dependencies.strategicIntent,
+        handDevelopmentEvaluations: (params) =>
+          decisionDerivedValue(input, handDevelopmentCacheKey, () =>
+            dependencies.handDevelopmentEvaluations(params),
+          ),
+      },
+    );
+    cache.set(action, evaluation ?? null);
+    return evaluation;
   }
 
   return {
