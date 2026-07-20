@@ -77,11 +77,9 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   const components: AiDecisionScoreComponent[] = [];
   const credits = input.playerView.own.credits;
   const boardTriageState = semanticRuntimeCorpBoardTriage(input, dependencies);
-  const deadlineInstall = corpDeadlineUnconvertibleInstallComponent(
-    input,
-    action,
-  );
-  if (deadlineInstall) components.push(deadlineInstall);
+  const deadlineScorelineAction =
+    corpDeadlineUnconvertibleScorelineActionComponent(input, action);
+  if (deadlineScorelineAction) components.push(deadlineScorelineAction);
   const purgeImpact = corpPurgeImpactScoreComponent(
     input,
     action,
@@ -505,21 +503,32 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   return components;
 }
 
-function corpDeadlineUnconvertibleInstallComponent(
+function corpDeadlineUnconvertibleScorelineActionComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  if (action.type !== "install_card") return undefined;
+  if (action.type !== "install_card" && action.type !== "advance_card") {
+    return undefined;
+  }
   const feasibility = corpScorelineFeasibilityForDecisionInput(input);
   if (feasibility?.deadline !== "current_turn_only") return undefined;
   if (corpScorelineActionCanCloseThisTurn(feasibility, action.actionId)) {
     return undefined;
   }
   const source = semanticRuntimeVisibleSourceCard(input, action);
-  if (source?.type !== "ice" && source?.type !== "agenda") return undefined;
+  const relevantInstall =
+    action.type === "install_card" &&
+    (source?.type === "ice" || source?.type === "agenda");
+  const relevantAdvance =
+    action.type === "advance_card" && source?.type === "agenda";
+  if (!relevantInstall && !relevantAdvance) return undefined;
+  const actionKind = action.type === "advance_card" ? "advance" : "install";
   return {
-    key: "corp_deadline_unconvertible_install",
-    label: "Installation ohne Conversion vor Deckout",
+    key: `corp_deadline_unconvertible_${actionKind}`,
+    label:
+      action.type === "advance_card"
+        ? "Advancement ohne Conversion vor Deckout"
+        : "Installation ohne Conversion vor Deckout",
     value: -3600,
     reason: [
       `card_type:${source.type}`,

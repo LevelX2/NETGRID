@@ -299,6 +299,30 @@ describe("tacticalPlanMappedChoice Runner overrides", () => {
     expect(result.overrideReason).toBe("runner_hard_interrupt");
   });
 
+  it("lets persistent trace-counter removal interrupt a credit-base plan", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const removeCounter = legalAction(
+      "remove-trace-counter",
+      "trigger_ability",
+    );
+    const removeCounterChoice = choice(removeCounter, 1077, [], {
+      key: "runner_goal_fit_persistent_trace_counter",
+      value: 1050,
+      reason:
+        "runner_clicks:1|action_click_cost:1|counter_type:trace_tag_counter",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [removeCounterChoice, choice(gain, 779)],
+      creditBaseMapping([gain]),
+      removeCounterChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("remove-trace-counter");
+    expect(result.overrideReason).toBe("runner_hard_interrupt");
+  });
+
   it("lets a viable run event interrupt coverage search for its urgent remote", () => {
     const draw = legalAction("draw-for-answer", "play_event");
     const bypass = legalAction("bypass-remote", "play_event", {

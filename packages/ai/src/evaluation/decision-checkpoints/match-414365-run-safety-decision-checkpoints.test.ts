@@ -10,7 +10,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match 414365 runner run-safety checkpoints", () => {
   it.each([
     [
-      "does not reduce Running Interference to economy development",
+      "does not score Running Interference as economy development",
       runningInterferenceJson,
     ],
     [

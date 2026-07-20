@@ -263,6 +263,7 @@ export function urgentCorpSemanticChoice(
           "corp_active_remote_agenda_unsafe_advance",
           "corp_active_remote_agenda_underfunded_advance",
           "corp_contestable_remote_score_penalty",
+          "corp_deadline_unconvertible_advance",
           "corp_trace_without_conversion_window",
           "corp_last_click_trace_without_payoff",
         ]) &&

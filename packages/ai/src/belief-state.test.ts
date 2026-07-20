@@ -164,6 +164,46 @@ describe("belief-state R&D top freshness", () => {
     );
   });
 
+  it("moves the next known R&D card into HQ after the accessed top card was stolen", () => {
+    const look = rndPrivateLookEvent("evt_rd_look", 1, [
+      "simple_agenda",
+      "simple_economy_operation",
+      "simple_upgrade",
+    ]);
+    const access = publicEvent("evt_access", "access_card", 2, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "rd",
+      cardDefinitionId: "simple_agenda",
+    });
+    const steal = publicEvent("evt_steal", "steal_agenda", 3, {
+      actor: "runner",
+      actionType: "steal_agenda",
+      serverId: "rd",
+      cardDefinitionId: "simple_agenda",
+    });
+    const draw = publicEvent("evt_draw", "mandatory_draw", 4, {
+      actor: "corp",
+      actionType: "mandatory_draw",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([look, access, steal, draw], 1),
+    );
+
+    expect(belief.runnerOpponentModel?.hqHandMemory?.knownDefinitions).toEqual([
+      "simple_economy_operation",
+    ]);
+    expect(
+      belief.runnerOpponentModel?.hqHandMemory?.knownDefinitions,
+    ).not.toContain("simple_agenda");
+    expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
+      freshness: "stale_known_same_top",
+      knownTopDefinitionId: "simple_upgrade",
+      knownSequenceDefinitionIds: ["simple_upgrade"],
+    });
+  });
+
   it("invalidates R&D order on an R&D shuffle while retaining cards already drawn into HQ", () => {
     const look = rndPrivateLookEvent("evt_rd_look", 1, [
       "simple_economy_operation",

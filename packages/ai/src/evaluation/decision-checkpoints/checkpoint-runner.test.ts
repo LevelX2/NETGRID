@@ -101,7 +101,8 @@ describe("AI decision checkpoints", () => {
 
   it("matches selected score-component contracts without fixing score values", () => {
     const baseline = runAiDecisionCheckpoint(fixture());
-    const componentKey = baseline.decision?.decisionDebug?.scoreBreakdown?.[0]?.key;
+    const componentKey =
+      baseline.decision?.decisionDebug?.scoreBreakdown?.[0]?.key;
     if (!componentKey) {
       throw new Error("Missing selected score breakdown in checkpoint fixture");
     }
@@ -161,7 +162,7 @@ describe("AI decision checkpoints", () => {
       memoryId: `${current.engine.testOnlyGameState.matchId}:corp:${input.profileId}`,
       side: "corp",
       planId: "checkpoint-plan",
-      type: "corp.establish_scoring_remote",
+      type: "corp.apply_punish_pressure",
       status: "progressing",
       blockedBy: [],
       ttlDecisionsRemaining: 2,

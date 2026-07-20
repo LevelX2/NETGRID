@@ -153,6 +153,10 @@ export function tacticalPlanHardInterruptShouldYield(
         overrideChoice,
         "runner_viable_followup_run_lock_release",
       ) ||
+      semanticRuntimeChoiceHasScoreBreakdownComponent(
+        overrideChoice,
+        "runner_goal_fit_persistent_trace_counter",
+      ) ||
       runnerUrgentRemoteContestRunCanInterruptPlan(
         mapping.plan,
         overrideChoice,
@@ -284,6 +288,14 @@ export function runnerPlanOverrideIsHardInterrupt(
     semanticRuntimeChoiceHasScoreBreakdownComponent(
       overrideChoice,
       "runner_viable_followup_run_lock_release",
+    )
+  ) {
+    return true;
+  }
+  if (
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      overrideChoice,
+      "runner_goal_fit_persistent_trace_counter",
     )
   ) {
     return true;

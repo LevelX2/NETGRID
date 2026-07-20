@@ -58,9 +58,8 @@ export function createCorpTagPunishPayoffProfileContext(
     const storedCredits = sourceCard
       ? dependencies.visibleCardStoredCredits(sourceCard)
       : 0;
-    const immediateGain = storedCredits > 0
-      ? Math.min(creditAmount, storedCredits)
-      : creditAmount;
+    const immediateGain =
+      storedCredits > 0 ? Math.min(creditAmount, storedCredits) : creditAmount;
     if (immediateGain <= 0) return undefined;
     return {
       kind: "installed_economy",
@@ -141,9 +140,7 @@ function corpVisibleTaggedPayoffFundingTarget(
   | undefined {
   const currentCredits = input.playerView.own.credits;
   const creditsAfterAction =
-    currentCredits +
-    corpBasicCreditGain(action) -
-    corpActionCreditCost(action);
+    currentCredits + corpBasicCreditGain(action) - corpActionCreditCost(action);
   return input.playerView.own.gripOrHq
     .map((card) => {
       if (!card.known || !card.definitionId) return undefined;
@@ -193,7 +190,7 @@ function corpNumericPayload(action: LegalAction, key: string): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
-function corpVisibleCardPlayCost(card: VisibleCard): number {
+export function corpVisibleCardPlayCost(card: VisibleCard): number {
   return (
     card.cost ??
     (card.definitionId

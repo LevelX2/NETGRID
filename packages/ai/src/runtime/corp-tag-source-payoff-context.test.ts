@@ -57,6 +57,72 @@ describe("createCorpTagSourcePayoffContext", () => {
     ).toBe(false);
   });
 
+  it("prioritizes an immediate tag source when a damage payoff remains reachable this turn", () => {
+    const context = createCorpTagSourcePayoffContext({
+      sourceDefinitionIdForAction: () => "custom-trace-operation",
+      visibleMeatDamagePayoff: () => true,
+      tagPunishAssessmentForAction: () => ({
+        isPunishPayoff: false,
+        isTagSource: true,
+      }),
+      tagSourceProfileForDefinition: () => undefined,
+      payoffProfileForDefinition: (definitionId) =>
+        definitionId === "custom-damage-punish"
+          ? { payoffKinds: ["damage"] }
+          : undefined,
+    });
+    const input = inputWithHqCard({
+      ...visibleCard("custom-damage-punish"),
+      cost: 3,
+    });
+    input.playerView.own.credits = 4;
+
+    expect(
+      context.corpImmediateTagSourceVisiblePayoffProfile(
+        input,
+        corpAction("play_operation", {}, [{ clicks: 1 }, { credits: 2 }]),
+      ),
+    ).toMatchObject({
+      kind: "tag_source",
+      value: 4300,
+      evidence: expect.arrayContaining([
+        "corp_tag_source_same_turn_damage_conversion:true",
+        "conversion_funding_clicks:1",
+      ]),
+    });
+  });
+
+  it("does not overvalue a visible damage payoff that cannot be reached this turn", () => {
+    const context = createCorpTagSourcePayoffContext({
+      sourceDefinitionIdForAction: () => "custom-trace-operation",
+      visibleMeatDamagePayoff: () => true,
+      tagPunishAssessmentForAction: () => ({
+        isPunishPayoff: false,
+        isTagSource: true,
+      }),
+      tagSourceProfileForDefinition: () => undefined,
+      payoffProfileForDefinition: (definitionId) =>
+        definitionId === "custom-damage-punish"
+          ? { payoffKinds: ["damage"] }
+          : undefined,
+    });
+    const input = inputWithHqCard({
+      ...visibleCard("custom-damage-punish"),
+      cost: 4,
+    });
+    input.playerView.own.credits = 4;
+
+    expect(
+      context.corpImmediateTagSourceVisiblePayoffProfile(
+        input,
+        corpAction("play_operation", {}, [{ clicks: 1 }, { credits: 2 }]),
+      ),
+    ).toMatchObject({
+      kind: "tag_source",
+      value: 2350,
+    });
+  });
+
   it("derives persistent tag asset setup from source tag-source profiles", () => {
     const context = createCorpTagSourcePayoffContext({
       sourceDefinitionIdForAction: (_input, action) => {
@@ -237,11 +303,13 @@ function visibleCard(definitionId: string): VisibleCard {
 function corpAction(
   type: string,
   payload: Record<string, string> = {},
+  costs: LegalAction["costs"] = [],
 ): LegalAction {
   return {
     actionId: `${type}-${payload.cardId ?? "action"}`,
     side: "corp",
     type,
     payload,
+    costs,
   } as LegalAction;
 }
