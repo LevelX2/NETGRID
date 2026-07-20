@@ -8,13 +8,16 @@ import {
   UserRound,
 } from "lucide-react";
 
-import type { OpenMatchEntry } from "../../lib/client-api";
+import type { PublicMatchEntry } from "../../lib/client-api";
 import { DeckSlotSelect } from "../decks/DeckSelectionControls";
 import {
   formatLobbyTime,
-  openMatchAgeLabel,
   shortMatchId,
 } from "./lobby-format";
+import {
+  publicMatchActionLabel,
+  publicMatchParticipantLabel,
+} from "./public-match-navigation";
 
 type DeckSlotSource = "snapshot" | "local" | "random_standard";
 
@@ -65,7 +68,7 @@ export function MatchJoinConsole({
   onJoinToken,
   onJoinMatch,
 }: {
-  openLanMatches: OpenMatchEntry[];
+  openLanMatches: PublicMatchEntry[];
   openLanLoading: boolean;
   openLanError: string;
   openLanUpdatedAt: string | null;
@@ -87,7 +90,7 @@ export function MatchJoinConsole({
   joinToken: string;
   canSubmitJoin: boolean;
   onRefreshOpenLanMatches(): void;
-  onSelectOpenLanMatch(matchId: string): void;
+  onSelectOpenLanMatch(entry: PublicMatchEntry): void;
   onJoinLinkInput(value: string): void;
   onDisplayName(value: string): void;
   onParticipantBRunnerDeckSource(source: DeckSlotSource): void;
@@ -104,11 +107,11 @@ export function MatchJoinConsole({
     <div className="matchStartConsole joinConsole">
       <section
         className="openLanMatchesPanel"
-        aria-label="Offene Spiele im LAN"
+        aria-label="Öffentliche Spiele"
         data-testid="open-lan-panel"
       >
         <div className="openLanMatchesHeader">
-          <p className="eyebrow">Offene Spiele im LAN</p>
+          <p className="eyebrow">Öffentliche Spiele</p>
           <button
             className="button"
             onClick={onRefreshOpenLanMatches}
@@ -121,8 +124,8 @@ export function MatchJoinConsole({
           </button>
         </div>
         <p className="openLanNotice" data-testid="open-lan-scope-note">
-          Hier erscheinen nur private Duelle (Mensch gegen Mensch) mit
-          aktivierter LAN-Sichtbarkeit.
+          Offenen Spielen kannst du beitreten, laufende Spiele beobachten und
+          beendete Spiele als Replay ansehen.
         </p>
         {openLanError ? (
           <p className="notice openLanNotice" role="status">
@@ -133,7 +136,7 @@ export function MatchJoinConsole({
           <p className="openLanEmpty">
             {openLanLoading
               ? "Lade offene Spiele ..."
-              : "Keine offenen Spiele gefunden."}
+              : "Keine öffentlichen Spiele gefunden."}
           </p>
         ) : (
           <ul className="openLanList" data-testid="open-lan-list">
@@ -141,13 +144,14 @@ export function MatchJoinConsole({
               <li key={entry.matchId}>
                 <button
                   className={`openLanEntry ${joinMatchIdTrimmed === entry.matchId && joinTokenTrimmed.length === 0 ? "selected" : ""}`}
-                  onClick={() => onSelectOpenLanMatch(entry.matchId)}
+                  onClick={() => onSelectOpenLanMatch(entry)}
                   type="button"
                 >
                   <strong>{shortMatchId(entry.matchId)}</strong>
                   <small>
-                    {entry.hostDisplayName} · Mensch vs Mensch · Status: wartend
-                    · Alter: {openMatchAgeLabel(entry.ageSeconds)}
+                    {publicMatchParticipantLabel(entry)}
+                    {" · "}
+                    {publicMatchActionLabel(entry.status)}
                   </small>
                 </button>
               </li>

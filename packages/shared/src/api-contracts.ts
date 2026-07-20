@@ -25,6 +25,22 @@ export type ApiMatchMode =
   | "human_corp_vs_runner_ai"
   | "ai_vs_ai";
 
+export type ApiPublicMatchStatus = "open" | "active" | "finished";
+
+export type ApiPublicMatchListEntry = {
+  matchId: string;
+  status: ApiPublicMatchStatus;
+  matchMode: ApiMatchMode;
+  matchFormat: ApiMatchFormat;
+  createdAt: string;
+  updatedAt: string;
+  participantNames: {
+    runner?: string;
+    corp?: string;
+  };
+  winner?: Winner;
+};
+
 export type ApiClientGameMode = ApiMatchMode;
 export type ApiMatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
 export type ApiMatchCardPool = "originalset" | "originalset_classic" | "originalset_proteus" | "originalset_classic_proteus";

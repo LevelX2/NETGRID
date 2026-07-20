@@ -39,6 +39,8 @@ export type {
   ApiPlayerClockConfig,
   ApiPlayerClockMode,
   ApiPlayerClockSnapshot,
+  ApiPublicMatchListEntry,
+  ApiPublicMatchStatus,
   ApiRecentGameResult,
   ApiRecentResultEntry,
   ApiRecentSeriesGameResult,

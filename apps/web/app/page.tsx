@@ -237,7 +237,7 @@ import {
   fetchAiDecisionDebugTraceDetail,
   fetchAiDecisionDebugTraceIndex,
   fetchAiDecisionPreview,
-  fetchOpenLanMatches,
+  fetchPublicMatches,
   fetchRecentGameResults,
   fromInitialResponse,
   fromJoinedResponse,
@@ -246,8 +246,9 @@ import {
   postJson,
   serverErrorNotice,
   type AiDecisionPreview,
-  type OpenMatchEntry,
+  type PublicMatchEntry,
 } from "../lib/client-api";
+import { publicMatchTarget } from "../features/match-start/public-match-navigation";
 import {
   playActionCueSound,
   playMatchStartJingle,
@@ -577,7 +578,7 @@ export default function Page() {
   const [joinMatchId, setJoinMatchId] = useState("");
   const [joinToken, setJoinToken] = useState("");
   const [isPublic, setIsPublic] = useState(true);
-  const [openLanMatches, setOpenLanMatches] = useState<OpenMatchEntry[]>([]);
+  const [openLanMatches, setOpenLanMatches] = useState<PublicMatchEntry[]>([]);
   const [openLanLoading, setOpenLanLoading] = useState(false);
   const [openLanError, setOpenLanError] = useState("");
   const [openLanUpdatedAt, setOpenLanUpdatedAt] = useState<string | null>(null);
@@ -1976,7 +1977,9 @@ export default function Page() {
   const aiDeckPolicyUsesPrimaryDeckSlots =
     aiDeckPolicy === "selected" || aiDeckPolicy === "same_as_participant_a";
   const openLanJoinableIds = new Set(
-    openLanMatches.map((entry) => entry.matchId),
+    openLanMatches
+      .filter((entry) => entry.status === "open")
+      .map((entry) => entry.matchId),
   );
   const joinMatchIdTrimmed = joinMatchId.trim();
   const joinTokenTrimmed = joinToken.trim();
@@ -3727,7 +3730,7 @@ export default function Page() {
     if (!silent) setOpenLanLoading(true);
     setOpenLanError("");
     try {
-      const response = await fetchOpenLanMatches();
+      const response = await fetchPublicMatches();
       if (response.error) {
         setOpenLanMatches([]);
         setOpenLanError(response.error.message);
@@ -3739,7 +3742,7 @@ export default function Page() {
     } catch (error) {
       setOpenLanMatches([]);
       setOpenLanError(
-        serverErrorNotice(error, "Offene Spiele konnten nicht geladen werden."),
+        serverErrorNotice(error, "Öffentliche Spiele konnten nicht geladen werden."),
       );
       setOpenLanUpdatedAt(new Date().toISOString());
     } finally {
@@ -3800,8 +3803,13 @@ export default function Page() {
     setJoinToken(parsed.joinToken);
   };
 
-  const selectOpenLanMatch = (matchId: string) => {
-    setJoinMatchId(matchId);
+  const selectOpenLanMatch = (entry: PublicMatchEntry) => {
+    const target = publicMatchTarget(entry);
+    if (target) {
+      window.location.assign(target);
+      return;
+    }
+    setJoinMatchId(entry.matchId);
     setJoinToken("");
     setJoinLinkInput("");
   };

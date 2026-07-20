@@ -2,6 +2,7 @@ import type {
   ApiCreateMatchResponse,
   ApiJoinMatchResponse,
   ApiLobbyPayload,
+  ApiPublicMatchListEntry,
   ApiRecentResultEntry,
   ApiSidePayload,
   LegalAction,
@@ -44,17 +45,10 @@ export type AiDecisionPreview = {
   detail: Record<string, unknown>;
 };
 
-export type OpenMatchEntry = {
-  matchId: string;
-  hostDisplayName: string;
-  mode: "human_vs_human";
-  status: "pending";
-  createdAt: string;
-  ageSeconds: number;
-};
+export type PublicMatchEntry = ApiPublicMatchListEntry;
 
-export type OpenMatchesResponse = {
-  matches?: OpenMatchEntry[];
+export type PublicMatchesResponse = {
+  matches?: PublicMatchEntry[];
   error?: { message: string };
 };
 
@@ -162,27 +156,27 @@ export async function bootstrap(session: SessionInfo): Promise<ClientPayload | L
   return (await response.json()) as ClientPayload | LobbyClientPayload;
 }
 
-export async function fetchOpenLanMatches(): Promise<OpenMatchesResponse> {
+export async function fetchPublicMatches(): Promise<PublicMatchesResponse> {
   let response: Response;
   try {
-    response = await fetch(`${SERVER_HTTP}/api/matches/open`, { cache: "no-store" });
+    response = await fetch(`${SERVER_HTTP}/api/public/matches`, { cache: "no-store" });
   } catch {
     throw new ServerConnectionError();
   }
   if (!response.ok) {
-    let payload: OpenMatchesResponse | undefined;
+    let payload: PublicMatchesResponse | undefined;
     try {
-      payload = (await response.json()) as OpenMatchesResponse;
+      payload = (await response.json()) as PublicMatchesResponse;
     } catch {
       payload = undefined;
     }
     if (payload?.error?.message) return { error: { message: payload.error.message } };
     if (response.status === 404) {
-      return { error: { message: "Dein Multiplayer-Server unterstützt die LAN-Liste noch nicht. Bitte den Server neu starten oder auf den aktuellen Stand bringen." } };
+      return { error: { message: "Dein Multiplayer-Server unterstützt öffentliche Spiele noch nicht. Bitte den Server neu starten oder auf den aktuellen Stand bringen." } };
     }
-    return { error: { message: "Offene Spiele konnten nicht geladen werden." } };
+    return { error: { message: "Öffentliche Spiele konnten nicht geladen werden." } };
   }
-  return (await response.json()) as OpenMatchesResponse;
+  return (await response.json()) as PublicMatchesResponse;
 }
 
 export async function fetchRecentGameResults(): Promise<RecentGameResultsResponse> {

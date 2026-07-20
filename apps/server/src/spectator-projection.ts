@@ -4,6 +4,7 @@ import type { StoredMatch } from "./multiplayer";
 export const SPECTATOR_PROJECTION_V1_SCHEMA = "SpectatorProjectionV1" as const;
 
 export type SpectatorProjectionKind =
+  | "public_live_v1"
   | "private_spectator_live_v1"
   | "delayed_public_spectator_v1";
 

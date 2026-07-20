@@ -95,7 +95,7 @@ prepared
 | Paket | Status | Ergebnis |
 | --- | --- | --- |
 | PUB-001 | abgeschlossen | `isPublic` ersetzt den LAN-Flag, Client und Server verwenden Standard `true`, Recreate und Serien übernehmen den Wert, SQLite normalisiert alle Bestandsmatches einmalig auf öffentlich. |
-| PUB-002 | offen | – |
+| PUB-002 | abgeschlossen | Gemeinsame öffentliche Liste für offene, aktive und beendete Matches; statusabhängige Navigation; öffentliche aktive Matches besitzen eine polling-aktualisierte read-only Zuschaueransicht auf Basis der leak-geprüften `SpectatorProjectionV1`. |
 | PUB-003 | offen | – |
 | PUB-004 | offen | – |
 | PUB-005 | offen | – |
@@ -160,7 +160,7 @@ Arbeit:
 
 - Öffentliche Liste für offene, aktive und beendete Matches bereitstellen.
 - Statusabhängige Aktionen `Beitreten`, `Zuschauen`, `Replay ansehen` ermöglichen.
-- `SpectatorProjectionV1` an Route und Realtime-Pfad anbinden.
+- `SpectatorProjectionV1` an Route und einen automatisch aktualisierten Lesepfad anbinden.
 - Zuschauerboard ohne Spieleraktion rendern.
 - Private Matches vollständig aus öffentlichen Pfaden ausschließen.
 

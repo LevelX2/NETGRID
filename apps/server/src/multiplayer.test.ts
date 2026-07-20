@@ -2684,6 +2684,114 @@ describe("MVP 0.2 multiplayer service", () => {
     }
   });
 
+  it("lists public open, active and finished matches while excluding private matches", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "public-directory" });
+    const open = await service.createMatch({
+      hostSide: "runner",
+      mode: "human_vs_human",
+      displayName: "Offener Host",
+      seed: "public-directory-open",
+      isPublic: true,
+    });
+    const active = await service.createMatch({
+      hostSide: "runner",
+      mode: "human_runner_vs_corp_ai",
+      displayName: "Aktiver Runner",
+      seed: "public-directory-active",
+      isPublic: true,
+    });
+    const privateMatch = await service.createMatch({
+      hostSide: "runner",
+      mode: "human_runner_vs_corp_ai",
+      seed: "public-directory-private",
+      isPublic: false,
+    });
+    const finished = await service.createMatch({
+      hostSide: "corp",
+      mode: "human_corp_vs_runner_ai",
+      displayName: "Fertige Corp",
+      seed: "public-directory-finished",
+      isPublic: true,
+    });
+    const finishedRecord = await storage.load(finished.matchId);
+    if (!finishedRecord) throw new Error("Missing finished record");
+    finishedRecord.match.status = "finished";
+    finishedRecord.match.winner = "corp";
+    finishedRecord.gameState.winner = "corp";
+    await storage.save(finishedRecord);
+
+    const entries = await service.listPublicMatches();
+
+    expect(entries).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ matchId: open.matchId, status: "open" }),
+        expect.objectContaining({ matchId: active.matchId, status: "active" }),
+        expect.objectContaining({ matchId: finished.matchId, status: "finished", winner: "corp" }),
+      ]),
+    );
+    expect(entries.some((entry) => entry.matchId === privateMatch.matchId)).toBe(false);
+    expect(JSON.stringify(entries)).not.toMatch(
+      /joinToken|sessionToken|reconnectToken|tokenHash|deckHash|deckSnapshot|privateDeck|cardInstances|legalActions/i,
+    );
+  });
+
+  it("exposes only the safe public projection for active public spectators", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "public-spectator-http" });
+    const publicMatch = await service.createMatch({
+      hostSide: "runner",
+      mode: "human_runner_vs_corp_ai",
+      seed: "public-spectator-visible",
+      isPublic: true,
+    });
+    const privateMatch = await service.createMatch({
+      hostSide: "runner",
+      mode: "human_runner_vs_corp_ai",
+      seed: "public-spectator-hidden",
+      isPublic: false,
+    });
+    const stored = await storage.load(publicMatch.matchId);
+    if (!stored) throw new Error("Missing public spectator match");
+    const hiddenCardId = stored.gameState.corp.hq[0];
+    const hiddenDefinitionId = hiddenCardId
+      ? stored.gameState.cardInstances[hiddenCardId]?.definitionId
+      : undefined;
+    const hiddenTitle = hiddenDefinitionId
+      ? CARD_DEFINITIONS_BY_ID[hiddenDefinitionId]?.title
+      : undefined;
+
+    const handle = createNetgridHttpServer(service);
+    const baseUrl = await listen(handle);
+    try {
+      const directoryResponse = await fetch(`${baseUrl}/api/public/matches`);
+      expect(directoryResponse.status).toBe(200);
+      const directoryText = await directoryResponse.text();
+      expect(directoryText).toContain(publicMatch.matchId);
+      expect(directoryText).not.toContain(privateMatch.matchId);
+
+      const spectatorResponse = await fetch(
+        `${baseUrl}/api/public/matches/${publicMatch.matchId}/spectator`,
+      );
+      expect(spectatorResponse.status).toBe(200);
+      const spectatorText = await spectatorResponse.text();
+      expect(spectatorText).toContain("SpectatorProjectionV1");
+      expect(spectatorText).toContain("public_live_v1");
+      expect(spectatorText).not.toMatch(
+        /playerView|legalActions|pendingChoice|joinToken|sessionToken|reconnectToken|tokenHash|cardInstances|privateDeck/i,
+      );
+      if (hiddenDefinitionId) expect(spectatorText).not.toContain(hiddenDefinitionId);
+      if (hiddenTitle) expect(spectatorText).not.toContain(hiddenTitle);
+
+      const privateResponse = await fetch(
+        `${baseUrl}/api/public/matches/${privateMatch.matchId}/spectator`,
+      );
+      expect(privateResponse.status).toBe(404);
+    } finally {
+      await handle.close();
+    }
+  });
+
   it("V23A-T011 V23A-T016 rejects stale tokenless LAN joins after status changes", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v23a-race" });
     const created = await service.createMatch({ hostSide: "runner", seed: "v23a-race-match", mode: "human_vs_human", isPublic: true });

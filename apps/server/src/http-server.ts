@@ -2343,6 +2343,47 @@ async function routeHttp(
       return;
     }
 
+    if (request.method === "GET" && url.pathname === "/api/public/matches") {
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "token_probe",
+          request,
+          deploymentConfig,
+          "public-matches",
+        )
+      )
+        return;
+      sendJson(response, 200, { matches: await service.listPublicMatches() });
+      return;
+    }
+
+    const publicSpectatorRoute = /^\/api\/public\/matches\/([^/]+)\/spectator$/.exec(
+      url.pathname,
+    );
+    if (publicSpectatorRoute && request.method === "GET") {
+      const matchId = decodeURIComponent(publicSpectatorRoute[1] ?? "");
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "token_probe",
+          request,
+          deploymentConfig,
+          `public-spectator:${matchId}`,
+        )
+      )
+        return;
+      const result = await service.loadPublicSpectatorView(matchId);
+      sendJson(
+        response,
+        result.ok ? 200 : 404,
+        result.ok ? result.spectator : { error: result.error },
+      );
+      return;
+    }
+
     if (
       request.method === "GET" &&
       url.pathname === "/api/matches/recent-results"

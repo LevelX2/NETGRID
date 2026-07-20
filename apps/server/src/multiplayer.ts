@@ -42,6 +42,7 @@ import {
   type ApiPlayerClockSnapshot,
   type ApiPendingUndoRequest,
   type ApiPlayerIdentityKind,
+  type ApiPublicMatchListEntry,
   type AiDecision,
   type AiDifficulty,
   type AiDecisionDebug,
@@ -80,6 +81,7 @@ import {
 } from "./event-projection";
 import { envValue, LOCAL_DEFAULT_SERVER_BASE_URL, LOCAL_DEFAULT_TOKEN_SALT, LOCAL_DEFAULT_WEB_BASE_URL } from "./internet-hardening";
 import { buildSidePayload } from "./multiplayer-payload";
+import { buildSpectatorProjectionV1, type SpectatorProjectionV1 } from "./spectator-projection";
 import { chronicleTurnNumberForEvent } from "./chronicle-turn-context";
 import type {
   BackupManifest,
@@ -429,6 +431,8 @@ export type OpenMatchListEntry = {
   createdAt: string;
   ageSeconds: number;
 };
+
+export type PublicMatchListEntry = ApiPublicMatchListEntry;
 
 export type RecentGameResultEntry = ApiRecentResultEntry;
 
@@ -1968,6 +1972,64 @@ export class MultiplayerService {
       })
       .filter((entry): entry is OpenMatchListEntry => Boolean(entry))
       .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  }
+
+  async listPublicMatches(): Promise<PublicMatchListEntry[]> {
+    const records = this.storage.list ? await this.storage.list() : [];
+    return records
+      .filter((record) => record.match.isPublic)
+      .map((record): PublicMatchListEntry | undefined => {
+        let status: PublicMatchListEntry["status"] | undefined;
+        if (
+          record.match.mode === "human_vs_human" &&
+          record.match.status === "pending" &&
+          this.openJoinToken(record)
+        ) {
+          status = "open";
+        } else if (record.match.status === "active") {
+          status = "active";
+        } else if (isTerminalStatus(record.match.status) && record.gameState) {
+          status = "finished";
+        }
+        if (!status) return undefined;
+
+        const participantNames = participantNamesForReplay(record);
+        if (!participantNames.runner && (record.match.mode === "human_corp_vs_runner_ai" || record.match.mode === "ai_vs_ai")) {
+          participantNames.runner = "Runner-KI";
+        }
+        if (!participantNames.corp && (record.match.mode === "human_runner_vs_corp_ai" || record.match.mode === "ai_vs_ai")) {
+          participantNames.corp = "Corp-KI";
+        }
+        return {
+          matchId: record.match.matchId,
+          status,
+          matchMode: record.match.mode,
+          matchFormat: record.match.settings.matchFormat,
+          createdAt: record.match.createdAt,
+          updatedAt: record.match.updatedAt,
+          participantNames,
+          ...(record.gameState.winner ? { winner: record.gameState.winner } : {})
+        };
+      })
+      .filter((entry): entry is PublicMatchListEntry => Boolean(entry))
+      .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+  }
+
+  async loadPublicSpectatorView(
+    matchId: string,
+  ): Promise<{ ok: true; spectator: SpectatorProjectionV1 } | { ok: false; error: SafeErrorPayload }> {
+    const record = await this.mustLoad(matchId);
+    if (!record || !record.match.isPublic || record.match.status !== "active" || !record.gameState) {
+      return { ok: false, error: safeError("not_found", "Dieses laufende öffentliche Spiel ist nicht verfügbar.") };
+    }
+    return {
+      ok: true,
+      spectator: buildSpectatorProjectionV1(record, {
+        kind: "public_live_v1",
+        eventCursor: record.gameState.stateVersion,
+        maxEvents: 40
+      })
+    };
   }
 
   async listRecentGameResults(limit = 20): Promise<RecentGameResultEntry[]> {
