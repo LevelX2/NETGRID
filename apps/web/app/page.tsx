@@ -8,6 +8,7 @@ import {
   Eye,
   FlaskConical,
   Award,
+  Gamepad2,
   Image,
   Layers3,
   ListFilter,
@@ -238,7 +239,7 @@ import {
   fetchAiDecisionDebugTraceIndex,
   fetchAiDecisionPreview,
   fetchPublicMatches,
-  fetchRecentGameResults,
+  fetchPersonalRecentGameResults,
   fromInitialResponse,
   fromJoinedResponse,
   lobbyFromInitialResponse,
@@ -248,7 +249,6 @@ import {
   type AiDecisionPreview,
   type PublicMatchEntry,
 } from "../lib/client-api";
-import { publicMatchTarget } from "../features/match-start/public-match-navigation";
 import {
   playActionCueSound,
   playMatchStartJingle,
@@ -419,6 +419,7 @@ import {
 } from "../features/actions/local-action-sounds";
 import { runHiddenContextActionHint } from "../features/actions/run-hidden-context-hint";
 import { RecentGamesPanel } from "../features/recent/RecentGamesPanel";
+import { PublicGamesPanel } from "../features/games/PublicGamesPanel";
 import {
   effectiveAiTurnPresentation,
   removePendingUndo,
@@ -493,7 +494,7 @@ type AiDeckPolicy =
   | "seeded_random"
   | "same_as_participant_a";
 type AiTraceStartMode = "off" | "detailed";
-type EntryTab = "play" | "catalog" | "decks" | "recent" | "options" | "account";
+type EntryTab = "play" | "games" | "catalog" | "decks" | "recent" | "options" | "account";
 type DeckSideFilter = Side | "all";
 type RunOverlayPositionPreference = OverlayPositionPreference;
 
@@ -3754,10 +3755,16 @@ export default function Page() {
   };
 
   const refreshRecentGameResults = async () => {
+    if (!accountSession.account) {
+      setRecentGameResults([]);
+      setRecentGameResultsError("");
+      setRecentGameResultsUpdatedAt(null);
+      return;
+    }
     setRecentGameResultsLoading(true);
     setRecentGameResultsError("");
     try {
-      const response = await fetchRecentGameResults();
+      const response = await fetchPersonalRecentGameResults();
       if (response.error) {
         setRecentGameResults([]);
         setRecentGameResultsError(response.error.message);
@@ -3769,7 +3776,7 @@ export default function Page() {
     } catch (error) {
       setRecentGameResults([]);
       setRecentGameResultsError(
-        serverErrorNotice(error, "Letzte Spiele konnten nicht geladen werden."),
+        serverErrorNotice(error, "Meine Spiele konnten nicht geladen werden."),
       );
       setRecentGameResultsUpdatedAt(new Date().toISOString());
     } finally {
@@ -3778,7 +3785,10 @@ export default function Page() {
   };
 
   useEffect(() => {
-    if (mode !== "join" || session || recoveryTabSelected) return;
+    const visible = session
+      ? activeMatchWorkspace === "games"
+      : entryTab === "games";
+    if (!visible) return;
     void refreshOpenLanMatches();
     const timer = window.setInterval(() => {
       void refreshOpenLanMatches(true);
@@ -3786,17 +3796,26 @@ export default function Page() {
     return () => {
       window.clearInterval(timer);
     };
-  }, [mode, recoveryTabSelected, session?.matchId]);
+  }, [activeMatchWorkspace, entryTab, session?.matchId]);
 
   useEffect(() => {
-    if (entryTab !== "recent" || session) return;
+    if (entryTab !== "recent" || session || !accountSession.account) return;
     void refreshRecentGameResults();
-  }, [entryTab, session?.matchId]);
+  }, [entryTab, session?.matchId, accountSession.account?.accountId]);
 
   useEffect(() => {
-    if (activeMatchWorkspace !== "recent" || !session) return;
+    if (
+      activeMatchWorkspace !== "recent" ||
+      !session ||
+      !accountSession.account
+    )
+      return;
     void refreshRecentGameResults();
-  }, [activeMatchWorkspace, session?.matchId]);
+  }, [
+    activeMatchWorkspace,
+    session?.matchId,
+    accountSession.account?.accountId,
+  ]);
 
   const updateJoinLinkInput = (value: string) => {
     setJoinLinkInput(value);
@@ -3807,11 +3826,9 @@ export default function Page() {
   };
 
   const selectOpenLanMatch = (entry: PublicMatchEntry) => {
-    const target = publicMatchTarget(entry);
-    if (target) {
-      window.location.assign(target);
-      return;
-    }
+    if (entry.status !== "open" || session) return;
+    setEntryTab("play");
+    selectStartTab("join");
     setJoinMatchId(entry.matchId);
     setJoinToken("");
     setJoinLinkInput("");
@@ -5567,6 +5584,15 @@ export default function Page() {
                     Spiel
                   </button>
                   <button
+                    className={`entryTab ${entryTab === "games" ? "active" : ""}`}
+                    onClick={() => setEntryTab("games")}
+                    type="button"
+                    aria-current={entryTab === "games" ? "page" : undefined}
+                  >
+                    <Gamepad2 size={16} />
+                    Spiele
+                  </button>
+                  <button
                     className={`entryTab ${entryTab === "catalog" ? "active" : ""}`}
                     onClick={() => setEntryTab("catalog")}
                     type="button"
@@ -5591,7 +5617,7 @@ export default function Page() {
                     aria-current={entryTab === "recent" ? "page" : undefined}
                   >
                     <Award size={16} />
-                    Letzte Spiele
+                    Meine Spiele
                   </button>
                   <button
                     className={`entryTab ${entryTab === "options" ? "active" : ""}`}
@@ -5797,10 +5823,6 @@ export default function Page() {
                         />
                       ) : (
                         <MatchJoinConsole
-                          openLanMatches={openLanMatches}
-                          openLanLoading={openLanLoading}
-                          openLanError={openLanError}
-                          openLanUpdatedAt={openLanUpdatedAt}
                           joinMatchIdTrimmed={joinMatchIdTrimmed}
                           joinTokenTrimmed={joinTokenTrimmed}
                           joinLinkInput={joinLinkInput}
@@ -5832,10 +5854,6 @@ export default function Page() {
                           joinMatchId={joinMatchId}
                           joinToken={joinToken}
                           canSubmitJoin={canSubmitJoin}
-                          onRefreshOpenLanMatches={() =>
-                            void refreshOpenLanMatches()
-                          }
-                          onSelectOpenLanMatch={selectOpenLanMatch}
                           onJoinLinkInput={updateJoinLinkInput}
                           onDisplayName={updateDisplayName}
                           onParticipantBRunnerDeckSource={
@@ -5862,6 +5880,17 @@ export default function Page() {
                         />
                       )}
                     </section>
+                  ) : null}
+                  {entryTab === "games" ? (
+                    <PublicGamesPanel
+                      matches={openLanMatches}
+                      loading={openLanLoading}
+                      error={openLanError}
+                      updatedAt={openLanUpdatedAt}
+                      canJoinOpen={!session}
+                      onRefresh={() => void refreshOpenLanMatches()}
+                      onJoinOpen={selectOpenLanMatch}
+                    />
                   ) : null}
                   {entryTab === "catalog" ? (
                     <CatalogPanel {...catalogPanelProps} />
@@ -5908,6 +5937,7 @@ export default function Page() {
                       loading={recentGameResultsLoading}
                       error={recentGameResultsError}
                       updatedAt={recentGameResultsUpdatedAt}
+                      accountMode={Boolean(accountSession.account)}
                       onRefresh={refreshRecentGameResults}
                     />
                   ) : null}
@@ -6676,11 +6706,21 @@ export default function Page() {
                   onImportText: setDeckImportText,
                   onImport: importLocalDeck,
                 }}
+                publicGamesPanelProps={{
+                  matches: openLanMatches,
+                  loading: openLanLoading,
+                  error: openLanError,
+                  updatedAt: openLanUpdatedAt,
+                  canJoinOpen: false,
+                  onRefresh: () => void refreshOpenLanMatches(),
+                  onJoinOpen: selectOpenLanMatch,
+                }}
                 recentGamesPanelProps={{
                   results: recentGameResults,
                   loading: recentGameResultsLoading,
                   error: recentGameResultsError,
                   updatedAt: recentGameResultsUpdatedAt,
+                  accountMode: Boolean(accountSession.account),
                   onRefresh: refreshRecentGameResults,
                 }}
                 optionsPanelProps={{

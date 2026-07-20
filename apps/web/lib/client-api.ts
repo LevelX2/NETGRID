@@ -2,8 +2,8 @@ import type {
   ApiCreateMatchResponse,
   ApiJoinMatchResponse,
   ApiLobbyPayload,
+  ApiPersonalRecentResults,
   ApiPublicMatchListEntry,
-  ApiRecentResultEntry,
   ApiSidePayload,
   LegalAction,
   Side,
@@ -53,8 +53,7 @@ export type PublicMatchesResponse = {
   error?: { message: string };
 };
 
-export type RecentGameResultsResponse = {
-  results?: ApiRecentResultEntry[];
+export type RecentGameResultsResponse = Partial<ApiPersonalRecentResults> & {
   error?: { message: string };
 };
 
@@ -230,12 +229,12 @@ export async function fetchPublicMatches(): Promise<PublicMatchesResponse> {
   return (await response.json()) as PublicMatchesResponse;
 }
 
-export async function fetchRecentGameResults(): Promise<RecentGameResultsResponse> {
+export async function fetchPersonalRecentGameResults(): Promise<RecentGameResultsResponse> {
   let response: Response;
   try {
     response = await fetch(
-      `${SERVER_HTTP}/api/matches/recent-results?limit=20`,
-      { cache: "no-store" },
+      `${SERVER_HTTP}/api/account/recent-results?limit=20`,
+      { cache: "no-store", credentials: "include" },
     );
   } catch {
     throw new ServerConnectionError();
@@ -253,12 +252,12 @@ export async function fetchRecentGameResults(): Promise<RecentGameResultsRespons
       return {
         error: {
           message:
-            "Dein Multiplayer-Server unterstützt letzte Spiele noch nicht. Bitte den Server neu starten oder auf den aktuellen Stand bringen.",
+            "Dein Multiplayer-Server unterstützt persönliche Spiele noch nicht. Bitte den Server neu starten oder auf den aktuellen Stand bringen.",
         },
       };
     }
     return {
-      error: { message: "Letzte Spiele konnten nicht geladen werden." },
+      error: { message: "Meine Spiele konnten nicht geladen werden." },
     };
   }
   return (await response.json()) as RecentGameResultsResponse;

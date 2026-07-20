@@ -43,6 +43,7 @@
 }
 
 .activeMatchWorkspace > .catalogPanel,
+.activeMatchWorkspace > .publicGamesPanel,
 .activeMatchWorkspace > .recentGamesPanel,
 .activeMatchWorkspace > .optionsPanel {
   width: min(1100px, 100%);
@@ -394,7 +395,7 @@ select {
   top: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 8px;
   padding: 4px;
   border: 1px solid var(--line);
@@ -418,6 +419,7 @@ select {
 
 .entryContent > .catalogPanel,
 .entryContent > .deckPanel,
+.entryContent > .publicGamesPanel,
 .entryContent > .recentGamesPanel,
 .entryContent > .optionsPanel {
   width: 100%;
@@ -1065,72 +1067,151 @@ select {
   grid-template-columns: 1fr;
 }
 
-.openLanMatchesPanel {
+.publicGamesPanel {
   display: grid;
-  gap: 8px;
+  gap: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--field-bg);
-  padding: 10px;
+  background: var(--panel);
+  padding: 14px;
 }
 
-.openLanMatchesHeader {
+.publicGamesHeader,
+.publicGameMain,
+.publicGameFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
 }
 
-.openLanMatchesHeader .eyebrow {
+.publicGamesHeader {
+  align-items: start;
+}
+
+.publicGamesHeader h2,
+.publicGamesHeader .eyebrow,
+.publicGameMeta,
+.publicGameJoinInfo,
+.publicGameResult,
+.publicGamesEmpty,
+.publicGamesTimestamp,
+.publicGamesNotice {
   margin: 0;
 }
 
-.openLanList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
+.publicGamesHeader h2 {
+  margin-top: 4px;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.publicGamesFilters {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.openLanEntry {
-  width: 100%;
-  display: grid;
-  gap: 4px;
-  text-align: left;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--text);
-  background: var(--panel);
-  padding: 8px 10px;
-  cursor: pointer;
-}
-
-.openLanEntry:hover,
-.openLanEntry:focus-visible {
-  border-color: var(--focus);
-  outline: 0;
-}
-
-.openLanEntry.selected {
+.publicGamesFilters .button.active {
+  color: var(--active-control-text);
   border-color: var(--active-control-border);
   background: var(--catalog-active-bg);
 }
 
-.openLanEntry small {
+.publicGamesList {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.publicGameCard {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  border-radius: 8px;
+  background: var(--field-bg);
+  padding: 12px;
+}
+
+.publicGameCard.open {
+  border-left-color: var(--success);
+}
+
+.publicGameCard.active {
+  border-left-color: var(--runner);
+}
+
+.publicGameCard.finished {
+  border-left-color: var(--muted);
+}
+
+.publicGameMain {
+  align-items: start;
+}
+
+.publicGameMain > div {
+  display: grid;
+  gap: 6px;
+}
+
+.publicGameTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.publicGameStatus {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.publicGameStatus.open {
+  color: var(--success);
+}
+
+.publicGameStatus.active {
+  color: var(--runner);
+}
+
+.publicGameStatus.finished,
+.publicGameMeta,
+.publicGameJoinInfo,
+.publicGamesEmpty,
+.publicGamesTimestamp,
+.publicGameFooter > span {
   color: var(--muted);
+}
+
+.publicGameMeta,
+.publicGameJoinInfo,
+.publicGameResult,
+.publicGamesEmpty,
+.publicGamesTimestamp,
+.publicGameFooter > span {
   font-size: 12px;
 }
 
-.openLanEmpty,
-.openLanTimestamp {
-  margin: 0;
-  color: var(--muted);
-  font-size: 12px;
+.publicGameJoinInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.openLanNotice {
-  margin: 0;
+.publicGameResult {
+  font-weight: 700;
+}
+
+.publicGameMain code {
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .recentGamesPanel {
@@ -11560,6 +11641,7 @@ select,
 .setup.v07Entry .resumeSessionPanel,
 .setup.v07Entry .catalogPanel,
 .setup.v07Entry .deckPanel,
+.setup.v07Entry .publicGamesPanel,
 .setup.v07Entry .optionsPanel {
   background: color-mix(in srgb, var(--panel), transparent 40%);
 }
@@ -15272,6 +15354,18 @@ select,
     grid-template-columns: 1fr;
   }
 
+  .publicGamesHeader,
+  .publicGameMain,
+  .publicGameFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .publicGameFooter .button {
+    justify-content: center;
+    width: 100%;
+  }
+
   .setup.v07Entry::before {
     background-position: 64% center;
   }
@@ -15285,6 +15379,7 @@ select,
   .setup.v07Entry .resumeSessionPanel,
   .setup.v07Entry .catalogPanel,
   .setup.v07Entry .deckPanel,
+  .setup.v07Entry .publicGamesPanel,
   .setup.v07Entry .recentGamesPanel,
   .setup.v07Entry .optionsPanel {
     background: color-mix(in srgb, var(--panel), transparent 40%);
