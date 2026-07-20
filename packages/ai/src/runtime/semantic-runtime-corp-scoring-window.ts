@@ -12,6 +12,7 @@ import {
 import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
 import { semanticRuntimeCorpObservedRemoteReachability } from "./semantic-runtime-corp-remote-reachability";
 import { visibleRunnerExposureCreditValue } from "./visible-runner-action-economy";
+import { decisionDerivedValue } from "./decision-derived-cache";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 import type {
@@ -45,6 +46,12 @@ import {
   strongestExistingScoringRemote,
 } from "./corp-scoreline/semantic-runtime-corp-scoring-window-projection";
 
+const CORP_SCORING_WINDOW_DECISION_CACHE_KEY = Symbol("corp-scoring-window");
+type CorpScoringWindowDecisionCache = WeakMap<
+  object,
+  Map<LegalAction, Map<string, CorpScoringWindowAssessment | undefined>>
+>;
+
 export function semanticRuntimeCorpScoringWindowAssessment<
   TServer extends CorpServerLike,
 >(
@@ -52,6 +59,41 @@ export function semanticRuntimeCorpScoringWindowAssessment<
   action: LegalAction,
   dependencies: SemanticRuntimeCorpScoringWindowDependencies<TServer>,
   roles: string[] = [],
+): CorpScoringWindowAssessment | undefined {
+  const cache = decisionDerivedValue<CorpScoringWindowDecisionCache>(
+    input,
+    CORP_SCORING_WINDOW_DECISION_CACHE_KEY,
+    () => new WeakMap(),
+  );
+  let byAction = cache.get(dependencies);
+  if (!byAction) {
+    byAction = new Map();
+    cache.set(dependencies, byAction);
+  }
+  let byRoles = byAction.get(action);
+  if (!byRoles) {
+    byRoles = new Map();
+    byAction.set(action, byRoles);
+  }
+  const rolesKey = roles.join("\u0000");
+  if (byRoles.has(rolesKey)) return byRoles.get(rolesKey);
+  const assessment = buildSemanticRuntimeCorpScoringWindowAssessment(
+    input,
+    action,
+    dependencies,
+    roles,
+  );
+  byRoles.set(rolesKey, assessment);
+  return assessment;
+}
+
+function buildSemanticRuntimeCorpScoringWindowAssessment<
+  TServer extends CorpServerLike,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoringWindowDependencies<TServer>,
+  roles: string[],
 ): CorpScoringWindowAssessment | undefined {
   if (input.side !== "corp" || action.side !== "corp") return undefined;
   const serverId = dependencies.actionServerId(input, action);

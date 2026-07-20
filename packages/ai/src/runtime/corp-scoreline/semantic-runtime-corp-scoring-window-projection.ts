@@ -7,6 +7,7 @@ import {
 import { RUNTIME_CARDS } from "../../ai-hints";
 import { endTheRunSubroutineCount } from "../../visible-run-analysis";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
+import { decisionDerivedValue } from "../decision-derived-cache";
 import type {
   CorpScoringWindowAgendaStealSeverity,
   CorpScoringWindowAssessment,
@@ -25,6 +26,10 @@ import {
 } from "./semantic-runtime-corp-scoring-window-runner-pressure";
 import { SCORING_WINDOW_AI_HINTS_BY_CARD } from "./semantic-runtime-corp-scoring-window-card-data";
 export { scoringWindowAccessAssessment } from "./semantic-runtime-corp-scoring-window-runner-pressure";
+
+const CORP_CENTRAL_PRESSURE_DECISION_CACHE_KEY = Symbol(
+  "corp-central-pressure",
+);
 
 export function projectedRemoteServerForAction<TServer extends CorpServerLike>(
   input: AiDecisionInput,
@@ -1076,15 +1081,25 @@ export function semanticRuntimeCorpHasAgendaInHq(
 export function semanticRuntimeCorpCentralPressure(
   input: AiDecisionInput,
 ): boolean {
+  return decisionDerivedValue(
+    input,
+    CORP_CENTRAL_PRESSURE_DECISION_CACHE_KEY,
+    () => buildSemanticRuntimeCorpCentralPressure(input),
+  );
+}
+
+function buildSemanticRuntimeCorpCentralPressure(
+  input: AiDecisionInput,
+): boolean {
   const agendaInHq = semanticRuntimeCorpHasAgendaInHq(input);
   const hq = input.playerView.servers.find((server) => server.id === "hq");
   const rd = input.playerView.servers.find((server) => server.id === "rd");
   const hqAccess = scoringWindowAccessAssessment(input, hq);
   const rdAccess = scoringWindowAccessAssessment(input, rd);
-  const hqRunOrAccessEvents = centralRunOrAccessEventCount(input, "hq");
-  const rdRunOrAccessEvents = centralRunOrAccessEventCount(input, "rd");
   const hqPressure = semanticRuntimeCorpCentralPressureAssessment(input, "hq");
   const rdPressure = semanticRuntimeCorpCentralPressureAssessment(input, "rd");
+  const hqRunOrAccessEvents = hqPressure.runOrAccessEvents;
+  const rdRunOrAccessEvents = rdPressure.runOrAccessEvents;
   return (
     (agendaInHq &&
       hqAccess.runnerCanReachAccessNow &&
@@ -1101,52 +1116,6 @@ export function semanticRuntimeCorpCentralPressure(
         rdPressure.successfulAccessEvents > 0 ||
         rdPressure.eventMultiaccess))
   );
-}
-
-function centralRunOrAccessEventCount(
-  input: AiDecisionInput,
-  serverId: "hq" | "rd",
-): number {
-  const eventsById = new Map(
-    [...(input.playerView.publicEvents ?? []), ...(input.eventTail ?? [])].map(
-      (event) => [event.eventId, event],
-    ),
-  );
-  return [...eventsById.values()].filter((event) => {
-    const payload = event.publicPayload;
-    const actor = typeof payload.actor === "string" ? payload.actor : undefined;
-    const actionType =
-      typeof payload.actionType === "string" ? payload.actionType : event.type;
-    return (
-      actor === "runner" &&
-      (actionType === "start_run" || actionType === "access_card") &&
-      normalizedCentralServerIdFromPayload(payload) === serverId
-    );
-  }).length;
-}
-
-function normalizedCentralServerIdFromPayload(
-  payload: Record<string, unknown>,
-): "hq" | "rd" | undefined {
-  return normalizedCentralServerId(
-    typeof payload.serverId === "string"
-      ? payload.serverId
-      : typeof payload.serverLabel === "string"
-        ? payload.serverLabel
-        : typeof payload.serverName === "string"
-          ? payload.serverName
-          : undefined,
-  );
-}
-
-function normalizedCentralServerId(
-  value: string | undefined,
-): "hq" | "rd" | undefined {
-  if (!value) return undefined;
-  const normalized = value.toLocaleLowerCase("en-US");
-  if (normalized === "hq") return "hq";
-  if (normalized === "rd" || normalized === "r&d") return "rd";
-  return undefined;
 }
 
 function visibleRunnerCentralMultiaccess(

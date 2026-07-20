@@ -11,6 +11,7 @@ import {
   type CorpBoardTriageDependencies,
 } from "./semantic-runtime-corp-board-triage";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
+import { withDecisionDerivedCache } from "./decision-derived-cache";
 import {
   agendaCard,
   assetCard,
@@ -29,6 +30,26 @@ import {
 } from "./semantic-runtime-corp-board-triage.test-support";
 
 describe("semantic runtime corp board triage", () => {
+  it("reuses state triage for all action candidates in one decision", () => {
+    const input = corpInput({
+      legalActions: [],
+      servers: [],
+    });
+    const dependencies = testDependencies();
+
+    const withinDecision = withDecisionDerivedCache(() => [
+      semanticRuntimeCorpBoardTriage(input, dependencies),
+      semanticRuntimeCorpBoardTriage(input, dependencies),
+    ]);
+    const nextDecision = withDecisionDerivedCache(() =>
+      semanticRuntimeCorpBoardTriage(input, dependencies),
+    );
+
+    expect(withinDecision[1]).toBe(withinDecision[0]);
+    expect(nextDecision).not.toBe(withinDecision[0]);
+    expect(nextDecision).toEqual(withinDecision[0]);
+  });
+
   it("protects an open central before creating the first empty remote", () => {
     const corticalScrub = iceCard("cortical-scrub", {
       definitionId: "onr_v1_231_cortical-scrub",

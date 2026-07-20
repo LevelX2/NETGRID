@@ -40,6 +40,7 @@ import {
   triageSeverityFromScoringWindow,
 } from "./corp-scoreline/semantic-runtime-corp-board-triage-policies";
 import { semanticRuntimeCorpBoardTriageActionComponentForTriage } from "./corp-scoreline/semantic-runtime-corp-board-triage-alignment";
+import { decisionDerivedValue } from "./decision-derived-cache";
 
 export type {
   CorpBoardTriage,
@@ -50,7 +51,26 @@ export type {
 
 export { normalizedCorpBoardTriageValue } from "./corp-scoreline/semantic-runtime-corp-board-triage-actions";
 
+const CORP_BOARD_TRIAGE_DECISION_CACHE_KEY = Symbol("corp-board-triage");
+type CorpBoardTriageDecisionCache = WeakMap<object, CorpBoardTriage>;
+
 export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
+  input: AiDecisionInput,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): CorpBoardTriage {
+  const cache = decisionDerivedValue<CorpBoardTriageDecisionCache>(
+    input,
+    CORP_BOARD_TRIAGE_DECISION_CACHE_KEY,
+    () => new WeakMap(),
+  );
+  const cached = cache.get(dependencies);
+  if (cached) return cached;
+  const triage = buildSemanticRuntimeCorpBoardTriage(input, dependencies);
+  cache.set(dependencies, triage);
+  return triage;
+}
+
+function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
   input: AiDecisionInput,
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): CorpBoardTriage {

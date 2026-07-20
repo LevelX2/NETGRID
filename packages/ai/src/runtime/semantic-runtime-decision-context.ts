@@ -7,6 +7,7 @@ import {
   type PracticalMicroCandidate,
 } from "./practical-micro-runtime";
 import { applyPracticalTacticOverlay } from "./practical-tactic-overlay";
+import { withDecisionDerivedCache } from "./decision-derived-cache";
 
 export type SemanticRuntimeDecisionContextDependencies =
   SemanticRuntimeDependencies & {
@@ -30,18 +31,24 @@ export function createSemanticRuntimeDecisionContext(
     input: AiDecisionInput,
     options: AiDecisionRuntimeOptions,
   ): AiDecision {
-    const runtimeDecision = chooseSemanticRuntimeActionFromRuntime(
-      input,
-      options,
-      dependencies,
-    );
-    const practicalMicroDecision = applyPracticalMicroRuntimeComparator(
-      input,
-      runtimeDecision,
-      options,
-      dependencies.practicalMicroRuntimeCandidates(input, runtimeDecision),
-    );
-    return applyPracticalTacticOverlay(input, practicalMicroDecision, options);
+    return withDecisionDerivedCache(() => {
+      const runtimeDecision = chooseSemanticRuntimeActionFromRuntime(
+        input,
+        options,
+        dependencies,
+      );
+      const practicalMicroDecision = applyPracticalMicroRuntimeComparator(
+        input,
+        runtimeDecision,
+        options,
+        dependencies.practicalMicroRuntimeCandidates(input, runtimeDecision),
+      );
+      return applyPracticalTacticOverlay(
+        input,
+        practicalMicroDecision,
+        options,
+      );
+    });
   }
 
   return { chooseSemanticRuntimeAction };

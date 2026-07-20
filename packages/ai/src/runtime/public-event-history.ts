@@ -1,5 +1,10 @@
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
 import type { CentralServerId } from "./server-target";
+import { decisionDerivedValue } from "./decision-derived-cache";
+
+const MERGED_PUBLIC_HISTORY_DECISION_CACHE_KEY = Symbol(
+  "merged-public-history",
+);
 
 export function findLastHistoryIndex<T>(
   values: readonly T[],
@@ -11,9 +16,15 @@ export function findLastHistoryIndex<T>(
   return -1;
 }
 
-export function mergedPublicHistory(
-  input: AiDecisionInput,
-): PublicGameEvent[] {
+export function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
+  return decisionDerivedValue(
+    input,
+    MERGED_PUBLIC_HISTORY_DECISION_CACHE_KEY,
+    () => buildMergedPublicHistory(input),
+  );
+}
+
+function buildMergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
   const byId = new Map<string, PublicGameEvent>();
   for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
     byId.set(event.eventId, event);
@@ -88,9 +99,7 @@ export function eventRefreshesCentralTarget(
   return actionType === "trash_card";
 }
 
-export function serverIdFromEvent(
-  event: PublicGameEvent,
-): string | undefined {
+export function serverIdFromEvent(event: PublicGameEvent): string | undefined {
   const payload = event.publicPayload;
   if (typeof payload.serverId === "string") return payload.serverId;
   if (typeof payload.server === "string") return payload.server;

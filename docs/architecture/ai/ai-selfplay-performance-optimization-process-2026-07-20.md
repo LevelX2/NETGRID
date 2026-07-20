@@ -169,6 +169,24 @@ Bei einem fehlgeschlagenen Done-Gate bleibt der Zustand beim aktuellen Paket.
   zum fachlichen Ausgangsstand; Messwerte und Restrisiken sind dokumentiert.
 - Commit: `docs(ai): close selfplay performance optimization`
 
+## Paketfortschritt
+
+### P1 – abgeschlossen am 20. Juli 2026
+
+- Abgeleitete semantische Entscheidungsdaten werden ausschließlich innerhalb
+  eines synchronen AI-Entscheidungszyklus wiederverwendet. Zwischen Zügen,
+  States oder Spielen besteht kein Cache.
+- Wiederverwendet werden insbesondere Belief State, zusammengeführte Public
+  History, Central-Pressure-Auswertungen, Scoring-Window und Corp Board Triage.
+  Rein textuelle Rollenzerlegung nutzt zusätzlich kleine begrenzte Caches.
+- Der feste 240-Aktionen-Fall
+  `strategy_panel_net_damage_black_ice` / `ai-behavior-baseline-v1-07` sank
+  auf derselben Maschine von 29,228 s auf 24,866 s, also um 14,9 Prozent.
+- Die vollständige Summary, Findings, Aggregate, ActionSequence und der finale
+  StateHash (`fnv1a:2c327d92`) waren bitgleich zum Ausgangslauf.
+- Verifikation: 83 fokussierte Tests grün, `@netgrid/ai`-Typecheck grün und
+  `git diff --check` ohne Befund.
+
 ## Verifikationsregeln
 
 - Parität wird über ActionSequence, finalen StateHash, Replaystatus,
