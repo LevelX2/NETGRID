@@ -1144,6 +1144,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
     );
     expect(take.payload).toMatchObject({
       cardImplementationTakesHostedCredits: true,
+      gainCreditsAmount: 3,
+      hostedCreditTakeAmount: 3,
       hostedCreditTakeMode: "all",
     });
     state = apply(

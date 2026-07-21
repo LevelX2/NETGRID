@@ -134,6 +134,41 @@ export type ActionCostProfile = {
   additionalCosts: string[];
 };
 
+export type ActionEconomyKind =
+  | "immediate_liquid"
+  | "stored_credit_build"
+  | "restricted_credit"
+  | "automatic_credit"
+  | "non_economy";
+
+export type ActionEconomyProjectionSource =
+  | "legal_action_payload"
+  | "basic_action_contract"
+  | "visible_source_state"
+  | "unknown";
+
+export type ActionEconomyProjection = {
+  schemaVersion: "action-economy-projection-v1";
+  kind: ActionEconomyKind;
+  timing: "immediate" | "setup" | "automatic" | "unknown";
+  creditRestriction: "general" | "restricted" | "unknown";
+  clickCost: number;
+  creditCost: number;
+  grossLiquidCreditGain?: number;
+  netLiquidCreditGain?: number;
+  storedCreditsAdded?: number;
+  storedCreditsTaken?: number;
+  cardsDrawn: number;
+  cardsConsumed: number;
+  netHandDelta: number;
+  payoutMode?: "fixed" | "all_available";
+  repeatable: boolean | "unknown";
+  reliability: "guaranteed" | "conditional" | "unknown";
+  source: ActionEconomyProjectionSource;
+  confidence: ActionSemanticConfidence;
+  evidence: string[];
+};
+
 export type ActionTimingProfile = {
   phase?: string;
   turnSide?: "runner" | "corp";
@@ -410,6 +445,7 @@ export type ActionSemanticCandidate = {
   risks: SemanticRisk[];
   constraints: SemanticConstraint[];
   costProfile: ActionCostProfile;
+  economyProjection?: ActionEconomyProjection;
   timingProfile: ActionTimingProfile;
   targetContext?: ActionTargetContext;
   runProjectionSummary?: ActionRunProjectionSummary;

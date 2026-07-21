@@ -9,6 +9,7 @@ export function buildCorpGainCreditAction(state: GameState): LegalAction {
     "1 Credit nehmen",
     "basic_action",
     [{ clicks: 1 }],
+    { gainCreditsAmount: 1 },
   );
 }
 

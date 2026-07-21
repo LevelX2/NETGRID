@@ -1,6 +1,7 @@
 import type { CardDefinitionId, LegalAction } from "@netgrid/shared";
 import { applyCardSemanticJoin } from "./actions/action-card-semantic-join";
 import { applyCostAndTimingProfiles } from "./actions/action-cost-timing";
+import { applyActionEconomyProjection } from "./actions/action-economy-projection";
 import { applyCardActionSourceBinding } from "./actions/action-source-binding";
 import { applyTagEffectSemantics } from "./actions/tag-effect-semantics";
 import { applyTargetContextProjection } from "./actions/action-target-context";
@@ -36,6 +37,9 @@ export type {
   SemanticConstraint,
   DamageAmount,
   ActionCostProfile,
+  ActionEconomyKind,
+  ActionEconomyProjectionSource,
+  ActionEconomyProjection,
   ActionTimingProfile,
   LegalTarget,
   LegalTargetSummary,
@@ -125,10 +129,11 @@ function projectActionSemanticCandidate(
     targetCandidate,
     action,
   );
-  const tagEffectCandidate = applyTagEffectSemantics(
+  const economyCandidate = applyActionEconomyProjection(
     costTimingCandidate,
     action,
   );
+  const tagEffectCandidate = applyTagEffectSemantics(economyCandidate, action);
   const traceCounterCandidate = applyTraceCounterSemantics(
     tagEffectCandidate,
     action,

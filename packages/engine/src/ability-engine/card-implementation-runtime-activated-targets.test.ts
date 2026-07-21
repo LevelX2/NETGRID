@@ -1,3 +1,4 @@
+import type { GameState } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActivatedCardAbilityImplementation } from "./definition-types";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
@@ -7,6 +8,36 @@ import {
 } from "./card-implementation-runtime-activated-targets";
 
 describe("activatedAbilityPayload advancement semantics", () => {
+  it("publishes the exact visible all-available hosted-credit cashout", () => {
+    const ability: ActivatedCardAbilityImplementation = {
+      kind: "activated",
+      timing: "runner_main",
+      costs: [{ kind: "action", amount: 1 }],
+      effects: [
+        {
+          kind: "take_hosted_credits",
+          source: "source",
+          recipient: "controller",
+          mode: "all",
+          visibility: "public",
+        },
+      ],
+    };
+    const state = {
+      cardInstances: {
+        source: { counters: { bit: 12 } },
+      },
+    } as unknown as GameState;
+
+    expect(
+      activatedAbilityPayload("source" as never, ability, 1, state),
+    ).toMatchObject({
+      gainCreditsAmount: 12,
+      hostedCreditTakeAmount: 12,
+      hostedCreditTakeMode: "all",
+    });
+  });
+
   it("publishes a side-safe run projection for declarative run abilities", () => {
     const ability: ActivatedCardAbilityImplementation = {
       kind: "activated",

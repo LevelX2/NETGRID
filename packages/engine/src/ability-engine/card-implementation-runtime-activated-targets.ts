@@ -32,8 +32,14 @@ export function activatedAbilityPayload(
     hostedCreditAddAmountForActivatedAbility(ability);
   const hostedCreditTakeEffect =
     hostedCreditTakeEffectForActivatedAbility(ability);
-  const hostedCreditTakeAmount =
+  const configuredHostedCreditTakeAmount =
     hostedCreditTakeAmountForActivatedAbility(ability);
+  const availableHostedCredits = hostedCreditsOnSource(state, cardId);
+  const hostedCreditTakeAmount = effectiveHostedCreditTakeAmount(
+    hostedCreditTakeEffect,
+    configuredHostedCreditTakeAmount,
+    availableHostedCredits,
+  );
   const directCreditGain = ability.effects.reduce(
     (sum, effect) =>
       effect.kind === "gain_credits" &&
@@ -73,9 +79,7 @@ export function activatedAbilityPayload(
     ...(hostedCreditTakeEffect
       ? {
           cardImplementationTakesHostedCredits: true,
-          ...(hostedCreditTakeEffect.amount !== undefined
-            ? { hostedCreditTakeAmount: hostedCreditTakeEffect.amount }
-            : {}),
+          ...(hostedCreditTakeAmount > 0 ? { hostedCreditTakeAmount } : {}),
           ...(hostedCreditTakeEffect.mode !== undefined
             ? { hostedCreditTakeMode: hostedCreditTakeEffect.mode }
             : {}),
@@ -151,6 +155,29 @@ export function activatedAbilityPayload(
         }
       : {}),
   };
+}
+
+function hostedCreditsOnSource(
+  state: GameState | undefined,
+  cardId: CardInstanceId,
+): number | undefined {
+  const amount = state?.cardInstances[cardId]?.counters?.bit;
+  return typeof amount === "number" && Number.isFinite(amount)
+    ? Math.max(0, Math.floor(amount))
+    : undefined;
+}
+
+function effectiveHostedCreditTakeAmount(
+  effect:
+    | Extract<CardEffectImplementation, { kind: "take_hosted_credits" }>
+    | undefined,
+  configuredAmount: number,
+  availableAmount: number | undefined,
+): number {
+  if (!effect) return 0;
+  if (effect.mode === "all") return availableAmount ?? configuredAmount;
+  if (availableAmount === undefined) return configuredAmount;
+  return Math.min(configuredAmount, availableAmount);
 }
 
 function makeRunLegalActionProjectionPayload(

@@ -21,6 +21,7 @@ describe("runner basic main actions", () => {
       source: "basic_action",
       timingPoint: state.timingPoint,
       costs: [{ clicks: 1 }],
+      payload: { gainCreditsAmount: 1 },
       targetRequirements: [],
       visibility: "private_to_actor",
       expiresAtStateVersion: state.stateVersion,
