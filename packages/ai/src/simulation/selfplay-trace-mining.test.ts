@@ -772,6 +772,27 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("run-mismatch-noise");
   });
 
+  it("accepts a run plan that was revalidated as known-unreachable", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "draw-for-missing-breaker",
+        planKind: "runner.opportunistic_central_run",
+        runnerKnownPathBlockedByMissingCoverage: true,
+      }),
+      selfplayAction("runner", 2, "gain_credit", {
+        selectedActionId: "hold-after-known-no-access",
+        planKind: "runner.opportunistic_central_run",
+        runnerRunSuppressedAsKnownNoAccess: true,
+      }),
+    ]);
+
+    expect(
+      detectAiSelfplaySuspiciousDecisions([summary], {
+        detectorIds: ["plan_step_action_mismatch"],
+      }),
+    ).toEqual([]);
+  });
+
   it("bounds Corp late-credit reserve explanations to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("corp", 1, "gain_credit", {

@@ -60,9 +60,18 @@ const FIELD_CONSUMER_CONTRACTS: Readonly<Record<string, readonly string[]>> = {
   scenarioRefs: ["hint-metadata-gate", "scenario-coverage"],
   side: ["hint-definition-join", "hint-metadata-gate"],
   strategicRole: ["deck-doctrine-strategy", "action-card-semantic-profiles"],
+  strategySupportPairs: [
+    "deck-opening-hand",
+    "deck-doctrine-strategy",
+  ],
   strategyAnchors: ["deck-doctrine-strategy"],
+  tacticSignals: ["action-card-semantic-profiles"],
   targetProfiles: ["action-card-semantic-profiles", "target-choice-semantics"],
   valueHints: ["runtime-value-consumers", "deck-opening-hand"],
+  remoteRole: [
+    "deck-doctrine-strategy",
+    "remote-role-ontology-consumer",
+  ],
 };
 
 const args = process.argv.slice(2);

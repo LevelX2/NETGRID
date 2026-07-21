@@ -53,6 +53,23 @@ describe("static AI hint semantics", () => {
     );
   });
 
+  it("keeps the ETR semantics of the audited ICE without redundant tactic signals", () => {
+    for (const cardId of [
+      "onr_v1_232_crystal-wall",
+      "onr_v1_252_keeper",
+      "onr_v1_261_quandary",
+    ]) {
+      const hint = hintById.get(cardId);
+      expect(hint?.tacticSignals).toBeUndefined();
+      expect(hint?.functionSignals).toEqual(
+        expect.arrayContaining(["corp_ice.end_run", "ice.etr"]),
+      );
+      expect(hint?.actionTacticSignals).toEqual(
+        expect.arrayContaining(["effect:etr", "effect:remote_protection"]),
+      );
+    }
+  });
+
   it("keeps every stored semantic array duplicate-free", () => {
     for (const hint of hints) {
       expect(new Set(hint.tacticSignals ?? []).size, hint.cardId).toBe(

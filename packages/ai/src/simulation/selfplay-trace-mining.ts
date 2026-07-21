@@ -2103,6 +2103,12 @@ function selfplaySemanticOverrideSuspicious(
 function selfplayPlanMismatchHasKnownExplanation(
   entry: AiSimulationSummary["actionSequence"][number],
 ): boolean {
+  if (
+    entry.runnerKnownPathBlockedByMissingCoverage === true ||
+    entry.runnerRunSuppressedAsKnownNoAccess === true
+  ) {
+    return true;
+  }
   return selfplayEntryHasStructuredSignal(entry, [
     "tactical_plan_mapping_outcome:semantic_choice_selected",
     "tactical_plan_mapping_outcome:plan_mapping_selected",

@@ -20459,9 +20459,6 @@
       ],
       "side": "corp",
       "strategicRole": [],
-      "tacticSignals": [
-        "corp_ice.end_run"
-      ],
       "valueHints": {},
       "strategyAnchors": [
         "corp.ice_tax_glacier"
@@ -21010,9 +21007,6 @@
       ],
       "side": "corp",
       "strategicRole": [],
-      "tacticSignals": [
-        "corp_ice.end_run"
-      ],
       "valueHints": {},
       "strategyAnchors": [
         "corp.ice_tax_glacier"
@@ -21091,9 +21085,6 @@
       ],
       "side": "corp",
       "strategicRole": [],
-      "tacticSignals": [
-        "corp_ice.end_run"
-      ],
       "valueHints": {},
       "strategyAnchors": [
         "corp.ice_tax_glacier"
@@ -22642,9 +22633,6 @@
       ],
       "side": "corp",
       "strategicRole": [],
-      "tacticSignals": [
-        "corp_ice.end_run"
-      ],
       "valueHints": {},
       "strategyAnchors": [
         "corp.ice_tax_glacier"
@@ -23616,9 +23604,6 @@
       ],
       "side": "corp",
       "strategicRole": [],
-      "tacticSignals": [
-        "corp_ice.end_run"
-      ],
       "valueHints": {},
       "strategyAnchors": [
         "corp.ice_tax_glacier"
