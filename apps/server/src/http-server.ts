@@ -2680,9 +2680,8 @@ async function routeHttp(
       return;
     }
 
-    const replayRoute = /^\/api\/replays\/([^/]+)(?:\/(export))?$/.exec(
-      url.pathname,
-    );
+    const replayRoute =
+      /^\/api\/replays\/([^/]+)(?:\/(export|gamebook))?$/.exec(url.pathname);
     if (replayRoute && request.method === "GET") {
       if (
         !checkRateLimit(
@@ -2696,18 +2695,6 @@ async function routeHttp(
       )
         return;
       const matchId = decodeURIComponent(replayRoute[1] ?? "");
-      const perspective = replayPerspectiveFromParam(
-        url.searchParams.get("perspective"),
-      );
-      if (!perspective) {
-        sendJson(response, 400, {
-          error: {
-            code: "bad_request",
-            message: "Unbekannte Replay-Perspektive.",
-          },
-        });
-        return;
-      }
       const replayAccess = {
         ...(url.searchParams.get("side") === "runner" ||
         url.searchParams.get("side") === "corp"
@@ -2722,6 +2709,31 @@ async function routeHttp(
             }
           : {}),
       };
+      if (replayRoute[2] === "gamebook") {
+        const exported = await service.exportGamebook(matchId, replayAccess);
+        if (!exported.ok) {
+          sendJson(response, 404, { error: exported.error });
+          return;
+        }
+        sendMarkdown(
+          response,
+          exported.artifact.markdown,
+          `netgrid-spielprotokoll-${matchId}.md`,
+        );
+        return;
+      }
+      const perspective = replayPerspectiveFromParam(
+        url.searchParams.get("perspective"),
+      );
+      if (!perspective) {
+        sendJson(response, 400, {
+          error: {
+            code: "bad_request",
+            message: "Unbekannte Replay-Perspektive.",
+          },
+        });
+        return;
+      }
       if (replayRoute[2] === "export") {
         const exported = await service.exportReplay(
           matchId,
@@ -3226,6 +3238,18 @@ function sendJson(
     "content-type": "application/json; charset=utf-8",
   });
   response.end(JSON.stringify(payload));
+}
+
+function sendMarkdown(
+  response: ServerResponse,
+  markdown: string,
+  filename: string,
+): void {
+  response.writeHead(200, {
+    "content-type": "text/markdown; charset=utf-8",
+    "content-disposition": `attachment; filename="${filename}"`,
+  });
+  response.end(markdown);
 }
 
 function sendBootstrap(

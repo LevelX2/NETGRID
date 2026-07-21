@@ -12386,6 +12386,24 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(JSON.stringify(exportPayload)).not.toMatch(
         /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i,
       );
+
+      const gamebookResponse = await fetch(
+        `${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}/gamebook`,
+      );
+      const gamebook = await gamebookResponse.text();
+      expect(gamebookResponse.status).toBe(200);
+      expect(gamebookResponse.headers.get("content-type")).toContain(
+        "text/markdown",
+      );
+      expect(gamebookResponse.headers.get("content-disposition")).toContain(
+        ".md",
+      );
+      expect(gamebook).toContain("# Spielprotokoll");
+      expect(gamebook).toContain("## Spielvorbereitung");
+      expect(gamebook).toContain("Hand zu Zugbeginn");
+      expect(gamebook).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i,
+      );
     } finally {
       await handle.close();
     }

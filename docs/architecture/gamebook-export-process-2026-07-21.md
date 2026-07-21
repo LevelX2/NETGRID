@@ -1,6 +1,6 @@
 # Spielprotokoll-Export
 
-Status: in Umsetzung; EXP-001 bis EXP-003 abgeschlossen
+Status: in Umsetzung; EXP-001 bis EXP-004 abgeschlossen
 Stand: 2026-07-21
 Arbeitsbranch: `codex/gamebook-export`
 Arbeits-Worktree: `C:\Projekte\NETGRID_GAMEBOOK_EXPORT`
@@ -95,10 +95,10 @@ Entfernung prüfen.
 
 ## Fortschritt
 
-| Paket   | Status        | Ergebnis                                                              |
-| ------- | ------------- | --------------------------------------------------------------------- |
-| EXP-001 | abgeschlossen | Produktvertrag, Grenzen, Pakete und Abnahmekriterien festgeschrieben. |
+| Paket   | Status        | Ergebnis                                                                                                                                         |
+| ------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| EXP-001 | abgeschlossen | Produktvertrag, Grenzen, Pakete und Abnahmekriterien festgeschrieben.                                                                            |
 | EXP-002 | abgeschlossen | Persistierte Engine-Ereignisse, private Aktionsbelege und Voraktions-Snapshots liefern den vollständigen Faktenledger ohne zweiten Speicherpfad. |
-| EXP-003 | abgeschlossen | Der Renderer erzeugt daraus das sachliche, nach Aktionen gegliederte Markdown-Protokoll. |
-| EXP-004 | aktiv         | Downloadroute und HTTP-Vertrag werden geprüft.                        |
-| EXP-005 | offen         |                                                                       |
+| EXP-003 | abgeschlossen | Der Renderer erzeugt daraus das sachliche, nach Aktionen gegliederte Markdown-Protokoll.                                                         |
+| EXP-004 | abgeschlossen | `GET /api/replays/:matchId/gamebook` liefert das terminal autorisierte Protokoll als Markdown-Download.                                          |
+| EXP-005 | aktiv         | Regression, Dokumentation und Abschlussprüfung laufen.                                                                                           |
