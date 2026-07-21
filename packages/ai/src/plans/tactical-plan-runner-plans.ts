@@ -342,6 +342,7 @@ export function buildRunnerTacticalPlans(
           }),
         ],
         evidence: [
+          "runner_remote_contest_phase:acquire_coverage",
           `blocked_remote_run_action:${action.actionId}`,
           `target_plan_requires_coverage:${missingCoverage}`,
           ...deckCapabilityEvidence,
@@ -546,6 +547,7 @@ export function buildRunnerTacticalPlans(
           ],
         }),
         evidence: [
+          "runner_remote_contest_phase:execute",
           `remote_run_action:${action.actionId}`,
           ...runnerRunTargetPlanEvidence(context, action),
           ...tacticalGoalEvidence(remoteGoal),

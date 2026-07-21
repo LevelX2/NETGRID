@@ -116,6 +116,32 @@ describe("tactical plan model", () => {
     ]);
   });
 
+  it("marks a contestable remote run as the execute phase", () => {
+    const input = aiInput("runner", [
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+    ]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [
+        { ...visibleCard("remote-root", "corp", "asset"), known: false },
+      ]),
+    ];
+
+    const contestPlan = buildTacticalPlans({ input }).find(
+      (plan) => plan.planId === "runner.contest_remote:remote_1",
+    );
+
+    expect(contestPlan?.status).toBe("active");
+    expect(contestPlan?.currentStep.kind).toBe("run_target");
+    expect(contestPlan?.evidence).toContain(
+      "runner_remote_contest_phase:execute",
+    );
+  });
+
   it("lets active plans outrank progressing plans when the continuity bonus is not enough", () => {
     const progressing = createTacticalPlan({
       planId: "runner.obtain_breaker_coverage:rd",
@@ -813,6 +839,9 @@ describe("tactical plan model", () => {
         "missing_wall_coverage",
         "coverage_not_in_deck",
       ]),
+    );
+    expect(contestPlan?.evidence).toContain(
+      "runner_remote_contest_phase:acquire_coverage",
     );
     expect(coveragePlan?.currentStep.kind).toBe("pivot_to_alternative");
     expect(coveragePlan?.status).toBe("blocked");

@@ -85,6 +85,10 @@ Rules Engine noch Kartenregeln.
   keinen `hint_field_without_consumer_contract`-Fund mehr. Seine drei
   verbleibenden Hosted-Credit-Funde betreffen BBS/Department of Truth und
   gehören nicht zum vorliegenden Hint-Consumer-Problem.
+- Remote-Contest-Pläne tragen jetzt explizit
+  `runner_remote_contest_phase:acquire_coverage` oder
+  `runner_remote_contest_phase:execute`. Die Phase beschreibt die tatsächliche
+  Planabsicht, ohne den Selektor zu einem unfinanzierten Run zu zwingen.
 
 ## Arbeitsform
 
