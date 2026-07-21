@@ -14,6 +14,7 @@ import {
   buildPlanPortfolio,
   planPortfolioEntryCanAct,
   planPortfolioEntryForPlan,
+  planPortfolioFundingStep,
   planPortfolioTurnKey,
   redactedPlanActionContributionFacts,
   redactedPlanPortfolioFacts,
@@ -30,6 +31,7 @@ import {
 import { visibleCardForAction } from "./plans/tactical-plan-visible-cards";
 import { buildCorpTacticalPlans } from "./plans/tactical-plan-corp-plans";
 import { buildRunnerTacticalPlans } from "./plans/tactical-plan-runner-plans";
+import { publishTacticalPlanCreditDemands } from "./plans/tactical-plan-credit-demands";
 import type { TacticalPlanCreditValueDependencies } from "./plans/tactical-plan-action-values";
 import { mapPlanStepToLegalActionsWithDependencies } from "./plans/tactical-plan-legal-action-mapping";
 import {
@@ -97,9 +99,19 @@ export type {
 export function buildTacticalPlans(
   context: TacticalPlanBuildContext,
 ): TacticalPlan[] {
-  return context.input.side === "runner"
-    ? buildRunnerTacticalPlans(context, TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES)
-    : buildCorpTacticalPlans(context);
+  const plans =
+    context.input.side === "runner"
+      ? buildRunnerTacticalPlans(
+          context,
+          TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
+        )
+      : buildCorpTacticalPlans(context);
+  return plans.map((plan) =>
+    publishTacticalPlanCreditDemands(
+      plan,
+      context.input.playerView.own.credits,
+    ),
+  );
 }
 export function evaluateTacticalPlans(
   context: TacticalPlanBuildContext,
@@ -162,19 +174,20 @@ export function evaluateTacticalPlans(
   const blockedPlans = planAlternatives.filter(
     (plan) => plan.status === "blocked",
   );
+  const candidates = context.candidates ?? [];
   const planPortfolio = buildPlanPortfolio({
     input: context.input,
     tacticalPlans: planAlternatives,
+    candidates,
     ...(previousPlanPortfolio ? { previous: previousPlanPortfolio } : {}),
     turnKey: planPortfolioTurnKey(context.input),
   });
-  const candidates = context.candidates ?? [];
   const interruptPlan = planPortfolio.interrupt
     ? planAlternatives.find(
         (plan) => plan.planId === planPortfolio.interrupt?.sourcePlanId,
       )
     : undefined;
-  const interruptMapping = interruptPlan
+  const interruptCurrentMapping = interruptPlan
     ? mapPlanStepToLegalActions(
         interruptPlan,
         interruptPlan.currentStep,
@@ -182,6 +195,23 @@ export function evaluateTacticalPlans(
         context.input,
       )
     : undefined;
+  const interruptFundingStep =
+    interruptPlan && planPortfolio.interrupt
+      ? planPortfolioFundingStep(planPortfolio.interrupt, candidates)
+      : undefined;
+  const interruptFundingMapping =
+    interruptPlan && interruptFundingStep
+      ? mapPlanStepToLegalActions(
+          interruptPlan,
+          interruptFundingStep,
+          candidates,
+          context.input,
+        )
+      : undefined;
+  const interruptMapping =
+    interruptCurrentMapping?.status === "matched"
+      ? interruptCurrentMapping
+      : (interruptFundingMapping ?? interruptCurrentMapping);
   const interruptCanAct =
     interruptMapping?.status === "matched" &&
     interruptMapping.legalActions.length > 0;
@@ -218,12 +248,25 @@ export function evaluateTacticalPlans(
       continue;
     }
     if (!planCanMapToCurrentAction(plan)) continue;
-    const mapping = mapPlanStepToLegalActions(
+    const currentMapping = mapPlanStepToLegalActions(
       plan,
       plan.currentStep,
       candidates,
       context.input,
     );
+    const fundingStep = portfolioEntry
+      ? planPortfolioFundingStep(portfolioEntry, candidates)
+      : undefined;
+    const fundingMapping = fundingStep
+      ? mapPlanStepToLegalActions(plan, fundingStep, candidates, context.input)
+      : undefined;
+    const mapping =
+      currentMapping.status === "matched" &&
+      plan.currentStep.kind !== "gain_credits"
+        ? currentMapping
+        : fundingMapping?.status === "matched"
+          ? fundingMapping
+          : currentMapping;
     if (mapping.status === "matched" && mapping.legalActions.length > 0) {
       return {
         planPortfolio,

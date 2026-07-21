@@ -21,11 +21,7 @@ import {
   actionTypeMatchesStep,
   candidateSemanticsMatchStep,
 } from "./tactical-plan-step-semantics";
-import {
-  legalActionCreditGainForPlan,
-  legalActionCreditNetGain,
-  type TacticalPlanCreditValueDependencies,
-} from "./tactical-plan-action-values";
+import type { TacticalPlanCreditValueDependencies } from "./tactical-plan-action-values";
 import { runnerHasConcreteFundingNeed } from "./tactical-plan-runner-funding-need";
 import {
   runnerSurvivalActionProgress,
@@ -57,7 +53,7 @@ export function planStepCandidatePriority(
     return coverageAnswerRolePriority(fit.answerRole);
   }
   if (step.kind === "gain_credits") {
-    return legalActionCreditNetGain(input, action, dependencies) * 100;
+    return immediateFundingNetGain(candidate) * 100;
   }
   if (step.kind === "clear_tags") {
     return tagClearStepPriority(candidate, action, input);
@@ -140,17 +136,13 @@ export function candidateMatchesStep(
     return developmentCardStepMatchesAction(plan, action);
   }
   if (step.kind === "gain_credits") {
-    const creditGain = legalActionCreditGainForPlan(
-      input,
-      action,
-      dependencies,
-    );
     return (
-      creditGain > 0 && candidateTargetMatchesPlan(plan, candidate, action)
+      immediateFundingNetGain(candidate) > 0 &&
+      candidateTargetMatchesPlan(plan, candidate, action)
     );
   }
   if (step.kind === "build_rez_reserve") {
-    if (legalActionCreditGainForPlan(input, action, dependencies) > 0) {
+    if (immediateFundingNetGain(candidate) > 0) {
       return candidateTargetMatchesPlan(plan, candidate, action);
     }
     return (
@@ -229,6 +221,18 @@ export function candidateMatchesStep(
     candidateTargetMatchesPlan(plan, candidate, action) &&
     bankStepMatchesCandidate(step, candidate, action)
   );
+}
+
+function immediateFundingNetGain(candidate: ActionSemanticCandidate): number {
+  const projection = candidate.economyProjection;
+  if (
+    projection?.kind !== "immediate_liquid" ||
+    projection.timing !== "immediate" ||
+    projection.creditRestriction !== "general"
+  ) {
+    return 0;
+  }
+  return Math.max(0, projection.netLiquidCreditGain ?? 0);
 }
 
 function survivalAnswerStepPriority(

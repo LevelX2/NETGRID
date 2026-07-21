@@ -9,15 +9,13 @@ import {
   legalActionCreditGainForPlan,
   type TacticalPlanCreditValueDependencies,
 } from "./tactical-plan-action-values";
-import {
-  createPlanStep,
-  createTacticalPlan,
-} from "./tactical-plan-builders";
+import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import { runnerMeaningfulRunOpportunityAvailable } from "./tactical-plan-runner-support-actions";
 import type {
   TacticalPlan,
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
+import { createRunnerCreditDemand } from "./credit-demand";
 
 export function runnerCreditBasePlans(
   context: TacticalPlanBuildContext,
@@ -57,9 +55,11 @@ export function runnerCreditBasePlans(
     return [];
   }
   const basePriority = creditBase
-    ? creditBase.economyPriority === "high" ? 930 :
-      creditBase.economyPriority === "medium" ? 820 :
-      650
+    ? creditBase.economyPriority === "high"
+      ? 930
+      : creditBase.economyPriority === "medium"
+        ? 820
+        : 650
     : 650;
   const overflowBoost = drawOverflowCreditPressure
     ? runnerDrawOverflowCreditPriorityBoost(drawOverflow)
@@ -85,6 +85,12 @@ export function runnerCreditBasePlans(
         "draw_for_economy") &&
     basicDrawActionAvailable &&
     !drawOverflowCreditPressure;
+  const currentCredits = context.input.playerView.own.credits;
+  const targetCredits = creditBase
+    ? nearTermFundingTarget && missingCredits !== undefined
+      ? currentCredits + missingCredits
+      : creditBase.desiredCreditReserve
+    : currentCredits + 1;
   return [
     createTacticalPlan({
       planId: "runner.build_credit_base",
@@ -93,6 +99,28 @@ export function runnerCreditBasePlans(
       status: "active",
       priority,
       horizonTurns: longBasicCreditFundingHorizon ? 2 : 1,
+      creditDemands: [
+        createRunnerCreditDemand({
+          demandId: "runner.build_credit_base:credits",
+          sourcePlanId: "runner.build_credit_base",
+          purpose: nearTermFundingTarget ? "foreground_plan" : "phase_reserve",
+          priority: nearTermFundingTarget
+            ? "current_foreground_plan"
+            : "phase_reserve",
+          hardness: "soft",
+          deadline: nearTermFundingTarget
+            ? longBasicCreditFundingHorizon
+              ? "start_of_next_own_turn"
+              : "end_of_current_turn"
+            : "within_three_own_turns",
+          currentCredits,
+          targetCredits,
+          evidence: [
+            `credit_base_explicit_demand:true`,
+            `credit_base_explicit_target:${targetCredits}`,
+          ],
+        }),
+      ],
       target: { kind: "capability", id: "runner_credit_base" },
       currentStep: createPlanStep({
         stepId: longBasicCreditFundingHorizon

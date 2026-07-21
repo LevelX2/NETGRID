@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { TacticalPlan, TacticalPlanType } from "./tactical-plan-types";
 import {
   corpScorelineAllowsMultiTurnDevelopment,
@@ -16,6 +17,13 @@ import {
   type PlanPortfolioRole,
   type PlanPortfolioSnapshot,
 } from "./plan-portfolio-types";
+import {
+  allocatePlanPortfolioFunding,
+  fundingActionIdsForEntry,
+  planPortfolioFundingStep,
+} from "./plan-portfolio-funding";
+import type { FutureFundingProjection } from "./funding-route";
+import { publishTacticalPlanCreditDemands } from "./tactical-plan-credit-demands";
 
 export {
   PLAN_PORTFOLIO_SCHEMA_VERSION,
@@ -33,6 +41,8 @@ export {
 export type BuildPlanPortfolioParams = {
   input: AiDecisionInput;
   tacticalPlans: readonly TacticalPlan[];
+  candidates?: readonly ActionSemanticCandidate[];
+  futureFundingProjections?: readonly FutureFundingProjection[];
   previous?: PlanPortfolioSnapshot;
   turnKey?: string;
 };
@@ -49,9 +59,13 @@ export function buildPlanPortfolio(
   const currentEntries = params.tacticalPlans
     .filter(planEligibleForPortfolio)
     .map((plan) => {
-      const previousEntry = findPreviousEntry(previous, plan);
-      return adaptTacticalPlanToPortfolioEntry({
+      const planWithDemands = publishTacticalPlanCreditDemands(
         plan,
+        params.input.playerView.own.credits,
+      );
+      const previousEntry = findPreviousEntry(previous, planWithDemands);
+      return adaptTacticalPlanToPortfolioEntry({
+        plan: planWithDemands,
         turnKey,
         ...(previousEntry ? { previousEntry } : {}),
       });
@@ -89,15 +103,41 @@ export function buildPlanPortfolio(
       ? suspendPortfolioEntry(foreground, interrupt)
       : resumeEntry(foreground)
     : undefined;
+  const selectedEntries = [
+    ...(interrupt ? [resumeEntry(interrupt)] : []),
+    ...(selectedForeground ? [selectedForeground] : []),
+    ...backgrounds,
+  ];
+  const funding = allocatePlanPortfolioFunding({
+    input: params.input,
+    entries: selectedEntries,
+    candidates: params.candidates ?? [],
+    ...(params.futureFundingProjections
+      ? { futureFundingProjections: params.futureFundingProjections }
+      : {}),
+  });
+  const fundedEntries = new Map(
+    funding.entries.map((entry) => [entry.portfolioEntryId, entry]),
+  );
+  const fundedInterrupt = interrupt
+    ? fundedEntries.get(interrupt.portfolioEntryId)
+    : undefined;
+  const fundedForeground = selectedForeground
+    ? fundedEntries.get(selectedForeground.portfolioEntryId)
+    : undefined;
+  const fundedBackgrounds = backgrounds.map(
+    (entry) => fundedEntries.get(entry.portfolioEntryId) ?? entry,
+  );
   const snapshot: PlanPortfolioSnapshot = {
     schemaVersion: PLAN_PORTFOLIO_SCHEMA_VERSION,
     side: params.input.side,
     profileId: params.input.profileId,
     stateVersion: params.input.playerView.stateVersion,
     turnKey,
-    ...(interrupt ? { interrupt: resumeEntry(interrupt) } : {}),
-    ...(selectedForeground ? { foreground: selectedForeground } : {}),
-    backgrounds,
+    ...(fundedInterrupt ? { interrupt: fundedInterrupt } : {}),
+    ...(fundedForeground ? { foreground: fundedForeground } : {}),
+    backgrounds: fundedBackgrounds,
+    unallocatedCredits: funding.unallocatedCredits,
     rejectedEntryIds: rankedBackgrounds
       .slice(MAX_BACKGROUND_PROJECTS)
       .map((entry) => entry.portfolioEntryId),
@@ -112,6 +152,7 @@ export function buildPlanPortfolio(
         0,
         rankedBackgrounds.length - MAX_BACKGROUND_PROJECTS,
       )}`,
+      ...funding.evidence,
     ],
   };
   return snapshot;
@@ -183,6 +224,14 @@ export function advancePlanPortfolioForSelectedAction(
           ? ["plan_portfolio_action_progress_source:selected_mapped_step"]
           : []),
       ],
+      ...(entry.selectedFundingRoute
+        ? {
+            selectedFundingRoute: advanceSelectedFundingRoute(
+              entry.selectedFundingRoute,
+              selectedActionId,
+            ),
+          }
+        : {}),
     };
   };
   return {
@@ -214,7 +263,8 @@ export function planPortfolioEntryCanAct(entry: PlanPortfolioEntry): boolean {
     entry.lifecycle === "suspended" ||
     entry.lifecycle === "completed" ||
     entry.lifecycle === "abandoned" ||
-    entry.lifecycle === "blocked"
+    (entry.lifecycle === "blocked" &&
+      fundingActionIdsForEntry(entry).length === 0)
   ) {
     return false;
   }
@@ -237,7 +287,7 @@ export function buildPlanPortfolioActionContributions(
           : backgroundCadenceReached
             ? 80
             : 300;
-    return entry.actionCandidateIds.map((actionId) => ({
+    const progressContributions = entry.actionCandidateIds.map((actionId) => ({
       actionId,
       portfolioEntryId: entry.portfolioEntryId,
       contributionKind: "progress" as const,
@@ -251,8 +301,28 @@ export function buildPlanPortfolioActionContributions(
           : []),
       ],
     }));
+    const fundingContributions = fundingActionIdsForEntry(entry).map(
+      (actionId) => ({
+        actionId,
+        portfolioEntryId: entry.portfolioEntryId,
+        contributionKind: "fund" as const,
+        value:
+          roleValue +
+          Math.min(150, (entry.creditDemands?.[0]?.priorityRank ?? 0) * 20),
+        milestoneAfter: entry.milestone,
+        evidence: [
+          `plan_contribution_role:${entry.role}`,
+          `plan_contribution_plan:${entry.planType}`,
+          `plan_contribution_funding_route:${entry.selectedFundingRoute?.routeId ?? "none"}`,
+          "plan_contribution_funding_not_immediate_economy_bonus:true",
+        ],
+      }),
+    );
+    return [...progressContributions, ...fundingContributions];
   });
 }
+
+export { planPortfolioFundingStep };
 
 export function redactedPlanActionContributionFacts(
   scores: readonly PlanActionContributionScore[],
@@ -336,6 +406,21 @@ export function adaptTacticalPlanToPortfolioEntry(params: {
     progress: portfolioProgressForPlan(params.plan),
     selectedStepKind: params.plan.currentStep.kind,
     actionCandidateIds: [...params.plan.currentStep.actionCandidateIds].sort(),
+    creditDemands: structuredClone(params.plan.creditDemands ?? []),
+    fundingRoutes: structuredClone(params.previousEntry?.fundingRoutes ?? []),
+    ...(params.previousEntry?.selectedFundingRoute
+      ? {
+          selectedFundingRoute: structuredClone(
+            params.previousEntry.selectedFundingRoute,
+          ),
+        }
+      : {}),
+    ...(params.previousEntry?.fundingCoverageResolvesHardBlocker !== undefined
+      ? {
+          fundingCoverageResolvesHardBlocker:
+            params.previousEntry.fundingCoverageResolvesHardBlocker,
+        }
+      : {}),
     cadence: {
       turnKey: params.turnKey,
       // Ranking threshold only: recurring background work remains legal when
@@ -350,12 +435,14 @@ export function adaptTacticalPlanToPortfolioEntry(params: {
         : {}),
     },
     resourceReservation: {
-      credits: Math.max(
+      credits: 0,
+      requestedCredits: Math.max(
         0,
         ...params.plan.requiredCapabilities.map(
           (capability) => capability.minimumCredits ?? 0,
         ),
       ),
+      shortfallCredits: 0,
       clicks:
         params.plan.currentStep.followupBudget?.requiredFollowupActions ?? 0,
     },
@@ -449,6 +536,10 @@ export function redactedPlanPortfolioFacts(
         .join("|") || "none"
     }`,
     `plan_portfolio_rejected_count:${portfolio.rejectedEntryIds.length}`,
+    `plan_portfolio_unallocated_credits:${portfolio.unallocatedCredits ?? 0}`,
+    ...allPortfolioEntries(portfolio).flatMap((entry) => [
+      `plan_portfolio_funding:${entry.planType}:${entry.selectedFundingRoute?.status ?? "none"}`,
+    ]),
   ];
 }
 
@@ -623,4 +714,23 @@ function maximumContributionValue(
 
 function uniqueStrings(values: readonly string[]): string[] {
   return [...new Set(values.filter(Boolean))];
+}
+
+function advanceSelectedFundingRoute(
+  route: NonNullable<PlanPortfolioEntry["selectedFundingRoute"]>,
+  selectedActionId: string,
+): NonNullable<PlanPortfolioEntry["selectedFundingRoute"]> {
+  const selectedStepIndex = route.steps.findIndex(
+    (step) =>
+      step.kind === "legal_action" && step.actionId === selectedActionId,
+  );
+  if (selectedStepIndex < 0) return route;
+  return {
+    ...route,
+    steps: route.steps.filter((_, index) => index !== selectedStepIndex),
+    evidence: [
+      ...route.evidence,
+      `funding_route_step_selected:${selectedActionId}`,
+    ],
+  };
 }

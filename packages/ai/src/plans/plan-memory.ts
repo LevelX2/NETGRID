@@ -27,6 +27,7 @@ import {
   corpScorelineAllowsMultiTurnDevelopment,
   corpScorelineFeasibilityForDecisionInput,
 } from "../runtime/corp-scoreline-feasibility";
+import type { FundingRoute } from "./funding-route";
 
 export type PlanContinuityMemorySnapshot = {
   type?: string;
@@ -64,8 +65,10 @@ export function rememberTacticalPlanRuntime(
     tacticalPlanMemoryByKey.delete(tacticalPlanMemoryKey(input));
     return undefined;
   }
+  let selectedPortfolioEntry: ReturnType<typeof planPortfolioEntryForPlan> =
+    undefined;
   if (result.planPortfolio) {
-    const selectedPortfolioEntry =
+    selectedPortfolioEntry =
       result.selectedPlan &&
       result.selectedStep?.actionCandidateIds.includes(selectedAction.actionId)
         ? planPortfolioEntryForPlan(result.planPortfolio, result.selectedPlan)
@@ -101,6 +104,9 @@ export function rememberTacticalPlanRuntime(
     plan: selectedPlan,
     step: selectedStep,
     selectedAction,
+    ...(selectedPortfolioEntry?.selectedFundingRoute
+      ? { selectedFundingRoute: selectedPortfolioEntry.selectedFundingRoute }
+      : {}),
     ...(result.previousPlan ? { previousPlan: result.previousPlan } : {}),
     ...(result.planProgressionReason
       ? { planProgressionReason: result.planProgressionReason }
@@ -215,6 +221,7 @@ export function createTacticalPlanMemorySnapshot(params: {
   step: PlanStep;
   selectedAction: LegalAction;
   previousPlan?: TacticalPlanMemorySnapshot;
+  selectedFundingRoute?: FundingRoute;
   planProgressionReason?: string;
   whyPlanAbandoned?: string;
 }): TacticalPlanMemorySnapshot {
@@ -245,6 +252,12 @@ export function createTacticalPlanMemorySnapshot(params: {
     selectedActionType: params.selectedAction.type,
     ...scoreConversionDesiredCountersField(params.plan),
     blockedBy: params.plan.blockers.map((blocker) => blocker.kind),
+    ...((params.plan.creditDemands?.length ?? 0) > 0
+      ? { creditDemands: structuredClone(params.plan.creditDemands) }
+      : {}),
+    ...(params.selectedFundingRoute
+      ? { selectedFundingRoute: structuredClone(params.selectedFundingRoute) }
+      : {}),
     ttlDecisionsRemaining,
     planProgressionReason:
       params.planProgressionReason ??

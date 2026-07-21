@@ -1,5 +1,10 @@
-import type { AiDecisionInput, Side } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction, Side } from "@netgrid/shared";
 import { beforeEach, describe, expect, it } from "vitest";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import {
+  createCorpCreditDemand,
+  createRunnerCreditDemand,
+} from "./credit-demand";
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import type { TacticalPlanType } from "./tactical-plan-types";
 import {
@@ -11,6 +16,7 @@ import {
   planPortfolioTurnKey,
   redactedPlanPortfolioFacts,
   redactedPlanActionContributionFacts,
+  planPortfolioFundingStep,
   tacticalPlanExecutionClass,
   type PlanActionContribution,
   type PlanPortfolioSnapshot,
@@ -312,6 +318,181 @@ describe("plan portfolio", () => {
       "plan_action_contribution_multi_plan:install-shared-ice:true",
     );
   });
+
+  it("reserves current credits by portfolio priority without double allocation", () => {
+    const input = decisionInput("corp", 90);
+    input.playerView.own.credits = 5;
+    const interrupt = plan(
+      "corp.rez_defense",
+      990,
+      "capability",
+      "rez-now",
+      90,
+    );
+    interrupt.creditDemands = [
+      createCorpCreditDemand({
+        demandId: "corp:rez-demand",
+        sourcePlanId: interrupt.planId,
+        purpose: "current_rez_window",
+        priority: "acute_hard_plan_blocker",
+        hardness: "hard",
+        deadline: "before_current_plan_action",
+        currentCredits: 5,
+        targetCredits: 4,
+      }),
+    ];
+    const foreground = plan(
+      "corp.create_score_window",
+      950,
+      "server",
+      "remote_1",
+      90,
+    );
+    foreground.creditDemands = [
+      createCorpCreditDemand({
+        demandId: "corp:score-demand",
+        sourcePlanId: foreground.planId,
+        purpose: "current_score_window",
+        priority: "current_foreground_plan",
+        hardness: "hard",
+        deadline: "end_of_current_turn",
+        currentCredits: 5,
+        targetCredits: 3,
+      }),
+    ];
+
+    const portfolio = buildPlanPortfolio({
+      input,
+      tacticalPlans: [foreground, interrupt],
+    });
+
+    expect(portfolio.interrupt?.resourceReservation).toMatchObject({
+      requestedCredits: 4,
+      credits: 4,
+      shortfallCredits: 0,
+    });
+    expect(portfolio.foreground?.resourceReservation).toMatchObject({
+      requestedCredits: 3,
+      credits: 1,
+      shortfallCredits: 2,
+    });
+    expect(portfolio.unallocatedCredits).toBe(0);
+  });
+
+  it("gives a Broker setup step route contribution without pretending it pays immediately", () => {
+    const input = decisionInput("runner", 91);
+    input.playerView.own.credits = 0;
+    input.playerView.own.clicks = 2;
+    const brokerLoad = legalAction("runner", "broker-load");
+    input.legalActions = [brokerLoad];
+    const bankPlan = plan(
+      "runner.build_credit_bank",
+      800,
+      "bank",
+      "broker",
+      91,
+    );
+    bankPlan.currentStep.actionCandidateIds = [];
+    bankPlan.creditDemands = [
+      createRunnerCreditDemand({
+        demandId: "runner:broker-next-turn",
+        sourcePlanId: bankPlan.planId,
+        purpose: "next_turn_setup",
+        priority: "next_own_turn",
+        hardness: "soft",
+        deadline: "start_of_next_own_turn",
+        currentCredits: 0,
+        targetCredits: 3,
+      }),
+    ];
+    const candidate = economyCandidate("broker-load", {
+      kind: "stored_credit_build",
+      timing: "setup",
+      storedCreditsAdded: 3,
+      repeatable: false,
+    });
+
+    const portfolio = buildPlanPortfolio({
+      input,
+      tacticalPlans: [bankPlan],
+      candidates: [candidate],
+      futureFundingProjections: [
+        {
+          projectionId: "broker-cashout-next-turn",
+          netLiquidCreditGain: 3,
+          clickCost: 1,
+          earliestOwnTurnOffset: 1,
+          reliability: "contingent",
+          requiredCurrentActionId: "broker-load",
+        },
+      ],
+    });
+    const entry = portfolio.backgrounds[0]!;
+    const fundingStep = planPortfolioFundingStep(entry, [candidate]);
+    const contribution = buildPlanPortfolioActionContributions(portfolio).find(
+      (item) =>
+        item.actionId === "broker-load" && item.contributionKind === "fund",
+    );
+
+    expect(entry.selectedFundingRoute?.status).toBe("covered_contingent");
+    expect(entry.fundingCoverageResolvesHardBlocker).toBe(false);
+    expect(fundingStep).toMatchObject({
+      kind: "build_bank_counter",
+      actionCandidateIds: ["broker-load"],
+    });
+    expect(contribution?.evidence).toContain(
+      "plan_contribution_funding_not_immediate_economy_bonus:true",
+    );
+  });
+
+  it("invalidates a remembered funding source and replans when the action disappears", () => {
+    const firstInput = decisionInput("corp", 92);
+    firstInput.playerView.own.credits = 0;
+    firstInput.legalActions = [legalAction("corp", "bbs-credit")];
+    const scorePlan = plan(
+      "corp.create_score_window",
+      950,
+      "server",
+      "remote_1",
+      92,
+    );
+    scorePlan.creditDemands = [
+      createCorpCreditDemand({
+        demandId: "corp:bbs-demand",
+        sourcePlanId: scorePlan.planId,
+        purpose: "current_score_window",
+        priority: "current_foreground_plan",
+        hardness: "hard",
+        deadline: "end_of_current_turn",
+        currentCredits: 0,
+        targetCredits: 2,
+      }),
+    ];
+    const first = buildPlanPortfolio({
+      input: firstInput,
+      tacticalPlans: [scorePlan],
+      candidates: [economyCandidate("bbs-credit")],
+    });
+    const nextInput = decisionInput("corp", 93);
+    nextInput.playerView.own.credits = 0;
+    const replanned = buildPlanPortfolio({
+      input: nextInput,
+      tacticalPlans: [scorePlan],
+      previous: first,
+      candidates: [],
+    });
+
+    expect(first.foreground?.selectedFundingRoute?.status).toBe(
+      "covered_guaranteed",
+    );
+    expect(first.foreground?.fundingCoverageResolvesHardBlocker).toBe(true);
+    expect(replanned.foreground?.selectedFundingRoute?.status).toBe(
+      "uncovered",
+    );
+    expect(replanned.foreground?.evidence).toContain(
+      "route_invalidated:bbs-credit",
+    );
+  });
 });
 
 function plan(
@@ -420,4 +601,51 @@ function publicEvent(
     visibilityClass: "public" as const,
     publicPayload: { actor, actionType },
   };
+}
+
+function legalAction(side: Side, actionId: string): LegalAction {
+  return {
+    actionId,
+    side,
+    type: "activated_card_ability",
+    label: actionId,
+    source: actionId,
+    timingPoint: side === "corp" ? "corp_action.main" : "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: 100,
+  };
+}
+
+function economyCandidate(
+  actionId: string,
+  overrides: Partial<
+    NonNullable<ActionSemanticCandidate["economyProjection"]>
+  > = {},
+): ActionSemanticCandidate {
+  return {
+    actionId,
+    actionType: "activated_card_ability",
+    actorSide: actionId.startsWith("broker") ? "runner" : "corp",
+    economyProjection: {
+      schemaVersion: "action-economy-projection-v1",
+      kind: "immediate_liquid",
+      timing: "immediate",
+      creditRestriction: "general",
+      clickCost: 1,
+      creditCost: 0,
+      grossLiquidCreditGain: 2,
+      netLiquidCreditGain: 2,
+      cardsDrawn: 0,
+      cardsConsumed: 0,
+      netHandDelta: 0,
+      repeatable: false,
+      reliability: "guaranteed",
+      source: "legal_action_payload",
+      confidence: "high",
+      evidence: [],
+      ...overrides,
+    },
+  } as ActionSemanticCandidate;
 }

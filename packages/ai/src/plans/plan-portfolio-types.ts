@@ -4,6 +4,8 @@ import type {
   PlanTarget,
   TacticalPlanType,
 } from "./plan-contract-types";
+import type { CreditDemand } from "./credit-demand";
+import type { FundingRoute } from "./funding-route";
 
 export const PLAN_PORTFOLIO_SCHEMA_VERSION = "plan-portfolio-v1" as const;
 
@@ -45,6 +47,10 @@ export type PlanPortfolioEntry = {
   progress: number;
   selectedStepKind?: PlanStepKind;
   actionCandidateIds: string[];
+  creditDemands?: CreditDemand[];
+  fundingRoutes?: FundingRoute[];
+  selectedFundingRoute?: FundingRoute;
+  fundingCoverageResolvesHardBlocker?: boolean;
   cadence: {
     turnKey: string;
     maxActionsPerTurn: number;
@@ -53,6 +59,8 @@ export type PlanPortfolioEntry = {
   };
   resourceReservation: {
     credits: number;
+    requestedCredits?: number;
+    shortfallCredits?: number;
     clicks: number;
   };
   updatedAtStateVersion: number;
@@ -68,6 +76,7 @@ export type PlanPortfolioSnapshot = {
   interrupt?: PlanPortfolioEntry;
   foreground?: PlanPortfolioEntry;
   backgrounds: PlanPortfolioEntry[];
+  unallocatedCredits?: number;
   rejectedEntryIds: string[];
   evidence: string[];
 };

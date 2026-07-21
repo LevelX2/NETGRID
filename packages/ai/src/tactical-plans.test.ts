@@ -16,6 +16,7 @@ import {
   buildActionSemanticCandidates,
   type ActionSemanticCandidate,
 } from "./action-semantic-candidate";
+import { actionEconomyProjectionFor } from "./actions/action-economy-projection";
 import type {
   RunnerHandDevelopmentEvaluation,
   RunnerPersistentInstallEvaluation,
@@ -126,9 +127,11 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [
-        { ...visibleCard("remote-root", "corp", "asset"), known: false },
-      ]),
+      server(
+        "remote_1",
+        [],
+        [{ ...visibleCard("remote-root", "corp", "asset"), known: false }],
+      ),
     ];
 
     const contestPlan = buildTacticalPlans({ input }).find(
@@ -414,6 +417,17 @@ describe("tactical plan model", () => {
       sourceCardId: "onr_v1_097_livewires-contacts",
       semanticActionType: "play.runner_event",
       actionTacticSignals: ["recover_economy"],
+      economyProjection: {
+        ...candidateForAction(livewireAction).economyProjection!,
+        kind: "immediate_liquid",
+        timing: "immediate",
+        grossLiquidCreditGain: 3,
+        netLiquidCreditGain: 3,
+        reliability: "guaranteed",
+        source: "legal_action_payload",
+        confidence: "high",
+        evidence: ["test_visible_burst:3"],
+      },
       evidence: ["candidate carries burst economy semantics"],
     };
     const basicCreditCandidate: ActionSemanticCandidate = {
@@ -4242,7 +4256,7 @@ function hqPrivateLookEvent(
 }
 
 function candidateForAction(action: LegalAction): ActionSemanticCandidate {
-  return {
+  const candidate: ActionSemanticCandidate = {
     actionId: action.actionId,
     actionType: action.type,
     actorSide: action.side,
@@ -4294,6 +4308,10 @@ function candidateForAction(action: LegalAction): ActionSemanticCandidate {
     projectionIssues: [],
     hardGates: [],
     evidence: ["test candidate"],
+  };
+  return {
+    ...candidate,
+    economyProjection: actionEconomyProjectionFor(candidate, action),
   };
 }
 

@@ -69,6 +69,79 @@ describe("candidateMatchesStep", () => {
     ).toBe(true);
   });
 
+  it("maps gain-credit steps from the common economy projection across action types", () => {
+    const step = planStep("gain_credits", ["economy.gain_credit"]);
+    const plan = tacticalPlan(step);
+    const input = { side: "corp", playerView: {} } as AiDecisionInput;
+    const dependencies = testDependencies();
+    const basic = legalAction("basic-credit", "gain_credit");
+    const coup = legalAction("corporate-coup", "activated_card_ability");
+    const wrapper = legalAction("hidden-wrapper", "gain_credit");
+    const basicCandidate = candidateFor(basic, {
+      economyProjection: immediateEconomyProjection(1),
+    });
+    const coupCandidate = candidateFor(coup, {
+      economyProjection: immediateEconomyProjection(3),
+    });
+    const wrapperCandidate = candidateFor(wrapper, {
+      economyProjection: {
+        ...immediateEconomyProjection(0),
+        kind: "non_economy",
+        timing: "unknown",
+      },
+    });
+
+    expect(
+      candidateMatchesStep(
+        plan,
+        step,
+        basicCandidate,
+        basic,
+        input,
+        dependencies,
+      ),
+    ).toBe(true);
+    expect(
+      candidateMatchesStep(
+        plan,
+        step,
+        coupCandidate,
+        coup,
+        input,
+        dependencies,
+      ),
+    ).toBe(true);
+    expect(
+      candidateMatchesStep(
+        plan,
+        step,
+        wrapperCandidate,
+        wrapper,
+        input,
+        dependencies,
+      ),
+    ).toBe(false);
+    expect(
+      planStepCandidatePriority(
+        plan,
+        step,
+        coupCandidate,
+        coup,
+        input,
+        dependencies,
+      ),
+    ).toBeGreaterThan(
+      planStepCandidatePriority(
+        plan,
+        step,
+        basicCandidate,
+        basic,
+        input,
+        dependencies,
+      ),
+    );
+  });
+
   it("does not satisfy clear_tags with generic card triggers", () => {
     const step = planStep("clear_tags", ["tag.remove"]);
     const plan = tacticalPlan(step, "runner");
@@ -536,6 +609,27 @@ function testDependencies() {
   return {
     aiHintsByCard: new Map(),
     visibleCardForAction: () => undefined,
+  };
+}
+
+function immediateEconomyProjection(amount: number) {
+  return {
+    schemaVersion: "action-economy-projection-v1" as const,
+    kind: "immediate_liquid" as const,
+    timing: "immediate" as const,
+    creditRestriction: "general" as const,
+    clickCost: 1,
+    creditCost: 0,
+    grossLiquidCreditGain: amount,
+    netLiquidCreditGain: amount,
+    cardsDrawn: 0,
+    cardsConsumed: 0,
+    netHandDelta: 0,
+    repeatable: false as const,
+    reliability: "guaranteed" as const,
+    source: "legal_action_payload" as const,
+    confidence: "high" as const,
+    evidence: [],
   };
 }
 

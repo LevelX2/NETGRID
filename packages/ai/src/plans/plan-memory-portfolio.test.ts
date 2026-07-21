@@ -1,6 +1,7 @@
 import type { AiDecisionInput, LegalAction, Side } from "@netgrid/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  createTacticalPlanMemorySnapshot,
   getPlanContinuityMemorySnapshot,
   rememberTacticalPlanRuntime,
   resetTacticalPlanMemory,
@@ -11,6 +12,8 @@ import {
 } from "./plan-portfolio";
 import { getPlanPortfolioMemorySnapshot } from "./plan-portfolio-memory";
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
+import { createRunnerCreditDemand } from "./credit-demand";
+import type { FundingRoute } from "./funding-route";
 
 describe("tactical plan memory with portfolio continuity", () => {
   beforeEach(() => resetTacticalPlanMemory());
@@ -90,6 +93,63 @@ describe("tactical plan memory with portfolio continuity", () => {
       planType: "runner.build_credit_bank",
       lifecycle: "active",
       cadence: { actionsUsedThisTurn: 0, turnKey: "runner:turn:4" },
+    });
+  });
+
+  it("stores the selected credit demand and funding-route status in plan memory", () => {
+    const decisionInput = input(20);
+    const selectedAction = legalAction("basic-credit", "trigger_ability");
+    const demand = createRunnerCreditDemand({
+      demandId: "runner:memory-demand",
+      sourcePlanId: "runner.build_credit_base:credit-base",
+      purpose: "foreground_plan",
+      priority: "current_foreground_plan",
+      hardness: "hard",
+      deadline: "end_of_current_turn",
+      currentCredits: 1,
+      targetCredits: 2,
+    });
+    const plan = tacticalPlan(
+      "runner.contest_remote",
+      "credit-base",
+      "run_target",
+      "basic-credit",
+      20,
+    );
+    plan.creditDemands = [demand];
+    const route: FundingRoute = {
+      schemaVersion: "funding-route-v1",
+      routeId: "runner:memory-demand:basic-credit",
+      demandId: demand.demandId,
+      status: "covered_guaranteed",
+      reliability: "guaranteed",
+      horizon: "same_turn",
+      startingCredits: 1,
+      targetCredits: 2,
+      projectedCredits: 2,
+      projectedGeneralCredits: 2,
+      projectedGap: 0,
+      totalClickCost: 1,
+      steps: [],
+      invalidationReasons: [],
+      evidence: ["memory-test"],
+    };
+
+    const snapshot = createTacticalPlanMemorySnapshot({
+      input: decisionInput,
+      plan,
+      step: plan.currentStep,
+      selectedAction,
+      selectedFundingRoute: route,
+    });
+
+    expect(snapshot.creditDemands?.[0]).toMatchObject({
+      demandId: "runner:memory-demand",
+      priority: "current_foreground_plan",
+    });
+    expect(snapshot.selectedFundingRoute).toMatchObject({
+      routeId: "runner:memory-demand:basic-credit",
+      status: "covered_guaranteed",
     });
   });
 });

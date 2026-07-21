@@ -20,6 +20,8 @@ import type {
   TacticalPlanType,
 } from "./plan-contract-types";
 import type { PlanPortfolioSnapshot } from "./plan-portfolio-types";
+import type { CreditDemand } from "./credit-demand";
+import type { FundingRoute } from "./funding-route";
 
 export type {
   PlanStepKind,
@@ -200,6 +202,7 @@ export type TacticalPlan = {
   status: PlanLifecycle;
   priority: number;
   horizonTurns: number;
+  creditDemands?: CreditDemand[];
   target?: PlanTarget;
   requiredCapabilities: RequiredCapability[];
   blockers: PlanBlocker[];
@@ -267,6 +270,8 @@ export type TacticalPlanMemorySnapshot = {
   selectedActionType?: LegalAction["type"];
   scoreConversionDesiredAdvancementCounters?: number;
   blockedBy: string[];
+  creditDemands?: CreditDemand[];
+  selectedFundingRoute?: FundingRoute;
   ttlDecisionsRemaining: number;
   planProgressionReason: string;
   progressBaseline?: {
