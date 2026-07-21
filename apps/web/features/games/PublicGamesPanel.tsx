@@ -1,12 +1,13 @@
 "use client";
 
-import { Eye, History, LogIn, RotateCcw, Users } from "lucide-react";
+import { Download, Eye, History, LogIn, RotateCcw, Users } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import type { PublicMatchEntry } from "../../lib/client-api";
 import {
   publicMatchActionLabel,
+  publicGamebookTarget,
   publicMatchParticipantLabel,
   publicMatchTarget,
 } from "../match-start/public-match-navigation";
@@ -119,6 +120,7 @@ function PublicGameCard({
   onJoinOpen(entry: PublicMatchEntry): void;
 }) {
   const target = publicMatchTarget(entry);
+  const gamebookTarget = publicGamebookTarget(entry);
   const ActionIcon =
     entry.status === "open" ? LogIn : entry.status === "active" ? Eye : History;
   return (
@@ -178,6 +180,12 @@ function PublicGameCard({
             <ActionIcon size={15} />
             {publicMatchActionLabel(entry.status)}
           </Link>
+        ) : null}
+        {gamebookTarget ? (
+          <a className="button" href={gamebookTarget}>
+            <Download size={15} />
+            Spielprotokoll herunterladen
+          </a>
         ) : null}
       </div>
     </article>
