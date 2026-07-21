@@ -206,7 +206,6 @@ describe("AI public export contract", () => {
       "./runtime/runner-hand-funding-context",
       "./runtime/runner-hand-funding-target",
       "./runtime/runner-tag-cleanup-score",
-      "./runtime/runner-credit-need-score",
       "./runtime/runner-install-score",
       "./runtime/runner-start-run-score",
       "./runtime/runner-basic-action-penalty-score",

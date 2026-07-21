@@ -239,7 +239,7 @@ function isReviewedFiniteActionEconomyAsset(card: VisibleCard): boolean {
     hint.quality?.hintReviewed === true &&
     (hint.effects ?? []).some(
       (effect) =>
-        effect.kind === "economy" &&
+        effect.kind === "action_economy" &&
         effect.timing === "action" &&
         effect.resource === "credits" &&
         effect.finite === true &&

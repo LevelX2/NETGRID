@@ -53,13 +53,6 @@ export function runnerRecoveryCommitmentScoreComponents(
   dependencies: RunnerRecoveryCommitmentScoreDependencies,
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
-  if (action.type === "gain_credit") {
-    const muPressureFunding = dependencies.muPressureFundingScoreComponent(
-      input,
-      action,
-    );
-    if (muPressureFunding) components.push(muPressureFunding);
-  }
   const handBufferComponent = dependencies.handBufferNeedScoreComponent(
     input,
     action,

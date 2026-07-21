@@ -40,18 +40,19 @@ describe("runnerCreditBankAssessment", () => {
     ).toBe(true);
   });
 
-  it("finishes a bank toward twelve despite high combined access", () => {
+  it("stops building after the first load when combined access is comfortable", () => {
     const assessment = runnerCreditBankAssessment(
       context({ credits: 12, storedCredits: 9, cashOutLegal: true }),
       [BUILD_ACTION, CASH_OUT_ACTION],
       false,
     );
 
-    expect(assessment.shouldBuild).toBe(true);
+    expect(assessment.shouldBuild).toBe(false);
     expect(assessment.evidence).toEqual(
       expect.arrayContaining([
         "runner_bank_combined_credit_access:21",
-        "runner_bank_build_ready:true",
+        "runner_bank_comfortable_combined_access:true",
+        "runner_bank_build_ready:false",
       ]),
     );
   });

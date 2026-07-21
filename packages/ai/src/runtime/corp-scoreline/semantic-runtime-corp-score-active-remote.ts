@@ -35,6 +35,8 @@ type CorpActiveRemoteScorelineState = {
   evidence: string[];
 };
 
+const CORP_SLOW_SCORELINE_RICH_RUNNER_CREDIT_FLOOR = 20;
+
 export function corpActiveRemoteAgendaAdvanceClockComponent<
   TConsumer extends string,
 >(
@@ -63,6 +65,28 @@ export function corpActiveRemoteAgendaAdvanceClockComponent<
   const closesBeforeRunner =
     dependencies.corpAdvanceCompletesScore?.(input, action) === true ||
     scoringWindow?.scoreHorizon === "immediate";
+  const visibleRunnerCredits =
+    positiveOrZeroNumber(input.playerView.opponent?.credits) ?? 0;
+  if (
+    !closesBeforeRunner &&
+    scoringWindow?.scoreHorizon === "slow" &&
+    visibleRunnerCredits >= CORP_SLOW_SCORELINE_RICH_RUNNER_CREDIT_FLOOR
+  ) {
+    return {
+      key: "corp_active_remote_agenda_rich_runner_slow_horizon",
+      label: "Langsame Scoreline gegen reichen Runner",
+      value: -5200,
+      reason: [
+        "active_remote_agenda:true",
+        "slow_score_horizon:true",
+        `visible_runner_credits:${visibleRunnerCredits}`,
+        `runner_credit_floor:${CORP_SLOW_SCORELINE_RICH_RUNNER_CREDIT_FLOOR}`,
+        `server:${state.serverId}`,
+        `card:${state.cardId}`,
+        ...state.evidence,
+      ].join("|"),
+    };
+  }
   if (
     !closesBeforeRunner &&
     scoringWindow?.windowKind === "unsafe" &&
@@ -331,31 +355,6 @@ function corpStrongSameRemoteIceInstallForScoreline<TConsumer extends string>(
         candidate.score >= CORP_SCORE_NOW_TEMPO_BLOCKING_REMOTE_ICE_SCORE,
     )
     .sort((left, right) => right.score - left.score)[0];
-}
-
-export function corpActiveScoreRemoteReserveFundingComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  if (action.type !== "gain_credit") return undefined;
-  const state = corpActiveRemoteScorelineState(input);
-  if (!state) return undefined;
-  const credits = input.playerView.own.credits;
-  if (credits >= state.reserveFloor) return undefined;
-  return {
-    key: "corp_active_score_remote_reserve_funding",
-    label: "Score-Remote-Reserve",
-    value: 950,
-    reason: [
-      "active_remote_agenda:true",
-      `server:${state.serverId}`,
-      `credits:${credits}`,
-      `reserve_floor:${state.reserveFloor}`,
-      `advances_remaining:${state.advancesRemaining}`,
-      `unrezzed_remote_rez_cost:${state.unrezzedRemoteRezCost}`,
-      ...state.evidence,
-    ].join("|"),
-  };
 }
 
 export function corpActiveScorelineOffPathPenaltyComponent<

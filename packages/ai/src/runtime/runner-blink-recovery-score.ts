@@ -26,7 +26,9 @@ export function runnerBlinkRecoveryScoreComponent(
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
   const targetServerId =
-    action.type === "start_run" ? dependencies.targetServerId(action) : undefined;
+    action.type === "start_run"
+      ? dependencies.targetServerId(action)
+      : undefined;
   const assessment = dependencies.assessment(input, targetServerId);
   if (!assessment?.active) return undefined;
 
@@ -55,18 +57,6 @@ export function runnerBlinkRecoveryScoreComponent(
         ]).join("|"),
       };
     }
-  }
-
-  if (action.type === "gain_credit") {
-    return {
-      key: "runner_blink_setup_recovery",
-      label: "Blink-Setup-Erholung",
-      value: 360,
-      reason: sortedUnique([
-        ...assessment.evidence,
-        "blink_recovery_action:gain_credit",
-      ]).join("|"),
-    };
   }
 
   return undefined;

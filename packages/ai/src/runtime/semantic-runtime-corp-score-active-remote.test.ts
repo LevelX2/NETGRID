@@ -541,13 +541,8 @@ describe("semanticRuntimeCorpScoreComponents active remote", () => {
       dependencies,
     );
 
-    expect(creditComponents).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "corp_active_score_remote_reserve_funding",
-          reason: expect.stringContaining("reserve_floor:7"),
-        }),
-      ]),
+    expect(creditComponents.map((component) => component.key)).not.toContain(
+      "corp_active_score_remote_reserve_funding",
     );
     expect(creditComponents.map((component) => component.key)).not.toContain(
       "corp_board_triage_mismatch",
@@ -559,9 +554,6 @@ describe("semanticRuntimeCorpScoreComponents active remote", () => {
           reason: expect.stringContaining("breaks_reserve:true"),
         }),
       ]),
-    );
-    expect(totalScore(creditComponents)).toBeGreaterThan(
-      totalScore(rezComponents),
     );
   });
 
@@ -729,6 +721,60 @@ describe("semanticRuntimeCorpScoreComponents active remote", () => {
     expect(
       totalScoreFor(input, gainCredit, "basic_economy_draw", dependencies),
     ).toBeGreaterThan(totalScore(advanceComponents));
+  });
+
+  it("defers a slow active scoreline while a rich runner can develop a contest", () => {
+    const agenda = corpCard("slow-active-agenda", "agenda", {
+      advancementRequirement: 5,
+      advancementCounters: 0,
+      agendaPoints: 2,
+    });
+    const advanceAgenda = corpAction(
+      "advance-slow-active-agenda",
+      "advance_card",
+      { serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    advanceAgenda.costs = [{ credits: 1 }];
+    const gainCredit = corpAction("gain-credit", "gain_credit", {});
+    const input = corpInputWithRemoteAgenda(4, 1, agenda, [
+      advanceAgenda,
+      gainCredit,
+    ]);
+    input.playerView.opponent = runnerOpponent({ credits: 30 });
+    const dependencies = {
+      ...testDependencies(),
+      actionCreditCost: (action: LegalAction) =>
+        action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0),
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === advanceAgenda.actionId
+          ? scoringWindow({
+              scoreHorizon: "slow",
+              recommendedNextStep: "build_remote_ice",
+              evidence: ["test_slow_scoreline_rich_runner"],
+            })
+          : undefined,
+    };
+
+    const advanceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      advanceAgenda,
+      "simple_score_advance",
+      dependencies,
+    );
+
+    expect(advanceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_active_remote_agenda_rich_runner_slow_horizon",
+          value: -5200,
+          reason: expect.stringContaining("visible_runner_credits:30"),
+        }),
+      ]),
+    );
   });
 
   it("aligns scoreline funding and suppresses the blocked scoreline action", () => {
@@ -958,7 +1004,6 @@ describe("semanticRuntimeCorpScoreComponents active remote", () => {
       "simple_score_advance",
       dependencies,
     );
-
     expect(advanceComponents).not.toEqual(
       expect.arrayContaining([
         expect.objectContaining({

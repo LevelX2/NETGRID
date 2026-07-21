@@ -44,6 +44,7 @@ const ALL_TACTICAL_PLAN_TYPES: TacticalPlanType[] = [
   "corp.develop_finite_economy",
   "corp.activate_persistent_economy",
   "corp.build_credit_bank",
+  "corp.fund_strategy_reserve",
   "corp.establish_scoring_remote",
   "corp.rez_defense",
   "corp.apply_punish_pressure",
@@ -66,7 +67,7 @@ describe("plan portfolio", () => {
         ["corp.activate_persistent_economy", "recurring_cycle"],
       ]),
     );
-    expect(ALL_TACTICAL_PLAN_TYPES).toHaveLength(19);
+    expect(ALL_TACTICAL_PLAN_TYPES).toHaveLength(20);
   });
 
   it("keeps one foreground and at most two deterministic backgrounds", () => {
@@ -106,6 +107,113 @@ describe("plan portfolio", () => {
     expect(portfolio.interrupt?.lifecycle).toBe("active");
     expect(portfolio.foreground?.lifecycle).toBe("suspended");
     expect(portfolio.backgrounds[0]?.lifecycle).toBe("suspended");
+  });
+
+  it("treats a future rez-reserve step as foreground funding, not an interrupt", () => {
+    const input = decisionInput("corp", 13);
+    input.playerView.own.credits = 2;
+    input.legalActions = [legalAction("corp", "gain-credit")];
+    const rezFunding = plan(
+      "corp.rez_defense",
+      1_006,
+      "capability",
+      "hq-rez-reserve",
+      13,
+    );
+    rezFunding.currentStep = createPlanStep({
+      stepId: "step:hq-rez-reserve",
+      kind: "build_rez_reserve",
+      desiredActionSemantics: ["gain_credits"],
+      actionCandidateIds: ["gain-credit"],
+      rationale: ["fund a later central rez"],
+    });
+    const scoreConversion = plan(
+      "corp.create_score_window",
+      1_129,
+      "server",
+      "remote_1",
+      13,
+    );
+    scoreConversion.status = "blocked";
+    scoreConversion.creditDemands = [
+      createCorpCreditDemand({
+        demandId: "corp:score-window",
+        sourcePlanId: scoreConversion.planId,
+        purpose: "current_score_window",
+        priority: "current_foreground_plan",
+        hardness: "hard",
+        deadline: "end_of_current_turn",
+        currentCredits: 2,
+        targetCredits: 4,
+      }),
+    ];
+
+    const portfolio = buildPlanPortfolio({
+      input,
+      turnKey: "corp-turn-5",
+      tacticalPlans: [rezFunding, scoreConversion],
+      candidates: [economyCandidate("gain-credit")],
+    });
+
+    expect(portfolio.interrupt).toBeUndefined();
+    expect(portfolio.foreground).toMatchObject({
+      planType: "corp.create_score_window",
+      lifecycle: "blocked",
+      fundingCoverageResolvesHardBlocker: true,
+    });
+  });
+
+  it("does not promote a hard blocker through a contingent funding route", () => {
+    const input = decisionInput("corp", 14);
+    input.playerView.own.credits = 2;
+    input.legalActions = [legalAction("corp", "contingent-credit")];
+    const activeRezFunding = plan(
+      "corp.rez_defense",
+      1_006,
+      "capability",
+      "hq-rez-reserve",
+      14,
+    );
+    activeRezFunding.currentStep = createPlanStep({
+      stepId: "step:hq-rez-reserve",
+      kind: "build_rez_reserve",
+      desiredActionSemantics: ["gain_credits"],
+      actionCandidateIds: ["contingent-credit"],
+      rationale: ["fund a later central rez"],
+    });
+    const blockedScore = plan(
+      "corp.create_score_window",
+      1_129,
+      "server",
+      "remote_1",
+      14,
+    );
+    blockedScore.status = "blocked";
+    blockedScore.creditDemands = [
+      createCorpCreditDemand({
+        demandId: "corp:contingent-score-window",
+        sourcePlanId: blockedScore.planId,
+        purpose: "current_score_window",
+        priority: "current_foreground_plan",
+        hardness: "hard",
+        deadline: "end_of_current_turn",
+        currentCredits: 2,
+        targetCredits: 4,
+      }),
+    ];
+
+    const portfolio = buildPlanPortfolio({
+      input,
+      turnKey: "corp-turn-6",
+      tacticalPlans: [activeRezFunding, blockedScore],
+      candidates: [
+        economyCandidate("contingent-credit", {
+          reliability: "conditional",
+        }),
+      ],
+    });
+
+    expect(portfolio.foreground?.planType).toBe("corp.rez_defense");
   });
 
   it("resumes a recurring background after an interrupt disappears", () => {

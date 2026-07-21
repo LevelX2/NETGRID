@@ -235,13 +235,13 @@ export {
   economyCreditBaseValue,
   economyNetHandDeltaValue,
   scoreEconomyAction,
-} from "./evaluation/economy-action-score";
+} from "./economy/economy-action-score";
 export type {
   EconomyActionDominance,
   EconomyActionMode,
   EconomyActionScore,
   EconomyScoreComponent,
-} from "./evaluation/economy-action-score";
+} from "./economy/economy-action-score";
 export type {
   FundingActionCandidate,
   FundingRoute,

@@ -9,6 +9,8 @@ import { buildSemanticDecisionDebugScoreComponent } from "../diagnostics/decisio
 import { semanticRuntimeStrategicActionFitScoreComponents } from "./strategic-action-fit";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { semanticRuntimeTypeTieBreakerScore } from "./semantic-runtime-score-components";
+import { economyProjectionAccountsForCreditCost } from "./economy-score-components";
+import type { CreditDemand } from "../plans/credit-demand";
 
 export type SemanticRuntimeScoreBreakdownDependencies = {
   contextComponents: (
@@ -16,6 +18,7 @@ export type SemanticRuntimeScoreBreakdownDependencies = {
     action: LegalAction,
     scopeId: string,
     actionSemanticCandidate?: ActionSemanticCandidate,
+    creditDemands?: readonly CreditDemand[],
   ) => AiDecisionScoreComponent[];
   actionCreditCost: (action: LegalAction) => number;
 };
@@ -26,12 +29,14 @@ export type SemanticRuntimeScoreBreakdownContextDependencies = {
     action: LegalAction,
     scopeId: string,
     actionSemanticCandidate?: ActionSemanticCandidate,
+    creditDemands?: readonly CreditDemand[],
   ) => AiDecisionScoreComponent[];
   corpComponents: (
     input: AiDecisionInput,
     action: LegalAction,
     scopeId: string,
     actionSemanticCandidate?: ActionSemanticCandidate,
+    creditDemands?: readonly CreditDemand[],
   ) => AiDecisionScoreComponent[];
   actionCreditCost: (action: LegalAction) => number;
 };
@@ -43,6 +48,7 @@ export type SemanticRuntimeScoreBreakdownContext = {
     scopeId: string,
     exclusion?: SemanticRuntimeExclusion,
     actionSemanticCandidate?: ActionSemanticCandidate,
+    creditDemands?: readonly CreditDemand[],
   ) => NonNullable<AiDecisionDebug["scoreBreakdown"]>;
 };
 
@@ -55,6 +61,7 @@ export function createSemanticRuntimeScoreBreakdownContext(
     scopeId: string,
     exclusion?: SemanticRuntimeExclusion,
     actionSemanticCandidate?: ActionSemanticCandidate,
+    creditDemands: readonly CreditDemand[] = [],
   ): NonNullable<AiDecisionDebug["scoreBreakdown"]> {
     return buildSemanticRuntimeScoreBreakdown({
       input,
@@ -63,22 +70,31 @@ export function createSemanticRuntimeScoreBreakdownContext(
       ...(exclusion ? { exclusion } : {}),
       ...(actionSemanticCandidate ? { actionSemanticCandidate } : {}),
       dependencies: {
-        contextComponents: (componentInput, componentAction, componentScopeId) =>
+        contextComponents: (
+          componentInput,
+          componentAction,
+          componentScopeId,
+          componentActionSemanticCandidate,
+          componentCreditDemands,
+        ) =>
           componentInput.side === "runner"
             ? dependencies.runnerComponents(
                 componentInput,
                 componentAction,
                 componentScopeId,
-                actionSemanticCandidate,
+                componentActionSemanticCandidate,
+                componentCreditDemands,
               )
             : dependencies.corpComponents(
                 componentInput,
                 componentAction,
                 componentScopeId,
-                actionSemanticCandidate,
+                componentActionSemanticCandidate,
+                componentCreditDemands,
               ),
         actionCreditCost: dependencies.actionCreditCost,
       },
+      creditDemands,
     });
   }
 
@@ -91,21 +107,20 @@ export function buildSemanticRuntimeScoreBreakdown(params: {
   scopeId: string;
   exclusion?: SemanticRuntimeExclusion;
   actionSemanticCandidate?: ActionSemanticCandidate;
+  creditDemands?: readonly CreditDemand[];
   dependencies: SemanticRuntimeScoreBreakdownDependencies;
 }): NonNullable<AiDecisionDebug["scoreBreakdown"]> {
-  const typeTieBreaker = semanticRuntimeTypeTieBreakerScore(
-    params.action.type,
-  );
+  const typeTieBreaker = semanticRuntimeTypeTieBreakerScore(params.action.type);
   const contextComponents = params.dependencies.contextComponents(
     params.input,
     params.action,
     params.scopeId,
     params.actionSemanticCandidate,
+    params.creditDemands,
   );
-  const privateBonus =
-    params.action.visibility === "private_to_actor" ? 25 : 0;
+  const privateBonus = params.action.visibility === "private_to_actor" ? 25 : 0;
   const creditCost = semanticRuntimeCreditCostForPenalty(params);
-  const costPenalty = -(creditCost * 35);
+  const costPenalty = creditCost === 0 ? 0 : -(creditCost * 35);
   return [
     buildSemanticDecisionDebugScoreComponent({
       key: "semantic_type_tie_breaker",
@@ -152,8 +167,14 @@ export function buildSemanticRuntimeScoreBreakdown(params: {
 function semanticRuntimeCreditCostForPenalty(params: {
   action: LegalAction;
   actionSemanticCandidate?: ActionSemanticCandidate;
-  dependencies: Pick<SemanticRuntimeScoreBreakdownDependencies, "actionCreditCost">;
+  dependencies: Pick<
+    SemanticRuntimeScoreBreakdownDependencies,
+    "actionCreditCost"
+  >;
 }): number {
+  if (economyProjectionAccountsForCreditCost(params.actionSemanticCandidate)) {
+    return 0;
+  }
   const costProfile = params.actionSemanticCandidate?.costProfile;
   if (costProfile === undefined) {
     return params.dependencies.actionCreditCost(params.action);

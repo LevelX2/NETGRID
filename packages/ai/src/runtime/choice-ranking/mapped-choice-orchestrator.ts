@@ -9,8 +9,10 @@ import type {
 } from "../semantic-runtime-types";
 import {
   tacticalPlanCorpEconomyActivationBlocksOffPlanOverride,
+  tacticalPlanCorpStrategyReserveBlocksNegativeOverride,
   tacticalPlanCorpScoreConversionBlocksOffPlanOverride,
   tacticalPlanCorpScorelineSupportBlocksOffPlanOverride,
+  tacticalPlanSoftFundingShouldYieldToFiniteEconomy,
 } from "./corp-plan-overrides";
 import { initialMappedChoiceOverride } from "./mapped-choice-initial-overrides";
 import {
@@ -256,6 +258,22 @@ export function tacticalPlanMappedChoice(
         threshold: Number.POSITIVE_INFINITY,
       });
     }
+    if (
+      tacticalPlanCorpStrategyReserveBlocksNegativeOverride(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        mappedActionIds,
+      )
+    ) {
+      return tacticalPlanBlockedOverrideResult({
+        mappedChoice,
+        overrideChoice,
+        reason: "corp_strategy_reserve_plan_controller",
+        scoreGap,
+        threshold: Number.POSITIVE_INFINITY,
+      });
+    }
     const mappedNonPositiveAgainstPositive =
       mappedChoice.score <= 0 && overrideChoice.score > 0;
     const deferredDevelopmentInstallShouldYield =
@@ -341,6 +359,12 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         scoreGap,
       );
+    const softFundingShouldYieldToFiniteEconomy =
+      tacticalPlanSoftFundingShouldYieldToFiniteEconomy(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+      );
     const backgroundBankBuildShouldYield =
       tacticalPlanBackgroundBankBuildShouldYield(
         mapping,
@@ -414,6 +438,7 @@ export function tacticalPlanMappedChoice(
       lowValueRecoveryShouldYield ||
       inferiorRunTargetShouldYield ||
       corpBoardTriageMismatchShouldYield ||
+      softFundingShouldYieldToFiniteEconomy ||
       backgroundBankBuildShouldYield ||
       committedBankBuildShouldYield ||
       deferredDevelopmentInstallShouldYield ||
@@ -445,6 +470,7 @@ export function tacticalPlanMappedChoice(
           lowValueRecoveryShouldYield,
           inferiorRunTargetShouldYield,
           corpBoardTriageMismatchShouldYield,
+          softFundingShouldYieldToFiniteEconomy,
           backgroundBankBuildShouldYield,
           committedBankBuildShouldYield,
           hardInterruptShouldYield,

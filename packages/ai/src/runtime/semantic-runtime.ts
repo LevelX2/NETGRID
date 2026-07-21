@@ -11,6 +11,7 @@ import type {
   BuildActionSemanticCandidatesParams,
 } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
+import { isBasicCreditAction } from "../actions/action-effect-classification";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
 import type {
@@ -59,6 +60,10 @@ import { runnerInevitableCorpDeckoutSemanticChoice } from "./runner-inevitable-c
 import { runnerOpponentMatchpointContestSemanticChoice } from "./runner-opponent-matchpoint-contest-choice";
 import { sourceDefinitionIdForAction } from "./visible-card-lookup";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
+import {
+  compareCreditDemandPriority,
+  type CreditDemand,
+} from "../plans/credit-demand";
 
 export type {
   SemanticRuntimeChoice,
@@ -72,6 +77,7 @@ export type SemanticRuntimeDependencies = {
   semanticRuntimeChoices: (
     input: AiDecisionInput,
     actionSemanticCandidates?: readonly ActionSemanticCandidate[],
+    creditDemands?: readonly CreditDemand[],
   ) => SemanticRuntimeChoice[];
   semanticRuntimeChoiceIsReactive: (choice: SemanticRuntimeChoice) => boolean;
   buildActionSemanticCandidates: (
@@ -310,27 +316,20 @@ export function chooseSemanticRuntimeAction(
             : {}),
         } as AiDecisionInput)
       : input;
-  const choices = dependencies.semanticRuntimeChoices(
+  const preliminaryChoices = dependencies.semanticRuntimeChoices(
     inputForSemanticChoices,
     actionSemanticCandidates,
   );
-  const runPlanChoice = activeRunnerRunPlan
-    ? runnerRunPlanSemanticChoice({
-        input,
-        plan: activeRunnerRunPlan,
-        choices,
-      })
-    : undefined;
   const reactiveChoice =
     activeRunnerRunPlan !== undefined
       ? undefined
-      : (choices.find(
+      : (preliminaryChoices.find(
           (candidate) =>
             !candidate.exclusion &&
             candidate.score > 0 &&
             dependencies.semanticRuntimeChoiceIsReactive(candidate),
         ) ??
-        choices.find(
+        preliminaryChoices.find(
           (candidate) =>
             !candidate.exclusion &&
             dependencies.semanticRuntimeChoiceIsReactive(candidate),
@@ -380,6 +379,22 @@ export function chooseSemanticRuntimeAction(
           : {}),
         candidates: actionSemanticCandidates,
       });
+  const runtimeCreditDemands = creditDemandsForRuntimeScoring(planRuntime);
+  const choices =
+    runtimeCreditDemands.length > 0
+      ? dependencies.semanticRuntimeChoices(
+          inputForSemanticChoices,
+          actionSemanticCandidates,
+          runtimeCreditDemands,
+        )
+      : preliminaryChoices;
+  const runPlanChoice = activeRunnerRunPlan
+    ? runnerRunPlanSemanticChoice({
+        input,
+        plan: activeRunnerRunPlan,
+        choices,
+      })
+    : undefined;
   const rawBestChoice = dependencies.bestSemanticRuntimeChoice(choices);
   const bestChoice = replayStableCorpBasicEconomyNearTieChoiceOrUndefined(
     input,
@@ -584,6 +599,34 @@ export function chooseSemanticRuntimeAction(
   };
 }
 
+export function creditDemandsForRuntimeScoring(
+  planRuntime: TacticalPlanRuntimeResult,
+): CreditDemand[] {
+  const portfolio = planRuntime.planPortfolio;
+  const entries = portfolio
+    ? [
+        ...(portfolio.interrupt ? [portfolio.interrupt] : []),
+        ...(portfolio.foreground ? [portfolio.foreground] : []),
+        ...portfolio.backgrounds,
+      ].filter(
+        (entry) =>
+          entry.lifecycle !== "suspended" &&
+          entry.lifecycle !== "completed" &&
+          entry.lifecycle !== "abandoned",
+      )
+    : [];
+  const demands = new Map<string, CreditDemand>();
+  for (const demand of entries.flatMap((entry) => entry.creditDemands ?? [])) {
+    if (demand.gap > 0) demands.set(demand.demandId, demand);
+  }
+  for (const demand of planRuntime.selectedPlan?.creditDemands ?? []) {
+    if (demand.gap > 0 && !demands.has(demand.demandId)) {
+      demands.set(demand.demandId, demand);
+    }
+  }
+  return [...demands.values()].sort(compareCreditDemandPriority);
+}
+
 export class SemanticCoverageFallbackError extends Error {
   constructor(
     readonly side: AiDecisionInput["side"],
@@ -760,7 +803,7 @@ function failClosedFallbackPolicyForAction(
   if (action.type === "access_card" || action.type === "trash_accessed_card") {
     return "access_resolution";
   }
-  if (action.type === "gain_credit" && action.source === "basic_action") {
+  if (isBasicCreditAction(action)) {
     return "economy_basic";
   }
   if (

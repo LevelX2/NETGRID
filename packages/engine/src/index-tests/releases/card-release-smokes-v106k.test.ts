@@ -286,6 +286,12 @@ describe("V1.0.6K Card Release", () => {
     expect(state.runner.grip.length).toBe(beforeJackGrip + 2);
 
     const beforeContactsCredits = state.runner.credits;
+    const contactsAction = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(state, action) === "onr_v1_097_livewires-contacts",
+    );
+    expect(contactsAction?.payload).toMatchObject({ gainCreditsAmount: 3 });
     state = apply(
       state,
       "runner",

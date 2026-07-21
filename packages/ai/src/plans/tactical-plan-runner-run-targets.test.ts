@@ -246,6 +246,51 @@ describe("runnerPressureProbeAllowance", () => {
     });
   });
 
+  it("publishes guaranteed path cost plus contest reserve for a funded remote", () => {
+    const remoteRun = runAction("run-remote-1", "remote_1");
+    const evaluation = runTargetEvaluation({
+      actionId: remoteRun.actionId,
+      targetServerId: "remote_1",
+      targetKind: "remote",
+      recommendation: "gain_credits_first",
+      accessPayoff: "score_threat",
+      scoreThreat: true,
+      score: 1250,
+      pathCost: 10,
+      creditsAfterRun: 0,
+    });
+    const context = planContext({
+      primaryStrategyId: "runner.remote_contest",
+      runnerClicks: 2,
+      runTargetEvaluations: [evaluation],
+    });
+    context.input.playerView.own.credits = 10;
+    context.runnerEconomyPosture = {
+      fundingNeed: true,
+      minimumCreditFloor: 4,
+      desiredCreditReserve: 26,
+      creditReservePolicy: { contestReserve: 8 },
+    } as NonNullable<TacticalPlanBuildContext["runnerEconomyPosture"]>;
+
+    expect(
+      runnerRunTargetCurrentStep(context, remoteRun, {
+        stepId: "run_target:remote_1",
+        kind: "run_target",
+        desiredActionSemantics: ["run.start"],
+      }),
+    ).toMatchObject({
+      kind: "gain_credits",
+      requiredCapabilities: [
+        {
+          capabilityId: "credits_for_run:remote_1",
+          kind: "credits",
+          side: "runner",
+          minimumCredits: 18,
+        },
+      ],
+    });
+  });
+
   it("funds a score-threat probe without suppressing an ordinary probe", () => {
     const remoteRun = runAction("run-remote-1", "remote_1");
     const defaultStep = {
@@ -295,11 +340,7 @@ describe("runnerPressureProbeAllowance", () => {
       desiredActionSemantics: ["economy.gain_credit"],
     });
     expect(
-      runnerRunTargetCurrentStep(
-        ordinaryProbeContext,
-        remoteRun,
-        defaultStep,
-      ),
+      runnerRunTargetCurrentStep(ordinaryProbeContext, remoteRun, defaultStep),
     ).toMatchObject({
       kind: "run_target",
       desiredActionSemantics: ["run.start"],

@@ -230,15 +230,25 @@ export function evaluateTacticalPlans(
   const planActionContributionsUsed = redactedPlanActionContributionFacts(
     planActionContributionScores,
   );
-  for (const plan of planAlternatives) {
+  const foregroundPlan = planPortfolio.foreground
+    ? planAlternatives.find(
+        (plan) => plan.planId === planPortfolio.foreground?.sourcePlanId,
+      )
+    : undefined;
+  const portfolioOrderedPlans = [
+    ...(interruptPlan ? [interruptPlan] : []),
+    ...(foregroundPlan ? [foregroundPlan] : []),
+    ...planAlternatives,
+  ].filter(
+    (plan, index, plans) =>
+      plans.findIndex((candidate) => candidate.planId === plan.planId) ===
+      index,
+  );
+  for (const plan of portfolioOrderedPlans) {
     const portfolioEntry = planPortfolioEntryForPlan(planPortfolio, plan);
-    const terminalMatchpointPlan = plan.scoreBreakdown.some(
-      (component) => component.key === "runner_matchpoint_run_conversion",
-    );
     const releasedSuspendedEntry =
       portfolioEntry?.lifecycle === "suspended" &&
       !interruptCanAct &&
-      terminalMatchpointPlan &&
       planPortfolioEntryCanAct({ ...portfolioEntry, lifecycle: "active" });
     if (
       portfolioEntry &&

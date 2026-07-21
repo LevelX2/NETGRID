@@ -4,7 +4,7 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
-import { actionProvidesCredits } from "../../actions/action-effect-classification";
+import { actionHasImmediateCreditGain } from "../../actions/action-effect-classification";
 import {
   semanticRuntimeCorpBoardTriage,
   type CorpBoardTriage,
@@ -56,6 +56,15 @@ export function corpMatchpointHqProtectionComponent(
     !hqPressure.active &&
     !hqPressure.visibleMultiaccess &&
     !hqPressure.eventMultiaccess &&
+    hqPressure.successfulAccessEvents <= 0
+  ) {
+    return undefined;
+  }
+  if (
+    corpServerIceCount(input, "hq") >= 3 &&
+    !hqPressure.visibleMultiaccess &&
+    !hqPressure.eventMultiaccess &&
+    hqPressure.recentRunOrAccessEvents <= 0 &&
     hqPressure.successfulAccessEvents <= 0
   ) {
     return undefined;
@@ -378,7 +387,7 @@ export function corpScorelineFundingAssessmentComponent<
   const bestPath = assessment.bestPath;
   const actionIsFundingPath =
     path?.actionRoles.includes("fund_scoreline") === true ||
-    (actionProvidesCredits(action) &&
+    (actionHasImmediateCreditGain(action) &&
       bestPath?.recommendedNextStep === "fund_scoreline" &&
       bestPath.actionId === action.actionId);
   if (actionIsFundingPath) {

@@ -3,6 +3,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import { isBasicCreditAction } from "../actions/action-effect-classification";
 import { runnerHasMeaningfulCreditConversionAlternative } from "./runner-marginal-credit-value";
 import { encounterContinueAcceptsOnlyNonlethalDamageThreats } from "./encounter-subroutine";
 
@@ -85,8 +86,8 @@ export function runnerBasicActionPenaltyScoreComponents(
     : undefined;
   if (
     matchingPressureRun &&
-    action.source === "basic_action" &&
-    (action.type === "gain_credit" || action.type === "draw_card") &&
+    (isBasicCreditAction(action) ||
+      (action.source === "basic_action" && action.type === "draw_card")) &&
     input.playerView.own.credits >= 4
   ) {
     components.push({
@@ -102,8 +103,7 @@ export function runnerBasicActionPenaltyScoreComponents(
     });
   }
   if (
-    action.type === "gain_credit" &&
-    action.source === "basic_action" &&
+    isBasicCreditAction(action) &&
     input.playerView.own.credits >= 10 &&
     runnerHasMeaningfulCreditConversionAlternative(input, action)
   ) {

@@ -10,6 +10,7 @@ import {
   semanticRuntimeChoiceHasAnyScoreComponent,
   semanticRuntimeChoiceHasScoreBreakdownComponent,
   semanticRuntimeChoiceHasScoreComponent,
+  semanticRuntimeChoiceIsImmediateEconomy,
   semanticRuntimeChoiceStrategicFitLevel,
   semanticRuntimeRecentRunnerStartRunsOnServer,
 } from "./semantic-choice-ranking-support";
@@ -54,12 +55,12 @@ export function tacticalPlanUrgentRunNowDevelopmentShouldYield(
   if (
     (mapping.plan.type !== "runner.develop_hand_card" &&
       mapping.plan.type !== "runner.play_best_hand_card") ||
-    (mappedChoice.action.type !== "gain_credit" &&
+    (!semanticRuntimeChoiceIsImmediateEconomy(mappedChoice) &&
       mappedChoice.action.type !== "install_card" &&
       mappedChoice.action.type !== "play_event") ||
-    (mappedChoice.action.type === "gain_credit" &&
+    (semanticRuntimeChoiceIsImmediateEconomy(mappedChoice) &&
       !mapping.plan.evidence.includes("hand_development_fit:blocked")) ||
-    (mappedChoice.action.type === "gain_credit" &&
+    (semanticRuntimeChoiceIsImmediateEconomy(mappedChoice) &&
       input.playerView.own.clicks <= 1) ||
     mappedChoice.score > 0 ||
     mappedChoice.scoreBreakdown.some(
@@ -113,7 +114,7 @@ export function tacticalPlanUnconvertibleFundingShouldYieldToBank(
     mapping.plan.type === "runner.develop_hand_card" &&
     mapping.step.kind === "gain_credits" &&
     mapping.plan.evidence.includes("funding_same_turn_convertible:false") &&
-    mappedChoice.action.type === "gain_credit" &&
+    semanticRuntimeChoiceIsImmediateEconomy(mappedChoice) &&
     scoreGap > 0 &&
     semanticRuntimeChoiceHasScoreBreakdownComponent(
       overrideChoice,
@@ -176,7 +177,7 @@ export function tacticalPlanMarginalDevelopmentInstallShouldYield(
   );
   const basicCapacityOverride =
     overrideChoice.action.type === "draw_card" ||
-    overrideChoice.action.type === "gain_credit";
+    semanticRuntimeChoiceIsImmediateEconomy(overrideChoice);
   const immediateHandPlayOverride = overrideChoice.action.type === "play_event";
   const minimumScoreGap = basicCapacityOverride
     ? 200
@@ -218,7 +219,7 @@ export function tacticalPlanDamageReactionReserveShouldYield(
     mapping.plan.type === "runner.opportunistic_central_run" &&
     semanticRuntimeChoiceIsProjectedRun(mappedChoice) &&
     !mappedPlanHasImmediateVisibleRunPayoff(mapping.plan, mappedChoice) &&
-    overrideChoice.action.type === "gain_credit" &&
+    semanticRuntimeChoiceIsImmediateEconomy(overrideChoice) &&
     overrideChoice.score > 0 &&
     scoreGap > 0 &&
     semanticRuntimeChoiceHasScoreComponent(
@@ -379,7 +380,7 @@ export function tacticalPlanAcuteHandBufferShouldYield(
       overrideChoice,
     ) ||
     (scoreGap > 0 &&
-      mappedChoice.action.type === "gain_credit" &&
+      semanticRuntimeChoiceIsImmediateEconomy(mappedChoice) &&
       semanticRuntimeChoiceIsAcuteHandBufferDraw(overrideChoice))
   );
 }
@@ -585,7 +586,7 @@ export function tacticalPlanLowValueRecoveryMappingShouldYield(
   if (scoreGap <= 0 || overrideChoice.score <= 0) return false;
   if (
     mappedChoice.score > 0 &&
-    (overrideChoice.action.type === "gain_credit" ||
+    (semanticRuntimeChoiceIsImmediateEconomy(overrideChoice) ||
       overrideChoice.action.type === "draw_card")
   )
     return false;
@@ -652,7 +653,7 @@ export function tacticalPlanNonPositiveMappingStillProtected(
       mapping.plan.type !== "runner.play_best_hand_card") ||
     mapping.step.kind !== "install_development_card" ||
     mapping.plan.priority < 900 ||
-    overrideChoice.action.type !== "gain_credit"
+    !semanticRuntimeChoiceIsImmediateEconomy(overrideChoice)
   ) {
     return false;
   }

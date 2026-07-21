@@ -5,7 +5,10 @@ import type {
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { corpPurgeImpactScoreComponent } from "./corp-purge-impact";
-import { actionProvidesCredits } from "../actions/action-effect-classification";
+import {
+  actionHasImmediateCreditGain,
+  actionProvidesCredits,
+} from "../actions/action-effect-classification";
 import {
   semanticRuntimeCorpBoardTriage,
   semanticRuntimeCorpBoardTriageActionComponent,
@@ -21,9 +24,6 @@ import {
   corpActionCandidateHasVisibleSignal,
   corpActionCandidateTargetsCorpScoreline,
   corpBurstEconomyOperationForAction,
-  corpBurstEconomyThresholdAfterBasicCredit,
-  corpImmediateEconomyOperationScoreValue,
-  corpImmediateEconomyThresholdScoreValue,
   corpInputHasScoreCloseoutBasis,
 } from "./corp-scoreline/semantic-runtime-corp-score-action-economy";
 import {
@@ -38,11 +38,11 @@ import { corpTacticalGoalFitScoreComponent } from "./corp-scoreline/semantic-run
 import {
   corpActiveRemoteAgendaAdvanceClockComponent,
   corpActiveScorelineOffPathPenaltyComponent,
-  corpActiveScoreRemoteReserveFundingComponent,
 } from "./corp-scoreline/semantic-runtime-corp-score-active-remote";
 import {
   corpContestedAgendaPointRiskComponent,
   corpGameEndingScorelineExposurePenaltyComponent,
+  corpMatchpointHqProtectionComponent,
   corpReserveScoreComponent,
   corpScorelineFundingAssessmentComponent,
   corpScoringWindowSuppressesContestableRemotePenalty,
@@ -60,6 +60,8 @@ import {
   corpScorelineFeasibilityForDecisionInput,
 } from "./corp-scoreline-feasibility";
 import { semanticRuntimeVisibleSourceCard } from "./visible-card-lookup";
+import { economyRuntimeScoreComponents } from "./economy-score-components";
+import type { CreditDemand } from "../plans/credit-demand";
 
 export type { SemanticRuntimeCorpScoreDependencies } from "./corp-scoreline/semantic-runtime-corp-score-contracts";
 
@@ -73,8 +75,28 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   scopeId: string,
   dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
   actionSemanticCandidate?: ActionSemanticCandidate,
+  creditDemands: readonly CreditDemand[] = [],
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
+  components.push(
+    ...economyRuntimeScoreComponents(actionSemanticCandidate, creditDemands),
+  );
+  const projectedCardsDrawn =
+    actionSemanticCandidate?.economyProjection?.cardsDrawn ?? 0;
+  if (
+    projectedCardsDrawn > 0 &&
+    projectedCardsDrawn > input.playerView.own.stackOrRdCount
+  ) {
+    components.push({
+      key: "corp_economy_draw_exceeds_rd",
+      label: "Ökonomie-Draweffekt ohne ausreichendes R&D",
+      value: -4000,
+      reason: [
+        `projected_cards_drawn:${projectedCardsDrawn}`,
+        `rd_cards:${input.playerView.own.stackOrRdCount}`,
+      ].join("|"),
+    });
+  }
   const credits = input.playerView.own.credits;
   const boardTriageState = semanticRuntimeCorpBoardTriage(input, dependencies);
   const deadlineScorelineAction =
@@ -124,24 +146,48 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       ].join("|"),
     });
   }
-  const activeScoreRemoteFunding = corpActiveScoreRemoteReserveFundingComponent(
-    input,
-    action,
-  );
   const boardTriage = semanticRuntimeCorpBoardTriageActionComponent(
     input,
     action,
     dependencies,
     actionSemanticCandidate,
   );
+  const fundsCurrentScoreOrRezDemand =
+    actionHasImmediateCreditGain(action) &&
+    creditDemands.some(
+      (demand) =>
+        demand.gap > 0 &&
+        (demand.purpose === "current_score_window" ||
+          demand.purpose === "current_rez_window"),
+    );
+  const matchpointHqProtection = corpMatchpointHqProtectionComponent(
+    input,
+    action,
+  );
+  const matchpointHqOverridesCentralMismatch =
+    boardTriage?.key === "corp_board_triage_mismatch" &&
+    matchpointHqProtection?.key === "corp_matchpoint_hq_protection_alignment";
   if (
     boardTriage &&
     !(
-      activeScoreRemoteFunding &&
+      fundsCurrentScoreOrRezDemand &&
       boardTriage.key === "corp_board_triage_mismatch"
-    )
+    ) &&
+    !matchpointHqOverridesCentralMismatch
   ) {
     components.push(boardTriage);
+  }
+  if (matchpointHqOverridesCentralMismatch) {
+    components.push({
+      key: "corp_board_triage_matchpoint_hq_override",
+      label: "Matchpoint-HQ-Schutz vor historischer Zentral-Triage",
+      value: 0,
+      reason: [
+        "runner_at_match_point:true",
+        "matchpoint_hq_protection_alignment:true",
+        `suppressed_component:${boardTriage?.key ?? "none"}`,
+      ].join("|"),
+    });
   }
   const unbackedExtraActionBurst = corpUnbackedExtraActionBurstComponent(
     input,
@@ -159,7 +205,6 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     boardTriageState,
   );
   if (activeScorelineAdvance) components.push(activeScorelineAdvance);
-  if (activeScoreRemoteFunding) components.push(activeScoreRemoteFunding);
   const activeScorelineOffPath = corpActiveScorelineOffPathPenaltyComponent(
     input,
     action,
@@ -207,7 +252,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       scopeId,
       dependencies,
       boardTriageState,
-      activeScoreRemoteFunding,
+      undefined,
       actionSemanticCandidate,
     ),
   );
@@ -298,26 +343,6 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       });
     }
   }
-  const burstEconomyOperation = corpBurstEconomyOperationForAction(
-    input,
-    action,
-    dependencies,
-    actionSemanticCandidate,
-  );
-  if (burstEconomyOperation) {
-    components.push({
-      key:
-        burstEconomyOperation.actionKind === "activated_ability"
-          ? "corp_activated_burst_economy"
-          : "corp_operation_burst_economy",
-      label:
-        burstEconomyOperation.actionKind === "activated_ability"
-          ? "Aktivierte Economy-Fähigkeit"
-          : "Immediate-Economy-Operation",
-      value: corpImmediateEconomyOperationScoreValue(burstEconomyOperation),
-      reason: burstEconomyOperation.evidence.join("|"),
-    });
-  }
   const hqAgendaFloodDrawRisk = corpHqAgendaFloodDrawRiskComponent(
     input,
     action,
@@ -326,54 +351,6 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     boardTriageState,
   );
   if (hqAgendaFloodDrawRisk) components.push(hqAgendaFloodDrawRisk);
-  const burstEconomyThreshold =
-    action.type === "gain_credit" && action.source === "basic_action"
-      ? corpBurstEconomyThresholdAfterBasicCredit(input)
-      : undefined;
-  if (burstEconomyThreshold) {
-    components.push({
-      key: "corp_operation_economy_threshold_funding",
-      label: "Operation-Schwelle",
-      value: corpImmediateEconomyThresholdScoreValue(burstEconomyThreshold),
-      reason: burstEconomyThreshold.evidence.join("|"),
-    });
-  }
-  if (actionProvidesCredits(action) && credits < 6) {
-    components.push({
-      key: "corp_low_credits",
-      label: "Credit-Bedarf",
-      value: 700,
-      reason: `credits:${credits}`,
-    });
-    if (dependencies.corpHasRemoteInstability(input)) {
-      components.push({
-        key: "corp_remote_instability_credit_reserve",
-        label: "Remote-Reserve",
-        value: 250,
-        reason: "remote_instability",
-      });
-    }
-    if (dependencies.corpHasRemoteRezFloorFundingNeed(input)) {
-      components.push(
-        corpReserveScoreComponent(
-          "corp_remote_rez_floor_credit_reserve",
-          "Remote-Rez-Floor",
-          900,
-          ["low_rez_reserve"],
-        ),
-      );
-    }
-    if (dependencies.corpHasCentralRezFloorFundingNeed(input)) {
-      components.push(
-        corpReserveScoreComponent(
-          "corp_central_rez_floor_credit_reserve",
-          "Zentrale Rez-Reserve",
-          900,
-          ["central_rez_reserve_needed"],
-        ),
-      );
-    }
-  }
   if (
     action.type === "gain_credit" &&
     !actionProvidesCredits(action) &&

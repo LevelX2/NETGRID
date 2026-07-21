@@ -18,7 +18,7 @@ describe("AI hint ontology doctrine diagnostics", () => {
     expect(summary.schemaVersion).toBe("ai-deck-ontology-summary-v1");
     expect(summary.validation.errorCount).toBe(0);
     expect(summary.effectCounts.byKind.scored_agenda_action).toBe(3);
-    expect(summary.effectCounts.byKind.economy).toBe(2);
+    expect(summary.effectCounts.byKind.action_economy).toBe(2);
     expect(summary.effectCounts.byKind.tag_source).toBe(2);
     expect(summary.effectCounts.byKind.tag_punish_payoff).toBe(2);
     expect(summary.scoredAgendaActions.cardIds).toEqual([
@@ -57,8 +57,12 @@ describe("AI hint ontology doctrine diagnostics", () => {
     expect(summary.effectCounts.byKind.topdeck_info).toBe(2);
     expect(summary.lineSupportCounts.byKind["runner.search.breaker"]).toBe(2);
     expect(summary.lineSupportCounts.byKind["runner.rnd_pressure"]).toBe(1);
-    expect(summary.lineSupportCounts.byKind["runner.interface_closeout"] ?? 0).toBe(0);
-    expect(summary.lineSupportCounts.byKind["runner.remote_trash"] ?? 0).toBe(0);
+    expect(
+      summary.lineSupportCounts.byKind["runner.interface_closeout"] ?? 0,
+    ).toBe(0);
+    expect(summary.lineSupportCounts.byKind["runner.remote_trash"] ?? 0).toBe(
+      0,
+    );
   });
 
   it("keeps reviewed fixture hints out of quality gaps without changing plan weights", () => {

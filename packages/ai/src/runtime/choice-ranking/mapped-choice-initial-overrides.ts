@@ -6,6 +6,7 @@ import type {
 } from "../semantic-runtime-types";
 import {
   strongerExistingCorpOverrideMustBePreserved,
+  tacticalPlanCorpBlockedScorelineFundingRejectsAdvanceOverride,
   urgentCorpSemanticChoice,
 } from "./corp-plan-overrides";
 import { bestSemanticRuntimeChoice } from "./mapped-choice-policies";
@@ -36,7 +37,13 @@ export function initialMappedChoiceOverride(
   const urgentCorpChoice = urgentCorpSemanticChoice(input, choices);
   if (
     urgentCorpChoice &&
-    urgentCorpChoice.action.actionId !== mappedChoice.action.actionId
+    urgentCorpChoice.action.actionId !== mappedChoice.action.actionId &&
+    !tacticalPlanCorpBlockedScorelineFundingRejectsAdvanceOverride(
+      input,
+      mapping,
+      mappedChoice,
+      urgentCorpChoice,
+    )
   ) {
     const reason =
       urgentCorpChoice.action.type === "score_agenda"

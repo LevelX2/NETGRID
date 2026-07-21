@@ -15,6 +15,7 @@ import { usefulLegalRunnerHandDevelopment } from "./tactical-plan-runner-hand-de
 import type {
   PlanScoreBreakdown,
   PlanStep,
+  RequiredCapability,
   RunnerPressureBudget,
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
@@ -588,6 +589,11 @@ export function runnerRunTargetCurrentStep(
     context.runnerEconomyPosture?.fundingNeed === true &&
     context.input.playerView.own.credits <
       context.runnerEconomyPosture.desiredCreditReserve;
+  const concreteCurrentRunFunding =
+    concreteEconomyFunding &&
+    evaluation !== undefined &&
+    (runnerRunFundingCreditCapability(context, evaluation).minimumCredits ??
+      0) > context.input.playerView.own.credits;
   const preserveReachableMatchpointRun = runnerReachableCentralMatchpointRun(
     context,
     evaluation,
@@ -635,20 +641,25 @@ export function runnerRunTargetCurrentStep(
       probeFundingRequired) &&
     !preserveLastClickForScoreThreat &&
     !preserveReachableMatchpointRun &&
-    (concreteEconomyFunding ||
+    (concreteCurrentRunFunding ||
       longHorizonFundingFallback ||
       (fundingHasImmediateRunValue &&
         (boundedPathFunding || urgentContestFunding)))
   ) {
+    const fundingCapability = runnerRunFundingCreditCapability(
+      context,
+      evaluation,
+    );
     return createPlanStep({
       stepId: `gain_credits_before_run:${evaluation.targetServerId}`,
       kind: "gain_credits",
       desiredActionSemantics: ["economy.gain_credit"],
+      requiredCapabilities: [fundingCapability],
       rationale: [
         "run target evaluation recommends funding before pressure",
         `run funding gap ${fundingGap}`,
         `run preparatory clicks ${preparatoryClicks}`,
-        `concrete economy funding ${concreteEconomyFunding}`,
+        `concrete current run funding ${concreteCurrentRunFunding}`,
         ...(scoreThreatProbeWithoutVisibleCost
           ? ["zero-cost score-threat probe honors funding recommendation"]
           : []),
@@ -671,6 +682,41 @@ export function runnerRunTargetCurrentStep(
         : []),
     ],
   });
+}
+
+function runnerRunFundingCreditCapability(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerRunTargetEvaluation,
+): RequiredCapability {
+  const currentCredits = Math.max(0, context.input.playerView.own.credits ?? 0);
+  const policy = context.runnerEconomyPosture?.creditReservePolicy;
+  const postRunReserve = Math.max(
+    0,
+    evaluation.unrezzedIceRiskCreditBuffer ?? 0,
+    evaluation.scoreThreat ? (policy?.contestReserve ?? 0) : 0,
+    evaluation.scoreThreat
+      ? 0
+      : (context.runnerEconomyPosture?.minimumCreditFloor ?? 0),
+  );
+  const fundingGap = Math.max(0, -evaluation.creditsAfterRun);
+  const minimumCredits = Math.max(
+    currentCredits + fundingGap,
+    evaluation.pathCost + postRunReserve,
+  );
+  return {
+    capabilityId: `credits_for_run:${evaluation.targetServerId}`,
+    kind: "credits",
+    side: "runner",
+    target: { kind: "server", id: evaluation.targetServerId },
+    minimumCredits,
+    evidence: [
+      `run_funding_target:${evaluation.targetServerId}`,
+      `run_guaranteed_path_cost:${evaluation.pathCost}`,
+      `run_post_path_reserve:${postRunReserve}`,
+      `run_current_credits:${currentCredits}`,
+      `run_funding_gap:${fundingGap}`,
+    ],
+  };
 }
 
 export function runnerRunTargetPlanEvidence(

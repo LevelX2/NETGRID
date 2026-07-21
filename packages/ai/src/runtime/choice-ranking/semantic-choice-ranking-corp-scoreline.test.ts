@@ -199,6 +199,92 @@ describe("tacticalPlanMappedChoice Corp scoreline overrides", () => {
     );
   });
 
+  it("keeps a blocked scoreline on its funding route instead of advancing", () => {
+    const fundScoreline = legalAction("fund-scoreline", "gain_credit");
+    const advanceAgenda = legalAction("advance-agenda", "advance_card");
+    fundScoreline.side = "corp";
+    advanceAgenda.side = "corp";
+    const fundingChoice = choice(
+      fundScoreline,
+      1200,
+      scoreComponentEvidence("economy_credit_base"),
+      {
+        key: "economy_credit_base",
+        value: 150,
+        reason: "economy_net_liquid_gain:2",
+      },
+    );
+    const advanceChoice = choice(
+      advanceAgenda,
+      3000,
+      scoreComponentEvidence("corp_active_remote_agenda_advance_clock"),
+      {
+        key: "corp_active_remote_agenda_advance_clock",
+        value: 2600,
+        reason:
+          "active_remote_agenda:true|runner_cannot_contest_before_score:true",
+      },
+    );
+    advanceChoice.scoreBreakdown.push({
+      key: "corp_scoring_window_assessment",
+      label: "Score window",
+      value: 0,
+      reason: "window_kind:unsafe|agenda_steal_severity:near_win",
+    });
+    const mapping = scorelineSupportMapping([fundScoreline], {
+      stepKind: "build_rez_reserve",
+    });
+    mapping.plan.status = "blocked";
+    const input = aiInput();
+    input.side = "corp";
+
+    const result = tacticalPlanMappedChoice(
+      input,
+      [advanceChoice, fundingChoice],
+      mapping,
+      advanceChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("fund-scoreline");
+    expect(result.overrideBlockedReason).toBe(
+      "corp_scoreline_support_plan_controller",
+    );
+  });
+
+  it("allows a stronger normal-stakes advance over an optional reserve route", () => {
+    const fundScoreline = legalAction("fund-scoreline", "gain_credit");
+    const advanceAgenda = legalAction("advance-agenda", "advance_card");
+    fundScoreline.side = "corp";
+    advanceAgenda.side = "corp";
+    const fundingChoice = choice(fundScoreline, 1_200, [], {
+      key: "economy_credit_base",
+      value: 150,
+      reason: "economy_net_liquid_gain:2",
+    });
+    const advanceChoice = choice(advanceAgenda, 1_900, [], {
+      key: "corp_scoring_window_assessment",
+      value: 0,
+      reason: "window_kind:unsafe|agenda_steal_severity:normal",
+    });
+    const mapping = scorelineSupportMapping([fundScoreline], {
+      stepKind: "build_rez_reserve",
+    });
+    mapping.plan.status = "blocked";
+    const input = aiInput();
+    input.side = "corp";
+
+    const result = tacticalPlanMappedChoice(
+      input,
+      [advanceChoice, fundingChoice],
+      mapping,
+      advanceChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("advance-agenda");
+  });
+
   it("scores a legal agenda before overadvancing the active scoreline", () => {
     const advanceAgenda = legalAction("advance-agenda", "advance_card");
     const scoreAgenda = legalAction("score-agenda", "score_agenda");

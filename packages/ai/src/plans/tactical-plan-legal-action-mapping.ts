@@ -20,7 +20,7 @@ import type {
   PlanStepMappingResult,
   TacticalPlan,
 } from "./tactical-plan-types";
-import { dominatedEconomyActionIds } from "../evaluation/economy-action-score";
+import { dominatedEconomyActionIds } from "../economy/economy-action-score";
 
 export function mapPlanStepToLegalActionsWithDependencies(
   plan: TacticalPlan,

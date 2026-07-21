@@ -1,5 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { actionHasImmediateCreditGain } from "../actions/action-effect-classification";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { visibleCorpRootProvidesRemoteProtection } from "../runtime/semantic-runtime-corp-remote-reachability";
 import {
@@ -38,6 +39,16 @@ const CORP_PUNISH_EXACT_SIGNALS = new Set([
   "meat_damage",
 ]);
 
+export function corpImmediateCreditActionIds(
+  input?: Pick<AiDecisionInput, "legalActions">,
+): string[] {
+  return (
+    input?.legalActions
+      .filter(actionHasImmediateCreditGain)
+      .map((action) => action.actionId) ?? []
+  );
+}
+
 export function corpPunishCandidates(
   context: TacticalPlanBuildContext,
   punishGoal: TacticalGoalLike | undefined,
@@ -45,6 +56,15 @@ export function corpPunishCandidates(
   if (!punishGoal) return [];
   return (context.candidates ?? []).filter((candidate) => {
     if (candidate.actorSide !== "corp") return false;
+    if (candidate.actionType === "install_card") {
+      const action = context.input?.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      // Installing damage-labelled ICE is setup, not an immediate punish
+      // payoff. Explicit non-ICE root setup may still be the concrete first
+      // step of a punish plan.
+      if (!action || action.payload?.placement === "ice") return false;
+    }
     if (
       candidate.primaryProjectionStatus === "blocked" ||
       candidate.primaryProjectionStatus === "hidden_info_blocked"
@@ -55,6 +75,12 @@ export function corpPunishCandidates(
       candidateRequiresSuccessfulTrace(candidate) &&
       (traceTagExpectedSuccessEstimate(context.input) === 0 ||
         !traceActionLeavesImmediatePunishWindow(context.input, candidate))
+    ) {
+      return false;
+    }
+    if (
+      candidate.sourceDefinitionId === "onr_v1_285_closed-accounts" &&
+      context.input.playerView.opponent.credits <= 0
     ) {
       return false;
     }
@@ -294,10 +320,7 @@ export function corpScoreWindowCurrentStep(
         stepId: `build_rez_reserve:${action.actionId}`,
         kind: "build_rez_reserve",
         desiredActionSemantics: ["economy.gain_credit", "card_ability.trigger"],
-        actionCandidateIds:
-          input?.legalActions
-            .filter((candidate) => candidate.type === "gain_credit")
-            .map((candidate) => candidate.actionId) ?? [],
+        actionCandidateIds: corpImmediateCreditActionIds(input),
         requiredCapabilities: [
           {
             capabilityId: `remote_protection_reserve:${action.actionId}`,
@@ -379,10 +402,7 @@ export function corpScoreWindowCurrentStep(
       stepId: `build_rez_reserve:${action.actionId}`,
       kind: "build_rez_reserve",
       desiredActionSemantics: ["economy.gain_credit", "card_ability.trigger"],
-      actionCandidateIds:
-        input?.legalActions
-          .filter((candidate) => candidate.type === "gain_credit")
-          .map((candidate) => candidate.actionId) ?? [],
+      actionCandidateIds: corpImmediateCreditActionIds(input),
       requiredCapabilities: [
         {
           capabilityId: `rez_reserve:${action.actionId}`,

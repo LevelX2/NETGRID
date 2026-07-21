@@ -16,6 +16,7 @@ import {
   corpInputWithHqCards,
   corpInputWithHqCardsAndServers,
   corpInputWithScoreAreaCards,
+  economySemanticCandidate,
   runnerOpponent,
   scoringWindow,
   semanticCandidate,
@@ -321,26 +322,25 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
       accountsReceivable,
       "basic_install",
       testDependencies(),
-      semanticCandidate(
-        accountsReceivable.actionId,
-        "play.corp_operation",
-        ["economy.corp_credit_burst"],
-        "play_operation",
-      ),
+      economySemanticCandidate(accountsReceivable, 5, { creditCost: 1 }),
     );
 
     expect(components).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_operation_burst_economy",
-          value: 2070,
-          reason: expect.stringContaining("burst_economy_net_gain:4"),
+          key: "economy_credit_base",
+          value: 240,
+          reason: expect.stringContaining("economy_net_liquid_gain:4"),
+        }),
+        expect.objectContaining({
+          key: "economy_net_hand_delta",
+          value: -40,
         }),
       ]),
     );
   });
 
-  it("scores basic credit when it unlocks a visible burst economy operation", () => {
+  it("does not invent locked operation value from visible rules text", () => {
     const basicCredit = corpAction(
       "gain-credit",
       "gain_credit",
@@ -352,16 +352,19 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
       basicCredit,
       "basic_economy_draw",
       testDependencies(),
+      economySemanticCandidate(basicCredit, 1),
     );
 
     expect(components).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_operation_economy_threshold_funding",
-          value: 1840,
-          reason: expect.stringContaining("credits_after_funding:5"),
+          key: "economy_credit_base",
+          value: 100,
         }),
       ]),
+    );
+    expect(components.map((component) => component.key)).not.toContain(
+      "corp_operation_economy_threshold_funding",
     );
   });
 
@@ -802,14 +805,17 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
       marineAbility,
       "basic_economy_draw",
       testDependencies(),
+      economySemanticCandidate(marineAbility, 3, {
+        sourceDefinitionId: "onr_v1_206_marine-arcology",
+      }),
     );
 
     expect(abilityComponents).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_activated_burst_economy",
-          value: 1890,
-          reason: expect.stringContaining("ability_click_cost:2"),
+          key: "economy_credit_base",
+          value: 200,
+          reason: expect.stringContaining("economy_net_liquid_gain:3"),
         }),
         expect.objectContaining({
           key: "corp_board_triage_alignment",
@@ -864,22 +870,17 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
       coupAbility,
       "basic_economy_draw",
       testDependencies(),
+      economySemanticCandidate(coupAbility, 3, {
+        sourceDefinitionId: "onr_v1_193_corporate-coup",
+      }),
     );
 
     expect(abilityComponents).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_activated_burst_economy",
-          value: 1890,
-          reason: expect.stringContaining("ability_payload_gain_credits:3"),
-        }),
-      ]),
-    );
-    expect(abilityComponents).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "corp_activated_burst_economy",
-          reason: expect.stringContaining("ability_visible_hosted_credits:15"),
+          key: "economy_credit_base",
+          value: 200,
+          reason: expect.stringContaining("economy_net_liquid_gain:3"),
         }),
       ]),
     );
@@ -907,9 +908,9 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
       {
         cardId: corporateCoup.instanceId,
         cardImplementationTakesHostedCredits: true,
-        hostedCreditTakeAmount: 3,
+        hostedCreditTakeAmount: 2,
         hostedCreditTakeMode: "up_to_amount_if_available",
-        gainCreditsAmount: 3,
+        gainCreditsAmount: 2,
       },
       corporateCoup.instanceId,
     );
@@ -925,16 +926,17 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
       coupAbility,
       "basic_economy_draw",
       testDependencies(),
+      economySemanticCandidate(coupAbility, 2, {
+        sourceDefinitionId: "onr_v1_193_corporate-coup",
+      }),
     );
 
     expect(abilityComponents).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_activated_burst_economy",
-          value: 1530,
-          reason: expect.stringContaining(
-            "ability_payload_effective_gain_credits:2",
-          ),
+          key: "economy_credit_base",
+          value: 150,
+          reason: expect.stringContaining("economy_net_liquid_gain:2"),
         }),
       ]),
     );
@@ -1026,6 +1028,9 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
       marineAbility,
       "basic_economy_draw",
       dependencies,
+      economySemanticCandidate(marineAbility, 3, {
+        sourceDefinitionId: "onr_v1_206_marine-arcology",
+      }),
     );
     const remoteIceComponents = semanticRuntimeCorpScoreComponents(
       input,
@@ -1037,8 +1042,8 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
     expect(marineComponents).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_activated_burst_economy",
-          value: 1890,
+          key: "economy_credit_base",
+          value: 200,
         }),
         expect.objectContaining({
           key: "corp_board_triage_mismatch",

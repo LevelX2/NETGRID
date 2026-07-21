@@ -860,7 +860,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     );
   });
 
-  it("defers a new naked remote agenda install when safe alternatives are legal", () => {
+  it("defers a new naked remote agenda install for a safe draw or economy action", () => {
     const input = aiInput("corp", [
       legalAction(
         "install-new-remote-agenda",
@@ -886,14 +886,12 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
 
     const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
 
-    expect(decision.actionId).toBe("gain-credit");
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        "corp_remote_risk:unsafe_score_action_available",
-        "corp_safe_alternative:economy",
-      ]),
-    );
+    expect(["gain-credit", "draw"]).toContain(decision.actionId);
+    expect(decision.actionId).not.toBe("install-new-remote-agenda");
+    expect(debugText).toContain("corp_unsafe_delayed_scoreline_exposure");
+    expect(debugText).toContain("corp_contestable_remote_score_penalty");
   });
 
   it("advances a naked remote score line when same-turn closeout is reachable", () => {
@@ -1262,6 +1260,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     input.eventTail = rdPressureEvents;
     input.playerView.publicEvents = rdPressureEvents;
     input.playerView.own.credits = 2;
+    input.playerView.own.stackOrRdCount = 20;
     input.playerView.servers = [
       server("hq"),
       server("rd", [rdIce]),
@@ -1278,8 +1277,9 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
         "corp_safe_alternative:economy",
       ]),
     );
-    expect(debugText).toContain("corp_central_rez_floor_credit_reserve");
-    expect(debugText).toContain("central_rez_reserve_needed");
+    expect(debugText).toContain("economy_credit_demand");
+    expect(debugText).toContain("corp.rez_defense:rd:fund");
+    expect(debugText).toContain("status=covered_guaranteed");
   });
 
   it("uses Closed Accounts before BBS economy in an open tag-payoff window", () => {

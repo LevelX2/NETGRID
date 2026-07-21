@@ -1,5 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
+import { isBasicCreditAction } from "../../actions/action-effect-classification";
 import { fnv1a } from "../stable-hash";
 import { corpOptionalDrawCapacity } from "./corp-defensive-draw";
 import type { SemanticRuntimeChoice } from "../semantic-runtime-types";
@@ -133,8 +134,8 @@ function corpBasicEconomyChoice(
   input: AiDecisionInput,
   choice: SemanticRuntimeChoice,
 ): boolean {
+  if (isBasicCreditAction(choice.action)) return true;
   if (choice.action.source !== "basic_action") return false;
-  if (choice.action.type === "gain_credit") return true;
   return (
     choice.action.type === "draw_card" &&
     corpOptionalDrawCapacity(input, choice.action).eligible

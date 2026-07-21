@@ -112,6 +112,8 @@ function creditDemandPurpose(plan: TacticalPlan): CreditDemandPurpose {
       return "current_rez_window";
     case "runner.build_credit_base":
       return "phase_reserve";
+    case "corp.fund_strategy_reserve":
+      return "tactical_reserve";
     case "runner.build_credit_bank":
     case "corp.build_credit_bank":
     case "corp.activate_persistent_economy":

@@ -1,6 +1,9 @@
 import type { LegalAction } from "@netgrid/shared";
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
-import { corpRemoteProtectionPath } from "./tactical-plan-corp-helpers";
+import {
+  corpImmediateCreditActionIds,
+  corpRemoteProtectionPath,
+} from "./tactical-plan-corp-helpers";
 import { actionServerId } from "./tactical-plan-server-targets";
 import type {
   PlanBlocker,
@@ -252,9 +255,7 @@ function remoteProjectCurrentStep(params: {
       stepId: `remote_project_fund:${params.targetServerId}`,
       kind: "build_rez_reserve",
       desiredActionSemantics: ["economy.gain_credit", "card_ability.trigger"],
-      actionCandidateIds: params.context.input.legalActions
-        .filter((action) => action.type === "gain_credit")
-        .map((action) => action.actionId),
+      actionCandidateIds: corpImmediateCreditActionIds(params.context.input),
       requiredCapabilities: [
         {
           capabilityId: `remote_project_rez_reserve:${params.targetServerId}`,

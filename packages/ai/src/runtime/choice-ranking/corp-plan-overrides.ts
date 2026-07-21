@@ -17,7 +17,7 @@ export function strongerExistingCorpOverrideMustBePreserved(
   }
   if (mapping.plan.side === "runner") return true;
   return existingOverride.scoreBreakdown.some((component) =>
-    ["corp_board_triage_alignment", "corp_operation_burst_economy"].includes(
+    ["corp_board_triage_alignment", "economy_credit_base"].includes(
       component.key,
     ),
   );
@@ -107,6 +107,16 @@ export function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
   mappedActionIds: ReadonlySet<string>,
 ): boolean {
   if (
+    tacticalPlanCorpBlockedScorelineFundingRejectsAdvanceOverride(
+      input,
+      mapping,
+      mappedChoice,
+      overrideChoice,
+    )
+  ) {
+    return true;
+  }
+  if (
     mappedChoice.score < 0 &&
     overrideChoice.score > 0 &&
     mappedChoice.scoreBreakdown.some(
@@ -168,7 +178,7 @@ export function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
     return false;
   }
   if (
-    tacticalPlanBuildRezReserveBurstEconomyShouldYield(
+    tacticalPlanBuildRezReserveEconomyShouldYield(
       input,
       mapping,
       mappedChoice,
@@ -187,7 +197,140 @@ export function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
   );
 }
 
-function tacticalPlanBuildRezReserveBurstEconomyShouldYield(
+export function tacticalPlanCorpBlockedScorelineFundingRejectsAdvanceOverride(
+  input: AiDecisionInput,
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  return (
+    mapping.plan.side === "corp" &&
+    mapping.plan.type === "corp.create_score_window" &&
+    (mapping.plan.status === "blocked" ||
+      mapping.plan.status === "progressing") &&
+    overrideChoice.action.type === "advance_card" &&
+    overrideChoice.action.actionId !== mappedChoice.action.actionId &&
+    !tacticalPlanMappedFundingMissesCurrentDeadline(
+      input,
+      mapping,
+      mappedChoice,
+    ) &&
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      mappedChoice,
+      "economy_credit_base",
+    ) &&
+    semanticRuntimeChoiceHasHighStakesUnsafeAdvance(overrideChoice)
+  );
+}
+
+function tacticalPlanMappedFundingMissesCurrentDeadline(
+  input: AiDecisionInput,
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+): boolean {
+  if (
+    mapping.step.kind !== "build_rez_reserve" ||
+    input.playerView.own.clicks > 1
+  ) {
+    return false;
+  }
+  const demand = [...(mapping.plan.creditDemands ?? [])].sort(
+    (left, right) =>
+      right.priorityRank - left.priorityRank || right.gap - left.gap,
+  )[0];
+  if (
+    !demand ||
+    demand.gap <= 0 ||
+    !["before_current_plan_action", "end_of_current_turn"].includes(
+      demand.deadline,
+    )
+  ) {
+    return false;
+  }
+  const netGain = mappedChoice.scoreBreakdown
+    .filter((component) => component.key === "economy_credit_base")
+    .map(
+      (component) =>
+        Number(
+          component.reason?.match(/economy_net_liquid_gain:(\d+)/)?.[1] ?? 0,
+        ) || 0,
+    )
+    .sort((left, right) => right - left)[0];
+  return (netGain ?? 0) < demand.gap;
+}
+
+function semanticRuntimeChoiceHasHighStakesUnsafeAdvance(
+  choice: SemanticRuntimeChoice,
+): boolean {
+  return (
+    choice.scoreBreakdown.some(
+      (component) =>
+        [
+          "corp_active_remote_agenda_unsafe_advance",
+          "corp_active_remote_agenda_underfunded_advance",
+          "corp_contestable_remote_score_penalty",
+          "corp_deadline_unconvertible_advance",
+        ].includes(component.key) && component.value < 0,
+    ) ||
+    choice.scoreBreakdown.some(
+      (component) =>
+        (component.key === "corp_scoring_window_assessment" ||
+          component.key === "corp_board_triage_alignment") &&
+        (component.reason?.includes("agenda_steal_severity:near_win") ===
+          true ||
+          component.reason?.includes("runner_can_contest_before_score:true") ===
+            true ||
+          component.reason?.includes(
+            "runner_can_reach_access_before_score:true",
+          ) === true),
+    )
+  );
+}
+
+export function tacticalPlanSoftFundingShouldYieldToFiniteEconomy(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  return (
+    mapping.plan.side === "corp" &&
+    (mapping.plan.type === "corp.rez_defense" ||
+      mapping.plan.type === "corp.fund_strategy_reserve") &&
+    (mapping.step.kind === "build_rez_reserve" ||
+      mapping.step.kind === "gain_credits") &&
+    !mapping.plan.blockers.some((blocker) => blocker.severity === "hard") &&
+    overrideChoice.score > mappedChoice.score &&
+    semanticRuntimeChoiceHasPositiveScoreBreakdownComponent(
+      mappedChoice,
+      "economy_credit_base",
+    ) &&
+    semanticRuntimeChoiceHasPositiveScoreBreakdownComponent(
+      overrideChoice,
+      "corp_install_economy",
+    )
+  );
+}
+
+export function tacticalPlanCorpStrategyReserveBlocksNegativeOverride(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  mappedActionIds: ReadonlySet<string>,
+): boolean {
+  return (
+    mapping.plan.side === "corp" &&
+    mapping.plan.type === "corp.fund_strategy_reserve" &&
+    mapping.step.kind === "gain_credits" &&
+    !mappedActionIds.has(overrideChoice.action.actionId) &&
+    overrideChoice.score < 0 &&
+    semanticRuntimeChoiceHasPositiveScoreBreakdownComponent(
+      mappedChoice,
+      "economy_credit_base",
+    )
+  );
+}
+
+function tacticalPlanBuildRezReserveEconomyShouldYield(
   input: AiDecisionInput,
   mapping: PlanStepMappingResult,
   mappedChoice: SemanticRuntimeChoice,
@@ -198,8 +341,6 @@ function tacticalPlanBuildRezReserveBurstEconomyShouldYield(
     mapping.plan.type !== "corp.create_score_window" ||
     mapping.plan.status !== "progressing" ||
     mapping.step.kind !== "build_rez_reserve" ||
-    mappedChoice.action.type !== "gain_credit" ||
-    overrideChoice.action.type !== "play_operation" ||
     overrideChoice.score <= mappedChoice.score ||
     input.playerView.own.stackOrRdCount <= 0
   ) {
@@ -207,7 +348,7 @@ function tacticalPlanBuildRezReserveBurstEconomyShouldYield(
   }
   return overrideChoice.scoreBreakdown.some(
     (component) =>
-      component.key === "corp_operation_burst_economy" && component.value > 0,
+      component.key === "economy_credit_base" && component.value > 0,
   );
 }
 

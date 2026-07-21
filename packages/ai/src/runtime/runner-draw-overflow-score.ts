@@ -5,21 +5,32 @@ import type {
 } from "@netgrid/shared";
 
 import { runnerDamageThreatAssessment } from "../runner-damage-threat-assessment";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 
 export function runnerDrawOverflowScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
+  actionSemanticCandidate?: ActionSemanticCandidate,
 ): AiDecisionScoreComponent | undefined {
   if (
     input.side !== "runner" ||
     action.side !== "runner" ||
-    action.type !== "draw_card"
+    (action.type !== "draw_card" &&
+      (actionSemanticCandidate?.economyProjection?.cardsDrawn ?? 0) <= 0)
   ) {
     return undefined;
   }
   const flatlineRisk = runnerDamageThreatAssessment(input).flatlineRisk;
   const handCount = input.playerView.own.gripOrHq.length;
-  const projectedHandCount = handCount + 1;
+  const netHandDelta =
+    action.type === "draw_card"
+      ? 1
+      : Math.max(
+          0,
+          actionSemanticCandidate?.economyProjection?.netHandDelta ?? 0,
+        );
+  if (netHandDelta === 0) return undefined;
+  const projectedHandCount = handCount + netHandDelta;
   const expectedOverflow = Math.max(
     0,
     projectedHandCount - flatlineRisk.effectiveMaxHandSize,
@@ -45,12 +56,13 @@ export function runnerDrawOverflowScoreComponent(
   return {
     key: "runner_expected_draw_overflow",
     label: "Erwarteter Grip-Überlauf",
-    value: -Math.min(1_800, 900 + (expectedOverflow - 1) * 300),
+    value: -Math.min(1_800, 1_050 + (expectedOverflow - 1) * 300),
     reason: [
       `hand:${handCount}`,
       `projected_hand:${projectedHandCount}`,
       `effective_max_hand:${flatlineRisk.effectiveMaxHandSize}`,
       `expected_overflow:${expectedOverflow}`,
+      `net_hand_delta:${netHandDelta}`,
       "productive_alternative:true",
     ].join("|"),
   };

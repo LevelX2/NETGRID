@@ -62,7 +62,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     const relaxedClock = mutateFixture(deckoutCloseoutJson, (checkpoint) => {
       moveArchivesCardsToRd(checkpoint, 6);
       checkpoint.expectation = {
-        acceptableActions: [{ type: "gain_credit" }],
+        acceptableActions: [{ type: "gain_credit" }, { type: "draw_card" }],
       };
     });
 

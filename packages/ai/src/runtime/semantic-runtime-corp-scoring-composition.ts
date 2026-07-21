@@ -1,5 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
-import { actionProvidesCredits } from "../actions/action-effect-classification";
+import { actionHasImmediateCreditGain } from "../actions/action-effect-classification";
 import {
   createCorpTagPunishWindowComposition,
   type CorpTagPunishWindowCompositionDependencies,
@@ -16,48 +16,45 @@ import { assessCorpScorelineWindow } from "./corp-scoreline/semantic-runtime-cor
 
 export type SemanticRuntimeCorpScoringCompositionDependencies<
   TConsumer extends string,
-> =
-  SemanticRuntimeCorpBoardScoreCompositionDependencies &
-    Omit<
-      CorpTagPunishWindowCompositionDependencies,
-      "actionSourceCard" | "advanceCompletesScore" | "actionIsScoreLine"
-    > &
-    Omit<
-      SemanticRuntimeCorpScoringEvidenceCompositionDependencies<TConsumer>,
-      | "normalizedRulesTextForDefinition"
-      | "actionSourceCard"
-      | "visibleServerCard"
-      | "cardType"
-      | "cardAdvancementRequirement"
-      | "emptyRemoteCount"
-      | "hasNakedScoreLine"
-      | "hasUnsafeRemoteScoreAction"
-      | "actionServerId"
-      | "server"
-      | "remoteIsProtected"
-      | "shouldBuildProtectedScoreRemote"
-      | "actionWouldCreateUnsafeRemoteScoreLine"
-      | "advanceCompletesScore"
-      | "corpRemoteRezFloorAssessment"
-      | "corpHasRemoteRezFloorFundingNeed"
-      | "corpCentralRezReserveAssessment"
-      | "corpHasCentralRezFloorFundingNeed"
-      | "corpRemoteScoreContestabilityAssessment"
-      | "corpActionIsScoreLine"
-      | "corpInstallRemoteScore"
-      | "corpHasRemoteInstability"
-      | "corpAdvanceRemoteScore"
-      | "corpTaggedRunnerPayoffPressure"
-      | "corpTaggedPayoffWindowPassiveActionPenalty"
-      | "corpScoringWindowAssessment"
-      | "corpScorelineWindowAssessment"
-    >;
+> = SemanticRuntimeCorpBoardScoreCompositionDependencies &
+  Omit<
+    CorpTagPunishWindowCompositionDependencies,
+    "actionSourceCard" | "advanceCompletesScore" | "actionIsScoreLine"
+  > &
+  Omit<
+    SemanticRuntimeCorpScoringEvidenceCompositionDependencies<TConsumer>,
+    | "normalizedRulesTextForDefinition"
+    | "actionSourceCard"
+    | "visibleServerCard"
+    | "cardType"
+    | "cardAdvancementRequirement"
+    | "emptyRemoteCount"
+    | "hasNakedScoreLine"
+    | "hasUnsafeRemoteScoreAction"
+    | "actionServerId"
+    | "server"
+    | "remoteIsProtected"
+    | "shouldBuildProtectedScoreRemote"
+    | "actionWouldCreateUnsafeRemoteScoreLine"
+    | "advanceCompletesScore"
+    | "corpRemoteRezFloorAssessment"
+    | "corpHasRemoteRezFloorFundingNeed"
+    | "corpCentralRezReserveAssessment"
+    | "corpHasCentralRezFloorFundingNeed"
+    | "corpRemoteScoreContestabilityAssessment"
+    | "corpActionIsScoreLine"
+    | "corpInstallRemoteScore"
+    | "corpHasRemoteInstability"
+    | "corpAdvanceRemoteScore"
+    | "corpTaggedRunnerPayoffPressure"
+    | "corpTaggedPayoffWindowPassiveActionPenalty"
+    | "corpScoringWindowAssessment"
+    | "corpScorelineWindowAssessment"
+  >;
 
 export function createSemanticRuntimeCorpScoringComposition<
   TConsumer extends string,
->(
-  dependencies: SemanticRuntimeCorpScoringCompositionDependencies<TConsumer>,
-) {
+>(dependencies: SemanticRuntimeCorpScoringCompositionDependencies<TConsumer>) {
   const board = createSemanticRuntimeCorpBoardScoreComposition(dependencies);
 
   const {
@@ -91,7 +88,10 @@ export function createSemanticRuntimeCorpScoringComposition<
         board.semanticRuntimeCorpRemoteScoreContestabilityAssessment,
       actionIsEconomy: (runtimeInput, action) => {
         if (action.type === "draw_card") return false;
-        if (action.type === "gain_credit") return actionProvidesCredits(action);
+        if (action.type === "gain_credit") {
+          return actionHasImmediateCreditGain(action);
+        }
+        if (actionHasImmediateCreditGain(action)) return true;
         return dependencies
           .rolesForAction(runtimeInput, action)
           .some((role) => role.includes("economy"));
@@ -104,8 +104,7 @@ export function createSemanticRuntimeCorpScoringComposition<
     semanticRuntimeCorpScoreComponents,
   } = createSemanticRuntimeCorpScoringEvidenceComposition({
     ...dependencies,
-    normalizedRulesTextForDefinition:
-      board.normalizedRulesTextForDefinition,
+    normalizedRulesTextForDefinition: board.normalizedRulesTextForDefinition,
     actionSourceCard: board.semanticRuntimeCorpActionSourceCard,
     visibleServerCard: dependencies.findVisibleCorpServerCard,
     cardType: board.semanticRuntimeVisibleCardType,
@@ -135,13 +134,11 @@ export function createSemanticRuntimeCorpScoringComposition<
       board.semanticRuntimeCorpRemoteScoreContestabilityAssessment,
     corpActionIsScoreLine: board.semanticRuntimeCorpActionIsScoreLine,
     corpInstallRemoteScore: board.semanticRuntimeCorpInstallRemoteScore,
-    corpHasRemoteInstability:
-      board.semanticRuntimeCorpHasRemoteInstability,
+    corpHasRemoteInstability: board.semanticRuntimeCorpHasRemoteInstability,
     corpAdvanceRemoteScore: board.semanticRuntimeCorpAdvanceRemoteScore,
     corpScoringWindowAssessment:
       board.semanticRuntimeCorpScoringWindowAssessment,
-    corpScorelineWindowAssessment:
-      semanticRuntimeCorpScorelineWindowAssessment,
+    corpScorelineWindowAssessment: semanticRuntimeCorpScorelineWindowAssessment,
     corpTaggedRunnerPayoffPressure,
     corpTaggedPayoffWindowPassiveActionPenalty,
   });

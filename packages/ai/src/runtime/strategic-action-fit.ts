@@ -5,7 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import { actionProvidesCredits } from "../actions/action-effect-classification";
+import { actionHasImmediateCreditGain } from "../actions/action-effect-classification";
 import { buildSemanticDecisionDebugScoreComponent } from "../diagnostics/decision-debug";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 
@@ -214,7 +214,7 @@ function corpStrategicActionFitValue(
         : 0;
     case "corp_asset_economy":
     case "corp_economy_reserve":
-      if (actionProvidesCredits(action)) return 120;
+      if (actionHasImmediateCreditGain(action)) return 120;
       return action.type === "install_card" &&
         corpActionLooksLikeEconomy(input, action)
         ? 130
@@ -372,7 +372,7 @@ function strategicIntentPhaseAllowsAction(
     action.type === "score_agenda" ||
     action.type === "steal_agenda" ||
     action.type === "trash_accessed_card" ||
-    actionProvidesCredits(action) ||
+    actionHasImmediateCreditGain(action) ||
     action.type === "draw_card" ||
     action.type === "trigger_ability" ||
     action.type === "activated_card_ability"
@@ -403,7 +403,7 @@ function strategicIntentActionTargetMatch(
       : "none";
   }
   if (target.kind === "economy") {
-    return actionProvidesCredits(action) ? "kind" : "none";
+    return actionHasImmediateCreditGain(action) ? "kind" : "none";
   }
   if (target.kind === "tag" || target.kind === "damage") {
     return corpStrategicPunishAction(

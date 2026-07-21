@@ -496,7 +496,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     expect(decision.decisionDebug?.scoreBreakdown).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "runner_hand_funding_target",
+          key: "economy_credit_demand",
         }),
       ]),
     );

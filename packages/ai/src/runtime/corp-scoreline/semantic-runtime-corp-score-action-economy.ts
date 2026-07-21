@@ -7,18 +7,14 @@ import type {
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import type { TacticalGoalLike } from "../../decision/semantic-decision-frame";
 import { actionProvidesCredits } from "../../actions/action-effect-classification";
+import { scoreEconomyAction } from "../../economy/economy-action-score";
 import { visibleCardDefinition } from "../card-definition-lookup";
-import { createAiHintsByCard } from "../../ai-hints";
 import { rolesMatch } from "../role-match";
 import type { CorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
 import {
-  CORP_IMMEDIATE_ECONOMY_MIN_ACTION_VALUE,
-  CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE,
   type CorpBurstEconomyOperation,
   type SemanticRuntimeCorpScoreDependencies,
 } from "./semantic-runtime-corp-score-contracts";
-
-const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export function visibleActionSourceId(action: LegalAction): string | undefined {
   if (
@@ -308,7 +304,9 @@ function corpGoalMatchesAction(
       return action.type === "install_card";
     case "corp.tactical.stabilize_economy":
       return (
-        action.type === "gain_credit" ||
+        actionProvidesCredits(action) ||
+        (actionSemanticCandidate?.economyProjection?.netLiquidCreditGain ?? 0) >
+          0 ||
         action.type === "draw_card" ||
         (action.type === "play_operation" &&
           corpActionCandidateHasVisibleSignal(actionSemanticCandidate, [
@@ -414,7 +412,7 @@ export function corpVisibleCardIsAgenda(card: VisibleCard): boolean {
 export function corpBurstEconomyOperationForAction<TConsumer extends string>(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  _dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): CorpBurstEconomyOperation | undefined {
   if (
@@ -424,289 +422,45 @@ export function corpBurstEconomyOperationForAction<TConsumer extends string>(
   ) {
     return undefined;
   }
-  const sourceCard = visibleSourceCardForAction(input, action);
-  if (!sourceCard) return undefined;
-  const fallbackCost = semanticRuntimeCorpActionCreditCost(
-    dependencies,
-    action,
-    actionSemanticCandidate,
-  );
-  const operation =
-    action.type === "play_operation"
-      ? corpBurstEconomyOperationForVisibleCard(sourceCard, fallbackCost)
-      : corpBurstEconomyAbilityForVisibleCard(
-          sourceCard,
-          action,
-          actionSemanticCandidate,
-          fallbackCost,
-        );
-  if (!operation) return undefined;
-  if (input.playerView.own.credits < operation.cost) return undefined;
+  const projection = actionSemanticCandidate?.economyProjection;
+  if (
+    !projection ||
+    projection.timing !== "immediate" ||
+    (projection.netLiquidCreditGain ?? 0) <= 0
+  ) {
+    return undefined;
+  }
+  const score = scoreEconomyAction(actionSemanticCandidate);
+  const cost = projection.creditCost;
+  if (input.playerView.own.credits < cost) return undefined;
+  const operation: CorpBurstEconomyOperation = {
+    actionKind:
+      action.type === "play_operation" ? "operation" : "activated_ability",
+    cost,
+    gain: projection.grossLiquidCreditGain ?? 0,
+    drawCards: projection.cardsDrawn,
+    netGain: projection.netLiquidCreditGain ?? 0,
+    actionValue: score.total,
+    evidence: [
+      `economy_projection_source:${projection.source}`,
+      `economy_projection_confidence:${projection.confidence}`,
+      `economy_mode:${score.mode}`,
+      `economy_score:${score.total}`,
+      ...score.evidence,
+    ],
+  };
   return {
     ...operation,
     evidence: [
       operation.actionKind === "activated_ability"
-        ? "corp_activated_burst_economy:true"
-        : "corp_operation_burst_economy:true",
+        ? "corp_projected_activated_economy:true"
+        : "corp_projected_operation_economy:true",
       ...operation.evidence,
       action.type === "play_operation"
         ? "play_operation_affordable:true"
         : "activated_economy_affordable:true",
     ],
   };
-}
-
-export function corpBurstEconomyThresholdAfterBasicCredit(
-  input: AiDecisionInput,
-): CorpBurstEconomyOperation | undefined {
-  const credits = input.playerView.own.credits;
-  const creditsAfterFunding = credits + 1;
-  const bestOperation = input.playerView.own.gripOrHq
-    .map((card) => corpBurstEconomyOperationForVisibleCard(card))
-    .filter((operation): operation is CorpBurstEconomyOperation => {
-      return (
-        operation !== undefined &&
-        operation.cost > credits &&
-        operation.cost <= creditsAfterFunding
-      );
-    })
-    .sort((left, right) => right.actionValue - left.actionValue)[0];
-  if (!bestOperation) return undefined;
-  return {
-    ...bestOperation,
-    evidence: [
-      "corp_operation_economy_threshold:true",
-      `credits_before_funding:${credits}`,
-      `credits_after_funding:${creditsAfterFunding}`,
-      ...bestOperation.evidence,
-    ],
-  };
-}
-
-function corpBurstEconomyOperationForVisibleCard(
-  card: VisibleCard,
-  fallbackCost?: number,
-): CorpBurstEconomyOperation | undefined {
-  if (card.known === false) return undefined;
-  const definition = visibleCardDefinition(card);
-  const type = card.type ?? definition?.type;
-  if (type !== "operation") return undefined;
-  if (corpImmediateEconomyOperationHasVisibleDrawback(card, definition)) {
-    return undefined;
-  }
-  const cost =
-    positiveOrZeroNumber(card.cost) ??
-    positiveOrZeroNumber(definition?.cost) ??
-    positiveOrZeroNumber(fallbackCost) ??
-    0;
-  const rulesText = card.rulesText ?? definition?.rulesText;
-  const gain = corpCreditGainFromRulesText(rulesText);
-  const drawCards = corpDrawCountFromRulesText(rulesText);
-  if (gain <= 0 && drawCards <= 0) return undefined;
-  const netGain = gain - cost;
-  const actionValue = netGain + drawCards;
-  if (actionValue < CORP_IMMEDIATE_ECONOMY_MIN_ACTION_VALUE) return undefined;
-  return {
-    actionKind: "operation",
-    cost,
-    gain,
-    drawCards,
-    netGain,
-    actionValue,
-    evidence: [
-      `operation_cost:${cost}`,
-      `operation_gain:${gain}`,
-      `operation_draw:${drawCards}`,
-      `burst_economy_net_gain:${netGain}`,
-      `operation_action_value:${actionValue}`,
-      `operation_economy_tier:${actionValue >= CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE ? "burst" : "efficient"}`,
-    ],
-  };
-}
-
-function corpBurstEconomyAbilityForVisibleCard(
-  card: VisibleCard,
-  action: LegalAction,
-  actionSemanticCandidate: ActionSemanticCandidate | undefined,
-  fallbackCost?: number,
-): CorpBurstEconomyOperation | undefined {
-  if (card.known === false) return undefined;
-  const definition = visibleCardDefinition(card);
-  const rulesText = card.rulesText ?? definition?.rulesText;
-  const payloadGain = corpCreditGainFromActionPayload(action, card);
-  const payloadDrawCards = positiveIntegerPayloadNumber(
-    action.payload,
-    "drawCardsAmount",
-  );
-  const gain = payloadGain?.amount ?? corpCreditGainFromRulesText(rulesText);
-  const drawCards = payloadDrawCards ?? corpDrawCountFromRulesText(rulesText);
-  if (gain <= 0 && drawCards <= 0) return undefined;
-  const cost = positiveOrZeroNumber(fallbackCost) ?? 0;
-  const netGain = gain - cost;
-  const actionValue = netGain + drawCards;
-  if (actionValue < CORP_IMMEDIATE_ECONOMY_MIN_ACTION_VALUE) return undefined;
-  const clickCost =
-    semanticRuntimeCorpActionClickCost(action, actionSemanticCandidate) ||
-    corpActionClickCostFromRulesText(rulesText);
-  return {
-    actionKind: "activated_ability",
-    cost,
-    gain,
-    drawCards,
-    netGain,
-    actionValue,
-    evidence: [
-      ...(payloadGain?.evidence ?? []),
-      ...(payloadDrawCards !== undefined
-        ? [`ability_payload_draw_cards:${payloadDrawCards}`]
-        : []),
-      `ability_click_cost:${clickCost}`,
-      `ability_credit_cost:${cost}`,
-      `ability_gain:${gain}`,
-      `ability_draw:${drawCards}`,
-      `burst_economy_net_gain:${netGain}`,
-      `ability_action_value:${actionValue}`,
-      `activated_economy_efficiency:${clickCost > 0 ? netGain / clickCost : netGain}`,
-    ],
-  };
-}
-
-function corpCreditGainFromActionPayload(
-  action: LegalAction,
-  sourceCard: VisibleCard,
-): { amount: number; evidence: string[] } | undefined {
-  const payloadGain = positiveIntegerPayloadNumber(
-    action.payload,
-    "gainCreditsAmount",
-  );
-  if (payloadGain === undefined) return undefined;
-
-  const evidence = [`ability_payload_gain_credits:${payloadGain}`];
-  let amount = payloadGain;
-  const hostedCreditTakeAmount = positiveIntegerPayloadNumber(
-    action.payload,
-    "hostedCreditTakeAmount",
-  );
-  const takesHostedCredits =
-    booleanPayloadValue(
-      action.payload,
-      "cardImplementationTakesHostedCredits",
-    ) === true || hostedCreditTakeAmount !== undefined;
-  if (takesHostedCredits) {
-    evidence.push("ability_payload_takes_hosted_credits:true");
-    if (hostedCreditTakeAmount !== undefined) {
-      evidence.push(
-        `ability_payload_hosted_credit_take:${hostedCreditTakeAmount}`,
-      );
-      amount = Math.min(amount, hostedCreditTakeAmount);
-    }
-    const visibleHostedCredits = visibleHostedCreditCounterAmount(sourceCard);
-    if (visibleHostedCredits !== undefined) {
-      evidence.push(`ability_visible_hosted_credits:${visibleHostedCredits}`);
-      amount = Math.min(amount, visibleHostedCredits);
-    }
-  }
-
-  if (amount <= 0) return undefined;
-  if (amount !== payloadGain) {
-    evidence.push(`ability_payload_effective_gain_credits:${amount}`);
-  }
-  return { amount, evidence };
-}
-
-function visibleHostedCreditCounterAmount(
-  card: VisibleCard,
-): number | undefined {
-  const counters = card.counters;
-  if (!counters) return undefined;
-  const counterValues = counters as Partial<Record<string, number>>;
-  for (const key of ["bit", "recurring_credit", "credit"]) {
-    const value = positiveOrZeroNumber(counterValues[key]);
-    if (value !== undefined) return value;
-  }
-  return undefined;
-}
-
-function positiveIntegerPayloadNumber(
-  payload: LegalAction["payload"],
-  key: string,
-): number | undefined {
-  if (!payload || typeof payload !== "object") return undefined;
-  const value = (payload as Record<string, unknown>)[key];
-  return typeof value === "number" && Number.isFinite(value) && value > 0
-    ? Math.floor(value)
-    : undefined;
-}
-
-function booleanPayloadValue(
-  payload: LegalAction["payload"],
-  key: string,
-): boolean | undefined {
-  if (!payload || typeof payload !== "object") return undefined;
-  const value = (payload as Record<string, unknown>)[key];
-  return typeof value === "boolean" ? value : undefined;
-}
-
-export function corpImmediateEconomyOperationScoreValue(
-  operation: CorpBurstEconomyOperation,
-): number {
-  return operation.actionValue >= CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE
-    ? 1350 + operation.actionValue * 180
-    : 1050 + operation.actionValue * 240;
-}
-
-export function corpImmediateEconomyThresholdScoreValue(
-  operation: CorpBurstEconomyOperation,
-): number {
-  return operation.actionValue >= CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE
-    ? 1200 + operation.actionValue * 160
-    : 650 + operation.actionValue * 140;
-}
-
-function corpImmediateEconomyOperationHasVisibleDrawback(
-  card: VisibleCard,
-  definition: ReturnType<typeof visibleCardDefinition>,
-): boolean {
-  const mechanics = definition?.mechanics ?? [];
-  if (
-    mechanics.some((mechanic) =>
-      ["bad_publicity", "add_bad_publicity"].includes(mechanic),
-    )
-  ) {
-    return true;
-  }
-  const text = [card.rulesText, definition?.rulesText]
-    .filter((value): value is string => typeof value === "string")
-    .flatMap(corpImmediateEconomyRulesTextTokens);
-  return corpImmediateEconomyRulesTextHasBadPublicityDrawback(text);
-}
-
-function corpImmediateEconomyRulesTextHasBadPublicityDrawback(
-  tokens: readonly string[],
-): boolean {
-  const drawbackVerbs = new Set(["take", "add", "gain", "suffer"]);
-  return tokens.some(
-    (token, index) =>
-      drawbackVerbs.has(token) &&
-      corpImmediateEconomyTokenIsPositiveInteger(tokens[index + 1]) &&
-      tokens[index + 2] === "bad" &&
-      tokens[index + 3] === "publicity",
-  );
-}
-
-function corpImmediateEconomyRulesTextTokens(text: string): string[] {
-  return text
-    .toLocaleLowerCase("en-US")
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
-}
-
-function corpImmediateEconomyTokenIsPositiveInteger(
-  token: string | undefined,
-): boolean {
-  if (token === undefined || token === "") return false;
-  const numeric = Number.parseInt(token, 10);
-  return String(numeric) === token && numeric > 0;
 }
 
 export function visibleSourceCardForAction(
@@ -726,38 +480,6 @@ export function visibleSourceCardForAction(
     .find((card) => card.instanceId === sourceId && card.known);
 }
 
-function corpCreditGainFromRulesText(rulesText: string | undefined): number {
-  const tokens = corpRulesTextTokens(rulesText);
-  const bracketToken = tokens.find(
-    (token, index) =>
-      tokens[index - 2] === "gain" &&
-      tokens[index - 1] === "bracketopen" &&
-      tokens[index + 1] === "bracketclose",
-  );
-  if (bracketToken) return numberFromDigitOrWord(bracketToken);
-  const creditToken = tokens.find(
-    (token, index) =>
-      (tokens[index - 1] === "gain" || tokens[index - 1] === "erhalte") &&
-      (tokens[index + 1] === "credit" || tokens[index + 1] === "credits"),
-  );
-  if (creditToken) return numberFromDigitOrWord(creditToken);
-  return 0;
-}
-
-function corpDrawCountFromRulesText(rulesText: string | undefined): number {
-  const tokens = corpRulesTextTokens(rulesText);
-  const drawToken = tokens.find(
-    (token, index) =>
-      (tokens[index - 1] === "draw" || tokens[index - 1] === "ziehe") &&
-      (tokens[index + 1] === "card" ||
-        tokens[index + 1] === "cards" ||
-        tokens[index + 1] === "karte" ||
-        tokens[index + 1] === "karten"),
-  );
-  if (drawToken) return numberFromDigitOrWord(drawToken);
-  return 0;
-}
-
 export function corpExtraActionGainFromRulesText(
   rulesText: string | undefined,
 ): number {
@@ -771,22 +493,6 @@ export function corpExtraActionGainFromRulesText(
         tokens[index + 1] === "aktionen"),
   );
   return actionToken ? numberFromDigitOrWord(actionToken) : 0;
-}
-
-function corpActionClickCostFromRulesText(
-  rulesText: string | undefined,
-): number {
-  const tokens = corpRulesTextTokens(rulesText);
-  const colonIndex = tokens.findIndex((token) => token === "colon");
-  const costTokens = colonIndex >= 0 ? tokens.slice(0, colonIndex) : tokens;
-  const bracketActions = costTokens.filter(
-    (token, index) =>
-      token === "a" &&
-      costTokens[index - 1] === "bracketopen" &&
-      costTokens[index + 1] === "bracketclose",
-  ).length;
-  if (bracketActions > 0) return bracketActions;
-  return costTokens.filter((token) => token === "action").length;
 }
 
 function numberFromDigitOrWord(value: string): number {

@@ -12,7 +12,7 @@ import {
   economyActionMode,
   economyCreditBaseValue,
   scoreEconomyAction,
-} from "./economy-action-score";
+} from "../economy/economy-action-score";
 
 describe("common economy action score", () => {
   it("uses the monotone base curve and +25 after six credits", () => {
@@ -150,7 +150,7 @@ describe("common economy action score", () => {
     });
   });
 
-  it("does not claim dominance when immediate card effects differ", () => {
+  it("compares draw-and-consume payouts by their net hand delta", () => {
     const pure = candidate("pure", 2);
     const drawAndConsume = candidate("draw-and-consume", 3, {
       cardsDrawn: 1,
@@ -158,7 +158,21 @@ describe("common economy action score", () => {
       netHandDelta: 0,
     });
 
-    expect(compareEconomyActionDominance(drawAndConsume, pure)).toBeUndefined();
+    expect(compareEconomyActionDominance(drawAndConsume, pure)).toMatchObject({
+      dominantActionId: "draw-and-consume",
+      dominatedActionId: "pure",
+      creditAdvantage: 1,
+    });
+  });
+
+  it("does not claim dominance when net hand effects differ", () => {
+    const pure = candidate("pure", 2);
+    const consuming = candidate("consuming", 3, {
+      cardsConsumed: 1,
+      netHandDelta: -1,
+    });
+
+    expect(compareEconomyActionDominance(consuming, pure)).toBeUndefined();
   });
 });
 

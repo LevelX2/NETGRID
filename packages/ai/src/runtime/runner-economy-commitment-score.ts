@@ -3,6 +3,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import { actionHasImmediateCreditGain } from "../actions/action-effect-classification";
 
 type RunnerBankInvestmentCommitmentScoreAssessment = {
   active: boolean;
@@ -29,7 +30,10 @@ export type RunnerBankInvestmentCommitmentScoreDependencies = {
   isBuildAction: (input: AiDecisionInput, action: LegalAction) => boolean;
   isCashOutAction: (input: AiDecisionInput, action: LegalAction) => boolean;
   isInstallAction: (input: AiDecisionInput, action: LegalAction) => boolean;
-  runOverride: (input: AiDecisionInput, action: LegalAction) => string | undefined;
+  runOverride: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => string | undefined;
 };
 
 export type RunnerNoRunEconomyCommitmentScoreDependencies = {
@@ -148,7 +152,7 @@ export function runnerNoRunEconomyCommitmentScoreComponents(
 
   if (
     assessment.active &&
-    (action.type === "gain_credit" ||
+    (actionHasImmediateCreditGain(action) ||
       action.type === "draw_card" ||
       dependencies.isRigInstallAction(input, action))
   ) {

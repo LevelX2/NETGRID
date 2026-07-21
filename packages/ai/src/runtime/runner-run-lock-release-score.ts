@@ -45,11 +45,12 @@ export function runnerRunLockReleaseScoreComponent(
   const ownAtMatchpoint =
     (input.playerView.own.agendaPoints ?? 0) >=
     input.playerView.agendaPointsToWin - 1;
+  const highLiquidityRelease = creditsAfterRelease >= 12;
   if (
     !terminalThreat &&
     (clicksAfterRelease < 2 ||
       !installedBreakerAvailable(input) ||
-      (creditCost > 1 && !ownAtMatchpoint))
+      (creditCost > 1 && !ownAtMatchpoint && !highLiquidityRelease))
   ) {
     return undefined;
   }
@@ -63,15 +64,6 @@ export function runnerRunLockReleaseScoreComponent(
   const reserveAfterProbe =
     creditsAfterRelease - followUp.estimatedProbeCredits;
   if (!terminalThreat && reserveAfterProbe < 4) return undefined;
-  if (
-    !terminalThreat &&
-    input.playerView.own.gripOrHq.length <
-      (input.playerView.own.maxHandSize ?? 5) &&
-    legalHostedInstallAvailable(input)
-  ) {
-    return undefined;
-  }
-
   return {
     key: terminalThreat
       ? "runner_matchpoint_run_lock_release"
@@ -89,9 +81,24 @@ export function runnerRunLockReleaseScoreComponent(
       `estimated_probe_credits:${followUp.estimatedProbeCredits}`,
       `reserve_after_probe:${reserveAfterProbe}`,
       `own_at_matchpoint:${ownAtMatchpoint}`,
+      `high_liquidity_release:${highLiquidityRelease}`,
       `release_context:${terminalThreat ? "terminal_contest" : "viable_followup"}`,
       ...(terminalThreat?.evidence ?? []),
     ].join("|"),
+  };
+}
+
+export function runnerSpeculativeRunLockReleaseScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (!isRunLockReleaseAction(action)) return undefined;
+  if (runnerRunLockReleaseScoreComponent(input, action)) return undefined;
+  return {
+    key: "runner_speculative_run_lock_release",
+    label: "Run-Sperre ohne Folgepfad",
+    value: -120,
+    reason: "run_lock_release_without_credible_followup:true",
   };
 }
 
@@ -110,19 +117,6 @@ function installedBreakerAvailable(input: AiDecisionInput): boolean {
       )
     );
   });
-}
-
-function legalHostedInstallAvailable(input: AiDecisionInput): boolean {
-  const installedIds = new Set(
-    (input.playerView.own.rig ?? []).map((card) => card.instanceId),
-  );
-  if (installedIds.size === 0) return false;
-  return (input.legalActions ?? []).some(
-    (action) =>
-      action.side === "runner" &&
-      action.type === "install_card" &&
-      action.actionId.split(".").some((segment) => installedIds.has(segment)),
-  );
 }
 
 function isRunLockReleaseAction(action: LegalAction): boolean {

@@ -10,6 +10,7 @@ import {
   corpInputWithGoals,
   corpInputWithHqCards,
   corpInputWithRemoteAgenda,
+  economySemanticCandidate,
   nightShiftCard,
   runnerOpponent,
   scoringWindow,
@@ -1035,12 +1036,7 @@ describe("semanticRuntimeCorpScoreComponents score pressure", () => {
       nightShift,
       "basic_install",
       dependencies,
-      semanticCandidate(
-        nightShift.actionId,
-        "play.corp_operation",
-        ["economy.corp_credit_burst", "draw_operation"],
-        "play_operation",
-      ),
+      economySemanticCandidate(nightShift, 2, { cardsDrawn: 1 }),
     );
 
     expect(installComponents).toEqual(

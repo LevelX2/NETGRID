@@ -20,6 +20,7 @@ import {
 import {
   allocatePlanPortfolioFunding,
   fundingActionIdsForEntry,
+  planPortfolioEntryHasGuaranteedFundingRoute,
   planPortfolioFundingStep,
 } from "./plan-portfolio-funding";
 import type { FutureFundingProjection } from "./funding-route";
@@ -72,10 +73,14 @@ export function buildPlanPortfolio(
     });
   const interrupt = currentEntries
     .filter((entry) => entry.role === "reactive_interrupt")
-    .sort(comparePortfolioEntries)[0];
+    .sort((left, right) =>
+      comparePortfolioEntriesForSelection(left, right, params),
+    )[0];
   const foreground = currentEntries
     .filter((entry) => entry.role === "foreground")
-    .sort(comparePortfolioEntries)[0];
+    .sort((left, right) =>
+      comparePortfolioEntriesForSelection(left, right, params),
+    )[0];
   const currentBackgrounds = currentEntries.filter(
     (entry) => entry.role === "background",
   );
@@ -91,7 +96,7 @@ export function buildPlanPortfolio(
     )
     .map((entry) => carryDormantBackground(entry, turnKey));
   const rankedBackgrounds = [...currentBackgrounds, ...carriedBackgrounds].sort(
-    comparePortfolioEntries,
+    (left, right) => comparePortfolioEntriesForSelection(left, right, params),
   );
   const backgrounds = rankedBackgrounds
     .slice(0, MAX_BACKGROUND_PROJECTS)
@@ -360,6 +365,7 @@ export function tacticalPlanExecutionClass(
     case "runner.build_credit_base":
     case "runner.cash_out_credit_bank":
     case "corp.create_score_window":
+    case "corp.fund_strategy_reserve":
     case "corp.develop_finite_economy":
     case "corp.apply_punish_pressure":
       return "bounded_sequence";
@@ -385,7 +391,7 @@ export function adaptTacticalPlanToPortfolioEntry(params: {
   turnKey: string;
   previousEntry?: PlanPortfolioEntry;
 }): PlanPortfolioEntry {
-  const executionClass = tacticalPlanExecutionClass(params.plan.type);
+  const executionClass = tacticalPlanExecutionClassForPlan(params.plan);
   const role = portfolioRoleForExecutionClass(executionClass);
   const sameTurn = params.previousEntry?.cadence.turnKey === params.turnKey;
   const actionsUsedThisTurn = sameTurn
@@ -459,6 +465,21 @@ export function adaptTacticalPlanToPortfolioEntry(params: {
         : []),
     ],
   };
+}
+
+function tacticalPlanExecutionClassForPlan(
+  plan: TacticalPlan,
+): PlanExecutionClass {
+  // Reacting to an affordable live rez opportunity may interrupt other work.
+  // Merely saving credits for a later rez is ordinary foreground funding and
+  // must not suspend a stronger score-conversion sequence.
+  if (
+    plan.type === "corp.rez_defense" &&
+    plan.currentStep.kind === "build_rez_reserve"
+  ) {
+    return "bounded_sequence";
+  }
+  return tacticalPlanExecutionClass(plan.type);
 }
 
 export function aggregatePlanActionContributions(params: {
@@ -660,12 +681,35 @@ function resumeEntry(entry: PlanPortfolioEntry): PlanPortfolioEntry {
   };
 }
 
-function comparePortfolioEntries(
+function comparePortfolioEntriesForSelection(
   left: PlanPortfolioEntry,
   right: PlanPortfolioEntry,
+  params: Pick<
+    BuildPlanPortfolioParams,
+    "input" | "candidates" | "futureFundingProjections"
+  >,
 ): number {
+  const selectionLifecycleRank = (entry: PlanPortfolioEntry): number => {
+    if (
+      planPortfolioEntryHasGuaranteedFundingRoute({
+        entry,
+        candidates: params.candidates ?? [],
+        remainingClicks: params.input.playerView.own.clicks,
+        ...(params.futureFundingProjections
+          ? { futureFundingProjections: params.futureFundingProjections }
+          : {}),
+      })
+    ) {
+      // A blocked plan competes as ready only when a deterministic route can
+      // cover its published credit demand. Only a guaranteed route may resolve
+      // a hard credit blocker; soft funding can still be selected without
+      // claiming that a different blocker has disappeared.
+      return lifecycleRank("active");
+    }
+    return lifecycleRank(entry.lifecycle);
+  };
   return (
-    lifecycleRank(right.lifecycle) - lifecycleRank(left.lifecycle) ||
+    selectionLifecycleRank(right) - selectionLifecycleRank(left) ||
     right.priority - left.priority ||
     right.progress - left.progress ||
     left.portfolioEntryId.localeCompare(right.portfolioEntryId)

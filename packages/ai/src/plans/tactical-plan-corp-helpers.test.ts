@@ -46,6 +46,10 @@ describe("corpPunishCandidates", () => {
       ],
       evidence: ["strategic_action_fit:corp.tag_trace_punish"],
     } as Partial<ActionSemanticCandidate>);
+    const installOnly = candidate("install-only", {
+      actionType: "install_card",
+      actionTacticSignals: ["damage.payoff"],
+    });
 
     expect(
       corpPunishCandidates(
@@ -57,6 +61,7 @@ describe("corpPunishCandidates", () => {
             compoundFlatline,
             noise,
             strategyOnly,
+            installOnly,
           ],
         } as unknown as TacticalPlanBuildContext,
         { goalId: "corp.apply_punish_pressure" } as TacticalGoalLike,
@@ -93,6 +98,42 @@ describe("corpPunishCandidates", () => {
         { goalId: "corp.apply_punish_pressure" } as TacticalGoalLike,
       ).map((entry) => entry.actionId),
     ).toEqual(["trace-damage"]);
+  });
+
+  it("does not protect Closed Accounts when the tagged Runner has no credits", () => {
+    const closedAccounts = candidate("closed-accounts", {
+      sourceDefinitionId: "onr_v1_285_closed-accounts",
+      actionTacticSignals: ["punish.payoff"],
+    });
+    const input = corpScoreInput({
+      credits: 6,
+      clicks: 2,
+      agenda: corpCard("remote-agenda", { type: "agenda" }),
+      legalActions: [],
+    });
+    input.playerView.opponent.credits = 0;
+    input.playerView.opponent.tags = 1;
+
+    expect(
+      corpPunishCandidates(
+        {
+          input,
+          candidates: [closedAccounts],
+        } as TacticalPlanBuildContext,
+        { goalId: "corp.apply_punish_pressure" } as TacticalGoalLike,
+      ),
+    ).toEqual([]);
+
+    input.playerView.opponent.credits = 3;
+    expect(
+      corpPunishCandidates(
+        {
+          input,
+          candidates: [closedAccounts],
+        } as TacticalPlanBuildContext,
+        { goalId: "corp.apply_punish_pressure" } as TacticalGoalLike,
+      ).map((entry) => entry.actionId),
+    ).toEqual(["closed-accounts"]);
   });
 });
 

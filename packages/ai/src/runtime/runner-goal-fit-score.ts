@@ -3,6 +3,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import { actionHasImmediateCreditGain } from "../actions/action-effect-classification";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { createAiHintsByCard } from "../ai-hints";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
@@ -447,7 +448,9 @@ function runnerActionBuildsEconomy(
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
   return (
-    action.type === "gain_credit" ||
+    actionHasImmediateCreditGain(action) ||
+    (actionSemanticCandidate?.economyProjection?.netLiquidCreditGain ?? 0) >
+      0 ||
     actionSemanticCandidate?.semanticActionType === "economy.gain_credit" ||
     actionSemanticCandidateHasSignal(actionSemanticCandidate, "economy.")
   );

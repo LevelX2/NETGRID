@@ -6,6 +6,7 @@ import {
 } from "@netgrid/shared";
 
 import { RUNTIME_CARDS } from "../ai-hints";
+import { isBasicCreditAction } from "../actions/action-effect-classification";
 
 import type { CorpTaggedRunnerPayoffActionProfile } from "./corp-scoring-assessment-types";
 
@@ -80,8 +81,7 @@ export function createCorpTagPunishPayoffProfileContext(
     if (
       input.side !== "corp" ||
       action.side !== "corp" ||
-      action.type !== "gain_credit" ||
-      action.source !== "basic_action" ||
+      !isBasicCreditAction(action) ||
       input.playerView.opponent.tags <= 0
     )
       return undefined;

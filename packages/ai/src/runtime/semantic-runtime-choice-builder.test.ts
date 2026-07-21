@@ -1,7 +1,10 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import {
+  buildActionSemanticCandidates,
+  type ActionSemanticCandidate,
+} from "../action-semantic-candidate";
 import { buildSemanticRuntimeChoices } from "./semantic-runtime-choice-builder";
 
 describe("buildSemanticRuntimeChoices", () => {
@@ -120,6 +123,33 @@ describe("buildSemanticRuntimeChoices", () => {
       "semantic_score_component:runner_activated_agenda_score",
     );
   });
+
+  it("excludes lower pure credit payouts from semantic choice ranking", () => {
+    const basic = corpAction("basic-credit");
+    const coup = {
+      ...corpAction("coup-credit"),
+      type: "activated_card_ability",
+      source: "coup-instance",
+      payload: { gainCreditsAmount: 3 },
+    } as LegalAction;
+    const input = corpInput(basic);
+    input.legalActions = [basic, coup];
+
+    const choices = buildSemanticRuntimeChoices(
+      input,
+      [economyCandidate(basic, 1), economyCandidate(coup, 3)],
+      dependencies(),
+    );
+
+    expect(choices.map((choice) => choice.action.actionId)).toEqual([
+      "coup-credit",
+      "basic-credit",
+    ]);
+    expect(choices[1]?.exclusion).toMatchObject({
+      key: "economy_action_dominated",
+      reason: expect.stringContaining("economy_dominant_action:coup-credit"),
+    });
+  });
 });
 
 function paidAction(): LegalAction {
@@ -154,6 +184,36 @@ function corpAction(actionId: string): LegalAction {
     choiceRequirements: [],
     payload: {},
   } as unknown as LegalAction;
+}
+
+function economyCandidate(
+  action: LegalAction,
+  amount: number,
+): ActionSemanticCandidate {
+  return {
+    actionId: action.actionId,
+    actionType: action.type,
+    actorSide: action.side,
+    economyProjection: {
+      schemaVersion: "action-economy-projection-v1",
+      kind: "immediate_liquid",
+      timing: "immediate",
+      creditRestriction: "general",
+      clickCost: 1,
+      creditCost: 0,
+      grossLiquidCreditGain: amount,
+      netLiquidCreditGain: amount,
+      cardsDrawn: 0,
+      cardsConsumed: 0,
+      netHandDelta: 0,
+      payoutMode: "fixed",
+      repeatable: false,
+      reliability: "guaranteed",
+      source: "legal_action_payload",
+      confidence: "high",
+      evidence: [],
+    },
+  } as unknown as ActionSemanticCandidate;
 }
 
 function dependencies() {

@@ -15,6 +15,7 @@ export type TacticalPlanType =
   | "corp.develop_finite_economy"
   | "corp.activate_persistent_economy"
   | "corp.build_credit_bank"
+  | "corp.fund_strategy_reserve"
   | "corp.establish_scoring_remote"
   | "corp.rez_defense"
   | "corp.apply_punish_pressure";

@@ -1,21 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
-const COMFORTABLE_RUNNER_CREDIT_TARGET = 6;
-
-export function runnerMarginalCreditYieldMultiplier(
-  input: AiDecisionInput,
-  action: LegalAction,
-): number {
-  const credits = input.playerView.own.credits;
-  if (credits < COMFORTABLE_RUNNER_CREDIT_TARGET) return 1;
-  if (!runnerHasMeaningfulCreditConversionAlternative(input, action)) return 1;
-  const excess = credits - COMFORTABLE_RUNNER_CREDIT_TARGET;
-  if (excess >= 8) return 0.1;
-  if (excess >= 4) return 0.25;
-  if (excess >= 2) return 0.5;
-  return 0.75;
-}
-
 export function runnerHasMeaningfulCreditConversionAlternative(
   input: AiDecisionInput,
   selectedAction: LegalAction,

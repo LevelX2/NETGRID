@@ -1,4 +1,9 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
+import { actionHasImmediateCreditGain } from "../actions/action-effect-classification";
 import { rolesHaveBreakerRole } from "./breaker-role-match";
 
 export type RunnerLoanFundingNeedDependencies = {
@@ -19,7 +24,9 @@ export function runnerLoanCriticalBreakerFundingNeed(
   remoteThreatVisible: boolean,
   dependencies: Pick<
     RunnerLoanFundingNeedDependencies,
-    "rolesForCardId" | "cardAddressesVisibleBreakerNeed" | "visibleCardPlayOrInstallCost"
+    | "rolesForCardId"
+    | "cardAddressesVisibleBreakerNeed"
+    | "visibleCardPlayOrInstallCost"
   >,
 ): { active: boolean; evidence: string[] } {
   const candidates = input.playerView.own.gripOrHq.filter((card) => {
@@ -51,7 +58,7 @@ export function runnerLoanEmergencyFundingNeed(
 ): boolean {
   const safeEconomyAvailable = input.legalActions.some(
     (action) =>
-      action.type === "gain_credit" ||
+      actionHasImmediateCreditGain(action) ||
       (action.type === "play_event" &&
         dependencies
           .rolesForAction(input, action)

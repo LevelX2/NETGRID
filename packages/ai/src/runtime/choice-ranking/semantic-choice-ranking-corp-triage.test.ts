@@ -47,11 +47,11 @@ describe("tacticalPlanMappedChoice Corp board-triage overrides", () => {
     const alternative = choice(
       burstEconomy,
       -423,
-      scoreComponentEvidence("corp_operation_burst_economy"),
+      scoreComponentEvidence("economy_credit_base"),
       {
-        key: "corp_operation_burst_economy",
-        value: 1890,
-        reason: "operation_gain:2|operation_draw:1",
+        key: "economy_credit_base",
+        value: 150,
+        reason: "economy_net_liquid_gain:2",
       },
     );
     const result = tacticalPlanMappedChoice(
@@ -73,11 +73,11 @@ describe("tacticalPlanMappedChoice Corp board-triage overrides", () => {
     const alternative = choice(
       burstEconomy,
       -423,
-      scoreComponentEvidence("corp_operation_burst_economy"),
+      scoreComponentEvidence("economy_credit_base"),
       {
-        key: "corp_operation_burst_economy",
-        value: 1890,
-        reason: "operation_gain:2|operation_draw:1",
+        key: "economy_credit_base",
+        value: 150,
+        reason: "economy_net_liquid_gain:2",
       },
     );
     const result = tacticalPlanMappedChoice(

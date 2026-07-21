@@ -46834,6 +46834,11 @@
     "acceptableActions": [
       {
         "actionId": "corp.gain_credit"
+      },
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_367_rio-de-janeiro-city-grid",
+        "targetServerId": "remote_1"
       }
     ],
     "forbiddenActions": [

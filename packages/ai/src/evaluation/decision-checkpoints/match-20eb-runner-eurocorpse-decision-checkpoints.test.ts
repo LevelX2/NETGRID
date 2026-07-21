@@ -83,7 +83,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(hostableBreaker);
   });
 
-  it("keeps draw available below the effective hand limit", () => {
+  it("keeps draw or a funded run-lock release available below the hand limit", () => {
     const belowHandLimit = mutateFixture(
       hostBeforeOverflowJson,
       (checkpoint) => {
@@ -103,7 +103,10 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "20EB-C04-DRAW-BELOW-HAND-LIMIT";
         checkpoint.expectation = {
-          acceptableActions: [{ actionId: "runner.draw_card" }],
+          acceptableActions: [
+            { actionId: "runner.draw_card" },
+            { actionId: "runner.trigger_ability" },
+          ],
         };
       },
     );

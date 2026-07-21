@@ -7,6 +7,7 @@ import {
   type MultiServerSuccessSequenceState,
 } from "@netgrid/shared";
 import {
+  deterministicOnPlayResourcePayload,
   isPrintedCostOnPlayAbility,
   onPlayCardImplementationClickCost,
 } from "../../ability-engine/card-implementation-runtime-shared";
@@ -683,6 +684,10 @@ export function buildRunnerMainActions(
         state,
         definition,
       );
+      const deterministicResourcePayload = deterministicOnPlayResourcePayload(
+        definition,
+        "runner",
+      );
       const playEventClickCost = canPlayCardImplementation
         ? runnerEventClickCost(host, definition)
         : 1;
@@ -703,7 +708,7 @@ export function buildRunnerMainActions(
               `${definition.title}: ${targetDefinition.title} verstärken`,
               id,
               [{ clicks: 1, credits: definition.cost ?? 0 }],
-              { cardId: id, targetCardId },
+              { cardId: id, targetCardId, ...deterministicResourcePayload },
             ),
           );
         }
@@ -752,7 +757,11 @@ export function buildRunnerMainActions(
               `${definition.title} auf ${server.label}`,
               id,
               [{ clicks: 1, credits: definition.cost ?? 0 }],
-              { cardId: id, serverId: server.id },
+              {
+                cardId: id,
+                serverId: server.id,
+                ...deterministicResourcePayload,
+              },
             ),
           );
         }
@@ -767,7 +776,12 @@ export function buildRunnerMainActions(
               `${definition.title} auf ${server.label}`,
               id,
               [{ clicks: playEventClickCost, credits: definition.cost ?? 0 }],
-              { cardId: id, serverId: server.id, runnerEventRun: true },
+              {
+                cardId: id,
+                serverId: server.id,
+                runnerEventRun: true,
+                ...deterministicResourcePayload,
+              },
             ),
           );
           continue;
@@ -782,7 +796,12 @@ export function buildRunnerMainActions(
                 `${definition.title} auf ${server.label}`,
                 id,
                 [{ clicks: playEventClickCost, credits: definition.cost ?? 0 }],
-                { cardId: id, serverId: server.id, runnerEventRun: true },
+                {
+                  cardId: id,
+                  serverId: server.id,
+                  runnerEventRun: true,
+                  ...deterministicResourcePayload,
+                },
               ),
             );
           }
@@ -796,7 +815,7 @@ export function buildRunnerMainActions(
             `${definition.title} spielen`,
             id,
             [{ clicks: playEventClickCost, credits: definition.cost ?? 0 }],
-            { cardId: id },
+            { cardId: id, ...deterministicResourcePayload },
           ),
         );
       }

@@ -18,6 +18,8 @@ import {
   type SemanticRuntimeScopeDependencies,
 } from "./semantic-runtime-scope";
 import { semanticRuntimeStrategicActionFitEvidence } from "./strategic-action-fit";
+import { compareEconomyActionDominance } from "../economy/economy-action-score";
+import type { CreditDemand } from "../plans/credit-demand";
 
 export type SemanticRuntimeChoiceBuilderDependencies = {
   scope: SemanticRuntimeScopeDependencies;
@@ -32,6 +34,7 @@ export type SemanticRuntimeChoiceBuilderDependencies = {
     scopeId: string,
     exclusion: SemanticRuntimeExclusion | undefined,
     actionSemanticCandidate: ActionSemanticCandidate | undefined,
+    creditDemands?: readonly CreditDemand[],
   ) => NonNullable<AiDecisionDebug["scoreBreakdown"]>;
   actionCreditCost: (action: LegalAction) => number;
   evidence: (
@@ -48,6 +51,7 @@ export function buildSemanticRuntimeChoices(
   input: AiDecisionInput,
   actionSemanticCandidates: readonly ActionSemanticCandidate[] = [],
   dependencies: SemanticRuntimeChoiceBuilderDependencies,
+  creditDemands: readonly CreditDemand[] = [],
 ): SemanticRuntimeChoice[] {
   const candidatesByActionId = new Map(
     actionSemanticCandidates.map((candidate) => [
@@ -55,13 +59,18 @@ export function buildSemanticRuntimeChoices(
       candidate,
     ]),
   );
+  const economyDominanceExclusions = buildEconomyDominanceExclusions(
+    actionSemanticCandidates,
+  );
   return sortSemanticRuntimeChoices(
     input.legalActions.map((action) =>
       scoreSemanticRuntimeAction(
         input,
         action,
         candidatesByActionId.get(action.actionId),
+        economyDominanceExclusions.get(action.actionId),
         dependencies,
+        creditDemands,
       ),
     ),
     dependencies.compareAction,
@@ -86,7 +95,9 @@ function scoreSemanticRuntimeAction(
   input: AiDecisionInput,
   action: LegalAction,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  economyDominanceExclusion: SemanticRuntimeExclusion | undefined,
   dependencies: SemanticRuntimeChoiceBuilderDependencies,
+  creditDemands: readonly CreditDemand[],
 ): SemanticRuntimeChoice {
   const scopeId = semanticRuntimeScopeForAction(
     input,
@@ -94,17 +105,16 @@ function scoreSemanticRuntimeAction(
     actionSemanticCandidate,
     dependencies.scope,
   );
-  const exclusion = dependencies.actionExclusion(
-    input,
-    action,
-    actionSemanticCandidate,
-  );
+  const exclusion =
+    dependencies.actionExclusion(input, action, actionSemanticCandidate) ??
+    economyDominanceExclusion;
   const scoreBreakdown = dependencies.scoreBreakdown(
     input,
     action,
     scopeId,
     exclusion,
     actionSemanticCandidate,
+    creditDemands,
   );
   const score = semanticRuntimeScoreFromComponents(scoreBreakdown);
   const reasonCode =
@@ -156,6 +166,44 @@ function scoreSemanticRuntimeAction(
     ],
     confidence: semanticRuntimeConfidence(scopeId, score),
   };
+}
+
+function buildEconomyDominanceExclusions(
+  candidates: readonly ActionSemanticCandidate[],
+): Map<string, SemanticRuntimeExclusion> {
+  const strongestDominance = new Map<
+    string,
+    ReturnType<typeof compareEconomyActionDominance>
+  >();
+  for (let leftIndex = 0; leftIndex < candidates.length; leftIndex += 1) {
+    for (
+      let rightIndex = leftIndex + 1;
+      rightIndex < candidates.length;
+      rightIndex += 1
+    ) {
+      const dominance = compareEconomyActionDominance(
+        candidates[leftIndex]!,
+        candidates[rightIndex]!,
+      );
+      if (!dominance) continue;
+      const previous = strongestDominance.get(dominance.dominatedActionId);
+      if (!previous || previous.creditAdvantage < dominance.creditAdvantage) {
+        strongestDominance.set(dominance.dominatedActionId, dominance);
+      }
+    }
+  }
+  return new Map(
+    [...strongestDominance].map(([actionId, dominance]) => [
+      actionId,
+      {
+        key: "economy_action_dominated",
+        label: "Vergleichbare Credit-Aktion dominiert",
+        reason: dominance
+          ? dominance.evidence.join("|")
+          : "economy_dominance_unavailable",
+      },
+    ]),
+  );
 }
 
 function semanticRuntimeChoiceCreditCostEvidence(params: {

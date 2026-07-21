@@ -3,6 +3,7 @@ import type { RunnerAccessPayoff } from "../run-analysis/runner-run-target-types
 import type { TacticalPlanBuildContext } from "./tactical-plan-types";
 
 const RUNNER_BANK_MIN_CRITICAL_CASHOUT = 3;
+const RUNNER_BANK_FIRST_LOAD_TARGET = 3;
 const RUNNER_BANK_VALUE_BUILD_TARGET = 12;
 const RUNNER_BANK_COMFORTABLE_BUILD_CREDITS = 15;
 const RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS = 20;
@@ -234,6 +235,9 @@ export function runnerCreditBankAssessment(
   );
   const buildTarget = RUNNER_BANK_VALUE_BUILD_TARGET;
   const combinedCreditAccess = ownCredits + portfolioStoredCredits;
+  const comfortableCombinedAccess =
+    currentStoredCredits >= RUNNER_BANK_FIRST_LOAD_TARGET &&
+    combinedCreditAccess >= RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS;
   const cashOutMinimum = concreteFundingNeed
     ? 1
     : ownCredits < 5
@@ -243,6 +247,7 @@ export function runnerCreditBankAssessment(
     buildActions.length > 0 &&
     !concreteFundingNeed &&
     ownCredits < RUNNER_BANK_COMFORTABLE_BUILD_CREDITS &&
+    !comfortableCombinedAccess &&
     currentStoredCredits < buildTarget;
   const cashOutReason =
     payoutActions.length === 0 || estimatedPayout <= 0
@@ -274,6 +279,7 @@ export function runnerCreditBankAssessment(
       `runner_bank_estimated_payout:${estimatedPayout}`,
       `runner_bank_build_target:${buildTarget}`,
       `runner_bank_combined_credit_access:${combinedCreditAccess}`,
+      `runner_bank_comfortable_combined_access:${comfortableCombinedAccess}`,
       `runner_bank_cashout_minimum:${cashOutMinimum}`,
       `runner_bank_concrete_funding_need:${concreteFundingNeed}`,
       `runner_bank_build_ready:${shouldBuild}`,

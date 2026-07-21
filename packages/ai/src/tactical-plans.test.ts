@@ -17,6 +17,7 @@ import {
   type ActionSemanticCandidate,
 } from "./action-semantic-candidate";
 import { actionEconomyProjectionFor } from "./actions/action-economy-projection";
+import type { StrategicIntentState } from "./strategic-intent-state";
 import type {
   RunnerHandDevelopmentEvaluation,
   RunnerPersistentInstallEvaluation,
@@ -115,6 +116,48 @@ describe("tactical plan model", () => {
       "runner.opportunistic_central_run:hq",
       "runner.contest_remote:remote_1",
     ]);
+  });
+
+  it("turns a Corp strategic reserve shortfall into a typed funding plan", () => {
+    const gainCredit = legalAction("corp.gain_credit", "corp", "gain_credit", {
+      effectKind: "gain_credits",
+      gainCreditsAmount: 1,
+    });
+    const input = aiInput("corp", [gainCredit]);
+    input.playerView.own.credits = 5;
+    const strategicIntentState = {
+      reserve: {
+        kind: "credits",
+        required: 7,
+        available: 5,
+        satisfied: false,
+        evidence: ["reserve_required:7", "reserve_available:5"],
+      },
+      primaryStrategy: { family: "corp_damage_kill" },
+    } as unknown as StrategicIntentState;
+
+    const plan = buildTacticalPlans({ input, strategicIntentState }).find(
+      (candidate) => candidate.type === "corp.fund_strategy_reserve",
+    );
+
+    expect(plan).toMatchObject({
+      planId: "corp.fund_strategy_reserve",
+      status: "progressing",
+      priority: expect.any(Number),
+      currentStep: {
+        kind: "gain_credits",
+        actionCandidateIds: ["corp.gain_credit"],
+      },
+      creditDemands: [
+        {
+          purpose: "tactical_reserve",
+          priority: "tactical_reserve",
+          hardness: "soft",
+          targetCredits: 7,
+          gap: 2,
+        },
+      ],
+    });
   });
 
   it("marks a contestable remote run as the execute phase", () => {
@@ -3645,7 +3688,7 @@ describe("tactical plan model", () => {
     );
   });
 
-  it("releases a terminal foreground run when tag cleanup cannot map", () => {
+  it("releases a suspended foreground when tag cleanup cannot map", () => {
     const hqRun = legalAction("run-hq", "runner", "start_run", {
       serverId: "hq",
     });

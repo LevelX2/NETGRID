@@ -35,6 +35,42 @@ export function printedCostOnPlayImplementation(
 }
 
 /**
+ * Projects direct, unconditional controller resources from a declarative
+ * printed-cost on-play ability into its LegalAction payload.
+ *
+ * Consumers must use these structured facts instead of inferring economy
+ * values from card text. Nested, variable and delayed effects deliberately do
+ * not participate here because their payout is not guaranteed by selecting
+ * the action alone.
+ */
+export function deterministicOnPlayResourcePayload(
+  definition: CardDefinition,
+  controller: "corp" | "runner",
+): { gainCreditsAmount?: number; drawCardsAmount?: number } {
+  const implementation = printedCostOnPlayImplementation(definition);
+  if (!implementation) return {};
+
+  let gainCreditsAmount = 0;
+  let drawCardsAmount = 0;
+  for (const effect of implementation.effects) {
+    const recipientMatchesController =
+      "recipient" in effect &&
+      (effect.recipient === "controller" || effect.recipient === controller);
+    if (!recipientMatchesController) continue;
+    if (effect.kind === "gain_credits") {
+      gainCreditsAmount += Math.max(0, effect.amount);
+    } else if (effect.kind === "draw_cards") {
+      drawCardsAmount += Math.max(0, effect.amount);
+    }
+  }
+
+  return {
+    ...(gainCreditsAmount > 0 ? { gainCreditsAmount } : {}),
+    ...(drawCardsAmount > 0 ? { drawCardsAmount } : {}),
+  };
+}
+
+/**
  * Evaluates the small declarative condition vocabulary used by migrated cards.
  *
  * Conditions are checked during LegalAction generation and revalidation;

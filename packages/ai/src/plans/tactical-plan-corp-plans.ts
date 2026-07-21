@@ -7,6 +7,7 @@ import {
 } from "./tactical-plan-corp-score-window";
 import {
   corpPunishCandidates,
+  corpImmediateCreditActionIds,
   corpScoreWindowBlockers,
   corpScoreWindowCurrentStep,
   corpScoreWindowSequence,
@@ -35,6 +36,9 @@ import {
   corpScorelineAllowsMultiTurnDevelopment,
   corpScorelineFeasibilityForDecisionInput,
 } from "../runtime/corp-scoreline-feasibility";
+import { createCorpCreditDemand } from "./credit-demand";
+import { corpActiveRemoteScorelineState } from "../runtime/corp-scoreline/semantic-runtime-corp-score-state";
+import { semanticRuntimeCorpExistingCentralRezFloorAssessments } from "../runtime/semantic-runtime-corp-central-rez-context";
 
 export function buildCorpTacticalPlans(
   context: TacticalPlanBuildContext,
@@ -63,6 +67,151 @@ export function buildCorpTacticalPlans(
   plans.push(...buildCorpPersistentEconomyPlans(context));
   if (scorelineMultiTurnDevelopmentAllowed) {
     plans.push(...buildCorpRemoteProjectPlans(context));
+  }
+  const immediateCreditActionIds = corpImmediateCreditActionIds(input);
+  const strategicReserve = context.strategicIntentState?.reserve;
+  if (
+    strategicReserve?.kind === "credits" &&
+    strategicReserve.satisfied === false &&
+    strategicReserve.required > input.playerView.own.credits
+  ) {
+    const planId = "corp.fund_strategy_reserve";
+    const strategicBoost = tacticalGoalPriorityBoost(economyGoal);
+    plans.push(
+      createTacticalPlan({
+        planId,
+        side: "corp",
+        type: "corp.fund_strategy_reserve",
+        status: immediateCreditActionIds.length > 0 ? "progressing" : "blocked",
+        priority: 800 + strategicBoost,
+        horizonTurns: 3,
+        target: { kind: "capability", id: "strategy_credit_reserve" },
+        blockers: [
+          {
+            blockerId: `${planId}:missing_credits`,
+            kind: "missing_credits",
+            severity: "soft",
+            target: { kind: "capability", id: "strategy_credit_reserve" },
+            removalStepKind: "gain_credits",
+            evidence: strategicReserve.evidence,
+          },
+        ],
+        creditDemands: [
+          createCorpCreditDemand({
+            demandId: `${planId}:credits`,
+            sourcePlanId: planId,
+            purpose: "tactical_reserve",
+            priority: "tactical_reserve",
+            hardness: "soft",
+            deadline: "within_three_own_turns",
+            currentCredits: input.playerView.own.credits,
+            targetCredits: strategicReserve.required,
+            evidence: strategicReserve.evidence,
+          }),
+        ],
+        currentStep: createPlanStep({
+          stepId: `${planId}:gain_credits`,
+          kind: "gain_credits",
+          desiredActionSemantics: [
+            "economy.gain_credit",
+            "card_ability.trigger",
+          ],
+          actionCandidateIds: immediateCreditActionIds,
+          requiredCapabilities: [
+            {
+              capabilityId: `${planId}:credit_reserve`,
+              kind: "credits",
+              side: "corp",
+              target: { kind: "capability", id: "strategy_credit_reserve" },
+              minimumCredits: strategicReserve.required,
+              evidence: strategicReserve.evidence,
+            },
+          ],
+          rationale: [
+            `build the strategic reserve to ${strategicReserve.required} credits`,
+          ],
+        }),
+        evidence: [
+          "corp_strategy_credit_reserve_plan:true",
+          ...strategicReserve.evidence,
+          ...tacticalGoalEvidence(economyGoal),
+        ],
+        scoreBreakdown: tacticalGoalScoreBreakdown(economyGoal, strategicBoost),
+        stateVersion,
+      }),
+    );
+  }
+  const centralRezReserveAssessments =
+    input.playerView.own.stackOrRdCount > 1
+      ? semanticRuntimeCorpExistingCentralRezFloorAssessments(input).filter(
+          (assessment) => assessment.blockedByFloor,
+        )
+      : [];
+  for (const reserve of centralRezReserveAssessments) {
+    const planId = `corp.rez_defense:${reserve.serverId}:fund`;
+    const strategicBoost = tacticalGoalPriorityBoost(defenseGoal);
+    plans.push(
+      createTacticalPlan({
+        planId,
+        side: "corp",
+        type: "corp.rez_defense",
+        status: immediateCreditActionIds.length > 0 ? "progressing" : "blocked",
+        priority: 930 + strategicBoost,
+        horizonTurns: 1,
+        target: { kind: "server", id: reserve.serverId },
+        blockers: [
+          {
+            blockerId: `${planId}:missing_rez_reserve`,
+            kind: "missing_rez_reserve",
+            severity: "soft",
+            target: { kind: "server", id: reserve.serverId },
+            removalStepKind: "build_rez_reserve",
+            evidence: reserve.evidence,
+          },
+        ],
+        creditDemands: [
+          createCorpCreditDemand({
+            demandId: `${planId}:credits`,
+            sourcePlanId: planId,
+            purpose: "current_rez_window",
+            priority: "current_foreground_plan",
+            hardness: "soft",
+            deadline: "end_of_current_turn",
+            currentCredits: input.playerView.own.credits,
+            targetCredits: reserve.rezFloor,
+            evidence: reserve.evidence,
+          }),
+        ],
+        currentStep: createPlanStep({
+          stepId: `${planId}:build_rez_reserve`,
+          kind: "build_rez_reserve",
+          desiredActionSemantics: [
+            "economy.gain_credit",
+            "card_ability.trigger",
+          ],
+          actionCandidateIds: immediateCreditActionIds,
+          requiredCapabilities: [
+            {
+              capabilityId: `${planId}:rez_reserve`,
+              kind: "rez_reserve",
+              side: "corp",
+              minimumCredits: reserve.rezFloor,
+              evidence: reserve.evidence,
+            },
+          ],
+          rationale: [
+            `fund the pressured ${reserve.serverId.toUpperCase()} ICE rez floor`,
+          ],
+        }),
+        evidence: [
+          "corp_central_rez_reserve_plan:true",
+          ...reserve.evidence,
+          ...tacticalGoalEvidence(defenseGoal),
+        ],
+        scoreBreakdown: tacticalGoalScoreBreakdown(defenseGoal, strategicBoost),
+        stateVersion,
+      }),
+    );
   }
   for (const action of input.legalActions.filter(
     (candidate) =>
@@ -114,6 +263,15 @@ export function buildCorpTacticalPlans(
     );
     const currentStep = corpScoreWindowCurrentStep(action, blockers, input);
     const strategicBoost = tacticalGoalPriorityBoost(scorelineGoal);
+    const planId = `corp.create_score_window:${action.actionId}`;
+    const activeScoreline = corpActiveRemoteScorelineState(input);
+    const explicitReserveTarget =
+      activeScoreline?.cardId === action.source &&
+      input.playerView.own.credits < activeScoreline.reserveFloor
+        ? activeScoreline.reserveFloor
+        : blockers.some((blocker) => blocker.kind === "missing_rez_reserve")
+          ? 4
+          : 0;
     if (
       serverId &&
       !remoteIsProtected(input.playerView, serverId) &&
@@ -124,7 +282,7 @@ export function buildCorpTacticalPlans(
     }
     plans.push(
       createTacticalPlan({
-        planId: `corp.create_score_window:${action.actionId}`,
+        planId,
         side: "corp",
         type: "corp.create_score_window",
         status:
@@ -140,6 +298,28 @@ export function buildCorpTacticalPlans(
         horizonTurns: 1,
         ...(serverId ? { target: { kind: "server", id: serverId } } : {}),
         blockers,
+        ...(explicitReserveTarget > 0
+          ? {
+              creditDemands: [
+                createCorpCreditDemand({
+                  demandId: `${planId}:score-window-reserve`,
+                  sourcePlanId: planId,
+                  purpose: "current_score_window",
+                  priority: "current_foreground_plan",
+                  hardness: "soft",
+                  deadline: "end_of_current_turn",
+                  currentCredits: input.playerView.own.credits,
+                  targetCredits: explicitReserveTarget,
+                  evidence: [
+                    `active_scoreline_reserve_target:${explicitReserveTarget}`,
+                    ...(activeScoreline?.cardId === action.source
+                      ? activeScoreline.evidence
+                      : ["missing_rez_reserve"]),
+                  ],
+                }),
+              ],
+            }
+          : {}),
         currentStep,
         nextSteps: corpScoreWindowSequence(action.actionId),
         evidence: [

@@ -65,7 +65,7 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("may drain finite economy when no immediate tag source is available", () => {
+  it("uses finite economy or concrete R&D protection before basic credit", () => {
     const noTagWindow = mutateFixture(cp02Json, (fixture) => {
       moveCorpCardsToArchives(fixture, new Set([CHANCE_OBSERVATION]));
       fixture.expectation = {
@@ -74,7 +74,13 @@ describe("match Manhunt exact decision checkpoints", () => {
             type: "activated_card_ability",
             sourceDefinitionId: BBS_WHISPERING_CAMPAIGN,
           },
+          {
+            type: "install_card",
+            sourceDefinitionId: "onr_v1_261_quandary",
+            targetServerId: "rd",
+          },
         ],
+        forbiddenActions: [{ type: "gain_credit" }],
       };
     });
 
@@ -115,7 +121,12 @@ describe("match Manhunt exact decision checkpoints", () => {
         new Set([AUDIT_OF_CALL_RECORDS, URBAN_RENEWAL]),
       );
       fixture.expectation = {
-        acceptableActions: [{ type: "gain_credit" }],
+        acceptableActions: [
+          {
+            type: "install_card",
+            sourceDefinitionId: BBS_WHISPERING_CAMPAIGN,
+          },
+        ],
       };
     });
 

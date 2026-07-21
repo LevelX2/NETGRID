@@ -39,8 +39,6 @@ export type CorpBurstEconomyOperation = {
   evidence: string[];
 };
 
-export const CORP_IMMEDIATE_ECONOMY_MIN_ACTION_VALUE = 2;
-export const CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE = 3;
 export const CORP_RESERVE_SCORE_NORMALIZATION_DIVISOR = 50;
 export const CORP_SCORE_NOW_TEMPO_BLOCKING_REMOTE_ICE_SCORE = 1500;
 

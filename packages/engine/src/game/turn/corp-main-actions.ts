@@ -1,4 +1,5 @@
 import type { GameState, LegalAction } from "@netgrid/shared";
+import { deterministicOnPlayResourcePayload } from "../../ability-engine/card-implementation-runtime-shared";
 import { canInstallCorpIceInServer } from "../install/corp-ice-install-restrictions";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
@@ -52,7 +53,9 @@ export type CorpMainActionGenerationHost = {
     activeObligationCount: HostFn<number>;
     canPlayCorpOperation: HostFn<boolean>;
     cardImplementationOperationLegalActions: HostFn<LegalAction[]>;
-    corpUtilityImplementationForDefinition: HostFn<{ kind?: string } | undefined>;
+    corpUtilityImplementationForDefinition: HostFn<
+      { kind?: string } | undefined
+    >;
     hardwareTrashByCounterLegalActions: HostFn<LegalAction[]>;
     advancementPlacementLegalActions: HostFn<LegalAction[]>;
     corpAgendaPointTotal: HostFn<number>;
@@ -110,7 +113,8 @@ export function buildCorpMainActions(
   const action = host.actions.buildLegalAction;
   const makeActionId = host.actions.makeActionId;
   const buildCorpEndTurnAction = host.actions.buildEndTurnAction;
-  const buildCorpForgoActionDebtAction = host.actions.buildForgoActionDebtAction;
+  const buildCorpForgoActionDebtAction =
+    host.actions.buildForgoActionDebtAction;
   const buildPurgeableRunnerVirusPurgeAction =
     host.actions.buildPurgeableRunnerVirusPurgeAction;
   const buildCorpPurgeVirusAction = host.actions.buildPurgeVirusAction;
@@ -135,10 +139,10 @@ export function buildCorpMainActions(
     host.cards.cardImplementationForDefinitionId;
   const rezzedCorpRootCardIds = host.cards.rezzedCorpRootCardIds;
   const corpInstalledCardIds = host.cards.corpInstalledCardIds;
-  const visibleVirusCounterTargetIds =
-    host.cards.visibleVirusCounterTargetIds;
+  const visibleVirusCounterTargetIds = host.cards.visibleVirusCounterTargetIds;
   const effectiveAgendaDifficulty = host.agenda.effectiveAgendaDifficulty;
-  const effectiveAgendaDifficultyDeps = host.agenda.effectiveAgendaDifficultyDeps;
+  const effectiveAgendaDifficultyDeps =
+    host.agenda.effectiveAgendaDifficultyDeps;
   const scoredAgendaKindForDefinition =
     host.agenda.scoredAgendaKindForDefinition;
   const serverChoiceDisplayLabel = host.agenda.serverChoiceDisplayLabel;
@@ -154,13 +158,14 @@ export function buildCorpMainActions(
     host.corp.filterActionsForRestrictedExtraActions ??
     ((_state: GameState, _side: "corp", candidateActions: LegalAction[]) =>
       candidateActions);
-  const activeObligationCount =
-    host.corp.activeObligationCount;
+  const activeObligationCount = host.corp.activeObligationCount;
   const canPlayCorpOperation = host.corp.canPlayCorpOperation;
   const corpUtilityImplementationForDefinition =
     host.corp.corpUtilityImplementationForDefinition;
-  const hardwareTrashByCounterLegalActions = host.corp.hardwareTrashByCounterLegalActions;
-  const advancementPlacementLegalActions = host.corp.advancementPlacementLegalActions;
+  const hardwareTrashByCounterLegalActions =
+    host.corp.hardwareTrashByCounterLegalActions;
+  const advancementPlacementLegalActions =
+    host.corp.advancementPlacementLegalActions;
   const hasCorpUtilityKind = host.corp.hasCorpUtilityKind;
   const uniqueDirectLongtailKindForDefinition =
     host.corp.uniqueDirectLongtailKindForDefinition;
@@ -177,8 +182,7 @@ export function buildCorpMainActions(
   const corpRootAgendaOrNodeCapacityInServer =
     host.install.corpRootAgendaOrNodeCapacityInServer;
   const corpRootAssetIdsInServer = host.install.corpRootAssetIdsInServer;
-  const corpRootMainCardIdsInServer =
-    host.install.corpRootMainCardIdsInServer;
+  const corpRootMainCardIdsInServer = host.install.corpRootMainCardIdsInServer;
   const isInstalledCorpCardAdvanceable =
     host.install.isInstalledCorpCardAdvanceable;
   const rootInstallRezzesOnInstall = host.rez.rootInstallRezzesOnInstall;
@@ -196,8 +200,7 @@ export function buildCorpMainActions(
     host.specialZones.edgerunnerTempsInstallActionsRemaining;
   const INSTALLED_CARD_LIMIT_ASSET_SOURCE =
     host.constants.INSTALLED_CARD_LIMIT_ASSET_SOURCE;
-  const VIRUS_COUNTER_ASSET_SOURCE =
-    host.constants.VIRUS_COUNTER_ASSET_SOURCE;
+  const VIRUS_COUNTER_ASSET_SOURCE = host.constants.VIRUS_COUNTER_ASSET_SOURCE;
   const COUNTER_UPGRADE_SOURCES = host.constants.COUNTER_UPGRADE_SOURCES;
   const ADVANCEMENT_PLACEMENT_OPERATION_SOURCE =
     host.constants.ADVANCEMENT_PLACEMENT_OPERATION_SOURCE;
@@ -331,14 +334,12 @@ export function buildCorpMainActions(
           obligationDebtAbility: "remove_obligation",
           obligationDebtCreditCost: 12,
           obligationDebtScoreAgendaPoints: 1,
-          obligationDebtCountBefore:
-            activeObligationCount(state),
+          obligationDebtCountBefore: activeObligationCount(state),
         },
       ),
     );
   }
-  if (state.corp.rd.length > 0)
-    actions.push(buildCorpDrawAction(state));
+  if (state.corp.rd.length > 0) actions.push(buildCorpDrawAction(state));
   if (state.runner.tags > 0 && state.corp.credits >= 2) {
     for (const id of state.runner.rig.resources) {
       const hiddenResource = isConcealedRunnerResource(state, id);
@@ -383,9 +384,9 @@ export function buildCorpMainActions(
   for (const id of state.runner.rig.resources.slice().sort()) {
     if (isConcealedRunnerResource(state, id)) continue;
     const definition = definitionFor(state, id);
-    const corpTrashAbility =
-      cardImplementationForDefinitionId(definition.id)
-        ?.corpTrashInstalledRunnerSource;
+    const corpTrashAbility = cardImplementationForDefinitionId(
+      definition.id,
+    )?.corpTrashInstalledRunnerSource;
     if (
       !corpTrashAbility ||
       corpTrashAbility.kind !== "corp_trash_installed_runner_resource" ||
@@ -442,15 +443,23 @@ export function buildCorpMainActions(
         corpUtilityImplementationForDefinition(definition.id)?.kind ===
         "installed_hardware_trash_by_counter"
       ) {
-        actions.push(...hardwareTrashByCounterLegalActions(state, id, definition));
+        actions.push(
+          ...hardwareTrashByCounterLegalActions(state, id, definition),
+        );
         continue;
       }
       if (definition.id === ADVANCEMENT_PLACEMENT_OPERATION_SOURCE) {
-        actions.push(...advancementPlacementLegalActions(state, id, definition));
+        actions.push(
+          ...advancementPlacementLegalActions(state, id, definition),
+        );
         continue;
       }
       const implementationActions =
-        host.corp.cardImplementationOperationLegalActions(state, id, definition);
+        host.corp.cardImplementationOperationLegalActions(
+          state,
+          id,
+          definition,
+        );
       if (implementationActions.length > 0) {
         actions.push(...implementationActions);
         continue;
@@ -463,7 +472,10 @@ export function buildCorpMainActions(
           `${definition.title} spielen`,
           id,
           [{ clicks: 1, credits: definition.cost ?? 0 }],
-          { cardId: id },
+          {
+            cardId: id,
+            ...deterministicOnPlayResourcePayload(definition, "corp"),
+          },
         ),
       );
     }
@@ -485,27 +497,21 @@ export function buildCorpMainActions(
           reductionSourceDefinitionIds,
           increaseSourceDefinitionIds,
           totalCost,
-        } =
-          corpIceInstallTotalCost(state, id, server);
+        } = corpIceInstallTotalCost(state, id, server);
         if (state.corp.credits < totalCost) continue;
         actions.push(
-          buildCorpServerIceInstallAction(
-            state,
-            id,
-            server,
-            {
-              baseCost,
-              additionalCost,
-              reduction,
-              ...(reductionSourceDefinitionIds
-                ? { reductionSourceDefinitionIds }
-                : {}),
-              ...(increaseSourceDefinitionIds
-                ? { increaseSourceDefinitionIds }
-                : {}),
-              totalCost,
-            },
-          ),
+          buildCorpServerIceInstallAction(state, id, server, {
+            baseCost,
+            additionalCost,
+            reduction,
+            ...(reductionSourceDefinitionIds
+              ? { reductionSourceDefinitionIds }
+              : {}),
+            ...(increaseSourceDefinitionIds
+              ? { increaseSourceDefinitionIds }
+              : {}),
+            totalCost,
+          }),
         );
       }
     }
@@ -540,7 +546,10 @@ export function buildCorpMainActions(
           const replacesRegion =
             isRegionUpgrade(definition) &&
             corpRegionUpgradeIdsInServer(state, server).length > 0;
-          const rootCapacity = corpRootAgendaOrNodeCapacityInServer(state, server);
+          const rootCapacity = corpRootAgendaOrNodeCapacityInServer(
+            state,
+            server,
+          );
           const replacesRootAsset =
             definition.type === "agenda" &&
             corpRootAssetIdsInServer(state, server).length > 0 &&
@@ -588,7 +597,9 @@ export function buildCorpMainActions(
             "rez_card",
             `Karte in ${server.label} rezzen`,
             id,
-            rezQuote.costs.map((cost: Record<string, unknown>) => ({ ...cost })),
+            rezQuote.costs.map((cost: Record<string, unknown>) => ({
+              ...cost,
+            })),
             { ...rezQuote.publicPayload },
           ),
         );
@@ -596,7 +607,8 @@ export function buildCorpMainActions(
     }
   }
   const corpTraceDamageAbilityActionsHost = corpTraceDamageAbilityHost(state);
-  const corpSpecialDamageAbilityActionsHost = corpSpecialDamageAbilityHost(state);
+  const corpSpecialDamageAbilityActionsHost =
+    corpSpecialDamageAbilityHost(state);
   for (const assetId of rezzedCorpRootCardIds(state).sort()) {
     const definition = definitionFor(state, assetId);
     pushCorpTraceDamageOrCardImplementationActions(
@@ -611,7 +623,13 @@ export function buildCorpMainActions(
     );
     if (specialDamageActions.handled)
       actions.push(...specialDamageActions.actions);
-    if (hasCorpUtilityKind(state, assetId, "shuffle_hq_into_rd_then_draw_same_count")) {
+    if (
+      hasCorpUtilityKind(
+        state,
+        assetId,
+        "shuffle_hq_into_rd_then_draw_same_count",
+      )
+    ) {
       actions.push(
         action(
           state,
@@ -689,7 +707,8 @@ export function buildCorpMainActions(
     }
   }
   const scoredAgendaAbilityActionsHost = scoredAgendaAbilityHost(state);
-  const scoredAgendaTraceDamageAbilityActionsHost = corpTraceDamageAbilityHost(state);
+  const scoredAgendaTraceDamageAbilityActionsHost =
+    corpTraceDamageAbilityHost(state);
   for (const agendaId of state.corp.scoreArea.slice().sort()) {
     const scoredAgendaAbilityActions = buildScoredAgendaAbilityActionsForCard(
       scoredAgendaAbilityActionsHost,
@@ -713,30 +732,30 @@ export function buildCorpMainActions(
       state,
       "corp",
       actions
-      .filter(
-        (candidate) =>
-          candidate.type === "install_card" || candidate.type === "end_turn",
-      )
-      .map((candidate) =>
-        candidate.type === "install_card"
-          ? {
-              ...candidate,
-              payload: {
-                ...(candidate.payload ?? {}),
-                v1922EdgerunnerTempsInstallAction: true,
-              },
-              actionId: makeActionId(
-                candidate.type,
-                candidate.side,
-                {
+        .filter(
+          (candidate) =>
+            candidate.type === "install_card" || candidate.type === "end_turn",
+        )
+        .map((candidate) =>
+          candidate.type === "install_card"
+            ? {
+                ...candidate,
+                payload: {
                   ...(candidate.payload ?? {}),
                   v1922EdgerunnerTempsInstallAction: true,
                 },
-                candidate.source,
-              ),
-            }
-          : candidate,
-      ),
+                actionId: makeActionId(
+                  candidate.type,
+                  candidate.side,
+                  {
+                    ...(candidate.payload ?? {}),
+                    v1922EdgerunnerTempsInstallAction: true,
+                  },
+                  candidate.source,
+                ),
+              }
+            : candidate,
+        ),
     );
   }
   return filterActionsForRestrictedExtraActions(state, "corp", actions);

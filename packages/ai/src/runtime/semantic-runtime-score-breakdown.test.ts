@@ -58,6 +58,37 @@ describe("semantic runtime score breakdown", () => {
       reason: "3",
     });
   });
+
+  it("does not subtract an immediate economy action cost after net projection", () => {
+    const action = legalAction("paid-economy", "play_event", {
+      costs: [{ credits: 2 }],
+      payload: { gainCreditsAmount: 5 },
+    });
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [action],
+      observerSide: "runner",
+      stateVersion: 7,
+    });
+    if (!candidate) throw new Error("Expected economy candidate");
+
+    const breakdown = buildSemanticRuntimeScoreBreakdown({
+      input: decisionInput([action]),
+      action,
+      scopeId: "test_scope",
+      actionSemanticCandidate: candidate,
+      dependencies: {
+        contextComponents: () => [],
+        actionCreditCost: () => 2,
+      },
+    });
+
+    expect(candidate.economyProjection?.netLiquidCreditGain).toBe(3);
+    expect(
+      breakdown.find(
+        (component) => component.key === "semantic_credit_cost_penalty",
+      ),
+    ).toMatchObject({ value: 0, reason: "0" });
+  });
 });
 
 function legalAction(

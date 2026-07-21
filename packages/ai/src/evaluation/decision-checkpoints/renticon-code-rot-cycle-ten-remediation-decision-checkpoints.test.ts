@@ -23,7 +23,7 @@ describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("keeps the last-credit advance when no unrezzed remote ice needs funding", () => {
+  it("uses the superior burst line or advances when the scoreline is safe", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(safeLowCreditAdvanceJson) as AiDecisionCheckpointV1,
     );

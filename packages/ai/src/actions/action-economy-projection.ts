@@ -3,7 +3,7 @@ import type {
   ActionEconomyProjection,
   ActionSemanticCandidate,
 } from "../action-semantic-candidate-types";
-import { knownNonCreditGainActionSemantics } from "./action-effect-classification";
+import { isBasicCreditAction } from "./action-effect-classification";
 
 export function applyActionEconomyProjection(
   candidate: ActionSemanticCandidate,
@@ -26,12 +26,7 @@ export function actionEconomyProjectionFor(
   action: LegalAction,
 ): ActionEconomyProjection {
   const payloadGain = positiveNumber(action.payload?.gainCreditsAmount);
-  const basicActionGain =
-    action.type === "gain_credit" &&
-    action.source === "basic_action" &&
-    knownNonCreditGainActionSemantics(action) === undefined
-      ? 1
-      : undefined;
+  const basicActionGain = isBasicCreditAction(action) ? 1 : undefined;
   const grossLiquidCreditGain = payloadGain ?? basicActionGain;
   const creditCost = Math.max(0, candidate.costProfile.creditCost ?? 0);
   const clickCost = Math.max(0, candidate.costProfile.clickCost ?? 0);
@@ -117,10 +112,7 @@ export function actionEconomyProjectionFor(
     cardsConsumed,
     netHandDelta,
     ...(payoutMode !== undefined ? { payoutMode } : {}),
-    repeatable:
-      action.type === "gain_credit" && action.source === "basic_action"
-        ? true
-        : "unknown",
+    repeatable: isBasicCreditAction(action) ? true : "unknown",
     reliability:
       source === "legal_action_payload" || source === "basic_action_contract"
         ? "guaranteed"

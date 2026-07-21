@@ -28,6 +28,7 @@ import {
   corpInputWithHqCardsAndServers,
   corpInputWithRemoteAgenda,
   corpInputWithScoreAreaCards,
+  economySemanticCandidate,
   dayShiftCard,
   economyOperationCard,
   fracterBreaker,
@@ -577,7 +578,6 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
 
     expect(drawComponents).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ key: "corp_operation_burst_economy" }),
         expect.objectContaining({
           key: "corp_board_triage_mismatch",
           value: -2400,
@@ -1377,20 +1377,40 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       nightShift,
       "basic_install",
       testDependencies(),
-      semanticCandidate(
-        nightShift.actionId,
-        "play.corp_operation",
-        ["economy.corp_credit_burst"],
-        "play_operation",
-      ),
+      economySemanticCandidate(nightShift, 2, { cardsDrawn: 1 }),
     );
 
     expect(components).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_operation_burst_economy",
-          value: 1890,
-          reason: expect.stringContaining("operation_draw:1"),
+          key: "economy_credit_base",
+          value: 150,
+          reason: expect.stringContaining("economy_net_liquid_gain:2"),
+        }),
+      ]),
+    );
+  });
+
+  it("rejects projected economy draw when R&D cannot supply it", () => {
+    const nightShift = corpAction(
+      "play-night-shift",
+      "play_operation",
+      {},
+      "corp_night_shift",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithDeckoutFlood(0, [nightShiftCard()], 0, [nightShift]),
+      nightShift,
+      "basic_install",
+      testDependencies(),
+      economySemanticCandidate(nightShift, 2, { cardsDrawn: 1 }),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_economy_draw_exceeds_rd",
+          value: -4000,
         }),
       ]),
     );
@@ -1561,7 +1581,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
     const creditConsolidation = corpAction(
       "play-credit-consolidation",
       "play_operation",
-      {},
+      { gainCreditsAmount: 15 },
       "corp_credit_consolidation",
     );
     const components = semanticRuntimeCorpScoreComponents(
@@ -1581,26 +1601,30 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       creditConsolidation,
       "basic_install",
       testDependencies(),
+      economySemanticCandidate(creditConsolidation, 15, { creditCost: 10 }),
     );
 
     expect(components).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_operation_burst_economy",
-          value: 2250,
-          reason: expect.stringContaining("operation_gain:15"),
+          key: "economy_credit_base",
+          value: 275,
+          reason: expect.stringContaining("economy_net_liquid_gain:5"),
+        }),
+        expect.objectContaining({
+          key: "economy_net_hand_delta",
+          value: -40,
         }),
       ]),
     );
-    expect(JSON.stringify(components)).toContain("burst_economy_net_gain:5");
-    expect(JSON.stringify(components)).toContain("operation_action_value:5");
+    expect(JSON.stringify(components)).toContain("economy_net_liquid_gain:5");
   });
 
   it("scores German immediate credit and draw operations", () => {
     const creditSurge = corpAction(
       "play-credit-surge",
       "play_operation",
-      {},
+      { gainCreditsAmount: 7 },
       "corp_credit_surge",
     );
     const archivePlanning = corpAction(
@@ -1627,6 +1651,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       creditSurge,
       "basic_install",
       testDependencies(),
+      economySemanticCandidate(creditSurge, 7, { creditCost: 1 }),
     );
     const drawComponents = semanticRuntimeCorpScoreComponents(
       corpInputWithHqCards(
@@ -1650,20 +1675,14 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
     expect(creditComponents).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_operation_burst_economy",
-          value: 2430,
-          reason: expect.stringContaining("burst_economy_net_gain:6"),
+          key: "economy_credit_base",
+          value: 305,
+          reason: expect.stringContaining("economy_net_liquid_gain:6"),
         }),
       ]),
     );
-    expect(drawComponents).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "corp_operation_burst_economy",
-          value: 1890,
-          reason: expect.stringContaining("operation_draw:3"),
-        }),
-      ]),
+    expect(drawComponents.map((component) => component.key)).not.toContain(
+      "economy_credit_base",
     );
   });
 
@@ -1733,7 +1752,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
     ).toBe(false);
   });
 
-  it("scores value-two Corp draw operations above basic draw without burst tier", () => {
+  it("leaves pure draw operations to the draw scorer", () => {
     const simpleDraw = corpAction(
       "play-simple-draw",
       "play_operation",
@@ -1759,17 +1778,8 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       testDependencies(),
     );
 
-    expect(components).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "corp_operation_burst_economy",
-          value: 1530,
-          reason: expect.stringContaining("operation_action_value:2"),
-        }),
-      ]),
-    );
-    expect(JSON.stringify(components)).toContain(
-      "operation_economy_tier:efficient",
+    expect(components.map((component) => component.key)).not.toContain(
+      "economy_credit_base",
     );
   });
 
@@ -1806,7 +1816,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
     ).toBe(false);
   });
 
-  it("bounds visible drawback operation rules text to exact bad publicity tokens", () => {
+  it("does not derive economy value from near-match rules text", () => {
     const noisyOperation = corpAction(
       "play-noisy-publicity",
       "play_operation",
@@ -1836,7 +1846,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       components.some(
         (component) => component.key === "corp_operation_burst_economy",
       ),
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("scores advance, rez and install actions that match Corp tactical goals", () => {

@@ -113,6 +113,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "amount",
   "gainedCredits",
   "gainCreditsAmount",
+  "drawCardsAmount",
   "addedCounterAmount",
   "addCounterAmount",
   "removedCounterAmount",

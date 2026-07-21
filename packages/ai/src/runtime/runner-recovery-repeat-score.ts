@@ -3,6 +3,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import { isBasicCreditAction } from "../actions/action-effect-classification";
 
 type RunnerRecoveryFundingNeedContext = {
   active: boolean;
@@ -82,7 +83,7 @@ export function runnerLateNoFundingCreditRepeatScoreComponent(
   dependencies: RunnerLateNoFundingCreditRepeatScoreDependencies,
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
-  if (action.type !== "gain_credit") return undefined;
+  if (!isBasicCreditAction(action)) return undefined;
   const recentCredits = dependencies.recentBasicCreditActions(input);
   if (recentCredits <= 0) return undefined;
   const fundingNeed = dependencies.fundingNeedContext(input);

@@ -836,6 +836,21 @@ export function semanticRuntimeDebugTacticalPlanItems(
       selectedPlan?.planId === plan.planId,
     ),
   );
+  const portfolioEntries = planRuntime.planPortfolio
+    ? [
+        planRuntime.planPortfolio.interrupt,
+        planRuntime.planPortfolio.foreground,
+        ...planRuntime.planPortfolio.backgrounds,
+      ].filter((entry) => entry !== undefined)
+    : [];
+  const selectedPortfolioEntry = portfolioEntries.find(
+    (entry) => entry.sourcePlanId === selectedPlan?.planId,
+  );
+  const selectedCreditDemands =
+    selectedPlan?.creditDemands ?? selectedPortfolioEntry?.creditDemands ?? [];
+  const selectedFundingRoutes = selectedPortfolioEntry?.selectedFundingRoute
+    ? [selectedPortfolioEntry.selectedFundingRoute]
+    : (selectedPortfolioEntry?.fundingRoutes ?? []).slice(0, 3);
   return [
     ...(previousPlan
       ? [
@@ -883,6 +898,25 @@ export function semanticRuntimeDebugTacticalPlanItems(
             .map((entry) => `why_this_action:${entry}`),
         ]
       : []),
+    ...selectedCreditDemands.map(
+      (demand) =>
+        `credit_demand:${demand.demandId}:priority=${demand.priority}:hardness=${demand.hardness}:gap=${demand.gap}:deadline=${demand.deadline}`,
+    ),
+    ...selectedFundingRoutes.map(
+      (route) =>
+        `funding_route:${route.routeId}:status=${route.status}:reliability=${route.reliability}:horizon=${route.horizon}:gap=${route.projectedGap}:steps=${route.steps
+          .map((step) => step.actionId ?? step.projectionId ?? step.stepId)
+          .join("|")}`,
+    ),
+    ...(selectedPortfolioEntry
+      ? [
+          `funding_resource_reservation:credits=${selectedPortfolioEntry.resourceReservation.credits}:requested=${selectedPortfolioEntry.resourceReservation.requestedCredits ?? selectedPortfolioEntry.resourceReservation.credits}:shortfall=${selectedPortfolioEntry.resourceReservation.shortfallCredits ?? 0}:clicks=${selectedPortfolioEntry.resourceReservation.clicks}`,
+          `funding_hard_blocker_resolved:${selectedPortfolioEntry.fundingCoverageResolvesHardBlocker === true}`,
+        ]
+      : []),
+    ...(selectedMapping?.rationale ?? [])
+      .filter((entry) => entry.startsWith("economy_action_dominated:"))
+      .map((entry) => `economy_dominance:${entry}`),
     ...planRuntime.blockedPlans
       .slice(0, 3)
       .map(

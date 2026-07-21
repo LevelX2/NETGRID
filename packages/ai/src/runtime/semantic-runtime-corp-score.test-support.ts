@@ -511,3 +511,57 @@ export function semanticCandidate(
     evidence: [...actionTacticSignals],
   };
 }
+
+export function economySemanticCandidate(
+  action: LegalAction,
+  grossLiquidCreditGain: number,
+  options: {
+    creditCost?: number;
+    cardsDrawn?: number;
+    sourceDefinitionId?: string;
+    payoutMode?: "fixed" | "all_available";
+  } = {},
+): ActionSemanticCandidate {
+  const cardsDrawn = options.cardsDrawn ?? 0;
+  const cardsConsumed =
+    action.type === "play_operation" || action.type === "play_event" ? 1 : 0;
+  const creditCost = options.creditCost ?? 0;
+  return {
+    ...semanticCandidate(
+      action.actionId,
+      "economy.gain_credit",
+      ["economy.action", "economy.recover"],
+      action.type,
+    ),
+    ...(options.sourceDefinitionId
+      ? { sourceDefinitionId: options.sourceDefinitionId }
+      : {}),
+    costProfile: {
+      costKnownStatus: "known",
+      clickCost:
+        action.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) || 1,
+      creditCost,
+      additionalCosts: [],
+    },
+    economyProjection: {
+      schemaVersion: "action-economy-projection-v1",
+      kind: "immediate_liquid",
+      timing: "immediate",
+      creditRestriction: "general",
+      clickCost:
+        action.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) || 1,
+      creditCost,
+      grossLiquidCreditGain,
+      netLiquidCreditGain: grossLiquidCreditGain - creditCost,
+      cardsDrawn,
+      cardsConsumed,
+      netHandDelta: cardsDrawn - cardsConsumed,
+      payoutMode: options.payoutMode ?? "fixed",
+      repeatable: false,
+      reliability: "guaranteed",
+      source: "legal_action_payload",
+      confidence: "high",
+      evidence: ["test_structured_economy_projection"],
+    },
+  };
+}

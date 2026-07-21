@@ -40,7 +40,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("keeps concrete blocking ICE development ahead of speculative draw", () => {
+  it("funds expensive blocking ICE instead of installing it unrezzably", () => {
     const checkpoint = fixture(defensiveDrawD9Json);
     const shock =
       checkpoint.engine.testOnlyGameState.cardInstances[
@@ -52,8 +52,8 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
       checkpoint.engine.testOnlyGameState,
     );
     checkpoint.expectation = {
-      acceptableActions: [{ type: "install_card" }],
-      forbiddenActions: [{ type: "draw_card" }],
+      acceptableActions: [{ type: "gain_credit" }],
+      forbiddenActions: [{ type: "draw_card" }, { type: "install_card" }],
     };
 
     const result = runAiDecisionCheckpoint(checkpoint);
@@ -106,7 +106,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
       decisions.every(
         (decision) =>
           decision.decisionDebug?.decisionChain?.rawScoreWinner?.actionId ===
-          "corp.draw_card",
+          "corp.gain_credit",
       ),
     ).toBe(true);
   });

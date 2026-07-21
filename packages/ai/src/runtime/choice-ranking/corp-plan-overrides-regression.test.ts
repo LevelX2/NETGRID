@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   strongerExistingCorpOverrideMustBePreserved,
   tacticalPlanCorpScoreConversionBlocksOffPlanOverride,
+  tacticalPlanCorpStrategyReserveBlocksNegativeOverride,
+  tacticalPlanSoftFundingShouldYieldToFiniteEconomy,
 } from "./corp-plan-overrides";
 import {
   choice,
+  createRezFundingMapping,
   legalAction,
   scoreConversionMapping,
   scoreComponentEvidence,
@@ -56,5 +59,52 @@ describe("Corp plan override preservation", () => {
         new Set([unsafeAgenda.actionId]),
       ),
     ).toBe(false);
+  });
+
+  it("lets a stronger finite economy setup beat soft basic rez funding", () => {
+    const basicCredit = legalAction("gain", "gain_credit");
+    const bbs = legalAction("install-bbs", "install_card");
+    const mappedChoice = choice(basicCredit, 1_236, [], {
+      key: "economy_credit_base",
+      value: 100,
+      reason: "one immediate credit",
+    });
+    const overrideChoice = choice(bbs, 1_546, [], {
+      key: "corp_install_economy",
+      value: 500,
+      reason: "finite economy setup",
+    });
+
+    expect(
+      tacticalPlanSoftFundingShouldYieldToFiniteEconomy(
+        createRezFundingMapping([basicCredit]),
+        mappedChoice,
+        overrideChoice,
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps strategic reserve funding over a negative off-plan install", () => {
+    const basicCredit = legalAction("gain", "gain_credit");
+    const deadInstall = legalAction("dead-install", "install_card");
+    const mapping = createRezFundingMapping([basicCredit]);
+    mapping.plan.type = "corp.fund_strategy_reserve";
+    mapping.plan.planId = "corp.fund_strategy_reserve";
+    mapping.step.kind = "gain_credits";
+    const mappedChoice = choice(basicCredit, -1_581, [], {
+      key: "economy_credit_base",
+      value: 100,
+      reason: "economy_net_liquid_gain:1",
+    });
+    const overrideChoice = choice(deadInstall, -926);
+
+    expect(
+      tacticalPlanCorpStrategyReserveBlocksNegativeOverride(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        new Set([basicCredit.actionId]),
+      ),
+    ).toBe(true);
   });
 });

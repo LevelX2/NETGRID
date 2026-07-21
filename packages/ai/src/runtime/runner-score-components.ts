@@ -11,14 +11,6 @@ import {
 } from "./runner-basic-action-penalty-score";
 import { runnerActivatedAgendaScoreComponents } from "./runner-activated-agenda-score";
 import {
-  runnerCreditNeedScoreComponents,
-  type RunnerCreditNeedScoreDependencies,
-} from "./runner-credit-need-score";
-import {
-  runnerCreditYieldScoreComponent,
-  type RunnerCreditYieldScoreDependencies,
-} from "./runner-credit-yield-score";
-import {
   runnerDamageLockedHandScoreComponents,
   runnerDamageThreatRunScoreComponent,
   runnerKnownAccessDamageScoreComponent,
@@ -54,18 +46,22 @@ import {
 } from "./runner-tag-cleanup-score";
 import { runnerDrawTaxLiabilityScoreComponent } from "./runner-draw-tax-liability-score";
 import { runnerTerminalRemoteToolScoreComponent } from "./runner-terminal-remote-tool-score";
-import { runnerRunLockReleaseScoreComponent } from "./runner-run-lock-release-score";
+import {
+  runnerRunLockReleaseScoreComponent,
+  runnerSpeculativeRunLockReleaseScoreComponent,
+} from "./runner-run-lock-release-score";
 import { runnerDrawOverflowScoreComponent } from "./runner-draw-overflow-score";
+import { runnerHandOverflowReliefScoreComponent } from "./runner-hand-overflow-relief-score";
 import { runnerHostedInstallScoreComponent } from "./runner-hosted-install-score";
+import { economyRuntimeScoreComponents } from "./economy-score-components";
+import type { CreditDemand } from "../plans/credit-demand";
 
 export type RunnerScoreComponentsDependencies = {
   loanLiabilityAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => RunnerLoanLiabilityScoreAssessment | undefined;
-  creditYield: RunnerCreditYieldScoreDependencies;
   goalFit: RunnerGoalFitScoreDependencies;
-  handFundingTarget: RunnerCreditNeedScoreDependencies["handFundingTarget"];
   recoveryCommitment: RunnerRecoveryCommitmentScoreDependencies;
   install: RunnerInstallScoreDependencies;
   startRun: RunnerStartRunScoreDependencies;
@@ -79,6 +75,7 @@ export type RunnerScoreComponentsContext = {
     action: LegalAction,
     scopeId: string,
     actionSemanticCandidate?: ActionSemanticCandidate,
+    creditDemands?: readonly CreditDemand[],
   ) => AiDecisionScoreComponent[];
 };
 
@@ -90,6 +87,7 @@ export function createRunnerScoreComponentsContext(
     action: LegalAction,
     scopeId: string,
     actionSemanticCandidate?: ActionSemanticCandidate,
+    creditDemands: readonly CreditDemand[] = [],
   ): AiDecisionScoreComponent[] {
     return runnerScoreComponents(
       input,
@@ -97,6 +95,7 @@ export function createRunnerScoreComponentsContext(
       scopeId,
       actionSemanticCandidate,
       dependencies,
+      creditDemands,
     );
   }
 
@@ -109,11 +108,18 @@ export function runnerScoreComponents(
   scopeId: string,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
   dependencies: RunnerScoreComponentsDependencies,
+  creditDemands: readonly CreditDemand[] = [],
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
+  components.push(
+    ...economyRuntimeScoreComponents(actionSemanticCandidate, creditDemands),
+  );
   components.push(...runnerActivatedAgendaScoreComponents(input, action));
   const runLockRelease = runnerRunLockReleaseScoreComponent(input, action);
   if (runLockRelease) components.push(runLockRelease);
+  const speculativeRunLockRelease =
+    runnerSpeculativeRunLockReleaseScoreComponent(input, action);
+  if (speculativeRunLockRelease) components.push(speculativeRunLockRelease);
   const terminalRemoteTool = runnerTerminalRemoteToolScoreComponent(
     input,
     action,
@@ -150,20 +156,18 @@ export function runnerScoreComponents(
   if (tagCleanupFallback) components.push(tagCleanupFallback);
   const drawTaxLiability = runnerDrawTaxLiabilityScoreComponent(input, action);
   if (drawTaxLiability) components.push(drawTaxLiability);
-  const drawOverflow = runnerDrawOverflowScoreComponent(input, action);
-  if (drawOverflow) components.push(drawOverflow);
-  const creditYield = runnerCreditYieldScoreComponent(
+  const drawOverflow = runnerDrawOverflowScoreComponent(
     input,
     action,
-    dependencies.creditYield,
+    actionSemanticCandidate,
   );
-  if (creditYield) components.push(creditYield);
-  components.push(
-    ...runnerCreditNeedScoreComponents(input, action, {
-      handFundingTarget: dependencies.handFundingTarget,
-      creditYield: dependencies.creditYield,
-    }),
+  if (drawOverflow) components.push(drawOverflow);
+  const handOverflowRelief = runnerHandOverflowReliefScoreComponent(
+    input,
+    action,
+    actionSemanticCandidate,
   );
+  if (handOverflowRelief) components.push(handOverflowRelief);
   components.push(
     ...runnerRecoveryCommitmentScoreComponents(
       input,

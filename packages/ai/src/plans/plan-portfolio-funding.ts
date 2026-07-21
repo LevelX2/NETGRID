@@ -198,6 +198,28 @@ export function fundingActionIdsForEntry(entry: PlanPortfolioEntry): string[] {
   return firstLegal?.actionId ? [firstLegal.actionId] : [];
 }
 
+export function planPortfolioEntryHasGuaranteedFundingRoute(params: {
+  entry: PlanPortfolioEntry;
+  candidates: readonly ActionSemanticCandidate[];
+  remainingClicks: number;
+  futureFundingProjections?: readonly FutureFundingProjection[];
+}): boolean {
+  if (params.entry.lifecycle !== "blocked") return false;
+  const demand = primaryCreditDemand(params.entry.creditDemands ?? []);
+  if (!demand || demand.gap <= 0) return false;
+  const search = searchFundingRoutes({
+    demand,
+    candidates: params.candidates,
+    remainingClicks: Math.max(0, Math.floor(params.remainingClicks)),
+    ...(params.futureFundingProjections
+      ? { futureProjections: params.futureFundingProjections }
+      : {}),
+  });
+  return demand.hardness === "hard"
+    ? creditDemandHardBlockerIsResolved(demand, search.bestRoute)
+    : search.bestRoute.status === "covered_guaranteed";
+}
+
 function primaryCreditDemand(
   demands: readonly CreditDemand[],
 ): CreditDemand | undefined {

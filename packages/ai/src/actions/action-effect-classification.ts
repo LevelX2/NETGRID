@@ -5,6 +5,25 @@ export function actionProvidesCredits(action: LegalAction): boolean {
   return !isKnownNonCreditGainAction(action);
 }
 
+export function isBasicCreditAction(action: LegalAction): boolean {
+  return (
+    action.type === "gain_credit" &&
+    action.source === "basic_action" &&
+    actionProvidesCredits(action)
+  );
+}
+
+export function actionHasImmediateCreditGain(action: LegalAction): boolean {
+  if (actionProvidesCredits(action)) return true;
+  const amount = action.payload?.gainCreditsAmount;
+  return (
+    typeof amount === "number" &&
+    Number.isFinite(amount) &&
+    amount > 0 &&
+    action.payload?.cardImplementationAddsHostedCredits !== true
+  );
+}
+
 export function knownNonCreditGainActionSemantics(action: LegalAction):
   | {
       semanticActionType: string;

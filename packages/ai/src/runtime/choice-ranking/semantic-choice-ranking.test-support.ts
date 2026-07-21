@@ -74,6 +74,45 @@ export function finiteEconomyMapping(
   };
 }
 
+export function createRezFundingMapping(
+  actions: LegalAction[],
+): PlanStepMappingResult {
+  const step = createPlanStep({
+    stepId: "corp.rez_defense:hq:fund:build_rez_reserve",
+    kind: "build_rez_reserve",
+    desiredActionSemantics: ["economy.gain_credit"],
+    actionCandidateIds: actions.map((action) => action.actionId),
+  });
+  return {
+    plan: createTacticalPlan({
+      planId: "corp.rez_defense:hq:fund",
+      side: "corp",
+      type: "corp.rez_defense",
+      status: "progressing",
+      priority: 1_006,
+      horizonTurns: 1,
+      target: { kind: "server", id: "hq" },
+      currentStep: step,
+      blockers: [
+        {
+          blockerId: "corp.rez_defense:hq:fund:missing_rez_reserve",
+          kind: "missing_rez_reserve",
+          severity: "soft",
+          removalStepKind: "build_rez_reserve",
+          evidence: ["save for a later HQ rez"],
+        },
+      ],
+      stateVersion: 1,
+    }),
+    step,
+    status: "matched",
+    actionCandidateIds: actions.map((action) => action.actionId),
+    actionPriorities: [],
+    legalActions: actions,
+    rationale: [],
+  };
+}
+
 export function scorelineSupportMapping(
   actions: LegalAction[],
   overrides: {

@@ -1180,9 +1180,7 @@
             "kind": "remote",
             "label": "Remote 2",
             "ice": [],
-            "root": [
-              "corp_onr_v1_325_hacker-tracker-central_1"
-            ]
+            "root": ["corp_onr_v1_325_hacker-tracker-central_1"]
           }
         ]
       },
@@ -1240,12 +1238,8 @@
           "runner_onr_v1_177_the-short-circuit_1",
           "runner_onr_v1_011_cloak_1"
         ],
-        "heap": [
-          "runner_onr_v1_093_if-you-want-it-done-right_2"
-        ],
-        "scoreArea": [
-          "corp_onr_v1_195_corporate-retreat_1"
-        ],
+        "heap": ["runner_onr_v1_093_if-you-want-it-done-right_2"],
+        "scoreArea": ["corp_onr_v1_195_corporate-retreat_1"],
         "rig": {
           "programs": [
             "runner_onr_v1_045_newsgroup-filter_1",
@@ -6687,9 +6681,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 74,
-      "blockerIds": [
-        "runner.hq_pressure:reserve_shortfall"
-      ],
+      "blockerIds": ["runner.hq_pressure:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 135,
       "state": {
@@ -6893,9 +6885,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -7333,10 +7323,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7445,9 +7432,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -7533,9 +7518,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -7566,10 +7549,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7801,6 +7781,14 @@
     "acceptableActions": [
       {
         "actionId": "runner.activated_card_ability.runner_onr_v1_045_newsgroup-filter_1.runner_onr_v1_045_newsgroup-filter_1.activated.0"
+      },
+      {
+        "actionId": "runner.start_run.remote_2"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "type": "gain_credit"
       }
     ]
   }

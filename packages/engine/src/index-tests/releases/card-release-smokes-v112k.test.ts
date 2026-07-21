@@ -515,6 +515,15 @@ describe("V1.1.2K Card Release", () => {
 
     const beforeNightShiftCards = operationState.corp.hq.length;
     const beforeNightShiftCredits = operationState.corp.credits;
+    const nightShiftAction = getLegalActions(operationState, "corp").find(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(operationState, action) === "onr_v1_295_night-shift",
+    );
+    expect(nightShiftAction?.payload).toMatchObject({
+      gainCreditsAmount: 2,
+      drawCardsAmount: 1,
+    });
     operationState = apply(
       operationState,
       "corp",

@@ -1,5 +1,6 @@
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
+import { isBasicCreditAction } from "../../actions/action-effect-classification";
 import {
   mapPlanStepToLegalActions,
   type PlanStepMappingResult,
@@ -34,6 +35,7 @@ export function tacticalPlanOverrideReason(input: {
   lowValueRecoveryShouldYield: boolean;
   inferiorRunTargetShouldYield: boolean;
   corpBoardTriageMismatchShouldYield: boolean;
+  softFundingShouldYieldToFiniteEconomy: boolean;
   backgroundBankBuildShouldYield: boolean;
   committedBankBuildShouldYield: boolean;
   hardInterruptShouldYield: boolean;
@@ -74,6 +76,10 @@ export function tacticalPlanOverrideReason(input: {
     [
       input.corpBoardTriageMismatchShouldYield,
       "corp_board_triage_mismatch_yield",
+    ],
+    [
+      input.softFundingShouldYieldToFiniteEconomy,
+      "soft_funding_finite_economy_yield",
     ],
     [
       input.backgroundBankBuildShouldYield,
@@ -158,7 +164,7 @@ export function tacticalPlanCoverageMappingBlocksRunOverride(
     mapping.plan.type === "runner.obtain_breaker_coverage" &&
     overrideChoice.action.type === "start_run" &&
     !mappedActionIds.has(overrideChoice.action.actionId) &&
-    mappedChoice.action.type !== "gain_credit" &&
+    !semanticRuntimeChoiceIsImmediateEconomy(mappedChoice) &&
     mappedChoice.action.type !== "draw_card"
   ) {
     return mappedChoice.score > 0;
@@ -227,7 +233,7 @@ export function tacticalPlanCoverageMappingBlocksEconomyOverride(
   return (
     mapping.plan.type === "runner.obtain_breaker_coverage" &&
     mappedChoice.action.type === "draw_card" &&
-    overrideChoice.action.type === "gain_credit" &&
+    semanticRuntimeChoiceIsImmediateEconomy(overrideChoice) &&
     scoreGap <= Math.max(threshold, 900)
   );
 }
@@ -452,6 +458,17 @@ export function semanticRuntimeChoiceHasAnyScoreComponent(
 ): boolean {
   return keys.some((key) =>
     semanticRuntimeChoiceHasScoreComponent(choice, key),
+  );
+}
+
+export function semanticRuntimeChoiceIsImmediateEconomy(
+  choice: SemanticRuntimeChoice,
+): boolean {
+  return (
+    choice.scoreBreakdown.some(
+      (component) =>
+        component.key === "economy_credit_base" && component.value > 0,
+    ) || isBasicCreditAction(choice.action)
   );
 }
 

@@ -16,13 +16,25 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const BEHAVIOR_FIXTURES = [
   ["defers dead first positional ICE in Seed 002", deadFirstSeed002Json],
-  ["defers unfunded dead first positional ICE in Seed 004", deadFirstSeed004Json],
-  ["continues the protected Seed 003 scoreline at d208", scorelineSeed003D208Json],
-  ["stops overbuilding the protected Seed 003 scoreline at d219", scorelineSeed003D219Json],
+  [
+    "defers unfunded dead first positional ICE in Seed 004",
+    deadFirstSeed004Json,
+  ],
+  [
+    "continues the protected Seed 003 scoreline at d208",
+    scorelineSeed003D208Json,
+  ],
+  [
+    "stops overbuilding the protected Seed 003 scoreline at d219",
+    scorelineSeed003D219Json,
+  ],
   ["continues the Seed 004 scoreline at d55", scorelineSeed004D55Json],
   ["continues the Seed 004 scoreline at d65", scorelineSeed004D65Json],
   ["continues the late Seed 004 scoreline at d247", scorelineSeed004D247Json],
-  ["protects the exposed central at Seed 004 matchpoint", matchpointSeed004Json],
+  [
+    "protects the exposed central at Seed 004 matchpoint",
+    matchpointSeed004Json,
+  ],
 ] as const;
 
 describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
@@ -34,41 +46,43 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
   it.each([
     ["Seed 001", nestedChoiceSeed001Json],
     ["Seed 005", nestedChoiceSeed005Json],
-  ] as const)("resolves the nested target choice in %s without an invariant", (_label, json) => {
-    const checkpoint = fixture(json);
-    const decisionResult = runAiDecisionCheckpoint(checkpoint);
-    expect(
-      decisionResult.ok,
-      `${decisionResult.code}: ${decisionResult.message}`,
-    ).toBe(true);
-    expect(decisionResult.selectedAction).toBeDefined();
-    const engineResult = applyAction(
-      structuredClone(checkpoint.engine.testOnlyGameState),
-      {
-        matchId: checkpoint.source.matchId!,
-        side: checkpoint.actor,
-        actionId: decisionResult.selectedAction!.actionId,
-        clientKnownStateVersion: checkpoint.engine.stateVersion,
-        ...(decisionResult.decision?.selectedChoices
-          ? { selectedChoices: decisionResult.decision.selectedChoices }
-          : {}),
-        idempotencyKey: `checkpoint-${checkpoint.checkpointId}`,
-      },
-    );
-    expect(
-      engineResult.ok,
-      engineResult.ok
-        ? "nested choice applied"
-        : `${engineResult.error.code}: ${engineResult.error.message}`,
-    ).toBe(true);
-  });
+  ] as const)(
+    "resolves the nested target choice in %s without an invariant",
+    (_label, json) => {
+      const checkpoint = fixture(json);
+      const decisionResult = runAiDecisionCheckpoint(checkpoint);
+      expect(
+        decisionResult.ok,
+        `${decisionResult.code}: ${decisionResult.message}`,
+      ).toBe(true);
+      expect(decisionResult.selectedAction).toBeDefined();
+      const engineResult = applyAction(
+        structuredClone(checkpoint.engine.testOnlyGameState),
+        {
+          matchId: checkpoint.source.matchId!,
+          side: checkpoint.actor,
+          actionId: decisionResult.selectedAction!.actionId,
+          clientKnownStateVersion: checkpoint.engine.stateVersion,
+          ...(decisionResult.decision?.selectedChoices
+            ? { selectedChoices: decisionResult.decision.selectedChoices }
+            : {}),
+          idempotencyKey: `checkpoint-${checkpoint.checkpointId}`,
+        },
+      );
+      expect(
+        engineResult.ok,
+        engineResult.ok
+          ? "nested choice applied"
+          : `${engineResult.error.code}: ${engineResult.error.message}`,
+      ).toBe(true);
+    },
+  );
 
   it("still installs positional outer ICE when a funded inner layer exists", () => {
     const checkpoint = mutateFixture(deadFirstSeed004Json, (candidate) => {
       const state = candidate.engine.testOnlyGameState;
-      const innerIceId = state.corp.servers.find(
-        (server) => server.id === "hq",
-      )?.ice[0];
+      const innerIceId = state.corp.servers.find((server) => server.id === "hq")
+        ?.ice[0];
       if (!innerIceId) throw new Error("Missing inner ICE for control");
       const hq = state.corp.servers.find((server) => server.id === "hq")!;
       hq.ice = hq.ice.filter((cardId) => cardId !== innerIceId);
@@ -102,7 +116,13 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     const checkpoint = mutateFixture(scorelineSeed004D55Json, (candidate) => {
       candidate.engine.testOnlyGameState.runner.credits = 30;
       candidate.expectation = {
-        acceptableActions: [{ type: "gain_credit" }],
+        acceptableActions: [
+          {
+            type: "play_operation",
+            sourceDefinitionId: "onr_v1_290_efficiency-experts",
+          },
+        ],
+        forbiddenActions: [{ type: "advance_card" }],
       };
     });
 

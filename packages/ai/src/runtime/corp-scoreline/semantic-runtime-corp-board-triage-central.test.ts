@@ -90,6 +90,64 @@ describe("semantic runtime corp board triage central protection", () => {
     expect(endTurnComponent?.reason).toContain("triage_action:end_turn");
   });
 
+  it("funds central protection when the legal ICE cannot yet be rezzed", () => {
+    const rdWall = {
+      ...corpAction(
+        "install-rd-wall",
+        "install_card",
+        { placement: "ice", serverId: "rd" },
+        "rd-wall",
+      ),
+      costs: [{ clicks: 1, credits: 1 }],
+    } as LegalAction;
+    const gainCredit = corpAction("gain-credit", "gain_credit", {
+      gainCreditsAmount: 1,
+    });
+    const input = corpInput({
+      corpCredits: 5,
+      corpHq: [
+        iceCard("rd-wall", {
+          title: "Wall of Ice",
+          definitionId: "onr_v1_278_wall-of-ice",
+          subtypes: ["Wall"],
+          rulesText: "End the run.",
+          rezCost: 6,
+        }),
+      ],
+      runnerAgendaPoints: 5,
+      legalActions: [rdWall, gainCredit],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", []),
+      ],
+    });
+    const dependencies = testDependencies({
+      actionCreditCost: (action) =>
+        action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0),
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const creditComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      gainCredit,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_rd",
+      targetServerId: "rd",
+    });
+    expect(creditComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+  });
+
   it("protects open HQ before forcing remote scoreline when HQ agenda flood has runner exposure", () => {
     const hqIce = corpAction("install-hq-ice", "install_card", {
       placement: "ice",

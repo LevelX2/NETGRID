@@ -5,7 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
-import { actionProvidesCredits } from "../../actions/action-effect-classification";
+import { actionHasImmediateCreditGain } from "../../actions/action-effect-classification";
 import { rolesMatch } from "../role-match";
 import { visibleCardDefinition } from "../card-definition-lookup";
 import {
@@ -338,7 +338,7 @@ export function actionProvidesEconomy<TConsumer extends string>(
   dependencies: CorpBoardTriageDependencies<TConsumer>,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
-  if (actionProvidesCredits(action)) return true;
+  if (actionHasImmediateCreditGain(action)) return true;
   if (
     action.type === "install_card" &&
     (input.playerView.own.credits > 1 ||
@@ -487,7 +487,7 @@ export function corpBoardTriagePositiveInteger(
 
 export function legalEconomyActionExists(input: AiDecisionInput): boolean {
   return corpLegalActions(input).some((action) =>
-    actionProvidesCredits(action),
+    actionHasImmediateCreditGain(action),
   );
 }
 

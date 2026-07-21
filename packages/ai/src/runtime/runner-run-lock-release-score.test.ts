@@ -1,7 +1,10 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import { runnerRunLockReleaseScoreComponent } from "./runner-run-lock-release-score";
+import {
+  runnerRunLockReleaseScoreComponent,
+  runnerSpeculativeRunLockReleaseScoreComponent,
+} from "./runner-run-lock-release-score";
 
 describe("runnerRunLockReleaseScoreComponent", () => {
   it("converts a payable matchpoint lock into a plausible HQ follow-up", () => {
@@ -108,6 +111,23 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     ).toBeUndefined();
   });
 
+  it("pays an expensive lock when ample liquidity leaves a credible run reserve", () => {
+    const current = input();
+    current.playerView.opponent.agendaPoints = 4;
+    current.playerView.own.credits = 18;
+
+    const component = runnerRunLockReleaseScoreComponent(
+      current,
+      releaseAction(2),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_viable_followup_run_lock_release",
+      value: 1800,
+    });
+    expect(component?.reason).toContain("high_liquidity_release:true");
+  });
+
   it("releases for a reachable public two-point terminal remote", () => {
     const current = input();
     current.playerView.opponent.agendaPoints = 5;
@@ -162,6 +182,18 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     expect(
       runnerRunLockReleaseScoreComponent(current, releaseAction()),
     ).toBeUndefined();
+  });
+
+  it("penalizes a release with no credible follow-up path", () => {
+    const current = input();
+    current.playerView.own.credits = 2;
+
+    expect(
+      runnerSpeculativeRunLockReleaseScoreComponent(current, releaseAction()),
+    ).toMatchObject({
+      key: "runner_speculative_run_lock_release",
+      value: -120,
+    });
   });
 });
 

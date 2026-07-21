@@ -11,7 +11,25 @@ describe("runnerDrawOverflowScoreComponent", () => {
       runnerDrawOverflowScoreComponent(current, drawAction()),
     ).toMatchObject({
       key: "runner_expected_draw_overflow",
-      value: -900,
+      value: -1050,
+    });
+  });
+
+  it("penalizes a played draw card by its projected net hand gain", () => {
+    const action = drawEventAction();
+    const current = input(6, [action, installAction()]);
+
+    expect(
+      runnerDrawOverflowScoreComponent(current, action, {
+        economyProjection: {
+          cardsDrawn: 5,
+          cardsConsumed: 1,
+          netHandDelta: 4,
+        },
+      } as never),
+    ).toMatchObject({
+      key: "runner_expected_draw_overflow",
+      value: -1650,
     });
   });
 
@@ -75,7 +93,7 @@ function drawAction(): LegalAction {
     type: "draw_card",
     source: "basic_action",
     costs: [{ clicks: 1 }],
-  } as LegalAction;
+  } as unknown as LegalAction;
 }
 
 function gainAction(): LegalAction {
@@ -96,4 +114,15 @@ function installAction(): LegalAction {
     source: "example",
     costs: [{ clicks: 1, credits: 1 }],
   } as LegalAction;
+}
+
+function drawEventAction(): LegalAction {
+  return {
+    actionId: "runner.play_event.draw-five",
+    side: "runner",
+    type: "play_event",
+    source: "draw-five",
+    costs: [{ clicks: 1, credits: 2 }],
+    payload: { drawCardsAmount: 5 },
+  } as unknown as LegalAction;
 }

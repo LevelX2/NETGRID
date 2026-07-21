@@ -282,8 +282,6 @@ function economyActionsAreComparable(
     leftProjection.creditCost === rightProjection.creditCost &&
     leftProjection.creditRestriction === rightProjection.creditRestriction &&
     leftProjection.reliability === rightProjection.reliability &&
-    leftProjection.cardsDrawn === rightProjection.cardsDrawn &&
-    leftProjection.cardsConsumed === rightProjection.cardsConsumed &&
     leftProjection.netHandDelta === rightProjection.netHandDelta &&
     leftProjection.payoutMode === rightProjection.payoutMode
   );

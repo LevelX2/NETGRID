@@ -14,6 +14,7 @@ import {
   corpLegalActions,
   corpRemoteScoringStrategyWantsRemoteDevelopment,
   inputWithOpponentDefaults,
+  legalEconomyActionExists,
   normalizedCorpBoardTriageValue,
 } from "./corp-scoreline/semantic-runtime-corp-board-triage-actions";
 import {
@@ -29,6 +30,7 @@ import {
   corpForcedScorelineClockPressure,
   corpRemoteScoringStrategyEvidence,
   corpTriageIsPunishPrimary,
+  fundableCentralProtectionFloor,
   highestPriorityScoreRemoteEntry,
   highestPriorityTriageCentralPressure,
   preScoreCentralProtectionTriage,
@@ -161,7 +163,15 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     centralPressure?.serverId === "rd" &&
     centralPressureSeverity === "critical" &&
     centralServerNeedsProtection(input, "rd") &&
-    concreteCentralProtectionActionExists(input, actions, "rd", dependencies)
+    (concreteCentralProtectionActionExists(
+      input,
+      actions,
+      "rd",
+      dependencies,
+    ) ||
+      (legalEconomyActionExists(input) &&
+        fundableCentralProtectionFloor(input, actions, "rd", dependencies) !==
+          undefined))
   ) {
     const activeScorelineClock = corpActiveScorelineClockPressure(
       input,

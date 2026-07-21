@@ -231,6 +231,25 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
     }
     case "protect_score_remote":
       if (
+        actionProvidesEconomy(
+          input,
+          action,
+          dependencies,
+          actionSemanticCandidate,
+        ) &&
+        input.legalActions.some((candidate) =>
+          actionIsUnfundedTargetProtectionInstall(
+            input,
+            candidate,
+            actionServerIdForAction(input, candidate),
+            triage,
+            dependencies,
+          ),
+        )
+      ) {
+        return "match";
+      }
+      if (
         actionKeepsSideSafeSameTurnScoreCloseoutForAction(
           input,
           action,
@@ -342,6 +361,25 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         : "neutral";
     case "protect_hq":
     case "protect_rd":
+      if (
+        actionProvidesEconomy(
+          input,
+          action,
+          dependencies,
+          actionSemanticCandidate,
+        ) &&
+        input.legalActions.some((candidate) =>
+          actionIsUnfundedTargetProtectionInstall(
+            input,
+            candidate,
+            actionServerIdForAction(input, candidate),
+            triage,
+            dependencies,
+          ),
+        )
+      ) {
+        return "match";
+      }
       if (
         triage.evidence.includes(
           "corp_board_triage_central_override:first_layer_before_speculative_remote",

@@ -4,6 +4,7 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import type { CreditDemand } from "../plans/credit-demand";
 import {
   semanticRuntimeCorpScoreComponents as buildSemanticRuntimeCorpScoreComponents,
   type SemanticRuntimeCorpScoreDependencies,
@@ -15,18 +16,18 @@ export type SemanticRuntimeCorpScoreContext = {
     action: LegalAction,
     scopeId: string,
     actionSemanticCandidate?: ActionSemanticCandidate,
+    creditDemands?: readonly CreditDemand[],
   ) => number;
   semanticRuntimeCorpScoreComponents: (
     input: AiDecisionInput,
     action: LegalAction,
     scopeId: string,
     actionSemanticCandidate?: ActionSemanticCandidate,
+    creditDemands?: readonly CreditDemand[],
   ) => AiDecisionScoreComponent[];
 };
 
-export function createSemanticRuntimeCorpScoreContext<
-  TConsumer extends string,
->(
+export function createSemanticRuntimeCorpScoreContext<TConsumer extends string>(
   dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
   scoreFromComponents: (components: AiDecisionScoreComponent[]) => number,
 ): SemanticRuntimeCorpScoreContext {
@@ -35,6 +36,7 @@ export function createSemanticRuntimeCorpScoreContext<
     action: LegalAction,
     scopeId: string,
     actionSemanticCandidate?: ActionSemanticCandidate,
+    creditDemands: readonly CreditDemand[] = [],
   ): AiDecisionScoreComponent[] {
     return buildSemanticRuntimeCorpScoreComponents(
       input,
@@ -42,17 +44,25 @@ export function createSemanticRuntimeCorpScoreContext<
       scopeId,
       dependencies,
       actionSemanticCandidate,
+      creditDemands,
     );
   }
 
   return {
-    semanticRuntimeCorpScore: (input, action, scopeId, actionSemanticCandidate) =>
+    semanticRuntimeCorpScore: (
+      input,
+      action,
+      scopeId,
+      actionSemanticCandidate,
+      creditDemands = [],
+    ) =>
       scoreFromComponents(
         semanticRuntimeCorpScoreComponents(
           input,
           action,
           scopeId,
           actionSemanticCandidate,
+          creditDemands,
         ),
       ),
     semanticRuntimeCorpScoreComponents,

@@ -21,6 +21,13 @@ type CorpCentralThreatAssessment = {
   evidence: string[];
 };
 
+export type CorpExistingCentralRezFloorAssessment = {
+  serverId: CorpCentralServerId;
+  rezFloor: number;
+  blockedByFloor: boolean;
+  evidence: string[];
+};
+
 export type SemanticRuntimeCorpCentralRezContextDependencies = {
   actionCreditCost: (action: LegalAction) => number;
   actionServerId: (
@@ -71,9 +78,7 @@ export function createSemanticRuntimeCorpCentralRezContext(
     );
   };
 
-  const semanticRuntimeCorpHasAgendaInHq = (
-    input: AiDecisionInput,
-  ): boolean =>
+  const semanticRuntimeCorpHasAgendaInHq = (input: AiDecisionInput): boolean =>
     input.playerView.own.gripOrHq.some(
       (card) => card.known && card.type === "agenda",
     );
@@ -135,29 +140,30 @@ export function createSemanticRuntimeCorpCentralRezContext(
     ) {
       return true;
     }
-    return (["hq", "rd"] as const).some((serverId) => {
-      const assessment = semanticRuntimeCorpExistingCentralRezFloorAssessment(
-        input,
-        serverId,
-      );
-      return assessment.blockedByFloor;
-    });
+    return semanticRuntimeCorpExistingCentralRezFloorAssessments(input).some(
+      (assessment) => assessment.blockedByFloor,
+    );
   };
 
-  const semanticRuntimeCorpExistingCentralRezFloorAssessment = (
-    input: AiDecisionInput,
-    serverId: CorpCentralServerId,
-  ): {
-    rezFloor: number;
-    blockedByFloor: boolean;
-    evidence: string[];
-  } => {
+  return {
+    semanticRuntimeCorpActionIceRezCost,
+    semanticRuntimeCorpCentralRezReserveAssessment,
+    semanticRuntimeCorpHasAgendaInHq,
+    semanticRuntimeCorpHasCentralRezFloorFundingNeed,
+  };
+}
+
+export function semanticRuntimeCorpExistingCentralRezFloorAssessments(
+  input: AiDecisionInput,
+): CorpExistingCentralRezFloorAssessment[] {
+  return (["hq", "rd"] as const).map((serverId) => {
     const centralThreat = semanticRuntimeCorpCentralThreatAssessment(
       input,
       serverId,
     );
     if (!centralThreat.active) {
       return {
+        serverId,
         rezFloor: 0,
         blockedByFloor: false,
         evidence: centralThreat.evidence,
@@ -174,6 +180,7 @@ export function createSemanticRuntimeCorpCentralRezContext(
     const blockedByFloor =
       rezFloor > 0 && input.playerView.own.credits < rezFloor;
     return {
+      serverId,
       rezFloor,
       blockedByFloor,
       evidence: [
@@ -184,14 +191,7 @@ export function createSemanticRuntimeCorpCentralRezContext(
         `central_rez_reserve_below_floor:${blockedByFloor}`,
       ],
     };
-  };
-
-  return {
-    semanticRuntimeCorpActionIceRezCost,
-    semanticRuntimeCorpCentralRezReserveAssessment,
-    semanticRuntimeCorpHasAgendaInHq,
-    semanticRuntimeCorpHasCentralRezFloorFundingNeed,
-  };
+  });
 }
 
 function semanticRuntimeCorpCentralThreatAssessment(

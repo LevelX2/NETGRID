@@ -6,6 +6,8 @@ import type {
   TacticalPlan,
   TacticalPlanRuntimeResult,
 } from "../tactical-plans";
+import { createRunnerCreditDemand } from "../plans/credit-demand";
+import type { FundingRoute } from "../plans/funding-route";
 import {
   buildSemanticRuntimeDebugPlanContext,
   semanticRuntimeDebugActionDisplayScore,
@@ -645,6 +647,126 @@ describe("SemanticRuntimeDebug", () => {
     expect(rankItem).toContain("target_role=breaker bad");
     expect(rankItem).toContain("capabilities=breaker_wall");
     expect(rankItem).toContain("scores=Coverage:12.35");
+  });
+
+  it("explains credit demand, route, resources, and economy dominance", () => {
+    const plan = tacticalPlan({
+      planId: "runner.fund-breaker",
+      type: "runner.obtain_breaker_coverage",
+    });
+    const demand = createRunnerCreditDemand({
+      demandId: "breaker-now",
+      sourcePlanId: plan.planId,
+      purpose: "breaker_for_current_plan",
+      priority: "acute_hard_plan_blocker",
+      hardness: "hard",
+      deadline: "before_current_plan_action",
+      currentCredits: 1,
+      targetCredits: 4,
+    });
+    plan.creditDemands = [demand];
+    const route: FundingRoute = {
+      schemaVersion: "funding-route-v1",
+      routeId: "route-coup",
+      demandId: demand.demandId,
+      status: "covered_guaranteed",
+      reliability: "guaranteed",
+      horizon: "same_turn",
+      startingCredits: 1,
+      targetCredits: 4,
+      projectedCredits: 4,
+      projectedGeneralCredits: 4,
+      projectedGap: 0,
+      totalClickCost: 1,
+      steps: [
+        {
+          stepId: "step-coup",
+          kind: "legal_action",
+          actionId: "coup-credit",
+          ownTurnOffset: 0,
+          clickCost: 1,
+          creditCost: 0,
+          netLiquidCreditGain: 3,
+          creditRestriction: "general",
+          reliability: "guaranteed",
+          evidence: [],
+        },
+      ],
+      invalidationReasons: [],
+      evidence: [],
+    };
+    const runtime: TacticalPlanRuntimeResult = {
+      planAlternatives: [plan],
+      blockedPlans: [],
+      selectedPlan: plan,
+      selectedStep: plan.currentStep,
+      selectedMapping: {
+        plan,
+        step: plan.currentStep,
+        status: "matched",
+        actionCandidateIds: ["coup-credit"],
+        actionPriorities: [{ actionId: "coup-credit", priority: 800 }],
+        legalActions: [action("coup-credit", "activated_card_ability")],
+        rationale: ["economy_action_dominated:basic-credit"],
+      },
+      planPortfolio: {
+        schemaVersion: "plan-portfolio-v1",
+        side: "runner",
+        profileId: "debug-test",
+        stateVersion: 1,
+        turnKey: "runner:1",
+        foreground: {
+          portfolioEntryId: "entry-fund-breaker",
+          sourcePlanId: plan.planId,
+          planType: plan.type,
+          side: "runner",
+          executionClass: "bounded_sequence",
+          role: "foreground",
+          lifecycle: "active",
+          priority: plan.priority,
+          supportsEntryIds: [],
+          milestone: "fund",
+          progress: 0,
+          actionCandidateIds: ["coup-credit"],
+          creditDemands: [demand],
+          fundingRoutes: [route],
+          selectedFundingRoute: route,
+          fundingCoverageResolvesHardBlocker: true,
+          cadence: {
+            turnKey: "runner:1",
+            maxActionsPerTurn: 1,
+            actionsUsedThisTurn: 0,
+          },
+          resourceReservation: {
+            credits: 3,
+            requestedCredits: 3,
+            shortfallCredits: 0,
+            clicks: 1,
+          },
+          updatedAtStateVersion: 1,
+          evidence: [],
+        },
+        backgrounds: [],
+        rejectedEntryIds: [],
+        evidence: [],
+      },
+    };
+
+    const items = semanticRuntimeDebugTacticalPlanItems(runtime);
+
+    expect(items).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "credit_demand:breaker-now:priority=acute_hard_plan_blocker",
+        ),
+        expect.stringContaining(
+          "funding_route:route-coup:status=covered_guaranteed",
+        ),
+        "funding_resource_reservation:credits=3:requested=3:shortfall=0:clicks=1",
+        "funding_hard_blocker_resolved:true",
+        "economy_dominance:economy_action_dominated:basic-credit",
+      ]),
+    );
   });
 
   it("keeps all ranked tactical plans visible when context diagnostics are large", () => {

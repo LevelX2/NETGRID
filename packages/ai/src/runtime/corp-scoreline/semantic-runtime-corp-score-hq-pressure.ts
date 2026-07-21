@@ -5,7 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
-import { actionProvidesCredits } from "../../actions/action-effect-classification";
+import { actionHasImmediateCreditGain } from "../../actions/action-effect-classification";
 import { semanticRuntimeCorpBoardTriage } from "../semantic-runtime-corp-board-triage";
 import { visibleCardDefinition } from "../card-definition-lookup";
 import { rolesMatch } from "../role-match";
@@ -633,11 +633,7 @@ export function corpLegalEconomyActionExists(input: AiDecisionInput): boolean {
     input.legalActions ?? input.playerView.legalActions ?? [];
   return legalActions.some(
     (candidate) =>
-      candidate.side === "corp" &&
-      (actionProvidesCredits(candidate) ||
-        candidate.type === "play_operation" ||
-        candidate.type === "activated_card_ability" ||
-        candidate.type === "trigger_ability"),
+      candidate.side === "corp" && actionHasImmediateCreditGain(candidate),
   );
 }
 
@@ -651,6 +647,6 @@ export function corpLegalCreditActionExists(
     (candidate) =>
       candidate !== currentAction &&
       candidate.side === "corp" &&
-      actionProvidesCredits(candidate),
+      actionHasImmediateCreditGain(candidate),
   );
 }

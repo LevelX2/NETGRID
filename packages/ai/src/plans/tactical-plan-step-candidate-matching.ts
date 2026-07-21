@@ -22,7 +22,7 @@ import {
   candidateSemanticsMatchStep,
 } from "./tactical-plan-step-semantics";
 import type { TacticalPlanCreditValueDependencies } from "./tactical-plan-action-values";
-import { scoreEconomyAction } from "../evaluation/economy-action-score";
+import { scoreEconomyAction } from "../economy/economy-action-score";
 import { runnerHasConcreteFundingNeed } from "./tactical-plan-runner-funding-need";
 import {
   runnerSurvivalActionProgress,

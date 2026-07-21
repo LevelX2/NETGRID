@@ -12,7 +12,7 @@ import type {
 } from "../deck-capabilities";
 import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
-import { actionProvidesCredits } from "../actions/action-effect-classification";
+import { actionHasImmediateCreditGain } from "../actions/action-effect-classification";
 import type {
   StrategicIntentFamily,
   StrategicReserveRequirement,
@@ -1017,7 +1017,7 @@ function actionMatchesFamily(
     case "corp_asset_economy":
     case "corp_economy_reserve":
       return (
-        actionProvidesCredits(action) ||
+        actionHasImmediateCreditGain(action) ||
         action.type === "rez_ice" ||
         action.type === "rez_card"
       );
@@ -1123,7 +1123,7 @@ function hasLegalAction(
 }
 
 function hasLegalCreditAction(legalActions: readonly LegalAction[]): boolean {
-  return legalActions.some(actionProvidesCredits);
+  return legalActions.some(actionHasImmediateCreditGain);
 }
 
 function hasInstallIceAction(legalActions: readonly LegalAction[]): boolean {

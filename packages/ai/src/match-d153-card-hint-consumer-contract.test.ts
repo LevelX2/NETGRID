@@ -28,21 +28,23 @@ describe("match D153 card hint consumer contract", () => {
     expect(hint?.functionSignals).toEqual(
       expect.arrayContaining([
         "economy.action",
+        "economy.action_credit",
         "economy.counter",
-        "economy.finite_pool",
         "economy.temporary_resource_bank",
       ]),
     );
     expect(hint?.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          kind: "finite_economy_pool",
+          kind: "counter_economy",
           amount: 3,
+          economyMode: "bank_load",
           resource: "credits",
         }),
         expect.objectContaining({
-          kind: "economy",
-          target: "economy.temporary_resource_bank",
+          kind: "action_economy",
+          economyMode: "bank_cashout",
+          target: "economy.bank_cashout_all",
         }),
       ]),
     );
@@ -135,7 +137,7 @@ describe("match D153 card hint consumer contract", () => {
         "economy.temporary_resource_bank",
       ]),
       actionTacticSignals: expect.arrayContaining([
-        "effect:finite_economy_pool",
+        "effect:action_economy",
         "effect:counter_economy",
       ]),
     });
