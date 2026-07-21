@@ -116,6 +116,7 @@ function buildSemanticRuntimeCorpScoringWindowAssessment<
     dependencies,
   );
   const scoreHorizon = scoringWindowHorizon(input, action, dependencies);
+  const sourceCard = dependencies.actionSourceCard?.(input, action);
   const creditsAfterAction =
     input.playerView.own.credits - dependencies.actionCreditCost(action);
   const preExposureAdvancementCreditReserve =
@@ -182,6 +183,11 @@ function buildSemanticRuntimeCorpScoringWindowAssessment<
     exposureAccess.runnerCanReachAccessNow &&
     exposureAccess.agendaStealRelevantNow;
   const delayedExposureRisk = scoringWindowDelayedScoreExposureRisk({
+    agendaInstall:
+      action.type === "install_card" &&
+      action.payload?.placement !== "ice" &&
+      action.payload?.cardType === "agenda" &&
+      sourceCard?.type === "agenda",
     access,
     agendaStealSeverity,
     exposureAccess,

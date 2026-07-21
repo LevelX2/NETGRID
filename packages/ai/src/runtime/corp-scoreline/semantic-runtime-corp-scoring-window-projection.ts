@@ -746,6 +746,7 @@ export function scoringWindowKind(params: {
 }
 
 export function scoringWindowDelayedScoreExposureRisk(params: {
+  agendaInstall: boolean;
   access: ReturnType<typeof scoringWindowAccessAssessment>;
   agendaStealSeverity: CorpScoringWindowAgendaStealSeverity;
   exposureAccess: ReturnType<typeof scoringWindowAccessAssessment>;
@@ -763,8 +764,41 @@ export function scoringWindowDelayedScoreExposureRisk(params: {
   // The access projections already model every visible installed or publicly
   // staged breaker and their available credits. High credits alone must not
   // turn an unknown Runner hand into a contest path: that would make the Corp
-  // act on hidden information and suppress otherwise legal scorelines.
-  return false;
+  // act on hidden information and suppress an agenda installation into an
+  // otherwise legal scoreline.
+  if (params.agendaInstall) {
+    return false;
+  }
+  const iceCount = params.projectedServer?.ice.length ?? 0;
+  if (iceCount <= 0) return false;
+  const lightOrUnprovenRemote =
+    iceCount <= 1 ||
+    (params.rezBudget.affordableDurableRelevantIceCount ?? 0) < 2 ||
+    !params.rezBudget.corpCanRezFullPath ||
+    (params.rezBudget.dynamicProtectionWeaknessCount ?? 0) > 0;
+  const safetyDependsOnMissingCoverage =
+    params.access.missingVisibleBreakerCoverage ||
+    params.exposureAccess.missingVisibleBreakerCoverage ||
+    (params.exposureAccess.unmodeledIceCount > 0 &&
+      params.exposureAccess.visibleRunnerIcebreakerCount === 0);
+  if (!safetyDependsOnMissingCoverage) return false;
+  const richRunnerExposure =
+    params.access.visibleRunnerContestCredits >= 8 ||
+    params.exposureAccess.visibleRunnerContestCredits >= 10;
+  const coverageAcquisitionAffordable =
+    safetyDependsOnMissingCoverage &&
+    (params.exposureAccess.visibleBreakCost ?? 0) > 0 &&
+    params.exposureAccess.visibleRunnerContestCredits >=
+      (params.exposureAccess.visibleBreakCost ?? Number.POSITIVE_INFINITY);
+  if (!richRunnerExposure && !coverageAcquisitionAffordable) return false;
+  const fullRunnerExposureBeforeScore =
+    params.scoreHorizon === "next_turn" ||
+    params.scoreHorizon === "slow" ||
+    params.runnerExposureCreditActions >= 3;
+  return (
+    lightOrUnprovenRemote ||
+    (fullRunnerExposureBeforeScore && safetyDependsOnMissingCoverage)
+  );
 }
 
 function scoringWindowIceInstallImprovesExistingWindow(params: {

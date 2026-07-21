@@ -1,6 +1,6 @@
 # Corp-Scoreline: sichtbarer Contest und temporär sichere Agenda-Remotes
 
-Status: in Arbeit
+Status: abgeschlossen
 
 ## Quelle und Zielprüfung
 
@@ -100,3 +100,15 @@ behandelt.
 - Die neue Entscheidung ist durch fokussierte Regressionen und die relevanten
   AI-Gates nachgewiesen.
 - Main enthält die Paketcommits; Worktree und Arbeitsbranch sind entfernt.
+
+## Abschlussstand
+
+- Die Verzögerungsrisiko-Projektion darf hohe sichtbare Credits nicht mehr als
+  Ersatz für eine verdeckte Runner-Karte behandeln, aber ausschließlich beim
+  tatsächlichen Agenda-Install in ein Remote.
+- Vorhandene Advancement-, Rezreserve-, Zentraldruck-, Multiaccess- und
+  sichtbare-Breaker-Checks bleiben unverändert. Nicht-Agenda-Roots behalten
+  damit ihre bestehende Stale-Remote- und Funding-Absicherung.
+- Fokussierte Scoring-Window- und Decision-Checkpoint-Tests sowie alle drei
+  AI-Testshards sind grün. `check:ai`,
+  `check:ai-deck-doctrine-strategy` und der AI-Typecheck sind ebenfalls grün.
