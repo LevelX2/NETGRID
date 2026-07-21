@@ -117,6 +117,7 @@ const AMOUNT_KEYS = [
   "secretHiddenAmountRevealed",
   "secretGuessAmount",
   "chosenIcePosition",
+  "passedIcePosition",
   "sourceIceIndex",
   "targetIceIndex",
   "newApproachIceIndex",

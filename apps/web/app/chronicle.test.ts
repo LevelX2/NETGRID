@@ -762,18 +762,19 @@ describe("formatChronicleEvent", () => {
   it("names the ICE automatically passed by Inside Job", () => {
     const event = makeEvent("rez_ice", {
       actor: "corp",
-      insideJobAutoPassedIce: true,
-      insideJobPassedIceDefinitionId: "simple_code_gate_ice",
+      runStartBypassAutoPassedIce: true,
+      runStartBypassPassedIceDefinitionId: "simple_code_gate_ice",
+      passedIcePosition: 2,
       serverLabel: "R&D",
     });
     const runnerItem = formatChronicleEffectItems(event, "runner")[0]!;
     const corpItem = formatChronicleEffectItems(event, "corp")[0]!;
 
     expect(runnerItem.title).toBe(
-      "Du hast Simple Code Gate ICE durch Inside Job automatisch passiert.",
+      "Du hast ICE 2 (Simple Code Gate ICE) durch Inside Job automatisch passiert.",
     );
     expect(corpItem.title).toBe(
-      "Der Runner hat Simple Code Gate ICE durch Inside Job automatisch passiert.",
+      "Der Runner hat ICE 2 (Simple Code Gate ICE) durch Inside Job automatisch passiert.",
     );
     expect(runnerItem.description).toBe(
       "Das war das erste gerezzte ICE, dem der Runner in diesem Run begegnet ist; seine Subroutinen wurden nicht abgearbeitet.",
@@ -792,6 +793,7 @@ describe("formatChronicleEvent", () => {
         "Inside Job",
         "Auto-Pass",
         "Simple Code Gate ICE",
+        "ICE 2",
         "R&D",
       ]),
     );
@@ -3999,6 +4001,23 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("ICE passiert");
     expect(item.chips).toContain("Data Wall 2.0");
     expect(JSON.stringify(item)).not.toContain("ungebrochene Subroutinen");
+  });
+
+  it("identifies unrezzed ICE by position when the run continues", () => {
+    const item = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        result: "continued",
+        passedIcePosition: 4,
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Du hast den Run nach dem Passieren von ICE 4 fortgesetzt.",
+    );
+    expect(item.chips).toContain("ICE 4 passiert");
+    expect(JSON.stringify(item)).not.toContain("Simple");
   });
 
   it("does not summarize printed ICE damage text when fully broken ICE is passed", () => {
