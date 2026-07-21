@@ -202,6 +202,42 @@ export type {
   PlanPortfolioSnapshot,
 } from "./plans/plan-portfolio";
 export {
+  compareCreditDemandPriority,
+  createCorpCreditDemand,
+  createCreditDemand,
+  createRunnerCreditDemand,
+  CREDIT_DEMAND_PRIORITY_RANK,
+  CREDIT_DEMAND_SCHEMA_VERSION,
+} from "./plans/credit-demand";
+export type {
+  CreateCreditDemandParams,
+  CreateSideCreditDemandParams,
+  CreditDemand,
+  CreditDemandDeadline,
+  CreditDemandHardness,
+  CreditDemandPriority,
+  CreditDemandPurpose,
+  CreditRestriction,
+} from "./plans/credit-demand";
+export {
+  creditDemandHardBlockerIsResolved,
+  FUNDING_ROUTE_SCHEMA_VERSION,
+  pruneDominatedRoutes,
+  revalidateFundingRoute,
+  searchFundingRoutes,
+} from "./plans/funding-route";
+export type {
+  FundingActionCandidate,
+  FundingRoute,
+  FundingRouteHorizon,
+  FundingRouteReliability,
+  FundingRouteSearchResult,
+  FundingRouteStatus,
+  FundingRouteStep,
+  FutureFundingProjection,
+  SearchFundingRoutesParams,
+} from "./plans/funding-route";
+export {
   getPlanPortfolioMemorySnapshot,
   rememberPlanPortfolioSnapshot,
   resetPlanPortfolioMemory,
