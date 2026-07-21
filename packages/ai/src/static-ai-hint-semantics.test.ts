@@ -53,14 +53,14 @@ describe("static AI hint semantics", () => {
     );
   });
 
-  it("keeps the ETR semantics of the audited ICE without redundant tactic signals", () => {
+  it("keeps the ETR compatibility and effect semantics of the audited ICE", () => {
     for (const cardId of [
       "onr_v1_232_crystal-wall",
       "onr_v1_252_keeper",
       "onr_v1_261_quandary",
     ]) {
       const hint = hintById.get(cardId);
-      expect(hint?.tacticSignals).toBeUndefined();
+      expect(hint?.tacticSignals).toContain("corp_ice.end_run");
       expect(hint?.functionSignals).toEqual(
         expect.arrayContaining(["corp_ice.end_run", "ice.etr"]),
       );

@@ -73,13 +73,14 @@ Rules Engine noch Kartenregeln.
   `strategySupportPairs` durch Opening-Hand- und Deck-Doktrin-Auswertung und
   `remoteRole` durch Deck-Doktrin sowie den Remote-Role-Ontology-Consumer.
   Der Audit-Contract war unvollständig, nicht die drei Felder pauschal nutzlos.
-- Für Crystal Wall, Keeper und Quandary war der konkrete einzelne Wert
-  `tacticSignals: ["corp_ice.end_run"]` jedoch doppelt: Die wirksame
-  Laufzeitsemantik bleibt über `functionSignals` (`corp_ice.end_run`,
-  `ice.etr`), `actionTacticSignals` (`effect:etr`,
-  `effect:remote_protection`), `effects` und `etr_ice` erhalten. Das
-  redundante Feld wurde deshalb entfernt und gegen diese Erhaltungsbedingungen
-  getestet.
+- Für Crystal Wall, Keeper und Quandary bleibt
+  `tacticSignals: ["corp_ice.end_run"]` erhalten. Das Feld wird im
+  Profil-Compiler als Kompatibilitätssignal verarbeitet und ergänzt somit die
+  ETR-Effekt-/Rollen-Semantik der Rez-Aktionen. Der vollständige Fünf-Seed-Lauf
+  mit und ohne diese drei Einträge ergab auf diesem Stand jeweils 3:2; daraus
+  folgt keine belastbare Verhaltensverbesserung durch eine Löschung. Der frühere
+  Audit-Fund war ausschließlich ein fehlender Registereintrag, keine
+  Löschaufforderung.
 - Der Audit auf dem Corp-Checkpoint
   `cp-74e2369-05-corporate-war-threshold-consumer` enthält nach der Korrektur
   keinen `hint_field_without_consumer_contract`-Fund mehr. Seine drei
