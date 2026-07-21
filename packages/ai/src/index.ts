@@ -226,6 +226,22 @@ export {
   revalidateFundingRoute,
   searchFundingRoutes,
 } from "./plans/funding-route";
+export {
+  compareEconomyActionDominance,
+  dominatedEconomyActionIds,
+  ECONOMY_CREDIT_BASE_CURVE,
+  ECONOMY_CREDIT_DEMAND_BONUS,
+  economyActionMode,
+  economyCreditBaseValue,
+  economyNetHandDeltaValue,
+  scoreEconomyAction,
+} from "./evaluation/economy-action-score";
+export type {
+  EconomyActionDominance,
+  EconomyActionMode,
+  EconomyActionScore,
+  EconomyScoreComponent,
+} from "./evaluation/economy-action-score";
 export type {
   FundingActionCandidate,
   FundingRoute,

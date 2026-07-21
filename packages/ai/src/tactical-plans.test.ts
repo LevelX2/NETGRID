@@ -457,7 +457,7 @@ describe("tactical plan model", () => {
       "basic-credit",
     ]);
     expect(mapping.actionPriorities).toEqual([
-      { actionId: "play-livewire", priority: 300 },
+      { actionId: "play-livewire", priority: 160 },
       { actionId: "basic-credit", priority: 100 },
     ]);
     expect(mapping.legalActions.map((action) => action.actionId)).toEqual([
@@ -466,6 +466,93 @@ describe("tactical plan model", () => {
     ]);
     expect(mapping.rationale.join("\n")).not.toContain(
       "blocked_no_valid_search_action",
+    );
+  });
+
+  it("removes dominated pure credit actions from a gain-credit plan step", () => {
+    const basicAction = legalAction("basic-credit", "corp", "gain_credit");
+    const bbsAction = legalAction(
+      "bbs-credit",
+      "corp",
+      "activated_card_ability",
+      {},
+      { source: "bbs-instance" },
+    );
+    const coupAction = legalAction(
+      "coup-credit",
+      "corp",
+      "activated_card_ability",
+      {},
+      { source: "coup-instance" },
+    );
+    const plan = createTacticalPlan({
+      planId: "corp.build_credit_base",
+      side: "corp",
+      type: "corp.build_credit_bank",
+      status: "active",
+      priority: 800,
+      horizonTurns: 1,
+      currentStep: createPlanStep({
+        stepId: "gain_credits:corp_credit_base",
+        kind: "gain_credits",
+        desiredActionSemantics: ["economy.gain_credit"],
+      }),
+      stateVersion: 1,
+    });
+    const fixedPayoutCandidate = (
+      action: LegalAction,
+      sourceDefinitionId: string,
+      amount: number,
+    ): ActionSemanticCandidate => ({
+      ...candidateForAction(action),
+      sourceKind: "card",
+      sourceDefinitionId,
+      semanticActionType: "economy.gain_credit",
+      economyProjection: {
+        ...candidateForAction(action).economyProjection!,
+        kind: "immediate_liquid",
+        timing: "immediate",
+        creditRestriction: "general",
+        grossLiquidCreditGain: amount,
+        netLiquidCreditGain: amount,
+        cardsDrawn: 0,
+        cardsConsumed: 0,
+        netHandDelta: 0,
+        payoutMode: "fixed",
+        reliability: "guaranteed",
+        source: "legal_action_payload",
+        confidence: "high",
+        evidence: [`test_fixed_payout:${amount}`],
+      },
+    });
+    const basicCandidate = fixedPayoutCandidate(basicAction, "basic_action", 1);
+    const bbsCandidate = fixedPayoutCandidate(
+      bbsAction,
+      "onr_v1_309_bbs-whispering-campaign",
+      2,
+    );
+    const coupCandidate = fixedPayoutCandidate(
+      coupAction,
+      "onr_v1_193_corporate-coup",
+      3,
+    );
+
+    const mapping = mapPlanStepToLegalActions(
+      plan,
+      plan.currentStep,
+      [basicCandidate, bbsCandidate, coupCandidate],
+      aiInput("corp", [basicAction, bbsAction, coupAction]),
+    );
+
+    expect(mapping.actionCandidateIds).toEqual(["coup-credit"]);
+    expect(mapping.actionPriorities).toEqual([
+      { actionId: "coup-credit", priority: 200 },
+    ]);
+    expect(mapping.rationale).toEqual(
+      expect.arrayContaining([
+        "economy_action_dominated:basic-credit",
+        "economy_action_dominated:bbs-credit",
+      ]),
     );
   });
 

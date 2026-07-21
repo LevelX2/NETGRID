@@ -1,12 +1,7 @@
-import {
-  type AiDecisionInput,
-  type LegalAction,
-} from "@netgrid/shared";
+import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalPlanCreditValueDependencies } from "./tactical-plan-action-values";
-import {
-  coverageSearchRequiredCapability,
-} from "./tactical-plan-coverage-answers";
+import { coverageSearchRequiredCapability } from "./tactical-plan-coverage-answers";
 import {
   matchedCoverageSearchRationales,
   rejectedCoverageSearchFalseMatches,
@@ -25,6 +20,7 @@ import type {
   PlanStepMappingResult,
   TacticalPlan,
 } from "./tactical-plan-types";
+import { dominatedEconomyActionIds } from "../evaluation/economy-action-score";
 
 export function mapPlanStepToLegalActionsWithDependencies(
   plan: TacticalPlan,
@@ -36,21 +32,22 @@ export function mapPlanStepToLegalActionsWithDependencies(
   const legalActionsById = new Map(
     input.legalActions.map((action) => [action.actionId, action]),
   );
-  const matchedCandidates = candidates
+  const stepCandidates = candidates
     .map((candidate) => ({
       candidate,
       action: legalActionsById.get(candidate.actionId),
     }))
     .filter(({ candidate, action }) =>
-      candidateMatchesStep(
-        plan,
-        step,
-        candidate,
-        action,
-        input,
-        dependencies,
-      ),
-    )
+      candidateMatchesStep(plan, step, candidate, action, input, dependencies),
+    );
+  const dominatedEconomyActions =
+    step.kind === "gain_credits"
+      ? dominatedEconomyActionIds(
+          stepCandidates.map(({ candidate }) => candidate),
+        )
+      : new Set<string>();
+  const matchedCandidates = stepCandidates
+    .filter(({ candidate }) => !dominatedEconomyActions.has(candidate.actionId))
     .map(({ candidate, action }) => ({
       candidate,
       priority: planStepCandidatePriority(
@@ -62,9 +59,10 @@ export function mapPlanStepToLegalActionsWithDependencies(
         dependencies,
       ),
     }))
-    .sort((left, right) =>
-      right.priority - left.priority ||
-      left.candidate.actionId.localeCompare(right.candidate.actionId),
+    .sort(
+      (left, right) =>
+        right.priority - left.priority ||
+        left.candidate.actionId.localeCompare(right.candidate.actionId),
     );
   const matchedCandidateIds = matchedCandidates.map(
     ({ candidate }) => candidate.actionId,
@@ -118,6 +116,9 @@ export function mapPlanStepToLegalActionsWithDependencies(
         : []),
       ...rejectedFalseMatches.slice(0, 6),
       ...matchedCoverageSearchFits.slice(0, 4),
+      ...[...dominatedEconomyActions]
+        .sort()
+        .map((actionId) => `economy_action_dominated:${actionId}`),
       ...matchedCandidateValues.slice(0, 4).map(candidateMappingRationale),
     ],
   };

@@ -22,6 +22,7 @@ import {
   candidateSemanticsMatchStep,
 } from "./tactical-plan-step-semantics";
 import type { TacticalPlanCreditValueDependencies } from "./tactical-plan-action-values";
+import { scoreEconomyAction } from "../evaluation/economy-action-score";
 import { runnerHasConcreteFundingNeed } from "./tactical-plan-runner-funding-need";
 import {
   runnerSurvivalActionProgress,
@@ -53,7 +54,7 @@ export function planStepCandidatePriority(
     return coverageAnswerRolePriority(fit.answerRole);
   }
   if (step.kind === "gain_credits") {
-    return immediateFundingNetGain(candidate) * 100;
+    return scoreEconomyAction(candidate, plan.creditDemands ?? []).total;
   }
   if (step.kind === "clear_tags") {
     return tagClearStepPriority(candidate, action, input);
