@@ -47,6 +47,14 @@ const TARGET_CARD_IDS = [
   "onr_v1_154_broker",
 ];
 
+const SCORED_AGENDA_ACTION_CONTRACTS = new Map([
+  ["onr_v1_193_corporate-coup", 3],
+  ["onr_v1_195_corporate-retreat", 2],
+  ["onr_v1_206_marine-arcology", 3],
+  ["onr_v1_209_political-coup", 3],
+  ["onr_v1_210_political-overthrow", 3],
+]);
+
 export function buildAiEconomyContractAudit() {
   const hints = readJson("data/ai/ai-card-hints-active.json");
   const hintCards = Array.isArray(hints.cards) ? hints.cards : [];
@@ -176,6 +184,7 @@ export function buildAiEconomyContractAudit() {
       ];
     }),
   );
+  const targetContractViolations = economyContractViolations(hintCards);
 
   return {
     schemaVersion: "ai-economy-contract-audit-v1",
@@ -199,6 +208,7 @@ export function buildAiEconomyContractAudit() {
       rawGainCreditTestConsumers: rawGainCreditConsumers.filter(
         (entry) => !entry.production,
       ).length,
+      targetContractViolations: targetContractViolations.length,
     },
     effectOccurrencesByKind: Object.fromEntries(
       [...effectOccurrencesByKind.entries()].sort(
@@ -219,9 +229,166 @@ export function buildAiEconomyContractAudit() {
     findings: {
       cardsWithPotentialOverlappingEffects,
       rawGainCreditConsumers,
+      targetContractViolations,
     },
     targetCards,
   };
+}
+
+function economyContractViolations(hintCards) {
+  const violations = [];
+  const cardsById = new Map(hintCards.map((card) => [card.cardId, card]));
+
+  for (const [cardId, amount] of SCORED_AGENDA_ACTION_CONTRACTS) {
+    const card = cardsById.get(cardId);
+    if (!card) {
+      violations.push(`${cardId}: missing hint`);
+      continue;
+    }
+    const effects = arrayValue(card.effects);
+    const payouts = effects.filter(
+      (effect) =>
+        effect.kind === "action_economy" &&
+        effect.timing === "scored_activated" &&
+        effect.scope === "corp" &&
+        effect.resource === "credits" &&
+        effect.amount === amount &&
+        effect.economyMode === "liquid_payout",
+    );
+    if (payouts.length !== 1) {
+      violations.push(
+        `${cardId}: expected one ${amount}-credit liquid scored action, found ${payouts.length}`,
+      );
+    }
+    const legacyPayouts = effects.filter(
+      (effect) =>
+        ["economy", "counter_economy"].includes(effect.kind) &&
+        effect.timing === "scored_activated" &&
+        effect.scope === "corp" &&
+        effect.resource === "credits",
+    );
+    if (legacyPayouts.length > 0) {
+      violations.push(
+        `${cardId}: legacy scored economy effects overlap the action payout`,
+      );
+    }
+  }
+
+  requireFixedPool(
+    cardsById,
+    violations,
+    "onr_v1_193_corporate-coup",
+    15,
+    "score_area",
+    "when_scored",
+  );
+  requireFixedPool(
+    cardsById,
+    violations,
+    "onr_v1_209_political-coup",
+    12,
+    "score_area",
+    "when_scored",
+  );
+  requireFixedPool(
+    cardsById,
+    violations,
+    "onr_v1_309_bbs-whispering-campaign",
+    16,
+    "remote",
+    "action",
+  );
+
+  const bbs = cardsById.get("onr_v1_309_bbs-whispering-campaign");
+  if (bbs) {
+    const bbsPayouts = arrayValue(bbs.effects).filter(
+      (effect) =>
+        effect.kind === "action_economy" &&
+        effect.amount === 2 &&
+        effect.economyMode === "liquid_payout" &&
+        effect.scope === "corp" &&
+        effect.timing === "action",
+    );
+    if (bbsPayouts.length !== 1) {
+      violations.push(
+        `onr_v1_309_bbs-whispering-campaign: expected one 2-credit liquid action, found ${bbsPayouts.length}`,
+      );
+    }
+    const overlappingPayouts = arrayValue(bbs.effects).filter(
+      (effect) =>
+        ["economy", "counter_economy"].includes(effect.kind) &&
+        effect.resource === "credits" &&
+        effect.scope === "corp" &&
+        effect.timing === "action",
+    );
+    if (overlappingPayouts.length > 0) {
+      violations.push(
+        "onr_v1_309_bbs-whispering-campaign: overlapping legacy payout effects remain",
+      );
+    }
+  }
+
+  const broker = cardsById.get("onr_v1_154_broker");
+  if (!broker) {
+    violations.push("onr_v1_154_broker: missing hint");
+  } else {
+    const effects = arrayValue(broker.effects);
+    if (
+      !effects.some(
+        (effect) =>
+          effect.kind === "counter_economy" &&
+          effect.amount === 3 &&
+          effect.economyMode === "bank_load" &&
+          effect.target === "economy.bank_load",
+      )
+    ) {
+      violations.push("onr_v1_154_broker: missing 3-credit bank-load action");
+    }
+    if (
+      !effects.some(
+        (effect) =>
+          effect.kind === "action_economy" &&
+          effect.amountKind === "all_available" &&
+          effect.economyMode === "bank_cashout" &&
+          effect.target === "economy.bank_cashout_all",
+      )
+    ) {
+      violations.push("onr_v1_154_broker: missing all-available bank cashout");
+    }
+    if (effects.some((effect) => effect.kind === "finite_economy_pool")) {
+      violations.push(
+        "onr_v1_154_broker: voluntary bank must not be a finite economy pool",
+      );
+    }
+  }
+
+  return violations;
+}
+
+function requireFixedPool(
+  cardsById,
+  violations,
+  cardId,
+  amount,
+  scope,
+  timing,
+) {
+  const card = cardsById.get(cardId);
+  if (!card) return;
+  const matchingPools = arrayValue(card.effects).filter(
+    (effect) =>
+      effect.kind === "finite_economy_pool" &&
+      effect.amount === amount &&
+      effect.economyMode === "fixed_pool" &&
+      effect.resource === "credits" &&
+      effect.scope === scope &&
+      effect.timing === timing,
+  );
+  if (matchingPools.length !== 1) {
+    violations.push(
+      `${cardId}: expected one fixed ${amount}-credit pool, found ${matchingPools.length}`,
+    );
+  }
 }
 
 function readJson(relativeFilePath) {
@@ -278,6 +445,12 @@ function printSummary(report) {
       `- ${cardId}: ${card ? arrayValue(card.effects).length : "missing"} effects`,
     );
   }
+  if (report.findings.targetContractViolations.length > 0) {
+    console.log("target contract violations:");
+    for (const violation of report.findings.targetContractViolations) {
+      console.log(`- ${violation}`);
+    }
+  }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -286,5 +459,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.log(JSON.stringify(report, null, 2));
   } else {
     printSummary(report);
+  }
+  if (
+    process.argv.includes("--check") &&
+    report.findings.targetContractViolations.length > 0
+  ) {
+    process.exitCode = 1;
   }
 }

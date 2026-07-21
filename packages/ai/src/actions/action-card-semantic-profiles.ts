@@ -92,9 +92,7 @@ function actionCardSemanticProfileFromHint(
 }
 
 function hintEffectTarget(effect: AiHintStructuredEffect): string | undefined {
-  const target = (effect as AiHintStructuredEffect & { target?: unknown })
-    .target;
-  return typeof target === "string" && target.length > 0 ? target : undefined;
+  return effect.target;
 }
 
 function strategySupportFromHint(hint: AiCardHint): StrategySupportPair[] {

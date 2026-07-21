@@ -144,6 +144,21 @@ export const KNOWN_HINT_EFFECT_RESOURCES = [
   "hand_size",
 ] as const;
 
+export const KNOWN_HINT_ECONOMY_MODES = [
+  "liquid_payout",
+  "fixed_pool",
+  "bank_load",
+  "bank_cashout",
+  "restricted_credit",
+  "automatic_credit",
+] as const;
+
+export const KNOWN_HINT_AMOUNT_KINDS = [
+  "fixed",
+  "all_available",
+  "dynamic",
+] as const;
+
 export const KNOWN_HINT_CONDITION_KINDS = [
   "requires_runner_tagged",
   "requires_successful_run",
@@ -488,6 +503,8 @@ export type KnownHintEffectTiming = (typeof KNOWN_HINT_EFFECT_TIMINGS)[number];
 export type KnownHintEffectScope = (typeof KNOWN_HINT_EFFECT_SCOPES)[number];
 export type KnownHintEffectResource =
   (typeof KNOWN_HINT_EFFECT_RESOURCES)[number];
+export type KnownHintEconomyMode = (typeof KNOWN_HINT_ECONOMY_MODES)[number];
+export type KnownHintAmountKind = (typeof KNOWN_HINT_AMOUNT_KINDS)[number];
 export type KnownHintConditionKind =
   (typeof KNOWN_HINT_CONDITION_KINDS)[number];
 export type KnownHintCostRisk = (typeof KNOWN_HINT_COST_RISKS)[number];
@@ -532,6 +549,9 @@ export type AiHintStructuredEffect = {
   scope: KnownHintEffectScope;
   resource?: KnownHintEffectResource;
   amount?: number;
+  amountKind?: KnownHintAmountKind;
+  economyMode?: KnownHintEconomyMode;
+  target?: string;
   repeatable?: boolean;
   finite?: boolean;
 };
@@ -648,6 +668,8 @@ export type AiHintOntologyIssueKind =
   | "unknown_effect_timing"
   | "unknown_effect_scope"
   | "unknown_effect_resource"
+  | "unknown_economy_mode"
+  | "unknown_amount_kind"
   | "unknown_condition_kind"
   | "unknown_breaker_coverage"
   | "unknown_breaker_side_effect"
@@ -801,6 +823,34 @@ function validateEffects(
         "unknown_effect_resource",
         issues,
         false,
+      );
+    }
+    requireKnownField(
+      effect.economyMode,
+      KNOWN_HINT_ECONOMY_MODES,
+      `${effectPath}.economyMode`,
+      "unknown_economy_mode",
+      issues,
+      false,
+    );
+    requireKnownField(
+      effect.amountKind,
+      KNOWN_HINT_AMOUNT_KINDS,
+      `${effectPath}.amountKind`,
+      "unknown_amount_kind",
+      issues,
+      false,
+    );
+    if (
+      effect.target !== undefined &&
+      (typeof effect.target !== "string" || effect.target.length === 0)
+    ) {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${effectPath}.target`,
+        "Expected non-empty string.",
       );
     }
     validateOptionalNumber(effect.amount, `${effectPath}.amount`, issues);

@@ -12378,21 +12378,20 @@
         },
         {
           "amount": 3,
-          "kind": "finite_economy_pool",
-          "resource": "credits",
-          "scope": "runner",
-          "timing": "action"
-        },
-        {
-          "kind": "action_economy",
-          "resource": "credits",
-          "scope": "runner",
-          "timing": "action"
-        },
-        {
+          "economyMode": "bank_load",
           "kind": "counter_economy",
           "resource": "credits",
           "scope": "runner",
+          "target": "economy.bank_load",
+          "timing": "action"
+        },
+        {
+          "amountKind": "all_available",
+          "economyMode": "bank_cashout",
+          "kind": "action_economy",
+          "resource": "credits",
+          "scope": "runner",
+          "target": "economy.bank_cashout_all",
           "timing": "action"
         }
       ],
@@ -12407,8 +12406,8 @@
         "confidence": "medium",
         "hintReviewed": true,
         "needsHumanReview": false,
-        "reviewedBy": "codex",
-        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex-economy-contract-v1",
+        "reviewedDate": "2026-07-21",
         "strategyCovered": false
       },
       "requiredMechanics": [
@@ -12442,14 +12441,12 @@
         "effect:action_economy",
         "effect:counter_economy",
         "effect:economy",
-        "effect:finite_economy_pool",
         "effect:global_modifier"
       ],
       "functionSignals": [
         "economy.action",
         "economy.action_credit",
         "economy.counter",
-        "economy.finite_pool",
         "economy.generic",
         "economy.temporary_resource_bank",
         "resource.connection"
@@ -16058,12 +16055,21 @@
         },
         {
           "amount": 3,
+          "economyMode": "liquid_payout",
           "finite": true,
-          "kind": "counter_economy",
+          "kind": "action_economy",
           "repeatable": true,
           "resource": "credits",
           "scope": "corp",
           "timing": "scored_activated"
+        },
+        {
+          "amount": 15,
+          "economyMode": "fixed_pool",
+          "kind": "finite_economy_pool",
+          "resource": "credits",
+          "scope": "score_area",
+          "timing": "when_scored"
         }
       ],
       "planRoles": [
@@ -16073,11 +16079,11 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "confidence": "medium",
+        "confidence": "high",
         "hintReviewed": true,
         "needsHumanReview": false,
-        "reviewedBy": "codex-agenda-semantic-review-v1",
-        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-economy-contract-v1",
+        "reviewedDate": "2026-07-21",
         "strategyCovered": false
       },
       "requiredMechanics": [
@@ -16115,13 +16121,16 @@
         "effect_scope:corp",
         "effect_scope:score_area",
         "effect_timing:scored_activated",
-        "effect:counter_economy",
+        "effect_timing:when_scored",
+        "effect:action_economy",
+        "effect:finite_economy_pool",
         "effect:scored_agenda_action"
       ],
       "functionSignals": [
         "economy.corp_counter_bank",
         "economy.corp_counter_cashout_action",
-        "economy.counter",
+        "economy.action",
+        "economy.finite_pool",
         "score.agenda_action",
         "score.economy_counter_bank"
       ]
@@ -16274,7 +16283,8 @@
       "effects": [
         {
           "amount": 2,
-          "kind": "economy",
+          "economyMode": "liquid_payout",
+          "kind": "action_economy",
           "resource": "credits",
           "scope": "corp",
           "timing": "scored_activated"
@@ -16294,8 +16304,8 @@
         "confidence": "medium",
         "hintReviewed": true,
         "needsHumanReview": false,
-        "reviewedBy": "codex-agenda-semantic-review-v1",
-        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-economy-contract-v1",
+        "reviewedDate": "2026-07-21",
         "strategyCovered": false
       },
       "requiredMechanics": [
@@ -16329,12 +16339,12 @@
         "effect_scope:corp",
         "effect_scope:score_area",
         "effect_timing:scored_activated",
-        "effect:economy",
+        "effect:action_economy",
         "effect:scored_agenda_action"
       ],
       "functionSignals": [
         "economy.corp_credit_action",
-        "economy.generic",
+        "economy.action",
         "risk.loses_ability_on_install_or_rez",
         "score.agenda_action"
       ]
@@ -17387,7 +17397,8 @@
         },
         {
           "amount": 3,
-          "kind": "economy",
+          "economyMode": "liquid_payout",
+          "kind": "action_economy",
           "repeatable": true,
           "resource": "credits",
           "scope": "corp",
@@ -17403,8 +17414,8 @@
         "confidence": "medium",
         "hintReviewed": true,
         "needsHumanReview": false,
-        "reviewedBy": "codex-agenda-semantic-review-v1",
-        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-economy-contract-v1",
+        "reviewedDate": "2026-07-21",
         "strategyCovered": false
       },
       "requiredMechanics": [
@@ -17437,12 +17448,12 @@
         "effect_scope:corp",
         "effect_scope:score_area",
         "effect_timing:scored_activated",
-        "effect:economy",
+        "effect:action_economy",
         "effect:scored_agenda_action"
       ],
       "functionSignals": [
         "economy.corp_two_action_credit_gain",
-        "economy.generic",
+        "economy.action",
         "score.agenda_action"
       ]
     },
@@ -17784,8 +17795,9 @@
         },
         {
           "amount": 3,
+          "economyMode": "liquid_payout",
           "finite": true,
-          "kind": "counter_economy",
+          "kind": "action_economy",
           "repeatable": true,
           "resource": "credits",
           "scope": "corp",
@@ -17793,6 +17805,7 @@
         },
         {
           "amount": 12,
+          "economyMode": "fixed_pool",
           "kind": "finite_economy_pool",
           "resource": "credits",
           "scope": "score_area",
@@ -17809,8 +17822,8 @@
         "confidence": "medium",
         "hintReviewed": true,
         "needsHumanReview": false,
-        "reviewedBy": "codex-agenda-semantic-review-v1",
-        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-economy-contract-v1",
+        "reviewedDate": "2026-07-21",
         "strategyCovered": false
       },
       "requiredMechanics": [
@@ -17849,14 +17862,14 @@
         "effect_scope:score_area",
         "effect_timing:scored_activated",
         "effect_timing:when_scored",
-        "effect:counter_economy",
+        "effect:action_economy",
         "effect:finite_economy_pool",
         "effect:scored_agenda_action"
       ],
       "functionSignals": [
         "economy.corp_counter_bank",
         "economy.corp_counter_cashout_action",
-        "economy.counter",
+        "economy.action",
         "economy.finite_pool",
         "score.agenda_action",
         "score.economy_counter_bank"
@@ -17884,7 +17897,8 @@
         },
         {
           "amount": 3,
-          "kind": "economy",
+          "economyMode": "liquid_payout",
+          "kind": "action_economy",
           "repeatable": true,
           "resource": "credits",
           "scope": "corp",
@@ -17901,8 +17915,8 @@
         "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Political Overthrow scored-agenda economy before basic credit",
         "hintReviewed": true,
         "needsHumanReview": false,
-        "reviewedBy": "codex-agenda-semantic-review-v1",
-        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-economy-contract-v1",
+        "reviewedDate": "2026-07-21",
         "strategyCovered": false
       },
       "requiredMechanics": [
@@ -17937,12 +17951,12 @@
         "effect_scope:corp",
         "effect_scope:score_area",
         "effect_timing:scored_activated",
-        "effect:economy",
+        "effect:action_economy",
         "effect:scored_agenda_action"
       ],
       "functionSignals": [
         "economy.corp_credit_action",
-        "economy.generic",
+        "economy.action",
         "score.agenda_action",
         "score.high_agenda_value",
         "score.vanilla_points"
@@ -28589,31 +28603,20 @@
       "effects": [
         {
           "amount": 2,
+          "economyMode": "liquid_payout",
           "finite": true,
-          "kind": "economy",
+          "kind": "action_economy",
+          "repeatable": true,
           "resource": "credits",
           "scope": "corp",
           "timing": "action"
         },
         {
           "amount": 16,
+          "economyMode": "fixed_pool",
           "kind": "finite_economy_pool",
           "resource": "credits",
           "scope": "remote",
-          "timing": "action"
-        },
-        {
-          "amount": 2,
-          "kind": "action_economy",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "action"
-        },
-        {
-          "amount": 2,
-          "kind": "counter_economy",
-          "resource": "credits",
-          "scope": "corp",
           "timing": "action"
         }
       ],
@@ -28633,8 +28636,8 @@
         "confidence": "high",
         "hintReviewed": true,
         "needsHumanReview": false,
-        "reviewedBy": "codex",
-        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex-economy-contract-v1",
+        "reviewedDate": "2026-07-21",
         "strategyCovered": true
       },
       "remoteRole": {
@@ -28694,17 +28697,13 @@
         "effect_scope:remote",
         "effect_timing:action",
         "effect:action_economy",
-        "effect:counter_economy",
-        "effect:economy",
         "effect:finite_economy_pool",
         "remote_role:asset_economy"
       ],
       "functionSignals": [
         "economy.action",
         "economy.corp_installed_credit_pool",
-        "economy.counter",
         "economy.finite_pool",
-        "economy.generic",
         "remote.asset_economy"
       ]
     },
