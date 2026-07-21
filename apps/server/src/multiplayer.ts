@@ -7000,7 +7000,13 @@ function renderGamebook(record: StoredMatch): string {
       }
       continue;
     }
-    if (side !== activeSide) {
+    const actionStart = gamebookNumberValue(payload.turnActionOrdinalStart);
+    const actionEnd = gamebookNumberValue(payload.turnActionOrdinalEnd);
+    const startsTurn =
+      activeSide === undefined ||
+      (side !== activeSide &&
+        (event.type === "mandatory_draw" || actionStart === 1));
+    if (startsTurn) {
       activeSide = side;
       turns[side] += 1;
       if (before) {
@@ -7013,8 +7019,6 @@ function renderGamebook(record: StoredMatch): string {
         );
       }
     }
-    const actionStart = gamebookNumberValue(payload.turnActionOrdinalStart);
-    const actionEnd = gamebookNumberValue(payload.turnActionOrdinalEnd);
     if (actionStart !== undefined) {
       const actionLabel =
         actionEnd !== undefined && actionEnd > actionStart
