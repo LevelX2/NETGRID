@@ -1,6 +1,6 @@
 # Spielprotokoll-Export
 
-Status: in Umsetzung; EXP-001 abgeschlossen
+Status: in Umsetzung; EXP-001 bis EXP-003 abgeschlossen
 Stand: 2026-07-21
 Arbeitsbranch: `codex/gamebook-export`
 Arbeits-Worktree: `C:\Projekte\NETGRID_GAMEBOOK_EXPORT`
@@ -61,13 +61,13 @@ Entfernung prüfen.
 
 ## Pakete
 
-| Paket | Ziel | Done-Gate | Commit |
-| --- | --- | --- | --- |
-| EXP-001 | Vertrag, Prozess und Testfälle festlegen | Format, Sicherheitsgrenzen und Beispiele festgeschrieben | `docs(gamebook): define export contract` |
-| EXP-002 | vollständigen Decision Ledger erfassen und persistieren | Jede neue Transition enthält die benötigten lesbaren Fakten | `feat(gamebook): persist decision ledger` |
-| EXP-003 | Markdown-Renderer und Nachweisformat | Aktionsprotokoll aus einem echten Match deterministisch erzeugbar | `feat(gamebook): render match chronicle export` |
-| EXP-004 | berechtigter Downloadpfad | terminale Berechtigung, Header und Fehlerpfade geprüft | `feat(gamebook): expose match chronicle export` |
-| EXP-005 | Regression, Reviews und Abschluss | Tests, Dokumentation und Final Review grün | `test(gamebook): verify complete match export` |
+| Paket   | Ziel                                                    | Done-Gate                                                         | Commit                                          |
+| ------- | ------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------- |
+| EXP-001 | Vertrag, Prozess und Testfälle festlegen                | Format, Sicherheitsgrenzen und Beispiele festgeschrieben          | `docs(gamebook): define export contract`        |
+| EXP-002 | vollständigen Decision Ledger erfassen und persistieren | Jede neue Transition enthält die benötigten lesbaren Fakten       | `feat(gamebook): persist decision ledger`       |
+| EXP-003 | Markdown-Renderer und Nachweisformat                    | Aktionsprotokoll aus einem echten Match deterministisch erzeugbar | `feat(gamebook): render match chronicle export` |
+| EXP-004 | berechtigter Downloadpfad                               | terminale Berechtigung, Header und Fehlerpfade geprüft            | `feat(gamebook): expose match chronicle export` |
+| EXP-005 | Regression, Reviews und Abschluss                       | Tests, Dokumentation und Final Review grün                        | `test(gamebook): verify complete match export`  |
 
 ## Controller-Invarianten
 
@@ -95,10 +95,10 @@ Entfernung prüfen.
 
 ## Fortschritt
 
-| Paket | Status | Ergebnis |
-| --- | --- | --- |
+| Paket   | Status        | Ergebnis                                                              |
+| ------- | ------------- | --------------------------------------------------------------------- |
 | EXP-001 | abgeschlossen | Produktvertrag, Grenzen, Pakete und Abnahmekriterien festgeschrieben. |
-| EXP-002 | aktiv | Decision Ledger wird untersucht und umgesetzt. |
-| EXP-003 | offen | |
-| EXP-004 | offen | |
-| EXP-005 | offen | |
+| EXP-002 | abgeschlossen | Persistierte Engine-Ereignisse, private Aktionsbelege und Voraktions-Snapshots liefern den vollständigen Faktenledger ohne zweiten Speicherpfad. |
+| EXP-003 | abgeschlossen | Der Renderer erzeugt daraus das sachliche, nach Aktionen gegliederte Markdown-Protokoll. |
+| EXP-004 | aktiv         | Downloadroute und HTTP-Vertrag werden geprüft.                        |
+| EXP-005 | offen         |                                                                       |

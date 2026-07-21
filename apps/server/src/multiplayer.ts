@@ -565,6 +565,12 @@ export type ReplayExportArtifact = {
   replay: ReplayView;
 };
 
+export type GamebookExportArtifact = {
+  version: "gamebook-v1";
+  exportedAt: string;
+  markdown: string;
+};
+
 export type SafeErrorPayload = {
   code: string;
   message: string;
@@ -3476,6 +3482,50 @@ export class MultiplayerService {
         baseline: loaded.replay.metadata.baseline,
         perspective,
         replay: loaded.replay,
+      },
+    };
+  }
+
+  async exportGamebook(
+    matchId: string,
+    access: ReplayAccessInput = {},
+  ): Promise<
+    | { ok: true; artifact: GamebookExportArtifact }
+    | { ok: false; error: SafeErrorPayload }
+  > {
+    const record = await this.mustLoad(matchId);
+    if (!record || !record.gameState || !isTerminalStatus(record.match.status))
+      return {
+        ok: false,
+        error: safeError(
+          "not_found",
+          "Dieses Spielprotokoll ist nicht verfügbar.",
+        ),
+      };
+    if (!record.match.isPublic) {
+      const session =
+        access.side && access.sessionToken
+          ? this.authenticateForRecreate(
+              record,
+              access.side,
+              access.sessionToken,
+            )
+          : undefined;
+      if (!session)
+        return {
+          ok: false,
+          error: safeError(
+            "not_found",
+            "Dieses Spielprotokoll ist nicht verfügbar.",
+          ),
+        };
+    }
+    return {
+      ok: true,
+      artifact: {
+        version: "gamebook-v1",
+        exportedAt: this.now(),
+        markdown: renderGamebook(record),
       },
     };
   }
@@ -6907,6 +6957,307 @@ function randomId(prefix: string): string {
 
 function clone<T>(value: T): T {
   return structuredClone(value) as T;
+}
+
+function renderGamebook(record: StoredMatch): string {
+  const lines = ["# Spielprotokoll", ""];
+  const initial = record.stateSnapshots.find(
+    (snapshot) => snapshot.snapshotId === "snap_initial",
+  )?.gameState;
+  if (initial) {
+    lines.push("## Spielvorbereitung", "");
+    lines.push(
+      `**Korp – Starthand:** ${cardNames(initial, initial.corp.hq).join(", ")}`,
+      "",
+    );
+    lines.push(
+      `**Runner – erste Starthand:** ${cardNames(initial, initial.runner.grip).join(", ")}`,
+      "",
+    );
+  }
+  const turns: Record<Side, number> = { corp: 0, runner: 0 };
+  let activeSide: Side | undefined;
+  for (const event of record.gameState.eventLog) {
+    const payload = event.publicPayload;
+    const side = sideValue(payload.actor);
+    if (!side) continue;
+    const before = gamebookStateBefore(record, event);
+    const after = gamebookStateAfter(record, event);
+    if (
+      event.type === "resolve_choice" &&
+      gamebookRecordValue(payload, "setupStep")
+    ) {
+      const decision = stringValue(payload.setupDecision);
+      if (decision === "mulligan" && after) {
+        lines.push(
+          `Der ${sideLabel(side)} nimmt einen Mulligan.`,
+          "",
+          `**${sideLabel(side)} – neue Starthand:** ${cardNames(after, handFor(after, side)).join(", ")}`,
+          "",
+        );
+      } else if (decision === "keep") {
+        lines.push(`Der ${sideLabel(side)} behält die Starthand.`, "");
+      }
+      continue;
+    }
+    if (side !== activeSide) {
+      activeSide = side;
+      turns[side] += 1;
+      if (before) {
+        lines.push(
+          `## ${sideLabel(side)} – Zug ${turns[side]}`,
+          "",
+          `**Hand zu Zugbeginn:** ${cardNames(before, handFor(before, side)).join(", ")}`,
+          `**Credits:** ${creditsFor(before, side)}`,
+          "",
+        );
+      }
+    }
+    const actionStart = gamebookNumberValue(payload.turnActionOrdinalStart);
+    const actionEnd = gamebookNumberValue(payload.turnActionOrdinalEnd);
+    if (actionStart !== undefined) {
+      const actionLabel =
+        actionEnd !== undefined && actionEnd > actionStart
+          ? `Aktion ${actionStart} und ${actionEnd}`
+          : `Aktion ${actionStart}`;
+      lines.push(
+        `### ${actionLabel} – ${gamebookActionTitle(event, before)}`,
+        "",
+      );
+    }
+    const description = gamebookEventDescription(event, before, after);
+    if (description) lines.push(description, "");
+  }
+  return `${lines.join("\n")}\n`;
+}
+
+function cardNames(state: GameState, ids: readonly string[]): string[] {
+  return ids.map((id) => {
+    const definitionId = state.cardInstances[id]?.definitionId;
+    return definitionId
+      ? (CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? definitionId)
+      : id;
+  });
+}
+
+function gamebookStateBefore(
+  record: StoredMatch,
+  event: GameEvent,
+): GameState | undefined {
+  return (
+    record.stateSnapshots.find(
+      (snapshot) =>
+        snapshot.snapshotId === `snap_before_${event.stateVersionAfter}`,
+    )?.gameState ??
+    record.stateSnapshots.find(
+      (snapshot) => snapshot.stateVersion === event.stateVersionBefore,
+    )?.gameState
+  );
+}
+
+function gamebookStateAfter(
+  record: StoredMatch,
+  event: GameEvent,
+): GameState | undefined {
+  return (
+    record.stateSnapshots.find(
+      (snapshot) =>
+        snapshot.snapshotId === `snap_before_${event.stateVersionAfter + 1}`,
+    )?.gameState ??
+    (record.gameState.stateVersion === event.stateVersionAfter
+      ? record.gameState
+      : undefined)
+  );
+}
+
+function sideLabel(side: Side): string {
+  return side === "corp" ? "Korp" : "Runner";
+}
+
+function handFor(state: GameState, side: Side): string[] {
+  return side === "corp" ? state.corp.hq : state.runner.grip;
+}
+
+function creditsFor(state: GameState, side: Side): number {
+  return side === "corp" ? state.corp.credits : state.runner.credits;
+}
+
+function gamebookActionTitle(event: GameEvent, before?: GameState): string {
+  const title = cardTitleForEvent(event, before);
+  if (event.type === "start_run")
+    return `Run auf ${stringValue(event.publicPayload.serverLabel) ?? "einen Server"}`;
+  if (title) {
+    if (event.type === "install_card") return `${title} installieren`;
+    if (event.type === "play_event" || event.type === "play_operation")
+      return `${title} spielen`;
+    if (event.type === "rez_card" || event.type === "rez_ice")
+      return `${title} rezz(en)`;
+    return title;
+  }
+  return stringValue(event.publicPayload.label) ?? event.type;
+}
+
+function gamebookEventDescription(
+  event: GameEvent,
+  before?: GameState,
+  after?: GameState,
+): string | undefined {
+  const side = sideValue(event.publicPayload.actor);
+  if (!side) return undefined;
+  const actor = sideLabel(side);
+  const title = cardTitleForEvent(event, before);
+  const credits = after ? creditsFor(after, side) : undefined;
+  if (event.type === "mandatory_draw" || event.type === "draw_card") {
+    const drawn = before && after ? addedCards(before, after, side) : [];
+    return drawn.length > 0
+      ? `${actor} zieht ${drawn.join(", ")}.${credits !== undefined ? ` Credits: ${credits}.` : ""}`
+      : `${actor} zieht eine Karte.`;
+  }
+  if (event.type === "install_card") {
+    const server =
+      stringValue(event.publicPayload.serverLabel) ?? serverForEvent(event);
+    const placement = stringValue(event.publicPayload.installPlacement);
+    const position =
+      title && after
+        ? installedPosition(after, title, server, placement)
+        : undefined;
+    return `${actor} installiert ${title ?? "eine Karte"}${server ? ` in ${server}` : ""}${position ? `, ${position}` : ""}.${credits !== undefined ? ` Credits: ${credits}.` : ""}`;
+  }
+  if (event.type === "play_event" || event.type === "play_operation") {
+    const effects = resolvedEffectText(event.publicPayload);
+    return `${actor} spielt ${title ?? "eine Karte"}.${effects ? ` ${effects}` : ""}${credits !== undefined ? ` Credits: ${credits}.` : ""}`;
+  }
+  if (event.type === "start_run")
+    return `${actor} startet einen Run auf ${stringValue(event.publicPayload.serverLabel) ?? "einen Server"}.`;
+  if (event.type === "access_card")
+    return `${actor} greift auf ${title ?? "eine Karte"} zu.`;
+  if (event.type === "end_turn") return `${actor} beendet den Zug.`;
+  if (event.type === "advance_card") {
+    const advanced = before && after ? advancedCard(before, after) : undefined;
+    return `${actor} platziert ${advanced?.count ?? 1} Fortschrittsmarker auf ${advanced?.title ?? title ?? "eine Karte"}.${credits !== undefined ? ` Credits: ${credits}.` : ""}`;
+  }
+  if (event.type === "score_agenda")
+    return `${actor} erzielt ${title ?? "eine Agenda"}.`;
+  const label = stringValue(event.publicPayload.label);
+  return label ? `${actor}: ${label}` : undefined;
+}
+
+function cardTitleForEvent(
+  event: GameEvent,
+  before?: GameState,
+): string | undefined {
+  const direct = stringValue(event.publicPayload.title);
+  if (direct) return direct;
+  const definitionId = stringValue(event.publicPayload.cardDefinitionId);
+  if (definitionId) return CARD_DEFINITIONS_BY_ID[definitionId]?.title;
+  const side = sideValue(event.publicPayload.actor);
+  const privatePayload = side ? event.privatePayload?.[side] : undefined;
+  const source =
+    privatePayload && gamebookRecordValue(privatePayload, "legalAction")
+      ? stringValue(
+          (privatePayload.legalAction as Record<string, unknown>).source,
+        )
+      : undefined;
+  const sourceDefinitionId =
+    source && before?.cardInstances[source]?.definitionId;
+  return sourceDefinitionId
+    ? CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.title
+    : undefined;
+}
+
+function serverForEvent(event: GameEvent): string | undefined {
+  const side = sideValue(event.publicPayload.actor);
+  const privatePayload = side ? event.privatePayload?.[side] : undefined;
+  const payload =
+    privatePayload && gamebookRecordValue(privatePayload, "legalAction")
+      ? (privatePayload.legalAction as Record<string, unknown>).payload
+      : undefined;
+  const serverId =
+    payload && gamebookRecordValue(payload, "serverId")
+      ? stringValue((payload as Record<string, unknown>).serverId)
+      : undefined;
+  if (!serverId) return undefined;
+  if (serverId === "new_remote") return "einem neuen Remote";
+  if (serverId === "rd") return "R&D";
+  if (serverId === "hq") return "HQ";
+  if (serverId === "archives") return "Archives";
+  return serverId.replace("_", " ").replace(/^remote /, "Remote ");
+}
+
+function installedPosition(
+  state: GameState,
+  title: string,
+  server?: string,
+  placement?: string,
+): string | undefined {
+  const candidate = Object.entries(state.cardInstances).find(
+    ([, card]) =>
+      CARD_DEFINITIONS_BY_ID[card.definitionId]?.title === title &&
+      (card.zone.zone === "serverIce" || card.zone.zone === "serverRoot"),
+  );
+  if (!candidate) return undefined;
+  const zone = candidate[1].zone;
+  if (zone.zone !== "serverIce" && zone.zone !== "serverRoot") return undefined;
+  const serverState = state.corp.servers.find(
+    (item) => item.id === zone.serverId,
+  );
+  if (!serverState) return undefined;
+  if (placement === "ice")
+    return `Position ${serverState.ice.indexOf(candidate[0]) + 1} vor dem Server`;
+  return "im Remote-Bereich";
+}
+
+function advancedCard(
+  before: GameState,
+  after: GameState,
+): { title: string; count: number } | undefined {
+  for (const [instanceId, afterCard] of Object.entries(after.cardInstances)) {
+    const beforeCard = before.cardInstances[instanceId];
+    if (
+      !beforeCard ||
+      afterCard.advancementCounters <= beforeCard.advancementCounters
+    )
+      continue;
+    return {
+      title:
+        CARD_DEFINITIONS_BY_ID[afterCard.definitionId]?.title ?? "eine Karte",
+      count: afterCard.advancementCounters - beforeCard.advancementCounters,
+    };
+  }
+  return undefined;
+}
+
+function addedCards(before: GameState, after: GameState, side: Side): string[] {
+  const beforeHand = new Set(handFor(before, side));
+  return cardNames(
+    after,
+    handFor(after, side).filter((id) => !beforeHand.has(id)),
+  );
+}
+
+function resolvedEffectText(
+  payload: Record<string, unknown>,
+): string | undefined {
+  const gained = gamebookNumberValue(payload.gainedCredits);
+  return gained !== undefined
+    ? `Effekt: ${sideLabel(sideValue(payload.actor) ?? "corp")} erhält ${gained} Credits.`
+    : undefined;
+}
+
+function gamebookRecordValue(
+  value: unknown,
+  key: string,
+): value is Record<string, unknown> {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    key in value
+  );
+}
+
+function gamebookNumberValue(value: unknown): number | undefined {
+  return typeof value === "number" ? value : undefined;
 }
 
 function cloneGameStateWithoutEventLog(gameState: GameState): GameState {

@@ -108,6 +108,61 @@ function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
 }
 
 describe("recent match results", () => {
+  it("exports a terminal full-information gamebook without technical or secret data", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "gamebook-export-test",
+      now: () => "2026-07-21T12:00:00.000Z",
+    });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      humanSide: "runner",
+      seed: "gamebook-export-test",
+    });
+    const record = await storage.load(created.matchId);
+    if (!record?.gameState) throw new Error("Missing gamebook test match");
+    record.gameState.winner = "runner";
+    record.match.status = "finished";
+    record.match.winner = "runner";
+    await storage.save(record);
+
+    const exported = await service.exportGamebook(created.matchId);
+
+    expect(exported.ok).toBe(true);
+    if (!exported.ok) throw new Error(exported.error.message);
+    expect(exported.artifact.version).toBe("gamebook-v1");
+    expect(exported.artifact.markdown).toContain("# Spielprotokoll");
+    expect(exported.artifact.markdown).toContain("## Spielvorbereitung");
+    expect(exported.artifact.markdown).toContain("Korp – Starthand");
+    expect(exported.artifact.markdown).toContain("Runner – erste Starthand");
+    expect(exported.artifact.markdown).not.toMatch(
+      /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|[A-Za-z]:\\/i,
+    );
+  });
+
+  it("does not export a private gamebook without a participant session", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "private-gamebook-export-test",
+    });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      humanSide: "runner",
+      seed: "private-gamebook-export-test",
+    });
+    const record = await storage.load(created.matchId);
+    if (!record?.gameState)
+      throw new Error("Missing private gamebook test match");
+    record.match.status = "finished";
+    record.match.isPublic = false;
+    await storage.save(record);
+
+    const denied = await service.exportGamebook(created.matchId);
+    expect(denied.ok).toBe(false);
+  });
+
   it("lists the newest fully finished games without session tokens", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {
