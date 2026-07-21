@@ -518,6 +518,43 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("announces an open Vortex redirect choice without claiming the run was not redirected", () => {
+    const choiceOpened = formatChronicleEffectItems(
+      makeEvent("continue_run", {
+        actor: "runner",
+        classicDeflector: true,
+        deflectorChoiceOpened: true,
+        deflectorCost: 2,
+        sourceDefinitionId: "onr_classic_015_vortex",
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            reason: "ice_subroutine",
+            sourceDefinitionId: "onr_classic_015_vortex",
+            sourceTitle: "Vortex",
+            subroutineIndex: 0,
+            subroutineType: "deflect_run",
+          },
+        ],
+      }),
+      "runner",
+    )[0]!;
+
+    expect(choiceOpened.title).toBe(
+      "Vortex: Subroutine 1 eröffnet der Korp eine Wahl zur Umleitung des Runs.",
+    );
+    expect(choiceOpened.description).toBe(
+      "Die Korp kann Credits bezahlen und ein legales Ziel für die Umleitung wählen.",
+    );
+    expect(choiceOpened.chips).toEqual(
+      expect.arrayContaining(["Vortex", "Entscheidung offen", "Redirect möglich"]),
+    );
+    expect(choiceOpened.title).not.toContain("leitet den Run nicht um");
+  });
+
   it("narrates the direct Trapdoor to Dumpster redirect chain with both destinations", () => {
     const trapdoor = makeEvent("continue_run", {
       actor: "runner",

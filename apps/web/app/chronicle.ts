@@ -4962,6 +4962,10 @@ function formatChronicleEffect(
           );
           description = "Die Begegnung mit Entrapment wird normal fortgesetzt.";
           chips.push("Nicht bezahlt", "Kein Redirect");
+        } else if (event.publicPayload.deflectorChoiceOpened === true) {
+          title = `${source}: ${subroutineChip} eröffnet der Korp eine Wahl zur Umleitung des Runs`;
+          description = "Die Korp kann Credits bezahlen und ein legales Ziel für die Umleitung wählen.";
+          chips.push("Entscheidung offen", "Redirect möglich");
         } else {
           title = `${source}: ${subroutineChip} leitet den Run nicht um`;
           chips.push("Kein Redirect");
