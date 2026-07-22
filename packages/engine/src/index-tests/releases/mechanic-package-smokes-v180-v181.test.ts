@@ -1103,6 +1103,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
       actionType: "rez_ice",
       runStartBypassAutoPassedIce: true,
       runStartBypassPassedIceDefinitionId: "simple_code_gate_ice",
+      passedIcePosition: 1,
       serverLabel: "R&D",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(

@@ -338,7 +338,7 @@ export function passApproachedIce(
       stateChanged: true,
     };
   }
-  return movePastCurrentIce(host);
+  return movePastCurrentIce(host, legalAction);
 }
 
 export function approachOrEncounterIce(
@@ -418,6 +418,12 @@ export function movePastCurrentIce(
   const server = host.servers.mustServer(run.position.serverId);
   const nextIndex = run.position.iceIndex - 1;
   const passedIceId = run.encounteredIceId ?? run.approachedIceId;
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      passedIcePosition: run.position.iceIndex + 1,
+    };
+  }
   clearEncounterTemporaryTraceCredits(run, legalAction);
   const passedIceFollowups = passedIceFollowupMarkersForCurrentIce(
     host.encounter.encounterResolutionHost(),

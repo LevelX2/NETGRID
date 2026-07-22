@@ -3140,6 +3140,9 @@ export function formatChronicleEvent(
               ) ?? stringValue(payload.trashedCardTitle))
             : undefined;
         const passedIceDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        const passedIcePosition = positiveIntegerValue(
+          payload.passedIcePosition,
+        );
         const passedIceTitle =
           cardTitle ??
           sourceTitle ??
@@ -3179,7 +3182,9 @@ export function formatChronicleEvent(
                   subject,
                   result === "ended"
                     ? "den Run beendet"
-                    : "den Run fortgesetzt",
+                    : passedIcePosition
+                      ? `den Run nach dem Passieren von ICE ${passedIcePosition} fortgesetzt`
+                      : "den Run fortgesetzt",
                 );
           }
           chips.push(
@@ -3189,6 +3194,9 @@ export function formatChronicleEvent(
               : runPhase
                 ? [runPhaseLabel(runPhase)]
                 : []),
+            ...(!encounterContinue && passedIcePosition
+              ? [`ICE ${passedIcePosition} passiert`]
+              : []),
             ...(trashedProgramTitle
               ? [trashedProgramTitle, "Programm getrasht"]
               : []),
@@ -4004,10 +4012,11 @@ function insideJobAutoPassChronicleItem(
   side: Side,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
-  if (payload.insideJobAutoPassedIce !== true) return undefined;
+  if (payload.runStartBypassAutoPassedIce !== true) return undefined;
   const passedIceDefinitionId = stringValue(
-    payload.insideJobPassedIceDefinitionId,
+    payload.runStartBypassPassedIceDefinitionId,
   );
+  const passedIcePosition = positiveIntegerValue(payload.passedIcePosition);
   const passedIceTitle =
     titleForDefinitionId(passedIceDefinitionId) ?? "ein gerezztes ICE";
   const serverLabel = displayServerLabel(stringValue(payload.serverLabel));
@@ -4019,7 +4028,7 @@ function insideJobAutoPassChronicleItem(
     importance: "important",
     visibility: "public",
     actor: "runner",
-    title: `${subject} ${passedIceTitle} durch Inside Job automatisch passiert.`,
+    title: `${subject}${passedIcePosition ? ` ICE ${passedIcePosition} (${passedIceTitle})` : ` ${passedIceTitle}`} durch Inside Job automatisch passiert.`,
     description:
       "Das war das erste gerezzte ICE, dem der Runner in diesem Run begegnet ist; seine Subroutinen wurden nicht abgearbeitet.",
     chips: uniqueChips([
@@ -4027,6 +4036,7 @@ function insideJobAutoPassChronicleItem(
       "Inside Job",
       "Auto-Pass",
       passedIceTitle,
+      ...(passedIcePosition ? [`ICE ${passedIcePosition}`] : []),
       ...(serverLabel ? [serverLabel] : []),
     ]),
     cardDefinitionId: INSIDE_JOB_ID,
@@ -4962,6 +4972,10 @@ function formatChronicleEffect(
           );
           description = "Die Begegnung mit Entrapment wird normal fortgesetzt.";
           chips.push("Nicht bezahlt", "Kein Redirect");
+        } else if (event.publicPayload.deflectorChoiceOpened === true) {
+          title = `${source}: ${subroutineChip} eröffnet der Korp eine Wahl zur Umleitung des Runs`;
+          description = "Die Korp kann Credits bezahlen und ein legales Ziel für die Umleitung wählen.";
+          chips.push("Entscheidung offen", "Redirect möglich");
         } else {
           title = `${source}: ${subroutineChip} leitet den Run nicht um`;
           chips.push("Kein Redirect");

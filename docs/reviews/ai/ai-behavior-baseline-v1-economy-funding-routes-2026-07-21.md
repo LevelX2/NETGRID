@@ -1,8 +1,8 @@
 # AI Behavior Baseline v1
 
 Status: complete
-Git head: cd5a73e5f
-Generated: 2026-07-22T01:11:53.369Z
+Git head: b3a59226f
+Generated: 2026-07-22T01:17:30.245Z
 
 ## Contract
 
@@ -66,7 +66,7 @@ Hard failures: none
 
 Comparable: yes
 Baseline git head: c6e1d4d72
-Candidate git head: cd5a73e5f
+Candidate git head: b3a59226f
 Incompatibilities: none
 
 | Metric                                        | Candidate minus baseline |

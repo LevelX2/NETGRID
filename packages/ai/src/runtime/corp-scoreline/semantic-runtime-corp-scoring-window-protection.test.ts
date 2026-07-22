@@ -363,7 +363,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
     });
   });
 
-  it("does not call a delayed scoreline durable when rich runner exposure only lacks visible coverage", () => {
+  it("keeps a delayed scoreline temporary-safe when rich runner credits lack visible coverage", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(
       "install-agenda",
@@ -384,7 +384,44 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
         servers: protectedCentralServers([
           remoteServer("remote_1", [
             wallIce("remote-wall-1", { rezCost: 2 }),
-            wallIce("remote-wall-2", { rezCost: 2 }),
+          ]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "temporary_safe",
+      scoreHorizon: "next_turn",
+      missingVisibleBreakerCoverage: true,
+      affordableDurableRelevantIceCount: 1,
+      recommendedNextStep: "install_agenda",
+    });
+    expect(assessment?.evidence).toContain("delayed_score_exposure_risk:false");
+  });
+
+  it("keeps a delayed scoreline unsafe when visible breaker coverage can contest", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 6,
+        runnerCredits: 10,
+        runnerRig: [simpleFracter("visible-runner-fracter")],
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            wallIce("remote-wall-1", { rezCost: 2 }),
           ]),
         ]),
       }),
@@ -393,12 +430,10 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
 
     expect(assessment).toMatchObject({
       windowKind: "unsafe",
-      scoreHorizon: "next_turn",
-      missingVisibleBreakerCoverage: true,
-      affordableDurableRelevantIceCount: 2,
-      recommendedNextStep: "build_remote_ice",
+      runnerCanContestBeforeScore: true,
+      runnerCanReachAccessBeforeScore: true,
+      recommendedNextStep: "none",
     });
-    expect(assessment?.evidence).toContain("delayed_score_exposure_risk:true");
   });
 
   it("prefers funding when the Corp cannot pay the relevant remote rez", () => {

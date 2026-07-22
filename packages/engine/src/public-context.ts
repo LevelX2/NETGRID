@@ -1429,6 +1429,7 @@ export function publicContextForAction(
     "rezzedMatchingIceCount",
     "countedMatchingIceCount",
     "iceCount",
+    "passedIcePosition",
     "serverIceOrderReversed",
     "serverLabel",
     "accessCount",

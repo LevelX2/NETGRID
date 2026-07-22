@@ -161,7 +161,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     );
   });
 
-  it("downgrades delayed one-ice agenda installs when rich runner exposure exists", () => {
+  it("keeps delayed one-ice agenda installs temporary-safe when rich runner credits lack coverage", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(
       "install-delayed-agenda",
@@ -187,13 +187,13 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     );
 
     expect(assessment).toMatchObject({
-      windowKind: "unsafe",
+      windowKind: "temporary_safe",
       scoreHorizon: "next_turn",
       missingVisibleBreakerCoverage: true,
       runnerCanContestBeforeScore: false,
-      recommendedNextStep: "build_remote_ice",
+      recommendedNextStep: "install_agenda",
     });
-    expect(assessment?.evidence).toContain("delayed_score_exposure_risk:true");
+    expect(assessment?.evidence).toContain("delayed_score_exposure_risk:false");
   });
 
   it("projects visible repeatable action economy across the runner exposure window", () => {

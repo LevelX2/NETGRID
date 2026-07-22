@@ -746,6 +746,7 @@ export function scoringWindowKind(params: {
 }
 
 export function scoringWindowDelayedScoreExposureRisk(params: {
+  agendaInstall: boolean;
   access: ReturnType<typeof scoringWindowAccessAssessment>;
   agendaStealSeverity: CorpScoringWindowAgendaStealSeverity;
   exposureAccess: ReturnType<typeof scoringWindowAccessAssessment>;
@@ -760,6 +761,14 @@ export function scoringWindowDelayedScoreExposureRisk(params: {
   if (params.scoreHorizon === "immediate") return false;
   if (params.runnerExposureCreditActions <= 0) return false;
   if (params.agendaStealSeverity === "none") return false;
+  // The access projections already model every visible installed or publicly
+  // staged breaker and their available credits. High credits alone must not
+  // turn an unknown Runner hand into a contest path: that would make the Corp
+  // act on hidden information and suppress an agenda installation into an
+  // otherwise legal scoreline.
+  if (params.agendaInstall) {
+    return false;
+  }
   const iceCount = params.projectedServer?.ice.length ?? 0;
   if (iceCount <= 0) return false;
   const lightOrUnprovenRemote =
