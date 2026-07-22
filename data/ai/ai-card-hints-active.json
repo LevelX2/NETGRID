@@ -703,6 +703,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_hq"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -789,6 +807,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_hq"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -871,6 +907,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_rnd"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -1109,6 +1163,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_hq"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -1421,6 +1493,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_rnd"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -1856,6 +1946,21 @@
         "defense.meat_damage_immunity",
         "defense.meat_damage_prevention",
         "setup.hand_size_penalty"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_loss",
+          "timing": "persistent",
+          "recipient": "runner",
+          "restriction": "unrestricted",
+          "reliability": "guaranteed",
+          "sourceResource": "replacement_effect",
+          "expiresAt": "persistent",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": false
+        }
       ]
     },
     {
@@ -2124,6 +2229,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_remote"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -2421,6 +2544,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_hq"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -2799,6 +2940,24 @@
         "virus.purge_tax",
         "virus.random_payload",
         "virus.trigger_any_successful_run"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -3766,6 +3925,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_any_successful_run"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -4020,6 +4197,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_any_successful_run"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -5185,6 +5380,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_rnd"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -6206,7 +6419,9 @@
           "kind": "action_penalty",
           "scope": "runner",
           "target": "action_loss",
-          "timing": "action"
+          "timing": "action",
+          "amount": 4,
+          "resource": "actions"
         },
         {
           "kind": "survival_payoff",
@@ -6292,6 +6507,21 @@
         "economy.generic",
         "economy.high_risk_burst_credit",
         "risk.action_loss"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_debt",
+          "timing": "prevention_window",
+          "recipient": "runner",
+          "restriction": "unrestricted",
+          "reliability": "guaranteed",
+          "sourceResource": "replacement_effect",
+          "expiresAt": "debt_paid",
+          "amount": 4,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": false
+        }
       ]
     },
     {
@@ -9338,6 +9568,24 @@
         "setup.install_credit",
         "setup.install_discount",
         "setup.program_install"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "restricted_gain",
+          "timing": "immediate",
+          "recipient": "runner",
+          "restriction": "program_install_only",
+          "reliability": "guaranteed",
+          "sourceResource": "source_card",
+          "expiresAt": "side_turn_end",
+          "amount": 5,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": false,
+          "actionTypes": [
+            "install_card"
+          ]
+        }
       ]
     },
     {
@@ -13948,6 +14196,21 @@
         "risk.brain_damage_self_inflicted",
         "risk.unpreventable_brain_damage",
         "run.extra_action"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "recurring_gain",
+          "timing": "immediate",
+          "recipient": "runner",
+          "restriction": "unrestricted",
+          "reliability": "conditional",
+          "sourceResource": "source_card",
+          "expiresAt": "side_turn_end",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -14052,6 +14315,21 @@
         "risk.self_brain_damage",
         "risk.unpreventable_brain_damage",
         "run.extra_action"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "random_gain",
+          "timing": "start_of_turn",
+          "recipient": "runner",
+          "restriction": "random_action",
+          "reliability": "random",
+          "sourceResource": "die_roll",
+          "expiresAt": "persistent",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -15503,6 +15781,24 @@
         "defense.tag_prevention",
         "risk.run_spend_limit",
         "run.extra_action"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "restricted_gain",
+          "timing": "immediate",
+          "recipient": "runner",
+          "restriction": "run_only",
+          "reliability": "conditional",
+          "sourceResource": "source_card",
+          "expiresAt": "resolution",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "start_run"
+          ]
+        }
       ]
     },
     {
@@ -16031,6 +16327,21 @@
         "limit.once_per_turn",
         "score.action_counter_bank",
         "score.agenda_action"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "finite_bank",
+          "timing": "scored_activated",
+          "recipient": "corp",
+          "restriction": "unrestricted",
+          "reliability": "guaranteed",
+          "sourceResource": "counter",
+          "expiresAt": "source_leaves_play",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": true,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -18921,6 +19232,21 @@
         "action.corp_recurring_extra_action",
         "score.recurring_extra_action",
         "tempo.corp_recurring_action"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "recurring_gain",
+          "timing": "start_of_turn",
+          "recipient": "corp",
+          "restriction": "unrestricted",
+          "reliability": "guaranteed",
+          "sourceResource": "source_card",
+          "expiresAt": "source_leaves_play",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -19217,6 +19543,23 @@
         "corp_ice.conditional_end_run",
         "corp_ice.trace_source",
         "ice.etr"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_lock",
+          "timing": "encounter",
+          "recipient": "runner",
+          "restriction": "run_only",
+          "reliability": "conditional",
+          "sourceResource": "encounter_effect",
+          "expiresAt": "resolution",
+          "amountKind": "dynamic",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "start_run"
+          ]
+        }
       ]
     },
     {
@@ -21319,6 +21662,23 @@
         "corp_ice.conditional_end_run",
         "corp_ice.trace_source",
         "ice.etr"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_lock",
+          "timing": "encounter",
+          "recipient": "runner",
+          "restriction": "run_only",
+          "reliability": "conditional",
+          "sourceResource": "encounter_effect",
+          "expiresAt": "resolution",
+          "amountKind": "dynamic",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "start_run"
+          ]
+        }
       ]
     },
     {
@@ -21437,6 +21797,23 @@
         "corp_ice.conditional_end_run",
         "corp_ice.trace_source",
         "ice.etr"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_lock",
+          "timing": "encounter",
+          "recipient": "runner",
+          "restriction": "run_only",
+          "reliability": "conditional",
+          "sourceResource": "encounter_effect",
+          "expiresAt": "resolution",
+          "amountKind": "dynamic",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "start_run"
+          ]
+        }
       ]
     },
     {
@@ -21968,6 +22345,23 @@
         "corp_ice.conditional_end_run",
         "corp_ice.trace_source",
         "ice.etr"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_lock",
+          "timing": "encounter",
+          "recipient": "runner",
+          "restriction": "run_only",
+          "reliability": "conditional",
+          "sourceResource": "encounter_effect",
+          "expiresAt": "resolution",
+          "amountKind": "dynamic",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "start_run"
+          ]
+        }
       ]
     },
     {
@@ -23941,6 +24335,23 @@
         "corp_ice.conditional_end_run",
         "corp_ice.trace_source",
         "ice.etr"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_lock",
+          "timing": "encounter",
+          "recipient": "runner",
+          "restriction": "run_only",
+          "reliability": "conditional",
+          "sourceResource": "encounter_effect",
+          "expiresAt": "resolution",
+          "amountKind": "dynamic",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "start_run"
+          ]
+        }
       ]
     },
     {
@@ -24598,6 +25009,21 @@
         "corp_ice.end_run",
         "corp_ice.runner_action_loss",
         "ice.etr"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_loss",
+          "timing": "encounter",
+          "recipient": "runner",
+          "restriction": "unrestricted",
+          "reliability": "conditional",
+          "sourceResource": "encounter_effect",
+          "expiresAt": "side_turn_end",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -26460,6 +26886,24 @@
         "action.corp_install_only_action_bundle",
         "install.corp_action_bundle",
         "tempo.corp_install_burst"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "restricted_gain",
+          "timing": "immediate",
+          "recipient": "corp",
+          "restriction": "install_only",
+          "reliability": "guaranteed",
+          "sourceResource": "source_card",
+          "expiresAt": "side_turn_end",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": false,
+          "actionTypes": [
+            "install_card"
+          ]
+        }
       ]
     },
     {
@@ -27254,6 +27698,21 @@
         "action.corp_extra_action_burst",
         "action.corp_extra_action_support",
         "tempo.corp_action_burst"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "immediate_gain",
+          "timing": "immediate",
+          "recipient": "corp",
+          "restriction": "unrestricted",
+          "reliability": "guaranteed",
+          "sourceResource": "source_card",
+          "expiresAt": "side_turn_end",
+          "amount": 2,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": false
+        }
       ]
     },
     {
@@ -31191,6 +31650,21 @@
         "action.corp_repeatable_extra_action",
         "risk.leaves_play_loss",
         "risk.loss_condition"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "recurring_gain",
+          "timing": "start_of_turn",
+          "recipient": "corp",
+          "restriction": "unrestricted",
+          "reliability": "conditional",
+          "sourceResource": "source_card",
+          "expiresAt": "source_leaves_play",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -31432,7 +31906,11 @@
         {
           "kind": "extra_action",
           "scope": "corp",
-          "timing": "action"
+          "timing": "action",
+          "amount": 1,
+          "finite": true,
+          "repeatable": true,
+          "resource": "actions"
         },
         {
           "kind": "advanceable_economy",
@@ -31522,6 +32000,21 @@
       ],
       "functionSignals": [
         "advance.corp_counter_bank"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "finite_bank",
+          "timing": "immediate",
+          "recipient": "corp",
+          "restriction": "unrestricted",
+          "reliability": "guaranteed",
+          "sourceResource": "advancement_counter",
+          "expiresAt": "source_leaves_play",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": true,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -31611,6 +32104,34 @@
       ],
       "functionSignals": [
         "action.corp_repeatable_extra_action"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "immediate_gain",
+          "timing": "on_rez",
+          "recipient": "corp",
+          "restriction": "unrestricted",
+          "reliability": "guaranteed",
+          "sourceResource": "source_card",
+          "expiresAt": "side_turn_end",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": false
+        },
+        {
+          "class": "recurring_gain",
+          "timing": "start_of_turn",
+          "recipient": "corp",
+          "restriction": "unrestricted",
+          "reliability": "guaranteed",
+          "sourceResource": "source_card",
+          "expiresAt": "source_leaves_play",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -36353,6 +36874,21 @@
         "draw.corp_draw_action",
         "economy.corp_credit_action",
         "risk.random_action_mode"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "random_gain",
+          "timing": "start_of_turn",
+          "recipient": "corp",
+          "restriction": "random_action",
+          "reliability": "random",
+          "sourceResource": "die_roll",
+          "expiresAt": "side_turn_end",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -36863,6 +37399,21 @@
         "action.corp_damage_conversion_counter_bank",
         "damage.corp_prevent_own_damage_for_counter",
         "limit.once_per_turn"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "finite_bank",
+          "timing": "scored_activated",
+          "recipient": "corp",
+          "restriction": "unrestricted",
+          "reliability": "conditional",
+          "sourceResource": "damage_counter",
+          "expiresAt": "source_leaves_play",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": true,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -36957,6 +37508,20 @@
         "advance.overadvance_payoff",
         "score.overadvance_bonus",
         "score.overadvance_scaling"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "recurring_gain",
+          "timing": "start_of_turn",
+          "recipient": "corp",
+          "restriction": "unrestricted",
+          "reliability": "guaranteed",
+          "sourceResource": "overadvance_counter",
+          "expiresAt": "source_leaves_play",
+          "amountKind": "dynamic",
+          "bankable": false,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -38829,6 +39394,23 @@
         "corp_ice.trace_source",
         "ice.etr",
         "ice.strength_modifier"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_lock",
+          "timing": "encounter",
+          "recipient": "runner",
+          "restriction": "run_only",
+          "reliability": "conditional",
+          "sourceResource": "encounter_effect",
+          "expiresAt": "resolution",
+          "amountKind": "dynamic",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "start_run"
+          ]
+        }
       ]
     },
     {
@@ -40845,6 +41427,21 @@
         "action.corp_future_extra_action",
         "action.corp_recurring_extra_action_limited",
         "risk.future_forfeit_drawback"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "future_recurring_gain",
+          "timing": "future_turn_start",
+          "recipient": "corp",
+          "restriction": "unrestricted",
+          "reliability": "guaranteed",
+          "sourceResource": "credits_x",
+          "expiresAt": "duration_end",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": false
+        }
       ]
     },
     {
@@ -44093,6 +44690,24 @@
         "virus.purge_tax",
         "virus.random_payload",
         "virus.trigger_rnd"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -44533,6 +45148,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_hq"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -44946,6 +45579,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_rnd"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -45050,6 +45701,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_rnd"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -45373,6 +46042,24 @@
         "virus.purge_tax",
         "virus.random_payload",
         "virus.trigger_hq"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -45589,6 +46276,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_hq"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -45693,6 +46398,24 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_hq"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        }
       ]
     },
     {
@@ -45767,6 +46490,37 @@
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_multi_central"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_cost",
+          "timing": "persistent",
+          "recipient": "corp",
+          "restriction": "purge_only",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "resolution",
+          "amount": 3,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true,
+          "actionTypes": [
+            "purge_virus_counters"
+          ]
+        },
+        {
+          "class": "action_loss",
+          "timing": "start_of_turn",
+          "recipient": "corp",
+          "restriction": "unrestricted",
+          "reliability": "conditional",
+          "sourceResource": "virus_state",
+          "expiresAt": "side_turn_end",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -48381,6 +49135,21 @@
         "run.event_tempo",
         "run.extra_action",
         "run.make_run"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "mandatory_gain",
+          "timing": "start_of_turn",
+          "recipient": "runner",
+          "restriction": "mandatory_random_action",
+          "reliability": "mandatory",
+          "sourceResource": "die_roll",
+          "expiresAt": "resolution",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -49829,6 +50598,21 @@
       "functionSignals": [
         "action.recurring_extra_action",
         "risk.brain_damage_self_inflicted"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "recurring_gain",
+          "timing": "start_of_turn",
+          "recipient": "runner",
+          "restriction": "unrestricted",
+          "reliability": "conditional",
+          "sourceResource": "counter",
+          "expiresAt": "side_turn_end",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true
+        }
       ]
     },
     {
@@ -58299,6 +59083,21 @@
       "functionSignals": [
         "defense.tag_prevention",
         "risk.action_loss"
+      ],
+      "actionCapacityProfiles": [
+        {
+          "class": "action_debt",
+          "timing": "prevention_window",
+          "recipient": "runner",
+          "restriction": "unrestricted",
+          "reliability": "guaranteed",
+          "sourceResource": "replacement_effect",
+          "expiresAt": "debt_paid",
+          "amount": 1,
+          "amountKind": "fixed",
+          "bankable": false,
+          "repeatable": true
+        }
       ]
     },
     {

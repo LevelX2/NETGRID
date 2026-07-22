@@ -15,24 +15,19 @@ const ACTION_EFFECT_KINDS = new Set([
   "forgo_actions",
 ]);
 
-const IMMEDIATE_TIMINGS = new Set(["action", "scored_activated"]);
-const RECURRING_OR_FUTURE_TIMINGS = new Set([
-  "start_of_turn",
-  "turn_start",
-  "corp_turn",
-  "runner_turn",
-  "persistent",
-  "future_turn",
-]);
-
 const TARGET_CARD_IDS = [
+  "onr_v1_117_valu-pak-software-bundle",
   "onr_v1_171_preying-mantis",
   "onr_v1_172_quest-for-cattekin",
+  "onr_v1_187_wilson-weeflerunner-apprentice",
   "onr_v1_192_corporate-boon",
   "onr_v1_218_subsidiary-branch",
   "onr_v1_297_overtime-incentives",
+  "onr_v1_289_edgerunner-inc-temps",
   "onr_v1_331_nevinyrral",
   "onr_v1_334_pacifica-regional-ai",
+  "onr_proteus_046_corporate-guard-r-temps",
+  "onr_proteus_131_bargain-with-viacox",
 ];
 
 const EXTRA_ACTION_CONTRACTS = [
@@ -68,6 +63,79 @@ const EXTRA_ACTION_CONTRACTS = [
   },
 ];
 
+const ACTION_CAPACITY_PROFILE_CONTRACTS = [
+  {
+    cardId: "onr_v1_117_valu-pak-software-bundle",
+    class: "restricted_gain",
+    amount: 5,
+    restriction: "program_install_only",
+    sourceResource: "source_card",
+  },
+  {
+    cardId: "onr_v1_172_quest-for-cattekin",
+    class: "random_gain",
+    amount: 1,
+    restriction: "random_action",
+    sourceResource: "die_roll",
+  },
+  {
+    cardId: "onr_v1_187_wilson-weeflerunner-apprentice",
+    class: "restricted_gain",
+    amount: 1,
+    restriction: "run_only",
+    sourceResource: "source_card",
+  },
+  {
+    cardId: "onr_v1_192_corporate-boon",
+    class: "finite_bank",
+    amount: 1,
+    restriction: "unrestricted",
+    sourceResource: "counter",
+  },
+  {
+    cardId: "onr_v1_289_edgerunner-inc-temps",
+    class: "restricted_gain",
+    amount: 3,
+    restriction: "install_only",
+    sourceResource: "source_card",
+  },
+  {
+    cardId: "onr_v1_297_overtime-incentives",
+    class: "immediate_gain",
+    amount: 2,
+    restriction: "unrestricted",
+    sourceResource: "source_card",
+  },
+  {
+    cardId: "onr_v1_334_pacifica-regional-ai",
+    class: "finite_bank",
+    amount: 1,
+    restriction: "unrestricted",
+    sourceResource: "advancement_counter",
+  },
+  {
+    cardId: "onr_proteus_046_corporate-guard-r-temps",
+    class: "future_recurring_gain",
+    amount: 1,
+    restriction: "unrestricted",
+    sourceResource: "credits_x",
+  },
+  {
+    cardId: "onr_proteus_131_bargain-with-viacox",
+    class: "mandatory_gain",
+    amount: 1,
+    restriction: "mandatory_random_action",
+    sourceResource: "die_roll",
+  },
+  {
+    cardId: "onr_v1_078_arasaka-owns-you",
+    class: "action_debt",
+    amount: 4,
+    restriction: "unrestricted",
+    sourceResource: "replacement_effect",
+  },
+];
+
 const DIRECT_CLICK_MUTATION =
   /(?:state|host\.state)\.(corp|runner)\.clicks\s*\+=/g;
 const NARROW_ACTION_GAIN_FIELD = /scoreConversionActionGainAmount/g;
@@ -86,13 +154,16 @@ export function buildAiActionCapacityContractAudit() {
   const cardsWithRecurringOrFutureActionGain = [];
   const cardsWithRestrictedRandomOrMandatoryActions = [];
   const cardsWithActionDebtOrLoss = [];
+  const cardsWithActionCostOrLock = [];
+  const unprofiledActionEffectCards = [];
   const effectOccurrencesByKind = new Map();
 
   for (const card of hintCards) {
     const effects = actionEffects(card);
-    const signals = cardSignals(card);
-    const hasSignal = signals.some((signal) => actionCapacitySignal(signal));
-    if (effects.length === 0 && !hasSignal) continue;
+    const profiles = actionCapacityProfiles(card);
+    if (effects.length > 0 && profiles.length === 0)
+      unprofiledActionEffectCards.push(card.cardId);
+    if (profiles.length === 0) continue;
 
     cardsWithActionCapacity.push(card.cardId);
     for (const effect of effects) {
@@ -103,50 +174,58 @@ export function buildAiActionCapacityContractAudit() {
       );
     }
 
-    const immediateGains = effects.filter(
-      (effect) =>
-        effect.kind === "extra_action" &&
-        effect.resource === "actions" &&
-        effect.scope === card.side &&
-        IMMEDIATE_TIMINGS.has(effect.timing),
+    const immediateGains = profiles.filter(
+      (profile) =>
+        ["immediate_gain", "finite_bank", "restricted_gain"].includes(
+          profile.class,
+        ) &&
+        ["immediate", "scored_activated", "on_rez"].includes(profile.timing),
     );
-    if (immediateGains.some((effect) => finiteNumber(effect.amount))) {
+    if (
+      immediateGains.some(
+        (profile) =>
+          profile.amountKind === "fixed" && finiteNumber(profile.amount),
+      )
+    ) {
       cardsWithFixedImmediateActionGain.push(card.cardId);
     }
-    if (immediateGains.some((effect) => !finiteNumber(effect.amount))) {
+    if (
+      immediateGains.some(
+        (profile) =>
+          profile.amountKind !== "fixed" || !finiteNumber(profile.amount),
+      )
+    ) {
       cardsWithDynamicImmediateActionGain.push(card.cardId);
     }
     if (
-      effects.some(
-        (effect) =>
-          effect.kind === "extra_action" &&
-          RECURRING_OR_FUTURE_TIMINGS.has(effect.timing),
-      ) ||
-      signals.some((signal) =>
-        /recurring|future|delayed/.test(signal.toLowerCase()),
+      profiles.some((profile) =>
+        ["recurring_gain", "future_recurring_gain"].includes(profile.class),
       )
     ) {
       cardsWithRecurringOrFutureActionGain.push(card.cardId);
     }
     if (
-      signals.some((signal) =>
-        /install_only|run_only|random_action|random_extra_action|mandatory_extra_action/.test(
-          signal.toLowerCase(),
+      profiles.some((profile) =>
+        ["restricted_gain", "random_gain", "mandatory_gain"].includes(
+          profile.class,
         ),
       )
     ) {
       cardsWithRestrictedRandomOrMandatoryActions.push(card.cardId);
     }
     if (
-      effects.some((effect) =>
-        ["action_penalty", "forgo_actions"].includes(effect.kind),
-      ) ||
-      signals.some((signal) =>
-        /action_debt|action_loss|forgo_actions/.test(signal.toLowerCase()),
+      profiles.some((profile) =>
+        ["action_debt", "action_loss"].includes(profile.class),
       )
     ) {
       cardsWithActionDebtOrLoss.push(card.cardId);
     }
+    if (
+      profiles.some((profile) =>
+        ["action_cost", "action_lock"].includes(profile.class),
+      )
+    )
+      cardsWithActionCostOrLock.push(card.cardId);
   }
 
   const directEngineClickMutations = sourceMatches(
@@ -182,6 +261,8 @@ export function buildAiActionCapacityContractAudit() {
         cardsWithRestrictedRandomOrMandatoryActions,
       ).length,
       cardsWithActionDebtOrLoss: unique(cardsWithActionDebtOrLoss).length,
+      cardsWithActionCostOrLock: unique(cardsWithActionCostOrLock).length,
+      unprofiledActionEffectCards: unique(unprofiledActionEffectCards).length,
       directEngineClickMutationFiles: directEngineClickMutations.length,
       narrowActionGainProductionConsumers: narrowActionGainConsumers.filter(
         (entry) => entry.production,
@@ -211,12 +292,14 @@ export function buildAiActionCapacityContractAudit() {
         cardsWithRestrictedRandomOrMandatoryActions,
       ),
       cardsWithActionDebtOrLoss: unique(cardsWithActionDebtOrLoss),
+      cardsWithActionCostOrLock: unique(cardsWithActionCostOrLock),
     },
     findings: {
       directEngineClickMutations,
       narrowActionGainConsumers,
       rulesTextActionParsers,
       targetContractViolations,
+      unprofiledActionEffectCards: unique(unprofiledActionEffectCards),
     },
     targetCards: Object.fromEntries(
       TARGET_CARD_IDS.map((cardId) => {
@@ -228,6 +311,7 @@ export function buildAiActionCapacityContractAudit() {
                 side: card.side,
                 cardType: card.cardType,
                 effects: actionEffects(card),
+                actionCapacityProfiles: actionCapacityProfiles(card),
                 signals: cardSignals(card).filter(actionCapacitySignal),
               }
             : null,
@@ -260,15 +344,40 @@ function actionContractViolations(hintCards) {
       );
     }
   }
+  for (const contract of ACTION_CAPACITY_PROFILE_CONTRACTS) {
+    const card = cardsById.get(contract.cardId);
+    if (!card) {
+      violations.push(`${contract.cardId}: missing hint`);
+      continue;
+    }
+    const matching = actionCapacityProfiles(card).filter(
+      (profile) =>
+        profile.class === contract.class &&
+        profile.amount === contract.amount &&
+        profile.amountKind === "fixed" &&
+        profile.restriction === contract.restriction &&
+        profile.sourceResource === contract.sourceResource,
+    );
+    if (matching.length !== 1)
+      violations.push(
+        `${contract.cardId}: expected one ${contract.class} profile with amount ${contract.amount}, found ${matching.length}`,
+      );
+  }
   return violations;
 }
 
 function actionEffects(card) {
-  return arrayValue(card.effects).filter(
-    (effect) =>
-      isRecord(effect) &&
-      (ACTION_EFFECT_KINDS.has(effect.kind) || effect.resource === "actions"),
-  );
+  return arrayValue(card.effects).filter((effect) => {
+    if (!isRecord(effect)) return false;
+    if (effect.kind === "extra_action" || effect.kind === "forgo_actions")
+      return true;
+    if (effect.resource !== "actions") return false;
+    return ACTION_EFFECT_KINDS.has(effect.kind) || effect.kind === "run_lock";
+  });
+}
+
+function actionCapacityProfiles(card) {
+  return arrayValue(card.actionCapacityProfiles).filter(isRecord);
 }
 
 function cardSignals(card) {
@@ -370,7 +479,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   }
   if (
     process.argv.includes("--check") &&
-    report.findings.targetContractViolations.length > 0
+    (report.findings.targetContractViolations.length > 0 ||
+      report.findings.unprofiledActionEffectCards.length > 0)
   ) {
     process.exitCode = 1;
   }

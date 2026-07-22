@@ -557,3 +557,39 @@ P1-Prüfstand:
 - der AI-Typecheck besitzt auf Branch und unverändertem `main` dieselben drei
   bereits vorhandenen Nullability-Befunde in
   `run-access-decision-model.ts`.
+
+## P2-Ergebnis
+
+P2 ersetzt die grobe Signalheuristik durch typisierte
+`actionCapacityProfiles`. Die Profile unterscheiden unmittelbaren Gewinn,
+finite Banken, wiederkehrenden und zukünftigen Gewinn, eingeschränkte,
+zufällige und verpflichtende Aktionen, Aktionsschuld und -verlust sowie
+Aktionskosten und Run-Locks. Betragstyp, Empfänger, Restriktion,
+Zuverlässigkeit, Quellenressource, Verfall, Bankfähigkeit, Wiederholbarkeit
+und kompatible Action-Typen sind explizit. Diese Angaben klassifizieren die
+strategische Familie; LegalActions bleiben Autorität für die gerade legale
+Menge und Auflösung.
+
+Der normalisierte Audit korrigiert dabei die P0-Grobschätzung: 46 statt 50
+Karten besitzen tatsächlich einen Aktionskapazitäts-, Kosten- oder
+Lock-Vertrag. Credit- und Agenda-Point-Effekte mit historisch ungenauem
+`action_penalty`-Label werden nicht mehr als Actions gezählt. Die 46 Profile
+teilen sich in acht feste unmittelbare Quellen, sieben recurring/future,
+sechs restricted/random/mandatory, fünf debt/loss und 25 cost/lock Karten;
+Mehrfachzuordnung ist bei Karten mit mehreren Wirkungen beabsichtigt.
+
+Pacifica veröffentlicht nun den fehlenden festen Betrag `1`, die Ressource
+`actions` und ihren Advancement-Counter-Bankvertrag. Valu-Pak, Wilson,
+Edgerunner, Corporate Guard, Quest for Cattekin, Bargain with Viacox und
+Arasaka besitzen ebenfalls explizite Zielverträge. Der reproduzierbare
+Normalizer und `check:ai-action-capacity` sind harte Gates.
+
+P2-Prüfstand:
+
+- Action-Capacity-Audit mit null Zielvertragsverletzungen und null
+  unprofilierten strukturierten Action-Effekten grün;
+- Normalizer-Idempotenzcheck grün;
+- 43/43 fokussierte Hint-, Ontologie-, Metadaten- und Semantiktests grün;
+- `check:ai` grün;
+- der AI-Typecheck zeigt weiterhin ausschließlich die drei auf `main`
+  reproduzierten Nullability-Befunde.

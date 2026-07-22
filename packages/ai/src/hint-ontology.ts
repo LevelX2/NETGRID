@@ -159,6 +159,71 @@ export const KNOWN_HINT_AMOUNT_KINDS = [
   "dynamic",
 ] as const;
 
+export const KNOWN_HINT_ACTION_CAPACITY_CLASSES = [
+  "immediate_gain",
+  "finite_bank",
+  "recurring_gain",
+  "future_recurring_gain",
+  "restricted_gain",
+  "random_gain",
+  "mandatory_gain",
+  "action_debt",
+  "action_loss",
+  "action_cost",
+  "action_lock",
+] as const;
+
+export const KNOWN_HINT_ACTION_CAPACITY_TIMINGS = [
+  "immediate",
+  "scored_activated",
+  "on_rez",
+  "start_of_turn",
+  "future_turn_start",
+  "persistent",
+  "encounter",
+  "prevention_window",
+] as const;
+
+export const KNOWN_HINT_ACTION_CAPACITY_RESTRICTIONS = [
+  "unrestricted",
+  "install_only",
+  "program_install_only",
+  "run_only",
+  "purge_only",
+  "random_action",
+  "mandatory_random_action",
+] as const;
+
+export const KNOWN_HINT_ACTION_CAPACITY_RELIABILITIES = [
+  "guaranteed",
+  "conditional",
+  "random",
+  "mandatory",
+] as const;
+
+export const KNOWN_HINT_ACTION_CAPACITY_SOURCE_RESOURCES = [
+  "none",
+  "source_card",
+  "counter",
+  "advancement_counter",
+  "damage_counter",
+  "overadvance_counter",
+  "credits_x",
+  "die_roll",
+  "replacement_effect",
+  "encounter_effect",
+  "virus_state",
+] as const;
+
+export const KNOWN_HINT_ACTION_CAPACITY_EXPIRATIONS = [
+  "resolution",
+  "side_turn_end",
+  "source_leaves_play",
+  "duration_end",
+  "debt_paid",
+  "persistent",
+] as const;
+
 export const KNOWN_HINT_CONDITION_KINDS = [
   "requires_runner_tagged",
   "requires_successful_run",
@@ -542,6 +607,18 @@ export type KnownHintQualityConfidence =
   (typeof KNOWN_HINT_QUALITY_CONFIDENCE)[number];
 export type KnownHintStrategySupportPairRole =
   (typeof KNOWN_HINT_STRATEGY_SUPPORT_PAIR_ROLES)[number];
+export type KnownHintActionCapacityClass =
+  (typeof KNOWN_HINT_ACTION_CAPACITY_CLASSES)[number];
+export type KnownHintActionCapacityTiming =
+  (typeof KNOWN_HINT_ACTION_CAPACITY_TIMINGS)[number];
+export type KnownHintActionCapacityRestriction =
+  (typeof KNOWN_HINT_ACTION_CAPACITY_RESTRICTIONS)[number];
+export type KnownHintActionCapacityReliability =
+  (typeof KNOWN_HINT_ACTION_CAPACITY_RELIABILITIES)[number];
+export type KnownHintActionCapacitySourceResource =
+  (typeof KNOWN_HINT_ACTION_CAPACITY_SOURCE_RESOURCES)[number];
+export type KnownHintActionCapacityExpiration =
+  (typeof KNOWN_HINT_ACTION_CAPACITY_EXPIRATIONS)[number];
 
 export type AiHintStructuredEffect = {
   kind: KnownHintEffectKind;
@@ -554,6 +631,26 @@ export type AiHintStructuredEffect = {
   target?: string;
   repeatable?: boolean;
   finite?: boolean;
+};
+
+/**
+ * Strategic classification only. Exact current legality and immediate
+ * amounts remain Engine/LegalAction facts; these profiles distinguish action
+ * families, restrictions, durability and visible risk for planning.
+ */
+export type AiHintActionCapacityProfile = {
+  class: KnownHintActionCapacityClass;
+  timing: KnownHintActionCapacityTiming;
+  recipient: "corp" | "runner";
+  restriction: KnownHintActionCapacityRestriction;
+  reliability: KnownHintActionCapacityReliability;
+  sourceResource: KnownHintActionCapacitySourceResource;
+  expiresAt: KnownHintActionCapacityExpiration;
+  amount?: number;
+  amountKind: "fixed" | "dynamic" | "random";
+  bankable: boolean;
+  repeatable: boolean;
+  actionTypes?: string[];
 };
 
 export type AiHintCondition = {
@@ -645,6 +742,7 @@ export type AiHintStrategySupportPair = {
 
 export type AiHintOntologyExtension = {
   effects?: AiHintStructuredEffect[];
+  actionCapacityProfiles?: AiHintActionCapacityProfile[];
   functionSignals?: string[];
   tacticSignals?: string[];
   actionTacticSignals?: string[];
@@ -670,6 +768,12 @@ export type AiHintOntologyIssueKind =
   | "unknown_effect_resource"
   | "unknown_economy_mode"
   | "unknown_amount_kind"
+  | "unknown_action_capacity_class"
+  | "unknown_action_capacity_timing"
+  | "unknown_action_capacity_restriction"
+  | "unknown_action_capacity_reliability"
+  | "unknown_action_capacity_source_resource"
+  | "unknown_action_capacity_expiration"
   | "unknown_condition_kind"
   | "unknown_breaker_coverage"
   | "unknown_breaker_side_effect"
@@ -731,6 +835,11 @@ function validateExtensionFields(
   issues: AiHintOntologyIssue[],
 ): void {
   validateEffects(input.effects, `${path}.effects`, issues);
+  validateActionCapacityProfiles(
+    input.actionCapacityProfiles,
+    `${path}.actionCapacityProfiles`,
+    issues,
+  );
   validateConditions(input.conditions, `${path}.conditions`, issues);
   validateCostProfile(input.costProfile, `${path}.costProfile`, issues);
   validateBreakerProfile(
@@ -767,6 +876,168 @@ function validateExtensionFields(
     issues,
   );
   validateQuality(input.quality, `${path}.quality`, issues);
+}
+
+function validateActionCapacityProfiles(
+  profiles: unknown,
+  path: string,
+  issues: AiHintOntologyIssue[],
+): void {
+  if (profiles === undefined) return;
+  if (!Array.isArray(profiles)) {
+    addIssue(issues, "error", "invalid_shape", path, "Expected array.");
+    return;
+  }
+  profiles.forEach((profile, index) => {
+    const profilePath = `${path}[${index}]`;
+    if (!isRecord(profile)) {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        profilePath,
+        "Expected object.",
+      );
+      return;
+    }
+    requireKnownField(
+      profile.class,
+      KNOWN_HINT_ACTION_CAPACITY_CLASSES,
+      `${profilePath}.class`,
+      "unknown_action_capacity_class",
+      issues,
+      true,
+    );
+    requireKnownField(
+      profile.timing,
+      KNOWN_HINT_ACTION_CAPACITY_TIMINGS,
+      `${profilePath}.timing`,
+      "unknown_action_capacity_timing",
+      issues,
+      true,
+    );
+    requireKnownField(
+      profile.restriction,
+      KNOWN_HINT_ACTION_CAPACITY_RESTRICTIONS,
+      `${profilePath}.restriction`,
+      "unknown_action_capacity_restriction",
+      issues,
+      true,
+    );
+    requireKnownField(
+      profile.reliability,
+      KNOWN_HINT_ACTION_CAPACITY_RELIABILITIES,
+      `${profilePath}.reliability`,
+      "unknown_action_capacity_reliability",
+      issues,
+      true,
+    );
+    requireKnownField(
+      profile.sourceResource,
+      KNOWN_HINT_ACTION_CAPACITY_SOURCE_RESOURCES,
+      `${profilePath}.sourceResource`,
+      "unknown_action_capacity_source_resource",
+      issues,
+      true,
+    );
+    requireKnownField(
+      profile.expiresAt,
+      KNOWN_HINT_ACTION_CAPACITY_EXPIRATIONS,
+      `${profilePath}.expiresAt`,
+      "unknown_action_capacity_expiration",
+      issues,
+      true,
+    );
+    requireKnownField(
+      profile.recipient,
+      ["corp", "runner"] as const,
+      `${profilePath}.recipient`,
+      "invalid_shape",
+      issues,
+      true,
+    );
+    requireKnownField(
+      profile.amountKind,
+      ["fixed", "dynamic", "random"] as const,
+      `${profilePath}.amountKind`,
+      "invalid_shape",
+      issues,
+      true,
+    );
+    validateOptionalNumber(profile.amount, `${profilePath}.amount`, issues);
+    if (
+      profile.amountKind === "fixed" &&
+      (typeof profile.amount !== "number" || profile.amount <= 0)
+    )
+      addIssue(
+        issues,
+        "error",
+        "missing_required_effect_field",
+        `${profilePath}.amount`,
+        "A fixed action-capacity profile requires a positive amount.",
+      );
+    if (typeof profile.amount === "number" && profile.amount <= 0)
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${profilePath}.amount`,
+        "Expected a positive amount.",
+      );
+    validateOptionalBoolean(
+      profile.bankable,
+      `${profilePath}.bankable`,
+      issues,
+    );
+    validateOptionalBoolean(
+      profile.repeatable,
+      `${profilePath}.repeatable`,
+      issues,
+    );
+    if (profile.bankable === undefined)
+      addIssue(
+        issues,
+        "error",
+        "missing_required_effect_field",
+        `${profilePath}.bankable`,
+        "Expected boolean.",
+      );
+    if (profile.repeatable === undefined)
+      addIssue(
+        issues,
+        "error",
+        "missing_required_effect_field",
+        `${profilePath}.repeatable`,
+        "Expected boolean.",
+      );
+    if (
+      profile.actionTypes !== undefined &&
+      !isStringArray(profile.actionTypes)
+    )
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${profilePath}.actionTypes`,
+        "Expected string array.",
+      );
+    if (
+      [
+        "install_only",
+        "program_install_only",
+        "run_only",
+        "purge_only",
+      ].includes(String(profile.restriction)) &&
+      (!Array.isArray(profile.actionTypes) || profile.actionTypes.length === 0)
+    )
+      addIssue(
+        issues,
+        "error",
+        "missing_required_effect_field",
+        `${profilePath}.actionTypes`,
+        "A concrete restriction requires compatible action types.",
+      );
+  });
 }
 
 function validateEffects(

@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import {
+  KNOWN_HINT_ACTION_CAPACITY_CLASSES,
   KNOWN_HINT_EFFECT_KINDS,
   validateAiHintOntologyFields,
 } from "./hint-ontology";
@@ -74,6 +75,57 @@ describe("AI hint ontology validation", () => {
     });
     expect(result.errors).toEqual([]);
     expect(result.valid).toBe(true);
+  });
+
+  it("accepts a complete finite action-bank profile", () => {
+    const result = validateAiHintOntologyFields({
+      actionCapacityProfiles: [
+        {
+          class: "finite_bank",
+          timing: "scored_activated",
+          recipient: "corp",
+          restriction: "unrestricted",
+          reliability: "guaranteed",
+          sourceResource: "counter",
+          expiresAt: "source_leaves_play",
+          amount: 1,
+          amountKind: "fixed",
+          bankable: true,
+          repeatable: true,
+        },
+      ],
+    });
+
+    expect(KNOWN_HINT_ACTION_CAPACITY_CLASSES).toContain("finite_bank");
+    expect(result.errors).toEqual([]);
+  });
+
+  it("rejects fixed or restricted action profiles without their exact contract", () => {
+    const result = validateAiHintOntologyFields({
+      actionCapacityProfiles: [
+        {
+          class: "restricted_gain",
+          timing: "immediate",
+          recipient: "runner",
+          restriction: "run_only",
+          reliability: "conditional",
+          sourceResource: "source_card",
+          expiresAt: "resolution",
+          amountKind: "fixed",
+          bankable: false,
+          repeatable: true,
+        },
+      ],
+    });
+
+    expect(result.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ path: "$.actionCapacityProfiles[0].amount" }),
+        expect.objectContaining({
+          path: "$.actionCapacityProfiles[0].actionTypes",
+        }),
+      ]),
+    );
   });
 
   it("rejects asset_economy without independent credit or economy evidence", () => {
