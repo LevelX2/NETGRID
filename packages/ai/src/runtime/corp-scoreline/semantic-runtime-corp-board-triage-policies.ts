@@ -792,6 +792,19 @@ export function actionKeepsSideSafeSameTurnScoreCloseout<
   entry: ScoredLegalAction,
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): boolean {
+  if (
+    entry.action.type === "install_card" &&
+    entry.action.payload?.placement !== "ice" &&
+    entry.scoringWindow?.scoreHorizon === "immediate" &&
+    entry.scoringWindow.recommendedNextStep === "install_agenda" &&
+    entry.scoringWindow.windowKind !== "unsafe" &&
+    !entry.scoringWindow.runnerCanContestNow &&
+    !entry.scoringWindow.runnerCanReachAccessNow &&
+    !entry.scoringWindow.agendaStealRelevantNow
+  ) {
+    const source = semanticRuntimeVisibleSourceCard(input, entry.action);
+    if (source && corpTriageVisibleCardIsAgenda(source)) return true;
+  }
   return actionKeepsSameTurnScoreCloseoutReachable(
     input,
     entry.action,

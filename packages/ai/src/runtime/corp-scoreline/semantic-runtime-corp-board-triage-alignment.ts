@@ -131,7 +131,10 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
 ): "match" | "mismatch" | "neutral" {
   switch (triage.primary) {
     case "score_now":
-      return actionClosesScoreNow(input, action, dependencies) ||
+      return triage.evidence.includes(
+        `corp_board_triage_action:${action.actionId}`,
+      ) ||
+        actionClosesScoreNow(input, action, dependencies) ||
         actionKeepsSideSafeSameTurnScoreCloseoutForAction(
           input,
           action,
