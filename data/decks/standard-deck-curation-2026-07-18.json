@@ -15,7 +15,7 @@
   },
   "localDeckLibrary": {
     "counts": {
-      "standard": 40,
+      "standard": 41,
       "internal_ai": 2,
       "retire": 1,
       "test_fixture": 10
@@ -403,6 +403,14 @@
         "classification": "standard",
         "reason": "curated_user_deck",
         "standardDeckId": "standard_runner_stealth_interface_starter"
+      },
+      {
+        "sourceDeckId": "local_runner_purge_window",
+        "name": "Purge Window",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "ai_playtest_derived",
+        "standardDeckId": "standard_runner_purge_window"
       },
       {
         "sourceDeckId": "local_runner_unused_resource_cybernetics_lab",

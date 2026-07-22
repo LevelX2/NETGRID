@@ -4770,6 +4770,42 @@
         "sourceDeckId": "local_runner_stealth_interface_starter",
         "sourceDeckVersion": "1.3.0-local-web-inspired"
       }
+    },
+    {
+      "standardDeckId": "standard_runner_purge_window",
+      "version": "1.0.0",
+      "status": "active",
+      "name": "Purge Window",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        { "cardId": "onr_proteus_083_corrosion", "quantity": 3 },
+        { "cardId": "onr_v1_014_codecracker", "quantity": 3 },
+        { "cardId": "onr_v1_039_krash", "quantity": 2 },
+        { "cardId": "onr_proteus_089_garbage-in", "quantity": 3 },
+        { "cardId": "onr_proteus_090_highlighter", "quantity": 3 },
+        { "cardId": "onr_proteus_078_armageddon", "quantity": 1 },
+        { "cardId": "onr_proteus_099_viral-pipeline", "quantity": 3 },
+        { "cardId": "onr_v1_086_forged-activation-orders", "quantity": 2 },
+        { "cardId": "onr_v1_094_inside-job", "quantity": 3 },
+        { "cardId": "onr_v1_109_security-code-worm-chip", "quantity": 3 },
+        { "cardId": "onr_v1_111_social-engineering", "quantity": 3 },
+        { "cardId": "onr_v1_108_score", "quantity": 3 },
+        { "cardId": "onr_v1_097_livewires-contacts", "quantity": 3 },
+        { "cardId": "onr_v1_079_bodyweight-synthetic-blood", "quantity": 3 },
+        { "cardId": "onr_v1_099_mantis-fixer-at-large", "quantity": 3 },
+        { "cardId": "onr_proteus_147_r-and-d-mole", "quantity": 3 },
+        { "cardId": "onr_v1_177_the-short-circuit", "quantity": 1 }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_runner_purge_window",
+        "sourceDeckVersion": "1.0.0-lab"
+      }
     }
   ]
 }
