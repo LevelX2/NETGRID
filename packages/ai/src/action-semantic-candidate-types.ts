@@ -3,6 +3,7 @@ import type {
   CardInstanceId,
   LegalAction,
 } from "@netgrid/shared";
+import type { AiHintActionCapacityProfile } from "./hint-ontology";
 
 export type ActionSemanticVisibilityScope =
   | "actor_private"
@@ -212,6 +213,7 @@ export type ActionCapacityProjection = {
   expiresAt?: "side_turn_end" | "duration_end" | "unknown";
   selfFinancing: boolean;
   repeatable: boolean | "unknown";
+  bankable?: boolean | "unknown";
   reliability: "guaranteed" | "conditional" | "random" | "unknown";
   sourceCounterType?: string;
   sourceCounterCost?: number;
@@ -581,4 +583,5 @@ export type ActionCardSemanticProfile = {
   constraints?: readonly SemanticConstraint[];
   targetProfileMatches?: readonly TargetProfileMatch[];
   abilitySemantics?: readonly ActionCardAbilitySemanticProfile[];
+  actionCapacityProfiles?: readonly AiHintActionCapacityProfile[];
 };

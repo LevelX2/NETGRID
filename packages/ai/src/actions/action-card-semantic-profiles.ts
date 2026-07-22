@@ -15,6 +15,7 @@ import type {
 } from "../action-semantic-candidate";
 import type {
   AiHintCondition,
+  AiHintActionCapacityProfile,
   AiHintEffectTargetProfile,
   AiHintStructuredEffect,
   AiHintTargetProfileV1,
@@ -30,6 +31,7 @@ type ExtendedAiCardHint = AiCardHint & {
   riskTags?: string[];
   tacticSignals?: string[];
   actionTacticSignals?: string[];
+  actionCapacityProfiles?: AiHintActionCapacityProfile[];
 };
 
 export function buildActionCardSemanticProfilesByDefinitionId(): Readonly<
@@ -87,6 +89,9 @@ function actionCardSemanticProfileFromHint(
     risks: riskTagsFromHint(hint),
     constraints: constraintsFromHint(hint),
     targetProfileMatches: (hint.targetProfiles ?? []).map(targetProfileMatch),
+    ...(extendedHint.actionCapacityProfiles?.length
+      ? { actionCapacityProfiles: extendedHint.actionCapacityProfiles }
+      : {}),
     ...(abilitySemantics.length > 0 ? { abilitySemantics } : {}),
   };
 }

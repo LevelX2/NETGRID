@@ -22,6 +22,11 @@ type Finding = {
 };
 
 const FIELD_CONSUMER_CONTRACTS: Readonly<Record<string, readonly string[]>> = {
+  actionCapacityProfiles: [
+    "action-card-semantic-profiles",
+    "legal-action-capacity-contract",
+    "action-capacity-runtime-scoring",
+  ],
   actionStrategySupportPairs: [
     "action-card-semantic-profiles",
     "strategic-action-fit",
