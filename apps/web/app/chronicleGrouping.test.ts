@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   chronicleActionTypeBelongsToRunContext,
+  chronicleAccessCompletesRun,
   chroniclePaymentSupportBelongsToRunPayload,
   chroniclePaymentSupportFollowingRunGroupLabel,
   chronicleResolveChoiceBelongsToRunPayload,
@@ -46,6 +47,22 @@ function debtEntry(
 }
 
 describe("groupChronicleEntriesForRender", () => {
+  it("keeps a multi-access run open until its final access", () => {
+    expect(
+      chronicleAccessCompletesRun({
+        accessIndex: 0,
+        effectiveAccessCount: 4,
+      }),
+    ).toBe(false);
+    expect(
+      chronicleAccessCompletesRun({
+        accessIndex: 3,
+        effectiveAccessCount: 4,
+      }),
+    ).toBe(true);
+    expect(chronicleAccessCompletesRun({})).toBe(true);
+  });
+
   it("keeps root-card rez actions inside the active run group", () => {
     expect(chronicleActionTypeBelongsToRunContext("rez_card")).toBe(true);
     expect(chronicleActionTypeBelongsToRunContext("install_card")).toBe(false);

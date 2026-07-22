@@ -184,6 +184,20 @@ export function chroniclePaymentSupportFollowingRunGroupLabel(
     : null;
 }
 
+/**
+ * An access event ends its run only after the final card of a multi-access
+ * sequence. Older or single-access events without progress fields remain
+ * completion events for backwards-compatible grouping.
+ */
+export function chronicleAccessCompletesRun(
+  payload: Record<string, unknown>,
+): boolean {
+  const accessIndex = nonNegativeInteger(payload.accessIndex);
+  const effectiveAccessCount = positiveInteger(payload.effectiveAccessCount);
+  if (accessIndex === null || effectiveAccessCount === null) return true;
+  return accessIndex >= effectiveAccessCount - 1;
+}
+
 function chronicleEntriesShareRenderGroup<T extends ChronicleGroupableEntry>(
   currentGroup: ChronicleRenderGroup<T>,
   entry: T,
@@ -205,6 +219,12 @@ function chronicleEntryGroupInstanceKey(
 
 function positiveInteger(value: unknown): number | null {
   return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : null;
+}
+
+function nonNegativeInteger(value: unknown): number | null {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0
     ? value
     : null;
 }
