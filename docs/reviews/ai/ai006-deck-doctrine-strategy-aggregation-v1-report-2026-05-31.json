@@ -5,8 +5,7 @@
   "source": {
     "mode": "productive_strategy_profile",
     "strategyGoals": "data/ai/strategy-goals-v1.json",
-    "compiledHints": "data/ai/ai-card-hints-compiled.json",
-    "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
+    "activeHints": "data/ai/ai-card-hints-active.json",
     "deckSnapshots": "data/decks/deck-snapshots-0.8.json",
     "plannerEffect": "strategic_intent_input"
   },
@@ -226,10 +225,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "missing_wall_coverage",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["missing_wall_coverage", "weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -565,7 +561,7 @@
             {
               "cardId": "onr_v1_006_black-dahlia",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -579,7 +575,7 @@
             {
               "cardId": "onr_v1_016_cyfermaster",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -593,7 +589,7 @@
             {
               "cardId": "onr_v1_040_loony-goon",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -607,7 +603,7 @@
             {
               "cardId": "onr_v1_052_raffles",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -621,7 +617,7 @@
             {
               "cardId": "onr_v1_054_raptor",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -635,7 +631,7 @@
             {
               "cardId": "onr_v1_060_shaka",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -649,7 +645,7 @@
             {
               "cardId": "onr_v1_070_tinweasel",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -663,7 +659,7 @@
             {
               "cardId": "onr_v1_072_wild-card",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -677,7 +673,7 @@
             {
               "cardId": "onr_v1_073_wizards-book",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -719,20 +715,15 @@
             {
               "cardId": "onr_v1_145_wutech-mem-chip",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "missing_wall_coverage",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["missing_wall_coverage", "weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:missing_wall_coverage"
-          ]
+          "runtimeBlockers": ["hard_support_gap:missing_wall_coverage"]
         },
         "runner.rnd_pressure": {
           "anchorScore": 0,
@@ -743,7 +734,7 @@
             {
               "cardId": "onr_v1_006_black-dahlia",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -757,7 +748,7 @@
             {
               "cardId": "onr_v1_016_cyfermaster",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -771,7 +762,7 @@
             {
               "cardId": "onr_v1_040_loony-goon",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -785,7 +776,7 @@
             {
               "cardId": "onr_v1_052_raffles",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -799,7 +790,7 @@
             {
               "cardId": "onr_v1_054_raptor",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -813,7 +804,7 @@
             {
               "cardId": "onr_v1_060_shaka",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -827,7 +818,7 @@
             {
               "cardId": "onr_v1_070_tinweasel",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -841,7 +832,7 @@
             {
               "cardId": "onr_v1_072_wild-card",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -855,7 +846,7 @@
             {
               "cardId": "onr_v1_073_wizards-book",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -897,15 +888,12 @@
             {
               "cardId": "onr_v1_145_wutech-mem-chip",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "missing_wall_coverage",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["missing_wall_coverage", "weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -986,21 +974,21 @@
             {
               "cardId": "onr_v1_079_bodyweight-synthetic-blood",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
               "cardId": "onr_v1_095_jack-n-joe",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
               "cardId": "onr_v1_097_livewires-contacts",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
@@ -1014,7 +1002,7 @@
             {
               "cardId": "onr_v1_108_score",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
@@ -1026,10 +1014,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "missing_wall_coverage",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["missing_wall_coverage", "weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -1047,7 +1032,7 @@
             {
               "cardId": "onr_v1_006_black-dahlia",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1061,7 +1046,7 @@
             {
               "cardId": "onr_v1_016_cyfermaster",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1075,7 +1060,7 @@
             {
               "cardId": "onr_v1_040_loony-goon",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1089,7 +1074,7 @@
             {
               "cardId": "onr_v1_052_raffles",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1103,7 +1088,7 @@
             {
               "cardId": "onr_v1_054_raptor",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1117,7 +1102,7 @@
             {
               "cardId": "onr_v1_060_shaka",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1131,7 +1116,7 @@
             {
               "cardId": "onr_v1_070_tinweasel",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1145,7 +1130,7 @@
             {
               "cardId": "onr_v1_072_wild-card",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1159,7 +1144,7 @@
             {
               "cardId": "onr_v1_073_wizards-book",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1201,14 +1186,12 @@
             {
               "cardId": "onr_v1_145_wutech-mem-chip",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "missing_wall_coverage"
-          ],
+          "supportGaps": ["missing_wall_coverage"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -1351,8 +1334,7 @@
       "source": {
         "mode": "ai_internal_strategy_profile",
         "strategyGoals": "data/ai/strategy-goals-v1.json",
-        "compiledHints": "data/ai/ai-card-hints-compiled.json",
-        "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
+        "activeHints": "data/ai/ai-card-hints-active.json",
         "plannerEffect": "strategic_intent_input"
       }
     },
@@ -1447,10 +1429,7 @@
               "reason": "support:pressurePayoff"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -1478,7 +1457,7 @@
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
               "strategyId": "runner.hq_pressure",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_085_executive-wiretaps",
@@ -1501,7 +1480,7 @@
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
               "strategyId": "runner.hq_pressure",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_129_hq-interface",
@@ -1570,15 +1549,10 @@
               "reason": "support:searchOrDraw"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:low_economy_support"
-          ]
+          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
         },
         "runner.interface_closeout": {
           "anchorScore": 77,
@@ -1598,7 +1572,7 @@
               "source": "lineSupport",
               "signal": "runner.interface_closeout",
               "strategyId": "runner.interface_closeout",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_081_custodial-position",
@@ -1621,7 +1595,7 @@
               "source": "lineSupport",
               "signal": "runner.interface_closeout",
               "strategyId": "runner.interface_closeout",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_085_executive-wiretaps",
@@ -1644,7 +1618,7 @@
               "source": "lineSupport",
               "signal": "runner.interface_closeout",
               "strategyId": "runner.interface_closeout",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_129_hq-interface",
@@ -1720,15 +1694,10 @@
               "reason": "support:centralAccess"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:low_economy_support"
-          ]
+          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
         },
         "runner.remote_contest": {
           "anchorScore": 0,
@@ -1890,9 +1859,7 @@
               "reason": "support:remoteAccess"
             }
           ],
-          "supportGaps": [
-            "low_economy_support"
-          ],
+          "supportGaps": ["low_economy_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -1910,7 +1877,7 @@
             {
               "cardId": "onr_v1_014_codecracker",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1924,7 +1891,7 @@
             {
               "cardId": "onr_v1_015_codeslinger",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1938,7 +1905,7 @@
             {
               "cardId": "onr_v1_021_dwarf",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1952,7 +1919,7 @@
             {
               "cardId": "onr_v1_039_krash",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1966,7 +1933,7 @@
             {
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -1980,7 +1947,7 @@
             {
               "cardId": "onr_v1_074_worm",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2008,20 +1975,15 @@
             {
               "cardId": "onr_v1_145_wutech-mem-chip",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:low_economy_support"
-          ]
+          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
         },
         "runner.rnd_pressure": {
           "anchorScore": 55,
@@ -2041,7 +2003,7 @@
               "source": "lineSupport",
               "signal": "runner.rnd_pressure",
               "strategyId": "runner.rnd_pressure",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_081_custodial-position",
@@ -2056,7 +2018,7 @@
             {
               "cardId": "onr_v1_014_codecracker",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2070,7 +2032,7 @@
             {
               "cardId": "onr_v1_015_codeslinger",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2084,7 +2046,7 @@
             {
               "cardId": "onr_v1_021_dwarf",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2098,7 +2060,7 @@
             {
               "cardId": "onr_v1_039_krash",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2112,7 +2074,7 @@
             {
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2126,7 +2088,7 @@
             {
               "cardId": "onr_v1_074_worm",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2154,20 +2116,15 @@
             {
               "cardId": "onr_v1_145_wutech-mem-chip",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:low_economy_support"
-          ]
+          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
         },
         "runner.run_event_tempo": {
           "anchorScore": 68,
@@ -2251,41 +2208,36 @@
             {
               "cardId": "onr_v1_081_custodial-position",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
               "cardId": "onr_v1_085_executive-wiretaps",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
               "cardId": "onr_v1_095_jack-n-joe",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
               "cardId": "onr_v1_101_mit-west-tier",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:low_economy_support"
-          ]
+          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
         },
         "runner.search.breaker": {
           "anchorScore": 0,
@@ -2296,7 +2248,7 @@
             {
               "cardId": "onr_v1_014_codecracker",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2310,7 +2262,7 @@
             {
               "cardId": "onr_v1_015_codeslinger",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2324,7 +2276,7 @@
             {
               "cardId": "onr_v1_021_dwarf",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2338,7 +2290,7 @@
             {
               "cardId": "onr_v1_039_krash",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2352,7 +2304,7 @@
             {
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2366,7 +2318,7 @@
             {
               "cardId": "onr_v1_074_worm",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -2394,14 +2346,12 @@
             {
               "cardId": "onr_v1_145_wutech-mem-chip",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "low_economy_support"
-          ],
+          "supportGaps": ["low_economy_support"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -2452,10 +2402,7 @@
               "reason": "support:pressurePayoff"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -2567,8 +2514,7 @@
       "source": {
         "mode": "ai_internal_strategy_profile",
         "strategyGoals": "data/ai/strategy-goals-v1.json",
-        "compiledHints": "data/ai/ai-card-hints-compiled.json",
-        "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
+        "activeHints": "data/ai/ai-card-hints-active.json",
         "plannerEffect": "strategic_intent_input"
       }
     },
@@ -2656,14 +2602,10 @@
               "reason": "support:pressurePayoff"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "supporting",
-          "runtimeBlockers": [
-            "supporting_only:runner.economy_first"
-          ]
+          "runtimeBlockers": ["supporting_only:runner.economy_first"]
         },
         "runner.hq_pressure": {
           "anchorScore": 67,
@@ -2683,7 +2625,7 @@
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
               "strategyId": "runner.hq_pressure",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_084_edited-shipping-manifests",
@@ -2706,7 +2648,7 @@
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
               "strategyId": "runner.hq_pressure",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_129_hq-interface",
@@ -2782,9 +2724,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -2807,7 +2747,7 @@
               "source": "lineSupport",
               "signal": "runner.interface_closeout",
               "strategyId": "runner.interface_closeout",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_129_hq-interface",
@@ -2876,9 +2816,7 @@
               "reason": "support:centralAccess"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -3058,7 +2996,7 @@
             {
               "cardId": "onr_v1_021_dwarf",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -3072,7 +3010,7 @@
             {
               "cardId": "onr_v1_039_krash",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -3086,7 +3024,7 @@
             {
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -3100,7 +3038,7 @@
             {
               "cardId": "onr_v1_074_worm",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -3149,21 +3087,19 @@
             {
               "cardId": "onr_v1_144_tycho-mem-chip",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
             {
               "cardId": "onr_v1_145_wutech-mem-chip",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -3177,7 +3113,7 @@
             {
               "cardId": "onr_v1_021_dwarf",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -3191,7 +3127,7 @@
             {
               "cardId": "onr_v1_039_krash",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -3205,7 +3141,7 @@
             {
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -3219,7 +3155,7 @@
             {
               "cardId": "onr_v1_074_worm",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -3268,21 +3204,19 @@
             {
               "cardId": "onr_v1_144_tycho-mem-chip",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
             {
               "cardId": "onr_v1_145_wutech-mem-chip",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -3327,7 +3261,7 @@
             {
               "cardId": "onr_v1_084_edited-shipping-manifests",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
@@ -3341,14 +3275,14 @@
             {
               "cardId": "onr_v1_095_jack-n-joe",
               "quantity": 3,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
               "cardId": "onr_v1_097_livewires-contacts",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
@@ -3362,14 +3296,14 @@
             {
               "cardId": "onr_v1_101_mit-west-tier",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
               "cardId": "onr_v1_108_score",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
@@ -3381,9 +3315,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -3400,7 +3332,7 @@
             {
               "cardId": "onr_v1_021_dwarf",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -3414,7 +3346,7 @@
             {
               "cardId": "onr_v1_039_krash",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -3428,7 +3360,7 @@
             {
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -3442,7 +3374,7 @@
             {
               "cardId": "onr_v1_074_worm",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
@@ -3491,14 +3423,14 @@
             {
               "cardId": "onr_v1_144_tycho-mem-chip",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             },
             {
               "cardId": "onr_v1_145_wutech-mem-chip",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
             }
@@ -3560,9 +3492,7 @@
               "reason": "support:pressurePayoff"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -3681,8 +3611,7 @@
       "source": {
         "mode": "ai_internal_strategy_profile",
         "strategyGoals": "data/ai/strategy-goals-v1.json",
-        "compiledHints": "data/ai/ai-card-hints-compiled.json",
-        "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
+        "activeHints": "data/ai/ai-card-hints-active.json",
         "plannerEffect": "strategic_intent_input"
       }
     },
@@ -3709,7 +3638,7 @@
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
@@ -3723,7 +3652,7 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
@@ -3737,7 +3666,7 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
@@ -3751,7 +3680,7 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
@@ -3812,9 +3741,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -3880,14 +3807,12 @@
             {
               "cardId": "onr_v1_350_antiquated-interface-routines",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:upgrade",
               "reason": "support:remoteSlots"
             }
           ],
-          "supportGaps": [
-            "low_ambush_support"
-          ],
+          "supportGaps": ["low_ambush_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -3925,7 +3850,7 @@
             {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:asset",
               "reason": "support:assetDensity"
             },
@@ -3966,14 +3891,14 @@
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -3994,14 +3919,14 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -4022,14 +3947,14 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -4050,14 +3975,14 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -4111,9 +4036,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["weak_remote_protection"],
           "confidence": "medium",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -4132,7 +4055,7 @@
               "source": "lineSupport",
               "signal": "corp.damage_kill",
               "strategyId": "corp.damage_kill",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_301_punitive-counterstrike",
@@ -4180,15 +4103,10 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_ambush_support",
-            "low_tagOrTrace_support"
-          ],
+          "supportGaps": ["low_ambush_support", "low_tagOrTrace_support"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "below_productive_score_threshold"
-          ]
+          "runtimeBlockers": ["below_productive_score_threshold"]
         },
         "corp.deck_recycle_engine": {
           "anchorScore": 0,
@@ -4199,7 +4117,7 @@
             {
               "cardId": "onr_v1_203_hostile-takeover",
               "quantity": 3,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
@@ -4213,14 +4131,14 @@
             {
               "cardId": "onr_v1_214_project-babylon",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
               "cardId": "onr_v1_220_tycho-extension",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
@@ -4260,9 +4178,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "missing_recycle_source"
-          ],
+          "supportGaps": ["missing_recycle_source"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -4287,7 +4203,7 @@
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
@@ -4301,7 +4217,7 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
@@ -4315,7 +4231,7 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
@@ -4329,7 +4245,7 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
@@ -4383,9 +4299,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -4432,7 +4346,7 @@
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -4446,7 +4360,7 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -4460,7 +4374,7 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -4474,7 +4388,7 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -4528,9 +4442,7 @@
               "reason": "support:rezReserve"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -4546,14 +4458,14 @@
               "source": "lineSupport",
               "signal": "corp.fast_advance",
               "strategyId": "corp.fast_advance",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             }
           ],
           "supportEvidence": [
             {
               "cardId": "onr_v1_203_hostile-takeover",
               "quantity": 3,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
@@ -4567,21 +4479,21 @@
             {
               "cardId": "onr_v1_214_project-babylon",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
               "cardId": "onr_v1_220_tycho-extension",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
@@ -4595,7 +4507,7 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
@@ -4609,7 +4521,7 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
@@ -4623,7 +4535,7 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
@@ -4663,9 +4575,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scoreAcceleration_support"
-          ],
+          "supportGaps": ["low_scoreAcceleration_support"],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -4716,7 +4626,7 @@
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
               "strategyId": "corp.ice_tax_glacier",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_317_data-masons",
@@ -4739,7 +4649,7 @@
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
               "strategyId": "corp.ice_tax_glacier",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_350_antiquated-interface-routines",
@@ -4768,14 +4678,14 @@
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -4796,14 +4706,14 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -4824,14 +4734,14 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -4852,14 +4762,14 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -4927,14 +4837,10 @@
               "reason": "support:rezReserve"
             }
           ],
-          "supportGaps": [
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["weak_remote_protection"],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:weak_remote_protection"
-          ]
+          "runtimeBlockers": ["hard_support_gap:weak_remote_protection"]
         },
         "corp.overadvance_value": {
           "anchorScore": 38,
@@ -4947,7 +4853,7 @@
               "source": "lineSupport",
               "signal": "corp.overadvance_value",
               "strategyId": "corp.overadvance_value",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_214_project-babylon",
@@ -5037,9 +4943,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -5053,7 +4957,7 @@
             {
               "cardId": "onr_v1_203_hostile-takeover",
               "quantity": 3,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
@@ -5067,28 +4971,28 @@
             {
               "cardId": "onr_v1_214_project-babylon",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
               "cardId": "onr_v1_220_tycho-extension",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -5109,14 +5013,14 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -5137,14 +5041,14 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -5165,14 +5069,14 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -5243,7 +5147,7 @@
             {
               "cardId": "onr_v1_203_hostile-takeover",
               "quantity": 3,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
@@ -5257,21 +5161,21 @@
             {
               "cardId": "onr_v1_214_project-babylon",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
               "cardId": "onr_v1_220_tycho-extension",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
@@ -5285,14 +5189,14 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
@@ -5306,14 +5210,14 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
@@ -5327,14 +5231,14 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
@@ -5397,7 +5301,7 @@
               "source": "lineSupport",
               "signal": "corp.tag_trace_punish",
               "strategyId": "corp.tag_trace_punish",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -5420,7 +5324,7 @@
               "source": "lineSupport",
               "signal": "corp.tag_trace_punish",
               "strategyId": "corp.tag_trace_punish",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_301_punitive-counterstrike",
@@ -5482,10 +5386,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_tag_sources",
-            "low_traceSupport_support"
-          ],
+          "supportGaps": ["low_tag_sources", "low_traceSupport_support"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -5499,9 +5400,7 @@
         "corp.rush_score",
         "corp.overadvance_value"
       ],
-      "secondaryStrategies": [
-        "corp.fast_advance"
-      ],
+      "secondaryStrategies": ["corp.fast_advance"],
       "functionSignalCounts": {
         "action.corp_extra_action_burst": 2,
         "action.corp_extra_action_support": 2,
@@ -5561,9 +5460,7 @@
         "role:tag_punishment_operation": 2,
         "role:upgrade": 1
       },
-      "warnings": [
-        "inspector:legacy_fallback_only:onr_v1_220_tycho-extension"
-      ],
+      "warnings": [],
       "corpProfile": {
         "iceProfile": {
           "etr": 8,
@@ -5603,8 +5500,7 @@
       "source": {
         "mode": "ai_internal_strategy_profile",
         "strategyGoals": "data/ai/strategy-goals-v1.json",
-        "compiledHints": "data/ai/ai-card-hints-compiled.json",
-        "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
+        "activeHints": "data/ai/ai-card-hints-active.json",
         "plannerEffect": "strategic_intent_input"
       }
     },
@@ -5631,7 +5527,7 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
@@ -5645,7 +5541,7 @@
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
@@ -5666,7 +5562,7 @@
             {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
@@ -5687,7 +5583,7 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
@@ -5701,7 +5597,7 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:boardSafety"
             },
@@ -5776,9 +5672,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -5851,14 +5745,12 @@
             {
               "cardId": "onr_v1_350_antiquated-interface-routines",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:upgrade",
               "reason": "support:remoteSlots"
             }
           ],
-          "supportGaps": [
-            "low_ambush_support"
-          ],
+          "supportGaps": ["low_ambush_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -5903,7 +5795,7 @@
             {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:asset",
               "reason": "support:assetDensity"
             },
@@ -5944,14 +5836,14 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -5972,14 +5864,14 @@
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -6014,14 +5906,14 @@
             {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -6056,14 +5948,14 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -6084,14 +5976,14 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -6166,9 +6058,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["weak_remote_protection"],
           "confidence": "medium",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -6260,10 +6150,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_ambush_support",
-            "low_punish_payoff_density"
-          ],
+          "supportGaps": ["low_ambush_support", "low_punish_payoff_density"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -6281,7 +6168,7 @@
             {
               "cardId": "onr_v1_203_hostile-takeover",
               "quantity": 3,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
@@ -6295,7 +6182,7 @@
             {
               "cardId": "onr_v1_220_tycho-extension",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
@@ -6342,9 +6229,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "missing_recycle_source"
-          ],
+          "supportGaps": ["missing_recycle_source"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -6369,7 +6254,7 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
@@ -6383,7 +6268,7 @@
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
@@ -6404,7 +6289,7 @@
             {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
@@ -6425,7 +6310,7 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
@@ -6439,7 +6324,7 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:safety"
             },
@@ -6507,9 +6392,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -6556,7 +6439,7 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -6570,7 +6453,7 @@
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -6591,7 +6474,7 @@
             {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -6612,7 +6495,7 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -6626,7 +6509,7 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -6701,9 +6584,7 @@
               "reason": "support:rezReserve"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -6719,14 +6600,14 @@
               "source": "lineSupport",
               "signal": "corp.fast_advance",
               "strategyId": "corp.fast_advance",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             }
           ],
           "supportEvidence": [
             {
               "cardId": "onr_v1_203_hostile-takeover",
               "quantity": 3,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
@@ -6740,14 +6621,14 @@
             {
               "cardId": "onr_v1_220_tycho-extension",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
@@ -6761,7 +6642,7 @@
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
@@ -6782,7 +6663,7 @@
             {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
@@ -6803,7 +6684,7 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
@@ -6817,7 +6698,7 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
@@ -6871,9 +6752,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scoreAcceleration_support"
-          ],
+          "supportGaps": ["low_scoreAcceleration_support"],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -6917,7 +6796,7 @@
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
               "strategyId": "corp.ice_tax_glacier",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_317_data-masons",
@@ -6940,7 +6819,7 @@
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
               "strategyId": "corp.ice_tax_glacier",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_350_antiquated-interface-routines",
@@ -6969,14 +6848,14 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -6997,14 +6876,14 @@
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -7039,14 +6918,14 @@
             {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -7081,14 +6960,14 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -7109,14 +6988,14 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -7212,14 +7091,10 @@
               "reason": "support:rezReserve"
             }
           ],
-          "supportGaps": [
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["weak_remote_protection"],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:weak_remote_protection"
-          ]
+          "runtimeBlockers": ["hard_support_gap:weak_remote_protection"]
         },
         "corp.overadvance_value": {
           "anchorScore": 0,
@@ -7305,7 +7180,7 @@
             {
               "cardId": "onr_v1_203_hostile-takeover",
               "quantity": 3,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
@@ -7319,21 +7194,21 @@
             {
               "cardId": "onr_v1_220_tycho-extension",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -7354,14 +7229,14 @@
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -7396,14 +7271,14 @@
             {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -7438,14 +7313,14 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -7466,14 +7341,14 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:ice"
             },
@@ -7565,7 +7440,7 @@
             {
               "cardId": "onr_v1_203_hostile-takeover",
               "quantity": 3,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
@@ -7579,21 +7454,21 @@
             {
               "cardId": "onr_v1_220_tycho-extension",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
             },
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
@@ -7607,14 +7482,14 @@
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
@@ -7635,14 +7510,14 @@
             {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
@@ -7663,14 +7538,14 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
@@ -7684,14 +7559,14 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
-              "source": "compiledHint",
+              "source": "cardHint",
               "signal": "cheap_ice",
               "reason": "support:earlyIce"
             },
@@ -7782,7 +7657,7 @@
               "source": "lineSupport",
               "signal": "corp.tag_trace_punish",
               "strategyId": "corp.tag_trace_punish",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -7805,7 +7680,7 @@
               "source": "lineSupport",
               "signal": "corp.tag_trace_punish",
               "strategyId": "corp.tag_trace_punish",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
               "cardId": "onr_v1_293_netwatch-credit-voucher",
@@ -7820,7 +7695,7 @@
               "source": "lineSupport",
               "signal": "corp.tag_trace_punish",
               "strategyId": "corp.tag_trace_punish",
-              "reason": "normalized_lineSupport_strategy_goal"
+              "reason": "card_hint_lineSupport_strategy_goal"
             }
           ],
           "supportEvidence": [
@@ -7934,9 +7809,7 @@
         "corp.economy_rez_reserve",
         "corp.rush_score"
       ],
-      "secondaryStrategies": [
-        "corp.fast_advance"
-      ],
+      "secondaryStrategies": ["corp.fast_advance"],
       "functionSignalCounts": {
         "action.corp_extra_action_burst": 2,
         "action.corp_extra_action_support": 2,
@@ -7994,9 +7867,7 @@
         "role:trace_ice": 2,
         "role:upgrade": 1
       },
-      "warnings": [
-        "inspector:legacy_fallback_only:onr_v1_220_tycho-extension"
-      ],
+      "warnings": [],
       "corpProfile": {
         "iceProfile": {
           "etr": 6,
@@ -8036,8 +7907,7 @@
       "source": {
         "mode": "ai_internal_strategy_profile",
         "strategyGoals": "data/ai/strategy-goals-v1.json",
-        "compiledHints": "data/ai/ai-card-hints-compiled.json",
-        "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
+        "activeHints": "data/ai/ai-card-hints-active.json",
         "plannerEffect": "strategic_intent_input"
       }
     }
@@ -8069,9 +7939,7 @@
       "runner.interface_closeout": 1,
       "runner.rig_first": 1
     },
-    "warningCounts": {
-      "inspector:legacy_fallback_only:onr_v1_220_tycho-extension": 2
-    },
-    "contentSha256": "43c56f359943235a781b93b733b7f529b19e6e8ec64230f712b3ed5c04803217"
+    "warningCounts": {},
+    "contentSha256": "b12a2533ec9c83ec7ed9a886fca803b50af2621afedcff9266e277063464a4a6"
   }
 }

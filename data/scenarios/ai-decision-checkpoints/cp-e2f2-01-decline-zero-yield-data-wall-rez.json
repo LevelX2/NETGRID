@@ -657,27 +657,21 @@
           "corp_onr_v1_194_corporate-downsizing_3",
           "corp_onr_v1_312_chicago-branch_1"
         ],
-        "archives": [
-          "corp_onr_v1_288_day-shift_3"
-        ],
+        "archives": ["corp_onr_v1_288_day-shift_3"],
         "scoreArea": [],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_279_wall-of-static_3"
-            ],
+            "ice": ["corp_onr_v1_279_wall-of-static_3"],
             "root": []
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_237_data-wall_3"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_3"],
             "root": []
           },
           {
@@ -744,18 +738,12 @@
           "runner_onr_v1_014_codecracker_2",
           "runner_onr_v1_094_inside-job_2"
         ],
-        "heap": [
-          "runner_onr_v1_097_livewires-contacts_1"
-        ],
+        "heap": ["runner_onr_v1_097_livewires-contacts_1"],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_proteus_083_corrosion_2"
-          ],
+          "programs": ["runner_onr_proteus_083_corrosion_2"],
           "hardware": [],
-          "resources": [
-            "runner_onr_proteus_147_r-and-d-mole_3"
-          ]
+          "resources": ["runner_onr_proteus_147_r-and-d-mole_3"]
         }
       },
       "specialZones": {
@@ -2583,10 +2571,7 @@
       "selectedStepKind": "protect_remote",
       "selectedActionId": "corp.install_card.corp_onr_v1_279_wall-of-static_3.hq.corp_onr_v1_279_wall-of-static_3.0",
       "selectedActionType": "install_card",
-      "blockedBy": [
-        "central_protection_floor",
-        "missing_remote_protection"
-      ],
+      "blockedBy": ["central_protection_floor", "missing_remote_protection"],
       "actionDemands": [
         {
           "schemaVersion": "action-demand-v1",
@@ -2601,13 +2586,8 @@
           "currentActions": 2,
           "targetActions": 1,
           "gap": 0,
-          "acceptedRestrictions": [
-            "unrestricted",
-            "install_only"
-          ],
-          "requiredActionTypes": [
-            "install_card"
-          ],
+          "acceptedRestrictions": ["unrestricted", "install_only"],
+          "requiredActionTypes": ["install_card"],
           "evidence": [
             "action_demand_source_plan:corp.establish_scoring_remote:new_remote",
             "action_demand_source_step:protect_remote",
@@ -2707,13 +2687,8 @@
               "currentActions": 0,
               "targetActions": 1,
               "gap": 1,
-              "acceptedRestrictions": [
-                "unrestricted",
-                "install_only"
-              ],
-              "requiredActionTypes": [
-                "install_card"
-              ],
+              "acceptedRestrictions": ["unrestricted", "install_only"],
+              "requiredActionTypes": ["install_card"],
               "evidence": [
                 "action_demand_source_plan:corp.establish_scoring_remote:new_remote",
                 "action_demand_source_step:protect_remote",
@@ -2998,9 +2973,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.fast_advance",
-          "evidence": [
-            "continued:corp.fast_advance"
-          ]
+          "evidence": ["continued:corp.fast_advance"]
         },
         "commitment": {
           "strategyId": "corp.fast_advance",
@@ -3219,9 +3192,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 82,
@@ -3279,9 +3250,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 59,
@@ -3313,10 +3282,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3335,9 +3301,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -3368,10 +3332,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3428,10 +3389,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3489,10 +3447,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3613,10 +3568,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3672,10 +3624,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
