@@ -2,6 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { createRunnerActionDemand } from "../plans/action-demand";
 import { buildSemanticRuntimeScoreBreakdown } from "./semantic-runtime-score-breakdown";
 
 describe("semantic runtime score breakdown", () => {
@@ -88,6 +89,62 @@ describe("semantic runtime score breakdown", () => {
         (component) => component.key === "semantic_credit_cost_penalty",
       ),
     ).toMatchObject({ value: 0, reason: "0" });
+  });
+
+  it("adds one action-capacity conversion component from the runtime context", () => {
+    const action = legalAction("runner-overtime", "play_event", {
+      costs: [{ clicks: 1 }],
+      payload: {
+        gainActionsAmount: 2,
+        actionCapacityTiming: "immediate",
+        actionCapacityRestriction: "unrestricted",
+        actionCapacityReliability: "guaranteed",
+      },
+    });
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [action],
+      observerSide: "runner",
+      stateVersion: 7,
+    });
+    if (!candidate) throw new Error("Expected action-capacity candidate");
+
+    const breakdown = buildSemanticRuntimeScoreBreakdown({
+      input: decisionInput([action]),
+      action,
+      scopeId: "test_scope",
+      actionSemanticCandidate: candidate,
+      actionCapacityContext: {
+        actionDemands: [
+          createRunnerActionDemand({
+            demandId: "runner:run-followup",
+            purpose: "current_run",
+            priority: "current_foreground_plan",
+            hardness: "soft",
+            deadline: "end_of_current_turn",
+            currentActions: 1,
+            targetActions: 2,
+            acceptedRestrictions: ["unrestricted", "run_only"],
+            requiredActionTypes: ["start_run"],
+          }),
+        ],
+        planActionContributions: [],
+      },
+      dependencies: {
+        contextComponents: () => [],
+        actionCreditCost: () => 0,
+      },
+    });
+
+    expect(
+      breakdown.filter((component) =>
+        component.key.startsWith("action_capacity_"),
+      ),
+    ).toEqual([
+      expect.objectContaining({
+        key: "action_capacity_followup_conversion",
+        value: expect.any(Number),
+      }),
+    ]);
   });
 });
 

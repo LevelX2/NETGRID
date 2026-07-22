@@ -19,7 +19,10 @@ import type {
   PlanTarget,
   TacticalPlanType,
 } from "./plan-contract-types";
-import type { PlanPortfolioSnapshot } from "./plan-portfolio-types";
+import type {
+  PlanActionContributionScore,
+  PlanPortfolioSnapshot,
+} from "./plan-portfolio-types";
 import type { CreditDemand } from "./credit-demand";
 import type { FundingRoute } from "./funding-route";
 import type { ActionDemand } from "./action-demand";
@@ -322,6 +325,7 @@ export type TacticalPlanRuntimeResult = {
   planPortfolio?: PlanPortfolioSnapshot;
   planPortfolioUsed?: string[];
   planActionContributionsUsed?: string[];
+  planActionContributionScores?: PlanActionContributionScore[];
   previousPlan?: TacticalPlanMemorySnapshot;
   deckCapabilitiesUsed?: string[];
   strategicIntentStateUsed?: string[];

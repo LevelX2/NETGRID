@@ -89,7 +89,14 @@ export function buildSemanticDecisionChainDebug(params: {
               params.planRuntime.selectedMapping?.legalActions.map(
                 (action) => action.actionId,
               ) ?? [],
-            contributionMode: "diagnostic_only",
+            contributionMode: params.choices.some((choice) =>
+              choice.scoreBreakdown.some(
+                (component) =>
+                  component.key === "action_capacity_plan_conversion",
+              ),
+            )
+              ? "action_capacity_scoring"
+              : "diagnostic_only",
           },
         }
       : {}),

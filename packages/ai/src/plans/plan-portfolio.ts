@@ -373,20 +373,30 @@ export function buildPlanPortfolioActionContributions(
     );
     const actionCapacityContributions = actionCapacityActionIdsForEntry(
       entry,
-    ).map((actionId) => ({
-      actionId,
-      portfolioEntryId: entry.portfolioEntryId,
-      contributionKind: "enable" as const,
-      value:
-        roleValue +
-        Math.min(150, (entry.actionDemands?.[0]?.priorityRank ?? 0) * 20),
-      milestoneAfter: entry.milestone,
-      evidence: [
-        `plan_contribution_role:${entry.role}`,
-        `plan_contribution_plan:${entry.planType}`,
-        `plan_contribution_action_capacity_route:${entry.selectedActionCapacityRoute?.routeId ?? "none"}`,
-      ],
-    }));
+    ).map((actionId) => {
+      const route = entry.selectedActionCapacityRoute;
+      const reliabilityMultiplier =
+        route?.reliability === "guaranteed" ? 1 : 0.55;
+      return {
+        actionId,
+        portfolioEntryId: entry.portfolioEntryId,
+        contributionKind: "enable" as const,
+        value: Math.round(
+          (roleValue +
+            Math.min(150, (entry.actionDemands?.[0]?.priorityRank ?? 0) * 20)) *
+            reliabilityMultiplier,
+        ),
+        milestoneAfter: entry.milestone,
+        evidence: [
+          `plan_contribution_role:${entry.role}`,
+          `plan_contribution_plan:${entry.planType}`,
+          `plan_contribution_action_capacity_route:${route?.routeId ?? "none"}`,
+          `plan_contribution_action_capacity_status:${route?.status ?? "none"}`,
+          `plan_contribution_action_capacity_reliability:${route?.reliability ?? "none"}`,
+          `plan_contribution_action_capacity_multiplier:${reliabilityMultiplier}`,
+        ],
+      };
+    });
     return [
       ...progressContributions,
       ...fundingContributions,

@@ -2212,7 +2212,7 @@ export type AiDecisionChainDebug = {
     planId: string;
     planKind: string;
     mappedActionIds: string[];
-    contributionMode: "diagnostic_only";
+    contributionMode: "diagnostic_only" | "action_capacity_scoring";
   };
   planArbitration?: {
     outcome?:

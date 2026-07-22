@@ -378,6 +378,24 @@ Done-Gate:
 - keine Aktionsquelle erhält doppelten Roh- plus Folgenutzen;
 - vergleichbare Entscheidungen sind monoton und diagnostisch erklärbar.
 
+Ergebnis:
+
+- der gemeinsame Runtime-Score verwendet entweder den bereits
+  routenbereinigten Planbeitrag oder einen begrenzten Folgeaktionsnutzen,
+  niemals beides;
+- Kartenverbrauch, endliche Counter, Aktionsschuld, Selbstschaden und weitere
+  bekannte Risiken werden explizit abgezogen; Creditkosten verbleiben im
+  bereits gemeinsamen Kostenpfad und werden dadurch genau einmal berechnet;
+- wiederkehrende Quellen werden nur über ihren nutzbaren Deadline-Horizont
+  amortisiert und lösen keine Same-turn-Lücke;
+- eine konservative Dominanz schließt nur Quellen mit gleichen Kosten,
+  Nebenwirkungen, Restriktionen, Timing und Garantiegrad aus; endliche Banken
+  werden nur innerhalb derselben Karteninstanz verglichen;
+- 124 fokussierte Integrations- und Vertragstests waren grün; `check:ai`,
+  `check:ai-action-capacity` und `git diff --check` waren grün. Der AI-Typecheck
+  zeigte ausschließlich die drei bereits auf `main` vorhandenen
+  `action.payload`-Fehler in `run-access-decision-model.ts`.
+
 Commit: `feat(ai): unify action capacity scoring`
 
 ### P6 – Altlogik, Diagnostik und Regression

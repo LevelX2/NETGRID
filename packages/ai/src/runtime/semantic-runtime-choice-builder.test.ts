@@ -150,6 +150,33 @@ describe("buildSemanticRuntimeChoices", () => {
       reason: expect.stringContaining("economy_dominant_action:coup-credit"),
     });
   });
+
+  it("excludes only the smaller otherwise comparable action-capacity source", () => {
+    const plusOne = actionCapacityAction("plus-one", 1);
+    const plusTwo = actionCapacityAction("plus-two", 2);
+    const input = corpInput(plusOne);
+    input.legalActions = [plusOne, plusTwo];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "corp",
+      stateVersion: input.playerView.stateVersion,
+    });
+
+    const choices = buildSemanticRuntimeChoices(
+      input,
+      candidates,
+      dependencies(),
+    );
+
+    expect(choices.map((choice) => choice.action.actionId)).toEqual([
+      "plus-two",
+      "plus-one",
+    ]);
+    expect(choices[1]?.exclusion).toMatchObject({
+      key: "action_capacity_dominated",
+      reason: expect.stringContaining("action_capacity_dominant:plus-two"),
+    });
+  });
 });
 
 function paidAction(): LegalAction {
@@ -184,6 +211,21 @@ function corpAction(actionId: string): LegalAction {
     choiceRequirements: [],
     payload: {},
   } as unknown as LegalAction;
+}
+
+function actionCapacityAction(actionId: string, amount: number): LegalAction {
+  return {
+    ...corpAction(actionId),
+    type: "play_operation",
+    source: actionId,
+    costs: [{ clicks: 1 }],
+    payload: {
+      gainActionsAmount: amount,
+      actionCapacityTiming: "immediate",
+      actionCapacityRestriction: "unrestricted",
+      actionCapacityReliability: "guaranteed",
+    },
+  };
 }
 
 function economyCandidate(

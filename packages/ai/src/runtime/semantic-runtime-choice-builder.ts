@@ -20,6 +20,10 @@ import {
 import { semanticRuntimeStrategicActionFitEvidence } from "./strategic-action-fit";
 import { compareEconomyActionDominance } from "../economy/economy-action-score";
 import type { CreditDemand } from "../plans/credit-demand";
+import {
+  compareActionCapacityDominance,
+  type ActionCapacityScoringContext,
+} from "./action-capacity-score-components";
 
 export type SemanticRuntimeChoiceBuilderDependencies = {
   scope: SemanticRuntimeScopeDependencies;
@@ -35,6 +39,7 @@ export type SemanticRuntimeChoiceBuilderDependencies = {
     exclusion: SemanticRuntimeExclusion | undefined,
     actionSemanticCandidate: ActionSemanticCandidate | undefined,
     creditDemands?: readonly CreditDemand[],
+    actionCapacityContext?: ActionCapacityScoringContext,
   ) => NonNullable<AiDecisionDebug["scoreBreakdown"]>;
   actionCreditCost: (action: LegalAction) => number;
   evidence: (
@@ -52,6 +57,7 @@ export function buildSemanticRuntimeChoices(
   actionSemanticCandidates: readonly ActionSemanticCandidate[] = [],
   dependencies: SemanticRuntimeChoiceBuilderDependencies,
   creditDemands: readonly CreditDemand[] = [],
+  actionCapacityContext?: ActionCapacityScoringContext,
 ): SemanticRuntimeChoice[] {
   const candidatesByActionId = new Map(
     actionSemanticCandidates.map((candidate) => [
@@ -62,15 +68,19 @@ export function buildSemanticRuntimeChoices(
   const economyDominanceExclusions = buildEconomyDominanceExclusions(
     actionSemanticCandidates,
   );
+  const actionCapacityDominanceExclusions =
+    buildActionCapacityDominanceExclusions(actionSemanticCandidates);
   return sortSemanticRuntimeChoices(
     input.legalActions.map((action) =>
       scoreSemanticRuntimeAction(
         input,
         action,
         candidatesByActionId.get(action.actionId),
-        economyDominanceExclusions.get(action.actionId),
+        economyDominanceExclusions.get(action.actionId) ??
+          actionCapacityDominanceExclusions.get(action.actionId),
         dependencies,
         creditDemands,
+        actionCapacityContext,
       ),
     ),
     dependencies.compareAction,
@@ -98,6 +108,7 @@ function scoreSemanticRuntimeAction(
   economyDominanceExclusion: SemanticRuntimeExclusion | undefined,
   dependencies: SemanticRuntimeChoiceBuilderDependencies,
   creditDemands: readonly CreditDemand[],
+  actionCapacityContext: ActionCapacityScoringContext | undefined,
 ): SemanticRuntimeChoice {
   const scopeId = semanticRuntimeScopeForAction(
     input,
@@ -115,6 +126,7 @@ function scoreSemanticRuntimeAction(
     exclusion,
     actionSemanticCandidate,
     creditDemands,
+    actionCapacityContext,
   );
   const score = semanticRuntimeScoreFromComponents(scoreBreakdown);
   const reasonCode =
@@ -166,6 +178,43 @@ function scoreSemanticRuntimeAction(
     ],
     confidence: semanticRuntimeConfidence(scopeId, score),
   };
+}
+
+function buildActionCapacityDominanceExclusions(
+  candidates: readonly ActionSemanticCandidate[],
+): Map<string, SemanticRuntimeExclusion> {
+  const strongest = new Map<
+    string,
+    ReturnType<typeof compareActionCapacityDominance>
+  >();
+  for (let leftIndex = 0; leftIndex < candidates.length; leftIndex += 1) {
+    for (
+      let rightIndex = leftIndex + 1;
+      rightIndex < candidates.length;
+      rightIndex += 1
+    ) {
+      const dominance = compareActionCapacityDominance(
+        candidates[leftIndex]!,
+        candidates[rightIndex]!,
+      );
+      if (!dominance) continue;
+      const previous = strongest.get(dominance.dominatedActionId);
+      if (!previous || previous.actionAdvantage < dominance.actionAdvantage)
+        strongest.set(dominance.dominatedActionId, dominance);
+    }
+  }
+  return new Map(
+    [...strongest].map(([actionId, dominance]) => [
+      actionId,
+      {
+        key: "action_capacity_dominated",
+        label: "Vergleichbare Aktionsquelle dominiert",
+        reason:
+          dominance?.evidence.join("|") ??
+          "action_capacity_dominance_unavailable",
+      },
+    ]),
+  );
 }
 
 function buildEconomyDominanceExclusions(

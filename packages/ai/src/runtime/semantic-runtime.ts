@@ -64,6 +64,11 @@ import {
   compareCreditDemandPriority,
   type CreditDemand,
 } from "../plans/credit-demand";
+import {
+  compareActionDemandPriority,
+  type ActionDemand,
+} from "../plans/action-demand";
+import type { ActionCapacityScoringContext } from "./action-capacity-score-components";
 
 export type {
   SemanticRuntimeChoice,
@@ -78,6 +83,7 @@ export type SemanticRuntimeDependencies = {
     input: AiDecisionInput,
     actionSemanticCandidates?: readonly ActionSemanticCandidate[],
     creditDemands?: readonly CreditDemand[],
+    actionCapacityContext?: ActionCapacityScoringContext,
   ) => SemanticRuntimeChoice[];
   semanticRuntimeChoiceIsReactive: (choice: SemanticRuntimeChoice) => boolean;
   buildActionSemanticCandidates: (
@@ -381,12 +387,17 @@ export function chooseSemanticRuntimeAction(
         candidates: actionSemanticCandidates,
       });
   const runtimeCreditDemands = creditDemandsForRuntimeScoring(planRuntime);
+  const runtimeActionCapacityContext =
+    actionCapacityScoringContextForRuntime(planRuntime);
   const choices =
-    runtimeCreditDemands.length > 0
+    runtimeCreditDemands.length > 0 ||
+    runtimeActionCapacityContext.actionDemands.length > 0 ||
+    runtimeActionCapacityContext.planActionContributions.length > 0
       ? dependencies.semanticRuntimeChoices(
           inputForSemanticChoices,
           actionSemanticCandidates,
           runtimeCreditDemands,
+          runtimeActionCapacityContext,
         )
       : preliminaryChoices;
   const runPlanChoice = activeRunnerRunPlan
@@ -627,6 +638,36 @@ export function creditDemandsForRuntimeScoring(
     }
   }
   return [...demands.values()].sort(compareCreditDemandPriority);
+}
+
+export function actionCapacityScoringContextForRuntime(
+  planRuntime: TacticalPlanRuntimeResult,
+): ActionCapacityScoringContext {
+  const portfolio = planRuntime.planPortfolio;
+  const entries = portfolio
+    ? [
+        ...(portfolio.interrupt ? [portfolio.interrupt] : []),
+        ...(portfolio.foreground ? [portfolio.foreground] : []),
+        ...portfolio.backgrounds,
+      ].filter(
+        (entry) =>
+          entry.lifecycle !== "suspended" &&
+          entry.lifecycle !== "completed" &&
+          entry.lifecycle !== "abandoned",
+      )
+    : [];
+  const demands = new Map<string, ActionDemand>();
+  for (const demand of entries.flatMap((entry) => entry.actionDemands ?? [])) {
+    if (demand.gap > 0) demands.set(demand.demandId, demand);
+  }
+  for (const demand of planRuntime.selectedPlan?.actionDemands ?? []) {
+    if (demand.gap > 0 && !demands.has(demand.demandId))
+      demands.set(demand.demandId, demand);
+  }
+  return {
+    actionDemands: [...demands.values()].sort(compareActionDemandPriority),
+    planActionContributions: planRuntime.planActionContributionScores ?? [],
+  };
 }
 
 export class SemanticCoverageFallbackError extends Error {

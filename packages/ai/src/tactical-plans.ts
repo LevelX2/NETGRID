@@ -315,6 +315,7 @@ export function evaluateTacticalPlans(
         planPortfolio,
         planPortfolioUsed,
         planActionContributionsUsed,
+        planActionContributionScores,
         ...(previousPlan ? { previousPlan } : {}),
         ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
         ...(strategicIntentStateUsed.length > 0
@@ -362,6 +363,7 @@ export function evaluateTacticalPlans(
     planPortfolio,
     planPortfolioUsed,
     planActionContributionsUsed,
+    planActionContributionScores,
     ...(previousPlan ? { previousPlan } : {}),
     ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
     ...(strategicIntentStateUsed.length > 0
