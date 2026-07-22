@@ -1,6 +1,6 @@
 # KI: wirkungsbasierter Purge und R&D-Gegenplan
 
-Status: in Bearbeitung
+Status: abgeschlossen
 
 ## Quelle und Ziel
 
@@ -126,3 +126,21 @@ verdecken.
   produktiven Consumer und der Deck-Audit ist grün.
 - Alle Paketcommits liegen auf `main`; Worktree und Arbeitsbranch sind
   entfernt.
+
+## Abschlussstand
+
+- Die beiden spielgleichen Checkpoints aus `match_5caedbfa15e0ba79` wählen
+  `Day Shift` statt eines Purges für je einen inaktiven Highlighter- und
+  Garbage-Counter. Der frühere Checkpoint mit zwei Highlighter-Countern und
+  offenem R&D purgt weiterhin.
+- Wiederholte erfolgreiche R&D-Zugriffe halten `protect_rd` auch ohne gerade
+  installierbares ICE aktiv. Ziehen nach Verteidigung gilt dann als
+  Planfortschritt; eine vorhandene Rez-Finanzierung sowie unmittelbare sichere
+  Agenda-Konversionen bleiben vorrangig.
+- `actionCapacityProfiles` wird in der produktiven Action-Semantic-Pipeline
+  gegen LegalAction-Fakten geprüft. Ein bestätigter Vertrag liefert
+  Bankbarkeit und Wiederholbarkeit; ein Mismatch überschreibt die Enginewerte
+  nicht und bleibt in der Evidence sichtbar.
+- Der Deck-Audit des 45-Karten-Corp-Decks endet mit 16/16 geprüften
+  Definitionen, null blockierenden Funden und null Warnungen. Alle drei
+  AI-Testshards sind mit 442 Dateien und 3.091 Tests grün.
