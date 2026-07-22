@@ -21,7 +21,10 @@ export function applyRunAccessDecisionModel(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
 ): ActionSemanticCandidate {
-  const armageddonCandidate = isArmageddonDoomCounterReplacement(action)
+  const armageddonCandidate = isArmageddonDoomCounterReplacement(
+    candidate,
+    action,
+  )
     ? {
         ...candidate,
         semanticActionType: "runner.armageddon_doom_counter",
@@ -223,15 +226,17 @@ function stringPayload(action: LegalAction, key: string): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-function isArmageddonDoomCounterReplacement(action: LegalAction): boolean {
+function isArmageddonDoomCounterReplacement(
+  candidate: ActionSemanticCandidate,
+  action: LegalAction,
+): boolean {
   return (
     action.side === "runner" &&
     action.type === "trigger_ability" &&
-    action.payload?.proteusRunnerVirusFollowup ===
-      "doom_counter_instead_of_rd_access" &&
+    candidate.sourceDefinitionId === "onr_proteus_078_armageddon" &&
     action.payload.serverId === "rd" &&
     action.payload.counterType === "doom" &&
-    action.payload.counterDelta === 1
+    action.payload.cardId === action.source
   );
 }
 

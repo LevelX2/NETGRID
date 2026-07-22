@@ -180,6 +180,11 @@ describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", (
       ),
     ]);
     input.legalActions[0]!.costs = [];
+    input.playerView.own.rig = [
+      visibleCard("armageddon-instance", "runner", "program", {
+        definitionId: "onr_proteus_078_armageddon",
+      }),
+    ];
 
     const decision = chooseSemanticRuntimeAction(
       input,

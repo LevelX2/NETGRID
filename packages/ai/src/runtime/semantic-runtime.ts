@@ -814,11 +814,14 @@ function failClosedFallbackPolicyForAction(
     action.costs.length === 0 &&
     (action.choiceRequirements?.length ?? 0) === 0 &&
     action.targetRequirements.length === 0 &&
-    action.payload?.proteusRunnerVirusFollowup ===
-      "doom_counter_instead_of_rd_access" &&
     action.payload.serverId === "rd" &&
     action.payload.counterType === "doom" &&
-    action.payload.counterDelta === 1
+    action.payload.cardId === action.source &&
+    input.playerView.own.rig?.some(
+      (card) =>
+        card.instanceId === action.source &&
+        card.definitionId === "onr_proteus_078_armageddon",
+    )
   ) {
     return "structured_access_replacement";
   }

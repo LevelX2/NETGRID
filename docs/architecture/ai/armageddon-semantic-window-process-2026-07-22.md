@@ -2,7 +2,7 @@
 
 ## Status
 
-In Umsetzung. Arbeitsbranch: `codex/armageddon-semantic-window`.
+Abgeschlossen. Arbeitsbranch: `codex/armageddon-semantic-window`.
 
 ## Quelle und Ziel
 
@@ -65,6 +65,18 @@ abgleichen.
 Semantic-Coverage-Blockade tritt nicht auf.
 
 **Commit:** `test(ai): cover Armageddon successful-run decision`
+
+## Verifikationsergebnis
+
+- Gezielte Engine-Tests fuer Access-Actions und Successful-Run-Interventions:
+  16 Tests bestanden.
+- Gezielte AI-Tests fuer Action-Semantik und Runtime-Coverage-Fallback:
+  37 Tests bestanden.
+- Reproduktion mit Seed `fast-advance-baby-2026-07-22-3-004`: kein
+  `SemanticCoverageFallbackError`, Replay erfolgreich; der Lauf erreichte nur
+  das konfigurierte Limit von 480 Aktionen.
+- `corepack pnpm check:ai`, `corepack pnpm check:ai-deck-doctrine-strategy`
+  und `corepack pnpm check:proteus-ai-readiness` bestanden.
 
 ## Fehlerbehandlung
 

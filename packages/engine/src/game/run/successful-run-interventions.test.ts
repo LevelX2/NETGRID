@@ -834,6 +834,21 @@ describe("successful run interventions", () => {
         counterDelta: 1,
       },
     });
+    fixture.state.run = {
+      ...(fixture.state.run as NonNullable<GameState["run"]>),
+      accessedCardId: "accessed_card",
+    };
+    expect(
+      buildSuccessfulRunFollowupActions(
+        fixture.host,
+        fixture.state.run as NonNullable<GameState["run"]>,
+      ).some(
+        (action) =>
+          action.payload?.proteusRunnerVirusFollowup ===
+          "doom_counter_instead_of_rd_access",
+      ),
+    ).toBe(false);
+    delete fixture.state.run.accessedCardId;
     if (!armageddonAction) throw new Error("Missing Armageddon action");
     expect(() =>
       resolveSuccessfulRunFollowupAbility(fixture.host, {

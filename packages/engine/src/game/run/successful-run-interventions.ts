@@ -184,7 +184,8 @@ export function buildSuccessfulRunFollowupActions(
         (followup) =>
           followup.kind === "skip_rd_access_add_purgeable_runner_virus_counter",
       ) &&
-      run.attackedServerId === "rd"
+      run.attackedServerId === "rd" &&
+      !run.accessedCardId
     ) {
       actions.push(
         host.actions.createRunnerTriggerAction(
