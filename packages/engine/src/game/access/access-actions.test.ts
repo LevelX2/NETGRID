@@ -178,6 +178,40 @@ describe("access action generation", () => {
     expect(finishActions[0]!.actionId).toBe("runner.continue_run");
   });
 
+  it("keeps normal R&D access legal when Armageddon offers its optional replacement", () => {
+    const host = makeHost({ serverId: "rd" });
+    host.callbacks.successfulRunProgramActions = () => [
+      buildLegalAction(
+        host.state,
+        "runner",
+        "trigger_ability",
+        "Armageddon: Doom-Counter statt Zugriff",
+        "armageddon",
+        [],
+        {
+          cardId: "armageddon",
+          serverId: "rd",
+          proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
+          counterType: "doom",
+          counterDelta: 1,
+        },
+      ),
+    ];
+
+    expect(buildRunnerAccessActions(host).legalActions).toMatchObject([
+      {
+        type: "trigger_ability",
+        payload: {
+          proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
+        },
+      },
+      {
+        type: "access_card",
+        source: "game_rule",
+      },
+    ]);
+  });
+
   it("builds stable steal actions only for accessed agendas", () => {
     const agendaHost = makeHost({
       accessedCardId: "agenda",

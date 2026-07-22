@@ -76,8 +76,28 @@ export function buildRunnerAccessActions(
   if (!host.state.run) return { handled: false, legalActions: [] };
   const run = host.state.run;
   const successfulRunActions = host.callbacks.successfulRunProgramActions(run);
-  if (successfulRunActions.length > 0)
+  if (successfulRunActions.length > 0) {
+    const armageddonAccessReplacement = successfulRunActions.some(
+      (action) =>
+        action.payload?.proteusRunnerVirusFollowup ===
+        "doom_counter_instead_of_rd_access",
+    );
+    if (armageddonAccessReplacement && !run.accessedCardId) {
+      return {
+        handled: true,
+        legalActions: [
+          ...successfulRunActions,
+          host.actions.buildLegalAction(
+            "runner",
+            "access_card",
+            "Karte accessen",
+            "game_rule",
+          ),
+        ],
+      };
+    }
     return { handled: true, legalActions: successfulRunActions };
+  }
   if (!run.accessedCardId) {
     const hiddenStackInstallActions = [
       ...host.callbacks.runnerDuringRunCardImplementationLegalActions(),
