@@ -22,6 +22,12 @@ describe("AI behavior baseline", () => {
       decisions: 100,
       findings: 7,
       clearlyDominated: 2,
+      actionCapacityOpportunities: 4,
+      actionCapacityUses: 2,
+      actionCapacityPlanConversions: 1,
+      actionCapacityFollowupConversions: 2,
+      actionCapacityExpiredUses: 0,
+      actionCapacityMisconversions: 0,
     });
     const baseline = createBaseline(slot);
 
@@ -32,6 +38,10 @@ describe("AI behavior baseline", () => {
     expect(
       baseline.aggregate.clearlyDominatedPlanChoiceRatePer100Decisions,
     ).toBe(2);
+    expect(baseline.aggregate.actionCapacityUseRate).toBe(0.5);
+    expect(baseline.aggregate.actionCapacityPlanConversionRate).toBe(0.5);
+    expect(baseline.aggregate.actionCapacityExpirationRate).toBe(0);
+    expect(baseline.aggregate.actionCapacityMisconversionRate).toBe(0);
     expect(baseline.gate.accepted).toBe(true);
     expect(formatAiBehaviorBaselineReport(baseline)).toContain(
       "# AI Behavior Baseline v1",
@@ -118,6 +128,12 @@ function createSlot(
     illegalActions: number;
     fallbackActions: number;
     redactionSafe: boolean;
+    actionCapacityOpportunities: number;
+    actionCapacityUses: number;
+    actionCapacityPlanConversions: number;
+    actionCapacityFollowupConversions: number;
+    actionCapacityExpiredUses: number;
+    actionCapacityMisconversions: number;
   }>,
 ) {
   return createAiBehaviorBaselineSlotResult({
@@ -165,6 +181,16 @@ function createSlot(
     timeoutActions: 0,
     runtimeErrors: 0,
     redactionSafe: overrides.redactionSafe ?? true,
+    actionCapacity: {
+      actionCapacityOpportunities: overrides.actionCapacityOpportunities ?? 0,
+      actionCapacityUses: overrides.actionCapacityUses ?? 0,
+      actionCapacityPlanConversions:
+        overrides.actionCapacityPlanConversions ?? 0,
+      actionCapacityFollowupConversions:
+        overrides.actionCapacityFollowupConversions ?? 0,
+      actionCapacityExpiredUses: overrides.actionCapacityExpiredUses ?? 0,
+      actionCapacityMisconversions: overrides.actionCapacityMisconversions ?? 0,
+    },
     games: [
       {
         seed: "baseline-seed",

@@ -13,6 +13,8 @@ export {
 } from "./simulation/benchmark-deck-snapshot-resolver";
 export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local-editable-deck-resolver";
 export { buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries } from "./simulation/selfplay-why-coverage";
+export { summarizeActionCapacityBaselineMetrics } from "./simulation/action-capacity-baseline-metrics";
+export type { ActionCapacityBaselineMetrics } from "./simulation/action-capacity-baseline-metrics";
 export { evaluatePracticalTacticBenchmark } from "./evaluation/practical-tactic-benchmark";
 export type {
   PracticalTacticBenchmarkCase,

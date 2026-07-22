@@ -1,5 +1,6 @@
 import {
   runAiSelfplayTraceMining,
+  summarizeActionCapacityBaselineMetrics,
   summarizeMatchProgressionMetrics,
   type AiBenchmarkDeckSlotDefinition,
   type AiSelfplayTraceMiningResult,
@@ -73,6 +74,7 @@ export function runAiBehaviorBaselineSlot(params: {
         0,
       ),
       redactionSafe: trace.aggregate.redactionSafe,
+      actionCapacity: summarizeActionCapacityBaselineMetrics(trace.summaries),
       games: trace.summaries.map((summary) => ({
         seed: summary.seed,
         winner: summary.winner,

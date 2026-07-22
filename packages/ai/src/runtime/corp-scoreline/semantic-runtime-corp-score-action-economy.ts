@@ -480,21 +480,6 @@ export function visibleSourceCardForAction(
     .find((card) => card.instanceId === sourceId && card.known);
 }
 
-export function corpExtraActionGainFromRulesText(
-  rulesText: string | undefined,
-): number {
-  const tokens = corpRulesTextTokens(rulesText);
-  const actionToken = tokens.find(
-    (token, index) =>
-      (tokens[index - 1] === "gain" || tokens[index - 1] === "erhalte") &&
-      (tokens[index + 1] === "action" ||
-        tokens[index + 1] === "actions" ||
-        tokens[index + 1] === "aktion" ||
-        tokens[index + 1] === "aktionen"),
-  );
-  return actionToken ? numberFromDigitOrWord(actionToken) : 0;
-}
-
 function numberFromDigitOrWord(value: string): number {
   const numeric = Number.parseInt(value, 10);
   if (Number.isFinite(numeric) && numeric > 0) return numeric;

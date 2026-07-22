@@ -92,9 +92,7 @@ export function scoringWindowHorizon<TServer extends CorpServerLike>(
   const remainingCorpClicksAfterAction = Math.max(
     0,
     Math.floor(
-      (typeof input.playerView.own.clicks === "number"
-        ? input.playerView.own.clicks
-        : 3) - scoringWindowActionClickCost(action),
+      input.playerView.own.clicks - scoringWindowActionClickCost(action),
     ),
   );
   if (remainingCorpClicksAfterAction >= requirement) return "immediate";
@@ -168,9 +166,7 @@ export function scoringWindowPreExposureAdvancementCreditReserve<
   const remainingCorpClicksAfterAction = Math.max(
     0,
     Math.floor(
-      (typeof input.playerView.own.clicks === "number"
-        ? input.playerView.own.clicks
-        : 3) - scoringWindowActionClickCost(action),
+      input.playerView.own.clicks - scoringWindowActionClickCost(action),
     ),
   );
   return Math.min(remainingCorpClicksAfterAction, advancesStillNeeded);

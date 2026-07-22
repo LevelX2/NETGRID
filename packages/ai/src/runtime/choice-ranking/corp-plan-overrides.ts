@@ -203,23 +203,34 @@ export function tacticalPlanCorpBlockedScorelineFundingRejectsAdvanceOverride(
   mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
 ): boolean {
-  return (
-    mapping.plan.side === "corp" &&
+  const mappedChoiceFundsCurrentPlan =
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      mappedChoice,
+      "economy_credit_base",
+    );
+  const highStakesUnsafeAdvance =
+    semanticRuntimeChoiceHasHighStakesUnsafeAdvance(overrideChoice);
+  const criticalCreditFundingRoute =
+    input.playerView.own.credits <=
+      CORP_ACTIVE_REMOTE_ADVANCE_CRITICAL_CREDIT_CEILING &&
+    mappedChoiceFundsCurrentPlan &&
+    highStakesUnsafeAdvance;
+  const blockedScorelineFundingRoute =
     mapping.plan.type === "corp.create_score_window" &&
     (mapping.plan.status === "blocked" ||
       mapping.plan.status === "progressing") &&
-    overrideChoice.action.type === "advance_card" &&
-    overrideChoice.action.actionId !== mappedChoice.action.actionId &&
     !tacticalPlanMappedFundingMissesCurrentDeadline(
       input,
       mapping,
       mappedChoice,
     ) &&
-    semanticRuntimeChoiceHasScoreBreakdownComponent(
-      mappedChoice,
-      "economy_credit_base",
-    ) &&
-    semanticRuntimeChoiceHasHighStakesUnsafeAdvance(overrideChoice)
+    mappedChoiceFundsCurrentPlan &&
+    highStakesUnsafeAdvance;
+  return (
+    mapping.plan.side === "corp" &&
+    overrideChoice.action.type === "advance_card" &&
+    overrideChoice.action.actionId !== mappedChoice.action.actionId &&
+    (criticalCreditFundingRoute || blockedScorelineFundingRoute)
   );
 }
 

@@ -427,6 +427,51 @@ Done-Gate:
 - Debug erklärt Auswahl und Nichtauswahl einer Aktionsquelle;
 - keine normale Drei-/Vier-Aktionsannahme überschreibt den Engine-Wert.
 
+Ergebnis:
+
+- der letzte DTO-Kompatibilitätseintrag
+  `scoreConversionActionGainAmount` und der verbliebene
+  Rules-Text-Aktionsmengenparser sind entfernt; der harte Audit meldet null
+  schmale produktive Consumer, null produktive Rules-Text-Parser und null
+  Zielvertragsverletzungen;
+- die Corp-Scoreline-Projektion verwendet ausschließlich
+  `PlayerView.own.clicks`. Geprüfte feste Zahlen betreffen nur echte
+  Regelkosten, ausdrücklich begrenzte Zukunftshorizonte oder modellierte
+  gegnerische Vollzüge und überschreiben den aktuellen Engine-Aktionsstand
+  nicht;
+- DecisionDebug zeigt aktuellen Aktionsstand, kanonische Projektionen,
+  ActionDemands, gewählte und verworfene Routen, Reservierungen, Garantiegrad,
+  Konversionswert, Dominanz und ungebundene Actions side-sicher an;
+- die Simulationsdiagnostik erfasst Gelegenheit, Nutzung, Plan-Konversion,
+  tatsächliche Same-turn-Folgekonversion, Verfall und Fehlkonversion. Die
+  neuen Felder sind additiv; bestehende v1-Baseline-Vergleiche bleiben mit
+  älteren JSON-Artefakten kompatibel;
+- ein im Volltest sichtbar gewordener Arbitration-Konflikt ist eng behoben:
+  Bei höchstens zwei Credits bleibt eine gemappte Finanzierung vor einem
+  hochriskanten unsicheren Advance geschützt. Sichere Advances, sofortige
+  Closeouts und Scoreline-Fortsetzungen mit vorhandenem Cashpool bleiben
+  unverändert.
+
+P6-Prüfstand:
+
+- alle drei AI-Shards geprüft: Shard 2 vollständig grün, Shard 3 nach der
+  engen Arbitration-Korrektur mit 929/929 Tests grün; Shard 1 besitzt
+  ausschließlich den auf unverändertem `main` reproduzierten starren
+  Deckkatalog-Zähler (`41` statt `40`);
+- 54/54 gezielte Scoreline-/Checkpoint-Regressionsfälle, 39/39
+  Diagnose-/Simulation-/Side-Safety-Tests und 25/25 Engine-Vertragstests
+  grün;
+- Engine- und Shared-Typecheck, `check:ai`,
+  `check:ai-action-capacity` und `git diff --check` grün;
+- der AI-Typecheck zeigt ausschließlich die drei bereits auf `main`
+  vorhandenen `action.payload`-Nullability-Befunde in
+  `run-access-decision-model.ts`;
+- `format:changed` meldet ausschließlich die bereits im Ausgangsstand
+  nicht Prettier-konforme Gesamtformatierung von
+  `ai-game-simulator.ts`. Eine automatische Ganzdatei-Formatierung würde
+  hunderte sachfremde Zeilen ändern und bleibt daher als getrennte
+  Baseline-Schuld unangetastet.
+
 Commit: `refactor(ai): retire legacy action capacity paths`
 
 ### P7 – Gesamtverifikation, Baseline, Wissen, Merge und Cleanup

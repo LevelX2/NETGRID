@@ -114,6 +114,131 @@ export function semanticRuntimeDebugStrategyPortfolioSectionItems(
   return scrubEvidence(semanticRuntimeDebugStrategyPortfolioItems(state));
 }
 
+export function semanticRuntimeDebugActionCapacityItems(params: {
+  input: AiDecisionInput;
+  candidates: readonly ActionSemanticCandidate[];
+  planRuntime: TacticalPlanRuntimeResult;
+  selectedScoreBreakdown: readonly AiDecisionScoreComponent[];
+  actionAlternatives: readonly NonNullable<
+    AiDecisionDebug["actionAlternatives"]
+  >[number][];
+}): string[] {
+  const capacityCandidates = params.candidates.filter(
+    (candidate) =>
+      candidate.actionCapacityProjection !== undefined &&
+      candidate.actionCapacityProjection.kind !== "non_action_capacity",
+  );
+  const portfolioEntries = params.planRuntime.planPortfolio
+    ? [
+        params.planRuntime.planPortfolio.interrupt,
+        params.planRuntime.planPortfolio.foreground,
+        ...params.planRuntime.planPortfolio.backgrounds,
+      ].filter((entry) => entry !== undefined)
+    : [];
+  const demands = new Map(
+    [
+      ...portfolioEntries.flatMap((entry) => entry.actionDemands ?? []),
+      ...(params.planRuntime.selectedPlan?.actionDemands ?? []),
+    ].map((demand) => [demand.demandId, demand]),
+  );
+  const routes = portfolioEntries.flatMap((entry) =>
+    entry.selectedActionCapacityRoute
+      ? [entry.selectedActionCapacityRoute]
+      : (entry.actionCapacityRoutes ?? []).slice(0, 2),
+  );
+  const conversions = params.selectedScoreBreakdown.filter((component) =>
+    component.key.startsWith("action_capacity_"),
+  );
+  const dominance = params.actionAlternatives.flatMap((alternative) =>
+    (alternative.whyNot ?? []).filter(
+      (entry) =>
+        entry.includes("action_capacity_dominant:") ||
+        entry.includes("action_capacity_dominated:") ||
+        entry.includes("action_capacity_dominance"),
+    ),
+  );
+  if (
+    capacityCandidates.length === 0 &&
+    demands.size === 0 &&
+    routes.length === 0 &&
+    conversions.length === 0 &&
+    dominance.length === 0
+  ) {
+    return [];
+  }
+  return scrubEvidence([
+    `action_capacity_current_actions:${params.input.playerView.own.clicks}`,
+    `action_capacity_candidate_count:${capacityCandidates.length}`,
+    ...capacityCandidates.slice(0, 12).map((candidate) => {
+      const projection = candidate.actionCapacityProjection!;
+      return [
+        "action_capacity_projection",
+        candidate.actionId,
+        `kind=${projection.kind}`,
+        `timing=${projection.timing}`,
+        `restriction=${projection.restriction}`,
+        `gross=${projection.grossActionsGained}`,
+        `followup=${projection.followupActionCapacity}`,
+        `net=${projection.netCurrentTurnActionDelta}`,
+        `debt=${projection.actionDebt}`,
+        `reliability=${projection.reliability}`,
+        `counter=${projection.sourceCounterType ?? "none"}:${projection.sourceCounterCost ?? 0}`,
+      ].join("|");
+    }),
+    ...[...demands.values()]
+      .slice(0, 8)
+      .map((demand) =>
+        [
+          "action_capacity_demand",
+          demand.demandId,
+          `priority=${demand.priority}`,
+          `hardness=${demand.hardness}`,
+          `deadline=${demand.deadline}`,
+          `current=${demand.currentActions}`,
+          `target=${demand.targetActions}`,
+          `gap=${demand.gap}`,
+          `restrictions=${demand.acceptedRestrictions.join(",")}`,
+          `actions=${demand.requiredActionTypes.join(",") || "any"}`,
+        ].join("|"),
+      ),
+    ...routes
+      .slice(0, 8)
+      .map((route) =>
+        [
+          "action_capacity_route",
+          route.routeId,
+          `demand=${route.demandId}`,
+          `status=${route.status}`,
+          `reliability=${route.reliability}`,
+          `horizon=${route.horizon}`,
+          `projected=${route.projectedCompatibleActions}`,
+          `gap=${route.projectedGap}`,
+          `actions=${route.totalPreExistingActionCost}`,
+          `credits=${route.totalCreditCost}`,
+          `cards=${route.totalCardsConsumed}`,
+          `counters=${route.totalSourceCountersConsumed}`,
+          `steps=${route.steps
+            .map((step) => step.actionId ?? step.projectionId ?? step.stepId)
+            .join(",")}`,
+        ].join("|"),
+      ),
+    ...portfolioEntries.map(
+      (entry) =>
+        `action_capacity_reservation:${entry.portfolioEntryId}|requested=${entry.resourceReservation.requestedActions ?? 0}|reserved=${entry.resourceReservation.clicks}|shortfall=${entry.resourceReservation.shortfallActions ?? 0}|hard_blocker_resolved=${entry.actionCapacityCoverageResolvesHardBlocker === true}`,
+    ),
+    ...conversions.map(
+      (component) =>
+        `action_capacity_conversion:${component.key}|value=${component.value}|reason=${component.reason ?? "none"}`,
+    ),
+    ...dominance.map((entry) => `action_capacity_dominance:${entry}`),
+    ...(params.planRuntime.planPortfolio?.unallocatedActions !== undefined
+      ? [
+          `action_capacity_unallocated_actions:${params.planRuntime.planPortfolio.unallocatedActions}`,
+        ]
+      : []),
+  ]).slice(0, 64);
+}
+
 function orderSemanticDebugCandidates(
   candidates: readonly ActionSemanticCandidate[],
   selectedActionId: string | undefined,

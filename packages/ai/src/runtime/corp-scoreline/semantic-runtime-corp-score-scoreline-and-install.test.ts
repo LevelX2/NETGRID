@@ -1488,20 +1488,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
             })
           : undefined,
     };
-    const overtimeCandidate = {
-      ...semanticCandidate(
-        overtime.actionId,
-        "play.corp_operation",
-        ["corp_extra_action_burst"],
-        "play_operation",
-      ),
-      costProfile: {
-        costKnownStatus: "known" as const,
-        creditCost: 4,
-        clickCost: 1,
-        additionalCosts: [],
-      },
-    };
+    const overtimeCandidate = actionCapacitySemanticCandidate(overtime, 4);
 
     const components = semanticRuntimeCorpScoreComponents(
       input,
@@ -1549,20 +1536,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       ],
       [overtime],
     );
-    const candidate = {
-      ...semanticCandidate(
-        overtime.actionId,
-        "play.corp_operation",
-        ["corp_extra_action_burst"],
-        "play_operation",
-      ),
-      costProfile: {
-        costKnownStatus: "known" as const,
-        creditCost: 0,
-        clickCost: 1,
-        additionalCosts: [],
-      },
-    };
+    const candidate = actionCapacitySemanticCandidate(overtime, 0);
 
     expect(
       semanticRuntimeCorpScoreComponents(
@@ -3321,3 +3295,43 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
     );
   });
 });
+
+function actionCapacitySemanticCandidate(
+  action: LegalAction,
+  creditCost: number,
+): ActionSemanticCandidate {
+  return {
+    ...semanticCandidate(
+      action.actionId,
+      "play.corp_operation",
+      ["corp_extra_action_burst"],
+      "play_operation",
+    ),
+    costProfile: {
+      costKnownStatus: "known",
+      creditCost,
+      clickCost: 1,
+      additionalCosts: [],
+    },
+    actionCapacityProjection: {
+      schemaVersion: "action-capacity-projection-v1",
+      kind: "immediate_unrestricted_gain",
+      timing: "immediate",
+      restriction: "unrestricted",
+      allowedActionTypes: [],
+      listedActionCost: 1,
+      preExistingActionCost: 1,
+      grossActionsGained: 2,
+      generatedActionsConsumedByCurrentAction: 0,
+      followupActionCapacity: 2,
+      netCurrentTurnActionDelta: 1,
+      actionDebt: 0,
+      selfFinancing: false,
+      repeatable: false,
+      reliability: "guaranteed",
+      source: "legal_action_payload",
+      confidence: "high",
+      evidence: ["test:overtime-action-capacity"],
+    },
+  };
+}

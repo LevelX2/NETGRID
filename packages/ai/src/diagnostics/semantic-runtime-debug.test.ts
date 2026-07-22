@@ -1,4 +1,8 @@
-import { sanitizeAiDecisionDebug, type LegalAction } from "@netgrid/shared";
+import {
+  sanitizeAiDecisionDebug,
+  type AiDecisionInput,
+  type LegalAction,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
@@ -7,9 +11,12 @@ import type {
   TacticalPlanRuntimeResult,
 } from "../tactical-plans";
 import { createRunnerCreditDemand } from "../plans/credit-demand";
+import { createRunnerActionDemand } from "../plans/action-demand";
+import type { ActionCapacityRoute } from "../plans/action-capacity-route";
 import type { FundingRoute } from "../plans/funding-route";
 import {
   buildSemanticRuntimeDebugPlanContext,
+  semanticRuntimeDebugActionCapacityItems,
   semanticRuntimeDebugActionDisplayScore,
   semanticRuntimeDebugActionPrecisionItems,
   semanticRuntimeDebugActionWhyChosen,
@@ -765,6 +772,144 @@ describe("SemanticRuntimeDebug", () => {
         "funding_resource_reservation:credits=3:requested=3:shortfall=0:clicks=1",
         "funding_hard_blocker_resolved:true",
         "economy_dominance:economy_action_dominated:basic-credit",
+      ]),
+    );
+  });
+
+  it("explains action-capacity projection, demand, route, conversion, and dominance", () => {
+    const demand = createRunnerActionDemand({
+      demandId: "runner:run-now",
+      purpose: "current_run",
+      priority: "acute_hard_plan_blocker",
+      hardness: "hard",
+      deadline: "end_of_current_turn",
+      currentActions: 0,
+      targetActions: 1,
+      acceptedRestrictions: ["unrestricted", "run_only"],
+      requiredActionTypes: ["start_run"],
+    });
+    const route: ActionCapacityRoute = {
+      schemaVersion: "action-capacity-route-v1",
+      routeId: "runner:run-now:overtime",
+      demandId: demand.demandId,
+      status: "covered_guaranteed",
+      reliability: "guaranteed",
+      horizon: "same_turn",
+      startingActions: 1,
+      targetActions: 1,
+      projectedCompatibleActions: 2,
+      projectedActionPool: 2,
+      projectedGap: 0,
+      restrictionsUsed: ["unrestricted"],
+      totalPreExistingActionCost: 1,
+      totalCreditCost: 2,
+      totalCardsConsumed: 1,
+      totalSourceCountersConsumed: 0,
+      steps: [
+        {
+          stepId: "overtime",
+          kind: "legal_action",
+          actionId: "overtime",
+          ownTurnOffset: 0,
+          restriction: "unrestricted",
+          listedActionCost: 1,
+          preExistingActionCost: 1,
+          creditCost: 2,
+          cardsConsumed: 1,
+          grossActionsGained: 2,
+          demandActionContribution: 1,
+          netCurrentTurnActionDelta: 1,
+          reliability: "guaranteed",
+          riskTags: [],
+          evidence: [],
+        },
+      ],
+      invalidationReasons: [],
+      evidence: [],
+    };
+    const items = semanticRuntimeDebugActionCapacityItems({
+      input: {
+        playerView: { own: { clicks: 1 } },
+      } as unknown as AiDecisionInput,
+      candidates: [
+        {
+          actionId: "overtime",
+          actionType: "play_event",
+          actionCapacityProjection: {
+            schemaVersion: "action-capacity-projection-v1",
+            kind: "immediate_unrestricted_gain",
+            timing: "immediate",
+            restriction: "unrestricted",
+            allowedActionTypes: [],
+            listedActionCost: 1,
+            preExistingActionCost: 1,
+            grossActionsGained: 2,
+            generatedActionsConsumedByCurrentAction: 0,
+            followupActionCapacity: 2,
+            netCurrentTurnActionDelta: 1,
+            actionDebt: 0,
+            selfFinancing: false,
+            repeatable: "no",
+            reliability: "guaranteed",
+            source: "legal_action_payload",
+            confidence: "high",
+            evidence: [],
+          },
+        } as unknown as ActionSemanticCandidate,
+      ],
+      planRuntime: {
+        planAlternatives: [],
+        blockedPlans: [],
+        selectedPlan: { actionDemands: [demand] },
+        planPortfolio: {
+          foreground: {
+            portfolioEntryId: "entry-run",
+            actionDemands: [demand],
+            selectedActionCapacityRoute: route,
+            resourceReservation: {
+              clicks: 1,
+              requestedActions: 1,
+              shortfallActions: 0,
+            },
+            actionCapacityCoverageResolvesHardBlocker: true,
+          },
+          backgrounds: [],
+          unallocatedActions: 0,
+        },
+      } as unknown as TacticalPlanRuntimeResult,
+      selectedScoreBreakdown: [
+        {
+          key: "action_capacity_plan_conversion",
+          label: "Planfolge",
+          value: 720,
+          reason: "action_capacity_plan_contribution_counted_once:true",
+        },
+      ],
+      actionAlternatives: [
+        {
+          rank: 2,
+          actionId: "plus-one",
+          actionType: "trigger_ability",
+          selected: false,
+          whyNot: [
+            "action_capacity_dominant:overtime|action_capacity_dominated:plus-one",
+          ],
+        },
+      ],
+    });
+
+    expect(items).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("action_capacity_projection|overtime"),
+        expect.stringContaining("action_capacity_demand|runner:run-now"),
+        expect.stringContaining(
+          "action_capacity_route|runner:run-now:overtime",
+        ),
+        expect.stringContaining(
+          "action_capacity_conversion:action_capacity_plan_conversion",
+        ),
+        expect.stringContaining("action_capacity_dominance:"),
+        expect.stringContaining("hard_blocker_resolved=true"),
       ]),
     );
   });

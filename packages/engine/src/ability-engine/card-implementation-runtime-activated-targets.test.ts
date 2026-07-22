@@ -181,7 +181,6 @@ describe("activatedAbilityPayload advancement semantics", () => {
       actionCapacityReliability: "guaranteed",
       actionCapacityExpiresAt: "side_turn_end",
       scoreConversionCapability: "gain_action_capacity",
-      scoreConversionActionGainAmount: 2,
       scoreConversionTiming: "immediate",
     });
   });
@@ -238,7 +237,6 @@ describe("score-conversion card-family contract", () => {
         actionCapacityRestriction: "unrestricted",
         actionCapacityReliability: "guaranteed",
         scoreConversionCapability: "gain_action_capacity",
-        scoreConversionActionGainAmount: amount,
         scoreConversionTiming: "immediate",
       });
     },

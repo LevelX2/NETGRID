@@ -9,7 +9,6 @@ import {
   semanticRuntimeCorpBoardTriage,
   type CorpBoardTriage,
 } from "../semantic-runtime-corp-board-triage";
-import { visibleCardDefinition } from "../card-definition-lookup";
 import { rolesMatch } from "../role-match";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
 import type { CorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
@@ -20,10 +19,8 @@ import {
   type SemanticRuntimeCorpScoreDependencies,
 } from "./semantic-runtime-corp-score-contracts";
 import {
-  corpExtraActionGainFromRulesText,
   corpSameTurnScoreCloseoutComponent,
   corpVisibleCardIsAgenda,
-  semanticRuntimeCorpActionClickCost,
   semanticRuntimeCorpActionCreditCost,
   visibleSourceCardForAction,
 } from "./semantic-runtime-corp-score-action-economy";
@@ -96,17 +93,18 @@ export function corpUnbackedExtraActionBurstComponent<TConsumer extends string>(
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): AiDecisionScoreComponent | undefined {
   if (action.type !== "play_operation") return undefined;
-  const source = visibleSourceCardForAction(input, action);
-  const gainedActions = corpExtraActionGainFromRulesText(
-    source?.rulesText ??
-      (source ? visibleCardDefinition(source)?.rulesText : undefined),
-  );
+  const projection = actionSemanticCandidate?.actionCapacityProjection;
+  if (
+    !projection ||
+    !projection.kind.startsWith("immediate_") ||
+    projection.timing !== "immediate"
+  ) {
+    return undefined;
+  }
+  const gainedActions = Math.max(0, projection.grossActionsGained);
   if (gainedActions <= 0) return undefined;
-  const clickCost = Math.max(
-    1,
-    semanticRuntimeCorpActionClickCost(action, actionSemanticCandidate),
-  );
-  const netExtraActions = Math.max(0, gainedActions - clickCost);
+  const clickCost = Math.max(1, projection.preExistingActionCost);
+  const netExtraActions = Math.max(0, projection.netCurrentTurnActionDelta);
   const creditCost = semanticRuntimeCorpActionCreditCost(
     dependencies,
     action,
@@ -131,6 +129,7 @@ export function corpUnbackedExtraActionBurstComponent<TConsumer extends string>(
       `action_click_cost:${clickCost}`,
       `net_extra_actions:${netExtraActions}`,
       `credit_cost:${creditCost}`,
+      `action_capacity_projection_source:${projection.source}`,
       "basic_action_return_below_credit_cost:true",
     ].join("|"),
   };

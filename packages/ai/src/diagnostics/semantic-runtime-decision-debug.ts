@@ -17,6 +17,7 @@ import { semanticRuntimeMemoryDebug } from "./semantic-runtime-memory-debug";
 import {
   buildSemanticRuntimePlanSelectionDisplayContext,
   semanticRuntimeDebugActionDisplayScore,
+  semanticRuntimeDebugActionCapacityItems,
   semanticRuntimeDebugActionPrecisionItems,
   semanticRuntimeDebugCalibrationProfileItems,
   semanticRuntimeDebugCoverageScoreBreakdown,
@@ -105,6 +106,13 @@ export function buildSemanticRuntimeDecisionDebug({
     ),
     actionSemanticProjectionItems:
       actionPrecisionDebug.actionSemanticProjectionItems,
+    actionCapacityItems: semanticRuntimeDebugActionCapacityItems({
+      input,
+      candidates: actionSemanticCandidates,
+      planRuntime,
+      selectedScoreBreakdown,
+      actionAlternatives,
+    }),
     abilitySemanticBindingItems:
       actionPrecisionDebug.abilitySemanticBindingItems,
     targetContextItems: actionPrecisionDebug.targetContextItems,

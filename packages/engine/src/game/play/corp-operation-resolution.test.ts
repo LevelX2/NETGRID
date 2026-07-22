@@ -433,7 +433,6 @@ describe("corp-operation-resolution", () => {
       actionCapacityReliability: "guaranteed",
       actionCapacityExpiresAt: "side_turn_end",
       scoreConversionCapability: "gain_action_capacity",
-      scoreConversionActionGainAmount: 2,
       scoreConversionTiming: "immediate",
     });
   });

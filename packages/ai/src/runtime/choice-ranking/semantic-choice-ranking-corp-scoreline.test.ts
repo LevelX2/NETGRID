@@ -4,6 +4,7 @@ import type { TacticalPlanRuntimeResult } from "../../tactical-plans";
 import {
   aiInput,
   choice,
+  createRezFundingMapping,
   finiteEconomyMapping,
   legalAction,
   scoreComponentEvidence,
@@ -428,6 +429,46 @@ describe("tacticalPlanMappedChoice Corp scoreline overrides", () => {
 
     expect(result.outcome).toBe("semantic_choice_blocked");
     expect(result.choice?.action.actionId).toBe("fund-scoreline");
+    expect(result.overrideBlockedReason).toBe(
+      "corp_scoreline_support_plan_controller",
+    );
+  });
+
+  it("keeps a critical low-credit funding route ahead of a high-stakes unsafe advance", () => {
+    const fundReserve = legalAction("fund-reserve", "play_operation");
+    const advanceAgenda = legalAction("advance-agenda", "advance_card");
+    fundReserve.side = "corp";
+    advanceAgenda.side = "corp";
+    const fundingChoice = choice(fundReserve, 1200, [], {
+      key: "economy_credit_base",
+      value: 150,
+      reason: "economy_net_liquid_gain:2",
+    });
+    const advanceChoice = choice(advanceAgenda, 3000, [], {
+      key: "corp_active_remote_agenda_advance_clock",
+      value: 3300,
+      reason:
+        "active_remote_agenda:true|runner_cannot_contest_before_score:true",
+    });
+    advanceChoice.scoreBreakdown.push({
+      key: "corp_scoring_window_assessment",
+      label: "Score window",
+      value: 0,
+      reason: "window_kind:unsafe|agenda_steal_severity:near_win",
+    });
+    const input = aiInput();
+    input.side = "corp";
+    input.playerView.own.credits = 2;
+
+    const result = tacticalPlanMappedChoice(
+      input,
+      [advanceChoice, fundingChoice],
+      createRezFundingMapping([fundReserve]),
+      advanceChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("fund-reserve");
     expect(result.overrideBlockedReason).toBe(
       "corp_scoreline_support_plan_controller",
     );

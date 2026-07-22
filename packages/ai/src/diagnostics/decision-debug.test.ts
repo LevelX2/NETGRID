@@ -118,6 +118,10 @@ describe("DecisionDebug diagnostics", () => {
       actionSemanticProjectionItems: [
         "action_projection:card-action:trigger_ability:hardware_trash:card:projected:high",
       ],
+      actionCapacityItems: [
+        "action_capacity_projection|overtime|gross=2|followup=2",
+        "privatePayload:bad",
+      ],
       abilitySemanticBindingItems: [
         "ability_binding:card-action:explicit_ability_id:paid_ability:visible-program",
       ],
@@ -148,6 +152,11 @@ describe("DecisionDebug diagnostics", () => {
           items: [
             "action_projection:card-action:trigger_ability:hardware_trash:card:projected:high",
           ],
+        },
+        {
+          id: "action_capacity",
+          title: "Action Capacity",
+          items: ["action_capacity_projection|overtime|gross=2|followup=2"],
         },
         {
           id: "ability_semantic_binding",

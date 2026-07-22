@@ -1,5 +1,6 @@
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSelfplayTraceMiningDetectorId } from "./selfplay-trace-mining";
+import type { ActionCapacityBaselineMetrics } from "./action-capacity-baseline-metrics";
 
 export const AI_BEHAVIOR_BASELINE_VERSION = "ai-behavior-baseline-v1";
 
@@ -60,6 +61,7 @@ export type AiBehaviorBaselineSlotInput = {
   timeoutActions: number;
   runtimeErrors: number;
   redactionSafe: boolean;
+  actionCapacity?: ActionCapacityBaselineMetrics;
   games: AiBehaviorBaselineGame[];
 };
 
@@ -89,6 +91,16 @@ export type AiBehaviorBaselineMetrics = {
   strategicNoProgressRatePer100Decisions: number;
   clearlyDominatedPlanChoices: number;
   clearlyDominatedPlanChoiceRatePer100Decisions: number;
+  actionCapacityOpportunities: number;
+  actionCapacityUses: number;
+  actionCapacityUseRate: number | null;
+  actionCapacityPlanConversions: number;
+  actionCapacityPlanConversionRate: number | null;
+  actionCapacityFollowupConversions: number;
+  actionCapacityExpiredUses: number;
+  actionCapacityExpirationRate: number | null;
+  actionCapacityMisconversions: number;
+  actionCapacityMisconversionRate: number | null;
   findings: number;
   findingRatePer100Decisions: number;
   illegalActions: number;
@@ -281,6 +293,19 @@ export function formatAiBehaviorBaselineReport(
       metrics.clearlyDominatedPlanChoiceRatePer100Decisions,
     ],
     ["Trace findings / 100 decisions", metrics.findingRatePer100Decisions],
+    ["Action-capacity use rate", formatRate(metrics.actionCapacityUseRate)],
+    [
+      "Action-capacity plan conversion rate",
+      formatRate(metrics.actionCapacityPlanConversionRate),
+    ],
+    [
+      "Action-capacity expiration rate",
+      formatRate(metrics.actionCapacityExpirationRate),
+    ],
+    [
+      "Action-capacity misconversion rate",
+      formatRate(metrics.actionCapacityMisconversionRate),
+    ],
   ];
   const hardRows = [
     ["illegalActions", metrics.illegalActions],
@@ -346,6 +371,12 @@ export function formatAiBehaviorBaselineReport(
     `- Runner steals: ${metrics.runnerSteals}`,
     `- Corp scores: ${metrics.corpScores}`,
     `- Score or steal actions: ${metrics.scoreOrStealActions}`,
+    `- Action-capacity opportunities: ${metrics.actionCapacityOpportunities}`,
+    `- Action-capacity uses: ${metrics.actionCapacityUses}`,
+    `- Action-capacity plan conversions: ${metrics.actionCapacityPlanConversions}`,
+    `- Action-capacity follow-up conversions: ${metrics.actionCapacityFollowupConversions}`,
+    `- Action-capacity expired uses: ${metrics.actionCapacityExpiredUses}`,
+    `- Action-capacity misconversions: ${metrics.actionCapacityMisconversions}`,
     `- Average actions: ${metrics.averageActions}`,
     `- Average turns: ${metrics.averageTurns}`,
     "",
@@ -395,6 +426,14 @@ function createMetrics(
   const hiddenInfoFindings = input.findingsByDetector.hidden_info_marker ?? 0;
   const noLegalActionFailures =
     input.findingsByDetector.no_legal_action_failure ?? 0;
+  const actionCapacity = input.actionCapacity ?? {
+    actionCapacityOpportunities: 0,
+    actionCapacityUses: 0,
+    actionCapacityPlanConversions: 0,
+    actionCapacityFollowupConversions: 0,
+    actionCapacityExpiredUses: 0,
+    actionCapacityMisconversions: 0,
+  };
   return {
     games: progression.games,
     decisions: input.decisions,
@@ -439,6 +478,23 @@ function createMetrics(
       clearlyDominatedPlanChoices,
       input.decisions,
     ),
+    ...actionCapacity,
+    actionCapacityUseRate: rate(
+      actionCapacity.actionCapacityUses,
+      actionCapacity.actionCapacityOpportunities,
+    ),
+    actionCapacityPlanConversionRate: rate(
+      actionCapacity.actionCapacityPlanConversions,
+      actionCapacity.actionCapacityUses,
+    ),
+    actionCapacityExpirationRate: rate(
+      actionCapacity.actionCapacityExpiredUses,
+      actionCapacity.actionCapacityUses,
+    ),
+    actionCapacityMisconversionRate: rate(
+      actionCapacity.actionCapacityMisconversions,
+      actionCapacity.actionCapacityUses,
+    ),
     findings: input.findings,
     findingRatePer100Decisions: per100(input.findings, input.decisions),
     illegalActions: input.illegalActions,
@@ -481,6 +537,18 @@ function combineMetrics(
     abandonedPlanIntents: sum(metrics, "abandonedPlanIntents"),
     strategicNoProgressRepeats: sum(metrics, "strategicNoProgressRepeats"),
     clearlyDominatedPlanChoices: sum(metrics, "clearlyDominatedPlanChoices"),
+    actionCapacityOpportunities: sum(metrics, "actionCapacityOpportunities"),
+    actionCapacityUses: sum(metrics, "actionCapacityUses"),
+    actionCapacityPlanConversions: sum(
+      metrics,
+      "actionCapacityPlanConversions",
+    ),
+    actionCapacityFollowupConversions: sum(
+      metrics,
+      "actionCapacityFollowupConversions",
+    ),
+    actionCapacityExpiredUses: sum(metrics, "actionCapacityExpiredUses"),
+    actionCapacityMisconversions: sum(metrics, "actionCapacityMisconversions"),
     findings: sum(metrics, "findings"),
     illegalActions: sum(metrics, "illegalActions"),
     replayFailures: sum(metrics, "replayFailures"),
@@ -514,6 +582,22 @@ function combineMetrics(
     clearlyDominatedPlanChoiceRatePer100Decisions: per100(
       summed.clearlyDominatedPlanChoices,
       summed.decisions,
+    ),
+    actionCapacityUseRate: rate(
+      summed.actionCapacityUses,
+      summed.actionCapacityOpportunities,
+    ),
+    actionCapacityPlanConversionRate: rate(
+      summed.actionCapacityPlanConversions,
+      summed.actionCapacityUses,
+    ),
+    actionCapacityExpirationRate: rate(
+      summed.actionCapacityExpiredUses,
+      summed.actionCapacityUses,
+    ),
+    actionCapacityMisconversionRate: rate(
+      summed.actionCapacityMisconversions,
+      summed.actionCapacityUses,
     ),
     findingRatePer100Decisions: per100(summed.findings, summed.decisions),
     redactionSafe: metrics.every((entry) => entry.redactionSafe),

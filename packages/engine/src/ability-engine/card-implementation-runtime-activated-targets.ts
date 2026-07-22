@@ -311,7 +311,6 @@ export function scoreConversionCapabilityPayloadForEffects(
   return actionGainAmount > 0
     ? {
         scoreConversionCapability: "gain_action_capacity",
-        scoreConversionActionGainAmount: actionGainAmount,
         scoreConversionTiming: "immediate",
       }
     : {};

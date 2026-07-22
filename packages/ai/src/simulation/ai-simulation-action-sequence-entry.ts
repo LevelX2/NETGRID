@@ -28,6 +28,12 @@ export type AiSimulationActionSequenceEntry = {
   eventType?: string;
   timingPoint?: string;
   turnNumber?: number;
+  actionsRemainingBefore?: number;
+  actionCapacityOpportunity?: boolean;
+  actionCapacityLegalSourceCount?: number;
+  actionCapacitySourceUsed?: boolean;
+  actionCapacityPlanConversionUsed?: boolean;
+  actionCapacityDominatedAlternativeCount?: number;
   planKind?: string;
   reasonCode: string;
   explanation: string;

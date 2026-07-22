@@ -33,6 +33,7 @@ import {
 } from "../runtime/simulation-action-target";
 import type { AiSimulationConfig } from "./ai-simulation-config";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
+import { actionCapacityDiagnosticsForSimulationDecision } from "./action-capacity-simulation-diagnostics";
 import { validateSimulationDeckSupport } from "./deck-support";
 import {
   finalAdvanceAssessmentForSimulationAction,
@@ -409,6 +410,8 @@ function simulateAiGame(
         targetServerId,
       );
     const decisionOpportunity = assessDecisionOpportunity(input, action);
+    const actionCapacityDiagnostics =
+      actionCapacityDiagnosticsForSimulationDecision(decision);
     actionSequence.push({
       side,
       stateVersionBefore: result.event.stateVersionBefore,
@@ -420,9 +423,11 @@ function simulateAiGame(
       actionType: action.type,
       eventType: result.event.type,
       timingPoint: action.timingPoint,
+      actionsRemainingBefore: input.playerView.own.clicks,
       turnNumber:
         state.eventLog.filter((event) => event.type === "end_turn").length + 1,
       ...selfplayTraceFactsForSimulationDecision(decision, config),
+      ...actionCapacityDiagnostics,
       reasonCode: decision.reasonCode,
       explanation: decision.explanation,
       confidence: decision.confidence ?? 0,

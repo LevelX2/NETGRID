@@ -39,6 +39,7 @@ export type SemanticDecisionDebugDiagnosticsInput = {
   strategyPortfolioItems?: readonly string[];
   selectionScoreItems?: readonly string[];
   actionSemanticProjectionItems?: readonly string[];
+  actionCapacityItems?: readonly string[];
   abilitySemanticBindingItems?: readonly string[];
   targetContextItems?: readonly string[];
   compatibilitySignalItems?: readonly string[];
@@ -205,6 +206,15 @@ export function buildSemanticDecisionDebugDiagnostics(
             id: "action_semantic_projection",
             title: "Action Semantic Projection",
             items: sideSafeDebugItems(input.actionSemanticProjectionItems),
+          },
+        ]
+      : []),
+    ...(input.actionCapacityItems && input.actionCapacityItems.length > 0
+      ? [
+          {
+            id: "action_capacity",
+            title: "Action Capacity",
+            items: sideSafeDebugItems(input.actionCapacityItems),
           },
         ]
       : []),

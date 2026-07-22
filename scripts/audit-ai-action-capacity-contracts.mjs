@@ -480,7 +480,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (
     process.argv.includes("--check") &&
     (report.findings.targetContractViolations.length > 0 ||
-      report.findings.unprofiledActionEffectCards.length > 0)
+      report.findings.unprofiledActionEffectCards.length > 0 ||
+      report.counts.narrowActionGainProductionConsumers > 0 ||
+      report.counts.rulesTextActionProductionParsers > 0)
   ) {
     process.exitCode = 1;
   }

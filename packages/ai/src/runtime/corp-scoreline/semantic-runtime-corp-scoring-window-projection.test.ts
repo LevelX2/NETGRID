@@ -50,6 +50,31 @@ describe("scoringWindowHorizon", () => {
       "next_turn",
     );
   });
+
+  it("uses the actual five-action pool for a four-advance install closeout", () => {
+    const agenda = agendaCard("four-advance-agenda", {
+      advancementRequirement: 4,
+    });
+    const action = corpAction(
+      "install-four-advance-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+    const input = corpInput({
+      ownClicks: 5,
+      hq: [agenda],
+      servers: protectedCentralServers([remoteServer("remote_1", [])]),
+    });
+
+    expect(scoringWindowHorizon(input, action, testDependencies())).toBe(
+      "immediate",
+    );
+  });
 });
 
 function advanceAction(cardId: string) {
