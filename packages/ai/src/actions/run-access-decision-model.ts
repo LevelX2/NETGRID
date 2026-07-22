@@ -21,8 +21,29 @@ export function applyRunAccessDecisionModel(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
 ): ActionSemanticCandidate {
-  const model = projectRunAccessDecisionModel(candidate, action);
-  return model ? { ...candidate, runAccessDecisionModel: model } : candidate;
+  const armageddonCandidate = isArmageddonDoomCounterReplacement(action)
+    ? {
+        ...candidate,
+        semanticActionType: "runner.armageddon_doom_counter",
+        actionTacticSignals: unique([
+          ...candidate.actionTacticSignals,
+          "run_pressure",
+          "access_replacement",
+          "successful_run",
+          "virus.counter_engine",
+          "corp.install_punish",
+          "virus.purge_tax",
+        ]),
+        evidence: [
+          ...candidate.evidence,
+          "Armageddon structured R&D access replacement",
+        ],
+      }
+    : candidate;
+  const model = projectRunAccessDecisionModel(armageddonCandidate, action);
+  return model
+    ? { ...armageddonCandidate, runAccessDecisionModel: model }
+    : armageddonCandidate;
 }
 
 export function projectRunAccessDecisionModel(
@@ -200,6 +221,18 @@ function semanticTerms(value: string): Set<string> {
 function stringPayload(action: LegalAction, key: string): string | undefined {
   const value = action.payload?.[key];
   return typeof value === "string" ? value : undefined;
+}
+
+function isArmageddonDoomCounterReplacement(action: LegalAction): boolean {
+  return (
+    action.side === "runner" &&
+    action.type === "trigger_ability" &&
+    action.payload?.proteusRunnerVirusFollowup ===
+      "doom_counter_instead_of_rd_access" &&
+    action.payload.serverId === "rd" &&
+    action.payload.counterType === "doom" &&
+    action.payload.counterDelta === 1
+  );
 }
 
 function unique<T>(values: readonly T[]): T[] {

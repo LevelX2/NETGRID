@@ -143,7 +143,6 @@ describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", (
         },
       ),
     ]);
-
     const decision = chooseSemanticRuntimeAction(
       input,
       {},
@@ -156,6 +155,46 @@ describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", (
     expect(decision.fallbackUsed).toBe(true);
     expect(decision.evidence).toContain(
       "fallback_action_policy:required_run_start",
+    );
+  });
+
+  it("uses the narrow Armageddon fallback for its sole structured access replacement", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "armageddon-doom",
+        "runner",
+        "trigger_ability",
+        "Armageddon: Doom-Counter statt Zugriff",
+        { credits: 0 },
+        {
+          source: "armageddon-instance",
+          payload: {
+            cardId: "armageddon-instance",
+            serverId: "rd",
+            proteusRunnerVirusFollowup:
+              "doom_counter_instead_of_rd_access",
+            counterType: "doom",
+            counterDelta: 1,
+          },
+        },
+      ),
+    ]);
+    input.legalActions[0]!.costs = [];
+
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      {},
+      semanticRuntimeDependencies([], {
+        initiallySelectedActionId: "none",
+      }),
+    );
+
+    expect(decision).toMatchObject({
+      actionId: "armageddon-doom",
+      fallbackUsed: true,
+    });
+    expect(decision.evidence).toContain(
+      "fallback_action_policy:structured_access_replacement",
     );
   });
 

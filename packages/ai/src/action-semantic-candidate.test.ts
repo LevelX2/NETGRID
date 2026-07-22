@@ -235,6 +235,51 @@ describe("buildActionSemanticCandidates", () => {
     expect(candidate.actionTacticSignals).not.toContain("economy.recover");
   });
 
+  it("projects the structured Armageddon replacement as a side-safe R&D access decision", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("trigger_ability", 1, {
+          side: "runner",
+          source: "armageddon-instance",
+          timingPoint: "access.resolve_card",
+          payload: {
+            cardId: "armageddon-instance",
+            serverId: "rd",
+            proteusRunnerVirusFollowup:
+              "doom_counter_instead_of_rd_access",
+            counterType: "doom",
+            counterDelta: 1,
+          },
+        }),
+      ],
+      observerSide: "runner",
+      stateVersion: 8,
+      visibleSourceDefinitionsByInstanceId: {
+        "armageddon-instance": "onr_proteus_078_armageddon",
+      },
+    });
+
+    expect(candidate).toMatchObject({
+      semanticActionType: "runner.armageddon_doom_counter",
+      actionTacticSignals: expect.arrayContaining([
+        "access_replacement",
+        "successful_run",
+        "virus.counter_engine",
+        "corp.install_punish",
+        "virus.purge_tax",
+      ]),
+      runAccessDecisionModel: {
+        serverId: "rd",
+        modifiers: expect.arrayContaining([
+          "access_replacement",
+          "post_run_followup",
+        ]),
+        hiddenInfoPolicy: "side_safe_visible_only",
+      },
+    });
+    expect(JSON.stringify(candidate)).not.toContain("hidden_rnd_card");
+  });
+
   it("does not classify scored hidden-zone reveal agenda actions as credit economy", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [

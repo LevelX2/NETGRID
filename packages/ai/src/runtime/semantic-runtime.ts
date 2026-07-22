@@ -757,6 +757,7 @@ function fallbackPolicyRank(
     case "required_run_start":
       return 3;
     case "access_resolution":
+    case "structured_access_replacement":
       return 4;
     case "economy_basic":
       return 5;
@@ -779,6 +780,7 @@ function failClosedFallbackPolicyForAction(
   | "required_run_continue"
   | "required_run_start"
   | "access_resolution"
+  | "structured_access_replacement"
   | "economy_basic"
   | "draw_setup"
   | "end_turn"
@@ -804,6 +806,21 @@ function failClosedFallbackPolicyForAction(
   }
   if (action.type === "access_card" || action.type === "trash_accessed_card") {
     return "access_resolution";
+  }
+  if (
+    input.side === "runner" &&
+    input.legalActions.length === 1 &&
+    action.type === "trigger_ability" &&
+    action.costs.length === 0 &&
+    (action.choiceRequirements?.length ?? 0) === 0 &&
+    action.targetRequirements.length === 0 &&
+    action.payload?.proteusRunnerVirusFollowup ===
+      "doom_counter_instead_of_rd_access" &&
+    action.payload.serverId === "rd" &&
+    action.payload.counterType === "doom" &&
+    action.payload.counterDelta === 1
+  ) {
+    return "structured_access_replacement";
   }
   if (isBasicCreditAction(action)) {
     return "economy_basic";
