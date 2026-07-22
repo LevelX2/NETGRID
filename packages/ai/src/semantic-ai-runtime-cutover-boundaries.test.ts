@@ -158,7 +158,7 @@ describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", (
     );
   });
 
-  it("uses the narrow Armageddon fallback for its sole structured access replacement", () => {
+  it("fails closed for a sole Armageddon replacement instead of masking a coverage gap", () => {
     const input = aiInput("runner", [
       legalAction(
         "armageddon-doom",
@@ -186,20 +186,16 @@ describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", (
       }),
     ];
 
-    const decision = chooseSemanticRuntimeAction(
-      input,
-      {},
-      semanticRuntimeDependencies([], {
-        initiallySelectedActionId: "none",
-      }),
-    );
-
-    expect(decision).toMatchObject({
-      actionId: "armageddon-doom",
-      fallbackUsed: true,
-    });
-    expect(decision.evidence).toContain(
-      "fallback_action_policy:structured_access_replacement",
+    expect(() =>
+      chooseSemanticRuntimeAction(
+        input,
+        {},
+        semanticRuntimeDependencies([], {
+          initiallySelectedActionId: "none",
+        }),
+      ),
+    ).toThrow(
+      "Semantic coverage has no fail-closed fallback for runner: trigger_ability",
     );
   });
 
