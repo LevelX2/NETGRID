@@ -1,7 +1,7 @@
 # Match e2f2: Corp-Entscheidungsfenster – Remediation-Prozess
 
 Stand: 2026-07-22
-Status: technisch abgenommen; lokale Integration ausstehend
+Status: abgeschlossen
 
 ## Quelle und Zielprüfung
 
