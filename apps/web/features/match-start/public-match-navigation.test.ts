@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { PublicMatchEntry } from "../../lib/client-api";
 import {
+  gamebookDownloadTarget,
   publicMatchActionLabel,
   publicGamebookTarget,
   publicMatchParticipantLabel,
@@ -42,6 +43,12 @@ describe("public match navigation", () => {
     expect(publicGamebookTarget(entry("active"))).toBeUndefined();
     expect(publicGamebookTarget(entry("finished"))).toBe(
       "http://127.0.0.1:8787/api/replays/match%20mit%20leerzeichen/gamebook",
+    );
+  });
+
+  it("creates a URL-safe gamebook download target", () => {
+    expect(gamebookDownloadTarget("Spiel mit Leerzeichen")).toBe(
+      "http://127.0.0.1:8787/api/replays/Spiel%20mit%20Leerzeichen/gamebook",
     );
   });
 

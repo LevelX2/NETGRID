@@ -33,5 +33,9 @@ export function publicGamebookTarget(
   entry: PublicMatchEntry,
 ): string | undefined {
   if (entry.status !== "finished") return undefined;
-  return `${SERVER_HTTP}/api/replays/${encodeURIComponent(entry.matchId)}/gamebook`;
+  return gamebookDownloadTarget(entry.matchId);
+}
+
+export function gamebookDownloadTarget(matchId: string): string {
+  return `${SERVER_HTTP}/api/replays/${encodeURIComponent(matchId)}/gamebook`;
 }

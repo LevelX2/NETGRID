@@ -1,6 +1,13 @@
 "use client";
 
-import { Award, BadgeCheck, Bot, RotateCcw, UserRound } from "lucide-react";
+import {
+  Award,
+  BadgeCheck,
+  Bot,
+  Download,
+  RotateCcw,
+  UserRound,
+} from "lucide-react";
 import Link from "next/link";
 import type {
   ApiMatchFormat,
@@ -16,6 +23,7 @@ import {
   seriesStatusLabel,
   singleRecentMatchPoints,
 } from "../../app/recent-results-ui";
+import { gamebookDownloadTarget } from "../match-start/public-match-navigation";
 
 export function RecentGamesPanel({
   results,
@@ -177,12 +185,18 @@ function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
             : "Korp-Deck"}
         </span>
         {result.isPublic ? (
-          <Link
-            className="button"
-            href={`/replays?matchId=${encodeURIComponent(result.matchId)}`}
-          >
-            Replay ansehen
-          </Link>
+          <>
+            <Link
+              className="button"
+              href={`/replays?matchId=${encodeURIComponent(result.matchId)}`}
+            >
+              Replay ansehen
+            </Link>
+            <a className="button" href={gamebookDownloadTarget(result.matchId)}>
+              <Download size={15} />
+              Spielprotokoll herunterladen
+            </a>
+          </>
         ) : null}
       </div>
     </article>
@@ -255,11 +269,16 @@ function RecentSeriesResultCard({ result }: { result: ApiRecentSeriesResult }) {
             </span>
             <span>{shortResultReasonLabel(game.reason)}</span>
             {game.isPublic ? (
-              <Link
-                href={`/replays?matchId=${encodeURIComponent(game.matchId)}`}
-              >
-                Replay ansehen
-              </Link>
+              <>
+                <Link
+                  href={`/replays?matchId=${encodeURIComponent(game.matchId)}`}
+                >
+                  Replay ansehen
+                </Link>
+                <a href={gamebookDownloadTarget(game.matchId)}>
+                  Spielprotokoll herunterladen
+                </a>
+              </>
             ) : null}
           </li>
         ))}
