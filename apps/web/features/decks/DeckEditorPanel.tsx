@@ -26,6 +26,7 @@ import { DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY } from "../../lib/storage-keys";
 import { readLocalStorage } from "../../lib/local-storage";
 import { neededDevelopmentLabel } from "../cards/card-detail-lines";
 import { DeckAgendaStatusBadge } from "./DeckAgendaStatusBadge";
+import type { StandardDeck } from "../account/account-deck-client";
 import {
   DeckBuilderPreview,
   DeckLibraryCard,
@@ -286,8 +287,9 @@ export function DeckEditorPanel({
   onExport,
   onImportText,
   onImport,
-  standardDeckOriginalName,
-  onSaveStandardCopy,
+  standardDecks = [],
+  standardCopyBusy = false,
+  onCopyStandard,
 }: {
   localDecks: EditableDeck[];
   selectedDeck: EditableDeck | null;
@@ -312,8 +314,9 @@ export function DeckEditorPanel({
   onExport(): void;
   onImportText(value: string): void;
   onImport(): void;
-  standardDeckOriginalName?: string;
-  onSaveStandardCopy?(): void;
+  standardDecks?: StandardDeck[];
+  standardCopyBusy?: boolean;
+  onCopyStandard?(deck: StandardDeck, name: string): Promise<boolean>;
 }) {
   const [builderSearch, setBuilderSearch] = useState("");
   const [builderTypeFilters, setBuilderTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
@@ -337,6 +340,10 @@ export function DeckEditorPanel({
   const [selectedTableCardKeys, setSelectedTableCardKeys] = useState<string[]>([]);
   const [tableSelectionAnchor, setTableSelectionAnchor] = useState<{ pileId: string; order: number } | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [standardCopyOpen, setStandardCopyOpen] = useState(false);
+  const [standardCopySide, setStandardCopySide] = useState<Side>("runner");
+  const [standardCopyDeckId, setStandardCopyDeckId] = useState("");
+  const [standardCopyName, setStandardCopyName] = useState("");
   const [deckSideFilter, setDeckSideFilter] = useState<DeckSideFilter>("all");
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
   const totalCards = selectedDeck?.cards.reduce((sum, entry) => sum + entry.quantity, 0) ?? 0;
@@ -354,6 +361,14 @@ export function DeckEditorPanel({
   const filteredLocalDecks = useMemo(() => (deckSideFilter === "all" ? localDecks : localDecks.filter((deck) => deck.side === deckSideFilter)), [deckSideFilter, localDecks]);
   const selectedDeckSelectValue = selectedDeck && filteredLocalDecks.some((deck) => deck.deckId === selectedDeck.deckId) ? selectedDeck.deckId : "";
   const visibleTypeFilterGroups = selectedDeck ? CATALOG_TYPE_FILTER_GROUPS.filter((group) => group.side === selectedDeck.side) : CATALOG_TYPE_FILTER_GROUPS;
+  const standardCopyCandidates = useMemo(
+    () => standardDecks.filter((deck) => deck.side === standardCopySide),
+    [standardCopySide, standardDecks],
+  );
+  const selectedStandardCopy =
+    standardCopyCandidates.find(
+      (deck) => deck.standardDeckId === standardCopyDeckId,
+    ) ?? standardCopyCandidates[0];
   const libraryCards = useMemo(() => {
     const search = builderSearch.trim().toLowerCase();
     return rarityFilteredPlayableCards
@@ -554,6 +569,35 @@ export function DeckEditorPanel({
   const createBlankDeck = (side: Side) => {
     setDeckSideFilter(side);
     onCreateEmpty(side);
+  };
+  const openStandardCopy = () => {
+    const first = standardDecks.find((deck) => deck.side === "runner") ?? standardDecks[0];
+    if (!first) return;
+    setStandardCopySide(first.side);
+    setStandardCopyDeckId(first.standardDeckId);
+    setStandardCopyName(`${first.name} Kopie`);
+    setStandardCopyOpen(true);
+  };
+  const selectStandardCopySide = (side: Side) => {
+    const first = standardDecks.find((deck) => deck.side === side);
+    setStandardCopySide(side);
+    setStandardCopyDeckId(first?.standardDeckId ?? "");
+    setStandardCopyName(first ? `${first.name} Kopie` : "");
+  };
+  const selectStandardCopyDeck = (deckId: string) => {
+    const deck = standardCopyCandidates.find(
+      (candidate) => candidate.standardDeckId === deckId,
+    );
+    setStandardCopyDeckId(deckId);
+    if (deck) setStandardCopyName(`${deck.name} Kopie`);
+  };
+  const submitStandardCopy = () => {
+    if (!selectedStandardCopy || !onCopyStandard || !standardCopyName.trim()) return;
+    void onCopyStandard(selectedStandardCopy, standardCopyName.trim()).then(
+      (copied) => {
+        if (copied) setStandardCopyOpen(false);
+      },
+    );
   };
   const setVisibleBuilderTypes = (selected: boolean) => {
     setBuilderTypeFilters((current) => {
@@ -895,6 +939,12 @@ export function DeckEditorPanel({
               <Upload size={15} />
               Import
             </button>
+            {onCopyStandard && standardDecks.length > 0 ? (
+              <button className={`button ${standardCopyOpen ? "primary" : ""}`} onClick={openStandardCopy} type="button" aria-expanded={standardCopyOpen}>
+                <CopyPlus size={15} />
+                Standard-Deck kopieren
+              </button>
+            ) : null}
           </div>
           {importOpen ? (
             <div className="deckImportBox deckImportInline">
@@ -904,6 +954,40 @@ export function DeckEditorPanel({
                 <Upload size={15} />
                 Importieren
               </button>
+            </div>
+          ) : null}
+          {standardCopyOpen ? (
+            <div className="deckImportBox deckImportInline">
+              <h3>Standard-Deck kopieren</h3>
+              <p className="meta">Die Kopie wird als persönliches Deck gespeichert und kann danach bearbeitet werden.</p>
+              <div className="deckFormGrid">
+                <label>
+                  Seite
+                  <select value={standardCopySide} onChange={(event) => selectStandardCopySide(event.target.value as Side)}>
+                    <option value="runner">Runner</option>
+                    <option value="corp">Korp</option>
+                  </select>
+                </label>
+                <label>
+                  Standard-Deck
+                  <select value={selectedStandardCopy?.standardDeckId ?? ""} onChange={(event) => selectStandardCopyDeck(event.target.value)}>
+                    {standardCopyCandidates.map((deck) => (
+                      <option key={deck.standardDeckId} value={deck.standardDeckId}>{deck.name}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Name der Kopie
+                  <input value={standardCopyName} onChange={(event) => setStandardCopyName(event.target.value)} />
+                </label>
+              </div>
+              <div className="deckActions">
+                <button className="button primary" onClick={submitStandardCopy} disabled={!selectedStandardCopy || !standardCopyName.trim() || standardCopyBusy} type="button">
+                  <CopyPlus size={15} />
+                  Kopieren
+                </button>
+                <button className="button" onClick={() => setStandardCopyOpen(false)} disabled={standardCopyBusy} type="button">Abbrechen</button>
+              </div>
             </div>
           ) : null}
           <div className="deckDisplayRow">
@@ -1199,28 +1283,11 @@ export function DeckEditorPanel({
                   )}
                   {deckEditorMode === "table" ? null : (
                   <section className="deckControlsPanel">
-                    {standardDeckOriginalName ? (
-                      <p className="deckSaveStatus dirty">
-                        Standard-Deck: Änderungen bleiben ein Entwurf. Speichere es unter einem anderen Namen als persönliches Deck.
-                      </p>
-                    ) : null}
                     <div className="deckActions">
-                      <button className="button primary" onClick={onSave} disabled={!selectedDeckDirty || Boolean(standardDeckOriginalName)}>
+                      <button className="button primary" onClick={onSave} disabled={!selectedDeckDirty}>
                         <Save size={15} />
                         Speichern
                       </button>
-                      {standardDeckOriginalName && onSaveStandardCopy ? (
-                        <button
-                          className="button primary"
-                          onClick={onSaveStandardCopy}
-                          disabled={selectedDeck.name.trim() === standardDeckOriginalName}
-                          title={selectedDeck.name.trim() === standardDeckOriginalName ? "Gib der persönlichen Kopie einen anderen Namen." : undefined}
-                          type="button"
-                        >
-                          <CopyPlus size={15} />
-                          Als eigenes Deck speichern
-                        </button>
-                      ) : null}
                       <button className="button primary" onClick={onValidate}>
                         <Check size={15} />
                         Prüfen
@@ -1233,11 +1300,11 @@ export function DeckEditorPanel({
                         <Download size={15} />
                         Export
                       </button>
-                      <button className="button" onClick={onDuplicate} disabled={Boolean(standardDeckOriginalName)}>
+                      <button className="button" onClick={onDuplicate}>
                         <CopyPlus size={15} />
                         Duplizieren
                       </button>
-                      <button className="button" onClick={onDelete} disabled={Boolean(standardDeckOriginalName)}>
+                      <button className="button" onClick={onDelete}>
                         <Trash2 size={15} />
                         Löschen
                       </button>
