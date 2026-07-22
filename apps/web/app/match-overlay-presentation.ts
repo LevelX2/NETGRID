@@ -12,6 +12,7 @@ export function matchOverlayPresentation(input: {
   accessRevealKind: string | null;
   accessOutcomeKind: AccessPresentationOutcomeKind | null;
   matchEnded: boolean;
+  damagePresentationPending: boolean;
   resultAvailable: boolean;
   resultDismissed: boolean;
   runnerWonByAgendaPoints: boolean;
@@ -33,6 +34,7 @@ export function matchOverlayPresentation(input: {
     showResultModal:
       input.resultAvailable &&
       !input.resultDismissed &&
-      !concludingAgendaAccessAwaitingConfirmation,
+      !concludingAgendaAccessAwaitingConfirmation &&
+      !input.damagePresentationPending,
   };
 }

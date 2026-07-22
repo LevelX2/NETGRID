@@ -22,6 +22,7 @@ import {
 import { localizedDeCardTitle } from "../../app/card-image-manifest";
 import {
   chronicleActionTypeBelongsToRunContext,
+  chronicleAccessCompletesRun,
   chroniclePaymentSupportBelongsToRunPayload,
   chroniclePaymentSupportFollowingRunGroupLabel,
   chronicleResolveChoiceBelongsToRunPayload,
@@ -623,12 +624,13 @@ function chronicleActionCompletesRun(
 ): boolean {
   if (
     actionType === "jack_out" ||
-    actionType === "access_card" ||
     actionType === "trash_accessed_card" ||
     actionType === "steal_agenda" ||
     actionType === "decline_trash"
   )
     return true;
+  if (actionType === "access_card")
+    return chronicleAccessCompletesRun(event.publicPayload);
   if (actionType === "continue_run")
     return (
       payloadString(event.publicPayload, "result") === "ended" ||

@@ -2348,6 +2348,8 @@ export default function Page() {
     accessRevealKind: accessReveal?.kind ?? null,
     accessOutcomeKind: accessReveal?.outcomeKind ?? null,
     matchEnded,
+    damagePresentationPending:
+      Boolean(currentDamageImpact) || damageImpactQueue.length > 0,
     resultAvailable: Boolean(resultSummary && resultKey),
     resultDismissed: Boolean(resultKey && dismissedResultKey === resultKey),
     runnerWonByAgendaPoints:
@@ -3144,17 +3146,13 @@ export default function Page() {
       lastSeenCueEventIdRef.current = latestId;
       return;
     }
-    if (matchEnded) {
-      lastSeenCueEventIdRef.current = latestId;
-      return;
-    }
     const newEvents = publicEventsAfter(payload.eventTail, lastSeen);
     const contextByEventId = chronicleContextByEventId(
       payload.playerView.publicEvents,
       catalogDetailsById,
       { preferGermanCardImages },
     );
-    const cues = actionCuesEnabled
+    const cues = !matchEnded && actionCuesEnabled
       ? deriveOpponentActionCues({
           viewerSide: payload.side,
           playerView: payload.playerView,
@@ -6170,7 +6168,7 @@ export default function Page() {
               onRequest={requestUndo}
               onResolve={resolveUndo}
             />
-            {activeMatchIsGame && !matchEnded ? (
+            {activeMatchIsGame ? (
               <DamageImpactOverlay
                 cue={standaloneDamageImpact}
                 queued={damageImpactQueue.length}
