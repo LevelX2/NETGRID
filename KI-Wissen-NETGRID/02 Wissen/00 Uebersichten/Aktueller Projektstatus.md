@@ -122,10 +122,13 @@ Stand: 2026-07-22
   darf für eine gebundene spätere Linie gehalten werden, und eingeschränkte
   Bursts ohne kompatiblen Demand oder Planbeitrag werden nicht von einem
   allgemeinen Handkartenplan erzwungen. Selbstfinanzierende Runs gelten
-  bereits in ihrer Quellaktion als konvertiert. Der vergleichbare Abschluss
-  über 60 Spiele und 11.040 Entscheidungen hat keine Hard Failures, keine
+  bereits in ihrer Quellaktion als konvertiert. Der vergleichbare
+  P7-Abschluss über 60 Spiele und 11.040 Entscheidungen hat keine Hard
+  Failures, keine
   verpassten Scorefenster, keine dominierte Planwahl und bei 45 Nutzungen
-  null Fehlkonversionen. Führend sind
+  null Fehlkonversionen. Der finale Integrationslauf nach Einbindung des
+  aktuellen Main-Stands umfasst 10.974 Entscheidungen und 43 Nutzungen mit
+  43 Folgekonversionen sowie weiterhin null Fehlkonversionen. Führend sind
   `docs/architecture/ai/ai-action-capacity-routes-implementation-process-2026-07-22.md`
   und
   `docs/reviews/ai/ai-behavior-baseline-v1-action-capacity-routes-2026-07-22.md`.

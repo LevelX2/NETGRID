@@ -30,6 +30,23 @@ export function tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
   mappedActionIds: ReadonlySet<string>,
 ): boolean {
   if (
+    mapping.plan.side === "corp" &&
+    mapping.plan.type === "corp.create_score_window" &&
+    overrideChoice.action.type === "install_card" &&
+    overrideChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_board_triage_alignment" &&
+        /triage_primary:protect_rd/.test(component.reason ?? ""),
+    ) &&
+    overrideChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_ice_placement_evaluator" &&
+        /server:rd\|/.test(component.reason ?? ""),
+    )
+  ) {
+    return false;
+  }
+  if (
     mappedChoice.action.type === "install_card" &&
     mappedChoice.score < 0 &&
     overrideChoice.score > 0 &&

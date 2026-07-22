@@ -43,7 +43,8 @@ normalisierten Hints projiziert. `ActionDemand`s, begrenzte garantierte oder
 kontingente Routen und Planportfolio-Reservierungen binden Zusatzaktionen an
 wirkliche Folgeaktionen. Eingeschränkte Bursts ohne kompatible Route werden
 nicht spekulativ bevorzugt; selbstfinanzierende Runs zählen ihre Quellaktion
-als Umwandlung. Der 60-Spiele-Abschlusslauf mit 11.040 Entscheidungen ist ohne
+als Umwandlung. Der finale 60-Spiele-Integrationslauf mit 10.974
+Entscheidungen ist ohne
 Hard Failure, verpasstes Scorefenster, dominierte Planwahl oder
 Fehlkonversion akzeptiert. Führend sind
 `docs/architecture/ai/ai-action-capacity-routes-implementation-process-2026-07-22.md`

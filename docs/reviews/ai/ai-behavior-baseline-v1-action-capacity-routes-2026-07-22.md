@@ -144,3 +144,28 @@ werden aus dem wirklichen PlayerView-Bestand, einer typisierten Projektion,
 kompatiblen Demands und begrenzten Routen bewertet. Nicht konvertierbare
 eingeschränkte Bursts werden nicht pauschal bevorzugt, während garantierte
 Score- und Folgeaktionsrouten ihren Wert behalten.
+
+## Nachintegration des aktuellen Main-Stands
+
+Nach dem P7-Commit wurden die inzwischen auf `main` abgeschlossenen
+Corp-Rez-Payoff- und Highlighter-Purge-/R&D-Defense-Änderungen zweimal
+konfliktfrei in den Arbeitsbranch integriert. Der endgültige lokale
+Integrationslauf verwendet den Merge-Stand nach `d779b9af7` und wurde erneut
+mit denselben sechs Slots, zehn Seeds und höchstens 480 Aktionen ausgeführt.
+
+- 60 Spiele und 10.974 Entscheidungen;
+- keine illegalen Aktionen, Replay-, Action-Limit-, Fallback-, Timeout-,
+  Runtime-, Hidden-Info- oder Redaktionsfehler;
+- 524 Aktionskapazitätsgelegenheiten und 43 Nutzungen;
+- 38 Plan-Konversionen und 43 tatsächliche Folgekonversionen;
+- eine terminal erklärte Teilverfallsnutzung und null Fehlkonversionen;
+- keine verpassten Scorefenster und keine klar dominierte Planwahl;
+- Remote-Contest-Skiprate 0.827, Plan-Konversion 0.710, No-progress 2.825 je
+  100 Entscheidungen, Findingrate 3.016 je 100 Entscheidungen und
+  durchschnittlich 182.9 Aktionen.
+
+Die Pfadverschiebung gegenüber dem P7-Lauf ist durch die nachgezogenen
+Main-Entscheidungen erklärbar. Die Aktionskapazitätsinvarianten bleiben auf
+dem tatsächlich zu mergenden Stand vollständig erfüllt. Kompakte und
+vollständige Raw-Artefakte dieses Nachlaufs liegen ausschließlich im
+ignorierten lokalen `data/local`-Bereich.

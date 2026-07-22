@@ -544,6 +544,19 @@ Ergebnis vor Integration:
 - die finale lokale Main-Integration sowie Worktree- und Branch-Bereinigung
   folgen nach dem P7-Commit gemäß Skillvertrag.
 
+Finaler Nachintegrationsstand:
+
+- die zwischenzeitlich hinzugekommenen Main-Änderungen für Corp-Rez-Payoffs,
+  Highlighter-Purge-Druck und dringenden R&D-Schutz wurden konfliktfrei in
+  den Arbeitsbranch übernommen;
+- 97 kombinierte Action-Capacity-, Scoreline-, Corp-Rez- und
+  Highlighter-Regressionsfälle sind auf dem jüngsten Integrationsstand grün;
+- der erneut ausgeführte Vergleich über 60 Spiele und 10.974 Entscheidungen
+  besitzt keine Hard Failures, verpassten Scorefenster oder dominierten
+  Planwahlen. 43 von 43 genutzten Aktionsquellen wurden tatsächlich
+  konvertiert; die Fehlkonversionsrate bleibt null und der eine bereits
+  erklärte terminale Teilverfall bleibt bestehen.
+
 Commit: `fix(ai): verify action capacity route rollout`
 
 ## Verifikationsregeln
