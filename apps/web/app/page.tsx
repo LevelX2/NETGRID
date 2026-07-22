@@ -466,7 +466,6 @@ import { AccountPanel } from "../features/account/AccountPanel";
 import { useAccountSession } from "../features/account/useAccountSession";
 import { AccountDeckLibraryHeader } from "../features/account/AccountDeckLibraryHeader";
 import {
-  copyStandardDeck,
   createAccountDeck,
   deleteAccountDeck,
   loadAccountDecks,
@@ -662,6 +661,11 @@ export default function Page() {
   const [accountDeckQuota, setAccountDeckQuota] =
     useState<AccountDeckQuota | null>(null);
   const [standardDecks, setStandardDecks] = useState<StandardDeck[]>([]);
+  const [standardEditorDeck, setStandardEditorDeck] =
+    useState<EditableDeck | null>(null);
+  const [standardEditorOriginalName, setStandardEditorOriginalName] = useState<
+    string | null
+  >(null);
   const [accountDeckBusy, setAccountDeckBusy] = useState(false);
   const [savedDeckFingerprints, setSavedDeckFingerprints] = useState<
     Record<string, string>
@@ -2041,20 +2045,20 @@ export default function Page() {
         ];
   const selectedLocalDeck =
     localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
-  const selectedDeckDirty = selectedLocalDeck
-    ? savedDeckFingerprints[selectedLocalDeck.deckId] !==
-      deckFingerprint(selectedLocalDeck)
-    : false;
+  const selectedDeck = standardEditorDeck ?? selectedLocalDeck;
+  const selectedDeckDirty = standardEditorDeck
+    ? deckFingerprint(standardEditorDeck) !==
+      savedDeckFingerprints[standardEditorDeck.deckId]
+    : selectedLocalDeck
+      ? savedDeckFingerprints[selectedLocalDeck.deckId] !==
+        deckFingerprint(selectedLocalDeck)
+      : false;
   const playableCatalogCards = useMemo(
     () =>
       allCatalogCards.filter((card) =>
-        catalogCardAllowedForDeckEditor(card, selectedLocalDeck),
+        catalogCardAllowedForDeckEditor(card, selectedDeck),
       ),
-    [
-      allCatalogCards,
-      selectedLocalDeck?.formatProfileId,
-      selectedLocalDeck?.side,
-    ],
+    [allCatalogCards, selectedDeck?.formatProfileId, selectedDeck?.side],
   );
   const gripPreviewCard =
     activeView?.own.gripOrHq.find((card) => card.known) ?? null;
@@ -2965,12 +2969,12 @@ export default function Page() {
   ]);
 
   useEffect(() => {
-    if (entryTab !== "decks" || !selectedLocalDeck) return;
-    const missingIds = selectedLocalDeck.cards
+    if (entryTab !== "decks" || !selectedDeck) return;
+    const missingIds = selectedDeck.cards
       .map((entry) => entry.cardId)
       .filter((cardId) => !catalogDetailsById[cardId]);
     void ensureCatalogDetails(missingIds);
-  }, [entryTab, selectedLocalDeck, catalogDetailsById, ensureCatalogDetails]);
+  }, [entryTab, selectedDeck, catalogDetailsById, ensureCatalogDetails]);
 
   useEffect(() => {
     if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
@@ -4827,24 +4831,61 @@ export default function Page() {
     setNotice(`${standard.name} ist für den Matchstart ausgewählt.`);
   };
 
-  const copyStandardToAccount = (standard: StandardDeck) => {
+  const openStandardInEditor = (standard: StandardDeck) => {
     if (!accountSession.account) return;
+    const now = new Date().toISOString();
+    const draft: EditableDeck = {
+      deckId: `standard_draft_${standard.standardDeckId}`,
+      deckVersion: "0.6.0-local",
+      name: `${standard.name} Kopie`,
+      side: standard.side,
+      identityCardId: standard.identityCardId,
+      cardPoolSnapshotId: standard.cardPoolSnapshotId,
+      ...(standard.cardPoolVersion
+        ? { cardPoolVersion: standard.cardPoolVersion }
+        : {}),
+      formatProfileId: standard.formatProfileId,
+      ...(standard.formatProfileVersion
+        ? { formatProfileVersion: standard.formatProfileVersion }
+        : {}),
+      validationStatus: "needs_revalidation",
+      cards: standard.cards,
+      createdAt: now,
+      updatedAt: now,
+    };
+    setStandardEditorDeck(draft);
+    setStandardEditorOriginalName(standard.name);
+    setSelectedLocalDeckId(null);
+    clearDeckValidation();
+    setNotice(
+      `${standard.name} als unveränderlichen Entwurf im Deck-Editor geöffnet.`,
+    );
+  };
+
+  const saveStandardEditorCopy = () => {
+    if (!standardEditorDeck || !accountSession.account) return;
+    if (standardEditorDeck.name.trim() === standardEditorOriginalName) {
+      setNotice("Gib der persönlichen Kopie einen anderen Namen.");
+      return;
+    }
     setAccountDeckBusy(true);
-    void copyStandardDeck(standard.standardDeckId, accountSession.csrfToken)
+    void createAccountDeck(standardEditorDeck, accountSession.csrfToken)
       .then((result) => {
         const nextRecords = [...accountDeckRecords, result.deck];
         setAccountDeckRecords(nextRecords);
         setAccountDeckQuota(result.quota);
         applyLoadedDecks(nextRecords.map((record) => record.deck));
         setSelectedLocalDeckId(result.deck.cloudDeckId);
+        setStandardEditorDeck(null);
+        setStandardEditorOriginalName(null);
         selectDeckForSide(result.deck.deck);
-        setNotice("Standard-Deck als persönliches Deck kopiert.");
+        setNotice("Standard-Entwurf als persönliches Deck gespeichert.");
       })
       .catch((error) =>
         setNotice(
           error instanceof Error
             ? error.message
-            : "Standard-Deck konnte nicht kopiert werden.",
+            : "Persönliches Deck konnte nicht gespeichert werden.",
         ),
       )
       .finally(() => setAccountDeckBusy(false));
@@ -4906,6 +4947,14 @@ export default function Page() {
   };
 
   const updateSelectedDeck = (nextDeck: EditableDeck) => {
+    if (standardEditorDeck?.deckId === nextDeck.deckId) {
+      setStandardEditorDeck({
+        ...nextDeck,
+        updatedAt: new Date().toISOString(),
+      });
+      clearDeckValidation();
+      return;
+    }
     setLocalDecks((current) =>
       current.map((deck) =>
         deck.deckId === nextDeck.deckId
@@ -4917,29 +4966,29 @@ export default function Page() {
   };
 
   const saveSelectedDeck = () => {
-    if (!selectedLocalDeck) return;
+    if (!selectedDeck || standardEditorDeck) return;
     if (accountSession.account) {
-      void saveAccountDeck(selectedLocalDeck, "Persönliches Deck gespeichert.");
+      void saveAccountDeck(selectedDeck, "Persönliches Deck gespeichert.");
       return;
     }
     void commitDeckLibrary(localDecks, "Deck gespeichert.");
   };
 
   const updateDeckCardQuantity = (cardId: string, quantity: number) => {
-    if (!selectedLocalDeck) return;
+    if (!selectedDeck) return;
     const nextQuantity = Math.max(0, Math.floor(quantity));
-    const existing = selectedLocalDeck.cards.some(
+    const existing = selectedDeck.cards.some(
       (entry) => entry.cardId === cardId,
     );
     updateSelectedDeck({
-      ...selectedLocalDeck,
+      ...selectedDeck,
       cards: (existing
-        ? selectedLocalDeck.cards.map((entry) =>
+        ? selectedDeck.cards.map((entry) =>
             entry.cardId === cardId
               ? { ...entry, quantity: nextQuantity }
               : entry,
           )
-        : [...selectedLocalDeck.cards, { cardId, quantity: nextQuantity }]
+        : [...selectedDeck.cards, { cardId, quantity: nextQuantity }]
       ).filter((entry) => entry.quantity > 0),
     });
   };
@@ -5020,11 +5069,11 @@ export default function Page() {
   };
 
   const validateSelectedDeck = async () => {
-    if (!selectedLocalDeck) return;
-    if (accountSession.account) {
+    if (!selectedDeck) return;
+    if (accountSession.account && !standardEditorDeck) {
       try {
         setAccountDeckBusy(true);
-        const saved = await saveAccountDeck(selectedLocalDeck);
+        const saved = await saveAccountDeck(selectedDeck);
         const result = await snapshotAccountDeck(
           saved.deckId,
           accountSession.csrfToken,
@@ -5046,7 +5095,7 @@ export default function Page() {
     const result = await fetch("/api/decks/validate", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ deck: selectedLocalDeck }),
+      body: JSON.stringify({ deck: selectedDeck }),
     }).then((response) => response.json() as Promise<DeckValidationResponse>);
     if (result.error) {
       setNotice(result.error.message);
@@ -5068,7 +5117,7 @@ export default function Page() {
     } else {
       setCorpLocalSnapshot(validatedSnapshot);
     }
-    if (selectedLocalDeck) selectDeckForSide(selectedLocalDeck);
+    if (selectedDeck) selectDeckForSide(selectedDeck);
     setEntryTab("play");
     setNotice("Deck-Snapshot für Match Setup gesetzt.");
   };
@@ -5080,14 +5129,14 @@ export default function Page() {
     } else {
       setCorpLocalSnapshot(validatedSnapshot);
     }
-    if (selectedLocalDeck) selectDeckForSide(selectedLocalDeck);
+    if (selectedDeck) selectDeckForSide(selectedDeck);
     setNotice("Deck-Snapshot für den nächsten Matchstart vorgemerkt.");
   };
 
   const exportSelectedDeck = () => {
-    if (!selectedLocalDeck) return;
+    if (!selectedDeck) return;
     setDeckExportText(
-      `${JSON.stringify({ schemaVersion: "editable-deck-v0.6", deck: selectedLocalDeck }, null, 2)}\n`,
+      `${JSON.stringify({ schemaVersion: "editable-deck-v0.6", deck: selectedDeck }, null, 2)}\n`,
     );
   };
 
@@ -5912,11 +5961,11 @@ export default function Page() {
                         accountMode={Boolean(accountSession.account)}
                         busy={accountDeckBusy}
                         onUseStandard={useStandardDeckForMatch}
-                        onCopyStandard={copyStandardToAccount}
+                        onEditStandard={openStandardInEditor}
                       />
                       <DeckEditorPanel
                         localDecks={localDecks}
-                        selectedDeck={selectedLocalDeck}
+                        selectedDeck={selectedDeck}
                         selectedDeckDirty={selectedDeckDirty}
                         storagePath={deckLibraryStoragePath}
                         validation={deckValidation}
@@ -5926,7 +5975,11 @@ export default function Page() {
                         importText={deckImportText}
                         exportText={deckExportText}
                         onCreateEmpty={createEmptyDeck}
-                        onSelectDeck={setSelectedLocalDeckId}
+                        onSelectDeck={(deckId) => {
+                          setStandardEditorDeck(null);
+                          setStandardEditorOriginalName(null);
+                          setSelectedLocalDeckId(deckId);
+                        }}
                         onUpdateDeck={updateSelectedDeck}
                         onSave={saveSelectedDeck}
                         onUpdateQuantity={updateDeckCardQuantity}
@@ -5937,6 +5990,13 @@ export default function Page() {
                         onExport={exportSelectedDeck}
                         onImportText={setDeckImportText}
                         onImport={importLocalDeck}
+                        {...(standardEditorOriginalName
+                          ? {
+                              standardDeckOriginalName:
+                                standardEditorOriginalName,
+                            }
+                          : {})}
+                        onSaveStandardCopy={saveStandardEditorCopy}
                       />
                     </>
                   ) : null}
@@ -6692,7 +6752,7 @@ export default function Page() {
                 catalogPanelProps={catalogPanelProps}
                 deckEditorPanelProps={{
                   localDecks,
-                  selectedDeck: selectedLocalDeck,
+                  selectedDeck,
                   selectedDeckDirty,
                   storagePath: deckLibraryStoragePath,
                   validation: deckValidation,
@@ -6702,7 +6762,11 @@ export default function Page() {
                   importText: deckImportText,
                   exportText: deckExportText,
                   onCreateEmpty: createEmptyDeck,
-                  onSelectDeck: setSelectedLocalDeckId,
+                  onSelectDeck: (deckId) => {
+                    setStandardEditorDeck(null);
+                    setStandardEditorOriginalName(null);
+                    setSelectedLocalDeckId(deckId);
+                  },
                   onUpdateDeck: updateSelectedDeck,
                   onSave: saveSelectedDeck,
                   onUpdateQuantity: updateDeckCardQuantity,
@@ -6714,6 +6778,10 @@ export default function Page() {
                   onExport: exportSelectedDeck,
                   onImportText: setDeckImportText,
                   onImport: importLocalDeck,
+                  ...(standardEditorOriginalName
+                    ? { standardDeckOriginalName: standardEditorOriginalName }
+                    : {}),
+                  onSaveStandardCopy: saveStandardEditorCopy,
                 }}
                 publicGamesPanelProps={{
                   matches: openLanMatches,

@@ -285,7 +285,9 @@ export function DeckEditorPanel({
   useForMatchLabel = "Im Matchstart auswählen",
   onExport,
   onImportText,
-  onImport
+  onImport,
+  standardDeckOriginalName,
+  onSaveStandardCopy,
 }: {
   localDecks: EditableDeck[];
   selectedDeck: EditableDeck | null;
@@ -310,6 +312,8 @@ export function DeckEditorPanel({
   onExport(): void;
   onImportText(value: string): void;
   onImport(): void;
+  standardDeckOriginalName?: string;
+  onSaveStandardCopy?(): void;
 }) {
   const [builderSearch, setBuilderSearch] = useState("");
   const [builderTypeFilters, setBuilderTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
@@ -1195,11 +1199,28 @@ export function DeckEditorPanel({
                   )}
                   {deckEditorMode === "table" ? null : (
                   <section className="deckControlsPanel">
+                    {standardDeckOriginalName ? (
+                      <p className="deckSaveStatus dirty">
+                        Standard-Deck: Änderungen bleiben ein Entwurf. Speichere es unter einem anderen Namen als persönliches Deck.
+                      </p>
+                    ) : null}
                     <div className="deckActions">
-                      <button className="button primary" onClick={onSave} disabled={!selectedDeckDirty}>
+                      <button className="button primary" onClick={onSave} disabled={!selectedDeckDirty || Boolean(standardDeckOriginalName)}>
                         <Save size={15} />
                         Speichern
                       </button>
+                      {standardDeckOriginalName && onSaveStandardCopy ? (
+                        <button
+                          className="button primary"
+                          onClick={onSaveStandardCopy}
+                          disabled={selectedDeck.name.trim() === standardDeckOriginalName}
+                          title={selectedDeck.name.trim() === standardDeckOriginalName ? "Gib der persönlichen Kopie einen anderen Namen." : undefined}
+                          type="button"
+                        >
+                          <CopyPlus size={15} />
+                          Als eigenes Deck speichern
+                        </button>
+                      ) : null}
                       <button className="button primary" onClick={onValidate}>
                         <Check size={15} />
                         Prüfen
@@ -1212,11 +1233,11 @@ export function DeckEditorPanel({
                         <Download size={15} />
                         Export
                       </button>
-                      <button className="button" onClick={onDuplicate}>
+                      <button className="button" onClick={onDuplicate} disabled={Boolean(standardDeckOriginalName)}>
                         <CopyPlus size={15} />
                         Duplizieren
                       </button>
-                      <button className="button" onClick={onDelete}>
+                      <button className="button" onClick={onDelete} disabled={Boolean(standardDeckOriginalName)}>
                         <Trash2 size={15} />
                         Löschen
                       </button>

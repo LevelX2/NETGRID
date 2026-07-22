@@ -9,14 +9,14 @@ export function AccountDeckLibraryHeader({
   accountMode,
   busy,
   onUseStandard,
-  onCopyStandard,
+  onEditStandard,
 }: {
   standards: StandardDeck[];
   quota: AccountDeckQuota | null;
   accountMode: boolean;
   busy: boolean;
   onUseStandard(deck: StandardDeck): void;
-  onCopyStandard(deck: StandardDeck): void;
+  onEditStandard(deck: StandardDeck): void;
 }) {
   const [side, setSide] = useState<"runner" | "corp">("runner");
   const filtered = useMemo(
@@ -37,7 +37,10 @@ export function AccountDeckLibraryHeader({
         </h2>
         <p className="muted">
           Standards sind unveränderlich. Du kannst sie direkt spielen
-          {accountMode ? " oder als persönliches Deck kopieren" : ""}.
+          {accountMode
+            ? " oder im Editor als persönliches Deck weiterführen"
+            : ""}
+          .
         </p>
       </div>
       <div className="accountDeckStandardControls">
@@ -79,10 +82,10 @@ export function AccountDeckLibraryHeader({
           <button
             className="button"
             disabled={!selected || busy || quota?.remaining === 0}
-            onClick={() => selected && onCopyStandard(selected)}
+            onClick={() => selected && onEditStandard(selected)}
             type="button"
           >
-            Als eigenes Deck kopieren
+            Im Editor öffnen
           </button>
         ) : null}
       </div>
