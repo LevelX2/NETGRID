@@ -1572,6 +1572,7 @@ export function centralPressureShouldDriveTriage<TConsumer extends string>(
   const canAcquireRdDefense =
     serverId === "rd" &&
     needsProtection &&
+    !dependencies.corpHasCentralRezFloorFundingNeed(input) &&
     pressure.recentSuccessfulAccessEvents >= 2 &&
     centralDefenseAcquisitionActionExists(input, actions);
   if (severity === "critical") {

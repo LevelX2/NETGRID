@@ -292,6 +292,8 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     const needsDefenseAcquisition =
       centralPressure.serverId === "rd" &&
       centralServerNeedsProtection(input, "rd") &&
+      !dependencies.corpHasCentralRezFloorFundingNeed(input) &&
+      centralPressure.recentSuccessfulAccessEvents >= 2 &&
       !concreteCentralProtectionActionExists(
         input,
         actions,
