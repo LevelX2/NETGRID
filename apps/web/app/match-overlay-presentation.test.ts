@@ -30,6 +30,32 @@ describe("match overlay presentation", () => {
     ).toBe(false);
   });
 
+  it("shows a terminal damage window before the result modal", () => {
+    expect(
+      matchOverlayPresentation(
+        winningAgendaInput({
+          accessRevealAvailable: false,
+          accessOutcomeKind: null,
+          runnerWonByAgendaPoints: false,
+          damagePresentationPending: true,
+        }),
+      ),
+    ).toMatchObject({
+      showAccessReveal: false,
+      showResultModal: false,
+    });
+    expect(
+      matchOverlayPresentation(
+        winningAgendaInput({
+          accessRevealAvailable: false,
+          accessOutcomeKind: null,
+          runnerWonByAgendaPoints: false,
+          damagePresentationPending: false,
+        }),
+      ).showResultModal,
+    ).toBe(true);
+  });
+
   it("keeps ordinary result and non-winning access behavior", () => {
     expect(
       matchOverlayPresentation(
@@ -76,6 +102,7 @@ function winningAgendaInput(
     accessRevealKind: "access",
     accessOutcomeKind: "stolen",
     matchEnded: true,
+    damagePresentationPending: false,
     resultAvailable: true,
     resultDismissed: false,
     runnerWonByAgendaPoints: true,
