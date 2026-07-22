@@ -570,7 +570,11 @@ export function DeckEditorPanel({
     setDeckSideFilter(side);
     onCreateEmpty(side);
   };
-  const openStandardCopy = () => {
+  const toggleStandardCopy = () => {
+    if (standardCopyOpen) {
+      setStandardCopyOpen(false);
+      return;
+    }
     const first = standardDecks.find((deck) => deck.side === "runner") ?? standardDecks[0];
     if (!first) return;
     setStandardCopySide(first.side);
@@ -940,7 +944,7 @@ export function DeckEditorPanel({
               Import
             </button>
             {onCopyStandard && standardDecks.length > 0 ? (
-              <button className={`button ${standardCopyOpen ? "primary" : ""}`} onClick={openStandardCopy} type="button" aria-expanded={standardCopyOpen}>
+              <button className={`button deckStandardCopyToggle ${standardCopyOpen ? "primary" : ""}`} onClick={toggleStandardCopy} type="button" aria-expanded={standardCopyOpen}>
                 <CopyPlus size={15} />
                 Standard-Deck kopieren
               </button>
@@ -957,7 +961,7 @@ export function DeckEditorPanel({
             </div>
           ) : null}
           {standardCopyOpen ? (
-            <div className="deckImportBox deckImportInline">
+            <div className="deckImportBox deckImportInline deckStandardCopyInline">
               <h3>Standard-Deck kopieren</h3>
               <p className="meta">Die Kopie wird als persönliches Deck gespeichert und kann danach bearbeitet werden.</p>
               <div className="deckFormGrid">

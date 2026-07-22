@@ -464,7 +464,6 @@ import {
 } from "../features/game-board/board-view-helpers";
 import { AccountPanel } from "../features/account/AccountPanel";
 import { useAccountSession } from "../features/account/useAccountSession";
-import { AccountDeckLibraryHeader } from "../features/account/AccountDeckLibraryHeader";
 import {
   createAccountDeck,
   deleteAccountDeck,
@@ -4806,23 +4805,6 @@ export default function Page() {
     rememberDisplayName(value);
   };
 
-  const useStandardDeckForMatch = (standard: StandardDeck) => {
-    const snapshotId = `standard_${standard.standardDeckId}_${standard.version}`;
-    if (standard.side === "runner") {
-      setSelectedRunnerSnapshotId(snapshotId);
-      setRunnerDeckSource("snapshot");
-      setSelectedParticipantBRunnerSnapshotId(snapshotId);
-      setParticipantBRunnerDeckSource("snapshot");
-    } else {
-      setSelectedCorpSnapshotId(snapshotId);
-      setCorpDeckSource("snapshot");
-      setSelectedParticipantBCorpSnapshotId(snapshotId);
-      setParticipantBCorpDeckSource("snapshot");
-    }
-    setEntryTab("play");
-    setNotice(`${standard.name} ist für den Matchstart ausgewählt.`);
-  };
-
   const copyStandardToAccount = async (
     standard: StandardDeck,
     name: string,
@@ -5927,15 +5909,7 @@ export default function Page() {
                     <CatalogPanel {...catalogPanelProps} />
                   ) : null}
                   {entryTab === "decks" ? (
-                    <>
-                      <AccountDeckLibraryHeader
-                        standards={standardDecks}
-                        quota={accountDeckQuota}
-                        accountMode={Boolean(accountSession.account)}
-                        busy={accountDeckBusy}
-                        onUseStandard={useStandardDeckForMatch}
-                      />
-                      <DeckEditorPanel
+                    <DeckEditorPanel
                         localDecks={localDecks}
                         selectedDeck={selectedDeck}
                         selectedDeckDirty={selectedDeckDirty}
@@ -5963,8 +5937,7 @@ export default function Page() {
                         }
                         standardCopyBusy={accountDeckBusy}
                         onCopyStandard={copyStandardToAccount}
-                      />
-                    </>
+                    />
                   ) : null}
                   {entryTab === "recent" ? (
                     <RecentGamesPanel

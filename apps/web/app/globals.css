@@ -2374,6 +2374,16 @@ select {
   background: var(--section-bg);
 }
 
+.deckStandardCopyInline {
+  border-color: color-mix(in srgb, var(--accent), var(--line) 45%);
+  border-left: 3px solid var(--accent);
+  background: color-mix(in srgb, var(--section-bg), var(--accent) 7%);
+}
+
+.deckStandardCopyToggle {
+  border-color: color-mix(in srgb, var(--accent), var(--line) 45%);
+}
+
 .deckImportInline .deckTextArea {
   min-height: 90px;
 }
