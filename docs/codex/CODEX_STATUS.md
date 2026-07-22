@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-20
+Stand: 2026-07-22
 
 ## Einstieg
 
@@ -35,6 +35,20 @@ beobachtbar; diese Observability verändert weder Scoring noch Planpriorität.
 Der vorhandene SQLite-KI-Trace persistiert die Kette im normalen
 `summary`-Modus kompakt und im erweiterten `detailed`-Modus vollständig unter
 demselben `trace_json`-Pfad.
+
+Aktionskapazität ist zusätzlich als gemeinsame side-sichere Ressource
+modelliert. Aktuelle Aktionen stammen ohne Drei-/Vier-Aktionsannahme aus dem
+PlayerView; unmittelbare und zukünftige Quellen werden aus LegalActions und
+normalisierten Hints projiziert. `ActionDemand`s, begrenzte garantierte oder
+kontingente Routen und Planportfolio-Reservierungen binden Zusatzaktionen an
+wirkliche Folgeaktionen. Eingeschränkte Bursts ohne kompatible Route werden
+nicht spekulativ bevorzugt; selbstfinanzierende Runs zählen ihre Quellaktion
+als Umwandlung. Der 60-Spiele-Abschlusslauf mit 11.040 Entscheidungen ist ohne
+Hard Failure, verpasstes Scorefenster, dominierte Planwahl oder
+Fehlkonversion akzeptiert. Führend sind
+`docs/architecture/ai/ai-action-capacity-routes-implementation-process-2026-07-22.md`
+und
+`docs/reviews/ai/ai-behavior-baseline-v1-action-capacity-routes-2026-07-22.md`.
 
 Die aktuelle Semantic Runtime verwendet reine abgeleitete Run-Target-,
 Handentwicklungs- und Install-Fit-Ergebnisse innerhalb genau einer synchronen

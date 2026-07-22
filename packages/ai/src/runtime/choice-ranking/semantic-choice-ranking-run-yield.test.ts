@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { tacticalPlanMappedChoice } from "../semantic-choice-ranking";
 import {
   aiInput,
+  bestHandCardMapping,
   centralRunMapping,
   choice,
   legalAction,
@@ -10,6 +11,30 @@ import {
 } from "./semantic-choice-ranking.test-support";
 
 describe("tactical plan run yield contracts", () => {
+  it("lets a useful action beat a restricted burst event without a conversion route", () => {
+    const bundle = legalAction("valu-pak", "play_event");
+    const draw = legalAction("draw", "draw_card");
+    const bundleChoice = choice(bundle, 937, [], {
+      key: "action_capacity_followup_conversion",
+      value: -80,
+      reason:
+        "action_capacity_restriction:program_install_only|action_capacity_demand:none|action_capacity_resource_cost:80",
+    });
+    const drawChoice = choice(draw, 714);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [bundleChoice, drawChoice],
+      bestHandCardMapping([bundle]),
+      drawChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("draw");
+    expect(result.overrideReason).toBe(
+      "unconverted_restricted_action_capacity_yield",
+    );
+  });
+
   it("lets a useful non-run action beat an expensive central run with no reserve", () => {
     const draw = legalAction("draw", "draw_card");
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });

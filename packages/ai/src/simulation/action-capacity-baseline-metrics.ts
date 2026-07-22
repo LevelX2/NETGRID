@@ -38,12 +38,14 @@ export function summarizeActionCapacityBaselineMetrics(
         }
         sameTurn.push(candidate);
       }
-      const followupConverted = sameTurn.some(
-        (candidate) =>
-          candidate.actionCapacitySourceUsed !== true &&
-          candidate.actionType !== "end_turn" &&
-          candidate.timingPoint === `${entry.side}_action.main`,
-      );
+      const followupConverted =
+        entry.actionCapacityInlineConversionUsed === true ||
+        sameTurn.some(
+          (candidate) =>
+            candidate.actionCapacitySourceUsed !== true &&
+            candidate.actionType !== "end_turn" &&
+            candidate.timingPoint === `${entry.side}_action.main`,
+        );
       if (followupConverted) metrics.actionCapacityFollowupConversions += 1;
       const endTurn = sameTurn.find(
         (candidate) => candidate.actionType === "end_turn",

@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-21
+Stand: 2026-07-22
 
 ## Führender Produktstand
 
@@ -108,6 +108,27 @@ Stand: 2026-07-21
   `docs/architecture/ai/ai-economy-funding-routes-implementation-process-2026-07-21.md`
   und
   `docs/reviews/ai/ai-behavior-baseline-v1-economy-funding-routes-2026-07-21.md`.
+
+- Die Aktionsökonomie besitzt nun denselben durchgängigen Vertrag:
+  `PlayerView.own.clicks` liefert den aktuellen Bestand, LegalActions und
+  normalisierte Kartenhints projizieren unmittelbare, eingeschränkte,
+  gespeicherte, wiederkehrende, zufällige und geschuldete Kapazität.
+  Typisierte `ActionDemand`s und begrenzte `ActionCapacityRoute`s bewerten
+  Quellen nach ihrer garantierten kompatiblen Folge statt nach einem hohen
+  pauschalen Aktionswert. Planportfolio-Reservierungen verhindern
+  Doppelverwendung; wiederkehrende Quellen werden nur über einen nutzbaren
+  Horizont amortisiert.
+- Overtime kann garantierte Same-turn-Scorefolgen schließen, Corporate Boon
+  darf für eine gebundene spätere Linie gehalten werden, und eingeschränkte
+  Bursts ohne kompatiblen Demand oder Planbeitrag werden nicht von einem
+  allgemeinen Handkartenplan erzwungen. Selbstfinanzierende Runs gelten
+  bereits in ihrer Quellaktion als konvertiert. Der vergleichbare Abschluss
+  über 60 Spiele und 11.040 Entscheidungen hat keine Hard Failures, keine
+  verpassten Scorefenster, keine dominierte Planwahl und bei 45 Nutzungen
+  null Fehlkonversionen. Führend sind
+  `docs/architecture/ai/ai-action-capacity-routes-implementation-process-2026-07-22.md`
+  und
+  `docs/reviews/ai/ai-behavior-baseline-v1-action-capacity-routes-2026-07-22.md`.
 
 - Die Deckstrategie-Ableitung ist für 40 aktive Standarddecks, 21 versionierte
   Snapshots und alle 24 Strategy-IDs vollständig gegatet. 39 aktive Decks

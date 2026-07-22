@@ -180,6 +180,7 @@ export function tacticalPlanRunnerMappingBlocksOffPlanOverride(
     noNeedSearchShouldYield: boolean;
     coverageProbeRunShouldYield: boolean;
     lowValueRunEventShouldYield: boolean;
+    unconvertedRestrictedActionCapacityShouldYield: boolean;
     urgentRunNowDevelopmentShouldYield: boolean;
     unconvertibleFundingShouldYieldToBank: boolean;
     urgentCoverageSearchInstallShouldYield: boolean;
@@ -204,6 +205,7 @@ export function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (exceptions.noNeedSearchShouldYield) return false;
   if (exceptions.coverageProbeRunShouldYield) return false;
   if (exceptions.lowValueRunEventShouldYield) return false;
+  if (exceptions.unconvertedRestrictedActionCapacityShouldYield) return false;
   if (exceptions.urgentRunNowDevelopmentShouldYield) return false;
   if (exceptions.unconvertibleFundingShouldYieldToBank) return false;
   if (exceptions.urgentCoverageSearchInstallShouldYield) return false;
@@ -231,6 +233,28 @@ export function tacticalPlanLowValueRunEventMappingShouldYield(
         component.key === "runner_run_target_semantic_guidance" &&
         component.value < 0,
     )
+  );
+}
+
+export function tacticalPlanUnconvertedRestrictedActionCapacityShouldYield(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  return (
+    (mapping.plan.type === "runner.develop_hand_card" ||
+      mapping.plan.type === "runner.play_best_hand_card") &&
+    mappedChoice.action.type === "play_event" &&
+    overrideChoice.score > 0 &&
+    mappedChoice.scoreBreakdown.some((component) => {
+      const reason = component.reason ?? "";
+      return (
+        component.key === "action_capacity_followup_conversion" &&
+        component.value <= 0 &&
+        reason.includes("action_capacity_demand:none") &&
+        !reason.includes("action_capacity_restriction:unrestricted")
+      );
+    })
   );
 }
 

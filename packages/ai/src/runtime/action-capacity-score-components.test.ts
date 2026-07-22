@@ -48,6 +48,24 @@ describe("action-capacity runtime scoring", () => {
     expect(speculative).toBeLessThanOrEqual(0);
   });
 
+  it("does not value restricted burst actions without a compatible route", () => {
+    const installOnly = candidate("valu-pak", 5, {
+      actionType: "play_event",
+      listedActionCost: 1,
+      restriction: "program_install_only",
+      allowedActionTypes: ["install_card"],
+    });
+    const unrestricted = candidate("unrestricted-burst", 5, {
+      listedActionCost: 1,
+    });
+
+    expect(value(installOnly)).toBe(-440);
+    expect(value(unrestricted)).toBeGreaterThan(0);
+    expect(
+      actionCapacityRuntimeScoreComponents(installOnly, undefined)[0]?.reason,
+    ).toContain("action_capacity_demand:none");
+  });
+
   it("does not discount a route-adjusted plan contribution twice", () => {
     const conditionalSource = candidate("conditional-overtime", 2, {
       listedActionCost: 1,

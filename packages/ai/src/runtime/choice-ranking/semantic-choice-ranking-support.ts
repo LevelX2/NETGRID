@@ -27,6 +27,7 @@ export function tacticalPlanOverrideReason(input: {
   noNeedSearchShouldYield: boolean;
   coverageProbeRunShouldYield: boolean;
   lowValueRunEventShouldYield: boolean;
+  unconvertedRestrictedActionCapacityShouldYield: boolean;
   mappedNonPositiveAgainstPositive: boolean;
   deferredDevelopmentInstallShouldYield: boolean;
   repeatedRunShouldYield: boolean;
@@ -57,6 +58,10 @@ export function tacticalPlanOverrideReason(input: {
     [input.noNeedSearchShouldYield, "no_need_search_mapping_yield"],
     [input.coverageProbeRunShouldYield, "coverage_probe_run_mapping_yield"],
     [input.lowValueRunEventShouldYield, "low_value_run_event_mapping_yield"],
+    [
+      input.unconvertedRestrictedActionCapacityShouldYield,
+      "unconverted_restricted_action_capacity_yield",
+    ],
     [
       input.mappedNonPositiveAgainstPositive,
       "mapped_nonpositive_against_positive",

@@ -37,6 +37,37 @@ describe("action-capacity baseline metrics", () => {
       actionCapacityMisconversions: 1,
     });
   });
+
+  it("counts an inline self-financing action as a converted use", () => {
+    const metrics = summarizeActionCapacityBaselineMetrics([
+      summary([
+        entry({
+          side: "runner",
+          turnNumber: 1,
+          timingPoint: "runner_action.main",
+          actionType: "start_run",
+          actionCapacityOpportunity: true,
+          actionCapacitySourceUsed: true,
+          actionCapacityInlineConversionUsed: true,
+          actionsRemainingBefore: 0,
+        }),
+        entry({
+          side: "runner",
+          turnNumber: 1,
+          timingPoint: "runner_action.main",
+          actionType: "end_turn",
+          actionsRemainingBefore: 0,
+        }),
+      ]),
+    ]);
+
+    expect(metrics).toMatchObject({
+      actionCapacityUses: 1,
+      actionCapacityFollowupConversions: 1,
+      actionCapacityExpiredUses: 0,
+      actionCapacityMisconversions: 0,
+    });
+  });
 });
 
 function summary(

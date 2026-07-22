@@ -27,6 +27,7 @@ import {
   tacticalPlanMappingSelectedEvidence,
   tacticalPlanRunnerMappingBlocksOffPlanOverride,
   tacticalPlanStepPriorityKeepsMappedChoice,
+  tacticalPlanUnconvertedRestrictedActionCapacityShouldYield,
 } from "./mapped-choice-policies";
 import {
   tacticalPlanAcuteHandBufferShouldYield,
@@ -176,6 +177,12 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         scoreGap,
       );
+    const unconvertedRestrictedActionCapacityShouldYield =
+      tacticalPlanUnconvertedRestrictedActionCapacityShouldYield(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+      );
     const urgentRunNowDevelopmentShouldYield =
       tacticalPlanUrgentRunNowDevelopmentShouldYield(
         input,
@@ -191,6 +198,7 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
       ) &&
       !lowValueRunEventShouldYield &&
+      !unconvertedRestrictedActionCapacityShouldYield &&
       !urgentRunNowDevelopmentShouldYield
     ) {
       return tacticalPlanBlockedOverrideResult({
@@ -479,6 +487,7 @@ export function tacticalPlanMappedChoice(
           noNeedSearchShouldYield,
           coverageProbeRunShouldYield,
           lowValueRunEventShouldYield,
+          unconvertedRestrictedActionCapacityShouldYield,
           urgentRunNowDevelopmentShouldYield,
           unconvertibleFundingShouldYieldToBank,
           urgentCoverageSearchInstallShouldYield,
@@ -509,6 +518,7 @@ export function tacticalPlanMappedChoice(
       noNeedSearchShouldYield ||
       coverageProbeRunShouldYield ||
       lowValueRunEventShouldYield ||
+      unconvertedRestrictedActionCapacityShouldYield ||
       urgentRunNowDevelopmentShouldYield ||
       unconvertibleFundingShouldYieldToBank ||
       urgentCoverageSearchInstallShouldYield ||
@@ -525,6 +535,7 @@ export function tacticalPlanMappedChoice(
           noNeedSearchShouldYield,
           coverageProbeRunShouldYield,
           lowValueRunEventShouldYield,
+          unconvertedRestrictedActionCapacityShouldYield,
           mappedNonPositiveAgainstPositive,
           deferredDevelopmentInstallShouldYield,
           repeatedRunShouldYield,

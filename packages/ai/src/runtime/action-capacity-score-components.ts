@@ -89,6 +89,8 @@ export function actionCapacityRuntimeScoreComponents(
         `action_capacity_kind:${projection.kind}`,
         `action_capacity_restriction:${projection.restriction}`,
         `action_capacity_reliability:${projection.reliability}`,
+        `action_capacity_self_financing:${projection.selfFinancing}`,
+        `action_capacity_inline_contribution:${projection.generatedActionsConsumedByCurrentAction}`,
         `action_capacity_benefit:${benefit}`,
         `action_capacity_reliability_multiplier:${reliabilityMultiplier}`,
         `action_capacity_route_reliability_preaccounted:${Boolean(contribution)}`,
@@ -156,6 +158,18 @@ function immediateBenefit(
       DEMAND_PRIORITY_VALUE[demand.priority] +
       usefulCapacity * 110 +
       netGain * 55
+    );
+  }
+  if (projection.restriction !== "unrestricted") {
+    if (
+      projection.selfFinancing ||
+      projection.generatedActionsConsumedByCurrentAction > 0
+    ) {
+      return netGain * 40;
+    }
+    return -Math.min(
+      DEMAND_PRIORITY_VALUE.current_foreground_plan,
+      Math.max(convertibleFollowups, netGain) * 90,
     );
   }
   return netGain * 40;

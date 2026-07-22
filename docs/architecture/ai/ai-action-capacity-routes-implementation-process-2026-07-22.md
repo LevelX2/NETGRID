@@ -1,6 +1,6 @@
 # KI-Aktionsökonomie, Aktionskapazität und Tempo-Routen – Umsetzungsprozess
 
-Status: in Umsetzung
+Status: P7 abschlussverifiziert; lokale Integration ausstehend
 
 Datum: 2026-07-22
 
@@ -508,7 +508,43 @@ Done-Gate:
 - Arbeitsbranch ist gelöscht;
 - erst danach wird das Goal abgeschlossen.
 
-Commit: `docs(ai): verify action capacity route rollout`
+Ergebnis vor Integration:
+
+- die Baseline-Auswertung hat vier selbstfinanzierende Runs als bereits in
+  der Quellaktion umgewandelte Aktionskapazität präzisiert;
+- drei echte Valu-Pak-Leerläufe führten zu einem zusätzlichen allgemeinen
+  Feasibility-Vertrag: eingeschränkte Bursts ohne kompatiblen Demand oder
+  Planbeitrag erhalten keinen spekulativen Rohwert, sondern einen begrenzten
+  Malus; selbstfinanzierende Quellen bleiben davon ausgenommen;
+- ein allgemeiner Runner-Handkartenplan darf eine nicht konvertierbare
+  eingeschränkte Aktionsquelle nicht gegen eine positive Alternative
+  erzwingen;
+- der finale vergleichbare Lauf über 60 Spiele und 11.040 Entscheidungen hat
+  keine Hard Failures, keine verpassten Scorefenster, keine klar dominierte
+  Planwahl und bei 45 Nutzungen 45 tatsächliche Folgekonversionen sowie null
+  Fehlkonversionen;
+- ein einziger teilweiser Verfall bleibt erklärt: In einer bereits terminal
+  verlorenen Partie mit leerem R&D verwendet die Corp den Burst noch für
+  einen Remote-Aufbau, bevor zwei Aktionen ungenutzt enden und der Runner den
+  sicheren Deckout erzwingt. Daraus wird keine breite Scoringverschärfung
+  gegen produktive uneingeschränkte Quellen abgeleitet;
+- 76 fokussierte Runtime-, Arbitration- und Simulationsregressionen sind
+  grün. Die AI-Shards 2 und 3 sind mit 1.056/1.056 beziehungsweise 930/930
+  Tests grün; Shard 1 hat 1.093 grüne Tests und ausschließlich den bereits
+  auf unverändertem `main` reproduzierten starren Katalogzähler (`41` aktive
+  Profile gegenüber der Erwartung `40`);
+- Engine- und Shared-Typecheck, `check:ai`,
+  `check:ai-action-capacity`, Package-Boundaries und `git diff --check` sind
+  grün. Der AI-Typecheck zeigt ausschließlich die drei bekannten, auf `main`
+  reproduzierten `action.payload`-Nullability-Befunde in
+  `run-access-decision-model.ts`;
+- `format:changed` meldet nach separater Prüfung aller P7-Dateien nur die
+  bereits am Ausgangsstand vorhandene Ganzdatei-Formatabweichung von
+  `ai-game-simulator.ts`;
+- die finale lokale Main-Integration sowie Worktree- und Branch-Bereinigung
+  folgen nach dem P7-Commit gemäß Skillvertrag.
+
+Commit: `fix(ai): verify action capacity route rollout`
 
 ## Verifikationsregeln
 

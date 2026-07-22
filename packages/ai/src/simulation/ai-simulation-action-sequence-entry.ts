@@ -33,6 +33,7 @@ export type AiSimulationActionSequenceEntry = {
   actionCapacityLegalSourceCount?: number;
   actionCapacitySourceUsed?: boolean;
   actionCapacityPlanConversionUsed?: boolean;
+  actionCapacityInlineConversionUsed?: boolean;
   actionCapacityDominatedAlternativeCount?: number;
   planKind?: string;
   reasonCode: string;

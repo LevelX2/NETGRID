@@ -5,6 +5,7 @@ export type ActionCapacitySimulationDiagnostics = {
   actionCapacityLegalSourceCount?: number;
   actionCapacitySourceUsed?: boolean;
   actionCapacityPlanConversionUsed?: boolean;
+  actionCapacityInlineConversionUsed?: boolean;
   actionCapacityDominatedAlternativeCount?: number;
 };
 
@@ -37,6 +38,14 @@ export function actionCapacityDiagnosticsForSimulationDecision(
   const planConversionUsed = selectedComponents.some(
     (component) => component.key === "action_capacity_plan_conversion",
   );
+  const inlineConversionUsed = selectedComponents.some((component) => {
+    const reason = component.reason ?? "";
+    return (
+      ACTION_CAPACITY_SOURCE_COMPONENTS.has(component.key) &&
+      (reason.includes("action_capacity_self_financing:true") ||
+        actionCapacityInlineContribution(reason) > 0)
+    );
+  });
   const dominatedAlternativeCount = alternatives.filter((alternative) =>
     (alternative.whyNot ?? []).some(
       (entry) =>
@@ -54,8 +63,16 @@ export function actionCapacityDiagnosticsForSimulationDecision(
       : {}),
     ...(sourceUsed ? { actionCapacitySourceUsed: true } : {}),
     ...(planConversionUsed ? { actionCapacityPlanConversionUsed: true } : {}),
+    ...(inlineConversionUsed
+      ? { actionCapacityInlineConversionUsed: true }
+      : {}),
     ...(dominatedAlternativeCount > 0
       ? { actionCapacityDominatedAlternativeCount: dominatedAlternativeCount }
       : {}),
   };
+}
+
+function actionCapacityInlineContribution(reason: string): number {
+  const match = reason.match(/action_capacity_inline_contribution:(\d+)/u);
+  return match ? Number(match[1]) : 0;
 }
