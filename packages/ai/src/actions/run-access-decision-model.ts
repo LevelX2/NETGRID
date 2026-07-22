@@ -234,9 +234,9 @@ function isArmageddonDoomCounterReplacement(
     action.side === "runner" &&
     action.type === "trigger_ability" &&
     candidate.sourceDefinitionId === "onr_proteus_078_armageddon" &&
-    action.payload.serverId === "rd" &&
-    action.payload.counterType === "doom" &&
-    action.payload.cardId === action.source
+    action.payload?.serverId === "rd" &&
+    action.payload?.counterType === "doom" &&
+    action.payload?.cardId === action.source
   );
 }
 
