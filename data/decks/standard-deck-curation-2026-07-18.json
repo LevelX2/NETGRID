@@ -15,7 +15,7 @@
   },
   "localDeckLibrary": {
     "counts": {
-      "standard": 41,
+      "standard": 42,
       "internal_ai": 2,
       "retire": 1,
       "test_fixture": 10
@@ -411,6 +411,14 @@
         "classification": "standard",
         "reason": "ai_playtest_derived",
         "standardDeckId": "standard_runner_purge_window"
+      },
+      {
+        "sourceDeckId": "local_corp_universal_fast_advance",
+        "name": "Universal Fast Advance",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "ai_playtest_derived",
+        "standardDeckId": "standard_corp_universal_fast_advance"
       },
       {
         "sourceDeckId": "local_runner_unused_resource_cybernetics_lab",
