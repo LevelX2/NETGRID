@@ -593,3 +593,37 @@ P2-Prüfstand:
 - `check:ai` grün;
 - der AI-Typecheck zeigt weiterhin ausschließlich die drei auf `main`
   reproduzierten Nullability-Befunde.
+
+## P3-Ergebnis
+
+P3 führt typisierte `ActionDemand`s mit Zweck, Priorität, Härte, Deadline,
+aktuellem und benötigtem Aktionsstand, akzeptierten Restriktionen und
+benötigten Action-Typen ein. Ein Adapter leitet diese Bedarfe aus Corp-
+Score-/Remote-Schutzplänen sowie Runner-Breaker-, Run- und
+Survival-Sequenzen ab. Bereits von der Engine gemeldete vier, fünf oder mehr
+Actions erzeugen entsprechend keinen künstlichen Gap.
+
+Die begrenzte `ActionCapacityRoute`-Suche verwendet nur vorhandene
+ActionSemanticCandidates beziehungsweise ausdrücklich markierte
+Future-Projections. Sie führt Brutto-/Nettoaktionen, selbstfinanzierte
+Inline-Konversion, freie und eingeschränkte Pools, Credits, verbrauchte
+Karten und sichtbare Source-Counter. Overtime, Corporate Boon/Pacifica,
+Wilson und Edgerunner werden dadurch verschieden, aber über denselben
+Vertrag behandelt. Future-/recurring- und risikobehaftete Schritte bleiben
+kontingent und lösen einen harten Blocker nicht.
+
+Dominanz wird nur zwischen Routen mit gleichem Restriktionsprofil geprüft.
+Eine größere ansonsten gleiche Quelle dominiert eine kleinere; Install-only
+und unrestricted bleiben dagegen getrennte Alternativen. Nach Verlust einer
+LegalAction invalidiert der Revalidator die Route.
+
+P3-Prüfstand:
+
+- 27/27 fokussierte Demand-, Action-Route-, Planableitungs- und bestehende
+  Funding-Route-Tests grün;
+- Overtime-Closeout, bereits ausreichende Actions, Wilson-Inline-Run,
+  Edgerunner-Restriktion, Pacifica-Counterreservierung, Creditreservierung,
+  Future-Kontingenz, Risikokontingenz und Dominanz explizit abgedeckt;
+- `check:ai` und `git diff --check` grün;
+- der AI-Typecheck zeigt keine neuen Befunde neben der dokumentierten
+  `main`-Baseline.

@@ -220,6 +220,46 @@ export type {
   CreditRestriction,
 } from "./plans/credit-demand";
 export {
+  ACTION_DEMAND_PRIORITY_RANK,
+  ACTION_DEMAND_SCHEMA_VERSION,
+  compareActionDemandPriority,
+  createActionDemand,
+  createCorpActionDemand,
+  createRunnerActionDemand,
+} from "./plans/action-demand";
+export type {
+  ActionDemand,
+  ActionDemandDeadline,
+  ActionDemandHardness,
+  ActionDemandPriority,
+  ActionDemandPurpose,
+  ActionDemandRestriction,
+  CreateActionDemandParams,
+  CreateSideActionDemandParams,
+} from "./plans/action-demand";
+export {
+  ACTION_CAPACITY_ROUTE_SCHEMA_VERSION,
+  actionDemandHardBlockerIsResolved,
+  pruneDominatedActionCapacityRoutes,
+  revalidateActionCapacityRoute,
+  searchActionCapacityRoutes,
+} from "./plans/action-capacity-route";
+export {
+  deriveTacticalPlanActionDemands,
+  primaryActionDemandForPlan,
+} from "./plans/tactical-plan-action-demands";
+export type {
+  ActionCapacityActionCandidate,
+  ActionCapacityRoute,
+  ActionCapacityRouteHorizon,
+  ActionCapacityRouteReliability,
+  ActionCapacityRouteSearchResult,
+  ActionCapacityRouteStatus,
+  ActionCapacityRouteStep,
+  FutureActionCapacityProjection,
+  SearchActionCapacityRoutesParams,
+} from "./plans/action-capacity-route";
+export {
   creditDemandHardBlockerIsResolved,
   FUNDING_ROUTE_SCHEMA_VERSION,
   pruneDominatedRoutes,
