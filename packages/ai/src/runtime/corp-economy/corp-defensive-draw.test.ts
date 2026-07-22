@@ -95,7 +95,7 @@ describe("Corp defensive draw context", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_quantitative_draw_yield",
-          value: 1400,
+          value: 1000,
         }),
       ]),
     );

@@ -17,7 +17,7 @@ import type { CorpBoardTriage } from "../semantic-runtime-corp-board-triage";
 const CORP_SAFE_DRAW_CAPACITY_VALUE = 100;
 const CORP_LOW_HAND_VALUE = 450;
 const CORP_MISSING_CONCRETE_DEFENSE_DRAW_VALUE = 250;
-const CORP_DRAW_VALUE_PER_CARD = 400;
+const CORP_ADDITIONAL_DRAW_VALUE_PER_CARD = 400;
 const CORP_MULTI_DRAW_ACTION_EFFICIENCY_PER_EXTRA_CARD = 100;
 const CORP_DRAW_OVERFLOW_PENALTY_PER_CARD = 100;
 
@@ -79,11 +79,13 @@ export function corpQuantitativeDrawScoreComponents(
       key: "corp_quantitative_draw_yield",
       label: "Quantitativer Kartenziehertrag",
       value:
-        projectedDrawCount * CORP_DRAW_VALUE_PER_CARD +
+        Math.max(0, projectedDrawCount - 1) *
+          CORP_ADDITIONAL_DRAW_VALUE_PER_CARD +
         Math.max(0, projectedDrawCount - 1) *
           CORP_MULTI_DRAW_ACTION_EFFICIENCY_PER_EXTRA_CARD,
       reason: [
         evidence,
+        "single_draw_value_owned_by_contextual_draw_components:true",
         `multi_draw_action_efficiency:${Math.max(0, projectedDrawCount - 1) * CORP_MULTI_DRAW_ACTION_EFFICIENCY_PER_EXTRA_CARD}`,
       ].join("|"),
     },

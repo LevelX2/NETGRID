@@ -531,7 +531,8 @@ function corpCreditSaturationComponent<TConsumer extends string>(
     0,
   );
   const targetReserve = Math.max(5, visibleCostCeiling + 2);
-  if (input.playerView.own.credits < targetReserve) return undefined;
+  const saturationFloor = targetReserve + 5;
+  if (input.playerView.own.credits < saturationFloor) return undefined;
   const alternativeDrawCount = input.legalActions.reduce(
     (count, candidate) => Math.max(count, corpProjectedDrawCount(candidate)),
     0,
@@ -544,6 +545,7 @@ function corpCreditSaturationComponent<TConsumer extends string>(
     reason: [
       `credits:${input.playerView.own.credits}`,
       `target_reserve:${targetReserve}`,
+      `saturation_floor:${saturationFloor}`,
       `visible_cost_ceiling:${visibleCostCeiling}`,
       "unresolved_credit_demand:false",
       `alternative_draw_count:${alternativeDrawCount}`,

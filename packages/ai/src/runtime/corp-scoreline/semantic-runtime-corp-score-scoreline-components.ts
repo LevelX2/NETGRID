@@ -12,6 +12,7 @@ import {
 import { rolesMatch } from "../role-match";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
 import type { CorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
+import { bestCorpSameTurnScoreConversionPath } from "../../plans/tactical-plan-corp-score-conversion";
 import { corpScoringWindowHasFundedPreScoreProtection } from "./semantic-runtime-corp-scoring-window-contracts";
 import { corpKnownAgendaInventory } from "../corp-known-agenda-inventory";
 import {
@@ -52,17 +53,9 @@ export function corpMatchpointHqProtectionComponent(
   }
   const hqAgendaCount = corpHqAgendaCount(input);
   if (hqAgendaCount <= 0) return undefined;
+  if (bestCorpSameTurnScoreConversionPath(input)) return undefined;
   const hqPressure = semanticRuntimeCorpCentralPressureAssessment(input, "hq");
-  if (
-    !hqPressure.hqAgendaExposure ||
-    (!hqPressure.visibleMultiaccess &&
-      !hqPressure.eventMultiaccess &&
-      hqPressure.recentRunOrAccessEvents <= 0 &&
-      hqPressure.recentSuccessfulAccessEvents <= 0 &&
-      hqPressure.recentSuccessfulAccessRunnerTurns <= 0)
-  ) {
-    return undefined;
-  }
+  if (!hqPressure.hqAgendaExposure) return undefined;
   if (
     corpServerIceCount(input, "hq") >= 3 &&
     !hqPressure.visibleMultiaccess &&

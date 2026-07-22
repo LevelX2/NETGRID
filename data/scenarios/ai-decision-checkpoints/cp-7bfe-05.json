@@ -11830,14 +11830,17 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_244_filter",
-        "targetServerId": "hq"
+        "type": "gain_credit"
       }
     ],
     "forbiddenActions": [
       {
         "type": "draw_card"
+      },
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_244_filter",
+        "targetServerId": "hq"
       }
     ]
   }
