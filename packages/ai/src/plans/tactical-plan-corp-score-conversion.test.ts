@@ -136,9 +136,10 @@ describe("Corp same-turn score conversion", () => {
       hq: [agenda],
       actions: [
         action("overtime", "play_operation", "overtime", {
-          scoreConversionCapability: "gain_action_capacity",
-          scoreConversionActionGainAmount: 2,
-          scoreConversionTiming: "immediate",
+          gainActionsAmount: 2,
+          actionCapacityTiming: "immediate",
+          actionCapacityRestriction: "unrestricted",
+          actionCapacityReliability: "guaranteed",
         }),
         action("install", "install_card", agenda.instanceId, {
           serverId: "new_remote",
@@ -161,6 +162,87 @@ describe("Corp same-turn score conversion", () => {
     ]);
   });
 
+  it("uses Overtime before installing and advancing a three-point agenda three times", () => {
+    const agenda = card("agenda", "agenda", { advancementRequirement: 3 });
+    const input = corpInput({
+      clicks: 3,
+      credits: 3,
+      hq: [agenda],
+      actions: [
+        action("overtime", "play_operation", "overtime", {
+          gainActionsAmount: 2,
+          actionCapacityTiming: "immediate",
+          actionCapacityRestriction: "unrestricted",
+          actionCapacityReliability: "guaranteed",
+        }),
+        action("install", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        action("advance", "advance_card", agenda.instanceId, {
+          serverId: "new_remote",
+        }),
+      ],
+    });
+
+    expect(
+      bestCorpSameTurnScoreConversionPath(input)?.steps.map(
+        (step) => step.kind,
+      ),
+    ).toEqual([
+      "gain_action_capacity",
+      "install_score_target",
+      "basic_advance",
+      "basic_advance",
+      "basic_advance",
+      "score_ready",
+    ]);
+  });
+
+  it("uses a legal Corporate Boon counter action through the shared projection", () => {
+    const agenda = card("agenda", "agenda", { advancementRequirement: 1 });
+    const boonAction = action(
+      "corporate-boon",
+      "activated_card_ability",
+      "boon-agenda",
+      {
+        gainActionsAmount: 1,
+        actionCapacityTiming: "immediate",
+        actionCapacityRestriction: "unrestricted",
+        actionCapacityReliability: "guaranteed",
+        cardImplementationSourceCounterType: "boon",
+        cardImplementationSourceCounterCost: 1,
+      },
+    );
+    boonAction.costs = [];
+    const input = corpInput({
+      clicks: 1,
+      credits: 1,
+      hq: [agenda],
+      actions: [
+        boonAction,
+        action("install", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        action("advance", "advance_card", agenda.instanceId, {
+          serverId: "new_remote",
+        }),
+      ],
+    });
+
+    expect(
+      bestCorpSameTurnScoreConversionPath(input)?.steps.map(
+        (step) => step.kind,
+      ),
+    ).toEqual([
+      "gain_action_capacity",
+      "install_score_target",
+      "basic_advance",
+      "score_ready",
+    ]);
+  });
+
   it("does not spend an action-gain card when the closeout already fits", () => {
     const agenda = card("agenda", "agenda", { advancementRequirement: 2 });
     const input = corpInput({
@@ -169,9 +251,10 @@ describe("Corp same-turn score conversion", () => {
       hq: [agenda],
       actions: [
         action("overtime", "play_operation", "overtime", {
-          scoreConversionCapability: "gain_action_capacity",
-          scoreConversionActionGainAmount: 2,
-          scoreConversionTiming: "immediate",
+          gainActionsAmount: 2,
+          actionCapacityTiming: "immediate",
+          actionCapacityRestriction: "unrestricted",
+          actionCapacityReliability: "guaranteed",
         }),
         action("install", "install_card", agenda.instanceId, {
           serverId: "new_remote",
@@ -305,9 +388,10 @@ describe("Corp same-turn score conversion", () => {
           "activated_card_ability",
           pacifica.instanceId,
           {
-            scoreConversionCapability: "gain_action_capacity",
-            scoreConversionActionGainAmount: 1,
-            scoreConversionTiming: "immediate",
+            gainActionsAmount: 1,
+            actionCapacityTiming: "immediate",
+            actionCapacityRestriction: "unrestricted",
+            actionCapacityReliability: "guaranteed",
             cardImplementationAdvancementCounterCost: 1,
           },
         ),

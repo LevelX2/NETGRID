@@ -2,6 +2,10 @@ import type { AiDecisionInput, LegalAction, Side } from "@netgrid/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
+  createCorpActionDemand,
+  type ActionDemandRestriction,
+} from "./action-demand";
+import {
   createCorpCreditDemand,
   createRunnerCreditDemand,
 } from "./credit-demand";
@@ -13,6 +17,7 @@ import {
   buildPlanPortfolioActionContributions,
   buildPlanPortfolio,
   planPortfolioEntryCanAct,
+  planPortfolioActionCapacityStep,
   planPortfolioTurnKey,
   redactedPlanPortfolioFacts,
   redactedPlanActionContributionFacts,
@@ -602,6 +607,233 @@ describe("plan portfolio", () => {
       "route_invalidated:bbs-credit",
     );
   });
+
+  it("reserves a guaranteed Overtime route for a four-action score closeout", () => {
+    const input = decisionInput("corp", 94);
+    input.playerView.own.clicks = 3;
+    input.legalActions = [actionCapacityLegalAction("overtime")];
+    const scorePlan = plan(
+      "corp.create_score_window",
+      980,
+      "card",
+      "agenda",
+      94,
+    );
+    scorePlan.actionDemands = [corpActionDemand(scorePlan.planId, 3, 4)];
+    const candidate = actionCapacityCandidate("overtime", 2, {
+      listedActionCost: 1,
+      sourceCardInstanceId: "overtime",
+    });
+
+    const portfolio = buildPlanPortfolio({
+      input,
+      tacticalPlans: [scorePlan],
+      candidates: [candidate],
+    });
+    const entry = portfolio.foreground!;
+
+    expect(entry.selectedActionCapacityRoute).toMatchObject({
+      status: "covered_guaranteed",
+      projectedCompatibleActions: 4,
+      totalPreExistingActionCost: 1,
+    });
+    expect(entry.actionCapacityCoverageResolvesHardBlocker).toBe(true);
+    expect(entry.resourceReservation).toMatchObject({
+      clicks: 3,
+      requestedActions: 4,
+      shortfallActions: 0,
+    });
+    expect(portfolio.unallocatedActions).toBe(0);
+    expect(planPortfolioActionCapacityStep(entry)).toMatchObject({
+      kind: "gain_action_capacity",
+      actionCandidateIds: ["overtime"],
+    });
+    expect(
+      advancePlanPortfolioForSelectedAction(
+        portfolio,
+        "overtime",
+        entry.portfolioEntryId,
+      ).foreground?.selectedActionCapacityRoute?.steps,
+    ).toEqual([]);
+  });
+
+  it("does not reserve an action source when the foreground sequence already fits", () => {
+    const input = decisionInput("corp", 95);
+    input.playerView.own.clicks = 4;
+    input.legalActions = [actionCapacityLegalAction("overtime")];
+    const scorePlan = plan(
+      "corp.create_score_window",
+      980,
+      "card",
+      "agenda",
+      95,
+    );
+    scorePlan.actionDemands = [corpActionDemand(scorePlan.planId, 4, 4)];
+
+    const portfolio = buildPlanPortfolio({
+      input,
+      tacticalPlans: [scorePlan],
+      candidates: [
+        actionCapacityCandidate("overtime", 2, {
+          listedActionCost: 1,
+          sourceCardInstanceId: "overtime",
+        }),
+      ],
+    });
+
+    expect(portfolio.foreground?.selectedActionCapacityRoute).toMatchObject({
+      status: "already_sufficient",
+      steps: [],
+    });
+    expect(
+      planPortfolioActionCapacityStep(portfolio.foreground!),
+    ).toBeUndefined();
+  });
+
+  it("reserves foreground actions before a background project", () => {
+    const input = decisionInput("corp", 96);
+    input.playerView.own.clicks = 3;
+    const foreground = plan(
+      "corp.create_score_window",
+      980,
+      "card",
+      "agenda",
+      96,
+    );
+    foreground.actionDemands = [corpActionDemand(foreground.planId, 3, 3)];
+    const background = plan("corp.build_credit_bank", 700, "bank", "bbs", 96);
+    background.actionDemands = [
+      createCorpActionDemand({
+        demandId: `${background.planId}:actions`,
+        sourcePlanId: background.planId,
+        purpose: "foreground_plan",
+        priority: "current_foreground_plan",
+        hardness: "soft",
+        deadline: "end_of_current_turn",
+        currentActions: 3,
+        targetActions: 1,
+      }),
+    ];
+
+    const portfolio = buildPlanPortfolio({
+      input,
+      tacticalPlans: [background, foreground],
+    });
+
+    expect(portfolio.foreground?.resourceReservation.clicks).toBe(3);
+    expect(portfolio.backgrounds[0]?.selectedActionCapacityRoute).toMatchObject(
+      {
+        status: "uncovered",
+        startingActions: 0,
+      },
+    );
+    expect(portfolio.unallocatedActions).toBe(0);
+  });
+
+  it("does not allocate the same finite counter source to two plans", () => {
+    const input = decisionInput("corp", 97);
+    input.playerView.own.clicks = 2;
+    input.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [
+          {
+            instanceId: "pacifica",
+            known: true,
+            advancementCounters: 1,
+          },
+        ],
+      },
+    ];
+    input.legalActions = [actionCapacityLegalAction("pacifica")];
+    const foreground = plan(
+      "corp.create_score_window",
+      980,
+      "card",
+      "agenda",
+      97,
+    );
+    foreground.actionDemands = [corpActionDemand(foreground.planId, 2, 3)];
+    const background = plan("corp.build_credit_bank", 700, "bank", "bbs", 97);
+    background.actionDemands = [
+      createCorpActionDemand({
+        demandId: `${background.planId}:actions`,
+        sourcePlanId: background.planId,
+        purpose: "foreground_plan",
+        priority: "current_foreground_plan",
+        hardness: "soft",
+        deadline: "end_of_current_turn",
+        currentActions: 2,
+        targetActions: 2,
+      }),
+    ];
+    const source = actionCapacityCandidate("pacifica", 3, {
+      listedActionCost: 1,
+      sourceCardInstanceId: "pacifica",
+      sourceCounterType: "advancement",
+      sourceCounterCost: 1,
+    });
+
+    const portfolio = buildPlanPortfolio({
+      input,
+      tacticalPlans: [foreground, background],
+      candidates: [source],
+    });
+
+    expect(portfolio.foreground?.resourceReservation.sourceCounters).toEqual({
+      "pacifica:advancement": 1,
+    });
+    expect(
+      portfolio.backgrounds[0]?.resourceReservation.sourceCounters,
+    ).toEqual({});
+    expect(
+      portfolio.backgrounds[0]?.selectedActionCapacityRoute?.steps,
+    ).toEqual([]);
+  });
+
+  it("invalidates a remembered action-capacity source when it disappears", () => {
+    const firstInput = decisionInput("corp", 98);
+    firstInput.playerView.own.clicks = 3;
+    firstInput.legalActions = [actionCapacityLegalAction("overtime")];
+    const scorePlan = plan(
+      "corp.create_score_window",
+      980,
+      "card",
+      "agenda",
+      98,
+    );
+    scorePlan.actionDemands = [corpActionDemand(scorePlan.planId, 3, 4)];
+    const first = buildPlanPortfolio({
+      input: firstInput,
+      tacticalPlans: [scorePlan],
+      candidates: [
+        actionCapacityCandidate("overtime", 2, {
+          listedActionCost: 1,
+          sourceCardInstanceId: "overtime",
+        }),
+      ],
+    });
+    const nextInput = decisionInput("corp", 99);
+    nextInput.playerView.own.clicks = 3;
+    const replanned = buildPlanPortfolio({
+      input: nextInput,
+      tacticalPlans: [scorePlan],
+      previous: first,
+      candidates: [],
+    });
+
+    expect(first.foreground?.selectedActionCapacityRoute?.status).toBe(
+      "covered_guaranteed",
+    );
+    expect(replanned.foreground?.selectedActionCapacityRoute?.status).toBe(
+      "uncovered",
+    );
+    expect(replanned.foreground?.evidence).toContain(
+      "action_route_invalidated:legal_action_unavailable:overtime",
+    );
+  });
 });
 
 function plan(
@@ -756,5 +988,91 @@ function economyCandidate(
       evidence: [],
       ...overrides,
     },
-  } as ActionSemanticCandidate;
+  } as unknown as ActionSemanticCandidate;
+}
+
+function corpActionDemand(
+  sourcePlanId: string,
+  currentActions: number,
+  targetActions: number,
+) {
+  return createCorpActionDemand({
+    demandId: `${sourcePlanId}:actions`,
+    sourcePlanId,
+    purpose: "current_score_closeout",
+    priority: "acute_hard_plan_blocker",
+    hardness: "hard",
+    deadline: "before_current_plan_action",
+    currentActions,
+    targetActions,
+    acceptedRestrictions: ["unrestricted"],
+    requiredActionTypes: ["install_card", "advance_card", "score_agenda"],
+  });
+}
+
+function actionCapacityLegalAction(actionId: string): LegalAction {
+  return {
+    ...legalAction("corp", actionId),
+    type: "play_operation",
+    source: actionId,
+  };
+}
+
+function actionCapacityCandidate(
+  actionId: string,
+  gain: number,
+  overrides: {
+    listedActionCost?: number;
+    restriction?: ActionDemandRestriction;
+    sourceCardInstanceId?: string;
+    sourceCounterType?: string;
+    sourceCounterCost?: number;
+  } = {},
+): ActionSemanticCandidate {
+  const listedActionCost = overrides.listedActionCost ?? 0;
+  const restriction = overrides.restriction ?? "unrestricted";
+  return {
+    actionId,
+    actionType: "play_operation",
+    actorSide: "corp",
+    ...(overrides.sourceCardInstanceId
+      ? { sourceCardInstanceId: overrides.sourceCardInstanceId }
+      : {}),
+    sourceDefinitionId: actionId,
+    costProfile: {
+      clickCost: listedActionCost,
+      creditCost: 0,
+      costKnownStatus: "known",
+      additionalCosts: [],
+    },
+    actionCapacityProjection: {
+      schemaVersion: "action-capacity-projection-v1",
+      kind:
+        restriction === "unrestricted"
+          ? "immediate_unrestricted_gain"
+          : "immediate_restricted_gain",
+      timing: "immediate",
+      restriction,
+      allowedActionTypes: [],
+      listedActionCost,
+      preExistingActionCost: listedActionCost,
+      grossActionsGained: gain,
+      generatedActionsConsumedByCurrentAction: 0,
+      followupActionCapacity: gain,
+      netCurrentTurnActionDelta: gain - listedActionCost,
+      actionDebt: 0,
+      selfFinancing: false,
+      repeatable: "unknown",
+      reliability: "guaranteed",
+      ...(overrides.sourceCounterType
+        ? { sourceCounterType: overrides.sourceCounterType }
+        : {}),
+      ...(overrides.sourceCounterCost !== undefined
+        ? { sourceCounterCost: overrides.sourceCounterCost }
+        : {}),
+      source: "legal_action_payload",
+      confidence: "high",
+      evidence: [`test:${actionId}`],
+    },
+  } as unknown as ActionSemanticCandidate;
 }

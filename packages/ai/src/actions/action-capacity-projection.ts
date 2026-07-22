@@ -31,6 +31,23 @@ export function actionCapacityProjectionFor(
   action: LegalAction,
 ): ActionCapacityProjection {
   const listedActionCost = Math.max(0, candidate.costProfile.clickCost ?? 0);
+  return actionCapacityProjectionWithListedCost(action, listedActionCost);
+}
+
+export function actionCapacityProjectionForLegalAction(
+  action: LegalAction,
+): ActionCapacityProjection {
+  const listedActionCost = (action.costs ?? []).reduce(
+    (sum, cost) => sum + Math.max(0, Math.floor(cost.clicks ?? 0)),
+    0,
+  );
+  return actionCapacityProjectionWithListedCost(action, listedActionCost);
+}
+
+function actionCapacityProjectionWithListedCost(
+  action: LegalAction,
+  listedActionCost: number,
+): ActionCapacityProjection {
   const grossActionsGained = nonNegativeInteger(
     action.payload?.gainActionsAmount,
   );
@@ -78,13 +95,19 @@ export function actionCapacityProjectionFor(
             : "non_action_capacity";
   const allowedActionTypes = allowedActionTypesFor(action, restriction);
   const reliability = actionCapacityReliability(action, source);
-  const sourceCounterType = stringPayload(
+  const explicitSourceCounterType = stringPayload(
     action,
     "cardImplementationSourceCounterType",
   );
-  const sourceCounterCost = positiveInteger(
-    action.payload?.cardImplementationSourceCounterCost,
+  const advancementCounterCost = positiveInteger(
+    action.payload?.cardImplementationAdvancementCounterCost,
   );
+  const sourceCounterType =
+    explicitSourceCounterType ??
+    (advancementCounterCost !== undefined ? "advancement" : undefined);
+  const sourceCounterCost =
+    positiveInteger(action.payload?.cardImplementationSourceCounterCost) ??
+    advancementCounterCost;
   const netCurrentTurnActionDelta =
     timing === "immediate" ? grossActionsGained - listedActionCost : 0;
   const evidence = [

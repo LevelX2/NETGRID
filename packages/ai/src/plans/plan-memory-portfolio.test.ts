@@ -14,6 +14,8 @@ import { getPlanPortfolioMemorySnapshot } from "./plan-portfolio-memory";
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import { createRunnerCreditDemand } from "./credit-demand";
 import type { FundingRoute } from "./funding-route";
+import { createRunnerActionDemand } from "./action-demand";
+import type { ActionCapacityRoute } from "./action-capacity-route";
 
 describe("tactical plan memory with portfolio continuity", () => {
   beforeEach(() => resetTacticalPlanMemory());
@@ -149,6 +151,69 @@ describe("tactical plan memory with portfolio continuity", () => {
     });
     expect(snapshot.selectedFundingRoute).toMatchObject({
       routeId: "runner:memory-demand:basic-credit",
+      status: "covered_guaranteed",
+    });
+  });
+
+  it("stores the selected action demand and action-capacity route in plan memory", () => {
+    const decisionInput = input(21);
+    const selectedAction = legalAction("overtime", "trigger_ability");
+    const plan = tacticalPlan(
+      "runner.contest_remote",
+      "remote_1",
+      "run_target",
+      "overtime",
+      21,
+    );
+    const demand = createRunnerActionDemand({
+      demandId: "runner:memory-actions",
+      sourcePlanId: plan.planId,
+      purpose: "current_run",
+      priority: "acute_hard_plan_blocker",
+      hardness: "hard",
+      deadline: "before_current_plan_action",
+      currentActions: 1,
+      targetActions: 2,
+      acceptedRestrictions: ["unrestricted", "run_only"],
+      requiredActionTypes: ["start_run"],
+    });
+    plan.actionDemands = [demand];
+    const route: ActionCapacityRoute = {
+      schemaVersion: "action-capacity-route-v1",
+      routeId: "runner:memory-actions:overtime",
+      demandId: demand.demandId,
+      status: "covered_guaranteed",
+      reliability: "guaranteed",
+      horizon: "same_turn",
+      startingActions: 1,
+      targetActions: 2,
+      projectedCompatibleActions: 2,
+      projectedActionPool: 2,
+      projectedGap: 0,
+      restrictionsUsed: ["unrestricted"],
+      totalPreExistingActionCost: 1,
+      totalCreditCost: 0,
+      totalCardsConsumed: 1,
+      totalSourceCountersConsumed: 0,
+      steps: [],
+      invalidationReasons: [],
+      evidence: ["memory-test"],
+    };
+
+    const snapshot = createTacticalPlanMemorySnapshot({
+      input: decisionInput,
+      plan,
+      step: plan.currentStep,
+      selectedAction,
+      selectedActionCapacityRoute: route,
+    });
+
+    expect(snapshot.actionDemands?.[0]).toMatchObject({
+      demandId: "runner:memory-actions",
+      targetActions: 2,
+    });
+    expect(snapshot.selectedActionCapacityRoute).toMatchObject({
+      routeId: "runner:memory-actions:overtime",
       status: "covered_guaranteed",
     });
   });

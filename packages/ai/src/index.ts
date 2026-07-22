@@ -182,6 +182,7 @@ export {
   buildPlanPortfolio,
   PLAN_PORTFOLIO_SCHEMA_VERSION,
   planPortfolioTurnKey,
+  planPortfolioActionCapacityStep,
   planPortfolioEntryCanAct,
   planPortfolioEntryForPlan,
   portfolioRoleForExecutionClass,
@@ -247,6 +248,7 @@ export {
 export {
   deriveTacticalPlanActionDemands,
   primaryActionDemandForPlan,
+  publishTacticalPlanActionDemands,
 } from "./plans/tactical-plan-action-demands";
 export type {
   ActionCapacityActionCandidate,

@@ -57,6 +57,26 @@ describe("action capacity projection", () => {
     });
   });
 
+  it("normalizes an advancement-counter cost into the shared source-counter contract", () => {
+    const projection = project(
+      legalAction("pacifica", "activated_card_ability", {
+        costs: [{ clicks: 1 }],
+        payload: {
+          gainActionsAmount: 1,
+          actionCapacityTiming: "immediate",
+          actionCapacityRestriction: "unrestricted",
+          actionCapacityReliability: "guaranteed",
+          cardImplementationAdvancementCounterCost: 1,
+        },
+      }),
+    );
+
+    expect(projection).toMatchObject({
+      sourceCounterType: "advancement",
+      sourceCounterCost: 1,
+    });
+  });
+
   it("does not count Wilson's self-financed run as a free follow-up click", () => {
     const projection = project(
       legalAction("wilson-run", "start_run", {

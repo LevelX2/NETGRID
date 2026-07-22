@@ -5,6 +5,12 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { createAiHintsByCard, RUNTIME_CARDS } from "../ai-hints";
+import { actionCapacityProjectionForLegalAction } from "../actions/action-capacity-projection";
+import {
+  searchActionCapacityRoutes,
+  type ActionCapacityActionCandidate,
+} from "./action-capacity-route";
+import { createCorpActionDemand } from "./action-demand";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -66,8 +72,10 @@ type ConversionCapability = {
 type ActionCapacity = {
   action: LegalAction;
   gain: number;
+  preExistingActionCost: number;
   sourceCardId?: string;
-  sourceAdvancementCounterCost: number;
+  sourceCounterType?: string;
+  sourceCounterCost: number;
 };
 
 type CandidatePath = CorpScoreConversionPath & {
@@ -142,10 +150,11 @@ function conversionPathForDesiredTarget(
     : undefined;
   const advancementCapabilities = conversionCapabilities(input, target);
   const actionCapacities = actionCapacityCapabilities(input);
+  const actionCapacitySets = routedActionCapacitySets(input, actionCapacities);
   const sourceCounterBudget = visibleAdvancementCounterBudget(input);
   let best: CandidatePath | undefined;
 
-  for (const capacitySet of powerSet(actionCapacities)) {
+  for (const capacitySet of actionCapacitySets) {
     const capacityResult = applyActionCapacitySet(
       input,
       target,
@@ -429,27 +438,127 @@ function conversionCapabilities(
 
 function actionCapacityCapabilities(input: AiDecisionInput): ActionCapacity[] {
   return input.legalActions.flatMap((action) => {
+    if (action.side !== "corp") return [];
+    const projection = actionCapacityProjectionForLegalAction(action);
     if (
-      action.side !== "corp" ||
-      stringPayload(action, "scoreConversionCapability") !==
-        "gain_action_capacity" ||
-      stringPayload(action, "scoreConversionTiming") !== "immediate"
+      projection.kind !== "immediate_unrestricted_gain" ||
+      projection.timing !== "immediate" ||
+      projection.reliability !== "guaranteed" ||
+      projection.grossActionsGained <= 0
     )
       return [];
-    const gain = numberPayload(action, "scoreConversionActionGainAmount");
-    if (!gain || gain <= 0) return [];
     const sourceCardId = actionCardId(action);
     return [
       {
         action,
-        gain,
+        gain: projection.grossActionsGained,
+        preExistingActionCost: projection.preExistingActionCost,
         ...(sourceCardId ? { sourceCardId } : {}),
-        sourceAdvancementCounterCost:
-          numberPayload(action, "cardImplementationAdvancementCounterCost") ??
-          0,
+        ...(projection.sourceCounterType
+          ? { sourceCounterType: projection.sourceCounterType }
+          : {}),
+        sourceCounterCost: projection.sourceCounterCost ?? 0,
       },
     ];
   });
+}
+
+function routedActionCapacitySets(
+  input: AiDecisionInput,
+  capacities: readonly ActionCapacity[],
+): ActionCapacity[][] {
+  if (capacities.length === 0) return [[]];
+  const candidates: ActionCapacityActionCandidate[] = capacities.map(
+    (capacity) => {
+      const projection = actionCapacityProjectionForLegalAction(
+        capacity.action,
+      );
+      return {
+        actionId: capacity.action.actionId,
+        actionType: capacity.action.type,
+        ...(capacity.sourceCardId
+          ? { sourceCardInstanceId: capacity.sourceCardId }
+          : {}),
+        costProfile: {
+          clickCost: projection.listedActionCost,
+          creditCost: actionCost(capacity.action, "credits"),
+          costKnownStatus: "known",
+          additionalCosts: [],
+        },
+        actionCapacityProjection: projection,
+      };
+    },
+  );
+  const capacityByActionId = new Map(
+    capacities.map((capacity) => [capacity.action.actionId, capacity]),
+  );
+  const visibleSourceCounterAmounts: Record<string, number> = {};
+  for (const capacity of capacities) {
+    if (
+      !capacity.sourceCardId ||
+      !capacity.sourceCounterType ||
+      capacity.sourceCounterCost <= 0
+    )
+      continue;
+    const source = visibleOwnCard(input, capacity.sourceCardId);
+    if (!source) continue;
+    const amount =
+      capacity.sourceCounterType === "advancement"
+        ? (source.advancementCounters ?? 0)
+        : ((source.counters as Record<string, number> | undefined)?.[
+            capacity.sourceCounterType
+          ] ?? 0);
+    visibleSourceCounterAmounts[
+      `${capacity.sourceCardId}:${capacity.sourceCounterType}`
+    ] = Math.max(0, amount);
+  }
+  const sets = new Map<string, ActionCapacity[]>([["", []]]);
+  const currentActions = Math.max(0, input.playerView.own.clicks);
+  const maximumTarget = Math.min(12, currentActions + 8);
+  for (
+    let targetActions = currentActions + 1;
+    targetActions <= maximumTarget;
+    targetActions += 1
+  ) {
+    const demand = createCorpActionDemand({
+      demandId: `score-conversion:${targetActions}`,
+      purpose: "current_score_closeout",
+      priority: "acute_hard_plan_blocker",
+      hardness: "hard",
+      deadline: "before_current_plan_action",
+      currentActions,
+      targetActions,
+      acceptedRestrictions: ["unrestricted"],
+      requiredActionTypes: ["install_card", "advance_card", "score_agenda"],
+    });
+    const search = searchActionCapacityRoutes({
+      demand,
+      candidates,
+      remainingActions: currentActions,
+      availableCredits: input.playerView.own.credits,
+      visibleSourceCounterAmounts,
+      maxSteps: 8,
+      maxRoutes: 16,
+    });
+    for (const route of search.routes) {
+      if (
+        route.status !== "covered_guaranteed" ||
+        route.horizon !== "same_turn"
+      )
+        continue;
+      const routed = route.steps.flatMap((step) => {
+        if (step.kind !== "legal_action" || !step.actionId) return [];
+        const capacity = capacityByActionId.get(step.actionId);
+        return capacity ? [capacity] : [];
+      });
+      const signature = routed
+        .map((capacity) => capacity.action.actionId)
+        .sort()
+        .join("+");
+      if (!sets.has(signature)) sets.set(signature, routed);
+    }
+  }
+  return [...sets.values()];
 }
 
 function applyActionCapacitySet(
@@ -472,18 +581,21 @@ function applyActionCapacitySet(
   for (const capacity of [...capacities].sort(
     (left, right) =>
       right.gain -
-        actionCost(right.action, "clicks") -
-        (left.gain - actionCost(left.action, "clicks")) ||
+        right.preExistingActionCost -
+        (left.gain - left.preExistingActionCost) ||
       left.action.actionId.localeCompare(right.action.actionId),
   )) {
     const clickCost = actionCost(capacity.action, "clicks");
     const creditCost = actionCost(capacity.action, "credits");
-    if (clickCost > clicks || creditCost > credits) return undefined;
-    if (capacity.sourceCardId && capacity.sourceAdvancementCounterCost > 0) {
-      const available = sourceCounters[capacity.sourceCardId] ?? 0;
-      if (available < capacity.sourceAdvancementCounterCost) return undefined;
-      sourceCounters[capacity.sourceCardId] =
-        available - capacity.sourceAdvancementCounterCost;
+    if (capacity.preExistingActionCost > clicks || creditCost > credits)
+      return undefined;
+    if (capacity.sourceCardId && capacity.sourceCounterCost > 0) {
+      if (capacity.sourceCounterType === "advancement") {
+        const available = sourceCounters[capacity.sourceCardId] ?? 0;
+        if (available < capacity.sourceCounterCost) return undefined;
+        sourceCounters[capacity.sourceCardId] =
+          available - capacity.sourceCounterCost;
+      }
     }
     clicks = clicks - clickCost + capacity.gain;
     credits -= creditCost;
@@ -780,13 +892,6 @@ function positiveInteger(value: unknown): number | undefined {
   return typeof value === "number" && Number.isInteger(value) && value > 0
     ? value
     : undefined;
-}
-
-function powerSet<T>(items: readonly T[]): T[][] {
-  if (items.length > 12) return [[]];
-  return Array.from({ length: 2 ** items.length }, (_, mask) =>
-    items.filter((_, index) => (mask & (1 << index)) !== 0),
-  );
 }
 
 function comparePaths(

@@ -22,6 +22,8 @@ import type {
 import type { PlanPortfolioSnapshot } from "./plan-portfolio-types";
 import type { CreditDemand } from "./credit-demand";
 import type { FundingRoute } from "./funding-route";
+import type { ActionDemand } from "./action-demand";
+import type { ActionCapacityRoute } from "./action-capacity-route";
 
 export type {
   PlanStepKind,
@@ -203,6 +205,7 @@ export type TacticalPlan = {
   priority: number;
   horizonTurns: number;
   creditDemands?: CreditDemand[];
+  actionDemands?: ActionDemand[];
   target?: PlanTarget;
   requiredCapabilities: RequiredCapability[];
   blockers: PlanBlocker[];
@@ -280,6 +283,8 @@ export type TacticalPlanMemorySnapshot = {
   blockedBy: string[];
   creditDemands?: CreditDemand[];
   selectedFundingRoute?: FundingRoute;
+  actionDemands?: ActionDemand[];
+  selectedActionCapacityRoute?: ActionCapacityRoute;
   ttlDecisionsRemaining: number;
   planProgressionReason: string;
   progressBaseline?: {

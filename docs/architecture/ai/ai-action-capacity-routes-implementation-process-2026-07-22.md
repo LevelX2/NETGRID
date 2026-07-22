@@ -627,3 +627,47 @@ P3-Prüfstand:
 - `check:ai` und `git diff --check` grün;
 - der AI-Typecheck zeigt keine neuen Befunde neben der dokumentierten
   `main`-Baseline.
+
+## P4-Ergebnis
+
+P4 veröffentlicht `ActionDemand`s direkt an TacticalPlans und führt sie in
+Planportfolio und PlanMemory weiter. Der Portfolio-Allocator arbeitet nach
+der Credit-Allokation mit den tatsächlich verbleibenden Actions und Credits.
+Er reserviert die vollständige geplante Folgekapazität, verbrauchte Karten
+und sichtbare Quellcounter in der Reihenfolge Interrupt, Vordergrund und
+Hintergrund. Dadurch kann ein Hintergrundprojekt weder die vom Vordergrund
+gebundenen Actions noch denselben Corporate-Boon-/Pacifica-Counter oder
+dieselbe einmalige LegalAction erneut verplanen.
+
+`already_sufficient` verbraucht keine Aktionsquelle. Kontingente Routen
+können einen sinnvollen Setup-Schritt liefern, lösen aber keinen harten
+Blocker. Ausgeführte Routenschritte werden in Portfolio und Memory
+fortgeschrieben; verschwundene LegalActions invalidieren die gespeicherte
+Route und erzwingen eine Neuplanung.
+
+Die Corp-Scorekonversion liest weder
+`scoreConversionActionGainAmount` noch Kartentext. Sie bezieht Overtime,
+Corporate Boon, Pacifica und weitere unmittelbare Quellen aus der
+kanonischen `ActionCapacityProjection` und lässt Kombination und
+Counter-/Credit-/Action-Saldo durch dieselbe begrenzte
+`ActionCapacityRoute`-Suche bestimmen. Die Scorelogik selbst plant nur noch
+Install-, Advancement- und Score-Folge. Advancement-Counter-Kosten werden in
+den gemeinsamen Source-Counter-Vertrag normalisiert; Wilsons
+selbstfinanzierter Inline-Beitrag bleibt von gewöhnlicher Folgekapazität
+getrennt.
+
+P4-Prüfstand:
+
+- 62/62 fokussierte Projektions-, Demand-, Route-, Score-, Portfolio- und
+  Memory-Tests grün;
+- 126/126 kombinierte Scoreplan-, Portfolio-, Memory- und TacticalPlan-
+  Regressionstests grün;
+- Install plus drei Basic Advances nach Overtime, Nichtverbrauch bei bereits
+  ausreichenden Actions, Corporate Boon, Pacifica-Doppelreservierung,
+  Vordergrund-vor-Hintergrund und Routeninvalidierung explizit abgedeckt;
+- `check:ai`, Action-Capacity-Audit mit null Zielvertragsverletzungen und
+  `git diff --check` grün;
+- der schmale produktive Action-Gain-Consumer ist von zwei auf den einzigen
+  verbleibenden DTO-Kompatibilitätseintrag reduziert;
+- der AI-Typecheck zeigt weiterhin ausschließlich die drei auf `main`
+  reproduzierten Nullability-Befunde.

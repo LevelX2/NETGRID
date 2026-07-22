@@ -6,6 +6,8 @@ import type {
 } from "./plan-contract-types";
 import type { CreditDemand } from "./credit-demand";
 import type { FundingRoute } from "./funding-route";
+import type { ActionDemand } from "./action-demand";
+import type { ActionCapacityRoute } from "./action-capacity-route";
 
 export const PLAN_PORTFOLIO_SCHEMA_VERSION = "plan-portfolio-v1" as const;
 
@@ -51,6 +53,10 @@ export type PlanPortfolioEntry = {
   fundingRoutes?: FundingRoute[];
   selectedFundingRoute?: FundingRoute;
   fundingCoverageResolvesHardBlocker?: boolean;
+  actionDemands?: ActionDemand[];
+  actionCapacityRoutes?: ActionCapacityRoute[];
+  selectedActionCapacityRoute?: ActionCapacityRoute;
+  actionCapacityCoverageResolvesHardBlocker?: boolean;
   cadence: {
     turnKey: string;
     maxActionsPerTurn: number;
@@ -62,6 +68,10 @@ export type PlanPortfolioEntry = {
     requestedCredits?: number;
     shortfallCredits?: number;
     clicks: number;
+    requestedActions?: number;
+    shortfallActions?: number;
+    sourceCounters?: Record<string, number>;
+    sourceCardInstanceIds?: string[];
   };
   updatedAtStateVersion: number;
   evidence: string[];
@@ -77,6 +87,7 @@ export type PlanPortfolioSnapshot = {
   foreground?: PlanPortfolioEntry;
   backgrounds: PlanPortfolioEntry[];
   unallocatedCredits?: number;
+  unallocatedActions?: number;
   rejectedEntryIds: string[];
   evidence: string[];
 };

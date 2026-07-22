@@ -54,6 +54,26 @@ export function deriveTacticalPlanActionDemands(
   ];
 }
 
+export function publishTacticalPlanActionDemands(
+  plan: TacticalPlan,
+  currentActions: number,
+): TacticalPlan {
+  if ((plan.actionDemands?.length ?? 0) > 0) {
+    return {
+      ...plan,
+      actionDemands: plan.actionDemands!.map((demand) =>
+        createActionDemand({
+          ...demand,
+          currentActions,
+          evidence: demand.evidence,
+        }),
+      ),
+    };
+  }
+  const actionDemands = deriveTacticalPlanActionDemands(plan, currentActions);
+  return actionDemands.length > 0 ? { ...plan, actionDemands } : plan;
+}
+
 export function primaryActionDemandForPlan(
   plan: TacticalPlan,
   currentActions: number,

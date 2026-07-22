@@ -1,5 +1,6 @@
 import type { Side } from "@netgrid/shared";
 import type { CreditDemand } from "./credit-demand";
+import type { ActionDemand } from "./action-demand";
 import {
   TACTICAL_PLAN_SCHEMA_VERSION,
   type PlanBlocker,
@@ -52,6 +53,7 @@ export function createTacticalPlan(params: {
   priority: number;
   horizonTurns: number;
   creditDemands?: CreditDemand[];
+  actionDemands?: ActionDemand[];
   target?: PlanTarget;
   requiredCapabilities?: RequiredCapability[];
   blockers?: PlanBlocker[];
@@ -73,6 +75,7 @@ export function createTacticalPlan(params: {
     priority: params.priority,
     horizonTurns: params.horizonTurns,
     creditDemands: structuredClone(params.creditDemands ?? []),
+    actionDemands: structuredClone(params.actionDemands ?? []),
     ...(params.target ? { target: params.target } : {}),
     requiredCapabilities: [...(params.requiredCapabilities ?? [])],
     blockers,

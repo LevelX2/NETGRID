@@ -28,6 +28,7 @@ import {
   corpScorelineFeasibilityForDecisionInput,
 } from "../runtime/corp-scoreline-feasibility";
 import type { FundingRoute } from "./funding-route";
+import type { ActionCapacityRoute } from "./action-capacity-route";
 
 export type PlanContinuityMemorySnapshot = {
   type?: string;
@@ -106,6 +107,12 @@ export function rememberTacticalPlanRuntime(
     selectedAction,
     ...(selectedPortfolioEntry?.selectedFundingRoute
       ? { selectedFundingRoute: selectedPortfolioEntry.selectedFundingRoute }
+      : {}),
+    ...(selectedPortfolioEntry?.selectedActionCapacityRoute
+      ? {
+          selectedActionCapacityRoute:
+            selectedPortfolioEntry.selectedActionCapacityRoute,
+        }
       : {}),
     ...(result.previousPlan ? { previousPlan: result.previousPlan } : {}),
     ...(result.planProgressionReason
@@ -222,6 +229,7 @@ export function createTacticalPlanMemorySnapshot(params: {
   selectedAction: LegalAction;
   previousPlan?: TacticalPlanMemorySnapshot;
   selectedFundingRoute?: FundingRoute;
+  selectedActionCapacityRoute?: ActionCapacityRoute;
   planProgressionReason?: string;
   whyPlanAbandoned?: string;
 }): TacticalPlanMemorySnapshot {
@@ -257,6 +265,16 @@ export function createTacticalPlanMemorySnapshot(params: {
       : {}),
     ...(params.selectedFundingRoute
       ? { selectedFundingRoute: structuredClone(params.selectedFundingRoute) }
+      : {}),
+    ...((params.plan.actionDemands?.length ?? 0) > 0
+      ? { actionDemands: structuredClone(params.plan.actionDemands) }
+      : {}),
+    ...(params.selectedActionCapacityRoute
+      ? {
+          selectedActionCapacityRoute: structuredClone(
+            params.selectedActionCapacityRoute,
+          ),
+        }
       : {}),
     ttlDecisionsRemaining,
     planProgressionReason:

@@ -14,6 +14,7 @@ import {
   buildPlanPortfolio,
   planPortfolioEntryCanAct,
   planPortfolioEntryForPlan,
+  planPortfolioActionCapacityStep,
   planPortfolioFundingStep,
   planPortfolioTurnKey,
   redactedPlanActionContributionFacts,
@@ -32,6 +33,7 @@ import { visibleCardForAction } from "./plans/tactical-plan-visible-cards";
 import { buildCorpTacticalPlans } from "./plans/tactical-plan-corp-plans";
 import { buildRunnerTacticalPlans } from "./plans/tactical-plan-runner-plans";
 import { publishTacticalPlanCreditDemands } from "./plans/tactical-plan-credit-demands";
+import { publishTacticalPlanActionDemands } from "./plans/tactical-plan-action-demands";
 import type { TacticalPlanCreditValueDependencies } from "./plans/tactical-plan-action-values";
 import { mapPlanStepToLegalActionsWithDependencies } from "./plans/tactical-plan-legal-action-mapping";
 import {
@@ -107,9 +109,12 @@ export function buildTacticalPlans(
         )
       : buildCorpTacticalPlans(context);
   return plans.map((plan) =>
-    publishTacticalPlanCreditDemands(
-      plan,
-      context.input.playerView.own.credits,
+    publishTacticalPlanActionDemands(
+      publishTacticalPlanCreditDemands(
+        plan,
+        context.input.playerView.own.credits,
+      ),
+      context.input.playerView.own.clicks,
     ),
   );
 }
@@ -208,10 +213,25 @@ export function evaluateTacticalPlans(
           context.input,
         )
       : undefined;
+  const interruptActionCapacityStep =
+    interruptPlan && planPortfolio.interrupt
+      ? planPortfolioActionCapacityStep(planPortfolio.interrupt)
+      : undefined;
+  const interruptActionCapacityMapping =
+    interruptPlan && interruptActionCapacityStep
+      ? mapPlanStepToLegalActions(
+          interruptPlan,
+          interruptActionCapacityStep,
+          candidates,
+          context.input,
+        )
+      : undefined;
   const interruptMapping =
-    interruptCurrentMapping?.status === "matched"
-      ? interruptCurrentMapping
-      : (interruptFundingMapping ?? interruptCurrentMapping);
+    interruptActionCapacityMapping?.status === "matched"
+      ? interruptActionCapacityMapping
+      : interruptCurrentMapping?.status === "matched"
+        ? interruptCurrentMapping
+        : (interruptFundingMapping ?? interruptCurrentMapping);
   const interruptCanAct =
     interruptMapping?.status === "matched" &&
     interruptMapping.legalActions.length > 0;
@@ -270,13 +290,26 @@ export function evaluateTacticalPlans(
     const fundingMapping = fundingStep
       ? mapPlanStepToLegalActions(plan, fundingStep, candidates, context.input)
       : undefined;
+    const actionCapacityStep = portfolioEntry
+      ? planPortfolioActionCapacityStep(portfolioEntry)
+      : undefined;
+    const actionCapacityMapping = actionCapacityStep
+      ? mapPlanStepToLegalActions(
+          plan,
+          actionCapacityStep,
+          candidates,
+          context.input,
+        )
+      : undefined;
     const mapping =
-      currentMapping.status === "matched" &&
-      plan.currentStep.kind !== "gain_credits"
-        ? currentMapping
-        : fundingMapping?.status === "matched"
-          ? fundingMapping
-          : currentMapping;
+      actionCapacityMapping?.status === "matched"
+        ? actionCapacityMapping
+        : currentMapping.status === "matched" &&
+            plan.currentStep.kind !== "gain_credits"
+          ? currentMapping
+          : fundingMapping?.status === "matched"
+            ? fundingMapping
+            : currentMapping;
     if (mapping.status === "matched" && mapping.legalActions.length > 0) {
       return {
         planPortfolio,

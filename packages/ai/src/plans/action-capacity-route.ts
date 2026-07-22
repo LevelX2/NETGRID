@@ -33,6 +33,7 @@ export type ActionCapacityRouteStep = {
   cardsConsumed: number;
   grossActionsGained: number;
   demandActionContribution: number;
+  inlineDemandActionContribution?: number;
   netCurrentTurnActionDelta: number;
   reliability: ActionCapacityRouteReliability;
   sourceCardInstanceId?: string;
@@ -353,6 +354,7 @@ function currentActionOption(
     grossActionsGained: projection.grossActionsGained,
     demandActionContribution:
       projection.followupActionCapacity + inlineDemandContribution,
+    inlineDemandActionContribution: inlineDemandContribution,
     netCurrentTurnActionDelta: projection.netCurrentTurnActionDelta,
     reliability: effectiveReliability,
     ...(candidate.sourceCardInstanceId
