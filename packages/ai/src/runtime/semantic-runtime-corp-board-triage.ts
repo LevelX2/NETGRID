@@ -23,6 +23,7 @@ import {
   centralPressureMustInterruptActiveScoreline,
   centralPressureShouldDriveTriage,
   centralPressureTriage,
+  centralDefenseAcquisitionActionExists,
   centralServerNeedsProtection,
   centralTriageSeverity,
   concreteCentralProtectionActionExists,
@@ -288,10 +289,26 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
       dependencies,
     )
   ) {
+    const needsDefenseAcquisition =
+      centralPressure.serverId === "rd" &&
+      centralServerNeedsProtection(input, "rd") &&
+      !concreteCentralProtectionActionExists(
+        input,
+        actions,
+        "rd",
+        dependencies,
+      ) &&
+      centralDefenseAcquisitionActionExists(input, actions);
     return centralPressureTriage(
       centralPressure,
       centralPressureSeverity,
       currentCredits,
+      needsDefenseAcquisition
+        ? [
+            "corp_board_triage_central_defense_acquisition:true",
+            "corp_board_triage_repeated_central_access:true",
+          ]
+        : [],
     );
   }
 

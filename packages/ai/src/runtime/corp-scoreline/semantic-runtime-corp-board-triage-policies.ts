@@ -1569,8 +1569,14 @@ export function centralPressureShouldDriveTriage<TConsumer extends string>(
     serverId,
     dependencies,
   );
+  const canAcquireRdDefense =
+    serverId === "rd" &&
+    needsProtection &&
+    pressure.recentSuccessfulAccessEvents >= 2 &&
+    centralDefenseAcquisitionActionExists(input, actions);
   if (severity === "critical") {
     if (needsProtection && hasProtectionAction) return true;
+    if (canAcquireRdDefense) return true;
     const hasScoreRemoteDevelopment =
       concreteScoreRemoteDevelopmentActionExists(actions);
     if (!hasScoreRemoteDevelopment) return hasProtectionAction;
@@ -1580,10 +1586,20 @@ export function centralPressureShouldDriveTriage<TConsumer extends string>(
     );
   }
   if (needsProtection && hasProtectionAction) return true;
+  if (canAcquireRdDefense) return true;
   const hasScoreRemoteDevelopment =
     concreteScoreRemoteDevelopmentActionExists(actions);
   if (!hasScoreRemoteDevelopment) return true;
   return !corpRemoteScoringStrategyWantsRemoteDevelopment(input);
+}
+
+export function centralDefenseAcquisitionActionExists(
+  input: AiDecisionInput,
+  actions: readonly ScoredLegalAction[],
+): boolean {
+  return actions.some((entry) =>
+    actionHasVisibleDrawSource(input, entry.action, undefined),
+  );
 }
 
 export function highestPriorityTriageCentralPressure(

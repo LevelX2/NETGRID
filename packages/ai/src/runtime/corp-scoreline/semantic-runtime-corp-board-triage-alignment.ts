@@ -362,6 +362,15 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
     case "protect_hq":
     case "protect_rd":
       if (
+        triage.primary === "protect_rd" &&
+        triage.evidence.includes(
+          "corp_board_triage_central_defense_acquisition:true",
+        ) &&
+        actionHasVisibleDrawSource(input, action, actionSemanticCandidate)
+      ) {
+        return "match";
+      }
+      if (
         actionProvidesEconomy(
           input,
           action,
