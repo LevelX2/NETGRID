@@ -219,6 +219,14 @@ export type TacticalPlanCorpScorelinePathAssessment = {
   serverId?: string;
   recommendedNextStep: string;
   blockers: readonly string[];
+  scoringWindow?: {
+    runnerCanContestBeforeScore: boolean;
+    runnerCanReachAccessBeforeScore: boolean;
+    agendaStealRelevantBeforeScore: boolean;
+    agendaStealSeverity?: "none" | "normal" | "near_win" | "game_ending";
+    corpCanRezRelevantIce: boolean;
+    corpCanRezFullPathWithDynamicReserve?: boolean;
+  };
   evidence: readonly string[];
 };
 

@@ -944,6 +944,7 @@ export function buildRunnerMainActions(
         "runner",
         cardId,
         definition,
+        { canStartRun },
       );
       if (
         definition.id === HOST_RETURN_HARDWARE_SOURCE &&

@@ -271,7 +271,87 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
     expect(assessment?.selectedTargets).toBe(1);
     expect(assessment?.noConcreteConversion).toBe(false);
   });
+
+  it("penalizes a self-funded counter whose credit cashout cannot repay its advance", () => {
+    const assessment = assessmentForBasicAdvance("Public counter surface.", {
+      economy: 1,
+      tacticSignals: [
+        "economy.corp_counter_cashout",
+        "advance.corp_counter_transfer",
+      ],
+    });
+
+    expect(assessment).toMatchObject({
+      dominatedByBasicAdvance: false,
+      noConcreteConversion: false,
+      advancementWitness: "counter_cashout_credit",
+      scoreValue: -5200,
+    });
+    expect(assessment?.evidence).toContain(
+      "self_funded_counter_liquid_gain_nonpositive:true",
+    );
+    expect(assessment?.evidence).toContain(
+      "self_funded_counter_requires_selected_conversion_route:true",
+    );
+    expect(assessment?.evidence).toContain(
+      "self_funded_counter_cashout_hint:true",
+    );
+  });
+
+  it("keeps profitable counter cashouts and agenda advances outside that penalty", () => {
+    expect(
+      assessmentForBasicAdvance("Public counter surface.", {
+        economy: 4,
+        tacticSignals: ["economy.corp_counter_cashout"],
+      }),
+    ).toBeUndefined();
+    expect(
+      assessmentForBasicAdvance(
+        "Gain 1 credit.",
+        { economy: 1, tacticSignals: ["economy.corp_counter_cashout"] },
+        { type: "agenda" },
+      ),
+    ).toBeUndefined();
+  });
 });
+
+function assessmentForBasicAdvance(
+  rulesText: string,
+  hint?: { economy: number; tacticSignals: string[] },
+  overrides: Partial<VisibleCard> = {},
+) {
+  const source = corpCard("self-funded-counter-source", {
+    type: "asset",
+    advancementCounters: 0,
+    ...overrides,
+  });
+  const advance = corpAction("advance_card", { cardId: source.instanceId });
+  advance.source = source.instanceId;
+  advance.costs = [{ clicks: 1, credits: 1 }];
+  const input = corpInput({ root: [source], legalActions: [advance] });
+  return semanticRuntimeCorpAdvancementCounterPlacementAssessment(
+    input,
+    advance,
+    {
+      ...semanticPayloadDependencies([source], {
+        [source.definitionId!]: rulesText,
+      }),
+      actionCreditCost: () => 1,
+      hintForDefinitionId: () =>
+        hint
+          ? ({
+              cardId: source.definitionId!,
+              side: "corp",
+              roles: [],
+              planRoles: [],
+              aiSupportStatus: "ai_supported",
+              tacticSignals: hint.tacticSignals,
+              valueHints: { economy: hint.economy },
+            } as never)
+          : undefined,
+    },
+  );
+}
 
 function assessmentForSemanticPayload(input: {
   amount: number;

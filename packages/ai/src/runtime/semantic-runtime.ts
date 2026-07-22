@@ -136,6 +136,7 @@ export type SemanticRuntimeDependencies = {
     choices: readonly SemanticRuntimeChoice[],
     selectedMapping: TacticalPlanRuntimeResult["selectedMapping"],
     bestPlanOverrideChoice: SemanticRuntimeChoice | undefined,
+    planRuntime?: TacticalPlanRuntimeResult,
   ) => TacticalPlanMappedChoiceResult;
   runnerSelfDamageImmediateWinSemanticChoice: (
     input: AiDecisionInput,
@@ -412,6 +413,7 @@ export function chooseSemanticRuntimeAction(
     choices,
     planRuntime.selectedMapping,
     bestPlanOverrideChoice,
+    planRuntime,
   );
   const selfDamageImmediateWinChoice =
     dependencies.runnerSelfDamageImmediateWinSemanticChoice(input, choices);

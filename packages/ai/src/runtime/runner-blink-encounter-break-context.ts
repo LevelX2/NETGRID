@@ -127,8 +127,7 @@ export function createRunnerBlinkEncounterBreakContext(
       }
       const candidateIndexes =
         dependencies.breakSubroutineIndexesForAction(candidate);
-      if (targetIndexes.size === 0 || candidateIndexes.size === 0)
-        return true;
+      if (targetIndexes.size === 0 || candidateIndexes.size === 0) return true;
       return [...targetIndexes].some((index) => candidateIndexes.has(index));
     });
   }
@@ -149,15 +148,10 @@ export function createRunnerBlinkEncounterBreakContext(
             (candidate) => candidate.id === run.position?.serverId,
           )
         : undefined;
-    if (!server || !dependencies.isRemoteServerTarget(server.id))
-      return "none";
+    if (!server || !dependencies.isRemoteServerTarget(server.id)) return "none";
     if (server.root.some(dependencies.visibleRootIsKnownAgenda))
       return "known_agenda";
-    if (
-      server.root.some(
-        (card) => card.known && (card.advancementCounters ?? 0) > 0,
-      )
-    ) {
+    if (server.root.some((card) => (card.advancementCounters ?? 0) > 0)) {
       return "remote_score_threat";
     }
     return "none";

@@ -1,6 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { semanticRuntimeCorpScoreComponents } from "./semantic-runtime-corp-score";
+import { corpScoringWindowSuppressesContestableRemotePenalty } from "./corp-scoreline/semantic-runtime-corp-score-scoreline-components";
 import {
   agendaCard,
   corpAction,
@@ -21,6 +22,27 @@ import {
 } from "./semantic-runtime-corp-score.test-support";
 
 describe("semanticRuntimeCorpScoreComponents score pressure", () => {
+  it("accepts only a fully funded pre-score protection route behind an unsafe window label", () => {
+    const protectedWindow = scoringWindow({
+      windowKind: "unsafe",
+      runnerCanContestBeforeScore: false,
+      runnerCanReachAccessBeforeScore: false,
+      agendaStealRelevantBeforeScore: false,
+      corpCanRezRelevantIce: true,
+      corpCanRezFullPathWithDynamicReserve: true,
+    });
+
+    expect(
+      corpScoringWindowSuppressesContestableRemotePenalty(protectedWindow),
+    ).toBe(true);
+    expect(
+      corpScoringWindowSuppressesContestableRemotePenalty({
+        ...protectedWindow,
+        corpCanRezFullPathWithDynamicReserve: false,
+      }),
+    ).toBe(false);
+  });
+
   it("prefers scoring a scoreable non-overadvance agenda over adding extra counters", () => {
     const agenda = corpCard("marine-arcology", "agenda", {
       title: "Marine Arcology",

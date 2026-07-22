@@ -64,6 +64,7 @@ describe("plan portfolio", () => {
         ["runner.clear_tags_or_survive", "reactive_interrupt"],
         ["runner.build_credit_bank", "recurring_cycle"],
         ["corp.create_score_window", "bounded_sequence"],
+        ["corp.develop_finite_economy", "recurring_cycle"],
         ["corp.activate_persistent_economy", "recurring_cycle"],
       ]),
     );

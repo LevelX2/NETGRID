@@ -62,6 +62,9 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
       visibleServerCard: dependencies.visibleServerCard,
       cardType: dependencies.cardType,
       cardAdvancementRequirement: dependencies.cardAdvancementRequirement,
+      ...(dependencies.hintForDefinitionId
+        ? { hintForDefinitionId: dependencies.hintForDefinitionId }
+        : {}),
       teamRestructuringCardId: dependencies.teamRestructuringCardId,
     });
 

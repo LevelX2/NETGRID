@@ -60,6 +60,31 @@ export type CorpScoringWindowAssessment = {
   evidence: string[];
 };
 
+export function corpScoringWindowHasFundedPreScoreProtection(
+  assessment:
+    | Pick<
+        CorpScoringWindowAssessment,
+        | "runnerCanContestBeforeScore"
+        | "runnerCanReachAccessBeforeScore"
+        | "agendaStealRelevantBeforeScore"
+        | "agendaStealSeverity"
+        | "corpCanRezRelevantIce"
+        | "corpCanRezFullPathWithDynamicReserve"
+      >
+    | undefined,
+): boolean {
+  return Boolean(
+    assessment &&
+    assessment.runnerCanContestBeforeScore === false &&
+    assessment.runnerCanReachAccessBeforeScore === false &&
+    assessment.agendaStealRelevantBeforeScore === false &&
+    assessment.agendaStealSeverity !== "near_win" &&
+    assessment.agendaStealSeverity !== "game_ending" &&
+    assessment.corpCanRezRelevantIce === true &&
+    assessment.corpCanRezFullPathWithDynamicReserve === true,
+  );
+}
+
 export type SemanticRuntimeCorpScoringWindowDependencies<
   TServer extends CorpServerLike = CorpServerLike,
 > = {

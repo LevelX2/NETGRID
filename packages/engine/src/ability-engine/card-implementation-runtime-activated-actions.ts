@@ -62,6 +62,7 @@ export function pushActivatedCardImplementationActions(
   side: Side,
   sourceCardId: CardInstanceId,
   definition: CardDefinition,
+  options: { canStartRun?: boolean } = {},
 ): void {
   const timing = side === "corp" ? "corp_main" : "runner_main";
   pushActivatedCardImplementationActionsForTiming(
@@ -72,6 +73,7 @@ export function pushActivatedCardImplementationActions(
     sourceCardId,
     definition,
     timing,
+    options,
   );
 }
 
@@ -83,6 +85,7 @@ export function pushActivatedCardImplementationActionsForTiming(
   sourceCardId: CardInstanceId,
   definition: CardDefinition,
   timing: ActivatedCardAbilityImplementation["timing"],
+  options: { canStartRun?: boolean } = {},
 ): void {
   if (deps.mustInstance(state.cardInstances, sourceCardId).controller !== side)
     return;
@@ -90,6 +93,12 @@ export function pushActivatedCardImplementationActionsForTiming(
     ability,
     index,
   } of activatedCardImplementationAbilitiesForTiming(definition, timing)) {
+    if (
+      side === "runner" &&
+      options.canStartRun === false &&
+      ability.effects.some((effect) => effect.kind === "make_run")
+    )
+      continue;
     if (
       !canResolveActivatedCardImplementationAbility(
         deps,

@@ -5,6 +5,7 @@ import {
   centralRunMapping,
   choice,
   legalAction,
+  runEvent,
   scoreComponentEvidence,
 } from "./semantic-choice-ranking.test-support";
 
@@ -58,5 +59,43 @@ describe("tactical plan run yield contracts", () => {
 
     expect(result.outcome).toBe("semantic_choice_blocked");
     expect(result.choice?.action.actionId).toBe("run-hq");
+  });
+
+  it("remembers a failed run across a long resolution sequence until the next turn", () => {
+    const draw = legalAction("draw", "draw_card");
+    const run = legalAction("run-hq", "start_run", { serverId: "hq" });
+    const oldRun = {
+      ...runEvent({ serverId: "hq" }),
+      eventId: "old-hq-run",
+      stateVersionBefore: 1,
+      stateVersionAfter: 2,
+    };
+    const previousRunnerEnd = {
+      ...runEvent({ actor: "runner", actionType: "end_turn" }),
+      eventId: "previous-runner-end",
+      type: "end_turn",
+      stateVersionBefore: 39,
+      stateVersionAfter: 40,
+    };
+    const currentCorpTurn = {
+      ...runEvent({ actor: "corp", actionType: "mandatory_draw" }),
+      eventId: "current-corp-turn",
+      type: "mandatory_draw",
+      stateVersionBefore: 40,
+      stateVersionAfter: 41,
+    };
+    const input = aiInput([oldRun, previousRunnerEnd, currentCorpTurn]);
+    input.playerView.stateVersion = 60;
+
+    const result = tacticalPlanMappedChoice(
+      input,
+      [choice(draw, 2_498), choice(run, 706)],
+      centralRunMapping([run]),
+      choice(draw, 2_498),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("draw");
+    expect(result.overrideReason).toBe("repeated_run_mapping_yield");
   });
 });

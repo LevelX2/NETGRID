@@ -3,7 +3,10 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
-import { isBasicCreditAction } from "../actions/action-effect-classification";
+import {
+  actionHasImmediateCreditGain,
+  isBasicCreditAction,
+} from "../actions/action-effect-classification";
 import { runnerHasMeaningfulCreditConversionAlternative } from "./runner-marginal-credit-value";
 import { encounterContinueAcceptsOnlyNonlethalDamageThreats } from "./encounter-subroutine";
 
@@ -53,7 +56,11 @@ export function runnerBasicActionPenaltyScoreComponents(
       reason: "break_or_pump_available",
     });
   }
-  if (action.type === "end_turn" && input.playerView.own.clicks > 0) {
+  if (
+    action.type === "end_turn" &&
+    input.playerView.own.clicks > 0 &&
+    !runnerCanYieldUnusedActionsAfterRichConversionWindow(input, action)
+  ) {
     components.push({
       key: "runner_unused_actions",
       label: "Ungenutzte Aktionen",
@@ -103,16 +110,41 @@ export function runnerBasicActionPenaltyScoreComponents(
     });
   }
   if (
-    isBasicCreditAction(action) &&
+    actionHasImmediateCreditGain(action) &&
     input.playerView.own.credits >= 10 &&
     runnerHasMeaningfulCreditConversionAlternative(input, action)
   ) {
+    const immediateDrawAmount = actionImmediateDrawAmount(action);
     components.push({
-      key: "runner_rich_basic_credit_without_conversion",
-      label: "Weitere Basis-Credits statt Konversion",
-      value: -1200,
-      reason: `credits:${input.playerView.own.credits}|conversion_alternative:true`,
+      key: "runner_rich_credit_without_conversion",
+      label: "Weitere Credits statt Konversion",
+      value: immediateDrawAmount > 0 ? -150 : -1200,
+      reason: [
+        `credits:${input.playerView.own.credits}`,
+        "conversion_alternative:true",
+        `immediate_draw:${immediateDrawAmount}`,
+      ].join("|"),
     });
   }
   return components;
+}
+
+function actionImmediateDrawAmount(action: LegalAction): number {
+  for (const key of ["drawCardsAmount", "drawAmount", "drawCount"] as const) {
+    const amount = action.payload?.[key];
+    if (typeof amount === "number" && Number.isFinite(amount) && amount > 0) {
+      return Math.floor(amount);
+    }
+  }
+  return 0;
+}
+
+function runnerCanYieldUnusedActionsAfterRichConversionWindow(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  return (
+    input.playerView.own.credits >= 10 &&
+    runnerHasMeaningfulCreditConversionAlternative(input, action)
+  );
 }

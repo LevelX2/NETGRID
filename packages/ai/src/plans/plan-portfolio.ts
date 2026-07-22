@@ -351,6 +351,7 @@ export function tacticalPlanExecutionClass(
     case "corp.rez_defense":
       return "reactive_interrupt";
     case "runner.build_credit_bank":
+    case "corp.develop_finite_economy":
     case "corp.activate_persistent_economy":
     case "corp.build_credit_bank":
       return "recurring_cycle";
@@ -366,7 +367,6 @@ export function tacticalPlanExecutionClass(
     case "runner.cash_out_credit_bank":
     case "corp.create_score_window":
     case "corp.fund_strategy_reserve":
-    case "corp.develop_finite_economy":
     case "corp.apply_punish_pressure":
       return "bounded_sequence";
   }

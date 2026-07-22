@@ -1207,6 +1207,28 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     );
     putCorpCardOnTopOfRd(protocolState, "simple_economy_operation");
     putCorpCardOnTopOfRd(protocolState, "simple_agenda");
+    if (!protocolState.runnerTurnFlags)
+      throw new Error("Missing Runner turn flags");
+    for (const lock of [
+      { runLockActionsPending: 1, runnerRunLockCreditCost: 0 },
+      { runLockActionsPending: 0, runnerRunLockCreditCost: 1 },
+    ]) {
+      protocolState.runnerTurnFlags.runLockActionsPending =
+        lock.runLockActionsPending;
+      protocolState.runnerTurnFlags.runnerRunLockCreditCost =
+        lock.runnerRunLockCreditCost;
+      expect(
+        getLegalActions(protocolState, "runner").some(
+          (action) =>
+            action.type === "activated_card_ability" &&
+            sourceDefinition(protocolState, action) ===
+              "onr_v1_050_r-and-d-protocol-files" &&
+            action.payload?.cardImplementationEffectKind === "make_run",
+        ),
+      ).toBe(false);
+    }
+    protocolState.runnerTurnFlags.runLockActionsPending = 0;
+    protocolState.runnerTurnFlags.runnerRunLockCreditCost = 0;
     const protocolRunAction = getLegalActions(protocolState, "runner").find(
       (action) =>
         action.type === "activated_card_ability" &&

@@ -12,6 +12,51 @@ import {
 } from "./tactical-plan-types";
 
 describe("candidateMatchesStep", () => {
+  it("does not keep an installed card ability inside a hand-development install step", () => {
+    const step = planStep("install_development_card", [
+      "install.card",
+      "play.runner_event",
+    ]);
+    const plan = tacticalPlan(step, "runner");
+    plan.type = "runner.play_best_hand_card";
+    plan.target = { kind: "card", id: "target-card" };
+    const install = legalAction(
+      "install-target",
+      "install_card",
+      { cardId: "target-card" },
+      "runner",
+    );
+    const installedAbility = legalAction(
+      "use-installed-target",
+      "activated_card_ability",
+      { sourceCardId: "target-card" },
+      "runner",
+    );
+    const input = runnerInput();
+    const dependencies = testDependencies();
+
+    expect(
+      candidateMatchesStep(
+        plan,
+        step,
+        candidateFor(install, { actorSide: "runner" }),
+        install,
+        input,
+        dependencies,
+      ),
+    ).toBe(true);
+    expect(
+      candidateMatchesStep(
+        plan,
+        step,
+        candidateFor(installedAbility, { actorSide: "runner" }),
+        installedAbility,
+        input,
+        dependencies,
+      ),
+    ).toBe(false);
+  });
+
   it("does not satisfy build_rez_reserve with non-credit gain wrappers", () => {
     const step = rezReserveStep();
     const plan = tacticalPlan(step);

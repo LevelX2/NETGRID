@@ -35,6 +35,7 @@ export function tacticalPlanDeferredDevelopmentInstallShouldYield(
       component.value < 0 &&
       (component.key === "runner_bank_install_commitment" ||
         component.key === "runner_no_run_economy_install_commitment" ||
+        component.key === "runner_rich_delayed_economy_without_demand" ||
         (component.key === "runner_persistent_install_fit" &&
           (component.value <= -500 ||
             (component.reason ?? "").includes(
@@ -604,7 +605,7 @@ export function tacticalPlanLowValueRecoveryMappingShouldYield(
   }
   return semanticRuntimeChoiceHasScoreBreakdownComponent(
     mappedChoice,
-    "runner_rich_basic_credit_without_conversion",
+    "runner_rich_credit_without_conversion",
   );
 }
 

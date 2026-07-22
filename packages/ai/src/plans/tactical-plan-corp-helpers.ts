@@ -3,6 +3,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { actionHasImmediateCreditGain } from "../actions/action-effect-classification";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { visibleCorpRootProvidesRemoteProtection } from "../runtime/semantic-runtime-corp-remote-reachability";
+import { corpScoringWindowHasFundedPreScoreProtection } from "../runtime/corp-scoreline/semantic-runtime-corp-scoring-window-contracts";
 import {
   advanceCanCloseScoreThisTurn,
   advanceCompletesScore,
@@ -159,9 +160,13 @@ export function corpScoreWindowBlockers(
     serverId && isRemoteServer(serverId)
       ? corpRemoteContestabilityAssessment(input, serverId)
       : undefined;
+  const fundedPreScoreProtection = corpScoringWindowHasFundedPreScoreProtection(
+    scorelinePath?.scoringWindow,
+  );
   if (
     serverId &&
     remoteContestability?.contestable === true &&
+    !fundedPreScoreProtection &&
     !advanceCompletesScore(input.playerView, action)
   ) {
     blockers.push({
@@ -184,6 +189,7 @@ export function corpScoreWindowBlockers(
     isRemoteServer(serverId) &&
     sourceScorelineProtectionBlockers &&
     sourceScorelineProtectionBlockers.length > 0 &&
+    !fundedPreScoreProtection &&
     !advanceCompletesScore(input.playerView, action) &&
     !blockers.some((blocker) => blocker.kind === "score_window_contestable")
   ) {

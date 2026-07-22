@@ -13,6 +13,7 @@ import { visibleCardDefinition } from "../card-definition-lookup";
 import { rolesMatch } from "../role-match";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
 import type { CorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
+import { corpScoringWindowHasFundedPreScoreProtection } from "./semantic-runtime-corp-scoring-window-contracts";
 import { corpKnownAgendaInventory } from "../corp-known-agenda-inventory";
 import {
   CORP_RESERVE_SCORE_NORMALIZATION_DIVISOR,
@@ -139,6 +140,7 @@ export function corpScoringWindowSuppressesContestableRemotePenalty(
   assessment: CorpScoringWindowAssessment | undefined,
 ): boolean {
   if (!assessment) return false;
+  if (corpScoringWindowHasFundedPreScoreProtection(assessment)) return true;
   if (
     assessment.windowKind !== "durable" &&
     assessment.windowKind !== "temporary_safe"

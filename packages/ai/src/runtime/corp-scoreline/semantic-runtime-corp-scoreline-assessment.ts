@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 import { actionProvidesCredits } from "../../actions/action-effect-classification";
 import type { CorpRemoteContestabilityAssessment } from "../corp-scoring-assessment-types";
+import { corpScoringWindowHasFundedPreScoreProtection } from "./semantic-runtime-corp-scoring-window-contracts";
 import {
   semanticRuntimeCorpScoringWindowAssessment,
   type CorpScoringWindowAssessment,
@@ -409,13 +410,20 @@ function scorelineBlockersForPath<TServer extends VisibleCorpServer>(params: {
   scoringWindow: CorpScoringWindowAssessment | undefined;
 }): CorpScorelineBlockerKind[] {
   const blockers = new Set<CorpScorelineBlockerKind>();
+  const fundedPreScoreProtection = corpScoringWindowHasFundedPreScoreProtection(
+    params.scoringWindow,
+  );
   if (params.creditsAfterAction < 0) blockers.add("credits");
   const immediateScore = params.actionRoles.includes("score_now");
   const preparatoryScoreline =
     params.actionRoles.includes("advance_to_score") ||
     params.actionRoles.includes("advance_agenda") ||
     params.actionRoles.includes("agenda_install");
-  if (preparatoryScoreline && params.scoringWindow?.windowKind === "unsafe") {
+  if (
+    preparatoryScoreline &&
+    params.scoringWindow?.windowKind === "unsafe" &&
+    !fundedPreScoreProtection
+  ) {
     blockers.add("unsafe_remote");
   }
   if (
@@ -428,7 +436,11 @@ function scorelineBlockersForPath<TServer extends VisibleCorpServer>(params: {
     params.input,
     params.action,
   );
-  if (preparatoryScoreline && contestability?.contestable === true) {
+  if (
+    preparatoryScoreline &&
+    contestability?.contestable === true &&
+    !fundedPreScoreProtection
+  ) {
     blockers.add("cheap_contest");
   }
   if (

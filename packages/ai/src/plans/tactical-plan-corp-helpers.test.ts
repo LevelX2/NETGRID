@@ -218,6 +218,58 @@ describe("corpScoreWindowBlockers", () => {
     );
   });
 
+  it("does not let rezzed-only contestability override funded pre-score protection", () => {
+    const agenda = corpCard("remote-agenda", {
+      advancementRequirement: 4,
+      advancementCounters: 0,
+    });
+    const advance = corpAction("advance-remote-agenda", agenda.instanceId);
+    const input = corpScoreInput({
+      credits: 37,
+      clicks: 3,
+      agenda,
+      legalActions: [advance],
+    });
+    input.playerView.opponent.credits = 12;
+    input.playerView.servers[0]!.ice[0]!.effectiveRunQuote = {
+      iceInstanceId: "remote-ice",
+      iceDefinitionId: "remote-ice",
+      effectiveStrength: 0,
+      subroutines: [],
+    };
+    const sourceAssessment = scorelineAssessment({
+      actionId: advance.actionId,
+      blockedByCredits: false,
+      recommendedNextStep: "advance_agenda",
+      blockers: [],
+      scoringWindow: {
+        runnerCanContestBeforeScore: false,
+        runnerCanReachAccessBeforeScore: false,
+        agendaStealRelevantBeforeScore: false,
+        agendaStealSeverity: "normal",
+        corpCanRezRelevantIce: true,
+        corpCanRezFullPathWithDynamicReserve: true,
+      },
+    });
+
+    const blockers = corpScoreWindowBlockers(
+      input,
+      "remote_1",
+      advance,
+      sourceAssessment,
+    );
+
+    expect(blockers).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "score_window_contestable" }),
+      ]),
+    );
+    expect(corpScoreWindowCurrentStep(advance, blockers, input)).toMatchObject({
+      kind: "advance_score_card",
+      actionCandidateIds: [advance.actionId],
+    });
+  });
+
   it("binds source scoreline safety blockers to remote protection before agenda exposure", () => {
     const agenda = corpCard("political-overthrow", {
       advancementRequirement: 9,
@@ -516,6 +568,9 @@ function scorelineAssessment(params: {
   recommendedNextStep?: string;
   blockers?: string[];
   evidence?: string[];
+  scoringWindow?: NonNullable<
+    TacticalPlanBuildContext["corpScorelineWindowAssessment"]
+  >["paths"][number]["scoringWindow"];
 }): TacticalPlanBuildContext["corpScorelineWindowAssessment"] {
   const recommendedNextStep = params.recommendedNextStep ?? "fund_scoreline";
   const blockers = params.blockers ?? ["credits"];
@@ -528,6 +583,7 @@ function scorelineAssessment(params: {
       serverId: "remote_1",
       recommendedNextStep,
       blockers,
+      ...(params.scoringWindow ? { scoringWindow: params.scoringWindow } : {}),
       evidence,
     },
     paths: [
@@ -536,6 +592,9 @@ function scorelineAssessment(params: {
         serverId: "remote_1",
         recommendedNextStep,
         blockers,
+        ...(params.scoringWindow
+          ? { scoringWindow: params.scoringWindow }
+          : {}),
         evidence,
       },
     ],

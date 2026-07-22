@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { tacticalPlanMappedChoice } from "../semantic-choice-ranking";
+import type { TacticalPlanRuntimeResult } from "../../tactical-plans";
 import {
   aiInput,
   choice,
@@ -66,6 +67,186 @@ describe("tacticalPlanMappedChoice Corp scoreline overrides", () => {
     expect(result.overrideBlockedReason).toBe(
       "corp_finite_economy_plan_controller",
     );
+  });
+
+  it("yields a finite background economy plan to positive foreground work after its cadence", () => {
+    const drainEconomy = legalAction("drain-bbs", "activated_card_ability");
+    const installProtection = legalAction("install-protection", "install_card");
+    const mapping = finiteEconomyMapping([drainEconomy]);
+    const drainChoice = choice(drainEconomy, 2_700, [], {
+      key: "economy_credit_base",
+      value: 180,
+      reason: "economy_net_liquid_gain:2",
+    });
+    const protectionChoice = choice(installProtection, 1_300);
+
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [drainChoice, protectionChoice],
+      mapping,
+      drainChoice,
+      finiteEconomyCadenceRuntime(mapping, "install-protection"),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("install-protection");
+    expect(result.overrideReason).toBe(
+      "corp_finite_economy_background_cadence_yield",
+    );
+    expect(result.choice?.evidence).toContain(
+      "corp_finite_economy_background_cadence:soft_limit_reached",
+    );
+  });
+
+  it("uses public same-turn payout evidence when the finite plan is outside the capped portfolio", () => {
+    const drainEconomy = {
+      ...legalAction("drain-bbs", "activated_card_ability"),
+      side: "corp" as const,
+      source: "bbs-instance",
+      timingPoint: "corp_action.main" as const,
+    };
+    const installProtection = legalAction("install-protection", "install_card");
+    const mapping = finiteEconomyMapping([drainEconomy]);
+    const drainChoice = choice(drainEconomy, 2_700, [], {
+      key: "economy_credit_base",
+      value: 180,
+      reason: "economy_net_liquid_gain:2",
+    });
+    const protectionChoice = choice(installProtection, 1_300);
+    const input = corpInputAfterBbsPayout();
+
+    const result = tacticalPlanMappedChoice(
+      input,
+      [drainChoice, protectionChoice],
+      mapping,
+      drainChoice,
+      {
+        planAlternatives: [mapping.plan],
+        blockedPlans: [],
+        selectedPlan: mapping.plan,
+        selectedStep: mapping.step,
+        selectedMapping: mapping,
+        planPortfolio: {
+          schemaVersion: "plan-portfolio-v1",
+          side: "corp",
+          profileId: input.profileId,
+          stateVersion: 20,
+          turnKey: "corp:turn:1",
+          backgrounds: [],
+          rejectedEntryIds: [mapping.plan.planId],
+          evidence: [],
+        },
+      },
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("install-protection");
+  });
+
+  it("blocks a repeated off-plan finite payout for positive mapped work", () => {
+    const drainEconomy = {
+      ...legalAction("drain-bbs", "activated_card_ability"),
+      side: "corp" as const,
+      source: "bbs-instance",
+      timingPoint: "corp_action.main" as const,
+    };
+    const installProtection = legalAction("install-protection", "install_card");
+    const finiteMapping = finiteEconomyMapping([drainEconomy]);
+    const foregroundMapping = scorelineSupportMapping([installProtection]);
+    const drainChoice = choice(drainEconomy, 2_700, [], {
+      key: "economy_credit_base",
+      value: 180,
+      reason: "economy_net_liquid_gain:2",
+    });
+    const protectionChoice = choice(installProtection, 1_300);
+    const input = corpInputAfterBbsPayout();
+
+    const result = tacticalPlanMappedChoice(
+      input,
+      [drainChoice, protectionChoice],
+      foregroundMapping,
+      drainChoice,
+      {
+        planAlternatives: [foregroundMapping.plan, finiteMapping.plan],
+        blockedPlans: [],
+        selectedPlan: foregroundMapping.plan,
+        selectedStep: foregroundMapping.step,
+        selectedMapping: foregroundMapping,
+        planPortfolio: {
+          schemaVersion: "plan-portfolio-v1",
+          side: "corp",
+          profileId: input.profileId,
+          stateVersion: 20,
+          turnKey: "corp:turn:1",
+          backgrounds: [],
+          rejectedEntryIds: [finiteMapping.plan.planId],
+          evidence: [],
+        },
+      },
+    );
+
+    expect(result.outcome).toBe("plan_mapping_selected");
+    expect(result.choice?.action.actionId).toBe("install-protection");
+    expect(result.overrideBlockedReason).toBe(
+      "corp_finite_economy_background_cadence_yield",
+    );
+  });
+
+  it("keeps the finite +2 credit action ahead of basic +1 after its cadence", () => {
+    const drainEconomy = legalAction("drain-bbs", "activated_card_ability");
+    const basicCredit = legalAction("gain", "gain_credit");
+    const mapping = finiteEconomyMapping([drainEconomy]);
+    const drainChoice = choice(drainEconomy, 2_700, [], {
+      key: "economy_credit_base",
+      value: 180,
+      reason: "economy_net_liquid_gain:2",
+    });
+    const basicCreditChoice = choice(basicCredit, 1_300, [], {
+      key: "economy_credit_base",
+      value: 90,
+      reason: "economy_net_liquid_gain:1",
+    });
+
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [drainChoice, basicCreditChoice],
+      mapping,
+      drainChoice,
+      finiteEconomyCadenceRuntime(mapping),
+    );
+
+    expect(result.outcome).toBe("plan_mapping_selected");
+    expect(result.choice?.action.actionId).toBe("drain-bbs");
+  });
+
+  it("lets an immediate +3 credit action beat the finite +2 route after its cadence", () => {
+    const drainEconomy = legalAction("drain-bbs", "activated_card_ability");
+    const corporateCoup = legalAction(
+      "corporate-coup",
+      "activated_card_ability",
+    );
+    const mapping = finiteEconomyMapping([drainEconomy]);
+    const drainChoice = choice(drainEconomy, 2_700, [], {
+      key: "economy_credit_base",
+      value: 180,
+      reason: "economy_net_liquid_gain:2",
+    });
+    const coupChoice = choice(corporateCoup, 1_900, [], {
+      key: "economy_credit_base",
+      value: 270,
+      reason: "economy_net_liquid_gain:3",
+    });
+
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [drainChoice, coupChoice],
+      mapping,
+      drainChoice,
+      finiteEconomyCadenceRuntime(mapping),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("corporate-coup");
   });
 
   it("lets a strong strategic punish action interrupt finite economy", () => {
@@ -313,3 +494,125 @@ describe("tacticalPlanMappedChoice Corp scoreline overrides", () => {
     expect(result.overrideReason).toBe("corp_scoreable_agenda_controller");
   });
 });
+
+function finiteEconomyCadenceRuntime(
+  mapping: ReturnType<typeof finiteEconomyMapping>,
+  foregroundActionId?: string,
+): TacticalPlanRuntimeResult {
+  return {
+    planAlternatives: [mapping.plan],
+    blockedPlans: [],
+    selectedPlan: mapping.plan,
+    selectedStep: mapping.step,
+    selectedMapping: mapping,
+    planPortfolio: {
+      schemaVersion: "plan-portfolio-v1",
+      side: "corp",
+      profileId: "test-profile",
+      stateVersion: 1,
+      turnKey: "corp:turn:1",
+      ...(foregroundActionId
+        ? {
+            foreground: {
+              portfolioEntryId: "corp.create_score_window:test",
+              sourcePlanId: "corp.create_score_window:test",
+              planType: "corp.create_score_window" as const,
+              side: "corp" as const,
+              executionClass: "bounded_sequence" as const,
+              role: "foreground" as const,
+              lifecycle: "active" as const,
+              priority: 900,
+              supportsEntryIds: [],
+              milestone: "protect_remote",
+              progress: 0.5,
+              selectedStepKind: "protect_remote" as const,
+              actionCandidateIds: [foregroundActionId],
+              cadence: {
+                turnKey: "corp:turn:1",
+                maxActionsPerTurn: 4,
+                actionsUsedThisTurn: 0,
+              },
+              resourceReservation: { credits: 0, clicks: 0 },
+              updatedAtStateVersion: 1,
+              evidence: [],
+            },
+          }
+        : {}),
+      backgrounds: [
+        {
+          portfolioEntryId: mapping.plan.planId,
+          sourcePlanId: mapping.plan.planId,
+          planType: mapping.plan.type,
+          side: mapping.plan.side,
+          executionClass: "recurring_cycle",
+          role: "background",
+          lifecycle: "active",
+          priority: mapping.plan.priority,
+          supportsEntryIds: [],
+          milestone: mapping.step.kind,
+          progress: 0.5,
+          selectedStepKind: mapping.step.kind,
+          actionCandidateIds: mapping.actionCandidateIds,
+          cadence: {
+            turnKey: "corp:turn:1",
+            maxActionsPerTurn: 1,
+            actionsUsedThisTurn: 1,
+          },
+          resourceReservation: { credits: 0, clicks: 0 },
+          updatedAtStateVersion: 1,
+          evidence: [],
+        },
+      ],
+      rejectedEntryIds: [],
+      evidence: [],
+    },
+  };
+}
+
+function publicCorpActionEvent(
+  stateVersionAfter: number,
+  actionType: string,
+  payload: Record<string, unknown> = {},
+): ReturnType<typeof aiInput>["eventTail"][number] {
+  return {
+    eventId: `corp-event-${stateVersionAfter}`,
+    type: actionType,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `hash-${stateVersionAfter}`,
+    publicPayload: { actor: "corp", actionType, ...payload },
+  } as ReturnType<typeof aiInput>["eventTail"][number];
+}
+
+function corpInputAfterBbsPayout(): ReturnType<typeof aiInput> {
+  const input = aiInput([
+    publicCorpActionEvent(18, "mandatory_draw"),
+    publicCorpActionEvent(19, "activated_card_ability", {
+      cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+    }),
+  ]);
+  input.side = "corp";
+  input.playerView.side = "corp";
+  input.playerView.activeSide = "corp";
+  input.playerView.timingPoint = "corp_action.main";
+  input.playerView.servers = [
+    {
+      id: "remote_1",
+      label: "Remote 1",
+      ice: [],
+      root: [
+        {
+          instanceId: "bbs-instance",
+          definitionId: "onr_v1_309_bbs-whispering-campaign",
+          title: "BBS Whispering Campaign",
+          owner: "corp",
+          controller: "corp",
+          type: "asset",
+          known: true,
+          rezzed: true,
+        },
+      ],
+    },
+  ];
+  return input;
+}

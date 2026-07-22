@@ -127,17 +127,22 @@ describe("tacticalPlanMappedChoice Runner overrides", () => {
   it("keeps a funded nonduplicate development install despite a negative immediate fit", () => {
     const install = legalAction("install-funded-card", "install_card");
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const fundedInstall = choice(install, -1056, [], {
+      key: "runner_persistent_install_fit",
+      value: -480,
+      reason:
+        "delta:cumulative_capacity|duplicate:none|fit:-480|stackability:cumulative_capacity",
+    });
+    fundedInstall.scoreBreakdown.push({
+      key: "runner_rich_delayed_economy_without_demand",
+      label: "Verzögerte Economy ohne Bedarf",
+      value: -900,
+      reason:
+        "credits:11|delayed_economy_demand:false|conversion_alternative:true",
+    });
     const result = tacticalPlanMappedChoice(
       aiInput(),
-      [
-        choice(run, 1903),
-        choice(install, -156, [], {
-          key: "runner_persistent_install_fit",
-          value: -480,
-          reason:
-            "delta:cumulative_capacity|duplicate:none|fit:-480|stackability:cumulative_capacity",
-        }),
-      ],
+      [choice(run, 1903), fundedInstall],
       fundedDevelopmentMapping([install]),
       choice(run, 1903),
     );
@@ -484,6 +489,28 @@ describe("tacticalPlanMappedChoice Runner overrides", () => {
     expect(result.outcome).toBe("semantic_choice_selected");
     expect(result.choice?.action.actionId).toBe("draw");
     expect(result.overrideReason).toBe("deferred_development_mapping_yield");
+  });
+
+  it("yields a rich delayed-economy install without demand to a positive hand action", () => {
+    const install = legalAction("install-delayed-bank", "install_card");
+    const event = legalAction("play-useful-event", "play_event");
+    const mappedInstall = choice(install, -319, [], {
+      key: "runner_rich_delayed_economy_without_demand",
+      value: -900,
+      reason:
+        "credits:20|delayed_economy_demand:false|conversion_alternative:true",
+    });
+    const eventChoice = choice(event, 82);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [eventChoice, mappedInstall],
+      bestHandCardMapping([install]),
+      eventChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("play-useful-event");
+    expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
   });
 
   it("yields a low-delta development install to a materially stronger bank commitment", () => {

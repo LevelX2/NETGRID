@@ -3,6 +3,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import type { AiCardHint } from "../ai-hints";
 
 type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];
 
@@ -95,6 +96,7 @@ export type SemanticRuntimeCorpAdvancementCounterDependencies = {
   ) => { card: VisibleCard; server: VisibleCorpServer } | undefined;
   cardType: (card: VisibleCard) => string | undefined;
   cardAdvancementRequirement: (card: VisibleCard) => number | undefined;
+  hintForDefinitionId?: (definitionId: string) => AiCardHint | undefined;
   teamRestructuringCardId: string;
 };
 
@@ -104,6 +106,9 @@ export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
   dependencies: SemanticRuntimeCorpAdvancementCounterDependencies,
 ): CorpAdvancementCounterPlacementAssessment | undefined {
   if (input.side !== "corp" || action.side !== "corp") return undefined;
+  const selfFundedCounterAssessment =
+    semanticRuntimeCorpSelfFundedCounterAssessment(input, action, dependencies);
+  if (selfFundedCounterAssessment) return selfFundedCounterAssessment;
   const profile = corpAdvancementCounterPlacementProfileForAction(
     input,
     action,
@@ -247,6 +252,71 @@ export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
     netAdvancementValue,
     advancementWitness: bestWitness,
     scoreValue,
+    evidence,
+  };
+}
+
+function semanticRuntimeCorpSelfFundedCounterAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpAdvancementCounterDependencies,
+): CorpAdvancementCounterPlacementAssessment | undefined {
+  if (action.type !== "advance_card") return undefined;
+  const sourceCard = dependencies.actionSourceCard(input, action);
+  const definitionId = sourceCard?.definitionId;
+  if (
+    !sourceCard ||
+    !definitionId ||
+    dependencies.cardType(sourceCard) === "agenda"
+  ) {
+    return undefined;
+  }
+  const rulesText = dependencies.normalizedRulesTextForDefinition(definitionId);
+  const hint = dependencies.hintForDefinitionId?.(definitionId);
+  const counterCashoutHint = hint?.tacticSignals?.includes(
+    "economy.corp_counter_cashout",
+  );
+  const hintedCreditCashout = counterCashoutHint
+    ? hint?.valueHints?.economy
+    : undefined;
+  const creditCashout =
+    typeof hintedCreditCashout === "number" && hintedCreditCashout > 0
+      ? hintedCreditCashout
+      : corpAdvancementCreditCashoutValue(rulesText);
+  const creditCost = Math.max(0, dependencies.actionCreditCost(action));
+  if (creditCashout <= 0 || creditCost <= 0 || creditCashout > creditCost) {
+    return undefined;
+  }
+  const transferSource =
+    hint?.tacticSignals?.includes("advance.corp_counter_transfer") === true ||
+    corpAdvancementLooksLikeTransferSource(rulesText);
+  const evidence = [
+    "self_funded_advancement_counter:true",
+    `advancement_source:${definitionId}`,
+    `self_funded_counter_credit_cost:${creditCost}`,
+    `self_funded_counter_credit_cashout:${creditCashout}`,
+    `self_funded_counter_cashout_hint:${counterCashoutHint === true}`,
+    `self_funded_counter_transfer_source:${transferSource}`,
+    "self_funded_counter_liquid_gain_nonpositive:true",
+    "self_funded_counter_requires_selected_conversion_route:true",
+  ];
+  return {
+    // This remains selectable through an exact score-conversion plan mapping;
+    // it is only a poor free-standing economy/advance action.
+    dominatedByBasicAdvance: false,
+    noConcreteConversion: false,
+    selectedTargets: 1,
+    maxTargets: 1,
+    basicAdvanceEquivalentAvailable: false,
+    secondCounterValue: 0,
+    bestBasicEquivalent: "gain_credit",
+    cardSpendPenalty: 0,
+    compressionValue: 0,
+    windowValue: 0,
+    weakTargetPenalty: 0,
+    netAdvancementValue: creditCashout - creditCost,
+    advancementWitness: "counter_cashout_credit",
+    scoreValue: -5200,
     evidence,
   };
 }

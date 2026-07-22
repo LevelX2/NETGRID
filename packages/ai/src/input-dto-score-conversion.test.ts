@@ -316,6 +316,48 @@ describe("AI input DTO score-conversion contract", () => {
     expect(input.eventTail[0]).toBe(input.playerView.publicEvents[1]);
     expect(input.eventTail[1]).toBe(input.playerView.publicEvents[2]);
   });
+
+  it("preserves public advancement-counter costs for economy-cycle reasoning", () => {
+    const action = conversionAction();
+    action.payload = {
+      ...action.payload,
+      cardImplementationAdvancementCounterCost: 1,
+    };
+    const payoutEvent = publicEvent("counter-payout", {
+      actor: "corp",
+      actionType: "activated_card_ability",
+      sourceDefinitionId: "corp-counter-economy",
+      cardImplementationAdvancementCounterCost: 1,
+      gainedCredits: 1,
+      privateProbe: "must-not-cross-dto",
+    });
+    const view = playerView(action);
+    view.publicEvents = [payoutEvent];
+
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [payoutEvent],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "advancement-counter-cost-dto",
+      decisionId: "advancement-counter-cost-dto:corp:1",
+      actionNumber: 1,
+      profileId: "advancement-counter-cost-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      cardImplementationAdvancementCounterCost: 1,
+    });
+    expect(input.eventTail[0]?.publicPayload).toMatchObject({
+      sourceDefinitionId: "corp-counter-economy",
+      cardImplementationAdvancementCounterCost: 1,
+      gainedCredits: 1,
+    });
+    expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(
+      "privateProbe",
+    );
+  });
 });
 
 function publicEvent(

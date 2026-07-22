@@ -13,6 +13,7 @@ type RunnerArchivesServer = AiDecisionInput["playerView"]["servers"][number];
 
 type RunnerArchivesEvaluation = {
   accessServerId: string;
+  pathPassability?: string;
 };
 
 export type RunnerArchivesScoreDependencies = {
@@ -72,7 +73,25 @@ export function runnerArchivesScoreComponents(
           candidate.payload?.serverId === "archives"
         ),
     );
-    const supported = pressure.active || randomDiscard;
+    const matchpointVolume =
+      pressure.runnerMatchPressure && hiddenArchivesCount >= 3;
+    const openCentralAlternative = input.legalActions.some((candidate) => {
+      if (candidate.actionId === action.actionId) return false;
+      const evaluation = dependencies.evaluationForAction(input, candidate);
+      return (
+        (evaluation?.accessServerId === "hq" ||
+          evaluation?.accessServerId === "rd") &&
+        evaluation.pathPassability === "reachable"
+      );
+    });
+    const supported = pressure.active || randomDiscard || matchpointVolume;
+    const supportedValue =
+      matchpointVolume &&
+      openCentralAlternative &&
+      !pressure.active &&
+      !randomDiscard
+        ? 150
+        : 700;
     return [
       {
         key: supported
@@ -81,13 +100,15 @@ export function runnerArchivesScoreComponents(
         label: supported
           ? "Archives verdeckte Karten mit Anlass"
           : "Archives verdeckte Karten ohne Anlass",
-        value: supported ? 700 : meaningfulAlternative ? -900 : 250,
+        value: supported ? supportedValue : meaningfulAlternative ? -900 : 250,
         reason: [
           `hidden_archives:${hiddenArchivesCount}`,
           `corp_deck_count:${input.playerView.opponent.deckCount}`,
           `runner_agenda_points:${input.playerView.own.agendaPoints}`,
           `archives_corp_deck_pressure:${pressure.corpDeckPressure}`,
           `archives_runner_match_pressure:${pressure.runnerMatchPressure}`,
+          `archives_runner_match_volume:${matchpointVolume}`,
+          `archives_open_central_alternative:${openCentralAlternative}`,
           `archives_random_discard_unseen:${randomDiscard}`,
           `archives_meaningful_alternative:${meaningfulAlternative}`,
         ].join("|"),

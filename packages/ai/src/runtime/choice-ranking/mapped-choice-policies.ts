@@ -7,6 +7,7 @@ import type { SemanticRuntimeChoice } from "../semantic-runtime-types";
 import { replayStableCorpBasicEconomyNearTieChoiceOrUndefined } from "../corp-economy/corp-basic-economy-near-tie";
 import { semanticRuntimeServerId } from "../semantic-runtime-scope";
 import {
+  semanticRuntimeChoiceHasScoreBreakdownComponent,
   semanticRuntimeChoiceHasScoreComponent,
   tacticalPlanBlocksSemanticChoice,
 } from "./semantic-choice-ranking-support";
@@ -40,6 +41,12 @@ export function tacticalPlanFundedDevelopmentContinuationBlocksOverride(
     return false;
   }
 
+  const richDelayedEconomyPlanTarget =
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      mappedChoice,
+      "runner_rich_delayed_economy_without_demand",
+    );
+
   return (
     mapping.plan.type === "runner.develop_hand_card" &&
     (mapping.plan.evidence.includes(
@@ -48,11 +55,12 @@ export function tacticalPlanFundedDevelopmentContinuationBlocksOverride(
       mapping.plan.evidence.includes(`previous_plan:${mapping.plan.planId}`)) &&
     (mappedChoice.action.type === "install_card" ||
       mappedChoice.action.type === "play_event") &&
-    !tacticalPlanDeferredDevelopmentInstallShouldYield(
-      mapping,
-      mappedChoice,
-      overrideChoice,
-    ) &&
+    (richDelayedEconomyPlanTarget ||
+      !tacticalPlanDeferredDevelopmentInstallShouldYield(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+      )) &&
     !semanticRuntimeChoiceHasScoreComponent(
       overrideChoice,
       "runner_activated_agenda_score",

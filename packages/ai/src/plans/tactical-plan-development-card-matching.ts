@@ -5,19 +5,17 @@ export function developmentCardStepMatchesAction(
   plan: TacticalPlan,
   action: LegalAction,
 ): boolean {
-  if (
-    action.type !== "install_card" &&
-    action.type !== "play_event" &&
-    action.type !== "trigger_ability" &&
-    action.type !== "activated_card_ability"
-  ) {
+  if (action.type !== "install_card" && action.type !== "play_event") {
     return false;
   }
   if (plan.target?.kind !== "card") return true;
   return legalActionReferencesCard(action, plan.target.id);
 }
 
-function legalActionReferencesCard(action: LegalAction, cardId: string): boolean {
+function legalActionReferencesCard(
+  action: LegalAction,
+  cardId: string,
+): boolean {
   const payload = action.payload ?? {};
   return (
     action.source === cardId ||

@@ -12,6 +12,49 @@ import {
 } from "./semantic-runtime-action-exclusion";
 
 describe("semanticRuntimeActionExclusion", () => {
+  it("hard-excludes an immediate non-profitable refill of a paid advancement counter", () => {
+    const action = corpAdvanceAction();
+    const exclusion = semanticRuntimeActionExclusion(
+      corpCounterEconomyInput(action),
+      action,
+      undefined,
+      dependencies(undefined),
+    );
+
+    expect(exclusion).toMatchObject({
+      key: "corp_advancement_counter_refill_after_credit_payout_cycle",
+    });
+    expect(exclusion?.reason).toContain("credits_gained:1");
+    expect(exclusion?.reason).toContain("refill_credit_cost:1");
+  });
+
+  it("does not suppress agendas or profitable counter conversions", () => {
+    const action = corpAdvanceAction();
+    const agendaInput = corpCounterEconomyInput(action, {
+      targetType: "agenda",
+    });
+    const profitableInput = corpCounterEconomyInput(action, {
+      gainedCredits: 2,
+    });
+
+    expect(
+      semanticRuntimeActionExclusion(
+        agendaInput,
+        action,
+        undefined,
+        dependencies(undefined),
+      ),
+    ).toBeUndefined();
+    expect(
+      semanticRuntimeActionExclusion(
+        profitableInput,
+        action,
+        undefined,
+        dependencies(undefined),
+      ),
+    ).toBeUndefined();
+  });
+
   it("fails closed when a structured immediate run has no target evaluation", () => {
     const action = {
       ...runEventAction(),
@@ -143,6 +186,79 @@ function runEventAction(): LegalAction {
     expiresAtStateVersion: 2,
     payload: { serverId: "remote_1" },
   } as LegalAction;
+}
+
+function corpAdvanceAction(): LegalAction {
+  return {
+    actionId: "advance-counter-economy",
+    side: "corp",
+    type: "advance_card",
+    label: "Counter Economy advancen",
+    source: "counter-economy-card",
+    timingPoint: "corp_action.main",
+    costs: [{ clicks: 1, credits: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+    payload: { cardId: "counter-economy-card" },
+  } as LegalAction;
+}
+
+function corpCounterEconomyInput(
+  action: LegalAction,
+  options: {
+    targetType?: "agenda" | "asset";
+    gainedCredits?: number;
+  } = {},
+): AiDecisionInput {
+  const payoutEvent = {
+    eventId: "counter-payout",
+    type: "activated_card_ability",
+    stateVersionBefore: 1,
+    stateVersionAfter: 2,
+    stateHashAfter: "counter-payout-hash",
+    publicPayload: {
+      actor: "corp",
+      actionType: "activated_card_ability",
+      sourceDefinitionId: "counter-economy-definition",
+      cardImplementationAdvancementCounterCost: 1,
+      gainedCredits: options.gainedCredits ?? 1,
+    },
+  };
+  return {
+    side: "corp",
+    legalActions: [action],
+    profileId: "test-corp",
+    difficulty: "normal",
+    eventTail: [payoutEvent],
+    seed: "counter-economy-exclusion",
+    decisionId: "counter-economy-exclusion.1",
+    actionNumber: 1,
+    playerView: {
+      stateVersion: 2,
+      own: { credits: 5, clicks: 3 },
+      opponent: { credits: 5, identity: { counterDisplays: [] } },
+      servers: [
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [],
+          root: [
+            {
+              instanceId: "counter-economy-card",
+              definitionId: "counter-economy-definition",
+              title: "Counter Economy",
+              type: options.targetType ?? "asset",
+              known: true,
+              rezzed: true,
+              advancementCounters: 0,
+            },
+          ],
+        },
+      ],
+      publicEvents: [payoutEvent],
+    },
+  } as unknown as AiDecisionInput;
 }
 
 function runnerInput(action: LegalAction): AiDecisionInput {

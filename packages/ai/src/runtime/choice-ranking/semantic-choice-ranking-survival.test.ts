@@ -12,7 +12,7 @@ describe("tacticalPlanMappedChoice survival progress", () => {
     const gain = legalAction("gain", "gain_credit");
     const develop = legalAction("develop", "install_card");
     const mappedCredit = choice(gain, -1121, [], {
-      key: "runner_rich_basic_credit_without_conversion",
+      key: "runner_rich_credit_without_conversion",
       value: -1200,
       reason: "credits:14|conversion:false",
     });

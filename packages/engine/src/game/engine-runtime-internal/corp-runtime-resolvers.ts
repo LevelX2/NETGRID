@@ -1427,11 +1427,20 @@ export function createCorpRuntimeResolvers(
     state: GameState,
     legalAction: LegalAction,
   ): boolean {
+    const payloadEntries = Object.entries(legalAction.payload ?? {});
+    const canonicalBasicCreditPayload =
+      payloadEntries.length === 0 ||
+      (legalAction.payload?.gainCreditsAmount === 1 &&
+        (legalAction.payload?.effectKind === undefined ||
+          legalAction.payload.effectKind === "gain_credits") &&
+        payloadEntries.every(([key]) =>
+          ["gainCreditsAmount", "effectKind"].includes(key),
+        ));
     return (
       legalAction.side === "corp" &&
       legalAction.source === "basic_action" &&
       legalAction.type === "gain_credit" &&
-      Object.keys(legalAction.payload ?? {}).length === 0 &&
+      canonicalBasicCreditPayload &&
       rezzedCorpInstalledEconomyCreditSourceIds(state).length > 0
     );
   }

@@ -62,6 +62,36 @@ describe("runnerArchivesScoreComponents", () => {
     ]);
   });
 
+  it("values a substantial hidden Archives pool at Runner match point", () => {
+    const input = aiInput({ hiddenArchives: 3, corpDeckCount: 14 });
+    input.playerView.own.agendaPoints = 5;
+
+    expect(components(input)).toEqual([
+      expect.objectContaining({
+        key: "runner_archives_hidden_cards_with_pressure",
+        value: 700,
+        reason: expect.stringContaining("archives_runner_match_volume:true"),
+      }),
+    ]);
+  });
+
+  it("keeps the matchpoint volume bonus below an open central alternative", () => {
+    const input = aiInput({ hiddenArchives: 3, corpDeckCount: 14 });
+    input.playerView.own.agendaPoints = 5;
+    const hq = startRunHq();
+    input.legalActions = [startRunArchives(), hq, gainCredit(), endTurn()];
+
+    expect(components(input)).toEqual([
+      expect.objectContaining({
+        key: "runner_archives_hidden_cards_with_pressure",
+        value: 150,
+        reason: expect.stringContaining(
+          "archives_open_central_alternative:true",
+        ),
+      }),
+    ]);
+  });
+
   it("values a still-unseen random HQ discard", () => {
     const randomDiscard = publicEvent(3, {
       actor: "corp",
@@ -103,7 +133,10 @@ function components(input: AiDecisionInput) {
     startRunArchives(),
     archives(input),
     {
-      evaluationForAction: () => ({ accessServerId: "archives" }),
+      evaluationForAction: (_input, action) => ({
+        accessServerId: action.payload?.serverId === "hq" ? "hq" : "archives",
+        pathPassability: "reachable",
+      }),
       definitionType: (definitionId) =>
         definitionId === "agenda" ? "agenda" : "operation",
     },
@@ -202,6 +235,10 @@ function startRunArchives(): LegalAction {
   return action("runner.start_run.archives", "start_run", {
     serverId: "archives",
   });
+}
+
+function startRunHq(): LegalAction {
+  return action("runner.start_run.hq", "start_run", { serverId: "hq" });
 }
 
 function gainCredit(): LegalAction {

@@ -1,6 +1,6 @@
 # AI-Economy, Finanzierungsrouten und Creditbewertung – Umsetzungsprozess
 
-Status: aktiv
+Status: abgeschlossen
 
 Datum: 2026-07-21
 
@@ -540,3 +540,53 @@ Der Prozess ist nur abgeschlossen, wenn:
 - Wissen und Diagnostik den neuen Vertrag wiedergeben;
 - `main` den vollständigen Arbeitsstand enthält;
 - Arbeits-Worktree und Arbeitsbranch verifiziert entfernt sind.
+
+## Abschlussnachweis
+
+Die Pakete P0 bis P7 wurden sequenziell umgesetzt. Der produktive Vertrag
+besteht aus einer LegalAction-basierten `EconomyActionProjection`, typisierten
+`CreditDemand`s, begrenzten `FundingRoute`s, Portfolio-Reservierungen und
+einem gemeinsamen Economy-Scoring. Unmittelbare liquide Nettogewinne folgen
+der kleinen monotonen Grundkurve; der höchste kompatible Bedarfsbonus wird je
+Action genau einmal addiert. Gemischte Actions verrechnen Kartenverbrauch und
+Draw als Netto-Handdelta. Verzögerte Economy-Investitionen bleiben eigene
+Planrouten und werden ohne konkreten Reservebedarf nicht wie Sofortgeld
+behandelt.
+
+Die Garantiegrenze ist geschlossen: Eine kontingente Route darf als beste
+verfügbare Route ausgewählt werden, löst einen harten Blocker aber erst dann,
+wenn ihre Schritte innerhalb des relevanten Horizonts garantiert ausführbar
+sind. Akuter Breaker-, Run-, Score- oder Rezbedarf steht vor Vordergrund-,
+Next-turn-, taktischem und allgemeinem Reservebedarf. Corporate Coup und BBS
+sind finite Auszahlungspools ohne Haltebonus; Broker behält seinen getrennten
+Aufbau-/Cashout-Vertrag.
+
+Die Abschlussremediation hat zusätzlich Run-erzeugende Kartenfähigkeiten an
+aktive Run-Locks gebunden, nichtprofitable Advancement-Counter-Refills
+abgewertet beziehungsweise unmittelbar ausgeschlossen, Scoreline-Sicherheit
+zwischen Detailbewertung und Planebene vereinheitlicht, Near-win- und
+Game-ending-Agenden von der großzügigen Schutz-Ausnahme ausgenommen und
+verzögerte Runner-Economy ohne Bedarf gegen konkrete Konvertierung gestellt.
+Eine bereits finanzierte konkrete Entwicklungssequenz bleibt davon
+unberührt. Bei gemischten Credit-und-Draw-Actions wird im reichen Zustand nur
+der unerwünschte Creditanteil abgewertet, nicht der eigenständige Draw-Nutzen.
+Das kanonische Basic-`gainCreditsAmount` bleibt dabei mit dem optionalen
+Investment-Firm-Ersatzfenster kompatibel.
+
+Verifikation vor lokaler Integration:
+
+- drei gezielte Hybrid-Seeds: 3 Spiele, 1.097 Entscheidungen, akzeptiert;
+- AI Behavior Baseline v1: 60 Spiele, 10.957 Entscheidungen, mit der
+  Referenz vergleichbar und ohne Hard Failure;
+- `illegalActions`, Replayfehler, Action-Limits, Fallbacks, Timeouts,
+  Runtimefehler, Hidden-Info-Findings und Redaction-Verstöße: jeweils 0;
+- `clearly_dominated_plan_choice`: 0;
+- Plan-Konversion 0,721, strategischer No-progress 2,729 je 100
+  Entscheidungen und Findings 3,112 je 100 Entscheidungen;
+- vollständige AI-Suite: 429 Testdateien und 3.007 Tests;
+- vollständige Engine-Suite: 202 Testdateien und 1.759 Tests;
+- AI-/Engine-Typechecks, AI-Hint-/Source-Gates, Economy-Audit,
+  Engine-Creditgrenze, Paketgrenzen, Format und Diff-Gate: grün.
+
+Die versionierte Baseline-Evidence liegt unter
+`docs/reviews/ai/ai-behavior-baseline-v1-economy-funding-routes-2026-07-21.md`.

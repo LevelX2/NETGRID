@@ -216,7 +216,7 @@ describe("runnerBasicActionPenaltyScoreComponents", () => {
       ),
     ).toContainEqual(
       expect.objectContaining({
-        key: "runner_rich_basic_credit_without_conversion",
+        key: "runner_rich_credit_without_conversion",
         value: -1200,
       }),
     );
@@ -235,9 +235,110 @@ describe("runnerBasicActionPenaltyScoreComponents", () => {
         "basic_economy_draw",
       ).some(
         (component) =>
-          component.key === "runner_rich_basic_credit_without_conversion",
+          component.key === "runner_rich_credit_without_conversion",
       ),
     ).toBe(false);
+  });
+
+  it("applies the rich-credit conversion penalty to a stronger card ability too", () => {
+    const gainTwo = action("activated_card_ability", {
+      gainCreditsAmount: 2,
+    });
+    const basicGain = action("gain_credit");
+    basicGain.source = "basic_action";
+    const develop = action("install_card");
+    const decisionInput = inputWithActions([gainTwo, basicGain, develop]);
+    decisionInput.playerView.own.credits = 15;
+
+    const cardComponents = runnerBasicActionPenaltyScoreComponents(
+      decisionInput,
+      gainTwo,
+      "basic_economy_draw",
+    );
+    const basicComponents = runnerBasicActionPenaltyScoreComponents(
+      decisionInput,
+      basicGain,
+      "basic_economy_draw",
+    );
+
+    expect(cardComponents).toContainEqual(
+      expect.objectContaining({
+        key: "runner_rich_credit_without_conversion",
+        value: -1200,
+      }),
+    );
+    expect(basicComponents).toContainEqual(
+      expect.objectContaining({
+        key: "runner_rich_credit_without_conversion",
+        value: -1200,
+      }),
+    );
+  });
+
+  it("only discounts the credit portion of a mixed credit-and-draw action", () => {
+    const mixedEconomy = action("play_event", {
+      gainCreditsAmount: 2,
+      drawCardsAmount: 1,
+    });
+    const decisionInput = inputWithActions([
+      mixedEconomy,
+      action("install_card"),
+    ]);
+    decisionInput.playerView.own.credits = 15;
+
+    expect(
+      runnerBasicActionPenaltyScoreComponents(
+        decisionInput,
+        mixedEconomy,
+        "basic_economy_draw",
+      ),
+    ).toContainEqual(
+      expect.objectContaining({
+        key: "runner_rich_credit_without_conversion",
+        value: -150,
+        reason: expect.stringContaining("immediate_draw:1"),
+      }),
+    );
+  });
+
+  it("allows ending a rich turn when every available conversion scores below neutral", () => {
+    const endTurn = action("end_turn");
+    const decisionInput = inputWithActions([
+      endTurn,
+      action("activated_card_ability"),
+    ]);
+    decisionInput.playerView.own.credits = 15;
+    decisionInput.playerView.own.clicks = 3;
+
+    expect(
+      runnerBasicActionPenaltyScoreComponents(
+        decisionInput,
+        endTurn,
+        "end_turn",
+      ).some((component) => component.key === "runner_unused_actions"),
+    ).toBe(false);
+  });
+
+  it("keeps the unused-action penalty when rich credits are the only option", () => {
+    const endTurn = action("end_turn");
+    const basicGain = action("gain_credit");
+    basicGain.source = "basic_action";
+    const decisionInput = inputWithActions([endTurn, basicGain]);
+    decisionInput.playerView.own.credits = 15;
+    decisionInput.playerView.own.clicks = 3;
+
+    expect(
+      runnerBasicActionPenaltyScoreComponents(
+        decisionInput,
+        endTurn,
+        "end_turn",
+      ),
+    ).toContainEqual(
+      expect.objectContaining({
+        key: "runner_unused_actions",
+        value: -1500,
+      }),
+    );
   });
 });
 

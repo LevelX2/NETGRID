@@ -391,6 +391,7 @@ export function semanticRuntimeRecentRunnerStartRunsOnServer(
   let count = 0;
   const history = mergedAiPublicHistory(input);
   let seenRunnerActions = 0;
+  let completedRunnerTurns = 0;
   for (let index = history.length - 1; index >= 0; index -= 1) {
     const event = history[index]!;
     const actionType =
@@ -401,8 +402,11 @@ export function semanticRuntimeRecentRunnerStartRunsOnServer(
       typeof event.publicPayload.actor === "string"
         ? event.publicPayload.actor
         : undefined;
-    if (input.playerView.stateVersion - aiEventVersion(event) > 18) break;
     if (semanticRuntimeRunnerRunProgressEvent(actionType, actor)) break;
+    if (actor === "runner" && actionType === "end_turn") {
+      completedRunnerTurns += 1;
+      if (completedRunnerTurns > 3) break;
+    }
     if (actor !== "runner" || actionType !== "start_run") continue;
     seenRunnerActions += 1;
     const target = aiServerIdFromEvent(event);

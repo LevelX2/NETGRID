@@ -4,6 +4,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import { createRunnerCreditDemand } from "../plans/credit-demand";
 import {
   runnerInstallScoreComponents,
   type RunnerInstallScoreDependencies,
@@ -108,6 +109,77 @@ describe("runnerInstallScoreComponents", () => {
       value: -500,
       reason: "mandatory_action|random_outcome",
     });
+  });
+
+  it("defers a delayed economy install when a rich runner has no reserve demand", () => {
+    const economyInstall = {
+      actionId: "install-delayed-bank",
+      side: "runner",
+      type: "install_card",
+    } as LegalAction;
+    const input = runnerInputWithKnownWallNeed(
+      visibleCard("delayed-bank", "runner", "resource"),
+    );
+    input.playerView.own.credits = 15;
+    input.legalActions = [
+      economyInstall,
+      { actionId: "draw", side: "runner", type: "draw_card" } as LegalAction,
+    ];
+    const economyDependencies = dependencies(["economy"]);
+    economyDependencies.isRunnerEconomyRole = () => true;
+
+    expect(
+      runnerInstallScoreComponents(
+        input,
+        economyInstall,
+        { loanInstallAction: false },
+        economyDependencies,
+      ),
+    ).toContainEqual(
+      expect.objectContaining({
+        key: "runner_rich_delayed_economy_without_demand",
+        value: -900,
+      }),
+    );
+  });
+
+  it("keeps a delayed economy install available for an explicit reserve demand", () => {
+    const economyInstall = {
+      actionId: "install-delayed-bank",
+      side: "runner",
+      type: "install_card",
+    } as LegalAction;
+    const input = runnerInputWithKnownWallNeed(
+      visibleCard("delayed-bank", "runner", "resource"),
+    );
+    input.playerView.own.credits = 15;
+    input.legalActions = [
+      economyInstall,
+      { actionId: "draw", side: "runner", type: "draw_card" } as LegalAction,
+    ];
+    const economyDependencies = dependencies(["economy"]);
+    economyDependencies.isRunnerEconomyRole = () => true;
+    const reserveDemand = createRunnerCreditDemand({
+      demandId: "reserve",
+      purpose: "phase_reserve",
+      priority: "phase_reserve",
+      hardness: "soft",
+      deadline: "within_three_own_turns",
+      currentCredits: 15,
+      targetCredits: 18,
+    });
+
+    expect(
+      runnerInstallScoreComponents(
+        input,
+        economyInstall,
+        { loanInstallAction: false, creditDemands: [reserveDemand] },
+        economyDependencies,
+      ).some(
+        (component) =>
+          component.key === "runner_rich_delayed_economy_without_demand",
+      ),
+    ).toBe(false);
   });
 
   it("prefers a central ICE-tax target over Archives", () => {

@@ -4,7 +4,9 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import type { CreditDemand } from "../plans/credit-demand";
 import { rolesHaveBreakerRole } from "./breaker-role-match";
+import { runnerHasMeaningfulCreditConversionAlternative } from "./runner-marginal-credit-value";
 import {
   runnerVisibleSearchCoverageNeed,
   visibleCardCoversRequiredCoverage,
@@ -66,6 +68,7 @@ export function runnerInstallScoreComponents(
   context: {
     loanInstallAction: boolean;
     semanticRiskKinds?: readonly string[];
+    creditDemands?: readonly CreditDemand[];
   },
   dependencies: RunnerInstallScoreDependencies,
 ): AiDecisionScoreComponent[] {
@@ -140,6 +143,18 @@ export function runnerInstallScoreComponents(
       value: 500,
       reason: "economy_role",
     });
+    if (
+      input.playerView.own.credits >= 10 &&
+      !hasDelayedEconomyDemand(context.creditDemands ?? []) &&
+      runnerHasMeaningfulCreditConversionAlternative(input, action)
+    ) {
+      components.push({
+        key: "runner_rich_delayed_economy_without_demand",
+        label: "Verzögerte Economy ohne Bedarf",
+        value: -900,
+        reason: `credits:${input.playerView.own.credits}|delayed_economy_demand:false|conversion_alternative:true`,
+      });
+    }
   }
   if (roles.some((role) => dependencies.isRunnerPressureRole(role))) {
     components.push({
@@ -187,6 +202,16 @@ export function runnerInstallScoreComponents(
     });
   }
   return components;
+}
+
+function hasDelayedEconomyDemand(demands: readonly CreditDemand[]): boolean {
+  return demands.some(
+    (demand) =>
+      demand.gap > 0 &&
+      (demand.purpose === "next_turn_setup" ||
+        demand.purpose === "tactical_reserve" ||
+        demand.purpose === "phase_reserve"),
+  );
 }
 
 function runnerServerIceInstallTaxComponents(

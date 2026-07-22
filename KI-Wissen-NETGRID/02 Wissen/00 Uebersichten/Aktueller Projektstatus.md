@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-20
+Stand: 2026-07-21
 
 ## Führender Produktstand
 
@@ -88,6 +88,26 @@ Stand: 2026-07-20
   `docs/reviews/engine/city-surveillance-draw-sequence-final-review-2026-07-14.md`.
 
 ## KI
+
+- Die Economy-KI besitzt einen gemeinsamen side-sicheren Vertrag von der
+  LegalAction-Ressourcenprojektion bis zur Planebene. Kleine monotone
+  Grundwerte ordnen vergleichbare liquide Sofortgewinne; typisierte
+  `CreditDemand`s geben akuten Breaker-/Run-/Score-/Rezblockern Vorrang vor
+  Vordergrund-, Next-turn- und Reservebedarf. Der höchste kompatible
+  Bedarfsbonus gilt für alle Economy-Action-Typen genau einmal.
+  `FundingRoute`s planen begrenzt über Same-turn, nächsten eigenen Zug und
+  höchstens drei eigene Züge. Kontingente Routen dürfen gewählt werden, lösen
+  harte Blocker aber nicht ohne garantierte Route. Planportfolio-
+  Reservierungen verhindern Doppelverwendung derselben Credits.
+- Corporate Coup und BBS sind finite Auszahlungspools ohne strategisches
+  Halten; Broker bleibt eine eigenständige Aufbau-/Cashout-Bank. Gemischte
+  Actions verrechnen Kartenverbrauch und Draw als Netto-Handdelta,
+  verzögerte Economy braucht einen passenden Reserveplan. Der vergleichbare
+  Abschlusslauf über 60 Spiele und 10.957 Entscheidungen hat keine Hard
+  Failures, Action-Limits oder klar dominierte Planwahl. Führend sind
+  `docs/architecture/ai/ai-economy-funding-routes-implementation-process-2026-07-21.md`
+  und
+  `docs/reviews/ai/ai-behavior-baseline-v1-economy-funding-routes-2026-07-21.md`.
 
 - Die Deckstrategie-Ableitung ist für 40 aktive Standarddecks, 21 versionierte
   Snapshots und alle 24 Strategy-IDs vollständig gegatet. 39 aktive Decks

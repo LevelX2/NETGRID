@@ -10,6 +10,7 @@ import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { removesPersistentTraceTagCounter } from "../actions/trace-counter-semantics";
 import { runnerRunReleaseForEvaluation } from "./runner-run-release";
+import { mergedPublicHistory } from "./public-event-history";
 
 type PlayerViewServer = AiDecisionInput["playerView"]["servers"][number];
 type KnownIcePathAssessment = ReturnType<typeof assessKnownRezzedIcePath>;
@@ -94,6 +95,11 @@ export function semanticRuntimeActionExclusion(
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
   dependencies: SemanticRuntimeActionExclusionDependencies,
 ): SemanticRuntimeExclusion | undefined {
+  const advancementCounterRefillExclusion =
+    corpAdvancementCounterRefillAfterCreditPayoutExclusion(input, action);
+  if (advancementCounterRefillExclusion) {
+    return advancementCounterRefillExclusion;
+  }
   const planMemoryExclusion = dependencies.planMemoryActionExclusion(
     input,
     action,
@@ -336,6 +342,83 @@ export function semanticRuntimeActionExclusion(
       : "Run-Ziel nicht bezahlbar",
     reason: dependencies.knownIcePathReason(assessment, server.id),
   };
+}
+
+function corpAdvancementCounterRefillAfterCreditPayoutExclusion(
+  input: AiDecisionInput,
+  action: LegalAction,
+): SemanticRuntimeExclusion | undefined {
+  if (input.side !== "corp" || action.type !== "advance_card") {
+    return undefined;
+  }
+  const targetId =
+    typeof action.source === "string" && action.source !== "game_rule"
+      ? action.source
+      : typeof action.payload?.cardId === "string"
+        ? action.payload.cardId
+        : undefined;
+  if (!targetId) return undefined;
+  const installedCards = input.playerView.servers.flatMap((server) => [
+    ...server.root,
+    ...server.ice,
+  ]);
+  const target = installedCards.find(
+    (card) => card.instanceId === targetId && card.known,
+  );
+  if (
+    !target?.definitionId ||
+    target.type === "agenda" ||
+    target.advancementCounters !== 0
+  ) {
+    return undefined;
+  }
+  const matchingVisibleSources = installedCards.filter(
+    (card) => card.known && card.definitionId === target.definitionId,
+  );
+  if (matchingVisibleSources.length !== 1) return undefined;
+
+  const previousEvent = mergedPublicHistory(input).at(-1);
+  const payload = previousEvent?.publicPayload;
+  const counterCost = positiveInteger(
+    payload?.cardImplementationAdvancementCounterCost,
+  );
+  const gainedCredits = positiveInteger(payload?.gainedCredits);
+  const advanceCreditCost = action.costs.reduce(
+    (sum, cost) => sum + Math.max(0, cost.credits ?? 0),
+    0,
+  );
+  if (
+    !previousEvent ||
+    previousEvent.stateVersionAfter !== input.playerView.stateVersion ||
+    payload?.actor !== "corp" ||
+    payload.actionType !== "activated_card_ability" ||
+    payload.sourceDefinitionId !== target.definitionId ||
+    counterCost !== 1 ||
+    gainedCredits === undefined ||
+    advanceCreditCost <= 0 ||
+    gainedCredits > advanceCreditCost
+  ) {
+    return undefined;
+  }
+  return {
+    key: "corp_advancement_counter_refill_after_credit_payout_cycle",
+    label: "Dominierter Counter-Refill",
+    reason: [
+      `action:${action.actionId}`,
+      `source_definition:${target.definitionId}`,
+      `counter_cost:${counterCost}`,
+      `credits_gained:${gainedCredits}`,
+      `refill_credit_cost:${advanceCreditCost}`,
+      "source_advancement_counters:0",
+      "immediately_preceding_payout:true",
+    ].join("|"),
+  };
+}
+
+function positiveInteger(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : undefined;
 }
 
 function structuredImmediateRunAction(action: LegalAction): boolean {

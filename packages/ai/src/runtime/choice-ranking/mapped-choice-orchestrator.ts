@@ -3,6 +3,8 @@ import {
   type PlanStepMappingResult,
   type TacticalPlanRuntimeResult,
 } from "../../tactical-plans";
+import { visibleCardForAction } from "../../plans/tactical-plan-visible-cards";
+import { mergedPublicHistory } from "../public-event-history";
 import type {
   SemanticRuntimeChoice,
   TacticalPlanMappedChoiceResult,
@@ -62,6 +64,7 @@ export function tacticalPlanMappedChoice(
   choices: readonly SemanticRuntimeChoice[],
   mapping: PlanStepMappingResult | undefined,
   overrideChoice: SemanticRuntimeChoice | undefined,
+  planRuntime?: TacticalPlanRuntimeResult,
 ): TacticalPlanMappedChoiceResult {
   if (!mapping) return {};
   const mappedActionIds = new Set(
@@ -77,6 +80,18 @@ export function tacticalPlanMappedChoice(
     .filter((choice): choice is SemanticRuntimeChoice => Boolean(choice));
   const mappedChoice = bestPlanCompatibleSemanticChoice(mappedChoices, mapping);
   if (!mappedChoice) return {};
+  const finiteEconomyCadenceOverrideChoice =
+    tacticalPlanFiniteEconomyCadenceOverrideChoice(
+      choices,
+      mapping,
+      mappedChoice,
+      mappedActionIds,
+      planRuntime,
+      input,
+    );
+  if (finiteEconomyCadenceOverrideChoice) {
+    overrideChoice = finiteEconomyCadenceOverrideChoice;
+  }
   const initialOverride = initialMappedChoiceOverride(
     input,
     choices,
@@ -86,6 +101,31 @@ export function tacticalPlanMappedChoice(
   );
   if (initialOverride.terminalResult) return initialOverride.terminalResult;
   overrideChoice = initialOverride.overrideChoice;
+  if (
+    overrideChoice &&
+    tacticalPlanOffPlanFiniteEconomyCadenceShouldYield(
+      input,
+      mapping,
+      mappedChoice,
+      overrideChoice,
+      mappedActionIds,
+      planRuntime,
+    )
+  ) {
+    return {
+      outcome: "plan_mapping_selected",
+      choice: semanticRuntimeChoiceWithAddedEvidence(mappedChoice, [
+        ...tacticalPlanMappingSelectedEvidence(mapping, mappedChoice),
+        "tactical_plan_mapping_override_blocked:true",
+        "tactical_plan_override_blocked_reason:corp_finite_economy_background_cadence_yield",
+        "corp_finite_economy_background_cadence:soft_limit_reached",
+      ]),
+      overrideBlockedChoice: overrideChoice,
+      overrideBlockedReason: "corp_finite_economy_background_cadence_yield",
+      overrideThreshold: Number.POSITIVE_INFINITY,
+      scoreGap: roundScore(overrideChoice.score - mappedChoice.score),
+    };
+  }
   if (
     overrideChoice &&
     overrideChoice.action.actionId !== mappedChoice.action.actionId &&
@@ -100,6 +140,29 @@ export function tacticalPlanMappedChoice(
       mappedChoice,
       overrideChoice,
     );
+    if (
+      finiteEconomyCadenceOverrideChoice &&
+      overrideChoice.action.actionId ===
+        finiteEconomyCadenceOverrideChoice.action.actionId
+    ) {
+      const result = {
+        outcome: "semantic_choice_selected" as const,
+        overrideChoice,
+        overriddenMappedChoice: mappedChoice,
+        overrideReason: "corp_finite_economy_background_cadence_yield",
+        overrideThreshold: 0,
+        scoreGap,
+      };
+      return {
+        ...result,
+        choice: semanticRuntimeChoiceWithAddedEvidence(overrideChoice, [
+          "tactical_plan_mapping_outcome:semantic_choice_selected",
+          "tactical_plan_mapping_override:true",
+          `tactical_plan_mapping_override_reason:${result.overrideReason}`,
+          "corp_finite_economy_background_cadence:soft_limit_reached",
+        ]),
+      };
+    }
     const coverageProbeRunShouldYield = tacticalPlanCoverageProbeRunShouldYield(
       mapping,
       mappedChoice,
@@ -504,4 +567,167 @@ export function tacticalPlanMappedChoice(
       tacticalPlanMappingSelectedEvidence(mapping, mappedChoice),
     ),
   };
+}
+
+function tacticalPlanFiniteEconomyCadenceOverrideChoice(
+  choices: readonly SemanticRuntimeChoice[],
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  mappedActionIds: ReadonlySet<string>,
+  planRuntime: TacticalPlanRuntimeResult | undefined,
+  input: AiDecisionInput,
+): SemanticRuntimeChoice | undefined {
+  if (
+    mapping.plan.side !== "corp" ||
+    mapping.plan.type !== "corp.develop_finite_economy" ||
+    (mapping.plan.status !== "active" && mapping.plan.status !== "progressing")
+  ) {
+    return undefined;
+  }
+  const portfolio = planRuntime?.planPortfolio;
+  const entry = portfolio?.backgrounds.find(
+    (candidate) => candidate.sourcePlanId === mapping.plan.planId,
+  );
+  const actionsUsedThisTurn = Math.max(
+    entry?.cadence.actionsUsedThisTurn ?? 0,
+    finiteEconomyActionsUsedThisTurn(input, mappedChoice),
+  );
+  const maxActionsPerTurn = entry?.cadence.maxActionsPerTurn ?? 1;
+  if (
+    (entry && entry.role !== "background") ||
+    actionsUsedThisTurn < maxActionsPerTurn
+  ) {
+    return undefined;
+  }
+
+  const mappedNetLiquidGain = semanticRuntimeChoiceNetLiquidGain(mappedChoice);
+  return choices.find((choice) => {
+    if (
+      choice.exclusion ||
+      choice.score <= 0 ||
+      choice.action.type === "end_turn" ||
+      mappedActionIds.has(choice.action.actionId)
+    ) {
+      return false;
+    }
+    return finiteEconomyCadenceAlternativeIsMeaningful(
+      mappedNetLiquidGain,
+      choice,
+    );
+  });
+}
+
+function tacticalPlanOffPlanFiniteEconomyCadenceShouldYield(
+  input: AiDecisionInput,
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  mappedActionIds: ReadonlySet<string>,
+  planRuntime: TacticalPlanRuntimeResult | undefined,
+): boolean {
+  if (
+    mapping.plan.side !== "corp" ||
+    mappedActionIds.has(overrideChoice.action.actionId) ||
+    !finiteEconomyCadenceAlternativeIsMeaningful(
+      semanticRuntimeChoiceNetLiquidGain(overrideChoice),
+      mappedChoice,
+    )
+  ) {
+    return false;
+  }
+  const finitePlan = planRuntime?.planAlternatives.find(
+    (plan) =>
+      plan.type === "corp.develop_finite_economy" &&
+      (plan.status === "active" || plan.status === "progressing") &&
+      plan.currentStep.actionCandidateIds.includes(
+        overrideChoice.action.actionId,
+      ),
+  );
+  if (!finitePlan) return false;
+  const portfolioEntry = planRuntime?.planPortfolio?.backgrounds.find(
+    (entry) => entry.sourcePlanId === finitePlan.planId,
+  );
+  const actionsUsedThisTurn = Math.max(
+    portfolioEntry?.cadence.actionsUsedThisTurn ?? 0,
+    finiteEconomyActionsUsedThisTurn(input, overrideChoice),
+  );
+  return (
+    (!portfolioEntry || portfolioEntry.role === "background") &&
+    actionsUsedThisTurn >= (portfolioEntry?.cadence.maxActionsPerTurn ?? 1)
+  );
+}
+
+function finiteEconomyCadenceAlternativeIsMeaningful(
+  finiteEconomyNetLiquidGain: number,
+  candidate: SemanticRuntimeChoice,
+): boolean {
+  if (
+    candidate.exclusion ||
+    candidate.score <= 0 ||
+    candidate.action.type === "end_turn"
+  ) {
+    return false;
+  }
+  const candidateNetLiquidGain = semanticRuntimeChoiceNetLiquidGain(candidate);
+  if (candidateNetLiquidGain > 0) {
+    return candidateNetLiquidGain > finiteEconomyNetLiquidGain;
+  }
+  return !candidate.scoreBreakdown.some(
+    (component) =>
+      component.key === "corp_install_economy" && component.value > 0,
+  );
+}
+
+function finiteEconomyActionsUsedThisTurn(
+  input: AiDecisionInput,
+  mappedChoice: SemanticRuntimeChoice,
+): number {
+  const sourceDefinitionId = visibleCardForAction(
+    input.playerView,
+    mappedChoice.action,
+  )?.definitionId;
+  if (!sourceDefinitionId) return 0;
+  const history = mergedPublicHistory(input);
+  let currentTurnStartIndex = -1;
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const event = history[index]!;
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    if (
+      actionType === "mandatory_draw" &&
+      event.publicPayload.actor === "corp"
+    ) {
+      currentTurnStartIndex = index;
+      break;
+    }
+  }
+  return history.slice(currentTurnStartIndex + 1).filter((event) => {
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    return (
+      event.publicPayload.actor === "corp" &&
+      actionType === mappedChoice.action.type &&
+      event.publicPayload.cardDefinitionId === sourceDefinitionId
+    );
+  }).length;
+}
+
+function semanticRuntimeChoiceNetLiquidGain(
+  choice: SemanticRuntimeChoice,
+): number {
+  return Math.max(
+    0,
+    ...choice.scoreBreakdown
+      .filter((component) => component.key === "economy_credit_base")
+      .map((component) =>
+        Number(
+          component.reason?.match(/economy_net_liquid_gain:(-?\d+)/)?.[1] ?? 0,
+        ),
+      )
+      .filter(Number.isFinite),
+  );
 }
