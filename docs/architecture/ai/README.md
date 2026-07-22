@@ -18,6 +18,13 @@
   Installation, Aktionsgewinn, Advancement-Platzierung, Countertransfer und
   Basic Advances generisch kombinieren. Ungeschützte Agenda-Installationen
   sind nur bei garantiertem Closeout zulässig.
+- Corp-Entscheidungsfenster bewerten Rez-Kosten gegen sichtbaren marginalen
+  Tax und Stop-Wirkung, Mehrkarten-Draw getrennt vom kontextuellen ersten Draw
+  und Basic Credits gegen eine konkrete Überschussgrenze. Wiederholter
+  erfolgreicher Zentraldruck bleibt über Runner-Züge erhalten. Matchpoint-HQ-
+  Schutz verlangt sichtbare Agendaexposition und verdrängt keinen garantiert
+  noch im selben Corp-Zug abschließbaren Scorepfad; dessen Install- und
+  Advance-Schritte erhalten keine widersprüchlichen Exposure-Strafen.
 - `PlanPortfolioSnapshot` koordiniert einen Interrupt, einen Vordergrundplan
   und höchstens zwei fortsetzbare Hintergrundprojekte. Broker-/Bank-Zyklen und
   strategieabhängige Corp-Scoring-Remotes besitzen begrenzte Zugkadenz,
@@ -162,6 +169,11 @@
 - `semantic-decision-chain-observability-contract-2026-07-14.md`: aktueller
   verhaltensneutraler Debug-, Arbitration- und Decision-Checkpoint-Vertrag für
   den produktiven Semantic-Runtime-Auswahlweg.
+- `match-e2f2-corp-decision-windows-remediation-process-2026-07-22.md` und
+  `docs/reviews/ai/match-e2f2-corp-decision-windows-remediation-final-review-2026-07-22.md`:
+  spielgleiche Corp-Verträge für Rez-Ertrag, Draw-/Credit-Grenznutzen,
+  persistenten R&D-Druck, HQ-Agendaexposition und garantierte
+  Overtime-/Same-Turn-Scorepfade.
 - `../legacy-simplification-process-2026-07-19.md`: aktueller Abschlussstand
   der Hint-Single-Source-, Source-Gate- und Legacy-Bereinigung.
 - `ai-source-structure-optimization-process-2026-07-17.md` und

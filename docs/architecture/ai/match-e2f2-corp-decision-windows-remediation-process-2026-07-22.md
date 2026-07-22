@@ -1,7 +1,7 @@
 # Match e2f2: Corp-Entscheidungsfenster – Remediation-Prozess
 
 Stand: 2026-07-22
-Status: in Umsetzung
+Status: technisch abgenommen; lokale Integration ausstehend
 
 ## Quelle und Zielprüfung
 
@@ -50,9 +50,9 @@ lokal nach `main` integriert.
    Zuggrenzen aktiv, bis der Pfad materiell teurer wird oder mehrere
    gegnerische Züge ohne Zugriff vergehen.
 5. **HQ-Matchpointschutz:** D63 legte Misleading Menus trotz agenda-freiem HQ
-   nach HQ. Der Schutz bindet an bekannte HQ-Agendapunkte, aktuellen
-   HQ-Zugriffsdruck, vorhandene Schichten und den marginalen Tax; lebenslange
-   historische Zugriffe reichen nicht.
+   nach HQ. Der Schutz bindet an bekannte HQ-Agendapunkte, vorhandene
+   Schichten und den marginalen Tax. Ein garantiert noch im selben Zug
+   abschließbarer Scorepfad geht zusätzlichem HQ-Schutz vor.
 6. **Scorepfad-Priorität:** D75 legte vor einem garantiert vollständigen
    Overtime-Scorepfad ein viertes HQ-ICE. Eine garantierte Scoreline, die eine
    Agenda vor dem nächsten Runner-Fenster aus HQ entfernt und punktet, geht
@@ -132,6 +132,19 @@ Condition wird dann im Prozessartefakt dokumentiert.
 - Gate: paketnahe Tests, AI-Typecheck, `check:ai`, Deck-Doctrine-/Strategy-Gate,
   Deckaudit, Format und `git diff --check` grün.
 - Commit: `docs(ai): close match e2f2 decision remediation`.
+
+## Technisches Abschlussprotokoll
+
+- Die zehn spielgleichen Match-Checkpoints sind grün.
+- Der breite Regressionssatz umfasst 9 Dateien mit 94 grünen Tests.
+- Die vollständige `@netgrid/ai`-Suite umfasst 444 Dateien mit 3.109 grünen
+  Tests; der Typecheck ist grün.
+- `check:ai` meldet null harte Hintfehler sowie null Runtime- und Typzyklen.
+- Deck-Doctrine-/Strategy-Gate und Formatprüfung sind grün.
+- Der Consumer-Audit von `Universal Fast Advance` umfasst 16 verschiedene
+  und 45 Karten ohne Ausschluss, Blocker oder Warnung.
+- Das Abschlussreview liegt unter
+  `docs/reviews/ai/match-e2f2-corp-decision-windows-remediation-final-review-2026-07-22.md`.
 
 ## Worktree-, Git- und Integrationsregeln
 

@@ -181,6 +181,14 @@ Stand: 2026-07-22
   Konvertierung weichen. Fall Guy wird im konkreten legalen
   Tag-Vermeidungsfenster statt `pass` genutzt. Führend ist
   `docs/reviews/ai/ai-match-424a-runner-endgame-remediation-final-2026-07-15.md`.
+- Die Corp-Entscheidungsfenster aus Match e2f2 sind mit zehn spielgleichen
+  Checkpoints geschlossen. Rez-Ertrag, Mehrkarten-Draw und Credit-Überschuss
+  werden getrennt bewertet; erfolgreicher R&D-Druck bleibt über Runner-Züge
+  bestehen. Matchpoint-HQ-Schutz verlangt sichtbare Agendaexposition und geht
+  einem garantiert vollständigen Same-Turn-Scorepfad nicht vor. Der
+  45-Karten-Audit von `Universal Fast Advance` meldet null Blocker und null
+  Warnungen; 444 AI-Testdateien mit 3.109 Tests sind grün. Führend ist
+  `docs/reviews/ai/match-e2f2-corp-decision-windows-remediation-final-review-2026-07-22.md`.
 - Die ECFE3CE-Remediation führt sichtbare Trace-Vermeidung und spätere
   ICE-Kosten durch einen gemeinsamen Credit-Pool und revalidiert Run-Sperren
   quellenunabhängig im tiefsten `startRun`-Pfad. Fang, All-Nighter, Private LDL

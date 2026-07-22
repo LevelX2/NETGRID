@@ -51,6 +51,18 @@ Fehlkonversion akzeptiert. Führend sind
 und
 `docs/reviews/ai/ai-behavior-baseline-v1-action-capacity-routes-2026-07-22.md`.
 
+Die Corp-Entscheidungsfenster aus `match_e2f2f6f433debe00` sind spielgleich
+gehärtet. Wirkungsloses oder negativ getauschtes Rezzing wird abgelehnt,
+Mehrkarten-Draw und Credit-Überschuss besitzen getrennte Grenzwerte,
+wiederholter R&D-Erfolg bleibt über Runner-Züge als Gegenplan aktiv und
+agenda-freies HQ erhält keinen Matchpoint-Sondervorrang. Sichtbare HQ-Agendas
+bleiben schützenswert, solange kein garantiert vollständiger Same-Turn-
+Scorepfad vorliegt. Dessen Install- und Advance-Schritte werden nicht mehr
+gleichzeitig als verzögert oder contestable bestraft. Zehn Match-Checkpoints,
+444 AI-Testdateien mit 3.109 Tests und der 45-Karten-Consumer-Audit sind grün;
+führend ist
+`docs/reviews/ai/match-e2f2-corp-decision-windows-remediation-final-review-2026-07-22.md`.
+
 Die aktuelle Semantic Runtime verwendet reine abgeleitete Run-Target-,
 Handentwicklungs- und Install-Fit-Ergebnisse innerhalb genau einer synchronen
 Entscheidung wieder. Allokationsarme Redaction- und Side-Safety-Prüfungen
