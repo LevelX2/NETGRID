@@ -41,6 +41,49 @@ describe("corpPurgeImpactScoreComponent", () => {
       })?.value,
     ).toBe(-6000);
   });
+
+  it("rejects one inactive Highlighter plus one inactive Garbage counter", () => {
+    const component = corpPurgeImpactScoreComponent(
+      inputWithRunnerVirusCounters({ highlighter: 1, garbage: 1 }),
+      runnerVirusPurgeAction(),
+      { primary: "protect_rd", severity: "critical" },
+    );
+
+    expect(component?.value).toBe(-6000);
+    expect(component?.reason).toContain("purge_visible_counter_total:2");
+    expect(component?.reason).toContain("purge_active_counter_total:0");
+    expect(component?.reason).toContain(
+      "purge_active_runner_counter_types:none",
+    );
+  });
+
+  it("keeps two Highlighter counters as an active R&D multiaccess threat", () => {
+    const component = corpPurgeImpactScoreComponent(
+      inputWithRunnerVirusCounters({ highlighter: 2 }),
+      runnerVirusPurgeAction(),
+      { primary: "low_value", severity: "low" },
+    );
+
+    expect(component?.value).toBeGreaterThan(4500);
+    expect(component?.reason).toContain("purge_active_counter_total:2");
+    expect(component?.reason).toContain(
+      "purge_active_runner_counter_types:highlighter",
+    );
+  });
+
+  it("does not let the first Highlighter counter inflate an active Garbage threshold", () => {
+    const component = corpPurgeImpactScoreComponent(
+      inputWithRunnerVirusCounters({ highlighter: 1, garbage: 2 }),
+      runnerVirusPurgeAction(),
+      { primary: "protect_rd", severity: "critical" },
+    );
+
+    expect(component?.value).toBeLessThan(2500);
+    expect(component?.reason).toContain("purge_active_counter_total:2");
+    expect(component?.reason).toContain(
+      "purge_active_runner_counter_types:garbage",
+    );
+  });
 });
 
 function inputWithVirusCounters(amount: number): AiDecisionInput {
@@ -105,4 +148,72 @@ function purgeAction(): LegalAction {
     costs: [{ clicks: 3 }],
     payload: {},
   } as LegalAction;
+}
+
+function runnerVirusPurgeAction(): LegalAction {
+  return {
+    ...purgeAction(),
+    actionId: "corp.purge_runner_virus_counters",
+    type: "purge_runner_virus_counters",
+  } as LegalAction;
+}
+
+function inputWithRunnerVirusCounters(
+  counters: Partial<Record<"highlighter" | "garbage", number>>,
+): AiDecisionInput {
+  const input = inputWithVirusCounters(0);
+  const counterEntries = Object.entries(counters) as Array<
+    ["highlighter" | "garbage", number | undefined]
+  >;
+  input.playerView.own.identity.counterDisplays = counterEntries.map(
+    ([counterType, amount]) => ({
+      id: `runner-virus-${counterType}`,
+      amount: amount ?? 0,
+      displayKind: "virus" as const,
+      label: `${counterType} counter`,
+      ariaLabel: `${amount ?? 0} ${counterType} counter`,
+      counterType,
+      usageHint: "status_marker" as const,
+    }),
+  );
+  input.legalActions = [runnerVirusPurgeAction()];
+  input.playerView.legalActions = [runnerVirusPurgeAction()];
+  input.playerView.opponent.credits = 4;
+  input.playerView.opponent.rig = Object.keys(counters).map((counterType) =>
+    counterType === "highlighter"
+      ? ({
+          instanceId: "highlighter",
+          definitionId: "onr_proteus_090_highlighter",
+          title: "Highlighter",
+          type: "program",
+          known: true,
+          rulesText:
+            "Each Highlighter counter after the first allows you to access an additional card from R&D.",
+        } as VisibleCard)
+      : ({
+          instanceId: "garbage-in",
+          definitionId: "onr_proteus_089_garbage-in",
+          title: "Garbage In",
+          type: "program",
+          known: true,
+          rulesText:
+            "Two or more Garbage counters allow you to trash at no cost cards accessed from R&D.",
+        } as VisibleCard),
+  );
+  input.playerView.publicEvents = [
+    {
+      eventId: "rd-run",
+      type: "action_resolved",
+      stateVersionBefore: 1,
+      stateVersionAfter: 2,
+      stateHashAfter: "rd-run-state",
+      publicPayload: {
+        actor: "runner",
+        actionType: "start_run",
+        serverId: "rd",
+      },
+    },
+  ];
+  input.eventTail = input.playerView.publicEvents;
+  return input;
 }
