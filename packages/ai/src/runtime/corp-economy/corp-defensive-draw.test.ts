@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   corpOptionalDrawCapacity,
   corpOptionalDrawScoreComponents,
+  corpQuantitativeDrawScoreComponents,
 } from "./corp-defensive-draw";
 import {
   corpAction,
@@ -67,6 +68,37 @@ describe("Corp defensive draw context", () => {
         (component) => component.key,
       ),
     ).toContain("corp_safe_draw_capacity");
+  });
+
+  it("consumes explicit multi-card draw yield from a played operation", () => {
+    const annualReviews = corpAction(
+      "corp.play.annual-reviews",
+      "play_operation",
+      { drawCardsAmount: 3 },
+      "annual-reviews",
+    );
+
+    const components = corpOptionalDrawScoreComponents(
+      drawInput(5, 2),
+      annualReviews,
+    );
+
+    expect(
+      corpOptionalDrawCapacity(drawInput(5, 2), annualReviews),
+    ).toMatchObject({ eligible: true, projectedDrawCount: 3 });
+    expect(components.map((component) => component.key)).toContain(
+      "corp_safe_draw_capacity",
+    );
+    expect(
+      corpQuantitativeDrawScoreComponents(drawInput(5, 2), annualReviews),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_quantitative_draw_yield",
+          value: 1400,
+        }),
+      ]),
+    );
   });
 
   it("does not reward optional draw while an existing protected score remote is urgent", () => {

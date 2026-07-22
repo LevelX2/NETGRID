@@ -24,6 +24,7 @@ import {
   totalScore,
   totalScoreFor,
 } from "./semantic-runtime-corp-score.test-support";
+import { createCorpCreditDemand } from "../plans/credit-demand";
 
 describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
   it("normalizes reserve score values into the scoring consumer scale", () => {
@@ -111,6 +112,67 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
           ),
         }),
       ]),
+    );
+  });
+
+  it("penalizes another basic credit above visible reserve when draw is available", () => {
+    const gainCredit = corpAction("gain-credit", "gain_credit", {
+      gainCreditsAmount: 1,
+    });
+    const drawThree = corpAction("draw-three", "play_operation", {
+      drawCardsAmount: 3,
+    });
+    const input = corpInputWithGoals([], [gainCredit, drawThree]);
+    input.playerView.own.credits = 12;
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      gainCredit,
+      "basic_economy_draw",
+      testDependencies(),
+      economySemanticCandidate(gainCredit, 1),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_credit_saturation_penalty",
+          value: -900,
+        }),
+      ]),
+    );
+  });
+
+  it("keeps basic credit unpenalized while a concrete credit demand is open", () => {
+    const gainCredit = corpAction("gain-credit", "gain_credit", {
+      gainCreditsAmount: 1,
+    });
+    const drawThree = corpAction("draw-three", "play_operation", {
+      drawCardsAmount: 3,
+    });
+    const input = corpInputWithGoals([], [gainCredit, drawThree]);
+    input.playerView.own.credits = 4;
+    const demand = createCorpCreditDemand({
+      demandId: "corp:test-rez",
+      purpose: "current_rez_window",
+      priority: "current_foreground_plan",
+      hardness: "hard",
+      deadline: "end_of_current_turn",
+      currentCredits: 4,
+      targetCredits: 7,
+    });
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      gainCredit,
+      "basic_economy_draw",
+      testDependencies(),
+      economySemanticCandidate(gainCredit, 1),
+      [demand],
+    );
+
+    expect(components.map((component) => component.key)).not.toContain(
+      "corp_credit_saturation_penalty",
     );
   });
 

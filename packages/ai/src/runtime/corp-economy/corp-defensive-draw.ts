@@ -17,6 +17,9 @@ import type { CorpBoardTriage } from "../semantic-runtime-corp-board-triage";
 const CORP_SAFE_DRAW_CAPACITY_VALUE = 100;
 const CORP_LOW_HAND_VALUE = 450;
 const CORP_MISSING_CONCRETE_DEFENSE_DRAW_VALUE = 250;
+const CORP_DRAW_VALUE_PER_CARD = 400;
+const CORP_MULTI_DRAW_ACTION_EFFICIENCY_PER_EXTRA_CARD = 100;
+const CORP_DRAW_OVERFLOW_PENALTY_PER_CARD = 100;
 
 export type CorpOptionalDrawCapacity = {
   eligible: boolean;
@@ -36,21 +39,66 @@ export function corpOptionalDrawCapacity(
     0,
     Math.floor(input.playerView.own.maxHandSize ?? 5),
   );
-  const projectedDrawCount = corpOptionalDrawCount(action);
+  const projectedDrawCount = corpProjectedDrawCount(action);
   const freeSlotsBefore = Math.max(0, maxHandSize - handCount);
   const freeSlotsAfter = freeSlotsBefore - projectedDrawCount;
   return {
-    eligible:
-      action.type === "draw_card" &&
-      maxHandSize > 2 &&
-      projectedDrawCount > 0 &&
-      freeSlotsAfter >= 0,
+    eligible: maxHandSize > 2 && projectedDrawCount > 0 && freeSlotsAfter >= 0,
     handCount,
     maxHandSize,
     projectedDrawCount,
     freeSlotsBefore,
     freeSlotsAfter,
   };
+}
+
+export function corpQuantitativeDrawScoreComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent[] {
+  const projectedDrawCount = corpProjectedDrawCount(action);
+  if (projectedDrawCount <= 0) return [];
+  const handCount = input.playerView.own.gripOrHq.length;
+  const maxHandSize = Math.max(
+    0,
+    Math.floor(input.playerView.own.maxHandSize ?? 5),
+  );
+  const overflowCount = Math.max(
+    0,
+    handCount + projectedDrawCount - maxHandSize,
+  );
+  const evidence = [
+    `projected_draw_count:${projectedDrawCount}`,
+    `hand_count:${handCount}`,
+    `max_hand_size:${maxHandSize}`,
+    `projected_overflow_count:${overflowCount}`,
+    `rd_count:${input.playerView.own.stackOrRdCount}`,
+  ].join("|");
+  return [
+    {
+      key: "corp_quantitative_draw_yield",
+      label: "Quantitativer Kartenziehertrag",
+      value:
+        projectedDrawCount * CORP_DRAW_VALUE_PER_CARD +
+        Math.max(0, projectedDrawCount - 1) *
+          CORP_MULTI_DRAW_ACTION_EFFICIENCY_PER_EXTRA_CARD,
+      reason: [
+        evidence,
+        `multi_draw_action_efficiency:${Math.max(0, projectedDrawCount - 1) * CORP_MULTI_DRAW_ACTION_EFFICIENCY_PER_EXTRA_CARD}`,
+      ].join("|"),
+    },
+    ...(overflowCount > 0
+      ? [
+          {
+            key: "corp_draw_overflow_penalty",
+            label: "Projizierter Handüberlauf",
+            value:
+              -Math.min(6, overflowCount) * CORP_DRAW_OVERFLOW_PENALTY_PER_CARD,
+            reason: evidence,
+          },
+        ]
+      : []),
+  ];
 }
 
 export function corpOptionalDrawScoreComponents(
@@ -206,15 +254,14 @@ function corpActionServerId(action: LegalAction): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-function corpOptionalDrawCount(action: LegalAction): number {
-  if (action.type !== "draw_card") return 0;
+export function corpProjectedDrawCount(action: LegalAction): number {
   for (const key of ["drawCardsAmount", "drawAmount", "drawCount"] as const) {
     const value = action.payload?.[key];
     if (typeof value === "number" && Number.isFinite(value) && value > 0) {
       return Math.max(1, Math.floor(value));
     }
   }
-  return 1;
+  return action.type === "draw_card" ? 1 : 0;
 }
 
 function corpOptionalDrawCapacityEvidence(

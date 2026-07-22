@@ -2746,7 +2746,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_effective_defense_zero_effect_risk",
-          value: -1600,
+          value: -2600,
         }),
       ]),
     );
@@ -3244,7 +3244,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_effective_defense_zero_effect_risk",
-          value: -1600,
+          value: -2600,
           reason: expect.stringContaining(
             "effective_defense_variable_kind:x_strength",
           ),

@@ -184,7 +184,23 @@ export function corpActionFamilyScoreComponents<TConsumer extends string>(
       components.push({
         key: "corp_effective_defense_zero_effect_risk",
         label: "Rez ohne wirksame Verteidigung",
-        value: -1600,
+        value: -2600,
+        reason: effectiveDefense.evidence.join("|"),
+      });
+    }
+    if (
+      effectiveDefense &&
+      corpRezHasNegativeMarginalExchange(
+        input,
+        action,
+        effectiveDefense,
+        boardTriageState,
+      )
+    ) {
+      components.push({
+        key: "corp_effective_defense_negative_exchange",
+        label: "Negativer marginaler Rez-Tausch",
+        value: -3000,
         reason: effectiveDefense.evidence.join("|"),
       });
     }
@@ -196,6 +212,49 @@ export function corpActionFamilyScoreComponents<TConsumer extends string>(
       effectiveDefense,
     );
     if (downstreamReserve) components.push(downstreamReserve);
+  }
+  if (action.type === "decline_rez" && scopeId === "simple_rez") {
+    const rezAlternatives = input.legalActions
+      .filter((candidate) => candidate.type === "rez_ice")
+      .map((candidate) => ({
+        action: candidate,
+        context: semanticRuntimeCorpEffectiveDefenseContext(
+          input,
+          candidate,
+          undefined,
+          { actionCreditCost: dependencies.actionCreditCost },
+        ),
+      }))
+      .filter(
+        (
+          entry,
+        ): entry is {
+          action: LegalAction;
+          context: NonNullable<typeof entry.context>;
+        } => Boolean(entry.context),
+      );
+    if (
+      rezAlternatives.length > 0 &&
+      rezAlternatives.every(
+        ({ action: rezAction, context }) =>
+          context.zeroEffectRisk ||
+          corpRezHasNegativeMarginalExchange(
+            input,
+            rezAction,
+            context,
+            boardTriageState,
+          ),
+      )
+    ) {
+      components.push({
+        key: "corp_decline_inefficient_rez_value",
+        label: "Ineffizientes Rez ablehnen",
+        value: 1400,
+        reason: rezAlternatives
+          .flatMap(({ context }) => context.evidence)
+          .join("|"),
+      });
+    }
   }
   const postPassIceLifecycle = corpPostPassIceLifecycleComponent(action);
   if (postPassIceLifecycle) components.push(postPassIceLifecycle);
@@ -375,6 +434,33 @@ export function corpActionFamilyScoreComponents<TConsumer extends string>(
     }
   }
   return components;
+}
+
+function corpRezHasNegativeMarginalExchange(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: NonNullable<
+    ReturnType<typeof semanticRuntimeCorpEffectiveDefenseContext>
+  >,
+  boardTriageState: CorpBoardTriage,
+): boolean {
+  if (
+    context.hasImmediateStopPotential ||
+    context.visibleBreakCost === undefined ||
+    context.runnerCanAffordVisibleBreak !== true ||
+    context.rezCost <= context.visibleBreakCost + context.rezCreditGain
+  ) {
+    return false;
+  }
+  const serverId = input.playerView.servers.find((server) =>
+    server.ice.some((card) => card.instanceId === action.source),
+  )?.id;
+  const protectsCurrentPriority =
+    serverId !== undefined &&
+    boardTriageState.targetServerId === serverId &&
+    (boardTriageState.severity === "high" ||
+      boardTriageState.severity === "critical");
+  return !protectsCurrentPriority;
 }
 
 export function corpActionCanResolveProfiledTrace(

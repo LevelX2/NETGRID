@@ -50,7 +50,11 @@ import {
   corpUnsafeDelayedScorelineExposureComponent,
 } from "./corp-scoreline/semantic-runtime-corp-score-scoreline-components";
 import { corpPreparedScoreRemoteAgendaSearchComponent } from "./corp-scoreline/semantic-runtime-corp-score-state";
-import { corpOptionalDrawScoreComponents } from "./corp-economy/corp-defensive-draw";
+import {
+  corpOptionalDrawScoreComponents,
+  corpProjectedDrawCount,
+  corpQuantitativeDrawScoreComponents,
+} from "./corp-economy/corp-defensive-draw";
 import {
   corpActionCanResolveProfiledTrace,
   corpActionFamilyScoreComponents,
@@ -97,6 +101,13 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       ].join("|"),
     });
   }
+  const creditSaturation = corpCreditSaturationComponent(
+    input,
+    action,
+    dependencies,
+    creditDemands,
+  );
+  if (creditSaturation) components.push(creditSaturation);
   const credits = input.playerView.own.credits;
   const boardTriageState = semanticRuntimeCorpBoardTriage(input, dependencies);
   const deadlineScorelineAction =
@@ -396,6 +407,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     action,
     boardTriageState,
   );
+  components.push(...corpQuantitativeDrawScoreComponents(input, action));
   components.push(...optionalDrawComponents);
   if (
     optionalDrawComponents.some(
@@ -478,6 +490,43 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     }
   }
   return components;
+}
+
+function corpCreditSaturationComponent<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  creditDemands: readonly CreditDemand[],
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "gain_credit" || !actionHasImmediateCreditGain(action)) {
+    return undefined;
+  }
+  const unresolvedDemand = creditDemands.some((demand) => demand.gap > 0);
+  if (unresolvedDemand) return undefined;
+  const visibleCostCeiling = input.legalActions.reduce(
+    (ceiling, candidate) =>
+      Math.max(ceiling, Math.max(0, dependencies.actionCreditCost(candidate))),
+    0,
+  );
+  const targetReserve = Math.max(5, visibleCostCeiling + 2);
+  if (input.playerView.own.credits < targetReserve) return undefined;
+  const alternativeDrawCount = input.legalActions.reduce(
+    (count, candidate) => Math.max(count, corpProjectedDrawCount(candidate)),
+    0,
+  );
+  if (alternativeDrawCount <= 0) return undefined;
+  return {
+    key: "corp_credit_saturation_penalty",
+    label: "Credit-Reserve bereits erfüllt",
+    value: -900,
+    reason: [
+      `credits:${input.playerView.own.credits}`,
+      `target_reserve:${targetReserve}`,
+      `visible_cost_ceiling:${visibleCostCeiling}`,
+      "unresolved_credit_demand:false",
+      `alternative_draw_count:${alternativeDrawCount}`,
+    ].join("|"),
+  };
 }
 
 function corpDeadlineUnconvertibleScorelineActionComponent(
