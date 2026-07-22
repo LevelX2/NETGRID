@@ -5,6 +5,7 @@ import type {
   ActionTargetContext,
   TargetProfileMatch,
 } from "../action-semantic-candidate-types";
+import type { AiHintActionCapacityProfile } from "../hint-ontology";
 
 export function applyCardSemanticJoin(
   candidate: ActionSemanticCandidate,
@@ -118,9 +119,16 @@ export function applyCardSemanticJoin(
     ...(candidate.effectTargets ?? []),
     ...(profile.effectTargets ?? []),
   ]);
+  const actionCapacityProjection = actionCapacityProjectionWithHintContract(
+    candidate,
+    profile.actionCapacityProfiles,
+  );
 
   return {
     ...candidate,
+    ...(actionCapacityProjection !== undefined
+      ? { actionCapacityProjection }
+      : {}),
     costProfile,
     ...(effectTargets.length > 0 ? { effectTargets } : {}),
     cardContextSignals,
@@ -161,6 +169,107 @@ export function applyCardSemanticJoin(
         : []),
     ],
   };
+}
+
+function actionCapacityProjectionWithHintContract(
+  candidate: ActionSemanticCandidate,
+  profiles: readonly AiHintActionCapacityProfile[] | undefined,
+): ActionSemanticCandidate["actionCapacityProjection"] {
+  const projection = candidate.actionCapacityProjection;
+  if (!projection || !profiles?.length) return projection;
+  const relevantProfiles = profiles.filter(
+    (profile) => profile.recipient === candidate.actorSide,
+  );
+  if (relevantProfiles.length === 0) return projection;
+  const matching = relevantProfiles.find((profile) =>
+    actionCapacityHintMatchesProjection(profile, projection),
+  );
+  if (!matching) {
+    return {
+      ...projection,
+      evidence: [
+        ...projection.evidence,
+        "hint_contract:action_capacity_mismatch",
+        "hint_contract:legal_action_remains_authoritative",
+      ],
+    };
+  }
+  return {
+    ...projection,
+    repeatable: matching.repeatable,
+    bankable: matching.bankable,
+    evidence: [
+      ...projection.evidence,
+      "hint_contract:action_capacity_confirmed",
+      `hint_contract:class:${matching.class}`,
+      `hint_contract:bankable:${matching.bankable}`,
+      `hint_contract:repeatable:${matching.repeatable}`,
+    ],
+  };
+}
+
+function actionCapacityHintMatchesProjection(
+  profile: AiHintActionCapacityProfile,
+  projection: NonNullable<ActionSemanticCandidate["actionCapacityProjection"]>,
+): boolean {
+  if (projection.source === "unknown") return false;
+  if (!hintClassMatchesProjection(profile, projection)) return false;
+  if (profile.timing !== projection.timing) return false;
+  if (profile.restriction !== projection.restriction) return false;
+  if (
+    profile.reliability !== projection.reliability &&
+    !(profile.reliability === "mandatory" &&
+      projection.reliability === "guaranteed")
+  ) {
+    return false;
+  }
+  if (
+    profile.amountKind === "fixed" &&
+    profile.amount !== undefined &&
+    profile.amount !== projectedActionCapacityAmount(projection)
+  ) {
+    return false;
+  }
+  return (
+    !profile.actionTypes?.length ||
+    profile.actionTypes.every((actionType) =>
+      projection.allowedActionTypes.includes(actionType),
+    )
+  );
+}
+
+function hintClassMatchesProjection(
+  profile: AiHintActionCapacityProfile,
+  projection: NonNullable<ActionSemanticCandidate["actionCapacityProjection"]>,
+): boolean {
+  switch (profile.class) {
+    case "immediate_gain":
+      return projection.kind === "immediate_unrestricted_gain";
+    case "restricted_gain":
+      return projection.kind === "immediate_restricted_gain";
+    case "future_recurring_gain":
+    case "recurring_gain":
+      return projection.kind === "future_recurring_gain";
+    case "action_debt":
+    case "action_loss":
+    case "action_cost":
+    case "action_lock":
+      return projection.kind === "action_debt";
+    case "finite_bank":
+    case "random_gain":
+    case "mandatory_gain":
+      return false;
+  }
+}
+
+function projectedActionCapacityAmount(
+  projection: NonNullable<ActionSemanticCandidate["actionCapacityProjection"]>,
+): number {
+  if (projection.kind === "action_debt") return projection.actionDebt;
+  if (projection.kind === "future_recurring_gain") {
+    return projection.gainAmountPerTurn ?? 0;
+  }
+  return projection.grossActionsGained;
 }
 
 function cardContextSignalsFromProfile(signals: readonly string[]): string[] {

@@ -13,16 +13,19 @@ import {
   actionBuildsScoreRemote,
   corpLegalActions,
   corpRemoteScoringStrategyWantsRemoteDevelopment,
+  corpTriageVisibleAgendaPoints,
   inputWithOpponentDefaults,
   legalEconomyActionExists,
   normalizedCorpBoardTriageValue,
 } from "./corp-scoreline/semantic-runtime-corp-board-triage-actions";
+import { semanticRuntimeVisibleSourceCard } from "./visible-card-lookup";
 import {
   actionClosesScoreNow,
   actionKeepsSideSafeSameTurnScoreCloseout,
   centralPressureMustInterruptActiveScoreline,
   centralPressureShouldDriveTriage,
   centralPressureTriage,
+  centralDefenseAcquisitionActionExists,
   centralServerNeedsProtection,
   centralTriageSeverity,
   concreteCentralProtectionActionExists,
@@ -88,11 +91,18 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
   const scorelineDevelopmentAllowed =
     corpScorelineAllowsMultiTurnDevelopment(scorelineFeasibility);
 
-  const scoreNow = actions.find(
-    (entry) =>
+  const scoreNow = actions
+    .filter(
+      (entry) =>
       actionClosesScoreNow(input, entry.action, dependencies) ||
       actionKeepsSideSafeSameTurnScoreCloseout(input, entry, dependencies),
-  );
+    )
+    .sort(
+      (left, right) =>
+        corpScoreNowAgendaPoints(input, right.action) -
+          corpScoreNowAgendaPoints(input, left.action) ||
+        left.action.actionId.localeCompare(right.action.actionId),
+    )[0];
   if (scoreNow) {
     const scoreNowCentralInterrupt = scoreNowCentralProtectionInterruptTriage(
       input,
@@ -288,10 +298,28 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
       dependencies,
     )
   ) {
+    const needsDefenseAcquisition =
+      centralPressure.serverId === "rd" &&
+      centralServerNeedsProtection(input, "rd") &&
+      !dependencies.corpHasCentralRezFloorFundingNeed(input) &&
+      centralPressure.recentSuccessfulAccessEvents >= 2 &&
+      !concreteCentralProtectionActionExists(
+        input,
+        actions,
+        "rd",
+        dependencies,
+      ) &&
+      centralDefenseAcquisitionActionExists(input, actions);
     return centralPressureTriage(
       centralPressure,
       centralPressureSeverity,
       currentCredits,
+      needsDefenseAcquisition
+        ? [
+            "corp_board_triage_central_defense_acquisition:true",
+            "corp_board_triage_repeated_central_access:true",
+          ]
+        : [],
     );
   }
 
@@ -346,6 +374,14 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
         : []),
     ],
   };
+}
+
+function corpScoreNowAgendaPoints(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  const source = semanticRuntimeVisibleSourceCard(input, action);
+  return source ? corpTriageVisibleAgendaPoints(source) : 0;
 }
 
 function openingCentralBaselineTriage<TConsumer extends string>(

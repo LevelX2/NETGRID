@@ -15,7 +15,7 @@ type VisibleVirusCounterCard = {
 };
 
 type VisibleRunnerVirusCounter = VisibleVirusCounterCard & {
-  counterType?: string;
+  counterType: string | undefined;
 };
 
 export function corpPurgeImpactScoreComponent(
@@ -33,6 +33,12 @@ export function corpPurgeImpactScoreComponent(
   const runnerVirusCounters = visibleRunnerVirusCounters(input, action);
   const allAffected = [...affected, ...runnerVirusCounters];
   const totalCounters = allAffected.reduce((sum, entry) => sum + entry.amount, 0);
+  const activeRunnerVirusCounters = runnerVirusCounters.filter(
+    runnerVirusCounterHasActiveEffect,
+  );
+  const activeCounterTotal =
+    affected.reduce((sum, entry) => sum + entry.amount, 0) +
+    activeRunnerVirusCounters.reduce((sum, entry) => sum + entry.amount, 0);
   const criticalIce = allAffected.filter(
     ({ card }) =>
       card.type === "ice" &&
@@ -44,8 +50,17 @@ export function corpPurgeImpactScoreComponent(
     const directlyAffected = allAffected.some((entry) => entry.serverId === serverId);
     const highlighterAffectsRd =
       serverId === "rd" &&
-      runnerVirusCounters.some((entry) => entry.counterType === "highlighter");
-    if (!directlyAffected && !highlighterAffectsRd) return false;
+      activeRunnerVirusCounters.some(
+        (entry) => entry.counterType === "highlighter",
+      );
+    const garbageAffectsRd =
+      serverId === "rd" &&
+      activeRunnerVirusCounters.some(
+        (entry) => entry.counterType === "garbage",
+      );
+    if (!directlyAffected && !highlighterAffectsRd && !garbageAffectsRd) {
+      return false;
+    }
     return semanticRuntimeCorpCentralPressureAssessment(
       input,
       serverId as "hq" | "rd",
@@ -58,15 +73,26 @@ export function corpPurgeImpactScoreComponent(
     boardTriage.primary === "fund_score_remote";
   const clickCost = Math.max(3, legalActionClickCost(action));
 
-  let value = purgeCounterVolumeValue(totalCounters);
+  let value = purgeCounterVolumeValue(activeCounterTotal);
   value += Math.min(900, criticalIce.length * 450);
   value += Math.min(1300, pressuredCentralServers.length * 650);
   if (
     action.type === "purge_runner_virus_counters" &&
-    runnerVirusCounters.some((entry) => entry.counterType === "highlighter") &&
+    activeRunnerVirusCounters.some(
+      (entry) => entry.counterType === "highlighter",
+    ) &&
     pressuredCentralServers.includes("rd")
   ) {
     value += 3500;
+  }
+  if (
+    action.type === "purge_runner_virus_counters" &&
+    activeRunnerVirusCounters.some(
+      (entry) => entry.counterType === "garbage",
+    ) &&
+    pressuredCentralServers.includes("rd")
+  ) {
+    value += 800;
   }
   if (urgentScoreline) value -= 2200;
   if (clickCost > 3) value -= (clickCost - 3) * 500;
@@ -77,6 +103,13 @@ export function corpPurgeImpactScoreComponent(
     value,
     reason: [
       `purge_visible_counter_total:${totalCounters}`,
+      `purge_active_counter_total:${activeCounterTotal}`,
+      `purge_inactive_counter_total:${Math.max(0, totalCounters - activeCounterTotal)}`,
+      `purge_active_runner_counter_types:${
+        activeRunnerVirusCounters
+          .map((entry) => entry.counterType ?? "unknown")
+          .join(",") || "none"
+      }`,
       `purge_affected_card_count:${affected.length}`,
       `purge_critical_ice_count:${criticalIce.length}`,
       `purge_pressured_central_count:${pressuredCentralServers.length}`,
@@ -88,6 +121,20 @@ export function corpPurgeImpactScoreComponent(
       `purge_component_value:${value}`,
     ].join("|"),
   };
+}
+
+function runnerVirusCounterHasActiveEffect(
+  entry: VisibleRunnerVirusCounter,
+): boolean {
+  switch (entry.counterType) {
+    case "highlighter":
+      return entry.amount >= 2;
+    case "garbage":
+    case "cascade":
+      return entry.amount >= 2;
+    default:
+      return entry.amount > 0;
+  }
 }
 
 function visibleRunnerVirusCounters(

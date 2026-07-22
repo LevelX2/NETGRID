@@ -160,6 +160,7 @@ function actionCapacityProjectionWithListedCost(
         : {}),
     selfFinancing,
     repeatable: "unknown",
+    bankable: "unknown",
     reliability,
     ...(sourceCounterType !== undefined ? { sourceCounterType } : {}),
     ...(sourceCounterCost !== undefined ? { sourceCounterCost } : {}),

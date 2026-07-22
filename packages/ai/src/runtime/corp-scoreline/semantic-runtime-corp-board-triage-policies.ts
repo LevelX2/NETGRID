@@ -792,6 +792,19 @@ export function actionKeepsSideSafeSameTurnScoreCloseout<
   entry: ScoredLegalAction,
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): boolean {
+  if (
+    entry.action.type === "install_card" &&
+    entry.action.payload?.placement !== "ice" &&
+    entry.scoringWindow?.scoreHorizon === "immediate" &&
+    entry.scoringWindow.recommendedNextStep === "install_agenda" &&
+    entry.scoringWindow.windowKind !== "unsafe" &&
+    !entry.scoringWindow.runnerCanContestNow &&
+    !entry.scoringWindow.runnerCanReachAccessNow &&
+    !entry.scoringWindow.agendaStealRelevantNow
+  ) {
+    const source = semanticRuntimeVisibleSourceCard(input, entry.action);
+    if (source && corpTriageVisibleCardIsAgenda(source)) return true;
+  }
   return actionKeepsSameTurnScoreCloseoutReachable(
     input,
     entry.action,
@@ -1569,8 +1582,15 @@ export function centralPressureShouldDriveTriage<TConsumer extends string>(
     serverId,
     dependencies,
   );
+  const canAcquireRdDefense =
+    serverId === "rd" &&
+    needsProtection &&
+    !dependencies.corpHasCentralRezFloorFundingNeed(input) &&
+    pressure.recentSuccessfulAccessEvents >= 2 &&
+    centralDefenseAcquisitionActionExists(input, actions);
   if (severity === "critical") {
     if (needsProtection && hasProtectionAction) return true;
+    if (canAcquireRdDefense) return true;
     const hasScoreRemoteDevelopment =
       concreteScoreRemoteDevelopmentActionExists(actions);
     if (!hasScoreRemoteDevelopment) return hasProtectionAction;
@@ -1580,10 +1600,20 @@ export function centralPressureShouldDriveTriage<TConsumer extends string>(
     );
   }
   if (needsProtection && hasProtectionAction) return true;
+  if (canAcquireRdDefense) return true;
   const hasScoreRemoteDevelopment =
     concreteScoreRemoteDevelopmentActionExists(actions);
   if (!hasScoreRemoteDevelopment) return true;
   return !corpRemoteScoringStrategyWantsRemoteDevelopment(input);
+}
+
+export function centralDefenseAcquisitionActionExists(
+  input: AiDecisionInput,
+  actions: readonly ScoredLegalAction[],
+): boolean {
+  return actions.some((entry) =>
+    actionHasVisibleDrawSource(input, entry.action, undefined),
+  );
 }
 
 export function highestPriorityTriageCentralPressure(

@@ -201,6 +201,65 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("persists critical R&D defense by drawing for protection when no ICE action is legal", () => {
+    const draw = corpAction("draw-defense", "draw_card");
+    const credit = corpAction("gain-credit", "gain_credit");
+    const purge = corpAction("purge", "purge_runner_virus_counters");
+    const input = corpInput({
+      corpCredits: 5,
+      runnerRig: [rdVirusCard("highlighter")],
+      legalActions: [draw, credit, purge],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+        publicCentralEvent("rd-run-3", "start_run", "rd"),
+        publicCentralEvent("rd-access-3", "access_card", "rd"),
+      ],
+      servers: [centralServer("hq", []), centralServer("rd", [])],
+    });
+    const dependencies = testDependencies();
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const drawComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      draw,
+      dependencies,
+    );
+    const creditComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      credit,
+      dependencies,
+    );
+    const purgeComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      purge,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_rd",
+      severity: "critical",
+      targetServerId: "rd",
+    });
+    expect(triage.evidence).toContain(
+      "corp_board_triage_central_defense_acquisition:true",
+    );
+    expect(triage.evidence).toContain(
+      "corp_board_triage_repeated_central_access:true",
+    );
+    expect(drawComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(creditComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+    expect(purgeComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+  });
+
   it("does not let repeated non-game-ending R&D pressure override a playable active scoreline", () => {
     const remoteScoreline = corpAction("remote-scoreline", "advance_card", {
       serverId: "remote_1",
