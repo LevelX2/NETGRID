@@ -4806,6 +4806,41 @@
         "sourceDeckId": "local_runner_purge_window",
         "sourceDeckVersion": "1.0.0-lab"
       }
+    },
+    {
+      "standardDeckId": "standard_corp_universal_fast_advance",
+      "version": "1.0.0",
+      "status": "active",
+      "name": "Universal Fast Advance",
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        { "cardId": "onr_v1_196_corporate-war", "quantity": 3 },
+        { "cardId": "onr_v1_194_corporate-downsizing", "quantity": 3 },
+        { "cardId": "onr_classic_002_superserum", "quantity": 1 },
+        { "cardId": "onr_v1_281_accounts-receivable", "quantity": 3 },
+        { "cardId": "onr_v1_282_annual-reviews", "quantity": 2 },
+        { "cardId": "onr_v1_288_day-shift", "quantity": 3 },
+        { "cardId": "onr_v1_290_efficiency-experts", "quantity": 3 },
+        { "cardId": "onr_v1_297_overtime-incentives", "quantity": 3 },
+        { "cardId": "onr_v1_292_management-shake-up", "quantity": 3 },
+        { "cardId": "onr_v1_304_systematic-layoffs", "quantity": 3 },
+        { "cardId": "onr_v1_312_chicago-branch", "quantity": 3 },
+        { "cardId": "onr_v1_347_vapor-ops", "quantity": 3 },
+        { "cardId": "onr_proteus_032_misleading-access-menus", "quantity": 3 },
+        { "cardId": "onr_proteus_038_snowbank", "quantity": 3 },
+        { "cardId": "onr_v1_237_data-wall", "quantity": 3 },
+        { "cardId": "onr_v1_279_wall-of-static", "quantity": 3 }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_corp_universal_fast_advance",
+        "sourceDeckVersion": "1.0.0-lab"
+      }
     }
   ]
 }
