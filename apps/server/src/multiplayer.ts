@@ -6961,6 +6961,14 @@ function clone<T>(value: T): T {
 
 function renderGamebook(record: StoredMatch): string {
   const lines = ["# Spielprotokoll", ""];
+  const result = record.resultSnapshot ?? matchResultSnapshotFor(record);
+  lines.push(
+    "## Beteiligte",
+    "",
+    `**Runner:** ${publicDisplayNameForSide(record, "runner")}`,
+    `**Korp:** ${publicDisplayNameForSide(record, "corp")}`,
+    "",
+  );
   const initial = record.stateSnapshots.find(
     (snapshot) => snapshot.snapshotId === "snap_initial",
   )?.gameState;
@@ -7014,7 +7022,7 @@ function renderGamebook(record: StoredMatch): string {
           `## ${sideLabel(side)} – Zug ${turns[side]}`,
           "",
           `**Hand zu Zugbeginn:** ${cardNames(before, handFor(before, side)).join(", ")}`,
-          `**Credits:** ${creditsFor(before, side)}`,
+          gamebookCredits(before),
           "",
         );
       }
@@ -7029,8 +7037,24 @@ function renderGamebook(record: StoredMatch): string {
         "",
       );
     }
-    const description = gamebookEventDescription(event, before, after);
+    const description = gamebookEventDescription(
+      event,
+      before,
+      after,
+      activeSide,
+    );
     if (description) lines.push(description, "");
+  }
+  if (result) {
+    lines.push(
+      "## Endergebnis",
+      "",
+      `**Gewinner:** ${gamebookWinnerLabel(result.winner, result)}`,
+      `**Endstand:** Runner ${result.runner.agendaPoints} Agendapunkte · Korp ${result.corp.agendaPoints} Agendapunkte`,
+      `**Beendet durch:** ${gamebookResultReasonLabel(result.reason)}`,
+      gamebookCredits(record.gameState),
+      "",
+    );
   }
   return `${lines.join("\n")}\n`;
 }
@@ -7086,6 +7110,29 @@ function creditsFor(state: GameState, side: Side): number {
   return side === "corp" ? state.corp.credits : state.runner.credits;
 }
 
+function gamebookCredits(state: GameState): string {
+  return `**Credits:** Runner ${state.runner.credits} · Korp ${state.corp.credits}`;
+}
+
+function gamebookWinnerLabel(
+  winner: Side | "draw",
+  result: ApiMatchResultSnapshot,
+): string {
+  if (winner === "draw") return "Unentschieden";
+  const player = winner === "runner" ? result.runner : result.corp;
+  return `${player.displayName} als ${sideLabel(winner)}`;
+}
+
+function gamebookResultReasonLabel(reason: ApiGameResultReason): string {
+  if (reason === "agenda_points") return "Agenda-Ziel";
+  if (reason === "bad_publicity_7") return "7 Bad Publicity";
+  if (reason === "corp_deck_empty") return "Korp-Deck leer";
+  if (reason === "flatline") return "Flatline";
+  if (reason === "forfeit") return "Aufgabe";
+  if (reason === "time_expired") return "abgelaufene Spielerzeit";
+  return "Unentschieden";
+}
+
 function gamebookActionTitle(event: GameEvent, before?: GameState): string {
   const title = cardTitleForEvent(event, before);
   if (event.type === "start_run")
@@ -7105,17 +7152,18 @@ function gamebookEventDescription(
   event: GameEvent,
   before?: GameState,
   after?: GameState,
+  turnSide?: Side,
 ): string | undefined {
   const side = sideValue(event.publicPayload.actor);
   if (!side) return undefined;
-  const actor = sideLabel(side);
+  const actor = side === turnSide ? "" : `${sideLabel(side)} `;
   const title = cardTitleForEvent(event, before);
-  const credits = after ? creditsFor(after, side) : undefined;
+  const creditStatus = after ? ` ${gamebookCredits(after)}` : "";
   if (event.type === "mandatory_draw" || event.type === "draw_card") {
     const drawn = before && after ? addedCards(before, after, side) : [];
     return drawn.length > 0
-      ? `${actor} zieht ${drawn.join(", ")}.${credits !== undefined ? ` Credits: ${credits}.` : ""}`
-      : `${actor} zieht eine Karte.`;
+      ? `${actor}zieht ${drawn.join(", ")}.${creditStatus}`
+      : `${actor}zieht eine Karte.${creditStatus}`;
   }
   if (event.type === "install_card") {
     const server =
@@ -7125,25 +7173,26 @@ function gamebookEventDescription(
       title && after
         ? installedPosition(after, title, server, placement)
         : undefined;
-    return `${actor} installiert ${title ?? "eine Karte"}${server ? ` in ${server}` : ""}${position ? `, ${position}` : ""}.${credits !== undefined ? ` Credits: ${credits}.` : ""}`;
+    return `${actor}installiert ${title ?? "eine Karte"}${server ? ` in ${server}` : ""}${position ? `, ${position}` : ""}.${creditStatus}`;
   }
   if (event.type === "play_event" || event.type === "play_operation") {
     const effects = resolvedEffectText(event.publicPayload);
-    return `${actor} spielt ${title ?? "eine Karte"}.${effects ? ` ${effects}` : ""}${credits !== undefined ? ` Credits: ${credits}.` : ""}`;
+    return `${actor}spielt ${title ?? "eine Karte"}.${effects ? ` ${effects}` : ""}${creditStatus}`;
   }
   if (event.type === "start_run")
-    return `${actor} startet einen Run auf ${stringValue(event.publicPayload.serverLabel) ?? "einen Server"}.`;
+    return `${actor}startet einen Run auf ${stringValue(event.publicPayload.serverLabel) ?? "einen Server"}.${creditStatus}`;
   if (event.type === "access_card")
-    return `${actor} greift auf ${title ?? "eine Karte"} zu.`;
-  if (event.type === "end_turn") return `${actor} beendet den Zug.`;
+    return `${actor}greift auf ${title ?? "eine Karte"} zu.${creditStatus}`;
+  if (event.type === "end_turn")
+    return `${actor}beendet den Zug.${creditStatus}`;
   if (event.type === "advance_card") {
     const advanced = before && after ? advancedCard(before, after) : undefined;
-    return `${actor} platziert ${advanced?.count ?? 1} Fortschrittsmarker auf ${advanced?.title ?? title ?? "eine Karte"}.${credits !== undefined ? ` Credits: ${credits}.` : ""}`;
+    return `${actor}platziert ${advanced?.count ?? 1} Fortschrittsmarker auf ${advanced?.title ?? title ?? "eine Karte"}.${creditStatus}`;
   }
   if (event.type === "score_agenda")
-    return `${actor} erzielt ${title ?? "eine Agenda"}.`;
+    return `${actor}erzielt ${title ?? "eine Agenda"}.${creditStatus}`;
   const label = stringValue(event.publicPayload.label);
-  return label ? `${actor}: ${label}` : undefined;
+  return label ? `${actor}${label}.${creditStatus}` : undefined;
 }
 
 function cardTitleForEvent(

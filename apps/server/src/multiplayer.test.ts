@@ -133,9 +133,15 @@ describe("recent match results", () => {
     if (!exported.ok) throw new Error(exported.error.message);
     expect(exported.artifact.version).toBe("gamebook-v1");
     expect(exported.artifact.markdown).toContain("# Spielprotokoll");
+    expect(exported.artifact.markdown).toContain("## Beteiligte");
+    expect(exported.artifact.markdown).toContain("**Runner:**");
+    expect(exported.artifact.markdown).toContain("**Korp:**");
     expect(exported.artifact.markdown).toContain("## Spielvorbereitung");
     expect(exported.artifact.markdown).toContain("Korp – Starthand");
     expect(exported.artifact.markdown).toContain("Runner – erste Starthand");
+    expect(exported.artifact.markdown).toContain("## Endergebnis");
+    expect(exported.artifact.markdown).toContain("**Endstand:**");
+    expect(exported.artifact.markdown).toContain("**Credits:** Runner");
     expect(exported.artifact.markdown).not.toMatch(
       /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|[A-Za-z]:\\/i,
     );
