@@ -44,6 +44,7 @@ export function corpActiveRemoteAgendaAdvanceClockComponent<
   action: LegalAction,
   dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
   boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+  closesScorelineThisTurn = false,
 ): AiDecisionScoreComponent | undefined {
   if (action.type !== "advance_card") return undefined;
   const state = corpActiveRemoteScorelineState(input);
@@ -63,6 +64,7 @@ export function corpActiveRemoteAgendaAdvanceClockComponent<
   const creditsAfterAction =
     input.playerView.own.credits - dependencies.actionCreditCost(action);
   const closesBeforeRunner =
+    closesScorelineThisTurn ||
     dependencies.corpAdvanceCompletesScore?.(input, action) === true ||
     scoringWindow?.scoreHorizon === "immediate";
   const visibleRunnerCredits =

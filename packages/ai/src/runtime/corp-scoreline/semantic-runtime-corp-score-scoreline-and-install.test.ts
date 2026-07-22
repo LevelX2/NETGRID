@@ -454,6 +454,73 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
     ).toBeGreaterThan(totalScore(installComponents));
   });
 
+  it("suppresses exposure penalties when an agenda install can be scored in the same turn", () => {
+    const agenda = agendaCard("same-turn-agenda", 2);
+    agenda.definitionId = "onr_v1_196_corporate-war";
+    const installAgenda = {
+      ...corpAction(
+        "install-same-turn-agenda",
+        "install_card",
+        {
+          placement: "root",
+          serverId: "new_remote",
+          cardType: "agenda",
+        },
+        agenda.instanceId,
+      ),
+      costs: [{ clicks: 1 }],
+    } as LegalAction;
+    const input = corpInputWithHqCards(8, [agenda], [installAgenda]);
+    input.playerView.own.clicks = 4;
+    (
+      input as AiDecisionInput & {
+        ownDeckSnapshot: {
+          deckSnapshotId: string;
+          side: "corp";
+          cards: Array<{ cardId: string; quantity: number }>;
+        };
+      }
+    ).ownDeckSnapshot = {
+      deckSnapshotId: "same-turn-scoreline-test",
+      side: "corp",
+      cards: [{ cardId: "onr_v1_196_corporate-war", quantity: 3 }],
+    };
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: () => true,
+      corpRemoteScoreContestabilityAssessment: () => ({
+        contestable: true,
+        evidence: ["test_contestable_remote"],
+      }),
+      corpScoringWindowAssessment: () =>
+        scoringWindow({
+          serverId: "new_remote",
+          windowKind: "unsafe",
+          scoreHorizon: "next_turn",
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealRelevantBeforeScore: true,
+          agendaStealSeverity: "game_ending",
+          runnerAgendaPointsAfterSteal: 7,
+          recommendedNextStep: "build_remote_ice",
+          evidence: ["test_same_turn_scoreline"],
+        }),
+    };
+
+    const keys = semanticRuntimeCorpScoreComponents(
+      input,
+      installAgenda,
+      "basic_install",
+      dependencies,
+    ).map((component) => component.key);
+
+    expect(keys).toContain("corp_same_turn_scoreline_exposure_suppressed");
+    expect(keys).toContain("corp_contestable_remote_score_penalty_suppressed");
+    expect(keys).not.toContain("corp_game_ending_scoreline_exposure_penalty");
+    expect(keys).not.toContain("corp_unsafe_delayed_scoreline_exposure");
+    expect(keys).not.toContain("corp_contestable_remote_score_penalty");
+  });
+
   it("keeps unsafe delayed scoreline penalties active under a forced scoreline clock", () => {
     const installAgenda = corpAction(
       "install-forced-unsafe-agenda",

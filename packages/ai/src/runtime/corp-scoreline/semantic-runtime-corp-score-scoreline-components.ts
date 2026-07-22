@@ -194,6 +194,7 @@ export function corpGameEndingScorelineExposurePenaltyComponent<
   input: AiDecisionInput,
   action: LegalAction,
   dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  closesScorelineThisTurn = false,
 ): AiDecisionScoreComponent | undefined {
   if (action.type !== "install_card" && action.type !== "advance_card") {
     return undefined;
@@ -202,6 +203,7 @@ export function corpGameEndingScorelineExposurePenaltyComponent<
   if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
     return undefined;
   }
+  if (closesScorelineThisTurn) return undefined;
   if (dependencies.corpAdvanceCompletesScore?.(input, action) === true) {
     return undefined;
   }
@@ -273,6 +275,7 @@ export function corpUnsafeDelayedScorelineExposureComponent<
   action: LegalAction,
   dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
   boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+  closesScorelineThisTurn = false,
 ): AiDecisionScoreComponent | undefined {
   if (action.type !== "install_card" && action.type !== "advance_card") {
     return undefined;
@@ -281,6 +284,7 @@ export function corpUnsafeDelayedScorelineExposureComponent<
   if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
     return undefined;
   }
+  if (closesScorelineThisTurn) return undefined;
   if (dependencies.corpAdvanceCompletesScore?.(input, action) === true) {
     return undefined;
   }

@@ -209,11 +209,28 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     actionSemanticCandidate,
   );
   if (unbackedExtraActionBurst) components.push(unbackedExtraActionBurst);
+  const closesScorelineThisTurn = corpScorelineActionCanCloseThisTurn(
+    corpScorelineFeasibilityForDecisionInput(input),
+    action.actionId,
+  );
+  if (closesScorelineThisTurn) {
+    components.push({
+      key: "corp_same_turn_scoreline_exposure_suppressed",
+      label: "Scoreline schließt noch im selben Zug",
+      value: 0,
+      reason: [
+        "same_turn_scoreline_closeout:true",
+        `action:${action.actionId}`,
+        "runner_has_no_action_window_before_score:true",
+      ].join("|"),
+    });
+  }
   const activeScorelineAdvance = corpActiveRemoteAgendaAdvanceClockComponent(
     input,
     action,
     dependencies,
     boardTriageState,
+    closesScorelineThisTurn,
   );
   if (activeScorelineAdvance) components.push(activeScorelineAdvance);
   const activeScorelineOffPath = corpActiveScorelineOffPathPenaltyComponent(
@@ -241,6 +258,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     input,
     action,
     dependencies,
+    closesScorelineThisTurn,
   );
   if (gameEndingExposure) components.push(gameEndingExposure);
   const unsafeDelayedExposure = corpUnsafeDelayedScorelineExposureComponent(
@@ -248,6 +266,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     action,
     dependencies,
     boardTriageState,
+    closesScorelineThisTurn,
   );
   if (unsafeDelayedExposure) components.push(unsafeDelayedExposure);
   const scorelineFunding = corpScorelineFundingAssessmentComponent(
@@ -278,6 +297,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     );
     if (
       protectedScoreline ||
+      closesScorelineThisTurn ||
       corpScoringWindowSuppressesContestableRemotePenalty(scoringWindow)
     ) {
       components.push({
@@ -289,7 +309,9 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
           ...(scoringWindow?.evidence ?? []),
           protectedScoreline
             ? "contestable_penalty_suppressed_by_protected_commitment:true"
-            : "contestable_penalty_suppressed_by_scoring_window:true",
+            : closesScorelineThisTurn
+              ? "contestable_penalty_suppressed_by_same_turn_closeout:true"
+              : "contestable_penalty_suppressed_by_scoring_window:true",
         ].join("|"),
       });
     } else {
