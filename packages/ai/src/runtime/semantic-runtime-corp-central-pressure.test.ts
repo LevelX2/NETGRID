@@ -77,6 +77,48 @@ describe("semanticRuntimeCorpCentralPressureAssessment", () => {
       recentSuccessfulAccessEvents: 1,
     });
   });
+
+  it("keeps one successful R&D access in each of three Runner turns persistent", () => {
+    const input = corpInput({
+      stateVersion: 200,
+      eventTail: [
+        publicCentralEvent("rd-access-turn-1", "access_card", "rd", 20),
+        publicRunnerEndTurn("runner-end-1", 30),
+        publicCentralEvent("rd-access-turn-2", "access_card", "rd", 80),
+        publicRunnerEndTurn("runner-end-2", 90),
+        publicCentralEvent("rd-access-turn-3", "access_card", "rd", 140),
+        publicRunnerEndTurn("runner-end-3", 150),
+      ],
+    });
+
+    const pressure = semanticRuntimeCorpCentralPressureAssessment(input, "rd");
+
+    expect(pressure).toMatchObject({
+      recentSuccessfulAccessEvents: 0,
+      recentSuccessfulAccessRunnerTurns: 3,
+    });
+    expect(pressure.evidence).toContain(
+      "corp_central_recent_successful_access_runner_turns:3",
+    );
+  });
+
+  it("decays persistent R&D access after three Runner turns without access", () => {
+    const input = corpInput({
+      stateVersion: 200,
+      eventTail: [
+        publicCentralEvent("rd-access-old-turn", "access_card", "rd", 20),
+        publicRunnerEndTurn("runner-end-old", 30),
+        publicRunnerEndTurn("runner-end-clean-1", 80),
+        publicRunnerEndTurn("runner-end-clean-2", 130),
+        publicRunnerEndTurn("runner-end-clean-3", 180),
+      ],
+    });
+
+    expect(
+      semanticRuntimeCorpCentralPressureAssessment(input, "rd")
+        .recentSuccessfulAccessRunnerTurns,
+    ).toBe(0);
+  });
 });
 
 function corpInput(
@@ -147,6 +189,24 @@ function publicCentralEvent(
       actor: "runner",
       actionType,
       serverId,
+    },
+  };
+}
+
+function publicRunnerEndTurn(
+  eventId: string,
+  stateVersionAfter: number,
+): AiDecisionInput["eventTail"][number] {
+  return {
+    eventId,
+    type: "end_turn",
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload: {
+      actor: "runner",
+      actionType: "end_turn",
     },
   };
 }

@@ -29,6 +29,7 @@ import {
   corpServerIceCount,
   corpVisibleAgendaPoints,
 } from "./semantic-runtime-corp-score-state";
+import { corpHqAgendaCount } from "./semantic-runtime-corp-score-facts";
 import {
   corpIsLastViableDeckoutMatchpointScoreline,
   corpProtectedScorelineCommitmentContext,
@@ -49,12 +50,16 @@ export function corpMatchpointHqProtectionComponent(
   if (agendaInventory?.remainingStealableAgendaPoints === 0) {
     return undefined;
   }
+  const hqAgendaCount = corpHqAgendaCount(input);
+  if (hqAgendaCount <= 0) return undefined;
   const hqPressure = semanticRuntimeCorpCentralPressureAssessment(input, "hq");
   if (
-    !hqPressure.active &&
-    !hqPressure.visibleMultiaccess &&
-    !hqPressure.eventMultiaccess &&
-    hqPressure.successfulAccessEvents <= 0
+    !hqPressure.hqAgendaExposure ||
+    (!hqPressure.visibleMultiaccess &&
+      !hqPressure.eventMultiaccess &&
+      hqPressure.recentRunOrAccessEvents <= 0 &&
+      hqPressure.recentSuccessfulAccessEvents <= 0 &&
+      hqPressure.recentSuccessfulAccessRunnerTurns <= 0)
   ) {
     return undefined;
   }
@@ -77,6 +82,7 @@ export function corpMatchpointHqProtectionComponent(
     value: serverId === "hq" ? 2200 : -1800,
     reason: [
       "runner_at_match_point:true",
+      `hq_agenda_count:${hqAgendaCount}`,
       `install_server:${serverId ?? "unknown"}`,
       ...(agendaInventory?.evidence ?? []),
       ...hqPressure.evidence,

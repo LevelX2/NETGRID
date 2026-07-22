@@ -94,8 +94,8 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
   const scoreNow = actions
     .filter(
       (entry) =>
-      actionClosesScoreNow(input, entry.action, dependencies) ||
-      actionKeepsSideSafeSameTurnScoreCloseout(input, entry, dependencies),
+        actionClosesScoreNow(input, entry.action, dependencies) ||
+        actionKeepsSideSafeSameTurnScoreCloseout(input, entry, dependencies),
     )
     .sort(
       (left, right) =>
@@ -302,7 +302,10 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
       centralPressure.serverId === "rd" &&
       centralServerNeedsProtection(input, "rd") &&
       !dependencies.corpHasCentralRezFloorFundingNeed(input) &&
-      centralPressure.recentSuccessfulAccessEvents >= 2 &&
+      Math.max(
+        centralPressure.recentSuccessfulAccessEvents,
+        centralPressure.recentSuccessfulAccessRunnerTurns,
+      ) >= 2 &&
       !concreteCentralProtectionActionExists(
         input,
         actions,

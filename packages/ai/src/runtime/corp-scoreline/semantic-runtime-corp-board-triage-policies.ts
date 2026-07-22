@@ -1586,7 +1586,10 @@ export function centralPressureShouldDriveTriage<TConsumer extends string>(
     serverId === "rd" &&
     needsProtection &&
     !dependencies.corpHasCentralRezFloorFundingNeed(input) &&
-    pressure.recentSuccessfulAccessEvents >= 2 &&
+    Math.max(
+      pressure.recentSuccessfulAccessEvents,
+      pressure.recentSuccessfulAccessRunnerTurns,
+    ) >= 2 &&
     centralDefenseAcquisitionActionExists(input, actions);
   if (severity === "critical") {
     if (needsProtection && hasProtectionAction) return true;
@@ -1726,7 +1729,10 @@ export function preScoreCentralProtectionTriage<TConsumer extends string>(
 
   if (
     centralPressureIsTriageAcute(pressureInput, rdPressure) &&
-    rdPressure.recentSuccessfulAccessEvents >= 2 &&
+    Math.max(
+      rdPressure.recentSuccessfulAccessEvents,
+      rdPressure.recentSuccessfulAccessRunnerTurns,
+    ) >= 2 &&
     centralServerNeedsProtection(input, "rd") &&
     speculativeRemoteLayeringWouldDisplaceCentralProtection(
       input,
@@ -1860,7 +1866,10 @@ export function centralPressureMustInterruptActiveScoreline(
   }
   if (
     pressure.serverId === "rd" &&
-    pressure.recentSuccessfulAccessEvents >= 2 &&
+    Math.max(
+      pressure.recentSuccessfulAccessEvents,
+      pressure.recentSuccessfulAccessRunnerTurns,
+    ) >= 2 &&
     activeScorelineClock.targetServerId === "new_remote"
   ) {
     return true;

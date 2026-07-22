@@ -18,6 +18,7 @@ export type CorpCentralPressureAssessment = {
   successfulAccessEvents: number;
   recentRunOrAccessEvents: number;
   recentSuccessfulAccessEvents: number;
+  recentSuccessfulAccessRunnerTurns: number;
   visibleMultiaccess: boolean;
   visibleVirusPressure: boolean;
   eventMultiaccess: boolean;
@@ -77,6 +78,10 @@ function buildSemanticRuntimeCorpCentralPressureAssessment(
   const recentSuccessfulAccessEvents = recentEvents.filter((event) =>
     centralSuccessfulAccessActionType(event),
   ).length;
+  const recentSuccessfulAccessRunnerTurns = centralSuccessfulAccessRunnerTurns(
+    input,
+    events,
+  );
   const eventMultiaccess = events.some((event) =>
     centralEventHasMultiaccess(event),
   );
@@ -117,6 +122,7 @@ function buildSemanticRuntimeCorpCentralPressureAssessment(
     successfulAccessEvents,
     recentRunOrAccessEvents,
     recentSuccessfulAccessEvents,
+    recentSuccessfulAccessRunnerTurns,
     visibleMultiaccess,
     visibleVirusPressure,
     eventMultiaccess,
@@ -128,6 +134,7 @@ function buildSemanticRuntimeCorpCentralPressureAssessment(
       `corp_central_successful_access_events:${successfulAccessEvents}`,
       `corp_central_recent_events:${recentRunOrAccessEvents}`,
       `corp_central_recent_successful_access_events:${recentSuccessfulAccessEvents}`,
+      `corp_central_recent_successful_access_runner_turns:${recentSuccessfulAccessRunnerTurns}`,
       `corp_central_visible_multiaccess:${visibleMultiaccess}`,
       `corp_central_visible_virus_pressure:${visibleVirusPressure}`,
       `corp_central_event_multiaccess:${eventMultiaccess}`,
@@ -137,6 +144,39 @@ function buildSemanticRuntimeCorpCentralPressureAssessment(
       ...(hqAgendaExposure ? ["corp_hq_agenda_exposure:true"] : []),
     ],
   };
+}
+
+function centralSuccessfulAccessRunnerTurns(
+  input: AiDecisionInput,
+  centralEvents: readonly PublicGameEvent[],
+): number {
+  const successfulEventIds = new Set(
+    centralEvents
+      .filter((event) => centralSuccessfulAccessActionType(event))
+      .map((event) => event.eventId),
+  );
+  const eventsById = new Map(
+    [...(input.playerView.publicEvents ?? []), ...(input.eventTail ?? [])].map(
+      (event) => [event.eventId, event],
+    ),
+  );
+  const completedRunnerTurns: boolean[] = [];
+  let accessedThisTurn = false;
+  for (const event of [...eventsById.values()].sort(
+    (left, right) =>
+      left.stateVersionAfter - right.stateVersionAfter ||
+      left.eventId.localeCompare(right.eventId),
+  )) {
+    if (successfulEventIds.has(event.eventId)) accessedThisTurn = true;
+    if (
+      eventActionType(event) === "end_turn" &&
+      stringPayload(event.publicPayload, "actor") === "runner"
+    ) {
+      completedRunnerTurns.push(accessedThisTurn);
+      accessedThisTurn = false;
+    }
+  }
+  return completedRunnerTurns.slice(-3).filter(Boolean).length;
 }
 
 export function semanticRuntimeCorpCentralRunOrAccessEventCount(
