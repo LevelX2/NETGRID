@@ -22,6 +22,7 @@ export type EffectiveDefenseContext = {
   visibleBreakCost?: number;
   runnerCanAffordVisibleBreak?: boolean;
   hasVisibleBreakerTax: boolean;
+  rezCreditGain: number;
   minimumUsefulX?: number;
   zeroEffectRisk: boolean;
   evidence: string[];
@@ -56,6 +57,7 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
   const isRezzableNow = postRezCredits >= 0;
   const defenseSignals = defenseSignalEntries(action, actionSemanticCandidate);
   const sourceDefense = visibleSourceIceDefenseProfile(input, action);
+  const rezCreditGain = visibleRezCreditGain(input, action);
   const variableRezKind = variableRezKindForAction(
     action,
     actionSemanticCandidate,
@@ -136,6 +138,7 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
     requiresPostRezPaidAbility;
   const zeroEffectRisk =
     isRezzableNow &&
+    rezCreditGain <= 0 &&
     (zeroVariableDefense ||
       (visibleBreakerCoverage &&
         !hasVisibleBreakerTax &&
@@ -158,6 +161,7 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
       ? { runnerCanAffordVisibleBreak }
       : {}),
     hasVisibleBreakerTax,
+    rezCreditGain,
     ...(minimumUsefulX !== undefined ? { minimumUsefulX } : {}),
     zeroEffectRisk,
     evidence: [
@@ -178,6 +182,7 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
           ]
         : []),
       `effective_defense_visible_breaker_tax:${hasVisibleBreakerTax}`,
+      `effective_defense_rez_credit_gain:${rezCreditGain}`,
       `effective_defense_zero_effect:${zeroEffectRisk}`,
       ...(variableRezKind
         ? [`effective_defense_variable_kind:${variableRezKind}`]
@@ -191,6 +196,19 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
       ...sourceDefense.evidence,
     ],
   };
+}
+
+function visibleRezCreditGain(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  const sourceCard = visibleActionSourceCard(input, action);
+  const rulesText = sourceCard?.rulesText;
+  if (typeof rulesText !== "string") return 0;
+  const match = /gain\s+(?:\[(\d+)\]|(\d+))\s+when\s+you\s+rez/i.exec(
+    rulesText,
+  );
+  return Math.max(0, Number(match?.[1] ?? match?.[2] ?? 0));
 }
 
 function visibleRunnerBreakCostForRezzedIce(
