@@ -10,6 +10,10 @@ import type {
   CardConditionImplementation,
   OnPlayCardAbilityImplementation,
 } from "./definition-types";
+import {
+  actionCapacityLegalActionPayloadForEffects,
+  type ActionCapacityLegalActionPayload,
+} from "./card-implementation-action-capacity";
 
 export function isPrintedCostOnPlayAbility(
   ability: CardAbilityImplementation,
@@ -46,13 +50,16 @@ export function printedCostOnPlayImplementation(
 export function deterministicOnPlayResourcePayload(
   definition: CardDefinition,
   controller: "corp" | "runner",
-): { gainCreditsAmount?: number; drawCardsAmount?: number } {
+): {
+  gainCreditsAmount?: number;
+  drawCardsAmount?: number;
+} & ActionCapacityLegalActionPayload {
+  const cardImplementation = cardImplementationForDefinitionId(definition.id);
   const implementation = printedCostOnPlayImplementation(definition);
-  if (!implementation) return {};
 
   let gainCreditsAmount = 0;
   let drawCardsAmount = 0;
-  for (const effect of implementation.effects) {
+  for (const effect of implementation?.effects ?? []) {
     const recipientMatchesController =
       "recipient" in effect &&
       (effect.recipient === "controller" || effect.recipient === controller);
@@ -64,9 +71,32 @@ export function deterministicOnPlayResourcePayload(
     }
   }
 
+  const actionCapacityPayload = implementation
+    ? actionCapacityLegalActionPayloadForEffects(
+        implementation.effects,
+        controller,
+      )
+    : {};
+  const utility = cardImplementation?.corpUtility;
+  const restrictedCorpInstallPayload =
+    controller === "corp" &&
+    utility?.kind === "gain_restricted_install_actions" &&
+    utility.amount > 0
+      ? {
+          gainActionsAmount: Math.floor(utility.amount),
+          actionCapacityTiming: "immediate" as const,
+          actionCapacityRestriction: "install_only" as const,
+          actionCapacityAllowedActionType: "install_card",
+          actionCapacityReliability: "guaranteed" as const,
+          actionCapacityExpiresAt: "side_turn_end" as const,
+        }
+      : {};
+
   return {
     ...(gainCreditsAmount > 0 ? { gainCreditsAmount } : {}),
     ...(drawCardsAmount > 0 ? { drawCardsAmount } : {}),
+    ...actionCapacityPayload,
+    ...restrictedCorpInstallPayload,
   };
 }
 

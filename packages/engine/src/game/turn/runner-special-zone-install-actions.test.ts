@@ -43,7 +43,12 @@ describe("runner special zone install action builders", () => {
 
     const install = buildRunnerValuPakInstallAction(state, {
       cardId,
-      definition: runnerCardDefinition(cardId, "program", "Valu-Pak Program", 1),
+      definition: runnerCardDefinition(
+        cardId,
+        "program",
+        "Valu-Pak Program",
+        1,
+      ),
     });
     const endSequence = buildRunnerValuPakSequenceEndAction(state);
 
@@ -54,7 +59,14 @@ describe("runner special zone install action builders", () => {
       label: "Valu-Pak Program installieren",
       source: cardId,
       costs: [{ clicks: 1, credits: 1 }],
-      payload: { cardId, v1922ValuPakInstallAction: true },
+      payload: {
+        cardId,
+        v1922ValuPakInstallAction: true,
+        actionCapacityRestriction: "program_install_only",
+        actionCapacityAllowedActionType: "install_card",
+        actionCapacityReliability: "guaranteed",
+        actionCapacityExpiresAt: "side_turn_end",
+      },
       targetRequirements: [],
       visibility: "public",
     });

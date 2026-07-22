@@ -743,6 +743,10 @@ export function buildCorpMainActions(
                 payload: {
                   ...(candidate.payload ?? {}),
                   v1922EdgerunnerTempsInstallAction: true,
+                  actionCapacityRestriction: "install_only",
+                  actionCapacityAllowedActionType: "install_card",
+                  actionCapacityReliability: "guaranteed",
+                  actionCapacityExpiresAt: "side_turn_end",
                 },
                 actionId: makeActionId(
                   candidate.type,
@@ -750,6 +754,10 @@ export function buildCorpMainActions(
                   {
                     ...(candidate.payload ?? {}),
                     v1922EdgerunnerTempsInstallAction: true,
+                    actionCapacityRestriction: "install_only",
+                    actionCapacityAllowedActionType: "install_card",
+                    actionCapacityReliability: "guaranteed",
+                    actionCapacityExpiresAt: "side_turn_end",
                   },
                   candidate.source,
                 ),

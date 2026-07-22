@@ -6,6 +6,7 @@ import {
   activatedAbilityPayload,
   scoreConversionCapabilityPayloadForEffects,
 } from "./card-implementation-runtime-activated-targets";
+import { actionCapacityLegalActionPayloadForEffects } from "./card-implementation-action-capacity";
 
 describe("activatedAbilityPayload advancement semantics", () => {
   it("publishes the exact visible all-available hosted-credit cashout", () => {
@@ -174,6 +175,11 @@ describe("activatedAbilityPayload advancement semantics", () => {
     expect(
       activatedAbilityPayload("source" as never, ability, 2),
     ).toMatchObject({
+      gainActionsAmount: 2,
+      actionCapacityTiming: "immediate",
+      actionCapacityRestriction: "unrestricted",
+      actionCapacityReliability: "guaranteed",
+      actionCapacityExpiresAt: "side_turn_end",
       scoreConversionCapability: "gain_action_capacity",
       scoreConversionActionGainAmount: 2,
       scoreConversionTiming: "immediate",
@@ -227,6 +233,10 @@ describe("score-conversion card-family contract", () => {
       expect(
         scoreConversionPayload(definitionId, "gain_actions"),
       ).toMatchObject({
+        gainActionsAmount: amount,
+        actionCapacityTiming: "immediate",
+        actionCapacityRestriction: "unrestricted",
+        actionCapacityReliability: "guaranteed",
         scoreConversionCapability: "gain_action_capacity",
         scoreConversionActionGainAmount: amount,
         scoreConversionTiming: "immediate",
@@ -253,5 +263,8 @@ function scoreConversionPayload(
     ability,
     `missing score-conversion ability on ${definitionId}`,
   ).toBeDefined();
-  return scoreConversionCapabilityPayloadForEffects(ability!.effects);
+  return {
+    ...scoreConversionCapabilityPayloadForEffects(ability!.effects),
+    ...actionCapacityLegalActionPayloadForEffects(ability!.effects, "corp"),
+  };
 }

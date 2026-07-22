@@ -15,6 +15,7 @@ import {
   onPlayCardImplementationClickCost,
 } from "../../ability-engine/card-implementation-runtime-shared";
 import { scoreConversionCapabilityPayloadForEffects } from "../../ability-engine/card-implementation-runtime-activated-targets";
+import { actionCapacityLegalActionPayloadForEffects } from "../../ability-engine/card-implementation-action-capacity";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   COUNTER_CREDIT_OPERATION_SOURCE,
@@ -775,6 +776,12 @@ export function cardImplementationOperationLegalActions(
             cardId,
             xValue: x,
             corpUtilityAbility: "x_future_actions_and_credit_forfeit",
+            actionCapacityTiming: "future_turn_start",
+            actionCapacityRestriction: "unrestricted",
+            actionCapacityReliability: "guaranteed",
+            actionCapacityExpiresAt: "duration_end",
+            actionCapacityGainAmountPerTurn: 1,
+            actionCapacityDurationTurns: x,
           },
         ),
       );
@@ -876,6 +883,10 @@ export function cardImplementationOperationLegalActions(
   const scoreConversionPayload = scoreConversionCapabilityPayloadForEffects(
     onPlayCardImplementationEffects(definition),
   );
+  const actionCapacityPayload = actionCapacityLegalActionPayloadForEffects(
+    onPlayCardImplementationEffects(definition),
+    "corp",
+  );
   const advancementPayload = advancementDistribution
     ? {
         cardImplementationEffectKind: "distribute_advancement_counters",
@@ -912,6 +923,7 @@ export function cardImplementationOperationLegalActions(
           ...advancementPayload,
           ...advancementMovePayload,
           ...scoreConversionPayload,
+          ...actionCapacityPayload,
           ...(additionalCost > 0
             ? { additionalTracePlayCost: additionalCost }
             : {}),

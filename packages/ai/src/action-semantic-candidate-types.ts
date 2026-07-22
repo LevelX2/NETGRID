@@ -169,6 +169,57 @@ export type ActionEconomyProjection = {
   evidence: string[];
 };
 
+export type ActionCapacityKind =
+  | "immediate_unrestricted_gain"
+  | "immediate_restricted_gain"
+  | "future_recurring_gain"
+  | "action_debt"
+  | "non_action_capacity";
+
+export type ActionCapacityRestriction =
+  | "unrestricted"
+  | "install_only"
+  | "program_install_only"
+  | "run_only"
+  | "unknown";
+
+export type ActionCapacityProjectionSource =
+  | "legal_action_payload"
+  | "action_debt_contract"
+  | "unknown";
+
+/**
+ * Side-safe projection of the action capacity created or consumed by one
+ * existing LegalAction. `preExistingActionCost` is intentionally separate
+ * from `listedActionCost`: a self-financing action such as Wilson's run pays
+ * its listed click from the restricted action it creates during resolution.
+ */
+export type ActionCapacityProjection = {
+  schemaVersion: "action-capacity-projection-v1";
+  kind: ActionCapacityKind;
+  timing: "immediate" | "future_turn_start" | "debt" | "unknown";
+  restriction: ActionCapacityRestriction;
+  allowedActionTypes: string[];
+  listedActionCost: number;
+  preExistingActionCost: number;
+  grossActionsGained: number;
+  generatedActionsConsumedByCurrentAction: number;
+  followupActionCapacity: number;
+  netCurrentTurnActionDelta: number;
+  actionDebt: number;
+  gainAmountPerTurn?: number;
+  durationTurns?: number;
+  expiresAt?: "side_turn_end" | "duration_end" | "unknown";
+  selfFinancing: boolean;
+  repeatable: boolean | "unknown";
+  reliability: "guaranteed" | "conditional" | "random" | "unknown";
+  sourceCounterType?: string;
+  sourceCounterCost?: number;
+  source: ActionCapacityProjectionSource;
+  confidence: ActionSemanticConfidence;
+  evidence: string[];
+};
+
 export type ActionTimingProfile = {
   phase?: string;
   turnSide?: "runner" | "corp";
@@ -446,6 +497,7 @@ export type ActionSemanticCandidate = {
   constraints: SemanticConstraint[];
   costProfile: ActionCostProfile;
   economyProjection?: ActionEconomyProjection;
+  actionCapacityProjection?: ActionCapacityProjection;
   timingProfile: ActionTimingProfile;
   targetContext?: ActionTargetContext;
   runProjectionSummary?: ActionRunProjectionSummary;

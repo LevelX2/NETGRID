@@ -427,6 +427,11 @@ describe("corp-operation-resolution", () => {
     expect(actions).toHaveLength(1);
     expect(actions[0]?.payload).toMatchObject({
       cardId: OPERATION_ID,
+      gainActionsAmount: 2,
+      actionCapacityTiming: "immediate",
+      actionCapacityRestriction: "unrestricted",
+      actionCapacityReliability: "guaranteed",
+      actionCapacityExpiresAt: "side_turn_end",
       scoreConversionCapability: "gain_action_capacity",
       scoreConversionActionGainAmount: 2,
       scoreConversionTiming: "immediate",

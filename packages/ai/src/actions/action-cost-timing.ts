@@ -270,6 +270,8 @@ function additionalCostFields(action: LegalAction): string[] {
     "cardImplementationCostKind",
     "cardImplementationCost",
     "cardImplementationTapSourceCost",
+    "cardImplementationSourceCounterType",
+    "cardImplementationSourceCounterCost",
     "sourceTapped",
     "publicRevealKind",
     "revealKind",

@@ -19,6 +19,7 @@ import type {
   ActivatedCardAbilityImplementation,
   CardEffectImplementation,
 } from "./definition-types";
+import { actionCapacityLegalActionPayloadForEffects } from "./card-implementation-action-capacity";
 
 export function activatedAbilityPayload(
   cardId: CardInstanceId,
@@ -54,6 +55,10 @@ export function activatedAbilityPayload(
   );
   const scoreConversionPayload = scoreConversionCapabilityPayloadForEffects(
     ability.effects,
+  );
+  const actionCapacityPayload = actionCapacityLegalActionPayloadForEffects(
+    ability.effects,
+    state?.cardInstances[cardId]?.controller ?? "corp",
   );
   const scoresSourceAsAgenda = ability.effects.some(
     (effect) => effect.kind === "score_source_as_agenda",
@@ -142,6 +147,7 @@ export function activatedAbilityPayload(
       ? makeRunLegalActionProjectionPayload(makeRunEffect)
       : {}),
     ...scoreConversionPayload,
+    ...actionCapacityPayload,
     ...(ability.timing === "runner_cost_penalty_support" &&
     state?.runnerCostPenaltySupportWindow
       ? {

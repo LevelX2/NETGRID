@@ -35,6 +35,66 @@ describe("AI input DTO score-conversion contract", () => {
     expect(input.legalActions[0]?.payload).not.toHaveProperty("privateProbe");
   });
 
+  it("preserves the complete side-safe action-capacity contract", () => {
+    const action = conversionAction();
+    action.payload = {
+      cardId: "corp-action-bank",
+      gainActionsAmount: 1,
+      actionCapacityTiming: "immediate",
+      actionCapacityRestriction: "unrestricted",
+      actionCapacityReliability: "guaranteed",
+      actionCapacityExpiresAt: "side_turn_end",
+      cardImplementationSourceCounterType: "boon",
+      cardImplementationSourceCounterCost: 1,
+      privateProbe: "must-not-cross-dto",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: playerView(action),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "action-capacity-dto",
+      decisionId: "action-capacity-dto:corp:1",
+      actionNumber: 1,
+      profileId: "action-capacity-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      gainActionsAmount: 1,
+      actionCapacityTiming: "immediate",
+      actionCapacityRestriction: "unrestricted",
+      actionCapacityReliability: "guaranteed",
+      actionCapacityExpiresAt: "side_turn_end",
+      cardImplementationSourceCounterType: "boon",
+      cardImplementationSourceCounterCost: 1,
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      gainActionsAmount: 1,
+      actionCapacityRestriction: "unrestricted",
+    });
+    expect(input.legalActions[0]?.payload).not.toHaveProperty("privateProbe");
+  });
+
+  it("keeps an Engine-resolved action total above the normal turn start", () => {
+    const action = conversionAction();
+    const view = playerView(action);
+    view.own.clicks = 5;
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "resolved-extra-actions-dto",
+      decisionId: "resolved-extra-actions-dto:corp:1",
+      actionNumber: 1,
+      profileId: "resolved-extra-actions-dto-test",
+    });
+
+    expect(input.playerView.own.clicks).toBe(5);
+  });
+
   it("preserves side-safe hosted-credit and run-action semantics", () => {
     const action = runnerSemanticAction();
     const input = buildAiDecisionInputDto({

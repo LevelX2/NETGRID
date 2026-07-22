@@ -45,6 +45,10 @@ export function buildRunnerValuPakInstallAction(
     {
       cardId: input.cardId,
       v1922ValuPakInstallAction: true,
+      actionCapacityRestriction: "program_install_only",
+      actionCapacityAllowedActionType: "install_card",
+      actionCapacityReliability: "guaranteed",
+      actionCapacityExpiresAt: "side_turn_end",
       ...(input.runnerProgramTrashBeforeInstall
         ? { runnerProgramTrashBeforeInstall: true }
         : {}),

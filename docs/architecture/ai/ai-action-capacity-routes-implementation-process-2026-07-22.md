@@ -527,3 +527,33 @@ Der reproduzierbare Startaudit über 618 aktive Hintprofile meldet:
 
 Diese Findings sind Arbeitsvorrat für P1, P2 und P6, keine offenen
 fachlichen Blocker.
+
+## P1-Ergebnis
+
+P1 projiziert Aktionskapazität nun als eigenen side-sicheren Vertrag an jedem
+`ActionSemanticCandidate`. Der Vertrag trennt gelistete Aktionskosten von
+vorher benötigten Aktionen, Bruttogewinn von Folgekapazität und
+Current-turn-Netto von zukünftigen Grants. Dadurch wird Wilsons
+selbstfinanzierter Run nicht als freier Folgeklick gezählt, während Overtime,
+Corporate Boon und Pacifica freie Folgekapazität sowie Edgerunner Temps und
+Valu-Pak ausschließlich kompatible Installationskapazität veröffentlichen.
+Aktionsschuld und mehrturnige Grants bleiben getrennte Klassen.
+
+Die Engine veröffentlicht dafür strukturierte LegalAction-Fakten aus den
+deklarativen Effekten und Utility-Verträgen; Kartentext wird nicht gelesen.
+Die AI-DTO-Allowlist erhält Betrag, Timing, Restriktion, Verfall,
+Zuverlässigkeit, Selbstfinanzierung und sichtbare Counterkosten.
+
+P1-Prüfstand:
+
+- 49/49 fokussierte Projektions-, DTO- und Engine-Vertragstests grün;
+- 69/69 Longtail-/Runner-/Corp-Main-Action-Regressionstests grün;
+- 18/18 Wilson-/Scorekonversionsregressionen grün;
+- AI-Shard 2 mit 1.037/1.037 und Shard 3 mit 911/911 Tests grün;
+- AI-Shard 1 mit 1.069/1.070 Tests; der einzige rote starre
+  Deckkatalog-Zähler (`41` statt `40`) ist auf unverändertem `main`
+  reproduziert;
+- Engine-Typecheck grün;
+- der AI-Typecheck besitzt auf Branch und unverändertem `main` dieselben drei
+  bereits vorhandenen Nullability-Befunde in
+  `run-access-decision-model.ts`.
