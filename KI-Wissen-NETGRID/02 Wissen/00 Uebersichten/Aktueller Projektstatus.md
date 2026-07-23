@@ -100,7 +100,12 @@ Stand: 2026-07-23
   Commitments, EndTurn-Invariante, Highlighter-R&D- und
   Manhunt-Flatline-Akzeptanzszenarien sowie spätere Implementierungsgates sind
   dokumentiert. Dies ist ein Architekturziel und noch keine Behauptung über
-  den vollständig erreichten Runtime-Stand.
+  den vollständig erreichten Runtime-Stand. Das erste Nutzerreview legt
+  zusätzlich fest: alle relevanten Pläne bleiben resident, genau ein Executor
+  handelt, nicht anderweitig zugeordnete Handkarten können eigene
+  kartenbezogene Planinstanzen bilden, Runner-Abwehr und Corp-Punish starten
+  jeweils als gemeinsames Modul, und harte Prioritätsklassen stehen vor der
+  Zahlenwertung innerhalb einer Klasse.
 - Runner-Fehlentscheidungen aus dem aktiven Match
   `match_fd22cad3cc454a9e` sind ohne produktive Laufzeitänderung als exakte
   Decision-Checkpoints gesichert. Die zweite redundante

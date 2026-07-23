@@ -1,7 +1,7 @@
 # KI-Planebene – modulares Zielkonzept
 
 Status: **Work in Progress**
-Dokumentversion: `0.1`
+Dokumentversion: `0.2`
 Stand: 2026-07-23
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
@@ -565,8 +565,13 @@ Das Portfolio unterscheidet:
 - beliebig viele fachlich relevante `dormant`, `blocked` oder `suspended`
   Instanzen innerhalb eines technisch begrenzten Speichers.
 
-Die heutige Grenze von höchstens zwei Background-Projekten ist keine
-fachliche Zielinvariante. Eine spätere technische Begrenzung muss:
+Die heutige Grenze von höchstens zwei Background-Projekten entfällt im
+Zielzustand als fachliche Invariante. Alle weiterhin relevanten
+Planinstanzen bleiben resident, damit Fortschritt, Blocker und
+Wiederaufnahmebedingungen nicht bei jeder Entscheidung neu aufgebaut werden
+müssen.
+
+Eine spätere rein technische Speicherbegrenzung muss:
 
 - ausreichend hoch sein;
 - deterministisch sein;
@@ -784,6 +789,35 @@ Bedingung gilt:
 
 Ein bloßer Einzelaktionsscore ist kein Wechselgrund.
 
+Die Prioritätsklassen sind hart lexikografisch. Kein Zahlenwert eines
+niedrigeren Rangs kann einen ausführbaren Plan einer höheren Klasse
+überstimmen. Zahlenwerte und normalisierte Merkmale entscheiden nur zwischen
+Plänen derselben Klasse.
+
+### 14.5 Entstehung strategischer und taktischer Pläne
+
+Eine langfristige strategische Kampagne verlangt eine belastbar vom eigenen
+Deck getragene Strategie oder Fähigkeit. Ein einzelner zufälliger Draw darf
+keine neue langfristige Deckidentität erzeugen.
+
+Ein taktischer Plan verlangt dagegen eine konkrete aktuelle Spielsituation:
+
+- existierendes Remote für Remote-Contest;
+- sinnvolle HQ-Kartenexposition für HQ-Druck;
+- erreichbares R&D für R&D-Probe;
+- sichtbare Score-Threat;
+- tatsächlicher Tag-, Damage- oder Survival-Kontext;
+- konkrete Funding-, Coverage- oder Schutzlücke.
+
+Ein neutraler Fallback benötigt weder einen Strategieanker noch eine
+Spezialkarte, aber einen sicheren kurzfristigen Zweck.
+
+Planmodule erhalten die side-sichere eigene Deckstrategie, DeckCapabilities
+und bekannte Rollen ihres Decks. Eine R&D-Kampagne darf deshalb wissen, dass
+noch eigene Multiaccess-, Search- oder Druckwerkzeuge im Deck vorhanden sind,
+und Draw oder Search als planinterne Steps erwägen. Sie kennt dadurch weder
+die verdeckte Kartenreihenfolge noch gegnerische Hidden-Zonen.
+
 ## 15. Steps, Fähigkeiten und LegalActions
 
 ### 15.1 Capability-first
@@ -959,6 +993,65 @@ Ein neuer positiver Rohscore ist kein Abbruchgrund.
 - Corp Chance Observation → Tag → Urban Renewal → Scorched Earth;
 - Agenda installieren → dreimal advancen → im selben Zug scoren.
 
+### 18.5 Bindungsstärken außerhalb atomarer Commitments
+
+Nicht jeder laufende Plan benötigt dieselbe Starrheit. Der Kernel
+unterscheidet vier Persistenzpolitiken:
+
+```ts
+type PlanPersistencePolicy =
+  | "locked_sequence"
+  | "sticky_goal"
+  | "flexible_support"
+  | "recurring_cadence";
+```
+
+#### `locked_sequence`
+
+Eine bereits begonnene, zeitlich oder ressourcenseitig irreversible
+Mehraktionsfolge. Beispiele:
+
+- turn-limitierte Vorbereitung plus Zugriff;
+- garantierte Same-Turn-Scorefolge;
+- begonnene Tag-/Damage-Killroute.
+
+Sie wird nur durch ein erzwungenes Fenster, eine echte Invalidierung oder
+einen notwendigen höherklassigen Terminal-/Survival-Interrupt gebrochen.
+Treffen zwei P1-Pfade aufeinander, entscheidet der side-spezifische
+Terminalsolver anhand von Reihenfolge und Garantiegrad.
+
+#### `sticky_goal`
+
+Ein wichtiges fortlaufendes Ziel wie notwendige Breaker-Coverage,
+R&D-Kampagne oder Scoring-Remote. Ein höherklassiger Plan darf
+unterbrechen. Innerhalb derselben Klasse verlangt ein Wechsel die definierte
+Marge oder einen fachlichen Blocker.
+
+#### `flexible_support`
+
+Ein Supportziel wie allgemeiner Geldaufbau. Der Plan darf leicht an einen
+neuen Parentbedarf gebunden oder durch einen besseren Plan ersetzt werden,
+solange sein bisheriger Fortschritt nicht verloren geht.
+
+Beispiel:
+
+```text
+Economy sammelt allgemeine Reserve
+→ neuer Remote-Contest wird wichtiger
+→ vorhandene Credits finanzieren nun den Contest
+→ kein Rückschritt und kein verlorenes Commitment
+```
+
+#### `recurring_cadence`
+
+Ein wiederkehrender Plan wie eine Bank, der gemäß Cadence einmal handelt und
+danach bewusst an den Vordergrund zurückgibt.
+
+Ein höherer Prioritätsrang unterbricht damit gewöhnliche und sticky Pläne.
+Ein `locked_sequence` besitzt zusätzlich seinen expliziten
+Commitment-Schutz; es wird nicht allein wegen eines neuen Zahlenwerts
+aufgebrochen.
+
 ## 19. Fortschritt und Wiederholung
 
 ### 19.1 Outcome statt Action-ID
@@ -1105,11 +1198,15 @@ Allgemeine Same-Turn-Commitment-Reservierung
 
 ## 24. Offene Kernfragen
 
-- **Arbeitsannahme:** Die fachliche Background-Anzahl wird nicht auf zwei
-  begrenzt; eine technische Höchstzahl wird erst mit realen
-  Performance-Daten festgelegt.
-- **Offen:** Ob Planprioritäten innerhalb einer Klasse als normalisierte
-  Zahlen, geordnete Merkmalsvektoren oder beides implementiert werden.
+- **Kernentscheidung:** Alle relevanten Pläne bleiben resident. Es gibt genau
+  einen Executor, aber keine fachliche Grenze von zwei Background-Plänen.
+  Eine rein technische Höchstzahl wird nur mit deterministischer,
+  diagnostizierter Verdrängung eingeführt.
+- **Kernentscheidung:** Prioritätsklassen sind hart lexikografisch.
+  Zahlenwerte oder geordnete Merkmale entscheiden nur innerhalb derselben
+  Klasse.
+- **Offen:** Ob die Bewertung innerhalb einer Klasse als normalisierte
+  Zahlen, geordnete Merkmalsvektoren oder beides implementiert wird.
 - **Offen:** Wie ein später belegter echter „Nichtstun ist besser“-Fall für
   `EndTurn` formal nachgewiesen werden müsste.
 - **Arbeitsannahme:** Strategic Intent bleibt eine eigene Ebene oberhalb der
@@ -1261,6 +1358,12 @@ Parameter:
 - bekannte Zugriffshistorie und Sättigung;
 - Serverpfad und Finanzierungsbedarf.
 
+Das Modul kennt aus der eigenen Deckstrategie und den eigenen
+DeckCapabilities, welche R&D-Druck-, Multiaccess-, Search- und
+Pfadwerkzeuge grundsätzlich vorhanden sind. Es darf daraus gezielte Draw-,
+Search-, Funding- oder Installations-Steps ableiten, statt nur aktuell
+angebotene Runs zu bewerten.
+
 Mögliche Phasen:
 
 ```text
@@ -1363,25 +1466,79 @@ Verantwortung:
 - sinnvollen Draw, Search, Install oder Eventeinsatz koordinieren;
 - generische Karten ohne eigenen Spezialplan verwertbar machen.
 
-Jede Zielkarte benötigt einen Zweck:
+Alle eigenen Handkarten werden bei der Planerkennung klassifiziert:
 
 ```text
-supports_plan_instance
-unlocks_capability
-improves_board_engine
-converts_current_window
-safe_generic_development
+1. Beitrag zu einem bereits vorhandenen Plan
+2. eigenständige kartenbezogene Planinstanz
+3. derzeit nicht sinnvoll entwickelbar
 ```
 
-Nicht zulässig:
+Eine Karte der ersten Gruppe wird als Route oder Beitrag des vorhandenen
+Plans behandelt. Eine Economy-Karte kann beispielsweise den Funding-Step
+eines R&D-Plans erfüllen; eine Multiaccess-Hardware kann unmittelbar zum
+R&D-Plan gehören.
+
+Für eine Karte der zweiten Gruppe erzeugt das gemeinsame Modul eine eigene,
+an die konkrete Karteninstanz gebundene Planinstanz:
+
+```text
+runner.develop_board_and_hand:<cardInstanceId>
+```
+
+Damit entstehen nicht für jede Karte neue Plantypen. Es entstehen mehrere
+resident bleibende Instanzen desselben Moduls, die der Scheduler einzeln
+bewertet. Bei drei unabhängigen Handkarten können daher drei Kandidaten
+existieren. Der aktuell höchste handelt; die beiden anderen bleiben erhalten
+und werden nach jeder Zustandsänderung neu bewertet.
+
+Der Zweck einer kartenbezogenen Instanz darf die eigenständige sinnvolle
+Nutzung der Karte selbst sein. Sie muss nicht künstlich einem bereits
+existierenden strategischen Plan zugerechnet werden. Der Modulzustand
+beschreibt mindestens:
+
+- Zielkarteninstanz und Kartensemantik;
+- erwarteten eigenständigen oder unterstützenden Nutzen;
+- Kosten, benötigte Slots und Ressourcen;
+- notwendige Vorbereitungs- und Folgeaktionen;
+- Timing und Verfallsfenster;
+- Completion- und Abandonment-Bedingung.
+
+Beispiel:
+
+```text
+Eine spezielle Karte wie Delta passt in keinen vorhandenen Domainplan
+→ eigene kartenbezogene Planinstanz
+→ Funding oder Setup als Steps
+→ Karte spielen/installieren
+→ erwarteten Effekt konvertieren
+→ Plan completed
+```
+
+Das Modul priorisiert diese Instanzen auf Planebene. Es wählt nicht erst nach
+Auswahl eines einzigen pauschalen „beste Handkarte“-Plans intern irgendeine
+Karte aus. Dadurch bleiben Planranking, Persistenz und Wechselgründe pro Karte
+sichtbar.
+
+Eine Karte darf mehreren bestehenden Plänen helfen. Eine zusätzliche
+eigenständige Instanz wird aber nur erzeugt, wenn sie darüber hinaus einen
+eigenen belastbaren Entwicklungszweck besitzt. So entstehen keine
+wertgleichen Duplikatpläne für dieselbe Nutzung.
+
+Die dritte Gruppe bleibt diagnostiziert, aber nicht ausführbar. Sie kann nach
+neuen Credits, Slots, Boardzuständen oder Strategiebedingungen später eine
+Planinstanz erhalten.
+
+Nicht zulässig bleiben:
 
 - Karte spielen, nur weil sie legal und roh positiv bewertet ist;
 - turn-limitierte Vorbereitung ohne Commitment;
 - Installation ohne absehbaren Nutzen oder mit kritischem Ressourcenbruch;
 - Draw bei voller Hand ohne Überlaufbehandlung.
 
-`play_best_hand_card` bleibt höchstens eine interne Routenauswahl, kein
-eigenständiger strategischer Fallback.
+`play_best_hand_card` entfällt als pauschaler strategischer Fallback. Seine
+berechtigte Funktion wird durch einzeln bewertete kartenbezogene
+Planinstanzen ersetzt.
 
 ### 27.6 `runner.economy`
 
@@ -1468,6 +1625,11 @@ gegnerischen Deck möglich“ reicht nicht automatisch.
 Die genaue Ordnung zwischen Tag-Clear, hostile-State-Entfernung,
 Handkarten-Draw und Präventionsinstallation bleibt modulinterne
 Verfeinerung.
+
+Wenn eine notwendige Prävention oder Recovery nicht auf der Hand liegt, darf
+das Modul planintern Draw-, Search-, Funding- und Installations-Steps
+erzeugen. „Abwehr“ bezeichnet damit das Ziel, nicht nur eine aktuell
+verfügbare Abwehraktion.
 
 ### 27.8 `runner.convert_run_window`
 
@@ -1680,6 +1842,11 @@ lifecycle: dormant
 Der Plan darf über mehrere Züge bestehen, während Scoring oder Economy den
 Vordergrund übernimmt.
 
+Tag-Druck, Credit-Denial und Damage bleiben zunächst Modi dieser gemeinsamen
+Kampagne. Das Modul priorisiert seine internen Linien selbst. Eine spätere
+Trennung ist nur nötig, wenn Spiel-Evidence zeigt, dass ihre Lebenszyklen und
+Fortschrittsbegriffe nicht mehr sinnvoll gemeinsam modellierbar sind.
+
 ### 28.7 `corp.execute_punish_sequence`
 
 **Klasse:** `bounded_sequence`
@@ -1878,18 +2045,33 @@ Jedes Modul besitzt eine interne Schema- oder Modulversion. Änderungen an
 
 - **Kernentscheidung:** Runner und Corp besitzen getrennte Registries und
   Scheduler-Policies.
+- **Kernentscheidung:** Alle relevanten Planinstanzen bleiben resident; nach
+  jeder Aktion werden sie neu bewertet, ohne sie neu aufbauen zu müssen.
 - **Kernentscheidung:** Economy ist sowohl selbständiges Planmodul als auch
   Supportlieferant für Parentpläne.
+- **Kernentscheidung:** Prioritätsklassen entscheiden vor Zahlenwerten.
+  Zahlenwerte gelten nur innerhalb derselben Klasse.
+- **Kernentscheidung:** Strategische Kampagnen benötigen Deckunterstützung;
+  taktische Pläne benötigen eine aktuelle Situation. Planmodule dürfen die
+  eigenen DeckCapabilities für Draw-, Search- und Entwicklungs-Steps nutzen.
 - **Kernentscheidung:** Same-Turn-Payoffs werden durch Commitments, nicht
   lediglich durch positive Action-Scores abgesichert.
-- **Arbeitsannahme:** Die drei heutigen Runner-Survival-Typen gehen in einem
+- **Kernentscheidung:** Nicht zugeordnete, sinnvoll entwickelbare Handkarten
+  erzeugen eigene kartenbezogene Instanzen eines gemeinsamen
+  Hand-/Boardentwicklungsmoduls.
+- **Kernentscheidung:** Die drei heutigen Runner-Survival-Typen gehen
+  zunächst in einem
   gemeinsamen `runner.defense_and_recovery`-Modul auf.
 - **Arbeitsannahme:** Die heutigen Economy-Typen bleiben als interne Modi oder
   Instanzvarianten erhalten, nicht als unabhängige Scheduler-Sonderfälle.
-- **Arbeitsannahme:** `runner.play_best_hand_card` wird als eigener
-  strategischer Plan entfernt.
-- **Arbeitsannahme:** Corp-Punish wird in langlebige Kampagne und atomare
-  Ausführung getrennt.
+- **Kernentscheidung:** `runner.play_best_hand_card` wird als pauschaler Plan
+  entfernt und durch einzeln bewertete kartenbezogene Planinstanzen ersetzt.
+- **Kernentscheidung:** Corp-Punish startet als gemeinsame langlebige
+  Kampagne mit internen Modi und atomarem Ausführungs-Kindplan.
+- **Kernentscheidung:** Planbindung verwendet `locked_sequence`,
+  `sticky_goal`, `flexible_support` und `recurring_cadence`. Ein höherer
+  Prioritätsrang unterbricht gewöhnliche Pläne; atomare Commitments besitzen
+  den engeren Terminal-/Survival-Vertrag.
 - **Offen:** Ob `corp.ambush_and_bluff` und
   `corp.hand_and_agenda_management` bereits in der ersten
   Implementierungsstufe eigene Module werden oder zunächst als Phasen
@@ -2130,6 +2312,37 @@ Broker-Bank background, cadence 1
 
 Der Wechselgrund lautet `cadence_yield`. Er ist kein zufälliger Wechsel durch
 Action-Score-Nähe.
+
+### 35.3 Höherklassiger Plan während einer laufenden Bindung
+
+Bei `sticky_goal`, `flexible_support` und `recurring_cadence` übernimmt ein
+ausführbarer höherklassiger Plan. Der bisherige Plan wird je nach Zustand
+suspendiert, neu gebunden oder gibt nach Cadence ab.
+
+Bei `locked_sequence` gilt:
+
+1. P0-Pflichtfenster werden immer aufgelöst.
+2. Eine nachweislich notwendige höherklassige Terminal- oder
+   Survival-Reaktion darf die Sequenz brechen.
+3. Zwei konkurrierende P1-Pfade werden durch den Terminalsolver nach
+   Garantiegrad und Reihenfolge entschieden.
+4. Ein bloß höherer Wert innerhalb derselben oder einer niedrigeren Klasse
+   bricht die Sequenz nicht.
+5. Wird die Sequenz objektiv unmöglich, wird sie invalidiert statt künstlich
+   fortgeführt.
+
+Ein flexibler Geldplan kann dagegen ohne Verlust das Ziel wechseln:
+
+```text
+allgemeine Reserve wird aufgebaut
+→ neuer höherklassiger Plan entsteht
+→ vorhandene Liquidität wird dessen Funding zugeordnet
+→ Economy-Fortschritt bleibt erhalten
+```
+
+Damit sind Planpersistenz und Commitments nicht identisch. Die genaue
+Kalibrierung von Sticky-Margen bleibt empirisch; die vier
+Bindungskategorien sind Teil des Rahmenvertrags.
 
 ## 36. Akzeptanzszenario A – Highlighter-R&D
 
@@ -2710,6 +2923,25 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 0.2 – 2026-07-23
+
+- Nutzerreview zu Portfolio, Handkartenplänen, Abwehr, Corp-Punish,
+  Prioritätsklassen, Bindungsstärken und Deckstrategie eingearbeitet;
+- alle relevanten Planinstanzen bleiben resident und werden nach jeder Aktion
+  neu bewertet, während genau ein Executor handelt;
+- nicht zugeordnete, sinnvoll entwickelbare Handkarten erzeugen eigene
+  kartenbezogene Instanzen eines gemeinsamen Moduls;
+- Runner-Abwehr und Corp-Punish starten jeweils als gemeinsames Modul mit
+  interner Spezialisierung;
+- Prioritätsklassen sind hart lexikografisch, Zahlen gelten nur innerhalb
+  derselben Klasse;
+- Planbindung in `locked_sequence`, `sticky_goal`, `flexible_support` und
+  `recurring_cadence` getrennt;
+- strategische Kampagnen an eigene Deckunterstützung und taktische Pläne an
+  aktuelle Situationsbedingungen gebunden;
+- planinterne Draw-, Search-, Funding- und Installations-Steps aus eigenen
+  DeckCapabilities ausdrücklich zugelassen.
 
 ### 0.1 – 2026-07-23
 
