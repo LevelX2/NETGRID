@@ -13,8 +13,9 @@ Aktueller Paketstand:
 - PF00: abgeschlossen, Commit `2d865be44`
 - PF01: abgeschlossen, Commit `46f5df39b`
 - PF02: abgeschlossen, Commit `e19287242`
-- PF03: abgeschlossen
-- nächstes Paket: PF04
+- PF03: abgeschlossen, Commit `0b4af1640`
+- PF04: abgeschlossen
+- nächstes Paket: PF05
 
 ## Zielprüfung
 
@@ -400,7 +401,10 @@ Die Plan-to-Action-Brücke wird zur einzigen Action-Bindung.
   `continuation` implementieren;
 - Action-ID plus StateVersion im Route Head prüfen;
 - Future-/Stale-ID-Guards ergänzen;
-- Psychic Friends als Breaker-Coverage semantisch unmöglich machen;
+- Psychic Friend nicht über generisches `install_card` als beliebige
+  Breaker-Coverage akzeptieren: Die erste Kopie darf den belegten
+  Code-Gate-Bedarf erfüllen, eine weitere Kopie oder eine falsche
+  Wall-/Sentry-Rolle aber nicht;
 - planlokale Routenauswahl darf nur Step-kompatible Kandidaten vergleichen.
 
 ### Done-Gate
