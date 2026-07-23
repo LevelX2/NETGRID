@@ -28,6 +28,7 @@ export type PlanSchedulerContext = {
   input: AiDecisionInput;
   actionCandidates: readonly ActionSemanticCandidate[];
   turnKey: string;
+  domain?: unknown;
 };
 
 export type PlanMaterialization = {
