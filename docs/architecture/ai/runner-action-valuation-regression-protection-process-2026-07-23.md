@@ -1,6 +1,6 @@
 # Runner-Aktionsbewertung: Regressionsschutz aus Match fd22cad3
 
-Status: P3 abgeschlossen, lokale Integration ausstehend
+Status: abgeschlossen
 
 ## Quelle und Vorgabe
 
