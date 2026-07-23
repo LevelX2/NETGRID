@@ -1,8 +1,8 @@
 # KI-Planebene – modulares Zielkonzept
 
-Status: **Work in Progress**  
-Dokumentversion: `0.1`  
-Stand: 2026-07-23  
+Status: **Work in Progress**
+Dokumentversion: `0.1`
+Stand: 2026-07-23
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
 
@@ -1117,7 +1117,787 @@ Allgemeine Same-Turn-Commitment-Reservierung
 - **Arbeitsannahme:** Forced-Window-Resolution bleibt ein gemeinsamer
   Untermechanismus und kein normales strategisches Planmodul.
 
-## 25. Änderungsverlauf
+## 25. Aktuelles TacticalPlan-Inventar
+
+Der produktive Typvertrag enthält derzeit 20 TacticalPlan-Typen. Diese Liste
+ist Ist-Evidence, nicht automatisch das endgültige Moduldesign.
+
+### 25.1 Runner: aktuelle Typen
+
+| Aktueller Typ | Heutiger Zweck | Zielrichtung |
+| --- | --- | --- |
+| `runner.obtain_breaker_coverage` | fehlende ICE-Coverage beschaffen | in `runner.rig_and_coverage` weiterführen |
+| `runner.contest_remote` | aktuelles Remote prüfen oder angreifen | als eigenes Zielmodul weiterführen |
+| `runner.opportunistic_central_run` | kurzfristige HQ-/R&D-Probe | durch dauerfähiges `runner.pressure_central` ablösen |
+| `runner.clear_tags_or_survive` | Tags oder akute Gefahr beseitigen | in `runner.defense_and_recovery` zusammenführen |
+| `runner.convert_success_window` | aktuelles Successful-Run-Fenster nutzen | als reaktiven Kindplan weiterführen |
+| `runner.survival_defense` | Damage-/Flatline-Risiko behandeln | in `runner.defense_and_recovery` zusammenführen |
+| `runner.restore_hand_buffer` | Handpuffer wiederherstellen | Step/Fachbereich von `runner.defense_and_recovery` |
+| `runner.develop_hand_card` | bestimmte Handkarte spielbar machen | in `runner.develop_board_and_hand` überführen |
+| `runner.play_best_hand_card` | generischer Handkarten-Fallback | nicht unverändert behalten; zweckgebunden in `runner.develop_board_and_hand` |
+| `runner.build_credit_base` | konkreten Funding-Gap schließen | Modus von `runner.economy` |
+| `runner.build_credit_bank` | wiederkehrende Bank laden | Recurring-Instanz von `runner.economy` |
+| `runner.cash_out_credit_bank` | Bank für Bedarf auszahlen | gebundener Kindplan von `runner.economy` |
+
+### 25.2 Corp: aktuelle Typen
+
+| Aktueller Typ | Heutiger Zweck | Zielrichtung |
+| --- | --- | --- |
+| `corp.create_score_window` | konkrete Agenda-Scorefolge herstellen | in `corp.score_agenda` weiterführen |
+| `corp.develop_finite_economy` | begrenzte Economy installieren und nutzen | Modus von `corp.economy` |
+| `corp.activate_persistent_economy` | dauerhafte Economy aktivieren | Modus von `corp.economy` |
+| `corp.build_credit_bank` | Corp-Bank aufbauen | Recurring-Instanz von `corp.economy` |
+| `corp.fund_strategy_reserve` | Strategie- oder Rezreserve finanzieren | Supportmodus von `corp.economy` |
+| `corp.establish_scoring_remote` | strategisches Zielremote aufbauen | als eigenes Development-Projekt weiterführen |
+| `corp.rez_defense` | aktuelles Rez-Fenster beantworten | Interrupt von `corp.defend_servers` |
+| `corp.apply_punish_pressure` | Tag-/Damage-/Punish-Fenster nutzen | in Kampagne und atomare Ausführung trennen |
+
+### 25.3 Strukturelle Bewertung des Ist-Inventars
+
+Das Inventar besitzt bereits wichtige Bausteine, aber noch keine vollständige
+Welt, in der alle freiwilligen Aktionen zuverlässig aus Plänen entstehen.
+
+Wesentliche Lücken:
+
+- zentraler Runner-Druck ist als kurzfristige Opportunity statt als
+  persistente Kampagne modelliert;
+- Runner-Abwehr ist über drei überschneidende Typen verteilt;
+- Handentwicklung und „beste Karte“ besitzen keinen zwingenden strategischen
+  Zweck- und Folgeaktionsvertrag;
+- Economy ist in mehrere Plantypen aufgeteilt, ohne dass Parentbedarf,
+  unabhängiger Wirtschaftsplan und konkrete Route immer sauber getrennt sind;
+- Corp-Punish bildet aktuelle Konversion ab, aber nicht ausreichend den
+  mehrere Züge wartenden Tag-/Damage-Kampagnenzustand;
+- Opening, allgemeiner Boardaufbau, Agenda-Flood und mehrere
+  deckstrategische Kampagnen sind nicht als vollständige Module abgedeckt;
+- der aktuelle Plan kann im Live-Auswahlweg diagnostisch bleiben, während
+  globale Action-Arbitration eine andere Aktion auswählt.
+
+## 26. Zielstruktur der Planregistries
+
+### 26.1 Gemeinsamer Registry-Vertrag
+
+Der Kernel kennt zwei Registries:
+
+```ts
+RunnerPlanModuleRegistry
+CorpPlanModuleRegistry
+```
+
+Jeder Registry-Eintrag deklariert:
+
+```ts
+type PlanModuleManifest = {
+  moduleId: string;
+  moduleVersion: string;
+  side: "runner" | "corp";
+  executionClasses: PlanExecutionClass[];
+  supportedStrategyLineIds: string[];
+  discoverySignals: string[];
+  supportedCapabilityKinds: string[];
+  allowedTargetKinds: string[];
+  diagnosticSchemaVersion: string;
+  invariantTestIds: string[];
+};
+```
+
+### 26.2 Keine automatische Seitenfreigabe
+
+Ein gemeinsamer Capability-Resolver bedeutet nicht, dass ein Planmodul auf
+beiden Seiten automatisch verwendet werden darf. Runner- und Corp-Economy
+können gemeinsame technische Hilfen nutzen, bleiben aber fachlich getrennte
+Module.
+
+### 26.3 Modulaufnahme
+
+Ein neues Planmodul wird nur aufgenommen, wenn:
+
+- ein eigener längerfristiger Zweck, Lebenszyklus oder Fortschrittsbegriff
+  besteht;
+- der Zweck nicht nur eine einzelne Karte oder Action-ID beschreibt;
+- vorhandene Module den Zweck nicht als Phase oder Step aufnehmen können;
+- Discovery, Completion, Abandonment und Diagnostik definiert sind;
+- mindestens ein Positiv- und ein Gegenfallszenario existiert.
+
+Eine neue Karte allein rechtfertigt kein neues Planmodul.
+
+## 27. Runner-Zielmodule
+
+Die folgende Liste ist das angestrebte Modulportfolio. Einzelne IDs sind noch
+Arbeitsnamen; ihre fachlichen Grenzen sind führender als die konkrete
+Benennung.
+
+### 27.1 `runner.opening_strategy`
+
+**Klasse:** `bounded_sequence`
+**Rolle:** Opening-/Setup-Vordergrund
+**Status:** Arbeitsannahme, bislang kein entsprechender TacticalPlan-Typ
+
+Zweck:
+
+- Mulligan im Kontext der Deckstrategie;
+- erste strategische Linie aktivieren;
+- notwendige Basis-Coverage, Economy oder Engine priorisieren;
+- nach erfolgreichem Opening in normale Kampagnen übergeben.
+
+Der Plan endet, sobald:
+
+- die deckstrategisch notwendige Startfähigkeit vorhanden ist;
+- ein dringender Interrupt übernimmt;
+- oder die Opening-Phase ausdrücklich abgebrochen wird.
+
+### 27.2 `runner.pressure_central`
+
+**Klasse:** `strategic_campaign`
+**Rolle:** Vordergrund, zeitweise suspendierbar
+**Status:** neu aufzubauen; ersetzt den rein opportunistischen Ein-Zug-Plan
+
+Parameter:
+
+- Ziel `hq` oder `rd`;
+- Druckmodus `probe`, `sustained`, `engine_growth` oder `closeout`;
+- deckstrategische Linie;
+- relevante Access-Engine;
+- bekannte Zugriffshistorie und Sättigung;
+- Serverpfad und Finanzierungsbedarf.
+
+Mögliche Phasen:
+
+```text
+assess_target
+fund_access
+find_or_install_access_tool
+open_path
+probe
+compound_access
+exploit_known_payoff
+closeout
+recover_and_resume
+```
+
+Planinterner Fortschritt:
+
+- neuer oder tieferer Zugriff;
+- neue relevante Information;
+- Agenda- oder Trash-Konversion;
+- Aufbau einer Multiaccess-/Highlighter-Engine;
+- Verringerung der Siegdistanz;
+- Senkung realer Zugangskosten.
+
+Eine HQ- und eine R&D-Instanz dürfen gleichzeitig Kandidaten sein. Nur eine
+ist Executor. Ein Zielwechsel verlangt Planarbitration, nicht bloß eine andere
+Run-Action.
+
+### 27.3 `runner.contest_remote`
+
+**Klasse:** `bounded_sequence` oder bei wiederkehrendem Ziel
+`strategic_campaign`
+**Rolle:** Vordergrund; bei unmittelbarer Score-Threat P2
+**Status:** aktuellen Typ weiterentwickeln
+
+Mögliche Phasen:
+
+```text
+classify_remote
+assess_score_threat
+fund_access
+obtain_path_answer
+run_remote
+resolve_access
+recontest_or_complete
+```
+
+Der Plan muss unterscheiden:
+
+- akute Siegagenda;
+- wirtschaftlich wertvolles Asset;
+- leeres oder bekannt wertloses Remote;
+- Ambush-/Damage-Risiko;
+- deckstrategisch begründeten wiederholten Remote-Druck.
+
+`draw_for_answer` ist nur zulässig, wenn:
+
+- eine konkrete fehlende Antwort benannt ist;
+- ein Draw diese Antwort plausibel liefern kann;
+- Handüberlauf und verbleibende Folgeaktionen den Plan nicht entwerten.
+
+### 27.4 `runner.rig_and_coverage`
+
+**Klasse:** `development_project` oder dringender `bounded_sequence`
+**Rolle:** Vordergrund/Background je Dringlichkeit
+**Status:** Ausbau von `runner.obtain_breaker_coverage`
+
+Verantwortung:
+
+- Wall-, Code-Gate-, Sentry- und Spezial-Coverage;
+- Universal- und probabilistische Coverage;
+- MU-/Slot-Konflikte;
+- Suche, Draw, Recovery und Installation;
+- Bezahlbarkeit des anschließenden Runpfads;
+- deckstrategischer Rig-first- oder Minimal-Rig-Modus.
+
+Mögliche Phasen:
+
+```text
+identify_required_coverage
+locate_answer
+fund_answer
+resolve_mu
+install_answer
+validate_run_path
+```
+
+Das Modul darf nicht bei jeder spielbaren Programminstallation wachsen. Es
+arbeitet auf eine konkrete Coverage- oder Rig-Fähigkeit hin.
+
+### 27.5 `runner.develop_board_and_hand`
+
+**Klasse:** `bounded_sequence` oder `development_project`
+**Rolle:** Vordergrund/Support
+**Status:** Ziel für `develop_hand_card` und `play_best_hand_card`
+
+Verantwortung:
+
+- eine strategisch nützliche Karte spielbar machen;
+- ein Deck- oder Board-Engine-Stück entwickeln;
+- sinnvollen Draw, Search, Install oder Eventeinsatz koordinieren;
+- generische Karten ohne eigenen Spezialplan verwertbar machen.
+
+Jede Zielkarte benötigt einen Zweck:
+
+```text
+supports_plan_instance
+unlocks_capability
+improves_board_engine
+converts_current_window
+safe_generic_development
+```
+
+Nicht zulässig:
+
+- Karte spielen, nur weil sie legal und roh positiv bewertet ist;
+- turn-limitierte Vorbereitung ohne Commitment;
+- Installation ohne absehbaren Nutzen oder mit kritischem Ressourcenbruch;
+- Draw bei voller Hand ohne Überlaufbehandlung.
+
+`play_best_hand_card` bleibt höchstens eine interne Routenauswahl, kein
+eigenständiger strategischer Fallback.
+
+### 27.6 `runner.economy`
+
+**Klasse:** je Instanz `bounded_sequence`, `recurring_cycle` oder
+`development_project`
+**Rolle:** Support, Vordergrund oder Background
+**Status:** Zusammenführung der heutigen Creditbase-/Bank-/Cashout-Typen
+
+Interne Modi:
+
+```text
+fund_parent_need
+restore_liquid_floor
+build_general_reserve
+develop_economy_engine
+load_bank
+cash_out_bank
+maintain_run_budget
+neutral_credit_fallback
+```
+
+Das Modul unterscheidet:
+
+- konkreten Finanzierungsbedarf eines Parentplans;
+- allgemeine Sicherheits- oder Runreserve;
+- eigenständige langfristige Economy-Engine;
+- Bankaufbau mit Cadence;
+- Auszahlung zu einem konkreten Konversionszweck;
+- Basic Credit als neutralen Fallback.
+
+Die Schwelle „genug Geld“ ist kontextabhängig. Sie berücksichtigt:
+
+- nächste Planroute;
+- Survival- und Trace-Reserve;
+- erwartete Run- und Breakkosten;
+- mögliche alternative Kartenentwicklung;
+- Deckphase und Bankkonversion.
+
+Mehr Geld wird bei vorhandener Reserve nicht automatisch wertlos. Es verliert
+aber gegenüber konkret ausführbaren strategischen Plänen an Priorität.
+
+### 27.7 `runner.defense_and_recovery`
+
+**Klasse:** `reactive_interrupt`, `bounded_sequence` oder
+`development_project`
+**Rolle:** Interrupt/Vordergrund
+**Status:** Zielzusammenführung von Tag-, Survival- und Handpufferplänen
+
+Das Modul besitzt eine gemeinsame Threat-Priorisierung für:
+
+- unmittelbare Flatline-Gefahr;
+- Meat-, Net- und Core-Damage-Risiko;
+- Tags und sichtbare Tag-Punish-Ketten;
+- zu kleinen Handpuffer;
+- relevante hostile Status-, Counter- oder Viruszustände, soweit die
+  Rules Engine hierfür Runner-Aktionen anbietet;
+- notwendige Damage-Prävention oder Recovery.
+
+Mögliche Phasen:
+
+```text
+assess_threats
+prevent_terminal_damage
+break_punish_chain
+clear_tags
+remove_hostile_state
+restore_hand_buffer
+install_prevention
+return_to_suspended_plan
+```
+
+Prioritätsregeln:
+
+1. unmittelbar terminale Gefahr verhindern;
+2. eine sichtbare gegnerische Punish-Kette unterbrechen;
+3. unvermeidbaren Damage durch ausreichenden Puffer überleben;
+4. Tags oder hostile Zustände kosteneffizient entfernen;
+5. Prävention für eine belastbar erwartete Gefahr aufbauen.
+
+Das Modul darf auch entscheiden, nichts zu tun und dormant zu bleiben, wenn
+kein materieller Threat vorliegt. „Tag vorhanden“ oder „Damage-Karte im
+gegnerischen Deck möglich“ reicht nicht automatisch.
+
+Die genaue Ordnung zwischen Tag-Clear, hostile-State-Entfernung,
+Handkarten-Draw und Präventionsinstallation bleibt modulinterne
+Verfeinerung.
+
+### 27.8 `runner.convert_run_window`
+
+**Klasse:** `reactive_interrupt` oder gebundener Kindplan
+**Rolle:** Interrupt
+**Status:** Weiterentwicklung von `runner.convert_success_window`
+
+Verantwortung:
+
+- Successful-Run-Trigger;
+- Access-Modifikationen;
+- Multiaccess-Aktivierungen;
+- Credit-, Trash- oder Folge-Run-Payoffs;
+- Ziel- und Choice-Auflösung innerhalb des begonnenen Runplans.
+
+Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
+auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.
+
+### 27.9 Runner-neutraler Fallback
+
+Der Runner-Scheduler erzeugt keinen zusätzlichen undurchsichtigen
+„do something“-Plan. Er aktiviert eine sichere Instanz eines vorhandenen
+generischen Moduls:
+
+- `runner.economy:neutral_credit_fallback`;
+- `runner.develop_board_and_hand:safe_generic_development`;
+- `runner.defense_and_recovery:restore_hand_buffer`;
+- eine risikoarme `runner.pressure_central:probe`, wenn wirklich begründet.
+
+Die Auswahl bleibt eine Planentscheidung mit Zweck und Abschlussbedingung.
+
+## 28. Corp-Zielmodule
+
+### 28.1 `corp.opening_and_board_foundation`
+
+**Klasse:** `bounded_sequence`
+**Rolle:** Opening-/Setup-Vordergrund
+**Status:** Arbeitsannahme, bislang kein entsprechender TacticalPlan-Typ
+
+Verantwortung:
+
+- erste Zentralserver-Schutzböden;
+- deckstrategisch erforderliches Remote oder Economy-Fundament;
+- Rez-Reserve;
+- Übergabe in Score-, Economy-, Punish- oder Glacier-Kampagne.
+
+Der Plan darf nicht pauschal jedes Central mit einem ICE versehen. Er folgt
+Deckstrategie, Hand, Agendaexposition und erwarteter früher Run-Gefahr.
+
+### 28.2 `corp.score_agenda`
+
+**Klasse:** `bounded_sequence` oder `strategic_campaign`
+**Rolle:** Vordergrund, Closeout P1
+**Status:** Weiterentwicklung von `corp.create_score_window`
+
+Interne Modi:
+
+```text
+fast_advance
+rush
+remote_score
+overadvance
+counter_transfer
+same_turn_closeout
+```
+
+Mögliche Phasen:
+
+```text
+select_agenda
+select_score_path
+fund_score_path
+prepare_or_select_remote
+install_agenda
+generate_action_capacity
+place_advancement
+protect_window
+score_agenda
+closeout_or_repeat
+```
+
+Der Plan berechnet die vollständige Konversionsroute und reserviert:
+
+- Agendaquelle;
+- Zielserver;
+- Credits;
+- Klicks oder Action Capacity;
+- Advancement-Counter;
+- benötigte Schutz-/Rezreserve.
+
+Ein garantierter Same-Turn-Score ist ein Commitment. Einzelne Economy- oder
+ICE-Aktionen dürfen ihn nicht aufbrechen.
+
+### 28.3 `corp.establish_scoring_remote`
+
+**Klasse:** `development_project`
+**Rolle:** Background, zeitweise Vordergrund
+**Status:** vorhandenen Typ fortführen
+
+Der Plan folgt `RemoteDoctrineProfile` und besitzt:
+
+```text
+select_target
+establish_first_stop
+fund_rez_reserve
+harden_to_protection_target
+payload_ready
+convert_score_window
+maintain_or_reopen
+```
+
+Fortschritt wird über effektiven Schutz und Nutzbarkeit gemessen, nicht über
+ICE-Anzahl allein.
+
+Ein vorbereitetes Zielremote bleibt über Economy-, Draw-, Punish- und
+Central-Interrupts erhalten. Fast-Advance-Decks erhalten nicht automatisch
+dieses dauerhafte Projekt.
+
+### 28.4 `corp.defend_servers`
+
+**Klasse:** `development_project` mit `reactive_interrupt`-Kindern
+**Rolle:** Background/Vordergrund/Interrupt
+**Status:** erweitert `corp.rez_defense`
+
+Verantwortung:
+
+- dynamische HQ- und R&D-Schutzböden;
+- Schutz des Zielremotes;
+- ICE-Installations- und Rezreserve;
+- Rez-Entscheidungen im aktuellen Run;
+- Glacier-/Tax-Fortschritt;
+- Reaktion auf sichtbare Runner-Rig- und Economy-Änderungen.
+
+Mögliche Kindpläne:
+
+- `rez_current_ice`;
+- `raise_hq_floor`;
+- `raise_rd_floor`;
+- `harden_target_remote`;
+- `restore_rez_reserve`.
+
+Eine Rez-Entscheidung ist ein Interrupt. Sie darf den Parent-Scoring- oder
+Remoteplan suspendieren, aber nicht vergessen.
+
+### 28.5 `corp.economy`
+
+**Klasse:** `bounded_sequence`, `recurring_cycle` oder
+`development_project`
+**Rolle:** Support/Vordergrund/Background
+**Status:** Zusammenführung von vier aktuellen Economy-Typen
+
+Interne Modi:
+
+```text
+fund_parent_need
+fund_rez_reserve
+fund_score_route
+fund_punish_route
+develop_finite_economy
+drain_finite_economy
+activate_persistent_economy
+build_bank
+cash_out_bank
+neutral_credit_fallback
+```
+
+Das Modul kennt:
+
+- verbleibende Nutzungen und Amortisation;
+- Installations- und Rez-Kosten;
+- Zugcadence;
+- Credits bis zur konkreten Score-, Rez- oder Punish-Konversion;
+- alternative sinnvolle Boardentwicklung;
+- Risiko eines wertlosen Economy-Remotes.
+
+Wiederholte Nutzung ist zulässig, solange sie das Fundingziel real
+voranbringt. Nach erreichter Zielreserve muss das Modul dem finanzierten
+strategischen Plan die Ausführung überlassen.
+
+### 28.6 `corp.punish_campaign`
+
+**Klasse:** `strategic_campaign` oder `development_project`
+**Rolle:** dormant/Background/Vordergrund
+**Status:** neu aus `corp.apply_punish_pressure` herauszulösen
+
+Verantwortung:
+
+- aus Deckstrategie ableiten, welche Tag-, Trace-, Credit-Denial- und
+  Damage-Linien belastbar getragen werden;
+- benötigte Komponenten und Reihenfolge verwalten;
+- gegnerische Triggerbedingungen beobachten;
+- Credits und Handkartenquellen reservieren;
+- zwischen bloßem Druck, wirtschaftlicher Bestrafung und Lethal unterscheiden;
+- auf ein ausführbares Punish-Fenster warten.
+
+Beispielzustand:
+
+```text
+strategy: tag_and_bag
+tag_source: Chance Observation
+damage_sources: Urban Renewal + Scorched Earth
+required_credits: 11
+required_clicks: 3
+trigger: runner_attempted_run_last_turn
+runner_grip: 5
+projected_damage: 9
+lifecycle: dormant
+```
+
+Der Plan darf über mehrere Züge bestehen, während Scoring oder Economy den
+Vordergrund übernimmt.
+
+### 28.7 `corp.execute_punish_sequence`
+
+**Klasse:** `bounded_sequence`
+**Rolle:** P1-/P3-Vordergrund; Kind von `corp.punish_campaign`
+**Status:** Ziel für die atomare Ausführung des heutigen Punish-Plans
+
+Mögliche Phasen:
+
+```text
+validate_trigger
+apply_tag_or_trace
+win_or_price_trace
+apply_credit_denial
+apply_damage
+confirm_lethal_or_complete
+```
+
+Vor Beginn wird die ganze Route geprüft:
+
+- Kosten und Klicks;
+- Trace-Garantie oder erwartete Gebote;
+- Tagbedingung;
+- Runner-Handpuffer;
+- Damage-Summe und Prävention;
+- legale Reihenfolge.
+
+Eine planfremde Aktion wie Closed Accounts darf eine garantierte
+Drei-Aktionen-Flatline-Sequenz nicht aufbrechen.
+
+### 28.8 `corp.ambush_and_bluff`
+
+**Klasse:** `development_project` oder `bounded_sequence`
+**Rolle:** Background/Vordergrund
+**Status:** WIP-Lücke
+
+Verantwortung:
+
+- deckstrategisch getragene Ambush-/Bluff-Remotes;
+- Contestability statt pauschaler Überhärtung;
+- Kosten-/Damage-/Trash-Payoff;
+- Wiederverwendung oder Aufgabe nach Expose/Access;
+- Abgrenzung zu echtem Scoring-Remote.
+
+Ein unbekanntes Remote allein erzeugt keinen Bluffplan. Das eigene Deck und
+die konkrete Hand müssen die Linie tragen.
+
+### 28.9 `corp.hand_and_agenda_management`
+
+**Klasse:** `bounded_sequence` oder `development_project`
+**Rolle:** Vordergrund/Support
+**Status:** WIP-Lücke
+
+Verantwortung:
+
+- Agenda-Flood und HQ-Exposition;
+- sinnvollen Draw, Refresh, Recovery und Discard;
+- Agenda in eine Scoreline überführen;
+- überzählige Karten im Cleanup zweckgebunden priorisieren;
+- Deckout-Risiko und notwendige R&D-Erholung.
+
+Das Modul darf Hidden-Info nur aus der eigenen HQ/R&D und öffentlichen
+Ereignissen verwenden.
+
+### 28.10 Corp-neutraler Fallback
+
+Wie beim Runner wird kein freier globaler Actionsieger verwendet.
+
+Mögliche sichere Instanzen:
+
+- `corp.economy:neutral_credit_fallback`;
+- `corp.hand_and_agenda_management:safe_draw_or_refresh`;
+- `corp.defend_servers:raise_visible_floor`;
+- `corp.opening_and_board_foundation:safe_generic_development`.
+
+## 29. Gemeinsame Resolver und Services
+
+Nicht jede wiederverwendbare Funktion ist ein eigener Plan.
+
+Gemeinsame, side-spezifisch parametrisierte Services dürfen sein:
+
+- Funding-Route;
+- Action-Capacity-Route;
+- Draw-/Search-Route;
+- Installations- und Slot-Route;
+- Run-/Access-Projektion;
+- Damage-/Survival-Projektion;
+- Advancement-/Score-Projektion;
+- Trace-/Bid-Projektion;
+- Discard-/Keep-Bewertung.
+
+Ein Service:
+
+- besitzt keine langfristige strategische Autorität;
+- liefert Routen und Bewertungen an ein Planmodul;
+- darf keinen Executor wählen;
+- darf kein Plan-Memory ersetzen.
+
+Beispiel:
+
+```text
+R&D-Plan fordert 5 Credits an
+→ Runner-Funding-Service liefert Livewire, Bank-Cashout und Basic Credits
+→ R&D-Plan oder Economy-Kindplan wählt eine Route
+```
+
+## 30. Abdeckung der Aktionsfamilien
+
+### 30.1 Runner
+
+| Aktionsfamilie | Planherkunft |
+| --- | --- |
+| Basic Credit | Economy-Plan, Supportbedarf oder neutraler Fallback |
+| Draw | Coverage-, Defense-, Handentwicklungs- oder konkreter Support-Step |
+| Programm/Hardware/Ressource installieren | verlangte Fähigkeit des Rig-, Defense-, Economy- oder Strategieplans |
+| Event spielen | Route des aktiven Plans mit vollständigem Follow-up-Vertrag |
+| Run starten | Central-, Remote- oder gebundener Run-Plan |
+| Run-Ability/Run-Event | Route des auslösenden Runplans |
+| Tag entfernen | Defense-and-Recovery |
+| Access stehlen/trashen/ablehnen | Auflösungs-Step des auslösenden Runplans |
+| Ability aktivieren | Step-Route eines Plans, nicht freie Kartennutzung |
+| Discard | Cleanup-Resolution unter Plan- und Keep-Kontext |
+| EndTurn | System-Gate, kein Plan |
+
+### 30.2 Corp
+
+| Aktionsfamilie | Planherkunft |
+| --- | --- |
+| Basic Credit | Economy-, Reserve- oder neutraler Fallbackplan |
+| Draw | Hand-/Agenda-Management, Economy oder konkreter Supportbedarf |
+| ICE installieren | Defense-, Remote-, Score- oder Opening-Plan |
+| Asset/Upgrade installieren | Economy-, Ambush-, Remote- oder Strategieplan |
+| Agenda installieren | Scoreplan mit Exposure-/Commitment-Vertrag |
+| Advance/Score | Scoreplan |
+| Operation spielen | Economy-, Score-, Punish-, Defense- oder Handplan |
+| ICE/Asset rezzen | aktueller Defense-/Economy-/Ambush-Interrupt |
+| Trace-Bid/Choice | auslösender Punish-/Defense-/Scoreplan |
+| Ability aktivieren | Step-Route eines Plans |
+| Discard | Hand-/Agenda-Management oder Cleanup-Resolution |
+| EndTurn | System-Gate, kein Plan |
+
+### 30.3 Coverage-Gate
+
+Die Implementierung ist erst vollständig umgestellt, wenn ein automatischer
+Check für jede produktiv auftretende freiwillige Action-Familie nachweist:
+
+```text
+selectedAction
+→ executorPlanInstanceId
+→ phase
+→ stepId
+→ routeId
+```
+
+Eine nicht zuordenbare Action ist ein Fehler und darf nicht über einen
+alphabetischen oder freien Semantic-Runtime-Fallback ausgeführt werden.
+
+## 31. Planinterne Weiterentwicklung
+
+### 31.1 Zulässige Verfeinerung
+
+Ein Planmodul darf später eigenständig ergänzen:
+
+- neue Phasen;
+- präzisere Fortschrittsmetriken;
+- neue Karten- und Capability-Routen;
+- bessere Risiko- oder Payoff-Projektion;
+- neue deckstrategische Varianten desselben Zwecks;
+- modulinterne Prioritäten zwischen Steps;
+- modulbezogene Regressionstests und Diagnostik.
+
+### 31.2 Nicht zulässige Verfeinerung
+
+Ein Modul darf nicht:
+
+- eine globale Override-Schicht einführen;
+- fremde Pläne löschen;
+- Executor-Exklusivität umgehen;
+- Ressourcen doppelt reservieren;
+- LegalActions erzeugen;
+- side-unsafe Daten anfordern;
+- `EndTurn` freischalten;
+- einen allgemeinen Kernel-Sonderfall nur für eine Karte verlangen, solange
+  ein generischer Commitment- oder Capability-Vertrag ausreicht.
+
+### 31.3 Modulversionierung
+
+Jedes Modul besitzt eine interne Schema- oder Modulversion. Änderungen an
+`moduleState` müssen:
+
+- deterministisch sein;
+- alte lokale Version-0-Daten nicht zwingend migrieren;
+- Tests und Diagnostik gemeinsam aktualisieren;
+- keine zweite parallele Runtime erzeugen.
+
+## 32. WIP-Entscheidungen zum Modulzuschnitt
+
+- **Kernentscheidung:** Runner und Corp besitzen getrennte Registries und
+  Scheduler-Policies.
+- **Kernentscheidung:** Economy ist sowohl selbständiges Planmodul als auch
+  Supportlieferant für Parentpläne.
+- **Kernentscheidung:** Same-Turn-Payoffs werden durch Commitments, nicht
+  lediglich durch positive Action-Scores abgesichert.
+- **Arbeitsannahme:** Die drei heutigen Runner-Survival-Typen gehen in einem
+  gemeinsamen `runner.defense_and_recovery`-Modul auf.
+- **Arbeitsannahme:** Die heutigen Economy-Typen bleiben als interne Modi oder
+  Instanzvarianten erhalten, nicht als unabhängige Scheduler-Sonderfälle.
+- **Arbeitsannahme:** `runner.play_best_hand_card` wird als eigener
+  strategischer Plan entfernt.
+- **Arbeitsannahme:** Corp-Punish wird in langlebige Kampagne und atomare
+  Ausführung getrennt.
+- **Offen:** Ob `corp.ambush_and_bluff` und
+  `corp.hand_and_agenda_management` bereits in der ersten
+  Implementierungsstufe eigene Module werden oder zunächst als Phasen
+  vorhandener Module starten.
+- **Offen:** Ob Opening-Pläne nach der ersten Spielphase vollständig
+  abgeschlossen oder als diagnostische Deckphaseninstanz behalten werden.
+
+## 33. Änderungsverlauf
 
 ### 0.1 – 2026-07-23
 
@@ -1127,3 +1907,9 @@ Allgemeine Same-Turn-Commitment-Reservierung
 - Lebenszyklus, Portfolio, Prioritätsklassen und Scheduler-Zyklus definiert;
 - Parent-/Support-Beziehungen, Ressourcen und Commitments festgelegt;
 - Outcome-basierter Fortschritt und EndTurn-Invariante aufgenommen.
+- alle 20 aktuellen TacticalPlan-Typen inventarisiert und einer Zielrichtung
+  zugeordnet;
+- Runner- und Corp-Zielmodule einschließlich Economy, zentralem Druck,
+  Abwehr, Scoring, Defense und Punish-Kampagne beschrieben;
+- Action-Familien einem Planursprung zugeordnet;
+- Registry-, Service- und Modulverfeinerungsvertrag ergänzt.
