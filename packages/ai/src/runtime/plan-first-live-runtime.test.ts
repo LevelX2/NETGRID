@@ -3,6 +3,8 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import {
   aiInput,
   legalAction,
+  server,
+  visibleCard,
 } from "../semantic-ai-runtime-cutover.test-support";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
@@ -54,13 +56,10 @@ describe("authoritative plan-first live runtime", () => {
 
   it("uses the engine lane for a sole zero-click EndTurn", () => {
     resetResidentPlanPortfolioMemory();
-    const action = legalAction(
-      "end",
-      "runner",
-      "end_turn",
-      "End turn",
-      { credits: 0, clicks: 0 },
-    );
+    const action = legalAction("end", "runner", "end_turn", "End turn", {
+      credits: 0,
+      clicks: 0,
+    });
     const input = aiInput("runner", [action]);
     input.playerView.own.clicks = 0;
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
@@ -86,21 +85,16 @@ describe("authoritative plan-first live runtime", () => {
     first.playerView.own.credits = 0;
     context.chooseSemanticRuntimeAction(first, {});
 
-    const end = legalAction(
-      "end",
-      "runner",
-      "end_turn",
-      "End turn",
-      { credits: 1, clicks: 0 },
-    );
+    const end = legalAction("end", "runner", "end_turn", "End turn", {
+      credits: 1,
+      clicks: 0,
+    });
     const later = aiInput("runner", [end]);
     later.decisionId = first.decisionId;
     later.playerView.stateVersion = first.playerView.stateVersion + 10;
     later.playerView.own.clicks = 0;
 
-    expect(
-      context.chooseSemanticRuntimeAction(later, {}),
-    ).toMatchObject({
+    expect(context.chooseSemanticRuntimeAction(later, {})).toMatchObject({
       actionId: "end",
       reasonCode: "plan_first.engine_window",
       fallbackUsed: false,
@@ -109,19 +103,90 @@ describe("authoritative plan-first live runtime", () => {
 
   it("fails visibly instead of ending a turn with usable clicks", () => {
     resetResidentPlanPortfolioMemory();
-    const action = legalAction(
-      "end",
-      "runner",
-      "end_turn",
-      "End turn",
-      { credits: 0, clicks: 0 },
-    );
+    const action = legalAction("end", "runner", "end_turn", "End turn", {
+      credits: 0,
+      clicks: 0,
+    });
     const input = aiInput("runner", [action]);
     input.playerView.own.clicks = 3;
+    input.playerView.opponent.deckCount = 1;
 
-    expect(() =>
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrow(PlanResolutionFailure);
+    expect(() => liveContext().chooseSemanticRuntimeAction(input, {})).toThrow(
+      PlanResolutionFailure,
+    );
+  });
+
+  it("permits early EndTurn only through the rules-proven Corp deckout plan", () => {
+    resetResidentPlanPortfolioMemory();
+    const action = legalAction("end", "runner", "end_turn", "End turn", {
+      credits: 0,
+      clicks: 0,
+    });
+    const input = aiInput("runner", [action]);
+    input.playerView.own.clicks = 3;
+    input.playerView.opponent.deckCount = 0;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: "end",
+      reasonCode: "plan_first.runner.secure_terminal_win",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.secure_terminal_win" },
+    });
+  });
+
+  it("creates a run-window plan for legal access choices even without a stale run snapshot", () => {
+    resetResidentPlanPortfolioMemory();
+    const decline = legalAction(
+      "decline",
+      "runner",
+      "decline_trash",
+      "Decline trash",
+      { credits: 0, clicks: 0 },
+    );
+    const steal = legalAction(
+      "steal",
+      "runner",
+      "steal_agenda",
+      "Steal agenda",
+      { credits: 0, clicks: 0 },
+    );
+    const input = aiInput("runner", [decline, steal]);
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      fallbackUsed: false,
+      reasonCode: "plan_first.runner.convert_run_window",
+      decisionDebug: { planKind: "runner.convert_run_window" },
+    });
+  });
+
+  it("admits a visibly known agenda remote directly as a witnessed contest plan", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-remote",
+      "runner",
+      "start_run",
+      "Run remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const draw = legalAction("draw", "runner", "draw_card", "Draw", {
+      credits: 0,
+      clicks: 1,
+    });
+    const input = aiInput("runner", [run, draw]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [visibleCard("agenda", "corp", "agenda")]),
+    ];
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: "run-remote",
+      reasonCode: "plan_first.runner.contest_remote",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.contest_remote" },
+    });
   });
 
   it("does not invoke legacy semantic choice or tactical override selection", () => {
@@ -154,9 +219,7 @@ describe("authoritative plan-first live runtime", () => {
   });
 });
 
-function liveContext(
-  overrides: Record<string, unknown> = {},
-) {
+function liveContext(overrides: Record<string, unknown> = {}) {
   const dependencies = {
     buildActionSemanticCandidates,
     deckCapabilitiesForInput: () => ({}),

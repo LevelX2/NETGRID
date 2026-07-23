@@ -11,7 +11,9 @@ import type { PlanSchedulerContext } from "./plan-scheduler";
 
 describe("Runner core plan modules", () => {
   it("contains no free play-best-card owner", () => {
-    expect(createRunnerCorePlanModules().map((module) => module.moduleId)).toEqual([
+    expect(
+      createRunnerCorePlanModules().map((module) => module.moduleId),
+    ).toEqual([
       "runner.economy",
       "runner.rig_and_coverage",
       "runner.defense_and_recovery",
@@ -56,13 +58,49 @@ describe("Runner core plan modules", () => {
       runnerContext,
     );
 
-    expect(materialized.candidates.map((entry) => entry.candidate.actionId)).toEqual([
-      "install-psychic",
-    ]);
-    expect(materialized.candidates[0]?.sourceRoles).toEqual([
+    expect(
+      materialized.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["install-psychic"]);
+    expect(materialized.candidates[0]?.sourceRoles).toContain(
       "breaker_code_gate",
-    ]);
+    );
   });
+
+  it.each([
+    ["breaker_sentry", "breaker_killer"],
+    ["breaker_code_gate", "breaker_decoder"],
+    ["breaker_wall", "breaker_fracter"],
+  ] as const)(
+    "maps canonical %s coverage to the concrete card role %s",
+    (requiredRole, cardRole) => {
+      const install = candidate(
+        `install-${cardRole}`,
+        "install_card",
+        "install.card",
+        `card-${cardRole}`,
+      );
+      const module = coreModule("runner.rig_and_coverage", () => [cardRole]);
+      const runnerContext = context([install], {
+        coverageGaps: [
+          {
+            gapId: requiredRole,
+            requiredRole,
+            priorityClass: "P4",
+            evidenceCode: "test_coverage_alias",
+            deckHasAnswer: true,
+          },
+        ],
+      });
+      const proposal = module.discover(runnerContext)[0]!;
+      const instance = instantiatePlanProposal(proposal, 10);
+
+      expect(
+        module
+          .materialize(instance, {} as never, runnerContext)
+          .candidates.map((entry) => entry.candidate.actionId),
+      ).toEqual([`install-${cardRole}`]);
+    },
+  );
 
   it("does not create a second Psychic Friend route after the gap is gone", () => {
     const module = coreModule("runner.rig_and_coverage", () => [
@@ -215,9 +253,7 @@ function coreModule(
 ) {
   return createRunnerCorePlanModules(
     rolesForDefinitionId ? { rolesForDefinitionId } : {},
-  ).find(
-    (module) => module.moduleId === moduleId,
-  )!;
+  ).find((module) => module.moduleId === moduleId)!;
 }
 
 function context(

@@ -51,8 +51,13 @@ export type CorpAmbushSignal = {
 
 export type CorpHandManagementSignal = {
   handPlanId: string;
-  phase: "draw_for_plan" | "agenda_flood_relief" | "discard_window";
+  phase:
+    | "draw_for_plan"
+    | "develop_card"
+    | "agenda_flood_relief"
+    | "discard_window";
   sourceDefinitionIds?: string[];
+  sourceInstanceId?: string;
   agendaCount: number;
   handSize: number;
   maximumHandSize: number;
@@ -661,6 +666,8 @@ function handSemanticTypes(
   phase: CorpHandManagementSignal["phase"],
 ): string[] {
   if (phase === "draw_for_plan") return ["draw.card", "card_ability.trigger"];
+  if (phase === "develop_card")
+    return ["install.card", "play.corp_operation", "card_ability.trigger"];
   return ["choice.resolve", "play.corp_operation"];
 }
 
@@ -674,7 +681,11 @@ function handCandidates(
         handSemanticTypes(signal.phase).includes(candidate.semanticActionType) &&
         (!signal.sourceDefinitionIds ||
           (candidate.sourceDefinitionId !== undefined &&
-            signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId))),
+            signal.sourceDefinitionIds.includes(
+              candidate.sourceDefinitionId,
+            ))) &&
+        (!signal.sourceInstanceId ||
+          candidate.sourceCardInstanceId === signal.sourceInstanceId),
     )
     .map((candidate) => ({ candidate, stepValue: signal.value }));
 }

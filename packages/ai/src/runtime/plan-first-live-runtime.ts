@@ -54,6 +54,11 @@ import {
 import type { SemanticRuntimeDependencies } from "./semantic-runtime";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
+import {
+  corpScorelineActionCanCloseThisTurn,
+  corpScorelineFeasibilityForDecisionInput,
+  type CorpScorelineFeasibility,
+} from "./corp-scoreline-feasibility";
 
 export type PlanFirstLiveDependencies = Pick<
   SemanticRuntimeDependencies,
@@ -71,16 +76,18 @@ export function choosePlanFirstLiveAction(
   options: AiDecisionRuntimeOptions,
   dependencies: PlanFirstLiveDependencies,
 ): AiDecision {
-  const candidates = dependencies.buildActionSemanticCandidates({
-    legalActions: input.legalActions,
-    observerSide: input.side,
-    stateVersion: input.playerView.stateVersion,
-    visibleSourceDefinitionsByInstanceId: visibleSourceDefinitionsByInstanceId(
-      input.playerView,
-    ),
-    cardSemanticProfilesByDefinitionId:
-      buildActionCardSemanticProfilesByDefinitionId(),
-  });
+  const candidates = attachActiveRunContext(
+    input,
+    dependencies.buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: input.side,
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId:
+        visibleSourceDefinitionsByInstanceId(input.playerView),
+      cardSemanticProfilesByDefinitionId:
+        buildActionCardSemanticProfilesByDefinitionId(),
+    }),
+  );
   const context =
     input.side === "runner"
       ? runnerContext(input, candidates, dependencies)
@@ -192,11 +199,41 @@ function buildRunnerDomain(
       rolesForDeckDoctrineCard(card.definitionId ?? ""),
     ),
   );
-  const coverageGaps = uniqueCoverageGaps(runTargets, installedRoles);
+  const coverageGaps = uniqueCoverageGaps(
+    runTargets,
+    installedRoles,
+    _deckCapabilities,
+    strategicIntent,
+  );
+  const damageBufferForecast =
+    runTargets.some(
+      (evaluation) =>
+        evaluation.recommendation === "draw_for_damage_buffer" ||
+        evaluation.pathPassability === "blocked_by_blink_hand_buffer" ||
+        (evaluation.riskyUniversalCoverage &&
+          input.playerView.own.gripOrHq.length < 3) ||
+        evaluation.blinkRiskAssessment?.blockedByHandBuffer === true ||
+        evaluation.blinkRiskAssessment?.riskSeverity === "high" ||
+        evaluation.blinkRiskAssessment?.riskSeverity === "lethal",
+    ) ||
+    (input.playerView.own.gripOrHq.length < 3 &&
+      input.playerView.servers.some((server) =>
+        server.ice.some(
+          (ice) =>
+            ice.rezzed === true &&
+            ((strategicIntent.riskProfile ?? []).includes(
+              "runner.risky_universal_breaker_pressure",
+            ) ||
+              rolesForDeckDoctrineCard(ice.definitionId ?? "").includes(
+                "sentry_ice",
+              )),
+        ),
+      ));
   const defense: RunnerCorePlanDomain["defense"] = {
     activeTags: input.playerView.own.tags,
     visibleTagPunish: input.playerView.own.tags > 0,
-    pendingDamage: visiblePendingDamage(candidates),
+    pendingDamage:
+      visiblePendingDamage(candidates) + (damageBufferForecast ? 1 : 0),
     damagePreventionNeeded: candidates.some(
       (candidate) =>
         candidate.semanticActionType.startsWith("damage.prevent") ||
@@ -209,7 +246,11 @@ function buildRunnerDomain(
       candidates.some(
         (candidate) => candidate.semanticActionType === "draw.card",
       ),
-    evidenceCodes: ["runner_visible_defense_state"],
+    evidenceCodes: [
+      damageBufferForecast
+        ? "runner_run_target_requires_damage_buffer"
+        : "runner_visible_defense_state",
+    ],
   };
   const centralPressure = bestRunTargetsByServer(runTargets)
     .filter(
@@ -223,17 +264,19 @@ function buildRunnerDomain(
     .map((evaluation) => ({
       pressureId: `central:${evaluation.targetServerId}`,
       serverId: evaluation.targetServerId as "hq" | "rd" | "archives",
-      purpose:
-        evaluation.multiaccessAvailable
-          ? ("multiaccess" as const)
-          : evaluation.knownAccessState === "unknown" ||
-              evaluation.knownAccessState === "fresh"
-            ? ("information" as const)
-            : ("access" as const),
+      purpose: evaluation.multiaccessAvailable
+        ? ("multiaccess" as const)
+        : evaluation.knownAccessState === "unknown" ||
+            evaluation.knownAccessState === "fresh"
+          ? ("information" as const)
+          : ("access" as const),
       strategyLineIds: [strategicIntent.primaryWinIntent],
       priorityClass: "P4" as const,
       reachable: true,
-      marginalValue: evaluation.score,
+      marginalValue:
+        evaluation.recommendation === "run_now"
+          ? evaluation.score
+          : Math.min(evaluation.score, 60),
       evidenceCode: evaluation.evidence[0] ?? "runner_run_target",
       ...(sourceDefinitionForEvaluation(evaluation, candidates)
         ? {
@@ -243,23 +286,54 @@ function buildRunnerDomain(
           }
         : {}),
     }));
-  const remoteContests = bestRunTargetsByServer(runTargets)
-    .filter(
-      (evaluation) =>
-        evaluation.targetKind === "remote" &&
-        evaluation.pathPassability === "reachable" &&
-        (evaluation.recommendation === "run_now" ||
-          evaluation.recommendation === "run_if_free") &&
-        evaluation.score > 0,
-    )
-    .map((evaluation) => ({
-      contestId: `remote:${evaluation.targetServerId}`,
-      serverId: evaluation.targetServerId,
-      knownAgendaThreat: evaluation.scoreThreat,
-      reachable: true,
-      marginalValue: evaluation.score,
-      evidenceCode: evaluation.evidence[0] ?? "runner_remote_target",
-    }));
+  const remoteContests = uniqueBy(
+    [
+      ...bestRunTargetsByServer(runTargets)
+        .filter(
+          (evaluation) =>
+            evaluation.targetKind === "remote" &&
+            evaluation.pathPassability === "reachable" &&
+            (evaluation.recommendation === "run_now" ||
+              evaluation.recommendation === "run_if_free") &&
+            evaluation.score > 0,
+        )
+        .map((evaluation) => ({
+          contestId: `remote:${evaluation.targetServerId}`,
+          serverId: evaluation.targetServerId,
+          knownAgendaThreat: evaluation.scoreThreat,
+          reachable: true,
+          marginalValue:
+            evaluation.recommendation === "run_now"
+              ? evaluation.score
+              : Math.min(evaluation.score, 60),
+          evidenceCode: evaluation.evidence[0] ?? "runner_remote_target",
+        })),
+      ...input.playerView.servers.flatMap((server) => {
+        const knownAgenda = server.root.some(
+          (card) => card.known !== false && card.type === "agenda",
+        );
+        const legalRun = candidates.some(
+          (candidate) =>
+            candidate.semanticActionType === "run.start" &&
+            candidate.runProjectionSummary?.serverId === server.id,
+        );
+        if (!server.id.startsWith("remote_") || !knownAgenda || !legalRun) {
+          return [];
+        }
+        return [
+          {
+            contestId: `remote:${server.id}`,
+            serverId: server.id,
+            knownAgendaThreat: true,
+            reachable: true,
+            marginalValue: 1_000,
+            evidenceCode: "visible_known_agenda_remote",
+          },
+        ];
+      }),
+    ],
+    (signal) => signal.contestId,
+  );
   const developments = handDevelopment.flatMap((evaluation) => {
     if (
       evaluation.availability !== "legal_now" ||
@@ -298,31 +372,49 @@ function buildRunnerDomain(
       },
     ];
   });
-  const runWindows =
-    input.playerView.run &&
-    candidates.some((candidate) => isRunWindowSemantic(candidate))
-      ? [
-          {
-            windowId: `run:${input.playerView.run.runId ?? input.playerView.stateVersion}`,
-            serverId: input.playerView.run.attackedServerId,
-            rootPlanInstanceId: `plan:runner.pressure_central:central%3A${input.playerView.run.attackedServerId}`,
-            leafPlanInstanceId: `plan:runner.convert_run_window:run%3A${input.playerView.run.runId ?? input.playerView.stateVersion}`,
-            semanticActionTypes: [
-              ...new Set(
-                candidates
-                  .filter(isRunWindowSemantic)
-                  .map((candidate) => candidate.semanticActionType),
-              ),
-            ],
-            purposeCode: "convert_active_run_window",
-            evidenceCode: "visible_active_run",
-          },
-        ]
-      : [];
+  const hasRunWindowCandidate = candidates.some((candidate) =>
+    isRunWindowSemantic(candidate),
+  );
+  const runWindows = hasRunWindowCandidate
+    ? [
+        {
+          windowId: `run:${input.playerView.run?.runId ?? input.playerView.stateVersion}`,
+          ...(input.playerView.run
+            ? { serverId: input.playerView.run.attackedServerId }
+            : {}),
+          rootPlanInstanceId: input.playerView.run
+            ? `plan:runner.pressure_central:central%3A${input.playerView.run.attackedServerId}`
+            : "rules.access_window",
+          leafPlanInstanceId: `plan:runner.convert_run_window:run%3A${input.playerView.run?.runId ?? input.playerView.stateVersion}`,
+          semanticActionTypes: [
+            ...new Set(
+              candidates
+                .filter(isRunWindowSemantic)
+                .map((candidate) => candidate.semanticActionType),
+            ),
+          ],
+          purposeCode: "convert_active_run_window",
+          evidenceCode: input.playerView.run
+            ? "visible_active_run"
+            : "legal_access_window_without_run_snapshot",
+        },
+      ]
+    : [];
   return {
     fundingNeeds,
     coverageGaps,
     defense,
+    terminalWins:
+      input.playerView.opponent.deckCount === 0 &&
+      candidates.some((candidate) => candidate.actionType === "end_turn")
+        ? [
+            {
+              terminalId: "force-corp-empty-rd-draw",
+              semanticActionTypes: ["turn_flow.end_turn"],
+              evidenceCode: "corp_visible_empty_rd_forced_mandatory_draw",
+            },
+          ]
+        : [],
     centralPressure,
     remoteContests,
     developments,
@@ -346,11 +438,14 @@ function buildCorpDomain(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
 ): CorpPlanDomain {
-  const scoreProjects: CorpScoreProjectSignal[] = candidates.flatMap(
-    (candidate) => scoreProjectForCandidate(input, candidate),
+  const scorelineFeasibility = corpScorelineFeasibilityForDecisionInput(input);
+  const scoreProjects: CorpScoreProjectSignal[] = uniqueScoreProjects(
+    candidates.flatMap((candidate) =>
+      scoreProjectForCandidate(input, candidate, scorelineFeasibility),
+    ),
   );
-  const defenseNeeds: CorpCorePlanDomain["defenseNeeds"] = candidates.flatMap(
-    (candidate): CorpDefenseSignal[] => {
+  const defenseNeeds: CorpCorePlanDomain["defenseNeeds"] = uniqueBy(
+    candidates.flatMap((candidate): CorpDefenseSignal[] => {
       const roles = candidate.sourceDefinitionId
         ? rolesForDeckDoctrineCard(candidate.sourceDefinitionId)
         : [];
@@ -364,7 +459,7 @@ function buildCorpDomain(
         if (!serverId || !candidate.sourceDefinitionId) return [];
         return [
           {
-            defenseId: `install:${candidate.sourceDefinitionId}:${serverId}`,
+            defenseId: `install:${candidate.sourceCardInstanceId ?? candidate.sourceDefinitionId}:${serverId}`,
             serverId,
             phase: "install_ice" as const,
             sourceDefinitionIds: [candidate.sourceDefinitionId],
@@ -374,19 +469,23 @@ function buildCorpDomain(
           },
         ];
       }
-      if (
-        candidate.semanticActionType === "corp_window.rez" &&
-        candidate.sourceDefinitionId &&
-        candidate.sourceCardInstanceId
-      ) {
+      if (candidate.semanticActionType === "corp_window.rez") {
         const targetId = candidate.sourceCardInstanceId;
         return [
           {
-            defenseId: `rez:${targetId}`,
-            serverId: serverForInstalledCard(input, targetId) ?? "unknown",
+            defenseId: `rez:${targetId ?? candidate.actionId}`,
+            serverId:
+              (targetId
+                ? serverForInstalledCard(input, targetId)
+                : undefined) ??
+              candidateTargetIds(candidate).find(isServerId) ??
+              input.playerView.run?.attackedServerId ??
+              "unknown",
             phase: "rez_response" as const,
-            sourceDefinitionIds: [candidate.sourceDefinitionId],
-            targetIceInstanceId: targetId,
+            sourceDefinitionIds: candidate.sourceDefinitionId
+              ? [candidate.sourceDefinitionId]
+              : [],
+            ...(targetId ? { targetIceInstanceId: targetId } : {}),
             urgent: input.playerView.run !== undefined,
             value: input.playerView.run ? 50 : 10,
             evidenceCode: "visible_rez_window",
@@ -394,43 +493,54 @@ function buildCorpDomain(
         ];
       }
       return [];
-    },
+    }),
+    (signal) => signal.defenseId,
   );
   const remoteProjects: CorpCorePlanDomain["remoteProjects"] = [];
-  const economyNeeds: CorpCorePlanDomain["economyNeeds"] =
-    input.playerView.own.credits < 5 &&
-    candidates.some(
-      (candidate) => candidate.semanticActionType === "economy.gain_credit",
-    )
-      ? [
-          {
-            needId: "corp-minimum-reserve",
-            gap: 5 - input.playerView.own.credits,
-            urgentForScore: scoreProjects.length > 0,
-            evidenceCode: "corp_visible_minimum_reserve_gap",
-          },
-        ]
-      : [];
-  const virusPressure: CorpPlanDomain["virusPressure"] =
-    candidates.some(
-      (candidate) =>
-        candidate.semanticActionType === "counter.purge_virus" ||
-        candidate.semanticActionType === "counter.purge_runner_virus",
-    )
-      ? [
-          {
-            pressureId: "visible-virus-pressure",
-            virusCounters: visibleRunnerVirusCounters(input),
-            strategicDamage: visibleRunnerVirusCounters(input),
-            critical: visibleRunnerVirusCounters(input) >= 3,
-            purgeUseful: visibleRunnerVirusCounters(input) > 0,
-            evidenceCode: "visible_runner_virus_counters",
-          },
-        ]
-      : [];
-  const punishCampaigns = punishSignals(candidates);
-  const ambushes: CorpPlanDomain["ambushes"] = candidates.flatMap(
-    (candidate) => {
+  const economyNeeds: CorpCorePlanDomain["economyNeeds"] = candidates.some(
+    (candidate) => candidate.semanticActionType === "economy.gain_credit",
+  )
+    ? [
+        {
+          needId:
+            input.playerView.own.credits < 5
+              ? "corp-minimum-reserve"
+              : "corp-neutral-credit-progress",
+          gap: Math.max(0, 5 - input.playerView.own.credits),
+          ...(input.playerView.own.credits >= 5
+            ? { neutralProgress: true }
+            : {}),
+          urgentForScore:
+            input.playerView.own.credits < 5 && scoreProjects.length > 0,
+          evidenceCode:
+            input.playerView.own.credits < 5
+              ? "corp_visible_minimum_reserve_gap"
+              : "corp_neutral_credit_progress_available",
+        },
+      ]
+    : [];
+  const virusPressure: CorpPlanDomain["virusPressure"] = candidates.some(
+    (candidate) =>
+      candidate.semanticActionType === "counter.purge_virus" ||
+      candidate.semanticActionType === "counter.purge_runner_virus",
+  )
+    ? [
+        {
+          pressureId: "visible-virus-pressure",
+          virusCounters: visibleRunnerVirusCounters(input),
+          strategicDamage: visibleRunnerVirusCounters(input),
+          critical: visibleRunnerVirusCounters(input) >= 3,
+          purgeUseful: visibleRunnerVirusCounters(input) > 0,
+          evidenceCode: "visible_runner_virus_counters",
+        },
+      ]
+    : [];
+  const punishCampaigns = uniqueBy(
+    punishSignals(candidates),
+    (signal) => signal.campaignId,
+  );
+  const ambushes: CorpPlanDomain["ambushes"] = uniqueBy(
+    candidates.flatMap((candidate) => {
       if (!candidate.sourceDefinitionId) return [];
       const roles = rolesForDeckDoctrineCard(candidate.sourceDefinitionId);
       if (!roles.some((role) => role.includes("ambush"))) return [];
@@ -438,7 +548,7 @@ function buildCorpDomain(
       if (!serverId) return [];
       return [
         {
-          ambushId: `ambush:${candidate.sourceDefinitionId}:${serverId}`,
+          ambushId: `ambush:${candidate.sourceCardInstanceId ?? candidate.sourceDefinitionId}:${serverId}`,
           sourceDefinitionId: candidate.sourceDefinitionId,
           serverId,
           phase: "install" as const,
@@ -450,7 +560,8 @@ function buildCorpDomain(
           evidenceCode: "own_visible_ambush",
         },
       ];
-    },
+    }),
+    (signal) => signal.ambushId,
   );
   const ownAgendas = input.playerView.own.gripOrHq.filter((card) =>
     rolesForDeckDoctrineCard(card.definitionId ?? "").some(
@@ -471,7 +582,28 @@ function buildCorpDomain(
             evidenceCode: "own_visible_agenda_flood",
           },
         ]
-      : [];
+      : [
+          ...(input.playerView.own.gripOrHq.length < 3 &&
+          input.playerView.own.stackOrRdCount > 0 &&
+          candidates.some(
+            (candidate) => candidate.semanticActionType === "draw.card",
+          )
+            ? [
+                {
+                  handPlanId: "draw-for-corp-plan",
+                  phase: "draw_for_plan" as const,
+                  agendaCount: ownAgendas,
+                  handSize: input.playerView.own.gripOrHq.length,
+                  maximumHandSize: input.playerView.own.maxHandSize,
+                  concretePurposeCode:
+                    "Find a concrete score, defense, or economy component.",
+                  value: 30,
+                  evidenceCode: "corp_low_hand_requires_plan_material",
+                },
+              ]
+            : []),
+          ...corpCardDevelopmentSignals(input, candidates, ownAgendas),
+        ];
   return {
     scoreProjects,
     remoteProjects,
@@ -487,6 +619,7 @@ function buildCorpDomain(
 function scoreProjectForCandidate(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  scorelineFeasibility: CorpScorelineFeasibility | undefined,
 ): CorpScoreProjectSignal[] {
   if (
     candidate.semanticActionType === "install.card" &&
@@ -495,19 +628,26 @@ function scoreProjectForCandidate(
       deckDoctrineRoleIsAgenda,
     )
   ) {
+    const serverId = candidateTargetIds(candidate).find(isServerId);
+    const sameTurnCloseout = corpScorelineActionCanCloseThisTurn(
+      scorelineFeasibility,
+      candidate.actionId,
+    );
+    const protectedRemote =
+      serverId !== undefined &&
+      (input.playerView.servers.find((server) => server.id === serverId)?.ice
+        .length ?? 0) > 0;
     return [
       {
-        projectId: `agenda:${candidate.sourceDefinitionId}`,
+        projectId: `agenda:${candidate.sourceCardInstanceId ?? candidate.sourceDefinitionId}:${serverId ?? "unbound"}`,
         agendaDefinitionId: candidate.sourceDefinitionId,
-        ...(candidateTargetIds(candidate).find(isServerId)
-          ? {
-              serverId: candidateTargetIds(candidate).find(isServerId)!,
-            }
-          : {}),
+        ...(serverId ? { serverId } : {}),
         phase: "install_agenda",
-        sameTurnCloseout: false,
+        sameTurnCloseout,
         terminalScore: false,
-        feasible: true,
+        feasible:
+          sameTurnCloseout ||
+          (protectedRemote && input.playerView.own.credits >= 3),
         evidenceCode: "own_visible_legal_agenda_install",
       },
     ];
@@ -516,18 +656,30 @@ function scoreProjectForCandidate(
     candidate.semanticActionType === "score.advance_card" ||
     candidate.semanticActionType === "score.agenda"
   ) {
-    const target = candidateTargetIds(candidate)[0];
+    const target =
+      candidate.sourceCardInstanceId ??
+      candidateTargetIds(candidate).find(
+        (targetId) => serverForInstalledCard(input, targetId) !== undefined,
+      );
     if (!target) return [];
+    const serverId = serverForInstalledCard(input, target);
+    const sameTurnCloseout =
+      candidate.semanticActionType === "score.agenda" ||
+      corpScorelineActionCanCloseThisTurn(
+        scorelineFeasibility,
+        candidate.actionId,
+      );
     return [
       {
-        projectId: `agenda:${target}`,
-        agendaDefinitionId: target,
+        projectId: `agenda:${target}:${serverId ?? "unbound"}`,
+        agendaDefinitionId: candidate.sourceDefinitionId ?? target,
         agendaInstanceId: target,
+        ...(serverId ? { serverId } : {}),
         phase:
           candidate.semanticActionType === "score.agenda"
             ? "score_agenda"
             : "advance_agenda",
-        sameTurnCloseout: true,
+        sameTurnCloseout,
         terminalScore:
           candidate.semanticActionType === "score.agenda" &&
           input.playerView.own.agendaPoints + 1 >=
@@ -554,7 +706,7 @@ function punishSignals(
     if (!phase) return [];
     return [
       {
-        campaignId: `punish:${candidate.sourceDefinitionId ?? phase}`,
+        campaignId: `punish:${candidate.sourceCardInstanceId ?? candidate.sourceDefinitionId ?? phase}:${phase}`,
         phase,
         sourceDefinitionIds: candidate.sourceDefinitionId
           ? [candidate.sourceDefinitionId]
@@ -579,10 +731,13 @@ function resolveEngineWindow(
   const semantic = candidate.semanticActionType;
   const automaticOrMandatory =
     semantic === "choice.resolve" ||
+    semantic === "draw.mandatory" ||
     semantic === "run.continue" ||
     semantic === "breaker.boost_strength" ||
     semantic === "breaker.break_subroutine" ||
     semantic.startsWith("access.") ||
+    semantic === "corp_window.decline_rez" ||
+    semantic === "run.jack_out" ||
     semantic === "turn_flow.forgo_action" ||
     (semantic === "turn_flow.end_turn" &&
       context.input.playerView.own.clicks === 0);
@@ -604,6 +759,32 @@ function resolveEngineWindow(
   };
 }
 
+function attachActiveRunContext(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+): ActionSemanticCandidate[] {
+  const serverId = input.playerView.run?.attackedServerId;
+  if (!serverId) return [...candidates];
+  return candidates.map((candidate) => {
+    if (candidate.runProjectionSummary || !isRunWindowSemantic(candidate)) {
+      return candidate;
+    }
+    return {
+      ...candidate,
+      runProjectionSummary: {
+        serverId,
+        serverKind:
+          serverId === "hq" || serverId === "rd" || serverId === "archives"
+            ? serverId
+            : "remote",
+        source: "target_context",
+        evidence: ["active_run_server_from_player_view"],
+      },
+      evidence: [...candidate.evidence, "active_run_server_from_player_view"],
+    };
+  });
+}
+
 function decisionFromScheduler(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -616,7 +797,10 @@ function decisionFromScheduler(
     (candidate) => candidate.actionId === actionId,
   );
   if (!action) throw new Error("plan_first_selected_action_not_legal");
-  const selectedChoices = dependencies.selectedChoicesForDecision(input, action);
+  const selectedChoices = dependencies.selectedChoicesForDecision(
+    input,
+    action,
+  );
   const planId =
     result.lane === "plan"
       ? result.selectedAssessment.instanceId
@@ -679,6 +863,8 @@ function decisionFromScheduler(
 function uniqueCoverageGaps(
   runTargets: readonly RunnerRunTargetEvaluation[],
   installedRoles: ReadonlySet<string>,
+  deckCapabilities: DeckCapabilityProfile,
+  strategicIntent: RunnerStrategicIntentProfile,
 ): RunnerCorePlanDomain["coverageGaps"] {
   const result = new Map<
     string,
@@ -696,6 +882,48 @@ function uniqueCoverageGaps(
       evidenceCode: evaluation.evidence[0] ?? `missing_${role}`,
       deckHasAnswer: true,
     });
+  }
+  if (
+    (strategicIntent.setupEngine ?? []).includes("runner.rig_first") ||
+    (strategicIntent.setupEngine ?? []).includes(
+      "runner.search_breaker_setup",
+    ) ||
+    strategicIntent.executionStyle === "runner.setup_first"
+  ) {
+    const matrix = deckCapabilities.runner?.breakerCoverageMatrix;
+    for (const [coverage, role] of [
+      ["wall", "breaker_wall"],
+      ["code_gate", "breaker_code_gate"],
+      ["sentry", "breaker_sentry"],
+    ] as const) {
+      const state = matrix?.[coverage];
+      if (
+        !state ||
+        state.installed ||
+        installedRoles.has(role) ||
+        (!state.inDeckKnown && !state.inHand)
+      ) {
+        continue;
+      }
+      const existing = result.get(role);
+      if (existing) {
+        if (
+          existing.priorityClass !== "P2" &&
+          state.inHand &&
+          existing.priorityClass === "P5"
+        ) {
+          result.set(role, { ...existing, priorityClass: "P4" });
+        }
+        continue;
+      }
+      result.set(role, {
+        gapId: `coverage:${role}`,
+        requiredRole: role,
+        priorityClass: state.inHand ? "P4" : "P5",
+        evidenceCode: `deck_strategy_open_${coverage}_coverage`,
+        deckHasAnswer: state.inDeckKnown || state.inHand,
+      });
+    }
   }
   return [...result.values()];
 }
@@ -779,11 +1007,23 @@ function serverForInstalledCard(
 }
 
 function visibleRunnerVirusCounters(input: AiDecisionInput): number {
-  return (input.playerView.opponent.rig ?? []).reduce(
-    (sum, card) =>
-      sum + (card.counters?.virus ?? 0),
+  const installedCounters = (input.playerView.opponent.rig ?? []).reduce(
+    (sum, card) => sum + (card.counters?.virus ?? 0),
     0,
   );
+  const identityCounters =
+    input.playerView.own.identity.counterDisplays?.reduce((sum, display) => {
+      if (display.displayKind !== "virus") return sum;
+      const amount = Math.max(0, Math.floor(display.amount ?? 0));
+      const activeThreshold =
+        display.counterType === "highlighter" ||
+        display.counterType === "garbage" ||
+        display.counterType === "cascade"
+          ? 2
+          : 1;
+      return amount >= activeThreshold ? sum + amount : sum;
+    }, 0) ?? 0;
+  return installedCounters + identityCounters;
 }
 
 function isServerId(value: string): boolean {
@@ -813,6 +1053,93 @@ function windowKindForSemantic(
 
 function turnKey(input: AiDecisionInput): string {
   return `${input.side}:${input.playerView.turnSerial ?? input.actionNumber}`;
+}
+
+function uniqueBy<T>(
+  values: readonly T[],
+  keyForValue: (value: T) => string,
+): T[] {
+  return [
+    ...new Map(values.map((value) => [keyForValue(value), value])).values(),
+  ];
+}
+
+function uniqueScoreProjects(
+  values: readonly CorpScoreProjectSignal[],
+): CorpScoreProjectSignal[] {
+  const phaseRank: Record<CorpScoreProjectSignal["phase"], number> = {
+    install_agenda: 1,
+    advance_agenda: 2,
+    score_agenda: 3,
+  };
+  const byProject = new Map<string, CorpScoreProjectSignal>();
+  for (const value of values) {
+    const previous = byProject.get(value.projectId);
+    if (!previous || phaseRank[value.phase] > phaseRank[previous.phase]) {
+      byProject.set(value.projectId, value);
+    }
+  }
+  return [...byProject.values()];
+}
+
+function corpCardDevelopmentSignals(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  agendaCount: number,
+): CorpPlanDomain["handManagement"] {
+  return uniqueBy(
+    candidates.flatMap((candidate) => {
+      if (
+        !candidate.sourceDefinitionId ||
+        !candidate.sourceCardInstanceId ||
+        ![
+          "install.card",
+          "play.corp_operation",
+          "card_ability.trigger",
+        ].includes(candidate.semanticActionType)
+      ) {
+        return [];
+      }
+      const roles = rolesForDeckDoctrineCard(candidate.sourceDefinitionId);
+      if (
+        roles.some(
+          (role) =>
+            deckDoctrineRoleIsAgenda(role) ||
+            role === "corp_install_ice" ||
+            role.includes("ambush"),
+        )
+      ) {
+        return [];
+      }
+      const immediateEconomy =
+        (candidate.economyProjection?.netLiquidCreditGain ?? 0) > 0;
+      if (
+        candidate.semanticActionType === "install.card" &&
+        input.playerView.own.credits < 3 &&
+        !immediateEconomy
+      ) {
+        return [];
+      }
+      return [
+        {
+          handPlanId: `develop:${candidate.sourceCardInstanceId}`,
+          phase: "develop_card" as const,
+          sourceDefinitionIds: [candidate.sourceDefinitionId],
+          sourceInstanceId: candidate.sourceCardInstanceId,
+          agendaCount,
+          handSize: input.playerView.own.gripOrHq.length,
+          maximumHandSize: input.playerView.own.maxHandSize,
+          concretePurposeCode: `Develop ${candidate.sourceDefinitionId} for ${roles[0] ?? candidate.semanticActionType}.`,
+          value: Math.max(
+            10,
+            (candidate.economyProjection?.netLiquidCreditGain ?? 0) * 10,
+          ),
+          evidenceCode: `corp_card_development:${roles[0] ?? candidate.semanticActionType}`,
+        },
+      ];
+    }),
+    (signal) => signal.handPlanId,
+  );
 }
 
 function difficultyLevel(input: AiDecisionInput): number {

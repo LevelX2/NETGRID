@@ -169,7 +169,12 @@ export function reconcileResidentPlanPortfolio(
     if (proposalKeys.has(key)) continue;
     const retention = retentionDecision(previous, params.stateVersion);
     if (retention.retain) {
-      nextInstances.push(previous);
+      nextInstances.push({
+        ...structuredClone(previous),
+        viability: "dormant",
+        portfolioRole: "unassigned",
+        executionState: "idle",
+      });
       transitions.push(
         transition(previous, params.stateVersion, "retained", retention.code),
       );

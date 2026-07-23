@@ -16,6 +16,7 @@ import {
 } from "./corp-core-plan-modules";
 import { instantiatePlanProposal } from "./plan-instance";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
+import { bindBestCurrentPlanRoute } from "./plan-route";
 import type { PlanSchedulerContext } from "./plan-scheduler";
 
 describe("Corp core plan modules", () => {
@@ -77,9 +78,9 @@ describe("Corp core plan modules", () => {
         corpContext,
       );
 
-      expect(materialized.candidates.map((entry) => entry.candidate.actionId)).toEqual([
-        action.actionId,
-      ]);
+      expect(
+        materialized.candidates.map((entry) => entry.candidate.actionId),
+      ).toEqual([action.actionId]);
       expect(materialized.step.target?.id).toBe(targetId);
     },
   );
@@ -130,12 +131,7 @@ describe("Corp core plan modules", () => {
   });
 
   it("does not let defense absorb a score action", () => {
-    const score = targetAction(
-      "score",
-      "score.agenda",
-      "agenda-1",
-      "agenda",
-    );
+    const score = targetAction("score", "score.agenda", "agenda-1", "agenda");
     const rez = {
       ...cardAction("rez", "corp_window.rez", "ice-def"),
       targetContext: targetContext("ice-1", "ice"),
@@ -159,15 +155,44 @@ describe("Corp core plan modules", () => {
       module.discover(corpContext)[0]!,
       10,
     );
-    const materialized = module.materialize(
-      instance,
-      {} as never,
-      corpContext,
-    );
+    const materialized = module.materialize(instance, {} as never, corpContext);
 
-    expect(materialized.candidates.map((entry) => entry.candidate.actionId)).toEqual([
-      "rez",
-    ]);
+    expect(
+      materialized.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["rez"]);
+  });
+
+  it("routes a legal source-less rez through defense without weakening the capability", () => {
+    const rez = candidate("rez", "rez_ice", "corp_window.rez");
+    const module = corpModule("corp.defend_servers");
+    const corpContext = context([rez], {
+      defenseNeeds: [
+        {
+          defenseId: "rez-visible",
+          serverId: "unknown",
+          phase: "rez_response",
+          sourceDefinitionIds: [],
+          urgent: false,
+          value: 10,
+          evidenceCode: "visible_rez_window",
+        },
+      ],
+    });
+    const instance = instantiatePlanProposal(
+      module.discover(corpContext)[0]!,
+      10,
+    );
+    const materialized = module.materialize(instance, {} as never, corpContext);
+
+    expect(
+      bindBestCurrentPlanRoute({
+        side: "corp",
+        stateVersion: 10,
+        timingPoint: "corp_action.main",
+        planInstanceId: instance.instanceId,
+        ...materialized,
+      }).head.actionId,
+    ).toBe("rez");
   });
 
   it("does not create a generic board-install winner without a domain project", () => {
@@ -214,10 +239,38 @@ describe("Corp core plan modules", () => {
       }),
     );
 
-    expect(open[0]?.parentInstanceId).toBe(
-      "plan:corp.score_agenda:score-1",
-    );
+    expect(open[0]?.parentInstanceId).toBe("plan:corp.score_agenda:score-1");
     expect(satisfied).toEqual([]);
+  });
+
+  it("keeps neutral credit progress explicit at P6 without inventing a funding gap", () => {
+    const economy = corpModule("corp.economy");
+    const credit = candidate("credit", "gain_credit", "economy.gain_credit");
+    const corpContext = context([credit], {
+      economyNeeds: [
+        {
+          needId: "neutral-credit",
+          gap: 0,
+          neutralProgress: true,
+          urgentForScore: false,
+          evidenceCode: "corp_neutral_credit_progress_available",
+        },
+      ],
+    });
+    const instance = instantiatePlanProposal(
+      economy.discover(corpContext)[0]!,
+      10,
+    );
+
+    expect(
+      economy.assess(instance, corpContext, emptyPortfolio()),
+    ).toMatchObject({
+      priorityClaim: {
+        requestedClass: "P6",
+        reasonCode: "neutral_progress",
+      },
+      withinClassValue: 1,
+    });
   });
 });
 

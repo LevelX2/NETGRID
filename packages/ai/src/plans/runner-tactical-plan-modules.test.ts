@@ -14,6 +14,51 @@ import {
 } from "./runner-tactical-plan-modules";
 
 describe("Runner tactical plan modules", () => {
+  it("owns early EndTurn only through a rules-proven terminal-win plan", () => {
+    const endTurn = candidate(
+      "runner.end_turn",
+      "end_turn",
+      "turn_flow.end_turn",
+    );
+    const module = tacticalModule("runner.secure_terminal_win");
+    const runnerContext = context([endTurn], {
+      terminalWins: [
+        {
+          terminalId: "corp-deckout",
+          semanticActionTypes: ["turn_flow.end_turn"],
+          evidenceCode: "corp_visible_empty_rd_forced_mandatory_draw",
+        },
+      ],
+    });
+    const instance = instantiatePlanProposal(
+      module.discover(runnerContext)[0]!,
+      10,
+    );
+    const assessment = module.assess(instance, runnerContext, emptyPortfolio());
+
+    expect(assessment).toMatchObject({
+      priorityClaim: {
+        requestedClass: "P1",
+        reasonCode: "terminal_win",
+        witness: { guarantee: "rules_proven" },
+      },
+    });
+    expect(
+      module
+        .materialize(instance, assessment as never, runnerContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["runner.end_turn"]);
+    expect(
+      runnerVoluntaryActionFamilyOwner(
+        endTurn,
+        runnerContext.domain as RunnerPlanDomain,
+      ),
+    ).toBe("runner.secure_terminal_win");
+    expect(
+      runnerVoluntaryActionFamilyOwner(endTurn, domain({})),
+    ).toBeUndefined();
+  });
+
   it("binds central pressure to its exact server and purpose", () => {
     const rd = run("run-rd", "rd");
     const hq = run("run-hq", "hq");
@@ -43,9 +88,9 @@ describe("Runner tactical plan modules", () => {
     );
 
     expect(materialized.step.target).toEqual({ kind: "server", id: "rd" });
-    expect(materialized.candidates.map((entry) => entry.candidate.actionId)).toEqual([
-      "run-rd",
-    ]);
+    expect(
+      materialized.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["run-rd"]);
   });
 
   it("allows an information probe only as an admitted pressure plan", () => {
@@ -105,11 +150,7 @@ describe("Runner tactical plan modules", () => {
     });
     const proposal = module.discover(runnerContext)[0]!;
     const instance = instantiatePlanProposal(proposal, 10);
-    const assessment = module.assess(
-      instance,
-      runnerContext,
-      emptyPortfolio(),
-    );
+    const assessment = module.assess(instance, runnerContext, emptyPortfolio());
 
     expect(assessment.priorityClaim).toMatchObject({
       requestedClass: "P2",
@@ -170,12 +211,10 @@ describe("Runner tactical plan modules", () => {
       runnerContext,
     );
 
-    expect(proposal.parentInstanceId).toBe(
-      "plan:runner.pressure_central:rd",
-    );
-    expect(materialized.candidates.map((entry) => entry.candidate.actionId)).toEqual([
-      "access",
-    ]);
+    expect(proposal.parentInstanceId).toBe("plan:runner.pressure_central:rd");
+    expect(
+      materialized.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["access"]);
   });
 
   it("records Highlighter progress only after real access conversion and resets on purge", () => {
@@ -275,6 +314,7 @@ function domain(
   };
   return {
     ...core,
+    terminalWins: overrides.terminalWins ?? [],
     centralPressure: overrides.centralPressure ?? [],
     remoteContests: overrides.remoteContests ?? [],
     developments: overrides.developments ?? [],

@@ -55,6 +55,7 @@ export type CorpDefenseSignal = {
 export type CorpEconomyNeedSignal = {
   needId: string;
   gap: number;
+  neutralProgress?: boolean;
   parentPlanInstanceId?: string;
   urgentForScore: boolean;
   evidenceCode: string;
@@ -83,12 +84,7 @@ export const CORP_CORE_ACTION_OWNERSHIP = {
 } as const;
 
 export function createCorpCorePlanModules(): PlanModule[] {
-  return [
-    scoreModule(),
-    remoteModule(),
-    defenseModule(),
-    economyModule(),
-  ];
+  return [scoreModule(), remoteModule(), defenseModule(), economyModule()];
 }
 
 export function corpCoreActionOwner(
@@ -132,7 +128,11 @@ function scoreModule(): PlanModule {
             : "P4",
         current.signal.feasible &&
           scoreCandidates(context, current.signal).length > 0,
-        current.signal.terminalScore ? 1_000 : current.signal.sameTurnCloseout ? 500 : 100,
+        current.signal.terminalScore
+          ? 1_000
+          : current.signal.sameTurnCloseout
+            ? 500
+            : 100,
         portfolio.executorInstanceId,
       );
     },
@@ -161,7 +161,8 @@ function scoreModule(): PlanModule {
                       },
                     }
                   : {}),
-                purpose: "Continue the protected same-turn score line after observing the new state.",
+                purpose:
+                  "Continue the protected same-turn score line after observing the new state.",
               },
             }
           : {}),
@@ -175,8 +176,8 @@ function remoteModule(): PlanModule {
     moduleId: "corp.establish_scoring_remote",
     side: "corp",
     discover: (context) =>
-      domain(context).remoteProjects
-        .filter((signal) => signal.purpose === "scoring_remote")
+      domain(context)
+        .remoteProjects.filter((signal) => signal.purpose === "scoring_remote")
         .map((signal) =>
           proposal({
             moduleId: "corp.establish_scoring_remote",
@@ -211,9 +212,7 @@ function remoteModule(): PlanModule {
               current.signal.phase === "install_project"
                 ? ["install.card"]
                 : ["install.card", "corp_window.rez"],
-            requiredSourceDefinitionIds: [
-              current.signal.sourceDefinitionId,
-            ],
+            requiredSourceDefinitionIds: [current.signal.sourceDefinitionId],
           },
           target: { kind: "server", id: current.signal.serverId },
           purpose: `Establish scoring remote ${current.signal.serverId}.`,
@@ -238,13 +237,13 @@ function defenseModule(): PlanModule {
           target:
             signal.phase === "rez_response" && signal.targetIceInstanceId
               ? { kind: "ice", id: signal.targetIceInstanceId }
-              : { kind: "server", id: signal.serverId },
+              : signal.serverId !== "unknown"
+                ? { kind: "server", id: signal.serverId }
+                : { kind: "capability", id: "rez_visible_ice" },
           routeExists: defenseCandidates(context, signal).length > 0,
           evidenceCode: signal.evidenceCode,
           persistencePolicy:
-            signal.phase === "rez_response"
-              ? "locked_sequence"
-              : "sticky_goal",
+            signal.phase === "rez_response" ? "locked_sequence" : "sticky_goal",
         }),
       ),
     assess: (instance, context, portfolio) => {
@@ -268,14 +267,28 @@ function defenseModule(): PlanModule {
               current.signal.phase === "rez_response"
                 ? ["corp_window.rez"]
                 : ["install.card"],
-            requiredSourceDefinitionIds:
-              current.signal.sourceDefinitionIds,
+            ...(current.signal.sourceDefinitionIds.length > 0
+              ? {
+                  requiredSourceDefinitionIds:
+                    current.signal.sourceDefinitionIds,
+                }
+              : {}),
           },
-          target:
-            current.signal.phase === "rez_response" &&
-            current.signal.targetIceInstanceId
-              ? { kind: "ice", id: current.signal.targetIceInstanceId }
-              : { kind: "server", id: current.signal.serverId },
+          ...(current.signal.phase === "rez_response"
+            ? current.signal.targetIceInstanceId
+              ? {
+                  target: {
+                    kind: "ice" as const,
+                    id: current.signal.targetIceInstanceId,
+                  },
+                }
+              : {}
+            : {
+                target: {
+                  kind: "server" as const,
+                  id: current.signal.serverId,
+                },
+              }),
           purpose: `${current.signal.phase} for ${current.signal.serverId}.`,
         },
         candidates: defenseCandidates(context, current.signal),
@@ -289,8 +302,10 @@ function economyModule(): PlanModule {
     moduleId: "corp.economy",
     side: "corp",
     discover: (context) =>
-      domain(context).economyNeeds
-        .filter((signal) => signal.gap > 0)
+      domain(context)
+        .economyNeeds.filter(
+          (signal) => signal.gap > 0 || signal.neutralProgress === true,
+        )
         .map((signal) =>
           proposal({
             moduleId: "corp.economy",
@@ -311,7 +326,7 @@ function economyModule(): PlanModule {
         instance,
         current.signal.urgentForScore ? "P5" : "P6",
         economyCandidates(context).length > 0,
-        current.signal.gap,
+        current.signal.neutralProgress ? 1 : current.signal.gap * 20,
         portfolio.executorInstanceId,
       );
     },
@@ -447,9 +462,7 @@ function assessment(
     side: "corp",
     priorityClaim: claim,
     intentFit:
-      priorityClass === "P4" || priorityClass === "P5"
-        ? "aligned"
-        : "none",
+      priorityClass === "P4" || priorityClass === "P5" ? "aligned" : "none",
     readiness: routeExists ? "executable_now" : "blocked",
     ...(routeExists
       ? {
@@ -540,8 +553,10 @@ function scoreCandidates(
       if (!semantic.includes(candidate.semanticActionType)) return false;
       if (signal.phase === "install_agenda")
         return candidate.sourceDefinitionId === signal.agendaDefinitionId;
-      return candidateTargetIds(candidate).includes(
-        signal.agendaInstanceId ?? signal.agendaDefinitionId,
+      const agendaId = signal.agendaInstanceId ?? signal.agendaDefinitionId;
+      return (
+        candidate.sourceCardInstanceId === agendaId ||
+        candidateTargetIds(candidate).includes(agendaId)
       );
     })
     .map((candidate) => ({ candidate, stepValue: 100 }));
@@ -567,7 +582,10 @@ function defenseCandidates(
 ): PlanMaterialization["candidates"] {
   return context.actionCandidates
     .filter((candidate) => {
-      if (!signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? ""))
+      if (
+        signal.sourceDefinitionIds.length > 0 &&
+        !signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? "")
+      )
         return false;
       if (signal.phase === "install_ice")
         return (

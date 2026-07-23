@@ -1,4 +1,5 @@
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
+import { rolesMatch } from "../runtime/role-match";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type {
   PlanAssessment,
@@ -33,7 +34,7 @@ export type RunnerCoverageGapSignal = {
     | "breaker_sentry"
     | "breaker_universal";
   targetServerId?: string;
-  priorityClass: "P2" | "P5";
+  priorityClass: "P2" | "P4" | "P5";
   evidenceCode: string;
   deckHasAnswer: boolean;
 };
@@ -117,8 +118,8 @@ function economyModule(): PlanModule {
     moduleId: "runner.economy",
     side: "runner",
     discover: (context) =>
-      domain(context).fundingNeeds
-        .filter((need) => need.gap > 0)
+      domain(context)
+        .fundingNeeds.filter((need) => need.gap > 0)
         .map((need) => {
           const routeExists = economyCandidates(context, false).length > 0;
           return proposal({
@@ -246,7 +247,11 @@ function coverageModule(
         instance,
         current.gap.priorityClass,
         candidates.length > 0,
-        current.phase === "install_answer" ? 80 : 30,
+        current.phase === "install_answer"
+          ? current.gap.targetServerId
+            ? 120
+            : 80
+          : 30,
         portfolio.executorInstanceId,
       );
     },
@@ -299,7 +304,11 @@ function defenseModule(): PlanModule {
         proposal({
           moduleId: "runner.defense_and_recovery",
           dedupeKey: "runner",
-          moduleState: { kind: "defense", phase, signals } satisfies DefenseState,
+          moduleState: {
+            kind: "defense",
+            phase,
+            signals,
+          } satisfies DefenseState,
           priorityClass:
             signals.pendingDamage > 0 ||
             (signals.activeTags > 0 && signals.visibleTagPunish)
@@ -321,8 +330,7 @@ function defenseModule(): PlanModule {
       );
       const priorityClass: "P2" | "P5" =
         current.signals.pendingDamage > 0 ||
-        (current.signals.activeTags > 0 &&
-          current.signals.visibleTagPunish)
+        (current.signals.activeTags > 0 && current.signals.visibleTagPunish)
           ? "P2"
           : "P5";
       return assessment(
@@ -341,11 +349,7 @@ function defenseModule(): PlanModule {
           capability: defenseCapability(current.phase),
           purpose: `Resolve runner defense phase ${current.phase}.`,
         },
-        candidates: defenseCandidates(
-          context,
-          current.phase,
-          current.signals,
-        ),
+        candidates: defenseCandidates(context, current.phase, current.signals),
       };
     },
   };
@@ -378,9 +382,7 @@ function proposal(params: {
     side: "runner",
     strategyLineIds: [],
     executionClass:
-      params.priorityClass === "P2"
-        ? "urgent_response"
-        : "development_project",
+      params.priorityClass === "P2" ? "urgent_response" : "development_project",
     initialViability: params.routeExists ? "ready" : "blocked",
     persistencePolicy:
       params.priorityClass === "P2" ? "locked_sequence" : "sticky_goal",
@@ -406,7 +408,7 @@ function proposal(params: {
 
 function assessment(
   instance: PlanInstance,
-  priorityClass: "P2" | "P5" | "P6",
+  priorityClass: "P2" | "P4" | "P5" | "P6",
   routeExists: boolean,
   withinClassValue: number,
   currentExecutorId: string | undefined,
@@ -429,16 +431,23 @@ function assessment(
             reasonCode: "development_need",
             horizon: "multi_turn",
           }
-        : {
-            requestedClass: "P6",
-            reasonCode: "neutral_progress",
-            horizon: "current_turn",
-          };
+        : priorityClass === "P4"
+          ? {
+              requestedClass: "P4",
+              reasonCode: "strategic_campaign",
+              horizon: "multi_turn",
+            }
+          : {
+              requestedClass: "P6",
+              reasonCode: "neutral_progress",
+              horizon: "current_turn",
+            };
   return {
     instanceId: instance.instanceId,
     side: "runner",
     priorityClaim,
-    intentFit: priorityClass === "P5" ? "aligned" : "none",
+    intentFit:
+      priorityClass === "P4" || priorityClass === "P5" ? "aligned" : "none",
     readiness: routeExists ? "executable_now" : "blocked",
     ...(routeExists
       ? {
@@ -514,9 +523,32 @@ function coverageInstallCandidates(
     )
       return [];
     const roles = rolesForDefinitionId(candidate.sourceDefinitionId);
-    if (!roles.includes(requiredRole)) return [];
-    return [{ candidate, sourceRoles: roles, stepValue: 100 }];
+    if (!rolesMatch(roles, coverageRoleNeedles(requiredRole))) return [];
+    return [
+      {
+        candidate,
+        sourceRoles: [...new Set([...roles, requiredRole])],
+        stepValue: 100,
+      },
+    ];
   });
+}
+
+function coverageRoleNeedles(
+  requiredRole: RunnerCoverageGapSignal["requiredRole"],
+): readonly string[] {
+  switch (requiredRole) {
+    case "breaker_wall":
+      return ["breaker_wall", "breaker_fracter"];
+    case "breaker_code_gate":
+      return ["breaker_code_gate", "breaker_decoder"];
+    case "breaker_sentry":
+      return ["breaker_sentry", "breaker_killer"];
+    case "breaker_universal":
+      return ["breaker_universal"];
+  }
+  const exhaustiveRole: never = requiredRole;
+  return exhaustiveRole;
 }
 
 function coverageDrawCandidates(
@@ -533,7 +565,8 @@ function coverageDrawCandidates(
     )
     .map((candidate) => ({
       candidate,
-      stepValue: candidate.semanticActionType === "card_ability.trigger" ? 20 : 5,
+      stepValue:
+        candidate.semanticActionType === "card_ability.trigger" ? 20 : 5,
     }));
 }
 
@@ -543,10 +576,7 @@ function defensePhase(
   if (signals.pendingDamage > 0 && signals.damagePreventionNeeded)
     return "prevent_damage";
   if (signals.activeTags > 0) return "clear_tags";
-  if (
-    signals.drawAllowed &&
-    signals.handSize < signals.minimumHandBuffer
-  )
+  if (signals.drawAllowed && signals.handSize < signals.minimumHandBuffer)
     return "build_hand_buffer";
   return undefined;
 }
@@ -571,11 +601,7 @@ function defenseCandidates(
     .map((candidate) => ({
       candidate,
       stepValue:
-        phase === "prevent_damage"
-          ? 100
-          : phase === "clear_tags"
-            ? 80
-            : 20,
+        phase === "prevent_damage" ? 100 : phase === "clear_tags" ? 80 : 20,
     }));
 }
 

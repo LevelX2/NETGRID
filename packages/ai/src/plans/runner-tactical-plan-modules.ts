@@ -60,15 +60,21 @@ export type RunnerRunWindowSignal = {
   evidenceCode: string;
 };
 
+export type RunnerTerminalWinSignal = {
+  terminalId: string;
+  semanticActionTypes: string[];
+  evidenceCode: string;
+};
+
 export type RunnerTacticalPlanDomain = {
+  terminalWins: RunnerTerminalWinSignal[];
   centralPressure: RunnerPressureSignal[];
   remoteContests: RunnerRemoteContestSignal[];
   developments: RunnerDevelopmentSignal[];
   runWindows: RunnerRunWindowSignal[];
 };
 
-export type RunnerPlanDomain = RunnerCorePlanDomain &
-  RunnerTacticalPlanDomain;
+export type RunnerPlanDomain = RunnerCorePlanDomain & RunnerTacticalPlanDomain;
 
 type PressureState = {
   kind: "central_pressure";
@@ -86,14 +92,65 @@ type RunWindowState = {
   kind: "run_window";
   signal: RunnerRunWindowSignal;
 };
+type TerminalWinState = {
+  kind: "terminal_win";
+  signal: RunnerTerminalWinSignal;
+};
 
 export function createRunnerTacticalPlanModules(): PlanModule[] {
   return [
+    terminalWinModule(),
     centralPressureModule(),
     remoteContestModule(),
     developmentModule(),
     runWindowModule(),
   ];
+}
+
+function terminalWinModule(): PlanModule {
+  return {
+    moduleId: "runner.secure_terminal_win",
+    side: "runner",
+    discover: (context) =>
+      domain(context).terminalWins.map((signal) => {
+        const candidates = terminalWinCandidates(context, signal);
+        return proposal(
+          "runner.secure_terminal_win",
+          signal.terminalId,
+          { kind: "terminal_win", signal } satisfies TerminalWinState,
+          "P1",
+          [],
+          { kind: "player", id: "corp" },
+          candidates.length > 0,
+          signal.evidenceCode,
+        );
+      }),
+    assess: (instance, context, portfolio) => {
+      const current = state<TerminalWinState>(instance);
+      return assessment(
+        instance,
+        "P1",
+        terminalWinCandidates(context, current.signal).length > 0,
+        1,
+        portfolio.executorInstanceId,
+      );
+    },
+    materialize: (instance, _assessment, context) => {
+      const current = state<TerminalWinState>(instance);
+      return {
+        step: {
+          stepId: `${instance.instanceId}:force_terminal`,
+          capability: {
+            capabilityId: "force_corp_mandatory_draw_deckout",
+            semanticActionTypes: current.signal.semanticActionTypes,
+          },
+          purpose:
+            "End the Runner turn to force the rules-proven empty-R&D mandatory draw.",
+        },
+        candidates: terminalWinCandidates(context, current.signal),
+      };
+    },
+  };
 }
 
 export function runnerPressureProgressReceipt(params: {
@@ -117,14 +174,15 @@ export function runnerPressureProgressReceipt(params: {
     };
   }
   const realProgress =
-    params.accessConverted &&
-    params.currentCounter > params.previousCounter;
+    params.accessConverted && params.currentCounter > params.previousCounter;
   return {
     planInstanceId: params.planInstanceId,
     stateVersionBefore: params.stateVersionBefore,
     stateVersionAfter: params.stateVersionAfter,
     progress: realProgress ? "progress" : "no_progress",
-    progressValue: realProgress ? params.currentCounter : params.previousCounter,
+    progressValue: realProgress
+      ? params.currentCounter
+      : params.previousCounter,
     milestoneAfter: realProgress
       ? "access_conversion_observed"
       : "no_real_conversion",
@@ -138,6 +196,11 @@ export function runnerVoluntaryActionFamilyOwner(
   candidate: ActionSemanticCandidate,
   planDomain: RunnerPlanDomain,
 ): PlanModule["moduleId"] | undefined {
+  if (candidate.semanticActionType === "turn_flow.end_turn") {
+    return planDomain.terminalWins.length > 0
+      ? "runner.secure_terminal_win"
+      : undefined;
+  }
   if (candidate.semanticActionType === "economy.gain_credit") {
     return candidate.sourceKind === "basic_action"
       ? "runner.basic_credit"
@@ -187,11 +250,8 @@ export function runnerVoluntaryActionFamilyOwner(
   if (candidate.semanticActionType === "draw.card") {
     const concreteDrawPurpose =
       planDomain.coverageGaps.some((gap) => gap.deckHasAnswer) ||
-      planDomain.defense.handSize <
-        planDomain.defense.minimumHandBuffer;
-    return concreteDrawPurpose
-      ? "runner.defense_and_recovery"
-      : undefined;
+      planDomain.defense.handSize < planDomain.defense.minimumHandBuffer;
+    return concreteDrawPurpose ? "runner.defense_and_recovery" : undefined;
   }
   return undefined;
 }
@@ -397,7 +457,12 @@ function runWindowModule(): PlanModule {
             semanticActionTypes: current.signal.semanticActionTypes,
           },
           ...(current.signal.serverId
-            ? { target: { kind: "server" as const, id: current.signal.serverId } }
+            ? {
+                target: {
+                  kind: "server" as const,
+                  id: current.signal.serverId,
+                },
+              }
             : {}),
           purpose: `Convert run window ${current.signal.windowId}.`,
         },
@@ -425,14 +490,16 @@ function proposal(
     side: "runner",
     strategyLineIds,
     executionClass:
-      priorityClass === "P2"
+      priorityClass === "P1" || priorityClass === "P2"
         ? "urgent_response"
         : priorityClass === "P3"
           ? "bounded_sequence"
           : "strategic_campaign",
     initialViability: routeExists ? "ready" : "blocked",
     persistencePolicy:
-      priorityClass === "P3" ? "locked_sequence" : "sticky_goal",
+      priorityClass === "P1" || priorityClass === "P3"
+        ? "locked_sequence"
+        : "sticky_goal",
     retentionPolicy: {
       blockedStateVersionTtl: 2,
       dormantStateVersionTtl: 2,
@@ -468,42 +535,58 @@ function proposal(
 
 function assessment(
   instance: PlanInstance,
-  priorityClass: "P2" | "P3" | "P4" | "P5",
+  priorityClass: "P1" | "P2" | "P3" | "P4" | "P5",
   routeExists: boolean,
   value: number,
   executorId: string | undefined,
   p2Reason: "score_threat" | undefined = undefined,
 ): PlanAssessment {
   const claim: PriorityClaim =
-    priorityClass === "P2"
+    priorityClass === "P1"
       ? {
-          requestedClass: "P2",
-          reasonCode: p2Reason ?? "irreversible_threat",
+          requestedClass: "P1",
+          reasonCode: "terminal_win",
           horizon: "current_turn",
           witness: {
-            kind: p2Reason === "score_threat" ? "score_threat" : "irreversible_threat",
-            evidenceCode: instance.evidenceRefs[0]?.code ?? "visible_threat",
-            guarantee: "visible_state_forced",
+            kind: "terminal_path",
+            evidenceCode:
+              instance.evidenceRefs[0]?.code ?? "rules_proven_terminal_path",
+            guarantee: "rules_proven",
             ...(instance.target ? { target: instance.target } : {}),
           },
         }
-      : priorityClass === "P3"
+      : priorityClass === "P2"
         ? {
-            requestedClass: "P3",
-            reasonCode: "expiring_conversion",
-            horizon: "current_window",
+            requestedClass: "P2",
+            reasonCode: p2Reason ?? "irreversible_threat",
+            horizon: "current_turn",
+            witness: {
+              kind:
+                p2Reason === "score_threat"
+                  ? "score_threat"
+                  : "irreversible_threat",
+              evidenceCode: instance.evidenceRefs[0]?.code ?? "visible_threat",
+              guarantee: "visible_state_forced",
+              ...(instance.target ? { target: instance.target } : {}),
+            },
           }
-        : priorityClass === "P4"
+        : priorityClass === "P3"
           ? {
-              requestedClass: "P4",
-              reasonCode: "strategic_campaign",
-              horizon: "multi_turn",
+              requestedClass: "P3",
+              reasonCode: "expiring_conversion",
+              horizon: "current_window",
             }
-          : {
-              requestedClass: "P5",
-              reasonCode: "development_need",
-              horizon: "multi_turn",
-            };
+          : priorityClass === "P4"
+            ? {
+                requestedClass: "P4",
+                reasonCode: "strategic_campaign",
+                horizon: "multi_turn",
+              }
+            : {
+                requestedClass: "P5",
+                reasonCode: "development_need",
+                horizon: "multi_turn",
+              };
   return {
     instanceId: instance.instanceId,
     side: "runner",
@@ -616,9 +699,28 @@ function runWindowCandidates(
     .map((candidate) => ({ candidate, stepValue: 100 }));
 }
 
+function terminalWinCandidates(
+  context: PlanSchedulerContext,
+  signal: RunnerTerminalWinSignal,
+): PlanMaterialization["candidates"] {
+  return context.actionCandidates
+    .filter(
+      (candidate) =>
+        signal.semanticActionTypes.includes(candidate.semanticActionType) &&
+        candidate.actionType === "end_turn",
+    )
+    .map((candidate) => ({ candidate, stepValue: 1 }));
+}
+
 function domain(context: PlanSchedulerContext): RunnerPlanDomain {
   const value = context.domain as RunnerPlanDomain | undefined;
-  if (value?.centralPressure && value.remoteContests && value.developments && value.runWindows)
+  if (
+    value?.terminalWins &&
+    value.centralPressure &&
+    value.remoteContests &&
+    value.developments &&
+    value.runWindows
+  )
     return value;
   throw new PlanResolutionFailure("missing_plan_module_coverage", {
     side: context.input.side,

@@ -29,6 +29,7 @@ import {
 } from "../runtime/corp-scoreline-feasibility";
 import type { FundingRoute } from "./funding-route";
 import type { ActionCapacityRoute } from "./action-capacity-route";
+import { resetResidentPlanPortfolioMemory } from "./resident-plan-portfolio-memory";
 
 export type PlanContinuityMemorySnapshot = {
   type?: string;
@@ -142,6 +143,7 @@ function previousCreditBaseGoalIsSatisfied(
 
 export function resetTacticalPlanMemory(): void {
   tacticalPlanMemoryByKey.clear();
+  resetResidentPlanPortfolioMemory();
   resetPlanPortfolioMemory();
   resetRunnerRunPlanMemory();
   resetStrategicIntentMemory();

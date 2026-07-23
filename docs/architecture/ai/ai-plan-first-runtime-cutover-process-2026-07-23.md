@@ -23,8 +23,9 @@ Aktueller Paketstand:
 - PF10: abgeschlossen, Commit `b684db3f5`
 - PF11: abgeschlossen, Commit `48f0f109e`
 - PF12: abgeschlossen, Commit `fbdb8fb10`
-- PF13: abgeschlossen
-- nächstes Paket: PF14
+- PF13: abgeschlossen, Commit `790259a4a`
+- PF14: abgeschlossen
+- nächstes Paket: PF15
 
 ## Zielprüfung
 
@@ -726,6 +727,25 @@ missing_action_semantics = 0
 end_turn_with_safe_action_capacity = 0
 fallback_reason_missing_module_coverage = 0
 ```
+
+Nachweis des vollständigen AI-Testlaufs nach Schließung der fachlichen Lücken:
+
+- `459` Testdateien und `3.216` Tests ausgeführt;
+- `missing_plan_module_coverage = 0`;
+- `invalid_plan_identity = 0`;
+- `priority_claim_rejected = 0`;
+- `scheduler_replan_exhausted = 0`;
+- die verbleibenden roten Tests sind alte Verhaltens-, Reason- oder
+  Evidence-Verträge und werden in PF15 einzeln auf den neuen Planvertrag
+  umgestellt, nicht durch Runtime-Fallbacks beruhigt.
+
+Zusätzliche PF14-Gates:
+
+- `tsc -p packages/ai/tsconfig.json --noEmit`: grün;
+- `check-ai-source-structure`: grün, keine Runtime- oder Typzyklen;
+- `check-package-boundaries`: grün;
+- fokussierte Plan-, Live-Runtime-, Real-Engine- und Simulationstests:
+  `48/48` grün.
 
 ### Commit
 
