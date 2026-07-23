@@ -1,0 +1,706 @@
+import type { Side } from "@netgrid/shared";
+import {
+  assertValidPlanInstance,
+  deduplicatePlanProposals,
+  instantiatePlanProposal,
+  planProposalKey,
+} from "./plan-instance";
+import type {
+  PlanInstance,
+  PlanProgress,
+  PlanProposal,
+} from "./plan-kernel-types";
+import { PlanResolutionFailure } from "./plan-resolution-failure";
+
+export const RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION =
+  "resident-plan-portfolio-v2" as const;
+
+export type PlanPortfolioTransitionReason =
+  | "discovered"
+  | "retained"
+  | "executor_selected"
+  | "preempted_by_higher_class"
+  | "preempted_by_validated_value"
+  | "resumed_after_preemption"
+  | "outcome_progress"
+  | "outcome_no_progress"
+  | "completed"
+  | "invalidated"
+  | "stale_ttl_expired"
+  | "target_disappeared"
+  | "module_version_evicted";
+
+export type PlanPortfolioTransition = {
+  instanceId: string;
+  stateVersion: number;
+  reason: PlanPortfolioTransitionReason;
+  fromExecutionState?: PlanInstance["executionState"];
+  toExecutionState?: PlanInstance["executionState"];
+  detailCode: string;
+};
+
+export type CompletedPlanRecord = {
+  instanceId: string;
+  moduleId: PlanInstance["moduleId"];
+  dedupeKey: string;
+  terminalViability: "completed" | "abandoned";
+  terminalAtStateVersion: number;
+  retainUntilStateVersion: number;
+  finalProgress: PlanProgress;
+};
+
+export type ResidentPlanPortfolio = {
+  schemaVersion: typeof RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION;
+  side: Side;
+  stateVersion: number;
+  rootForegroundInstanceId?: string;
+  executorInstanceId?: string;
+  instances: PlanInstance[];
+  completionHistory: CompletedPlanRecord[];
+  transitions: PlanPortfolioTransition[];
+};
+
+export type ReconcileResidentPlanPortfolioParams = {
+  side: Side;
+  stateVersion: number;
+  timingPoint: string;
+  proposals: readonly PlanProposal[];
+  previous?: ResidentPlanPortfolio;
+  selectedExecutorInstanceId?: string;
+  selectionReason?:
+    | "executor_selected"
+    | "preempted_by_higher_class"
+    | "preempted_by_validated_value";
+};
+
+export type PlanOutcomeReceipt = {
+  planInstanceId: string;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  progress:
+    | "progress"
+    | "no_progress"
+    | "regression"
+    | "completed"
+    | "invalidated";
+  progressValue: number;
+  milestoneAfter: string;
+  reasonCode: string;
+};
+
+export function reconcileResidentPlanPortfolio(
+  params: ReconcileResidentPlanPortfolioParams,
+): ResidentPlanPortfolio {
+  assertPortfolioInput(params);
+  const proposals = deduplicatePlanProposals(
+    params.proposals,
+    params.stateVersion,
+  );
+  const wrongSideProposal = proposals.find(
+    (proposal) => proposal.side !== params.side,
+  );
+  if (wrongSideProposal) {
+    throw new PlanResolutionFailure("invalid_plan_identity", {
+      side: params.side,
+      stateVersion: params.stateVersion,
+      timingPoint: params.timingPoint,
+      legalActionTypes: [],
+      owner: "plan_registry",
+      removalCondition:
+        "A side-specific scheduler may reconcile only proposals for its own side.",
+      planInstanceId: `proposal:${wrongSideProposal.moduleId}:${wrongSideProposal.dedupeKey}`,
+    });
+  }
+  const previousInstances = new Map(
+    (params.previous?.instances ?? []).map((instance) => [
+      planProposalKey(instance),
+      structuredClone(instance),
+    ]),
+  );
+  const proposalKeys = new Set(proposals.map(planProposalKey));
+  const transitions: PlanPortfolioTransition[] = [];
+  const nextInstances: PlanInstance[] = [];
+
+  for (const proposal of proposals) {
+    const key = planProposalKey(proposal);
+    const previous = previousInstances.get(key);
+    if (!previous) {
+      const created = instantiatePlanProposal(proposal, params.stateVersion);
+      nextInstances.push(created);
+      transitions.push(
+        transition(created, params.stateVersion, "discovered", "new_proposal"),
+      );
+      continue;
+    }
+    if (previous.moduleVersion !== proposal.moduleVersion) {
+      transitions.push(
+        transition(
+          previous,
+          params.stateVersion,
+          "module_version_evicted",
+          "module_contract_changed",
+        ),
+      );
+      const replaced = instantiatePlanProposal(proposal, params.stateVersion);
+      nextInstances.push(replaced);
+      transitions.push(
+        transition(
+          replaced,
+          params.stateVersion,
+          "discovered",
+          "replacement_instance",
+        ),
+      );
+      continue;
+    }
+    const retained = refreshFromProposal(previous, proposal, params.stateVersion);
+    nextInstances.push(retained);
+    transitions.push(
+      transition(
+        retained,
+        params.stateVersion,
+        "retained",
+        "proposal_still_relevant",
+      ),
+    );
+  }
+
+  for (const [key, previous] of previousInstances) {
+    if (proposalKeys.has(key)) continue;
+    const retention = retentionDecision(previous, params.stateVersion);
+    if (retention.retain) {
+      nextInstances.push(previous);
+      transitions.push(
+        transition(previous, params.stateVersion, "retained", retention.code),
+      );
+    } else {
+      transitions.push(
+        transition(
+          previous,
+          params.stateVersion,
+          retention.reason,
+          retention.code,
+        ),
+      );
+    }
+  }
+
+  let portfolio: ResidentPlanPortfolio = {
+    schemaVersion: RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION,
+    side: params.side,
+    stateVersion: params.stateVersion,
+    instances: stableInstances(nextInstances),
+    completionHistory: pruneHistory(
+      params.previous?.completionHistory ?? [],
+      params.stateVersion,
+    ),
+    transitions,
+  };
+  portfolio = assignExecutor(
+    portfolio,
+    params.selectedExecutorInstanceId,
+    params.selectionReason ?? "executor_selected",
+    params.timingPoint,
+  );
+  assertResidentPlanPortfolio(portfolio, params.timingPoint);
+  return portfolio;
+}
+
+export function applyPlanOutcomeReceipt(
+  portfolio: ResidentPlanPortfolio,
+  receipt: PlanOutcomeReceipt,
+  timingPoint: string,
+): ResidentPlanPortfolio {
+  assertNoActionReference(receipt, portfolio, timingPoint);
+  if (
+    receipt.stateVersionBefore !== portfolio.stateVersion ||
+    receipt.stateVersionAfter <= receipt.stateVersionBefore
+  ) {
+    throw portfolioFailure(
+      "stale_or_future_action_reference",
+      portfolio,
+      timingPoint,
+      receipt.planInstanceId,
+      "Apply only an outcome observed directly after the portfolio state.",
+    );
+  }
+  const instance = portfolio.instances.find(
+    (candidate) => candidate.instanceId === receipt.planInstanceId,
+  );
+  if (!instance) {
+    throw portfolioFailure(
+      "invalid_plan_identity",
+      portfolio,
+      timingPoint,
+      receipt.planInstanceId,
+      "Apply outcomes only to resident plan instances.",
+    );
+  }
+
+  const updated = structuredClone(instance);
+  updated.updatedAtStateVersion = receipt.stateVersionAfter;
+  updated.milestone = receipt.milestoneAfter;
+  updated.progress = {
+    status: receipt.progress,
+    value: receipt.progressValue,
+    milestone: receipt.milestoneAfter,
+    reasonCode: receipt.reasonCode,
+  };
+  if (receipt.progress === "progress" || receipt.progress === "completed") {
+    updated.lastProductiveAtStateVersion = receipt.stateVersionAfter;
+  }
+
+  const terminal =
+    receipt.progress === "completed" || receipt.progress === "invalidated";
+  updated.viability = terminal
+    ? receipt.progress === "completed"
+      ? "completed"
+      : "abandoned"
+    : updated.viability;
+  updated.executionState = terminal ? "idle" : updated.executionState;
+  updated.portfolioRole = terminal ? "unassigned" : updated.portfolioRole;
+  if (terminal) {
+    updated.openNeedIds = [];
+    delete updated.commitmentId;
+  }
+  assertValidPlanInstance(updated);
+
+  const history = terminal
+    ? [
+        ...portfolio.completionHistory,
+        completedRecord(updated, receipt.stateVersionAfter),
+      ]
+    : portfolio.completionHistory;
+  const next: ResidentPlanPortfolio = {
+    ...portfolio,
+    stateVersion: receipt.stateVersionAfter,
+    instances: terminal
+      ? portfolio.instances.filter(
+          (candidate) => candidate.instanceId !== updated.instanceId,
+        )
+      : portfolio.instances.map((candidate) =>
+          candidate.instanceId === updated.instanceId ? updated : candidate,
+        ),
+    completionHistory: pruneHistory(history, receipt.stateVersionAfter),
+    transitions: [
+      ...portfolio.transitions,
+      transition(
+        updated,
+        receipt.stateVersionAfter,
+        receipt.progress === "completed"
+          ? "completed"
+          : receipt.progress === "invalidated"
+            ? "invalidated"
+            : receipt.progress === "no_progress"
+              ? "outcome_no_progress"
+              : "outcome_progress",
+        receipt.reasonCode,
+      ),
+    ],
+  };
+  if (portfolio.executorInstanceId === updated.instanceId && terminal) {
+    delete next.executorInstanceId;
+  }
+  if (
+    portfolio.rootForegroundInstanceId === updated.instanceId &&
+    terminal
+  ) {
+    delete next.rootForegroundInstanceId;
+  }
+  assertResidentPlanPortfolio(next, timingPoint);
+  return next;
+}
+
+export function assertResidentPlanPortfolio(
+  portfolio: ResidentPlanPortfolio,
+  timingPoint: string,
+): void {
+  const executors = portfolio.instances.filter(
+    (instance) => instance.executionState === "executor",
+  );
+  const ids = new Set(portfolio.instances.map((instance) => instance.instanceId));
+  const duplicateCount = portfolio.instances.length - ids.size;
+  const executor = portfolio.executorInstanceId
+    ? portfolio.instances.find(
+        (instance) => instance.instanceId === portfolio.executorInstanceId,
+      )
+    : undefined;
+  const hasResidentChild = executor
+    ? portfolio.instances.some(
+        (instance) =>
+          instance.parentInstanceId === executor.instanceId &&
+          instance.viability !== "completed" &&
+          instance.viability !== "abandoned",
+      )
+    : false;
+  if (
+    portfolio.schemaVersion !== RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION ||
+    duplicateCount > 0 ||
+    executors.length > 1 ||
+    (portfolio.executorInstanceId !== undefined &&
+      (executors.length !== 1 || !executor)) ||
+    (executor !== undefined && executor.executionState !== "executor") ||
+    hasResidentChild
+  ) {
+    throw portfolioFailure(
+      "executor_invariant_broken",
+      portfolio,
+      timingPoint,
+      portfolio.executorInstanceId,
+      "Keep stable unique instances and assign at most one ready leaf executor.",
+    );
+  }
+  for (const instance of portfolio.instances) assertValidPlanInstance(instance);
+}
+
+function assignExecutor(
+  portfolio: ResidentPlanPortfolio,
+  selectedId: string | undefined,
+  reason: NonNullable<
+    ReconcileResidentPlanPortfolioParams["selectionReason"]
+  >,
+  timingPoint: string,
+): ResidentPlanPortfolio {
+  const previousExecutorId = portfolio.instances.find(
+    (instance) => instance.executionState === "executor",
+  )?.instanceId;
+  if (!selectedId) {
+    return {
+      ...portfolio,
+      instances: portfolio.instances.map(clearAssignment),
+    };
+  }
+  const selected = portfolio.instances.find(
+    (instance) => instance.instanceId === selectedId,
+  );
+  if (!selected || selected.viability !== "ready") {
+    throw portfolioFailure(
+      "executor_invariant_broken",
+      portfolio,
+      timingPoint,
+      selectedId,
+      "Select exactly one resident ready plan as executor.",
+    );
+  }
+  if (
+    portfolio.instances.some(
+      (instance) =>
+        instance.parentInstanceId === selectedId &&
+        instance.viability !== "completed" &&
+        instance.viability !== "abandoned",
+    )
+  ) {
+    throw portfolioFailure(
+      "executor_invariant_broken",
+      portfolio,
+      timingPoint,
+      selectedId,
+      "Select the active support child, not its parent, as leaf executor.",
+    );
+  }
+
+  const rootId = rootAncestorId(selected, portfolio.instances);
+  const transitions = [...portfolio.transitions];
+  const instances = portfolio.instances.map((instance) => {
+    const before = instance.executionState;
+    const next = structuredClone(instance);
+    if (instance.instanceId === selectedId) {
+      next.executionState = "executor";
+      next.portfolioRole =
+        instance.instanceId === rootId ? "foreground" : "background";
+      if (before === "preempted") {
+        transitions.push(
+          transition(
+            next,
+            portfolio.stateVersion,
+            "resumed_after_preemption",
+            "selected_again",
+            before,
+            next.executionState,
+          ),
+        );
+      } else if (before !== "executor") {
+        transitions.push(
+          transition(
+            next,
+            portfolio.stateVersion,
+            reason,
+            "validated_scheduler_selection",
+            before,
+            next.executionState,
+          ),
+        );
+      }
+    } else if (
+      instance.executionState === "executor" ||
+      (previousExecutorId === instance.instanceId &&
+        instance.instanceId !== selectedId)
+    ) {
+      next.executionState =
+        instance.viability === "ready" ? "preempted" : "idle";
+      next.portfolioRole =
+        instance.executionClass === "urgent_response"
+          ? "response_candidate"
+          : "background";
+      transitions.push(
+        transition(
+          next,
+          portfolio.stateVersion,
+          reason,
+          "scheduler_changed_executor",
+          before,
+          next.executionState,
+        ),
+      );
+    } else {
+      next.executionState =
+        instance.executionState === "preempted" ? "preempted" : "idle";
+      next.portfolioRole =
+        instance.instanceId === rootId
+          ? "foreground"
+          : instance.executionClass === "urgent_response"
+            ? "response_candidate"
+            : "background";
+    }
+    assertValidPlanInstance(next);
+    return next;
+  });
+  return {
+    ...portfolio,
+    rootForegroundInstanceId: rootId,
+    executorInstanceId: selectedId,
+    instances,
+    transitions,
+  };
+}
+
+function clearAssignment(instance: PlanInstance): PlanInstance {
+  const next = structuredClone(instance);
+  next.executionState = "idle";
+  next.portfolioRole =
+    next.executionClass === "urgent_response"
+      ? "response_candidate"
+      : "background";
+  return next;
+}
+
+function rootAncestorId(
+  selected: PlanInstance,
+  instances: readonly PlanInstance[],
+): string {
+  const byId = new Map(instances.map((instance) => [instance.instanceId, instance]));
+  const visited = new Set<string>();
+  let current = selected;
+  while (current.parentInstanceId) {
+    if (visited.has(current.instanceId)) break;
+    visited.add(current.instanceId);
+    const parent = byId.get(current.parentInstanceId);
+    if (!parent) break;
+    current = parent;
+  }
+  return current.instanceId;
+}
+
+function refreshFromProposal(
+  instance: PlanInstance,
+  proposal: PlanProposal,
+  stateVersion: number,
+): PlanInstance {
+  const next = structuredClone(instance);
+  next.strategyLineIds = [...new Set(proposal.strategyLineIds)].sort();
+  next.executionClass = proposal.executionClass;
+  next.viability = proposal.initialViability;
+  next.persistencePolicy = proposal.persistencePolicy;
+  next.retentionPolicy = structuredClone(proposal.retentionPolicy);
+  if (proposal.target) next.target = structuredClone(proposal.target);
+  else delete next.target;
+  if (proposal.parentInstanceId)
+    next.parentInstanceId = proposal.parentInstanceId;
+  else delete next.parentInstanceId;
+  next.phase = proposal.phase;
+  next.milestone = proposal.milestone;
+  next.moduleState = structuredClone(proposal.moduleState);
+  next.blockers = structuredClone(proposal.blockers);
+  next.resumeConditions = structuredClone(proposal.resumeConditions);
+  next.completionConditions = structuredClone(proposal.completionConditions);
+  next.abandonmentConditions = structuredClone(proposal.abandonmentConditions);
+  if (proposal.cadence) next.cadence = structuredClone(proposal.cadence);
+  else delete next.cadence;
+  next.evidenceRefs = structuredClone(proposal.evidenceRefs);
+  next.updatedAtStateVersion = stateVersion;
+  if (next.viability !== "ready") next.executionState = "idle";
+  assertValidPlanInstance(next);
+  return next;
+}
+
+function retentionDecision(
+  instance: PlanInstance,
+  stateVersion: number,
+):
+  | { retain: true; code: string }
+  | {
+      retain: false;
+      code: string;
+      reason: "stale_ttl_expired" | "target_disappeared";
+    } {
+  if (
+    (instance.openNeedIds.length > 0 &&
+      instance.retentionPolicy.protectedWhileNeedOpen) ||
+    (instance.commitmentId &&
+      instance.retentionPolicy.protectedWhileCommitted)
+  ) {
+    return { retain: true, code: "retention_protected" };
+  }
+  if (
+    instance.target &&
+    instance.retentionPolicy.abandonWhenTargetMissing
+  ) {
+    return {
+      retain: false,
+      code: "proposal_missing_target_contract",
+      reason: "target_disappeared",
+    };
+  }
+  const ttl =
+    instance.viability === "blocked"
+      ? instance.retentionPolicy.blockedStateVersionTtl
+      : instance.retentionPolicy.dormantStateVersionTtl;
+  if (stateVersion - instance.updatedAtStateVersion <= ttl) {
+    return { retain: true, code: "within_stale_ttl" };
+  }
+  return {
+    retain: false,
+    code: "stale_ttl_elapsed",
+    reason: "stale_ttl_expired",
+  };
+}
+
+function completedRecord(
+  instance: PlanInstance,
+  stateVersion: number,
+): CompletedPlanRecord {
+  return {
+    instanceId: instance.instanceId,
+    moduleId: instance.moduleId,
+    dedupeKey: instance.dedupeKey,
+    terminalViability:
+      instance.viability === "completed" ? "completed" : "abandoned",
+    terminalAtStateVersion: stateVersion,
+    retainUntilStateVersion:
+      stateVersion +
+      instance.retentionPolicy.completedHistoryStateVersionTtl,
+    finalProgress: structuredClone(instance.progress),
+  };
+}
+
+function pruneHistory(
+  history: readonly CompletedPlanRecord[],
+  stateVersion: number,
+): CompletedPlanRecord[] {
+  return history
+    .filter((record) => record.retainUntilStateVersion >= stateVersion)
+    .map((record) => structuredClone(record))
+    .sort(
+      (left, right) =>
+        left.terminalAtStateVersion - right.terminalAtStateVersion ||
+        left.instanceId.localeCompare(right.instanceId),
+    );
+}
+
+function stableInstances(instances: readonly PlanInstance[]): PlanInstance[] {
+  return [...instances]
+    .map((instance) => structuredClone(instance))
+    .sort((left, right) => left.instanceId.localeCompare(right.instanceId));
+}
+
+function transition(
+  instance: PlanInstance,
+  stateVersion: number,
+  reason: PlanPortfolioTransitionReason,
+  detailCode: string,
+  fromExecutionState?: PlanInstance["executionState"],
+  toExecutionState?: PlanInstance["executionState"],
+): PlanPortfolioTransition {
+  return {
+    instanceId: instance.instanceId,
+    stateVersion,
+    reason,
+    ...(fromExecutionState ? { fromExecutionState } : {}),
+    ...(toExecutionState ? { toExecutionState } : {}),
+    detailCode,
+  };
+}
+
+function assertPortfolioInput(
+  params: ReconcileResidentPlanPortfolioParams,
+): void {
+  if (
+    params.previous &&
+    (params.previous.schemaVersion !==
+      RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION ||
+      params.previous.side !== params.side ||
+      params.previous.stateVersion > params.stateVersion)
+  ) {
+    throw portfolioFailure(
+      "invalid_plan_identity",
+      {
+        schemaVersion: RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION,
+        side: params.side,
+        stateVersion: params.stateVersion,
+        instances: [],
+        completionHistory: [],
+        transitions: [],
+      },
+      params.timingPoint,
+      undefined,
+      "Discard legacy or future portfolio snapshots instead of migrating them.",
+    );
+  }
+}
+
+function assertNoActionReference(
+  receipt: PlanOutcomeReceipt,
+  portfolio: ResidentPlanPortfolio,
+  timingPoint: string,
+): void {
+  const keys = recursiveKeys(receipt);
+  if (!keys.some((key) => key.toLocaleLowerCase("en-US").includes("actionid")))
+    return;
+  throw portfolioFailure(
+    "executor_invariant_broken",
+    portfolio,
+    timingPoint,
+    receipt.planInstanceId,
+    "Derive plan progress from semantic outcome receipts, never action ids.",
+  );
+}
+
+function recursiveKeys(value: unknown): string[] {
+  if (!value || typeof value !== "object") return [];
+  return Object.entries(value).flatMap(([key, nested]) => [
+    key,
+    ...recursiveKeys(nested),
+  ]);
+}
+
+function portfolioFailure(
+  code:
+    | "invalid_plan_identity"
+    | "executor_invariant_broken"
+    | "stale_or_future_action_reference",
+  portfolio: ResidentPlanPortfolio,
+  timingPoint: string,
+  planInstanceId: string | undefined,
+  removalCondition: string,
+): PlanResolutionFailure {
+  return new PlanResolutionFailure(code, {
+    side: portfolio.side,
+    stateVersion: portfolio.stateVersion,
+    timingPoint,
+    legalActionTypes: [],
+    owner: "plan_registry",
+    removalCondition,
+    ...(planInstanceId ? { planInstanceId } : {}),
+    candidateCount: portfolio.instances.length,
+  });
+}

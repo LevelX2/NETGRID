@@ -21,7 +21,11 @@ export type PlanProposalViability = Exclude<
   "completed" | "abandoned"
 >;
 
-export type PlanPortfolioRole = "foreground" | "background" | "unassigned";
+export type PlanPortfolioRole =
+  | "foreground"
+  | "background"
+  | "response_candidate"
+  | "unassigned";
 
 export type PlanExecutionState = "idle" | "executor" | "preempted";
 
