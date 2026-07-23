@@ -21,8 +21,9 @@ Aktueller Paketstand:
 - PF08: abgeschlossen, Commit `c0da361f2`
 - PF09: abgeschlossen, Commit `50eb3b892`
 - PF10: abgeschlossen, Commit `b684db3f5`
-- PF11: abgeschlossen
-- nächstes Paket: PF12
+- PF11: abgeschlossen, Commit `48f0f109e`
+- PF12: abgeschlossen
+- nächstes Paket: PF13
 
 ## Zielprüfung
 
