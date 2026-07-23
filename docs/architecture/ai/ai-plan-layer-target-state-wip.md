@@ -1897,7 +1897,819 @@ Jedes Modul besitzt eine interne Schema- oder Modulversion. Änderungen an
 - **Offen:** Ob Opening-Pläne nach der ersten Spielphase vollständig
   abgeschlossen oder als diagnostische Deckphaseninstanz behalten werden.
 
-## 33. Änderungsverlauf
+## 33. Konkreter Entscheidungsalgorithmus
+
+Der folgende Ablauf ist konzeptioneller Zielpseudocode:
+
+```ts
+function choosePlannedAction(context): PlannedDecision {
+  assertCurrentStateVersion(context);
+  assertSideSafeInput(context);
+
+  const window = classifyDecisionWindow(context);
+  if (window.isForcedResolution) {
+    return resolveForcedWindow(window, context);
+  }
+
+  let portfolio = reconcilePortfolio(context);
+
+  for (let attempt = 0; attempt < MAX_REPLAN_ATTEMPTS; attempt += 1) {
+    const interrupt = selectInterrupt(portfolio, context);
+    const executor =
+      interrupt ?? continueOrSelectForeground(portfolio, context);
+
+    if (!executor) {
+      portfolio = activateNeutralFallback(portfolio, context);
+      continue;
+    }
+
+    const module = registry.moduleFor(executor.moduleId);
+    const step = module.proposeStep(executor, context);
+    const routes = module.buildRoutes(
+      executor,
+      step,
+      context.legalActions,
+      context,
+    );
+
+    const viableRoutes = applyGlobalSafetyGates(routes, context);
+
+    if (viableRoutes.length === 0) {
+      portfolio = blockOrReplan(executor, step, portfolio, context);
+      continue;
+    }
+
+    const route = selectPlanLocalRoute(
+      module,
+      executor,
+      step,
+      viableRoutes,
+      context,
+    );
+
+    const commitment = maybeCreateCommitment(route, context);
+    const action = route.nextAction;
+
+    assertLegalActionExists(action, context.legalActions);
+    assertActionAttributedToPlan(action, executor, step, route);
+    assertEndTurnContract(action, context);
+
+    return buildPlannedDecision(
+      executor,
+      step,
+      route,
+      commitment,
+      action,
+    );
+  }
+
+  throw new PlanResolutionFailure(currentStateVersion, diagnostics);
+}
+```
+
+### 33.1 Begrenztes Replanning
+
+Ist ein ausgewählter Step nicht auf LegalActions abbildbar, wird nicht sofort
+eine beliebige Aktion gewählt. Der Scheduler darf innerhalb derselben
+Entscheidung begrenzt neu planen:
+
+1. Step als blockiert markieren;
+2. Supportbedarf prüfen;
+3. Plan gegebenenfalls suspendieren;
+4. nächsten ausführbaren Plan wählen;
+5. spätestens nach einer festen Anzahl deterministischer Versuche mit
+   Diagnosefehler stoppen.
+
+Ein stiller freier Action-Fallback ist nicht erlaubt.
+
+### 33.2 Deterministische Tie-Breaks
+
+Bei fachlich gleichwertigen Plänen oder Routen gilt eine stabile Reihenfolge,
+beispielsweise:
+
+1. laufendes Commitment;
+2. bestehender Vordergrund;
+3. höherer sichtbarer Fortschritt;
+4. geringere Ressourcen- und Wechselkosten;
+5. stabiler Modul-, Ziel- und Instanzschlüssel.
+
+Randomisierte Play-Style-Variation darf nur an ausdrücklich freigegebenen,
+nahezu gleichwertigen Stellen und über den deterministischen Match-RNG
+erfolgen.
+
+## 34. Arbeit während eines Zuges
+
+### 34.1 Zugbeginn
+
+Am Zugbeginn:
+
+- per-turn Cadence zurücksetzen;
+- abgelaufene Opportunities und Commitments schließen;
+- dauerhafte Kampagnen und Background-Projekte behalten;
+- Mandatory-Draw- oder Start-of-Turn-Fenster auflösen;
+- neue eigene Karten und sichtbare gegnerische Änderungen einarbeiten;
+- Strategic Intent und Spielphase revalidieren;
+- Portfolio-Rollen neu vergeben.
+
+Ein Zugbeginn startet nicht mit einem leeren Planbestand.
+
+### 34.2 Vor der ersten freiwilligen Aktion
+
+Der Scheduler erstellt ein Planranking. Es enthält:
+
+- alle relevanten residenten Instanzen;
+- neue Kandidaten;
+- Readiness und Prioritätsklasse;
+- aktuellen Vordergrund;
+- Challenger;
+- wartende und blockierte Pläne;
+- Ressourcen- und Commitment-Konflikte.
+
+Danach wird genau ein Executor festgelegt.
+
+### 34.3 Nach jeder eigenen Aktion
+
+Nach der neuen StateVersion:
+
+1. tatsächliches Ergebnis gegen Planerwartung prüfen;
+2. Commitment fortsetzen oder mit Grund invalidieren;
+3. Planfortschritt aktualisieren;
+4. aktuellen Step abschließen oder wiederholen;
+5. neue Interrupts und Terminalpfade prüfen;
+6. Planwechsel nur nach Hysteresevertrag zulassen;
+7. nächste Aktion erneut plan-first bestimmen.
+
+Die KI commitet sich nicht blind für einen ganzen Zug. Sie revalidiert nach
+jeder Aktion, behält aber Ziel und Commitment.
+
+### 34.4 Während des gegnerischen Zuges
+
+Plan-Memory darf durch erlaubte öffentliche Ereignisse aktualisiert werden:
+
+- neue Remotes und Advancements;
+- Runs und erfolgreiche Zugriffe;
+- Rez- und Trash-Ereignisse;
+- sichtbare Tags, Damage und Agenda-Punkte;
+- Draw-, Shuffle- oder Reorder-Ereignisse, soweit öffentlich.
+
+Corp-Rez- und andere echte Entscheidungsfenster können einen Interrupt
+aktivieren. Ansonsten handelt kein Plan außerhalb eines legalen Fensters.
+
+### 34.5 Zugende
+
+Vor `EndTurn` prüft der Scheduler:
+
+- verbleibende Action Capacity;
+- offene Commitments;
+- ungenutzte zwingende Follow-ups;
+- sofort ausführbare P1- bis P5-Pläne;
+- neutralen sicheren Fallback.
+
+Nur wenn der EndTurn-Vertrag erfüllt ist, wird die LegalAction gewählt.
+
+## 35. Planwechsel, Unterbrechung und Rückkehr
+
+Jeder Wechsel besitzt einen standardisierten Grund:
+
+```text
+completed
+hard_blocked
+target_invalidated
+higher_priority_interrupt
+terminal_challenger
+expiring_opportunity
+cadence_yield
+same_class_margin
+strategy_phase_changed
+```
+
+Nicht zulässig:
+
+```text
+raw_action_score_positive
+mapped_action_nonpositive
+semantic_override
+arbitrary_repetition_penalty
+```
+
+### 35.1 Suspendieren statt Vergessen
+
+Beispiel Runner:
+
+```text
+R&D-Kampagne aktiv
+→ Corp installiert unpassierbares Code Gate
+→ R&D-Kampagne blocked: missing_code_gate_coverage
+→ Rig-and-Coverage wird Vordergrund
+→ Decoder installiert
+→ R&D-Kampagne ready
+→ nach Hysterese wieder Vordergrund
+```
+
+Beispiel Corp:
+
+```text
+Scoring-Remote-Projekt aktiv
+→ Runner startet R&D-Run
+→ Rez-Defense-Interrupt übernimmt
+→ Run endet
+→ Remote-Projekt kehrt unverändert zurück
+```
+
+### 35.2 Bewusste Abwechslung
+
+Ein Background-Plan darf eine begrenzte Aktion erhalten:
+
+```text
+R&D-Kampagne foreground
+Broker-Bank background, cadence 1
+→ Scheduler lässt Broker einmal laden
+→ Broker cadence exhausted
+→ R&D-Kampagne wird wieder Executor
+```
+
+Der Wechselgrund lautet `cadence_yield`. Er ist kein zufälliger Wechsel durch
+Action-Score-Nähe.
+
+## 36. Akzeptanzszenario A – Highlighter-R&D
+
+Quelle: gespeichertes Spiel `match_85f8dc10007f057d`.
+
+### 36.1 Erwartete Planinstanzen am ersten Runnerzug
+
+| Plan | Zustand | Rolle |
+| --- | --- | --- |
+| `runner.pressure_central:rd` | ready | Vordergrund |
+| `runner.economy:fund_parent_need` | bei Bedarf erzeugbar | Support |
+| `runner.rig_and_coverage` | dormant | resident |
+| `runner.develop_board_and_hand` | ready, aber niedriger | Challenger |
+| `runner.pressure_central:hq` | ready, aber niedriger | Challenger |
+
+R&D ist durch Deckstrategie, Highlighter auf der Hand, offenen Pfad und
+ausreichende Anfangsressourcen die führende Kampagne.
+
+### 36.2 Erwartete Stepfolge im ersten Zug
+
+```text
+runner.pressure_central:rd
+phase prepare_engine
+
+Step fund_engine
+→ Livewire’s Contacts
+→ Credits 5 → 8
+
+Step install_engine
+→ Highlighter installieren
+→ Credits 8 → 5
+
+Step seed_engine
+→ R&D-Run
+→ Highlighter-Fortschritt
+
+Step seed_engine
+→ zweiter R&D-Run
+→ Highlighter auf zwei Zähler
+
+EndTurn erst bei null Klicks
+```
+
+Livewire ist kein konkurrierender eigenständiger Geldplan. Die Karte ist die
+beste Funding-Route des R&D-Plans.
+
+### 36.3 Erwartete Stepfolge im zweiten Zug
+
+| Klick | Zugriffstiefe | Planfortschritt |
+| --- | --- | --- |
+| 1 | 2 Karten | neue Information, Highlighter wächst |
+| 2 | 3 Karten | Corporate War gestohlen, 3 AP |
+| 3 | 4 Karten | weitere Information und Corp-Trash |
+| 4 | 5 Karten | Corporate Downsizing gestohlen, 5 AP |
+
+Die vier R&D-Runs dürfen keine pauschale Same-Server-Strafe erhalten, weil:
+
+- Zugriffstiefe wächst;
+- neue Karten erreicht werden;
+- Agenda-Punkte gewonnen werden;
+- die Siegdistanz sinkt.
+
+### 36.4 Closeout
+
+Im dritten Runnerzug:
+
+```text
+phase closeout
+→ erster R&D-Run mit sechs Zugriffen
+→ Revalidierung
+→ zweiter R&D-Run mit sieben Zugriffen
+→ Agenda für 7 AP
+→ terminaler Sieg
+```
+
+### 36.5 Abnahmebedingungen
+
+- dieselbe R&D-Planinstanz bleibt über Zuggrenzen erhalten;
+- Highlighter-Zähler und Zugriffstiefe liegen im Modulzustand;
+- Economy ist als Supportbeitrag diagnostiziert;
+- Wiederholungslogik erkennt wachsenden Grenznutzen;
+- kein EndTurn bei verbleibenden Klicks;
+- alternative Deckstrategie kann im gleichen Boardzustand eine andere
+  Kampagne priorisieren.
+
+## 37. Akzeptanzszenario B – Manhunt-Flatline
+
+Quelle: gespeichertes Spiel `match_639d02fcac91f90f`.
+
+### 37.1 Anfangsportfolio der Corp
+
+| Plan | Zustand | Rolle |
+| --- | --- | --- |
+| `corp.opening_and_board_foundation` | ready | Vordergrund |
+| `corp.punish_campaign:tag_and_bag` | dormant | resident |
+| `corp.score_agenda` | dormant, noch keine Agenda gewählt | resident |
+| `corp.economy` | ready, aber niedriger | Support/Challenger |
+
+Die Eröffnung:
+
+```text
+Credit beschaffen
+→ Keeper vor R&D installieren
+→ Quandary vor neues Remote installieren
+```
+
+ist eine zusammenhängende Board-Foundation, nicht drei unverbundene
+Einzelaktionen.
+
+### 37.2 Scoring-Übergabe
+
+Nach Draw von Corporate War:
+
+```text
+corp.score_agenda wird ready
+→ Corporate War in Remote installieren
+→ zwei Credits als Funding-Step
+→ Zugende
+
+nächster Corpzug
+→ dreimal advancen
+→ Corporate War scoren
+→ Plan completed
+```
+
+Der Punish-Plan bleibt dormant und verliert seine Kartenkomponenten nicht.
+
+### 37.3 Economy als zeitweiliger Vordergrund
+
+Nach dem Scoring benötigt die Punish-Kampagne 11 Credits für ihre spätere
+Killroute.
+
+```text
+BBS installieren
+→ verbleibende Nutzungen und Zielreserve verfolgen
+→ BBS über mehrere Züge leeren
+→ zweite BBS beginnen
+→ Credits 20
+```
+
+Der Economy-Plan ist:
+
+- Support für die Punish-Kampagne;
+- über mehrere Züge selbst Executor;
+- abgeschlossen oder zurückgestuft, sobald die Killroute bereit ist.
+
+### 37.4 Wartender Killplan
+
+Vor dem letzten Corpzug:
+
+```text
+Chance Observation vorhanden
+Urban Renewal vorhanden
+Scorched Earth vorhanden
+Credits ausreichend
+Runner-Hand 5
+aber: Runner hat im vorherigen Zug noch nicht gerunnt
+```
+
+Der Plan bleibt `dormant` oder `blocked`, ohne seine Komponenten zu verlieren.
+
+Nachdem der Runner einen Run unternommen hat:
+
+```text
+tag trigger true
+trace base 5
+runner max strength 4
+damage 5 + 4
+cost 2 + 6 + 3
+clicks 3
+```
+
+Die Kampagne erzeugt den Kindplan
+`corp.execute_punish_sequence`.
+
+### 37.5 Atomare Killroute
+
+```text
+Step apply_tag
+→ Chance Observation
+→ Corp-Bid 0 reicht garantiert
+
+Step apply_damage
+→ Urban Renewal
+→ Runner-Hand 5 → 0
+
+Step apply_lethal_damage
+→ Scorched Earth
+→ Flatline
+```
+
+Closed Accounts darf nicht zwischen diese Steps treten, obwohl es legal und
+tagbezogen ist. Es würde den dritten notwendigen Klick verbrauchen.
+
+### 37.6 Abnahmebedingungen
+
+- Punish-Kampagne bleibt über Scoring- und Economy-Züge resident;
+- Scoring-, Economy- und Killplan wechseln explizit den Vordergrund;
+- Runner-Run-Trigger reaktiviert den Killplan;
+- vollständige Drei-Aktionen-Route wird vor Chance Observation geprüft;
+- Credits, Klicks und Kartenquellen werden reserviert;
+- der Plan revalidiert Tag und Runner-Hand nach jedem Step;
+- kein planfremder Punish-Effekt unterbricht die garantierte Flatline.
+
+## 38. Regressionsszenarien aus der aktuellen Action-Arbitration
+
+### 38.1 Turn-limitierte Vorbereitung
+
+**Prearranged Drop**
+
+Erwartung:
+
+- nur spielbar, wenn ein Agenda-Zugriff im selben Zug als vollständige Route
+  vorhanden ist;
+- nach dem Ausspielen wird der Zugriff durch Commitment reserviert;
+- ein späterer Draw- oder Credit-Rohscore darf die Route nicht ersetzen.
+
+**Promises, Promises**
+
+Erwartung:
+
+- gleiche Commitment-Regel;
+- vorbereiteter HQ-/R&D-/Remote-Zugriff besitzt festes Ziel;
+- kein `mapped_nonpositive_against_positive`-Override.
+
+Ein reiner Test „nach der Vorbereitung bleibt ein Klick übrig“ ist nicht
+ausreichend. Der Test muss die tatsächliche Folgeaktion und Konversion prüfen.
+
+### 38.2 Alles negativ
+
+Historischer Zustand:
+
+- Archives-Run `−241`;
+- Draw bei voller Hand `−972`;
+- Basic Credit `−1021`;
+- HQ-Run `−1302`;
+- EndTurn `−1465`.
+
+Zielverhalten:
+
+1. keine globale Auswahl des kleinsten negativen Werts;
+2. gesättigte und blockierte Pläne ausscheiden;
+3. Draw-Plan wegen Überlauf blockieren;
+4. neutralen Economy-Fallback aktivieren;
+5. Basic Credit als Step dieses Plans wählen;
+6. EndTurn sperren.
+
+Der Credit braucht dafür keinen künstlichen globalen Bonus.
+
+### 38.3 Falsche Capability-Erfüllung
+
+Eine Karte darf einen Step nur erfüllen, wenn ihre Semantik die benötigte
+Fähigkeit tatsächlich trägt.
+
+Verbindlicher Gegenfall:
+
+- Psychic Friends oder eine andere Nicht-Breaker-Karte darf nicht als
+  Icebreaker-Coverage installiert oder gezählt werden;
+- Kartentyp, Subtyp, Taktiksignale und konkrete LegalAction-Ziele müssen den
+  Capability-Vertrag gemeinsam erfüllen;
+- mehrere unpassende Installationen dürfen keinen scheinbaren
+  Rig-Fortschritt erzeugen.
+
+### 38.4 Background-Pingpong
+
+- Bankplan lädt höchstens gemäß seiner Cadence;
+- Cashout nur bei konkretem Bedarf oder Zielschwelle;
+- kein Load/Cashout-Wechsel ohne neue Zustandsgrundlage;
+- Vordergrundplan kehrt nach der Background-Aktion zurück.
+
+### 38.5 Planwechsel ohne Grund
+
+Bei unverändertem Zustand und unveränderten Kandidaten muss die nächste
+Entscheidung denselben Vordergrund behalten. Ein anderer stabiler Tie-Break
+oder eine kleine Scoreverschiebung darf kein Churn erzeugen.
+
+## 39. Diagnostikvertrag
+
+Die Decision Chain soll den echten Auswahlweg abbilden, nicht lediglich eine
+nachträgliche Erklärung.
+
+### 39.1 Planportfolio
+
+Mindestens sichtbar:
+
+```text
+portfolio
+  interrupt
+  foreground
+  backgrounds
+  dormant
+  blocked
+  suspended
+  rejected proposals
+```
+
+Je Instanz:
+
+- Modul und Instanz-ID;
+- Ziel;
+- Lebenszyklus und Rolle;
+- Prioritätsklasse und relativer Planwert;
+- Phase und Step;
+- Fortschritt und letzter Fortschrittsgrund;
+- Blocker und Resume Conditions;
+- Ressourcenbedarf und Reservierung;
+- Commitment und verbleibende Steps;
+- Completion-/Abandonment-Grund.
+
+### 39.2 Planranking
+
+Das Ranking erklärt:
+
+- warum der Vordergrund fortgesetzt wurde;
+- welcher Challenger am nächsten lag;
+- welche Prioritätsklasse entschied;
+- welche Wechselmarge oder Hysterese wirkte;
+- warum wartende Pläne nicht ausführbar waren.
+
+### 39.3 Step- und Routenranking
+
+Für den Executor:
+
+- aktueller Step;
+- benötigte Fähigkeit;
+- alle viable Routen;
+- ausgeschlossene Routen mit fachlichem Grund;
+- gewählte Action-ID;
+- erwartetes Ergebnis;
+- tatsächliches Ergebnis nach Revalidierung.
+
+### 39.4 Verbotene Zielbegriffe
+
+Im Zielzustand gibt es keine Auswahlbegründung:
+
+```text
+plan is diagnostic_only
+semantic choice overrode plan
+mapped nonpositive against positive
+selected by raw action score despite plan mismatch
+```
+
+Ein Plan darf zu Diagnosezwecken zusätzlich beobachtet werden, aber der
+produktive ausgewählte Plan ist immer autoritativ.
+
+### 39.5 Redaction
+
+Öffentliche oder gegnerseitige Diagnostik zeigt niemals:
+
+- eigene verdeckte Kartenidentitäten der anderen Seite;
+- geheime Planquellen aus gegnerischer Hand oder Deck;
+- abgeleitete Hidden-Zone-Inhalte;
+- unredigierte interne Evidence.
+
+Plan-Debug bleibt nach Seite, Betrachter und Matchstatus redigiert.
+
+## 40. Teststrategie
+
+### 40.1 Planmodul-Vertragstests
+
+Jedes Modul testet:
+
+- Discovery-Positivfall;
+- Discovery-Gegenfall;
+- Instanzidentität und Deduplizierung;
+- Phasenübergänge;
+- Blocker und Resume Condition;
+- Completion und Abandonment;
+- Fortschritt nur bei echter Zustandsänderung;
+- side-safe Diagnostik;
+- deterministisches Ergebnis.
+
+### 40.2 Scheduler-Kerntests
+
+- genau ein Executor;
+- Interrupt suspendiert und Rückkehr funktioniert;
+- Hysterese verhindert Churn;
+- höhere Prioritätsklasse gewinnt;
+- Background-Cadence;
+- Ressourcen werden nicht doppelt reserviert;
+- Commitment schützt Folgeaktionen;
+- begrenztes Replanning terminiert;
+- neutraler Fallback entsteht;
+- EndTurn-Gate;
+- jede gewählte Action besitzt Planattribution.
+
+### 40.3 Cross-Modul-Tests
+
+- Parentplan fordert Economy-Support an und wird wieder aufgenommen;
+- Rigplan entsperrt Central-Plan;
+- Corp-Economy finanziert Score- oder Punishplan;
+- Remote-Projekt überlebt Rez-Interrupt;
+- Defense-Plan unterbricht Central-Druck und gibt später zurück;
+- ein Mehrplanbeitrag bleibt Tiebreaker, nicht Override.
+
+### 40.4 Decision Checkpoints
+
+Checkpoints prüfen nicht nur die Action-ID. Sie können verlangen:
+
+- ausgewähltes Planmodul;
+- Planinstanz und Ziel;
+- Phase und Step;
+- vorhandenes Commitment;
+- verbotenen Planwechselgrund;
+- Ressourcenreservierung;
+- Planattribution der gewählten Aktion.
+
+Numerische Scores bleiben möglichst ungepinnt. Fachliche Rang- und
+Invariantenverträge sind führend.
+
+### 40.5 Historische Matchszenarien
+
+Mindestens:
+
+- Highlighter-R&D-Kampagne;
+- Manhunt-Flatline;
+- Prearranged Drop;
+- Promises, Promises;
+- negativer Draw bei voller Hand;
+- wiederholte wertlose Archives-/HQ-Runs;
+- Broker-Cadence und Cashout;
+- Remote-Matchpoint-Interrupt;
+- Corp-Same-Turn-Score;
+- Runner-Tag-/Damage-Abwehr;
+- falsche Breaker-Coverage durch Nicht-Breaker.
+
+### 40.6 Deckstrategie-Gegenfälle
+
+Dasselbe Board und dieselbe Hand werden mit unterschiedlichen eigenen
+Deckstrategien getestet:
+
+- R&D-Deck priorisiert nachhaltigen R&D-Druck;
+- HQ-Deck priorisiert HQ-Linie;
+- Rig-first-Deck investiert früher in Coverage;
+- Run-Event-Tempo-Deck hält passende Eventketten;
+- Fast-Advance-Corp baut keine Glacier-Burg;
+- Glacier-Corp hält ein langfristiges Remote-Projekt;
+- Tag-and-Bag-Corp bewahrt Killkomponenten;
+- neutrales Deck erhält sichere Fallbackpläne.
+
+### 40.7 Full-Match- und Baseline-Evidence
+
+Nach Modul- und Checkpointtests:
+
+- deterministische Full Matches;
+- feste AI Behavior Baseline;
+- Seed-Serien;
+- Plan-Churn-, EndTurn-, Action-Coverage- und Commitment-Metriken;
+- qualitative Vollaudits ausgewählter Spiele;
+- getrennte Bewertung von technischer Sicherheit und Play Strength.
+
+## 41. Zielmetriken
+
+Technische Kernmetriken:
+
+```text
+plan_attribution_rate = 100 %
+voluntary_action_without_executor = 0
+plan_override_after_selection = 0
+end_turn_with_safe_action_capacity = 0
+broken_same_turn_commitment = 0
+duplicate_plan_instance_same_target = 0
+resource_overreservation = 0
+hidden_info_plan_leak = 0
+nondeterministic_plan_selection = 0
+```
+
+Qualitative Metriken:
+
+- Planwechsel pro Zug mit klassifiziertem Grund;
+- Anteil fortgesetzter gegenüber neu entdeckten Kampagnen;
+- Anteil planloser oder nicht konvertierter Vorbereitungen;
+- Background-Aktionen ohne Parent- oder Eigenfortschritt;
+- wiederholte Aktionen mit und ohne echten Grenznutzen;
+- neutrale Fallbacks nach Ursache;
+- Planabschluss, Aufgabe und Stale-TTL.
+
+Die Metriken sind Diagnose- und Gate-Evidence, keine alleinige
+Play-Strength-Freigabe.
+
+## 42. Ableitung eines späteren Implementierungsplans
+
+Dieses Dokument legt noch keine endgültige Paketfolge fest. Ein späterer
+Umsetzungsprozess soll mindestens folgende Arbeitsstränge schneiden:
+
+### 42.1 Vertrag und Observability
+
+- Zieltypen und Planattribution;
+- echte Plan-/Step-/Route-Decision-Chain;
+- Ist-Abweichungen messbar machen;
+- Checkpoints um Planinvarianten erweitern.
+
+### 42.2 Kernel und side-spezifische Scheduler
+
+- Lebenszyklus vereinheitlichen;
+- Runner-/Corp-Registry;
+- Executor-Exklusivität;
+- Planprioritätsklassen und Hysterese;
+- Ressourcen- und Commitment-Kernel.
+
+### 42.3 Runner-Migration
+
+Empfohlene fachliche Reihenfolge:
+
+1. neutraler Fallback und EndTurn-Gate;
+2. Economy-Support;
+3. Central-Kampagne;
+4. Remote-Contest;
+5. Rig-and-Coverage;
+6. Defense-and-Recovery;
+7. Hand-/Boardentwicklung;
+8. Run-Window-Konversion.
+
+### 42.4 Corp-Migration
+
+Empfohlene fachliche Reihenfolge:
+
+1. Economy-Support;
+2. Score-Commitments;
+3. Server-Defense und Rez-Interrupt;
+4. Scoring-Remote-Projekt;
+5. Punish-Kampagne und atomare Ausführung;
+6. Opening-/Board-Foundation;
+7. Hand-/Agenda-Management;
+8. Ambush-/Bluff-Modul.
+
+### 42.5 Cutover
+
+- globale Action-over-Plan-Overrides entfernen;
+- `diagnostic_only` für den produktiv ausgewählten Plan verbieten;
+- freie Semantic-Runtime-Auswahl als Produktivfallback schließen;
+- Action-Coverage-Gate aktivieren;
+- alte überlappende Plantypen und Legacy-Memory entfernen.
+
+NETGRID Version 0 benötigt dafür keine Rückwärtskompatibilität alter lokaler
+Plan-Memory- oder Trace-Formate.
+
+Es soll keine dauerhaft parallele zweite KI-Runtime entstehen.
+Zwischenvergleiche erfolgen über reproduzierbare Checkpoints, Simulation und
+klar begrenzte Diagnosepfade.
+
+## 43. Architektur-Gate vor Implementierungsplanung
+
+Vor dem Schneiden des Umsetzungsprozesses sind mindestens zu reviewen:
+
+- Ist der Kernel klein genug und frei von Kartenlogik?
+- Sind Runner- und Corp-Grenzen eindeutig?
+- Decken Zielmodule alle freiwilligen Action-Familien ab?
+- Sind Economy als Plan und Economy als Support sauber getrennt?
+- Sind Parent-, Kind- und Background-Beziehungen ausreichend?
+- Reicht der Commitment-Vertrag für Prep-, Score-, Run- und Killketten?
+- Ist die Prioritätsklassenordnung für Sieg, Überleben und Threats eindeutig?
+- Sind Planwechsel und Wiederaufnahme vollständig diagnostizierbar?
+- Können neue Karten innerhalb bestehender Module ergänzt werden?
+- Sind alle Daten side-safe und deterministisch?
+- Welche offenen Modulzuschnitte müssen vor der ersten Codephase entschieden
+  werden?
+
+## 44. Pflege dieses WIP-Dokuments
+
+Neue Spielanalysen werden wie folgt eingearbeitet:
+
+1. Beobachtung und Match-Evidence benennen;
+2. prüfen, ob sie Kernel, Scheduler-Policy oder ein Planmodul betrifft;
+3. bestehende Regel erweitern, statt einen parallelen Sondervertrag anzulegen;
+4. Reifegrad als Kernentscheidung, Arbeitsannahme oder offen markieren;
+5. neues Akzeptanz- oder Gegenfallszenario ergänzen;
+6. Änderungsverlauf aktualisieren;
+7. erst danach Umsetzungsfolgen ableiten.
+
+Wenn eine Detailverbesserung nur ein Modul betrifft, wird der gemeinsame
+Rahmen nicht verändert. Beispiele:
+
+- genauere Credit-Dringlichkeit → Economy-Modul;
+- Highlighter-Zugriffstiefe → Central-Planmodul;
+- Reihenfolge Tag-Clear gegen Hand-Draw → Runner-Defense-Modul;
+- Remote-Schutzband → Corp-Remote-/Defense-Modul;
+- allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
+
+## 45. Änderungsverlauf
 
 ### 0.1 – 2026-07-23
 
@@ -1913,3 +2725,10 @@ Jedes Modul besitzt eine interne Schema- oder Modulversion. Änderungen an
   Abwehr, Scoring, Defense und Punish-Kampagne beschrieben;
 - Action-Familien einem Planursprung zugeordnet;
 - Registry-, Service- und Modulverfeinerungsvertrag ergänzt.
+- operativen Entscheidungsalgorithmus und vollständigen Zugzyklus ergänzt;
+- Planwechsel-, Unterbrechungs- und Rückkehrgründe festgelegt;
+- Highlighter-R&D und Manhunt-Flatline als Akzeptanzszenarien aufgenommen;
+- historische Override-, Follow-up-, Negativwert- und Coverage-Regressionen
+  beschrieben;
+- Diagnostik-, Test-, Metrik- und Cutover-Vertrag ergänzt;
+- Pflege- und Architektur-Gate für spätere WIP-Iterationen festgelegt.
