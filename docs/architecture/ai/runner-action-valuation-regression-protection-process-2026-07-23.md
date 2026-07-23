@@ -1,6 +1,6 @@
 # Runner-Aktionsbewertung: Regressionsschutz aus Match fd22cad3
 
-Status: aktiv
+Status: P3 abgeschlossen, lokale Integration ausstehend
 
 ## Quelle und Vorgabe
 
@@ -211,6 +211,14 @@ Checks:
 
 Done-Gate: Technische Gates grün, erwartete rote Verhaltenscheckpoints klar
 klassifiziert, Review und Wissensbasis aktuell.
+
+Ergebnis: erfüllt. Der vollständige Behavior-Baseline-Lauf ist wegen eines
+deterministisch reproduzierbaren 480-Aktionen-Spiels nicht als insgesamt
+akzeptiert markiert. Der betroffene Slot enthält keinen Treffer der beiden
+neuen Diagnoseklassen; alle Illegal-Action-, Replay-, Runtime-, Hidden-Info-,
+Redaktions- und technischen Gates sind grün. Der unabhängige Bestandsbefund
+ist im Abschlussreview als eigener Follow-up festgehalten und wird nicht
+durch eine sachfremde Laufzeitänderung in diesem Diagnosepaket kaschiert.
 
 Commit-Vorschlag:
 

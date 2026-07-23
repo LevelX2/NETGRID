@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-22
+Stand: 2026-07-23
 
 ## Einstieg
 
@@ -35,6 +35,17 @@ beobachtbar; diese Observability verändert weder Scoring noch Planpriorität.
 Der vorhandene SQLite-KI-Trace persistiert die Kette im normalen
 `summary`-Modus kompakt und im erweiterten `detailed`-Modus vollständig unter
 demselben `trace_json`-Pfad.
+
+Das aktive Match `match_fd22cad3cc454a9e` besitzt jetzt exakte
+Regressionsverträge für eine redundante zweite `Psychic Friend`-Installation
+und drei sofortige Runner-Zugenden mit vier Restklicks. Zulässige erste
+Breaker-Installationen, null-Klick-Zugenden und ein deterministischer
+Corp-Deckout-Sieg sind positive Gegenproben. Diagnosemetriken weisen im
+60-Spiele-Lauf 22 vorzeitige Zugenden und 16 redundante negativ bewertete
+Installationen aus, ohne die produktive Auswahl zu verändern. Ein
+eigenständiger Slot erreicht reproduzierbar das 480-Aktionen-Limit und bleibt
+als separater KI-Qualitäts-Follow-up offen. Führend ist
+`docs/reviews/ai/runner-action-valuation-regression-final-review-2026-07-23.md`.
 
 Aktionskapazität ist zusätzlich als gemeinsame side-sichere Ressource
 modelliert. Aktuelle Aktionen stammen ohne Drei-/Vier-Aktionsannahme aus dem

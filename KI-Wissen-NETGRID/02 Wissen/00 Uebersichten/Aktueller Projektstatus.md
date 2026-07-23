@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-22
+Stand: 2026-07-23
 
 ## Führender Produktstand
 
@@ -88,6 +88,24 @@ Stand: 2026-07-22
   `docs/reviews/engine/city-surveillance-draw-sequence-final-review-2026-07-14.md`.
 
 ## KI
+
+- Runner-Fehlentscheidungen aus dem aktiven Match
+  `match_fd22cad3cc454a9e` sind ohne produktive Laufzeitänderung als exakte
+  Decision-Checkpoints gesichert. Die zweite redundante
+  `Psychic Friend`-Installation und drei sofortige Zugenden mit vier
+  Restklicks bleiben rote `behavior_regression`-Evidence. Erste sinnvolle
+  `Matador`-/`Psychic Friend`-Installationen, null-Klick-Zugenden und ein
+  sicherer sofortiger Zugabschluss für den deterministischen Corp-Deckout
+  schützen die zulässigen Nachbarfälle.
+- Diagnosemetriken zählen im 60-Spiele-Current-State-Lauf 22 vorzeitige
+  Runner-Zugenden und 16 redundante negativ bewertete Installationen; 29
+  sichere Deckout-Zugenden werden separat erkannt. Der Lauf besitzt keine
+  Illegal-Action-, Replay-, Runtime-, Hidden-Info- oder Redaktionsverletzung,
+  erreicht aber in einem davon unabhängigen reproduzierbaren Slot das
+  480-Aktionen-Limit. Führend sind
+  `docs/reviews/ai/runner-action-valuation-regression-evidence-2026-07-23.md`
+  und
+  `docs/reviews/ai/runner-action-valuation-regression-final-review-2026-07-23.md`.
 
 - Die Economy-KI besitzt einen gemeinsamen side-sicheren Vertrag von der
   LegalAction-Ressourcenprojektion bis zur Planebene. Kleine monotone
