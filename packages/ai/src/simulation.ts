@@ -15,6 +15,8 @@ export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local
 export { buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries } from "./simulation/selfplay-why-coverage";
 export { summarizeActionCapacityBaselineMetrics } from "./simulation/action-capacity-baseline-metrics";
 export type { ActionCapacityBaselineMetrics } from "./simulation/action-capacity-baseline-metrics";
+export { summarizeRunnerActionValuationBaselineMetrics } from "./simulation/runner-action-valuation-baseline-metrics";
+export type { RunnerActionValuationBaselineMetrics } from "./simulation/runner-action-valuation-baseline-metrics";
 export { evaluatePracticalTacticBenchmark } from "./evaluation/practical-tactic-benchmark";
 export type {
   PracticalTacticBenchmarkCase,

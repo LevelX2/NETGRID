@@ -1,6 +1,7 @@
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSelfplayTraceMiningDetectorId } from "./selfplay-trace-mining";
 import type { ActionCapacityBaselineMetrics } from "./action-capacity-baseline-metrics";
+import type { RunnerActionValuationBaselineMetrics } from "./runner-action-valuation-baseline-metrics";
 
 export const AI_BEHAVIOR_BASELINE_VERSION = "ai-behavior-baseline-v1";
 
@@ -62,6 +63,7 @@ export type AiBehaviorBaselineSlotInput = {
   runtimeErrors: number;
   redactionSafe: boolean;
   actionCapacity?: ActionCapacityBaselineMetrics;
+  runnerActionValuation?: RunnerActionValuationBaselineMetrics;
   games: AiBehaviorBaselineGame[];
 };
 
@@ -101,6 +103,13 @@ export type AiBehaviorBaselineMetrics = {
   actionCapacityExpirationRate: number | null;
   actionCapacityMisconversions: number;
   actionCapacityMisconversionRate: number | null;
+  runnerEndTurnsWithClicks: number;
+  runnerInevitableCorpDeckoutEndTurnsWithClicks: number;
+  runnerPrematureEndTurnsWithClicks: number;
+  runnerPrematureEndTurnRatePer100Decisions: number;
+  runnerPersistentInstallSelections: number;
+  runnerRedundantPersistentInstallSelections: number;
+  runnerRedundantPersistentInstallRate: number | null;
   findings: number;
   findingRatePer100Decisions: number;
   illegalActions: number;
@@ -306,6 +315,14 @@ export function formatAiBehaviorBaselineReport(
       "Action-capacity misconversion rate",
       formatRate(metrics.actionCapacityMisconversionRate),
     ],
+    [
+      "Premature Runner end turns / 100 decisions",
+      metrics.runnerPrematureEndTurnRatePer100Decisions,
+    ],
+    [
+      "Redundant Runner persistent install rate",
+      formatRate(metrics.runnerRedundantPersistentInstallRate),
+    ],
   ];
   const hardRows = [
     ["illegalActions", metrics.illegalActions],
@@ -377,6 +394,11 @@ export function formatAiBehaviorBaselineReport(
     `- Action-capacity follow-up conversions: ${metrics.actionCapacityFollowupConversions}`,
     `- Action-capacity expired uses: ${metrics.actionCapacityExpiredUses}`,
     `- Action-capacity misconversions: ${metrics.actionCapacityMisconversions}`,
+    `- Runner end turns with clicks: ${metrics.runnerEndTurnsWithClicks}`,
+    `- Deterministic Corp-deckout end turns with clicks: ${metrics.runnerInevitableCorpDeckoutEndTurnsWithClicks}`,
+    `- Premature Runner end turns with clicks: ${metrics.runnerPrematureEndTurnsWithClicks}`,
+    `- Runner persistent install selections: ${metrics.runnerPersistentInstallSelections}`,
+    `- Redundant Runner persistent install selections: ${metrics.runnerRedundantPersistentInstallSelections}`,
     `- Average actions: ${metrics.averageActions}`,
     `- Average turns: ${metrics.averageTurns}`,
     "",
@@ -409,6 +431,8 @@ export function formatAiBehaviorBaselineReport(
     "- Missed score windows are direct Corp conversion misses.",
     "- Remote contest skips are normalised by detected affordable advanced-remote opportunities and remain a diagnostic signal, not a standalone failure.",
     "- Plan conversion uses plans settled by conversion, expiry, or abandonment; no-progress and dominated-choice rates are independent review signals.",
+    "- Premature Runner end turns exclude zero-click turns and the explicit deterministic Corp-deckout closeout.",
+    "- Redundant persistent installs require structured persistent-install evaluation, redundant-duplicate classification, and negative final fit.",
     "- Win rate is deliberately outcome context rather than the acceptance criterion.",
   ].join("\n");
 }
@@ -433,6 +457,13 @@ function createMetrics(
     actionCapacityFollowupConversions: 0,
     actionCapacityExpiredUses: 0,
     actionCapacityMisconversions: 0,
+  };
+  const runnerActionValuation = input.runnerActionValuation ?? {
+    runnerEndTurnsWithClicks: 0,
+    runnerInevitableCorpDeckoutEndTurnsWithClicks: 0,
+    runnerPrematureEndTurnsWithClicks: 0,
+    runnerPersistentInstallSelections: 0,
+    runnerRedundantPersistentInstallSelections: 0,
   };
   return {
     games: progression.games,
@@ -495,6 +526,15 @@ function createMetrics(
       actionCapacity.actionCapacityMisconversions,
       actionCapacity.actionCapacityUses,
     ),
+    ...runnerActionValuation,
+    runnerPrematureEndTurnRatePer100Decisions: per100(
+      runnerActionValuation.runnerPrematureEndTurnsWithClicks,
+      input.decisions,
+    ),
+    runnerRedundantPersistentInstallRate: rate(
+      runnerActionValuation.runnerRedundantPersistentInstallSelections,
+      runnerActionValuation.runnerPersistentInstallSelections,
+    ),
     findings: input.findings,
     findingRatePer100Decisions: per100(input.findings, input.decisions),
     illegalActions: input.illegalActions,
@@ -549,6 +589,23 @@ function combineMetrics(
     ),
     actionCapacityExpiredUses: sum(metrics, "actionCapacityExpiredUses"),
     actionCapacityMisconversions: sum(metrics, "actionCapacityMisconversions"),
+    runnerEndTurnsWithClicks: sum(metrics, "runnerEndTurnsWithClicks"),
+    runnerInevitableCorpDeckoutEndTurnsWithClicks: sum(
+      metrics,
+      "runnerInevitableCorpDeckoutEndTurnsWithClicks",
+    ),
+    runnerPrematureEndTurnsWithClicks: sum(
+      metrics,
+      "runnerPrematureEndTurnsWithClicks",
+    ),
+    runnerPersistentInstallSelections: sum(
+      metrics,
+      "runnerPersistentInstallSelections",
+    ),
+    runnerRedundantPersistentInstallSelections: sum(
+      metrics,
+      "runnerRedundantPersistentInstallSelections",
+    ),
     findings: sum(metrics, "findings"),
     illegalActions: sum(metrics, "illegalActions"),
     replayFailures: sum(metrics, "replayFailures"),
@@ -598,6 +655,14 @@ function combineMetrics(
     actionCapacityMisconversionRate: rate(
       summed.actionCapacityMisconversions,
       summed.actionCapacityUses,
+    ),
+    runnerPrematureEndTurnRatePer100Decisions: per100(
+      summed.runnerPrematureEndTurnsWithClicks,
+      summed.decisions,
+    ),
+    runnerRedundantPersistentInstallRate: rate(
+      summed.runnerRedundantPersistentInstallSelections,
+      summed.runnerPersistentInstallSelections,
     ),
     findingRatePer100Decisions: per100(summed.findings, summed.decisions),
     redactionSafe: metrics.every((entry) => entry.redactionSafe),

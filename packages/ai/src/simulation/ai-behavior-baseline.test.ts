@@ -28,6 +28,11 @@ describe("AI behavior baseline", () => {
       actionCapacityFollowupConversions: 2,
       actionCapacityExpiredUses: 0,
       actionCapacityMisconversions: 0,
+      runnerEndTurnsWithClicks: 3,
+      runnerInevitableCorpDeckoutEndTurnsWithClicks: 1,
+      runnerPrematureEndTurnsWithClicks: 2,
+      runnerPersistentInstallSelections: 5,
+      runnerRedundantPersistentInstallSelections: 1,
     });
     const baseline = createBaseline(slot);
 
@@ -42,10 +47,15 @@ describe("AI behavior baseline", () => {
     expect(baseline.aggregate.actionCapacityPlanConversionRate).toBe(0.5);
     expect(baseline.aggregate.actionCapacityExpirationRate).toBe(0);
     expect(baseline.aggregate.actionCapacityMisconversionRate).toBe(0);
-    expect(baseline.gate.accepted).toBe(true);
-    expect(formatAiBehaviorBaselineReport(baseline)).toContain(
-      "# AI Behavior Baseline v1",
+    expect(baseline.aggregate.runnerPrematureEndTurnRatePer100Decisions).toBe(
+      2,
     );
+    expect(baseline.aggregate.runnerRedundantPersistentInstallRate).toBe(0.2);
+    expect(baseline.gate.accepted).toBe(true);
+    const report = formatAiBehaviorBaselineReport(baseline);
+    expect(report).toContain("# AI Behavior Baseline v1");
+    expect(report).toContain("Premature Runner end turns / 100 decisions");
+    expect(report).toContain("Redundant Runner persistent install rate");
   });
 
   it("fails the hard gate for technical safety regressions", () => {
@@ -134,6 +144,11 @@ function createSlot(
     actionCapacityFollowupConversions: number;
     actionCapacityExpiredUses: number;
     actionCapacityMisconversions: number;
+    runnerEndTurnsWithClicks: number;
+    runnerInevitableCorpDeckoutEndTurnsWithClicks: number;
+    runnerPrematureEndTurnsWithClicks: number;
+    runnerPersistentInstallSelections: number;
+    runnerRedundantPersistentInstallSelections: number;
   }>,
 ) {
   return createAiBehaviorBaselineSlotResult({
@@ -190,6 +205,17 @@ function createSlot(
         overrides.actionCapacityFollowupConversions ?? 0,
       actionCapacityExpiredUses: overrides.actionCapacityExpiredUses ?? 0,
       actionCapacityMisconversions: overrides.actionCapacityMisconversions ?? 0,
+    },
+    runnerActionValuation: {
+      runnerEndTurnsWithClicks: overrides.runnerEndTurnsWithClicks ?? 0,
+      runnerInevitableCorpDeckoutEndTurnsWithClicks:
+        overrides.runnerInevitableCorpDeckoutEndTurnsWithClicks ?? 0,
+      runnerPrematureEndTurnsWithClicks:
+        overrides.runnerPrematureEndTurnsWithClicks ?? 0,
+      runnerPersistentInstallSelections:
+        overrides.runnerPersistentInstallSelections ?? 0,
+      runnerRedundantPersistentInstallSelections:
+        overrides.runnerRedundantPersistentInstallSelections ?? 0,
     },
     games: [
       {
