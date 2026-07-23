@@ -125,6 +125,13 @@
 
 ## Führende Artefakte
 
+- `ai-plan-layer-target-state-wip.md`: führendes fortlaufendes
+  Zielzustandskonzept für die modulare Plan-first-KI mit gemeinsamem
+  Planrahmen, getrennten Runner-/Corp-Schedulern, aktuellen und angestrebten
+  Planmodulen, Zugausführung, Commitments, Diagnostik und Abnahme. Der
+  Zielzustand ist noch nicht vollständig implementiert.
+- `ai-plan-layer-target-concept-process-2026-07-23.md`: Quellen-, Paket- und
+  Reviewprozess für den initialen WIP-Stand des Zielkonzepts.
 - `ai-controller-spec.md`: öffentlicher Controller- und LegalAction-Vertrag.
 - `ai-decision-trace-contract-2026-05-22.md`: lokaler Trace-, Redaction- und
   Debugvertrag.

@@ -89,6 +89,18 @@ Stand: 2026-07-23
 
 ## KI
 
+- Das WIP-Zielkonzept
+  `docs/architecture/ai/ai-plan-layer-target-state-wip.md` führt die
+  verteilten Verträge für Deckstrategie, Strategic Intent, Tactical Goals,
+  Tactical Plans, Portfolio, Ressourcen und Folgeaktionen zu einer
+  Plan-first-Zielarchitektur zusammen. Im Zielzustand wählen getrennte
+  Runner-/Corp-Scheduler zuerst einen autoritativen Plan und Step; erst
+  innerhalb dieses Steps wird eine vorhandene LegalAction ausgewählt.
+  Aktuelle und angestrebte Planmodule, Lebenszyklus, Parent-/Supportpläne,
+  Commitments, EndTurn-Invariante, Highlighter-R&D- und
+  Manhunt-Flatline-Akzeptanzszenarien sowie spätere Implementierungsgates sind
+  dokumentiert. Dies ist ein Architekturziel und noch keine Behauptung über
+  den vollständig erreichten Runtime-Stand.
 - Runner-Fehlentscheidungen aus dem aktiven Match
   `match_fd22cad3cc454a9e` sind ohne produktive Laufzeitänderung als exakte
   Decision-Checkpoints gesichert. Die zweite redundante
