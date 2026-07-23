@@ -1,12 +1,8 @@
 import type { AiDecision, AiDecisionInput } from "@netgrid/shared";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
-import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./semantic-runtime";
 import type { SemanticRuntimeDependencies } from "./semantic-runtime";
-import {
-  applyPracticalMicroRuntimeComparator,
-  type PracticalMicroCandidate,
-} from "./practical-micro-runtime";
-import { applyPracticalTacticOverlay } from "./practical-tactic-overlay";
+import type { PracticalMicroCandidate } from "./practical-micro-runtime";
+import { choosePlanFirstLiveAction } from "./plan-first-live-runtime";
 import { withDecisionDerivedCache } from "./decision-derived-cache";
 
 export type SemanticRuntimeDecisionContextDependencies =
@@ -32,21 +28,10 @@ export function createSemanticRuntimeDecisionContext(
     options: AiDecisionRuntimeOptions,
   ): AiDecision {
     return withDecisionDerivedCache(() => {
-      const runtimeDecision = chooseSemanticRuntimeActionFromRuntime(
+      return choosePlanFirstLiveAction(
         input,
         options,
         dependencies,
-      );
-      const practicalMicroDecision = applyPracticalMicroRuntimeComparator(
-        input,
-        runtimeDecision,
-        options,
-        dependencies.practicalMicroRuntimeCandidates(input, runtimeDecision),
-      );
-      return applyPracticalTacticOverlay(
-        input,
-        practicalMicroDecision,
-        options,
       );
     });
   }

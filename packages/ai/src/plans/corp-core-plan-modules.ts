@@ -577,6 +577,7 @@ function defenseCandidates(
       return (
         candidate.semanticActionType === "corp_window.rez" &&
         (!signal.targetIceInstanceId ||
+          candidate.sourceCardInstanceId === signal.targetIceInstanceId ||
           candidateTargetIds(candidate).includes(signal.targetIceInstanceId))
       );
     })

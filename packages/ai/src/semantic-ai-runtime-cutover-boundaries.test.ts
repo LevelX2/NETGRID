@@ -89,8 +89,13 @@ describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", (
     const decision = chooseCorpAction(input);
 
     expect(decision.actionId).toBe("rez-outer");
-    expect(decision.decisionDebug?.planKind).toBe("corp.rez_defense");
-    expect(decision.evidence).toContain("tactical_step:rez_outer_ice");
+    expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_runtime:true",
+        "plan_first_lane:plan",
+      ]),
+    );
   });
 
   it("uses semantic coverage fallback instead of legacy when no choice is selectable", () => {

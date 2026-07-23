@@ -156,6 +156,39 @@ describe("plan route binding", () => {
     ).toThrow(expect.objectContaining({ code: "step_target_mismatch" }));
   });
 
+  it("binds an exact source instance when the action operates on that ICE", () => {
+    const rez = {
+      ...candidate(
+        "rez-outer",
+        "rez_ice",
+        "corp_window.rez",
+        "corp-ice-definition",
+      ),
+      actorSide: "corp" as const,
+      observerSide: "corp" as const,
+      sourceCardInstanceId: "outer-ice",
+    };
+
+    expect(
+      bindBestCurrentPlanRoute({
+        ...baseParams(),
+        side: "corp",
+        timingPoint: "corp_rez.window",
+        step: {
+          stepId: "rez_exact_outer_ice",
+          capability: {
+            capabilityId: "rez_response",
+            semanticActionTypes: ["corp_window.rez"],
+            requiredSourceDefinitionIds: ["corp-ice-definition"],
+          },
+          target: { kind: "ice", id: "outer-ice" },
+          purpose: "Rez the exact ICE owned by this defense response.",
+        },
+        candidates: [routeCandidate(rez, 20)],
+      }).head.actionId,
+    ).toBe("rez-outer");
+  });
+
   it("rejects an unprojected candidate as missing action semantics", () => {
     expect(() =>
       bindBestCurrentPlanRoute({

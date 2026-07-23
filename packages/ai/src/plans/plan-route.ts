@@ -240,7 +240,6 @@ function candidateMatchesTarget(
     return candidate.runProjectionSummary?.serverId === target.id;
   }
   if (
-    target.kind === "card" &&
     (candidate.sourceCardInstanceId === target.id ||
       candidate.sourceDefinitionId === target.id)
   ) {

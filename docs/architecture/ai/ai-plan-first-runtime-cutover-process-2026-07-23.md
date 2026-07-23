@@ -22,8 +22,9 @@ Aktueller Paketstand:
 - PF09: abgeschlossen, Commit `50eb3b892`
 - PF10: abgeschlossen, Commit `b684db3f5`
 - PF11: abgeschlossen, Commit `48f0f109e`
-- PF12: abgeschlossen
-- nächstes Paket: PF13
+- PF12: abgeschlossen, Commit `fbdb8fb10`
+- PF13: abgeschlossen
+- nächstes Paket: PF14
 
 ## Zielprüfung
 
@@ -693,6 +694,16 @@ Abdeckung führt rot zu PF14, nicht zurück zur alten Runtime.
 
 Jede nach PF13 sichtbar werdende Lücke fachlich schließen und die alten
 Kaschierungsfallbacks endgültig entfernen.
+
+Initialer roter Failure-Korpus nach dem produktiven Cutover:
+
+- erster Matador: strategischer Sentry-Coverage-Bedarf wird noch nicht aus dem
+  residenten Deck-/Rollenbild in `runner.rig_and_coverage` aufgenommen;
+- deterministischer Corp-Deckout: die gewinnbringende Rush-Hour-Linie benötigt
+  einen expliziten terminalen Plan statt einer EndTurn-Ausnahme;
+- alte FD22-Tests erwarten noch die absichtlich roten Altfehler
+  „zweiter Psychic Friend“ und „vorzeitiges EndTurn“, obwohl die neue Runtime
+  bereits produktive Planaktionen auswählt.
 
 ### Konkrete Arbeit
 
