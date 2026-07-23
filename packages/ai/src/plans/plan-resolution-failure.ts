@@ -3,6 +3,7 @@ import type { Side } from "@netgrid/shared";
 export const PLAN_RESOLUTION_FAILURE_CODES = [
   "missing_plan_module_coverage",
   "missing_action_semantics",
+  "invalid_plan_identity",
   "step_capability_mismatch",
   "step_target_mismatch",
   "no_current_route_head",

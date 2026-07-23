@@ -11,8 +11,9 @@ Worktree: `C:\Projekte\NETGRID_AI_PLAN_FIRST_RUNTIME_CUTOVER`
 Aktueller Paketstand:
 
 - PF00: abgeschlossen, Commit `2d865be44`
-- PF01: abgeschlossen
-- nächstes Paket: PF02
+- PF01: abgeschlossen, Commit `46f5df39b`
+- PF02: abgeschlossen
+- nächstes Paket: PF03
 
 ## Zielprüfung
 
