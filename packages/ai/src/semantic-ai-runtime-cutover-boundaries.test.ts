@@ -17,6 +17,7 @@ import {
   type SemanticRuntimeDependencies,
 } from "./runtime/semantic-runtime";
 import type { LegalAction } from "@netgrid/shared";
+import { PlanResolutionFailure } from "./plans/plan-resolution-failure";
 import {
   aiInput,
   legalAction,
@@ -155,6 +156,62 @@ describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", (
     expect(decision.fallbackUsed).toBe(true);
     expect(decision.evidence).toContain(
       "fallback_action_policy:required_run_start",
+    );
+  });
+
+  it("fails instead of using EndTurn as coverage fallback with remaining clicks", () => {
+    const input = aiInput("runner", [
+      legalAction("end-turn", "runner", "end_turn", "End turn", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.clicks = 4;
+
+    let failure: unknown;
+    try {
+      chooseSemanticRuntimeAction(
+        input,
+        {},
+        semanticRuntimeDependencies([], {
+          initiallySelectedActionId: "none",
+        }),
+      );
+    } catch (error) {
+      failure = error;
+    }
+
+    expect(failure).toBeInstanceOf(PlanResolutionFailure);
+    expect(failure).toMatchObject({
+      code: "end_turn_with_usable_capacity",
+      context: {
+        side: "runner",
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: ["end_turn"],
+        owner: "rules_contract",
+      },
+    });
+  });
+
+  it("retains the zero-click EndTurn resolution boundary", () => {
+    const input = aiInput("runner", [
+      legalAction("end-turn", "runner", "end_turn", "End turn", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.clicks = 0;
+
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      {},
+      semanticRuntimeDependencies([], {
+        initiallySelectedActionId: "none",
+      }),
+    );
+
+    expect(decision.actionId).toBe("end-turn");
+    expect(decision.evidence).toContain(
+      "fallback_action_policy:end_turn",
     );
   });
 

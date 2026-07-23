@@ -69,6 +69,7 @@ import {
   type ActionDemand,
 } from "../plans/action-demand";
 import type { ActionCapacityScoringContext } from "./action-capacity-score-components";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 export type {
   SemanticRuntimeChoice,
@@ -670,15 +671,24 @@ export function actionCapacityScoringContextForRuntime(
   };
 }
 
-export class SemanticCoverageFallbackError extends Error {
+export class SemanticCoverageFallbackError extends PlanResolutionFailure {
   constructor(
     readonly side: AiDecisionInput["side"],
     readonly legalActionTypes: readonly string[],
+    stateVersion = 0,
+    timingPoint = "unknown",
   ) {
-    super(
-      `Semantic coverage has no fail-closed fallback for ${side}: ${legalActionTypes.join(",") || "no_legal_actions"}`,
-    );
+    super("missing_plan_module_coverage", {
+      side,
+      stateVersion,
+      timingPoint,
+      legalActionTypes,
+      owner: "plan_registry",
+      removalCondition:
+        "Add a plan module or explicit window resolver for the uncovered action family.",
+    });
     this.name = "SemanticCoverageFallbackError";
+    this.message = `Semantic coverage has no fail-closed fallback for ${side}: ${legalActionTypes.join(",") || "no_legal_actions"}`;
   }
 }
 
@@ -717,16 +727,39 @@ function semanticCoverageFallbackDecision(
     );
   const action = rankedFallbackActions[0];
   if (!action) {
+    if (
+      input.playerView.own.clicks > 0 &&
+      input.legalActions.length > 0 &&
+      input.legalActions.every((candidate) => candidate.type === "end_turn")
+    ) {
+      throw new PlanResolutionFailure("end_turn_with_usable_capacity", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: ["end_turn"],
+        owner: "rules_contract",
+        removalCondition:
+          "Resolve a plan-compatible action or remove the illegal remaining-capacity EndTurn action at the engine boundary.",
+        candidateCount: actionSemanticCandidates.length,
+      });
+    }
     throw new SemanticCoverageFallbackError(
       input.side,
       [
         ...new Set(input.legalActions.map((candidate) => candidate.type)),
       ].sort(),
+      input.playerView.stateVersion,
+      input.playerView.timingPoint,
     );
   }
   const policy = failClosedFallbackPolicyForAction(input, action);
   if (!policy) {
-    throw new SemanticCoverageFallbackError(input.side, [action.type]);
+    throw new SemanticCoverageFallbackError(
+      input.side,
+      [action.type],
+      input.playerView.stateVersion,
+      input.playerView.timingPoint,
+    );
   }
   const decisionOpportunity = assessDecisionOpportunity(input, action);
   const evidence = dependencies.scrubEvidence([
@@ -749,7 +782,12 @@ function semanticCoverageFallbackDecision(
     action,
   );
   if ((action.choiceRequirements?.length ?? 0) > 0 && !selectedChoices) {
-    throw new SemanticCoverageFallbackError(input.side, [action.type]);
+    throw new SemanticCoverageFallbackError(
+      input.side,
+      [action.type],
+      input.playerView.stateVersion,
+      input.playerView.timingPoint,
+    );
   }
   const decisionChain = buildSemanticCoverageFallbackDecisionChainDebug({
     input,
@@ -789,6 +827,8 @@ function fallbackPolicyRank(
   switch (failClosedFallbackPolicyForAction(input, action)) {
     case "mandatory_choice":
       return 0;
+    case "mandatory_resolution":
+      return 0;
     case "direct_closeout":
       return 1;
     case "tag_clear":
@@ -798,6 +838,8 @@ function fallbackPolicyRank(
     case "required_run_start":
       return 3;
     case "access_resolution":
+      return 4;
+    case "window_decline":
       return 4;
     case "economy_basic":
       return 5;
@@ -815,16 +857,19 @@ function failClosedFallbackPolicyForAction(
   action: LegalAction,
 ):
   | "mandatory_choice"
+  | "mandatory_resolution"
   | "direct_closeout"
   | "tag_clear"
   | "required_run_continue"
   | "required_run_start"
   | "access_resolution"
+  | "window_decline"
   | "economy_basic"
   | "draw_setup"
   | "end_turn"
   | undefined {
   if (action.type === "resolve_choice") return "mandatory_choice";
+  if (action.type === "mandatory_draw") return "mandatory_resolution";
   if (action.type === "score_agenda" || action.type === "steal_agenda") {
     return "direct_closeout";
   }
@@ -850,16 +895,21 @@ function failClosedFallbackPolicyForAction(
     return "economy_basic";
   }
   if (
-    (action.type === "draw_card" && action.source === "basic_action") ||
-    action.type === "mandatory_draw"
+    action.type === "draw_card" &&
+    action.source === "basic_action"
   ) {
     return "draw_setup";
   }
   if (
-    action.type === "end_turn" ||
     action.type === "jack_out" ||
     action.type === "decline_trash" ||
     action.type === "decline_rez"
+  ) {
+    return "window_decline";
+  }
+  if (
+    action.type === "end_turn" &&
+    input.playerView.own.clicks <= 0
   ) {
     return "end_turn";
   }

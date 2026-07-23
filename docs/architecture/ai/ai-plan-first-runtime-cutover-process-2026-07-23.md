@@ -8,6 +8,12 @@ Primärer Agent: `release-planning-agent`, Umsetzung später
 Branch: `codex/ai-plan-first-runtime-cutover`
 Worktree: `C:\Projekte\NETGRID_AI_PLAN_FIRST_RUNTIME_CUTOVER`
 
+Aktueller Paketstand:
+
+- PF00: abgeschlossen, Commit `2d865be44`
+- PF01: abgeschlossen
+- nächstes Paket: PF02
+
 ## Zielprüfung
 
 Die Vorgabe ist für eine direkte sequenzielle Umsetzung ausreichend präzise.
