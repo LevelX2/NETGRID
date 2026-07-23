@@ -1,7 +1,7 @@
 # KI-Planebene – modulares Zielkonzept
 
 Status: **Work in Progress**
-Dokumentversion: `0.2`
+Dokumentversion: `0.3`
 Stand: 2026-07-23
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
@@ -10,9 +10,9 @@ Verantwortlicher Architekturprozess:
 
 Dieses Dokument beschreibt den angestrebten Zielzustand der produktiven
 NETGRID-KI-Planebene. Es führt die bislang verteilten Verträge für
-Deckstrategie, Strategic Intent, Tactical Goals, Tactical Plans,
-PlanPortfolio, Ressourcenrouten, Follow-up-Budgets und LegalAction-Auswahl zu
-einem gemeinsamen Modell zusammen.
+Deckstrategie, Strategic Intent, kurzlebige Goal-/Threat-Signale, Tactical
+Plans, PlanPortfolio, Ressourcenrouten, Follow-up-Budgets und
+LegalAction-Auswahl zu einem gemeinsamen Modell zusammen.
 
 Die Leitentscheidung lautet:
 
@@ -46,6 +46,44 @@ Festlegungen werden in drei Reifegrade getrennt:
 
 Der Änderungsverlauf steht am Ende dieses Dokuments. Neue Detailregeln sollen
 immer angeben, ob sie den gemeinsamen Kernel oder nur ein Planmodul betreffen.
+
+### 2.1 Disposition des Architekturreviews zu Version 0.3
+
+Das Review wird nicht pauschal übernommen:
+
+**Übernommen, weil der Vertrag sonst widersprüchlich oder technisch nicht
+erfüllbar wäre:**
+
+- Tactical Goals als kurzlebige Signale statt zweite Autorität;
+- PlanAssessment vor Executorwahl;
+- genau ein aktueller Route Head, keine zukünftigen Action-IDs;
+- getrennte Achsen für Viability, Portfolio-Rolle und Execution State;
+- validierte Priority Claims;
+- First-class `PlanNeed`, typisierte Ressourcen und Garantiegrade;
+- differenzierte Entscheidungsfenster und `PlanExecutionOrigin`;
+- Hidden-Info-Äquivalenz-, Capability-/Target- und Fallback-Audit-Tests.
+
+**Präzisiert statt unverändert übernommen:**
+
+- `PlanAssessment` darf Machbarkeit und nächsten semantischen Step
+  vorbewerten, aber keinen verdeckten globalen Action-Wettbewerb vorziehen.
+- Kartenbezogene Planinstanzen bleiben möglich, benötigen aber ein
+  Admission-Gate. Das Reviewrisiko ist real; ein vollständiges Verbot würde
+  eigenständige mehrstufige Kartenentwicklungen wieder unsichtbar machen.
+- Ein allgemeiner Corp-Midgame-Plan wird nicht vorsorglich als breites Modul
+  eingeführt. Erst konkrete wiederkehrende Evidence rechtfertigt einen engen
+  Domainzuschnitt.
+- P1 verlangt nicht in jedem Fall mathematische Gewissheit. Ein starker
+  Lethalversuch darf P1 sein, muss aber Garantiegrad und gegnerische
+  Eingriffsmöglichkeit ausweisen.
+
+**Nicht als Architekturentscheidung übernommen:**
+
+- Das Comprehensive Rules PDF macht `end_turn` nicht automatisch illegal,
+  solange die primäre NETGRID-Konzeption und die Engine das Gegenteil
+  ausdrücken. Festgestellt ist ein blockierender Quellenkonflikt.
+- Terminalprojektion erhält keinen Zugriff auf vollständige gegnerische
+  Hidden-Zonen. Sie bleibt engine-semantisch, aber strikt side-safe.
 
 ## 3. Ausgangsproblem
 
@@ -112,7 +150,7 @@ Alle Planmodule verwenden denselben Vertrag für:
 - Blocker;
 - Steps und Fähigkeiten;
 - Ressourcenbedarf und Reservierung;
-- atomare Folgeaktionsketten;
+- geschützte, StateVersion-weise neu materialisierte Fortsetzungen;
 - Fortschritt und Abschluss;
 - Unterbrechung und Wiederaufnahme;
 - Diagnostik, Redaction und Determinismus.
@@ -191,6 +229,20 @@ Aktuell führende strategische Ausrichtung innerhalb der vom Deck gestützten
 Möglichkeiten. Der Intent darf phasenabhängig wechseln, ist aber keine
 konkrete Aktion.
 
+### Goal-/Threat-Signal
+
+Kurzlebige, StateVersion-gebundene Beschreibung eines aktuellen Bedarfs,
+einer Opportunity oder einer Bedrohung. Diese Signale:
+
+- beeinflussen Planerkennung und Planbewertung;
+- können einen Intent-Wechsel anregen;
+- besitzen weder Plan-Memory noch Ausführungsautorität;
+- referenzieren keine zukünftigen Action-IDs;
+- verfallen oder werden bei jeder neuen StateVersion neu erzeugt.
+
+Damit bleiben Tactical Goals als semantische Brücke erhalten, ohne neben dem
+PlanPortfolio eine zweite Handlungsautorität zu bilden.
+
 ### Planmodul
 
 Wiederverwendbare fachliche Implementierung eines Plantyps, beispielsweise
@@ -217,9 +269,9 @@ nicht nur den momentan ausführenden Plan.
 
 ### Executor
 
-Die eine Planinstanz, die die aktuelle freiwillige Entscheidung besitzt.
-Normalerweise ist dies der Vordergrundplan, bei einem zeitkritischen Fenster
-der Interrupt.
+Die eine Planinstanz, die die aktuelle freiwillige Entscheidung besitzt. Bei
+Supportbeziehungen wird zwischen strategischem Root-Foreground und
+ausführendem Leaf-Executor unterschieden. Es handelt trotzdem genau ein Leaf.
 
 ### Phase
 
@@ -233,13 +285,16 @@ Fähigkeit oder Konversion, aber zunächst keine bestimmte Action-ID.
 
 ### Route
 
-Eine ausführbare Folge vorhandener LegalActions, mit der ein Step erfüllt
-werden kann.
+Die konkrete aktuelle LegalAction, mit der ein Step jetzt begonnen oder
+fortgesetzt wird, plus ausschließlich semantische Fortsetzungsanforderungen.
+Eine Route enthält nie zukünftige Action-IDs.
 
 ### Commitment
 
-Verbindliche, vor Beginn auf Machbarkeit geprüfte Mehraktionsfolge. Credits,
-Klicks, Quellen und Ziel werden dafür reserviert.
+Geschützte, vor Beginn auf Machbarkeit geprüfte Fortsetzung. Sie kann
+verzweigen, wird nach jeder StateVersion neu materialisiert und reserviert
+typisierte Ressourcen mit einem ausgewiesenen Garantiegrad. Sie ist keine
+atomare Engine-Transaktion.
 
 ## 7. Gesamtarchitektur
 
@@ -250,17 +305,23 @@ eigene Kartensemantik und Deckfähigkeiten
                     |
               Strategic Intent
                     |
+       kurzlebige Goal-/Threat-Signale
+                    |
         side-spezifische Planerkennung
                     |
       persistentes Runner-/Corp-Portfolio
                     |
+      leichtgewichtige PlanAssessments
+                    |
        side-spezifischer PlanScheduler
           /          |           \
-   Interrupt     Vordergrund    Backgrounds
+ Responses      Vordergrund    Backgrounds
           \          |           /
-         ausführender Plan und Step
+    Root-Foreground und Leaf-Executor
                     |
-       Step-Routen aus LegalActions
+ ActionSemanticCandidates der LegalActions
+                    |
+ aktueller Route Head + semantische Fortsetzung
                     |
         planlokale Action-Auswahl
                     |
@@ -278,10 +339,10 @@ Der Kernel ist zuständig für:
 - Lebenszyklusübergänge;
 - Portfoliohaltung und deterministische Sortierung;
 - Executor-Exklusivität;
-- Prioritätsklassen und Hysterese;
-- Parent-/Support-Beziehungen;
-- Ressourcenreservierungen;
-- Commitment-Schutz;
+- Validierung von Prioritätsansprüchen und Hysterese;
+- typisierte, zyklenfreie Parent-/Need-/Support-Beziehungen;
+- typisierte Ressourcenclaims und Reservierungen;
+- Schutz laufender Fortsetzungen;
 - globale Safety- und LegalAction-Invarianten;
 - Ergebnisrückführung;
 - redigierte Diagnostik.
@@ -350,6 +411,35 @@ Er liefert niemals:
 - eine ungeprüfte Alternative zur Engine-Aktion;
 - einen veralteten Planbefehl gegen eine neue StateVersion.
 
+### 8.3 Ausführungsursprung und Receipt
+
+Fenster- und Runfortsetzungen tragen einen stabilen, side-sicheren Ursprung:
+
+```ts
+type PlanExecutionOrigin = {
+  rootPlanInstanceId: string;
+  executorInstanceId: string;
+  phase: string;
+  stepId: string;
+  routeId: string;
+  commitmentId?: string;
+  runPurpose?: string;
+};
+
+type PlanExecutionReceipt = {
+  beforeStateVersion: number;
+  afterStateVersion: number;
+  origin: PlanExecutionOrigin;
+  actionId: string;
+  expectedOutcome: OutcomeEnvelope;
+  observedEvents: SideSafeEvent[];
+};
+```
+
+Der Ursprung verändert weder Engine-Regeln noch LegalActions. Er bindet
+optionale Ability-, Run-, Access- und Trace-Entscheidungen an das auslösende
+Vorhaben und ermöglicht Outcome-basierte Fortschrittsprüfung.
+
 ## 9. Gemeinsamer Planmodul-Vertrag
 
 Der folgende Typ ist konzeptionell. Die endgültigen TypeScript-Namen werden im
@@ -358,9 +448,10 @@ Implementierungsplan festgelegt.
 ```ts
 type PlanModule = {
   moduleId: string;
+  moduleVersion: string;
   side: "runner" | "corp";
   executionClass:
-    | "reactive_interrupt"
+    | "urgent_response"
     | "bounded_sequence"
     | "recurring_cycle"
     | "development_project"
@@ -369,9 +460,14 @@ type PlanModule = {
   discover(context): PlanProposal[];
   instantiate(proposal, context): PlanInstance;
   reconcile(instance, context): PlanReconciliation;
-  evaluatePriority(instance, context): PlanPriority;
+  assessPlan(instance, context): PlanAssessment;
   proposeStep(instance, context): PlanStepProposal;
-  buildRoutes(instance, step, legalActions, context): PlanRoute[];
+  materializeRoutes(
+    instance,
+    step,
+    semanticActions,
+    context,
+  ): PlanRoute[];
   evaluateRoute(instance, step, route, context): RouteEvaluation;
   assessOutcome(instance, previousState, currentState): PlanOutcome;
   redact(instance, diagnostics): RedactedPlanDiagnostics;
@@ -390,7 +486,8 @@ Beispiele:
 - sichtbarer Tag-/Damage-Punish erzeugt einen Runner-Abwehrplan.
 
 `discover` darf nicht bei jeder Entscheidung Duplikate desselben Plans
-erzeugen.
+erzeugen. Jedes Proposal liefert einen modulstabilen `dedupeKey`; der Kernel
+entscheidet über Aufnahme, Reaktivierung oder Zusammenführung.
 
 ### 9.2 `reconcile`
 
@@ -400,14 +497,36 @@ Prüft eine bestehende Instanz gegen den aktuellen Zustand:
 - wurde ein Blocker entfernt?
 - ist die Strategie noch gestützt?
 - wurde ein Meilenstein erreicht?
-- ist der Plan abgeschlossen, suspendiert oder aufzugeben?
+- ist der Plan abgeschlossen, präemptiert oder aufzugeben?
 - haben fremde Aktionen oder neue Informationen seine Phase verändert?
 
-### 9.3 `evaluatePriority`
+### 9.3 `assessPlan`
 
-Bewertet die Planinstanz, nicht ihre einzelnen LegalActions. Die Bewertung
-liefert eine Prioritätsklasse und innerhalb dieser Klasse einen relativen
-Planwert.
+Erzeugt für jede relevante Instanz vor der Executorwahl ein
+leichtgewichtiges `PlanAssessment`:
+
+```ts
+type PlanAssessment = {
+  instanceId: string;
+  priorityClaim: PriorityClaim;
+  readiness: PlanReadiness;
+  nextStepPreview?: PlanStepSpec;
+  feasibility: FeasibilityEnvelope;
+  resourceGaps: ResourceGap[];
+  expectedOutcome: OutcomeEnvelope;
+  continuity: ContinuityAssessment;
+  blockers: PlanBlocker[];
+};
+```
+
+Die Vorschau darf nur planlokal prüfen, ob eine aktuelle oder absehbar
+herstellbare Route existiert. Sie führt keinen globalen LegalAction-Wettbewerb
+durch. So kennt die Planwahl Readiness und Ressourcenlücke, ohne nach der Wahl
+erst blind in einen nicht ausführbaren Step zu laufen.
+
+Das Modul liefert nur einen `PriorityClaim`. Die side-spezifische
+Scheduler-Policy validiert Klasse, Reason Code, Horizon, Witness und
+Garantiegrad. Ein Modul darf sich nicht selbst unbelegt zu P1 oder P2 erklären.
 
 ### 9.4 `proposeStep`
 
@@ -421,11 +540,26 @@ Bestimmt den fachlich nächsten Step. Ein Step kann beispielsweise verlangen:
 - ein Tag erzeugen;
 - Handpuffer herstellen.
 
-### 9.5 `buildRoutes`
+### 9.5 `materializeRoutes`
 
-Übersetzt den Step in aktuell mögliche LegalAction-Routen. Diese Funktion
+Übersetzt den Step nach der Executorwahl aus verbindlichen
+`ActionSemanticCandidates` in aktuell mögliche Route Heads. Diese Funktion
 verwendet Action-Semantik, Kartenfähigkeiten, Kosten, Ziele und aktuelle
 LegalActions.
+
+```ts
+type PlanRoute = {
+  routeId: string;
+  head: LegalActionInvocation;
+  continuation: SemanticStepSpec[];
+  assumptions: RouteAssumption[];
+  expectedOutcome: OutcomeEnvelope;
+};
+```
+
+Nur `head` verweist auf eine LegalAction der aktuellen StateVersion. Nach
+deren Anwendung wird die Fortsetzung gegen die neue LegalAction-Menge erneut
+materialisiert.
 
 ### 9.6 `evaluateRoute`
 
@@ -444,17 +578,21 @@ Eine Planinstanz benötigt mindestens:
 ```ts
 type PlanInstance = {
   instanceId: string;
+  dedupeKey: string;
   moduleId: string;
+  moduleVersion: string;
   side: "runner" | "corp";
   strategyLineIds: string[];
 
   executionClass: PlanExecutionClass;
-  lifecycle: PlanLifecycle;
-  portfolioRole?: PlanPortfolioRole;
+  viability: PlanViability;
+  portfolioRole: PlanPortfolioRole;
+  executionState: PlanExecutionState;
+  persistencePolicy: PlanPersistencePolicy;
 
   target?: PlanTarget;
   parentInstanceId?: string;
-  supportsInstanceIds: string[];
+  openNeedIds: string[];
 
   phase: string;
   milestone: string;
@@ -465,19 +603,22 @@ type PlanInstance = {
   completionConditions: PlanCondition[];
   abandonmentConditions: PlanCondition[];
 
-  resourceDemand: PlanResourceDemand;
-  resourceReservation: PlanResourceReservation;
+  resourceClaims: PlanResourceClaim[];
+  acceptedReservations: PlanReservation[];
   commitment?: PlanCommitment;
   cadence?: PlanCadence;
 
-  priority: PlanPriority;
   progress: PlanProgress;
 
   createdAtStateVersion: number;
   updatedAtStateVersion: number;
-  evidence: string[];
+  lastProductiveAtStateVersion?: number;
+  evidenceRefs: PlanEvidenceRef[];
 };
 ```
+
+Priorität wird absichtlich nicht als autoritativer Instanzzustand gespeichert.
+Sie gehört zum Assessment der aktuellen StateVersion.
 
 ### 10.1 Modulzustand
 
@@ -487,71 +628,74 @@ Beispiele:
 
 - R&D-Plan: Highlighter-Zähler, bekannte Zugriffstiefe, Topkartenfrische;
 - Economy-Plan: Zielreserve, verfügbare Quellen, Auszahlungsfenster;
-- Corp-Killplan: verfügbare Tagquelle, Damage-Summe, garantierte Trace-Stärke;
+- Corp-Killplan: verfügbare Tagquelle, Damage-Summe, sichtbare
+  Trace-Projektion und Garantiegrad;
 - Remote-Projekt: Zielserver, Schutzband, Rez-Reserve, nächste Härtungsstufe.
 
 Der Scheduler darf daraus keine kartenspezifischen Sonderregeln ableiten.
 
-## 11. Lebenszyklus
+## 11. Orthogonale Plan-Zustandsachsen
 
-Der Zielvertrag verwendet einen einheitlichen Lebenszyklus:
+Lebensfähigkeit, Portfoliorolle und Ausführung werden nicht in einem
+mehrdeutigen `active`-/`suspended`-Zustand vermischt:
 
-```text
-proposed
-   |
-   +--> dormant ----+
-   |                |
-   +--> ready ------+--> active --> completed
-                        |   |
-                        |   +--> blocked ----+
-                        |                    |
-                        +--> suspended ------+--> ready
-                        |
-                        +--> abandoned
+```ts
+type PlanViability =
+  | "dormant"
+  | "ready"
+  | "blocked"
+  | "completed"
+  | "abandoned";
+
+type PlanPortfolioRole =
+  | "foreground"
+  | "background"
+  | "unassigned";
+
+type PlanExecutionState =
+  | "idle"
+  | "executor"
+  | "preempted";
 ```
 
-### `proposed`
+`proposed` liegt vor der Portfolioaufnahme und ist kein persistenter
+Planstatus. Ein reaktiver Kandidat ist ein `ready`-Plan mit validiertem
+Response-Claim; mehrere solcher Kandidaten dürfen gleichzeitig existieren.
+Nur einer kann `executor` sein.
 
-Das Modul hat einen Kandidaten erkannt. Er ist noch nicht in das Portfolio
-aufgenommen.
+Beispielkombinationen:
 
-### `dormant`
+```text
+ready   + background + idle
+ready   + foreground + executor
+ready   + foreground + preempted
+blocked + foreground + idle
+```
 
-Strategisch relevanter Plan, dessen Aktivierungsbedingungen noch nicht
-vorliegen. Beispiel: Corp-Killplan ohne aktuelle Tagmöglichkeit.
+`completed` und `abandoned` bleiben nur gemäß Retention-Vertrag kurz im
+Portfolio und wechseln dann in redigierte Historie. `preempted` benötigt einen
+klassifizierten Grund und eine Resume Condition.
 
-### `ready`
+`progressing` ist kein Status. Fortschritt ist ein Ergebnis zwischen zwei
+StateVersions.
 
-Plan kann jetzt einen fachlich gültigen Step ausführen.
+### 11.1 Identität und Retention
 
-### `active`
+Der Kernel bildet die technische Instanzidentität aus Modul, Modulversion und
+stabilem `dedupeKey`. Das Modul definiert, welche fachlichen Änderungen eine
+bestehende Instanz fortsetzen und welche eine neue Instanz verlangen.
 
-Plan befindet sich im Portfolio und arbeitet als Interrupt, Vordergrund oder
-bewusst eingeplantes Background-Projekt.
+Jede Persistence Policy legt fest:
 
-### `blocked`
+- wann eine Opportunity verfällt;
+- wie lange `blocked` ohne neue Evidence resident bleibt;
+- wann ein Zonen- oder Targetwechsel die Instanz invalidiert;
+- wie lange abgeschlossene Instanzen diagnostisch gehalten werden;
+- welche Bindung, offene Need oder geschützte Fortsetzung Verdrängung
+  verhindert.
 
-Plan ist relevant, kann aber wegen eines konkreten beseitigbaren Blockers
-nicht fortfahren. Er benennt eine Resume Condition oder erzeugt einen
-Supportbedarf.
-
-### `suspended`
-
-Plan wäre grundsätzlich ausführbar, wurde aber durch einen höherpriorisierten
-Interrupt oder eine bewusst gewählte andere Linie zeitweise angehalten.
-
-### `completed`
-
-Abschlussbedingung erreicht. Der Plan wird nicht reaktiviert; ein späteres
-gleichartiges Vorhaben erhält eine neue Instanz.
-
-### `abandoned`
-
-Ziel dauerhaft ungültig, Strategie verworfen oder Erfolg nicht mehr
-realistisch. Der Grund ist verpflichtend zu diagnostizieren.
-
-`progressing` ist kein eigener Lebenszykluszustand. Fortschritt ist ein
-Ergebnis zwischen zwei StateVersions.
+„Alle relevanten Pläne bleiben resident“ ist eine fachliche Aussage, keine
+unbegrenzte Speicherzusage. Relevanz muss durch Retention-Regeln belegbar sein.
 
 ## 12. Portfolio und Ausführungsrollen
 
@@ -559,10 +703,10 @@ Ergebnis zwischen zwei StateVersions.
 
 Das Portfolio unterscheidet:
 
-- höchstens einen `reactive_interrupt`;
+- mehrere mögliche `urgent_response`-Kandidaten;
 - höchstens einen ausführenden `foreground`;
 - mehrere persistente `background`-Projekte;
-- beliebig viele fachlich relevante `dormant`, `blocked` oder `suspended`
+- beliebig viele fachlich relevante `dormant`, `blocked` oder `preempted`
   Instanzen innerhalb eines technisch begrenzten Speichers.
 
 Die heutige Grenze von höchstens zwei Background-Projekten entfällt im
@@ -584,20 +728,23 @@ Bei jeder freiwilligen Entscheidung besitzt genau ein Plan die
 Ausführungsautorität:
 
 ```text
-Interrupt vorhanden?
-  ja  → Interrupt ist Executor
-  nein → Vordergrund ist Executor
+validierte Urgent Response vorhanden?
+  ja  → höchstpriorisierte Response ist Leaf-Executor
+  nein → Vordergrund oder delegierter Supportplan ist Leaf-Executor
 ```
 
 Ein Background-Projekt darf:
 
-- bei der Planwahl für einen zeitlich begrenzten Step in den Vordergrund
+- in einen ausdrücklich vom Vordergrund freigegebenen Portfolio-Slice
   wechseln;
+- einen offenen Parentbedarf mit delegierter effektiver Priorität erfüllen;
+- eine planverträgliche Route des Vordergrunds liefern;
 - von einer Vordergrundaktion nebenbei profitieren;
-- Ressourcen reservieren, wenn der Scheduler dies akzeptiert.
+- Soft Claims für Ressourcen veröffentlichen.
 
 Es darf nicht durch die Addition vieler kleiner Beiträge den ausführenden
-Vordergrundplan umgehen.
+Vordergrundplan umgehen. Cadence begrenzt Nutzung; sie erzeugt keine höhere
+Prioritätsklasse.
 
 ### 12.3 Wechselnde aktive Pläne
 
@@ -605,7 +752,9 @@ Mehrere Pläne dürfen über einen Zug oder mehrere Züge hinweg abwechselnd
 handeln. Beispiel:
 
 - eine R&D-Kampagne ist Vordergrund;
-- ein Broker-Bankplan darf gemäß Cadence einmal laden;
+- die R&D-Kampagne erlaubt einen günstigen Portfolio-Slice für Broker oder
+  delegiert einen Fundingbedarf;
+- der Broker-Bankplan darf gemäß Cadence einmal laden;
 - danach kehrt die R&D-Kampagne zurück.
 
 Dieser Wechsel ist eine explizite Schedulerentscheidung. Die R&D-Kampagne
@@ -618,10 +767,18 @@ gedächtnislos.
 
 ### Phase 0 – Engine-Fenster klassifizieren
 
-- Pflichtentscheidung oder freiwillige Hauptaktion?
+- automatische Pflichtauflösung;
+- Pflichtauswahl;
+- optionale Trigger-/Paid-Ability-Entscheidung;
+- freiwilliges Hauptaktionsfenster;
+- Run-/Access-/Trace-Fortsetzung;
+- legitimes Pass/Decline in einem passenden Fenster;
 - aktuelle StateVersion und Seite prüfen;
 - LegalActions übernehmen;
-- veraltete Commitments invalidieren.
+- veraltete geschützte Fortsetzungen invalidieren.
+
+Nicht jedes Fenster startet den vollen Scheduler. Pflichtauswahlen und
+Fortsetzungsfenster behalten den `PlanExecutionOrigin` des auslösenden Plans.
 
 ### Phase 1 – Side-sicheres Weltmodell aktualisieren
 
@@ -632,14 +789,19 @@ gedächtnislos.
 - eigene neue Karten und Fähigkeiten;
 - Plan-Memory und Fortschritt.
 
-### Phase 2 – Strategic Intent revalidieren
+### Phase 2 – Goal-/Threat-Signale und Strategic Intent revalidieren
 
 - trägt die Deckstrategie die aktuelle Linie weiterhin?
 - hat sich die Spielphase verändert?
 - existiert ein Matchpoint- oder Survival-Kontext?
 - ist eine Nebenlinie vorübergehend sinnvoller?
 
-Deckstrategie bleibt Prior, aber kein Autopilot.
+Deckstrategie bleibt Prior, aber kein Autopilot. P1–P3-Pläne dürfen einen
+bestehenden Intent mit belegter akuter Evidence übergehen. P4-/P5-Pläne
+benötigen Intent-Fit oder eine explizite taktische Evidence. Intent-Wechsel
+entstehen nur aus Phasenwechsel, belastbarer neuer Information,
+Planabschluss/-invalidierung oder einem validierten hochklassigen Claim, nie
+aus normalen Action-Score-Schwankungen.
 
 ### Phase 3 – Planinstanzen reconciliieren
 
@@ -654,24 +816,26 @@ Für jede bestehende Instanz:
 ### Phase 4 – Neue Kandidaten entdecken
 
 Runner- oder Corp-Registry fragt ihre Module nach neuen Planvorschlägen.
-Duplikate mit gleichem Typ und Ziel werden zusammengeführt oder abgelehnt.
+Duplikate mit gleichem `dedupeKey` werden zusammengeführt oder abgelehnt.
 
-### Phase 5 – Interrupts prüfen
+### Phase 5 – Alle relevanten Pläne assessen
 
-Zeitkritische Regel- oder Überlebensfenster werden vor normaler Planwahl
-behandelt. Ein Interrupt suspendiert den Vordergrund, löscht ihn aber nicht.
+Für jede relevante Instanz erzeugt das Modul eine leichte Step- und
+Machbarkeitsvorschau. Dabei werden noch keine vollständigen Routen gebaut und
+keine zukünftigen LegalActions angenommen.
 
-### Phase 6 – Planprioritäten bestimmen
+### Phase 6 – Priority Claims validieren und Ressourcen arbitrieren
 
-Alle ausführbaren Instanzen erhalten:
+Die side-spezifische Policy validiert für jede Instanz:
 
-- Prioritätsklasse;
-- Readiness;
-- erwartete Konversion;
-- Risiken und Opportunity Cost;
-- Kontinuitäts- oder Wechselkosten.
+- angeforderte Prioritätsklasse und Reason Code;
+- Terminal-/Threat-Witness und Garantiegrad;
+- Intent-Fit oder taktische Evidence;
+- Readiness, Ressourcenlücke und erwartete Konversion;
+- Hard-/Soft-/Forecast-Claims;
+- Risiken, Opportunity Cost und Kontinuitätskosten.
 
-### Phase 7 – Executor wählen oder fortsetzen
+### Phase 7 – Root-Foreground und Leaf-Executor wählen oder fortsetzen
 
 Der bisherige Vordergrund bleibt bevorzugt, solange:
 
@@ -685,10 +849,11 @@ Der bisherige Vordergrund bleibt bevorzugt, solange:
 Das gewählte Planmodul liefert genau einen aktuellen Step sowie erlaubte
 Alternativ-Steps.
 
-### Phase 9 – Step-Routen auf LegalActions abbilden
+### Phase 9 – aktuelle Route Heads materialisieren
 
-Nur vorhandene LegalActions werden verwendet. Nicht abbildbare Steps werden
-als Blocker oder Supportbedarf zurückgegeben.
+Nur `ActionSemanticCandidates` vorhandener LegalActions werden verwendet.
+Nicht abbildbare Steps werden als Blocker oder `PlanNeed` zurückgegeben.
+Semantische Fortsetzungen enthalten keine zukünftigen Action-IDs.
 
 ### Phase 10 – Planlokal Aktion wählen
 
@@ -707,7 +872,7 @@ Nach der neuen StateVersion beginnt der Zyklus erneut. Das Modul bewertet:
 - erwartete und tatsächliche Zustandsänderung;
 - Planfortschritt;
 - neue Blocker;
-- Commitment-Fortsetzung;
+- geschützte Fortsetzung;
 - Phasenwechsel oder Abschluss.
 
 ## 14. Planpriorisierung
@@ -730,6 +895,23 @@ Zuerst gilt eine fachliche Prioritätsklasse:
 Ein P5-Plan darf keinen ausführbaren P2-Plan durch einen hohen lokalen
 Actionscore verdrängen.
 
+Ein Modul vergibt diese Klasse nicht selbst. Es beantragt sie:
+
+```ts
+type PriorityClaim = {
+  requestedClass: PriorityClass;
+  reasonCode: PriorityReason;
+  horizon: PlanHorizon;
+  witness?: TerminalOrThreatWitness;
+  confidence: GuaranteeLevel;
+};
+```
+
+Die Scheduler-Policy kann den Claim bestätigen oder herabstufen. P1 verlangt
+einen belegten terminalen Pfad oder belegte unmittelbare
+Niederlagenverhinderung; P2 verlangt einen konkreten Survival- oder
+Score-Threat.
+
 Bei mehreren P1-Plänen bewertet ein side-spezifischer Terminalsolver:
 
 - Garantiegrad;
@@ -737,6 +919,12 @@ Bei mehreren P1-Plänen bewertet ein side-spezifischer Terminalsolver:
 - Reihenfolge;
 - gegnerische Eingriffsmöglichkeit;
 - eigene Sieg- gegenüber Niederlagenverhinderung.
+
+Terminalität wird über eine engine-nahe, side-sichere
+`evaluateTerminalConditions`-Projektion bestimmt. Sie umfasst neben Agenda
+und Flatline auch Deckout, Bad-Publicity- oder andere im normativen
+NETGRID-Regelvertrag tatsächlich freigeschaltete Niederlagen- und
+Siegbedingungen.
 
 ### 14.2 Wert innerhalb einer Klasse
 
@@ -794,6 +982,11 @@ niedrigeren Rangs kann einen ausführbaren Plan einer höheren Klasse
 überstimmen. Zahlenwerte und normalisierte Merkmale entscheiden nur zwischen
 Plänen derselben Klasse.
 
+Cadence ist ausschließlich eine Nutzungsschranke. Ein niedriger klassifizierter
+Background erhält dadurch kein Recht, einen höheren Vordergrund zu verdrängen.
+Er handelt nur in einem freigegebenen Portfolio-Slice, als planverträgliche
+Route oder mit delegierter Priorität eines offenen Parentbedarfs.
+
 ### 14.5 Entstehung strategischer und taktischer Pläne
 
 Eine langfristige strategische Kampagne verlangt eine belastbar vom eigenen
@@ -840,7 +1033,19 @@ ICE rezzen
 ```
 
 Das Planmodul bestimmt, welche Fähigkeiten seinen Step erfüllen. Gemeinsame
-Resolver finden dafür mögliche LegalActions.
+Resolver verwenden dafür ausschließlich die semantische Projektion der
+aktuellen LegalActions:
+
+```text
+LegalAction
+→ ActionSemanticCandidate
+→ CapabilityKinds + Target + Kosten + Fensterkontext
+→ Step-Match
+```
+
+Eine bloße Action-Familie oder ein positiver Taktikscore reicht nicht.
+Capability und Target müssen den Stepvertrag erfüllen. Diese Semantikbrücke
+bleibt verbindlicher Kernelinput und wird durch Plan-first nicht ersetzt.
 
 ### 15.2 Planlokale Routenauswahl
 
@@ -874,12 +1079,23 @@ LegalAction ausführen.
 
 Ein Vordergrundplan kann einen konkreten Bedarf veröffentlichen:
 
-```text
-need:
-  capability: credits
-  amount: 5
-  deadline: next_runner_turn
-  preserves: R&D campaign
+```ts
+type PlanNeed = {
+  needId: string;
+  requesterInstanceId: string;
+  capability: CapabilityRequest;
+  minimum: ResourceQuantity;
+  target?: ResourceQuantity;
+  deadline: PlanDeadline;
+  criticality: "required" | "preferred";
+  status:
+    | "open"
+    | "assigned"
+    | "partially_satisfied"
+    | "satisfied"
+    | "cancelled";
+  providerInstanceId?: string;
+};
 ```
 
 Ein Economy-Plan oder Economy-Service erfüllt diesen Bedarf. Der übergeordnete
@@ -897,6 +1113,17 @@ Commitment benötigt:
 
 Nach Abschluss kehrt die Autorität zum Parent zurück.
 
+Der Scheduler führt dabei zwei Identitäten:
+
+```text
+Root-Foreground: runner.pressure_central
+└─ Leaf-Executor: runner.economy:fund_parent_need
+```
+
+Supportkanten sind typisiert und zyklenfrei. Ein Supportkind erbt höchstens
+die validierte effektive Priorität seines konkreten Parentbedarfs; ein
+unabhängiger Economy-Plan erhält diese Delegation nicht.
+
 ### 16.3 Mehrplannutzen
 
 Eine Aktion darf mehreren Plänen helfen. Beispiel: Eine Economy-Karte
@@ -905,7 +1132,7 @@ finanziert den Vordergrund und lädt zugleich eine Strategie-Engine.
 Mehrplannutzen:
 
 - ist ein begrenzter Tiebreaker zwischen bereits planverträglichen Routen;
-- darf keinen Interrupt, Closeout oder notwendigen Vordergrund-Step
+- darf keine Urgent Response, keinen Closeout oder notwendigen Vordergrund-Step
   überstimmen;
 - wird nur bei realer Zustandsannäherung vergeben.
 
@@ -920,6 +1147,46 @@ Der Scheduler verwaltet mindestens:
 - Counter und Bankbestände;
 - Memory und Installationsslots;
 - planrelevante Timingfenster.
+
+Action Capacity und Credits werden als typisierte Tokens modelliert:
+
+```ts
+type ActionCapacityToken = {
+  sourceId: string;
+  quantity: number;
+  allowedCapabilityKinds: CapabilityKind[];
+  mustBeConsecutive?: boolean;
+  expiresAt: PlanDeadline;
+  usageLimit?: UsageLimit;
+};
+
+type CreditToken = {
+  sourceId: string;
+  quantity: number;
+  allowedUses: CreditUseConstraint[];
+  expiresAt?: PlanDeadline;
+};
+
+type PlanDeadline = {
+  side: "runner" | "corp";
+  turnId?: string;
+  windowId?: string;
+  beforeEvent?: PlanEventCondition;
+};
+
+type PlanLiability = {
+  sourceId: string;
+  kind: "action_debt" | "credit_debt" | "damage_risk" | "forced_followup";
+  quantity?: number;
+  due: PlanDeadline;
+  confidence: GuaranteeLevel;
+};
+```
+
+Dadurch bleiben Valu-Pak-, Edgerunner-, Wilson-, Broker- und andere
+eingeschränkte Kapazitäten von allgemeinen Klicks oder Credits getrennt.
+Spätere Action-Schulden, Damage oder verpflichtende Folgeschritte werden als
+Liability bewertet und nicht als kostenlose aktuelle Kapazität verbucht.
 
 ### 17.1 Bedarf
 
@@ -937,48 +1204,69 @@ deadline: Same Turn, Next Turn oder langfristig
 Reservierungen werden zentral auf Konflikte geprüft. Zwei Pläne dürfen nicht
 denselben Credit, Klick oder Counter gleichzeitig als garantiert behandeln.
 
+```text
+hard      – nur für Leaf-Executor oder laufende geschützte Fortsetzung
+soft      – gewünschte Reserve eines residenten Plans
+forecast  – erwartete zukünftige Ressource, nicht garantiert
+```
+
+Höherklassige Pläne dürfen Soft Claims präemptieren; jede Präemption wird
+diagnostiziert. Background-Pläne dürfen keine dauerhaften Hard Reservations
+halten.
+
 ### 17.3 Freie Ressourcen
 
 Ressourcen oberhalb akzeptierter Reservierungen dürfen andere Pläne nutzen.
 Der Scheduler muss sichtbar diagnostizieren, welche Reserve einen ansonsten
 legalen Step blockiert.
 
-## 18. Atomare Commitments
+## 18. Geschützte Fortsetzungen
 
 Zeitlich oder sequenziell gebundene Effekte benötigen vor der ersten Aktion
-eine vollständige Machbarkeitsprüfung.
+eine belastbare Machbarkeitsprüfung. Die Engine führt trotzdem jede Aktion und
+jede Zwischenentscheidung einzeln aus; der Vertrag ist keine Transaktion.
 
 ### 18.1 Commitment-Vertrag
 
 ```ts
 type PlanCommitment = {
   commitmentId: string;
-  routeId: string;
-  requiredSteps: string[];
-  nextStepIndex: number;
-  reservedClicks: number;
-  reservedCredits: number;
-  reservedSourceIds: string[];
+  rootPlanInstanceId: string;
+  executorInstanceId: string;
+  entryRouteId: string;
+  continuationGraph: SemanticContinuationGraph;
+  currentNodeId: string;
+  guarantee: GuaranteeLevel;
+  reservations: PlanReservation[];
   fixedTarget?: PlanTarget;
-  expiresAt: "same_turn" | "window_end" | "next_turn";
+  expiresAt: PlanDeadline;
   breakConditions: PlanCondition[];
 };
+
+type GuaranteeLevel =
+  | "rules_proven"
+  | "visible_state_forced"
+  | "robust_but_reactive"
+  | "belief_supported"
+  | "speculative";
 ```
 
 ### 18.2 Startbedingung
 
 Eine Vorbereitung darf nur begonnen werden, wenn:
 
-- alle zwingenden Folge-Steps semantisch bekannt sind;
+- alle zwingenden Folge-Steps und relevanten Verzweigungen semantisch bekannt
+  sind;
 - genügend Action Capacity vorhanden oder sicher erzeugbar ist;
 - Ressourcen und Ziel erreichbar sind;
 - kein bekannter harter Blocker die Konversion verhindert.
 
 ### 18.3 Bindung
 
-Nach Beginn bleibt das Commitment führend. Ein Wechsel ist nur erlaubt bei:
+Nach Beginn bleibt die geschützte Fortsetzung führend. Ein Wechsel ist nur
+erlaubt bei:
 
-- neuem höherpriorisiertem Interrupt;
+- neuer validierter höherpriorisierter Response;
 - Engine- oder Gegnerereignis, das die Route invalidiert;
 - erkanntem Regel-/Safety-Fehler;
 - bereits erreichtem terminalem Zustand.
@@ -993,7 +1281,16 @@ Ein neuer positiver Rohscore ist kein Abbruchgrund.
 - Corp Chance Observation → Tag → Urban Renewal → Scorched Earth;
 - Agenda installieren → dreimal advancen → im selben Zug scoren.
 
-### 18.5 Bindungsstärken außerhalb atomarer Commitments
+Ein Verzweigungsergebnis materialisiert den nächsten Step neu. Tag scheitert,
+Prävention verändert Lethalität oder ein Runpfad wird unpassierbar: Dann wird
+der passende Graphzweig gewählt oder die Fortsetzung mit Grund invalidiert.
+
+Nur `rules_proven`, `visible_state_forced` und ausdrücklich definierte robuste
+Sequenzen dürfen vollständig sperren. Belief-gestützte oder spekulative Pfade
+dürfen Ressourcen vorplanen, aber keine konkurrierende terminale Response
+blockieren.
+
+### 18.5 Bindungsstärken außerhalb geschützter Fortsetzungen
 
 Nicht jeder laufende Plan benötigt dieselbe Starrheit. Der Kernel
 unterscheidet vier Persistenzpolitiken:
@@ -1012,11 +1309,11 @@ Eine bereits begonnene, zeitlich oder ressourcenseitig irreversible
 Mehraktionsfolge. Beispiele:
 
 - turn-limitierte Vorbereitung plus Zugriff;
-- garantierte Same-Turn-Scorefolge;
+- nach sichtbarem Zustand erzwungene Same-Turn-Scorefolge;
 - begonnene Tag-/Damage-Killroute.
 
 Sie wird nur durch ein erzwungenes Fenster, eine echte Invalidierung oder
-einen notwendigen höherklassigen Terminal-/Survival-Interrupt gebrochen.
+eine notwendige höherklassige Terminal-/Survival-Response gebrochen.
 Treffen zwei P1-Pfade aufeinander, entscheidet der side-spezifische
 Terminalsolver anhand von Reihenfolge und Garantiegrad.
 
@@ -1048,9 +1345,9 @@ Ein wiederkehrender Plan wie eine Bank, der gemäß Cadence einmal handelt und
 danach bewusst an den Vordergrund zurückgibt.
 
 Ein höherer Prioritätsrang unterbricht damit gewöhnliche und sticky Pläne.
-Ein `locked_sequence` besitzt zusätzlich seinen expliziten
-Commitment-Schutz; es wird nicht allein wegen eines neuen Zahlenwerts
-aufgebrochen.
+Ein `locked_sequence` besitzt zusätzlich seinen expliziten Schutzvertrag; es
+wird nicht allein wegen eines neuen Zahlenwerts aufgebrochen. Der Name
+bezeichnet Schedulerbindung, nicht atomare Engine-Ausführung.
 
 ## 19. Fortschritt und Wiederholung
 
@@ -1101,29 +1398,54 @@ invalidated
 `EndTurn` ist kein strategischer Plan und keine normale wirtschaftliche
 Alternative.
 
-### 20.1 Kernregel
+### 20.1 Noch ungelöster normativer Quellenkonflikt
 
-In einem freiwilligen Hauptfenster ist `EndTurn` bei verbleibender
-Action Capacity grundsätzlich nicht zulässig, solange mindestens eine sichere
-neutrale Fortschrittsaktion vorhanden ist. Im normalen NETGRID-Grundsystem
-erfüllt der Basic Credit diese Bedingung.
+Die aktuelle NETGRID-Quellenlage ist widersprüchlich:
 
-### 20.2 Zulässige Fälle
+- Das nach der Wissensbasis primäre konsolidierte MVP-Konzept führt
+  `end_turn` ausdrücklich als Basic Action und LegalAction.
+- Das als Regelreferenz geführte Comprehensive Rules v26.03 verlangt in
+  5.4.2 Aktionen bis zum Verbrauch der Klicks oder einem kartenseitigen Ende
+  der Action Phase; 9.2.6b erlaubt im Action Window keinen Pass.
+- Die aktuelle Engine erzeugt `end_turn` für Runner und Corp.
 
-- keine verbleibende Action Capacity;
-- Engine erzwingt oder beendet den Zug;
-- terminaler Spielzustand;
-- später ausdrücklich definierte regel- oder schadensbedingte Ausnahme, bei
-  der jede verbleibende Aktion nachweislich schlechter als Nichtstun wäre.
+Evidence:
 
-Die letzte Ausnahme ist derzeit offen und benötigt einen konkreten
-Regelbeleg.
+- [Konsolidiertes MVP-Konzept](../../source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md)
+- [Comprehensive Rules v26.03](../../source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf)
+- [Runner Basic Actions](../../../packages/engine/src/game/turn/runner-basic-actions.ts)
+- [Corp Basic Actions](../../../packages/engine/src/game/turn/corp-basic-actions.ts)
 
-### 20.3 Defense in Depth
+Das Review des Regel-PDF belegt daher einen echten Regelvertragskonflikt, aber
+nicht, dass die nach Projektquellenhierarchie derzeit primäre Konzeption
+stillschweigend überschrieben werden darf.
 
-Zusätzlich zum Admissibility-Gate darf `EndTurn` bei verbleibenden Aktionen
-einen extrem negativen Sicherheitswert erhalten. Die strukturelle Sperre ist
-jedoch führend; `−10000` allein wäre weiterhin nur ein Score-Hack.
+Vor Kernel-Freigabe muss ein ausdrücklich normativer NETGRID-Regelvertrag
+festlegen:
+
+- ob freiwilliges Zugende mit verbleibender Action Capacity regeltechnisch
+  existiert;
+- ob `end_turn` nur ein Engine-Komfortkommando bei null nutzbarer Kapazität
+  ist;
+- wie eingeschränkte Zusatzaktionen und Kartenfähigkeiten zum Phasenende
+  wirken;
+- welche Timingverträge für Score, Rez, Trace, Access und Pass gelten.
+
+### 20.2 Vorläufiger KI-Sicherheitsvertrag
+
+Solange die Engine `end_turn` anbietet, darf der PlanScheduler diese Action
+bei verbleibender sicher nutzbarer Action Capacity nicht auswählen. Die
+Sperre ist strukturell; ein Wert von `−10000` wäre weiterhin nur ein
+zusätzlicher Guard und keine Lösung.
+
+Wenn der normative Regelvertrag bestätigt, dass ein Zug nicht freiwillig
+beendet werden darf, gehört die endgültige Lösung in
+Engine/LegalAction-Generierung. Dann darf `end_turn` bei verbleibender
+nutzbarer Kapazität überhaupt keine LegalAction sein.
+
+Bestätigt der Regelvertrag stattdessen das NETGRID-Hybridmodell, muss die
+Engine exakt definieren, in welchen Zuständen freiwilliges EndTurn legal ist.
+Der Planner darf diese Legalität nicht selbst erfinden.
 
 ## 21. Neutraler Fallback
 
@@ -1141,26 +1463,44 @@ Der neutrale Fallback:
 Typische Fallback-Zwecke:
 
 - sichere Liquidität erhöhen;
-- Handpuffer herstellen;
-- eine nachweislich nützliche Karte ziehen;
-- Boardzustand mit einer allgemein nutzbaren Karte verbessern;
-- risikoarme Information gewinnen.
+- zwingenden Handpuffer gegen sichtbare Gefahr herstellen;
+- zwingenden Overflow-/Cleanup-Bedarf erfüllen;
+- einen eng katalogisierten, monoton sicheren Supportbedarf bedienen.
 
 Ein Draw bei voller Hand und erwartetem wertvollem Überlauf ist kein sicherer
 Fallback, solange eine sinnvolle Credit-Aktion verfügbar ist.
+
+„Allgemein Board verbessern“, freier Draw und Probe-Run sind keine neutralen
+Fallbacks. Sie benötigen einen fachlichen Plan oder einen konkreten
+Parentbedarf. Jeder Fallback trägt einen `fallbackReason` aus einem geschlossenen
+Katalog:
+
+```text
+no_strategic_candidate
+all_candidates_blocked
+missing_module_coverage
+semantic_mapping_failed
+resource_conflict
+scheduler_failure
+```
+
+Die letzten vier Gründe sind Diagnose- oder Fehlerzustände und dürfen nicht
+durch wiederholte sichere Entwicklung unsichtbar gemacht werden.
 
 ## 22. Globale Invarianten
 
 1. Keine freiwillige Hauptaktion ohne Plan, Phase und Step.
 2. Kein globaler Actionscore darf den Executor planlos ersetzen.
 3. Genau ein Executor pro Entscheidung.
-4. Interrupts suspendieren; sie löschen keine fremden Pläne.
+4. Urgent Responses präemptieren; sie löschen keine fremden Pläne.
 5. Planwechsel benötigen einen dokumentierten fachlichen Grund.
-6. Commitments reservieren ihre zwingenden Folgeaktionen.
+6. Geschützte Fortsetzungen reservieren typisierte Ressourcen, aber keine
+   zukünftigen Action-IDs.
 7. Blockierte Pläne benennen Blocker und Resume Condition.
 8. Fortschritt wird aus Zustandsänderung abgeleitet.
 9. Background-Beiträge sind begrenzt und nicht autoritativ.
-10. `EndTurn` ist bei verbleibender sicher nutzbarer Action Capacity gesperrt.
+10. Bis zur normativen Regelklärung ist `EndTurn` bei verbleibender sicher
+    nutzbarer Action Capacity als KI-Sicherheitsvertrag gesperrt.
 11. Nur aktuelle vorhandene LegalActions sind ausführbar.
 12. Alle Planinformationen bleiben side-safe und deterministisch.
 13. Karten- und Deckstrategie-Semantik beeinflusst Pläne, erzeugt aber keine
@@ -1168,6 +1508,10 @@ Fallback, solange eine sinnvolle Credit-Aktion verfügbar ist.
 14. Moduldetails dürfen den gemeinsamen Scheduler nicht mit kartenspezifischen
     Sonderfällen erweitern.
 15. Jede Planinstanz besitzt einen expliziten Abschluss- oder Abbruchvertrag.
+16. Priority Claims werden zentral validiert; Module vergeben sich keine
+    autoritative Klasse.
+17. Ausgewählte Actions erfüllen Capability und Target ihres Steps
+    semantisch.
 
 ## 23. Kriterien für Änderungen am gemeinsamen Rahmen
 
@@ -1207,12 +1551,19 @@ Allgemeine Same-Turn-Commitment-Reservierung
   Klasse.
 - **Offen:** Ob die Bewertung innerhalb einer Klasse als normalisierte
   Zahlen, geordnete Merkmalsvektoren oder beides implementiert wird.
-- **Offen:** Wie ein später belegter echter „Nichtstun ist besser“-Fall für
-  `EndTurn` formal nachgewiesen werden müsste.
+- **Blockierend offen:** Welcher ausdrücklich benannte NETGRID-Regelvertrag
+  den Widerspruch zwischen konsolidiertem MVP-Konzept, aktueller Engine und
+  Comprehensive Rules für EndTurn und Timingfenster auflöst.
 - **Arbeitsannahme:** Strategic Intent bleibt eine eigene Ebene oberhalb der
   Planmodule und wird nicht in jedem Modul dupliziert.
-- **Arbeitsannahme:** Forced-Window-Resolution bleibt ein gemeinsamer
-  Untermechanismus und kein normales strategisches Planmodul.
+- **Kernentscheidung:** Tactical Goals bleiben als kurzlebige
+  Goal-/Threat-Signale ohne Ausführungsautorität erhalten.
+- **Arbeitsannahme:** Pflichtauswahl und window-spezifische Fortsetzung
+  bleiben gemeinsame Untermechanismen und keine normalen strategischen
+  Planmodule; optionale Fenster behalten jedoch den PlanExecutionOrigin.
+- **Arbeitsannahme:** Pro Karte entsteht nur dann eine residente Planinstanz,
+  wenn die Admission-Kriterien aus Abschnitt 27.5 erfüllt sind. Einfache
+  One-shot-Opportunities bleiben Route oder kurzlebiges Proposal.
 
 ## 25. Aktuelles TacticalPlan-Inventar
 
@@ -1246,8 +1597,8 @@ ist Ist-Evidence, nicht automatisch das endgültige Moduldesign.
 | `corp.build_credit_bank` | Corp-Bank aufbauen | Recurring-Instanz von `corp.economy` |
 | `corp.fund_strategy_reserve` | Strategie- oder Rezreserve finanzieren | Supportmodus von `corp.economy` |
 | `corp.establish_scoring_remote` | strategisches Zielremote aufbauen | als eigenes Development-Projekt weiterführen |
-| `corp.rez_defense` | aktuelles Rez-Fenster beantworten | Interrupt von `corp.defend_servers` |
-| `corp.apply_punish_pressure` | Tag-/Damage-/Punish-Fenster nutzen | in Kampagne und atomare Ausführung trennen |
+| `corp.rez_defense` | aktuelles Rez-Fenster beantworten | Urgent Response von `corp.defend_servers` |
+| `corp.apply_punish_pressure` | Tag-/Damage-/Punish-Fenster nutzen | in Kampagne und geschützte Ausführung trennen |
 
 ### 25.3 Strukturelle Bewertung des Ist-Inventars
 
@@ -1332,26 +1683,30 @@ Benennung.
 
 Zweck:
 
-- Mulligan im Kontext der Deckstrategie;
 - erste strategische Linie aktivieren;
 - notwendige Basis-Coverage, Economy oder Engine priorisieren;
 - nach erfolgreichem Opening in normale Kampagnen übergeben.
 
+Die Mulligan-Entscheidung selbst gehört nicht in dieses normale Planmodul.
+Sie wird durch einen einmaligen, deckstrategischen Opening-Resolver mit
+eigenen LegalActions und Abschlussbedingungen getroffen. Dessen Ergebnis
+initialisiert anschließend Portfolio und Opening-Plan.
+
 Der Plan endet, sobald:
 
 - die deckstrategisch notwendige Startfähigkeit vorhanden ist;
-- ein dringender Interrupt übernimmt;
+- eine dringende Response übernimmt;
 - oder die Opening-Phase ausdrücklich abgebrochen wird.
 
 ### 27.2 `runner.pressure_central`
 
 **Klasse:** `strategic_campaign`
-**Rolle:** Vordergrund, zeitweise suspendierbar
+**Rolle:** Vordergrund, zeitweise präemptierbar
 **Status:** neu aufzubauen; ersetzt den rein opportunistischen Ein-Zug-Plan
 
 Parameter:
 
-- Ziel `hq` oder `rd`;
+- Ziel `hq`, `rd`, `archives` oder eine typisierte Multi-Server-Sequenz;
 - Druckmodus `probe`, `sustained`, `engine_growth` oder `closeout`;
 - deckstrategische Linie;
 - relevante Access-Engine;
@@ -1363,6 +1718,18 @@ DeckCapabilities, welche R&D-Druck-, Multiaccess-, Search- und
 Pfadwerkzeuge grundsätzlich vorhanden sind. Es darf daraus gezielte Draw-,
 Search-, Funding- oder Installations-Steps ableiten, statt nur aktuell
 angebotene Runs zu bewerten.
+
+Reine Virus- oder Bad-Publicity-Kampagnen sind nicht automatisch Modi dieses
+Moduls. Für Version 0.3 gilt:
+
+- serverbezogener Virusfortschritt kann planinterner Enginezustand sein;
+- Archives- und Multi-Server-Sequenzen gehören in dieses Modul, wenn ihr
+  Hauptzweck Zugriff oder Druck ist;
+- Bad-Publicity- oder alternative Loss-Condition-Linien benötigen vor
+  produktiver Freigabe einen eigenen Domainvertrag oder einen ausdrücklich
+  definierten Modus;
+- fehlende Abdeckung wird als `missing_module_coverage` diagnostiziert und
+  nicht in den neutralen Fallback gedrückt.
 
 Mögliche Phasen:
 
@@ -1457,7 +1824,8 @@ arbeitet auf eine konkrete Coverage- oder Rig-Fähigkeit hin.
 
 **Klasse:** `bounded_sequence` oder `development_project`
 **Rolle:** Vordergrund/Support
-**Status:** Ziel für `develop_hand_card` und `play_best_hand_card`
+**Status:** Arbeitsannahme mit Admission-Gate für `develop_hand_card`;
+`play_best_hand_card` entfällt
 
 Verantwortung:
 
@@ -1480,17 +1848,26 @@ eines R&D-Plans erfüllen; eine Multiaccess-Hardware kann unmittelbar zum
 R&D-Plan gehören.
 
 Für eine Karte der zweiten Gruppe erzeugt das gemeinsame Modul eine eigene,
-an die konkrete Karteninstanz gebundene Planinstanz:
+an die konkrete Karteninstanz gebundene Planinstanz, aber nur wenn mindestens
+ein Admission-Kriterium erfüllt ist:
+
+- mehrere vorbereitende oder konvertierende Steps;
+- persistenter Engine- oder Boardzustand;
+- relevantes Verfallsfenster;
+- eigene geschützte Fortsetzung;
+- nachhaltige Transformation von Board oder Strategie;
+- kein bestehender Domainplan kann den Zweck als Route oder `PlanNeed`
+  aufnehmen.
 
 ```text
 runner.develop_board_and_hand:<cardInstanceId>
 ```
 
 Damit entstehen nicht für jede Karte neue Plantypen. Es entstehen mehrere
-resident bleibende Instanzen desselben Moduls, die der Scheduler einzeln
-bewertet. Bei drei unabhängigen Handkarten können daher drei Kandidaten
-existieren. Der aktuell höchste handelt; die beiden anderen bleiben erhalten
-und werden nach jeder Zustandsänderung neu bewertet.
+Instanzen desselben Moduls nur für fachlich persistenzwürdige Vorhaben.
+Einfache One-shot-Karten bleiben planlokale Routen oder kurzlebige
+Opportunity-Proposals. Damit wird der alte globale Kartenwettbewerb nicht als
+globaler Wettbewerb vieler Kleinstpläne reproduziert.
 
 Der Zweck einer kartenbezogenen Instanz darf die eigenständige sinnvolle
 Nutzung der Karte selbst sein. Sie muss nicht künstlich einem bereits
@@ -1515,10 +1892,10 @@ Eine spezielle Karte wie Delta passt in keinen vorhandenen Domainplan
 → Plan completed
 ```
 
-Das Modul priorisiert diese Instanzen auf Planebene. Es wählt nicht erst nach
-Auswahl eines einzigen pauschalen „beste Handkarte“-Plans intern irgendeine
-Karte aus. Dadurch bleiben Planranking, Persistenz und Wechselgründe pro Karte
-sichtbar.
+Das Modul priorisiert zugelassene Instanzen auf Planebene. Wo mehrere
+One-shot-Karten denselben Domain-Step erfüllen, entscheidet dagegen die
+planlokale Routenauswahl. Dadurch bleiben persistenzwürdige Wechselgründe
+sichtbar, ohne jede Handkarte künstlich zum strategischen Vorhaben zu machen.
 
 Eine Karte darf mehreren bestehenden Plänen helfen. Eine zusätzliche
 eigenständige Instanz wird aber nur erzeugt, wenn sie darüber hinaus einen
@@ -1537,8 +1914,8 @@ Nicht zulässig bleiben:
 - Draw bei voller Hand ohne Überlaufbehandlung.
 
 `play_best_hand_card` entfällt als pauschaler strategischer Fallback. Seine
-berechtigte Funktion wird durch einzeln bewertete kartenbezogene
-Planinstanzen ersetzt.
+berechtigten Funktionen werden entweder durch Domainrouten oder durch
+Admission-geprüfte kartenbezogene Planinstanzen ersetzt.
 
 ### 27.6 `runner.economy`
 
@@ -1582,9 +1959,9 @@ aber gegenüber konkret ausführbaren strategischen Plänen an Priorität.
 
 ### 27.7 `runner.defense_and_recovery`
 
-**Klasse:** `reactive_interrupt`, `bounded_sequence` oder
+**Klasse:** `urgent_response`, `bounded_sequence` oder
 `development_project`
-**Rolle:** Interrupt/Vordergrund
+**Rolle:** Urgent Response/Vordergrund
 **Status:** Zielzusammenführung von Tag-, Survival- und Handpufferplänen
 
 Das Modul besitzt eine gemeinsame Threat-Priorisierung für:
@@ -1607,7 +1984,7 @@ clear_tags
 remove_hostile_state
 restore_hand_buffer
 install_prevention
-return_to_suspended_plan
+return_to_preempted_plan
 ```
 
 Prioritätsregeln:
@@ -1633,8 +2010,8 @@ verfügbare Abwehraktion.
 
 ### 27.8 `runner.convert_run_window`
 
-**Klasse:** `reactive_interrupt` oder gebundener Kindplan
-**Rolle:** Interrupt
+**Klasse:** `urgent_response` oder gebundener Kindplan
+**Rolle:** Urgent Response
 **Status:** Weiterentwicklung von `runner.convert_success_window`
 
 Verantwortung:
@@ -1655,11 +2032,12 @@ Der Runner-Scheduler erzeugt keinen zusätzlichen undurchsichtigen
 generischen Moduls:
 
 - `runner.economy:neutral_credit_fallback`;
-- `runner.develop_board_and_hand:safe_generic_development`;
-- `runner.defense_and_recovery:restore_hand_buffer`;
-- eine risikoarme `runner.pressure_central:probe`, wenn wirklich begründet.
+- `runner.defense_and_recovery:restore_hand_buffer` bei sichtbarer Gefahr;
+- Admission-geprüfter monotoner Supportbedarf.
 
 Die Auswahl bleibt eine Planentscheidung mit Zweck und Abschlussbedingung.
+Ein Probe-Run ist nie neutraler Fallback. Er benötigt einen ausführbaren
+Pressure-/Informationsplan mit Target, Risiko und erwarteter Konversion.
 
 ## 28. Corp-Zielmodule
 
@@ -1720,7 +2098,8 @@ Der Plan berechnet die vollständige Konversionsroute und reserviert:
 - Advancement-Counter;
 - benötigte Schutz-/Rezreserve.
 
-Ein garantierter Same-Turn-Score ist ein Commitment. Einzelne Economy- oder
+Ein nach sichtbarem Zustand erzwungener Same-Turn-Score ist ein Commitment.
+Einzelne Economy- oder
 ICE-Aktionen dürfen ihn nicht aufbrechen.
 
 ### 28.3 `corp.establish_scoring_remote`
@@ -1745,13 +2124,13 @@ Fortschritt wird über effektiven Schutz und Nutzbarkeit gemessen, nicht über
 ICE-Anzahl allein.
 
 Ein vorbereitetes Zielremote bleibt über Economy-, Draw-, Punish- und
-Central-Interrupts erhalten. Fast-Advance-Decks erhalten nicht automatisch
+Central-Responses erhalten. Fast-Advance-Decks erhalten nicht automatisch
 dieses dauerhafte Projekt.
 
 ### 28.4 `corp.defend_servers`
 
-**Klasse:** `development_project` mit `reactive_interrupt`-Kindern
-**Rolle:** Background/Vordergrund/Interrupt
+**Klasse:** `development_project` mit `urgent_response`-Kindern
+**Rolle:** Background/Vordergrund/Urgent Response
 **Status:** erweitert `corp.rez_defense`
 
 Verantwortung:
@@ -1771,10 +2150,41 @@ Mögliche Kindpläne:
 - `harden_target_remote`;
 - `restore_rez_reserve`.
 
-Eine Rez-Entscheidung ist ein Interrupt. Sie darf den Parent-Scoring- oder
-Remoteplan suspendieren, aber nicht vergessen.
+Eine Rez-Entscheidung ist eine fenstergebundene Urgent Response. Sie darf den
+Parent-Scoring- oder Remoteplan präemptieren, aber nicht vergessen.
 
-### 28.5 `corp.economy`
+#### Ownership zwischen Score, Remote und Defense
+
+| Verantwortung | fachlicher Owner |
+| --- | --- |
+| Agendaquelle, Install/Advance/Score und Scoredeadline | `corp.score_agenda` |
+| langfristige Nutzbarkeit und Wiederverwendung eines Remotes | `corp.establish_scoring_remote` |
+| Schutzbewertung, Rez-Entscheidung und allgemeine Central-Floors | `corp.defend_servers` |
+| konkrete Härtung für einen Score- oder Remote-Parent | typisierter Defense-Supportbedarf des Parents |
+| einmalige Opening-Basis ohne bestehendes Zielprojekt | `corp.opening_and_board_foundation` |
+
+Eine ICE-Installation kann mehreren Plänen nutzen, besitzt aber genau einen
+Root-Owner und genau einen Leaf-Executor. Mehrplannutzen bleibt Tiebreaker.
+
+### 28.5 `corp.respond_to_virus_pressure`
+
+**Klasse:** `urgent_response` oder `bounded_sequence`
+**Rolle:** Vordergrund/Urgent Response
+**Status:** explizite Zielmodul-Lücke
+
+Verantwortung:
+
+- sichtbare Virusbedrohung und erwartete nächste Konversion bewerten;
+- Regelkosten und Opportunity Cost eines Purges bestimmen;
+- eingeschränkte oder aufgegebene Action Capacity korrekt reservieren;
+- Purge gegen Score, Remote-Härtung, Economy und Terminalpfade vergleichen;
+- nach Wirkung zum vorherigen Root-Foreground zurückkehren.
+
+Ob der Purge in NETGRID exakt drei Aktionen aufgibt oder anders modelliert
+wird, folgt ausschließlich dem noch festzulegenden normativen Regelvertrag.
+Das Modul erzeugt keine eigene Purge-Legalität.
+
+### 28.6 `corp.economy`
 
 **Klasse:** `bounded_sequence`, `recurring_cycle` oder
 `development_project`
@@ -1809,7 +2219,7 @@ Wiederholte Nutzung ist zulässig, solange sie das Fundingziel real
 voranbringt. Nach erreichter Zielreserve muss das Modul dem finanzierten
 strategischen Plan die Ausführung überlassen.
 
-### 28.6 `corp.punish_campaign`
+### 28.7 `corp.punish_campaign`
 
 **Klasse:** `strategic_campaign` oder `development_project`
 **Rolle:** dormant/Background/Vordergrund
@@ -1836,7 +2246,7 @@ required_clicks: 3
 trigger: runner_attempted_run_last_turn
 runner_grip: 5
 projected_damage: 9
-lifecycle: dormant
+viability: dormant
 ```
 
 Der Plan darf über mehrere Züge bestehen, während Scoring oder Economy den
@@ -1847,11 +2257,11 @@ Kampagne. Das Modul priorisiert seine internen Linien selbst. Eine spätere
 Trennung ist nur nötig, wenn Spiel-Evidence zeigt, dass ihre Lebenszyklen und
 Fortschrittsbegriffe nicht mehr sinnvoll gemeinsam modellierbar sind.
 
-### 28.7 `corp.execute_punish_sequence`
+### 28.8 `corp.execute_punish_sequence`
 
 **Klasse:** `bounded_sequence`
 **Rolle:** P1-/P3-Vordergrund; Kind von `corp.punish_campaign`
-**Status:** Ziel für die atomare Ausführung des heutigen Punish-Plans
+**Status:** Ziel für die geschützte Ausführung des heutigen Punish-Plans
 
 Mögliche Phasen:
 
@@ -1873,10 +2283,10 @@ Vor Beginn wird die ganze Route geprüft:
 - Damage-Summe und Prävention;
 - legale Reihenfolge.
 
-Eine planfremde Aktion wie Closed Accounts darf eine garantierte
+Eine planfremde Aktion wie Closed Accounts darf eine weiterhin lethal
 Drei-Aktionen-Flatline-Sequenz nicht aufbrechen.
 
-### 28.8 `corp.ambush_and_bluff`
+### 28.9 `corp.ambush_and_bluff`
 
 **Klasse:** `development_project` oder `bounded_sequence`
 **Rolle:** Background/Vordergrund
@@ -1893,7 +2303,7 @@ Verantwortung:
 Ein unbekanntes Remote allein erzeugt keinen Bluffplan. Das eigene Deck und
 die konkrete Hand müssen die Linie tragen.
 
-### 28.9 `corp.hand_and_agenda_management`
+### 28.10 `corp.hand_and_agenda_management`
 
 **Klasse:** `bounded_sequence` oder `development_project`
 **Rolle:** Vordergrund/Support
@@ -1910,7 +2320,14 @@ Verantwortung:
 Das Modul darf Hidden-Info nur aus der eigenen HQ/R&D und öffentlichen
 Ereignissen verwenden.
 
-### 28.10 Corp-neutraler Fallback
+Ungewöhnliche Midgame-Utility-, Action-Engine- oder Boardtransformationskarten
+werden zuerst bestehenden Domainplänen als Route oder Admission-geprüfte
+kartenbezogene Instanz zugeordnet. Ein breiter
+`corp.safe_generic_development`-Plan ist kein akzeptierter Dauerauffang. Falls
+diese Zuordnung wiederholt scheitert, wird daraus anhand konkreter
+Spielevidence ein enger Corp-Entwicklungsdomainvertrag geschnitten.
+
+### 28.11 Corp-neutraler Fallback
 
 Wie beim Runner wird kein freier globaler Actionsieger verwendet.
 
@@ -1918,8 +2335,10 @@ Mögliche sichere Instanzen:
 
 - `corp.economy:neutral_credit_fallback`;
 - `corp.hand_and_agenda_management:safe_draw_or_refresh`;
-- `corp.defend_servers:raise_visible_floor`;
-- `corp.opening_and_board_foundation:safe_generic_development`.
+- zwingender sichtbarer Hand-/Overflow-Schutz.
+
+`raise_visible_floor` benötigt Defense-Evidence; allgemeine Boardentwicklung
+benötigt ein Domainmodul. Beides ist kein neutraler Fallback.
 
 ## 29. Gemeinsame Resolver und Services
 
@@ -1981,7 +2400,7 @@ R&D-Plan fordert 5 Credits an
 | Agenda installieren | Scoreplan mit Exposure-/Commitment-Vertrag |
 | Advance/Score | Scoreplan |
 | Operation spielen | Economy-, Score-, Punish-, Defense- oder Handplan |
-| ICE/Asset rezzen | aktueller Defense-/Economy-/Ambush-Interrupt |
+| ICE/Asset rezzen | aktuelle Defense-/Economy-/Ambush-Response |
 | Trace-Bid/Choice | auslösender Punish-/Defense-/Scoreplan |
 | Ability aktivieren | Step-Route eines Plans |
 | Discard | Hand-/Agenda-Management oder Cleanup-Resolution |
@@ -2050,28 +2469,39 @@ Jedes Modul besitzt eine interne Schema- oder Modulversion. Änderungen an
 - **Kernentscheidung:** Economy ist sowohl selbständiges Planmodul als auch
   Supportlieferant für Parentpläne.
 - **Kernentscheidung:** Prioritätsklassen entscheiden vor Zahlenwerten.
-  Zahlenwerte gelten nur innerhalb derselben Klasse.
+  Zahlenwerte gelten nur innerhalb derselben Klasse; Module liefern
+  validierbare Claims statt autoritativer Klassen.
 - **Kernentscheidung:** Strategische Kampagnen benötigen Deckunterstützung;
   taktische Pläne benötigen eine aktuelle Situation. Planmodule dürfen die
   eigenen DeckCapabilities für Draw-, Search- und Entwicklungs-Steps nutzen.
-- **Kernentscheidung:** Same-Turn-Payoffs werden durch Commitments, nicht
-  lediglich durch positive Action-Scores abgesichert.
-- **Kernentscheidung:** Nicht zugeordnete, sinnvoll entwickelbare Handkarten
-  erzeugen eigene kartenbezogene Instanzen eines gemeinsamen
-  Hand-/Boardentwicklungsmoduls.
+- **Kernentscheidung:** Same-Turn-Payoffs werden durch geschützte,
+  StateVersion-weise neu materialisierte Fortsetzungen abgesichert, nicht
+  lediglich durch positive Action-Scores.
+- **Arbeitsannahme:** Nicht zugeordnete Handkarten erzeugen nur nach
+  Admission-Gate eine residente kartenbezogene Instanz. Einfache One-shots
+  bleiben Routen oder kurzlebige Proposals.
 - **Kernentscheidung:** Die drei heutigen Runner-Survival-Typen gehen
   zunächst in einem
   gemeinsamen `runner.defense_and_recovery`-Modul auf.
 - **Arbeitsannahme:** Die heutigen Economy-Typen bleiben als interne Modi oder
   Instanzvarianten erhalten, nicht als unabhängige Scheduler-Sonderfälle.
 - **Kernentscheidung:** `runner.play_best_hand_card` wird als pauschaler Plan
-  entfernt und durch einzeln bewertete kartenbezogene Planinstanzen ersetzt.
+  entfernt und durch Domainrouten plus Admission-geprüfte kartenbezogene
+  Instanzen ersetzt.
 - **Kernentscheidung:** Corp-Punish startet als gemeinsame langlebige
-  Kampagne mit internen Modi und atomarem Ausführungs-Kindplan.
+  Kampagne mit internen Modi und geschütztem Ausführungs-Kindplan.
 - **Kernentscheidung:** Planbindung verwendet `locked_sequence`,
   `sticky_goal`, `flexible_support` und `recurring_cadence`. Ein höherer
-  Prioritätsrang unterbricht gewöhnliche Pläne; atomare Commitments besitzen
-  den engeren Terminal-/Survival-Vertrag.
+  Prioritätsrang unterbricht gewöhnliche Pläne; geschützte Fortsetzungen
+  besitzen den engeren Terminal-/Survival-Vertrag.
+- **Kernentscheidung:** Tactical Goals bleiben kurzlebige Goal-/Threat-Signale
+  ohne eigene Handlungsautorität.
+- **Kernentscheidung:** PlanAssessments werden vor der Executorwahl erzeugt;
+  vollständige Route Heads erst danach.
+- **Kernentscheidung:** Viability, Portfolio-Rolle und Execution State sind
+  orthogonale Achsen.
+- **Kernentscheidung:** `PlanNeed`, typisierte Ressourcenclaims und
+  Root-/Leaf-Executorpfad sind gemeinsame Kernelverträge.
 - **Offen:** Ob `corp.ambush_and_bluff` und
   `corp.hand_and_agenda_management` bereits in der ersten
   Implementierungsstufe eigene Module werden oder zunächst als Phasen
@@ -2089,28 +2519,47 @@ function choosePlannedAction(context): PlannedDecision {
   assertSideSafeInput(context);
 
   const window = classifyDecisionWindow(context);
-  if (window.isForcedResolution) {
-    return resolveForcedWindow(window, context);
+  if (window.kind === "automatic_resolution") {
+    return continueEngineResolution(window, context);
+  }
+  if (window.kind === "mandatory_choice") {
+    return resolveMandatoryChoice(window, context);
+  }
+  if (window.kind === "run_access_trace_continuation") {
+    return resolvePlanBoundContinuation(window, context.executionOrigin);
   }
 
-  let portfolio = reconcilePortfolio(context);
+  const semanticActions = projectActionSemanticCandidates(
+    context.legalActions,
+    context,
+  );
+  let portfolio = reconcileAndDiscoverPortfolio(context);
 
   for (let attempt = 0; attempt < MAX_REPLAN_ATTEMPTS; attempt += 1) {
-    const interrupt = selectInterrupt(portfolio, context);
-    const executor =
-      interrupt ?? continueOrSelectForeground(portfolio, context);
+    const assessments = assessAllRelevantPlans(
+      portfolio,
+      semanticActions,
+      context,
+    );
+    const validated = validatePriorityClaimsAndArbitrateResources(
+      assessments,
+      portfolio,
+      context,
+    );
+    const { rootForeground, leafExecutor } =
+      continueOrSelectExecutionPath(validated, portfolio, context);
 
-    if (!executor) {
+    if (!leafExecutor) {
       portfolio = activateNeutralFallback(portfolio, context);
       continue;
     }
 
-    const module = registry.moduleFor(executor.moduleId);
-    const step = module.proposeStep(executor, context);
-    const routes = module.buildRoutes(
-      executor,
+    const module = registry.moduleFor(leafExecutor.moduleId);
+    const step = module.proposeStep(leafExecutor, context);
+    const routes = module.materializeRoutes(
+      leafExecutor,
       step,
-      context.legalActions,
+      semanticActions,
       context,
     );
 
@@ -2123,21 +2572,30 @@ function choosePlannedAction(context): PlannedDecision {
 
     const route = selectPlanLocalRoute(
       module,
-      executor,
+      leafExecutor,
       step,
       viableRoutes,
       context,
     );
 
     const commitment = maybeCreateCommitment(route, context);
-    const action = route.nextAction;
+    const action = route.head;
 
     assertLegalActionExists(action, context.legalActions);
-    assertActionAttributedToPlan(action, executor, step, route);
+    assertNoFutureActionIds(route, context.stateVersion);
+    assertActionAttributedToPlan(
+      action,
+      rootForeground,
+      leafExecutor,
+      step,
+      route,
+    );
+    assertSemanticCapabilityAndTargetMatch(action, step, semanticActions);
     assertEndTurnContract(action, context);
 
     return buildPlannedDecision(
-      executor,
+      rootForeground,
+      leafExecutor,
       step,
       route,
       commitment,
@@ -2157,7 +2615,7 @@ Entscheidung begrenzt neu planen:
 
 1. Step als blockiert markieren;
 2. Supportbedarf prüfen;
-3. Plan gegebenenfalls suspendieren;
+3. Viability, Need oder Preemption-Grund aktualisieren;
 4. nächsten ausführbaren Plan wählen;
 5. spätestens nach einer festen Anzahl deterministischer Versuche mit
    Diagnosefehler stoppen.
@@ -2217,7 +2675,7 @@ Nach der neuen StateVersion:
 2. Commitment fortsetzen oder mit Grund invalidieren;
 3. Planfortschritt aktualisieren;
 4. aktuellen Step abschließen oder wiederholen;
-5. neue Interrupts und Terminalpfade prüfen;
+5. neue Urgent Responses und Terminalpfade prüfen;
 6. Planwechsel nur nach Hysteresevertrag zulassen;
 7. nächste Aktion erneut plan-first bestimmen.
 
@@ -2234,7 +2692,7 @@ Plan-Memory darf durch erlaubte öffentliche Ereignisse aktualisiert werden:
 - sichtbare Tags, Damage und Agenda-Punkte;
 - Draw-, Shuffle- oder Reorder-Ereignisse, soweit öffentlich.
 
-Corp-Rez- und andere echte Entscheidungsfenster können einen Interrupt
+Corp-Rez- und andere echte Entscheidungsfenster können eine Urgent Response
 aktivieren. Ansonsten handelt kein Plan außerhalb eines legalen Fensters.
 
 ### 34.5 Zugende
@@ -2293,7 +2751,7 @@ Beispiel Corp:
 ```text
 Scoring-Remote-Projekt aktiv
 → Runner startet R&D-Run
-→ Rez-Defense-Interrupt übernimmt
+→ Rez-Defense-Response übernimmt
 → Run endet
 → Remote-Projekt kehrt unverändert zurück
 ```
@@ -2317,7 +2775,7 @@ Action-Score-Nähe.
 
 Bei `sticky_goal`, `flexible_support` und `recurring_cadence` übernimmt ein
 ausführbarer höherklassiger Plan. Der bisherige Plan wird je nach Zustand
-suspendiert, neu gebunden oder gibt nach Cadence ab.
+präemptiert, neu gebunden oder gibt nach Cadence ab.
 
 Bei `locked_sequence` gilt:
 
@@ -2426,7 +2884,13 @@ phase closeout
 - Wiederholungslogik erkennt wachsenden Grenznutzen;
 - kein EndTurn bei verbleibenden Klicks;
 - alternative Deckstrategie kann im gleichen Boardzustand eine andere
-  Kampagne priorisieren.
+  Kampagne priorisieren;
+- `corp.respond_to_virus_pressure` prüft nach jedem relevanten Fortschritt
+  Purge-Machbarkeit und Opportunity Cost;
+- nach Purge, Entfernung von Highlighter, unpassierbarem R&D oder sinkendem
+  Grenznutzen wird die Runner-Kampagne korrekt reconciliiert;
+- unterschiedliche verdeckte R&D-Reihenfolgen bei gleicher Runner-PlayerView
+  erzeugen vor dem Access dieselbe Entscheidung.
 
 ## 37. Akzeptanzszenario B – Manhunt-Flatline
 
@@ -2518,16 +2982,21 @@ clicks 3
 Die Kampagne erzeugt den Kindplan
 `corp.execute_punish_sequence`.
 
-### 37.5 Atomare Killroute
+### 37.5 Geschützte, verzweigte Killfortsetzung
 
 ```text
 Step apply_tag
 → Chance Observation
-→ Corp-Bid 0 reicht garantiert
+├─ Tag erfolgreich
+│  → Damagepfad neu materialisieren
+└─ Tag verhindert oder Trace verändert
+   → Commitment invalidieren oder Alternativpfad bewerten
 
 Step apply_damage
 → Urban Renewal
-→ Runner-Hand 5 → 0
+├─ erwartete Damagekonversion
+└─ Prävention/abweichende Handlage
+   → Lethalität neu bewerten
 
 Step apply_lethal_damage
 → Scorched Earth
@@ -2537,15 +3006,26 @@ Step apply_lethal_damage
 Closed Accounts darf nicht zwischen diese Steps treten, obwohl es legal und
 tagbezogen ist. Es würde den dritten notwendigen Klick verbrauchen.
 
+Die historische sichtbare Lage kann den Versuch stark stützen. Sie wird
+jedoch nicht pauschal als `rules_proven` bezeichnet, solange eine für die Corp
+unbekannte Gegenoption Tag, Trace oder Damage beeinflussen kann. Das
+Assessment trägt den tatsächlichen Garantiegrad und die gegnerische
+Eingriffsmöglichkeit.
+
 ### 37.6 Abnahmebedingungen
 
 - Punish-Kampagne bleibt über Scoring- und Economy-Züge resident;
 - Scoring-, Economy- und Killplan wechseln explizit den Vordergrund;
 - Runner-Run-Trigger reaktiviert den Killplan;
-- vollständige Drei-Aktionen-Route wird vor Chance Observation geprüft;
+- semantischer Drei-Aktionen-Graph wird vor Chance Observation geprüft;
 - Credits, Klicks und Kartenquellen werden reserviert;
 - der Plan revalidiert Tag und Runner-Hand nach jedem Step;
-- kein planfremder Punish-Effekt unterbricht die garantierte Flatline.
+- kein planfremder Punish-Effekt unterbricht einen weiterhin lethal
+  bewerteten Pfad;
+- Tag-/Damage-Vermeidung oder verlorene Lethalität verzweigt oder beendet die
+  Fortsetzung regelkonform;
+- gleiche Corp-PlayerView mit unterschiedlichen verdeckten Runner-Ressourcen
+  erzeugt vor Enthüllung dieselbe Entscheidung.
 
 ## 38. Regressionsszenarien aus der aktuellen Action-Arbitration
 
@@ -2630,26 +3110,28 @@ Mindestens sichtbar:
 
 ```text
 portfolio
-  interrupt
-  foreground
+  urgent response candidates
+  root foreground
+  leaf executor
   backgrounds
   dormant
   blocked
-  suspended
+  preempted
   rejected proposals
 ```
 
 Je Instanz:
 
 - Modul und Instanz-ID;
+- dedupeKey und Modulversion;
 - Ziel;
-- Lebenszyklus und Rolle;
-- Prioritätsklasse und relativer Planwert;
+- Viability, Portfolio-Rolle und Execution State;
+- beantragte und validierte Prioritätsklasse samt Witness/Garantiegrad;
 - Phase und Step;
 - Fortschritt und letzter Fortschrittsgrund;
 - Blocker und Resume Conditions;
-- Ressourcenbedarf und Reservierung;
-- Commitment und verbleibende Steps;
+- offene Needs, Ressourcenclaims und akzeptierte Reservierungen;
+- geschützte Fortsetzung und aktueller semantischer Graphknoten;
 - Completion-/Abandonment-Grund.
 
 ### 39.2 Planranking
@@ -2657,8 +3139,9 @@ Je Instanz:
 Das Ranking erklärt:
 
 - warum der Vordergrund fortgesetzt wurde;
+- welches PlanAssessment Readiness und Machbarkeit belegte;
 - welcher Challenger am nächsten lag;
-- welche Prioritätsklasse entschied;
+- welcher Priority Claim bestätigt oder herabgestuft wurde;
 - welche Wechselmarge oder Hysterese wirkte;
 - warum wartende Pläne nicht ausführbar waren.
 
@@ -2668,7 +3151,8 @@ Für den Executor:
 
 - aktueller Step;
 - benötigte Fähigkeit;
-- alle viable Routen;
+- alle aktuellen viable Route Heads;
+- semantische Fortsetzung ohne zukünftige Action-IDs;
 - ausgeschlossene Routen mit fachlichem Grund;
 - gewählte Action-ID;
 - erwartetes Ergebnis;
@@ -2718,24 +3202,33 @@ Jedes Modul testet:
 ### 40.2 Scheduler-Kerntests
 
 - genau ein Executor;
-- Interrupt suspendiert und Rückkehr funktioniert;
+- Root-Foreground und Leaf-Executor bleiben korrekt zugeordnet;
+- Urgent Response präemptiert und Rückkehr funktioniert;
 - Hysterese verhindert Churn;
 - höhere Prioritätsklasse gewinnt;
-- Background-Cadence;
+- Modul kann keinen unbelegten P1-/P2-Claim installieren;
+- P5-Background verdrängt P4 nicht allein wegen Cadence;
+- Supportkind eines P2-Parents erhält delegierte Priorität, unabhängiger
+  Economy-Plan nicht;
 - Ressourcen werden nicht doppelt reserviert;
-- Commitment schützt Folgeaktionen;
+- typisierte Action Capacity wird nur für zulässige Fähigkeiten ausgegeben;
+- geschützte Fortsetzung schützt Folgeaktionen;
+- Route oder Commitment enthält keine zukünftige oder veraltete Action-ID;
 - begrenztes Replanning terminiert;
 - neutraler Fallback entsteht;
 - EndTurn-Gate;
-- jede gewählte Action besitzt Planattribution.
+- jede gewählte Action besitzt Planattribution;
+- Capability- und Target-Mismatch der ausgewählten Action sind null.
 
 ### 40.3 Cross-Modul-Tests
 
 - Parentplan fordert Economy-Support an und wird wieder aufgenommen;
 - Rigplan entsperrt Central-Plan;
 - Corp-Economy finanziert Score- oder Punishplan;
-- Remote-Projekt überlebt Rez-Interrupt;
+- Remote-Projekt überlebt Rez-Response;
 - Defense-Plan unterbricht Central-Druck und gibt später zurück;
+- Corp-Purge unterbricht Highlighter-Druck und gibt zum vorherigen Plan
+  zurück;
 - ein Mehrplanbeitrag bleibt Tiebreaker, nicht Override.
 
 ### 40.4 Decision Checkpoints
@@ -2764,10 +3257,16 @@ Mindestens:
 - negativer Draw bei voller Hand;
 - wiederholte wertlose Archives-/HQ-Runs;
 - Broker-Cadence und Cashout;
-- Remote-Matchpoint-Interrupt;
+- Remote-Matchpoint-Response;
 - Corp-Same-Turn-Score;
 - Runner-Tag-/Damage-Abwehr;
 - falsche Breaker-Coverage durch Nicht-Breaker.
+
+Highlighter-Gegenfälle umfassen zusätzlich Corp-Purge, unpassierbares R&D,
+Entfernung des Virusträgers, sinkenden Grenznutzen und
+Remote-Matchpoint-Unterbrechung. Manhunt-Gegenfälle umfassen gescheiterten
+Trace, Tagvermeidung, Damageprävention, fehlende Damagequelle und Abbruch einer
+nach dem ersten Step nicht mehr terminalen Linie.
 
 ### 40.6 Deckstrategie-Gegenfälle
 
@@ -2794,18 +3293,45 @@ Nach Modul- und Checkpointtests:
 - qualitative Vollaudits ausgewählter Spiele;
 - getrennte Bewertung von technischer Sicherheit und Play Strength.
 
+### 40.8 Hidden-Info-Äquivalenz
+
+Zwei vollständige Testzustände mit identischer side-sicherer `PlayerView`,
+aber unterschiedlichen gegnerischen Hidden-Zonen müssen vor Enthüllung
+dieselbe KI-Entscheidung erzeugen. Das umfasst insbesondere:
+
+- gegnerische Handkarten und verdeckte Remotes;
+- unbekannte ICE-Identitäten;
+- verdeckte Runner-Ressourcen;
+- zukünftige R&D-Reihenfolge.
+
+Bei kontrolliertem Match-RNG gilt Gleichheit einschließlich Seed und
+RandomCounter.
+
+### 40.9 Eingeschränkte Kapazität und Fallback-Audit
+
+Mindestens Valu-Pak-, Edgerunner-, Wilson-, Broker- und kostenlose
+Follow-up-Run-Kontexte prüfen Tokenart, Folgezwang, Usage Limit und Ablauf.
+
+Full Matches zählen Fallbacks nicht nur, sondern klassifizieren ihren Grund.
+`missing_module_coverage`, `semantic_mapping_failed`, `resource_conflict` und
+`scheduler_failure` sind sichtbare Abweichungen und dürfen nicht dauerhaft
+durch generische Entwicklung kaschiert werden.
+
 ## 41. Zielmetriken
 
 Technische Kernmetriken:
 
 ```text
 plan_attribution_rate = 100 %
+selected_action_capability_mismatch = 0
+selected_action_target_mismatch = 0
 voluntary_action_without_executor = 0
 plan_override_after_selection = 0
 end_turn_with_safe_action_capacity = 0
 broken_same_turn_commitment = 0
 duplicate_plan_instance_same_target = 0
 resource_overreservation = 0
+future_or_stale_action_id_in_route = 0
 hidden_info_plan_leak = 0
 nondeterministic_plan_selection = 0
 ```
@@ -2828,6 +3354,22 @@ Play-Strength-Freigabe.
 Dieses Dokument legt noch keine endgültige Paketfolge fest. Ein späterer
 Umsetzungsprozess soll mindestens folgende Arbeitsstränge schneiden:
 
+### 42.0 Verhältnis zu Ist-Architektur, Roadmap und Proteus
+
+- Die aktuellen TacticalPlan-Typen sind produktive Ist-Evidence und
+  Migrationsmaterial, aber keine Basisklassen des neuen Kernels.
+- Plan-first ersetzt im Zielzustand den früheren direkten
+  Goal-vs-Action-Entscheider. Goal-/Threat-Signale und
+  `ActionSemanticCandidates` bleiben jedoch verbindliche Vor- beziehungsweise
+  Abbildungsebenen.
+- Ältere Roadmap-Aussagen, Proteus erst nach Originalset-Stabilität zu öffnen,
+  sind überholt: Der aktuelle Projektstatus weist 154/154 Proteus-Karten als
+  technisch `ai_supported` aus. Die Akzeptanzszenarien gehören daher zum
+  produktiven Zielscope; Play Strength bleibt ein separates Gate.
+- Temporäre reproduzierbare Vergleichsläufe und Checkpoints sind zulässig.
+  Eine dauerhaft parallele Hybrid-Runtime oder ein unbefristeter
+  Legacy-Fallback sind kein Ziel.
+
 ### 42.1 Vertrag und Observability
 
 - Zieltypen und Planattribution;
@@ -2837,23 +3379,23 @@ Umsetzungsprozess soll mindestens folgende Arbeitsstränge schneiden:
 
 ### 42.2 Kernel und side-spezifische Scheduler
 
-- Lebenszyklus vereinheitlichen;
+- orthogonale Zustandsachsen und Retention-Vertrag;
 - Runner-/Corp-Registry;
 - Executor-Exklusivität;
-- Planprioritätsklassen und Hysterese;
-- Ressourcen- und Commitment-Kernel.
+- PlanAssessment, validierte Priority Claims und Hysterese;
+- PlanNeed, typisierte Ressourcen und geschützte Fortsetzungen.
 
 ### 42.3 Runner-Migration
 
 Empfohlene fachliche Reihenfolge:
 
-1. neutraler Fallback und EndTurn-Gate;
+1. Regelvertrag und vorläufiger EndTurn-Guard;
 2. Economy-Support;
 3. Central-Kampagne;
 4. Remote-Contest;
 5. Rig-and-Coverage;
 6. Defense-and-Recovery;
-7. Hand-/Boardentwicklung;
+7. Admission-geprüfte Hand-/Boardentwicklung;
 8. Run-Window-Konversion.
 
 ### 42.4 Corp-Migration
@@ -2862,12 +3404,13 @@ Empfohlene fachliche Reihenfolge:
 
 1. Economy-Support;
 2. Score-Commitments;
-3. Server-Defense und Rez-Interrupt;
+3. Server-Defense und Rez-Response;
 4. Scoring-Remote-Projekt;
-5. Punish-Kampagne und atomare Ausführung;
-6. Opening-/Board-Foundation;
-7. Hand-/Agenda-Management;
-8. Ambush-/Bluff-Modul.
+5. Virusresponse/Purge;
+6. Punish-Kampagne und geschützte Ausführung;
+7. Opening-/Board-Foundation;
+8. Hand-/Agenda-Management;
+9. Ambush-/Bluff-Modul.
 
 ### 42.5 Cutover
 
@@ -2884,6 +3427,21 @@ Es soll keine dauerhaft parallele zweite KI-Runtime entstehen.
 Zwischenvergleiche erfolgen über reproduzierbare Checkpoints, Simulation und
 klar begrenzte Diagnosepfade.
 
+### 42.6 Vertikale Kernel-Slices
+
+Der Kernel wird nicht zuerst vollständig abstrakt gebaut und erst danach
+fachlich geprüft. Die belastbare Reihenfolge ist:
+
+1. normativen Regelvertrag festhalten;
+2. Goal-/Planhierarchie, Zustandsachsen und Retention definieren;
+3. `ActionSemanticCandidate` als verbindliche Step-Bindung absichern;
+4. `PlanAssessment` sowie Route Head/Fortsetzung implementieren;
+5. Corp-Same-Turn-Score und einen Runner-Central-Step End-to-End ausführen;
+6. daraus `PlanNeed`, Ressourcen und geschützte Fortsetzung verifizieren;
+7. Highlighter plus Corp-Purge, verzweigten Manhunt-Pfad und ein echtes
+   Run-/Ability-Fenster als unterschiedliche Belastungsslices ergänzen;
+8. erst danach breite Modulmigration und Cutover.
+
 ## 43. Architektur-Gate vor Implementierungsplanung
 
 Vor dem Schneiden des Umsetzungsprozesses sind mindestens zu reviewen:
@@ -2893,8 +3451,14 @@ Vor dem Schneiden des Umsetzungsprozesses sind mindestens zu reviewen:
 - Decken Zielmodule alle freiwilligen Action-Familien ab?
 - Sind Economy als Plan und Economy als Support sauber getrennt?
 - Sind Parent-, Kind- und Background-Beziehungen ausreichend?
-- Reicht der Commitment-Vertrag für Prep-, Score-, Run- und Killketten?
+- Reicht der Need-/Fortsetzungsvertrag für Prep-, Score-, Run- und
+  Killketten?
 - Ist die Prioritätsklassenordnung für Sieg, Überleben und Threats eindeutig?
+- Kann kein Modul einen unbelegten P1-/P2-Claim installieren?
+- Sind Goal-/Threat-Signale eindeutig nicht autoritativ?
+- Enthalten Routen und Fortsetzungen ausschließlich eine aktuelle Action-ID?
+- Sind Viability, Rolle und Execution State trennscharf?
+- Ist der normative Regelvertrag einschließlich EndTurn und Fenster festgelegt?
 - Sind Planwechsel und Wiederaufnahme vollständig diagnostizierbar?
 - Können neue Karten innerhalb bestehender Module ergänzt werden?
 - Sind alle Daten side-safe und deterministisch?
@@ -2923,6 +3487,32 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 0.3 – 2026-07-23
+
+- externes Architekturreview kritisch eingearbeitet; Regel-PDF-Seiten 39 und
+  65 visuell gegen die angeführten Regeln geprüft;
+- Tactical Goals als kurzlebige, nicht autoritative Goal-/Threat-Signale
+  festgelegt;
+- PlanAssessment vor Executorwahl und aktuelle Route Heads mit ausschließlich
+  semantischer Fortsetzung eingeführt;
+- Viability, Portfolio-Rolle und Execution State getrennt; Identitäts- und
+  Retention-Vertrag ergänzt;
+- validierte Priority Claims, First-class `PlanNeed`, Root-/Leaf-Executor,
+  typisierte Ressourcenclaims und Hard-/Soft-/Forecast-Reservierungen
+  aufgenommen;
+- „atomare Commitments“ durch geschützte, verzweigte und nach jeder
+  StateVersion neu materialisierte Fortsetzungen mit Garantiegrad ersetzt;
+- Entscheidungsfenster und PlanExecutionOrigin präzisiert;
+- EndTurn nicht vorschnell nach dem Regel-PDF entschieden, sondern den
+  belegten Konflikt zwischen primärem MVP-Konzept, Engine und Regelreferenz als
+  blockierende normative Regelentscheidung dokumentiert;
+- per-card-Pläne gegen den alten Einzelaktionswettbewerb abgegrenzt und von
+  Kernentscheidung auf Admission-geprüfte Arbeitsannahme zurückgestuft;
+- Corp-Virusresponse/Purge, alternative Terminalprojektion,
+  Score-/Remote-/Defense-Ownership, engere Fallbacks und Proteus-Scope ergänzt;
+- Capability-/Target-, Hidden-Info-Äquivalenz-, Future-Action-ID-,
+  Supportprioritäts-, Ressourcen- und Fallback-Audit-Tests ergänzt.
 
 ### 0.2 – 2026-07-23
 

@@ -96,16 +96,20 @@ Stand: 2026-07-23
   Plan-first-Zielarchitektur zusammen. Im Zielzustand wählen getrennte
   Runner-/Corp-Scheduler zuerst einen autoritativen Plan und Step; erst
   innerhalb dieses Steps wird eine vorhandene LegalAction ausgewählt.
-  Aktuelle und angestrebte Planmodule, Lebenszyklus, Parent-/Supportpläne,
-  Commitments, EndTurn-Invariante, Highlighter-R&D- und
+  Aktuelle und angestrebte Planmodule, orthogonale Zustandsachsen,
+  Parent-/Need-/Supportpläne, geschützte Fortsetzungen,
+  Highlighter-R&D- und
   Manhunt-Flatline-Akzeptanzszenarien sowie spätere Implementierungsgates sind
   dokumentiert. Dies ist ein Architekturziel und noch keine Behauptung über
-  den vollständig erreichten Runtime-Stand. Das erste Nutzerreview legt
-  zusätzlich fest: alle relevanten Pläne bleiben resident, genau ein Executor
-  handelt, nicht anderweitig zugeordnete Handkarten können eigene
-  kartenbezogene Planinstanzen bilden, Runner-Abwehr und Corp-Punish starten
-  jeweils als gemeinsames Modul, und harte Prioritätsklassen stehen vor der
-  Zahlenwertung innerhalb einer Klasse.
+  den vollständig erreichten Runtime-Stand. Version 0.3 legt zusätzlich fest:
+  Tactical Goals bleiben kurzlebige nicht autoritative Signale,
+  PlanAssessments gehen der Executorwahl voraus, Routen enthalten nur eine
+  aktuelle Action-ID, Priority Claims werden validiert und Support nutzt
+  typisierte Ressourcen sowie Root-/Leaf-Executor. Kartenbezogene
+  Planinstanzen benötigen ein Admission-Gate. Der Widerspruch zwischen
+  konsolidiertem MVP-Konzept, aktueller Engine und Comprehensive Rules zu
+  EndTurn ist als vor Kernel-Freigabe zu entscheidender Regelvertragsblocker
+  dokumentiert.
 - Runner-Fehlentscheidungen aus dem aktiven Match
   `match_fd22cad3cc454a9e` sind ohne produktive Laufzeitänderung als exakte
   Decision-Checkpoints gesichert. Die zweite redundante
