@@ -6196,9 +6196,17 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.pressure_central"
+      ]
+    },
+    "runTargets": [
       {
-        "actionId": "runner.start_run.rd"
+        "actionId": "runner.start_run.rd",
+        "targetServerId": "rd",
+        "pathPassability": "reachable",
+        "recommendation": "run_now"
       }
     ]
   }

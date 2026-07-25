@@ -5091,10 +5091,23 @@
     "schemaVersion": "ai-runtime-checkpoint-v1"
   },
   "expectation": {
-    "acceptableActions": [
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.pressure_central"
+      ],
+      "acceptableCapabilities": [
+        "pressure_hq_information"
+      ],
+      "requiredAssessmentEvidence": [
+        "target:hq"
+      ]
+    },
+    "runTargets": [
       {
-        "type": "start_run",
-        "targetServerId": "rd"
+        "targetServerId": "rd",
+        "pathPassability": "reachable",
+        "pathCost": 8,
+        "recommendation": "run_now"
       }
     ]
   }

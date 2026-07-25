@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseCorpAction, chooseRunnerAction } from "./index";
+import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { buildDeckDoctrineV2Diagnostic } from "./deck-doctrine-strategy";
 import { buildStrategicIntentState } from "./strategic-intent-state";
 import {
@@ -8,6 +9,8 @@ import {
 } from "./decision/pilot-scope-registry";
 import { resetTacticalPlanMemory } from "./tactical-plans";
 import { getStrategicIntentMemorySnapshot } from "./strategic-intent-memory";
+import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
+import { PlanResolutionFailure } from "./plans/plan-resolution-failure";
 import {
   chooseSemanticRuntimeAction,
   type SemanticRuntimeDependencies,
@@ -45,6 +48,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
 
   afterEach(() => {
     resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     if (originalRuntimeMode === undefined) {
       delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     } else {
@@ -63,7 +67,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     }
   });
 
-  it("uses semantic runtime as the live runner decision by default", () => {
+  it("uses the Runner defense plan as the live tag-removal decision by default", () => {
     const input = aiInput("runner", [
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -77,21 +81,88 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("remove-tag");
-    expect(decision.reasonCode).toBe("runner.semantic.tag_removal");
+    expect(decision.reasonCode).toBe("plan_first.runner.defense_and_recovery");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "semantic_runtime_default:true",
-        "semantic_runtime_scope:tag_removal",
+        "plan_first_runtime:true",
+        "plan_module:runner.defense_and_recovery",
+        "plan_step_capability:remove_active_tags",
       ]),
     );
     expect(decision.fallbackUsed).toBe(false);
   });
 
+  it("does not disguise a scored-agenda ability without a downstream purpose as hand-card development", () => {
+    const scoredAgenda = visibleCard(
+      "scored-artificial-security-directors",
+      "corp",
+      "agenda",
+      {
+        definitionId: "onr_v1_189_artificial-security-directors",
+        title: "Artificial Security Directors",
+        agendaPoints: 1,
+      },
+    );
+    const revealAction = legalAction(
+      "corp.gain_credit.scored-directors.reveal-rd-top",
+      "corp",
+      "gain_credit",
+      "Reveal the top card of R&D",
+      { clicks: 1, credits: 0 },
+      {
+        source: scoredAgenda.instanceId,
+        payload: {
+          agendaAbility: "v1919_scored_agenda_reveal_rd_top",
+        },
+      },
+    );
+    const basicCredit = legalAction(
+      "corp.gain_credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 credit",
+      { clicks: 1, credits: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("corp", [
+      revealAction,
+      basicCredit,
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+    ]);
+    input.playerView.own.scoreArea = [scoredAgenda];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("end-turn");
+    expect(decision.evidence).toContain("plan_module:corp.complete_turn");
+    expect(debugText).toContain(
+      "corp_scored_agenda_reveal_rd_top_has_no_bound_downstream_plan",
+    );
+    expect(debugText).not.toContain(
+      "corp.hand_and_agenda_management:develop%3Ascored-artificial-security-directors",
+    );
+  });
+
   it("marks an alternative-free Corp end turn as forced without hiding its raw decision", () => {
     const input = aiInput("corp", [
-      legalAction("end-turn", "corp", "end_turn", "End turn", {
-        credits: 0,
-      }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        {
+          credits: 0,
+        },
+        { source: "game_rule" },
+      ),
     ]);
     input.playerView.own.clicks = 0;
 
@@ -100,12 +171,13 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     expect(decision.actionId).toBe("end-turn");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "decision_opportunity:forced_terminal",
-        "decision_legal_action_count:1",
-        "decision_actionable_alternative_count:0",
+        "plan_first_lane:plan",
+        "plan_module:corp.complete_turn",
+        "plan_step_capability:complete_turn_after_productive_routes_exhausted",
+        "plan_assessment_evidence:productive_legal_routes_exhausted",
       ]),
     );
-    expect(decision.decisionDebug?.scoreBreakdown).toBeDefined();
+    expect(decision.decisionDebug?.planId).toContain("corp.complete_turn");
   });
 
   it("selects the guaranteed affordable Corp trace bid through the live choice contract", () => {
@@ -126,11 +198,13 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
         definitionId: "onr_v1_285_closed-accounts",
         title: "Closed Accounts",
         cost: 1,
+        playCost: { kind: "fixed", credits: 1 },
       }),
       visibleCard("scorched-earth", "corp", "operation", {
         definitionId: "onr_v1_302_scorched-earth",
         title: "Scorched Earth",
         cost: 3,
+        playCost: { kind: "fixed", credits: 3 },
       }),
     ];
     input.playerView.pendingChoice = {
@@ -163,10 +237,16 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       choiceId: "trace-corp-choice",
       selectedOptionIds: ["bid_7"],
     });
-    expect(decision.evidence).toContain("decision_opportunity:competitive");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_runtime:true",
+        "plan_first_lane:engine_window",
+        "plan_first_executor:rules.window_resolution",
+      ]),
+    );
   });
 
-  it("routes activated tag cleanup cards through tag_removal", () => {
+  it("routes activated tag cleanup cards through the Runner defense plan", () => {
     const input = aiInput("runner", [
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -199,11 +279,12 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("use-danshi");
-    expect(decision.reasonCode).toBe("runner.semantic.tag_removal");
+    expect(decision.reasonCode).toBe("plan_first.runner.defense_and_recovery");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "semantic_runtime_scope:tag_removal",
-        "action_semantic_candidate:tag.remove",
+        "plan_module:runner.defense_and_recovery",
+        "plan_step_capability:remove_active_tags",
+        "plan_assessment_evidence:runner_base_hand_buffer:3",
       ]),
     );
   });
@@ -241,8 +322,11 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("gain-credit");
-    expect(decision.evidence).toContain(
-      "semantic_runtime_scope:basic_economy_draw",
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:runner.economy",
+        "plan_step_capability:gain_general_liquid_credits",
+      ]),
     );
   });
 
@@ -277,19 +361,22 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     expect(decision.actionId).toBe("run-rd");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "semantic_runtime_default:true",
-        "action_type:start_run",
+        "plan_module:runner.pressure_central",
+        "plan_step_capability:pressure_rd_information",
       ]),
     );
-    const runAlternative = decision.decisionDebug?.rankedAlternatives?.find(
-      (entry) => entry.selectedActionType === "start_run",
+    const runAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === "run-rd",
     );
-    const drawAlternative = decision.decisionDebug?.rankedAlternatives?.find(
-      (entry) => entry.selectedActionType === "draw_card",
+    const drawAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === "draw",
     );
-    expect(runAlternative?.score ?? 0).toBeGreaterThan(
-      drawAlternative?.score ?? 0,
-    );
+    expect(runAlternative?.selected).toBe(true);
+    expect(
+      drawAlternative?.whyNot?.some((entry) =>
+        entry.startsWith("not_selected_by_plan:"),
+      ),
+    ).toBe(true);
   });
 
   it("does not surface Doctrine v1 plan-weight trace items in DecisionDebug", () => {
@@ -303,6 +390,14 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     );
     const input = aiInput("runner", [rdRun]);
     input.playerView.own.credits = 8;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("held-1", "runner", "event"),
+      visibleCard("held-2", "runner", "program"),
+      visibleCard("held-3", "runner", "resource"),
+      visibleCard("held-4", "runner", "hardware"),
+    ];
+    input.playerView.opponent.deckCount = 20;
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
 
     const decision = chooseRunnerAction(input, {
@@ -457,7 +552,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     );
   });
 
-  it("adds bounded StrategicIntent action fit to semantic runtime scoring", () => {
+  it("routes a bounded StrategicIntent target through the matching plan", () => {
     delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
     const rdRun = legalAction(
       "run-rd",
@@ -499,35 +594,21 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     expect(decision.actionId).toBe("run-rd");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "semantic_strategic_action_fit:true",
-        "strategic_action_fit_family:runner_central_pressure",
+        "plan_module:runner.pressure_central",
+        "plan_step_capability:pressure_rd_information",
       ]),
     );
-    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "semantic_strategic_action_fit",
-          reason: expect.stringContaining(
-            "strategic_action_fit_family:runner_central_pressure",
-          ),
-        }),
-      ]),
+    expect(decision.decisionDebug?.planId).toContain(
+      "plan:runner.pressure_central:central%3Ard",
     );
     expect(decision.decisionDebug?.detailSections).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          id: "strategic_runtime",
+          id: "plan_execution",
           items: expect.arrayContaining([
-            "strategic_intent_state:runner.rnd_pressure",
-            "strategic_intent_target_id:rd",
-            "strategic_action_fit_target_match:exact",
-          ]),
-        }),
-        expect.objectContaining({
-          id: "selection_score",
-          items: expect.arrayContaining([
-            expect.stringMatching(/^runtime_raw_score:/),
-            "display_score_only:true",
+            "module:runner.pressure_central",
+            "capability:pressure_rd_information",
+            "assessment_evidence:target:rd",
           ]),
         }),
       ]),
@@ -586,20 +667,154 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
   });
 
   it("uses semantic runtime as the live corp decision by default", () => {
+    const agenda = visibleCard("score-target", "corp", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      advancementCounters: 3,
+    });
     const input = aiInput("corp", [
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
         credits: 0,
       }),
-      legalAction("score", "corp", "score_agenda", "Score agenda", {
-        credits: 0,
-      }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+      legalAction(
+        "score",
+        "corp",
+        "score_agenda",
+        "Score agenda",
+        {
+          credits: 0,
+        },
+        {
+          source: agenda.instanceId,
+          payload: {
+            serverId: "remote_1",
+            cardId: agenda.instanceId,
+          },
+        },
+      ),
     ]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [agenda]),
+    ];
 
     const decision = chooseCorpAction(input);
 
     expect(decision.actionId).toBe("score");
-    expect(decision.reasonCode).toBe("corp.semantic.simple_score_advance");
-    expect(decision.evidence).toContain("semantic_runtime_default:true");
+    expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_runtime:true",
+        "plan_module:corp.score_agenda",
+        "plan_assessment_evidence:corp_same_turn_score_conversion:score_ready",
+      ]),
+    );
+    expect(decision.fallbackUsed).toBe(false);
+  });
+
+  it("executes only the first step of a same-turn score conversion", () => {
+    const agenda = visibleCard("executive-extraction", "corp", "agenda", {
+      definitionId: "onr_v1_201_executive-extraction",
+      advancementRequirement: 3,
+    });
+    const consultants = visibleCard(
+      "project-consultants",
+      "corp",
+      "operation",
+      {
+        definitionId: "onr_v1_300_project-consultants",
+        cost: 0,
+      },
+    );
+    const laundering = visibleCard(
+      "information-laundering",
+      "corp",
+      "asset",
+      {
+        definitionId: "onr_v1_328_information-laundering",
+        advancementCounters: 0,
+      },
+    );
+    const installAgenda = legalAction(
+      "install-agenda",
+      "corp",
+      "install_card",
+      "Agenda installieren",
+      { credits: 0 },
+      {
+        source: agenda.instanceId,
+        payload: {
+          cardId: agenda.instanceId,
+          placement: "root",
+          serverId: "new_remote",
+        },
+      },
+    );
+    const playConsultants = legalAction(
+      "play-project-consultants",
+      "corp",
+      "play_operation",
+      "Project Consultants spielen",
+      { credits: 0 },
+      {
+        source: consultants.instanceId,
+        payload: {
+          cardId: consultants.instanceId,
+          scoreConversionCapability: "place_advancement",
+          scoreConversionAdvancementAmount: 3,
+          scoreConversionAdvancementMode: "any_combination",
+        },
+      },
+    );
+    const gainCredit = legalAction(
+      "gain-credit",
+      "corp",
+      "gain_credit",
+      "Gain 1",
+      { credits: 0 },
+    );
+    const input = aiInput("corp", [
+      playConsultants,
+      installAgenda,
+      gainCredit,
+    ]);
+    input.playerView.own.gripOrHq = [agenda, consultants];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [laundering]),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe(installAgenda.actionId);
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.score_agenda",
+        "plan_assessment_evidence:corp_same_turn_score_conversion:install_score_target",
+      ]),
+    );
+    expect(decision.evidence).not.toContain(
+      "plan_assessment_evidence:corp_same_turn_score_conversion:place_advancement",
+    );
     expect(decision.fallbackUsed).toBe(false);
   });
 
@@ -624,18 +839,23 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
     ]);
     input.playerView.own.gripOrHq = [rasmin];
     input.playerView.servers = [server("hq")];
 
     const decision = chooseCorpAction(input);
-    const alternative = decision.decisionDebug?.actionAlternatives?.find(
-      (entry) => entry.actionId === install.actionId,
-    );
 
-    expect(decision.actionId).toBe("gain-credit");
-    expect(JSON.stringify(alternative)).toContain(
-      "corp_upgrade_ice_support_without_ice",
+    expect(decision.actionId).toBe("end-turn");
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "corp_defense_support_rejected:hq:ice_support_without_ice",
     );
 
     const protectedInput = aiInput("corp", [
@@ -643,6 +863,14 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
     ]);
     protectedInput.playerView.own.gripOrHq = [rasmin];
     protectedInput.playerView.servers = [
@@ -701,23 +929,27 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
         rezzed: true,
       },
     );
-    const inactiveInput = aiInput("corp", [install, gainCredit]);
+    const endTurn = legalAction(
+      "end-turn",
+      "corp",
+      "end_turn",
+      "End turn",
+      { credits: 0 },
+      { source: "game_rule" },
+    );
+    const inactiveInput = aiInput("corp", [install, gainCredit, endTurn]);
     inactiveInput.playerView.own.gripOrHq = [researchBunker];
     inactiveInput.playerView.servers = [
       server("remote_1", [], [networkedCenter]),
     ];
 
     const inactiveDecision = chooseCorpAction(inactiveInput);
-    expect(inactiveDecision.actionId).toBe(gainCredit.actionId);
-    expect(
-      JSON.stringify(
-        inactiveDecision.decisionDebug?.actionAlternatives?.find(
-          (entry) => entry.actionId === install.actionId,
-        ),
-      ),
-    ).toContain("region_replacement_without_marginal_value");
+    expect(inactiveDecision.actionId).toBe(endTurn.actionId);
+    expect(JSON.stringify(inactiveDecision.decisionDebug)).toContain(
+      "region_replacement_without_marginal_value",
+    );
 
-    const activeInput = aiInput("corp", [install, gainCredit]);
+    const activeInput = aiInput("corp", [install, gainCredit, endTurn]);
     activeInput.playerView.own.gripOrHq = [researchBunker];
     activeInput.playerView.servers = [
       server(
@@ -726,6 +958,8 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
         [
           networkedCenter,
           visibleCard("research-agenda", "corp", "agenda", {
+            definitionId: "onr_v1_189_artificial-security-directors",
+            title: "Artificial Security Directors",
             subtypes: ["research"],
             advancementRequirement: 3,
           }),
@@ -834,28 +1068,52 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
         credits: 0,
       }),
-      legalAction("draw", "corp", "draw_card", "Draw 1", { credits: 0 }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
     ]);
     input.playerView.own.gripOrHq = [
-      visibleCard("ice-for-new-remote", "corp", "ice"),
-      visibleCard("ice-for-rd", "corp", "ice"),
+      visibleCard("ice-for-new-remote", "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        title: "Data Wall",
+        rezCost: 1,
+      }),
+      visibleCard("ice-for-rd", "corp", "ice", {
+        definitionId: "onr_v1_238_data-wall-2-0",
+        title: "Data Wall 2.0",
+        rezCost: 2,
+      }),
     ];
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [visibleCard("remote-ice-1", "corp", "ice")]),
-      server("remote_2", [visibleCard("remote-ice-2", "corp", "ice")]),
+      server("remote_1", [
+        visibleCard("remote-ice-1", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          title: "Data Wall",
+        }),
+      ]),
+      server("remote_2", [
+        visibleCard("remote-ice-2", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          title: "Data Wall",
+        }),
+      ]),
     ];
 
     const decision = chooseCorpAction(input);
 
-    expect(decision.actionId).toBe("protect-rd");
+    expect(decision.actionId).toBe("end-turn");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "corp_empty_remote_count:2",
-        "corp_remote_risk:present",
-        "corp_protection:central_ice",
+        "plan_module:corp.complete_turn",
+        "plan_step_capability:complete_turn_after_productive_routes_exhausted",
       ]),
     );
   });
@@ -880,6 +1138,8 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     ]);
     input.playerView.own.gripOrHq = [
       visibleCard("agenda-in-hq", "corp", "agenda", {
+        definitionId: "onr_v1_194_corporate-downsizing",
+        title: "Corporate Downsizing",
         advancementRequirement: 3,
       }),
     ];
@@ -890,12 +1150,17 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
 
     expect(["gain-credit", "draw"]).toContain(decision.actionId);
     expect(decision.actionId).not.toBe("install-new-remote-agenda");
-    expect(debugText).toContain("corp_unsafe_delayed_scoreline_exposure");
-    expect(debugText).toContain("corp_contestable_remote_score_penalty");
+    expect(debugText).toContain("plan:corp.score_agenda");
+    expect(debugText).toContain(
+      "corp_score_protection_required:new_remote",
+    );
+    expect(debugText).toContain("viability:blocked");
   });
 
   it("advances a naked remote score line when same-turn closeout is reachable", () => {
     const remoteAgenda = visibleCard("remote-agenda", "corp", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      title: "Corporate Downsizing",
       advancementCounters: 1,
       advancementRequirement: 3,
     });
@@ -905,12 +1170,20 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
         "corp",
         "advance_card",
         "Advance installed agenda",
-        { credits: 1 },
+        { clicks: 1, credits: 1 },
         { source: remoteAgenda.instanceId, payload: { serverId: "remote_1" } },
       ),
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
       legalAction("draw", "corp", "draw_card", "Draw 1", { credits: 0 }),
     ]);
     input.playerView.servers = [
@@ -924,8 +1197,9 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe("advance-naked-agenda");
-    expect(debugText).toContain("corp_same_turn_score_closeout_advance");
-    expect(debugText).toContain("corp_board_triage_primary:score_now");
+    expect(debugText).toContain("plan_module:corp.score_agenda");
+    expect(debugText).toContain("plan_step_capability:advance_score_agenda");
+    expect(debugText).toContain("plan_priority_class:P3");
   });
 
   it("keeps a protected remote score line selectable", () => {
@@ -934,6 +1208,8 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       "corp",
       "agenda",
       {
+        definitionId: "onr_v1_194_corporate-downsizing",
+        title: "Corporate Downsizing",
         advancementCounters: 1,
         advancementRequirement: 3,
       },
@@ -944,12 +1220,20 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
         "corp",
         "advance_card",
         "Advance installed agenda",
-        { credits: 1 },
+        { clicks: 1, credits: 1 },
         { source: remoteAgenda.instanceId, payload: { serverId: "remote_1" } },
       ),
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
     ]);
     input.playerView.servers = [
       server("hq"),
@@ -957,7 +1241,11 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       server("archives"),
       server(
         "remote_1",
-        [visibleCard("remote-protection-ice", "corp", "ice")],
+        [
+          visibleCard("remote-protection-ice", "corp", "ice", {
+            definitionId: "onr_v1_237_data-wall",
+          }),
+        ],
         [remoteAgenda],
       ),
     ];
@@ -966,12 +1254,77 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
 
     expect(decision.actionId).toBe("advance-protected-agenda");
     expect(decision.evidence).toEqual(
-      expect.arrayContaining(["corp_remote_protection:protected"]),
+      expect.arrayContaining([
+        "plan_module:corp.score_agenda",
+        "plan_step_capability:advance_score_agenda",
+        "plan_assessment_evidence:corp_funded_protected_score_advance:remote_1",
+      ]),
     );
+  });
+
+  it("fails closed when a conditional score-credit threshold is incompletely defined", () => {
+    const corporateWarId = "onr_v1_196_corporate-war";
+    const originalHint = AI_HINTS_BY_CARD.get(corporateWarId);
+    if (!originalHint) throw new Error("Missing Corporate War AI definition");
+    const agenda = visibleCard("conditional-score-agenda", "corp", "agenda", {
+      definitionId: corporateWarId,
+      title: "Corporate War",
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "install-conditional-score-agenda",
+        "corp",
+        "install_card",
+        "Install Corporate War",
+        { clicks: 1, credits: 0 },
+        {
+          source: agenda.instanceId,
+          payload: { placement: "root", serverId: "remote_1" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 20;
+    input.playerView.own.gripOrHq = [agenda];
+    input.playerView.opponent.credits = 0;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("conditional-score-wall-1", "corp", "ice", {
+          definitionId: "onr_v1_279_wall-of-static",
+          rezzed: true,
+        }),
+        visibleCard("conditional-score-wall-2", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          rezzed: true,
+        }),
+      ]),
+    ];
+    AI_HINTS_BY_CARD.set(corporateWarId, {
+      ...structuredClone(originalHint),
+      effects: [],
+    });
+
+    try {
+      expect(() => chooseCorpAction(input)).toThrowError(
+        expect.objectContaining<Partial<PlanResolutionFailure>>({
+          code: "missing_card_definition",
+        }),
+      );
+    } finally {
+      AI_HINTS_BY_CARD.set(corporateWarId, originalHint);
+    }
   });
 
   it("defers a protected but contestable remote agenda install", () => {
     const agenda = visibleCard("agenda-in-hq", "corp", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      title: "Corporate Downsizing",
       advancementRequirement: 3,
     });
     const input = aiInput("corp", [
@@ -989,6 +1342,14 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
     ]);
     input.playerView.own.gripOrHq = [agenda];
     input.playerView.opponent.credits = 8;
@@ -1009,18 +1370,618 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     ];
 
     const decision = chooseCorpAction(input);
-    const debugText = JSON.stringify(decision.decisionDebug);
+    expect(decision.actionId).toBe("end-turn");
+    expect(decision.evidence).toContain("plan_module:corp.complete_turn");
+    expect(
+      decision.evidence?.some(
+        (entry) =>
+          entry.startsWith("plan_portfolio_blocked_evidence:") &&
+          entry.endsWith(
+            ":corp_score_protection_assessment_unknown:remote_1:subset_assessment_unknown",
+          ),
+      ) ?? false,
+    ).toBe(true);
+    expect(
+      decision.evidence?.some(
+        (entry) =>
+          entry.startsWith("plan_portfolio_blocker:") &&
+        entry.endsWith(":corp_score_route_unavailable"),
+      ) ?? false,
+    ).toBe(true);
+  });
 
-    expect(decision.actionId).toBe("gain-credit");
+  it("keeps a persistently blocked agenda-flood plan fail-closed without a generic fallback", () => {
+    const minimumAgenda = visibleCard(
+      "stalled-flood-minimum-agenda",
+      "corp",
+      "agenda",
+      {
+        definitionId: "onr_v1_214_project-babylon",
+        title: "Project Babylon",
+        agendaPoints: 1,
+        advancementRequirement: 3,
+      },
+    );
+    const largerAgendaA = visibleCard(
+      "stalled-flood-larger-agenda-a",
+      "corp",
+      "agenda",
+      {
+        definitionId: "onr_v1_199_employee-empowerment",
+        title: "Employee Empowerment",
+        agendaPoints: 3,
+        advancementRequirement: 5,
+      },
+    );
+    const largerAgendaB = visibleCard(
+      "stalled-flood-larger-agenda-b",
+      "corp",
+      "agenda",
+      {
+        definitionId: "onr_v1_190_bioweapons-engineering",
+        title: "Bioweapons Engineering",
+        agendaPoints: 3,
+        advancementRequirement: 5,
+      },
+    );
+    const installAction = legalAction(
+      "install-stalled-flood-minimum",
+      "corp",
+      "install_card",
+      "Install the minimum-exposure agenda",
+      { clicks: 1, credits: 0 },
+      {
+        source: minimumAgenda.instanceId,
+        payload: { placement: "root", serverId: "remote_1" },
+      },
+    );
+    const gainCredit = legalAction(
+      "gain-credit",
+      "corp",
+      "gain_credit",
+      "Gain 1",
+      { credits: 0 },
+    );
+    const input = aiInput("corp", [
+      installAction,
+      gainCredit,
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+    ]);
+    input.playerView.own.credits = 12;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.own.gripOrHq = [
+      minimumAgenda,
+      largerAgendaA,
+      largerAgendaB,
+    ];
+    input.playerView.opponent.credits = 30;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("stalled-flood-wall-1", "corp", "ice", {
+          definitionId: "onr_v1_279_wall-of-static",
+          rezzed: true,
+        }),
+        visibleCard("stalled-flood-wall-2", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          rezzed: true,
+        }),
+      ]),
+    ];
+
+    input.playerView.stateVersion = 13;
+    const decision = chooseCorpAction(input);
+    expect(decision.actionId).toBe("end-turn");
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.evidence).toContain("plan_module:corp.complete_turn");
+  });
+
+  it("adds a contestability buffer through the global defense plan before opening a score line", () => {
+    const agenda = visibleCard("agenda-in-hq", "corp", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      title: "Corporate Downsizing",
+      advancementRequirement: 3,
+    });
+    const ice = visibleCard("second-score-ice", "corp", "ice", {
+      definitionId: "onr_v1_237_data-wall",
+      title: "Data Wall",
+      rezCost: 1,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "install-contestable-agenda",
+        "corp",
+        "install_card",
+        "Install agenda in protected remote",
+        { clicks: 1, credits: 0 },
+        {
+          source: agenda.instanceId,
+          payload: { placement: "root", serverId: "remote_1" },
+        },
+      ),
+      legalAction(
+        "install-contestability-buffer",
+        "corp",
+        "install_card",
+        "Install another ICE protecting the score remote",
+        { clicks: 1, credits: 0 },
+        {
+          source: ice.instanceId,
+          payload: { placement: "ice", serverId: "remote_1" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+    ]);
+    input.playerView.own.gripOrHq = [agenda, ice];
+    input.playerView.opponent.credits = 8;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-wall-1", "corp", "ice", {
+          definitionId: "onr_v1_279_wall-of-static",
+          rezzed: true,
+        }),
+      ]),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("end-turn");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "corp_remote_risk:unsafe_score_action_available",
-        "corp_safe_alternative:economy",
+        "plan_module:corp.complete_turn",
+        "plan_step_capability:complete_turn_after_productive_routes_exhausted",
       ]),
     );
-    expect(debugText).toContain("corp_contestable_remote_score_penalty");
-    expect(debugText).toContain("corp_remote_score_line:contestable_by_runner");
-    expect(debugText).toContain("remote_contestable_by_runner:true");
+  });
+
+  it("does not treat finite ICE depth as a safe terminal score window", () => {
+    const agenda = visibleCard("terminal-agenda-in-hq", "corp", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      title: "Corporate Downsizing",
+      advancementRequirement: 3,
+    });
+    const ice = visibleCard("terminal-score-buffer", "corp", "ice", {
+      definitionId: "onr_v1_223_banpei",
+      title: "Banpei",
+      rezCost: 4,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "install-terminal-agenda",
+        "corp",
+        "install_card",
+        "Install the terminal agenda in the score remote",
+        { clicks: 1, credits: 0 },
+        {
+          source: agenda.instanceId,
+          payload: { placement: "root", serverId: "remote_1" },
+        },
+      ),
+      legalAction(
+        "install-terminal-score-buffer",
+        "corp",
+        "install_card",
+        "Install another ICE protecting the terminal score remote",
+        { clicks: 1, credits: 0 },
+        {
+          source: ice.instanceId,
+          payload: { placement: "ice", serverId: "remote_1" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+    ]);
+    input.playerView.own.agendaPoints = 5;
+    input.playerView.own.credits = 26;
+    input.playerView.own.gripOrHq = [agenda, ice];
+    input.playerView.opponent.credits = 20;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("terminal-wall-1", "corp", "ice", {
+          definitionId: "onr_v1_279_wall-of-static",
+          rezzed: true,
+        }),
+        visibleCard("terminal-wall-2", "corp", "ice", {
+          definitionId: "onr_v1_279_wall-of-static",
+          rezzed: true,
+        }),
+        visibleCard("terminal-wall-3", "corp", "ice", {
+          definitionId: "onr_v1_279_wall-of-static",
+          rezzed: true,
+        }),
+      ]),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("end-turn");
+    expect(debugText).toContain(
+      "corp_score_protection_assessment_unknown:remote_1:subset_assessment_unknown",
+    );
+    expect(debugText).toContain("viability:blocked");
+  });
+
+  it("does not expose one of two agendas merely because the remote has two ICE", () => {
+    const agenda = visibleCard("agenda-in-hq", "corp", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      title: "Corporate Downsizing",
+      advancementRequirement: 3,
+    });
+    const secondAgenda = visibleCard("second-agenda-in-hq", "corp", "agenda", {
+      definitionId: "onr_v1_203_hostile-takeover",
+      title: "Hostile Takeover",
+      advancementRequirement: 2,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "install-portfolio-agenda",
+        "corp",
+        "install_card",
+        "Install agenda in protected remote",
+        { clicks: 1, credits: 0 },
+        {
+          source: agenda.instanceId,
+          payload: { placement: "root", serverId: "remote_1" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+    ]);
+    input.playerView.own.gripOrHq = [agenda, secondAgenda];
+    input.playerView.own.credits = 8;
+    input.playerView.opponent.credits = 8;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-wall-1", "corp", "ice", {
+          definitionId: "onr_v1_279_wall-of-static",
+          rezzed: true,
+        }),
+        visibleCard("remote-wall-2", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          rezzed: true,
+        }),
+      ]),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("end-turn");
+    expect(debugText).toContain(
+      "corp_score_protection_assessment_unknown:remote_1:subset_assessment_unknown",
+    );
+    expect(debugText).toContain("viability:blocked");
+  });
+
+  it("does not expose a single agenda merely because the remote has two ICE", () => {
+    const agenda = visibleCard("single-agenda-in-hq", "corp", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      title: "Corporate Downsizing",
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "install-single-protected-agenda",
+        "corp",
+        "install_card",
+        "Install agenda in protected remote",
+        { clicks: 1, credits: 0 },
+        {
+          source: agenda.instanceId,
+          payload: { placement: "root", serverId: "remote_1" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+    ]);
+    input.playerView.own.gripOrHq = [agenda];
+    input.playerView.own.credits = 8;
+    input.playerView.opponent.credits = 8;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-wall-1", "corp", "ice", {
+          definitionId: "onr_v1_279_wall-of-static",
+          rezzed: true,
+        }),
+        visibleCard("remote-wall-2", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          rezzed: true,
+        }),
+      ]),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("end-turn");
+    expect(debugText).toContain(
+      "corp_score_protection_assessment_unknown:remote_1:subset_assessment_unknown",
+    );
+    expect(debugText).toContain("viability:blocked");
+  });
+
+  it("funds a concrete safe score project before exposing its agenda", () => {
+    const agenda = visibleCard("funding-open-agenda", "corp", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      title: "Corporate Downsizing",
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "install-funding-open-agenda",
+        "corp",
+        "install_card",
+        "Install agenda before later advancement funding",
+        { clicks: 1, credits: 0 },
+        {
+          source: agenda.instanceId,
+          payload: { placement: "root", serverId: "remote_1" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+    ]);
+    input.playerView.own.gripOrHq = [agenda];
+    input.playerView.own.credits = 2;
+    input.playerView.opponent.credits = 0;
+    input.playerView.opponent.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-wall-1", "corp", "ice", {
+          definitionId: "onr_v1_279_wall-of-static",
+          rezzed: true,
+        }),
+        visibleCard("remote-wall-2", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          rezzed: true,
+        }),
+      ]),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("end-turn");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.complete_turn",
+        "plan_step_capability:complete_turn_after_productive_routes_exhausted",
+      ]),
+    );
+  });
+
+  it("does not continue an installed score commitment while access remains contestable", () => {
+    const remoteAgenda = visibleCard(
+      "committed-remote-agenda",
+      "corp",
+      "agenda",
+      {
+        definitionId: "onr_v1_195_corporate-retreat",
+        title: "Corporate Retreat",
+        advancementCounters: 0,
+        advancementRequirement: 4,
+      },
+    );
+    const input = aiInput("corp", [
+      legalAction(
+        "advance-committed-agenda",
+        "corp",
+        "advance_card",
+        "Advance installed agenda",
+        { credits: 1 },
+        {
+          source: remoteAgenda.instanceId,
+          payload: { serverId: "remote_1" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+    ]);
+    input.playerView.own.credits = 8;
+    input.playerView.opponent.credits = 8;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("remote-wall-1", "corp", "ice", {
+            definitionId: "onr_v1_279_wall-of-static",
+            rezzed: true,
+          }),
+          visibleCard("remote-wall-2", "corp", "ice", {
+            definitionId: "onr_v1_237_data-wall",
+            rezzed: true,
+          }),
+        ],
+        [remoteAgenda],
+      ),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("end-turn");
+    expect(debugText).toContain(
+      "corp_score_protection_assessment_unknown:remote_1",
+    );
+    expect(debugText).toContain("plan_module:corp.complete_turn");
+  });
+
+  it("does not expose a matchpoint agenda while the remote remains contestable", () => {
+    const agenda = visibleCard("matchpoint-agenda", "corp", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      title: "Corporate Downsizing",
+      advancementRequirement: 3,
+      agendaPoints: 2,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "install-matchpoint-agenda",
+        "corp",
+        "install_card",
+        "Install matchpoint agenda in protected remote",
+        { clicks: 1, credits: 0 },
+        {
+          source: agenda.instanceId,
+          payload: { placement: "root", serverId: "remote_1" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+    ]);
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.own.credits = 8;
+    input.playerView.own.gripOrHq = [agenda];
+    input.playerView.opponent.credits = 8;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-wall-1", "corp", "ice", {
+          definitionId: "onr_v1_279_wall-of-static",
+          rezzed: true,
+        }),
+        visibleCard("remote-wall-2", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          rezzed: true,
+        }),
+      ]),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("end-turn");
+    expect(debugText).toContain(
+      "corp_score_protection_assessment_unknown:remote_1",
+    );
+    expect(debugText).toContain("plan_module:corp.complete_turn");
   });
 
   it("advances a protected but contestable remote score line when same-turn closeout is reachable", () => {
@@ -1029,6 +1990,8 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       "corp",
       "agenda",
       {
+        definitionId: "onr_v1_194_corporate-downsizing",
+        title: "Corporate Downsizing",
         advancementCounters: 1,
         advancementRequirement: 3,
       },
@@ -1071,17 +2034,19 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe("advance-contestable-agenda");
-    expect(debugText).toContain("corp_same_turn_score_closeout_advance");
-    expect(debugText).toContain("corp_board_triage_primary:score_now");
-    expect(debugText).toContain("remote_contestable_by_runner:true");
+    expect(debugText).toContain("plan_module:corp.score_agenda");
+    expect(debugText).toContain("plan_step_capability:advance_score_agenda");
+    expect(debugText).toContain("plan_priority_class:P3");
   });
 
-  it("funds remote rez floor before advancing a remote agenda behind unrezzed ice", () => {
+  it("does not create remote rez funding from an unquoted ICE cost", () => {
     const remoteAgenda = visibleCard(
       "remote-agenda-below-rez-floor",
       "corp",
       "agenda",
       {
+        definitionId: "onr_v1_194_corporate-downsizing",
+        title: "Corporate Downsizing",
         advancementCounters: 1,
         advancementRequirement: 3,
       },
@@ -1102,7 +2067,11 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     ]);
     input.playerView.own.credits = 1;
     input.playerView.own.gripOrHq = [
-      visibleCard("corp-ice-in-hq", "corp", "ice"),
+      visibleCard("corp-ice-in-hq", "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        title: "Data Wall",
+        rezCost: 1,
+      }),
     ];
     input.playerView.opponent.rig = [];
     input.playerView.servers = [
@@ -1113,6 +2082,8 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
         "remote_1",
         [
           visibleCard("remote-unrezzed-ice", "corp", "ice", {
+            definitionId: "onr_v1_279_wall-of-static",
+            title: "Wall of Static",
             rezzed: false,
             rezCost: 3,
           }),
@@ -1123,18 +2094,9 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
 
     const decision = chooseCorpAction(input);
 
-    expect(decision.actionId).toBe("gain-credit");
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        "remote_rez_floor_funding_need:true",
-        "corp_safe_alternative:economy",
-      ]),
-    );
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "corp_remote_rez_floor_penalty",
-    );
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "agenda_development_risk:below_remote_rez_floor",
+    expect(decision.actionId).toBe("draw");
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      "corp_score_combined_rez_and_advancement_funding_required:remote_1",
     );
   });
 
@@ -1144,6 +2106,8 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       "corp",
       "agenda",
       {
+        definitionId: "onr_v1_194_corporate-downsizing",
+        title: "Corporate Downsizing",
         advancementCounters: 1,
         advancementRequirement: 3,
       },
@@ -1154,7 +2118,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
         "corp",
         "advance_card",
         "Advance installed agenda",
-        { credits: 1 },
+        { clicks: 1, credits: 1 },
         { source: remoteAgenda.instanceId, payload: { serverId: "remote_1" } },
       ),
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
@@ -1170,6 +2134,8 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
         "remote_1",
         [
           visibleCard("remote-unrezzed-ice", "corp", "ice", {
+            definitionId: "onr_v1_279_wall-of-static",
+            title: "Wall of Static",
             rezzed: false,
             rezCost: 3,
           }),
@@ -1183,18 +2149,22 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     expect(decision.actionId).toBe("advance-with-rez-floor");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "remote_rez_floor:3",
-        "credits_after_action:4",
-        "low_rez_reserve:false",
+        "plan_module:corp.score_agenda",
+        "plan_step_capability:advance_score_agenda",
+        "plan_assessment_evidence:corp_funded_protected_score_advance:remote_1",
       ]),
     );
   });
 
-  it("funds HQ rez reserve before installing unrezzable HQ ICE over agenda exposure", () => {
+  it("does not invent an HQ rez reserve from an unquoted ICE cost", () => {
     const agenda = visibleCard("agenda-in-hq", "corp", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      title: "Corporate Downsizing",
       advancementRequirement: 3,
     });
     const expensiveIce = visibleCard("expensive-hq-ice", "corp", "ice", {
+      definitionId: "onr_v1_279_wall-of-static",
+      title: "Wall of Static",
       rezCost: 4,
     });
     const input = aiInput("corp", [
@@ -1212,28 +2182,30 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
     ]);
     input.playerView.own.credits = 2;
     input.playerView.own.gripOrHq = [agenda, expensiveIce];
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
 
     const decision = chooseCorpAction(input);
-    const debugText = JSON.stringify(decision.decisionDebug);
-
-    expect(decision.actionId).toBe("gain-credit");
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        "central_rez_floor_funding_need:true",
-        "corp_safe_alternative:economy",
-      ]),
+    expect(decision.actionId).toBe("end-turn");
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      "central_rez_floor_funding_required:hq",
     );
-    expect(debugText).toContain("corp_central_rez_floor_penalty");
-    expect(debugText).toContain("corp_hq_agenda_exposure:true");
-    expect(debugText).toContain("central_rez_reserve_below_floor:true");
   });
 
-  it("funds R&D rez reserve when visible R&D pressure meets unrezzed ICE", () => {
+  it("does not invent an R&D rez reserve from an unquoted ICE cost", () => {
     const rdIce = visibleCard("rd-unrezzed-ice", "corp", "ice", {
+      definitionId: "onr_v1_279_wall-of-static",
+      title: "Wall of Static",
       rezzed: false,
       rezCost: 3,
     });
@@ -1268,18 +2240,70 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     ];
 
     const decision = chooseCorpAction(input);
-    const debugText = JSON.stringify(decision.decisionDebug);
 
-    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.actionId).toBe("draw");
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      "central_rez_floor_funding_required:rd",
+    );
+  });
+
+  it("draws terminal score material before non-urgent central rez funding", () => {
+    const hqIce = visibleCard("hq-ice-in-hand", "corp", "ice", {
+      definitionId: "onr_v1_227_cerberus",
+      title: "Cerberus",
+      rezCost: 11,
+    });
+    const input = aiInput("corp", [
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "corp", "draw_card", "Draw 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "install-hq-ice",
+        "corp",
+        "install_card",
+        "Install ICE on HQ",
+        { credits: 0 },
+        {
+          source: hqIce.instanceId,
+          payload: { placement: "ice", serverId: "hq" },
+        },
+      ),
+    ]);
+    const hqPressureEvents = [
+      publicEvent("hq-run-pressure", "start_run", 10, {
+        actor: "runner",
+        actionType: "start_run",
+        serverId: "hq",
+      }),
+      publicEvent("hq-access-pressure", "access_card", 11, {
+        actor: "runner",
+        actionType: "access_card",
+        serverId: "hq",
+      }),
+    ];
+    input.eventTail = hqPressureEvents;
+    input.playerView.publicEvents = hqPressureEvents;
+    input.playerView.own.credits = 3;
+    input.playerView.own.agendaPoints = 4;
+    input.playerView.own.stackOrRdCount = 2;
+    input.playerView.own.gripOrHq = [hqIce];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("draw");
+    expect(decision.reasonCode).toBe(
+      "plan_first.corp.hand_and_agenda_management",
+    );
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "central_rez_floor_funding_need:true",
-        "corp_safe_alternative:economy",
+        "plan_priority_class:P3",
+        "plan_assessment_evidence:corp_terminal_score_campaign_missing_agenda_material",
       ]),
     );
-    expect(debugText).toContain("economy_credit_demand");
-    expect(debugText).toContain("corp.rez_defense:rd:fund");
-    expect(debugText).toContain("status=covered_guaranteed");
   });
 
   it("uses Closed Accounts before BBS economy in an open tag-payoff window", () => {
@@ -1309,12 +2333,25 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
         { credits: 0 },
         {
           source: bbs.instanceId,
-          payload: { cardImplementationCreditAmount: 2 },
+          payload: {
+            gainCreditsAmount: 2,
+            cardImplementationTakesHostedCredits: true,
+            hostedCreditTakeAmount: 2,
+            hostedCreditTakeMode: "up_to_amount_if_available",
+          },
         },
       ),
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
     ]);
     input.playerView.own.gripOrHq = [closedAccounts];
     input.playerView.opponent.tags = 1;
@@ -1333,13 +2370,14 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     );
 
     expect(decision.actionId).toBe("closed-accounts");
-    expect(debugText).toContain("corp_tagged_runner_payoff_pressure");
-    expect(debugText).toContain("tagged_payoff_kind:economic");
-    expect(debugText).toContain("corp_tagged_payoff_followup_plan:active");
+    expect(debugText).toContain("plan_module:corp.execute_punish_sequence");
+    expect(debugText).toContain("plan_step_capability:punish_damage");
+    expect(debugText).toContain(
+      "plan_assessment_evidence:tag_punish_ontology_damage:onr_v1_285_closed-accounts",
+    );
     expect(
-      bbsAlternative?.scoreBreakdown?.some(
-        (component) =>
-          component.key === "corp_tagged_payoff_window_passive_penalty",
+      bbsAlternative?.whyNot?.some((entry) =>
+        entry.startsWith("not_selected_by_plan:"),
       ),
     ).toBe(true);
   });
@@ -1349,6 +2387,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       definitionId: "onr_v1_285_closed-accounts",
       title: "Closed Accounts",
       cost: 1,
+      playCost: { kind: "fixed", credits: 1 },
     });
     const input = aiInput("corp", [
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
@@ -1366,9 +2405,47 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe("gain-credit");
-    expect(debugText).toContain("corp_tag_punish_payoff_funding");
-    expect(debugText).toContain("corp_tagged_payoff_targeted_funding:true");
-    expect(debugText).toContain("target_definition:onr_v1_285_closed-accounts");
+    expect(debugText).toContain(
+      "plan_assessment_evidence:corp_tag_punish_payoff_funding:onr_v1_285_closed-accounts",
+    );
+    expect(debugText).toContain(
+      "plan:corp.economy:tag-payoff%3Aonr_v1_285_closed-accounts",
+    );
+  });
+
+  it("funds the explicit minimum of a visible variable-X tagged payoff", () => {
+    const powerGrid = visibleCard("power-grid", "corp", "operation", {
+      definitionId: "onr_v1_299_power-grid-overload",
+      title: "Power Grid Overload",
+      playCost: {
+        kind: "variable_x",
+        minimumX: 1,
+        creditsPerX: 1,
+        maximumX: { kind: "context" },
+      },
+    });
+    const input = aiInput("corp", [
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "corp", "draw_card", "Draw 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 0;
+    input.playerView.own.gripOrHq = [powerGrid];
+    input.playerView.opponent.tags = 1;
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(debugText).toContain(
+      "plan_assessment_evidence:corp_tag_punish_payoff_funding:onr_v1_299_power-grid-overload",
+    );
+    expect(debugText).toContain(
+      "plan:corp.economy:tag-payoff%3Aonr_v1_299_power-grid-overload",
+    );
   });
 
   it("uses hardware trash payoff over basic credit while the Runner is tagged", () => {
@@ -1402,9 +2479,64 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe("power-grid");
-    expect(debugText).toContain("corp_tagged_runner_payoff_pressure");
-    expect(debugText).toContain("tagged_payoff_kind:hardware_trash");
-    expect(debugText).toContain("runner_hardware_payoff:multiaccess");
+    expect(debugText).toContain("plan_module:corp.execute_punish_sequence");
+    expect(debugText).toContain("plan_step_capability:punish_damage");
+    expect(debugText).toContain(
+      "plan_assessment_evidence:tag_punish_ontology_damage:onr_v1_299_power-grid-overload",
+    );
+  });
+
+  it("does not plan a tag-source conversion when variable-X payoff minimum is unfunded", () => {
+    const chanceObservation = visibleCard(
+      "chance-observation",
+      "corp",
+      "operation",
+      {
+        definitionId: "onr_v1_284_chance-observation",
+        title: "Chance Observation",
+        playCost: { kind: "fixed", credits: 1 },
+      },
+    );
+    const powerGrid = visibleCard("power-grid", "corp", "operation", {
+      definitionId: "onr_v1_299_power-grid-overload",
+      title: "Power Grid Overload",
+      playCost: {
+        kind: "variable_x",
+        minimumX: 1,
+        creditsPerX: 1,
+        maximumX: { kind: "context" },
+      },
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "chance-observation",
+        "corp",
+        "play_operation",
+        "Chance Observation spielen",
+        { clicks: 1, credits: 1 },
+        { source: chanceObservation.instanceId },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+    ]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.gripOrHq = [chanceObservation, powerGrid];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("end-turn");
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      "plan_module:corp.execute_punish_sequence",
+    );
   });
 
   it("trashes a visible Runner credit-bank resource before basic credit while tagged", () => {
@@ -1434,8 +2566,9 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe("trash-broker");
-    expect(debugText).toContain("corp_tagged_runner_payoff_pressure");
-    expect(debugText).toContain("tagged_payoff_kind:resource_trash");
-    expect(debugText).toContain("runner_resource_credit_bank_visible:true");
+    expect(debugText).toContain("plan_module:corp.execute_punish_sequence");
+    expect(debugText).toContain(
+      "plan_assessment_evidence:corp_tagged_runner_visible_credit_bank_trash",
+    );
   });
 });

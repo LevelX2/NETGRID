@@ -1087,6 +1087,23 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       state,
       "onr_v1_299_power-grid-overload",
     );
+    const corpPowerGridView = getPlayerView(state, "corp").own.gripOrHq.find(
+      (card) => card.instanceId === operationId,
+    );
+    expect(corpPowerGridView).toMatchObject({
+      known: true,
+      definitionId: "onr_v1_299_power-grid-overload",
+      playCost: {
+        kind: "variable_x",
+        minimumX: 1,
+        creditsPerX: 1,
+        maximumX: { kind: "context" },
+      },
+    });
+    expect(corpPowerGridView).not.toHaveProperty("cost");
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "onr_v1_299_power-grid-overload",
+    );
 
     let untagged = apply(
       state,
@@ -1240,6 +1257,85 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       [{ clicks: 1, credits: 1 }],
       [{ clicks: 1, credits: 2 }],
     ]);
+    expect(
+      powerGridActions.map((action) => ({
+        xValue: action.payload?.xValue,
+        xMinimum: action.payload?.xMinimum,
+        xMaximum: action.payload?.xMaximum,
+        xUpperBound: action.payload?.xUpperBound,
+        xCreditsPerUnit: action.payload?.xCreditsPerUnit,
+        variableCostKind: action.payload?.variableCostKind,
+      })),
+    ).toEqual([
+      {
+        xValue: 1,
+        xMinimum: 1,
+        xMaximum: 2,
+        xUpperBound: 2,
+        xCreditsPerUnit: 1,
+        variableCostKind: "printed_play_cost",
+      },
+      {
+        xValue: 2,
+        xMinimum: 1,
+        xMaximum: 2,
+        xUpperBound: 2,
+        xCreditsPerUnit: 1,
+        variableCostKind: "printed_play_cost",
+      },
+    ]);
+    expect(new Set(powerGridActions.map((action) => action.actionId)).size).toBe(
+      2,
+    );
+
+    const trashTwo = powerGridActions[1]!;
+    const staleHash = hashState(state);
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: trashTwo.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+      }),
+    ).toMatchObject({ ok: false, error: { code: "ERR_STALE_STATE" } });
+    expect(hashState(state)).toBe(staleHash);
+
+    const underfunded = structuredClone(state);
+    underfunded.corp.credits = 1;
+    const underfundedHash = hashState(underfunded);
+    expect(
+      applyAction(underfunded, {
+        matchId: underfunded.matchId,
+        side: "corp",
+        actionId: trashTwo.actionId,
+        clientKnownStateVersion: underfunded.stateVersion,
+      }),
+    ).toMatchObject({ ok: false, error: { code: "ERR_UNKNOWN_ACTION" } });
+    expect(hashState(underfunded)).toBe(underfundedHash);
+
+    const xTwoInitial = structuredClone(state);
+    const xTwoReplayStart = state.eventLog.length;
+    const creditsBeforeXTwo = state.corp.credits;
+    const xTwoResult = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: trashTwo.actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    expect(xTwoResult.ok).toBe(true);
+    if (!xTwoResult.ok) throw new Error(xTwoResult.error.message);
+    const xTwoState = xTwoResult.state;
+    expect(xTwoState.corp.credits).toBe(creditsBeforeXTwo - 2);
+    expect(xTwoState.pendingChoice).toBeUndefined();
+    expect(xTwoState.runner.heap).toEqual(
+      expect.arrayContaining([rdInterfaceId, simpleHardwareId]),
+    );
+    const xTwoReplay = replayEvents(
+      xTwoInitial,
+      xTwoState.eventLog.slice(xTwoReplayStart),
+    );
+    expect(xTwoReplay.ok).toBe(true);
+    expect(hashState(xTwoReplay.state)).toBe(hashState(xTwoState));
 
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;

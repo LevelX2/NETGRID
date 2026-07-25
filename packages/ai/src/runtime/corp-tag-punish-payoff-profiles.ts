@@ -1,11 +1,8 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type AiDecisionInput,
-  type LegalAction,
-  type VisibleCard,
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
 } from "@netgrid/shared";
-
-import { RUNTIME_CARDS } from "../ai-hints";
 import { isBasicCreditAction } from "../actions/action-effect-classification";
 
 import type { CorpTaggedRunnerPayoffActionProfile } from "./corp-scoring-assessment-types";
@@ -148,6 +145,7 @@ function corpVisibleTaggedPayoffFundingTarget(
         return undefined;
       }
       const cost = corpVisibleCardPlayCost(card);
+      if (cost === undefined) return undefined;
       if (currentCredits >= cost || creditsAfterAction < cost) return undefined;
       return {
         definitionId: card.definitionId,
@@ -190,13 +188,25 @@ function corpNumericPayload(action: LegalAction, key: string): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
-export function corpVisibleCardPlayCost(card: VisibleCard): number {
-  return (
-    card.cost ??
-    (card.definitionId
-      ? (RUNTIME_CARDS[card.definitionId]?.numeric.cost ??
-        CARD_DEFINITIONS_BY_ID[card.definitionId]?.cost)
-      : undefined) ??
-    0
-  );
+export function corpVisibleCardPlayCost(
+  card: VisibleCard,
+): number | undefined {
+  const playCost = card.playCost;
+  if (playCost === undefined) return undefined;
+  if (playCost.kind === "fixed") {
+    return Number.isInteger(playCost.credits) && playCost.credits >= 0
+      ? playCost.credits
+      : undefined;
+  }
+  if (
+    playCost.kind !== "variable_x" ||
+    !Number.isInteger(playCost.minimumX) ||
+    playCost.minimumX < 1 ||
+    !Number.isInteger(playCost.creditsPerX) ||
+    playCost.creditsPerX < 1 ||
+    playCost.maximumX?.kind !== "context"
+  ) {
+    return undefined;
+  }
+  return playCost.minimumX * playCost.creditsPerX;
 }

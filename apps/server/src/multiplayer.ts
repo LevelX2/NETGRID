@@ -11,12 +11,14 @@ import {
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import {
   applyAction,
+  applyRandomizedIceInstallSelection,
   createGame,
   getLegalActions,
   getPlayerView,
   hashState,
   isHiddenInfoBarrierEvent,
   replayEvents,
+  quoteRandomizedIceInstallSelection,
 } from "@netgrid/engine";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
@@ -59,6 +61,8 @@ import {
   type AiDecisionInput,
   type DeckPublicMetadata,
   type EngineError,
+  type EngineRandomizedIceInstallSelectionCommand,
+  type EngineResult,
   type GameEvent,
   type GameState,
   type LegalAction,
@@ -67,6 +71,7 @@ import {
   type PlayerView,
   type PublicGameEvent,
   type RulesBaseline,
+  type ReplayableEngineAction,
   type Side,
   type VisibleCard,
   type Winner,
@@ -738,6 +743,8 @@ export type PreviewAiResult =
 
 type AiDecisionChooser = typeof chooseAiAction;
 type EngineActionApplier = typeof applyAction;
+type EngineRandomizedIceInstallSelectionApplier =
+  typeof applyRandomizedIceInstallSelection;
 type AiStepFailureCode =
   | "ai_no_action"
   | "ai_decision_action_not_legal"
@@ -784,6 +791,7 @@ export class MultiplayerService {
   private readonly now: () => string;
   private readonly chooseAiAction: AiDecisionChooser;
   private readonly applyEngineAction: EngineActionApplier;
+  private readonly applyEngineRandomizedIceInstallSelection: EngineRandomizedIceInstallSelectionApplier;
   private readonly persistenceObservers = new Set<MatchPersistenceObserver>();
 
   constructor(
@@ -796,6 +804,7 @@ export class MultiplayerService {
       now?: () => string;
       chooseAiAction?: AiDecisionChooser;
       applyAction?: EngineActionApplier;
+      applyRandomizedIceInstallSelection?: EngineRandomizedIceInstallSelectionApplier;
     } = {},
   ) {
     this.tokenSalt =
@@ -816,6 +825,9 @@ export class MultiplayerService {
     this.now = options.now ?? (() => new Date().toISOString());
     this.chooseAiAction = options.chooseAiAction ?? chooseAiAction;
     this.applyEngineAction = options.applyAction ?? applyAction;
+    this.applyEngineRandomizedIceInstallSelection =
+      options.applyRandomizedIceInstallSelection ??
+      applyRandomizedIceInstallSelection;
   }
 
   addPersistenceObserver(observer: MatchPersistenceObserver): () => void {
@@ -2884,7 +2896,23 @@ export class MultiplayerService {
       }
       const decision = this.chooseAiAction(aiInput, {
         persistTacticalPlanMemory: false,
+        quoteRandomizedIceInstallSelection: (request) =>
+          quoteRandomizedIceInstallSelection(record.gameState, request),
       });
+      if (
+        decision.selectionKind === "engine_randomized_ice_install_selection"
+      ) {
+        return {
+          ok: false,
+          error: safeError(
+            "ai_randomized_selection_requires_execution",
+            "Diese KI-Entscheidung wird erst bei der Ausführung durch die Engine ausgewählt.",
+            record.gameState,
+            input.side,
+          ),
+          payload: this.payloadFor(record, input.side),
+        };
+      }
       const legalAction = legalActionForAiDecision(decision, legalActions);
       if (!legalAction) {
         return {
@@ -4710,9 +4738,18 @@ export class MultiplayerService {
         return { ok: false, code: error.code };
       throw error;
     }
-    const decision = this.chooseAiAction(input);
-    const legalAction = legalActionForAiDecision(decision, legalActions);
-    if (!legalAction)
+    const decision = this.chooseAiAction(input, {
+      quoteRandomizedIceInstallSelection: (request) =>
+        quoteRandomizedIceInstallSelection(state, request),
+    });
+    const directLegalAction =
+      decision.selectionKind === "engine_randomized_ice_install_selection"
+        ? undefined
+        : legalActionForAiDecision(decision, legalActions);
+    if (
+      decision.selectionKind !== "engine_randomized_ice_install_selection" &&
+      !directLegalAction
+    )
       return { ok: false, code: "ai_decision_action_not_legal" };
     const snapshot = this.snapshotFor(
       record.match.matchId,
@@ -4721,26 +4758,52 @@ export class MultiplayerService {
       `snap_before_${state.stateVersion + 1}`,
       false,
     );
-    const result = this.applyEngineAction(
-      state,
-      {
-        matchId: record.match.matchId,
-        side,
-        actionId: legalAction.actionId,
-        clientKnownStateVersion: state.stateVersion,
-        ...(decision.selectedChoices
-          ? { selectedChoices: decision.selectedChoices }
-          : {}),
-        idempotencyKey: `ai-${side}-${state.stateVersion}`,
-      },
-      { publicEventsMode: "latest" },
-    );
-    if (!result.ok) {
-      return {
-        ok: false,
-        code: "ai_engine_action_rejected",
-        engineErrorCode: result.error.code,
-      };
+    let result: Extract<EngineResult, { ok: true }>;
+    let legalAction: LegalAction;
+    if (decision.selectionKind === "engine_randomized_ice_install_selection") {
+      const randomizedResult = this.applyEngineRandomizedIceInstallSelection(
+        state,
+        {
+          ...decision.engineCommand,
+          idempotencyKey:
+            decision.engineCommand.idempotencyKey ??
+            `ai-${side}-${state.stateVersion}`,
+        },
+        { publicEventsMode: "latest" },
+      );
+      if (!randomizedResult.ok) {
+        return {
+          ok: false,
+          code: "ai_engine_action_rejected",
+          engineErrorCode: randomizedResult.error.code,
+        };
+      }
+      result = randomizedResult;
+      legalAction = randomizedResult.receipt.selectedLegalAction;
+    } else {
+      const directResult = this.applyEngineAction(
+        state,
+        {
+          matchId: record.match.matchId,
+          side,
+          actionId: directLegalAction!.actionId,
+          clientKnownStateVersion: state.stateVersion,
+          ...(decision.selectedChoices
+            ? { selectedChoices: decision.selectedChoices }
+            : {}),
+          idempotencyKey: `ai-${side}-${state.stateVersion}`,
+        },
+        { publicEventsMode: "latest" },
+      );
+      if (!directResult.ok) {
+        return {
+          ok: false,
+          code: "ai_engine_action_rejected",
+          engineErrorCode: directResult.error.code,
+        };
+      }
+      result = directResult;
+      legalAction = directLegalAction!;
     }
     const event: GameEvent = {
       ...result.event,
@@ -5274,7 +5337,9 @@ function legalActionForAiDecision(
   decision: AiDecision,
   legalActions: readonly LegalAction[],
 ): LegalAction | undefined {
-  if (!decision.actionId) return undefined;
+  if (decision.selectionKind === "engine_randomized_ice_install_selection") {
+    return undefined;
+  }
   return legalActions.find(
     (candidate) => candidate.actionId === decision.actionId,
   );
@@ -5369,7 +5434,9 @@ function replayStateHashChecks(record: StoredMatch): {
     }
 
     const beforeRandomCounter = replayState.randomCounter;
-    const result = applyAction(replayState, replayAction);
+    const result = isRandomizedIceInstallSelectionCommand(replayAction)
+      ? applyRandomizedIceInstallSelection(replayState, replayAction)
+      : applyAction(replayState, replayAction);
     if (!result.ok) {
       byEventId[event.eventId] = {
         ok: false,
@@ -5466,7 +5533,9 @@ function replayPlayerViewFor(state: GameState, side: Side): PlayerView {
   };
 }
 
-function replayActionFromEvent(event: GameEvent): PlayerAction | undefined {
+function replayActionFromEvent(
+  event: GameEvent,
+): ReplayableEngineAction | undefined {
   const payload = event.privatePayload;
   if (!payload || typeof payload !== "object") return undefined;
   for (const side of ["runner", "corp"] as const) {
@@ -5474,6 +5543,15 @@ function replayActionFromEvent(event: GameEvent): PlayerAction | undefined {
     if (!local || typeof local !== "object" || !("action" in local)) continue;
     const action = (local as { action?: unknown }).action;
     if (!action || typeof action !== "object") continue;
+    if (
+      "kind" in action &&
+      action.kind === "engine_randomized_ice_install_selection"
+    ) {
+      const command =
+        action as Partial<EngineRandomizedIceInstallSelectionCommand>;
+      if (!command.quote || typeof command.quote !== "object") return undefined;
+      return command as EngineRandomizedIceInstallSelectionCommand;
+    }
     const candidate = action as Partial<PlayerAction>;
     if (candidate.side !== "runner" && candidate.side !== "corp") continue;
     if (
@@ -5486,6 +5564,15 @@ function replayActionFromEvent(event: GameEvent): PlayerAction | undefined {
     return candidate as PlayerAction;
   }
   return undefined;
+}
+
+function isRandomizedIceInstallSelectionCommand(
+  action: ReplayableEngineAction,
+): action is EngineRandomizedIceInstallSelectionCommand {
+  return (
+    "kind" in action &&
+    action.kind === "engine_randomized_ice_install_selection"
+  );
 }
 
 function replayTimelineStepFor(input: {
@@ -5651,7 +5738,7 @@ function aiDecisionTraceFor(
     side,
     turn,
     decisionIndex,
-    selectedActionId: decision.actionId,
+    selectedActionId: legalAction.actionId,
     selectedActionType,
     ...(planKind ? { planKind } : {}),
     ...(score !== undefined ? { score } : {}),
@@ -5962,9 +6049,15 @@ function actionCreditCost(action: LegalAction): number {
 function replayRandomDrawEntries(record: StoredMatch): ReplayRandomDrawEntry[] {
   return record.gameState.randomDrawRecords.map((entry) => ({
     counter: entry.counter,
-    purpose: entry.purpose,
+    purpose: publicReplayRandomPurpose(entry.purpose),
     valueHash: `fnv1a:${fnv1a(String(entry.value))}`,
   }));
+}
+
+function publicReplayRandomPurpose(purpose: string): string {
+  return purpose.includes("engine.randomized_ice_install_selection")
+    ? "engine_randomized_ice_install_selection"
+    : purpose;
 }
 
 function replayExploitSuggestions(

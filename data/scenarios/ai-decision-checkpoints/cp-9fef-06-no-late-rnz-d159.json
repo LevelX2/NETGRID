@@ -10960,17 +10960,20 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "actionId": "runner.start_run.remote_1"
-      },
-      {
-        "actionId": "runner.draw_card"
-      },
-      {
-        "actionId": "runner.gain_credit"
-      }
-    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.pressure_central"
+      ],
+      "acceptableCapabilities": [
+        "pressure_hq_information"
+      ],
+      "requiredAssessmentEvidence": [
+        "target:hq"
+      ]
+    },
+    "requiredAction": {
+      "actionId": "runner.start_run.hq"
+    },
     "forbiddenActions": [
       {
         "sourceDefinitionId": "onr_v1_173_restrictive-net-zoning"

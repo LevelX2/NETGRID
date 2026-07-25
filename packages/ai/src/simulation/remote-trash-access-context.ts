@@ -41,6 +41,7 @@ export type RunnerRemoteTrashAccessContext = {
   corpValueRemaining: number;
   legalTrashActionCount: number;
   centralAccess: boolean;
+  installedRootAccess: boolean;
   allInGeneralTrash: boolean;
   accessServerId?: string;
   evidence: string[];
@@ -80,12 +81,17 @@ export function buildRunnerRemoteTrashAccessContext(
       corpValueRemaining: 0,
       legalTrashActionCount: 0,
       centralAccess: false,
+      installedRootAccess: false,
       allInGeneralTrash: false,
       ...(accessServerId ? { accessServerId } : {}),
       evidence: ["remote_trash_access:none"],
     };
   }
   const targetType = remoteTrashTargetTypeForVisibleCard(accessed);
+  const installedRootAccess =
+    input.playerView.servers
+      .find((server) => server.id === accessServerId)
+      ?.root.some((card) => card.instanceId === accessed.instanceId) === true;
   const structuredRemoteRole = getStructuredRemoteRoleForCard(
     accessed.definitionId,
   );
@@ -202,6 +208,7 @@ export function buildRunnerRemoteTrashAccessContext(
     corpValueRemaining,
     legalTrashActionCount,
     centralAccess,
+    installedRootAccess,
     allInGeneralTrash,
     evidence: [
       `access_trash_scope:${centralAccess ? "central" : "remote"}`,
@@ -233,6 +240,7 @@ export function buildRunnerRemoteTrashAccessContext(
       `remote_trash_acute_threat:${acuteThreat}`,
       `remote_trash_deferred_by_budget:${deferredByBudget}`,
       `central_access_trash:${centralAccess}`,
+      `accessed_card_installed_root:${installedRootAccess}`,
       `central_access_trash_all_in_budget_risk:${centralBudgetDeferral}`,
       `remote_trash_finite_pool_economy:${finitePoolEconomy}`,
       `remote_trash_bbs_whispering_campaign:${bbsWhisperingCampaign}`,

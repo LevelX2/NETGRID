@@ -8,6 +8,7 @@ import { RUNTIME_CARDS } from "../../ai-hints";
 import { endTheRunSubroutineCount } from "../../visible-run-analysis";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
 import { decisionDerivedValue } from "../decision-derived-cache";
+import { readExactCurrentInstalledCorpIceRezQuote } from "../corp-exact-ice-rez-route";
 import type {
   CorpScoringWindowAgendaStealSeverity,
   CorpScoringWindowAssessment,
@@ -228,6 +229,7 @@ function scoringWindowVisibleInTurnAdvancementBurstAvailable<
     const burstCounters = scoringWindowVisibleAdvancementBurstAmount(card);
     if (burstCounters <= 0) return false;
     const operationCost = scoringWindowVisibleOperationCost(card);
+    if (operationCost === undefined) return false;
     const basicAdvancesNeeded = Math.max(0, requirement - burstCounters);
     const clicksNeeded = 1 + basicAdvancesNeeded;
     const creditsNeeded = operationCost + basicAdvancesNeeded;
@@ -266,31 +268,27 @@ function scoringWindowVisibleAdvancementBurstAmount(card: VisibleCard): number {
   return scoringWindowPositiveInteger(amountToken);
 }
 
-function scoringWindowVisibleOperationCost(card: VisibleCard): number {
-  const runtimeNumeric =
-    card.definitionId !== undefined
-      ? (
-          RUNTIME_CARDS[card.definitionId] as
-            | {
-                numeric?: {
-                  cost?: number | null;
-                  installCost?: number | null;
-                };
-              }
-            | undefined
-        )?.numeric
+function scoringWindowVisibleOperationCost(
+  card: VisibleCard,
+): number | undefined {
+  const playCost = card.playCost;
+  if (playCost === undefined) return undefined;
+  if (playCost.kind === "fixed") {
+    return Number.isInteger(playCost.credits) && playCost.credits >= 0
+      ? playCost.credits
       : undefined;
-  const demoCost =
-    card.definitionId !== undefined
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.cost
-      : undefined;
-  return (
-    positiveVisibleNumber(card.cost) ??
-    positiveVisibleNumber(runtimeNumeric?.cost) ??
-    positiveVisibleNumber(runtimeNumeric?.installCost) ??
-    positiveVisibleNumber(demoCost) ??
-    0
-  );
+  }
+  if (
+    playCost.kind !== "variable_x" ||
+    !Number.isInteger(playCost.minimumX) ||
+    playCost.minimumX < 1 ||
+    !Number.isInteger(playCost.creditsPerX) ||
+    playCost.creditsPerX < 1 ||
+    playCost.maximumX?.kind !== "context"
+  ) {
+    return undefined;
+  }
+  return playCost.minimumX * playCost.creditsPerX;
 }
 
 function scoringWindowPositiveInteger(value: string | undefined): number {
@@ -346,15 +344,13 @@ export function scoringWindowRunnerExposureCreditActions(
   return Math.max(3, availableRunnerClicks - 1);
 }
 
-export function scoringWindowRezBudget<TServer extends CorpServerLike>(
+export function scoringWindowRezBudget(
+  input: AiDecisionInput,
   server: CorpServerLike | undefined,
   creditsAfterAction: number,
-  dependencies: Pick<
-    SemanticRuntimeCorpScoringWindowDependencies<TServer>,
-    "visibleIceRezCost"
-  >,
   preExposureAdvancementCreditReserve = 0,
 ): {
+  knowledge: "known" | "unknown";
   corpCanRezRelevantIce: boolean;
   corpCanRezFullPath: boolean;
   affordableIceCount: number;
@@ -368,11 +364,22 @@ export function scoringWindowRezBudget<TServer extends CorpServerLike>(
   corpCanRezFullPathWithDynamicReserve: boolean;
   evidence: string[];
 } {
+  if (
+    !nonNegativeSafeInteger(creditsAfterAction) ||
+    !nonNegativeSafeInteger(preExposureAdvancementCreditReserve)
+  ) {
+    return unknownScoringWindowRezBudget({
+      creditsAfterAction,
+      preExposureAdvancementCreditReserve,
+      effectiveCreditsAfterReserve: undefined,
+      reason: "invalid_credit_input",
+    });
+  }
   const effectiveCreditsAfterReserve =
-    creditsAfterAction -
-    Math.max(0, Math.floor(preExposureAdvancementCreditReserve));
+    creditsAfterAction - preExposureAdvancementCreditReserve;
   if (!server || server.ice.length === 0) {
     return {
+      knowledge: "known",
       corpCanRezRelevantIce: false,
       corpCanRezFullPath: false,
       affordableIceCount: 0,
@@ -391,11 +398,30 @@ export function scoringWindowRezBudget<TServer extends CorpServerLike>(
       ],
     };
   }
-  const rezCosts = server.ice.map((ice) =>
-    ice.rezzed === true
-      ? 0
-      : Math.max(0, dependencies.visibleIceRezCost(ice) ?? 2),
-  );
+  const rezCosts: number[] = [];
+  for (const ice of server.ice) {
+    if (ice.rezzed === true) {
+      rezCosts.push(0);
+      continue;
+    }
+    const quoteRead = readExactCurrentInstalledCorpIceRezQuote({
+      input,
+      sourceCard: ice,
+      targetServerId: server.id,
+    });
+    if (
+      !quoteRead ||
+      quoteRead.quote.mandatoryAdditionalCosts.agendaPoints !== 0
+    ) {
+      return unknownScoringWindowRezBudget({
+        creditsAfterAction,
+        preExposureAdvancementCreditReserve,
+        effectiveCreditsAfterReserve,
+        reason: `unknown_installed_rez_quote:${ice.instanceId}`,
+      });
+    }
+    rezCosts.push(quoteRead.totalRezCredits);
+  }
   const qualities = server.ice.map((ice, iceIndex) =>
     scoringWindowIceQuality(server, ice, iceIndex),
   );
@@ -408,13 +434,13 @@ export function scoringWindowRezBudget<TServer extends CorpServerLike>(
   const relevantIceCount = relevantRezCosts.length;
   const durableRelevantIceCount = durableRelevantRezCosts.length;
   const affordableIceCount = rezCosts.filter(
-    (cost) => cost <= Math.max(0, effectiveCreditsAfterReserve),
+    (cost) => cost <= effectiveCreditsAfterReserve,
   ).length;
   const affordableRelevantIceCount = relevantRezCosts.filter(
-    (cost) => cost <= Math.max(0, effectiveCreditsAfterReserve),
+    (cost) => cost <= effectiveCreditsAfterReserve,
   ).length;
   const affordableDurableRelevantIceCount = durableRelevantRezCosts.filter(
-    (cost) => cost <= Math.max(0, effectiveCreditsAfterReserve),
+    (cost) => cost <= effectiveCreditsAfterReserve,
   ).length;
   const weakPositionScalingIceCount = qualities.filter(
     (quality) => quality.weakPositionScaling,
@@ -432,6 +458,7 @@ export function scoringWindowRezBudget<TServer extends CorpServerLike>(
   const totalRezCostWithDynamicReserve =
     totalRezCost + dynamicProtectionReserve;
   return {
+    knowledge: "known",
     corpCanRezRelevantIce:
       relevantRezCosts.length > 0 &&
       effectiveCreditsAfterReserve >= minimumRezCost,
@@ -464,6 +491,39 @@ export function scoringWindowRezBudget<TServer extends CorpServerLike>(
       `remote_rez_budget:dynamic_protection_reserve:${dynamicProtectionReserve}`,
     ],
   };
+}
+
+function unknownScoringWindowRezBudget(params: {
+  creditsAfterAction: number;
+  preExposureAdvancementCreditReserve: number;
+  effectiveCreditsAfterReserve: number | undefined;
+  reason: string;
+}): ReturnType<typeof scoringWindowRezBudget> {
+  return {
+    knowledge: "unknown",
+    corpCanRezRelevantIce: false,
+    corpCanRezFullPath: false,
+    affordableIceCount: 0,
+    relevantIceCount: 0,
+    affordableRelevantIceCount: 0,
+    durableRelevantIceCount: 0,
+    affordableDurableRelevantIceCount: 0,
+    weakPositionScalingIceCount: 0,
+    dynamicProtectionWeaknessCount: 0,
+    dynamicProtectionReserve: 0,
+    corpCanRezFullPathWithDynamicReserve: false,
+    evidence: [
+      "remote_rez_budget:knowledge:unknown",
+      `remote_rez_budget:${params.reason}`,
+      `remote_rez_budget:credits_after_action:${params.creditsAfterAction}`,
+      `remote_rez_budget:pre_exposure_advancement_credit_reserve:${params.preExposureAdvancementCreditReserve}`,
+      `remote_rez_budget:credits_after_pre_exposure_reserve:${params.effectiveCreditsAfterReserve ?? "unknown"}`,
+    ],
+  };
+}
+
+function nonNegativeSafeInteger(value: unknown): value is number {
+  return Number.isSafeInteger(value) && (value as number) >= 0;
 }
 
 function scoringWindowIceQuality(
@@ -943,6 +1003,7 @@ export function scoringWindowRecommendedNextStep(params: {
   ) {
     return "advance";
   }
+  if (params.rezBudget.knowledge === "unknown") return "none";
   if (
     (params.windowKind === "temporary_safe" ||
       params.windowKind === "durable") &&
@@ -1036,9 +1097,9 @@ export function strongestExistingScoringRemote<TServer extends CorpServerLike>(
     }
     const access = scoringWindowAccessAssessment(input, candidate);
     const rezBudget = scoringWindowRezBudget(
+      input,
       candidate,
       input.playerView.own.credits,
-      dependencies,
     );
     const kind = scoringWindowKind({
       action: {

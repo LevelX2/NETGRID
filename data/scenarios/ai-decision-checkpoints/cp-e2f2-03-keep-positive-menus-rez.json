@@ -5556,15 +5556,26 @@
   "expectation": {
     "acceptableActions": [
       {
-        "sourceDefinitionId": "onr_proteus_032_misleading-access-menus",
-        "type": "rez_ice"
+        "type": "decline_rez"
       }
     ],
     "contractKind": "correctness",
     "forbiddenActions": [
       {
-        "type": "decline_rez"
+        "sourceDefinitionId": "onr_proteus_032_misleading-access-menus",
+        "type": "rez_ice"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "corp.defend_servers"
+      ],
+      "acceptableCapabilities": [
+        "allocate_server_defense"
+      ],
+      "requiredAssessmentEvidence": [
+        "visible_rez_window_decline_without_defense_threat"
+      ]
+    }
   }
 }

@@ -55,6 +55,10 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
+      "variableStrength": {
+        "kind": "random_die",
+        "dieSides": 6
+      },
       "text": "1: Break sentry subroutine. 1: +1 strength. At the start of each run, roll a die to determine AI Boon’s strength for that run.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
@@ -2420,8 +2424,8 @@
         "sabotage"
       ],
       "numeric": {
-        "cost": null,
-        "installCost": 3,
+        "cost": 3,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -2450,8 +2454,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -2512,8 +2516,8 @@
         "sabotage"
       ],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -2572,8 +2576,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -2696,8 +2700,8 @@
         "sabotage"
       ],
       "numeric": {
-        "cost": null,
-        "installCost": 1,
+        "cost": 1,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -2726,8 +2730,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -2758,8 +2762,8 @@
         "sabotage"
       ],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -2788,8 +2792,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 2,
+        "cost": 2,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -2850,8 +2854,8 @@
         "bbs"
       ],
       "numeric": {
-        "cost": null,
-        "installCost": 1,
+        "cost": 1,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -2880,8 +2884,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -2910,8 +2914,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3062,8 +3066,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3092,8 +3096,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 3,
+        "cost": 3,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3124,8 +3128,8 @@
         "bbs"
       ],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3184,8 +3188,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3214,8 +3218,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3247,8 +3251,8 @@
         "random"
       ],
       "numeric": {
-        "cost": null,
-        "installCost": 1,
+        "cost": 1,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3279,8 +3283,8 @@
         "sabotage"
       ],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3403,8 +3407,8 @@
         "sabotage"
       ],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3433,8 +3437,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 3,
+        "cost": 3,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3463,8 +3467,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 1,
+        "cost": 1,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3493,8 +3497,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 2,
+        "cost": 2,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3523,8 +3527,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 4,
+        "cost": 4,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3615,8 +3619,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 3,
+        "cost": 3,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -3645,8 +3649,8 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -9158,8 +9162,8 @@
       "type": "operation",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 1,
+        "cost": 1,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -9220,8 +9224,8 @@
       "type": "operation",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 1,
+        "cost": 1,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -9250,8 +9254,8 @@
       "type": "operation",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 10,
+        "cost": 10,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -9312,8 +9316,8 @@
       "type": "operation",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -9372,8 +9376,8 @@
       "type": "operation",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -9434,8 +9438,8 @@
         "gray ops"
       ],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -9475,6 +9479,14 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
+      "playCost": {
+        "kind": "variable_x",
+        "minimumX": 1,
+        "creditsPerX": 1,
+        "maximumX": {
+          "kind": "context"
+        }
+      },
       "text": "Play only if Runner is tagged. Trash X pieces of hardware, other than cybernetics.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
@@ -9496,8 +9508,8 @@
       "type": "operation",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 12,
+        "cost": 12,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -9590,8 +9602,8 @@
       "type": "operation",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 0,
+        "cost": 0,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -9620,8 +9632,8 @@
       "type": "operation",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 5,
+        "cost": 5,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,
@@ -9650,8 +9662,8 @@
       "type": "operation",
       "subtypes": [],
       "numeric": {
-        "cost": null,
-        "installCost": 1,
+        "cost": 1,
+        "installCost": null,
         "memoryCost": null,
         "strength": null,
         "rezCost": null,

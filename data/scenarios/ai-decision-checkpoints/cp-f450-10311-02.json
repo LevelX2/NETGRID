@@ -12793,10 +12793,9 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "start_run"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.score_installed_agenda"],
+      "acceptableCapabilities": ["score_installed_agenda"]
+    }
   }
 }

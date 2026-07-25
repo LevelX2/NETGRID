@@ -66,24 +66,18 @@ export type {
 } from "./runtime/ai-decision-input";
 export {
   assessCorpIcePlacementForDiagnostics,
-  buildCorpIceCardPlacementProfile,
-  buildCorpIceDensityProfile,
-  buildCorpServerNeedProfile,
+  buildCorpIceCardFacts,
   classifyCorpFutureRunIcePlacementProfile,
-  corpIcePlacementCandidateForAction,
-  corpIcePlacementEvaluationForActions,
-  corpIcePlacementScoreComponent,
+  corpIcePlacementPostInstallRezCostFact,
 } from "./runtime/corp-ice-placement/corp-ice-placement";
 export type {
   CorpFutureRunIceClass,
-  CorpIceCardPlacementProfile,
-  CorpIceDensityProfile,
-  CorpIcePlacementCandidate,
+  CorpIceCardFacts,
   CorpIcePlacementDiagnosticsAssessment,
-  CorpIcePlacementEvaluation,
-  CorpIcePlacementRecommendation,
-  CorpServerNeedProfile,
+  CorpIcePlacementResultingPosition,
 } from "./runtime/corp-ice-placement/corp-ice-placement";
+export { buildCorpIceDensityProfile } from "./runtime/corp-economy/corp-ice-density";
+export type { CorpIceDensityProfile } from "./runtime/corp-economy/corp-ice-density";
 export {
   buildTargetRef,
   targetRefFromIdentity,
@@ -338,6 +332,7 @@ export {
 } from "./runner-hand-development";
 export type {
   EvaluateRunnerHandDevelopmentParams,
+  RunnerHandDevelopmentActivationPrerequisite,
   RunnerHandDevelopmentAvailability,
   RunnerHandDevelopmentCurrentNeed,
   RunnerHandDevelopmentDeferReason,

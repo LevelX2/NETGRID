@@ -11629,16 +11629,30 @@
     }
   },
   "expectation": {
-    "forbiddenActions": [
-      {
-        "type": "gain_credit"
-      }
-    ],
     "acceptableActions": [
       {
         "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
         "type": "install_card"
       }
-    ]
+    ],
+    "forbiddenActions": [
+      {
+        "type": "gain_credit"
+      }
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "corp.economy"
+      ],
+      "acceptableCapabilities": [
+        "develop_or_convert_corp_economy"
+      ],
+      "requiredAssessmentEvidence": [
+      "corp_visible_economy_campaign:onr_v1_309_bbs-whispering-campaign:install"
+      ],
+      "forbiddenCapabilities": [
+        "gain_general_liquid_credits"
+      ]
+    }
   }
 }

@@ -7638,7 +7638,7 @@
         {
           "kind": "search",
           "scope": "runner",
-          "target": "card_search",
+          "target": "program_search",
           "timing": "action"
         },
         {
@@ -7661,8 +7661,11 @@
           "timing": "action"
         }
       ],
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
       "manualNotes": [
-        "AI018 review adjustment: generic any-card search/recovery is deferred until a non-breaker search/recovery strategy exists."
+        "The printed effect searches specifically for a program; plan admission therefore requires a concrete program target such as missing breaker coverage."
       ],
       "planRoles": [
         "runner_play_event",
@@ -8129,6 +8132,7 @@
         "connection",
         "event",
         "hidden_zone_tool",
+        "program_search",
         "stack_search"
       ],
       "scenarioRefs": [
@@ -8141,9 +8145,9 @@
           "hiddenInfoPolicy": "public_or_controller_known_only",
           "kind": "use_target",
           "preferences": [],
-          "purpose": "generic_card_tutor",
+          "purpose": "program_search",
           "schemaVersion": "target-profile-v1",
-          "targetType": "card",
+          "targetType": "program",
           "timing": "on_play"
         }
       ],
@@ -8156,7 +8160,7 @@
         "setup.search"
       ],
       "functionSignals": [
-        "setup.card_search",
+        "setup.program_search",
         "setup.search"
       ]
     },
@@ -34330,8 +34334,8 @@
         "strategyCovered": true
       },
       "remoteRole": {
-        "kind": "ambush",
-        "serverScope": "remote",
+        "kind": "tag_punish_asset",
+        "serverScope": "server",
         "threatLevel": "medium"
       },
       "requiredMechanics": [

@@ -25,6 +25,7 @@ type RunnerAccessTrashContext = {
   reserveTarget: number;
   deferredByBudget: boolean;
   centralAccess: boolean;
+  installedRootAccess?: boolean;
   accessServerId?: string;
   targetType?: string;
   role?: string;

@@ -5,8 +5,11 @@ import { instantiatePlanProposal } from "./plan-instance";
 import {
   createRunnerCorePlanModules,
   runnerDevelopmentCardAdmission,
+  runnerFundingRouteCandidateIsMaterializable,
   type RunnerCorePlanDomain,
 } from "./runner-core-plan-modules";
+import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
+import { reconcileResidentPlanPortfolio } from "./resident-plan-portfolio";
 import type { PlanSchedulerContext } from "./plan-scheduler";
 
 describe("Runner core plan modules", () => {
@@ -14,11 +17,378 @@ describe("Runner core plan modules", () => {
     expect(
       createRunnerCorePlanModules().map((module) => module.moduleId),
     ).toEqual([
+      "runner.score_installed_agenda",
+      "runner.resource_lifecycle",
+      "runner.credit_bank",
+      "runner.recurring_economy",
       "runner.economy",
       "runner.rig_and_coverage",
       "runner.defense_and_recovery",
-      "runner.basic_credit",
     ]);
+  });
+
+  it("keeps credit-bank cashouts outside generic funding-route search", () => {
+    const basicCredit = candidate("basic-credit");
+    const bankCashout = candidate("bank-cashout");
+    bankCashout.economyProjection = {
+      ...bankCashout.economyProjection!,
+      grossLiquidCreditGain: 6,
+      netLiquidCreditGain: 6,
+      storedCreditsTaken: 6,
+      payoutMode: "all_available",
+      repeatable: "unknown",
+      source: "legal_action_payload",
+    };
+
+    expect(runnerFundingRouteCandidateIsMaterializable(basicCredit)).toBe(true);
+    expect(runnerFundingRouteCandidateIsMaterializable(bankCashout)).toBe(
+      false,
+    );
+  });
+
+  it("binds a profitable card-sourced EndTurn to its resource lifecycle plan", () => {
+    const lifecycle = coreModule("runner.resource_lifecycle");
+    const leavePlay = candidate(
+      "leave-loan",
+      "end_turn",
+      "turn_flow.end_turn",
+      "onr_v1_168_loan-from-chiba",
+    );
+    leavePlay.sourceCardInstanceId = "loan-1";
+    const runnerContext = context([leavePlay], {
+      resourceLifecycle: [
+        {
+          lifecycleId: "onr_v1_168_loan-from-chiba",
+          sourceCardInstanceId: "loan-1",
+          definitionId: "onr_v1_168_loan-from-chiba",
+          phase: "leave_play",
+          actionIds: [leavePlay.actionId],
+          priorityClass: "P5",
+          value: 2,
+          evidenceCodes: [
+            "runner_loan_from_chiba_leave_avoids_visible_long_horizon_liability:12",
+          ],
+        },
+      ],
+    });
+    const [proposal] = lifecycle.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+
+    expect(proposal).toMatchObject({
+      target: { kind: "card", id: "loan-1" },
+      initialViability: "ready",
+    });
+    expect(
+      lifecycle
+        .materialize(instance, {} as never, runnerContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([leavePlay.actionId]);
+  });
+
+  it("keeps simultaneous Loan-from-Chiba lifecycle plans bound to their own instances", () => {
+    const lifecycle = coreModule("runner.resource_lifecycle");
+    const firstLoanEnd = candidate(
+      "leave-loan-1",
+      "end_turn",
+      "turn_flow.end_turn",
+      "onr_v1_168_loan-from-chiba",
+    );
+    firstLoanEnd.sourceCardInstanceId = "loan-1";
+    const secondLoanEnd = candidate(
+      "leave-loan-2",
+      "end_turn",
+      "turn_flow.end_turn",
+      "onr_v1_168_loan-from-chiba",
+    );
+    secondLoanEnd.sourceCardInstanceId = "loan-2";
+    const runnerContext = context([firstLoanEnd, secondLoanEnd], {
+      resourceLifecycle: [
+        {
+          lifecycleId: "onr_v1_168_loan-from-chiba:loan-1",
+          sourceCardInstanceId: "loan-1",
+          definitionId: "onr_v1_168_loan-from-chiba",
+          phase: "leave_play",
+          actionIds: [firstLoanEnd.actionId],
+          priorityClass: "P5",
+          value: 2,
+          evidenceCodes: ["runner_loan_from_chiba_leave_play"],
+        },
+        {
+          lifecycleId: "onr_v1_168_loan-from-chiba:loan-2",
+          sourceCardInstanceId: "loan-2",
+          definitionId: "onr_v1_168_loan-from-chiba",
+          phase: "leave_play",
+          actionIds: [secondLoanEnd.actionId],
+          priorityClass: "P5",
+          value: 2,
+          evidenceCodes: ["runner_loan_from_chiba_leave_play"],
+        },
+      ],
+    });
+    const proposals = lifecycle.discover(runnerContext);
+
+    expect(proposals).toHaveLength(2);
+    expect(proposals.map((proposal) => proposal.target?.id).sort()).toEqual([
+      "loan-1",
+      "loan-2",
+    ]);
+    expect(
+      proposals.map((proposal) =>
+        lifecycle
+          .materialize(
+            instantiatePlanProposal(proposal, 10),
+            {} as never,
+            runnerContext,
+          )
+          .candidates.map((entry) => entry.candidate.actionId),
+      ),
+    ).toEqual([["leave-loan-1"], ["leave-loan-2"]]);
+  });
+
+  it("keeps two Loan lifecycle funding children bound to their exact blocked parents", () => {
+    const lifecycle = coreModule("runner.resource_lifecycle");
+    const economy = coreModule("runner.economy");
+    const parentOne =
+      "plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1";
+    const parentTwo =
+      "plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-2";
+    const credit = candidate("credit");
+    const runnerContext = context([credit], {
+      resourceLifecycle: [
+        {
+          lifecycleId: "onr_v1_168_loan-from-chiba:loan-1",
+          sourceCardInstanceId: "loan-1",
+          definitionId: "onr_v1_168_loan-from-chiba",
+          phase: "retain",
+          actionIds: [],
+          rejectedActionIds: ["leave-loan-1"],
+          supportNeedId: "resource-lifecycle-support:loan-1",
+          marginalValue: 10,
+          priorityClass: "P5",
+          value: 10,
+          evidenceCodes: ["runner_loan_waiting_for_funding"],
+        },
+        {
+          lifecycleId: "onr_v1_168_loan-from-chiba:loan-2",
+          sourceCardInstanceId: "loan-2",
+          definitionId: "onr_v1_168_loan-from-chiba",
+          phase: "retain",
+          actionIds: [],
+          rejectedActionIds: ["leave-loan-2"],
+          supportNeedId: "resource-lifecycle-support:loan-2",
+          marginalValue: 10,
+          priorityClass: "P5",
+          value: 10,
+          evidenceCodes: ["runner_loan_waiting_for_funding"],
+        },
+      ],
+      fundingNeeds: [
+        {
+          kind: "parent_plan_support",
+          ...fundingRouteContract(credit.actionId),
+          needId: "resource-lifecycle-support:loan-1",
+          parentPlanInstanceId: parentOne,
+          driver: {
+            kind: "resource_lifecycle",
+            targetId: "loan-1",
+            reasonCode: "fund_exact_lifecycle_leave_play_payment",
+          },
+          targetCredits: 10,
+          currentCreditsAtRevalidation: 9,
+          gap: 1,
+          priorityClass: "P5",
+          revalidation: {
+            stateVersion: 10,
+            status: "material_parent_open",
+          },
+          evidenceCode: "runner_loan_waiting_for_funding",
+        },
+        {
+          kind: "parent_plan_support",
+          ...fundingRouteContract(credit.actionId),
+          needId: "resource-lifecycle-support:loan-2",
+          parentPlanInstanceId: parentTwo,
+          driver: {
+            kind: "resource_lifecycle",
+            targetId: "loan-2",
+            reasonCode: "fund_exact_lifecycle_leave_play_payment",
+          },
+          targetCredits: 10,
+          currentCreditsAtRevalidation: 9,
+          gap: 1,
+          priorityClass: "P5",
+          revalidation: {
+            stateVersion: 10,
+            status: "material_parent_open",
+          },
+          evidenceCode: "runner_loan_waiting_for_funding",
+        },
+      ],
+    });
+
+    const parentProposals = lifecycle.discover(runnerContext);
+    const childProposals = economy.discover(runnerContext);
+
+    expect(
+      parentProposals.map((proposal) => ({
+        id: instantiatePlanProposal(proposal, 10).instanceId,
+        blocker: proposal.blockers[0],
+      })),
+    ).toEqual([
+      {
+        id: parentOne,
+        blocker: expect.objectContaining({
+          code: "waiting_for_bound_funding_support",
+          resumeCondition: {
+            code: "resource-lifecycle-support:loan-1",
+          },
+        }),
+      },
+      {
+        id: parentTwo,
+        blocker: expect.objectContaining({
+          code: "waiting_for_bound_funding_support",
+          resumeCondition: {
+            code: "resource-lifecycle-support:loan-2",
+          },
+        }),
+      },
+    ]);
+    expect(
+      childProposals.map((proposal) => ({
+        parentInstanceId: proposal.parentInstanceId,
+        priorityClass: (
+          proposal.moduleState as {
+            need: { priorityClass: string };
+          }
+        ).need.priorityClass,
+      })),
+    ).toEqual([
+      { parentInstanceId: parentOne, priorityClass: "P5" },
+      { parentInstanceId: parentTwo, priorityClass: "P5" },
+    ]);
+  });
+
+  it("binds a nonterminal installed-agenda conversion to its explicit action", () => {
+    const score = coreModule("runner.score_installed_agenda");
+    const scoreAction = candidate(
+      "score-theorem",
+      "activated_card_ability",
+      "agenda.score_installed",
+      "onr_classic_004_theorem-proof",
+    );
+    const runnerContext = context([scoreAction], {
+      installedAgendaScores: [
+        {
+          opportunityId: "theorem-1",
+          sourceCardInstanceId: "theorem-1",
+          actionIds: ["score-theorem"],
+          agendaPoints: 3,
+          terminal: false,
+          evidenceCode: "runner_installed_agenda_score_conversion",
+        },
+      ],
+    });
+    const [proposal] = score.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const planAssessment = score.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+
+    expect(proposal).toMatchObject({
+      target: { kind: "card", id: "theorem-1" },
+      initialViability: "ready",
+    });
+    expect(planAssessment.priorityClaim).toMatchObject({
+      requestedClass: "P3",
+      reasonCode: "expiring_conversion",
+    });
+    expect(
+      score
+        .materialize(instance, {} as never, runnerContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["score-theorem"]);
+  });
+
+  it("does not let a stale generic EndTurn impersonate a Loan-from-Chiba lifecycle action", () => {
+    const lifecycle = coreModule("runner.resource_lifecycle");
+    const genericEndTurn = candidate(
+      "runner.end_turn",
+      "end_turn",
+      "turn_flow.end_turn",
+    );
+    const runnerContext = context([genericEndTurn], {
+      resourceLifecycle: [
+        {
+          lifecycleId: "onr_v1_168_loan-from-chiba",
+          sourceCardInstanceId: "loan-1",
+          definitionId: "onr_v1_168_loan-from-chiba",
+          phase: "leave_play",
+          actionIds: [genericEndTurn.actionId],
+          priorityClass: "P5",
+          value: 2,
+          evidenceCodes: [
+            "runner_loan_from_chiba_leave_avoids_visible_long_horizon_liability:12",
+          ],
+        },
+      ],
+    });
+    const [proposal] = lifecycle.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+
+    expect(proposal).toMatchObject({
+      initialViability: "blocked",
+      blockers: [{ code: "resource_lifecycle_leave_play" }],
+    });
+    expect(
+      lifecycle
+        .materialize(instance, {} as never, runnerContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([]);
+  });
+
+  it("raises a terminal installed-agenda conversion to P1", () => {
+    const score = coreModule("runner.score_installed_agenda");
+    const runnerContext = context(
+      [
+        candidate(
+          "score-terminal-theorem",
+          "activated_card_ability",
+          "agenda.score_installed",
+          "onr_classic_004_theorem-proof",
+        ),
+      ],
+      {
+        installedAgendaScores: [
+          {
+            opportunityId: "terminal-theorem",
+            sourceCardInstanceId: "terminal-theorem",
+            actionIds: ["score-terminal-theorem"],
+            agendaPoints: 3,
+            terminal: true,
+            evidenceCode: "runner_installed_agenda_score_conversion",
+          },
+        ],
+      },
+    );
+    const [proposal] = score.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const planAssessment = score.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+
+    expect(proposal).toMatchObject({
+      executionClass: "urgent_response",
+      initialViability: "ready",
+    });
+    expect(planAssessment.priorityClaim).toMatchObject({
+      requestedClass: "P1",
+      reasonCode: "terminal_win",
+    });
   });
 
   it("never lets a non-breaker satisfy exact coverage", () => {
@@ -47,6 +417,11 @@ describe("Runner core plan modules", () => {
           priorityClass: "P5",
           evidenceCode: "visible_code_gate",
           deckHasAnswer: true,
+          answerInHand: false,
+          fundingActionIds: [],
+          directSearchActionIds: [],
+          searchEngineSetupActionIds: [],
+          drawForAnswerActionIds: [],
         },
       ],
     });
@@ -88,6 +463,11 @@ describe("Runner core plan modules", () => {
             priorityClass: "P4",
             evidenceCode: "test_coverage_alias",
             deckHasAnswer: true,
+            answerInHand: false,
+            fundingActionIds: [],
+            directSearchActionIds: [],
+            searchEngineSetupActionIds: [],
+            drawForAnswerActionIds: [],
           },
         ],
       });
@@ -129,9 +509,24 @@ describe("Runner core plan modules", () => {
       context([candidate("credit")], {
         fundingNeeds: [
           {
+            kind: "parent_plan_support",
+            ...fundingRouteContract("credit"),
             needId: "fund-run",
+            parentPlanInstanceId:
+              "plan:runner.contest_remote:remote%3Aremote_1",
+            driver: {
+              kind: "contest",
+              targetId: "remote_1",
+              reasonCode: "material_remote_contest",
+            },
+            targetCredits: 4,
+            currentCreditsAtRevalidation: 1,
             gap: 3,
-            priorityClass: "P5",
+            priorityClass: "P4",
+            revalidation: {
+              stateVersion: 10,
+              status: "material_parent_open",
+            },
             evidenceCode: "run_needs_credits",
           },
         ],
@@ -141,9 +536,24 @@ describe("Runner core plan modules", () => {
       context([candidate("credit")], {
         fundingNeeds: [
           {
+            kind: "parent_plan_support",
+            ...fundingRouteContract("credit"),
             needId: "fund-run",
+            parentPlanInstanceId:
+              "plan:runner.contest_remote:remote%3Aremote_1",
+            driver: {
+              kind: "contest",
+              targetId: "remote_1",
+              reasonCode: "material_remote_contest",
+            },
+            targetCredits: 4,
+            currentCreditsAtRevalidation: 4,
             gap: 0,
-            priorityClass: "P5",
+            priorityClass: "P4",
+            revalidation: {
+              stateVersion: 10,
+              status: "material_parent_open",
+            },
             evidenceCode: "run_funded",
           },
         ],
@@ -153,6 +563,357 @@ describe("Runner core plan modules", () => {
     expect(open).toHaveLength(1);
     expect(open[0]?.retentionPolicy.abandonWhenTargetMissing).toBe(true);
     expect(satisfied).toEqual([]);
+  });
+
+  it("blocks an autonomous P5 economy request without an exact parent", () => {
+    const economy = coreModule("runner.economy");
+    const [proposal] = economy.discover(
+      context([candidate("credit")], {
+        fundingNeeds: [
+          {
+            kind: "parent_plan_support",
+            ...fundingRouteContract("credit"),
+            needId: "orphaned-reserve",
+            parentPlanInstanceId: "",
+            driver: {
+              kind: "contest",
+              targetId: "remote_1",
+              reasonCode: "raw_remote_scan",
+            },
+            targetCredits: 10,
+            currentCreditsAtRevalidation: 4,
+            gap: 6,
+            priorityClass: "P5",
+            revalidation: {
+              stateVersion: 10,
+              status: "material_parent_open",
+            },
+            evidenceCode: "raw_remote_runway",
+          },
+        ],
+      }),
+    );
+
+    expect(proposal).toMatchObject({
+      initialViability: "blocked",
+      blockers: [{ code: "orphaned_funding_need" }],
+    });
+  });
+
+  it("executes parent-bound funding only while the exact parent stays material", () => {
+    const economy = coreModule("runner.economy");
+    const parentPlanInstanceId = "plan:runner.contest_remote:remote%3Aremote_1";
+    const runnerContext = context([candidate("credit")], {
+      fundingNeeds: [
+        {
+          kind: "parent_plan_support",
+          ...fundingRouteContract("credit"),
+          needId: "fund-remote-1",
+          parentPlanInstanceId,
+          driver: {
+            kind: "contest",
+            targetId: "remote_1",
+            reasonCode: "admitted_remote_contest",
+          },
+          targetCredits: 7,
+          currentCreditsAtRevalidation: 4,
+          gap: 3,
+          priorityClass: "P4",
+          revalidation: {
+            stateVersion: 10,
+            status: "material_parent_open",
+          },
+          evidenceCode: "fund_material_remote",
+        },
+      ],
+    });
+    const [proposal] = economy.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const readyParent = structuredClone(instance);
+    readyParent.instanceId = parentPlanInstanceId;
+    readyParent.moduleId = "runner.contest_remote";
+    readyParent.dedupeKey = "remote:remote_1";
+    delete readyParent.parentInstanceId;
+    readyParent.moduleState = {
+      kind: "remote_contest",
+      signal: {
+        supportNeedId: "fund-remote-1",
+        marginalValue: 120,
+      },
+    };
+    readyParent.blockers = [];
+    readyParent.viability = "ready";
+    const readyPortfolio = emptyPortfolio();
+    readyPortfolio.instances = [readyParent, instance];
+
+    expect(
+      economy.assess(instance, runnerContext, readyPortfolio),
+    ).toMatchObject({
+      readiness: "executable_now",
+    });
+
+    const blockedPortfolio = structuredClone(readyPortfolio);
+    blockedPortfolio.instances[0]!.viability = "ready";
+    blockedPortfolio.instances[0]!.blockers = [
+      {
+        code: "target_no_longer_material",
+        owner: "plan_module",
+        removable: true,
+        resumeCondition: { code: "target_material_again" },
+      },
+    ];
+    expect(
+      economy.assess(instance, runnerContext, blockedPortfolio),
+    ).toMatchObject({
+      readiness: "blocked",
+      blockers: [{ code: "orphaned_funding_need" }],
+    });
+
+    const mismatchedSupportPortfolio = structuredClone(readyPortfolio);
+    (
+      mismatchedSupportPortfolio.instances[0]!.moduleState as {
+        signal: { supportNeedId: string };
+      }
+    ).signal.supportNeedId = "different-need";
+    expect(
+      economy.assess(instance, runnerContext, mismatchedSupportPortfolio),
+    ).toMatchObject({
+      readiness: "blocked",
+      blockers: [{ code: "orphaned_funding_need" }],
+    });
+  });
+
+  it("removes parent support as soon as revalidation removes the material need", () => {
+    const economy = coreModule("runner.economy");
+    const [proposal] = economy.discover(
+      context([candidate("credit")], {
+        fundingNeeds: [
+          {
+            kind: "parent_plan_support",
+            ...fundingRouteContract("credit"),
+            needId: "fund-remote-1",
+            parentPlanInstanceId:
+              "plan:runner.contest_remote:remote%3Aremote_1",
+            driver: {
+              kind: "contest",
+              targetId: "remote_1",
+              reasonCode: "admitted_remote_contest",
+            },
+            targetCredits: 7,
+            currentCreditsAtRevalidation: 4,
+            gap: 3,
+            priorityClass: "P4",
+            revalidation: {
+              stateVersion: 10,
+              status: "material_parent_open",
+            },
+            evidenceCode: "fund_material_remote",
+          },
+        ],
+      }),
+    );
+    const open = reconcileResidentPlanPortfolio({
+      side: "runner",
+      stateVersion: 10,
+      timingPoint: "runner_action.main",
+      proposals: [proposal!],
+    });
+    const afterMaterialityLoss = reconcileResidentPlanPortfolio({
+      side: "runner",
+      stateVersion: 11,
+      timingPoint: "runner_action.main",
+      proposals: [],
+      previous: open,
+    });
+
+    expect(afterMaterialityLoss.instances).toEqual([]);
+    expect(afterMaterialityLoss.transitions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          instanceId: "plan:runner.economy:fund-remote-1",
+          reason: "target_disappeared",
+        }),
+      ]),
+    );
+  });
+
+  it("keeps a finite portfolio reserve autonomous only until its fixed target is reached", () => {
+    const economy = coreModule("runner.economy");
+    const runnerContext = context([candidate("credit")], {
+      fundingNeeds: [
+        {
+          kind: "portfolio_reserve",
+          ...fundingRouteContract("credit"),
+          needId: "runner-portfolio-credit-reserve",
+          targetCredits: 8,
+          currentCreditsAtRevalidation: 4,
+          gap: 4,
+          priorityClass: "P6",
+          revalidation: {
+            stateVersion: 10,
+            status: "portfolio_reserve_open",
+          },
+          evidenceCode: "runner_finite_portfolio_credit_reserve",
+        },
+      ],
+    });
+    const [proposal] = economy.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+
+    expect(proposal?.parentInstanceId).toBeUndefined();
+    expect(
+      economy.assess(instance, runnerContext, emptyPortfolio()),
+    ).toMatchObject({
+      priorityClaim: { requestedClass: "P6" },
+      readiness: "executable_now",
+    });
+  });
+
+  it("materializes only the exact head of the selected funding route", () => {
+    const economy = coreModule("runner.economy");
+    const runnerContext = context(
+      [candidate("selected-credit"), candidate("other-credit")],
+      {
+        fundingNeeds: [
+          {
+            kind: "portfolio_reserve",
+            ...fundingRouteContract("selected-credit"),
+            needId: "runner-portfolio-credit-reserve",
+            targetCredits: 8,
+            currentCreditsAtRevalidation: 4,
+            gap: 4,
+            priorityClass: "P6",
+            revalidation: {
+              stateVersion: 10,
+              status: "portfolio_reserve_open",
+            },
+            evidenceCode: "runner_finite_portfolio_credit_reserve",
+          },
+        ],
+      },
+    );
+    const [proposal] = economy.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+
+    expect(
+      economy
+        .materialize(instance, {} as never, runnerContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["selected-credit"]);
+  });
+
+  it("rejects a delegated funding action without a complete liquid projection", () => {
+    const unprojected = candidate("unprojected-credit");
+    delete unprojected.economyProjection;
+    const economy = coreModule("runner.economy");
+    const [proposal] = economy.discover(
+      context([unprojected], {
+        fundingNeeds: [
+          {
+            kind: "portfolio_reserve",
+            ...fundingRouteContract("unprojected-credit"),
+            needId: "runner-portfolio-credit-reserve",
+            targetCredits: 8,
+            currentCreditsAtRevalidation: 4,
+            gap: 4,
+            priorityClass: "P6",
+            revalidation: {
+              stateVersion: 10,
+              status: "portfolio_reserve_open",
+            },
+            evidenceCode: "runner_finite_portfolio_credit_reserve",
+          },
+        ],
+      }),
+    );
+
+    expect(proposal).toMatchObject({
+      initialViability: "blocked",
+      blockers: [{ code: "no_compatible_credit_route" }],
+    });
+  });
+
+  it("materializes a composite card action when the exact route delegates it", () => {
+    const composite = candidate(
+      "composite-draw-credit",
+      "play_event",
+      "draw.card",
+      "test-composite-economy",
+    );
+    composite.economyProjection =
+      candidate("projection-source").economyProjection!;
+    const economy = coreModule("runner.economy");
+    const runnerContext = context([composite], {
+      fundingNeeds: [
+        {
+          kind: "portfolio_reserve",
+          ...fundingRouteContract(composite.actionId),
+          needId: "runner-portfolio-credit-reserve",
+          targetCredits: 5,
+          currentCreditsAtRevalidation: 4,
+          gap: 1,
+          priorityClass: "P6",
+          revalidation: {
+            stateVersion: 10,
+            status: "portfolio_reserve_open",
+          },
+          evidenceCode: "runner_finite_portfolio_credit_reserve",
+        },
+      ],
+    });
+    const [proposal] = economy.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const materialized = economy.materialize(
+      instance,
+      {} as never,
+      runnerContext,
+    );
+
+    expect(
+      materialized.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([composite.actionId]);
+    expect(materialized.step.capability.semanticActionTypes).toEqual([
+      "draw.card",
+    ]);
+  });
+
+  it("does not claim a composite card action without exact delegation", () => {
+    const composite = candidate(
+      "composite-draw-credit",
+      "play_event",
+      "draw.card",
+      "test-composite-economy",
+    );
+    composite.economyProjection =
+      candidate("projection-source").economyProjection!;
+    const selectedCredit = candidate("selected-credit");
+    const economy = coreModule("runner.economy");
+    const runnerContext = context([composite, selectedCredit], {
+      fundingNeeds: [
+        {
+          kind: "portfolio_reserve",
+          ...fundingRouteContract(selectedCredit.actionId),
+          needId: "runner-portfolio-credit-reserve",
+          targetCredits: 5,
+          currentCreditsAtRevalidation: 4,
+          gap: 1,
+          priorityClass: "P6",
+          revalidation: {
+            stateVersion: 10,
+            status: "portfolio_reserve_open",
+          },
+          evidenceCode: "runner_finite_portfolio_credit_reserve",
+        },
+      ],
+    });
+    const [proposal] = economy.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+
+    expect(
+      economy
+        .materialize(instance, {} as never, runnerContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([selectedCredit.actionId]);
   });
 
   it("blocks coverage rather than drawing when draw is not a valid route", () => {
@@ -166,6 +927,11 @@ describe("Runner core plan modules", () => {
             priorityClass: "P5",
             evidenceCode: "missing_sentry",
             deckHasAnswer: true,
+            answerInHand: false,
+            fundingActionIds: [],
+            directSearchActionIds: [],
+            searchEngineSetupActionIds: [],
+            drawForAnswerActionIds: [],
           },
         ],
         defense: { drawAllowed: false },
@@ -178,7 +944,142 @@ describe("Runner core plan modules", () => {
     });
   });
 
-  it("prioritizes pending damage, then tags, then hand buffer internally", () => {
+  it("materializes an exact AP search route for special coverage", () => {
+    const coverage = coreModule("runner.rig_and_coverage");
+    const search = candidate(
+      "search-ap",
+      "activated_card_ability",
+      "card_ability.trigger",
+      "runner-special-search",
+    );
+    const runnerContext = context([search], {
+      coverageGaps: [
+        {
+          gapId: "special:ap",
+          requiredRole: "breaker_ap",
+          targetServerId: "remote_1",
+          priorityClass: "P4",
+          evidenceCode: "missing_special_ap_coverage",
+          deckHasAnswer: true,
+          answerInHand: false,
+          fundingActionIds: [],
+          directSearchActionIds: ["search-ap"],
+          searchEngineSetupActionIds: [],
+          drawForAnswerActionIds: [],
+        },
+      ],
+    });
+    const [proposal] = coverage.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const materialized = coverage.materialize(
+      instance,
+      {} as never,
+      runnerContext,
+    );
+
+    expect(instance.phase).toBe("search_answer");
+    expect(materialized.step.capability.capabilityId).toBe(
+      "search_answer_breaker_ap",
+    );
+    expect(
+      materialized.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["search-ap"]);
+  });
+
+  it("keeps an explicitly nonproductive search-engine install out of the coverage route", () => {
+    const coverage = coreModule("runner.rig_and_coverage");
+    const directInstall = candidate(
+      "install-smc-direct",
+      "install_card",
+      "install.card",
+      "onr_v1_059_self-modifying-code",
+    );
+    const trashInstall = candidate(
+      "install-smc-trash.runner_program_trash_before_install",
+      "install_card",
+      "install.card",
+      "onr_v1_059_self-modifying-code",
+    );
+    const runnerContext = context([directInstall, trashInstall], {
+      coverageGaps: [
+        {
+          gapId: "wall",
+          requiredRole: "breaker_wall",
+          priorityClass: "P5",
+          evidenceCode: "deck_strategy_open_wall_coverage",
+          deckHasAnswer: true,
+          answerInHand: false,
+          fundingActionIds: [],
+          directSearchActionIds: [],
+          searchEngineSetupActionIds: [
+            directInstall.actionId,
+            trashInstall.actionId,
+          ],
+          drawForAnswerActionIds: [],
+        },
+      ],
+    });
+    runnerContext.actionDispositions = [
+      {
+        actionId: trashInstall.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.develop_board_and_hand",
+        evidenceCode:
+          "runner_program_trash_install_unneeded_direct_install_available",
+      },
+    ];
+    const [proposal] = coverage.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+
+    expect(instance.phase).toBe("setup_search_engine");
+    expect(
+      coverage
+        .materialize(instance, {} as never, runnerContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([directInstall.actionId]);
+  });
+
+  it("funds a visible in-hand breaker instead of drawing for another answer", () => {
+    const coverage = coreModule("runner.rig_and_coverage");
+    const runnerContext = context(
+      [candidate("draw", "draw_card", "draw.card"), candidate("gain-credit")],
+      {
+        coverageGaps: [
+          {
+            gapId: "wall",
+            requiredRole: "breaker_wall",
+            priorityClass: "P4",
+            evidenceCode: "visible_wall",
+            deckHasAnswer: true,
+            answerInHand: true,
+            answerInstallCost: 6,
+            fundingGap: 5,
+            fundingActionIds: ["gain-credit"],
+            directSearchActionIds: [],
+            searchEngineSetupActionIds: [],
+            drawForAnswerActionIds: [],
+          },
+        ],
+      },
+    );
+    const [proposal] = coverage.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const materialized = coverage.materialize(
+      instance,
+      {} as never,
+      runnerContext,
+    );
+
+    expect(instance.phase).toBe("fund_answer");
+    expect(materialized.step.capability.capabilityId).toBe(
+      "fund_install_breaker_wall",
+    );
+    expect(
+      materialized.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["gain-credit"]);
+  });
+
+  it("prioritizes pending damage, tags, persistent hazard counters, then hand buffer internally", () => {
     const defense = coreModule("runner.defense_and_recovery");
     const prevention = candidate(
       "prevent",
@@ -186,6 +1087,11 @@ describe("Runner core plan modules", () => {
       "damage.prevent_net",
     );
     const clearTag = candidate("clear", "remove_tag", "tag.remove");
+    const clearHazardCounter = candidate(
+      "clear-mastiff-counter",
+      "trigger_ability",
+      "counter.remove_runner_hazard",
+    );
     const draw = candidate("draw", "draw_card", "draw.card");
     const [damage] = defense.discover(
       context([prevention, clearTag, draw], {
@@ -197,6 +1103,7 @@ describe("Runner core plan modules", () => {
           handSize: 1,
           minimumHandBuffer: 3,
           drawAllowed: true,
+          forgoUnsafeRunCapacity: false,
         },
       }),
     );
@@ -208,6 +1115,7 @@ describe("Runner core plan modules", () => {
           handSize: 1,
           minimumHandBuffer: 3,
           drawAllowed: true,
+          forgoUnsafeRunCapacity: false,
         },
       }),
     );
@@ -217,13 +1125,218 @@ describe("Runner core plan modules", () => {
           handSize: 1,
           minimumHandBuffer: 3,
           drawAllowed: true,
+          forgoUnsafeRunCapacity: false,
+        },
+      }),
+    );
+    const [traceCounter] = defense.discover(
+      context([clearHazardCounter, draw], {
+        defense: {
+          persistentHazardCounterRemovalAvailable: true,
+          handSize: 1,
+          minimumHandBuffer: 3,
+          drawAllowed: true,
+          forgoUnsafeRunCapacity: false,
         },
       }),
     );
 
     expect(damage?.phase).toBe("prevent_damage");
     expect(tags?.phase).toBe("clear_tags");
+    expect(traceCounter?.phase).toBe("clear_persistent_hazard_counter");
+    expect(traceCounter?.executionClass).toBe("urgent_response");
     expect(buffer?.phase).toBe("build_hand_buffer");
+  });
+
+  it("uses a structured top-heap recovery action to build the required hand buffer", () => {
+    const defense = coreModule("runner.defense_and_recovery");
+    const recovery = {
+      ...candidate(
+        "recover-top-heap",
+        "activated_card_ability",
+        "card_ability.unknown",
+        "recovery-resource",
+      ),
+      effectTargets: ["setup.top_trash_recovery"],
+      actionTacticSignals: ["setup.search"],
+    };
+    const runnerContext = context([recovery], {
+      defense: {
+        handSize: 1,
+        minimumHandBuffer: 3,
+        drawAllowed: false,
+        handBufferActionIds: [recovery.actionId],
+      },
+    });
+    const [proposal] = defense.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const planAssessment = defense.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+    const route = defense.materialize(
+      instance,
+      planAssessment as never,
+      runnerContext,
+    );
+
+    expect(proposal?.phase).toBe("build_hand_buffer");
+    expect(route.step.capability.capabilityId).toBe(
+      "build_required_hand_buffer",
+    );
+    expect(route.candidates.map((entry) => entry.candidate.actionId)).toEqual([
+      recovery.actionId,
+    ]);
+  });
+
+  it("continues with an actionable hand buffer when tag removal is currently blocked", () => {
+    const defense = coreModule("runner.defense_and_recovery");
+    const draw = candidate("draw", "draw_card", "draw.card");
+    const [proposal] = defense.discover(
+      context([draw], {
+        defense: {
+          activeTags: 1,
+          visibleTagPunish: true,
+          handSize: 1,
+          minimumHandBuffer: 5,
+          drawAllowed: true,
+          forgoUnsafeRunCapacity: false,
+        },
+      }),
+    );
+
+    expect(proposal).toMatchObject({
+      initialViability: "ready",
+      phase: "build_hand_buffer",
+      moduleState: {
+        signals: {
+          activeTags: 1,
+          minimumHandBuffer: 5,
+        },
+      },
+    });
+  });
+
+  it("builds an explicit last-click reaction reserve under confirmed damage pressure", () => {
+    const defense = coreModule("runner.defense_and_recovery");
+    const gainCredit = candidate("gain-reaction-credit");
+    const runnerContext = context([gainCredit], {
+      defense: {
+        reactionReserveNeed: {
+          needId: "runner-defense-reaction-reserve",
+          parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          targetCredits: 10,
+          currentCreditsAtRevalidation: 4,
+          gap: 6,
+          actionIds: ["gain-reaction-credit"],
+          revalidation: {
+            stateVersion: 10,
+            status: "defense_parent_open",
+          },
+          evidenceCode: "runner_damage_locked_hand_reaction_reserve",
+        },
+      },
+    });
+    const [proposal] = defense.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const planAssessment = defense.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+    const route = defense.materialize(
+      instance,
+      planAssessment as never,
+      runnerContext,
+    );
+
+    expect(proposal).toMatchObject({
+      phase: "build_reaction_reserve",
+      executionClass: "bounded_sequence",
+      initialViability: "ready",
+    });
+    expect(planAssessment.priorityClaim.requestedClass).toBe("P3");
+    expect(route.step.capability.capabilityId).toBe(
+      "build_damage_reaction_reserve",
+    );
+    expect(route.candidates.map((entry) => entry.candidate.actionId)).toEqual([
+      "gain-reaction-credit",
+    ]);
+  });
+
+  it("fails closed when the defense funding need is stale or arithmetically incomplete", () => {
+    const defense = coreModule("runner.defense_and_recovery");
+    const gainCredit = candidate("gain-reaction-credit");
+    const [proposal] = defense.discover(
+      context([gainCredit], {
+        defense: {
+          reactionReserveNeed: {
+            needId: "runner-defense-reaction-reserve",
+            parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+            targetCredits: 10,
+            currentCreditsAtRevalidation: 4,
+            gap: 5,
+            actionIds: ["gain-reaction-credit"],
+            revalidation: {
+              stateVersion: 9,
+              status: "defense_parent_open",
+            },
+            evidenceCode: "runner_damage_locked_hand_reaction_reserve",
+          },
+        },
+      }),
+    );
+
+    expect(proposal).toMatchObject({
+      phase: "build_reaction_reserve",
+      initialViability: "blocked",
+      blockers: [{ code: "invalid_reaction_reserve_need" }],
+    });
+  });
+
+  it("forgoes restricted run capacity when the required hand buffer cannot be built", () => {
+    const defense = coreModule("runner.defense_and_recovery");
+    const endTurn = candidate(
+      "runner.end_turn",
+      "end_turn",
+      "turn_flow.end_turn",
+    );
+    endTurn.sourceKind = "game_rule";
+    const run = candidate("runner.run.rd", "start_run", "run.start");
+    const runnerContext = context([run, endTurn], {
+      defense: {
+        pendingDamage: 1,
+        handSize: 2,
+        minimumHandBuffer: 3,
+        drawAllowed: false,
+        forgoUnsafeRunCapacity: true,
+      },
+    });
+    const [proposal] = defense.discover(runnerContext);
+    expect(proposal).toMatchObject({
+      initialViability: "ready",
+      phase: "forgo_unsafe_run",
+    });
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const assessment = defense.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+    const materialization = defense.materialize(
+      instance,
+      assessment as never,
+      runnerContext,
+    );
+    expect(
+      materialization.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["runner.end_turn"]);
+    expect(materialization.earlyEndTurnJustification).toEqual({
+      kind: "forgo_restricted_capacity",
+      capacityKind: "zero_click_non_basic_run_only",
+      explicitlyNonproductiveActionIds: ["runner.run.rd"],
+    });
   });
 
   it("admits card-specific development only with a concrete feasible purpose", () => {
@@ -235,6 +1348,19 @@ describe("Runner core plan modules", () => {
         affordableOrSupportable: true,
       }),
     ).toEqual({ admitted: false, reasonCode: "no_concrete_plan_purpose" });
+    expect(
+      runnerDevelopmentCardAdmission({
+        definitionId: "special-card",
+        assignedDomainPlanIds: ["runner.pressure_central"],
+        concretePurposeCode: "increase_rnd_access",
+        duplicateAlreadyInstalled: false,
+        affordableOrSupportable: true,
+      }),
+    ).toEqual({
+      admitted: false,
+      reasonCode:
+        "assigned_domain_requires_domain_owner:runner.pressure_central",
+    });
     expect(
       runnerDevelopmentCardAdmission({
         definitionId: "special-card",
@@ -256,25 +1382,48 @@ function coreModule(
   ).find((module) => module.moduleId === moduleId)!;
 }
 
+function emptyPortfolio(): ResidentPlanPortfolio {
+  return {
+    schemaVersion: "resident-plan-portfolio-v2",
+    side: "runner",
+    stateVersion: 10,
+    instances: [],
+    completionHistory: [],
+    transitions: [],
+  };
+}
+
 function context(
   actionCandidates: ActionSemanticCandidate[],
   overrides: {
     fundingNeeds?: RunnerCorePlanDomain["fundingNeeds"];
     coverageGaps?: RunnerCorePlanDomain["coverageGaps"];
+    creditBanks?: RunnerCorePlanDomain["creditBanks"];
+    installedAgendaScores?: RunnerCorePlanDomain["installedAgendaScores"];
+    resourceLifecycle?: RunnerCorePlanDomain["resourceLifecycle"];
     defense?: Partial<RunnerCorePlanDomain["defense"]>;
   },
 ): PlanSchedulerContext {
   const domain: RunnerCorePlanDomain = {
     fundingNeeds: overrides.fundingNeeds ?? [],
     coverageGaps: overrides.coverageGaps ?? [],
+    creditBanks: overrides.creditBanks ?? [],
+    installedAgendaScores: overrides.installedAgendaScores ?? [],
+    resourceLifecycle: overrides.resourceLifecycle ?? [],
     defense: {
       activeTags: 0,
       visibleTagPunish: false,
+      persistentHazardCounterRemovalAvailable: false,
       pendingDamage: 0,
       damagePreventionNeeded: false,
       handSize: 5,
       minimumHandBuffer: 3,
       drawAllowed: true,
+      handBufferActionIds: actionCandidates
+        .filter((candidate) => candidate.semanticActionType === "draw.card")
+        .map((candidate) => candidate.actionId),
+      forgoUnsafeRunCapacity: false,
+      handBufferPriorityClass: "P5",
       evidenceCodes: [],
       ...overrides.defense,
     },
@@ -334,5 +1483,45 @@ function candidate(
     projectionIssues: [],
     hardGates: [],
     evidence: [],
+    ...(semanticActionType === "economy.gain_credit"
+      ? {
+          economyProjection: {
+            schemaVersion: "action-economy-projection-v1",
+            kind: "immediate_liquid",
+            timing: "immediate",
+            creditRestriction: "general",
+            clickCost: 1,
+            creditCost: 0,
+            grossLiquidCreditGain: 1,
+            netLiquidCreditGain: 1,
+            cardsDrawn: 0,
+            cardsConsumed: 0,
+            netHandDelta: 0,
+            payoutMode: "fixed",
+            repeatable: true,
+            reliability: "guaranteed",
+            source: "basic_action_contract",
+            confidence: "high",
+            evidence: ["test_immediate_liquid_credit"],
+          } as const,
+        }
+      : {}),
+  };
+}
+
+function fundingRouteContract(actionId: string) {
+  return {
+    routeActionIds: [actionId],
+    routeAssessment: {
+      stateVersion: 10,
+      routeId: `test-route:${actionId}`,
+      status: "covered_guaranteed" as const,
+      reliability: "guaranteed" as const,
+      horizon: "same_turn" as const,
+      projectedGap: 0,
+      totalClickCost: 1,
+      firstStepActionId: actionId,
+      evidenceCodes: [`test_route_head:${actionId}`],
+    },
   };
 }

@@ -920,9 +920,22 @@ export function configureCardRuntimeBootstrap() {
         0,
         Math.floor(Number(legalAction.payload?.xValue ?? 0)),
       );
-      const upperBound = Math.max(1, targetRezCost);
+      const paidCredits = legalAction.costs.reduce(
+        (sum, cost) => sum + Math.max(0, Math.floor(cost.credits ?? 0)),
+        0,
+      );
+      const creditsBeforePayment = state.corp.credits + paidCredits;
+      const upperBound = Math.min(
+        Math.max(1, targetRezCost),
+        creditsBeforePayment,
+      );
       if (
         Number(legalAction.payload?.xUpperBound) !== upperBound ||
+        Number(legalAction.payload?.xMinimum) !== 1 ||
+        Number(legalAction.payload?.xMaximum) !== upperBound ||
+        Number(legalAction.payload?.xCreditsPerUnit) !== 1 ||
+        legalAction.payload?.variableCostKind !== "printed_play_cost" ||
+        paidCredits !== counterAmount ||
         counterAmount < 1 ||
         counterAmount > upperBound
       )

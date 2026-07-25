@@ -15,7 +15,10 @@ import {
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "../semantic-runtime-corp-effective-defense";
 import { semanticRuntimeCorpCentralIceProfile } from "../semantic-runtime-corp-remote-score";
-import { corpIcePlacementCandidateForAction } from "../corp-ice-placement/corp-ice-placement";
+import {
+  corpIcePlacementActionCreditCostFact,
+  corpIcePlacementPostInstallRezCostFact,
+} from "../corp-ice-placement/corp-ice-placement";
 import type {
   CorpScoringWindowAssessment,
   CorpScoringWindowAgendaStealSeverity,
@@ -210,21 +213,20 @@ export function actionIsUnfundedTargetProtectionInstall<
   action: LegalAction,
   actionServerId: string | undefined,
   triage: CorpBoardTriage,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  _dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): boolean {
   if (action.type !== "install_card") return false;
   if (action.payload?.placement !== "ice") return false;
   if (!triage.targetServerId || actionServerId !== triage.targetServerId) {
     return false;
   }
-  const source = semanticRuntimeVisibleSourceCard(input, action);
-  if (!source || source.known === false) return false;
-  const rezCost = corpTriagePositiveNumber(source.rezCost);
-  if (rezCost === undefined) return false;
-  const creditsAfterAction =
-    input.playerView.own.credits -
-    Math.max(0, dependencies.actionCreditCost(action));
-  return creditsAfterAction < rezCost;
+  const actionCost = corpIcePlacementActionCreditCostFact(action);
+  const rezCost = corpIcePlacementPostInstallRezCostFact(input, action);
+  if (actionCost.status !== "known" || rezCost.status !== "known") {
+    return true;
+  }
+  const creditsAfterAction = input.playerView.own.credits - actionCost.amount;
+  return creditsAfterAction < rezCost.amount;
 }
 
 export function actionDistractsFromCentralProtection(

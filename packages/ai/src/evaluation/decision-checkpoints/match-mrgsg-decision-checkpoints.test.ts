@@ -2,6 +2,7 @@ import { hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
 import cp01Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-mrgsg-01.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -12,7 +13,7 @@ describe("match MRGSG exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("keeps the planned R&D run when Archives is empty and R&D is open", () => {
+  it("chooses stronger HQ multiaccess while the open R&D run remains legal", () => {
     const openRnd = mutateFixture(cp01Json, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       const rnd = state.corp.servers.find((server) => server.id === "rd");
@@ -38,18 +39,33 @@ describe("match MRGSG exact decision checkpoints", () => {
       }
       state.runner.credits = 10;
       fixture.expectation = {
-        acceptableActions: [{ type: "start_run", targetServerId: "rd" }],
+        acceptableActions: [{ type: "start_run", targetServerId: "hq" }],
+        planExecution: {
+          acceptablePlanKinds: ["runner.pressure_central"],
+          acceptableCapabilities: ["pressure_hq_multiaccess"],
+          requiredAssessmentEvidence: ["target:hq"],
+        },
       };
     });
 
     const result = runAiDecisionCheckpoint(openRnd);
 
     expect(result.ok, result.message).toBe(true);
+    expect(
+      result.input.legalActions.some(
+        (action) =>
+          action.type === "start_run" &&
+          action.payload?.serverId === "rd",
+      ),
+    ).toBe(true);
   });
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    ["CP-MRGSG-01"],
+  );
 }
 
 function mutateFixture(

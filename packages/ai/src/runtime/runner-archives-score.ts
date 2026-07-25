@@ -64,58 +64,43 @@ export function runnerArchivesScoreComponents(
   if (hiddenArchivesCount > 0) {
     const pressure = hiddenArchivesPressureContext(input);
     const randomDiscard = unresolvedRandomCorpDiscard(input);
-    const meaningfulAlternative = input.legalActions.some(
-      (candidate) =>
-        candidate.actionId !== action.actionId &&
-        candidate.type !== "end_turn" &&
-        !(
-          candidate.type === "start_run" &&
-          candidate.payload?.serverId === "archives"
-        ),
-    );
-    const matchpointVolume =
-      pressure.runnerMatchPressure && hiddenArchivesCount >= 3;
-    const openCentralAlternative = input.legalActions.some((candidate) => {
-      if (candidate.actionId === action.actionId) return false;
-      const evaluation = dependencies.evaluationForAction(input, candidate);
-      return (
-        (evaluation?.accessServerId === "hq" ||
-          evaluation?.accessServerId === "rd") &&
-        evaluation.pathPassability === "reachable"
-      );
-    });
-    const supported = pressure.active || randomDiscard || matchpointVolume;
-    const supportedValue =
-      matchpointVolume &&
-      openCentralAlternative &&
-      !pressure.active &&
-      !randomDiscard
-        ? 150
-        : 700;
     return [
       {
-        key: supported
-          ? "runner_archives_hidden_cards_with_pressure"
-          : "runner_archives_unqualified_hidden_cards",
-        label: supported
-          ? "Archives verdeckte Karten mit Anlass"
-          : "Archives verdeckte Karten ohne Anlass",
-        value: supported ? supportedValue : meaningfulAlternative ? -900 : 250,
+        key: "runner_archives_hidden_information",
+        label: "Archives enthält verdeckte Information",
+        value: 700,
         reason: [
           `hidden_archives:${hiddenArchivesCount}`,
           `corp_deck_count:${input.playerView.opponent.deckCount}`,
           `runner_agenda_points:${input.playerView.own.agendaPoints}`,
           `archives_corp_deck_pressure:${pressure.corpDeckPressure}`,
           `archives_runner_match_pressure:${pressure.runnerMatchPressure}`,
-          `archives_runner_match_volume:${matchpointVolume}`,
-          `archives_open_central_alternative:${openCentralAlternative}`,
           `archives_random_discard_unseen:${randomDiscard}`,
-          `archives_meaningful_alternative:${meaningfulAlternative}`,
+          "archives_hidden_information_window:true",
         ].join("|"),
       },
     ];
   }
   return [];
+}
+
+export function runnerArchivesHasQualifiedHiddenPayoff(
+  input: AiDecisionInput,
+): boolean {
+  return runnerHiddenArchivesCount(input) > 0;
+}
+
+function runnerHiddenArchivesCount(input: AiDecisionInput): number {
+  const knownRootCount =
+    input.playerView.servers
+      .find((server) => server.id === "archives")
+      ?.root.filter(
+        (card) => card.known && typeof card.definitionId === "string",
+      ).length ?? 0;
+  return Math.max(
+    0,
+    input.playerView.opponent.discardCount - knownRootCount,
+  );
 }
 
 function hiddenArchivesPressureContext(input: AiDecisionInput): {

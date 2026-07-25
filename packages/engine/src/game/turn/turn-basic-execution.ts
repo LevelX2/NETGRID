@@ -39,6 +39,10 @@ export type TurnBasicExecutionHost = {
   turn: {
     spendClick: (state: GameState, side: Side) => void;
     spendClicks: (state: GameState, side: Side, amount: number) => void;
+    stopRunnerRestrictedActionSequence: (
+      state: GameState,
+      legalAction: LegalAction,
+    ) => void;
     endTurn: (state: GameState, side: Side, legalAction: LegalAction) => void;
   };
   credits: {
@@ -193,6 +197,9 @@ export function handleTurnBasicExecution(
       };
       return handled(legalAction);
     }
+    case "stop_restricted_action_sequence":
+      host.turn.stopRunnerRestrictedActionSequence(state, legalAction);
+      return handled(legalAction);
     case "end_turn":
       host.turn.endTurn(state, legalAction.side, legalAction);
       return handled(legalAction);

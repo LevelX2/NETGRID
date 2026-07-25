@@ -94,6 +94,14 @@ function actionCapacityProjectionWithListedCost(
             ? "immediate_unrestricted_gain"
             : "non_action_capacity";
   const allowedActionTypes = allowedActionTypesFor(action, restriction);
+  const allowedCardType =
+    restriction === "program_install_only" &&
+    action.payload?.actionCapacityAllowedCardType === "program"
+      ? "program"
+      : undefined;
+  const temporaryCredits = nonNegativeInteger(
+    action.payload?.actionCapacityTemporaryCredits,
+  );
   const reliability = actionCapacityReliability(action, source);
   const explicitSourceCounterType = stringPayload(
     action,
@@ -126,6 +134,12 @@ function actionCapacityProjectionWithListedCost(
     ...(allowedActionTypes.length > 0
       ? [`allowed_action_types:${allowedActionTypes.join(",")}`]
       : []),
+    ...(allowedCardType
+      ? [`allowed_card_types:${allowedCardType}`]
+      : []),
+    ...(temporaryCredits > 0
+      ? [`temporary_credits:${temporaryCredits}`]
+      : []),
     ...(gainAmountPerTurn !== undefined
       ? [`gain_amount_per_turn:${gainAmountPerTurn}`]
       : []),
@@ -144,6 +158,8 @@ function actionCapacityProjectionWithListedCost(
     timing,
     restriction,
     allowedActionTypes,
+    ...(allowedCardType ? { allowedCardTypes: [allowedCardType] } : {}),
+    ...(temporaryCredits > 0 ? { temporaryCredits } : {}),
     listedActionCost,
     preExistingActionCost,
     grossActionsGained,

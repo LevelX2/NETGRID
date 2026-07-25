@@ -453,7 +453,16 @@ function evaluateKnownHqAccessPayoff(
   const affordableTrashCards = trashableKnownCards.filter(
     (card) => path.creditsAfterPath >= card.trashCost,
   );
-  if (affordableTrashCards.length > 0) {
+  const currentlyProductiveTrashCards = affordableTrashCards.filter(
+    (card) =>
+      !recentRunnerDeclinedKnownHqTrash(input, card.definitionId),
+  );
+  if (currentlyProductiveTrashCards.length > 0) {
+    const cheapestTrashCard = [...currentlyProductiveTrashCards].sort(
+      (left, right) =>
+        left.trashCost - right.trashCost ||
+        left.definitionId.localeCompare(right.definitionId),
+    )[0]!;
     return {
       payoff: "trash_affordable",
       knownNoCurrentPayoff: false,
@@ -462,9 +471,34 @@ function evaluateKnownHqAccessPayoff(
       reasons: ["known_hq_trash_affordable_after_ice"],
       evidence: [
         ...evidenceBase,
-        `hq_known_trash_affordable_count:${affordableTrashCards.length}`,
+        `hq_known_trash_affordable_count:${currentlyProductiveTrashCards.length}`,
+        `hq_known_trash_declined_count:${affordableTrashCards.length - currentlyProductiveTrashCards.length}`,
+        `hq_known_trash_definition:${cheapestTrashCard.definitionId}`,
+        `hq_known_trash_cost:${cheapestTrashCard.trashCost}`,
         "central_memory_payoff:trash_affordable",
         "hq_run_boosted_by_known_trashable:true",
+      ],
+    };
+  }
+
+  if (memory.allCardsKnown && affordableTrashCards.length > 0) {
+    return {
+      payoff: "known_low_value",
+      knownNoCurrentPayoff: true,
+      score: 0,
+      penalty: 700,
+      reasons: [
+        "known_hq_trash_payoff_already_declined",
+        "central_known_no_current_payoff",
+      ],
+      evidence: [
+        ...evidenceBase,
+        `hq_known_trash_declined_count:${affordableTrashCards.length}`,
+        ...affordableTrashCards.map(
+          (card) => `hq_known_trash_declined_definition:${card.definitionId}`,
+        ),
+        "central_memory_payoff:known_low_value",
+        "hq_run_suppressed_by_recent_declined_trash:true",
       ],
     };
   }
@@ -977,6 +1011,55 @@ function recentRunnerDeclinedKnownRdTopTrash(
   }
   return declined;
 }
+
+function recentRunnerDeclinedKnownHqTrash(
+  input: AiDecisionInput,
+  definitionId: string,
+): boolean {
+  const history = mergedPublicHistory(input);
+  const accessIndex = findLastHistoryIndex(
+    history,
+    (event) =>
+      publicActor(event) === "runner" &&
+      publicActionType(event) === "access_card" &&
+      eventServerId(event) === "hq" &&
+      stringPayloadValue(event, "cardDefinitionId") === definitionId,
+  );
+  if (accessIndex < 0) return false;
+  const accessEvent = history[accessIndex];
+  if (!accessEvent) return false;
+  let declineIndex = -1;
+  for (let index = accessIndex + 1; index < history.length; index += 1) {
+    const event = history[index]!;
+    if (publicActor(event) !== "runner") continue;
+    const actionType = publicActionType(event);
+    if (actionType === "access_card") return false;
+    if (actionType === "trash_accessed_card" || actionType === "steal_agenda")
+      return false;
+    if (actionType === "decline_trash") {
+      declineIndex = index;
+      break;
+    }
+  }
+  if (declineIndex < 0) return false;
+  for (const event of history.slice(declineIndex + 1)) {
+    if (
+      publicActor(event) === "runner" &&
+      runnerActionReopensDeclinedTrashPayoff.has(publicActionType(event))
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+const runnerActionReopensDeclinedTrashPayoff = new Set([
+  "gain_credit",
+  "draw_card",
+  "install_card",
+  "activated_card_ability",
+  "play_event",
+]);
 
 function mergedPublicHistory(input: AiDecisionInput) {
   const byId = new Map<string, AiDecisionInput["eventTail"][number]>();

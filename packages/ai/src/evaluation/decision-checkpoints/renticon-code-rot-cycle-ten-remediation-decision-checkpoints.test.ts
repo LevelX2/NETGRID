@@ -7,7 +7,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
-  it("funds before advancing an exposed remote with the last credit", () => {
+  it("develops hand options while the exposed score parent is not certified", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(fundExposedRemoteJson) as AiDecisionCheckpointV1,
     );
@@ -15,7 +15,7 @@ describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("keeps advancing when the scoreline window is genuinely safe", () => {
+  it("keeps the explicit funding route for the committed scoreline", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(safeAdvanceControlJson) as AiDecisionCheckpointV1,
     );
@@ -23,7 +23,7 @@ describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("uses the superior burst line or advances when the scoreline is safe", () => {
+  it("ends the turn when no productive route is certified", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(safeLowCreditAdvanceJson) as AiDecisionCheckpointV1,
     );

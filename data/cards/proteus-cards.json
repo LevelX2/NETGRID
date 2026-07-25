@@ -662,6 +662,11 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
+      "variableStrength": {
+        "kind": "paid_x",
+        "minimumStrength": 0,
+        "maximumStrength": 6
+      },
       "text": "*Do 2 Net damage. *End the run. Pay [X], above the rez cost, when you rez Digiconda. X is Digiconda 's strength, and X cannot be greater than 6.",
       "displayOnlyText": true,
       "faction": "onr_proteus",
@@ -823,6 +828,11 @@
         "trashCost": null,
         "advancementRequirement": null,
         "agendaPoints": null
+      },
+      "variableStrength": {
+        "kind": "paid_x",
+        "minimumStrength": 0,
+        "maximumStrength": 8
       },
       "text": "*Trace x-If trace is successful, end the run, and Runner cannot make another run until Runner takes an action to pay [2]. Pay X, above the rez cost, when you rez Homing Missile. X is Homing Missile 's strength and trace limit, and X cannot be greater than 8.",
       "displayOnlyText": true,
@@ -1594,6 +1604,14 @@
         "trashCost": null,
         "advancementRequirement": null,
         "agendaPoints": null
+      },
+      "playCost": {
+        "kind": "variable_x",
+        "minimumX": 1,
+        "creditsPerX": 1,
+        "maximumX": {
+          "kind": "context"
+        }
       },
       "text": "Rez a piece of ice, at no cost. Put X Kludge counters on that piece of ice; X cannot be 0. At the start of each of your turns, remove a Kludge counter. Trash that piece of ice when the last Kludge counter is removed from it.",
       "displayOnlyText": true,

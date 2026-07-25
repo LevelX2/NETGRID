@@ -1,5 +1,6 @@
 import {
   applyAction,
+  applyRandomizedIceInstallSelection,
   createGameAfterSetup,
   getLegalActions,
 } from "@netgrid/engine";
@@ -69,7 +70,7 @@ describe("match series 70BE real Engine regressions", () => {
     ).toBe(true);
   });
 
-  it("preserves Engine-produced Broker bank semantics through the live AI input", () => {
+  it("preserves Engine-produced Broker semantics while productive central pressure wins", () => {
     const state = runnerTurnState("series-70be-broker-live-input");
     RealEngineFixtureBuilder.forState(state)
       .withRunnerResourceInstalled(BROKER)
@@ -83,7 +84,22 @@ describe("match series 70BE real Engine regressions", () => {
       cardImplementationAddsHostedCredits: true,
       hostedCreditAddAmount: 3,
     });
-    expect(chooseRunnerAction(input).actionId).toBe(build?.actionId);
+    const decision = chooseRunnerAction(input);
+    expect(decision.actionId).not.toBe(build?.actionId);
+    expect(
+      input.legalActions.find(
+        (action) => action.actionId === decision.actionId,
+      ),
+    ).toMatchObject({
+      type: "start_run",
+      payload: { serverId: "rd" },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:runner.pressure_central",
+        "plan_step_capability:pressure_rd_information",
+      ]),
+    );
   });
 
   it("draws first and then pays the affordable City Surveillance choice", () => {
@@ -196,7 +212,7 @@ describe("match series 70BE real Engine regressions", () => {
     expect(decision.actionId).not.toBe(rushHour?.actionId);
   });
 
-  it("lets a one-card hand draw preempt a speculative live run", () => {
+  it("keeps a safe productive central run above a non-acute one-card hand buffer", () => {
     const state = runnerTurnState("series-70be-hand-buffer-live-input");
     RealEngineFixtureBuilder.forState(state)
       .withRunnerGripSize(1)
@@ -207,7 +223,11 @@ describe("match series 70BE real Engine regressions", () => {
       (action) => action.actionId === decision.actionId,
     );
 
-    expect(selected?.type).toBe("draw_card");
+    expect(selected).toMatchObject({
+      type: "start_run",
+      payload: { serverId: "rd" },
+    });
+    expect(decision.evidence).toContain("plan_module:runner.pressure_central");
   });
 
   it("keeps a visible immediate remote score threat as a hand-buffer override", () => {
@@ -283,16 +303,23 @@ function applyDecision(
   side: Side,
   decision: AiDecision,
 ): GameState {
-  const result = applyAction(state, {
-    matchId: state.matchId,
-    side,
-    actionId: decision.actionId,
-    clientKnownStateVersion: state.stateVersion,
-    ...(decision.selectedChoices
-      ? { selectedChoices: decision.selectedChoices }
-      : {}),
-    idempotencyKey: `series-70be:${side}:${state.stateVersion}`,
-  });
+  const idempotencyKey = `series-70be:${side}:${state.stateVersion}`;
+  const result =
+    decision.selectionKind === "engine_randomized_ice_install_selection"
+      ? applyRandomizedIceInstallSelection(state, {
+          ...decision.engineCommand,
+          idempotencyKey,
+        })
+      : applyAction(state, {
+          matchId: state.matchId,
+          side,
+          actionId: decision.actionId,
+          clientKnownStateVersion: state.stateVersion,
+          ...(decision.selectedChoices
+            ? { selectedChoices: decision.selectedChoices }
+            : {}),
+          idempotencyKey,
+        });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;
 }

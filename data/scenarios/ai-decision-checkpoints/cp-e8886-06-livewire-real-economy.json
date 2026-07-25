@@ -4553,8 +4553,11 @@
         "sourceDefinitionId": "onr_v1_097_livewires-contacts"
       }
     ],
-    "selectedScoreBreakdown": {
-      "requiredComponentKeys": ["economy_credit_base"]
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
+      "acceptableCapabilities": [
+        "fund_onr_v1_094_inside-job"
+      ]
     }
   }
 }

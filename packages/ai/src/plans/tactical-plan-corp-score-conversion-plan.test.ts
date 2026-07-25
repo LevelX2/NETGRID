@@ -73,7 +73,7 @@ describe("Corp score-conversion TacticalPlan integration", () => {
       "layoffs",
       "onr_v1_304_systematic-layoffs",
       "operation",
-      { cost: 5 },
+      { playCost: { kind: "fixed", credits: 5 } },
     );
     const vapor = card("vapor", "onr_v1_347_vapor-ops", "asset", {
       advancementCounters: 0,

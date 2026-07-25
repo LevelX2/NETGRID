@@ -59,6 +59,23 @@ describe("projectRunnerRunActions", () => {
     ]);
   });
 
+  it("does not turn an installed future run payoff into a run action", () => {
+    const installPayoff = action({
+      actionId: "install-hq-interface",
+      type: "install_card",
+      payload: {
+        cardId: "hq-interface",
+        sourceDefinitionId: "onr_v1_129_hq-interface",
+        runActionSignals: ["hq_run"],
+        serverId: "hq",
+      },
+    });
+
+    expect(projectRunnerRunActions({ input: input([installPayoff]) })).toEqual(
+      [],
+    );
+  });
+
   it("bounds structured run signals before projecting concrete server payloads", () => {
     const structured = action({
       actionId: "structured-run",
@@ -359,6 +376,30 @@ describe("projectRunnerRunActions", () => {
         (projection) => projection.actionId === "label-like-server",
       )?.targetServerId,
     ).toBeUndefined();
+  });
+
+  it("does not widen a concrete action target with generic card capability signals", () => {
+    const concreteHqRun = action({
+      actionId: "library-search-hq",
+      type: "play_event",
+      payload: {
+        serverId: "hq",
+        runActionSignals: [
+          "run_pressure",
+          "multiaccess",
+          "scope:hq",
+          "scope:rd",
+        ],
+      } as unknown as LegalAction["payload"],
+    });
+
+    expect(projectRunnerRunActions({ input: input([concreteHqRun]) })).toEqual([
+      expect.objectContaining({
+        actionId: "library-search-hq",
+        targetServerId: "hq",
+        projectionStatus: "concrete_target",
+      }),
+    ]);
   });
 
   it("projects Bodyweight's click-free followup as a bonus run without treating decline as a run", () => {

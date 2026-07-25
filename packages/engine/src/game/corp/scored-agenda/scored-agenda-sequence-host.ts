@@ -2,6 +2,9 @@ import type {
   CardDefinition,
   CardInstance,
   CardInstanceId,
+  ChoiceOption,
+  ChoiceRequest,
+  CorpOptionalRezChoiceQuote,
   CorpServer,
   GameState,
   LegalAction,
@@ -10,6 +13,11 @@ import type {
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
 
 export type SequencePayload = Record<string, string | number | boolean>;
+export type CorpSequenceRezPaymentReceipt = {
+  temporaryCreditsSpent: number;
+  temporaryCreditsRemaining: number;
+  corpCreditsSpent: number;
+};
 
 /**
  * @contract Shared host surface for corp scored-agenda sequence resolvers.
@@ -44,7 +52,6 @@ export type CorpInstallRezSequenceHandlerHost = {
     ) => boolean;
     isRegionUpgrade: (definition: CardDefinition) => boolean;
     rootInstallRezzesOnInstall: (definition: CardDefinition) => boolean;
-    rezCostForCard: (cardId: CardInstanceId) => number;
     isScoredAgendaFreeRezCandidate: (cardId: CardInstanceId) => boolean;
   };
   zones: {
@@ -65,6 +72,22 @@ export type CorpInstallRezSequenceHandlerHost = {
   };
   callbacks: {
     resolveCorpRootRez: (cardId: CardInstanceId) => void;
+    preflightMandatoryHqInstallRez: (
+      selectedCardIds: readonly CardInstanceId[],
+      temporaryCreditsAvailable: number,
+    ) => void;
+    projectHqInstallRezOptionQuote: (
+      choice: ChoiceRequest,
+      option: ChoiceOption,
+    ) => CorpOptionalRezChoiceQuote | undefined;
+    payAndFinalizeHqInstallRezOption: (
+      cardId: CardInstanceId,
+      quote: Extract<CorpOptionalRezChoiceQuote, { complete: true }>,
+    ) => CorpSequenceRezPaymentReceipt;
+    payAndFinalizeMandatoryHqInstallRez: (
+      cardId: CardInstanceId,
+      temporaryCreditsAvailable: number,
+    ) => CorpSequenceRezPaymentReceipt;
   };
 };
 

@@ -4741,10 +4741,10 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_279_wall-of-static",
-        "targetServerId": "rd"
+        "type": "play_operation",
+        "sourceDefinitionId": "onr_v1_295_night-shift"
       }
-    ]
+    ],
+    "planExecution": {"acceptablePlanKinds":["corp.hand_and_agenda_management"],"acceptableCapabilities":["draw_for_plan"],"requiredAssessmentEvidence":["corp_option_development_below_hand_capacity"]}
   }
 }

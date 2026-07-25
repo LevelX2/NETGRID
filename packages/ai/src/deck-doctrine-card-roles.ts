@@ -23,7 +23,7 @@ export function deckDoctrineRoleIsAgenda(role: string): boolean {
     role === "agenda" ||
     role === "corp_score_agenda" ||
     role === "score_agenda" ||
-    rolesMatch([role], ["agenda_"])
+    /^agenda_[1-9]\d*pt$/.test(role)
   );
 }
 

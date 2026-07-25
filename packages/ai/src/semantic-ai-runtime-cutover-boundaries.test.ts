@@ -66,15 +66,41 @@ describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", (
   });
 
   it("represents a corp rez window as a rez defense plan", () => {
+    const outerIce = visibleCard("outer-ice", "corp", "ice", {
+      definitionId: "onr_v1_279_wall-of-static",
+      title: "Wall of Static",
+      rezzed: false,
+      strength: 2,
+      subtypes: ["wall"],
+      effectiveRezCostQuote: {
+        context: "installed",
+        cardId: "outer-ice",
+        targetServerId: "remote_1",
+        projectedServerId: "remote_1",
+        expiresAtStateVersion: 1,
+        complete: true,
+        baseCredits: 3,
+        finalCredits: 3,
+        mandatoryAdditionalCosts: { agendaPoints: 0 },
+      },
+    });
+    const rezOuter = legalAction(
+      "rez-outer",
+      "corp",
+      "rez_ice",
+      "Rez outer ICE",
+      { credits: 3 },
+      {
+        source: outerIce.instanceId,
+        payload: {
+          cardId: outerIce.instanceId,
+          serverId: "remote_1",
+        },
+      },
+    );
+    rezOuter.expiresAtStateVersion = 1;
     const input = aiInput("corp", [
-      legalAction(
-        "rez-outer",
-        "corp",
-        "rez_ice",
-        "Rez outer ICE",
-        { credits: 3 },
-        { source: "outer-ice", payload: { serverId: "remote_1" } },
-      ),
+      rezOuter,
       legalAction("decline-rez", "corp", "decline_rez", "Decline rez", {
         credits: 0,
       }),
@@ -83,7 +109,7 @@ describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", (
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [visibleCard("outer-ice", "corp", "ice")]),
+      server("remote_1", [outerIce]),
     ];
 
     const decision = chooseCorpAction(input);

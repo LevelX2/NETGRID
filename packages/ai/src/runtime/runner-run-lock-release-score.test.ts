@@ -101,17 +101,20 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     expect(component?.reason).toContain("reserve_after_probe:10");
   });
 
-  it("does not pay an expensive speculative lock below own matchpoint", () => {
+  it("pays a two-credit lock when the concrete path still preserves the required reserve", () => {
     const current = input();
     current.playerView.opponent.agendaPoints = 4;
     current.playerView.own.credits = 12;
 
     expect(
       runnerRunLockReleaseScoreComponent(current, releaseAction(2)),
-    ).toBeUndefined();
+    ).toMatchObject({
+      key: "runner_viable_followup_run_lock_release",
+      value: 1800,
+    });
   });
 
-  it("pays an expensive lock when ample liquidity leaves a credible run reserve", () => {
+  it("does not depend on a blanket twelve-credit post-payment threshold", () => {
     const current = input();
     current.playerView.opponent.agendaPoints = 4;
     current.playerView.own.credits = 18;
@@ -125,7 +128,8 @@ describe("runnerRunLockReleaseScoreComponent", () => {
       key: "runner_viable_followup_run_lock_release",
       value: 1800,
     });
-    expect(component?.reason).toContain("high_liquidity_release:true");
+    expect(component?.reason).toContain("run_lock_release_target_credits:7");
+    expect(component?.reason).not.toContain("high_liquidity_release");
   });
 
   it("releases for a reachable public two-point terminal remote", () => {

@@ -4484,15 +4484,9 @@
         "recommendation": "run_now"
       }
     ],
-    "decisionChain": {
-      "rawScoreWinner": {
-        "type": "start_run",
-        "targetServerId": "hq"
-      },
-      "planMappedAction": {
-        "type": "start_run",
-        "targetServerId": "hq"
-      }
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_hq_access"]
     }
   }
 }

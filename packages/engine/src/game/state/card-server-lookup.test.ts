@@ -1,6 +1,5 @@
 import {
   CARD_DEFINITIONS_BY_ID,
-  type CardDefinition,
   type CardDefinitionId,
   type CardInstance,
   type CardInstanceId,
@@ -37,7 +36,7 @@ const UNKNOWN_DEF_ID = "missing_definition" as CardDefinitionId;
 
 function definitionIdFor(type: CardType): CardDefinitionId {
   const definition = Object.values(CARD_DEFINITIONS_BY_ID).find(
-    (candidate): candidate is CardDefinition => candidate.type === type,
+    (candidate) => candidate.type === type,
   );
   if (!definition) throw new Error(`Missing fixture definition for ${type}`);
   return definition.id;

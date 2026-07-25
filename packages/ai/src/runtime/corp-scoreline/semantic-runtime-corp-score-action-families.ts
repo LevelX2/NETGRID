@@ -26,10 +26,8 @@ import {
 } from "./semantic-runtime-corp-score-hq-pressure";
 import {
   corpDownstreamRezReserveAssessment,
-  corpIcePlacementComponent,
   corpInstallServerId,
   corpPostPassIceLifecycleComponent,
-  corpRemoteScorelineIceFundingPenaltyComponent,
   corpRootRezTimingComponent,
 } from "./semantic-runtime-corp-score-ice-components";
 import {
@@ -313,30 +311,11 @@ export function corpActionFamilyScoreComponents<TConsumer extends string>(
         reason: "protect_role",
       });
     }
-    const icePlacement = corpIcePlacementComponent(
-      input,
-      action,
-      dependencies,
-      actionSemanticCandidate,
-      boardTriageState,
-    );
-    if (icePlacement) components.push(icePlacement);
     const matchpointHqProtection = corpMatchpointHqProtectionComponent(
       input,
       action,
     );
     if (matchpointHqProtection) components.push(matchpointHqProtection);
-    const scorelineIceFundingPenalty =
-      corpRemoteScorelineIceFundingPenaltyComponent(
-        input,
-        action,
-        dependencies,
-        roles,
-        icePlacement,
-      );
-    if (scorelineIceFundingPenalty) {
-      components.push(scorelineIceFundingPenalty);
-    }
     if (rolesMatch(roles, ["economy"])) {
       components.push({
         key: "corp_install_economy",

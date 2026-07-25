@@ -27,24 +27,31 @@ export type CorpPunishCampaignSignal = {
   campaignId: string;
   phase: "prepare" | "trace" | "tag" | "damage" | "kill";
   sourceDefinitionIds: string[];
+  actionIds?: string[];
+  initiatingSemanticActionType?: string;
   feasible: boolean;
   guarantee: GuaranteeLevel;
   terminalCondition?: "runner_flatline" | "runner_deckout";
   visibleTerminalProjection: boolean;
+  priorityClass?: "P4" | "P5";
   value: number;
   evidenceCode: string;
 };
 
 export type CorpAmbushSignal = {
+  commitmentVersion: "corp_ambush_commitment_v1";
   ambushId: string;
   sourceDefinitionId: string;
-  sourceInstanceId?: string;
+  sourceInstanceId: string;
+  actionIds: string[];
   serverId: string;
   phase: "install" | "advance" | "trigger";
   purposeCode?: string;
   assignedDomainPlanIds: string[];
   duplicateAlreadyInstalled: boolean;
   affordableOrSupportable: boolean;
+  plannedAtStateVersion: number;
+  plannedAdvancementTarget: number;
   value: number;
   evidenceCode: string;
 };
@@ -58,10 +65,14 @@ export type CorpHandManagementSignal = {
     | "discard_window";
   sourceDefinitionIds?: string[];
   sourceInstanceId?: string;
+  actionIds?: string[];
+  exactActionRoute?: boolean;
   agendaCount: number;
   handSize: number;
   maximumHandSize: number;
   concretePurposeCode: string;
+  priorityClass?: "P3" | "P5" | "P6";
+  routeAllowed?: boolean;
   value: number;
   evidenceCode: string;
 };
@@ -101,14 +112,14 @@ export function corpSpecialDevelopmentAdmission(params: {
 }):
   | { admitted: true; reasonCode: string }
   | { admitted: false; reasonCode: string } {
-  if (params.assignedDomainPlanIds.length > 0)
-    return { admitted: true, reasonCode: "assigned_domain_plan" };
-  if (!params.concretePurposeCode)
-    return { admitted: false, reasonCode: "no_concrete_corp_purpose" };
   if (params.duplicateAlreadyInstalled)
     return { admitted: false, reasonCode: "redundant_corp_copy" };
   if (!params.affordableOrSupportable)
     return { admitted: false, reasonCode: "unfunded_corp_development" };
+  if (params.assignedDomainPlanIds.length > 0)
+    return { admitted: true, reasonCode: "assigned_domain_plan" };
+  if (!params.concretePurposeCode)
+    return { admitted: false, reasonCode: "no_concrete_corp_purpose" };
   return {
     admitted: true,
     reasonCode: `specific_purpose:${params.concretePurposeCode}`,
@@ -119,6 +130,13 @@ export function corpTacticalActionFamilyOwner(
   candidate: ActionSemanticCandidate,
   planDomain: CorpPlanDomain,
 ): PlanModule["moduleId"] | undefined {
+  const punishCampaign = planDomain.punishCampaigns.find((signal) =>
+    corpPunishCampaignOwnsCandidate(signal, candidate),
+  );
+  if (punishCampaign)
+    return punishCampaign.phase === "prepare"
+      ? "corp.punish_campaign"
+      : "corp.execute_punish_sequence";
   if (
     candidate.semanticActionType === "counter.purge_virus" ||
     candidate.semanticActionType === "counter.purge_runner_virus"
@@ -127,28 +145,47 @@ export function corpTacticalActionFamilyOwner(
       ? "corp.respond_to_virus_pressure"
       : undefined;
   if (
-    candidate.semanticActionType.startsWith("trace.") ||
-    candidate.semanticActionType.startsWith("tag.") ||
-    candidate.semanticActionType.startsWith("damage.")
-  )
-    return planDomain.punishCampaigns.some((signal) => signal.feasible)
-      ? "corp.execute_punish_sequence"
-      : undefined;
-  if (
-    candidate.sourceDefinitionId &&
     planDomain.ambushes.some(
-      (signal) => signal.sourceDefinitionId === candidate.sourceDefinitionId,
+      (signal) => signal.actionIds.includes(candidate.actionId),
     )
   )
     return "corp.ambush_and_bluff";
-  if (
-    candidate.semanticActionType === "draw.card" ||
-    candidate.semanticActionType === "choice.resolve"
-  )
-    return planDomain.handManagement.length > 0
+  const allowedHandPlans = planDomain.handManagement.filter(
+    (signal) => signal.routeAllowed !== false,
+  );
+  if (candidate.semanticActionType === "choice.resolve")
+    return allowedHandPlans.length > 0
       ? "corp.hand_and_agenda_management"
       : undefined;
+  if (
+    allowedHandPlans.some(
+      (signal) =>
+        signal.actionIds?.includes(candidate.actionId) === true,
+    )
+  )
+    return "corp.hand_and_agenda_management";
   return undefined;
+}
+
+export function corpPunishCampaignOwnsCandidate(
+  signal: CorpPunishCampaignSignal,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  if (
+    !signal.feasible ||
+    (signal.actionIds !== undefined &&
+      !signal.actionIds.includes(candidate.actionId)) ||
+    !punishCapability(signal).semanticActionTypes.includes(
+      candidate.semanticActionType,
+    )
+  ) {
+    return false;
+  }
+  return (
+    signal.sourceDefinitionIds.length === 0 ||
+    candidate.semanticActionType === "choice.resolve" ||
+    signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? "")
+  );
 }
 
 function virusModule(): PlanModule {
@@ -210,7 +247,7 @@ function punishCampaignModule(): PlanModule {
             "corp.punish_campaign",
             signal.campaignId,
             { kind: "punish_campaign", signal } satisfies PunishState,
-            "P4",
+            punishCampaignPriority(signal),
             punishCandidates(context, signal),
             signal.evidenceCode,
             { kind: "player", id: "runner" },
@@ -221,7 +258,7 @@ function punishCampaignModule(): PlanModule {
       const current = state<PunishState>(instance);
       return assessment(
         instance,
-        "P4",
+        punishCampaignPriority(current.signal),
         current.signal.feasible &&
           punishCandidates(context, current.signal).length > 0,
         current.signal.value,
@@ -232,6 +269,12 @@ function punishCampaignModule(): PlanModule {
     materialize: (instance, _assessment, context) =>
       punishMaterialization(instance, context),
   };
+}
+
+function punishCampaignPriority(
+  signal: CorpPunishCampaignSignal,
+): "P4" | "P5" {
+  return signal.priorityClass ?? "P4";
 }
 
 function punishSequenceModule(): PlanModule {
@@ -251,7 +294,6 @@ function punishSequenceModule(): PlanModule {
             signal.evidenceCode,
             { kind: "player", id: "runner" },
             "locked_sequence",
-            `plan:corp.punish_campaign:${encodeURIComponent(signal.campaignId)}`,
           ),
         ),
     assess: (instance, context, portfolio) => {
@@ -315,24 +357,29 @@ function ambushModule(): PlanModule {
           affordableOrSupportable: signal.affordableOrSupportable,
         });
         if (!admission.admitted) return [];
-        return [
-          proposal(
-            "corp.ambush_and_bluff",
-            signal.ambushId,
-            { kind: "ambush", signal } satisfies AmbushState,
-            "P4",
-            ambushCandidates(context, signal),
-            `${signal.evidenceCode}:${admission.reasonCode}`,
-            { kind: "server", id: signal.serverId },
-            "sticky_goal",
-          ),
-        ];
+        const priorityClass = ambushPriority(signal);
+        const currentProposal = proposal(
+          "corp.ambush_and_bluff",
+          signal.ambushId,
+          { kind: "ambush", signal } satisfies AmbushState,
+          priorityClass,
+          ambushCandidates(context, signal),
+          `${signal.evidenceCode}:${admission.reasonCode}`,
+          { kind: "server", id: signal.serverId },
+          "sticky_goal",
+        );
+        currentProposal.retentionPolicy = {
+          ...currentProposal.retentionPolicy,
+          abandonWhenTargetMissing: true,
+          protectedWhileCommitted: false,
+        };
+        return [currentProposal];
       }),
     assess: (instance, context, portfolio) => {
       const current = state<AmbushState>(instance);
       return assessment(
         instance,
-        "P4",
+        ambushPriority(current.signal),
         ambushCandidates(context, current.signal).length > 0,
         current.signal.value,
         portfolio.executorInstanceId,
@@ -356,9 +403,7 @@ function ambushModule(): PlanModule {
               ? { kind: "server", id: current.signal.serverId }
               : {
                   kind: "card",
-                  id:
-                    current.signal.sourceInstanceId ??
-                    current.signal.sourceDefinitionId,
+                  id: current.signal.sourceInstanceId,
                 },
           purpose: `Execute admitted ambush purpose ${current.signal.purposeCode ?? "domain assigned"}.`,
         },
@@ -366,6 +411,14 @@ function ambushModule(): PlanModule {
       };
     },
   };
+}
+
+function ambushPriority(
+  signal: CorpAmbushSignal,
+): "P3" | "P4" | "P5" {
+  if (signal.phase === "trigger") return "P3";
+  if (signal.phase === "advance") return "P4";
+  return "P5";
 }
 
 function handModule(): PlanModule {
@@ -378,10 +431,12 @@ function handModule(): PlanModule {
           "corp.hand_and_agenda_management",
           signal.handPlanId,
           { kind: "hand", signal } satisfies HandState,
-          signal.phase === "agenda_flood_relief" ? "P2" : "P5",
+          handPriority(signal),
           handCandidates(context, signal),
           signal.evidenceCode,
-          { kind: "player", id: "corp" },
+          signal.sourceDefinitionIds?.[0]
+            ? { kind: "card", id: signal.sourceDefinitionIds[0] }
+            : { kind: "player", id: "corp" },
           signal.phase === "discard_window"
             ? "locked_sequence"
             : "sticky_goal",
@@ -391,7 +446,7 @@ function handModule(): PlanModule {
       const current = state<HandState>(instance);
       return assessment(
         instance,
-        current.signal.phase === "agenda_flood_relief" ? "P2" : "P5",
+        handPriority(current.signal),
         handCandidates(context, current.signal).length > 0,
         current.signal.value,
         portfolio.executorInstanceId,
@@ -405,7 +460,10 @@ function handModule(): PlanModule {
           stepId: `${instance.instanceId}:${current.signal.phase}`,
           capability: {
             capabilityId: current.signal.phase,
-            semanticActionTypes: handSemanticTypes(current.signal.phase),
+            semanticActionTypes: handStepSemanticTypes(
+              context,
+              current.signal,
+            ),
             ...(current.signal.sourceDefinitionIds
               ? {
                   requiredSourceDefinitionIds:
@@ -479,7 +537,7 @@ function proposal(
 
 function assessment(
   instance: PlanInstance,
-  priorityClass: "P1" | "P2" | "P3" | "P4" | "P5",
+  priorityClass: PriorityClass,
   routeExists: boolean,
   value: number,
   executorId: string | undefined,
@@ -522,11 +580,17 @@ function assessment(
                 reasonCode: "strategic_campaign",
                 horizon: "multi_turn",
               }
-            : {
+            : priorityClass === "P5"
+              ? {
                 requestedClass: "P5",
                 reasonCode: "development_need",
                 horizon: "multi_turn",
-              };
+                }
+              : {
+                  requestedClass: "P6",
+                  reasonCode: "neutral_progress",
+                  horizon: "multi_turn",
+                };
   return {
     instanceId: instance.instanceId,
     side: "corp",
@@ -574,22 +638,31 @@ function punishPriority(
       signal.guarantee === "robust_but_reactive")
   )
     return "P1";
-  if (signal.phase === "damage" || signal.phase === "kill") return "P3";
-  return "P2";
+  return "P3";
 }
 
 function punishCapability(signal: CorpPunishCampaignSignal) {
-  const semantic = {
-    prepare: ["install.card", "play.corp_operation"],
+  const phaseSemantic = {
+    prepare: ["install.card", "corp_window.rez", "play.corp_operation"],
     trace: ["trace.initiate", "choice.resolve"],
     tag: ["tag.apply", "choice.resolve"],
     damage: ["damage.net", "damage.meat", "choice.resolve"],
     kill: ["damage.net", "damage.meat"],
   }[signal.phase];
+  const semantic = [
+    ...new Set([
+      ...phaseSemantic,
+      ...(signal.initiatingSemanticActionType
+        ? [signal.initiatingSemanticActionType]
+        : []),
+    ]),
+  ];
   return {
     capabilityId: `punish_${signal.phase}`,
     semanticActionTypes: semantic,
-    requiredSourceDefinitionIds: signal.sourceDefinitionIds,
+    ...(signal.sourceDefinitionIds.length > 0
+      ? { requiredSourceDefinitionIds: signal.sourceDefinitionIds }
+      : {}),
   };
 }
 
@@ -609,19 +682,32 @@ function punishCandidates(
   context: PlanSchedulerContext,
   signal: CorpPunishCampaignSignal,
 ): PlanMaterialization["candidates"] {
-  const semantic = punishCapability(signal).semanticActionTypes;
   return context.actionCandidates
-    .filter(
-      (candidate) =>
-        signal.feasible &&
-        semantic.includes(candidate.semanticActionType) &&
-        (signal.sourceDefinitionIds.length === 0 ||
-          candidate.semanticActionType === "choice.resolve" ||
-          signal.sourceDefinitionIds.includes(
-            candidate.sourceDefinitionId ?? "",
-          )),
-    )
-    .map((candidate) => ({ candidate, stepValue: signal.value }));
+    .filter((candidate) => corpPunishCampaignOwnsCandidate(signal, candidate))
+    .map((candidate) => ({
+      candidate,
+      stepValue:
+        signal.value +
+        (signal.phase === "prepare"
+          ? corpPrepareTargetValue(context, candidate)
+          : 0),
+    }));
+}
+
+function corpPrepareTargetValue(
+  context: PlanSchedulerContext,
+  candidate: ActionSemanticCandidate,
+): number {
+  if (candidate.semanticActionType !== "install.card") return 0;
+  const target = candidateTargets(candidate).find(
+    (targetId) =>
+      targetId === "new_remote" || targetId.startsWith("remote_"),
+  );
+  if (!target || target === "new_remote") return 0;
+  const server = context.input.playerView.servers.find(
+    (current) => current.id === target,
+  );
+  return (server?.ice.length ?? 0) > 0 ? 50 : 10;
 }
 
 function purgeCandidates(
@@ -646,26 +732,20 @@ function ambushCandidates(
   context: PlanSchedulerContext,
   signal: CorpAmbushSignal,
 ): PlanMaterialization["candidates"] {
-  const targetId =
-    signal.phase === "install"
-      ? signal.serverId
-      : signal.sourceInstanceId ?? signal.sourceDefinitionId;
   return context.actionCandidates
-    .filter(
-      (candidate) =>
-        candidate.sourceDefinitionId === signal.sourceDefinitionId &&
-        ambushSemanticTypes(signal.phase).includes(
-          candidate.semanticActionType,
-        ) &&
-        candidateTargets(candidate).includes(targetId),
-    )
+    .filter((candidate) => signal.actionIds.includes(candidate.actionId))
     .map((candidate) => ({ candidate, stepValue: signal.value }));
 }
 
 function handSemanticTypes(
   phase: CorpHandManagementSignal["phase"],
 ): string[] {
-  if (phase === "draw_for_plan") return ["draw.card", "card_ability.trigger"];
+  if (phase === "draw_for_plan")
+    return [
+      "draw.card",
+      "play.corp_operation",
+      "card_ability.trigger",
+    ];
   if (phase === "develop_card")
     return ["install.card", "play.corp_operation", "card_ability.trigger"];
   return ["choice.resolve", "play.corp_operation"];
@@ -675,19 +755,77 @@ function handCandidates(
   context: PlanSchedulerContext,
   signal: CorpHandManagementSignal,
 ): PlanMaterialization["candidates"] {
+  if (signal.routeAllowed === false) return [];
   return context.actionCandidates
     .filter(
-      (candidate) =>
-        handSemanticTypes(signal.phase).includes(candidate.semanticActionType) &&
-        (!signal.sourceDefinitionIds ||
-          (candidate.sourceDefinitionId !== undefined &&
-            signal.sourceDefinitionIds.includes(
-              candidate.sourceDefinitionId,
-            ))) &&
-        (!signal.sourceInstanceId ||
-          candidate.sourceCardInstanceId === signal.sourceInstanceId),
+      (candidate) => {
+        const exactProjectedDrawRoute =
+          signal.phase === "draw_for_plan" &&
+          signal.actionIds?.includes(candidate.actionId) === true &&
+          (candidate.economyProjection?.cardsDrawn ?? 0) > 0;
+        const exactActionRoute =
+          signal.exactActionRoute === true &&
+          signal.actionIds?.includes(candidate.actionId) === true;
+        return (
+          (handSemanticTypes(signal.phase).includes(
+            candidate.semanticActionType,
+          ) ||
+            exactProjectedDrawRoute ||
+            exactActionRoute) &&
+          (!signal.actionIds ||
+            signal.actionIds.includes(candidate.actionId)) &&
+          (!signal.sourceDefinitionIds ||
+            (candidate.sourceDefinitionId !== undefined &&
+              signal.sourceDefinitionIds.includes(
+                candidate.sourceDefinitionId,
+              ))) &&
+          (!signal.sourceInstanceId ||
+            candidate.sourceCardInstanceId === signal.sourceInstanceId)
+        );
+      },
     )
-    .map((candidate) => ({ candidate, stepValue: signal.value }));
+    .map((candidate) => ({
+      candidate,
+      stepValue:
+        signal.value +
+        (signal.phase === "draw_for_plan"
+          ? Math.max(0, candidate.economyProjection?.cardsDrawn ?? 0) * 10 +
+            Math.max(
+              0,
+              candidate.economyProjection?.netLiquidCreditGain ?? 0,
+            ) *
+              5
+          : 0),
+    }));
+}
+
+function handStepSemanticTypes(
+  context: PlanSchedulerContext,
+  signal: CorpHandManagementSignal,
+): string[] {
+  const semanticActionTypes = handSemanticTypes(signal.phase);
+  if (
+    (signal.phase !== "draw_for_plan" && signal.exactActionRoute !== true) ||
+    !signal.actionIds
+  ) {
+    return semanticActionTypes;
+  }
+  const exactProjectedDrawTypes = context.actionCandidates
+    .filter(
+      (candidate) =>
+        signal.actionIds?.includes(candidate.actionId) === true &&
+        (signal.exactActionRoute === true ||
+          (candidate.economyProjection?.cardsDrawn ?? 0) > 0),
+    )
+    .map((candidate) => candidate.semanticActionType);
+  return [...new Set([...semanticActionTypes, ...exactProjectedDrawTypes])];
+}
+
+function handPriority(
+  signal: CorpHandManagementSignal,
+): "P2" | "P3" | "P5" | "P6" {
+  if (signal.phase === "agenda_flood_relief") return "P2";
+  return signal.priorityClass ?? "P5";
 }
 
 function candidateTargets(candidate: ActionSemanticCandidate): string[] {

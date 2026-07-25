@@ -18,6 +18,7 @@ type RunnerAccessTrashContext = {
   reserveTarget: number;
   deferredByBudget: boolean;
   centralAccess: boolean;
+  installedRootAccess?: boolean;
   acuteThreat?: boolean;
   finitePoolEconomy?: boolean;
   corpValueRemaining?: number;
@@ -78,7 +79,7 @@ export function runnerAccessTrashScoreComponents(
           : -1200,
       reason: `credits:${input.playerView.own.credits};cost:${context.trashCost};general_cost:${context.generalCreditCost}`,
     });
-    if (context.centralAccess) {
+    if (context.centralAccess && context.installedRootAccess !== true) {
       components.push({
         key: "runner_central_access_trash_low_corp_investment",
         label: "Zentralzugriff ohne Korp-Install",

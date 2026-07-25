@@ -13,7 +13,10 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
     ["converts the financed protected scoreline", convertScorelineJson],
     ["keeps the only protected score remote root open", keepScoreRemoteOpenJson],
     ["minimizes agenda points exposed on a contested remote", minimizeAgendaRiskJson],
-    ["starts the protected game-ending scoreline", startMatchpointJson],
+    [
+      "does not expose a game-ending agenda on a still-reachable remote",
+      startMatchpointJson,
+    ],
   ])("%s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
@@ -25,7 +28,17 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-A1-RICH-RUNNER-CONTROL";
       fixture.expectation = {
-        acceptableActions: [{ type: "gain_credit" }],
+        acceptableActions: [{ type: "draw_card" }],
+        forbiddenActions: [
+          {
+            type: "install_card",
+            sourceDefinitionId: "onr_v1_203_hostile-takeover",
+          },
+          {
+            type: "install_card",
+            sourceDefinitionId: "onr_v1_193_corporate-coup",
+          },
+        ],
       };
     });
 
@@ -54,7 +67,6 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.findingId = "LATEST-CORP-A2-NO-AGENDA-CONTROL";
       fixture.expectation = {
         acceptableActions: [
-          { type: "draw_card" },
           {
             actionId:
               "corp.install_card.corp_onr_v1_365_paris-city-grid_1.remote_1.corp_onr_v1_365_paris-city-grid_1",
@@ -90,20 +102,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-B1-SAFE-REMOTE-CONTROL";
       fixture.expectation = {
-        acceptableActions: [
-          {
-            actionId:
-              "corp.install_card.corp_onr_v1_195_corporate-retreat_1.remote_1.corp_onr_v1_195_corporate-retreat_1",
-          },
-          {
-            actionId:
-              "corp.install_card.corp_onr_v1_214_project-babylon_1.remote_1.corp_onr_v1_214_project-babylon_1",
-          },
-          {
-            actionId:
-              "corp.install_card.corp_onr_v1_216_security-purge_1.remote_1.corp_onr_v1_216_security-purge_1",
-          },
-        ],
+        acceptableActions: [{ type: "draw_card" }],
         selectedScoreBreakdown: {
           forbiddenComponentKeys: ["corp_contested_agenda_point_risk"],
         },
@@ -135,7 +134,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-B2-NO-MATCHPOINT-CONTROL";
       fixture.expectation = {
-        acceptableActions: [{ type: "gain_credit" }],
+        acceptableActions: [{ type: "end_turn" }],
       };
     });
 

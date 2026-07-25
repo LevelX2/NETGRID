@@ -3082,6 +3082,13 @@
         "sourceDefinitionId": "onr_v1_252_keeper",
         "targetServerId": "hq"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": [
+        "engine_certified_global_defense_access_probability_reduced"
+      ]
+    }
   }
 }

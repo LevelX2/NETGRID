@@ -1,27 +1,12 @@
 import {
   CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
-  type AiDecisionScoreComponent,
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
 
 import { createAiHintsByCard, RUNTIME_CARDS } from "../../ai-hints";
-import {
-  endTheRunSubroutineCount,
-  minimumCreditsToBreakEndTheRunSubroutines,
-} from "../../visible-run-analysis";
-import {
-  visibleBreakerCardCanAddressIce,
-  visibleBreakerRoles,
-} from "../runner-visible-breaker-coverage";
 import { rolesMatch } from "../role-match";
-
-export type CorpIcePlacementRecommendation =
-  | "install_now"
-  | "hold_for_later"
-  | "prefer_economy"
-  | "prefer_scoreline";
 
 export type CorpFutureRunIceClass =
   | "ball_and_chain"
@@ -36,11 +21,7 @@ export type CorpIcePlacementDiagnosticsAssessment = {
   serverId: string;
   existingIceCount: number;
   installedOnEmptyServer: boolean;
-  installedAsOutermost: boolean;
-  hasLaterIceAfterInstall: boolean;
-  deadEffect: boolean;
-  liveEffect: boolean;
-  directImpactAlternativeCount: number;
+  resultingPosition: CorpIcePlacementResultingPosition;
 };
 
 export type CorpIcePlacementResultingPosition =
@@ -48,29 +29,38 @@ export type CorpIcePlacementResultingPosition =
   | "known_engine_position"
   | "unknown";
 
-export type CorpIcePlacementServerLike = {
-  id: string;
-  ice: readonly VisibleCard[];
-  root: readonly VisibleCard[];
-};
+export type CorpIceCostFact =
+  | {
+      status: "known";
+      amount: number;
+      source:
+        | "legal_action"
+        | "candidate_projection"
+        | "engine_post_install_rez_quote";
+    }
+  | {
+      status: "unknown";
+      reason:
+        | "missing"
+        | "incomplete"
+        | "variable"
+        | "non_finite"
+        | "negative"
+        | "non_integer"
+        | "projection_drift"
+        | "binding_drift"
+        | "malformed"
+        | "unsupported_mandatory_cost";
+      source:
+        | "legal_action"
+        | "candidate_projection"
+        | "engine_post_install_rez_quote";
+    };
 
-export type CorpServerNeedProfile = {
-  serverId: string;
-  serverKind: "hq" | "rd" | "archives" | "remote" | "new_remote" | "unknown";
-  serverNeed: number;
-  iceCount: number;
-  existingRezzedIceCount: number;
-  rootHasAgendaOrScoreline: boolean;
-  agendaRisk: boolean;
-  pressureActive: boolean;
-  evidence: string[];
-};
-
-export type CorpIceCardPlacementProfile = {
+export type CorpIceCardFacts = {
   iceInstanceId?: string;
   iceDefinitionId?: string;
   title?: string;
-  rezCost: number;
   immediateStop: boolean;
   softStop: boolean;
   tax: boolean;
@@ -90,76 +80,8 @@ export type CorpIceCardPlacementProfile = {
   mobileReposition: boolean;
   maintenanceOrBounceRisk: boolean;
   positionDependent: boolean;
-  deadAsFirstIce: boolean;
-  wantsOuter: boolean;
-  wantsInner: boolean;
-  wantsFollowupIce: boolean;
+  requiresOtherIceContext: boolean;
   evidence: string[];
-};
-
-export type CorpIceDensityProfile = {
-  knownCorpCardCount: number;
-  knownIceSeen: number;
-  iceInHq: number;
-  installedIce: number;
-  remainingDeckCount: number;
-  remainingIceEstimate: number;
-  iceDensityClass: "low" | "normal" | "high" | "unknown";
-  handIceQuality: "none" | "weak" | "mixed" | "strong";
-  evidence: string[];
-};
-
-export type CorpIcePlacementCandidate = {
-  actionId: string;
-  iceInstanceId?: string;
-  iceDefinitionId?: string;
-  serverId: string;
-  resultingPosition: CorpIcePlacementResultingPosition;
-  actionCreditCost: number;
-  rezCost: number;
-  rezAffordable: boolean;
-  immediateStop: boolean;
-  visibleZeroEffectRisk: boolean;
-  score: number;
-  recommendation: CorpIcePlacementRecommendation;
-  components: {
-    serverNeed: number;
-    immediateStopValue: number;
-    futureRunSynergy: number;
-    positionFit: number;
-    rezAffordability: number;
-    deckDensityAdjustment: number;
-    opportunityCost: number;
-    visibleZeroEffect: number;
-    postInstallReserve: number;
-    marginalLayerValue: number;
-  };
-  evidence: string[];
-};
-
-export type CorpIcePlacementEvaluation = {
-  bestInstall?: CorpIcePlacementCandidate;
-  bestDeferReason?: string | undefined;
-  candidates: CorpIcePlacementCandidate[];
-  serverNeeds: CorpServerNeedProfile[];
-  handIceProfiles: CorpIceCardPlacementProfile[];
-  deckDensity: CorpIceDensityProfile;
-  evidence: string[];
-};
-
-export type CorpIcePlacementCandidateParams<
-  TServer extends CorpIcePlacementServerLike = CorpIcePlacementServerLike,
-> = {
-  input: AiDecisionInput;
-  action: LegalAction;
-  serverId?: string | undefined;
-  server?: TServer | undefined;
-  sourceCard?: VisibleCard | undefined;
-  actionCreditCost?: number | undefined;
-  iceRezCost?: number | undefined;
-  immediateServerNeedBonus?: number | undefined;
-  hasUrgentScoreline?: boolean | undefined;
-  hasBetterImmediateIceAlternative?: boolean | undefined;
 };
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
@@ -178,175 +100,6 @@ const CORP_FUTURE_RUN_ICE_CLASS_BY_DEFINITION: Record<
   onr_v1_277_virizz: "future_run_ice",
 };
 
-export function corpIcePlacementCandidateForAction<
-  TServer extends CorpIcePlacementServerLike,
->(
-  params: CorpIcePlacementCandidateParams<TServer>,
-): CorpIcePlacementCandidate | undefined {
-  const { input, action } = params;
-  if (
-    input.side !== "corp" ||
-    action.side !== "corp" ||
-    action.type !== "install_card" ||
-    action.payload?.placement !== "ice"
-  ) {
-    return undefined;
-  }
-  const serverId = params.serverId ?? corpIcePlacementServerId(action);
-  if (!serverId) return undefined;
-  const sourceCard =
-    params.sourceCard ?? visibleSourceCardForCorpIcePlacement(input, action);
-  if (!sourceCard || sourceCard.known === false) return undefined;
-
-  const serverNeed = buildCorpServerNeedProfile(
-    input,
-    serverId,
-    params.server,
-    {
-      immediateServerNeedBonus: params.immediateServerNeedBonus,
-      hasUrgentScoreline: params.hasUrgentScoreline,
-    },
-  );
-  const profile = buildCorpIceCardPlacementProfile(sourceCard, {
-    rezCost: params.iceRezCost,
-  });
-  const deckDensity = buildCorpIceDensityProfile(input);
-  const actionCreditCost =
-    params.actionCreditCost ?? corpIcePlacementActionCreditCost(action);
-  const creditsAfterInstall = input.playerView.own.credits - actionCreditCost;
-  const affordable = profile.rezCost <= Math.max(0, creditsAfterInstall);
-  const firstIce = serverNeed.iceCount === 0;
-  const hasOutsideRezzedIce = serverNeed.existingRezzedIceCount > 0;
-  const serverNeedScore = corpServerNeedScoreValue(profile, serverNeed);
-  const visibleDefenseFit = corpVisibleIceDefenseFit(
-    input,
-    sourceCard,
-    profile,
-  );
-
-  const components = {
-    serverNeed: serverNeedScore,
-    immediateStopValue: corpImmediateStopValue(profile, serverNeed, affordable),
-    futureRunSynergy: corpFutureRunSynergyValue(
-      profile,
-      firstIce,
-      hasOutsideRezzedIce,
-    ),
-    positionFit: corpPositionFitValue(profile, firstIce, hasOutsideRezzedIce),
-    rezAffordability: corpRezAffordabilityValue(profile, affordable),
-    deckDensityAdjustment: corpDeckDensityAdjustmentValue(
-      profile,
-      deckDensity,
-      firstIce,
-      serverNeed,
-    ),
-    opportunityCost: corpPlacementOpportunityCostValue({
-      profile,
-      serverNeed,
-      affordable,
-      creditsAfterInstall,
-      hasBetterImmediateIceAlternative:
-        params.hasBetterImmediateIceAlternative === true,
-    }),
-    visibleZeroEffect: corpVisibleZeroEffectValue(visibleDefenseFit),
-    postInstallReserve: corpPostInstallReserveValue({
-      profile,
-      serverNeed,
-      creditsAfterInstall,
-      visibleDefenseFit,
-    }),
-    marginalLayerValue: corpMarginalIceLayerValue({
-      serverNeed,
-      visibleDefenseFit,
-      actionCreditCost,
-      urgentScoreline: params.hasUrgentScoreline === true,
-    }),
-  };
-  const score = Object.values(components).reduce(
-    (sum, value) => sum + value,
-    0,
-  );
-  const recommendation = corpIcePlacementRecommendationForScore(
-    score,
-    components,
-    params.hasUrgentScoreline === true,
-  );
-  const deferReason =
-    recommendation === "install_now"
-      ? undefined
-      : corpDeferReasonForPlacement(components, deckDensity);
-  return {
-    actionId: action.actionId,
-    iceInstanceId: sourceCard.instanceId,
-    ...(sourceCard.definitionId
-      ? { iceDefinitionId: sourceCard.definitionId }
-      : {}),
-    serverId,
-    resultingPosition: corpIcePlacementResultingPosition(action),
-    actionCreditCost,
-    rezCost: profile.rezCost,
-    rezAffordable: affordable,
-    immediateStop: profile.immediateStop,
-    visibleZeroEffectRisk: visibleDefenseFit.zeroEffectRisk,
-    score,
-    recommendation,
-    components,
-    evidence: [
-      `server:${serverId}`,
-      `first_ice:${firstIce}`,
-      `credits_after_install:${creditsAfterInstall}`,
-      `rez_cost:${profile.rezCost}`,
-      `rez_affordable:${affordable}`,
-      `raw_server_need:${serverNeed.serverNeed}`,
-      `server_need_score:${serverNeedScore}`,
-      `recommendation:${recommendation}`,
-      ...(deferReason ? [`defer_reason:${deferReason}`] : []),
-      `component_visible_zero_effect:${components.visibleZeroEffect}`,
-      `component_post_install_reserve:${components.postInstallReserve}`,
-      `component_marginal_layer_value:${components.marginalLayerValue}`,
-      `component_opportunity_cost:${components.opportunityCost}`,
-      ...serverNeed.evidence,
-      ...profile.evidence,
-      ...visibleDefenseFit.evidence,
-      ...deckDensity.evidence,
-    ],
-  };
-}
-
-export function corpIcePlacementScoreComponent<
-  TServer extends CorpIcePlacementServerLike,
->(
-  params: CorpIcePlacementCandidateParams<TServer>,
-): AiDecisionScoreComponent | undefined {
-  const candidate = corpIcePlacementCandidateForAction(params);
-  if (!candidate) return undefined;
-  const badFirstIce = candidate.evidence.includes(
-    "defer_reason:bad_first_ice_wait_for_followup",
-  );
-  const deadAsFirstIce =
-    candidate.evidence.includes("first_ice:true") &&
-    candidate.evidence.includes("dead_as_first_ice:true") &&
-    candidate.evidence.includes("immediate_stop:false");
-  const deferredNewRemoteIce =
-    candidate.serverId === "new_remote" &&
-    candidate.recommendation === "hold_for_later";
-  const value = deadAsFirstIce
-    ? Math.min(candidate.score, -4200)
-    : deferredNewRemoteIce
-      ? Math.min(candidate.score, -1800)
-      : candidate.recommendation === "install_now"
-        ? candidate.score
-        : badFirstIce
-          ? Math.min(candidate.score, -1800)
-          : Math.min(candidate.score, 0);
-  return {
-    key: "corp_ice_placement_evaluator",
-    label: "ICE-Platzierung",
-    value,
-    reason: candidate.evidence.join("|"),
-  };
-}
-
 export function classifyCorpFutureRunIcePlacementProfile(
   definitionId: string | undefined,
   card?: VisibleCard | undefined,
@@ -354,14 +107,14 @@ export function classifyCorpFutureRunIcePlacementProfile(
   if (!definitionId) return undefined;
   const mappedClass = CORP_FUTURE_RUN_ICE_CLASS_BY_DEFINITION[definitionId];
   if (mappedClass) return mappedClass;
-  const profile = buildCorpIceCardPlacementProfile(
+  const profile = buildCorpIceCardFacts(
     card ?? {
       instanceId: `definition:${definitionId}`,
       known: true,
       definitionId,
     },
   );
-  return profile.wantsFollowupIce ? "future_run_ice" : undefined;
+  return profile.requiresOtherIceContext ? "future_run_ice" : undefined;
 }
 
 export function assessCorpIcePlacementForDiagnostics(
@@ -389,21 +142,10 @@ export function assessCorpIcePlacementForDiagnostics(
   const existingIceCount =
     serverId === "new_remote"
       ? 0
-      : (input.playerView.servers.find((server) => server.id === serverId)?.ice
-          .length ?? 0);
+      : input.playerView.servers.find((server) => server.id === serverId)?.ice
+          .length;
+  if (existingIceCount === undefined) return undefined;
   const installedOnEmptyServer = existingIceCount === 0;
-  const directImpactAlternativeCount =
-    installedOnEmptyServer || serverId === "new_remote"
-      ? input.legalActions.filter(
-          (candidate) =>
-            candidate.actionId !== action.actionId &&
-            candidate.side === "corp" &&
-            candidate.type === "install_card" &&
-            candidate.payload?.placement === "ice" &&
-            candidate.payload?.serverId === serverId &&
-            corpIcePlacementActionHasDirectImpact(input, candidate),
-        ).length
-      : 0;
   return {
     definitionId,
     title: sourceCard.title ?? definitionId,
@@ -411,139 +153,13 @@ export function assessCorpIcePlacementForDiagnostics(
     serverId,
     existingIceCount,
     installedOnEmptyServer,
-    installedAsOutermost: true,
-    hasLaterIceAfterInstall: existingIceCount > 0,
-    deadEffect: existingIceCount === 0,
-    liveEffect: existingIceCount > 0,
-    directImpactAlternativeCount,
+    resultingPosition: corpIcePlacementResultingPosition(action),
   };
 }
 
-export function buildCorpServerNeedProfile<
-  TServer extends CorpIcePlacementServerLike,
->(
-  input: AiDecisionInput,
-  serverId: string,
-  server?: TServer,
-  options: {
-    immediateServerNeedBonus?: number | undefined;
-    hasUrgentScoreline?: boolean | undefined;
-  } = {},
-): CorpServerNeedProfile {
-  const serverKind = corpServerKind(serverId);
-  const iceCount = serverId === "new_remote" ? 0 : (server?.ice.length ?? 0);
-  const existingRezzedIceCount = (server?.ice ?? []).filter(
-    (ice) => ice.known !== false && ice.rezzed === true,
-  ).length;
-  const rootHasAgendaOrScoreline =
-    server?.root.some(
-      (card) =>
-        card.known !== false &&
-        (card.type === "agenda" ||
-          typeof card.advancementRequirement === "number" ||
-          (card.advancementCounters ?? 0) > 0),
-    ) === true;
-  const hqAgendaRisk = semanticCorpHasAgendaInHq(input);
-  const archivesAgendaRisk = semanticCorpHasAgendaInArchives(input);
-  const centralPressure = corpCentralPressureFromVisibleInput(input, serverId);
-  const remotePressure =
-    serverKind === "remote" || serverKind === "new_remote"
-      ? rootHasAgendaOrScoreline || options.hasUrgentScoreline === true
-      : false;
-
-  let serverNeed = 0;
-  const evidence: string[] = [
-    `server_kind:${serverKind}`,
-    `ice_count:${iceCount}`,
-  ];
-  if (serverKind === "hq") {
-    if (hqAgendaRisk) {
-      serverNeed += 900;
-      evidence.push("hq_agenda_risk:true");
-    }
-    if (centralPressure) {
-      serverNeed += 450;
-      evidence.push("hq_pressure:true");
-    }
-  } else if (serverKind === "rd") {
-    if (centralPressure) {
-      serverNeed += 1150;
-      evidence.push("rd_pressure:true");
-    } else if ((input.playerView.opponent?.agendaPoints ?? 0) >= 5) {
-      serverNeed += 650;
-      evidence.push("runner_score_pressure:true");
-    }
-  } else if (serverKind === "archives") {
-    if (archivesAgendaRisk) {
-      serverNeed += 550;
-      evidence.push("archives_agenda_risk:true");
-    }
-    if (corpArchivesPressureFromVisibleInput(input)) {
-      serverNeed += 250;
-      evidence.push("archives_pressure:true");
-    }
-  } else if (serverKind === "remote" || serverKind === "new_remote") {
-    if (rootHasAgendaOrScoreline) {
-      serverNeed += 1100;
-      evidence.push("remote_scoreline_root:true");
-    }
-    if (options.hasUrgentScoreline === true) {
-      serverNeed += 650;
-      evidence.push("urgent_scoreline:true");
-    }
-    if (!rootHasAgendaOrScoreline && hqAgendaRisk) {
-      serverNeed += serverKind === "new_remote" ? 450 : 550;
-      evidence.push("score_remote_setup_need:true");
-    }
-    const rdIceCount =
-      input.playerView.servers.find((candidate) => candidate.id === "rd")?.ice
-        .length ?? 0;
-    if (
-      !rootHasAgendaOrScoreline &&
-      options.hasUrgentScoreline !== true &&
-      rdIceCount === 0
-    ) {
-      serverNeed = Math.max(0, serverNeed - 900);
-      evidence.push("background_remote_before_rd_floor:true");
-    }
-    if (
-      !rootHasAgendaOrScoreline &&
-      options.hasUrgentScoreline !== true &&
-      serverKind === "remote" &&
-      iceCount > rdIceCount
-    ) {
-      serverNeed = Math.max(0, serverNeed - 900);
-      evidence.push(
-        "background_remote_ahead_of_rd:true",
-        `background_remote_ice:${iceCount}`,
-        `background_remote_rd_ice:${rdIceCount}`,
-      );
-    }
-  }
-  if (options.immediateServerNeedBonus) {
-    serverNeed += options.immediateServerNeedBonus;
-    evidence.push(`server_need_bonus:${options.immediateServerNeedBonus}`);
-  }
-
-  return {
-    serverId,
-    serverKind,
-    serverNeed,
-    iceCount,
-    existingRezzedIceCount,
-    rootHasAgendaOrScoreline,
-    agendaRisk:
-      (serverKind === "hq" && hqAgendaRisk) ||
-      (serverKind === "archives" && archivesAgendaRisk),
-    pressureActive: centralPressure || remotePressure,
-    evidence,
-  };
-}
-
-export function buildCorpIceCardPlacementProfile(
+export function buildCorpIceCardFacts(
   card: VisibleCard | undefined,
-  options: { rezCost?: number | undefined } = {},
-): CorpIceCardPlacementProfile {
+): CorpIceCardFacts {
   const definitionId = card?.definitionId;
   const runtimeDefinition = definitionId
     ? RUNTIME_CARDS[definitionId]
@@ -699,10 +315,12 @@ export function buildCorpIceCardPlacementProfile(
       [...hintRiskTags, ...hintTacticSignals],
       ["position_dependent_ice", "position_scaling"],
     );
-  const wantsInner = outsideIceScaling || innerIceScaling || runRewind;
-  const wantsOuter = nextIceModifier || futureIceModifier;
-  const wantsFollowupIce = wantsInner || wantsOuter;
-  const deadAsFirstIce = wantsFollowupIce && !immediateStop;
+  const requiresOtherIceContext =
+    outsideIceScaling ||
+    innerIceScaling ||
+    runRewind ||
+    nextIceModifier ||
+    futureIceModifier;
   const evidence = [
     ...(definitionId ? [`definition:${definitionId}`] : []),
     `immediate_stop:${immediateStop}`,
@@ -711,15 +329,13 @@ export function buildCorpIceCardPlacementProfile(
     `multi_program_trash:${multiProgramTrash}`,
     `run_rewind:${runRewind}`,
     `position_dependent:${positionDependent}`,
-    `wants_inner:${wantsInner}`,
-    `wants_outer:${wantsOuter}`,
-    `dead_as_first_ice:${deadAsFirstIce}`,
+    `requires_other_ice_context:${requiresOtherIceContext}`,
+    "printed_rez_cost_consumed:false",
   ];
   return {
     ...(card?.instanceId ? { iceInstanceId: card.instanceId } : {}),
     ...(definitionId ? { iceDefinitionId: definitionId } : {}),
     ...(card?.title ? { title: card.title } : {}),
-    rezCost: safeNonNegativeInteger(options.rezCost ?? card?.rezCost),
     immediateStop,
     softStop,
     tax,
@@ -739,151 +355,8 @@ export function buildCorpIceCardPlacementProfile(
     mobileReposition,
     maintenanceOrBounceRisk,
     positionDependent,
-    deadAsFirstIce,
-    wantsOuter,
-    wantsInner,
-    wantsFollowupIce,
+    requiresOtherIceContext,
     evidence,
-  };
-}
-
-export function buildCorpIceDensityProfile(
-  input: AiDecisionInput,
-): CorpIceDensityProfile {
-  const knownCards = visibleCorpCardsForPlacement(input);
-  const knownIce = knownCards.filter(cardLooksLikeIce);
-  const iceInHq = (input.playerView.own.gripOrHq ?? []).filter(
-    cardLooksLikeIce,
-  ).length;
-  const installedIce = (input.playerView.servers ?? []).reduce(
-    (count, server) =>
-      count + (server.ice?.filter(cardLooksLikeIce).length ?? 0),
-    0,
-  );
-  const remainingDeckCount = safeNonNegativeInteger(
-    input.playerView.own.stackOrRdCount,
-  );
-  const knownCorpCardCount = knownCards.length;
-  const knownIceSeen = knownIce.length;
-  const knownDensity =
-    knownCorpCardCount > 0 ? knownIceSeen / knownCorpCardCount : undefined;
-  const remainingIceEstimate =
-    knownDensity === undefined
-      ? 0
-      : Math.round(remainingDeckCount * knownDensity);
-  const iceDensityClass =
-    knownDensity === undefined
-      ? "unknown"
-      : knownDensity < 0.18 && iceInHq <= 1
-        ? "low"
-        : knownDensity > 0.36 || iceInHq >= 3
-          ? "high"
-          : "normal";
-  const handProfiles = (input.playerView.own.gripOrHq ?? [])
-    .filter(cardLooksLikeIce)
-    .map((card) => buildCorpIceCardPlacementProfile(card));
-  const strongHandIce = handProfiles.filter(
-    (profile) => profile.immediateStop && !profile.deadAsFirstIce,
-  ).length;
-  const weakHandIce = handProfiles.filter(
-    (profile) => profile.deadAsFirstIce || !profile.immediateStop,
-  ).length;
-  const handIceQuality =
-    handProfiles.length === 0
-      ? "none"
-      : strongHandIce > 0 && weakHandIce === 0
-        ? "strong"
-        : strongHandIce > 0
-          ? "mixed"
-          : "weak";
-  return {
-    knownCorpCardCount,
-    knownIceSeen,
-    iceInHq,
-    installedIce,
-    remainingDeckCount,
-    remainingIceEstimate,
-    iceDensityClass,
-    handIceQuality,
-    evidence: [
-      `known_ice_seen:${knownIceSeen}`,
-      `ice_in_hq:${iceInHq}`,
-      `installed_ice:${installedIce}`,
-      `remaining_deck_count:${remainingDeckCount}`,
-      `remaining_ice_estimate:${remainingIceEstimate}`,
-      `ice_density_class:${iceDensityClass}`,
-      `hand_ice_quality:${handIceQuality}`,
-    ],
-  };
-}
-
-export function corpIcePlacementEvaluationForActions<
-  TServer extends CorpIcePlacementServerLike,
->(
-  input: AiDecisionInput,
-  actions: readonly LegalAction[],
-  dependencies: {
-    serverIdForAction: (action: LegalAction) => string | undefined;
-    serverForId: (serverId: string | undefined) => TServer | undefined;
-    actionCreditCost?: (action: LegalAction) => number;
-    visibleIceRezCost?: (card: VisibleCard) => number | undefined;
-  },
-): CorpIcePlacementEvaluation {
-  const deckDensity = buildCorpIceDensityProfile(input);
-  const candidates = actions
-    .map((action) => {
-      const sourceCard = visibleSourceCardForCorpIcePlacement(input, action);
-      return corpIcePlacementCandidateForAction({
-        input,
-        action,
-        serverId: dependencies.serverIdForAction(action),
-        server: dependencies.serverForId(
-          dependencies.serverIdForAction(action),
-        ),
-        sourceCard,
-        actionCreditCost: dependencies.actionCreditCost?.(action),
-        iceRezCost: sourceCard
-          ? dependencies.visibleIceRezCost?.(sourceCard)
-          : undefined,
-      });
-    })
-    .filter((candidate): candidate is CorpIcePlacementCandidate =>
-      Boolean(candidate),
-    )
-    .sort((left, right) => right.score - left.score);
-  const serverNeeds = uniqueStrings(
-    candidates.map((candidate) => candidate.serverId),
-  ).map((serverId) =>
-    buildCorpServerNeedProfile(
-      input,
-      serverId,
-      dependencies.serverForId(serverId),
-    ),
-  );
-  const handIceProfiles = (input.playerView.own.gripOrHq ?? [])
-    .filter(cardLooksLikeIce)
-    .map((card) => buildCorpIceCardPlacementProfile(card));
-  const bestInstall = candidates[0];
-  const bestDeferReason = bestInstall
-    ? corpBestDeferReason(bestInstall, deckDensity)
-    : "no_legal_ice_install";
-  return {
-    ...(bestInstall ? { bestInstall } : {}),
-    bestDeferReason,
-    candidates,
-    serverNeeds,
-    handIceProfiles,
-    deckDensity,
-    evidence: [
-      `candidate_count:${candidates.length}`,
-      ...(bestInstall
-        ? [
-            `best_action:${bestInstall.actionId}`,
-            `best_score:${bestInstall.score}`,
-          ]
-        : []),
-      `best_defer_reason:${bestDeferReason}`,
-    ],
   };
 }
 
@@ -899,371 +372,12 @@ export function visibleSourceCardForCorpIcePlacement(
   );
 }
 
-export function corpIcePlacementServerId(
-  action: LegalAction,
-): string | undefined {
+function corpIcePlacementServerId(action: LegalAction): string | undefined {
   const value =
     action.payload?.serverId ??
     action.payload?.targetServerId ??
     action.payload?.attackedServerId;
   return typeof value === "string" ? value : undefined;
-}
-
-function corpServerNeedScoreValue(
-  profile: CorpIceCardPlacementProfile,
-  serverNeed: CorpServerNeedProfile,
-): number {
-  if (profile.immediateStop) return serverNeed.serverNeed;
-  if (profile.positionDependent && serverNeed.serverNeed >= 900) {
-    return serverNeed.serverNeed;
-  }
-  if (
-    profile.softStop ||
-    profile.tax ||
-    profile.damage ||
-    profile.programTrash ||
-    profile.tagTrace ||
-    profile.runLock
-  ) {
-    return Math.min(serverNeed.serverNeed, 350);
-  }
-  return Math.min(serverNeed.serverNeed, 200);
-}
-
-function corpImmediateStopValue(
-  profile: CorpIceCardPlacementProfile,
-  serverNeed: CorpServerNeedProfile,
-  affordable: boolean,
-): number {
-  if (profile.immediateStop && affordable) {
-    return serverNeed.serverNeed >= 1000 ? 900 : 650;
-  }
-  if (profile.immediateStop) return serverNeed.serverNeed >= 1000 ? 250 : 150;
-  if (profile.runRewind && serverNeed.iceCount > 0) {
-    return serverNeed.serverNeed >= 1000 ? 325 : 225;
-  }
-  if (profile.multiProgramTrash || profile.persistentDamageCounter) {
-    return serverNeed.serverNeed >= 1000 ? 350 : 225;
-  }
-  if (
-    profile.tax ||
-    profile.damage ||
-    profile.programTrash ||
-    profile.tagTrace
-  ) {
-    return serverNeed.serverNeed >= 1000 ? 250 : 150;
-  }
-  return serverNeed.serverNeed >= 900 ? -650 : -250;
-}
-
-function corpFutureRunSynergyValue(
-  profile: CorpIceCardPlacementProfile,
-  firstIce: boolean,
-  hasOutsideRezzedIce: boolean,
-): number {
-  if (!profile.wantsFollowupIce) return 0;
-  if (profile.runRewind) return hasOutsideRezzedIce ? 350 : -450;
-  if (profile.outsideIceScaling) return hasOutsideRezzedIce ? 450 : -550;
-  if (profile.nextIceModifier || profile.futureIceModifier) {
-    return firstIce ? -350 : 350;
-  }
-  return 0;
-}
-
-function corpPositionFitValue(
-  profile: CorpIceCardPlacementProfile,
-  firstIce: boolean,
-  hasOutsideRezzedIce: boolean,
-): number {
-  let value = 0;
-  if (profile.deadAsFirstIce && firstIce) value -= 850;
-  if (profile.outsideIceScaling && !hasOutsideRezzedIce) value -= 450;
-  if (profile.runRewind && !hasOutsideRezzedIce && !firstIce) value -= 250;
-  if ((profile.nextIceModifier || profile.futureIceModifier) && !firstIce) {
-    value += 300;
-  }
-  if (profile.mobileReposition && value < 0) {
-    return Math.trunc(value / 2);
-  }
-  return value;
-}
-
-function corpRezAffordabilityValue(
-  profile: CorpIceCardPlacementProfile,
-  affordable: boolean,
-): number {
-  if (profile.rezCost === 0) return 100;
-  return affordable ? 350 : -650;
-}
-
-function corpDeckDensityAdjustmentValue(
-  profile: CorpIceCardPlacementProfile,
-  deckDensity: CorpIceDensityProfile,
-  firstIce: boolean,
-  serverNeed: CorpServerNeedProfile,
-): number {
-  if (!firstIce || serverNeed.serverNeed < 450) return 0;
-  if (
-    deckDensity.iceDensityClass === "low" &&
-    serverNeed.serverNeed >= 900 &&
-    profile.positionDependent &&
-    !profile.immediateStop
-  ) {
-    return 900;
-  }
-  if (deckDensity.iceDensityClass === "low") return 250;
-  if (
-    deckDensity.iceDensityClass === "high" &&
-    profile.positionDependent &&
-    !profile.immediateStop
-  ) {
-    return -250;
-  }
-  return 0;
-}
-
-function corpPlacementOpportunityCostValue(params: {
-  profile: CorpIceCardPlacementProfile;
-  serverNeed: CorpServerNeedProfile;
-  affordable: boolean;
-  creditsAfterInstall: number;
-  hasBetterImmediateIceAlternative: boolean;
-}): number {
-  if (
-    params.serverNeed.serverKind === "archives" &&
-    params.serverNeed.serverNeed === 0
-  ) {
-    return -1200;
-  }
-  if (
-    params.serverNeed.evidence.includes(
-      "background_remote_before_rd_floor:true",
-    )
-  ) {
-    return -650;
-  }
-  if (
-    params.serverNeed.evidence.includes("background_remote_ahead_of_rd:true")
-  ) {
-    return -1500;
-  }
-  if (
-    params.hasBetterImmediateIceAlternative &&
-    params.profile.deadAsFirstIce
-  ) {
-    return -500;
-  }
-  if (!params.affordable && params.creditsAfterInstall < 3) {
-    return params.serverNeed.serverNeed >= 1200 ? -150 : -450;
-  }
-  if (params.serverNeed.serverNeed < 300 && params.profile.positionDependent) {
-    return -350;
-  }
-  return 0;
-}
-
-type CorpVisibleIceDefenseFit = {
-  visibleBreakerCoverage: boolean;
-  visibleBreakCost?: number | undefined;
-  runnerCanAffordVisibleBreak?: boolean | undefined;
-  hasVisibleBreakerTax: boolean;
-  zeroEffectRisk: boolean;
-  evidence: string[];
-};
-
-function corpVisibleIceDefenseFit(
-  input: AiDecisionInput,
-  sourceCard: VisibleCard,
-  profile: CorpIceCardPlacementProfile,
-): CorpVisibleIceDefenseFit {
-  const visibleBreakerCoverage = (input.playerView.opponent?.rig ?? []).some(
-    (card) =>
-      card.known !== false &&
-      card.type === "program" &&
-      visibleBreakerCardCanAddressIce(card, sourceCard, {
-        visibleBreakerRoles,
-        visibleCardText: corpIcePlacementVisibleCardText,
-      }),
-  );
-  const visibleBreakCost = corpVisibleRunnerBreakCostForIce(input, sourceCard);
-  const runnerCredits = corpVisibleRunnerContestCredits(input);
-  const runnerCanAffordVisibleBreak =
-    visibleBreakCost !== undefined
-      ? runnerCredits >= visibleBreakCost
-      : undefined;
-  const hasVisibleBreakerTax =
-    visibleBreakerCoverage &&
-    visibleBreakCost !== undefined &&
-    visibleBreakCost > 0;
-  const zeroEffectRisk =
-    visibleBreakerCoverage &&
-    !hasVisibleBreakerTax &&
-    profile.immediateStop &&
-    !profile.tax &&
-    !profile.damage &&
-    !profile.programTrash &&
-    !profile.tagTrace;
-  return {
-    visibleBreakerCoverage,
-    ...(visibleBreakCost !== undefined ? { visibleBreakCost } : {}),
-    ...(runnerCanAffordVisibleBreak !== undefined
-      ? { runnerCanAffordVisibleBreak }
-      : {}),
-    hasVisibleBreakerTax,
-    zeroEffectRisk,
-    evidence: [
-      `visible_breaker_coverage:${visibleBreakerCoverage}`,
-      ...(visibleBreakCost !== undefined
-        ? [`visible_break_cost:${visibleBreakCost}`]
-        : []),
-      ...(runnerCanAffordVisibleBreak !== undefined
-        ? [`runner_can_afford_visible_break:${runnerCanAffordVisibleBreak}`]
-        : []),
-      `visible_breaker_tax:${hasVisibleBreakerTax}`,
-      `zero_effect_risk:${zeroEffectRisk}`,
-    ],
-  };
-}
-
-function corpVisibleZeroEffectValue(
-  visibleDefenseFit: CorpVisibleIceDefenseFit,
-): number {
-  return visibleDefenseFit.zeroEffectRisk ? -2200 : 0;
-}
-
-function corpPostInstallReserveValue(params: {
-  profile: CorpIceCardPlacementProfile;
-  serverNeed: CorpServerNeedProfile;
-  creditsAfterInstall: number;
-  visibleDefenseFit: CorpVisibleIceDefenseFit;
-}): number {
-  const centralPressure =
-    (params.serverNeed.serverKind === "hq" ||
-      params.serverNeed.serverKind === "rd") &&
-    (params.serverNeed.pressureActive || params.serverNeed.serverNeed >= 1000);
-  if (!centralPressure) return 0;
-  const reserveFloor = params.visibleDefenseFit.zeroEffectRisk ? 2 : 1;
-  if (params.creditsAfterInstall >= reserveFloor) return 0;
-  if (
-    params.profile.immediateStop &&
-    params.profile.rezCost === 0 &&
-    !params.visibleDefenseFit.zeroEffectRisk
-  ) {
-    return 0;
-  }
-  return params.creditsAfterInstall <= 0 ? -900 : -500;
-}
-
-function corpMarginalIceLayerValue(params: {
-  serverNeed: CorpServerNeedProfile;
-  visibleDefenseFit: CorpVisibleIceDefenseFit;
-  actionCreditCost: number;
-  urgentScoreline: boolean;
-}): number {
-  if (params.serverNeed.iceCount < 3) return 0;
-  const visibleBreakCost = params.visibleDefenseFit.visibleBreakCost;
-  if (
-    !params.visibleDefenseFit.visibleBreakerCoverage ||
-    visibleBreakCost === undefined ||
-    visibleBreakCost > 1
-  ) {
-    return 0;
-  }
-  const extraLayerCount = params.serverNeed.iceCount - 2;
-  const installTax = Math.max(0, params.actionCreditCost) * 220;
-  const weakLayerTax = visibleBreakCost === 0 ? 900 : 550;
-  const depthTax = extraLayerCount * 450;
-  const urgentReduction = params.urgentScoreline ? 900 : 0;
-  return -Math.max(500, weakLayerTax + depthTax + installTax - urgentReduction);
-}
-
-function corpVisibleRunnerBreakCostForIce(
-  input: AiDecisionInput,
-  ice: VisibleCard,
-): number | undefined {
-  const endTheRunCount = corpVisibleEndTheRunSubroutineCount(ice);
-  if (endTheRunCount <= 0) return undefined;
-  return minimumCreditsToBreakEndTheRunSubroutines(
-    ice,
-    [...(input.playerView.opponent?.rig ?? [])],
-    endTheRunCount,
-    new Map(),
-  )?.cost;
-}
-
-function corpVisibleEndTheRunSubroutineCount(ice: VisibleCard): number {
-  const quoteCount =
-    ice.effectiveRunQuote?.subroutines?.filter(
-      (subroutine) => subroutine.type === "end_the_run",
-    ).length ?? 0;
-  if (quoteCount > 0) return quoteCount;
-  return ice.definitionId ? endTheRunSubroutineCount(ice.definitionId) : 0;
-}
-
-function corpVisibleRunnerContestCredits(input: AiDecisionInput): number {
-  return (
-    (input.playerView.opponent?.credits ?? 0) +
-    (input.playerView.opponent?.rig ?? []).reduce((sum, card) => {
-      if (card.known === false) return sum;
-      return (
-        sum +
-        (card.counterDisplays ?? []).reduce((cardSum, display) => {
-          const uses = display.creditPool?.uses ?? [];
-          return uses.includes("using_icebreaker_during_run") ||
-            uses.includes("using_icebreaker_during_run_non_noisy") ||
-            uses.includes("using_killer_during_run")
-            ? cardSum + Math.max(0, Math.floor(display.amount))
-            : cardSum;
-        }, 0)
-      );
-    }, 0)
-  );
-}
-
-function corpIcePlacementVisibleCardText(card: VisibleCard): string {
-  return [
-    card.title,
-    card.rulesText,
-    card.definitionId,
-    ...(card.subtypes ?? []),
-  ]
-    .filter((value): value is string => typeof value === "string")
-    .join(" ");
-}
-
-function corpIcePlacementRecommendationForScore(
-  score: number,
-  components: CorpIcePlacementCandidate["components"],
-  urgentScoreline: boolean,
-): CorpIcePlacementRecommendation {
-  if (urgentScoreline && score > 0) return "install_now";
-  if (components.rezAffordability < 0 && score < 650) return "prefer_economy";
-  if (score >= 900) return "install_now";
-  if (score <= 0) return "hold_for_later";
-  return "hold_for_later";
-}
-
-function corpBestDeferReason(
-  candidate: CorpIcePlacementCandidate,
-  deckDensity: CorpIceDensityProfile,
-): string | undefined {
-  if (candidate.recommendation === "install_now") return undefined;
-  return corpDeferReasonForPlacement(candidate.components, deckDensity);
-}
-
-function corpDeferReasonForPlacement(
-  components: CorpIcePlacementCandidate["components"],
-  deckDensity: CorpIceDensityProfile,
-): string {
-  if (components.rezAffordability < 0) return "rez_reserve_too_low";
-  if (components.positionFit < -500) return "bad_first_ice_wait_for_followup";
-  if (
-    deckDensity.iceDensityClass === "high" &&
-    components.deckDensityAdjustment < 0
-  ) {
-    return "deck_ice_density_high_wait_reasonable";
-  }
-  return "ice_install_score_below_development_options";
 }
 
 function corpIcePlacementResultingPosition(
@@ -1272,86 +386,7 @@ function corpIcePlacementResultingPosition(
   const position = action.payload?.position ?? action.payload?.installPosition;
   if (position === "outermost") return "outermost";
   if (typeof position === "string") return "known_engine_position";
-  return "outermost";
-}
-
-function corpServerKind(serverId: string): CorpServerNeedProfile["serverKind"] {
-  if (serverId === "hq") return "hq";
-  if (serverId === "rd") return "rd";
-  if (serverId === "archives") return "archives";
-  if (serverId === "new_remote") return "new_remote";
-  if (serverId.startsWith("remote_")) return "remote";
   return "unknown";
-}
-
-function semanticCorpHasAgendaInHq(input: AiDecisionInput): boolean {
-  return (input.playerView.own.gripOrHq ?? []).some(
-    (card) => card.known !== false && card.type === "agenda",
-  );
-}
-
-function semanticCorpHasAgendaInArchives(input: AiDecisionInput): boolean {
-  return (input.playerView.own.heapOrArchives ?? []).some(
-    (card) => card.known !== false && card.type === "agenda",
-  );
-}
-
-function corpCentralPressureFromVisibleInput(
-  input: AiDecisionInput,
-  serverId: string,
-): boolean {
-  if (serverId !== "hq" && serverId !== "rd") return false;
-  const runnerAgendaPoints = input.playerView.opponent?.agendaPoints ?? 0;
-  const rig = input.playerView.opponent?.rig ?? [];
-  const centralEvents = [
-    ...(input.playerView.publicEvents ?? []),
-    ...(input.eventTail ?? []),
-  ].filter((event) => eventServerId(event.publicPayload) === serverId).length;
-  if (serverId === "hq") {
-    return semanticCorpHasAgendaInHq(input) || centralEvents >= 2;
-  }
-  return (
-    runnerAgendaPoints >= 5 ||
-    centralEvents >= 2 ||
-    rig.some((card) => visibleTextHasCentralMultiaccess(card, "rd"))
-  );
-}
-
-function corpArchivesPressureFromVisibleInput(input: AiDecisionInput): boolean {
-  return [
-    ...(input.playerView.publicEvents ?? []),
-    ...(input.eventTail ?? []),
-  ].some((event) => eventServerId(event.publicPayload) === "archives");
-}
-
-function eventServerId(payload: Record<string, unknown>): string | undefined {
-  const value =
-    payload.serverId ??
-    payload.attackedServerId ??
-    payload.targetServerId ??
-    payload.server;
-  return typeof value === "string" ? value : undefined;
-}
-
-function visibleTextHasCentralMultiaccess(
-  card: VisibleCard,
-  serverId: "hq" | "rd",
-): boolean {
-  const tokens = corpIcePlacementTextTokens(
-    [card.title, card.rulesText, card.definitionId].filter(Boolean).join(" "),
-  );
-  if (serverId === "rd") {
-    return (
-      tokensIncludePhrase(tokens, ["r", "d"]) &&
-      (tokensIncludePhrase(tokens, ["access", "1", "additional"]) ||
-        tokensIncludePhrase(tokens, ["access", "additional"]))
-    );
-  }
-  return (
-    tokens.includes("hq") &&
-    (tokensIncludePhrase(tokens, ["access", "1", "additional"]) ||
-      tokensIncludePhrase(tokens, ["access", "additional"]))
-  );
 }
 
 function visibleCorpCardsForPlacement(input: AiDecisionInput): VisibleCard[] {
@@ -1372,30 +407,6 @@ function visibleCorpCardsForPlacement(input: AiDecisionInput): VisibleCard[] {
   return values.filter(isVisibleCard);
 }
 
-function corpIcePlacementActionHasDirectImpact(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  if (
-    action.side !== "corp" ||
-    action.type !== "install_card" ||
-    action.payload?.placement !== "ice"
-  ) {
-    return false;
-  }
-  const sourceCard = visibleSourceCardForCorpIcePlacement(input, action);
-  if (!sourceCard || !cardLooksLikeIce(sourceCard)) return false;
-  const profile = buildCorpIceCardPlacementProfile(sourceCard);
-  return (
-    profile.immediateStop &&
-    !profile.wantsFollowupIce &&
-    !classifyCorpFutureRunIcePlacementProfile(
-      sourceCard.definitionId,
-      sourceCard,
-    )
-  );
-}
-
 function isVisibleCard(value: unknown): value is VisibleCard {
   return (
     typeof value === "object" &&
@@ -1404,26 +415,163 @@ function isVisibleCard(value: unknown): value is VisibleCard {
   );
 }
 
-function cardLooksLikeIce(card: VisibleCard): boolean {
-  if (card.known === false) return false;
-  if (card.type === "ice") return true;
-  const definitionId = card.definitionId;
-  if (!definitionId) return false;
-  return (
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type === "ice" ||
-    RUNTIME_CARDS[definitionId]?.type === "ice"
-  );
+export function corpIcePlacementActionCreditCostFact(
+  action: LegalAction,
+): CorpIceCostFact {
+  if (
+    action.payload?.variableCostKind !== undefined ||
+    action.payload?.variableInstallCost === true ||
+    action.payload?.xValue !== undefined
+  ) {
+    return {
+      status: "unknown",
+      reason: "variable",
+      source: "legal_action",
+    };
+  }
+  if (!Array.isArray(action.costs)) {
+    return {
+      status: "unknown",
+      reason: "missing",
+      source: "legal_action",
+    };
+  }
+  let amount = 0;
+  for (const cost of action.costs) {
+    if (cost.credits === undefined) continue;
+    const fact = finiteNonNegativeIntegerCostFact(cost.credits, "legal_action");
+    if (fact.status === "unknown") return fact;
+    amount += fact.amount;
+    if (!Number.isSafeInteger(amount)) {
+      return {
+        status: "unknown",
+        reason: Number.isFinite(amount) ? "non_integer" : "non_finite",
+        source: "legal_action",
+      };
+    }
+  }
+  return { status: "known", amount, source: "legal_action" };
 }
 
-function corpIcePlacementActionCreditCost(action: LegalAction): number {
-  return (action.costs ?? []).reduce(
-    (sum, cost) =>
-      sum +
-      safeNonNegativeInteger(
-        (cost as { credits?: number | undefined }).credits,
-      ),
-    0,
+export function corpIcePlacementActionCostAgreementFact(
+  action: LegalAction,
+  projectedActionCreditCost?: number | undefined,
+): CorpIceCostFact {
+  const legalActionFact = corpIcePlacementActionCreditCostFact(action);
+  if (
+    legalActionFact.status === "unknown" ||
+    projectedActionCreditCost === undefined
+  ) {
+    return legalActionFact;
+  }
+  const projectedFact = finiteNonNegativeIntegerCostFact(
+    projectedActionCreditCost,
+    "candidate_projection",
   );
+  if (projectedFact.status === "unknown") return projectedFact;
+  if (projectedFact.amount !== legalActionFact.amount) {
+    return {
+      status: "unknown",
+      reason: "projection_drift",
+      source: "candidate_projection",
+    };
+  }
+  return projectedFact;
+}
+
+export function corpIcePlacementPostInstallRezCostFact(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpIceCostFact {
+  const source = "engine_post_install_rez_quote" as const;
+  const canonicalActions = input.legalActions.filter(
+    (candidate) => candidate.actionId === action.actionId,
+  );
+  if (canonicalActions.length !== 1 || canonicalActions[0] !== action) {
+    return { status: "unknown", reason: "binding_drift", source };
+  }
+  const canonicalAction = canonicalActions[0]!;
+  if (
+    input.side !== "corp" ||
+    canonicalAction.side !== "corp" ||
+    canonicalAction.type !== "install_card" ||
+    canonicalAction.payload?.placement !== "ice"
+  ) {
+    return { status: "unknown", reason: "binding_drift", source };
+  }
+  const sourceCard = visibleSourceCardForCorpIcePlacement(
+    input,
+    canonicalAction,
+  );
+  const targetServerId = corpIcePlacementServerId(canonicalAction);
+  const payload = canonicalAction.payload;
+  if (
+    !sourceCard ||
+    sourceCard.known !== true ||
+    sourceCard.type !== "ice" ||
+    sourceCard.owner !== "corp" ||
+    sourceCard.controller !== "corp" ||
+    canonicalAction.source !== sourceCard.instanceId ||
+    payload.cardId !== sourceCard.instanceId ||
+    (payload.sourceDefinitionId !== undefined &&
+      payload.sourceDefinitionId !== sourceCard.definitionId) ||
+    !targetServerId ||
+    canonicalAction.timingPoint !== input.playerView.timingPoint ||
+    canonicalAction.expiresAtStateVersion !== input.playerView.stateVersion ||
+    payload.postInstallRezQuoteCardId !== sourceCard.instanceId ||
+    payload.postInstallRezQuoteTargetServerId !== targetServerId ||
+    payload.postInstallRezQuoteExpiresAtStateVersion !==
+      input.playerView.stateVersion
+  ) {
+    return { status: "unknown", reason: "binding_drift", source };
+  }
+  if (payload.postInstallRezQuoteComplete !== true) {
+    return {
+      status: "unknown",
+      reason:
+        payload.postInstallRezQuoteComplete === false
+          ? "incomplete"
+          : "missing",
+      source,
+    };
+  }
+  const projectedServerId = payload.postInstallRezQuoteProjectedServerId;
+  const baseCredits = payload.postInstallRezQuoteBaseCredits;
+  const finalCredits = payload.postInstallRezQuoteFinalCredits;
+  const mandatoryAgendaPointCost =
+    payload.postInstallRezQuoteMandatoryAgendaPointCost;
+  const mandatoryKind = payload.postInstallRezQuoteMandatoryAdditionalCostKind;
+  const reductionIds = canonicalCommaSeparatedDefinitionIds(
+    payload.postInstallRezQuoteReductionSourceDefinitionIds,
+  );
+  const increaseIds = canonicalCommaSeparatedDefinitionIds(
+    payload.postInstallRezQuoteIncreaseSourceDefinitionIds,
+  );
+  if (
+    !validTargetProjectedServerBinding(targetServerId, projectedServerId) ||
+    !nonNegativeSafeInteger(baseCredits) ||
+    !nonNegativeSafeInteger(finalCredits) ||
+    !nonNegativeSafeInteger(mandatoryAgendaPointCost) ||
+    reductionIds === undefined ||
+    increaseIds === undefined ||
+    !definitionIdListsDisjoint(reductionIds, increaseIds) ||
+    (reductionIds.length === 0 &&
+      increaseIds.length === 0 &&
+      finalCredits !== baseCredits) ||
+    (mandatoryAgendaPointCost > 0
+      ? mandatoryKind !== "agenda_point"
+      : mandatoryKind !== undefined)
+  ) {
+    return { status: "unknown", reason: "malformed", source };
+  }
+  if (mandatoryAgendaPointCost > 0) {
+    return {
+      status: "unknown",
+      reason: "unsupported_mandatory_cost",
+      source,
+    };
+  }
+  return { status: "known", amount: finalCredits, source };
 }
 
 function hintStringArray(hint: unknown, key: string): string[] {
@@ -1551,12 +699,60 @@ function tokensIncludePhrase(
   );
 }
 
-function uniqueStrings(values: readonly string[]): string[] {
-  return [...new Set(values)];
+function finiteNonNegativeIntegerCostFact(
+  value: number | undefined,
+  source: CorpIceCostFact["source"],
+): CorpIceCostFact {
+  if (value === undefined) {
+    return { status: "unknown", reason: "missing", source };
+  }
+  if (!Number.isFinite(value)) {
+    return { status: "unknown", reason: "non_finite", source };
+  }
+  if (value < 0) {
+    return { status: "unknown", reason: "negative", source };
+  }
+  if (!Number.isSafeInteger(value)) {
+    return { status: "unknown", reason: "non_integer", source };
+  }
+  return { status: "known", amount: value, source };
 }
 
-function safeNonNegativeInteger(value: number | undefined): number {
-  return typeof value === "number" && Number.isFinite(value)
-    ? Math.max(0, Math.floor(value))
-    : 0;
+function nonNegativeSafeInteger(value: unknown): value is number {
+  return Number.isSafeInteger(value) && (value as number) >= 0;
+}
+
+function validTargetProjectedServerBinding(
+  targetServerId: string,
+  projectedServerId: unknown,
+): projectedServerId is string {
+  if (targetServerId === "new_remote") {
+    return (
+      typeof projectedServerId === "string" &&
+      /^remote_[1-9]\d*$/.test(projectedServerId)
+    );
+  }
+  return projectedServerId === targetServerId;
+}
+
+function canonicalCommaSeparatedDefinitionIds(
+  value: unknown,
+): string[] | undefined {
+  if (value === undefined) return [];
+  if (typeof value !== "string" || value.length === 0) return undefined;
+  const ids = value.split(",");
+  return ids.every(
+    (id, index) => id.length > 0 && (index === 0 || ids[index - 1]! < id),
+  )
+    ? ids
+    : undefined;
+}
+
+function definitionIdListsDisjoint(
+  reductionIds: readonly string[],
+  increaseIds: readonly string[],
+): boolean {
+  if (reductionIds.length === 0 || increaseIds.length === 0) return true;
+  const reductions = new Set(reductionIds);
+  return increaseIds.every((id) => !reductions.has(id));
 }

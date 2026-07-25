@@ -5199,8 +5199,25 @@
   "expectation": {
     "acceptableActions": [
       {
+        "type": "decline_rez"
+      }
+    ],
+    "contractKind": "correctness",
+    "forbiddenActions": [
+      {
         "type": "rez_ice"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "corp.defend_servers"
+      ],
+      "acceptableCapabilities": [
+        "allocate_server_defense"
+      ],
+      "requiredAssessmentEvidence": [
+        "visible_rez_window_decline_without_defense_threat"
+      ]
+    }
   }
 }

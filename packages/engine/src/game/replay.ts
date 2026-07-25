@@ -1,18 +1,27 @@
 import type {
   EngineResult,
+  EngineRandomizedIceInstallSelectionCommand,
+  EngineRandomizedIceInstallSelectionResult,
   GameEvent,
   GameState,
   PlayerAction,
   ReplayResult,
   Side,
 } from "@netgrid/shared";
-import { isReplayCompatibilityActionPayload } from "../compatibility/payload-compatibility";
+import {
+  isReplayCompatibilityActionPayload,
+  isReplayRandomizedIceInstallSelectionCommand,
+} from "../compatibility/payload-compatibility";
 import { hashState } from "./hash";
 import { sanitizeEventPayloadForSurface } from "./view/surface-policy";
 
 export type ReplayHost = {
   actions: {
     applyAction: (state: GameState, action: PlayerAction) => EngineResult;
+    applyRandomizedIceInstallSelection?: (
+      state: GameState,
+      command: EngineRandomizedIceInstallSelectionCommand,
+    ) => EngineRandomizedIceInstallSelectionResult;
   };
 };
 
@@ -62,11 +71,37 @@ export function buildReplayEvents(
     }
     const actionPayload =
       event.privatePayload?.[event.publicPayload.actor as Side]?.action;
-    if (!isReplayCompatibilityActionPayload(actionPayload)) {
+    const declaresRandomizedCommand =
+      typeof actionPayload === "object" &&
+      actionPayload !== null &&
+      "kind" in actionPayload &&
+      actionPayload.kind === "engine_randomized_ice_install_selection";
+    const randomizedCommand = isReplayRandomizedIceInstallSelectionCommand(
+      actionPayload,
+    )
+      ? actionPayload
+      : undefined;
+    const playerAction =
+      !declaresRandomizedCommand &&
+      isReplayCompatibilityActionPayload(actionPayload)
+        ? actionPayload
+        : undefined;
+    if (!randomizedCommand && !playerAction) {
       errors.push(`Event ${event.eventId} has no replayable action.`);
       continue;
     }
-    const result = host.actions.applyAction(current, actionPayload);
+    if (randomizedCommand && !host.actions.applyRandomizedIceInstallSelection) {
+      errors.push(
+        `Event ${event.eventId} has no randomized replay application.`,
+      );
+      continue;
+    }
+    const result = randomizedCommand
+      ? host.actions.applyRandomizedIceInstallSelection!(
+          current,
+          randomizedCommand,
+        )
+      : host.actions.applyAction(current, playerAction!);
     if (!result.ok) {
       errors.push(`Replay failed at ${event.eventId}: ${result.error.code}`);
       break;

@@ -1,6 +1,5 @@
 import {
   CARD_DEFINITIONS_BY_ID,
-  type CardDefinition,
   AiDecisionInput,
   LegalAction,
   VisibleCard,
@@ -696,14 +695,26 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       title: "Definition Backed Agenda",
       side: "corp",
       type: "agenda",
+      playCost: null,
       subtypes: [],
       implementationStatus: "playable_mvp",
       advancementRequirement: 3,
       agendaPoints: 2,
+      numeric: {
+        cost: null,
+        installCost: null,
+        memoryCost: null,
+        strength: null,
+        rezCost: null,
+        trashCost: null,
+        advancementRequirement: 3,
+        agendaPoints: 2,
+      },
+      strengthModel: { kind: "not_applicable" },
       rulesText:
         "Synthetic agenda whose visible card omits advancementRequirement.",
       mechanics: ["agenda", "test_fixture"],
-    } satisfies CardDefinition;
+    };
     const agenda = {
       ...agendaCard("definition-backed-agenda"),
       definitionId: DEFINITION_BACKED_AGENDA_ID,

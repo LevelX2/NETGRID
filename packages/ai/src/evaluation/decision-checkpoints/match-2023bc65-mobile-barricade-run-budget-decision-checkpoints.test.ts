@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import fundedRemoteContestJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-2023bc65-01-funded-remote-contest-d72.json";
 import allowNonlethalDamageJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-2023bc65-02-allow-nonlethal-damage-d73.json";
 import doNotBreakDoomedDamageJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-2023bc65-03-do-not-break-doomed-damage-d76.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -12,7 +13,7 @@ const SPIN_CHIP_INSTANCE_ID =
   "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1";
 
 describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
-  it("does not start the historical underfunded remote contest", () => {
+  it("takes free current-credit-preserving HQ information instead of the underfunded remote contest", () => {
     expectCheckpointToPass(fixture(fundedRemoteContestJson));
   });
 
@@ -35,7 +36,7 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
     expectCheckpointToPass(lowCorpCredits);
   });
 
-  it("waits when the same known route leaves no reserve against a rich Corp", () => {
+  it("takes current-credit-preserving HQ information while the rich-Corp remote remains unfunded", () => {
     const highCorpCredits = mutateFixture(
       fundedRemoteContestJson,
       (checkpoint) => {
@@ -46,8 +47,13 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "2023BC65-C02-HIGH-CORP-REZ-CAPACITY";
         checkpoint.expectation = {
-          acceptableActions: [{ type: "gain_credit" }],
+          acceptableActions: [{ actionId: "runner.start_run.hq" }],
           forbiddenActions: [{ actionId: "runner.start_run.remote_1" }],
+          planExecution: {
+            acceptablePlanKinds: ["runner.pressure_central"],
+            acceptableCapabilities: ["pressure_hq_information"],
+            requiredAssessmentEvidence: ["target:hq"],
+          },
         };
       },
     );
@@ -118,7 +124,10 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    ["match-2023bc65-01-funded-remote-contest-d72"],
+  );
 }
 
 function mutateFixture(

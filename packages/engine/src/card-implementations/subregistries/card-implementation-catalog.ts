@@ -8,6 +8,7 @@ import { CLASSIC_RUNNER_EVENT_IMPLEMENTATIONS } from "./classic-runner-event-imp
 import { CLASSIC_RUNNER_HARDWARE_IMPLEMENTATIONS } from "./classic-runner-hardware-implementations";
 import { CLASSIC_RUNNER_PROGRAM_IMPLEMENTATIONS } from "./classic-runner-program-implementations";
 import { CLASSIC_RUNNER_RESOURCE_IMPLEMENTATIONS } from "./classic-runner-resource-implementations";
+import { DEMO_CORP_ASSET_IMPLEMENTATIONS } from "./demo-corp-asset-implementations";
 import { ONR_V1_CORP_AGENDA_IMPLEMENTATIONS } from "./onr-v1-corp-agenda-implementations";
 import { ONR_V1_CORP_ASSET_IMPLEMENTATIONS } from "./onr-v1-corp-asset-implementations";
 import { ONR_V1_CORP_ICE_IMPLEMENTATIONS } from "./onr-v1-corp-ice-implementations";
@@ -26,9 +27,10 @@ import { PROTEUS_RUNNER_EVENT_IMPLEMENTATIONS } from "./proteus-runner-event-imp
 import { PROTEUS_RUNNER_HARDWARE_IMPLEMENTATIONS } from "./proteus-runner-hardware-implementations";
 import { PROTEUS_RUNNER_PROGRAM_IMPLEMENTATIONS } from "./proteus-runner-program-implementations";
 import { PROTEUS_RUNNER_RESOURCE_IMPLEMENTATIONS } from "./proteus-runner-resource-implementations";
+import { V08_CORP_ASSET_IMPLEMENTATIONS } from "./v08-corp-asset-implementations";
 
 export type CardImplementationCatalogGroup = {
-  set: "classic" | "onr-v1" | "proteus";
+  set: "classic" | "demo" | "onr-v1" | "proteus" | "v08";
   side: "corp" | "runner";
   cardType:
     | "agenda"
@@ -206,6 +208,18 @@ export const CARD_IMPLEMENTATION_CATALOG_GROUPS = [
     side: "runner",
     cardType: "resource",
     implementations: PROTEUS_RUNNER_RESOURCE_IMPLEMENTATIONS,
+  },
+  {
+    set: "demo",
+    side: "corp",
+    cardType: "asset",
+    implementations: DEMO_CORP_ASSET_IMPLEMENTATIONS,
+  },
+  {
+    set: "v08",
+    side: "corp",
+    cardType: "asset",
+    implementations: V08_CORP_ASSET_IMPLEMENTATIONS,
   },
 ] as const satisfies readonly CardImplementationCatalogGroup[];
 

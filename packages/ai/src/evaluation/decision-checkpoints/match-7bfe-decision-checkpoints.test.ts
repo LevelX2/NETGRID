@@ -56,6 +56,17 @@ describe("match 7BFE exact decision checkpoints", () => {
     expectCheckpointToPass(fixtureWithCredits);
   });
 
+  it("keeps score-material draw available before the final action", () => {
+    const earlierWindow = mutateFixture(cp05Json, (fixture) => {
+      fixture.engine.testOnlyGameState.corp.clicks = 2;
+      fixture.expectation = {
+        acceptableActions: [{ type: "end_turn" }],
+      };
+    });
+
+    expectCheckpointToPass(earlierWindow);
+  });
+
   it("keeps I Got a Rock when its agenda-point prerequisite is live", () => {
     const enabledPayoff = mutateFixture(cp03Json, (fixture) => {
       const state = fixture.engine.testOnlyGameState;

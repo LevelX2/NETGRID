@@ -30,6 +30,10 @@ import {
   RD_TOP5_REORDER_OPERATION_SOURCE,
 } from "../../mechanics/hidden-zone";
 import { RUNNER_CARD_INSTALL_OPERATION_SOURCE } from "../../mechanics/longtail-card-effects";
+import {
+  fixedPlayCostCredits,
+  minimumPlayCostCredits,
+} from "../payment/play-cost";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
 import {
   RESTRICTED_ACTION_GRANT_KEYS,
@@ -383,7 +387,7 @@ export function canPlayCorpOperation(
       host.state.corp.clicks >=
         onPlayCardImplementationClickCostForDefinition(definition) &&
       host.state.corp.credits >=
-        (definition.cost ?? 0) +
+        minimumPlayCostCredits(definition) +
           onPlayCardImplementationAdditionalOperationCost(definition) &&
       host.cardImplementation.canPlayPrintedCostOnPlay(definition) &&
       onPlayCardImplementationChoicesAreAvailable(host, definition)
@@ -742,6 +746,41 @@ export function onPlayCardImplementationAdditionalOperationCost(
   }, 0);
 }
 
+export function onPlayCardImplementationVariableOperationCreditCostForAction(
+  definition: CardDefinition,
+  legalAction: LegalAction,
+): number | undefined {
+  const freeRezEffect = onPlayCardImplementationEffects(definition).find(
+    (effect) => effect.kind === "free_rez_installed_ice_with_counters",
+  );
+  if (
+    freeRezEffect?.kind === "free_rez_installed_ice_with_counters" &&
+    freeRezEffect.counterType === "kludge"
+  ) {
+    const xValue = Number(legalAction.payload?.xValue);
+    const xMinimum = Number(legalAction.payload?.xMinimum);
+    const xMaximum = Number(legalAction.payload?.xMaximum);
+    const xUpperBound = Number(legalAction.payload?.xUpperBound);
+    const xCreditsPerUnit = Number(legalAction.payload?.xCreditsPerUnit);
+    const variableCostKind = String(
+      legalAction.payload?.variableCostKind ?? "",
+    );
+    if (
+      !Number.isInteger(xValue) ||
+      xValue < 1 ||
+      xMinimum !== 1 ||
+      !Number.isInteger(xMaximum) ||
+      xMaximum < xValue ||
+      xMaximum !== xUpperBound ||
+      xCreditsPerUnit !== 1 ||
+      variableCostKind !== "printed_play_cost"
+    )
+      throw new Error("Die variablen Operation-X-Kosten sind nicht gueltig.");
+    return xValue;
+  }
+  return undefined;
+}
+
 export function onPlayCardImplementationNeedsLastTurnResourceTarget(
   definition: CardDefinition,
 ): boolean {
@@ -790,7 +829,7 @@ export function cardImplementationOperationLegalActions(
   }
   const utilityClickCost = corpUtilityPlayClickCost(utility);
   if (utility && utilityClickCost > 1) {
-    const totalCost = definition.cost ?? 0;
+    const totalCost = fixedPlayCostCredits(definition);
     if (
       host.state.corp.clicks < utilityClickCost ||
       host.state.corp.credits < totalCost ||
@@ -814,8 +853,6 @@ export function cardImplementationOperationLegalActions(
   if (host.state.corp.clicks < clickCost) return [];
   const additionalCost =
     onPlayCardImplementationAdditionalOperationCost(definition);
-  const totalCost = (definition.cost ?? 0) + additionalCost;
-  if (host.state.corp.credits < totalCost) return [];
   const freeRezEffect = onPlayCardImplementationEffects(definition).find(
     (effect) => effect.kind === "free_rez_installed_ice_with_counters",
   ) as
@@ -824,13 +861,29 @@ export function cardImplementationOperationLegalActions(
         { kind: "free_rez_installed_ice_with_counters" }
       >
     | undefined;
+  const isVariableKludgeRez =
+    freeRezEffect?.kind === "free_rez_installed_ice_with_counters" &&
+    freeRezEffect.counterType === "kludge";
+  const totalCost = isVariableKludgeRez
+    ? undefined
+    : fixedPlayCostCredits(definition) + additionalCost;
+  if (
+    !isVariableKludgeRez &&
+    totalCost !== undefined &&
+    host.state.corp.credits < totalCost
+  ) {
+    return [];
+  }
   if (freeRezEffect) {
     const actions: LegalAction[] = [];
     for (const targetCardId of host.cards.unrezzedInstalledIceIds?.() ?? []) {
       const targetDefinition = definitionFor(host.state, targetCardId);
       const targetRezCost = host.cards.rezCostForCard?.(targetCardId) ?? 0;
-      const xUpperBound = Math.max(1, targetRezCost);
       if (freeRezEffect.counterType === "kludge") {
+        const xUpperBound = Math.min(
+          Math.max(1, targetRezCost),
+          Math.max(0, Math.floor(host.state.corp.credits)),
+        );
         for (let x = 1; x <= xUpperBound; x += 1) {
           actions.push(
             host.actions.buildLegalAction(
@@ -839,19 +892,27 @@ export function cardImplementationOperationLegalActions(
               "play_operation",
               `${definition.title}: ${targetDefinition.title} rezzen (X=${x})`,
               cardId,
-              [{ clicks: clickCost, credits: totalCost }],
+              [{ clicks: clickCost, credits: x }],
               {
                 cardId,
                 targetCardId,
                 targetDefinitionId: targetDefinition.id,
                 targetRezCost,
                 xValue: x,
+                xMinimum: 1,
+                xMaximum: xUpperBound,
                 xUpperBound,
+                xCreditsPerUnit: 1,
+                variableCostKind: "printed_play_cost",
               },
             ),
           );
         }
       } else {
+        if (totalCost === undefined)
+          throw new Error(
+            `${definition.id}: Feste Operation-Kosten fehlen fuer die LegalAction-Projektion.`,
+          );
         actions.push(
           host.actions.buildLegalAction(
             host.state,
@@ -872,6 +933,10 @@ export function cardImplementationOperationLegalActions(
     }
     return actions;
   }
+  if (totalCost === undefined)
+    throw new Error(
+      `${definition.id}: Feste Operation-Kosten fehlen fuer die LegalAction-Projektion.`,
+    );
   const needsResourceTarget =
     onPlayCardImplementationNeedsLastTurnResourceTarget(definition);
   const advancementDistribution = onPlayCardImplementationEffects(

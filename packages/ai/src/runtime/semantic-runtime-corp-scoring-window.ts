@@ -128,9 +128,9 @@ function buildSemanticRuntimeCorpScoringWindowAssessment<
       scoreLineAction,
     );
   const rezBudget = scoringWindowRezBudget(
+    input,
     projectedServer,
     creditsAfterAction,
-    dependencies,
     preExposureAdvancementCreditReserve,
   );
   const access = scoringWindowAccessAssessment(input, projectedServer);
@@ -271,6 +271,7 @@ function buildSemanticRuntimeCorpScoringWindowAssessment<
       `pre_exposure_advancement_credit_reserve:${preExposureAdvancementCreditReserve}`,
       `missing_visible_installed_coverage:${access.missingVisibleBreakerCoverage}`,
       `corp_can_rez_relevant_ice:${rezBudget.corpCanRezRelevantIce}`,
+      `remote_rez_budget_knowledge:${rezBudget.knowledge}`,
       `corp_can_rez_full_path:${rezBudget.corpCanRezFullPath}`,
       `corp_can_rez_full_path_with_dynamic_reserve:${rezBudget.corpCanRezFullPathWithDynamicReserve}`,
       `remote_effective_ice_count:${access.effectiveIceCount}`,

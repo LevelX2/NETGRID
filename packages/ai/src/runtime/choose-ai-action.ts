@@ -1,7 +1,15 @@
-import { type AiDecision, type AiDecisionInput } from "@netgrid/shared";
+import {
+  type AiDecision,
+  type AiDecisionInput,
+  type EngineRandomizedIceInstallSelectionQuoteResult,
+  type EngineRandomizedIceInstallSelectionRequest,
+} from "@netgrid/shared";
 
 export type AiDecisionRuntimeOptions = {
   persistTacticalPlanMemory?: boolean;
+  quoteRandomizedIceInstallSelection?: (
+    request: EngineRandomizedIceInstallSelectionRequest,
+  ) => EngineRandomizedIceInstallSelectionQuoteResult;
   practicalMicroRuntime?: PracticalMicroRuntimeOptions;
   practicalTacticOverlay?: PracticalTacticOverlayOptions;
 };

@@ -7,6 +7,7 @@ import cp03Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-d
 import cp04Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-dfe6-04-survival-draw-over-fall-guy.json";
 import cp05Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-dfe6-05-first-fall-guy-control.json";
 import cp06Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-dfe6-06-unaffordable-liche-control.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -25,7 +26,7 @@ describe("match DFE6 exact decision checkpoints", () => {
     expectCheckpointToPass(fixture(cp05Json));
   });
 
-  it("keeps Archives attractive when the Corp deck is under pressure", () => {
+  it("does not infer an Archives payoff merely from a low Corp deck count", () => {
     const deckPressure = mutateFixture(cp01Json, (checkpoint) => {
       const state = checkpoint.engine.testOnlyGameState;
       const movedToArchives = state.corp.rd.splice(6);
@@ -39,7 +40,18 @@ describe("match DFE6 exact decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "DFE6-F01-CORP-DECK-PRESSURE";
       checkpoint.expectation = {
-        acceptableActions: [{ type: "start_run", targetServerId: "archives" }],
+        acceptableActions: [
+          { type: "start_run", targetServerId: "remote_1" },
+          { type: "start_run", targetServerId: "rd" },
+        ],
+        forbiddenActions: [{ type: "start_run", targetServerId: "archives" }],
+        planExecution: {
+          acceptablePlanKinds: [
+            "runner.contest_remote",
+            "runner.pressure_central",
+          ],
+          acceptableCapabilities: ["contest_remote", "pressure_rd_information"],
+        },
       };
     });
 
@@ -61,7 +73,10 @@ describe("match DFE6 exact decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    ["cp-dfe6-03-archives-before-winning-rd"],
+  );
 }
 
 function mutateFixture(

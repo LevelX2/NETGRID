@@ -23241,7 +23241,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "runner.draw_card"
+        "type": "trigger_ability"
       }
     ],
     "forbiddenActions": [
@@ -23249,6 +23249,10 @@
         "type": "activated_card_ability",
         "sourceDefinitionId": "onr_v1_154_broker"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_rd_access"]
+    }
   }
 }

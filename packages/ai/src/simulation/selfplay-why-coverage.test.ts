@@ -59,6 +59,7 @@ function summary(
 ): AiSimulationSummary {
   return {
     seed: "why-coverage",
+    terminationKind: "action_limit",
     winner: "action_limit_reached",
     actions: actionSequence.length,
     turns: 1,

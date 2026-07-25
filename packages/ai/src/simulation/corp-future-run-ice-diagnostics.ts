@@ -34,6 +34,7 @@ export function createCorpFutureRunIceDiagnosticsForSimulationAction(
     if (!assessment) {
       return opportunity ? { corpFutureRunIceInstallOpportunity: true } : {};
     }
+    const hasOtherIceContext = !assessment.installedOnEmptyServer;
     return {
       ...(opportunity ? { corpFutureRunIceInstallOpportunity: true } : {}),
       corpFutureRunIceInstalled: true,
@@ -53,28 +54,30 @@ export function createCorpFutureRunIceDiagnosticsForSimulationAction(
             corpFutureRunIceInstalledAsLiveEffect: true,
             corpIceOrderFutureEffectLive: true,
           }),
-      corpFutureRunIceInstalledAsOutermost: true,
-      ...(assessment.deadEffect &&
+      ...(assessment.resultingPosition === "outermost"
+        ? { corpFutureRunIceInstalledAsOutermost: true }
+        : {}),
+      ...(!hasOtherIceContext &&
       (assessment.futureRunIceClass === "bolter_or_data_darts" ||
         assessment.futureRunIceClass === "future_run_ice")
         ? { corpNextIceEffectInstalledLast: true }
         : {}),
       ...(assessment.futureRunIceClass === "ball_and_chain" &&
-      assessment.deadEffect
+      !hasOtherIceContext
         ? {
             corpBallAndChainInstalledInnermost: true,
             corpBallAndChainInstalledWithoutLaterIce: true,
           }
         : {}),
       ...(assessment.futureRunIceClass === "ball_and_chain" &&
-      assessment.liveEffect
+      hasOtherIceContext
         ? { corpBallAndChainInstalledWithLaterIce: true }
         : {}),
-      ...(assessment.futureRunIceClass === "canis" && assessment.deadEffect
+      ...(assessment.futureRunIceClass === "canis" && !hasOtherIceContext
         ? { corpCanisInstalledWithoutLaterIce: true }
         : {}),
       ...(assessment.futureRunIceClass === "bolter_or_data_darts" &&
-      assessment.deadEffect
+      !hasOtherIceContext
         ? { corpBolterOrDataDartsInstalledWithoutNextIce: true }
         : {}),
     };

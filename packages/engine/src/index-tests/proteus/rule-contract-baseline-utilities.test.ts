@@ -310,24 +310,160 @@ describe("PRO019 rule-contract baseline utilities", () => {
     addCorpHq(state, EMERGENCY_RIG, "emergency_1");
     const iceId = addCorpIce(state, WALL, "wall_1", "remote_1");
 
-    const actions = getLegalActions(state, "corp").filter(
-      (action) =>
-        action.type === "play_operation" &&
-        action.payload?.cardId === "emergency_1",
+    const actions = getLegalActions(state, "corp")
+      .filter(
+        (action) =>
+          action.type === "play_operation" &&
+          action.payload?.cardId === "emergency_1",
+      )
+      .sort(
+        (left, right) =>
+          Number(left.payload?.xValue) - Number(right.payload?.xValue),
+      );
+    expect(actions.map((action) => action.payload?.xValue)).toEqual([1, 2, 3]);
+    expect(actions.map((action) => action.costs)).toEqual([
+      [{ clicks: 1, credits: 1 }],
+      [{ clicks: 1, credits: 2 }],
+      [{ clicks: 1, credits: 3 }],
+    ]);
+    expect(new Set(actions.map((action) => action.actionId)).size).toBe(
+      actions.length,
     );
-    expect(actions.length).toBeGreaterThan(0);
-    expect(actions.some((action) => action.payload?.xValue === 0)).toBe(false);
-    expect(actions.every((action) => Number(action.payload?.xValue) >= 1)).toBe(
-      true,
-    );
+    expect(
+      actions.map((action) => ({
+        xMinimum: action.payload?.xMinimum,
+        xMaximum: action.payload?.xMaximum,
+        xCreditsPerUnit: action.payload?.xCreditsPerUnit,
+        variableCostKind: action.payload?.variableCostKind,
+      })),
+    ).toEqual([
+      {
+        xMinimum: 1,
+        xMaximum: 3,
+        xCreditsPerUnit: 1,
+        variableCostKind: "printed_play_cost",
+      },
+      {
+        xMinimum: 1,
+        xMaximum: 3,
+        xCreditsPerUnit: 1,
+        variableCostKind: "printed_play_cost",
+      },
+      {
+        xMinimum: 1,
+        xMaximum: 3,
+        xCreditsPerUnit: 1,
+        variableCostKind: "printed_play_cost",
+      },
+    ]);
 
-    const selected = actions.find((action) => action.payload?.xValue === 1);
+    const selected = actions.find((action) => action.payload?.xValue === 3);
     expect(selected).toBeDefined();
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBefore = state.corp.credits;
     state = applySelected(state, "corp", selected!.actionId);
 
     expect(state.cardInstances[iceId]?.rezzed).toBe(true);
-    expect(state.cardInstances[iceId]?.counters?.kludge).toBe(1);
+    expect(state.cardInstances[iceId]?.counters?.kludge).toBe(3);
+    expect(state.corp.credits).toBe(creditsBefore - 3);
     expect(hashState(state)).toMatch(/^fnv1a:/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("bounds Emergency Rig X by credits and rejects zero, forged, and stale actions", () => {
+    const setup = (seed: string, credits: number) => {
+      const state = corpActionState(seed);
+      state.corp.credits = credits;
+      addCorpHq(state, EMERGENCY_RIG, "emergency_cost_guard");
+      addCorpIce(state, WALL, "emergency_cost_wall", "remote_1");
+      return state;
+    };
+    const emergencyActions = (state: GameState) =>
+      getLegalActions(state, "corp")
+        .filter(
+          (action) =>
+            action.type === "play_operation" &&
+            action.payload?.cardId === "emergency_cost_guard",
+        )
+        .sort(
+          (left, right) =>
+            Number(left.payload?.xValue) - Number(right.payload?.xValue),
+        );
+
+    const zeroCredits = setup("pro019-emergency-zero-credits", 0);
+    expect(emergencyActions(zeroCredits)).toEqual([]);
+
+    let twoCredits = setup("pro019-emergency-two-credits", 2);
+    const twoCreditActions = emergencyActions(twoCredits);
+    expect(twoCreditActions.map((action) => action.payload?.xValue)).toEqual([
+      1, 2,
+    ]);
+    expect(twoCreditActions.map((action) => action.costs[0]?.credits)).toEqual([
+      1, 2,
+    ]);
+    const twoCreditApplyState = setup(
+      "pro019-emergency-two-credits-apply",
+      2,
+    );
+    const payableX2 = emergencyActions(twoCreditApplyState).find(
+      (action) => action.payload?.xValue === 2,
+    );
+    expect(payableX2).toBeDefined();
+    const afterPayableX2 = applySelected(
+      twoCreditApplyState,
+      "corp",
+      payableX2!.actionId,
+    );
+    expect(afterPayableX2.corp.credits).toBe(0);
+    expect(
+      afterPayableX2.cardInstances.emergency_cost_wall?.counters?.kludge,
+    ).toBe(2);
+
+    const threeCredits = setup("pro019-emergency-three-credits", 3);
+    const unaffordableActionId = emergencyActions(threeCredits).find(
+      (action) => action.payload?.xValue === 3,
+    )?.actionId;
+    expect(unaffordableActionId).toBeDefined();
+    const beforeForgedHash = hashState(twoCredits);
+    const beforeForgedEvents = twoCredits.eventLog.length;
+    const forged = applyAction(twoCredits, {
+      matchId: twoCredits.matchId,
+      side: "corp",
+      actionId: unaffordableActionId!,
+      clientKnownStateVersion: twoCredits.stateVersion,
+      idempotencyKey: "emergency-rig-unaffordable-x",
+    });
+    expect(forged.ok).toBe(false);
+    if (!forged.ok) expect(forged.error.code).toBe("ERR_UNKNOWN_ACTION");
+    expect(hashState(forged.state)).toBe(beforeForgedHash);
+    expect(forged.state.eventLog).toHaveLength(beforeForgedEvents);
+
+    const selected = twoCreditActions.find(
+      (action) => action.payload?.xValue === 2,
+    );
+    expect(selected).toBeDefined();
+    const staleStateVersion = twoCredits.stateVersion;
+    twoCredits = apply(
+      twoCredits,
+      "corp",
+      (action) => action.type === "gain_credit",
+    );
+    const beforeStaleHash = hashState(twoCredits);
+    const beforeStaleEvents = twoCredits.eventLog.length;
+    const stale = applyAction(twoCredits, {
+      matchId: twoCredits.matchId,
+      side: "corp",
+      actionId: selected!.actionId,
+      clientKnownStateVersion: staleStateVersion,
+      idempotencyKey: "emergency-rig-stale-x",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+    expect(hashState(stale.state)).toBe(beforeStaleHash);
+    expect(stale.state.eventLog).toHaveLength(beforeStaleEvents);
   });
 
   it("removes Kludge counters at Corp turn start and trashes ICE on the last counter", () => {

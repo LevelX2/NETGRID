@@ -14,6 +14,7 @@ import {
 import { runnerMemoryLimit } from "../ability-engine/effective-values";
 import { CARD_IMPLEMENTATIONS } from "../card-implementations/registry";
 import { runnerMemoryCheckpointChoiceStateIsValid } from "./checkpoints/runner-memory-checkpoint";
+import { corpServerIdsAreCanonicalAndUnique } from "./state/remote-server-id";
 
 export function validateGameState(state: GameState): ValidationResult {
   const errors: string[] = [];
@@ -28,6 +29,8 @@ export function validateGameState(state: GameState): ValidationResult {
 
   addPlacement(state.corp.identity, "corp.identity");
   addPlacement(state.runner.identity, "runner.identity");
+  if (!corpServerIdsAreCanonicalAndUnique(state.corp.servers))
+    errors.push("Corp server IDs must be canonical and unique.");
   for (const id of state.corp.hq) addPlacement(id, "corp.hq");
   for (const id of state.corp.rd) addPlacement(id, "corp.rd");
   for (const id of state.corp.archives) addPlacement(id, "corp.archives");

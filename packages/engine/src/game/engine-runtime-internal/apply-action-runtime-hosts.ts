@@ -701,6 +701,8 @@ export function createApplyActionRuntimeHosts(
       turn: {
         spendClick,
         spendClicks,
+        stopRunnerRestrictedActionSequence:
+          deps.stopValuPakProgramInstallSequence,
         endTurn: deps.endTurn,
       },
       credits: {

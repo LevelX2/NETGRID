@@ -1,7 +1,10 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
+import {
+  semanticRuntimeCorpCentralDefenseAllocationDirection,
+  semanticRuntimeCorpCentralPressureAssessment,
+} from "./semantic-runtime-corp-central-pressure";
 import { withDecisionDerivedCache } from "./decision-derived-cache";
 
 describe("semanticRuntimeCorpCentralPressureAssessment", () => {
@@ -119,11 +122,31 @@ describe("semanticRuntimeCorpCentralPressureAssessment", () => {
         .recentSuccessfulAccessRunnerTurns,
     ).toBe(0);
   });
+
+  it("permits a visible Highlighter R&D focus to divert central defense despite a known HQ agenda", () => {
+    const input = corpInput({
+      ownGripOrHq: [
+        { instanceId: "agenda", known: true, type: "agenda", owner: "corp" },
+      ],
+      runnerRig: [highlighterCard("highlighter")],
+    });
+
+    expect(
+      semanticRuntimeCorpCentralDefenseAllocationDirection(input),
+    ).toEqual({
+      kind: "rd_focus_diversion",
+      selectedServerId: "rd",
+      evidenceCode:
+        "corp_visible_rd_focus_diversion:multiaccess_with_visible_or_repeated_pressure",
+    });
+  });
+
 });
 
 function corpInput(
   overrides: {
     runnerRig?: VisibleCard[];
+    ownGripOrHq?: VisibleCard[];
     eventTail?: AiDecisionInput["eventTail"];
     stateVersion?: number;
   } = {},
@@ -137,7 +160,7 @@ function corpInput(
         credits: 5,
         clicks: 3,
         agendaPoints: 0,
-        gripOrHq: [],
+        gripOrHq: overrides.ownGripOrHq ?? [],
       },
       opponent: {
         credits: 1,
@@ -156,6 +179,16 @@ function rdVirusCard(instanceId: string): VisibleCard {
     title: "Garbage In",
     rulesText:
       "After each successful run on R&D, give the Corp a Virus counter. You may trash accessed cards from R&D.",
+  });
+}
+
+function highlighterCard(instanceId: string): VisibleCard {
+  return runnerCard(instanceId, {
+    definitionId: "onr_proteus_090_highlighter",
+    title: "Highlighter",
+    rulesText:
+      "After each successful run on R&D, give the Corp a Highlighter counter. Each Highlighter counter after the first allows you to access an additional card from R&D whenever you access cards from R&D.",
+    subtypes: ["virus"],
   });
 }
 

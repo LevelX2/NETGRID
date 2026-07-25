@@ -5,6 +5,7 @@ import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { buildDeckCapabilityProfile } from "./deck-capabilities";
+import { bindHistoricalRunEventCadence } from "./evaluation/decision-checkpoints/checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./evaluation/decision-checkpoints/checkpoint-types";
 import { runAiDecisionCheckpoint } from "./evaluation/decision-checkpoints/checkpoint-runner";
 
@@ -50,18 +51,18 @@ describe("match D153 card hint consumer contract", () => {
     );
   });
 
-  it("binds only the structured Broker actions and selects the payout for R&D funding", () => {
-    const result = runAiDecisionCheckpoint(
+  it("binds only the structured Broker actions without selecting an unbound payout", () => {
+    const checkpoint = bindHistoricalRunEventCadence(
       structuredClone(checkpointJson) as AiDecisionCheckpointV1,
     );
+    const result = runAiDecisionCheckpoint(checkpoint);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
 
     const capabilityProfile = buildDeckCapabilityProfile({
       side: result.input.side,
       playerView: result.input.playerView,
       legalActions: result.input.legalActions,
-      deckSnapshot: (structuredClone(checkpointJson) as AiDecisionCheckpointV1)
-        .deckSnapshot,
+      deckSnapshot: checkpoint.deckSnapshot,
     });
     const broker = capabilityProfile.runner?.economyBankTools.find(
       (tool) => tool.cardId === BROKER,
@@ -95,13 +96,17 @@ describe("match D153 card hint consumer contract", () => {
         (tool) => tool.cardId === JUNKYARD,
       ),
     ).toBe(false);
-    expect(result.decision?.actionId).toBe(expectedCashOutIds[0]);
-    expect(result.decision?.decisionDebug?.scoreBreakdown).toEqual(
+    expect(result.decision?.actionId).toBe("runner.end_turn");
+    expect(result.decision?.fallbackUsed).toBe(false);
+    expect(result.decision?.decisionDebug?.planKind).toBe(
+      "runner.complete_turn",
+    );
+    expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          key: "runner_bank_cashout_gate",
-          value: 1100,
-        }),
+        "plan_step_capability:complete_turn_after_productive_routes_exhausted",
+        "plan_assessment_evidence:runner_immediate_credit_route_has_no_bound_funding_need",
+        "plan_assessment_evidence:productive_legal_routes_exhausted",
+        "plan_priority_class:P6",
       ]),
     );
 
@@ -127,10 +132,10 @@ describe("match D153 card hint consumer contract", () => {
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
     });
-    const selectedCandidate = candidates.find(
-      (candidate) => candidate.actionId === result.decision?.actionId,
+    const cashOutCandidate = candidates.find(
+      (candidate) => candidate.actionId === expectedCashOutIds[0],
     );
-    expect(selectedCandidate).toMatchObject({
+    expect(cashOutCandidate).toMatchObject({
       sourceDefinitionId: BROKER,
       effectTargets: expect.arrayContaining([
         "economy.action_credit",

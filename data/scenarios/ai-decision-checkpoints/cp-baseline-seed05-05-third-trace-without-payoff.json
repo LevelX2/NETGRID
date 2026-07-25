@@ -46833,12 +46833,9 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "corp.gain_credit"
-      },
-      {
         "type": "install_card",
         "sourceDefinitionId": "onr_v1_367_rio-de-janeiro-city-grid",
-        "targetServerId": "remote_1"
+        "targetServerId": "hq"
       }
     ],
     "forbiddenActions": [
@@ -46846,6 +46843,10 @@
         "type": "activated_card_ability",
         "sourceDefinitionId": "onr_v1_207_netwatch-operations-office"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
+      "acceptableCapabilities": ["develop_card"]
+    }
   }
 }

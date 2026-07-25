@@ -1,6 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { createAiHintsByCard } from "../ai-hints";
+import { corpVisibleCardPlayCost } from "./corp-tag-punish-payoff-profiles";
 import type { LatestTraceContext } from "./trace-context";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
@@ -150,7 +151,7 @@ function cheapestVisibleTagPunishPayoff(
       const requiresTag = (hint?.conditions ?? []).some(
         (condition) => condition.kind === "requires_runner_tagged",
       );
-      const cost = card.cost ?? hint?.costProfile?.credits;
+      const cost = corpVisibleCardPlayCost(card);
       if (
         !taggedPayoff ||
         !requiresTag ||

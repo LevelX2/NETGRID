@@ -53,6 +53,87 @@ describe("semanticRuntimeCorpRemoteRezFloorAssessment", () => {
       }),
     );
   });
+
+  it.each([
+    ["missing", (ice: any) => delete ice.effectiveRezCostQuote],
+    [
+      "incomplete",
+      (ice: any) => {
+        ice.effectiveRezCostQuote = {
+          context: "installed",
+          complete: false,
+          cardId: ice.instanceId,
+          targetServerId: "remote_1",
+          projectedServerId: "remote_1",
+          expiresAtStateVersion: 1,
+        };
+      },
+    ],
+    [
+      "stale",
+      (ice: any) => {
+        ice.effectiveRezCostQuote.expiresAtStateVersion = 0;
+      },
+    ],
+    [
+      "mandatory additional cost",
+      (ice: any) => {
+        ice.effectiveRezCostQuote.mandatoryAdditionalCosts.agendaPoints = 1;
+      },
+    ],
+  ])("fails closed for a %s rez-floor quote", (_label, corruptQuote) => {
+    const input = corpInput(3);
+    corruptQuote(input.playerView.servers[0]!.ice[0]);
+
+    const assessment = semanticRuntimeCorpRemoteRezFloorAssessment(
+      input,
+      corpAction("advance-scoreline", "advance_card"),
+      testDependencies(),
+    );
+
+    expect(assessment).toMatchObject({
+      knowledge: "unknown",
+      rezFloor: undefined,
+      requiredCreditsAfterAction: undefined,
+      blockedByFloor: true,
+      evidence: expect.arrayContaining([
+        "remote_rez_floor_knowledge:unknown",
+        "agenda_development_risk:below_remote_rez_floor",
+      ]),
+    });
+  });
+
+  it.each([
+    ["NaN current credits", Number.NaN, 0],
+    ["negative current credits", -1, 0],
+    ["fractional current credits", 3.5, 0],
+    ["NaN action cost", 3, Number.NaN],
+    ["infinite action cost", 3, Number.POSITIVE_INFINITY],
+    ["negative action cost", 3, -1],
+    ["fractional action cost", 3, 0.5],
+    ["action cost above bank", 3, 4],
+  ])(
+    "fails closed for %s",
+    (_label, currentCredits, actionCreditCost) => {
+      const assessment = semanticRuntimeCorpRemoteRezFloorAssessment(
+        corpInput(currentCredits),
+        corpAction("advance-scoreline", "advance_card"),
+        testDependencies({ actionCreditCost }),
+      );
+
+      expect(assessment).toMatchObject({
+        knowledge: "unknown",
+        rezFloor: undefined,
+        requiredCreditsAfterAction: undefined,
+        creditsAfterAction: undefined,
+        blockedByFloor: true,
+        evidence: expect.arrayContaining([
+          "remote_rez_floor_knowledge:unknown",
+          "remote_rez_floor:invalid_credit_input",
+        ]),
+      });
+    },
+  );
 });
 
 function corpInput(credits: number): AiDecisionInput {
@@ -60,6 +141,7 @@ function corpInput(credits: number): AiDecisionInput {
     side: "corp",
     legalActions: [],
     playerView: {
+      stateVersion: 1,
       own: {
         credits,
       },
@@ -71,8 +153,20 @@ function corpInput(credits: number): AiDecisionInput {
               instanceId: "remote-ice",
               known: true,
               type: "ice",
+              definitionId: "test-remote-ice",
               rezzed: false,
               rezCost: 2,
+              effectiveRezCostQuote: {
+                context: "installed",
+                complete: true,
+                cardId: "remote-ice",
+                targetServerId: "remote_1",
+                projectedServerId: "remote_1",
+                expiresAtStateVersion: 1,
+                baseCredits: 2,
+                finalCredits: 2,
+                mandatoryAdditionalCosts: { agendaPoints: 0 },
+              },
             } as VisibleCard,
           ],
           root: [],
@@ -109,6 +203,5 @@ function testDependencies(overrides: {
     advanceCompletesScore: () => false,
     actionIsScoreLine: () => overrides.actionIsScoreLine ?? false,
     remoteHasScoreLine: () => false,
-    visibleIceRezCost: (card: VisibleCard) => card.rezCost,
   };
 }

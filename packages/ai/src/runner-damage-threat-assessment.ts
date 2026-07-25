@@ -54,6 +54,29 @@ export type RunnerDamageThreatAssessment = {
   evidence: string[];
 };
 
+export type RunnerFutureEncounterDamageJackOutAssessment = {
+  sourceDefinitionId: string;
+  projectedDamage: number;
+  handCount: number;
+  projectedHandAfterDamage: number;
+  requiredHandFloor: number;
+  evidenceCode: string;
+};
+
+export type RunnerRecentFutureEncounterDamageSafetyAbort = {
+  serverId: string;
+  sourceDefinitionId: string;
+  evidenceCode: string;
+};
+
+export type RunnerKnownAccessDamageJackOutAssessment = {
+  serverId: string;
+  sourceDefinitionId: string;
+  advancementCounters: number;
+  damageRisk: number;
+  evidenceCode: string;
+};
+
 const DAMAGE_TOKENS = new Set([
   "brain",
   "core",
@@ -168,6 +191,131 @@ export function runnerDamageThreatAssessment(
   };
 }
 
+export function runnerFutureEncounterDamageJackOutAssessment(
+  input: AiDecisionInput,
+): RunnerFutureEncounterDamageJackOutAssessment | undefined {
+  if (
+    input.side !== "runner" ||
+    input.playerView.timingPoint !== "run.jack_out_window" ||
+    input.playerView.run?.position?.kind !== "ice"
+  )
+    return undefined;
+  const history = mergedHistory(input);
+  const lastRunStartIndex = findPreviousEventIndex(
+    history,
+    history.length,
+    (event) => event.type === "start_run",
+  );
+  const triggerEvent = futureEncounterDamageTrigger(
+    history,
+    lastRunStartIndex,
+    history.length,
+  );
+  const sourceDefinitionId = triggerEvent?.publicPayload?.sourceDefinitionId;
+  if (typeof sourceDefinitionId !== "string") return undefined;
+  const hint = AI_HINTS.get(sourceDefinitionId);
+  const projectedDamage = Math.max(
+    0,
+    ...(hint?.effects ?? [])
+      .filter(
+        (effect) =>
+          effect.kind === "damage" &&
+          (effect.timing === "encounter" || effect.timing === undefined),
+      )
+      .map((effect) =>
+        typeof effect.amount === "number" && Number.isFinite(effect.amount)
+          ? effect.amount
+          : 0,
+      ),
+  );
+  if (projectedDamage <= 0) return undefined;
+
+  const flatlineRisk = runnerDamageThreatAssessment(input).flatlineRisk;
+  const requiredHandFloor = Math.max(
+    3,
+    flatlineRisk.recommendedHandFloor,
+  );
+  const handCount = input.playerView.own.gripOrHq.length;
+  const projectedHandAfterDamage = handCount - projectedDamage;
+  if (projectedHandAfterDamage >= requiredHandFloor) return undefined;
+
+  return {
+    sourceDefinitionId,
+    projectedDamage,
+    handCount,
+    projectedHandAfterDamage,
+    requiredHandFloor,
+    evidenceCode: [
+      "runner_future_encounter_damage_requires_jack_out",
+      `source:${sourceDefinitionId}`,
+      `damage:${projectedDamage}`,
+      `hand:${handCount}`,
+      `projected_hand:${projectedHandAfterDamage}`,
+      `required_floor:${requiredHandFloor}`,
+    ].join("|"),
+  };
+}
+
+export function runnerRecentFutureEncounterDamageSafetyAbort(
+  input: AiDecisionInput,
+): RunnerRecentFutureEncounterDamageSafetyAbort | undefined {
+  if (input.side !== "runner") return undefined;
+  const history = mergedHistory(input);
+  const currentRunnerTurnStart = findPreviousEventIndex(
+    history,
+    history.length,
+    (event) =>
+      event.type === "end_turn" &&
+      event.publicPayload?.actor === "corp",
+  );
+  const jackOutIndex = findPreviousEventIndex(
+    history,
+    history.length,
+    (event) => event.type === "jack_out",
+  );
+  if (jackOutIndex <= currentRunnerTurnStart) return undefined;
+  const runStartIndex = findPreviousEventIndex(
+    history,
+    jackOutIndex,
+    (event) => event.type === "start_run",
+  );
+  if (runStartIndex <= currentRunnerTurnStart) return undefined;
+  const triggerEvent = futureEncounterDamageTrigger(
+    history,
+    runStartIndex,
+    jackOutIndex,
+  );
+  const sourceDefinitionId = triggerEvent?.publicPayload?.sourceDefinitionId;
+  const serverId = history[runStartIndex]?.publicPayload?.serverId;
+  if (
+    typeof sourceDefinitionId !== "string" ||
+    typeof serverId !== "string"
+  )
+    return undefined;
+  const routeChangedAfterAbort = history
+    .slice(jackOutIndex + 1)
+    .some(
+      (event) =>
+        event.publicPayload?.actor === "runner" &&
+        [
+          "activated_card_ability",
+          "install_card",
+          "play_event",
+        ].includes(event.type),
+    );
+  if (routeChangedAfterAbort) return undefined;
+  return {
+    serverId,
+    sourceDefinitionId,
+    evidenceCode: [
+      "runner_future_encounter_damage_route_safety_aborted",
+      `server:${serverId}`,
+      `source:${sourceDefinitionId}`,
+      "resume:runner_route_development",
+    ].join("|"),
+  };
+}
+
 export function runnerKnownAccessDamageScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
@@ -177,6 +325,37 @@ export function runnerKnownAccessDamageScoreComponent(
     action.side !== "runner" ||
     action.type !== "continue_run" ||
     input.playerView.timingPoint !== "run.jack_out_window"
+  ) {
+    return undefined;
+  }
+  const assessment = knownAccessDamageAmbushAssessment(input, false);
+  if (!assessment) return undefined;
+  return {
+    key: "runner_known_access_damage_ambush",
+    label: "Bekannter Access-Damage-Ambush",
+    value: -2200 - assessment.damageRisk * 200,
+    reason: assessment.evidenceCode,
+  };
+}
+
+export function runnerKnownAccessDamageJackOutAssessment(
+  input: AiDecisionInput,
+): RunnerKnownAccessDamageJackOutAssessment | undefined {
+  return knownAccessDamageAmbushAssessment(input, true);
+}
+
+function knownAccessDamageAmbushAssessment(
+  input: AiDecisionInput,
+  requireRunWindowActions: boolean,
+): RunnerKnownAccessDamageJackOutAssessment | undefined {
+  if (
+    input.side !== "runner" ||
+    input.playerView.timingPoint !== "run.jack_out_window" ||
+    (requireRunWindowActions &&
+      (!input.legalActions.some(
+        (action) => action.type === "continue_run",
+      ) ||
+        !input.legalActions.some((action) => action.type === "jack_out")))
   ) {
     return undefined;
   }
@@ -213,10 +392,12 @@ export function runnerKnownAccessDamageScoreComponent(
     ? advancementCounters
     : Math.max(1, hint?.valueHints?.damage ?? 1);
   return {
-    key: "runner_known_access_damage_ambush",
-    label: "Bekannter Access-Damage-Ambush",
-    value: -2200 - damageRisk * 200,
-    reason: [
+    serverId: server.id,
+    sourceDefinitionId: root.definitionId ?? root.instanceId,
+    advancementCounters,
+    damageRisk,
+    evidenceCode: [
+      "runner_known_access_damage_ambush_requires_jack_out",
       `server:${server.id}`,
       `source:${root.definitionId ?? root.instanceId}`,
       `advancement_counters:${advancementCounters}`,
@@ -467,6 +648,49 @@ function mergedHistory(input: AiDecisionInput): PublicGameEvent[] {
   return [...byId.values()].sort(
     (left, right) => eventVersion(left) - eventVersion(right),
   );
+}
+
+function findPreviousEventIndex(
+  history: readonly PublicGameEvent[],
+  beforeExclusive: number,
+  predicate: (event: PublicGameEvent) => boolean,
+): number {
+  for (
+    let index = Math.min(beforeExclusive, history.length) - 1;
+    index >= 0;
+    index -= 1
+  ) {
+    const event = history[index];
+    if (event && predicate(event)) return index;
+  }
+  return -1;
+}
+
+function futureEncounterDamageTrigger(
+  history: readonly PublicGameEvent[],
+  afterExclusive: number,
+  beforeExclusive: number,
+): PublicGameEvent | undefined {
+  for (
+    let index = Math.min(beforeExclusive, history.length) - 1;
+    index > afterExclusive;
+    index -= 1
+  ) {
+    const event = history[index];
+    if (!event || event.type !== "continue_run") continue;
+    const sourceDefinitionId = event.publicPayload?.sourceDefinitionId;
+    if (typeof sourceDefinitionId !== "string") continue;
+    const hint = AI_HINTS.get(sourceDefinitionId);
+    if (
+      hint?.side === "corp" &&
+      hint.effects?.some(
+        (effect) => effect.kind === "future_encounter_effect",
+      ) === true
+    ) {
+      return event;
+    }
+  }
+  return undefined;
 }
 
 function publicEventDamageAmount(event: PublicGameEvent): number {

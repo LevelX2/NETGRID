@@ -2023,6 +2023,22 @@ export function publicContextForAction(
     }
     if (legalAction.payload.valuPakInstallActionSpent === true)
       context.valuPakInstallActionSpent = true;
+    if (legalAction.payload.valuPakSequenceStopped === true)
+      context.valuPakSequenceStopped = true;
+    if (
+      typeof legalAction.payload.valuPakRestrictedActionsForgone ===
+      "number"
+    ) {
+      context.valuPakRestrictedActionsForgone =
+        legalAction.payload.valuPakRestrictedActionsForgone;
+    }
+    if (
+      typeof legalAction.payload.valuPakTemporaryCreditsReturned ===
+      "number"
+    ) {
+      context.valuPakTemporaryCreditsReturned =
+        legalAction.payload.valuPakTemporaryCreditsReturned;
+    }
     if (typeof legalAction.payload.derezzedCount === "number")
       context.derezzedCount = legalAction.payload.derezzedCount;
     if (typeof legalAction.payload.targetCardDefinitionId === "string")

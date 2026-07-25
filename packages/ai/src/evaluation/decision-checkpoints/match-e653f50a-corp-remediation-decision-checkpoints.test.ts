@@ -29,7 +29,7 @@ describe("match e653f50a Corp remediation decision checkpoints", () => {
       rdBeforeBackgroundRemoteJson,
     ],
     [
-      "protects a central before adding a third layer to an empty remote",
+      "avoids a third empty-remote ICE layer while allowing a protected score plan",
       rdBeforeThirdEmptyRemoteLayerJson,
     ],
   ])("%s", (_label, json) => {

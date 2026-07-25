@@ -2,9 +2,8 @@
 
 Status: **implementing**
 Quelle/Vorgabe: Nutzerauftrag und
-`docs/architecture/ai/ai-plan-layer-target-state-wip.md` Version `0.3`
-Primärer Agent: `release-planning-agent`, Umsetzung später
-`release-implementation-agent`
+`docs/architecture/ai/ai-plan-layer-target-state-wip.md` Version `0.6`
+Primärer Agent: `release-implementation-agent`
 Branch: `codex/ai-plan-first-runtime-cutover`
 Worktree: `C:\Projekte\NETGRID_AI_PLAN_FIRST_RUNTIME_CUTOVER`
 
@@ -24,8 +23,9 @@ Aktueller Paketstand:
 - PF11: abgeschlossen, Commit `48f0f109e`
 - PF12: abgeschlossen, Commit `fbdb8fb10`
 - PF13: abgeschlossen, Commit `790259a4a`
-- PF14: abgeschlossen
-- nächstes Paket: PF15
+- PF14: abgeschlossen, Commit `533eeefaf`
+- PF15: Done-Gate grün, Commit freigegeben
+- nächstes Paket: PF16
 
 ## Zielprüfung
 
@@ -765,11 +765,211 @@ Verhaltensslices freigeben.
 - Corp-Same-Turn-Score;
 - Manhunt mit Trace-/Tag-/Damageverzweigungen;
 - Action-Capacity-Fälle;
+- Valu-Pak nur mit vorab gebundenen, sinnvollen Programmen, exakter
+  Reihenfolge sowie nachgewiesener MU-/Credit-/Handpuffer-Projektion; der
+  Kartenplan wartet davor resident in `prepare_restricted_sequence`, und
+  Programme mit lediglich `later`/`none`-Bedarf legitimieren das Ausspielen
+  nicht; keine spekulative Öffnung für erst später ziehbare Programme;
 - observational-equivalence-Paare;
 - komplette AI-Shards, Typecheck, Contracts und AI-Gates;
 - AI Behavior Baseline mit qualitativen Vollaudits;
 - Full Matches müssen regulär enden oder eine klassifizierte echte
   Modul-/Semantiklücke melden.
+
+### Aktueller Zwischenstand am 2026-07-25
+
+Implementiert und fokussiert verifiziert:
+
+- Die frühere familienheuristische Abdeckung über
+  `actionPlanOwnerships` ist entfernt. Eine Rollen-, Kartenfamilien- oder
+  Semantikzuordnung gilt nicht mehr als Planabdeckung.
+- Für jede freiwillige aktuelle LegalAction gilt jetzt der harte
+  Schedulervertrag: entweder materialisiert ein aktuell ausführbarer
+  Plan-Step genau diese Action-ID als Route, oder genau ein registriertes
+  Fachmodul weist sie mit einer konkreten
+  `explicitly_nonproductive`-Disposition zurück. Eine wartende residente
+  Instanz, ein generischer Owner oder ein anderer ausführbarer Plan dürfen
+  eine unaufgelöste Aktion nicht kaschieren. Route und Disposition derselben
+  Action-ID bleiben ein fail-closed Widerspruch.
+- Valu-Pak besitzt eine residente Vorbereitungsphase
+  `prepare_restricted_sequence`; hohe Deckstrategiepassung allein öffnet die
+  Sequenz nicht.
+- Die Preflight-Projektion bindet konkrete sichtbare Programme und deren
+  Reihenfolge und prüft MU, normale sowie eingeschränkte Credits,
+  Credit-Floor und Handkartenpuffer über die gesamte Sequenz.
+- Ein einzelnes Programm ist nur als akute, exakt durch die temporären Credits
+  geschlossene Brücke zulässig. Ressourcen, spätere Programme und bloße
+  Deckdichte zählen nicht als produktives Bundle.
+- Nach dem Öffnen verlangt die Sequenz ein residentes Commitment. Fehlt es
+  oder ist es nicht mehr erfüllbar, entsteht `commitment_invalidated`; weder
+  ein anderes Programm noch EndTurn darf die Lücke kaschieren.
+- Eine laufende Valu-Pak-Sequenz wird ausschließlich über die genau eine
+  aktive Executor-Instanz fortgesetzt. Abgeschlossene oder historische
+  Sequenzen dürfen ihre Commitments nicht mehr liefern; fehlende oder
+  mehrdeutige Executorbindung schlägt als `commitment_invalidated` fehl.
+- Nicht-endliche temporäre Credits, Installationskosten, MU-Werte oder
+  Commitmentzahlen werden nicht auf null normalisiert: fehlerhafte
+  Preflight-Kartendaten scheitern fail-closed, korrupte residente
+  Commitments werden invalidiert.
+- Der vollständige Hidden-Info-Beobachtungsäquivalenzvertrag ist als vier
+  getrennte Vollzustandspaare ausführbar: Corp-HQ plus zukünftige
+  R&D-Reihenfolge, unrezzte ICE-Identität, verdeckte Remote-Identität sowie
+  verdeckte Runner-Ressource plus Grip/Stack. Jedes Paar verlangt identische
+  side-sichere `PlayerView`, identische `LegalActions`, gleichen Seed und
+  RandomCounter sowie anschließend die vollständig identische
+  KI-Entscheidung. Der fokussierte Lauf ist `4/4` grün.
+- Die beiden fokussierten Same-Turn-Gegenfälle „Tycho Extension plus Project
+  Consultants“ und „geschützte Corporate-War-Linie“ sind auf dem aktuellen
+  Stand grün. Eine Installationsvariante wird nur noch dispositioniert, wenn
+  kein exakter Same-Turn-Scoreplan ihre Action-ID bindet.
+- Runner-Run-Funding benötigt jetzt ein reales Route- oder
+  Post-Run-Floor-Gap. Ein bereits direkt konvertierbares Ziel erzeugt keinen
+  Funding-Step; eine andere direkt positive Runroute verdrängt nicht
+  dringliches Funding. Nur eine belegte akute Score-Bedrohung kann diese
+  Alternativsperre überstimmen. Eine direkt konvertierbare
+  Geschwisterroute auf demselben Server blockiert Funding auch bei akuter
+  Bedrohung. Der dringliche Floor-Override erlaubt nur eine exakt
+  ausführbare, nichtnegative Terminalroute; ein echtes Route-Gap oder
+  negative Credits nach dem Run bleiben finanzierungsbedürftig.
+- Broker-Cashout ist an eine konkrete planfähige Kartenentwicklung gebunden,
+  muss deren Credit-Gap im selben Zug schließen und den erforderlichen
+  Handpuffer nach Cashout und Entwicklung erhalten. Ausnahmen verlangen einen
+  expliziten akuten Survival- oder Coverage-Nachweis für genau diese
+  Zielkarteninstanz. Nicht-endliche Cashout-, Puffer- oder Fundingwerte
+  erzeugen eine konkrete Ablehnung und werden nicht als null oder als
+  konvertierbare Route behandelt.
+- Der globale Corp-Verteidigungsplan bindet genau die ausgewählte
+  ICE-Server-Kombination. Alle anderen aktuellen Installationsvarianten
+  derselben ICE-Instanz werden durch `corp.defend_servers` konkret
+  dispositioniert; eine allgemeine ICE-Familienzuordnung deckt sie nicht ab.
+- Die ICE-Härtung ist umgesetzt und fokussiert verifiziert:
+  - Das frühere ICE-Platzierungsmodul liefert ausschließlich Facts; die
+    serverübergreifende Auswahl liegt allein bei `corp.defend_servers`.
+  - Score-Schutz ist an den exakten Score-Parent gebunden. Die Parent-Band
+    wird zuerst nach P1–P4 gewählt; erst innerhalb dieser Band konkurrieren
+    Child-Routen. Parent-ID, Priorität, Evidence, Assessment und Action
+    stammen aus derselben Bindung. Fehlender Parent oder fehlende
+    Score-Klasse schlägt fail-closed fehl.
+  - Ein blockierter terminaler P1-Score-Parent behält seinen exakt gebundenen
+    Funding-Child auch neben einem fremden ausführbaren P4-Score-Parent. Der
+    Umkehr- und Prioritätsfall ist ebenfalls verifiziert.
+  - Effekt und Funding werden getrennt bewertet. `funding_only` übernimmt
+    den exakten Engine-projizierten Funding-Gap und erzeugt Economy-Support
+    desselben Parents, niemals zielgerichteten ICE-Draw.
+  - Installations-, aktuelle Rez- und Post-Install-Rez-Kosten stammen nur aus
+    vollständigen, an `stateVersion`, Karteninstanz, Server und Action
+    gebundenen Engine-Quotes. Gedruckte `rezCost`, Layerzählung, numerische
+    Scoreboni und die frühere zentrale Reserveheuristik sind keine
+    Verteidigungsautorität mehr.
+  - Das vorbereitete Remote-Szenario bindet Defense und alle Score-Signale
+    ausschließlich an
+    `plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1`; es entsteht kein
+    konkurrierendes `new_remote`-Signal.
+  - Unvollständige, unbekannte, veraltete oder falsch gebundene Facts und
+    Quotes bleiben fail-closed.
+- In einem Rez-Fenster wird `decline_rez` nur dann als unproduktiv
+  dispositioniert, wenn `corp.defend_servers` eine exakte, aktuell
+  produktive Rez-Action materialisiert. Ohne eine solche Route bleibt
+  Decline die zulässige fenstergebundene Entscheidung.
+- `corp.ambush_and_bluff` bindet jede sichtbare Ambush-Kopie über
+  `sourceInstanceId`, Zielserver und exakte aktuelle `actionId`. Eine
+  Ambush-Rolle oder LegalAction allein erzeugt keinen Plan: Die konkrete
+  Vorausplanung verlangt einen expliziten CorpIntent für
+  `corp.ambush_bluff`; fehlt der Signalvertrag, schlägt die Runtime
+  fail-closed fehl. Zwei gleiche Kopien materialisieren nicht gegenseitig
+  ihre Installationsvarianten; spätere Advance-/Trigger-Phasen bleiben an
+  Instanz und Commitment gebunden.
+- Chester Mix öffnet nur mit einer vorab positiv bewerteten exakten
+  Same-Fort-ICE-Fortsetzung eine gesperrte Rez-Install-Sequenz. Nach dem Rez
+  wird die neue Install-LegalAction über ICE-Instanz und Fort gebunden;
+  verschwindet sie, entsteht `commitment_invalidated`.
+- Dr. Dreff und Jenny Jett besitzen getrennte Modelle. Dr. Dreff verlangt das
+  letzte relevante Fenster und unter seinem Halb-Rez-Vertrag bezahlbares
+  sichtbares HQ-ICE. Jenny verlangt einen aktuellen Run am eigenen Fort und
+  die Finanzierung ihrer Rez- plus fortabhängigen Installationskosten; der
+  Dr.-Dreff-Vertrag wird nicht auf sie übertragen.
+- Vor den jüngsten Proteus-Longtail-Korrekturen war der vollständige
+  Prüfstand grün:
+  - alle Workspace-Typechecks einschließlich AI, Engine, Shared und Catalog;
+  - AI-Shard 1: `162/162` Dateien und `1.529/1.529` Tests;
+  - AI-Shard 2: `162/162` Dateien und `1.338/1.338` Tests;
+  - AI-Shard 3: `162/162` Dateien und `1.046/1.046` Tests;
+  - vollständiger Engine-Lauf: `207/207` Dateien und `1.795/1.795` Tests;
+  - Decision Checkpoints: `62/62` Dateien und `368/368` Tests;
+  - fokussierte Hidden-Info-, Authority-, Live-Runtime- und Replay-Verträge:
+    `152/152`;
+  - Package-Boundaries, AI-Source-Structure, Hints, Doctrine,
+    Proteus-Readiness und `git diff --check`;
+  - akzeptierte Standard-Baseline: `60` regulär beendete Spiele,
+    `11.168` Entscheidungen und null IllegalActions, Replayfehler,
+    FallbackActions, Runtimefehler, Action-Limits oder
+    Hidden-Info-Findings. Die qualitative Prüfung hält `175` Findings,
+    darunter drei HIGH-Corp-never-scores-Fälle, sowie zwei
+    `gameEndReason=unknown`-Anomalien sichtbar fest.
+- Seit diesem Vollstand fokussiert korrigiert und gemeinsam verifiziert:
+  - Precision-Bribery-Lock-Removal ist nur als exakter Step eines sichtbaren
+    Score-Parents produktiv; ohne solchen Parent bleibt die Action
+    ausdrücklich unproduktiv.
+  - Corporate Guard(R) Temps bleibt trotz Engine-zertifizierter zukünftiger
+    Action-Capacity ohne gebundenen taktischen Parent ausdrücklich
+    unproduktiv.
+  - Fetal-AI-Installationen behalten ihre exakt vorbereitete
+    `corp.ambush_and_bluff`-Route auch neben blockierten Score-Parents auf
+    demselben oder einem anderen Server.
+  - R&D Mole wird im exakten laufenden R&D-Accessfenster als zusätzlicher
+    Multiaccess-Step von `runner.convert_run_window` materialisiert.
+  - Engine-beschränkte Pirate-Broadcast-Mehrfachrunfolgen werden über ihre
+    exakten R&D-/Archives-Legs fortgesetzt; normale Cadence- und
+    Archives-Nutzenprüfungen bleiben davon getrennt.
+  - Der zusammengeführte Runtime-/Variantenstand ist fokussiert grün:
+    `152/152` Live-Runtime-Verbundtests, `26/26` Varianten-/Reprofälle und
+    `141/141` Runner-Run-Window-/Pilot-Reprofälle.
+  - Der aktuelle Proteus Selected Pilot ist qualifiziert: `16` Spiele,
+    `1.991` Entscheidungen, `11` reguläre Abschlüsse, `5` Action-Limits,
+    `0` Runtime-Failures und jeweils `0` IllegalActions, Replay-,
+    Redaction-, No-Progress-, Fallback- und Originalset-Control-Fehler. Der
+    Report persistiert und summiert `terminationKind` vollständig; die reale
+    Action-Limit-Rate beträgt `31,3 %` bei erlaubten `75 %`.
+- Auf dem aktuellen Code-Freeze-Stand erneut vollständig grün:
+  - Workspace-Typecheck einschließlich Shared, Catalog, Engine, Decks, AI,
+    Web und Server;
+  - AI-Shard 1: `165/165` Dateien und `1.549/1.549` Tests;
+  - AI-Shard 2: `165/165` Dateien und `1.336/1.336` Tests;
+  - AI-Shard 3: `164/164` Dateien und `1.051/1.051` Tests;
+  - Engine: `207/207` Dateien und `1.795/1.795` Tests;
+  - Decision Checkpoints: `62/62` Dateien und `368/368` Tests;
+  - finaler Hidden-Info-, Authority-, Replay-, EndTurn- und
+    Planabdeckungsfokus: `8/8` Dateien und `237/237` Tests;
+  - Contracts, Test-Discovery, Package-Boundaries, AI-/Engine-Source-
+    Structure, Hint-Metadaten, Doctrine, Proteus-Inventar/-Family/-Pilot/
+    Readiness, Card-Function-Abstraction sowie Economy- und
+    Action-Capacity-Audits.
+  - akzeptierte finale Standard-Baseline: `60` Spiele und `11.012`
+    Entscheidungen; sämtliche Hard Gates grün und jeweils `0`
+    IllegalActions, Replayfehler, Action-Limits, Fallbacks, Timeouts,
+    Runtimefehler, Hidden-Info-Findings und No-LegalAction-Fehler.
+    Redaction ist vollständig sicher. Die `175` qualitativen Findings,
+    darunter drei HIGH-Corp-never-scores-Fälle und zwei bekannte
+    `gameEndReason=unknown`-Anomalien, bleiben im Bericht sichtbar.
+
+Der Variantenvertrag ist für PF15 verbindlich:
+
+- Eine Kartenfamilien-, Rollen- oder Semantikdeklaration ist keine
+  Action-Abdeckung und darf den harten Schedulervertrag nicht ersetzen.
+- Ein Score-, Installations- oder Sequenz-Step mit konkreten `actionIds`
+  materialisiert ausschließlich diese IDs.
+- Breite Semantik-, Source- oder Target-Materialisierung ist bei vorhandenen
+  `actionIds` verboten.
+- Jede aktuell legale Geschwistervariante, die nicht zum gebundenen Step
+  gehört, benötigt genau eine explizite Disposition des fachlichen
+  Eigentümers.
+- Dieselbe Action-ID darf nicht zugleich produktive Planroute und
+  `explicitly_nonproductive` sein. Der Scheduler bricht diesen Widerspruch
+  weiterhin fail-closed als `missing_plan_module_coverage` ab.
+
+PF15 besitzt keine offenen Done-Gates mehr. Der vollständig grüne aktuelle
+Prüfstand gibt den Commit
+`test(ai): verify fail-closed plan-first runtime cutover` frei.
 
 ### Done-Gate
 
@@ -793,10 +993,29 @@ Nur den neuen aktuellen Vertrag im Repository behalten.
 ### Konkrete Arbeit
 
 - tote Legacy-Plan-, Override- und Fallbackdateien entfernen;
+- `TacticalGoal` als Legacy-Autoritätsvertrag entfernen beziehungsweise in
+  typisierte, an die aktuelle `stateVersion` gebundene Goal-/Threat-Signale
+  überführen. Diese Signale sind kurzlebig, nicht persistent und niemals
+  Action-Autorität; persistente Handlungsautorität besitzen ausschließlich
+  Planinstanzen;
+- den Strategic-Intent-Vertrag trennen: P1–P3 dürfen den aktuellen Intent mit
+  belastbarer Evidence übergehen; P4/P5 benötigen Intent-Fit oder explizite
+  taktische Evidence. Intent-Wechsel erfolgen nur bei Phasenwechsel,
+  belastbarer neuer Information oder Planabschluss/-invalidierung, nicht
+  durch normale Action-Schwankungen;
+- verbliebene Legacy-TacticalGoal- und Semantic-Runtime-Abhängigkeiten aus
+  öffentlichen Entry-Points, Dependency-Komposition und Exporten entfernen;
 - Exporte, Source-Structure- und Package-Boundary-Gates aktualisieren;
-- WIP 0.3 mit erreicht/offen abgleichen;
+- WIP 0.6 mit erreicht/offen abgleichen;
 - AI-README, CODEX_STATUS, Projektstatus und Monatslog aktualisieren;
 - Final Review mit Checks, Metriken, Abweichungen und Restpunkten;
+- belegten Restpunkt für eine strukturierte Engine-Continuation-ID festhalten:
+  `ChoiceRequest` und LegalAction sollen eine gemeinsame `originActionId` oder
+  `continuationId` tragen, damit mehrstufige Planaktionen nicht dauerhaft
+  `choice.source` parsen müssen. Die aktuelle PF15-Korrektur bleibt eng und
+  verhindert ungebundene Choice-Aktionen vor der Ausführung; die größere
+  Engine-Vertragsmigration gehört in PF16 beziehungsweise ein daraus
+  abgeleitetes Folgepaket;
 - aktuelles `main` in den Arbeitsbranch integrieren;
 - finale Gates ausführen.
 

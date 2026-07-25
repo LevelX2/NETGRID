@@ -108,6 +108,22 @@ function tokensIncludePhrase(
 }
 
 function cardLooksLikeUniversalBreaker(tokens: readonly string[]): boolean {
+  const hasExplicitCoverageLimit =
+    tokensIncludeAny(tokens, [
+      "fracter",
+      "wall",
+      "barrier",
+      "decoder",
+      "codegate",
+      "killer",
+      "sentry",
+      "ap",
+      "trace",
+      "traces",
+    ]) ||
+    tokensIncludePhrase(tokens, ["code", "gate"]) ||
+    tokensIncludePhrase(tokens, ["anti", "personnel"]);
+  if (hasExplicitCoverageLimit) return false;
   const hasGenericIceBreakPhrase = tokens.some((token, index) => {
     if (token !== "break" && token !== "breaks") return false;
     const nextTokens = tokens.slice(index + 1, index + 4);
@@ -118,8 +134,6 @@ function cardLooksLikeUniversalBreaker(tokens: readonly string[]): boolean {
   return (
     hasGenericIceBreakPhrase ||
     ((tokenSet.has("break") || tokenSet.has("breaks")) &&
-      tokenSet.has("subroutine") &&
-      !tokensIncludeAny(tokens, ["wall", "barrier", "codegate", "sentry"]) &&
-      !tokensIncludePhrase(tokens, ["code", "gate"]))
+      tokenSet.has("subroutine"))
   );
 }

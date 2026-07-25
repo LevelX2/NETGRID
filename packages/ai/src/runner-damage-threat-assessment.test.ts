@@ -9,7 +9,10 @@ import type {
 import {
   runnerDamageLockedHandScoreComponents,
   runnerDamageThreatAssessment,
+  runnerFutureEncounterDamageJackOutAssessment,
+  runnerKnownAccessDamageJackOutAssessment,
   runnerKnownAccessDamageScoreComponent,
+  runnerRecentFutureEncounterDamageSafetyAbort,
 } from "./runner-damage-threat-assessment";
 
 describe("runnerDamageThreatAssessment", () => {
@@ -244,6 +247,15 @@ describe("runnerDamageThreatAssessment", () => {
       position: { kind: "server", serverId: "remote_1" },
       successful: false,
     };
+    current.legalActions = [
+      continueRun,
+      {
+        ...continueRun,
+        actionId: "jack-out",
+        type: "jack_out",
+        label: "Jack out",
+      },
+    ];
 
     expect(runnerKnownAccessDamageScoreComponent(current, continueRun)).toEqual(
       expect.objectContaining({
@@ -251,6 +263,100 @@ describe("runnerDamageThreatAssessment", () => {
         value: -2600,
       }),
     );
+    expect(runnerKnownAccessDamageJackOutAssessment(current)).toEqual(
+      expect.objectContaining({
+        serverId: "remote_1",
+        damageRisk: 2,
+        evidenceCode: expect.stringContaining(
+          "runner_known_access_damage_ambush_requires_jack_out",
+        ),
+      }),
+    );
+  });
+
+  it("requires jack-out when a witnessed future-encounter damage effect would break the safe hand floor", () => {
+    const current = input({
+      handCount: 4,
+      stateVersion: 20,
+      events: [
+        event("run-start", 18, {
+          actor: "runner",
+          actionType: "start_run",
+        }),
+        event("fatal-attractor-fired", 19, {
+          actor: "runner",
+          actionType: "continue_run",
+          sourceDefinitionId: "onr_v1_242_fatal-attractor",
+        }),
+      ],
+    });
+    current.playerView.timingPoint = "run.jack_out_window";
+    current.playerView.run = {
+      attackedServerId: "hq",
+      phase: "movement",
+      position: { kind: "ice", serverId: "hq", iceIndex: 1 },
+      successful: false,
+    };
+
+    expect(
+      runnerFutureEncounterDamageJackOutAssessment(current),
+    ).toMatchObject({
+      sourceDefinitionId: "onr_v1_242_fatal-attractor",
+      projectedDamage: 3,
+      handCount: 4,
+      projectedHandAfterDamage: 1,
+      requiredHandFloor: 3,
+    });
+  });
+
+  it("keeps the aborted server route blocked until Runner development changes it", () => {
+    const events = [
+      event("corp-turn-ended", 17, {
+        actor: "corp",
+        actionType: "end_turn",
+      }),
+      event("run-start", 18, {
+        actor: "runner",
+        actionType: "start_run",
+        serverId: "remote_1",
+      }),
+      event("fatal-attractor-fired", 19, {
+        actor: "runner",
+        actionType: "continue_run",
+        sourceDefinitionId: "onr_v1_242_fatal-attractor",
+      }),
+      event("safety-abort", 20, {
+        actor: "runner",
+        actionType: "jack_out",
+      }),
+    ];
+    const blocked = input({
+      handCount: 4,
+      stateVersion: 20,
+      events,
+    });
+
+    expect(
+      runnerRecentFutureEncounterDamageSafetyAbort(blocked),
+    ).toMatchObject({
+      serverId: "remote_1",
+      sourceDefinitionId: "onr_v1_242_fatal-attractor",
+    });
+
+    const developed = input({
+      handCount: 5,
+      stateVersion: 21,
+      events: [
+        ...events,
+        event("runner-developed", 21, {
+          actor: "runner",
+          actionType: "install_card",
+        }),
+      ],
+    });
+    expect(
+      runnerRecentFutureEncounterDamageSafetyAbort(developed),
+    ).toBeUndefined();
   });
 
   it("prefers liquid reaction reserve when core damage locks the last-click hand buffer", () => {

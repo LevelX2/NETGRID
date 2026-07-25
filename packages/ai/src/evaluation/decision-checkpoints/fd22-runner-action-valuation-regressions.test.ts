@@ -14,7 +14,10 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match fd22 runner action valuation regression evidence", () => {
   it.each([
-    ["first Matador adds sentry coverage", firstMatadorControlJson],
+    [
+      "first in-hand breaker adds missing deck-strategy coverage",
+      firstMatadorControlJson,
+    ],
     [
       "first Psychic Friend adds code-gate coverage",
       firstPsychicFriendControlJson,
@@ -31,19 +34,14 @@ describe("match fd22 runner action valuation regression evidence", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("reproduces the redundant second Psychic Friend as behavior-only red evidence", () => {
+  it("rejects the redundant second Psychic Friend and keeps productive alternatives", () => {
     const result = runAiDecisionCheckpoint(
       fixture(redundantPsychicFriendJson),
     );
 
-    expect(result).toMatchObject({
-      ok: false,
-      code: "behavior_regression",
-      selectedAction: {
-        type: "install_card",
-      },
-    });
-    expect(result.selectedAction?.actionId).toContain("psychic-friend");
+    expect(result.ok, result.message).toBe(true);
+    expect(result.selectedAction?.type).not.toBe("install_card");
+    expect(result.selectedAction?.actionId).not.toContain("psychic-friend");
   });
 
   it.each([
@@ -51,17 +49,12 @@ describe("match fd22 runner action valuation regression evidence", () => {
     ["D75", prematureEndTurnD75Json],
     ["D76", prematureEndTurnD76Json],
   ])(
-    "reproduces premature four-click end turn at %s as behavior-only red evidence",
+    "rejects premature four-click end turn at %s",
     (_label, json) => {
       const result = runAiDecisionCheckpoint(fixture(json));
 
-      expect(result).toMatchObject({
-        ok: false,
-        code: "behavior_regression",
-        selectedAction: {
-          type: "end_turn",
-        },
-      });
+      expect(result.ok, result.message).toBe(true);
+      expect(result.selectedAction?.type).not.toBe("end_turn");
       expect(result.input.playerView.own.clicks).toBe(4);
     },
   );

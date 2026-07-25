@@ -3,7 +3,7 @@ import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared"
 import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import {
   isEndRunSubroutine,
-  isImmediateSafetyThreatSubroutine,
+  isUnacceptableImmediateSafetyThreatSubroutine,
   type VisibleEncounterSubroutine,
 } from "./encounter-subroutine";
 import {
@@ -60,7 +60,11 @@ export function createRunnerAccessPathContext(
       return { blocksBreak: false, evidence: [] };
     if (remainingCurrentEndRunAfterBreak > 0)
       return { blocksBreak: false, evidence: [] };
-    if (targetSubroutines.some(isImmediateSafetyThreatSubroutine))
+    if (
+      targetSubroutines.some((subroutine) =>
+        isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine),
+      )
+    )
       return { blocksBreak: false, evidence: [] };
     if (!targetSubroutines.every(isEndRunSubroutine))
       return { blocksBreak: false, evidence: [] };
@@ -151,7 +155,11 @@ export function createRunnerAccessPathContext(
       .filter((subroutine): subroutine is NonNullable<typeof subroutine> =>
         Boolean(subroutine),
       );
-    if (targetSubroutines.some(isImmediateSafetyThreatSubroutine))
+    if (
+      targetSubroutines.some((subroutine) =>
+        isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine),
+      )
+    )
       return {
         canPreserveAccessPath: true,
         evidence: ["break_preserves_immediate_safety:true"],

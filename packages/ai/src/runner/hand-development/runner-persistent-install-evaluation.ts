@@ -1148,11 +1148,16 @@ export function candidateMatchesCard(
   candidate: ActionSemanticCandidate,
   card: VisibleCard,
 ): boolean {
+  const sourceMatches =
+    candidate.sourceCardInstanceId !== undefined
+      ? candidate.sourceCardInstanceId === card.instanceId
+      : candidate.sourceDefinitionId !== undefined
+        ? candidate.sourceDefinitionId === card.definitionId
+        : candidate.sourceCardId === card.instanceId ||
+          candidate.sourceCardId === card.definitionId;
   return (
     candidate.actorSide === "runner" &&
-    (candidate.sourceCardId === card.instanceId ||
-      candidate.sourceCardId === card.definitionId ||
-      candidate.legalActionRef.actionId === card.instanceId)
+    sourceMatches
   );
 }
 

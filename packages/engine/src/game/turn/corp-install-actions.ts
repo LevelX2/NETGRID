@@ -4,6 +4,10 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
+import {
+  corpIcePostInstallRezProjectionPayload,
+  projectCorpIceRezCostAfterInstall,
+} from "../payment";
 import { buildLegalAction } from "./action-builders";
 
 export type CorpInstallServerRef = Pick<CorpServer, "id" | "label">;
@@ -26,6 +30,11 @@ export function buildCorpNewRemoteIceInstallAction(
   state: GameState,
   cardId: CardInstanceId,
 ): LegalAction {
+  const rezProjection = projectCorpIceRezCostAfterInstall(
+    state,
+    cardId,
+    "new_remote",
+  );
   return buildLegalAction(
     state,
     "corp",
@@ -33,7 +42,12 @@ export function buildCorpNewRemoteIceInstallAction(
     "ICE vor neuem Remote installieren",
     cardId,
     [{ clicks: 1 }],
-    { cardId, serverId: "new_remote", placement: "ice" },
+    {
+      cardId,
+      serverId: "new_remote",
+      placement: "ice",
+      ...corpIcePostInstallRezProjectionPayload(rezProjection),
+    },
   );
 }
 
@@ -43,6 +57,11 @@ export function buildCorpServerIceInstallAction(
   server: CorpInstallServerRef,
   cost: CorpIceInstallCostDetails,
 ): LegalAction {
+  const rezProjection = projectCorpIceRezCostAfterInstall(
+    state,
+    cardId,
+    server.id,
+  );
   return buildLegalAction(
     state,
     "corp",
@@ -64,6 +83,7 @@ export function buildCorpServerIceInstallAction(
         ? { iceInstallIncreaseSourceDefinitionIds: cost.increaseSourceDefinitionIds }
         : {}),
       iceInstallTotalCost: cost.totalCost,
+      ...corpIcePostInstallRezProjectionPayload(rezProjection),
     },
   );
 }

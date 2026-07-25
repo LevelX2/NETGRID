@@ -8,6 +8,7 @@ import {
   mustInstance,
   runnerInstalledCardIds,
 } from "./card-server-lookup";
+import { nextCanonicalRemoteServerId } from "./remote-server-id";
 import { clearCardCounters } from "./turn-flags-counters";
 
 export function ensureSpecialZones(state: GameState): SpecialZoneState {
@@ -108,12 +109,14 @@ export function uninstallCorpInstalledCardToHq(
 }
 
 export function createRemote(state: GameState): CorpServer {
-  const remoteIds = state.corp.servers
-    .filter((server) => server.kind === "remote")
-    .map((server) => Number(server.id.replace("remote_", "")));
-  const nextId = Math.max(0, ...remoteIds) + 1;
+  const id = nextCanonicalRemoteServerId(state.corp.servers);
+  if (!id)
+    throw new Error(
+      "Neue Remote-ID kann aus nichtkanonischem Serverzustand nicht abgeleitet werden.",
+    );
+  const nextId = Number(id.slice("remote_".length));
   const server: CorpServer = {
-    id: `remote_${nextId}`,
+    id,
     kind: "remote",
     label: `Remote ${nextId}`,
     ice: [],

@@ -14,14 +14,21 @@ import type {
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { REZ_INTERRUPT_PROGRAM_SOURCE } from "../../mechanics/longtail-card-effects";
 import {
+  corpFortRunRezSupportQuotePayload,
   costQuotePublicPayload,
   costQuoteToLegalActionCosts,
   discountedRezSourceIdsForRunIce,
+  quoteCorpFortRunRezSupport,
   quoteCorpRezCost,
   quoteCorpRootRezCost,
 } from "../payment";
 import { buildLegalAction } from "../turn/action-builders";
 import { credits } from "../state/economy-mutation";
+import {
+  corpRootRezCreditOutcomeQuotePayload,
+  immediateRootRezCreditGainForDefinition,
+  quoteCorpRootRezCreditOutcome,
+} from "../payment/root-rez-credit-outcome";
 import { buildRegisteredRunWindowActions } from "./windows/run-window-registry";
 import { runIsAtServerAfterPassingLastIce } from "./windows/after-passing-last-ice-window";
 import type {
@@ -37,31 +44,6 @@ type ActiveRun = NonNullable<GameState["run"]>;
 type CorpRootRezResolver = {
   name: string;
   resolve: (state: GameState) => void;
-};
-
-const CORP_ROOT_REZ_RESOLVERS: Record<string, CorpRootRezResolver> = {
-  simple_economy_asset: {
-    name: "corp_asset_rez_gain_3",
-    resolve: (state) => {
-      credits(state, "corp", 3, {
-        kind: "card_effect",
-        sourceDefinitionId: "simple_economy_asset" as CardDefinition["id"],
-        gainOrdinal: 1,
-        reason: "corp_root_rez",
-      });
-    },
-  },
-  v08_cashout_asset: {
-    name: "corp_asset_rez_gain_4",
-    resolve: (state) => {
-      credits(state, "corp", 4, {
-        kind: "card_effect",
-        sourceDefinitionId: "v08_cashout_asset" as CardDefinition["id"],
-        gainOrdinal: 1,
-        reason: "corp_root_rez",
-      });
-    },
-  },
 };
 
 export type {
@@ -164,20 +146,43 @@ export function buildCorpRunRootRezActions(
       if (!rezQuote.canPay) continue;
       if (!rootRezLifecycleIsSolvable(host, cardId, definition, server))
         continue;
-      actions.push(
-        buildLegalAction(
-          host.state,
-          "corp",
-          "rez_card",
-          `${definition.title} in ${server.label} rezzen`,
-          cardId,
-          costQuoteToLegalActionCosts(rezQuote),
-          {
-            ...costQuotePublicPayload(rezQuote),
-            rezInterruptJackOutEligible: true,
-          },
-        ),
+      const action = buildLegalAction(
+        host.state,
+        "corp",
+        "rez_card",
+        `${definition.title} in ${server.label} rezzen`,
+        cardId,
+        costQuoteToLegalActionCosts(rezQuote),
+        {
+          ...costQuotePublicPayload(rezQuote),
+          rezInterruptJackOutEligible: true,
+        },
       );
+      const creditOutcomeQuote = quoteCorpRootRezCreditOutcome(
+        host.state,
+        cardId,
+        action.actionId,
+        rezQuote.finalCredits,
+      );
+      if (creditOutcomeQuote) {
+        action.payload = {
+          ...(action.payload ?? {}),
+          ...corpRootRezCreditOutcomeQuotePayload(creditOutcomeQuote),
+        };
+      }
+      const fortRunRezSupportQuote = quoteCorpFortRunRezSupport(
+        host.state,
+        cardId,
+        action.actionId,
+        rezQuote.finalCredits,
+      );
+      if (fortRunRezSupportQuote) {
+        action.payload = {
+          ...(action.payload ?? {}),
+          ...corpFortRunRezSupportQuotePayload(fortRunRezSupportQuote),
+        };
+      }
+      actions.push(action);
     }
   }
   actions.push(
@@ -412,9 +417,7 @@ export function resolveCorpRootRezEffect(
   legalAction?: LegalAction,
 ): RootRezEffectResult {
   const definition = host.cards.definitionFor(cardId);
-  const resolver =
-    cardImplementationCorpRootRezResolver(definition) ??
-    CORP_ROOT_REZ_RESOLVERS[definition.id];
+  const resolver = cardImplementationCorpRootRezResolver(definition);
   if (!resolver) return { handled: false, rezzedCardId: cardId };
   resolver.resolve(host.state);
   if (isObligationDebtDefinition(definition.id)) {
@@ -790,23 +793,19 @@ function normalizeSubtypeLabel(subtype: string): string {
 function cardImplementationCorpRootRezResolver(
   definition: CardDefinition,
 ): CorpRootRezResolver | undefined {
-  const longtail = remainingReplacementLongtailImplementationForDefinition(
-    definition.id,
-  );
-  if (longtail?.kind === "obligation_debt") {
-    return {
-      name: "card_implementation_corp_root_rez_obligation_debt",
-      resolve: (state) => {
-        credits(state, "corp", longtail.gainCreditsOnRez, {
-          kind: "card_effect",
-          sourceDefinitionId: definition.id,
-          gainOrdinal: 1,
-          reason: "corp_root_rez",
-        });
-      },
-    };
-  }
-  return undefined;
+  const gainCredits = immediateRootRezCreditGainForDefinition(definition.id);
+  if (gainCredits === undefined) return undefined;
+  return {
+    name: "card_implementation_corp_root_rez_credit_outcome",
+    resolve: (state) => {
+      credits(state, "corp", gainCredits, {
+        kind: "card_effect",
+        sourceDefinitionId: definition.id,
+        gainOrdinal: 1,
+        reason: "corp_root_rez",
+      });
+    },
+  };
 }
 
 function remainingReplacementLongtailImplementationForDefinition(

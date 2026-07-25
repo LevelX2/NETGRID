@@ -13869,12 +13869,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "advance_card"
-      },
-      {
-        "type": "play_operation",
-        "sourceDefinitionId": "onr_v1_290_efficiency-experts"
+        "type": "end_turn"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.complete_turn"],
+      "acceptableCapabilities": [
+        "complete_turn_after_productive_routes_exhausted"
+      ],
+      "requiredAssessmentEvidence": ["productive_legal_routes_exhausted"]
+    }
   }
 }

@@ -7,12 +7,10 @@ import emptyEurocorpseJson from "../../../../../data/scenarios/ai-decision-check
 import hostBeforeOverflowJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-20eb-04-host-breaker-before-overflow-d59.json";
 import lateBankWithoutNeedJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-20eb-05-no-late-bank-without-need-d129.json";
 import firstEarlyBankLoadJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-20eb-06-first-early-bank-load-control-d38.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
-const EUROCORPSE_INSTANCE_ID =
-  "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1";
-const EUROCORPSE_INSTALL_ACTION_ID = `runner.install_card.${EUROCORPSE_INSTANCE_ID}.${EUROCORPSE_INSTANCE_ID}`;
 const KRASH_INSTANCE_ID = "runner_onr_v1_039_krash_1";
 const STREETWARE_DEFINITION_ID = "onr_proteus_150_streetware-distributor";
 
@@ -27,7 +25,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
       viableRunLockReleaseJson,
     ],
     [
-      "does not install Eurocorpse without a hostable breaker",
+      "releases the funded run lock instead of installing an empty Eurocorpse",
       emptyEurocorpseJson,
     ],
     [
@@ -62,13 +60,14 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(noFollowUpClick);
   });
 
-  it("allows Eurocorpse installation when a breaker can be hosted immediately", () => {
+  it("keeps a hostable Eurocorpse development below a productive P4 central-pressure run", () => {
     const hostableBreaker = mutateFixture(emptyEurocorpseJson, (checkpoint) => {
       const state = checkpoint.engine.testOnlyGameState;
       state.runner.stack = state.runner.stack.filter(
         (instanceId) => instanceId !== KRASH_INSTANCE_ID,
       );
       state.runner.grip.push(KRASH_INSTANCE_ID);
+      state.runnerTurnFlags!.runnerRunLockCreditCost = 0;
       state.cardInstances[KRASH_INSTANCE_ID] = {
         ...state.cardInstances[KRASH_INSTANCE_ID]!,
         zone: { side: "runner", zone: "grip" },
@@ -76,7 +75,12 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "20EB-C03-HOSTABLE-EUROCORPSE";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: EUROCORPSE_INSTALL_ACTION_ID }],
+        acceptableActions: [{ actionId: "runner.start_run.rd" }],
+        planExecution: {
+          acceptablePlanKinds: ["runner.pressure_central"],
+          acceptableCapabilities: ["pressure_rd_information"],
+          requiredAssessmentEvidence: ["target:rd"],
+        },
       };
     });
 
@@ -114,7 +118,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(belowHandLimit);
   });
 
-  it("allows another background load when no meaningful alternative remains", () => {
+  it("uses direct code-gate search before another background-bank load", () => {
     const noMeaningfulAlternative = mutateFixture(
       repeatedEarlyBankJson,
       (checkpoint) => {
@@ -127,9 +131,22 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
           acceptableActions: [
             {
               type: "activated_card_ability",
+              sourceDefinitionId: "onr_v1_177_the-short-circuit",
+            },
+          ],
+          forbiddenActions: [
+            {
+              type: "activated_card_ability",
               sourceDefinitionId: STREETWARE_DEFINITION_ID,
             },
           ],
+          planExecution: {
+            acceptablePlanKinds: ["runner.rig_and_coverage"],
+            acceptableCapabilities: ["search_answer_breaker_code_gate"],
+            requiredAssessmentEvidence: [
+              "deck_strategy_open_code_gate_coverage",
+            ],
+          },
         };
       },
     );
@@ -139,7 +156,13 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    [
+      "cp-20eb-03-no-empty-eurocorpse-d55",
+      "cp-20eb-05-no-late-bank-without-need-d129",
+    ],
+  );
 }
 
 function mutateFixture(

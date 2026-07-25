@@ -42,12 +42,13 @@ describe("runnerSearchDevelopmentHasConcreteConversion", () => {
 
 function programSearchEvaluation(): RunnerHandDevelopmentEvaluation {
   return {
-    schemaVersion: "runner-hand-development-evaluation-v1",
+    schemaVersion: "runner-hand-development-evaluation-v2",
     cardInstanceId: "program-search-resource",
     availability: "legal_now",
     developmentRole: "draw_or_search_engine",
     strategicFit: "strong",
     currentNeed: "useful_now",
+    activationPrerequisites: [],
     priority: 900,
     deferReason: "none",
     legalActionId: "install-program-search",

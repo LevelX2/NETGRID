@@ -65,22 +65,18 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("uses finite economy or concrete R&D protection before basic credit", () => {
+  it("completes the turn when score material is unobservable and all routes are closed", () => {
     const noTagWindow = mutateFixture(cp02Json, (fixture) => {
       moveCorpCardsToArchives(fixture, new Set([CHANCE_OBSERVATION]));
       fixture.expectation = {
-        acceptableActions: [
-          {
-            type: "activated_card_ability",
-            sourceDefinitionId: BBS_WHISPERING_CAMPAIGN,
-          },
-          {
-            type: "install_card",
-            sourceDefinitionId: "onr_v1_261_quandary",
-            targetServerId: "rd",
-          },
-        ],
-        forbiddenActions: [{ type: "gain_credit" }],
+        acceptableActions: [{ type: "end_turn" }],
+        planExecution: {
+          acceptablePlanKinds: ["corp.complete_turn"],
+          acceptableCapabilities: ["complete_turn_after_productive_routes_exhausted"],
+          requiredAssessmentEvidence: [
+            "productive_legal_routes_exhausted",
+          ],
+        },
       };
     });
 
@@ -114,19 +110,24 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("keeps basic credit recovery when no visible kill pair needs preserving", () => {
+  it("draws for missing score material when no visible kill pair remains", () => {
     const noVisibleKillPair = mutateFixture(cp05Json, (fixture) => {
       moveCorpCardsToArchives(
         fixture,
         new Set([AUDIT_OF_CALL_RECORDS, URBAN_RENEWAL]),
       );
+      restoreCorpScoredAgendaToRd(fixture);
       fixture.expectation = {
         acceptableActions: [
-          {
-            type: "install_card",
-            sourceDefinitionId: BBS_WHISPERING_CAMPAIGN,
-          },
+          { type: "draw_card" },
         ],
+        planExecution: {
+          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
+          acceptableCapabilities: ["draw_for_plan"],
+          requiredAssessmentEvidence: [
+            "corp_terminal_score_campaign_missing_agenda_material",
+          ],
+        },
       };
     });
 
@@ -212,4 +213,19 @@ function moveCorpCardsToArchives(
       rezzed: false,
     };
   }
+}
+
+function restoreCorpScoredAgendaToRd(
+  fixture: AiDecisionCheckpointV1,
+): void {
+  const state = fixture.engine.testOnlyGameState;
+  const agendaId = state.corp.scoreArea.pop();
+  if (!agendaId) throw new Error("Missing scored Corp agenda counterprobe");
+  state.corp.rd.push(agendaId);
+  state.cardInstances[agendaId] = {
+    ...state.cardInstances[agendaId]!,
+    zone: { side: "corp", zone: "rd" },
+    faceup: false,
+    rezzed: false,
+  };
 }

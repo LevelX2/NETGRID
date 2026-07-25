@@ -19,8 +19,8 @@ import {
   pumpStrengthAmountForAction,
 } from "./encounter-action";
 import {
-  isImmediateSafetyThreatSubroutine,
   isEndRunSubroutine,
+  isUnacceptableImmediateSafetyThreatSubroutine,
   type VisibleEncounterSubroutine,
 } from "./encounter-subroutine";
 import type { EncounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
@@ -201,7 +201,7 @@ export function createRunnerPumpViabilityContext(
     const requiredBreakCount =
       currentQuote?.subroutines.filter(
         (subroutine) =>
-          isImmediateSafetyThreatSubroutine(subroutine) ||
+          isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
           visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext) ||
           (encounterContinue?.payload?.encounterWillEndRun === true &&
             isEndRunSubroutine(subroutine)),
@@ -246,8 +246,9 @@ export function createRunnerPumpViabilityContext(
         : undefined;
     if (server) {
       const hasImmediateSafetyThreat =
-        currentQuote?.subroutines.some(isImmediateSafetyThreatSubroutine) ??
-        false;
+        currentQuote?.subroutines.some((subroutine) =>
+          isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine),
+        ) ?? false;
       const futurePath = hasImmediateSafetyThreat
         ? {
             blocksPump: false,

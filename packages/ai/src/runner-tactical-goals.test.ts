@@ -1055,6 +1055,7 @@ function handDevelopmentEvaluation(
     developmentRole: "access_payoff",
     strategicFit: "strong",
     currentNeed: "useful_now",
+    activationPrerequisites: [],
     priority: 600,
     deferReason: "missing_credits",
     evidence: ["source:own_runner_hand"],

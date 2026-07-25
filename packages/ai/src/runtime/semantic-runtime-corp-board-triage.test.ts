@@ -50,7 +50,7 @@ describe("semantic runtime corp board triage", () => {
     expect(nextDecision).toEqual(withinDecision[0]);
   });
 
-  it("protects an open central before creating the first empty remote", () => {
+  it("fails closed when the candidate ICE has unsupported access-relevant effects", () => {
     const corticalScrub = iceCard("cortical-scrub", {
       definitionId: "onr_v1_231_cortical-scrub",
       title: "Cortical Scrub",
@@ -79,13 +79,9 @@ describe("semantic runtime corp board triage", () => {
     const triage = semanticRuntimeCorpBoardTriage(input, testDependencies());
 
     expect(triage).toMatchObject({
-      primary: "protect_rd",
-      severity: "high",
-      targetServerId: "rd",
+      primary: "low_value",
+      severity: "low",
     });
-    expect(triage.evidence).toContain(
-      "corp_board_triage_opening_central_baseline:true",
-    );
   });
 
   it("normalizes boardstate triage values into the AI-COMPLETE-17 consumer scale", () => {
@@ -136,7 +132,7 @@ describe("semantic runtime corp board triage", () => {
     );
   });
 
-  it("lets critical repeated R&D pressure override remote-protection triage", () => {
+  it("does not let an unbound ICE install override remote-protection triage", () => {
     const purge = corpAction("purge", "purge_runner_virus_counters");
     const remoteScoreline = corpAction("remote-scoreline", "advance_card", {
       serverId: "remote_1",
@@ -185,19 +181,16 @@ describe("semantic runtime corp board triage", () => {
     );
 
     expect(triage).toMatchObject({
-      primary: "protect_rd",
+      primary: "protect_score_remote",
       severity: "critical",
-      targetServerId: "rd",
+      targetServerId: "remote_1",
     });
-    expect(triage.evidence).toContain(
-      "corp_board_triage_central_override:pre_score_rd_exposure",
-    );
     expect(purgeComponent).toMatchObject({
       key: "corp_board_triage_mismatch",
       value: -3200,
     });
     expect(rdIceComponent).toMatchObject({
-      key: "corp_board_triage_alignment",
+      key: "corp_board_triage_mismatch",
     });
   });
 
@@ -570,7 +563,7 @@ describe("semantic runtime corp board triage", () => {
       value: -5200,
     });
     expect(remoteIceComponent).toMatchObject({
-      key: "corp_board_triage_alignment",
+      key: "corp_board_triage_mismatch",
     });
   });
 
@@ -1308,14 +1301,14 @@ describe("semantic runtime corp board triage", () => {
       primary: "fund_score_remote",
       severity: "critical",
       targetServerId: "remote_1",
-      requiredRezFloor: 8,
+      requiredRezFloor: 6,
       currentCredits: 5,
     });
     expect(creditComponent).toMatchObject({
       key: "corp_board_triage_alignment",
     });
     expect(iceComponent).toMatchObject({
-      key: "corp_board_triage_mismatch",
+      key: "corp_board_triage_context",
     });
   });
 
@@ -1657,7 +1650,7 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
-  it("lets punish-primary HQ tax or damage ICE count as non-game-ending central protection", () => {
+  it("fails closed for a punish ICE without exact catalog access facts", () => {
     const hqShock = {
       ...corpAction("install-hq-shock", "install_card", {
         placement: "ice",
@@ -1731,18 +1724,14 @@ describe("semantic runtime corp board triage", () => {
     );
 
     expect(triage).toMatchObject({
-      primary: "protect_hq",
-      targetServerId: "hq",
+      primary: "low_value",
+      severity: "low",
     });
-    expect(hqComponent).toMatchObject({
-      key: "corp_board_triage_alignment",
-    });
-    expect(remoteComponent).toMatchObject({
-      key: "corp_board_triage_mismatch",
-    });
+    expect(hqComponent).toBeUndefined();
+    expect(remoteComponent).toBeUndefined();
   });
 
-  it("does not let position-dependent punish ICE count as concrete HQ protection", () => {
+  it("fails closed for position-dependent and fallback ICE without exact catalog facts", () => {
     const hqTrap = {
       ...corpAction("install-hq-position-trap", "install_card", {
         placement: "ice",
@@ -1830,14 +1819,10 @@ describe("semantic runtime corp board triage", () => {
     );
 
     expect(triage).toMatchObject({
-      primary: "protect_hq",
-      targetServerId: "hq",
+      primary: "low_value",
+      severity: "low",
     });
-    expect(trapComponent).toMatchObject({
-      key: "corp_board_triage_mismatch",
-    });
-    expect(wallComponent).toMatchObject({
-      key: "corp_board_triage_alignment",
-    });
+    expect(trapComponent).toBeUndefined();
+    expect(wallComponent).toBeUndefined();
   });
 });

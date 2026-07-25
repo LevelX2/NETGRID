@@ -105,6 +105,7 @@ describe("runner main action generation", () => {
           side: "runner",
           type: "event",
           cost: 0,
+          playCost: { kind: "fixed", credits: 0 },
         }) as never;
       host.cards.isUniqueCard = () => false;
       host.cards.hasInstalledUniqueCardDefinition = () => false;
@@ -273,6 +274,7 @@ describe("runner main action generation", () => {
         side: "runner",
         type: "event",
         cost: 0,
+        playCost: { kind: "fixed", credits: 0 },
       }) as never;
     host.cards.isUniqueCard = () => false;
     host.cards.hasInstalledUniqueCardDefinition = () => false;

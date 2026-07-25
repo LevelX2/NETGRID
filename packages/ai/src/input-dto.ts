@@ -1,7 +1,10 @@
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
+  CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
+  CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type AiDifficulty,
+  type CorpOptionalRezChoiceQuote,
   type CounterDisplay,
   type ChoiceRequirement,
   type Cost,
@@ -15,10 +18,12 @@ import {
   type TraceSuccessEffect,
   type VisibleCard,
   type VisibleChoiceRequest,
+  type VisibleCorpRezCostQuote,
   type VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 
 export type BuildAiDecisionInputDtoParams = {
+  matchId?: string;
   side: Side;
   playerView: PlayerView;
   eventTail: PublicGameEvent[];
@@ -31,6 +36,7 @@ export type BuildAiDecisionInputDtoParams = {
 };
 
 export const AI_DECISION_INPUT_TOP_LEVEL_FIELDS = [
+  "matchId",
   "side",
   "playerView",
   "eventTail",
@@ -51,6 +57,36 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "subroutineIndex",
   "subroutineIndexes",
   "placement",
+  "iceInstallBaseCost",
+  "iceInstallAdditionalCost",
+  "iceInstallReduction",
+  "iceInstallReductionSourceDefinitionIds",
+  "iceInstallIncreaseSourceDefinitionIds",
+  "iceInstallTotalCost",
+  "postInstallRezQuoteCardId",
+  "postInstallRezQuoteTargetServerId",
+  "postInstallRezQuoteProjectedServerId",
+  "postInstallRezQuoteExpiresAtStateVersion",
+  "postInstallRezQuoteComplete",
+  "postInstallRezQuoteBaseCredits",
+  "postInstallRezQuoteFinalCredits",
+  "postInstallRezQuoteMandatoryAgendaPointCost",
+  "postInstallRezQuoteMandatoryAdditionalCostKind",
+  "postInstallRezQuoteReductionSourceDefinitionIds",
+  "postInstallRezQuoteIncreaseSourceDefinitionIds",
+  "agendaPointCost",
+  "selfRezAdditionalCostKind",
+  "rootRezCreditOutcomeQuoteSchemaVersion",
+  "rootRezCreditOutcomeQuoteComplete",
+  "rootRezCreditOutcomeQuoteSourceCardInstanceId",
+  "rootRezCreditOutcomeQuoteTargetServerId",
+  "rootRezCreditOutcomeQuoteStateVersion",
+  "rootRezCreditOutcomeQuoteTimingPoint",
+  "rootRezCreditOutcomeQuoteActionId",
+  "rootRezCreditOutcomeQuoteResolution",
+  "rootRezCreditOutcomeQuoteGrossCreditGain",
+  "rootRezCreditOutcomeQuoteRezCredits",
+  "rootRezCreditOutcomeQuoteNetCreditGain",
   "regionReplacementWarning",
   "rootReplacement",
   "encounterContinue",
@@ -63,6 +99,13 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "abilityId",
   "effectKind",
   "xValue",
+  "xMinimum",
+  "xMaximum",
+  "xUpperBound",
+  "xCreditsPerUnit",
+  "variableCostKind",
+  "hardwareTrashByCounterTrashCount",
+  "eligibleHardwareCount",
   "damageCannotBePrevented",
   "damageType",
   "damageAmount",
@@ -78,6 +121,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "hostedCreditTakeMode",
   "cardImplementationScoresSourceAsAgenda",
   "cardImplementationEffectKind",
+  "cardImplementationSearchFilter",
   "runActionKind",
   "runServerId",
   "runTargetChoiceRequired",
@@ -103,6 +147,8 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "actionCapacityTiming",
   "actionCapacityRestriction",
   "actionCapacityAllowedActionType",
+  "actionCapacityAllowedCardType",
+  "actionCapacityTemporaryCredits",
   "actionCapacityReliability",
   "actionCapacityExpiresAt",
   "actionCapacitySelfFinancing",
@@ -147,6 +193,8 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "citySurveillanceDrawDecision",
   "citySurveillanceProjectedCreditsPaid",
   "citySurveillanceProjectedTagsAdded",
+  "ambushPaymentChoiceOpened",
+  "ambushPaymentAmount",
   "payOrTrashProgramSubroutineIndexes",
   "payOrTrashProgramSubroutinePayment",
   "payOrEndRunSubroutineIndexes",
@@ -244,6 +292,8 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "citySurveillanceProjectedTagsAdded",
   "citySurveillanceCreditsPaid",
   "citySurveillanceTagsAdded",
+  "ambushPaymentChoiceOpened",
+  "ambushPaymentAmount",
   "addedCounterAmount",
   "removedCounterAmount",
   "remainingCounters",
@@ -388,6 +438,7 @@ export function buildAiDecisionInputDto(
     sanitizePublicGameEvent,
   );
   return {
+    ...(params.matchId !== undefined ? { matchId: params.matchId } : {}),
     side: params.side,
     playerView: sanitizePlayerView(params.playerView, sanitizedPublicEvents),
     eventTail: sanitizeEventTail(
@@ -430,6 +481,7 @@ function sanitizePlayerView(
   return {
     side: view.side,
     stateVersion: view.stateVersion,
+    ...(view.turnSerial !== undefined ? { turnSerial: view.turnSerial } : {}),
     timingPoint: view.timingPoint,
     activeSide: view.activeSide,
     phase: view.phase,
@@ -476,7 +528,18 @@ function sanitizePlayerView(
     servers: view.servers.map((server) => ({
       id: server.id,
       label: server.label,
-      ice: server.ice.map(sanitizeVisibleCard),
+      ice: server.ice.map((card) =>
+        sanitizeVisibleCardWithOptions(card, {
+          allowCorpRezCostQuote:
+            view.side === "corp" &&
+            card.known &&
+            card.owner === "corp" &&
+            card.controller === "corp" &&
+            card.type === "ice",
+          expectedCorpRezServerId: server.id,
+          expectedCorpRezStateVersion: view.stateVersion,
+        }),
+      ),
       root: server.root.map(sanitizeVisibleCard),
       ...(server.counterDisplays
         ? {
@@ -493,6 +556,30 @@ function sanitizePlayerView(
             setAsideCount: view.specialZones.setAsideCount,
             removedFromGameCount: view.specialZones.removedFromGameCount,
           },
+        }
+      : {}),
+    ...(view.side === "corp" && view.corpCentralAccessQuotes
+      ? {
+          corpCentralAccessQuotes: view.corpCentralAccessQuotes.map(
+            (quote) => ({
+              serverId: quote.serverId,
+              stateVersion: quote.stateVersion,
+              complete: quote.complete,
+              effectiveAccessCount: quote.effectiveAccessCount,
+              isMultiaccess: quote.isMultiaccess,
+              sourceDefinitionIds: quote.sourceDefinitionIds.slice(),
+              serverBoundEffects: quote.serverBoundEffects.map((effect) => ({
+                id: effect.id,
+                kind: effect.kind,
+                serverId: effect.serverId,
+                counterKind: effect.counterKind,
+                formula: effect.formula,
+                sourceDefinitionId: effect.sourceDefinitionId,
+                counterCount: effect.counterCount,
+                additionalAccessCount: effect.additionalAccessCount,
+              })),
+            }),
+          ),
         }
       : {}),
     ...(view.run
@@ -536,7 +623,17 @@ function sanitizePlayerView(
         }
       : {}),
     ...(view.pendingChoice
-      ? { pendingChoice: sanitizeVisibleChoiceRequest(view.pendingChoice) }
+      ? {
+          pendingChoice: sanitizeVisibleChoiceRequest(
+            view.pendingChoice,
+            view.stateVersion,
+            view.side,
+            view.own.credits,
+            view.own.agendaPoints,
+            view.own.scoreArea,
+            view.servers,
+          ),
+        }
       : {}),
     publicEvents,
     legalActions: view.legalActions.map(sanitizeLegalAction),
@@ -547,6 +644,27 @@ function sanitizePlayerView(
 }
 
 function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
+  return sanitizeVisibleCardWithOptions(card);
+}
+
+function sanitizeVisibleCardWithOptions(
+  card: VisibleCard,
+  options: {
+    allowCorpRezCostQuote?: boolean;
+    expectedCorpRezServerId?: PlayerView["servers"][number]["id"];
+    expectedCorpRezStateVersion?: number;
+  } = {},
+): VisibleCard {
+  const effectiveRezCostQuote = card.effectiveRezCostQuote;
+  const includeEffectiveRezCostQuote =
+    options.allowCorpRezCostQuote === true &&
+    effectiveRezCostQuote?.context === "installed" &&
+    effectiveRezCostQuote.cardId === card.instanceId &&
+    effectiveRezCostQuote.targetServerId === options.expectedCorpRezServerId &&
+    effectiveRezCostQuote.projectedServerId ===
+      options.expectedCorpRezServerId &&
+    effectiveRezCostQuote.expiresAtStateVersion ===
+      options.expectedCorpRezStateVersion;
   return {
     instanceId: card.instanceId,
     known: card.known,
@@ -558,6 +676,17 @@ function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
     ...(card.subtypes !== undefined ? { subtypes: card.subtypes.slice() } : {}),
     ...(card.rulesText !== undefined ? { rulesText: card.rulesText } : {}),
     ...(card.cost !== undefined ? { cost: card.cost } : {}),
+    ...(card.known && card.playCost !== undefined
+      ? {
+          playCost:
+            card.playCost.kind === "fixed"
+              ? { ...card.playCost }
+              : {
+                  ...card.playCost,
+                  maximumX: { ...card.playCost.maximumX },
+                },
+        }
+      : {}),
     ...(card.installCost !== undefined
       ? { installCost: card.installCost }
       : {}),
@@ -595,6 +724,71 @@ function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
             card.effectiveRunQuote,
           ),
         }
+      : {}),
+    ...(includeEffectiveRezCostQuote && effectiveRezCostQuote
+      ? {
+          effectiveRezCostQuote: sanitizeInstalledCorpRezCostQuote(
+            effectiveRezCostQuote,
+          ),
+        }
+      : {}),
+  };
+}
+
+function sanitizeInstalledCorpRezCostQuote(
+  quote: Extract<VisibleCorpRezCostQuote, { context: "installed" }>,
+): VisibleCorpRezCostQuote {
+  const binding = {
+    context: "installed" as const,
+    cardId: quote.cardId,
+    targetServerId: quote.targetServerId,
+    projectedServerId: quote.projectedServerId,
+    expiresAtStateVersion: quote.expiresAtStateVersion,
+  };
+  if (!quote.complete) return { ...binding, complete: false };
+  const reductionSourceDefinitionIds = sanitizedStringArray(
+    quote.reductionSourceDefinitionIds,
+  );
+  const increaseSourceDefinitionIds = sanitizedStringArray(
+    quote.increaseSourceDefinitionIds,
+  );
+  const modifiersValid =
+    (quote.reductionSourceDefinitionIds === undefined ||
+      reductionSourceDefinitionIds !== undefined) &&
+    (quote.increaseSourceDefinitionIds === undefined ||
+      increaseSourceDefinitionIds !== undefined) &&
+    modifierDefinitionIdListsAreDisjoint(
+      reductionSourceDefinitionIds,
+      increaseSourceDefinitionIds,
+    );
+  if (
+    quote.projectedServerId !== quote.targetServerId ||
+    !isNonNegativeSafeInteger(quote.expiresAtStateVersion) ||
+    !isNonNegativeSafeInteger(quote.baseCredits) ||
+    !isNonNegativeSafeInteger(quote.finalCredits) ||
+    !isNonNegativeSafeInteger(
+      quote.mandatoryAdditionalCosts?.agendaPoints,
+    ) ||
+    !modifiersValid ||
+    (reductionSourceDefinitionIds === undefined &&
+      increaseSourceDefinitionIds === undefined &&
+      quote.finalCredits !== quote.baseCredits)
+  ) {
+    return { ...binding, complete: false };
+  }
+  return {
+    ...binding,
+    complete: true,
+    baseCredits: quote.baseCredits,
+    finalCredits: quote.finalCredits,
+    mandatoryAdditionalCosts: {
+      agendaPoints: quote.mandatoryAdditionalCosts.agendaPoints,
+    },
+    ...(reductionSourceDefinitionIds
+      ? { reductionSourceDefinitionIds }
+      : {}),
+    ...(increaseSourceDefinitionIds
+      ? { increaseSourceDefinitionIds }
       : {}),
   };
 }
@@ -779,6 +973,12 @@ function sanitizeTraceSuccessEffect(
 
 function sanitizeVisibleChoiceRequest(
   choice: VisibleChoiceRequest,
+  playerViewStateVersion: number,
+  playerViewSide: Side,
+  ownCredits: number,
+  ownAgendaPoints: number,
+  ownScoreArea: readonly VisibleCard[],
+  servers: readonly PlayerView["servers"][number][],
 ): VisibleChoiceRequest {
   const stackSearchResolution = sanitizeStackSearchResolution(
     choice.stackSearchResolution,
@@ -795,6 +995,23 @@ function sanitizeVisibleChoiceRequest(
     options: choice.options.map((option) => {
       const value = sanitizePrimitive(option.value);
       const metadata = sanitizeChoiceOptionMetadata(option.metadata);
+      const hqInstallRezOptionQuote = sanitizeCorpOptionalRezChoiceQuote(
+        option.hqInstallRezOptionQuote,
+        {
+          choiceId: choice.choiceId,
+          optionId: option.id,
+          stateVersion: playerViewStateVersion,
+          choiceStateVersion: choice.stateVersion,
+          actorPrivateCorpChoice:
+            playerViewSide === "corp" && choice.side === "corp",
+          optionValue: option.value,
+          optionCard: option.card,
+          ownCredits,
+          ownAgendaPoints,
+          ownScoreArea,
+          servers,
+        },
+      );
       return {
         id: option.id,
         label: option.label,
@@ -807,6 +1024,7 @@ function sanitizeVisibleChoiceRequest(
           : {}),
         ...(metadata ? { metadata } : {}),
         ...(option.card ? { card: sanitizeVisibleCard(option.card) } : {}),
+        ...(hqInstallRezOptionQuote ? { hqInstallRezOptionQuote } : {}),
       };
     }),
     minSelections: choice.minSelections,
@@ -817,6 +1035,223 @@ function sanitizeVisibleChoiceRequest(
     ...(cardSearchPresentation ? { cardSearchPresentation } : {}),
   };
 }
+
+function sanitizeCorpOptionalRezChoiceQuote(
+  value: unknown,
+  expected: {
+    choiceId: string;
+    optionId: string;
+    stateVersion: number;
+    choiceStateVersion: number;
+    actorPrivateCorpChoice: boolean;
+    optionValue: unknown;
+    optionCard: VisibleCard | undefined;
+    ownCredits: number;
+    ownAgendaPoints: number;
+    ownScoreArea: readonly VisibleCard[];
+    servers: readonly PlayerView["servers"][number][];
+  },
+): CorpOptionalRezChoiceQuote | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    return undefined;
+  const quote = value as Record<string, unknown>;
+  const boundServer =
+    typeof quote.targetServerId === "string"
+      ? expected.servers.find((server) => server.id === quote.targetServerId)
+      : undefined;
+  const boundServerCard =
+    quote.installedZone === "serverIce"
+      ? boundServer?.ice.find((card) => card.instanceId === quote.cardId)
+      : quote.installedZone === "serverRoot"
+        ? boundServer?.root.find((card) => card.instanceId === quote.cardId)
+        : undefined;
+  if (
+    quote.schemaVersion !== CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION ||
+    !expected.actorPrivateCorpChoice ||
+    quote.kind !== CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND ||
+    quote.context !== "hq_to_new_remote_optional_rez" ||
+    quote.choiceId !== expected.choiceId ||
+    quote.optionId !== expected.optionId ||
+    quote.stateVersion !== expected.stateVersion ||
+    quote.stateVersion !== expected.choiceStateVersion ||
+    !isNonEmptyString(quote.sourceAgendaId) ||
+    !isNonEmptyString(quote.cardId) ||
+    !isNonEmptyString(quote.cardDefinitionId) ||
+    expected.optionValue !== quote.cardId ||
+    expected.optionCard?.known !== true ||
+    expected.optionCard.instanceId !== quote.cardId ||
+    expected.optionCard.definitionId !== quote.cardDefinitionId ||
+    expected.optionCard.rezzed !== false ||
+    !expected.ownScoreArea.some(
+      (card) =>
+        card.known === true &&
+        card.type === "agenda" &&
+        card.instanceId === quote.sourceAgendaId,
+    ) ||
+    !isNonEmptyString(quote.targetServerId) ||
+    !isExistingCorpServerId(quote.targetServerId) ||
+    !boundServer ||
+    boundServerCard?.known !== true ||
+    boundServerCard.definitionId !== quote.cardDefinitionId ||
+    boundServerCard.rezzed !== false ||
+    (quote.installedZone !== "serverIce" &&
+      quote.installedZone !== "serverRoot") ||
+    !isNonNegativeSafeInteger(quote.sequencePosition) ||
+    quote.sequencePosition < 1 ||
+    (quote.complete !== true && quote.complete !== false)
+  )
+    return undefined;
+
+  const binding = {
+    schemaVersion: CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
+    kind: CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
+    context: "hq_to_new_remote_optional_rez" as const,
+    choiceId: quote.choiceId,
+    optionId: quote.optionId,
+    sourceAgendaId: quote.sourceAgendaId,
+    cardId: quote.cardId,
+    cardDefinitionId: quote.cardDefinitionId,
+    targetServerId: quote.targetServerId,
+    installedZone:
+      quote.installedZone as CorpOptionalRezChoiceQuote["installedZone"],
+    sequencePosition: quote.sequencePosition,
+    stateVersion: quote.stateVersion,
+  };
+  if (quote.complete === false) {
+    if (OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS.some((field) => field in quote))
+      return undefined;
+    return { ...binding, complete: false };
+  }
+
+  const cardType = quote.cardType;
+  const mandatoryAdditionalCosts = quote.mandatoryAdditionalCosts;
+  const reductionSourceDefinitionIds = sanitizedStringArray(
+    quote.reductionSourceDefinitionIds,
+  );
+  const increaseSourceDefinitionIds = sanitizedStringArray(
+    quote.increaseSourceDefinitionIds,
+  );
+  const optionalModifierIdsValid =
+    (quote.reductionSourceDefinitionIds === undefined ||
+      reductionSourceDefinitionIds !== undefined) &&
+    (quote.increaseSourceDefinitionIds === undefined ||
+      increaseSourceDefinitionIds !== undefined) &&
+    modifierDefinitionIdListsAreDisjoint(
+      reductionSourceDefinitionIds,
+      increaseSourceDefinitionIds,
+    );
+  if (
+    (cardType !== "ice" &&
+      cardType !== "asset" &&
+      cardType !== "upgrade") ||
+    (cardType === "ice") !== (quote.installedZone === "serverIce") ||
+    !mandatoryAdditionalCosts ||
+    typeof mandatoryAdditionalCosts !== "object" ||
+    Array.isArray(mandatoryAdditionalCosts) ||
+    !isNonNegativeSafeInteger(
+      (mandatoryAdditionalCosts as Record<string, unknown>).agendaPoints,
+    ) ||
+    !isNonNegativeSafeInteger(quote.baseCredits) ||
+    !isNonNegativeSafeInteger(quote.finalCredits) ||
+    !isNonNegativeSafeInteger(quote.temporaryCreditsAvailable) ||
+    !isNonNegativeSafeInteger(quote.temporaryCreditsApplied) ||
+    !isNonNegativeSafeInteger(quote.regularCreditsAvailable) ||
+    !isNonNegativeSafeInteger(quote.regularCreditsRequired) ||
+    typeof quote.creditPayable !== "boolean" ||
+    typeof quote.additionalCostsPayable !== "boolean" ||
+    typeof quote.affordable !== "boolean" ||
+    !optionalModifierIdsValid ||
+    quote.temporaryCreditsApplied !==
+      Math.min(quote.temporaryCreditsAvailable, quote.finalCredits) ||
+    quote.regularCreditsRequired !==
+      quote.finalCredits - quote.temporaryCreditsApplied ||
+    quote.creditPayable !==
+      (quote.regularCreditsAvailable >= quote.regularCreditsRequired) ||
+    quote.regularCreditsAvailable !== expected.ownCredits ||
+    quote.additionalCostsPayable !==
+      (expected.ownAgendaPoints >=
+        (mandatoryAdditionalCosts as { agendaPoints: number }).agendaPoints) ||
+    quote.affordable !==
+      (quote.creditPayable && quote.additionalCostsPayable)
+  )
+    return undefined;
+
+  return {
+    ...binding,
+    complete: true,
+    cardType,
+    baseCredits: quote.baseCredits,
+    finalCredits: quote.finalCredits,
+    mandatoryAdditionalCosts: {
+      agendaPoints: (mandatoryAdditionalCosts as { agendaPoints: number })
+        .agendaPoints,
+    },
+    ...(reductionSourceDefinitionIds
+      ? { reductionSourceDefinitionIds }
+      : {}),
+    ...(increaseSourceDefinitionIds ? { increaseSourceDefinitionIds } : {}),
+    temporaryCreditsAvailable: quote.temporaryCreditsAvailable,
+    temporaryCreditsApplied: quote.temporaryCreditsApplied,
+    regularCreditsAvailable: quote.regularCreditsAvailable,
+    regularCreditsRequired: quote.regularCreditsRequired,
+    creditPayable: quote.creditPayable,
+    additionalCostsPayable: quote.additionalCostsPayable,
+    affordable: quote.affordable,
+  };
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function isNonNegativeSafeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
+function sanitizedStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value) || value.some((entry) => !isNonEmptyString(entry)))
+    return undefined;
+  const strings = value as string[];
+  if (
+    new Set(strings).size !== strings.length ||
+    strings.some(
+      (entry, index) => index > 0 && strings[index - 1]! >= entry,
+    )
+  )
+    return undefined;
+  return strings.slice();
+}
+
+function modifierDefinitionIdListsAreDisjoint(
+  reductionIds: readonly string[] | undefined,
+  increaseIds: readonly string[] | undefined,
+): boolean {
+  if (!reductionIds || !increaseIds) return true;
+  const reductions = new Set(reductionIds);
+  return increaseIds.every((id) => !reductions.has(id));
+}
+
+function isExistingCorpServerId(
+  value: string,
+): value is CorpOptionalRezChoiceQuote["targetServerId"] {
+  return /^remote_[1-9][0-9]*$/.test(value);
+}
+
+const OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS = [
+  "cardType",
+  "baseCredits",
+  "finalCredits",
+  "mandatoryAdditionalCosts",
+  "reductionSourceDefinitionIds",
+  "increaseSourceDefinitionIds",
+  "temporaryCreditsAvailable",
+  "temporaryCreditsApplied",
+  "regularCreditsAvailable",
+  "regularCreditsRequired",
+  "creditPayable",
+  "additionalCostsPayable",
+  "affordable",
+] as const;
 
 function sanitizeLegalAction(action: LegalAction): LegalAction {
   const payload = action.payload
@@ -946,6 +1381,9 @@ function sanitizePublicGameEvent(event: PublicGameEvent): PublicGameEvent {
     type: event.type,
     stateVersionBefore: event.stateVersionBefore,
     stateVersionAfter: event.stateVersionAfter,
+    ...(Number.isSafeInteger(event.turnSerial) && (event.turnSerial ?? -1) >= 0
+      ? { turnSerial: event.turnSerial }
+      : {}),
     stateHashAfter: event.stateHashAfter,
     ...(event.visibilityClass
       ? { visibilityClass: event.visibilityClass }
@@ -989,6 +1427,18 @@ function sanitizePublicPayload(
     PUBLIC_DECK_METADATA_KEYS,
   );
   if (Object.keys(corpDeck).length > 0) result.corpDeck = corpDeck;
+  if (Array.isArray(payload.resolvedEffects)) {
+    const resolvedEffects = payload.resolvedEffects
+      .filter(
+        (effect): effect is ResolvedGameEffect =>
+          typeof effect === "object" &&
+          effect !== null &&
+          !Array.isArray(effect) &&
+          (effect as Partial<ResolvedGameEffect>).visibility === "public",
+      )
+      .map(sanitizeResolvedGameEffect);
+    if (resolvedEffects.length > 0) result.resolvedEffects = resolvedEffects;
+  }
   return result;
 }
 
@@ -1041,6 +1491,13 @@ function sanitizeChoiceOptionMetadata(
   const result: NonNullable<
     VisibleChoiceRequest["options"][number]["metadata"]
   > = {};
+  const creditCost = metadata.creditCost;
+  if (
+    typeof creditCost === "number" &&
+    Number.isInteger(creditCost) &&
+    creditCost >= 0
+  )
+    result.creditCost = creditCost;
   const postBidTraceLinkDelta = metadata.postBidTraceLinkDelta;
   if (
     typeof postBidTraceLinkDelta === "number" &&

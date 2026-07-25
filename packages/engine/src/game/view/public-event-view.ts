@@ -14,6 +14,9 @@ export function toPublicEvent(event: GameEvent): PublicGameEvent {
     type: event.type,
     stateVersionBefore: event.stateVersionBefore,
     stateVersionAfter: event.stateVersionAfter,
+    ...(Number.isSafeInteger(event.turnSerial) && (event.turnSerial ?? -1) >= 0
+      ? { turnSerial: event.turnSerial }
+      : {}),
     stateHashAfter: event.stateHashAfter,
     ...(event.visibilityClass
       ? { visibilityClass: event.visibilityClass }

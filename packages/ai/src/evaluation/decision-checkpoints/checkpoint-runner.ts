@@ -109,6 +109,10 @@ export function runAiDecisionCheckpoint(
       decision,
       fixture.expectation.selectedScoreBreakdown,
     );
+  const planExecutionAccepted = planExecutionExpectationMatches(
+    decision,
+    fixture.expectation.planExecution,
+  );
   const decisionChainAccepted = decisionChainExpectationMatches(
     input,
     decision,
@@ -118,20 +122,58 @@ export function runAiDecisionCheckpoint(
     input,
     fixture.expectation.runTargets,
   );
-  if (
-    forbidden ||
-    !accepted ||
-    !choiceAccepted ||
-    !discardChoiceAccepted ||
-    !strategicIntentAccepted ||
-    !selectedScoreBreakdownAccepted ||
-    !runTargetsAccepted ||
-    !decisionChainAccepted
-  ) {
+  const failedExpectations = [
+    ...(forbidden ? ["forbidden_action"] : []),
+    ...(!accepted ? ["acceptable_action"] : []),
+    ...(!choiceAccepted ? ["choice"] : []),
+    ...(!discardChoiceAccepted ? ["discard_choice"] : []),
+    ...(!strategicIntentAccepted ? ["strategic_intent"] : []),
+    ...(!selectedScoreBreakdownAccepted
+      ? ["selected_score_breakdown"]
+      : []),
+    ...(!planExecutionAccepted ? ["plan_execution"] : []),
+    ...(!runTargetsAccepted ? ["run_targets"] : []),
+    ...(!decisionChainAccepted ? ["decision_chain"] : []),
+  ];
+  if (failedExpectations.length > 0) {
+    const planCapabilities = (decision.evidence ?? [])
+      .filter((item) => item.startsWith("plan_step_capability:"))
+      .map((item) => item.slice("plan_step_capability:".length));
+    const planAssessmentEvidence = (decision.evidence ?? [])
+      .filter((item) => item.startsWith("plan_assessment_evidence:"))
+      .map((item) => item.slice("plan_assessment_evidence:".length));
+    const runTargetSummary =
+      input.side === "runner"
+        ? evaluateRunnerRunTargets({ input }).map((target) => ({
+            actionId: target.actionId,
+            serverId: target.targetServerId,
+            recommendation: target.recommendation,
+            path: target.pathPassability,
+            pathCost: target.pathCost,
+            creditsAfterRun: target.creditsAfterRun,
+            score: target.score,
+            payoff: target.accessPayoff,
+            knownAccessState: target.knownAccessState,
+            evidence: target.evidence.filter(
+              (item) =>
+                item.startsWith("run_") ||
+                item.startsWith("visible_") ||
+                item.startsWith("known_") ||
+                item.startsWith("remote_") ||
+                item.startsWith("central_"),
+            ),
+          }))
+        : [];
     return {
       ok: false,
       code: "behavior_regression",
-      message: `Behavior expectation failed for ${selectedAction.actionId}`,
+      message: [
+        `Behavior expectation failed for ${selectedAction.actionId}: ${failedExpectations.join(",")}`,
+        `plan=${decision.decisionDebug?.planKind ?? "none"}`,
+        `capabilities=${planCapabilities.join("|") || "none"}`,
+        `assessment=${planAssessmentEvidence.join("|") || "none"}`,
+        `runTargets=${JSON.stringify(runTargetSummary)}`,
+      ].join("; "),
       input,
       decision,
       selectedAction,
@@ -146,6 +188,48 @@ export function runAiDecisionCheckpoint(
     selectedAction,
     ...(strategicIntent ? { strategicIntent } : {}),
   };
+}
+
+function planExecutionExpectationMatches(
+  decision: AiDecision,
+  expectation: AiDecisionCheckpointExpectationV1["planExecution"] | undefined,
+): boolean {
+  if (!expectation) return true;
+  const planId = decision.decisionDebug?.planId;
+  const planKind = decision.decisionDebug?.planKind;
+  const evidence = decision.evidence ?? [];
+  const capabilities = evidence
+    .filter((item) => item.startsWith("plan_step_capability:"))
+    .map((item) => item.slice("plan_step_capability:".length));
+  const assessmentEvidence = evidence
+    .filter((item) => item.startsWith("plan_assessment_evidence:"))
+    .map((item) => item.slice("plan_assessment_evidence:".length));
+  return (
+    (!expectation.acceptablePlanIds?.length ||
+      (planId !== undefined &&
+        expectation.acceptablePlanIds.includes(planId))) &&
+    !(planId !== undefined && expectation.forbiddenPlanIds?.includes(planId)) &&
+    (!expectation.acceptablePlanKinds?.length ||
+      (planKind !== undefined &&
+        expectation.acceptablePlanKinds.includes(planKind))) &&
+    !(
+      planKind !== undefined &&
+      expectation.forbiddenPlanKinds?.includes(planKind)
+    ) &&
+    (!expectation.acceptableCapabilities?.length ||
+      expectation.acceptableCapabilities.some((capability) =>
+        capabilities.includes(capability),
+      )) &&
+    !(expectation.forbiddenCapabilities ?? []).some((capability) =>
+      capabilities.includes(capability),
+    ) &&
+    (expectation.requiredAssessmentEvidence ?? []).every((item) =>
+      assessmentEvidence.includes(item),
+    ) &&
+    !(expectation.forbiddenAssessmentEvidence ?? []).some((item) =>
+      assessmentEvidence.includes(item),
+    )
+  );
 }
 
 function runTargetExpectationsMatch(

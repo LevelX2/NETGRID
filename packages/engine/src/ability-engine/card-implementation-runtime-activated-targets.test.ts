@@ -69,6 +69,33 @@ describe("activatedAbilityPayload advancement semantics", () => {
     });
   });
 
+  it("publishes a side-safe program-search projection for declarative stack tutors", () => {
+    const ability: ActivatedCardAbilityImplementation = {
+      kind: "activated",
+      timing: "runner_main",
+      costs: [
+        { kind: "action", amount: 1 },
+        { kind: "credit", amount: 1 },
+      ],
+      effects: [
+        {
+          kind: "search_stack_to_grip",
+          filter: "program",
+          revealToCorp: true,
+          shuffleAfterwards: true,
+          visibility: "hidden_info_barrier",
+        },
+      ],
+    };
+
+    expect(
+      activatedAbilityPayload("source" as never, ability, 0),
+    ).toMatchObject({
+      cardImplementationEffectKind: "search_stack_to_grip",
+      cardImplementationSearchFilter: "program",
+    });
+  });
+
   it("publishes scoring the visible source as an agenda", () => {
     const ability: ActivatedCardAbilityImplementation = {
       kind: "activated",

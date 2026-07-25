@@ -9,6 +9,7 @@ import newsgroupD75Json from "../../../../../data/scenarios/ai-decision-checkpoi
 import newsgroupD83Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-5f6d-06-newsgroup-dominance-d83.json";
 import newsgroupD84Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-5f6d-07-newsgroup-dominance-d84.json";
 import stackSearchFirstPickJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-5f6d-08-stack-search-first-pick.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -25,8 +26,14 @@ describe("match 5F6D runner decision checkpoints", () => {
     ["prefers Newsgroup's higher credit yield at D62", newsgroupD62Json],
     ["keeps Newsgroup above the basic credit action at D74", newsgroupD74Json],
     ["keeps Newsgroup above the basic credit action at D75", newsgroupD75Json],
-    ["keeps Newsgroup above the basic credit action at D83", newsgroupD83Json],
-    ["keeps Newsgroup above the basic credit action at D84", newsgroupD84Json],
+    [
+      "keeps the HQ-pressure plan above P5 Newsgroup economy at D83",
+      newsgroupD83Json,
+    ],
+    [
+      "keeps the HQ-pressure plan above P5 Newsgroup economy at D84",
+      newsgroupD84Json,
+    ],
     [
       "takes the immediately useful card before ordering the rest",
       stackSearchFirstPickJson,
@@ -114,7 +121,13 @@ describe("match 5F6D runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    [
+      "cp-5f6d-06-newsgroup-dominance-d83",
+      "cp-5f6d-07-newsgroup-dominance-d84",
+    ],
+  );
 }
 
 function mutateFixture(

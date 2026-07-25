@@ -6714,25 +6714,16 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "sourceDefinitionId": "onr_v1_173_restrictive-net-zoning",
-        "targetServerId": "hq"
-      },
-      {
-        "sourceDefinitionId": "onr_v1_173_restrictive-net-zoning",
-        "targetServerId": "rd"
-      },
-      {
-        "sourceDefinitionId": "onr_v1_173_restrictive-net-zoning",
-        "targetServerId": "remote_1"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "sourceDefinitionId": "onr_v1_173_restrictive-net-zoning",
-        "targetServerId": "archives"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.pressure_central"
+      ],
+      "acceptableCapabilities": [
+        "pressure_hq_information"
+      ],
+      "requiredAssessmentEvidence": [
+        "target:hq"
+      ]
+    }
   }
 }

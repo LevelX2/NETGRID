@@ -1,6 +1,8 @@
 import type {
   ApplyActionOptions,
   EngineResult,
+  EngineRandomizedIceInstallSelectionCommand,
+  EngineRandomizedIceInstallSelectionResult,
   GameState,
   LegalAction,
   PlayerAction,
@@ -17,10 +19,11 @@ import {
   createPerformActionExecutorFromDependencies,
   type PerformActionExecutionDependencies,
 } from "./perform-action";
+import { configureReplayHost, type ReplayHost } from "../replay";
 import {
-  configureReplayHost,
-  type ReplayHost,
-} from "../replay";
+  applyRandomizedIceInstallSelection,
+  configureRandomizedIceInstallSelectionHost,
+} from "../randomized-ice-install-selection";
 
 export type ApplyActionHostCompositionHost = {
   actions?: {
@@ -29,6 +32,11 @@ export type ApplyActionHostCompositionHost = {
       playerAction: PlayerAction,
       options?: ApplyActionOptions,
     ) => EngineResult;
+    applyRandomizedIceInstallSelection?: (
+      state: GameState,
+      command: EngineRandomizedIceInstallSelectionCommand,
+      options?: ApplyActionOptions,
+    ) => EngineRandomizedIceInstallSelectionResult;
     afterPerformAction?: (state: GameState, legalAction: LegalAction) => void;
   };
   perform: PerformActionExecutionDependencies;
@@ -48,12 +56,21 @@ export type ApplyActionHostComposition = {
 export function createApplyActionHostComposition(
   host: ApplyActionHostCompositionHost,
 ): ApplyActionHostComposition {
-  const performAction = createPerformActionExecutorFromDependencies(host.perform);
+  const performAction = createPerformActionExecutorFromDependencies(
+    host.perform,
+  );
   const applyGameActionHost = host.actions
     ? { actions: { applyAction: host.actions.applyAction } }
     : undefined;
   const replayHost = host.actions
-    ? { actions: { applyAction: host.actions.applyAction } }
+    ? {
+        actions: {
+          applyAction: host.actions.applyAction,
+          applyRandomizedIceInstallSelection:
+            host.actions.applyRandomizedIceInstallSelection ??
+            applyRandomizedIceInstallSelection,
+        },
+      }
     : undefined;
   return {
     performAction,
@@ -75,6 +92,7 @@ export function configureApplyActionHostComposition(
 ): ApplyActionHostComposition {
   const composition = createApplyActionHostComposition(host);
   configureApplyActionCoreHost(composition.applyActionCoreHost);
+  configureRandomizedIceInstallSelectionHost(composition.applyActionCoreHost);
   if (composition.applyGameActionHost)
     configureApplyGameActionHost(composition.applyGameActionHost);
   if (composition.replayHost) configureReplayHost(composition.replayHost);

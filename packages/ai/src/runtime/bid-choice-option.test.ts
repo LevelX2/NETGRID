@@ -255,7 +255,7 @@ function card(instanceId: string, definitionId: string, cost: number) {
     definitionId,
     title: instanceId,
     type: "operation",
-    cost,
+    playCost: { kind: "fixed", credits: cost },
     known: true,
     owner: "corp",
     controller: "corp",

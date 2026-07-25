@@ -147,7 +147,6 @@ function makeScoredAgendaFreeRezHost(
       canInstallCorpRootCardInServer: () => false,
       isRegionUpgrade: () => false,
       rootInstallRezzesOnInstall: () => false,
-      rezCostForCard: () => 7,
       isScoredAgendaFreeRezCandidate: (cardId: CardInstanceId) =>
         cardId === "ice_1",
     },

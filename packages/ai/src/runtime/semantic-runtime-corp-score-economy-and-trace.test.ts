@@ -599,7 +599,7 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
     );
   });
 
-  it("does not dampen punish-primary HQ agenda relief into a safe prepared remote under high HQ triage", () => {
+  it("does not manufacture HQ relief from legacy safe-window fields", () => {
     const agenda = agendaCard("hq-agenda", 3);
     const remoteAgenda = corpAction(
       "install-hq-agenda-into-prepared-remote",
@@ -680,22 +680,17 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
       dependencies,
     );
 
+    expect(components.map((component) => component.key)).not.toContain(
+      "corp_board_triage_alignment",
+    );
+    expect(components.map((component) => component.key)).not.toContain(
+      "corp_hq_agenda_relief_scoreline",
+    );
     expect(components).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_board_triage_alignment",
-          reason: expect.stringContaining("triage_primary:protect_hq"),
-        }),
-        expect.objectContaining({
-          key: "corp_hq_agenda_relief_scoreline",
-          value: 3200,
-          reason: expect.stringContaining(
-            "hq_pressure_safe_remote_relief:true",
-          ),
-        }),
-        expect.objectContaining({
           key: "corp_install_remote_context",
-          value: -350,
+          value: -2200,
         }),
       ]),
     );
@@ -1004,7 +999,7 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
     );
   });
 
-  it("suppresses scored-agenda economy when critical triage needs remote protection", () => {
+  it("keeps scored-agenda economy available as score-parent support", () => {
     const agenda = agendaCard("agenda-in-hq", 2);
     const marineArcology = corpCard("marine-arcology", "agenda", {
       title: "Marine Arcology",
@@ -1108,8 +1103,8 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
           value: 200,
         }),
         expect.objectContaining({
-          key: "corp_board_triage_mismatch",
-          value: -3200,
+          key: "corp_board_triage_alignment",
+          value: 24,
           reason: expect.stringContaining(
             "triage_primary:protect_score_remote",
           ),
@@ -1119,15 +1114,15 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
     expect(remoteIceComponents).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_board_triage_alignment",
+          key: "corp_board_triage_mismatch",
           reason: expect.stringContaining(
             "triage_primary:protect_score_remote",
           ),
         }),
       ]),
     );
-    expect(totalScore(remoteIceComponents)).toBeGreaterThan(
-      totalScore(marineComponents),
+    expect(totalScore(marineComponents)).toBeGreaterThan(
+      totalScore(remoteIceComponents),
     );
   });
 });

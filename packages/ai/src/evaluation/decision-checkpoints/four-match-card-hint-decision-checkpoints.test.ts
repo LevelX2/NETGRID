@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import disgruntledArchivesJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-four-match-01-disgruntled-archives.json";
 import insideJobRdJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-four-match-02-inside-job-rd.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
@@ -40,9 +41,27 @@ describe("four-match card-hint decision checkpoints", () => {
         "path_passability:reachable",
       ]),
     );
+    const directHqEvaluation = evaluateRunnerRunTargets({
+      input: result.input,
+    }).find((entry) => entry.actionId === "runner.start_run.hq");
+    expect(directHqEvaluation).toMatchObject({
+      targetServerId: "hq",
+      accessServerId: "hq",
+      pathPassability: "reachable",
+      routeQuote: {
+        reachability: "guaranteed_access",
+        fundingGap: 0,
+        unknownIceCount: 0,
+      },
+      unavoidableVisibleIceHazardCount: 1,
+    });
+    expect(directHqEvaluation?.score).toBeLessThan(0);
   });
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    ["cp-four-match-02-inside-job-rd"],
+  );
 }

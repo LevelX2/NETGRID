@@ -4,8 +4,9 @@ import {
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
-import { createAiHintsByCard, RUNTIME_CARDS } from "../ai-hints";
+import { createAiHintsByCard } from "../ai-hints";
 import { actionCapacityProjectionForLegalAction } from "../actions/action-capacity-projection";
+import { PlanResolutionFailure } from "./plan-resolution-failure";
 import {
   searchActionCapacityRoutes,
   type ActionCapacityActionCandidate,
@@ -137,6 +138,7 @@ function conversionPathForDesiredTarget(
     const scoreAction = scoreActionForCard(input, target.card.instanceId);
     if (!scoreAction) return undefined;
     return completedPath(
+      input,
       target,
       requirement,
       desiredCounters,
@@ -222,6 +224,7 @@ function visitCapabilityCombinations(params: {
     );
     params.onCandidate(
       completedPath(
+        params.input,
         params.target,
         params.requirement,
         params.desiredCounters,
@@ -421,6 +424,8 @@ function conversionCapabilities(
           .map((effect) => effect.amount ?? 0),
       );
       if (amount <= 0) return [];
+      const creditCost = visibleCardCost(card);
+      if (creditCost === undefined) return [];
       return [
         {
           kind: "place_advancement",
@@ -428,7 +433,7 @@ function conversionCapabilities(
           amount,
           sourceCardId: card.instanceId,
           clickCost: 1,
-          creditCost: visibleCardCost(card),
+          creditCost,
           projected: true,
         },
       ];
@@ -619,6 +624,7 @@ function applyActionCapacitySet(
 }
 
 function completedPath(
+  input: AiDecisionInput,
   target: ScoreTarget,
   requirement: number,
   desiredCounters: number,
@@ -654,9 +660,10 @@ function completedPath(
         target.card.overadvanceThreshold ?? desiredCounters - requirement
       }`
     : undefined;
+  const agendaPoints = visibleAgendaPoints(input, target.card);
   return {
     agendaCardId: target.card.instanceId,
-    agendaPoints: visibleAgendaPoints(target.card),
+    agendaPoints,
     targetServerId: target.serverId,
     advancementRequirement: requirement,
     initialAdvancementCounters: initialCounters,
@@ -674,7 +681,7 @@ function completedPath(
       "corp_score_conversion_path:true",
       "corp_score_conversion_same_turn_guaranteed:true",
       `corp_score_conversion_agenda:${target.card.instanceId}`,
-      `corp_score_conversion_agenda_points:${visibleAgendaPoints(target.card)}`,
+      `corp_score_conversion_agenda_points:${agendaPoints}`,
       `corp_score_conversion_server:${target.serverId}`,
       `corp_score_conversion_requirement:${requirement}`,
       `corp_score_conversion_desired_counters:${
@@ -694,11 +701,24 @@ function completedPath(
   };
 }
 
-function visibleAgendaPoints(card: VisibleCard): number {
+function visibleAgendaPoints(
+  input: AiDecisionInput,
+  card: VisibleCard,
+): number {
   const definition = card.definitionId
     ? CARD_DEFINITIONS_BY_ID[card.definitionId]
     : undefined;
-  return Math.max(0, card.agendaPoints ?? definition?.agendaPoints ?? 0);
+  const agendaPoints = card.agendaPoints ?? definition?.agendaPoints;
+  if (typeof agendaPoints !== "number" || !Number.isFinite(agendaPoints))
+    throw new PlanResolutionFailure("missing_card_definition", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      owner: "rules_contract",
+      removalCondition: `Provide finite agenda points for ${card.definitionId ?? card.instanceId}.`,
+    });
+  return Math.max(0, agendaPoints);
 }
 
 function installTargetStep(
@@ -858,25 +878,30 @@ function actionCost(action: LegalAction, key: "clicks" | "credits"): number {
   );
 }
 
-function visibleCardCost(card: VisibleCard): number {
-  const runtimeNumeric = card.definitionId
-    ? (
-        RUNTIME_CARDS[card.definitionId] as
-          | { numeric?: { cost?: number | null; installCost?: number | null } }
-          | undefined
-      )?.numeric
+function visibleCardCost(card: VisibleCard): number | undefined {
+  if (card.type === "event" || card.type === "operation") {
+    const playCost = card.playCost;
+    if (playCost === undefined) return undefined;
+    if (playCost.kind === "fixed") {
+      return Number.isInteger(playCost.credits) && playCost.credits >= 0
+        ? playCost.credits
+        : undefined;
+    }
+    if (
+      playCost.kind !== "variable_x" ||
+      !Number.isInteger(playCost.minimumX) ||
+      playCost.minimumX < 1 ||
+      !Number.isInteger(playCost.creditsPerX) ||
+      playCost.creditsPerX < 1 ||
+      playCost.maximumX?.kind !== "context"
+    ) {
+      return undefined;
+    }
+    return playCost.minimumX * playCost.creditsPerX;
+  }
+  return Number.isInteger(card.installCost) && (card.installCost ?? -1) >= 0
+    ? card.installCost
     : undefined;
-  const demoCost = card.definitionId
-    ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.cost
-    : undefined;
-  return Math.max(
-    0,
-    card.cost ??
-      runtimeNumeric?.cost ??
-      runtimeNumeric?.installCost ??
-      demoCost ??
-      0,
-  );
 }
 
 function stringPayload(action: LegalAction, key: string): string | undefined {

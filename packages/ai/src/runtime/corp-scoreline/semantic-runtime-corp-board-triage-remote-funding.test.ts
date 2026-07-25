@@ -88,7 +88,7 @@ describe("semantic runtime corp board triage remote funding", () => {
     });
   });
 
-  it("treats build-remote-ice as protection before funding for a new score remote", () => {
+  it("uses Economy support when an unbound new-remote ICE cannot certify protection", () => {
     const remoteAgenda = corpAction("new-remote-scoreline", "install_card", {
       placement: "root",
       serverId: "new_remote",
@@ -153,13 +153,13 @@ describe("semantic runtime corp board triage remote funding", () => {
       targetServerId: "new_remote",
     });
     expect(remoteIceComponent).toMatchObject({
-      key: "corp_board_triage_alignment",
+      key: "corp_board_triage_mismatch",
     });
     expect(hqComponent).toMatchObject({
       key: "corp_board_triage_mismatch",
     });
     expect(creditComponent).toMatchObject({
-      key: "corp_board_triage_mismatch",
+      key: "corp_board_triage_alignment",
     });
   });
 

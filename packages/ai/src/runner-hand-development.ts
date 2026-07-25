@@ -11,6 +11,7 @@ import type {
 } from "./deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
+import { runnerDamageThreatAssessment } from "./runner-damage-threat-assessment";
 import {
   actionDevelopsPersistentCardNow,
   persistentDevelopmentActionProjection,
@@ -21,6 +22,7 @@ import {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
   RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION,
   type EvaluateRunnerHandDevelopmentParams,
+  type RunnerHandDevelopmentActivationPrerequisite,
   type RunnerHandDevelopmentAvailability,
   type RunnerHandDevelopmentCurrentNeed,
   type RunnerHandDevelopmentDeferReason,
@@ -39,6 +41,7 @@ export {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
   RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION,
   type EvaluateRunnerHandDevelopmentParams,
+  type RunnerHandDevelopmentActivationPrerequisite,
   type RunnerHandDevelopmentAvailability,
   type RunnerHandDevelopmentCurrentNeed,
   type RunnerHandDevelopmentDeferReason,
@@ -206,7 +209,7 @@ function evaluateHandCard(
           developmentRole,
           baseNeed,
         );
-  const currentNeed =
+  const adjustedNeed =
     developmentRole === "draw_or_search_engine" &&
     recoveryOnlySearchHasNoVisibleTarget(params.input, context)
       ? baseNeed
@@ -214,6 +217,11 @@ function evaluateHandCard(
           baseNeed,
           persistentInstallEvaluation,
         );
+  const currentNeed =
+    developmentRole === "defense_support" &&
+    cardProvidesOnlyNonUrgentHandSizeSupport(params.input, context)
+      ? "none"
+      : adjustedNeed;
   const strategicFit = strategicFitForCard(
     params.strategicIntent,
     availability,
@@ -237,6 +245,25 @@ function evaluateHandCard(
     currentNeed,
     ...(persistentInstallEvaluation ? { persistentInstallEvaluation } : {}),
   });
+  const activationPrerequisites: RunnerHandDevelopmentActivationPrerequisite[] =
+    [
+      ...(context.signals.requiresSameTurnAccess
+        ? [
+            {
+              kind: "same_turn_access" as const,
+              satisfied: context.sameTurnAccessFollowupAvailable === true,
+            },
+          ]
+        : []),
+      ...(context.signals.requiresHostedIcebreaker
+        ? [
+            {
+              kind: "hosted_icebreaker" as const,
+              satisfied: context.hostableIcebreakerAvailable === true,
+            },
+          ]
+        : []),
+    ];
 
   return {
     schemaVersion: RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
@@ -251,6 +278,7 @@ function evaluateHandCard(
     liquidityTiming,
     priority,
     ...(fundingNeed ? { fundingNeed } : {}),
+    activationPrerequisites,
     deferReason,
     ...(context.legalAction
       ? { legalActionId: context.legalAction.actionId }
@@ -442,7 +470,7 @@ function currentNeedForCard(
     role === "draw_or_search_engine" &&
     recoveryOnlySearchHasNoVisibleTarget(params.input, context)
   ) {
-    return "later";
+    return "none";
   }
   if (
     role === "economy_engine" &&
@@ -450,6 +478,12 @@ function currentNeedForCard(
     context.hostableIcebreakerAvailable !== true
   ) {
     return "later";
+  }
+  if (
+    role === "economy_engine" &&
+    selfDamageEconomyWouldBreakRequiredHandBuffer(params.input, context)
+  ) {
+    return "none";
   }
   switch (role) {
     case "memory_support":
@@ -487,11 +521,92 @@ function currentNeedForCard(
           ? "setup"
           : "later";
     case "defense_support":
-      return visibleRunnerThreat(params.input) ? "acute" : "none";
+      return defenseSupportNeed(params.input, context);
     case "duplicate_or_low_value":
     case "unknown":
       return context.legalAction ? "later" : "none";
   }
+}
+
+function defenseSupportNeed(
+  input: AiDecisionInput,
+  context: CardContext,
+): RunnerHandDevelopmentCurrentNeed {
+  if (!visibleRunnerThreat(input)) return "none";
+  const damage = runnerDamageThreatAssessment(input).flatlineRisk;
+  const damagePrevention =
+    context.signals.effectTargets.some((target) =>
+      target.includes("damage"),
+    ) ||
+    context.signals.text.includes("damage_prevention") ||
+    (context.signals.text.includes("damage") &&
+      context.signals.text.includes("prevent"));
+  if (damagePrevention) {
+    return damage.level === "confirmed" || damage.level === "critical"
+      ? "acute"
+      : "setup";
+  }
+  if (cardHasHandSizeSupport(context)) {
+    return damage.effectiveMaxHandSize < damage.uncappedRecommendedHandFloor
+      ? "useful_now"
+      : "none";
+  }
+  const tagPrevention =
+    context.signals.roles.includes("tag_avoid") ||
+    context.signals.effectTargets.some((target) => target.includes("tag_"));
+  if (tagPrevention) {
+    return input.playerView.own.tags > 0 ? "none" : "setup";
+  }
+  return "setup";
+}
+
+function cardProvidesOnlyNonUrgentHandSizeSupport(
+  input: AiDecisionInput,
+  context: CardContext,
+): boolean {
+  return (
+    cardHasHandSizeSupport(context) &&
+    defenseSupportNeed(input, context) === "none"
+  );
+}
+
+function cardHasHandSizeSupport(context: CardContext): boolean {
+  return (
+    context.signals.effectTargets.some((target) =>
+      target.includes("hand_size"),
+    ) ||
+    context.signals.roles.includes("handlimit") ||
+    context.signals.text.includes("hand_size")
+  );
+}
+
+function selfDamageEconomyWouldBreakRequiredHandBuffer(
+  input: AiDecisionInput,
+  context: CardContext,
+): boolean {
+  const selfUnpreventableDamage =
+    context.signals.effectTargets.some((target) =>
+      target.includes("self_unpreventable_brain_damage"),
+    ) ||
+    (context.legalAction?.payload?.damageCannotBePrevented === true &&
+      context.legalAction.payload.damageType === "core");
+  if (!selfUnpreventableDamage) return false;
+  const minimumDamage = Math.min(
+    ...input.legalActions
+      .filter((action) => actionMatchesCard(action, context.card))
+      .map((action) => action.payload?.damageAmount)
+      .filter(
+        (amount): amount is number =>
+          typeof amount === "number" && Number.isFinite(amount) && amount > 0,
+      ),
+  );
+  if (!Number.isFinite(minimumDamage)) return true;
+  const risk = runnerDamageThreatAssessment(input).flatlineRisk;
+  return (
+    risk.handCount - minimumDamage < risk.recommendedHandFloor ||
+    risk.effectiveMaxHandSize - minimumDamage <
+      risk.uncappedRecommendedHandFloor
+  );
 }
 
 function recoveryOnlySearchHasNoVisibleTarget(
@@ -510,7 +625,12 @@ function recoveryOnlySearchHasNoVisibleTarget(
     : runnerHandTextHasRecoveryUtilitySignal(text) &&
       !runnerHandTextHasProgramSearchUtilitySignal(text) &&
       !runnerHandTextHasStackSearchUtilitySignal(text);
-  return recoveryOnly && input.playerView.own.heapOrArchives.length === 0;
+  if (!recoveryOnly) return false;
+  const boundRecoveryTarget =
+    typeof context.legalAction?.payload?.targetCardId === "string" ||
+    typeof context.legalAction?.payload?.targetCardDefinitionId === "string";
+  if (context.card.type === "event" && !boundRecoveryTarget) return true;
+  return input.playerView.own.heapOrArchives.length === 0;
 }
 
 function currentNeedAdjustedByPersistentInstall(

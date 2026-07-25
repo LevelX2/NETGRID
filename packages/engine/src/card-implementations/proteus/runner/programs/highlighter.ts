@@ -10,5 +10,12 @@ export const proteusHighlighterImplementation: CardImplementationDefinition = {
       amount: 1,
       visibility: "public",
     },
+    centralAccessCountModifier: {
+      source: "corp_purgeable_runner_virus_counter",
+      counterKind: "highlighter",
+      server: "rd",
+      formula: "per_counter_after_first",
+      visibility: "public",
+    },
   },
 };

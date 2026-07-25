@@ -364,7 +364,7 @@ export function summarizeMatchProgressionMetrics(
   return {
     games,
     actionLimitRate: round(
-      summaries.filter((summary) => summary.winner === "action_limit_reached")
+      summaries.filter((summary) => summary.terminationKind === "action_limit")
         .length / Math.max(games, 1),
     ),
     averageActions: round(

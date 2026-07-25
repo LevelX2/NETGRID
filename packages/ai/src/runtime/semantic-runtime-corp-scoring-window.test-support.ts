@@ -30,6 +30,7 @@ export function corpInput(overrides: {
     legalActions: [],
     eventTail: overrides.eventTail ?? [],
     playerView: {
+      stateVersion: 1,
       own: {
         credits: overrides.ownCredits ?? 5,
         clicks: overrides.ownClicks ?? 3,
@@ -144,9 +145,37 @@ export function server(
   return {
     id: id as AiDecisionInput["playerView"]["servers"][number]["id"],
     label: id,
-    ice: [...ice],
+    ice: ice.map((card) => testInstalledIceWithExactRezQuote(card, id)),
     root: [...root],
   };
+}
+
+function testInstalledIceWithExactRezQuote(
+  card: VisibleCard,
+  serverId: string,
+): VisibleCard {
+  if (
+    card.rezzed !== false ||
+    card.effectiveRezCostQuote !== undefined ||
+    !Number.isSafeInteger(card.rezCost) ||
+    (card.rezCost ?? -1) < 0
+  ) {
+    return card;
+  }
+  return {
+    ...card,
+    effectiveRezCostQuote: {
+      context: "installed",
+      complete: true,
+      cardId: card.instanceId,
+      targetServerId: serverId,
+      projectedServerId: serverId,
+      expiresAtStateVersion: 1,
+      baseCredits: card.rezCost!,
+      finalCredits: card.rezCost!,
+      mandatoryAdditionalCosts: { agendaPoints: 0 },
+    },
+  } as VisibleCard;
 }
 
 export function agendaCard(
@@ -169,13 +198,21 @@ export function operationCard(
   instanceId: string,
   overrides: Partial<VisibleCard> = {},
 ): VisibleCard {
-  return {
+  const card = {
     instanceId,
     known: true,
     type: "operation",
     owner: "corp",
     ...overrides,
   } as VisibleCard;
+  if (
+    card.playCost === undefined &&
+    typeof card.cost === "number" &&
+    Number.isFinite(card.cost)
+  ) {
+    card.playCost = { kind: "fixed", credits: card.cost };
+  }
+  return card;
 }
 
 export function wallIce(
@@ -508,7 +545,6 @@ export function testDependencies() {
       ) === true,
     isRemoteServerTarget: (serverId: string | undefined) =>
       serverId?.startsWith("remote_") === true,
-    visibleIceRezCost: (card: VisibleCard) => card.rezCost,
     actionSourceCard: (input: AiDecisionInput, action: LegalAction) =>
       findVisibleCard(input, String(action.source)),
   };

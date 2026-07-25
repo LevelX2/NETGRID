@@ -1,5 +1,8 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
+import { currentEncounteredIceCard } from "./current-encounter";
+import { isUnacceptableImmediateSafetyThreatSubroutine } from "./encounter-subroutine";
+import { breakSubroutineIndexesForAction } from "./subroutine-indexes";
 
 export type RunnerEncounterViabilityAssessment = {
   canLeadToBreak: boolean;
@@ -75,6 +78,14 @@ export function runnerEncounterActionExclusion(
   if (action.type === "break_subroutine") {
     const blinkExclusion = dependencies.blinkBreakExclusion(input, action);
     if (blinkExclusion) return blinkExclusion;
+    if (breakMissesAvailableImmediateSafetyThreat(input, action)) {
+      return {
+        key: "break_does_not_mitigate_visible_safety_threat",
+        label: "Break löst die sichtbare unmittelbare Gefahr nicht",
+        reason:
+          "encounter_action:break_subroutine|visible_safety_threat_has_exact_break_route:true",
+      };
+    }
     const assessment = dependencies.breakAccessPathAssessment(input, action);
     if (assessment.canPreserveAccessPath) return undefined;
     const evidence = new Set(assessment.evidence);
@@ -95,6 +106,33 @@ export function runnerEncounterActionExclusion(
     };
   }
   return undefined;
+}
+
+function breakMissesAvailableImmediateSafetyThreat(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const subroutines =
+    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines;
+  if (!subroutines?.length) return false;
+  const threatenedIndexes = new Set(
+    subroutines.flatMap((subroutine, index) =>
+      isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine)
+        ? [index]
+        : [],
+    ),
+  );
+  if (threatenedIndexes.size === 0) return false;
+  const actionBreakIndexes = breakSubroutineIndexesForAction(action);
+  if ([...actionBreakIndexes].some((index) => threatenedIndexes.has(index))) {
+    return false;
+  }
+  return input.legalActions.some((candidate) => {
+    if (candidate.type !== "break_subroutine") return false;
+    return [...breakSubroutineIndexesForAction(candidate)].some((index) =>
+      threatenedIndexes.has(index),
+    );
+  });
 }
 
 function sortedUnique(values: string[]): string[] {

@@ -244,6 +244,16 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
       let state = proteusVariableIceGame(`proteus-variable-digiconda-${x}`);
       state.corp.credits = 12;
       const iceId = putCorpIceOnServer(state, "rd", DIGICONDA);
+      const hiddenRunnerIce = getPlayerView(
+        state,
+        "runner",
+      ).servers.find((server) => server.id === "rd")?.ice[0];
+      expect(hiddenRunnerIce).toMatchObject({
+        known: false,
+        rezzed: false,
+      });
+      expect(hiddenRunnerIce?.definitionId).toBeUndefined();
+      expect(hiddenRunnerIce?.strength).toBeUndefined();
       state = apply(
         state,
         "runner",

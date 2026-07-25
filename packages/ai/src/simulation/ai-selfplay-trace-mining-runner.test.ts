@@ -117,6 +117,7 @@ function simulationSummary({
 }): AiSimulationSummary {
   return {
     seed,
+    terminationKind: "action_limit",
     winner: "action_limit_reached",
     actions: maxActions,
     turns: Math.ceil(maxActions / 4),

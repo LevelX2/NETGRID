@@ -1,6 +1,6 @@
 {
   "schemaVersion": "ai-decision-checkpoint-v1",
-  "checkpointId": "cp-e8886-07-funded-known-rd-run",
+  "checkpointId": "cp-e8886-07-funded-known-rd-target-evaluation",
   "source": {
     "kind": "captured_match",
     "findingId": "E8886-C03",
@@ -5305,11 +5305,6 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "actionId": "runner.start_run.rd"
-      }
-    ],
     "runTargets": [
       {
         "actionId": "runner.start_run.rd",

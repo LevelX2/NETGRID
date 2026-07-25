@@ -1,3 +1,4 @@
+import { hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
 import declineZeroYieldDataWallJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e2f2-01-decline-zero-yield-data-wall-rez.json";
@@ -17,14 +18,20 @@ describe("match e2f2 Corp decision-window remediation checkpoints", () => {
   it.each([
     ["declines a zero-yield Data Wall rez", declineZeroYieldDataWallJson],
     ["declines a negative Wall of Static rez", declineNegativeWallStaticJson],
-    ["keeps a positive Misleading Access Menus rez", keepPositiveMenusRezJson],
     [
-      "plays Annual Reviews instead of taking a saturated credit",
+      "declines Misleading Access Menus without exact access reduction",
+      keepPositiveMenusRezJson,
+    ],
+    [
+      "clears HQ overflow with score-acceleration setup instead of saturated credit or overflowing draw",
       annualReviewsOverSaturatedCreditJson,
     ],
-    ["keeps a positive R&D Wall of Static rez", keepPositiveRdWallRezJson],
     [
-      "protects pressured R&D instead of agenda-free HQ",
+      "declines R&D Wall of Static against a funded visible breaker",
+      keepPositiveRdWallRezJson,
+    ],
+    [
+      "purges visible R&D-virus pressure before adding another R&D ICE",
       rdBeforeEmptyHqProtectionJson,
     ],
     [
@@ -46,6 +53,36 @@ describe("match e2f2 Corp decision-window remediation checkpoints", () => {
   ])("%s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
 
+    expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
+  });
+
+  it("does not route Annual Reviews after R&D has become empty", () => {
+    const checkpoint = fixture(annualReviewsOverSaturatedCreditJson);
+    checkpoint.source.kind = "synthetic_companion";
+    const state = checkpoint.engine.testOnlyGameState;
+    const movedCards = [...state.corp.rd];
+    state.corp.rd = [];
+    state.corp.archives.push(...movedCards);
+    for (const cardId of movedCards) {
+      state.cardInstances[cardId] = {
+        ...state.cardInstances[cardId]!,
+        zone: { side: "corp", zone: "archives" },
+        faceup: true,
+        rezzed: false,
+      };
+    }
+    checkpoint.engine.stateHash = hashGameState(state);
+    checkpoint.expectation = {
+      contractKind: "correctness",
+      forbiddenActions: [
+        {
+          type: "play_operation",
+          sourceDefinitionId: "onr_v1_282_annual-reviews",
+        },
+      ],
+    };
+
+    const result = runAiDecisionCheckpoint(checkpoint);
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
   });
 });

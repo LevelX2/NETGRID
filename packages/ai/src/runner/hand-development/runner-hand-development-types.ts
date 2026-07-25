@@ -4,7 +4,7 @@ import type { DeckCapabilityProfile } from "../../deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 
 export const RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION =
-  "runner-hand-development-evaluation-v1" as const;
+  "runner-hand-development-evaluation-v2" as const;
 export const RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION =
   "runner-persistent-install-evaluation-v1" as const;
 
@@ -59,6 +59,11 @@ export type RunnerHandDevelopmentFundingNeed = {
   installOrPlayCost: number;
   missingCredits: number;
   reason: "cannot_pay" | "would_break_floor" | "would_break_run_reserve";
+};
+
+export type RunnerHandDevelopmentActivationPrerequisite = {
+  kind: "same_turn_access" | "hosted_icebreaker";
+  satisfied: boolean;
 };
 
 export type RunnerPersistentInstallCapabilityDelta =
@@ -128,6 +133,7 @@ export type RunnerHandDevelopmentEvaluation = {
   liquidityTiming?: RunnerHandDevelopmentLiquidityTiming;
   priority: number;
   fundingNeed?: RunnerHandDevelopmentFundingNeed;
+  activationPrerequisites: RunnerHandDevelopmentActivationPrerequisite[];
   deferReason: RunnerHandDevelopmentDeferReason;
   legalActionId?: string;
   persistentInstallEvaluation?: RunnerPersistentInstallEvaluation;

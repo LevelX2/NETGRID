@@ -131,6 +131,8 @@ const AMOUNT_KEYS = [
   "runnerGripShuffledIntoStackCount",
   "runnerCardsDrawnAfterGripShuffle",
   "runnerStackAfter",
+  "valuPakRestrictedActionsForgone",
+  "valuPakTemporaryCreditsReturned",
 ] as const;
 
 const TARGET_KEYS = [
@@ -183,6 +185,7 @@ const TARGET_KEYS = [
   "purgeModel",
   "timingWindowId",
   "timingFamily",
+  "valuPakSequenceStopped",
 ] as const;
 
 export function abilityPayloadDiscriminatorEntries(

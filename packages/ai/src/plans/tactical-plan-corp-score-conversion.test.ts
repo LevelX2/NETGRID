@@ -571,6 +571,7 @@ function card(
     title: instanceId,
     type,
     known: true,
+    ...(type === "agenda" ? { agendaPoints: 2 } : {}),
     owner: "corp",
     controller: "corp",
     ...overrides,

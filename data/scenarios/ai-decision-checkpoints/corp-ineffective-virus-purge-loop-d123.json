@@ -14102,17 +14102,28 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_operation",
-        "sourceDefinitionId": "onr_v1_288_day-shift"
-      },
-      {
-        "type": "draw_card"
+        "type": "end_turn"
       }
     ],
     "forbiddenActions": [
       {
         "type": "purge_runner_virus_counters"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "corp.complete_turn"
+      ],
+      "acceptableCapabilities": [
+        "complete_turn_after_productive_routes_exhausted"
+      ],
+      "requiredAssessmentEvidence": [
+        "corp_virus_purge_has_no_visible_strategic_pressure",
+        "productive_legal_routes_exhausted"
+      ],
+      "forbiddenCapabilities": [
+        "purge_visible_runner_viruses"
+      ]
+    }
   }
 }

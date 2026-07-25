@@ -1,9 +1,6 @@
 import type { LegalAction } from "@netgrid/shared";
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
-import {
-  corpImmediateCreditActionIds,
-  corpRemoteProtectionPath,
-} from "./tactical-plan-corp-helpers";
+import { corpRemoteProtectionPath } from "./tactical-plan-corp-helpers";
 import { actionServerId } from "./tactical-plan-server-targets";
 import type {
   PlanBlocker,
@@ -30,10 +27,6 @@ export function buildCorpRemoteProjectPlans(
     doctrine,
   });
   const centralFloor = assessCorpCentralProtectionFloor(context.input);
-  const centralFloorActionIds = centralProtectionFloorActions(
-    context,
-    centralFloor.missingServerIds,
-  );
   const protectionPath = corpRemoteProtectionPath(
     context.input,
     targetServerId,
@@ -75,7 +68,6 @@ export function buildCorpRemoteProjectPlans(
     context,
     targetServerId,
     centralFloorMet: centralFloor.met,
-    centralFloorActionIds,
     targetMet: assessment.targetMet,
     agendaInstallActionIds,
     protectionPath,
@@ -109,6 +101,10 @@ export function buildCorpRemoteProjectPlans(
         `remote_project_background_actions:${doctrine.investmentBudget.backgroundActionsPerTurn}`,
         ...assessment.evidence,
         ...centralFloor.evidence,
+        ...centralFloor.missingServerIds.map(
+          (serverId) =>
+            `ice_allocation_delegated_to_corp_defend_servers:${serverId}`,
+        ),
         ...protectionPath.evidence,
       ],
       scoreBreakdown: [
@@ -206,7 +202,6 @@ function remoteProjectCurrentStep(params: {
   context: TacticalPlanBuildContext;
   targetServerId: string;
   centralFloorMet: boolean;
-  centralFloorActionIds: string[];
   targetMet: boolean;
   agendaInstallActionIds: string[];
   protectionPath: ReturnType<typeof corpRemoteProtectionPath>;
@@ -215,10 +210,10 @@ function remoteProjectCurrentStep(params: {
     return createPlanStep({
       stepId: `remote_project_central_floor:${params.targetServerId}`,
       kind: "protect_remote",
-      desiredActionSemantics: ["install.card", "central_protection_floor"],
-      actionCandidateIds: params.centralFloorActionIds,
+      desiredActionSemantics: ["central_protection_floor"],
+      actionCandidateIds: [],
       rationale: [
-        "satisfy the one-ICE HQ/R&D floor before resuming remote investment",
+        "delegate the one-ICE HQ/R&D floor to corp.defend_servers before resuming remote investment",
       ],
     });
   }
@@ -249,25 +244,6 @@ function remoteProjectCurrentStep(params: {
       ],
     });
   }
-  if (params.protectionPath.fundingCandidate) {
-    const candidate = params.protectionPath.fundingCandidate;
-    return createPlanStep({
-      stepId: `remote_project_fund:${params.targetServerId}`,
-      kind: "build_rez_reserve",
-      desiredActionSemantics: ["economy.gain_credit", "card_ability.trigger"],
-      actionCandidateIds: corpImmediateCreditActionIds(params.context.input),
-      requiredCapabilities: [
-        {
-          capabilityId: `remote_project_rez_reserve:${params.targetServerId}`,
-          kind: "rez_reserve",
-          side: "corp",
-          minimumCredits: candidate.actionCreditCost + candidate.rezCost,
-          evidence: [`protection_action:${candidate.actionId}`],
-        },
-      ],
-      rationale: ["fund the next concrete protection layer"],
-    });
-  }
   return createPlanStep({
     stepId: `remote_project_find_protection:${params.targetServerId}`,
     kind: "find_remote_protection",
@@ -275,22 +251,6 @@ function remoteProjectCurrentStep(params: {
     actionCandidateIds: params.protectionPath.acquisitionActionIds,
     rationale: ["find effective ICE instead of overprotecting central servers"],
   });
-}
-
-function centralProtectionFloorActions(
-  context: TacticalPlanBuildContext,
-  missingServerIds: readonly string[],
-): string[] {
-  const missing = new Set(missingServerIds);
-  return context.input.legalActions
-    .filter(
-      (action) =>
-        action.type === "install_card" &&
-        action.payload?.placement === "ice" &&
-        missing.has(actionServerId(action) ?? ""),
-    )
-    .map((action) => action.actionId)
-    .sort();
 }
 
 function remoteProjectSequence(serverId: string): PlanStep[] {

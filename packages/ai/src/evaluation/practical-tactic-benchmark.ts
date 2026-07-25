@@ -1,6 +1,5 @@
 import type {
   ActionType,
-  AiDecision,
   AiDecisionInput,
   LegalAction,
   Side,
@@ -45,9 +44,9 @@ export type PracticalTacticBenchmarkResult = {
   }>;
 };
 
-export type PracticalTacticDecisionSelector = (
-  input: AiDecisionInput,
-) => Pick<AiDecision, "actionId">;
+export type PracticalTacticDecisionSelector = (input: AiDecisionInput) => {
+  actionId: string;
+};
 
 type ActionSpec = {
   actionId: string;
@@ -104,8 +103,7 @@ export const PRACTICAL_TACTIC_BENCHMARK_CASES: PracticalTacticBenchmarkCase[] =
 
 export function evaluatePracticalTacticBenchmark(
   selector: PracticalTacticDecisionSelector,
-  cases: readonly PracticalTacticBenchmarkCase[] =
-    PRACTICAL_TACTIC_BENCHMARK_CASES,
+  cases: readonly PracticalTacticBenchmarkCase[] = PRACTICAL_TACTIC_BENCHMARK_CASES,
 ): PracticalTacticBenchmarkResult {
   const totalsByCategory = emptyCategoryCounts();
   const hitsByCategory = emptyCategoryCounts();
@@ -127,7 +125,10 @@ export function evaluatePracticalTacticBenchmark(
       });
     }
   }
-  const hits = Object.values(hitsByCategory).reduce((sum, value) => sum + value, 0);
+  const hits = Object.values(hitsByCategory).reduce(
+    (sum, value) => sum + value,
+    0,
+  );
   const caseCount = cases.length;
   return {
     caseCount,
@@ -140,17 +141,24 @@ export function evaluatePracticalTacticBenchmark(
   };
 }
 
-export function frozenLegacyPracticalTacticSelector(
-  input: AiDecisionInput,
-): Pick<AiDecision, "actionId"> {
+export function frozenLegacyPracticalTacticSelector(input: AiDecisionInput): {
+  actionId: string;
+} {
   const benchmarkCase = PRACTICAL_TACTIC_BENCHMARK_CASES.find(
     (candidate) => candidate.input.decisionId === input.decisionId,
   );
-  return { actionId: benchmarkCase?.frozenLegacyActionId ?? input.legalActions[0]?.actionId ?? "" };
+  return {
+    actionId:
+      benchmarkCase?.frozenLegacyActionId ??
+      input.legalActions[0]?.actionId ??
+      "",
+  };
 }
 
 function buildCase(spec: CaseSpec): PracticalTacticBenchmarkCase {
-  const legalActions = spec.actions.map((action) => legalAction(spec.side, action));
+  const legalActions = spec.actions.map((action) =>
+    legalAction(spec.side, action),
+  );
   return {
     caseId: spec.caseId,
     category: spec.category,
@@ -162,15 +170,20 @@ function buildCase(spec: CaseSpec): PracticalTacticBenchmarkCase {
   };
 }
 
-function inputFor(spec: CaseSpec, legalActions: LegalAction[]): AiDecisionInput {
+function inputFor(
+  spec: CaseSpec,
+  legalActions: LegalAction[],
+): AiDecisionInput {
   return {
     side: spec.side,
     playerView: {
       side: spec.side,
       stateVersion: 1,
-      timingPoint: spec.side === "runner" ? "runner_action.main" : "corp_action.main",
+      timingPoint:
+        spec.side === "runner" ? "runner_action.main" : "corp_action.main",
       activeSide: spec.side,
-      phase: spec.side === "runner" ? "runner_action_phase" : "corp_action_phase",
+      phase:
+        spec.side === "runner" ? "runner_action_phase" : "corp_action_phase",
       own: {
         identity: visibleCard(`${spec.side}-identity`, "identity"),
         credits: spec.credits ?? 5,
@@ -237,7 +250,8 @@ function safeScoreCases(): CaseSpec[] {
     frozenLegacyActionId: `gain-${index}`,
     acceptableActionIds: [`score-${index}`],
     badActionIds: [`gain-${index}`, `protect-${index}`],
-    rationale: "Corp hat ein sicheres Score-Fenster; Scoren ist der konkrete Fortschritt.",
+    rationale:
+      "Corp hat ein sicheres Score-Fenster; Scoren ist der konkrete Fortschritt.",
     actions: [
       {
         actionId: `score-${index}`,
@@ -264,9 +278,14 @@ function stealAgendaCases(): CaseSpec[] {
     frozenLegacyActionId: `decline-${index}`,
     acceptableActionIds: [`steal-${index}`],
     badActionIds: [`decline-${index}`],
-    rationale: "Runner kann eine Agenda stehlen; Ablehnen ist eindeutig schlecht.",
+    rationale:
+      "Runner kann eine Agenda stehlen; Ablehnen ist eindeutig schlecht.",
     actions: [
-      { actionId: `steal-${index}`, type: "steal_agenda", label: "Steal agenda" },
+      {
+        actionId: `steal-${index}`,
+        type: "steal_agenda",
+        label: "Steal agenda",
+      },
       { actionId: `decline-${index}`, type: "decline_trash", label: "Decline" },
     ],
   }));
@@ -281,7 +300,8 @@ function trashValueCases(): CaseSpec[] {
     frozenLegacyActionId: `decline-trash-${index}`,
     acceptableActionIds: [`trash-${index}`],
     badActionIds: [`decline-trash-${index}`],
-    rationale: "Runner kann eine sichtbar wertvolle Access-Karte bezahlen und trashen.",
+    rationale:
+      "Runner kann eine sichtbar wertvolle Access-Karte bezahlen und trashen.",
     actions: [
       {
         actionId: `trash-${index}`,
@@ -289,7 +309,11 @@ function trashValueCases(): CaseSpec[] {
         label: "Trash SanSan City Grid",
         costs: [{ credits: 3 }],
       },
-      { actionId: `decline-trash-${index}`, type: "decline_trash", label: "Decline trash" },
+      {
+        actionId: `decline-trash-${index}`,
+        type: "decline_trash",
+        label: "Decline trash",
+      },
     ],
   }));
 }
@@ -302,7 +326,8 @@ function openAccessCardCases(): CaseSpec[] {
     frozenLegacyActionId: `gain-before-access-${index}`,
     acceptableActionIds: [`access-card-${index}`],
     badActionIds: [`gain-before-access-${index}`],
-    rationale: "Runner ist bereits im Access-Fenster; die sichtbare Access-Aktion ist konkreter Fortschritt.",
+    rationale:
+      "Runner ist bereits im Access-Fenster; die sichtbare Access-Aktion ist konkreter Fortschritt.",
     run: {
       attackedServerId: "rd",
       phase: "access",
@@ -310,8 +335,16 @@ function openAccessCardCases(): CaseSpec[] {
       successful: true,
     },
     actions: [
-      { actionId: `access-card-${index}`, type: "access_card", label: "Access R&D card" },
-      { actionId: `gain-before-access-${index}`, type: "gain_credit", label: "Gain credit" },
+      {
+        actionId: `access-card-${index}`,
+        type: "access_card",
+        label: "Access R&D card",
+      },
+      {
+        actionId: `gain-before-access-${index}`,
+        type: "gain_credit",
+        label: "Gain credit",
+      },
     ],
   }));
 }
@@ -325,9 +358,18 @@ function coverageInstallCases(): CaseSpec[] {
     frozenLegacyActionId: `run-hq-${index}`,
     acceptableActionIds: [`install-fracter-${index}`],
     badActionIds: [`run-hq-${index}`],
-    rationale: "Ein sichtbarer Fracter schließt die sichtbare Barrier-Coverage-Lücke.",
-    gripOrHq: [visibleCard(`fracter-${index}`, "program", ["icebreaker", "fracter"])],
-    servers: [server("hq", [visibleCard(`barrier-${index}`, "ice", ["barrier"], true)], [])],
+    rationale:
+      "Ein sichtbarer Fracter schließt die sichtbare Barrier-Coverage-Lücke.",
+    gripOrHq: [
+      visibleCard(`fracter-${index}`, "program", ["icebreaker", "fracter"]),
+    ],
+    servers: [
+      server(
+        "hq",
+        [visibleCard(`barrier-${index}`, "ice", ["barrier"], true)],
+        [],
+      ),
+    ],
     actions: [
       {
         actionId: `install-fracter-${index}`,
@@ -335,7 +377,12 @@ function coverageInstallCases(): CaseSpec[] {
         label: "Install Fracter",
         source: `fracter-${index}`,
       },
-      { actionId: `run-hq-${index}`, type: "start_run", label: "Run HQ", payload: { serverId: "hq" } },
+      {
+        actionId: `run-hq-${index}`,
+        type: "start_run",
+        label: "Run HQ",
+        payload: { serverId: "hq" },
+      },
     ],
   }));
 }
@@ -348,7 +395,8 @@ function takeHighPayoffRunCases(): CaseSpec[] {
     frozenLegacyActionId: `draw-before-payoff-run-${index}`,
     acceptableActionIds: [`run-payoff-${index}`],
     badActionIds: [`draw-before-payoff-run-${index}`],
-    rationale: "Ein markierter frischer High-Payoff-Run soll gegenüber passiver Vorbereitung genommen werden.",
+    rationale:
+      "Ein markierter frischer High-Payoff-Run soll gegenüber passiver Vorbereitung genommen werden.",
     actions: [
       {
         actionId: `run-payoff-${index}`,
@@ -382,7 +430,11 @@ function realPunishCases(): CaseSpec[] {
         label: "Closed Accounts punish tag",
         payload: { tagPunishAction: true },
       },
-      { actionId: `gain-punish-${index}`, type: "gain_credit", label: "Gain credit" },
+      {
+        actionId: `gain-punish-${index}`,
+        type: "gain_credit",
+        label: "Gain credit",
+      },
     ],
   }));
 }
@@ -396,7 +448,8 @@ function stalePunishCases(): CaseSpec[] {
     frozenLegacyActionId: `punish-stale-${index}`,
     acceptableActionIds: [`advance-${index}`, `score-${index}`],
     badActionIds: [`punish-stale-${index}`],
-    rationale: "Ohne Tag-Fenster ist Punish stale; Scoreline-Fortschritt ist konkret.",
+    rationale:
+      "Ohne Tag-Fenster ist Punish stale; Scoreline-Fortschritt ist konkret.",
     actions: [
       {
         actionId: `punish-stale-${index}`,
@@ -404,8 +457,16 @@ function stalePunishCases(): CaseSpec[] {
         label: "Closed Accounts punish tag",
         payload: { tagPunishAction: true },
       },
-      { actionId: `advance-${index}`, type: "advance_card", label: "Advance agenda" },
-      { actionId: `score-${index}`, type: "score_agenda", label: "Score agenda" },
+      {
+        actionId: `advance-${index}`,
+        type: "advance_card",
+        label: "Advance agenda",
+      },
+      {
+        actionId: `score-${index}`,
+        type: "score_agenda",
+        label: "Score agenda",
+      },
     ],
   }));
 }
@@ -418,7 +479,8 @@ function continueRunCases(): CaseSpec[] {
     frozenLegacyActionId: `jack-out-${index}`,
     acceptableActionIds: [`continue-${index}`],
     badActionIds: [`jack-out-${index}`],
-    rationale: "Der Runner steht in einem erreichbaren Run und soll zum Access fortsetzen.",
+    rationale:
+      "Der Runner steht in einem erreichbaren Run und soll zum Access fortsetzen.",
     run: {
       attackedServerId: "rd",
       phase: "movement",
@@ -426,7 +488,11 @@ function continueRunCases(): CaseSpec[] {
       successful: true,
     },
     actions: [
-      { actionId: `continue-${index}`, type: "continue_run", label: "Continue to access" },
+      {
+        actionId: `continue-${index}`,
+        type: "continue_run",
+        label: "Continue to access",
+      },
       { actionId: `jack-out-${index}`, type: "jack_out", label: "Jack out" },
     ],
   }));
@@ -440,10 +506,20 @@ function avoidStaleRunCases(): CaseSpec[] {
     frozenLegacyActionId: `run-rd-stale-${index}`,
     acceptableActionIds: [`install-pressure-${index}`, `draw-${index}`],
     badActionIds: [`run-rd-stale-${index}`],
-    rationale: "Ein wiederholter Run ohne frischen Payoff soll zugunsten konkreter Vorbereitung vermieden werden.",
+    rationale:
+      "Ein wiederholter Run ohne frischen Payoff soll zugunsten konkreter Vorbereitung vermieden werden.",
     actions: [
-      { actionId: `run-rd-stale-${index}`, type: "start_run", label: "Repeat stale R&D run", payload: { serverId: "rd", knownNoCurrentPayoff: true } },
-      { actionId: `install-pressure-${index}`, type: "install_card", label: "Install R&D Interface" },
+      {
+        actionId: `run-rd-stale-${index}`,
+        type: "start_run",
+        label: "Repeat stale R&D run",
+        payload: { serverId: "rd", knownNoCurrentPayoff: true },
+      },
+      {
+        actionId: `install-pressure-${index}`,
+        type: "install_card",
+        label: "Install R&D Interface",
+      },
       { actionId: `draw-${index}`, type: "draw_card", label: "Draw" },
     ],
   }));
@@ -476,11 +552,13 @@ function visibleCard(
   };
 }
 
-function emptyCategoryCounts(): Record<PracticalTacticBenchmarkCategory, number> {
-  return Object.fromEntries(CATEGORY_ORDER.map((category) => [category, 0])) as Record<
-    PracticalTacticBenchmarkCategory,
-    number
-  >;
+function emptyCategoryCounts(): Record<
+  PracticalTacticBenchmarkCategory,
+  number
+> {
+  return Object.fromEntries(
+    CATEGORY_ORDER.map((category) => [category, 0]),
+  ) as Record<PracticalTacticBenchmarkCategory, number>;
 }
 
 function round(value: number): number {

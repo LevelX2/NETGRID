@@ -27,12 +27,14 @@ describe("staleKnownRndRepeatRunPenalty", () => {
     expect(staleKnownRndRepeatRunPenalty(input, runRd)).toBe(420);
   });
 
-  it("chooses economy over a repeated label-only R&D run on a known low-value top card", () => {
+  it("ends after rejecting a repeated label-only R&D run on a known low-value top card", () => {
     const runRd = runAction("run-rd", "rd");
     const gain = action("gain", "gain_credit");
+    const end = action("end", "end_turn");
     const input = runnerInput({
-      legalActions: [runRd, gain],
+      legalActions: [runRd, gain, end],
       events: [
+        runnerRunStartEvent("evt_rd_run", 0, "rd"),
         rdLabelOnlyAccessEvent(
           "evt_rd_access",
           1,
@@ -43,13 +45,18 @@ describe("staleKnownRndRepeatRunPenalty", () => {
     });
 
     const decision = chooseRunnerAction(input);
+    const runAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === runRd.actionId,
+      );
 
-    expect(decision.actionId).toBe("gain");
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "rd_run_suppressed_by_known_low_value_top:true",
-    );
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "semantic_excluded:known_central_no_current_payoff",
+    expect(decision.actionId).toBe("end");
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.decisionDebug?.planKind).toBe("runner.complete_turn");
+    expect(runAlternative?.whyNot).toEqual(
+      expect.arrayContaining([
+        "candidate_plan_evidence:runner_central_pressure_known_no_current_payoff:rd",
+      ]),
     );
   });
 });
@@ -62,6 +69,7 @@ function runnerInput(params: {
   const playerView: PlayerView = {
     side: "runner",
     stateVersion,
+    turnSerial: 0,
     activeSide: "runner",
     phase: "runner_action_phase",
     timingPoint: "runner_action.main",
@@ -124,6 +132,7 @@ function rdLabelOnlyAccessEvent(
     type: "access_card",
     stateVersionBefore,
     stateVersionAfter: stateVersionBefore + 1,
+    turnSerial: 0,
     stateHashAfter: `hash_${eventId}`,
     visibilityClass: "hidden_info_barrier",
     publicPayload: {
@@ -133,6 +142,27 @@ function rdLabelOnlyAccessEvent(
       targets: { serverLabel: "R&D" },
       cardDefinitionId,
       title,
+    },
+  } as PublicGameEvent;
+}
+
+function runnerRunStartEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  serverId: string,
+): PublicGameEvent {
+  return {
+    eventId,
+    type: "start_run",
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    turnSerial: 0,
+    stateHashAfter: `hash_${eventId}`,
+    visibilityClass: "public",
+    publicPayload: {
+      actor: "runner",
+      actionType: "start_run",
+      serverId,
     },
   } as PublicGameEvent;
 }
@@ -159,9 +189,9 @@ function action(actionId: string, type: LegalAction["type"]): LegalAction {
     side: "runner",
     type,
     label: actionId,
-    source: "basic_action",
+    source: type === "end_turn" ? "game_rule" : "basic_action",
     timingPoint: "runner_action.main",
-    costs: [{ clicks: 1 }],
+    costs: [{ clicks: type === "end_turn" ? 0 : 1 }],
     targetRequirements: [],
     visibility: "public",
     expiresAtStateVersion: 2,

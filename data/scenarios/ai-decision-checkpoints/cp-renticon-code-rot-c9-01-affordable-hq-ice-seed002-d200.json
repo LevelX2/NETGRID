@@ -20209,9 +20209,22 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "targetServerId": "hq"
+        "type": "end_turn"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "corp.complete_turn"
+      ],
+      "acceptableCapabilities": [
+        "complete_turn_after_productive_routes_exhausted"
+      ],
+      "requiredAssessmentEvidence": [
+        "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
+        "corp_exact_draw_projection_exceeds_hand_capacity",
+        "corp_ice_install_has_no_engine_certified_access_probability_reduction",
+        "productive_legal_routes_exhausted"
+      ]
+    }
   }
 }

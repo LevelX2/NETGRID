@@ -26,6 +26,14 @@ export function compareSemanticShadowToRuntime(params: {
   trace: SemanticDecisionTrace;
   runtimeDecision: AiDecision;
 }): SemanticShadowRuntimeComparison {
+  if (
+    params.runtimeDecision.selectionKind ===
+    "engine_randomized_ice_install_selection"
+  ) {
+    throw new Error(
+      "semantic_shadow_comparison_requires_applied_engine_randomized_decision",
+    );
+  }
   const legalActionIds = new Set(params.frame.legalActionIds);
   const top = params.trace.rankedActions[0];
   const shadowTopLegal = top ? legalActionIds.has(top.actionId) : false;
@@ -44,7 +52,9 @@ export function compareSemanticShadowToRuntime(params: {
     ...(shadowTopActionId
       ? { shadowTopActionId: safeReportString(shadowTopActionId) }
       : {}),
-    agreement: Boolean(runtimeLegal && shadowTopActionId === params.runtimeDecision.actionId),
+    agreement: Boolean(
+      runtimeLegal && shadowTopActionId === params.runtimeDecision.actionId,
+    ),
     runtimeReasonCode: safeReportString(params.runtimeDecision.reasonCode),
     ...(top && shadowTopLegal ? { shadowTopScore: top.score } : {}),
     ...(top?.primaryGoalId && shadowTopLegal
@@ -77,10 +87,12 @@ export function compareSemanticShadowToRuntime(params: {
         ? [`shadow_top_goal:${top.primaryGoalId}`]
         : []),
       ...(top && shadowTopLegal
-        ? top.whyChosen?.map((fact) => `shadow_top_why_chosen:${fact}`) ?? []
+        ? (top.whyChosen?.map((fact) => `shadow_top_why_chosen:${fact}`) ?? [])
         : []),
       ...(params.trace.frameSummary.calibrationProfileId
-        ? [`calibration_profile:${params.trace.frameSummary.calibrationProfileId}`]
+        ? [
+            `calibration_profile:${params.trace.frameSummary.calibrationProfileId}`,
+          ]
         : []),
       ...(params.trace.frameSummary.calibrationMode
         ? [`calibration_mode:${params.trace.frameSummary.calibrationMode}`]

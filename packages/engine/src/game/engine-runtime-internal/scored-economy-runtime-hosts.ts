@@ -53,10 +53,12 @@ import {
 import {
   assertCorpRezCostQuoteValid,
   corpServerIdForInstalledCard,
+  projectHqInstallRezOptionQuote,
+  projectInstalledCorpSequenceRezPayment,
   quoteCorpIceInstallCost,
-  rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
   type CorpTracePaymentDependencies,
+  type CorpSequenceRezPaymentProjection,
   type RunnerTracePaymentDependencies,
 } from "../payment";
 import {
@@ -199,7 +201,11 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
+import {
+  finalizeCorpRezAfterExternalPayment,
+  rezCard as executeRezCard,
+  type RezCardHost,
+} from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -699,6 +705,84 @@ export function createScoredEconomyRuntimeHosts(
     legalAction: LegalAction,
     playerAction?: PlayerAction,
   ): CorpInstallRezSequenceHandlerHost {
+    const payAndFinalizeSequenceRez = (
+      cardId: CardInstanceId,
+      quote: Extract<CorpSequenceRezPaymentProjection, { complete: true }>,
+    ) => {
+      if (
+        quote.regularCreditsAvailable !== state.corp.credits ||
+        quote.temporaryCreditsApplied > quote.temporaryCreditsAvailable ||
+        quote.regularCreditsRequired !==
+          quote.finalCredits - quote.temporaryCreditsApplied ||
+        quote.creditPayable !==
+          (state.corp.credits >= quote.regularCreditsRequired) ||
+        !quote.creditPayable ||
+        !quote.additionalCostsPayable ||
+        !quote.affordable
+      )
+        throw new Error(
+          "Die Data-Fort-Reclamation-Rez-Quote ist nicht mehr bezahlbar.",
+        );
+      const agendaPointCost = quote.mandatoryAdditionalCosts.agendaPoints;
+      if (agendaPointCost > 0) {
+        const costResult = deps.spendCorpAgendaPointCost(
+          state,
+          agendaPointCost,
+        );
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          agendaPointCost,
+          agendaPointCostPaid: costResult.paidPoints,
+          ...(costResult.bonusPointsSpent > 0
+            ? { corpBonusAgendaPointsSpent: costResult.bonusPointsSpent }
+            : {}),
+          ...(costResult.spentAgendaDefinitionIds.length > 0
+            ? {
+                spentAgendaDefinitionIds:
+                  costResult.spentAgendaDefinitionIds.join(","),
+              }
+            : {}),
+        };
+      }
+      if (quote.regularCreditsRequired > 0)
+        spendCredits(state, "corp", quote.regularCreditsRequired);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        cardId,
+        rezCostPaid: quote.finalCredits,
+        temporaryCreditsSpent: quote.temporaryCreditsApplied,
+        corpCreditsSpent: quote.regularCreditsRequired,
+        ...(quote.reductionSourceDefinitionIds?.length
+          ? {
+              rezCostReductionSourceDefinitionIds:
+                quote.reductionSourceDefinitionIds.join(","),
+            }
+          : {}),
+        ...(quote.increaseSourceDefinitionIds?.length
+          ? {
+              rezCostIncreaseSourceDefinitionIds:
+                quote.increaseSourceDefinitionIds.join(","),
+            }
+          : {}),
+      };
+      finalizeCorpRezAfterExternalPayment(
+        deps.rezCardHost(state),
+        cardId,
+        legalAction,
+      );
+      if (quote.cardType !== "ice")
+        resolveCorpRootRezEffect(
+          deps.runRezWindowHostForState(state),
+          cardId,
+          legalAction,
+        );
+      return {
+        temporaryCreditsSpent: quote.temporaryCreditsApplied,
+        temporaryCreditsRemaining:
+          quote.temporaryCreditsAvailable - quote.temporaryCreditsApplied,
+        corpCreditsSpent: quote.regularCreditsRequired,
+      };
+    };
     return {
       state,
       legalAction,
@@ -718,7 +802,6 @@ export function createScoredEconomyRuntimeHosts(
           deps.canInstallCorpRootCardInServer(state, definition, server),
         isRegionUpgrade: deps.isRegionUpgrade,
         rootInstallRezzesOnInstall: deps.rootInstallRezzesOnInstall,
-        rezCostForCard: (cardId) => rezCostForCard(state, cardId),
         isScoredAgendaFreeRezCandidate: (cardId) => {
           const instance = state.cardInstances[cardId];
           return (
@@ -760,6 +843,94 @@ export function createScoredEconomyRuntimeHosts(
             deps.runRezWindowHostForState(state),
             cardId,
           );
+        },
+        preflightMandatoryHqInstallRez: (
+          selectedCardIds,
+          temporaryCreditsAvailable,
+        ) => {
+          const previewState = structuredClone(state);
+          const previewLegalAction = structuredClone(legalAction);
+          const previewHost = corpInstallRezSequenceHandlerHost(
+            previewState,
+            previewLegalAction,
+          );
+          const previewServer = createRemote(previewState);
+          let temporaryCreditsRemaining = temporaryCreditsAvailable;
+          for (const cardId of selectedCardIds) {
+            const definition = definitionFor(previewState, cardId);
+            removeFromAllZones(previewState, cardId);
+            if (definition.type === "ice") {
+              previewServer.ice.push(cardId);
+              previewState.cardInstances[cardId] = {
+                ...mustInstance(previewState.cardInstances, cardId),
+                faceup: false,
+                rezzed: false,
+                zone: {
+                  side: "corp",
+                  zone: "serverIce",
+                  serverId: previewServer.id,
+                },
+              };
+              continue;
+            }
+            previewServer.root.push(cardId);
+            previewState.cardInstances[cardId] = {
+              ...mustInstance(previewState.cardInstances, cardId),
+              faceup: false,
+              rezzed: false,
+              zone: {
+                side: "corp",
+                zone: "serverRoot",
+                serverId: previewServer.id,
+              },
+            };
+            if (
+              !deps.isRegionUpgrade(definition) &&
+              !deps.rootInstallRezzesOnInstall(definition)
+            )
+              continue;
+            const payment =
+              previewHost.callbacks.payAndFinalizeMandatoryHqInstallRez(
+                cardId,
+                temporaryCreditsRemaining,
+              );
+            temporaryCreditsRemaining =
+              payment.temporaryCreditsRemaining;
+            if (deps.isRegionUpgrade(definition))
+              deps.trashOlderRegionUpgradesInServer(
+                previewState,
+                previewServer,
+                cardId,
+                previewLegalAction,
+              );
+          }
+        },
+        projectHqInstallRezOptionQuote: (choice, option) =>
+          projectHqInstallRezOptionQuote(state, choice, option),
+        payAndFinalizeHqInstallRezOption: (cardId, quote) => {
+          if (
+            quote.cardId !== cardId ||
+            quote.stateVersion !== state.stateVersion
+          )
+            throw new Error(
+              "Die Data-Fort-Reclamation-Rez-Quote ist nicht mehr gebunden.",
+            );
+          return payAndFinalizeSequenceRez(cardId, quote);
+        },
+        payAndFinalizeMandatoryHqInstallRez: (
+          cardId,
+          temporaryCreditsAvailable,
+        ) => {
+          const quote = projectInstalledCorpSequenceRezPayment(
+            state,
+            cardId,
+            temporaryCreditsAvailable,
+          );
+          if (!quote.complete || !quote.affordable)
+            throw new Error(
+              "Die verpflichtende Data-Fort-Reclamation-Rez-Quote ist unvollstaendig oder unbezahlbar.",
+            );
+          return payAndFinalizeSequenceRez(cardId, quote);
         },
       },
     };

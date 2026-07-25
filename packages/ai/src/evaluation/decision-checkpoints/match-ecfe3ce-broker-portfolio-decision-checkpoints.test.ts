@@ -10,16 +10,26 @@ import secondInstallJson from "../../../../../data/scenarios/ai-decision-checkpo
 import twoSourceFirstLoadJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-ecfe3ce-broker-08-two-source-first-load.json";
 import maturePoolCashoutJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-ecfe3ce-broker-09-mature-pool-cashout.json";
 import twoSourceBalancedLoadJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-ecfe3ce-broker-10-two-source-balanced-load.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match ECFE3CE Broker portfolio checkpoints", () => {
   it.each([
-    ["allows the zero-credit emergency cashout", emergencyCashoutJson],
-    ["allows the score-window cashout", scoreWindowCashoutJson],
-    ["allows the pressure cashout", pressureCashoutJson],
     [
-      "restores a reaction floor from a nine-credit bank",
+      "rejects a zero-credit cashout without a consuming parent",
+      emergencyCashoutJson,
+    ],
+    [
+      "rejects an unsafe score-window cashout without an executable run parent",
+      scoreWindowCashoutJson,
+    ],
+    [
+      "rejects pressure cashout without an executable pressure parent",
+      pressureCashoutJson,
+    ],
+    [
+      "does not invent a reaction-floor parent for a nine-credit bank",
       reactionFloorCashoutJson,
     ],
     [
@@ -42,20 +52,40 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("loads three stored credits instead of cashing out without a liquidity need", () => {
+  it("uses the productive open-HQ plan instead of cashing out without a bound need", () => {
     expectCheckpointToPass(fixture(holdThreeJson));
   });
 
   it("uses the last click to store three credits instead of taking one liquid credit", () => {
-    expectCheckpointToPass(fixture(lastClickLoadJson));
+    const result = expectCheckpointToPass(fixture(lastClickLoadJson));
+    const portfolio =
+      result.decision?.decisionDebug?.detailSections?.find(
+        (section) => section.id === "plan_portfolio",
+      )?.items ?? [];
+
+    expect(result.decision?.decisionDebug?.planKind).toBe(
+      "runner.credit_bank",
+    );
+    expect(portfolio).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(
+          /runner\.develop_board_and_hand:card%3Arunner_onr_v1_108_score_3.*phase:fund.*viability:blocked/,
+        ),
+      ]),
+    );
   });
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    ["cp-ecfe3ce-broker-02-hold-three-with-liquid-five"],
+  );
 }
 
-function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {
+function expectCheckpointToPass(
+  checkpoint: AiDecisionCheckpointV1,
+): ReturnType<typeof runAiDecisionCheckpoint> {
   const result = runAiDecisionCheckpoint(checkpoint);
   expect(
     result.ok,
@@ -70,4 +100,5 @@ function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {
       2,
     )}`,
   ).toBe(true);
+  return result;
 }

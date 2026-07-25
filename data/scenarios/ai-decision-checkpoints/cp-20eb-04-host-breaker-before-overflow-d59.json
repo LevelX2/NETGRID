@@ -6905,13 +6905,20 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.install_card.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.runner_onr_proteus_139_eurocorpse-tm-spin-chip_1"
+        "actionId": "runner.trigger_ability"
       }
     ],
     "forbiddenActions": [
       {
         "actionId": "runner.draw_card"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_hq_access"],
+      "requiredAssessmentEvidence": [
+        "runner_viable_followup_run_lock_release"
+      ]
+    }
   }
 }

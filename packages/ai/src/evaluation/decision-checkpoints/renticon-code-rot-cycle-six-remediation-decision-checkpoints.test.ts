@@ -11,7 +11,10 @@ const FIXTURES = [
   ["rejects a negative persistent install", negativeInstallJson],
   ["stops a saturated coverage search", saturatedSearchJson],
   ["converts a rich-credit repeat into progress", richCreditRepeatJson],
-  ["stops a mapped overflow draw", overflowDrawJson],
+  [
+    "converts the overflow window into a free Archives information run",
+    overflowDrawJson,
+  ],
 ] as const;
 
 describe("Rent-I-Con versus CODE ROT cycle-six remediation checkpoints", () => {

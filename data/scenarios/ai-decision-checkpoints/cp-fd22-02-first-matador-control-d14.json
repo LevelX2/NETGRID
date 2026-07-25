@@ -4520,7 +4520,20 @@
       {
         "type": "install_card",
         "sourceDefinitionId": "onr_classic_028_matador"
+      },
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_classic_030_psychic-friend"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.rig_and_coverage"
+      ],
+      "acceptableCapabilities": [
+        "install_breaker_code_gate",
+        "install_breaker_sentry"
+      ]
+    }
   }
 }

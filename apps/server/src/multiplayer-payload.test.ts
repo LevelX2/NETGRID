@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createGame } from "@netgrid/engine";
 import {
   CURRENT_RULES_BASELINE,
+  type CardInstanceId,
   type DeckPublicMetadata,
   type PublicGameEvent,
   type Side,
@@ -35,7 +36,120 @@ describe("multiplayer side payload projection", () => {
     ).toBeGreaterThan(1);
     expect(payload.eventTail[0]?.publicPayload.chronicleTurnSide).toBe("corp");
   });
+
+  it("keeps a Data Fort optional-rez quote actor-private in side payloads", () => {
+    const record = storedMatchWithEvents(0);
+    const state = record.gameState;
+    const corpCardIds = Object.entries(state.cardInstances)
+      .filter(([, card]) => card.owner === "corp")
+      .map(([cardId]) => cardId as CardInstanceId);
+    const sourceAgendaId = corpCardIds[0] as CardInstanceId;
+    const iceId = corpCardIds[1] as CardInstanceId;
+    if (!sourceAgendaId || !iceId)
+      throw new Error("Missing Corp cards for payload fixture");
+    removeCorpCardFromZones(state, sourceAgendaId);
+    removeCorpCardFromZones(state, iceId);
+    state.stateVersion = 12;
+    state.corp.credits = 5;
+    state.corp.scoreArea = [sourceAgendaId];
+    state.cardInstances[sourceAgendaId] = {
+      ...state.cardInstances[sourceAgendaId]!,
+      definitionId: "onr_v1_197_data-fort-reclamation",
+      owner: "corp",
+      controller: "corp",
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "scoreArea" },
+    };
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [iceId],
+      root: [],
+    });
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[iceId]!,
+      definitionId: "simple_barrier_ice",
+      owner: "corp",
+      controller: "corp",
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+    };
+    state.hqInstallRezSequence = {
+      sourceAgendaId,
+      sourceDefinitionId: "onr_v1_197_data-fort-reclamation",
+      serverId: "remote_1",
+      selectedCardIds: [iceId],
+      nextCardIndex: 1,
+      temporaryCreditsProvided: 10,
+      temporaryCreditsRemaining: 10,
+    };
+    state.pendingChoice = {
+      choiceId: "choice_data_fort_optional_rez_12",
+      side: "corp",
+      source:
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:opaque",
+      prompt: "Installierte Karte rezzen?",
+      kind: "select_cards",
+      options: [
+        {
+          id: `card_${iceId}`,
+          label: "Simple Barrier ICE",
+          value: iceId,
+        },
+      ],
+      minSelections: 0,
+      maxSelections: 1,
+      stateVersion: 12,
+      visibility: "hidden_info_barrier",
+    };
+
+    const deps = {
+      isAiSide: () => false,
+      safeDisplayNameFor: () => "Gegenüber",
+      aiTurnPresentationFor: () => undefined,
+      resultSummaryFor: () => undefined,
+      retentionProtectionPayload: { retentionProtected: false },
+    };
+    const corpPayload = buildSidePayload(record, "corp", deps);
+    const runnerPayload = buildSidePayload(record, "runner", deps);
+    expect(
+      corpPayload.pendingChoice?.options[0]?.hqInstallRezOptionQuote,
+    ).toMatchObject({
+      choiceId: "choice_data_fort_optional_rez_12",
+      cardId: iceId,
+      cardDefinitionId: "simple_barrier_ice",
+      targetServerId: "remote_1",
+      installedZone: "serverIce",
+      stateVersion: 12,
+      complete: true,
+      temporaryCreditsApplied: 3,
+      regularCreditsRequired: 0,
+      affordable: true,
+    });
+    expect(runnerPayload.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(runnerPayload)).not.toContain(
+      "corp-optional-rez-choice-quote-v1",
+    );
+    expect(JSON.stringify(runnerPayload)).not.toContain(iceId);
+  });
 });
+
+function removeCorpCardFromZones(
+  state: StoredMatch["gameState"],
+  cardId: CardInstanceId,
+): void {
+  state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
+  state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
+  state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
+  state.corp.scoreArea = state.corp.scoreArea.filter((id) => id !== cardId);
+  for (const server of state.corp.servers) {
+    server.ice = server.ice.filter((id) => id !== cardId);
+    server.root = server.root.filter((id) => id !== cardId);
+  }
+}
 
 function storedMatchWithEvents(count: number): StoredMatch {
   const now = "2026-05-22T00:00:00.000Z";

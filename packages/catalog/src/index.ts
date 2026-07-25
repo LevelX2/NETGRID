@@ -28,12 +28,14 @@ export type {
   CatalogIndex,
   CatalogManifestReference,
   CatalogNumericFields,
+  CatalogPlayCost,
   CatalogQuery,
   CatalogRarity,
   CatalogRarityCode,
   CatalogSide,
   CatalogStatusKey,
   CatalogStatuses,
+  CatalogVariableXPlayCost,
   CatalogValidationResult,
 } from "./catalog-types";
 export type RuntimeCardPool = {
@@ -85,6 +87,8 @@ export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
         blockReasons: [...card.blockReasons],
         statuses: { ...card.statuses },
         numeric: { ...card.numeric },
+        playCost: clonePlayCost(card.playCost),
+        strengthModel: { ...card.strengthModel },
         implementationManifest: card.implementationManifest
           ? {
               ...card.implementationManifest,
@@ -116,6 +120,7 @@ export function validateSnapshot(
     if (card.side !== "runner" && card.side !== "corp")
       errors.push(`Card ${card.catalogCardId} has invalid side.`);
     if (!card.type) errors.push(`Card ${card.catalogCardId} is missing type.`);
+    errors.push(...validateResolvedPlayCost(card));
     if (!card.displayOnlyText)
       errors.push(`Card ${card.catalogCardId} text must be display-only.`);
     if (card.rarity) {
@@ -386,6 +391,91 @@ function cloneRarityField(rarity: CatalogRarity | null | undefined): {
   rarity?: CatalogRarity;
 } {
   return rarity ? { rarity: { ...rarity } } : {};
+}
+
+function clonePlayCost(
+  playCost: CatalogCard["playCost"],
+): CatalogCard["playCost"] {
+  if (playCost === null) return null;
+  if (playCost.kind === "fixed") return { ...playCost };
+  return {
+    ...playCost,
+    maximumX: { ...playCost.maximumX },
+  };
+}
+
+function validateResolvedPlayCost(card: CatalogCard): string[] {
+  const errors: string[] = [];
+  const isPlayCard = card.type === "event" || card.type === "operation";
+  if (!isPlayCard) {
+    if (card.playCost !== null) {
+      errors.push(
+        `Card ${card.catalogCardId} is not an event or operation but has a play cost.`,
+      );
+    }
+    return errors;
+  }
+  if (card.playCost === null) {
+    errors.push(`Card ${card.catalogCardId} is missing its play cost.`);
+    return errors;
+  }
+  if (card.playCost.kind === "fixed") {
+    if (
+      !hasExactKeys(card.playCost, ["kind", "credits"]) ||
+      !Number.isInteger(card.playCost.credits) ||
+      card.playCost.credits < 0
+    ) {
+      errors.push(
+        `Card ${card.catalogCardId} has an invalid fixed play cost.`,
+      );
+    }
+    if (card.numeric.cost !== card.playCost.credits) {
+      errors.push(
+        `Card ${card.catalogCardId} fixed play cost must equal numeric.cost.`,
+      );
+    }
+    return errors;
+  }
+  if (card.playCost.kind !== "variable_x") {
+    errors.push(`Card ${card.catalogCardId} has an unknown play cost kind.`);
+    return errors;
+  }
+  if (
+    !hasExactKeys(card.playCost, [
+      "kind",
+      "minimumX",
+      "creditsPerX",
+      "maximumX",
+    ]) ||
+    !Number.isInteger(card.playCost.minimumX) ||
+    card.playCost.minimumX < 1 ||
+    !Number.isInteger(card.playCost.creditsPerX) ||
+    card.playCost.creditsPerX <= 0 ||
+    card.playCost.maximumX?.kind !== "context" ||
+    !hasExactKeys(card.playCost.maximumX, ["kind"])
+  ) {
+    errors.push(
+      `Card ${card.catalogCardId} has an invalid variable-X play cost.`,
+    );
+  }
+  if (card.numeric.cost !== null) {
+    errors.push(
+      `Card ${card.catalogCardId} variable-X play cost requires numeric.cost null.`,
+    );
+  }
+  return errors;
+}
+
+function hasExactKeys(
+  value: object,
+  expectedKeys: readonly string[],
+): boolean {
+  const expected = [...expectedKeys].sort();
+  const actual = Object.keys(value).sort();
+  return (
+    actual.length === expected.length &&
+    actual.every((key, index) => key === expected[index])
+  );
 }
 
 function stableStringify(value: unknown): string {

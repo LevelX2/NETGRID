@@ -84,10 +84,16 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
     );
 
     expect(assessment).toMatchObject({
-      windowKind: "durable",
+      windowKind: "none",
       runnerCanContestBeforeScore: false,
-      recommendedNextStep: "build_remote_ice",
+      recommendedNextStep: "none",
     });
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_rez_budget:knowledge:unknown",
+        "remote_rez_budget:unknown_installed_rez_quote:second-remote-wall",
+      ]),
+    );
   });
 
   it("lets acute HQ pressure override a temporary remote score window", () => {
@@ -643,11 +649,17 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
     );
 
     expect(assessment).toMatchObject({
-      windowKind: "temporary_safe",
-      recommendedNextStep: "build_remote_ice",
-      affordableDurableRelevantIceCount: 1,
-      dynamicProtectionWeaknessCount: 2,
+      windowKind: "none",
+      recommendedNextStep: "none",
+      affordableDurableRelevantIceCount: 0,
+      dynamicProtectionWeaknessCount: 0,
     });
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_rez_budget:knowledge:unknown",
+        "remote_rez_budget:unknown_installed_rez_quote:static-remote-wall",
+      ]),
+    );
   });
 
   it("marks solo Dog Pile unsafe when visible killer coverage and credits can access", () => {
@@ -741,9 +753,15 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
     );
 
     expect(assessment).toMatchObject({
-      windowKind: "durable",
-      recommendedNextStep: "build_remote_ice",
+      windowKind: "none",
+      recommendedNextStep: "none",
     });
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_rez_budget:knowledge:unknown",
+        "remote_rez_budget:unknown_installed_rez_quote:second-remote-wall",
+      ]),
+    );
   });
 
   it("does not create remote-ice spam without agenda pressure or a scoreline", () => {

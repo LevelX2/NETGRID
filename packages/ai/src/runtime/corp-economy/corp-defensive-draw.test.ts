@@ -1,11 +1,18 @@
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import {
+  corpMissingConcreteDefenseDrawNeed,
+  corpMissingConcreteScoreDefenseDrawNeed,
   corpOptionalDrawCapacity,
   corpOptionalDrawScoreComponents,
   corpQuantitativeDrawScoreComponents,
 } from "./corp-defensive-draw";
+import type {
+  CorpFundedRemoteAccessRiskNeed,
+  KnownCorpFundedScoreProtectionAssessment,
+} from "../corp-funded-score-protection";
+import type { CorpCentralDefenseAllocation } from "../corp-central-defense-allocation";
 import {
   corpAction,
   corpCard,
@@ -13,6 +20,7 @@ import {
 } from "../semantic-runtime-corp-score.test-support";
 
 const draw = corpAction("corp.draw_card", "draw_card", {}, "basic_action");
+draw.costs = [{ clicks: 1 }];
 
 describe("Corp defensive draw context", () => {
   it("uses the current maximum hand size for one-card draw capacity", () => {
@@ -136,7 +144,432 @@ describe("Corp defensive draw context", () => {
       "corp_missing_concrete_defense_draw",
     );
   });
+
+  it("does not invent defense pressure from an empty central alone", () => {
+    const input = drawInput(5, 3);
+
+    expect(corpMissingConcreteDefenseDrawNeed(input, draw)).toBeUndefined();
+  });
+
+  it("binds the generic defense draw only to active visible pressure", () => {
+    const input = drawInput(5, 3);
+    input.playerView.own.gripOrHq.push(corpCard("hq-agenda", "agenda"));
+
+    expect(
+      corpMissingConcreteDefenseDrawNeed(
+        input,
+        draw,
+        undefined,
+        knownCentralAllocation("hq"),
+      ),
+    ).toMatchObject({
+      serverId: "hq",
+      evidence: expect.arrayContaining([
+        "central_defense_allocation_known:true",
+        "central_defense_selected_server:hq",
+      ]),
+    });
+  });
+
+  it("never re-ranks the known global central-defense selection for generic draw", () => {
+    const input = drawInput(5, 3);
+    input.playerView.own.gripOrHq.push(corpCard("hq-agenda", "agenda"));
+
+    expect(
+      corpMissingConcreteDefenseDrawNeed(
+        input,
+        draw,
+        undefined,
+        knownCentralAllocation("rd"),
+      ),
+    ).toMatchObject({
+      serverId: "rd",
+      evidence: expect.arrayContaining(["central_defense_selected_server:rd"]),
+    });
+  });
+
+  it("admits a targeted score-defense draw only from the exact unprotected effect need", () => {
+    const setup = targetedScoreDefenseDrawSetup();
+
+    expect(corpMissingConcreteScoreDefenseDrawNeed(setup.args)).toMatchObject({
+      needId: `score-defense-draw:${setup.need.needId}:${draw.actionId}`,
+      parentProjectId: setup.need.parentProjectId,
+      serverId: "remote_1",
+      cleanupReplacementDraw: false,
+      evidence: expect.arrayContaining([
+        "funded_protection_baseline:known_unprotected",
+        "direct_install_route_disposition:effect_missing",
+        "remaining_score_defense_effect_suitable_ice_count:2",
+      ]),
+    });
+  });
+
+  it("fails closed on unknown or already productive direct install routing", () => {
+    const setup = targetedScoreDefenseDrawSetup();
+
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        directInstallRouteState: { knowledge: "unknown" },
+      }),
+    ).toBeUndefined();
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        directInstallRouteState: {
+          knowledge: "known",
+          disposition: "productive",
+        },
+      }),
+    ).toBeUndefined();
+  });
+
+  it("does not draw for ICE when the protection effect exists and only funding is missing", () => {
+    const setup = targetedScoreDefenseDrawSetup();
+
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        directInstallRouteState: {
+          knowledge: "known",
+          disposition: "funding_only",
+        },
+      }),
+    ).toBeUndefined();
+  });
+
+  it("fails closed unless the funded protection baseline is current, known, and unsatisfied", () => {
+    const setup = targetedScoreDefenseDrawSetup();
+    const protectedBaseline: KnownCorpFundedScoreProtectionAssessment = {
+      ...setup.need.baseline,
+      fundedProtection: true,
+      protection: {
+        ...setup.need.baseline.protection,
+        protectsScore: true,
+        runnerAccessSuccessProbability: { numerator: 1, denominator: 4 },
+      },
+    };
+
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        protectionNeed: {
+          ...setup.need,
+          baseline: protectedBaseline,
+        },
+      }),
+    ).toBeUndefined();
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        protectionNeed: {
+          ...setup.need,
+          observedAtStateVersion: setup.input.playerView.stateVersion - 1,
+        },
+      }),
+    ).toBeUndefined();
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        protectionNeed: {
+          ...setup.need,
+          baseline: {
+            knowledge: "unknown",
+            fundedProtection: false,
+            unknownReason: "missing_rez_cost_quote",
+            availableCorpCredits: 13,
+            availableCorpClicks: 2,
+            totalScoreReserveCredits: 0,
+            hardClickReserve: 0,
+            evidence: [],
+          },
+        },
+      }),
+    ).toBeUndefined();
+  });
+
+  it("requires an identity-bound exact draw projection and the full click horizon", () => {
+    const setup = targetedScoreDefenseDrawSetup();
+
+    for (const drawActionProjection of [
+      { knowledge: "unknown" as const },
+      {
+        ...setup.args.drawActionProjection,
+        actionId: "different-action",
+      },
+      {
+        ...setup.args.drawActionProjection,
+        observedAtStateVersion: setup.input.playerView.stateVersion - 1,
+      },
+      { ...setup.args.drawActionProjection, clickCost: 2 },
+      { ...setup.args.drawActionProjection, cardsDrawn: 2 },
+      { ...setup.args.drawActionProjection, netHandDelta: 0 },
+    ]) {
+      expect(
+        corpMissingConcreteScoreDefenseDrawNeed({
+          ...setup.args,
+          drawActionProjection,
+        }),
+      ).toBeUndefined();
+    }
+
+    setup.input.playerView.own.clicks = 1;
+    expect(corpMissingConcreteScoreDefenseDrawNeed(setup.args)).toBeUndefined();
+  });
+
+  it("preserves the hard-click reserve and permits only capacity-safe draw-plus-install sequences", () => {
+    const setup = targetedScoreDefenseDrawSetup(5);
+    const reserveNeed: CorpFundedRemoteAccessRiskNeed = {
+      ...setup.need,
+      scoreReserve: {
+        ...setup.need.scoreReserve,
+        hardClickReserve: 1,
+      },
+      baseline: {
+        ...setup.need.baseline,
+        hardClickReserve: 1,
+      },
+    };
+
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        protectionNeed: reserveNeed,
+      }),
+    ).toBeUndefined();
+
+    setup.input.playerView.own.clicks = 3;
+    const enoughClicksNeed: CorpFundedRemoteAccessRiskNeed = {
+      ...reserveNeed,
+      baseline: {
+        ...reserveNeed.baseline,
+        availableCorpClicks: 3,
+      },
+    };
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        protectionNeed: enoughClicksNeed,
+      }),
+    ).toMatchObject({ cleanupReplacementDraw: true });
+
+    const drawTwo = corpAction(
+      "corp.draw_two",
+      "draw_card",
+      { drawCardsAmount: 2 },
+      "card",
+    );
+    drawTwo.costs = [{ clicks: 1 }];
+    setup.input.legalActions = [drawTwo];
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        action: drawTwo,
+        drawActionProjection: {
+          knowledge: "known",
+          actionId: drawTwo.actionId,
+          observedAtStateVersion: setup.input.playerView.stateVersion,
+          clickCost: 1,
+          cardsDrawn: 2,
+          netHandDelta: 2,
+        },
+      }),
+    ).toBeUndefined();
+  });
+
+  it("requires an unused exact attempt state and verifies the event-tail fact", () => {
+    const setup = targetedScoreDefenseDrawSetup();
+
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        attemptState: {
+          residentAttemptedThisTurn: true,
+          eventTailAttemptedThisTurn: false,
+        },
+      }),
+    ).toBeUndefined();
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        attemptState: {
+          residentAttemptedThisTurn: false,
+          eventTailAttemptedThisTurn: true,
+        },
+      }),
+    ).toBeUndefined();
+
+    setup.input.eventTail = [
+      {
+        eventId: "mandatory-draw",
+        type: "mandatory_draw",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        stateHashAfter: "hash",
+        visibilityClass: "private_to_side",
+        publicPayload: {
+          actor: "corp",
+          actionType: "mandatory_draw",
+          label: "Mandatory draw",
+        },
+      },
+      {
+        eventId: "optional-draw",
+        type: "draw_card",
+        stateVersionBefore: 2,
+        stateVersionAfter: 3,
+        stateHashAfter: "hash-2",
+        visibilityClass: "private_to_side",
+        publicPayload: {
+          actor: "corp",
+          actionType: "draw_card",
+          label: "Draw",
+        },
+      },
+    ];
+    expect(corpMissingConcreteScoreDefenseDrawNeed(setup.args)).toBeUndefined();
+  });
+
+  it("requires a positive exact target-server ICE density from the deck snapshot", () => {
+    const setup = targetedScoreDefenseDrawSetup();
+    delete setup.input.ownDeckSnapshot;
+
+    expect(corpMissingConcreteScoreDefenseDrawNeed(setup.args)).toBeUndefined();
+
+    setup.input.ownDeckSnapshot = {
+      deckSnapshotId: "only-zero-effect-ice-remains",
+      side: "corp",
+      cards: [],
+    };
+    expect(corpMissingConcreteScoreDefenseDrawNeed(setup.args)).toBeUndefined();
+  });
 });
+
+function targetedScoreDefenseDrawSetup(handCount = 3): {
+  input: AiDecisionInput & {
+    ownDeckSnapshot?: {
+      deckSnapshotId: string;
+      side: "corp";
+      cards: Array<{ cardId: string; quantity: number }>;
+    };
+  };
+  need: CorpFundedRemoteAccessRiskNeed & {
+    baseline: KnownCorpFundedScoreProtectionAssessment;
+  };
+  args: Parameters<typeof corpMissingConcreteScoreDefenseDrawNeed>[0];
+} {
+  const exactDraw = {
+    ...draw,
+    costs: [{ clicks: 1 }],
+    expiresAtStateVersion: 13,
+  };
+  const input = corpInputWithHqCardsAndServers(
+    13,
+    Array.from({ length: handCount }, (_, index) =>
+      corpCard(`operation-${index}`, "operation"),
+    ),
+    [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [centralIce("remote-existing")],
+        root: [corpCard("score-agenda", "agenda")],
+      },
+    ],
+    [exactDraw],
+  ) as AiDecisionInput & {
+    ownDeckSnapshot?: {
+      deckSnapshotId: string;
+      side: "corp";
+      cards: Array<{ cardId: string; quantity: number }>;
+    };
+  };
+  input.playerView.stateVersion = 13;
+  input.playerView.own.maxHandSize = 5;
+  input.playerView.own.clicks = 2;
+  input.playerView.own.stackOrRdCount = 20;
+  input.ownDeckSnapshot = {
+    deckSnapshotId: "targeted-score-defense-draw",
+    side: "corp",
+    cards: [{ cardId: "onr_v1_244_filter", quantity: 2 }],
+  };
+  const baseline: KnownCorpFundedScoreProtectionAssessment = {
+    knowledge: "known",
+    availableCorpCredits: 13,
+    availableCorpClicks: 2,
+    totalScoreReserveCredits: 0,
+    hardClickReserve: 0,
+    fundedProtection: false,
+    scoreReserveFingerprint: "test-score-reserve",
+    protection: {
+      knowledge: "known",
+      maximumRunnerAccessSuccessProbability: {
+        numerator: 1,
+        denominator: 4,
+      },
+      runnerAccessSuccessProbability: {
+        numerator: 1,
+        denominator: 1,
+      },
+      protectsScore: false,
+      requiredRandomBreakSuccesses: 1,
+      randomBreaks: [],
+      runnerCreditsRemainingOnBestAccessPath: 0,
+      evidence: [],
+    },
+    selectedRezCosts: [],
+    totalSelectedRezCost: 0,
+    creditsAfterDefense: 13,
+    clicksAfterDefense: 2,
+    preservesScoreCreditReserve: true,
+    preservesHardClickReserve: true,
+    evidence: [],
+  };
+  const need = {
+    needId: "need:remote_1",
+    parentProjectId: "score-project:remote_1",
+    targetServerId: "remote_1",
+    observedAtStateVersion: 13,
+    objective: {
+      kind: "funded_remote_access_risk",
+      maximumRunnerAccessSuccessProbability: {
+        numerator: 1,
+        denominator: 4,
+      },
+      policySource: "test",
+    },
+    scoreReserve: {
+      creditBreakdown: [],
+      hardClickReserve: 0,
+    },
+    baseline,
+  } satisfies CorpFundedRemoteAccessRiskNeed;
+  return {
+    input,
+    need,
+    args: {
+      input,
+      action: exactDraw,
+      protectionNeed: need,
+      directInstallRouteState: {
+        knowledge: "known",
+        disposition: "effect_missing",
+      },
+      drawActionProjection: {
+        knowledge: "known",
+        actionId: exactDraw.actionId,
+        observedAtStateVersion: 13,
+        clickCost: 1,
+        cardsDrawn: 1,
+        netHandDelta: 1,
+      },
+      attemptState: {
+        residentAttemptedThisTurn: false,
+        eventTailAttemptedThisTurn: false,
+      },
+    },
+  };
+}
 
 function drawInput(
   maxHandSize: number,
@@ -167,6 +600,16 @@ function drawInput(
   );
   input.playerView.own.maxHandSize = maxHandSize;
   input.playerView.own.stackOrRdCount = 20;
+  Object.assign(input, {
+    ownDeckSnapshot: {
+      deckSnapshotId: "generic-central-defense-draw",
+      side: "corp",
+      cards: [
+        { cardId: "onr_v1_263_reinforced-wall", quantity: 3 },
+        { cardId: "simple_economy_operation", quantity: 37 },
+      ],
+    },
+  });
   return input;
 }
 
@@ -176,4 +619,26 @@ function centralIce(instanceId: string): VisibleCard {
     title: "Reinforced Wall",
     subtypes: ["Wall"],
   });
+}
+
+function knownCentralAllocation(
+  selectedServerId: "hq" | "rd",
+): CorpCentralDefenseAllocation {
+  const evidence = {
+    threat: "material" as const,
+    expectedAgendaLoss: { numerator: 1, denominator: 5 },
+    expectedTrashableLoss: { numerator: 0, denominator: 1 },
+    accessibleCardCount: 1,
+    isMultiaccess: false,
+    recentRunOrAccessEvents: 0,
+    recentSuccessfulAccessRunnerTurns: 0,
+    serverBoundEffectIds: [],
+  };
+  return {
+    status: "known",
+    selectedServerId,
+    evidence: { hq: evidence, rd: evidence },
+    canonicalNearTieCandidateServerIds: [],
+    hqHold: { status: "ineligible" },
+  };
 }

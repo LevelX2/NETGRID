@@ -73,7 +73,7 @@ describe("createCorpTagSourcePayoffContext", () => {
     });
     const input = inputWithHqCard({
       ...visibleCard("custom-damage-punish"),
-      cost: 3,
+      playCost: { kind: "fixed", credits: 3 },
     });
     input.playerView.own.credits = 4;
 
@@ -108,7 +108,7 @@ describe("createCorpTagSourcePayoffContext", () => {
     });
     const input = inputWithHqCard({
       ...visibleCard("custom-damage-punish"),
-      cost: 4,
+      playCost: { kind: "fixed", credits: 4 },
     });
     input.playerView.own.credits = 4;
 

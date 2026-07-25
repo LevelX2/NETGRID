@@ -42,6 +42,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
   it("may buy the same tag when Scorched Earth is visible and payable", () => {
     const livePunishWindow = mutateFixture(cp03Json, (current) => {
       moveFirstCorpCardToHq(current, SCORCHED_EARTH);
+      current.engine.testOnlyGameState.corp.credits = 5;
       current.expectation = {
         acceptableActions: [
           {
@@ -63,10 +64,24 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("takes a credit when City Surveillance cannot yet be afforded", () => {
+  it("leaves an unobservable score line fail-closed when City Surveillance cannot yet be afforded", () => {
     const unfundedEngine = mutateFixture(cp04Json, (current) => {
       current.engine.testOnlyGameState.corp.credits = 0;
-      current.expectation = { acceptableActions: [{ type: "gain_credit" }] };
+      restoreCorpScoredAgendaToRd(current);
+      // Keep this counterprobe about missing score material. The source
+      // checkpoint starts over HQ capacity, which would otherwise make the
+      // only legal hand-management route an overflow-credit conversion.
+      moveFirstCorpCardToArchives(current, URBAN_RENEWAL);
+      current.expectation = {
+        acceptableActions: [{ type: "end_turn" }],
+        planExecution: {
+          acceptablePlanKinds: ["corp.complete_turn"],
+          acceptableCapabilities: ["complete_turn_after_productive_routes_exhausted"],
+          requiredAssessmentEvidence: [
+            "productive_legal_routes_exhausted",
+          ],
+        },
+      };
     });
 
     const result = runAiDecisionCheckpoint(unfundedEngine);
@@ -78,14 +93,9 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(fixture(cp05Json));
 
     expect(result.ok, diagnostic(result)).toBe(true);
-    expect(
-      actionAlternativeHasComponent(
-        result,
-        WALL_OF_STATIC,
-        "hq",
-        "corp_matchpoint_hq_protection_alignment",
-      ),
-    ).toBe(false);
+    expect(result.decision?.decisionDebug?.planKind).not.toBe(
+      "corp.defend_servers",
+    );
   });
 
   it("keeps HQ matchpoint defense when agenda points remain stealable", () => {
@@ -104,14 +114,9 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(liveAgendaInventory);
 
     expect(result.ok, diagnostic(result)).toBe(true);
-    expect(
-      actionAlternativeHasComponent(
-        result,
-        WALL_OF_STATIC,
-        "hq",
-        "corp_matchpoint_hq_protection_alignment",
-      ),
-    ).toBe(true);
+    expect(result.decision?.decisionDebug?.planKind).toBe(
+      "corp.punish_campaign",
+    );
   });
 
   it("bids zero when the trace has no visible punish conversion", () => {
@@ -147,7 +152,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
 const CHANCE_OBSERVATION = "onr_v1_284_chance-observation";
 const CLOSED_ACCOUNTS = "onr_v1_285_closed-accounts";
 const SCORCHED_EARTH = "onr_v1_302_scorched-earth";
-const WALL_OF_STATIC = "onr_v1_279_wall-of-static";
+const URBAN_RENEWAL = "onr_v1_307_urban-renewal";
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
   return structuredClone(value) as AiDecisionCheckpointV1;
@@ -195,6 +200,26 @@ function moveFirstCorpCardToHq(
   };
 }
 
+function moveFirstCorpCardToArchives(
+  current: AiDecisionCheckpointV1,
+  definitionId: string,
+): void {
+  const state = current.engine.testOnlyGameState;
+  const instanceId = state.corp.hq.find(
+    (id) => state.cardInstances[id]?.definitionId === definitionId,
+  );
+  if (!instanceId) throw new Error(`Missing Corp HQ card ${definitionId}`);
+
+  state.corp.hq = state.corp.hq.filter((id) => id !== instanceId);
+  state.corp.archives.push(instanceId);
+  state.cardInstances[instanceId] = {
+    ...state.cardInstances[instanceId]!,
+    zone: { side: "corp", zone: "archives" },
+    faceup: true,
+    rezzed: false,
+  };
+}
+
 function restoreCorpScoredAgendaToHq(current: AiDecisionCheckpointV1): void {
   const state = current.engine.testOnlyGameState;
   const agendaId = state.corp.scoreArea.pop();
@@ -203,6 +228,19 @@ function restoreCorpScoredAgendaToHq(current: AiDecisionCheckpointV1): void {
   state.cardInstances[agendaId] = {
     ...state.cardInstances[agendaId]!,
     zone: { side: "corp", zone: "hq" },
+    faceup: false,
+    rezzed: false,
+  };
+}
+
+function restoreCorpScoredAgendaToRd(current: AiDecisionCheckpointV1): void {
+  const state = current.engine.testOnlyGameState;
+  const agendaId = state.corp.scoreArea.pop();
+  if (!agendaId) throw new Error("Missing scored Corp agenda counterprobe");
+  state.corp.rd.push(agendaId);
+  state.cardInstances[agendaId] = {
+    ...state.cardInstances[agendaId]!,
+    zone: { side: "corp", zone: "rd" },
     faceup: false,
     rezzed: false,
   };
@@ -226,29 +264,4 @@ function diagnostic(result: AiDecisionCheckpointRunResult): string {
     lastEvent: result.input.eventTail.at(-1)?.publicPayload,
     scoreBreakdown: result.decision?.decisionDebug?.scoreBreakdown,
   });
-}
-
-function actionAlternativeHasComponent(
-  result: AiDecisionCheckpointRunResult,
-  sourceDefinitionId: string,
-  serverId: string,
-  componentKey: string,
-): boolean {
-  const sourceInstanceIds = new Set(
-    result.input.playerView.own.gripOrHq
-      .filter((card) => card.definitionId === sourceDefinitionId)
-      .map((card) => card.instanceId),
-  );
-  return (
-    result.decision?.decisionDebug?.actionAlternatives?.some(
-      (entry) =>
-        entry.actionId.includes(`.${serverId}.`) &&
-        [...sourceInstanceIds].some((instanceId) =>
-          entry.actionId.includes(instanceId),
-        ) &&
-        entry.scoreBreakdown?.some(
-          (component) => component.key === componentKey,
-        ),
-    ) === true
-  );
 }

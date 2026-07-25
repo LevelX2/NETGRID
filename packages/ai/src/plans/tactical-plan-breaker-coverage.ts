@@ -26,7 +26,12 @@ export function missingBreakerCoverageKind(
     server.root,
   );
   const preciseMissingCoverage = coverageKindForAssessment(assessment);
-  if (preciseMissingCoverage) return preciseMissingCoverage;
+  if (
+    preciseMissingCoverage &&
+    preciseMissingCoverage !== "breaker_universal"
+  ) {
+    return preciseMissingCoverage;
+  }
   const blockedIceIndex =
     assessment.unbreakableIceIndex ?? assessment.unpayableIceIndex;
   const blockedIce =
@@ -47,7 +52,7 @@ export function missingBreakerCoverageKind(
   if (coverageTokensInclude(tokens, ["sentry"])) return "breaker_sentry";
   if (coverageTokensInclude(tokens, ["ap"])) return "breaker_ap";
   if (coverageTokensInclude(tokens, ["trace"])) return "breaker_trace";
-  return "breaker_universal";
+  return preciseMissingCoverage ?? "breaker_universal";
 }
 
 function visibleCardCoverageTokens(card: VisibleCard): string[] {

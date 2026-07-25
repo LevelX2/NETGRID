@@ -33,6 +33,7 @@ export type AccessOutcomeMemoryStatus = {
   applies: boolean;
   invalidationReason?: AccessOutcomeMemoryInvalidationReason;
   suppressesPlanBonus: boolean;
+  suppressUntilInvalidated?: boolean;
   evidence: string[];
 };
 
@@ -142,10 +143,16 @@ export function evaluateAccessOutcomeMemoryStatus(
   return {
     applies: true,
     suppressesPlanBonus: record.observedDecision === "decline",
+    ...(record.observedDecision === "decline"
+      ? { suppressUntilInvalidated: true }
+      : {}),
     evidence: [
       ...accessOutcomeMemoryEvidence(record),
       "access_outcome_memory_applies:true",
       `access_outcome_memory_suppresses_plan_bonus:${record.observedDecision === "decline"}`,
+      ...(record.observedDecision === "decline"
+        ? ["access_outcome_memory_suppress_until_invalidated:true"]
+        : []),
     ],
   };
 }
@@ -197,6 +204,15 @@ export function deriveObservedRemoteNoProgressAccessMemory(
   );
   if (progressEvent) return undefined;
   if (remoteChangedAfterAccess(input, serverId, accessEvent)) return undefined;
+  const declineEvent = afterRun.find(
+    (event) =>
+      event.stateVersionAfter > accessEvent.stateVersionAfter &&
+      publicActor(event) === "runner" &&
+      publicActionType(event) === "decline_trash" &&
+      eventServerId(event) === serverId,
+  );
+  const observedDecision = declineEvent ? "decline" : "access_only";
+  const reason = declineEvent ? "reserve_would_break" : "target_unavailable";
   const accessedDefinitionId =
     stringPayloadValue(accessEvent, "cardDefinitionId") ??
     currentKnownRootDefinitionIds[0]!;
@@ -207,8 +223,8 @@ export function deriveObservedRemoteNoProgressAccessMemory(
     profileId: input.profileId,
     serverId,
     remoteFingerprint,
-    observedDecision: "access_only",
-    reason: "target_unavailable",
+    observedDecision,
+    reason,
     creditsAtOutcome: input.playerView.own.credits,
     desiredReserveAtOutcome: input.playerView.own.credits,
     stateVersion: accessEvent.stateVersionAfter,
@@ -221,14 +237,18 @@ export function deriveObservedRemoteNoProgressAccessMemory(
   return {
     applies: status.applies,
     suppressesPlanBonus: status.applies,
+    ...(declineEvent ? { suppressUntilInvalidated: true } : {}),
     evidence: [
       "remote_access_outcome_source:observed_public_access",
-      "remote_access_outcome_decision:access_only",
-      "remote_access_outcome_reason:target_unavailable",
+      `remote_access_outcome_decision:${observedDecision}`,
+      `remote_access_outcome_reason:${reason}`,
       "remote_access_outcome_no_progress:true",
       "known_remote_no_current_payoff",
       "repeated_remote_no_progress_suppressed",
       `remote_access_outcome_source_event:${accessEvent.eventId}`,
+      ...(declineEvent
+        ? [`remote_access_outcome_decline_event:${declineEvent.eventId}`]
+        : []),
       `remote_access_outcome_server:${serverId}`,
       `remote_access_outcome_known_root:${accessedDefinitionId}`,
       ...observedAccessOutcomeEvidence({

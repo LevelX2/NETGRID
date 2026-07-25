@@ -1646,7 +1646,7 @@ describe("tactical plan model", () => {
 
     expect(emptyRemotePlan?.status).toBe("abandoned");
     expect(emptyRemotePlan?.scoreBreakdown[0]).toMatchObject({
-      key: "empty_remote_no_root_value",
+      key: "remote_known_no_current_payoff",
     });
   });
 
@@ -1716,7 +1716,7 @@ describe("tactical plan model", () => {
     );
   });
 
-  it("does not continue a previous no-progress remote plan over central pressure", () => {
+  it("does not let stale no-progress memory suppress a currently affordable remote trash", () => {
     const noProgressRemoteEvents = [
       publicEvent("evt-run-remote-1", 8, "start_run", {
         actor: "runner",
@@ -1784,16 +1784,15 @@ describe("tactical plan model", () => {
     );
 
     expect(result.planAlternatives[0]?.planId).toBe(
-      "runner.opportunistic_central_run:rd",
+      "runner.contest_remote:remote_1",
     );
+    expect(remotePlan?.status).toBe("progressing");
     expect(remotePlan?.evidence).toEqual(
       expect.arrayContaining([
+        "runner_run_target_payoff:trash_affordable",
         "repeated_remote_no_progress_suppressed",
         "known_remote_no_current_payoff",
       ]),
-    );
-    expect(remotePlan?.priority).toBeLessThan(
-      result.planAlternatives[0]?.priority ?? -Infinity,
     );
   });
 
@@ -1830,6 +1829,7 @@ describe("tactical plan model", () => {
         pathPassability: "reachable",
         pathCost: 0,
         creditsAfterRun: 5,
+        runCommitment: "full_path",
         stealOrTrashAffordable: true,
         installedRunPayoff: {
           immediateAccessValue: 0,
@@ -2105,7 +2105,7 @@ describe("tactical plan model", () => {
     ]);
     const handDevelopmentEvaluations: RunnerHandDevelopmentEvaluation[] = [
       {
-        schemaVersion: "runner-hand-development-evaluation-v1",
+        schemaVersion: "runner-hand-development-evaluation-v2",
         cardInstanceId: "access-card",
         definitionId: "access_card_definition",
         title: "Concrete Access Tool",
@@ -2114,6 +2114,7 @@ describe("tactical plan model", () => {
         developmentRole: "access_payoff",
         strategicFit: "strong",
         currentNeed: "useful_now",
+        activationPrerequisites: [],
         priority: 650,
         deferReason: "none",
         legalActionId: "install-access-card",
@@ -3066,7 +3067,7 @@ describe("tactical plan model", () => {
     );
   });
 
-  it("maps remote hardening into the score-window plan when runner can fund access before score", () => {
+  it("fails closed when remote hardening lacks an Engine-certified rez quote", () => {
     const advance = legalAction(
       "advance-agenda",
       "corp",
@@ -3132,18 +3133,15 @@ describe("tactical plan model", () => {
         input,
       );
 
-    expect(scorePlan?.status).toBe("progressing");
-    expect(scorePlan?.currentStep.kind).toBe("protect_remote");
+    expect(scorePlan?.status).toBe("blocked");
+    expect(scorePlan?.currentStep.kind).toBe("find_remote_protection");
     expect(scorePlan?.blockers.map((blocker) => blocker.kind)).toEqual(
       expect.arrayContaining(["score_window_contestable"]),
     );
     expect(JSON.stringify(scorePlan)).toContain(
       "runner_visible_exposure_contest_credits:5",
     );
-    expect(mapping && mapping.status).toBe("matched");
-    expect(
-      mapping && mapping.legalActions.map((action) => action.actionId),
-    ).toEqual(["install-remote-ice"]);
+    expect(mapping && mapping.status).toBe("blocked_missing_capability");
   });
 
   it("draws for real remote protection instead of treating non-stopping ICE as progress", () => {
@@ -3211,7 +3209,7 @@ describe("tactical plan model", () => {
     );
   });
 
-  it("builds a concrete reserve for effective but currently unrezzable remote ICE", () => {
+  it("fails closed instead of deriving a rez reserve from printed ICE cost", () => {
     const advance = legalAction(
       "advance-agenda",
       "corp",
@@ -3264,17 +3262,11 @@ describe("tactical plan model", () => {
       (plan) => plan.type === "corp.create_score_window",
     );
 
-    expect(scorePlan?.status).toBe("progressing");
-    expect(scorePlan?.currentStep.kind).toBe("build_rez_reserve");
-    expect(scorePlan?.currentStep.actionCandidateIds).toEqual([
-      "gain-for-protection",
-    ]);
-    expect(scorePlan?.currentStep.requiredCapabilities[0]).toMatchObject({
-      kind: "rez_reserve",
-      minimumCredits: 9,
-    });
+    expect(scorePlan?.status).toBe("blocked");
+    expect(scorePlan?.currentStep.kind).toBe("find_remote_protection");
+    expect(scorePlan?.currentStep.actionCandidateIds).toEqual([]);
     expect(JSON.stringify(scorePlan)).toContain(
-      "protection_action:install-expensive-ice",
+      "no_effective_remote_protection_in_hq",
     );
   });
 
@@ -4007,12 +3999,13 @@ function runnerHandDevelopmentEvaluation(
 ): RunnerHandDevelopmentEvaluation {
   const { cardInstanceId, ...rest } = overrides;
   return {
-    schemaVersion: "runner-hand-development-evaluation-v1",
+    schemaVersion: "runner-hand-development-evaluation-v2",
     cardInstanceId,
     availability: "legal_now",
     developmentRole: "access_payoff",
     strategicFit: "strong",
     currentNeed: "useful_now",
+    activationPrerequisites: [],
     priority: 650,
     deferReason: "none",
     evidence: [],

@@ -1,6 +1,7 @@
 import { chooseRunnerAction } from "./index";
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import type { AiDeckStrategyProfile } from "./deck-doctrine-strategy";
+import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import type { SemanticRuntimeDependencies } from "./runtime/semantic-runtime";
 import type { SemanticRuntimeChoice } from "./runtime/semantic-runtime-types";
 import type {
@@ -38,6 +39,7 @@ export function playerView(
   const opponentSide = side === "runner" ? "corp" : "runner";
   return {
     stateVersion: 1,
+    turnSerial: 0,
     side,
     activeSide: side,
     phase: side === "runner" ? "runner_action_phase" : "corp_action_phase",
@@ -94,7 +96,19 @@ export function runnerWallCoverageInput(
       [visibleCard("simple_agenda", "corp", "agenda")],
     ),
   ];
+  attachOwnDeckSnapshot(input, {
+    deckSnapshotId: "runner-wall-coverage-fixture",
+    side: "runner",
+    cards: [{ cardId: "onr_v1_047_pile-driver", quantity: 1 }],
+  });
   return input;
+}
+
+export function attachOwnDeckSnapshot(
+  input: AiDecisionInput,
+  ownDeckSnapshot: AiDeckStrategyDeckSnapshot,
+): void {
+  Object.assign(input, { ownDeckSnapshot });
 }
 
 export function identityCard(side: Side): VisibleCard {
@@ -160,7 +174,9 @@ export function legalAction(
     side,
     type,
     label,
-    source: options.source ?? "basic_action",
+    source:
+      options.source ??
+      (type === "end_turn" ? "game_rule" : "basic_action"),
     timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
     costs: [cost],
     targetRequirements: [],
@@ -218,7 +234,23 @@ export function safeRuntimeRunTarget(actionId: string, targetServerId: string) {
     multiaccessAvailable: false,
     pathPassability: "reachable",
     pathCost: 0,
+    routeQuote: {
+      reachability: "guaranteed_access" as const,
+      knownCost: 0,
+      guaranteedKnownCost: 0,
+      availableCredits: 4,
+      fundingGap: 0,
+      unknownIceCount: 0,
+      effects: [],
+      conditionalReasons: [],
+      evidence: [
+        "route_reachability:guaranteed_access",
+        "route_funding_gap:0",
+        "route_unknown_ice_count:0",
+      ],
+    },
     creditsAfterRun: 4,
+    runCommitment: "full_path" as const,
     stealOrTrashAffordable: "unknown",
     installedRunPayoff: payoff,
     runActionPayoff: payoff,

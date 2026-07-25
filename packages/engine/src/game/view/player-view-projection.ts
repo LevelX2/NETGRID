@@ -13,6 +13,7 @@ import {
   maxHandSize,
   runnerMemoryLimit,
 } from "../../ability-engine/effective-values";
+import { projectInstalledCorpIceRezCost } from "../payment";
 import {
   activeCardImplementationModifiersForRunnerInstalled,
   isPublicRunnerInstalledModifier,
@@ -34,6 +35,7 @@ import {
 import { visibleChoice } from "./choice-view";
 import { toPublicEventForSide } from "./public-event-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
+import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
 
 export function buildPlayerViewProjection(
   state: GameState,
@@ -41,6 +43,8 @@ export function buildPlayerViewProjection(
   legalActions: LegalAction[],
 ): PlayerView {
   const runnerSide = side === "runner";
+  const corpCentralAccessQuotes =
+    side === "corp" ? quoteCorpCentralAccesses(state) : undefined;
   const visibleServers = state.corp.servers.map((server) => {
     const ice = server.ice.map((id) => {
       const visibleIce = visibleCorpCard(state, id, side, "ice");
@@ -49,9 +53,13 @@ export function buildPlayerViewProjection(
         id,
         visibleIce,
       );
-      return effectiveRunQuote
-        ? { ...visibleIce, effectiveRunQuote }
-        : visibleIce;
+      const effectiveRezCostQuote =
+        side === "corp" ? projectInstalledCorpIceRezCost(state, id) : undefined;
+      return {
+        ...visibleIce,
+        ...(effectiveRunQuote ? { effectiveRunQuote } : {}),
+        ...(effectiveRezCostQuote ? { effectiveRezCostQuote } : {}),
+      };
     });
     return {
       id: server.id,
@@ -220,6 +228,9 @@ export function buildPlayerViewProjection(
           memoryLimit: runnerMemoryLimit(state),
         },
     servers: visibleServers,
+    ...(corpCentralAccessQuotes
+      ? { corpCentralAccessQuotes: [...corpCentralAccessQuotes] }
+      : {}),
     specialZones: visibleSpecialZones(state, side),
     ...(run ? { run } : {}),
     ...(state.pendingChoice?.side === side

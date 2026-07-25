@@ -14,16 +14,11 @@ import { createPlanStep } from "./tactical-plan-builders";
 import { actionServerId, isRemoteServer } from "./tactical-plan-server-targets";
 import { serverHasUnrezzedIce } from "./tactical-plan-run-reachability";
 import { visibleCardByInstanceId } from "./tactical-plan-visible-cards";
-import { assessPlanFollowupActionBudget } from "./tactical-plan-followup-budget";
 import type {
   PlanBlocker,
   PlanStep,
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
-import {
-  corpIcePlacementCandidateForAction,
-  type CorpIcePlacementCandidate,
-} from "../runtime/corp-ice-placement/corp-ice-placement";
 import {
   candidateRequiresSuccessfulTrace,
   traceActionLeavesImmediatePunishWindow,
@@ -279,85 +274,12 @@ export function corpScoreWindowCurrentStep(
     const protectionPath = input
       ? corpRemoteProtectionPath(input, targetServerId)
       : emptyCorpRemoteProtectionPath();
-    const protectionFollowupBudget = input
-      ? assessPlanFollowupActionBudget({
-          input,
-          acquisitionActionIds: protectionPath.acquisitionActionIds,
-          conversionActionIds: protectionPath.fallbackActionIds,
-          requiredFollowupActions: 1,
-          horizon: "same_turn_required",
-        })
-      : undefined;
-    if (
-      protectionPath.immediateActionIds.length === 0 &&
-      protectionPath.fallbackActionIds.length > 0 &&
-      protectionFollowupBudget?.recommendation === "convert_now"
-    ) {
-      return createPlanStep({
-        stepId: `protect_remote_fallback:${action.actionId}`,
-        kind: "protect_remote",
-        desiredActionSemantics: ["install.card", "remote_protection"],
-        actionCandidateIds: protectionPath.fallbackActionIds,
-        requiredCapabilities: [
-          {
-            capabilityId: `remote_protection_fallback:${action.actionId}`,
-            kind: "remote_protection",
-            side: "corp",
-            evidence: [
-              "last_click_requires_protection_followup",
-              "no_click_budget_for_another_draw_then_install",
-            ],
-          },
-        ],
-        rationale: [
-          "use the best affordable non-zero protection before the search click budget expires",
-        ],
-        followupBudget: protectionFollowupBudget,
-      });
-    }
-    if (
-      protectionPath.immediateActionIds.length === 0 &&
-      protectionPath.fundingCandidate
-    ) {
-      const minimumCredits =
-        protectionPath.fundingCandidate.actionCreditCost +
-        protectionPath.fundingCandidate.rezCost;
-      return createPlanStep({
-        stepId: `build_rez_reserve:${action.actionId}`,
-        kind: "build_rez_reserve",
-        desiredActionSemantics: ["economy.gain_credit", "card_ability.trigger"],
-        actionCandidateIds: corpImmediateCreditActionIds(input),
-        requiredCapabilities: [
-          {
-            capabilityId: `remote_protection_reserve:${action.actionId}`,
-            kind: "rez_reserve",
-            side: "corp",
-            minimumCredits,
-            evidence: [
-              "remote_protection_requires_funding",
-              `protection_action:${protectionPath.fundingCandidate.actionId}`,
-              `protection_rez_cost:${protectionPath.fundingCandidate.rezCost}`,
-              `protection_install_cost:${protectionPath.fundingCandidate.actionCreditCost}`,
-            ],
-          },
-        ],
-        rationale: [
-          `fund concrete remote protection to ${minimumCredits} credits`,
-        ],
-      });
-    }
     if (protectionPath.immediateActionIds.length === 0) {
       return createPlanStep({
         stepId: `find_remote_protection:${action.actionId}`,
         kind: "find_remote_protection",
-        desiredActionSemantics:
-          protectionFollowupBudget?.recommendation === "defer_acquisition"
-            ? []
-            : ["draw.card", "search.deck", "remote_protection"],
-        actionCandidateIds:
-          protectionFollowupBudget?.recommendation === "defer_acquisition"
-            ? []
-            : protectionPath.acquisitionActionIds,
+        desiredActionSemantics: ["draw.card", "search.deck"],
+        actionCandidateIds: protectionPath.acquisitionActionIds,
         requiredCapabilities: [
           {
             capabilityId: `remote_protection:${action.actionId}`,
@@ -378,9 +300,6 @@ export function corpScoreWindowCurrentStep(
         rationale: [
           "find protection that the visible Runner rig cannot nullify",
         ],
-        ...(protectionFollowupBudget
-          ? { followupBudget: protectionFollowupBudget }
-          : {}),
       });
     }
     return createPlanStep({
@@ -431,8 +350,6 @@ export function corpScoreWindowCurrentStep(
 
 export type CorpRemoteProtectionPath = {
   immediateActionIds: string[];
-  fallbackActionIds: string[];
-  fundingCandidate?: CorpIcePlacementCandidate;
   acquisitionActionIds: string[];
   evidence: string[];
 };
@@ -440,7 +357,6 @@ export type CorpRemoteProtectionPath = {
 function emptyCorpRemoteProtectionPath(): CorpRemoteProtectionPath {
   return {
     immediateActionIds: [],
-    fallbackActionIds: [],
     acquisitionActionIds: [],
     evidence: [],
   };
@@ -455,8 +371,6 @@ export function corpRemoteProtectionPath(
     (candidate) => candidate.id === serverId,
   );
   const immediateActionIds: string[] = [];
-  const fallbackCandidates: CorpIcePlacementCandidate[] = [];
-  const fundingCandidates: CorpIcePlacementCandidate[] = [];
   const evidence: string[] = [];
 
   for (const action of input.legalActions.filter(
@@ -472,37 +386,9 @@ export function corpRemoteProtectionPath(
       action.payload?.placement === "ice" &&
       source?.type === "ice"
     ) {
-      const placement = corpIcePlacementCandidateForAction({
-        input,
-        action,
-        serverId,
-        server,
-        sourceCard: source,
-        iceRezCost: source.rezCost,
-      });
-      if (!placement) continue;
       evidence.push(
-        `protection_candidate:${action.actionId}:${placement.recommendation}`,
-        `protection_candidate_immediate_stop:${action.actionId}:${placement.immediateStop}`,
-        `protection_candidate_zero_effect:${action.actionId}:${placement.visibleZeroEffectRisk}`,
-        `protection_candidate_rez_affordable:${action.actionId}:${placement.rezAffordable}`,
+        `ice_allocation_delegated_to_corp_defend_servers:${serverId}`,
       );
-      const providesConcreteProtection =
-        placement.immediateStop && !placement.visibleZeroEffectRisk;
-      if (!providesConcreteProtection) {
-        if (placement.rezAffordable && !placement.visibleZeroEffectRisk) {
-          fallbackCandidates.push(placement);
-        }
-        continue;
-      }
-      if (
-        placement.rezAffordable &&
-        placement.recommendation === "install_now"
-      ) {
-        immediateActionIds.push(action.actionId);
-      } else if (!placement.rezAffordable) {
-        fundingCandidates.push(placement);
-      }
       continue;
     }
     if (action.type === "rez_ice" && source?.type === "ice") {
@@ -539,22 +425,8 @@ export function corpRemoteProtectionPath(
     }
   }
 
-  fundingCandidates.sort(
-    (left, right) =>
-      left.actionCreditCost +
-        left.rezCost -
-        (right.actionCreditCost + right.rezCost) || right.score - left.score,
-  );
-  fallbackCandidates.sort(
-    (left, right) =>
-      right.score - left.score || left.actionId.localeCompare(right.actionId),
-  );
   return {
     immediateActionIds,
-    fallbackActionIds: fallbackCandidates.map(
-      (candidate) => candidate.actionId,
-    ),
-    ...(fundingCandidates[0] ? { fundingCandidate: fundingCandidates[0] } : {}),
     acquisitionActionIds: input.legalActions
       .filter((action) => action.side === "corp" && action.type === "draw_card")
       .map((action) => action.actionId),

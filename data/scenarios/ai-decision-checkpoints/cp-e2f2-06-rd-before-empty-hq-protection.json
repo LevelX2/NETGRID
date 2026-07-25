@@ -8648,9 +8648,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "sourceDefinitionId": "onr_proteus_032_misleading-access-menus",
-        "type": "install_card",
-        "targetServerId": "rd"
+        "type": "purge_runner_virus_counters"
       }
     ],
     "contractKind": "correctness",

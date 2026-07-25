@@ -12958,8 +12958,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.1"
+        "actionId": "runner.start_run.archives"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_archives_information"],
+      "requiredAssessmentEvidence": ["target:archives"]
+    }
   }
 }

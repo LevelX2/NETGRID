@@ -10,10 +10,7 @@ import {
 import { buildCorpStrategicIntentProfile } from "./corp-strategic-intent";
 import { buildRunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { buildStrategicIntentState } from "./strategic-intent-state";
-import {
-  getTacticalPlanMemorySnapshot,
-  resetTacticalPlanMemory,
-} from "./tactical-plans";
+import { resetTacticalPlanMemory } from "./tactical-plans";
 import type { AiDecisionInputWithDeckCapabilities } from "./runtime/ai-decision-input";
 import type {
   AiDecisionInput,
@@ -93,7 +90,6 @@ describe("Deck strategy runtime vertical slices", () => {
     });
 
     const first = chooseRunnerAction(input);
-    const firstMemory = getTacticalPlanMemorySnapshot(input);
     const second = chooseRunnerAction({
       ...input,
       decisionId: input.decisionId.replace(":1", ":2"),
@@ -105,15 +101,22 @@ describe("Deck strategy runtime vertical slices", () => {
     });
 
     expect(first.actionId).toBe("run-rd");
-    expect(first.evidence).toContain("semantic_strategic_action_fit:true");
-    expect(firstMemory?.planId).toBe("runner.opportunistic_central_run:rd");
-    expect(second.evidence).toEqual(
+    expect(first.evidence).toEqual(
       expect.arrayContaining([
-        "runner_run_plan_memory:created",
-        "runner_run_plan_target:rd",
-        "runner_run_plan_revalidation:valid",
+        "plan_module:runner.pressure_central",
+        "plan_step_capability:pressure_rd_information",
       ]),
     );
+    expect(first.decisionDebug?.planId).toContain(
+      "plan:runner.pressure_central:central%3Ard",
+    );
+    expect(second.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:runner.pressure_central",
+        "plan_step_capability:pressure_rd_information",
+      ]),
+    );
+    expect(second.decisionDebug?.planId).toBe(first.decisionDebug?.planId);
   });
 
   it("uses Corp tag-punish payoff only when the boardstate window exists", () => {
@@ -146,7 +149,13 @@ describe("Deck strategy runtime vertical slices", () => {
     const noWindowInput = strategicInput({
       side: "corp",
       snapshot: corpTagPunishSnapshot(),
-      actions: [{ ...punish, costs: [{ credits: 5 }] }, gain],
+      actions: [
+        { ...punish, costs: [{ credits: 5 }] },
+        gain,
+        legalAction("end-turn", "corp", "end_turn", "End turn", {
+          source: "game_rule",
+        }),
+      ],
       credits: 2,
       gripOrHq: [closedAccounts],
       runnerTags: 0,
@@ -162,21 +171,50 @@ describe("Deck strategy runtime vertical slices", () => {
     const noWindow = chooseCorpAction(noWindowInput);
 
     expect(tagged.actionId).toBe("closed-accounts");
-    expect(tagged.evidence).toContain("semantic_strategic_action_fit:true");
-    expect(noWindow.actionId).toBe("gain-credit");
-    expect(noWindow.evidence).not.toContain(
-      "corp_tagged_runner_payoff_pressure",
+    expect(tagged.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.execute_punish_sequence",
+        "plan_step_capability:punish_damage",
+      ]),
+    );
+    expect(noWindow.actionId).toBe("end-turn");
+    expect(noWindow.evidence).toEqual(
+      expect.arrayContaining(["plan_module:corp.complete_turn"]),
     );
   });
 
   it("keeps Corp scoreline terminal windows above setup, but avoids contestable advances", () => {
-    const score = legalAction("score-agenda", "corp", "score_agenda", "Score");
+    const scoringAgenda = visibleCard(
+      "scoring-agenda",
+      "corp",
+      "agenda",
+      {
+        definitionId: "simple_agenda",
+        title: "Simple Agenda",
+        advancementRequirement: 3,
+        advancementCounters: 3,
+      },
+    );
+    const score = legalAction("score-agenda", "corp", "score_agenda", "Score", {
+      source: scoringAgenda.instanceId,
+      payload: {
+        serverId: "remote_1",
+        cardId: scoringAgenda.instanceId,
+        sourceCardId: scoringAgenda.instanceId,
+      },
+    });
     const gain = legalAction("gain-credit", "corp", "gain_credit", "Gain 1");
     const scoreInput = strategicInput({
       side: "corp",
       snapshot: corpRemoteScoringSnapshot(),
       actions: [score, gain],
       credits: 4,
+      servers: [
+        server("hq"),
+        server("rd"),
+        server("archives"),
+        server("remote_1", [], [scoringAgenda]),
+      ],
       targetVector: {
         kind: "scoreline",
         evidence: ["dsr08:corp_scoreline"],
@@ -205,8 +243,14 @@ describe("Deck strategy runtime vertical slices", () => {
     const contestableInput = strategicInput({
       side: "corp",
       snapshot: corpRemoteScoringSnapshot(),
-      actions: [contestableAdvance, gain],
-      credits: 4,
+      actions: [
+        contestableAdvance,
+        gain,
+        legalAction("end-turn", "corp", "end_turn", "End turn", {
+          source: "game_rule",
+        }),
+      ],
+      credits: 3,
       servers: [
         server("hq"),
         server("rd"),
@@ -224,22 +268,56 @@ describe("Deck strategy runtime vertical slices", () => {
     const contestableDecision = chooseCorpAction(contestableInput);
 
     expect(scoreDecision.actionId).toBe("score-agenda");
-    expect(scoreDecision.evidence).toContain(
-      "semantic_strategic_action_fit:true",
+    expect(scoreDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.score_agenda",
+        "plan_priority_class:P3",
+      ]),
     );
-    expect(contestableDecision.actionId).toBe("gain-credit");
+    expect(contestableDecision.actionId).toBe("end-turn");
   });
 
   it("uses ICE-tax defense when affordable and economy when the defensive line is unfunded", () => {
-    const rez = legalAction("rez-ice", "corp", "rez_ice", "Rez Wall", {
-      cost: 3,
+    const installedIce = visibleCard("installed-rd-wall", "corp", "ice", {
+      definitionId: "onr_v1_237_data-wall",
+      title: "Data Wall",
+      rezzed: false,
+      rezCost: 1,
+      strength: 0,
+      subtypes: ["wall"],
+      effectiveRezCostQuote: {
+        context: "installed",
+        cardId: "installed-rd-wall",
+        targetServerId: "rd",
+        projectedServerId: "rd",
+        expiresAtStateVersion: 1,
+        complete: true,
+        baseCredits: 1,
+        finalCredits: 1,
+        mandatoryAdditionalCosts: { agendaPoints: 0 },
+      },
     });
+    const expensiveIce = visibleCard("expensive-rd-wall", "corp", "ice", {
+      definitionId: "onr_v1_279_wall-of-static",
+      title: "Wall of Static",
+      rezCost: 3,
+    });
+    const rez = legalAction("rez-ice", "corp", "rez_ice", "Rez Wall", {
+      cost: 1,
+      source: installedIce.instanceId,
+      payload: {
+        cardId: installedIce.instanceId,
+        serverId: "rd",
+      },
+    });
+    rez.expiresAtStateVersion = 1;
     const gain = legalAction("gain-credit", "corp", "gain_credit", "Gain 1");
     const fundedInput = strategicInput({
       side: "corp",
       snapshot: corpIceTaxSnapshot(),
       actions: [rez, gain],
       credits: 6,
+      servers: [server("hq"), server("rd", [installedIce]), server("archives")],
       targetVector: {
         kind: "coverage",
         evidence: ["dsr08:corp_ice_tax"],
@@ -257,12 +335,17 @@ describe("Deck strategy runtime vertical slices", () => {
           "Install ICE",
           {
             cost: 100,
+            source: expensiveIce.instanceId,
             payload: { placement: "ice", serverId: "rd" },
           },
         ),
         gain,
+        legalAction("end-turn", "corp", "end_turn", "End turn", {
+          source: "game_rule",
+        }),
       ],
       credits: 2,
+      gripOrHq: [expensiveIce],
       targetVector: {
         kind: "coverage",
         evidence: ["dsr08:corp_ice_tax_unfunded"],
@@ -274,8 +357,13 @@ describe("Deck strategy runtime vertical slices", () => {
     const unfunded = chooseCorpAction(unfundedInput);
 
     expect(funded.actionId).toBe("rez-ice");
-    expect(funded.evidence).toContain("semantic_strategic_action_fit:true");
-    expect(unfunded.actionId).toBe("gain-credit");
+    expect(funded.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.defend_servers",
+        "plan_step_capability:allocate_server_defense",
+      ]),
+    );
+    expect(unfunded.actionId).toBe("end-turn");
   });
 
   it("runs Runner remote-contest windows but lets acute hand safety override pressure", () => {
@@ -346,12 +434,15 @@ describe("Deck strategy runtime vertical slices", () => {
     const safetyDecision = chooseRunnerAction(safetyInput);
 
     expect(remoteDecision.actionId).toBe("run-remote");
-    expect(remoteDecision.evidence).toContain(
-      "semantic_strategic_action_fit:true",
+    expect(remoteDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:runner.contest_remote",
+        "plan_step_capability:contest_remote",
+      ]),
     );
     expect(safetyDecision.actionId).toBe("draw");
     expect(JSON.stringify(safetyDecision.decisionDebug)).toContain(
-      "runner_hand_buffer_need",
+      "plan_module:runner.defense_and_recovery",
     );
   });
 });
@@ -445,6 +536,7 @@ function playerViewFor(params: {
   const runnerOwn = params.side === "runner";
   return {
     stateVersion: 1,
+    turnSerial: 0,
     side: params.side,
     activeSide: params.side,
     phase:

@@ -5,7 +5,10 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
-import type { CardLifecycleTriggeredAbilityImplementation } from "./definition-types";
+import type {
+  CardLifecycleTriggeredAbilityImplementation,
+  PayCreditsOrLoseGameEffectImplementation,
+} from "./definition-types";
 import { executeCardImplementationEffects } from "./effect-interpreter";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import { cardImplementationConditionMet } from "./card-implementation-runtime-shared";
@@ -24,13 +27,47 @@ function cardImplementationEndOfRunnerTurnAbilities(
 }
 
 export function endOfRunnerTurnPayload(
+  state: GameState,
+  definition: CardDefinition,
   cardId: CardInstanceId,
   abilityIndex: number,
 ): Record<string, string | number | boolean> {
+  const leavePlayPayment = leavePlayPaymentQuote(state, definition, cardId);
   return {
     cardId,
     cardImplementationLifecycleAction: "end_of_runner_turn",
     cardImplementationLifecycleAbilityIndex: abilityIndex,
+    ...(leavePlayPayment ?? {}),
+  };
+}
+
+function leavePlayPaymentQuote(
+  state: GameState,
+  definition: CardDefinition,
+  cardId: CardInstanceId,
+):
+  | {
+      cardImplementationLifecycleLeavePlayPaymentAmount: number;
+      cardImplementationLifecycleLeavePlayPaymentStatus: "payable" | "unpayable";
+    }
+  | undefined {
+  const paymentEffects =
+    cardImplementationForDefinitionId(definition.id)?.lifecycle?.on_leave_play
+      ?.filter(
+        (effect): effect is PayCreditsOrLoseGameEffectImplementation =>
+          effect.kind === "pay_credits_or_lose_game",
+      ) ?? [];
+  if (paymentEffects.length !== 1) return undefined;
+  const [paymentEffect] = paymentEffects;
+  if (!paymentEffect) return undefined;
+  const controller = state.cardInstances[cardId]?.controller;
+  const payer =
+    paymentEffect.payer === "controller" ? controller : paymentEffect.payer;
+  if (payer !== "runner" && payer !== "corp") return undefined;
+  return {
+    cardImplementationLifecycleLeavePlayPaymentAmount: paymentEffect.amount,
+    cardImplementationLifecycleLeavePlayPaymentStatus:
+      state[payer].credits >= paymentEffect.amount ? "payable" : "unpayable",
   };
 }
 
@@ -64,7 +101,7 @@ export function pushCardImplementationEndOfRunnerTurnActions(
           `${definition.title} trashen und Zug beenden`,
           cardId,
           [],
-          endOfRunnerTurnPayload(cardId, index),
+          endOfRunnerTurnPayload(state, definition, cardId, index),
         ),
       );
     });

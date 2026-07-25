@@ -6886,15 +6886,12 @@
   "expectation": {
     "forbiddenActions": [
       {
-        "type": "pump_breaker"
-      },
-      {
         "type": "break_subroutine"
       }
     ],
     "acceptableActions": [
       {
-        "actionId": "runner.continue_run.card_implementation.onr_v1_276_viral-15.printed_subroutine.1.run_duration_jack_out_cost,card_implementation.onr_v1_276_viral-15.printed_subroutine.2.run_duration_trash_program_after_passing_rezzed_ice_unless_jack_out"
+        "type": "pump_breaker"
       }
     ]
   }

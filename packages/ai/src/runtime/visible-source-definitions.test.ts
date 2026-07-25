@@ -34,6 +34,36 @@ describe("visibleSourceDefinitionsByInstanceId", () => {
       "known-root": "onr_v1_347_vapor-ops",
     });
   });
+
+  it("binds the currently revealed accessed card for access-step semantics", () => {
+    const accessed = card(
+      "accessed-krumz",
+      "onr_v1_330_krumz",
+      "asset",
+    );
+    const playerView = {
+      own: {
+        identity: card("runner-identity", "test-runner-identity", "identity"),
+        gripOrHq: [],
+        heapOrArchives: [],
+        scoreArea: [],
+        rig: [],
+      },
+      run: {
+        attackedServerId: "hq",
+        phase: "access",
+        position: { kind: "server", serverId: "hq" },
+        successful: true,
+        accessedCard: accessed,
+      },
+      servers: [],
+    } as unknown as PlayerView;
+
+    expect(visibleSourceDefinitionsByInstanceId(playerView)).toEqual({
+      "runner-identity": "test-runner-identity",
+      "accessed-krumz": "onr_v1_330_krumz",
+    });
+  });
 });
 
 function card(

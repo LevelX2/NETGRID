@@ -2,6 +2,7 @@ import {
   CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
+  type PublicGameEvent,
 } from "@netgrid/shared";
 import {
   reconstructBeliefState,
@@ -287,10 +288,15 @@ function evaluateRunnerRunTarget(
   const visibleTraceTagHazardUnavoidable =
     path.visibleTraceTagHazardUnavoidable === true;
   const runnerMatchpointCentralAccess =
-    accessTargetKind === "rd" &&
+    (accessTargetKind === "rd" || accessTargetKind === "hq") &&
     payoff.knownAccessState !== "known_no_current_payoff" &&
     params.input.playerView.own.agendaPoints >=
       params.input.playerView.agendaPointsToWin - 2;
+  const targetFundingNeed = runnerRunTargetFundingNeed({
+    routeQuote,
+    creditsAfterRun,
+    economyPosture,
+  });
   const recommendation = recommendationForRunTarget({
     targetKind: accessTargetKind,
     accessPayoff,
@@ -309,6 +315,7 @@ function evaluateRunnerRunTarget(
     visibleTraceTagHazardUnavoidable,
     runnerMatchpointCentralAccess,
     routeQuote,
+    targetFundingNeed,
     unrezzedIceRiskUnderfunded,
     ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
     ...(rankedAccessTarget ? { rankedAccessTarget } : {}),
@@ -348,6 +355,7 @@ function evaluateRunnerRunTarget(
     pathCost: routeQuote.guaranteedKnownCost,
     routeQuote,
     creditsAfterRun,
+    runCommitment,
     unknownUnrezzedIceCount,
     unrezzedIceRisk,
     unrezzedIceRiskCreditBuffer,
@@ -424,6 +432,10 @@ function evaluateRunnerRunTarget(
       `unavoidable_visible_ice_hazard_count:${unavoidableVisibleIceHazardCount}`,
       `visible_trace_tag_hazard_unavoidable:${visibleTraceTagHazardUnavoidable}`,
       `runner_matchpoint_central_access:${runnerMatchpointCentralAccess}`,
+      `run_target_funding_need:${targetFundingNeed.reason}`,
+      `run_target_route_funding_gap:${targetFundingNeed.routeFundingGap}`,
+      `run_target_post_run_floor_gap:${targetFundingNeed.postRunFloorGap}`,
+      `global_economy_funding_need:${economyPosture.fundingNeed}`,
       ...(path.visibleIceRunHazards ?? [])
         .flatMap((hazard) => hazard.evidence)
         .slice(0, 16),
@@ -459,6 +471,16 @@ function evaluateRunnerRunTarget(
       `score_threat:${scoreThreat}`,
       `recommendation:${recommendation}`,
       ...accessOutcomeMemoryEvaluationEvidence(accessOutcomeMemory),
+      ...(accessOutcomeMemorySuppressesCurrentPayoff({
+        accessPayoff,
+        knownAccessState: payoff.knownAccessState,
+        ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
+      })
+        ? []
+        : accessOutcomeMemory?.applies === true &&
+            accessOutcomeMemory.suppressesPlanBonus
+          ? ["run_target_access_memory_overridden_by_current_payoff:true"]
+          : []),
       ...rankedAccessTargetEvaluationEvidence(rankedAccessTarget),
       ...economyPosture.creditReservePolicy.evidence.slice(0, 12),
       ...payoff.evidence.slice(0, 36),
@@ -832,13 +854,18 @@ function accessReplacementPayoffForTarget(
     Math.floor(params.input.playerView.opponent.deckCount),
   );
   const effectiveLookCount = Math.min(requestedLookCount, visibleRdCount);
-  const addsNewInformation = knownSequence.length < effectiveLookCount;
+  const priorPrivateLookStillCurrent =
+    rdPrivateLookHasNoProvenStateInvalidation(params.input);
+  const addsNewInformation =
+    !priorPrivateLookStillCurrent &&
+    knownSequence.length < effectiveLookCount;
   const evidence = [
     "central_target:rd",
     "central_access_replacement:private_look_top_rd",
     `central_access_replacement_look_count:${requestedLookCount}`,
     `central_access_replacement_effective_count:${effectiveLookCount}`,
     `central_access_replacement_known_sequence_count:${knownSequence.length}`,
+    `central_access_replacement_prior_private_look_still_current:${priorPrivateLookStillCurrent}`,
     `central_access_replacement_adds_information:${addsNewInformation}`,
   ];
   if (!addsNewInformation) {
@@ -858,6 +885,72 @@ function accessReplacementPayoffForTarget(
       "central_access_replacement_information_payoff:true",
     ],
   };
+}
+
+function rdPrivateLookHasNoProvenStateInvalidation(
+  input: AiDecisionInput,
+): boolean {
+  const events = aiVisibleEvents(input);
+  let latestPrivateLookIndex = -1;
+  for (let index = 0; index < events.length; index += 1) {
+    if (isRunnerRdPrivateLook(events[index]!)) latestPrivateLookIndex = index;
+  }
+  if (latestPrivateLookIndex < 0) return false;
+  return !events
+    .slice(latestPrivateLookIndex + 1)
+    .some(rdTopMayHaveChanged);
+}
+
+function aiVisibleEvents(input: AiDecisionInput): PublicGameEvent[] {
+  const byId = new Map<string, PublicGameEvent>();
+  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
+    const previous = byId.get(event.eventId);
+    if (!previous || previous.stateVersionAfter <= event.stateVersionAfter) {
+      byId.set(event.eventId, event);
+    }
+  }
+  return [...byId.values()].sort(
+    (left, right) =>
+      left.stateVersionBefore - right.stateVersionBefore ||
+      left.eventId.localeCompare(right.eventId),
+  );
+}
+
+function isRunnerRdPrivateLook(event: PublicGameEvent): boolean {
+  return (
+    event.publicPayload.actor === "runner" &&
+    event.publicPayload.hiddenZoneAction === "p3_33_private_look" &&
+    event.publicPayload.privateLookZone === "rd" &&
+    (Array.isArray(event.publicPayload.knownRndDefinitionIds) ||
+      typeof event.publicPayload.knownRndTopDefinitionId === "string")
+  );
+}
+
+function rdTopMayHaveChanged(event: PublicGameEvent): boolean {
+  const actionType = String(event.publicPayload.actionType ?? event.type);
+  const actor = event.publicPayload.actor;
+  if (
+    actor === "corp" &&
+    (actionType === "draw_card" || actionType === "mandatory_draw")
+  ) {
+    return true;
+  }
+  if (
+    actionType === "steal_agenda" ||
+    actionType === "trash_accessed_card" ||
+    actionType === "move_to_removed_from_game" ||
+    actionType === "move_to_set_aside" ||
+    actionType === "return_from_set_aside"
+  ) {
+    return event.publicPayload.serverId === "rd";
+  }
+  return (
+    event.publicPayload.hiddenZoneAction === "shuffle" ||
+    event.publicPayload.hiddenZoneAction === "arrange" ||
+    event.publicPayload.hiddenZoneAction === "reorder" ||
+    event.publicPayload.hiddenZoneAction === "conceal" ||
+    event.publicPayload.hiddenZoneAction === "swap"
+  );
 }
 
 function rankedAccessTargetForServer(
@@ -957,6 +1050,7 @@ function recommendationForRunTarget(params: {
   visibleTraceTagHazardUnavoidable: boolean;
   runnerMatchpointCentralAccess: boolean;
   routeQuote: NonNullable<RunnerRunTargetEvaluation["routeQuote"]>;
+  targetFundingNeed: RunnerRunTargetFundingNeed;
   unrezzedIceRiskUnderfunded: boolean;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
   rankedAccessTarget?: RankedKnownRemoteAccessCandidate;
@@ -1033,8 +1127,7 @@ function recommendationForRunTarget(params: {
   }
   if (
     params.targetKind === "remote" &&
-    params.accessOutcomeMemory?.applies === true &&
-    params.accessOutcomeMemory.suppressesPlanBonus
+    accessOutcomeMemorySuppressesCurrentPayoff(params)
   ) {
     return "declined_trash_memory_active";
   }
@@ -1054,6 +1147,13 @@ function recommendationForRunTarget(params: {
     return params.accessPayoff === "trash_unaffordable"
       ? "gain_credits_first"
       : "do_not_run_now";
+  }
+  if (
+    params.runnerMatchpointCentralAccess &&
+    params.pathPassability === "reachable" &&
+    params.routeQuote.fundingGap === 0
+  ) {
+    return "run_now";
   }
   if (
     params.accessPayoff !== "agenda" &&
@@ -1085,8 +1185,7 @@ function recommendationForRunTarget(params: {
   }
   if (highValuePayoff(params.accessPayoff)) return "run_now";
   if (
-    params.creditsAfterRun < params.economyPosture.minimumCreditFloor ||
-    params.economyPosture.fundingNeed
+    params.targetFundingNeed.reason !== "none"
   ) {
     return "gain_credits_first";
   }
@@ -1099,6 +1198,34 @@ function recommendationForRunTarget(params: {
   if (params.scoreThreat) return "run_now";
   if (params.accessPayoff === "unknown") return "run_if_free";
   return "setup_first";
+}
+
+type RunnerRunTargetFundingNeed = {
+  reason: "none" | "route_funding_gap" | "post_run_floor_gap";
+  routeFundingGap: number;
+  postRunFloorGap: number;
+};
+
+function runnerRunTargetFundingNeed(params: {
+  routeQuote: NonNullable<RunnerRunTargetEvaluation["routeQuote"]>;
+  creditsAfterRun: number;
+  economyPosture: RunnerEconomyPosture;
+}): RunnerRunTargetFundingNeed {
+  const routeFundingGap = Math.max(0, params.routeQuote.fundingGap ?? 0);
+  const postRunFloorGap = Math.max(
+    0,
+    params.economyPosture.minimumCreditFloor - params.creditsAfterRun,
+  );
+  return {
+    reason:
+      routeFundingGap > 0
+        ? "route_funding_gap"
+        : postRunFloorGap > 0
+          ? "post_run_floor_gap"
+          : "none",
+    routeFundingGap,
+    postRunFloorGap,
+  };
 }
 
 function scoreRunTargetEvaluation(params: {
@@ -1139,8 +1266,7 @@ function scoreRunTargetEvaluation(params: {
   const blinkRiskPenalty = blinkRiskScorePenalty(params.blinkRiskAssessment);
   const accessOutcomeMemoryPenalty =
     params.targetKind === "remote" &&
-    params.accessOutcomeMemory?.applies === true &&
-    params.accessOutcomeMemory.suppressesPlanBonus
+    accessOutcomeMemorySuppressesCurrentPayoff(params)
       ? -360
       : 0;
   return (
@@ -1155,6 +1281,22 @@ function scoreRunTargetEvaluation(params: {
     blinkRiskPenalty +
     accessOutcomeMemoryPenalty +
     recommendationScore
+  );
+}
+
+function accessOutcomeMemorySuppressesCurrentPayoff(params: {
+  accessPayoff: RunnerAccessPayoff;
+  knownAccessState: RunnerKnownAccessState;
+  accessOutcomeMemory?: AccessOutcomeMemoryStatus;
+}): boolean {
+  return (
+    params.accessOutcomeMemory?.applies === true &&
+    params.accessOutcomeMemory.suppressesPlanBonus &&
+    (params.accessOutcomeMemory.suppressUntilInvalidated === true ||
+      !(
+        params.knownAccessState === "known_payoff" &&
+        highValuePayoff(params.accessPayoff)
+      ))
   );
 }
 

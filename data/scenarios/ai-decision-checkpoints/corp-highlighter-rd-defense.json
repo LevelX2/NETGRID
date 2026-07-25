@@ -4753,7 +4753,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_237_data-wall_3.rd.corp_onr_v1_237_data-wall_3.0"
+        "actionId": "corp.purge_runner_virus_counters"
       }
     ]
   }

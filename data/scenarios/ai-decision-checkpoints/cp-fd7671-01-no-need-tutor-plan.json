@@ -6113,13 +6113,24 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.hq"
+      "actionId": "runner.start_run.hq"
       }
     ],
     "forbiddenActions": [
       {
         "sourceDefinitionId": "onr_v1_099_mantis-fixer-at-large"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+      "runner.pressure_central"
+      ],
+      "acceptableCapabilities": [
+      "pressure_hq_information"
+      ],
+      "requiredAssessmentEvidence": [
+      "runner_hq_success_window_setup:onr_v1_080_core-command-jettison-ice"
+      ]
+    }
   }
 }

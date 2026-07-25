@@ -163,14 +163,14 @@ const corpus = {
       .length,
     regularlyCompletedGames: summaries.filter(
       (summary) =>
-        summary.errors.length === 0 && summary.winner !== "action_limit_reached",
+        summary.terminationKind === "game_result",
     ).length,
     actionLimitReached: summaries.filter(
-      (summary) => summary.winner === "action_limit_reached",
+      (summary) => summary.terminationKind === "action_limit",
     ).length,
     actionLimitReachedWithoutError: summaries.filter(
       (summary) =>
-        summary.winner === "action_limit_reached" && summary.errors.length === 0,
+        summary.terminationKind === "action_limit",
     ).length,
     findingsRedactionSafe: isSelfplayTraceRedactionSafe({
       findings: persistentFindings,
@@ -223,7 +223,7 @@ const manifest = {
     runStatus:
       summary.errors.length > 0
         ? "engine_aborted"
-        : summary.winner === "action_limit_reached"
+        : summary.terminationKind === "action_limit"
           ? "action_limit_reached"
           : "regularly_completed",
     winner: summary.winner,

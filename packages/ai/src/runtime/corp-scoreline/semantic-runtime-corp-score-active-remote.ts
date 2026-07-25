@@ -5,12 +5,8 @@ import type {
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import { semanticRuntimeCorpBoardTriage } from "../semantic-runtime-corp-board-triage";
-import { corpIcePlacementCandidateForAction } from "../corp-ice-placement/corp-ice-placement";
 import type { CorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
-import {
-  CORP_SCORE_NOW_TEMPO_BLOCKING_REMOTE_ICE_SCORE,
-  type SemanticRuntimeCorpScoreDependencies,
-} from "./semantic-runtime-corp-score-contracts";
+import { type SemanticRuntimeCorpScoreDependencies } from "./semantic-runtime-corp-score-contracts";
 import { corpPreparedScoreRemotePipeline } from "./semantic-runtime-corp-score-facts";
 import {
   corpSameTurnScoreCloseoutComponent,
@@ -260,22 +256,6 @@ function corpActiveRemoteAgendaCanTempoAdvanceUnderClock<
       evidence: [`tempo_score_now_target_mismatch:${triageServer}`],
     };
   }
-  const blockingIce = corpStrongSameRemoteIceInstallForScoreline(
-    input,
-    dependencies,
-    state.serverId,
-  );
-  if (blockingIce) {
-    return {
-      allowed: false,
-      evidence: [
-        "tempo_score_now_blocked_by_remote_ice:true",
-        `blocking_ice_action:${blockingIce.actionId}`,
-        `blocking_ice_score:${blockingIce.score}`,
-        `blocking_ice_recommendation:${blockingIce.recommendation}`,
-      ],
-    };
-  }
   const sameTurnCloseout =
     corpSameTurnScoreCloseoutComponent(
       input,
@@ -308,55 +288,6 @@ function corpActiveRemoteAgendaCanTempoAdvanceUnderClock<
     };
   }
   return { allowed: true, evidence: ["tempo_score_now:true"] };
-}
-
-function corpStrongSameRemoteIceInstallForScoreline<TConsumer extends string>(
-  input: AiDecisionInput,
-  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
-  serverId: string,
-):
-  | {
-      actionId: string;
-      score: number;
-      recommendation: string;
-    }
-  | undefined {
-  const legalActions =
-    input.legalActions ?? input.playerView.legalActions ?? [];
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  return legalActions
-    .map((candidateAction) => {
-      if (
-        candidateAction.side !== "corp" ||
-        candidateAction.type !== "install_card" ||
-        candidateAction.payload?.placement !== "ice" ||
-        corpInstallServerId(candidateAction) !== serverId
-      ) {
-        return undefined;
-      }
-      const sourceCard = visibleSourceCardForAction(input, candidateAction);
-      return corpIcePlacementCandidateForAction({
-        input,
-        action: candidateAction,
-        serverId,
-        server,
-        sourceCard,
-        actionCreditCost: dependencies.actionCreditCost(candidateAction),
-        iceRezCost: sourceCard?.rezCost,
-        hasUrgentScoreline: true,
-      });
-    })
-    .filter((candidate): candidate is NonNullable<typeof candidate> =>
-      Boolean(candidate),
-    )
-    .filter(
-      (candidate) =>
-        candidate.recommendation === "install_now" &&
-        candidate.score >= CORP_SCORE_NOW_TEMPO_BLOCKING_REMOTE_ICE_SCORE,
-    )
-    .sort((left, right) => right.score - left.score)[0];
 }
 
 export function corpActiveScorelineOffPathPenaltyComponent<

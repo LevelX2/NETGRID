@@ -105,6 +105,7 @@ export function startHqToNewRemoteInstallRezChoice(
   agendaId: CardInstanceId,
 ): CorpInstallRezSequenceHandlerResult {
   const sequence = requireHqToNewRemoteInstallRezSequence(host, agendaId);
+  const sourceDefinitionId = host.cards.definitionFor(agendaId).id;
   const agendaDefinition = host.cards.definitionFor(agendaId);
   const primitivePayload = cardImplementationPrimitivePayload({
     sourceCardId: agendaId,
@@ -143,6 +144,8 @@ export function startHqToNewRemoteInstallRezChoice(
     choiceId: `choice_card_implementation_hq_to_new_remote_install_rez_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `${HQ_TO_NEW_REMOTE_INSTALL_REZ_SOURCE}:${agendaId}:${host.state.stateVersion + 1}`,
+    sourceCardInstanceId: agendaId,
+    sourceCardDefinitionId: sourceDefinitionId,
     prompt: "Data Fort Reclamation: HQ-Karten fuer neues Data Fort waehlen.",
     kind: "select_cards",
     options,
@@ -191,11 +194,12 @@ export function resolveHqToNewRemoteInstallRezChoice(
     host,
     "HQ-to-new-remote-Install-Choice ist nicht offen.",
   );
-  const [, agendaId] = choice.source.split(":");
+  const agendaId = choice.sourceCardInstanceId;
   if (
     !agendaId ||
-    !host.state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
-    host.cards.scoredAgendaKind(agendaId as CardInstanceId) !==
+    !host.state.corp.scoreArea.includes(agendaId) ||
+    host.cards.definitionFor(agendaId).id !== choice.sourceCardDefinitionId ||
+    host.cards.scoredAgendaKind(agendaId) !==
       "score_install_hq_cards_into_new_remote_then_rez"
   )
     throw new Error(
@@ -203,11 +207,11 @@ export function resolveHqToNewRemoteInstallRezChoice(
     );
   const sequence = requireHqToNewRemoteInstallRezSequence(
     host,
-    agendaId as CardInstanceId,
+    agendaId,
   );
   const primitivePayload = cardImplementationPrimitivePayload({
-    sourceCardId: agendaId as CardInstanceId,
-    sourceDefinitionId: host.cards.definitionFor(agendaId as CardInstanceId).id,
+    sourceCardId: agendaId,
+    sourceDefinitionId: choice.sourceCardDefinitionId,
     primitiveKind: sequence.kind,
     effectKind: "install_rez_sequence",
     abilityKey: sequence.abilityKey,
@@ -228,7 +232,10 @@ export function resolveHqToNewRemoteInstallRezChoice(
     selectedIds,
   );
   const temporaryCreditAmount = sequence.temporaryCredits.amount;
-  validateImmediateRootRezBudget(host, selectedCards, temporaryCreditAmount);
+  host.callbacks.preflightMandatoryHqInstallRez(
+    selectedCards.map((card) => card.cardId),
+    temporaryCreditAmount,
+  );
   if (selectedCards.length === 0) {
     delete host.state.pendingChoice;
     const resolvedPayload = applySequencePayloadPatch(host.legalAction, {
@@ -265,8 +272,8 @@ export function resolveHqToNewRemoteInstallRezChoice(
 
   const server = host.servers.createRemote();
   host.state.hqInstallRezSequence = {
-    sourceAgendaId: agendaId as CardInstanceId,
-    sourceDefinitionId: host.cards.definitionFor(agendaId as CardInstanceId).id,
+    sourceAgendaId: agendaId,
+    sourceDefinitionId: choice.sourceCardDefinitionId,
     serverId: server.id,
     selectedCardIds: selectedCards.map((card) => card.cardId),
     nextCardIndex: 0,
@@ -291,7 +298,7 @@ function advanceHqInstallRezSequence(
   const server = host.servers.mustServer(sequenceState.serverId);
   const installedIds: CardInstanceId[] = [];
   const immediatelyRezzedIds: CardInstanceId[] = [];
-  const corpCreditsBefore = host.state.corp.credits;
+  let corpCreditsSpent = 0;
 
   while (sequenceState.nextCardIndex < sequenceState.selectedCardIds.length) {
     const cardId = sequenceState.selectedCardIds[sequenceState.nextCardIndex]!;
@@ -314,24 +321,23 @@ function advanceHqInstallRezSequence(
       };
     } else {
       server.root.push(cardId);
+      host.state.cardInstances[cardId] = {
+        ...host.cards.mustInstance(cardId),
+        faceup: false,
+        rezzed: false,
+        zone: { side: "corp", zone: "serverRoot", serverId: server.id },
+      };
       if (rootRezOnInstall) {
-        const payment = spendHqToNewRemoteInstallRezRezCost(
-          host,
+        const payment = host.callbacks.payAndFinalizeMandatoryHqInstallRez(
           cardId,
           sequenceState.temporaryCreditsRemaining,
         );
         sequenceState.temporaryCreditsRemaining =
           payment.temporaryCreditsRemaining;
+        corpCreditsSpent += payment.corpCreditsSpent;
       }
-      host.state.cardInstances[cardId] = {
-        ...host.cards.mustInstance(cardId),
-        faceup: rootRezOnInstall,
-        rezzed: rootRezOnInstall,
-        zone: { side: "corp", zone: "serverRoot", serverId: server.id },
-      };
       if (rootRezOnInstall) {
         immediatelyRezzedIds.push(cardId);
-        host.callbacks.resolveCorpRootRez(cardId);
         if (host.cards.isRegionUpgrade(definition))
           host.servers.trashOlderRegionUpgradesInServer(
             server,
@@ -361,7 +367,7 @@ function advanceHqInstallRezSequence(
             immediateRezzedCount: immediatelyRezzedIds.length,
             hqToNewRemoteInstallRezRezChoiceOpened: true,
             hqToNewRemoteInstallRezRezCandidateCount: 1,
-            corpCreditsSpent: corpCreditsBefore - host.state.corp.credits,
+            corpCreditsSpent,
           },
         ),
       });
@@ -381,7 +387,7 @@ function advanceHqInstallRezSequence(
     primitivePayload,
     installedIds,
     immediatelyRezzedIds,
-    corpCreditsBefore - host.state.corp.credits,
+    corpCreditsSpent,
   );
 }
 
@@ -581,31 +587,6 @@ function prevalidateHqToNewRemoteInstallSelection(
   return selectedCards;
 }
 
-function validateImmediateRootRezBudget(
-  host: CorpInstallRezSequenceHandlerHost,
-  selectedCards: readonly PrevalidatedHqToNewRemoteInstall[],
-  temporaryCreditAmount: number,
-): void {
-  let temporaryCreditsRemaining = temporaryCreditAmount;
-  let corpCreditsAvailable = host.state.corp.credits;
-  for (const { cardId, definition, destination } of selectedCards) {
-    if (
-      destination !== "root" ||
-      !requiresOrderedRootInstallRezSequence(host, definition)
-    )
-      continue;
-    const rezCost = host.cards.rezCostForCard(cardId);
-    const temporary = Math.min(temporaryCreditsRemaining, rezCost);
-    const corp = rezCost - temporary;
-    if (corpCreditsAvailable < corp)
-      throw new Error(
-        "Die Korp kann die Data-Fort-Reclamation-Rez-on-install-Kosten nicht bezahlen.",
-      );
-    temporaryCreditsRemaining -= temporary;
-    corpCreditsAvailable -= corp;
-  }
-}
-
 function requiresOrderedRootInstallRezSequence(
   host: CorpInstallRezSequenceHandlerHost,
   definition: CardDefinition,
@@ -624,23 +605,25 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
     "HQ-to-new-remote-Install-/Rez-Choice ist nicht offen.",
   );
   const sequenceState = requireHqInstallRezSequence(host);
-  const [, agendaId, serverId, cardId, sequencePositionText] =
-    choice.source.split(":");
   const expectedCardId =
     sequenceState.selectedCardIds[sequenceState.nextCardIndex - 1];
-  const sequencePosition = Math.floor(Number(sequencePositionText));
+  const option = choice.options[0];
   if (
-    !agendaId ||
-    !serverId ||
-    !cardId ||
-    agendaId !== sequenceState.sourceAgendaId ||
-    serverId !== sequenceState.serverId ||
-    cardId !== expectedCardId ||
-    !Number.isInteger(sequencePosition) ||
-    sequencePosition !== sequenceState.nextCardIndex
+    choice.side !== "corp" ||
+    choice.kind !== "select_cards" ||
+    choice.minSelections !== 0 ||
+    choice.maxSelections !== 1 ||
+    choice.options.length !== 1 ||
+    !option ||
+    option.value !== expectedCardId
   )
     throw new Error("Die Data-Fort-Reclamation-Rez-Choice ist ungueltig.");
   host.servers.mustServer(sequenceState.serverId);
+  const quote = host.callbacks.projectHqInstallRezOptionQuote(choice, option);
+  if (!quote)
+    throw new Error(
+      "Die Data-Fort-Reclamation-Rez-Choice hat keine gueltige Engine-Quote.",
+    );
   const selectedIds = selectedChoiceCardIds(host, choice);
   if (selectedIds.length > 1)
     throw new Error(
@@ -661,24 +644,19 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
     throw new Error("Die aktuelle Data-Fort-Karte kann nicht gerezzed werden.");
 
   const primitivePayload = hqInstallRezPrimitivePayload(host);
-  const corpCreditsBefore = host.state.corp.credits;
+  let corpCreditsSpent = 0;
   const rezzedCardIds: CardInstanceId[] = [];
   if (expectedCardId && selectedIds.length === 1) {
-    const payment = spendHqToNewRemoteInstallRezRezCost(
-      host,
+    if (!quote.complete || !quote.affordable)
+      throw new Error(
+        "Die Data-Fort-Reclamation-Rez-Option ist nicht ausfuehrbar.",
+      );
+    const payment = host.callbacks.payAndFinalizeHqInstallRezOption(
       expectedCardId,
-      sequenceState.temporaryCreditsRemaining,
+      quote,
     );
     sequenceState.temporaryCreditsRemaining = payment.temporaryCreditsRemaining;
-    const definition = host.cards.definitionFor(expectedCardId);
-    const instance = host.cards.mustInstance(expectedCardId);
-    host.state.cardInstances[expectedCardId] = {
-      ...instance,
-      faceup: true,
-      rezzed: true,
-    };
-    if (definition.type !== "ice")
-      host.callbacks.resolveCorpRootRez(expectedCardId);
+    corpCreditsSpent += payment.corpCreditsSpent;
     rezzedCardIds.push(expectedCardId);
   }
   delete host.state.pendingChoice;
@@ -704,37 +682,12 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
                 rezzedRootCount: rezzedCardIds.filter(
                   (rezId) => host.cards.definitionFor(rezId).type !== "ice",
                 ).length,
-                corpCreditsSpent: corpCreditsBefore - host.state.corp.credits,
+                corpCreditsSpent,
               },
             ),
           }),
         }
       : {}),
-  };
-}
-
-function spendHqToNewRemoteInstallRezRezCost(
-  host: CorpInstallRezSequenceHandlerHost,
-  cardId: CardInstanceId,
-  temporaryCreditsRemaining: number,
-): {
-  temporaryCreditsSpent: number;
-  temporaryCreditsRemaining: number;
-  corpCreditsSpent: number;
-} {
-  const rezCost = host.cards.rezCostForCard(cardId);
-  const temporaryCreditsSpent = Math.min(temporaryCreditsRemaining, rezCost);
-  const corpCreditsSpent = rezCost - temporaryCreditsSpent;
-  if (host.state.corp.credits < corpCreditsSpent)
-    throw new Error(
-      "Die Korp kann die Install-/Rez-Primitive-Rez-Kosten nicht bezahlen.",
-    );
-  if (corpCreditsSpent > 0) host.credits.spendCorpCredits(corpCreditsSpent);
-  return {
-    temporaryCreditsSpent,
-    temporaryCreditsRemaining:
-      temporaryCreditsRemaining - temporaryCreditsSpent,
-    corpCreditsSpent,
   };
 }
 

@@ -277,6 +277,37 @@ describe("turn basic execution", () => {
     expect(state.activeSide).toBe("corp");
   });
 
+  it("delegates restricted-sequence stop without ending the turn", () => {
+    const state = createGame({
+      seed: "arch-64-turn-basic-stop-restricted-sequence",
+      setupMode: "completed",
+    });
+    state.activeSide = "runner";
+    state.runner.clicks = 7;
+    const calls: string[] = [];
+    const action = buildLegalAction(
+      state,
+      "runner",
+      "stop_restricted_action_sequence",
+      "Valu-Pak-Installationssequenz beenden",
+      "game_rule",
+    );
+
+    handleTurnBasicExecution(
+      testHost(state, {
+        stopRunnerRestrictedActionSequence: (_state, legalAction) => {
+          calls.push(legalAction.type);
+          _state.runner.clicks = 2;
+        },
+      }),
+      action,
+    );
+
+    expect(calls).toEqual(["stop_restricted_action_sequence"]);
+    expect(state.activeSide).toBe("runner");
+    expect(state.runner.clicks).toBe(2);
+  });
+
   it("does not import from index.ts", () => {
     const source = readFileSync(
       new URL("./turn-basic-execution.ts", import.meta.url),
@@ -296,6 +327,7 @@ function testHost(
   state: GameState,
   overrides: Partial<{
     endTurn: TurnBasicExecutionHost["turn"]["endTurn"];
+    stopRunnerRestrictedActionSequence: TurnBasicExecutionHost["turn"]["stopRunnerRestrictedActionSequence"];
   }> = {},
 ): TurnBasicExecutionHost {
   return {
@@ -317,6 +349,8 @@ function testHost(
       spendClicks: (next, side, amount) => {
         for (let index = 0; index < amount; index += 1) spendClick(next, side);
       },
+      stopRunnerRestrictedActionSequence:
+        overrides.stopRunnerRestrictedActionSequence ?? (() => undefined),
       endTurn:
         overrides.endTurn ??
         ((next, side) => {

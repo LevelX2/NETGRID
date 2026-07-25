@@ -8979,8 +8979,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "draw_card"
+        "actionId": "runner.play_event.runner_onr_classic_039_library-search_1.hq.runner_onr_classic_039_library-search_1"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_hq_multiaccess"],
+      "requiredAssessmentEvidence": ["target:hq"]
+    }
   }
 }

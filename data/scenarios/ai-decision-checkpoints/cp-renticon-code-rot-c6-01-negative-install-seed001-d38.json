@@ -6492,8 +6492,21 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_event"
+        "type": "play_event",
+        "sourceDefinitionId": "onr_v1_110_sneak-preview"
       }
-    ]
+    ],
+    "forbiddenActions": [
+      {
+        "sourceDefinitionId": "onr_v1_011_cloak"
+      }
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.rig_and_coverage"],
+      "acceptableCapabilities": ["search_answer_breaker_code_gate"],
+      "requiredAssessmentEvidence": [
+        "deck_strategy_open_code_gate_coverage"
+      ]
+    }
   }
 }

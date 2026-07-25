@@ -14,6 +14,11 @@ describe("PlanResolutionFailure", () => {
         stateVersion: 12.9,
         timingPoint: "runner_action.main",
         legalActionTypes: ["draw_card", "gain_credit", "draw_card"],
+        unresolvedActionIds: [
+          "runner.draw",
+          "runner install/card",
+          "runner.draw",
+        ],
         owner: "plan_registry",
         removalCondition:
           "Add a domain plan for the uncovered semantic action family.",
@@ -27,13 +32,14 @@ describe("PlanResolutionFailure", () => {
       stateVersion: 12,
       timingPoint: "runner_action.main",
       legalActionTypes: ["draw_card", "gain_credit"],
+      unresolvedActionIds: ["runner.draw", "runner_install_card"],
       owner: "plan_registry",
       removalCondition:
         "Add a domain plan for the uncovered semantic action family.",
       candidateCount: 2,
     });
     expect(failure.message).toBe(
-      "Plan resolution failed: missing_plan_module_coverage side=runner stateVersion=12 timing=runner_action.main actions=draw_card,gain_credit owner=plan_registry",
+      "Plan resolution failed: missing_plan_module_coverage side=runner stateVersion=12 timing=runner_action.main actions=draw_card,gain_credit unresolved=runner.draw,runner_install_card owner=plan_registry",
     );
   });
 

@@ -108,7 +108,6 @@ export type SemanticRuntimeCorpScoringWindowDependencies<
   ) => boolean;
   remoteHasScoreLine: (server: TServer | undefined) => boolean;
   isRemoteServerTarget: (serverId: string | undefined) => boolean;
-  visibleIceRezCost: (card: VisibleCard) => number | undefined;
   actionSourceCard?: (
     input: AiDecisionInput,
     action: LegalAction,

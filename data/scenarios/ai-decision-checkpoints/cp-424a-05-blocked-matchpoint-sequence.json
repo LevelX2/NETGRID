@@ -11257,13 +11257,16 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_event",
-        "sourceDefinitionId": "onr_v1_086_forged-activation-orders"
-      },
-      {
-        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.1"
+        "actionId": "runner.play_event.runner_onr_v1_097_livewires-contacts_3.runner_onr_v1_097_livewires-contacts_3"
       }
     ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
+      "acceptableCapabilities": ["develop_onr_v1_097_livewires-contacts"],
+      "requiredAssessmentEvidence": [
+        "source:own_runner_hand:card_specific_purpose:economy_engine:useful_now"
+      ]
+    },
     "forbiddenActions": [
       {
         "type": "draw_card"

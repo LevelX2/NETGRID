@@ -8,7 +8,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { createAiHintsByCard } from "../ai-hints";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
-import { removesPersistentTraceTagCounter } from "../actions/trace-counter-semantics";
+import { removesPersistentTraceTagCounter } from "../actions/runner-hazard-counter-semantics";
 import {
   runnerCoverageSearchSaturation,
   runnerVisibleSearchCoverageNeed,

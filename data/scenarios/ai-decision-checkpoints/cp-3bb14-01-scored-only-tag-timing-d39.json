@@ -6234,7 +6234,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_268_shock-r_1.remote_1.corp_onr_v1_268_shock-r_1.1"
+        "actionId": "corp.install_card.corp_onr_v1_323_experimental-ai_1.new_remote.corp_onr_v1_323_experimental-ai_1"
       }
     ],
     "forbiddenActions": [
@@ -6242,9 +6242,15 @@
         "actionId": "corp.install_card.corp_onr_v1_213_private-cybernet-police_1.remote_1.corp_onr_v1_213_private-cybernet-police_1"
       }
     ],
-    "selectedScoreBreakdown": {
-      "forbiddenComponentKeys": [
-        "corp_persistent_tag_engine_activation_pressure"
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.ambush_and_bluff"],
+      "forbiddenPlanKinds": [
+        "corp.punish_campaign",
+        "corp.execute_punish_sequence"
+      ],
+      "acceptableCapabilities": ["ambush_install"],
+      "requiredAssessmentEvidence": [
+        "corp_ambush_preplanned_exact_install:onr_v1_323_experimental-ai:new_remote:assigned_domain_plan"
       ]
     }
   }

@@ -125,6 +125,7 @@ export type ActionType =
   | "move_to_removed_from_game"
   | "return_from_set_aside"
   | "change_card_control"
+  | "stop_restricted_action_sequence"
   | "resolve_choice"
   | "trigger_ability"
   | "end_turn";
@@ -142,6 +143,21 @@ export type CardType =
   | "ice";
 export type CardDefinitionId = string;
 export type CardInstanceId = string;
+export type FixedPlayCostDefinition = {
+  kind: "fixed";
+  credits: number;
+};
+export type VariableXPlayCostDefinition = {
+  kind: "variable_x";
+  minimumX: number;
+  creditsPerX: number;
+  maximumX: {
+    kind: "context";
+  };
+};
+export type PlayCostDefinition =
+  | FixedPlayCostDefinition
+  | VariableXPlayCostDefinition;
 export type ServerId =
   | "hq"
   | "rd"
@@ -727,6 +743,48 @@ export type ChoiceKind =
   | "bid_amount"
   | "confirm";
 
+export const CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION =
+  "corp-optional-rez-choice-quote-v1" as const;
+export const CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND =
+  "optional_rez_installed_corp_card_with_temporary_credits" as const;
+
+export type CorpOptionalRezChoiceQuoteBinding = {
+  schemaVersion: typeof CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION;
+  kind: typeof CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND;
+  context: "hq_to_new_remote_optional_rez";
+  choiceId: string;
+  optionId: string;
+  sourceAgendaId: CardInstanceId;
+  cardId: CardInstanceId;
+  cardDefinitionId: CardDefinitionId;
+  targetServerId: Exclude<ServerId, "new_remote">;
+  installedZone: "serverIce" | "serverRoot";
+  sequencePosition: number;
+  stateVersion: number;
+};
+
+export type CorpOptionalRezChoiceQuote =
+  CorpOptionalRezChoiceQuoteBinding &
+    (
+      | { complete: false }
+      | {
+          complete: true;
+          cardType: "ice" | "asset" | "upgrade";
+          baseCredits: number;
+          finalCredits: number;
+          mandatoryAdditionalCosts: VisibleMandatoryCorpRezCosts;
+          reductionSourceDefinitionIds?: CardDefinitionId[];
+          increaseSourceDefinitionIds?: CardDefinitionId[];
+          temporaryCreditsAvailable: number;
+          temporaryCreditsApplied: number;
+          regularCreditsAvailable: number;
+          regularCreditsRequired: number;
+          creditPayable: boolean;
+          additionalCostsPayable: boolean;
+          affordable: boolean;
+        }
+    );
+
 export type ChoiceOption = {
   id: string;
   label: string;
@@ -767,12 +825,15 @@ export type TemporaryProgramInstallReturn = {
 
 export type VisibleChoiceOption = ChoiceOption & {
   card?: VisibleCard;
+  hqInstallRezOptionQuote?: CorpOptionalRezChoiceQuote;
 };
 
 export type ChoiceRequest = {
   choiceId: string;
   side: Side;
   source: string;
+  sourceCardInstanceId?: CardInstanceId;
+  sourceCardDefinitionId?: CardDefinitionId;
   prompt: string;
   kind: ChoiceKind;
   options: ChoiceOption[];
@@ -828,6 +889,33 @@ export type AbilityDefinition = {
   useLimit?: "once_per_run";
 };
 
+export type CardDefinitionNumericFields = {
+  cost: number | null;
+  installCost: number | null;
+  memoryCost: number | null;
+  strength: number | null;
+  rezCost: number | null;
+  trashCost: number | null;
+  advancementRequirement: number | null;
+  agendaPoints: number | null;
+};
+
+export type VariableStrengthDefinition =
+  | {
+      kind: "paid_x";
+      minimumStrength: number;
+      maximumStrength: number;
+    }
+  | {
+      kind: "random_die";
+      dieSides: number;
+    };
+
+export type ResolvedStrengthDefinition =
+  | { kind: "fixed"; value: number }
+  | VariableStrengthDefinition
+  | { kind: "not_applicable" };
+
 export type CardDefinition = {
   id: CardDefinitionId;
   title: string;
@@ -837,11 +925,13 @@ export type CardDefinition = {
   implementationStatus: "playable_mvp";
   abilityEnabled?: boolean;
   cost?: number;
+  playCost?: PlayCostDefinition | null;
   installCost?: number;
   memoryCost?: number;
   memoryLimitBonus?: number;
   maxHandSizeBonus?: number;
   strength?: number;
+  variableStrength?: VariableStrengthDefinition;
   baseLink?: number;
   rezCost?: number;
   trashCost?: number;
@@ -859,6 +949,20 @@ export type CardDefinition = {
     ariaLabelName: string;
   };
 };
+
+export type ResolvedCardDefinition =
+  | (Omit<CardDefinition, "type" | "playCost" | "variableStrength"> & {
+      type: "event" | "operation";
+      playCost: PlayCostDefinition;
+      numeric: CardDefinitionNumericFields;
+      strengthModel: ResolvedStrengthDefinition;
+    })
+  | (Omit<CardDefinition, "type" | "playCost" | "variableStrength"> & {
+      type: Exclude<CardType, "event" | "operation">;
+      playCost: null;
+      numeric: CardDefinitionNumericFields;
+      strengthModel: ResolvedStrengthDefinition;
+    });
 
 export type DeckDefinition = {
   id: string;
@@ -1773,11 +1877,66 @@ export type LegalAction = {
   payload?: LegalActionPayload;
 };
 
+export const CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION =
+  "corp-fort-run-rez-support-quote-v1" as const;
+export const CORP_FORT_RUN_REZ_SUPPORT_KIND =
+  "install_hq_ice_innermost_after_successful_run" as const;
+
+/**
+ * Engine-certified, actor-private support quote for rezzing a source with the
+ * matching CardImplementation fort-run mechanic in the exact final run window
+ * where its successful-run ICE install can matter. Hidden HQ card identities
+ * are intentionally not part of this contract.
+ */
+export type CorpFortRunRezSupportQuote = {
+  schemaVersion: typeof CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION;
+  fortRunKind: typeof CORP_FORT_RUN_REZ_SUPPORT_KIND;
+  complete: true;
+  sourceCardInstanceId: CardInstanceId;
+  targetServerId: Exclude<ServerId, "new_remote">;
+  stateVersion: number;
+  actionId: string;
+  rezCredits: number;
+  installCredits: number;
+  totalCredits: number;
+  totalCreditsPayable: boolean;
+  hasOwnHqIce: boolean;
+};
+
+export const CORP_ROOT_REZ_CREDIT_OUTCOME_QUOTE_SCHEMA_VERSION =
+  "corp-root-rez-credit-outcome-quote-v1" as const;
+
+/**
+ * Engine-certified actor quote for the immediate liquid-credit outcome of one
+ * exact Corp root-rez LegalAction. `runner_interruptible` means the Engine has
+ * found a current Runner rez interrupt that resolves before the quoted credit
+ * effect, so consumers must not treat the gain as guaranteed.
+ */
+export type CorpRootRezCreditOutcomeQuote = {
+  schemaVersion: typeof CORP_ROOT_REZ_CREDIT_OUTCOME_QUOTE_SCHEMA_VERSION;
+  complete: true;
+  sourceCardInstanceId: CardInstanceId;
+  targetServerId: Exclude<ServerId, "new_remote">;
+  stateVersion: number;
+  timingPoint: TimingPointId;
+  actionId: string;
+  resolution: "guaranteed" | "runner_interruptible";
+  grossCreditGain: number;
+  rezCredits: number;
+  netCreditGain: number;
+};
+
 export type LegalActionPayload = Record<string, string | number | boolean> &
   AbilityPayloadDiscriminators & {
     abilityFamily?: PublicAbilityFamily;
     abilityId?: string;
     effectKind?: string;
+    /**
+     * Engine-certified current quote for a lifecycle action that makes its
+     * source leave play and then requires a payment or loses the game.
+     */
+    cardImplementationLifecycleLeavePlayPaymentAmount?: number;
+    cardImplementationLifecycleLeavePlayPaymentStatus?: "payable" | "unpayable";
   };
 
 export type PlayerAction = {
@@ -1788,6 +1947,86 @@ export type PlayerAction = {
   selectedTargets?: Record<string, string>;
   selectedChoices?: Record<string, unknown>;
   idempotencyKey?: string;
+};
+
+export const ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION =
+  "engine-randomized-ice-install-selection-v1" as const;
+
+export type EngineRandomizedIceInstallCandidate = {
+  actionId: string;
+  targetServerId: ServerId;
+};
+
+/**
+ * Actor-private request for an Engine-certified choice among ICE installs that
+ * the caller has already rated as a genuine near tie. Candidate order carries
+ * no meaning; the Engine canonicalizes it before quoting.
+ */
+export type EngineRandomizedIceInstallSelectionRequest = {
+  schemaVersion: typeof ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION;
+  matchId: string;
+  side: "corp";
+  stateVersion: number;
+  timingPoint: TimingPointId;
+  planStepId: string;
+  candidates: EngineRandomizedIceInstallCandidate[];
+};
+
+/**
+ * Actor-private and state-bound. `candidateFingerprint` is a collision-free,
+ * versioned canonical serialization rather than a lossy hash.
+ */
+export type EngineRandomizedIceInstallSelectionQuote = {
+  schemaVersion: typeof ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION;
+  visibility: "private_to_actor";
+  complete: true;
+  matchId: string;
+  side: "corp";
+  stateVersion: number;
+  timingPoint: TimingPointId;
+  planStepId: string;
+  candidates: EngineRandomizedIceInstallCandidate[];
+  candidateFingerprint: string;
+  legalActions: LegalAction[];
+};
+
+export type EngineRandomizedIceInstallSelectionQuoteResult =
+  | {
+      ok: true;
+      quote: EngineRandomizedIceInstallSelectionQuote;
+    }
+  | {
+      ok: false;
+      error: EngineError;
+    };
+
+/**
+ * Replayable command. Applying it must re-quote every candidate before the
+ * Engine consumes randomness.
+ */
+export type EngineRandomizedIceInstallSelectionCommand = {
+  kind: "engine_randomized_ice_install_selection";
+  quote: EngineRandomizedIceInstallSelectionQuote;
+  idempotencyKey?: string;
+};
+
+export type ReplayableEngineAction =
+  | PlayerAction
+  | EngineRandomizedIceInstallSelectionCommand;
+
+export type EngineRandomizedIceInstallSelectionReceipt = {
+  schemaVersion: typeof ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION;
+  visibility: "private_to_actor";
+  matchId: string;
+  side: "corp";
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  timingPoint: TimingPointId;
+  planStepId: string;
+  candidateFingerprint: string;
+  selectedCandidate: EngineRandomizedIceInstallCandidate;
+  selectedLegalAction: LegalAction;
+  randomDraw: RandomDrawRecord;
 };
 
 export type EngineError = {
@@ -1815,6 +2054,12 @@ export type EngineResult =
       error: EngineError;
       state: GameState;
     };
+
+export type EngineRandomizedIceInstallSelectionResult =
+  | (Extract<EngineResult, { ok: true }> & {
+      receipt: EngineRandomizedIceInstallSelectionReceipt;
+    })
+  | Extract<EngineResult, { ok: false }>;
 
 export type ApplyActionOptions = {
   publicEventsMode?: "history" | "latest";
@@ -1946,6 +2191,54 @@ export type VisibleEffectiveIceRunQuote = {
   conditionalEncounterEffects?: VisibleConditionalEncounterEffect[];
 };
 
+export type VisibleMandatoryCorpRezCosts = {
+  agendaPoints: number;
+};
+
+/**
+ * Engine-certified effective rez-cost projection.
+ *
+ * Incomplete projections intentionally carry only their identity, server and
+ * state-version binding. Consumers must not reconstruct missing costs from
+ * printed card data.
+ */
+export type VisibleInstalledCorpRezCostQuoteBinding = {
+  context: "installed";
+  cardId: CardInstanceId;
+  targetServerId: Exclude<ServerId, "new_remote">;
+  projectedServerId: Exclude<ServerId, "new_remote">;
+  expiresAtStateVersion: number;
+};
+
+export type VisiblePostInstallCorpRezCostQuoteBinding = {
+  context: "post_install";
+  cardId: CardInstanceId;
+  targetServerId: ServerId;
+  expiresAtStateVersion: number;
+};
+
+type VisibleCompleteCorpRezCostQuoteFields = {
+  complete: true;
+  projectedServerId: Exclude<ServerId, "new_remote">;
+  baseCredits: number;
+  finalCredits: number;
+  mandatoryAdditionalCosts: VisibleMandatoryCorpRezCosts;
+  reductionSourceDefinitionIds?: CardDefinitionId[];
+  increaseSourceDefinitionIds?: CardDefinitionId[];
+};
+
+export type VisibleCorpRezCostQuote =
+  | (VisibleInstalledCorpRezCostQuoteBinding & {
+      complete: false;
+    })
+  | (VisibleInstalledCorpRezCostQuoteBinding &
+      VisibleCompleteCorpRezCostQuoteFields)
+  | (VisiblePostInstallCorpRezCostQuoteBinding & {
+      complete: false;
+    })
+  | (VisiblePostInstallCorpRezCostQuoteBinding &
+      VisibleCompleteCorpRezCostQuoteFields);
+
 export type VisibleCardLifecycleMarker = {
   kind: "temporary_return_to_grip";
   label: string;
@@ -1971,6 +2264,7 @@ export type VisibleCard = {
   alternateIceSubtypeActive?: boolean;
   rulesText?: string;
   cost?: number;
+  playCost?: PlayCostDefinition;
   installCost?: number;
   memoryCost?: number;
   memoryLimitBonus?: number;
@@ -2006,6 +2300,7 @@ export type VisibleCard = {
   lifecycleMarkers?: VisibleCardLifecycleMarker[];
   runnerPaymentSupportAbilities?: VisibleRunnerPaymentSupportAbility[];
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
+  effectiveRezCostQuote?: VisibleCorpRezCostQuote;
 };
 
 export type PlayerView = {
@@ -2061,6 +2356,8 @@ export type PlayerView = {
     setAsideCount: number;
     removedFromGameCount: number;
   };
+  /** Present only in the Corp's own PlayerView; never a Runner-information surface. */
+  corpCentralAccessQuotes?: CorpCentralAccessQuote[];
   run?: {
     runId?: string;
     attackedServerId: Exclude<ServerId, "new_remote">;
@@ -2091,7 +2388,28 @@ export type PlayerView = {
   gameEndReason?: GameEndReason;
 };
 
+export type CorpCentralAccessQuote = {
+  serverId: "hq" | "rd";
+  stateVersion: number;
+  complete: true;
+  effectiveAccessCount: number;
+  isMultiaccess: boolean;
+  sourceDefinitionIds: CardDefinitionId[];
+  serverBoundEffects: Array<{
+    id: string;
+    kind: "purgeable_runner_virus_counter_access_modifier";
+    serverId: "hq" | "rd";
+    counterKind: PurgeableRunnerVirusCounterType;
+    formula: "per_counter" | "per_counter_after_first";
+    sourceDefinitionId: CardDefinitionId;
+    counterCount: number;
+    additionalAccessCount: number;
+  }>;
+};
+
 export type AiDecisionInput = {
+  /** Actor-private match binding used only for Engine-certified commands. */
+  matchId?: string;
   side: Side;
   playerView: PlayerView;
   eventTail: PublicGameEvent[];
@@ -2634,9 +2952,7 @@ function sanitizeAiDecisionDebugString(value: unknown): string | undefined {
     : value;
 }
 
-export type AiDecision = {
-  actionId: string;
-  selectedChoices?: PlayerAction["selectedChoices"];
+type AiDecisionBase = {
   reasonCode: string;
   explanation: string;
   consideredActionIds: string[];
@@ -2649,5 +2965,21 @@ export type AiDecision = {
   difficulty?: AiDifficulty;
   reason?: string;
 };
+
+export type AiDecision = AiDecisionBase &
+  (
+    | {
+        selectionKind?: "direct";
+        actionId: string;
+        selectedChoices?: PlayerAction["selectedChoices"];
+        engineCommand?: never;
+      }
+    | {
+        selectionKind: "engine_randomized_ice_install_selection";
+        engineCommand: EngineRandomizedIceInstallSelectionCommand;
+        actionId?: never;
+        selectedChoices?: never;
+      }
+  );
 
 export { CARD_DEFINITIONS, CARD_DEFINITIONS_BY_ID } from "./card-definitions";

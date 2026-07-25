@@ -9,6 +9,10 @@ import type {
   PlayerAction,
   ServerId,
 } from "@netgrid/shared";
+import {
+  CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
+  CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   handleCorpInstallRezSequenceChoice,
@@ -80,6 +84,14 @@ function selectCardsChoice(
     choiceId: "choice_1",
     side: "corp",
     source,
+    ...(source.includes("hq_to_new_remote_install_rez") ||
+    source.includes("score_install_hq_cards_into_new_remote_then_rez")
+      ? {
+          sourceCardInstanceId: "data_fort_agenda",
+          sourceCardDefinitionId:
+            "score_install_hq_cards_into_new_remote_then_rez",
+        }
+      : {}),
     prompt: "Choice",
     kind: "select_cards",
     options: ids.map((cardId) => ({
@@ -223,7 +235,6 @@ function makeHost(
       rootInstallRezzesOnInstall: (cardDefinition) =>
         (cardDefinition.subtypes?.includes("region") ?? false) ||
         cardDefinition.id === "forced_rez_root_def",
-      rezCostForCard: (cardId) => definitions[cardId]?.rezCost ?? 0,
       isScoredAgendaFreeRezCandidate: (cardId) => {
         const cardInstance = cardInstances[cardId];
         return (
@@ -303,6 +314,127 @@ function makeHost(
     callbacks: {
       resolveCorpRootRez: (cardId) => {
         rezRootCalls.push(cardId);
+      },
+      preflightMandatoryHqInstallRez: (
+        selectedCardIds,
+        temporaryCreditsAvailable,
+      ) => {
+        let temporaryCreditsRemaining = temporaryCreditsAvailable;
+        let corpCreditsRemaining = state.corp.credits;
+        for (const cardId of selectedCardIds) {
+          const cardDefinition = definitions[cardId];
+          if (
+            !cardDefinition ||
+            (!cardDefinition.subtypes?.includes("region") &&
+              cardDefinition.id !== "forced_rez_root_def")
+          )
+            continue;
+          const finalCredits = cardDefinition.rezCost ?? 0;
+          const temporaryCreditsSpent = Math.min(
+            temporaryCreditsRemaining,
+            finalCredits,
+          );
+          const corpCreditsSpent =
+            finalCredits - temporaryCreditsSpent;
+          if (corpCreditsRemaining < corpCreditsSpent)
+            throw new Error("mandatory test rez is unpayable");
+          temporaryCreditsRemaining -= temporaryCreditsSpent;
+          corpCreditsRemaining -= corpCreditsSpent;
+        }
+      },
+      projectHqInstallRezOptionQuote: (choice, option) => {
+        const sequence = state.hqInstallRezSequence;
+        const cardId =
+          sequence?.selectedCardIds[sequence.nextCardIndex - 1];
+        const cardDefinition = cardId ? definitions[cardId] : undefined;
+        const cardInstance = cardId ? cardInstances[cardId] : undefined;
+        if (
+          !sequence ||
+          !cardId ||
+          !cardDefinition ||
+          !cardInstance ||
+          option.value !== cardId ||
+          (cardInstance.zone.zone !== "serverIce" &&
+            cardInstance.zone.zone !== "serverRoot")
+        )
+          return undefined;
+        const finalCredits = cardDefinition.rezCost ?? 0;
+        const temporaryCreditsApplied = Math.min(
+          sequence.temporaryCreditsRemaining,
+          finalCredits,
+        );
+        const regularCreditsRequired =
+          finalCredits - temporaryCreditsApplied;
+        const creditPayable =
+          state.corp.credits >= regularCreditsRequired;
+        return {
+          schemaVersion: CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
+          kind: CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
+          context: "hq_to_new_remote_optional_rez",
+          choiceId: choice.choiceId,
+          optionId: option.id,
+          sourceAgendaId: sequence.sourceAgendaId,
+          cardId,
+          cardDefinitionId: cardDefinition.id,
+          targetServerId: sequence.serverId,
+          installedZone: cardInstance.zone.zone,
+          sequencePosition: sequence.nextCardIndex,
+          stateVersion: choice.stateVersion,
+          complete: true,
+          cardType: cardDefinition.type as "ice" | "asset" | "upgrade",
+          baseCredits: finalCredits,
+          finalCredits,
+          mandatoryAdditionalCosts: { agendaPoints: 0 },
+          temporaryCreditsAvailable: sequence.temporaryCreditsRemaining,
+          temporaryCreditsApplied,
+          regularCreditsAvailable: state.corp.credits,
+          regularCreditsRequired,
+          creditPayable,
+          additionalCostsPayable: true,
+          affordable: creditPayable,
+        };
+      },
+      payAndFinalizeHqInstallRezOption: (cardId, quote) => {
+        state.corp.credits -= quote.regularCreditsRequired;
+        state.cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        if (quote.cardType !== "ice") rezRootCalls.push(cardId);
+        return {
+          temporaryCreditsSpent: quote.temporaryCreditsApplied,
+          temporaryCreditsRemaining:
+            quote.temporaryCreditsAvailable -
+            quote.temporaryCreditsApplied,
+          corpCreditsSpent: quote.regularCreditsRequired,
+        };
+      },
+      payAndFinalizeMandatoryHqInstallRez: (
+        cardId,
+        temporaryCreditsAvailable,
+      ) => {
+        const finalCredits = definitions[cardId]?.rezCost ?? 0;
+        const temporaryCreditsSpent = Math.min(
+          temporaryCreditsAvailable,
+          finalCredits,
+        );
+        const corpCreditsSpent = finalCredits - temporaryCreditsSpent;
+        if (state.corp.credits < corpCreditsSpent)
+          throw new Error("mandatory test rez is unpayable");
+        state.corp.credits -= corpCreditsSpent;
+        state.cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        rezRootCalls.push(cardId);
+        return {
+          temporaryCreditsSpent,
+          temporaryCreditsRemaining:
+            temporaryCreditsAvailable - temporaryCreditsSpent,
+          corpCreditsSpent,
+        };
       },
     },
   };
@@ -627,6 +759,38 @@ describe("corp install rez sequence handlers", () => {
       temporaryCreditsReturned: 1,
       corpCreditsSpent: 0,
     });
+  });
+
+  it("rejects an unaffordable cumulative mandatory root-rez selection before installation", () => {
+    const host = makeHost({
+      hq: ["region_1", "region_2"] as CardInstanceId[],
+      scoreArea: ["data_fort_agenda"] as CardInstanceId[],
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
+      definitions: {
+        region_1: definition("region_1_def", "upgrade", "Region 1", 10, [
+          "region",
+        ]),
+        region_2: definition("region_2_def", "upgrade", "Region 2", 10, [
+          "region",
+        ]),
+      },
+      pendingChoice: selectCardsChoice(
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
+        ["region_1", "region_2"] as CardInstanceId[],
+        4,
+      ),
+      playerAction: playerAction(["card_region_1", "card_region_2"]),
+    });
+    const stateBefore = structuredClone(host.state);
+
+    expect(() => handleCorpInstallRezSequenceChoice(host)).toThrow(
+      "mandatory test rez is unpayable",
+    );
+    expect(host.state).toEqual(stateBefore);
+    expect(host.state.corp.servers).toEqual([]);
+    expect(host.state.corp.hq).toEqual(["region_1", "region_2"]);
   });
 
   it("continues through Data Fort Reclamation one card at a time after each rez decision", () => {

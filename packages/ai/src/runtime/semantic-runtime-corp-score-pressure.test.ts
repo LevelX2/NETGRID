@@ -220,7 +220,7 @@ describe("semanticRuntimeCorpScoreComponents score pressure", () => {
     );
   });
 
-  it("targets the existing unsafe score remote over a hypothetical new remote", () => {
+  it("does not treat an unbound ICE action as exact score-remote protection", () => {
     const installRemoteAgenda = corpAction(
       "install-agenda-remote-1",
       "install_card",
@@ -286,16 +286,11 @@ describe("semanticRuntimeCorpScoreComponents score pressure", () => {
     expect(iceComponents).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_board_triage_alignment",
-          value: 24,
+          key: "corp_board_triage_mismatch",
+          value: -3200,
           reason: expect.stringContaining("triage_target:remote_1"),
         }),
       ]),
-    );
-    expect(
-      totalScoreFor(input, installRemoteIce, "basic_install", dependencies),
-    ).toBeGreaterThan(
-      totalScoreFor(input, installRemoteAgenda, "basic_install", dependencies),
     );
   });
 
@@ -400,14 +395,8 @@ describe("semanticRuntimeCorpScoreComponents score pressure", () => {
       dependencies,
     );
 
-    expect(installComponents).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "corp_remote_scoreline_unfunded_ice_install_penalty",
-          value: -1900,
-          reason: expect.stringContaining("window_needs_funding:true"),
-        }),
-      ]),
+    expect(installComponents.map((component) => component.key)).not.toContain(
+      "corp_remote_scoreline_unfunded_ice_install_penalty",
     );
     expect(creditComponents).toEqual(
       expect.arrayContaining([
@@ -416,9 +405,6 @@ describe("semanticRuntimeCorpScoreComponents score pressure", () => {
           reason: expect.stringContaining("triage_primary:fund_score_remote"),
         }),
       ]),
-    );
-    expect(totalScore(creditComponents)).toBeGreaterThan(
-      totalScore(installComponents),
     );
   });
 
@@ -490,17 +476,8 @@ describe("semanticRuntimeCorpScoreComponents score pressure", () => {
       dependencies,
     );
 
-    expect(installComponents).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "corp_remote_scoreline_unfunded_ice_install_penalty",
-          value: -1900,
-          reason: expect.stringContaining("prepared_score_remote:true"),
-        }),
-      ]),
-    );
-    expect(totalScore(creditComponents)).toBeGreaterThan(
-      totalScore(installComponents),
+    expect(installComponents.map((component) => component.key)).not.toContain(
+      "corp_remote_scoreline_unfunded_ice_install_penalty",
     );
   });
 

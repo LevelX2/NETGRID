@@ -110,7 +110,7 @@ export function summarizeActionLimitEndgameMetrics(
   let actionLimitLikelyMetricArtifact = 0;
 
   for (const summary of summaries) {
-    if (summary.winner !== "action_limit_reached") continue;
+    if (summary.terminationKind !== "action_limit") continue;
     actionLimitRootCauseByMatch += 1;
     const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
     const strategicWindow = sequence.filter(isStrategicPlanDecision).slice(-30);

@@ -7,11 +7,23 @@ import type {
   CardDefinition,
   CardDefinitionId,
   CardInstanceId,
+  ChoiceOption,
+  ChoiceRequest,
+  CorpOptionalRezChoiceQuote,
+  CorpFortRunRezSupportQuote,
   CorpServer,
   GameState,
   LegalAction,
+  ServerId,
+  VisibleCorpRezCostQuote,
 } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import {
+  CARD_DEFINITIONS_BY_ID,
+  CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
+  CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
+  CORP_FORT_RUN_REZ_SUPPORT_KIND,
+  CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION,
+} from "@netgrid/shared";
 import {
   activeCardImplementationModifiersForCorpRoot,
   activeCardImplementationModifiersForRunnerInstalled,
@@ -30,12 +42,19 @@ import type {
   CardSelfRezCostModifierImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import {
+  corpRootRezCreditOutcomeQuotePayload,
+  quoteCorpRootRezCreditOutcome,
+  ROOT_REZ_CREDIT_OUTCOME_QUOTE_PAYLOAD_FIELDS,
+} from "./root-rez-credit-outcome";
+import { nextCanonicalRemoteServerId } from "../state/remote-server-id";
 import type { CostModifierQuote, CostQuote } from "./cost-quote";
 
 export { corpServerIdForInstalledCard } from "../../ability-engine/card-implementation-modifiers";
 
 export type CorpRezCostOptions = {
   discountedRezSourceCardId?: CardInstanceId;
+  projectedServerId?: Exclude<ServerId, "new_remote">;
 };
 
 type ActiveCorpRezCostModifier = {
@@ -61,6 +80,553 @@ export type CorpInstallCostOptions = {
   legacyReduction?: number;
 };
 
+function incompleteCorpRezCostProjection(
+  state: GameState,
+  context: "installed" | "post_install",
+  cardId: CardInstanceId,
+  targetServerId: ServerId,
+  projectedServerId?: Exclude<ServerId, "new_remote">,
+): VisibleCorpRezCostQuote {
+  if (context === "installed") {
+    if (targetServerId === "new_remote" || !projectedServerId)
+      throw new Error("Installed-Rez-Quote braucht einen bestehenden Server.");
+    return {
+      context,
+      cardId,
+      targetServerId,
+      projectedServerId,
+      expiresAtStateVersion: state.stateVersion,
+      complete: false,
+    };
+  }
+  return {
+    context,
+    cardId,
+    targetServerId,
+    expiresAtStateVersion: state.stateVersion,
+    complete: false,
+  };
+}
+
+function isExactNonNegativeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
+/**
+ * Converts the authoritative rez quote into a consumer-safe, explicitly
+ * complete projection. Unsupported or non-integral costs fail closed.
+ */
+function projectExactCorpRezCost(
+  originalState: GameState,
+  context: "installed" | "post_install",
+  cardId: CardInstanceId,
+  targetServerId: ServerId,
+  projectedServerId: Exclude<ServerId, "new_remote">,
+): VisibleCorpRezCostQuote {
+  const instance = originalState.cardInstances[cardId];
+  const definitionId = instance?.definitionId;
+  const definition = definitionId
+    ? CARD_DEFINITIONS_BY_ID[definitionId]
+    : undefined;
+  if (
+    !instance ||
+    definition?.type !== "ice" ||
+    !isExactNonNegativeInteger(definition.rezCost) ||
+    cardImplementationForDefinitionId(definition.id)?.variableRez !== undefined
+  )
+    return incompleteCorpRezCostProjection(
+      originalState,
+      context,
+      cardId,
+      targetServerId,
+      projectedServerId,
+    );
+
+  const additionalCosts = selfRezAdditionalCostsForIce(definition);
+  if (
+    additionalCosts.some(
+      (cost) =>
+        cost.kind !== "agenda_point" ||
+        cost.visibility !== "public" ||
+        !isExactNonNegativeInteger(cost.amount),
+    )
+  )
+    return incompleteCorpRezCostProjection(
+      originalState,
+      context,
+      cardId,
+      targetServerId,
+      projectedServerId,
+    );
+
+  const quote = quoteCorpRezCost(originalState, cardId, {
+    projectedServerId,
+  });
+  if (
+    !isExactNonNegativeInteger(quote.baseCredits) ||
+    !isExactNonNegativeInteger(quote.finalCredits) ||
+    quote.costs.some(
+      (cost) =>
+        (cost.clicks !== undefined &&
+          !isExactNonNegativeInteger(cost.clicks)) ||
+        (cost.credits !== undefined &&
+          !isExactNonNegativeInteger(cost.credits)),
+    ) ||
+    quote.modifiers.some(
+      (modifier) => !isExactNonNegativeInteger(modifier.amount),
+    )
+  )
+    return incompleteCorpRezCostProjection(
+      originalState,
+      context,
+      cardId,
+      targetServerId,
+      projectedServerId,
+    );
+
+  const agendaPointCost = selfRezAgendaPointCostForIce(definition);
+  const reductionSourceDefinitionIds = quote.modifiers
+    .filter((modifier) => modifier.kind === "reduction")
+    .map((modifier) => modifier.sourceDefinitionId);
+  const increaseSourceDefinitionIds = quote.modifiers
+    .filter((modifier) => modifier.kind === "increase")
+    .map((modifier) => modifier.sourceDefinitionId);
+  const completeFields = {
+    cardId,
+    projectedServerId,
+    expiresAtStateVersion: originalState.stateVersion,
+    complete: true as const,
+    baseCredits: quote.baseCredits,
+    finalCredits: quote.finalCredits,
+    mandatoryAdditionalCosts: { agendaPoints: agendaPointCost },
+    ...(reductionSourceDefinitionIds.length > 0
+      ? { reductionSourceDefinitionIds }
+      : {}),
+    ...(increaseSourceDefinitionIds.length > 0
+      ? { increaseSourceDefinitionIds }
+      : {}),
+  };
+  if (context === "installed") {
+    if (targetServerId === "new_remote")
+      throw new Error("Installed-Rez-Quote braucht einen bestehenden Server.");
+    return { context, targetServerId, ...completeFields };
+  }
+  return { context, targetServerId, ...completeFields };
+}
+
+/**
+ * Certifies the current rez cost for one already-installed Corp ICE.
+ */
+export function projectInstalledCorpIceRezCost(
+  state: GameState,
+  cardId: CardInstanceId,
+): VisibleCorpRezCostQuote | undefined {
+  const instance = state.cardInstances[cardId];
+  if (
+    !instance ||
+    instance.owner !== "corp" ||
+    instance.controller !== "corp" ||
+    instance.zone.side !== "corp" ||
+    instance.zone.zone !== "serverIce" ||
+    !instance.zone.serverId ||
+    instance.rezzed
+  )
+    return undefined;
+  const serverId = instance.zone.serverId;
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId && candidate.ice.includes(cardId),
+  );
+  if (!server) return undefined;
+  return projectExactCorpRezCost(
+    state,
+    "installed",
+    cardId,
+    serverId,
+    serverId,
+  );
+}
+
+export type CorpSequenceRezPaymentProjection =
+  | { complete: false }
+  | {
+      complete: true;
+      cardType: "ice" | "asset" | "upgrade";
+      baseCredits: number;
+      finalCredits: number;
+      mandatoryAdditionalCosts: { agendaPoints: number };
+      reductionSourceDefinitionIds?: CardDefinitionId[];
+      increaseSourceDefinitionIds?: CardDefinitionId[];
+      temporaryCreditsAvailable: number;
+      temporaryCreditsApplied: number;
+      regularCreditsAvailable: number;
+      regularCreditsRequired: number;
+      creditPayable: boolean;
+      additionalCostsPayable: boolean;
+      affordable: boolean;
+    };
+
+/**
+ * Exact payment projection shared by optional and mandatory scored-agenda rez
+ * steps. Missing printed costs, variable rez contracts and unsupported
+ * mandatory costs stay explicitly incomplete.
+ */
+export function projectInstalledCorpSequenceRezPayment(
+  state: GameState,
+  cardId: CardInstanceId,
+  temporaryCreditsAvailable: number,
+): CorpSequenceRezPaymentProjection {
+  const instance = state.cardInstances[cardId];
+  const definition = instance
+    ? CARD_DEFINITIONS_BY_ID[instance.definitionId]
+    : undefined;
+  const serverId =
+    instance?.zone.side === "corp" &&
+    (instance.zone.zone === "serverIce" ||
+      instance.zone.zone === "serverRoot")
+      ? instance.zone.serverId
+      : undefined;
+  const server = serverId
+    ? state.corp.servers.find((candidate) => candidate.id === serverId)
+    : undefined;
+  if (
+    !instance ||
+    instance.owner !== "corp" ||
+    instance.controller !== "corp" ||
+    instance.rezzed ||
+    !definition ||
+    !server ||
+    server.kind !== "remote" ||
+    !isExactNonNegativeInteger(temporaryCreditsAvailable) ||
+    (instance.zone.zone === "serverIce"
+      ? !server.ice.includes(cardId) || definition.type !== "ice"
+      : instance.zone.zone === "serverRoot"
+        ? !server.root.includes(cardId) ||
+          (definition.type !== "asset" && definition.type !== "upgrade")
+        : true)
+  )
+    return { complete: false };
+
+  const unsupportedIceAdditionalCost =
+    definition.type === "ice" &&
+    selfRezAdditionalCostsForIce(definition).some(
+      (cost) =>
+        cost.kind !== "agenda_point" ||
+        cost.visibility !== "public" ||
+        !isExactNonNegativeInteger(cost.amount),
+    );
+  const rootAgendaPointCost =
+    definition.type === "asset" || definition.type === "upgrade"
+      ? rootRezAgendaPointCostForDefinition(definition)
+      : 0;
+  if (
+    !isExactNonNegativeInteger(definition.rezCost) ||
+    (definition.type === "ice" &&
+      cardImplementationForDefinitionId(definition.id)?.variableRez !==
+        undefined) ||
+    unsupportedIceAdditionalCost ||
+    !isExactNonNegativeInteger(rootAgendaPointCost)
+  )
+    return { complete: false };
+
+  let quote: CostQuote;
+  try {
+    quote =
+      definition.type === "ice"
+        ? quoteCorpRezCost(state, cardId, { projectedServerId: server.id })
+        : quoteCorpRootRezCost(state, cardId);
+  } catch {
+    return { complete: false };
+  }
+  if (
+    !isExactNonNegativeInteger(quote.baseCredits) ||
+    !isExactNonNegativeInteger(quote.finalCredits) ||
+    quote.costs.some(
+      (cost) =>
+        (cost.clicks !== undefined &&
+          !isExactNonNegativeInteger(cost.clicks)) ||
+        (cost.credits !== undefined &&
+          !isExactNonNegativeInteger(cost.credits)),
+    ) ||
+    quote.modifiers.some(
+      (modifier) =>
+        !isExactNonNegativeInteger(modifier.amount) ||
+        modifier.sourceDefinitionId.trim().length === 0,
+    )
+  )
+    return { complete: false };
+
+  const mandatoryAgendaPoints =
+    definition.type === "ice"
+      ? selfRezAgendaPointCostForIce(definition)
+      : rootAgendaPointCost;
+  const exactAgendaPointsAvailable = exactCorpAgendaPointTotalForRezCost(state);
+  if (
+    !isExactNonNegativeInteger(mandatoryAgendaPoints) ||
+    exactAgendaPointsAvailable === undefined ||
+    !isExactNonNegativeInteger(state.corp.credits)
+  )
+    return { complete: false };
+
+  const temporaryCreditsApplied = Math.min(
+    temporaryCreditsAvailable,
+    quote.finalCredits,
+  );
+  const regularCreditsRequired =
+    quote.finalCredits - temporaryCreditsApplied;
+  const regularCreditsAvailable = state.corp.credits;
+  const creditPayable = regularCreditsAvailable >= regularCreditsRequired;
+  const additionalCostsPayable =
+    exactAgendaPointsAvailable >= mandatoryAgendaPoints;
+  const reductionSourceDefinitionIds = [
+    ...new Set(
+      quote.modifiers
+        .filter((modifier) => modifier.kind === "reduction")
+        .map((modifier) => modifier.sourceDefinitionId),
+    ),
+  ].sort();
+  const increaseSourceDefinitionIds = [
+    ...new Set(
+      quote.modifiers
+        .filter((modifier) => modifier.kind === "increase")
+        .map((modifier) => modifier.sourceDefinitionId),
+    ),
+  ].sort();
+  return {
+    complete: true,
+    cardType: definition.type as "ice" | "asset" | "upgrade",
+    baseCredits: quote.baseCredits,
+    finalCredits: quote.finalCredits,
+    mandatoryAdditionalCosts: { agendaPoints: mandatoryAgendaPoints },
+    ...(reductionSourceDefinitionIds.length > 0
+      ? { reductionSourceDefinitionIds }
+      : {}),
+    ...(increaseSourceDefinitionIds.length > 0
+      ? { increaseSourceDefinitionIds }
+      : {}),
+    temporaryCreditsAvailable,
+    temporaryCreditsApplied,
+    regularCreditsAvailable,
+    regularCreditsRequired,
+    creditPayable,
+    additionalCostsPayable,
+    affordable: creditPayable && additionalCostsPayable,
+  };
+}
+
+/**
+ * Actor-private, state-bound payment projection for the exact optional rez
+ * option opened by Data Fort Reclamation. The quote is derived from typed
+ * sequence state and never persisted in GameState or reconstructed from the
+ * choice source string.
+ */
+export function projectHqInstallRezOptionQuote(
+  state: GameState,
+  choice: ChoiceRequest,
+  option: ChoiceOption,
+): CorpOptionalRezChoiceQuote | undefined {
+  const sequence = state.hqInstallRezSequence;
+  if (
+    !sequence ||
+    state.pendingChoice?.choiceId !== choice.choiceId ||
+    choice.side !== "corp" ||
+    choice.kind !== "select_cards" ||
+    choice.minSelections !== 0 ||
+    choice.maxSelections !== 1 ||
+    choice.options.length !== 1 ||
+    choice.options[0]?.id !== option.id ||
+    choice.stateVersion !== state.stateVersion ||
+    !Number.isSafeInteger(sequence.nextCardIndex) ||
+    sequence.nextCardIndex <= 0 ||
+    !Number.isSafeInteger(sequence.temporaryCreditsRemaining) ||
+    sequence.temporaryCreditsRemaining < 0
+  )
+    return undefined;
+
+  const cardId = sequence.selectedCardIds[sequence.nextCardIndex - 1];
+  if (
+    !cardId ||
+    option.value !== cardId ||
+    !state.corp.scoreArea.includes(sequence.sourceAgendaId)
+  )
+    return undefined;
+
+  const agenda = state.cardInstances[sequence.sourceAgendaId];
+  const agendaDefinitionId = agenda?.definitionId;
+  if (
+    !agenda ||
+    agenda.owner !== "corp" ||
+    agenda.controller !== "corp" ||
+    agenda.zone.side !== "corp" ||
+    agenda.zone.zone !== "scoreArea" ||
+    agendaDefinitionId !== sequence.sourceDefinitionId ||
+    cardImplementationForDefinitionId(agendaDefinitionId)?.scoredAgenda
+      ?.kind !== "score_install_hq_cards_into_new_remote_then_rez"
+  )
+    return undefined;
+
+  const instance = state.cardInstances[cardId];
+  const definitionId = instance?.definitionId;
+  const definition = definitionId
+    ? CARD_DEFINITIONS_BY_ID[definitionId]
+    : undefined;
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === sequence.serverId,
+  );
+  if (
+    !instance ||
+    instance.owner !== "corp" ||
+    instance.controller !== "corp" ||
+    instance.rezzed ||
+    instance.zone.side !== "corp" ||
+    (instance.zone.zone !== "serverIce" &&
+      instance.zone.zone !== "serverRoot") ||
+    instance.zone.serverId !== sequence.serverId ||
+    !definition ||
+    !server ||
+    (instance.zone.zone === "serverIce"
+      ? !server.ice.includes(cardId)
+      : !server.root.includes(cardId)) ||
+    (definition.type === "ice" && instance.zone.zone !== "serverIce") ||
+    ((definition.type === "asset" || definition.type === "upgrade") &&
+      instance.zone.zone !== "serverRoot") ||
+    (definition.type !== "ice" &&
+      definition.type !== "asset" &&
+      definition.type !== "upgrade")
+  )
+    return undefined;
+
+  const binding = {
+    schemaVersion: CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
+    kind: CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
+    context: "hq_to_new_remote_optional_rez" as const,
+    choiceId: choice.choiceId,
+    optionId: option.id,
+    sourceAgendaId: sequence.sourceAgendaId,
+    cardId,
+    cardDefinitionId: definition.id,
+    targetServerId: sequence.serverId,
+    installedZone: instance.zone.zone,
+    sequencePosition: sequence.nextCardIndex,
+    stateVersion: state.stateVersion,
+  };
+
+  return {
+    ...binding,
+    ...projectInstalledCorpSequenceRezPayment(
+      state,
+      cardId,
+      sequence.temporaryCreditsRemaining,
+    ),
+  };
+}
+
+/**
+ * Projects the authoritative rez quote in the exact board position produced by
+ * a legal Corp ICE install. The input state is never mutated.
+ */
+export function projectCorpIceRezCostAfterInstall(
+  state: GameState,
+  cardId: CardInstanceId,
+  targetServerId: ServerId,
+): VisibleCorpRezCostQuote {
+  const instance = state.cardInstances[cardId];
+  const projectedServerId =
+    targetServerId === "new_remote"
+      ? nextCanonicalRemoteServerId(state.corp.servers)
+      : targetServerId;
+  if (!projectedServerId)
+    return incompleteCorpRezCostProjection(
+      state,
+      "post_install",
+      cardId,
+      targetServerId,
+    );
+  if (
+    !instance ||
+    instance.owner !== "corp" ||
+    instance.controller !== "corp" ||
+    instance.zone.side !== "corp" ||
+    instance.zone.zone !== "hq" ||
+    !state.corp.hq.includes(cardId)
+  )
+    return incompleteCorpRezCostProjection(
+      state,
+      "post_install",
+      cardId,
+      targetServerId,
+    );
+
+  const server =
+    targetServerId === "new_remote"
+      ? { id: projectedServerId }
+      : state.corp.servers.find(
+          (candidate) => candidate.id === projectedServerId,
+        );
+  if (!server)
+    return incompleteCorpRezCostProjection(
+      state,
+      "post_install",
+      cardId,
+      targetServerId,
+    );
+
+  return projectExactCorpRezCost(
+    state,
+    "post_install",
+    cardId,
+    targetServerId,
+    projectedServerId,
+  );
+}
+
+export function corpIcePostInstallRezProjectionPayload(
+  projection: VisibleCorpRezCostQuote,
+): NonNullable<LegalAction["payload"]> {
+  const certifiedComplete =
+    projection.complete &&
+    isExactNonNegativeInteger(projection.baseCredits) &&
+    isExactNonNegativeInteger(projection.finalCredits) &&
+    isExactNonNegativeInteger(projection.mandatoryAdditionalCosts.agendaPoints);
+  const agendaPointCost = projection.complete
+    ? projection.mandatoryAdditionalCosts.agendaPoints
+    : 0;
+  return {
+    postInstallRezQuoteCardId: projection.cardId,
+    postInstallRezQuoteTargetServerId: projection.targetServerId,
+    postInstallRezQuoteExpiresAtStateVersion: projection.expiresAtStateVersion,
+    postInstallRezQuoteComplete: certifiedComplete,
+    ...(projection.complete
+      ? {
+          postInstallRezQuoteProjectedServerId: projection.projectedServerId,
+        }
+      : {}),
+    ...(certifiedComplete
+      ? {
+          postInstallRezQuoteBaseCredits: projection.baseCredits,
+          postInstallRezQuoteFinalCredits: projection.finalCredits,
+          postInstallRezQuoteMandatoryAgendaPointCost: agendaPointCost,
+          ...(agendaPointCost > 0
+            ? {
+                postInstallRezQuoteMandatoryAdditionalCostKind: "agenda_point",
+              }
+            : {}),
+          ...(projection.reductionSourceDefinitionIds?.length
+            ? {
+                postInstallRezQuoteReductionSourceDefinitionIds:
+                  projection.reductionSourceDefinitionIds.join(","),
+              }
+            : {}),
+          ...(projection.increaseSourceDefinitionIds?.length
+            ? {
+                postInstallRezQuoteIncreaseSourceDefinitionIds:
+                  projection.increaseSourceDefinitionIds.join(","),
+              }
+            : {}),
+        }
+      : {}),
+  };
+}
+
 function mustRun(state: GameState): NonNullable<GameState["run"]> {
   if (!state.run) throw new Error("Kein aktiver Run.");
   return state.run;
@@ -85,6 +651,7 @@ function corpRezCostModifierAppliesToIce(
   sourceCardInstanceId: CardInstanceId,
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
+  projectedServerId?: Exclude<ServerId, "new_remote">,
 ): boolean {
   if (
     modifier.operation !== "reduce" ||
@@ -93,6 +660,11 @@ function corpRezCostModifierAppliesToIce(
     return false;
   if (!cardMatchesModifierAppliesTo(iceDefinition, modifier.appliesTo))
     return false;
+  if (projectedServerId && modifier.appliesTo.sameServerAsSource)
+    return (
+      corpServerIdForInstalledCard(state, sourceCardInstanceId) ===
+      projectedServerId
+    );
   return sameServerAsSourceApplies(
     state,
     sourceCardInstanceId,
@@ -104,13 +676,15 @@ function corpRezCostModifierAppliesToIce(
 /**
  * Collects currently active rez-cost modifiers for one ICE.
  *
- * Same-server filtering happens here from the current board state; stale action
- * protection relies on callers rebuilding and comparing the quote before pay.
+ * Same-server filtering uses either the current installed position or an
+ * explicit projected post-install server. Stale action protection relies on
+ * callers rebuilding and comparing the quote before pay.
  */
 function activeCorpRezCostModifiersForIce(
   state: GameState,
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
+  projectedServerId?: Exclude<ServerId, "new_remote">,
 ): ActiveCorpRezCostModifier[] {
   const matches: ActiveCorpRezCostModifier[] = [];
   for (const match of activeCardImplementationModifiersForCorpRoot(
@@ -124,6 +698,7 @@ function activeCorpRezCostModifiersForIce(
         match.sourceCardInstanceId,
         iceId,
         iceDefinition,
+        projectedServerId,
       )
     )
       continue;
@@ -159,13 +734,17 @@ function selfRezAdditionalCostsForIce(
   definition: CardDefinition,
 ): readonly CardSelfRezAdditionalCostImplementation[] {
   if (definition.type !== "ice") return [];
-  return cardImplementationForDefinitionId(definition.id)
-    ?.selfRezAdditionalCosts ?? [];
+  return (
+    cardImplementationForDefinitionId(definition.id)?.selfRezAdditionalCosts ??
+    []
+  );
 }
 
 function selfRezAgendaPointCostForIce(definition: CardDefinition): number {
   return selfRezAdditionalCostsForIce(definition)
-    .filter((cost) => cost.kind === "agenda_point" && cost.visibility === "public")
+    .filter(
+      (cost) => cost.kind === "agenda_point" && cost.visibility === "public",
+    )
     .reduce((sum, cost) => sum + Math.max(0, Math.floor(cost.amount)), 0);
 }
 
@@ -187,6 +766,34 @@ function corpAgendaPointTotalForRezCost(state: GameState): number {
     );
   }, 0);
   return bonusPoints + scoredPoints;
+}
+
+function exactCorpAgendaPointTotalForRezCost(
+  state: GameState,
+): number | undefined {
+  const bonusPoints = state.corpBonusAgendaPoints ?? 0;
+  if (!isExactNonNegativeInteger(bonusPoints)) return undefined;
+  let total = bonusPoints;
+  for (const cardId of state.corp.scoreArea) {
+    const instance = state.cardInstances[cardId];
+    const definition = instance
+      ? CARD_DEFINITIONS_BY_ID[instance.definitionId]
+      : undefined;
+    const printedPoints = definition?.agendaPoints;
+    const counterPoints = instance?.counters?.agenda ?? 0;
+    const spentPoints = instance?.agendaPointsSpent ?? 0;
+    if (
+      !instance ||
+      definition?.type !== "agenda" ||
+      !isExactNonNegativeInteger(printedPoints) ||
+      !isExactNonNegativeInteger(counterPoints) ||
+      !isExactNonNegativeInteger(spentPoints) ||
+      spentPoints > printedPoints + counterPoints
+    )
+      return undefined;
+    total += printedPoints + counterPoints - spentPoints;
+  }
+  return total;
 }
 
 function rootRezAgendaPointCostForDefinition(
@@ -292,9 +899,7 @@ export function rezCostReductionSourceDefinitionIdsFor(
   return [
     ...activeCorpRezCostModifiersForIce(state, iceId, iceDefinition),
     ...activeCorpSelfRezCostModifiersForIce(state, iceId, iceDefinition),
-  ].map(
-    (match) => match.sourceDefinitionId,
-  );
+  ].map((match) => match.sourceDefinitionId);
 }
 
 /**
@@ -431,15 +1036,31 @@ export function quoteCorpRezCost(
 ): CostQuote {
   const definition = definitionFor(state, iceId);
   const baseCredits = definition.rezCost ?? 0;
-  const regularFinalCredits = rezCostForCard(state, iceId);
   const existingModifierMatches =
     definition.type === "ice"
-      ? activeCorpRezCostModifiersForIce(state, iceId, definition)
+      ? activeCorpRezCostModifiersForIce(
+          state,
+          iceId,
+          definition,
+          options.projectedServerId,
+        )
       : [];
   const selfModifierMatches =
     definition.type === "ice"
       ? activeCorpSelfRezCostModifiersForIce(state, iceId, definition)
       : [];
+  const regularFinalCredits = Math.max(
+    0,
+    baseCredits -
+      existingModifierMatches.reduce(
+        (sum, match) => sum + match.modifier.amount,
+        0,
+      ) -
+      selfModifierMatches.reduce(
+        (sum, match) => sum + match.modifier.amount,
+        0,
+      ),
+  );
   const existingSourceDefinitionIds = [
     ...existingModifierMatches,
     ...selfModifierMatches,
@@ -480,7 +1101,8 @@ export function quoteCorpRezCost(
     modifiers.push({
       sourceCardInstanceId: discountedRezSourceCardId,
       sourceDefinitionId,
-      label: CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.title ?? sourceDefinitionId,
+      label:
+        CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.title ?? sourceDefinitionId,
       amount: regularFinalCredits - finalCredits,
       kind: "reduction",
     });
@@ -572,6 +1194,117 @@ export function quoteCorpRootRezCost(
   };
 }
 
+export function quoteCorpFortRunRezSupport(
+  state: GameState,
+  sourceCardInstanceId: CardInstanceId,
+  actionId: string,
+  rezCredits: number,
+): CorpFortRunRezSupportQuote | undefined {
+  const source = state.cardInstances[sourceCardInstanceId];
+  const sourceDefinitionId = source?.definitionId;
+  const serverId = corpServerIdForInstalledCard(state, sourceCardInstanceId);
+  const server = serverId
+    ? state.corp.servers.find((candidate) => candidate.id === serverId)
+    : undefined;
+  const run = state.run;
+  if (
+    !source ||
+    source.owner !== "corp" ||
+    source.controller !== "corp" ||
+    source.rezzed ||
+    source.zone.side !== "corp" ||
+    source.zone.zone !== "serverRoot" ||
+    !sourceDefinitionId ||
+    !serverId ||
+    !server ||
+    !server.root.includes(sourceCardInstanceId) ||
+    !definitionHasFortRunWindowKind(
+      sourceDefinitionId,
+      CORP_FORT_RUN_REZ_SUPPORT_KIND,
+    ) ||
+    !run ||
+    run.attackedServerId !== serverId ||
+    run.delayedSuccessfulRun !== undefined ||
+    run.successfulRunInterventionWindowClosed === true ||
+    (run.successfulRunInterventionUsedSourceIds ?? []).includes(
+      sourceCardInstanceId,
+    ) ||
+    actionId.trim().length === 0 ||
+    !isExactNonNegativeInteger(rezCredits)
+  )
+    return undefined;
+
+  const finalIceWindow =
+    run.position.kind === "ice" &&
+    run.position.serverId === serverId &&
+    run.position.iceIndex === 0 &&
+    ((state.timingPoint === "run.approach_ice" &&
+      run.phase === "approach_ice") ||
+      (state.timingPoint === "run.movement_rez_window" &&
+        run.phase === "movement"));
+  const finalServerWindow =
+    state.timingPoint === "run.movement_rez_window" &&
+    run.phase === "movement" &&
+    run.position.kind === "server" &&
+    run.position.serverId === serverId;
+  if (!finalIceWindow && !finalServerWindow) return undefined;
+
+  const installCredits = server.ice.length;
+  if (!isExactNonNegativeInteger(installCredits)) return undefined;
+  const totalCredits = rezCredits + installCredits;
+  if (!Number.isSafeInteger(totalCredits)) return undefined;
+  const hasOwnHqIce = state.corp.hq.some((cardId) => {
+    const instance = state.cardInstances[cardId];
+    const definition = instance
+      ? CARD_DEFINITIONS_BY_ID[instance.definitionId]
+      : undefined;
+    return (
+      instance?.owner === "corp" &&
+      instance.controller === "corp" &&
+      instance.zone.side === "corp" &&
+      instance.zone.zone === "hq" &&
+      definition?.type === "ice"
+    );
+  });
+  return {
+    schemaVersion: CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION,
+    fortRunKind: CORP_FORT_RUN_REZ_SUPPORT_KIND,
+    complete: true,
+    sourceCardInstanceId,
+    targetServerId: serverId,
+    stateVersion: state.stateVersion,
+    actionId,
+    rezCredits,
+    installCredits,
+    totalCredits,
+    totalCreditsPayable: state.corp.credits >= totalCredits,
+    hasOwnHqIce,
+  };
+}
+
+export function corpFortRunRezSupportQuotePayload(
+  quote: CorpFortRunRezSupportQuote,
+): NonNullable<LegalAction["payload"]> {
+  return {
+    cardImplementationFortRunRezSupportQuoteSchemaVersion: quote.schemaVersion,
+    cardImplementationFortRunRezSupportQuoteKind: quote.fortRunKind,
+    cardImplementationFortRunRezSupportQuoteComplete: quote.complete,
+    cardImplementationFortRunRezSupportQuoteSourceCardInstanceId:
+      quote.sourceCardInstanceId,
+    cardImplementationFortRunRezSupportQuoteTargetServerId:
+      quote.targetServerId,
+    cardImplementationFortRunRezSupportQuoteStateVersion: quote.stateVersion,
+    cardImplementationFortRunRezSupportQuoteActionId: quote.actionId,
+    cardImplementationFortRunRezSupportQuoteRezCredits: quote.rezCredits,
+    cardImplementationFortRunRezSupportQuoteInstallCredits:
+      quote.installCredits,
+    cardImplementationFortRunRezSupportQuoteTotalCredits: quote.totalCredits,
+    cardImplementationFortRunRezSupportQuoteTotalCreditsPayable:
+      quote.totalCreditsPayable,
+    cardImplementationFortRunRezSupportQuoteHasOwnHqIce: quote.hasOwnHqIce,
+  };
+}
+
 function currentRunRezSurcharge(
   state: GameState,
   printedRezCost: number,
@@ -655,12 +1388,16 @@ export function assertCorpRezCostQuoteValid(
       throw new Error("Discounted-Rez-Quelle fehlt.");
     const availableSources = discountedRezSourceIdsForRunIce(state, iceId);
     if (!availableSources.includes(discountedRezSourceCardId))
-      throw new Error("Die Discounted-Rez-Quelle ist fuer dieses ICE nicht aktiv.");
+      throw new Error(
+        "Die Discounted-Rez-Quelle ist fuer dieses ICE nicht aktiv.",
+      );
     if (
       corpServerIdForInstalledCard(state, discountedRezSourceCardId) !==
       run.attackedServerId
     )
-      throw new Error("Die Discounted-Rez-Quelle gehoert nicht zu diesem Fort.");
+      throw new Error(
+        "Die Discounted-Rez-Quelle gehoert nicht zu diesem Fort.",
+      );
   }
   const quote = quoteCorpRezCost(state, iceId, {
     ...(discountedRezSourceCardId ? { discountedRezSourceCardId } : {}),
@@ -668,8 +1405,12 @@ export function assertCorpRezCostQuoteValid(
   if (!quote.canPay) throw new Error("Corp kann die Rez-Kosten nicht zahlen.");
   if ((legalAction.costs[0]?.credits ?? 0) !== quote.finalCredits)
     throw new Error("Corp-Rez-Kosten sind nicht mehr gueltig.");
-  const quotedAgendaPointCost = Number(quote.publicPayload.agendaPointCost ?? 0);
-  const actionAgendaPointCost = Number(legalAction.payload?.agendaPointCost ?? 0);
+  const quotedAgendaPointCost = Number(
+    quote.publicPayload.agendaPointCost ?? 0,
+  );
+  const actionAgendaPointCost = Number(
+    legalAction.payload?.agendaPointCost ?? 0,
+  );
   if (
     !Number.isInteger(actionAgendaPointCost) ||
     actionAgendaPointCost !== quotedAgendaPointCost
@@ -689,6 +1430,21 @@ const ROOT_REZ_QUOTE_PAYLOAD_FIELDS = [
   "rezCostPaid",
   "corpRezCostSurchargeAmount",
   "corpRezCostSurchargeSourceDefinitionId",
+] as const;
+
+const FORT_RUN_REZ_SUPPORT_QUOTE_PAYLOAD_FIELDS = [
+  "cardImplementationFortRunRezSupportQuoteSchemaVersion",
+  "cardImplementationFortRunRezSupportQuoteKind",
+  "cardImplementationFortRunRezSupportQuoteComplete",
+  "cardImplementationFortRunRezSupportQuoteSourceCardInstanceId",
+  "cardImplementationFortRunRezSupportQuoteTargetServerId",
+  "cardImplementationFortRunRezSupportQuoteStateVersion",
+  "cardImplementationFortRunRezSupportQuoteActionId",
+  "cardImplementationFortRunRezSupportQuoteRezCredits",
+  "cardImplementationFortRunRezSupportQuoteInstallCredits",
+  "cardImplementationFortRunRezSupportQuoteTotalCredits",
+  "cardImplementationFortRunRezSupportQuoteTotalCreditsPayable",
+  "cardImplementationFortRunRezSupportQuoteHasOwnHqIce",
 ] as const;
 
 export function assertCorpRootRezCostQuoteValid(
@@ -736,6 +1492,58 @@ export function assertCorpRootRezCostQuoteValid(
   for (const field of ROOT_REZ_QUOTE_PAYLOAD_FIELDS) {
     if (actionPayload[field] !== quotePayload[field])
       throw new Error("Root-Rez-Kostenpayload ist nicht mehr gueltig.");
+  }
+  const creditOutcomeQuote = quoteCorpRootRezCreditOutcome(
+    state,
+    cardId,
+    legalAction.actionId,
+    quote.finalCredits,
+  );
+  if (!creditOutcomeQuote) {
+    if (
+      ROOT_REZ_CREDIT_OUTCOME_QUOTE_PAYLOAD_FIELDS.some(
+        (field) => actionPayload[field] !== undefined,
+      )
+    ) {
+      throw new Error(
+        "Root-Rez-Credit-Outcome-Quote ist in diesem Kontext nicht gueltig.",
+      );
+    }
+  } else {
+    const creditOutcomePayload = corpRootRezCreditOutcomeQuotePayload(
+      creditOutcomeQuote,
+    ) as Record<string, unknown>;
+    for (const field of ROOT_REZ_CREDIT_OUTCOME_QUOTE_PAYLOAD_FIELDS) {
+      if (actionPayload[field] !== creditOutcomePayload[field]) {
+        throw new Error(
+          "Root-Rez-Credit-Outcome-Quote ist nicht mehr gueltig.",
+        );
+      }
+    }
+  }
+  const fortRunRezSupportQuote = quoteCorpFortRunRezSupport(
+    state,
+    cardId,
+    legalAction.actionId,
+    quote.finalCredits,
+  );
+  if (!fortRunRezSupportQuote) {
+    if (
+      FORT_RUN_REZ_SUPPORT_QUOTE_PAYLOAD_FIELDS.some(
+        (field) => actionPayload[field] !== undefined,
+      )
+    )
+      throw new Error(
+        "Fort-Run-Rez-Support-Quote ist in diesem Kontext nicht gueltig.",
+      );
+    return quote;
+  }
+  const fortRunRezSupportPayload = corpFortRunRezSupportQuotePayload(
+    fortRunRezSupportQuote,
+  ) as Record<string, unknown>;
+  for (const field of FORT_RUN_REZ_SUPPORT_QUOTE_PAYLOAD_FIELDS) {
+    if (actionPayload[field] !== fortRunRezSupportPayload[field])
+      throw new Error("Fort-Run-Rez-Support-Quote ist nicht mehr gueltig.");
   }
   return quote;
 }

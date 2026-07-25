@@ -271,6 +271,7 @@ export type RunnerRunTargetEvaluation = {
   pathCost: number;
   routeQuote?: RunnerRunRouteQuote;
   creditsAfterRun: number;
+  runCommitment: "probe_only" | "full_path";
   unknownUnrezzedIceCount?: number;
   unrezzedIceRisk?: number;
   unrezzedIceRiskCreditBuffer?: number;

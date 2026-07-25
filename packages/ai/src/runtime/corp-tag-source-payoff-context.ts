@@ -254,6 +254,7 @@ function corpSameTurnDamageConversionAfterTagSource(
         return undefined;
       }
       const cost = corpVisibleCardPlayCost(card);
+      if (cost === undefined) return undefined;
       const fundingClicks = Math.max(0, cost - creditsAfterSource);
       if (clicksAfterSource < fundingClicks + 1) return undefined;
       return { definitionId: card.definitionId, cost, fundingClicks };

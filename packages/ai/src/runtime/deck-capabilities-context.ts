@@ -3,9 +3,11 @@ import {
   buildDeckCapabilityProfileFromInput,
   type DeckCapabilityProfile,
 } from "../deck-capabilities";
+import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 
 type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
   ownDeckCapabilities?: DeckCapabilityProfile;
+  ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
 };
 
 export type DeckCapabilitiesContext = {
@@ -18,9 +20,10 @@ export function createDeckCapabilitiesContext(): DeckCapabilitiesContext {
   function deckCapabilitiesForInput(
     input: AiDecisionInput,
   ): DeckCapabilityProfile {
+    const enrichedInput = input as AiDecisionInputWithDeckCapabilities;
     return (
-      (input as AiDecisionInputWithDeckCapabilities).ownDeckCapabilities ??
-      buildDeckCapabilityProfileFromInput(input)
+      enrichedInput.ownDeckCapabilities ??
+      buildDeckCapabilityProfileFromInput(input, enrichedInput.ownDeckSnapshot)
     );
   }
 

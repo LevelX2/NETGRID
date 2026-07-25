@@ -4365,9 +4365,19 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_proteus_134_cortical-cybermodem"
+        "actionId": "runner.start_run.rd"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.pressure_central"
+      ],
+      "acceptableCapabilities": [
+        "pressure_rd_information"
+      ],
+      "requiredAssessmentEvidence": [
+        "target:rd"
+      ]
+    }
   }
 }

@@ -5010,10 +5010,19 @@
         "type": "install_card"
       },
       {
+        "sourceDefinitionId": "onr_v1_220_tycho-extension",
+        "targetServerId": "remote_1",
+        "type": "install_card"
+      },
+      {
         "type": "gain_credit"
       },
       {
         "type": "draw_card"
+      },
+      {
+        "type": "play_operation",
+        "sourceDefinitionId": "onr_v1_298_planning-consultants"
       }
     ]
   }

@@ -17,6 +17,7 @@ import {
 } from "@netgrid/engine";
 import { buildAiDecisionInputDto } from "./input-dto";
 import { chooseRunnerAction } from "./index";
+import { evaluateRunnerRunTargets } from "./runner-run-target-evaluation";
 
 const originalSemanticRuntime = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
 
@@ -147,18 +148,16 @@ describe("known visible ICE run risk", () => {
       ]) ?? [],
     );
     const runAlternative = alternatives.get(run.actionId);
-    const guidance = runAlternative?.scoreBreakdown?.find(
-      (component) => component.key === "runner_run_target_semantic_guidance",
-    );
+    const planExclusion = runAlternative?.whyNot?.join("|") ?? "";
 
     expect(decision.actionId).toBe(gain.actionId);
     expect(runAlternative?.excluded).not.toBe(true);
-    expect(guidance).toMatchObject({ value: -42 });
-    expect(guidance?.reason).toContain("recommendation:gain_credits_first");
-    expect(guidance?.reason).toContain("raw_guidance:-2100");
-    expect(guidance?.reason).toContain("normalized_guidance:-42");
-    expect(guidance?.reason).toContain("visible_ice_hazard:trace_tag");
-    expect(guidance?.reason).toContain(
+    expect(decision.fallbackUsed).toBe(false);
+    expect(planExclusion).toContain(
+      "run_route_excluded:recommendation:gain_credits_first",
+    );
+    expect(planExclusion).toContain("visible_ice_hazard:trace_tag");
+    expect(planExclusion).toContain(
       "visible_trace_tag_hazard_unavoidable:true",
     );
   });
@@ -188,8 +187,72 @@ describe("known visible ICE run risk", () => {
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
     });
+    const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(decision.actionId).toBe(run.actionId);
+    expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
+    expect(evaluation).toMatchObject({
+      actionId: run.actionId,
+      targetServerId: "remote_1",
+      accessServerId: "remote_1",
+      accessPayoff: "agenda",
+      knownAccessState: "known_payoff",
+      pathPassability: "reachable",
+      creditsAfterRun: 2,
+      routeQuote: {
+        reachability: "guaranteed_access",
+        fundingGap: 0,
+        unknownIceCount: 0,
+      },
+    });
+    expect(evaluation?.score).toBeLessThan(0);
+  });
+
+  it("fails closed when a visible remote agenda has no exact access route through unknown ICE", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const run = runAction("run-remote-1", "remote_1");
+    const gain = gainCreditAction("gain-credit");
+    const input = aiInput({
+      credits: 2,
+      servers: [
+        server("remote_1", {
+          ice: [
+            visibleCard("unknown-ice", {
+              type: "ice",
+              known: false,
+              rezzed: false,
+            }),
+          ],
+          root: [
+            visibleCard("remote-agenda", {
+              definitionId: "simple_agenda",
+              title: "Simple Agenda",
+              type: "agenda",
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [run, gain],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(evaluation).toMatchObject({
+      actionId: run.actionId,
+      targetServerId: "remote_1",
+      accessPayoff: "agenda",
+      routeQuote: {
+        reachability: "conditional_access",
+        fundingGap: 0,
+        unknownIceCount: 1,
+      },
+    });
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.fallbackUsed).toBe(false);
   });
 
   it.each([
@@ -469,11 +532,7 @@ function semanticGuidanceReason(
   const alternative = decision.decisionDebug?.actionAlternatives?.find(
     (entry) => entry.actionId === actionId,
   );
-  return (
-    alternative?.scoreBreakdown?.find(
-      (component) => component.key === "runner_run_target_semantic_guidance",
-    )?.reason ?? ""
-  );
+  return alternative?.whyNot?.join("|") ?? "";
 }
 
 function engineRunnerTurnWithRezzedIce(

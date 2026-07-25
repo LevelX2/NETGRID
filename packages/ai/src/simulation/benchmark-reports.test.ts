@@ -173,8 +173,26 @@ describe("benchmark report formatting", () => {
       expect(slot.benchmark?.corpDeckId).toContain("local_realistic_");
       expect(slot.benchmark?.runnerDeckId).not.toBe("demo_runner_008");
       expect(slot.benchmark?.corpDeckId).not.toBe("demo_corp_008");
-      expect(slot.benchmark?.candidate.illegalActions).toBe(0);
-      expect(slot.benchmark?.candidate.replayFailures).toBe(0);
+      expect(
+        slot.benchmark?.candidate.illegalActions,
+        `candidate illegal action in benchmark slot ${slot.slotId}: ${JSON.stringify(
+          slot.benchmark?.candidateRun.summaries.map((summary) => ({
+            errors: summary.errors,
+            lastActions: summary.actionSequence.slice(-4).map((entry) => ({
+              side: entry.side,
+              stateVersionBefore: entry.stateVersionBefore,
+              actionType: entry.actionType,
+              selectedActionId: entry.selectedActionId,
+              planKind: entry.planKind,
+              reasonCode: entry.reasonCode,
+            })),
+          })) ?? [],
+        )}`,
+      ).toBe(0);
+      expect(
+        slot.benchmark?.candidate.replayFailures,
+        `candidate replay failure in benchmark slot ${slot.slotId}`,
+      ).toBe(0);
     }
     expect(realSceneSlots).toHaveLength(2);
     expect(realSceneSlots.every((slot) => slot.status === "runnable")).toBe(
@@ -196,8 +214,14 @@ describe("benchmark report formatting", () => {
       expect(slot.benchmark?.corpDeckId).toContain("real_scene_");
       expect(slot.benchmark?.runnerDeckId).not.toBe("demo_runner_008");
       expect(slot.benchmark?.corpDeckId).not.toBe("demo_corp_008");
-      expect(slot.benchmark?.candidate.illegalActions).toBe(0);
-      expect(slot.benchmark?.candidate.replayFailures).toBe(0);
+      expect(
+        slot.benchmark?.candidate.illegalActions,
+        `candidate illegal action in benchmark slot ${slot.slotId}`,
+      ).toBe(0);
+      expect(
+        slot.benchmark?.candidate.replayFailures,
+        `candidate replay failure in benchmark slot ${slot.slotId}`,
+      ).toBe(0);
     }
     expect([...runnableCorpArchetypes]).toEqual(
       expect.arrayContaining([
@@ -259,6 +283,7 @@ describe("benchmark report formatting", () => {
   it("detects suspicious selfplay decisions from redaction-safe synthetic traces", () => {
     const summary: AiSimulationSummary = {
       seed: "selfplay-detector-synthetic",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 6,
       turns: 3,
@@ -323,6 +348,7 @@ describe("benchmark report formatting", () => {
   it("categorizes recovery loop findings without suppressing the detector", () => {
     const summary: AiSimulationSummary = {
       seed: "selfplay-recovery-loop-categories",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 4,
       turns: 2,
@@ -390,6 +416,7 @@ describe("benchmark report formatting", () => {
   it("keeps explained semantic overrides out of suspicious selfplay findings", () => {
     const summary: AiSimulationSummary = {
       seed: "selfplay-detector-explained-overrides",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 2,
       turns: 1,
@@ -660,6 +687,7 @@ describe("benchmark report formatting", () => {
   it("clusters action-limit roots without hidden trace data", () => {
     const summary: AiSimulationSummary = {
       seed: "selfplay-action-limit-cluster",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 4,
       turns: 2,
@@ -717,6 +745,7 @@ describe("benchmark report formatting", () => {
   it("summarizes action type dominance by side from selfplay traces", () => {
     const balanced: AiSimulationSummary = {
       seed: "selfplay-action-type-balanced",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 8,
       turns: 4,
@@ -781,6 +810,7 @@ describe("benchmark report formatting", () => {
   it("subclusters action-limit roots from the final forty actions", () => {
     const summary: AiSimulationSummary = {
       seed: "selfplay-action-limit-subcluster",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 5,
       turns: 3,
@@ -838,6 +868,7 @@ describe("benchmark report formatting", () => {
   it("keeps reserve and no-alternative gain-credit cases out of no-need subclusters", () => {
     const reserveSummary: AiSimulationSummary = {
       seed: "selfplay-action-limit-runner-reserve-subcluster",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 3,
       turns: 2,
@@ -904,6 +935,7 @@ describe("benchmark report formatting", () => {
   it("splits corp gain-credit stalls by rez or scoreline alternative", () => {
     const reserveSummary: AiSimulationSummary = {
       seed: "selfplay-action-limit-corp-reserve-subcluster",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 3,
       turns: 2,
@@ -955,6 +987,7 @@ describe("benchmark report formatting", () => {
   it("does not treat run microsteps as stalls when access follows", () => {
     const summary: AiSimulationSummary = {
       seed: "selfplay-action-limit-run-microstep-subcluster",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 5,
       turns: 2,
@@ -999,6 +1032,7 @@ describe("benchmark report formatting", () => {
   it("catches continue and jack-out loops without progress", () => {
     const continueLoop: AiSimulationSummary = {
       seed: "selfplay-action-limit-continue-loop-subcluster",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 5,
       turns: 2,
@@ -1059,6 +1093,7 @@ describe("benchmark report formatting", () => {
   it("breaks mixed subcluster ties by the latest end-window evidence", () => {
     const summary: AiSimulationSummary = {
       seed: "selfplay-action-limit-terminal-tie-subcluster",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 4,
       turns: 2,
@@ -1104,6 +1139,7 @@ describe("benchmark report formatting", () => {
   it("keeps late draws with coverage gaps out of no-goal draw subclusters", () => {
     const summary: AiSimulationSummary = {
       seed: "selfplay-action-limit-coverage-draw-subcluster",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 2,
       turns: 2,
@@ -1133,6 +1169,7 @@ describe("benchmark report formatting", () => {
   it("keeps the pair A late no-goal draw regression separate from coverage draws", () => {
     const pairANoGoalDraw: AiSimulationSummary = {
       seed: "pair-a-ai-benchmark-tuning-006-late-no-goal-draw",
+      terminationKind: "action_limit",
       winner: "action_limit_reached",
       actions: 4,
       turns: 2,

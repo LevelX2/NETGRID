@@ -153,6 +153,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.evidence).toContain(
       "hostable_icebreaker_available:false",
     );
+    expect(evaluation.activationPrerequisites).toEqual([
+      { kind: "hosted_icebreaker", satisfied: false },
+    ]);
   });
 
   it("keeps hosted breaker economy useful when a breaker is immediately hostable", () => {
@@ -188,6 +191,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
     expect(evaluation.currentNeed).not.toBe("later");
     expect(evaluation.evidence).toContain("hostable_icebreaker_available:true");
+    expect(evaluation.activationPrerequisites).toEqual([
+      { kind: "hosted_icebreaker", satisfied: true },
+    ]);
   });
 
   it("separates MU-blocked breaker setup from missing-credit setup", () => {
@@ -392,7 +398,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.priority).toBeLessThan(500);
   });
 
-  it("treats visible net-damage ICE as a current defense-support need", () => {
+  it("treats visible net-damage ICE as a setup need without inventing an acute damage window", () => {
     const prevention = visibleCard("green-knight-1", {
       definitionId: "onr_v1_128_green-knight-surge-buffers",
       title: '"Green Knight" Surge Buffers',
@@ -435,8 +441,8 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation).toMatchObject({
       developmentRole: "defense_support",
       availability: "legal_now",
-      currentNeed: "acute",
-      strategicFit: "strong",
+      currentNeed: "setup",
+      strategicFit: "medium",
       deferReason: "none",
       persistentInstallEvaluation: {
         capabilityDelta: "cumulative_capacity",

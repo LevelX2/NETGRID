@@ -8,6 +8,8 @@ import type {
   PlayerAction,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { hashState } from "../hash";
+import { assertCorpRootRezCostQuoteValid } from "../payment";
 import { buildLegalAction } from "../turn/action-builders";
 import {
   buildCorpApproachActions,
@@ -322,6 +324,159 @@ describe("run rez window", () => {
     });
   });
 
+  it("certifies Jenny Jett's exact final-window rez and install funding without exposing HQ ICE identity", () => {
+    const state = makeState({
+      timingPoint: "run.approach_ice",
+      rootDefinitionId: "onr_v1_359_jenny-jett",
+    });
+    state.run!.phase = "approach_ice";
+    const hqIceId = "hq_ice_1" as CardInstanceId;
+    state.corp.credits = 3;
+    state.corp.hq.push(hqIceId);
+    state.cardInstances[hqIceId] = instance(hqIceId, "onr_v1_261_quandary", {
+      zone: { side: "corp", zone: "hq" },
+      faceup: false,
+    });
+    const beforeHash = hashState(state);
+    const { host } = hostFor(state);
+
+    const actions = buildCorpApproachActions(host);
+    const jennyRez = actions.find(
+      (action) => action.type === "rez_card" && action.source === "root_1",
+    );
+
+    expect(jennyRez).toBeDefined();
+    expect(jennyRez?.payload).toMatchObject({
+      cardImplementationFortRunRezSupportQuoteSchemaVersion:
+        "corp-fort-run-rez-support-quote-v1",
+      cardImplementationFortRunRezSupportQuoteKind:
+        "install_hq_ice_innermost_after_successful_run",
+      cardImplementationFortRunRezSupportQuoteComplete: true,
+      cardImplementationFortRunRezSupportQuoteSourceCardInstanceId: "root_1",
+      cardImplementationFortRunRezSupportQuoteTargetServerId: "rd",
+      cardImplementationFortRunRezSupportQuoteStateVersion: 11,
+      cardImplementationFortRunRezSupportQuoteActionId: jennyRez?.actionId,
+      cardImplementationFortRunRezSupportQuoteRezCredits: 1,
+      cardImplementationFortRunRezSupportQuoteInstallCredits: 1,
+      cardImplementationFortRunRezSupportQuoteTotalCredits: 2,
+      cardImplementationFortRunRezSupportQuoteTotalCreditsPayable: true,
+      cardImplementationFortRunRezSupportQuoteHasOwnHqIce: true,
+    });
+    const serializedPayload = JSON.stringify(jennyRez?.payload);
+    expect(serializedPayload).not.toContain(hqIceId);
+    expect(serializedPayload).not.toContain("onr_v1_261_quandary");
+    expect(hashState(state)).toBe(beforeHash);
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(state, "root_1", jennyRez!),
+    ).not.toThrow();
+  });
+
+  it("omits fort-run support fields for nonmatching roots and before the exact final run window", () => {
+    const nonJennyState = makeState({ timingPoint: "run.approach_ice" });
+    const nonJennyAction = buildCorpApproachActions(
+      hostFor(nonJennyState).host,
+    ).find((action) => action.type === "rez_card");
+    expect(
+      Object.keys(nonJennyAction?.payload ?? {}).some((field) =>
+        field.includes("FortRunRezSupport"),
+      ),
+    ).toBe(false);
+    const injectedNonJennyAction = structuredClone(nonJennyAction!);
+    injectedNonJennyAction.payload = {
+      ...(injectedNonJennyAction.payload ?? {}),
+      cardImplementationFortRunRezSupportQuoteComplete: true,
+    };
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(
+        nonJennyState,
+        "root_1",
+        injectedNonJennyAction,
+      ),
+    ).toThrow(/Fort-Run-Rez-Support-Quote/);
+
+    const earlyJennyState = makeState({
+      timingPoint: "run.approach_ice",
+      rootDefinitionId: "onr_v1_359_jenny-jett",
+    });
+    earlyJennyState.run!.phase = "approach_ice";
+    earlyJennyState.run!.position = {
+      kind: "ice",
+      serverId: "rd",
+      iceIndex: 1,
+    };
+    const earlyJennyAction = buildCorpApproachActions(
+      hostFor(earlyJennyState).host,
+    ).find(
+      (action) => action.type === "rez_card" && action.source === "root_1",
+    );
+    expect(earlyJennyAction).toBeDefined();
+    expect(
+      Object.keys(earlyJennyAction?.payload ?? {}).some((field) =>
+        field.includes("FortRunRezSupport"),
+      ),
+    ).toBe(false);
+  });
+
+  it("rejects stale Jenny support quotes when action, state, server ICE count or HQ ICE availability changes", () => {
+    const state = makeState({
+      timingPoint: "run.approach_ice",
+      rootDefinitionId: "onr_v1_359_jenny-jett",
+    });
+    state.run!.phase = "approach_ice";
+    const hqIceId = "hq_ice_1" as CardInstanceId;
+    state.corp.hq.push(hqIceId);
+    state.cardInstances[hqIceId] = instance(hqIceId, "onr_v1_261_quandary", {
+      zone: { side: "corp", zone: "hq" },
+    });
+    const action = buildCorpApproachActions(hostFor(state).host).find(
+      (candidate) =>
+        candidate.type === "rez_card" && candidate.source === "root_1",
+    )!;
+
+    const incompleteQuote = structuredClone(action);
+    delete incompleteQuote.payload
+      ?.cardImplementationFortRunRezSupportQuoteInstallCredits;
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(state, "root_1", incompleteQuote),
+    ).toThrow(/Fort-Run-Rez-Support-Quote/);
+
+    const changedActionId = structuredClone(action);
+    changedActionId.actionId = `${action.actionId}:stale`;
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(state, "root_1", changedActionId),
+    ).toThrow(/Fort-Run-Rez-Support-Quote/);
+
+    const changedStateVersion = structuredClone(state);
+    changedStateVersion.stateVersion += 1;
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(changedStateVersion, "root_1", action),
+    ).toThrow(/Fort-Run-Rez-Support-Quote/);
+
+    const changedIceCount = structuredClone(state);
+    const outerIceId = "ice_2" as CardInstanceId;
+    changedIceCount.cardInstances[outerIceId] = instance(
+      outerIceId,
+      "simple_barrier_ice",
+      {
+        zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+      },
+    );
+    changedIceCount.corp.servers[0]!.ice.push(outerIceId);
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(changedIceCount, "root_1", action),
+    ).toThrow(/Fort-Run-Rez-Support-Quote/);
+
+    const changedHqIce = structuredClone(state);
+    changedHqIce.corp.hq = [];
+    changedHqIce.cardInstances[hqIceId] = {
+      ...changedHqIce.cardInstances[hqIceId]!,
+      zone: { side: "corp", zone: "archives" },
+    };
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(changedHqIce, "root_1", action),
+    ).toThrow(/Fort-Run-Rez-Support-Quote/);
+  });
+
   it("opens and passes the root rez window without changing action ids or payload shape", () => {
     const state = makeState({ rootRezzed: false });
     const { host, calls } = hostFor(state);
@@ -391,13 +546,60 @@ describe("run rez window", () => {
         rootRez: true,
         rezInterruptJackOutEligible: true,
         serverId: "remote_1",
+        rootRezCreditOutcomeQuoteSchemaVersion:
+          "corp-root-rez-credit-outcome-quote-v1",
+        rootRezCreditOutcomeQuoteComplete: true,
+        rootRezCreditOutcomeQuoteSourceCardInstanceId: remoteRootId,
+        rootRezCreditOutcomeQuoteTargetServerId: "remote_1",
+        rootRezCreditOutcomeQuoteStateVersion: state.stateVersion,
+        rootRezCreditOutcomeQuoteTimingPoint: state.timingPoint,
+        rootRezCreditOutcomeQuoteActionId: actions[0]?.actionId,
+        rootRezCreditOutcomeQuoteResolution: "guaranteed",
+        rootRezCreditOutcomeQuoteGrossCreditGain: 3,
+        rootRezCreditOutcomeQuoteRezCredits: 1,
+        rootRezCreditOutcomeQuoteNetCreditGain: 2,
       },
     });
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(state, remoteRootId, actions[0]!),
+    ).not.toThrow();
+    const manipulatedOutcome = structuredClone(actions[0]!);
+    manipulatedOutcome.payload = {
+      ...(manipulatedOutcome.payload ?? {}),
+      rootRezCreditOutcomeQuoteNetCreditGain: 3,
+    };
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(state, remoteRootId, manipulatedOutcome),
+    ).toThrow(/Root-Rez-Credit-Outcome-Quote/);
     expect(actions[1]?.payload).toMatchObject({
       runRootRezPass: true,
       serverId: "rd",
       serverLabel: "R&D",
     });
+  });
+
+  it("marks an exact root-rez credit outcome as Runner-interruptible when Speed Trap is active", () => {
+    const state = makeState({
+      rootDefinitionId: "simple_economy_asset",
+      runnerProgramDefinitionId: "onr_v1_067_speed-trap",
+      positionKind: "server",
+    });
+    const { host } = hostFor(state);
+
+    const rez = buildCorpRunRootRezWindowActions(host).find(
+      (action) => action.type === "rez_card",
+    );
+
+    expect(rez?.payload).toMatchObject({
+      rootRezCreditOutcomeQuoteComplete: true,
+      rootRezCreditOutcomeQuoteResolution: "runner_interruptible",
+      rootRezCreditOutcomeQuoteGrossCreditGain: 3,
+      rootRezCreditOutcomeQuoteRezCredits: 1,
+      rootRezCreditOutcomeQuoteNetCreditGain: 2,
+    });
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(state, "root_1" as CardInstanceId, rez!),
+    ).not.toThrow();
   });
 
   it("resolves simple root rez effects without generic rez or payment execution", () => {

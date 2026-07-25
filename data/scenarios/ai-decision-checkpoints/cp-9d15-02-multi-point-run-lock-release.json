@@ -8145,8 +8145,10 @@
         "actionId": "runner.trigger_ability"
       }
     ],
-    "selectedScoreBreakdown": {
-      "requiredComponentKeys": [
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.contest_remote"],
+      "acceptableCapabilities": ["contest_remote"],
+      "requiredAssessmentEvidence": [
         "runner_matchpoint_run_lock_release"
       ]
     }

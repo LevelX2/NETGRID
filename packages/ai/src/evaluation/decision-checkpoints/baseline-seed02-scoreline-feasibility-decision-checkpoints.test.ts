@@ -12,7 +12,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("baseline Seed 02 shared scoreline feasibility checkpoints", () => {
-  it("invalidates the unreachable score-window plan and selects explicit tag-line support", () => {
+  it("invalidates the unreachable score-window plan and develops an independently executable tag engine", () => {
     const result = runAiDecisionCheckpoint(fixture(unreachableScorelineJson));
 
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
@@ -28,7 +28,7 @@ describe("baseline Seed 02 shared scoreline feasibility checkpoints", () => {
       remainingMandatoryDraws: 5,
     });
     expect(result.decision?.decisionDebug?.planKind).toBe(
-      "corp.apply_punish_pressure",
+      "corp.punish_campaign",
     );
     expect(result.decision?.decisionDebug?.planKind).not.toBe(
       "corp.create_score_window",

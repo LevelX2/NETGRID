@@ -9,6 +9,8 @@ export type ActionCapacityLegalActionPayload = {
     | "program_install_only"
     | "run_only";
   actionCapacityAllowedActionType?: string;
+  actionCapacityAllowedCardType?: "program";
+  actionCapacityTemporaryCredits?: number;
   actionCapacityReliability?: "guaranteed" | "conditional" | "random";
   actionCapacityExpiresAt?: "side_turn_end" | "duration_end";
   actionCapacitySelfFinancing?: boolean;
@@ -58,6 +60,11 @@ export function actionCapacityLegalActionPayloadForEffects(
       actionCapacityTiming: "immediate",
       actionCapacityRestriction: "program_install_only",
       actionCapacityAllowedActionType: "install_card",
+      actionCapacityAllowedCardType: "program",
+      actionCapacityTemporaryCredits: Math.max(
+        0,
+        Math.floor(programInstallBundle.temporaryCredit),
+      ),
       actionCapacityReliability: "guaranteed",
       actionCapacityExpiresAt: "side_turn_end",
     };

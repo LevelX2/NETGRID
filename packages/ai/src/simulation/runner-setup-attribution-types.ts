@@ -519,7 +519,7 @@ export function attributeStarvedEconomySkip(
   if (reserveRecovered)
     metrics.runnerStarvedEconomySkipThenReserveRecovered += 1;
   if (progressed) metrics.runnerStarvedEconomySkipThenProgress += 1;
-  if (summary.winner === "action_limit_reached")
+  if (summary.terminationKind === "action_limit")
     metrics.runnerStarvedEconomySkipThenActionLimit += 1;
 
   const blocked =
@@ -691,7 +691,7 @@ export function attributeSearchRecoverySkip(
     5,
     isMeaningfulBoardProgress,
   );
-  const actionLimit = summary.winner === "action_limit_reached" && noProgress;
+  const actionLimit = summary.terminationKind === "action_limit" && noProgress;
   if (installFollowup) metrics.runnerSearchRecoverySkipThenInstallFollowup += 1;
   if (coverageResolved)
     metrics.runnerSearchRecoverySkipThenCoverageResolved += 1;
@@ -906,7 +906,7 @@ export function attributeMemorySkip(
     5,
     isMeaningfulBoardProgress,
   );
-  const actionLimit = summary.winner === "action_limit_reached" && noProgress;
+  const actionLimit = summary.terminationKind === "action_limit" && noProgress;
   if (memoryInstalled) metrics.runnerMemorySkipThenMemoryInstalled += 1;
   if (programBlocked) metrics.runnerMemorySkipThenProgramInstallBlocked += 1;
   if (coverageStillMissing)

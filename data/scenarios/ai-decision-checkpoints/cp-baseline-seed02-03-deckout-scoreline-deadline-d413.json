@@ -38998,9 +38998,15 @@
         "sourceDefinitionId": "onr_v1_255_mastiff"
       }
     ],
-    "selectedScoreBreakdown": {
-      "requiredComponentKeys": [
-        "corp_persistent_tag_engine_activation_pressure"
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "corp.punish_campaign"
+      ],
+      "acceptableCapabilities": [
+        "punish_prepare"
+      ],
+      "requiredAssessmentEvidence": [
+        "tag_punish_ontology_prepare:onr_v1_310_blood-cat"
       ]
     }
   }

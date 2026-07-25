@@ -5989,9 +5989,16 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "activated_card_ability",
-        "sourceDefinitionId": "onr_proteus_150_streetware-distributor"
+      "type": "play_event",
+      "sourceDefinitionId": "onr_v1_097_livewires-contacts"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.defense_and_recovery"],
+      "acceptableCapabilities": ["build_damage_reaction_reserve"],
+      "requiredAssessmentEvidence": [
+        "runner_damage_locked_hand_reaction_reserve"
+      ]
+    }
   }
 }

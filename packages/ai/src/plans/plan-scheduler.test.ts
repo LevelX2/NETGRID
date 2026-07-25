@@ -10,12 +10,30 @@ import {
 import type { PlanProposal } from "./plan-kernel-types";
 import {
   createSidePlanRegistry,
+  isStandardEndTurnCandidate,
   runPlanScheduler,
   type PlanModule,
   type PlanSchedulerContext,
 } from "./plan-scheduler";
 
 describe("shared plan scheduler", () => {
+  it("reserves the EndTurn exception for the game-rule action", () => {
+    const cardEndTurn = {
+      ...candidate("card-end"),
+      actionType: "end_turn",
+      semanticActionType: "turn_flow.end_turn",
+      sourceKind: "card" as const,
+    };
+    const standardEndTurn = {
+      ...cardEndTurn,
+      actionId: "runner.end_turn",
+      sourceKind: "game_rule" as const,
+    };
+
+    expect(isStandardEndTurnCandidate(cardEndTurn)).toBe(false);
+    expect(isStandardEndTurnCandidate(standardEndTurn)).toBe(true);
+  });
+
   it.each([
     ["runner", RUNNER_PLAN_PRIORITY_POLICY],
     ["corp", CORP_PLAN_PRIORITY_POLICY],
@@ -61,50 +79,565 @@ describe("shared plan scheduler", () => {
     );
   });
 
-  it("replans deterministically after a route failure", () => {
-    const bad = candidate("bad");
-    const good = candidate("good");
-    const result = runPlanScheduler({
-      context: context("runner", [bad, good]),
-      registry: createSidePlanRegistry({
-        side: "runner",
-        priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
-        modules: [
-          module("runner", "runner.first", "P4", bad, 20, "draw.card"),
-          module("runner", "runner.second", "P4", good, 10),
-        ],
-      }),
-      resolveEngineWindow: () => undefined,
-      maxReplans: 1,
-    });
+  it("does not let a ready maintenance plan hide an unowned voluntary action", () => {
+    const maintenance = candidate("maintenance");
+    const unexplained = candidate("unexplained");
+    const schedulerContext = context("runner", [
+      maintenance,
+      unexplained,
+    ]);
 
-    expect(result.lane === "plan" && result.route.head.actionId).toBe("good");
-    expect(result.diagnostics).toContainEqual(
-      expect.objectContaining({
-        stage: "replan",
-        instanceId: "plan:runner.first:general",
-      }),
-    );
-  });
-
-  it("fails after bounded replanning instead of choosing an arbitrary action", () => {
-    const bad = candidate("bad");
     expect(() =>
       runPlanScheduler({
-        context: context("runner", [bad]),
+        context: schedulerContext,
         registry: createSidePlanRegistry({
           side: "runner",
           priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
           modules: [
-            module("runner", "runner.bad", "P4", bad, 20, "draw.card"),
+            module(
+              "runner",
+              "runner.economy",
+              "P6",
+              maintenance,
+            ),
           ],
         }),
         resolveEngineWindow: () => undefined,
-        maxReplans: 0,
       }),
     ).toThrow(
-      expect.objectContaining({ code: "scheduler_replan_exhausted" }),
+      expect.objectContaining({
+        code: "missing_plan_module_coverage",
+        context: expect.objectContaining({
+          unresolvedActionIds: ["unexplained"],
+        }),
+      }),
     );
+  });
+
+  it("rejects a legal later step that the resident plan does not materialize", () => {
+    const prepare = candidate("prepare");
+    const laterStep = candidate("later-step");
+    const schedulerContext = context("runner", [prepare, laterStep]);
+
+    expect(() =>
+      runPlanScheduler({
+        context: schedulerContext,
+        registry: createSidePlanRegistry({
+          side: "runner",
+          priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+          modules: [
+            module("runner", "runner.pressure", "P4", prepare),
+          ],
+        }),
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: "missing_plan_module_coverage",
+        context: expect.objectContaining({
+          unresolvedActionIds: ["later-step"],
+          removalCondition: expect.stringContaining(
+            "Materialize each voluntary LegalAction",
+          ),
+        }),
+      }),
+    );
+  });
+
+  it("fails when an executable route is simultaneously declared nonproductive", () => {
+    const action = candidate("contradiction");
+    const schedulerContext = context("runner", [action]);
+    schedulerContext.actionDispositions = [
+      {
+        actionId: action.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.economy",
+        evidenceCode: "should_not_be_executable",
+      },
+    ];
+
+    expect(() =>
+      runPlanScheduler({
+        context: schedulerContext,
+        registry: createSidePlanRegistry({
+          side: "runner",
+          priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+          modules: [
+            module("runner", "runner.economy", "P5", action),
+          ],
+        }),
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: "missing_plan_module_coverage",
+        context: expect.objectContaining({
+          unresolvedActionIds: ["contradiction"],
+          removalCondition: expect.stringContaining(
+            "both executable plan routes and explicitly nonproductive",
+          ),
+        }),
+      }),
+    );
+  });
+
+  it("fails immediately when the selected ready plan cannot bind its route", () => {
+    const bad = candidate("bad");
+    const good = candidate("good");
+    expect(() =>
+      runPlanScheduler({
+        context: context("runner", [bad, good]),
+        registry: createSidePlanRegistry({
+          side: "runner",
+          priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+          modules: [
+            module("runner", "runner.first", "P4", bad, 20, "draw.card"),
+            module("runner", "runner.second", "P4", good, 10),
+          ],
+        }),
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: "step_capability_mismatch",
+        context: expect.objectContaining({
+          planInstanceId: "plan:runner.first:general",
+        }),
+      }),
+    );
+  });
+
+  it("counts every individually bindable candidate of a plan as coverage", () => {
+    const lower = candidate("lower");
+    const higher = candidate("higher");
+    const planModule = module(
+      "runner",
+      "runner.economy",
+      "P5",
+      lower,
+    );
+    planModule.materialize = () => ({
+      step: {
+        stepId: "execute",
+        capability: {
+          capabilityId: "execute",
+          semanticActionTypes: ["economy.gain_credit"],
+        },
+        purpose: "test",
+      },
+      candidates: [
+        { candidate: lower, stepValue: 1 },
+        { candidate: higher, stepValue: 2 },
+      ],
+    });
+
+    const result = runPlanScheduler({
+      context: context("runner", [lower, higher]),
+      registry: createSidePlanRegistry({
+        side: "runner",
+        priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+        modules: [planModule],
+      }),
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(result.lane).toBe("plan");
+    if (result.lane === "plan") {
+      expect(result.route.head.actionId).toBe("higher");
+    }
+  });
+
+  it("fails coverage immediately when any advertised candidate cannot bind the concrete step", () => {
+    const valid = candidate("valid");
+    const invalid = {
+      ...candidate("invalid"),
+      actionType: "draw_card",
+      legalActionRef: {
+        actionId: "invalid",
+        actionType: "draw_card",
+        originalPayloadKeys: [],
+      },
+      semanticActionType: "draw.card",
+    };
+    const planModule = module(
+      "runner",
+      "runner.economy",
+      "P5",
+      valid,
+    );
+    planModule.materialize = () => ({
+      step: {
+        stepId: "execute",
+        capability: {
+          capabilityId: "execute",
+          semanticActionTypes: ["economy.gain_credit"],
+        },
+        purpose: "test",
+      },
+      candidates: [
+        { candidate: valid, stepValue: 2 },
+        { candidate: invalid, stepValue: 1 },
+      ],
+    });
+
+    expect(() =>
+      runPlanScheduler({
+        context: context("runner", [valid, invalid]),
+        registry: createSidePlanRegistry({
+          side: "runner",
+          priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+          modules: [planModule],
+        }),
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: "step_capability_mismatch",
+        context: expect.objectContaining({
+          planInstanceId: "plan:runner.economy:general",
+          legalActionTypes: ["draw_card"],
+          candidateCount: 1,
+        }),
+      }),
+    );
+  });
+
+  it("keeps a blocked higher-class plan resident without letting it execute", () => {
+    const waiting = candidate("waiting");
+    const progress = candidate("progress");
+    const schedulerContext = context("runner", [waiting, progress]);
+    schedulerContext.actionDispositions = [
+      {
+        actionId: waiting.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.waiting",
+        evidenceCode: "waiting_for_bound_support",
+      },
+    ];
+    const waitingModule = module(
+      "runner",
+      "runner.waiting",
+      "P2",
+      waiting,
+    );
+    waitingModule.assess = (instance) => ({
+      ...assessment(instance.instanceId, "runner", "P2"),
+      readiness: "blocked",
+      feasibility: {
+        currentRouteHeadPossible: false,
+        projectedActionCount: 0,
+        opponentCanReact: false,
+        confidence: "visible_state_forced",
+      },
+      blockers: [
+        {
+          code: "waiting_for_bound_support",
+          owner: "plan_module",
+          removable: true,
+          resumeCondition: { code: "bound_support_ready" },
+        },
+      ],
+    });
+
+    const result = runPlanScheduler({
+      context: schedulerContext,
+      registry: createSidePlanRegistry({
+        side: "runner",
+        priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+        modules: [
+          waitingModule,
+          module("runner", "runner.progress", "P5", progress),
+        ],
+      }),
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(result.lane).toBe("plan");
+    if (result.lane === "plan") {
+      expect(result.route.head.actionId).toBe("progress");
+      expect(
+        result.portfolio.instances.find(
+          (instance) => instance.moduleId === "runner.waiting",
+        ),
+      ).toBeDefined();
+    }
+  });
+
+  it("fails closed when every assessed resident plan is blocked", () => {
+    const waiting = candidate("waiting");
+    const schedulerContext = context("runner", [waiting]);
+    schedulerContext.actionDispositions = [
+      {
+        actionId: waiting.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.waiting",
+        evidenceCode: "waiting_for_bound_support",
+      },
+    ];
+    const waitingModule = module(
+      "runner",
+      "runner.waiting",
+      "P2",
+      waiting,
+    );
+    waitingModule.assess = (instance) => ({
+      ...assessment(instance.instanceId, "runner", "P2"),
+      readiness: "blocked",
+      feasibility: {
+        currentRouteHeadPossible: false,
+        projectedActionCount: 0,
+        opponentCanReact: false,
+        confidence: "visible_state_forced",
+      },
+      blockers: [
+        {
+          code: "waiting_for_bound_support",
+          owner: "plan_module",
+          removable: true,
+          resumeCondition: { code: "bound_support_ready" },
+        },
+      ],
+    });
+
+    expect(() =>
+      runPlanScheduler({
+        context: schedulerContext,
+        registry: createSidePlanRegistry({
+          side: "runner",
+          priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+          modules: [waitingModule],
+        }),
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: "missing_plan_module_coverage",
+      }),
+    );
+  });
+
+  it("rejects early standard EndTurn without a typed structural justification", () => {
+    const endTurn = standardEndTurnCandidate();
+    const schedulerContext = context("runner", [endTurn]);
+    schedulerContext.input.playerView.own.clicks = 1;
+
+    expect(() =>
+      runPlanScheduler({
+        context: schedulerContext,
+        registry: createSidePlanRegistry({
+          side: "runner",
+          priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+          modules: [
+            module(
+              "runner",
+              "runner.complete_turn",
+              "P5",
+              endTurn,
+              -10_000,
+              "turn_flow.end_turn",
+            ),
+          ],
+        }),
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow(
+      expect.objectContaining({ code: "end_turn_with_usable_capacity" }),
+    );
+  });
+
+  it("accepts early EndTurn only for the structurally proven terminal-win plan", () => {
+    const endTurn = standardEndTurnCandidate();
+    const schedulerContext = context("runner", [endTurn]);
+    schedulerContext.input.playerView.own.clicks = 1;
+    schedulerContext.input.playerView.opponent.deckCount = 0;
+    const terminal = module(
+      "runner",
+      "runner.secure_terminal_win",
+      "P1",
+      endTurn,
+      1,
+      "turn_flow.end_turn",
+    );
+    const baseMaterialize = terminal.materialize;
+    terminal.materialize = (instance, planAssessment, schedulerContext) => ({
+      ...baseMaterialize(instance, planAssessment, schedulerContext),
+      earlyEndTurnJustification: {
+        kind: "rules_proven_terminal_win",
+        terminalCondition: "corp_empty_rd_mandatory_draw",
+      },
+    });
+
+    const result = runPlanScheduler({
+      context: schedulerContext,
+      registry: createSidePlanRegistry({
+        side: "runner",
+        priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+        modules: [terminal],
+      }),
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(result.lane === "plan" && result.route.head.actionId).toBe(
+      endTurn.actionId,
+    );
+  });
+
+  it("rejects a typed terminal-win claim when the rule state does not prove it", () => {
+    const endTurn = standardEndTurnCandidate();
+    const schedulerContext = context("runner", [endTurn]);
+    schedulerContext.input.playerView.own.clicks = 1;
+    const terminal = module(
+      "runner",
+      "runner.secure_terminal_win",
+      "P1",
+      endTurn,
+      1,
+      "turn_flow.end_turn",
+    );
+    const baseMaterialize = terminal.materialize;
+    terminal.materialize = (instance, planAssessment, schedulerContext) => ({
+      ...baseMaterialize(instance, planAssessment, schedulerContext),
+      earlyEndTurnJustification: {
+        kind: "rules_proven_terminal_win",
+        terminalCondition: "corp_empty_rd_mandatory_draw",
+      },
+    });
+
+    expect(() =>
+      runPlanScheduler({
+        context: schedulerContext,
+        registry: createSidePlanRegistry({
+          side: "runner",
+          priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+          modules: [terminal],
+        }),
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow(
+      expect.objectContaining({ code: "end_turn_with_usable_capacity" }),
+    );
+  });
+
+  it("accepts early EndTurn for an exact explicitly rejected restricted-run capacity", () => {
+    const endTurn = standardEndTurnCandidate();
+    const restrictedRun = {
+      ...candidate("restricted-run"),
+      actionType: "start_run",
+      semanticActionType: "run.start",
+      sourceKind: "card" as const,
+    };
+    const schedulerContext = context("runner", [restrictedRun, endTurn]);
+    schedulerContext.input.playerView.own.clicks = 1;
+    schedulerContext.actionDispositions = [
+      {
+        actionId: restrictedRun.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.defense_and_recovery",
+        evidenceCode: "restricted_run_is_below_required_hand_buffer",
+      },
+    ];
+    const defense = module(
+      "runner",
+      "runner.defense_and_recovery",
+      "P5",
+      endTurn,
+      1,
+      "turn_flow.end_turn",
+    );
+    const baseMaterialize = defense.materialize;
+    defense.materialize = (instance, planAssessment, schedulerContext) => ({
+      ...baseMaterialize(instance, planAssessment, schedulerContext),
+      earlyEndTurnJustification: {
+        kind: "forgo_restricted_capacity",
+        capacityKind: "zero_click_non_basic_run_only",
+        explicitlyNonproductiveActionIds: [restrictedRun.actionId],
+      },
+    });
+
+    const result = runPlanScheduler({
+      context: schedulerContext,
+      registry: createSidePlanRegistry({
+        side: "runner",
+        priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+        modules: [defense],
+      }),
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(result.lane === "plan" && result.route.head.actionId).toBe(
+      endTurn.actionId,
+    );
+  });
+
+  it("rejects incomplete or ambiguous nonproductive action dispositions", () => {
+    const action = candidate("credit");
+    const endTurn = {
+      ...candidate("end"),
+      actionType: "end_turn",
+      semanticActionType: "turn_flow.end_turn",
+      sourceKind: "game_rule" as const,
+    };
+    const registry = createSidePlanRegistry({
+      side: "runner",
+      priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+      modules: [
+        module("runner", "runner.economy", "P5", action),
+      ],
+    });
+    const valid = {
+      actionId: action.actionId,
+      disposition: "explicitly_nonproductive" as const,
+      ownerModuleId: "runner.economy" as const,
+      evidenceCode: "credit_need_closed",
+    };
+    const invalidCases: Array<{
+      candidates: ActionSemanticCandidate[];
+      dispositions: NonNullable<
+        PlanSchedulerContext["actionDispositions"]
+      >;
+    }> = [
+      {
+        candidates: [action],
+        dispositions: [{ ...valid, actionId: "missing-action" }],
+      },
+      {
+        candidates: [action],
+        dispositions: [valid, valid],
+      },
+      {
+        candidates: [action],
+        dispositions: [
+          { ...valid, ownerModuleId: "runner.pressure" },
+        ],
+      },
+      {
+        candidates: [action],
+        dispositions: [{ ...valid, evidenceCode: " " }],
+      },
+      {
+        candidates: [endTurn],
+        dispositions: [{ ...valid, actionId: endTurn.actionId }],
+      },
+    ];
+
+    for (const invalidCase of invalidCases) {
+      const schedulerContext = context(
+        "runner",
+        invalidCase.candidates,
+      );
+      schedulerContext.actionDispositions = invalidCase.dispositions;
+      expect(() =>
+        runPlanScheduler({
+          context: schedulerContext,
+          registry,
+          resolveEngineWindow: () => undefined,
+        }),
+      ).toThrow(
+        expect.objectContaining({
+          code: "missing_plan_module_coverage",
+        }),
+      );
+    }
   });
 
   it("keeps mandatory engine windows ahead of voluntary discovery", () => {
@@ -271,14 +804,35 @@ function context(
       legalActions: actionCandidates.map((candidate) => ({
         actionId: candidate.actionId,
         type: candidate.actionType,
+        source:
+          candidate.sourceKind === "basic_action"
+            ? "basic_action"
+            : candidate.sourceKind,
+        costs: [],
       })),
       playerView: {
         stateVersion: 10,
         timingPoint: `${side}_action.main`,
+        own: { clicks: 0 },
+        opponent: { deckCount: 1 },
       },
     } as unknown as AiDecisionInput,
     actionCandidates,
     turnKey: `${side}:1`,
+  };
+}
+
+function standardEndTurnCandidate(): ActionSemanticCandidate {
+  return {
+    ...candidate("runner.end_turn"),
+    actionType: "end_turn",
+    legalActionRef: {
+      actionId: "runner.end_turn",
+      actionType: "end_turn",
+      originalPayloadKeys: [],
+    },
+    sourceKind: "game_rule",
+    semanticActionType: "turn_flow.end_turn",
   };
 }
 

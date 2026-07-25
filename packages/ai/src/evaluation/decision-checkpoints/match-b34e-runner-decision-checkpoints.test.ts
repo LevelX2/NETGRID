@@ -12,6 +12,7 @@ import closeoutNetworkingD102Json from "../../../../../data/scenarios/ai-decisio
 import remoteAnswerDrawD104Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-b34e-09-urgent-remote-answer-draw-control-d104.json";
 import viral15SpendD54Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-b34e-10-viral15-minimal-encounter-spend-d54.json";
 import jackOutFireWallD92Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-14-jack-out-fire-wall-control-d92.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -64,7 +65,7 @@ describe("match B34E runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(jackOutFireWallD92Json));
   });
 
-  it("protects another installed program from Viral-15", () => {
+  it("applies required encounter mitigation against Viral-15", () => {
     const valuableProgram = mutateFixture(viral15SpendD54Json, (checkpoint) => {
       const state = checkpoint.engine.testOnlyGameState;
       state.runner.grip = state.runner.grip.filter(
@@ -80,6 +81,14 @@ describe("match B34E runner decision checkpoints", () => {
       checkpoint.source.findingId = "B34E-C02-VIRAL15-VALUABLE-PROGRAM";
       checkpoint.expectation = {
         acceptableActions: [{ type: "pump_breaker" }],
+        forbiddenActions: [{ type: "break_subroutine" }],
+        planExecution: {
+          acceptablePlanKinds: ["runner.convert_run_window"],
+          acceptableCapabilities: ["convert_active_run_window"],
+          requiredAssessmentEvidence: [
+            "runner_visible_encounter_requires_mitigation:onr_v1_276_viral-15",
+          ],
+        },
       };
     });
 
@@ -88,7 +97,18 @@ describe("match B34E runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    [
+      "cp-b34e-01-library-search-semantic-role-d69",
+      "cp-b34e-03-closeout-over-overflow-draw-d91",
+      "cp-b34e-04-closeout-over-elena-install-d92",
+      "cp-b34e-05-closeout-over-black-box-install-d94",
+      "cp-b34e-07-closeout-over-setup-draw-d101",
+      "cp-b34e-08-closeout-over-networking-d102",
+      "cp-b34e-09-urgent-remote-answer-draw-control-d104",
+    ],
+  );
 }
 
 function mutateFixture(

@@ -9,6 +9,7 @@ import type {
 } from "../action-semantic-candidate-types";
 import {
   knownCreditGainAbilitySemantics,
+  knownImmediateCreditGainActionSemantics,
   knownNonCreditGainActionSemantics,
 } from "./action-effect-classification";
 
@@ -112,6 +113,11 @@ const BASIC_ACTION_SEMANTICS: Record<
   },
   decline_rez: {
     semanticActionType: "corp_window.decline_rez",
+    primaryProjectionStatus: "projected",
+    confidence: "high",
+  },
+  stop_restricted_action_sequence: {
+    semanticActionType: "turn_flow.stop_restricted_action_sequence",
     primaryProjectionStatus: "projected",
     confidence: "high",
   },
@@ -230,7 +236,8 @@ export function applyBasicActionSemantics(
 ): ActionSemanticCandidate {
   const actionEffectOverride =
     knownNonCreditGainActionSemantics(action) ??
-    knownCreditGainAbilitySemantics(action);
+    knownCreditGainAbilitySemantics(action) ??
+    knownImmediateCreditGainActionSemantics(action);
   const scoreConversionOverride = scoreConversionActionSemantics(action);
   const classification = scoreConversionOverride
     ? scoreConversionOverride

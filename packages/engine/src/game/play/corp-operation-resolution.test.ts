@@ -90,12 +90,14 @@ function definition(
   id: string,
   options: Partial<CardDefinition> = {},
 ): CardDefinition {
+  const cost = options.cost ?? 1;
   return {
     id,
     title: options.title ?? id,
     side: "corp",
     type: "operation",
-    cost: 1,
+    cost,
+    playCost: { kind: "fixed", credits: cost },
     ...options,
   } as CardDefinition;
 }

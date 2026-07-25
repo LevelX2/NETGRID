@@ -177,11 +177,13 @@ function scoreSearchChoiceOption(
       memoryCost <= features.memoryRemaining
         ? 180
         : -260 - (memoryCost - features.memoryRemaining) * 40;
-    const installCost = card.installCost ?? card.cost ?? 0;
-    score +=
-      installCost <= features.credits
-        ? 110
-        : -160 - (installCost - features.credits) * 30;
+    const installCost = visibleSearchCardCreditCost(card);
+    if (installCost !== undefined) {
+      score +=
+        installCost <= features.credits
+          ? 110
+          : -160 - (installCost - features.credits) * 30;
+    }
   }
   if (destination === "grip" && card.type === "program") {
     const memoryCost = card.memoryCost ?? 0;
@@ -189,18 +191,22 @@ function scoreSearchChoiceOption(
       memoryCost <= features.memoryRemaining
         ? 90
         : -220 - (memoryCost - features.memoryRemaining) * 40;
-    const installCost = card.installCost ?? card.cost ?? 0;
-    score +=
-      installCost <= features.credits
-        ? 100
-        : -120 - (installCost - features.credits) * 30;
+    const installCost = visibleSearchCardCreditCost(card);
+    if (installCost !== undefined) {
+      score +=
+        installCost <= features.credits
+          ? 100
+          : -120 - (installCost - features.credits) * 30;
+    }
   }
   if (destination === "grip" && card.type !== "program") {
-    const playOrInstallCost = card.installCost ?? card.cost ?? 0;
-    score +=
-      playOrInstallCost <= features.credits
-        ? 80
-        : -100 - (playOrInstallCost - features.credits) * 25;
+    const playOrInstallCost = visibleSearchCardCreditCost(card);
+    if (playOrInstallCost !== undefined) {
+      score +=
+        playOrInstallCost <= features.credits
+          ? 80
+          : -100 - (playOrInstallCost - features.credits) * 25;
+    }
   }
 
   if (
@@ -241,6 +247,44 @@ function scoreSearchChoiceOption(
     if (gripCopies > 0) score -= 520 + (gripCopies - 1) * 220;
   }
   score -= Math.max(0, card.memoryCost ?? 0) * 5;
-  score -= Math.max(0, card.installCost ?? card.cost ?? 0) * 2;
+  const visibleCreditCost = visibleSearchCardCreditCost(card);
+  if (visibleCreditCost !== undefined) score -= visibleCreditCost * 2;
   return score;
+}
+
+function visibleSearchCardCreditCost(
+  card: NonNullable<PendingChoiceOption["card"]>,
+): number | undefined {
+  if (card.type === "event" || card.type === "operation") {
+    const playCost = card.playCost;
+    if (playCost === undefined) {
+      throw new Error(
+        "Invalid visible play-cost projection for a known event or operation search option.",
+      );
+    }
+    if (playCost.kind === "fixed") {
+      if (Number.isInteger(playCost.credits) && playCost.credits >= 0) {
+        return playCost.credits;
+      }
+      throw new Error(
+        "Invalid visible play-cost projection for a known event or operation search option.",
+      );
+    }
+    if (
+      playCost.kind !== "variable_x" ||
+      !Number.isInteger(playCost.minimumX) ||
+      playCost.minimumX < 1 ||
+      !Number.isInteger(playCost.creditsPerX) ||
+      playCost.creditsPerX < 1 ||
+      playCost.maximumX?.kind !== "context"
+    ) {
+      throw new Error(
+        "Invalid visible play-cost projection for a known event or operation search option.",
+      );
+    }
+    return playCost.minimumX * playCost.creditsPerX;
+  }
+  return Number.isInteger(card.installCost) && (card.installCost ?? -1) >= 0
+    ? card.installCost
+    : undefined;
 }

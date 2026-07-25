@@ -3,6 +3,8 @@ import type { Side } from "@netgrid/shared";
 export const PLAN_RESOLUTION_FAILURE_CODES = [
   "missing_plan_module_coverage",
   "missing_action_semantics",
+  "missing_card_definition",
+  "invalid_player_view_card_projection",
   "invalid_plan_identity",
   "step_capability_mismatch",
   "step_target_mismatch",
@@ -15,7 +17,6 @@ export const PLAN_RESOLUTION_FAILURE_CODES = [
   "window_origin_missing",
   "executor_invariant_broken",
   "end_turn_with_usable_capacity",
-  "scheduler_replan_exhausted",
 ] as const;
 
 export type PlanResolutionFailureCode =
@@ -38,6 +39,7 @@ export type PlanResolutionFailureContextInput = {
   stateVersion: number;
   timingPoint: string;
   legalActionTypes: readonly string[];
+  unresolvedActionIds?: readonly string[];
   owner: PlanResolutionFailureOwner;
   removalCondition: string;
   planInstanceId?: string;
@@ -52,6 +54,7 @@ export type PlanResolutionFailureContext = {
   stateVersion: number;
   timingPoint: string;
   legalActionTypes: string[];
+  unresolvedActionIds?: string[];
   owner: PlanResolutionFailureOwner;
   removalCondition: string;
   planInstanceId?: string;
@@ -88,6 +91,11 @@ export function planResolutionFailureEvidence(
     `plan_resolution_state_version:${context.stateVersion}`,
     `plan_resolution_timing:${context.timingPoint}`,
     `plan_resolution_legal_action_types:${context.legalActionTypes.join(",") || "none"}`,
+    ...(context.unresolvedActionIds
+      ? [
+          `plan_resolution_unresolved_action_ids:${context.unresolvedActionIds.join(",") || "none"}`,
+        ]
+      : []),
     `plan_resolution_removal_condition:${context.removalCondition}`,
     ...(context.planInstanceId
       ? [`plan_resolution_instance:${context.planInstanceId}`]
@@ -117,6 +125,20 @@ function normalizePlanResolutionFailureContext(
     ]
       .filter(Boolean)
       .sort(),
+    ...(context.unresolvedActionIds
+      ? {
+          unresolvedActionIds: [
+            ...new Set(
+              context.unresolvedActionIds.map((entry) =>
+                redactedToken(entry),
+              ),
+            ),
+          ]
+            .filter(Boolean)
+            .sort()
+            .slice(0, 64),
+        }
+      : {}),
     owner: context.owner,
     removalCondition: redactedText(context.removalCondition),
     ...(context.planInstanceId
@@ -145,6 +167,11 @@ function formatPlanResolutionFailureMessage(
     `stateVersion=${context.stateVersion}`,
     `timing=${context.timingPoint}`,
     `actions=${context.legalActionTypes.join(",") || "none"}`,
+    ...(context.unresolvedActionIds
+      ? [
+          `unresolved=${context.unresolvedActionIds.join(",") || "none"}`,
+        ]
+      : []),
     `owner=${context.owner}`,
   ].join(" ");
 }

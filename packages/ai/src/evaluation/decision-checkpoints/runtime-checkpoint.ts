@@ -20,6 +20,11 @@ import {
   restoreRunnerRunPlanMemorySnapshot,
 } from "../../runtime/runner-run-plan-memory";
 import type { RunnerRunPlan } from "../../runtime/runner-run-plan-types";
+import {
+  residentPlanPortfolioSnapshot,
+  restoreResidentPlanPortfolioMemorySnapshot,
+} from "../../plans/resident-plan-portfolio-memory";
+import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
 export const AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION =
   "ai-runtime-checkpoint-v1" as const;
@@ -30,6 +35,7 @@ export type AiRuntimeCheckpointV1 = {
   planPortfolio?: PlanPortfolioSnapshot;
   strategicIntent?: StrategicIntentMemorySnapshot;
   runnerRunPlan?: RunnerRunPlan;
+  residentPlanPortfolio?: ResidentPlanPortfolio;
 };
 
 export function exportAiRuntimeCheckpoint(
@@ -43,6 +49,7 @@ export function exportAiRuntimeCheckpoint(
     deckSnapshotId,
   );
   const runnerRunPlan = getRunnerRunPlanMemorySnapshot(input);
+  const residentPlanPortfolio = residentPlanPortfolioSnapshot(input);
   return {
     schemaVersion: AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION,
     ...(tacticalPlan ? { tacticalPlan: structuredClone(tacticalPlan) } : {}),
@@ -51,6 +58,9 @@ export function exportAiRuntimeCheckpoint(
       ? { strategicIntent: structuredClone(strategicIntent) }
       : {}),
     ...(runnerRunPlan ? { runnerRunPlan: structuredClone(runnerRunPlan) } : {}),
+    ...(residentPlanPortfolio
+      ? { residentPlanPortfolio: structuredClone(residentPlanPortfolio) }
+      : {}),
   };
 }
 
@@ -70,4 +80,8 @@ export function restoreAiRuntimeCheckpoint(
     deckSnapshotId,
   );
   restoreRunnerRunPlanMemorySnapshot(input, checkpoint.runnerRunPlan);
+  restoreResidentPlanPortfolioMemorySnapshot(
+    input,
+    checkpoint.residentPlanPortfolio,
+  );
 }

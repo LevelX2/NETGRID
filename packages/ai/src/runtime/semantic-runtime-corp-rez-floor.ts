@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import { readExactCurrentInstalledCorpIceRezQuote } from "./corp-exact-ice-rez-route";
 
 type CorpServerLike = {
   id: string;
@@ -8,9 +9,10 @@ type CorpServerLike = {
 
 export type CorpRemoteRezFloorAssessment = {
   serverId: string;
-  rezFloor: number;
-  requiredCreditsAfterAction: number;
-  creditsAfterAction: number;
+  knowledge: "known" | "unknown";
+  rezFloor: number | undefined;
+  requiredCreditsAfterAction: number | undefined;
+  creditsAfterAction: number | undefined;
   blockedByFloor: boolean;
   evidence: string[];
 };
@@ -34,7 +36,6 @@ export type SemanticRuntimeCorpRezFloorDependencies<
   ) => boolean;
   actionIsScoreLine: (input: AiDecisionInput, action: LegalAction) => boolean;
   remoteHasScoreLine: (server: TServer | undefined) => boolean;
-  visibleIceRezCost: (card: VisibleCard) => number | undefined;
 };
 
 export function semanticRuntimeCorpRemoteRezFloorAssessment<
@@ -62,26 +63,59 @@ export function semanticRuntimeCorpRemoteRezFloorAssessment<
     return undefined;
   }
   const server = dependencies.server(input, serverId);
-  const rezFloor = semanticRuntimeCorpRemoteRezFloor(server, dependencies);
+  const rezFloor = semanticRuntimeCorpRemoteRezFloor(input, server);
+  const currentCredits = input.playerView.own.credits;
+  const actionCreditCost = dependencies.actionCreditCost(action);
   const creditsAfterAction =
-    input.playerView.own.credits - dependencies.actionCreditCost(action);
+    nonNegativeSafeInteger(currentCredits) &&
+    nonNegativeSafeInteger(actionCreditCost) &&
+    currentCredits >= actionCreditCost
+      ? currentCredits - actionCreditCost
+      : undefined;
   const completesScore = dependencies.advanceCompletesScore(input, action);
+  if (creditsAfterAction === undefined) {
+    return {
+      serverId,
+      knowledge: "unknown",
+      rezFloor: undefined,
+      requiredCreditsAfterAction: undefined,
+      creditsAfterAction: undefined,
+      blockedByFloor: true,
+      evidence: [
+        `remote_rez_floor_server:${serverId}`,
+        "remote_rez_floor_knowledge:unknown",
+        "remote_rez_floor:unknown",
+        "remote_rez_floor_required_after_action:unknown",
+        "credits_after_action:unknown",
+        "remote_rez_floor:invalid_credit_input",
+        "low_rez_reserve:true",
+        "agenda_development_risk:below_remote_rez_floor",
+      ],
+    };
+  }
   const requiredCreditsAfterAction =
-    scoreLineInstall && !completesScore ? rezFloor + 1 : rezFloor;
+    rezFloor === undefined
+      ? undefined
+      : scoreLineInstall && !completesScore
+        ? rezFloor + 1
+        : rezFloor;
   const blockedByFloor =
     !completesScore &&
-    rezFloor > 0 &&
-    creditsAfterAction < requiredCreditsAfterAction;
+    (rezFloor === undefined ||
+      (rezFloor > 0 &&
+        creditsAfterAction < (requiredCreditsAfterAction ?? 0)));
   return {
     serverId,
+    knowledge: rezFloor === undefined ? "unknown" : "known",
     rezFloor,
     requiredCreditsAfterAction,
     creditsAfterAction,
     blockedByFloor,
     evidence: [
       `remote_rez_floor_server:${serverId}`,
-      `remote_rez_floor:${rezFloor}`,
-      `remote_rez_floor_required_after_action:${requiredCreditsAfterAction}`,
+      `remote_rez_floor_knowledge:${rezFloor === undefined ? "unknown" : "known"}`,
+      `remote_rez_floor:${rezFloor ?? "unknown"}`,
+      `remote_rez_floor_required_after_action:${requiredCreditsAfterAction ?? "unknown"}`,
       `credits_after_action:${creditsAfterAction}`,
       `low_rez_reserve:${blockedByFloor}`,
       ...(scoreLineInstall && !completesScore
@@ -100,19 +134,27 @@ export function semanticRuntimeCorpRemoteRezFloorAssessment<
 export function semanticRuntimeCorpRemoteRezFloor<
   TServer extends CorpServerLike,
 >(
+  input: AiDecisionInput,
   server: TServer | undefined,
-  dependencies: Pick<
-    SemanticRuntimeCorpRezFloorDependencies<TServer>,
-    "visibleIceRezCost"
-  >,
-): number {
+): number | undefined {
   if (!server || server.ice.length === 0) return 0;
   if (server.ice.some((ice) => ice.rezzed === true)) return 0;
-  const rezCosts = server.ice
-    .filter((ice) => ice.rezzed !== true)
-    .map(dependencies.visibleIceRezCost)
-    .filter((cost): cost is number => cost !== undefined && cost > 0);
-  if (rezCosts.length === 0) return 2;
+  const rezCosts: number[] = [];
+  for (const ice of server.ice) {
+    const quoteRead = readExactCurrentInstalledCorpIceRezQuote({
+      input,
+      sourceCard: ice,
+      targetServerId: server.id,
+    });
+    if (
+      !quoteRead ||
+      quoteRead.quote.mandatoryAdditionalCosts.agendaPoints !== 0
+    ) {
+      return undefined;
+    }
+    rezCosts.push(quoteRead.totalRezCredits);
+  }
+  if (rezCosts.length === 0) return 0;
   return Math.min(...rezCosts);
 }
 
@@ -124,16 +166,14 @@ export function semanticRuntimeCorpHasRemoteRezFloorFundingNeed<
 ): boolean {
   if (input.side !== "corp") return false;
   const currentCredits = input.playerView.own.credits;
+  if (!nonNegativeSafeInteger(currentCredits)) return false;
   if (
     input.playerView.servers.some((server) => {
       if (!dependencies.isRemoteServerTarget(server.id)) return false;
       const candidate = server as unknown as TServer;
       if (!dependencies.remoteHasScoreLine(candidate)) return false;
-      const rezFloor = semanticRuntimeCorpRemoteRezFloor(
-        candidate,
-        dependencies,
-      );
-      return rezFloor > 0 && currentCredits < rezFloor;
+      const rezFloor = semanticRuntimeCorpRemoteRezFloor(input, candidate);
+      return rezFloor !== undefined && rezFloor > 0 && currentCredits < rezFloor;
     })
   ) {
     return true;
@@ -144,6 +184,13 @@ export function semanticRuntimeCorpHasRemoteRezFloorFundingNeed<
       action,
       dependencies,
     );
-    return assessment?.blockedByFloor === true;
+    return (
+      assessment?.blockedByFloor === true &&
+      assessment.rezFloor !== undefined
+    );
   });
+}
+
+function nonNegativeSafeInteger(value: unknown): value is number {
+  return Number.isSafeInteger(value) && (value as number) >= 0;
 }

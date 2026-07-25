@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import delayedEconomyReserveJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-c6eedf46-01-delayed-economy-reserve.json";
 import immediateEconomyJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e8886-06-livewire-real-economy.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -11,7 +12,7 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
     expectCheckpointToPass(fixture(delayedEconomyReserveJson));
   });
 
-  it("keeps delayed economy installable when the reserve remains funded", () => {
+  it("keeps delayed economy legal but continues strategic wall coverage after R&D cadence is consumed", () => {
     const fundedDelayedEconomy = mutateFixture(
       delayedEconomyReserveJson,
       (checkpoint) => {
@@ -21,13 +22,37 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
           "C6EEDF46-C01-FUNDED-DELAYED-ECONOMY";
         checkpoint.expectation = {
           acceptableActions: [
-            { sourceDefinitionId: "onr_v1_174_rigged-investments" },
+            {
+              type: "install_card",
+              sourceDefinitionId: "onr_v1_021_dwarf",
+            },
           ],
+          planExecution: {
+            acceptablePlanKinds: ["runner.rig_and_coverage"],
+            acceptableCapabilities: ["install_breaker_wall"],
+            requiredAssessmentEvidence: [
+              "deck_strategy_open_wall_coverage",
+            ],
+          },
         };
       },
     );
 
-    expectCheckpointToPass(fundedDelayedEconomy);
+    const result = runAiDecisionCheckpoint(fundedDelayedEconomy);
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    const riggedInvestmentsInstanceId =
+      result.input.playerView.own.gripOrHq.find(
+        (card) =>
+          card.definitionId === "onr_v1_174_rigged-investments",
+      )?.instanceId;
+    expect(riggedInvestmentsInstanceId).toBeDefined();
+    expect(
+      result.input.legalActions.some(
+        (action) =>
+          action.type === "install_card" &&
+          action.source === riggedInvestmentsInstanceId,
+      ),
+    ).toBe(true);
   });
 
   it("keeps an immediate net-positive economy action available", () => {
@@ -46,7 +71,10 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    ["cp-c6eedf46-01-delayed-economy-reserve"],
+  );
 }
 
 function mutateFixture(

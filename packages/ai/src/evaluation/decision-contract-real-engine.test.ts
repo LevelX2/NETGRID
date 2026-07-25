@@ -78,7 +78,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
     });
   });
 
-  it("defers Rasmin without ICE and makes it eligible after ICE is installed", () => {
+  it("defers Rasmin until HQ has ICE, then admits its plan without overriding global defense", () => {
     const withoutIce = corpMainState("contract-rasmin-without-ice");
     RealEngineFixtureBuilder.forState(withoutIce)
       .withCorpHqSize(0)
@@ -99,7 +99,9 @@ describe("hardened decision contracts on real Engine inputs", () => {
           (entry) => entry.actionId === rasminWithoutIce.actionId,
         ),
       ),
-    ).toContain("corp_upgrade_ice_support_without_ice");
+    ).toContain(
+      "not_selected_by_plan:plan:corp.defend_servers:server-defense-portfolio",
+    );
 
     const withIce = corpMainState("contract-rasmin-with-ice");
     RealEngineFixtureBuilder.forState(withIce)
@@ -115,7 +117,23 @@ describe("hardened decision contracts on real Engine inputs", () => {
     );
     const eligible = chooseCorpAction(withIceInput);
 
-    expect(eligible.actionId).toBe(rasminWithIce.actionId);
+    expect(
+      withIceInput.legalActions.find(
+        (action) => action.actionId === eligible.actionId,
+      )?.type,
+    ).toBe("draw_card");
+    const rasminWithIceAlternative =
+      eligible.decisionDebug?.actionAlternatives?.find(
+        (entry) => entry.actionId === rasminWithIce.actionId,
+      );
+    expect(rasminWithIceAlternative?.whyNot).toEqual(
+      expect.arrayContaining([
+        "not_selected_by_plan:plan:corp.defend_servers:server-defense-portfolio",
+        expect.stringMatching(
+          /^candidate_plan:plan:corp\.hand_and_agenda_management:develop%3A.+:ready$/,
+        ),
+      ]),
+    );
   });
 
   it("allows Research Bunker to replace a region only for an active Research agenda", () => {

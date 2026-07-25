@@ -5,6 +5,7 @@ import noNeedTutorJson from "../../../../../data/scenarios/ai-decision-checkpoin
 import centralTrashJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-fd7671-02-matchpoint-central-trash-reserve.json";
 import releaseRunLockJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-fd7671-03-release-run-lock.json";
 import exposeTargetJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-fd7671-04-expose-valuable-position.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -126,7 +127,10 @@ describe("match FD7671 runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    ["cp-fd7671-01-no-need-tutor-plan"],
+  );
 }
 
 function mutateFixture(

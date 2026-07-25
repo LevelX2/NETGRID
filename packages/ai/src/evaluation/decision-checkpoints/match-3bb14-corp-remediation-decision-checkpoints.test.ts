@@ -9,11 +9,11 @@ import { scoringWindowAccessAssessment } from "../../runtime/corp-scoreline/sema
 describe("match 3bb14 Corp remediation decision checkpoints", () => {
   it.each([
     [
-      "does not treat an unscored agenda install as persistent tag-engine activation",
+      "uses the admitted ambush route while unknown score protection blocks agenda installation",
       scoredOnlyTimingJson,
     ],
     [
-      "protects the remote instead of advancing a scoreline outside its real horizon",
+      "uses the admitted ambush route while the remote scoreline is not provably protected",
       realisticScoreHorizonJson,
     ],
   ])("%s", (_label, json) => {

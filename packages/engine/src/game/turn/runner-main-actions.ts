@@ -12,6 +12,7 @@ import {
   onPlayCardImplementationClickCost,
 } from "../../ability-engine/card-implementation-runtime-shared";
 import { expandRunnerProgramInstallPaymentActions } from "../install/runner-program-install-payment";
+import { fixedPlayCostCredits } from "../payment/play-cost";
 import { restrictedHostedCredits } from "../run/run-duration-payment";
 import { runnerCanStartRun } from "../run/run-start-lock";
 
@@ -367,13 +368,16 @@ export function buildRunnerMainActions(
     actions.push(buildRunnerEndTurnAction(state));
     return actions;
   }
-  if (valuPakProgramInstallActionsRemaining(state) > 0) {
+  const valuPakRestrictedActionsRemaining =
+    valuPakProgramInstallActionsRemaining(state);
+  if (valuPakRestrictedActionsRemaining > 0) {
     for (const id of runnerInstallableProgramIdsForValuPak(state)) {
       const definition = definitionFor(state, id);
       pushRunnerProgramInstallAction(
         buildRunnerValuPakInstallAction(state, {
           cardId: id,
           definition,
+          remainingActions: valuPakRestrictedActionsRemaining,
           runnerProgramTrashBeforeInstall:
             state.runner.memoryUsed + (definition.memoryCost ?? 0) >
             runnerMemoryLimit(state),
@@ -386,7 +390,12 @@ export function buildRunnerMainActions(
       state,
       actions,
     );
-    actions.push(buildRunnerValuPakSequenceEndAction(state));
+    actions.push(
+      buildRunnerValuPakSequenceEndAction(
+        state,
+        valuPakRestrictedActionsRemaining,
+      ),
+    );
     return actions;
   }
   if (hasClicks) {
@@ -671,13 +680,18 @@ export function buildRunnerMainActions(
       }
       actions.push(buildRunnerResourceInstallAction(state, id, definition));
     }
+    const eventPlayCost =
+      definition.type === "event"
+        ? fixedPlayCostCredits(definition)
+        : undefined;
     if (
       hasClicks &&
       definition.type === "event" &&
+      eventPlayCost !== undefined &&
       state.runner.credits +
         restrictedHostedCredits(state, "play_events") +
         runnerCostPenaltySupportCreditCapacity(state) >=
-        (definition.cost ?? 0)
+        eventPlayCost
     ) {
       const canPlayCardImplementation = canPlayPrintedCostOnPlayImplementation(
         cardImplementationRuntimeDeps,
@@ -707,7 +721,7 @@ export function buildRunnerMainActions(
               "play_event",
               `${definition.title}: ${targetDefinition.title} verstärken`,
               id,
-              [{ clicks: 1, credits: definition.cost ?? 0 }],
+              [{ clicks: 1, credits: eventPlayCost }],
               { cardId: id, targetCardId, ...deterministicResourcePayload },
             ),
           );
@@ -737,7 +751,7 @@ export function buildRunnerMainActions(
             definition,
             buildAction: action,
             clickCost: playEventClickCost,
-            creditCost: definition.cost ?? 0,
+            creditCost: eventPlayCost,
           }),
         );
         continue;
@@ -756,7 +770,7 @@ export function buildRunnerMainActions(
               "play_event",
               `${definition.title} auf ${server.label}`,
               id,
-              [{ clicks: 1, credits: definition.cost ?? 0 }],
+              [{ clicks: 1, credits: eventPlayCost }],
               {
                 cardId: id,
                 serverId: server.id,
@@ -775,7 +789,7 @@ export function buildRunnerMainActions(
               "play_event",
               `${definition.title} auf ${server.label}`,
               id,
-              [{ clicks: playEventClickCost, credits: definition.cost ?? 0 }],
+              [{ clicks: playEventClickCost, credits: eventPlayCost }],
               {
                 cardId: id,
                 serverId: server.id,
@@ -795,7 +809,7 @@ export function buildRunnerMainActions(
                 "play_event",
                 `${definition.title} auf ${server.label}`,
                 id,
-                [{ clicks: playEventClickCost, credits: definition.cost ?? 0 }],
+                [{ clicks: playEventClickCost, credits: eventPlayCost }],
                 {
                   cardId: id,
                   serverId: server.id,
@@ -814,7 +828,7 @@ export function buildRunnerMainActions(
             "play_event",
             `${definition.title} spielen`,
             id,
-            [{ clicks: playEventClickCost, credits: definition.cost ?? 0 }],
+            [{ clicks: playEventClickCost, credits: eventPlayCost }],
             { cardId: id, ...deterministicResourcePayload },
           ),
         );

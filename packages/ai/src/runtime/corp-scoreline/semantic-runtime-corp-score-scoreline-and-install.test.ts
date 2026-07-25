@@ -43,7 +43,7 @@ import {
 } from "../semantic-runtime-corp-score.test-support";
 
 describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
-  it("keeps remote protection above relative HQ relief when protection is legal", () => {
+  it("does not certify an unbound ICE action as score-remote protection", () => {
     const installAgenda = corpAction(
       "install-agenda-remote-1",
       "install_card",
@@ -132,7 +132,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       dependencies,
     );
 
-    expect(JSON.stringify(installComponents)).not.toContain(
+    expect(JSON.stringify(installComponents)).toContain(
       "corp_hq_agenda_relief_scoreline",
     );
     expect(remoteIceComponents).toEqual(
@@ -140,13 +140,10 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
         expect.objectContaining({
           key: "corp_board_triage_alignment",
           reason: expect.stringContaining(
-            "triage_primary:protect_score_remote",
+            "triage_primary:force_scoreline_clock",
           ),
         }),
       ]),
-    );
-    expect(totalScore(remoteIceComponents)).toBeGreaterThan(
-      totalScore(installComponents),
     );
   });
 
@@ -1030,7 +1027,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
     );
   });
 
-  it("uses board triage so HQ protection beats remote setup under agenda exposure", () => {
+  it("does not prefer unbound HQ ICE over unbound remote setup", () => {
     const protectHq = corpAction("protect-hq", "install_card", {
       placement: "ice",
       serverId: "hq",
@@ -1066,7 +1063,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
 
     expect(
       totalScoreFor(input, protectHq, "basic_install", testDependencies()),
-    ).toBeGreaterThan(
+    ).toBeLessThan(
       totalScoreFor(input, buildRemote, "basic_install", testDependencies()),
     );
   });
@@ -1175,7 +1172,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
     );
   });
 
-  it("prefers HQ access-stop ICE over position-dependent ICE under HQ agenda pressure", () => {
+  it("does not rank competing ICE placements in legacy score components", () => {
     const agenda = agendaCard("agenda-1");
     const taxOnlyIce = corpCard("ball-and-chain", "ice", {
       title: "Ball and Chain",
@@ -1226,25 +1223,13 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       testDependencies(),
     );
 
-    expect(taxComponents).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "corp_ice_placement_evaluator",
-          reason: expect.stringContaining("position_dependent:true"),
-        }),
-      ]),
-    );
-    expect(etrComponents).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "corp_ice_placement_evaluator",
-          reason: expect.stringContaining("position_dependent:false"),
-        }),
-      ]),
-    );
-    expect(totalScore(etrComponents)).toBeGreaterThan(
-      totalScore(taxComponents),
-    );
+    expect(
+      [...taxComponents, ...etrComponents].some(
+        (component) =>
+          component.key ===
+          ["corp", "ice", "placement", "evaluator"].join("_"),
+      ),
+    ).toBe(false);
   });
 
   it("uses board triage and downstream budget so inner relevant ICE beats breakable outer rez", () => {

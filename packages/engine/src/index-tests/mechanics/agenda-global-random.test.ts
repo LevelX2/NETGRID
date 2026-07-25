@@ -2502,6 +2502,23 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           "end_of_runner_turn" &&
         action.payload?.cardId === loanId,
     );
+    expect(trashAction).toMatchObject({
+      source: loanId,
+      expiresAtStateVersion: state.stateVersion,
+      payload: {
+        cardId: loanId,
+        cardImplementationLifecycleAction: "end_of_runner_turn",
+        cardImplementationLifecycleLeavePlayPaymentAmount: 10,
+        cardImplementationLifecycleLeavePlayPaymentStatus: "payable",
+      },
+    });
+    expect(trashAction.actionId).toContain(loanId);
+    expect(JSON.stringify(getLegalActions(state, "corp"))).not.toContain(
+      "cardImplementationLifecycleLeavePlayPayment",
+    );
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "cardImplementationLifecycleLeavePlayPayment",
+    );
     const removed = structuredClone(state);
     removeEverywhere(removed, loanId);
     expect(
@@ -2578,15 +2595,28 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         sourceDefinition(state, action) === "onr_v1_168_loan-from-chiba",
     );
     state.runner.credits = 9;
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-    state = apply(
+    const leavePlayAction = mustAction(
       state,
       "runner",
       (action) =>
         action.type === "end_turn" &&
         action.payload?.cardImplementationLifecycleAction ===
           "end_of_runner_turn",
+    );
+    expect(leavePlayAction).toMatchObject({
+      source: leavePlayAction.payload?.cardId,
+      expiresAtStateVersion: state.stateVersion,
+      payload: {
+        cardImplementationLifecycleLeavePlayPaymentAmount: 10,
+        cardImplementationLifecycleLeavePlayPaymentStatus: "unpayable",
+      },
+    });
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === leavePlayAction.actionId,
     );
     expect(state.winner).toBe("corp");
     expect(state.gameEndReason).toBe("unknown");

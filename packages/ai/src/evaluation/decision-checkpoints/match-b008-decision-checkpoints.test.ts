@@ -25,7 +25,7 @@ describe("match B008 older decision checkpoints", () => {
     expectCheckpointToPass(noBreakBudget);
   });
 
-  it("allows Gypsy Schedule Analyzer against an open R&D path", () => {
+  it("keeps an open R&D path in the pressure plan while Gypsy remains legal", () => {
     const openRnd = mutateFixture(cp02Json, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       const rnd = state.corp.servers.find((server) => server.id === "rd");
@@ -42,15 +42,32 @@ describe("match B008 older decision checkpoints", () => {
       fixture.expectation = {
         acceptableActions: [
           {
-            type: "play_event",
-            sourceDefinitionId: "onr_classic_038_gypsytm-schedule-analyzer",
+            actionId:
+              "runner.play_event.runner_onr_proteus_119_promises-promises_3.runner_onr_proteus_119_promises-promises_3",
           },
-          { type: "start_run", targetServerId: "rd" },
         ],
+        planExecution: {
+          acceptablePlanKinds: ["runner.pressure_central"],
+          acceptableCapabilities: [
+            "develop_onr_proteus_119_promises-promises",
+          ],
+          requiredAssessmentEvidence: [
+            "runner_same_turn_access_preparation:rd:onr_proteus_119_promises-promises",
+          ],
+        },
       };
     });
 
-    expectCheckpointToPass(openRnd);
+    const result = runAiDecisionCheckpoint(openRnd);
+    expect(result.ok, result.message).toBe(true);
+    expect(
+      result.input.legalActions.some(
+        (action) =>
+          action.type === "play_event" &&
+          action.source ===
+            "runner_onr_classic_038_gypsytm-schedule-analyzer_2",
+      ),
+    ).toBe(true);
   });
 
   it("keeps credit development with a four-card hand buffer", () => {

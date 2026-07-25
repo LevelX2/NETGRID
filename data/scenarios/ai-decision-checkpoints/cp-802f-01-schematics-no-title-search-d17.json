@@ -4167,14 +4167,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.install_card.runner_onr_classic_032_schematics-search-engine_2.runner_onr_classic_032_schematics-search-engine_2"
-      },
-      {
-        "actionId": "runner.gain_credit"
+        "actionId": "runner.install_card.runner_onr_classic_028_matador_1.runner_onr_classic_028_matador_1"
       }
     ],
-    "selectedScoreBreakdown": {
-      "forbiddenComponentKeys": ["runner_goal_fit_setup_search"]
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.rig_and_coverage"],
+      "acceptableCapabilities": ["install_breaker_sentry"],
+      "requiredAssessmentEvidence": ["deck_strategy_open_sentry_coverage"]
     }
   }
 }

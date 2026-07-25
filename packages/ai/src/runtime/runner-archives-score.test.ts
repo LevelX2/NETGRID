@@ -7,32 +7,32 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 
-import { runnerArchivesScoreComponents } from "./runner-archives-score";
+import {
+  runnerArchivesHasQualifiedHiddenPayoff,
+  runnerArchivesScoreComponents,
+} from "./runner-archives-score";
 
 describe("runnerArchivesScoreComponents", () => {
-  it("devalues a lone hidden card while useful alternatives remain", () => {
+  it("treats a lone hidden card as a concrete information plan", () => {
     const input = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
 
     expect(components(input)).toEqual([
       expect.objectContaining({
-        key: "runner_archives_unqualified_hidden_cards",
-        value: -900,
-        reason: expect.stringContaining("archives_meaningful_alternative:true"),
+        key: "runner_archives_hidden_information",
+        value: 700,
+        reason: expect.stringContaining("archives_hidden_information_window:true"),
       }),
     ]);
   });
 
-  it("keeps a hidden Archives probe available when no useful action remains", () => {
+  it("keeps the same explicit information value when no other action remains", () => {
     const input = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
     input.legalActions = [startRunArchives(), endTurn()];
 
     expect(components(input)).toEqual([
       expect.objectContaining({
-        key: "runner_archives_unqualified_hidden_cards",
-        value: 250,
-        reason: expect.stringContaining(
-          "archives_meaningful_alternative:false",
-        ),
+        key: "runner_archives_hidden_information",
+        value: 700,
       }),
     ]);
   });
@@ -42,52 +42,22 @@ describe("runnerArchivesScoreComponents", () => {
 
     expect(components(input)).toEqual([
       expect.objectContaining({
-        key: "runner_archives_hidden_cards_with_pressure",
+        key: "runner_archives_hidden_information",
         value: 700,
         reason: expect.stringContaining("archives_corp_deck_pressure:true"),
       }),
     ]);
   });
 
-  it("does not treat Runner match point alone as hidden Archives evidence", () => {
+  it("does not require Runner match point to qualify hidden Archives information", () => {
     const input = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
     input.playerView.own.agendaPoints = 5;
 
     expect(components(input)).toEqual([
       expect.objectContaining({
-        key: "runner_archives_unqualified_hidden_cards",
-        value: -900,
-        reason: expect.stringContaining("archives_runner_match_pressure:true"),
-      }),
-    ]);
-  });
-
-  it("values a substantial hidden Archives pool at Runner match point", () => {
-    const input = aiInput({ hiddenArchives: 3, corpDeckCount: 14 });
-    input.playerView.own.agendaPoints = 5;
-
-    expect(components(input)).toEqual([
-      expect.objectContaining({
-        key: "runner_archives_hidden_cards_with_pressure",
+        key: "runner_archives_hidden_information",
         value: 700,
-        reason: expect.stringContaining("archives_runner_match_volume:true"),
-      }),
-    ]);
-  });
-
-  it("keeps the matchpoint volume bonus below an open central alternative", () => {
-    const input = aiInput({ hiddenArchives: 3, corpDeckCount: 14 });
-    input.playerView.own.agendaPoints = 5;
-    const hq = startRunHq();
-    input.legalActions = [startRunArchives(), hq, gainCredit(), endTurn()];
-
-    expect(components(input)).toEqual([
-      expect.objectContaining({
-        key: "runner_archives_hidden_cards_with_pressure",
-        value: 150,
-        reason: expect.stringContaining(
-          "archives_open_central_alternative:true",
-        ),
+        reason: expect.stringContaining("archives_runner_match_pressure:true"),
       }),
     ]);
   });
@@ -106,11 +76,32 @@ describe("runnerArchivesScoreComponents", () => {
 
     expect(components(input)).toEqual([
       expect.objectContaining({
-        key: "runner_archives_hidden_cards_with_pressure",
+        key: "runner_archives_hidden_information",
         value: 700,
         reason: expect.stringContaining("archives_random_discard_unseen:true"),
       }),
     ]);
+  });
+
+  it("admits one hidden Archives card as a concrete information plan", () => {
+    const input = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
+
+    expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(true);
+    expect(components(input)).toEqual([
+      expect.objectContaining({
+        key: "runner_archives_hidden_information",
+        value: 700,
+        reason: expect.stringContaining(
+          "archives_hidden_information_window:true",
+        ),
+      }),
+    ]);
+  });
+
+  it("does not invent an Archives information plan without hidden cards", () => {
+    const input = aiInput({ hiddenArchives: 0, corpDeckCount: 14 });
+
+    expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(false);
   });
 
   it("keeps a visible Archives agenda as an unconditional payoff", () => {
@@ -235,10 +226,6 @@ function startRunArchives(): LegalAction {
   return action("runner.start_run.archives", "start_run", {
     serverId: "archives",
   });
-}
-
-function startRunHq(): LegalAction {
-  return action("runner.start_run.hq", "start_run", { serverId: "hq" });
 }
 
 function gainCredit(): LegalAction {

@@ -70,6 +70,7 @@ const DECISION_ACTION_TYPES = new Set<LegalAction["type"]>([
   "move_to_removed_from_game",
   "return_from_set_aside",
   "change_card_control",
+  "stop_restricted_action_sequence",
 ]);
 
 const ACTION_GROUP_LABELS: Record<LegalAction["type"], string> = {
@@ -103,6 +104,7 @@ const ACTION_GROUP_LABELS: Record<LegalAction["type"], string> = {
   move_to_removed_from_game: "Spezialzonen",
   return_from_set_aside: "Spezialzonen",
   change_card_control: "Kontrolle",
+  stop_restricted_action_sequence: "Installationssequenz",
   resolve_choice: "Entscheidung",
   trigger_ability: "Weitere Aktionen",
   end_turn: "Zug",
@@ -1149,6 +1151,10 @@ export function actionButtonLabel(action: LegalAction): string {
       return "Installation ausbauen";
     case "end_turn":
       return "Zug beenden";
+    case "stop_restricted_action_sequence":
+      return normalizeVisibleTerms(
+        action.label || "Installationssequenz beenden",
+      );
     case "resolve_choice":
       return normalizeVisibleTerms(action.label || "Entscheidung bestätigen");
     case "pump_breaker":

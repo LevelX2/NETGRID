@@ -22,7 +22,30 @@ describe("AI simulation harness", () => {
 
     expect(captures).toEqual([{ actionIndex: 1, stateVersion: 1 }]);
     expect(result.actions).toBe(3);
+    expect(result.terminationKind).toBe("action_limit");
+    expect(result.winner).toBe("action_limit_reached");
     expect(result.errors).toEqual([]);
+  });
+
+  it("classifies a technical abort as a runtime failure instead of an action limit", () => {
+    const result = simulateAiGame({
+      seed: "ai-sim-invalid-deck-support",
+      runnerDeck: {
+        id: "invalid-runtime-deck",
+        side: "runner",
+        identityCardId: "missing-identity",
+        cards: [{ id: "missing-card", quantity: 1 }],
+      } as never,
+    });
+
+    expect(result.terminationKind).toBe("runtime_failure");
+    expect(result.winner).toBe("runtime_failure");
+    expect(result.actions).toBe(0);
+    expect(result.runtimeFailures).toEqual([
+      expect.objectContaining({
+        code: "simulation_deck_support_invalid",
+      }),
+    ]);
   });
 
   it("runs deterministic AI-vs-AI simulations and replays the event log", () => {

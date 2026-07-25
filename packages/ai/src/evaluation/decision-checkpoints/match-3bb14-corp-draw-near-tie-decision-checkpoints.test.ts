@@ -10,13 +10,13 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
   it.each([
-    ["draws for missing central defense at historical D9", defensiveDrawD9Json],
+    ["draws through the explicit hand-development plan at historical D9", defensiveDrawD9Json],
     [
-      "draws instead of repeating the one-point credit tiebreak at D10",
+      "draws through the explicit hand-development plan at D10",
       defensiveDrawD10Json,
     ],
     [
-      "draws instead of repeating the one-point credit tiebreak at D11",
+      "draws through the explicit hand-development plan at D11",
       defensiveDrawD11Json,
     ],
   ])("%s", (_label, json) => {
@@ -31,8 +31,13 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
       checkpoint.engine.testOnlyGameState,
     );
     checkpoint.expectation = {
-      acceptableActions: [{ type: "gain_credit" }],
+      acceptableActions: [{ type: "end_turn" }],
       forbiddenActions: [{ type: "draw_card" }],
+      planExecution: {
+        acceptablePlanKinds: ["corp.complete_turn"],
+        acceptableCapabilities: ["complete_turn_after_productive_routes_exhausted"],
+        requiredAssessmentEvidence: ["productive_legal_routes_exhausted"],
+      },
     };
 
     const result = runAiDecisionCheckpoint(checkpoint);
@@ -40,7 +45,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("funds expensive blocking ICE instead of installing it unrezzably", () => {
+  it("does not install uncertified expensive ICE and funds the exact score parent instead", () => {
     const checkpoint = fixture(defensiveDrawD9Json);
     const shock =
       checkpoint.engine.testOnlyGameState.cardInstances[
@@ -53,15 +58,26 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     );
     checkpoint.expectation = {
       acceptableActions: [{ type: "gain_credit" }],
-      forbiddenActions: [{ type: "draw_card" }, { type: "install_card" }],
+      forbiddenActions: [{ type: "install_card" }],
+      planExecution: {
+        acceptablePlanIds: [EXACT_SCORE_FUNDING_PLAN_ID],
+        acceptablePlanKinds: ["corp.economy"],
+        acceptableCapabilities: ["develop_or_convert_corp_economy"],
+        requiredAssessmentEvidence: [
+          "corp_score_protection_funding_gap:new_remote:9",
+        ],
+      },
     };
 
     const result = runAiDecisionCheckpoint(checkpoint);
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    expect(result.decision?.evidence).toContain(
+      `plan_portfolio_blocked:${EXACT_SCORE_PARENT_PLAN_ID}`,
+    );
   });
 
-  it("wires seeded variation through the productive chooser for a controlled near tie", () => {
+  it("does not revive the old seeded action near-tie after every defense need is covered", () => {
     const checkpoint = runAiDecisionCheckpoint(fixture(defensiveDrawD9Json));
     expect(checkpoint.ok, `${checkpoint.code}: ${checkpoint.message}`).toBe(
       true,
@@ -94,19 +110,23 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     );
     const selected = new Set(decisions.map((decision) => decision.actionId));
 
-    expect(selected).toEqual(new Set(["corp.draw_card", "corp.gain_credit"]));
+    expect(selected.size).toBe(1);
     expect(
-      decisions.every((decision) =>
-        decision.decisionDebug?.scoreBreakdown?.some(
-          (component) => component.key === "corp_seeded_near_tie_variation",
-        ),
+      [...selected].every(
+        (actionId) =>
+          actionId === "corp.gain_credit" || actionId === "corp.draw_card",
       ),
     ).toBe(true);
     expect(
       decisions.every(
         (decision) =>
-          decision.decisionDebug?.decisionChain?.rawScoreWinner?.actionId ===
-          "corp.gain_credit",
+          (decision.decisionDebug?.planKind === "corp.economy" ||
+            decision.decisionDebug?.planKind ===
+              "corp.hand_and_agenda_management") &&
+          !decision.decisionDebug?.scoreBreakdown?.some(
+            (component) =>
+              component.key === "corp_seeded_near_tie_variation",
+          ),
       ),
     ).toBe(true);
   });
@@ -115,3 +135,8 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
 function fixture(value: unknown): AiDecisionCheckpointV1 {
   return structuredClone(value) as AiDecisionCheckpointV1;
 }
+
+const EXACT_SCORE_PARENT_PLAN_ID =
+  "plan:corp.score_agenda:agenda%3Acorp_onr_v1_213_private-cybernet-police_1%3Anew_remote";
+const EXACT_SCORE_FUNDING_PLAN_ID =
+  "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_213_private-cybernet-police_1%3Anew_remote";

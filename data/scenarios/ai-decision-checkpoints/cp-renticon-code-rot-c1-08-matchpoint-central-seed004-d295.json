@@ -28627,17 +28627,21 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_251_jack-attack",
-        "targetServerId": "hq"
+        "type": "end_turn"
       }
     ],
-    "forbiddenActions": [
-      {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_251_jack-attack",
-        "targetServerId": "remote_1"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.complete_turn"],
+      "acceptableCapabilities": [
+        "complete_turn_after_productive_routes_exhausted"
+      ],
+      "requiredAssessmentEvidence": [
+        "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
+        "corp_ice_install_has_no_engine_certified_access_probability_reduction",
+        "corp_last_click_score_install_deferred:remote_1",
+        "corp_prepared_score_parent_dominates_sibling_route",
+        "productive_legal_routes_exhausted"
+      ]
+    }
   }
 }

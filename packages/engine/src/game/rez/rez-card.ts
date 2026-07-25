@@ -205,6 +205,53 @@ export function rezCard(
     };
   }
   host.payment.spendCredits("corp", creditCost);
+  finalizeCorpRezAfterPayment(
+    host,
+    cardId,
+    definition,
+    legalAction,
+    variableIceState,
+  );
+  if (rootRez) {
+    host.run.handleRunRootRezPostRez(cardId, legalAction);
+    return;
+  }
+  if (host.run.handlePostIceRezContinuation?.(cardId, legalAction)) return;
+  host.run.beginEncounter(cardId, legalAction);
+}
+
+/**
+ * Completes the canonical rez lifecycle after an external Engine payment
+ * contract has paid all mandatory costs. This is intentionally separate from
+ * run continuation so scored-agenda install/rez sequences cannot accidentally
+ * start an encounter outside a run.
+ */
+export function finalizeCorpRezAfterExternalPayment(
+  host: RezCardHost,
+  cardId: CardInstanceId,
+  legalAction: LegalAction,
+): void {
+  const instance = host.cards.mustInstance(cardId);
+  const definition = host.cards.definitionFor(cardId);
+  if (instance.rezzed)
+    throw new Error("Die extern bezahlte Rez-Karte ist bereits gerezzed.");
+  if (
+    definition.type !== "ice" &&
+    definition.type !== "asset" &&
+    definition.type !== "upgrade"
+  )
+    throw new Error("Diese Karte kann nicht extern gerezzed werden.");
+  finalizeCorpRezAfterPayment(host, cardId, definition, legalAction);
+}
+
+function finalizeCorpRezAfterPayment(
+  host: RezCardHost,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  legalAction?: LegalAction,
+  variableIceState?: CardInstance["variableIceState"],
+): void {
+  const { state } = host;
   state.cardInstances[cardId] = {
     ...host.cards.mustInstance(cardId),
     rezzed: true,
@@ -265,12 +312,6 @@ export function rezCard(
     }
   }
   if (legalAction) host.lifecycle.executeOnRez(legalAction, definition, cardId);
-  if (rootRez) {
-    host.run.handleRunRootRezPostRez(cardId, legalAction);
-    return;
-  }
-  if (host.run.handlePostIceRezContinuation?.(cardId, legalAction)) return;
-  host.run.beginEncounter(cardId, legalAction);
 }
 
 function selfRezAdditionalCostsForDefinition(

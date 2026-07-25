@@ -33736,13 +33736,24 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_213_private-cybernet-police_1.remote_1.corp_onr_v1_213_private-cybernet-police_1"
+        "actionId": "corp.install_card.corp_onr_v1_310_blood-cat_2.remote_1.corp_onr_v1_310_blood-cat_2"
       }
     ],
     "forbiddenActions": [
       {
         "actionId": "corp.gain_credit"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "corp.punish_campaign"
+      ],
+      "acceptableCapabilities": [
+        "punish_prepare"
+      ],
+      "requiredAssessmentEvidence": [
+        "tag_punish_ontology_prepare:onr_v1_310_blood-cat"
+      ]
+    }
   }
 }

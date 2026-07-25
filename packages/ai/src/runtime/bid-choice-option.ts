@@ -1,5 +1,9 @@
 import { traceSuccessEffectCardImplementationQuotesForDefinition } from "@netgrid/engine";
-import { type AiDecisionInput, type CardDefinitionId } from "@netgrid/shared";
+import {
+  type AiDecisionInput,
+  type AiDifficulty,
+  type CardDefinitionId,
+} from "@netgrid/shared";
 
 import { selectEfficientTraceBidOption } from "../trace-bid-efficiency";
 import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
@@ -262,10 +266,7 @@ function corpDesiredBidAmount(
       "hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:",
     )
   ) {
-    if (input.difficulty === "hard") return maxBid;
-    if (input.difficulty === "normal")
-      return Math.max(2, Math.ceil(maxBid * 0.75));
-    return Math.min(2, maxBid);
+    return socialEngineeringCorpGuessAmount(input.difficulty, maxBid);
   }
   if (input.difficulty === "easy") return 0;
   const sourceDefinitionId =
@@ -277,4 +278,15 @@ function corpDesiredBidAmount(
     maxBid,
     ...(sourceDefinitionId ? { sourceDefinitionId } : {}),
   }).recommendedBid;
+}
+
+export function socialEngineeringCorpGuessAmount(
+  difficulty: AiDifficulty,
+  maximumGuess: number,
+): number {
+  if (difficulty === "hard") return maximumGuess;
+  if (difficulty === "normal") {
+    return Math.max(2, Math.ceil(maximumGuess * 0.75));
+  }
+  return Math.min(2, maximumGuess);
 }

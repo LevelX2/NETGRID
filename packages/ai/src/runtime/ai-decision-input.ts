@@ -121,6 +121,7 @@ export function buildAiDecisionInput(
     ...(expectedDeckSnapshot ? { expectedDeckSnapshot } : {}),
   });
   const input = buildAiDecisionInputDto({
+    matchId: state.matchId,
     side,
     playerView,
     eventTail:

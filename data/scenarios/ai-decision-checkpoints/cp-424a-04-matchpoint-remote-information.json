@@ -11014,14 +11014,9 @@
         "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.0"
       }
     ],
-    "selectedScoreBreakdown": {
-      "requiredComponentKeys": ["runner_terminal_remote_tool"]
-    },
-    "decisionChain": {
-      "rawScoreWinner": {
-        "type": "activated_card_ability",
-        "sourceDefinitionId": "onr_v1_058_seeya"
-      }
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.contest_remote"],
+      "acceptableCapabilities": ["contest_remote"]
     }
   }
 }

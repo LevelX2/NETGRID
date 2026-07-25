@@ -240,6 +240,14 @@ function runActionRelevant(
   signals: readonly string[],
 ): boolean {
   if (action.type === "start_run") return true;
+  if (
+    action.type !== "play_event" &&
+    action.type !== "activated_card_ability" &&
+    action.type !== "trigger_ability" &&
+    action.type !== "resolve_choice"
+  ) {
+    return false;
+  }
   const text = runActionSearchText(action, signals);
   if (runActionHasStructuredSignal(signals, ["path blocked", "path_blocked"]))
     return false;
@@ -471,7 +479,8 @@ function targetServerIdsForRunAction(
     .map((targetId) => normalizeServerId(targetId))
     .filter((targetId): targetId is string => targetId !== undefined);
   const signalTargets = targetServerIdsFromSignals(input, signals);
-  let resolvedTargets = uniqueStrings([...targetIds, ...signalTargets]);
+  let resolvedTargets =
+    targetIds.length > 0 ? uniqueStrings(targetIds) : signalTargets;
   if (
     targetIds.length === 0 &&
     resolvedTargets.includes("archives") &&

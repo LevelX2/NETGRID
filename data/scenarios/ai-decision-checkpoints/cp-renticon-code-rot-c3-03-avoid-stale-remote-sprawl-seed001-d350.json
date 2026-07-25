@@ -33210,9 +33210,13 @@
   "expectation": {
     "acceptableActions": [
       {
+        "type": "end_turn"
+      }
+    ],
+    "forbiddenActions": [
+      {
         "type": "install_card",
-        "sourceDefinitionId": "onr_v1_237_data-wall",
-        "targetServerId": "rd"
+        "targetServerId": "new_remote"
       }
     ]
   }

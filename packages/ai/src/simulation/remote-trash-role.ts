@@ -33,6 +33,7 @@ export function remoteTrashRoleForVisibleCard(
     if (structuredRole.kind === "remote_capacity") return "remote_capacity";
     if (structuredRole.kind === "score_acceleration") return "score_acceleration";
     if (structuredRole.kind === "asset_economy") return "economy";
+    if (structuredRole.kind === "tag_punish_asset") return "tag_punish";
     if (structuredRole.kind === "bait" || structuredRole.kind === "ambush")
       return "ambush";
     if (

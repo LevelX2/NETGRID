@@ -6606,7 +6606,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign"
       }
     ],
     "forbiddenActions": [

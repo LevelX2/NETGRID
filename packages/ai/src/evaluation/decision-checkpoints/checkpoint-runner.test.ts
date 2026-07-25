@@ -4,6 +4,8 @@ import {
   hashGameState,
 } from "@netgrid/engine";
 import type { GameState } from "@netgrid/shared";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { AiDeckStrategyDeckSnapshot } from "../../deck-strategy-snapshot";
@@ -72,50 +74,36 @@ describe("AI decision checkpoints", () => {
     });
   });
 
-  it("matches the productive decision-chain route without blessing score values", () => {
-    const baseline = runAiDecisionCheckpoint(fixture());
-    const chain = baseline.decision?.decisionDebug?.decisionChain;
-    if (!chain) throw new Error("Missing decision chain in checkpoint result");
-
-    const accepted = fixture();
-    accepted.expectation.decisionChain = {
-      selectionRoute: chain.initialSelection.route,
-      ...(chain.rawScoreWinner
-        ? { rawScoreWinner: { actionId: chain.rawScoreWinner.actionId } }
-        : {}),
-    };
-    expect(runAiDecisionCheckpoint(accepted)).toMatchObject({ ok: true });
-
-    const rejected = fixture();
-    rejected.expectation.decisionChain = {
-      selectionRoute:
-        chain.initialSelection.route === "semantic_coverage_fallback"
-          ? "semantic_score"
-          : "semantic_coverage_fallback",
-    };
-    expect(runAiDecisionCheckpoint(rejected)).toMatchObject({
-      ok: false,
-      code: "behavior_regression",
-    });
-  });
-
-  it("matches selected score-component contracts without fixing score values", () => {
-    const baseline = runAiDecisionCheckpoint(fixture());
-    const componentKey =
-      baseline.decision?.decisionDebug?.scoreBreakdown?.[0]?.key;
-    if (!componentKey) {
-      throw new Error("Missing selected score breakdown in checkpoint fixture");
+  it("matches plan-first executor and capability contracts without reviving action scores", () => {
+    const current = capturedFixture(
+      "cp-20eb-07-no-upgrade-only-matchpoint-run-d92.json",
+    );
+    const baseline = runAiDecisionCheckpoint(current);
+    const planId = baseline.decision?.decisionDebug?.planId;
+    const planKind = baseline.decision?.decisionDebug?.planKind;
+    const capability = baseline.decision?.evidence
+      ?.find((entry) => entry.startsWith("plan_step_capability:"))
+      ?.slice("plan_step_capability:".length);
+    if (!planId || !planKind || !capability) {
+      throw new Error("Missing plan-first execution diagnostics");
     }
 
-    const accepted = fixture();
+    const accepted = structuredClone(current);
     accepted.expectation = {
-      selectedScoreBreakdown: { requiredComponentKeys: [componentKey] },
+      planExecution: {
+        acceptablePlanIds: [planId],
+        acceptablePlanKinds: [planKind],
+        acceptableCapabilities: [capability],
+      },
     };
     expect(runAiDecisionCheckpoint(accepted)).toMatchObject({ ok: true });
 
-    const rejected = fixture();
+    const rejected = structuredClone(current);
     rejected.expectation = {
-      selectedScoreBreakdown: { forbiddenComponentKeys: [componentKey] },
+      planExecution: {
+        forbiddenPlanKinds: [planKind],
+        forbiddenCapabilities: [capability],
+      },
     };
     expect(runAiDecisionCheckpoint(rejected)).toMatchObject({
       ok: false,
@@ -269,4 +257,17 @@ function buildInput(state: GameState) {
     decisionId: `${state.matchId}:${state.stateVersion}:corp`,
     ownDeckSnapshot: DECK,
   });
+}
+
+function capturedFixture(fileName: string): AiDecisionCheckpointV1 {
+  return JSON.parse(
+    readFileSync(
+      resolve(
+        import.meta.dirname,
+        "../../../../../data/scenarios/ai-decision-checkpoints",
+        fileName,
+      ),
+      "utf8",
+    ),
+  ) as AiDecisionCheckpointV1;
 }

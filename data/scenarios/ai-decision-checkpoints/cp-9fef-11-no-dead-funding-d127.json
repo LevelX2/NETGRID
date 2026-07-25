@@ -9503,12 +9503,28 @@
     "acceptableActions": [
       {
         "actionId": "runner.draw_card"
+      },
+      {
+        "actionId": "runner.start_run.hq"
+      },
+      {
+        "actionId": "runner.start_run.archives"
       }
     ],
     "forbiddenActions": [
       {
         "actionId": "runner.gain_credit"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.pressure_central",
+        "runner.rig_and_coverage",
+        "runner.develop_board_and_hand"
+      ],
+      "forbiddenCapabilities": [
+        "gain_general_liquid_credits"
+      ]
+    }
   }
 }

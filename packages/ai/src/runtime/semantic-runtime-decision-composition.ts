@@ -133,6 +133,8 @@ export function createSemanticRuntimeDecisionComposition(
       dependencies.runnerRunOnlyActionAdjustedSemanticChoice,
     semanticRuntimeCoverageSelectionDebug,
     selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
+    runnerEncounterActionExclusion:
+      dependencies.runnerEncounterActionExclusion,
     rememberTacticalPlanRuntime: dependencies.rememberTacticalPlanRuntime,
     scrubEvidence: dependencies.scrubEvidence,
     semanticRuntimeDecisionDebug,

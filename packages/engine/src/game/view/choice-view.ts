@@ -11,6 +11,7 @@ import {
 } from "@netgrid/shared";
 import { definitionFor, visibleOwnCard } from "./card-view";
 import { sanitizeChoiceViewForSurface } from "./surface-policy";
+import { projectHqInstallRezOptionQuote } from "../payment";
 
 export function visibleChoice(
   state: GameState,
@@ -29,7 +30,14 @@ export function visibleChoice(
       prompt: choice.prompt,
       kind: choice.kind,
       options: choice.options.map((option) => {
-        const card = visibleChoiceCardForOption(state, choice, option);
+        const hqInstallRezOptionQuote = projectHqInstallRezOptionQuote(
+          state,
+          choice,
+          option,
+        );
+        const card = hqInstallRezOptionQuote
+          ? visibleOwnCard(state, hqInstallRezOptionQuote.cardId)
+          : visibleChoiceCardForOption(state, choice, option);
         const value = visibleChoiceOptionValue(state, choice, option);
         return {
           id: option.id,
@@ -39,6 +47,7 @@ export function visibleChoice(
           ...(value !== undefined ? { value } : {}),
           ...(option.metadata ? { metadata: { ...option.metadata } } : {}),
           ...(card ? { card } : {}),
+          ...(hqInstallRezOptionQuote ? { hqInstallRezOptionQuote } : {}),
         };
       }),
       minSelections: choice.minSelections,

@@ -9,6 +9,11 @@ export { checkWinConditions } from "../win-conditions";
 export { quoteCorpRezCost } from "../payment";
 export { createGame, createGameAfterSetup } from "../create-game";
 export { applyAction } from "../apply-action";
+export {
+  applyRandomizedIceInstallSelection,
+  candidateFingerprint,
+  quoteRandomizedIceInstallSelection,
+} from "../randomized-ice-install-selection";
 export { applyGameAction } from "../apply-game-action";
 export { getPlayerView, playerViewFor } from "../player-view";
 export { replayEvents, replayGameEvents } from "../replay";
@@ -43,6 +48,13 @@ export type {
   ApplyActionOptions,
   EngineError,
   EngineResult,
+  EngineRandomizedIceInstallCandidate,
+  EngineRandomizedIceInstallSelectionCommand,
+  EngineRandomizedIceInstallSelectionQuote,
+  EngineRandomizedIceInstallSelectionQuoteResult,
+  EngineRandomizedIceInstallSelectionReceipt,
+  EngineRandomizedIceInstallSelectionRequest,
+  EngineRandomizedIceInstallSelectionResult,
   EventVisibilityClass,
   EventModificationCandidate,
   EventModificationWindow,
@@ -53,6 +65,7 @@ export type {
   ImminentEvent,
   LegalAction,
   PlayerAction,
+  ReplayableEngineAction,
   PlayerController,
   PlayerView,
   PublicGameEvent,

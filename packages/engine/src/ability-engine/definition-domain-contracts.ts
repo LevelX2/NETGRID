@@ -9,6 +9,7 @@ import type {
   CounterType,
   DamageType,
   EventVisibilityClass,
+  PurgeableRunnerVirusCounterType,
   ServerId,
 } from "@netgrid/shared";
 import type { CardLifecycleTriggeredAbilityImplementation } from "./definition-ability-contracts";
@@ -849,6 +850,13 @@ export type CardVirusCounterImplementation = {
       | "corp_purgeable_runner_virus_counter"
       | "central_server_socket_counters";
     amount: 1;
+    visibility: Extract<EventVisibilityClass, "public">;
+  };
+  centralAccessCountModifier?: {
+    source: "corp_purgeable_runner_virus_counter";
+    counterKind: PurgeableRunnerVirusCounterType;
+    server: "hq" | "rd";
+    formula: "per_counter" | "per_counter_after_first";
     visibility: Extract<EventVisibilityClass, "public">;
   };
   startOfRunnerTurn?:

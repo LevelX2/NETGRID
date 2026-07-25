@@ -9841,8 +9841,19 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.0"
+        "actionId": "runner.start_run.hq"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.pressure_central"
+      ],
+      "acceptableCapabilities": [
+        "pressure_hq_information"
+      ],
+      "requiredAssessmentEvidence": [
+        "target:hq"
+      ]
+    }
   }
 }

@@ -7,7 +7,7 @@ import retainJettisonD34Json from "../../../../../data/scenarios/ai-decision-che
 import rnzTargetD66Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-05-rnz-target-d66.json";
 import noLateRnzD159Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-06-no-late-rnz-d159.json";
 import probeNotFundingD88Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-07-probe-not-funding-d88.json";
-import hqOverRdD95Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-08-hq-over-known-rd-d95.json";
+import rdAfterKnownTopInvalidatedD95Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-08-rd-after-known-top-invalidated-d95.json";
 import hqProbeD109Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-09-hq-probe-classification-d109.json";
 import noRepeatRdD115Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-10-no-repeat-rd-d115.json";
 import noDeadFundingD127Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-11-no-dead-funding-d127.json";
@@ -15,6 +15,7 @@ import remote2ProbeD143Json from "../../../../../data/scenarios/ai-decision-chec
 import noBreakWithoutPayoffD144Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-13-no-break-without-payoff-d144.json";
 import jackOutFireWallD92Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-9fef-14-jack-out-fire-wall-control-d92.json";
 import earlyCheckRunJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e8886-05-early-remote-check-run.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -36,7 +37,10 @@ describe("match 9FEF runner decision checkpoints", () => {
       "F04 probes now or draws instead of dead funding at D88",
       probeNotFundingD88Json,
     ],
-    ["F05 chooses open HQ over costly known R&D at D95", hqOverRdD95Json],
+    [
+      "F05 reopens R&D after the known top card is invalidated at D95",
+      rdAfterKnownTopInvalidatedD95Json,
+    ],
     ["F06 classifies the D109 HQ run as a probe", hqProbeD109Json],
     ["F05 avoids the repeated costly R&D run at D115", noRepeatRdD115Json],
     [
@@ -61,7 +65,16 @@ describe("match 9FEF runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    [
+      "9FEF-F02-JETTISON-WINDOW-D26",
+      "9FEF-F03-RNZ-TARGET-D66",
+      "9FEF-F03-NO-LATE-RNZ-D159",
+      "9FEF-F05-RD-AFTER-KNOWN-TOP-INVALIDATED-D95",
+      "9FEF-F06-HQ-PROBE-CLASSIFICATION-D109",
+    ],
+  );
 }
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {

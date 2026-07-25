@@ -726,8 +726,8 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
     expect(evaluation).toMatchObject({
       developmentRole: "draw_or_search_engine",
-      currentNeed: "later",
-      deferReason: "none",
+      currentNeed: "none",
+      deferReason: "no_current_need",
     });
   });
 

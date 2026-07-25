@@ -7,7 +7,9 @@ import {
 
 describe("createCorpTagPunishPayoffProfileContext", () => {
   it("values basic credit when it reaches a visible tagged payoff cost", () => {
-    const payoff = corpCard("tagged-payoff", { cost: 1 });
+    const payoff = corpCard("tagged-payoff", {
+      playCost: { kind: "fixed", credits: 1 },
+    });
     const context = testContext();
     const profile = context.corpTagPunishPayoffFundingProfile(
       corpInput({
@@ -40,7 +42,11 @@ describe("createCorpTagPunishPayoffProfileContext", () => {
       corpInput({
         credits: 0,
         runnerTags: 0,
-        gripOrHq: [corpCard("tagged-payoff", { cost: 1 })],
+        gripOrHq: [
+          corpCard("tagged-payoff", {
+            playCost: { kind: "fixed", credits: 1 },
+          }),
+        ],
       }),
       gainCreditAction(),
     );
@@ -54,12 +60,88 @@ describe("createCorpTagPunishPayoffProfileContext", () => {
       corpInput({
         credits: 0,
         runnerTags: 1,
-        gripOrHq: [corpCard("tagged-payoff", { cost: 3 })],
+        gripOrHq: [
+          corpCard("tagged-payoff", {
+            playCost: { kind: "fixed", credits: 3 },
+          }),
+        ],
       }),
       gainCreditAction(),
     );
 
     expect(profile).toBeUndefined();
+  });
+
+  it("funds the explicit minimum of a variable-X tagged payoff", () => {
+    const context = testContext();
+    const profile = context.corpTagPunishPayoffFundingProfile(
+      corpInput({
+        credits: 0,
+        runnerTags: 1,
+        gripOrHq: [
+          corpCard("tagged-payoff", {
+            playCost: {
+              kind: "variable_x",
+              minimumX: 1,
+              creditsPerX: 1,
+              maximumX: { kind: "context" },
+            },
+          }),
+        ],
+      }),
+      gainCreditAction(),
+    );
+
+    expect(profile?.evidence).toEqual(
+      expect.arrayContaining(["payoff_cost:1", "credits_after_action:1"]),
+    );
+  });
+
+  it("fails closed when a visible tagged payoff has no play-cost model", () => {
+    const context = testContext();
+    const profile = context.corpTagPunishPayoffFundingProfile(
+      corpInput({
+        credits: 0,
+        runnerTags: 1,
+        gripOrHq: [corpCard("tagged-payoff")],
+      }),
+      gainCreditAction(),
+    );
+
+    expect(profile).toBeUndefined();
+  });
+
+  it("fails closed for malformed fixed and variable-X play-cost payloads", () => {
+    const context = testContext();
+    for (const playCost of [
+      { kind: "fixed", credits: -1 },
+      {
+        kind: "variable_x",
+        minimumX: 0,
+        creditsPerX: 1,
+        maximumX: { kind: "context" },
+      },
+      {
+        kind: "variable_x",
+        minimumX: 1,
+        creditsPerX: 0,
+        maximumX: { kind: "context" },
+      },
+    ]) {
+      const profile = context.corpTagPunishPayoffFundingProfile(
+        corpInput({
+          credits: 0,
+          runnerTags: 1,
+          gripOrHq: [
+            corpCard("tagged-payoff", {
+              playCost: playCost as NonNullable<VisibleCard["playCost"]>,
+            }),
+          ],
+        }),
+        gainCreditAction(),
+      );
+      expect(profile).toBeUndefined();
+    }
   });
 });
 

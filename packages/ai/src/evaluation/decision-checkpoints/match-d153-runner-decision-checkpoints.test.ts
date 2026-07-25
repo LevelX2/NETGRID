@@ -12,6 +12,7 @@ import buildRemoteReserveD161Json from "../../../../../data/scenarios/ai-decisio
 import liquidateForRemoteD167Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-d153-10-liquidate-for-remote-threat-d167.json";
 import cashoutForRdD179Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-d153-11-cashout-for-rd-d179.json";
 import cashoutForRdD185Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-d153-12-cashout-for-rd-d185.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -29,21 +30,27 @@ describe("match D153 Runner decision checkpoints", () => {
       noJunkyardCashoutD124Json,
     ],
     [
-      "F04 releases the low-value remote plan at D131",
+      "F04 contests the affordable partially unknown remote at D131",
       releaseRemotePlanD131Json,
     ],
     [
       "F05 pumps before allowing four ETR subroutines at D134",
       breakBeforeEtrD134Json,
     ],
-    ["F06 cashes the second Broker to fund R&D at D179", cashoutForRdD179Json],
-    ["F06 cashes Broker to fund R&D at D185", cashoutForRdD185Json],
     [
-      "F07 builds the deep-remote pressure reserve at D161",
+      "F06 takes free Archives information instead of an unbound Broker payout at D179",
+      cashoutForRdD179Json,
+    ],
+    [
+      "F06 completes the turn without an unbound Broker payout or credit route at D185",
+      cashoutForRdD185Json,
+    ],
+    [
+      "F07 takes free Archives information instead of an unbound reserve step at D161",
       buildRemoteReserveD161Json,
     ],
     [
-      "F08 liquidates Broker for the advanced remote threat at D167",
+      "F08 executes funded R&D pressure without unnecessary Broker liquidation at D167",
       liquidateForRemoteD167Json,
     ],
   ])("satisfies %s", (_label, json) => {
@@ -58,7 +65,14 @@ describe("match D153 Runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    [
+      "cp-d153-05-preserve-hq-facecheck-d61",
+      "cp-d153-10-liquidate-for-remote-threat-d167",
+      "cp-d153-12-cashout-for-rd-d185",
+    ],
+  );
 }
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {

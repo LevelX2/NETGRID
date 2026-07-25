@@ -22,16 +22,21 @@ describe("last two matches exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("may prepare an access payoff when a click remains for the run", () => {
+  it("funds the missing wall route instead of playing an unbound access payoff", () => {
     const accessStillExecutable = mutateFixture(cp01Json, (fixture) => {
       fixture.engine.testOnlyGameState.runner.clicks = 2;
       fixture.expectation = {
-        acceptableActions: [
-          {
-            type: "play_event",
-            sourceDefinitionId: PREARRANGED_DROP,
-          },
+        acceptableActions: [{ type: "gain_credit" }],
+        forbiddenActions: [
+          { type: "play_event", sourceDefinitionId: PREARRANGED_DROP },
         ],
+        planExecution: {
+          acceptablePlanKinds: ["runner.rig_and_coverage"],
+          acceptableCapabilities: ["fund_install_breaker_wall"],
+          requiredAssessmentEvidence: [
+            "deck_strategy_open_wall_coverage",
+          ],
+        },
       };
     });
 

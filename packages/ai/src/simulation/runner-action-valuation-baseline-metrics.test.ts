@@ -20,6 +20,91 @@ describe("summarizeRunnerActionValuationBaselineMetrics", () => {
     });
   });
 
+  it("recognizes only an immediately verified plan-first Corp deckout closeout", () => {
+    const terminalEndTurn = action("end_turn", 4);
+    terminalEndTurn.planKind = "runner.secure_terminal_win";
+    const forcedDraw = action("mandatory_draw", 3);
+    forcedDraw.side = "corp";
+
+    const metrics = summarizeRunnerActionValuationBaselineMetrics([
+      summary([terminalEndTurn, forcedDraw], {
+        winner: "runner",
+        gameEndReason: "corp_deck_empty",
+      }),
+    ]);
+
+    expect(metrics).toMatchObject({
+      runnerEndTurnsWithClicks: 1,
+      runnerInevitableCorpDeckoutEndTurnsWithClicks: 1,
+      runnerPrematureEndTurnsWithClicks: 0,
+    });
+  });
+
+  it("does not trust the terminal plan label without the immediate deckout outcome", () => {
+    const mislabeledEndTurn = action("end_turn", 4);
+    mislabeledEndTurn.planKind = "runner.secure_terminal_win";
+    const forcedDraw = action("mandatory_draw", 3);
+    forcedDraw.side = "corp";
+
+    const metrics = summarizeRunnerActionValuationBaselineMetrics([
+      summary([mislabeledEndTurn, forcedDraw], {
+        winner: "runner",
+        gameEndReason: "agenda_points",
+      }),
+    ]);
+
+    expect(metrics).toMatchObject({
+      runnerEndTurnsWithClicks: 1,
+      runnerInevitableCorpDeckoutEndTurnsWithClicks: 0,
+      runnerPrematureEndTurnsWithClicks: 1,
+    });
+  });
+
+  it("does not call an alternative-free click-rich end turn premature", () => {
+    const forcedEndTurn = action("end_turn", 7);
+    forcedEndTurn.legalActionCount = 1;
+    forcedEndTurn.actionableAlternativeCount = 0;
+
+    expect(
+      summarizeRunnerActionValuationBaselineMetrics([
+        summary([forcedEndTurn]),
+      ]),
+    ).toMatchObject({
+      runnerEndTurnsWithClicks: 1,
+      runnerInevitableCorpDeckoutEndTurnsWithClicks: 0,
+      runnerPrematureEndTurnsWithClicks: 0,
+    });
+  });
+
+  it("accepts only a fully certified plan-first route-exhaustion completion", () => {
+    const certified = action("end_turn", 3, [
+      "plan_first_lane:plan",
+      "plan_step_capability:complete_turn_after_productive_routes_exhausted",
+      "plan_assessment_evidence:productive_legal_routes_exhausted",
+    ]);
+    certified.planKind = "runner.complete_turn";
+    certified.reasonCode = "plan_first.runner.complete_turn";
+    certified.actionableAlternativeCount = 7;
+    const missingCapability = {
+      ...certified,
+      evidence: certified.evidence.filter(
+        (entry) =>
+          entry !==
+          "plan_step_capability:complete_turn_after_productive_routes_exhausted",
+      ),
+    };
+
+    expect(
+      summarizeRunnerActionValuationBaselineMetrics([
+        summary([certified, missingCapability]),
+      ]),
+    ).toMatchObject({
+      runnerEndTurnsWithClicks: 2,
+      runnerInevitableCorpDeckoutEndTurnsWithClicks: 0,
+      runnerPrematureEndTurnsWithClicks: 1,
+    });
+  });
+
   it("counts only structured negative redundant persistent installs", () => {
     const metrics = summarizeRunnerActionValuationBaselineMetrics([
       summary([
@@ -66,8 +151,9 @@ describe("summarizeRunnerActionValuationBaselineMetrics", () => {
 
 function summary(
   actionSequence: AiSimulationSummary["actionSequence"],
+  overrides: Partial<AiSimulationSummary> = {},
 ): AiSimulationSummary {
-  return { actionSequence } as AiSimulationSummary;
+  return { actionSequence, ...overrides } as AiSimulationSummary;
 }
 
 function action(

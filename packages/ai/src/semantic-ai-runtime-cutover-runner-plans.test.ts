@@ -1,20 +1,101 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseRunnerAction } from "./index";
+import { evaluateRunnerRunTargets } from "./runner-run-target-evaluation";
 import {
   AI_PLAY_STRENGTH_PILOT_ENV,
   AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV,
 } from "./decision/pilot-scope-registry";
+import { PlanResolutionFailure } from "./plans/plan-resolution-failure";
 import { resetTacticalPlanMemory } from "./tactical-plans";
 import {
+  attachOwnDeckSnapshot,
   aiInput,
   legalAction,
   publicEvent,
   rdAccessEvent,
   runnerWallCoverageInput,
   server,
-  tacticalDebugItems,
   visibleCard,
 } from "./semantic-ai-runtime-cutover.test-support";
+
+type RunnerDecision = ReturnType<typeof chooseRunnerAction>;
+
+function expectPlanDecision(
+  decision: RunnerDecision,
+  expected: {
+    actionId: string;
+    planKind: string;
+    capability: string;
+    priorityClass?: string;
+    assessmentEvidence?: string;
+  },
+): void {
+  expect(decision.actionId).toBe(expected.actionId);
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.decisionDebug?.planKind).toBe(expected.planKind);
+  expect(decision.evidence).toEqual(
+    expect.arrayContaining([
+      "plan_first_runtime:true",
+      `plan_module:${expected.planKind}`,
+      `plan_step_capability:${expected.capability}`,
+      ...(expected.priorityClass
+        ? [`plan_priority_class:${expected.priorityClass}`]
+        : []),
+      ...(expected.assessmentEvidence
+        ? [`plan_assessment_evidence:${expected.assessmentEvidence}`]
+        : []),
+    ]),
+  );
+}
+
+function actionAlternative(decision: RunnerDecision, actionId: string) {
+  return decision.decisionDebug?.actionAlternatives?.find(
+    (alternative) => alternative.actionId === actionId,
+  );
+}
+
+function planPortfolioItems(decision: RunnerDecision): string[] {
+  return (
+    decision.decisionDebug?.detailSections?.find(
+      (section) => section.id === "plan_portfolio",
+    )?.items ?? []
+  );
+}
+
+function expectMissingPlanModuleCoverage(
+  decide: () => RunnerDecision,
+  expectedLegalActionTypes: readonly string[],
+): PlanResolutionFailure {
+  let failure: unknown;
+  try {
+    decide();
+  } catch (error) {
+    failure = error;
+  }
+
+  expect(failure).toBeInstanceOf(PlanResolutionFailure);
+  const planFailure = failure as PlanResolutionFailure;
+  expect(planFailure.code).toBe("missing_plan_module_coverage");
+  expect(planFailure.context.owner).toBe("scheduler");
+  expect(planFailure.context.side).toBe("runner");
+  expect(planFailure.context.legalActionTypes).toEqual(
+    [...expectedLegalActionTypes].sort(),
+  );
+  return planFailure;
+}
+
+function expectExhaustedRunnerTurn(decision: RunnerDecision): void {
+  expect(decision.actionId).toBe("end-turn");
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.evidence).toEqual(
+    expect.arrayContaining([
+      "plan_first_runtime:true",
+      "plan_module:runner.complete_turn",
+      "plan_step_capability:complete_turn_after_productive_routes_exhausted",
+      "plan_assessment_evidence:productive_legal_routes_exhausted",
+    ]),
+  );
+}
 
 describe("Semantic AI runtime cutover — Runner plan and memory contracts", () => {
   const originalRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
@@ -44,7 +125,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     }
   });
 
-  it("keeps an opportunistic central run available while a remote plan is blocked", () => {
+  it("keeps a material central run available while a remote plan is blocked", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-remote",
@@ -64,6 +145,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       ),
     ]);
     input.playerView.own.rig = [];
+    input.playerView.own.agendaPoints = 5;
     input.playerView.servers = [
       server("hq"),
       server("rd"),
@@ -80,14 +162,16 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ];
 
     const decision = chooseRunnerAction(input);
-
-    expect(decision.actionId).toBe("run-hq");
-    expect(decision.decisionDebug?.planKind).toBe(
-      "runner.opportunistic_central_run",
-    );
+    expectPlanDecision(decision, {
+      actionId: "run-hq",
+      planKind: "runner.pressure_central",
+      capability: "pressure_hq_information",
+      priorityClass: "P4",
+      assessmentEvidence: "target:hq",
+    });
   });
 
-  it("uses Broker build and payout as explicit credit-bank plans", () => {
+  it("uses Broker build as an explicit credit-bank plan but does not cash out for low credits alone", () => {
     const bankSource = visibleCard(
       "runner-credit-bank-source",
       "runner",
@@ -118,10 +202,13 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     const stableDecision = chooseRunnerAction(stableInput);
 
-    expect(stableDecision.actionId).toBe("broker-load");
-    expect(stableDecision.decisionDebug?.planKind).toBe(
-      "runner.build_credit_bank",
-    );
+    expectPlanDecision(stableDecision, {
+      actionId: "broker-load",
+      planKind: "runner.credit_bank",
+      capability: "credit_bank_build",
+      priorityClass: "P5",
+      assessmentEvidence: "runner_credit_bank_first_load",
+    });
 
     const payoutBankSource = visibleCard(
       "runner-credit-bank-source",
@@ -163,13 +250,19 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     const lowCreditDecision = chooseRunnerAction(lowCreditInput);
 
-    expect(lowCreditDecision.actionId).toBe("broker-take");
-    expect(lowCreditDecision.decisionDebug?.planKind).toBe(
-      "runner.cash_out_credit_bank",
+    expectPlanDecision(lowCreditDecision, {
+      actionId: "gain-credit",
+      planKind: "runner.economy",
+      capability: "gain_general_liquid_credits",
+      priorityClass: "P6",
+      assessmentEvidence: "runner_finite_portfolio_credit_reserve",
+    });
+    expect(actionAlternative(lowCreditDecision, "broker-take")?.selected).toBe(
+      false,
     );
   });
 
-  it("does not cash out Broker immediately after a stable bank-build plan", () => {
+  it("keeps Broker held and fails closed above the finite reserve after a stable bank-build plan", () => {
     const bankSource = visibleCard(
       "runner-credit-bank-source",
       "runner",
@@ -217,26 +310,20 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction("end-turn", "runner", "end_turn", "End turn", {
+        credits: 0,
+      }, {
+        source: "game_rule",
+      }),
     ]);
     payoutInput.playerView.own.credits = 6;
+    payoutInput.playerView.opponent.deckCount = 10;
     payoutInput.playerView.own.rig = [bankSource];
 
-    const payoutDecision = chooseRunnerAction(payoutInput);
-
-    expect(payoutDecision.actionId).toBe("gain-credit");
-    expect(payoutDecision.decisionDebug?.detailSections).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: "tactical_plan",
-          items: expect.arrayContaining([
-            "previous_plan_type:runner.build_credit_bank",
-          ]),
-        }),
-      ]),
-    );
+    expectExhaustedRunnerTurn(chooseRunnerAction(payoutInput));
   });
 
-  it("prefers the first empty Broker build over low-value runs and generic setup", () => {
+  it("prefers a productive central run over the first empty Broker build", () => {
     const input = aiInput("runner", [
       legalAction(
         "broker-load",
@@ -266,30 +353,18 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
 
     const decision = chooseRunnerAction(input);
-
-    expect(decision.actionId).toBe("broker-load");
-    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+    expectPlanDecision(decision, {
+      actionId: "run-rd",
+      planKind: "runner.pressure_central",
+      capability: "pressure_rd_information",
+      priorityClass: "P4",
+      assessmentEvidence: "target:rd",
+    });
+    expect(actionAlternative(decision, "broker-load")?.whyNot).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          key: "runner_bank_investment_commitment",
-          reason: expect.stringContaining(
-            "bankCommitmentStatus:build_first_load",
-          ),
-        }),
+        expect.stringContaining("not_selected_by_plan:"),
+        expect.stringContaining("candidate_plan:plan:runner.credit_bank:"),
       ]),
-    );
-    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
-      expect.objectContaining({
-        actionId: "run-rd",
-        scoreBreakdown: expect.arrayContaining([
-          expect.objectContaining({
-            key: "runner_bank_commitment_build_over_low_run",
-            reason: expect.stringContaining(
-              "why_bank_build_over_run:low_value_run",
-            ),
-          }),
-        ]),
-      }),
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|fullGameState/i,
@@ -331,15 +406,17 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe("run-remote");
-    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+    expectPlanDecision(decision, {
+      actionId: "run-remote",
+      planKind: "runner.contest_remote",
+      capability: "contest_remote",
+      priorityClass: "P2",
+      assessmentEvidence: "visible_known_agenda_remote",
+    });
+    expect(planPortfolioItems(decision)).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          key: "runner_bank_commitment_run_override",
-          reason: expect.stringContaining(
-            "why_run_over_bank_build:known_agenda",
-          ),
-        }),
+        expect.stringContaining("module:runner.credit_bank"),
+        expect.stringContaining("module:runner.contest_remote"),
       ]),
     );
   });
@@ -357,11 +434,17 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction("end-turn", "runner", "end_turn", "End turn", {
+        credits: 0,
+      }, {
+        source: "game_rule",
+      }),
       legalAction("draw", "runner", "draw_card", "Draw", {
         credits: 0,
       }),
     ]);
     input.playerView.own.credits = 5;
+    input.playerView.opponent.deckCount = 10;
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("onr_v1_154_broker", "runner", "resource"),
@@ -369,21 +452,19 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe("install-broker");
-    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "runner_bank_install_commitment",
-          reason: expect.stringContaining("bankCommitmentStatus:install_ready"),
-        }),
-      ]),
-    );
+    expectPlanDecision(decision, {
+      actionId: "install-broker",
+      planKind: "runner.credit_bank",
+      capability: "credit_bank_install",
+      priorityClass: "P5",
+      assessmentEvidence: "runner_credit_bank_install_ready",
+    });
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|fullGameState/i,
     );
   });
 
-  it("does not let a program-trash install variant bypass duplicate breaker utility", () => {
+  it("fails closed at the finite reserve instead of installing a redundant breaker or taking Basic Credit", () => {
     const cyfermasterHand = visibleCard(
       "cyfermaster-hand",
       "runner",
@@ -410,8 +491,17 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction(
+        "end-turn",
+        "runner",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
     ]);
     input.playerView.own.credits = 5;
+    input.playerView.opponent.deckCount = 10;
     input.playerView.own.gripOrHq = [cyfermasterHand];
     input.playerView.own.rig = [
       visibleCard("cyfermaster-installed", "runner", "program", {
@@ -422,29 +512,10 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       }),
     ];
 
-    const decision = chooseRunnerAction(input);
-    const installAlternative = decision.decisionDebug?.actionAlternatives?.find(
-      (entry) =>
-        entry.actionId === "install-second-cyfermaster-with-program-trash",
-    );
-
-    expect(decision.actionId).toBe("gain-credit");
-    expect(installAlternative?.scoreBreakdown).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "runner_persistent_install_fit",
-          value: expect.any(Number),
-        }),
-      ]),
-    );
-    expect(
-      installAlternative?.scoreBreakdown?.find(
-        (component) => component.key === "runner_persistent_install_fit",
-      )?.value,
-    ).toBeLessThan(0);
+    expectExhaustedRunnerTurn(chooseRunnerAction(input));
   });
 
-  it("does not prepare a redundant wall breaker through Shell Traders", () => {
+  it("fails closed at the finite reserve instead of preparing a redundant wall breaker or taking Basic Credit", () => {
     const dwarf = visibleCard("dwarf-hand", "runner", "program", {
       definitionId: "onr_v1_021_dwarf",
       title: "Dwarf",
@@ -472,8 +543,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction("end-turn", "runner", "end_turn", "End turn", {
+        credits: 0,
+      }, {
+        source: "game_rule",
+      }),
     ]);
     input.playerView.own.credits = 5;
+    input.playerView.opponent.deckCount = 10;
     input.playerView.own.gripOrHq = [dwarf];
     input.playerView.own.rig = [
       visibleCard("pile-driver-installed", "runner", "program", {
@@ -485,17 +562,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       }),
     ];
 
-    const decision = chooseRunnerAction(input);
-    const prepareAlternative = decision.decisionDebug?.actionAlternatives?.find(
-      (entry) => entry.actionId === "prepare-dwarf",
-    );
-
-    expect(decision.actionId).toBe("gain-credit");
-    expect(
-      prepareAlternative?.scoreBreakdown?.find(
-        (component) => component.key === "runner_persistent_install_fit",
-      )?.value,
-    ).toBeLessThan(0);
+    expectExhaustedRunnerTurn(chooseRunnerAction(input));
   });
 
   it("keeps loading Broker below its multi-load value target", () => {
@@ -525,8 +592,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction("end-turn", "runner", "end_turn", "End turn", {
+        credits: 0,
+      }, {
+        source: "game_rule",
+      }),
     ]);
     input.playerView.own.credits = 6;
+    input.playerView.opponent.deckCount = 10;
     input.playerView.own.rig = [
       visibleCard("onr_v1_154_broker", "runner", "resource", {
         counters: { bit: 6 },
@@ -545,23 +618,17 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe("broker-load");
-    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "runner_bank_investment_commitment",
-          reason: expect.stringContaining(
-            "bankCommitmentStatus:build_second_load",
-          ),
-        }),
-      ]),
-    );
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "bankCashOutThreshold:false",
-    );
+    expectPlanDecision(decision, {
+      actionId: "broker-load",
+      planKind: "runner.credit_bank",
+      capability: "credit_bank_build",
+      priorityClass: "P5",
+      assessmentEvidence: "runner_credit_bank_continue_to_value_target",
+    });
+    expect(actionAlternative(decision, "broker-take")?.selected).toBe(false);
   });
 
-  it("cashes out Broker after reaching its multi-load value target", () => {
+  it("fails closed above the finite reserve instead of cashing out Broker or taking Basic Credit", () => {
     const input = aiInput("runner", [
       legalAction(
         "broker-take",
@@ -579,6 +646,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       }),
     ]);
     input.playerView.own.credits = 6;
+    input.playerView.opponent.deckCount = 10;
     input.playerView.own.rig = [
       visibleCard("onr_v1_154_broker", "runner", "resource", {
         counters: { bit: 12 },
@@ -595,20 +663,13 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       }),
     ];
 
-    const decision = chooseRunnerAction(input);
-
-    expect(decision.actionId).toBe("broker-take");
-    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "runner_bank_cashout_gate",
-          reason: expect.stringContaining("why_cashout_now:bank_threshold"),
-        }),
-      ]),
+    expectMissingPlanModuleCoverage(
+      () => chooseRunnerAction(input),
+      ["activated_card_ability", "gain_credit"],
     );
   });
 
-  it("defers Broker cashout when no funding need or bank threshold is visible", () => {
+  it("defers Broker cashout and fails closed above the finite reserve without a parent plan", () => {
     const input = aiInput("runner", [
       legalAction(
         "broker-take",
@@ -624,8 +685,17 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction(
+        "end-turn",
+        "runner",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
     ]);
     input.playerView.own.credits = 6;
+    input.playerView.opponent.deckCount = 10;
     input.playerView.own.rig = [
       visibleCard("onr_v1_154_broker", "runner", "resource", {
         counters: { bit: 3 },
@@ -642,21 +712,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       }),
     ];
 
-    const decision = chooseRunnerAction(input);
-
-    expect(decision.actionId).toBe("gain-credit");
-    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
-      expect.objectContaining({
-        actionId: "broker-take",
-        excluded: true,
-        scoreBreakdown: expect.arrayContaining([
-          expect.objectContaining({
-            key: "runner_bank_cashout_gate",
-            reason: expect.stringContaining("why_cashout_now:no_funding_need"),
-          }),
-        ]),
-      }),
-    );
+    expectExhaustedRunnerTurn(chooseRunnerAction(input));
   });
 
   it("stops loading Broker when stored credits and runner pool are comfortable", () => {
@@ -693,6 +749,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       ),
     ]);
     input.playerView.own.credits = 13;
+    input.playerView.opponent.deckCount = 10;
     input.playerView.own.rig = [
       visibleCard("onr_v1_154_broker", "runner", "resource", {
         counters: { bit: 21 },
@@ -716,35 +773,21 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     expect(decision.actionId).not.toBe("broker-load");
     expect(decision.actionId).not.toBe("broker-take");
-    const decisionDebug = JSON.stringify(decision.decisionDebug);
-    expect(decisionDebug).toContain("bankStoredCredits:21");
-    expect(decisionDebug).toContain("bankComfortableCreditPool:true");
-    expect(decisionDebug).toContain("bankOverDesiredTarget:true");
-    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
-      expect.objectContaining({
-        actionId: "broker-load",
-        scoreBreakdown: expect.arrayContaining([
-          expect.objectContaining({
-            key: "runner_bank_investment_commitment",
-            reason: expect.stringContaining(
-              "bankCommitmentStatus:over_target_hold",
-            ),
-          }),
-        ]),
-      }),
+    expect(planPortfolioItems(decision)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "module:runner.credit_bank|phase:hold|viability:blocked",
+        ),
+      ]),
     );
-    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
-      expect.objectContaining({
-        actionId: "broker-take",
-        excluded: true,
-        scoreBreakdown: expect.arrayContaining([
-          expect.objectContaining({
-            key: "runner_bank_cashout_gate",
-            reason: expect.stringContaining("why_cashout_now:no_funding_need"),
-          }),
+    for (const actionId of ["broker-load", "broker-take"]) {
+      expect(actionAlternative(decision, actionId)?.whyNot).toEqual(
+        expect.arrayContaining([
+          "candidate_plan_evidence:runner_credit_bank_hold_comfortable_value",
+          "candidate_plan_blocker:no_credit_bank_hold_route",
         ]),
-      }),
-    );
+      );
+    }
   });
 
   it("uses legal Mantis search for missing wall coverage before basic draw", () => {
@@ -781,54 +824,19 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       persistTacticalPlanMemory: false,
     });
 
-    expect(decision.actionId).toBe("mantis");
-    expect(decision.reasonCode).toBe("runner.semantic.coverage_search");
-    expect(decision.evidence).toEqual(
+    expectPlanDecision(decision, {
+      actionId: "mantis",
+      planKind: "runner.rig_and_coverage",
+      capability: "search_answer_breaker_wall",
+      priorityClass: "P2",
+      assessmentEvidence: "target:remote_1",
+    });
+    expect(actionAlternative(decision, "mantis")?.whyChosen).toEqual(
       expect.arrayContaining([
-        "semantic_scope:coverage_search",
-        "tactical_plan_type:runner.contest_remote",
-        "tactical_step:search_for_answer",
+        expect.stringContaining("selected_by_plan:"),
+        "selected_for_step:search_answer_breaker_wall",
       ]),
     );
-    expect(decision.evidence).not.toContain("semantic_scope:basic_install");
-    expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
-    const mantisAlternative = decision.decisionDebug?.actionAlternatives?.find(
-      (entry) => entry.actionId === "mantis",
-    );
-    const planSelectionRow = mantisAlternative?.scoreBreakdown?.find(
-      (entry) => entry.key === "selected_by_plan_mapping",
-    );
-    expect(planSelectionRow?.value ?? 0).toBeGreaterThan(0);
-    expect(mantisAlternative).toEqual(
-      expect.objectContaining({
-        sourceTitle: "Mantis, Fixer-at-Large",
-        scoreBreakdown: expect.arrayContaining([
-          expect.objectContaining({
-            key: "runner_goal_fit_coverage_search",
-            label: "Coverage-Suche",
-            reason: expect.stringContaining("source_role:search"),
-          }),
-        ]),
-      }),
-    );
-    const decisionDebug = JSON.stringify(decision.decisionDebug);
-    expect(decisionDebug).toContain("coverageAnswerRole:program_search");
-    expect(decisionDebug).toContain("activeRequiredCapability:breaker_wall");
-    expect(decisionDebug).toContain("matchedCoverageSearchFit:mantis");
-    expect(
-      tacticalDebugItems(decision).some(
-        (item) =>
-          item.includes("id=runner.play_best_hand_card:mantis-card") &&
-          item.includes("card_type=event"),
-      ),
-    ).toBe(true);
-    expect(
-      tacticalDebugItems(decision).some(
-        (item) =>
-          item.includes("id=runner.play_best_hand_card:mantis-card") &&
-          item.includes("step=install_development_card"),
-      ),
-    ).toBe(true);
   });
 
   it("keeps Bodyweight event plan display data as play-not-install fallback", () => {
@@ -864,17 +872,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       persistTacticalPlanMemory: false,
     });
 
-    expect(decision.actionId).toBe("bodyweight");
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining(["semantic_scope:basic_economy_draw"]),
-    );
-    expect(
-      tacticalDebugItems(decision).some(
-        (item) =>
-          item.includes("id=runner.play_best_hand_card:bodyweight-card") &&
-          item.includes("card_type=event"),
-      ),
-    ).toBe(true);
+    expectPlanDecision(decision, {
+      actionId: "bodyweight",
+      planKind: "runner.rig_and_coverage",
+      capability: "draw_for_answer_breaker_wall",
+      priorityClass: "P2",
+      assessmentEvidence: "target:remote_1",
+    });
+    expect(decision.decisionDebug?.selectedActionType).toBe("play_event");
   });
 
   it("keeps The Short Circuit plan display data as a resource installation", () => {
@@ -911,17 +916,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       persistTacticalPlanMemory: false,
     });
 
-    expect(decision.actionId).toBe("install-short-circuit");
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining(["semantic_scope:setup_card_search"]),
-    );
-    expect(
-      tacticalDebugItems(decision).some(
-        (item) =>
-          item.includes("id=runner.play_best_hand_card:short-circuit-card") &&
-          item.includes("card_type=resource"),
-      ),
-    ).toBe(true);
+    expectPlanDecision(decision, {
+      actionId: "install-short-circuit",
+      planKind: "runner.rig_and_coverage",
+      capability: "setup_search_engine_breaker_wall",
+      priorityClass: "P2",
+      assessmentEvidence: "target:remote_1",
+    });
+    expect(decision.decisionDebug?.selectedActionType).toBe("install_card");
   });
 
   it("sets up The Short Circuit as a search engine before basic draw when no direct search is legal", () => {
@@ -958,13 +960,13 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       persistTacticalPlanMemory: false,
     });
 
-    expect(decision.actionId).toBe("install-short-circuit");
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "selected_step_kind:setup_search_engine",
-    );
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "coverageAnswerRole:search_engine_setup",
-    );
+    expectPlanDecision(decision, {
+      actionId: "install-short-circuit",
+      planKind: "runner.rig_and_coverage",
+      capability: "setup_search_engine_breaker_wall",
+      priorityClass: "P2",
+      assessmentEvidence: "target:remote_1",
+    });
   });
 
   it("does not repeat The Short Circuit search while a fetched program waits in grip", () => {
@@ -1001,6 +1003,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       visibleCard("pile-driver", "runner", "program", {
         definitionId: "onr_v1_047_pile-driver",
         title: "Pile Driver",
+        subtypes: ["icebreaker", "fracter", "noisy"],
+        installCost: 1,
       }),
     ];
     input.playerView.publicEvents = [
@@ -1021,10 +1025,20 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       persistTacticalPlanMemory: false,
     });
 
-    expect(decision.actionId).toBe("gain");
-    expect(decision.actionId).not.toBe("short-circuit-search");
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "coverage_search_wait_for_install_or_fund",
+    expectPlanDecision(decision, {
+      actionId: "gain",
+      planKind: "runner.economy",
+      capability: "gain_general_liquid_credits",
+      priorityClass: "P6",
+      assessmentEvidence: "runner_finite_portfolio_credit_reserve",
+    });
+    expect(actionAlternative(decision, "short-circuit-search")?.selected).toBe(
+      false,
+    );
+    expect(actionAlternative(decision, "short-circuit-search")?.whyNot).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("not_selected_by_plan:"),
+      ]),
     );
   });
 
@@ -1061,13 +1075,13 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       persistTacticalPlanMemory: false,
     });
 
-    expect(decision.actionId).toBe("bodyweight");
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "selected_step_kind:draw_for_answer",
-    );
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "coverageAnswerRole:draw_for_answer",
-    );
+    expectPlanDecision(decision, {
+      actionId: "bodyweight",
+      planKind: "runner.rig_and_coverage",
+      capability: "draw_for_answer_breaker_wall",
+      priorityClass: "P2",
+      assessmentEvidence: "target:remote_1",
+    });
   });
 
   it("uses basic draw as draw-for-answer when no search or draw card is legal", () => {
@@ -1083,26 +1097,32 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction("end-turn", "runner", "end_turn", "End turn", {
+        credits: 0,
+      }, {
+        source: "game_rule",
+      }),
       legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
     ]);
     input.playerView.own.credits = 13;
+    input.playerView.opponent.deckCount = 10;
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
     });
 
-    expect(decision.actionId).toBe("draw");
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "selected_step_kind:draw_for_answer",
-    );
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "coverageAnswerRole:basic_draw_fallback",
-    );
-    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
-      expect.objectContaining({
-        actionId: "draw",
-        whyChosen: expect.arrayContaining(["selected_by_plan_mapping"]),
-      }),
+    expectPlanDecision(decision, {
+      actionId: "draw",
+      planKind: "runner.rig_and_coverage",
+      capability: "draw_for_answer_breaker_wall",
+      priorityClass: "P2",
+      assessmentEvidence: "target:remote_1",
+    });
+    expect(actionAlternative(decision, "draw")?.whyChosen).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("selected_by_plan:"),
+        "selected_for_step:draw_for_answer_breaker_wall",
+      ]),
     );
   });
 
@@ -1136,20 +1156,20 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       decision.decisionDebug?.actionAlternatives?.find(
         (entry) => entry.actionId === "run-archives",
       );
-    const selectedAlternative =
-      decision.decisionDebug?.actionAlternatives?.find(
-        (entry) => entry.actionId === "draw",
-      );
-
-    expect(decision.actionId).toBe("draw");
+    expectPlanDecision(decision, {
+      actionId: "draw",
+      planKind: "runner.rig_and_coverage",
+      capability: "draw_for_answer_breaker_wall",
+      priorityClass: "P2",
+      assessmentEvidence: "target:remote_1",
+    });
     expect(archivesAlternative?.whyNot).toEqual(
-      expect.arrayContaining(["plan_mismatch"]),
-    );
-    expect(archivesAlternative?.priority ?? 0).toBeLessThan(
-      selectedAlternative?.priority ?? 0,
-    );
-    expect(JSON.stringify(archivesAlternative?.scoreBreakdown)).toContain(
-      "rawSemanticScore:",
+      expect.arrayContaining([
+        expect.stringContaining("not_selected_by_plan:"),
+        expect.stringContaining(
+          "candidate_plan:plan:runner.pressure_central:central%3Aarchives:ready",
+        ),
+      ]),
     );
   });
 
@@ -1175,23 +1195,22 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe("gain-credit");
-    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
-      expect.objectContaining({
-        actionId: "install-broker",
-        scoreBreakdown: expect.arrayContaining([
-          expect.objectContaining({
-            key: "runner_bank_install_commitment",
-            reason: expect.stringContaining(
-              "why_bank_install_deferred:no_plausible_followup_load",
-            ),
-          }),
-        ]),
-      }),
+    expectPlanDecision(decision, {
+      actionId: "gain-credit",
+      planKind: "runner.economy",
+      capability: "gain_general_liquid_credits",
+      priorityClass: "P6",
+      assessmentEvidence: "runner_finite_portfolio_credit_reserve",
+    });
+    expect(actionAlternative(decision, "install-broker")?.whyNot).toEqual(
+      expect.arrayContaining([
+        "candidate_plan_evidence:runner_credit_bank_install_deferred_no_followup_window",
+        "candidate_plan_blocker:no_credit_bank_hold_route",
+      ]),
     );
   });
 
-  it("defers low-value runs while Top Runners' Conference value is unrealized", () => {
+  it("keeps recurring economy blocked instead of aliasing Basic Draw or Credit into its P4 hold", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-rd",
@@ -1213,23 +1232,88 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
 
     const decision = chooseRunnerAction(input);
-
-    expect(decision.actionId).toBe("draw");
-    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
-      expect.objectContaining({
-        actionId: "run-rd",
-        scoreBreakdown: expect.arrayContaining([
-          expect.objectContaining({
-            key: "runner_no_run_economy_run_penalty",
-            reason: expect.stringContaining(
-              "why_run_deferred_for_conference:low_value_run",
-            ),
-          }),
-        ]),
-      }),
+    expectPlanDecision(decision, {
+      actionId: "run-rd",
+      planKind: "runner.pressure_central",
+      capability: "pressure_rd_information",
+      priorityClass: "P4",
+      assessmentEvidence: "target:rd",
+    });
+    expect(actionAlternative(decision, "draw")?.selected).toBe(false);
+    expect(actionAlternative(decision, "gain-credit")?.selected).toBe(false);
+    expect(planPortfolioItems(decision)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "module:runner.recurring_economy|phase:hold|viability:blocked",
+        ),
+        expect.stringContaining(
+          "blocker:recurring_economy_waiting_for_value",
+        ),
+      ]),
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("lets matchpoint central pressure win within the strategic class without claiming a proven emergency", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
+    ]);
+    input.playerView.own.agendaPoints = input.playerView.agendaPointsToWin - 1;
+    input.playerView.own.credits = 100;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
+      visibleCard("onr_v1_007_blink", "runner", "program"),
+    ];
+    input.playerView.own.gripOrHq = Array.from({ length: 5 }, (_, index) =>
+      visibleCard(`runner-buffer-${index}`, "runner", "event"),
+    );
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("onr_v1_264_rex", "corp", "ice", {
+          rezzed: true,
+          strength: 3,
+        }),
+      ]),
+      server("archives"),
+    ];
+
+    const rdMatchpointTarget = evaluateRunnerRunTargets({ input }).find(
+      (target) => target.targetServerId === "rd",
+    );
+    expect(rdMatchpointTarget).toMatchObject({
+      pathPassability: "reachable",
+      recommendation: "run_now",
+    });
+    expect(rdMatchpointTarget?.score).toBeLessThanOrEqual(0);
+
+    const decision = chooseRunnerAction(input);
+
+    expectPlanDecision(decision, {
+      actionId: "run-rd",
+      planKind: "runner.pressure_central",
+      capability: "pressure_rd_information",
+      priorityClass: "P4",
+    });
+    expect(planPortfolioItems(decision)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "module:runner.recurring_economy|phase:hold|viability:blocked",
+        ),
+      ]),
     );
   });
 
@@ -1260,19 +1344,18 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe("run-rd");
-    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
-      expect.objectContaining({
-        actionId: "install-conference",
-        scoreBreakdown: expect.arrayContaining([
-          expect.objectContaining({
-            key: "runner_no_run_economy_install_commitment",
-            reason: expect.stringContaining(
-              "why_conference_install_deferred:no_setup_window",
-            ),
-          }),
-        ]),
-      }),
+    expectPlanDecision(decision, {
+      actionId: "run-rd",
+      planKind: "runner.pressure_central",
+      capability: "pressure_rd_information",
+      priorityClass: "P4",
+      assessmentEvidence: "target:rd",
+    });
+    expect(actionAlternative(decision, "install-conference")?.whyNot).toEqual(
+      expect.arrayContaining([
+        "candidate_plan_evidence:runner_recurring_economy_install_deferred_no_setup_window",
+        "candidate_plan_blocker:recurring_economy_waiting_for_value",
+      ]),
     );
   });
 
@@ -1303,15 +1386,19 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe("run-remote");
-    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+    expectPlanDecision(decision, {
+      actionId: "run-remote",
+      planKind: "runner.contest_remote",
+      capability: "contest_remote",
+      priorityClass: "P2",
+      assessmentEvidence: "visible_known_agenda_remote",
+    });
+    expect(planPortfolioItems(decision)).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          key: "runner_no_run_economy_run_override",
-          reason: expect.stringContaining(
-            "why_run_allowed_despite_conference:known_agenda",
-          ),
-        }),
+        expect.stringContaining(
+          "module:runner.recurring_economy|phase:hold|viability:blocked",
+        ),
+        expect.stringContaining("module:runner.contest_remote"),
       ]),
     );
   });
@@ -1362,16 +1449,18 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe("run-rd");
-    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "runner_no_run_economy_run_penalty",
-          value: -850,
-          reason: expect.stringContaining("realizedValueEstimate:2"),
-        }),
-      ]),
-    );
+    expectPlanDecision(decision, {
+      actionId: "run-rd",
+      planKind: "runner.pressure_central",
+      capability: "pressure_rd_information",
+      priorityClass: "P4",
+      assessmentEvidence: "target:rd",
+    });
+    expect(
+      planPortfolioItems(decision).some((item) =>
+        item.includes("runner.recurring_economy"),
+      ),
+    ).toBe(false);
   });
 
   it("does not treat turn-start economy without run drawback as no-run commitment", () => {
@@ -1396,12 +1485,21 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     const decision = chooseRunnerAction(input);
 
-    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
-      "noRunEconomyCommitmentActive:true",
-    );
+    expectPlanDecision(decision, {
+      actionId: "run-rd",
+      planKind: "runner.pressure_central",
+      capability: "pressure_rd_information",
+      priorityClass: "P4",
+      assessmentEvidence: "target:rd",
+    });
+    expect(
+      planPortfolioItems(decision).some((item) =>
+        item.includes("runner.recurring_economy"),
+      ),
+    ).toBe(false);
   });
 
-  it("returns from an opportunistic central run to the blocked remote coverage plan", () => {
+  it("returns from a material central run to the blocked remote coverage plan", () => {
     const centralInput = aiInput("runner", [
       legalAction(
         "run-remote",
@@ -1421,6 +1519,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       ),
     ]);
     centralInput.playerView.own.rig = [];
+    centralInput.playerView.own.agendaPoints = 5;
     centralInput.playerView.servers = [
       server("hq"),
       server("rd"),
@@ -1435,6 +1534,11 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];
+    attachOwnDeckSnapshot(centralInput, {
+      deckSnapshotId: "runner-wall-coverage-fixture",
+      side: "runner",
+      cards: [{ cardId: "onr_v1_053_ramming-piston", quantity: 1 }],
+    });
 
     const centralDecision = chooseRunnerAction(centralInput);
     expect(centralDecision.actionId).toBe("run-hq");
@@ -1460,23 +1564,27 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     followupInput.playerView.stateVersion = 2;
     followupInput.playerView.own.rig = [];
+    followupInput.playerView.own.agendaPoints = 5;
     followupInput.playerView.servers = centralInput.playerView.servers;
+    attachOwnDeckSnapshot(followupInput, {
+      deckSnapshotId: "runner-wall-coverage-fixture",
+      side: "runner",
+      cards: [{ cardId: "onr_v1_053_ramming-piston", quantity: 1 }],
+    });
 
     const followupDecision = chooseRunnerAction(followupInput);
 
-    expect(followupDecision.actionId).toBe("draw");
-    expect(followupDecision.decisionDebug?.planKind).toBe(
-      "runner.contest_remote",
-    );
-    expect(followupDecision.decisionDebug?.detailSections).toEqual(
+    expectPlanDecision(followupDecision, {
+      actionId: "draw",
+      planKind: "runner.rig_and_coverage",
+      capability: "draw_for_answer_breaker_wall",
+      priorityClass: "P2",
+      assessmentEvidence: "target:remote_1",
+    });
+    expect(planPortfolioItems(followupDecision)).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          id: "tactical_plan",
-          items: expect.arrayContaining([
-            "previous_plan_type:runner.opportunistic_central_run",
-            "plan_progression_reason:previous_central_probe_satisfied",
-          ]),
-        }),
+        expect.stringContaining("module:runner.rig_and_coverage"),
+        expect.stringContaining("module:runner.pressure_central"),
       ]),
     );
   });
@@ -1535,34 +1643,52 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     followupInput.playerView.stateVersion = 3;
     followupInput.playerView.servers = initialInput.playerView.servers;
+    const followupTurnSerial = followupInput.playerView.turnSerial;
+    if (followupTurnSerial === undefined) {
+      throw new Error("Expected a concrete Runner turn serial.");
+    }
     followupInput.eventTail = [
-      rdAccessEvent("semantic-rd-rock-access", 1, "onr_v1_265_rock-is-strong"),
+      {
+        ...publicEvent("semantic-rd-rock-run", "start_run", 0, {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "rd",
+        }),
+        turnSerial: followupTurnSerial,
+      },
+      {
+        ...rdAccessEvent(
+          "semantic-rd-rock-access",
+          1,
+          "onr_v1_265_rock-is-strong",
+        ),
+        turnSerial: followupTurnSerial,
+      },
     ];
 
     const followupDecision = chooseRunnerAction(followupInput);
     const selected = followupInput.legalActions.find(
       (action) => action.actionId === followupDecision.actionId,
     );
-    const tacticalDebug =
-      followupDecision.decisionDebug?.detailSections
-        ?.find((section) => section.id === "tactical_plan")
-        ?.items.join("\n") ?? "";
-
     expect(
       selected?.type === "start_run" && selected.payload?.serverId === "rd",
     ).toBe(false);
-    expect(tacticalDebug).toContain("runner.opportunistic_central_run:rd");
-    expect(tacticalDebug).toContain("status=abandoned");
-    expect(tacticalDebug).toContain("blockers=target_unreachable");
-    expect(tacticalDebug).toContain(
-      "plan_progression_reason:previous_central_probe_satisfied",
-    );
-    expect(JSON.stringify(followupDecision.decisionDebug)).toContain(
-      "semantic_excluded:known_central_no_current_payoff",
+    expectPlanDecision(followupDecision, {
+      actionId: "run-hq",
+      planKind: "runner.pressure_central",
+      capability: "pressure_hq_information",
+      priorityClass: "P4",
+      assessmentEvidence: "target:hq",
+    });
+    expect(actionAlternative(followupDecision, "run-rd")?.whyNot).toEqual(
+      expect.arrayContaining([
+        "candidate_plan_evidence:runner_central_pressure_known_no_current_payoff:rd",
+        "candidate_plan_blocker:no_current_tactical_route",
+      ]),
     );
   });
 
-  it("excludes a stale known low-value R&D top card from semantic fallback choices", () => {
+  it("fails closed at the finite reserve instead of repeating stale R&D or taking Basic Credit", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-rd",
@@ -1575,27 +1701,41 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction(
+        "end-turn",
+        "runner",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
     ]);
     input.playerView.stateVersion = 3;
+    input.playerView.opponent.deckCount = 10;
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const currentTurnSerial = input.playerView.turnSerial;
+    if (currentTurnSerial === undefined) {
+      throw new Error("Expected a concrete Runner turn serial.");
+    }
     input.eventTail = [
-      rdAccessEvent(
-        "semantic-rd-rock-fallback-access",
-        1,
-        "onr_v1_265_rock-is-strong",
-      ),
+      {
+        ...publicEvent("semantic-rd-rock-fallback-run", "start_run", 0, {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "rd",
+        }),
+        turnSerial: currentTurnSerial,
+      },
+      {
+        ...rdAccessEvent(
+          "semantic-rd-rock-fallback-access",
+          1,
+          "onr_v1_265_rock-is-strong",
+        ),
+        turnSerial: currentTurnSerial,
+      },
     ];
 
-    const decision = chooseRunnerAction(input);
-    const debugText = JSON.stringify(decision.decisionDebug);
-
-    expect(decision.actionId).toBe("gain-credit");
-    expect(debugText).toContain(
-      "semantic_excluded:known_central_no_current_payoff",
-    );
-    expect(debugText).toContain("payoff:known_low_value");
-    expect(debugText).toContain(
-      "rd_run_suppressed_by_known_low_value_top:true",
-    );
+    expectExhaustedRunnerTurn(chooseRunnerAction(input));
   });
 });

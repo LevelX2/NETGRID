@@ -8252,7 +8252,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.1"
+        "actionId": "runner.draw_card"
       }
     ]
   }

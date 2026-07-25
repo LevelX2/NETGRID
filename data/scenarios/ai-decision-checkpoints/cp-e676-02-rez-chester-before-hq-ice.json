@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-decision-checkpoint-v1",
-  "checkpointId": "cp-e676-02-rez-chester-before-hq-ice",
+  "checkpointId": "cp-e676-02-certified-hq-defense-install",
   "source": {
     "kind": "captured_match",
-    "findingId": "e676-chester-persistent-install-discount",
+    "findingId": "e676-certified-hq-defense-install",
     "capturedAt": "2026-07-14T14:26:00.562Z",
     "matchId": "match_e6761d8fcdbd7996",
     "decisionIndex": 101,
@@ -9461,9 +9461,25 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "rez_card",
-        "sourceDefinitionId": "onr_v1_352_chester-mix"
+        "type": "end_turn"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanIds": [
+        "plan:corp.complete_turn:standard-turn-completion"
+      ],
+      "acceptablePlanKinds": [
+        "corp.complete_turn"
+      ],
+      "acceptableCapabilities": [
+        "complete_turn_after_productive_routes_exhausted"
+      ],
+      "requiredAssessmentEvidence": [
+        "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
+        "corp_ice_install_has_no_engine_certified_access_probability_reduction",
+        "corp_root_rez_has_no_exact_engine_certified_economy_or_defense_route",
+        "productive_legal_routes_exhausted"
+      ]
+    }
   }
 }

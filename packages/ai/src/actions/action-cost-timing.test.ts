@@ -43,6 +43,80 @@ describe("action cost and timing profiles", () => {
     });
   });
 
+  it("projects the standardized printed X play-cost contract without treating it as free", () => {
+    const profile = costProfileForAction({
+      ...action("play_operation", {
+        xValue: 2,
+        xMinimum: 1,
+        xMaximum: 4,
+        xUpperBound: 4,
+        xCreditsPerUnit: 1,
+        variableCostKind: "printed_play_cost",
+      }),
+      costs: [{ clicks: 1, credits: 2 }],
+    });
+
+    expect(profile).toMatchObject({
+      clickCost: 1,
+      creditCost: 2,
+      costKnownStatus: "known",
+      xValue: 2,
+      variableCost: {
+        kind: "x",
+        min: 1,
+        max: 4,
+        chosen: 2,
+        source: "legal_action_payload",
+      },
+    });
+    expect(profile.additionalCosts).toEqual(
+      expect.arrayContaining([
+        "xValue",
+        "xMinimum",
+        "xMaximum",
+        "xUpperBound",
+        "xCreditsPerUnit",
+        "variableCostKind",
+      ]),
+    );
+  });
+
+  it("treats an omitted dimension in the complete Engine cost list as exact zero", () => {
+    expect(
+      costProfileForAction({
+        ...action("install_card", {}),
+        costs: [{ clicks: 1 }],
+      }),
+    ).toMatchObject({
+      clickCost: 1,
+      creditCost: 0,
+      costKnownStatus: "known",
+    });
+    expect(
+      costProfileForAction({
+        ...action("play_operation", {}),
+        costs: [{ credits: 3 }],
+      }),
+    ).toMatchObject({
+      clickCost: 0,
+      creditCost: 3,
+      costKnownStatus: "known",
+    });
+  });
+
+  it("keeps an Engine payload payment authoritative when the cost list only spends clicks", () => {
+    expect(
+      costProfileForAction({
+        ...action("activated_card_ability", { paymentAmount: 10 }),
+        costs: [{ clicks: 1 }],
+      }),
+    ).toMatchObject({
+      clickCost: 1,
+      creditCost: 10,
+      costKnownStatus: "known",
+    });
+  });
+
   it("normalizes structured run duration and action debt", () => {
     expect(
       timingProfileForAction(

@@ -42,8 +42,27 @@ import type {
   RunnerTraceCounterEffectImplementation,
 } from "../ability-engine/definition-types";
 
+/**
+ * Declares a Corp root-card credit outcome that resolves only after the
+ * Runner's post-rez jack-out intervention window.
+ *
+ * This intentionally is not lifecycle.on_rez: the generic on-rez lifecycle
+ * executes immediately, while this outcome can still be prevented by the
+ * Runner leaving before the card effect resolves.
+ */
+export type CorpRootRezCreditOutcomeImplementation = {
+  timing: "after_runner_rez_interrupt_window";
+  effect: {
+    kind: "gain_credits";
+    recipient: "corp";
+    amount: number;
+    visibility: "public";
+  };
+};
+
 export type CardImplementationDefinition = {
   cardDefinitionId: CardDefinitionId;
+  corpRootRezCreditOutcome?: CorpRootRezCreditOutcomeImplementation;
   advanceable?: {
     while: "installed_before_and_after_rez";
   };
@@ -71,7 +90,11 @@ export type CardImplementationDefinition = {
     visibility: "public";
   };
   icebreakerSubtypeChange?: {
-    timing: "runner_main" | "during_run" | "runner_cost_penalty_support" | "access_start";
+    timing:
+      | "runner_main"
+      | "during_run"
+      | "runner_cost_penalty_support"
+      | "access_start";
     cost: { clicks: 0 | 1; credits: number };
     choices: readonly ("code_gate" | "sentry" | "wall")[];
     limit?: "once_until_selected";

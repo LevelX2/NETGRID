@@ -4608,7 +4608,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.hq"
+        "targetServerId": "hq"
       },
       {
         "type": "gain_credit"
@@ -4622,6 +4622,19 @@
       {
         "actionId": "runner.start_run.rd"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.pressure_central",
+        "runner.economy"
+      ],
+      "acceptableCapabilities": [
+        "pressure_hq_information",
+        "gain_general_liquid_credits"
+      ],
+      "forbiddenCapabilities": [
+        "pressure_rd_information"
+      ]
+    }
   }
 }

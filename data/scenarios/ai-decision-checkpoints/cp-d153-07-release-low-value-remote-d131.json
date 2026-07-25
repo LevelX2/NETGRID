@@ -10449,10 +10449,28 @@
     }
   },
   "expectation": {
-    "forbiddenActions": [
+    "acceptableActions": [
       {
-        "type": "start_run",
-        "targetServerId": "remote_1"
+        "actionId": "runner.start_run.remote_1"
+      }
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.contest_remote"],
+      "acceptableCapabilities": ["contest_remote"],
+      "requiredAssessmentEvidence": [
+        "runner_direct_run_converts_now:remote_1"
+      ]
+    },
+    "runTargets": [
+      {
+        "actionId": "runner.start_run.remote_1",
+        "targetServerId": "remote_1",
+        "pathPassability": "reachable",
+        "recommendation": "run_if_free",
+        "requiredEvidence": [
+          "remote_score_threat:possible",
+          "remote_memory_payoff:partial_unknown"
+        ]
       }
     ]
   }

@@ -34,7 +34,7 @@ describe("baseline seed 03 and seed 05 exact loop checkpoints", () => {
       postRemediationNewsgroupLoopJson,
     ],
     [
-      "funds the protected agenda instead of landing an unconvertible last-click tag",
+      "continues the funded protected agenda instead of landing an unconvertible last-click tag",
       thirdTraceWithoutPayoffJson,
     ],
     [

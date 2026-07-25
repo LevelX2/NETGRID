@@ -13,7 +13,7 @@ import type { TacticalGoalLike } from "./decision/semantic-decision-frame";
 import { corpPunishCandidates } from "./plans/tactical-plan-corp-helpers";
 import type { TacticalPlanBuildContext } from "./plans/tactical-plan-types";
 import { candidateRequiresSuccessfulTrace } from "./runtime/trace-tag-success-estimate";
-import { buildCorpIceCardPlacementProfile } from "./runtime/corp-ice-placement/corp-ice-placement";
+import { buildCorpIceCardFacts } from "./runtime/corp-ice-placement/corp-ice-placement";
 
 type Hint = {
   cardId: string;
@@ -63,7 +63,7 @@ describe("match FD7671 card-hint contract", () => {
     expect(runtimeHint?.roles).toEqual(["ice", "trace"]);
     expect(runtimeHint?.planRoles).toEqual(["defend_server"]);
 
-    const profile = buildCorpIceCardPlacementProfile({
+    const profile = buildCorpIceCardFacts({
       instanceId: "rex-consumer-contract",
       definitionId: "onr_v1_264_rex",
       known: true,

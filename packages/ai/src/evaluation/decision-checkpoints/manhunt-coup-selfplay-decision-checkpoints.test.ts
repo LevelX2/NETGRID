@@ -52,17 +52,31 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("enters the final winning scoreline before the last R&D card is drawn", () => {
+  it("fails closed at matchpoint while exact remote score protection remains unknown", () => {
     const result = runAiDecisionCheckpoint(fixture(deckoutCloseoutJson));
 
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("keeps ordinary recovery when R&D provides several future turns", () => {
+  it("also completes the turn with no finite need while exact score protection remains unknown", () => {
     const relaxedClock = mutateFixture(deckoutCloseoutJson, (checkpoint) => {
       moveArchivesCardsToRd(checkpoint, 6);
       checkpoint.expectation = {
-        acceptableActions: [{ type: "gain_credit" }, { type: "draw_card" }],
+        acceptableActions: [{ type: "end_turn" }],
+        planExecution: {
+          acceptablePlanIds: [
+            "plan:corp.complete_turn:standard-turn-completion",
+          ],
+          acceptablePlanKinds: ["corp.complete_turn"],
+          acceptableCapabilities: [
+            "complete_turn_after_productive_routes_exhausted",
+          ],
+          requiredAssessmentEvidence: [
+            "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
+            "corp_score_protection_assessment_unknown:remote_1:subset_assessment_unknown",
+            "productive_legal_routes_exhausted",
+          ],
+        },
       };
     });
 

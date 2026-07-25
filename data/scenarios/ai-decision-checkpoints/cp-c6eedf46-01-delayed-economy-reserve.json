@@ -4209,17 +4209,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "sourceDefinitionId": "onr_v1_152_back-door-to-hilliard"
-      },
-      {
         "type": "start_run",
         "targetServerId": "hq"
-      },
-      {
-        "type": "draw_card"
-      },
-      {
-        "type": "gain_credit"
       }
     ],
     "forbiddenActions": [
@@ -4229,6 +4220,11 @@
       {
         "sourceDefinitionId": "onr_v1_139_r-and-d-interface"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_hq_information"],
+      "requiredAssessmentEvidence": ["target:hq"]
+    }
   }
 }

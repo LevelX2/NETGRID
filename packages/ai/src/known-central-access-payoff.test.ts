@@ -273,6 +273,120 @@ describe("known central access payoff HQ knownness", () => {
     expect(payoff.evidence).not.toContain("central_memory_payoff:trash_affordable");
   });
 
+  it("binds an affordable known HQ trash payoff to its definition and cost", () => {
+    const payoff = evaluateKnownCentralAccessPayoff(
+      aiInput({ handCount: 2, credits: 4 }),
+      "hq",
+      beliefWithHqMemory({
+        handCount: 2,
+        knownDefinitions: [
+          "onr_v1_281_accounts-receivable",
+          "onr_v1_330_krumz",
+        ],
+        unknownRestCount: 0,
+      }),
+    );
+
+    expect(payoff).toMatchObject({
+      payoff: "trash_affordable",
+      knownNoCurrentPayoff: false,
+    });
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "hq_known_trash_definition:onr_v1_330_krumz",
+        "hq_known_trash_cost:2",
+        "hq_known_trash_declined_count:0",
+      ]),
+    );
+  });
+
+  it("does not recreate a fully known HQ trash payoff after declining it", () => {
+    const access = publicEvent("evt_hq_krumz_access", "access_card", 2, {
+      actor: "runner",
+      actionType: "access_card",
+      serverLabel: "HQ",
+      cardDefinitionId: "onr_v1_330_krumz",
+      title: "Krumz",
+    });
+    const decline = publicEvent("evt_hq_krumz_decline", "decline_trash", 3, {
+      actor: "runner",
+      actionType: "decline_trash",
+    });
+    const payoff = evaluateKnownCentralAccessPayoff(
+      aiInput({
+        handCount: 2,
+        credits: 4,
+        publicEvents: [access, decline],
+      }),
+      "hq",
+      beliefWithHqMemory({
+        handCount: 2,
+        knownDefinitions: [
+          "onr_v1_281_accounts-receivable",
+          "onr_v1_330_krumz",
+        ],
+        unknownRestCount: 0,
+      }),
+    );
+
+    expect(payoff).toMatchObject({
+      payoff: "known_low_value",
+      knownNoCurrentPayoff: true,
+      penalty: 700,
+    });
+    expect(payoff.reasons).toContain(
+      "known_hq_trash_payoff_already_declined",
+    );
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "hq_known_trash_declined_definition:onr_v1_330_krumz",
+        "hq_run_suppressed_by_recent_declined_trash:true",
+      ]),
+    );
+  });
+
+  it("reopens a declined HQ trash payoff after the Runner improves its economy", () => {
+    const access = publicEvent("evt_hq_krumz_access", "access_card", 2, {
+      actor: "runner",
+      actionType: "access_card",
+      serverLabel: "HQ",
+      cardDefinitionId: "onr_v1_330_krumz",
+      title: "Krumz",
+    });
+    const decline = publicEvent("evt_hq_krumz_decline", "decline_trash", 3, {
+      actor: "runner",
+      actionType: "decline_trash",
+    });
+    const gainCredit = publicEvent("evt_runner_credit", "gain_credit", 4, {
+      actor: "runner",
+      actionType: "gain_credit",
+    });
+    const payoff = evaluateKnownCentralAccessPayoff(
+      aiInput({
+        handCount: 2,
+        credits: 5,
+        publicEvents: [access, decline, gainCredit],
+      }),
+      "hq",
+      beliefWithHqMemory({
+        handCount: 2,
+        knownDefinitions: [
+          "onr_v1_281_accounts-receivable",
+          "onr_v1_330_krumz",
+        ],
+        unknownRestCount: 0,
+      }),
+    );
+
+    expect(payoff).toMatchObject({
+      payoff: "trash_affordable",
+      knownNoCurrentPayoff: false,
+    });
+    expect(payoff.evidence).toContain(
+      "hq_known_trash_definition:onr_v1_330_krumz",
+    );
+  });
+
   it("suppresses a repeated R&D run after the Runner declined the known top trash", () => {
     const rdAccess = publicEvent("evt_rd_bbs_access", "access_card", 1, {
       actor: "runner",

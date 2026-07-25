@@ -20,7 +20,11 @@ import {
   toRunnerTurn,
   V095_CORP_DECK,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
-import type { CardDefinition, CardInstanceId, GameState } from "@netgrid/shared";
+import type {
+  CardInstanceId,
+  GameState,
+  ResolvedCardDefinition,
+} from "@netgrid/shared";
 
 describe("HiddenInfo special zone projection", () => {
   it("moves a card to side-private Set Aside atomically without public identity leaks and replays deterministically", () => {
@@ -98,10 +102,13 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
   afterEach(() => {
     delete CARD_DEFINITIONS_BY_ID[hiddenResourceDefinitionId];
     for (const [definitionId, subtypes] of hiddenOriginalSubtypesByDefinitionId) {
+      const currentDefinition = CARD_DEFINITIONS_BY_ID[definitionId];
+      if (!currentDefinition)
+        throw new Error(`Fehlende Test-Kartendefinition: ${definitionId}`);
       CARD_DEFINITIONS_BY_ID[definitionId] = {
-        ...CARD_DEFINITIONS_BY_ID[definitionId],
+        ...currentDefinition,
         subtypes,
-      } as CardDefinition;
+      };
     }
     hiddenOriginalSubtypesByDefinitionId.clear();
   });
@@ -112,9 +119,21 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
       title: hiddenResourceTitle,
       side: "runner",
       type: "resource",
+      playCost: null,
       subtypes: ["hidden"],
       implementationStatus: "playable_mvp",
       installCost: 1,
+      numeric: {
+        cost: null,
+        installCost: 1,
+        memoryCost: null,
+        strength: null,
+        rezCost: null,
+        trashCost: null,
+        advancementRequirement: null,
+        agendaPoints: null,
+      },
+      strengthModel: { kind: "not_applicable" },
       rulesText:
         "Harness-only hidden Runner resource for side-safe install and trash tests.",
       mechanics: [
@@ -123,7 +142,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
         "hidden_runner_resource_foundation",
         "test_fixture",
       ],
-    } satisfies CardDefinition;
+    } satisfies ResolvedCardDefinition;
   }
 
   function hiddenResourceHarnessGame(seed: string): GameState {

@@ -4632,10 +4632,16 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "sourceDefinitionId": "onr_v1_039_krash"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.pressure_central"
+      ],
+      "acceptableCapabilities": [
+        "pressure_rd_information"
+      ],
+      "requiredAssessmentEvidence": [
+        "target:rd"
+      ]
+    }
   }
 }

@@ -13,7 +13,7 @@ import {
 
 const EVENT_ID = "event_1" as CardInstanceId;
 const OPERATION_ID = "operation_1" as CardInstanceId;
-const RUNNER_EVENT_DEFINITION_ID = "onr_v1_097_livewires-contacts";
+const RUNNER_EVENT_DEFINITION_ID = "onr_classic_038_gypsytm-schedule-analyzer";
 const CORP_OPERATION_DEFINITION_ID = "simple_economy_operation";
 
 function state(): GameState {
@@ -215,6 +215,21 @@ describe("play-card-execution", () => {
     ]);
   });
 
+  it("rejects a Runner event whose action cost does not match its fixed play-cost contract", () => {
+    const calls: string[] = [];
+    const targetState = state();
+
+    expect(() =>
+      handlePlayCardExecution(
+        hostFor(targetState, calls),
+        legalAction("play_event", EVENT_ID, 1),
+      ),
+    ).toThrow("Die Event-Kosten sind nicht mehr gueltig.");
+    expect(calls).toEqual([]);
+    expect(targetState.runner.grip).toContain(EVENT_ID);
+    expect(targetState.runner.heap).not.toContain(EVENT_ID);
+  });
+
   it("uses on-play CardImplementation for runner events before resolver fallback", () => {
     const calls: string[] = [];
     const targetState = state();
@@ -223,12 +238,12 @@ describe("play-card-execution", () => {
       hostFor(targetState, calls, {
         cardImplementation: { canPlayPrintedCostOnPlay: () => true },
       }),
-      legalAction("play_event", EVENT_ID),
+      legalAction("play_event", EVENT_ID, 2),
     );
 
     expect(calls).toEqual([
       "click:runner",
-      "credits:runner:1",
+      "credits:runner:2",
       `remove:${EVENT_ID}`,
       `onPlay:${RUNNER_EVENT_DEFINITION_ID}:${EVENT_ID}`,
     ]);
@@ -255,6 +270,22 @@ describe("play-card-execution", () => {
       `remove:${OPERATION_ID}`,
       `operationResolver:${CORP_OPERATION_DEFINITION_ID}:play_operation`,
     ]);
+  });
+
+  it("rejects a Corp operation without an explicit credit cost", () => {
+    const calls: string[] = [];
+    const targetState = state();
+    const malformedAction = legalAction("play_operation", OPERATION_ID, 3);
+    malformedAction.costs = [{ clicks: 1 }];
+
+    expect(() =>
+      handlePlayCardExecution(
+        hostFor(targetState, calls),
+        malformedAction,
+      ),
+    ).toThrow("Die Operation hat keine gueltigen Credit-Kosten.");
+    expect(calls).toEqual([]);
+    expect(targetState.corp.hq).toContain(OPERATION_ID);
   });
 
   it("keeps printed-cost operation revalidation and hidden/bad-publicity payloads stable", () => {

@@ -1,11 +1,9 @@
 import {
-  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
 
-import { RUNTIME_CARDS } from "../ai-hints";
 import type { CorpCentralRezReserveAssessment } from "./corp-scoring-assessment-types";
 import {
   semanticRuntimeCorpCentralPressureAssessment,
@@ -50,7 +48,7 @@ export function createSemanticRuntimeCorpCentralRezContext(
   semanticRuntimeCorpActionIceRezCost: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => number;
+  ) => number | undefined;
   semanticRuntimeCorpCentralRezReserveAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -63,19 +61,28 @@ export function createSemanticRuntimeCorpCentralRezContext(
   const semanticRuntimeCorpActionIceRezCost = (
     input: AiDecisionInput,
     action: LegalAction,
-  ): number => {
+  ): number | undefined => {
     const sourceCard = dependencies.actionSourceCard(input, action);
-    const sourceDefinitionId =
-      sourceCard?.definitionId ??
-      dependencies.sourceDefinitionIdForAction(input, action);
-    return (
-      sourceCard?.rezCost ??
-      (sourceDefinitionId
-        ? (RUNTIME_CARDS[sourceDefinitionId]?.numeric.rezCost ??
-          CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.rezCost)
-        : undefined) ??
-      0
-    );
+    const serverId = dependencies.actionServerId(input, action);
+    const payload = action.payload;
+    const finalCredits = payload?.postInstallRezQuoteFinalCredits;
+    if (
+      !sourceCard ||
+      !semanticRuntimeCorpIsCentralServer(serverId) ||
+      payload?.postInstallRezQuoteComplete !== true ||
+      payload.postInstallRezQuoteCardId !== sourceCard.instanceId ||
+      payload.postInstallRezQuoteTargetServerId !== serverId ||
+      payload.postInstallRezQuoteProjectedServerId !== serverId ||
+      payload.postInstallRezQuoteExpiresAtStateVersion !==
+        input.playerView.stateVersion ||
+      !Number.isSafeInteger(finalCredits) ||
+      (finalCredits as number) < 0 ||
+      payload.postInstallRezQuoteMandatoryAgendaPointCost !== 0 ||
+      payload.postInstallRezQuoteMandatoryAdditionalCostKind !== undefined
+    ) {
+      return undefined;
+    }
+    return finalCredits as number;
   };
 
   const semanticRuntimeCorpHasAgendaInHq = (input: AiDecisionInput): boolean =>
@@ -103,7 +110,7 @@ export function createSemanticRuntimeCorpCentralRezContext(
     );
     if (!sourceDefinitionId) return undefined;
     const rezFloor = semanticRuntimeCorpActionIceRezCost(input, action);
-    if (rezFloor <= 0) return undefined;
+    if (rezFloor === undefined || rezFloor <= 0) return undefined;
     const creditsAfterAction =
       input.playerView.own.credits - dependencies.actionCreditCost(action);
     const blockedByFloor = creditsAfterAction < rezFloor;
@@ -174,7 +181,7 @@ export function semanticRuntimeCorpExistingCentralRezFloorAssessments(
     );
     const rezCosts = (server?.ice ?? [])
       .filter((ice) => ice.rezzed !== true)
-      .map(semanticRuntimeCorpVisibleIceRezCost)
+      .map((ice) => semanticRuntimeCorpVisibleIceRezCost(input, serverId, ice))
       .filter((cost): cost is number => cost !== undefined && cost > 0);
     const rezFloor = rezCosts.length > 0 ? Math.min(...rezCosts) : 0;
     const blockedByFloor =
@@ -218,13 +225,23 @@ function semanticRuntimeCorpIsCentralServer(
 }
 
 function semanticRuntimeCorpVisibleIceRezCost(
+  input: AiDecisionInput,
+  serverId: CorpCentralServerId,
   ice: VisibleCard,
 ): number | undefined {
-  return (
-    ice.rezCost ??
-    (ice.definitionId
-      ? (RUNTIME_CARDS[ice.definitionId]?.numeric.rezCost ??
-        CARD_DEFINITIONS_BY_ID[ice.definitionId]?.rezCost)
-      : undefined)
-  );
+  const quote = ice.effectiveRezCostQuote;
+  if (
+    quote?.context !== "installed" ||
+    !quote.complete ||
+    quote.cardId !== ice.instanceId ||
+    quote.targetServerId !== serverId ||
+    quote.projectedServerId !== serverId ||
+    quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !Number.isSafeInteger(quote.finalCredits) ||
+    quote.finalCredits < 0 ||
+    quote.mandatoryAdditionalCosts.agendaPoints !== 0
+  ) {
+    return undefined;
+  }
+  return quote.finalCredits;
 }

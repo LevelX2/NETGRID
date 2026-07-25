@@ -8518,13 +8518,17 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "advance_card"
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [
       {
-        "type": "gain_credit"
+        "type": "advance_card"
+      },
+      {
+        "type": "end_turn"
       }
     ]
+    ,"planExecution":{"acceptablePlanKinds":["corp.hand_and_agenda_management"],"acceptableCapabilities":["draw_for_plan"],"requiredAssessmentEvidence":["corp_option_development_below_hand_capacity"]}
   }
 }

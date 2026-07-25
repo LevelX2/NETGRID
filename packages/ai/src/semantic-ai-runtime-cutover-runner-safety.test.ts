@@ -8,8 +8,14 @@ import {
   getTacticalPlanMemorySnapshot,
   resetTacticalPlanMemory,
 } from "./tactical-plans";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+} from "./plans/resident-plan-portfolio-memory";
+import { missingBreakerCoverageKind } from "./plans/tactical-plan-breaker-coverage";
 import type { VisibleCard } from "@netgrid/shared";
 import {
+  attachOwnDeckSnapshot,
   aiInput,
   legalAction,
   publicEvent,
@@ -27,6 +33,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
 
   afterEach(() => {
     resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     if (originalRuntimeMode === undefined) {
       delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     } else {
@@ -75,31 +82,38 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "runner-wall-coverage-safety",
+      side: "runner",
+      cards: [{ cardId: "onr_v1_053_ramming-piston", quantity: 1 }],
+    });
 
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("draw");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "tactical_plan_type:runner.contest_remote",
-        "tactical_step:draw_for_answer",
+        "plan_module:runner.rig_and_coverage",
+        "plan_step_capability:draw_for_answer_breaker_wall",
       ]),
     );
-    expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.rig_and_coverage",
+    );
     expect(decision.decisionDebug?.detailSections).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          id: "tactical_plan",
+          id: "plan_execution",
           items: expect.arrayContaining([
-            "selected_step_kind:draw_for_answer",
-            "selected_step_mapping:matched",
+            "module:runner.rig_and_coverage",
+            "capability:draw_for_answer_breaker_wall",
           ]),
         }),
       ]),
     );
   });
 
-  it("builds credits when a matching blocked-server breaker is already in hand", () => {
+  it("draws for a barrier breaker when the hand card only breaks trace subroutines", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-remote",
@@ -118,9 +132,11 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     input.playerView.own.rig = [];
     input.playerView.own.gripOrHq = [
       visibleCard("expensive-fracter", "runner", "program", {
+        definitionId: "onr_v1_056_replicator",
+        title: "Replicator",
         installCost: 6,
-        subtypes: ["Fracter"],
-        rulesText: "1 credit: Break 1 barrier subroutine.",
+        subtypes: ["Icebreaker"],
+        rulesText: "Break a Trace subroutine.",
       }),
     ];
     input.playerView.servers = [
@@ -138,20 +154,26 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       ),
     ];
 
+    expect(
+      missingBreakerCoverageKind(input.playerView, "remote_1"),
+    ).toBe("breaker_wall");
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.actionId).toBe("draw");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "tactical_plan_type:runner.contest_remote",
-        "tactical_step:gain_credits",
+        "plan_module:runner.defense_and_recovery",
+        "plan_step_capability:build_required_hand_buffer",
       ]),
     );
     expect(decision.decisionDebug?.detailSections).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          id: "tactical_plan",
-          items: expect.arrayContaining(["selected_step_kind:gain_credits"]),
+          id: "plan_execution",
+          items: expect.arrayContaining([
+            "module:runner.defense_and_recovery",
+            "capability:build_required_hand_buffer",
+          ]),
         }),
       ]),
     );
@@ -230,9 +252,11 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe(continueIntoEtr.actionId);
-    expect(decision.reasonCode).toBe("runner.semantic.simple_run_choice");
+    expect(decision.reasonCode).toBe(
+      "plan_first.runner.convert_run_window",
+    );
     expect(debugText).toContain(
-      "semantic_excluded:pump_cannot_lead_to_useful_break",
+      "encounter_action_excluded:pump_cannot_lead_to_useful_break",
     );
     expect(debugText).toContain("pump_required_count:1");
   });
@@ -353,7 +377,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe(pump.actionId);
-    expect(decision.reasonCode).toBe("runner.semantic.encounter_survival");
+    expect(decision.reasonCode).toBe(
+      "plan_first.runner.convert_run_window",
+    );
     expect(debugText).not.toContain("pump_cannot_reach_break_strength:true");
 
     input.playerView.own.rig = [codecracker];
@@ -467,11 +493,66 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe(continueIntoEtr.actionId);
-    expect(decision.reasonCode).toBe("runner.semantic.simple_run_choice");
+    expect(decision.reasonCode).toBe(
+      "plan_first.runner.convert_run_window",
+    );
     expect(debugText).toContain(
-      "semantic_excluded:break_cannot_preserve_access_path",
+      "encounter_action_excluded:break_cannot_preserve_access_path",
     );
     expect(debugText).toContain("break_future_path_blocked_after_cost:true");
+  });
+
+  it("trashes an affordable Crybaby installed in a repeatedly pressured central root", () => {
+    const crybaby = visibleCard("crybaby-root", "corp", "upgrade", {
+      definitionId: "onr_v1_354_crybaby",
+      title: "Crybaby",
+      trashCost: 2,
+      rezzed: false,
+    });
+    const trash = legalAction(
+      "trash-crybaby",
+      "runner",
+      "trash_accessed_card",
+      "Crybaby trashen",
+      { credits: 2 },
+      { source: crybaby.instanceId },
+    );
+    const decline = legalAction(
+      "decline-crybaby",
+      "runner",
+      "decline_trash",
+      "Nicht trashen",
+      { credits: 0 },
+      { source: "game_rule" },
+    );
+    trash.timingPoint = "access.resolve_card";
+    decline.timingPoint = "access.resolve_card";
+    const input = aiInput("runner", [trash, decline]);
+    input.playerView.timingPoint = "access.resolve_card";
+    input.playerView.own.credits = 18;
+    input.playerView.own.clicks = 0;
+    input.playerView.servers = [
+      server("hq", [], [crybaby]),
+      server("rd"),
+      server("archives"),
+    ];
+    input.playerView.run = {
+      attackedServerId: "hq",
+      phase: "access",
+      position: { kind: "server", serverId: "hq" },
+      accessedCard: crybaby,
+      successful: true,
+    };
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe(trash.actionId);
+    expect(decision.reasonCode).toBe(
+      "plan_first.runner.convert_run_window",
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      "runner_central_access_trash_low_corp_investment",
+    );
   });
 
   it("builds toward an unaffordable economy payout card in hand", () => {
@@ -493,11 +574,10 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("gain-credit");
-    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+    expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          key: "economy_credit_demand",
-        }),
+        "plan_module:runner.develop_board_and_hand",
+        "plan_step_capability:fund_onr_v1_108_score",
       ]),
     );
   });
@@ -530,21 +610,24 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("draw");
-    expect(decision.reasonCode).toBe("runner.semantic.basic_economy_draw");
-    expect(decision.decisionDebug?.planKind).toBe("runner.survival_defense");
-    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+    expect(decision.reasonCode).toBe(
+      "plan_first.runner.defense_and_recovery",
+    );
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.defense_and_recovery",
+    );
+    expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          key: "runner_hand_buffer_need",
-          value: 2800,
-          reason: expect.stringContaining("flatline_risk:critical"),
-        }),
+        "plan_step_capability:build_required_hand_buffer",
+        "plan_priority_class:P3",
       ]),
     );
     expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
       expect.objectContaining({
         actionId: "run-rd",
-        whyNot: expect.arrayContaining(["plan_mismatch"]),
+        whyNot: expect.arrayContaining([
+          expect.stringContaining("not_selected_by_plan:"),
+        ]),
       }),
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
@@ -604,18 +687,18 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("draw");
-    expect(decision.decisionDebug?.planKind).toBe("runner.survival_defense");
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.defense_and_recovery",
+    );
+    expect(decision.evidence).toContain(
+      "plan_step_capability:build_required_hand_buffer",
+    );
     expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
       expect.objectContaining({
         actionId: "run-rd",
-        scoreBreakdown: expect.arrayContaining([
-          expect.objectContaining({
-            key: "runner_damage_survival_run_risk",
-            value: -2600,
-            reason: expect.stringContaining("full_exposure:true"),
-          }),
+        whyNot: expect.arrayContaining([
+          expect.stringContaining("not_selected_by_plan:"),
         ]),
-        whyNot: expect.arrayContaining(["plan_mismatch"]),
       }),
     );
   });
@@ -638,26 +721,162 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [visibleCard("agenda", "corp", "agenda")]),
+      server("remote_1", [], [
+        visibleCard("agenda", "corp", "agenda", {
+          definitionId: "simple_agenda",
+        }),
+      ]),
     ];
 
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("run-remote");
-    expect(decision.reasonCode).toBe("runner.semantic.remote_contest");
-    expect(decision.decisionDebug?.planKind).not.toBe(
-      "runner.restore_hand_buffer",
+    expect(decision.reasonCode).toBe(
+      "plan_first.runner.contest_remote",
+    );
+    expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
+    expect(decision.evidence).toContain(
+      "plan_step_capability:contest_remote",
     );
     expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
       expect.objectContaining({
         actionId: "draw",
-        scoreBreakdown: expect.arrayContaining([
-          expect.objectContaining({
-            key: "runner_hand_buffer_need",
-            reason: expect.stringContaining("hand:0"),
-          }),
+        whyNot: expect.arrayContaining([
+          expect.stringContaining("not_selected_by_plan:"),
         ]),
       }),
+    );
+  });
+
+  it("uses a terminal remote-contest plan when Blink recovery is impossible", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    const hiddenIce = visibleCard("hidden-ice", "corp", "ice", {
+      rezzed: false,
+    });
+    hiddenIce.known = false;
+    delete hiddenIce.definitionId;
+    const hiddenAdvancedRoot = visibleCard(
+      "hidden-advanced-root",
+      "corp",
+      "agenda",
+      { advancementCounters: 1 },
+    );
+    hiddenAdvancedRoot.known = false;
+    delete hiddenAdvancedRoot.definitionId;
+    input.playerView.own.credits = 17;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [];
+    input.playerView.own.stackOrRdCount = 0;
+    input.playerView.own.rig = [
+      visibleCard("runner-blink", "runner", "program", {
+        definitionId: "onr_v1_007_blink",
+        subtypes: ["icebreaker", "random"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("remote-data-wall", "corp", "ice", {
+            definitionId: "onr_v1_237_data-wall",
+            rezzed: true,
+          }),
+          hiddenIce,
+        ],
+        [hiddenAdvancedRoot],
+      ),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("run-remote");
+    expect(decision.reasonCode).toBe("plan_first.runner.contest_remote");
+    expect(decision.evidence).toContain(
+      "plan_assessment_evidence:runner_irrecoverable_blink_score_threat_contest:remote_1",
+    );
+    expect(decision.evidence).not.toContain(
+      "fallback_reason:missing_module_coverage",
+    );
+  });
+
+  it("keeps Blink recovery ahead of a lethal remote contest when draw exists", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    const hiddenIce = visibleCard("hidden-ice", "corp", "ice", {
+      rezzed: false,
+    });
+    hiddenIce.known = false;
+    delete hiddenIce.definitionId;
+    const hiddenAdvancedRoot = visibleCard(
+      "hidden-advanced-root",
+      "corp",
+      "agenda",
+      { advancementCounters: 1 },
+    );
+    hiddenAdvancedRoot.known = false;
+    delete hiddenAdvancedRoot.definitionId;
+    input.playerView.own.credits = 17;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [];
+    input.playerView.own.stackOrRdCount = 1;
+    input.playerView.own.rig = [
+      visibleCard("runner-blink", "runner", "program", {
+        definitionId: "onr_v1_007_blink",
+        subtypes: ["icebreaker", "random"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("remote-data-wall", "corp", "ice", {
+            definitionId: "onr_v1_237_data-wall",
+            rezzed: true,
+          }),
+          hiddenIce,
+        ],
+        [hiddenAdvancedRoot],
+      ),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("draw");
+    expect(decision.reasonCode).toBe(
+      "plan_first.runner.defense_and_recovery",
+    );
+    expect(decision.evidence).toContain(
+      "plan_step_capability:build_required_hand_buffer",
     );
   });
 
@@ -688,6 +907,11 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "runner-wall-coverage-preview",
+      side: "runner",
+      cards: [{ cardId: "onr_v1_053_ramming-piston", quantity: 1 }],
+    });
 
     const previewDecision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
@@ -695,15 +919,19 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
 
     expect(previewDecision.actionId).toBe("draw");
     expect(previewDecision.evidence).toContain(
-      "tactical_plan_memory_preview_only:true",
+      "resident_plan_portfolio_preview_only:true",
     );
+    expect(residentPlanPortfolioSnapshot(input)).toBeUndefined();
     expect(getTacticalPlanMemorySnapshot(input)).toBeUndefined();
 
     const liveDecision = chooseRunnerAction(input);
 
     expect(liveDecision.actionId).toBe(previewDecision.actionId);
-    expect(getTacticalPlanMemorySnapshot(input)).toMatchObject({
-      type: "runner.contest_remote",
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      executorInstanceId: expect.stringContaining(
+        "plan:runner.rig_and_coverage:",
+      ),
     });
+    expect(getTacticalPlanMemorySnapshot(input)).toBeUndefined();
   });
 });

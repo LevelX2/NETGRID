@@ -283,7 +283,7 @@ function buildLegOutput(
       turns: summary.turns,
       finalAgendaPoints: summary.finalAgendaPoints,
       replayOk: summary.replayOk,
-      actionLimitReached: summary.winner === "action_limit_reached",
+      actionLimitReached: summary.terminationKind === "action_limit",
       errors: summary.errors,
     })),
   };
@@ -532,7 +532,7 @@ function combineTraceMiningAggregates(
       (aggregate) => aggregate.replayFailures,
     ),
     actionLimitReached: summaries.filter(
-      (summary) => summary.winner === "action_limit_reached",
+      (summary) => summary.terminationKind === "action_limit",
     ).length,
     allRedactionSafe,
     redactionSafe,

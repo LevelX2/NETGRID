@@ -2007,6 +2007,52 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
     );
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "stop_restricted_action_sequence" &&
+          action.payload?.v1922ValuPakSequenceStop === true,
+      ),
+    ).toBe(true);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "stop_restricted_action_sequence" &&
+        action.payload?.v1922ValuPakSequenceStop === true,
+    );
+    expect(state.activeSide).toBe("runner");
+    expect(state.runner.clicks).toBe(3);
+    expect(state.runnerTurnFlags?.valuPakProgramInstallActionsRemaining).toBe(
+      0,
+    );
+    expect(
+      state.runnerTurnFlags?.valuPakTemporaryProgramInstallCredits,
+    ).toBe(0);
+    expect(
+      state.runnerTurnFlags?.restrictedActionGrants?.valu_pak_program_install,
+    ).toBe(undefined);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "stop_restricted_action_sequence",
+      abilityId: "program_install_action_bundle",
+      valuPakSequenceStopped: true,
+      valuPakRestrictedActionsForgone: 4,
+      valuPakTemporaryCreditsReturned: 0,
+      runnerClicksAfter: 3,
+    });
+    const resumedActions = getLegalActions(state, "runner");
+    expect(
+      resumedActions.some((action) => action.type === "gain_credit"),
+    ).toBe(true);
+    expect(
+      resumedActions.some((action) => action.type === "draw_card"),
+    ).toBe(true);
+    expect(
+      resumedActions.some(
+        (action) => action.type === "stop_restricted_action_sequence",
+      ),
+    ).toBe(false);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -4954,6 +5000,47 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       minSelections: 0,
       maxSelections: 1,
     });
+    const corpRezChoice = getPlayerView(state, "corp").pendingChoice;
+    const runnerRezView = getPlayerView(state, "runner");
+    const rezOption = corpRezChoice?.options[0];
+    expect(rezOption?.card).toMatchObject({
+      instanceId: iceId,
+      definitionId: "simple_barrier_ice",
+      known: true,
+    });
+    expect(rezOption?.hqInstallRezOptionQuote).toMatchObject({
+      schemaVersion: "corp-optional-rez-choice-quote-v1",
+      kind: "optional_rez_installed_corp_card_with_temporary_credits",
+      context: "hq_to_new_remote_optional_rez",
+      choiceId: corpRezChoice?.choiceId,
+      optionId: `card_${iceId}`,
+      sourceAgendaId: expect.any(String),
+      cardId: iceId,
+      cardDefinitionId: "simple_barrier_ice",
+      targetServerId: remote?.id,
+      installedZone: "serverIce",
+      sequencePosition: 1,
+      stateVersion: state.stateVersion,
+      complete: true,
+      cardType: "ice",
+      baseCredits: 3,
+      finalCredits: 3,
+      mandatoryAdditionalCosts: { agendaPoints: 0 },
+      temporaryCreditsAvailable: 10,
+      temporaryCreditsApplied: 3,
+      regularCreditsAvailable: state.corp.credits,
+      regularCreditsRequired: 0,
+      creditPayable: true,
+      additionalCostsPayable: true,
+      affordable: true,
+    });
+    expect(runnerRezView.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(runnerRezView)).not.toContain(
+      "corp-optional-rez-choice-quote-v1",
+    );
+    expect(JSON.stringify(state.pendingChoice)).not.toContain(
+      "hqInstallRezOptionQuote",
+    );
     const rezChoice = mustAction(
       state,
       "corp",
@@ -4997,18 +5084,58 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"|ACME/,
     );
-    state = applyChoices(state, "corp", []);
+    const assetRezOption =
+      getPlayerView(state, "corp").pendingChoice?.options[0];
+    expect(assetRezOption?.card).toMatchObject({
+      instanceId: assetId,
+      definitionId: "onr_v1_308_acme-savings-and-loan",
+      known: true,
+    });
+    expect(assetRezOption?.hqInstallRezOptionQuote).toMatchObject({
+      sourceAgendaId: "corp_onr_v1_197_data-fort-reclamation_1",
+      cardId: assetId,
+      cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
+      targetServerId: remote?.id,
+      installedZone: "serverRoot",
+      sequencePosition: 2,
+      stateVersion: state.stateVersion,
+      complete: true,
+      cardType: "asset",
+      baseCredits: 0,
+      finalCredits: 0,
+      mandatoryAdditionalCosts: { agendaPoints: 1 },
+      temporaryCreditsAvailable: 7,
+      temporaryCreditsApplied: 0,
+      regularCreditsAvailable: state.corp.credits,
+      regularCreditsRequired: 0,
+      creditPayable: true,
+      additionalCostsPayable: true,
+      affordable: true,
+    });
+    const creditsBeforeAcmeRez = state.corp.credits;
+    state = applyChoices(state, "corp", [`card_${assetId}`]);
     expect(state.pendingChoice).toBeUndefined();
     expect(state.hqInstallRezSequence).toBeUndefined();
+    expect(state.cardInstances[assetId]?.zone).toMatchObject({
+      side: "corp",
+      zone: "archives",
+    });
+    expect(state.corp.credits).toBe(creditsBeforeAcmeRez + 12);
+    expect(state.activeObligationDebtCount).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneAction: "hq_to_new_remote_rez_sequence",
       selectedCount: 2,
       installedCount: 2,
+      rezzedCount: 1,
+      rezzedRootCount: 1,
       temporaryCreditsProvided: 10,
       temporaryCreditsSpent: 3,
       temporaryCreditsRemaining: 7,
       temporaryCreditsReturned: 7,
+      corpCreditsSpent: 0,
+      agendaPointCost: 1,
+      agendaPointCostPaid: 1,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);

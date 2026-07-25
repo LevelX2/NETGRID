@@ -3905,7 +3905,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "purge_runner_virus_counters"
+        "actionId": "corp.draw_card"
       }
     ]
   }

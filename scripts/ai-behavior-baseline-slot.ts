@@ -5,12 +5,14 @@ import {
   summarizeRunnerActionValuationBaselineMetrics,
   type AiBenchmarkDeckSlotDefinition,
   type AiSelfplayTraceMiningResult,
+  type AiSimulationSummary,
 } from "../packages/ai/src/simulation";
 import {
   createAiBehaviorBaselineSlotResult,
   type AiBehaviorBaselineSlotDescriptor,
   type AiBehaviorBaselineSlotResult,
 } from "../packages/ai/src/simulation/ai-behavior-baseline";
+import { actionLimitDiagnosisForSimulation } from "../packages/ai/src/simulation/ai-behavior-baseline-runtime-evidence";
 import { resolveBenchmarkDeckSlot } from "../packages/ai/src/simulation/benchmark-deck-slot-resolver";
 import { validateSimulationDeckSupport } from "../packages/ai/src/simulation/deck-support";
 
@@ -79,21 +81,29 @@ export function runAiBehaviorBaselineSlot(params: {
       runnerActionValuation: summarizeRunnerActionValuationBaselineMetrics(
         trace.summaries,
       ),
-      games: trace.summaries.map((summary) => ({
-        seed: summary.seed,
-        winner: summary.winner,
-        ...(summary.gameEndReason
-          ? { gameEndReason: summary.gameEndReason }
-          : {}),
-        actions: summary.actions,
-        turns: summary.turns,
-        runnerAgendaPoints: summary.finalAgendaPoints.runner,
-        corpAgendaPoints: summary.finalAgendaPoints.corp,
-        finalStateHash: summary.finalStateHash,
-        replayOk: summary.replayOk,
-        errorCount: summary.errors.length,
-      })),
+      games: trace.summaries.map(baselineGameForSummary),
     }),
+  };
+}
+
+function baselineGameForSummary(summary: AiSimulationSummary) {
+  const actionLimitDiagnosis = actionLimitDiagnosisForSimulation(summary);
+  return {
+    seed: summary.seed,
+    terminationKind: summary.terminationKind,
+    winner: summary.winner,
+    ...(summary.gameEndReason ? { gameEndReason: summary.gameEndReason } : {}),
+    actions: summary.actions,
+    turns: summary.turns,
+    runnerAgendaPoints: summary.finalAgendaPoints.runner,
+    corpAgendaPoints: summary.finalAgendaPoints.corp,
+    finalStateHash: summary.finalStateHash,
+    replayOk: summary.replayOk,
+    errorCount: summary.errors.length,
+    ...(summary.runtimeFailures
+      ? { runtimeFailures: summary.runtimeFailures }
+      : {}),
+    ...(actionLimitDiagnosis ? { actionLimitDiagnosis } : {}),
   };
 }
 

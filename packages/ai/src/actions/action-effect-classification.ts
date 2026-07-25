@@ -8,7 +8,7 @@ export function actionProvidesCredits(action: LegalAction): boolean {
 export function isBasicCreditAction(action: LegalAction): boolean {
   return (
     action.type === "gain_credit" &&
-    action.source === "basic_action" &&
+    (action.source === "basic_action" || action.source === "game_rule") &&
     actionProvidesCredits(action)
   );
 }
@@ -74,6 +74,31 @@ export function knownCreditGainAbilitySemantics(action: LegalAction):
   };
 }
 
+export function knownImmediateCreditGainActionSemantics(
+  action: LegalAction,
+):
+  | {
+      semanticActionType: string;
+      tacticSignals: readonly string[];
+    }
+  | undefined {
+  if (
+    ![
+      "play_event",
+      "play_operation",
+      "activated_card_ability",
+      "trigger_ability",
+    ].includes(action.type) ||
+    !actionHasImmediateCreditGain(action)
+  ) {
+    return undefined;
+  }
+  return {
+    semanticActionType: "economy.gain_credit",
+    tacticSignals: ["economy.action", "economy.recover"],
+  };
+}
+
 function isKnownNonCreditGainAction(action: LegalAction): boolean {
   return knownNonCreditGainActionSemantics(action) !== undefined;
 }
@@ -92,5 +117,15 @@ function gainCreditActionHasExplicitNoCreditPayload(
   action: LegalAction,
 ): boolean {
   const amount = action.payload?.gainCreditsAmount;
-  return typeof amount === "number" && Number.isFinite(amount) && amount <= 0;
+  if (typeof amount === "number" && Number.isFinite(amount) && amount <= 0) {
+    return true;
+  }
+  // A scored-agenda ability can share the Engine's gain_credit action family
+  // while performing a non-credit effect. Without an exact positive amount it
+  // is not a certified liquid-credit route.
+  return (
+    action.source !== "basic_action" &&
+    typeof action.payload?.agendaAbility === "string" &&
+    !(typeof amount === "number" && Number.isFinite(amount) && amount > 0)
+  );
 }

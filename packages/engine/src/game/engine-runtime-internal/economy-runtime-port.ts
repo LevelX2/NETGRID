@@ -30,6 +30,10 @@ export type EconomyRuntimePort = {
     state: GameState,
     definition: CardDefinition,
   ) => boolean;
+  stopValuPakProgramInstallSequence: (
+    state: GameState,
+    legalAction: LegalAction,
+  ) => void;
   clearValuPakProgramInstallFlags: (state: GameState) => void;
   consumeValuPakProgramInstallAction: (
     state: GameState,

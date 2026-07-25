@@ -6623,18 +6623,21 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "actionId": "runner.play_event.runner_onr_proteus_124_stakeout_2.runner_onr_proteus_124_stakeout_2"
-      },
-      {
-        "actionId": "runner.draw_card"
-      }
-    ],
     "forbiddenActions": [
       {
         "sourceDefinitionId": "onr_proteus_139_eurocorpse-tm-spin-chip"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.pressure_central"
+      ],
+      "acceptableCapabilities": [
+        "pressure_hq_access"
+      ],
+      "requiredAssessmentEvidence": [
+        "runner_viable_followup_run_lock_release"
+      ]
+    }
   }
 }

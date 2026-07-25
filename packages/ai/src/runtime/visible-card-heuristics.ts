@@ -32,6 +32,35 @@ export function visibleCardPlayOrInstallCost(
   card: VisibleCard,
   definition: VisibleCardHeuristicDefinition | undefined,
 ): number {
+  if (card.type === "event" || card.type === "operation") {
+    const playCost = card.playCost;
+    if (playCost === undefined) {
+      throw new Error(
+        "Invalid visible play-cost projection for a known event or operation.",
+      );
+    }
+    if (playCost.kind === "fixed") {
+      if (Number.isInteger(playCost.credits) && playCost.credits >= 0) {
+        return playCost.credits;
+      }
+      throw new Error(
+        "Invalid visible play-cost projection for a known event or operation.",
+      );
+    }
+    if (
+      playCost.kind === "variable_x" &&
+      Number.isInteger(playCost.minimumX) &&
+      playCost.minimumX >= 1 &&
+      Number.isInteger(playCost.creditsPerX) &&
+      playCost.creditsPerX >= 1 &&
+      playCost.maximumX?.kind === "context"
+    ) {
+      return playCost.minimumX * playCost.creditsPerX;
+    }
+    throw new Error(
+      "Invalid visible play-cost projection for a known event or operation.",
+    );
+  }
   const direct = card.installCost ?? card.cost ?? card.rezCost;
   if (typeof direct === "number" && Number.isFinite(direct)) {
     return Math.max(0, direct);
@@ -87,14 +116,6 @@ export function visibleCardAdvancementRequirement(
     runtime?.numeric?.advancementRequirement ??
     demo?.advancementRequirement
   );
-}
-
-export function visibleIceRezCost(
-  card: VisibleCard,
-  runtime: VisibleCardRuntimeDefinition | undefined,
-  demo: VisibleCardDemoDefinition | undefined,
-): number | undefined {
-  return card.rezCost ?? runtime?.numeric?.rezCost ?? demo?.rezCost;
 }
 
 export function runnerCardLooksLikeCreditPayout(

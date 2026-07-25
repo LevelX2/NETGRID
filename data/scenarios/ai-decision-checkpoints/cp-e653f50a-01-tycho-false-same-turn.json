@@ -11612,6 +11612,11 @@
       },
       {
         "type": "gain_credit"
+      },
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_323_experimental-ai",
+        "targetServerId": "new_remote"
       }
     ]
   }

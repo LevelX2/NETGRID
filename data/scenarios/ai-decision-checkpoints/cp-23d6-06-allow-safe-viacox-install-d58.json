@@ -6181,8 +6181,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.install_card.runner_onr_proteus_131_bargain-with-viacox_1.runner_onr_proteus_131_bargain-with-viacox_1"
+        "actionId": "runner.start_run.hq"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_hq_information"],
+      "requiredAssessmentEvidence": ["target:hq"]
+    }
   }
 }

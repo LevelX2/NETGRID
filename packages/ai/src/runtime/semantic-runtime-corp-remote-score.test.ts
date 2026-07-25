@@ -32,7 +32,6 @@ describe("semanticRuntimeCorpShouldBuildProtectedScoreRemote", () => {
         remoteHasScoreLine: () => false,
         actionCreditCost: () => 99,
         advanceCompletesScore: () => false,
-        visibleIceRezCost: (card) => card.rezCost,
         actionSourceCard: () => undefined,
       },
       candidate,
@@ -160,7 +159,7 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     expect(centralInstallScore(etrIce, "rd", fallbackInput)).toBe(1350);
   });
 
-  it("does not treat unaffordable central ICE as real R&D protection", () => {
+  it("fails closed instead of assigning residual value to unaffordable central ICE", () => {
     const etrIce = corpCard("expensive-barrier", "ice", {
       definitionId: "simple_barrier_ice",
       rezCost: 6,
@@ -171,10 +170,10 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
       runnerRig: [rdInterface()],
     });
 
-    expect(centralInstallScore(etrIce, "rd", input)).toBe(250);
+    expect(centralInstallScore(etrIce, "rd", input)).toBe(0);
   });
 
-  it("does not drain the rez bank for unrezzable central ICE while a remote agenda is active", () => {
+  it("fails closed when install plus exact rez quote exceeds the available bank", () => {
     const etrIce = corpCard("rd-wall", "ice", {
       definitionId: "simple_barrier_ice",
       rezCost: 2,
@@ -206,7 +205,7 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
       ],
     });
 
-    expect(centralInstallScore(etrIce, "rd", input, 2)).toBe(-1500);
+    expect(centralInstallScore(etrIce, "rd", input, 2)).toBe(0);
   });
 
   it("downgrades solo Dog Pile when visible Killer coverage can break it", () => {
@@ -740,9 +739,10 @@ function centralInstallScore(
   input = corpInputForCentralInstall(ice),
   actionCreditCost = 0,
 ): number {
-  const action = centralInstallIceAction(ice, serverId);
+  const action = centralInstallIceAction(ice, serverId, actionCreditCost);
+  const boundInput = bindCanonicalAction(input, action);
   return semanticRuntimeCorpInstallRemoteScore(
-    input,
+    boundInput,
     action,
     [],
     centralInstallDependencies({ actionCreditCost }),
@@ -755,8 +755,9 @@ function installIceScore(
   input = corpInputForCentralInstall(ice),
 ): number {
   const action = centralInstallIceAction(ice, serverId);
+  const boundInput = bindCanonicalAction(input, action);
   return semanticRuntimeCorpInstallRemoteScore(
-    input,
+    boundInput,
     action,
     [],
     centralInstallDependencies(),
@@ -805,24 +806,59 @@ function remoteInstallIceAction(): LegalAction {
 function centralInstallIceAction(
   ice: VisibleCard,
   serverId: "hq" | "rd" | "archives" | "new_remote" | `remote_${number}`,
+  actionCreditCost = 0,
 ): LegalAction {
+  const quotedRezCost =
+    Number.isSafeInteger(ice.rezCost) && (ice.rezCost ?? -1) >= 0
+      ? ice.rezCost
+      : undefined;
   return {
     actionId: `install-${serverId}-ice`,
     label: "Install central ICE",
     type: "install_card",
     side: "corp",
     source: ice.instanceId,
-    costs: [],
+    costs: actionCreditCost > 0 ? [{ credits: actionCreditCost }] : [],
     timingPoint: "corp_action.main",
     visibility: "private_to_actor",
-    expiresAtStateVersion: 12,
+    expiresAtStateVersion: 11,
     targetRequirements: [],
     choiceRequirements: [],
     payload: {
       placement: "ice",
       serverId,
+      cardId: ice.instanceId,
+      ...(ice.definitionId !== undefined
+        ? { sourceDefinitionId: ice.definitionId }
+        : {}),
+      ...(quotedRezCost !== undefined
+        ? {
+            postInstallRezQuoteCardId: ice.instanceId,
+            postInstallRezQuoteTargetServerId: serverId,
+            postInstallRezQuoteProjectedServerId: serverId,
+            postInstallRezQuoteExpiresAtStateVersion: 11,
+            postInstallRezQuoteComplete: true,
+            postInstallRezQuoteBaseCredits: quotedRezCost,
+            postInstallRezQuoteFinalCredits: quotedRezCost,
+            postInstallRezQuoteMandatoryAgendaPointCost: 0,
+          }
+        : {}),
     },
   } as unknown as LegalAction;
+}
+
+function bindCanonicalAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionInput {
+  return {
+    ...input,
+    legalActions: [action],
+    playerView: {
+      ...input.playerView,
+      timingPoint: action.timingPoint,
+    },
+  };
 }
 
 function corpInput(): AiDecisionInput {
@@ -995,6 +1031,7 @@ function corpCard(
     known: true,
     type,
     owner: "corp",
+    controller: "corp",
     ...overrides,
   } as VisibleCard;
 }
@@ -1080,7 +1117,6 @@ function centralInstallDependencies(
     remoteHasScoreLine: () => false,
     actionCreditCost: () => options.actionCreditCost ?? 0,
     advanceCompletesScore: () => false,
-    visibleIceRezCost: (card: VisibleCard) => card.rezCost,
     actionSourceCard: (input: AiDecisionInput, action: LegalAction) =>
       input.playerView.own.gripOrHq.find(
         (card) => card.instanceId === action.source,

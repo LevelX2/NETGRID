@@ -7214,15 +7214,26 @@
   "expectation": {
     "acceptableActions": [
       {
-        "sourceDefinitionId": "onr_v1_279_wall-of-static",
-        "type": "rez_ice"
+        "type": "decline_rez"
       }
     ],
     "contractKind": "correctness",
     "forbiddenActions": [
       {
-        "type": "decline_rez"
+        "sourceDefinitionId": "onr_v1_279_wall-of-static",
+        "type": "rez_ice"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "corp.defend_servers"
+      ],
+      "acceptableCapabilities": [
+        "allocate_server_defense"
+      ],
+      "requiredAssessmentEvidence": [
+        "visible_rez_window_decline_without_defense_threat"
+      ]
+    }
   }
 }

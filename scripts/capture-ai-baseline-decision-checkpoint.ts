@@ -39,27 +39,34 @@ if (supportErrors.length > 0) {
 
 let captured: AiSimulationDecisionCheckpointCapture | undefined;
 let capturedRuntime: AiRuntimeCheckpointV1 | undefined;
-const summary = simulateAiGame({
-  seed: args.seed,
-  maxActions: args.actionIndex + 1,
-  runnerControllerMode: "current_candidate",
-  corpControllerMode: "current_candidate",
-  ...resolved.config,
-  testOnlyDecisionCheckpointCapture: {
-    actionIndices: [args.actionIndex],
-    capture: (snapshot) => {
-      captured = snapshot;
-      capturedRuntime = exportAiRuntimeCheckpoint(
-        snapshot.input,
-        snapshot.deckSnapshot.deckSnapshotId,
-      );
+let summary: ReturnType<typeof simulateAiGame> | undefined;
+let simulationFailure: unknown;
+try {
+  summary = simulateAiGame({
+    seed: args.seed,
+    maxActions: args.actionIndex + 1,
+    runnerControllerMode: "current_candidate",
+    corpControllerMode: "current_candidate",
+    ...resolved.config,
+    testOnlyDecisionCheckpointCapture: {
+      actionIndices: [args.actionIndex],
+      capture: (snapshot) => {
+        captured = snapshot;
+        capturedRuntime = exportAiRuntimeCheckpoint(
+          snapshot.input,
+          snapshot.deckSnapshot.deckSnapshotId,
+        );
+      },
     },
-  },
-});
+  });
+} catch (error) {
+  simulationFailure = error;
+}
 
 if (!captured || !capturedRuntime) {
+  if (simulationFailure) throw simulationFailure;
   throw new Error(
-    `baseline_checkpoint_not_reached:${args.slotId}:${args.seed}:${args.actionIndex}:${summary.actions}:${summary.errors.join("|")}`,
+    `baseline_checkpoint_not_reached:${args.slotId}:${args.seed}:${args.actionIndex}:${summary?.actions ?? 0}:${summary?.errors.join("|") ?? "simulation_failed_before_capture"}`,
   );
 }
 

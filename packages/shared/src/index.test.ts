@@ -7,6 +7,7 @@ import { DEMO_DECKS } from "./demo-decks";
 import {
   DEMO_DECK_IDS,
   AI_DECISION_DEBUG_SCHEMA_VERSION,
+  ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   CARD_DEFINITIONS,
   CARD_DEFINITIONS_BY_ID,
   CURRENT_RULES_BASELINE as INDEX_CURRENT_RULES_BASELINE,
@@ -80,6 +81,14 @@ describe("rules baseline registry", () => {
   });
 });
 
+describe("Engine-randomized ICE install selection schema", () => {
+  it("keeps the replayable actor-private contract explicitly versioned", () => {
+    expect(ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION).toBe(
+      "engine-randomized-ice-install-selection-v1",
+    );
+  });
+});
+
 describe("shared card definition registry", () => {
   it("keeps concrete card data out of the shared contract barrel", () => {
     const barrel = readFileSync(new URL("./index.ts", import.meta.url), "utf8");
@@ -119,6 +128,41 @@ describe("shared card definition registry", () => {
     const asp = CARD_DEFINITIONS_BY_ID["onr_v1_221_asp"];
 
     expect(asp?.subtypes).toEqual(["sentry", "flatline"]);
+  });
+
+  it("exposes only resolved fixed, variable-X, or non-applicable play costs", () => {
+    const variableCostIds: string[] = [];
+    for (const [cardId, definition] of Object.entries(CARD_DEFINITIONS_BY_ID)) {
+      if (definition.type !== "event" && definition.type !== "operation") {
+        expect(definition.playCost, cardId).toBeNull();
+        continue;
+      }
+      expect(definition.playCost, cardId).not.toBeNull();
+      if (definition.playCost.kind === "fixed") {
+        expect(Object.keys(definition.playCost).sort(), cardId).toEqual([
+          "credits",
+          "kind",
+        ]);
+        expect(Number.isInteger(definition.playCost.credits), cardId).toBe(
+          true,
+        );
+        expect(definition.playCost.credits, cardId).toBeGreaterThanOrEqual(0);
+        expect(definition.cost, cardId).toBe(definition.playCost.credits);
+      } else {
+        variableCostIds.push(cardId);
+        expect(definition.cost, cardId).toBeUndefined();
+        expect(definition.playCost, cardId).toEqual({
+          kind: "variable_x",
+          minimumX: 1,
+          creditsPerX: 1,
+          maximumX: { kind: "context" },
+        });
+      }
+    }
+    expect(variableCostIds.sort()).toEqual([
+      "onr_proteus_049_emergency-rig",
+      "onr_v1_299_power-grid-overload",
+    ]);
   });
 });
 

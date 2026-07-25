@@ -39320,9 +39320,24 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_196_corporate-war"
+        "type": "end_turn"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanIds": [
+        "plan:corp.complete_turn:standard-turn-completion"
+      ],
+      "acceptablePlanKinds": [
+        "corp.complete_turn"
+      ],
+      "acceptableCapabilities": [
+        "complete_turn_after_productive_routes_exhausted"
+      ],
+      "requiredAssessmentEvidence": [
+        "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
+        "corp_score_protection_assessment_unknown:remote_1:subset_assessment_unknown",
+        "productive_legal_routes_exhausted"
+      ]
+    }
   }
 }

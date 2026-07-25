@@ -4,6 +4,7 @@ import type { VisibleCard } from "@netgrid/shared";
 import {
   runnerBadPublicityOrTraceTechCard,
   runnerCardLooksLikeCreditPayout,
+  visibleCardPlayOrInstallCost,
 } from "./visible-card-heuristics";
 
 describe("visible card heuristics", () => {
@@ -81,6 +82,40 @@ describe("visible card heuristics", () => {
         undefined,
       ),
     ).toBe(false);
+  });
+
+  it("uses fixed and variable-X play-cost models for visible play cards", () => {
+    expect(
+      visibleCardPlayOrInstallCost(
+        card({
+          type: "event",
+          playCost: { kind: "fixed", credits: 3 },
+        }),
+        undefined,
+      ),
+    ).toBe(3);
+    expect(
+      visibleCardPlayOrInstallCost(
+        card({
+          type: "operation",
+          playCost: {
+            kind: "variable_x",
+            minimumX: 1,
+            creditsPerX: 1,
+            maximumX: { kind: "context" },
+          },
+        }),
+        undefined,
+      ),
+    ).toBe(1);
+  });
+
+  it("fails closed when a visible play card has no play-cost model", () => {
+    expect(() =>
+      visibleCardPlayOrInstallCost(card({ type: "event" }), undefined),
+    ).toThrow(
+      "Invalid visible play-cost projection for a known event or operation.",
+    );
   });
 });
 

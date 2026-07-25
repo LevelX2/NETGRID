@@ -38720,8 +38720,28 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "end_turn"
       }
-    ]
+    ],
+    "forbiddenActions": [
+      {
+        "type": "advance_card",
+        "sourceDefinitionId": "onr_v1_193_corporate-coup"
+      }
+    ],
+    "planExecution": {
+      "acceptablePlanModuleIds": [
+        "corp.complete_turn"
+      ],
+      "acceptableCapabilityIds": [
+        "complete_turn_after_productive_routes_exhausted"
+      ],
+      "requiredEvidenceIncludes": [
+        "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
+        "corp_current_turn_scoreline_unreachable:remote_1",
+        "corp_prepared_score_parent_dominates_sibling_route",
+        "productive_legal_routes_exhausted"
+      ]
+    }
   }
 }

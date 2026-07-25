@@ -7,7 +7,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const FIXTURES = [
   [
-    "advances a positive scoreline over a passive support action",
+    "uses explicit burst funding for the committed scoreline",
     advanceOverPassiveSupportJson,
   ],
   ["funds an explicitly unsafe scoring window", fundUnsafeWindowJson],

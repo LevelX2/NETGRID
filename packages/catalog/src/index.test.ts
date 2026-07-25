@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import cardSupportAiSupportedScenarioData from "../../../data/scenarios/card-support-ai-supported-current.json";
 import {
@@ -19,6 +20,7 @@ import {
   searchCatalog,
   TESTSET_CARD_IDS,
   validateLoadedCardSets,
+  validatePlayableNumericContract,
   validateSnapshot,
 } from "./index";
 
@@ -148,6 +150,196 @@ describe("card set support catalog source", () => {
         ]);
       }
     }
+  });
+
+  it("requires exactly one authoritative source play-cost model", () => {
+    const both = structuredClone(loadCardSets());
+    const bothCard = both
+      .flatMap(({ set }) => set.cards)
+      .find((card) => card.cardId === "onr_v1_077_anonymous-tip");
+    expect(bothCard).toBeDefined();
+    if (!bothCard) return;
+    bothCard.playCost = {
+      kind: "variable_x",
+      minimumX: 1,
+      creditsPerX: 1,
+      maximumX: { kind: "context" },
+    };
+    expect(validateLoadedCardSets(both)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "event/operation must define exactly one fixed or variable-X play cost",
+        ),
+      ]),
+    );
+
+    const missing = structuredClone(loadCardSets());
+    const missingCard = missing
+      .flatMap(({ set }) => set.cards)
+      .find((card) => card.cardId === "onr_v1_299_power-grid-overload");
+    expect(missingCard).toBeDefined();
+    if (!missingCard) return;
+    delete missingCard.playCost;
+    expect(validateLoadedCardSets(missing)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "event/operation must define exactly one fixed or variable-X play cost",
+        ),
+      ]),
+    );
+
+    const nonfinite = structuredClone(loadCardSets());
+    const nonfiniteCard = nonfinite
+      .flatMap(({ set }) => set.cards)
+      .find((card) => card.cardId === "onr_v1_077_anonymous-tip");
+    expect(nonfiniteCard).toBeDefined();
+    if (!nonfiniteCard) return;
+    nonfiniteCard.numeric.cost = Number.POSITIVE_INFINITY;
+    expect(validateLoadedCardSets(nonfinite)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "event/operation must define exactly one fixed or variable-X play cost",
+        ),
+      ]),
+    );
+  });
+
+  it("rejects incomplete, contradictory, foreign, or invalid playable numeric fields", () => {
+    const cards = loadCardSets().flatMap(({ set }) => set.cards);
+    const hardware = structuredClone(
+      cards.find((card) => card.cardId === "simple_setup_hardware"),
+    );
+    const event = structuredClone(
+      cards.find((card) => card.cardId === "onr_v1_077_anonymous-tip"),
+    );
+    const agenda = structuredClone(
+      cards.find((card) => card.cardId === "simple_agenda"),
+    );
+    const variableBreaker = structuredClone(
+      cards.find((card) => card.cardId === "onr_v1_002_ai-boon"),
+    );
+    const fixedIce = structuredClone(
+      cards.find((card) => card.cardId === "simple_barrier_ice"),
+    );
+    expect(hardware).toBeDefined();
+    expect(event).toBeDefined();
+    expect(agenda).toBeDefined();
+    expect(variableBreaker).toBeDefined();
+    expect(fixedIce).toBeDefined();
+    if (!hardware || !event || !agenda || !variableBreaker || !fixedIce)
+      return;
+
+    hardware.numeric.installCost = null;
+    expect(validatePlayableNumericContract(hardware)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("hardware requires numeric.installCost"),
+      ]),
+    );
+
+    event.numeric.installCost = 3;
+    expect(validatePlayableNumericContract(event)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "event requires numeric.installCost to be explicitly null",
+        ),
+      ]),
+    );
+
+    agenda.numeric.agendaPoints = -1;
+    const loadedSets = structuredClone(loadCardSets());
+    const sourceAgenda = loadedSets
+      .flatMap(({ set }) => set.cards)
+      .find((card) => card.cardId === agenda.cardId);
+    expect(sourceAgenda).toBeDefined();
+    if (!sourceAgenda) return;
+    sourceAgenda.numeric.agendaPoints = -1;
+    expect(validateLoadedCardSets(loadedSets)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "numeric.agendaPoints must be a non-negative integer or null",
+        ),
+      ]),
+    );
+
+    delete variableBreaker.variableStrength;
+    expect(validatePlayableNumericContract(variableBreaker)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "requires exactly one fixed or variable strength model",
+        ),
+      ]),
+    );
+
+    fixedIce.variableStrength = {
+      kind: "paid_x",
+      minimumStrength: 0,
+      maximumStrength: 5,
+    };
+    expect(validatePlayableNumericContract(fixedIce)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "requires exactly one fixed or variable strength model",
+        ),
+      ]),
+    );
+  });
+
+  it("resolves every playable event and operation to the same exhaustive catalog/shared play-cost contract", () => {
+    const cardsById = createRuntimeCardsById();
+    const variableCostIds: string[] = [];
+    let playablePlayCardCount = 0;
+
+    for (const cardId of activeRuntimeCardIds) {
+      const card = cardsById[cardId];
+      const definition = CARD_DEFINITIONS_BY_ID[cardId];
+      expect(card, cardId).toBeDefined();
+      expect(definition, cardId).toBeDefined();
+      if (!card || !definition) continue;
+
+      if (card.type !== "event" && card.type !== "operation") {
+        expect(card.playCost, cardId).toBeNull();
+        expect(definition.playCost, cardId).toBeNull();
+        continue;
+      }
+
+      expect(definition.type, cardId).toBe(card.type);
+      expect(definition.playCost, cardId).toEqual(card.playCost);
+      playablePlayCardCount += 1;
+      expect(card.playCost, cardId).not.toBeNull();
+      if (!card.playCost) continue;
+      if (card.playCost.kind === "fixed") {
+        expect(Object.keys(card.playCost).sort(), cardId).toEqual([
+          "credits",
+          "kind",
+        ]);
+        expect(Number.isInteger(card.playCost.credits), cardId).toBe(true);
+        expect(card.playCost.credits, cardId).toBeGreaterThanOrEqual(0);
+        expect(card.numeric.cost, cardId).toBe(card.playCost.credits);
+        expect(definition.cost, cardId).toBe(card.playCost.credits);
+      } else {
+        variableCostIds.push(cardId);
+        expect(Object.keys(card.playCost).sort(), cardId).toEqual([
+          "creditsPerX",
+          "kind",
+          "maximumX",
+          "minimumX",
+        ]);
+        expect(card.numeric.cost, cardId).toBeNull();
+        expect(definition.cost, cardId).toBeUndefined();
+        expect(card.playCost).toEqual({
+          kind: "variable_x",
+          minimumX: 1,
+          creditsPerX: 1,
+          maximumX: { kind: "context" },
+        });
+      }
+    }
+
+    expect(playablePlayCardCount).toBe(129);
+    expect(variableCostIds.sort()).toEqual([
+      "onr_proteus_049_emergency-rig",
+      "onr_v1_299_power-grid-overload",
+    ]);
   });
 
   it("keeps Priority Requisition text visibly optional", () => {
@@ -350,6 +542,21 @@ describe("card set support catalog source", () => {
       activeAiApprovedCardIds.length,
     );
     expect(assertCatalogPayloadSafe(index)).toEqual({ ok: true, errors: [] });
+  });
+
+  it("includes the resolved play-cost contract in the deterministic snapshot hash", () => {
+    const snapshot = createRuntimeCardSnapshot();
+    const changed = structuredClone(snapshot);
+    const emergencyRig = changed.cards.find(
+      (card) => card.catalogCardId === "onr_proteus_049_emergency-rig",
+    );
+    expect(emergencyRig?.playCost?.kind).toBe("variable_x");
+    if (emergencyRig?.playCost?.kind !== "variable_x") return;
+    emergencyRig.playCost.creditsPerX = 2;
+
+    expect(computeSnapshotHash(changed)).not.toBe(
+      computeSnapshotHash(snapshot),
+    );
   });
 
   it("keeps Detroit Police Contract display text aligned to its 12/2 runtime effect", () => {

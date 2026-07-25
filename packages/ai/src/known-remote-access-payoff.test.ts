@@ -4,6 +4,26 @@ import type { BeliefState } from "./belief-state";
 import { evaluateKnownRemoteAccessPayoff } from "./known-remote-access-payoff";
 
 describe("evaluateKnownRemoteAccessPayoff", () => {
+  it("treats a visible empty remote as known to have no current payoff", () => {
+    const input = inputWithUnidentifiedKnownRoot("remote_1");
+    input.playerView.servers[0]!.root = [];
+
+    expect(
+      evaluateKnownRemoteAccessPayoff(
+        input,
+        "remote_1",
+        beliefWithInvalidations([]),
+      ),
+    ).toMatchObject({
+      payoff: "known_low_value",
+      accessDecision: "decline",
+      declineReason: "no_current_payoff",
+      contestable: false,
+      knownNoCurrentPayoff: true,
+      penalty: 420,
+    });
+  });
+
   it("matches remote invalidation entries by bounded server id", () => {
     expect(
       evaluateKnownRemoteAccessPayoff(
@@ -42,6 +62,46 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     expect(payoff.evidence).not.toContain(
       "access_decision_projection:trash_cost_waiver",
     );
+  });
+
+  it("prices only remaining ICE after the active run has reached the server", () => {
+    const input = inputWithDepletedFreeTrashTarget();
+    input.playerView.own.credits = 12;
+    input.playerView.servers[0]!.root = [
+      visibleCard("dr-dreff", {
+        definitionId: "onr_v1_358_dr-dreff",
+        title: "Dr. Dreff",
+        type: "upgrade",
+        trashCost: 3,
+        rezzed: true,
+      }),
+    ];
+    input.playerView.servers[0]!.ice = [
+      visibleCard("passed-data-wall", {
+        definitionId: "onr_v1_237_data-wall",
+        title: "Data Wall",
+        type: "ice",
+        rezzed: true,
+      }),
+    ];
+    input.playerView.run = {
+      attackedServerId: "remote_1",
+      phase: "movement",
+      position: { kind: "server", serverId: "remote_1" },
+      successful: false,
+    };
+
+    expect(
+      evaluateKnownRemoteAccessPayoff(
+        input,
+        "remote_1",
+        beliefWithInvalidations([]),
+      ),
+    ).toMatchObject({
+      payoff: "trash_affordable",
+      accessDecision: "trash",
+      knownNoCurrentPayoff: false,
+    });
   });
 });
 

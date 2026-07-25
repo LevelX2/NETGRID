@@ -6,15 +6,16 @@ import cp02Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-f
 import cp03Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-f450-10311-03.json";
 import cp03ControlJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-f450-10311-03-control.json";
 import cp04Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-f450-10311-04.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("F450 and 10311 exact decision checkpoints", () => {
   it.each([
     ["reachable movement path is continued", cp01Json],
-    ["opponent matchpoint is contested", cp02Json],
+    ["guaranteed score conversion precedes later matchpoint pressure", cp02Json],
     ["comfortable Streetware bank is not overfilled", cp03Json],
-    ["funded Cybermodem plan is completed", cp04Json],
+    ["captured R&D pressure is executed instead of a vacuous action class", cp04Json],
   ])("satisfies %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
 
@@ -29,10 +30,11 @@ describe("F450 and 10311 exact decision checkpoints", () => {
       state.corp.scoreArea = state.corp.scoreArea.filter(
         (cardId) => cardId !== agendaId,
       );
-      state.corp.archives.push(agendaId);
+      state.corp.rd.push(agendaId);
       state.cardInstances[agendaId] = {
         ...state.cardInstances[agendaId]!,
-        zone: { side: "corp", zone: "archives" },
+        zone: { side: "corp", zone: "rd" },
+        faceup: false,
         rezzed: false,
       };
       checkpoint.expectation = {
@@ -65,7 +67,10 @@ describe("F450 and 10311 exact decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    ["cp-f450-10311-funded-cybermodem"],
+  );
 }
 
 function mutateFixture(

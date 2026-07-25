@@ -126,6 +126,7 @@ function aiInput(legalActions: LegalAction[]): AiDecisionInput {
 function playerView(legalActions: LegalAction[]): PlayerView {
   return {
     stateVersion: 13,
+    turnSerial: 0,
     side: "runner",
     activeSide: "runner",
     phase: "runner_action_phase",

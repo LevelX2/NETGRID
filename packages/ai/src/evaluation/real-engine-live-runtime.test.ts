@@ -81,5 +81,11 @@ function chooseWithoutPersistentMemory(input: AiDecisionInput): string {
   resetTacticalPlanMemory();
   resetRunnerRunPlanMemory();
   resetStrategicIntentMemory();
-  return chooseAiAction(input, { persistTacticalPlanMemory: false }).actionId;
+  const decision = chooseAiAction(input, {
+    persistTacticalPlanMemory: false,
+  });
+  if (decision.selectionKind === "engine_randomized_ice_install_selection") {
+    throw new Error("test_requires_applied_engine_randomized_decision");
+  }
+  return decision.actionId;
 }

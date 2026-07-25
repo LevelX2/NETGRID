@@ -10999,16 +10999,20 @@
   "expectation": {
     "acceptableActions": [
       {
+        "type": "end_turn"
+      }
+    ],
+    "forbiddenActions": [
+      {
         "actionId": "corp.install_card.corp_onr_v1_216_security-purge_1.remote_1.corp_onr_v1_216_security-purge_1"
       },
       {
         "actionId": "corp.install_card.corp_onr_proteus_008_project-zurich_1.remote_1.corp_onr_proteus_008_project-zurich_1"
       }
     ],
-    "forbiddenActions": [
-      {
-        "actionId": "corp.gain_credit"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.complete_turn"],
+      "acceptableCapabilities": ["complete_turn_after_productive_routes_exhausted"]
+    }
   }
 }

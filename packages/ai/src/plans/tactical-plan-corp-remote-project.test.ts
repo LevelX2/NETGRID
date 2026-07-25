@@ -12,7 +12,7 @@ import { assessCorpRemoteProject } from "./corp-remote-project-assessment";
 import { buildCorpRemoteProjectPlans } from "./tactical-plan-corp-remote-project";
 
 describe("Corp scoring remote development project", () => {
-  it("binds effective ICE installation to a strategy-required scoring remote", () => {
+  it("binds the scoring remote but delegates its ICE allocation to defense", () => {
     const ice = card("remote-wall", "simple_barrier_ice", "ice", {
       rezCost: 2,
       rulesText: "End the run.",
@@ -37,15 +37,18 @@ describe("Corp scoring remote development project", () => {
       expect.objectContaining({
         type: "corp.establish_scoring_remote",
         target: { kind: "server", id: "remote_1" },
-        status: "progressing",
+        status: "blocked",
         currentStep: expect.objectContaining({
-          kind: "protect_remote",
-          actionCandidateIds: ["install-remote-wall"],
+          kind: "find_remote_protection",
+          actionCandidateIds: [],
         }),
       }),
     ]);
     expect(JSON.stringify(plans)).toContain(
       "remote_project_target_band:glacier",
+    );
+    expect(JSON.stringify(plans)).toContain(
+      "ice_allocation_delegated_to_corp_defend_servers:remote_1",
     );
   });
 
@@ -95,9 +98,10 @@ describe("Corp scoring remote development project", () => {
       remoteDoctrine: doctrine("primary", "glacier", ["scoreline"]),
     });
 
-    expect(floorPlan?.currentStep.actionCandidateIds).toEqual([
-      "install-hq-floor",
-    ]);
+    expect(floorPlan?.currentStep.actionCandidateIds).toEqual([]);
+    expect(floorPlan?.evidence).toContain(
+      "ice_allocation_delegated_to_corp_defend_servers:hq",
+    );
     expect(floorPlan?.blockers).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ kind: "central_protection_floor" }),
@@ -122,9 +126,10 @@ describe("Corp scoring remote development project", () => {
       remoteDoctrine: doctrine("primary", "glacier", ["scoreline"]),
     });
 
-    expect(remotePlan?.currentStep.actionCandidateIds).toEqual([
-      "install-remote-after-floor",
-    ]);
+    expect(remotePlan?.currentStep.actionCandidateIds).toEqual([]);
+    expect(remotePlan?.evidence).toContain(
+      "ice_allocation_delegated_to_corp_defend_servers:remote_1",
+    );
     expect(remotePlan?.currentStep.actionCandidateIds).not.toContain(
       "install-extra-hq",
     );

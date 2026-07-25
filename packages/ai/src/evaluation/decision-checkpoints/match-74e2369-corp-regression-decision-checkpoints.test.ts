@@ -11,11 +11,11 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match 74e2369 exact Corp decision checkpoints", () => {
   it.each([
     [
-      "converts Project Consultants into the higher-point Tycho agenda",
+      "protects repeatedly accessed open R&D before exposing Tycho",
       projectConsultantsTychoJson,
     ],
     ["protects repeatedly accessed R&D", protectRdJson],
-    ["uses Night Shift instead of an inferior basic credit", nightShiftJson],
+    ["allocates a quote-certified HQ defense before a generic economy operation", nightShiftJson],
     [
       "retains both agendas and Night Shift while discarding Liche",
       discardLicheJson,

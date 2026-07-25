@@ -7,11 +7,6 @@ import type {
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import { corpPurgeImpactScoreComponent } from "../corp-purge-impact";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "../semantic-runtime-corp-effective-defense";
-import type { CorpBoardTriage } from "../semantic-runtime-corp-board-triage";
-import {
-  corpIcePlacementCandidateForAction,
-  corpIcePlacementScoreComponent,
-} from "../corp-ice-placement/corp-ice-placement";
 import { visibleCardDefinition } from "../card-definition-lookup";
 import { createAiHintsByCard } from "../../ai-hints";
 import { rolesMatch } from "../role-match";
@@ -21,13 +16,11 @@ import {
   traceTagExpectedSuccessEstimate,
 } from "../trace-tag-success-estimate";
 import { type SemanticRuntimeCorpScoreDependencies } from "./semantic-runtime-corp-score-contracts";
-import { corpPreparedScoreRemotePipeline } from "./semantic-runtime-corp-score-facts";
 import {
   corpBurstEconomyOperationForAction,
   positiveOrZeroNumber,
   semanticRuntimeCorpActionCreditCost,
   visibleActionSourceId,
-  visibleSourceCardForAction,
 } from "./semantic-runtime-corp-score-action-economy";
 import {
   corpServerIceLocation,
@@ -35,135 +28,6 @@ import {
 } from "./semantic-runtime-corp-score-install-sequencing";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
-
-export function corpIcePlacementComponent<TConsumer extends string>(
-  input: AiDecisionInput,
-  action: LegalAction,
-  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
-  actionSemanticCandidate: ActionSemanticCandidate | undefined,
-  boardTriageState: CorpBoardTriage,
-): AiDecisionScoreComponent | undefined {
-  if (action.type !== "install_card" || action.payload?.placement !== "ice") {
-    return undefined;
-  }
-  const serverId = corpInstallServerId(action);
-  const server =
-    serverId && serverId !== "new_remote"
-      ? input.playerView.servers.find((candidate) => candidate.id === serverId)
-      : undefined;
-  const sourceCard = visibleSourceCardForAction(input, action);
-  const scoringWindow = dependencies.corpScoringWindowAssessment?.(
-    input,
-    action,
-    dependencies.rolesForAction(input, action),
-  );
-  const directlyProtectsCriticalScoreRemote =
-    boardTriageState.primary === "protect_score_remote" &&
-    boardTriageState.severity === "critical" &&
-    boardTriageState.targetServerId === serverId;
-  return corpIcePlacementScoreComponent({
-    input,
-    action,
-    serverId,
-    server,
-    sourceCard,
-    actionCreditCost: semanticRuntimeCorpActionCreditCost(
-      dependencies,
-      action,
-      actionSemanticCandidate,
-    ),
-    iceRezCost: sourceCard?.rezCost,
-    hasUrgentScoreline:
-      scoringWindow?.recommendedNextStep === "build_remote_ice" ||
-      scoringWindow?.agendaStealSeverity === "game_ending" ||
-      directlyProtectsCriticalScoreRemote,
-  });
-}
-
-export function corpRemoteScorelineIceFundingPenaltyComponent<
-  TConsumer extends string,
->(
-  input: AiDecisionInput,
-  action: LegalAction,
-  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
-  roles: string[],
-  icePlacement: AiDecisionScoreComponent | undefined,
-): AiDecisionScoreComponent | undefined {
-  if (action.type !== "install_card" || action.payload?.placement !== "ice") {
-    return undefined;
-  }
-  const serverId = corpInstallServerId(action);
-  if (!serverId?.startsWith("remote_")) return undefined;
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  const hasActiveScoreline = corpServerHasVisibleScorelineRoot(server);
-  const preparedPipeline = corpPreparedScoreRemotePipeline(input);
-  const isPreparedScoreRemote =
-    !hasActiveScoreline && preparedPipeline?.serverId === serverId;
-  if (!hasActiveScoreline && !isPreparedScoreRemote) return undefined;
-
-  const placementReason = icePlacement?.reason ?? "";
-  const placementPrefersFunding =
-    placementReason.includes("recommendation:prefer_economy") ||
-    placementReason.includes("defer_reason:rez_reserve_too_low");
-  const scoringWindow = dependencies.corpScoringWindowAssessment?.(
-    input,
-    action,
-    roles,
-  );
-  const windowNeedsFunding =
-    scoringWindow?.recommendedNextStep === "gain_credit" ||
-    scoringWindow?.corpCanRezRelevantIce === false ||
-    scoringWindow?.corpCanRezFullPathWithDynamicReserve === false;
-  if (!placementPrefersFunding && !windowNeedsFunding) return undefined;
-  const value = -1900;
-
-  return {
-    key: "corp_remote_scoreline_unfunded_ice_install_penalty",
-    label: "Remote-Scoreline-Funding",
-    value,
-    reason: [
-      hasActiveScoreline
-        ? "active_remote_scoreline:true"
-        : "prepared_score_remote:true",
-      `server:${serverId}`,
-      `penalty_value:${value}`,
-      ...(isPreparedScoreRemote && preparedPipeline
-        ? [
-            `prepared_ice_count:${preparedPipeline.iceCount}`,
-            `prepared_reserve_floor:${preparedPipeline.reserveFloor}`,
-          ]
-        : []),
-      `placement_prefers_funding:${placementPrefersFunding}`,
-      `window_needs_funding:${windowNeedsFunding}`,
-      ...(scoringWindow?.recommendedNextStep
-        ? [`recommended_next_step:${scoringWindow.recommendedNextStep}`]
-        : []),
-      ...(scoringWindow?.dynamicProtectionReserve !== undefined
-        ? [
-            `dynamic_protection_reserve:${scoringWindow.dynamicProtectionReserve}`,
-          ]
-        : []),
-    ].join("|"),
-  };
-}
-
-function corpServerHasVisibleScorelineRoot(
-  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
-): boolean {
-  return (
-    server?.root.some(
-      (card) =>
-        card.known !== false &&
-        (card.type === "agenda" ||
-          typeof card.advancementRequirement === "number" ||
-          typeof visibleCardDefinition(card)?.advancementRequirement ===
-            "number" ||
-          (card.advancementCounters ?? 0) > 0),
-    ) === true
-  );
-}
 
 export function corpInstallServerId(action: LegalAction): string | undefined {
   const serverId =

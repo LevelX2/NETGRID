@@ -165,6 +165,7 @@ describe("selectedSearchChoiceOptionIds", () => {
       option("wiretaps", "Executive Wiretaps", "event", {
         definitionId: "wiretaps",
         cost: 2,
+        playCost: { kind: "fixed", credits: 2 },
       }),
       option("mouse", "Mouse", "program", {
         definitionId: "mouse",
@@ -207,6 +208,7 @@ describe("selectedSearchChoiceOptionIds", () => {
       option("wiretaps", "Executive Wiretaps", "event", {
         definitionId: "wiretaps",
         cost: 2,
+        playCost: { kind: "fixed", credits: 2 },
       }),
       option("mouse", "Mouse", "program", {
         definitionId: "mouse",
@@ -234,6 +236,33 @@ describe("selectedSearchChoiceOptionIds", () => {
     expect(selected[0]).toBe("cloak-a");
     expect(selected.indexOf("cloak-b")).toBeGreaterThan(
       selected.indexOf("mouse"),
+    );
+  });
+
+  it("fails closed for a search-result event with missing play cost", () => {
+    const choice = searchChoice(
+      [
+        option("modeled", "Modeled event", "event", {
+          playCost: { kind: "fixed", credits: 1 },
+        }),
+        option("unmodeled", "Unmodeled event", "event", {
+          playCost: undefined,
+        }),
+      ],
+      1,
+    );
+    expect(() =>
+      selectedSearchChoiceOptionIds(choice, choice.options, {
+        features: {
+          credits: 1,
+          memoryRemaining: 4,
+          rigRoles: new Set(),
+          rigDefinitionIds: new Set(),
+        },
+        rolesForCardId: () => [],
+      }),
+    ).toThrow(
+      "Invalid visible play-cost projection for a known event or operation search option.",
     );
   });
 });
@@ -292,6 +321,9 @@ function option(
       title: label,
       type,
       known: true,
+      ...(type === "event" || type === "operation"
+        ? { playCost: { kind: "fixed", credits: 0 } }
+        : {}),
       ...cardOverrides,
     },
   } as unknown as PendingChoice["options"][number];

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "ai-decision-checkpoint-v1",
-  "checkpointId": "9FEF-F05-HQ-OVER-KNOWN-RD-D95",
+  "checkpointId": "9FEF-F05-RD-AFTER-KNOWN-TOP-INVALIDATED-D95",
   "source": {
     "kind": "captured_match",
     "findingId": "9FEF-F05-NONREPRO",
@@ -8210,18 +8210,19 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "actionId": "runner.start_run.hq"
-      },
-      {
-        "actionId": "runner.draw_card"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "actionId": "runner.start_run.rd"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.pressure_central"
+      ],
+      "acceptableCapabilities": [
+        "pressure_rd_information"
+      ],
+      "requiredAssessmentEvidence": [
+        "target:rd"
+      ]
+    },
+    "requiredAction": {
+      "actionId": "runner.start_run.rd"
+    }
   }
 }

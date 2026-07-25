@@ -371,7 +371,7 @@ export function summarizeSelfplayActionLimitClusters(
     SELFPLAY_ACTION_LIMIT_CLUSTER_IDS.map((cluster) => [cluster, 0]),
   ) as Record<AiSelfplayActionLimitClusterId, number>;
   for (const summary of summaries) {
-    if (summary.winner !== "action_limit_reached" || summary.errors.length > 0)
+    if (summary.terminationKind !== "action_limit")
       continue;
     counts[classifySelfplayActionLimitCluster(summary)] += 1;
   }
@@ -385,7 +385,7 @@ export function summarizeSelfplayActionLimitSubclusters(
     SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS.map((subcluster) => [subcluster, 0]),
   ) as Record<AiSelfplayActionLimitSubclusterId, number>;
   for (const summary of summaries) {
-    if (summary.winner !== "action_limit_reached" || summary.errors.length > 0)
+    if (summary.terminationKind !== "action_limit")
       continue;
     counts[classifySelfplayActionLimitSubcluster(summary)] += 1;
   }
@@ -1001,7 +1001,7 @@ function collectSelfplayFindingsForSummary(
   }
   if (
     enabled.has("action_limit_reached") &&
-    summary.winner === "action_limit_reached" &&
+    summary.terminationKind === "action_limit" &&
     summary.errors.length === 0
   ) {
     findings.push(
@@ -1016,7 +1016,7 @@ function collectSelfplayFindingsForSummary(
   }
   if (
     enabled.has("repeatable_action_no_progress_loop") &&
-    summary.winner === "action_limit_reached"
+    summary.terminationKind === "action_limit"
   ) {
     findings.push(
       ...repeatableActionNoProgressLoopFindings(summary, summaryIndex),
@@ -1480,7 +1480,8 @@ function selfplayEntryDetectorFindings(
     if (
       recoveryContext.category === "funding_need_recovery" ||
       recoveryContext.category === "coverage_recovery" ||
-      recoveryContext.category === "search_or_draw_recovery"
+      recoveryContext.category === "search_or_draw_recovery" ||
+      recoveryContext.category === "survival_buffer_recovery"
     ) {
       // Funding and capability recovery are not low-value recovery loops.
     } else {
@@ -1659,6 +1660,48 @@ function repeatedRunDecisionStateIsStable(
   ]);
   if (previousFingerprint && currentFingerprint) {
     return previousFingerprint === currentFingerprint;
+  }
+  if (
+    current.targetServerId === "hq" &&
+    typeof previous.hqKnownCards === "number" &&
+    typeof current.hqKnownCards === "number"
+  ) {
+    return (
+      previous.hqKnownCards === current.hqKnownCards &&
+      previous.hqUnknownCards === current.hqUnknownCards
+    );
+  }
+  if (current.targetServerId === "archives") {
+    if (
+      previous.runnerArchivesVisibleFingerprint &&
+      current.runnerArchivesVisibleFingerprint
+    ) {
+      return (
+        previous.runnerArchivesVisibleFingerprint ===
+          current.runnerArchivesVisibleFingerprint &&
+        previous.runnerArchivesUnknownCardCount ===
+          current.runnerArchivesUnknownCardCount &&
+        previous.runnerArchivesKnownAgenda ===
+          current.runnerArchivesKnownAgenda
+      );
+    }
+    if (
+      typeof previous.runnerArchivesUnknownCardCount === "number" &&
+      typeof current.runnerArchivesUnknownCardCount === "number"
+    ) {
+      return (
+        previous.runnerArchivesUnknownCardCount ===
+          current.runnerArchivesUnknownCardCount &&
+        previous.runnerArchivesKnownAgenda ===
+          current.runnerArchivesKnownAgenda
+      );
+    }
+  }
+  if (
+    current.targetServerId === "rd" &&
+    previous.knownRndTopCard !== current.knownRndTopCard
+  ) {
+    return false;
   }
   return true;
 }
@@ -1925,7 +1968,8 @@ function selfplayEntryIsMeaningfulProgress(
     entry.runnerRemoteTrashTaken === true ||
     entry.corpScoreTerminalScoreTaken === true ||
     entry.corpScoreTerminalAdvanceTaken === true ||
-    entry.protectBeforeAdvance === true
+    entry.protectBeforeAdvance === true ||
+    entry.runnerDrawAction === true
   );
 }
 
@@ -1955,6 +1999,14 @@ function recoveryLowValueLoopContext(
       "coverageanswerrole:program_search",
       "coverageanswerrole:draw_for_answer",
     ]);
+  const survivalBufferNeed =
+    entry.actionType === "draw_card" &&
+    entry.planKind === "runner.defense_and_recovery" &&
+    selfplayEntryHasStructuredSignal(entry, [
+      "runner_base_hand_buffer",
+      "runner_volatile_breaker_hand_buffer",
+      "runner_high_risk_run_hand_buffer",
+    ]);
   const pressureSkipped =
     entry.runnerSearchRecoveryChosenOverPressure === true ||
     entry.runnerEconomyChosenWhilePressureReady === true;
@@ -1964,6 +2016,8 @@ function recoveryLowValueLoopContext(
       ? "funding_need_recovery"
       : searchOrDrawNeed
         ? "search_or_draw_recovery"
+        : survivalBufferNeed
+          ? "survival_buffer_recovery"
         : pressureSkipped
           ? "recovery_over_pressure"
           : "low_value_repeat_no_funding_need";
@@ -1974,6 +2028,7 @@ function recoveryLowValueLoopContext(
       `recovery_loop_funding_need:${fundingNeed}`,
       `recovery_loop_coverage_need:${coverageRecovery}`,
       `recovery_loop_search_or_draw_need:${searchOrDrawNeed}`,
+      `recovery_loop_survival_buffer_need:${survivalBufferNeed}`,
       `recovery_loop_pressure_skipped:${pressureSkipped}`,
     ],
   };
@@ -2041,7 +2096,7 @@ function selfplayPlanActionMismatch(
       "contest",
       "access",
     ]) &&
-    !selfplayRunPlanCompatibleAction(entry.actionType) &&
+    !selfplayRunPlanCompatibleAction(entry) &&
     !selfplayEntryHasFundingOrReserveExplanation(entry) &&
     !selfplayPlanMismatchHasKnownExplanation(entry)
   )
@@ -2065,10 +2120,18 @@ function selfplayPlanActionMismatch(
 }
 
 function selfplayRunPlanCompatibleAction(
-  actionType: AiSimulationSummary["actionSequence"][number]["actionType"],
+  entry: AiSimulationSummary["actionSequence"][number],
 ): boolean {
   return (
-    actionType === "start_run" || selfplayReactiveSemanticOverride(actionType)
+    entry.actionType === "start_run" ||
+    selfplayReactiveSemanticOverride(entry.actionType) ||
+    (entry.actionType === "play_event" &&
+      entry.targetServerId !== undefined &&
+      selfplayEntryHasStructuredSignal(entry, [
+        "pressure_rd_information",
+        "pressure_hq_information",
+        "contest_remote",
+      ]))
   );
 }
 

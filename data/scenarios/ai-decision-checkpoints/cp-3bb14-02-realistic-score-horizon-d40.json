@@ -6259,7 +6259,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_268_shock-r_1.remote_1.corp_onr_v1_268_shock-r_1.1"
+        "actionId": "corp.install_card.corp_onr_v1_323_experimental-ai_1.new_remote.corp_onr_v1_323_experimental-ai_1"
       }
     ],
     "forbiddenActions": [
@@ -6271,6 +6271,13 @@
       "forbiddenComponentKeys": [
         "corp_last_click_trace_without_payoff",
         "corp_active_remote_agenda_advance_clock"
+      ]
+    },
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.ambush_and_bluff"],
+      "acceptableCapabilities": ["ambush_install"],
+      "requiredAssessmentEvidence": [
+        "corp_ambush_preplanned_exact_install:onr_v1_323_experimental-ai:new_remote:assigned_domain_plan"
       ]
     }
   }

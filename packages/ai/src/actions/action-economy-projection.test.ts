@@ -106,6 +106,45 @@ describe("action economy projection", () => {
     });
   });
 
+  it("projects the exact basic draw contract even without a redundant payload amount", () => {
+    const projection = project(
+      legalAction("basic-draw", "draw_card", {
+        source: "basic_action",
+      }),
+    );
+
+    expect(projection).toMatchObject({
+      kind: "non_economy",
+      timing: "immediate",
+      cardsDrawn: 1,
+      cardsConsumed: 0,
+      netHandDelta: 1,
+      repeatable: true,
+      reliability: "guaranteed",
+      source: "basic_action_contract",
+      confidence: "medium",
+    });
+  });
+
+  it("projects a guaranteed draw event as immediate payload-backed hand progress", () => {
+    const projection = project(
+      legalAction("draw-three", "play_event", {
+        payload: { drawCardsAmount: 3 },
+      }),
+    );
+
+    expect(projection).toMatchObject({
+      kind: "non_economy",
+      timing: "immediate",
+      cardsDrawn: 3,
+      cardsConsumed: 1,
+      netHandDelta: 2,
+      reliability: "guaranteed",
+      source: "legal_action_payload",
+      confidence: "high",
+    });
+  });
+
   it("does not turn an explicitly non-credit wrapper into economy", () => {
     const projection = project(
       legalAction("wrapper", "gain_credit", {
@@ -139,6 +178,125 @@ describe("action economy projection", () => {
       netLiquidCreditGain: 3,
     });
   });
+
+  it("projects an exact guaranteed root-rez outcome quote as immediate liquid economy", () => {
+    const projection = project(rootRezCreditAction());
+
+    expect(projection).toMatchObject({
+      kind: "immediate_liquid",
+      timing: "immediate",
+      creditCost: 1,
+      grossLiquidCreditGain: 3,
+      netLiquidCreditGain: 2,
+      reliability: "guaranteed",
+      source: "legal_action_payload",
+      confidence: "high",
+    });
+    expect(projection.evidence).toContain(
+      "root_rez_credit_outcome:guaranteed_positive",
+    );
+  });
+
+  it("does not project a Runner-interruptible root-rez credit outcome as liquid economy", () => {
+    const action = rootRezCreditAction();
+    action.payload = {
+      ...action.payload,
+      rootRezCreditOutcomeQuoteResolution: "runner_interruptible",
+    };
+
+    const projection = project(action);
+
+    expect(projection).toMatchObject({
+      kind: "non_economy",
+      reliability: "conditional",
+      source: "legal_action_payload",
+      confidence: "high",
+    });
+    expect(projection).not.toHaveProperty("grossLiquidCreditGain");
+  });
+
+  it.each([
+    [
+      "missing",
+      (action: LegalAction) => {
+        action.payload = {
+          cardId: "root-1",
+          rootRez: true,
+          serverId: "remote_1",
+        };
+      },
+    ],
+    [
+      "wrong source",
+      (action: LegalAction) => {
+        action.payload = {
+          ...action.payload,
+          rootRezCreditOutcomeQuoteSourceCardInstanceId: "root-2",
+        };
+      },
+    ],
+    [
+      "stale state",
+      (action: LegalAction) => {
+        action.payload = {
+          ...action.payload,
+          rootRezCreditOutcomeQuoteStateVersion: 0,
+        };
+      },
+    ],
+    [
+      "wrong action",
+      (action: LegalAction) => {
+        action.payload = {
+          ...action.payload,
+          rootRezCreditOutcomeQuoteActionId: "other-action",
+        };
+      },
+    ],
+    [
+      "wrong cost",
+      (action: LegalAction) => {
+        action.payload = {
+          ...action.payload,
+          rootRezCreditOutcomeQuoteRezCredits: 0,
+          rootRezCreditOutcomeQuoteNetCreditGain: 3,
+        };
+      },
+    ],
+  ])("fails closed for a %s root-rez outcome quote", (_case, mutate) => {
+    const action = rootRezCreditAction();
+    mutate(action);
+
+    const projection = project(action);
+
+    expect(projection).toMatchObject({
+      kind: "non_economy",
+      reliability: "unknown",
+      source: "unknown",
+      confidence: "none",
+    });
+    expect(projection).not.toHaveProperty("grossLiquidCreditGain");
+  });
+
+  it("keeps a complete but nonpositive root-rez outcome out of immediate economy", () => {
+    const action = rootRezCreditAction();
+    action.costs = [{ credits: 3 }];
+    action.payload = {
+      ...action.payload,
+      rootRezCreditOutcomeQuoteRezCredits: 3,
+      rootRezCreditOutcomeQuoteNetCreditGain: 0,
+    };
+
+    const projection = project(action);
+
+    expect(projection).toMatchObject({
+      kind: "non_economy",
+      reliability: "guaranteed",
+      source: "legal_action_payload",
+      confidence: "high",
+    });
+    expect(projection).not.toHaveProperty("grossLiquidCreditGain");
+  });
 });
 
 function project(action: LegalAction) {
@@ -170,4 +328,29 @@ function legalAction(
     expiresAtStateVersion: 1,
     ...overrides,
   };
+}
+
+function rootRezCreditAction(): LegalAction {
+  return legalAction("rez-root-1", "rez_card", {
+    source: "root-1",
+    timingPoint: "run.movement_rez_window",
+    costs: [{ credits: 1 }],
+    payload: {
+      cardId: "root-1",
+      rootRez: true,
+      serverId: "remote_1",
+      rootRezCreditOutcomeQuoteSchemaVersion:
+        "corp-root-rez-credit-outcome-quote-v1",
+      rootRezCreditOutcomeQuoteComplete: true,
+      rootRezCreditOutcomeQuoteSourceCardInstanceId: "root-1",
+      rootRezCreditOutcomeQuoteTargetServerId: "remote_1",
+      rootRezCreditOutcomeQuoteStateVersion: 1,
+      rootRezCreditOutcomeQuoteTimingPoint: "run.movement_rez_window",
+      rootRezCreditOutcomeQuoteActionId: "rez-root-1",
+      rootRezCreditOutcomeQuoteResolution: "guaranteed",
+      rootRezCreditOutcomeQuoteGrossCreditGain: 3,
+      rootRezCreditOutcomeQuoteRezCredits: 1,
+      rootRezCreditOutcomeQuoteNetCreditGain: 2,
+    },
+  });
 }

@@ -21,18 +21,21 @@ const BEHAVIOR_FIXTURES = [
     deadFirstSeed004Json,
   ],
   [
-    "continues the protected Seed 003 scoreline at d208",
+    "completes the protected Seed 003 turn without unbound overflow credit at d208",
     scorelineSeed003D208Json,
   ],
   [
-    "stops overbuilding the protected Seed 003 scoreline at d219",
+    "stops overbuilding and completes the protected Seed 003 turn at d219",
     scorelineSeed003D219Json,
   ],
   ["continues the Seed 004 scoreline at d55", scorelineSeed004D55Json],
   ["continues the Seed 004 scoreline at d65", scorelineSeed004D65Json],
-  ["continues the late Seed 004 scoreline at d247", scorelineSeed004D247Json],
   [
-    "protects the exposed central at Seed 004 matchpoint",
+    "defers the late Seed 004 scoreline without unbound funding at d247",
+    scorelineSeed004D247Json,
+  ],
+  [
+    "does not invent central protection or funding at Seed 004 matchpoint",
     matchpointSeed004Json,
   ],
 ] as const;
@@ -78,7 +81,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     },
   );
 
-  it("still installs positional outer ICE when a funded inner layer exists", () => {
+  it("does not infer an outer ICE route from positional layering and keeps the exact funded score install", () => {
     const checkpoint = mutateFixture(deadFirstSeed004Json, (candidate) => {
       const state = candidate.engine.testOnlyGameState;
       const innerIceId = state.corp.servers.find((server) => server.id === "hq")
@@ -102,10 +105,17 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         acceptableActions: [
           {
             type: "install_card",
-            sourceDefinitionId: "onr_v1_251_jack-attack",
+            sourceDefinitionId: "onr_v1_193_corporate-coup",
             targetServerId: "remote_1",
           },
         ],
+        planExecution: {
+          acceptablePlanKinds: ["corp.score_agenda"],
+          acceptableCapabilities: ["install_score_agenda"],
+          requiredAssessmentEvidence: [
+            "corp_funded_protected_score_install:remote_1",
+          ],
+        },
       };
     });
 
@@ -116,12 +126,14 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     const checkpoint = mutateFixture(scorelineSeed004D55Json, (candidate) => {
       candidate.engine.testOnlyGameState.runner.credits = 30;
       candidate.expectation = {
-        acceptableActions: [
-          {
-            type: "play_operation",
-            sourceDefinitionId: "onr_v1_290_efficiency-experts",
-          },
-        ],
+        acceptableActions: [{ type: "draw_card" }],
+        planExecution: {
+          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
+          acceptableCapabilities: ["draw_for_plan"],
+          requiredAssessmentEvidence: [
+            "corp_option_development_below_hand_capacity",
+          ],
+        },
         forbiddenActions: [{ type: "advance_card" }],
       };
     });
@@ -129,7 +141,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("does not force central protection below runner matchpoint", () => {
+  it("does not force central protection or unbound funding below runner matchpoint", () => {
     const checkpoint = mutateFixture(matchpointSeed004Json, (candidate) => {
       const state = candidate.engine.testOnlyGameState;
       const scoredCards = [...state.runner.scoreArea];
@@ -144,13 +156,27 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         };
       }
       candidate.expectation = {
-        acceptableActions: [
+        acceptableActions: [{ type: "end_turn" }],
+        forbiddenActions: [
           {
             type: "install_card",
             sourceDefinitionId: "onr_v1_251_jack-attack",
             targetServerId: "remote_1",
           },
         ],
+        planExecution: {
+          acceptablePlanKinds: ["corp.complete_turn"],
+          acceptableCapabilities: [
+            "complete_turn_after_productive_routes_exhausted",
+          ],
+          requiredAssessmentEvidence: [
+            "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
+            "corp_ice_install_has_no_engine_certified_access_probability_reduction",
+            "corp_last_click_score_install_deferred:remote_1",
+            "corp_prepared_score_parent_dominates_sibling_route",
+            "productive_legal_routes_exhausted",
+          ],
+        },
       };
     });
 

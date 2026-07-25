@@ -32791,8 +32791,9 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+      "type": "draw_card"
       }
-    ]
+  ],
+  "planExecution": {"acceptablePlanKinds":["corp.hand_and_agenda_management"],"acceptableCapabilities":["draw_for_plan"],"requiredAssessmentEvidence":["corp_option_development_below_hand_capacity"]}
   }
 }

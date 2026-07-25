@@ -7,13 +7,19 @@ import originalsetSupportData from "../../../data/manifests/originalset-v1-card-
 import proteusSupportData from "../../../data/manifests/proteus-card-support.json";
 import testsetSupportData from "../../../data/manifests/testset-card-support.json";
 import type {
+  ResolvedStrengthDefinition,
+  VariableStrengthDefinition,
+} from "@netgrid/shared";
+import type {
   CatalogCard,
   CatalogCardType,
   CatalogManifestReference,
   CatalogNumericFields,
+  CatalogPlayCost,
   CatalogRarity,
   CatalogSide,
   CatalogStatuses,
+  CatalogVariableXPlayCost,
 } from "./catalog-types";
 import type {
   AiApprovalEvidence,
@@ -35,6 +41,8 @@ export type CardSetCard = {
   type: CatalogCardType;
   subtypes: string[];
   numeric: CatalogNumericFields;
+  playCost?: CatalogVariableXPlayCost;
+  variableStrength?: VariableStrengthDefinition;
   text: string;
   displayOnlyText: boolean;
   faction?: string;
@@ -176,9 +184,19 @@ export function validateLoadedCardSets(
         if (!(key in card.numeric))
           errors.push(`${card.cardId}: numeric.${key} is missing.`);
         const value = card.numeric[key];
-        if (value !== null && typeof value !== "number")
-          errors.push(`${card.cardId}: numeric.${key} must be number or null.`);
+        if (
+          value !== null &&
+          (typeof value !== "number" ||
+            !Number.isFinite(value) ||
+            !Number.isInteger(value) ||
+            value < 0)
+        )
+          errors.push(
+            `${card.cardId}: numeric.${key} must be a non-negative integer or null.`,
+          );
       }
+      errors.push(...validateSourcePlayCost(card));
+      errors.push(...validateSourceStrengthModel(card));
     }
 
     for (const entry of loaded.support.cards) {
@@ -197,6 +215,15 @@ export function validateLoadedCardSets(
     for (const cardId of cardsById.keys()) {
       if (!supportById.has(cardId))
         errors.push(`${cardId}: card has no support entry.`);
+    }
+    for (const card of cardsById.values()) {
+      const supportEntry = supportById.get(card.cardId);
+      if (
+        supportEntry &&
+        isFinalPlayableStatus(normalizeStatuses(supportEntry.statuses))
+      ) {
+        errors.push(...validatePlayableNumericContract(card));
+      }
     }
   }
 
@@ -272,6 +299,8 @@ function toCatalogCard(
     text: card.text,
     displayOnlyText: card.displayOnlyText,
     numeric: { ...card.numeric },
+    playCost: resolvePlayCost(card),
+    strengthModel: resolveStrengthModel(card),
     statuses,
     blockReasons: supportEntry?.blockReasons ? [...supportEntry.blockReasons] : [],
     implementationManifest:
@@ -279,6 +308,200 @@ function toCatalogCard(
         ? manifestReferenceFromSupport(card.setId, supportEntry)
         : null,
   };
+}
+
+export function validatePlayableNumericContract(
+  card: CardSetCard,
+): string[] {
+  const errors: string[] = [];
+  const physicalType: CatalogCardType = card.type.startsWith("hardware-")
+    ? "hardware"
+    : card.type;
+  const allowedFields: Record<
+    CatalogCardType,
+    readonly (keyof CatalogNumericFields)[]
+  > = {
+    identity: [],
+    event: ["cost"],
+    operation: ["cost"],
+    program: ["installCost", "memoryCost", "strength"],
+    hardware: ["installCost"],
+    resource: ["installCost"],
+    agenda: ["advancementRequirement", "agendaPoints"],
+    asset: ["rezCost", "trashCost"],
+    upgrade: ["rezCost", "trashCost"],
+    ice: ["rezCost", "strength"],
+  };
+  const requiredFields: Partial<
+    Record<CatalogCardType, readonly (keyof CatalogNumericFields)[]>
+  > = {
+    program: ["installCost", "memoryCost"],
+    hardware: ["installCost"],
+    resource: ["installCost"],
+    agenda: ["advancementRequirement", "agendaPoints"],
+    asset: ["rezCost", "trashCost"],
+    upgrade: ["rezCost", "trashCost"],
+    ice: ["rezCost"],
+  };
+
+  const allowed = new Set(allowedFields[physicalType]);
+  for (const key of NUMERIC_KEYS) {
+    if (card.numeric[key] !== null && !allowed.has(key)) {
+      errors.push(
+        `${card.cardId}: ${physicalType} requires numeric.${key} to be explicitly null.`,
+      );
+    }
+  }
+  for (const key of requiredFields[physicalType] ?? []) {
+    if (card.numeric[key] === null) {
+      errors.push(`${card.cardId}: ${physicalType} requires numeric.${key}.`);
+    }
+  }
+
+  const strengthRelevant =
+    physicalType === "ice" ||
+    (physicalType === "program" && card.subtypes.includes("icebreaker"));
+  const hasFixedStrength = card.numeric.strength !== null;
+  const hasVariableStrength = card.variableStrength !== undefined;
+  if (
+    strengthRelevant &&
+    hasFixedStrength === hasVariableStrength
+  ) {
+    errors.push(
+      `${card.cardId}: strength-relevant ${physicalType} requires exactly one fixed or variable strength model.`,
+    );
+  }
+  if (!strengthRelevant && (hasFixedStrength || hasVariableStrength)) {
+    errors.push(
+      `${card.cardId}: ${physicalType}/${card.subtypes.join(",")} strength is not applicable and must be explicit null.`,
+    );
+  }
+  return errors;
+}
+
+function validateSourceStrengthModel(card: CardSetCard): string[] {
+  const strength = card.variableStrength;
+  if (!strength) return [];
+  if (strength.kind === "paid_x") {
+    if (
+      !hasExactKeys(strength, [
+        "kind",
+        "minimumStrength",
+        "maximumStrength",
+      ]) ||
+      !Number.isInteger(strength.minimumStrength) ||
+      strength.minimumStrength < 0 ||
+      !Number.isInteger(strength.maximumStrength) ||
+      strength.maximumStrength < strength.minimumStrength
+    ) {
+      return [`${card.cardId}: invalid paid-X strength model.`];
+    }
+    return [];
+  }
+  if (
+    !hasExactKeys(strength, ["kind", "dieSides"]) ||
+    !Number.isInteger(strength.dieSides) ||
+    strength.dieSides < 2
+  ) {
+    return [`${card.cardId}: invalid random-die strength model.`];
+  }
+  return [];
+}
+
+function validateSourcePlayCost(card: CardSetCard): string[] {
+  const errors: string[] = [];
+  const isPlayCard = card.type === "event" || card.type === "operation";
+  if (!isPlayCard) {
+    if (card.playCost !== undefined) {
+      errors.push(
+        `${card.cardId}: only events and operations may define playCost.`,
+      );
+    }
+    return errors;
+  }
+  const hasFixedCost =
+    typeof card.numeric.cost === "number" &&
+    Number.isInteger(card.numeric.cost) &&
+    card.numeric.cost >= 0;
+  const playCost = card.playCost;
+  const hasVariableCost = playCost !== undefined;
+  if (hasFixedCost === hasVariableCost) {
+    errors.push(
+      `${card.cardId}: event/operation must define exactly one fixed or variable-X play cost.`,
+    );
+    return errors;
+  }
+  if (playCost === undefined) return errors;
+  if (
+    playCost.kind !== "variable_x" ||
+    !hasExactKeys(playCost, [
+      "kind",
+      "minimumX",
+      "creditsPerX",
+      "maximumX",
+    ]) ||
+    !Number.isInteger(playCost.minimumX) ||
+    playCost.minimumX < 1 ||
+    !Number.isInteger(playCost.creditsPerX) ||
+    playCost.creditsPerX <= 0 ||
+    playCost.maximumX?.kind !== "context" ||
+    !hasExactKeys(playCost.maximumX, ["kind"])
+  ) {
+    errors.push(`${card.cardId}: invalid variable-X play cost.`);
+  }
+  if (card.numeric.cost !== null) {
+    errors.push(`${card.cardId}: variable-X play cost requires numeric.cost null.`);
+  }
+  return errors;
+}
+
+function hasExactKeys(
+  value: object,
+  expectedKeys: readonly string[],
+): boolean {
+  const expected = [...expectedKeys].sort();
+  const actualKeys = Object.keys(value).sort();
+  return (
+    actualKeys.length === expected.length &&
+    actualKeys.every((key, index) => key === expected[index])
+  );
+}
+
+function resolvePlayCost(card: CardSetCard): CatalogPlayCost | null {
+  if (card.type !== "event" && card.type !== "operation") return null;
+  if (card.playCost) {
+    return {
+      ...card.playCost,
+      maximumX: { ...card.playCost.maximumX },
+    };
+  }
+  if (typeof card.numeric.cost !== "number") {
+    throw new Error(`${card.cardId}: unresolved event/operation play cost.`);
+  }
+  return {
+    kind: "fixed",
+    credits: card.numeric.cost,
+  };
+}
+
+function resolveStrengthModel(
+  card: CardSetCard,
+): ResolvedStrengthDefinition {
+  if (card.numeric.strength !== null) {
+    return { kind: "fixed", value: card.numeric.strength };
+  }
+  if (card.variableStrength) {
+    return { ...card.variableStrength };
+  }
+  return { kind: "not_applicable" };
+}
+
+function isFinalPlayableStatus(statuses: CatalogStatuses): boolean {
+  return (
+    statuses.engine_supported ||
+    statuses.ai_supported ||
+    statuses.playable
+  );
 }
 
 function engineCardIdFromSupport(

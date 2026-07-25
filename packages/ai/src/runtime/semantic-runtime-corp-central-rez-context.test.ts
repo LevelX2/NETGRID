@@ -19,7 +19,7 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
       events: rdPressureEvents(),
       servers: [
         server("hq"),
-        server("rd", [corpCard("rd-ice", "ice", { rezzed: false, rezCost: 3 })]),
+        server("rd", [centralIce("rd-ice", "rd", 3)]),
         server("archives"),
       ],
     });
@@ -35,7 +35,24 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
       credits: 2,
       servers: [
         server("hq"),
-        server("rd", [corpCard("rd-ice", "ice", { rezzed: false, rezCost: 3 })]),
+        server("rd", [centralIce("rd-ice", "rd", 3)]),
+        server("archives"),
+      ],
+    });
+
+    expect(context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input)).toBe(
+      false,
+    );
+  });
+
+  it("fails closed instead of reconstructing a central rez floor without an engine quote", () => {
+    const context = testContext();
+    const input = corpInput({
+      credits: 2,
+      events: rdPressureEvents(),
+      servers: [
+        server("hq"),
+        server("rd", [corpCard("rd-ice", "ice", { rezzed: false, rezCost: 99 })]),
         server("archives"),
       ],
     });
@@ -63,7 +80,7 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
       ],
       servers: [
         server("hq"),
-        server("rd", [corpCard("rd-ice", "ice", { rezzed: false, rezCost: 3 })]),
+        server("rd", [centralIce("rd-ice", "rd", 3)]),
         server("archives"),
       ],
     });
@@ -85,7 +102,7 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
       ],
       servers: [
         server("hq"),
-        server("rd", [corpCard("rd-ice", "ice", { rezzed: false, rezCost: 3 })]),
+        server("rd", [centralIce("rd-ice", "rd", 3)]),
         server("archives"),
       ],
     });
@@ -172,6 +189,7 @@ function corpInput(options: {
         server("archives"),
       ],
       publicEvents: events,
+      stateVersion: 1,
     },
   } as unknown as AiDecisionInput;
 }
@@ -269,6 +287,36 @@ function installIceAction(
     payload: {
       placement: "ice",
       serverId,
+      postInstallRezQuoteComplete: true,
+      postInstallRezQuoteCardId: ice.instanceId,
+      postInstallRezQuoteTargetServerId: serverId,
+      postInstallRezQuoteProjectedServerId: serverId,
+      postInstallRezQuoteExpiresAtStateVersion: 1,
+      postInstallRezQuoteBaseCredits: 4,
+      postInstallRezQuoteFinalCredits: 4,
+      postInstallRezQuoteMandatoryAgendaPointCost: 0,
     },
   } as unknown as LegalAction;
+}
+
+function centralIce(
+  instanceId: string,
+  serverId: "hq" | "rd",
+  rezCost: number,
+): VisibleCard {
+  return corpCard(instanceId, "ice", {
+    rezzed: false,
+    rezCost,
+    effectiveRezCostQuote: {
+      context: "installed",
+      cardId: instanceId,
+      targetServerId: serverId,
+      projectedServerId: serverId,
+      expiresAtStateVersion: 1,
+      complete: true,
+      baseCredits: rezCost,
+      finalCredits: rezCost,
+      mandatoryAdditionalCosts: { agendaPoints: 0 },
+    },
+  });
 }

@@ -2803,9 +2803,16 @@
                     "reason": "card_resolver",
                     "sourceDefinitionId": "onr_v1_281_accounts-receivable",
                     "sourceTitle": "Accounts Receivable"
-                  }
-                ]
-              }
+    }
+  ],
+  "planExecution": {
+    "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
+    "acceptableCapabilities": ["draw_for_plan"],
+    "requiredAssessmentEvidence": [
+      "corp_option_development_below_hand_capacity"
+    ]
+  }
+}
             }
           }
         },
@@ -13572,7 +13579,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [

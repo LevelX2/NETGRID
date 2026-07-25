@@ -12,8 +12,7 @@ import { createSemanticRuntimeCorpRiskContext } from "./semantic-runtime-corp-ri
 export type SemanticRuntimeCorpBoardScoreCompositionDependencies =
   SemanticRuntimeCorpBoardDependencies & {
     actionCreditCost: (action: LegalAction) => number;
-  } &
-    Omit<
+  } & Omit<
       SemanticRuntimeCorpFundingContestabilityCompositionDependencies,
       | "actionServerId"
       | "server"
@@ -65,7 +64,6 @@ export function createSemanticRuntimeCorpBoardScoreComposition(
     normalizedRulesTextForDefinition,
     semanticRuntimeVisibleCardType,
     semanticRuntimeVisibleCardAdvancementRequirement,
-    semanticRuntimeVisibleIceRezCost,
     semanticRuntimeCorpRemoteRezFloorAssessment,
     semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
     semanticRuntimeCorpCentralRezReserveAssessment,
@@ -94,8 +92,7 @@ export function createSemanticRuntimeCorpBoardScoreComposition(
   } = createSemanticRuntimeCorpRemoteScoreContext({
     actionServerId: semanticRuntimeCorpActionServerId,
     server: semanticRuntimeCorpServer,
-    hasStabilizingAlternative:
-      semanticRuntimeCorpHasStabilizingAlternative,
+    hasStabilizingAlternative: semanticRuntimeCorpHasStabilizingAlternative,
     isRemoteServerTarget: dependencies.isRemoteServerTarget,
     emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
     remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
@@ -103,7 +100,6 @@ export function createSemanticRuntimeCorpBoardScoreComposition(
     remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
     actionCreditCost: dependencies.actionCreditCost,
     advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
-    visibleIceRezCost: semanticRuntimeVisibleIceRezCost,
     actionSourceCard: semanticRuntimeCorpActionSourceCard,
   });
 
@@ -127,7 +123,6 @@ export function createSemanticRuntimeCorpBoardScoreComposition(
     normalizedRulesTextForDefinition,
     semanticRuntimeVisibleCardType,
     semanticRuntimeVisibleCardAdvancementRequirement,
-    semanticRuntimeVisibleIceRezCost,
     semanticRuntimeCorpRemoteRezFloorAssessment,
     semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
     semanticRuntimeCorpCentralRezReserveAssessment,

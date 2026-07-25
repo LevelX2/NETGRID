@@ -49,7 +49,7 @@ describe("semantic runtime corp board triage central protection", () => {
     expect(existingScoreRemoteOutletExists(input)).toBe(true);
   });
 
-  it("treats end-turn as a mismatch while critical central protection is unresolved", () => {
+  it("does not infer R&D protection from an unbound ICE action", () => {
     const endTurn = corpAction("end-turn", "end_turn");
     const rdIce = corpAction("install-rd-ice", "install_card", {
       placement: "ice",
@@ -72,25 +72,13 @@ describe("semantic runtime corp board triage central protection", () => {
     const dependencies = testDependencies();
 
     const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
-    const endTurnComponent = semanticRuntimeCorpBoardTriageActionComponent(
-      input,
-      endTurn,
-      dependencies,
-    );
-
     expect(triage).toMatchObject({
-      primary: "protect_rd",
-      severity: "critical",
-      targetServerId: "rd",
+      primary: "low_value",
+      severity: "low",
     });
-    expect(endTurnComponent).toMatchObject({
-      key: "corp_board_triage_mismatch",
-      value: -3200,
-    });
-    expect(endTurnComponent?.reason).toContain("triage_action:end_turn");
   });
 
-  it("funds central protection when the legal ICE cannot yet be rezzed", () => {
+  it("does not invent one-click funding when the exact defense gap remains open", () => {
     const rdWall = {
       ...corpAction(
         "install-rd-wall",
@@ -140,15 +128,12 @@ describe("semantic runtime corp board triage central protection", () => {
     );
 
     expect(triage).toMatchObject({
-      primary: "protect_rd",
-      targetServerId: "rd",
+      primary: "low_value",
     });
-    expect(creditComponent).toMatchObject({
-      key: "corp_board_triage_alignment",
-    });
+    expect(creditComponent?.key).not.toBe("corp_board_triage_alignment");
   });
 
-  it("protects open HQ before forcing remote scoreline when HQ agenda flood has runner exposure", () => {
+  it("does not certify unbound HQ ICE ahead of a prepared scoreline", () => {
     const hqIce = corpAction("install-hq-ice", "install_card", {
       placement: "ice",
       serverId: "hq",
@@ -200,23 +185,19 @@ describe("semantic runtime corp board triage central protection", () => {
     );
 
     expect(triage).toMatchObject({
-      primary: "protect_hq",
-      severity: "critical",
-      targetServerId: "hq",
+      primary: "force_scoreline_clock",
+      severity: "high",
+      targetServerId: "remote_1",
     });
-    expect(triage.evidence).toContain(
-      "corp_board_triage_central_override:unprotected_hq_before_runner_exposure",
-    );
     expect(hqComponent).toMatchObject({
-      key: "corp_board_triage_alignment",
+      key: "corp_board_triage_mismatch",
     });
     expect(remoteComponent).toMatchObject({
-      key: "corp_board_triage_mismatch",
-      value: -3200,
+      key: "corp_board_triage_alignment",
     });
   });
 
-  it("protects HQ with visibly covered ICE before forcing remote scoreline", () => {
+  it("does not turn an unbound extra HQ ICE action into exact protection", () => {
     const hqIce = corpAction("install-hq-ice", "install_card", {
       placement: "ice",
       serverId: "hq",
@@ -277,18 +258,15 @@ describe("semantic runtime corp board triage central protection", () => {
     );
 
     expect(triage).toMatchObject({
-      primary: "protect_hq",
-      severity: "critical",
-      targetServerId: "hq",
+      primary: "force_scoreline_clock",
+      severity: "high",
+      targetServerId: "remote_1",
     });
-    expect(triage.evidence).toContain("corp_hq_ice_count:1");
-    expect(triage.evidence).toContain("corp_hq_effective_stop_ice:false");
     expect(hqComponent).toMatchObject({
-      key: "corp_board_triage_alignment",
+      key: "corp_board_triage_mismatch",
     });
     expect(remoteComponent).toMatchObject({
-      key: "corp_board_triage_mismatch",
-      value: -3200,
+      key: "corp_board_triage_alignment",
     });
   });
 

@@ -330,7 +330,7 @@ describe("corpScoreWindowBlockers", () => {
     expect(step.actionCandidateIds).not.toContain(install.actionId);
   });
 
-  it("uses affordable fallback protection on the last click instead of drawing without an install click", () => {
+  it("does not treat printed ICE cost as an affordable protection quote", () => {
     const agenda = corpCard("political-overthrow", {
       advancementRequirement: 9,
       agendaPoints: 6,
@@ -385,19 +385,15 @@ describe("corpScoreWindowBlockers", () => {
     const step = corpScoreWindowCurrentStep(installAgenda, blockers, input);
 
     expect(step).toMatchObject({
-      kind: "protect_remote",
-      actionCandidateIds: [installHuntingPack.actionId],
+      kind: "find_remote_protection",
+      actionCandidateIds: [draw.actionId],
       rationale: [
-        "use the best affordable non-zero protection before the search click budget expires",
+        "find protection that the visible Runner rig cannot nullify",
       ],
-      followupBudget: {
-        recommendation: "convert_now",
-        horizon: "same_turn_required",
-      },
     });
   });
 
-  it("does not spend the last urgent click searching without a conversion action", () => {
+  it("keeps a real protection-acquisition route distinct from funding-only draw", () => {
     const agenda = corpCard("political-overthrow", {
       advancementRequirement: 9,
       agendaPoints: 6,
@@ -436,12 +432,8 @@ describe("corpScoreWindowBlockers", () => {
       corpScoreWindowCurrentStep(installAgenda, blockers, input),
     ).toMatchObject({
       kind: "find_remote_protection",
-      actionCandidateIds: [],
-      desiredActionSemantics: [],
-      followupBudget: {
-        recommendation: "defer_acquisition",
-        sameTurnReachable: false,
-      },
+      actionCandidateIds: [draw.actionId],
+      desiredActionSemantics: ["draw.card", "search.deck"],
     });
   });
 });

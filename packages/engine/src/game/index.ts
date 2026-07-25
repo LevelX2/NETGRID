@@ -2,6 +2,11 @@
 // Later ARCH steps can move rule families behind this stable import edge.
 export { createGame, createGameAfterSetup } from "./create-game";
 export { applyAction } from "./apply-action";
+export {
+  applyRandomizedIceInstallSelection,
+  candidateFingerprint,
+  quoteRandomizedIceInstallSelection,
+} from "./randomized-ice-install-selection";
 export { applyGameAction } from "./apply-game-action";
 export { legalActionsFor } from "./legal-actions";
 export {
@@ -47,10 +52,13 @@ export type {
 } from "./payment";
 export {
   assertCorpRezCostQuoteValid,
+  corpIcePostInstallRezProjectionPayload,
   corpServerIdForInstalledCard,
   costQuotePublicPayload,
   costQuoteToLegalActionCosts,
   discountedRezSourceIdsForRunIce,
+  projectCorpIceRezCostAfterInstall,
+  projectInstalledCorpIceRezCost,
   quoteCorpIceInstallCost,
   quoteCorpRezCost,
   rezCostForCard,

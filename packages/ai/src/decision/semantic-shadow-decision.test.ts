@@ -889,6 +889,7 @@ function runTarget(params: {
     pathPassability: "reachable",
     pathCost: 0,
     creditsAfterRun: 5,
+    runCommitment: "full_path",
     stealOrTrashAffordable: "unknown",
     installedRunPayoff: runPayoff(),
     runActionPayoff: runPayoff(),

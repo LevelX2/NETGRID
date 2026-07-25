@@ -40,6 +40,40 @@ describe("runnerAccessTrashScoreComponents", () => {
     );
   });
 
+  it("does not treat an installed central-root card as low Corp investment", () => {
+    const trash = accessAction("trash-root", "trash_accessed_card");
+    const current = runnerInput([trash]);
+    current.playerView.own.credits = 18;
+
+    const components = runnerAccessTrashScoreComponents(current, trash, {
+      trashAccessContext: () => ({
+        trashable: true,
+        affordableRelevant: true,
+        highImpact: true,
+        trashCost: 2,
+        generalCreditCost: 2,
+        creditsAfterGeneralTrash: 16,
+        reserveTarget: 4,
+        deferredByBudget: false,
+        centralAccess: true,
+        installedRootAccess: true,
+        accessServerId: "hq",
+        targetType: "upgrade",
+        role: "tag_punish",
+      }),
+    });
+
+    expect(components.map((component) => component.key)).not.toContain(
+      "runner_central_access_trash_low_corp_investment",
+    );
+    expect(components).toContainEqual(
+      expect.objectContaining({
+        key: "runner_trash_affordability",
+        value: 220,
+      }),
+    );
+  });
+
   it("protects the central economy-trash reserve at Corp matchpoint", () => {
     const trash = accessAction("trash-economy", "trash_accessed_card");
     const decline = accessAction("decline-economy", "decline_trash");

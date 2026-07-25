@@ -14,7 +14,8 @@ export type PriorityReason =
   | "strategic_campaign"
   | "required_parent_support"
   | "development_need"
-  | "neutral_progress";
+  | "neutral_progress"
+  | "turn_completion";
 
 export type PlanHorizon =
   | "current_window"
@@ -319,7 +320,10 @@ function claimReasonMatchesClass(claim: PriorityClaim): boolean {
         claim.reasonCode === "development_need"
       );
     case "P6":
-      return claim.reasonCode === "neutral_progress";
+      return (
+        claim.reasonCode === "neutral_progress" ||
+        claim.reasonCode === "turn_completion"
+      );
   }
 }
 

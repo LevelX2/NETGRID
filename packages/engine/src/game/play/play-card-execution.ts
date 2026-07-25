@@ -12,11 +12,13 @@ import {
   closeRunnerCostPenaltySupportWindowForPayment,
   openRunnerCostPenaltySupportWindow,
 } from "../payment/runner-payment-support";
+import { fixedPlayCostCredits } from "../payment/play-cost";
 import { restrictedHostedCredits } from "../run/run-duration-payment";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
 import {
   corpUtilityImplementationForDefinition,
   corpUtilityPlayClickCost,
+  onPlayCardImplementationVariableOperationCreditCostForAction,
 } from "./corp-operation-resolution";
 
 type PlayCardResolver = {
@@ -96,6 +98,9 @@ function executePlayEventAction(
 ): void {
   const cardId = String(legalAction.payload?.cardId) as CardInstanceId;
   const definition = definitionFor(host.state, cardId);
+  const expectedCreditCost = fixedPlayCostCredits(definition);
+  if (legalAction.costs[0]?.credits !== expectedCreditCost)
+    throw new Error("Die Event-Kosten sind nicht mehr gueltig.");
   if (host.cardImplementation.canPlayPrintedCostOnPlay(definition)) {
     const ability = printedCostOnPlayImplementation(definition);
     const expectedClicks = ability
@@ -104,7 +109,7 @@ function executePlayEventAction(
     if ((legalAction.costs[0]?.clicks ?? 1) !== expectedClicks)
       throw new Error("Die Event-Klickkosten sind nicht mehr gueltig.");
   }
-  const creditCost = legalAction.costs[0]?.credits ?? 0;
+  const creditCost = expectedCreditCost;
   if (creditCost > 0) {
     const availableWithoutSupport =
       host.state.runner.credits +
@@ -165,6 +170,10 @@ function executePlayOperationAction(
 ): void {
   if (!legalAction.payload?.cardId)
     throw new Error("Die Operation hat keine gueltige Karte.");
+  const operationCreditCost = requiredCreditCost(
+    legalAction,
+    "Die Operation hat keine gueltigen Credit-Kosten.",
+  );
   {
     const cardId = String(legalAction.payload.cardId) as CardInstanceId;
     const definition = definitionFor(host.state, cardId);
@@ -179,9 +188,13 @@ function executePlayOperationAction(
       throw new Error("Die Operation-Klickkosten sind nicht mehr gueltig.");
     if (host.cardImplementation.hasPrintedCostOnPlay(definition)) {
       const expectedCost =
-        (definition.cost ?? 0) +
-        host.cardImplementation.additionalOperationCost(definition);
-      if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
+        onPlayCardImplementationVariableOperationCreditCostForAction(
+          definition,
+          legalAction,
+        ) ??
+        fixedPlayCostCredits(definition) +
+          host.cardImplementation.additionalOperationCost(definition);
+      if (operationCreditCost !== expectedCost)
         throw new Error("Die Operation-Kosten sind nicht mehr gueltig.");
       const ability = printedCostOnPlayImplementation(definition);
       const expectedClicks = ability
@@ -199,7 +212,7 @@ function executePlayOperationAction(
     }
   }
   spendPlayClicks(host, "corp", legalAction.costs[0]?.clicks ?? 1);
-  host.payment.spendCredits("corp", legalAction.costs[0]?.credits ?? 0);
+  host.payment.spendCredits("corp", operationCreditCost);
   if (legalAction.payload?.cardId) {
     const cardId = String(legalAction.payload.cardId) as CardInstanceId;
     const definition = definitionFor(host.state, cardId);
@@ -226,6 +239,20 @@ function executePlayOperationAction(
       };
     }
   }
+}
+
+function requiredCreditCost(
+  legalAction: LegalAction,
+  message: string,
+): number {
+  const creditCost = legalAction.costs[0]?.credits;
+  if (
+    typeof creditCost !== "number" ||
+    !Number.isInteger(creditCost) ||
+    creditCost < 0
+  )
+    throw new Error(message);
+  return creditCost;
 }
 
 function spendPlayClicks(

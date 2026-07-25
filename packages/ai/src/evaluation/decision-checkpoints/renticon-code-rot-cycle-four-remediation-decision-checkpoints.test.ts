@@ -5,7 +5,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("Rent-I-Con versus CODE ROT cycle-four remediation checkpoint", () => {
-  it("funds an unsafe score window instead of forcing another advance", () => {
+  it("holds an already funded score parent instead of forcing an unsafe advance", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(unsafeWindowAdvanceJson) as AiDecisionCheckpointV1,
     );

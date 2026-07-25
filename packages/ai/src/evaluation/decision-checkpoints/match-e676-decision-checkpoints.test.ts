@@ -11,7 +11,7 @@ describe("match e676 exact decision checkpoints", () => {
   it.each([
     ["does not expose a slow four-point Tycho at matchpoint", unsafeTychoJson],
     [
-      "rezzes a free persistent Chester Mix before installing HQ ICE",
+      "does not infer an HQ defense install from Chester Mix without an engine quote",
       chesterBeforeHqIceJson,
     ],
     [

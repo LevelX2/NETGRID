@@ -102,6 +102,40 @@ describe("game replay facade", () => {
     ]);
   });
 
+  it("never falls back to direct action replay for an invalid randomized command", () => {
+    const initial = createGame({
+      seed: "arch-58-replay-invalid-randomized-command",
+      setupMode: "completed",
+    });
+    const event: GameEvent = {
+      eventId: "arch_58_invalid_randomized_event",
+      type: "test_invalid_randomized_replay_payload",
+      stateVersionBefore: 0,
+      stateVersionAfter: 1,
+      stateHashAfter: hashState(initial),
+      publicPayload: { actor: "corp" },
+      privatePayload: {
+        corp: {
+          action: {
+            kind: "engine_randomized_ice_install_selection",
+            matchId: initial.matchId,
+            side: "corp",
+            actionId: "must_not_fall_back",
+            clientKnownStateVersion: initial.stateVersion,
+            quote: { complete: false },
+          },
+        },
+      },
+    };
+
+    const replay = replayGameEvents(initial, [event]);
+
+    expect(replay.ok).toBe(false);
+    expect(replay.errors).toEqual([
+      "Event arch_58_invalid_randomized_event has no replayable action.",
+    ]);
+  });
+
   it("keeps invalid replay action failure behavior stable", () => {
     const initial = createGame({
       seed: "arch-58-replay-stale-action",

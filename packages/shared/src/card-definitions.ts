@@ -4,11 +4,22 @@ import type {
   CardDefinition,
   CardDefinitionId,
   CardType,
+  ResolvedCardDefinition,
   Side,
   SubroutineDefinition,
 } from "./index";
 
 const ONR_V1_LOCAL_PRIVATE = "onr_v1_limited_private_local";
+const DEFINITION_NUMERIC_FIELDS = [
+  "cost",
+  "installCost",
+  "memoryCost",
+  "strength",
+  "rezCost",
+  "trashCost",
+  "advancementRequirement",
+  "agendaPoints",
+] as const;
 
 function onrBreaker(params: {
   id: string;
@@ -3476,6 +3487,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 12,
     memoryCost: 1,
+    variableStrength: {
+      kind: "random_die",
+      dieSides: 6,
+    },
     recurringCredits: 1,
     rulesText:
       "1 Credit: Break 1 sentry subroutine. 1 Credit: +1 strength. At the start of each run, roll a die to determine AI Boon's strength for that run.",
@@ -6766,6 +6781,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "operation",
     subtypes: ["gray-ops"],
     implementationStatus: "playable_mvp",
+    playCost: {
+      kind: "variable_x",
+      minimumX: 1,
+      creditsPerX: 1,
+      maximumX: { kind: "context" },
+    },
     rulesText:
       "Play only if the Runner is tagged. Pay X to trash X pieces of installed Runner hardware, other than Cybernetics.",
     mechanics: [
@@ -8105,7 +8126,11 @@ const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
     subtypes: ["sentry", "ap", "sword"],
     implementationStatus: "playable_mvp",
     rezCost: 6,
-    strength: 0,
+    variableStrength: {
+      kind: "paid_x",
+      minimumStrength: 0,
+      maximumStrength: 6,
+    },
     rulesText:
       "[Subroutine] Do 2 net damage.\n[Subroutine] End the run.\nPay X above the rez cost when you rez Digiconda. X is Digiconda's strength and cannot be greater than 6.",
     subroutines: [
@@ -8222,7 +8247,11 @@ const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
     subtypes: ["sentry"],
     implementationStatus: "playable_mvp",
     rezCost: 4,
-    strength: 0,
+    variableStrength: {
+      kind: "paid_x",
+      minimumStrength: 0,
+      maximumStrength: 8,
+    },
     rulesText:
       "[Subroutine] Trace X. If successful, end the run and Runner cannot make another run until Runner takes an action to pay 2.\nPay X above the rez cost when you rez Homing Missile. X is Homing Missile's strength and trace limit, and X cannot be greater than 8.",
     subroutines: [
@@ -9452,12 +9481,19 @@ export const CARD_DEFINITIONS: CardDefinition[] = [
   ...PROTEUS_VARIABLE_ICE_CARDS,
 ];
 
-export const CARD_DEFINITIONS_BY_ID: Record<CardDefinitionId, CardDefinition> =
-  Object.fromEntries([
-    ...classicCatalogFallbackCards().map((card) => [card.id, card] as const),
-    ...proteusCatalogFallbackCards().map((card) => [card.id, card] as const),
-    ...CARD_DEFINITIONS.map((card) => [card.id, card] as const),
-  ]);
+export const CARD_DEFINITIONS_BY_ID: Record<
+  CardDefinitionId,
+  ResolvedCardDefinition
+> = Object.fromEntries(
+  [
+    ...classicCatalogFallbackCards(),
+    ...proteusCatalogFallbackCards(),
+    ...CARD_DEFINITIONS,
+  ].map((card) => {
+    const resolved = resolveCardDefinition(card);
+    return [resolved.id, resolved] as const;
+  }),
+);
 
 type CatalogFallbackCard = {
   cardId: string;
@@ -9475,6 +9511,8 @@ type CatalogFallbackCard = {
     advancementRequirement?: number | null;
     agendaPoints?: number | null;
   };
+  playCost?: CardDefinition["playCost"];
+  variableStrength?: CardDefinition["variableStrength"];
   text?: string;
   markCounterDisplay?: CardDefinition["markCounterDisplay"];
 };
@@ -9506,6 +9544,10 @@ function catalogFallbackCards(
       type: card.type,
       subtypes: card.subtypes ?? [],
       implementationStatus: "playable_mvp",
+      ...(card.playCost ? { playCost: card.playCost } : {}),
+      ...(card.variableStrength
+        ? { variableStrength: card.variableStrength }
+        : {}),
       ...numberField("cost", numeric.cost),
       ...numberField("installCost", numeric.installCost),
       ...numberField("memoryCost", numeric.memoryCost),
@@ -9521,6 +9563,205 @@ function catalogFallbackCards(
       mechanics: [mechanic],
     };
   });
+}
+
+function resolveCardDefinition(
+  card: CardDefinition,
+): ResolvedCardDefinition {
+  validateDefinitionNumericContract(card);
+  const { variableStrength, ...cardWithoutVariableStrength } = card;
+  const numeric = {
+    cost: card.cost ?? null,
+    installCost: card.installCost ?? null,
+    memoryCost: card.memoryCost ?? null,
+    strength: card.strength ?? null,
+    rezCost: card.rezCost ?? null,
+    trashCost: card.trashCost ?? null,
+    advancementRequirement: card.advancementRequirement ?? null,
+    agendaPoints: card.agendaPoints ?? null,
+  };
+  const strengthModel =
+    card.strength !== undefined
+      ? ({ kind: "fixed", value: card.strength } as const)
+      : variableStrength
+        ? { ...variableStrength }
+        : ({ kind: "not_applicable" } as const);
+  const type = card.type;
+  if (type !== "event" && type !== "operation") {
+    if (card.playCost !== undefined) {
+      throw new Error(
+        `${card.id}: only events and operations may define playCost.`,
+      );
+    }
+    return {
+      ...cardWithoutVariableStrength,
+      type,
+      playCost: null,
+      numeric,
+      strengthModel,
+    };
+  }
+  if (card.playCost !== undefined && card.cost !== undefined) {
+    throw new Error(
+      `${card.id}: event/operation defines both fixed and variable play cost.`,
+    );
+  }
+  const playCost =
+    card.playCost ??
+    (card.cost !== undefined
+      ? {
+          kind: "fixed" as const,
+          credits: card.cost,
+        }
+      : undefined);
+  if (playCost === undefined) {
+    throw new Error(`${card.id}: event/operation play cost is unresolved.`);
+  }
+  if (playCost.kind === "fixed") {
+    if (
+      !hasExactKeys(playCost, ["kind", "credits"]) ||
+      !Number.isInteger(playCost.credits) ||
+      !Number.isFinite(playCost.credits) ||
+      playCost.credits < 0
+    ) {
+      throw new Error(`${card.id}: invalid fixed play cost.`);
+    }
+  } else if (
+    !hasExactKeys(playCost, [
+      "kind",
+      "minimumX",
+      "creditsPerX",
+      "maximumX",
+    ]) ||
+    !Number.isInteger(playCost.minimumX) ||
+    playCost.minimumX < 1 ||
+    !Number.isInteger(playCost.creditsPerX) ||
+    playCost.creditsPerX <= 0 ||
+    playCost.maximumX.kind !== "context" ||
+    !hasExactKeys(playCost.maximumX, ["kind"])
+  ) {
+    throw new Error(`${card.id}: invalid variable-X play cost.`);
+  }
+  return {
+    ...cardWithoutVariableStrength,
+    type,
+    playCost,
+    numeric,
+    strengthModel,
+  };
+}
+
+function validateDefinitionNumericContract(card: CardDefinition): void {
+  for (const key of DEFINITION_NUMERIC_FIELDS) {
+    const value = card[key];
+    if (
+      value !== undefined &&
+      (!Number.isFinite(value) || !Number.isInteger(value) || value < 0)
+    ) {
+      throw new Error(`${card.id}: ${key} must be a non-negative integer.`);
+    }
+  }
+
+  const requiredFields: Partial<
+    Record<CardType, readonly (typeof DEFINITION_NUMERIC_FIELDS)[number][]>
+  > = {
+    program: ["installCost", "memoryCost"],
+    hardware: ["installCost"],
+    resource: ["installCost"],
+    agenda: ["advancementRequirement", "agendaPoints"],
+    asset: ["rezCost", "trashCost"],
+    upgrade: ["rezCost", "trashCost"],
+    ice: ["rezCost"],
+  };
+  const allowedFields: Partial<
+    Record<CardType, readonly (typeof DEFINITION_NUMERIC_FIELDS)[number][]>
+  > = {
+    identity: [],
+    event: ["cost"],
+    operation: ["cost"],
+    program: ["installCost", "memoryCost", "strength"],
+    hardware: ["installCost"],
+    resource: ["installCost"],
+    agenda: ["advancementRequirement", "agendaPoints"],
+    asset: ["rezCost", "trashCost"],
+    upgrade: ["rezCost", "trashCost"],
+    ice: ["rezCost", "strength"],
+  };
+
+  for (const key of requiredFields[card.type] ?? []) {
+    if (card[key] === undefined) {
+      throw new Error(`${card.id}: ${card.type} requires ${key}.`);
+    }
+  }
+  const allowed = new Set(allowedFields[card.type] ?? []);
+  for (const key of DEFINITION_NUMERIC_FIELDS) {
+    if (card[key] !== undefined && !allowed.has(key)) {
+      throw new Error(`${card.id}: ${card.type} cannot define ${key}.`);
+    }
+  }
+
+  const strengthRequired =
+    card.type === "ice" ||
+    (card.type === "program" && card.subtypes.includes("icebreaker"));
+  const hasFixedStrength = card.strength !== undefined;
+  const hasVariableStrength = card.variableStrength !== undefined;
+  if (
+    strengthRequired &&
+    (hasFixedStrength === hasVariableStrength)
+  ) {
+    throw new Error(
+      `${card.id}: strength-relevant ${card.type} requires exactly one fixed or variable strength model.`,
+    );
+  }
+  if (!strengthRequired && (hasFixedStrength || hasVariableStrength)) {
+    throw new Error(
+      `${card.id}: ${card.type}/${card.subtypes.join(",")} cannot define strength.`,
+    );
+  }
+  if (card.variableStrength) {
+    validateVariableStrength(card.id, card.variableStrength);
+  }
+}
+
+function validateVariableStrength(
+  cardId: string,
+  strength: NonNullable<CardDefinition["variableStrength"]>,
+): void {
+  if (strength.kind === "paid_x") {
+    if (
+      !hasExactKeys(strength, [
+        "kind",
+        "minimumStrength",
+        "maximumStrength",
+      ]) ||
+      !Number.isInteger(strength.minimumStrength) ||
+      strength.minimumStrength < 0 ||
+      !Number.isInteger(strength.maximumStrength) ||
+      strength.maximumStrength < strength.minimumStrength
+    ) {
+      throw new Error(`${cardId}: invalid paid-X strength model.`);
+    }
+    return;
+  }
+  if (
+    !hasExactKeys(strength, ["kind", "dieSides"]) ||
+    !Number.isInteger(strength.dieSides) ||
+    strength.dieSides < 2
+  ) {
+    throw new Error(`${cardId}: invalid random-die strength model.`);
+  }
+}
+
+function hasExactKeys(
+  value: object,
+  expectedKeys: readonly string[],
+): boolean {
+  const expected = [...expectedKeys].sort();
+  const actual = Object.keys(value).sort();
+  return (
+    actual.length === expected.length &&
+    actual.every((key, index) => key === expected[index])
+  );
 }
 
 function numberField<K extends keyof CardDefinition>(

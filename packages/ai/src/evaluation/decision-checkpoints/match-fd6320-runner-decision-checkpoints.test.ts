@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import centralTargetQualityJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-fd6320-01-central-target-quality.json";
 import reachableHqMatchpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-fd6320-02-reachable-hq-matchpoint.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
@@ -63,7 +64,13 @@ describe("match FD6320 runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    [
+      "FD6320-F01-central-target-quality",
+      "FD6320-F02-reachable-hq-matchpoint",
+    ],
+  );
 }
 
 function mutateFixture(

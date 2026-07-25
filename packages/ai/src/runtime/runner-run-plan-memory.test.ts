@@ -827,6 +827,7 @@ function runTargetEvaluation(
     targetKind?: RunnerRunTargetEvaluation["targetKind"];
     evidence?: string[];
     routeQuote?: RunnerRunTargetEvaluation["routeQuote"];
+    runCommitment?: RunnerRunTargetEvaluation["runCommitment"];
   } = {},
 ): RunnerRunTargetEvaluation {
   const accessPayoff = options.accessPayoff ?? "unknown";
@@ -849,6 +850,7 @@ function runTargetEvaluation(
     pathCost: 2,
     ...(options.routeQuote ? { routeQuote: options.routeQuote } : {}),
     creditsAfterRun: 3,
+    runCommitment: options.runCommitment ?? "full_path",
     stealOrTrashAffordable: "unknown",
     installedRunPayoff: {
       immediateAccessValue: 0,

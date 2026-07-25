@@ -12032,8 +12032,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.gain_credit"
+        "actionId": "runner.start_run.archives"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_archives_information"],
+      "requiredAssessmentEvidence": ["target:archives"]
+    }
   }
 }

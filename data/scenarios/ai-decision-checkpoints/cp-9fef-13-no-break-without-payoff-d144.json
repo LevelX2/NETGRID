@@ -10470,6 +10470,106 @@
         "decisions_committed:48"
       ]
     },
+    "residentPlanPortfolio": {
+      "schemaVersion": "resident-plan-portfolio-v2",
+      "side": "runner",
+      "stateVersion": 241,
+      "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Aremote_2",
+      "executorInstanceId": "plan:runner.contest_remote:remote%3Aremote_2",
+      "instances": [
+        {
+          "instanceId": "plan:runner.contest_remote:remote%3Aremote_2",
+          "dedupeKey": "remote:remote_2",
+          "moduleId": "runner.contest_remote",
+          "moduleVersion": "1",
+          "side": "runner",
+          "strategyLineIds": [
+            "runner.rig_first"
+          ],
+          "executionClass": "strategic_campaign",
+          "viability": "ready",
+          "portfolioRole": "foreground",
+          "executionState": "executor",
+          "persistencePolicy": "sticky_goal",
+          "retentionPolicy": {
+            "blockedStateVersionTtl": 2,
+            "dormantStateVersionTtl": 2,
+            "completedHistoryStateVersionTtl": 4,
+            "abandonWhenTargetMissing": true,
+            "protectedWhileNeedOpen": true,
+            "protectedWhileCommitted": true
+          },
+          "target": {
+            "kind": "server",
+            "id": "remote_2"
+          },
+          "openNeedIds": [],
+          "phase": "execute",
+          "milestone": "admitted",
+          "moduleState": {
+            "kind": "remote_contest",
+            "signal": {
+              "contestId": "remote:remote_2",
+              "serverId": "remote_2",
+              "purpose": "information",
+              "knownAgendaThreat": false,
+              "reachable": true,
+              "marginalValue": 60,
+              "evidenceCode": "run_plan_objective:probe_unknown_ice",
+              "runActionIds": [
+                "runner.start_run.remote_2"
+              ],
+              "encounterCreditSpendLimit": 1,
+              "accessCommitment": {
+                "payoff": "unknown",
+                "intendedAction": "access",
+                "knownTargetDefinitionIds": [],
+                "trashBudget": 0,
+                "evidenceCode": "remote_memory_payoff:unknown"
+              }
+            }
+          },
+          "blockers": [],
+          "resumeConditions": [
+            {
+              "code": "route_becomes_available"
+            }
+          ],
+          "completionConditions": [
+            {
+              "code": "purpose_converted"
+            }
+          ],
+          "abandonmentConditions": [
+            {
+              "code": "target_invalidated"
+            },
+            {
+              "code": "marginal_value_exhausted"
+            }
+          ],
+          "resourceClaimIds": [],
+          "acceptedReservationIds": [],
+          "progress": {
+            "status": "progress",
+            "value": 1,
+            "milestone": "ice_probe_started",
+            "reasonCode": "run_started_for_information"
+          },
+          "createdAtStateVersion": 241,
+          "updatedAtStateVersion": 241,
+          "lastProductiveAtStateVersion": 241,
+          "evidenceRefs": [
+            {
+              "code": "run_plan_objective:probe_unknown_ice",
+              "source": "plan_outcome"
+            }
+          ]
+        }
+      ],
+      "completionHistory": [],
+      "transitions": []
+    },
     "runnerRunPlan": {
       "id": "runner_run_plan:match_9fef30abd4b16341:241:runner:runner.start_run.remote_2:remote_2",
       "side": "runner",
@@ -10613,10 +10713,18 @@
     "forbiddenActions": [
       {
         "type": "pump_breaker"
-      },
-      {
-        "type": "break_subroutine"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.convert_run_window"
+      ],
+      "acceptableCapabilities": [
+        "convert_active_run_window"
+      ],
+      "requiredAssessmentEvidence": [
+        "runner_visible_encounter_requires_mitigation:onr_v1_263_reinforced-wall"
+      ]
+    }
   }
 }

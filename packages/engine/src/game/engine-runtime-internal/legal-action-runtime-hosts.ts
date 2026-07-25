@@ -52,8 +52,10 @@ import {
 } from "@netgrid/shared";
 import {
   assertCorpRezCostQuoteValid,
+  corpRootRezCreditOutcomeQuotePayload,
   corpServerIdForInstalledCard,
   quoteCorpIceInstallCost,
+  quoteCorpRootRezCreditOutcome,
   quoteCorpRootRezCost,
   type CorpTracePaymentDependencies,
   type RunnerTracePaymentDependencies,
@@ -705,20 +707,31 @@ export function createLegalActionRuntimeHosts(
           continue;
         const rezQuote = quoteCorpRootRezCost(state, id);
         if (!rezQuote.canPay) continue;
-        actions.push(
-          action(
-            state,
-            "corp",
-            "rez_card",
-            `${definition.title} in ${server.label} rezzen`,
-            id,
-            rezQuote.costs.map((cost) => ({ ...cost })),
-            {
-              ...rezQuote.publicPayload,
-              runnerActionPaidWindowRez: true,
-            },
-          ),
+        const rezAction = action(
+          state,
+          "corp",
+          "rez_card",
+          `${definition.title} in ${server.label} rezzen`,
+          id,
+          rezQuote.costs.map((cost) => ({ ...cost })),
+          {
+            ...rezQuote.publicPayload,
+            runnerActionPaidWindowRez: true,
+          },
         );
+        const creditOutcomeQuote = quoteCorpRootRezCreditOutcome(
+          state,
+          id,
+          rezAction.actionId,
+          rezQuote.finalCredits,
+        );
+        if (creditOutcomeQuote) {
+          rezAction.payload = {
+            ...(rezAction.payload ?? {}),
+            ...corpRootRezCreditOutcomeQuotePayload(creditOutcomeQuote),
+          };
+        }
+        actions.push(rezAction);
       }
     }
     return actions;

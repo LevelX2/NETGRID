@@ -1,5 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import {
+  assertResidentPlanPortfolio,
   RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION,
   type ResidentPlanPortfolio,
 } from "./resident-plan-portfolio";
@@ -60,6 +61,35 @@ export function rememberResidentPlanPortfolio(
 
 export function resetResidentPlanPortfolioMemory(): void {
   memory.clear();
+}
+
+export function restoreResidentPlanPortfolioMemorySnapshot(
+  input: AiDecisionInput,
+  snapshot: ResidentPlanPortfolio | undefined,
+): void {
+  const key = memoryKey(input);
+  if (!snapshot) {
+    memory.delete(key);
+    return;
+  }
+  if (
+    snapshot.schemaVersion !== RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION ||
+    snapshot.side !== input.side ||
+    snapshot.stateVersion > input.playerView.stateVersion
+  ) {
+    memory.delete(key);
+    throw new PlanResolutionFailure("invalid_plan_identity", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      owner: "plan_registry",
+      removalCondition:
+        "Restore only a same-side resident v2 portfolio captured no later than the checkpoint state.",
+    });
+  }
+  assertResidentPlanPortfolio(snapshot, input.playerView.timingPoint);
+  memory.set(key, structuredClone(snapshot));
 }
 
 function memoryKey(input: AiDecisionInput): string {

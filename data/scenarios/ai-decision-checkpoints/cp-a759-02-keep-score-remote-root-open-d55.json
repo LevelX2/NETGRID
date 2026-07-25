@@ -7154,21 +7154,14 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "actionId": "corp.draw_card"
-      },
-      {
-        "actionId": "corp.install_card.corp_onr_v1_365_paris-city-grid_1.hq.corp_onr_v1_365_paris-city-grid_1"
-      },
-      {
-        "actionId": "corp.install_card.corp_onr_v1_365_paris-city-grid_1.rd.corp_onr_v1_365_paris-city-grid_1"
-      }
-    ],
     "forbiddenActions": [
       {
         "actionId": "corp.install_card.corp_onr_v1_365_paris-city-grid_1.remote_1.corp_onr_v1_365_paris-city-grid_1"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.punish_campaign"],
+      "acceptableCapabilities": ["punish_prepare"]
+    }
   }
 }

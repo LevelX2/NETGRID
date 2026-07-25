@@ -46,6 +46,39 @@ describe("buildRunnerRemoteTrashAccessContext", () => {
       ]),
     );
   });
+
+  it("recognizes an installed central-root Crybaby as tag-punish investment", () => {
+    const crybaby = visibleCorpCard(
+      "crybaby-root",
+      "onr_v1_354_crybaby",
+      "upgrade",
+      2,
+    );
+    const trash = accessAction("trash-crybaby", "trash_accessed_card");
+    trash.costs = [{ credits: 2 }];
+    const decline = accessAction("decline-crybaby", "decline_trash");
+    const input = runnerAccessInput({
+      accessedCard: crybaby,
+      legalActions: [trash, decline],
+      attackedServerId: "hq",
+      credits: 18,
+      serverRoot: [crybaby],
+    });
+
+    const context = buildRunnerRemoteTrashAccessContext(input, trash, 4);
+
+    expect(context).toMatchObject({
+      trashable: true,
+      relevant: true,
+      affordableRelevant: true,
+      highImpact: true,
+      role: "tag_punish",
+      centralAccess: true,
+      installedRootAccess: true,
+      trashCost: 2,
+    });
+    expect(context.evidence).toContain("accessed_card_installed_root:true");
+  });
 });
 
 function runnerAccessInput(params: {
@@ -53,6 +86,7 @@ function runnerAccessInput(params: {
   legalActions: LegalAction[];
   attackedServerId: string;
   credits: number;
+  serverRoot?: VisibleCard[];
 }): AiDecisionInput {
   const playerView: PlayerView = {
     side: "runner",
@@ -85,7 +119,14 @@ function runnerAccessInput(params: {
       discardCount: 0,
       scoreArea: [],
     },
-    servers: [{ id: "hq", label: "HQ", ice: [], root: [] }],
+    servers: [
+      {
+        id: "hq",
+        label: "HQ",
+        ice: [],
+        root: params.serverRoot ?? [],
+      },
+    ],
     publicEvents: [],
     legalActions: params.legalActions,
     winner: null,
@@ -105,6 +146,24 @@ function runnerAccessInput(params: {
     decisionId: "remote-trash-access-context-test:runner",
     actionNumber: 1,
     profileId: "runner-ai-test",
+  };
+}
+
+function visibleCorpCard(
+  instanceId: string,
+  definitionId: string,
+  type: NonNullable<VisibleCard["type"]>,
+  trashCost: number,
+): VisibleCard {
+  return {
+    instanceId,
+    definitionId,
+    title: instanceId,
+    owner: "corp",
+    controller: "corp",
+    type,
+    known: true,
+    trashCost,
   };
 }
 

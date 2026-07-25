@@ -79,6 +79,7 @@ describe("game apply-action core", () => {
       stateVersionBefore: result.event.stateVersionBefore,
       stateVersionAfter: result.event.stateVersionAfter,
       stateHashAfter: result.event.stateHashAfter,
+      turnSerial: 0,
       visibilityClass: result.event.visibilityClass,
       publicPayload: result.event.publicPayload,
     });

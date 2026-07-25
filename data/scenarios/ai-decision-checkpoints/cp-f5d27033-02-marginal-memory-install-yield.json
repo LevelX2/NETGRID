@@ -4748,13 +4748,24 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "actionId": "runner.start_run.remote_1"
       }
     ],
     "forbiddenActions": [
       {
-        "sourceDefinitionId": "onr_v1_053_zetatech-mem-chip"
+        "sourceDefinitionId": "onr_v1_146_zetatech-mem-chip"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.contest_remote"
+      ],
+      "acceptableCapabilities": [
+        "contest_remote"
+      ],
+      "requiredAssessmentEvidence": [
+        "runner_direct_run_converts_now:remote_1"
+      ]
+    }
   }
 }

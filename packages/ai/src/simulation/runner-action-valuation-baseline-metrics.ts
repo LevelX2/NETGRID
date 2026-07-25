@@ -19,15 +19,22 @@ export function summarizeRunnerActionValuationBaselineMetrics(
     runnerRedundantPersistentInstallSelections: 0,
   };
   for (const summary of summaries) {
-    for (const entry of summary.actionSequence) {
+    for (const [index, entry] of summary.actionSequence.entries()) {
       if (
         entry.side === "runner" &&
         entry.actionType === "end_turn" &&
         (entry.actionsRemainingBefore ?? 0) > 0
       ) {
         metrics.runnerEndTurnsWithClicks += 1;
-        if (entry.evidence.includes("runner_inevitable_corp_deckout:true")) {
+        if (
+          entry.evidence.includes("runner_inevitable_corp_deckout:true") ||
+          isVerifiedPlanFirstCorpDeckoutCloseout(summary, index)
+        ) {
           metrics.runnerInevitableCorpDeckoutEndTurnsWithClicks += 1;
+        } else if (isCertifiedPlanFirstRouteExhaustion(entry)) {
+          continue;
+        } else if (entry.actionableAlternativeCount === 0) {
+          continue;
         } else {
           metrics.runnerPrematureEndTurnsWithClicks += 1;
         }
@@ -51,6 +58,40 @@ export function summarizeRunnerActionValuationBaselineMetrics(
     }
   }
   return metrics;
+}
+
+function isCertifiedPlanFirstRouteExhaustion(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  return (
+    entry.planKind === "runner.complete_turn" &&
+    entry.reasonCode === "plan_first.runner.complete_turn" &&
+    entry.fallbackUsed === false &&
+    entry.timeoutUsed === false &&
+    entry.evidence.includes("plan_first_lane:plan") &&
+    entry.evidence.includes(
+      "plan_step_capability:complete_turn_after_productive_routes_exhausted",
+    ) &&
+    entry.evidence.includes(
+      "plan_assessment_evidence:productive_legal_routes_exhausted",
+    )
+  );
+}
+
+function isVerifiedPlanFirstCorpDeckoutCloseout(
+  summary: AiSimulationSummary,
+  endTurnIndex: number,
+): boolean {
+  const entry = summary.actionSequence[endTurnIndex];
+  const forcedDraw = summary.actionSequence[endTurnIndex + 1];
+  return (
+    entry?.planKind === "runner.secure_terminal_win" &&
+    summary.winner === "runner" &&
+    summary.gameEndReason === "corp_deck_empty" &&
+    forcedDraw?.side === "corp" &&
+    forcedDraw.actionType === "mandatory_draw" &&
+    endTurnIndex + 2 === summary.actionSequence.length
+  );
 }
 
 function persistentInstallFinalFit(evidence: readonly string[]): number {

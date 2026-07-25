@@ -438,7 +438,6 @@ function buildRunnerCreditReservePolicy(params: {
     params.baseDesiredCreditReserve,
     breakerUseReserve,
     contestReserve,
-    params.remotePressureReserve.runwayTarget,
     developmentReserve,
     emergencyReserve,
   );
@@ -448,11 +447,6 @@ function buildRunnerCreditReservePolicy(params: {
     ...(params.bankToolsRelevant ? ["bank_tools"] : []),
     ...(params.remoteScoreThreat !== "none"
       ? [`remote_score_threat:${params.remoteScoreThreat}`]
-      : []),
-    ...(params.remotePressureReserve.active
-      ? [
-          `remote_pressure_reserve:${params.remotePressureReserve.serverId ?? "unknown"}`,
-        ]
       : []),
     ...(developmentReserve > params.baseDesiredCreditReserve
       ? ["development_reserve"]
@@ -481,13 +475,10 @@ function buildRunnerCreditReservePolicy(params: {
     minimumCreditFloor: params.minimumCreditFloor,
     breakerUseReserve,
     contestReserve,
-    remotePressureReserve: params.remotePressureReserve.reserve,
-    ...(params.remotePressureReserve.serverId
-      ? { remotePressureServerId: params.remotePressureReserve.serverId }
-      : {}),
-    remotePressureReserveActive: params.remotePressureReserve.active,
-    rdPressureSpendTarget: params.remotePressureReserve.rdPressureSpendTarget,
-    pressureRunwayTarget: params.remotePressureReserve.runwayTarget,
+    remotePressureReserve: 0,
+    remotePressureReserveActive: false,
+    rdPressureSpendTarget: 0,
+    pressureRunwayTarget: 0,
     developmentReserve,
     emergencyReserve,
     desiredCreditReserve,
@@ -496,7 +487,7 @@ function buildRunnerCreditReservePolicy(params: {
     belowReserveNow,
     spendingWouldDropBelowReserve,
     reserveDrivers,
-    reserveOverrides: params.remotePressureReserve.reserveOverrides,
+    reserveOverrides: [],
     evidence: [
       `credit_reserve_phase:${params.phase}`,
       `current_credits:${params.currentCredits}`,
@@ -508,17 +499,17 @@ function buildRunnerCreditReservePolicy(params: {
       `can_contest_if_funded:${canContestIfFunded}`,
       `convertible_bank_credits:${params.convertibleBankCredits}`,
       `available_credit_pool:${params.availableCreditPool}`,
-      `remote_pressure_reserve:${params.remotePressureReserve.reserve}`,
-      `remote_pressure_server:${params.remotePressureReserve.serverId ?? "none"}`,
-      `remote_pressure_reserve_active:${params.remotePressureReserve.active}`,
-      `rd_pressure_spend_target:${params.remotePressureReserve.rdPressureSpendTarget}`,
-      `pressure_runway_target:${params.remotePressureReserve.runwayTarget}`,
+      `diagnostic_remote_pressure_reserve:${params.remotePressureReserve.reserve}`,
+      `diagnostic_remote_pressure_server:${params.remotePressureReserve.serverId ?? "none"}`,
+      `diagnostic_remote_pressure_reserve_active:${params.remotePressureReserve.active}`,
+      `diagnostic_rd_pressure_spend_target:${params.remotePressureReserve.rdPressureSpendTarget}`,
+      `diagnostic_pressure_runway_target:${params.remotePressureReserve.runwayTarget}`,
       `development_reserve:${developmentReserve}`,
       `emergency_reserve:${emergencyReserve}`,
       `below_reserve_now:${belowReserveNow}`,
       `spending_would_drop_below_reserve:${spendingWouldDropBelowReserve}`,
       ...params.remotePressureReserve.reserveOverrides.map(
-        (override) => `reserve_override:${override}`,
+        (override) => `diagnostic_reserve_override:${override}`,
       ),
       ...reserveDrivers.map((driver) => `reserve_driver:${driver}`),
     ],
@@ -861,7 +852,12 @@ function runnerRemotePressureReserveAssessment(params: {
         ? 6
         : 5;
   const candidates = params.input.playerView.servers.flatMap((server) => {
-    if (!server.id.startsWith("remote_") || server.ice.length < 2) return [];
+    if (
+      !server.id.startsWith("remote_") ||
+      server.ice.length < 2 ||
+      server.root.length === 0
+    )
+      return [];
     const hasLegalRun = params.input.legalActions.some(
       (action) =>
         action.type === "start_run" && actionServerId(action) === server.id,

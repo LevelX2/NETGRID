@@ -2,6 +2,8 @@ import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSelfplayTraceMiningDetectorId } from "./selfplay-trace-mining";
 import type { ActionCapacityBaselineMetrics } from "./action-capacity-baseline-metrics";
 import type { RunnerActionValuationBaselineMetrics } from "./runner-action-valuation-baseline-metrics";
+import type { AiBehaviorActionLimitDiagnosis } from "./ai-behavior-baseline-runtime-evidence";
+import type { AiSimulationRuntimeFailure } from "./ai-simulation-runtime-failure";
 
 export const AI_BEHAVIOR_BASELINE_VERSION = "ai-behavior-baseline-v1";
 
@@ -38,6 +40,7 @@ export type AiBehaviorBaselineSlotDescriptor = {
 
 export type AiBehaviorBaselineGame = {
   seed: string;
+  terminationKind: "game_result" | "action_limit" | "runtime_failure";
   winner: string;
   gameEndReason?: string;
   actions: number;
@@ -47,6 +50,8 @@ export type AiBehaviorBaselineGame = {
   finalStateHash: string;
   replayOk: boolean;
   errorCount: number;
+  runtimeFailures?: AiSimulationRuntimeFailure[];
+  actionLimitDiagnosis?: AiBehaviorActionLimitDiagnosis;
 };
 
 export type AiBehaviorBaselineSlotInput = {
@@ -118,6 +123,13 @@ export type AiBehaviorBaselineMetrics = {
   fallbackActions: number;
   timeoutActions: number;
   runtimeErrors: number;
+  classifiedRuntimeFailures: number;
+  unclassifiedRuntimeFailures: number;
+  runtimeFailureCodeCounts: Record<string, number>;
+  runtimeFailureOwnerCounts: Record<string, number>;
+  repeatedRuntimeFailureOwners: string[];
+  classifiedActionLimitGames: number;
+  unclassifiedActionLimitGames: number;
   hiddenInfoFindings: number;
   noLegalActionFailures: number;
   redactionSafe: boolean;
@@ -211,6 +223,11 @@ export function evaluateAiBehaviorBaselineGate(
     ...(metrics.actionLimitGames > 0
       ? [`action_limit_games:${metrics.actionLimitGames}`]
       : []),
+    ...(metrics.unclassifiedActionLimitGames > 0
+      ? [
+          `unclassified_action_limit_games:${metrics.unclassifiedActionLimitGames}`,
+        ]
+      : []),
     ...(metrics.fallbackActions > 0
       ? [`fallback_actions:${metrics.fallbackActions}`]
       : []),
@@ -219,6 +236,25 @@ export function evaluateAiBehaviorBaselineGate(
       : []),
     ...(metrics.runtimeErrors > 0
       ? [`runtime_errors:${metrics.runtimeErrors}`]
+      : []),
+    ...(metrics.unclassifiedRuntimeFailures > 0
+      ? [
+          `unclassified_runtime_failures:${metrics.unclassifiedRuntimeFailures}`,
+        ]
+      : []),
+    ...metrics.repeatedRuntimeFailureOwners.map(
+      (owner) =>
+        `repeated_runtime_failure_owner:${owner}:${metrics.runtimeFailureOwnerCounts[owner] ?? 0}`,
+    ),
+    ...(metrics.runnerPrematureEndTurnsWithClicks > 0
+      ? [
+          `premature_runner_end_turns_with_clicks:${metrics.runnerPrematureEndTurnsWithClicks}`,
+        ]
+      : []),
+    ...(metrics.runnerRedundantPersistentInstallSelections > 0
+      ? [
+          `redundant_low_value_runner_persistent_installs:${metrics.runnerRedundantPersistentInstallSelections}`,
+        ]
       : []),
     ...(metrics.hiddenInfoFindings > 0
       ? [`hidden_info_findings:${metrics.hiddenInfoFindings}`]
@@ -320,7 +356,7 @@ export function formatAiBehaviorBaselineReport(
       metrics.runnerPrematureEndTurnRatePer100Decisions,
     ],
     [
-      "Redundant Runner persistent install rate",
+      "Redundant low-value Runner persistent install rate",
       formatRate(metrics.runnerRedundantPersistentInstallRate),
     ],
   ];
@@ -331,6 +367,10 @@ export function formatAiBehaviorBaselineReport(
     ["fallbackActions", metrics.fallbackActions],
     ["timeoutActions", metrics.timeoutActions],
     ["runtimeErrors", metrics.runtimeErrors],
+    ["classifiedRuntimeFailures", metrics.classifiedRuntimeFailures],
+    ["unclassifiedRuntimeFailures", metrics.unclassifiedRuntimeFailures],
+    ["classifiedActionLimitGames", metrics.classifiedActionLimitGames],
+    ["unclassifiedActionLimitGames", metrics.unclassifiedActionLimitGames],
     ["hiddenInfoFindings", metrics.hiddenInfoFindings],
     ["noLegalActionFailures", metrics.noLegalActionFailures],
     ["redactionSafe", metrics.redactionSafe ? "yes" : "no"],
@@ -344,6 +384,21 @@ export function formatAiBehaviorBaselineReport(
         ([metric, delta]) => `| ${metric} | ${formatDelta(delta)} |`,
       )
     : [];
+  const runtimeFailureCodeRows = countRecordRows(
+    metrics.runtimeFailureCodeCounts,
+  );
+  const runtimeFailureOwnerRows = countRecordRows(
+    metrics.runtimeFailureOwnerCounts,
+  );
+  const actionLimitRows = result.slots.flatMap((slot) =>
+    slot.games.flatMap((game) => {
+      const diagnosis = game.actionLimitDiagnosis;
+      if (!diagnosis) return [];
+      return [
+        `| ${slot.slotId} | ${game.seed} | ${diagnosis.classified ? "yes" : "no"} | ${diagnosis.owner} | ${diagnosis.planInstanceId} | ${diagnosis.stepId} | ${diagnosis.noProgressCluster} | ${diagnosis.noProgressSubcluster} |`,
+      ];
+    }),
+  );
   return [
     "# AI Behavior Baseline v1",
     "",
@@ -368,6 +423,28 @@ export function formatAiBehaviorBaselineReport(
     "| Metric | Value |",
     "| --- | ---: |",
     ...hardRows.map(([metric, value]) => `| ${metric} | ${value} |`),
+    "",
+    "### Runtime failure classifications",
+    "",
+    "| Code | Count |",
+    "| --- | ---: |",
+    ...(runtimeFailureCodeRows.length > 0
+      ? runtimeFailureCodeRows
+      : ["| none | 0 |"]),
+    "",
+    "| Owner | Count |",
+    "| --- | ---: |",
+    ...(runtimeFailureOwnerRows.length > 0
+      ? runtimeFailureOwnerRows
+      : ["| none | 0 |"]),
+    "",
+    "### Action-limit classifications",
+    "",
+    "| Slot | Seed | Classified | Last owner | Last plan | Last step | No-progress cluster | No-progress subcluster |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    ...(actionLimitRows.length > 0
+      ? actionLimitRows
+      : ["| none | none | yes | none | none | none | none | none |"]),
     "",
     "## Behavioural metrics",
     "",
@@ -398,7 +475,7 @@ export function formatAiBehaviorBaselineReport(
     `- Deterministic Corp-deckout end turns with clicks: ${metrics.runnerInevitableCorpDeckoutEndTurnsWithClicks}`,
     `- Premature Runner end turns with clicks: ${metrics.runnerPrematureEndTurnsWithClicks}`,
     `- Runner persistent install selections: ${metrics.runnerPersistentInstallSelections}`,
-    `- Redundant Runner persistent install selections: ${metrics.runnerRedundantPersistentInstallSelections}`,
+    `- Redundant low-value Runner persistent install selections: ${metrics.runnerRedundantPersistentInstallSelections}`,
     `- Average actions: ${metrics.averageActions}`,
     `- Average turns: ${metrics.averageTurns}`,
     "",
@@ -431,8 +508,8 @@ export function formatAiBehaviorBaselineReport(
     "- Missed score windows are direct Corp conversion misses.",
     "- Remote contest skips are normalised by detected affordable advanced-remote opportunities and remain a diagnostic signal, not a standalone failure.",
     "- Plan conversion uses plans settled by conversion, expiry, or abandonment; no-progress and dominated-choice rates are independent review signals.",
-    "- Premature Runner end turns exclude zero-click turns and the explicit deterministic Corp-deckout closeout.",
-    "- Redundant persistent installs require structured persistent-install evaluation, redundant-duplicate classification, and negative final fit.",
+    "- Premature Runner end turns exclude zero-click turns, decisions without an actionable legal alternative, and the explicit deterministic Corp-deckout closeout.",
+    "- Redundant low-value persistent installs require structured persistent-install evaluation, `redundant_duplicate` classification, and negative final fit. Useful backups and other positively valued second copies remain permitted.",
     "- Win rate is deliberately outcome context rather than the acceptance criterion.",
   ].join("\n");
 }
@@ -465,6 +542,8 @@ function createMetrics(
     runnerPersistentInstallSelections: 0,
     runnerRedundantPersistentInstallSelections: 0,
   };
+  const runtimeFailureEvidence = summarizeRuntimeFailureEvidence(input.games);
+  const actionLimitEvidence = summarizeActionLimitEvidence(input.games);
   return {
     games: progression.games,
     decisions: input.decisions,
@@ -543,6 +622,8 @@ function createMetrics(
     fallbackActions: input.fallbackActions,
     timeoutActions: input.timeoutActions,
     runtimeErrors: input.runtimeErrors,
+    ...runtimeFailureEvidence,
+    ...actionLimitEvidence,
     hiddenInfoFindings,
     noLegalActionFailures,
     redactionSafe: input.redactionSafe,
@@ -613,11 +694,28 @@ function combineMetrics(
     fallbackActions: sum(metrics, "fallbackActions"),
     timeoutActions: sum(metrics, "timeoutActions"),
     runtimeErrors: sum(metrics, "runtimeErrors"),
+    classifiedRuntimeFailures: sum(metrics, "classifiedRuntimeFailures"),
+    unclassifiedRuntimeFailures: sum(metrics, "unclassifiedRuntimeFailures"),
+    classifiedActionLimitGames: sum(metrics, "classifiedActionLimitGames"),
+    unclassifiedActionLimitGames: sum(
+      metrics,
+      "unclassifiedActionLimitGames",
+    ),
     hiddenInfoFindings: sum(metrics, "hiddenInfoFindings"),
     noLegalActionFailures: sum(metrics, "noLegalActionFailures"),
   };
+  const runtimeFailureCodeCounts = combineCountRecords(
+    metrics.map((entry) => entry.runtimeFailureCodeCounts),
+  );
+  const runtimeFailureOwnerCounts = combineCountRecords(
+    metrics.map((entry) => entry.runtimeFailureOwnerCounts),
+  );
   return {
     ...summed,
+    runtimeFailureCodeCounts,
+    runtimeFailureOwnerCounts,
+    repeatedRuntimeFailureOwners:
+      repeatedRuntimeFailureOwners(runtimeFailureOwnerCounts),
     averageActions: weightedAverage(metrics, "averageActions"),
     averageTurns: weightedAverage(metrics, "averageTurns"),
     missedScoreWindowRate: rate(
@@ -667,6 +765,113 @@ function combineMetrics(
     findingRatePer100Decisions: per100(summed.findings, summed.decisions),
     redactionSafe: metrics.every((entry) => entry.redactionSafe),
   };
+}
+
+function summarizeRuntimeFailureEvidence(
+  games: readonly AiBehaviorBaselineGame[],
+): Pick<
+  AiBehaviorBaselineMetrics,
+  | "classifiedRuntimeFailures"
+  | "unclassifiedRuntimeFailures"
+  | "runtimeFailureCodeCounts"
+  | "runtimeFailureOwnerCounts"
+  | "repeatedRuntimeFailureOwners"
+> {
+  const runtimeFailureCodeCounts: Record<string, number> = {};
+  const runtimeFailureOwnerCounts: Record<string, number> = {};
+  let classifiedRuntimeFailures = 0;
+  let unclassifiedRuntimeFailures = 0;
+  for (const game of games) {
+    const runtimeFailures = game.runtimeFailures ?? [];
+    for (const failure of runtimeFailures) {
+      incrementCount(runtimeFailureCodeCounts, failure.code);
+      if (failure.classified && failure.owner) {
+        classifiedRuntimeFailures += 1;
+        incrementCount(runtimeFailureOwnerCounts, failure.owner);
+      } else {
+        unclassifiedRuntimeFailures += 1;
+      }
+    }
+    const unclassifiedRemainder = Math.max(
+      0,
+      game.errorCount - runtimeFailures.length,
+    );
+    unclassifiedRuntimeFailures += unclassifiedRemainder;
+    if (unclassifiedRemainder > 0) {
+      incrementCount(
+        runtimeFailureCodeCounts,
+        "unclassified_runtime_failure",
+        unclassifiedRemainder,
+      );
+    }
+  }
+  return {
+    classifiedRuntimeFailures,
+    unclassifiedRuntimeFailures,
+    runtimeFailureCodeCounts,
+    runtimeFailureOwnerCounts,
+    repeatedRuntimeFailureOwners:
+      repeatedRuntimeFailureOwners(runtimeFailureOwnerCounts),
+  };
+}
+
+function summarizeActionLimitEvidence(
+  games: readonly AiBehaviorBaselineGame[],
+): Pick<
+  AiBehaviorBaselineMetrics,
+  "classifiedActionLimitGames" | "unclassifiedActionLimitGames"
+> {
+  let classifiedActionLimitGames = 0;
+  let unclassifiedActionLimitGames = 0;
+  for (const game of games) {
+    if (game.terminationKind !== "action_limit") continue;
+    if (game.actionLimitDiagnosis?.classified === true) {
+      classifiedActionLimitGames += 1;
+    } else {
+      unclassifiedActionLimitGames += 1;
+    }
+  }
+  return { classifiedActionLimitGames, unclassifiedActionLimitGames };
+}
+
+function combineCountRecords(
+  records: readonly Record<string, number>[],
+): Record<string, number> {
+  const combined: Record<string, number> = {};
+  for (const record of records) {
+    for (const [key, count] of Object.entries(record)) {
+      if (count > 0) incrementCount(combined, key, count);
+    }
+  }
+  return Object.fromEntries(
+    Object.entries(combined).sort(([left], [right]) =>
+      left.localeCompare(right),
+    ),
+  );
+}
+
+function repeatedRuntimeFailureOwners(
+  counts: Readonly<Record<string, number>>,
+): string[] {
+  return Object.entries(counts)
+    .filter(([, count]) => count > 1)
+    .map(([owner]) => owner)
+    .sort();
+}
+
+function incrementCount(
+  counts: Record<string, number>,
+  key: string,
+  amount = 1,
+): void {
+  counts[key] = (counts[key] ?? 0) + amount;
+}
+
+function countRecordRows(counts: Readonly<Record<string, number>>): string[] {
+  return Object.entries(counts)
+    .filter(([, count]) => count > 0)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, count]) => `| ${key} | ${count} |`);
 }
 
 function baselineCompatibilityIssues(

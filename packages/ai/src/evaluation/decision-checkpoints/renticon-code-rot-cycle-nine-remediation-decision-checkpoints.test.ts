@@ -5,7 +5,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
-  it("lets affordable HQ ice override a negative remote support mapping", () => {
+  it("converts exact hand-overflow capacity instead of over-layering HQ", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(affordableHqIceJson) as AiDecisionCheckpointV1,
     );

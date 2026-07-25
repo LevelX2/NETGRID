@@ -6,6 +6,8 @@ import {
   evaluateAiBehaviorBaselineGate,
   formatAiBehaviorBaselineReport,
 } from "./ai-behavior-baseline";
+import type { AiBehaviorActionLimitDiagnosis } from "./ai-behavior-baseline-runtime-evidence";
+import type { AiSimulationRuntimeFailure } from "./ai-simulation-runtime-failure";
 
 describe("AI behavior baseline", () => {
   it("normalizes behavioural metrics and preserves hard technical gates", () => {
@@ -51,11 +53,136 @@ describe("AI behavior baseline", () => {
       2,
     );
     expect(baseline.aggregate.runnerRedundantPersistentInstallRate).toBe(0.2);
-    expect(baseline.gate.accepted).toBe(true);
+    expect(baseline.gate.accepted).toBe(false);
+    expect(baseline.gate.hardFailures).toEqual(
+      expect.arrayContaining([
+        "premature_runner_end_turns_with_clicks:2",
+        "redundant_low_value_runner_persistent_installs:1",
+      ]),
+    );
     const report = formatAiBehaviorBaselineReport(baseline);
     expect(report).toContain("# AI Behavior Baseline v1");
     expect(report).toContain("Premature Runner end turns / 100 decisions");
-    expect(report).toContain("Redundant Runner persistent install rate");
+    expect(report).toContain(
+      "Redundant low-value Runner persistent install rate",
+    );
+  });
+
+  it("allows only the separately verified Corp-deckout EndTurn control", () => {
+    const baseline = createBaseline(
+      createSlot({
+        runnerEndTurnsWithClicks: 1,
+        runnerInevitableCorpDeckoutEndTurnsWithClicks: 1,
+        runnerPrematureEndTurnsWithClicks: 0,
+      }),
+    );
+
+    expect(baseline.gate.accepted).toBe(true);
+    expect(baseline.gate.hardFailures).not.toContain(
+      expect.stringContaining("premature_runner_end_turns"),
+    );
+  });
+
+  it("gates unclassified and repeated-owner runtime failures with code evidence", () => {
+    const runtimeFailures: AiSimulationRuntimeFailure[] = [
+      runtimeFailure("missing_plan_module_coverage", "plan_registry"),
+      runtimeFailure("invalid_plan_identity", "plan_registry"),
+      {
+        classified: false,
+        code: "unclassified_runtime_failure",
+        side: "runner",
+        stateVersion: 3,
+        timingPoint: "runner_action.main",
+      },
+    ];
+    const baseline = createBaseline(
+      createSlot({
+        runtimeFailures,
+        runtimeErrorCount: runtimeFailures.length,
+      }),
+    );
+
+    expect(baseline.aggregate.runtimeFailureCodeCounts).toEqual({
+      invalid_plan_identity: 1,
+      missing_plan_module_coverage: 1,
+      unclassified_runtime_failure: 1,
+    });
+    expect(baseline.aggregate.runtimeFailureOwnerCounts).toEqual({
+      plan_registry: 2,
+    });
+    expect(baseline.gate.hardFailures).toEqual(
+      expect.arrayContaining([
+        "runtime_errors:3",
+        "unclassified_runtime_failures:1",
+        "repeated_runtime_failure_owner:plan_registry:2",
+      ]),
+    );
+    const report = formatAiBehaviorBaselineReport(baseline);
+    expect(report).toContain("| missing_plan_module_coverage | 1 |");
+    expect(report).toContain("| plan_registry | 2 |");
+  });
+
+  it("treats an action limit without complete owner-plan-step diagnosis as unclassified", () => {
+    const baseline = createBaseline(
+      createSlot({
+        actionLimitGames: 1,
+        winner: "action_limit_reached",
+      }),
+    );
+
+    expect(baseline.aggregate.unclassifiedActionLimitGames).toBe(1);
+    expect(baseline.gate.hardFailures).toEqual(
+      expect.arrayContaining([
+        "action_limit_games:1",
+        "unclassified_action_limit_games:1",
+      ]),
+    );
+  });
+
+  it("reports a complete classified action-limit diagnosis without softening the gate", () => {
+    const actionLimitDiagnosis: AiBehaviorActionLimitDiagnosis = {
+      classified: true,
+      owner: "plan_module",
+      planInstanceId: "plan:runner.contest_remote:remote_1",
+      stepId: "contest",
+      noProgressCluster: "action_limit_runner_remote_contest_blocked",
+      noProgressSubcluster: "late_run_step_stall",
+    };
+    const baseline = createBaseline(
+      createSlot({
+        actionLimitGames: 1,
+        winner: "action_limit_reached",
+        actionLimitDiagnosis,
+      }),
+    );
+
+    expect(baseline.aggregate.classifiedActionLimitGames).toBe(1);
+    expect(baseline.aggregate.unclassifiedActionLimitGames).toBe(0);
+    expect(baseline.gate.hardFailures).toContain("action_limit_games:1");
+    expect(formatAiBehaviorBaselineReport(baseline)).toContain(
+      "| behavior-test-slot | baseline-seed | yes | plan_module | plan:runner.contest_remote:remote_1 | contest | action_limit_runner_remote_contest_blocked | late_run_step_stall |",
+    );
+  });
+
+  it("does not relabel a classified runtime failure as an action-limit failure", () => {
+    const runtimeFailures: AiSimulationRuntimeFailure[] = [
+      runtimeFailure("missing_plan_module_coverage", "plan_registry"),
+    ];
+    const baseline = createBaseline(
+      createSlot({
+        actionLimitGames: 0,
+        winner: "action_limit_reached",
+        runtimeFailures,
+        runtimeErrorCount: runtimeFailures.length,
+      }),
+    );
+
+    expect(baseline.aggregate.classifiedRuntimeFailures).toBe(1);
+    expect(baseline.aggregate.classifiedActionLimitGames).toBe(0);
+    expect(baseline.aggregate.unclassifiedActionLimitGames).toBe(0);
+    expect(baseline.gate.hardFailures).not.toContain(
+      expect.stringContaining("action_limit_games"),
+    );
   });
 
   it("fails the hard gate for technical safety regressions", () => {
@@ -149,6 +276,11 @@ function createSlot(
     runnerPrematureEndTurnsWithClicks: number;
     runnerPersistentInstallSelections: number;
     runnerRedundantPersistentInstallSelections: number;
+    runtimeFailures: AiSimulationRuntimeFailure[];
+    runtimeErrorCount: number;
+    actionLimitGames: number;
+    winner: "runner" | "action_limit_reached";
+    actionLimitDiagnosis: AiBehaviorActionLimitDiagnosis;
   }>,
 ) {
   return createAiBehaviorBaselineSlotResult({
@@ -191,10 +323,10 @@ function createSlot(
     },
     illegalActions: overrides.illegalActions ?? 0,
     replayFailures: 0,
-    actionLimitGames: 0,
+    actionLimitGames: overrides.actionLimitGames ?? 0,
     fallbackActions: overrides.fallbackActions ?? 0,
     timeoutActions: 0,
-    runtimeErrors: 0,
+    runtimeErrors: overrides.runtimeErrorCount ?? 0,
     redactionSafe: overrides.redactionSafe ?? true,
     actionCapacity: {
       actionCapacityOpportunities: overrides.actionCapacityOpportunities ?? 0,
@@ -220,15 +352,41 @@ function createSlot(
     games: [
       {
         seed: "baseline-seed",
-        winner: "runner",
+        terminationKind:
+          (overrides.runtimeErrorCount ?? 0) > 0
+            ? "runtime_failure"
+            : (overrides.winner ?? "runner") === "action_limit_reached"
+              ? "action_limit"
+              : "game_result",
+        winner: overrides.winner ?? "runner",
         actions: 100,
         turns: 20,
         runnerAgendaPoints: 4,
         corpAgendaPoints: 5,
         finalStateHash: "hash",
         replayOk: true,
-        errorCount: 0,
+        errorCount: overrides.runtimeErrorCount ?? 0,
+        ...(overrides.runtimeFailures
+          ? { runtimeFailures: overrides.runtimeFailures }
+          : {}),
+        ...(overrides.actionLimitDiagnosis
+          ? { actionLimitDiagnosis: overrides.actionLimitDiagnosis }
+          : {}),
       },
     ],
   });
+}
+
+function runtimeFailure(
+  code: string,
+  owner: "plan_registry",
+): AiSimulationRuntimeFailure {
+  return {
+    classified: true,
+    code,
+    owner,
+    side: "runner",
+    stateVersion: 1,
+    timingPoint: "runner_action.main",
+  };
 }

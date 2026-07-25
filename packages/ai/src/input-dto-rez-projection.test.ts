@@ -1,0 +1,616 @@
+import {
+  CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
+  CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
+  CORP_ROOT_REZ_CREDIT_OUTCOME_QUOTE_SCHEMA_VERSION,
+  type CorpOptionalRezChoiceQuote,
+  type LegalAction,
+  type PlayerView,
+  type VisibleCard,
+} from "@netgrid/shared";
+import { describe, expect, it } from "vitest";
+import { buildAiDecisionInputDto } from "./input-dto";
+
+describe("AI input DTO Corp rez projection contract", () => {
+  it("preserves install cost fields, exact post-install quote and current visible quote", () => {
+    const action = iceInstallAction();
+    const view = playerView(action);
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "rez-projection-dto",
+      decisionId: "rez-projection-dto:corp:1",
+      actionNumber: 1,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toEqual(action.payload);
+    expect(input.playerView.legalActions[0]?.payload).toEqual(action.payload);
+    expect(input.playerView.servers[0]?.ice[0]?.effectiveRezCostQuote).toEqual(
+      view.servers[0]?.ice[0]?.effectiveRezCostQuote,
+    );
+  });
+
+  it("drops a maliciously enriched Corp rez quote from a Runner view", () => {
+    const action = iceInstallAction();
+    const view = playerView(action);
+    view.side = "runner";
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [],
+      difficulty: "normal",
+      seed: "rez-projection-runner-negative",
+      decisionId: "rez-projection-runner-negative:runner:1",
+      actionNumber: 1,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(input.playerView.servers[0]?.ice[0]).not.toHaveProperty(
+      "effectiveRezCostQuote",
+    );
+  });
+
+  it.each([
+    [
+      "fractional base credits",
+      (quote: Record<string, unknown>) => {
+        quote.baseCredits = 0.5;
+      },
+    ],
+    [
+      "negative final credits",
+      (quote: Record<string, unknown>) => {
+        quote.finalCredits = -1;
+      },
+    ],
+    [
+      "duplicate modifier ids",
+      (quote: Record<string, unknown>) => {
+        quote.reductionSourceDefinitionIds = ["same", "same"];
+      },
+    ],
+    [
+      "unsorted modifier ids",
+      (quote: Record<string, unknown>) => {
+        quote.reductionSourceDefinitionIds = ["z", "a"];
+      },
+    ],
+    [
+      "overlapping modifier ids",
+      (quote: Record<string, unknown>) => {
+        quote.reductionSourceDefinitionIds = ["same"];
+        quote.increaseSourceDefinitionIds = ["same"];
+      },
+    ],
+  ])("downgrades an installed quote with %s to incomplete", (_label, mutate) => {
+    const action = iceInstallAction();
+    const view = playerView(action);
+    const quote = view.servers[0]?.ice[0]
+      ?.effectiveRezCostQuote as unknown as Record<string, unknown>;
+    mutate(quote);
+
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "malformed-installed-rez-quote",
+      decisionId: "malformed-installed-rez-quote:corp:1",
+      actionNumber: 1,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(
+      input.playerView.servers[0]?.ice[0]?.effectiveRezCostQuote,
+    ).toMatchObject({
+      context: "installed",
+      complete: false,
+    });
+  });
+
+  it("preserves the complete Engine-certified root-rez credit outcome quote", () => {
+    const action = rootRezCreditAction();
+    const view = playerView(action);
+    view.stateVersion = 18;
+    view.timingPoint = "run.movement_rez_window";
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "root-rez-credit-outcome-dto",
+      decisionId: "root-rez-credit-outcome-dto:corp:1",
+      actionNumber: 1,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toEqual(action.payload);
+    expect(input.playerView.legalActions[0]?.payload).toEqual(action.payload);
+  });
+
+  it("preserves only an exactly bound complete optional-rez option quote", () => {
+    const action = iceInstallAction();
+    const view = optionalRezChoiceView(action, optionalRezQuote());
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: view.legalActions,
+      difficulty: "normal",
+      seed: "optional-rez-choice-dto",
+      decisionId: "optional-rez-choice-dto:corp:12",
+      actionNumber: 12,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(
+      input.playerView.pendingChoice?.options[0]?.hqInstallRezOptionQuote,
+    ).toEqual(optionalRezQuote());
+    expect(
+      input.playerView.pendingChoice?.options[0]?.hqInstallRezOptionQuote,
+    ).not.toBe(view.pendingChoice?.options[0]?.hqInstallRezOptionQuote);
+  });
+
+  it("preserves a bound incomplete optional-rez quote without cost fields", () => {
+    const action = iceInstallAction();
+    const complete = optionalRezQuote();
+    const incomplete: CorpOptionalRezChoiceQuote = {
+      schemaVersion: complete.schemaVersion,
+      kind: complete.kind,
+      context: complete.context,
+      choiceId: complete.choiceId,
+      optionId: complete.optionId,
+      sourceAgendaId: complete.sourceAgendaId,
+      cardId: complete.cardId,
+      cardDefinitionId: complete.cardDefinitionId,
+      targetServerId: complete.targetServerId,
+      installedZone: complete.installedZone,
+      sequencePosition: complete.sequencePosition,
+      stateVersion: complete.stateVersion,
+      complete: false,
+    };
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: optionalRezChoiceView(action, incomplete),
+      eventTail: [],
+      legalActions: [],
+      difficulty: "normal",
+      seed: "optional-rez-choice-incomplete",
+      decisionId: "optional-rez-choice-incomplete:corp:12",
+      actionNumber: 12,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(
+      input.playerView.pendingChoice?.options[0]?.hqInstallRezOptionQuote,
+    ).toEqual(incomplete);
+  });
+
+  it.each([
+    [
+      "choice binding",
+      (quote: Record<string, unknown>) => {
+        quote.choiceId = "different-choice";
+      },
+    ],
+    [
+      "state binding",
+      (quote: Record<string, unknown>) => {
+        quote.stateVersion = 11;
+      },
+    ],
+    [
+      "payment arithmetic",
+      (quote: Record<string, unknown>) => {
+        quote.regularCreditsRequired = 99;
+      },
+    ],
+    [
+      "card type and zone",
+      (quote: Record<string, unknown>) => {
+        quote.cardType = "asset";
+      },
+    ],
+    [
+      "score parent",
+      (quote: Record<string, unknown>) => {
+        quote.sourceAgendaId = "different-agenda";
+      },
+    ],
+    [
+      "target server",
+      (quote: Record<string, unknown>) => {
+        quote.targetServerId = "hq";
+      },
+    ],
+    [
+      "new_remote target",
+      (quote: Record<string, unknown>) => {
+        quote.targetServerId = "new_remote";
+      },
+    ],
+    [
+      "current regular credits",
+      (quote: Record<string, unknown>) => {
+        quote.regularCreditsAvailable = 4;
+      },
+    ],
+    [
+      "additional-cost affordability",
+      (quote: Record<string, unknown>) => {
+        quote.additionalCostsPayable = false;
+        quote.affordable = false;
+      },
+    ],
+    [
+      "duplicate modifier ids",
+      (quote: Record<string, unknown>) => {
+        quote.reductionSourceDefinitionIds = ["rez-reducer", "rez-reducer"];
+      },
+    ],
+    [
+      "non-canonical modifier ids",
+      (quote: Record<string, unknown>) => {
+        quote.reductionSourceDefinitionIds = ["z-reducer", "a-reducer"];
+      },
+    ],
+  ])("drops an optional-rez quote with malformed %s", (_label, mutate) => {
+    const action = iceInstallAction();
+    const quote = structuredClone(optionalRezQuote()) as unknown as Record<
+      string,
+      unknown
+    >;
+    mutate(quote);
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: optionalRezChoiceView(
+        action,
+        quote as unknown as CorpOptionalRezChoiceQuote,
+      ),
+      eventTail: [],
+      legalActions: [],
+      difficulty: "normal",
+      seed: "optional-rez-choice-malformed",
+      decisionId: "optional-rez-choice-malformed:corp:12",
+      actionNumber: 12,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(
+      input.playerView.pendingChoice?.options[0],
+    ).not.toHaveProperty("hqInstallRezOptionQuote");
+  });
+
+  it("drops an optional-rez quote when the card is in the wrong server zone", () => {
+    const action = iceInstallAction();
+    const view = optionalRezChoiceView(action, optionalRezQuote());
+    const server = view.servers[0]!;
+    server.root = server.ice;
+    server.ice = [];
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [],
+      difficulty: "normal",
+      seed: "optional-rez-choice-wrong-zone",
+      decisionId: "optional-rez-choice-wrong-zone:corp:12",
+      actionNumber: 12,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(
+      input.playerView.pendingChoice?.options[0],
+    ).not.toHaveProperty("hqInstallRezOptionQuote");
+  });
+
+  it.each([
+    [
+      "option value",
+      (view: PlayerView) => {
+        view.pendingChoice!.options[0]!.value = "different-card";
+      },
+    ],
+    [
+      "visible card id",
+      (view: PlayerView) => {
+        view.pendingChoice!.options[0]!.card!.instanceId = "different-card";
+      },
+    ],
+    [
+      "visible definition",
+      (view: PlayerView) => {
+        view.pendingChoice!.options[0]!.card!.definitionId =
+          "different-definition";
+      },
+    ],
+  ])("drops an optional-rez quote with mismatched %s", (_label, mutate) => {
+    const action = iceInstallAction();
+    const view = optionalRezChoiceView(action, optionalRezQuote());
+    mutate(view);
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [],
+      difficulty: "normal",
+      seed: "optional-rez-choice-misbinding",
+      decisionId: "optional-rez-choice-misbinding:corp:12",
+      actionNumber: 12,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(
+      input.playerView.pendingChoice?.options[0],
+    ).not.toHaveProperty("hqInstallRezOptionQuote");
+  });
+
+  it("drops an optional-rez quote from a non-Corp actor view", () => {
+    const action = iceInstallAction();
+    const view = optionalRezChoiceView(action, optionalRezQuote());
+    view.side = "runner";
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [],
+      difficulty: "normal",
+      seed: "optional-rez-choice-runner",
+      decisionId: "optional-rez-choice-runner:runner:12",
+      actionNumber: 12,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(
+      input.playerView.pendingChoice?.options[0],
+    ).not.toHaveProperty("hqInstallRezOptionQuote");
+  });
+});
+
+function iceInstallAction(): LegalAction {
+  return {
+    actionId: "corp.install.ice",
+    side: "corp",
+    type: "install_card",
+    label: "ICE vor HQ installieren",
+    source: "ice-in-hq",
+    timingPoint: "corp_action.main",
+    costs: [{ clicks: 1, credits: 2 }],
+    targetRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: 12,
+    payload: {
+      cardId: "ice-in-hq",
+      serverId: "hq",
+      placement: "ice",
+      iceInstallBaseCost: 1,
+      iceInstallAdditionalCost: 2,
+      iceInstallReduction: 1,
+      iceInstallReductionSourceDefinitionIds: "rez-reducer",
+      iceInstallIncreaseSourceDefinitionIds: "rez-increaser",
+      iceInstallTotalCost: 2,
+      postInstallRezQuoteCardId: "ice-in-hq",
+      postInstallRezQuoteTargetServerId: "hq",
+      postInstallRezQuoteProjectedServerId: "hq",
+      postInstallRezQuoteExpiresAtStateVersion: 12,
+      postInstallRezQuoteComplete: true,
+      postInstallRezQuoteBaseCredits: 5,
+      postInstallRezQuoteFinalCredits: 3,
+      postInstallRezQuoteMandatoryAgendaPointCost: 1,
+      postInstallRezQuoteMandatoryAdditionalCostKind: "agenda_point",
+      postInstallRezQuoteReductionSourceDefinitionIds: "rez-reducer",
+      postInstallRezQuoteIncreaseSourceDefinitionIds: "rez-increaser",
+    },
+  };
+}
+
+function rootRezCreditAction(): LegalAction {
+  const actionId = "corp.rez_card.economy-asset.remote_1.economy-asset";
+  return {
+    actionId,
+    side: "corp",
+    type: "rez_card",
+    label: "Economy Asset laden",
+    source: "economy-asset",
+    timingPoint: "run.movement_rez_window",
+    costs: [{ credits: 1 }],
+    targetRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: 18,
+    payload: {
+      cardId: "economy-asset",
+      serverId: "remote_1",
+      rootRezCreditOutcomeQuoteSchemaVersion:
+        CORP_ROOT_REZ_CREDIT_OUTCOME_QUOTE_SCHEMA_VERSION,
+      rootRezCreditOutcomeQuoteComplete: true,
+      rootRezCreditOutcomeQuoteSourceCardInstanceId: "economy-asset",
+      rootRezCreditOutcomeQuoteTargetServerId: "remote_1",
+      rootRezCreditOutcomeQuoteStateVersion: 18,
+      rootRezCreditOutcomeQuoteTimingPoint: "run.movement_rez_window",
+      rootRezCreditOutcomeQuoteActionId: actionId,
+      rootRezCreditOutcomeQuoteResolution: "guaranteed",
+      rootRezCreditOutcomeQuoteGrossCreditGain: 3,
+      rootRezCreditOutcomeQuoteRezCredits: 1,
+      rootRezCreditOutcomeQuoteNetCreditGain: 2,
+    },
+  };
+}
+
+function playerView(action: LegalAction): PlayerView {
+  const corpIdentity = identity("corp");
+  const runnerIdentity = identity("runner");
+  const installedIce: VisibleCard = {
+    instanceId: "installed-ice",
+    definitionId: "installed-ice-definition",
+    title: "Installed ICE",
+    owner: "corp",
+    controller: "corp",
+    type: "ice",
+    known: true,
+    rezzed: false,
+    rezCost: 5,
+    effectiveRezCostQuote: {
+      context: "installed",
+      cardId: "installed-ice",
+      targetServerId: "hq",
+      projectedServerId: "hq",
+      expiresAtStateVersion: 12,
+      complete: true,
+      baseCredits: 5,
+      finalCredits: 3,
+      mandatoryAdditionalCosts: { agendaPoints: 1 },
+      reductionSourceDefinitionIds: ["rez-reducer"],
+      increaseSourceDefinitionIds: ["rez-increaser"],
+    },
+  };
+  return {
+    side: "corp",
+    stateVersion: 12,
+    timingPoint: "corp_action.main",
+    activeSide: "corp",
+    phase: "action",
+    own: {
+      identity: corpIdentity,
+      credits: 5,
+      clicks: 3,
+      agendaPoints: 0,
+      gripOrHq: [],
+      stackOrRdCount: 40,
+      heapOrArchives: [],
+      scoreArea: [],
+      maxHandSize: 5,
+      tags: 0,
+    },
+    opponent: {
+      identity: runnerIdentity,
+      credits: 5,
+      clicks: 4,
+      agendaPoints: 0,
+      tags: 0,
+      handCount: 5,
+      maxHandSize: 5,
+      coreDamage: 0,
+      deckCount: 40,
+      discardCount: 0,
+      discardCards: [],
+      scoreArea: [],
+      rig: [],
+      memoryUsed: 0,
+      memoryLimit: 4,
+    },
+    servers: [
+      {
+        id: "hq",
+        label: "HQ",
+        ice: [installedIce],
+        root: [],
+      },
+    ],
+    publicEvents: [],
+    legalActions: [action],
+    winner: null,
+    agendaPointsToWin: 7,
+  } as unknown as PlayerView;
+}
+
+function optionalRezChoiceView(
+  action: LegalAction,
+  quote: CorpOptionalRezChoiceQuote,
+): PlayerView {
+  const view = playerView(action);
+  view.servers[0]!.id = "remote_1";
+  view.servers[0]!.label = "Remote 1";
+  view.pendingChoice = {
+    choiceId: "choice_optional_rez_12",
+    side: "corp",
+    source:
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data-fort:remote_1:installed-ice:1:12",
+    prompt: "Karte rezzen?",
+    kind: "select_cards",
+    options: [
+      {
+        id: "card_installed-ice",
+        label: "Installed ICE",
+        value: "installed-ice",
+        card: {
+          instanceId: "installed-ice",
+          definitionId: "installed-ice-definition",
+          title: "Installed ICE",
+          known: true,
+          type: "ice",
+          owner: "corp",
+          controller: "corp",
+          rezzed: false,
+        },
+        hqInstallRezOptionQuote: quote,
+      },
+    ],
+    minSelections: 0,
+    maxSelections: 1,
+    stateVersion: 12,
+    visibility: "hidden_info_barrier",
+  };
+  view.own.scoreArea = [
+    {
+      instanceId: "data-fort",
+      definitionId: "onr_v1_197_data-fort-reclamation",
+      title: "Data Fort Reclamation",
+      known: true,
+      type: "agenda",
+      owner: "corp",
+      controller: "corp",
+    },
+  ];
+  return view;
+}
+
+function optionalRezQuote(): Extract<
+  CorpOptionalRezChoiceQuote,
+  { complete: true }
+> {
+  return {
+    schemaVersion: CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
+    kind: CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
+    context: "hq_to_new_remote_optional_rez",
+    choiceId: "choice_optional_rez_12",
+    optionId: "card_installed-ice",
+    sourceAgendaId: "data-fort",
+    cardId: "installed-ice",
+    cardDefinitionId: "installed-ice-definition",
+    targetServerId: "remote_1",
+    installedZone: "serverIce",
+    sequencePosition: 1,
+    stateVersion: 12,
+    complete: true,
+    cardType: "ice",
+    baseCredits: 5,
+    finalCredits: 3,
+    mandatoryAdditionalCosts: { agendaPoints: 0 },
+    reductionSourceDefinitionIds: ["rez-reducer"],
+    temporaryCreditsAvailable: 2,
+    temporaryCreditsApplied: 2,
+    regularCreditsAvailable: 5,
+    regularCreditsRequired: 1,
+    creditPayable: true,
+    additionalCostsPayable: true,
+    affordable: true,
+  };
+}
+
+function identity(side: "corp" | "runner"): VisibleCard {
+  return {
+    instanceId: `${side}-identity`,
+    definitionId: `${side}-identity`,
+    title: `${side} identity`,
+    owner: side,
+    controller: side,
+    type: "identity",
+    known: true,
+  };
+}

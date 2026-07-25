@@ -1,18 +1,21 @@
-import type {
-  AiDecisionInput,
-  AiDecisionScoreComponent,
-  LegalAction,
+import {
+  CARD_DEFINITIONS_BY_ID,
+  type AiDecisionInput,
+  type AiDecisionScoreComponent,
+  type LegalAction,
+  type VisibleCard,
 } from "@netgrid/shared";
-
-import {
-  buildCorpIceDensityProfile,
-  corpIcePlacementCandidateForAction,
-} from "../corp-ice-placement/corp-ice-placement";
-import {
-  semanticRuntimeCorpCentralPressureAssessment,
-  type CorpCentralServerId,
-} from "../semantic-runtime-corp-central-pressure";
+import { buildCorpIceDensityProfile } from "./corp-ice-density";
+import { RUNTIME_CARDS } from "../../ai-hints";
+import type { AiDeckStrategyDeckSnapshot } from "../../deck-strategy-snapshot";
 import type { CorpBoardTriage } from "../semantic-runtime-corp-board-triage";
+import type { CorpFundedRemoteAccessRiskNeed } from "../corp-funded-score-protection";
+import type { CorpCentralDefenseAllocation } from "../corp-central-defense-allocation";
+import {
+  assessCorpScoreProtection,
+  compareExactProbabilities,
+  type CorpScoreProtectionIceInput,
+} from "../corp-score-protection-assessment";
 
 const CORP_SAFE_DRAW_CAPACITY_VALUE = 100;
 const CORP_LOW_HAND_VALUE = 450;
@@ -29,6 +32,393 @@ export type CorpOptionalDrawCapacity = {
   freeSlotsBefore: number;
   freeSlotsAfter: number;
 };
+
+export type CorpMissingConcreteDefenseDrawNeed = {
+  serverId: "hq" | "rd";
+  planValue: number;
+  cleanupReplacementDraw?: boolean;
+  evidence: string[];
+};
+
+export type CorpScoreDefenseDirectInstallRouteState =
+  | Readonly<{
+      knowledge: "known";
+      disposition: "productive" | "effect_missing" | "funding_only";
+    }>
+  | Readonly<{
+      knowledge: "unknown";
+    }>;
+
+export type CorpScoreDefenseDrawActionProjection =
+  | Readonly<{
+      knowledge: "known";
+      actionId: string;
+      observedAtStateVersion: number;
+      clickCost: number;
+      cardsDrawn: number;
+      netHandDelta: number;
+    }>
+  | Readonly<{
+      knowledge: "unknown";
+    }>;
+
+export type CorpScoreDefenseDrawAttemptState = Readonly<{
+  residentAttemptedThisTurn: boolean;
+  eventTailAttemptedThisTurn: boolean;
+}>;
+
+export type CorpScoreDefenseDrawNeed = Readonly<{
+  needId: string;
+  parentProjectId: string;
+  serverId: string;
+  cleanupReplacementDraw: boolean;
+  evidence: readonly string[];
+}>;
+
+export type CorpMissingConcreteScoreDefenseDrawNeedInput = Readonly<{
+  input: AiDecisionInput;
+  action: LegalAction;
+  protectionNeed: CorpFundedRemoteAccessRiskNeed;
+  directInstallRouteState: CorpScoreDefenseDirectInstallRouteState;
+  drawActionProjection: CorpScoreDefenseDrawActionProjection;
+  attemptState: CorpScoreDefenseDrawAttemptState;
+}>;
+
+export function corpMissingConcreteScoreDefenseDrawNeed(
+  args: CorpMissingConcreteScoreDefenseDrawNeedInput,
+): CorpScoreDefenseDrawNeed | undefined {
+  const {
+    input,
+    action,
+    protectionNeed,
+    directInstallRouteState,
+    drawActionProjection,
+    attemptState,
+  } = args;
+  const stateVersion = input.playerView.stateVersion;
+  if (
+    input.side !== "corp" ||
+    !input.legalActions.includes(action) ||
+    protectionNeed.observedAtStateVersion !== stateVersion ||
+    protectionNeed.baseline.knowledge !== "known" ||
+    protectionNeed.baseline.fundedProtection ||
+    directInstallRouteState.knowledge !== "known" ||
+    directInstallRouteState.disposition !== "effect_missing" ||
+    drawActionProjection.knowledge !== "known" ||
+    drawActionProjection.actionId !== action.actionId ||
+    drawActionProjection.observedAtStateVersion !== stateVersion ||
+    action.expiresAtStateVersion !== stateVersion ||
+    attemptState.residentAttemptedThisTurn ||
+    attemptState.eventTailAttemptedThisTurn ||
+    attemptState.eventTailAttemptedThisTurn !==
+      corpOptionalDrawAttemptedInEventTailThisTurn(input)
+  ) {
+    return undefined;
+  }
+  const exactClickCost = exactLegalActionClickCost(action);
+  const exactDrawCount = exactLegalActionDrawCount(action);
+  if (
+    exactClickCost === undefined ||
+    exactClickCost <= 0 ||
+    drawActionProjection.clickCost !== exactClickCost ||
+    exactDrawCount === undefined ||
+    drawActionProjection.cardsDrawn !== exactDrawCount ||
+    !positiveSafeInteger(drawActionProjection.netHandDelta) ||
+    drawActionProjection.netHandDelta > drawActionProjection.cardsDrawn
+  ) {
+    return undefined;
+  }
+  const handCount = input.playerView.own.gripOrHq.length;
+  const maxHandSize = input.playerView.own.maxHandSize;
+  const clicks = input.playerView.own.clicks;
+  const hardClickReserve = protectionNeed.scoreReserve.hardClickReserve;
+  if (
+    !nonNegativeSafeInteger(maxHandSize) ||
+    maxHandSize <= 2 ||
+    !nonNegativeSafeInteger(clicks) ||
+    !nonNegativeSafeInteger(hardClickReserve) ||
+    protectionNeed.baseline.availableCorpCredits !==
+      input.playerView.own.credits ||
+    protectionNeed.baseline.availableCorpClicks !== clicks ||
+    clicks < drawActionProjection.clickCost + 1 + hardClickReserve ||
+    handCount + drawActionProjection.netHandDelta - 1 > maxHandSize
+  ) {
+    return undefined;
+  }
+  const cleanupReplacementDraw =
+    handCount + drawActionProjection.netHandDelta > maxHandSize;
+  const targetDensity = corpScoreDefenseEffectSuitableIceDensity(
+    input,
+    protectionNeed,
+  );
+  if (
+    targetDensity.confidence !== "deck_snapshot" ||
+    !positiveSafeInteger(targetDensity.remainingDeckCount) ||
+    !positiveSafeInteger(targetDensity.remainingSuitableIceCount) ||
+    typeof targetDensity.remainingSuitableIceDensity !== "number" ||
+    !Number.isFinite(targetDensity.remainingSuitableIceDensity) ||
+    targetDensity.remainingSuitableIceDensity <= 0
+  ) {
+    return undefined;
+  }
+  return {
+    needId: `score-defense-draw:${protectionNeed.needId}:${action.actionId}`,
+    parentProjectId: protectionNeed.parentProjectId,
+    serverId: protectionNeed.targetServerId,
+    cleanupReplacementDraw,
+    evidence: [
+      `protection_need:${protectionNeed.needId}`,
+      `parent_project:${protectionNeed.parentProjectId}`,
+      `target_server:${protectionNeed.targetServerId}`,
+      "funded_protection_baseline:known_unprotected",
+      "direct_install_route_disposition:effect_missing",
+      `score_defense_cleanup_replacement_draw:${cleanupReplacementDraw}`,
+      "score_defense_draw_install_click_horizon:true",
+      `score_defense_draw_action_click_cost:${drawActionProjection.clickCost}`,
+      `score_defense_draw_cards_drawn:${drawActionProjection.cardsDrawn}`,
+      `score_defense_draw_net_hand_delta:${drawActionProjection.netHandDelta}`,
+      `score_defense_hard_click_reserve:${hardClickReserve}`,
+      "score_defense_optional_draw_already_attempted:false",
+      ...targetDensity.evidence,
+      `hand_count:${handCount}`,
+      `max_hand_size:${maxHandSize}`,
+      `projected_hand_after_draw_and_install:${handCount + drawActionProjection.netHandDelta - 1}`,
+    ],
+  };
+}
+
+type CorpScoreDefenseEffectSuitableIceDensity = Readonly<{
+  confidence: "deck_snapshot" | "unknown";
+  remainingDeckCount: number;
+  remainingSuitableIceCount?: number;
+  remainingSuitableIceDensity?: number;
+  suitableDefinitionIds: readonly string[];
+  evidence: readonly string[];
+}>;
+
+type DecisionInputWithOptionalDeckSnapshot = AiDecisionInput & {
+  ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
+};
+
+function corpScoreDefenseEffectSuitableIceDensity(
+  input: AiDecisionInput,
+  need: CorpFundedRemoteAccessRiskNeed,
+): CorpScoreDefenseEffectSuitableIceDensity {
+  const remainingDeckCount = input.playerView.own.stackOrRdCount;
+  const snapshot = (input as DecisionInputWithOptionalDeckSnapshot)
+    .ownDeckSnapshot;
+  if (
+    snapshot?.side !== "corp" ||
+    !positiveSafeInteger(remainingDeckCount) ||
+    need.baseline.knowledge !== "known" ||
+    !Array.isArray(input.playerView.opponent.rig)
+  ) {
+    return unknownScoreDefenseDensity(
+      remainingDeckCount,
+      "missing_or_invalid_deck_snapshot",
+    );
+  }
+  const selectedIceInstanceIds = new Set(
+    need.baseline.selectedRezCosts.map((cost) => cost.iceInstanceId),
+  );
+  const currentServer = input.playerView.servers.find(
+    (server) => server.id === need.targetServerId,
+  );
+  const currentFundedIce: CorpScoreProtectionIceInput[] = (
+    currentServer?.ice ?? []
+  ).map((card) => ({
+    instanceId: card.instanceId,
+    known: card.known,
+    ...(card.definitionId ? { definitionId: card.definitionId } : {}),
+    rezzed: card.rezzed === true || selectedIceInstanceIds.has(card.instanceId),
+    ...(card.strength !== undefined ? { strength: card.strength } : {}),
+    ...(card.subtypes !== undefined ? { subtypes: card.subtypes } : {}),
+    ...(card.effectiveRunQuote
+      ? { effectiveRunQuote: card.effectiveRunQuote }
+      : {}),
+  }));
+  const outsideByDefinitionId = visibleCorpCardsOutsideRdByDefinition(input);
+  let remainingSuitableIceCount = 0;
+  const suitableDefinitionIds: string[] = [];
+  for (const entry of snapshot.cards) {
+    if (!nonNegativeSafeInteger(entry.quantity)) {
+      return unknownScoreDefenseDensity(
+        remainingDeckCount,
+        "invalid_deck_snapshot_quantity",
+      );
+    }
+    const remainingCopies = Math.max(
+      0,
+      entry.quantity - (outsideByDefinitionId.get(entry.cardId) ?? 0),
+    );
+    if (remainingCopies === 0) continue;
+    const resolvedDefinitionId = resolvedEngineDefinitionId(entry.cardId);
+    if (!resolvedDefinitionId) continue;
+    const definition = CARD_DEFINITIONS_BY_ID[resolvedDefinitionId];
+    if (definition?.type !== "ice") continue;
+    const after = assessCorpScoreProtection({
+      serverIce: [
+        ...currentFundedIce,
+        {
+          instanceId: `deck-effect-projection:${entry.cardId}`,
+          known: true,
+          definitionId: resolvedDefinitionId,
+          rezzed: true,
+          ...(definition.strength !== undefined
+            ? { strength: definition.strength }
+            : {}),
+          ...(definition.subtypes !== undefined
+            ? { subtypes: definition.subtypes }
+            : {}),
+        },
+      ],
+      runnerRig: input.playerView.opponent.rig,
+      runnerCredits: input.playerView.opponent.credits,
+      maximumRunnerAccessSuccessProbability:
+        need.objective.maximumRunnerAccessSuccessProbability,
+    });
+    if (
+      after.knowledge !== "known" ||
+      compareExactProbabilities(
+        after.runnerAccessSuccessProbability,
+        need.baseline.protection.runnerAccessSuccessProbability,
+      ) !== -1
+    ) {
+      continue;
+    }
+    remainingSuitableIceCount += remainingCopies;
+    suitableDefinitionIds.push(entry.cardId);
+  }
+  const boundedSuitableIceCount = Math.min(
+    remainingDeckCount,
+    remainingSuitableIceCount,
+  );
+  const density = boundedSuitableIceCount / remainingDeckCount;
+  const uniqueSuitableDefinitionIds = [
+    ...new Set(suitableDefinitionIds),
+  ].sort();
+  return {
+    confidence: "deck_snapshot",
+    remainingDeckCount,
+    remainingSuitableIceCount: boundedSuitableIceCount,
+    remainingSuitableIceDensity: density,
+    suitableDefinitionIds: uniqueSuitableDefinitionIds,
+    evidence: [
+      "score_defense_effect_density_confidence:deck_snapshot",
+      `remaining_deck_count:${remainingDeckCount}`,
+      `remaining_score_defense_effect_suitable_ice_count:${boundedSuitableIceCount}`,
+      `remaining_score_defense_effect_suitable_ice_density:${density.toFixed(4)}`,
+      `remaining_score_defense_effect_suitable_ice_definitions:${uniqueSuitableDefinitionIds.join(",") || "none"}`,
+      "score_defense_effect_density_uses_printed_rez_cost:false",
+    ],
+  };
+}
+
+function unknownScoreDefenseDensity(
+  remainingDeckCount: number,
+  reason: string,
+): CorpScoreDefenseEffectSuitableIceDensity {
+  return {
+    confidence: "unknown",
+    remainingDeckCount,
+    suitableDefinitionIds: [],
+    evidence: [
+      "score_defense_effect_density_confidence:unknown",
+      `score_defense_effect_density_unknown_reason:${reason}`,
+    ],
+  };
+}
+
+function resolvedEngineDefinitionId(definitionId: string): string | undefined {
+  if (CARD_DEFINITIONS_BY_ID[definitionId]) return definitionId;
+  const engineCardId = RUNTIME_CARDS[definitionId]?.engineCardId;
+  return engineCardId && CARD_DEFINITIONS_BY_ID[engineCardId]
+    ? engineCardId
+    : undefined;
+}
+
+function visibleCorpCardsOutsideRdByDefinition(
+  input: AiDecisionInput,
+): Map<string, number> {
+  const visibleCards: VisibleCard[] = [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.own.heapOrArchives,
+    ...input.playerView.own.scoreArea,
+    ...input.playerView.servers.flatMap((server) => [
+      ...server.ice,
+      ...server.root,
+    ]),
+  ].filter((card) => card.known !== false);
+  const uniqueCards = new Map(
+    visibleCards.map((card) => [card.instanceId, card]),
+  );
+  const counts = new Map<string, number>();
+  for (const card of uniqueCards.values()) {
+    if (!card.definitionId) continue;
+    counts.set(card.definitionId, (counts.get(card.definitionId) ?? 0) + 1);
+  }
+  return counts;
+}
+
+function exactLegalActionDrawCount(action: LegalAction): number | undefined {
+  for (const key of ["drawCardsAmount", "drawAmount", "drawCount"] as const) {
+    const value = action.payload?.[key];
+    if (positiveSafeInteger(value)) return value;
+    if (value !== undefined) return undefined;
+  }
+  return action.type === "draw_card" && action.source === "basic_action"
+    ? 1
+    : undefined;
+}
+
+function positiveSafeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
+function nonNegativeSafeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
+function exactLegalActionClickCost(action: LegalAction): number | undefined {
+  let clickCost = 0;
+  for (const cost of action.costs) {
+    const value = cost.clicks ?? 0;
+    if (
+      typeof value !== "number" ||
+      !Number.isFinite(value) ||
+      !Number.isInteger(value) ||
+      value < 0
+    ) {
+      return undefined;
+    }
+    clickCost += value;
+  }
+  return Number.isSafeInteger(clickCost) ? clickCost : undefined;
+}
+
+export function corpOptionalDrawAttemptedInEventTailThisTurn(
+  input: AiDecisionInput,
+): boolean {
+  const eventTail = input.eventTail ?? [];
+  let latestMandatoryDrawIndex = -1;
+  for (let index = eventTail.length - 1; index >= 0; index -= 1) {
+    const event = eventTail[index]!;
+    if (
+      event.type === "mandatory_draw" &&
+      event.publicPayload?.actor === "corp"
+    ) {
+      latestMandatoryDrawIndex = index;
+      break;
+    }
+  }
+  if (latestMandatoryDrawIndex < 0) return false;
+  return eventTail
+    .slice(latestMandatoryDrawIndex + 1)
+    .some(
+      (event) =>
+        event.type === "draw_card" && event.publicPayload?.actor === "corp",
+    );
+}
 
 export function corpOptionalDrawCapacity(
   input: AiDecisionInput,
@@ -155,97 +545,116 @@ export function corpMissingConcreteDefenseDrawComponent(
   input: AiDecisionInput,
   action: LegalAction,
   capacity = corpOptionalDrawCapacity(input, action),
+  centralAllocation?: CorpCentralDefenseAllocation,
 ): AiDecisionScoreComponent | undefined {
-  if (!capacity.eligible) return undefined;
-  if (input.playerView.own.stackOrRdCount <= 1) return undefined;
-  const deckDensity = buildCorpIceDensityProfile(input);
-  if (deckDensity.remainingIceEstimate <= 0) return undefined;
-  const target = corpMissingConcreteCentralDefenseTarget(input);
-  if (!target) return undefined;
+  const need = corpMissingConcreteDefenseDrawNeed(
+    input,
+    action,
+    capacity,
+    centralAllocation,
+  );
+  if (!need) return undefined;
   return {
     key: "corp_missing_concrete_defense_draw",
     label: "Fehlende zentrale ICE-Verteidigung",
     value: CORP_MISSING_CONCRETE_DEFENSE_DRAW_VALUE,
-    reason: [
-      `target_server:${target.serverId}`,
-      `target_pressure_active:${target.pressureActive}`,
-      `target_pressure:${target.pressure.toFixed(2)}`,
-      "target_ice_count:0",
-      "concrete_install_available:false",
-      ...deckDensity.evidence,
-      ...corpOptionalDrawCapacityEvidence(capacity),
-    ].join("|"),
+    reason: need.evidence.join("|"),
   };
 }
 
-function corpMissingConcreteCentralDefenseTarget(input: AiDecisionInput):
+export function corpMissingConcreteDefenseDrawNeed(
+  input: AiDecisionInput,
+  action: LegalAction,
+  capacity = corpOptionalDrawCapacity(input, action),
+  centralAllocation?: CorpCentralDefenseAllocation,
+): CorpMissingConcreteDefenseDrawNeed | undefined {
+  if (!capacity.eligible) return undefined;
+  if (input.playerView.own.stackOrRdCount <= 1) return undefined;
+  const deckDensity = buildCorpIceDensityProfile(input);
+  if (
+    deckDensity.confidence !== "deck_snapshot" ||
+    deckDensity.remainingIceCount === undefined ||
+    deckDensity.remainingIceCount === 0
+  ) {
+    return undefined;
+  }
+  const target = corpMissingConcreteCentralDefenseTarget(
+    input,
+    centralAllocation,
+  );
+  if (!target) return undefined;
+  return {
+    serverId: target.serverId,
+    planValue: 1_000 + CORP_MISSING_CONCRETE_DEFENSE_DRAW_VALUE,
+    evidence: [
+      `target_server:${target.serverId}`,
+      "target_ice_count:0",
+      "concrete_install_available:false",
+      ...target.evidence,
+      ...deckDensity.evidence,
+      ...corpOptionalDrawCapacityEvidence(capacity),
+    ],
+  };
+}
+
+function corpMissingConcreteCentralDefenseTarget(
+  input: AiDecisionInput,
+  allocation: CorpCentralDefenseAllocation | undefined,
+):
   | {
-      serverId: CorpCentralServerId;
-      pressureActive: boolean;
-      pressure: number;
+      serverId: "hq" | "rd";
+      evidence: string[];
     }
   | undefined {
-  return (["hq", "rd"] as const)
-    .map((serverId) => {
-      const server = input.playerView.servers.find(
-        (candidate) => candidate.id === serverId,
-      );
-      const pressure = semanticRuntimeCorpCentralPressureAssessment(
-        input,
-        serverId,
-      );
-      return {
-        serverId,
-        iceCount: server?.ice.length ?? 0,
-        pressureActive: pressure.active,
-        pressure: pressure.pressure,
-        concreteInstallAvailable: corpConcreteCentralIceInstallAvailable(
-          input,
-          serverId,
-        ),
-      };
-    })
-    .filter(
-      (candidate) =>
-        candidate.iceCount === 0 && !candidate.concreteInstallAvailable,
-    )
-    .sort((left, right) => {
-      if (left.pressureActive !== right.pressureActive) {
-        return left.pressureActive ? -1 : 1;
-      }
-      if (left.pressure !== right.pressure) {
-        return right.pressure - left.pressure;
-      }
-      return left.serverId === "rd" ? -1 : 1;
-    })[0];
+  if (allocation?.status !== "known") return undefined;
+  const serverId = allocation.selectedServerId;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  const facts = allocation.evidence[serverId];
+  const pressureActive =
+    facts.threat !== "none" ||
+    facts.expectedAgendaLoss.numerator > 0 ||
+    facts.expectedTrashableLoss.numerator > 0 ||
+    facts.isMultiaccess ||
+    facts.recentRunOrAccessEvents > 0 ||
+    facts.recentSuccessfulAccessRunnerTurns > 0 ||
+    facts.serverBoundEffectIds.length > 0;
+  if (
+    !pressureActive ||
+    !server ||
+    server.ice.length !== 0 ||
+    corpConcreteCentralIceInstallAvailable(input, serverId)
+  ) {
+    return undefined;
+  }
+  return {
+    serverId,
+    evidence: [
+      "central_defense_allocation_known:true",
+      `central_defense_selected_server:${serverId}`,
+      `central_defense_threat:${facts.threat}`,
+      `central_defense_expected_agenda_loss:${facts.expectedAgendaLoss.numerator}/${facts.expectedAgendaLoss.denominator}`,
+      `central_defense_expected_trashable_loss:${facts.expectedTrashableLoss.numerator}/${facts.expectedTrashableLoss.denominator}`,
+      `central_defense_multiaccess:${facts.isMultiaccess}`,
+      `central_defense_recent_pressure:${facts.recentRunOrAccessEvents}`,
+      ...facts.serverBoundEffectIds.map(
+        (effectId) => `central_defense_server_effect:${effectId}`,
+      ),
+    ],
+  };
 }
 
 function corpConcreteCentralIceInstallAvailable(
   input: AiDecisionInput,
-  serverId: CorpCentralServerId,
+  serverId: "hq" | "rd",
 ): boolean {
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
+  return input.legalActions.some(
+    (action) =>
+      action.type === "install_card" &&
+      action.payload?.placement === "ice" &&
+      corpActionServerId(action) === serverId,
   );
-  return input.legalActions.some((action) => {
-    if (
-      action.type !== "install_card" ||
-      action.payload?.placement !== "ice" ||
-      corpActionServerId(action) !== serverId
-    ) {
-      return false;
-    }
-    const placement = corpIcePlacementCandidateForAction({
-      input,
-      action,
-      serverId,
-      server,
-    });
-    return (
-      placement?.recommendation === "install_now" &&
-      !placement.visibleZeroEffectRisk
-    );
-  });
 }
 
 function corpActionServerId(action: LegalAction): string | undefined {

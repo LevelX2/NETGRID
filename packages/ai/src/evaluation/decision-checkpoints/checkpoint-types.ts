@@ -39,6 +39,17 @@ export type AiDecisionCheckpointRunTargetExpectation = {
   forbiddenEvidence?: string[];
 };
 
+export type AiDecisionCheckpointPlanExecutionExpectation = {
+  acceptablePlanIds?: string[];
+  forbiddenPlanIds?: string[];
+  acceptablePlanKinds?: string[];
+  forbiddenPlanKinds?: string[];
+  acceptableCapabilities?: string[];
+  forbiddenCapabilities?: string[];
+  requiredAssessmentEvidence?: string[];
+  forbiddenAssessmentEvidence?: string[];
+};
+
 export type AiDecisionCheckpointExpectationV1 = {
   contractKind?: "correctness" | "equivalence_only";
   acceptableActions?: AiDecisionCheckpointActionMatcher[];
@@ -64,6 +75,7 @@ export type AiDecisionCheckpointExpectationV1 = {
     requiredComponentKeys?: string[];
     forbiddenComponentKeys?: string[];
   };
+  planExecution?: AiDecisionCheckpointPlanExecutionExpectation;
   runTargets?: AiDecisionCheckpointRunTargetExpectation[];
   decisionChain?: {
     selectionRoute?: AiDecisionSelectionRoute;

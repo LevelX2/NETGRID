@@ -66,6 +66,9 @@ export function activatedAbilityPayload(
   const makeRunEffect = ability.effects.find(
     (effect) => effect.kind === "make_run",
   );
+  const stackToGripSearchEffect = ability.effects.find(
+    (effect) => effect.kind === "search_stack_to_grip",
+  );
   return {
     cardId,
     cardImplementationAbility: "activated",
@@ -145,6 +148,12 @@ export function activatedAbilityPayload(
       : {}),
     ...(makeRunEffect?.kind === "make_run"
       ? makeRunLegalActionProjectionPayload(makeRunEffect)
+      : {}),
+    ...(stackToGripSearchEffect?.kind === "search_stack_to_grip"
+      ? {
+          cardImplementationEffectKind: "search_stack_to_grip",
+          cardImplementationSearchFilter: stackToGripSearchEffect.filter,
+        }
       : {}),
     ...scoreConversionPayload,
     ...actionCapacityPayload,

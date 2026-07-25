@@ -1,10 +1,12 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { AiDecisionInput } from "@netgrid/shared";
 import type {
   PlanAssessment,
   PriorityClass,
   PriorityClaim,
 } from "./plan-assessment";
 import type { PlanInstance, PlanProposal } from "./plan-kernel-types";
+import { planInstanceIdForProposal } from "./plan-instance";
 import type {
   PlanMaterialization,
   PlanModule,
@@ -12,20 +14,51 @@ import type {
 } from "./plan-scheduler";
 import type { PlanStepCapability } from "./plan-route";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import { createCreditDemand } from "./credit-demand";
+import {
+  searchFundingRoutes,
+  type FundingRouteSearchResult,
+} from "./funding-route";
+import {
+  compareExactProbabilities,
+  type ExactProbability,
+} from "../runtime/corp-score-protection-assessment";
+import type {
+  CorpFundedRemoteAccessRiskNeed,
+  KnownCorpFundedIceInstallRouteProjection,
+} from "../runtime/corp-funded-score-protection";
+import type {
+  CorpCentralDefenseAllocation,
+  CorpCentralDefenseHqHoldCadence,
+} from "../runtime/corp-central-defense-allocation";
+import {
+  exactCorpIceRezRoutesEqual,
+  projectExactCorpIceRezRoute,
+  type CorpExactIceRezRouteProjection,
+} from "../runtime/corp-exact-ice-rez-route";
 
 export type CorpScorePhase =
+  | "unlock_remote_creation"
   | "install_agenda"
+  | "convert_agenda"
   | "advance_agenda"
   | "score_agenda";
 
 export type CorpScoreProjectSignal = {
   projectId: string;
   agendaDefinitionId: string;
+  agendaPoints: number;
   agendaInstanceId?: string;
   serverId?: string;
+  actionIds?: string[];
+  routeSemanticActionTypes?: string[];
   phase: CorpScorePhase;
   sameTurnCloseout: boolean;
+  deadlinePressure?: boolean;
+  protectionNeed?: CorpFundedRemoteAccessRiskNeed;
+  fundingGap?: number;
   terminalScore: boolean;
+  preventsTerminalSteal?: boolean;
   feasible: boolean;
   evidenceCode: string;
 };
@@ -41,36 +74,167 @@ export type CorpRemoteProjectSignal = {
   evidenceCode: string;
 };
 
-export type CorpDefenseSignal = {
+type CorpDefenseSignalBase = {
   defenseId: string;
   serverId: string;
-  phase: "install_ice" | "rez_response";
-  sourceDefinitionIds: string[];
-  targetIceInstanceId?: string;
-  urgent: boolean;
-  value: number;
   evidenceCode: string;
 };
 
-export type CorpEconomyNeedSignal = {
+export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
+  kind: "generic";
+  phase:
+    | "install_ice"
+    | "install_defense_support"
+    | "draw_for_ice"
+    | "rez_response"
+    | "activate_run_defense"
+    | "decline_rez";
+  sourceDefinitionIds: string[];
+  actionIds?: string[];
+  targetIceInstanceId?: string;
+  followupIceInstanceId?: string;
+  urgent: boolean;
+  immediateInstallSupport?: boolean;
+  rezWindowVerdict?: "productive" | "nonproductive" | "open";
+  installRoute?: Readonly<{
+    disposition: "productive" | "funding_only";
+    projection: KnownCorpFundedIceInstallRouteProjection;
+  }>;
+  rezRoute?: CorpExactIceRezRouteProjection;
+  value: number;
+  drawAttemptState?: {
+    turnKey: string;
+    remainingAttempts: 0 | 1;
+    selectedAtStateVersion?: number;
+  };
+};
+
+export type { CorpExactIceRezRouteProjection };
+
+export type CorpScoreProtectionInstallSignal = CorpDefenseSignalBase & {
+  kind: "score_protection_install";
+  phase: "install_ice";
+  parentProjectId: string;
+  delegatedPriorityClass: CorpScorePriorityClass;
+  actionId: string;
+  sourceCardInstanceId: string;
+  sourceDefinitionId: string;
+  effect: "progress" | "satisfied";
+  runnerAccessSuccessProbability: ExactProbability;
+  totalInstallAndRezCredits: number;
+  projection: KnownCorpFundedIceInstallRouteProjection & {
+    effect: "progress" | "satisfied";
+  };
+};
+
+export type CorpScoreProtectionDrawSignal = CorpDefenseSignalBase & {
+  kind: "score_protection_draw";
+  phase: "draw_for_ice";
+  parentProjectId: string;
+  delegatedPriorityClass: CorpScorePriorityClass;
+  actionId: string;
+  drawAttemptState: {
+    turnKey: string;
+    remainingAttempts: 1;
+    selectedAtStateVersion?: number;
+  };
+};
+
+export type CorpDefenseSignal =
+  | CorpGenericDefenseSignal
+  | CorpScoreProtectionInstallSignal
+  | CorpScoreProtectionDrawSignal;
+
+type CorpEconomySignalBase = {
   needId: string;
-  gap: number;
-  neutralProgress?: boolean;
-  parentPlanInstanceId?: string;
   urgentForScore: boolean;
   evidenceCode: string;
 };
+
+export type CorpEconomyFundingRouteAssessment = {
+  routeId: string;
+  status: FundingRouteSearchResult["bestRoute"]["status"];
+  reliability: FundingRouteSearchResult["bestRoute"]["reliability"];
+  headActionId?: string;
+  evidence: string[];
+};
+
+export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
+  kind: "parent_funding";
+  gap: number;
+  actionIds: string[];
+  delegatedPriorityClass?: CorpScorePriorityClass;
+  parentPriorityClass?: PriorityClass;
+  immediateDefenseConversion?: boolean;
+  parentPlanInstanceId?: string;
+  parentNeedId?: string;
+  incrementalDefenseReserve?: {
+    targetCredits: number;
+    serverId: string;
+    iceInstanceId: string;
+  };
+  fundingRouteAssessment?: CorpEconomyFundingRouteAssessment;
+};
+
+export type CorpEconomyReserveSignal = CorpEconomySignalBase & {
+  kind: "reserve";
+  targetCredits: number;
+  gap: number;
+  actionIds: string[];
+  priorityClass?: "P5" | "P6";
+  fundingRouteAssessment?: CorpEconomyFundingRouteAssessment;
+};
+
+export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
+  kind: "develop_campaign";
+  sourceInstanceId: string;
+  sourceDefinitionId: string;
+  phase: "install" | "rez";
+  actionIds: string[];
+  cadence: {
+    kind: "finite_pool" | "automatic_start_of_turn" | "immediate_on_rez";
+    maximumSetupExecutions: 1;
+  };
+  payback: {
+    projectedCredits: number;
+    setupCreditCost: number;
+    projectedNetCredits: number;
+    horizonTurns: number;
+  };
+  completion: {
+    kind: "source_phase_reached";
+    expectedState: "installed_unrezzed" | "installed_rezzed";
+  };
+};
+
+export type CorpEconomyNeedSignal =
+  | CorpEconomyParentFundingSignal
+  | CorpEconomyReserveSignal
+  | CorpEconomyDevelopmentSignal;
 
 export type CorpCorePlanDomain = {
   scoreProjects: CorpScoreProjectSignal[];
   remoteProjects: CorpRemoteProjectSignal[];
   defenseNeeds: CorpDefenseSignal[];
+  centralDefenseAllocation?: CorpCentralDefenseAllocation;
+  centralDefenseHqHoldCadence?: CorpCentralDefenseHqHoldCadence;
   economyNeeds: CorpEconomyNeedSignal[];
 };
 
 type ScoreState = { kind: "score"; signal: CorpScoreProjectSignal };
 type RemoteState = { kind: "remote"; signal: CorpRemoteProjectSignal };
-type DefenseState = { kind: "defense"; signal: CorpDefenseSignal };
+type DefenseState = {
+  kind: "defense";
+  signals: CorpDefenseSignal[];
+  centralAllocation?: CorpCentralDefenseAllocation;
+  hqHoldCadence?: CorpCentralDefenseHqHoldCadence;
+  hqHoldSelection?: {
+    selectedActionId: string;
+    sourceCardInstanceId: string;
+    selectedAtStateVersion: number;
+    targetServerId: "rd";
+  };
+};
 type EconomyState = { kind: "economy"; signal: CorpEconomyNeedSignal };
 
 export const CORP_CORE_ACTION_OWNERSHIP = {
@@ -79,7 +243,6 @@ export const CORP_CORE_ACTION_OWNERSHIP = {
   "score.agenda": "corp.score_agenda",
   "install.remote_project": "corp.establish_scoring_remote",
   "install.ice": "corp.defend_servers",
-  "corp_window.rez": "corp.defend_servers",
   "economy.gain_credit": "corp.economy",
 } as const;
 
@@ -93,6 +256,12 @@ export function corpCoreActionOwner(
   return CORP_CORE_ACTION_OWNERSHIP[semanticFamily];
 }
 
+export function corpEconomyActionIsOwned(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  return immediateCorpLiquidCreditGain(candidate) > 0;
+}
+
 function scoreModule(): PlanModule {
   return {
     moduleId: "corp.score_agenda",
@@ -103,36 +272,29 @@ function scoreModule(): PlanModule {
           moduleId: "corp.score_agenda",
           dedupeKey: signal.projectId,
           moduleState: { kind: "score", signal } satisfies ScoreState,
-          priorityClass: signal.terminalScore
-            ? "P1"
-            : signal.sameTurnCloseout
-              ? "P3"
-              : "P4",
+          priorityClass: corpScorePriorityClass(signal),
           target: scoreTarget(signal),
           routeExists:
             signal.feasible && scoreCandidates(context, signal).length > 0,
           evidenceCode: signal.evidenceCode,
-          persistencePolicy: signal.sameTurnCloseout
-            ? "locked_sequence"
-            : "sticky_goal",
+          ...(scoreBlockerCode(signal)
+            ? { blockerCode: scoreBlockerCode(signal)! }
+            : {}),
+          abandonWhenTargetMissing: false,
+          persistencePolicy:
+            signal.sameTurnCloseout || signal.deadlinePressure
+              ? "locked_sequence"
+              : "sticky_goal",
         }),
       ),
     assess: (instance, context, portfolio) => {
       const current = state<ScoreState>(instance);
       return assessment(
         instance,
-        current.signal.terminalScore
-          ? "P1"
-          : current.signal.sameTurnCloseout
-            ? "P3"
-            : "P4",
+        corpScorePriorityClass(current.signal),
         current.signal.feasible &&
           scoreCandidates(context, current.signal).length > 0,
-        current.signal.terminalScore
-          ? 1_000
-          : current.signal.sameTurnCloseout
-            ? 500
-            : 100,
+        scoreAssessmentValue(current.signal),
         portfolio.executorInstanceId,
       );
     },
@@ -143,11 +305,15 @@ function scoreModule(): PlanModule {
         step: {
           stepId: `${instance.instanceId}:${current.signal.phase}`,
           capability: scoreCapability(current.signal),
-          target: scoreTarget(current.signal),
+          ...(current.signal.actionIds
+            ? {}
+            : { target: scoreTarget(current.signal) }),
           purpose: `Execute score phase ${current.signal.phase}.`,
         },
         candidates: scoreCandidates(context, current.signal),
-        ...(current.signal.sameTurnCloseout && nextCapability
+        ...(current.signal.sameTurnCloseout &&
+        !current.signal.actionIds &&
+        nextCapability
           ? {
               continuation: {
                 continuationId: `${instance.instanceId}:same-turn-score`,
@@ -169,6 +335,38 @@ function scoreModule(): PlanModule {
       };
     },
   };
+}
+
+export type CorpScorePriorityClass = "P1" | "P2" | "P3" | "P4";
+
+export function corpScorePriorityClass(
+  signal: CorpScoreProjectSignal,
+): CorpScorePriorityClass {
+  if (signal.terminalScore) return "P1";
+  if (signal.preventsTerminalSteal) return "P2";
+  if (signal.sameTurnCloseout || signal.deadlinePressure) return "P3";
+  return "P4";
+}
+
+function scoreAssessmentValue(signal: CorpScoreProjectSignal): number {
+  const agendaPointValue = Math.max(1, signal.agendaPoints) * 20;
+  if (signal.terminalScore) return 1_000 + agendaPointValue;
+  if (signal.preventsTerminalSteal) return 2_000 + agendaPointValue;
+  if (signal.deadlinePressure) return 700 + agendaPointValue;
+  if (signal.sameTurnCloseout) return 500 + agendaPointValue;
+  return 100 + agendaPointValue;
+}
+
+function scoreBlockerCode(signal: CorpScoreProjectSignal): string | undefined {
+  if (signal.feasible) return undefined;
+  if ((signal.fundingGap ?? 0) > 0) return "corp_score_funding_route_required";
+  if (
+    signal.evidenceCode.startsWith("corp_current_turn_scoreline_unreachable:")
+  )
+    return "corp_score_deadline_route_unavailable";
+  if (signal.evidenceCode.startsWith("corp_last_click_score_install_deferred:"))
+    return "corp_score_development_click_unavailable";
+  return "corp_score_route_unavailable";
 }
 
 function remoteModule(): PlanModule {
@@ -227,74 +425,279 @@ function defenseModule(): PlanModule {
   return {
     moduleId: "corp.defend_servers",
     side: "corp",
-    discover: (context) =>
-      domain(context).defenseNeeds.map((signal) =>
+    discover: (context) => {
+      const currentDomain = domain(context);
+      const signals = validDefenseSignals(currentDomain.defenseNeeds, context);
+      if (signals.length === 0) return [];
+      const selectedBand = selectedDefensePortfolioBand(
+        context,
+        signals,
+        currentDomain.centralDefenseAllocation,
+      );
+      const candidates = selectedBand.candidates;
+      const priorityClass = selectedBand.priorityClass;
+      const scoreProtectionRoute =
+        selectedBand.kind === "score" ? selectedBand.route : undefined;
+      return [
         proposal({
           moduleId: "corp.defend_servers",
-          dedupeKey: signal.defenseId,
-          moduleState: { kind: "defense", signal } satisfies DefenseState,
-          priorityClass: signal.urgent ? "P2" : "P5",
-          target:
-            signal.phase === "rez_response" && signal.targetIceInstanceId
-              ? { kind: "ice", id: signal.targetIceInstanceId }
-              : signal.serverId !== "unknown"
-                ? { kind: "server", id: signal.serverId }
-                : { kind: "capability", id: "rez_visible_ice" },
-          routeExists: defenseCandidates(context, signal).length > 0,
-          evidenceCode: signal.evidenceCode,
+          dedupeKey: "server-defense-portfolio",
+          moduleState: {
+            kind: "defense",
+            signals,
+            ...(currentDomain.centralDefenseAllocation
+              ? {
+                  centralAllocation: currentDomain.centralDefenseAllocation,
+                }
+              : {}),
+            ...(currentDomain.centralDefenseHqHoldCadence
+              ? {
+                  hqHoldCadence: currentDomain.centralDefenseHqHoldCadence,
+                }
+              : {}),
+          } satisfies DefenseState,
+          priorityClass,
+          target: { kind: "capability", id: "allocate_server_defense" },
+          routeExists: candidates.length > 0,
+          evidenceCode: defensePortfolioEvidenceCode(
+            context,
+            signals,
+            currentDomain.centralDefenseAllocation,
+          ),
+          ...(scoreProtectionRoute
+            ? {
+                parentInstanceId: planInstanceIdForProposal({
+                  moduleId: "corp.score_agenda",
+                  dedupeKey: scoreProtectionRoute.signal.parentProjectId,
+                }),
+              }
+            : {}),
           persistencePolicy:
-            signal.phase === "rez_response" ? "locked_sequence" : "sticky_goal",
+            priorityClass === "P2" || priorityClass === "P3"
+              ? "locked_sequence"
+              : scoreProtectionRoute
+                ? "flexible_support"
+                : "sticky_goal",
         }),
-      ),
+      ];
+    },
     assess: (instance, context, portfolio) => {
       const current = state<DefenseState>(instance);
-      return assessment(
-        instance,
-        current.signal.urgent ? "P2" : "P5",
-        defenseCandidates(context, current.signal).length > 0,
-        current.signal.value,
-        portfolio.executorInstanceId,
+      const priorityClass = defensePriority(
+        context,
+        current.signals,
+        current.centralAllocation,
       );
+      const candidates = defensePortfolioCandidates(
+        context,
+        current.signals,
+        current.centralAllocation,
+      );
+      return {
+        ...assessment(
+          instance,
+          priorityClass,
+          candidates.length > 0,
+          defensePortfolioAssessmentValue(
+            context,
+            current.signals,
+            priorityClass,
+            current.centralAllocation,
+          ),
+          portfolio.executorInstanceId,
+        ),
+        evidenceCodes: [
+          defensePortfolioEvidenceCode(
+            context,
+            current.signals,
+            current.centralAllocation,
+          ),
+        ],
+      };
     },
     materialize: (instance, _assessment, context) => {
       const current = state<DefenseState>(instance);
+      const candidates = defensePortfolioCandidates(
+        context,
+        current.signals,
+        current.centralAllocation,
+      );
+      const engineRandomizedIceInstallNearTie =
+        engineRandomizedCentralIceInstallNearTie(
+          context,
+          candidates,
+          current.centralAllocation,
+        );
+      const semanticActionTypes = [
+        ...new Set(
+          candidates.map((entry) => entry.candidate.semanticActionType),
+        ),
+      ];
       return {
         step: {
-          stepId: `${instance.instanceId}:${current.signal.phase}`,
+          stepId: `${instance.instanceId}:allocate`,
           capability: {
-            capabilityId: current.signal.phase,
-            semanticActionTypes:
-              current.signal.phase === "rez_response"
-                ? ["corp_window.rez"]
-                : ["install.card"],
-            ...(current.signal.sourceDefinitionIds.length > 0
-              ? {
-                  requiredSourceDefinitionIds:
-                    current.signal.sourceDefinitionIds,
-                }
-              : {}),
+            capabilityId: "allocate_server_defense",
+            semanticActionTypes,
           },
-          ...(current.signal.phase === "rez_response"
-            ? current.signal.targetIceInstanceId
-              ? {
-                  target: {
-                    kind: "ice" as const,
-                    id: current.signal.targetIceInstanceId,
-                  },
-                }
-              : {}
-            : {
-                target: {
-                  kind: "server" as const,
-                  id: current.signal.serverId,
-                },
-              }),
-          purpose: `${current.signal.phase} for ${current.signal.serverId}.`,
+          purpose:
+            "Allocate the best currently available defense resource across all visible server needs.",
         },
-        candidates: defenseCandidates(context, current.signal),
+        candidates,
+        ...(engineRandomizedIceInstallNearTie
+          ? { engineRandomizedIceInstallNearTie }
+          : {}),
       };
     },
   };
+}
+
+function engineRandomizedCentralIceInstallNearTie(
+  context: PlanSchedulerContext,
+  candidates: PlanMaterialization["candidates"],
+  allocation: CorpCentralDefenseAllocation | undefined,
+): PlanMaterialization["engineRandomizedIceInstallNearTie"] | undefined {
+  if (
+    allocation?.status !== "known" ||
+    allocation.canonicalNearTieCandidateServerIds.length !== 2 ||
+    allocation.canonicalNearTieCandidateServerIds[0] !== "hq" ||
+    allocation.canonicalNearTieCandidateServerIds[1] !== "rd"
+  ) {
+    return undefined;
+  }
+  const candidateForServer = (
+    serverId: "hq" | "rd",
+  ): PlanMaterialization["candidates"][number] | undefined =>
+    candidates
+      .filter(({ candidate }) => {
+        if (
+          candidate.semanticActionType !== "install.card" ||
+          !candidateTargetIds(candidate).includes(serverId)
+        ) {
+          return false;
+        }
+        const action = context.input.legalActions.find(
+          (legalAction) => legalAction.actionId === candidate.actionId,
+        );
+        return (
+          action?.type === "install_card" &&
+          action.side === "corp" &&
+          action.expiresAtStateVersion ===
+            context.input.playerView.stateVersion &&
+          action.payload?.placement === "ice" &&
+          action.payload.serverId === serverId &&
+          (action.choiceRequirements?.length ?? 0) === 0 &&
+          action.targetRequirements.length === 0
+        );
+      })
+      .sort((left, right) =>
+        left.candidate.actionId.localeCompare(right.candidate.actionId),
+      )[0];
+  const hq = candidateForServer("hq");
+  const rd = candidateForServer("rd");
+  if (!hq || !rd || hq.candidate.actionId === rd.candidate.actionId) {
+    return undefined;
+  }
+  return {
+    kind: "engine_randomized_ice_install_selection",
+    candidates: [
+      { actionId: hq.candidate.actionId, targetServerId: "hq" },
+      { actionId: rd.candidate.actionId, targetServerId: "rd" },
+    ],
+  };
+}
+
+function defensePortfolioEvidenceCode(
+  context: PlanSchedulerContext,
+  signals: readonly CorpDefenseSignal[],
+  centralAllocation?: CorpCentralDefenseAllocation,
+): string {
+  const selectedBand = selectedDefensePortfolioBand(
+    context,
+    signals,
+    centralAllocation,
+  );
+  if (selectedBand.kind === "score") {
+    return selectedBand.route.signal.evidenceCode;
+  }
+  const selectedActionId = selectedBand.candidates[0]?.candidate.actionId;
+  if (!selectedActionId) return "visible_server_defense_portfolio";
+  return (
+    [...selectedBand.eligibleSignals]
+      .filter((signal) =>
+        defenseCandidates(context, signal).some(
+          (route) => route.candidate.actionId === selectedActionId,
+        ),
+      )
+      .sort(
+        (left, right) =>
+          right.value - left.value ||
+          left.defenseId.localeCompare(right.defenseId),
+      )[0]?.evidenceCode ?? "visible_server_defense_portfolio"
+  );
+}
+
+function defensePriority(
+  context: PlanSchedulerContext,
+  signals: readonly CorpDefenseSignal[],
+  centralAllocation?: CorpCentralDefenseAllocation,
+): PriorityClass {
+  return selectedDefensePortfolioBand(context, signals, centralAllocation)
+    .priorityClass;
+}
+
+export function corpGenericDefensePriorityClass(
+  genericSignals: readonly CorpGenericDefenseSignal[],
+): "P2" | "P3" | "P5" | "P6" {
+  if (
+    genericSignals.some(
+      (signal) =>
+        signal.urgent &&
+        (signal.phase === "install_ice" ||
+          signal.phase === "install_defense_support" ||
+          signal.phase === "activate_run_defense" ||
+          (signal.phase === "rez_response" &&
+            signal.rezWindowVerdict === "productive")),
+    )
+  )
+    return "P2";
+  if (genericSignals.some((signal) => signal.immediateInstallSupport)) {
+    return "P3";
+  }
+  if (
+    genericSignals.some(
+      (signal) =>
+        signal.phase === "rez_response" &&
+        signal.rezWindowVerdict === "productive",
+    )
+  )
+    return "P5";
+  if (
+    genericSignals.some(
+      (signal) =>
+        (signal.serverId === "hq" || signal.serverId === "rd") &&
+        signal.value > 8,
+    )
+  )
+    return "P5";
+  return "P6";
+}
+
+function defensePriorityRank(priorityClass: PriorityClass): number {
+  switch (priorityClass) {
+    case "P1":
+      return 1;
+    case "P2":
+      return 2;
+    case "P3":
+      return 3;
+    case "P4":
+      return 4;
+    case "P5":
+      return 5;
+    case "P6":
+      return 6;
+  }
 }
 
 function economyModule(): PlanModule {
@@ -302,20 +705,23 @@ function economyModule(): PlanModule {
     moduleId: "corp.economy",
     side: "corp",
     discover: (context) =>
-      domain(context)
+      validatedEconomyNeeds(context)
         .economyNeeds.filter(
-          (signal) => signal.gap > 0 || signal.neutralProgress === true,
+          (signal) => signal.kind === "develop_campaign" || signal.gap > 0,
         )
         .map((signal) =>
           proposal({
             moduleId: "corp.economy",
             dedupeKey: signal.needId,
             moduleState: { kind: "economy", signal } satisfies EconomyState,
-            priorityClass: signal.urgentForScore ? "P5" : "P6",
-            target: { kind: "capability", id: signal.needId },
-            routeExists: economyCandidates(context).length > 0,
+            priorityClass: economyPriority(signal),
+            target:
+              signal.kind === "develop_campaign"
+                ? { kind: "card", id: signal.sourceInstanceId }
+                : { kind: "capability", id: signal.needId },
+            routeExists: economyCandidates(context, signal).length > 0,
             evidenceCode: signal.evidenceCode,
-            ...(signal.parentPlanInstanceId
+            ...(signal.kind === "parent_funding" && signal.parentPlanInstanceId
               ? { parentInstanceId: signal.parentPlanInstanceId }
               : {}),
           }),
@@ -324,24 +730,156 @@ function economyModule(): PlanModule {
       const current = state<EconomyState>(instance);
       return assessment(
         instance,
-        current.signal.urgentForScore ? "P5" : "P6",
-        economyCandidates(context).length > 0,
-        current.signal.neutralProgress ? 1 : current.signal.gap * 20,
+        economyPriority(current.signal),
+        economyCandidates(context, current.signal).length > 0,
+        economyAssessmentValue(current.signal),
         portfolio.executorInstanceId,
       );
     },
     materialize: (instance, _assessment, context) => ({
-      step: {
-        stepId: `${instance.instanceId}:fund`,
-        capability: {
-          capabilityId: "gain_corp_liquid_credits",
-          semanticActionTypes: ["economy.gain_credit"],
-        },
-        purpose: "Fund the explicitly bound Corp need.",
-      },
-      candidates: economyCandidates(context),
+      ...economyMaterialization(
+        instance,
+        context,
+        state<EconomyState>(instance).signal,
+      ),
     }),
   };
+}
+
+function validatedEconomyNeeds(
+  context: PlanSchedulerContext,
+): CorpCorePlanDomain {
+  const currentDomain = domain(context);
+  const invalidScoreParent = currentDomain.economyNeeds.find((signal) => {
+    if (signal.kind !== "parent_funding") return false;
+    const scoreFundingNeed = signal.needId.startsWith("score-support:");
+    const scoreParentBound =
+      signal.parentPlanInstanceId?.startsWith("plan:corp.score_agenda:") ===
+      true;
+    const scorePriorityDelegated = signal.delegatedPriorityClass !== undefined;
+    if (!scoreFundingNeed && !scoreParentBound && !scorePriorityDelegated)
+      return false;
+    const projectId = signal.needId.slice("score-support:".length);
+    const parentProject = currentDomain.scoreProjects.find(
+      (project) => project.projectId === projectId,
+    );
+    const expectedParent = parentProject
+      ? planInstanceIdForProposal({
+          moduleId: "corp.score_agenda",
+          dedupeKey: parentProject.projectId,
+        })
+      : undefined;
+    const validFundingActions = new Set(
+      context.actionCandidates
+        .filter(immediateCorpLiquidCreditGain)
+        .map((candidate) => candidate.actionId),
+    );
+    const validFundingRouteBinding =
+      signal.actionIds.length > 0
+        ? signal.actionIds.every((actionId) =>
+            validFundingActions.has(actionId),
+          )
+        : signal.fundingRouteAssessment?.status === "uncovered" &&
+          signal.fundingRouteAssessment.headActionId === undefined;
+    return (
+      !parentProject ||
+      signal.parentPlanInstanceId !== expectedParent ||
+      !scorePriorityDelegated ||
+      signal.delegatedPriorityClass !== corpScorePriorityClass(parentProject) ||
+      signal.evidenceCode !== parentProject.evidenceCode ||
+      !validFundingRouteBinding
+    );
+  });
+  if (invalidScoreParent) {
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map((action) => action.type),
+      unresolvedActionIds: invalidScoreParent.actionIds,
+      owner: "plan_module",
+      removalCondition: `Bind score funding need ${invalidScoreParent.needId} to its exact score parent, inherited P1-P4 priority class, matching evidence and current liquid-credit actions.`,
+    });
+  }
+  const expectedDefenseParent = planInstanceIdForProposal({
+    moduleId: "corp.defend_servers",
+    dedupeKey: "server-defense-portfolio",
+  });
+  const invalidDefenseParent = currentDomain.economyNeeds.find((signal) => {
+    if (signal.kind !== "parent_funding") return false;
+    const isDefenseFundingShape =
+      signal.immediateDefenseConversion === true ||
+      signal.parentNeedId !== undefined ||
+      signal.incrementalDefenseReserve !== undefined ||
+      signal.parentPlanInstanceId?.startsWith(
+        "plan:corp.defend_servers:",
+      ) === true;
+    if (!isDefenseFundingShape) return false;
+    const parentNeed = currentDomain.defenseNeeds.find(
+      (need): need is CorpGenericDefenseSignal =>
+        need.kind === "generic" &&
+        need.phase === "install_ice" &&
+        need.defenseId === signal.parentNeedId,
+    );
+    const validFundingActions = new Set(
+      context.actionCandidates
+        .filter(immediateCorpLiquidCreditGain)
+        .map((candidate) => candidate.actionId),
+    );
+    return (
+      signal.parentPlanInstanceId !== expectedDefenseParent ||
+      !parentNeed ||
+      parentNeed.installRoute?.disposition !== "funding_only" ||
+      signal.parentPriorityClass !==
+        corpGenericDefensePriorityClass([parentNeed]) ||
+      signal.evidenceCode !== parentNeed.evidenceCode ||
+      signal.actionIds.length === 0 ||
+      signal.actionIds.some((actionId) => !validFundingActions.has(actionId))
+    );
+  });
+  if (invalidDefenseParent) {
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map((action) => action.type),
+      unresolvedActionIds: invalidDefenseParent.actionIds,
+      owner: "plan_module",
+      removalCondition: `Bind defense funding need ${invalidDefenseParent.needId} to the exact corp.defend_servers parent, its funding-only child route, inherited priority, matching evidence and current liquid-credit actions.`,
+    });
+  }
+  return currentDomain;
+}
+
+function economyPriority(signal: CorpEconomyNeedSignal): PriorityClass {
+  if (signal.kind === "parent_funding" && signal.parentPriorityClass)
+    return signal.parentPriorityClass;
+  if (signal.kind === "parent_funding" && signal.delegatedPriorityClass)
+    return signal.delegatedPriorityClass;
+  if (signal.kind === "reserve" && signal.priorityClass)
+    return signal.priorityClass;
+  if (
+    signal.kind === "develop_campaign" &&
+    signal.phase === "rez" &&
+    signal.cadence.kind === "immediate_on_rez"
+  )
+    return "P3";
+  return "P5";
+}
+
+function economyAssessmentValue(signal: CorpEconomyNeedSignal): number {
+  if (signal.kind === "develop_campaign") {
+    return Math.max(1, signal.payback.projectedNetCredits * 20);
+  }
+  if (signal.kind === "reserve") return 100 + signal.gap * 20;
+  return (
+    (signal.delegatedPriorityClass || signal.parentPriorityClass
+      ? 300
+      : signal.immediateDefenseConversion
+        ? 180
+        : 100) +
+    signal.gap * 20
+  );
 }
 
 function proposal(params: {
@@ -354,6 +892,8 @@ function proposal(params: {
   evidenceCode: string;
   persistencePolicy?: PlanProposal["persistencePolicy"];
   parentInstanceId?: string;
+  blockerCode?: string;
+  abandonWhenTargetMissing?: boolean;
 }): PlanProposal {
   return {
     moduleId: params.moduleId,
@@ -373,7 +913,7 @@ function proposal(params: {
       blockedStateVersionTtl: 2,
       dormantStateVersionTtl: 2,
       completedHistoryStateVersionTtl: 4,
-      abandonWhenTargetMissing: true,
+      abandonWhenTargetMissing: params.abandonWhenTargetMissing ?? true,
       protectedWhileNeedOpen: true,
       protectedWhileCommitted: true,
     },
@@ -388,7 +928,7 @@ function proposal(params: {
       ? []
       : [
           {
-            code: "no_current_corp_route",
+            code: params.blockerCode ?? "no_current_corp_route",
             owner: "plan_module",
             removable: true,
             resumeCondition: { code: "route_becomes_available" },
@@ -501,6 +1041,18 @@ function assessment(
 }
 
 function scoreCapability(signal: CorpScoreProjectSignal): PlanStepCapability {
+  if (signal.phase === "unlock_remote_creation")
+    return {
+      capabilityId: "unlock_score_remote_creation",
+      semanticActionTypes: ["card_ability.trigger"],
+    };
+  if (signal.phase === "convert_agenda")
+    return {
+      capabilityId: "convert_score_agenda",
+      semanticActionTypes: signal.routeSemanticActionTypes ?? [
+        "play.corp_operation",
+      ],
+    };
   if (signal.phase === "install_agenda")
     return {
       capabilityId: "install_score_agenda",
@@ -521,6 +1073,11 @@ function scoreCapability(signal: CorpScoreProjectSignal): PlanStepCapability {
 function nextScoreCapability(
   phase: CorpScorePhase,
 ): PlanStepCapability | undefined {
+  if (phase === "unlock_remote_creation")
+    return {
+      capabilityId: "install_unlocked_score_agenda",
+      semanticActionTypes: ["install.card"],
+    };
   if (phase === "install_agenda")
     return {
       capabilityId: "advance_installed_agenda",
@@ -535,6 +1092,11 @@ function nextScoreCapability(
 }
 
 function scoreTarget(signal: CorpScoreProjectSignal) {
+  if (signal.actionIds)
+    return {
+      kind: "capability" as const,
+      id: "rules_legal_score_action",
+    };
   return signal.phase === "install_agenda"
     ? { kind: "card" as const, id: signal.agendaDefinitionId }
     : {
@@ -550,9 +1112,25 @@ function scoreCandidates(
   const semantic = scoreCapability(signal).semanticActionTypes;
   return context.actionCandidates
     .filter((candidate) => {
+      if (
+        signal.actionIds !== undefined &&
+        !signal.actionIds.includes(candidate.actionId)
+      )
+        return false;
       if (!semantic.includes(candidate.semanticActionType)) return false;
+      if (
+        signal.phase === "convert_agenda" &&
+        signal.actionIds?.includes(candidate.actionId) === true
+      ) {
+        return true;
+      }
+      if (signal.phase === "unlock_remote_creation") return true;
       if (signal.phase === "install_agenda")
-        return candidate.sourceDefinitionId === signal.agendaDefinitionId;
+        return (
+          candidate.sourceDefinitionId === signal.agendaDefinitionId &&
+          (!signal.serverId ||
+            candidateTargetIds(candidate).includes(signal.serverId))
+        );
       const agendaId = signal.agendaInstanceId ?? signal.agendaDefinitionId;
       return (
         candidate.sourceCardInstanceId === agendaId ||
@@ -580,20 +1158,113 @@ function defenseCandidates(
   context: PlanSchedulerContext,
   signal: CorpDefenseSignal,
 ): PlanMaterialization["candidates"] {
+  if (!isValidDefenseSignal(signal)) return [];
+  if (signal.kind === "score_protection_install") {
+    if (
+      signal.projection.actionId !== signal.actionId ||
+      signal.projection.sourceCardInstanceId !== signal.sourceCardInstanceId ||
+      signal.projection.sourceDefinitionId !== signal.sourceDefinitionId ||
+      signal.projection.targetServerId !== signal.serverId ||
+      signal.projection.effect !== signal.effect ||
+      !exactInstallProjectionIsCurrent(context, signal.projection)
+    ) {
+      return [];
+    }
+    return context.actionCandidates
+      .filter(
+        (candidate) =>
+          candidate.actionId === signal.actionId &&
+          candidate.semanticActionType === "install.card" &&
+          candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
+          candidate.sourceDefinitionId === signal.sourceDefinitionId &&
+          candidateTargetIds(candidate).includes(signal.serverId) &&
+          scoreProtectionInstallActionMatches(context, candidate, signal),
+      )
+      .map((candidate) => ({ candidate, stepValue: 1 }));
+  }
+  if (signal.kind === "score_protection_draw") {
+    return context.actionCandidates
+      .filter(
+        (candidate) =>
+          candidate.actionId === signal.actionId &&
+          context.input.legalActions.some(
+            (action) => action.actionId === candidate.actionId,
+          ) &&
+          corpCandidateProjectsCardDraw(candidate),
+      )
+      .map((candidate) => ({ candidate, stepValue: 1 }));
+  }
+  if (signal.phase === "install_ice") {
+    const route = signal.installRoute;
+    if (
+      !route ||
+      route.disposition !== "productive" ||
+      !exactInstallProjectionMatchesSignal(context, signal, route.projection)
+    ) {
+      return [];
+    }
+    return context.actionCandidates
+      .filter(
+        (candidate) =>
+          candidate.actionId === route.projection.actionId &&
+          candidate.semanticActionType === "install.card" &&
+          candidate.sourceCardInstanceId ===
+            route.projection.sourceCardInstanceId &&
+          candidate.sourceDefinitionId === route.projection.sourceDefinitionId &&
+          candidateTargetIds(candidate).includes(
+            route.projection.targetServerId,
+          ) &&
+          scoreProtectionInstallActionMatches(
+            context,
+            candidate,
+            route.projection,
+          ),
+      )
+      .map((candidate) => ({ candidate, stepValue: 1 }));
+  }
+  if (signal.phase === "rez_response" && signal.rezRoute) {
+    if (!exactIceRezRouteIsCurrent(context, signal, signal.rezRoute)) {
+      return [];
+    }
+    return context.actionCandidates
+      .filter(
+        (candidate) =>
+          candidate.actionId === signal.rezRoute!.actionId &&
+          candidate.semanticActionType === "corp_window.rez" &&
+          candidate.sourceCardInstanceId ===
+            signal.rezRoute!.sourceCardInstanceId &&
+          candidate.sourceDefinitionId ===
+            signal.rezRoute!.sourceDefinitionId,
+      )
+      .map((candidate) => ({ candidate, stepValue: 1 }));
+  }
   return context.actionCandidates
     .filter((candidate) => {
+      if (
+        signal.actionIds !== undefined &&
+        !signal.actionIds.includes(candidate.actionId)
+      ) {
+        return false;
+      }
       if (
         signal.sourceDefinitionIds.length > 0 &&
         !signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? "")
       )
         return false;
-      if (signal.phase === "install_ice")
+      if (signal.phase === "install_defense_support")
         return (
           candidate.semanticActionType === "install.card" &&
           candidateTargetIds(candidate).includes(signal.serverId)
         );
+      if (signal.phase === "draw_for_ice")
+        return corpCandidateProjectsCardDraw(candidate);
+      if (signal.phase === "activate_run_defense")
+        return candidate.semanticActionType === "card_ability.trigger";
       return (
-        candidate.semanticActionType === "corp_window.rez" &&
+        candidate.semanticActionType ===
+          (signal.phase === "decline_rez"
+            ? "corp_window.decline_rez"
+            : "corp_window.rez") &&
         (!signal.targetIceInstanceId ||
           candidate.sourceCardInstanceId === signal.targetIceInstanceId ||
           candidateTargetIds(candidate).includes(signal.targetIceInstanceId))
@@ -602,30 +1273,1792 @@ function defenseCandidates(
     .map((candidate) => ({ candidate, stepValue: signal.value }));
 }
 
+function exactIceRezRouteIsCurrent(
+  context: PlanSchedulerContext,
+  signal: CorpGenericDefenseSignal,
+  route: CorpExactIceRezRouteProjection,
+): boolean {
+  if (
+    route.targetServerId !== signal.serverId ||
+    route.actionId !== signal.actionIds?.[0] ||
+    signal.actionIds?.length !== 1 ||
+    route.sourceCardInstanceId !== signal.targetIceInstanceId
+  ) {
+    return false;
+  }
+  const candidate = context.actionCandidates.find(
+    (candidate) => candidate.actionId === route.actionId,
+  );
+  const sourceCard = context.input.playerView.servers
+    .flatMap((server) => server.ice)
+    .find((card) => card.instanceId === route.sourceCardInstanceId);
+  if (!candidate || !sourceCard) return false;
+  const expected = projectExactCorpIceRezRoute({
+    input: context.input,
+    candidate,
+    sourceCard,
+    targetServerId: signal.serverId,
+  });
+  return (
+    expected !== undefined &&
+    exactCorpIceRezRoutesEqual(route, expected)
+  );
+}
+
+function scoreProtectionInstallActionMatches(
+  context: PlanSchedulerContext,
+  candidate: ActionSemanticCandidate,
+  signal:
+    | CorpScoreProtectionInstallSignal
+    | KnownCorpFundedIceInstallRouteProjection,
+): boolean {
+  const source = authoritativeDefensePlacementSource(context, candidate);
+  if (!source) return false;
+  const payload = source.action.payload;
+  const targetServerId =
+    "serverId" in signal ? signal.serverId : signal.targetServerId;
+  return (
+    payload?.placement === "ice" &&
+    payload.cardId === signal.sourceCardInstanceId &&
+    (payload.sourceDefinitionId === undefined ||
+      payload.sourceDefinitionId === signal.sourceDefinitionId) &&
+    payload.serverId === targetServerId
+  );
+}
+
+function exactInstallProjectionMatchesSignal(
+  context: PlanSchedulerContext,
+  signal: CorpGenericDefenseSignal,
+  projection: KnownCorpFundedIceInstallRouteProjection,
+): boolean {
+  if (
+    projection.knowledge !== "known" ||
+    projection.actionId !== signal.actionIds?.[0] ||
+    signal.actionIds.length !== 1 ||
+    projection.targetServerId !== signal.serverId ||
+    signal.sourceDefinitionIds.length !== 1 ||
+    signal.sourceDefinitionIds[0] !== projection.sourceDefinitionId ||
+    !exactInstallProjectionIsCurrent(context, projection)
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function exactInstallProjectionIsCurrent(
+  context: PlanSchedulerContext,
+  projection: KnownCorpFundedIceInstallRouteProjection,
+): boolean {
+  if (
+    projection.knowledge !== "known" ||
+    projection.before.knowledge !== "known" ||
+    projection.after.knowledge !== "known" ||
+    !knownNonNegativeInteger(context.input.playerView.own.credits) ||
+    !knownNonNegativeInteger(context.input.playerView.own.clicks) ||
+    projection.before.availableCorpCredits !==
+      context.input.playerView.own.credits ||
+    projection.before.availableCorpClicks !== context.input.playerView.own.clicks
+  ) {
+    return false;
+  }
+  const action = context.input.legalActions.find(
+    (candidate) => candidate.actionId === projection.actionId,
+  );
+  const projectedRezCost = projection.selectedRezCosts.find(
+    (selected) =>
+      selected.iceInstanceId === projection.sourceCardInstanceId &&
+      selected.iceDefinitionId === projection.sourceDefinitionId &&
+      selected.source === "engine_rez_cost_quote",
+  );
+  const projectedServerId =
+    action?.payload?.postInstallRezQuoteProjectedServerId;
+  const selectedRezCostsAreCurrent =
+    selectedRezCostSetsEqual(
+      projection.selectedRezCosts,
+      projection.after.selectedRezCosts,
+    ) &&
+    selectedRezCostsAreUnique(projection.selectedRezCosts) &&
+    projection.selectedRezCosts.every((selected) =>
+      selected.iceInstanceId === projection.sourceCardInstanceId
+        ? selected === projectedRezCost
+        : currentInstalledRezQuoteMatchesSelection(
+            context,
+            selected,
+            projectedServerId,
+          ),
+    );
+  return (
+    action?.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    action.side === "corp" &&
+    action.type === "install_card" &&
+    action.source === projection.sourceCardInstanceId &&
+    action.payload?.placement === "ice" &&
+    action.payload.cardId === projection.sourceCardInstanceId &&
+    action.payload.serverId === projection.targetServerId &&
+    action.payload.postInstallRezQuoteComplete === true &&
+    action.payload.postInstallRezQuoteCardId ===
+      projection.sourceCardInstanceId &&
+    action.payload.postInstallRezQuoteTargetServerId ===
+      projection.targetServerId &&
+    action.payload.postInstallRezQuoteExpiresAtStateVersion ===
+      context.input.playerView.stateVersion &&
+    validPostInstallProjectedServerBinding(
+      projection.targetServerId,
+      action.payload.postInstallRezQuoteProjectedServerId,
+    ) &&
+    knownNonNegativeInteger(
+      action.payload.postInstallRezQuoteBaseCredits,
+    ) &&
+    knownNonNegativeInteger(
+      action.payload.postInstallRezQuoteFinalCredits,
+    ) &&
+    knownNonNegativeInteger(
+      action.payload.postInstallRezQuoteMandatoryAgendaPointCost,
+    ) &&
+    action.payload.postInstallRezQuoteMandatoryAgendaPointCost === 0 &&
+    action.payload.postInstallRezQuoteMandatoryAdditionalCostKind ===
+      undefined &&
+    validPostInstallRezQuoteModifiers(action.payload) &&
+    projectedRezCost?.credits ===
+      action.payload.postInstallRezQuoteFinalCredits &&
+    selectedRezCostsAreCurrent &&
+    legalActionResourceCost(action, "credits") === projection.installCredits &&
+    legalActionResourceCost(action, "clicks") === projection.installClicks
+  );
+}
+
+function selectedRezCostsAreUnique(
+  costs: KnownCorpFundedIceInstallRouteProjection["selectedRezCosts"],
+): boolean {
+  return (
+    costs.length > 0 &&
+    new Set(costs.map((cost) => cost.iceInstanceId)).size === costs.length
+  );
+}
+
+function selectedRezCostSetsEqual(
+  left: KnownCorpFundedIceInstallRouteProjection["selectedRezCosts"],
+  right: KnownCorpFundedIceInstallRouteProjection["selectedRezCosts"],
+): boolean {
+  if (left.length !== right.length) return false;
+  const rightByInstanceId = new Map(
+    right.map((cost) => [cost.iceInstanceId, cost] as const),
+  );
+  return (
+    rightByInstanceId.size === right.length &&
+    left.every((cost) => {
+      const matching = rightByInstanceId.get(cost.iceInstanceId);
+      return (
+        matching?.iceDefinitionId === cost.iceDefinitionId &&
+        matching.credits === cost.credits &&
+        matching.source === cost.source
+      );
+    })
+  );
+}
+
+function currentInstalledRezQuoteMatchesSelection(
+  context: PlanSchedulerContext,
+  selected: KnownCorpFundedIceInstallRouteProjection["selectedRezCosts"][number],
+  projectedServerId: unknown,
+): boolean {
+  if (
+    typeof projectedServerId !== "string" ||
+    selected.source !== "engine_rez_cost_quote"
+  ) {
+    return false;
+  }
+  const matches = context.input.playerView.servers.flatMap((server) =>
+    server.ice
+      .filter((ice) => ice.instanceId === selected.iceInstanceId)
+      .map((ice) => ({ ice, serverId: server.id })),
+  );
+  if (matches.length !== 1) return false;
+  const match = matches[0]!;
+  const quote = match.ice.effectiveRezCostQuote;
+  if (
+    match.serverId !== projectedServerId ||
+    match.ice.known !== true ||
+    match.ice.type !== "ice" ||
+    match.ice.definitionId !== selected.iceDefinitionId ||
+    match.ice.rezzed !== false ||
+    quote?.context !== "installed" ||
+    quote.complete !== true ||
+    quote.cardId !== selected.iceInstanceId ||
+    quote.targetServerId !== projectedServerId ||
+    quote.projectedServerId !== projectedServerId ||
+    quote.expiresAtStateVersion !== context.input.playerView.stateVersion ||
+    !knownNonNegativeInteger(quote.baseCredits) ||
+    !knownNonNegativeInteger(quote.finalCredits) ||
+    quote.finalCredits !== selected.credits ||
+    !validMandatoryInstalledRezCosts(quote.mandatoryAdditionalCosts) ||
+    !validDefinitionIdArray(quote.reductionSourceDefinitionIds) ||
+    !validDefinitionIdArray(quote.increaseSourceDefinitionIds)
+  ) {
+    return false;
+  }
+  const reductions = quote.reductionSourceDefinitionIds ?? [];
+  const increases = quote.increaseSourceDefinitionIds ?? [];
+  return (
+    definitionIdListsAreDisjoint(reductions, increases) &&
+    (quote.baseCredits === quote.finalCredits ||
+      reductions.length + increases.length > 0)
+  );
+}
+
+function validMandatoryInstalledRezCosts(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const costs = value as Record<string, unknown>;
+  return (
+    Object.keys(costs).length === 1 &&
+    knownNonNegativeInteger(costs.agendaPoints) &&
+    costs.agendaPoints === 0
+  );
+}
+
+function validDefinitionIdArray(value: unknown): boolean {
+  if (value === undefined) return true;
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (id, index) =>
+        typeof id === "string" &&
+        id.length > 0 &&
+        (index === 0 || value[index - 1]! < id),
+    )
+  );
+}
+
+function definitionIdListsAreDisjoint(
+  left: readonly string[],
+  right: readonly string[],
+): boolean {
+  const leftIds = new Set(left);
+  return right.every((id) => !leftIds.has(id));
+}
+
+function validPostInstallRezQuoteModifiers(
+  payload: NonNullable<
+    AiDecisionInput["legalActions"][number]["payload"]
+  >,
+): boolean {
+  const reductionIds = commaSeparatedDefinitionIds(
+    payload.postInstallRezQuoteReductionSourceDefinitionIds,
+  );
+  const increaseIds = commaSeparatedDefinitionIds(
+    payload.postInstallRezQuoteIncreaseSourceDefinitionIds,
+  );
+  if (reductionIds === undefined || increaseIds === undefined) return false;
+  return (
+    definitionIdListsAreDisjoint(reductionIds, increaseIds) &&
+    (payload.postInstallRezQuoteBaseCredits ===
+      payload.postInstallRezQuoteFinalCredits ||
+      reductionIds.length + increaseIds.length > 0)
+  );
+}
+
+function validPostInstallProjectedServerBinding(
+  targetServerId: string,
+  projectedServerId: unknown,
+): boolean {
+  return targetServerId === "new_remote"
+    ? typeof projectedServerId === "string" &&
+        /^remote_[1-9]\d*$/.test(projectedServerId)
+    : projectedServerId === targetServerId;
+}
+
+function validCommaSeparatedDefinitionIds(value: unknown): boolean {
+  if (value === undefined) return true;
+  if (typeof value !== "string" || value.length === 0) return false;
+  const ids = value.split(",");
+  return ids.every(
+    (id, index) =>
+      id.length > 0 && (index === 0 || ids[index - 1]! < id),
+  );
+}
+
+function commaSeparatedDefinitionIds(value: unknown): string[] | undefined {
+  if (value === undefined) return [];
+  if (!validCommaSeparatedDefinitionIds(value)) return undefined;
+  return (value as string).split(",");
+}
+
+function legalActionResourceCost(
+  action: AiDecisionInput["legalActions"][number],
+  resource: "credits" | "clicks",
+): number | undefined {
+  let total = 0;
+  for (const cost of action.costs) {
+    const amount = cost[resource] ?? 0;
+    if (!knownNonNegativeInteger(amount)) return undefined;
+    total += amount;
+    if (!Number.isSafeInteger(total)) return undefined;
+  }
+  return total;
+}
+
+function defensePortfolioCandidates(
+  context: PlanSchedulerContext,
+  signals: readonly CorpDefenseSignal[],
+  centralAllocation?: CorpCentralDefenseAllocation,
+): PlanMaterialization["candidates"] {
+  return selectedDefensePortfolioBand(context, signals, centralAllocation)
+    .candidates;
+}
+
+type SelectedDefensePortfolioBand =
+  | Readonly<{
+      kind: "score";
+      route: SelectedScoreProtectionRoute;
+      priorityClass: CorpScorePriorityClass;
+      candidates: PlanMaterialization["candidates"];
+    }>
+  | Readonly<{
+      kind: "generic";
+      eligibleSignals: readonly CorpGenericDefenseSignal[];
+      priorityClass: "P2" | "P3" | "P5" | "P6";
+      candidates: PlanMaterialization["candidates"];
+    }>;
+
+function selectedDefensePortfolioBand(
+  context: PlanSchedulerContext,
+  signals: readonly CorpDefenseSignal[],
+  centralAllocation?: CorpCentralDefenseAllocation,
+): SelectedDefensePortfolioBand {
+  const validSignals = validDefenseSignals(signals, context);
+  const genericSignals = validSignals.filter(isGenericDefenseSignal);
+  const selectedGenericBand = selectedGenericDefensePortfolioBand(
+    context,
+    genericSignals,
+    centralAllocation,
+  );
+  const scoreProtectionRoute = selectedScoreProtectionRoute(
+    context,
+    validSignals,
+  );
+  const genericPriority = selectedGenericBand.priorityClass;
+  const genericCandidates = selectedGenericBand.candidates;
+  const scoreCandidates = scoreProtectionRoute
+    ? [
+        {
+          candidate: scoreProtectionRoute.candidate,
+          stepValue:
+            scoreProtectionRoute.signal.kind === "score_protection_install" &&
+            scoreProtectionRoute.signal.effect === "satisfied"
+              ? 2
+              : 1,
+        },
+      ]
+    : [];
+  if (
+    scoreProtectionRoute &&
+    (genericCandidates.length === 0 ||
+      defensePriorityRank(scoreProtectionRoute.signal.delegatedPriorityClass) <
+        defensePriorityRank(genericPriority))
+  ) {
+    return {
+      kind: "score",
+      route: scoreProtectionRoute,
+      priorityClass: scoreProtectionRoute.signal.delegatedPriorityClass,
+      candidates: scoreCandidates,
+    };
+  }
+  if (genericCandidates.length > 0 || !scoreProtectionRoute) {
+    return {
+      kind: "generic",
+      eligibleSignals: selectedGenericBand.eligibleSignals,
+      priorityClass: genericPriority,
+      candidates: genericCandidates,
+    };
+  }
+  return {
+    kind: "score",
+    route: scoreProtectionRoute,
+    priorityClass: scoreProtectionRoute.signal.delegatedPriorityClass,
+    candidates: scoreCandidates,
+  };
+}
+
+function selectedGenericDefensePortfolioBand(
+  context: PlanSchedulerContext,
+  signals: readonly CorpGenericDefenseSignal[],
+  centralAllocation?: CorpCentralDefenseAllocation,
+): Readonly<{
+  eligibleSignals: readonly CorpGenericDefenseSignal[];
+  priorityClass: "P2" | "P3" | "P5" | "P6";
+  candidates: PlanMaterialization["candidates"];
+}> {
+  const windowEligibleSignals = urgentDefenseBand(context, signals);
+  const priorityClasses = ["P2", "P3", "P5", "P6"] as const;
+  for (const priorityClass of priorityClasses) {
+    const prioritySignals = windowEligibleSignals.filter(
+      (signal) =>
+        corpGenericDefensePriorityClass([signal]) === priorityClass,
+    );
+    if (prioritySignals.length === 0) continue;
+    const candidates = genericDefensePortfolioCandidates(
+      context,
+      prioritySignals,
+      centralAllocation,
+    );
+    if (candidates.length > 0) {
+      return {
+        eligibleSignals: prioritySignals,
+        priorityClass,
+        candidates,
+      };
+    }
+  }
+  const priorityClass = corpGenericDefensePriorityClass(windowEligibleSignals);
+  return {
+    eligibleSignals: windowEligibleSignals.filter(
+      (signal) =>
+        corpGenericDefensePriorityClass([signal]) === priorityClass,
+    ),
+    priorityClass,
+    candidates: [],
+  };
+}
+
+function genericDefensePortfolioCandidates(
+  context: PlanSchedulerContext,
+  eligibleSignals: readonly CorpGenericDefenseSignal[],
+  centralAllocation?: CorpCentralDefenseAllocation,
+): PlanMaterialization["candidates"] {
+  const urgentRezSignals = eligibleSignals.filter(
+    (signal) => signal.urgent && !isDefensePlacementPhase(signal.phase),
+  );
+  if (urgentRezSignals.length > 0) {
+    return selectedDirectDefenseRoute(context, urgentRezSignals);
+  }
+  if (eligibleSignals.some((signal) => signal.urgent)) {
+    return selectedExactGenericDefenseRoutes(
+      context,
+      eligibleSignals,
+      centralAllocation,
+    );
+  }
+  const lockedInstallSequenceSignals = eligibleSignals.filter(
+    (signal) => signal.immediateInstallSupport === true,
+  );
+  if (lockedInstallSequenceSignals.length > 0) {
+    const rezHeads = lockedInstallSequenceSignals.filter(
+      (signal) => signal.phase === "rez_response",
+    );
+    if (rezHeads.length > 0) {
+      return selectedDirectDefenseRoute(context, rezHeads);
+    }
+    return selectedExactGenericDefenseRoutes(
+      context,
+      lockedInstallSequenceSignals,
+      centralAllocation,
+    );
+  }
+
+  const allocatedPlacements = selectedExactGenericDefenseRoutes(
+    context,
+    eligibleSignals.filter((signal) => isDefensePlacementPhase(signal.phase)),
+    centralAllocation,
+  );
+  const rezCandidates = selectedDirectDefenseRoute(
+    context,
+    eligibleSignals.filter((signal) => !isDefensePlacementPhase(signal.phase)),
+  );
+  return rezCandidates.length > 0 ? rezCandidates : allocatedPlacements;
+}
+
+function selectedDirectDefenseRoute(
+  context: PlanSchedulerContext,
+  signals: readonly CorpGenericDefenseSignal[],
+): PlanMaterialization["candidates"] {
+  const exactRezRoutes = signals
+    .filter(
+      (
+        signal,
+      ): signal is CorpGenericDefenseSignal & {
+        rezRoute: CorpExactIceRezRouteProjection;
+      } => signal.phase === "rez_response" && signal.rezRoute !== undefined,
+    )
+    .flatMap((signal) =>
+      defenseCandidates(context, signal).map((route) => ({
+        ...route,
+        projection: signal.rezRoute,
+      })),
+    )
+    .sort(compareExactIceRezRoutes);
+  if (exactRezRoutes[0]) {
+    return [
+      {
+        candidate: exactRezRoutes[0].candidate,
+        stepValue: exactRezRoutes[0].stepValue,
+      },
+    ];
+  }
+  return dedupeDefenseCandidates(context, signals)
+    .sort(
+      (left, right) =>
+        right.stepValue - left.stepValue ||
+        technicalCompare(left.candidate.actionId, right.candidate.actionId),
+    )
+    .slice(0, 1);
+}
+
+function compareExactIceRezRoutes(
+  left: {
+    candidate: ActionSemanticCandidate;
+    projection: CorpExactIceRezRouteProjection;
+  },
+  right: {
+    candidate: ActionSemanticCandidate;
+    projection: CorpExactIceRezRouteProjection;
+  },
+): number {
+  if (left.projection.effect !== right.projection.effect) {
+    return left.projection.effect === "satisfied" ? -1 : 1;
+  }
+  const probabilityComparison = compareExactProbabilities(
+    left.projection.after.runnerAccessSuccessProbability,
+    right.projection.after.runnerAccessSuccessProbability,
+  );
+  if (probabilityComparison !== undefined && probabilityComparison !== 0) {
+    return probabilityComparison;
+  }
+  return (
+    left.projection.totalRezCredits - right.projection.totalRezCredits ||
+    technicalCompare(left.candidate.actionId, right.candidate.actionId)
+  );
+}
+
+function selectedExactGenericDefenseRoutes(
+  context: PlanSchedulerContext,
+  signals: readonly CorpGenericDefenseSignal[],
+  allocation: CorpCentralDefenseAllocation | undefined,
+): PlanMaterialization["candidates"] {
+  const exactIceRoutes = signals
+    .filter(
+      (
+        signal,
+      ): signal is CorpGenericDefenseSignal & {
+        phase: "install_ice";
+        installRoute: {
+          disposition: "productive";
+          projection: KnownCorpFundedIceInstallRouteProjection;
+        };
+      } =>
+        signal.phase === "install_ice" &&
+        signal.installRoute?.disposition === "productive",
+    )
+    .flatMap((signal) =>
+      defenseCandidates(context, signal).map((route) => ({
+        ...route,
+        signal,
+        projection: signal.installRoute.projection,
+      })),
+    );
+  const supportRoutes = dedupeDefenseCandidates(
+    context,
+    signals.filter((signal) => signal.phase === "install_defense_support"),
+  );
+  if (exactIceRoutes.length === 0) return supportRoutes;
+  const centralServerForRoute = (
+    route: (typeof exactIceRoutes)[number],
+  ): "hq" | "rd" | undefined =>
+    route.projection.targetServerId === "hq" ||
+    route.projection.targetServerId === "rd"
+      ? route.projection.targetServerId
+      : undefined;
+  const hqRoutes = exactIceRoutes.filter(
+    (route) => centralServerForRoute(route) === "hq",
+  );
+  const rdRoutes = exactIceRoutes.filter(
+    (route) => centralServerForRoute(route) === "rd",
+  );
+  let eligibleRoutes = exactIceRoutes;
+  if (hqRoutes.length > 0 || rdRoutes.length > 0) {
+    if (
+      allocation?.status !== "known" &&
+      hqRoutes.length > 0 &&
+      rdRoutes.length > 0
+    ) {
+      eligibleRoutes = exactIceRoutes.filter(
+        (route) => centralServerForRoute(route) === undefined,
+      );
+    } else if (
+      allocation?.status === "known" &&
+      allocation.canonicalNearTieCandidateServerIds.length === 2 &&
+      hqRoutes.length > 0 &&
+      rdRoutes.length > 0
+    ) {
+      eligibleRoutes = [
+        [...hqRoutes].sort(compareGenericExactInstallRoutes)[0]!,
+        [...rdRoutes].sort(compareGenericExactInstallRoutes)[0]!,
+      ];
+    } else if (allocation?.status === "known") {
+      const selectedCentralRoutes =
+        allocation.selectedServerId === "hq" ? hqRoutes : rdRoutes;
+      eligibleRoutes =
+        selectedCentralRoutes.length > 0
+          ? selectedCentralRoutes
+          : exactIceRoutes.filter(
+              (route) => centralServerForRoute(route) === undefined,
+            );
+    }
+  }
+  if (
+    allocation?.status === "known" &&
+    allocation.canonicalNearTieCandidateServerIds.length === 2
+  ) {
+    return eligibleRoutes.map(({ candidate, stepValue }) => ({
+      candidate,
+      stepValue,
+    }));
+  }
+  const selected = [...eligibleRoutes].sort(compareGenericExactInstallRoutes)[0];
+  return selected
+    ? [{ candidate: selected.candidate, stepValue: selected.stepValue }]
+    : supportRoutes;
+}
+
+function compareGenericExactInstallRoutes(
+  left: {
+    candidate: ActionSemanticCandidate;
+    projection: KnownCorpFundedIceInstallRouteProjection;
+  },
+  right: {
+    candidate: ActionSemanticCandidate;
+    projection: KnownCorpFundedIceInstallRouteProjection;
+  },
+): number {
+  if (left.projection.effect !== right.projection.effect) {
+    return left.projection.effect === "satisfied" ? -1 : 1;
+  }
+  const probabilityComparison = compareExactProbabilities(
+    left.projection.after.protection.runnerAccessSuccessProbability,
+    right.projection.after.protection.runnerAccessSuccessProbability,
+  );
+  if (probabilityComparison !== undefined && probabilityComparison !== 0) {
+    return probabilityComparison;
+  }
+  const costComparison =
+    knownExactInstallRouteCreditCost(left.projection) -
+    knownExactInstallRouteCreditCost(right.projection);
+  return (
+    costComparison ||
+    technicalCompare(left.candidate.actionId, right.candidate.actionId)
+  );
+}
+
+export function corpDefensePortfolioHasExecutableRoute(
+  context: PlanSchedulerContext,
+  signals: readonly CorpDefenseSignal[],
+  centralAllocation?: CorpCentralDefenseAllocation,
+): boolean {
+  return (
+    defensePortfolioCandidates(context, signals, centralAllocation).length > 0
+  );
+}
+
+type SelectedScoreProtectionRoute = {
+  signal: CorpScoreProtectionInstallSignal | CorpScoreProtectionDrawSignal;
+  candidate: ActionSemanticCandidate;
+};
+
+function selectedScoreProtectionRoute(
+  context: PlanSchedulerContext,
+  signals: readonly CorpDefenseSignal[],
+): SelectedScoreProtectionRoute | undefined {
+  const scoreSignals = signals.filter(
+    (
+      signal,
+    ): signal is
+      | CorpScoreProtectionInstallSignal
+      | CorpScoreProtectionDrawSignal =>
+      isScoreProtectionInstallSignal(signal) ||
+      isScoreProtectionDrawSignal(signal),
+  );
+  const parentIds = [
+    ...new Set(scoreSignals.map((signal) => signal.parentProjectId)),
+  ].sort(technicalCompare);
+  const parentRoutes: SelectedScoreProtectionRoute[] = [];
+  for (const parentProjectId of parentIds) {
+    const parentSignals = scoreSignals.filter(
+      (signal) => signal.parentProjectId === parentProjectId,
+    );
+    const directInstallRoute = parentSignals
+      .filter(isScoreProtectionInstallSignal)
+      .flatMap((signal) =>
+        defenseCandidates(context, signal).map(({ candidate }) => ({
+          signal,
+          candidate,
+        })),
+      )
+      .sort(compareScoreProtectionInstallRoutes)[0];
+    if (directInstallRoute) {
+      parentRoutes.push(directInstallRoute);
+      continue;
+    }
+    const drawRoute = parentSignals
+      .filter(isScoreProtectionDrawSignal)
+      .flatMap((signal) =>
+        defenseCandidates(context, signal).map(({ candidate }) => ({
+          signal,
+          candidate,
+        })),
+      )
+      .sort((left, right) =>
+        technicalCompare(left.candidate.actionId, right.candidate.actionId),
+      )[0];
+    if (drawRoute) parentRoutes.push(drawRoute);
+  }
+  return parentRoutes.sort(
+    (left, right) =>
+      defensePriorityRank(left.signal.delegatedPriorityClass) -
+        defensePriorityRank(right.signal.delegatedPriorityClass) ||
+      technicalCompare(
+        left.signal.parentProjectId,
+        right.signal.parentProjectId,
+      ),
+  )[0];
+}
+
+function compareScoreProtectionInstallRoutes(
+  left: SelectedScoreProtectionRoute & {
+    signal: CorpScoreProtectionInstallSignal;
+  },
+  right: SelectedScoreProtectionRoute & {
+    signal: CorpScoreProtectionInstallSignal;
+  },
+): number {
+  const leftProjection = left.signal.projection;
+  const rightProjection = right.signal.projection;
+  if (leftProjection.effect !== rightProjection.effect) {
+    return leftProjection.effect === "satisfied" ? -1 : 1;
+  }
+  const probabilityComparison = compareExactProbabilities(
+    leftProjection.after.protection.runnerAccessSuccessProbability,
+    rightProjection.after.protection.runnerAccessSuccessProbability,
+  );
+  if (probabilityComparison !== undefined && probabilityComparison !== 0) {
+    return probabilityComparison;
+  }
+  if (
+    knownExactInstallRouteCreditCost(leftProjection) !==
+    knownExactInstallRouteCreditCost(rightProjection)
+  ) {
+    return (
+      knownExactInstallRouteCreditCost(leftProjection) -
+      knownExactInstallRouteCreditCost(rightProjection)
+    );
+  }
+  return technicalCompare(left.candidate.actionId, right.candidate.actionId);
+}
+
+function exactInstallRouteCreditCost(
+  projection: KnownCorpFundedIceInstallRouteProjection,
+): number | undefined {
+  let total = projection.installCredits;
+  if (!knownNonNegativeInteger(total)) return undefined;
+  for (const selected of projection.selectedRezCosts) {
+    if (!knownNonNegativeInteger(selected.credits)) return undefined;
+    total += selected.credits;
+    if (!Number.isSafeInteger(total)) return undefined;
+  }
+  return total;
+}
+
+function knownExactInstallRouteCreditCost(
+  projection: KnownCorpFundedIceInstallRouteProjection,
+): number {
+  return exactInstallRouteCreditCost(projection) ?? Number.MAX_SAFE_INTEGER;
+}
+
+export type CorpDefenseActionDisposition = {
+  actionId: string;
+  evidenceCode: string;
+};
+
+export type CorpDefensePlacementDisposition = CorpDefenseActionDisposition;
+
+export function corpDefenseActionDispositions(
+  context: PlanSchedulerContext,
+  signals: readonly CorpDefenseSignal[],
+  centralAllocation?: CorpCentralDefenseAllocation,
+): CorpDefenseActionDisposition[] {
+  const validSignals = validDefenseSignals(signals, context);
+  const materializedRoutes = defensePortfolioCandidates(
+    context,
+    validSignals,
+    centralAllocation,
+  );
+  const materializedActionIds = new Set(
+    materializedRoutes.map((route) => route.candidate.actionId),
+  );
+  const selectedBand = selectedDefensePortfolioBand(
+    context,
+    validSignals,
+    centralAllocation,
+  );
+  const eligibleSignals =
+    selectedBand.kind === "generic" ? selectedBand.eligibleSignals : [];
+  const scoreProtectionSignals = validSignals.filter(
+    (
+      signal,
+    ): signal is
+      | CorpScoreProtectionInstallSignal
+      | CorpScoreProtectionDrawSignal => signal.kind !== "generic",
+  );
+  const selectedAllocation = materializedRoutes
+    .flatMap((route) =>
+      validSignals
+        .filter((signal) =>
+          defenseCandidates(context, signal).some(
+            (candidate) =>
+              candidate.candidate.actionId === route.candidate.actionId,
+          ),
+        )
+        .map((signal) => ({ route, signal })),
+    )
+    .sort(
+      (left, right) =>
+        right.route.stepValue - left.route.stepValue ||
+        defenseSignalOrderingValue(right.signal) -
+          defenseSignalOrderingValue(left.signal) ||
+        technicalCompare(left.signal.defenseId, right.signal.defenseId) ||
+        technicalCompare(
+          left.route.candidate.actionId,
+          right.route.candidate.actionId,
+        ),
+    )[0];
+  const placementSignals = validSignals
+    .filter(isGenericDefenseSignal)
+    .filter((signal) => isDefensePlacementPhase(signal.phase));
+  const byActionId = new Map<string, CorpDefenseActionDisposition>();
+  for (const candidate of context.actionCandidates) {
+    if (materializedActionIds.has(candidate.actionId)) {
+      continue;
+    }
+    if (isSharedCorpSupportBasicAction(candidate)) {
+      continue;
+    }
+    const rejectedScoreProtectionSignal = scoreProtectionSignals.find(
+      (signal) =>
+        defenseCandidates(context, signal).some(
+          (route) => route.candidate.actionId === candidate.actionId,
+        ),
+    );
+    if (rejectedScoreProtectionSignal && selectedAllocation) {
+      byActionId.set(candidate.actionId, {
+        actionId: candidate.actionId,
+        evidenceCode: `corp_score_protection_route_rejected:${rejectedScoreProtectionSignal.parentProjectId}:selected:${selectedAllocation.route.candidate.actionId}`,
+      });
+      continue;
+    }
+    if (candidate.semanticActionType !== "install.card") {
+      const matchingSignals = validSignals
+        .filter(isGenericDefenseSignal)
+        .filter((signal) =>
+          defenseCandidates(context, signal).some(
+            (route) => route.candidate.actionId === candidate.actionId,
+          ),
+        )
+        .sort(
+          (left, right) =>
+            Number(right.urgent) - Number(left.urgent) ||
+            right.value - left.value ||
+            technicalCompare(left.defenseId, right.defenseId),
+        );
+      if (matchingSignals.length === 0 || !selectedAllocation) continue;
+      const rejectedSignal = matchingSignals[0]!;
+      const remainsInPriorityBand = matchingSignals.some((signal) =>
+        eligibleSignals.includes(signal),
+      );
+      byActionId.set(candidate.actionId, {
+        actionId: candidate.actionId,
+        evidenceCode: `${
+          remainsInPriorityBand
+            ? "corp_defense_global_allocation_rejected"
+            : "corp_defense_global_priority_band_rejected"
+        }:${rejectedSignal.serverId}:${rejectedSignal.defenseId}:selected:${selectedAllocation.signal.serverId}:${selectedAllocation.signal.defenseId}:${selectedAllocation.route.candidate.actionId}`,
+      });
+      continue;
+    }
+    const fundingOnlyInstall = placementSignals.find(
+      (signal) =>
+        signal.phase === "install_ice" &&
+        signal.installRoute?.disposition === "funding_only" &&
+        signal.installRoute.projection.actionId === candidate.actionId,
+    );
+    if (fundingOnlyInstall) {
+      byActionId.set(candidate.actionId, {
+        actionId: candidate.actionId,
+        evidenceCode: `corp_defense_exact_route_requires_parent_funding:${fundingOnlyInstall.serverId}:${fundingOnlyInstall.defenseId}`,
+      });
+      continue;
+    }
+    const matchingPlacements = placementSignals
+      .filter((signal) =>
+        defenseCandidates(context, signal).some(
+          (route) => route.candidate.actionId === candidate.actionId,
+        ),
+      )
+      .sort(
+        (left, right) =>
+          defenseSignalOrderingValue(right) -
+            defenseSignalOrderingValue(left) ||
+          technicalCompare(left.serverId, right.serverId),
+      );
+    if (matchingPlacements.length === 0) continue;
+    const selected = matchingPlacements[0]!;
+    byActionId.set(candidate.actionId, {
+      actionId: candidate.actionId,
+      evidenceCode: `corp_defense_global_allocation_rejected:${selected.serverId}:${candidate.actionId}`,
+    });
+  }
+  return [...byActionId.values()];
+}
+
+export function corpDefensePlacementDispositions(
+  context: PlanSchedulerContext,
+  signals: readonly CorpDefenseSignal[],
+  centralAllocation?: CorpCentralDefenseAllocation,
+): CorpDefensePlacementDisposition[] {
+  return corpDefenseActionDispositions(context, signals, centralAllocation);
+}
+
+function isSharedCorpSupportBasicAction(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  return (
+    candidate.sourceKind === "basic_action" &&
+    (candidate.semanticActionType === "draw.card" ||
+      candidate.semanticActionType === "economy.gain_credit")
+  );
+}
+
+function dedupeDefenseCandidates(
+  context: PlanSchedulerContext,
+  signals: readonly CorpDefenseSignal[],
+): PlanMaterialization["candidates"] {
+  const byActionId = new Map<
+    string,
+    PlanMaterialization["candidates"][number]
+  >();
+  for (const signal of signals) {
+    for (const candidate of defenseCandidates(context, signal)) {
+      const previous = byActionId.get(candidate.candidate.actionId);
+      if (!previous || candidate.stepValue > previous.stepValue) {
+        byActionId.set(candidate.candidate.actionId, candidate);
+      }
+    }
+  }
+  return [...byActionId.values()];
+}
+
+function authoritativeDefensePlacementSource(
+  context: PlanSchedulerContext,
+  candidate: ActionSemanticCandidate,
+):
+  | {
+      action: AiDecisionInput["legalActions"][number];
+      sourceCardInstanceId: string;
+    }
+  | undefined {
+  const sourceCardInstanceId = candidate.sourceCardInstanceId;
+  if (!sourceCardInstanceId || candidate.sourceKind !== "card") {
+    return undefined;
+  }
+  const action = context.input.legalActions.find(
+    (candidateAction) => candidateAction.actionId === candidate.actionId,
+  );
+  if (!action || action.source !== sourceCardInstanceId) {
+    return undefined;
+  }
+  if (
+    typeof action.payload?.cardId === "string" &&
+    action.payload.cardId !== sourceCardInstanceId
+  ) {
+    return undefined;
+  }
+  if (
+    candidate.sourceDefinitionId !== undefined &&
+    typeof action.payload?.sourceDefinitionId === "string" &&
+    action.payload.sourceDefinitionId !== candidate.sourceDefinitionId
+  ) {
+    return undefined;
+  }
+  return { action, sourceCardInstanceId };
+}
+
+function knownNonNegativeInteger(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    Number.isSafeInteger(value) &&
+    value >= 0
+  );
+}
+
+function validDefenseSignals(
+  signals: readonly CorpDefenseSignal[],
+  context: PlanSchedulerContext,
+): CorpDefenseSignal[] {
+  const invalid = signals.find((signal) => !isValidDefenseSignal(signal));
+  if (!invalid) return [...signals];
+  throw new PlanResolutionFailure("missing_plan_module_coverage", {
+    side: context.input.side,
+    stateVersion: context.input.playerView.stateVersion,
+    timingPoint: context.input.playerView.timingPoint,
+    legalActionTypes: context.input.legalActions.map((action) => action.type),
+    unresolvedActionIds: defenseSignalActionIds(invalid),
+    owner: "plan_module",
+    removalCondition: `Replace incomplete or legacy Corp defense signal ${String(
+      (invalid as { defenseId?: unknown }).defenseId ?? "unknown",
+    )} with a complete discriminated defense contract.`,
+  });
+}
+
+function defenseSignalActionIds(signal: CorpDefenseSignal): string[] {
+  const value = signal as unknown as Record<string, unknown>;
+  if (
+    (value.kind === "score_protection_install" ||
+      value.kind === "score_protection_draw") &&
+    nonEmptyString(value.actionId)
+  ) {
+    return [value.actionId];
+  }
+  return Array.isArray(value.actionIds)
+    ? value.actionIds.filter(nonEmptyString)
+    : [];
+}
+
+function isValidDefenseSignal(
+  signal: CorpDefenseSignal,
+): signal is CorpDefenseSignal {
+  const value = signal as unknown as Record<string, unknown>;
+  if (
+    !nonEmptyString(value.defenseId) ||
+    !nonEmptyString(value.serverId) ||
+    !nonEmptyString(value.evidenceCode)
+  ) {
+    return false;
+  }
+  if (value.kind === "generic") {
+    const installRoute = value.installRoute as
+      | Record<string, unknown>
+      | undefined;
+    return (
+      hasOnlyKeys(value, GENERIC_DEFENSE_SIGNAL_KEYS) &&
+      genericDefensePhase(value.phase) &&
+      Array.isArray(value.sourceDefinitionIds) &&
+      value.sourceDefinitionIds.every(nonEmptyString) &&
+      (value.actionIds === undefined ||
+        (Array.isArray(value.actionIds) &&
+          value.actionIds.every(nonEmptyString))) &&
+      typeof value.urgent === "boolean" &&
+      typeof value.value === "number" &&
+      Number.isFinite(value.value) &&
+      (value.phase === "install_ice"
+        ? installRoute !== undefined &&
+          hasOnlyKeys(
+            installRoute,
+            new Set(["disposition", "projection"]),
+          ) &&
+          (installRoute.disposition === "productive" ||
+            installRoute.disposition === "funding_only") &&
+          validKnownInstallProjection(installRoute.projection)
+        : installRoute === undefined) &&
+      (value.rezRoute === undefined ||
+        (value.phase === "rez_response" &&
+          validExactIceRezRoute(value.rezRoute))) &&
+      validGenericDrawAttemptState(value.drawAttemptState)
+    );
+  }
+  if (value.kind === "score_protection_install") {
+    return (
+      hasOnlyKeys(value, SCORE_PROTECTION_INSTALL_SIGNAL_KEYS) &&
+      value.phase === "install_ice" &&
+      nonEmptyString(value.parentProjectId) &&
+      scorePriorityClass(value.delegatedPriorityClass) &&
+      nonEmptyString(value.actionId) &&
+      nonEmptyString(value.sourceCardInstanceId) &&
+      nonEmptyString(value.sourceDefinitionId) &&
+      (value.effect === "progress" || value.effect === "satisfied") &&
+      validExactProbability(value.runnerAccessSuccessProbability) &&
+      knownNonNegativeInteger(value.totalInstallAndRezCredits) &&
+      validKnownInstallProjection(value.projection) &&
+      exactInstallRouteCreditCost(
+        value.projection as KnownCorpFundedIceInstallRouteProjection,
+      ) === value.totalInstallAndRezCredits &&
+      (value.projection as KnownCorpFundedIceInstallRouteProjection).actionId ===
+        value.actionId &&
+      (value.projection as KnownCorpFundedIceInstallRouteProjection)
+        .sourceCardInstanceId === value.sourceCardInstanceId &&
+      (value.projection as KnownCorpFundedIceInstallRouteProjection)
+        .sourceDefinitionId === value.sourceDefinitionId &&
+      (value.projection as KnownCorpFundedIceInstallRouteProjection)
+        .targetServerId === value.serverId &&
+      (value.projection as KnownCorpFundedIceInstallRouteProjection).effect ===
+        value.effect &&
+      exactProbabilityValuesEqual(
+        value.runnerAccessSuccessProbability,
+        (value.projection as KnownCorpFundedIceInstallRouteProjection).after
+          .protection.runnerAccessSuccessProbability,
+      )
+    );
+  }
+  if (value.kind === "score_protection_draw") {
+    const attempt = value.drawAttemptState as
+      | Record<string, unknown>
+      | undefined;
+    return (
+      hasOnlyKeys(value, SCORE_PROTECTION_DRAW_SIGNAL_KEYS) &&
+      value.phase === "draw_for_ice" &&
+      nonEmptyString(value.parentProjectId) &&
+      scorePriorityClass(value.delegatedPriorityClass) &&
+      nonEmptyString(value.actionId) &&
+      attempt !== undefined &&
+      hasOnlyKeys(attempt, SCORE_PROTECTION_DRAW_ATTEMPT_KEYS) &&
+      nonEmptyString(attempt.turnKey) &&
+      attempt.remainingAttempts === 1 &&
+      (attempt.selectedAtStateVersion === undefined ||
+        knownNonNegativeInteger(attempt.selectedAtStateVersion))
+    );
+  }
+  return false;
+}
+
+function isGenericDefenseSignal(
+  signal: CorpDefenseSignal,
+): signal is CorpGenericDefenseSignal {
+  return signal.kind === "generic";
+}
+
+function isScoreProtectionInstallSignal(
+  signal: CorpDefenseSignal,
+): signal is CorpScoreProtectionInstallSignal {
+  return signal.kind === "score_protection_install";
+}
+
+function isScoreProtectionDrawSignal(
+  signal: CorpDefenseSignal,
+): signal is CorpScoreProtectionDrawSignal {
+  return signal.kind === "score_protection_draw";
+}
+
+function genericDefensePhase(
+  value: unknown,
+): value is CorpGenericDefenseSignal["phase"] {
+  return (
+    value === "install_ice" ||
+    value === "install_defense_support" ||
+    value === "draw_for_ice" ||
+    value === "rez_response" ||
+    value === "activate_run_defense" ||
+    value === "decline_rez"
+  );
+}
+
+function scorePriorityClass(value: unknown): value is CorpScorePriorityClass {
+  return value === "P1" || value === "P2" || value === "P3" || value === "P4";
+}
+
+function validExactProbability(value: unknown): value is ExactProbability {
+  if (!value || typeof value !== "object") return false;
+  const probability = value as Record<string, unknown>;
+  return (
+    knownNonNegativeInteger(probability.numerator) &&
+    knownNonNegativeInteger(probability.denominator) &&
+    probability.denominator > 0 &&
+    probability.numerator <= probability.denominator
+  );
+}
+
+function validKnownInstallProjection(
+  value: unknown,
+): value is KnownCorpFundedIceInstallRouteProjection {
+  if (!value || typeof value !== "object") return false;
+  const projection = value as Record<string, unknown>;
+  const before = projection.before as Record<string, unknown> | undefined;
+  const after = projection.after as Record<string, unknown> | undefined;
+  const afterProtection = after?.protection as
+    | Record<string, unknown>
+    | undefined;
+  return (
+    projection.knowledge === "known" &&
+    (projection.effect === "no_progress" ||
+      projection.effect === "progress" ||
+      projection.effect === "satisfied") &&
+    nonEmptyString(projection.actionId) &&
+    nonEmptyString(projection.sourceCardInstanceId) &&
+    nonEmptyString(projection.sourceDefinitionId) &&
+    nonEmptyString(projection.targetServerId) &&
+    before?.knowledge === "known" &&
+    after?.knowledge === "known" &&
+    afterProtection?.knowledge === "known" &&
+    validExactProbability(afterProtection.runnerAccessSuccessProbability) &&
+    knownNonNegativeInteger(projection.installCredits) &&
+    knownNonNegativeInteger(projection.installClicks) &&
+    projection.installCostSource === "legal_action_agreed_projection" &&
+    Array.isArray(projection.selectedRezCosts) &&
+    projection.selectedRezCosts.every((selected) => {
+      if (!selected || typeof selected !== "object") return false;
+      const rezCost = selected as Record<string, unknown>;
+      return (
+        nonEmptyString(rezCost.iceInstanceId) &&
+        nonEmptyString(rezCost.iceDefinitionId) &&
+        knownNonNegativeInteger(rezCost.credits) &&
+        rezCost.source === "engine_rez_cost_quote"
+      );
+    }) &&
+    knownNonNegativeInteger(projection.creditsAfterDefense) &&
+    knownNonNegativeInteger(projection.clicksAfterDefense) &&
+    typeof projection.preservesScoreCreditReserve === "boolean" &&
+    typeof projection.preservesHardClickReserve === "boolean" &&
+    typeof projection.preservesReserves === "boolean" &&
+    typeof projection.funded === "boolean"
+    &&
+    exactInstallRouteCreditCost(
+      value as KnownCorpFundedIceInstallRouteProjection,
+    ) !== undefined
+  );
+}
+
+function validExactIceRezRoute(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const route = value as Record<string, unknown>;
+  const quote = route.quote as Record<string, unknown> | undefined;
+  const before = route.before as Record<string, unknown> | undefined;
+  const after = route.after as Record<string, unknown> | undefined;
+  return (
+    nonEmptyString(route.actionId) &&
+    nonEmptyString(route.sourceCardInstanceId) &&
+    nonEmptyString(route.sourceDefinitionId) &&
+    nonEmptyString(route.targetServerId) &&
+    quote?.context === "installed" &&
+    quote.complete === true &&
+    quote.cardId === route.sourceCardInstanceId &&
+    quote.targetServerId === route.targetServerId &&
+    knownNonNegativeInteger(quote.expiresAtStateVersion) &&
+    knownNonNegativeInteger(quote.finalCredits) &&
+    before?.knowledge === "known" &&
+    after?.knowledge === "known" &&
+    validExactProbability(before.runnerAccessSuccessProbability) &&
+    validExactProbability(after.runnerAccessSuccessProbability) &&
+    (route.effect === "progress" || route.effect === "satisfied") &&
+    knownNonNegativeInteger(route.totalRezCredits) &&
+    quote.finalCredits === route.totalRezCredits
+  );
+}
+
+function exactProbabilityValuesEqual(
+  left: unknown,
+  right: ExactProbability,
+): boolean {
+  if (!left || typeof left !== "object") return false;
+  const probability = left as Record<string, unknown>;
+  return (
+    probability.numerator === right.numerator &&
+    probability.denominator === right.denominator
+  );
+}
+
+function nonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0;
+}
+
+const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
+  "kind",
+  "defenseId",
+  "serverId",
+  "phase",
+  "sourceDefinitionIds",
+  "actionIds",
+  "targetIceInstanceId",
+  "followupIceInstanceId",
+  "urgent",
+  "immediateInstallSupport",
+  "rezWindowVerdict",
+  "installRoute",
+  "rezRoute",
+  "value",
+  "evidenceCode",
+  "drawAttemptState",
+]);
+
+const SCORE_PROTECTION_INSTALL_SIGNAL_KEYS = new Set([
+  "kind",
+  "defenseId",
+  "serverId",
+  "phase",
+  "parentProjectId",
+  "delegatedPriorityClass",
+  "actionId",
+  "sourceCardInstanceId",
+  "sourceDefinitionId",
+  "effect",
+  "runnerAccessSuccessProbability",
+  "totalInstallAndRezCredits",
+  "projection",
+  "evidenceCode",
+]);
+
+const SCORE_PROTECTION_DRAW_SIGNAL_KEYS = new Set([
+  "kind",
+  "defenseId",
+  "serverId",
+  "phase",
+  "parentProjectId",
+  "delegatedPriorityClass",
+  "actionId",
+  "drawAttemptState",
+  "evidenceCode",
+]);
+
+const SCORE_PROTECTION_DRAW_ATTEMPT_KEYS = new Set([
+  "turnKey",
+  "remainingAttempts",
+  "selectedAtStateVersion",
+]);
+
+function validGenericDrawAttemptState(value: unknown): boolean {
+  if (value === undefined) return true;
+  if (!value || typeof value !== "object") return false;
+  const attempt = value as Record<string, unknown>;
+  return (
+    hasOnlyKeys(attempt, SCORE_PROTECTION_DRAW_ATTEMPT_KEYS) &&
+    nonEmptyString(attempt.turnKey) &&
+    (attempt.remainingAttempts === 0 || attempt.remainingAttempts === 1) &&
+    (attempt.selectedAtStateVersion === undefined ||
+      knownNonNegativeInteger(attempt.selectedAtStateVersion))
+  );
+}
+
+function hasOnlyKeys(
+  value: Readonly<Record<string, unknown>>,
+  allowedKeys: ReadonlySet<string>,
+): boolean {
+  return Object.keys(value).every((key) => allowedKeys.has(key));
+}
+
+function defenseSignalOrderingValue(signal: CorpDefenseSignal): number {
+  if (signal.kind === "generic") return signal.value;
+  if (signal.kind === "score_protection_install") {
+    return signal.effect === "satisfied" ? 2 : 1;
+  }
+  return 0;
+}
+
+function technicalCompare(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function defensePortfolioAssessmentValue(
+  context: PlanSchedulerContext,
+  signals: readonly CorpDefenseSignal[],
+  _priorityClass: PriorityClass,
+  centralAllocation?: CorpCentralDefenseAllocation,
+): number {
+  const selectedBand = selectedDefensePortfolioBand(
+    context,
+    signals,
+    centralAllocation,
+  );
+  if (selectedBand.kind === "score") {
+    return selectedBand.route.signal.kind === "score_protection_install" &&
+      selectedBand.route.signal.effect === "satisfied"
+      ? 2
+      : 1;
+  }
+  const selectedCandidate = selectedBand.candidates[0];
+  if (!selectedCandidate) return 0;
+  const selectedSignal = selectedBand.eligibleSignals.find((signal) =>
+    defenseCandidates(context, signal).some(
+      ({ candidate }) =>
+        candidate.actionId === selectedCandidate.candidate.actionId,
+    ),
+  );
+  if (selectedSignal?.phase === "install_ice") {
+    return selectedSignal.installRoute?.projection.effect === "satisfied"
+      ? 2
+      : 1;
+  }
+  return Math.max(1, selectedCandidate.stepValue);
+}
+
+function isDefensePlacementPhase(phase: CorpDefenseSignal["phase"]): boolean {
+  return phase === "install_ice" || phase === "install_defense_support";
+}
+
+function dedupeRouteCandidates(
+  candidates: PlanMaterialization["candidates"],
+): PlanMaterialization["candidates"] {
+  const byActionId = new Map<
+    string,
+    PlanMaterialization["candidates"][number]
+  >();
+  for (const candidate of candidates) {
+    const previous = byActionId.get(candidate.candidate.actionId);
+    if (!previous || candidate.stepValue > previous.stepValue) {
+      byActionId.set(candidate.candidate.actionId, candidate);
+    }
+  }
+  return [...byActionId.values()];
+}
+
+function urgentDefenseBand(
+  context: PlanSchedulerContext,
+  signals: readonly CorpGenericDefenseSignal[],
+): readonly CorpGenericDefenseSignal[] {
+  const exactWindowSignals = exactRezWindowAlternatives(signals);
+  const urgentWindowSignals = exactWindowSignals.filter(
+    (signal) =>
+      signal.urgent &&
+      (signal.phase === "rez_response" ||
+        signal.phase === "decline_rez" ||
+        signal.phase === "activate_run_defense") &&
+      defenseCandidates(context, signal).length > 0,
+  );
+  if (urgentWindowSignals.length > 0) return urgentWindowSignals;
+  return exactWindowSignals;
+}
+
+function exactRezWindowAlternatives(
+  signals: readonly CorpGenericDefenseSignal[],
+): readonly CorpGenericDefenseSignal[] {
+  const productiveRezExists = signals.some(
+    (signal) =>
+      signal.phase === "rez_response" &&
+      signal.rezWindowVerdict === "productive",
+  );
+  return signals.filter((signal) => {
+    if (
+      signal.phase === "rez_response" &&
+      signal.rezWindowVerdict === "nonproductive"
+    ) {
+      return false;
+    }
+    if (signal.phase === "decline_rez" && productiveRezExists) {
+      return false;
+    }
+    return true;
+  });
+}
+
+function corpCandidateProjectsCardDraw(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  if (candidate.semanticActionType === "draw.card") return true;
+  const cardsDrawn = candidate.economyProjection?.cardsDrawn;
+  return (
+    typeof cardsDrawn === "number" &&
+    Number.isFinite(cardsDrawn) &&
+    cardsDrawn > 0
+  );
+}
+
 function economyCandidates(
   context: PlanSchedulerContext,
+  signal: CorpEconomyNeedSignal,
 ): PlanMaterialization["candidates"] {
+  const exactFundingHead =
+    signal.kind === "develop_campaign"
+      ? undefined
+      : (
+          signal.fundingRouteAssessment ??
+          assessCorpEconomyFundingRoute(context, signal)
+        ).headActionId;
+  const campaignActionIds =
+    signal.kind === "develop_campaign" ? new Set(signal.actionIds) : undefined;
   return context.actionCandidates
     .filter(
       (candidate) =>
-        candidate.semanticActionType === "economy.gain_credit" &&
-        (candidate.economyProjection?.creditRestriction ?? "general") ===
-          "general",
+        (signal.kind === "develop_campaign"
+          ? campaignActionIds!.has(candidate.actionId) &&
+            candidate.sourceCardInstanceId === signal.sourceInstanceId &&
+            candidate.sourceDefinitionId === signal.sourceDefinitionId &&
+            candidate.semanticActionType ===
+              (signal.phase === "install"
+                ? "install.card"
+                : "corp_window.rez") &&
+            (signal.cadence.kind !== "immediate_on_rez" ||
+              certifiedImmediateRootRezCampaignCandidate(candidate, signal))
+          : candidate.actionId === exactFundingHead &&
+            immediateCorpLiquidCreditGain(candidate) > 0) &&
+        economyCandidateHasExecutablePayload(context, candidate),
     )
     .map((candidate) => ({
       candidate,
-      stepValue: candidate.economyProjection?.netLiquidCreditGain ?? 1,
+      stepValue:
+        signal.kind === "develop_campaign"
+          ? economyDevelopmentStepValue(context, candidate, signal)
+          : immediateCorpLiquidCreditGain(candidate) * 10,
     }));
 }
 
+function certifiedImmediateRootRezCampaignCandidate(
+  candidate: ActionSemanticCandidate,
+  signal: CorpEconomyDevelopmentSignal,
+): boolean {
+  const projection = candidate.economyProjection;
+  return (
+    signal.phase === "rez" &&
+    signal.cadence.kind === "immediate_on_rez" &&
+    projection?.kind === "immediate_liquid" &&
+    projection.timing === "immediate" &&
+    projection.creditRestriction === "general" &&
+    projection.reliability === "guaranteed" &&
+    projection.source === "legal_action_payload" &&
+    projection.confidence === "high" &&
+    Number.isSafeInteger(projection.grossLiquidCreditGain) &&
+    projection.grossLiquidCreditGain === signal.payback.projectedCredits &&
+    Number.isSafeInteger(projection.creditCost) &&
+    projection.creditCost === signal.payback.setupCreditCost &&
+    Number.isSafeInteger(projection.netLiquidCreditGain) &&
+    projection.netLiquidCreditGain === signal.payback.projectedNetCredits &&
+    projection.netLiquidCreditGain > 0 &&
+    signal.payback.horizonTurns === 0
+  );
+}
+
+export function assessCorpEconomyFundingRoute(
+  context: PlanSchedulerContext,
+  signal: CorpEconomyParentFundingSignal | CorpEconomyReserveSignal,
+): CorpEconomyFundingRouteAssessment {
+  const candidates = context.actionCandidates.filter(
+    (candidate) =>
+      signal.actionIds.includes(candidate.actionId) &&
+      immediateCorpLiquidCreditGain(candidate) > 0 &&
+      candidate.economyProjection?.reliability === "guaranteed",
+  );
+  const currentCredits = context.input.playerView.own.credits;
+  const demandForTarget = (
+    targetCredits: number,
+    evidence: readonly string[],
+  ) =>
+    createCreditDemand({
+      demandId: signal.needId,
+      side: "corp",
+      ...(signal.kind === "parent_funding" && signal.parentPlanInstanceId
+        ? { sourcePlanId: signal.parentPlanInstanceId }
+        : {}),
+      purpose: signal.urgentForScore
+        ? "current_score_window"
+        : "tactical_reserve",
+      priority: signal.urgentForScore
+        ? "current_foreground_plan"
+        : "tactical_reserve",
+      hardness: signal.kind === "parent_funding" ? "hard" : "soft",
+      deadline: "end_of_current_turn",
+      currentCredits,
+      targetCredits,
+      acceptedCreditRestrictions: ["general"],
+      evidence,
+    });
+  const fullTargetCredits =
+    signal.kind === "reserve"
+      ? signal.targetCredits
+      : (signal.incrementalDefenseReserve?.targetCredits ??
+        currentCredits + signal.gap);
+  const fullTargetDemand = demandForTarget(fullTargetCredits, [
+    signal.evidenceCode,
+  ]);
+  const fullTargetResult = searchFundingRoutes({
+    demand: fullTargetDemand,
+    candidates,
+    remainingClicks: context.input.playerView.own.clicks,
+  });
+  let result = fullTargetResult;
+  const progressEvidence: string[] = [];
+  const exactIncrementalDefenseReserve =
+    signal.kind === "parent_funding" &&
+    signal.immediateDefenseConversion === true &&
+    signal.incrementalDefenseReserve !== undefined &&
+    typeof signal.parentPlanInstanceId === "string" &&
+    signal.parentPlanInstanceId.length > 0 &&
+    typeof signal.parentNeedId === "string" &&
+    signal.parentNeedId.length > 0 &&
+    Number.isFinite(signal.gap) &&
+    signal.gap > 0 &&
+    Number.isFinite(signal.incrementalDefenseReserve.targetCredits) &&
+    signal.incrementalDefenseReserve.targetCredits > currentCredits &&
+    signal.incrementalDefenseReserve.targetCredits - currentCredits ===
+      signal.gap &&
+    signal.incrementalDefenseReserve.serverId.length > 0 &&
+    signal.incrementalDefenseReserve.iceInstanceId.length > 0;
+  const exactIncrementalScoreFunding =
+    signal.kind === "parent_funding" &&
+    signal.needId.startsWith("score-support:") &&
+    signal.parentPlanInstanceId?.startsWith("plan:corp.score_agenda:") ===
+      true &&
+    signal.delegatedPriorityClass !== undefined &&
+    signal.urgentForScore === true &&
+    Number.isFinite(signal.gap) &&
+    signal.gap > 0;
+  const incrementalProgressAllowed =
+    (signal.kind === "reserve" &&
+      Number.isFinite(signal.targetCredits) &&
+      currentCredits < signal.targetCredits) ||
+    exactIncrementalDefenseReserve ||
+    exactIncrementalScoreFunding;
+  if (
+    incrementalProgressAllowed &&
+    fullTargetResult.bestRoute.status === "uncovered"
+  ) {
+    const maximumSingleActionGain = Math.max(
+      0,
+      ...candidates.map((candidate) =>
+        Math.floor(immediateCorpLiquidCreditGain(candidate)),
+      ),
+    );
+    const incrementalGap = Math.min(
+      fullTargetCredits - currentCredits,
+      maximumSingleActionGain,
+    );
+    if (incrementalGap > 0) {
+      const incrementalTarget = currentCredits + incrementalGap;
+      const incrementalResult = searchFundingRoutes({
+        demand: demandForTarget(incrementalTarget, [
+          signal.evidenceCode,
+          "corp_reserve_incremental_progress_contract",
+          `corp_reserve_final_target:${fullTargetCredits}`,
+          `corp_reserve_incremental_target:${incrementalTarget}`,
+        ]),
+        candidates,
+        remainingClicks: context.input.playerView.own.clicks,
+      });
+      if (
+        incrementalResult.bestRoute.status === "covered_guaranteed" &&
+        incrementalResult.bestRoute.reliability === "guaranteed"
+      ) {
+        result = incrementalResult;
+        const evidencePrefix =
+          signal.kind === "reserve"
+            ? "corp_reserve"
+            : exactIncrementalScoreFunding
+              ? "corp_incremental_score_funding"
+              : "corp_incremental_defense_reserve";
+        progressEvidence.push(
+          `${evidencePrefix}_incremental_route:true`,
+          `${evidencePrefix}_final_target:${fullTargetCredits}`,
+          `${evidencePrefix}_incremental_target:${incrementalTarget}`,
+        );
+      }
+    }
+  }
+  const route = result.bestRoute;
+  const head =
+    route.status === "covered_guaranteed" && route.reliability === "guaranteed"
+      ? route.steps.find(
+          (step) =>
+            step.kind === "legal_action" &&
+            step.ownTurnOffset === 0 &&
+            typeof step.actionId === "string",
+        )
+      : undefined;
+  return {
+    routeId: route.routeId,
+    status: route.status,
+    reliability: route.reliability,
+    ...(head?.actionId ? { headActionId: head.actionId } : {}),
+    evidence: [...result.evidence, ...route.evidence, ...progressEvidence],
+  };
+}
+
+export function immediateCorpLiquidCreditGain(
+  candidate: ActionSemanticCandidate,
+): number {
+  const projection = candidate.economyProjection;
+  if (
+    !projection ||
+    projection.kind !== "immediate_liquid" ||
+    projection.timing !== "immediate" ||
+    projection.creditRestriction !== "general"
+  ) {
+    return 0;
+  }
+  const projectedGain = projection.netLiquidCreditGain;
+  return typeof projectedGain === "number" &&
+    Number.isFinite(projectedGain) &&
+    projectedGain > 0
+    ? projectedGain
+    : 0;
+}
+
+function economyCandidateHasExecutablePayload(
+  context: PlanSchedulerContext,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  const action = context.input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  const drawCardsAmount = Number(action?.payload?.drawCardsAmount ?? 0);
+  return !(
+    drawCardsAmount > 0 && context.input.playerView.own.stackOrRdCount <= 0
+  );
+}
+
+function economyDevelopmentStepValue(
+  context: PlanSchedulerContext,
+  candidate: ActionSemanticCandidate,
+  signal: CorpEconomyDevelopmentSignal,
+): number {
+  if (signal.phase === "rez")
+    return Math.max(1, signal.payback.projectedNetCredits * 10);
+
+  const targetServerId = candidateTargetIds(candidate).find(
+    (targetId) => targetId === "new_remote" || targetId.startsWith("remote_"),
+  );
+  if (!targetServerId) return 10;
+  if (targetServerId === "new_remote") {
+    const installedScoreProjectExists = domain(context).scoreProjects.some(
+      (project) => project.phase !== "install_agenda",
+    );
+    return installedScoreProjectExists ? 5 : 25;
+  }
+  const server = context.input.playerView.servers.find(
+    (candidateServer) => candidateServer.id === targetServerId,
+  );
+  if (!server) return 10;
+  if (server.root.length > 0) return 10;
+  return 60 + Math.min(3, server.ice.length) * 10;
+}
+
+function economyMaterialization(
+  instance: PlanInstance,
+  context: PlanSchedulerContext,
+  signal: CorpEconomyNeedSignal,
+): PlanMaterialization {
+  const candidates = economyCandidates(context, signal);
+  return {
+    step: {
+      stepId: `${instance.instanceId}:fund`,
+      capability: {
+        capabilityId: "develop_or_convert_corp_economy",
+        semanticActionTypes: [
+          ...new Set(
+            candidates.map((entry) => entry.candidate.semanticActionType),
+          ),
+        ],
+      },
+      purpose:
+        signal.kind === "develop_campaign"
+          ? `Advance the admitted ${signal.sourceDefinitionId} economy campaign from ${signal.phase} to ${signal.completion.expectedState}.`
+          : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
+    },
+    candidates,
+  };
+}
+
 function candidateTargetIds(candidate: ActionSemanticCandidate): string[] {
+  const selectedTargets =
+    candidate.targetContext?.selectedTargets.map((target) => target.targetId) ??
+    [];
   return [
-    ...(candidate.targetContext?.selectedTargets.map(
-      (target) => target.targetId,
-    ) ?? []),
-    ...(candidate.targetContext?.availableTargets?.map(
-      (target) => target.targetId,
-    ) ?? []),
+    ...(selectedTargets.length > 0
+      ? selectedTargets
+      : (candidate.targetContext?.availableTargets?.map(
+          (target) => target.targetId,
+        ) ?? [])),
     ...(candidate.runProjectionSummary?.serverId
       ? [candidate.runProjectionSummary.serverId]
       : []),

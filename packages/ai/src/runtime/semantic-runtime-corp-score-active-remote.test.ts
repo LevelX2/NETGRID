@@ -1204,7 +1204,7 @@ describe("semanticRuntimeCorpScoreComponents active remote", () => {
     );
   });
 
-  it("does not bypass active remote reserve when a strong same-remote ICE install is legal", () => {
+  it("keeps an exact same-turn score closeout ahead of a same-remote ICE install", () => {
     const agenda = corpCard("active-score-agenda", "agenda", {
       advancementRequirement: 5,
       advancementCounters: 3,
@@ -1285,19 +1285,24 @@ describe("semanticRuntimeCorpScoreComponents active remote", () => {
       dependencies,
     );
 
-    expect(advanceComponents).toEqual(
+    expect(advanceComponents).not.toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_active_remote_agenda_underfunded_advance",
-          reason: expect.stringContaining(
-            "tempo_score_now_blocked_by_remote_ice:true",
-          ),
         }),
       ]),
     );
-    expect(
+    expect(advanceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_same_turn_score_closeout_advance",
+          reason: expect.stringContaining("additional_advances_needed:1"),
+        }),
+      ]),
+    );
+    expect(totalScore(advanceComponents)).toBeGreaterThan(
       totalScoreFor(input, installRemoteIce, "basic_install", dependencies),
-    ).toBeGreaterThan(totalScore(advanceComponents));
+    );
   });
 
   it("uses an existing ready remote for HQ agenda install over opening another remote", () => {

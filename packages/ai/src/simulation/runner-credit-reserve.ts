@@ -14,7 +14,10 @@ export function runnerCreditReserveTargetForInput(
 ): number {
   if (input.side !== "runner") return 0;
   let target = 4;
+  const activeRunServerId = input.playerView.run?.attackedServerId;
+  if (!activeRunServerId) return target;
   for (const server of input.playerView.servers) {
+    if (server.id !== activeRunServerId) continue;
     if (!isRemoteServerTarget(server.id)) continue;
     const pathCost =
       assessKnownRezzedIcePath(

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecision, AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecision,
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { chooseAiAction } from "../index";
 import {
   PRACTICAL_TACTIC_BENCHMARK_CASES,
@@ -105,7 +110,7 @@ describe("PracticalTacticOverlay", () => {
     );
   });
 
-  it("is wired into chooseAiAction as compare-only evidence when enabled", () => {
+  it("does not re-enter the retired overlay from the authoritative live runtime", () => {
     const benchmarkCase = PRACTICAL_TACTIC_BENCHMARK_CASES.find(
       (candidate) => candidate.category === "runner_steal_agenda",
     );
@@ -118,11 +123,13 @@ describe("PracticalTacticOverlay", () => {
 
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "practical_tactic:runner_steal_agenda",
-        "practical_tactic_overlay_compare:true",
-        "practical_tactic_overlay_actual_override:false",
-        "practical_tactic_overlay_candidate:runner.practical_tactic.steal_agenda",
+        "plan_first_runtime:true",
+        "plan_module:runner.convert_run_window",
+        "plan_step_capability:convert_active_run_window",
       ]),
+    );
+    expect(decision.evidence).not.toEqual(
+      expect.arrayContaining(["practical_tactic_overlay_compare:true"]),
     );
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload|secretGripIds|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
@@ -268,9 +275,9 @@ describe("PracticalTacticOverlay", () => {
         "practical_tactic_overlay_candidate:runner.practical_tactic.avoid_stale_run",
       ]),
     );
-    expect(structuredDecision.decisionDebug?.detailSections?.at(-1)?.items).toContain(
-      "candidate:draw-card",
-    );
+    expect(
+      structuredDecision.decisionDebug?.detailSections?.at(-1)?.items,
+    ).toContain("candidate:draw-card");
   });
 
   it("uses structured access-payoff payloads and ignores label-only high-payoff run text", () => {
@@ -323,9 +330,9 @@ describe("PracticalTacticOverlay", () => {
         "practical_tactic_overlay_candidate:runner.practical_tactic.high_payoff_run",
       ]),
     );
-    expect(structuredDecision.decisionDebug?.detailSections?.at(-1)?.items).toContain(
-      "candidate:structured-high-payoff-run",
-    );
+    expect(
+      structuredDecision.decisionDebug?.detailSections?.at(-1)?.items,
+    ).toContain("candidate:structured-high-payoff-run");
   });
 
   it("uses structured tag-punish payloads and ignores label-only punish text", () => {
@@ -462,6 +469,9 @@ describe("PracticalTacticOverlay", () => {
 
 function frozenLegacyDecision(input: AiDecisionInput): AiDecision {
   const selected = frozenLegacyPracticalTacticSelector(input).actionId;
+  if (!selected) {
+    throw new Error("frozen_legacy_selector_returned_no_action");
+  }
   return {
     actionId: selected,
     reasonCode: "frozen_legacy.practical_tactic_reference",

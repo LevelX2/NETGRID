@@ -8710,10 +8710,9 @@
         "actionId": "runner.start_run.remote_1"
       }
     ],
-    "decisionChain": {
-      "rawScoreWinner": {
-        "actionId": "runner.start_run.rd"
-      }
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_rd_information"]
     }
   }
 }

@@ -201,6 +201,8 @@ export type ActionCapacityProjection = {
   timing: "immediate" | "future_turn_start" | "debt" | "unknown";
   restriction: ActionCapacityRestriction;
   allowedActionTypes: string[];
+  allowedCardTypes?: string[];
+  temporaryCredits?: number;
   listedActionCost: number;
   preExistingActionCost: number;
   grossActionsGained: number;

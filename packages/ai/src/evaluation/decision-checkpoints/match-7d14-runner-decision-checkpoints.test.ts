@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import staleFundingJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-7d14-01-urgent-run-over-stale-funding.json";
 import fundedInstallJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-7d14-01b-urgent-run-over-funded-install.json";
 import matchpointDiscardJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-7d14-02-matchpoint-discard.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -71,7 +72,13 @@ describe("match 7D14 runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    [
+      "cp-7d14-01-urgent-run-over-stale-funding",
+      "cp-7d14-01b-urgent-run-over-funded-install",
+    ],
+  );
 }
 
 function mutateFixture(

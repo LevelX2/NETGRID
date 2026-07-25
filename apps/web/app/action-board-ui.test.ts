@@ -242,6 +242,28 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(split.contextualActions).toEqual([]);
   });
 
+  it("keeps the explicit restricted-sequence closeout visible and labeled", () => {
+    const stopSequence = legalAction(
+      "runner",
+      "stop_restricted_action_sequence",
+      "game_rule",
+      "Valu-Pak-Installationssequenz beenden",
+      {
+        v1922ValuPakSequenceStop: true,
+        restrictedActionGrantRemainingActions: 1,
+      },
+      "runner_action.main",
+    );
+
+    const split = splitLegalActions([stopSequence]);
+
+    expect(split.primaryActions).toEqual([stopSequence]);
+    expect(split.contextualActions).toEqual([]);
+    expect(actionButtonLabel(stopSequence)).toBe(
+      "Valu-Pak-Installationssequenz beenden",
+    );
+  });
+
   it("keeps equivalent card-bound actions contextual outside payment support", () => {
     const ordinaryEvent = legalAction(
       "runner",

@@ -8,6 +8,126 @@ import type {
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO score-conversion contract", () => {
+  it("preserves explicit play costs only for known cards", () => {
+    const action = conversionAction();
+    const view = playerView(action);
+    view.own.gripOrHq = [
+      {
+        instanceId: "power-grid",
+        definitionId: "onr_v1_299_power-grid-overload",
+        title: "Power Grid Overload",
+        owner: "corp",
+        controller: "corp",
+        type: "operation",
+        known: true,
+        playCost: {
+          kind: "variable_x",
+          minimumX: 1,
+          creditsPerX: 1,
+          maximumX: { kind: "context" },
+        },
+      },
+    ];
+    view.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [
+          {
+            instanceId: "hidden-root",
+            known: false,
+            playCost: { kind: "fixed", credits: 7 },
+          },
+        ],
+      },
+    ];
+
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "play-cost-dto",
+      decisionId: "play-cost-dto:corp:1",
+      actionNumber: 1,
+      profileId: "play-cost-dto-test",
+    });
+
+    expect(input.playerView.own.gripOrHq[0]?.playCost).toEqual({
+      kind: "variable_x",
+      minimumX: 1,
+      creditsPerX: 1,
+      maximumX: { kind: "context" },
+    });
+    expect(input.playerView.servers[0]?.root[0]).not.toHaveProperty(
+      "playCost",
+    );
+  });
+
+  it("preserves only explicitly public resolved effects for plan-phase communication", () => {
+    const action = conversionAction();
+    const view = playerView(action, "runner");
+    view.publicEvents = [
+      {
+        eventId: "turn-start-effects",
+        type: "automatic_effects_resolved",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        stateHashAfter: "fnv1a:turn-start-effects",
+        visibilityClass: "hidden_info_barrier",
+        publicPayload: {
+          resolvedEffects: [
+            {
+              effectId: "conference-credit",
+              kind: "gain_credits",
+              visibility: "public",
+              side: "runner",
+              amount: 2,
+              reason: "start_of_turn",
+              sourceDefinitionId: "onr_v1_184_top-runners-conference",
+              sourceTitle: "Top Runners' Conference",
+            },
+            {
+              effectId: "private-probe",
+              kind: "draw_cards",
+              visibility: "private_to_side",
+              side: "corp",
+              amount: 1,
+              cardDefinitionId: "must-not-cross-dto",
+              cardTitle: "Must not cross DTO",
+            },
+          ],
+        },
+      },
+    ];
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: view.publicEvents,
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "public-resolved-effects-dto",
+      decisionId: "public-resolved-effects-dto:runner:1",
+      actionNumber: 1,
+      profileId: "public-resolved-effects-dto-test",
+    });
+
+    expect(input.playerView.publicEvents[0]?.publicPayload.resolvedEffects).toEqual([
+      expect.objectContaining({
+        effectId: "conference-credit",
+        kind: "gain_credits",
+        visibility: "public",
+        sourceDefinitionId: "onr_v1_184_top-runners-conference",
+      }),
+    ]);
+    expect(input.eventTail[0]?.publicPayload.resolvedEffects).toEqual(
+      input.playerView.publicEvents[0]?.publicPayload.resolvedEffects,
+    );
+    expect(JSON.stringify(input)).not.toContain("must-not-cross-dto");
+  });
+
   it("preserves exact public score-conversion capabilities and drops unknown payload data", () => {
     const action = conversionAction();
     const input = buildAiDecisionInputDto({
@@ -181,6 +301,13 @@ describe("AI input DTO score-conversion contract", () => {
     action.payload = {
       ...action.payload,
       xValue: 2,
+      xMinimum: 1,
+      xMaximum: 4,
+      xUpperBound: 4,
+      xCreditsPerUnit: 1,
+      variableCostKind: "printed_play_cost",
+      hardwareTrashByCounterTrashCount: 2,
+      eligibleHardwareCount: 4,
       damageCannotBePrevented: true,
       damageType: "core",
       damageAmount: 2,
@@ -199,11 +326,26 @@ describe("AI input DTO score-conversion contract", () => {
 
     expect(input.legalActions[0]?.payload).toMatchObject({
       xValue: 2,
+      xMinimum: 1,
+      xMaximum: 4,
+      xUpperBound: 4,
+      xCreditsPerUnit: 1,
+      variableCostKind: "printed_play_cost",
+      hardwareTrashByCounterTrashCount: 2,
+      eligibleHardwareCount: 4,
       damageCannotBePrevented: true,
       damageType: "core",
       damageAmount: 2,
     });
     expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      xValue: 2,
+      xMinimum: 1,
+      xMaximum: 4,
+      xUpperBound: 4,
+      xCreditsPerUnit: 1,
+      variableCostKind: "printed_play_cost",
+      hardwareTrashByCounterTrashCount: 2,
+      eligibleHardwareCount: 4,
       damageCannotBePrevented: true,
       damageType: "core",
       damageAmount: 2,
@@ -331,6 +473,7 @@ describe("AI input DTO score-conversion contract", () => {
   it("sanitizes aliased public history only once", () => {
     const action = conversionAction();
     const events = [publicEvent("shared", { actionType: "gain_credit" })];
+    events[0]!.turnSerial = 7;
     const view = playerView(action);
     view.publicEvents = events;
 
@@ -348,6 +491,8 @@ describe("AI input DTO score-conversion contract", () => {
 
     expect(input.eventTail).toBe(input.playerView.publicEvents);
     expect(input.eventTail[0]).not.toBe(events[0]);
+    expect(input.eventTail[0]?.turnSerial).toBe(7);
+    expect(input.playerView.publicEvents[0]?.turnSerial).toBe(7);
   });
 
   it("reuses sanitized event objects for a public-history suffix", () => {

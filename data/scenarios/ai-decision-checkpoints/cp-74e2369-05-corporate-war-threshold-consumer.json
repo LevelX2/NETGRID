@@ -11418,10 +11418,9 @@
         "sourceDefinitionId": "onr_v1_196_corporate-war"
       }
     ],
-    "selectedScoreBreakdown": {
-      "requiredComponentKeys": [
-        "corp_conditional_score_economy"
-      ]
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["score_agenda"]
     }
   }
 }

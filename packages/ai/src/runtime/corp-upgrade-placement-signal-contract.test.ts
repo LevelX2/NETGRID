@@ -103,6 +103,20 @@ describe("Corp upgrade placement signal contract", () => {
     );
   });
 
+  it("defers Dr. Dreff until the Engine certifies a concrete future encounter route", () => {
+    expect(
+      placementComponent("onr_v1_358_dr-dreff", "hq"),
+    ).toEqual(
+      expect.objectContaining({
+        key: "corp_upgrade_install_placement_defer",
+        value: -900,
+        reason: expect.stringContaining(
+          "defer_reason:dr_dreff_requires_engine_certified_future_encounter_route",
+        ),
+      }),
+    );
+  });
+
   it("keeps Simon Francisco on HQ or R&D as a central counterexample", () => {
     expect(
       placementComponent("onr_proteus_073_simon-francisco", "rd"),
@@ -125,15 +139,17 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("defers pass-ICE tax upgrades until their fort actually has ICE", () => {
-    expect(
-      placementComponent("onr_proteus_070_rasmin-bridger", "hq"),
-    ).toEqual(
+    const deferred = placementComponent(
+      "onr_proteus_070_rasmin-bridger",
+      "hq",
+    );
+    expect(deferred).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_defer",
-        value: 0,
         reason: expect.stringContaining("defer_reason:ice_support_without_ice"),
       }),
     );
+    expect(deferred?.value).toBeLessThan(0);
     expect(
       placementComponent("onr_proteus_070_rasmin-bridger", "hq", {
         hqIce: [visibleCard("hq-ice", "simple_ice", "ice")],

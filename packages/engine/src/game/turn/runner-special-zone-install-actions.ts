@@ -10,6 +10,7 @@ import { buildLegalAction } from "./action-builders";
 export type RunnerValuPakInstallActionInput = {
   cardId: CardInstanceId;
   definition: CardDefinition;
+  remainingActions: number;
   runnerProgramTrashBeforeInstall?: boolean;
 };
 
@@ -35,6 +36,14 @@ export function buildRunnerValuPakInstallAction(
   state: GameState,
   input: RunnerValuPakInstallActionInput,
 ): LegalAction {
+  if (
+    !Number.isInteger(input.remainingActions) ||
+    input.remainingActions <= 0
+  ) {
+    throw new Error(
+      "Valu-Pak Software Bundle requires positive restricted actions.",
+    );
+  }
   return buildLegalAction(
     state,
     "runner",
@@ -47,8 +56,12 @@ export function buildRunnerValuPakInstallAction(
       v1922ValuPakInstallAction: true,
       actionCapacityRestriction: "program_install_only",
       actionCapacityAllowedActionType: "install_card",
+      actionCapacityAllowedCardType: "program",
       actionCapacityReliability: "guaranteed",
       actionCapacityExpiresAt: "side_turn_end",
+      restrictedActionGrantActionType: "install_card",
+      restrictedActionGrantCostProfile: "temporary_credit_bundle",
+      restrictedActionGrantRemainingActions: input.remainingActions,
       ...(input.runnerProgramTrashBeforeInstall
         ? { runnerProgramTrashBeforeInstall: true }
         : {}),
@@ -58,16 +71,30 @@ export function buildRunnerValuPakInstallAction(
 
 export function buildRunnerValuPakSequenceEndAction(
   state: GameState,
+  remainingActions: number,
 ): LegalAction {
+  if (!Number.isInteger(remainingActions) || remainingActions <= 0) {
+    throw new Error(
+      "Valu-Pak Software Bundle cannot end an inactive restricted sequence.",
+    );
+  }
   return buildLegalAction(
     state,
     "runner",
-    "end_turn",
-    "Zug beenden",
+    "stop_restricted_action_sequence",
+    "Valu-Pak-Installationssequenz beenden",
     "game_rule",
     [],
     {
-      v1922ValuPakSequenceEnd: true,
+      v1922ValuPakSequenceStop: true,
+      actionCapacityRestriction: "program_install_only",
+      actionCapacityAllowedActionType: "install_card",
+      actionCapacityAllowedCardType: "program",
+      actionCapacityReliability: "guaranteed",
+      actionCapacityExpiresAt: "side_turn_end",
+      restrictedActionGrantActionType: "install_card",
+      restrictedActionGrantCostProfile: "temporary_credit_bundle",
+      restrictedActionGrantRemainingActions: remainingActions,
     },
   );
 }

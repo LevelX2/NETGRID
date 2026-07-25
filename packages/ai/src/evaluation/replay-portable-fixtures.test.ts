@@ -28,8 +28,9 @@ describe("replay portable fixtures", () => {
     expect(selected?.type).toBe("start_run");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "semantic_runtime_default:true",
-        "action_type:start_run",
+        "plan_first_runtime:true",
+        "plan_module:runner.pressure_central",
+        "plan_step_capability:pressure_rd_information",
       ]),
     );
     expect(JSON.stringify(fixture)).not.toMatch(

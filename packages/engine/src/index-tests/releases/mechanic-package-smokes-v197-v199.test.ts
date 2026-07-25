@@ -468,12 +468,17 @@ describe("V1.9.9 Mechanikpaket R", () => {
     let state = toRunnerTurn(onrV1Game("p354-jenny-jett"));
     state.runner.credits = 20;
     state.corp.credits = 20;
-    addRezzedCorpRootForTest(
+    const jennyId = addRezzedCorpRootForTest(
       state,
       "onr_v1_359_jenny-jett",
       "remote_1",
       "jenny",
     );
+    state.cardInstances[jennyId] = {
+      ...state.cardInstances[jennyId]!,
+      faceup: false,
+      rezzed: false,
+    };
     const hqIceId = addCorpCardToHqForTest(
       state,
       "onr_v1_261_quandary",
@@ -488,6 +493,64 @@ describe("V1.9.9 Mechanikpaket R", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    const jennyRez = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "rez_card" && action.source === jennyId,
+    );
+    expect(jennyRez.payload).toMatchObject({
+      cardImplementationFortRunRezSupportQuoteSchemaVersion:
+        "corp-fort-run-rez-support-quote-v1",
+      cardImplementationFortRunRezSupportQuoteKind:
+        "install_hq_ice_innermost_after_successful_run",
+      cardImplementationFortRunRezSupportQuoteComplete: true,
+      cardImplementationFortRunRezSupportQuoteSourceCardInstanceId: jennyId,
+      cardImplementationFortRunRezSupportQuoteTargetServerId: "remote_1",
+      cardImplementationFortRunRezSupportQuoteStateVersion: state.stateVersion,
+      cardImplementationFortRunRezSupportQuoteActionId: jennyRez.actionId,
+      cardImplementationFortRunRezSupportQuoteRezCredits: 1,
+      cardImplementationFortRunRezSupportQuoteInstallCredits: 0,
+      cardImplementationFortRunRezSupportQuoteTotalCredits: 1,
+      cardImplementationFortRunRezSupportQuoteTotalCreditsPayable: true,
+      cardImplementationFortRunRezSupportQuoteHasOwnHqIce: true,
+    });
+    expect(
+      getLegalActions(state, "runner").some((action) =>
+        Object.keys(action.payload ?? {}).some((field) =>
+          field.includes("FortRunRezSupportQuote"),
+        ),
+      ),
+    ).toBe(false);
+    const runnerView = JSON.stringify(getPlayerView(state, "runner"));
+    expect(runnerView).not.toContain("corp-fort-run-rez-support-quote-v1");
+    expect(runnerView).not.toContain(hqIceId);
+    expect(runnerView).not.toContain("onr_v1_261_quandary");
+
+    const changedState = structuredClone(state);
+    changedState.stateVersion += 1;
+    const staleApply = applyAction(changedState, {
+      matchId: changedState.matchId,
+      side: "corp",
+      actionId: jennyRez.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "p354-jenny-stale-quote",
+    });
+    expect(staleApply.ok).toBe(false);
+    if (!staleApply.ok) expect(staleApply.error.code).toBe("ERR_STALE_STATE");
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === jennyRez.actionId,
+    );
+    expect(state.cardInstances[jennyId]?.rezzed).toBe(true);
+    const runnerViewAfterRez = JSON.stringify(getPlayerView(state, "runner"));
+    expect(runnerViewAfterRez).not.toContain(
+      "corp-fort-run-rez-support-quote-v1",
+    );
+    expect(runnerViewAfterRez).not.toContain(hqIceId);
+    expect(runnerViewAfterRez).not.toContain("onr_v1_261_quandary");
     state = applyChoice(
       state,
       "corp",
@@ -498,7 +561,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       approachedIceId: hqIceId,
       successful: false,
     });
-    expect(state.corp.credits).toBe(20);
+    expect(state.corp.credits).toBe(19);
     expect(state.corp.hq).not.toContain(hqIceId);
     expect(
       state.corp.servers.find((server) => server.id === "remote_1")?.ice[0],

@@ -10,7 +10,8 @@ import { applyBasicActionSemantics } from "./actions/basic-action-semantics";
 import { applyRunAccessDecisionModel } from "./actions/run-access-decision-model";
 import { applyRandomBadPublicityModel } from "./actions/random-bad-publicity-model";
 import { applyHiddenResourceVirusModel } from "./actions/hidden-resource-virus-model";
-import { applyTraceCounterSemantics } from "./actions/trace-counter-semantics";
+import { applyRunnerHazardCounterSemantics } from "./actions/runner-hazard-counter-semantics";
+import { applyCardImplementationEffectSemantics } from "./actions/card-implementation-effect-semantics";
 import type {
   ActionSemanticVisibilityScope,
   ActionGateResult,
@@ -146,12 +147,14 @@ function projectActionSemanticCandidate(
     actionCapacityCandidate,
     action,
   );
-  const traceCounterCandidate = applyTraceCounterSemantics(
+  const traceCounterCandidate = applyRunnerHazardCounterSemantics(
     tagEffectCandidate,
     action,
   );
+  const implementationEffectCandidate =
+    applyCardImplementationEffectSemantics(traceCounterCandidate, action);
   const cardSemanticCandidate = applyCardSemanticJoin(
-    traceCounterCandidate,
+    implementationEffectCandidate,
     cardSemanticProfilesByDefinitionId,
   );
   const runAccessCandidate = applyRunAccessDecisionModel(

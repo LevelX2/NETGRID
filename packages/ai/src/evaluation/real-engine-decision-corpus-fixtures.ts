@@ -238,6 +238,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
         fixture
           .withRunnerCredits(4)
           .withRunnerGripSize(1)
+          .withRezzedCorpIceOnServer("hq", "simple_code_gate_ice")
           .withRezzedCorpIceOnServer("rd", "simple_sentry_ice");
       },
       ["fixture:low_hand_buffer"],
@@ -397,6 +398,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
         fixture
           .withRunnerCredits(4)
           .withRunnerGripSize(1)
+          .withRezzedCorpIceOnServer("hq", "simple_code_gate_ice")
           .withRezzedCorpIceOnServer("rd", "simple_sentry_ice");
       },
       ["fixture:runner_draw_before_damage_risk"],

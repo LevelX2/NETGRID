@@ -7335,27 +7335,9 @@
         "type": "draw_card"
       }
     ],
-    "runTargets": [
-      {
-        "actionId": "runner.start_run.hq",
-        "pathPassability": "reachable",
-        "recommendation": "gain_credits_first"
-      },
-      {
-        "actionId": "runner.start_run.rd",
-        "pathPassability": "blocked_unpayable",
-        "recommendation": "do_not_run_now"
-      }
-    ],
-    "decisionChain": {
-      "rawScoreWinner": {
-        "type": "start_run",
-        "targetServerId": "hq"
-      },
-      "planMappedAction": {
-        "type": "start_run",
-        "targetServerId": "hq"
-      }
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_hq_information"]
     }
   }
 }

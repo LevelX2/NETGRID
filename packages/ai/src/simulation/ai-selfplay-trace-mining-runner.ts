@@ -153,7 +153,7 @@ export function createAiSelfplayTraceMiningRunner(
       replayFailures: summaries.filter((summary) => !summary.replayOk).length,
       actionLimitReached: summaries.filter(
         (summary) =>
-          summary.winner === "action_limit_reached" &&
+          summary.terminationKind === "action_limit" &&
           summary.actions >= maxActions &&
           summary.errors.length === 0,
       ).length,

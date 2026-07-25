@@ -283,12 +283,13 @@ function handEvaluation(
   overrides: Partial<RunnerHandDevelopmentEvaluation>,
 ): RunnerHandDevelopmentEvaluation {
   return {
-    schemaVersion: "runner-hand-development-evaluation-v1",
+    schemaVersion: "runner-hand-development-evaluation-v2",
     cardInstanceId,
     availability: "legal_now",
     developmentRole: "access_payoff",
     strategicFit: "strong",
     currentNeed: "useful_now",
+    activationPrerequisites: [],
     priority: 650,
     deferReason: "none",
     evidence: [],

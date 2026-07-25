@@ -8,7 +8,7 @@ import {
 import { runnerActionReserveExclusion } from "./runner-action-reserve";
 import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
-import { removesPersistentTraceTagCounter } from "../actions/trace-counter-semantics";
+import { removesPersistentTraceTagCounter } from "../actions/runner-hazard-counter-semantics";
 import { runnerRunReleaseForEvaluation } from "./runner-run-release";
 import { mergedPublicHistory } from "./public-event-history";
 

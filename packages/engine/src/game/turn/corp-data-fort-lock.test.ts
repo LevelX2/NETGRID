@@ -3,6 +3,7 @@ import type {
   CardInstance,
   CardInstanceId,
   GameState,
+  ResolvedCardDefinition,
   ServerId,
   Side,
 } from "@netgrid/shared";
@@ -26,13 +27,25 @@ function ensurePrecisionBriberyDefinition(): void {
     title: "Precision Bribery",
     side: "runner",
     type: "resource",
+    playCost: null,
     subtypes: ["unique"],
     implementationStatus: "playable_mvp",
     installCost: 0,
+    numeric: {
+      cost: null,
+      installCost: 0,
+      memoryCost: null,
+      strength: null,
+      rezCost: null,
+      trashCost: null,
+      advancementRequirement: null,
+      agendaPoints: null,
+    },
+    strengthModel: { kind: "not_applicable" },
     rulesText:
       "The Corp cannot create any new data forts. The Corp may trash Precision Bribery by taking an action to pay [4].",
     mechanics: ["runner_resource_install", "data_fort_creation_lock"],
-  };
+  } satisfies ResolvedCardDefinition;
 }
 
 function instance(

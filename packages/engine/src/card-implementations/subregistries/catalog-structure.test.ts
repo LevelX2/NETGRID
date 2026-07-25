@@ -34,12 +34,16 @@ const EXPECTED_GROUP_KEYS = [
   "proteus:runner:hardware",
   "proteus:runner:program",
   "proteus:runner:resource",
+  "demo:corp:asset",
+  "v08:corp:asset",
 ] as const;
 
 const SET_PREFIX = {
   classic: "onr_classic_",
+  demo: "simple_",
   "onr-v1": "onr_v1_",
   proteus: "onr_proteus_",
+  v08: "v08_",
 } as const;
 
 describe("semantic CardImplementation catalog", () => {

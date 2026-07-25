@@ -8,6 +8,7 @@ import theorem173Json from "../../../../../data/scenarios/ai-decision-checkpoint
 import theorem183Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-f450-10311-followup-theorem-proof-183.json";
 import activatedAbilityControlJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-f450-10311-04.json";
 import { buildAiDecisionInput } from "../../index";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -24,7 +25,7 @@ describe("F450 and 10311 follow-up decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("does not globally prefer arbitrary activated abilities", () => {
+  it("keeps the captured positive central-pressure control", () => {
     expectCheckpointToPass(fixture(activatedAbilityControlJson));
   });
 
@@ -107,7 +108,10 @@ describe("F450 and 10311 follow-up decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    ["cp-f450-10311-funded-cybermodem"],
+  );
 }
 
 function mutateFixture(

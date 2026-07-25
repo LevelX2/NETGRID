@@ -210,6 +210,7 @@ function selfplaySummary(
 ): SelfplayDecisionSnapshotMiningSummary {
   return {
     seed: "selfplay-snapshot-mining",
+    terminationKind: "action_limit",
     winner: "action_limit_reached",
     actions: actionSequence.length,
     turns: 2,

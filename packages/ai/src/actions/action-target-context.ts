@@ -41,7 +41,10 @@ export function applyTargetContextProjection(
   const sideSafeSelectedTargets =
     hiddenTargetRequirement === true
       ? []
-      : selectedLegalTargetsForAction(action, selectedTargets);
+      : uniqueSelectedTargets([
+          ...selectedLegalTargetsForAction(action, selectedTargets),
+          ...payloadTargets.map(payloadTargetAsSelectedTarget),
+        ]);
   const requirementTargets = hiddenTargetRequirement
     ? []
     : requirementTargetsForAction(action);
@@ -50,13 +53,11 @@ export function applyTargetContextProjection(
     ? undefined
     : availableTargets !== undefined ||
         requirementTargets.length > 0 ||
-        choiceOptionTargets.length > 0 ||
-        payloadTargets.length > 0
+        choiceOptionTargets.length > 0
       ? uniqueLegalTargetSummaries([
           ...(availableTargets?.map(cloneLegalTargetSummary) ?? []),
           ...requirementTargets,
           ...choiceOptionTargets,
-          ...payloadTargets,
         ])
       : undefined;
   const targetContext = targetContextForAction(
@@ -148,6 +149,7 @@ function normalizeServerId(value: unknown): string | undefined {
   if (normalized === "hq") return "hq";
   if (normalized === "rd") return "rd";
   if (normalized === "archives") return "archives";
+  if (normalized === "new_remote") return "new_remote";
   if (normalized.startsWith("remote_")) return normalized;
   return undefined;
 }
@@ -239,6 +241,44 @@ function selectedLegalTargetsForAction(
   });
 }
 
+function payloadTargetAsSelectedTarget(
+  target: LegalTargetSummary,
+): LegalTarget {
+  return {
+    ...target,
+    visibilityScope: "actor_private",
+    evidence: [...target.evidence, "AI039 payload-bound selected target"],
+  };
+}
+
+function uniqueSelectedTargets(targets: readonly LegalTarget[]): LegalTarget[] {
+  const byKey = new Map<string, LegalTarget>();
+  for (const target of targets) {
+    const key = [
+      target.targetId,
+      target.targetKind,
+      target.targetSide,
+      target.targetZone ?? "",
+    ].join("|");
+    const previous = byKey.get(key);
+    byKey.set(
+      key,
+      previous
+        ? {
+            ...previous,
+            evidence: [
+              ...new Set([...previous.evidence, ...target.evidence]),
+            ],
+          }
+        : {
+            ...target,
+            evidence: [...target.evidence],
+          },
+    );
+  }
+  return [...byKey.values()];
+}
+
 function choiceOptionTargetsForAction(
   action: LegalAction,
 ): LegalTargetSummary[] {
@@ -309,7 +349,8 @@ function payloadTargetsForAction(action: LegalAction): LegalTargetSummary[] {
 
   const cardTarget = cardPayloadTargetForAction(
     action,
-    stringPayload(action, "cardId"),
+    stringPayload(action, "cardId") ??
+      stringPayload(action, "targetCardId"),
   );
   if (cardTarget !== undefined) targets.push(cardTarget);
 

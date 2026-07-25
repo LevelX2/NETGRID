@@ -72,6 +72,7 @@ export function validateAiDecisionCheckpoint(
     !fixture.expectation.discardChoice &&
     !fixture.expectation.strategicIntent &&
     !fixture.expectation.selectedScoreBreakdown &&
+    !fixture.expectation.planExecution &&
     !fixture.expectation.runTargets?.length &&
     !fixture.expectation.decisionChain
   ) {

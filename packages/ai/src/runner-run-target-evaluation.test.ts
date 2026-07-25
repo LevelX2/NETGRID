@@ -174,6 +174,45 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("does not re-admit R&D Protocol after its private look already knows the exact requested depth", () => {
+    const protocolRun = activatedPrivateLookRun("protocol-repeated-rd");
+    const input = aiInput({
+      credits: 6,
+      servers: [server("rd")],
+      legalActions: [protocolRun],
+      eventTail: [
+        {
+          eventId: "protocol-private-look",
+          type: "resolve_choice",
+          stateVersionBefore: 7,
+          stateVersionAfter: 8,
+          stateHashAfter: "hash-protocol-private-look",
+          visibilityClass: "hidden_info_barrier",
+          publicPayload: {
+            actor: "runner",
+            actionType: "resolve_choice",
+            hiddenZoneAction: "p3_33_private_look",
+            privateLookZone: "rd",
+            privateLookCount: 5,
+            knownRndTopDefinitionId: "simple_agenda",
+            knownRndDefinitionIds: ["simple_agenda"],
+          },
+        },
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      accessPayoff: "known_low_value",
+      knownAccessState: "known_no_current_payoff",
+      recommendation: "do_not_run_now",
+    });
+    expect(evaluation?.evidence).toContain(
+      "central_access_replacement_redundant:true",
+    );
+  });
+
   it("quotes a run that bypasses the outermost ICE without pricing that ICE", () => {
     const insideJob = {
       ...runAction("inside-job-rd", "rd"),
@@ -793,7 +832,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(evaluations[1]?.targetServerId).toBe("hq");
   });
 
-  it("lets a remote score threat oversteer central future payoff", () => {
+  it("keeps runnable central payoff ahead of a Remote threat that still needs funding", () => {
     const input = aiInput({
       credits: 6,
       servers: [
@@ -823,12 +862,19 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
     const evaluations = evaluateRunnerRunTargets({ input });
 
-    expect(evaluations[0]?.targetServerId).toBe("remote_1");
-    expect(evaluations[0]?.accessPayoff).toBe("score_threat");
-    expect(evaluations[1]?.targetServerId).toBe("hq");
-    expect(evaluations[1]?.evidence).toContain(
+    expect(evaluations[0]).toMatchObject({
+      targetServerId: "hq",
+      accessPayoff: "unknown",
+      recommendation: "run_if_free",
+    });
+    expect(evaluations[0]?.evidence).toContain(
       "installed_run_payoff:hq:future_hq_info",
     );
+    expect(evaluations[1]).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "score_threat",
+      recommendation: "gain_credits_first",
+    });
   });
 
   it("treats a Blink-only remote score threat with one hand card as no-progress setup first", () => {
@@ -1981,7 +2027,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
-  it("does not keep an unchanged observed no-progress remote run above central pressure", () => {
+  it("lets a currently affordable remote trash payoff override stale access-only memory", () => {
     const noProgressRemoteEvents = [
       syntheticPublicEvent("evt_run_remote_1", 8, "start_run", {
         actor: "runner",
@@ -2029,21 +2075,73 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
     expect(remoteEvaluation).toMatchObject({
       accessPayoff: "trash_affordable",
-      recommendation: "declined_trash_memory_active",
+      knownAccessState: "known_payoff",
+      recommendation: "run_now",
     });
     expect(remoteEvaluation?.evidence).toEqual(
       expect.arrayContaining([
         "known_remote_no_current_payoff",
         "repeated_remote_no_progress_suppressed",
+        "run_target_access_memory_overridden_by_current_payoff:true",
       ]),
     );
     expect(remoteEvaluation?.evidence.join("\n")).not.toMatch(
       /privatePayload|cardInstances|decklist/i,
     );
-    expect(remoteEvaluation?.score).toBeLessThan(
-      evaluations[0]?.score ?? -Infinity,
+    expect(remoteEvaluation?.score).toBeGreaterThan(0);
+  });
+
+  it("does not override an explicit declined trash while the remote and economy are unchanged", () => {
+    const input = aiInput({
+      credits: 6,
+      eventTail: [
+        syntheticPublicEvent("evt_run_remote_1", 8, "start_run", {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        }),
+        syntheticPublicEvent("evt_access_remote_1", 9, "access_card", {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "remote_1",
+          cardDefinitionId: "onr_v1_317_data-masons",
+        }),
+        syntheticPublicEvent("evt_decline_remote_1", 10, "decline_trash", {
+          actor: "runner",
+          actionType: "decline_trash",
+          serverId: "remote_1",
+        }),
+      ],
+      servers: [
+        server("remote_1", {
+          root: [
+            visibleCard("remote-trashable-root", {
+              definitionId: "onr_v1_317_data-masons",
+              title: "Data Masons",
+              type: "asset",
+              trashCost: 1,
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      accessPayoff: "trash_affordable",
+      knownAccessState: "known_payoff",
+      recommendation: "declined_trash_memory_active",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_access_outcome_decision:decline",
+        "run_target_access_memory_suppresses_plan_bonus:true",
+        "recommendation:declined_trash_memory_active",
+      ]),
     );
-    expect(evaluations[0]?.targetServerId).toBe("rd");
   });
 
   it("keeps a known remote agenda attractive despite prior access-only telemetry", () => {
@@ -2537,6 +2635,47 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("keeps free HQ pressure live without turning a raw Remote scan into a reserve need", () => {
+    const input = pressureReserveInput(12);
+    input.playerView.servers.push(server("hq"));
+    input.legalActions.push(runAction("run-hq", "hq"));
+
+    const posture = buildRunnerEconomyPosture({ input });
+    const evaluations = evaluateRunnerRunTargets({ input });
+    const hq = evaluations.find(
+      (evaluation) => evaluation.targetServerId === "hq",
+    );
+    const rd = evaluations.find(
+      (evaluation) => evaluation.targetServerId === "rd",
+    );
+
+    expect(posture).toMatchObject({
+      fundingNeed: false,
+      recommendation: "stable",
+      creditReservePolicy: {
+        remotePressureReserveActive: false,
+        remotePressureReserve: 0,
+        pressureRunwayTarget: 0,
+      },
+    });
+    expect(hq).toMatchObject({
+      pathPassability: "reachable",
+      pathCost: 0,
+      recommendation: "run_if_free",
+    });
+    expect(hq?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_target_funding_need:none",
+        "run_target_route_funding_gap:0",
+        "run_target_post_run_floor_gap:0",
+        "global_economy_funding_need:false",
+      ]),
+    );
+    expect(rd).toMatchObject({
+      recommendation: "run_now",
+    });
+  });
+
   it("allows setup spending at five credits when a useful hand card is legal", () => {
     const input = aiInput({
       credits: 5,
@@ -2684,7 +2823,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
-  it("builds a deep-remote threat reserve before the installed card is advanced", () => {
+  it("keeps a deep-remote raw reserve scan diagnostic until a concrete plan is admitted", () => {
     const input = pressureReserveInput(20);
 
     const posture = buildRunnerEconomyPosture({ input });
@@ -2694,30 +2833,43 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
     expect(posture.creditReservePolicy).toMatchObject({
       remoteScoreThreat: "possible",
-      remotePressureReserveActive: true,
-      remotePressureServerId: "remote_1",
-      remotePressureReserve: 17,
-      rdPressureSpendTarget: 4,
-      pressureRunwayTarget: 21,
+      remotePressureReserveActive: false,
+      remotePressureReserve: 0,
+      rdPressureSpendTarget: 0,
+      pressureRunwayTarget: 0,
       availableCreditPool: 20,
-      desiredCreditReserve: 21,
-      belowReserveNow: true,
+      desiredCreditReserve: 5,
+      belowReserveNow: false,
     });
     expect(rd).toMatchObject({
       pathCost: 4,
       creditsAfterRun: 16,
-      recommendation: "gain_credits_first",
+      recommendation: "run_now",
     });
-    expect(rd?.evidence).toEqual(
-      expect.arrayContaining([
-        "remote_pressure_credit_pool_after_run:16",
-        "rd_pressure_runway_ready:false",
-        "rd_preserves_remote_pressure_reserve:false",
-      ]),
+    expect(rd?.evidence.join("\n")).not.toContain(
+      "rd_preserves_remote_pressure_reserve:",
     );
   });
 
-  it("spends only the credit layer above the deep-remote threat reserve on R&D", () => {
+  it("does not build a remote-pressure reserve for a known empty remote", () => {
+    const input = pressureReserveInput(10);
+    const remote = input.playerView.servers.find(
+      (server) => server.id === "remote_1",
+    );
+    if (!remote) throw new Error("Missing remote_1 test server");
+    remote.root = [];
+
+    const posture = buildRunnerEconomyPosture({ input });
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      remotePressureReserveActive: false,
+      remotePressureReserve: 0,
+      pressureRunwayTarget: 0,
+    });
+    expect(posture.fundingNeed).toBe(false);
+  });
+
+  it("does not create an R&D spending veto from a deep-remote raw scan", () => {
     const input = pressureReserveInput(22);
 
     const posture = buildRunnerEconomyPosture({ input });
@@ -2726,8 +2878,8 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
 
     expect(posture.creditReservePolicy).toMatchObject({
-      remotePressureReserve: 17,
-      pressureRunwayTarget: 21,
+      remotePressureReserve: 0,
+      pressureRunwayTarget: 0,
       availableCreditPool: 22,
       belowReserveNow: false,
     });
@@ -2736,12 +2888,8 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       creditsAfterRun: 18,
       recommendation: "run_now",
     });
-    expect(rd?.evidence).toEqual(
-      expect.arrayContaining([
-        "remote_pressure_credit_pool_after_run:18",
-        "rd_pressure_runway_ready:true",
-        "rd_preserves_remote_pressure_reserve:true",
-      ]),
+    expect(rd?.evidence.join("\n")).not.toContain(
+      "rd_preserves_remote_pressure_reserve:",
     );
   });
 
@@ -2770,8 +2918,8 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(posture.creditReservePolicy).toMatchObject({
       convertibleBankCredits: 12,
       availableCreditPool: 21,
-      remotePressureReserve: 17,
-      pressureRunwayTarget: 21,
+      remotePressureReserve: 0,
+      pressureRunwayTarget: 0,
     });
     expect(rd).toMatchObject({
       creditsAfterRun: 5,
@@ -2790,9 +2938,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(posture.creditReservePolicy).toMatchObject({
       remoteScoreThreat: "urgent",
       contestReserve: 8,
-      remotePressureReserve: 20,
+      remotePressureReserve: 0,
       rdPressureSpendTarget: 0,
-      pressureRunwayTarget: 20,
+      pressureRunwayTarget: 0,
       availableCreditPool: 20,
     });
     expect(remote).toMatchObject({
@@ -3289,6 +3437,7 @@ function handDevelopmentEvaluation(
     developmentRole: "access_payoff",
     strategicFit: "strong",
     currentNeed: "useful_now",
+    activationPrerequisites: [],
     priority: 600,
     deferReason: "missing_credits",
     evidence: ["source:own_runner_hand"],

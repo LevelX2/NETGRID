@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import type { RunnerOptionalChoiceResolution } from "./damage-prevention-choice-option";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -8,10 +9,10 @@ type PendingChoiceOption = PendingChoice["options"][number];
 const TAG_AVOIDANCE_CHOICE_SOURCE = "v120.event_modification.avoid";
 const TAG_AVOIDANCE_OPTION_PREFIX = "card_implementation_avoid_tag_";
 
-export function selectedRunnerTagAvoidanceChoiceOptionId(
+export function runnerTagAvoidanceChoiceResolution(
   choice: PendingChoice,
   selectableOptions: readonly PendingChoiceOption[],
-): string | undefined {
+): RunnerOptionalChoiceResolution | undefined {
   if (
     choice.source !== TAG_AVOIDANCE_CHOICE_SOURCE ||
     choice.kind !== "select_option" ||
@@ -20,7 +21,8 @@ export function selectedRunnerTagAvoidanceChoiceOptionId(
   ) {
     return undefined;
   }
-  return selectableOptions.find((option) =>
+  const optionId = selectableOptions.find((option) =>
     option.id.startsWith(TAG_AVOIDANCE_OPTION_PREFIX),
   )?.id;
+  return optionId ? { kind: "select", optionId } : { kind: "pass" };
 }

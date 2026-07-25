@@ -602,8 +602,7 @@ export function runnerRunTargetCurrentStep(
     (evaluation?.score ?? 0) > 0 ||
     evaluation?.scoreThreat === true ||
     runnerCentralMatchpointAccessOpportunity(context, evaluation);
-  const probeOnly =
-    evaluation?.evidence.includes("run_commitment:probe_only") === true;
+  const probeOnly = evaluation?.runCommitment === "probe_only";
   const scoreThreatProbeWithoutVisibleCost =
     probeOnly && evaluation?.scoreThreat === true && evaluation.pathCost === 0;
   const probeFundingRequired =

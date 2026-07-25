@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import traceBidEconomyJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-03575-01-trace-bid-economy.json";
 import rdRepeatFreshMatchpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-03575-02-rd-repeat-fresh-matchpoint.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
@@ -38,7 +39,12 @@ describe("match 03575 runner decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "03575-C02-STALE-RD-TOP";
         checkpoint.expectation = {
-          acceptableActions: [{ actionId: "runner.draw_card" }],
+          forbiddenActions: [{ actionId: "runner.start_run.rd" }],
+          planExecution: {
+            acceptablePlanKinds: ["runner.pressure_central"],
+            acceptableCapabilities: ["pressure_hq_information"],
+            requiredAssessmentEvidence: ["target:hq"],
+          },
         };
       },
     );
@@ -48,7 +54,10 @@ describe("match 03575 runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    ["cp-03575-02-rd-repeat-fresh-matchpoint"],
+  );
 }
 
 function mutateFixture(

@@ -5,6 +5,7 @@ import {
   runAiSelfplayTraceMining,
   simulateAiGame,
 } from "../packages/ai/src/simulation";
+import { proteusPilotTerminationTotals } from "./proteus-ai-selected-pilot-report";
 
 type PlaytestDeckFile = {
   decks: DeckDefinition[];
@@ -52,6 +53,7 @@ const pairResults = runnerDecks.flatMap((runnerDeck) =>
         holdout: summary.seed.includes("holdout"),
         winner: summary.winner,
         gameEndReason: summary.gameEndReason ?? null,
+        terminationKind: summary.terminationKind,
         actions: summary.actions,
         turns: summary.turns,
         finalAgendaPoints: summary.finalAgendaPoints,
@@ -60,7 +62,7 @@ const pairResults = runnerDecks.flatMap((runnerDeck) =>
         illegalActions: summary.metrics.illegalActions,
         fallbackRate: summary.metrics.fallbackRate,
         noProgress:
-          summary.winner === "action_limit_reached" &&
+          summary.terminationKind === "action_limit" &&
           summary.finalAgendaPoints.runner === 0 &&
           summary.finalAgendaPoints.corp === 0,
       })),
@@ -84,14 +86,11 @@ const controlGames = seeds.map((seed) => {
 });
 
 const games = pairResults.flatMap((pair) => pair.games);
+const terminationTotals = proteusPilotTerminationTotals(games);
 const totals = {
   games: games.length,
   decisions: games.reduce((sum, game) => sum + game.actions, 0),
-  completedGames: games.filter((game) => game.winner !== "action_limit_reached")
-    .length,
-  actionLimitGames: games.filter(
-    (game) => game.winner === "action_limit_reached",
-  ).length,
+  ...terminationTotals,
   noProgressGames: games.filter((game) => game.noProgress).length,
   illegalActions: games.reduce((sum, game) => sum + game.illegalActions, 0),
   replayFailures: games.filter((game) => !game.replayOk).length,

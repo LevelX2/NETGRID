@@ -1,4 +1,5 @@
 import type { AiDecisionInput, Side } from "@netgrid/shared";
+import type { EngineRandomizedIceInstallCandidate } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
   compareValidatedPlanAssessments,
@@ -8,7 +9,11 @@ import {
   type ValidatedPlanAssessment,
 } from "./plan-assessment";
 import type { PlanExecutionOrigin } from "./plan-continuation";
-import type { PlanInstance, PlanModuleId, PlanProposal } from "./plan-kernel-types";
+import type {
+  PlanInstance,
+  PlanModuleId,
+  PlanProposal,
+} from "./plan-kernel-types";
 import {
   applyPlanOutcomeReceipt,
   reconcileResidentPlanPortfolio,
@@ -27,14 +32,48 @@ import { PlanResolutionFailure } from "./plan-resolution-failure";
 export type PlanSchedulerContext = {
   input: AiDecisionInput;
   actionCandidates: readonly ActionSemanticCandidate[];
+  actionDispositions?: readonly PlanActionDisposition[];
   turnKey: string;
   domain?: unknown;
 };
 
+export type PlanActionDisposition = {
+  actionId: string;
+  disposition: "explicitly_nonproductive";
+  ownerModuleId: PlanModuleId;
+  evidenceCode: string;
+};
+
+export function isStandardEndTurnCandidate(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  return (
+    candidate.actionType === "end_turn" &&
+    candidate.semanticActionType === "turn_flow.end_turn" &&
+    candidate.sourceKind === "game_rule"
+  );
+}
+
+export type PlanEarlyEndTurnJustification =
+  | {
+      kind: "rules_proven_terminal_win";
+      terminalCondition: "corp_empty_rd_mandatory_draw";
+    }
+  | {
+      kind: "forgo_restricted_capacity";
+      capacityKind: "zero_click_non_basic_run_only";
+      explicitlyNonproductiveActionIds: string[];
+    };
+
 export type PlanMaterialization = {
   step: PlanRouteStep;
   candidates: PlanRouteCandidate[];
+  engineRandomizedIceInstallNearTie?: {
+    kind: "engine_randomized_ice_install_selection";
+    candidates: EngineRandomizedIceInstallCandidate[];
+  };
   continuation?: SemanticContinuation;
+  earlyEndTurnJustification?: PlanEarlyEndTurnJustification;
 };
 
 export type PlanModule = {
@@ -77,7 +116,6 @@ export type SchedulerDiagnosticEvent = {
     | "assess"
     | "select"
     | "materialize"
-    | "replan"
     | "route";
   code: string;
   instanceId?: string;
@@ -98,6 +136,9 @@ export type PlanSchedulerResult =
       route: PlanRoute;
       selectedAssessment: ValidatedPlanAssessment;
       portfolio: ResidentPlanPortfolio;
+      engineRandomizedIceInstallNearTie?: NonNullable<
+        PlanMaterialization["engineRandomizedIceInstallNearTie"]
+      >;
       diagnostics: SchedulerDiagnosticEvent[];
     };
 
@@ -106,7 +147,6 @@ export type RunPlanSchedulerParams = {
   registry: SidePlanRegistry;
   previousPortfolio?: ResidentPlanPortfolio;
   resolveEngineWindow: EngineWindowResolver;
-  maxReplans?: number;
 };
 
 export type PlanSchedulerReceiptResult = {
@@ -134,6 +174,7 @@ export function runPlanScheduler(
   params: RunPlanSchedulerParams,
 ): PlanSchedulerResult {
   assertRegistry(params.registry, params.context);
+  assertActionDispositions(params.registry, params.context);
   const diagnostics: SchedulerDiagnosticEvent[] = [];
   const window = params.resolveEngineWindow(params.context);
   if (window) {
@@ -171,10 +212,14 @@ export function runPlanScheduler(
     code: `resident:${reconciled.instances.length}`,
   });
 
-  const assessments = reconciled.instances
+  const validatedAssessments = reconciled.instances
     .filter((instance) => instance.viability === "ready")
     .map((instance) => {
-      const module = moduleForInstance(params.registry, instance, params.context);
+      const module = moduleForInstance(
+        params.registry,
+        instance,
+        params.context,
+      );
       const assessment = requireValidatedPlanAssessment(
         module.assess(instance, params.context, reconciled),
         params.registry.priorityPolicy,
@@ -190,114 +235,410 @@ export function runPlanScheduler(
       return assessment;
     })
     .sort(compareValidatedPlanAssessments);
+  assertVoluntaryActionPlanCoverage(
+    params.registry,
+    params.context,
+    reconciled,
+    validatedAssessments,
+  );
+  const assessments = validatedAssessments.filter(
+    (assessment) => assessment.readiness === "executable_now",
+  );
   if (assessments.length === 0) {
     throw schedulerFailure(
       "missing_plan_module_coverage",
       params.context,
       undefined,
       reconciled.instances.length,
-      "Provide at least one ready assessed plan for the legal voluntary actions.",
+      missingReadyPlanRemovalCondition(params.context),
     );
   }
 
-  const excluded = new Set<string>();
-  const maxReplans = Math.max(0, Math.min(8, params.maxReplans ?? 2));
-  for (let attempt = 0; attempt <= maxReplans; attempt += 1) {
-    const selected = assessments.find(
-      (assessment) => !excluded.has(assessment.instanceId),
+  const selected = assessments[0]!;
+  diagnostics.push({
+    stage: "select",
+    code: "validated_winner",
+    instanceId: selected.instanceId,
+    priorityClass: selected.priorityValidation.effectiveClass,
+  });
+  const instance = reconciled.instances.find(
+    (candidate) => candidate.instanceId === selected.instanceId,
+  );
+  if (!instance) {
+    throw schedulerFailure(
+      "invalid_plan_identity",
+      params.context,
+      selected.instanceId,
+      reconciled.instances.length,
+      "Keep every validated assessment bound to a resident instance.",
     );
-    if (!selected) break;
-    diagnostics.push({
-      stage: "select",
-      code: `attempt:${attempt}`,
-      instanceId: selected.instanceId,
-      priorityClass: selected.priorityValidation.effectiveClass,
+  }
+  const module = moduleForInstance(params.registry, instance, params.context);
+  const materialized = module.materialize(instance, selected, params.context);
+  diagnostics.push({
+    stage: "materialize",
+    code: materialized.step.stepId,
+    instanceId: instance.instanceId,
+    moduleId: module.moduleId,
+  });
+  const route = bindBestCurrentPlanRoute({
+    side: params.registry.side,
+    stateVersion: params.context.input.playerView.stateVersion,
+    timingPoint: params.context.input.playerView.timingPoint,
+    planInstanceId: instance.instanceId,
+    step: materialized.step,
+    candidates: materialized.candidates,
+    ...(materialized.continuation
+      ? { continuation: materialized.continuation }
+      : {}),
+  });
+  assertEngineRandomizedIceInstallNearTie(
+    params.context,
+    materialized,
+    instance.instanceId,
+  );
+  assertEarlyEndTurnRoute(params.context, route, materialized, module.moduleId);
+  const portfolio = reconcileResidentPlanPortfolio({
+    side: params.registry.side,
+    stateVersion: params.context.input.playerView.stateVersion,
+    timingPoint: params.context.input.playerView.timingPoint,
+    proposals,
+    ...(params.previousPortfolio ? { previous: params.previousPortfolio } : {}),
+    selectedExecutorInstanceId: instance.instanceId,
+    selectionReason:
+      params.previousPortfolio?.executorInstanceId &&
+      params.previousPortfolio.executorInstanceId !== instance.instanceId
+        ? "preempted_by_higher_class"
+        : "executor_selected",
+  });
+  diagnostics.push({
+    stage: "route",
+    code: route.head.semanticActionType,
+    instanceId: instance.instanceId,
+  });
+  return {
+    lane: "plan",
+    route,
+    selectedAssessment: selected,
+    portfolio,
+    ...(materialized.engineRandomizedIceInstallNearTie?.candidates.some(
+      (candidate) => candidate.actionId === route.head.actionId,
+    )
+      ? {
+          engineRandomizedIceInstallNearTie:
+            materialized.engineRandomizedIceInstallNearTie,
+        }
+      : {}),
+    diagnostics,
+  };
+}
+
+function assertEngineRandomizedIceInstallNearTie(
+  context: PlanSchedulerContext,
+  materialized: PlanMaterialization,
+  planInstanceId: string,
+): void {
+  const selection = materialized.engineRandomizedIceInstallNearTie;
+  if (!selection) return;
+  const candidates = selection.candidates;
+  const exactServers =
+    candidates.length === 2 &&
+    candidates[0]?.targetServerId === "hq" &&
+    candidates[1]?.targetServerId === "rd";
+  const exactActions =
+    exactServers &&
+    new Set(candidates.map((candidate) => candidate.actionId)).size === 2 &&
+    candidates.every((candidate) => {
+      const routeCandidate = materialized.candidates.find(
+        (entry) => entry.candidate.actionId === candidate.actionId,
+      )?.candidate;
+      const legalAction = context.input.legalActions.find(
+        (action) => action.actionId === candidate.actionId,
+      );
+      return (
+        routeCandidate?.stateVersion ===
+          context.input.playerView.stateVersion &&
+        routeCandidate.semanticActionType === "install.card" &&
+        legalAction?.type === "install_card" &&
+        legalAction.side === "corp" &&
+        legalAction.expiresAtStateVersion ===
+          context.input.playerView.stateVersion &&
+        legalAction.payload?.placement === "ice" &&
+        legalAction.payload.serverId === candidate.targetServerId &&
+        (legalAction.choiceRequirements?.length ?? 0) === 0 &&
+        legalAction.targetRequirements.length === 0
+      );
     });
-    const instance = reconciled.instances.find(
-      (candidate) => candidate.instanceId === selected.instanceId,
+  if (exactActions) return;
+  throw new PlanResolutionFailure("invalid_support_graph", {
+    side: context.input.side,
+    stateVersion: context.input.playerView.stateVersion,
+    timingPoint: context.input.playerView.timingPoint,
+    legalActionTypes: context.input.legalActions.map((action) => action.type),
+    unresolvedActionIds: candidates.map((candidate) => candidate.actionId),
+    owner: "support_graph",
+    planInstanceId,
+    removalCondition:
+      "An Engine-randomized central near tie must contain exactly one current choice-free HQ and one current choice-free R&D ICE-install LegalAction from the materialized plan step.",
+  });
+}
+
+function assertEarlyEndTurnRoute(
+  context: PlanSchedulerContext,
+  route: PlanRoute,
+  materialized: PlanMaterialization,
+  moduleId: PlanModuleId,
+): void {
+  const selectedCandidate = materialized.candidates.find(
+    (entry) => entry.candidate.actionId === route.head.actionId,
+  )?.candidate;
+  if (
+    !selectedCandidate ||
+    !isStandardEndTurnCandidate(selectedCandidate) ||
+    context.input.playerView.own.clicks <= 0
+  ) {
+    return;
+  }
+
+  const justification = materialized.earlyEndTurnJustification;
+  const terminalWinProven =
+    justification?.kind === "rules_proven_terminal_win" &&
+    justification.terminalCondition === "corp_empty_rd_mandatory_draw" &&
+    context.input.side === "runner" &&
+    moduleId === "runner.secure_terminal_win" &&
+    context.input.playerView.opponent.deckCount === 0;
+  if (terminalWinProven) return;
+
+  const remainingCandidates = context.actionCandidates.filter(
+    (candidate) => !isStandardEndTurnCandidate(candidate),
+  );
+  const remainingActionIds = sortedUnique(
+    remainingCandidates.map((candidate) => candidate.actionId),
+  );
+  const forgoProofActionIds =
+    justification?.kind === "forgo_restricted_capacity"
+      ? sortedUnique(justification.explicitlyNonproductiveActionIds)
+      : [];
+  const exactRestrictedActionSet =
+    remainingActionIds.length > 0 &&
+    sameStrings(remainingActionIds, forgoProofActionIds);
+  const everyRemainingActionIsRestrictedRun =
+    exactRestrictedActionSet &&
+    remainingCandidates.every((candidate) => {
+      const legalAction = context.input.legalActions.find(
+        (action) => action.actionId === candidate.actionId,
+      );
+      return (
+        candidate.semanticActionType === "run.start" &&
+        candidate.actionType === "start_run" &&
+        candidate.sourceKind !== "basic_action" &&
+        legalAction?.type === "start_run" &&
+        legalAction.source !== "basic_action" &&
+        legalAction.costs.reduce(
+          (total, cost) => total + Math.max(0, cost.clicks ?? 0),
+          0,
+        ) === 0
+      );
+    });
+  const everyRestrictedRunIsExplicitlyNonproductive =
+    everyRemainingActionIsRestrictedRun &&
+    remainingActionIds.every((actionId) =>
+      (context.actionDispositions ?? []).some(
+        (entry) =>
+          entry.actionId === actionId &&
+          entry.disposition === "explicitly_nonproductive" &&
+          entry.ownerModuleId === moduleId,
+      ),
     );
-    if (!instance) {
-      throw schedulerFailure(
-        "invalid_plan_identity",
-        params.context,
-        selected.instanceId,
-        reconciled.instances.length,
-        "Keep every validated assessment bound to a resident instance.",
-      );
-    }
-    const module = moduleForInstance(params.registry, instance, params.context);
-    try {
-      const materialized = module.materialize(
-        instance,
-        selected,
-        params.context,
-      );
-      diagnostics.push({
-        stage: "materialize",
-        code: materialized.step.stepId,
-        instanceId: instance.instanceId,
-        moduleId: module.moduleId,
-      });
-      const route = bindBestCurrentPlanRoute({
-        side: params.registry.side,
-        stateVersion: params.context.input.playerView.stateVersion,
-        timingPoint: params.context.input.playerView.timingPoint,
+  const restrictedCapacityForgoProven =
+    justification?.kind === "forgo_restricted_capacity" &&
+    justification.capacityKind === "zero_click_non_basic_run_only" &&
+    context.input.side === "runner" &&
+    moduleId === "runner.defense_and_recovery" &&
+    everyRestrictedRunIsExplicitlyNonproductive;
+  if (restrictedCapacityForgoProven) return;
+
+  const exhaustedVoluntaryRoutes =
+    moduleId === `${context.input.side}.complete_turn` &&
+    remainingActionIds.length > 0 &&
+    remainingActionIds.every((actionId) =>
+      (context.actionDispositions ?? []).some(
+        (entry) =>
+          entry.actionId === actionId &&
+          entry.disposition === "explicitly_nonproductive",
+      ),
+    );
+  if (exhaustedVoluntaryRoutes) return;
+
+  throw new PlanResolutionFailure("end_turn_with_usable_capacity", {
+    side: context.input.side,
+    stateVersion: context.input.playerView.stateVersion,
+    timingPoint: context.input.playerView.timingPoint,
+    legalActionTypes: context.input.legalActions.map((action) => action.type),
+    unresolvedActionIds: remainingActionIds,
+    owner: "rules_contract",
+    removalCondition:
+      "Bind early standard EndTurn to a structurally proven terminal-win or restricted-capacity-forgo plan justification.",
+    planInstanceId: route.planInstanceId,
+    stepId: route.step.stepId,
+    candidateCount: materialized.candidates.length,
+  });
+}
+
+function sortedUnique(values: readonly string[]): string[] {
+  return [...new Set(values)].sort();
+}
+
+function sameStrings(
+  left: readonly string[],
+  right: readonly string[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
+  );
+}
+
+function assertVoluntaryActionPlanCoverage(
+  registry: SidePlanRegistry,
+  context: PlanSchedulerContext,
+  portfolio: ResidentPlanPortfolio,
+  assessments: readonly ValidatedPlanAssessment[],
+): void {
+  const planOwnersByActionId = new Map<string, Set<string>>();
+  for (const assessment of assessments) {
+    if (assessment.readiness !== "executable_now") continue;
+    const instance = portfolio.instances.find(
+      (entry) => entry.instanceId === assessment.instanceId,
+    );
+    if (!instance) continue;
+    const module = moduleForInstance(registry, instance, context);
+    const materialization = module.materialize(instance, assessment, context);
+    for (const entry of materialization.candidates) {
+      bindBestCurrentPlanRoute({
+        side: registry.side,
+        stateVersion: context.input.playerView.stateVersion,
+        timingPoint: context.input.playerView.timingPoint,
         planInstanceId: instance.instanceId,
-        step: materialized.step,
-        candidates: materialized.candidates,
-        ...(materialized.continuation
-          ? { continuation: materialized.continuation }
+        step: materialization.step,
+        candidates: [entry],
+        ...(materialization.continuation
+          ? { continuation: materialization.continuation }
           : {}),
       });
-      const portfolio = reconcileResidentPlanPortfolio({
-        side: params.registry.side,
-        stateVersion: params.context.input.playerView.stateVersion,
-        timingPoint: params.context.input.playerView.timingPoint,
-        proposals,
-        ...(params.previousPortfolio
-          ? { previous: params.previousPortfolio }
-          : {}),
-        selectedExecutorInstanceId: instance.instanceId,
-        selectionReason:
-          params.previousPortfolio?.executorInstanceId &&
-          params.previousPortfolio.executorInstanceId !== instance.instanceId
-            ? "preempted_by_higher_class"
-            : "executor_selected",
-      });
-      diagnostics.push({
-        stage: "route",
-        code: route.head.semanticActionType,
-        instanceId: instance.instanceId,
-      });
-      return {
-        lane: "plan",
-        route,
-        selectedAssessment: selected,
-        portfolio,
-        diagnostics,
-      };
-    } catch (error) {
-      if (!(error instanceof PlanResolutionFailure)) throw error;
-      excluded.add(selected.instanceId);
-      diagnostics.push({
-        stage: "replan",
-        code: error.code,
-        instanceId: selected.instanceId,
-      });
+      const owners =
+        planOwnersByActionId.get(entry.candidate.actionId) ?? new Set<string>();
+      owners.add(module.moduleId);
+      planOwnersByActionId.set(entry.candidate.actionId, owners);
     }
   }
-  throw schedulerFailure(
-    "scheduler_replan_exhausted",
-    params.context,
-    undefined,
-    assessments.length,
-    `Repair the failing plan module or semantic route; no arbitrary action fallback is permitted. Failed routes: ${
-      diagnostics
-        .filter((event) => event.stage === "replan")
-        .map((event) => `${event.instanceId ?? "unknown"}:${event.code}`)
-        .join(",") || "none"
-    }.`,
+  const dispositionByActionId = new Map(
+    (context.actionDispositions ?? []).map((entry) => [entry.actionId, entry]),
   );
+  const contradictoryActionIds = [...planOwnersByActionId.keys()].filter(
+    (actionId) => dispositionByActionId.has(actionId),
+  );
+  if (contradictoryActionIds.length > 0) {
+    const conflicts = contradictoryActionIds
+      .map((actionId) => {
+        const disposition = dispositionByActionId.get(actionId)!;
+        const routeOwners = [
+          ...(planOwnersByActionId.get(actionId) ?? []),
+        ].join("+");
+        return `${disposition.evidenceCode}@${disposition.ownerModuleId}->${routeOwners}[${actionId}]`;
+      })
+      .join(",");
+    throw schedulerFailure(
+      "missing_plan_module_coverage",
+      context,
+      undefined,
+      assessments.length,
+      `Actions cannot be both executable plan routes and explicitly nonproductive dispositions. Conflicts=${conflicts}.`,
+      contradictoryActionIds,
+    );
+  }
+  const unresolvedActionIds = context.actionCandidates
+    .filter(
+      (candidate) =>
+        !isStandardEndTurnCandidate(candidate) &&
+        !planOwnersByActionId.has(candidate.actionId) &&
+        !dispositionByActionId.has(candidate.actionId),
+    )
+    .map((candidate) => candidate.actionId);
+  if (unresolvedActionIds.length > 0) {
+    const unresolvedDetails = context.actionCandidates
+      .filter((candidate) => unresolvedActionIds.includes(candidate.actionId))
+      .map(
+        (candidate) =>
+          `${candidate.actionId}{semantic=${candidate.semanticActionType},sourceKind=${candidate.sourceKind},sourceDefinition=${candidate.sourceDefinitionId ?? "none"}}`,
+      )
+      .join(",");
+    throw schedulerFailure(
+      "missing_plan_module_coverage",
+      context,
+      undefined,
+      assessments.length,
+      `Unresolved=${unresolvedDetails}. Materialize each voluntary LegalAction in an executable plan route or reject it through exactly one registered owner module with a concrete nonproductive disposition. A family-level ownership declaration is not plan coverage.`,
+      unresolvedActionIds,
+    );
+  }
+}
+
+function missingReadyPlanRemovalCondition(
+  context: PlanSchedulerContext,
+): string {
+  const unresolved = unresolvedVoluntaryActionIds(context);
+  if (context.input.playerView.own.clicks > 0 && unresolved.length === 0) {
+    const rejected = (context.actionDispositions ?? [])
+      .slice(0, 8)
+      .map(
+        (entry) =>
+          `${entry.actionId}@${entry.ownerModuleId}:${entry.evidenceCode}`,
+      )
+      .join(",");
+    return `Unused action capacity=${context.input.playerView.own.clicks} remains after every current voluntary action was explicitly rejected. Add a productive plan route or a domain-specific capacity-forgo plan; normal TurnCompletion is forbidden. Rejections=${rejected || "none"}.`;
+  }
+  return "Provide at least one ready assessed plan for the legal voluntary actions.";
+}
+
+function assertActionDispositions(
+  registry: SidePlanRegistry,
+  context: PlanSchedulerContext,
+): void {
+  const dispositions = context.actionDispositions ?? [];
+  const knownActionIds = new Set(
+    context.actionCandidates.map((candidate) => candidate.actionId),
+  );
+  const seen = new Set<string>();
+  for (const entry of dispositions) {
+    const dispositionCandidate = context.actionCandidates.find(
+      (candidate) => candidate.actionId === entry.actionId,
+    );
+    const invalidReasons = [
+      ...(!knownActionIds.has(entry.actionId) ? ["unknown_action"] : []),
+      ...(seen.has(entry.actionId) ? ["duplicate_action"] : []),
+      ...(!registry.modules.some(
+        (module) => module.moduleId === entry.ownerModuleId,
+      )
+        ? ["unregistered_owner"]
+        : []),
+      ...(entry.evidenceCode.trim().length === 0 ? ["blank_evidence"] : []),
+      ...(dispositionCandidate &&
+      isStandardEndTurnCandidate(dispositionCandidate)
+        ? ["end_turn_disposition"]
+        : []),
+    ];
+    if (invalidReasons.length > 0) {
+      throw schedulerFailure(
+        "missing_plan_module_coverage",
+        context,
+        undefined,
+        dispositions.length,
+        `Invalid nonproductive action disposition reasons=${invalidReasons.join(",")} action=${entry.actionId} owner=${entry.ownerModuleId}. Each current non-EndTurn action may be explicitly rejected by one registered owner with concrete evidence exactly once.`,
+      );
+    }
+    seen.add(entry.actionId);
+  }
 }
 
 export function createSidePlanRegistry(params: {
@@ -385,21 +726,36 @@ function schedulerFailure(
   code:
     | "missing_plan_module_coverage"
     | "invalid_plan_identity"
-    | "stale_or_future_action_reference"
-    | "scheduler_replan_exhausted",
+    | "stale_or_future_action_reference",
   context: PlanSchedulerContext,
   instanceId: string | undefined,
   candidateCount: number,
   removalCondition: string,
+  unresolvedActionIds?: readonly string[],
 ): PlanResolutionFailure {
   return new PlanResolutionFailure(code, {
     side: context.input.side,
     stateVersion: context.input.playerView.stateVersion,
     timingPoint: context.input.playerView.timingPoint,
     legalActionTypes: context.input.legalActions.map((action) => action.type),
+    unresolvedActionIds:
+      unresolvedActionIds ?? unresolvedVoluntaryActionIds(context),
     owner: "scheduler",
     removalCondition,
     ...(instanceId ? { planInstanceId: instanceId } : {}),
     candidateCount,
   });
+}
+
+function unresolvedVoluntaryActionIds(context: PlanSchedulerContext): string[] {
+  const explicitlyNonproductive = new Set(
+    (context.actionDispositions ?? []).map((entry) => entry.actionId),
+  );
+  return context.actionCandidates
+    .filter(
+      (candidate) =>
+        !isStandardEndTurnCandidate(candidate) &&
+        !explicitlyNonproductive.has(candidate.actionId),
+    )
+    .map((candidate) => candidate.actionId);
 }

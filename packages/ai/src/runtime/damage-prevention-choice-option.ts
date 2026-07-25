@@ -7,12 +7,21 @@ type PendingChoiceOption = PendingChoice["options"][number];
 
 const DAMAGE_PREVENTION_CHOICE_SOURCE = "v120.event_modification.prevent";
 
-export function selectedRunnerDamagePreventionChoiceOptionId(
+export type RunnerOptionalChoiceResolution =
+  | {
+      readonly kind: "select";
+      readonly optionId: string;
+    }
+  | {
+      readonly kind: "pass";
+    };
+
+export function runnerDamagePreventionChoiceResolution(
   input: AiDecisionInput,
   choice: PendingChoice,
   selectableOptions: readonly PendingChoiceOption[],
   rolesForCardId: (cardId: string | undefined) => readonly string[],
-): string | undefined {
+): RunnerOptionalChoiceResolution | undefined {
   if (
     choice.source !== DAMAGE_PREVENTION_CHOICE_SOURCE ||
     choice.kind !== "select_option" ||
@@ -25,11 +34,13 @@ export function selectedRunnerDamagePreventionChoiceOptionId(
     (option) => option.id !== "pass",
   );
   if (runnerHasAcuteDamagePressure(input, preventionOptions)) {
-    return preventionOptions[0]?.id;
+    const optionId = preventionOptions[0]?.id;
+    return optionId ? { kind: "select", optionId } : { kind: "pass" };
   }
-  return preventionOptions.find((option) =>
+  const optionId = preventionOptions.find((option) =>
     isRoutineDamagePreventionOption(input, option, rolesForCardId),
   )?.id;
+  return optionId ? { kind: "select", optionId } : { kind: "pass" };
 }
 
 function runnerHasAcuteDamagePressure(

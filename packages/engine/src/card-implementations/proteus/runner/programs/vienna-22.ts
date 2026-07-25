@@ -10,5 +10,12 @@ export const proteusVienna22Implementation: CardImplementationDefinition = {
       amount: 1,
       visibility: "public",
     },
+    centralAccessCountModifier: {
+      source: "corp_purgeable_runner_virus_counter",
+      counterKind: "vienna",
+      server: "hq",
+      formula: "per_counter",
+      visibility: "public",
+    },
   },
 };

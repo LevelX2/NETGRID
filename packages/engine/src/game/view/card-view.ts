@@ -12,6 +12,7 @@ import {
   type PlayerView,
   type PurgeableRunnerVirusCounterBucket,
   type PurgeableRunnerVirusCounterType,
+  type ResolvedCardDefinition,
   type ServerId,
   type Side,
   type VisibleCard,
@@ -66,10 +67,19 @@ function visibleKnownCardWithReferenceViewer(
     (state.run?.runStartRandomStrengthSourceCardId === id
       ? state.run.runStartRandomStrength
       : undefined);
+  const variableIceStrength =
+    definition.type === "ice" &&
+    instance.variableIceState?.family === "x_strength" &&
+    typeof instance.variableIceState.strength === "number"
+      ? instance.variableIceState.strength
+      : undefined;
   const visibleBaseStrength =
     typeof runStartStrength === "number"
       ? runStartStrength
-      : definition.strength;
+      : variableIceStrength ??
+        (definition.strengthModel.kind === "fixed"
+          ? definition.strengthModel.value
+          : undefined);
   const visibleStrength =
     visibleBaseStrength !== undefined
       ? definition.type === "ice"
@@ -116,6 +126,17 @@ function visibleKnownCardWithReferenceViewer(
       : {}),
     rulesText: definition.rulesText,
     ...(definition.cost !== undefined ? { cost: definition.cost } : {}),
+    ...(definition.playCost !== undefined && definition.playCost !== null
+      ? {
+          playCost:
+            definition.playCost.kind === "fixed"
+              ? { ...definition.playCost }
+              : {
+                  ...definition.playCost,
+                  maximumX: { ...definition.playCost.maximumX },
+                },
+        }
+      : {}),
     ...(definition.installCost !== undefined
       ? { installCost: definition.installCost }
       : {}),
@@ -1412,7 +1433,9 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
     instance.variableIceState?.family === "x_strength" &&
     typeof instance.variableIceState.strength === "number"
       ? instance.variableIceState.strength
-      : (definition.strength ?? 0);
+      : definition.strengthModel.kind === "fixed"
+        ? definition.strengthModel.value
+        : 0;
   const total =
     baseStrength +
     instance.strengthModifier +
@@ -1426,17 +1449,19 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
 function visibleStrengthModifierForKnownCard(
   state: GameState,
   cardId: CardInstanceId,
-  definition: CardDefinition,
+  definition: ResolvedCardDefinition,
   visibleStrength: number,
 ): number | undefined {
-  if (definition.strength === undefined) return undefined;
   const instance = mustInstance(state.cardInstances, cardId);
   const baseStrength =
     definition.type === "ice" &&
     instance.variableIceState?.family === "x_strength" &&
     typeof instance.variableIceState.strength === "number"
       ? instance.variableIceState.strength
-      : definition.strength;
+      : definition.strengthModel.kind === "fixed"
+        ? definition.strengthModel.value
+        : undefined;
+  if (baseStrength === undefined) return undefined;
   const modifier = Math.floor(visibleStrength - baseStrength);
   return modifier > 0 ? modifier : undefined;
 }
@@ -1583,7 +1608,7 @@ function relativeIceStrengthBonusFor(
 export function definitionFor(
   state: GameState,
   id: CardInstanceId,
-): CardDefinition {
+): ResolvedCardDefinition {
   const instance = mustInstance(state.cardInstances, id);
   const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
   if (!definition)

@@ -4567,8 +4567,14 @@
     "acceptableActions": [
       {
         "type": "install_card",
-        "sourceDefinitionId": "onr_v1_220_tycho-extension"
+        "sourceDefinitionId": "onr_v1_220_tycho-extension",
+        "targetServerId": "remote_1"
       }
-    ]
+    ],
+  "planExecution": {
+    "acceptablePlanKinds": ["corp.score_agenda"],
+    "acceptableCapabilities": ["install_score_agenda"],
+    "requiredAssessmentEvidence": ["corp_same_turn_score_conversion:install_score_target"]
+    }
   }
 }

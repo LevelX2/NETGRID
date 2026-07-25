@@ -1,3 +1,10 @@
+import type {
+  CardDefinitionNumericFields,
+  PlayCostDefinition,
+  ResolvedStrengthDefinition,
+  VariableXPlayCostDefinition,
+} from "@netgrid/shared";
+
 export type CatalogSide = "runner" | "corp";
 
 export type CatalogCardType =
@@ -37,16 +44,10 @@ export type CatalogRarity = {
   sourceId: string;
 };
 
-export type CatalogNumericFields = {
-  cost: number | null;
-  installCost: number | null;
-  memoryCost: number | null;
-  strength: number | null;
-  rezCost: number | null;
-  trashCost: number | null;
-  advancementRequirement: number | null;
-  agendaPoints: number | null;
-};
+export type CatalogNumericFields = CardDefinitionNumericFields;
+
+export type CatalogPlayCost = PlayCostDefinition;
+export type CatalogVariableXPlayCost = VariableXPlayCostDefinition;
 
 export type CatalogManifestReference = {
   manifestVersion: string;
@@ -73,6 +74,8 @@ export type CatalogCard = {
   displayOnlyText: boolean;
   rarity?: CatalogRarity;
   numeric: CatalogNumericFields;
+  playCost: CatalogPlayCost | null;
+  strengthModel: ResolvedStrengthDefinition;
   statuses: CatalogStatuses;
   blockReasons: string[];
   implementationManifest: CatalogManifestReference | null;

@@ -356,6 +356,7 @@ export function startCardImplementationAccessPaymentChoice(
         label: `${cost.amount} Credits zahlen`,
         publicLabel: "Access-Ambush bezahlen",
         value: "pay",
+        metadata: { creditCost: cost.amount },
       },
       {
         id: "decline",

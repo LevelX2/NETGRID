@@ -88,6 +88,7 @@ import {
   AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION,
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
+  ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   type AiDecision,
   type ApiCreateMatchResponse,
   type CardInstanceId,
@@ -10235,7 +10236,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const created = await service.createMatch({
       mode: "ai_vs_ai",
       hostSide: "runner",
-      seed: "observable-ai-vs-ai-long-run",
+      seed: "seed08",
       runnerDifficulty: "normal",
       corpDifficulty: "normal",
       aiDeckPolicy: "fixed",
@@ -11305,7 +11306,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const breakStep = await advanceRunnerAiStep("break Filter with Krash");
     expect(breakStep.publicEvent?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
-      aiReasonCode: "runner.semantic.encounter_survival",
+      aiReasonCode: "plan_first.runner.convert_run_window",
     });
 
     const passIceStep = await advanceRunnerAiStep(
@@ -11322,11 +11323,9 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(accessWindowStep.publicEvent?.publicPayload.actionType).toBe(
       "continue_run",
     );
-    expect([
-      "runner.plan.safe_probe_run",
-      "runner.encounter.continue",
-      "runner.semantic.simple_run_choice",
-    ]).toContain(accessWindowStep.publicEvent?.publicPayload.aiReasonCode);
+    expect(accessWindowStep.publicEvent?.publicPayload.aiReasonCode).toBe(
+      "plan_first.runner.convert_run_window",
+    );
     expect(
       JSON.stringify(accessWindowStep.publicEvent?.publicPayload),
     ).not.toMatch(
@@ -11336,7 +11335,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const accessStep = await advanceRunnerAiStep("access R&D");
     expect(accessStep.publicEvent?.publicPayload).toMatchObject({
       actionType: "access_card",
-      aiReasonCode: "runner.semantic.access_trash_steal",
+      aiReasonCode: "plan_first.runner.convert_run_window",
     });
     expect(actionTypes).toEqual([
       "break_subroutine",
@@ -11775,6 +11774,204 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(first.requesterPayload.aiTurnPresentation?.canAdvanceAi).toBe(false);
   });
 
+  it("keeps randomized Corp ICE selection actor-private, atomic, and replayable", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "ai-randomized-ice-selection",
+      chooseAiAction: (input, options): AiDecision => {
+        const hqIce = input.legalActions.find(
+          (action) =>
+            action.type === "install_card" &&
+            action.payload?.placement === "ice" &&
+            action.payload.serverId === "hq" &&
+            typeof action.payload.cardId === "string",
+        );
+        const rdIce = input.legalActions.find(
+          (action) =>
+            action.type === "install_card" &&
+            action.payload?.placement === "ice" &&
+            action.payload.serverId === "rd" &&
+            action.payload.cardId === hqIce?.payload?.cardId,
+        );
+        if (hqIce && rdIce) {
+          if (!input.matchId)
+            throw new Error("Randomized AI input is missing match binding.");
+          const quote = options?.quoteRandomizedIceInstallSelection?.({
+            schemaVersion:
+              ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
+            matchId: input.matchId,
+            side: "corp",
+            stateVersion: input.playerView.stateVersion,
+            timingPoint: input.playerView.timingPoint,
+            planStepId: "plan:corp.defend_servers:test-near-tie",
+            candidates: [
+              { actionId: hqIce.actionId, targetServerId: "hq" },
+              { actionId: rdIce.actionId, targetServerId: "rd" },
+            ],
+          });
+          if (!quote?.ok)
+            throw new Error(
+              quote?.error.message ?? "Randomized Engine quote is missing.",
+            );
+          return {
+            selectionKind: "engine_randomized_ice_install_selection",
+            engineCommand: {
+              kind: "engine_randomized_ice_install_selection",
+              quote: quote.quote,
+            },
+            reasonCode: "test.randomized_ice_near_tie",
+            explanation:
+              "Select one of two Engine-certified central ICE installs.",
+            consideredActionIds: [hqIce.actionId, rdIce.actionId],
+            fallbackUsed: false,
+            evidence: ["test_randomized_ice_near_tie"],
+            decisionDebug: {
+              schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+              aiLevel: 2,
+              summary: "Engine-certified randomized central ICE selection.",
+              planKind: "corp.defend_servers",
+              selectedActionType: "install_card",
+              fallbackUsed: false,
+            },
+            timeoutUsed: false,
+            profileId: input.profileId,
+            difficulty: input.difficulty,
+            confidence: 1,
+            reason: "test.randomized_ice_near_tie",
+          };
+        }
+        return chooseRuntimeAiAction(input, options);
+      },
+    });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "near-0",
+      corpDifficulty: "normal",
+      aiTraceMode: "detailed",
+    });
+    await submitChoice(
+      service,
+      created.matchId,
+      {
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
+      "keep",
+      "randomized-ice-setup",
+    );
+
+    let before = await service.loadForTest(created.matchId);
+    for (let step = 0; step < 4; step += 1) {
+      if (!before?.gameState)
+        throw new Error("Missing randomized ICE test state.");
+      const iceActions = getLegalActions(before.gameState, "corp").filter(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.placement === "ice" &&
+          (action.payload.serverId === "hq" ||
+            action.payload.serverId === "rd"),
+      );
+      if (iceActions.length >= 2) break;
+      const advanced = await service.advanceAi({
+        matchId: created.matchId,
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        mode: "single_step",
+      });
+      expect(advanced.ok ? "ok" : advanced.error.code).toBe("ok");
+      before = await service.loadForTest(created.matchId);
+    }
+    if (!before?.gameState)
+      throw new Error("Missing Corp action state for randomized selection.");
+    expect(
+      getLegalActions(before.gameState, "corp").filter(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.placement === "ice" &&
+          (action.payload.serverId === "hq" ||
+            action.payload.serverId === "rd"),
+      ).length,
+    ).toBeGreaterThanOrEqual(2);
+
+    const stateVersionBefore = before.gameState.stateVersion;
+    const randomCounterBefore = before.gameState.randomCounter;
+    const eventCountBefore = before.gameState.eventLog.length;
+    const preview = await service.previewAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+    });
+    expect(preview.ok).toBe(false);
+    if (preview.ok)
+      throw new Error("Randomized selection preview must not draw.");
+    expect(preview.error.code).toBe(
+      "ai_randomized_selection_requires_execution",
+    );
+    expect(JSON.stringify(preview)).not.toMatch(
+      /candidateFingerprint|test-near-tie|engine_randomized_ice_install_selection/,
+    );
+    const afterPreview = await service.loadForTest(created.matchId);
+    expect(afterPreview?.gameState.stateVersion).toBe(stateVersionBefore);
+    expect(afterPreview?.gameState.randomCounter).toBe(randomCounterBefore);
+    expect(afterPreview?.gameState.eventLog).toHaveLength(eventCountBefore);
+
+    const advanced = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      mode: "single_step",
+    });
+    expect(advanced.ok).toBe(true);
+    const after = await service.loadForTest(created.matchId);
+    if (!after?.gameState)
+      throw new Error("Missing state after randomized ICE selection.");
+    expect(after.gameState.stateVersion).toBe(stateVersionBefore + 1);
+    expect(after.gameState.randomCounter).toBe(randomCounterBefore + 1);
+    const event = after.gameState.eventLog.at(-1);
+    expect(event?.privatePayload?.corp?.action).toMatchObject({
+      kind: "engine_randomized_ice_install_selection",
+      quote: {
+        visibility: "private_to_actor",
+        planStepId: "plan:corp.defend_servers:test-near-tie",
+      },
+    });
+    const receipt = event?.privatePayload?.corp
+      ?.randomizedIceInstallSelectionReceipt as
+      | { selectedLegalAction?: LegalAction }
+      | undefined;
+    expect(receipt?.selectedLegalAction?.type).toBe("install_card");
+    expect(receipt?.selectedLegalAction?.payload?.placement).toBe("ice");
+    expect(JSON.stringify(after.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /candidateFingerprint|candidates|test-near-tie/,
+    );
+    expect(after.aiDecisionTraces?.at(-1)?.selectedActionId).toBe(
+      receipt?.selectedLegalAction?.actionId,
+    );
+
+    const replay = await service.loadReplayDiagnostics(
+      created.matchId,
+      "runner",
+    );
+    expect(replay.ok).toBe(true);
+    if (!replay.ok) throw new Error(replay.error.message);
+    expect(replay.replay.metadata.replayOk).toBe(true);
+    const randomStep = replay.replay.timeline.find(
+      (step) => step.eventId === event?.eventId,
+    );
+    expect(randomStep?.stateHashCheck.ok).toBe(true);
+    expect(randomStep?.randomDrawCounters).toEqual([randomCounterBefore]);
+    expect(
+      replay.replay.randomDrawRecords.find(
+        (entry) => entry.counter === randomCounterBefore,
+      )?.purpose,
+    ).toBe("engine_randomized_ice_install_selection");
+    expect(JSON.stringify(replay.replay)).not.toMatch(
+      /candidateFingerprint|test-near-tie|corp\.install_card\..*\.(?:hq|rd)\./,
+    );
+  });
+
   it("does not preview or execute a substitute action when the AI decision action is unknown", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ai-invalid-decision-no-substitute",
@@ -12064,6 +12261,7 @@ describe("MVP 0.2 multiplayer service", () => {
       hostSide: "runner",
       seed: "server-corp-ai-root-rez-active-runner",
       corpDifficulty: "normal",
+      aiTraceMode: "detailed",
     });
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing stored match");
@@ -12110,7 +12308,6 @@ describe("MVP 0.2 multiplayer service", () => {
         .map((action) => action.type)
         .sort(),
     ).toEqual(["decline_rez", "rez_card"]);
-
     record.gameState = gameState;
     record.match.baseline = gameState.baseline;
     record.eventLog = gameState.eventLog.map((event) =>
@@ -12152,15 +12349,47 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
-    expect(["decline_rez", "rez_card"]).toContain(
-      advanced.publicEvent?.publicPayload.actionType,
-    );
+    expect(advanced.publicEvent?.publicPayload).toMatchObject({
+      actionType: "rez_card",
+      aiReasonCode: "plan_first.corp.economy",
+    });
     expect(advanced.requesterPayload.playerView.stateVersion).toBe(
       before.playerView.stateVersion + 1,
     );
     expect(JSON.stringify(advanced.requesterPayload)).not.toContain(
       "cardInstances",
     );
+    expect(JSON.stringify(advanced.publicEvent?.publicPayload)).not.toContain(
+      "rootRezCreditOutcomeQuote",
+    );
+
+    const after = await service.loadForTest(created.matchId);
+    if (!after?.gameState)
+      throw new Error("Missing state after Corp Economy root rez.");
+    expect(after.gameState.corp.credits).toBe(7);
+    expect(after.aiDecisionTraces?.at(-1)).toMatchObject({
+      selectedActionType: "rez_card",
+      planKind: "corp.economy",
+    });
+    expect(JSON.stringify(after.aiDecisionTraces?.at(-1)?.traceJson)).toContain(
+      "plan_module:corp.economy",
+    );
+    expect(JSON.stringify(after.aiDecisionTraces?.at(-1)?.traceJson)).toContain(
+      "plan_priority_class:P3",
+    );
+
+    const replay = await service.loadReplayDiagnostics(
+      created.matchId,
+      "runner",
+    );
+    expect(replay.ok).toBe(true);
+    if (!replay.ok) throw new Error(replay.error.message);
+    expect(replay.replay.metadata.replayCheckStatus).toBe("verified");
+    expect(
+      replay.replay.timeline.find(
+        (step) => step.eventId === advanced.publicEvent?.eventId,
+      )?.stateHashCheck.ok,
+    ).toBe(true);
   });
 
   it("keeps REST ai-advance responses limited to the requesting human side", async () => {

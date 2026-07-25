@@ -176,6 +176,83 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("run-hq-repeat");
   });
 
+  it("does not flag repeated HQ pressure after the prior access increased visible HQ knowledge", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-hq-before-knowledge",
+        targetServerId: "hq",
+        hqKnownCards: 0,
+        hqUnknownCards: 5,
+      }),
+      selfplayAction("runner", 2, "access_card", {
+        selectedActionId: "access-hq-card",
+      }),
+      selfplayAction("runner", 3, "start_run", {
+        selectedActionId: "run-hq-after-knowledge",
+        targetServerId: "hq",
+        hqKnownCards: 1,
+        hqUnknownCards: 4,
+      }),
+    ]);
+
+    expect(
+      detectAiSelfplaySuspiciousDecisions([summary], {
+        detectorIds: ["repeated_no_progress_run"],
+      }),
+    ).toEqual([]);
+  });
+
+  it("does not flag Archives pressure after the visible Archives fingerprint changed", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-archives-before-change",
+        targetServerId: "archives",
+        runnerArchivesUnknownCardCount: 1,
+        runnerArchivesKnownAgenda: false,
+        runnerArchivesVisibleFingerprint: "fnv1a:before",
+      }),
+      selfplayAction("corp", 2, "install_card", {
+        selectedActionId: "corp-moves-card-to-archives",
+      }),
+      selfplayAction("runner", 3, "start_run", {
+        selectedActionId: "run-archives-after-change",
+        targetServerId: "archives",
+        runnerArchivesUnknownCardCount: 1,
+        runnerArchivesKnownAgenda: false,
+        runnerArchivesVisibleFingerprint: "fnv1a:after",
+      }),
+    ]);
+
+    expect(
+      detectAiSelfplaySuspiciousDecisions([summary], {
+        detectorIds: ["repeated_no_progress_run"],
+      }),
+    ).toEqual([]);
+  });
+
+  it("treats a Runner draw between failed run attempts as visible progress", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-rd-before-draw",
+        targetServerId: "rd",
+      }),
+      selfplayAction("runner", 2, "draw_card", {
+        selectedActionId: "draw-during-run-window",
+        runnerDrawAction: true,
+      }),
+      selfplayAction("runner", 3, "start_run", {
+        selectedActionId: "run-rd-after-draw",
+        targetServerId: "rd",
+      }),
+    ]);
+
+    expect(
+      detectAiSelfplaySuspiciousDecisions([summary], {
+        detectorIds: ["repeated_no_progress_run"],
+      }),
+    ).toEqual([]);
+  });
+
   it("flags a repeated run only when the visible decision fingerprint is stable", () => {
     const stable = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {
@@ -599,6 +676,66 @@ describe("SelfplayTraceMining", () => {
 
     expect(findings).toHaveLength(1);
     expect(findings[0]?.selectedActionId).toBe("funding-noise-2");
+  });
+
+  it("recognizes an explicit defense-plan hand buffer as recovery progress", () => {
+    const protectedDraw = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "buffer-draw-1",
+        reasonCode: "plan_first.runner.defense_and_recovery",
+        planKind: "runner.defense_and_recovery",
+      }),
+      selfplayAction("runner", 2, "draw_card", {
+        selectedActionId: "buffer-draw-2",
+        reasonCode: "plan_first.runner.defense_and_recovery",
+        planKind: "runner.defense_and_recovery",
+        debugFacts: [
+          "plan_assessment_evidence:runner_volatile_breaker_hand_buffer:4",
+        ],
+      }),
+    ]);
+    const unsupportedDraw = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "unsupported-buffer-draw-1",
+        reasonCode: "plan_first.runner.defense_and_recovery",
+        planKind: "runner.defense_and_recovery",
+      }),
+      selfplayAction("runner", 2, "draw_card", {
+        selectedActionId: "unsupported-buffer-draw-2",
+        reasonCode: "plan_first.runner.defense_and_recovery",
+        planKind: "runner.defense_and_recovery",
+        debugFacts: [
+          "plan_assessment_evidence:runner_volatile_breaker_hand_bufferish:4",
+        ],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions(
+      [protectedDraw, unsupportedDraw],
+      { detectorIds: ["recovery_low_value_loop"] },
+    );
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe(
+      "unsupported-buffer-draw-2",
+    );
+  });
+
+  it("accepts a server-bound run event materialized by a pressure plan", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "play_event", {
+        selectedActionId: "run-event-rd",
+        targetServerId: "rd",
+        planKind: "runner.pressure_central",
+        debugFacts: ["plan_step_capability:pressure_rd_information"],
+      }),
+    ]);
+
+    expect(
+      detectAiSelfplaySuspiciousDecisions([summary], {
+        detectorIds: ["plan_step_action_mismatch"],
+      }),
+    ).toEqual([]);
   });
 
   it("bounds recovery search signals to structured entries", () => {
@@ -1231,6 +1368,7 @@ function selfplaySummary(
 ): AiSimulationSummary {
   return {
     seed: "selfplay-trace-mining",
+    terminationKind: "action_limit",
     winner: "action_limit_reached",
     actions: actionSequence.length,
     turns: 2,

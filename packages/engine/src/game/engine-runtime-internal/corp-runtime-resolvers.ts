@@ -57,6 +57,8 @@ import {
 import {
   assertCorpRezCostQuoteValid,
   corpServerIdForInstalledCard,
+  fixedPlayCostCredits,
+  playCostForDefinition,
   quoteCorpIceInstallCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
@@ -880,14 +882,23 @@ export function createCorpRuntimeResolvers(
     cardId: CardInstanceId,
     definition: CardDefinition,
   ): LegalAction[] {
+    const playCost = playCostForDefinition(definition);
+    if (playCost.kind !== "variable_x")
+      throw new Error(
+        "Hardware-Trash-by-Counter braucht variable X-Play-Kosten.",
+      );
     const eligibleHardwareIds =
       hardwareTrashByCounterEligibleHardwareIds(state);
     const maxTrashCount = Math.min(
       eligibleHardwareIds.length,
-      state.corp.credits,
+      Math.floor(state.corp.credits / playCost.creditsPerX),
     );
     const actions: LegalAction[] = [];
-    for (let trashCount = 1; trashCount <= maxTrashCount; trashCount += 1) {
+    for (
+      let trashCount = playCost.minimumX;
+      trashCount <= maxTrashCount;
+      trashCount += 1
+    ) {
       actions.push(
         action(
           state,
@@ -895,11 +906,17 @@ export function createCorpRuntimeResolvers(
           "play_operation",
           `${definition.title}: ${trashCount} Hardware trashen`,
           cardId,
-          [{ clicks: 1, credits: trashCount }],
+          [{ clicks: 1, credits: trashCount * playCost.creditsPerX }],
           {
             cardId,
             hardwareTrashByCounterTrashCount: trashCount,
             eligibleHardwareCount: eligibleHardwareIds.length,
+            xValue: trashCount,
+            xMinimum: playCost.minimumX,
+            xMaximum: maxTrashCount,
+            xUpperBound: maxTrashCount,
+            xCreditsPerUnit: playCost.creditsPerX,
+            variableCostKind: "printed_play_cost",
           },
         ),
       );
@@ -911,7 +928,7 @@ export function createCorpRuntimeResolvers(
     legalAction: LegalAction,
   ): number {
     const trashCount = Number(
-      legalAction.payload?.hardwareTrashByCounterTrashCount ?? 1,
+      legalAction.payload?.hardwareTrashByCounterTrashCount,
     );
     if (!Number.isInteger(trashCount) || trashCount <= 0)
       throw new Error(
@@ -927,6 +944,33 @@ export function createCorpRuntimeResolvers(
     const trashCount = hardwareTrashByCounterTrashCountFromPayload(legalAction);
     const eligibleHardwareIds =
       hardwareTrashByCounterEligibleHardwareIds(state);
+    const cardId = String(legalAction.payload?.cardId) as CardInstanceId;
+    const definition = definitionFor(state, cardId);
+    const playCost = playCostForDefinition(definition);
+    if (playCost.kind !== "variable_x")
+      throw new Error(
+        "Hardware-Trash-by-Counter braucht variable X-Play-Kosten.",
+      );
+    const paidCredits = Number(legalAction.costs[0]?.credits);
+    const creditsBeforePlay = state.corp.credits + paidCredits;
+    const currentMaximum = Math.min(
+      eligibleHardwareIds.length,
+      Math.floor(creditsBeforePlay / playCost.creditsPerX),
+    );
+    if (
+      !Number.isInteger(paidCredits) ||
+      trashCount < playCost.minimumX ||
+      paidCredits !== trashCount * playCost.creditsPerX ||
+      Number(legalAction.payload?.xValue) !== trashCount ||
+      Number(legalAction.payload?.xMinimum) !== playCost.minimumX ||
+      Number(legalAction.payload?.xMaximum) !== currentMaximum ||
+      Number(legalAction.payload?.xUpperBound) !== currentMaximum ||
+      Number(legalAction.payload?.xCreditsPerUnit) !== playCost.creditsPerX ||
+      legalAction.payload?.variableCostKind !== "printed_play_cost"
+    )
+      throw new Error(
+        "Hardware-Trash-by-Counter hat keinen gueltigen X-Kostenvertrag.",
+      );
     if (eligibleHardwareIds.length < trashCount)
       throw new Error(
         "Hardware-Trash-by-Counter findet nicht genug nicht-Cybernetics-Hardware.",
@@ -1075,7 +1119,7 @@ export function createCorpRuntimeResolvers(
         "play_operation",
         `${definition.title} spielen`,
         cardId,
-        [{ clicks: 1, credits: definition.cost ?? 0 }],
+        [{ clicks: 1, credits: fixedPlayCostCredits(definition) }],
         { cardId, ...scoreConversionPayload },
       ),
     ];

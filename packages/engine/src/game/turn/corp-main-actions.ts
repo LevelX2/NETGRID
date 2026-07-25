@@ -1,6 +1,14 @@
 import type { GameState, LegalAction } from "@netgrid/shared";
 import { deterministicOnPlayResourcePayload } from "../../ability-engine/card-implementation-runtime-shared";
 import { canInstallCorpIceInServer } from "../install/corp-ice-install-restrictions";
+import {
+  fixedPlayCostCredits,
+  minimumPlayCostCredits,
+} from "../payment/play-cost";
+import {
+  corpRootRezCreditOutcomeQuotePayload,
+  quoteCorpRootRezCreditOutcome,
+} from "../payment/root-rez-credit-outcome";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -434,9 +442,14 @@ export function buildCorpMainActions(
   const newDataFortCreationLocked = corpNewDataFortCreationLocked(state);
   for (const id of state.corp.hq) {
     const definition = definitionFor(state, id);
+    const operationMinimumPlayCost =
+      definition.type === "operation"
+        ? minimumPlayCostCredits(definition)
+        : undefined;
     if (
       definition.type === "operation" &&
-      state.corp.credits >= (definition.cost ?? 0) &&
+      operationMinimumPlayCost !== undefined &&
+      state.corp.credits >= operationMinimumPlayCost &&
       canPlayCorpOperation(state, definition)
     ) {
       if (
@@ -460,7 +473,14 @@ export function buildCorpMainActions(
           id,
           definition,
         );
-      if (implementationActions.length > 0) {
+      const implementationOwnsLegalActionProjection =
+        cardImplementationOwnsCorpOperationLegalActionProjection(
+          host.cards.cardImplementationForDefinitionId(definition.id),
+        );
+      if (
+        implementationActions.length > 0 ||
+        implementationOwnsLegalActionProjection
+      ) {
         actions.push(...implementationActions);
         continue;
       }
@@ -471,7 +491,7 @@ export function buildCorpMainActions(
           "play_operation",
           `${definition.title} spielen`,
           id,
-          [{ clicks: 1, credits: definition.cost ?? 0 }],
+          [{ clicks: 1, credits: fixedPlayCostCredits(definition) }],
           {
             cardId: id,
             ...deterministicOnPlayResourcePayload(definition, "corp"),
@@ -590,19 +610,30 @@ export function buildCorpMainActions(
       ) {
         const rezQuote = quoteCorpRootRezCost(state, id);
         if (!rezQuote.canPay) continue;
-        actions.push(
-          action(
-            state,
-            "corp",
-            "rez_card",
-            `Karte in ${server.label} rezzen`,
-            id,
-            rezQuote.costs.map((cost: Record<string, unknown>) => ({
-              ...cost,
-            })),
-            { ...rezQuote.publicPayload },
-          ),
+        const rezAction = action(
+          state,
+          "corp",
+          "rez_card",
+          `Karte in ${server.label} rezzen`,
+          id,
+          rezQuote.costs.map((cost: Record<string, unknown>) => ({
+            ...cost,
+          })),
+          { ...rezQuote.publicPayload },
         );
+        const creditOutcomeQuote = quoteCorpRootRezCreditOutcome(
+          state,
+          id,
+          rezAction.actionId,
+          rezQuote.finalCredits,
+        );
+        if (creditOutcomeQuote) {
+          rezAction.payload = {
+            ...(rezAction.payload ?? {}),
+            ...corpRootRezCreditOutcomeQuotePayload(creditOutcomeQuote),
+          };
+        }
+        actions.push(rezAction);
       }
     }
   }
@@ -767,4 +798,22 @@ export function buildCorpMainActions(
     );
   }
   return filterActionsForRestrictedExtraActions(state, "corp", actions);
+}
+
+function cardImplementationOwnsCorpOperationLegalActionProjection(
+  implementation:
+    | {
+        abilities?: readonly {
+          effects?: readonly { kind?: string }[];
+        }[];
+      }
+    | undefined,
+): boolean {
+  return (
+    implementation?.abilities?.some((ability) =>
+      ability.effects?.some(
+        (effect) => effect.kind === "free_rez_installed_ice_with_counters",
+      ),
+    ) === true
+  );
 }

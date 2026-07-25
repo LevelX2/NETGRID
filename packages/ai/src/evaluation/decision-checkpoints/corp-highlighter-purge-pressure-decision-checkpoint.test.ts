@@ -4,11 +4,20 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("corp Highlighter purge pressure checkpoint", () => {
-  it("purges visible Runner-virus multiaccess pressure", () => {
+  it("keeps exact score-defense draw above noncritical virus pressure", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(checkpointJson) as AiDecisionCheckpointV1,
     );
 
-    expect(result).toMatchObject({ ok: true });
+    expect(result).toMatchObject({
+      ok: true,
+      decision: {
+        actionId: "corp.draw_card",
+        reasonCode: "plan_first.corp.defend_servers",
+      },
+    });
+    expect(result.decision?.decisionDebug?.visibleReasons).toContain(
+      "plan_priority_class:P4",
+    );
   });
 });

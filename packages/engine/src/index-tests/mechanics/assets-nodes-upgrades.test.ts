@@ -2281,7 +2281,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     });
   });
 
-  it("covers V1.9.18 counter and hidden-zone upgrade actions with migrated tag-condition suppression", () => {
+  it("does not offer a legacy counter action for Dr. Dreff", () => {
     let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
       "v1918-counter-tag-hidden-actions",
     );
@@ -2302,23 +2302,14 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         rezzed: true,
       };
     }
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1918UpgradeAbility === "add_power_counter",
-    );
-    expect(cardCounterAmount(state, drDreffId, "power")).toBe(1);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
-      abilityId: "add_power_counter",
-      addedCounterAmount: 1,
-      remainingCounters: 1,
-    });
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.v1918UpgradeAbility === "add_power_counter" &&
+          action.payload?.cardId === drDreffId,
+      ),
+    ).toBe(false);
 
     expect(
       getLegalActions(state, "corp").some(
@@ -2340,9 +2331,6 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       /"privatePayload"|"cardInstances"|"hq"|"rd"/,
     );
     expect(validateGameState(state).ok).toBe(true);
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("applies Crystal Palace Station Grid break_subroutine_cost only on its fort", () => {

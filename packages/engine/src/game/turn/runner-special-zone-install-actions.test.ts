@@ -33,7 +33,7 @@ function runnerCardDefinition(
 }
 
 describe("runner special zone install action builders", () => {
-  it("builds Valu-Pak install and sequence-end actions without mutating state", () => {
+  it("builds Valu-Pak install and sequence-stop actions without mutating state", () => {
     const state = createGame({
       seed: "arch-12-valu-pak-actions",
       setupMode: "completed",
@@ -49,8 +49,9 @@ describe("runner special zone install action builders", () => {
         "Valu-Pak Program",
         1,
       ),
+      remainingActions: 5,
     });
-    const endSequence = buildRunnerValuPakSequenceEndAction(state);
+    const endSequence = buildRunnerValuPakSequenceEndAction(state, 5);
 
     expect(install).toMatchObject({
       actionId: "runner.install_card.valu_pak_program.valu_pak_program",
@@ -64,20 +65,34 @@ describe("runner special zone install action builders", () => {
         v1922ValuPakInstallAction: true,
         actionCapacityRestriction: "program_install_only",
         actionCapacityAllowedActionType: "install_card",
+        actionCapacityAllowedCardType: "program",
         actionCapacityReliability: "guaranteed",
         actionCapacityExpiresAt: "side_turn_end",
+        restrictedActionGrantActionType: "install_card",
+        restrictedActionGrantCostProfile: "temporary_credit_bundle",
+        restrictedActionGrantRemainingActions: 5,
       },
       targetRequirements: [],
       visibility: "public",
     });
     expect(endSequence).toMatchObject({
-      actionId: "runner.end_turn",
+      actionId: "runner.stop_restricted_action_sequence",
       side: "runner",
-      type: "end_turn",
-      label: "Zug beenden",
+      type: "stop_restricted_action_sequence",
+      label: "Valu-Pak-Installationssequenz beenden",
       source: "game_rule",
       costs: [],
-      payload: { v1922ValuPakSequenceEnd: true },
+      payload: {
+        v1922ValuPakSequenceStop: true,
+        actionCapacityRestriction: "program_install_only",
+        actionCapacityAllowedActionType: "install_card",
+        actionCapacityAllowedCardType: "program",
+        actionCapacityReliability: "guaranteed",
+        actionCapacityExpiresAt: "side_turn_end",
+        restrictedActionGrantActionType: "install_card",
+        restrictedActionGrantCostProfile: "temporary_credit_bundle",
+        restrictedActionGrantRemainingActions: 5,
+      },
       visibility: "private_to_actor",
     });
     expect(state).toEqual(before);

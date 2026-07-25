@@ -80,7 +80,6 @@ export function createSemanticRuntimeCorpScoringComposition<
       advanceCompletesScore: board.semanticRuntimeCorpAdvanceCompletesScore,
       remoteHasScoreLine: board.semanticRuntimeCorpRemoteHasScoreLine,
       isRemoteServerTarget: dependencies.isRemoteServerTarget,
-      visibleIceRezCost: board.semanticRuntimeVisibleIceRezCost,
       actionSourceCard: board.semanticRuntimeCorpActionSourceCard,
       rolesForAction: dependencies.rolesForAction,
       remoteIsProtected: board.semanticRuntimeCorpRemoteIsProtected,

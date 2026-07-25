@@ -1,7 +1,9 @@
 import type {
   AbilityPayloadDiscriminatorField,
+  EngineRandomizedIceInstallSelectionCommand,
   PlayerAction,
 } from "@netgrid/shared";
+import { ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION } from "@netgrid/shared";
 
 // Only current execution discriminators that contribute to Action IDs belong
 // here. The order is deterministic because replay and stale-action validation
@@ -75,5 +77,34 @@ export function isReplayCompatibilityActionPayload(
     typeof record.side === "string" &&
     typeof record.actionId === "string" &&
     typeof record.clientKnownStateVersion === "number"
+  );
+}
+
+export function isReplayRandomizedIceInstallSelectionCommand(
+  value: unknown,
+): value is EngineRandomizedIceInstallSelectionCommand {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Partial<EngineRandomizedIceInstallSelectionCommand>;
+  if (
+    record.kind !== "engine_randomized_ice_install_selection" ||
+    !record.quote ||
+    typeof record.quote !== "object"
+  ) {
+    return false;
+  }
+  const quote = record.quote;
+  return (
+    quote.schemaVersion ===
+      ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION &&
+    quote.visibility === "private_to_actor" &&
+    quote.complete === true &&
+    typeof quote.matchId === "string" &&
+    quote.side === "corp" &&
+    typeof quote.stateVersion === "number" &&
+    typeof quote.timingPoint === "string" &&
+    typeof quote.planStepId === "string" &&
+    typeof quote.candidateFingerprint === "string" &&
+    Array.isArray(quote.candidates) &&
+    Array.isArray(quote.legalActions)
   );
 }

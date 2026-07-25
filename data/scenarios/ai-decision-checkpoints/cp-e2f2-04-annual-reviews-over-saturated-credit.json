@@ -6027,15 +6027,27 @@
   "expectation": {
     "acceptableActions": [
       {
-        "sourceDefinitionId": "onr_v1_282_annual-reviews",
-        "type": "play_operation"
+        "sourceDefinitionId": "onr_v1_312_chicago-branch",
+        "targetServerId": "new_remote",
+        "type": "install_card"
       }
     ],
     "contractKind": "correctness",
     "forbiddenActions": [
       {
         "type": "gain_credit"
+      },
+      {
+        "sourceDefinitionId": "onr_v1_282_annual-reviews",
+        "type": "play_operation"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
+      "acceptableCapabilities": ["develop_card"],
+      "requiredAssessmentEvidence": [
+        "corp_score_acceleration_campaign_setup:onr_v1_312_chicago-branch"
+      ]
+    }
   }
 }

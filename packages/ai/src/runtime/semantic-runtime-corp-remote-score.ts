@@ -6,7 +6,11 @@ import {
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { rolesMatch } from "./role-match";
 import { createAiHintsByCard } from "../ai-hints";
-import { buildCorpIceCardPlacementProfile } from "./corp-ice-placement/corp-ice-placement";
+import {
+  buildCorpIceCardFacts,
+  corpIcePlacementActionCreditCostFact,
+  corpIcePlacementPostInstallRezCostFact,
+} from "./corp-ice-placement/corp-ice-placement";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import {
   semanticRuntimeCorpScoringWindowAssessment,
@@ -56,7 +60,6 @@ export type SemanticRuntimeCorpRemoteScoreDependencies<
     input: AiDecisionInput,
     action: LegalAction,
   ) => boolean;
-  visibleIceRezCost: (card: VisibleCard) => number | undefined;
   actionSourceCard: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -390,7 +393,7 @@ function semanticRuntimeCorpDynamicOnlyRemoteIce(
 function semanticRuntimeCorpRemoteInstallHasDynamicProtectionRisk(
   card: VisibleCard | undefined,
 ): boolean {
-  return buildCorpIceCardPlacementProfile(card).positionDependent;
+  return buildCorpIceCardFacts(card).positionDependent;
 }
 
 function semanticRuntimeCorpCentralIceInstallScore<
@@ -409,21 +412,25 @@ function semanticRuntimeCorpCentralIceInstallScore<
     input,
     serverId,
   );
-  const rezCost = sourceCard
-    ? (dependencies.visibleIceRezCost(sourceCard) ?? sourceCard.rezCost ?? 0)
-    : 0;
-  const creditsAfterInstall =
-    input.playerView.own.credits - dependencies.actionCreditCost(action);
-  const canRez = rezCost <= creditsAfterInstall;
-  const visibleCoverage = sourceCard
-    ? semanticRuntimeCorpVisibleRunnerCoverageCanBreakIce(
-        input,
-        sourceCard,
-        profile,
-        creditsAfterInstall,
-        rezCost,
-      )
-    : false;
+  const actionCost = corpIcePlacementActionCreditCostFact(action);
+  const rezCost = corpIcePlacementPostInstallRezCostFact(input, action);
+  if (
+    !sourceCard ||
+    actionCost.status !== "known" ||
+    rezCost.status !== "known"
+  ) {
+    return 0;
+  }
+  const creditsAfterInstall = input.playerView.own.credits - actionCost.amount;
+  const canRez = rezCost.amount <= creditsAfterInstall;
+  if (!canRez) return 0;
+  const visibleCoverage = semanticRuntimeCorpVisibleRunnerCoverageCanBreakIce(
+    input,
+    sourceCard,
+    profile,
+    creditsAfterInstall,
+    rezCost.amount,
+  );
   const positionDependentWeakSolo =
     profile.positionDependent && firstCentralIce;
   const yieldsToActiveScoreline =
@@ -434,7 +441,6 @@ function semanticRuntimeCorpCentralIceInstallScore<
     );
 
   if (yieldsToActiveScoreline) {
-    if (!canRez) return -350;
     if (profile.hasAccessStop && !visibleCoverage) {
       return centralThreat ? 250 : 100;
     }
@@ -445,16 +451,6 @@ function semanticRuntimeCorpCentralIceInstallScore<
     return 0;
   }
 
-  if (!canRez) {
-    if (
-      semanticRuntimeCorpHasActiveRemoteScoreline(input) &&
-      creditsAfterInstall <= 0
-    ) {
-      return -1500;
-    }
-    if (centralThreat) return firstCentralIce ? 250 : 150;
-    return firstCentralIce ? 100 : 50;
-  }
   if (profile.hasAccessStop && !visibleCoverage) {
     if (centralThreat) return firstCentralIce ? 1350 : 950;
     return firstCentralIce ? 1050 : 750;
@@ -529,7 +525,7 @@ export function semanticRuntimeCorpCentralIceProfile(
   modeChoice: boolean;
   definitionId?: string;
 } {
-  const profile = buildCorpIceCardPlacementProfile(card);
+  const profile = buildCorpIceCardFacts(card);
   return {
     hasAccessStop: profile.immediateStop,
     hasTaxOrDamage:

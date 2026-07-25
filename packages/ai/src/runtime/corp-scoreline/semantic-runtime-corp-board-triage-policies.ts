@@ -15,7 +15,15 @@ import {
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "../semantic-runtime-corp-effective-defense";
 import { semanticRuntimeCorpCentralIceProfile } from "../semantic-runtime-corp-remote-score";
-import { corpIcePlacementCandidateForAction } from "../corp-ice-placement/corp-ice-placement";
+import {
+  corpIcePlacementActionCreditCostFact,
+  corpIcePlacementPostInstallRezCostFact,
+} from "../corp-ice-placement/corp-ice-placement";
+import {
+  assessCorpScoreProtection,
+  compareExactProbabilities,
+  type CorpScoreProtectionIceInput,
+} from "../corp-score-protection-assessment";
 import type {
   CorpScoringWindowAssessment,
   CorpScoringWindowAgendaStealSeverity,
@@ -1012,22 +1020,29 @@ export function fundableCentralProtectionCandidate<TConsumer extends string>(
   input: AiDecisionInput,
   action: LegalAction,
   serverId: "hq" | "rd",
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  _dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): { requiredCredits: number; evidence: string[] } | undefined {
-  const source = semanticRuntimeVisibleSourceCard(input, action);
-  if (!source || source.known === false) return undefined;
-  const profile = semanticRuntimeCorpCentralIceProfile(source);
-  if (!profile.hasAccessStop || profile.positionDependent) return undefined;
-  const actionCost = Math.max(0, dependencies.actionCreditCost(action));
-  const rezCost = corpTriagePositiveNumber(source.rezCost);
-  if (rezCost === undefined) return undefined;
+  const actionCost = corpIcePlacementActionCreditCostFact(action);
+  const rezCost = corpIcePlacementPostInstallRezCostFact(input, action);
+  if (
+    actionCost.status !== "known" ||
+    rezCost.status !== "known" ||
+    !projectedIceProvidesExactAccessImprovement(input, action, serverId)
+  ) {
+    return undefined;
+  }
+  const requiredCredits = actionCost.amount + rezCost.amount;
+  if (!Number.isSafeInteger(requiredCredits)) return undefined;
   return {
-    requiredCredits: actionCost + rezCost,
+    requiredCredits,
     evidence: [
       `corp_central_protection_floor_server:${serverId}`,
       `corp_central_protection_floor_action:${action.actionId}`,
-      `corp_central_protection_floor_credits:${actionCost + rezCost}`,
-      `corp_central_protection_floor_rez_cost:${rezCost}`,
+      `corp_central_protection_floor_credits:${requiredCredits}`,
+      `corp_central_protection_floor_install_cost:${actionCost.amount}`,
+      `corp_central_protection_floor_rez_cost:${rezCost.amount}`,
+      "corp_central_protection_floor_rez_cost_source:engine_post_install_rez_quote",
+      "corp_central_protection_floor_effect_source:exact_access_probability",
     ],
   };
 }
@@ -1288,7 +1303,7 @@ export function sameTargetProtectionInstallRezFloor<TConsumer extends string>(
   input: AiDecisionInput,
   actions: readonly ScoredLegalAction[],
   serverId: string | undefined,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  _dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): number | undefined {
   if (!serverId) return undefined;
   const candidates = actions
@@ -1299,13 +1314,24 @@ export function sameTargetProtectionInstallRezFloor<TConsumer extends string>(
         entry.action.payload?.placement === "ice",
     )
     .map((entry) => {
-      const source = semanticRuntimeVisibleSourceCard(input, entry.action);
-      const rezCost =
-        source && source.known !== false
-          ? corpTriagePositiveNumber(source.rezCost)
-          : undefined;
-      if (rezCost === undefined) return undefined;
-      return rezCost + Math.max(0, dependencies.actionCreditCost(entry.action));
+      const actionCost = corpIcePlacementActionCreditCostFact(entry.action);
+      const rezCost = corpIcePlacementPostInstallRezCostFact(
+        input,
+        entry.action,
+      );
+      if (
+        actionCost.status !== "known" ||
+        rezCost.status !== "known" ||
+        !projectedIceProvidesExactAccessImprovement(
+          input,
+          entry.action,
+          serverId,
+        )
+      ) {
+        return undefined;
+      }
+      const total = actionCost.amount + rezCost.amount;
+      return Number.isSafeInteger(total) ? total : undefined;
     })
     .filter((value): value is number => value !== undefined && value > 0)
     .sort((left, right) => left - right);
@@ -2088,66 +2114,110 @@ export function installedIceProvidesConcreteCentralProtection(
   input: AiDecisionInput,
   action: LegalAction,
   serverId: "hq" | "rd",
-  dependencies: CorpBoardTriageDependencies<string>,
+  _dependencies: CorpBoardTriageDependencies<string>,
 ): boolean {
-  const source = semanticRuntimeVisibleSourceCard(input, action);
-  if (!source || source.known === false) return true;
-  const profile = semanticRuntimeCorpCentralIceProfile(source);
-  const placementCandidate = corpIcePlacementCandidateForAction({
-    input,
-    action,
-    serverId,
-    server: input.playerView.servers.find((server) => server.id === serverId),
-    sourceCard: source,
-    actionCreditCost: dependencies.actionCreditCost(action),
-    iceRezCost: source.rezCost,
-  });
-  const placementIsConcrete =
-    placementCandidate?.recommendation === "install_now" &&
-    placementCandidate.components.visibleZeroEffect >= 0;
-  if (!placementIsConcrete) return false;
-  if (profile.hasAccessStop && !profile.positionDependent) {
-    return true;
-  }
-  if (
-    serverId === "hq" &&
-    installedIceHasPunishTaxOrDamagePotential(source, profile) &&
-    punishPrimaryHqTaxOrDamageIceCanCountAsProtection(input)
-  ) {
-    return true;
-  }
-  return false;
+  return installedIceProvidesExactAccessImprovement(input, action, serverId);
 }
 
 export function installedIceProvidesConcreteRemoteScoreProtection(
   input: AiDecisionInput,
   action: LegalAction,
   serverId: string,
-  dependencies: CorpBoardTriageDependencies<string>,
-  options: { urgentScoreline?: boolean } = {},
+  _dependencies: CorpBoardTriageDependencies<string>,
+  _options: { urgentScoreline?: boolean } = {},
 ): boolean {
   if (serverId !== "new_remote" && !serverId.startsWith("remote_")) {
     return false;
   }
+  return installedIceProvidesExactAccessImprovement(input, action, serverId);
+}
+
+function installedIceProvidesExactAccessImprovement(
+  input: AiDecisionInput,
+  action: LegalAction,
+  serverId: string,
+): boolean {
+  const installCost = corpIcePlacementActionCreditCostFact(action);
+  const rezCost = corpIcePlacementPostInstallRezCostFact(input, action);
+  const totalDefenseCredits =
+    installCost.status === "known" && rezCost.status === "known"
+      ? installCost.amount + rezCost.amount
+      : undefined;
+  if (
+    installCost.status !== "known" ||
+    rezCost.status !== "known" ||
+    !Number.isSafeInteger(totalDefenseCredits) ||
+    input.playerView.own.credits < totalDefenseCredits!
+  ) {
+    return false;
+  }
+  return projectedIceProvidesExactAccessImprovement(input, action, serverId);
+}
+
+function projectedIceProvidesExactAccessImprovement(
+  input: AiDecisionInput,
+  action: LegalAction,
+  serverId: string,
+): boolean {
   const source = semanticRuntimeVisibleSourceCard(input, action);
-  if (!source || source.known === false) return true;
-  const profile = semanticRuntimeCorpCentralIceProfile(source);
-  const placementCandidate = corpIcePlacementCandidateForAction({
-    input,
-    action,
-    serverId,
-    server: input.playerView.servers.find((server) => server.id === serverId),
-    sourceCard: source,
-    actionCreditCost: dependencies.actionCreditCost(action),
-    iceRezCost: source.rezCost,
-    hasUrgentScoreline: options.urgentScoreline === true,
+  if (
+    !source ||
+    source.known === false ||
+    !source.definitionId ||
+    corpIcePlacementPostInstallRezCostFact(input, action).status !== "known"
+  ) {
+    return false;
+  }
+  const currentServer =
+    serverId === "new_remote"
+      ? undefined
+      : input.playerView.servers.find((server) => server.id === serverId);
+  if (serverId !== "new_remote" && !currentServer) return false;
+  const currentIce = (currentServer?.ice ?? []).map((card) =>
+    visibleIceForExactAccessAssessment(card),
+  );
+  const projectedIce = visibleIceForExactAccessAssessment(source, true);
+  const assessmentInput = {
+    runnerRig: input.playerView.opponent.rig ?? [],
+    runnerCredits: input.playerView.opponent.credits,
+    maximumRunnerAccessSuccessProbability: {
+      numerator: 0,
+      denominator: 1,
+    },
+  } as const;
+  const before = assessCorpScoreProtection({
+    ...assessmentInput,
+    serverIce: currentIce,
   });
-  const placementIsConcrete =
-    placementCandidate?.recommendation === "install_now" &&
-    placementCandidate.components.visibleZeroEffect >= 0;
-  if (!placementIsConcrete) return false;
-  if (profile.hasAccessStop && !profile.positionDependent) return true;
-  return false;
+  const after = assessCorpScoreProtection({
+    ...assessmentInput,
+    serverIce: [...currentIce, projectedIce],
+  });
+  return (
+    before.knowledge === "known" &&
+    after.knowledge === "known" &&
+    compareExactProbabilities(
+      after.runnerAccessSuccessProbability,
+      before.runnerAccessSuccessProbability,
+    ) === -1
+  );
+}
+
+function visibleIceForExactAccessAssessment(
+  card: VisibleCard,
+  rezzed = card.rezzed === true,
+): CorpScoreProtectionIceInput {
+  return {
+    instanceId: card.instanceId,
+    known: card.known,
+    ...(card.definitionId ? { definitionId: card.definitionId } : {}),
+    rezzed,
+    ...(card.strength !== undefined ? { strength: card.strength } : {}),
+    ...(card.subtypes ? { subtypes: card.subtypes.slice() } : {}),
+    ...(card.effectiveRunQuote
+      ? { effectiveRunQuote: card.effectiveRunQuote }
+      : {}),
+  };
 }
 
 export function installedIceHasPunishTaxOrDamagePotential(

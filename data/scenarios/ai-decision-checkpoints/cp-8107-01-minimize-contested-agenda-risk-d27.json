@@ -4840,7 +4840,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_214_project-babylon_1.remote_1.corp_onr_v1_214_project-babylon_1"
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [

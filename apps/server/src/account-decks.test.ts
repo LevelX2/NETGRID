@@ -14,7 +14,7 @@ describe("AccountDeckService", () => {
   it("publishes only curated standards and snapshots all of them as valid immutable decks", () => {
     const service = new AccountDeckService(new InMemoryAccountDeckStorage());
     const standards = service.listStandards();
-    expect(standards).toHaveLength(40);
+    expect(standards).toHaveLength(42);
     expect(standards.every((deck) => deck.status === "active" && deck.standardDeckId.startsWith("standard_"))).toBe(true);
     for (const standard of standards) {
       const snapshot = service.standardSnapshot(standard.standardDeckId);

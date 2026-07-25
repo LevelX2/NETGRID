@@ -8799,8 +8799,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.decline_trash"
-      }
-    ]
+      "actionId": "runner.trash_accessed_card.corp_onr_v1_337_rockerboy-promotion_1.3"
+    }
+  ],
+  "planExecution": {
+    "acceptablePlanKinds": ["runner.convert_run_window"],
+    "acceptableCapabilities": ["convert_active_run_window"],
+    "requiredAssessmentEvidence": ["visible_active_run"]
+  }
   }
 }

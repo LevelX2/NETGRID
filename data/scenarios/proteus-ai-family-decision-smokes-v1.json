@@ -94,20 +94,14 @@
         "onr_proteus_037_scaffolding",
         "onr_proteus_041_toughoniumtm-wall",
         "onr_proteus_042_tumblers",
-        "onr_proteus_045_washed-up-solo-construct",
         "onr_proteus_047_credit-consolidation",
         "onr_proteus_048_data-sifters",
         "onr_proteus_050_manhunt",
         "onr_proteus_052_schlaghund-pointers",
-        "onr_proteus_053_underworld-mole",
         "onr_proteus_055_cybertech-think-tank",
         "onr_proteus_056_department-of-misinformation",
-        "onr_proteus_065_networked-center",
         "onr_proteus_067_panic-button",
         "onr_proteus_070_rasmin-bridger",
-        "onr_proteus_072_research-bunker",
-        "onr_proteus_077_weapons-depot",
-        "onr_proteus_079_big-frackin-gun",
         "onr_proteus_081_boring-bit",
         "onr_proteus_082_bulldozer",
         "onr_proteus_083_corrosion",
@@ -115,11 +109,9 @@
         "onr_proteus_095_skeleton-passkeys",
         "onr_proteus_100_wrecking-ball",
         "onr_proteus_103_cruising-for-netwatch",
-        "onr_proteus_110_hijack",
         "onr_proteus_114_on-the-fast-track",
         "onr_proteus_119_promises-promises",
-        "onr_proteus_135_cortical-stimulators",
-        "onr_proteus_146_precision-bribery"
+        "onr_proteus_135_cortical-stimulators"
       ],
       "positiveDecisionAssertions": [
         "legal_action_only",
@@ -141,6 +133,11 @@
       "id": "proteus_complex_multi_ability",
       "family": "complex_multi_ability",
       "cards": [
+        "onr_proteus_045_washed-up-solo-construct",
+        "onr_proteus_053_underworld-mole",
+        "onr_proteus_065_networked-center",
+        "onr_proteus_072_research-bunker",
+        "onr_proteus_077_weapons-depot",
         "onr_proteus_134_cortical-cybermodem",
         "onr_proteus_151_sunburst-cranial-interface"
       ],
@@ -215,7 +212,6 @@
       "family": "run_modification",
       "cards": [
         "onr_proteus_105_demolition-run",
-        "onr_proteus_106_disgruntled-ice-technician",
         "onr_proteus_120_reconnaissance",
         "onr_proteus_121_remote-detonator",
         "onr_proteus_122_rush-hour"
@@ -250,10 +246,14 @@
         "onr_proteus_044_walking-wall",
         "onr_proteus_051_rent-to-own-contract",
         "onr_proteus_060_herman-revista",
+        "onr_proteus_079_big-frackin-gun",
         "onr_proteus_080_black-widow",
         "onr_proteus_085_disintegrator",
         "onr_proteus_088_fubar",
-        "onr_proteus_092_morphing-tool"
+        "onr_proteus_092_morphing-tool",
+        "onr_proteus_106_disgruntled-ice-technician",
+        "onr_proteus_110_hijack",
+        "onr_proteus_146_precision-bribery"
       ],
       "positiveDecisionAssertions": [
         "legal_target_only",

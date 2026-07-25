@@ -16,10 +16,7 @@ export type SemanticRuntimeCorpFundingContestabilityCompositionDependencies =
   SemanticRuntimeVisibleCardContextDependencies &
     Parameters<typeof createSemanticRuntimeCorpCentralRezContext>[0] &
     Parameters<typeof createSemanticRuntimeCorpRemoteContestabilityContext>[0] &
-    Omit<
-      Parameters<typeof createSemanticRuntimeCorpRezFloorContext>[0],
-      "visibleIceRezCost"
-    >;
+    Parameters<typeof createSemanticRuntimeCorpRezFloorContext>[0];
 
 export function createSemanticRuntimeCorpFundingContestabilityComposition(
   dependencies: SemanticRuntimeCorpFundingContestabilityCompositionDependencies,
@@ -28,7 +25,6 @@ export function createSemanticRuntimeCorpFundingContestabilityComposition(
     normalizedRulesTextForDefinition,
     semanticRuntimeVisibleCardType,
     semanticRuntimeVisibleCardAdvancementRequirement,
-    semanticRuntimeVisibleIceRezCost,
   } = createSemanticRuntimeVisibleCardContext({
     runtimeDefinition: dependencies.runtimeDefinition,
     demoDefinition: dependencies.demoDefinition,
@@ -45,7 +41,6 @@ export function createSemanticRuntimeCorpFundingContestabilityComposition(
     advanceCompletesScore: dependencies.advanceCompletesScore,
     actionIsScoreLine: dependencies.actionIsScoreLine,
     remoteHasScoreLine: dependencies.remoteHasScoreLine,
-    visibleIceRezCost: semanticRuntimeVisibleIceRezCost,
   });
 
   const {
@@ -73,7 +68,6 @@ export function createSemanticRuntimeCorpFundingContestabilityComposition(
     normalizedRulesTextForDefinition,
     semanticRuntimeVisibleCardType,
     semanticRuntimeVisibleCardAdvancementRequirement,
-    semanticRuntimeVisibleIceRezCost,
     semanticRuntimeCorpRemoteRezFloorAssessment,
     semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
     semanticRuntimeCorpCentralRezReserveAssessment,

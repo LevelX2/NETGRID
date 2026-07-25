@@ -34,8 +34,12 @@ export function applyCostAndTimingProfiles(
 }
 
 export function costProfileForAction(action: LegalAction): ActionCostProfile {
-  const clickCost = sumCost(action, "clicks");
-  const explicitCreditCost = sumCost(action, "credits");
+  const clickCostDimension = exactCostDimension(action, "clicks");
+  const creditCostDimension = exactCostDimension(action, "credits");
+  const clickCost =
+    clickCostDimension.status === "known"
+      ? clickCostDimension.value
+      : undefined;
   const payloadCreditCost =
     numberPayload(action, "accessTrashTotalCost") ??
     numberPayload(action, "stealCost") ??
@@ -43,7 +47,12 @@ export function costProfileForAction(action: LegalAction): ActionCostProfile {
     numberPayload(action, "rezCostPaid") ??
     numberPayload(action, "corpCreditsSpent") ??
     numberPayload(action, "runnerCreditsSpent");
-  const creditCost = explicitCreditCost ?? payloadCreditCost;
+  const creditCost =
+    creditCostDimension.status === "known"
+      ? creditCostDimension.explicit
+        ? creditCostDimension.value
+        : (payloadCreditCost ?? creditCostDimension.value)
+      : payloadCreditCost;
   const trashCost = numberPayload(action, "accessTrashTotalCost");
   const agendaPointCost =
     numberPayload(action, "agendaPointCost") ??
@@ -91,15 +100,29 @@ export function costProfileForAction(action: LegalAction): ActionCostProfile {
   };
 }
 
-function sumCost(
+function exactCostDimension(
   action: LegalAction,
   key: "clicks" | "credits",
-): number | undefined {
-  const values = action.costs
-    .map((cost) => cost[key])
-    .filter((value): value is number => typeof value === "number");
-  if (values.length === 0) return undefined;
-  return values.reduce((sum, value) => sum + value, 0);
+):
+  | { status: "not_applicable" | "invalid" }
+  | { status: "known"; value: number; explicit: boolean } {
+  if (action.costs.length === 0) return { status: "not_applicable" };
+  let value = 0;
+  let explicit = false;
+  for (const cost of action.costs) {
+    const component = cost[key];
+    if (component === undefined) continue;
+    if (
+      !Number.isSafeInteger(component) ||
+      component < 0 ||
+      !Number.isSafeInteger(value + component)
+    ) {
+      return { status: "invalid" };
+    }
+    explicit = true;
+    value += component;
+  }
+  return { status: "known", value, explicit };
 }
 
 function stringPayload(action: LegalAction, key: string): string | undefined {
@@ -290,6 +313,9 @@ function additionalCostFields(action: LegalAction): string[] {
     "xMinimum",
     "xMaxValue",
     "xMaximum",
+    "xUpperBound",
+    "xCreditsPerUnit",
+    "variableCostKind",
     "creditsRemainingAfterCost",
     "postActionCredits",
   ];

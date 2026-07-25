@@ -1,5 +1,6 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type {
+  GuaranteeLevel,
   PlanAssessment,
   PriorityClass,
   PriorityClaim,
@@ -16,38 +17,131 @@ import type {
   PlanSchedulerContext,
 } from "./plan-scheduler";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import type { RunnerTargetedBypassCommitment } from "../runtime/runner-targeted-bypass-plan";
 
 export type RunnerPressureSignal = {
   pressureId: string;
   serverId: "hq" | "rd" | "archives";
   purpose: "access" | "multiaccess" | "information";
   strategyLineIds: string[];
-  priorityClass: "P4" | "P5";
+  priorityClass: "P2" | "P4" | "P5" | "P6";
   reachable: boolean;
   marginalValue: number;
   evidenceCode: string;
   sourceDefinitionIds?: string[];
+  runActionIds?: string[];
+  runActionValues?: Record<string, number>;
+  runActionEvidence?: Record<string, string[]>;
+  runActionExclusions?: Record<string, string[]>;
+  preparationActionIds?: string[];
+  supportNeedId?: string;
+  routePreparation?:
+    | "release_run_lock"
+    | "develop_payoff"
+    | "targeted_bypass";
+  targetedBypassCommitment?: RunnerTargetedBypassCommitment;
+  encounterCreditSpendLimit?: number;
+  accessCommitment?: RunnerRunAccessCommitmentSignal;
 };
 
 export type RunnerRemoteContestSignal = {
   contestId: string;
   serverId: string;
+  purpose: "contest" | "information";
   knownAgendaThreat: boolean;
   reachable: boolean;
   marginalValue: number;
+  constrainedActionCapacity?: boolean;
   evidenceCode: string;
+  runActionAssessments: Record<
+    string,
+    {
+      verdict: "executable" | "explicitly_nonproductive";
+      stepValue: number;
+      evidenceCodes: string[];
+    }
+  >;
+  preparationActionIds?: string[];
+  supportNeedId?: string;
+  routePreparation?:
+    | "release_run_lock"
+    | "expose_remote"
+    | "prepare_access_payoff"
+    | "targeted_bypass";
+  targetedBypassCommitment?: RunnerTargetedBypassCommitment;
+  encounterCreditSpendLimit?: number;
+  accessCommitment?: RunnerRunAccessCommitmentSignal;
+};
+
+export type RunnerRunAccessCommitmentSignal = {
+  payoff:
+    | "agenda"
+    | "score_threat"
+    | "trash_affordable"
+    | "trash_unaffordable"
+    | "known_low_value"
+    | "unknown"
+    | "fresh"
+    | "access_bonus";
+  intendedAction: "steal" | "trash" | "decline" | "access";
+  knownTargetDefinitionIds: string[];
+  trashBudget: number;
+  evidenceCode: string;
+};
+
+export type RunnerRestrictedProgramInstallSequenceStep = {
+  order: number;
+  cardInstanceId: string;
+  definitionId: string;
+  installCost: number;
+  memoryCost: number;
+  projectedRunnerCreditsAfter: number;
+  projectedMemoryAvailableAfter: number;
+  projectedGripCountAfter: number;
+  purposeCode: string;
+  evidenceCode: string;
+};
+
+export type RunnerRestrictedProgramInstallSequenceCommitment = {
+  kind: "restricted_program_install_sequence";
+  sourceActionId: string;
+  sourceCardInstanceId: string;
+  sourceDefinitionId: string;
+  plannedAtStateVersion: number;
+  runnerCreditsBeforeOpening: number;
+  grantedActionCount: number;
+  temporaryInstallCredits: number;
+  minimumCreditFloor: number;
+  minimumHandBuffer: number;
+  ordinaryClicksAfterOpening: number;
+  targetSteps: RunnerRestrictedProgramInstallSequenceStep[];
+  admissionReason: "multiple_productive_programs" | "acute_temporary_credit_bridge";
+  evidenceCodes: string[];
 };
 
 export type RunnerDevelopmentSignal = {
   developmentId: string;
   definitionId: string;
+  targetKind?: "card" | "capability";
+  phase:
+    | "execute"
+    | "fund"
+    | "prepare_restricted_sequence"
+    | "open_restricted_sequence"
+    | "execute_restricted_sequence"
+    | "complete_restricted_sequence";
   purposeCode?: string;
   assignedDomainPlanIds: string[];
   duplicateAlreadyInstalled: boolean;
   affordableOrSupportable: boolean;
   semanticActionTypes: string[];
+  actionIds: string[];
+  fundingGap?: number;
+  priorityClass: "P3" | "P4" | "P5" | "P6";
   value: number;
   evidenceCode: string;
+  evidenceCodes?: string[];
+  restrictedProgramInstallCommitment?: RunnerRestrictedProgramInstallSequenceCommitment;
 };
 
 export type RunnerRunWindowSignal = {
@@ -58,6 +152,18 @@ export type RunnerRunWindowSignal = {
   semanticActionTypes: string[];
   purposeCode: string;
   evidenceCode: string;
+  accessCommitment?: RunnerRunAccessCommitmentSignal;
+  safetyIntent?: "jack_out";
+  safetyEvidenceCode?: string;
+  encounterIntent?: "mitigate_threat";
+  encounterEvidenceCode?: string;
+  actionAssessments?: Record<string, RunnerRunWindowActionAssessment>;
+};
+
+export type RunnerRunWindowActionAssessment = {
+  admissible: boolean;
+  value?: number;
+  evidenceCodes: string[];
 };
 
 export type RunnerTerminalWinSignal = {
@@ -148,6 +254,10 @@ function terminalWinModule(): PlanModule {
             "End the Runner turn to force the rules-proven empty-R&D mandatory draw.",
         },
         candidates: terminalWinCandidates(context, current.signal),
+        earlyEndTurnJustification: {
+          kind: "rules_proven_terminal_win",
+          terminalCondition: "corp_empty_rd_mandatory_draw",
+        },
       };
     },
   };
@@ -202,16 +312,59 @@ export function runnerVoluntaryActionFamilyOwner(
       : undefined;
   }
   if (candidate.semanticActionType === "economy.gain_credit") {
-    return candidate.sourceKind === "basic_action"
-      ? "runner.basic_credit"
-      : "runner.economy";
+    if (
+      planDomain.defense.reactionReserveNeed?.actionIds.includes(
+        candidate.actionId,
+      ) === true
+    ) {
+      return "runner.defense_and_recovery";
+    }
+    if (
+      planDomain.coverageGaps.some(
+        (gap) => gap.answerInHand && (gap.fundingGap ?? 0) > 0,
+      )
+    ) {
+      return "runner.rig_and_coverage";
+    }
+    return planDomain.fundingNeeds.some((need) => need.gap > 0)
+      ? "runner.economy"
+      : undefined;
   }
   if (
     candidate.semanticActionType === "tag.remove" ||
+    candidate.semanticActionType === "counter.remove_trace_tag" ||
+    candidate.semanticActionType === "counter.remove_runner_hazard" ||
+    planDomain.defense.handBufferActionIds?.includes(candidate.actionId) ===
+      true ||
     candidate.semanticActionType.startsWith("damage.prevent")
   )
     return "runner.defense_and_recovery";
-  if (candidate.semanticActionType === "run.start") {
+  if (
+    planDomain.coverageGaps.some((gap) =>
+      [
+        ...gap.directSearchActionIds,
+        ...(gap.rejectedSearchActionIds ?? []),
+        ...gap.searchEngineSetupActionIds,
+        ...gap.drawForAnswerActionIds,
+      ].includes(candidate.actionId),
+    )
+  ) {
+    return "runner.rig_and_coverage";
+  }
+  if (
+    planDomain.runWindows.some(
+      (window) => window.actionAssessments?.[candidate.actionId] !== undefined,
+    )
+  ) {
+    return "runner.convert_run_window";
+  }
+  if (
+    candidate.semanticActionType === "run.start" ||
+    candidate.runProjectionSummary?.serverId !== undefined
+  ) {
+    if (planDomain.defense.forgoUnsafeRunCapacity) {
+      return "runner.defense_and_recovery";
+    }
     const server = candidate.runProjectionSummary?.serverId;
     if (
       server &&
@@ -240,9 +393,15 @@ export function runnerVoluntaryActionFamilyOwner(
     candidate.semanticActionType === "card_ability.trigger"
   ) {
     if (
-      candidate.sourceDefinitionId &&
-      planDomain.developments.some(
-        (signal) => signal.definitionId === candidate.sourceDefinitionId,
+      planDomain.centralPressure.some((signal) =>
+        signal.preparationActionIds?.includes(candidate.actionId),
+      )
+    ) {
+      return "runner.pressure_central";
+    }
+    if (
+      planDomain.developments.some((signal) =>
+        signal.actionIds.includes(candidate.actionId),
       )
     )
       return "runner.develop_board_and_hand";
@@ -270,42 +429,98 @@ function centralPressureModule(): PlanModule {
           signal.priorityClass,
           signal.strategyLineIds,
           { kind: "server", id: signal.serverId },
-          signal.reachable && signal.marginalValue > 0 && candidates.length > 0,
+          (signal.supportNeedId !== undefined ||
+            (signal.reachable && candidates.length > 0)) &&
+            signal.marginalValue > 0,
           signal.evidenceCode,
+          undefined,
+          signal.routePreparation === "develop_payoff" ||
+          signal.routePreparation === "targeted_bypass"
+            ? {
+                phase: "develop_payoff",
+                blockerCode: "central_pressure_payoff_route_unavailable",
+                evidenceCodes: [
+                  `central_pressure_preparation_actions:${signal.preparationActionIds?.length ?? 0}`,
+                ],
+              }
+            : undefined,
         );
       }),
     assess: (instance, context, portfolio) => {
       const current = state<PressureState>(instance);
       const candidates = pressureCandidates(context, current.signal);
-      return assessment(
+      const routeExists =
+        current.signal.reachable &&
+        current.signal.marginalValue > 0 &&
+        candidates.length > 0;
+      const result = assessment(
         instance,
         current.signal.priorityClass,
-        current.signal.reachable &&
-          current.signal.marginalValue > 0 &&
-          candidates.length > 0,
+        routeExists,
         current.signal.marginalValue,
         portfolio.executorInstanceId,
+        undefined,
+        current.signal.routePreparation === "targeted_bypass"
+          ? "belief_supported"
+          : "visible_state_forced",
       );
+      if (!routeExists && current.signal.supportNeedId) {
+        result.blockers = [
+          {
+            code: "waiting_for_bound_funding_support",
+            owner: "plan_module",
+            removable: true,
+            resumeCondition: { code: current.signal.supportNeedId },
+          },
+        ];
+      }
+      return result;
     },
     materialize: (instance, _assessment, context) => {
       const current = state<PressureState>(instance);
+      const candidates = pressureCandidates(context, current.signal);
       return {
         step: {
           stepId: `${instance.instanceId}:pressure:${current.signal.serverId}`,
           capability: {
-            capabilityId: `pressure_${current.signal.serverId}_${current.signal.purpose}`,
-            semanticActionTypes: ["run.start", "play.runner_event"],
-            ...(current.signal.sourceDefinitionIds
+            capabilityId:
+              (current.signal.routePreparation === "develop_payoff" ||
+                current.signal.routePreparation === "targeted_bypass") &&
+              current.signal.sourceDefinitionIds?.[0]
+                ? `develop_${current.signal.sourceDefinitionIds[0]}`
+                : `pressure_${current.signal.serverId}_${current.signal.purpose}`,
+            semanticActionTypes: [
+              ...new Set(
+                candidates.map(
+                  (candidate) => candidate.candidate.semanticActionType,
+                ),
+              ),
+            ],
+            ...((current.signal.routePreparation === "develop_payoff" ||
+              current.signal.routePreparation === "targeted_bypass") &&
+            current.signal.sourceDefinitionIds
               ? {
                   requiredSourceDefinitionIds:
                     current.signal.sourceDefinitionIds,
                 }
               : {}),
           },
-          target: { kind: "server", id: current.signal.serverId },
-          purpose: `Execute ${current.signal.purpose} pressure on ${current.signal.serverId}.`,
+          ...(current.signal.routePreparation
+            ? {}
+            : {
+                target: {
+                  kind: "server" as const,
+                  id: current.signal.serverId,
+                },
+              }),
+          purpose:
+            current.signal.routePreparation === "targeted_bypass"
+              ? `Execute the preflighted targeted bypass route on ${current.signal.serverId}.`
+              : current.signal.routePreparation === "develop_payoff"
+                ? `Develop ${current.signal.purpose} payoff for ${current.signal.serverId}.`
+              : `Execute ${current.signal.purpose} pressure on ${current.signal.serverId}.`,
         },
-        candidates: pressureCandidates(context, current.signal),
+        candidates,
       };
     },
   };
@@ -322,42 +537,81 @@ function remoteContestModule(): PlanModule {
           "runner.contest_remote",
           signal.contestId,
           { kind: "remote_contest", signal } satisfies RemoteState,
-          signal.knownAgendaThreat ? "P2" : "P4",
+          remotePriority(signal),
           [],
           { kind: "server", id: signal.serverId },
-          signal.reachable && signal.marginalValue > 0 && candidates.length > 0,
+          (signal.supportNeedId !== undefined ||
+            (signal.reachable && candidates.length > 0)) &&
+            signal.marginalValue > 0,
           signal.evidenceCode,
         );
       }),
     assess: (instance, context, portfolio) => {
       const current = state<RemoteState>(instance);
-      return assessment(
-        instance,
-        current.signal.knownAgendaThreat ? "P2" : "P4",
+      const routeExists =
         current.signal.reachable &&
-          current.signal.marginalValue > 0 &&
-          remoteCandidates(context, current.signal).length > 0,
+        current.signal.marginalValue > 0 &&
+        remoteCandidates(context, current.signal).length > 0;
+      const result = assessment(
+        instance,
+        remotePriority(current.signal),
+        routeExists,
         current.signal.marginalValue,
         portfolio.executorInstanceId,
         current.signal.knownAgendaThreat ? "score_threat" : undefined,
+        current.signal.routePreparation === "targeted_bypass"
+          ? "belief_supported"
+          : "visible_state_forced",
       );
+      if (!routeExists && current.signal.supportNeedId) {
+        result.blockers = [
+          {
+            code: "waiting_for_bound_funding_support",
+            owner: "plan_module",
+            removable: true,
+            resumeCondition: { code: current.signal.supportNeedId },
+          },
+        ];
+      }
+      return result;
     },
     materialize: (instance, _assessment, context) => {
       const current = state<RemoteState>(instance);
+      const candidates = remoteCandidates(context, current.signal);
       return {
         step: {
           stepId: `${instance.instanceId}:contest`,
           capability: {
             capabilityId: "contest_remote",
-            semanticActionTypes: ["run.start"],
+            semanticActionTypes: [
+              ...new Set(
+                candidates.map(
+                  (candidate) => candidate.candidate.semanticActionType,
+                ),
+              ),
+            ],
           },
-          target: { kind: "server", id: current.signal.serverId },
+          ...(current.signal.routePreparation
+            ? {}
+            : {
+                target: {
+                  kind: "server" as const,
+                  id: current.signal.serverId,
+                },
+              }),
           purpose: `Contest visible remote ${current.signal.serverId}.`,
         },
-        candidates: remoteCandidates(context, current.signal),
+        candidates,
       };
     },
   };
+}
+
+function remotePriority(
+  signal: RunnerRemoteContestSignal,
+): "P2" | "P4" | "P6" {
+  if (signal.knownAgendaThreat) return "P2";
+  return signal.constrainedActionCapacity ? "P6" : "P4";
 }
 
 function developmentModule(): PlanModule {
@@ -382,11 +636,27 @@ function developmentModule(): PlanModule {
             "runner.develop_board_and_hand",
             signal.developmentId,
             { kind: "development", signal } satisfies DevelopmentState,
-            "P5",
+            signal.priorityClass,
             signal.assignedDomainPlanIds,
-            { kind: "card", id: signal.definitionId },
+            {
+              kind: signal.targetKind ?? "card",
+              id: signal.definitionId,
+            },
             candidates.length > 0,
             `${signal.evidenceCode}:${admission.reasonCode}`,
+            undefined,
+            {
+              phase: signal.phase,
+              blockerCode:
+                signal.phase === "fund"
+                  ? "development_funding_route_unavailable_this_turn"
+                  : signal.phase === "prepare_restricted_sequence"
+                    ? "productive_program_bundle_not_ready"
+                  : "development_action_route_unavailable",
+              ...(signal.evidenceCodes
+                ? { evidenceCodes: signal.evidenceCodes }
+                : {}),
+            },
           ),
         ];
       }),
@@ -394,7 +664,7 @@ function developmentModule(): PlanModule {
       const current = state<DevelopmentState>(instance);
       return assessment(
         instance,
-        "P5",
+        current.signal.priorityClass,
         developmentCandidates(context, current.signal).length > 0,
         current.signal.value,
         portfolio.executorInstanceId,
@@ -402,16 +672,66 @@ function developmentModule(): PlanModule {
     },
     materialize: (instance, _assessment, context) => {
       const current = state<DevelopmentState>(instance);
+      const funding = current.signal.phase === "fund";
+      const preparingRestrictedSequence =
+        current.signal.phase === "prepare_restricted_sequence";
+      const openingRestrictedSequence =
+        current.signal.phase === "open_restricted_sequence";
+      const executingRestrictedSequence =
+        current.signal.phase === "execute_restricted_sequence";
+      const completingRestrictedSequence =
+        current.signal.phase === "complete_restricted_sequence";
       return {
         step: {
-          stepId: `${instance.instanceId}:develop`,
+          stepId: `${instance.instanceId}:${current.signal.phase}`,
           capability: {
-            capabilityId: `develop_${current.signal.definitionId}`,
+            capabilityId: preparingRestrictedSequence
+              ? "prepare_productive_program_install_sequence"
+              : openingRestrictedSequence
+                ? "open_committed_program_install_sequence"
+                : executingRestrictedSequence
+                  ? "execute_next_committed_program_install"
+                  : completingRestrictedSequence
+                    ? "complete_committed_program_install_sequence"
+              : funding
+                ? `fund_${current.signal.definitionId}`
+                : `develop_${current.signal.definitionId}`,
             semanticActionTypes: current.signal.semanticActionTypes,
-            requiredSourceDefinitionIds: [current.signal.definitionId],
+            ...(funding ||
+            openingRestrictedSequence ||
+            executingRestrictedSequence ||
+            completingRestrictedSequence ||
+            current.signal.targetKind === "capability"
+              ? {}
+              : {
+                  requiredSourceDefinitionIds: [
+                    current.signal.definitionId,
+                  ],
+                }),
           },
-          target: { kind: "card", id: current.signal.definitionId },
-          purpose: `Develop ${current.signal.definitionId} for ${current.signal.purposeCode ?? "assigned domain plan"}.`,
+          ...(funding ||
+          openingRestrictedSequence ||
+          executingRestrictedSequence ||
+          completingRestrictedSequence ||
+          current.signal.targetKind === "capability"
+            ? {}
+            : {
+                target: {
+                  kind: "card" as const,
+                  id: current.signal.definitionId,
+                },
+              }),
+          purpose: openingRestrictedSequence
+              ? "Open a Valu-Pak sequence only for a concrete, resource-feasible ordered program-install commitment."
+              : preparingRestrictedSequence
+                ? "Keep Valu-Pak resident while waiting for a concrete bundle of currently meaningful, jointly feasible programs."
+              : executingRestrictedSequence
+                ? "Execute the next program in the committed Valu-Pak installation order."
+                : completingRestrictedSequence
+                  ? "Close the completed Valu-Pak installation sequence without ending the Runner turn."
+            : funding
+              ? `Fund the resident ${current.signal.definitionId} development plan.`
+              : `Develop ${current.signal.definitionId} for ${current.signal.purposeCode ?? "assigned domain plan"}.`,
         },
         candidates: developmentCandidates(context, current.signal),
       };
@@ -482,6 +802,11 @@ function proposal(
   routeExists: boolean,
   evidenceCode: string,
   parentInstanceId?: string,
+  options?: {
+    phase?: string;
+    blockerCode?: string;
+    evidenceCodes?: string[];
+  },
 ): PlanProposal {
   return {
     moduleId,
@@ -510,14 +835,14 @@ function proposal(
     },
     target,
     ...(parentInstanceId ? { parentInstanceId } : {}),
-    phase: "execute",
+    phase: options?.phase ?? "execute",
     milestone: "admitted",
     moduleState: structuredClone(moduleState),
     blockers: routeExists
       ? []
       : [
           {
-            code: "no_current_tactical_route",
+            code: options?.blockerCode ?? "no_current_tactical_route",
             owner: "plan_module",
             removable: true,
             resumeCondition: { code: "route_becomes_available" },
@@ -529,17 +854,24 @@ function proposal(
       { code: "target_invalidated" },
       { code: "marginal_value_exhausted" },
     ],
-    evidenceRefs: [{ code: evidenceCode, source: "visible_state" }],
+    evidenceRefs: [
+      { code: evidenceCode, source: "visible_state" },
+      ...(options?.evidenceCodes ?? []).map((code) => ({
+        code,
+        source: "visible_state" as const,
+      })),
+    ],
   };
 }
 
 function assessment(
   instance: PlanInstance,
-  priorityClass: "P1" | "P2" | "P3" | "P4" | "P5",
+  priorityClass: "P1" | "P2" | "P3" | "P4" | "P5" | "P6",
   routeExists: boolean,
   value: number,
   executorId: string | undefined,
   p2Reason: "score_threat" | undefined = undefined,
+  guarantee: GuaranteeLevel = "visible_state_forced",
 ): PlanAssessment {
   const claim: PriorityClaim =
     priorityClass === "P1"
@@ -566,7 +898,7 @@ function assessment(
                   ? "score_threat"
                   : "irreversible_threat",
               evidenceCode: instance.evidenceRefs[0]?.code ?? "visible_threat",
-              guarantee: "visible_state_forced",
+              guarantee,
               ...(instance.target ? { target: instance.target } : {}),
             },
           }
@@ -582,10 +914,16 @@ function assessment(
                 reasonCode: "strategic_campaign",
                 horizon: "multi_turn",
               }
-            : {
+          : priorityClass === "P5"
+            ? {
                 requestedClass: "P5",
                 reasonCode: "development_need",
                 horizon: "multi_turn",
+              }
+            : {
+                requestedClass: "P6",
+                reasonCode: "neutral_progress",
+                horizon: "current_turn",
               };
   return {
     instanceId: instance.instanceId,
@@ -607,7 +945,7 @@ function assessment(
       currentRouteHeadPossible: routeExists,
       projectedActionCount: routeExists ? 1 : 0,
       opponentCanReact: priorityClass !== "P3",
-      confidence: "visible_state_forced",
+      confidence: guarantee,
     },
     resourceGaps: [],
     expectedOutcome: {
@@ -616,7 +954,7 @@ function assessment(
       expectedValue: routeExists ? value : 0,
       maximumValue: routeExists ? value : 0,
       terminal: false,
-      guarantee: "visible_state_forced",
+      guarantee,
     },
     continuity: {
       isCurrentForeground: executorId === instance.instanceId,
@@ -634,41 +972,151 @@ function pressureCandidates(
   context: PlanSchedulerContext,
   signal: RunnerPressureSignal,
 ): PlanMaterialization["candidates"] {
-  return context.actionCandidates
+  if (
+    signal.routePreparation === "develop_payoff" ||
+    signal.routePreparation === "targeted_bypass"
+  ) {
+    const preparationActionIds = new Set(
+      signal.preparationActionIds ?? [],
+    );
+    return context.actionCandidates
+      .filter((candidate) => preparationActionIds.has(candidate.actionId))
+      .map((candidate) => ({
+        candidate,
+        stepValue: signal.marginalValue,
+      }));
+  }
+  const runCandidates = context.actionCandidates
     .filter(
       (candidate) =>
-        ((candidate.semanticActionType === "run.start" &&
-          candidate.runProjectionSummary?.serverId === signal.serverId) ||
-          (candidate.semanticActionType === "play.runner_event" &&
-            candidate.sourceDefinitionId !== undefined &&
-            candidate.runProjectionSummary?.serverId === signal.serverId &&
-            (signal.sourceDefinitionIds ?? []).includes(
-              candidate.sourceDefinitionId,
-            ))) &&
+        (signal.runActionIds?.length
+          ? signal.runActionIds.includes(candidate.actionId)
+          : (candidate.semanticActionType === "run.start" &&
+              candidate.runProjectionSummary?.serverId === signal.serverId) ||
+            (candidate.semanticActionType === "play.runner_event" &&
+              candidate.sourceDefinitionId !== undefined &&
+              candidate.runProjectionSummary?.serverId === signal.serverId &&
+              (signal.sourceDefinitionIds ?? []).includes(
+                candidate.sourceDefinitionId,
+              ))) &&
         signal.reachable &&
         signal.marginalValue > 0,
-    )
+    );
+  const directRunAvailable = runCandidates.some(
+    (candidate) => candidate.semanticActionType === "run.start",
+  );
+  return runCandidates
     .map((candidate) => ({
       candidate,
       stepValue:
         signal.marginalValue +
-        (candidate.semanticActionType === "play.runner_event" ? 5 : 0),
+        runnerCardRunRoutePreference(
+          context,
+          candidate,
+          signal.serverId,
+          directRunAvailable,
+        ) +
+        (signal.runActionValues?.[candidate.actionId] ?? 0),
     }));
+}
+
+function runnerCardRunRoutePreference(
+  context: PlanSchedulerContext,
+  candidate: ActionSemanticCandidate,
+  serverId: RunnerPressureSignal["serverId"],
+  directRunAvailable: boolean,
+): number {
+  if (candidate.semanticActionType !== "play.runner_event") return 0;
+  if (
+    !directRunAvailable ||
+    runnerCardRunHasVisibleDifferentialPayoff(context, candidate, serverId)
+  ) {
+    return 5;
+  }
+  const knownCreditCost =
+    candidate.costProfile.costKnownStatus === "known" &&
+    Number.isSafeInteger(candidate.costProfile.creditCost) &&
+    candidate.costProfile.creditCost! >= 0
+      ? candidate.costProfile.creditCost!
+      : 0;
+  return -1 - knownCreditCost;
+}
+
+function runnerCardRunHasVisibleDifferentialPayoff(
+  context: PlanSchedulerContext,
+  candidate: ActionSemanticCandidate,
+  serverId: RunnerPressureSignal["serverId"],
+): boolean {
+  const server = context.input.playerView.servers.find(
+    (entry) => entry.id === serverId,
+  );
+  if (!server) return false;
+  if (
+    candidate.conditions.some(
+      (condition) => condition.status === "absent",
+    )
+  ) {
+    return false;
+  }
+  if (
+    candidate.conditions.some(
+      (condition) => condition.kind === "requires_encounter",
+    ) &&
+    server.ice.length === 0
+  ) {
+    return false;
+  }
+  if (
+    candidate.conditions.some(
+      (condition) => condition.kind === "requires_rezzed_ice",
+    ) &&
+    !server.ice.some((ice) => ice.rezzed === true)
+  ) {
+    return false;
+  }
+  return (candidate.effectTargets ?? []).some((target) => {
+    if (target === "make_run" || target === "ends_run_after_effect") {
+      return false;
+    }
+    if (target === "derez") {
+      return server.ice.some((ice) => ice.rezzed === true);
+    }
+    if (target === "bypass_first_ice") return server.ice.length > 0;
+    return true;
+  });
 }
 
 function remoteCandidates(
   context: PlanSchedulerContext,
   signal: RunnerRemoteContestSignal,
 ): PlanMaterialization["candidates"] {
+  if (
+    signal.routePreparation === "expose_remote" ||
+    signal.routePreparation === "prepare_access_payoff" ||
+    signal.routePreparation === "targeted_bypass"
+  ) {
+    const preparationActionIds = new Set(
+      signal.preparationActionIds ?? [],
+    );
+    return context.actionCandidates
+      .filter((candidate) => preparationActionIds.has(candidate.actionId))
+      .map((candidate) => ({
+        candidate,
+        stepValue: signal.marginalValue,
+      }));
+  }
   return context.actionCandidates
-    .filter(
-      (candidate) =>
-        candidate.semanticActionType === "run.start" &&
-        candidate.runProjectionSummary?.serverId === signal.serverId &&
-        signal.reachable &&
-        signal.marginalValue > 0,
-    )
-    .map((candidate) => ({ candidate, stepValue: signal.marginalValue }));
+    .flatMap((candidate) => {
+      const assessment = signal.runActionAssessments[candidate.actionId];
+      if (
+        assessment?.verdict !== "executable" ||
+        !signal.reachable ||
+        signal.marginalValue <= 0
+      ) {
+        return [];
+      }
+      return [{ candidate, stepValue: assessment.stepValue }];
+    });
 }
 
 function developmentCandidates(
@@ -678,10 +1126,84 @@ function developmentCandidates(
   return context.actionCandidates
     .filter(
       (candidate) =>
-        candidate.sourceDefinitionId === signal.definitionId &&
-        signal.semanticActionTypes.includes(candidate.semanticActionType),
+        signal.actionIds.includes(candidate.actionId) &&
+        (signal.phase === "fund" ||
+          signal.phase === "open_restricted_sequence" ||
+          signal.phase === "execute_restricted_sequence" ||
+          signal.phase === "complete_restricted_sequence" ||
+          signal.targetKind === "capability" ||
+          candidate.sourceDefinitionId === signal.definitionId) &&
+        signal.semanticActionTypes.includes(candidate.semanticActionType) &&
+        !runnerOptionalProgramTrashInstallHasDirectSibling(context, candidate),
     )
-    .map((candidate) => ({ candidate, stepValue: signal.value }));
+    .map((candidate) => ({
+      candidate,
+      stepValue:
+        signal.phase === "fund"
+          ? signal.value +
+            Math.min(
+              signal.fundingGap ?? 0,
+              Math.max(
+                0,
+                candidate.economyProjection?.netLiquidCreditGain ?? 0,
+              ),
+            ) *
+              20
+          : signal.value,
+    }));
+}
+
+function runnerOptionalProgramTrashInstallHasDirectSibling(
+  context: PlanSchedulerContext,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  if (candidate.semanticActionType !== "install.card") return false;
+  const action = context.input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  const optionalProgramTrashInstall =
+    action?.payload?.runnerProgramTrashBeforeInstall === true ||
+    candidate.actionId.endsWith(".runner_program_trash_before_install");
+  if (!optionalProgramTrashInstall) return false;
+  const sourceCardInstanceId = runnerInstallSourceCardInstanceId(
+    context,
+    candidate,
+  );
+  if (!sourceCardInstanceId) return false;
+  return context.actionCandidates.some((alternative) => {
+    if (
+      alternative.actionId === candidate.actionId ||
+      alternative.semanticActionType !== "install.card" ||
+      runnerInstallSourceCardInstanceId(context, alternative) !==
+        sourceCardInstanceId
+    ) {
+      return false;
+    }
+    const alternativeAction = context.input.legalActions.find(
+      (entry) => entry.actionId === alternative.actionId,
+    );
+    return (
+      alternativeAction?.payload?.runnerProgramTrashBeforeInstall !== true &&
+      !alternative.actionId.endsWith(".runner_program_trash_before_install")
+    );
+  });
+}
+
+function runnerInstallSourceCardInstanceId(
+  context: PlanSchedulerContext,
+  candidate: ActionSemanticCandidate,
+): string | undefined {
+  if (candidate.sourceCardInstanceId) return candidate.sourceCardInstanceId;
+  const action = context.input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  const cardId = action?.payload?.cardId;
+  if (typeof cardId === "string" && cardId.length > 0) return cardId;
+  return typeof action?.source === "string" &&
+    action.source.length > 0 &&
+    action.source !== "basic_action"
+    ? action.source
+    : undefined;
 }
 
 function runWindowCandidates(
@@ -692,11 +1214,83 @@ function runWindowCandidates(
     .filter(
       (candidate) =>
         signal.semanticActionTypes.includes(candidate.semanticActionType) &&
+        signal.actionAssessments?.[candidate.actionId]?.admissible === true &&
         (!signal.serverId ||
           candidate.runProjectionSummary?.serverId === signal.serverId ||
+          signal.actionAssessments?.[
+            candidate.actionId
+          ]?.evidenceCodes.includes(
+            "runner_engine_restricted_run_sequence_continuation",
+          ) === true ||
           candidate.semanticActionType.startsWith("access.")),
     )
-    .map((candidate) => ({ candidate, stepValue: 100 }));
+    .map((candidate) => ({
+      candidate,
+      stepValue: runWindowCandidateValue(
+        context,
+        candidate,
+        signal.accessCommitment,
+        signal.safetyIntent,
+        signal.encounterIntent,
+        signal.actionAssessments?.[candidate.actionId]?.value,
+      ),
+    }));
+}
+
+function runWindowCandidateValue(
+  context: PlanSchedulerContext,
+  candidate: ActionSemanticCandidate,
+  commitment: RunnerRunAccessCommitmentSignal | undefined,
+  safetyIntent?: RunnerRunWindowSignal["safetyIntent"],
+  encounterIntent?: RunnerRunWindowSignal["encounterIntent"],
+  assessedValue?: number,
+): number {
+  if (safetyIntent === "jack_out") {
+    if (candidate.actionType === "jack_out")
+      return (assessedValue ?? 0) + 5_000;
+    if (candidate.actionType === "continue_run")
+      return (assessedValue ?? 0) - 5_000;
+  }
+  if (
+    encounterIntent === "mitigate_threat" &&
+    assessedValue === undefined
+  ) {
+    if (candidate.semanticActionType === "breaker.break_subroutine")
+      return 450;
+    if (candidate.semanticActionType === "breaker.boost_strength") return 350;
+    if (candidate.actionType === "continue_run") return 0;
+  }
+  if (candidate.actionType === "steal_agenda") return 400;
+  if (!commitment) return assessedValue ?? 100;
+  if (commitment.intendedAction === "decline") {
+    if (candidate.actionType === "decline_trash")
+      return (assessedValue ?? 0) + 200;
+    return candidate.actionType === "trash_accessed_card"
+      ? (assessedValue ?? 0) - 200
+      : (assessedValue ?? 100);
+  }
+  if (commitment.intendedAction !== "trash") return 100;
+  const committedTrashCandidates = context.actionCandidates.filter(
+    (entry) =>
+      entry.actionType === "trash_accessed_card" &&
+      entry.sourceDefinitionId !== undefined &&
+      commitment.knownTargetDefinitionIds.includes(entry.sourceDefinitionId) &&
+      actionCreditCost(entry) <= commitment.trashBudget,
+  );
+  if (candidate.actionType === "decline_trash") {
+    return committedTrashCandidates.length > 0
+      ? (assessedValue ?? 0) - 200
+      : (assessedValue ?? 100);
+  }
+  return committedTrashCandidates.some(
+    (entry) => entry.actionId === candidate.actionId,
+  )
+    ? (assessedValue ?? 0) + 200
+    : (assessedValue ?? 100);
+}
+
+function actionCreditCost(candidate: ActionSemanticCandidate): number {
+  return Math.max(0, candidate.costProfile.creditCost ?? 0);
 }
 
 function terminalWinCandidates(
@@ -707,7 +1301,8 @@ function terminalWinCandidates(
     .filter(
       (candidate) =>
         signal.semanticActionTypes.includes(candidate.semanticActionType) &&
-        candidate.actionType === "end_turn",
+        candidate.actionType === "end_turn" &&
+        candidate.sourceKind === "game_rule",
     )
     .map((candidate) => ({ candidate, stepValue: 1 }));
 }

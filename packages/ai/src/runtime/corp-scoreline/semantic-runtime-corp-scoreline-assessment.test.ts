@@ -348,7 +348,6 @@ function scoreline(
       ) === true,
     isRemoteServerTarget: (serverId) =>
       serverId?.startsWith("remote_") === true,
-    visibleIceRezCost: (card) => card.rezCost ?? 0,
     actionSourceCard: sourceCard,
     rolesForAction: (_input, action) =>
       action.type === "gain_credit" ? ["economy"] : [],

@@ -119,6 +119,21 @@ export function corpUpgradeInstallPlacementComponent(
     return agendaDifficultyPlacementComponent(params.serverId, server, evidence);
   }
 
+  if (
+    params.actionSemanticCandidate?.sourceDefinitionId ===
+    "onr_v1_358_dr-dreff"
+  ) {
+    return {
+      key: "corp_upgrade_install_placement_defer",
+      label: "Upgrade-Placement vertagen",
+      value: -900,
+      reason: [
+        ...evidence,
+        "defer_reason:dr_dreff_requires_engine_certified_future_encounter_route",
+      ].join("|"),
+    };
+  }
+
   if (hasSignal(signals, "condition.during_hq_run")) {
     return hqOnlyPlacementComponent(params.serverId, evidence);
   }
@@ -132,7 +147,12 @@ export function corpUpgradeInstallPlacementComponent(
   }
 
   if (hasIceSupportSignal(signals)) {
-    return iceSupportPlacementComponent(params.serverId, server, evidence);
+    return iceSupportPlacementComponent(
+      params.serverId,
+      server,
+      signals,
+      evidence,
+    );
   }
 
   if (
@@ -299,6 +319,7 @@ function remoteCapacityPlacementComponent(
 function iceSupportPlacementComponent(
   serverId: string | undefined,
   server: VisibleCorpServer | undefined,
+  signals: ReadonlySet<string>,
   evidence: string[],
 ): AiDecisionScoreComponent {
   if (serverId === undefined || serverId === "new_remote") {
@@ -309,23 +330,35 @@ function iceSupportPlacementComponent(
       reason: [...evidence, "defer_reason:no_existing_ice_fort"].join("|"),
     };
   }
-  if (server !== undefined && server.ice.length > 0) {
+  const requiresUnrezzedIce = hasRezSupportSignal(signals);
+  const supportedIceCount =
+    server?.ice.filter(
+      (ice) => !requiresUnrezzedIce || ice.rezzed !== true,
+    ).length ?? 0;
+  if (supportedIceCount > 0) {
     return {
       key: "corp_upgrade_install_placement_fit",
       label: "Upgrade-Zielserver passend",
-      value: 750,
+      value: 750 + Math.max(0, supportedIceCount - 1) * 50,
       reason: [
         ...evidence,
-        "fit:ice_support_existing_ice",
-        `ice_count:${server.ice.length}`,
+        requiresUnrezzedIce
+          ? "fit:ice_rez_support_existing_unrezzed_ice"
+          : "fit:ice_support_existing_ice",
+        `supported_ice_count:${supportedIceCount}`,
       ].join("|"),
     };
   }
   return {
     key: "corp_upgrade_install_placement_defer",
     label: "Upgrade-Placement vertagen",
-    value: 0,
-    reason: [...evidence, "defer_reason:ice_support_without_ice"].join("|"),
+    value: -900,
+    reason: [
+      ...evidence,
+      requiresUnrezzedIce && (server?.ice.length ?? 0) > 0
+        ? "defer_reason:ice_rez_support_without_unrezzed_ice"
+        : "defer_reason:ice_support_without_ice",
+    ].join("|"),
   };
 }
 
@@ -457,7 +490,18 @@ function activeUpgradeUtility(
     utility.add("score.agenda_difficulty_discount");
   }
   if (
+    agendas.length === 0 &&
+    serverId.startsWith("remote_") &&
     server.ice.length > 0 &&
+    (signals.has("score.agenda_difficulty_discount") ||
+      signals.has("remote.agenda_difficulty_discount"))
+  ) {
+    utility.add("prepared_score_remote_support");
+  }
+  if (
+    server.ice.some(
+      (ice) => !hasRezSupportSignal(signals) || ice.rezzed !== true,
+    ) &&
     [...signals].some((signal) =>
       signal.startsWith("ice.corp_") ||
       signal === "run.corp_pay_or_end_run" ||
@@ -535,6 +579,13 @@ function hasIceSupportSignal(signals: ReadonlySet<string>): boolean {
       signal === "ice.corp_rez_discount" ||
       signal === "ice.corp_install_discount" ||
       signal === "ice.corp_ice_swap",
+  );
+}
+
+function hasRezSupportSignal(signals: ReadonlySet<string>): boolean {
+  return (
+    signals.has("ice.corp_rez_discount") ||
+    signals.has("ice.corp_temporary_rez")
   );
 }
 

@@ -24,7 +24,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
       remoteInformationJson,
     ],
     [
-      "424A-F05 begin a blocked matchpoint conversion sequence",
+      "424A-F05 builds the resident bank instead of pretending a blocked matchpoint converts",
       blockedMatchpointJson,
     ],
   ])("satisfies %s", (_label, json) => {
@@ -113,7 +113,15 @@ describe("match 424A runner endgame decision checkpoints", () => {
       };
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "424A-F06-MISSING-COVERAGE-CONTROL";
-      checkpoint.expectation = { acceptableActions: [{ type: "draw_card" }] };
+      delete checkpoint.expectation.runTargets;
+      checkpoint.expectation = {
+        acceptableActions: [{ type: "draw_card" }],
+        planExecution: {
+          acceptablePlanKinds: ["runner.rig_and_coverage"],
+          acceptableCapabilities: ["draw_for_answer_breaker_ap"],
+          requiredAssessmentEvidence: ["target:remote_1"],
+        },
+      };
     });
     const result = runAiDecisionCheckpoint(missingCoverage);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

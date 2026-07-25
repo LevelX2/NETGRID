@@ -49,7 +49,25 @@ describe("Runner Wilson run action utilization", () => {
 
     expect(decision.actionId).toBe(wilson.actionId);
     expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
-    expect(debugText).toContain("run_only_action_preferred");
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.pressure_central",
+    );
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_step_capability:pressure_rd_information",
+      ]),
+    );
+    expect(
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === wilson.actionId,
+      )?.whyChosen,
+    ).toEqual(
+      expect.arrayContaining([
+        "selected_for_step:pressure_rd_information",
+        "plan_route_preference:bounded_card_run",
+      ]),
+    );
     expect(debugText).toContain("run_action_spending_cap_target_server:rd");
     expect(debugText).toContain("run_action_spending_cap_limit:3");
     expect(debugText).not.toMatch(
@@ -99,7 +117,20 @@ describe("Runner Wilson run action utilization", () => {
 
     expect(decision.actionId).toBe(wilsonRun.actionId);
     expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
-    expect(debugText).toContain("run_only_action_preferred");
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.pressure_central",
+    );
+    expect(
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === wilsonRun.actionId,
+      )?.whyChosen,
+    ).toEqual(
+      expect.arrayContaining([
+        "selected_for_step:pressure_rd_information",
+        "plan_route_preference:bounded_card_run",
+      ]),
+    );
     expect(debugText).toContain("run_action_spending_cap_target_server:rd");
     expect(debugText).not.toMatch(/cardInstances|privatePayload|FullState|decklist|hidden-card/i);
   });
@@ -143,6 +174,11 @@ describe("Runner Wilson run action utilization", () => {
       ],
       legalActions: [runRd, wilson, gainCreditAction()],
     });
+    input.playerView.own.gripOrHq = [
+      visibleGripCard("wilson-cap-hand-1"),
+      visibleGripCard("wilson-cap-hand-2"),
+      visibleGripCard("wilson-cap-hand-3"),
+    ];
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
@@ -151,8 +187,22 @@ describe("Runner Wilson run action utilization", () => {
 
     expect(decision.actionId).toBe(runRd.actionId);
     expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
-    expect(debugText).toContain("run_action_spending_cap_risk_skip:visible_break_cost_gt_cap");
-    expect(debugText).toContain("run_action_spending_cap_visible_break_cost:5");
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.pressure_central",
+    );
+    expect(
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === wilson.actionId,
+      )?.whyNot,
+    ).toEqual(
+      expect.arrayContaining([
+        "run_route_excluded:path:blocked_unpayable",
+        "run_action_spending_cap_risk_skip:visible_break_cost_gt_cap",
+        "run_action_spending_cap_visible_break_cost:5",
+        "run_action_spending_cap_limit:3",
+      ]),
+    );
     expect(debugText).not.toMatch(
       /cardInstances|privatePayload|FullState|sessionToken|reconnectToken|joinToken|decklist|hidden-card/i,
     );
@@ -167,6 +217,7 @@ function runnerInput(params: {
 }): AiDecisionInput {
   const view: PlayerView = {
     stateVersion: 1,
+    turnSerial: 0,
     side: "runner",
     activeSide: "runner",
     phase: "runner_action_phase",
@@ -256,6 +307,7 @@ function gainCreditAction(): LegalAction {
 
 function endTurnAction(): LegalAction {
   return legalAction("runner.end_turn", "end_turn", "Zug beenden", {
+    source: "game_rule",
     costs: [],
   });
 }
@@ -346,6 +398,18 @@ function visibleBreaker(
     known: true,
     subtypes: ["icebreaker", "fracter"],
     strength,
+  };
+}
+
+function visibleGripCard(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "simple_run_event",
+    title: instanceId,
+    owner: "runner",
+    controller: "runner",
+    type: "event",
+    known: true,
   };
 }
 

@@ -6,7 +6,10 @@ export type {
   AiMatchProgressionProfileComparison,
 } from "./simulation/ai-match-progression-types";
 export type { AiSimulationConfig } from "./simulation/ai-simulation-config";
-export type { AiSimulationSummary } from "./simulation/ai-simulation-summary";
+export type {
+  AiSimulationSummary,
+  AiSimulationTerminationKind,
+} from "./simulation/ai-simulation-summary";
 export {
   benchmarkDeckFromFrozenLocalSnapshot,
   benchmarkDeckFromSnapshot,

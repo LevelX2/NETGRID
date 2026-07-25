@@ -6,6 +6,7 @@ import confirmedDamageReserveJson from "../../../../../data/scenarios/ai-decisio
 import safeRemoteContinueJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-f5d27033-04-safe-remote-continue-control.json";
 import usefulBreakerInstallJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-f5d27033-05-useful-breaker-install-control.json";
 import visiblePayoffRunJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-f5d27033-06-visible-payoff-run-control.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -29,7 +30,10 @@ describe("match F5D27033 runner flatline-risk checkpoints", () => {
 
   it.each([
     ["continues an unambiguous safe remote run", safeRemoteContinueJson],
-    ["still installs a useful breaker", usefulBreakerInstallJson],
+    [
+      "keeps the useful breaker resident while executing stronger R&D pressure",
+      usefulBreakerInstallJson,
+    ],
     ["still takes a run with visible immediate payoff", visiblePayoffRunJson],
   ])("control: %s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
@@ -47,7 +51,13 @@ describe("match F5D27033 runner flatline-risk checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    [
+      "cp-f5d27033-05-useful-breaker-install-control",
+      "cp-f5d27033-06-visible-payoff-run-control",
+    ],
+  );
 }
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {

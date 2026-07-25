@@ -225,7 +225,10 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["missing_wall_coverage", "weak_tag_damage_defense"],
+          "supportGaps": [
+            "missing_wall_coverage",
+            "weak_tag_damage_defense"
+          ],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -720,10 +723,15 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": ["missing_wall_coverage", "weak_tag_damage_defense"],
+          "supportGaps": [
+            "missing_wall_coverage",
+            "weak_tag_damage_defense"
+          ],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": ["hard_support_gap:missing_wall_coverage"]
+          "runtimeBlockers": [
+            "hard_support_gap:missing_wall_coverage"
+          ]
         },
         "runner.rnd_pressure": {
           "anchorScore": 0,
@@ -893,7 +901,10 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": ["missing_wall_coverage", "weak_tag_damage_defense"],
+          "supportGaps": [
+            "missing_wall_coverage",
+            "weak_tag_damage_defense"
+          ],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -1014,7 +1025,10 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["missing_wall_coverage", "weak_tag_damage_defense"],
+          "supportGaps": [
+            "missing_wall_coverage",
+            "weak_tag_damage_defense"
+          ],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -1191,7 +1205,9 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": ["missing_wall_coverage"],
+          "supportGaps": [
+            "missing_wall_coverage"
+          ],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -1429,7 +1445,10 @@
               "reason": "support:pressurePayoff"
             }
           ],
-          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
+          "supportGaps": [
+            "low_economy_support",
+            "weak_tag_damage_defense"
+          ],
           "confidence": "low",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -1549,10 +1568,15 @@
               "reason": "support:searchOrDraw"
             }
           ],
-          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
+          "supportGaps": [
+            "low_economy_support",
+            "weak_tag_damage_defense"
+          ],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
+          "runtimeBlockers": [
+            "hard_support_gap:low_economy_support"
+          ]
         },
         "runner.interface_closeout": {
           "anchorScore": 77,
@@ -1694,10 +1718,15 @@
               "reason": "support:centralAccess"
             }
           ],
-          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
+          "supportGaps": [
+            "low_economy_support",
+            "weak_tag_damage_defense"
+          ],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
+          "runtimeBlockers": [
+            "hard_support_gap:low_economy_support"
+          ]
         },
         "runner.remote_contest": {
           "anchorScore": 0,
@@ -1859,7 +1888,9 @@
               "reason": "support:remoteAccess"
             }
           ],
-          "supportGaps": ["low_economy_support"],
+          "supportGaps": [
+            "low_economy_support"
+          ],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -1980,10 +2011,15 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
+          "supportGaps": [
+            "low_economy_support",
+            "weak_tag_damage_defense"
+          ],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
+          "runtimeBlockers": [
+            "hard_support_gap:low_economy_support"
+          ]
         },
         "runner.rnd_pressure": {
           "anchorScore": 55,
@@ -2121,10 +2157,15 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
+          "supportGaps": [
+            "low_economy_support",
+            "weak_tag_damage_defense"
+          ],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
+          "runtimeBlockers": [
+            "hard_support_gap:low_economy_support"
+          ]
         },
         "runner.run_event_tempo": {
           "anchorScore": 68,
@@ -2234,10 +2275,15 @@
               "reason": "support:eventDensity"
             }
           ],
-          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
+          "supportGaps": [
+            "low_economy_support",
+            "weak_tag_damage_defense"
+          ],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
+          "runtimeBlockers": [
+            "hard_support_gap:low_economy_support"
+          ]
         },
         "runner.search.breaker": {
           "anchorScore": 0,
@@ -2351,7 +2397,9 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": ["low_economy_support"],
+          "supportGaps": [
+            "low_economy_support"
+          ],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -2402,7 +2450,10 @@
               "reason": "support:pressurePayoff"
             }
           ],
-          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
+          "supportGaps": [
+            "low_economy_support",
+            "weak_tag_damage_defense"
+          ],
           "confidence": "low",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -2602,10 +2653,14 @@
               "reason": "support:pressurePayoff"
             }
           ],
-          "supportGaps": ["weak_tag_damage_defense"],
+          "supportGaps": [
+            "weak_tag_damage_defense"
+          ],
           "confidence": "medium",
           "runtimeStatus": "supporting",
-          "runtimeBlockers": ["supporting_only:runner.economy_first"]
+          "runtimeBlockers": [
+            "supporting_only:runner.economy_first"
+          ]
         },
         "runner.hq_pressure": {
           "anchorScore": 67,
@@ -2724,7 +2779,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["weak_tag_damage_defense"],
+          "supportGaps": [
+            "weak_tag_damage_defense"
+          ],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -2816,7 +2873,9 @@
               "reason": "support:centralAccess"
             }
           ],
-          "supportGaps": ["weak_tag_damage_defense"],
+          "supportGaps": [
+            "weak_tag_damage_defense"
+          ],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -3099,7 +3158,9 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": ["weak_tag_damage_defense"],
+          "supportGaps": [
+            "weak_tag_damage_defense"
+          ],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -3216,7 +3277,9 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": ["weak_tag_damage_defense"],
+          "supportGaps": [
+            "weak_tag_damage_defense"
+          ],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -3315,7 +3378,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["weak_tag_damage_defense"],
+          "supportGaps": [
+            "weak_tag_damage_defense"
+          ],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -3492,7 +3557,9 @@
               "reason": "support:pressurePayoff"
             }
           ],
-          "supportGaps": ["weak_tag_damage_defense"],
+          "supportGaps": [
+            "weak_tag_damage_defense"
+          ],
           "confidence": "low",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -3741,7 +3808,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["low_scorePlan_support"],
+          "supportGaps": [
+            "low_scorePlan_support"
+          ],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -3812,7 +3881,9 @@
               "reason": "support:remoteSlots"
             }
           ],
-          "supportGaps": ["low_ambush_support"],
+          "supportGaps": [
+            "low_ambush_support"
+          ],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -4036,7 +4107,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["weak_remote_protection"],
+          "supportGaps": [
+            "weak_remote_protection"
+          ],
           "confidence": "medium",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -4103,10 +4176,15 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["low_ambush_support", "low_tagOrTrace_support"],
+          "supportGaps": [
+            "low_ambush_support",
+            "low_tagOrTrace_support"
+          ],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": ["below_productive_score_threshold"]
+          "runtimeBlockers": [
+            "below_productive_score_threshold"
+          ]
         },
         "corp.deck_recycle_engine": {
           "anchorScore": 0,
@@ -4178,7 +4256,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["missing_recycle_source"],
+          "supportGaps": [
+            "missing_recycle_source"
+          ],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -4299,7 +4379,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["low_scorePlan_support"],
+          "supportGaps": [
+            "low_scorePlan_support"
+          ],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -4442,7 +4524,9 @@
               "reason": "support:rezReserve"
             }
           ],
-          "supportGaps": ["low_scorePlan_support"],
+          "supportGaps": [
+            "low_scorePlan_support"
+          ],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -4575,7 +4659,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["low_scoreAcceleration_support"],
+          "supportGaps": [
+            "low_scoreAcceleration_support"
+          ],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -4837,10 +4923,14 @@
               "reason": "support:rezReserve"
             }
           ],
-          "supportGaps": ["weak_remote_protection"],
+          "supportGaps": [
+            "weak_remote_protection"
+          ],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": ["hard_support_gap:weak_remote_protection"]
+          "runtimeBlockers": [
+            "hard_support_gap:weak_remote_protection"
+          ]
         },
         "corp.overadvance_value": {
           "anchorScore": 38,
@@ -4943,7 +5033,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["low_scorePlan_support"],
+          "supportGaps": [
+            "low_scorePlan_support"
+          ],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -5386,7 +5478,10 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["low_tag_sources", "low_traceSupport_support"],
+          "supportGaps": [
+            "low_tag_sources",
+            "low_traceSupport_support"
+          ],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -5400,7 +5495,9 @@
         "corp.rush_score",
         "corp.overadvance_value"
       ],
-      "secondaryStrategies": ["corp.fast_advance"],
+      "secondaryStrategies": [
+        "corp.fast_advance"
+      ],
       "functionSignalCounts": {
         "action.corp_extra_action_burst": 2,
         "action.corp_extra_action_support": 2,
@@ -5672,7 +5769,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["low_scorePlan_support"],
+          "supportGaps": [
+            "low_scorePlan_support"
+          ],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -5750,7 +5849,9 @@
               "reason": "support:remoteSlots"
             }
           ],
-          "supportGaps": ["low_ambush_support"],
+          "supportGaps": [
+            "low_ambush_support"
+          ],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -6058,7 +6159,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["weak_remote_protection"],
+          "supportGaps": [
+            "weak_remote_protection"
+          ],
           "confidence": "medium",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -6150,7 +6253,10 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["low_ambush_support", "low_punish_payoff_density"],
+          "supportGaps": [
+            "low_ambush_support",
+            "low_punish_payoff_density"
+          ],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -6229,7 +6335,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["missing_recycle_source"],
+          "supportGaps": [
+            "missing_recycle_source"
+          ],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -6392,7 +6500,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["low_scorePlan_support"],
+          "supportGaps": [
+            "low_scorePlan_support"
+          ],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -6584,7 +6694,9 @@
               "reason": "support:rezReserve"
             }
           ],
-          "supportGaps": ["low_scorePlan_support"],
+          "supportGaps": [
+            "low_scorePlan_support"
+          ],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -6752,7 +6864,9 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": ["low_scoreAcceleration_support"],
+          "supportGaps": [
+            "low_scoreAcceleration_support"
+          ],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -7091,10 +7205,14 @@
               "reason": "support:rezReserve"
             }
           ],
-          "supportGaps": ["weak_remote_protection"],
+          "supportGaps": [
+            "weak_remote_protection"
+          ],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": ["hard_support_gap:weak_remote_protection"]
+          "runtimeBlockers": [
+            "hard_support_gap:weak_remote_protection"
+          ]
         },
         "corp.overadvance_value": {
           "anchorScore": 0,
@@ -7809,7 +7927,9 @@
         "corp.economy_rez_reserve",
         "corp.rush_score"
       ],
-      "secondaryStrategies": ["corp.fast_advance"],
+      "secondaryStrategies": [
+        "corp.fast_advance"
+      ],
       "functionSignalCounts": {
         "action.corp_extra_action_burst": 2,
         "action.corp_extra_action_support": 2,

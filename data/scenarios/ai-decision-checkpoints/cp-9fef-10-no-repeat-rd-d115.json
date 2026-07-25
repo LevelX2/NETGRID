@@ -9059,12 +9059,26 @@
       },
       {
         "actionId": "runner.start_run.hq"
+      },
+      {
+        "actionId": "runner.start_run.archives"
       }
     ],
     "forbiddenActions": [
       {
         "actionId": "runner.start_run.rd"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.pressure_central",
+        "runner.rig_and_coverage",
+        "runner.economy",
+        "runner.develop_board_and_hand"
+      ],
+      "forbiddenCapabilities": [
+        "pressure_rd_information"
+      ]
+    }
   }
 }

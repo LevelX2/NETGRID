@@ -779,6 +779,7 @@ describe("AI module boundaries", () => {
       "evaluation/real-engine-decision-corpus-fixtures.ts",
       "index.ts",
       "runner-run-target-evaluation.ts",
+      "runtime/plan-first-live-runtime.ts",
       "runtime/semantic-runtime.ts",
       "runtime/semantic-runtime-decision-composition.ts",
     ]);
@@ -805,6 +806,7 @@ describe("AI module boundaries", () => {
       "known-remote-access-payoff.ts",
       "runner-run-target-evaluation.ts",
       "plans/tactical-plan-runner-plans.ts",
+      "runtime/runner-known-access-payoff-context.ts",
     ]);
     const guardedSymbols = [
       "evaluateKnownCentralAccessPayoff",

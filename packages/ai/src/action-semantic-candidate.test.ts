@@ -33,6 +33,7 @@ const ALL_ACTION_TYPES = [
   "move_to_removed_from_game",
   "return_from_set_aside",
   "change_card_control",
+  "stop_restricted_action_sequence",
   "resolve_choice",
   "trigger_ability",
   "end_turn",
@@ -150,7 +151,7 @@ describe("buildActionSemanticCandidates", () => {
       serverId: "rd",
       serverKind: "rd",
     });
-    expect(candidates[1]?.targetContext?.availableTargets).toEqual([
+    expect(candidates[1]?.targetContext?.selectedTargets).toEqual([
       expect.objectContaining({
         targetId: "rd",
         targetKind: "server",
@@ -202,13 +203,35 @@ describe("buildActionSemanticCandidates", () => {
     expect(breakSubroutine.sourceKind).toBe("card");
     expect(breakSubroutine.sourceCardId).toBe("breaker-source");
     expect(breakSubroutine.targetContext?.targetKind).toBe("subroutine");
-    expect(breakSubroutine.targetContext?.availableTargets).toEqual([
+    expect(breakSubroutine.targetContext?.selectedTargets).toEqual([
       expect.objectContaining({
         targetId: "ice-1:subroutine:0",
         targetKind: "subroutine",
       }),
     ]);
     expect(breakSubroutine.projectionIssues).toEqual(["ability_unresolved"]);
+  });
+
+  it("classifies a card action with an explicit immediate general credit gain as economy", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("play_event", 0, {
+          source: "livewire",
+          payload: {
+            cardId: "livewire",
+            gainCreditsAmount: 3,
+          },
+        }),
+      ],
+    });
+
+    expect(candidate?.semanticActionType).toBe("economy.gain_credit");
+    expect(candidate?.economyProjection).toMatchObject({
+      kind: "immediate_liquid",
+      timing: "immediate",
+      creditRestriction: "general",
+      netLiquidCreditGain: 3,
+    });
   });
 
   it("does not classify scored shuffle-draw agenda actions as credit economy", () => {
@@ -390,19 +413,19 @@ describe("buildActionSemanticCandidates", () => {
 
     expect(
       candidates.find((candidate) => candidate.actionType === "start_run")
-        ?.targetContext?.availableTargets,
+        ?.targetContext?.selectedTargets,
     ).toEqual([expect.objectContaining({ targetId: "rd" })]);
     expect(
       candidates.find((candidate) => candidate.actionType === "rez_ice")
-        ?.targetContext?.availableTargets,
+        ?.targetContext?.selectedTargets,
     ).toEqual([expect.objectContaining({ targetId: "rd" })]);
     expect(
       candidates.find((candidate) => candidate.actionType === "advance_card")
-        ?.targetContext?.availableTargets,
+        ?.targetContext?.selectedTargets,
     ).toEqual([expect.objectContaining({ targetId: "installed-agenda" })]);
     expect(
       candidates.find((candidate) => candidate.actionType === "score_agenda")
-        ?.targetContext?.availableTargets,
+        ?.targetContext?.selectedTargets,
     ).toEqual([
       expect.objectContaining({
         targetId: "installed-agenda",
@@ -588,6 +611,32 @@ describe("buildActionSemanticCandidates", () => {
     }
     expect(serialized).not.toContain("planWeight");
     expect(serialized).not.toContain("scoringWeight");
+  });
+
+  it("projects a declarative program tutor as an exact search action", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("activated_card_ability", 0, {
+          source: "short-circuit",
+          payload: {
+            cardId: "short-circuit",
+            sourceDefinitionId: "onr_v1_177_the-short-circuit",
+            cardImplementationEffectKind: "search_stack_to_grip",
+            cardImplementationSearchFilter: "program",
+          },
+        }),
+      ],
+      observerSide: "runner",
+    });
+
+    expect(candidate).toMatchObject({
+      semanticActionType: "search.program_to_grip",
+      primaryProjectionStatus: "projected",
+      confidence: "high",
+      actionTacticSignals: ["setup.search"],
+      effectTargets: ["setup.program_search"],
+    });
+    expect(candidate?.projectionIssues).not.toContain("ability_unresolved");
   });
 
   it("derives card implementation ability binding from source definition and ability key", () => {
@@ -807,6 +856,34 @@ describe("buildActionSemanticCandidates", () => {
     );
   });
 
+  it("projects new_remote as a side-safe install target", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("install_card", 0, {
+          side: "corp",
+          source: "corp-install-source",
+          payload: {
+            serverId: "new_remote",
+            placement: "ice",
+          },
+        }),
+      ],
+      observerSide: "corp",
+      stateVersion: 42,
+    });
+
+    expect(candidate?.targetContext?.selectedTargets).toEqual([
+      expect.objectContaining({
+        targetId: "new_remote",
+        targetKind: "server",
+        targetSide: "corp",
+      }),
+    ]);
+    expect(candidate?.projectionIssues).not.toContain(
+      "target_context_unavailable",
+    );
+  });
+
   it("projects side-safe target metadata and target constraints for trash targets", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [
@@ -897,7 +974,7 @@ describe("buildActionSemanticCandidates", () => {
       "target_context_unavailable",
     );
 
-    expect(resourceTrash.targetContext?.availableTargets).toEqual([
+    expect(resourceTrash.targetContext?.selectedTargets).toEqual([
       expect.objectContaining({
         targetId: "runner-resource-1",
         targetKind: "resource",
@@ -1684,6 +1761,7 @@ function defaultSourceFor(type: LegalAction["type"]): LegalAction["source"] {
       "decline_trash",
       "purge_runner_virus_counters",
       "forgo_action",
+      "stop_restricted_action_sequence",
       "resolve_choice",
       "end_turn",
     ].includes(type)

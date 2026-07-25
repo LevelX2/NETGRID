@@ -347,6 +347,51 @@ describe("access outcome memory", () => {
     });
   });
 
+  it("keeps an explicit declined trash suppressed until the remote or economy changes", () => {
+    const input = aiInput({
+      eventTail: [
+        publicEvent("evt-run", 8, "start_run", {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        }),
+        publicEvent("evt-access", 9, "access_card", {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "remote_1",
+          cardDefinitionId: "onr_v1_317_data-masons",
+        }),
+        publicEvent("evt-decline", 10, "decline_trash", {
+          actor: "runner",
+          actionType: "decline_trash",
+          serverId: "remote_1",
+        }),
+      ],
+      servers: [
+        server("remote_1", [
+          visibleCard("remote-root", {
+            definitionId: "onr_v1_317_data-masons",
+            type: "asset",
+            trashCost: 1,
+          }),
+        ]),
+      ],
+    });
+
+    expect(
+      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+    ).toMatchObject({
+      applies: true,
+      suppressesPlanBonus: true,
+      suppressUntilInvalidated: true,
+      evidence: expect.arrayContaining([
+        "remote_access_outcome_decision:decline",
+        "remote_access_outcome_reason:reserve_would_break",
+        "remote_access_outcome_decline_event:evt-decline",
+      ]),
+    });
+  });
+
   it("does not derive no-progress memory after a visible remote change", () => {
     const input = aiInput({
       eventTail: [

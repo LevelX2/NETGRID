@@ -243,6 +243,7 @@ function runTarget(params: {
     pathPassability,
     pathCost: 1,
     creditsAfterRun: 4,
+    runCommitment: "full_path",
     stealOrTrashAffordable: true,
     installedRunPayoff: payoff(),
     runActionPayoff: payoff(),

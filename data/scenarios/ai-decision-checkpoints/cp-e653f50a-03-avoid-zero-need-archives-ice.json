@@ -8807,6 +8807,11 @@
       },
       {
         "type": "draw_card"
+      },
+      {
+        "type": "rez_card",
+        "sourceDefinitionId": "onr_v1_320_encoder-inc",
+        "targetServerId": "remote_1"
       }
     ]
   }

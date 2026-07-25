@@ -25,8 +25,15 @@ export {
 export {
   assertCorpRootRezCostQuoteValid,
   assertCorpRezCostQuoteValid,
+  corpFortRunRezSupportQuotePayload,
+  corpIcePostInstallRezProjectionPayload,
   corpServerIdForInstalledCard,
   discountedRezSourceIdsForRunIce,
+  projectHqInstallRezOptionQuote,
+  projectInstalledCorpSequenceRezPayment,
+  projectCorpIceRezCostAfterInstall,
+  projectInstalledCorpIceRezCost,
+  quoteCorpFortRunRezSupport,
   quoteCorpIceInstallCost,
   quoteCorpRootRezCost,
   quoteCorpRezCost,
@@ -36,6 +43,7 @@ export {
 export type {
   CorpInstallCostOptions,
   CorpRezCostOptions,
+  CorpSequenceRezPaymentProjection,
 } from "./corp-rez-cost";
 export {
   assertCorpTraceBidPaymentQuoteValid,
@@ -64,3 +72,13 @@ export {
   runnerPoolCreditsWithCostPenaltySupport,
   syncPendingChoiceAfterRunnerCostPenaltySupport,
 } from "./runner-payment-support";
+export {
+  fixedPlayCostCredits,
+  minimumPlayCostCredits,
+  playCostForDefinition,
+} from "./play-cost";
+export {
+  corpRootRezCreditOutcomeQuotePayload,
+  immediateRootRezCreditGainForDefinition,
+  quoteCorpRootRezCreditOutcome,
+} from "./root-rez-credit-outcome";

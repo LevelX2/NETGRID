@@ -27,10 +27,18 @@ describe("isBreakerInstallAction", () => {
       subtypes: ["Icebreaker"],
       rulesText: "Break one ice subroutine.",
     });
+    const traceBreaker = visibleCard({
+      instanceId: "runner-breaker-trace",
+      definitionId: "custom-trace-breaker",
+      title: "Trace Tool",
+      subtypes: ["Icebreaker"],
+      rulesText: "Break an ice subroutine that traces.",
+    });
     const playerView = playerViewWithGrip([
       breaker,
       noisyBreaker,
       universalBreaker,
+      traceBreaker,
     ]);
     const matchesBreaker = isBreakerInstallAction(playerView, "breaker_wall");
 
@@ -45,6 +53,16 @@ describe("isBreakerInstallAction", () => {
     expect(
       matchesBreaker(
         installAction("runner-breaker-universal", "Install Universal Tool"),
+      ),
+    ).toBe(true);
+    expect(
+      matchesBreaker(
+        installAction("runner-breaker-trace", "Install Trace Tool"),
+      ),
+    ).toBe(false);
+    expect(
+      isBreakerInstallAction(playerView, "breaker_trace")(
+        installAction("runner-breaker-trace", "Install Trace Tool"),
       ),
     ).toBe(true);
     expect(
@@ -63,6 +81,22 @@ describe("missingBreakerCoverageKind", () => {
     expect(missingCoverageForIceText("barrierish traceable")).toBe(
       "breaker_universal",
     );
+  });
+
+  it("uses a known ICE definition when its visible fixture omits subtypes", () => {
+    expect(
+      missingBreakerCoverageKind(
+        playerViewWithIce(
+          visibleCard({
+            instanceId: "wall-of-static",
+            definitionId: "onr_v1_279_wall-of-static",
+            type: "ice",
+            title: "Wall of Static",
+          }),
+        ),
+        "remote_1",
+      ),
+    ).toBe("breaker_wall");
   });
 });
 

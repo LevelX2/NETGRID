@@ -27,136 +27,52 @@
     "allowed_catalog_reference": 43,
     "test_only_card_name": 45,
     "mechanics_constant_controls_behavior_by_card_id": 28,
-    "functional_kind_uses_card_name": 2,
-    "false_positive": 14
+    "false_positive": 2
   },
   "derivedCatalogGuard": {
     "status": "baseline_enforced",
     "tokenSource": "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus packages/shared/src/card-definitions.ts",
     "tokenCount": 1317,
-    "baselineCount": 154,
+    "baselineCount": 72,
     "summary": {
-      "new_unclassified_card_name_leak": 147,
-      "functional_kind_uses_card_name": 7
+      "new_unclassified_card_name_leak": 72
     },
     "fingerprints": [
-      "scripts/build-ai-compiled-hints.mjs|45|15|corporate-coup|Corporate Coup|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|46|15|hostile-takeover|Hostile Takeover|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|47|15|marine-arcology|Marine Arcology|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|48|15|accounts-receivable|Accounts Receivable|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|49|15|closed-accounts|Closed Accounts|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|50|15|efficiency-experts|Efficiency Experts|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|51|15|night-shift|Night Shift|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|52|15|overtime-incentives|Overtime Incentives|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|53|15|scorched-earth|Scorched Earth|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|54|15|red-herrings|Red Herrings|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|55|15|bodyweight-synthetic-blood|Bodyweight™ Synthetic Blood|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|56|15|custodial-position|Custodial Position|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|57|15|executive-wiretaps|Executive Wiretaps|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|58|15|jack-n-joe|Jack 'n' Joe|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|59|15|livewires-contacts|Livewire's Contacts|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|780|9|selfModifyingCode|Self-Modifying Code|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|781|17|self-modifying-code|Self-Modifying Code|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|784|5|selfModifyingCode|Self-Modifying Code|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|789|14|self_modifying_code|Self-Modifying Code|functional_kind_uses_card_name",
-      "scripts/build-ai-compiled-hints.mjs|790|27|self-modifying-code|Self-Modifying Code|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|794|46|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|798|27|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|804|17|ball-and-chain|Ball and Chain|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|805|17|canis-major|Canis Major|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|660|17|viral-15|Viral 15|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|817|9|EmployeeEmpowerment|Employee Empowerment|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|911|15|corporate_downsizing|Corporate Downsizing|functional_kind_uses_card_name",
-      "scripts/check-ai-derived-facts.mjs|922|44|corporate_downsizing|Corporate Downsizing|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|929|44|corporate_downsizing|Corporate Downsizing|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|937|38|corporate_downsizing|Corporate Downsizing|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|941|44|corporate_downsizing|Corporate Downsizing|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|945|44|corporate_downsizing|Corporate Downsizing|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|949|44|corporate_downsizing|Corporate Downsizing|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|974|15|priority_requisition|Priority Requisition|functional_kind_uses_card_name",
-      "scripts/check-ai-derived-facts.mjs|988|38|priority_requisition|Priority Requisition|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|995|38|priority_requisition|Priority Requisition|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|1000|38|priority_requisition|Priority Requisition|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|1005|15|security_purge|Security Purge|functional_kind_uses_card_name",
-      "scripts/check-ai-derived-facts.mjs|1020|44|security_purge|Security Purge|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|1026|44|security_purge|Security Purge|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|1033|44|security_purge|Security Purge|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|1037|44|security_purge|Security Purge|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|1041|44|security_purge|Security Purge|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|1150|15|corporate_retreat|Corporate Retreat|functional_kind_uses_card_name",
-      "scripts/check-ai-derived-facts.mjs|1158|44|corporate_retreat|Corporate Retreat|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|1166|44|corporate_retreat|Corporate Retreat|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|1814|41|ai_boon|AI Boon|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|2055|10|emergency_self_construct|Emergency Self-Construct|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|2062|54|emergency_self_construct|Emergency Self-Construct|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|2070|54|emergency_self_construct|Emergency Self-Construct|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|2079|54|emergency_self_construct|Emergency Self-Construct|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|2088|54|emergency_self_construct|Emergency Self-Construct|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|2095|54|emergency_self_construct|Emergency Self-Construct|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|2578|8|i_spy|I Spy|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|2583|53|i_spy|I Spy|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|2587|53|i_spy|I Spy|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|2622|20|ball-and-chain|Ball and Chain|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|2622|49|canis-major|Canis Major|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3338|8|city_surveillance|City Surveillance|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3345|60|city_surveillance|City Surveillance|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3353|60|city_surveillance|City Surveillance|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3357|60|city_surveillance|City Surveillance|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3361|60|city_surveillance|City Surveillance|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3369|62|city_surveillance|City Surveillance|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3374|8|acme_savings_and_loan|ACME Savings and Loan|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3382|54|acme_savings_and_loan|ACME Savings and Loan|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3391|54|acme_savings_and_loan|ACME Savings and Loan|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3395|8|investment_firm|Investment Firm|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3406|62|investment_firm|Investment Firm|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3416|62|investment_firm|Investment Firm|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3468|8|trojan_horse|Trojan Horse|functional_kind_uses_card_name",
-      "scripts/check-ai-derived-facts.mjs|3474|43|trojan_horse|Trojan Horse|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3478|43|trojan_horse|Trojan Horse|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3503|6|i_got_a_rock|I Got a Rock|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3548|8|power_grid_overload|Power Grid Overload|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3553|43|power_grid_overload|Power Grid Overload|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3560|43|power_grid_overload|Power Grid Overload|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3564|43|power_grid_overload|Power Grid Overload|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3569|108|cowboy_sysop|Cowboy Sysop|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3798|15|microtech_backup_drive|Microtech Backup Drive|functional_kind_uses_card_name",
-      "scripts/check-ai-derived-facts.mjs|3811|47|microtech_backup_drive|Microtech Backup Drive|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3819|47|microtech_backup_drive|Microtech Backup Drive|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3824|47|microtech_backup_drive|Microtech Backup Drive|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3829|47|microtech_backup_drive|Microtech Backup Drive|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3937|12|EmployeeEmpowerment|Employee Empowerment|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3939|33|employee-empowerment|Employee Empowerment|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|4506|30|crystal-palace-station-grid|Crystal Palace Station Grid|new_unclassified_card_name_leak",
-      "scripts/check-ai-hint-compiled-index.mjs|73|44|crystal-palace-station-grid|Crystal Palace Station Grid|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|19|15|valu-pak-software-bundle|Valu-Pak Software Bundle|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|20|15|preying-mantis|Preying Mantis|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|21|15|quest-for-cattekin|Quest for Cattekin|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|22|15|wilson-weeflerunner-apprentice|Wilson, Weeflerunner Apprentice|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|23|15|corporate-boon|Corporate Boon|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|24|15|subsidiary-branch|Subsidiary Branch|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|25|15|overtime-incentives|Overtime Incentives|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|26|15|edgerunner-inc-temps|Edgerunner, Inc., Temps|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|28|15|pacifica-regional-ai|Pacifica Regional AI|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|35|25|corporate-boon|Corporate Boon|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|41|25|subsidiary-branch|Subsidiary Branch|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|47|25|overtime-incentives|Overtime Incentives|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|59|25|pacifica-regional-ai|Pacifica Regional AI|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|68|25|valu-pak-software-bundle|Valu-Pak Software Bundle|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|75|25|quest-for-cattekin|Quest for Cattekin|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|82|25|wilson-weeflerunner-apprentice|Wilson, Weeflerunner Apprentice|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|89|25|corporate-boon|Corporate Boon|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|96|25|edgerunner-inc-temps|Edgerunner, Inc., Temps|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|103|25|overtime-incentives|Overtime Incentives|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|110|25|pacifica-regional-ai|Pacifica Regional AI|new_unclassified_card_name_leak",
+      "scripts/audit-ai-action-capacity-contracts.mjs|131|25|arasaka-owns-you|Arasaka Owns You|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|45|15|corporate-coup|Corporate Coup|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|46|15|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|51|16|corporate-coup|Corporate Coup|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|52|16|corporate-retreat|Corporate Retreat|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|53|16|marine-arcology|Marine Arcology|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|54|16|political-coup|Political Coup|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|55|16|political-overthrow|Political Overthrow|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|280|17|corporate-coup|Corporate Coup|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|288|17|political-coup|Political Coup|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|296|17|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|302|41|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|314|21|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
+      "scripts/audit-ai-economy-contracts.mjs|326|21|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
       "scripts/check-ai-hint-quality.mjs|54|15|crystal-palace-station-grid|Crystal Palace Station Grid|new_unclassified_card_name_leak",
-      "scripts/check-ai-manual-overlays.mjs|118|44|crystal-palace-station-grid|Crystal Palace Station Grid|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|147|23|audit_of_call_records|Audit of Call Records|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|149|21|AuditOfCallRecords|Audit of Call Records|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|152|17|force_shield|Force Shield|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|154|16|ForceShield|Force Shield|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|157|33|fall_guy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|159|30|FallGuy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|432|21|AuditOfCallRecords|Audit of Call Records|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|436|39|audit-of-call-records|Audit of Call Records|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|437|47|crystal-wall|Crystal Wall|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|449|55|crystal-wall|Crystal Wall|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|466|55|audit-of-call-records|Audit of Call Records|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|473|16|ForceShield|Force Shield|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|476|37|force-shield|Force Shield|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|483|43|force-shield|Force Shield|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|489|55|force-shield|Force Shield|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|509|30|FallGuy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|510|33|fall-guy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|510|9|fallGuy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|514|53|fall-guy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|517|37|fall_guy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|519|17|fallGuy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|525|37|fall_guy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|537|9|fallGuy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|537|53|fallGuy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|543|42|fallGuy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|549|9|fallGuy|Fall Guy|new_unclassified_card_name_leak",
-      "scripts/check-chronicle-choice-fallbacks.ts|552|40|fallGuy|Fall Guy|new_unclassified_card_name_leak",
       "scripts/generate-localized-agenda-skin-data.mjs|36|15|ai-chief-financial-officer|AI Chief Financial Officer|new_unclassified_card_name_leak",
       "scripts/generate-localized-agenda-skin-data.mjs|49|15|artificial-security-directors|Artificial Security Directors|new_unclassified_card_name_leak",
       "scripts/generate-localized-agenda-skin-data.mjs|59|15|bioweapons-engineering|Bioweapons Engineering|new_unclassified_card_name_leak",
@@ -230,7 +146,9 @@
         "questForCattekinPermanentActionGain"
       ],
       "targetKind": "start_turn_random_effect_table",
-      "targetState": ["runnerTurnFlags.persistentModifiers[]"],
+      "targetState": [
+        "runnerTurnFlags.persistentModifiers[]"
+      ],
       "params": {
         "dieFaces": 6,
         "outcomes": [
@@ -252,7 +170,9 @@
         "multiServerSuccessSequenceRun"
       ],
       "targetKind": "multi_server_success_sequence",
-      "targetState": ["runnerTurnFlags.pendingSequences[]"],
+      "targetState": [
+        "runnerTurnFlags.pendingSequences[]"
+      ],
       "params": {
         "sequence": "run_each_data_fort",
         "advanceOnSuccessfulRun": true,
@@ -269,7 +189,10 @@
         "delayedAccessEffects"
       ],
       "targetKind": "delayed_agenda_access_replacement",
-      "targetState": ["runDurationEffects[]", "delayedAccessEffects[]"],
+      "targetState": [
+        "runDurationEffects[]",
+        "delayedAccessEffects[]"
+      ],
       "params": {
         "replacementWindow": "agenda_access",
         "delay": "after_current_access_sequence"
@@ -284,7 +207,9 @@
         "codeViralCachePurgePreserveTargets"
       ],
       "targetKind": "purge_replacement_with_runner_virus_counter_cleanup",
-      "targetState": ["replacementEffects[]"],
+      "targetState": [
+        "replacementEffects[]"
+      ],
       "params": {
         "interruptedEvent": "corp_purge_virus_counters",
         "runnerVirusCounterCleanup": true
@@ -317,7 +242,9 @@
         "spendRecurringTraceCreditPool"
       ],
       "targetKind": "recurring_trace_credit_pool",
-      "targetState": ["recurringCreditPools[]"],
+      "targetState": [
+        "recurringCreditPools[]"
+      ],
       "params": {
         "amount": 1,
         "spendWindow": "trace",
@@ -333,7 +260,9 @@
         "runStartInterventions"
       ],
       "targetKind": "start_run_redirect_to_source_fort",
-      "targetState": ["runStartInterventions[]"],
+      "targetState": [
+        "runStartInterventions[]"
+      ],
       "params": {
         "redirectTarget": "source_fort",
         "triggerWindow": "run_start"
@@ -348,7 +277,9 @@
         "overadvance_bonus_agenda_points"
       ],
       "targetKind": "score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points",
-      "targetState": ["scoredAgendaAbilities[]"],
+      "targetState": [
+        "scoredAgendaAbilities[]"
+      ],
       "params": {
         "triggerWindow": "agenda_scored",
         "conditionSource": "agenda_params"
@@ -1041,7 +972,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/access-flow-runtime-hosts.ts",
-      "line": 608,
+      "line": 607,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1063,7 +994,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/activated-card-runtime-hosts.ts",
-      "line": 608,
+      "line": 607,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1074,7 +1005,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/apply-action-runtime-hosts.ts",
-      "line": 608,
+      "line": 607,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1085,7 +1016,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/card-lifecycle-runtime-hosts.ts",
-      "line": 616,
+      "line": 615,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1096,7 +1027,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/card-runtime-bootstrap.ts",
-      "line": 616,
+      "line": 619,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1129,7 +1060,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/card-strength-cost-runtime-services.ts",
-      "line": 608,
+      "line": 607,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1140,61 +1071,6 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/choice-hidden-zone-resolvers.ts",
-      "line": 611,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/corp-runtime-resolvers.ts",
-      "line": 613,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/counter-turn-runtime-services.ts",
-      "line": 608,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/damage-trace-runtime-hosts.ts",
-      "line": 608,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/economy-runtime-services.ts",
-      "line": 617,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/encounter-movement-runtime-hosts.ts",
       "line": 610,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
@@ -1205,8 +1081,8 @@
       "snippet": "CODE_VIRAL_CACHE_ID,"
     },
     {
-      "path": "packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts",
-      "line": 623,
+      "path": "packages/engine/src/game/engine-runtime-internal/corp-runtime-resolvers.ts",
+      "line": 614,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1216,18 +1092,7 @@
       "snippet": "CODE_VIRAL_CACHE_ID,"
     },
     {
-      "path": "packages/engine/src/game/engine-runtime-internal/install-rez-runtime-hosts.ts",
-      "line": 608,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/legal-action-runtime-hosts.ts",
+      "path": "packages/engine/src/game/engine-runtime-internal/counter-turn-runtime-services.ts",
       "line": 607,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
@@ -1238,7 +1103,7 @@
       "snippet": "CODE_VIRAL_CACHE_ID,"
     },
     {
-      "path": "packages/engine/src/game/engine-runtime-internal/lookup-runtime-services.ts",
+      "path": "packages/engine/src/game/engine-runtime-internal/damage-trace-runtime-hosts.ts",
       "line": 607,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
@@ -1249,7 +1114,18 @@
       "snippet": "CODE_VIRAL_CACHE_ID,"
     },
     {
-      "path": "packages/engine/src/game/engine-runtime-internal/play-board-runtime-hosts.ts",
+      "path": "packages/engine/src/game/engine-runtime-internal/economy-runtime-services.ts",
+      "line": 616,
+      "column": 3,
+      "token": "CODE_VIRAL_CACHE",
+      "cardTitle": "Code Viral Cache",
+      "tokenSource": "known_watch_token",
+      "category": "mechanics_constant_controls_behavior_by_card_id",
+      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
+      "snippet": "CODE_VIRAL_CACHE_ID,"
+    },
+    {
+      "path": "packages/engine/src/game/engine-runtime-internal/encounter-movement-runtime-hosts.ts",
       "line": 609,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
@@ -1260,7 +1136,7 @@
       "snippet": "CODE_VIRAL_CACHE_ID,"
     },
     {
-      "path": "packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts",
+      "path": "packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts",
       "line": 621,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
@@ -1271,8 +1147,63 @@
       "snippet": "CODE_VIRAL_CACHE_ID,"
     },
     {
+      "path": "packages/engine/src/game/engine-runtime-internal/install-rez-runtime-hosts.ts",
+      "line": 607,
+      "column": 3,
+      "token": "CODE_VIRAL_CACHE",
+      "cardTitle": "Code Viral Cache",
+      "tokenSource": "known_watch_token",
+      "category": "mechanics_constant_controls_behavior_by_card_id",
+      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
+      "snippet": "CODE_VIRAL_CACHE_ID,"
+    },
+    {
+      "path": "packages/engine/src/game/engine-runtime-internal/legal-action-runtime-hosts.ts",
+      "line": 608,
+      "column": 3,
+      "token": "CODE_VIRAL_CACHE",
+      "cardTitle": "Code Viral Cache",
+      "tokenSource": "known_watch_token",
+      "category": "mechanics_constant_controls_behavior_by_card_id",
+      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
+      "snippet": "CODE_VIRAL_CACHE_ID,"
+    },
+    {
+      "path": "packages/engine/src/game/engine-runtime-internal/lookup-runtime-services.ts",
+      "line": 606,
+      "column": 3,
+      "token": "CODE_VIRAL_CACHE",
+      "cardTitle": "Code Viral Cache",
+      "tokenSource": "known_watch_token",
+      "category": "mechanics_constant_controls_behavior_by_card_id",
+      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
+      "snippet": "CODE_VIRAL_CACHE_ID,"
+    },
+    {
+      "path": "packages/engine/src/game/engine-runtime-internal/play-board-runtime-hosts.ts",
+      "line": 608,
+      "column": 3,
+      "token": "CODE_VIRAL_CACHE",
+      "cardTitle": "Code Viral Cache",
+      "tokenSource": "known_watch_token",
+      "category": "mechanics_constant_controls_behavior_by_card_id",
+      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
+      "snippet": "CODE_VIRAL_CACHE_ID,"
+    },
+    {
+      "path": "packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts",
+      "line": 622,
+      "column": 3,
+      "token": "CODE_VIRAL_CACHE",
+      "cardTitle": "Code Viral Cache",
+      "tokenSource": "known_watch_token",
+      "category": "mechanics_constant_controls_behavior_by_card_id",
+      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
+      "snippet": "CODE_VIRAL_CACHE_ID,"
+    },
+    {
       "path": "packages/engine/src/game/engine-runtime-internal/run-flow-runtime-hosts.ts",
-      "line": 601,
+      "line": 600,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1283,7 +1214,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/runtime-bootstrap-support.ts",
-      "line": 626,
+      "line": 625,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1294,7 +1225,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/scored-economy-runtime-hosts.ts",
-      "line": 609,
+      "line": 614,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1305,7 +1236,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/state-corp-runtime-resolvers.ts",
-      "line": 617,
+      "line": 616,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1316,7 +1247,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/state-runtime-bootstrap.ts",
-      "line": 629,
+      "line": 628,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1327,7 +1258,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts",
-      "line": 609,
+      "line": 608,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1338,7 +1269,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/zone-runtime-services.ts",
-      "line": 609,
+      "line": 608,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1503,7 +1434,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.test.ts",
-      "line": 479,
+      "line": 481,
       "column": 32,
       "token": "quest_for_cattekin",
       "cardTitle": "Quest for Cattekin",
@@ -1514,7 +1445,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.test.ts",
-      "line": 482,
+      "line": 484,
       "column": 26,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1525,7 +1456,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
-      "line": 80,
+      "line": 107,
       "column": 27,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1536,7 +1467,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
-      "line": 81,
+      "line": 108,
       "column": 27,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1547,7 +1478,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
-      "line": 110,
+      "line": 137,
       "column": 33,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1558,7 +1489,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
-      "line": 110,
+      "line": 137,
       "column": 54,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1569,7 +1500,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
-      "line": 110,
+      "line": 137,
       "column": 75,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1580,7 +1511,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
-      "line": 110,
+      "line": 137,
       "column": 116,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1591,7 +1522,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
-      "line": 143,
+      "line": 170,
       "column": 33,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1602,7 +1533,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
-      "line": 143,
+      "line": 170,
       "column": 54,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1613,7 +1544,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
-      "line": 143,
+      "line": 170,
       "column": 75,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1624,7 +1555,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
-      "line": 143,
+      "line": 170,
       "column": 117,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1632,160 +1563,6 @@
       "category": "test_only_card_name",
       "targetAbstraction": "delayed_install_sequence",
       "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell_traders_target.remove_shell_counter.shell_traders_target\","
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 1555,
-      "column": 15,
-      "token": "silver_lining",
-      "cardTitle": "Silver Lining Recovery Protocol",
-      "tokenSource": "known_watch_token",
-      "category": "functional_kind_uses_card_name",
-      "targetAbstraction": "recovery_protocol_after_runner_action",
-      "snippet": "/kind:\\s*\"silver_lining_recovery\"|kind:\\s*\"gain_credits_from_stolen_agenda_advancement_history\"/.test("
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 1568,
-      "column": 43,
-      "token": "silver_lining",
-      "cardTitle": "Silver Lining Recovery Protocol",
-      "tokenSource": "known_watch_token",
-      "category": "false_positive",
-      "targetAbstraction": "recovery_protocol_after_runner_action",
-      "snippet": "source: \"implementation.corpUtility.silver_lining_recovery\","
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 1572,
-      "column": 43,
-      "token": "silver_lining",
-      "cardTitle": "Silver Lining Recovery Protocol",
-      "tokenSource": "known_watch_token",
-      "category": "false_positive",
-      "targetAbstraction": "recovery_protocol_after_runner_action",
-      "snippet": "source: \"implementation.corpUtility.silver_lining_recovery\","
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3434,
-      "column": 6,
-      "token": "newsgroup_taunting",
-      "cardTitle": "Newsgroup Taunting",
-      "tokenSource": "known_watch_token",
-      "category": "false_positive",
-      "targetAbstraction": "run_start_tax",
-      "snippet": "/newsgroup_taunting_run_start_tax/.test(implementationText) ||"
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3443,
-      "column": 43,
-      "token": "newsgroup_taunting",
-      "cardTitle": "Newsgroup Taunting",
-      "tokenSource": "known_watch_token",
-      "category": "false_positive",
-      "targetAbstraction": "run_start_tax",
-      "snippet": "source: \"implementation.corpUtility.newsgroup_taunting_run_start_tax\","
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3451,
-      "column": 43,
-      "token": "newsgroup_taunting",
-      "cardTitle": "Newsgroup Taunting",
-      "tokenSource": "known_watch_token",
-      "category": "false_positive",
-      "targetAbstraction": "run_start_tax",
-      "snippet": "source: \"implementation.corpUtility.newsgroup_taunting_run_start_tax\","
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3455,
-      "column": 43,
-      "token": "newsgroup_taunting",
-      "cardTitle": "Newsgroup Taunting",
-      "tokenSource": "known_watch_token",
-      "category": "false_positive",
-      "targetAbstraction": "run_start_tax",
-      "snippet": "source: \"implementation.corpUtility.newsgroup_taunting_run_start_tax\","
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3463,
-      "column": 45,
-      "token": "newsgroup_taunting",
-      "cardTitle": "Newsgroup Taunting",
-      "tokenSource": "known_watch_token",
-      "category": "false_positive",
-      "targetAbstraction": "run_start_tax",
-      "snippet": "source: \"implementation.corpUtility.newsgroup_taunting_run_start_tax\","
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3483,
-      "column": 6,
-      "token": "omniscience_foundation",
-      "cardTitle": "Omniscience Foundation",
-      "tokenSource": "known_watch_token",
-      "category": "false_positive",
-      "targetAbstraction": "end_turn_tag_on_successful_run_condition",
-      "snippet": "/omniscience_foundation_end_turn_tag|end_turn_tag_if_runner_received_tag/.test("
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3569,
-      "column": 6,
-      "token": "new_blood",
-      "cardTitle": "New Blood",
-      "tokenSource": "known_watch_token",
-      "category": "false_positive",
-      "targetAbstraction": "conceal_reorder_installed_ice",
-      "snippet": "/new_blood_conceal_reorder_installed_ice|conceal_and_reorder_installed_ice|rescheduler_hq_shuffle_draw|cowboy_sysop_uninstall_corp_card_to_hq|swap_unrezzed_fort_ice_with_hq_ice|temporary_hq_ice_encounter_after_successful_run/.test("
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3770,
-      "column": 15,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "functional_kind_uses_card_name",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "/kind:\\s*\"shell_traders_delayed_install\"|kind:\\s*\"delayed_install_with_counter_countdown\"/.test("
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3780,
-      "column": 51,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "false_positive",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "\"implementation.hiddenReplacementLongtail.shell_traders_delayed_install\","
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3785,
-      "column": 51,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "false_positive",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "\"implementation.hiddenReplacementLongtail.shell_traders_delayed_install\","
-    },
-    {
-      "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3790,
-      "column": 51,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "false_positive",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "\"implementation.hiddenReplacementLongtail.shell_traders_delayed_install\","
     },
     {
       "path": "scripts/check-engine-cardimplementation-architecture-target.mjs",

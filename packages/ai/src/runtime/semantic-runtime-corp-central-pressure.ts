@@ -27,6 +27,13 @@ export type CorpCentralPressureAssessment = {
   evidence: string[];
 };
 
+export type CorpCentralDefenseAllocationDirection =
+  | Readonly<{
+      kind: "rd_focus_diversion";
+      selectedServerId: "rd";
+      evidenceCode: "corp_visible_rd_focus_diversion:multiaccess_with_visible_or_repeated_pressure";
+    }>;
+
 type AiCardHintWithSignals = AiCardHint & {
   tacticSignals?: readonly string[];
 };
@@ -56,6 +63,34 @@ export function semanticRuntimeCorpCentralPressureAssessment(
     CENTRAL_PRESSURE_ASSESSMENT_DECISION_CACHE_KEYS[serverId],
     () => buildSemanticRuntimeCorpCentralPressureAssessment(input, serverId),
   );
+}
+
+/**
+ * Selects R&D only when the visible facts establish a concentrated attack.
+ * Near ties deliberately remain deterministic until an
+ * Engine-recorded AI choice protocol exists; consuming neither hidden state
+ * nor an unrecorded pseudo-random value is permitted here.
+ */
+export function semanticRuntimeCorpCentralDefenseAllocationDirection(
+  input: AiDecisionInput,
+): CorpCentralDefenseAllocationDirection | undefined {
+  const hq = semanticRuntimeCorpCentralPressureAssessment(input, "hq");
+  if (!hq.hqAgendaExposure) return undefined;
+  const rd = semanticRuntimeCorpCentralPressureAssessment(input, "rd");
+  const strongRdFocus =
+    rd.visibleMultiaccess &&
+    (rd.visibleVirusPressure ||
+      rd.eventMultiaccess ||
+      rd.recentSuccessfulAccessRunnerTurns >= 2);
+  if (strongRdFocus) {
+    return {
+      kind: "rd_focus_diversion",
+      selectedServerId: "rd",
+      evidenceCode:
+        "corp_visible_rd_focus_diversion:multiaccess_with_visible_or_repeated_pressure",
+    };
+  }
+  return undefined;
 }
 
 function buildSemanticRuntimeCorpCentralPressureAssessment(

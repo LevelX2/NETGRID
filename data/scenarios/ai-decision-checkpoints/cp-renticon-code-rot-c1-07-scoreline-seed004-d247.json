@@ -24467,13 +24467,21 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "advance_card"
+        "type": "end_turn"
       }
     ],
-    "forbiddenActions": [
-      {
-        "type": "gain_credit"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.complete_turn"],
+      "acceptableCapabilities": [
+        "complete_turn_after_productive_routes_exhausted"
+      ],
+      "requiredAssessmentEvidence": [
+        "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
+        "corp_ice_install_has_no_engine_certified_access_probability_reduction",
+        "corp_score_protection_assessment_unknown:remote_1:subset_assessment_unknown",
+        "corp_last_click_score_install_deferred:new_remote",
+        "productive_legal_routes_exhausted"
+      ]
+    }
   }
 }

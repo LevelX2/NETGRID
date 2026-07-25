@@ -14,6 +14,10 @@ import {
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
 } from "./corp-rez-cost";
+import {
+  corpRootRezCreditOutcomeQuotePayload,
+  quoteCorpRootRezCreditOutcome,
+} from "./root-rez-credit-outcome";
 
 const BASKERVILLE_ID = "baskerville_1" as CardInstanceId;
 const BASKERVILLE_DEFINITION_ID = "onr_classic_005_baskerville";
@@ -211,6 +215,17 @@ describe("corp rez costs", () => {
       expiresAtStateVersion: state.stateVersion,
       payload: { ...quote.publicPayload },
     } as LegalAction;
+    const creditOutcomeQuote = quoteCorpRootRezCreditOutcome(
+      state,
+      ACME_ID,
+      action.actionId,
+      quote.finalCredits,
+    );
+    expect(creditOutcomeQuote).toBeDefined();
+    action.payload = {
+      ...(action.payload ?? {}),
+      ...corpRootRezCreditOutcomeQuotePayload(creditOutcomeQuote!),
+    };
 
     expect(assertCorpRootRezCostQuoteValid(state, ACME_ID, action)).toEqual(
       quote,

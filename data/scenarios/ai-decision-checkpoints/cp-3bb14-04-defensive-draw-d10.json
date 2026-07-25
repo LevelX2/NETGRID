@@ -3869,14 +3869,11 @@
         "type": "gain_credit"
       }
     ],
-    "selectedScoreBreakdown": {
-      "requiredComponentKeys": [
-        "corp_safe_draw_capacity",
-        "corp_missing_concrete_defense_draw"
-      ],
-      "forbiddenComponentKeys": [
-        "corp_low_hand",
-        "corp_seeded_near_tie_variation"
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
+      "acceptableCapabilities": ["draw_for_plan"],
+      "requiredAssessmentEvidence": [
+        "corp_option_development_below_hand_capacity"
       ]
     }
   }

@@ -6576,13 +6576,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_203_hostile-takeover_1.remote_1.corp_onr_v1_203_hostile-takeover_1"
-      },
-      {
-        "actionId": "corp.install_card.corp_onr_v1_193_corporate-coup_1.remote_1.corp_onr_v1_193_corporate-coup_1"
-      },
-      {
-        "actionId": "corp.install_card.corp_onr_v1_193_corporate-coup_2.remote_1.corp_onr_v1_193_corporate-coup_2"
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [

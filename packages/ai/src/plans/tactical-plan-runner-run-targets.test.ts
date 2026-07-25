@@ -352,8 +352,8 @@ describe("runnerPressureProbeAllowance", () => {
         defaultStep,
       ),
     ).toMatchObject({
-      kind: "run_target",
-      desiredActionSemantics: ["run.start"],
+      kind: "gain_credits",
+      desiredActionSemantics: ["economy.gain_credit"],
     });
   });
 

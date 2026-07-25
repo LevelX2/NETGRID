@@ -12,6 +12,7 @@ describe("deck doctrine card role classification", () => {
     expect(deckDoctrineRoleIsAgenda("agenda_2pt")).toBe(true);
     expect(deckDoctrineRoleIsAgenda("corp_score_agenda")).toBe(true);
     expect(deckDoctrineRoleIsAgenda("agendaish_asset")).toBe(false);
+    expect(deckDoctrineRoleIsAgenda("agenda_fast_advance")).toBe(false);
     expect(deckDoctrineRoleIsAgenda("remote_agenda_protection")).toBe(false);
   });
 

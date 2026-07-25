@@ -13,6 +13,23 @@ import {
 import { toPublicEvent } from "./public-event-view";
 
 describe("PublicEvent projection", () => {
+  it("preserves the Engine turn serial as a public cadence fact", () => {
+    expect(
+      toPublicEvent({
+        eventId: "event_turn_7",
+        type: "gain_credit",
+        stateVersionBefore: 10,
+        stateVersionAfter: 11,
+        turnSerial: 7,
+        stateHashAfter: "hash" as never,
+        publicPayload: {
+          actor: "runner",
+          actionType: "gain_credit",
+        },
+      }),
+    ).toMatchObject({ turnSerial: 7 });
+  });
+
   it("classifies access as a hidden-info barrier event", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({

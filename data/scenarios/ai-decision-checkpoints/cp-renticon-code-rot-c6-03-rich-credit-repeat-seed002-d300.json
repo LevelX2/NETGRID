@@ -28704,8 +28704,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "draw_card"
+        "actionId": "runner.install_card.runner_onr_v1_071_vewy-vewy-quiet_2.runner_onr_v1_071_vewy-vewy-quiet_2"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.credit_bank"],
+      "acceptableCapabilities": ["credit_bank_install"],
+      "requiredAssessmentEvidence": ["runner_credit_bank_install_ready"]
+    }
   }
 }

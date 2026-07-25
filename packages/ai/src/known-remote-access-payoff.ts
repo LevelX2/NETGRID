@@ -17,6 +17,7 @@ import {
 import { projectAccessDecision } from "./decision/access-decision-projection";
 import { createProjectedAccessOutcome } from "./access/access-outcome-projection";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
+import { currentRunRemainingIce } from "./runtime/current-encounter";
 
 export type KnownRemoteAccessPayoffKind =
   | "agenda"
@@ -68,8 +69,8 @@ export function evaluateKnownRemoteAccessPayoff(
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
-  if (!server || server.root.length === 0)
-    return unknownRemotePayoff(serverId, ["remote_memory_payoff:no_root"]);
+  if (!server) return unknownRemotePayoff(serverId, ["remote_server:missing"]);
+  if (server.root.length === 0) return emptyRemotePayoff(serverId);
 
   const knownRoots = knownRemoteRoots(input, serverId, beliefState);
   const remoteInvalidations = beliefState.invalidationLog
@@ -379,8 +380,12 @@ function knownRemotePathCost(
       creditsAfterPath: input.playerView.own.credits,
     };
   }
+  const ice =
+    input.playerView.run?.attackedServerId === serverId
+      ? currentRunRemainingIce(input)
+      : server.ice;
   const assessment = assessKnownRezzedIcePath(
-    server.ice,
+    ice,
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
     server.root,
@@ -424,6 +429,25 @@ function unknownRemotePayoff(
       `remote_target:${serverId}`,
       "remote_memory_payoff:unknown",
       ...extraEvidence,
+    ],
+  };
+}
+
+function emptyRemotePayoff(serverId: string): KnownRemoteAccessPayoff {
+  return {
+    payoff: "known_low_value",
+    accessDecision: "decline",
+    declineReason: "no_current_payoff",
+    contestable: false,
+    knownNoCurrentPayoff: true,
+    score: 0,
+    penalty: 420,
+    reasons: ["remote_root_empty", "remote_known_no_current_payoff"],
+    evidence: [
+      `remote_target:${serverId}`,
+      "remote_root_count:0",
+      "remote_memory_payoff:known_low_value",
+      "remote_run_suppressed_by_empty_remote:true",
     ],
   };
 }

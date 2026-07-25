@@ -43,7 +43,11 @@ export function currentRunRemainingIce(input: AiDecisionInput): VisibleCard[] {
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === run.position?.serverId,
   );
-  return server?.ice.slice(0, Math.max(0, run.position.iceIndex)) ?? [];
+  const remainingIceCount =
+    run.phase === "movement"
+      ? run.position.iceIndex + 1
+      : run.position.iceIndex;
+  return server?.ice.slice(0, Math.max(0, remainingIceCount)) ?? [];
 }
 
 export function currentRunHasFutureVisibleIce(input: AiDecisionInput): boolean {

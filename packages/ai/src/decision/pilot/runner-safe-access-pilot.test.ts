@@ -70,6 +70,7 @@ function frame(params: { candidate: ActionSemanticCandidate }): SemanticDecision
           pathPassability: "reachable",
           pathCost: 0,
           creditsAfterRun: 4,
+          runCommitment: "full_path",
           stealOrTrashAffordable: "unknown",
           installedRunPayoff: payoff(),
           runActionPayoff: payoff(),

@@ -1,7 +1,8 @@
-import type {
-  AiDecisionInput,
-  LegalAction,
-  VisibleCard,
+import {
+  CARD_DEFINITIONS_BY_ID,
+  type AiDecisionInput,
+  type LegalAction,
+  type VisibleCard,
 } from "@netgrid/shared";
 import type { CorpBoardTriageDependencies } from "./semantic-runtime-corp-board-triage";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
@@ -16,6 +17,14 @@ export function corpInput(overrides: {
   eventTail?: AiDecisionInput["eventTail"];
   actionNumber?: number;
 }): AiDecisionInput {
+  bindEngineInstallQuotes(
+    overrides.legalActions,
+    [
+      ...(overrides.corpHq ?? []),
+      ...overrides.servers.flatMap((server) => [...server.ice, ...server.root]),
+    ],
+    1,
+  );
   return {
     side: "corp",
     ...(overrides.actionNumber !== undefined
@@ -25,6 +34,7 @@ export function corpInput(overrides: {
     eventTail: overrides.eventTail ?? [],
     playerView: {
       stateVersion: 1,
+      timingPoint: "corp_action.main",
       own: {
         credits: overrides.corpCredits ?? 5,
         clicks: 3,
@@ -174,15 +184,70 @@ export function iceCard(
   instanceId: string,
   overrides: Partial<VisibleCard> = {},
 ): VisibleCard {
+  const definitionId = overrides.definitionId ?? "simple_barrier_ice";
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   return {
     instanceId,
     known: true,
     type: "ice",
     owner: "corp",
-    definitionId: "simple_barrier_ice",
+    controller: "corp",
+    definitionId,
     rezCost: 2,
     ...overrides,
+    ...(definition?.strength !== undefined
+      ? { strength: definition.strength }
+      : {}),
+    ...(definition?.subtypes !== undefined
+      ? { subtypes: definition.subtypes.slice() }
+      : {}),
   } as VisibleCard;
+}
+
+function bindEngineInstallQuotes(
+  actions: LegalAction[],
+  visibleCards: readonly VisibleCard[],
+  stateVersion: number,
+): void {
+  for (const action of actions) {
+    if (action.type !== "install_card" || action.payload?.placement !== "ice") {
+      continue;
+    }
+    const sourceCard = visibleCards.find(
+      (card) => card.instanceId === action.source,
+    );
+    const serverId = action.payload.serverId;
+    if (
+      !sourceCard ||
+      sourceCard.known !== true ||
+      sourceCard.type !== "ice" ||
+      typeof serverId !== "string" ||
+      !Number.isSafeInteger(sourceCard.rezCost) ||
+      (sourceCard.rezCost ?? -1) < 0
+    ) {
+      continue;
+    }
+    Object.assign(action, {
+      timingPoint: "corp_action.main",
+      expiresAtStateVersion: stateVersion,
+      payload: {
+        ...action.payload,
+        cardId: sourceCard.instanceId,
+        ...(sourceCard.definitionId !== undefined
+          ? { sourceDefinitionId: sourceCard.definitionId }
+          : {}),
+        postInstallRezQuoteCardId: sourceCard.instanceId,
+        postInstallRezQuoteTargetServerId: serverId,
+        postInstallRezQuoteProjectedServerId:
+          serverId === "new_remote" ? "remote_1" : serverId,
+        postInstallRezQuoteExpiresAtStateVersion: stateVersion,
+        postInstallRezQuoteComplete: true,
+        postInstallRezQuoteBaseCredits: sourceCard.rezCost,
+        postInstallRezQuoteFinalCredits: sourceCard.rezCost,
+        postInstallRezQuoteMandatoryAgendaPointCost: 0,
+      },
+    });
+  }
 }
 
 export function assetCard(instanceId: string): VisibleCard {

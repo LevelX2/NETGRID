@@ -1,6 +1,9 @@
 import {
+  CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
+  CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   type AiDecision,
   type AiDecisionInput,
+  type CorpOptionalRezChoiceQuote,
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
@@ -8,27 +11,36 @@ import {
 import { selectedBidChoiceOptionId } from "./bid-choice-option";
 import { selectableChoiceOptions } from "./choice-option";
 import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement-counter-choice";
+import { selectedCorpAccessPaymentChoiceOptionId } from "./corp-access-payment-choice";
 import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
 import { selectedDiscardChoiceOptionIds } from "./discard-choice-selection";
-import { selectedRunnerDamagePreventionChoiceOptionId } from "./damage-prevention-choice-option";
+import {
+  runnerDamagePreventionChoiceResolution,
+  type RunnerOptionalChoiceResolution,
+} from "./damage-prevention-choice-option";
 import { selectedPlayfulAiChoiceOptionId } from "./playful-ai-choice-option";
 import { selectedPostBidLinkChoiceOptionId } from "./post-bid-link-choice-option";
 import {
   selectedSearchChoiceOptionIds,
   type SearchChoiceFeatureSnapshot,
 } from "./search-choice-option";
-import { runnerVisibleSearchCoverageNeed } from "./runner-search-coverage-need";
 import { selectedRunnerExposeInstalledCardChoiceOptionIds } from "./runner-expose-installed-card-choice";
-import {
-  selectedDefaultCardChoiceOptionIds,
-  selectedFallbackChoiceOptionIds,
-} from "./select-card-choice-option";
+import { selectedForcedChoiceOptionIds } from "./select-card-choice-option";
 import { selectedSetupMulliganChoiceOptionId } from "./setup-mulligan-choice-option";
 import { selectedShellTradersStartTurnChoiceOptionId } from "./shell-traders-choice-option";
-import { selectedRunnerTagAvoidanceChoiceOptionId } from "./tag-avoidance-choice-option";
+import { runnerTagAvoidanceChoiceResolution } from "./tag-avoidance-choice-option";
 import { latestTraceContext } from "./trace-context";
-import { getTacticalPlanMemorySnapshot } from "../plans/plan-memory";
+import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
+import type { StrategicIntentState } from "../strategic-intent-state";
+import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
+import {
+  isRunnerTargetedBypassChoice,
+  isRunnerTargetedBypassHideChoice,
+  selectedRunnerTargetedBypassChoiceOptionId,
+  selectedRunnerTargetedBypassHideChoiceOptionId,
+} from "./runner-targeted-bypass-choice";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -77,6 +89,18 @@ export function selectedChoicesForDecision(
   const choice = input.playerView.pendingChoice;
   if (action.type !== "resolve_choice" || !choice) return undefined;
   const selectableOptions = selectableChoiceOptions(choice.options);
+  const resolved = (
+    selectedOptionIds: readonly string[],
+    resolverId: string,
+  ): NonNullable<AiDecision["selectedChoices"]> =>
+    validatedChoiceSelection(
+      input,
+      action,
+      choice,
+      selectableOptions,
+      selectedOptionIds,
+      resolverId,
+    );
   if (choice.source === "setup.mulligan") {
     const opening =
       input.side === "corp"
@@ -86,9 +110,10 @@ export function selectedChoicesForDecision(
       choice,
       opening.decision,
     );
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
+    return resolved(
+      selectedOptionId !== undefined ? [selectedOptionId] : [],
+      "setup_mulligan",
+    );
   }
   if (choice.kind === "select_cards" && choice.source === "discard_phase") {
     const selected = selectedDiscardChoiceOptionIds(
@@ -97,20 +122,19 @@ export function selectedChoicesForDecision(
       selectableOptions,
       dependencies.discardKeepScore,
     );
-    return { choiceId: choice.choiceId, selectedOptionIds: selected };
+    return resolved(selected, "discard_phase");
   }
   if (
     choice.kind === "select_cards" &&
     choice.source.startsWith("runner.checkpoint_memory_cleanup:")
   ) {
-    return {
-      choiceId: choice.choiceId,
-      selectedOptionIds:
-        dependencies.selectedRunnerMemoryCheckpointTrashOptionIds(
-          input,
-          selectableOptions,
-        ),
-    };
+    return resolved(
+      dependencies.selectedRunnerMemoryCheckpointTrashOptionIds(
+        input,
+        selectableOptions,
+      ),
+      "runner_checkpoint_memory_cleanup",
+    );
   }
   if (
     choice.kind === "select_cards" &&
@@ -118,36 +142,36 @@ export function selectedChoicesForDecision(
   ) {
     const selectedOptionId =
       selectedShellTradersStartTurnChoiceOptionId(choice);
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
+    return resolved(
+      selectedOptionId !== undefined ? [selectedOptionId] : [],
+      "runner_delayed_install",
+    );
   }
   if (
     choice.kind === "select_cards" &&
     choice.source.startsWith("runner_program_trash_before_install")
   ) {
-    return {
-      choiceId: choice.choiceId,
-      selectedOptionIds:
-        dependencies.selectedRunnerProgramInstallTrashOptionIds(
-          input,
-          choice,
-          selectableOptions,
-        ),
-    };
+    return resolved(
+      dependencies.selectedRunnerProgramInstallTrashOptionIds(
+        input,
+        choice,
+        selectableOptions,
+      ),
+      "runner_program_trash_before_install",
+    );
   }
   if (
     choice.kind === "select_cards" &&
     (choice.source.startsWith("p3_56.pass_ice_program_trash") ||
       choice.source.startsWith("card_implementation.active_ice_program_trash"))
   ) {
-    return {
-      choiceId: choice.choiceId,
-      selectedOptionIds: dependencies.selectedRunnerForcedProgramTrashOptionIds(
+    return resolved(
+      dependencies.selectedRunnerForcedProgramTrashOptionIds(
         input,
         selectableOptions,
       ),
-    };
+      "runner_forced_program_trash",
+    );
   }
   if (
     input.side === "corp" &&
@@ -155,48 +179,127 @@ export function selectedChoicesForDecision(
       choice.source.startsWith("p3_34.move_advancement") ||
       choice.source.startsWith("v1919.systematic_layoffs_advancement"))
   ) {
-    const planMemory = getTacticalPlanMemorySnapshot(input);
-    const plannedTargetCardId =
-      planMemory?.type === "corp.create_score_window" &&
-      planMemory.target?.kind === "card"
-        ? planMemory.target.id
-        : undefined;
+    const scoreBinding = residentCorpScoreChoiceBinding(
+      input,
+      choice,
+      selectableOptions,
+    );
     const selected = selectedCorpAdvancementCounterChoiceOptionId(
       input,
       selectableOptions,
-      plannedTargetCardId,
-      planMemory?.scoreConversionDesiredAdvancementCounters,
+      scoreBinding.targetCardId,
     );
-    return {
-      choiceId: choice.choiceId,
-      selectedOptionIds: selected ? [selected] : [],
-    };
+    return resolved(
+      selected ? [selected] : [],
+      "resident_corp_score_advancement",
+    );
+  }
+  if (
+    input.side === "corp" &&
+    choice.source.startsWith("scored_agenda.hq_agenda_shuffle_credits:")
+  ) {
+    const binding = residentCorpScoredAgendaHqShuffleBinding(
+      input,
+      action,
+      choice,
+      selectableOptions,
+    );
+    return resolved(
+      binding.selectedOptionIds,
+      "resident_corp_scored_agenda_hq_shuffle",
+    );
   }
   if (
     choice.kind === "select_cards" &&
     isHqToNewRemoteOptionalRezChoice(choice)
   ) {
-    return {
-      choiceId: choice.choiceId,
-      selectedOptionIds: selectedAffordableOptionalRezOptionIds(
+    const selected = selectedAffordableOptionalRezOptionIds(
+      input,
+      choice,
+      selectableOptions,
+    );
+    if (!selected) {
+      throw unresolvedChoiceFailure(
         input,
-        choice,
-        selectableOptions,
-      ),
-    };
+        action,
+        "Expose complete temporary-credit and installed-card rez-cost data for the HQ-to-remote rez choice.",
+      );
+    }
+    return resolved(selected, "hq_to_new_remote_optional_rez");
   }
   if (
     choice.kind === "select_cards" &&
     isHqToNewRemoteInstallRezChoice(choice)
   ) {
-    return {
-      choiceId: choice.choiceId,
-      selectedOptionIds: selectedHqToNewRemoteInstallRezOptionIds(
+    return resolved(
+      selectedHqToNewRemoteInstallRezOptionIds(
         input,
         choice,
         selectableOptions,
       ),
-    };
+      "hq_to_new_remote_install_rez",
+    );
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "bid_amount" &&
+    isRunnerTargetedBypassHideChoice(choice)
+  ) {
+    return resolved(
+      [
+        selectedRunnerTargetedBypassHideChoiceOptionId(
+          input,
+          action,
+          choice,
+          selectableOptions,
+        ),
+      ],
+      "runner_targeted_bypass_hide",
+    );
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_cards" &&
+    isRunnerTargetedBypassChoice(choice)
+  ) {
+    return resolved(
+      [
+        selectedRunnerTargetedBypassChoiceOptionId(
+          input,
+          action,
+          choice,
+          selectableOptions,
+        ),
+      ],
+      "runner_targeted_bypass",
+    );
+  }
+  if (
+    choice.kind === "select_cards" &&
+    (choice.source.startsWith("v1917.corp_hq_agenda_reveal:") ||
+      choice.source.startsWith("p3_36.show_hq_agendas_for_credits:"))
+  ) {
+    return resolved(
+      selectableOptions
+        .slice(0, choice.maxSelections)
+        .map((option) => option.id),
+      "corp_hq_agenda_reveal_for_credits",
+    );
+  }
+  if (choice.source.startsWith("p3_35.access_payment")) {
+    const selectedOptionId = selectedCorpAccessPaymentChoiceOptionId(
+      input,
+      choice,
+      selectableOptions,
+    );
+    if (!selectedOptionId) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "Preserve the exact Corp access-payment source, accessed-card binding, state version, pay/decline contract and Engine-certified credit cost.",
+      );
+    }
+    return resolved([selectedOptionId], "corp_access_payment");
   }
   if (choice.kind === "select_cards") {
     const retainedHqCards = selectedCorpHqRetainPaymentOptionIds(
@@ -206,10 +309,7 @@ export function selectedChoicesForDecision(
       dependencies.discardKeepScore,
     );
     if (retainedHqCards) {
-      return {
-        choiceId: choice.choiceId,
-        selectedOptionIds: retainedHqCards,
-      };
+      return resolved(retainedHqCards, "corp_hq_retain_payment");
     }
     const exposeSelected = selectedRunnerExposeInstalledCardChoiceOptionIds(
       input,
@@ -217,61 +317,63 @@ export function selectedChoicesForDecision(
       selectableOptions,
     );
     if (exposeSelected) {
-      return { choiceId: choice.choiceId, selectedOptionIds: exposeSelected };
+      return resolved(exposeSelected, "runner_expose_installed_card");
     }
-    const requiredCoverage =
-      runnerVisibleSearchCoverageNeed(input)?.requiredCoverage;
-    const preferredServerId = runnerSearchPreferredServerId(input);
+    const coverageBinding = runnerCoverageSearchChoiceBinding(input, choice);
+    const preferredServerId =
+      coverageBinding?.serverId ?? runnerStrategicSearchTarget(input);
     const searchSelected = selectedSearchChoiceOptionIds(
       choice,
       selectableOptions,
       {
         features: dependencies.extractAiFeatures(input),
         rolesForCardId: dependencies.rolesForCardId,
-        ...(requiredCoverage ? { requiredCoverage } : {}),
+        ...(coverageBinding
+          ? {
+              requiredCoverage: coverageBinding.requiredCoverage,
+            }
+          : {}),
         ...(preferredServerId ? { preferredServerId } : {}),
       },
     );
-    if (searchSelected)
-      return { choiceId: choice.choiceId, selectedOptionIds: searchSelected };
-    return {
-      choiceId: choice.choiceId,
-      selectedOptionIds: selectedDefaultCardChoiceOptionIds(
-        choice,
-        selectableOptions,
-      ),
-    };
+    if (searchSelected) {
+      return resolved(searchSelected, "search_choice");
+    }
   }
   if (choice.source.startsWith("v1921.playful_ai")) {
     const selectedOptionId = selectedPlayfulAiChoiceOptionId(choice);
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
+    return resolved(
+      selectedOptionId !== undefined ? [selectedOptionId] : [],
+      "playful_ai",
+    );
   }
   if (choice.source.startsWith("trace_post_bid_link")) {
     const selectedOptionId = selectedPostBidLinkChoiceOptionId(
       choice,
       latestTraceContext(input),
     );
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
+    return resolved(
+      selectedOptionId !== undefined ? [selectedOptionId] : [],
+      "post_bid_link",
+    );
   }
   if (choice.source.startsWith("runner_draw.draw_tax:")) {
     const selectedOptionId =
       selectableOptions.find((option) => option.id === "pay_credit")?.id ??
       selectableOptions.find((option) => option.id === "take_tag")?.id;
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
+    return resolved(
+      selectedOptionId !== undefined ? [selectedOptionId] : [],
+      "runner_draw_tax",
+    );
   }
   if (choice.source.startsWith("runner_draw.draw_tax_rez:")) {
     const selectedOptionId =
       selectableOptions.find((option) => option.id.startsWith("rez_"))?.id ??
       selectableOptions.find((option) => option.id === "pass")?.id;
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
+    return resolved(
+      selectedOptionId !== undefined ? [selectedOptionId] : [],
+      "runner_draw_tax_rez",
+    );
   }
   if (
     input.side === "runner" &&
@@ -281,53 +383,444 @@ export function selectedChoicesForDecision(
       input,
       selectableOptions,
     );
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
+    return resolved(
+      selectedOptionId !== undefined ? [selectedOptionId] : [],
+      "successful_run_credit_loss_spend",
+    );
   }
   if (input.side === "runner") {
-    const selectedDamagePreventionOptionId =
-      selectedRunnerDamagePreventionChoiceOptionId(
-        input,
-        choice,
-        selectableOptions,
-        dependencies.rolesForCardId,
+    if (choice.source === "v120.event_modification.prevent") {
+      const selectedDamagePreventionOptionId =
+        selectedRunnerOptionalChoiceOptionId(
+          input,
+          action,
+          runnerDamagePreventionChoiceResolution(
+            input,
+            choice,
+            selectableOptions,
+            dependencies.rolesForCardId,
+          ),
+          selectableOptions,
+        );
+      return resolved(
+        [selectedDamagePreventionOptionId],
+        "runner_damage_prevention",
       );
-    if (selectedDamagePreventionOptionId !== undefined) {
-      return {
-        choiceId: choice.choiceId,
-        selectedOptionIds: [selectedDamagePreventionOptionId],
-      };
     }
-    const selectedOptionId = selectedRunnerTagAvoidanceChoiceOptionId(
-      choice,
-      selectableOptions,
-    );
-    if (selectedOptionId !== undefined) {
-      return {
-        choiceId: choice.choiceId,
-        selectedOptionIds: [selectedOptionId],
-      };
+    if (choice.source === "v120.event_modification.avoid") {
+      const selectedTagAvoidanceOptionId = selectedRunnerOptionalChoiceOptionId(
+        input,
+        action,
+        runnerTagAvoidanceChoiceResolution(choice, selectableOptions),
+        selectableOptions,
+      );
+      return resolved([selectedTagAvoidanceOptionId], "runner_tag_avoidance");
     }
   }
-  if (choice.kind !== "bid_amount") {
-    return {
-      choiceId: choice.choiceId,
-      selectedOptionIds: selectedFallbackChoiceOptionIds(
-        choice,
-        selectableOptions,
-      ),
-    };
+  if (choice.kind === "bid_amount") {
+    const selectedOptionId = selectedBidChoiceOptionId(
+      input,
+      choice,
+      latestTraceContext(input),
+    );
+    return resolved(
+      selectedOptionId !== undefined ? [selectedOptionId] : [],
+      "bid_amount",
+    );
   }
 
-  const selectedOptionId = selectedBidChoiceOptionId(
-    input,
+  const forcedSelection = selectedForcedChoiceOptionIds(
     choice,
-    latestTraceContext(input),
+    selectableOptions,
   );
-  return selectedOptionId !== undefined
-    ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-    : { choiceId: choice.choiceId, selectedOptionIds: [] };
+  if (forcedSelection !== undefined) {
+    return resolved(forcedSelection, "engine_forced_selection");
+  }
+  throw unresolvedChoiceFailure(
+    input,
+    action,
+    "Register a complete domain resolver or preserve an exact resident-plan continuation for this non-forced choice.",
+  );
+}
+
+function selectedRunnerOptionalChoiceOptionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+  resolution: RunnerOptionalChoiceResolution | undefined,
+  selectableOptions: PendingChoiceOptions,
+): string {
+  if (!resolution) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Invoke the Runner optional-choice resolver only for its exact registered source, kind, and selection cardinality.",
+    );
+  }
+  if (resolution.kind === "select") return resolution.optionId;
+  const passOptionId = selectableOptions.find(
+    (option) => option.id === "pass",
+  )?.id;
+  if (!passOptionId) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Expose the exact pass option required by the Runner resolver's intentional pass decision.",
+    );
+  }
+  return passOptionId;
+}
+
+function validatedChoiceSelection(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  selectedOptionIds: readonly string[],
+  resolverId: string,
+): NonNullable<AiDecision["selectedChoices"]> {
+  const selectableIds = new Set(selectableOptions.map((option) => option.id));
+  const uniqueIds = new Set(selectedOptionIds);
+  const selectionIsValid =
+    Number.isInteger(choice.minSelections) &&
+    Number.isInteger(choice.maxSelections) &&
+    choice.minSelections >= 0 &&
+    choice.maxSelections >= choice.minSelections &&
+    selectedOptionIds.length >= choice.minSelections &&
+    selectedOptionIds.length <= choice.maxSelections &&
+    uniqueIds.size === selectedOptionIds.length &&
+    selectedOptionIds.every((optionId) => selectableIds.has(optionId));
+  if (!selectionIsValid) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      `Make the registered ${resolverId} resolver return a unique selectable payload within the Engine min/max contract.`,
+    );
+  }
+  return {
+    choiceId: choice.choiceId,
+    selectedOptionIds: [...selectedOptionIds],
+  };
+}
+
+function unresolvedChoiceFailure(
+  input: AiDecisionInput,
+  action: LegalAction,
+  removalCondition: string,
+): PlanResolutionFailure {
+  return new PlanResolutionFailure("window_origin_missing", {
+    side: input.side,
+    stateVersion: input.playerView.stateVersion,
+    timingPoint: input.playerView.timingPoint,
+    legalActionTypes: input.legalActions.map((legalAction) => legalAction.type),
+    unresolvedActionIds: [action.actionId],
+    owner: "window_resolution",
+    removalCondition,
+  });
+}
+
+function residentCorpScoreChoiceBinding(
+  input: AiDecisionInput,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+): { planInstanceId: string; targetCardId: string } {
+  const portfolio = residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "corp.score_agenda" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signal?: { agendaInstanceId?: unknown };
+        choiceContinuation?: {
+          family?: unknown;
+          selectedActionId?: unknown;
+          selectedAtStateVersion?: unknown;
+          targetCardId?: unknown;
+        };
+      }
+    | undefined;
+  const continuation = moduleState?.choiceContinuation;
+  const targetCardId =
+    typeof continuation?.targetCardId === "string"
+      ? continuation.targetCardId
+      : undefined;
+  const exactContinuation =
+    portfolio !== undefined &&
+    executor !== undefined &&
+    moduleState?.kind === "score" &&
+    typeof moduleState.signal?.agendaInstanceId === "string" &&
+    moduleState.signal.agendaInstanceId === targetCardId &&
+    continuation?.family === "corp_advancement_counter" &&
+    typeof continuation.selectedActionId === "string" &&
+    continuation.selectedActionId.length > 0 &&
+    continuation.selectedAtStateVersion === portfolio.stateVersion &&
+    portfolio.stateVersion + 1 === input.playerView.stateVersion &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    targetCardId !== undefined &&
+    selectableOptions.some((option) =>
+      advancementChoiceOptionTargetsCard(option.value, targetCardId),
+    );
+  if (!exactContinuation || !executor || !targetCardId) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      owner: "continuation",
+      removalCondition:
+        "Bind the advancement choice to the immediately preceding resident Corp score executor, selected score-conversion action and exact agenda target.",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+    });
+  }
+  return { planInstanceId: executor.instanceId, targetCardId };
+}
+
+function residentCorpScoredAgendaHqShuffleBinding(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+): { planInstanceId: string; selectedOptionIds: string[] } {
+  const portfolio = residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "corp.score_agenda" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signal?: { agendaInstanceId?: unknown };
+        choiceContinuation?: {
+          family?: unknown;
+          selectedActionId?: unknown;
+          selectedAtStateVersion?: unknown;
+          targetCardId?: unknown;
+        };
+      }
+    | undefined;
+  const continuation = moduleState?.choiceContinuation;
+  const sourceParts = choice.source.split(":");
+  const sourceCardId = sourceParts[1];
+  const creditPerAgendaPoint = Number(sourceParts[2]);
+  const sourceStateVersion = Number(sourceParts[3]);
+  const knownHqAgendaIds = input.playerView.own.gripOrHq
+    .filter((card) => card.known && card.type === "agenda")
+    .map((card) => card.instanceId)
+    .sort();
+  const selectedOptionIds = selectableOptions.map((option) => option.id);
+  const [choiceRequirement] = action.choiceRequirements ?? [];
+  const optionAgendaIds = selectableOptions
+    .map((option) =>
+      typeof option.value === "string" ? option.value : undefined,
+    )
+    .filter((cardId): cardId is string => cardId !== undefined)
+    .sort();
+  const exactContinuation =
+    sourceParts.length === 4 &&
+    sourceParts[0] === "scored_agenda.hq_agenda_shuffle_credits" &&
+    sourceCardId !== undefined &&
+    Number.isSafeInteger(creditPerAgendaPoint) &&
+    creditPerAgendaPoint > 0 &&
+    String(creditPerAgendaPoint) === sourceParts[2] &&
+    Number.isSafeInteger(sourceStateVersion) &&
+    String(sourceStateVersion) === sourceParts[3] &&
+    sourceStateVersion === input.playerView.stateVersion &&
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    choiceRequirement?.choiceId === choice.choiceId &&
+    choiceRequirement.minSelections === choice.minSelections &&
+    choiceRequirement.maxSelections === choice.maxSelections &&
+    choiceRequirement.optionIds.length === selectedOptionIds.length &&
+    choiceRequirement.optionIds.every(
+      (optionId, index) => optionId === selectedOptionIds[index],
+    ) &&
+    portfolio !== undefined &&
+    executor !== undefined &&
+    moduleState?.kind === "score" &&
+    moduleState.signal?.agendaInstanceId === sourceCardId &&
+    continuation?.family === "corp_scored_agenda_on_score" &&
+    typeof continuation.selectedActionId === "string" &&
+    continuation.selectedActionId.length > 0 &&
+    continuation.selectedAtStateVersion === portfolio.stateVersion &&
+    continuation.targetCardId === sourceCardId &&
+    portfolio.stateVersion + 1 === input.playerView.stateVersion &&
+    choice.kind === "select_cards" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.minSelections === 0 &&
+    choice.maxSelections === selectableOptions.length &&
+    optionAgendaIds.length === selectableOptions.length &&
+    optionAgendaIds.length === knownHqAgendaIds.length &&
+    optionAgendaIds.every(
+      (cardId, index) => cardId === knownHqAgendaIds[index],
+    ) &&
+    input.playerView.own.scoreArea.some(
+      (card) =>
+        card.known &&
+        card.type === "agenda" &&
+        card.instanceId === sourceCardId,
+    );
+  if (!exactContinuation || !executor) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      owner: "continuation",
+      removalCondition:
+        "Bind the scored-agenda HQ shuffle to the immediately preceding resident Corp score executor, exact scored agenda, state version and complete visible HQ-agenda option set.",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+    });
+  }
+  return { planInstanceId: executor.instanceId, selectedOptionIds };
+}
+
+function advancementChoiceOptionTargetsCard(
+  value: PendingChoiceOptions[number]["value"],
+  targetCardId: string,
+): boolean {
+  if (typeof value !== "string") return false;
+  const moveParts = value.split("|");
+  if (moveParts.length === 3 && !value.includes(":")) {
+    return moveParts[1] === targetCardId;
+  }
+  return value.split("|").some((placement) => {
+    const [cardId, amount] = placement.split(":");
+    return (
+      cardId === targetCardId &&
+      Number.isFinite(Number(amount)) &&
+      Number(amount) > 0
+    );
+  });
+}
+
+function runnerStrategicSearchTarget(
+  input: AiDecisionInput,
+): "hq" | "rd" | undefined {
+  if (input.side !== "runner") return undefined;
+  const enriched = input as AiDecisionInput & {
+    ownStrategicIntentState?: StrategicIntentState;
+    ownDeckSnapshot?: { deckSnapshotId?: string };
+  };
+  const target =
+    enriched.ownStrategicIntentState?.targetVector ??
+    getStrategicIntentMemorySnapshot(
+      input,
+      enriched.ownDeckSnapshot?.deckSnapshotId,
+    )?.state.targetVector;
+  return target?.kind === "central" &&
+    (target.targetId === "hq" || target.targetId === "rd")
+    ? target.targetId
+    : undefined;
+}
+
+function runnerCoverageSearchChoiceBinding(
+  input: AiDecisionInput,
+  choice: PendingChoice,
+):
+  | {
+      planInstanceId: string;
+      actionId: string;
+      requiredCoverage: RequiredCapabilityKind;
+      serverId?: string;
+    }
+  | undefined {
+  if (input.side !== "runner") return undefined;
+  const portfolio = residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "runner.rig_and_coverage",
+  );
+  if (!executor) return undefined;
+  const moduleState = executor.moduleState as
+    | {
+        kind?: unknown;
+        phase?: unknown;
+        selectedSearchActionId?: unknown;
+        selectedSearchStateVersion?: unknown;
+        gap?: {
+          requiredRole?: unknown;
+          targetServerId?: unknown;
+          directSearchChoiceBindings?: Array<{
+            actionId?: unknown;
+            sourceCardInstanceId?: unknown;
+            sourceDefinitionId?: unknown;
+          }>;
+        };
+      }
+    | undefined;
+  if (
+    moduleState?.kind !== "coverage" ||
+    moduleState.phase !== "search_answer" ||
+    typeof moduleState.selectedSearchActionId !== "string" ||
+    typeof moduleState.selectedSearchStateVersion !== "number" ||
+    moduleState.selectedSearchStateVersion !== portfolio?.stateVersion ||
+    moduleState.selectedSearchStateVersion > input.playerView.stateVersion ||
+    typeof moduleState.gap?.requiredRole !== "string"
+  ) {
+    throw coverageSearchChoiceBindingFailure(
+      input,
+      executor.instanceId,
+      "The resident coverage executor lacks the exact selected search action and state-version binding.",
+    );
+  }
+  const bindings =
+    moduleState.gap.directSearchChoiceBindings?.filter(
+      (candidate) =>
+        candidate.actionId === moduleState.selectedSearchActionId &&
+        typeof candidate.sourceCardInstanceId === "string" &&
+        typeof candidate.sourceDefinitionId === "string" &&
+        choice.source.includes(`:${candidate.sourceCardInstanceId}:`) &&
+        choice.source.includes(`:${candidate.sourceDefinitionId}:`),
+    ) ?? [];
+  if (bindings.length !== 1) {
+    throw coverageSearchChoiceBindingFailure(
+      input,
+      executor.instanceId,
+      "The current search choice source does not match exactly one binding for the selected coverage-search LegalAction.",
+    );
+  }
+  const binding = bindings[0];
+  if (!binding || typeof binding.actionId !== "string") {
+    throw coverageSearchChoiceBindingFailure(
+      input,
+      executor.instanceId,
+      "The exact coverage-search binding is incomplete.",
+    );
+  }
+  return {
+    planInstanceId: executor.instanceId,
+    actionId: binding.actionId,
+    requiredCoverage: moduleState.gap.requiredRole as RequiredCapabilityKind,
+    ...(typeof moduleState.gap.targetServerId === "string"
+      ? { serverId: moduleState.gap.targetServerId }
+      : {}),
+  };
+}
+
+function coverageSearchChoiceBindingFailure(
+  input: AiDecisionInput,
+  planInstanceId: string,
+  removalCondition: string,
+): PlanResolutionFailure {
+  return new PlanResolutionFailure("invalid_support_graph", {
+    side: input.side,
+    stateVersion: input.playerView.stateVersion,
+    timingPoint: input.playerView.timingPoint,
+    legalActionTypes: input.legalActions.map((action) => action.type),
+    owner: "support_graph",
+    planInstanceId,
+    removalCondition,
+  });
 }
 
 function selectedCreditLossSpendOptionId(
@@ -368,16 +861,6 @@ function choiceNumericValue(
   return Number.isInteger(value) && value >= 0 ? value : undefined;
 }
 
-function runnerSearchPreferredServerId(
-  input: AiDecisionInput,
-): string | undefined {
-  if (input.side !== "runner") return undefined;
-  const target = getStrategicIntentMemorySnapshot(input)?.state.targetVector;
-  return target?.kind === "central" || target?.kind === "remote"
-    ? target.targetId
-    : undefined;
-}
-
 function isHqToNewRemoteOptionalRezChoice(choice: PendingChoice): boolean {
   return (
     choice.source.startsWith(
@@ -393,29 +876,164 @@ function selectedAffordableOptionalRezOptionIds(
   input: AiDecisionInput,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
-): string[] {
-  const sourceParts = choice.source.split(":");
-  const temporaryCredits = Number.parseInt(sourceParts.at(-2) ?? "", 10);
-  if (!Number.isInteger(temporaryCredits) || temporaryCredits < 0) return [];
-  let creditsRemaining = input.playerView.own.credits + temporaryCredits;
-  const installedCardsById = new Map(
-    input.playerView.servers.flatMap((server) =>
-      [...server.ice, ...server.root].map((card) => [card.instanceId, card]),
-    ),
-  );
+): string[] | undefined {
+  const quotedOptions = selectableOptions.map((option) => ({
+    option,
+    quote: option.hqInstallRezOptionQuote,
+  }));
+  if (
+    quotedOptions.some(
+      ({ option, quote }) =>
+        !isExactOptionalRezChoiceQuoteBinding(input, choice, option, quote),
+    )
+  )
+    return undefined;
+
   const selected: string[] = [];
-  for (const option of selectableOptions) {
-    const card = installedCardsById.get(choiceCardInstanceId(option));
-    const rezCost = card?.rezCost;
-    if (!Number.isFinite(rezCost) || rezCost === undefined || rezCost < 0)
-      continue;
-    if (rezCost > creditsRemaining) continue;
+  for (const { option, quote } of quotedOptions) {
+    if (!quote) return undefined;
+    if (!quote.complete || !quote.affordable) continue;
     selected.push(option.id);
-    creditsRemaining -= rezCost;
     if (selected.length >= choice.maxSelections) break;
   }
   return selected.length >= choice.minSelections ? selected : [];
 }
+
+function isExactOptionalRezChoiceQuoteBinding(
+  input: AiDecisionInput,
+  choice: PendingChoice,
+  option: PendingChoiceOptions[number],
+  quote: CorpOptionalRezChoiceQuote | undefined,
+): quote is CorpOptionalRezChoiceQuote {
+  const sourceAgenda = quote
+    ? input.playerView.own.scoreArea.find(
+        (card) => card.instanceId === quote.sourceAgendaId,
+      )
+    : undefined;
+  const boundServer = quote
+    ? input.playerView.servers.find(
+        (server) => server.id === quote.targetServerId,
+      )
+    : undefined;
+  const boundServerCard =
+    quote?.installedZone === "serverIce"
+      ? boundServer?.ice.find((card) => card.instanceId === quote.cardId)
+      : quote?.installedZone === "serverRoot"
+        ? boundServer?.root.find((card) => card.instanceId === quote.cardId)
+        : undefined;
+  if (
+    input.side !== "corp" ||
+    choice.side !== "corp" ||
+    !quote ||
+    quote.schemaVersion !== CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION ||
+    quote.kind !== CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND ||
+    quote.context !== "hq_to_new_remote_optional_rez" ||
+    quote.choiceId !== choice.choiceId ||
+    quote.optionId !== option.id ||
+    quote.stateVersion !== choice.stateVersion ||
+    quote.stateVersion !== input.playerView.stateVersion ||
+    !nonEmptyString(quote.sourceAgendaId) ||
+    !nonEmptyString(quote.cardId) ||
+    !nonEmptyString(quote.cardDefinitionId) ||
+    option.value !== quote.cardId ||
+    option.card?.known !== true ||
+    option.card.instanceId !== quote.cardId ||
+    option.card.definitionId !== quote.cardDefinitionId ||
+    option.card.rezzed !== false ||
+    sourceAgenda?.known !== true ||
+    sourceAgenda.type !== "agenda" ||
+    !nonEmptyString(quote.targetServerId) ||
+    !/^remote_[1-9][0-9]*$/.test(quote.targetServerId) ||
+    !boundServer ||
+    boundServerCard?.known !== true ||
+    boundServerCard.definitionId !== quote.cardDefinitionId ||
+    boundServerCard.rezzed !== false ||
+    (quote.installedZone !== "serverIce" &&
+      quote.installedZone !== "serverRoot") ||
+    !nonNegativeSafeInteger(quote.sequencePosition) ||
+    quote.sequencePosition < 1
+  )
+    return false;
+  if (!quote.complete) {
+    const value = quote as unknown as Record<string, unknown>;
+    return !OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS.some((field) => field in value);
+  }
+  return (
+    ((quote.cardType === "ice" && quote.installedZone === "serverIce") ||
+      ((quote.cardType === "asset" || quote.cardType === "upgrade") &&
+        quote.installedZone === "serverRoot")) &&
+    quote.cardType === option.card.type &&
+    nonNegativeSafeInteger(quote.baseCredits) &&
+    nonNegativeSafeInteger(quote.finalCredits) &&
+    nonNegativeSafeInteger(quote.mandatoryAdditionalCosts.agendaPoints) &&
+    validDefinitionIdList(quote.reductionSourceDefinitionIds) &&
+    validDefinitionIdList(quote.increaseSourceDefinitionIds) &&
+    modifierDefinitionIdListsAreDisjoint(
+      quote.reductionSourceDefinitionIds,
+      quote.increaseSourceDefinitionIds,
+    ) &&
+    nonNegativeSafeInteger(quote.temporaryCreditsAvailable) &&
+    nonNegativeSafeInteger(quote.temporaryCreditsApplied) &&
+    nonNegativeSafeInteger(quote.regularCreditsAvailable) &&
+    nonNegativeSafeInteger(quote.regularCreditsRequired) &&
+    quote.temporaryCreditsApplied ===
+      Math.min(quote.temporaryCreditsAvailable, quote.finalCredits) &&
+    quote.regularCreditsRequired ===
+      quote.finalCredits - quote.temporaryCreditsApplied &&
+    quote.regularCreditsAvailable === input.playerView.own.credits &&
+    quote.creditPayable ===
+      (quote.regularCreditsAvailable >= quote.regularCreditsRequired) &&
+    quote.additionalCostsPayable ===
+      (input.playerView.own.agendaPoints >=
+        quote.mandatoryAdditionalCosts.agendaPoints) &&
+    quote.affordable ===
+      (quote.creditPayable && quote.additionalCostsPayable)
+  );
+}
+
+function modifierDefinitionIdListsAreDisjoint(
+  reductionIds: readonly string[] | undefined,
+  increaseIds: readonly string[] | undefined,
+): boolean {
+  if (!reductionIds || !increaseIds) return true;
+  const reductions = new Set(reductionIds);
+  return increaseIds.every((id) => !reductions.has(id));
+}
+
+function validDefinitionIdList(value: readonly string[] | undefined): boolean {
+  return (
+    value === undefined ||
+    (value.every(nonEmptyString) &&
+      new Set(value).size === value.length &&
+      value.every(
+        (entry, index) => index === 0 || value[index - 1]! < entry,
+      ))
+  );
+}
+
+function nonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function nonNegativeSafeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
+const OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS = [
+  "cardType",
+  "baseCredits",
+  "finalCredits",
+  "mandatoryAdditionalCosts",
+  "reductionSourceDefinitionIds",
+  "increaseSourceDefinitionIds",
+  "temporaryCreditsAvailable",
+  "temporaryCreditsApplied",
+  "regularCreditsAvailable",
+  "regularCreditsRequired",
+  "creditPayable",
+  "additionalCostsPayable",
+  "affordable",
+] as const;
 
 function isHqToNewRemoteInstallRezChoice(choice: PendingChoice): boolean {
   return (
@@ -467,12 +1085,6 @@ function selectedHqToNewRemoteInstallRezOptionIds(
   for (const option of upgradeOptions) {
     if (selected.length >= maxSelections) break;
     selected.push(option);
-  }
-  if (selected.length < choice.minSelections) {
-    return selectedDefaultCardChoiceOptionIds(choice, selectableOptions).slice(
-      0,
-      choice.minSelections,
-    );
   }
   return selected.map((option) => option.id);
 }

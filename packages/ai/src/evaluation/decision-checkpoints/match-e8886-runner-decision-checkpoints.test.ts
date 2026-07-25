@@ -7,8 +7,9 @@ import blockedInsideJobJson from "../../../../../data/scenarios/ai-decision-chec
 import knownAbortJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e8886-04-known-unpayable-run-abort.json";
 import earlyCheckRunJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e8886-05-early-remote-check-run.json";
 import livewireJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e8886-06-livewire-real-economy.json";
-import fundedRdJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e8886-07-funded-known-rd-run.json";
+import fundedRdTargetEvaluationJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e8886-07-funded-known-rd-target-evaluation.json";
 import reachableInsideJobJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-four-match-02-inside-job-rd.json";
+import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -29,8 +30,8 @@ describe("match E8886 runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(earlyCheckRunJson));
   });
 
-  it("keeps a fully known and exactly funded R&D path runnable", () => {
-    expectCheckpointToPass(fixture(fundedRdJson));
+  it("classifies a fully known and exactly funded R&D path as runnable without requiring it to win central target selection", () => {
+    expectCheckpointToPass(fixture(fundedRdTargetEvaluationJson));
   });
 
   it("keeps Livewire's Contacts as real economy", () => {
@@ -61,13 +62,34 @@ describe("match E8886 runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "E8886-C04-RECOVERY-TARGET";
       checkpoint.expectation = {
-        acceptableActions: [
-          { sourceDefinitionId: "onr_v1_165_junkyard-bbs" },
-        ],
+        acceptableActions: [{ actionId: "runner.draw_card" }],
+        planExecution: {
+          acceptablePlanKinds: ["runner.rig_and_coverage"],
+          acceptableCapabilities: ["draw_for_answer_breaker_sentry"],
+          requiredAssessmentEvidence: [
+            "deck_strategy_open_sentry_coverage",
+          ],
+        },
       };
     });
 
-    expectCheckpointToPass(recoveryTarget);
+    const result = runAiDecisionCheckpoint(recoveryTarget);
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    const portfolioItems =
+      result.decision?.decisionDebug?.detailSections?.find(
+        (section) => section.id === "plan_portfolio",
+      )?.items ?? [];
+    expect(
+      portfolioItems.some(
+        (item) =>
+          item.includes("module:runner.develop_board_and_hand") &&
+          item.includes(
+            "card%3Arunner_onr_v1_165_junkyard-bbs_1",
+          ) &&
+          item.includes("phase:fund") &&
+          item.includes("viability:blocked"),
+      ),
+    ).toBe(true);
   });
 
   it("continues when the same remaining known path is now affordable", () => {
@@ -85,7 +107,13 @@ describe("match E8886 runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  return bindHistoricalRunEventCadence(
+    structuredClone(value) as AiDecisionCheckpointV1,
+    [
+      "cp-e8886-03-inside-job-blocked-unpayable",
+      "cp-four-match-02-inside-job-rd",
+    ],
+  );
 }
 
 function mutateFixture(

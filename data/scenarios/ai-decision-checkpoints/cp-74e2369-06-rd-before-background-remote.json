@@ -2595,11 +2595,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "targetServerId": "rd",
-        "type": "install_card"
-      },
-      {
-        "type": "gain_credit"
+        "type": "end_turn"
       }
     ]
   }

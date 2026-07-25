@@ -9306,9 +9306,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_operation",
-        "sourceDefinitionId": "onr_v1_295_night-shift"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_324_fortress-architects",
+        "targetServerId": "new_remote"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
+      "acceptableCapabilities": ["develop_card"],
+      "requiredAssessmentEvidence": ["corp_card_development:asset"]
+    }
   }
 }

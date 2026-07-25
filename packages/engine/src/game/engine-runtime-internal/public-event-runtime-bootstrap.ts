@@ -51,6 +51,7 @@ import {
 import {
   assertCorpRezCostQuoteValid,
   corpServerIdForInstalledCard,
+  fixedPlayCostCredits,
   quoteCorpIceInstallCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
@@ -1144,7 +1145,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     name: "runner_event_secret_spend_guess_targeted_bypass_run",
     startsRun: true,
     canPlay: (state, definition) =>
-      state.runner.credits - (definition.cost ?? 0) >= 2,
+      state.runner.credits - fixedPlayCostCredits(definition) >= 2,
     resolve: (state, legalAction) => {
       if (state.runner.credits < 2)
         throw new Error(

@@ -10842,6 +10842,10 @@
       {
         "type": "play_event",
         "sourceDefinitionId": "onr_v1_086_forged-activation-orders"
+      },
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_161_fall-guy"
       }
     ],
     "forbiddenActions": [

@@ -815,6 +815,9 @@ export function createEconomyRuntimeServices(
   function runnerInstallableProgramIdsForValuPak(
     state: GameState,
   ): CardInstanceId[] {
+    const activeBundle =
+      valuPakProgramInstallActionsRemaining(state) > 0;
+    const prospectiveTemporaryCredit = activeBundle ? 0 : 1;
     return state.runner.grip.filter((cardId) => {
       const definition = definitionFor(state, cardId);
       const uniqueBlocked =
@@ -823,7 +826,8 @@ export function createEconomyRuntimeServices(
       return (
         definition.type === "program" &&
         !uniqueBlocked &&
-        deps.availableRunnerProgramInstallCredits(state) >=
+        deps.availableRunnerProgramInstallCredits(state) +
+            prospectiveTemporaryCredit >=
           (definition.installCost ?? 0) &&
         runnerProgramInstallMemoryReachableAfterTrash(state, definition)
       );
@@ -874,6 +878,44 @@ export function createEconomyRuntimeServices(
     );
     flags.valuPakProgramInstallActionsRemaining = 0;
     flags.valuPakTemporaryProgramInstallCredits = 0;
+  }
+
+  function stopValuPakProgramInstallSequence(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    if (
+      legalAction.side !== "runner" ||
+      legalAction.type !== "stop_restricted_action_sequence" ||
+      legalAction.payload?.v1922ValuPakSequenceStop !== true
+    ) {
+      throw new Error(
+        "Nur die aktive Valu-Pak-Installationssequenz kann beendet werden.",
+      );
+    }
+    const remainingActions = valuPakProgramInstallActionsRemaining(state);
+    if (remainingActions <= 0) {
+      throw new Error(
+        "Valu-Pak Software Bundle hat keine aktive Installationssequenz.",
+      );
+    }
+    if (state.runner.clicks < remainingActions) {
+      throw new Error(
+        "Die verbleibenden Valu-Pak-Aktionen überschreiten die Runner-Aktionen.",
+      );
+    }
+    const returnedTemporaryCredits =
+      valuPakTemporaryProgramInstallCredits(state);
+    state.runner.clicks -= remainingActions;
+    clearValuPakProgramInstallFlags(state);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1922RunnerEventAbility: "program_install_action_bundle",
+      valuPakSequenceStopped: true,
+      valuPakRestrictedActionsForgone: remainingActions,
+      valuPakTemporaryCreditsReturned: returnedTemporaryCredits,
+      runnerClicksAfter: state.runner.clicks,
+    };
   }
 
   function consumeValuPakProgramInstallAction(
@@ -937,6 +979,7 @@ export function createEconomyRuntimeServices(
     installedRunnerProgramTrashOptionsForInstall,
     runnerProgramInstallMemoryReachableAfterTrash,
     shouldOfferRunnerProgramTrashBeforeInstall,
+    stopValuPakProgramInstallSequence,
     clearValuPakProgramInstallFlags,
     consumeValuPakProgramInstallAction,
     runnerDrawActionContext,

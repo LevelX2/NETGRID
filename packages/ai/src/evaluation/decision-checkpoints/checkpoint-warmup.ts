@@ -35,6 +35,11 @@ export function replayAiDecisionCheckpointWarmup(params: {
   for (const row of params.rows) {
     const input = params.inputForStateVersion(row.stateVersion);
     const preview = params.choose(input, false);
+    if (preview.selectionKind === "engine_randomized_ice_install_selection") {
+      throw new Error(
+        `warmup_requires_applied_engine_randomized_decision:decision=${row.decisionIndex}`,
+      );
+    }
     if (preview.actionId !== row.selectedActionId) {
       if (params.policy === "strict") {
         throw new Error(
@@ -52,6 +57,11 @@ export function replayAiDecisionCheckpointWarmup(params: {
       continue;
     }
     const persisted = params.choose(input, true);
+    if (persisted.selectionKind === "engine_randomized_ice_install_selection") {
+      throw new Error(
+        `warmup_requires_applied_engine_randomized_decision:decision=${row.decisionIndex}`,
+      );
+    }
     if (persisted.actionId !== preview.actionId) {
       throw new Error(
         `warmup_nondeterministic_choice:decision=${row.decisionIndex}:preview=${preview.actionId}:persisted=${persisted.actionId}`,
