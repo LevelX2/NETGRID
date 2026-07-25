@@ -2,7 +2,7 @@
 
 Status: **implementing**
 Quelle/Vorgabe: Nutzerauftrag und
-`docs/architecture/ai/ai-plan-layer-target-state-wip.md` Version `0.6`
+`docs/architecture/ai/ai-plan-layer-target-state-wip.md` Version `0.7`
 Primärer Agent: `release-implementation-agent`
 Branch: `codex/ai-plan-first-runtime-cutover`
 Worktree: `C:\Projekte\NETGRID_AI_PLAN_FIRST_RUNTIME_CUTOVER`
@@ -24,8 +24,9 @@ Aktueller Paketstand:
 - PF12: abgeschlossen, Commit `fbdb8fb10`
 - PF13: abgeschlossen, Commit `790259a4a`
 - PF14: abgeschlossen, Commit `533eeefaf`
-- PF15: Done-Gate grün, Commit freigegeben
-- nächstes Paket: PF16
+- PF15: abgeschlossen, Commit `4b0c459f6`
+- PF16: Runtime-Cleanup, Vertragsarbeit, vollständige Gates und Final Review
+  abgeschlossen; PF16-Commit und Main-Integration ausstehend
 
 ## Zielprüfung
 
@@ -967,9 +968,9 @@ Der Variantenvertrag ist für PF15 verbindlich:
   `explicitly_nonproductive` sein. Der Scheduler bricht diesen Widerspruch
   weiterhin fail-closed als `missing_plan_module_coverage` ab.
 
-PF15 besitzt keine offenen Done-Gates mehr. Der vollständig grüne aktuelle
-Prüfstand gibt den Commit
-`test(ai): verify fail-closed plan-first runtime cutover` frei.
+PF15 besitzt keine offenen Done-Gates mehr. Der vollständig grüne Prüfstand
+wurde mit Commit `4b0c459f6`
+(`test(ai): verify fail-closed plan-first runtime cutover`) abgeschlossen.
 
 ### Done-Gate
 
@@ -988,11 +989,17 @@ Prüfstand gibt den Commit
 
 ### Ziel
 
-Nur den neuen aktuellen Vertrag im Repository behalten.
+Nur den neuen aktuellen Vertrag im produktiven Runtime- und Exportgraphen
+behalten. Historische Altverträge dürfen ausschließlich dann als
+quarantänisierte Test-/Evaluationsdiagnostik verbleiben, wenn Boundary-Gates
+ihre produktive Wiedereinführung verhindern und ihr aktueller Evidence-Wert
+benannt ist.
 
 ### Konkrete Arbeit
 
-- tote Legacy-Plan-, Override- und Fallbackdateien entfernen;
+- tote Legacy-Plan-, Override- und Fallbackdateien entfernen; noch
+  evidence-tragende Altverträge ausdrücklich in Test-/Evaluation-Scopes
+  quarantänisieren;
 - `TacticalGoal` als Legacy-Autoritätsvertrag entfernen beziehungsweise in
   typisierte, an die aktuelle `stateVersion` gebundene Goal-/Threat-Signale
   überführen. Diese Signale sind kurzlebig, nicht persistent und niemals
@@ -1006,7 +1013,7 @@ Nur den neuen aktuellen Vertrag im Repository behalten.
 - verbliebene Legacy-TacticalGoal- und Semantic-Runtime-Abhängigkeiten aus
   öffentlichen Entry-Points, Dependency-Komposition und Exporten entfernen;
 - Exporte, Source-Structure- und Package-Boundary-Gates aktualisieren;
-- WIP 0.6 mit erreicht/offen abgleichen;
+- WIP 0.7 mit erreicht/offen abgleichen;
 - AI-README, CODEX_STATUS, Projektstatus und Monatslog aktualisieren;
 - Final Review mit Checks, Metriken, Abweichungen und Restpunkten;
 - belegten Restpunkt für eine strukturierte Engine-Continuation-ID festhalten:
@@ -1019,10 +1026,52 @@ Nur den neuen aktuellen Vertrag im Repository behalten.
 - aktuelles `main` in den Arbeitsbranch integrieren;
 - finale Gates ausführen.
 
+### Aktueller PF16-Nachweis
+
+- `TransientPlanSignal` formalisiert kurzlebige, side- und exakt
+  `stateVersion`-gebundene Goal-/Threat-Signale. Stale/future Signale,
+  unbekannte Felder und Autoritätsfelder wie `actionIds` scheitern
+  fail-closed. Produktive Signalquellen existieren für Runner-Remote-Contest,
+  Survival, Terminal Wins und Corp-Scoreprojekte. Der Scheduler bindet nur
+  die exakte Kombination aus Planmodul, residentem `dedupeKey` und Ziel;
+  Module dürfen keine eigene taktische Evidence injizieren.
+- Priority-Override und Intent-Mutation sind getrennt. P1/P2 benötigen starke
+  beobachtete Evidence, P3 starke Machbarkeit plus Evidence; P4/P5 verlangen
+  Intent-Fit oder ein aktuelles explizites taktisches Signal. Intent-Wechsel
+  sind ausschließlich an belegte Revalidierungsgrenzen gebunden. Als
+  produktiver Live-Trigger ist aktuell der öffentliche Abschluss der
+  Setup-/Mulliganphase für beide Seiten angeschlossen. Die weiteren
+  typisierten Gründe `new_information`, `plan_completed` und
+  `plan_invalidated` benötigen vor produktiver Nutzung jeweils einen
+  side-sicheren Evidence-Produzenten.
+- Der öffentliche transitive Livegraph enthält keine alten TacticalGoal-,
+  SemanticChoice-, PracticalMicro-, TacticalPlan-Memory- oder
+  TacticalPlan-Override-Abhängigkeiten mehr. Öffentliche TacticalGoal-Exporte
+  und `ownRunnerTacticalGoals` sind entfernt.
+- Live und Simulation verwenden denselben Plan-first-Live-Einstieg. Der
+  historische `semantic-runtime.ts`-Altvertrag bleibt ausschließlich als
+  isolierter Test-/Evaluation-Harness bestehen und ist durch
+  Authority-/Module-Boundarytests vom produktiven Livegraphen ausgeschlossen.
+- `runner.resource_lifecycle` besitzt einen instanzgenauen, Engine-gequoteten
+  Vertrag für Halten, Finanzierung und Verlassen von `Loan from Chiba`;
+  Erwerb und Entwicklung bleiben Economy-Aufgaben.
+- Der zusammengeführte PF16-Stand ist mit AI-Typecheck, `246/246` gezielten
+  Signal-/Intent-/Authority-/Runtime-Tests, `149/149`
+  Runtime-/Real-Engine-/Baseline-Repros, Paketgrenzen, Source Structure ohne
+  Runtime-/Typzyklen, `check:ai` und Diffcheck verifiziert.
+- Die vollständigen Abschlussgates sind grün: 496/496 AI-Testdateien mit
+  3.966/3.966 Tests, 207/207 Engine-Testdateien mit 1.795/1.795 Tests,
+  Workspace-Typecheck, Contracts, Package-/Source-Struktur, Doctrine,
+  Proteus sowie die finale Baseline mit 60 Spielen, 11.012 Entscheidungen
+  und 0 harten Fehlern.
+- Final Review und Wissensabgleich sind abgeschlossen. Noch offen sind der
+  PF16-Commit, der Main-Abgleich und die lokale Abschlussintegration.
+
 ### Finale Checks
 
 ```text
 corepack pnpm --filter @netgrid/ai test
+corepack pnpm --filter @netgrid/engine test
 corepack pnpm typecheck
 corepack pnpm test:contracts
 corepack pnpm check:package-boundaries

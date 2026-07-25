@@ -695,9 +695,22 @@ describe("AI module boundaries", () => {
 
   it("keeps the transitive live package graph free of legacy modules", () => {
     const liveGraph = transitiveRuntimeFiles(path.join(srcDir, "index.ts"));
+    const retiredLiveContracts = new Set([
+      "decision/corp-tactical-goals.ts",
+      "decision/tactical-goal-merge.ts",
+      "decision/tactical-goal-types.ts",
+      "runner-tactical-goals.ts",
+      "runtime/semantic-runtime.ts",
+      "tactical-plans.ts",
+    ]);
     const violations = [...liveGraph]
       .map(relativeFile)
-      .filter((file) => file === "legacy" || file.startsWith("legacy/"));
+      .filter(
+        (file) =>
+          file === "legacy" ||
+          file.startsWith("legacy/") ||
+          retiredLiveContracts.has(file),
+      );
 
     expect(violations).toEqual([]);
   });
@@ -779,9 +792,9 @@ describe("AI module boundaries", () => {
       "evaluation/real-engine-decision-corpus-fixtures.ts",
       "index.ts",
       "runner-run-target-evaluation.ts",
+      "runtime/ai-live-runtime-composition.ts",
       "runtime/plan-first-live-runtime.ts",
       "runtime/semantic-runtime.ts",
-      "runtime/semantic-runtime-decision-composition.ts",
     ]);
     const violations = collectSourceFiles(srcDir)
       .filter((file) => !file.endsWith(".test.ts"))

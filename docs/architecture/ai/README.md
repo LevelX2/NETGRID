@@ -77,11 +77,12 @@
   Top. Ein veränderter Top erhält vor Matchpoint nur eine begrenzte
   Wiederholungsstrafe und wird innerhalb von zwei Agenda-Punkten zum Sieg nicht
   durch die pauschale Zentralserver-Strafe unterdrückt.
-- TacticalPlans schreiben Fortschritt nur bei einer nachfolgend sichtbaren
-  Zielannäherung fort. Erreichte Creditreserven beenden stale Creditbase-Pläne;
-  Punish-Pläne ohne Tag, Payoff oder messbare Ressourcenannäherung verlieren
-  ihre TTL. Ein letzter Klick darf eine Trace-Quelle ohne unmittelbaren
-  Punish-Payoff nicht als Fortschrittsplan erzwingen.
+- Residente Planinstanzen schreiben Fortschritt nur bei einer nachfolgend
+  sichtbaren Zielannäherung fort. Erreichte Creditreserven beenden stale
+  Creditbase-Pläne; Punish-Pläne ohne Tag, Payoff oder messbare
+  Ressourcenannäherung verlieren ihre TTL. Ein letzter Klick darf eine
+  Trace-Quelle ohne unmittelbaren Punish-Payoff nicht als Fortschrittsplan
+  erzwingen.
 - Universelle probabilistische Breaker-Coverage ist von stabiler typgebundener
   Coverage getrennt. Ihr Nutzen wird über Erfolgswahrscheinlichkeit und
   Handpuffer bewertet; die KI wartet nicht auf im eigenen Deck nicht
@@ -123,13 +124,67 @@
 - Technisches `ai_supported`, semantische Coverage, Szenario-Evidence,
   Play Strength und Default-/Random-Pool-Promotion sind getrennte Gates.
 
+## Plan-first-Cutover-Stand
+
+- PF15 ist mit Commit `4b0c459f6` als fail-closed Plan-first-Runtime-Cutover
+  abgeschlossen. Die produktive Arbitration wählt zuerst eine residente
+  `PlanInstance`, deren Step und aktuelle Route; eine Action besitzt außerhalb
+  dieses Vertrags keine eigene Handlungsautorität.
+- Tactical Goals sind im Zielvertrag ausschließlich kurzlebige, an die
+  aktuelle `stateVersion` gebundene Goal-/Threat-Signale. Sie dürfen
+  Discovery, Revalidierung und Priorisierung von Planproposals beeinflussen,
+  werden aber weder persistent noch autoritativ. `TransientPlanSignal`
+  typisiert diesen Vertrag; stale/future Signale, unbekannte Felder und
+  Action-Autoritätsfelder scheitern fail-closed. Die Live-Runtime erzeugt
+  exakte Signale für Runner-Remote-Contest, Survival, Terminal Wins und
+  Corp-Scoreprojekte; der Scheduler bindet ausschließlich Planmodul,
+  residenten `dedupeKey` und Ziel derselben Instanz.
+- Strategic Intent ist ein stabiler Strategieanker, keine zweite
+  Ausführungsautorität. P1- bis P3-Pläne dürfen ihn mit belastbarer Evidence
+  übergehen; P4-/P5-Kampagnen benötigen Intent-Fit oder explizite taktische
+  Evidence. Intent-Wechsel sind an Phasenwechsel, neue belastbare Information
+  oder Planabschluss/-invalidierung gebunden, nicht an normale
+  Action-Schwankungen. Override und Intent-Mutation sind im Runtime-Vertrag
+  getrennt und fail-closed abgesichert. Produktiv angeschlossen ist derzeit
+  der öffentliche Abschluss der Setup-/Mulliganphase als aktueller
+  `phase_change`; weitere Revalidierungsgründe benötigen jeweils einen
+  side-sicheren Live-Evidence-Produzenten.
+- Für Corp-Verteidigung existiert keine Legacy-Zentralreserve und kein
+  eigenständiger zentraler Reserveplan. Finanzierung entsteht ausschließlich
+  als an den exakten Defense-Parent gebundener Economy-Bedarf; Wirkung und
+  Reserve werden getrennt und nur mit Engine-zertifizierten Quotes bewertet.
+  Unbekannte Kosten bleiben fail-closed.
+- Bei `Loan from Chiba` gehören Erwerb und Entwicklung zum Economy-Modul.
+  Halten, Verlassen und die dafür nötige Zahlung beziehungsweise das
+  Verlustrisiko gehören nach der Installation in einen
+  `runner.resource_lifecycle`-Child der exakten Karteninstanz. Unbekannte
+  Engine-Zahlungsquotes bleiben blockiert und werden nicht geschätzt.
+- Der öffentliche transitive Livegraph ist frei von alten TacticalGoal-,
+  SemanticChoice-, PracticalMicro-, TacticalPlan-Memory- und
+  TacticalPlan-Override-Abhängigkeiten. Live und Simulation verwenden
+  denselben Plan-first-Einstieg; historische Altverträge bleiben nur als
+  isolierte Test-/Evaluationsdiagnostik.
+- Der verifizierte PF15-Code-Freeze umfasst 60 Spiele und 11.012
+  Entscheidungen ohne Illegal Action, Replay-, Runtime-, Hidden-Info-,
+  Fallback-, Timeout-, Action-Limit- oder Redaktionsfehler. Die qualitativen
+  Restbefunde bleiben PF16-/Play-Strength-Evidence und sind keine kaschierten
+  technischen Gate-Ausnahmen.
+
 ## Führende Artefakte
 
 - `ai-plan-layer-target-state-wip.md`: führendes fortlaufendes
   Zielzustandskonzept für die modulare Plan-first-KI mit gemeinsamem
   Planrahmen, getrennten Runner-/Corp-Schedulern, aktuellen und angestrebten
   Planmodulen, Zugausführung, Commitments, Diagnostik und Abnahme. Der
-  Zielzustand ist noch nicht vollständig implementiert.
+  PF15-Runtime-Kern, PF16-Livegraph-Cleanup, Final Review und Pre-Commit-Gates
+  sind abgeschlossen; Main-Abgleich und integrierte Abschlussgates stehen
+  noch aus.
+- `docs/reviews/ai/ai-plan-first-runtime-cutover-final-review-2026-07-25.md`:
+  PF16-Endvertrag, Akzeptanz- und Gatematrix, Baseline-Provenienz sowie
+  sichtbare Folgepunkte.
+- `docs/reviews/ai/ai-behavior-baseline-v1-plan-first-pf15-code-freeze-verified-2026-07-25.md`:
+  verifizierte PF15-Code-Freeze-Baseline mit Hard-Gates und qualitativer
+  Restpunkt-Evidence.
 - `ai-plan-layer-target-concept-process-2026-07-23.md`: Quellen-, Paket- und
   Reviewprozess für den initialen WIP-Stand des Zielkonzepts.
 - `ai-controller-spec.md`: öffentlicher Controller- und LegalAction-Vertrag.
@@ -175,7 +230,7 @@
   Entwicklungsprojekte und strategieabhängigen Remote-Ausbau.
 - `semantic-decision-chain-observability-contract-2026-07-14.md`: aktueller
   verhaltensneutraler Debug-, Arbitration- und Decision-Checkpoint-Vertrag für
-  den produktiven Semantic-Runtime-Auswahlweg.
+  den produktiven Plan-first-Auswahlweg.
 - `match-e2f2-corp-decision-windows-remediation-process-2026-07-22.md` und
   `docs/reviews/ai/match-e2f2-corp-decision-windows-remediation-final-review-2026-07-22.md`:
   spielgleiche Corp-Verträge für Rez-Ertrag, Draw-/Credit-Grenznutzen,

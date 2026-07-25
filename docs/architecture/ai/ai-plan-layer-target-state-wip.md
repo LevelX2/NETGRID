@@ -1,7 +1,7 @@
 # KI-Planebene – modulares Zielkonzept
 
 Status: **Work in Progress**
-Dokumentversion: `0.6`
+Dokumentversion: `0.7`
 Stand: 2026-07-25
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
@@ -11,8 +11,12 @@ Verantwortlicher Architekturprozess:
 Dieses Dokument beschreibt den angestrebten Zielzustand der produktiven
 NETGRID-KI-Planebene. Es führt die bislang verteilten Verträge für
 Deckstrategie, Strategic Intent, kurzlebige Goal-/Threat-Signale, Tactical
-Plans, PlanPortfolio, Ressourcenrouten, Follow-up-Budgets und
-LegalAction-Auswahl zu einem gemeinsamen Modell zusammen.
+Goals und Tactical Plans, produktive Planmodule und -instanzen,
+PlanPortfolio, Ressourcenrouten, Follow-up-Budgets und LegalAction-Auswahl
+zu einem gemeinsamen Modell zusammen. `TacticalGoal` und `TacticalPlan`
+bezeichnen dabei ausschließlich die abgelöste Legacy-Runtime; im
+produktiven Zielvertrag existiert kein persistentes oder autoritatives
+`TacticalGoal`-Objekt mehr.
 
 Die Leitentscheidung lautet:
 
@@ -94,52 +98,105 @@ erfüllbar wäre:**
 
 ### 2.2 Abgleich mit dem Runtime-Cutover-Worktree
 
-Version 0.6 ist der aktuelle fachliche Zielvertrag und spiegelt zugleich den
-Arbeitsstand des Worktrees
+Version 0.7 ist der aktuelle fachliche Zielvertrag und spiegelt zugleich den
+erreichten Cutover-Stand im Worktree
 `C:\Projekte\NETGRID_AI_PLAN_FIRST_RUNTIME_CUTOVER` auf
-`codex/ai-plan-first-runtime-cutover` wider. Sie ist keine vorzeitige
-Abschlussbehauptung: PF00 bis PF14 sind committed; PF15 ist in Arbeit und
-bleibt bis zum vollständigen Gate ohne Implementierungscommit.
+`codex/ai-plan-first-runtime-cutover` wider. PF00 bis PF15 sind committed;
+PF15 wurde mit Commit `4b0c459f6` und vollständig grünem Done-Gate
+abgeschlossen. PF16 bereinigt nun ausschließlich verbleibende
+Legacy-Verträge, aktualisiert Wissen und Status und führt den finalen
+Main-Abgleich aus.
 
-Im PF15-Worktree bereits implementiert und fokussiert verifiziert sind
-insbesondere:
+Für PF15 erreicht und vollständig verifiziert sowie für die neuen
+PF16-Verträge implementiert und fokussiert verifiziert sind insbesondere die
+folgenden Punkte. Die PF16-Pre-Commit-Gesamtverifikation ist abgeschlossen:
 
-- die Plan-first-Auswahl ohne kaschierende Action-over-Plan-Fallbacks;
-- exakte Score-Protection-Assessments mit Parent-first-Auswahl,
-  `parentInstanceId`-Bindung und geerbten P1-bis-P4-Klassen;
-- vollständige Engine-Rez-Quote-Projektion für die bereits migrierten Routen
-  des globalen `corp.defend_servers`-Allokators;
-- die Trennung von `funding_only`, echter Effektlücke und Targeted Draw;
-- positive, kandidatenexakte Bindung von Run-/Access-Varianten einschließlich
-  der R&D-Protocol-Files-Invalidierung nach unverändertem Informationsstand;
-- zahlreiche konkrete Karten- und Choice-Verträge, darunter Access-Ambush-
-  Zahlung, SMC-Installationsvarianten und Broker-Cashout;
-- der Engine-zertifizierte, instanzgenaue Loan-from-Chiba-Lebenszyklus mit
-  exaktem `runner.resource_lifecycle`-Parent und ausschließlich gebundenem
-  Economy-Support;
-- die dimensionsgenaue Normalisierung vollständiger Engine-Kostenlisten,
-  sodass ein nur mit Klickkosten ausgewiesener aktueller Agenda-Step exakt
-  null Credits kostet und regulär seinen Score-Parent fortentwickelt;
-- der Engine-seitige Jenny-Jett-Vertrag für die an Quelle, Fort,
-  `stateVersion` und `actionId` gebundene Rez-/Installations-Gesamtquote
-  einschließlich Apply-Revalidation und Hidden-Info-Schutz;
-- die vollständige Entfernung der alten produktiven Zentralreserve zugunsten
-  endlicher, Engine-gequoteter Defense-Needs sowie ein Struktur-Gate gegen
-  gedruckte Defense-Kostenfallbacks.
+- Die produktive Live- und Simulationsentscheidung läuft ausschließlich
+  Plan-first. Für jede freiwillige aktuelle LegalAction existiert entweder
+  genau eine ausführbare Planroute oder genau eine konkrete
+  `explicitly_nonproductive`-Disposition; Action-over-Plan-, neutrale
+  Credit- und andere kaschierende Fallbacks sind entfernt.
+- Das residente PlanPortfolio bewertet alle relevanten Planinstanzen neu und
+  wählt genau einen Leaf-Executor. Parent, Child, Priority Claim, Evidence,
+  Assessment, Step und aktuelle Action-ID bleiben durchgängig gebunden.
+- Der globale Plan `corp.defend_servers` ist die einzige
+  serverübergreifende ICE-Allokationsautorität. Das frühere
+  ICE-Platzierungsmodul liefert nur noch Facts. Score-Schutz wird
+  Parent-first ausgewählt, erbt P1 bis P4 vom exakten Score-Parent und trennt
+  nachgewiesenen Schutzeffekt, Finanzierung und Reserve.
+- Installations-, aktuelle Rez- und Post-Install-Rez-Kosten stammen nur aus
+  vollständigen, an `stateVersion`, Karteninstanz, Server und Action
+  gebundenen Engine-Quotes. Gedruckte `rezCost`, Schutzlayer, numerische
+  Scoreboni und die frühere produktive Zentralreserve sind keine
+  Entscheidungsautorität mehr. `funding_only` erzeugt Economy-Support
+  desselben Parents und niemals Targeted Draw.
+- Die HQ-/R&D-Allokation konsumiert vollständige, Corp-bekannte
+  Agendaanzahl/-punkte, wichtige trashbare Karten, serverspezifischen
+  Multiaccess und Zugriffsfakten. Der einmalige belegte HQ-Hold-/Blufffall
+  sowie ein echter Same-Step-Nahgleichstand werden explizit modelliert; nur
+  der vollständig vorvalidierte Nahgleichstand wird atomar durch die Engine
+  randomisiert und als `RandomDrawRecord` replaybar festgehalten.
+- Runner-Run-, Access-, Jack-out-, Pump-, Break- und zusätzliche
+  Zugriffsschritte benötigen exakte planlokale Assessments. Mehrstufige
+  Engine-Runfolgen wie Pirate Broadcast, All-Nighter und Wilson bleiben an
+  ihren `runner.convert_run_window`-Parent gebunden und werden nicht durch
+  normale Cadence- oder isolierte Nutzenprüfungen überstimmt.
+- Agenda-Install, Advance und Score sind Phasen derselben exakten
+  `corp.score_agenda`-Instanz. Vollständige aktuelle Engine-Kosten werden
+  dimensionsgenau gelesen; ein nur mit Klickkosten ausgewiesener Advance-
+  Step kostet exakt null Credits und bleibt eine reguläre
+  Planfortentwicklung.
+- Loan from Chiba besitzt keinen globalen Sonderplan: Erwerb und
+  Kartenentwicklung nutzen Economy-Support, während Halten, Verlassen und die
+  Engine-gequotete End-of-turn-Zahlung ein instanzgenauer Child-Step von
+  `runner.resource_lifecycle` sind.
+- Goal-/Threat-Signale sind als kurzlebiger, side- und exakt
+  `stateVersion`-gebundener Evidence-Vertrag formalisiert. Sie besitzen keine
+  Step-, Capability- oder Action-Autorität und werden nicht persistent
+  gespeichert. Stale/future Signale und Autoritätsfelder wie `actionIds`
+  scheitern fail-closed. Die Live-Runtime erzeugt solche Signale derzeit für
+  Runner-Remote-Contest, Runner-Survival, Terminal Wins und
+  Corp-Scoreprojekte. Der
+  Scheduler bindet sie ausschließlich an die exakte Kombination aus
+  Planmodul, residentem `dedupeKey` und Ziel; ein Planmodul darf sich die
+  Evidence nicht selbst geben.
+- P1 bis P3 dürfen den aktuellen Strategic Intent nur mit belastbarer
+  aktueller Evidence übergehen. P4/P5 benötigen Intent-Fit oder ein
+  explizites aktuelles taktisches Signal. Ein Override mutiert den Intent
+  nicht automatisch; normale Action- und Score-Schwankungen lösen keinen
+  Wechsel aus. Intent-Wechsel erfolgen nur an belegten Revalidierungsgrenzen
+  wie Phasenwechsel, neuer Information, Planabschluss oder
+  Planinvalidierung. Produktiv wird gegenwärtig der öffentliche Abschluss
+  der Setup-/Mulliganphase als exakter aktueller `phase_change`-Trigger
+  erzeugt. Die übrigen typisierten Gründe sind im Intent-Vertrag
+  fail-closed vorbereitet, benötigen aber jeweils noch einen eigenen
+  produktiven, side-sicheren Evidence-Produzenten und werden nicht aus einer
+  bloßen Planbewertung oder Action-Score-Schwankung abgeleitet.
 
-Der Worktree ist trotzdem noch nicht PF15-grün. Fokussierte Baseline-Läufe
-bestätigen, dass die früheren SMC-, Broker- und fehlenden
-Agenda-Kostensemantik-Fehler geschlossen sind. Der Fast-Advance-Seed 09
-schreitet dadurch wieder bis zu einer Corp-Wertung fort, erreicht aber weiter
-das Aktionslimit: Zwei gleichzeitig sichtbare Blink-Instanzen werden in der
-exakten Score-Schutzprojektion noch als nicht unterstützte
-Mehr-Zufallsbrecher-Strategie geschlossen. Deren exakte kombinierte
-Zugriffswahrscheinlichkeit ist in Arbeit. Ebenfalls noch offen sind der
-AI-seitige Konsum der Jenny-Jett-Quote, die in Version 0.6 präzisierte
-HQ-/R&D-Faktenabwägung einschließlich Hold-/Bluff-Gegenfällen und der dafür
-vorgesehene atomare Engine-RNG-Vertrag für echte Nahgleichstände. Erst danach
-folgen die vollständigen Typecheck-, Testshard-, Scenario-, Checkpoint-,
-Hidden-Info-, Authority-, Replay- und Baseline-Gates.
+Der PF15-Code-Freeze wurde durch alle Workspace-Typechecks, drei vollständige
+AI-Shards, `207/207` Engine-Dateien mit `1.795/1.795` Tests, vollständige
+Decision Checkpoints, Hidden-Info-Äquivalenz, Authority-, Replay-, EndTurn-
+und Planabdeckungsverträge sowie statische Source-/Package-/Hint-/Doctrine-/
+Proteus-/Economy-/Action-Capacity-Gates freigegeben. Die akzeptierte finale
+Standard-Baseline umfasst `60` Spiele und `11.012` Entscheidungen ohne
+IllegalAction, Runtime-, Replay-, Hidden-Info-, Fallback-, Timeout-,
+Action-Limit- oder No-LegalAction-Fehler. Die `175` qualitativen Findings,
+darunter drei HIGH-Corp-never-scores-Fälle und zwei
+`gameEndReason=unknown`-Anomalien, bleiben sichtbare Review-Evidence, sind
+aber kein kaschierter technischer Gatefehler.
+
+Der PF16-Importgraph-Cleanup ist umgesetzt: Der öffentliche transitive
+Livegraph enthält keine alten TacticalGoal-, SemanticChoice-,
+PracticalMicro-, TacticalPlan-Memory- oder TacticalPlan-Override-
+Abhängigkeiten mehr. Live und Simulation verwenden denselben
+Plan-first-Einstieg. Historische TacticalGoal-/Semantic-Runtime-Verträge
+bleiben nur als isolierte Test-/Evaluationsdiagnostik erhalten und werden
+durch Authority-/Module-Boundarytests vom produktiven Graphen ausgeschlossen.
+
+PF16-Implementierung, Final Review, Dokumentations-/Statusabgleich und
+Pre-Commit-Gates sind abgeschlossen. Noch offen sind ausschließlich der
+PF16-Commit, die Integration des aktuellen `main` sowie die finalen Gates auf
+dem integrierten Stand.
 
 Der sequenzielle Paket- und Gate-Stand wird im
 `ai-plan-first-runtime-cutover-process-2026-07-23.md` fortgeschrieben. Dieses
@@ -148,10 +205,10 @@ welche Teile im aktuellen Worktree noch nicht abgeschlossen sind.
 
 ## 3. Ausgangsproblem
 
-Die aktuelle Runtime besitzt bereits:
+Die vor dem Cutover produktive Runtime besaß parallel:
 
 - Deckstrategie und Strategic Intent;
-- Tactical Goals und Tactical Plans;
+- persistente Tactical Goals und Tactical Plans;
 - Plan-Memory und PlanPortfolio;
 - Foreground-, Background- und Interrupt-Rollen;
 - Credit- und Action-Demands;
@@ -297,12 +354,31 @@ einer Opportunity oder einer Bedrohung. Diese Signale:
 
 - beeinflussen Planerkennung und Planbewertung;
 - können einen Intent-Wechsel anregen;
+- sind für jeden Assessment- oder Override-Einfluss exakt an `planModuleId`,
+  residenten `dedupeKey` und ein konkretes Ziel gebunden;
 - besitzen weder Plan-Memory noch Ausführungsautorität;
 - referenzieren keine zukünftigen Action-IDs;
 - verfallen oder werden bei jeder neuen StateVersion neu erzeugt.
 
-Damit bleiben Tactical Goals als semantische Brücke erhalten, ohne neben dem
-PlanPortfolio eine zweite Handlungsautorität zu bilden.
+Targetlose sowie modul-, instanz- oder zielfremde Signale sind keine
+taktische Evidence für einen P4-/P5-Override. Ein Planmodul darf sich ein
+Signal nicht selbst in sein Assessment schreiben; die Bindung erfolgt
+ausschließlich durch den Scheduler aus dem aktuellen Runtimekontext.
+
+Damit bleibt die fachliche Funktion früherer Tactical Goals als semantische
+Brücke erhalten, ohne ein produktives `TacticalGoal`-Objekt und ohne neben
+dem PlanPortfolio eine zweite Handlungsautorität zu bilden. Im Codevertrag
+heißt diese Brücke `TransientPlanSignal`.
+
+Ein Signal ist keine Vorstufe, die zwingend dauerhaft zwischen Intent und
+Plan gespeichert wird. Es wird aus dem aktuellen side-sicheren Weltmodell
+erzeugt, darf bestehenden Intent und residente Planinstanzen als Kontext
+verwenden und fließt danach ausschließlich als Evidence in Discovery und
+Assessment ein. Der Zielvertrag erlaubt damit Discovery-Einfluss; im
+erreichten produktiven Ist ist insbesondere die exakt gebundene Zulassung
+des taktischen P4-Remote-Assessments belegt. Andere Signalarten erhalten
+dadurch weder eine generische Scoreverstärkung noch eigene Plan- oder
+Intent-Autorität.
 
 ### Planmodul
 
@@ -365,9 +441,12 @@ eigene Kartensemantik und Deckfähigkeiten
             Deckstrategieprofil
                     |
               Strategic Intent
-                    |
-       kurzlebige Goal-/Threat-Signale
-                    |
+                    |\
+                    | \  aktuelles side-sicheres Weltmodell
+                    |  \             |
+                    |   kurzlebige Goal-/Threat-Signale
+                    |              /
+                    |             /
         side-spezifische Planerkennung
                     |
       persistentes Runner-/Corp-Portfolio
@@ -390,6 +469,24 @@ eigene Kartensemantik und Deckfähigkeiten
                     |
       Ergebnis-/Fortschritts-Revalidierung
 ```
+
+Der Rückkanal zum Strategic Intent ist ebenso ausdrücklich begrenzt:
+
+```text
+öffentlicher Phasenwechsel / belastbare neue Information /
+Planabschluss / Planinvalidierung
+                    |
+     stateVersion-gebundene Revalidation-Evidence
+                    |
+       Strategic Intent neu bewerten
+```
+
+Eine neu erkannte Planinstanz darf Evidence für einen solchen
+Revalidierungsgrund liefern, aber weder den Intent selbst mutieren noch den
+Rückkanal allein durch ihren höheren Action- oder Assessmentwert auslösen.
+P1–P3 dürfen mit belastbarer aktueller Evidence trotz abweichendem Intent
+konkurrieren. P4/P5 benötigen Intent-Fit oder ein exaktes aktuelles
+taktisches Signal. Ein solcher Plan-Override ist kein Intent-Wechsel.
 
 ### 7.1 Gemeinsamer Plan-Kernel
 
@@ -885,8 +982,11 @@ Deckstrategie bleibt Prior, aber kein Autopilot. P1–P3-Pläne dürfen einen
 bestehenden Intent mit belegter akuter Evidence übergehen. P4-/P5-Pläne
 benötigen Intent-Fit oder eine explizite taktische Evidence. Intent-Wechsel
 entstehen nur aus Phasenwechsel, belastbarer neuer Information,
-Planabschluss/-invalidierung oder einem validierten hochklassigen Claim, nie
-aus normalen Action-Score-Schwankungen.
+Planabschluss oder Planinvalidierung, nie aus normalen
+Action-Score-Schwankungen. Ein validierter hochklassiger Claim kann mit
+belastbarer Evidence den bestehenden Intent übergehen oder Evidence für
+einen dieser vier Revalidierungsgründe liefern, ist aber kein fünfter
+Intent-Wechselgrund.
 
 ### Phase 3 – Planinstanzen reconciliieren
 
@@ -1405,10 +1505,12 @@ vollständig materialisierten Same-Step-Route-Heads. Sobald die Engine daraus
 gezogen hat, existiert für Ausführung, Receipt und Planfortschritt wieder
 genau eine konkrete Invocation.
 
-Sobald ein Domainsignal konkrete `actionIds` ausweist, sind diese IDs der
-vollständige ausführbare Variantenvertrag des Steps. Eine zusätzliche
-Materialisierung über breite Semantik, Kartendefinition oder nur das Ziel ist
-in diesem Zustand verboten.
+Sobald ein planmodul-internes Domain-/Route-Fact konkrete `actionIds`
+ausweist, sind diese IDs der vollständige ausführbare Variantenvertrag des
+Steps. Dieses Fact ist ausdrücklich kein `TransientPlanSignal`; dort sind
+Action-IDs als Autoritätsfelder verboten. Eine zusätzliche Materialisierung
+über breite Semantik, Kartendefinition oder nur das Ziel ist in diesem
+Zustand verboten.
 
 Für jede freiwillige aktuelle LegalAction muss deshalb genau eine der
 folgenden Aussagen gelten:
@@ -1826,14 +1928,15 @@ Allgemeine Same-Turn-Commitment-Reservierung
   wenn die Admission-Kriterien aus Abschnitt 27.5 erfüllt sind. Einfache
   One-shot-Opportunities bleiben Route oder kurzlebiges Proposal.
 
-## 25. Aktuelles TacticalPlan-Inventar
+## 25. Historisches TacticalPlan-Inventar vor dem Cutover
 
-Der produktive Typvertrag enthält derzeit 20 TacticalPlan-Typen. Diese Liste
-ist Ist-Evidence, nicht automatisch das endgültige Moduldesign.
+Der vor dem Cutover produktive Typvertrag enthielt 20 TacticalPlan-Typen.
+Diese Liste bleibt historische Migrations-Evidence und beschreibt weder den
+aktuellen produktiven Livegraphen noch Basisklassen des neuen Kernels.
 
-### 25.1 Runner: aktuelle Typen
+### 25.1 Runner: damalige Typen
 
-| Aktueller Typ                      | Heutiger Zweck                          | Zielrichtung                                                                 |
+| Damals produktiver Typ             | Damaliger Zweck                         | Zielrichtung                                                                 |
 | ---------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------- |
 | `runner.obtain_breaker_coverage`   | fehlende ICE-Coverage beschaffen        | in `runner.rig_and_coverage` weiterführen                                    |
 | `runner.contest_remote`            | aktuelles Remote prüfen oder angreifen  | als eigenes Zielmodul weiterführen                                           |
@@ -1848,9 +1951,9 @@ ist Ist-Evidence, nicht automatisch das endgültige Moduldesign.
 | `runner.build_credit_bank`         | wiederkehrende Bank laden               | Recurring-Instanz von `runner.economy`                                       |
 | `runner.cash_out_credit_bank`      | Bank für Bedarf auszahlen               | gebundener Kindplan von `runner.economy`                                     |
 
-### 25.2 Corp: aktuelle Typen
+### 25.2 Corp: damalige Typen
 
-| Aktueller Typ                      | Heutiger Zweck                            | Zielrichtung                                                 |
+| Damals produktiver Typ             | Damaliger Zweck                           | Zielrichtung                                                 |
 | ---------------------------------- | ----------------------------------------- | ------------------------------------------------------------ |
 | `corp.create_score_window`         | konkrete Agenda-Scorefolge herstellen     | in `corp.score_agenda` weiterführen                          |
 | `corp.develop_finite_economy`      | begrenzte Economy installieren und nutzen | Modus von `corp.economy`                                     |
@@ -1861,10 +1964,10 @@ ist Ist-Evidence, nicht automatisch das endgültige Moduldesign.
 | `corp.rez_defense`                 | aktuelles Rez-Fenster beantworten         | Urgent Response von `corp.defend_servers`                    |
 | `corp.apply_punish_pressure`       | Tag-/Damage-/Punish-Fenster nutzen        | in Kampagne und geschützte Ausführung trennen                |
 
-### 25.3 Strukturelle Bewertung des Ist-Inventars
+### 25.3 Historische strukturelle Bewertung
 
-Das Inventar besitzt bereits wichtige Bausteine, aber noch keine vollständige
-Welt, in der alle freiwilligen Aktionen zuverlässig aus Plänen entstehen.
+Das Inventar besaß wichtige Bausteine, aber noch keine vollständige Welt, in
+der alle freiwilligen Aktionen zuverlässig aus Plänen entstanden.
 
 Wesentliche Lücken:
 
@@ -1879,8 +1982,8 @@ Wesentliche Lücken:
   mehrere Züge wartenden Tag-/Damage-Kampagnenzustand;
 - Opening, allgemeiner Boardaufbau, Agenda-Flood und mehrere
   deckstrategische Kampagnen sind nicht als vollständige Module abgedeckt;
-- der aktuelle Plan kann im Live-Auswahlweg diagnostisch bleiben, während
-  globale Action-Arbitration eine andere Aktion auswählt.
+- der damalige aktuelle Plan konnte im Live-Auswahlweg diagnostisch bleiben,
+  während globale Action-Arbitration eine andere Aktion auswählte.
 
 ## 26. Zielstruktur der Planregistries
 
@@ -4096,14 +4199,16 @@ Qualitative Metriken:
 Die Metriken sind Diagnose- und Gate-Evidence, keine alleinige
 Play-Strength-Freigabe.
 
-## 42. Ableitung eines späteren Implementierungsplans
+## 42. Historische Ableitung des ausgeführten Implementierungsplans
 
-Dieses Dokument legt noch keine endgültige Paketfolge fest. Ein späterer
-Umsetzungsprozess soll mindestens folgende Arbeitsstränge schneiden:
+Dieser Abschnitt dokumentiert die ursprüngliche Ableitung der
+Arbeitsstränge. Die verbindliche Paketfolge PF00 bis PF16 wurde anschließend
+im `ai-plan-first-runtime-cutover-process-2026-07-23.md` festgelegt und bis
+PF15 vollständig ausgeführt; PF16 befindet sich in der Abschlussprüfung.
 
 ### 42.0 Verhältnis zu Ist-Architektur, Roadmap und Proteus
 
-- Die aktuellen TacticalPlan-Typen sind produktive Ist-Evidence und
+- Die damaligen TacticalPlan-Typen waren produktive Ist-Evidence und
   Migrationsmaterial, aber keine Basisklassen des neuen Kernels.
 - Plan-first ersetzt im Zielzustand den früheren direkten
   Goal-vs-Action-Entscheider. Goal-/Threat-Signale und
@@ -4234,6 +4339,30 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 0.7 – 2026-07-25
+
+- PF15 nach Commit `4b0c459f6` und vollständig grünem Code-Freeze-Gate als
+  erreicht dokumentiert; veraltete Zwischenstände zu Blink, Jenny Jett,
+  Central-Defense-Facts und noch ausstehenden Vollgates entfernt.
+- Tactical Goals als typisierte, kurzlebige und exakt `stateVersion`-
+  gebundene Goal-/Threat-Signale formalisiert. Persistente Handlungsautorität
+  bleibt ausschließlich bei Planinstanzen; Signale mit stale/future
+  Zustandsbindung oder Action-Autoritätsfeldern scheitern fail-closed.
+- Strategic-Intent-Override und Intent-Mutation getrennt: P1–P3 benötigen
+  belastbare Evidence, P4/P5 Intent-Fit oder explizite taktische Evidence;
+  Intent-Wechsel bleiben auf stabile Revalidierungsgrenzen beschränkt.
+- Den erreichten globalen ICE-/Score-Schutz-, HQ-/R&D-Fakten-, Hold-/Bluff-,
+  Engine-Nahgleichstands-, Run-Window-, Agenda-Phasen- und
+  Loan-from-Chiba-Vertrag mit dem produktiven Stand abgeglichen.
+- Finale PF15-Shards, Engine-, Checkpoint-, Hidden-Info-, Authority-,
+  Replay-, Source-/Package- und Standard-Baseline-Evidence aufgenommen und
+  den PF16-Importgraph-Cleanup abgeschlossen: Der produktive Livegraph ist
+  frei von alten TacticalGoal-, SemanticChoice-, PracticalMicro-,
+  TacticalPlan-Memory- und TacticalPlan-Override-Abhängigkeiten; historische
+  Verträge bleiben nur in isolierter Test-/Evaluationsdiagnostik.
+- PF16-Final-Review, Wissenspflege und Pre-Commit-Gates abgeschlossen; nur
+  PF16-Commit, Main-Abgleich und integrierte Abschlussgates verbleiben.
 
 ### 0.6 – 2026-07-25
 

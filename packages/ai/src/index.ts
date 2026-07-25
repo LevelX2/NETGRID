@@ -381,17 +381,6 @@ export type {
   RunnerStrategicIntentProfile,
 } from "./runner-strategic-intent";
 export {
-  buildRunnerTacticalGoals,
-  redactedRunnerTacticalGoalFacts,
-  RUNNER_TACTICAL_GOAL_SCHEMA_VERSION,
-} from "./runner-tactical-goals";
-export type {
-  BuildRunnerTacticalGoalsParams,
-  RunnerTacticalGoal,
-  RunnerTacticalGoalFamily,
-  RunnerTacticalGoalId,
-} from "./runner-tactical-goals";
-export {
   classifyTagPunishLegalActionFromOntology,
   classifyTagPunishPayoffFromOntology,
   classifyTagSourceFromOntology,

@@ -1,6 +1,5 @@
 import {
   createAiActionEntrypointsComposition,
-  type AiActionEntrypointsCompositionDependencies,
 } from "./ai-action-entrypoints-composition";
 import {
   createSemanticRuntimeDecisionComposition,
@@ -8,11 +7,7 @@ import {
 } from "./semantic-runtime-decision-composition";
 
 export type SemanticRuntimeEntrypointsCompositionDependencies =
-  SemanticRuntimeDecisionCompositionDependencies &
-    Omit<
-      AiActionEntrypointsCompositionDependencies,
-      "chooseSemanticRuntimeAction"
-    >;
+  SemanticRuntimeDecisionCompositionDependencies;
 
 export function createSemanticRuntimeEntrypointsComposition(
   dependencies: SemanticRuntimeEntrypointsCompositionDependencies,

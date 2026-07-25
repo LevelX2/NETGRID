@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-23
+Stand: 2026-07-25
 
 ## Führender Produktstand
 
@@ -91,26 +91,62 @@ Stand: 2026-07-23
 
 - Das WIP-Zielkonzept
   `docs/architecture/ai/ai-plan-layer-target-state-wip.md` führt die
-  verteilten Verträge für Deckstrategie, Strategic Intent, Tactical Goals,
-  Tactical Plans, Portfolio, Ressourcen und Folgeaktionen zu einer
-  Plan-first-Zielarchitektur zusammen. Im Zielzustand wählen getrennte
-  Runner-/Corp-Scheduler zuerst einen autoritativen Plan und Step; erst
+  verteilten Verträge für Deckstrategie, Strategic Intent, kurzlebige
+  Goal-/Threat-Signale, Planinstanzen, Portfolio, Ressourcen und
+  Folgeaktionen zu einer Plan-first-Zielarchitektur zusammen. PF15 ist mit
+  Commit `4b0c459f6` abgeschlossen: Getrennte Runner-/Corp-Scheduler wählen
+  zuerst eine autoritative residente `PlanInstance` und deren Step; erst
   innerhalb dieses Steps wird eine vorhandene LegalAction ausgewählt.
   Aktuelle und angestrebte Planmodule, orthogonale Zustandsachsen,
   Parent-/Need-/Supportpläne, geschützte Fortsetzungen,
   Highlighter-R&D- und
   Manhunt-Flatline-Akzeptanzszenarien sowie spätere Implementierungsgates sind
-  dokumentiert. Dies ist ein Architekturziel und noch keine Behauptung über
-  den vollständig erreichten Runtime-Stand. Version 0.3 legt zusätzlich fest:
-  Tactical Goals bleiben kurzlebige nicht autoritative Signale,
-  PlanAssessments gehen der Executorwahl voraus, Routen enthalten nur eine
-  aktuelle Action-ID, Priority Claims werden validiert und Support nutzt
-  typisierte Ressourcen sowie Root-/Leaf-Executor. Kartenbezogene
-  Planinstanzen benötigen ein Admission-Gate. Der Widerspruch zwischen
-  konsolidiertem MVP-Konzept, aktueller Engine und Comprehensive Rules zu
-  EndTurn ist als vor Kernel-Freigabe zu entscheidender Regelvertragsblocker
-  dokumentiert.
-- Runner-Fehlentscheidungen aus dem aktiven Match
+  dokumentiert. Version 0.7 legt fest: Tactical Goals sind nicht persistent,
+  sondern ausschließlich `stateVersion`-gebundene, nicht autoritative
+  Goal-/Threat-Signale für Discovery und Priorisierung. Planinstanzen bleiben
+  alleinige persistente Handlungsautorität. Strategic Intent ist ein stabiler
+  Strategieanker: P1- bis P3-Pläne dürfen ihn mit Evidence übergehen,
+  P4-/P5-Kampagnen benötigen Intent-Fit oder explizite taktische Evidence;
+  normale Action-Schwankungen wechseln ihn nicht. `TransientPlanSignal`
+  typisiert diesen Vertrag fail-closed. Produktive Signalquellen bestehen
+  für Runner-Remote-Contest, Survival, Terminal Wins und Corp-Scoreprojekte;
+  gebunden wird ausschließlich die exakte Planmodul-/`dedupeKey`-/
+  Zielkombination. Der öffentliche Setup-/Mulliganabschluss erzeugt für
+  beide Seiten einen aktuellen `phase_change`; weitere typisierte
+  Intent-Revalidierungsgründe benötigen eigene side-sichere
+  Live-Evidence-Produzenten. Der öffentliche transitive Livegraph
+  ist von alten TacticalGoal-, SemanticChoice-, PracticalMicro-,
+  TacticalPlan-Memory- und TacticalPlan-Override-Abhängigkeiten bereinigt;
+  historische Altverträge bleiben ausschließlich isolierte
+  Test-/Evaluationsdiagnostik.
+- Für Corp-Verteidigung existiert keine Legacy-Zentralreserve und kein
+  eigenständiger zentraler Reserveplan. Finanzierung entsteht nur als
+  Economy-Bedarf des exakten Defense-Parents; Schutzwirkung und Reserve
+  werden getrennt und ausschließlich über Engine-zertifizierte Quotes
+  bewertet. Unknown bleibt fail-closed.
+- `Loan from Chiba` gehört bei Erwerb und Entwicklung zum Economy-Modul.
+  Nach der Installation gehören Halten, Verlassen und das zugehörige
+  Zahlungs-/Verlustrisiko in einen `runner.resource_lifecycle`-Child der
+  exakten Karteninstanz. Unbekannte Engine-Zahlungsquotes bleiben blockiert
+  und werden nicht geschätzt.
+- PF16-Final-Review und vollständige Pre-Commit-Gates einschließlich der
+  60-Spiele-Baseline sind grün. Offen sind PF16-Commit, Abgleich mit aktuellem
+  `main`, lokale Integration und verifizierter Worktree-/Branch-Cleanup.
+- Die verifizierte PF15-Code-Freeze-Baseline umfasst 60 Spiele und 11.012
+  Entscheidungen. Sie wurde im vollständigen dirty PF15-Arbeitsbaum auf
+  Parent `527833085` gemessen; dieser Arbeitsstand wurde anschließend mit
+  `4b0c459f6` committed. Illegal Action, Replay-, Runtime-, Hidden-Info-,
+  Fallback-, Timeout-, Action-Limit-, No-Legal-Action- und
+  Redaktionsfehler stehen bei null. Die Plan-Conversion beträgt `0,670`;
+  klar dominierte Planwahlen stehen bei null. Typechecks, alle drei
+  AI-Vitest-Shards, der vollständige Engine-Lauf mit 207 Dateien und 1.795
+  Tests sowie Scenario-, Checkpoint-, Hidden-Info-, Authority-, Structure-
+  und Diff-Gates sind grün. 175 qualitative Trace-Befunde, darunter drei hohe
+  `corp_never_scores_long_game`-Fälle, und zwei
+  `gameEndReason=unknown`-Anomalien bleiben offene Play-Strength-Evidence.
+  Führend ist
+  `docs/reviews/ai/ai-behavior-baseline-v1-plan-first-pf15-code-freeze-verified-2026-07-25.md`.
+- Historische Runner-Fehlentscheidungen aus dem damals aktiven Match
   `match_fd22cad3cc454a9e` sind ohne produktive Laufzeitänderung als exakte
   Decision-Checkpoints gesichert. Die zweite redundante
   `Psychic Friend`-Installation und drei sofortige Zugenden mit vier
@@ -118,12 +154,13 @@ Stand: 2026-07-23
   `Matador`-/`Psychic Friend`-Installationen, null-Klick-Zugenden und ein
   sicherer sofortiger Zugabschluss für den deterministischen Corp-Deckout
   schützen die zulässigen Nachbarfälle.
-- Diagnosemetriken zählen im 60-Spiele-Current-State-Lauf 22 vorzeitige
+- Die damals aufgezeichneten Diagnosemetriken zählten 22 vorzeitige
   Runner-Zugenden und 16 redundante negativ bewertete Installationen; 29
-  sichere Deckout-Zugenden werden separat erkannt. Der Lauf besitzt keine
-  Illegal-Action-, Replay-, Runtime-, Hidden-Info- oder Redaktionsverletzung,
-  erreicht aber in einem davon unabhängigen reproduzierbaren Slot das
-  480-Aktionen-Limit. Führend sind
+  sichere Deckout-Zugenden wurden separat erkannt. Der historische Lauf
+  besaß keine Illegal-Action-, Replay-, Runtime-, Hidden-Info- oder
+  Redaktionsverletzung, erreichte aber in einem davon unabhängigen
+  reproduzierbaren Slot das 480-Aktionen-Limit. Diese Werte sind nicht die
+  aktuelle PF15-Code-Freeze-Baseline. Führend sind
   `docs/reviews/ai/runner-action-valuation-regression-evidence-2026-07-23.md`
   und
   `docs/reviews/ai/runner-action-valuation-regression-final-review-2026-07-23.md`.
@@ -188,7 +225,9 @@ Stand: 2026-07-23
   Hint-Quality und Target-Profile-Gates stehen bei null offenen Fällen.
   Führend sind der Vollbestandsaudit, der Remediationprozess und das
   Abschlussreview vom 18.07.2026.
-- Die Semantic Runtime ist der einzige produktive Entscheidungsweg.
+- Die Plan-first-Live-Runtime ist der einzige produktive Entscheidungsweg;
+  historisch benannte Semantic-Runtime-Fassaden rufen ausschließlich diesen
+  Einstieg auf.
 - `@netgrid/ai` exportiert nur Live-Verträge; Simulation, Selfplay und
   Benchmarks liegen unter `@netgrid/ai/simulation`.
 - Alte Corp-/Runner-Planer, Baseline-Selectoren, Shadow-/META-/Readiness-

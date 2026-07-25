@@ -21,7 +21,6 @@ import {
   runnerRunTargetPlausibleForMultiRun,
   runnerRunTargetSemanticGuidanceValue,
 } from "./runner-run-target-guidance";
-import { buildRunnerTacticalGoals } from "./runner-tactical-goals";
 import { actionClickCost, actionCreditCost } from "./runtime/action-cost";
 import { compareAction } from "./runtime/action-order";
 import {
@@ -48,9 +47,7 @@ import {
   mergedPublicHistory as mergedAiPublicHistory,
 } from "./runtime/public-event-history";
 import {
-  isRunnerReactiveBaselineDecision,
   semanticRuntimeActionTypeIsReactive,
-  semanticRuntimeChoiceIsReactive,
 } from "./runtime/reactive-action";
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
 import { corpVisibleRunnerHardwarePayoffEvidence } from "./runtime/runner-hardware-payoff-evidence";
@@ -88,18 +85,10 @@ import {
   visibleBreakerRoles as visibleBreakerRolesForAi,
 } from "./runtime/runner-visible-breaker-coverage";
 import { isSearchChoice } from "./runtime/search-choice-option";
-import {
-  bestSemanticRuntimeChoice,
-  bestSemanticRuntimeChoiceForTacticalPlanOverride,
-  tacticalPlanMappedChoice,
-  tacticalPlanMappingOverrideEvidence,
-  tacticalPlanRuntimeAlignedToChoice,
-} from "./runtime/semantic-choice-ranking";
 import { semanticRuntimeExplanation } from "./runtime/semantic-runtime-explanation";
 import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
 import {
   scrubEvidence,
-  semanticRuntimeChoiceWithEvidence,
   semanticRuntimeScoreFromComponents,
 } from "./runtime/semantic-runtime-score-components";
 import { isRemoteServerTarget } from "./runtime/server-target";
@@ -156,12 +145,6 @@ import {
 import { runnerSurvivalCounterContextForInput } from "./simulation/runner-survival-counter-context";
 import { applyTagPunishOntologyDiagnostics } from "./simulation/tag-punish-ontology-diagnostics";
 import { visibleRootIsKnownAgendaForMetrics } from "./simulation/visible-root-agenda-metrics";
-import {
-  evaluateTacticalPlans,
-  getPlanContinuityMemorySnapshot,
-  getTacticalPlanMemorySnapshot,
-  rememberTacticalPlanRuntime,
-} from "./tactical-plans";
 import {
   classifyTagPunishPayoffFromOntology,
   classifyTagSourceFromOntology,
@@ -232,7 +215,6 @@ export const aiLiveRuntimeDependencies = {
   handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
   economyPosture: buildRunnerEconomyPosture,
   runTargets: evaluateRunnerRunTargets,
-  previousPlan: getPlanContinuityMemorySnapshot,
   mechanicsForDefinition: runnerCardMechanicsForAi,
   actionTypeIsReactive: semanticRuntimeActionTypeIsReactive,
   evaluatePracticalRunnerRunTargets: evaluateRunnerRunTargets,
@@ -290,21 +272,10 @@ export const aiLiveRuntimeDependencies = {
   runActionSpendingCapAssessment: runnerRunActionSpendingCapAssessment,
   handBufferNeedScoreComponent: runnerHandBufferNeedScoreComponent,
   explanation: semanticRuntimeExplanation,
-  semanticRuntimeChoiceIsReactive,
   buildActionSemanticCandidates,
-  getTacticalPlanMemorySnapshot,
   evaluateRunnerHandDevelopment,
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
-  buildRunnerTacticalGoals,
-  evaluateTacticalPlans,
-  bestSemanticRuntimeChoice,
-  bestSemanticRuntimeChoiceForTacticalPlanOverride,
-  tacticalPlanMappedChoice,
-  semanticRuntimeChoiceWithEvidence,
-  tacticalPlanMappingOverrideEvidence,
-  tacticalPlanRuntimeAlignedToChoice,
-  rememberTacticalPlanRuntime,
 };
 
 const { chooseAiAction, chooseCorpAction, chooseRunnerAction } =

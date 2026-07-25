@@ -4,6 +4,7 @@ import type {
   DeckStrategyRuntimeStatus,
   DeckStrategyScore,
 } from "./deck-doctrine-strategy";
+import { PlanResolutionFailure } from "./plans/plan-resolution-failure";
 import {
   buildStrategicIntentState,
   type StrategicRoleStatusSnapshot,
@@ -215,15 +216,15 @@ describe("StrategicIntentState contract", () => {
         primary: ["runner.hq_pressure"],
         scores: {
           "runner.rnd_pressure": score({
-            anchor: 78,
-            support: 78,
-            final: 78,
+            anchor: 70,
+            support: 70,
+            final: 70,
             confidence: "high",
           }),
           "runner.hq_pressure": score({
-            anchor: 85,
-            support: 85,
-            final: 85,
+            anchor: 95,
+            support: 95,
+            final: 95,
             confidence: "high",
           }),
         },
@@ -251,7 +252,107 @@ describe("StrategicIntentState contract", () => {
     ).toEqual(["runner.rnd_pressure", "runner.hq_pressure"]);
   });
 
-  it("lets completed Runner setup bypass commitment and switch to pressure", () => {
+  it("lets a current phase revalidation replace a provisional initial selection only above the switch margin", () => {
+    const first = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 30,
+      strategyProfile: profile("runner", {
+        primary: ["runner.rnd_pressure"],
+        scores: {
+          "runner.rnd_pressure": score({
+            anchor: 80,
+            support: 80,
+            final: 80,
+            confidence: "high",
+          }),
+          "runner.hq_pressure": score({
+            anchor: 70,
+            support: 70,
+            final: 70,
+            confidence: "high",
+          }),
+        },
+      }),
+      availableCredits: 8,
+    });
+    const belowMargin = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 31,
+      strategyProfile: profile("runner", {
+        primary: ["runner.hq_pressure"],
+        scores: {
+          "runner.rnd_pressure": score({
+            anchor: 80,
+            support: 80,
+            final: 80,
+            confidence: "high",
+          }),
+          "runner.hq_pressure": score({
+            anchor: 90,
+            support: 90,
+            final: 90,
+            confidence: "high",
+          }),
+        },
+      }),
+      previousState: first,
+      availableCredits: 8,
+      revalidation: {
+        observedAtStateVersion: 31,
+        reason: "phase_change",
+        evidenceCodes: ["setup_phase_completed"],
+      },
+    });
+    const aboveMargin = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 31,
+      strategyProfile: profile("runner", {
+        primary: ["runner.hq_pressure"],
+        scores: {
+          "runner.rnd_pressure": score({
+            anchor: 80,
+            support: 80,
+            final: 80,
+            confidence: "high",
+          }),
+          "runner.hq_pressure": score({
+            anchor: 95,
+            support: 95,
+            final: 95,
+            confidence: "high",
+          }),
+        },
+      }),
+      previousState: first,
+      availableCredits: 8,
+      revalidation: {
+        observedAtStateVersion: 31,
+        reason: "phase_change",
+        evidenceCodes: ["setup_phase_completed"],
+      },
+    });
+
+    expect(belowMargin.primaryStrategy.strategyId).toBe(
+      "runner.rnd_pressure",
+    );
+    expect(belowMargin.transition.reason).toBe("min_commitment_not_met");
+    expect(aboveMargin.primaryStrategy.strategyId).toBe(
+      "runner.hq_pressure",
+    );
+    expect(aboveMargin.transition).toMatchObject({
+      status: "switched",
+      reason: "primary_strategy_changed",
+      previousStrategyId: "runner.rnd_pressure",
+    });
+    expect(aboveMargin.transition.evidence).toEqual(
+      expect.arrayContaining([
+        "revalidation:phase_change",
+        "revalidation_evidence:setup_phase_completed",
+      ]),
+    );
+  });
+
+  it("documents completed Runner setup as invalidation before switching to pressure", () => {
     const searchProfile = profile("runner", {
       primary: ["runner.search.breaker"],
       scores: {
@@ -328,6 +429,12 @@ describe("StrategicIntentState contract", () => {
       status: "switched",
       previousStrategyId: "runner.search.breaker",
     });
+    expect(switched.transition.evidence).toEqual(
+      expect.arrayContaining([
+        "intent_selection_authority:invalidation",
+        "intent_invalidation:runner_setup_completed",
+      ]),
+    );
   });
 
   it("does not promote blocked strategy scores into the active line", () => {
@@ -364,7 +471,7 @@ describe("StrategicIntentState contract", () => {
     ).toEqual(["runner.rnd_pressure"]);
   });
 
-  it("switches strategy after commitment when the score margin is high enough", () => {
+  it("does not mutate intent from normal action-score fluctuation and switches only after explicit revalidation", () => {
     const first = buildStrategicIntentState({
       side: "runner",
       stateVersion: 40,
@@ -398,7 +505,7 @@ describe("StrategicIntentState contract", () => {
       previousState: first,
       availableCredits: 8,
     });
-    const switched = buildStrategicIntentState({
+    const fluctuated = buildStrategicIntentState({
       side: "runner",
       stateVersion: 42,
       strategyProfile: profile("runner", {
@@ -421,14 +528,120 @@ describe("StrategicIntentState contract", () => {
       previousState: committed,
       availableCredits: 8,
     });
+    const switched = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 43,
+      strategyProfile: profile("runner", {
+        primary: ["runner.hq_pressure"],
+        scores: {
+          "runner.rnd_pressure": score({
+            anchor: 80,
+            support: 80,
+            final: 80,
+            confidence: "high",
+          }),
+          "runner.hq_pressure": score({
+            anchor: 95,
+            support: 95,
+            final: 95,
+            confidence: "high",
+          }),
+        },
+      }),
+      previousState: fluctuated,
+      availableCredits: 8,
+      revalidation: {
+        observedAtStateVersion: 43,
+        reason: "new_information",
+        evidenceCodes: ["new_public_server_information"],
+      },
+    });
 
     expect(committed.commitment.decisionsCommitted).toBe(2);
+    expect(fluctuated.primaryStrategy.strategyId).toBe(
+      "runner.rnd_pressure",
+    );
+    expect(fluctuated.transition).toMatchObject({
+      status: "continued",
+      reason: "revalidation_not_triggered",
+      previousStrategyId: "runner.rnd_pressure",
+    });
     expect(switched.primaryStrategy.strategyId).toBe("runner.hq_pressure");
     expect(switched.transition).toMatchObject({
       status: "switched",
       reason: "primary_strategy_changed",
       previousStrategyId: "runner.rnd_pressure",
     });
+    expect(switched.transition.evidence).toEqual(
+      expect.arrayContaining([
+        "revalidation:new_information",
+        "revalidation_evidence:new_public_server_information",
+      ]),
+    );
+  });
+
+  it.each([41, 43])(
+    "fails closed when intent revalidation is not bound to current stateVersion 42 (observed %s)",
+    (observedAtStateVersion) => {
+      expect(() =>
+        buildStrategicIntentState({
+          side: "runner",
+          stateVersion: 42,
+          strategyProfile: profile("runner", {
+            primary: ["runner.rnd_pressure"],
+            scores: {
+              "runner.rnd_pressure": score({
+                anchor: 80,
+                support: 80,
+                final: 80,
+                confidence: "high",
+              }),
+            },
+          }),
+          availableCredits: 8,
+          revalidation: {
+            observedAtStateVersion,
+            reason: "phase_change",
+            evidenceCodes: ["phase_changed"],
+          },
+        }),
+      ).toThrowError("invalid_plan_identity");
+    },
+  );
+
+  it("rejects action authority embedded in an intent revalidation trigger", () => {
+    let failure: unknown;
+    try {
+      buildStrategicIntentState({
+        side: "runner",
+        stateVersion: 42,
+        strategyProfile: profile("runner", {
+          primary: ["runner.rnd_pressure"],
+          scores: {
+            "runner.rnd_pressure": score({
+              anchor: 80,
+              support: 80,
+              final: 80,
+              confidence: "high",
+            }),
+          },
+        }),
+        availableCredits: 8,
+        revalidation: {
+          observedAtStateVersion: 42,
+          reason: "phase_change",
+          evidenceCodes: ["phase_changed"],
+          actionIds: ["runner.start_run.rd"],
+        } as never,
+      });
+    } catch (error) {
+      failure = error;
+    }
+
+    expect(failure).toBeInstanceOf(PlanResolutionFailure);
+    expect((failure as PlanResolutionFailure).context.removalCondition).toContain(
+      "unexpected field actionIds",
+    );
   });
 
   it("abandons previous strategy when the current profile has no productive anchor", () => {
@@ -461,6 +674,12 @@ describe("StrategicIntentState contract", () => {
       reason: "no_current_strategy_anchor",
       previousStrategyId: "runner.rnd_pressure",
     });
+    expect(abandoned.transition.evidence).toEqual(
+      expect.arrayContaining([
+        "intent_selection_authority:invalidation",
+        "intent_invalidation:candidate_has_no_current_anchor",
+      ]),
+    );
   });
 });
 

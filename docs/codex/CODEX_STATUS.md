@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-23
+Stand: 2026-07-25
 
 ## Einstieg
 
@@ -25,10 +25,12 @@ gebunden. Vier qualifizierte Proteus-Snapshots sind im AI-Deckpool 1.1.0 für
 poolbewusste feste oder seedbasierte Auswahl freigegeben. Technischer Support
 ist keine automatische Play-Strength-Freigabe.
 
-Die Semantic Runtime ist der einzige produktive KI-Entscheidungsweg. Alte
-Planer, Shadow-/META-Runtime, historisch benannte Controllerprofile und
-stille Legacy-Fallbacks sind kein aktueller Vertrag. Der Coverage-Restpfad
-ist fail-closed und darf nur vorhandene sichere LegalActions auswählen.
+Die Plan-first-Live-Runtime ist der einzige produktive
+KI-Entscheidungsweg. Historisch benannte Semantic-Runtime-Fassaden rufen
+ausschließlich diesen Einstieg auf. Alte Planer, Shadow-/META-Runtime,
+historisch benannte Controllerprofile und stille Legacy-Fallbacks sind kein
+aktueller Vertrag. Der Coverage-Restpfad ist fail-closed und darf nur
+vorhandene sichere LegalActions auswählen.
 Der produktive Auswahlweg ist über den side-sicheren
 `AiDecisionDebug.decisionChain` bis zur finalen Action und Choice getrennt
 beobachtbar; diese Observability verändert weder Scoring noch Planpriorität.
@@ -36,15 +38,68 @@ Der vorhandene SQLite-KI-Trace persistiert die Kette im normalen
 `summary`-Modus kompakt und im erweiterten `detailed`-Modus vollständig unter
 demselben `trace_json`-Pfad.
 
-Das aktive Match `match_fd22cad3cc454a9e` besitzt jetzt exakte
+PF15 des Plan-first-Runtime-Cutovers ist mit Commit `4b0c459f6`
+abgeschlossen. Residente `PlanInstance`s sind die einzige persistente
+Handlungsautorität; Step, Route und vorhandene LegalAction werden daraus
+materialisiert. Tactical Goals bleiben ausschließlich kurzlebige,
+`stateVersion`-gebundene und nicht autoritative Goal-/Threat-Signale für
+Discovery und Priorisierung. `TransientPlanSignal` typisiert diesen Vertrag;
+stale/future Signale, unbekannte Felder und Action-Autoritätsfelder scheitern
+fail-closed. Live-Produzenten bestehen für Runner-Remote-Contest, Survival,
+Terminal Wins und Corp-Scoreprojekte; der Scheduler bindet nur das exakte
+Planmodul, den residenten `dedupeKey` und das Ziel. P1- bis P3-Pläne dürfen
+den Intent nur mit belastbarer Evidence
+übergehen; P4-/P5-Kampagnen benötigen Intent-Fit oder explizite taktische
+Evidence. Ein Override mutiert den Intent nicht automatisch, und normale
+Action-Schwankungen wechseln ihn nicht. Der öffentliche Abschluss der
+Setup-/Mulliganphase ist als aktueller `phase_change`-Trigger produktiv
+angeschlossen; weitere typisierte Revalidierungsgründe benötigen noch eigene
+side-sichere Live-Evidence-Produzenten.
+
+Der öffentliche transitive Livegraph enthält keine alten TacticalGoal-,
+SemanticChoice-, PracticalMicro-, TacticalPlan-Memory- oder
+TacticalPlan-Override-Abhängigkeiten mehr. Öffentliche TacticalGoal-Exporte
+und `ownRunnerTacticalGoals` sind entfernt. Live und Simulation verwenden
+denselben Plan-first-Einstieg; historische Altverträge bleiben nur als
+isolierte Test-/Evaluationsdiagnostik und sind durch Boundary-Gates vom
+produktiven Graphen getrennt.
+
+Corp-Verteidigung besitzt keine Legacy-Zentralreserve und keinen eigenen
+zentralen Reserveplan. Finanzierung ist ein Economy-Bedarf des exakten
+Defense-Parents; Schutzwirkung und Reserve werden getrennt und ausschließlich
+über Engine-zertifizierte Quotes bewertet. `Loan from Chiba` wird bei Erwerb
+und Entwicklung durch Economy behandelt; Halten, Verlassen und
+Zahlungs-/Verlustrisiko gehören nach der Installation in einen
+`runner.resource_lifecycle`-Child der exakten Karteninstanz. Unbekannte
+Engine-Zahlungsquotes bleiben blockiert und werden nicht geschätzt.
+
+Die verifizierte PF15-Code-Freeze-Baseline umfasst 60 Spiele und 11.012
+Entscheidungen. Sie wurde im vollständigen dirty PF15-Arbeitsbaum auf Parent
+`527833085` gemessen; dieser Arbeitsstand wurde anschließend mit
+`4b0c459f6` committed. Illegal Actions, Replay-, Runtime-, Hidden-Info-,
+Fallback-, Timeout-, Action-Limit-, No-Legal-Action- und Redaktionsfehler
+stehen jeweils bei null; die Plan-Conversion beträgt `0,670`, klar dominierte
+Planwahlen stehen bei null. AI-, Engine-, Shared- und Catalog-Typechecks, alle
+drei AI-Vitest-Shards, der vollständige Engine-Lauf mit 207 Dateien und 1.795
+Tests sowie Scenario-, Checkpoint-, Hidden-Info-, Authority-, Structure- und
+Diff-Gates waren grün. 175 qualitative Trace-Befunde, darunter drei hohe
+`corp_never_scores_long_game`-Fälle, und zwei Outcome-Anomalien mit
+`gameEndReason=unknown` bleiben sichtbare Qualitäts-Restpunkte, nicht
+technische Gate-Ausnahmen. Führend ist
+`docs/reviews/ai/ai-behavior-baseline-v1-plan-first-pf15-code-freeze-verified-2026-07-25.md`.
+
+Die historische Regressionsevidence des Matches
+`match_fd22cad3cc454a9e` besitzt exakte
 Regressionsverträge für eine redundante zweite `Psychic Friend`-Installation
 und drei sofortige Runner-Zugenden mit vier Restklicks. Zulässige erste
 Breaker-Installationen, null-Klick-Zugenden und ein deterministischer
-Corp-Deckout-Sieg sind positive Gegenproben. Diagnosemetriken weisen im
-60-Spiele-Lauf 22 vorzeitige Zugenden und 16 redundante negativ bewertete
-Installationen aus, ohne die produktive Auswahl zu verändern. Ein
-eigenständiger Slot erreicht reproduzierbar das 480-Aktionen-Limit und bleibt
-als separater KI-Qualitäts-Follow-up offen. Führend ist
+Corp-Deckout-Sieg sind positive Gegenproben. Die damals aufgezeichneten
+Diagnosemetriken wiesen 22 vorzeitige Zugenden und 16 redundante negativ
+bewertete Installationen aus, ohne die produktive Auswahl zu verändern. Ein
+damaliger eigenständiger Slot erreichte reproduzierbar das
+480-Aktionen-Limit. Diese Werte sind historische Regressionsevidence und
+nicht der unmittelbar zuvor ausgewiesene PF15-Code-Freeze-Current-State.
+Führend ist
 `docs/reviews/ai/runner-action-valuation-regression-final-review-2026-07-23.md`.
 
 Aktionskapazität ist zusätzlich als gemeinsame side-sichere Ressource
@@ -74,7 +129,7 @@ gleichzeitig als verzögert oder contestable bestraft. Zehn Match-Checkpoints,
 führend ist
 `docs/reviews/ai/match-e2f2-corp-decision-windows-remediation-final-review-2026-07-22.md`.
 
-Die aktuelle Semantic Runtime verwendet reine abgeleitete Run-Target-,
+Die aktuelle Plan-first-Live-Runtime verwendet reine abgeleitete Run-Target-,
 Handentwicklungs- und Install-Fit-Ergebnisse innerhalb genau einer synchronen
 Entscheidung wieder. Allokationsarme Redaction- und Side-Safety-Prüfungen
 erhalten denselben Hidden-Info-Vertrag. Der feste 240-Aktionen-Fall sank vom
@@ -249,6 +304,12 @@ und
 
 ## Offene technische Schwerpunkte
 
+- PF16 hat den Legacy-Livegraph bereinigt, den nicht autoritativen
+  Goal-/Threat-Signalvertrag einschließlich Strategic-Intent-Rückkanal
+  typisiert und den Resource-Lifecycle-Vertrag verifiziert. Final Review und
+  vollständige Pre-Commit-Gates einschließlich der 60-Spiele-Baseline sind
+  grün. Offen sind PF16-Commit, lokale Integration nach `main` und der
+  verifizierte Worktree-/Branch-Cleanup.
 - `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts` und
   `apps/server/src/multiplayer.test.ts` sind weiterhin groß. Die priorisierten
   Corp-AI-Scoring-, Choice- und Triage-Owner liegen wieder innerhalb ihrer

@@ -1,77 +1,26 @@
+import type { BlinkRiskAssessment } from "../runner-run-target-evaluation";
 import {
-  createSemanticRuntimeOrchestrationComposition,
-  type SemanticRuntimeOrchestrationCompositionDependencies,
-} from "./semantic-runtime-orchestration-composition";
-import {
-  createSemanticRuntimeCorpScoringComposition,
-  type SemanticRuntimeCorpScoringCompositionDependencies,
-} from "./semantic-runtime-corp-scoring-composition";
-import {
-  createRunnerSemanticSupportComposition,
-  type RunnerSemanticSupportCompositionDependencies,
-} from "./runner-semantic-support-composition";
+  createRunnerBaselineSupportComposition,
+  type RunnerBaselineSupportCompositionDependencies,
+} from "./runner-baseline-support-composition";
 import {
   createAiContextDiagnosticsComposition,
   type AiContextDiagnosticsCompositionDependencies,
 } from "./ai-context-diagnostics-composition";
-import { corpUpgradePlacementExclusion } from "./corp-upgrade-placement";
-import { semanticRuntimeServerId } from "./semantic-runtime-scope";
-import { semanticRuntimeVisibleSourceCard } from "./visible-card-lookup";
-
-type RuntimeScoringDependencyObjects = Pick<
-  SemanticRuntimeOrchestrationCompositionDependencies,
-  | "badPublicityRelevance"
-  | "goalFit"
-  | "recoveryCommitment"
-  | "install"
-  | "startRun"
->;
-
-type AiLiveRuntimeScoringDependencies = Pick<
-  RuntimeScoringDependencyObjects["badPublicityRelevance"],
-  "sourceDefinitionIdForAction" | "actionCreditCost" | "fakedHitCardId"
-> & {
-  runActionSpendingCapAssessment: RuntimeScoringDependencyObjects["goalFit"]["runActionSpendingCapAssessment"];
-  handBufferNeedScoreComponent: RuntimeScoringDependencyObjects["recoveryCommitment"]["handBufferNeedScoreComponent"];
-};
-
-type RunnerSemanticSupportOutputs = ReturnType<
-  typeof createRunnerSemanticSupportComposition
->;
-
-type RuntimeRunnerSupportDependencyKeys =
-  | keyof RunnerSemanticSupportOutputs
-  | "badPublicityOrTraceTechCard"
-  | "bankHasConcreteFundingNeed"
-  | "bankInvestmentCommitmentEvidence"
-  | "bankInvestmentCommitmentScoreComponents"
-  | "blinkRiskEvidenceForAction"
-  | "cardAddressesVisibleBreakerNeed"
-  | "evaluationForAction"
-  | "handFundingTarget"
-  | "loanLiabilityAssessment"
-  | "multiRunEventScoreComponent"
-  | "muPressureActionEvidence"
-  | "muPressureFundingScoreComponent"
-  | "muPressureInstallScoreComponent"
-  | "noRunEconomyCommitmentEvidence"
-  | "noRunEconomyCommitmentScoreComponents"
-  | "persistentInstallEvidenceForAction"
-  | "persistentInstallFitScoreComponent"
-  | "planMemoryActionExclusion"
-  | "programInstallDisplacementPenalty"
-  | "programInstallTrashAssessmentForAction"
-  | "riskAssessment"
-  | "runnerMultiRunEventExclusion"
-  | "runnerRunTargetEvaluationForAction"
-  | "viral15JackOutScoreComponent";
+import {
+  createRunnerBlinkEncounterBreakContext,
+  type RunnerBlinkEncounterBreakContextDependencies,
+} from "./runner-blink-encounter-break-context";
+import { createRunnerBlinkBreakExclusionContext } from "./runner-blink-break-exclusion";
+import { createRunnerEncounterActionExclusionContext } from "./runner-encounter-action-exclusion";
+import { currentEncounteredIceCard } from "./current-encounter";
+import {
+  createSemanticRuntimeOrchestrationComposition,
+  type SemanticRuntimeOrchestrationCompositionDependencies,
+} from "./semantic-runtime-orchestration-composition";
 
 type AiContextDiagnosticsOutputs = ReturnType<
   typeof createAiContextDiagnosticsComposition
->;
-
-type SemanticRuntimeCorpScoringOutputs = ReturnType<
-  typeof createSemanticRuntimeCorpScoringComposition<string>
 >;
 
 type RuntimeContextDiagnosticsDependencyKeys =
@@ -83,32 +32,32 @@ type RuntimeContextDiagnosticsDependencyKeys =
   | "tagPunishAssessmentForAction"
   | "trashAccessContext";
 
-export type AiLiveRuntimeCompositionDependencies = Omit<
-  SemanticRuntimeOrchestrationCompositionDependencies,
-  | "badPublicityRelevance"
-  | "corpAdvancementCounterPlacementAssessment"
-  | "corpComponents"
-  | "corpEvidence"
-  | "corpOntologyPayoffAvailableForTagSource"
-  | "goalFit"
-  | "recoveryCommitment"
-  | "install"
-  | "startRun"
-  | RuntimeRunnerSupportDependencyKeys
-  | RuntimeContextDiagnosticsDependencyKeys
-> &
-  AiContextDiagnosticsCompositionDependencies &
-  Omit<
-    SemanticRuntimeCorpScoringCompositionDependencies<string>,
-    RuntimeContextDiagnosticsDependencyKeys
-  > &
-  Omit<
-    RunnerSemanticSupportCompositionDependencies,
-    RuntimeContextDiagnosticsDependencyKeys
-  > &
-  AiLiveRuntimeScoringDependencies;
+type DirectPlanFirstDependencyKeys =
+  | "buildActionSemanticCandidates"
+  | "evaluateRunnerHandDevelopment"
+  | "buildRunnerEconomyPosture"
+  | "evaluateRunnerRunTargets";
 
-export function createRuntimeComposedDependencies(
+export type AiLiveRuntimeCompositionDependencies =
+  AiContextDiagnosticsCompositionDependencies &
+    Omit<
+      RunnerBaselineSupportCompositionDependencies,
+      RuntimeContextDiagnosticsDependencyKeys
+    > &
+    Omit<
+      RunnerBlinkEncounterBreakContextDependencies,
+      "encounteredSubroutines"
+    > &
+    Pick<
+      SemanticRuntimeOrchestrationCompositionDependencies,
+      DirectPlanFirstDependencyKeys
+    > & {
+      shouldAvoidBlinkRiskAssessment: (
+        assessment: BlinkRiskAssessment | undefined,
+      ) => boolean;
+    };
+
+function createRuntimeComposedDependencies(
   dependencies: AiLiveRuntimeCompositionDependencies,
   contextDiagnostics: AiContextDiagnosticsOutputs,
 ) {
@@ -126,131 +75,52 @@ export function createRuntimeComposedDependencies(
   };
 }
 
-function createSemanticRuntimeDependencies(
-  dependencies: AiLiveRuntimeCompositionDependencies,
-  contextDiagnostics: AiContextDiagnosticsOutputs,
-  runnerSupport: RunnerSemanticSupportOutputs,
-  corpScoring: SemanticRuntimeCorpScoringOutputs,
-): SemanticRuntimeOrchestrationCompositionDependencies {
-  return {
-    ...dependencies,
-    ...contextDiagnostics,
-    ...runnerSupport,
-    closeout: contextDiagnostics.bestTrueCentralCloseoutProfileForMetrics,
-    hasKnownUnaffordableLegalRun:
-      contextDiagnostics.runnerHasKnownUnaffordableLegalRun,
-    remoteTrashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
-    trashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
-    riskAssessment: runnerSupport.blinkRiskAssessmentForEncounterBreak,
-    planMemoryActionExclusion:
-      runnerSupport.semanticRuntimePlanMemoryActionExclusion,
-    evaluationForAction:
-      runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
-    handFundingTarget: runnerSupport.runnerHandFundingTarget,
-    bankHasConcreteFundingNeed: runnerSupport.runnerBankHasConcreteFundingNeed,
-    cardAddressesVisibleBreakerNeed:
-      runnerSupport.runnerCardAddressesVisibleBreakerNeed,
-    badPublicityOrTraceTechCard:
-      runnerSupport.runnerBadPublicityOrTraceTechCard,
-    loanLiabilityAssessment: runnerSupport.runnerLoanLiabilityAssessment,
-    runnerMultiRunEventExclusion:
-      runnerSupport.semanticRuntimeRunnerMultiRunEventExclusion,
-    runnerRunTargetEvaluationForAction:
-      runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
-    programInstallTrashAssessmentForAction:
-      runnerSupport.runnerProgramInstallTrashAssessmentForAction,
-    programInstallDisplacementPenalty:
-      runnerSupport.runnerProgramInstallDisplacementPenalty,
-    muPressureActionEvidence: runnerSupport.runnerMuPressureActionEvidence,
-    bankInvestmentCommitmentEvidence:
-      runnerSupport.runnerBankInvestmentCommitmentEvidence,
-    noRunEconomyCommitmentEvidence:
-      runnerSupport.runnerNoRunEconomyCommitmentEvidence,
-    blinkRiskEvidenceForAction: runnerSupport.runnerBlinkRiskEvidenceForAction,
-    persistentInstallEvidenceForAction:
-      runnerSupport.runnerPersistentInstallEvidenceForAction,
-    badPublicityRelevance: {
-      sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
-      actionCreditCost: dependencies.actionCreditCost,
-      fakedHitCardId: dependencies.fakedHitCardId,
-    },
-    goalFit: {
-      runActionSpendingCapAssessment:
-        dependencies.runActionSpendingCapAssessment,
-      runTargetEvaluationForAction:
-        runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
-    },
-    recoveryCommitment: {
-      muPressureFundingScoreComponent:
-        runnerSupport.runnerMuPressureFundingScoreComponent,
-      handBufferNeedScoreComponent: dependencies.handBufferNeedScoreComponent,
-      viral15JackOutScoreComponent:
-        runnerSupport.runnerViral15JackOutScoreComponent,
-      multiRunEventScoreComponent:
-        runnerSupport.runnerMultiRunEventScoreComponent,
-      bankInvestmentCommitmentScoreComponents:
-        runnerSupport.runnerBankInvestmentCommitmentScoreComponents,
-      noRunEconomyCommitmentScoreComponents:
-        runnerSupport.runnerNoRunEconomyCommitmentScoreComponents,
-    },
-    install: {
-      rolesForAction: contextDiagnostics.rolesForAction,
-      muPressureInstallScoreComponent:
-        runnerSupport.runnerMuPressureInstallScoreComponent,
-      persistentInstallFitScoreComponent:
-        runnerSupport.runnerPersistentInstallFitScoreComponent,
-      isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
-      isRunnerPressureRole: dependencies.isRunnerPressureRole,
-      badPublicityOrTraceTechCard:
-        runnerSupport.runnerBadPublicityOrTraceTechCard,
-      programInstallTrashAssessmentForAction:
-        runnerSupport.runnerProgramInstallTrashAssessmentForAction,
-      programInstallDisplacementPenalty:
-        runnerSupport.runnerProgramInstallDisplacementPenalty,
-    },
-    startRun: {
-      serverId: dependencies.serverId,
-      isRemoteServerTarget: dependencies.isRemoteServerTarget,
-    },
-    corpAdvancementCounterPlacementAssessment:
-      corpScoring.semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-    corpUpgradePlacementExclusion: (input, action, actionSemanticCandidate) =>
-      corpUpgradePlacementExclusion({
-        input,
-        action,
-        roles: contextDiagnostics.rolesForAction(input, action),
-        actionSemanticCandidate,
-        sourceCard: semanticRuntimeVisibleSourceCard(input, action),
-        serverId: semanticRuntimeServerId(action),
-      }),
-    corpComponents: corpScoring.semanticRuntimeCorpScoreComponents,
-    corpEvidence: corpScoring.semanticRuntimeCorpEvidence,
-    scorelineWindowAssessment:
-      corpScoring.semanticRuntimeCorpScorelineWindowAssessment,
-  };
-}
-
 export function createAiLiveRuntimeComposition(
   dependencies: AiLiveRuntimeCompositionDependencies,
 ) {
   const contextDiagnostics = createAiContextDiagnosticsComposition(dependencies);
-  const composedDependencies = createRuntimeComposedDependencies(
-    dependencies,
-    contextDiagnostics,
+  const runnerBaseline = createRunnerBaselineSupportComposition(
+    createRuntimeComposedDependencies(dependencies, contextDiagnostics),
   );
-  const runnerSupport = createRunnerSemanticSupportComposition(
-    composedDependencies,
-  );
-  const corpScoring = createSemanticRuntimeCorpScoringComposition(
-    composedDependencies,
-  );
+  const { blinkRiskAssessmentForEncounterBreak } =
+    createRunnerBlinkEncounterBreakContext({
+      sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
+      randomBreakOrDamageRiskProfileForDefinitionId:
+        dependencies.randomBreakOrDamageRiskProfileForDefinitionId,
+      breakSubroutineIndexesForAction:
+        dependencies.breakSubroutineIndexesForAction,
+      encounteredSubroutines: (input) =>
+        currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines ?? [],
+      buildBlinkRiskAssessment: dependencies.buildBlinkRiskAssessment,
+      isImmediateSafetyThreatSubroutine:
+        dependencies.isImmediateSafetyThreatSubroutine,
+      isRemoteServerTarget: dependencies.isRemoteServerTarget,
+      visibleRootIsKnownAgenda: dependencies.visibleRootIsKnownAgenda,
+    });
+  const { semanticRuntimeRunnerBlinkBreakExclusion } =
+    createRunnerBlinkBreakExclusionContext({
+      riskAssessment: blinkRiskAssessmentForEncounterBreak,
+      shouldAvoidRun: (assessment) =>
+        dependencies.shouldAvoidBlinkRiskAssessment(
+          assessment as BlinkRiskAssessment | undefined,
+        ),
+    });
+  const { runnerEncounterActionExclusion } =
+    createRunnerEncounterActionExclusionContext({
+      blinkBreakExclusion: semanticRuntimeRunnerBlinkBreakExclusion,
+      pumpViabilityAssessment: contextDiagnostics.pumpViabilityAssessment,
+      breakAccessPathAssessment: contextDiagnostics.breakAccessPathAssessment,
+    });
 
-  return createSemanticRuntimeOrchestrationComposition(
-    createSemanticRuntimeDependencies(
-      dependencies,
-      contextDiagnostics,
-      runnerSupport,
-      corpScoring,
-    ),
-  );
+  return createSemanticRuntimeOrchestrationComposition({
+    buildActionSemanticCandidates: dependencies.buildActionSemanticCandidates,
+    deckCapabilitiesForInput: runnerBaseline.deckCapabilitiesForInput,
+    runnerStrategicIntentForInput:
+      runnerBaseline.runnerStrategicIntentForInput,
+    evaluateRunnerHandDevelopment: dependencies.evaluateRunnerHandDevelopment,
+    buildRunnerEconomyPosture: dependencies.buildRunnerEconomyPosture,
+    evaluateRunnerRunTargets: dependencies.evaluateRunnerRunTargets,
+    selectedChoicesForDecision: runnerBaseline.selectedChoicesForDecision,
+    runnerEncounterActionExclusion,
+  });
 }

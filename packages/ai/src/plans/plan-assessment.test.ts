@@ -88,6 +88,89 @@ describe("plan assessment and priority claims", () => {
     });
   });
 
+  it.each(["P1", "P2", "P3"] as const)(
+    "allows a reliably evidenced %s plan to override strategic intent",
+    (priorityClass) => {
+      const assessment = assessmentFor(
+        `runner.${priorityClass.toLowerCase()}`,
+        "runner",
+        priorityClass,
+        10,
+      );
+      assessment.intentFit = "none";
+
+      expect(
+        requireValidatedPlanAssessment(
+          assessment,
+          RUNNER_PLAN_PRIORITY_POLICY,
+          17,
+        ).priorityValidation.effectiveClass,
+      ).toBe(priorityClass);
+    },
+  );
+
+  it("rejects a P3 intent override without reliable current evidence", () => {
+    const assessment = assessmentFor(
+      "runner.expiring",
+      "runner",
+      "P3",
+      10,
+    );
+    assessment.intentFit = "none";
+    assessment.feasibility.confidence = "belief_supported";
+    assessment.evidenceCodes = [];
+
+    expect(
+      validatePriorityClaim(assessment, RUNNER_PLAN_PRIORITY_POLICY),
+    ).toMatchObject({
+      status: "rejected",
+      reasonCodes: ["priority_intent_override_without_reliable_evidence"],
+    });
+  });
+
+  it("requires explicit current tactical evidence for a P4/P5 tactical override", () => {
+    const assessment = assessmentFor(
+      "runner.tactical-development",
+      "runner",
+      "P4",
+      10,
+    );
+    assessment.intentFit = "tactical_override";
+
+    expect(
+      validatePriorityClaim(assessment, RUNNER_PLAN_PRIORITY_POLICY),
+    ).toMatchObject({
+      status: "rejected",
+      reasonCodes: ["missing_explicit_tactical_evidence"],
+    });
+
+    assessment.transientSignals = [
+      {
+        schemaVersion: "transient-plan-signal-v1",
+        signalId: "runner-visible-tactical-window",
+        side: "runner",
+        observedAtStateVersion: 17,
+        planModuleId: "runner.tactical-development",
+        planDedupeKey: "remote-1",
+        kind: "goal",
+        scope: "tactical",
+        evidenceCode: "runner_visible_tactical_window",
+        guarantee: "visible_state_forced",
+        target: { kind: "server", id: "remote_1" },
+      },
+    ];
+    const validated = requireValidatedPlanAssessment(
+      assessment,
+      RUNNER_PLAN_PRIORITY_POLICY,
+      17,
+    );
+
+    expect(validated.priorityValidation.effectiveClass).toBe("P4");
+    expect(validated.evidenceCodes).toContain(
+      "transient_plan_signal_evidence:runner_visible_tactical_window",
+    );
+  });
+
   it("cannot encode a future action id in the step preview contract", () => {
     const assessment = assessmentFor(
       "runner.pressure",

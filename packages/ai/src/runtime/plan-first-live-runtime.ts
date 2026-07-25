@@ -13,6 +13,7 @@ import {
   type VisibleCorpRezCostQuote,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { BuildActionSemanticCandidatesParams } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import { rootRezCreditOutcomeProjectionStatus } from "../actions/action-economy-projection";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
@@ -34,6 +35,7 @@ import {
 import {
   assessCorpEconomyFundingRoute,
   corpScorePriorityClass,
+  corpScorePlanTarget,
   corpDefenseActionDispositions,
   corpDefensePortfolioHasExecutableRoute,
   corpGenericDefensePriorityClass,
@@ -83,6 +85,10 @@ import {
   type PlanSchedulerContext,
   type PlanSchedulerResult,
 } from "../plans/plan-scheduler";
+import {
+  TRANSIENT_PLAN_SIGNAL_SCHEMA_VERSION,
+  type TransientPlanSignal,
+} from "../plans/transient-plan-signals";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { planInstanceIdForProposal } from "../plans/plan-instance";
 import {
@@ -95,7 +101,6 @@ import {
   missingBreakerCoverageKind,
   runnerHandBreakerForCoverage,
 } from "../plans/tactical-plan-breaker-coverage";
-import type { SemanticRuntimeDependencies } from "./semantic-runtime";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { buildRunnerRemoteTrashAccessContext } from "../simulation/remote-trash-access-context";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
@@ -184,16 +189,38 @@ import {
   type CorpScoreConversionStep,
 } from "../plans/tactical-plan-corp-score-conversion";
 
-export type PlanFirstLiveDependencies = Pick<
-  SemanticRuntimeDependencies,
-  | "buildActionSemanticCandidates"
-  | "deckCapabilitiesForInput"
-  | "runnerStrategicIntentForInput"
-  | "evaluateRunnerHandDevelopment"
-  | "buildRunnerEconomyPosture"
-  | "evaluateRunnerRunTargets"
-  | "selectedChoicesForDecision"
-> & {
+export type PlanFirstLiveDependencies = {
+  buildActionSemanticCandidates: (
+    input: BuildActionSemanticCandidatesParams,
+  ) => ActionSemanticCandidate[];
+  deckCapabilitiesForInput: (input: AiDecisionInput) => DeckCapabilityProfile;
+  runnerStrategicIntentForInput: (
+    input: AiDecisionInput,
+    deckCapabilities: DeckCapabilityProfile,
+  ) => RunnerStrategicIntentProfile;
+  evaluateRunnerHandDevelopment: (input: {
+    input: AiDecisionInput;
+    strategicIntent: RunnerStrategicIntentProfile;
+    deckCapabilities: DeckCapabilityProfile;
+    actionCandidates: readonly ActionSemanticCandidate[];
+  }) => RunnerHandDevelopmentEvaluation[];
+  buildRunnerEconomyPosture: (input: {
+    input: AiDecisionInput;
+    strategicIntent: RunnerStrategicIntentProfile;
+    deckCapabilities: DeckCapabilityProfile;
+    handDevelopmentEvaluations?: readonly RunnerHandDevelopmentEvaluation[];
+  }) => RunnerEconomyPosture;
+  evaluateRunnerRunTargets: (input: {
+    input: AiDecisionInput;
+    strategicIntent: RunnerStrategicIntentProfile;
+    deckCapabilities: DeckCapabilityProfile;
+    actionCandidates: readonly ActionSemanticCandidate[];
+    handDevelopmentEvaluations?: readonly RunnerHandDevelopmentEvaluation[];
+  }) => RunnerRunTargetEvaluation[];
+  selectedChoicesForDecision: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => AiDecision["selectedChoices"] | undefined;
   runnerEncounterActionExclusion: (
     input: AiDecisionInput,
     action: AiDecisionInput["legalActions"][number],
@@ -682,9 +709,82 @@ function runnerContext(
     input,
     actionCandidates: candidates,
     actionDispositions,
+    transientSignals: runnerTransientPlanSignals(input, domain),
     turnKey: turnKey(input),
     domain,
   };
+}
+
+function runnerTransientPlanSignals(
+  input: AiDecisionInput,
+  domain: RunnerPlanDomain,
+): TransientPlanSignal[] {
+  const current = {
+    schemaVersion: TRANSIENT_PLAN_SIGNAL_SCHEMA_VERSION,
+    side: "runner" as const,
+    observedAtStateVersion: input.playerView.stateVersion,
+  };
+  const remoteSignals: TransientPlanSignal[] = domain.remoteContests.flatMap(
+    (signal) =>
+      signal.marginalValue > 0 &&
+      (signal.knownAgendaThreat ||
+        signal.reachable ||
+        signal.supportNeedId !== undefined)
+        ? [
+            {
+              ...current,
+              signalId: `runner-remote:${signal.contestId}`,
+              planModuleId: "runner.contest_remote",
+              planDedupeKey: signal.contestId,
+              kind: signal.knownAgendaThreat ? "threat" : "goal",
+              scope: "tactical",
+              evidenceCode: signal.evidenceCode,
+              guarantee: signal.knownAgendaThreat
+                ? "visible_state_forced"
+                : "robust_but_reactive",
+              target: { kind: "server", id: signal.serverId },
+            },
+          ]
+        : [],
+  );
+  const defense = domain.defense;
+  const survivalNeedOpen =
+    defense.activeTags > 0 ||
+    defense.pendingDamage > 0 ||
+    defense.damagePreventionNeeded ||
+    defense.handSize < defense.minimumHandBuffer ||
+    defense.forgoUnsafeRunCapacity ||
+    defense.reactionReserveNeed !== undefined;
+  const survivalSignals: TransientPlanSignal[] = survivalNeedOpen
+    ? [
+        {
+          ...current,
+          signalId: "runner-survival:runner",
+          planModuleId: "runner.defense_and_recovery",
+          planDedupeKey: "runner",
+          kind: "threat",
+          scope: "tactical",
+          evidenceCode:
+            defense.evidenceCodes[0] ?? "runner_visible_survival_need",
+          guarantee: "robust_but_reactive",
+          target: { kind: "player", id: "runner" },
+        },
+      ]
+    : [];
+  const terminalSignals: TransientPlanSignal[] = domain.terminalWins.map(
+    (signal) => ({
+      ...current,
+      signalId: `runner-terminal:${signal.terminalId}`,
+      planModuleId: "runner.secure_terminal_win",
+      planDedupeKey: signal.terminalId,
+      kind: "goal",
+      scope: "tactical",
+      evidenceCode: signal.evidenceCode,
+      guarantee: "rules_proven",
+      target: { kind: "player", id: "corp" },
+    }),
+  );
+  return [...remoteSignals, ...survivalSignals, ...terminalSignals];
 }
 
 function runnerCandidateSourceSupportsProgramSearch(
@@ -5700,9 +5800,36 @@ function corpContext(
     input,
     actionCandidates: candidates,
     actionDispositions,
+    transientSignals: corpTransientPlanSignals(input, domain),
     turnKey: turnKey(input),
     domain,
   };
+}
+
+function corpTransientPlanSignals(
+  input: AiDecisionInput,
+  domain: CorpPlanDomain,
+): TransientPlanSignal[] {
+  return domain.scoreProjects.map((project) => ({
+    schemaVersion: TRANSIENT_PLAN_SIGNAL_SCHEMA_VERSION,
+    signalId: `corp-score:${project.projectId}`,
+    side: "corp",
+    observedAtStateVersion: input.playerView.stateVersion,
+    planModuleId: "corp.score_agenda",
+    planDedupeKey: project.projectId,
+    kind: "goal",
+    scope:
+      project.terminalScore ||
+      project.sameTurnCloseout ||
+      project.deadlinePressure
+        ? "tactical"
+        : "strategic",
+    evidenceCode: project.evidenceCode,
+    guarantee: project.terminalScore
+      ? "visible_state_forced"
+      : "robust_but_reactive",
+    target: corpScorePlanTarget(project),
+  }));
 }
 
 function corpActionDispositions(

@@ -28,11 +28,17 @@ import {
   type SemanticContinuation,
 } from "./plan-route";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import {
+  requireCurrentTransientPlanSignals,
+  transientPlanSignalsForExactPlanTarget,
+  type TransientPlanSignal,
+} from "./transient-plan-signals";
 
 export type PlanSchedulerContext = {
   input: AiDecisionInput;
   actionCandidates: readonly ActionSemanticCandidate[];
   actionDispositions?: readonly PlanActionDisposition[];
+  transientSignals?: readonly TransientPlanSignal[];
   turnKey: string;
   domain?: unknown;
 };
@@ -190,9 +196,21 @@ export function runPlanScheduler(
       diagnostics,
     };
   }
+  const transientSignals = requireCurrentTransientPlanSignals(
+    params.context.transientSignals,
+    {
+      side: params.registry.side,
+      stateVersion: params.context.input.playerView.stateVersion,
+      timingPoint: "plan_discovery",
+    },
+  );
+  const context: PlanSchedulerContext =
+    transientSignals.length > 0
+      ? { ...params.context, transientSignals }
+      : params.context;
 
   const proposals = params.registry.modules.flatMap((module) => {
-    const discovered = module.discover(params.context);
+    const discovered = module.discover(context);
     diagnostics.push({
       stage: "discover",
       code: `proposals:${discovered.length}`,
@@ -202,8 +220,8 @@ export function runPlanScheduler(
   });
   const reconciled = reconcileResidentPlanPortfolio({
     side: params.registry.side,
-    stateVersion: params.context.input.playerView.stateVersion,
-    timingPoint: params.context.input.playerView.timingPoint,
+    stateVersion: context.input.playerView.stateVersion,
+    timingPoint: context.input.playerView.timingPoint,
     proposals,
     ...(params.previousPortfolio ? { previous: params.previousPortfolio } : {}),
   });
@@ -218,12 +236,16 @@ export function runPlanScheduler(
       const module = moduleForInstance(
         params.registry,
         instance,
-        params.context,
+        context,
       );
       const assessment = requireValidatedPlanAssessment(
-        module.assess(instance, params.context, reconciled),
+        bindExactTransientPlanSignals(
+          module.assess(instance, context, reconciled),
+          instance,
+          context,
+        ),
         params.registry.priorityPolicy,
-        params.context.input.playerView.stateVersion,
+        context.input.playerView.stateVersion,
       );
       diagnostics.push({
         stage: "assess",
@@ -237,7 +259,7 @@ export function runPlanScheduler(
     .sort(compareValidatedPlanAssessments);
   assertVoluntaryActionPlanCoverage(
     params.registry,
-    params.context,
+    context,
     reconciled,
     validatedAssessments,
   );
@@ -247,10 +269,10 @@ export function runPlanScheduler(
   if (assessments.length === 0) {
     throw schedulerFailure(
       "missing_plan_module_coverage",
-      params.context,
+      context,
       undefined,
       reconciled.instances.length,
-      missingReadyPlanRemovalCondition(params.context),
+      missingReadyPlanRemovalCondition(context),
     );
   }
 
@@ -267,14 +289,14 @@ export function runPlanScheduler(
   if (!instance) {
     throw schedulerFailure(
       "invalid_plan_identity",
-      params.context,
+      context,
       selected.instanceId,
       reconciled.instances.length,
       "Keep every validated assessment bound to a resident instance.",
     );
   }
-  const module = moduleForInstance(params.registry, instance, params.context);
-  const materialized = module.materialize(instance, selected, params.context);
+  const module = moduleForInstance(params.registry, instance, context);
+  const materialized = module.materialize(instance, selected, context);
   diagnostics.push({
     stage: "materialize",
     code: materialized.step.stepId,
@@ -283,8 +305,8 @@ export function runPlanScheduler(
   });
   const route = bindBestCurrentPlanRoute({
     side: params.registry.side,
-    stateVersion: params.context.input.playerView.stateVersion,
-    timingPoint: params.context.input.playerView.timingPoint,
+    stateVersion: context.input.playerView.stateVersion,
+    timingPoint: context.input.playerView.timingPoint,
     planInstanceId: instance.instanceId,
     step: materialized.step,
     candidates: materialized.candidates,
@@ -293,15 +315,15 @@ export function runPlanScheduler(
       : {}),
   });
   assertEngineRandomizedIceInstallNearTie(
-    params.context,
+    context,
     materialized,
     instance.instanceId,
   );
-  assertEarlyEndTurnRoute(params.context, route, materialized, module.moduleId);
+  assertEarlyEndTurnRoute(context, route, materialized, module.moduleId);
   const portfolio = reconcileResidentPlanPortfolio({
     side: params.registry.side,
-    stateVersion: params.context.input.playerView.stateVersion,
-    timingPoint: params.context.input.playerView.timingPoint,
+    stateVersion: context.input.playerView.stateVersion,
+    timingPoint: context.input.playerView.timingPoint,
     proposals,
     ...(params.previousPortfolio ? { previous: params.previousPortfolio } : {}),
     selectedExecutorInstanceId: instance.instanceId,
@@ -331,6 +353,34 @@ export function runPlanScheduler(
       : {}),
     diagnostics,
   };
+}
+
+function bindExactTransientPlanSignals(
+  assessment: PlanAssessment,
+  instance: PlanInstance,
+  context: PlanSchedulerContext,
+): PlanAssessment {
+  if (assessment.transientSignals !== undefined) {
+    throw new PlanResolutionFailure("invalid_plan_identity", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: "plan_assessment",
+      legalActionTypes: [],
+      owner: "priority_policy",
+      planInstanceId: instance.instanceId,
+      removalCondition:
+        "Plan modules must not inject transient goal/threat evidence into their own assessment. The scheduler binds only current context signals for the exact resident module and target.",
+    });
+  }
+  const transientSignals = transientPlanSignalsForExactPlanTarget(
+    context.transientSignals,
+    instance.moduleId,
+    instance.dedupeKey,
+    instance.target,
+  );
+  return transientSignals.length > 0
+    ? { ...assessment, transientSignals }
+    : assessment;
 }
 
 function assertEngineRandomizedIceInstallNearTie(

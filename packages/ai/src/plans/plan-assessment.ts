@@ -1,6 +1,12 @@
 import type { Side } from "@netgrid/shared";
 import type { PlanBlocker, PlanTargetRef } from "./plan-kernel-types";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import {
+  hasExplicitTacticalTransientEvidence,
+  requireCurrentTransientPlanSignals,
+  transientPlanSignalEvidenceCodes,
+  type TransientPlanSignal,
+} from "./transient-plan-signals";
 
 export type PriorityClass = "P1" | "P2" | "P3" | "P4" | "P5" | "P6";
 
@@ -100,6 +106,7 @@ export type PlanAssessment = {
   side: Side;
   priorityClaim: PriorityClaim;
   intentFit: PlanIntentFit;
+  transientSignals?: TransientPlanSignal[];
   readiness: PlanReadiness;
   nextStepPreview?: PlanStepPreview;
   feasibility: FeasibilityEnvelope;
@@ -212,6 +219,23 @@ export function validatePriorityClaim(
     reasons.push("missing_intent_or_tactical_evidence");
   }
   if (
+    (claim.requestedClass === "P4" || claim.requestedClass === "P5") &&
+    assessment.intentFit === "tactical_override" &&
+    !hasExplicitTacticalTransientEvidence(assessment.transientSignals)
+  ) {
+    reasons.push("missing_explicit_tactical_evidence");
+  }
+  if (
+    (claim.requestedClass === "P1" ||
+      claim.requestedClass === "P2" ||
+      claim.requestedClass === "P3") &&
+    assessment.intentFit !== "aligned" &&
+    (claim.requestedClass === "P3" || claim.witness !== undefined) &&
+    !hasReliablePriorityIntentOverrideEvidence(assessment)
+  ) {
+    reasons.push("priority_intent_override_without_reliable_evidence");
+  }
+  if (
     claim.requestedClass === "P3" &&
     claim.horizon !== "current_window" &&
     claim.horizon !== "current_turn"
@@ -261,7 +285,28 @@ export function requireValidatedPlanAssessment(
   policy: PlanPriorityPolicy,
   stateVersion: number,
 ): ValidatedPlanAssessment {
-  const validation = validatePriorityClaim(assessment, policy);
+  const transientSignals = requireCurrentTransientPlanSignals(
+    assessment.transientSignals,
+    {
+      side: assessment.side,
+      stateVersion,
+      timingPoint: "plan_assessment",
+    },
+  );
+  const currentAssessment: PlanAssessment =
+    transientSignals.length > 0
+      ? {
+          ...assessment,
+          transientSignals,
+          evidenceCodes: [
+            ...new Set([
+              ...assessment.evidenceCodes,
+              ...transientPlanSignalEvidenceCodes(transientSignals),
+            ]),
+          ],
+        }
+      : assessment;
+  const validation = validatePriorityClaim(currentAssessment, policy);
   if (validation.status === "rejected" || !validation.effectiveClass) {
     throw new PlanResolutionFailure("priority_claim_rejected", {
       side: assessment.side,
@@ -275,13 +320,33 @@ export function requireValidatedPlanAssessment(
     });
   }
   return {
-    ...assessment,
+    ...currentAssessment,
     priorityValidation: {
       ...validation,
       status: "accepted",
       effectiveClass: validation.effectiveClass,
     },
   };
+}
+
+function hasReliablePriorityIntentOverrideEvidence(
+  assessment: PlanAssessment,
+): boolean {
+  const priorityClass = assessment.priorityClaim.requestedClass;
+  if (priorityClass === "P1" || priorityClass === "P2") {
+    return Boolean(
+      assessment.priorityClaim.witness &&
+        STRONG_GUARANTEES.has(assessment.priorityClaim.witness.guarantee) &&
+        assessment.priorityClaim.witness.evidenceCode.trim().length > 0,
+    );
+  }
+  if (priorityClass === "P3") {
+    return (
+      STRONG_GUARANTEES.has(assessment.feasibility.confidence) &&
+      assessment.evidenceCodes.some((code) => code.trim().length > 0)
+    );
+  }
+  return false;
 }
 
 export function compareValidatedPlanAssessments(

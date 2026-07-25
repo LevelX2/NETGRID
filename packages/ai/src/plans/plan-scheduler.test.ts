@@ -58,6 +58,205 @@ describe("shared plan scheduler", () => {
     }
   });
 
+  it("makes a current exact goal signal available to discovery and uses it to authorize only its bound tactical assessment", () => {
+    const action = candidate("run-remote");
+    const schedulerContext = context("runner", [action]);
+    schedulerContext.transientSignals = [
+      {
+        schemaVersion: "transient-plan-signal-v1",
+        signalId: "runner-visible-remote-window",
+        side: "runner",
+        observedAtStateVersion: 10,
+        planModuleId: "runner.contest_remote",
+        planDedupeKey: "general",
+        kind: "goal",
+        scope: "tactical",
+        evidenceCode: "runner_visible_remote_window",
+        guarantee: "visible_state_forced",
+        target: { kind: "server", id: "remote_1" },
+      },
+    ];
+    const tactical = module(
+      "runner",
+      "runner.contest_remote",
+      "P4",
+      action,
+    );
+    const discover = vi.fn((context: PlanSchedulerContext) => {
+      expect(context.transientSignals?.map((signal) => signal.signalId)).toEqual(
+        ["runner-visible-remote-window"],
+      );
+      return [
+        {
+          ...proposal("runner", "runner.contest_remote"),
+          target: { kind: "server" as const, id: "remote_1" },
+        },
+      ];
+    });
+    tactical.discover = discover;
+    tactical.assess = (instance) => ({
+      ...assessment(instance.instanceId, "runner", "P4"),
+      intentFit: "tactical_override",
+    });
+
+    const result = runPlanScheduler({
+      context: schedulerContext,
+      registry: createSidePlanRegistry({
+        side: "runner",
+        priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+        modules: [tactical],
+      }),
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(discover).toHaveBeenCalledOnce();
+    expect(result.lane).toBe("plan");
+    if (result.lane === "plan") {
+      expect(result.selectedAssessment.evidenceCodes).toEqual(
+        expect.arrayContaining([
+          "transient_plan_signal_plan:runner.contest_remote",
+          "transient_plan_signal_evidence:runner_visible_remote_window",
+        ]),
+      );
+    }
+  });
+
+  it.each([
+    {
+      label: "foreign plan",
+      signal: {
+        planModuleId: "runner.pressure_central" as const,
+        target: { kind: "server" as const, id: "remote_1" },
+      },
+    },
+    {
+      label: "foreign target",
+      signal: {
+        planModuleId: "runner.contest_remote" as const,
+        target: { kind: "server" as const, id: "remote_2" },
+      },
+    },
+    {
+      label: "foreign resident plan",
+      signal: {
+        planModuleId: "runner.contest_remote" as const,
+        planDedupeKey: "other-remote",
+        target: { kind: "server" as const, id: "remote_1" },
+      },
+    },
+    {
+      label: "targetless",
+      signal: {
+        planModuleId: "runner.contest_remote" as const,
+      },
+    },
+  ])(
+    "does not let a $label signal authorize a P4 tactical override",
+    ({ signal }) => {
+      const action = candidate("run-remote");
+      const schedulerContext = context("runner", [action]);
+      schedulerContext.transientSignals = [
+        {
+          schemaVersion: "transient-plan-signal-v1",
+          signalId: "unbound-signal",
+          side: "runner",
+          observedAtStateVersion: 10,
+          kind: "goal",
+          scope: "tactical",
+          evidenceCode: "unbound_tactical_signal",
+          guarantee: "visible_state_forced",
+          planDedupeKey: "general",
+          ...signal,
+        },
+      ];
+      const tactical = module(
+        "runner",
+        "runner.contest_remote",
+        "P4",
+        action,
+      );
+      tactical.discover = () => [
+        {
+          ...proposal("runner", "runner.contest_remote"),
+          target: { kind: "server", id: "remote_1" },
+        },
+      ];
+      tactical.assess = (instance) => ({
+        ...assessment(instance.instanceId, "runner", "P4"),
+        intentFit: "tactical_override",
+      });
+
+      expect(() =>
+        runPlanScheduler({
+          context: schedulerContext,
+          registry: createSidePlanRegistry({
+            side: "runner",
+            priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+            modules: [tactical],
+          }),
+          resolveEngineWindow: () => undefined,
+        }),
+      ).toThrow(
+        expect.objectContaining({
+          code: "priority_claim_rejected",
+          context: expect.objectContaining({
+            removalCondition: expect.stringContaining(
+              "missing_explicit_tactical_evidence",
+            ),
+          }),
+        }),
+      );
+    },
+  );
+
+  it("rejects a stale goal signal before plan discovery", () => {
+    const action = candidate("run-remote");
+    const schedulerContext = context("runner", [action]);
+    schedulerContext.transientSignals = [
+      {
+        schemaVersion: "transient-plan-signal-v1",
+        signalId: "stale-remote",
+        side: "runner",
+        observedAtStateVersion: 9,
+        planModuleId: "runner.contest_remote",
+        planDedupeKey: "general",
+        kind: "goal",
+        scope: "tactical",
+        evidenceCode: "stale_remote",
+        guarantee: "visible_state_forced",
+        target: { kind: "server", id: "remote_1" },
+      },
+    ];
+    const discover = vi.fn();
+    const tactical = module(
+      "runner",
+      "runner.contest_remote",
+      "P4",
+      action,
+    );
+    tactical.discover = discover;
+
+    expect(() =>
+      runPlanScheduler({
+        context: schedulerContext,
+        registry: createSidePlanRegistry({
+          side: "runner",
+          priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+          modules: [tactical],
+        }),
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: "invalid_plan_identity",
+        context: expect.objectContaining({
+          removalCondition: expect.stringContaining("stale_state_version"),
+        }),
+      }),
+    );
+    expect(discover).not.toHaveBeenCalled();
+  });
+
   it("selects by validated plan class, not by action step value", () => {
     const strategic = candidate("strategic");
     const development = candidate("development");

@@ -273,7 +273,7 @@ function scoreModule(): PlanModule {
           dedupeKey: signal.projectId,
           moduleState: { kind: "score", signal } satisfies ScoreState,
           priorityClass: corpScorePriorityClass(signal),
-          target: scoreTarget(signal),
+          target: corpScorePlanTarget(signal),
           routeExists:
             signal.feasible && scoreCandidates(context, signal).length > 0,
           evidenceCode: signal.evidenceCode,
@@ -307,7 +307,7 @@ function scoreModule(): PlanModule {
           capability: scoreCapability(current.signal),
           ...(current.signal.actionIds
             ? {}
-            : { target: scoreTarget(current.signal) }),
+            : { target: corpScorePlanTarget(current.signal) }),
           purpose: `Execute score phase ${current.signal.phase}.`,
         },
         candidates: scoreCandidates(context, current.signal),
@@ -1091,7 +1091,7 @@ function nextScoreCapability(
   return undefined;
 }
 
-function scoreTarget(signal: CorpScoreProjectSignal) {
+export function corpScorePlanTarget(signal: CorpScoreProjectSignal) {
   if (signal.actionIds)
     return {
       kind: "capability" as const,

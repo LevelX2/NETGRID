@@ -22,10 +22,11 @@ import {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
 } from "../runtime/ai-decision-input";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { assessDecisionOpportunity } from "../runtime/decision-opportunity";
 import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
 import { fnv1a } from "../runtime/stable-hash";
-import { resetTacticalPlanMemory } from "../tactical-plans";
+import { resetStrategicIntentMemory } from "../strategic-intent-memory";
 import { sortedUniqueProgressionCardTargetTypes } from "../runtime/progression-card-target";
 import { advancementCountersAddedForSimulationAction } from "../runtime/simulation-action-event";
 import {
@@ -144,8 +145,9 @@ export function createAiGameSimulator(
   function simulateAiGame(
     config: AiSimulationConfig = {},
   ): AiSimulationSummary {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     resetRunnerRunPlanMemory();
+    resetStrategicIntentMemory();
     const deckSupportErrors = validateSimulationDeckSupport(config);
     if (deckSupportErrors.length > 0) {
       const runtimeFailures = deckSupportErrors.map(() =>

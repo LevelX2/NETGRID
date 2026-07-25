@@ -548,13 +548,14 @@ function remoteContestModule(): PlanModule {
       }),
     assess: (instance, context, portfolio) => {
       const current = state<RemoteState>(instance);
+      const priorityClass = remotePriority(current.signal);
       const routeExists =
         current.signal.reachable &&
         current.signal.marginalValue > 0 &&
         remoteCandidates(context, current.signal).length > 0;
       const result = assessment(
         instance,
-        remotePriority(current.signal),
+        priorityClass,
         routeExists,
         current.signal.marginalValue,
         portfolio.executorInstanceId,
@@ -563,6 +564,9 @@ function remoteContestModule(): PlanModule {
           ? "belief_supported"
           : "visible_state_forced",
       );
+      if (priorityClass === "P4") {
+        result.intentFit = "tactical_override";
+      }
       if (!routeExists && current.signal.supportNeedId) {
         result.blockers = [
           {

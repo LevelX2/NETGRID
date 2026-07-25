@@ -34,8 +34,11 @@ import {
   type StrategicIntentState,
 } from "../strategic-intent-state";
 import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
-import { type RunnerTacticalGoal } from "../runner-tactical-goals";
 import { buildAiDecisionInputDto } from "../input-dto";
+import {
+  strategicIntentRevalidationFromCurrentPublicEvents,
+  strategicIntentRevalidationPublicEventFacts,
+} from "./strategic-intent-live-revalidation";
 import { buildStrategicRuntimeContext } from "./strategic-runtime-context";
 
 export type AiDecisionSideSelection =
@@ -65,7 +68,6 @@ export type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
   ownStrategicIntentState?: StrategicIntentState;
   ownCorpStrategicIntent?: CorpStrategicIntentProfile;
   ownRunnerStrategicIntent?: RunnerStrategicIntentProfile;
-  ownRunnerTacticalGoals?: RunnerTacticalGoal[];
 };
 
 export const FORBIDDEN_AI_INPUT_FIELDS = [
@@ -145,6 +147,15 @@ export function buildAiDecisionInput(
     input,
     ownDeckSnapshot.deckSnapshotId,
   )?.state;
+  const strategicIntentRevalidation = previousStrategicIntentState
+    ? strategicIntentRevalidationFromCurrentPublicEvents({
+        side,
+        stateVersion: playerView.stateVersion,
+        eventTail: strategicIntentRevalidationPublicEventFacts(
+          aiDecisionEventTail(state.eventLog),
+        ),
+      })
+    : undefined;
   const strategicRuntimeContext = buildStrategicRuntimeContext({
     side,
     playerView,
@@ -160,6 +171,9 @@ export function buildAiDecisionInput(
     deckCapabilities: ownDeckCapabilities,
     ...(previousStrategicIntentState
       ? { previousState: previousStrategicIntentState }
+      : {}),
+    ...(strategicIntentRevalidation
+      ? { revalidation: strategicIntentRevalidation }
       : {}),
     availableCredits: playerView.own.credits,
     ...(strategicRuntimeContext.strategyPortfolio.activeStrategyId

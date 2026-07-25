@@ -3074,11 +3074,15 @@ describe("authoritative plan-first live runtime", () => {
       ),
     ];
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(decision).toMatchObject({
       actionId: "advance-agenda",
       reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
     });
+    expect(decision.evidence).toContain(
+      "plan_assessment_evidence:transient_plan_signal_plan:corp.score_agenda",
+    );
   });
 
   it("binds an exact scored-agenda continuation to the selected score parent", () => {
@@ -6933,12 +6937,16 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.opponent.deckCount = 0;
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(decision).toMatchObject({
       actionId: "end",
       reasonCode: "plan_first.runner.secure_terminal_win",
       fallbackUsed: false,
       decisionDebug: { planKind: "runner.secure_terminal_win" },
     });
+    expect(decision.evidence).toContain(
+      "plan_assessment_evidence:transient_plan_signal_guarantee:rules_proven",
+    );
   });
 
   it.each([
@@ -6997,21 +7005,25 @@ describe("authoritative plan-first live runtime", () => {
         score: 400,
       };
 
-      expect(
-        liveContext({
-          evaluateRunnerRunTargets: () => [target],
-          buildRunnerEconomyPosture: () => ({
-            minimumCreditFloor: 0,
-            desiredCreditReserve: 0,
-            fundingNeed: false,
-            evidence: [],
-          }),
-        }).chooseSemanticRuntimeAction(input, {}),
-      ).toMatchObject({
+      const decision = liveContext({
+        evaluateRunnerRunTargets: () => [target],
+        buildRunnerEconomyPosture: () => ({
+          minimumCreditFloor: 0,
+          desiredCreditReserve: 0,
+          fundingNeed: false,
+          evidence: [],
+        }),
+      }).chooseSemanticRuntimeAction(input, {});
+      expect(decision).toMatchObject({
         actionId: expectedActionId,
         reasonCode: `plan_first.${expectedPlan}`,
         fallbackUsed: false,
       });
+      if (expectedPlan === "runner.defense_and_recovery") {
+        expect(decision.evidence).toContain(
+          "plan_assessment_evidence:transient_plan_signal_plan:runner.defense_and_recovery",
+        );
+      }
     },
   );
 
@@ -7962,31 +7974,33 @@ describe("authoritative plan-first live runtime", () => {
       server("remote_1", [], [visibleCard("agenda", "corp", "agenda")]),
     ];
 
-    expect(
-      liveContext({
-        evaluateRunnerRunTargets: () => [
-          {
-            ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [
+        {
+          ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+          targetKind: "remote",
+          accessTargetKind: "remote",
+          runActionProjection: {
+            ...safeRuntimeRunTarget(run.actionId, "remote_1")
+              .runActionProjection,
             targetKind: "remote",
-            accessTargetKind: "remote",
-            runActionProjection: {
-              ...safeRuntimeRunTarget(run.actionId, "remote_1")
-                .runActionProjection,
-              targetKind: "remote",
-            },
-            scoreThreat: true,
-            accessPayoff: "agenda",
-            knownAccessState: "known_payoff",
-            score: 1_000,
           },
-        ],
-      }).chooseSemanticRuntimeAction(input, {}),
-    ).toMatchObject({
+          scoreThreat: true,
+          accessPayoff: "agenda",
+          knownAccessState: "known_payoff",
+          score: 1_000,
+        },
+      ],
+    }).chooseSemanticRuntimeAction(input, {});
+    expect(decision).toMatchObject({
       actionId: "run-remote",
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
       decisionDebug: { planKind: "runner.contest_remote" },
     });
+    expect(decision.evidence).toContain(
+      "plan_assessment_evidence:transient_plan_signal_plan:runner.contest_remote",
+    );
   });
 
   it("reads a known Archives agenda from the Archives server projection", () => {

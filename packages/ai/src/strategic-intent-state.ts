@@ -12,6 +12,7 @@ import {
   strategicFamilyForStrategyId,
   type StrategicIntentFamily,
 } from "./strategy-runtime-registry";
+import { PlanResolutionFailure } from "./plans/plan-resolution-failure";
 
 export type { StrategicIntentFamily } from "./strategy-runtime-registry";
 
@@ -175,6 +176,19 @@ export type BuildStrategicIntentStateParams = {
   reserveRequirement?: StrategicReserveRequirement;
   preferredStrategyId?: string;
   strategyPortfolio?: StrategicStrategyPortfolio;
+  revalidation?: StrategicIntentRevalidation;
+};
+
+export type StrategicIntentRevalidationReason =
+  | "phase_change"
+  | "new_information"
+  | "plan_completed"
+  | "plan_invalidated";
+
+export type StrategicIntentRevalidation = {
+  observedAtStateVersion: number;
+  reason: StrategicIntentRevalidationReason;
+  evidenceCodes: string[];
 };
 
 const DEFAULT_SWITCH_MARGIN = 12;
@@ -188,10 +202,12 @@ const DEFAULT_MIN_COMMITMENT_DECISIONS = 2;
 export function buildStrategicIntentState(
   params: BuildStrategicIntentStateParams,
 ): StrategicIntentState {
+  const revalidation = requireCurrentStrategicIntentRevalidation(params);
   const candidatePrimaryStrategy = selectPrimaryStrategy(params);
   const commitmentSelection = committedPrimaryStrategy(
     params,
     candidatePrimaryStrategy,
+    revalidation,
   );
   const primaryStrategy = commitmentSelection.primaryStrategy;
   const secondaryStrategies = selectSecondaryStrategies(
@@ -220,6 +236,8 @@ export function buildStrategicIntentState(
     blockers,
     candidatePrimaryStrategy,
     commitmentSelection.holdReason,
+    revalidation,
+    commitmentSelection.selectionAuthorityEvidence,
   );
   const commitment = commitmentFor(
     params.previousState,
@@ -271,6 +289,14 @@ export function buildStrategicIntentState(
       `blocker_count:${blockers.length}`,
       `secondary_strategy_count:${secondaryStrategies.length}`,
       `strategy_portfolio_candidate_count:${strategyPortfolio.productiveCandidates.length}`,
+      ...(revalidation
+        ? [
+            `intent_revalidation:${revalidation.reason}`,
+            ...revalidation.evidenceCodes.map(
+              (code) => `intent_revalidation_evidence:${code}`,
+            ),
+          ]
+        : ["intent_revalidation:none"]),
     ],
   };
   assertSemanticObjectSideSafe(state, "StrategicIntentState");
@@ -378,40 +404,53 @@ function strategyEligibleForActiveLine(
 function committedPrimaryStrategy(
   params: BuildStrategicIntentStateParams,
   candidate: StrategicLineState,
+  revalidation: StrategicIntentRevalidation | undefined,
 ): {
   primaryStrategy: StrategicLineState;
-  holdReason?: "min_commitment_not_met" | "switch_margin_not_met";
+  holdReason?: StrategicIntentHoldReason;
+  selectionAuthorityEvidence?: string[];
 } {
   const previous = params.previousState;
   if (!previous) return { primaryStrategy: candidate };
   if (previous.primaryStrategy.strategyId === candidate.strategyId) {
     return { primaryStrategy: candidate };
   }
-  if (
-    previous.primaryStrategy.family === "runner_setup" &&
-    candidate.family === "runner_central_pressure" &&
-    candidate.evidence.includes("runtime_transition:runner_setup_complete")
-  ) {
-    return { primaryStrategy: candidate };
-  }
-  if (
-    candidate.family === "neutral" ||
-    previous.primaryStrategy.family === "neutral"
-  ) {
-    return { primaryStrategy: candidate };
-  }
-  if (previous.blockers.some((blocker) => blocker.severity === "hard")) {
-    return { primaryStrategy: candidate };
-  }
-  if (previousStrategyHasNewHardRuntimeBlocker(params, previous)) {
-    return { primaryStrategy: candidate };
+  if (previous.primaryStrategy.family === "neutral") {
+    return {
+      primaryStrategy: candidate,
+      selectionAuthorityEvidence: [
+        "intent_selection_authority:initial_from_neutral",
+      ],
+    };
   }
   const previousCurrent = currentLineForPreviousStrategy(params, previous);
-  if (!previousCurrent || previousCurrent.completeness === "none") {
+  const invalidationReason = previousIntentInvalidationReason(
+    params,
+    previous,
+    candidate,
+    previousCurrent,
+  );
+  if (invalidationReason) {
+    return {
+      primaryStrategy: candidate,
+      selectionAuthorityEvidence: [
+        "intent_selection_authority:invalidation",
+        `intent_invalidation:${invalidationReason}`,
+      ],
+    };
+  }
+  if (!previousCurrent) {
+    throw new Error("unreachable_previous_intent_without_current_line");
+  }
+  if (
+    revalidation?.reason === "plan_completed" ||
+    revalidation?.reason === "plan_invalidated"
+  ) {
     return { primaryStrategy: candidate };
   }
   const candidateLead = candidate.score.final - previousCurrent.score.final;
   if (
+    revalidation?.reason === "phase_change" &&
     previous.transition.reason === "initial_strategy_selection" &&
     previous.commitment.decisionsCommitted <
       previous.commitment.minCommitmentDecisions &&
@@ -440,6 +479,12 @@ function committedPrimaryStrategy(
       holdReason: "min_commitment_not_met",
     };
   }
+  if (!revalidation) {
+    return {
+      primaryStrategy: previousCurrent,
+      holdReason: "revalidation_not_triggered",
+    };
+  }
   if (candidateLead < previous.commitment.switchMargin) {
     return {
       primaryStrategy: previousCurrent,
@@ -447,6 +492,88 @@ function committedPrimaryStrategy(
     };
   }
   return { primaryStrategy: candidate };
+}
+
+function previousIntentInvalidationReason(
+  params: BuildStrategicIntentStateParams,
+  previous: StrategicIntentState,
+  candidate: StrategicLineState,
+  previousCurrent: StrategicLineState | undefined,
+):
+  | "candidate_has_no_current_anchor"
+  | "runner_setup_completed"
+  | "previous_hard_blocker"
+  | "new_hard_runtime_blocker"
+  | "previous_strategy_no_longer_productive"
+  | undefined {
+  if (candidate.family === "neutral") {
+    return "candidate_has_no_current_anchor";
+  }
+  if (
+    previous.primaryStrategy.family === "runner_setup" &&
+    candidate.family === "runner_central_pressure" &&
+    candidate.evidence.includes("runtime_transition:runner_setup_complete")
+  ) {
+    return "runner_setup_completed";
+  }
+  if (previous.blockers.some((blocker) => blocker.severity === "hard")) {
+    return "previous_hard_blocker";
+  }
+  if (previousStrategyHasNewHardRuntimeBlocker(params, previous)) {
+    return "new_hard_runtime_blocker";
+  }
+  if (!previousCurrent || previousCurrent.completeness === "none") {
+    return "previous_strategy_no_longer_productive";
+  }
+  return undefined;
+}
+
+type StrategicIntentHoldReason =
+  | "min_commitment_not_met"
+  | "switch_margin_not_met"
+  | "revalidation_not_triggered";
+
+function requireCurrentStrategicIntentRevalidation(
+  params: BuildStrategicIntentStateParams,
+): StrategicIntentRevalidation | undefined {
+  const revalidation = params.revalidation;
+  if (!revalidation) return undefined;
+  const allowedKeys = new Set([
+    "observedAtStateVersion",
+    "reason",
+    "evidenceCodes",
+  ]);
+  const unknownKey = Object.keys(revalidation).find(
+    (key) => !allowedKeys.has(key),
+  );
+  const validReason =
+    revalidation.reason === "phase_change" ||
+    revalidation.reason === "new_information" ||
+    revalidation.reason === "plan_completed" ||
+    revalidation.reason === "plan_invalidated";
+  const validEvidence =
+    Array.isArray(revalidation.evidenceCodes) &&
+    revalidation.evidenceCodes.length > 0 &&
+    revalidation.evidenceCodes.every(
+      (code) => typeof code === "string" && code.trim().length > 0,
+    );
+  if (
+    unknownKey ||
+    !Number.isSafeInteger(revalidation.observedAtStateVersion) ||
+    revalidation.observedAtStateVersion !== params.stateVersion ||
+    !validReason ||
+    !validEvidence
+  ) {
+    throw new PlanResolutionFailure("invalid_plan_identity", {
+      side: params.side,
+      stateVersion: params.stateVersion,
+      timingPoint: "strategic_intent_revalidation",
+      legalActionTypes: [],
+      owner: "priority_policy",
+      removalCondition: `Strategic intent revalidation must be current-state, evidence-bearing, reason-bound and action-authority-free${unknownKey ? `; unexpected field ${unknownKey}` : ""}.`,
+    });
+  }
+  return structuredClone(revalidation);
 }
 
 function feasibleCommittedScorelineHasNoImmediateAlternate(
@@ -771,7 +898,9 @@ function transitionFor(
   primary: StrategicLineState,
   blockers: readonly StrategicIntentBlocker[],
   candidate: StrategicLineState,
-  holdReason: "min_commitment_not_met" | "switch_margin_not_met" | undefined,
+  holdReason: StrategicIntentHoldReason | undefined,
+  revalidation: StrategicIntentRevalidation | undefined,
+  selectionAuthorityEvidence: readonly string[] | undefined,
 ): StrategicIntentTransition {
   if (!previous) {
     return {
@@ -792,6 +921,7 @@ function transitionFor(
         `previous:${previous.primaryStrategy.strategyId}`,
         `selected:${primary.strategyId}`,
         "abandon_reason:no_current_strategy_anchor",
+        ...(selectionAuthorityEvidence ?? []),
       ],
     };
   }
@@ -826,6 +956,15 @@ function transitionFor(
     evidence: [
       `previous:${previous.primaryStrategy.strategyId}`,
       `selected:${primary.strategyId}`,
+      ...(revalidation
+        ? [
+            `revalidation:${revalidation.reason}`,
+            ...revalidation.evidenceCodes.map(
+              (code) => `revalidation_evidence:${code}`,
+            ),
+          ]
+        : []),
+      ...(selectionAuthorityEvidence ?? []),
     ],
   };
 }

@@ -36,8 +36,9 @@ describe("plan-first live authority structure", () => {
       "createAiLiveRuntimeComposition(aiLiveRuntimeDependencies)",
     );
     expect(decisionContext).toContain(
-      'import { choosePlanFirstLiveAction } from "./plan-first-live-runtime";',
+      'from "./plan-first-live-runtime";',
     );
+    expect(decisionContext).toContain("choosePlanFirstLiveAction,");
     expect(occurrences(decisionContext, /\bchoosePlanFirstLiveAction\(/g)).toBe(
       1,
     );
@@ -77,6 +78,60 @@ describe("plan-first live authority structure", () => {
       expect(planFirstRuntime, forbidden).not.toContain(forbidden);
     }
     expect(planFirstRuntime).not.toMatch(/\bfallbackUsed\s*:\s*true\b/);
+  });
+
+  it("keeps legacy TacticalGoal and semantic-choice wiring outside the live composition", () => {
+    const liveSources = [
+      readSource("ai-runtime-public-entrypoints.ts"),
+      readSource("runtime", "ai-live-runtime-composition.ts"),
+      readSource(
+        "runtime",
+        "semantic-runtime-orchestration-composition.ts",
+      ),
+      readSource("runtime", "semantic-runtime-entrypoints-composition.ts"),
+      readSource("runtime", "semantic-runtime-decision-composition.ts"),
+      readSource("runtime", "semantic-runtime-decision-context.ts"),
+      readSource("runtime", "plan-first-live-runtime.ts"),
+    ].join("\n");
+    const publicIndex = readSource("index.ts");
+    const decisionInput = readSource("runtime", "ai-decision-input.ts");
+
+    for (const forbidden of [
+      "SemanticRuntimeDependencies",
+      "TacticalGoalLike",
+      "buildRunnerTacticalGoals",
+      "buildCorpTacticalGoals",
+      "buildMergedTacticalGoals",
+      "evaluateTacticalPlans",
+      "getTacticalPlanMemorySnapshot",
+      "rememberTacticalPlanRuntime",
+      "semanticRuntimeChoices",
+      "bestSemanticRuntimeChoice",
+      "bestSemanticRuntimeChoiceForTacticalPlanOverride",
+      "tacticalPlanMappedChoice",
+      "practicalMicroRuntimeCandidates",
+    ]) {
+      expect(liveSources, forbidden).not.toContain(forbidden);
+    }
+    expect(publicIndex).not.toContain('from "./runner-tactical-goals"');
+    expect(decisionInput).not.toContain("ownRunnerTacticalGoals");
+  });
+
+  it("keeps the public simulation adapter independent from legacy TacticalPlan memory", () => {
+    const simulationEntrypoints = readSource(
+      "ai-simulation-public-entrypoints.ts",
+    );
+    const simulator = readSource(
+      "simulation",
+      "ai-game-simulator.ts",
+    );
+
+    for (const source of [simulationEntrypoints, simulator]) {
+      expect(source).not.toContain('from "./tactical-plans"');
+      expect(source).not.toContain('from "../tactical-plans"');
+      expect(source).not.toContain("getPlanContinuityMemorySnapshot");
+      expect(source).not.toContain("resetTacticalPlanMemory");
+    }
   });
 
   it("keeps legacy central-reserve scoring inputs outside the productive plan-first path", () => {
