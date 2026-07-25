@@ -1,7 +1,7 @@
 # KI-Planebene – modulares Zielkonzept
 
 Status: **Work in Progress**
-Dokumentversion: `0.5`
+Dokumentversion: `0.6`
 Stand: 2026-07-25
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
@@ -94,7 +94,7 @@ erfüllbar wäre:**
 
 ### 2.2 Abgleich mit dem Runtime-Cutover-Worktree
 
-Version 0.5 ist der aktuelle fachliche Zielvertrag und spiegelt zugleich den
+Version 0.6 ist der aktuelle fachliche Zielvertrag und spiegelt zugleich den
 Arbeitsstand des Worktrees
 `C:\Projekte\NETGRID_AI_PLAN_FIRST_RUNTIME_CUTOVER` auf
 `codex/ai-plan-first-runtime-cutover` wider. Sie ist keine vorzeitige
@@ -113,19 +113,33 @@ insbesondere:
 - positive, kandidatenexakte Bindung von Run-/Access-Varianten einschließlich
   der R&D-Protocol-Files-Invalidierung nach unverändertem Informationsstand;
 - zahlreiche konkrete Karten- und Choice-Verträge, darunter Access-Ambush-
-  Zahlung, SMC-Installationsvarianten, Broker-Cashout und Loan-from-Chiba-
-  Lebenszyklus.
+  Zahlung, SMC-Installationsvarianten und Broker-Cashout;
+- der Engine-zertifizierte, instanzgenaue Loan-from-Chiba-Lebenszyklus mit
+  exaktem `runner.resource_lifecycle`-Parent und ausschließlich gebundenem
+  Economy-Support;
+- die dimensionsgenaue Normalisierung vollständiger Engine-Kostenlisten,
+  sodass ein nur mit Klickkosten ausgewiesener aktueller Agenda-Step exakt
+  null Credits kostet und regulär seinen Score-Parent fortentwickelt;
+- der Engine-seitige Jenny-Jett-Vertrag für die an Quelle, Fort,
+  `stateVersion` und `actionId` gebundene Rez-/Installations-Gesamtquote
+  einschließlich Apply-Revalidation und Hidden-Info-Schutz;
+- die vollständige Entfernung der alten produktiven Zentralreserve zugunsten
+  endlicher, Engine-gequoteter Defense-Needs sowie ein Struktur-Gate gegen
+  gedruckte Defense-Kostenfallbacks.
 
 Der Worktree ist trotzdem noch nicht PF15-grün. Fokussierte Baseline-Läufe
-zeigen weiterhin Plan-Coverage-Fehler für Broker-Cashout,
-SMC-Installation und Loan-from-Chiba-EndTurn, obwohl die zugehörigen
-Unit-Verträge bereits gehärtet wurden. Außerdem sind die in Version 0.5
-präzisierte HQ-/R&D-Bluffabwägung, die Engine-gebundene
-Nahgleichstandsrandomisierung und die vollständige Ablösung alter zentraler
-Rezreserve-Kostenpfade noch umzusetzen beziehungsweise end-to-end zu
-verifizieren. Erst danach folgen die vollständigen Typecheck-, Testshard-,
-Scenario-, Checkpoint-, Hidden-Info-, Authority-, Replay- und
-Baseline-Gates.
+bestätigen, dass die früheren SMC-, Broker- und fehlenden
+Agenda-Kostensemantik-Fehler geschlossen sind. Der Fast-Advance-Seed 09
+schreitet dadurch wieder bis zu einer Corp-Wertung fort, erreicht aber weiter
+das Aktionslimit: Zwei gleichzeitig sichtbare Blink-Instanzen werden in der
+exakten Score-Schutzprojektion noch als nicht unterstützte
+Mehr-Zufallsbrecher-Strategie geschlossen. Deren exakte kombinierte
+Zugriffswahrscheinlichkeit ist in Arbeit. Ebenfalls noch offen sind der
+AI-seitige Konsum der Jenny-Jett-Quote, die in Version 0.6 präzisierte
+HQ-/R&D-Faktenabwägung einschließlich Hold-/Bluff-Gegenfällen und der dafür
+vorgesehene atomare Engine-RNG-Vertrag für echte Nahgleichstände. Erst danach
+folgen die vollständigen Typecheck-, Testshard-, Scenario-, Checkpoint-,
+Hidden-Info-, Authority-, Replay- und Baseline-Gates.
 
 Der sequenzielle Paket- und Gate-Stand wird im
 `ai-plan-first-runtime-cutover-process-2026-07-23.md` fortgeschrieben. Dieses
@@ -4220,6 +4234,19 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 0.6 – 2026-07-25
+
+- PF15-Status nach den fokussiert verifizierten SMC-, Broker-,
+  Loan-from-Chiba-, Nullkosten- und Zentralreserve-Härtungen aktualisiert.
+- Den Engine-seitig vollständigen Jenny-Jett-Quote-/Revalidation-Vertrag als
+  umgesetzt ausgewiesen; der AI-Consumer bleibt bis zu seinem eigenen Gate
+  ausdrücklich offen.
+- Den realen Fast-Advance-Seed-09-Fortschritt und die verbleibende exakte
+  Mehr-Blink-Wahrscheinlichkeitslücke statt der geschlossenen früheren
+  Coverage-Fehler dokumentiert.
+- HQ-/R&D-Faktenabwägung und atomare Nahgleichstandsrandomisierung weiterhin
+  als offene PF15-Umsetzung markiert; keine vorzeitige Abschlussbehauptung.
 
 ### 0.5 – 2026-07-25
 
