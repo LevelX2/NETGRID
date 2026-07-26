@@ -517,42 +517,42 @@ function AiDecisionDebugPlanFirstTraceView({
           defaultOpen={false}
         >
           <div className="aiDecisionDebugCompactList">
-            {decision.portfolio.map((plan) => (
-              <div key={plan.instanceId}>
-                <span>
-                  {aiTracePlanLabel(plan.moduleId)} · {plan.phase} ·{" "}
-                  {plan.viability}
-                </span>
-                <strong>
-                  {plan.instanceId === decision.leafExecutorInstanceId
-                    ? "Leaf-Executor"
-                    : plan.instanceId === decision.rootPlanInstanceId
-                      ? "Root"
-                      : plan.portfolioRole}
-                </strong>
-              </div>
-            ))}
+            {decision.portfolio.map((plan) => {
+              const selected = plan.instanceId === selectedPlan?.instanceId;
+              return (
+                <div key={plan.instanceId}>
+                  <span>
+                    {aiTracePlanLabel(plan.moduleId)} · {plan.phase} ·{" "}
+                    {plan.viability}
+                  </span>
+                  <strong>
+                    {plan.instanceId === decision.leafExecutorInstanceId
+                      ? "führt diese Aktion aus"
+                      : plan.instanceId === decision.rootPlanInstanceId
+                        ? "übergeordneter Plan"
+                        : "begleitender Plan"}
+                  </strong>
+                  {selected ? (
+                    <AiDecisionDebugRows
+                      rows={[
+                        ["Bleibt als Ziel", plan.persistencePolicy],
+                        [
+                          "Stand im Plan",
+                          `${plan.phase} · ${plan.milestone}`,
+                        ],
+                        [
+                          "Benötigt noch",
+                          plan.openNeedIds.length > 0
+                            ? plan.openNeedIds.join(", ")
+                            : "nichts",
+                        ],
+                      ]}
+                    />
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
-          {selectedPlan ? (
-            <AiDecisionDebugRows
-              rows={[
-                ["Instanz-ID", selectedPlan.instanceId],
-                ["Dedupe-Key", selectedPlan.dedupeKey],
-                ["Modulversion", selectedPlan.moduleVersion],
-                ["Persistenz", selectedPlan.persistencePolicy],
-                [
-                  "Phase / Meilenstein",
-                  `${selectedPlan.phase} / ${selectedPlan.milestone}`,
-                ],
-                [
-                  "Offene Needs",
-                  selectedPlan.openNeedIds.length > 0
-                    ? selectedPlan.openNeedIds.join(", ")
-                    : "keine",
-                ],
-              ]}
-            />
-          ) : null}
         </AiDecisionDebugCollapsibleSection>
       ) : null}
 
