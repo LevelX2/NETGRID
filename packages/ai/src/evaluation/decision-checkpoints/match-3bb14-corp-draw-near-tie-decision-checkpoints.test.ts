@@ -11,15 +11,15 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
   it.each([
     [
-      "draws through the explicit hand-development plan at historical D9",
+      "draws through the exact score-defense child at historical D9",
       defensiveDrawD9Json,
     ],
     [
-      "draws through the explicit hand-development plan at D10",
+      "draws through the exact score-defense child at D10",
       defensiveDrawD10Json,
     ],
     [
-      "draws through the explicit hand-development plan at D11",
+      "uses the last click as capacity-safe multi-turn score-defense progress at D11",
       defensiveDrawD11Json,
     ],
   ])("%s", (_label, json) => {
@@ -27,8 +27,31 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("uses exact basic liquidity instead of an optional draw when the current hand is full", () => {
+  it("uses the full-hand draw as same-turn replacement when the install follow-up fits", () => {
     const checkpoint = fixture(defensiveDrawD9Json);
+    checkpoint.engine.testOnlyGameState.corp.maxHandSize = 4;
+    checkpoint.engine.stateHash = hashGameState(
+      checkpoint.engine.testOnlyGameState,
+    );
+    checkpoint.expectation = {
+      acceptableActions: [{ type: "draw_card" }],
+      forbiddenActions: [{ type: "gain_credit" }],
+      planExecution: {
+        acceptablePlanKinds: ["corp.defend_servers"],
+        acceptableCapabilities: ["develop_score_protection"],
+        requiredAssessmentEvidence: [
+          "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_213_private-cybernet-police_1:new_remote:new_remote",
+        ],
+      },
+    };
+
+    const result = runAiDecisionCheckpoint(checkpoint);
+
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  });
+
+  it("does not overflow HQ with a last-click multi-turn draw before any install follow-up", () => {
+    const checkpoint = fixture(defensiveDrawD11Json);
     checkpoint.engine.testOnlyGameState.corp.maxHandSize = 4;
     checkpoint.engine.stateHash = hashGameState(
       checkpoint.engine.testOnlyGameState,
@@ -78,7 +101,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.decision?.evidence).toContain(
-      `plan_portfolio_blocked:${EXACT_SCORE_PARENT_PLAN_ID}`,
+      `plan_priority_delegated_from:${EXACT_SCORE_PARENT_PLAN_ID}`,
     );
   });
 
