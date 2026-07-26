@@ -2320,11 +2320,35 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     );
-    const input = aiInput("corp", [installExisting, installNew, installAgenda]);
+    const installIceArchives = legalAction(
+      "install-data-wall-archives",
+      "corp",
+      "install_card",
+      "Install Data Wall in Archives",
+      { credits: 1, clicks: 1 },
+      {
+        source: "data-wall",
+        payload: {
+          cardId: "data-wall",
+          serverId: "archives",
+          placement: "ice",
+        },
+      },
+    );
+    const input = aiInput("corp", [
+      installExisting,
+      installNew,
+      installAgenda,
+      installIceArchives,
+    ]);
     input.playerView.own.clicks = 1;
     input.playerView.own.credits = 10;
     input.playerView.own.gripOrHq = [
       pacificaCard("pacifica"),
+      visibleCard("data-wall", "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        title: "Data Wall",
+      }),
       visibleCard("agenda", "corp", "agenda", {
         definitionId: "onr_v1_201_executive-extraction",
         title: "Executive Extraction",
@@ -2356,6 +2380,7 @@ describe("authoritative plan-first live runtime", () => {
         }
       | undefined;
     expect(state?.signal?.actionIds).toEqual([installExisting.actionId]);
+    expect(state?.signal?.actionIds).not.toContain(installIceArchives.actionId);
   });
 
   it("does not claim a blocked Corp upgrade placement as an executable hand-plan route", () => {

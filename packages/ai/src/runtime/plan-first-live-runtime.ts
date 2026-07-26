@@ -8003,6 +8003,12 @@ function corpHqOverflowCandidateIsExactCurrentConversion(
       projection.netHandDelta <= -1
     );
   }
+  // Converting an ICE out of HQ may relieve hand pressure, but choosing a
+  // server for that ICE is exclusively corp.defend_servers' responsibility.
+  // The hand-management plan must never turn a legal install into an
+  // unassessed "discard route" for an arbitrary server.
+  if (action.type === "install_card" && action.payload?.placement === "ice")
+    return false;
   if (
     action.type !== "install_card" ||
     candidate.semanticActionType !== "install.card" ||
