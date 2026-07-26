@@ -1633,7 +1633,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       decision,
       "install-terminal-agenda",
       agenda.instanceId,
-      "P1",
+      "P4",
     );
     expectRejectedByPlan(decision, "install-terminal-score-buffer");
     expect(debugText).toContain(
@@ -1982,7 +1982,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       decision,
       "install-matchpoint-agenda",
       agenda.instanceId,
-      "P1",
+      "P4",
     );
     expect(debugText).toContain(
       "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",

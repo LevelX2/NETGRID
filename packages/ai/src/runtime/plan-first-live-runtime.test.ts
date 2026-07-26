@@ -4878,7 +4878,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("keeps a terminal P1 score-funding child bound to its exact parent beside an executable P4 score parent", () => {
+  it("keeps a multi-turn terminal P4 score-funding child bound to its exact parent beside another executable P4 score parent", () => {
     const stateVersion = 1;
     const agendaDefinitionId = "onr_v1_189_artificial-security-directors";
     const installTerminal = legalAction(
@@ -4999,7 +4999,7 @@ describe("authoritative plan-first live runtime", () => {
       expect.arrayContaining([
         `plan_first_root:${scoreParentInstanceId}`,
         `plan_first_executor:${economyChildInstanceId}`,
-        "plan_priority_class:P1",
+        "plan_priority_class:P4",
         `plan_priority_delegated_from:${scoreParentInstanceId}`,
         `plan_priority_need:${fundingNeedId}`,
       ]),
@@ -5015,7 +5015,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     expect(portfolio).toContain(`"parentNeedId":"${fundingNeedId}"`);
     expect(portfolio).toContain(`"openNeedIds":["${fundingNeedId}"]`);
-    expect(portfolio).toContain('"delegatedPriorityClass":"P1"');
+    expect(portfolio).toContain('"delegatedPriorityClass":"P4"');
     expect(portfolio).toContain(
       '"evidenceCode":"corp_score_protection_funding_gap:remote_1:',
     );
