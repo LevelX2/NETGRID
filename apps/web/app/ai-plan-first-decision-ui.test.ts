@@ -4,6 +4,7 @@ import {
   aiPlanFirstDispositionSummary,
   aiPlanFirstPriorityLabel,
   aiPlanFirstQuoteStatusLabel,
+  aiPlanFirstStepLabel,
   parseAiPlanFirstDecisionDebug,
 } from "./ai-plan-first-decision-ui";
 
@@ -67,6 +68,14 @@ describe("plan-first AI decision display", () => {
     expect(aiPlanFirstPriorityLabel(transition?.priority)).not.toMatch(
       /Produktivität|Fallback/i,
     );
+  });
+
+  it("reduces a serialized resident route to its readable current step", () => {
+    expect(
+      aiPlanFirstStepLabel(
+        "plan:corp_hand_and_agenda_management:resolve_hq_overflow%3Acorp%3A26:resolve_hq_overflow",
+      ),
+    ).toBe("Handkartenlimit erfüllen");
   });
 
   it("fails closed for legacy-only data and exposes Unknown without estimates", () => {

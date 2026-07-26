@@ -37,6 +37,28 @@ export function aiPlanFirstPriorityLabel(
   return labels[priority.effectiveClass];
 }
 
+/** Turns a runtime route key into the short, player-readable current step. */
+export function aiPlanFirstStepLabel(value: string): string {
+  const decoded = decodeRouteSegment(value);
+  const step = decoded.startsWith("plan:")
+    ? (decoded.split(":").filter(Boolean).at(-1) ?? decoded)
+    : decoded;
+  const normalized = step.replace(/[\s._-]+/g, "_").toLowerCase();
+  const labels: Record<string, string> = {
+    resolve_headquarter_overflow: "Handkartenlimit erfüllen",
+    resolve_hq_overflow: "Handkartenlimit erfüllen",
+  };
+  return labels[normalized] ?? step.replace(/[._-]+/g, " ").trim();
+}
+
+function decodeRouteSegment(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 export function aiPlanFirstQuoteStatusLabel(
   status: AiPlanFirstDecisionDebug["engineQuoteEvidence"]["status"],
 ): string {

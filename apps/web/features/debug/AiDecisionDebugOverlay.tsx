@@ -27,6 +27,7 @@ import {
   aiPlanFirstIntentFitLabel,
   aiPlanFirstPriorityLabel,
   aiPlanFirstQuoteStatusLabel,
+  aiPlanFirstStepLabel,
   parseAiPlanFirstDecisionDebug,
 } from "../../app/ai-plan-first-decision-ui";
 import {
@@ -2461,8 +2462,6 @@ function aiDecisionDebugPlanStepLabel(
       : "Breaker installieren",
     probe_central: "Zentralserver-Run prüfen",
     rez_outer_ice: "äußeres ICE rezzen",
-    resolve_headquarter_overflow: "Handkartenlimit erfüllen",
-    resolve_hq_overflow: "Handkartenlimit erfüllen",
     run_target: runTarget || "Run auf Zielserver prüfen",
     score_agenda: "Agenda punkten",
     search_for_answer: coverage
@@ -2473,11 +2472,7 @@ function aiDecisionDebugPlanStepLabel(
       : "Such-Engine installieren",
   };
   if (value === "probe_central" && runTarget) return runTarget;
-  return labels[value] ?? aiDecisionDebugReadableStepId(value);
-}
-
-function aiDecisionDebugReadableStepId(value: string): string {
-  return value.replace(/[._-]+/g, " ").replace(/\s+/g, " ").trim();
+  return labels[value] ?? aiPlanFirstStepLabel(value);
 }
 
 function aiDecisionDebugDevelopmentCardVerb(
