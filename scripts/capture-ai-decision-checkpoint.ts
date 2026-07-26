@@ -235,8 +235,8 @@ function loadAllEvents(): PublicGameEvent[] {
 }
 
 function difficultyFor(value: unknown): AiDifficulty {
-  if (value === 2 || value === "hard") return "hard";
-  if (value === 0 || value === "easy") return "easy";
+  if (value === 3 || value === "hard") return "hard";
+  if (value === 1 || value === "easy") return "easy";
   return "normal";
 }
 
