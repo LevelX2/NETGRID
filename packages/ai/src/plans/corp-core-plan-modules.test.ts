@@ -856,6 +856,51 @@ describe("Corp core plan modules", () => {
     ).toBe("install-rd");
   });
 
+  it.each([
+    ["rd", "hq"],
+    ["hq", "rd"],
+  ] as const)(
+    "falls back from allocated %s when only %s still has an exact productive central route",
+    (allocatedServerId, productiveServerId) => {
+      const install = {
+        ...cardAction(
+          `install-${productiveServerId}`,
+          "install.card",
+          "ice-shared",
+        ),
+        sourceCardInstanceId: "ice-shared-1",
+        targetContext: targetContext(productiveServerId, "server"),
+      };
+      const module = corpModule("corp.defend_servers");
+      const corpContext = context([install], {
+        centralDefenseAllocation: knownCentralAllocation(allocatedServerId),
+        defenseNeeds: [
+          {
+            kind: "generic",
+            defenseId: `install:${productiveServerId}`,
+            serverId: productiveServerId,
+            phase: "install_ice",
+            sourceDefinitionIds: ["ice-shared"],
+            urgent: true,
+            value: 100,
+            evidenceCode:
+              "engine_certified_global_defense_access_probability_reduced",
+          },
+        ],
+      });
+      const instance = instantiatePlanProposal(
+        module.discover(corpContext)[0]!,
+        10,
+      );
+
+      expect(
+        module
+          .materialize(instance, {} as never, corpContext)
+          .candidates.map((entry) => entry.candidate.actionId),
+      ).toEqual([`install-${productiveServerId}`]);
+    },
+  );
+
   it("selects the exact central route class only after global allocation and preserves non-central continuations", () => {
     const actions = ["hq", "rd", "remote_1"].map((serverId) => ({
       ...cardAction(`install-${serverId}`, "install.card", "ice-shared"),

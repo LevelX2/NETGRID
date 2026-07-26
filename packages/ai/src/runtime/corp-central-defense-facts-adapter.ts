@@ -114,8 +114,7 @@ function quotesForCurrentView(
     if (
       quote.serverBoundEffects.some(
         (effect) =>
-          effect.kind !==
-            "purgeable_runner_virus_counter_access_modifier" ||
+          effect.kind !== "purgeable_runner_virus_counter_access_modifier" ||
           effect.serverId !== quote.serverId ||
           effect.id !== `corp:${effect.counterKind}` ||
           effect.counterCount < 1 ||
@@ -173,18 +172,22 @@ function centralInventory(
     remaining.set(entry.cardId, entry.quantity);
   }
   const hqCards = input.playerView.own.gripOrHq;
-  const nonRd = [
+  const archivesCards = canonicalCorpArchives(input);
+  if (!archivesCards) return undefined;
+  const visibleNonRd = [
     ...hqCards,
-    ...input.playerView.own.heapOrArchives,
+    ...archivesCards,
     ...input.playerView.own.scoreArea,
     ...input.playerView.opponent.scoreArea,
     ...(input.playerView.specialZones?.removedFromGame ?? []),
     ...(input.playerView.specialZones?.setAside ?? []),
     ...input.playerView.servers.flatMap((server) => [
       ...server.ice,
-      ...server.root,
+      ...(server.id === "archives" ? [] : server.root),
     ]),
   ];
+  const nonRd = uniqueVisibleInstances(visibleNonRd);
+  if (!nonRd) return undefined;
   for (const card of nonRd)
     if (!subtractKnown(remaining, card)) return undefined;
   let remainingCardCount = 0;
@@ -200,6 +203,53 @@ function centralInventory(
   const hq = inventoryForCards(hqCards);
   const rd = inventoryForDefinitionCounts(remaining);
   return hq && rd ? { hq, rd } : undefined;
+}
+
+function canonicalCorpArchives(
+  input: AiDecisionInput,
+): readonly VisibleCard[] | undefined {
+  const archivesServers = input.playerView.servers.filter(
+    (server) => server.id === "archives",
+  );
+  if (archivesServers.length !== 1) return undefined;
+  const ownArchives = uniqueVisibleInstanceMap(
+    input.playerView.own.heapOrArchives,
+  );
+  const serverArchives = uniqueVisibleInstanceMap(archivesServers[0]!.root);
+  if (
+    !ownArchives ||
+    !serverArchives ||
+    ownArchives.size !== serverArchives.size
+  )
+    return undefined;
+  for (const [instanceId, card] of ownArchives) {
+    const mirrored = serverArchives.get(instanceId);
+    if (
+      !mirrored ||
+      card.known !== mirrored.known ||
+      card.definitionId !== mirrored.definitionId
+    )
+      return undefined;
+  }
+  return [...ownArchives.values()];
+}
+
+function uniqueVisibleInstanceMap(
+  cards: readonly VisibleCard[],
+): ReadonlyMap<string, VisibleCard> | undefined {
+  const byInstanceId = new Map<string, VisibleCard>();
+  for (const card of cards) {
+    if (byInstanceId.has(card.instanceId)) return undefined;
+    byInstanceId.set(card.instanceId, card);
+  }
+  return byInstanceId;
+}
+
+function uniqueVisibleInstances(
+  cards: readonly VisibleCard[],
+): readonly VisibleCard[] | undefined {
+  const byInstanceId = uniqueVisibleInstanceMap(cards);
+  return byInstanceId ? [...byInstanceId.values()] : undefined;
 }
 
 function subtractKnown(

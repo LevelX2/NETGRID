@@ -489,7 +489,7 @@ function bindSelectedCorpDefenseHqHold(
         signals?: CorpDefenseSignal[];
         centralAllocation?: CorpCorePlanDomain["centralDefenseAllocation"];
         hqHoldCadence?: CorpCorePlanDomain["centralDefenseHqHoldCadence"];
-        hqHoldSelection?: unknown;
+        hqHoldSelection?: CorpCorePlanDomain["centralDefenseHqHoldSelection"];
       }
     | undefined;
   if (
@@ -6892,10 +6892,12 @@ function buildCorpDomain(
   previous: ResidentPlanPortfolio | undefined,
 ): CorpPlanDomain {
   const currentTurnKey = turnKey(input);
-  const centralDefenseHqHoldCadence = corpResidentCentralDefenseHqHoldCadence(
+  const centralDefenseHqHoldState = corpResidentCentralDefenseHqHoldState(
     previous,
     input,
   );
+  const centralDefenseHqHoldCadence = centralDefenseHqHoldState.cadence;
+  const centralDefenseHqHoldSelection = centralDefenseHqHoldState.selection;
   const centralDefenseAllocation = allocateCorpCentralDefenseFromAiFacts({
     input,
     hqHoldCadence: centralDefenseHqHoldCadence,
@@ -7656,6 +7658,7 @@ function buildCorpDomain(
     defenseNeeds,
     centralDefenseAllocation,
     centralDefenseHqHoldCadence,
+    ...(centralDefenseHqHoldSelection ? { centralDefenseHqHoldSelection } : {}),
     economyNeeds,
     virusPressure,
     punishCampaigns,
@@ -8765,17 +8768,6 @@ function corpGlobalDefenseInstallRouteAssessment(
         knowledge: "unknown",
         evidenceCode:
           "corp_ice_install_assessment_unknown:central_defense_allocation_unknown",
-      };
-    }
-    const centralCandidates =
-      centralAllocation.canonicalNearTieCandidateServerIds.length === 2
-        ? centralAllocation.canonicalNearTieCandidateServerIds
-        : [centralAllocation.selectedServerId];
-    if (!centralCandidates.includes(serverId)) {
-      return {
-        knowledge: "known",
-        disposition: "effect_missing",
-        evidenceCode: `corp_ice_install_rejected_by_exact_global_central_allocation:${serverId}`,
       };
     }
   }
@@ -14594,17 +14586,24 @@ function corpResidentScoreMaterialDrawAttempt(
   };
 }
 
-function corpResidentCentralDefenseHqHoldCadence(
+function corpResidentCentralDefenseHqHoldState(
   previous: ResidentPlanPortfolio | undefined,
   input: AiDecisionInput,
-): NonNullable<CorpCorePlanDomain["centralDefenseHqHoldCadence"]> {
+): {
+  cadence: NonNullable<CorpCorePlanDomain["centralDefenseHqHoldCadence"]>;
+  selection?: NonNullable<CorpCorePlanDomain["centralDefenseHqHoldSelection"]>;
+} {
   const fresh = (
     receiptId = "corp-central-hq-hold:server-defense-portfolio",
-  ): NonNullable<CorpCorePlanDomain["centralDefenseHqHoldCadence"]> => ({
-    status: "available",
-    receiptId,
-    turnKey: turnKey(input),
-    factsStateVersion: input.playerView.stateVersion,
+  ): {
+    cadence: NonNullable<CorpCorePlanDomain["centralDefenseHqHoldCadence"]>;
+  } => ({
+    cadence: {
+      status: "available",
+      receiptId,
+      turnKey: turnKey(input),
+      factsStateVersion: input.playerView.stateVersion,
+    },
   });
   const instance = previous?.instances.find(
     (candidate) => candidate.moduleId === "corp.defend_servers",
@@ -14655,8 +14654,7 @@ function corpResidentCentralDefenseHqHoldCadence(
       selection.sourceCardInstanceId.length > 0 &&
       selection.targetServerId === "rd" &&
       Number.isSafeInteger(selection.selectedAtStateVersion) &&
-      selection.selectedAtStateVersion === cadence.factsStateVersion &&
-      (selection.selectedAtStateVersion as number) === previous!.stateVersion);
+      selection.selectedAtStateVersion === cadence.factsStateVersion);
   if (!cadenceValid || !availableValid || !consumedValid) {
     throw new PlanResolutionFailure("invalid_plan_identity", {
       side: input.side,
@@ -14706,10 +14704,18 @@ function corpResidentCentralDefenseHqHoldCadence(
     }
   }
   return {
-    status: "consumed",
-    receiptId: cadence.receiptId as string,
-    turnKey: cadence.turnKey as string,
-    factsStateVersion: cadence.factsStateVersion as number,
+    cadence: {
+      status: "consumed",
+      receiptId: cadence.receiptId as string,
+      turnKey: cadence.turnKey as string,
+      factsStateVersion: cadence.factsStateVersion as number,
+    },
+    selection: {
+      selectedActionId: selection!.selectedActionId as string,
+      sourceCardInstanceId: selection!.sourceCardInstanceId as string,
+      selectedAtStateVersion,
+      targetServerId: "rd",
+    },
   };
 }
 
@@ -14857,8 +14863,13 @@ function corpDefensiveUpgradePlacement(
   }
   const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
   const assignedToDefense =
-    hint?.roles?.includes("run_defense") === true &&
-    hint?.planRoles?.includes("remote_upgrade_rez_support") === true;
+    (hint?.roles?.includes("run_defense") === true &&
+      hint?.planRoles?.includes("remote_upgrade_rez_support") === true) ||
+    (hint?.roles?.includes("remote_support") === true &&
+      hint?.remoteRole?.kind === "scoring_protection" &&
+      hint.remoteRole.serverScope === "fort" &&
+      hint.functionSignals?.includes("remote.scoring_protection") === true &&
+      hint.functionSignals.includes("run.corp_pay_or_end_run"));
   const legalAction = input.legalActions.find(
     (action) => action.actionId === candidate.actionId,
   );
