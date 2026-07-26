@@ -649,6 +649,65 @@ describe("deriveOpponentActionCues", () => {
     expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
   });
 
+  it("shows the Corporate Downsizing zero selection in an AI action cue", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_downsizing_none", "resolve_choice", {
+          actor: "corp",
+          aiReasonCode: "corp.score_agenda",
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
+          sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+          sourceTitle: "Corporate Downsizing",
+          publicRevealKind: "reveal",
+          publicRevealDefinitionIds: "",
+          publicRevealTitles: "",
+          shownCardDefinitionIds: "",
+          shownCount: 0,
+          shuffledIntoRndCount: 0,
+          combinedAgendaPoints: 0,
+          gainedCredits: 0
+        })
+      ]
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.title).toBe("Die Korp-KI hat mit Corporate Downsizing keine Agenda aus HQ vorgezeigt, keine Karte in R&D gemischt und 0 Credits erhalten.");
+    expect(cues[0]?.description).toBe("Kombinierte Agendapunkte: 0 Agendapunkte.");
+    expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
+  });
+
+  it("shows public Corporate Downsizing agenda titles in human Corp action cues", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_downsizing_selected", "resolve_choice", {
+          actor: "corp",
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
+          sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+          sourceTitle: "Corporate Downsizing",
+          publicRevealKind: "reveal",
+          publicRevealDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+          publicRevealTitles: "Simple Agenda||Hostile Takeover",
+          shownCardDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+          shownCount: 2,
+          shuffledIntoRndCount: 2,
+          combinedAgendaPoints: 5,
+          gainedCredits: 10
+        })
+      ]
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.title).toBe("Die Korp hat 2 Agenden aus HQ mit Corporate Downsizing vorgezeigt, 2 Karten in R&D gemischt und 10 Credits erhalten.");
+    expect(cues[0]?.description).toBe("Gezeigt: Simple Agenda und Hostile Takeover. Kombinierte Agendapunkte: 5 Agendapunkte.");
+    expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
+  });
+
   it("keeps automatic system cues behind the local option", () => {
     const systemEvent = event("evt_auto_credit", "gain_credit", { amount: 2 });
 

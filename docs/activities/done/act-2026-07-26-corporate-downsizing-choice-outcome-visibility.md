@@ -1,19 +1,26 @@
 ---
 activityId: act-2026-07-26-corporate-downsizing-choice-outcome-visibility
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-26
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-26
+completedAt: 2026-07-26
+branch: codex/activities-worktree-20260726-141500
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+  - apps/web/app/action-cues.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts app/action-cues.test.ts --passWithNoTests
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm exec prettier --check apps/web/app/chronicle.ts apps/web/app/chronicle.test.ts docs/activities/done/act-2026-07-26-corporate-downsizing-choice-outcome-visibility.md
+  - git diff --check
 ---
 
 # Corporate Downsizing im Entscheidungsfenster und in der Chronik konkret auflösen
@@ -79,4 +86,11 @@ Die öffentliche Auflösung von `Corporate Downsizing` soll im Aktionsfenster un
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen: `scored_agenda_hq_agenda_shuffle_credits` erhält einen eigenen öffentlichen Chronicle-Formatter. Damit zeigen Aktionsfenster und Chronik für `Corporate Downsizing` nun die Nullauswahl beziehungsweise die tatsächlich vorgezeigten HQ-Agenden, kombinierte Agendapunkte, Creditgewinn und R&D-Shuffle. Die Darstellung greift ausschließlich auf bereits öffentliche Payloadfelder zu; nicht gewählte HQ-Karten und die Kandidatenmenge bleiben verborgen.
+
+Checks grün:
+
+- `corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts app/action-cues.test.ts --passWithNoTests` (2 Dateien, 228 Tests)
+- `corepack pnpm --filter @netgrid/web typecheck`
+- `corepack pnpm exec prettier --check apps/web/app/chronicle.ts apps/web/app/chronicle.test.ts docs/activities/done/act-2026-07-26-corporate-downsizing-choice-outcome-visibility.md`
+- `git diff --check`
