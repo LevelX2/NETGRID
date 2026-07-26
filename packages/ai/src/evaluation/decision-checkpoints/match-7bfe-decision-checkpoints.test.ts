@@ -13,8 +13,8 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match 7BFE exact decision checkpoints", () => {
   it.each([
     ["CP-7BFE-01 central protection", cp01Json],
-    ["CP-7BFE-02a five-credit score commitment", cp02aJson],
-    ["CP-7BFE-02b five-credit Systematic follow-up", cp02bJson],
+    ["CP-7BFE-02a staged five-credit score campaign", cp02aJson],
+    ["CP-7BFE-02b parent-bound score protection follow-up", cp02bJson],
     ["CP-7BFE-03 strategy-aware discard", cp03Json],
     ["CP-7BFE-04 zero-effect Closed Accounts", cp04Json],
     ["CP-7BFE-05 funds pressured R&D instead of agenda-free HQ", cp05Json],
@@ -40,16 +40,28 @@ describe("match 7BFE exact decision checkpoints", () => {
     expectCheckpointToPass(fixtureAtSix);
   });
 
-  it("keeps Closed Accounts valuable when it removes three credits", () => {
+  it("does not fabricate a Closed Accounts payoff without a decision-local Engine quote", () => {
     const fixtureWithCredits = mutateFixture(cp04Json, (fixture) => {
       fixture.engine.testOnlyGameState.runner.credits = 3;
       fixture.expectation = {
         acceptableActions: [
           {
+            type: "draw_card",
+          },
+        ],
+        forbiddenActions: [
+          {
             type: "play_operation",
             sourceDefinitionId: "onr_v1_285_closed-accounts",
           },
         ],
+        planExecution: {
+          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
+          acceptableCapabilities: ["draw_for_plan"],
+          requiredAssessmentEvidence: [
+            "corp_score_campaign_missing_agenda_material",
+          ],
+        },
       };
     });
 
@@ -60,12 +72,12 @@ describe("match 7BFE exact decision checkpoints", () => {
     const earlierWindow = mutateFixture(cp05Json, (fixture) => {
       fixture.engine.testOnlyGameState.corp.clicks = 2;
       fixture.expectation = {
-        acceptableActions: [{ type: "gain_credit" }],
+        acceptableActions: [{ type: "draw_card" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.economy"],
-          acceptableCapabilities: ["develop_or_convert_corp_economy"],
+          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
+          acceptableCapabilities: ["draw_for_plan"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_basic_liquidity_development",
+            "corp_score_campaign_missing_agenda_material",
           ],
         },
       };

@@ -46833,9 +46833,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_367_rio-de-janeiro-city-grid",
-        "targetServerId": "hq"
+        "actionId": "corp.advance_card.corp_onr_v1_190_bioweapons-engineering_1.corp_onr_v1_190_bioweapons-engineering_1"
       }
     ],
     "forbiddenActions": [
@@ -46845,8 +46843,11 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
-      "acceptableCapabilities": ["develop_card"]
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["advance_score_agenda"],
+      "requiredAssessmentEvidence": [
+        "corp_score_protection_assessment_unknown:remote_1:subset_assessment_unknown"
+      ]
     }
   }
 }

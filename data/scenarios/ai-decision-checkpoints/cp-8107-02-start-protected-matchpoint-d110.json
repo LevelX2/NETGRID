@@ -10962,22 +10962,19 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.gain_credit"
+        "actionId": "corp.install_card.corp_onr_proteus_008_project-zurich_1.remote_1.corp_onr_proteus_008_project-zurich_1"
       }
     ],
     "forbiddenActions": [
       {
         "actionId": "corp.install_card.corp_onr_v1_216_security-purge_1.remote_1.corp_onr_v1_216_security-purge_1"
-      },
-      {
-        "actionId": "corp.install_card.corp_onr_proteus_008_project-zurich_1.remote_1.corp_onr_proteus_008_project-zurich_1"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_basic_liquidity_development"
+        "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1"
       ]
     }
   }

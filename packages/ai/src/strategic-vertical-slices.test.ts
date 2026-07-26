@@ -119,7 +119,7 @@ describe("Deck strategy runtime vertical slices", () => {
     expect(second.decisionDebug?.planId).toBe(first.decisionDebug?.planId);
   });
 
-  it("uses Corp tag-punish payoff only when the boardstate window exists", () => {
+  it("does not invent Corp tag-punish payoff without an Engine quote and keeps the score plan active outside the window", () => {
     const closedAccounts = visibleCard("closed-accounts", "corp", "operation", {
       definitionId: "onr_v1_285_closed-accounts",
       title: "Closed Accounts",
@@ -131,11 +131,16 @@ describe("Deck strategy runtime vertical slices", () => {
       "Closed Accounts spielen",
       { source: closedAccounts.instanceId, cost: 1 },
     );
-    const gain = legalAction("gain-credit", "corp", "gain_credit", "Gain 1");
+    const draw = legalAction(
+      "draw-score-material",
+      "corp",
+      "draw_card",
+      "Draw",
+    );
     const taggedInput = strategicInput({
       side: "corp",
       snapshot: corpTagPunishSnapshot(),
-      actions: [punish, gain],
+      actions: [punish],
       credits: 5,
       gripOrHq: [closedAccounts],
       runnerTags: 1,
@@ -150,8 +155,7 @@ describe("Deck strategy runtime vertical slices", () => {
       side: "corp",
       snapshot: corpTagPunishSnapshot(),
       actions: [
-        { ...punish, costs: [{ credits: 5 }] },
-        gain,
+        draw,
         legalAction("end-turn", "corp", "end_turn", "End turn", {
           source: "game_rule",
         }),
@@ -167,23 +171,21 @@ describe("Deck strategy runtime vertical slices", () => {
       strategyId: "corp.tag_trace_punish",
     });
 
-    const tagged = chooseCorpAction(taggedInput);
+    expect(() => chooseCorpAction(taggedInput)).toThrow(
+      /missing_plan_module_coverage/,
+    );
     const noWindow = chooseCorpAction(noWindowInput);
 
-    expect(tagged.actionId).toBe("closed-accounts");
-    expect(tagged.evidence).toEqual(
-      expect.arrayContaining([
-        "plan_module:corp.execute_punish_sequence",
-        "plan_step_capability:punish_damage",
-      ]),
-    );
-    expect(noWindow.actionId).toBe("gain-credit");
+    expect(noWindow.actionId).toBe("draw-score-material");
     expect(noWindow.evidence).toEqual(
-      expect.arrayContaining(["plan_module:corp.economy"]),
+      expect.arrayContaining([
+        "plan_module:corp.hand_and_agenda_management",
+        "plan_step_capability:draw_for_plan",
+      ]),
     );
   });
 
-  it("keeps Corp scoreline terminal windows above setup, but avoids contestable advances", () => {
+  it("keeps Corp scoreline terminal windows above staged contestable progress", () => {
     const scoringAgenda = visibleCard("scoring-agenda", "corp", "agenda", {
       definitionId: "simple_agenda",
       title: "Simple Agenda",
@@ -269,7 +271,13 @@ describe("Deck strategy runtime vertical slices", () => {
         "plan_priority_class:P3",
       ]),
     );
-    expect(contestableDecision.actionId).toBe("gain-credit");
+    expect(contestableDecision.actionId).toBe("advance-exposed-agenda");
+    expect(contestableDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.score_agenda",
+        "plan_priority_class:P4",
+      ]),
+    );
   });
 
   it("uses ICE-tax defense when affordable and economy when the defensive line is unfunded", () => {
@@ -528,6 +536,7 @@ function strategicInput(params: {
   };
   return {
     ...input,
+    ownDeckSnapshot: params.snapshot,
     ownDeckCapabilities: deckCapabilities,
     ownStrategicIntentState: strategicIntentState,
     ...(params.side === "runner"
@@ -608,10 +617,21 @@ function legalAction(
   label: string,
   options: {
     cost?: number;
+    clicks?: number;
     source?: LegalAction["source"];
     payload?: LegalAction["payload"];
   } = {},
 ): LegalAction {
+  const defaultClicks =
+    type === "draw_card" ||
+    type === "gain_credit" ||
+    type === "install_card" ||
+    type === "play_operation" ||
+    type === "start_run" ||
+    type === "advance_card"
+      ? 1
+      : 0;
+  const defaultCredits = type === "advance_card" ? 1 : 0;
   return {
     actionId,
     side,
@@ -621,13 +641,13 @@ function legalAction(
     timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
     costs: [
       {
-        credits: options.cost ?? 0,
-        ...(type === "gain_credit" ? { clicks: 1 } : {}),
+        credits: options.cost ?? defaultCredits,
+        clicks: options.clicks ?? defaultClicks,
       },
     ],
     targetRequirements: [],
     visibility: "public",
-    expiresAtStateVersion: 2,
+    expiresAtStateVersion: 1,
     ...(options.payload ? { payload: options.payload } : {}),
   };
 }
@@ -782,6 +802,7 @@ function corpTagPunishSnapshot(): AiDeckStrategyDeckSnapshot {
     ["onr_v1_299_power-grid-overload", 2],
     ["onr_v1_249_hunter", 2],
     ["onr_v1_236_data-raven", 2],
+    ["onr_v1_196_corporate-war", 4],
     ["simple_economy_operation", 4],
   ]);
 }

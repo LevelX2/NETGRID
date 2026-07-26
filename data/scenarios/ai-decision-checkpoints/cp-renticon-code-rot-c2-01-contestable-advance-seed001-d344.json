@@ -1239,9 +1239,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_232_crystal-wall_1"
-            ],
+            "ice": ["corp_onr_v1_232_crystal-wall_1"],
             "root": []
           },
           {
@@ -1274,9 +1272,7 @@
               "corp_onr_v1_252_keeper_1",
               "corp_onr_v1_243_fetch-4-0-1_2"
             ],
-            "root": [
-              "corp_onr_v1_207_netwatch-operations-office_1"
-            ]
+            "root": ["corp_onr_v1_207_netwatch-operations-office_1"]
           }
         ]
       },
@@ -1339,9 +1335,7 @@
         ],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_v1_035_invisibility_1"
-          ],
+          "programs": ["runner_onr_v1_035_invisibility_1"],
           "hardware": [],
           "resources": [
             "runner_onr_proteus_128_airport-locker_1",
@@ -2751,9 +2745,7 @@
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-0"
               },
@@ -2773,10 +2765,7 @@
                     "choiceId": "setup_mulligan_runner_0",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -2836,9 +2825,7 @@
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-1"
               },
@@ -2858,10 +2845,7 @@
                     "choiceId": "setup_mulligan_corp_1",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -3420,9 +3404,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -6289,9 +6271,7 @@
                 "clientKnownStateVersion": 61,
                 "selectedChoices": {
                   "choiceId": "run_58.corp_onr_v1_221_asp_1.0.trace.corp.bid.61",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-61"
               },
@@ -6395,9 +6375,7 @@
                 "clientKnownStateVersion": 62,
                 "selectedChoices": {
                   "choiceId": "run_58.corp_onr_v1_221_asp_1.0.trace.runner.bid.62",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-62"
               },
@@ -6417,13 +6395,7 @@
                     "choiceId": "run_58.corp_onr_v1_221_asp_1.0.trace.runner.bid.62",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3",
-                      "bid_4"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4"]
                   }
                 ],
                 "payload": {
@@ -7553,9 +7525,7 @@
                 "clientKnownStateVersion": 82,
                 "selectedChoices": {
                   "choiceId": "discard_corp_82",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_342_solo-squad_1"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_342_solo-squad_1"]
                 },
                 "idempotencyKey": "ai-sim-82"
               },
@@ -8238,9 +8208,7 @@
                 "clientKnownStateVersion": 94,
                 "selectedChoices": {
                   "choiceId": "v1911_temporary_program_install_source_94",
-                  "selectedOptionIds": [
-                    "source_stack"
-                  ]
+                  "selectedOptionIds": ["source_stack"]
                 },
                 "idempotencyKey": "ai-sim-94"
               },
@@ -8260,9 +8228,7 @@
                     "choiceId": "v1911_temporary_program_install_source_94",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "source_stack"
-                    ]
+                    "optionIds": ["source_stack"]
                   }
                 ],
                 "payload": {
@@ -8360,9 +8326,7 @@
                 "clientKnownStateVersion": 95,
                 "selectedChoices": {
                   "choiceId": "v1911_temporary_program_install_stack_install_95",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_035_invisibility_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_035_invisibility_1"]
                 },
                 "idempotencyKey": "ai-sim-95"
               },
@@ -13698,9 +13662,7 @@
                 "clientKnownStateVersion": 182,
                 "selectedChoices": {
                   "choiceId": "p3_37_search_stack_to_grip_182",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_035_invisibility_2"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_035_invisibility_2"]
                 },
                 "idempotencyKey": "ai-sim-182"
               },
@@ -15508,9 +15470,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -17644,9 +17604,7 @@
                 "clientKnownStateVersion": 245,
                 "selectedChoices": {
                   "choiceId": "run_237.corp_onr_v1_221_asp_2.0.trace.corp.bid.245",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-245"
               },
@@ -17731,9 +17689,7 @@
                 "clientKnownStateVersion": 246,
                 "selectedChoices": {
                   "choiceId": "run_237.corp_onr_v1_221_asp_2.0.trace.runner.bid.246",
-                  "selectedOptionIds": [
-                    "bid_7"
-                  ]
+                  "selectedOptionIds": ["bid_7"]
                 },
                 "idempotencyKey": "ai-sim-246"
               },
@@ -17942,9 +17898,7 @@
                 "clientKnownStateVersion": 248,
                 "selectedChoices": {
                   "choiceId": "run_237.corp_onr_v1_221_asp_2.0.trace.runner.bid.246",
-                  "selectedOptionIds": [
-                    "bid_7"
-                  ]
+                  "selectedOptionIds": ["bid_7"]
                 },
                 "idempotencyKey": "ai-sim-248"
               },
@@ -18289,9 +18243,7 @@
                 "clientKnownStateVersion": 254,
                 "selectedChoices": {
                   "choiceId": "discard_runner_254",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_165_junkyard-bbs_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_165_junkyard-bbs_1"]
                 },
                 "idempotencyKey": "ai-sim-254"
               },
@@ -18632,9 +18584,7 @@
                 "clientKnownStateVersion": 259,
                 "selectedChoices": {
                   "choiceId": "choice_card_implementation_hq_to_new_remote_install_rez_259",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_236_data-raven_2"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_236_data-raven_2"]
                 },
                 "idempotencyKey": "ai-sim-259"
               },
@@ -18757,9 +18707,7 @@
                 "clientKnownStateVersion": 260,
                 "selectedChoices": {
                   "choiceId": "choice_card_implementation_hq_to_new_remote_install_rez_rez_260",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_236_data-raven_2"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_236_data-raven_2"]
                 },
                 "idempotencyKey": "ai-sim-260"
               },
@@ -18779,9 +18727,7 @@
                     "choiceId": "choice_card_implementation_hq_to_new_remote_install_rez_rez_260",
                     "minSelections": 0,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "card_corp_onr_v1_236_data-raven_2"
-                    ]
+                    "optionIds": ["card_corp_onr_v1_236_data-raven_2"]
                   }
                 ],
                 "payload": {
@@ -19128,9 +19074,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -19903,9 +19847,7 @@
                 "clientKnownStateVersion": 278,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_hide_278",
-                  "selectedOptionIds": [
-                    "hide_2"
-                  ]
+                  "selectedOptionIds": ["hide_2"]
                 },
                 "idempotencyKey": "ai-sim-278"
               },
@@ -19925,11 +19867,7 @@
                     "choiceId": "secret_spend_guess_then_targeted_bypass_run_hide_278",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "hide_2",
-                      "hide_3",
-                      "hide_4"
-                    ]
+                    "optionIds": ["hide_2", "hide_3", "hide_4"]
                   }
                 ],
                 "payload": {
@@ -19987,9 +19925,7 @@
                 "clientKnownStateVersion": 279,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_guess_279",
-                  "selectedOptionIds": [
-                    "guess_3"
-                  ]
+                  "selectedOptionIds": ["guess_3"]
                 },
                 "idempotencyKey": "ai-sim-279"
               },
@@ -20083,9 +20019,7 @@
                 "clientKnownStateVersion": 280,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_target_280",
-                  "selectedOptionIds": [
-                    "ice_corp_onr_v1_221_asp_1"
-                  ]
+                  "selectedOptionIds": ["ice_corp_onr_v1_221_asp_1"]
                 },
                 "idempotencyKey": "ai-sim-280"
               },
@@ -20507,9 +20441,7 @@
                 "clientKnownStateVersion": 287,
                 "selectedChoices": {
                   "choiceId": "run_281.corp_onr_v1_221_asp_2.0.trace.corp.bid.287",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-287"
               },
@@ -20611,9 +20543,7 @@
                 "clientKnownStateVersion": 288,
                 "selectedChoices": {
                   "choiceId": "run_281.corp_onr_v1_221_asp_2.0.trace.runner.bid.288",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-288"
               },
@@ -20633,13 +20563,7 @@
                     "choiceId": "run_281.corp_onr_v1_221_asp_2.0.trace.runner.bid.288",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3",
-                      "bid_4"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4"]
                   }
                 ],
                 "payload": {
@@ -22132,9 +22056,7 @@
                 "clientKnownStateVersion": 313,
                 "selectedChoices": {
                   "choiceId": "run_310.corp_onr_v1_251_jack-attack_3.1.trace.corp.bid.313",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-313"
               },
@@ -22154,10 +22076,7 @@
                     "choiceId": "run_310.corp_onr_v1_251_jack-attack_3.1.trace.corp.bid.313",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -22226,9 +22145,7 @@
                 "clientKnownStateVersion": 314,
                 "selectedChoices": {
                   "choiceId": "run_310.corp_onr_v1_251_jack-attack_3.1.trace.runner.bid.314",
-                  "selectedOptionIds": [
-                    "bid_5"
-                  ]
+                  "selectedOptionIds": ["bid_5"]
                 },
                 "idempotencyKey": "ai-sim-314"
               },
@@ -22633,9 +22550,7 @@
                 "clientKnownStateVersion": 320,
                 "selectedChoices": {
                   "choiceId": "run_310.corp_onr_proteus_026_hunting-pack_2.0.trace.corp.bid.320",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-320"
               },
@@ -22655,10 +22570,7 @@
                     "choiceId": "run_310.corp_onr_proteus_026_hunting-pack_2.0.trace.corp.bid.320",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -22729,9 +22641,7 @@
                 "clientKnownStateVersion": 321,
                 "selectedChoices": {
                   "choiceId": "run_310.corp_onr_proteus_026_hunting-pack_2.0.trace.runner.bid.321",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-321"
               },
@@ -22751,10 +22661,7 @@
                     "choiceId": "run_310.corp_onr_proteus_026_hunting-pack_2.0.trace.runner.bid.321",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -23106,9 +23013,7 @@
                 "clientKnownStateVersion": 327,
                 "selectedChoices": {
                   "choiceId": "run_310.corp_onr_v1_221_asp_2.0.trace.corp.bid.327",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-327"
               },
@@ -23128,10 +23033,7 @@
                     "choiceId": "run_310.corp_onr_v1_221_asp_2.0.trace.corp.bid.327",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -23202,9 +23104,7 @@
                 "clientKnownStateVersion": 328,
                 "selectedChoices": {
                   "choiceId": "run_310.corp_onr_v1_221_asp_2.0.trace.runner.bid.328",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-328"
               },
@@ -23224,10 +23124,7 @@
                     "choiceId": "run_310.corp_onr_v1_221_asp_2.0.trace.runner.bid.328",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -31768,9 +31665,7 @@
           "milestone": "find_remote_protection",
           "progress": 0.6,
           "selectedStepKind": "find_remote_protection",
-          "actionCandidateIds": [
-            "corp.draw_card"
-          ],
+          "actionCandidateIds": ["corp.draw_card"],
           "cadence": {
             "turnKey": "corp:turn:24",
             "maxActionsPerTurn": 1,
@@ -31879,9 +31774,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 162,
-      "blockerIds": [
-        "corp.damage_kill:reserve_shortfall"
-      ],
+      "blockerIds": ["corp.damage_kill:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 343,
       "state": {
@@ -32284,10 +32177,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -32309,9 +32199,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -32369,9 +32257,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -32402,10 +32288,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -32459,10 +32342,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -32649,10 +32529,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -32694,10 +32571,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -32739,10 +32613,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -32791,9 +32662,15 @@
   "expectation": {
     "acceptableActions": [
       {
-      "type": "draw_card"
+        "type": "draw_card"
       }
-  ],
-  "planExecution": {"acceptablePlanKinds":["corp.hand_and_agenda_management"],"acceptableCapabilities":["draw_for_plan"],"requiredAssessmentEvidence":["corp_option_development_below_hand_capacity"]}
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["develop_score_protection"],
+      "requiredAssessmentEvidence": [
+        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_207_netwatch-operations-office_1:remote_2:remote_2"
+      ]
+    }
   }
 }

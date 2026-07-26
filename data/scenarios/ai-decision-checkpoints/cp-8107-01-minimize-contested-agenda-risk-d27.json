@@ -705,26 +705,20 @@
           "corp_onr_v1_309_bbs-whispering-campaign_2",
           "corp_onr_v1_281_accounts-receivable_2"
         ],
-        "scoreArea": [
-          "corp_onr_proteus_008_project-zurich_2"
-        ],
+        "scoreArea": ["corp_onr_proteus_008_project-zurich_2"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_237_data-wall_2"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_2"],
             "root": []
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_238_data-wall-2-0_2"
-            ],
+            "ice": ["corp_onr_v1_238_data-wall-2-0_2"],
             "root": []
           },
           {
@@ -738,10 +732,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_262_razor-wire_1",
-              "corp_onr_v1_244_filter_1"
-            ],
+            "ice": ["corp_onr_v1_262_razor-wire_1", "corp_onr_v1_244_filter_1"],
             "root": []
           }
         ]
@@ -808,12 +799,8 @@
             "runner_onr_v1_071_vewy-vewy-quiet_2",
             "runner_onr_classic_031_rent-i-con_2"
           ],
-          "hardware": [
-            "runner_onr_v1_139_r-and-d-interface_1"
-          ],
-          "resources": [
-            "runner_onr_v1_176_the-shell-traders_1"
-          ]
+          "hardware": ["runner_onr_v1_139_r-and-d-interface_1"],
+          "resources": ["runner_onr_v1_176_the-shell-traders_1"]
         }
       },
       "specialZones": {
@@ -3649,9 +3636,7 @@
       },
       "selectedStepKind": "protect_remote",
       "selectedActionId": "corp.install_card.corp_onr_v1_244_filter_1.remote_1.corp_onr_v1_244_filter_1.1",
-      "blockedBy": [
-        "missing_remote_protection"
-      ],
+      "blockedBy": ["missing_remote_protection"],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
       "progressBaseline": {
@@ -3687,9 +3672,7 @@
         "milestone": "find_remote_protection",
         "progress": 0.5,
         "selectedStepKind": "find_remote_protection",
-        "actionCandidateIds": [
-          "corp.draw_card"
-        ],
+        "actionCandidateIds": ["corp.draw_card"],
         "cadence": {
           "turnKey": "corp:turn:5",
           "maxActionsPerTurn": 4,
@@ -3725,9 +3708,7 @@
           "milestone": "find_remote_protection",
           "progress": 0.5,
           "selectedStepKind": "find_remote_protection",
-          "actionCandidateIds": [
-            "corp.draw_card"
-          ],
+          "actionCandidateIds": ["corp.draw_card"],
           "cadence": {
             "turnKey": "corp:turn:5",
             "maxActionsPerTurn": 1,
@@ -3949,9 +3930,7 @@
               "support": 80,
               "final": 92
             },
-            "supportGaps": [
-              "low_tagOrTrace_support"
-            ],
+            "supportGaps": ["low_tagOrTrace_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -3972,9 +3951,7 @@
               "support": 78,
               "final": 91
             },
-            "supportGaps": [
-              "low_bait_support"
-            ],
+            "supportGaps": ["low_bait_support"],
             "evidence": [
               "strategy:corp.asset_economy",
               "confidence:high",
@@ -4165,10 +4142,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4286,10 +4260,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4329,10 +4300,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4448,10 +4416,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4533,9 +4498,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.central_stabilize"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.central_stabilize"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -4567,10 +4530,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4743,10 +4703,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4788,10 +4745,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4840,13 +4794,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "draw_card"
-      }
-    ],
-    "forbiddenActions": [
-      {
         "actionId": "corp.install_card.corp_onr_v1_195_corporate-retreat_1.remote_1.corp_onr_v1_195_corporate-retreat_1"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
+      "requiredAssessmentEvidence": [
+        "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1"
+      ]
+    }
   }
 }

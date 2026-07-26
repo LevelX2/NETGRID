@@ -16,11 +16,11 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       keepScoreRemoteOpenJson,
     ],
     [
-      "minimizes agenda points exposed on a contested remote",
+      "starts an exact score campaign behind staged ETR",
       minimizeAgendaRiskJson,
     ],
     [
-      "does not expose a game-ending agenda on a still-reachable remote",
+      "starts the exact matchpoint campaign without claiming guaranteed safety",
       startMatchpointJson,
     ],
   ])("%s", (_label, json) => {
@@ -72,12 +72,14 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-A2-NO-AGENDA-CONTROL";
       fixture.expectation = {
-        acceptableActions: [
-          {
-            actionId:
-              "corp.install_card.corp_onr_v1_365_paris-city-grid_1.remote_1.corp_onr_v1_365_paris-city-grid_1",
-          },
-        ],
+        acceptableActions: [{ type: "draw_card" }],
+        planExecution: {
+          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
+          acceptableCapabilities: ["draw_for_plan"],
+          requiredAssessmentEvidence: [
+            "corp_score_campaign_missing_agenda_material",
+          ],
+        },
       };
     });
 
@@ -108,7 +110,19 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-B1-SAFE-REMOTE-CONTROL";
       fixture.expectation = {
-        acceptableActions: [{ type: "draw_card" }],
+        acceptableActions: [
+          {
+            actionId:
+              "corp.install_card.corp_onr_v1_195_corporate-retreat_1.remote_1.corp_onr_v1_195_corporate-retreat_1",
+          },
+        ],
+        planExecution: {
+          acceptablePlanKinds: ["corp.score_agenda"],
+          acceptableCapabilities: ["install_score_agenda"],
+          requiredAssessmentEvidence: [
+            "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
+          ],
+        },
         selectedScoreBreakdown: {
           forbiddenComponentKeys: ["corp_contested_agenda_point_risk"],
         },
@@ -140,7 +154,19 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-B2-NO-MATCHPOINT-CONTROL";
       fixture.expectation = {
-        acceptableActions: [{ actionId: "corp.gain_credit" }],
+        acceptableActions: [
+          {
+            actionId:
+              "corp.install_card.corp_onr_proteus_008_project-zurich_1.remote_1.corp_onr_proteus_008_project-zurich_1",
+          },
+        ],
+        planExecution: {
+          acceptablePlanKinds: ["corp.score_agenda"],
+          acceptableCapabilities: ["install_score_agenda"],
+          requiredAssessmentEvidence: [
+            "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
+          ],
+        },
       };
     });
 

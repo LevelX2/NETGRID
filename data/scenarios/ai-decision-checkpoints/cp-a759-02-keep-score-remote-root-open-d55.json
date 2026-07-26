@@ -7160,8 +7160,11 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.punish_campaign"],
-      "acceptableCapabilities": ["punish_prepare"]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["develop_score_protection"],
+      "requiredAssessmentEvidence": [
+        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_193_corporate-coup_1:remote_1:remote_1"
+      ]
     }
   }
 }

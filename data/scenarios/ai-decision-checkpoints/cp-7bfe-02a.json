@@ -6538,18 +6538,16 @@
     "acceptableActions": [
       {
         "type": "install_card",
-        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+        "sourceDefinitionId": "onr_v1_196_corporate-war",
         "targetServerId": "remote_1"
-      },
-      {
-        "type": "gain_credit"
       }
     ],
-    "forbiddenActions": [
-      {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_196_corporate-war"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
+      "requiredAssessmentEvidence": [
+        "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1"
+      ]
+    }
   }
 }

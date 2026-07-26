@@ -33081,7 +33081,9 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.gain_credit"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_207_netwatch-operations-office",
+        "targetServerId": "remote_1"
       }
     ],
     "forbiddenActions": [
@@ -33089,6 +33091,13 @@
         "type": "install_card",
         "targetServerId": "new_remote"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
+      "requiredAssessmentEvidence": [
+        "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1"
+      ]
+    }
   }
 }

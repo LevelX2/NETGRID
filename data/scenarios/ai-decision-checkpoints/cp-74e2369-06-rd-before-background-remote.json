@@ -2600,14 +2600,14 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "draw_card"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["develop_score_protection"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_basic_liquidity_development"
+        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_203_hostile-takeover_1:new_remote:new_remote"
       ]
     }
   }
