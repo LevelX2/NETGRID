@@ -69,6 +69,8 @@ export function FloatingAiDecisionDebugOverlay({
   previewError,
   previewLoading,
   canRequestPreview,
+  trace,
+  traceCount,
   onRequestPreview,
   onPosition,
   onClose,
@@ -80,6 +82,8 @@ export function FloatingAiDecisionDebugOverlay({
   previewError: string;
   previewLoading: boolean;
   canRequestPreview: boolean;
+  trace: MaintenanceAiTraceDetail | null;
+  traceCount: number;
   onRequestPreview(): void;
   onPosition(position: RunOverlayPositionPreference): void;
   onClose(): void;
@@ -160,11 +164,11 @@ export function FloatingAiDecisionDebugOverlay({
           transform: "none",
         }
       : {};
-  const exportTrace = preview ? aiDecisionPreviewAsTrace(preview) : null;
-  const exportMode: "trace" | "preview" = "preview";
+  const exportTrace = preview ? aiDecisionPreviewAsTrace(preview) : trace;
+  const exportMode: "trace" | "preview" = preview ? "preview" : "trace";
   const statusText = exportTrace
     ? aiDecisionDebugWindowHeaderStatusLabel(exportTrace, exportMode)
-    : aiDecisionDebugStatusLabel(status);
+    : aiDecisionDebugStatusLabel(status, traceCount);
   const windowClassName = `aiDecisionDebugWindow ${collapsed ? "is-collapsed" : ""}`;
   const exportButtonTitle =
     preview && exportStatus === "idle"
@@ -268,12 +272,12 @@ export function FloatingAiDecisionDebugOverlay({
             >
               {previewLoading
                 ? "KI-Vorschlag wird berechnet …"
-                : "Was würde die KI tun?"}
+                : "Eigene KI-Probe (optional)"}
             </button>
             <span>
               {canRequestPreview
-                ? "Read-only · aktuelle eigene LegalActions"
-                : "Nur im aktuellen eigenen Entscheidungsfenster verfügbar"}
+                ? "Read-only · aktuelle eigene LegalActions · ersetzt keinen KI-Trace"
+                : "Eigene KI-Probe nur im aktuellen eigenen Entscheidungsfenster"}
             </span>
           </div>
           <AiDecisionDebugOverlayBody
@@ -282,6 +286,7 @@ export function FloatingAiDecisionDebugOverlay({
             preview={preview}
             previewError={previewError}
             canRequestPreview={canRequestPreview}
+            trace={trace}
           />
         </div>
       </section>
@@ -298,12 +303,14 @@ function AiDecisionDebugOverlayBody({
   preview,
   previewError,
   canRequestPreview,
+  trace,
 }: {
   status: AiDecisionDebugOverlayStatus;
   error: string;
   preview: AiDecisionPreview | null;
   previewError: string;
   canRequestPreview: boolean;
+  trace: MaintenanceAiTraceDetail | null;
 }) {
   if (preview) {
     return (
@@ -327,11 +334,12 @@ function AiDecisionDebugOverlayBody({
       </p>
     );
   }
+  if (trace) return <AiDecisionDebugTraceView trace={trace} />;
   return (
     <p className="aiDecisionDebugNotice" role="status">
       {canRequestPreview
-        ? "Wähle „Was würde die KI tun?“. Die Auskunft ist read-only, an deine aktuellen LegalActions gebunden und zeigt keinen gegnerischen Server-Trace."
-        : "Für dieses Fenster gibt es außerhalb deines aktuellen Entscheidungsfensters keine Auskunft. Es zeigt weder verdeckte Informationen noch gegnerische Server-Traces."}
+        ? "Warte auf die nächste tatsächliche KI-Entscheidung. Die eigene KI-Probe ist optional und ersetzt den Entscheidungs-Trace nicht."
+        : "Warte auf die nächste tatsächliche KI-Entscheidung. Außerhalb deines eigenen Entscheidungsfensters ist keine eigene KI-Probe verfügbar."}
     </p>
   );
 }
@@ -3187,10 +3195,13 @@ function aiDecisionDebugRecordList(
 
 function aiDecisionDebugStatusLabel(
   status: AiDecisionDebugOverlayStatus,
+  traceCount: number,
 ): string {
   if (status === "activating") return "Aktivierung";
-  if (status === "waiting") return "Bereit";
-  if (status === "live") return "Live";
+  if (status === "waiting")
+    return traceCount > 0 ? `${traceCount} geladen` : "Wartet";
+  if (status === "live")
+    return traceCount > 0 ? `${traceCount} KI-Trace` : "Live";
   if (status === "error") return "Fehler";
   return "Aus";
 }

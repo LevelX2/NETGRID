@@ -207,6 +207,7 @@ import {
   type RecentSessionInfo,
   type SessionInfo,
 } from "./session-recovery";
+import { latestAiDecisionDebugEventTrace } from "./ai-decision-debug-event-trace";
 import {
   ACTION_CUE_SETTINGS_STORAGE_KEY,
   ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
@@ -2551,6 +2552,18 @@ export default function Page() {
     session && payload
       ? `${session.matchId}:${session.side}:${payload.matchVersion}:${payload.playerView.stateVersion}`
       : "";
+  const aiDecisionDebugTrace = useMemo(
+    () =>
+      session && payload
+        ? latestAiDecisionDebugEventTrace({
+            matchId: session.matchId,
+            matchVersion: payload.matchVersion,
+            eventTail: payload.eventTail,
+            observedAt: new Date().toISOString(),
+          })
+        : null,
+    [payload, session],
+  );
   const floatingPanelHasHiddenContextActions = Boolean(
     !activeView?.run &&
     legalActionSplit.contextualActions.length > 0 &&
@@ -6257,12 +6270,16 @@ export default function Page() {
             {showAiDecisionDebugOverlay ? (
               <FloatingAiDecisionDebugOverlay
                 position={aiDecisionDebugOverlayPosition}
-                status={aiDecisionDebugStatus}
+                status={
+                  aiDecisionDebugTrace ? "live" : aiDecisionDebugStatus
+                }
                 error={aiDecisionDebugError}
                 preview={aiDecisionDebugPreview}
                 previewError={aiDecisionDebugPreviewError}
                 previewLoading={aiDecisionDebugPreviewLoading}
                 canRequestPreview={canRequestHumanAiDecisionPreview}
+                trace={aiDecisionDebugTrace}
+                traceCount={aiDecisionDebugTrace ? 1 : 0}
                 onRequestPreview={() => void requestHumanAiDecisionPreview()}
                 onPosition={setAiDecisionDebugOverlayPosition}
                 onClose={() => setAiDecisionDebugOverlayEnabled(false)}
