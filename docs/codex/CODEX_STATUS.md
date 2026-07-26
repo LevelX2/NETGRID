@@ -312,6 +312,10 @@ und
   `codex/ai-plan-first-runtime-cutover` sind verifiziert entfernt. Die
   vollständigen Pre-Commit- und Integrationsgates einschließlich der
   60-Spiele-Baseline sind grün.
+- Der erste Folgezuschnitt für strukturierte Choice-Fortsetzungen begrenzt
+  `originActionId` und eine diskriminierte Nutzlast auf die zwei
+  Corp-Score-Familien; er ist geplant, aber nicht implementiert. Führend ist
+  `docs/architecture/ai/ai-score-choice-continuation-identity-process-2026-07-26.md`.
 - `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts` und
   `apps/server/src/multiplayer.test.ts` sind weiterhin groß. Die priorisierten
   Corp-AI-Scoring-, Choice- und Triage-Owner liegen wieder innerhalb ihrer
