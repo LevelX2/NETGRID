@@ -367,6 +367,7 @@ export async function fetchAiDecisionPreview(
         },
         body: JSON.stringify({
           side: session.side,
+          targetSide: session.side,
           knownStateVersion: payload.playerView.stateVersion,
           knownMatchVersion: payload.matchVersion,
         }),

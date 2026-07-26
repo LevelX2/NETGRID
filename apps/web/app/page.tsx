@@ -2041,9 +2041,9 @@ export default function Page() {
     localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
   const selectedDeck = selectedLocalDeck;
   const selectedDeckDirty = selectedLocalDeck
-      ? savedDeckFingerprints[selectedLocalDeck.deckId] !==
-        deckFingerprint(selectedLocalDeck)
-      : false;
+    ? savedDeckFingerprints[selectedLocalDeck.deckId] !==
+      deckFingerprint(selectedLocalDeck)
+    : false;
   const playableCatalogCards = useMemo(
     () =>
       allCatalogCards.filter((card) =>
@@ -2758,6 +2758,8 @@ export default function Page() {
       !session ||
       !payload ||
       !aiTurnPresentation?.canAdvanceAi ||
+      aiTurnPresentation.activeAiSide !== session.side ||
+      session.mode === "ai_vs_ai" ||
       payload.winner
     ) {
       setAiDecisionDebugPreview(null);
@@ -3152,16 +3154,17 @@ export default function Page() {
       catalogDetailsById,
       { preferGermanCardImages },
     );
-    const cues = !matchEnded && actionCuesEnabled
-      ? deriveOpponentActionCues({
-          viewerSide: payload.side,
-          playerView: payload.playerView,
-          events: payload.eventTail,
-          lastPresentedEventId: lastSeen,
-          includeAutomaticEffectCues: automaticEffectCuesEnabled,
-          contextByEventId,
-        })
-      : [];
+    const cues =
+      !matchEnded && actionCuesEnabled
+        ? deriveOpponentActionCues({
+            viewerSide: payload.side,
+            playerView: payload.playerView,
+            events: payload.eventTail,
+            lastPresentedEventId: lastSeen,
+            includeAutomaticEffectCues: automaticEffectCuesEnabled,
+            contextByEventId,
+          })
+        : [];
     const damageImpacts = deriveDamageImpactCues({
       viewerSide: payload.side,
       playerView: payload.playerView,
@@ -5908,33 +5911,33 @@ export default function Page() {
                   ) : null}
                   {entryTab === "decks" ? (
                     <DeckEditorPanel
-                        localDecks={localDecks}
-                        selectedDeck={selectedDeck}
-                        selectedDeckDirty={selectedDeckDirty}
-                        storagePath={deckLibraryStoragePath}
-                        validation={deckValidation}
-                        validatedSnapshot={validatedSnapshot}
-                        playableCards={playableCatalogCards}
-                        cardDetailsById={catalogDetailsById}
-                        importText={deckImportText}
-                        exportText={deckExportText}
-                        onCreateEmpty={createEmptyDeck}
-                        onSelectDeck={setSelectedLocalDeckId}
-                        onUpdateDeck={updateSelectedDeck}
-                        onSave={saveSelectedDeck}
-                        onUpdateQuantity={updateDeckCardQuantity}
-                        onDuplicate={duplicateSelectedDeck}
-                        onDelete={deleteSelectedDeck}
-                        onValidate={validateSelectedDeck}
-                        onUseForMatch={useValidatedDeckForMatch}
-                        onExport={exportSelectedDeck}
-                        onImportText={setDeckImportText}
-                        onImport={importLocalDeck}
-                        standardDecks={
-                          accountSession.account ? standardDecks : []
-                        }
-                        standardCopyBusy={accountDeckBusy}
-                        onCopyStandard={copyStandardToAccount}
+                      localDecks={localDecks}
+                      selectedDeck={selectedDeck}
+                      selectedDeckDirty={selectedDeckDirty}
+                      storagePath={deckLibraryStoragePath}
+                      validation={deckValidation}
+                      validatedSnapshot={validatedSnapshot}
+                      playableCards={playableCatalogCards}
+                      cardDetailsById={catalogDetailsById}
+                      importText={deckImportText}
+                      exportText={deckExportText}
+                      onCreateEmpty={createEmptyDeck}
+                      onSelectDeck={setSelectedLocalDeckId}
+                      onUpdateDeck={updateSelectedDeck}
+                      onSave={saveSelectedDeck}
+                      onUpdateQuantity={updateDeckCardQuantity}
+                      onDuplicate={duplicateSelectedDeck}
+                      onDelete={deleteSelectedDeck}
+                      onValidate={validateSelectedDeck}
+                      onUseForMatch={useValidatedDeckForMatch}
+                      onExport={exportSelectedDeck}
+                      onImportText={setDeckImportText}
+                      onImport={importLocalDeck}
+                      standardDecks={
+                        accountSession.account ? standardDecks : []
+                      }
+                      standardCopyBusy={accountDeckBusy}
+                      onCopyStandard={copyStandardToAccount}
                     />
                   ) : null}
                   {entryTab === "recent" ? (

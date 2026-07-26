@@ -73,7 +73,6 @@ import {
   type RulesBaseline,
   type ReplayableEngineAction,
   type Side,
-  type VisibleCard,
   type Winner,
 } from "@netgrid/shared";
 import {
@@ -733,12 +732,10 @@ export type PreviewAiResult =
   | {
       ok: true;
       preview: AiDecisionPreview;
-      payload: SidePayload;
     }
   | {
       ok: false;
       error: SafeErrorPayload;
-      payload?: SidePayload;
     };
 
 type AiDecisionChooser = typeof chooseAiAction;
@@ -2755,7 +2752,8 @@ export class MultiplayerService {
 
   async previewAi(input: {
     matchId: string;
-    side: Side;
+    requesterSide: Side;
+    targetSide: Side;
     sessionToken: string;
     knownStateVersion?: number;
     knownMatchVersion?: number;
@@ -2772,26 +2770,41 @@ export class MultiplayerService {
             "Dieses private Match ist nicht verfügbar.",
           ),
         };
-      const session = this.authenticate(record, input.side, input.sessionToken);
+      const session = this.authenticate(
+        record,
+        input.requesterSide,
+        input.sessionToken,
+      );
       if (!session)
         return {
           ok: false,
           error: safeError("unauthorized", "Die Session ist nicht gültig."),
         };
-      if (this.isAiSide(record, input.side) && record.match.mode !== "ai_vs_ai")
+      if (input.targetSide !== input.requesterSide)
+        return {
+          ok: false,
+          error: safeError(
+            "preview_side_forbidden",
+            "Die Session darf nur die eigene Seite bewerten.",
+          ),
+        };
+      if (
+        record.match.mode !== "human_runner_vs_corp_ai" &&
+        record.match.mode !== "human_corp_vs_runner_ai"
+      )
+        return {
+          ok: false,
+          error: safeError(
+            "preview_mode_forbidden",
+            "Die KI-Vorschau ist auf private Human-vs-KI-Spielersessions begrenzt.",
+          ),
+        };
+      if (this.isAiSide(record, input.requesterSide))
         return {
           ok: false,
           error: safeError(
             "ai_session_forbidden",
-            "Nur eine menschliche Session darf die KI bewerten.",
-          ),
-        };
-      if (record.match.mode === "ai_vs_ai" && !isHostSession(record, session))
-        return {
-          ok: false,
-          error: safeError(
-            "host_required",
-            "Nur die Beobachtersession darf die Simulation bewerten.",
+            "Nur die menschliche Seite darf eine eigene KI-Vorschau anfordern.",
           ),
         };
       if (record.match.status !== "active" || !record.gameState)
@@ -2802,17 +2815,16 @@ export class MultiplayerService {
             "Das Match ist noch nicht aktiv.",
           ),
         };
-      const activeAiSide = this.aiControllableSide(record);
-      if (!activeAiSide) {
+      const decisionSide = selectAiDecisionSideForState(record.gameState).side;
+      if (!decisionSide || decisionSide !== input.targetSide) {
         return {
           ok: false,
           error: safeError(
-            "ai_not_active",
-            "Aktuell ist keine KI am Zug.",
+            "preview_side_not_active",
+            "Die eigene Seite darf im aktuellen Zustand nicht entscheiden.",
             record.gameState,
-            input.side,
+            input.requesterSide,
           ),
-          payload: this.payloadFor(record, input.side),
         };
       }
       if (
@@ -2825,9 +2837,8 @@ export class MultiplayerService {
             "stale_state",
             "Der Spielzustand ist veraltet.",
             record.gameState,
-            input.side,
+            input.requesterSide,
           ),
-          payload: this.payloadFor(record, input.side),
         };
       }
       if (
@@ -2840,13 +2851,12 @@ export class MultiplayerService {
             "stale_match",
             "Der Matchzustand ist veraltet.",
             record.gameState,
-            input.side,
+            input.requesterSide,
           ),
-          payload: this.payloadFor(record, input.side),
         };
       }
 
-      const legalActions = getLegalActions(record.gameState, activeAiSide);
+      const legalActions = getLegalActions(record.gameState, input.targetSide);
       if (legalActions.length === 0) {
         return {
           ok: false,
@@ -2854,29 +2864,28 @@ export class MultiplayerService {
             "ai_no_action",
             "Die KI hat aktuell keine legalen Aktionen.",
             record.gameState,
-            input.side,
+            input.requesterSide,
           ),
-          payload: this.payloadFor(record, input.side),
         };
       }
-      const controller = record.match.aiControllers?.[activeAiSide];
+      const controller = record.match.aiControllers?.[input.targetSide];
       let aiInput: AiDecisionInput;
       try {
         const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(
           record,
-          activeAiSide,
+          input.targetSide,
         );
-        aiInput = buildAiDecisionInput(record.gameState, activeAiSide, {
+        aiInput = buildAiDecisionInput(record.gameState, input.targetSide, {
           difficulty: controller?.difficulty ?? "normal",
           profileId:
             controller?.profileId ??
-            `${activeAiSide}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
-          decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${activeAiSide}`,
+            `${input.targetSide}-session-preview-v0.9-${controller?.difficulty ?? "normal"}`,
+          decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${input.targetSide}:session-preview`,
           actionNumber: record.gameState.stateVersion,
           ownDeckSnapshot,
           expectedDeckSnapshot: aiDeckSnapshotExpectationFor(
             record,
-            activeAiSide,
+            input.targetSide,
           ),
         });
       } catch (error) {
@@ -2887,9 +2896,8 @@ export class MultiplayerService {
               error.code,
               aiDeckSnapshotErrorMessage(error.code),
               record.gameState,
-              input.side,
+              input.requesterSide,
             ),
-            payload: this.payloadFor(record, input.side),
           };
         }
         throw error;
@@ -2908,9 +2916,8 @@ export class MultiplayerService {
             "ai_randomized_selection_requires_execution",
             "Diese KI-Entscheidung wird erst bei der Ausführung durch die Engine ausgewählt.",
             record.gameState,
-            input.side,
+            input.requesterSide,
           ),
-          payload: this.payloadFor(record, input.side),
         };
       }
       const legalAction = legalActionForAiDecision(decision, legalActions);
@@ -2921,29 +2928,25 @@ export class MultiplayerService {
             "ai_decision_action_not_legal",
             "Die KI wählte keine aktuell legale Aktion.",
             record.gameState,
-            input.side,
+            input.requesterSide,
           ),
-          payload: this.payloadFor(record, input.side),
         };
       }
       const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
-      const detail = withAiPrivateHandPreview(
-        safeDebug
-          ? aiDecisionTraceJson(
-              safeDebug,
-              activeAiSide,
-              legalAction,
-              "detailed",
-            )
-          : minimalAiPreviewDetail(activeAiSide, legalAction, decision),
-        aiInput,
-      );
+      const detail = safeDebug
+        ? aiDecisionTraceJson(
+            safeDebug,
+            input.targetSide,
+            legalAction,
+            "detailed",
+          )
+        : minimalAiPreviewDetail(input.targetSide, legalAction, decision);
       const preview: AiDecisionPreview = {
         matchId: record.match.matchId,
         matchVersion: record.match.matchVersion,
         stateVersion: record.gameState.stateVersion,
-        requestedBy: input.side,
-        side: activeAiSide,
+        requestedBy: input.requesterSide,
+        side: input.targetSide,
         generatedAt: this.now(),
         actionId: legalAction.actionId,
         actionType: legalAction.type,
@@ -2963,7 +2966,6 @@ export class MultiplayerService {
       return {
         ok: true,
         preview,
-        payload: this.payloadFor(record, input.side),
       };
     });
   }
@@ -5947,103 +5949,6 @@ function minimalAiPreviewDetail(
     ],
     scoreBreakdown: [],
   };
-}
-
-function withAiPrivateHandPreview(
-  detail: Record<string, unknown>,
-  input: AiDecisionInput,
-): Record<string, unknown> {
-  return {
-    ...detail,
-    aiPrivateHandPreview: aiPrivateHandPreview(input),
-  };
-}
-
-function aiPrivateHandPreview(input: AiDecisionInput): Record<string, unknown> {
-  const legalActionsBySource = new Map<string, LegalAction[]>();
-  for (const action of input.legalActions) {
-    const source = typeof action.source === "string" ? action.source : "";
-    if (!source || source === "basic_action" || source === "game_rule")
-      continue;
-    const actions = legalActionsBySource.get(source) ?? [];
-    actions.push(action);
-    legalActionsBySource.set(source, actions);
-  }
-  return {
-    schemaVersion: "ai-private-hand-preview-v1",
-    visibility: "preview_only_not_persisted",
-    side: input.side,
-    credits: input.playerView.own.credits,
-    handCount: input.playerView.own.gripOrHq.length,
-    cards: input.playerView.own.gripOrHq
-      .slice(0, 12)
-      .map((card, index) =>
-        aiPrivateHandCardPreview(
-          card,
-          index,
-          input.playerView.own.credits,
-          legalActionsBySource.get(card.instanceId) ?? [],
-        ),
-      ),
-  };
-}
-
-function aiPrivateHandCardPreview(
-  card: VisibleCard,
-  index: number,
-  credits: number,
-  legalActions: LegalAction[],
-): Record<string, unknown> {
-  const playCost = aiPrivateHandCardCost(card);
-  const missingCredits =
-    playCost === undefined ? undefined : Math.max(0, playCost - credits);
-  const rulesText = aiPrivateHandCardRulesText(card);
-  return {
-    index,
-    instanceId: card.instanceId,
-    definitionId: card.definitionId ?? "",
-    title: card.title ?? card.definitionId ?? "Unbekannte Karte",
-    type: card.type ?? "unknown",
-    ...(rulesText ? { rulesText } : {}),
-    ...(card.subtypes && card.subtypes.length > 0
-      ? { subtypes: card.subtypes.slice(0, 4) }
-      : {}),
-    ...(playCost !== undefined ? { playCost } : {}),
-    ...(missingCredits !== undefined ? { missingCredits } : {}),
-    availability:
-      legalActions.length > 0
-        ? "legal_now"
-        : missingCredits !== undefined && missingCredits > 0
-          ? "missing_credits"
-          : "not_legal_now",
-    legalActions: legalActions.slice(0, 4).map((action) => ({
-      actionId: action.actionId,
-      actionType: action.type,
-      label: action.label,
-      creditCost: actionCreditCost(action),
-    })),
-  };
-}
-
-function aiPrivateHandCardRulesText(card: VisibleCard): string | undefined {
-  const rulesText =
-    card.rulesText ??
-    (card.definitionId
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.rulesText
-      : undefined);
-  if (typeof rulesText !== "string") return undefined;
-  const normalized = rulesText.trim();
-  return normalized.length > 0 ? normalized.slice(0, 1200) : undefined;
-}
-
-function aiPrivateHandCardCost(card: VisibleCard): number | undefined {
-  if (typeof card.installCost === "number") return card.installCost;
-  if (typeof card.cost === "number") return card.cost;
-  return undefined;
-}
-
-function actionCreditCost(action: LegalAction): number {
-  return action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0);
 }
 
 function replayRandomDrawEntries(record: StoredMatch): ReplayRandomDrawEntry[] {
