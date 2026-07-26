@@ -1,19 +1,34 @@
 ---
 activityId: act-2026-07-26-ai-preview-session-redaction-hardening
-status: inbox
+status: done
 kind: fix
 area: server
 priority: hotfix
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-07-26
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-26
+completedAt: 2026-07-26
+branch: codex/activities-ai-preview-20260726
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/http-server.ts
+  - apps/server/src/multiplayer.test.ts
+  - apps/web/lib/client-api.ts
+  - apps/web/lib/client-api-ai-preview.test.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/maintenance.ts
+checks:
+  - corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer.test.ts -t "stores enabled AI decision traces|does not preview or execute|keeps tactical plan ranking|binds session AI previews" (4 passed)
+  - corepack pnpm --filter @netgrid/web exec vitest run lib/client-api-ai-preview.test.ts app/maintenance.test.ts (16 passed)
+  - corepack pnpm --filter @netgrid/web test (691 passed)
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm format:changed
+  - git diff --check
+  - Baseline-Gegenprüfung des einzigen Full-Server-Fehlers auf unverändertem main reproduziert
 ---
 
 # KI-Preview gegen Hidden-Info-Leaks in Spieler-Sessions härten
@@ -86,23 +101,23 @@ an den bestehenden Maintenance-/Diagnosevertrag gebunden.
 
 ## Akzeptanzkriterien
 
-- [ ] Eine menschliche Runner-Session erhält aus dem Match-Preview-Pfad weder
+- [x] Eine menschliche Runner-Session erhält aus dem Match-Preview-Pfad weder
       Korp-HQ-Kartentitel noch andere private Korp-Daten.
-- [ ] Eine menschliche Korp-Session erhält weder Runner-Grip-/Stack-Kartentitel
+- [x] Eine menschliche Korp-Session erhält weder Runner-Grip-/Stack-Kartentitel
       noch andere private Runner-Daten.
-- [ ] Eine KI-vs-KI-Beobachtersession erhält über die normale Matchroute keine
+- [x] Eine KI-vs-KI-Beobachtersession erhält über die normale Matchroute keine
       private Hand, Deckliste oder verdeckte Aktionsquelle einer KI-Seite.
-- [ ] Fremdseitige `targetSide`-Anfragen scheitern fail-closed mit einer
+- [x] Fremdseitige `targetSide`-Anfragen scheitern fail-closed mit einer
       side-sicheren Fehlermeldung.
-- [ ] Eigenseitige Preview-Antworten enthalten nur Daten, die aus der
+- [x] Eigenseitige Preview-Antworten enthalten nur Daten, die aus der
       authentifizierten `PlayerView`, ihren `LegalActions`, erlaubten
       `PublicEvents` und side-sicherem `DecisionDebug` ableitbar sind.
-- [ ] Sentinel-Tests mit eindeutig benannten verdeckten Karten beweisen, dass
+- [x] Sentinel-Tests mit eindeutig benannten verdeckten Karten beweisen, dass
       deren Titel, Definition-IDs und Instanz-IDs nicht in JSON-Antwort oder
       DOM der Gegenperspektive erscheinen.
-- [ ] Preview-Aufrufe verändern weder Eventlog noch `stateVersion`,
+- [x] Preview-Aufrufe verändern weder Eventlog noch `stateVersion`,
       `matchVersion`, StateHash, Zufallszähler oder KI-Memory.
-- [ ] Server-, Web- und Hidden-Info-Checks sowie `git diff --check` sind grün.
+- [x] Server-, Web- und Hidden-Info-Checks sowie `git diff --check` sind grün.
 
 ## Umsetzungshinweise
 
@@ -117,4 +132,26 @@ an den bestehenden Maintenance-/Diagnosevertrag gebunden.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die normale Matchroute ist jetzt strikt requester-relativ: Nur eine
+authentifizierte menschliche Seite in einem Human-vs-KI-Match darf ihre eigene
+aktuell entscheidungsberechtigte Seite bewerten. Fremde Zielseiten und
+KI-vs-KI-Beobachtersessions scheitern vor dem Aufbau eines KI-Inputs.
+
+Die Route liefert ausschließlich das eigentliche Preview-Objekt. Der frühere
+`aiPrivateHandPreview` samt Karten-, Titel- und Regeltextdaten sowie der
+zusätzliche vollständige Side-Payload wurden entfernt. Die Vorschau verwendet
+weiter ausschließlich `LegalActions`, bleibt mit
+`persistTacticalPlanMemory: false` zustandslos und verändert weder Matchdaten
+noch Engine-Zustand oder Zufallsstand.
+
+Der Webclient fordert ausdrücklich nur `targetSide === session.side` an,
+übergibt ausschließlich das Preview an die Oberfläche und blockiert das
+retirierte Private-Hand-Schema zusätzlich vor der Anzeige. Das Gameplay lädt
+keine gegnerseitige oder KI-vs-KI-Session-Preview mehr automatisch.
+
+Die gezielten Server-, Web-, Redaction-, Typ- und Formatprüfungen sind grün.
+Der vollständige Serverlauf endet bei 205 von 206 Tests grün; der unabhängige
+Langlauf `runs an observable AI-vs-AI match beyond 120 actions ...` beendet das
+deterministische Spiel aktuell nach 109 statt mehr als 120 Aktionen. Derselbe
+Fehler wurde auf dem unveränderten lokalen `main` identisch reproduziert und
+ist daher kein Regressionsbefund dieses Pakets.

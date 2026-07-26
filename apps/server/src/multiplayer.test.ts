@@ -1259,58 +1259,21 @@ describe("Backend 0.5 private storage maintenance", () => {
       "ai-trace-off-setup",
     );
     const beforePreview = await service.loadForTest(traced.matchId);
-    let previewActionId = "";
-    let previewActionType = "";
     const preview = await service.previewAi({
       matchId: traced.matchId,
-      side: "runner",
+      requesterSide: "runner",
+      targetSide: "corp",
       sessionToken: traced.hostSessionToken,
       knownStateVersion: tracedSetup.playerView.stateVersion,
       knownMatchVersion: tracedSetup.matchVersion,
     });
     const afterPreview = await service.loadForTest(traced.matchId);
-    expect(preview.ok).toBe(true);
-    if (preview.ok) {
-      expect(preview.preview).toMatchObject({
-        matchId: traced.matchId,
-        requestedBy: "runner",
-        side: "corp",
-        actionId: expect.any(String),
-        actionType: expect.any(String),
-        detail: expect.objectContaining({
-          selectedActionId: expect.any(String),
-          selectedActionType: expect.any(String),
-          debugSelectionMatchesApplied: true,
-          actionAlternatives: expect.any(Array),
-        }),
-      });
-      expect(preview.preview.detail.aiPrivateHandPreview).toMatchObject({
-        schemaVersion: "ai-private-hand-preview-v1",
-        visibility: "preview_only_not_persisted",
-        side: "corp",
-        credits: expect.any(Number),
-        handCount: expect.any(Number),
-        cards: expect.any(Array),
-      });
-      const privateHand = preview.preview.detail.aiPrivateHandPreview as {
-        cards?: unknown[];
-      };
-      expect(privateHand.cards?.length ?? 0).toBeGreaterThan(0);
-      expect(privateHand.cards?.[0]).toMatchObject({
-        title: expect.any(String),
-        definitionId: expect.any(String),
-        rulesText: expect.any(String),
-        availability: expect.any(String),
-        legalActions: expect.any(Array),
-      });
-      previewActionId = preview.preview.actionId;
-      previewActionType = preview.preview.actionType;
-      expect(
-        Array.isArray(preview.preview.detail.actionAlternatives)
-          ? preview.preview.detail.actionAlternatives.length
-          : 0,
-      ).toBeGreaterThan(0);
-    }
+    expect(preview.ok).toBe(false);
+    if (preview.ok) throw new Error("Expected foreign-side preview rejection");
+    expect(preview.error.code).toBe("preview_side_forbidden");
+    expect(JSON.stringify(preview)).not.toMatch(
+      /aiPrivateHandPreview|privateDeckSnapshots|cardInstances/,
+    );
     expect(afterPreview?.eventLog.length).toBe(beforePreview?.eventLog.length);
     expect(afterPreview?.gameState?.stateVersion).toBe(
       beforePreview?.gameState?.stateVersion,
@@ -1384,11 +1347,8 @@ describe("Backend 0.5 private storage maintenance", () => {
       ),
     );
     const detail = details[0];
-    const previewExecutionDetail = details.at(-1);
     expect(detail?.selectedActionId).toBeDefined();
     expect(detail?.selectedActionType).toBeDefined();
-    expect(previewExecutionDetail?.selectedActionId).toBe(previewActionId);
-    expect(previewExecutionDetail?.selectedActionType).toBe(previewActionType);
     expect(detail?.detail).toMatchObject({
       schemaVersion: "ai-decision-trace-v1",
       actor: "corp",
@@ -11900,15 +11860,14 @@ describe("MVP 0.2 multiplayer service", () => {
     const eventCountBefore = before.gameState.eventLog.length;
     const preview = await service.previewAi({
       matchId: created.matchId,
-      side: "runner",
+      requesterSide: "runner",
+      targetSide: "corp",
       sessionToken: created.hostSessionToken,
     });
     expect(preview.ok).toBe(false);
     if (preview.ok)
       throw new Error("Randomized selection preview must not draw.");
-    expect(preview.error.code).toBe(
-      "ai_randomized_selection_requires_execution",
-    );
+    expect(preview.error.code).toBe("preview_side_forbidden");
     expect(JSON.stringify(preview)).not.toMatch(
       /candidateFingerprint|test-near-tie|engine_randomized_ice_install_selection/,
     );
@@ -11973,78 +11932,128 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("does not preview or execute a substitute action when the AI decision action is unknown", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+    let rejectAiDecision = false;
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
       tokenSalt: "ai-invalid-decision-no-substitute",
-      chooseAiAction: (input): AiDecision => ({
-        actionId: "missing-ai-action",
-        reasonCode: "test.invalid_ai_action",
-        explanation:
-          "Test decision references an action outside current LegalActions.",
-        consideredActionIds: input.legalActions.map(
-          (action) => action.actionId,
-        ),
-        fallbackUsed: false,
-        evidence: ["test_invalid_ai_action"],
-        timeoutUsed: false,
-        profileId: input.profileId,
-        difficulty: input.difficulty,
-        confidence: 0,
-        reason: "test.invalid_ai_action",
-      }),
+      chooseAiAction: (input, options): AiDecision =>
+        rejectAiDecision
+          ? {
+              actionId: "missing-ai-action",
+              reasonCode: "test.invalid_ai_action",
+              explanation:
+                "Test decision references an action outside current LegalActions.",
+              consideredActionIds: input.legalActions.map(
+                (action) => action.actionId,
+              ),
+              fallbackUsed: false,
+              evidence: ["test_invalid_ai_action"],
+              timeoutUsed: false,
+              profileId: input.profileId,
+              difficulty: input.difficulty,
+              confidence: 0,
+              reason: "test.invalid_ai_action",
+            }
+          : chooseRuntimeAiAction(input, options),
     });
-    const created = await service.createMatch({
+    const previewMatch = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
-      seed: "ai-invalid-decision-no-substitute",
+      seed: "ai-invalid-decision-preview-no-substitute",
       corpDifficulty: "normal",
     });
-    const afterSetup = await submitChoice(
+    const runner = {
+      side: "runner" as const,
+      sessionToken: previewMatch.hostSessionToken,
+      reconnectToken: previewMatch.hostReconnectToken,
+    };
+    await submitChoice(
       service,
-      created.matchId,
-      {
-        side: "runner",
-        sessionToken: created.hostSessionToken,
-        reconnectToken: created.hostReconnectToken,
-      },
+      previewMatch.matchId,
+      runner,
       "keep",
-      "invalid-ai-action-setup",
+      "invalid-ai-action-preview-setup",
     );
-    const before = await service.loadForTest(created.matchId);
-    if (!before?.gameState)
-      throw new Error("Missing active match before invalid AI decision");
-    const beforeEventCount = before.eventLog.length;
-    const beforeStateVersion = before.gameState.stateVersion;
+    const previewRecord = await storage.load(previewMatch.matchId);
+    if (!previewRecord?.gameState)
+      throw new Error("Missing preview match state");
+    if (previewRecord.gameState.pendingChoice?.side === "corp") {
+      const optionId =
+        previewRecord.gameState.pendingChoice.options.find(
+          (option) => option.id === "keep",
+        )?.id ?? previewRecord.gameState.pendingChoice.options[0]?.id;
+      if (!optionId) throw new Error("Missing Corp setup choice");
+      previewRecord.gameState = applyEngineChoice(
+        previewRecord.gameState,
+        "corp",
+        [String(optionId)],
+      );
+    }
+    previewRecord.gameState = toRunnerTurnEngine(previewRecord.gameState);
+    await storage.save(previewRecord);
+    const runnerPreviewTurn = await bootstrap(
+      service,
+      previewMatch.matchId,
+      runner,
+    );
+    expect(runnerPreviewTurn.playerView.activeSide).toBe("runner");
+    rejectAiDecision = true;
+    const beforePreview = await service.loadForTest(previewMatch.matchId);
 
     const preview = await service.previewAi({
-      matchId: created.matchId,
-      side: "runner",
-      sessionToken: created.hostSessionToken,
-      knownStateVersion: afterSetup.playerView.stateVersion,
-      knownMatchVersion: afterSetup.matchVersion,
+      matchId: previewMatch.matchId,
+      requesterSide: "runner",
+      targetSide: "runner",
+      sessionToken: previewMatch.hostSessionToken,
+      knownStateVersion: runnerPreviewTurn.playerView.stateVersion,
+      knownMatchVersion: runnerPreviewTurn.matchVersion,
     });
 
     expect(preview.ok).toBe(false);
     if (preview.ok) throw new Error("Expected preview rejection");
     expect(preview.error.code).toBe("ai_decision_action_not_legal");
-    const afterPreview = await service.loadForTest(created.matchId);
-    expect(afterPreview?.eventLog).toHaveLength(beforeEventCount);
-    expect(afterPreview?.gameState?.stateVersion).toBe(beforeStateVersion);
+    const afterPreview = await service.loadForTest(previewMatch.matchId);
+    expect(afterPreview).toEqual(beforePreview);
+
+    const executionMatch = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "ai-invalid-decision-execution-no-substitute",
+      corpDifficulty: "normal",
+      aiPacingMode: "paced",
+    });
+    const executionTurn = await submitChoice(
+      service,
+      executionMatch.matchId,
+      {
+        side: "runner",
+        sessionToken: executionMatch.hostSessionToken,
+        reconnectToken: executionMatch.hostReconnectToken,
+      },
+      "keep",
+      "invalid-ai-action-execution-setup",
+    );
+    const beforeAdvance = await service.loadForTest(executionMatch.matchId);
+    if (!beforeAdvance?.gameState)
+      throw new Error("Missing state before invalid AI execution");
 
     const advanced = await service.advanceAi({
-      matchId: created.matchId,
+      matchId: executionMatch.matchId,
       side: "runner",
-      sessionToken: created.hostSessionToken,
-      knownStateVersion: afterSetup.playerView.stateVersion,
-      knownMatchVersion: afterSetup.matchVersion,
+      sessionToken: executionMatch.hostSessionToken,
+      knownStateVersion: executionTurn.playerView.stateVersion,
+      knownMatchVersion: executionTurn.matchVersion,
       mode: "single_step",
     });
 
     expect(advanced.ok).toBe(false);
     if (advanced.ok) throw new Error("Expected advance rejection");
     expect(advanced.error.code).toBe("ai_decision_action_not_legal");
-    const afterAdvance = await service.loadForTest(created.matchId);
-    expect(afterAdvance?.eventLog).toHaveLength(beforeEventCount);
-    expect(afterAdvance?.gameState?.stateVersion).toBe(beforeStateVersion);
+    const afterAdvance = await service.loadForTest(executionMatch.matchId);
+    expect(afterAdvance?.eventLog).toHaveLength(beforeAdvance.eventLog.length);
+    expect(afterAdvance?.gameState?.stateVersion).toBe(
+      beforeAdvance.gameState.stateVersion,
+    );
   });
 
   it("reports an engine rejection of an AI LegalAction without exposing its private message", async () => {
@@ -12118,7 +12127,8 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("keeps tactical plan ranking detail sections in AI previews", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
       tokenSalt: "ai-preview-tactical-plan-sections",
       chooseAiAction: (input): AiDecision => {
         const action = input.legalActions[0];
@@ -12217,7 +12227,7 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "ai-preview-tactical-plan-sections",
       corpDifficulty: "normal",
     });
-    const afterSetup = await submitChoice(
+    await submitChoice(
       service,
       created.matchId,
       {
@@ -12228,13 +12238,33 @@ describe("MVP 0.2 multiplayer service", () => {
       "keep",
       "preview-tactical-plan-setup",
     );
+    const record = await storage.load(created.matchId);
+    if (!record?.gameState) throw new Error("Missing AI preview test state");
+    if (record.gameState.pendingChoice?.side === "corp") {
+      const optionId =
+        record.gameState.pendingChoice.options.find(
+          (option) => option.id === "keep",
+        )?.id ?? record.gameState.pendingChoice.options[0]?.id;
+      if (!optionId) throw new Error("Missing Corp setup choice");
+      record.gameState = applyEngineChoice(record.gameState, "corp", [
+        String(optionId),
+      ]);
+    }
+    record.gameState = toRunnerTurnEngine(record.gameState);
+    await storage.save(record);
+    const runnerTurn = await bootstrap(service, created.matchId, {
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    });
 
     const preview = await service.previewAi({
       matchId: created.matchId,
-      side: "runner",
+      requesterSide: "runner",
+      targetSide: "runner",
       sessionToken: created.hostSessionToken,
-      knownStateVersion: afterSetup.playerView.stateVersion,
-      knownMatchVersion: afterSetup.matchVersion,
+      knownStateVersion: runnerTurn.playerView.stateVersion,
+      knownMatchVersion: runnerTurn.matchVersion,
     });
 
     expect(preview.ok).toBe(true);
@@ -12249,6 +12279,468 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(tacticalPlanSection?.items).toEqual(
       expect.arrayContaining([expect.stringContaining("plan_rank|")]),
     );
+  });
+
+  it("binds session AI previews to the human side without leaking hidden opponent cards or mutating the match", async () => {
+    const runnerPreviewMemoryFlags: Array<boolean | undefined> = [];
+    const runnerStorage = new InMemoryMatchStorage();
+    const runnerService = new MultiplayerService(runnerStorage, {
+      tokenSalt: "runner-own-side-ai-preview-redaction",
+      chooseAiAction: (input, options) => {
+        runnerPreviewMemoryFlags.push(options?.persistTacticalPlanMemory);
+        return chooseRuntimeAiAction(input, options);
+      },
+    });
+    const runnerMatch = await runnerService.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "runner-own-side-ai-preview-redaction",
+      corpDifficulty: "normal",
+    });
+    const runnerAfterSetup = await submitChoice(
+      runnerService,
+      runnerMatch.matchId,
+      {
+        side: "runner",
+        sessionToken: runnerMatch.hostSessionToken,
+        reconnectToken: runnerMatch.hostReconnectToken,
+      },
+      "keep",
+      "runner-own-side-ai-preview-setup",
+    );
+    const runnerTurn = await runnerService.advanceAi({
+      matchId: runnerMatch.matchId,
+      side: "runner",
+      sessionToken: runnerMatch.hostSessionToken,
+      knownStateVersion: runnerAfterSetup.playerView.stateVersion,
+      knownMatchVersion: runnerAfterSetup.matchVersion,
+      mode: "until_human",
+    });
+    expect(runnerTurn.ok).toBe(true);
+    if (!runnerTurn.ok) throw new Error(runnerTurn.error.message);
+    let runnerRecordBefore = await runnerService.loadForTest(
+      runnerMatch.matchId,
+    );
+    if (!runnerRecordBefore?.gameState)
+      throw new Error("Missing Runner preview state");
+    const runnerPayloadJson = JSON.stringify(runnerTurn.requesterPayload);
+    const hiddenCorpCardId = runnerRecordBefore.gameState.corp.hq[0];
+    const hiddenCorpSentinelDefinition = Object.entries(
+      CARD_DEFINITIONS_BY_ID,
+    ).find(
+      ([definitionId, definition]) =>
+        definition.side === "corp" &&
+        !runnerPayloadJson.includes(definitionId) &&
+        !runnerPayloadJson.includes(definition.title),
+    );
+    if (!hiddenCorpCardId || !hiddenCorpSentinelDefinition)
+      throw new Error("Missing hidden Corp sentinel card");
+    const hiddenCorpCard = {
+      instanceId: hiddenCorpCardId,
+      definitionId: hiddenCorpSentinelDefinition[0],
+      title: hiddenCorpSentinelDefinition[1].title,
+    };
+    runnerRecordBefore.gameState.cardInstances[hiddenCorpCardId]!.definitionId =
+      hiddenCorpCard.definitionId;
+    await runnerStorage.save(runnerRecordBefore);
+    runnerRecordBefore = await runnerService.loadForTest(runnerMatch.matchId);
+    if (!runnerRecordBefore?.gameState)
+      throw new Error("Missing stored Runner preview sentinel state");
+    runnerPreviewMemoryFlags.length = 0;
+
+    const runnerPreview = await runnerService.previewAi({
+      matchId: runnerMatch.matchId,
+      requesterSide: "runner",
+      targetSide: "runner",
+      sessionToken: runnerMatch.hostSessionToken,
+      knownStateVersion: runnerTurn.requesterPayload.playerView.stateVersion,
+      knownMatchVersion: runnerTurn.requesterPayload.matchVersion,
+    });
+
+    expect(runnerPreview.ok).toBe(true);
+    if (!runnerPreview.ok) throw new Error(runnerPreview.error.message);
+    expect(runnerPreview.preview).toMatchObject({
+      requestedBy: "runner",
+      side: "runner",
+      actionId: expect.any(String),
+      actionType: expect.any(String),
+      advisorProfileId: "runner-human-advisor-v0.9-normal",
+      advisorDifficulty: "normal",
+      advisorMode: "fresh_human_side_takeover",
+    });
+    expect(
+      runnerTurn.requesterPayload.legalActions.map((action) => action.actionId),
+    ).toContain(runnerPreview.preview.actionId);
+    const runnerPreviewJson = JSON.stringify(runnerPreview);
+    expect(runnerPreviewJson).not.toContain(hiddenCorpCard.instanceId);
+    expect(runnerPreviewJson).not.toContain(hiddenCorpCard.definitionId);
+    expect(runnerPreviewJson).not.toContain(hiddenCorpCard.title);
+    expect(runnerPreviewJson).not.toMatch(
+      /aiPrivateHandPreview|privateDeckSnapshots|cardInstances/,
+    );
+    const repeatedRunnerPreview = await runnerService.previewAi({
+      matchId: runnerMatch.matchId,
+      requesterSide: "runner",
+      targetSide: "runner",
+      sessionToken: runnerMatch.hostSessionToken,
+      knownStateVersion: runnerTurn.requesterPayload.playerView.stateVersion,
+      knownMatchVersion: runnerTurn.requesterPayload.matchVersion,
+    });
+    expect(repeatedRunnerPreview.ok).toBe(true);
+    if (!repeatedRunnerPreview.ok)
+      throw new Error(repeatedRunnerPreview.error.message);
+    expect(repeatedRunnerPreview.preview.actionId).toBe(
+      runnerPreview.preview.actionId,
+    );
+    expect(repeatedRunnerPreview.preview.actionType).toBe(
+      runnerPreview.preview.actionType,
+    );
+    expect(repeatedRunnerPreview.preview.selectedChoices).toEqual(
+      runnerPreview.preview.selectedChoices,
+    );
+    expect(repeatedRunnerPreview.preview.detail).toEqual(
+      runnerPreview.preview.detail,
+    );
+    expect(runnerPreviewMemoryFlags).toEqual([false, false]);
+    const staleStatePreview = await runnerService.previewAi({
+      matchId: runnerMatch.matchId,
+      requesterSide: "runner",
+      targetSide: "runner",
+      sessionToken: runnerMatch.hostSessionToken,
+      knownStateVersion:
+        runnerTurn.requesterPayload.playerView.stateVersion - 1,
+      knownMatchVersion: runnerTurn.requesterPayload.matchVersion,
+    });
+    expect(staleStatePreview.ok).toBe(false);
+    if (staleStatePreview.ok)
+      throw new Error("Expected stale-state preview rejection");
+    expect(staleStatePreview.error.code).toBe("stale_state");
+    const staleMatchPreview = await runnerService.previewAi({
+      matchId: runnerMatch.matchId,
+      requesterSide: "runner",
+      targetSide: "runner",
+      sessionToken: runnerMatch.hostSessionToken,
+      knownStateVersion: runnerTurn.requesterPayload.playerView.stateVersion,
+      knownMatchVersion: runnerTurn.requesterPayload.matchVersion - 1,
+    });
+    expect(staleMatchPreview.ok).toBe(false);
+    if (staleMatchPreview.ok)
+      throw new Error("Expected stale-match preview rejection");
+    expect(staleMatchPreview.error.code).toBe("stale_match");
+    const runnerRecordAfter = await runnerService.loadForTest(
+      runnerMatch.matchId,
+    );
+    expect(runnerRecordAfter).toEqual(runnerRecordBefore);
+    expect(hashState(runnerRecordAfter!.gameState)).toBe(
+      hashState(runnerRecordBefore.gameState),
+    );
+
+    const foreignSidePreview = await runnerService.previewAi({
+      matchId: runnerMatch.matchId,
+      requesterSide: "runner",
+      targetSide: "corp",
+      sessionToken: runnerMatch.hostSessionToken,
+    });
+    expect(foreignSidePreview.ok).toBe(false);
+    if (foreignSidePreview.ok)
+      throw new Error("Expected foreign-side preview rejection");
+    expect(foreignSidePreview.error.code).toBe("preview_side_forbidden");
+
+    const corpPreviewMemoryFlags: Array<boolean | undefined> = [];
+    const corpStorage = new InMemoryMatchStorage();
+    const corpService = new MultiplayerService(corpStorage, {
+      tokenSalt: "corp-own-side-ai-preview-redaction",
+      chooseAiAction: (input, options) => {
+        corpPreviewMemoryFlags.push(options?.persistTacticalPlanMemory);
+        return chooseRuntimeAiAction(input, options);
+      },
+    });
+    const corpMatch = await corpService.createMatch({
+      mode: "human_corp_vs_runner_ai",
+      hostSide: "corp",
+      seed: "corp-own-side-ai-preview-redaction",
+      runnerDifficulty: "normal",
+    });
+    const corpTurn = await submitChoice(
+      corpService,
+      corpMatch.matchId,
+      {
+        side: "corp",
+        sessionToken: corpMatch.hostSessionToken,
+        reconnectToken: corpMatch.hostReconnectToken,
+      },
+      "keep",
+      "corp-own-side-ai-preview-setup",
+    );
+    let corpRecordBefore = await corpService.loadForTest(corpMatch.matchId);
+    if (!corpRecordBefore?.gameState)
+      throw new Error("Missing Corp preview state");
+    const corpPayloadJson = JSON.stringify(corpTurn);
+    const hiddenRunnerCardIds = [
+      corpRecordBefore.gameState.runner.grip[0],
+      corpRecordBefore.gameState.runner.stack[0],
+    ];
+    const hiddenRunnerSentinelDefinitions = Object.entries(
+      CARD_DEFINITIONS_BY_ID,
+    )
+      .filter(
+        ([definitionId, definition]) =>
+          definition.side === "runner" &&
+          !corpPayloadJson.includes(definitionId) &&
+          !corpPayloadJson.includes(definition.title),
+      )
+      .slice(0, hiddenRunnerCardIds.length);
+    if (
+      hiddenRunnerCardIds.some((instanceId) => !instanceId) ||
+      hiddenRunnerSentinelDefinitions.length !== hiddenRunnerCardIds.length
+    )
+      throw new Error("Missing hidden Runner sentinel cards");
+    const hiddenRunnerCards = hiddenRunnerCardIds.map((instanceId, index) => ({
+      instanceId: instanceId!,
+      definitionId: hiddenRunnerSentinelDefinitions[index]![0],
+      title: hiddenRunnerSentinelDefinitions[index]![1].title,
+    }));
+    for (const hiddenRunnerCard of hiddenRunnerCards) {
+      corpRecordBefore.gameState.cardInstances[
+        hiddenRunnerCard.instanceId
+      ]!.definitionId = hiddenRunnerCard.definitionId;
+    }
+    await corpStorage.save(corpRecordBefore);
+    corpRecordBefore = await corpService.loadForTest(corpMatch.matchId);
+    if (!corpRecordBefore?.gameState)
+      throw new Error("Missing stored Corp preview sentinel state");
+    corpPreviewMemoryFlags.length = 0;
+
+    const corpPreview = await corpService.previewAi({
+      matchId: corpMatch.matchId,
+      requesterSide: "corp",
+      targetSide: "corp",
+      sessionToken: corpMatch.hostSessionToken,
+      knownStateVersion: corpTurn.playerView.stateVersion,
+      knownMatchVersion: corpTurn.matchVersion,
+    });
+
+    expect(corpPreview.ok).toBe(true);
+    if (!corpPreview.ok) throw new Error(corpPreview.error.message);
+    expect(corpPreview.preview).toMatchObject({
+      requestedBy: "corp",
+      side: "corp",
+      actionId: expect.any(String),
+      actionType: expect.any(String),
+      advisorProfileId: "corp-human-advisor-v0.9-normal",
+      advisorDifficulty: "normal",
+      advisorMode: "fresh_human_side_takeover",
+    });
+    const corpPreviewJson = JSON.stringify(corpPreview);
+    for (const hiddenRunnerCard of hiddenRunnerCards) {
+      expect(corpPreviewJson).not.toContain(hiddenRunnerCard.instanceId);
+      expect(corpPreviewJson).not.toContain(hiddenRunnerCard.definitionId);
+      expect(corpPreviewJson).not.toContain(hiddenRunnerCard.title);
+    }
+    expect(corpPreviewJson).not.toMatch(
+      /aiPrivateHandPreview|privateDeckSnapshots|cardInstances/,
+    );
+    expect(corpPreviewMemoryFlags).toEqual([false]);
+    const corpRecordAfter = await corpService.loadForTest(corpMatch.matchId);
+    expect(corpRecordAfter).toEqual(corpRecordBefore);
+    expect(hashState(corpRecordAfter!.gameState)).toBe(
+      hashState(corpRecordBefore.gameState),
+    );
+
+    const observerService = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-vs-ai-preview-redaction",
+    });
+    const observerMatch = await observerService.createMatch({
+      mode: "ai_vs_ai",
+      hostSide: "runner",
+      seed: "ai-vs-ai-preview-redaction",
+      runnerDifficulty: "normal",
+      corpDifficulty: "normal",
+    });
+    const observerPreview = await observerService.previewAi({
+      matchId: observerMatch.matchId,
+      requesterSide: "runner",
+      targetSide: "runner",
+      sessionToken: observerMatch.hostSessionToken,
+    });
+    expect(observerPreview.ok).toBe(false);
+    if (observerPreview.ok)
+      throw new Error("Expected observer preview rejection");
+    expect(observerPreview.error.code).toBe("preview_mode_forbidden");
+    expect(JSON.stringify(observerPreview)).not.toMatch(
+      /aiPrivateHandPreview|privateDeckSnapshots|cardInstances/,
+    );
+  });
+
+  it("does not resolve an Engine-randomized selection or consume randomness for a human-side advisor preview", async () => {
+    const storage = new InMemoryMatchStorage();
+    const previewMemoryFlags: Array<boolean | undefined> = [];
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "human-advisor-randomized-selection",
+      chooseAiAction: (input, options): AiDecision => {
+        previewMemoryFlags.push(options?.persistTacticalPlanMemory);
+        if (input.side !== "corp") return chooseRuntimeAiAction(input, options);
+        return {
+          selectionKind: "engine_randomized_ice_install_selection",
+          engineCommand: {
+            kind: "engine_randomized_ice_install_selection",
+            quote: {
+              schemaVersion:
+                ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
+              visibility: "private_to_actor",
+              complete: true,
+              matchId: input.matchId ?? "human-advisor-randomized-selection",
+              side: "corp",
+              stateVersion: input.playerView.stateVersion,
+              timingPoint: input.playerView.timingPoint,
+              planStepId: "plan:human-advisor:test-randomized-selection",
+              candidates: [],
+              candidateFingerprint: "test-preview-must-not-execute",
+              legalActions: [],
+            },
+          },
+          reasonCode: "test.human_advisor_randomized_selection",
+          explanation:
+            "The Engine must resolve this randomized selection only during execution.",
+          consideredActionIds: input.legalActions.map(
+            (action) => action.actionId,
+          ),
+          fallbackUsed: false,
+          evidence: ["test_human_advisor_randomized_selection"],
+          timeoutUsed: false,
+          profileId: input.profileId,
+          difficulty: input.difficulty,
+          confidence: 1,
+          reason: "test.human_advisor_randomized_selection",
+        };
+      },
+    });
+    const created = await service.createMatch({
+      mode: "human_corp_vs_runner_ai",
+      hostSide: "corp",
+      seed: "human-advisor-randomized-selection",
+      runnerDifficulty: "normal",
+    });
+    const corpTurn = await submitChoice(
+      service,
+      created.matchId,
+      {
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
+      "keep",
+      "human-advisor-randomized-selection-setup",
+    );
+    const before = await service.loadForTest(created.matchId);
+    if (!before?.gameState)
+      throw new Error("Missing randomized advisor preview state");
+    previewMemoryFlags.length = 0;
+
+    const preview = await service.previewAi({
+      matchId: created.matchId,
+      requesterSide: "corp",
+      targetSide: "corp",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: corpTurn.playerView.stateVersion,
+      knownMatchVersion: corpTurn.matchVersion,
+    });
+
+    expect(preview.ok).toBe(false);
+    if (preview.ok) throw new Error("Expected randomized preview rejection");
+    expect(preview.error.code).toBe(
+      "ai_randomized_selection_requires_execution",
+    );
+    expect(previewMemoryFlags).toEqual([false]);
+    expect(await service.loadForTest(created.matchId)).toEqual(before);
+  });
+
+  it("returns a current own-side resolve_choice LegalAction and selected choices without applying them", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "human-advisor-choice-preview",
+      chooseAiAction: (input): AiDecision => {
+        const action = input.legalActions[0];
+        if (!action)
+          throw new Error("Missing LegalAction for advisor choice preview");
+        const pendingChoice = input.playerView.pendingChoice;
+        return {
+          actionId: action.actionId,
+          ...(action.type === "resolve_choice" && pendingChoice
+            ? {
+                selectedChoices: {
+                  choiceId: pendingChoice.choiceId,
+                  selectedOptionIds: [
+                    String(pendingChoice.options[0]?.id ?? ""),
+                  ],
+                },
+              }
+            : {}),
+          reasonCode: "test.human_advisor_choice",
+          explanation: "Choose the first visible option from the own choice.",
+          consideredActionIds: input.legalActions.map(
+            (candidate) => candidate.actionId,
+          ),
+          fallbackUsed: false,
+          evidence: ["test_human_advisor_choice"],
+          timeoutUsed: false,
+          profileId: input.profileId,
+          difficulty: input.difficulty,
+          confidence: 1,
+          reason: "test.human_advisor_choice",
+        };
+      },
+    });
+    const created = await service.createMatch({
+      mode: "human_corp_vs_runner_ai",
+      hostSide: "corp",
+      seed: "human-advisor-choice-preview",
+      runnerDifficulty: "normal",
+    });
+    await submitChoice(
+      service,
+      created.matchId,
+      {
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
+      "keep",
+      "human-advisor-choice-preview-setup",
+    );
+    const record = await storage.load(created.matchId);
+    if (!record?.gameState)
+      throw new Error("Missing advisor choice preview state");
+    const ownChoice = choiceRequest(record.gameState, "corp");
+    record.gameState.pendingChoice = ownChoice;
+    await storage.save(record);
+    const corpChoice = await bootstrap(service, created.matchId, {
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    });
+    const before = await service.loadForTest(created.matchId);
+
+    const preview = await service.previewAi({
+      matchId: created.matchId,
+      requesterSide: "corp",
+      targetSide: "corp",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: corpChoice.playerView.stateVersion,
+      knownMatchVersion: corpChoice.matchVersion,
+    });
+
+    expect(preview.ok).toBe(true);
+    if (!preview.ok) throw new Error(preview.error.message);
+    expect(preview.preview.actionType).toBe("resolve_choice");
+    expect(preview.preview.selectedChoices).toEqual({
+      choiceId: ownChoice.choiceId,
+      selectedOptionIds: ["keep"],
+    });
+    expect(corpChoice.legalActions.map((action) => action.actionId)).toContain(
+      preview.preview.actionId,
+    );
+    expect(await service.loadForTest(created.matchId)).toEqual(before);
   });
 
   it("advances Corp AI in the post-jack-out root-rez window", async () => {

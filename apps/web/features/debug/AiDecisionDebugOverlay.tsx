@@ -20,6 +20,7 @@ import {
   aiDecisionDebugDeckStrategySummary,
   aiDecisionDebugHqHandRows,
 } from "../../app/ai-decision-debug-ui";
+import { humanAiDecisionProbeReportSource } from "../../app/human-ai-decision-probe";
 import {
   aiTraceActionRows,
   aiTraceDebugGapNotes,
@@ -59,8 +60,11 @@ export function FloatingAiDecisionDebugOverlay({
   error,
   preview,
   previewError,
+  previewLoading,
+  canRequestPreview,
   trace,
   traceCount,
+  onRequestPreview,
   onPosition,
   onClose,
 }: {
@@ -69,8 +73,11 @@ export function FloatingAiDecisionDebugOverlay({
   error: string;
   preview: AiDecisionPreview | null;
   previewError: string;
+  previewLoading: boolean;
+  canRequestPreview: boolean;
   trace: MaintenanceAiTraceDetail | null;
   traceCount: number;
+  onRequestPreview(): void;
   onPosition(position: RunOverlayPositionPreference): void;
   onClose(): void;
 }) {
@@ -156,10 +163,10 @@ export function FloatingAiDecisionDebugOverlay({
     ? aiDecisionDebugWindowHeaderStatusLabel(exportTrace, exportMode)
     : aiDecisionDebugStatusLabel(status, traceCount);
   const windowClassName = `aiDecisionDebugWindow ${collapsed ? "is-collapsed" : ""}`;
-  const exportButtonTitle = aiDecisionDebugHeaderExportTitle(
-    exportStatus,
-    Boolean(exportTrace),
-  );
+  const exportButtonTitle =
+    preview && exportStatus === "idle"
+      ? "KI-Vorschlag als redigierten Meldeexport kopieren"
+      : aiDecisionDebugHeaderExportTitle(exportStatus, Boolean(exportTrace));
   const copyAiDecisionDebugJson = async () => {
     if (!exportTrace) {
       setExportStatus("copy_failed");
@@ -249,6 +256,23 @@ export function FloatingAiDecisionDebugOverlay({
           </div>
         </div>
         <div className="aiDecisionDebugBody" hidden={collapsed}>
+          <div className="aiDecisionDebugTraceHead">
+            <button
+              className="button secondary"
+              type="button"
+              onClick={onRequestPreview}
+              disabled={!canRequestPreview || previewLoading}
+            >
+              {previewLoading
+                ? "KI-Vorschlag wird berechnet …"
+                : "Was würde die KI tun?"}
+            </button>
+            <span>
+              {canRequestPreview
+                ? "Read-only · aktuelle eigene LegalActions"
+                : "Nur im aktuellen eigenen Entscheidungsfenster verfügbar"}
+            </span>
+          </div>
           <AiDecisionDebugOverlayBody
             status={status}
             error={error}
@@ -348,13 +372,20 @@ function aiDecisionPreviewAsTrace(
       selectedActionType: preview.actionType,
       debugSelectionMatchesApplied: true,
       summary: preview.explanation,
+      reasonCode: preview.reasonCode,
+      fallbackUsed: preview.fallbackUsed,
+      timeoutUsed: preview.timeoutUsed === true,
+      selectedChoices: preview.selectedChoices,
+      advisorProfileId: preview.advisorProfileId,
+      advisorDifficulty: preview.advisorDifficulty,
+      advisorMode: preview.advisorMode,
     },
   };
 }
 
 function aiDecisionPreviewTitle(trace: MaintenanceAiTraceDetail): string {
   const side = trace.side === "runner" ? "Runner" : "Korp";
-  return `Nächster KI-Schritt · ${side} · ${aiDecisionTraceSelectedActionLabel(trace)}`;
+  return `KI-Vorschlag ab aktuellem Zustand · ${side} · ${aiDecisionTraceSelectedActionLabel(trace)}`;
 }
 
 function aiDecisionTraceSelectedActionLabel(
@@ -440,6 +471,13 @@ function AiDecisionDebugTraceView({
         summary={overviewSummary}
         defaultOpen
       >
+        {mode === "preview" ? (
+          <p className="aiDecisionDebugNotice" role="status">
+            <strong>Read-only KI-Vorschlag, keine Regelentscheidung.</strong>{" "}
+            Frische Übernahme ohne persistentes KI-Memory · Profil{" "}
+            {String(detail.advisorProfileId ?? "human-advisor")}
+          </p>
+        ) : null}
         <div className="aiDecisionDebugTraceHead">
           <strong>{title}</strong>
           <span>
@@ -555,7 +593,7 @@ function AiDecisionDebugTraceView({
   );
 }
 
-function serializeAiDecisionDebugVisibleJsonExport(
+export function serializeAiDecisionDebugVisibleJsonExport(
   trace: MaintenanceAiTraceDetail,
   mode: "trace" | "preview",
   exportedAt: string,
@@ -575,15 +613,27 @@ function serializeAiDecisionDebugVisibleJsonExport(
     mode,
     source: {
       traceId: trace.traceId,
-      matchId: trace.matchId,
       eventId: trace.eventId,
-      stateVersion: trace.stateVersion,
-      matchVersion: trace.matchVersion,
-      side: trace.side,
       turn: trace.turn,
       decisionIndex: trace.decisionIndex,
-      selectedActionId: trace.selectedActionId,
-      selectedActionType: trace.selectedActionType,
+      ...(mode === "preview"
+        ? humanAiDecisionProbeReportSource({
+            matchId: trace.matchId,
+            matchVersion: trace.matchVersion,
+            stateVersion: trace.stateVersion,
+            side: trace.side,
+            selectedActionId: trace.selectedActionId,
+            selectedActionType: trace.selectedActionType,
+            detail,
+          })
+        : {
+            matchId: trace.matchId,
+            stateVersion: trace.stateVersion,
+            matchVersion: trace.matchVersion,
+            side: trace.side,
+            selectedActionId: trace.selectedActionId,
+            selectedActionType: trace.selectedActionType,
+          }),
       planKind: trace.planKind,
       score: trace.score,
       confidence: trace.confidence,
@@ -709,9 +759,7 @@ function aiDecisionDebugOverlayMetaRows(
     .filter(([label]) => AI_DECISION_DEBUG_OVERLAY_META_LABELS.has(label))
     .filter(([label]) => mode !== "preview" || !hiddenPreviewLabels.has(label))
     .map(([label, value]) =>
-      label === "Score"
-        ? ["Action-Rohscore", value]
-        : [label, value],
+      label === "Score" ? ["Action-Rohscore", value] : [label, value],
     );
 }
 
@@ -836,8 +884,10 @@ function aiDecisionDebugPlanCandidateSummary(
   if (counts.evaluated > 0) {
     return aiDecisionDebugPlanCandidateSummaryText(counts);
   }
-  return aiDecisionDebugMetaRowValue(planLayer.summaryRows, "Plan-Kandidaten")
-    ?.replace(/\s*\(.*\)\s*$/, "");
+  return aiDecisionDebugMetaRowValue(
+    planLayer.summaryRows,
+    "Plan-Kandidaten",
+  )?.replace(/\s*\(.*\)\s*$/, "");
 }
 
 function aiDecisionDebugPlanCandidateCounts(params: {
@@ -845,8 +895,10 @@ function aiDecisionDebugPlanCandidateCounts(params: {
   evaluatedPlanCount: number | undefined;
   blockedPlanCount: number | undefined;
 }): AiDecisionDebugPlanCandidateCounts {
-  const evaluatedPlans =
-    Math.max(params.evaluatedPlanCount ?? 0, params.entries.length);
+  const evaluatedPlans = Math.max(
+    params.evaluatedPlanCount ?? 0,
+    params.entries.length,
+  );
   const visibleActivePlans = params.entries.filter((entry) =>
     aiDecisionDebugPlanStatusIsActive(entry.status),
   ).length;
@@ -888,7 +940,9 @@ function aiDecisionDebugPlanCandidateSummaryText(
     .join(" · ");
 }
 
-function aiDecisionDebugPlanStatusIsActive(status: string | undefined): boolean {
+function aiDecisionDebugPlanStatusIsActive(
+  status: string | undefined,
+): boolean {
   return (
     status === undefined ||
     status === "active" ||
@@ -917,10 +971,9 @@ function aiDecisionDebugPlanLayerSummary(
           .join(" · ")
       : aiDecisionDebugMetaRowValue(planLayer.summaryRows, "Ausgewählter Plan");
   return uniqueDisplayStrings(
-    [
-      selectedLabel,
-      aiDecisionDebugPlanCandidateSummary(planLayer),
-    ].filter((part): part is string => Boolean(part)),
+    [selectedLabel, aiDecisionDebugPlanCandidateSummary(planLayer)].filter(
+      (part): part is string => Boolean(part),
+    ),
   ).join(" · ");
 }
 
@@ -936,10 +989,7 @@ function AiDecisionDebugSelectedPlanOverview({
   selectedScoreRows: Array<[string, string]>;
 }) {
   const selectedPlan = planLayer.entries.find((entry) => entry.selected);
-  const planActions = aiDecisionDebugPlanRelevantActions(
-    planLayer,
-    actionRows,
-  );
+  const planActions = aiDecisionDebugPlanRelevantActions(planLayer, actionRows);
   const selectedAction =
     planActions.find((action) => action.selected) ??
     actionRows.find((action) => action.selected);
@@ -971,7 +1021,7 @@ function AiDecisionDebugSelectedPlanOverview({
                 ]
                   .filter(Boolean)
                   .join(" · ")
-              : aiDecisionDebugMetaRowValue(metaRows, "Plan") ?? "-"}
+              : (aiDecisionDebugMetaRowValue(metaRows, "Plan") ?? "-")}
           </span>
         </summary>
         <AiDecisionDebugRows rows={selectedPlanRows} />
@@ -1073,9 +1123,9 @@ function aiDecisionDebugSelectedPlanRows(
         ] as Array<[string, string]>)
       : []),
     ...(plan.step
-      ? ([["Aktueller Schritt", aiDecisionDebugPlanStepLabel(plan.step, plan)]] as Array<
-          [string, string]
-        >)
+      ? ([
+          ["Aktueller Schritt", aiDecisionDebugPlanStepLabel(plan.step, plan)],
+        ] as Array<[string, string]>)
       : []),
     ...(aiDecisionDebugPlanSecondaryLabel(plan, titleUsesTarget)
       ? ([
@@ -1087,10 +1137,7 @@ function aiDecisionDebugSelectedPlanRows(
       : []),
     ...(planLayer.mappedActionIds.length > 0
       ? ([
-          [
-            "Gemappte LegalActions",
-            String(planLayer.mappedActionIds.length),
-          ],
+          ["Gemappte LegalActions", String(planLayer.mappedActionIds.length)],
         ] as Array<[string, string]>)
       : []),
     ...aiDecisionDebugPlanSummaryRows(planLayer, [
@@ -1126,14 +1173,13 @@ function aiDecisionDebugPlanRelevantActions(
   actionRows: MaintenanceAiTraceActionRow[],
 ): MaintenanceAiTraceActionRow[] {
   const mappedActionIds = new Set(planLayer.mappedActionIds);
-  return actionRows
-    .filter(
-      (action) =>
-        mappedActionIds.has(action.actionId) ||
-        action.selected ||
-        action.debugSelected ||
-        aiDecisionDebugActionHasSelectedPlanScore(action),
-    );
+  return actionRows.filter(
+    (action) =>
+      mappedActionIds.has(action.actionId) ||
+      action.selected ||
+      action.debugSelected ||
+      aiDecisionDebugActionHasSelectedPlanScore(action),
+  );
 }
 
 function aiDecisionDebugActionHasSelectedPlanScore(
