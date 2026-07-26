@@ -104,6 +104,11 @@ import {
 import { matchOverlayPresentation } from "./match-overlay-presentation";
 import { latestSuccessfulRunOutcomePresentation } from "./successful-run-outcome-presentation";
 import {
+  humanAiDecisionProbeActionContext,
+  humanAiDecisionProbeAvailable,
+  humanAiDecisionProbeMatchesPayload,
+} from "./human-ai-decision-probe";
+import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
   actionConsumesClick,
@@ -800,6 +805,8 @@ export default function Page() {
     useState<AiDecisionPreview | null>(null);
   const [aiDecisionDebugPreviewError, setAiDecisionDebugPreviewError] =
     useState("");
+  const [aiDecisionDebugPreviewLoading, setAiDecisionDebugPreviewLoading] =
+    useState(false);
   const [aiDecisionDebugTraceIndex, setAiDecisionDebugTraceIndex] = useState<
     MaintenanceAiTraceIndexEntry[]
   >([]);
@@ -874,6 +881,8 @@ export default function Page() {
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const aiDecisionDebugEnabledMatchRef = useRef<string | null>(null);
   const aiDecisionDebugTraceIdRef = useRef<string | null>(null);
+  const aiDecisionDebugPreviewRequestKeyRef = useRef<string | null>(null);
+  const aiDecisionDebugPreviewContextRef = useRef<ActionContext | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
   const hasStoredMatchStartSettingsRef = useRef(false);
   const statusPanelsRef = useRef<HTMLElement | null>(null);
@@ -2550,6 +2559,13 @@ export default function Page() {
   const showAiDecisionDebugOverlay = Boolean(
     activeMatchIsGame && aiDecisionDebugOverlayEnabled && session,
   );
+  const canRequestHumanAiDecisionPreview =
+    aiDecisionDebugOverlayEnabled &&
+    humanAiDecisionProbeAvailable(session, payload);
+  const aiDecisionDebugPreviewStateKey =
+    session && payload
+      ? `${session.matchId}:${session.side}:${payload.matchVersion}:${payload.playerView.stateVersion}`
+      : "";
   const floatingPanelHasHiddenContextActions = Boolean(
     !activeView?.run &&
     legalActionSplit.contextualActions.length > 0 &&
@@ -2659,10 +2675,22 @@ export default function Page() {
       setAiDecisionDebugError("");
       setAiDecisionDebugPreview(null);
       setAiDecisionDebugPreviewError("");
+      setAiDecisionDebugPreviewLoading(false);
       setAiDecisionDebugTraceIndex([]);
       setAiDecisionDebugTrace(null);
       aiDecisionDebugEnabledMatchRef.current = null;
       aiDecisionDebugTraceIdRef.current = null;
+      aiDecisionDebugPreviewRequestKeyRef.current = null;
+      const previewContext = aiDecisionDebugPreviewContextRef.current;
+      if (previewContext) {
+        setSelectedActionContext((current) =>
+          current?.kind === previewContext.kind &&
+          current.id === previewContext.id
+            ? null
+            : current,
+        );
+        aiDecisionDebugPreviewContextRef.current = null;
+      }
       return;
     }
     let closed = false;
@@ -2677,6 +2705,8 @@ export default function Page() {
       setAiDecisionDebugError("");
       setAiDecisionDebugPreview(null);
       setAiDecisionDebugPreviewError("");
+      setAiDecisionDebugPreviewLoading(false);
+      aiDecisionDebugPreviewRequestKeyRef.current = null;
       setAiDecisionDebugTraceIndex([]);
       setAiDecisionDebugTrace(null);
       aiDecisionDebugTraceIdRef.current = null;
@@ -2753,51 +2783,92 @@ export default function Page() {
   ]);
 
   useEffect(() => {
+    aiDecisionDebugPreviewRequestKeyRef.current = null;
+    setAiDecisionDebugPreview(null);
+    setAiDecisionDebugPreviewError("");
+    setAiDecisionDebugPreviewLoading(false);
+    const previewContext = aiDecisionDebugPreviewContextRef.current;
+    if (previewContext) {
+      setSelectedActionContext((current) =>
+        current?.kind === previewContext.kind &&
+        current.id === previewContext.id
+          ? null
+          : current,
+      );
+      aiDecisionDebugPreviewContextRef.current = null;
+    }
+  }, [aiDecisionDebugPreviewStateKey]);
+
+  const requestHumanAiDecisionPreview = useCallback(async () => {
     if (
-      !aiDecisionDebugOverlayEnabled ||
+      !canRequestHumanAiDecisionPreview ||
       !session ||
       !payload ||
-      !aiTurnPresentation?.canAdvanceAi ||
-      aiTurnPresentation.activeAiSide !== session.side ||
-      session.mode === "ai_vs_ai" ||
-      payload.winner
-    ) {
-      setAiDecisionDebugPreview(null);
-      setAiDecisionDebugPreviewError("");
+      !aiDecisionDebugPreviewStateKey
+    )
       return;
+    const requestKey = aiDecisionDebugPreviewStateKey;
+    aiDecisionDebugPreviewRequestKeyRef.current = requestKey;
+    setAiDecisionDebugPreviewLoading(true);
+    setAiDecisionDebugPreview(null);
+    setAiDecisionDebugPreviewError("");
+    const existingPreviewContext = aiDecisionDebugPreviewContextRef.current;
+    if (existingPreviewContext) {
+      setSelectedActionContext((current) =>
+        current?.kind === existingPreviewContext.kind &&
+        current.id === existingPreviewContext.id
+          ? null
+          : current,
+      );
+      aiDecisionDebugPreviewContextRef.current = null;
     }
-    let closed = false;
-    const loadPreview = async () => {
-      try {
-        const preview = await fetchAiDecisionPreview(session, payload);
-        if (closed) return;
-        setAiDecisionDebugPreview(preview);
-        setAiDecisionDebugPreviewError("");
-      } catch (error) {
-        if (closed) return;
+    try {
+      const preview = await fetchAiDecisionPreview(session, payload);
+      if (aiDecisionDebugPreviewRequestKeyRef.current !== requestKey) return;
+      const legalAction = payload.legalActions.find(
+        (action) => action.actionId === preview.actionId,
+      );
+      if (
+        !humanAiDecisionProbeMatchesPayload(preview, session, payload) ||
+        !legalAction
+      ) {
         setAiDecisionDebugPreview(null);
         setAiDecisionDebugPreviewError(
-          error instanceof Error
-            ? error.message
-            : "KI-Preview konnte nicht geladen werden.",
+          "Der KI-Vorschlag ist für den aktuellen Zustand nicht mehr gültig.",
         );
+        return;
       }
-    };
-    void loadPreview();
-    return () => {
-      closed = true;
-    };
+      const previousContext = aiDecisionDebugPreviewContextRef.current;
+      const nextContext = humanAiDecisionProbeActionContext(legalAction);
+      setSelectedActionContext((current) => {
+        if (
+          previousContext &&
+          current?.kind === previousContext.kind &&
+          current.id === previousContext.id
+        )
+          return nextContext;
+        return nextContext ?? current;
+      });
+      aiDecisionDebugPreviewContextRef.current = nextContext;
+      setAiDecisionDebugPreview(preview);
+      setAiDecisionDebugPreviewError("");
+    } catch (error) {
+      if (aiDecisionDebugPreviewRequestKeyRef.current !== requestKey) return;
+      setAiDecisionDebugPreview(null);
+      setAiDecisionDebugPreviewError(
+        error instanceof Error
+          ? error.message
+          : "KI-Vorschlag konnte nicht geladen werden.",
+      );
+    } finally {
+      if (aiDecisionDebugPreviewRequestKeyRef.current === requestKey)
+        setAiDecisionDebugPreviewLoading(false);
+    }
   }, [
-    aiDecisionDebugOverlayEnabled,
-    session?.matchId,
-    session?.side,
-    session?.sessionToken,
-    payload?.matchId,
-    payload?.matchVersion,
-    payload?.playerView.stateVersion,
-    payload?.winner,
-    aiTurnPresentation?.activeAiSide,
-    aiTurnPresentation?.canAdvanceAi,
+    aiDecisionDebugPreviewStateKey,
+    canRequestHumanAiDecisionPreview,
+    payload,
+    session,
   ]);
 
   useEffect(() => {
@@ -6288,8 +6359,11 @@ export default function Page() {
                 error={aiDecisionDebugError}
                 preview={aiDecisionDebugPreview}
                 previewError={aiDecisionDebugPreviewError}
+                previewLoading={aiDecisionDebugPreviewLoading}
+                canRequestPreview={canRequestHumanAiDecisionPreview}
                 trace={aiDecisionDebugTrace}
                 traceCount={aiDecisionDebugTraceIndex.length}
+                onRequestPreview={() => void requestHumanAiDecisionPreview()}
                 onPosition={setAiDecisionDebugOverlayPosition}
                 onClose={() => setAiDecisionDebugOverlayEnabled(false)}
               />

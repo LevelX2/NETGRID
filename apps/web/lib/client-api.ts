@@ -43,6 +43,9 @@ export type AiDecisionPreview = {
   timeoutUsed?: boolean;
   confidence?: number;
   selectedChoices?: Record<string, unknown>;
+  advisorProfileId: string;
+  advisorDifficulty: "easy" | "normal" | "hard";
+  advisorMode: "fresh_human_side_takeover";
   detail: Record<string, unknown>;
 };
 

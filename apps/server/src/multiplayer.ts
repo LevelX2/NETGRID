@@ -725,6 +725,9 @@ export type AiDecisionPreview = {
   timeoutUsed?: boolean;
   confidence?: number;
   selectedChoices?: PlayerAction["selectedChoices"];
+  advisorProfileId: string;
+  advisorDifficulty: AiDifficulty;
+  advisorMode: "fresh_human_side_takeover";
   detail: Record<string, unknown>;
 };
 
@@ -2868,7 +2871,10 @@ export class MultiplayerService {
           ),
         };
       }
-      const controller = record.match.aiControllers?.[input.targetSide];
+      const advisorDifficulty =
+        record.match.aiControllers?.[opposite(input.targetSide)]?.difficulty ??
+        "normal";
+      const advisorProfileId = `${input.targetSide}-human-advisor-v0.9-${advisorDifficulty}`;
       let aiInput: AiDecisionInput;
       try {
         const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(
@@ -2876,11 +2882,9 @@ export class MultiplayerService {
           input.targetSide,
         );
         aiInput = buildAiDecisionInput(record.gameState, input.targetSide, {
-          difficulty: controller?.difficulty ?? "normal",
-          profileId:
-            controller?.profileId ??
-            `${input.targetSide}-session-preview-v0.9-${controller?.difficulty ?? "normal"}`,
-          decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${input.targetSide}:session-preview`,
+          difficulty: advisorDifficulty,
+          profileId: advisorProfileId,
+          decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${input.targetSide}:human-advisor`,
           actionNumber: record.gameState.stateVersion,
           ownDeckSnapshot,
           expectedDeckSnapshot: aiDeckSnapshotExpectationFor(
@@ -2961,6 +2965,9 @@ export class MultiplayerService {
         ...(decision.selectedChoices
           ? { selectedChoices: decision.selectedChoices }
           : {}),
+        advisorProfileId,
+        advisorDifficulty,
+        advisorMode: "fresh_human_side_takeover",
         detail,
       };
       return {
