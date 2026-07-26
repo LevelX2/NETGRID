@@ -2326,7 +2326,9 @@ export type VisibleRunnerPaymentSupportAbility = {
 };
 
 export const CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION =
-  "corp-punish-route-quote-v1" as const;
+  "corp-punish-route-quote-v2" as const;
+export const CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID =
+  "corp_utility:installed_hardware_trash_by_counter" as const;
 
 export type CorpPunishRouteIncompleteReason =
   | "malformed_route_request"
@@ -2339,7 +2341,9 @@ export type CorpPunishRouteIncompleteReason =
   | "source_condition_unsatisfied"
   | "head_legal_action_unavailable"
   | "cost_quote_incomplete"
+  | "target_quote_incomplete"
   | "response_window_unknown"
+  | "trash_prevention_quote_incomplete"
   | "damage_prevention_quote_incomplete"
   | "future_state_transition_unavailable";
 
@@ -2349,6 +2353,7 @@ export type CorpPunishRouteStepKind =
   | "meat_damage"
   | "net_damage"
   | "core_damage"
+  | "hardware_trash"
   | "other_punish";
 
 export type CorpPunishRouteStepRequest = {
@@ -2357,6 +2362,12 @@ export type CorpPunishRouteStepRequest = {
   kind: CorpPunishRouteStepKind;
   sourceCardInstanceId: CardInstanceId;
   sourceCapabilityId: string;
+  /**
+   * Exact current head action selected by the caller when multiple legal
+   * variants exist. Omitted only when asking the Engine to certify a
+   * funding-only minimum horizon or a uniquely identified fixed action.
+   */
+  currentLegalActionId?: string;
 };
 
 /**
@@ -2390,6 +2401,19 @@ export type CorpPunishRouteStepQuote = {
   sourceCapabilityId: string;
   clicks: number;
   credits: number;
+  hardwareTrashProjection?: {
+    kind: "installed_runner_hardware";
+    targetKnowledge: "public_exact";
+    eligibleTargetInstanceIds: CardInstanceId[];
+    eligibleTargetCount: number;
+    excludedSubtype: "cybernetics";
+    costKind: "variable_x";
+    minimumX: number;
+    selectedX: number;
+    legalMaximumX: number;
+    creditsPerX: number;
+    preventionKnowledge: "none_visible";
+  };
   currentLegalAction?: LegalAction;
 };
 

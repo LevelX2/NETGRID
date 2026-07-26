@@ -13,6 +13,7 @@ import { selectableChoiceOptions } from "./choice-option";
 import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement-counter-choice";
 import { selectedCorpAccessPaymentChoiceOptionId } from "./corp-access-payment-choice";
 import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
+import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
 import { selectedDiscardChoiceOptionIds } from "./discard-choice-selection";
 import {
   runnerDamagePreventionChoiceResolution,
@@ -210,6 +211,28 @@ export function selectedChoicesForDecision(
       binding.selectedOptionIds,
       "resident_corp_scored_agenda_hq_shuffle",
     );
+  }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_cards" &&
+    choice.source.startsWith(
+      "card_implementation.installed_hardware_trash_by_counter:",
+    )
+  ) {
+    const selected = selectedCorpHardwareTrashChoiceOptionIds(
+      input,
+      action,
+      choice,
+      selectableOptions,
+    );
+    if (!selected) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "Preserve the exact public installed-hardware target set, variable-X cardinality, state version and resolve-choice LegalAction binding.",
+      );
+    }
+    return resolved(selected, "corp_hardware_trash_by_counter");
   }
   if (
     choice.kind === "select_cards" &&

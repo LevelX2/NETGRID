@@ -30,7 +30,7 @@ describe("AI input DTO Corp punish-route quote contract", () => {
     });
 
     expect(dto.playerView.corpPunishRouteQuoteSet).toMatchObject({
-      schemaVersion: "corp-punish-route-quote-v1",
+      schemaVersion: "corp-punish-route-quote-v2",
       visibility: "private_to_actor",
       side: "corp",
       stateVersion: 1,
@@ -259,7 +259,7 @@ function damageAction(source: string, actionId: string): LegalAction {
 
 function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
   const request: CorpPunishRouteQuoteRequest = {
-    schemaVersion: "corp-punish-route-quote-v1",
+    schemaVersion: "corp-punish-route-quote-v2",
     matchId: "match:punish-route-dto",
     side: "corp",
     stateVersion: 1,
@@ -291,7 +291,7 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
     ],
   };
   return {
-    schemaVersion: "corp-punish-route-quote-v1",
+    schemaVersion: "corp-punish-route-quote-v2",
     visibility: "private_to_actor",
     side: "corp",
     stateVersion: 1,
@@ -303,7 +303,7 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
     runnerCreditsVisible: 4,
     routes: [
       {
-        schemaVersion: "corp-punish-route-quote-v1",
+        schemaVersion: "corp-punish-route-quote-v2",
         visibility: "private_to_actor",
         matchId: request.matchId,
         side: "corp",

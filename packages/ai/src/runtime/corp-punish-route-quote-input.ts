@@ -1,4 +1,5 @@
 import {
+  CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type CorpPunishRouteIncompleteReason,
@@ -21,15 +22,18 @@ const ON_PLAY_CAPABILITY_ID = "ability:on_play:0";
 type PunishComponentAdapter = {
   kind: Extract<
     CorpPunishRouteStepKind,
-    "tag" | "meat_damage" | "other_punish"
+    "tag" | "meat_damage" | "hardware_trash" | "other_punish"
   >;
   definitionId: string;
   hintFamily:
     | "direct_tag"
     | "fixed_meat_damage"
+    | "tagged_runner_hardware_trash"
     | "tagged_runner_credit_denial";
   routeOrder: number;
-  sourceCapabilityId: typeof ON_PLAY_CAPABILITY_ID;
+  sourceCapabilityId:
+    | typeof ON_PLAY_CAPABILITY_ID
+    | typeof CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID;
 };
 
 /**
@@ -154,7 +158,9 @@ export function buildBoundedCorpPunishRouteRequests(
     (component) => component.adapter.kind === "meat_damage",
   );
   const otherPunish = components.filter(
-    (component) => component.adapter.kind === "other_punish",
+    (component) =>
+      component.adapter.kind === "other_punish" ||
+      component.adapter.kind === "hardware_trash",
   );
   if (damage.length === 0 && otherPunish.length === 0) return [];
   const tagHeads =
@@ -191,15 +197,51 @@ export function buildBoundedCorpPunishRouteRequests(
       timingPoint: input.playerView.timingPoint,
       campaignId: PUNISH_CAMPAIGN_ID,
       routeId,
-      steps: route.map((component, order) => ({
-        stepId: `${routeId}:step:${order}`,
-        order,
-        kind: component.adapter.kind,
-        sourceCardInstanceId: component.card.instanceId,
-        sourceCapabilityId: component.adapter.sourceCapabilityId,
-      })),
+      steps: route.map((component, order) => {
+        const currentLegalActionId =
+          order === 0 && component.adapter.kind === "hardware_trash"
+            ? currentHardwareTrashActionId(input, component.card.instanceId)
+            : undefined;
+        return {
+          stepId: `${routeId}:step:${order}`,
+          order,
+          kind: component.adapter.kind,
+          sourceCardInstanceId: component.card.instanceId,
+          sourceCapabilityId: component.adapter.sourceCapabilityId,
+          ...(currentLegalActionId ? { currentLegalActionId } : {}),
+        };
+      }),
     };
   });
+}
+
+function currentHardwareTrashActionId(
+  input: AiDecisionInput,
+  sourceCardInstanceId: string,
+): string | undefined {
+  return input.legalActions
+    .filter(
+      (action) =>
+        action.side === "corp" &&
+        action.type === "play_operation" &&
+        action.source === sourceCardInstanceId &&
+        action.payload?.cardId === sourceCardInstanceId &&
+        action.timingPoint === input.playerView.timingPoint &&
+        action.expiresAtStateVersion === input.playerView.stateVersion &&
+        action.targetRequirements.length === 0 &&
+        (action.choiceRequirements?.length ?? 0) === 0,
+    )
+    .sort(
+      (left, right) =>
+        legalActionCreditCost(left) - legalActionCreditCost(right) ||
+        left.actionId.localeCompare(right.actionId),
+    )[0]?.actionId;
+}
+
+function legalActionCreditCost(
+  action: AiDecisionInput["legalActions"][number],
+): number {
+  return action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0);
 }
 
 function visiblePunishComponent(
@@ -214,9 +256,58 @@ function visiblePunishComponent(
   ) {
     return undefined;
   }
-  const adapter = PUNISH_COMPONENT_ADAPTERS.get(card.definitionId);
+  const adapter =
+    PUNISH_COMPONENT_ADAPTERS.get(card.definitionId) ??
+    structuredHardwareTrashAdapter(card.definitionId);
   if (!adapter || !hintMatchesAdapter(adapter)) return undefined;
   return { card, adapter };
+}
+
+/**
+ * Discovers the Power-Grid family from reviewed semantic hints. The visible
+ * definition id only joins the visible card to its hint record; no concrete
+ * card id, title, rules text or visible printed cost determines the role.
+ * The Engine subsequently proves the exact corpUtility capability.
+ */
+function structuredHardwareTrashAdapter(
+  definitionId: string,
+): PunishComponentAdapter | undefined {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  if (
+    !hint ||
+    hint.side !== "corp" ||
+    hint.cardType !== "operation" ||
+    hint.planRoles?.includes("tag_punish") !== true ||
+    hint.conditions?.some(
+      (condition) => condition.kind === "requires_runner_tagged",
+    ) !== true ||
+    hint.conditions.some(
+      (condition) => condition.kind === "requires_installed_hardware",
+    ) !== true ||
+    hint.effects?.some(
+      (effect) =>
+        effect.kind === "hardware_trash" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        effect.finite === true,
+    ) !== true ||
+    hint.effects.some(
+      (effect) =>
+        effect.kind === "tag_punish_payoff" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        effect.finite === true,
+    ) !== true
+  ) {
+    return undefined;
+  }
+  return {
+    definitionId,
+    kind: "hardware_trash",
+    hintFamily: "tagged_runner_hardware_trash",
+    routeOrder: 6,
+    sourceCapabilityId: CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
+  };
 }
 
 function hintMatchesAdapter(adapter: PunishComponentAdapter): boolean {
@@ -253,6 +344,9 @@ function hintMatchesAdapter(adapter: PunishComponentAdapter): boolean {
           effect.resource === "credits",
       ) === true
     );
+  }
+  if (adapter.hintFamily === "tagged_runner_hardware_trash") {
+    return structuredHardwareTrashAdapter(adapter.definitionId) !== undefined;
   }
   return (
     hint.conditions?.some(
@@ -329,7 +423,20 @@ function quoteMatchesRequest(
     quote.requestEcho.stateVersion === request.stateVersion &&
     quote.requestEcho.timingPoint === request.timingPoint &&
     quote.requestEcho.campaignId === request.campaignId &&
-    quote.requestEcho.routeId === request.routeId
+    quote.requestEcho.routeId === request.routeId &&
+    quote.requestEcho.steps.length === request.steps.length &&
+    quote.requestEcho.steps.every((echoed, index) => {
+      const requested = request.steps[index];
+      return (
+        requested !== undefined &&
+        echoed.stepId === requested.stepId &&
+        echoed.order === requested.order &&
+        echoed.kind === requested.kind &&
+        echoed.sourceCardInstanceId === requested.sourceCardInstanceId &&
+        echoed.sourceCapabilityId === requested.sourceCapabilityId &&
+        echoed.currentLegalActionId === requested.currentLegalActionId
+      );
+    })
   );
 }
 

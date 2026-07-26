@@ -1,5 +1,6 @@
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
+  CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
@@ -747,6 +748,15 @@ export function sanitizeCorpPunishRouteQuoteSet(
         sourceCapabilityId: step.sourceCapabilityId,
         clicks: step.clicks,
         credits: step.credits,
+        ...(step.hardwareTrashProjection
+          ? {
+              hardwareTrashProjection: {
+                ...step.hardwareTrashProjection,
+                eligibleTargetInstanceIds:
+                  step.hardwareTrashProjection.eligibleTargetInstanceIds.slice(),
+              },
+            }
+          : {}),
         ...(index === 0 && step.currentLegalAction
           ? { currentLegalAction: sanitizeLegalAction(step.currentLegalAction) }
           : {}),
@@ -877,7 +887,9 @@ function validPunishRequestEcho(route: CorpPunishRouteQuote): boolean {
         step.order === index &&
         validPunishStepKind(step.kind) &&
         nonblank(step.sourceCardInstanceId) &&
-        nonblank(step.sourceCapabilityId),
+        nonblank(step.sourceCapabilityId) &&
+        (step.currentLegalActionId === undefined ||
+          (index === 0 && nonblank(step.currentLegalActionId))),
     ) &&
     (!route.complete ||
       request.steps.every((requested, index) => {
@@ -959,6 +971,7 @@ function validOrderedPunishSteps(
         !validPunishStepKind(step.kind) ||
         !nonNegativeInteger(step.clicks) ||
         !nonNegativeInteger(step.credits) ||
+        !validHardwareTrashProjection(step, view) ||
         (index > 0 && step.currentLegalAction !== undefined),
     )
   )
@@ -966,27 +979,111 @@ function validOrderedPunishSteps(
 
   const head = route.steps[0];
   const action = head?.currentLegalAction;
+  const requestedHeadActionId =
+    route.requestEcho.steps[0]?.currentLegalActionId;
   const visibleCurrentAction = action
     ? view.legalActions.find(
         (candidate) => candidate.actionId === action.actionId,
       )
     : undefined;
   return (
-    !action ||
-    (visibleCurrentAction !== undefined &&
-      action.side === "corp" &&
-      action.source === head.sourceCardInstanceId &&
-      action.timingPoint === quoteSet.timingPoint &&
-      action.expiresAtStateVersion === quoteSet.stateVersion &&
-      action.source === visibleCurrentAction.source &&
-      action.timingPoint === visibleCurrentAction.timingPoint &&
-      action.expiresAtStateVersion ===
-        visibleCurrentAction.expiresAtStateVersion &&
-      action.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) ===
-        head.clicks &&
-      action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0) ===
-        head.credits)
+    (requestedHeadActionId === undefined ||
+      (action !== undefined && action.actionId === requestedHeadActionId)) &&
+    (!action ||
+      (visibleCurrentAction !== undefined &&
+        action.side === "corp" &&
+        action.source === head.sourceCardInstanceId &&
+        action.timingPoint === quoteSet.timingPoint &&
+        action.expiresAtStateVersion === quoteSet.stateVersion &&
+        action.source === visibleCurrentAction.source &&
+        action.timingPoint === visibleCurrentAction.timingPoint &&
+        action.expiresAtStateVersion ===
+          visibleCurrentAction.expiresAtStateVersion &&
+        action.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) ===
+          head.clicks &&
+        action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0) ===
+          head.credits &&
+        validCurrentHardwareTrashAction(action, head)))
   );
+}
+
+function validHardwareTrashProjection(
+  step: CorpPunishRouteQuote["steps"][number],
+  view: PlayerView,
+): boolean {
+  const projection = step.hardwareTrashProjection;
+  if (step.kind !== "hardware_trash") return projection === undefined;
+  if (
+    !projection ||
+    step.sourceCapabilityId !== CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID ||
+    projection.kind !== "installed_runner_hardware" ||
+    projection.targetKnowledge !== "public_exact" ||
+    projection.excludedSubtype !== "cybernetics" ||
+    projection.costKind !== "variable_x" ||
+    projection.preventionKnowledge !== "none_visible" ||
+    !uniqueNonblankStrings(projection.eligibleTargetInstanceIds) ||
+    !nonNegativeInteger(projection.eligibleTargetCount) ||
+    projection.eligibleTargetCount !==
+      projection.eligibleTargetInstanceIds.length ||
+    projection.eligibleTargetCount < 1 ||
+    !nonNegativeInteger(projection.minimumX) ||
+    projection.minimumX < 1 ||
+    !nonNegativeInteger(projection.selectedX) ||
+    projection.selectedX < projection.minimumX ||
+    !nonNegativeInteger(projection.legalMaximumX) ||
+    projection.legalMaximumX < projection.selectedX ||
+    projection.legalMaximumX > projection.eligibleTargetCount ||
+    !nonNegativeInteger(projection.creditsPerX) ||
+    projection.creditsPerX < 1 ||
+    step.credits !== projection.selectedX * projection.creditsPerX
+  ) {
+    return false;
+  }
+  const visibleEligibleIds = (view.opponent.rig ?? [])
+    .filter(
+      (card) =>
+        card.known === true &&
+        card.owner === "runner" &&
+        card.controller === "runner" &&
+        card.type === "hardware" &&
+        card.subtypes?.some(
+          (subtype) =>
+            normalizePunishSubtype(subtype) ===
+            normalizePunishSubtype(projection.excludedSubtype),
+        ) !== true,
+    )
+    .map((card) => card.instanceId)
+    .sort();
+  const quotedIds = projection.eligibleTargetInstanceIds.slice().sort();
+  return (
+    visibleEligibleIds.length === quotedIds.length &&
+    visibleEligibleIds.every((cardId, index) => cardId === quotedIds[index])
+  );
+}
+
+function validCurrentHardwareTrashAction(
+  action: LegalAction,
+  step: CorpPunishRouteQuote["steps"][number],
+): boolean {
+  const projection = step.hardwareTrashProjection;
+  if (!projection) return step.kind !== "hardware_trash";
+  return (
+    action.payload?.hardwareTrashByCounterTrashCount === projection.selectedX &&
+    action.payload?.eligibleHardwareCount === projection.eligibleTargetCount &&
+    action.payload?.xValue === projection.selectedX &&
+    action.payload?.xMinimum === projection.minimumX &&
+    action.payload?.xMaximum === projection.legalMaximumX &&
+    action.payload?.xUpperBound === projection.legalMaximumX &&
+    action.payload?.xCreditsPerUnit === projection.creditsPerX &&
+    action.payload?.variableCostKind === "printed_play_cost"
+  );
+}
+
+function normalizePunishSubtype(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
 }
 
 function validTagTrigger(
@@ -1099,6 +1196,7 @@ function validPunishStepKind(
     value === "meat_damage" ||
     value === "net_damage" ||
     value === "core_damage" ||
+    value === "hardware_trash" ||
     value === "other_punish"
   );
 }
@@ -1133,6 +1231,7 @@ function punishRequestFingerprint(
       step.kind,
       step.sourceCardInstanceId,
       step.sourceCapabilityId,
+      ...(step.currentLegalActionId ? [step.currentLegalActionId] : []),
     ]),
   ]);
 }
@@ -1169,7 +1268,9 @@ function isCorpPunishRouteIncompleteReason(
     value === "source_condition_unsatisfied" ||
     value === "head_legal_action_unavailable" ||
     value === "cost_quote_incomplete" ||
+    value === "target_quote_incomplete" ||
     value === "response_window_unknown" ||
+    value === "trash_prevention_quote_incomplete" ||
     value === "damage_prevention_quote_incomplete" ||
     value === "future_state_transition_unavailable"
   );

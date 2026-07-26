@@ -84,6 +84,7 @@ import {
   scoredCorpAgendaIds,
   unrezzedRootCardIdOnServer,
 } from "../state/card-server-lookup";
+import { eligibleInstalledRunnerHardwareIds } from "../state/installed-runner-hardware";
 import {
   drawCorpCard,
   drawCorpCards,
@@ -857,24 +858,7 @@ export function createCorpRuntimeResolvers(
   function hardwareTrashByCounterEligibleHardwareIds(
     state: GameState,
   ): CardInstanceId[] {
-    return state.runner.rig.hardware
-      .slice()
-      .filter((cardId) => {
-        const definition = definitionFor(state, cardId);
-        return (
-          definition.type === "hardware" &&
-          !deps.cardHasSubtype(definition, "cybernetics")
-        );
-      })
-      .sort((left, right) => {
-        const leftDefinition = definitionFor(state, left);
-        const rightDefinition = definitionFor(state, right);
-        const byTitle = leftDefinition.title.localeCompare(
-          rightDefinition.title,
-        );
-        if (byTitle !== 0) return byTitle;
-        return left.localeCompare(right);
-      });
+    return eligibleInstalledRunnerHardwareIds(state, "cybernetics");
   }
 
   function hardwareTrashByCounterLegalActions(

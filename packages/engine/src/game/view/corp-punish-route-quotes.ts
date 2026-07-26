@@ -1,5 +1,6 @@
 import {
   CARD_DEFINITIONS_BY_ID,
+  CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   type CorpPunishRouteIncompleteReason,
   type CorpPunishRouteQuote,
@@ -16,13 +17,21 @@ import type {
   OnPlayCardAbilityImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { createRunnerInstalledTrashImminentEvent } from "../damage/damage-event-resolution";
+import { collectEventModificationCandidates } from "../damage/prevention-sources";
 import { getLegalActions } from "../legal-actions";
-import { fixedPlayCostCredits } from "../payment/play-cost";
+import {
+  fixedPlayCostCredits,
+  playCostForDefinition,
+} from "../payment/play-cost";
+import { eligibleInstalledRunnerHardwareIds } from "../state/installed-runner-hardware";
+import { isConcealedRunnerResource } from "./card-view";
 
 type CertifiedStep = {
   quote: CorpPunishRouteStepQuote;
   effects: readonly CardEffectImplementation[];
   condition?: CardConditionImplementation;
+  currentLegalActionId?: string;
 };
 
 /**
@@ -91,10 +100,10 @@ export function quoteCorpPunishRoute(
 
   const head = certifiedSteps[0];
   const currentHeadAction = head
-    ? exactCurrentHeadAction(state, head.quote)
+    ? exactCurrentHeadAction(state, head.quote, head.currentLegalActionId)
     : undefined;
   const fundingOnlyHead =
-    head && !currentHeadAction
+    head && !currentHeadAction && head.currentLegalActionId === undefined
       ? exactFundingOnlyHeadAvailable(state, head.quote)
       : false;
   if (!head || (!currentHeadAction && !fundingOnlyHead)) {
@@ -144,7 +153,10 @@ export function quoteCorpPunishRoute(
     }
   }
 
-  if (hasVisibleDamageModifierOrPrevention(state)) {
+  if (
+    rawMeatDamage + rawNetDamage + rawCoreDamage > 0 &&
+    hasVisibleDamageModifierOrPrevention(state)
+  ) {
     return {
       ok: true,
       quote: incompleteQuote(base, "damage_prevention_quote_incomplete"),
@@ -255,6 +267,7 @@ export function corpPunishRouteRequestFingerprint(
       step.kind,
       step.sourceCardInstanceId,
       step.sourceCapabilityId,
+      ...(step.currentLegalActionId ? [step.currentLegalActionId] : []),
     ]),
   ]);
 }
@@ -284,6 +297,9 @@ function certifyStep(
   }
   if (definition.type !== "operation") {
     return { ok: false, reason: "source_capability_unsupported" };
+  }
+  if (request.sourceCapabilityId === CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID) {
+    return certifyHardwareTrashStep(state, request, definition);
   }
   const capability = onPlayCapability(
     instance.definitionId,
@@ -317,8 +333,197 @@ function certifyStep(
       },
       effects: capability.effects,
       ...(capability.condition ? { condition: capability.condition } : {}),
+      ...(request.currentLegalActionId
+        ? { currentLegalActionId: request.currentLegalActionId }
+        : {}),
     },
   };
+}
+
+function certifyHardwareTrashStep(
+  state: GameState,
+  request: CorpPunishRouteQuoteRequest["steps"][number],
+  definition: (typeof CARD_DEFINITIONS_BY_ID)[string],
+):
+  | { ok: true; step: CertifiedStep }
+  | { ok: false; reason: CorpPunishRouteIncompleteReason } {
+  if (request.kind !== "hardware_trash") {
+    return { ok: false, reason: "source_effects_unsupported" };
+  }
+  const utility = cardImplementationForDefinitionId(definition.id)?.corpUtility;
+  if (
+    utility?.kind !== "installed_hardware_trash_by_counter" ||
+    utility.excludesSubtype !== "cybernetics" ||
+    utility.visibility !== "public"
+  ) {
+    return { ok: false, reason: "source_capability_unsupported" };
+  }
+  const playCost = playCostForDefinition(definition);
+  if (
+    playCost.kind !== "variable_x" ||
+    !Number.isSafeInteger(playCost.minimumX) ||
+    playCost.minimumX < 1 ||
+    !Number.isSafeInteger(playCost.creditsPerX) ||
+    playCost.creditsPerX < 1
+  ) {
+    return { ok: false, reason: "cost_quote_incomplete" };
+  }
+  if (state.runner.tags < 1) {
+    return { ok: false, reason: "source_condition_unsatisfied" };
+  }
+  if (
+    new Set(state.runner.rig.hardware).size !==
+      state.runner.rig.hardware.length ||
+    state.runner.rig.hardware.some((cardId) => {
+      const instance = state.cardInstances[cardId];
+      const targetDefinition = instance
+        ? CARD_DEFINITIONS_BY_ID[instance.definitionId]
+        : undefined;
+      return (
+        !instance ||
+        instance.owner !== "runner" ||
+        instance.controller !== "runner" ||
+        instance.zone.side !== "runner" ||
+        instance.zone.zone !== "rig" ||
+        targetDefinition?.type !== "hardware"
+      );
+    })
+  ) {
+    return { ok: false, reason: "target_quote_incomplete" };
+  }
+  const eligibleTargetInstanceIds = eligibleInstalledRunnerHardwareIds(
+    state,
+    utility.excludesSubtype,
+  );
+  if (eligibleTargetInstanceIds.length === 0) {
+    return { ok: false, reason: "source_condition_unsatisfied" };
+  }
+  const trashEvent = createRunnerInstalledTrashImminentEvent(
+    state,
+    eligibleTargetInstanceIds,
+    "corp_punish_route_quote.hardware_trash",
+  );
+  if (
+    state.runner.rig.resources.some((cardId) =>
+      isConcealedRunnerResource(state, cardId),
+    ) ||
+    collectEventModificationCandidates(state, trashEvent).length > 0
+  ) {
+    return { ok: false, reason: "trash_prevention_quote_incomplete" };
+  }
+  const currentActionProjection = request.currentLegalActionId
+    ? exactRequestedHardwareTrashAction(
+        state,
+        request,
+        playCost,
+        eligibleTargetInstanceIds.length,
+      )
+    : undefined;
+  if (request.currentLegalActionId && !currentActionProjection) {
+    return { ok: false, reason: "head_legal_action_unavailable" };
+  }
+  const selectedX = currentActionProjection?.selectedX ?? playCost.minimumX;
+  const credits =
+    currentActionProjection?.credits ?? selectedX * playCost.creditsPerX;
+  if (!Number.isSafeInteger(credits) || credits < 1) {
+    return { ok: false, reason: "cost_quote_incomplete" };
+  }
+  const legalMaximumX =
+    currentActionProjection?.legalMaximumX ??
+    Math.min(
+      eligibleTargetInstanceIds.length,
+      Math.floor(credits / playCost.creditsPerX),
+    );
+  if (!Number.isSafeInteger(legalMaximumX) || legalMaximumX < selectedX) {
+    return { ok: false, reason: "cost_quote_incomplete" };
+  }
+  return {
+    ok: true,
+    step: {
+      quote: {
+        stepId: request.stepId,
+        order: request.order,
+        kind: request.kind,
+        sourceCardInstanceId: request.sourceCardInstanceId,
+        sourceCardDefinitionId: definition.id,
+        sourceCapabilityId: request.sourceCapabilityId,
+        clicks: 1,
+        credits,
+        hardwareTrashProjection: {
+          kind: "installed_runner_hardware",
+          targetKnowledge: "public_exact",
+          eligibleTargetInstanceIds,
+          eligibleTargetCount: eligibleTargetInstanceIds.length,
+          excludedSubtype: utility.excludesSubtype,
+          costKind: "variable_x",
+          minimumX: playCost.minimumX,
+          selectedX,
+          legalMaximumX,
+          creditsPerX: playCost.creditsPerX,
+          preventionKnowledge: "none_visible",
+        },
+      },
+      effects: [],
+      ...(request.currentLegalActionId
+        ? { currentLegalActionId: request.currentLegalActionId }
+        : {}),
+    },
+  };
+}
+
+function exactRequestedHardwareTrashAction(
+  state: GameState,
+  request: CorpPunishRouteQuoteRequest["steps"][number],
+  playCost: Extract<
+    ReturnType<typeof playCostForDefinition>,
+    { kind: "variable_x" }
+  >,
+  eligibleTargetCount: number,
+):
+  | {
+      selectedX: number;
+      legalMaximumX: number;
+      credits: number;
+    }
+  | undefined {
+  const action = getLegalActions(state, "corp").find(
+    (candidate) =>
+      candidate.actionId === request.currentLegalActionId &&
+      candidate.side === "corp" &&
+      candidate.type === "play_operation" &&
+      candidate.source === request.sourceCardInstanceId &&
+      candidate.payload?.cardId === request.sourceCardInstanceId &&
+      candidate.timingPoint === state.timingPoint &&
+      candidate.expiresAtStateVersion === state.stateVersion &&
+      candidate.targetRequirements.length === 0 &&
+      (candidate.choiceRequirements?.length ?? 0) === 0,
+  );
+  if (!action) return undefined;
+  const selectedX = Number(action.payload?.hardwareTrashByCounterTrashCount);
+  const legalMaximumX = Math.min(
+    eligibleTargetCount,
+    Math.floor(state.corp.credits / playCost.creditsPerX),
+  );
+  const credits = selectedX * playCost.creditsPerX;
+  if (
+    !Number.isSafeInteger(selectedX) ||
+    selectedX < playCost.minimumX ||
+    selectedX > legalMaximumX ||
+    !Number.isSafeInteger(credits) ||
+    credits < 1 ||
+    sumActionCost(action, "clicks") !== 1 ||
+    sumActionCost(action, "credits") !== credits ||
+    action.payload?.eligibleHardwareCount !== eligibleTargetCount ||
+    action.payload?.xValue !== selectedX ||
+    action.payload?.xMinimum !== playCost.minimumX ||
+    action.payload?.xMaximum !== legalMaximumX ||
+    action.payload?.xUpperBound !== legalMaximumX ||
+    action.payload?.xCreditsPerUnit !== playCost.creditsPerX ||
+    action.payload?.variableCostKind !== "printed_play_cost"
+  ) {
+    return undefined;
+  }
+  return { selectedX, legalMaximumX, credits };
 }
 
 function onPlayCapability(
@@ -383,9 +588,12 @@ function supportedEffects(
 function exactCurrentHeadAction(
   state: GameState,
   step: CorpPunishRouteStepQuote,
+  currentLegalActionId?: string,
 ): LegalAction | undefined {
   return getLegalActions(state, "corp").find(
     (action) =>
+      (currentLegalActionId === undefined ||
+        action.actionId === currentLegalActionId) &&
       action.side === "corp" &&
       action.type === "play_operation" &&
       action.source === step.sourceCardInstanceId &&
@@ -395,7 +603,27 @@ function exactCurrentHeadAction(
       action.targetRequirements.length === 0 &&
       (action.choiceRequirements?.length ?? 0) === 0 &&
       sumActionCost(action, "clicks") === step.clicks &&
-      sumActionCost(action, "credits") === step.credits,
+      sumActionCost(action, "credits") === step.credits &&
+      exactHardwareTrashActionBinding(action, step),
+  );
+}
+
+function exactHardwareTrashActionBinding(
+  action: LegalAction,
+  step: CorpPunishRouteStepQuote,
+): boolean {
+  const projection = step.hardwareTrashProjection;
+  if (!projection) return step.kind !== "hardware_trash";
+  return (
+    step.kind === "hardware_trash" &&
+    action.payload?.hardwareTrashByCounterTrashCount === projection.selectedX &&
+    action.payload?.eligibleHardwareCount === projection.eligibleTargetCount &&
+    action.payload?.xValue === projection.selectedX &&
+    action.payload?.xMinimum === projection.minimumX &&
+    action.payload?.xMaximum === projection.legalMaximumX &&
+    action.payload?.xUpperBound === projection.legalMaximumX &&
+    action.payload?.xCreditsPerUnit === projection.creditsPerX &&
+    action.payload?.variableCostKind === "printed_play_cost"
   );
 }
 
@@ -578,7 +806,9 @@ function isCorpPunishRouteQuoteRequest(request: unknown): boolean {
         step.order === index &&
         validStepKind(step.kind) &&
         nonblank(step.sourceCardInstanceId) &&
-        nonblank(step.sourceCapabilityId),
+        nonblank(step.sourceCapabilityId) &&
+        (step.currentLegalActionId === undefined ||
+          (index === 0 && nonblank(step.currentLegalActionId))),
     )
   );
 }
@@ -592,6 +822,7 @@ function validStepKind(
     value === "meat_damage" ||
     value === "net_damage" ||
     value === "core_damage" ||
+    value === "hardware_trash" ||
     value === "other_punish"
   );
 }
