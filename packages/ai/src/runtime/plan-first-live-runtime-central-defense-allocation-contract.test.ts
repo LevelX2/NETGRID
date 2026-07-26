@@ -545,6 +545,63 @@ describe("plan-first live Corp central-defense allocation contract", () => {
     });
     expect(defense?.moduleState).not.toHaveProperty("hqHoldSelection");
   });
+
+  it("revalidates an unconsumed HQ-hold receipt after the resident portfolio advances", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = fourPlusOneNearTieInput();
+
+    liveContext().chooseSemanticRuntimeAction(fixture.input, {
+      quoteRandomizedIceInstallSelection: (request) =>
+        successfulQuote(request, fixture.input.legalActions),
+    });
+
+    const captured = residentPlanPortfolioSnapshot(fixture.input);
+    if (!captured) {
+      throw new Error("test fixture requires the resident portfolio");
+    }
+    const advancedPortfolio = structuredClone(captured);
+    advancedPortfolio.stateVersion = 2;
+
+    const next = structuredClone(fixture.input);
+    next.decisionId = "central-defense-runtime-contract:3:corp";
+    next.playerView.stateVersion = 3;
+    next.playerView.corpCentralAccessQuotes =
+      next.playerView.corpCentralAccessQuotes!.map((quote) => ({
+        ...quote,
+        stateVersion: 3,
+      }));
+    for (const action of next.legalActions) {
+      action.expiresAtStateVersion = 3;
+      if (action.payload?.postInstallRezQuoteCardId) {
+        action.payload.postInstallRezQuoteExpiresAtStateVersion = 3;
+      }
+    }
+    next.playerView.legalActions = next.legalActions;
+
+    resetResidentPlanPortfolioMemory();
+    restoreResidentPlanPortfolioMemorySnapshot(next, advancedPortfolio);
+    expect(
+      liveContext().chooseSemanticRuntimeAction(next, {
+        quoteRandomizedIceInstallSelection: (request) =>
+          successfulQuote(request, next.legalActions),
+      }),
+    ).toMatchObject({
+      selectionKind: "engine_randomized_ice_install_selection",
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+
+    expect(
+      residentPlanPortfolioSnapshot(next)?.instances.find(
+        (instance) => instance.moduleId === "corp.defend_servers",
+      )?.moduleState,
+    ).toMatchObject({
+      hqHoldCadence: {
+        status: "available",
+        factsStateVersion: 3,
+      },
+    });
+  });
 });
 
 function fourPlusOneNearTieInput() {

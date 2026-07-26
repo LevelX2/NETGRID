@@ -14459,9 +14459,7 @@ function corpResidentCentralDefenseHqHoldState(
     (cadence.factsStateVersion as number) >= 0 &&
     (cadence.factsStateVersion as number) <= previous!.stateVersion;
   const availableValid =
-    cadence.status !== "available" ||
-    (selection === undefined &&
-      cadence.factsStateVersion === previous!.stateVersion);
+    cadence.status !== "available" || selection === undefined;
   const consumedValid =
     cadence.status !== "consumed" ||
     (typeof selection?.selectedActionId === "string" &&
