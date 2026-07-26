@@ -18201,15 +18201,25 @@
   "expectation": {
     "acceptableActions": [
       {
+        "actionId": "corp.draw_card"
+      }
+    ],
+    "forbiddenActions": [
+      {
         "type": "install_card",
         "sourceDefinitionId": "onr_v1_365_paris-city-grid",
         "targetServerId": "hq"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.punish_campaign"],
-      "acceptableCapabilities": ["punish_prepare"],
-      "requiredAssessmentEvidence": ["visible_prepare_action"]
+      "acceptablePlanIds": [
+        "plan:corp.defend_servers:server-defense-portfolio"
+      ],
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["develop_score_protection"],
+      "requiredAssessmentEvidence": [
+        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_193_corporate-coup_1:remote_1:remote_1"
+      ]
     }
   }
 }

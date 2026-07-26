@@ -9,16 +9,24 @@ import { scoringWindowAccessAssessment } from "../../runtime/corp-scoreline/sema
 describe("match 3bb14 Corp remediation decision checkpoints", () => {
   it.each([
     [
-      "uses the admitted ambush route while unknown score protection blocks agenda installation",
+      "installs the exact Strike Force Kali scoreline with staged ETR support",
       scoredOnlyTimingJson,
+      ["plan_priority_class:P4"],
     ],
     [
-      "uses the admitted ambush route while the remote scoreline is not provably protected",
+      "draws defense for the exact Private Cybernet Police score parent",
       realisticScoreHorizonJson,
+      [
+        "plan_priority_class:P4",
+        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_213_private-cybernet-police_1%3Aremote_1",
+      ],
     ],
-  ])("%s", (_label, json) => {
+  ] as const)("%s", (_label, json, requiredDecisionEvidence) => {
     const result = runAiDecisionCheckpoint(fixture(json));
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    for (const evidence of requiredDecisionEvidence) {
+      expect(result.decision?.evidence).toContain(evidence);
+    }
   });
 
   it("counts a public Shell-Traders breaker when it is reachable before scoring", () => {
@@ -28,10 +36,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     );
     if (!remote) throw new Error("Missing captured scoring remote");
 
-    const currentAccess = scoringWindowAccessAssessment(
-      result.input,
-      remote,
-    );
+    const currentAccess = scoringWindowAccessAssessment(result.input, remote);
     const exposureAccess = scoringWindowAccessAssessment(
       result.input,
       remote,
@@ -44,7 +49,9 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     );
     expect(exposureAccess.runnerCanReachAccessNow).toBe(true);
     expect(exposureAccess.visibleRunnerIcebreakerCount).toBe(1);
-    expect(exposureAccess.evidence).toContain("public_staged_breaker_used:true");
+    expect(exposureAccess.evidence).toContain(
+      "public_staged_breaker_used:true",
+    );
     expect(exposureAccess.evidence).toContain(
       "public_staged_breaker_install_credit_cost:2",
     );
@@ -55,9 +62,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     const input = structuredClone(result.input);
     input.playerView.opponent.rig = (
       input.playerView.opponent.rig ?? []
-    ).filter(
-      (card) => card.definitionId !== "onr_v1_176_the-shell-traders",
-    );
+    ).filter((card) => card.definitionId !== "onr_v1_176_the-shell-traders");
     const remote = input.playerView.servers.find(
       (server) => server.id === "remote_1",
     );

@@ -9461,14 +9461,20 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "draw_card"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "type": "rez_card",
+        "sourceDefinitionId": "onr_v1_352_chester-mix"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
+      "acceptableCapabilities": ["draw_for_plan"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_basic_liquidity_development"
+        "corp_score_campaign_missing_agenda_material"
       ]
     }
   }

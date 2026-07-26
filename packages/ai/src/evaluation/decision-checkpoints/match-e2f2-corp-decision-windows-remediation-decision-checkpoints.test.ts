@@ -23,7 +23,7 @@ describe("match e2f2 Corp decision-window remediation checkpoints", () => {
       keepPositiveMenusRezJson,
     ],
     [
-      "clears HQ overflow with score-acceleration setup instead of saturated credit or overflowing draw",
+      "draws the missing score material instead of forcing Annual Reviews",
       annualReviewsOverSaturatedCreditJson,
     ],
     [
@@ -54,6 +54,16 @@ describe("match e2f2 Corp decision-window remediation checkpoints", () => {
     const result = runAiDecisionCheckpoint(fixture(json));
 
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
+    if (json === annualReviewsOverSaturatedCreditJson) {
+      expect(result.decision?.evidence).toEqual(
+        expect.arrayContaining([
+          "plan_priority_class:P4",
+          "plan_module:corp.hand_and_agenda_management",
+          "plan_step_capability:draw_for_plan",
+          "plan_assessment_evidence:corp_score_campaign_missing_agenda_material",
+        ]),
+      );
+    }
   });
 
   it("does not route Annual Reviews after R&D has become empty", () => {

@@ -7,27 +7,31 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
-  it("develops hand options while the exposed score parent is not certified", () => {
+  it.each([
+    [
+      "draws defense for the first exact Corporate Coup score parent",
+      fundExposedRemoteJson,
+      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_1",
+    ],
+    [
+      "keeps the reused Corporate Coup control on the same exact defense draw",
+      safeAdvanceControlJson,
+      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_1",
+    ],
+    [
+      "draws defense for the second exact Corporate Coup score parent",
+      safeLowCreditAdvanceJson,
+      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
+    ],
+  ] as const)("%s", (_label, json, exactScoreParentPlanId) => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(fundExposedRemoteJson) as AiDecisionCheckpointV1,
+      structuredClone(json) as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-  });
-
-  it("keeps the explicit funding route for the committed scoreline", () => {
-    const result = runAiDecisionCheckpoint(
-      structuredClone(safeAdvanceControlJson) as AiDecisionCheckpointV1,
+    expect(result.decision?.evidence).toContain("plan_priority_class:P4");
+    expect(result.decision?.evidence).toContain(
+      `plan_priority_delegated_from:${exactScoreParentPlanId}`,
     );
-
-    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-  });
-
-  it("uses last productive liquidity when no stronger route is certified", () => {
-    const result = runAiDecisionCheckpoint(
-      structuredClone(safeLowCreditAdvanceJson) as AiDecisionCheckpointV1,
-    );
-
-    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 });

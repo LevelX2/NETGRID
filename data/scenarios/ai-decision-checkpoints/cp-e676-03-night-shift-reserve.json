@@ -12611,9 +12611,17 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_operation",
-        "sourceDefinitionId": "onr_v1_295_night-shift"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_203_hostile-takeover",
+        "targetServerId": "remote_1"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
+      "requiredAssessmentEvidence": [
+        "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1"
+      ]
+    }
   }
 }

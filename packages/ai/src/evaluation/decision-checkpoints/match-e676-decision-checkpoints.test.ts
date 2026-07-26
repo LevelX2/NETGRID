@@ -9,17 +9,33 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match e676 exact decision checkpoints", () => {
   it.each([
-    ["does not expose a slow four-point Tycho at matchpoint", unsafeTychoJson],
     [
-      "does not infer an HQ defense install from Chester Mix without an engine quote",
+      "starts the exact Tycho score campaign with staged ETR uncertainty",
+      unsafeTychoJson,
+      true,
+    ],
+    [
+      "draws missing score material without rezzing Chester Mix",
       chesterBeforeHqIceJson,
+      false,
     ],
     [
-      "uses Night Shift instead of an inferior basic reserve credit",
+      "starts the exact Hostile Takeover score campaign with staged ETR uncertainty",
       nightShiftReserveJson,
+      true,
     ],
-  ])("%s", (_label, json) => {
-    expectCheckpointToPass(fixture(json));
+  ])("%s", (_label, json, expectsP4ScoreInstall) => {
+    const result = expectCheckpointToPass(fixture(json));
+    if (expectsP4ScoreInstall) {
+      expect(result.decision?.evidence).toEqual(
+        expect.arrayContaining([
+          "plan_priority_class:P4",
+          "plan_module:corp.score_agenda",
+          "plan_step_capability:install_score_agenda",
+          "plan_assessment_evidence:corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
+        ]),
+      );
+    }
   });
 
   it("still allows Tycho exposure when Project Consultants converts it this turn", () => {
@@ -140,7 +156,10 @@ function mutateFixture(
   return result;
 }
 
-function expectCheckpointToPass(fixture: AiDecisionCheckpointV1): void {
+function expectCheckpointToPass(
+  fixture: AiDecisionCheckpointV1,
+): ReturnType<typeof runAiDecisionCheckpoint> {
   const result = runAiDecisionCheckpoint(fixture);
   expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
+  return result;
 }

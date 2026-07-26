@@ -6027,9 +6027,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "sourceDefinitionId": "onr_v1_312_chicago-branch",
-        "targetServerId": "new_remote",
-        "type": "install_card"
+        "type": "draw_card"
       }
     ],
     "contractKind": "correctness",
@@ -6044,9 +6042,9 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
-      "acceptableCapabilities": ["develop_card"],
+      "acceptableCapabilities": ["draw_for_plan"],
       "requiredAssessmentEvidence": [
-        "corp_score_acceleration_campaign_setup:onr_v1_312_chicago-branch"
+        "corp_score_campaign_missing_agenda_material"
       ]
     }
   }
