@@ -4,9 +4,12 @@ import {
   buildAiDecisionInput,
   chooseAiAction,
   isAiDeckSnapshotRuntimeError,
+  residentPlanPortfolioSnapshot,
+  restoreResidentPlanPortfolioMemorySnapshot,
   selectAiDecisionSideForState,
   type AiDeckSnapshotRuntimeErrorCode,
   type AiDeckSnapshotRuntimeExpectation,
+  type ResidentPlanPortfolio,
 } from "@netgrid/ai";
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import {
@@ -381,6 +384,15 @@ export type StoredMatch = {
   undoSnapshots: UndoSnapshot[];
   stateSnapshots: StateSnapshot[];
   aiDecisionTraces?: AiDecisionTraceRecord[];
+  /**
+   * Server-private, state-bound AI runtime data. It never enters PlayerViews,
+   * events, replays, or public projections.
+   */
+  aiPlanRuntime?: {
+    residentPlanPortfolioBySide?: Partial<
+      Record<Side, ResidentPlanPortfolio>
+    >;
+  };
   pendingUndo?: PendingUndoRequest;
   actionPersistenceBaseline?: ActionPersistenceBaseline;
 };
@@ -894,6 +906,40 @@ export class MultiplayerService {
       await this.storage.save(record);
     }
     for (const observer of this.persistenceObservers) await observer(record);
+  }
+
+  /**
+   * The plan portfolio is the authority for the next plan-first decision.
+   * Process-local AI memory alone would silently replace it after a server
+   * restart, even though the match state has not changed.
+   */
+  private restoreResidentPlanPortfolioFor(
+    record: StoredMatch,
+    input: AiDecisionInput,
+  ): void {
+    const snapshot =
+      record.aiPlanRuntime?.residentPlanPortfolioBySide?.[input.side];
+    if (!snapshot) return;
+    restoreResidentPlanPortfolioMemorySnapshot(input, snapshot);
+  }
+
+  private captureResidentPlanPortfolioFor(
+    record: StoredMatch,
+    input: AiDecisionInput,
+  ): boolean {
+    const snapshot = residentPlanPortfolioSnapshot(input);
+    if (!snapshot) return false;
+    const previous =
+      record.aiPlanRuntime?.residentPlanPortfolioBySide?.[input.side];
+    if (JSON.stringify(previous) === JSON.stringify(snapshot)) return false;
+    record.aiPlanRuntime = {
+      ...record.aiPlanRuntime,
+      residentPlanPortfolioBySide: {
+        ...record.aiPlanRuntime?.residentPlanPortfolioBySide,
+        [input.side]: snapshot,
+      },
+    };
+    return true;
   }
 
   private async ensurePersistedResultSnapshots(
@@ -2912,6 +2958,7 @@ export class MultiplayerService {
             ownDeckSnapshot,
             expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, activeAiSide),
           });
+          this.restoreResidentPlanPortfolioFor(record, aiInput);
         } catch (error) {
           if (isAiDeckSnapshotRuntimeError(error))
             return {
@@ -2936,6 +2983,8 @@ export class MultiplayerService {
           side: activeAiSide,
           decision,
         });
+        if (this.captureResidentPlanPortfolioFor(record, aiInput))
+          await this.persist(record);
       }
       if (decision.selectionKind === "engine_randomized_ice_install_selection")
         return {
@@ -4180,6 +4229,9 @@ export class MultiplayerService {
       (event) => event.stateVersionAfter <= snapshot.stateVersion,
     );
     record.gameState = { ...clone(snapshot.gameState), eventLog };
+    // A rewind deliberately invalidates the state-bound plan authority. A
+    // later decision may rebuild it, but must never reuse a future portfolio.
+    delete record.aiPlanRuntime;
     record.eventLog =
       targetIndex >= 0
         ? record.eventLog.slice(0, targetIndex)
@@ -5004,6 +5056,7 @@ export class MultiplayerService {
           ownDeckSnapshot,
           expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, side),
         });
+        this.restoreResidentPlanPortfolioFor(record, input);
       } catch (error) {
         if (isAiDeckSnapshotRuntimeError(error))
           return { ok: false, code: error.code };
@@ -5014,6 +5067,7 @@ export class MultiplayerService {
         quoteRandomizedIceInstallSelection: (request) =>
           quoteRandomizedIceInstallSelection(state, request),
       });
+      this.captureResidentPlanPortfolioFor(record, input);
     }
     const directLegalAction =
       decision.selectionKind === "engine_randomized_ice_install_selection"

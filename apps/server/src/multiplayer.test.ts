@@ -19,7 +19,9 @@ import {
   beliefStateInvariantSignature,
   buildAiDecisionInputDto,
   chooseAiAction as chooseRuntimeAiAction,
+  residentPlanPortfolioSnapshot,
   reconstructBeliefState,
+  resetResidentPlanPortfolioMemory,
 } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import {
@@ -12472,6 +12474,83 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(preview.preview.detail)).not.toMatch(
       /Tactical Plan|plan_rank\||raw action score/i,
     );
+  });
+
+  it("restores the resident plan portfolio before preparing an AI decision after a server restart", async () => {
+    resetResidentPlanPortfolioMemory();
+    try {
+      const storage = new InMemoryMatchStorage();
+      const restoredBeforeChoice: boolean[] = [];
+      const choose = (input: Parameters<typeof chooseRuntimeAiAction>[0], options?: Parameters<typeof chooseRuntimeAiAction>[1]) => {
+        restoredBeforeChoice.push(Boolean(residentPlanPortfolioSnapshot(input)));
+        return chooseRuntimeAiAction(input, options);
+      };
+      const service = new MultiplayerService(storage, {
+        tokenSalt: "resident-portfolio-restart",
+        chooseAiAction: choose,
+      });
+      const created = await service.createMatch({
+        mode: "human_runner_vs_corp_ai",
+        hostSide: "runner",
+        seed: "resident-portfolio-restart",
+        corpDifficulty: "normal",
+        aiPacingMode: "paced",
+      });
+      const runner = {
+        side: "runner" as const,
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      };
+      await forceSetupComplete(service, created.matchId);
+      let current = await bootstrap(service, created.matchId, runner);
+      expect(current.playerView.activeSide).toBe("corp");
+      const mandatory = await service.advanceAi({
+        matchId: created.matchId,
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        knownStateVersion: current.playerView.stateVersion,
+        knownMatchVersion: current.matchVersion,
+        mode: "single_step",
+      });
+      expect(mandatory.ok).toBe(true);
+      if (!mandatory.ok) throw new Error(mandatory.error.message);
+      current = mandatory.requesterPayload;
+      expect(current.playerView.timingPoint).toBe("corp_action.main");
+
+      const first = await service.prepareAiDecisionDebug({
+        matchId: created.matchId,
+        requesterSide: "runner",
+        sessionToken: created.hostSessionToken,
+        knownStateVersion: current.playerView.stateVersion,
+        knownMatchVersion: current.matchVersion,
+      });
+      expect(first.ok).toBe(true);
+      const persisted = await storage.load(created.matchId);
+      expect(
+        persisted?.aiPlanRuntime?.residentPlanPortfolioBySide?.corp?.instances
+          .length,
+      ).toBeGreaterThan(0);
+      expect(restoredBeforeChoice.at(-1)).toBe(false);
+
+      // A new service stands in for a process restart: prepared decisions and
+      // process-local memory are gone, while the match record remains.
+      resetResidentPlanPortfolioMemory();
+      const restarted = new MultiplayerService(storage, {
+        tokenSalt: "resident-portfolio-restart",
+        chooseAiAction: choose,
+      });
+      const afterRestart = await restarted.prepareAiDecisionDebug({
+        matchId: created.matchId,
+        requesterSide: "runner",
+        sessionToken: created.hostSessionToken,
+        knownStateVersion: current.playerView.stateVersion,
+        knownMatchVersion: current.matchVersion,
+      });
+      expect(afterRestart.ok).toBe(true);
+      expect(restoredBeforeChoice.at(-1)).toBe(true);
+    } finally {
+      resetResidentPlanPortfolioMemory();
+    }
   });
 
   it("binds session AI previews to the human side without leaking hidden opponent cards or mutating the match", async () => {
