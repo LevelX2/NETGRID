@@ -1,6 +1,6 @@
 # AI Score-Choice-Continuation-Identity – Umsetzungsprozess
 
-Status: **geplant; noch nicht implementiert**
+Status: **abgeschlossen**
 
 Stand: 2026-07-26
 
@@ -24,7 +24,8 @@ Fakten werden als typisierte Continuation-Nutzlast übertragen.
 
 Im Scope sind nur:
 
-- `corp_advancement_counter` nach einer Corp-Advance-Fortsetzung;
+- `corp_advancement_counter` nach einer Corp-Advance-Fortsetzung, einschließlich
+  der Engine-Produzenten für `p3_34` und `v1919`;
 - `corp_scored_agenda_on_score` für die HQ-Agenda-Shuffle-Credits;
 - der gemeinsame Shared-/Engine-/AI-Vertrag, die beiden Producer, die beiden
   AI-Resolver und ihre fokussierten Tests.
@@ -51,7 +52,9 @@ enthält mindestens:
 
 `source` bleibt unverändert als bestehende Engine-Provenienz und für
 Diagnostik/Replays erhalten. Die beiden neuen KI-Resolver dürfen für ihre
-Autorisierung und Auswahl keine Felder mehr aus `source` parsen. Sie müssen
+Autorisierung und Auswahl keine semantischen Fakten mehr aus `source` parsen.
+Sie erkennen nur noch ein unmarkiertes Legacy-Fenster, um dieses fail-closed
+abzuweisen. Sie müssen
 stattdessen die Continuation gegen den residenten `corp.score_agenda`-Executor,
 seine gespeicherte auslösende `actionId`, Ziel-Agenda, Seite, Timing und
 unmittelbare `stateVersion` prüfen. Fehlende, fremde, stale oder unvollständige
@@ -100,5 +103,14 @@ bis ein eigener Producer-/Consumer- und Visibility-Audit vorliegt. Eine
 versteckte Fallback-Lektüre von `source` in den beiden migrierten Resolvern
 wäre kein Abschluss dieses Pakets.
 
-Führender Ausgangspunkt ist
+## 7. Abschlussnachweis
+
+Die Umsetzung liegt in den Paketcommits `49b57d99b`, `f713959fc` und
+`fa6389c35`. Der DTO-Sanitizer übernimmt die Continuation nur für eine
+aktuelle Corp-Choice und verwirft stale oder unvollständige Werte. Die
+Endgates waren grün: Workspace-Typecheck, 496/496 AI-Testdateien mit
+3.968/3.968 Tests, 207/207 Engine-Testdateien mit 1.796/1.796 Tests,
+`check:ai`, Paketgrenzen mit 1.950 Dateien, Format- und Diff-Gate.
+
+Führender Ausgangspunkt bleibt
 `docs/reviews/ai/ai-plan-first-runtime-cutover-final-review-2026-07-25.md`.

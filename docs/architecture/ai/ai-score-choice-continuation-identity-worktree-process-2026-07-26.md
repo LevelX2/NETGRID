@@ -1,6 +1,6 @@
 # Score-Choice-Continuation-Identity – Worktree-Paketprozess
 
-Status: **in Arbeit**
+Status: **abgeschlossen; lokale Main-Integration und Cleanup ausstehend**
 
 Stand: 2026-07-26
 
@@ -102,6 +102,14 @@ Done-Gate: Alle Paketcommits integriert, Worktree und gemergter Branch
 verifiziert entfernt.
 
 Commit: `docs(ai): close score choice continuation identity process`.
+
+## Abschlussstand vor Integration
+
+P1 bis P3 sind in `64981e10c`, `49b57d99b`, `f713959fc` und `fa6389c35`
+committed. Die vollständigen Gates sind grün: Workspace-Typecheck, 496/496
+AI-Testdateien mit 3.968/3.968 Tests, 207/207 Engine-Testdateien mit
+1.796/1.796 Tests, `check:ai`, Paketgrenzen mit 1.950 Dateien,
+`format:changed` und `git diff --check`.
 
 ## Git- und Abschlussregeln
 

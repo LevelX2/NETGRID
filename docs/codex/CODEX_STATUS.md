@@ -314,7 +314,10 @@ und
   60-Spiele-Baseline sind grün.
 - Der erste Folgezuschnitt für strukturierte Choice-Fortsetzungen begrenzt
   `originActionId` und eine diskriminierte Nutzlast auf die zwei
-  Corp-Score-Familien; er ist geplant, aber nicht implementiert. Führend ist
+  Corp-Score-Familien; er ist abgeschlossen. Engine, PlayerView und
+  AI-DTO transportieren den aktuellen Corp-Vertrag side-sicher; die Resolver
+  prüfen ihn fail-closed statt semantische Source-Daten zu parsen. Weitere
+  Choice-Familien bleiben getrennte Folgepakete. Führend ist
   `docs/architecture/ai/ai-score-choice-continuation-identity-process-2026-07-26.md`.
 - `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts` und
   `apps/server/src/multiplayer.test.ts` sind weiterhin groß. Die priorisierten
