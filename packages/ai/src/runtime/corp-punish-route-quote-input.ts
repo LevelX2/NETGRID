@@ -15,13 +15,19 @@ import { sanitizeCorpPunishRouteQuoteSet } from "../input-dto";
 
 const MAX_PUNISH_ROUTES = 8;
 const MAX_PUNISH_ROUTE_STEPS = 6;
-const PUNISH_CAMPAIGN_ID = "corp-punish:visible-fixed-damage";
+const PUNISH_CAMPAIGN_ID = "corp-punish:engine-certified-payoff";
 const ON_PLAY_CAPABILITY_ID = "ability:on_play:0";
 
 type PunishComponentAdapter = {
-  kind: Extract<CorpPunishRouteStepKind, "tag" | "meat_damage">;
+  kind: Extract<
+    CorpPunishRouteStepKind,
+    "tag" | "meat_damage" | "other_punish"
+  >;
   definitionId: string;
-  hintFamily: "direct_tag" | "fixed_meat_damage";
+  hintFamily:
+    | "direct_tag"
+    | "fixed_meat_damage"
+    | "tagged_runner_credit_denial";
   routeOrder: number;
   sourceCapabilityId: typeof ON_PLAY_CAPABILITY_ID;
 };
@@ -51,6 +57,13 @@ const PUNISH_COMPONENT_ADAPTER_LIST: readonly PunishComponentAdapter[] = [
     kind: "meat_damage",
     hintFamily: "fixed_meat_damage",
     routeOrder: 10,
+    sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
+  },
+  {
+    definitionId: "onr_v1_285_closed-accounts",
+    kind: "other_punish",
+    hintFamily: "tagged_runner_credit_denial",
+    routeOrder: 5,
     sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
   },
 ];
@@ -140,7 +153,10 @@ export function buildBoundedCorpPunishRouteRequests(
   const damage = components.filter(
     (component) => component.adapter.kind === "meat_damage",
   );
-  if (damage.length === 0) return [];
+  const otherPunish = components.filter(
+    (component) => component.adapter.kind === "other_punish",
+  );
+  if (damage.length === 0 && otherPunish.length === 0) return [];
   const tagHeads =
     input.playerView.opponent.tags > 0
       ? [undefined]
@@ -149,15 +165,22 @@ export function buildBoundedCorpPunishRouteRequests(
         : [];
   if (tagHeads.length === 0) return [];
 
-  const routeComponents = tagHeads.flatMap((tag) => {
+  const damageRouteComponents = tagHeads.flatMap((tag) => {
     const maximumDamageSteps = MAX_PUNISH_ROUTE_STEPS - (tag ? 1 : 0);
     return boundedDamageCombinations(damage, maximumDamageSteps).map(
       (damageSteps) => [...(tag ? [tag] : []), ...damageSteps],
     );
   });
+  const otherPunishRouteComponents = tagHeads.flatMap((tag) =>
+    otherPunish.map((payoff) => [...(tag ? [tag] : []), payoff]),
+  );
+  const routeComponents = [
+    ...damageRouteComponents,
+    ...otherPunishRouteComponents,
+  ];
   const selectedRoutes = selectBoundedRoutes(routeComponents);
   return selectedRoutes.map((route, routeIndex) => {
-    const routeId = `visible-fixed-damage:${routeIndex}:${route
+    const routeId = `engine-certified-payoff:${routeIndex}:${route
       .map((component) => component.card.instanceId)
       .join("+")}`;
     return {
@@ -214,6 +237,21 @@ function hintMatchesAdapter(adapter: PunishComponentAdapter): boolean {
           Number.isSafeInteger(effect.amount) &&
           Number(effect.amount) > 0,
       ) === true && hint.effects.every((effect) => effect.kind !== "trace")
+    );
+  }
+  if (adapter.hintFamily === "tagged_runner_credit_denial") {
+    return (
+      hint.conditions?.some(
+        (condition) => condition.kind === "requires_runner_tagged",
+      ) === true &&
+      hint.effects?.some(
+        (effect) =>
+          effect.kind === "tag_punish_payoff" &&
+          effect.scope === "runner" &&
+          effect.timing === "action" &&
+          effect.finite === true &&
+          effect.resource === "credits",
+      ) === true
     );
   }
   return (
