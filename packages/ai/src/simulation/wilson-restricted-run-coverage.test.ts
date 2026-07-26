@@ -20,12 +20,12 @@ describe("Wilson Weeflerunner Engine-restricted run coverage", () => {
 
     const summary = simulateAiGame({
       seed: "ai-behavior-baseline-v1-02",
-      maxActions: 15,
+      maxActions: 16,
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
       ...resolved.config,
       testOnlyDecisionCheckpointCapture: {
-        actionIndices: Array.from({ length: 15 }, (_, index) => index),
+        actionIndices: Array.from({ length: 16 }, (_, index) => index),
         capture: (snapshot) => {
           captures.push(snapshot);
         },
