@@ -140,14 +140,24 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
     !nonNegativeSafeInteger(hardClickReserve) ||
     protectionNeed.baseline.availableCorpCredits !==
       input.playerView.own.credits ||
-    protectionNeed.baseline.availableCorpClicks !== clicks ||
-    clicks < drawActionProjection.clickCost + 1 + hardClickReserve ||
-    handCount + drawActionProjection.netHandDelta - 1 > maxHandSize
+    protectionNeed.baseline.availableCorpClicks !== clicks
   ) {
     return undefined;
   }
+  const projectedHandAfterDraw = handCount + drawActionProjection.netHandDelta;
+  const projectedHandAfterDrawAndInstall = projectedHandAfterDraw - 1;
+  const sameTurnFollowupAvailable =
+    clicks >= drawActionProjection.clickCost + 1 + hardClickReserve &&
+    projectedHandAfterDrawAndInstall <= maxHandSize;
+  const safeMultiTurnProgressAvailable =
+    hardClickReserve === 0 &&
+    clicks >= drawActionProjection.clickCost &&
+    projectedHandAfterDraw <= maxHandSize;
+  if (!sameTurnFollowupAvailable && !safeMultiTurnProgressAvailable) {
+    return undefined;
+  }
   const cleanupReplacementDraw =
-    handCount + drawActionProjection.netHandDelta > maxHandSize;
+    sameTurnFollowupAvailable && projectedHandAfterDraw > maxHandSize;
   const targetDensity = corpScoreDefenseEffectSuitableIceDensity(
     input,
     protectionNeed,
@@ -178,7 +188,9 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
         ? "direct_install_route_disposition:effect_missing"
         : "direct_install_route_disposition:unknown_deferred",
       `score_defense_cleanup_replacement_draw:${cleanupReplacementDraw}`,
-      "score_defense_draw_install_click_horizon:true",
+      `score_defense_draw_followup_horizon:${
+        sameTurnFollowupAvailable ? "same_turn" : "multi_turn_progress"
+      }`,
       `score_defense_draw_action_click_cost:${drawActionProjection.clickCost}`,
       `score_defense_draw_cards_drawn:${drawActionProjection.cardsDrawn}`,
       `score_defense_draw_net_hand_delta:${drawActionProjection.netHandDelta}`,
@@ -187,7 +199,8 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
       ...targetDensity.evidence,
       `hand_count:${handCount}`,
       `max_hand_size:${maxHandSize}`,
-      `projected_hand_after_draw_and_install:${handCount + drawActionProjection.netHandDelta - 1}`,
+      `projected_hand_after_draw:${projectedHandAfterDraw}`,
+      `projected_hand_after_draw_and_install:${projectedHandAfterDrawAndInstall}`,
     ],
   };
 }
