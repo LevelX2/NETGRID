@@ -1456,6 +1456,27 @@ describe("authoritative plan-first live runtime", () => {
         planId: expect.stringContaining(
           "runner.develop_board_and_hand:card%3Atarget-program",
         ),
+        planFirstDecision: {
+          schemaVersion: "ai-plan-first-decision-debug-v1",
+          selectionAuthority: "resident_plan_instance",
+          rootPlanInstanceId: expect.stringContaining(
+            "runner.develop_board_and_hand:card%3Atarget-program",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "runner.develop_board_and_hand:card%3Atarget-program",
+          ),
+          selectedPlan: {
+            moduleId: "runner.develop_board_and_hand",
+            executionState: "executor",
+          },
+          route: {
+            actionId: "broker-cash",
+            stepId: expect.any(String),
+          },
+          strategicContext: {
+            authority: "diagnostic_only",
+          },
+        },
         detailSections: expect.arrayContaining([
           expect.objectContaining({
             id: "plan_execution",
@@ -5438,7 +5459,22 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision).toMatchObject({
       actionId: credit.actionId,
       reasonCode: "plan_first.runner.economy",
-      decisionDebug: { planKind: "runner.economy" },
+      decisionDebug: {
+        planKind: "runner.economy",
+        planFirstDecision: {
+          priority: {
+            effectiveClass: "P5",
+            reasonCode: "development_need",
+            parentNeedId: "resource-lifecycle-support:loan-1",
+          },
+          selectedPlan: {
+            parentInstanceId:
+              "plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1",
+            parentNeedId: "resource-lifecycle-support:loan-1",
+          },
+          route: { actionId: credit.actionId },
+        },
+      },
       fallbackUsed: false,
     });
     expect(decision.evidence).toContain(
@@ -5883,7 +5919,16 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision).toMatchObject({
       actionId: credit.actionId,
       reasonCode: "plan_first.runner.economy",
-      decisionDebug: { planKind: "runner.economy" },
+      decisionDebug: {
+        planKind: "runner.economy",
+        planFirstDecision: {
+          priority: {
+            effectiveClass: "P6",
+            p6Contract: "bounded_plan_contract",
+          },
+          route: { actionId: credit.actionId },
+        },
+      },
     });
     expect(decision.evidence).toContain(
       "plan_assessment_evidence:runner_finite_portfolio_credit_reserve",
@@ -5903,6 +5948,15 @@ describe("authoritative plan-first live runtime", () => {
       actionId: credit.actionId,
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          priority: {
+            effectiveClass: "P6",
+            p6Contract: "temporary_bounded_liquidity_transition",
+          },
+          route: { actionId: credit.actionId },
+        },
+      },
     });
     expect(continued.evidence ?? []).toContain(
       "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",

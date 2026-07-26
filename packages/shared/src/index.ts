@@ -2715,6 +2715,7 @@ export const AI_DECISION_DEBUG_SCHEMA_VERSION = "ai-decision-debug-v1";
 export const AI_DECISION_DEBUG_REPLAY_FIELDS = [
   "schemaVersion",
   "aiLevel",
+  "planFirstDecision",
   "planKind",
   "memoryVersion",
   "facts",
@@ -2787,6 +2788,124 @@ export type AiDecisionDetailSection = {
   id: string;
   title: string;
   items: string[];
+};
+
+export const AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION =
+  "ai-plan-first-decision-debug-v1" as const;
+
+export type AiPlanFirstDebugTarget = {
+  kind: string;
+  id: string;
+  label?: string;
+};
+
+export type AiPlanFirstDebugSignal = {
+  signalId: string;
+  kind: "goal" | "threat";
+  scope: "strategic" | "tactical";
+  planModuleId: string;
+  planDedupeKey: string;
+  evidenceCode: string;
+  guarantee: string;
+  target?: AiPlanFirstDebugTarget;
+};
+
+export type AiPlanFirstDebugPlanInstance = {
+  instanceId: string;
+  dedupeKey: string;
+  moduleId: string;
+  moduleVersion: string;
+  viability: string;
+  portfolioRole: string;
+  executionState: string;
+  persistencePolicy: string;
+  phase: string;
+  milestone: string;
+  target?: AiPlanFirstDebugTarget;
+  parentInstanceId?: string;
+  parentNeedId?: string;
+  openNeedIds: string[];
+  blockers: string[];
+  evidenceCodes: string[];
+};
+
+export type AiPlanFirstDebugPriority = {
+  requestedClass: "P1" | "P2" | "P3" | "P4" | "P5" | "P6";
+  effectiveClass: "P1" | "P2" | "P3" | "P4" | "P5" | "P6";
+  reasonCode: string;
+  horizon: string;
+  readiness: string;
+  intentFit: "aligned" | "tactical_override" | "none";
+  validationReasonCodes: string[];
+  delegatedFromPlanInstanceId?: string;
+  parentNeedId?: string;
+  witness?: {
+    kind: string;
+    evidenceCode: string;
+    guarantee: string;
+    target?: AiPlanFirstDebugTarget;
+  };
+  p6Contract?:
+    | "temporary_bounded_liquidity_transition"
+    | "turn_completion"
+    | "bounded_plan_contract";
+};
+
+export type AiPlanFirstDebugRoute = {
+  planInstanceId: string;
+  stepId: string;
+  capabilityId: string;
+  purpose: string;
+  actionId: string;
+  actionType: string;
+  semanticActionType: string;
+  stateVersion: number;
+  target?: AiPlanFirstDebugTarget;
+  continuation?: {
+    continuationId: string;
+    trigger: string;
+    nextCapabilityId: string;
+    purpose: string;
+    target?: AiPlanFirstDebugTarget;
+  };
+};
+
+export type AiPlanFirstDebugDisposition = {
+  actionId: string;
+  disposition: "explicitly_nonproductive" | "assessment_unknown";
+  ownerModuleId: string;
+  evidenceCode: string;
+};
+
+export type AiPlanFirstDecisionDebug = {
+  schemaVersion: typeof AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION;
+  stateVersion: number;
+  lane: "plan" | "engine_window";
+  selectionAuthority: "resident_plan_instance" | "engine_window";
+  rootPlanInstanceId: string;
+  leafExecutorInstanceId: string;
+  selectedPlan?: AiPlanFirstDebugPlanInstance;
+  priority?: AiPlanFirstDebugPriority;
+  route?: AiPlanFirstDebugRoute;
+  engineWindowAction?: {
+    actionId: string;
+    actionType: string;
+    reasonCode: string;
+  };
+  strategicContext: {
+    authority: "diagnostic_only";
+    primaryStrategyId?: string;
+    phase?: string;
+    intentFit?: "aligned" | "tactical_override" | "none";
+    signals: AiPlanFirstDebugSignal[];
+  };
+  engineQuoteEvidence: {
+    status: "certified" | "unknown" | "not_reported";
+    evidenceCodes: string[];
+  };
+  assessmentEvidenceCodes: string[];
+  dispositions: AiPlanFirstDebugDisposition[];
+  portfolio: AiPlanFirstDebugPlanInstance[];
 };
 
 export const AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION =
@@ -2863,6 +2982,7 @@ export type AiDecisionChainDebug = {
 export type AiDecisionDebug = {
   schemaVersion: typeof AI_DECISION_DEBUG_SCHEMA_VERSION;
   aiLevel: number;
+  planFirstDecision?: AiPlanFirstDecisionDebug;
   summary?: string;
   planId?: string;
   planKind?: string;
@@ -2969,6 +3089,10 @@ export function sanitizeAiDecisionDebug(
     source.detailSections,
   );
   if (detailSections) result.detailSections = detailSections;
+  const planFirstDecision = sanitizeAiPlanFirstDecisionDebug(
+    source.planFirstDecision,
+  );
+  if (planFirstDecision) result.planFirstDecision = planFirstDecision;
   const decisionChain = sanitizeAiDecisionChainDebug(source.decisionChain);
   if (decisionChain) result.decisionChain = decisionChain;
   const opponentModel = sanitizeAiDecisionDebugJson(source.opponentModel);
@@ -3172,7 +3296,7 @@ function sanitizeAiDecisionDetailSections(
 }
 
 function sanitizeAiDecisionDebugJson(value: unknown, depth = 0): unknown {
-  if (depth > 4) return undefined;
+  if (depth > 6) return undefined;
   if (typeof value === "string") return sanitizeAiDecisionDebugString(value);
   if (typeof value === "number")
     return Number.isFinite(value) ? value : undefined;
@@ -3196,6 +3320,366 @@ function sanitizeAiDecisionDebugJson(value: unknown, depth = 0): unknown {
     if (sanitized !== undefined) result[key] = sanitized;
   }
   return result;
+}
+
+function sanitizeAiPlanFirstDecisionDebug(
+  value: unknown,
+): AiPlanFirstDecisionDebug | undefined {
+  const sanitized = sanitizeAiDecisionDebugJson(value);
+  if (!sanitized || typeof sanitized !== "object" || Array.isArray(sanitized)) {
+    return undefined;
+  }
+  const candidate = sanitized as Record<string, unknown>;
+  if (
+    !hasOnlyAiPlanFirstFields(candidate, [
+      "schemaVersion",
+      "stateVersion",
+      "lane",
+      "selectionAuthority",
+      "rootPlanInstanceId",
+      "leafExecutorInstanceId",
+      "selectedPlan",
+      "priority",
+      "route",
+      "engineWindowAction",
+      "strategicContext",
+      "engineQuoteEvidence",
+      "assessmentEvidenceCodes",
+      "dispositions",
+      "portfolio",
+    ]) ||
+    candidate.schemaVersion !== AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION ||
+    typeof candidate.stateVersion !== "number" ||
+    !Number.isFinite(candidate.stateVersion) ||
+    (candidate.lane !== "plan" && candidate.lane !== "engine_window") ||
+    (candidate.selectionAuthority !== "resident_plan_instance" &&
+      candidate.selectionAuthority !== "engine_window") ||
+    typeof candidate.rootPlanInstanceId !== "string" ||
+    typeof candidate.leafExecutorInstanceId !== "string" ||
+    !isAiPlanFirstStrategicContext(candidate.strategicContext) ||
+    !isAiPlanFirstQuoteEvidence(candidate.engineQuoteEvidence) ||
+    !Array.isArray(candidate.assessmentEvidenceCodes) ||
+    !candidate.assessmentEvidenceCodes.every(
+      (entry) => typeof entry === "string",
+    ) ||
+    !Array.isArray(candidate.dispositions) ||
+    !candidate.dispositions.every(isAiPlanFirstDisposition) ||
+    !Array.isArray(candidate.portfolio) ||
+    !candidate.portfolio.every(isAiPlanFirstPlanInstance)
+  ) {
+    return undefined;
+  }
+  if (
+    candidate.lane === "plan" &&
+    (candidate.selectionAuthority !== "resident_plan_instance" ||
+      candidate.engineWindowAction !== undefined ||
+      !isAiPlanFirstPlanInstance(candidate.selectedPlan) ||
+      !isAiPlanFirstPriority(candidate.priority) ||
+      !isAiPlanFirstRoute(candidate.route) ||
+      candidate.selectedPlan.instanceId !== candidate.route.planInstanceId ||
+      candidate.selectedPlan.instanceId !== candidate.leafExecutorInstanceId ||
+      candidate.route.stateVersion !== candidate.stateVersion)
+  ) {
+    return undefined;
+  }
+  if (
+    candidate.lane === "engine_window" &&
+    (candidate.selectionAuthority !== "engine_window" ||
+      candidate.selectedPlan !== undefined ||
+      candidate.priority !== undefined ||
+      candidate.route !== undefined ||
+      !isAiPlanFirstEngineWindowAction(candidate.engineWindowAction))
+  ) {
+    return undefined;
+  }
+  return sanitized as AiPlanFirstDecisionDebug;
+}
+
+function isAiPlanFirstPlanInstance(
+  value: unknown,
+): value is AiPlanFirstDebugPlanInstance {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "instanceId",
+      "dedupeKey",
+      "moduleId",
+      "moduleVersion",
+      "viability",
+      "portfolioRole",
+      "executionState",
+      "persistencePolicy",
+      "phase",
+      "milestone",
+      "target",
+      "parentInstanceId",
+      "parentNeedId",
+      "openNeedIds",
+      "blockers",
+      "evidenceCodes",
+    ]) &&
+    [
+      "instanceId",
+      "dedupeKey",
+      "moduleId",
+      "moduleVersion",
+      "viability",
+      "portfolioRole",
+      "executionState",
+      "persistencePolicy",
+      "phase",
+      "milestone",
+    ].every((field) => typeof candidate[field] === "string") &&
+    (candidate.target === undefined || isAiPlanFirstTarget(candidate.target)) &&
+    (candidate.parentInstanceId === undefined ||
+      typeof candidate.parentInstanceId === "string") &&
+    (candidate.parentNeedId === undefined ||
+      typeof candidate.parentNeedId === "string") &&
+    Array.isArray(candidate.openNeedIds) &&
+    candidate.openNeedIds.every((entry) => typeof entry === "string") &&
+    Array.isArray(candidate.blockers) &&
+    candidate.blockers.every((entry) => typeof entry === "string") &&
+    Array.isArray(candidate.evidenceCodes) &&
+    candidate.evidenceCodes.every((entry) => typeof entry === "string")
+  );
+}
+
+function isAiPlanFirstPriority(
+  value: unknown,
+): value is AiPlanFirstDebugPriority {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  const priorityClasses = new Set(["P1", "P2", "P3", "P4", "P5", "P6"]);
+  const p6Contracts = new Set([
+    "temporary_bounded_liquidity_transition",
+    "turn_completion",
+    "bounded_plan_contract",
+  ]);
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "requestedClass",
+      "effectiveClass",
+      "reasonCode",
+      "horizon",
+      "readiness",
+      "intentFit",
+      "validationReasonCodes",
+      "delegatedFromPlanInstanceId",
+      "parentNeedId",
+      "witness",
+      "p6Contract",
+    ]) &&
+    typeof candidate.requestedClass === "string" &&
+    priorityClasses.has(candidate.requestedClass) &&
+    typeof candidate.effectiveClass === "string" &&
+    priorityClasses.has(candidate.effectiveClass) &&
+    typeof candidate.reasonCode === "string" &&
+    typeof candidate.horizon === "string" &&
+    typeof candidate.readiness === "string" &&
+    (candidate.intentFit === "aligned" ||
+      candidate.intentFit === "tactical_override" ||
+      candidate.intentFit === "none") &&
+    Array.isArray(candidate.validationReasonCodes) &&
+    candidate.validationReasonCodes.every(
+      (entry) => typeof entry === "string",
+    ) &&
+    (candidate.delegatedFromPlanInstanceId === undefined ||
+      typeof candidate.delegatedFromPlanInstanceId === "string") &&
+    (candidate.parentNeedId === undefined ||
+      typeof candidate.parentNeedId === "string") &&
+    (candidate.witness === undefined ||
+      isAiPlanFirstWitness(candidate.witness)) &&
+    (candidate.effectiveClass === "P6"
+      ? typeof candidate.p6Contract === "string" &&
+        p6Contracts.has(candidate.p6Contract)
+      : candidate.p6Contract === undefined)
+  );
+}
+
+function isAiPlanFirstRoute(value: unknown): value is AiPlanFirstDebugRoute {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "planInstanceId",
+      "stepId",
+      "capabilityId",
+      "purpose",
+      "actionId",
+      "actionType",
+      "semanticActionType",
+      "stateVersion",
+      "target",
+      "continuation",
+    ]) &&
+    [
+      "planInstanceId",
+      "stepId",
+      "capabilityId",
+      "purpose",
+      "actionId",
+      "actionType",
+      "semanticActionType",
+    ].every((field) => typeof candidate[field] === "string") &&
+    typeof candidate.stateVersion === "number" &&
+    Number.isFinite(candidate.stateVersion) &&
+    (candidate.target === undefined || isAiPlanFirstTarget(candidate.target)) &&
+    (candidate.continuation === undefined ||
+      isAiPlanFirstContinuation(candidate.continuation))
+  );
+}
+
+function isAiPlanFirstStrategicContext(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "authority",
+      "primaryStrategyId",
+      "phase",
+      "intentFit",
+      "signals",
+    ]) &&
+    candidate.authority === "diagnostic_only" &&
+    (candidate.primaryStrategyId === undefined ||
+      typeof candidate.primaryStrategyId === "string") &&
+    (candidate.phase === undefined || typeof candidate.phase === "string") &&
+    (candidate.intentFit === undefined ||
+      candidate.intentFit === "aligned" ||
+      candidate.intentFit === "tactical_override" ||
+      candidate.intentFit === "none") &&
+    Array.isArray(candidate.signals) &&
+    candidate.signals.every((signal) => {
+      if (!signal || typeof signal !== "object" || Array.isArray(signal)) {
+        return false;
+      }
+      const entry = signal as Record<string, unknown>;
+      return (
+        hasOnlyAiPlanFirstFields(entry, [
+          "signalId",
+          "kind",
+          "scope",
+          "planModuleId",
+          "planDedupeKey",
+          "evidenceCode",
+          "guarantee",
+          "target",
+        ]) &&
+        typeof entry.signalId === "string" &&
+        (entry.kind === "goal" || entry.kind === "threat") &&
+        (entry.scope === "strategic" || entry.scope === "tactical") &&
+        typeof entry.planModuleId === "string" &&
+        typeof entry.planDedupeKey === "string" &&
+        typeof entry.evidenceCode === "string" &&
+        typeof entry.guarantee === "string" &&
+        (entry.target === undefined || isAiPlanFirstTarget(entry.target))
+      );
+    })
+  );
+}
+
+function isAiPlanFirstQuoteEvidence(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, ["status", "evidenceCodes"]) &&
+    (candidate.status === "certified" ||
+      candidate.status === "unknown" ||
+      candidate.status === "not_reported") &&
+    Array.isArray(candidate.evidenceCodes) &&
+    candidate.evidenceCodes.every((entry) => typeof entry === "string")
+  );
+}
+
+function isAiPlanFirstDisposition(
+  value: unknown,
+): value is AiPlanFirstDebugDisposition {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "actionId",
+      "disposition",
+      "ownerModuleId",
+      "evidenceCode",
+    ]) &&
+    typeof candidate.actionId === "string" &&
+    (candidate.disposition === "explicitly_nonproductive" ||
+      candidate.disposition === "assessment_unknown") &&
+    typeof candidate.ownerModuleId === "string" &&
+    typeof candidate.evidenceCode === "string"
+  );
+}
+
+function isAiPlanFirstEngineWindowAction(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "actionId",
+      "actionType",
+      "reasonCode",
+    ]) &&
+    typeof candidate.actionId === "string" &&
+    typeof candidate.actionType === "string" &&
+    typeof candidate.reasonCode === "string"
+  );
+}
+
+function isAiPlanFirstTarget(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, ["kind", "id", "label"]) &&
+    typeof candidate.kind === "string" &&
+    typeof candidate.id === "string" &&
+    (candidate.label === undefined || typeof candidate.label === "string")
+  );
+}
+
+function isAiPlanFirstWitness(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "kind",
+      "evidenceCode",
+      "guarantee",
+      "target",
+    ]) &&
+    typeof candidate.kind === "string" &&
+    typeof candidate.evidenceCode === "string" &&
+    typeof candidate.guarantee === "string" &&
+    (candidate.target === undefined || isAiPlanFirstTarget(candidate.target))
+  );
+}
+
+function isAiPlanFirstContinuation(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "continuationId",
+      "trigger",
+      "nextCapabilityId",
+      "purpose",
+      "target",
+    ]) &&
+    typeof candidate.continuationId === "string" &&
+    typeof candidate.trigger === "string" &&
+    typeof candidate.nextCapabilityId === "string" &&
+    typeof candidate.purpose === "string" &&
+    (candidate.target === undefined || isAiPlanFirstTarget(candidate.target))
+  );
+}
+
+function hasOnlyAiPlanFirstFields(
+  value: Record<string, unknown>,
+  allowedFields: readonly string[],
+): boolean {
+  const allowed = new Set(allowedFields);
+  return Object.keys(value).every((field) => allowed.has(field));
 }
 
 function sanitizeAiDecisionChainDebug(

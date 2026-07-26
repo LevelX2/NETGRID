@@ -239,16 +239,21 @@ Stand: 2026-07-25
   Importscan enthält keine ungenutzten App-/Package-Module mehr.
 - Der Coverage-Restpfad ist fail-closed und darf nur ausdrücklich sichere
   Engine-Fortsetzungen auswählen.
-- Der produktive Auswahlweg ist über `AiDecisionDebug.decisionChain`
-  verhaltensneutral beobachtbar: LegalActions, semantische Ausschlüsse,
-  Rohscore-Sieger, Plan-Mapping, Plan-vs.-Score-Arbitration, feste
-  Sonderprioritäten, nachgelagerte Anpassung und Choice-Auflösung werden
-  side-sicher getrennt ausgewiesen. Spielgleiche Decision-Checkpoints können
-  diese Auswahlroute zusätzlich zur finalen Action prüfen.
-- Der bestehende SQLite-KI-Trace ist die einzige dauerhafte Diagnoseablage für
-  diese Kette: `summary` speichert sie kompakt, `detailed` vollständig im
-  gleichen `ai_decision_traces.trace_json`; ein zweiter Speicherpfad entsteht
-  nicht.
+- Der produktive Auswahlweg ist über den strukturierten side-sicheren Vertrag
+  `AiDecisionDebug.planFirstDecision` verhaltensneutral erklärbar:
+  autoritative Planinstanz, Root-/Leaf-/Executor-Bezug, P1 bis P6, aktueller
+  Step und exakter Route Head, Parent-/Need-Bindung, Engine-Quote-Evidence,
+  diagnostischer Strategic Intent und Goal-/Threat-Signale sowie
+  `whyNot`-/Dispositionen werden getrennt ausgewiesen. Das sichtbare
+  KI-Entscheidungsfenster verwendet nur diesen Vertrag und bleibt bei
+  fehlenden oder unvollständigen Daten fail-closed.
+- `AiDecisionDebug.decisionChain` bleibt eine tiefere Trace-Ebene für
+  bestehende Checkpoint- und Evaluationsdiagnostik, ist aber keine sichtbare
+  Auswahlautorität. Der bestehende SQLite-KI-Trace bleibt die einzige
+  dauerhafte Diagnoseablage: `summary` und `detailed` speichern den
+  redigierten Plan-first-Vertrag im gleichen
+  `ai_decision_traces.trace_json`; Replayperspektiven werden aus demselben
+  Pfad side-sicher hydriert.
 - Der bestehende Plan `corp.create_score_window` erkennt vollständige
   Same-Turn-Konversionspfade aus Aktionsgewinn, Advancement-Platzierung,
   Countertransfer und Basic Advances. Vapor Ops und andere Werkzeuge werden

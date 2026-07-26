@@ -1,11 +1,13 @@
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
+  AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
   CARD_DEFINITIONS_BY_ID,
   CORP_FORT_RUN_REZ_SUPPORT_KIND,
   CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   type AiDecision,
   type AiDecisionInput,
+  type AiPlanFirstDecisionDebug,
   type CardDefinition,
   type CorpPunishRouteQuote,
   type LegalAction,
@@ -312,6 +314,7 @@ export function choosePlanFirstLiveAction(
   return decisionFromScheduler(
     input,
     candidates,
+    context,
     result,
     dependencies,
     options,
@@ -10922,9 +10925,245 @@ function attachActiveRunContext(
   });
 }
 
+function planFirstDecisionDebug(params: {
+  input: AiDecisionInput;
+  context: PlanSchedulerContext;
+  result: PlanSchedulerResult;
+  action: LegalAction;
+  planId: string;
+  planKind: string | undefined;
+  assessmentEvidenceCodes: readonly string[];
+}): AiPlanFirstDecisionDebug {
+  const strategicIntent = (params.input as AiDecisionInputWithDeckCapabilities)
+    .ownStrategicIntentState;
+  const base = {
+    schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+    stateVersion: params.input.playerView.stateVersion,
+    strategicContext: {
+      authority: "diagnostic_only" as const,
+      ...(strategicIntent?.primaryStrategy.strategyId
+        ? { primaryStrategyId: strategicIntent.primaryStrategy.strategyId }
+        : {}),
+      ...(strategicIntent?.phase ? { phase: strategicIntent.phase } : {}),
+      signals: [],
+    },
+    dispositions: (params.context.actionDispositions ?? []).map(
+      (disposition) => ({ ...disposition }),
+    ),
+  };
+  if (params.result.lane === "engine_window") {
+    return {
+      ...base,
+      lane: "engine_window",
+      selectionAuthority: "engine_window",
+      rootPlanInstanceId: params.result.origin.rootPlanInstanceId,
+      leafExecutorInstanceId: params.result.origin.leafPlanInstanceId,
+      engineWindowAction: {
+        actionId: params.action.actionId,
+        actionType: params.action.type,
+        reasonCode:
+          params.result.diagnostics.find((event) => event.stage === "window")
+            ?.code ?? "engine_window_resolution",
+      },
+      engineQuoteEvidence: {
+        status: "not_reported",
+        evidenceCodes: [],
+      },
+      assessmentEvidenceCodes: [],
+      portfolio: [],
+    };
+  }
+
+  const selectedPlan = params.result.portfolio.instances.find(
+    (instance) => instance.instanceId === params.planId,
+  );
+  if (!selectedPlan) {
+    throw new Error("plan_first_selected_plan_instance_missing");
+  }
+  const assessment = params.result.selectedAssessment;
+  const actionCandidate = params.context.actionCandidates.find(
+    (candidate) => candidate.actionId === params.action.actionId,
+  );
+  const assessmentEvidenceCodes = uniquePlanFirstDebugCodes([
+    ...params.assessmentEvidenceCodes,
+    ...assessment.evidenceCodes,
+    ...selectedPlan.evidenceRefs.map((reference) => reference.code),
+    ...(actionCandidate?.evidence ?? []),
+  ]);
+  const quoteEvidenceCodes = assessmentEvidenceCodes.filter((code) =>
+    /(?:quote|engine_certified|exact_(?:cost|payment|liquid)|cost_semantics)/i.test(
+      code,
+    ),
+  );
+  const quoteStatus: AiPlanFirstDecisionDebug["engineQuoteEvidence"]["status"] =
+    quoteEvidenceCodes.some((code) =>
+      /(?:unknown|missing|malformed|stale|incomplete|unsupported)/i.test(code),
+    )
+      ? "unknown"
+      : quoteEvidenceCodes.some((code) =>
+            /(?:engine_certified|quote.*(?:complete|certified)|exact_(?:cost|payment|liquid))/i.test(
+              code,
+            ),
+          )
+        ? "certified"
+        : "not_reported";
+  const priority = assessment.priorityValidation;
+  const p6Contract =
+    priority.effectiveClass === "P6"
+      ? planFirstP6Contract(
+          selectedPlan.moduleId,
+          assessment.priorityClaim.reasonCode,
+          assessmentEvidenceCodes,
+        )
+      : undefined;
+
+  return {
+    ...base,
+    lane: "plan",
+    selectionAuthority: "resident_plan_instance",
+    rootPlanInstanceId:
+      params.result.portfolio.rootForegroundInstanceId ?? params.planId,
+    leafExecutorInstanceId:
+      params.result.portfolio.executorInstanceId ?? params.planId,
+    selectedPlan: planFirstDebugPlanInstance(selectedPlan),
+    priority: {
+      requestedClass: assessment.priorityClaim.requestedClass,
+      effectiveClass: priority.effectiveClass,
+      reasonCode: assessment.priorityClaim.reasonCode,
+      horizon: assessment.priorityClaim.horizon,
+      readiness: assessment.readiness,
+      intentFit: assessment.intentFit,
+      validationReasonCodes: [...priority.reasonCodes],
+      ...(priority.delegatedFromPlanInstanceId
+        ? {
+            delegatedFromPlanInstanceId: priority.delegatedFromPlanInstanceId,
+          }
+        : {}),
+      ...(priority.needId || selectedPlan.parentNeedId
+        ? { parentNeedId: priority.needId ?? selectedPlan.parentNeedId }
+        : {}),
+      ...(assessment.priorityClaim.witness
+        ? {
+            witness: {
+              kind: assessment.priorityClaim.witness.kind,
+              evidenceCode: assessment.priorityClaim.witness.evidenceCode,
+              guarantee: assessment.priorityClaim.witness.guarantee,
+              ...(assessment.priorityClaim.witness.target
+                ? { target: { ...assessment.priorityClaim.witness.target } }
+                : {}),
+            },
+          }
+        : {}),
+      ...(p6Contract ? { p6Contract } : {}),
+    },
+    route: {
+      planInstanceId: params.result.route.planInstanceId,
+      stepId: params.result.route.step.stepId,
+      capabilityId: params.result.route.step.capability.capabilityId,
+      purpose: params.result.route.step.purpose,
+      actionId: params.result.route.head.actionId,
+      actionType: params.result.route.head.actionType,
+      semanticActionType: params.result.route.head.semanticActionType,
+      stateVersion: params.result.route.head.stateVersion,
+      ...((params.result.route.head.target ?? params.result.route.step.target)
+        ? {
+            target: {
+              ...(params.result.route.head.target ??
+                params.result.route.step.target)!,
+            },
+          }
+        : {}),
+      ...(params.result.route.continuation
+        ? {
+            continuation: {
+              continuationId: params.result.route.continuation.continuationId,
+              trigger: params.result.route.continuation.trigger,
+              nextCapabilityId:
+                params.result.route.continuation.nextCapability.capabilityId,
+              purpose: params.result.route.continuation.purpose,
+              ...(params.result.route.continuation.target
+                ? { target: { ...params.result.route.continuation.target } }
+                : {}),
+            },
+          }
+        : {}),
+    },
+    strategicContext: {
+      ...base.strategicContext,
+      intentFit: assessment.intentFit,
+      signals: (assessment.transientSignals ?? []).map((signal) => ({
+        signalId: signal.signalId,
+        kind: signal.kind,
+        scope: signal.scope,
+        planModuleId: signal.planModuleId,
+        planDedupeKey: signal.planDedupeKey,
+        evidenceCode: signal.evidenceCode,
+        guarantee: signal.guarantee,
+        ...(signal.target ? { target: { ...signal.target } } : {}),
+      })),
+    },
+    engineQuoteEvidence: {
+      status: quoteStatus,
+      evidenceCodes: quoteEvidenceCodes,
+    },
+    assessmentEvidenceCodes,
+    portfolio: params.result.portfolio.instances.map(
+      planFirstDebugPlanInstance,
+    ),
+  };
+}
+
+function planFirstDebugPlanInstance(
+  instance: ResidentPlanPortfolio["instances"][number],
+): AiPlanFirstDecisionDebug["portfolio"][number] {
+  return {
+    instanceId: instance.instanceId,
+    dedupeKey: instance.dedupeKey,
+    moduleId: instance.moduleId,
+    moduleVersion: instance.moduleVersion,
+    viability: instance.viability,
+    portfolioRole: instance.portfolioRole,
+    executionState: instance.executionState,
+    persistencePolicy: instance.persistencePolicy,
+    phase: instance.phase,
+    milestone: instance.milestone,
+    ...(instance.target ? { target: { ...instance.target } } : {}),
+    ...(instance.parentInstanceId
+      ? { parentInstanceId: instance.parentInstanceId }
+      : {}),
+    ...(instance.parentNeedId ? { parentNeedId: instance.parentNeedId } : {}),
+    openNeedIds: [...instance.openNeedIds],
+    blockers: instance.blockers.map((blocker) => blocker.code),
+    evidenceCodes: instance.evidenceRefs.map((reference) => reference.code),
+  };
+}
+
+function planFirstP6Contract(
+  moduleId: string,
+  reasonCode: string,
+  evidenceCodes: readonly string[],
+): NonNullable<AiPlanFirstDecisionDebug["priority"]>["p6Contract"] {
+  if (reasonCode === "turn_completion" || moduleId.endsWith(".complete_turn")) {
+    return "turn_completion";
+  }
+  if (
+    evidenceCodes.some((code) =>
+      code.includes("engine_certified_basic_liquidity_development"),
+    )
+  ) {
+    return "temporary_bounded_liquidity_transition";
+  }
+  return "bounded_plan_contract";
+}
+
+function uniquePlanFirstDebugCodes(codes: readonly string[]): string[] {
+  return [...new Set(codes.filter((code) => code.trim().length > 0))];
+}
+
 function decisionFromScheduler(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
+  context: PlanSchedulerContext,
   result: PlanSchedulerResult,
   dependencies: PlanFirstLiveDependencies,
   options: AiDecisionRuntimeOptions,
@@ -11079,6 +11318,9 @@ function decisionFromScheduler(
       const semanticCandidate = candidates.find(
         (candidate) => candidate.actionId === alternative.actionId,
       );
+      const actionDisposition = context.actionDispositions?.find(
+        (disposition) => disposition.actionId === alternative.actionId,
+      );
       const planActionAssessment =
         result.lane === "plan"
           ? (
@@ -11162,7 +11404,9 @@ function decisionFromScheduler(
         label: alternative.label,
         source: String(alternative.source),
         selected,
-        ...(encounterExclusion || planActionAssessment?.admissible === false
+        ...(encounterExclusion ||
+        actionDisposition ||
+        planActionAssessment?.admissible === false
           ? { excluded: true }
           : {}),
         ...(selected
@@ -11189,12 +11433,16 @@ function decisionFromScheduler(
                 whyNot: [
                   ...(encounterExclusion
                     ? rejectionEvidence
-                    : [
-                        `not_selected_by_plan:${planId}`,
-                        ...residentPlanEvidence,
-                        ...planRouteEvidence,
-                        ...planActionAssessmentEvidence,
-                      ]),
+                    : actionDisposition
+                      ? [
+                          `${actionDisposition.disposition}:${actionDisposition.ownerModuleId}:${actionDisposition.evidenceCode}`,
+                        ]
+                      : [
+                          `not_selected_by_plan:${planId}`,
+                          ...residentPlanEvidence,
+                          ...planRouteEvidence,
+                          ...planActionAssessmentEvidence,
+                        ]),
                 ],
               }),
       };
@@ -11263,6 +11511,15 @@ function decisionFromScheduler(
             items: [`leaf_plan:${planId}`, `selected_action:${actionId}`],
           },
         ];
+  const planFirstDecision = planFirstDecisionDebug({
+    input,
+    context,
+    result,
+    action,
+    planId,
+    planKind,
+    assessmentEvidenceCodes: planEvidence,
+  });
   const decisionBase = {
     reasonCode:
       result.lane === "plan"
@@ -11282,6 +11539,7 @@ function decisionFromScheduler(
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       aiLevel: difficultyLevel(input),
       summary: "Authoritative plan-first runtime selection",
+      planFirstDecision,
       planId,
       ...(planKind ? { planKind } : {}),
       selectedActionType: action.type,

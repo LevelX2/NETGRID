@@ -143,7 +143,9 @@ export type ConnectionQuality = ApiConnectionQuality;
 const AI_DECISION_DETAIL_SECTION_TRACE_LIMIT = 8;
 const AI_DECISION_DETAIL_SECTION_PRIORITY_IDS = [
   "runner_run_plan",
-  "tactical_plan",
+  "plan_execution",
+  "plan_portfolio",
+  "plan_action_routes",
 ] as const;
 
 export type MatchSettings = {
@@ -5652,6 +5654,8 @@ function replayDecisionDebug(
   const result: Record<string, unknown> = {};
   result.schemaVersion = safeDebug.schemaVersion;
   result.aiLevel = safeDebug.aiLevel;
+  if (safeDebug.planFirstDecision)
+    result.planFirstDecision = safeDebug.planFirstDecision;
   if (typeof safeDebug.summary === "string") result.summary = safeDebug.summary;
   if (typeof safeDebug.planKind === "string")
     result.planKind = safeDebug.planKind;
@@ -5828,6 +5832,9 @@ function aiDecisionTraceJson(
     result.actionAlternatives = debug.actionAlternatives.slice(0, 32);
   if (Array.isArray(debug.scoreBreakdown))
     result.scoreBreakdown = debug.scoreBreakdown.slice(0, 16);
+  if (debug.planFirstDecision) {
+    result.planFirstDecision = debug.planFirstDecision;
+  }
   if (debug.decisionChain) {
     result.decisionChain = aiDecisionTraceDecisionChain(
       debug.decisionChain,

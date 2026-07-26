@@ -7,6 +7,7 @@ import { DEMO_DECKS } from "./demo-decks";
 import {
   DEMO_DECK_IDS,
   AI_DECISION_DEBUG_SCHEMA_VERSION,
+  AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   CARD_DEFINITIONS,
   CARD_DEFINITIONS_BY_ID,
@@ -284,5 +285,153 @@ describe("AI decision debug sanitizing", () => {
     expect(sanitized?.decisionChain?.exclusions[0]?.key).toBe(
       "[redacted-debug-value]",
     );
+  });
+
+  it("keeps the structured side-safe plan-first authority contract", () => {
+    const sanitized = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      planFirstDecision: {
+        schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+        stateVersion: 12,
+        lane: "plan",
+        selectionAuthority: "resident_plan_instance",
+        rootPlanInstanceId: "plan:corp.score_agenda:general",
+        leafExecutorInstanceId: "plan:corp.economy:score-material",
+        selectedPlan: {
+          instanceId: "plan:corp.economy:score-material",
+          dedupeKey: "score-material:general",
+          moduleId: "corp.economy",
+          moduleVersion: "1",
+          viability: "ready",
+          portfolioRole: "foreground",
+          executionState: "executor",
+          persistencePolicy: "flexible_support",
+          phase: "fund_parent_need",
+          milestone: "open",
+          parentInstanceId: "plan:corp.score_agenda:general",
+          parentNeedId: "score-material:general",
+          openNeedIds: [],
+          blockers: [],
+          evidenceCodes: ["engine_certified_draw_quote"],
+        },
+        priority: {
+          requestedClass: "P5",
+          effectiveClass: "P5",
+          reasonCode: "required_parent_support",
+          horizon: "current_turn",
+          readiness: "executable_now",
+          intentFit: "aligned",
+          validationReasonCodes: ["priority_claim_accepted"],
+          delegatedFromPlanInstanceId: "plan:corp.score_agenda:general",
+          parentNeedId: "score-material:general",
+        },
+        route: {
+          planInstanceId: "plan:corp.economy:score-material",
+          stepId: "draw_score_material",
+          capabilityId: "draw_card",
+          purpose: "Satisfy the exact score-material need.",
+          actionId: "corp.draw",
+          actionType: "draw_card",
+          semanticActionType: "economy.draw",
+          stateVersion: 12,
+        },
+        strategicContext: {
+          authority: "diagnostic_only",
+          primaryStrategyId: "corp.remote_scoring",
+          phase: "convert",
+          intentFit: "aligned",
+          signals: [],
+        },
+        engineQuoteEvidence: {
+          status: "certified",
+          evidenceCodes: ["engine_certified_draw_quote"],
+        },
+        assessmentEvidenceCodes: ["required_parent_support"],
+        dispositions: [
+          {
+            actionId: "corp.install",
+            disposition: "assessment_unknown",
+            ownerModuleId: "corp.defend_servers",
+            evidenceCode: "corp_install_quote_unknown",
+          },
+        ],
+        portfolio: [],
+      },
+    });
+
+    expect(sanitized?.planFirstDecision).toMatchObject({
+      schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+      lane: "plan",
+      rootPlanInstanceId: "plan:corp.score_agenda:general",
+      leafExecutorInstanceId: "plan:corp.economy:score-material",
+      priority: {
+        effectiveClass: "P5",
+        parentNeedId: "score-material:general",
+      },
+      route: {
+        actionId: "corp.draw",
+        stepId: "draw_score_material",
+      },
+      strategicContext: { authority: "diagnostic_only" },
+      dispositions: [
+        expect.objectContaining({ disposition: "assessment_unknown" }),
+      ],
+    });
+
+    const p6WithoutNarrowContract = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      planFirstDecision: {
+        ...sanitized?.planFirstDecision,
+        priority: {
+          ...sanitized?.planFirstDecision?.priority,
+          requestedClass: "P6",
+          effectiveClass: "P6",
+        },
+      },
+    });
+    expect(p6WithoutNarrowContract?.planFirstDecision).toBeUndefined();
+
+    const unknownField = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      planFirstDecision: {
+        ...sanitized?.planFirstDecision,
+        undeclaredDiagnostic: "must-not-cross-the-side-safe-contract",
+      },
+    });
+    expect(unknownField?.planFirstDecision).toBeUndefined();
+  });
+
+  it("drops incomplete plan-first authority data instead of guessing fields", () => {
+    const sanitized = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      planFirstDecision: {
+        schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+        stateVersion: 12,
+        lane: "plan",
+        selectionAuthority: "resident_plan_instance",
+        rootPlanInstanceId: "plan:corp.score_agenda:general",
+        leafExecutorInstanceId: "plan:corp.economy:score-material",
+        selectedPlan: {
+          instanceId: "plan:corp.economy:score-material",
+        },
+        strategicContext: {
+          authority: "diagnostic_only",
+          signals: [],
+        },
+        engineQuoteEvidence: {
+          status: "unknown",
+          evidenceCodes: [],
+        },
+        assessmentEvidenceCodes: [],
+        dispositions: [],
+        portfolio: [],
+      },
+    });
+
+    expect(sanitized?.planFirstDecision).toBeUndefined();
   });
 });

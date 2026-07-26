@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-25
+Stand: 2026-07-26
 
 ## Einstieg
 
@@ -31,12 +31,18 @@ ausschließlich diesen Einstieg auf. Alte Planer, Shadow-/META-Runtime,
 historisch benannte Controllerprofile und stille Legacy-Fallbacks sind kein
 aktueller Vertrag. Der Coverage-Restpfad ist fail-closed und darf nur
 vorhandene sichere LegalActions auswählen.
-Der produktive Auswahlweg ist über den side-sicheren
-`AiDecisionDebug.decisionChain` bis zur finalen Action und Choice getrennt
-beobachtbar; diese Observability verändert weder Scoring noch Planpriorität.
-Der vorhandene SQLite-KI-Trace persistiert die Kette im normalen
-`summary`-Modus kompakt und im erweiterten `detailed`-Modus vollständig unter
-demselben `trace_json`-Pfad.
+Der produktive Auswahlweg transportiert mit
+`AiDecisionDebug.planFirstDecision` einen side-sicheren, strukturierten
+Erklärvertrag für die autoritative Planinstanz, Root und Leaf-Executor,
+P1 bis P6, aktuellen Step, exakten Route Head, Parent-/Need-Bindung,
+Engine-Quote-Evidence, diagnostischen Strategic Intent und Goal-/Threat-
+Signale sowie `whyNot`-/Dispositionen. Das KI-Entscheidungsfenster rendert nur
+diesen Vertrag und bleibt bei fehlenden oder unvollständigen Daten
+fail-closed; historische Score-, TacticalPlan- und Action-over-Plan-
+Diagnostik wird dort nicht rekonstruiert. Der vorhandene SQLite-KI-Trace und
+die Replayperspektive persistieren die redigierte Struktur im bestehenden
+Pfad; `AiDecisionDebug.decisionChain` bleibt eine getrennte tiefere
+Trace-Ebene und keine sichtbare Auswahlautorität.
 
 PF15 des Plan-first-Runtime-Cutovers ist mit Commit `4b0c459f6`
 abgeschlossen. Residente `PlanInstance`s sind die einzige persistente
