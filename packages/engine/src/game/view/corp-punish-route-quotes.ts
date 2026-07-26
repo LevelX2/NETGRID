@@ -93,13 +93,19 @@ export function quoteCorpPunishRoute(
   const currentHeadAction = head
     ? exactCurrentHeadAction(state, head.quote)
     : undefined;
-  if (!head || !currentHeadAction) {
+  const fundingOnlyHead =
+    head && !currentHeadAction
+      ? exactFundingOnlyHeadAvailable(state, head.quote)
+      : false;
+  if (!head || (!currentHeadAction && !fundingOnlyHead)) {
     return {
       ok: true,
       quote: incompleteQuote(base, "head_legal_action_unavailable"),
     };
   }
-  head.quote.currentLegalAction = structuredClone(currentHeadAction);
+  if (currentHeadAction) {
+    head.quote.currentLegalAction = structuredClone(currentHeadAction);
+  }
 
   let projectedRunnerTags = state.runner.tags;
   let rawMeatDamage = 0;
@@ -362,6 +368,15 @@ function supportedEffects(
       ? { ok: true }
       : { ok: false, reason: "source_effects_unsupported" };
   }
+  if (
+    effect.kind === "lose_credits" &&
+    effect.recipient === "runner" &&
+    effect.mode === "all"
+  ) {
+    return requestedKind === "other_punish"
+      ? { ok: true }
+      : { ok: false, reason: "source_effects_unsupported" };
+  }
   return { ok: false, reason: "source_effects_unsupported" };
 }
 
@@ -382,6 +397,30 @@ function exactCurrentHeadAction(
       sumActionCost(action, "clicks") === step.clicks &&
       sumActionCost(action, "credits") === step.credits,
   );
+}
+
+/**
+ * Proves that the current head is blocked only by a fixed credit shortfall.
+ *
+ * The hypothetical state changes no rules fact except the Corp credit pool.
+ * LegalAction projection remains the authority for every other condition,
+ * timing, click, target and choice requirement. The projected action is not
+ * exposed as a current LegalAction; it only certifies the funding horizon.
+ */
+function exactFundingOnlyHeadAvailable(
+  state: GameState,
+  step: CorpPunishRouteStepQuote,
+): boolean {
+  if (
+    step.credits <= state.corp.credits ||
+    step.clicks > state.corp.clicks ||
+    step.credits < 1
+  ) {
+    return false;
+  }
+  const fundedProbe = structuredClone(state);
+  fundedProbe.corp.credits = step.credits;
+  return exactCurrentHeadAction(fundedProbe, step) !== undefined;
 }
 
 function conditionStatusAfterPriorSteps(

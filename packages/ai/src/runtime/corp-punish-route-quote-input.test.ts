@@ -17,6 +17,7 @@ import {
 } from "./corp-punish-route-quote-input";
 
 const DATA_SIFTERS = "onr_proteus_048_data-sifters";
+const CLOSED_ACCOUNTS = "onr_v1_285_closed-accounts";
 const PUNITIVE = "onr_v1_301_punitive-counterstrike";
 const SCORCHED = "onr_v1_302_scorched-earth";
 
@@ -100,6 +101,53 @@ describe("decision-local Corp punish route quote input", () => {
         request.steps.every((step) => step.kind === "meat_damage"),
       ),
     ).toBe(true);
+  });
+
+  it("probes tagged Closed Accounts as an explicit Engine-certified non-damage payoff", () => {
+    const input = punishInput({ runnerTags: 1, runnerHandCount: 3 });
+    input.playerView.own.gripOrHq = [
+      operation("closed-accounts", CLOSED_ACCOUNTS),
+    ];
+
+    expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([
+      expect.objectContaining({
+        steps: [
+          expect.objectContaining({
+            kind: "other_punish",
+            sourceCardInstanceId: "closed-accounts",
+            sourceCapabilityId: "ability:on_play:0",
+          }),
+        ],
+      }),
+    ]);
+  });
+
+  it("binds Closed Accounts behind a visible direct-tag head but emits no untagged standalone probe", () => {
+    const input = punishInput({ runnerTags: 0, runnerHandCount: 3 });
+    input.playerView.own.gripOrHq = [
+      operation("data-sifters", DATA_SIFTERS),
+      operation("closed-accounts", CLOSED_ACCOUNTS),
+    ];
+
+    expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([
+      expect.objectContaining({
+        steps: [
+          expect.objectContaining({
+            kind: "tag",
+            sourceCardInstanceId: "data-sifters",
+          }),
+          expect.objectContaining({
+            kind: "other_punish",
+            sourceCardInstanceId: "closed-accounts",
+          }),
+        ],
+      }),
+    ]);
+
+    input.playerView.own.gripOrHq = [
+      operation("closed-accounts", CLOSED_ACCOUNTS),
+    ];
+    expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([]);
   });
 
   it("uses only known own visible explicitly adapted components", () => {
