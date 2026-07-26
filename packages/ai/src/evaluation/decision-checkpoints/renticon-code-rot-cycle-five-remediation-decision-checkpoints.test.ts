@@ -10,7 +10,10 @@ const FIXTURES = [
     "uses explicit burst funding for the committed scoreline",
     advanceOverPassiveSupportJson,
   ],
-  ["funds an explicitly unsafe scoring window", fundUnsafeWindowJson],
+  [
+    "continues the current bound score step despite incomplete future projection",
+    fundUnsafeWindowJson,
+  ],
 ] as const;
 
 describe("Rent-I-Con versus CODE ROT cycle-five remediation checkpoints", () => {

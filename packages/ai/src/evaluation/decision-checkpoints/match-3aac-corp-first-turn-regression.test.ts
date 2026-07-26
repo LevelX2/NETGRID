@@ -6,7 +6,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 
 describe("match 3aac Corp first-turn regression evidence", () => {
-  it("uses one exact score-material observation step instead of completing the turn", () => {
+  it("funds one exact HQ-defense route instead of completing the turn", () => {
     const checkpoint = structuredClone(
       checkpointJson,
     ) as AiDecisionCheckpointV1;
@@ -15,63 +15,61 @@ describe("match 3aac Corp first-turn regression evidence", () => {
     expect(checkpoint.difficulty).toBe("hard");
     expect(result.input.playerView.own.clicks).toBe(2);
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
-    expect(result.selectedAction?.type).toBe("draw_card");
+    expect(result.selectedAction?.type).toBe("gain_credit");
     const portfolio = residentPlanPortfolioSnapshot(result.input);
-    const scoreRootInstanceId = "plan:corp.score_agenda:general";
-    const scoreMaterialNeedId = "score-material:general";
-    const drawLeafInstanceId =
-      "plan:corp.hand_and_agenda_management:draw-for-score-material";
+    const defenseRootInstanceId =
+      "plan:corp.defend_servers:server-defense-portfolio";
+    const defenseNeedId =
+      "install:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0";
+    const fundingLeafInstanceId =
+      "plan:corp.economy:defense-reserve%3Ahq%3Acorp_onr_proteus_017_credit-blocks_2";
     const executor = portfolio?.instances.find(
       (instance) => instance.instanceId === portfolio.executorInstanceId,
     );
-    const scoreRoot = portfolio?.instances.find(
-      (instance) => instance.instanceId === scoreRootInstanceId,
+    const defenseRoot = portfolio?.instances.find(
+      (instance) => instance.instanceId === defenseRootInstanceId,
     );
     expect(portfolio).toMatchObject({
-      rootForegroundInstanceId: scoreRootInstanceId,
-      executorInstanceId: drawLeafInstanceId,
+      rootForegroundInstanceId: defenseRootInstanceId,
+      executorInstanceId: fundingLeafInstanceId,
     });
-    expect(scoreRoot).toMatchObject({
-      moduleId: "corp.score_agenda",
-      dedupeKey: "general",
-      phase: "select_agenda",
-      persistencePolicy: "sticky_goal",
-      openNeedIds: [scoreMaterialNeedId],
+    expect(defenseRoot).toMatchObject({
+      moduleId: "corp.defend_servers",
+      dedupeKey: "server-defense-portfolio",
+      phase: "defense",
+      persistencePolicy: "locked_sequence",
+      openNeedIds: expect.arrayContaining([defenseNeedId]),
     });
     expect(executor).toMatchObject({
-      moduleId: "corp.hand_and_agenda_management",
-      parentInstanceId: scoreRootInstanceId,
-      parentNeedId: scoreMaterialNeedId,
+      moduleId: "corp.economy",
+      parentInstanceId: defenseRootInstanceId,
+      parentNeedId: defenseNeedId,
       persistencePolicy: "flexible_support",
       moduleState: {
-        kind: "hand",
+        kind: "economy",
         signal: {
-          handPlanId: "draw-for-score-material",
-          uncertainty: {
-            kind: "draw_then_observe",
-            unknownOutcome: "drawn_card_identity",
-            revalidateAfterCurrentHead: true,
+          kind: "parent_funding",
+          gap: 1,
+          immediateDefenseConversion: true,
+          parentPlanInstanceId: defenseRootInstanceId,
+          parentNeedId: defenseNeedId,
+          parentPriorityClass: "P2",
+          incrementalDefenseReserve: {
+            targetCredits: 6,
+            serverId: "hq",
+            iceInstanceId: "corp_onr_proteus_017_credit-blocks_2",
           },
-          drawAttemptState: {
-            turnKey: "corp:0",
-            remainingAttempts: 0,
-            selectedAtStateVersion: 4,
-          },
-          evidenceCode: "corp_score_campaign_missing_agenda_material",
         },
       },
     });
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        `plan_first_root:${scoreRootInstanceId}`,
-        `plan_first_executor:${drawLeafInstanceId}`,
-        `plan_priority_delegated_from:${scoreRootInstanceId}`,
-        `plan_priority_need:${scoreMaterialNeedId}`,
-        "plan_assessment_evidence:corp_score_campaign_missing_agenda_material",
+        `plan_first_root:${defenseRootInstanceId}`,
+        `plan_first_executor:${fundingLeafInstanceId}`,
+        `plan_priority_delegated_from:${defenseRootInstanceId}`,
+        `plan_priority_need:${defenseNeedId}`,
+        `plan_assessment_evidence:corp_defense_exact_route_funding_required:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0`,
       ]),
-    );
-    expect(JSON.stringify(portfolio)).not.toContain(
-      '"immediateDefenseConversion":true',
     );
   });
 });

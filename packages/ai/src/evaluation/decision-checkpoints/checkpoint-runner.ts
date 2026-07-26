@@ -1,4 +1,5 @@
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { quoteCorpPunishRoute } from "@netgrid/engine";
 
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetTacticalPlanMemory } from "../../plans/plan-memory";
@@ -65,7 +66,9 @@ export function runAiDecisionCheckpoint(
     };
   }
   const input = buildAiDecisionInput(state, fixture.actor, options);
-  const decision = chooseAiAction(input);
+  const decision = chooseAiAction(input, {
+    quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
+  });
   const strategicIntent = getStrategicIntentMemorySnapshot(
     input,
     fixture.deckSnapshot.deckSnapshotId,
@@ -128,9 +131,7 @@ export function runAiDecisionCheckpoint(
     ...(!choiceAccepted ? ["choice"] : []),
     ...(!discardChoiceAccepted ? ["discard_choice"] : []),
     ...(!strategicIntentAccepted ? ["strategic_intent"] : []),
-    ...(!selectedScoreBreakdownAccepted
-      ? ["selected_score_breakdown"]
-      : []),
+    ...(!selectedScoreBreakdownAccepted ? ["selected_score_breakdown"] : []),
     ...(!planExecutionAccepted ? ["plan_execution"] : []),
     ...(!runTargetsAccepted ? ["run_targets"] : []),
     ...(!decisionChainAccepted ? ["decision_chain"] : []),

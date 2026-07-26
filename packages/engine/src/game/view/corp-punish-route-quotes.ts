@@ -17,6 +17,7 @@ import type {
   OnPlayCardAbilityImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { applyAction } from "../apply-action";
 import { createRunnerInstalledTrashImminentEvent } from "../damage/damage-event-resolution";
 import { collectEventModificationCandidates } from "../damage/prevention-sources";
 import { getLegalActions } from "../legal-actions";
@@ -32,6 +33,15 @@ type CertifiedStep = {
   effects: readonly CardEffectImplementation[];
   condition?: CardConditionImplementation;
   currentLegalActionId?: string;
+};
+
+type CertifiedTraceTagResponse = {
+  sourceStepId: string;
+  baseTraceStrength: number;
+  corpResponseCredits: number;
+  runnerResponseCredits: number;
+  tagAmount: number;
+  concealedRunnerResponsesUnknown: boolean;
 };
 
 /**
@@ -116,11 +126,28 @@ export function quoteCorpPunishRoute(
     head.quote.currentLegalAction = structuredClone(currentHeadAction);
   }
 
+  const traceTagResponse =
+    currentHeadAction || fundingOnlyHead
+      ? certifyExactTraceTagResponse(state, certifiedSteps, currentHeadAction)
+      : undefined;
+  if (
+    certifiedSteps.some((step) =>
+      step.effects.some((effect) => effect.kind === "trace"),
+    ) &&
+    !traceTagResponse
+  ) {
+    return {
+      ok: true,
+      quote: incompleteQuote(base, "response_window_unknown"),
+    };
+  }
+
   let projectedRunnerTags = state.runner.tags;
   let rawMeatDamage = 0;
   let rawNetDamage = 0;
   let rawCoreDamage = 0;
   let directTagStepId: string | undefined;
+  let traceTagStepId: string | undefined;
   for (const certified of certifiedSteps) {
     const condition = certified.condition;
     if (condition) {
@@ -145,6 +172,12 @@ export function quoteCorpPunishRoute(
       if (effect.kind === "add_tags") {
         projectedRunnerTags += effect.amount;
         directTagStepId ??= certified.quote.stepId;
+      } else if (
+        effect.kind === "trace" &&
+        traceTagResponse?.sourceStepId === certified.quote.stepId
+      ) {
+        projectedRunnerTags += traceTagResponse.tagAmount;
+        traceTagStepId ??= certified.quote.stepId;
       } else if (effect.kind === "damage") {
         if (effect.damageType === "meat") rawMeatDamage += effect.amount;
         if (effect.damageType === "net") rawNetDamage += effect.amount;
@@ -173,6 +206,11 @@ export function quoteCorpPunishRoute(
   );
   const rawDamage = rawMeatDamage + rawNetDamage + rawCoreDamage;
   const hasDamage = rawDamage > 0;
+  const hasTraceTagResponse = traceTagResponse !== undefined;
+  const corpResponseCredits = traceTagResponse?.corpResponseCredits ?? 0;
+  const runnerResponseCredits =
+    traceTagResponse?.runnerResponseCredits ??
+    (hasDamage ? state.runner.credits : 0);
 
   return {
     ok: true,
@@ -199,25 +237,47 @@ export function quoteCorpPunishRoute(
                 requiredRunnerTags: 1,
                 sourceStepId: directTagStepId,
               }
-            : {
-                kind: "none",
-                status: "not_required",
-                currentRunnerTags: 0,
-                requiredRunnerTags: 0,
-              },
+            : traceTagStepId && traceTagResponse
+              ? {
+                  kind: "trace_tag_step",
+                  status: "response_required",
+                  currentRunnerTags: 0,
+                  requiredRunnerTags: traceTagResponse.tagAmount,
+                  sourceStepId: traceTagStepId,
+                  baseTraceStrength: traceTagResponse.baseTraceStrength,
+                }
+              : {
+                  kind: "none",
+                  status: "not_required",
+                  currentRunnerTags: 0,
+                  requiredRunnerTags: 0,
+                },
       responsePaymentEnvelope: {
-        responseKind: hasDamage ? "runner_optional" : "none",
-        paymentKnowledge: hasDamage ? "unknown" : "exact_public",
+        responseKind: hasTraceTagResponse
+          ? "trace_bid"
+          : hasDamage
+            ? "runner_optional"
+            : "none",
+        paymentKnowledge: hasTraceTagResponse
+          ? traceTagResponse.concealedRunnerResponsesUnknown
+            ? "unknown"
+            : "exact_public"
+          : hasDamage
+            ? "unknown"
+            : "exact_public",
         corpCreditsAvailable: state.corp.credits,
         runnerCreditsVisible: state.runner.credits,
-        corpResponseCredits: { minimum: 0, maximum: 0 },
+        corpResponseCredits: {
+          minimum: 0,
+          maximum: corpResponseCredits,
+        },
         totalCorpCredits: {
           minimum: totalActionCredits,
-          maximum: totalActionCredits,
+          maximum: totalActionCredits + corpResponseCredits,
         },
         runnerResponseCredits: {
           minimum: 0,
-          maximum: hasDamage ? state.runner.credits : 0,
+          maximum: runnerResponseCredits,
         },
       },
       damageEnvelope: {
@@ -243,10 +303,262 @@ export function quoteCorpPunishRoute(
           creditCost: { minimum: 0, maximum: 0 },
         },
       },
-      guarantee: hasDamage ? "conditional_on_runner_response" : "guaranteed",
-      responseKnowledge: hasDamage ? "unknown" : "public_exact",
+      guarantee: traceTagResponse?.concealedRunnerResponsesUnknown
+        ? "not_guaranteed"
+        : hasDamage
+          ? "conditional_on_runner_response"
+          : "guaranteed",
+      responseKnowledge: hasTraceTagResponse
+        ? traceTagResponse.concealedRunnerResponsesUnknown
+          ? "unknown"
+          : "public_exact"
+        : hasDamage
+          ? "unknown"
+          : "public_exact",
     },
   };
+}
+
+/**
+ * Certifies the smallest Corp bid that wins against the Runner's largest
+ * currently legal response by executing the real trace flow on cloned states.
+ * Any additional base-link, post-bid or prevention choice keeps the route
+ * unknown instead of being approximated.
+ */
+function certifyExactTraceTagResponse(
+  state: GameState,
+  steps: readonly CertifiedStep[],
+  currentHeadAction: LegalAction | undefined,
+): CertifiedTraceTagResponse | undefined {
+  const traceSteps = steps.filter((step) =>
+    step.effects.some((effect) => effect.kind === "trace"),
+  );
+  if (traceSteps.length !== 1 || traceSteps[0] !== steps[0]) return undefined;
+  const traceStep = traceSteps[0]!;
+  const traceEffect = traceStep.effects[0];
+  if (
+    traceStep.effects.length !== 1 ||
+    traceEffect?.kind !== "trace" ||
+    traceEffect.onSuccess.length !== 1
+  ) {
+    return undefined;
+  }
+  const tagEffect = traceEffect.onSuccess[0];
+  if (
+    !tagEffect ||
+    tagEffect.kind !== "add_tags" ||
+    tagEffect.recipient !== "runner" ||
+    tagEffect.visibility !== "public" ||
+    !Number.isSafeInteger(tagEffect.amount) ||
+    tagEffect.amount <= 0
+  ) {
+    return undefined;
+  }
+
+  const { state: simulationState, concealedRunnerResponsesUnknown } =
+    publicTraceSimulationState(state);
+  if (!currentHeadAction) {
+    simulationState.corp.credits = traceStep.quote.credits;
+    currentHeadAction = exactCurrentHeadAction(
+      simulationState,
+      traceStep.quote,
+    );
+  }
+  if (!currentHeadAction) return undefined;
+  const played = applyAction(simulationState, {
+    matchId: simulationState.matchId,
+    side: "corp",
+    actionId: currentHeadAction.actionId,
+    clientKnownStateVersion: simulationState.stateVersion,
+  });
+  if (
+    !played.ok ||
+    played.state.trace?.status !== "corp_bid" ||
+    played.state.pendingChoice?.side !== "corp" ||
+    played.state.pendingChoice.kind !== "bid_amount" ||
+    played.state.trace.baseTraceStrength !== traceEffect.baseTraceStrength
+  ) {
+    return undefined;
+  }
+  const afterHead = played.state;
+  const zeroBid = numericBidOptions(afterHead).find(
+    (option) => option.value === 0,
+  );
+  if (!zeroBid) return undefined;
+  const zeroProbe = applyExactChoice(afterHead, "corp", zeroBid.id);
+  if (
+    !zeroProbe ||
+    zeroProbe.trace?.status !== "runner_bid" ||
+    zeroProbe.pendingChoice?.side !== "runner" ||
+    zeroProbe.pendingChoice.kind !== "bid_amount" ||
+    !Number.isSafeInteger(zeroProbe.trace.runnerLink) ||
+    zeroProbe.trace.runnerLink! < 0
+  ) {
+    return undefined;
+  }
+  const maximumRunnerBid = numericBidOptions(zeroProbe).sort(
+    (left, right) => right.value - left.value,
+  )[0];
+  if (!maximumRunnerBid) return undefined;
+  const requiredBidValue = Math.max(
+    0,
+    zeroProbe.trace.runnerLink! +
+      maximumRunnerBid.value -
+      traceEffect.baseTraceStrength +
+      1,
+  );
+  let verifiedAfterHead = afterHead;
+  let requiredCorpBid = numericBidOptions(verifiedAfterHead).find(
+    (option) => option.value === requiredBidValue,
+  );
+  if (!requiredCorpBid) {
+    const { state: fundedSimulationState } = publicTraceSimulationState(state);
+    fundedSimulationState.corp.credits =
+      traceStep.quote.credits + requiredBidValue;
+    const fundedHeadAction = exactCurrentHeadAction(
+      fundedSimulationState,
+      traceStep.quote,
+    );
+    if (!fundedHeadAction) return undefined;
+    const fundedHead = applyAction(fundedSimulationState, {
+      matchId: fundedSimulationState.matchId,
+      side: "corp",
+      actionId: fundedHeadAction.actionId,
+      clientKnownStateVersion: fundedSimulationState.stateVersion,
+    });
+    if (
+      !fundedHead.ok ||
+      fundedHead.state.trace?.status !== "corp_bid" ||
+      fundedHead.state.pendingChoice?.side !== "corp" ||
+      fundedHead.state.pendingChoice.kind !== "bid_amount"
+    ) {
+      return undefined;
+    }
+    verifiedAfterHead = fundedHead.state;
+    requiredCorpBid = numericBidOptions(verifiedAfterHead).find(
+      (option) => option.value === requiredBidValue,
+    );
+  }
+  if (!requiredCorpBid) return undefined;
+  const afterCorpBid = applyExactChoice(
+    verifiedAfterHead,
+    "corp",
+    requiredCorpBid.id,
+  );
+  if (
+    !afterCorpBid ||
+    afterCorpBid.trace?.status !== "runner_bid" ||
+    afterCorpBid.pendingChoice?.side !== "runner" ||
+    afterCorpBid.pendingChoice.kind !== "bid_amount"
+  ) {
+    return undefined;
+  }
+  const verifiedRunnerBid = numericBidOptions(afterCorpBid).find(
+    (option) => option.value === maximumRunnerBid.value,
+  );
+  if (!verifiedRunnerBid) return undefined;
+  const resolved = applyExactChoice(
+    afterCorpBid,
+    "runner",
+    verifiedRunnerBid.id,
+  );
+  if (
+    !resolved ||
+    resolved.trace !== undefined ||
+    resolved.pendingChoice !== undefined ||
+    resolved.runner.tags < simulationState.runner.tags + tagEffect.amount
+  ) {
+    return undefined;
+  }
+  const corpResponseCredits =
+    verifiedAfterHead.corp.credits - afterCorpBid.corp.credits;
+  const runnerResponseCredits =
+    afterCorpBid.runner.credits - resolved.runner.credits;
+  if (
+    !Number.isSafeInteger(corpResponseCredits) ||
+    corpResponseCredits < 0 ||
+    !Number.isSafeInteger(runnerResponseCredits) ||
+    runnerResponseCredits < 0
+  ) {
+    return undefined;
+  }
+  return {
+    sourceStepId: traceStep.quote.stepId,
+    baseTraceStrength: traceEffect.baseTraceStrength,
+    corpResponseCredits,
+    runnerResponseCredits,
+    tagAmount: tagEffect.amount,
+    concealedRunnerResponsesUnknown,
+  };
+}
+
+/**
+ * Concealed installed Runner cards are absent from the Corp's rules evidence.
+ * Remove them from the private simulation and downgrade the response contract
+ * to unknown so neither quote presence nor cost can encode their identities.
+ */
+function publicTraceSimulationState(state: GameState): {
+  state: GameState;
+  concealedRunnerResponsesUnknown: boolean;
+} {
+  const projected = structuredClone(state);
+  const concealed = new Set(
+    [
+      ...projected.runner.rig.hardware,
+      ...projected.runner.rig.programs,
+      ...projected.runner.rig.resources,
+    ].filter((cardId) => projected.cardInstances[cardId]?.faceup !== true),
+  );
+  if (concealed.size === 0) {
+    return { state: projected, concealedRunnerResponsesUnknown: false };
+  }
+  projected.runner.rig.hardware = projected.runner.rig.hardware.filter(
+    (cardId) => !concealed.has(cardId),
+  );
+  projected.runner.rig.programs = projected.runner.rig.programs.filter(
+    (cardId) => !concealed.has(cardId),
+  );
+  projected.runner.rig.resources = projected.runner.rig.resources.filter(
+    (cardId) => !concealed.has(cardId),
+  );
+  for (const cardId of concealed) delete projected.cardInstances[cardId];
+  return { state: projected, concealedRunnerResponsesUnknown: true };
+}
+
+function numericBidOptions(
+  state: GameState,
+): Array<{ id: string; value: number }> {
+  return (state.pendingChoice?.options ?? []).flatMap((option) =>
+    typeof option.value === "number" &&
+    Number.isSafeInteger(option.value) &&
+    option.value >= 0
+      ? [{ id: option.id, value: option.value }]
+      : [],
+  );
+}
+
+function applyExactChoice(
+  state: GameState,
+  side: "corp" | "runner",
+  optionId: string,
+): GameState | undefined {
+  const choice = state.pendingChoice;
+  if (!choice || choice.side !== side) return undefined;
+  const action = getLegalActions(state, side).find(
+    (candidate) => candidate.type === "resolve_choice",
+  );
+  if (!action) return undefined;
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    selectedChoices: {
+      choiceId: choice.choiceId,
+      selectedOptionIds: [optionId],
+    },
+  });
+  return result.ok ? result.state : undefined;
 }
 
 export function corpPunishRouteRequestFingerprint(
@@ -550,7 +862,16 @@ function supportedEffects(
     return { ok: false, reason: "source_effects_unsupported" };
   }
   if (effect.kind === "trace") {
-    return { ok: false, reason: "response_window_unknown" };
+    const success = effect.onSuccess;
+    return requestedKind === "trace_tag" &&
+      success.length === 1 &&
+      success[0]?.kind === "add_tags" &&
+      success[0].recipient === "runner" &&
+      success[0].visibility === "public" &&
+      Number.isSafeInteger(success[0].amount) &&
+      success[0].amount > 0
+      ? { ok: true }
+      : { ok: false, reason: "response_window_unknown" };
   }
   if (
     effect.kind === "add_tags" &&

@@ -21685,7 +21685,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "advance_card",
+        "sourceDefinitionId": "onr_v1_193_corporate-coup"
       }
     ],
     "forbiddenActions": [
@@ -21695,11 +21696,11 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
-      "requiredAssessmentEvidence": [
-        "corp_engine_certified_basic_liquidity_development"
-      ]
+      "acceptablePlanIds": [
+        "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_1"
+      ],
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["advance_score_agenda"]
     }
   }
 }

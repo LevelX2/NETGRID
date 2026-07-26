@@ -39,17 +39,24 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("may buy the same tag when Scorched Earth is visible and payable", () => {
+  it("prepares persistent tag pressure when a guaranteed trace would strand Scorched Earth", () => {
     const livePunishWindow = mutateFixture(cp03Json, (current) => {
       moveFirstCorpCardToHq(current, SCORCHED_EARTH);
       current.engine.testOnlyGameState.corp.credits = 5;
       current.expectation = {
         acceptableActions: [
           {
-            type: "play_operation",
-            sourceDefinitionId: CHANCE_OBSERVATION,
+            type: "install_card",
+            sourceDefinitionId: "onr_v1_313_city-surveillance",
           },
         ],
+        planExecution: {
+          acceptablePlanKinds: ["corp.punish_campaign"],
+          acceptableCapabilities: ["punish_prepare"],
+          requiredAssessmentEvidence: [
+            "tag_punish_ontology_prepare:onr_v1_313_city-surveillance",
+          ],
+        },
       };
     });
 
@@ -64,7 +71,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("leaves an unobservable score line fail-closed when City Surveillance cannot yet be afforded", () => {
+  it("draws for score material when unfunded City Surveillance has no legal punish route", () => {
     const unfundedEngine = mutateFixture(cp04Json, (current) => {
       current.engine.testOnlyGameState.corp.credits = 0;
       restoreCorpScoredAgendaToRd(current);
@@ -73,12 +80,12 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
       // only legal hand-management route an overflow-credit conversion.
       moveFirstCorpCardToArchives(current, URBAN_RENEWAL);
       current.expectation = {
-        acceptableActions: [{ actionId: "corp.gain_credit" }],
+        acceptableActions: [{ actionId: "corp.draw_card" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.economy"],
-          acceptableCapabilities: ["develop_or_convert_corp_economy"],
+          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
+          acceptableCapabilities: ["draw_for_plan"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_basic_liquidity_development",
+            "corp_score_campaign_missing_agenda_material",
           ],
         },
       };

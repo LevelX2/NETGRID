@@ -336,7 +336,7 @@ describe("Corp defensive draw context", () => {
       },
       { ...setup.args.drawActionProjection, clickCost: 2 },
       { ...setup.args.drawActionProjection, cardsDrawn: 2 },
-      { ...setup.args.drawActionProjection, netHandDelta: 0 },
+      { ...setup.args.drawActionProjection, netHandDelta: -1 },
     ]) {
       expect(
         corpMissingConcreteScoreDefenseDrawNeed({
@@ -345,6 +345,37 @@ describe("Corp defensive draw context", () => {
         }),
       ).toBeUndefined();
     }
+  });
+
+  it("admits a card-consuming replacement draw with exact zero net hand delta", () => {
+    const setup = targetedScoreDefenseDrawSetup();
+    const replacementDraw = corpAction(
+      "corp.play_replacement_draw",
+      "play_operation",
+      { drawCardsAmount: 1 },
+      "card",
+    );
+    replacementDraw.costs = [{ clicks: 1 }];
+    replacementDraw.expiresAtStateVersion = setup.input.playerView.stateVersion;
+    setup.input.legalActions = [replacementDraw];
+
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        action: replacementDraw,
+        drawActionProjection: {
+          knowledge: "known",
+          actionId: replacementDraw.actionId,
+          observedAtStateVersion: setup.input.playerView.stateVersion,
+          clickCost: 1,
+          cardsDrawn: 1,
+          netHandDelta: 0,
+        },
+      }),
+    ).toMatchObject({
+      cleanupReplacementDraw: false,
+      evidence: expect.arrayContaining(["score_defense_draw_net_hand_delta:0"]),
+    });
   });
 
   it("allows a capacity-safe last-click draw as multi-turn progress but not under a hard same-turn reserve", () => {

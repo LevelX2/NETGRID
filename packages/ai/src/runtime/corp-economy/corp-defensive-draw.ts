@@ -124,7 +124,7 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
     drawActionProjection.clickCost !== exactClickCost ||
     exactDrawCount === undefined ||
     drawActionProjection.cardsDrawn !== exactDrawCount ||
-    !positiveSafeInteger(drawActionProjection.netHandDelta) ||
+    !nonNegativeSafeInteger(drawActionProjection.netHandDelta) ||
     drawActionProjection.netHandDelta > drawActionProjection.cardsDrawn
   ) {
     return undefined;

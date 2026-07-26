@@ -1,5 +1,6 @@
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+  type CardDefinitionId,
   type CardInstanceId,
   type CorpPunishRouteQuoteRequest,
   type GameState,
@@ -116,6 +117,123 @@ describe("Corp punish-route quote request", () => {
         damageEnvelope: {
           rawDamage: { meat: 6, net: 0, core: 0, total: 6 },
           effectiveDamage: { minimum: 6, maximum: 6 },
+        },
+      },
+    });
+  });
+
+  it("certifies the public Chance Observation bid bound and hides concealed response identities", () => {
+    const state = corpActionState("punish-route-chance-scorched");
+    state.corp.credits = 12;
+    state.corp.clicks = 3;
+    state.runner.credits = 9;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runAttemptsLastTurn: 1,
+    };
+    const chance = addCorpCardToHqForTest(
+      state,
+      "onr_v1_284_chance-observation",
+      "chance",
+    );
+    const scorched = addCorpCardToHqForTest(
+      state,
+      "onr_v1_302_scorched-earth",
+      "scorched",
+    );
+    const request = routeRequest(state, [
+      step("trace-tag", 0, "trace_tag", chance),
+      step("damage-4", 1, "meat_damage", scorched),
+    ]);
+    const before = structuredClone(state);
+
+    const clean = quoteCorpPunishRoute(state, request);
+
+    expect(clean).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        totalClicks: 2,
+        totalActionCredits: 5,
+        tagTrigger: {
+          kind: "trace_tag_step",
+          baseTraceStrength: 5,
+          sourceStepId: "trace-tag",
+        },
+        responsePaymentEnvelope: {
+          paymentKnowledge: "exact_public",
+          corpResponseCredits: { minimum: 0, maximum: 5 },
+          totalCorpCredits: { minimum: 5, maximum: 10 },
+          runnerResponseCredits: { minimum: 0, maximum: 9 },
+        },
+        damageEnvelope: {
+          effectiveDamage: { minimum: 4, maximum: 4 },
+        },
+        responseKnowledge: "public_exact",
+      },
+    });
+    expect(state).toEqual(before);
+
+    const unfunded = structuredClone(state);
+    unfunded.corp.credits = 0;
+    const unfundedQuote = quoteCorpPunishRoute(unfunded, request);
+    expect(unfundedQuote).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        responsePaymentEnvelope: {
+          corpCreditsAvailable: 0,
+          corpResponseCredits: { maximum: 5 },
+          totalCorpCredits: { maximum: 10 },
+        },
+        steps: [
+          {
+            sourceCardDefinitionId: "onr_v1_284_chance-observation",
+          },
+          {
+            sourceCardDefinitionId: "onr_v1_302_scorched-earth",
+          },
+        ],
+      },
+    });
+    if (!unfundedQuote.ok) throw new Error(unfundedQuote.error.message);
+    expect(unfundedQuote.quote.steps[0]).not.toHaveProperty(
+      "currentLegalAction",
+    );
+
+    const left = structuredClone(state);
+    const leftFirst = addConcealedRunnerResource(
+      left,
+      "onr_proteus_147_r-and-d-mole",
+      "first",
+    );
+    const leftSecond = addConcealedRunnerResource(
+      left,
+      "onr_proteus_142_hq-mole",
+      "second",
+    );
+    const right = structuredClone(left);
+    right.cardInstances[leftFirst]!.definitionId = "onr_proteus_142_hq-mole";
+    right.cardInstances[leftSecond]!.definitionId =
+      "onr_proteus_147_r-and-d-mole";
+
+    const leftQuote = quoteCorpPunishRoute(left, request);
+    const rightQuote = quoteCorpPunishRoute(right, request);
+
+    expect(leftQuote).toEqual(rightQuote);
+    expect(leftQuote).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        guarantee: "not_guaranteed",
+        responseKnowledge: "unknown",
+        responsePaymentEnvelope: {
+          paymentKnowledge: "unknown",
+          corpResponseCredits: { maximum: 5 },
+          totalCorpCredits: { maximum: 10 },
         },
       },
     });
@@ -374,7 +492,7 @@ describe("Corp punish-route quote request", () => {
     }
   });
 
-  it("fails only the requested route for absent heads, bad capabilities and variable trace responses", () => {
+  it("fails only the requested route for absent heads, bad capabilities and unsupported trace costs", () => {
     const state = corpActionState("punish-route-fail-closed");
     const damage = addCorpCardToHqForTest(
       state,
@@ -432,7 +550,7 @@ describe("Corp punish-route quote request", () => {
       ok: true,
       quote: {
         complete: false,
-        incompleteReasons: ["response_window_unknown"],
+        incompleteReasons: ["head_legal_action_unavailable"],
       },
     });
   });
@@ -485,6 +603,27 @@ function step(
     sourceCardInstanceId,
     sourceCapabilityId: "ability:on_play:0",
   };
+}
+
+function addConcealedRunnerResource(
+  state: GameState,
+  definitionId: CardDefinitionId,
+  suffix: string,
+): CardInstanceId {
+  const cardId = `concealed_runner_resource_${suffix}` as CardInstanceId;
+  state.runner.rig.resources.push(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId,
+    owner: "runner",
+    controller: "runner",
+    zone: { side: "runner", zone: "rig" },
+    faceup: false,
+    rezzed: false,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
 }
 
 function incompleteProbeFacts(

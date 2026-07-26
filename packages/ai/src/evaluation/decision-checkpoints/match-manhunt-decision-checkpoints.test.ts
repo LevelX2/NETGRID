@@ -17,7 +17,7 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("uses the visible tag window before draining finite economy", () => {
+  it("uses the visible material tag-and-damage route before generic development", () => {
     const result = runAiDecisionCheckpoint(fixture(cp02Json));
 
     expect(result.ok, result.message).toBe(true);
@@ -65,16 +65,16 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("uses exact basic liquidity when score material is unobservable and the draw route is closed", () => {
+  it("draws for missing score material when no visible tag action remains", () => {
     const noTagWindow = mutateFixture(cp02Json, (fixture) => {
       moveCorpCardsToArchives(fixture, new Set([CHANCE_OBSERVATION]));
       fixture.expectation = {
-        acceptableActions: [{ type: "gain_credit" }],
+        acceptableActions: [{ type: "draw_card" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.economy"],
-          acceptableCapabilities: ["develop_or_convert_corp_economy"],
+          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
+          acceptableCapabilities: ["draw_for_plan"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_basic_liquidity_development",
+            "corp_score_campaign_missing_agenda_material",
           ],
         },
       };
@@ -123,7 +123,7 @@ describe("match Manhunt exact decision checkpoints", () => {
           acceptablePlanKinds: ["corp.hand_and_agenda_management"],
           acceptableCapabilities: ["draw_for_plan"],
           requiredAssessmentEvidence: [
-            "corp_terminal_score_campaign_missing_agenda_material",
+            "corp_score_campaign_missing_agenda_material",
           ],
         },
       };

@@ -22,11 +22,12 @@ const ON_PLAY_CAPABILITY_ID = "ability:on_play:0";
 type PunishComponentAdapter = {
   kind: Extract<
     CorpPunishRouteStepKind,
-    "tag" | "meat_damage" | "hardware_trash" | "other_punish"
+    "tag" | "trace_tag" | "meat_damage" | "hardware_trash" | "other_punish"
   >;
   definitionId: string;
   hintFamily:
     | "direct_tag"
+    | "trace_tag"
     | "fixed_meat_damage"
     | "tagged_runner_hardware_trash"
     | "tagged_runner_credit_denial";
@@ -152,7 +153,9 @@ export function buildBoundedCorpPunishRouteRequests(
         left.card.instanceId.localeCompare(right.card.instanceId),
     );
   const tags = components.filter(
-    (component) => component.adapter.kind === "tag",
+    (component) =>
+      component.adapter.kind === "tag" ||
+      component.adapter.kind === "trace_tag",
   );
   const damage = components.filter(
     (component) => component.adapter.kind === "meat_damage",
@@ -258,9 +261,54 @@ function visiblePunishComponent(
   }
   const adapter =
     PUNISH_COMPONENT_ADAPTERS.get(card.definitionId) ??
+    structuredTraceTagAdapter(card.definitionId) ??
     structuredHardwareTrashAdapter(card.definitionId);
   if (!adapter || !hintMatchesAdapter(adapter)) return undefined;
   return { card, adapter };
+}
+
+/**
+ * Discovers reviewed finite Trace -> tag heads without assigning any trace
+ * strength, bid or cost in the AI layer. The Engine remains responsible for
+ * certifying the exact current action and the complete response window.
+ */
+function structuredTraceTagAdapter(
+  definitionId: string,
+): PunishComponentAdapter | undefined {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  if (
+    !hint ||
+    hint.side !== "corp" ||
+    hint.cardType !== "operation" ||
+    hint.conditions?.some(
+      (condition) => condition.kind === "requires_trace_success",
+    ) !== true ||
+    hint.effects?.some(
+      (effect) =>
+        effect.kind === "trace" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        effect.finite === true,
+    ) !== true ||
+    hint.effects.some(
+      (effect) =>
+        effect.kind === "tag_source" &&
+        effect.scope === "runner" &&
+        effect.timing === "trace_success" &&
+        effect.finite === true &&
+        Number.isSafeInteger(effect.amount) &&
+        Number(effect.amount) > 0,
+    ) !== true
+  ) {
+    return undefined;
+  }
+  return {
+    definitionId,
+    kind: "trace_tag",
+    hintFamily: "trace_tag",
+    routeOrder: 1,
+    sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
+  };
 }
 
 /**
@@ -329,6 +377,9 @@ function hintMatchesAdapter(adapter: PunishComponentAdapter): boolean {
           Number(effect.amount) > 0,
       ) === true && hint.effects.every((effect) => effect.kind !== "trace")
     );
+  }
+  if (adapter.hintFamily === "trace_tag") {
+    return structuredTraceTagAdapter(adapter.definitionId) !== undefined;
   }
   if (adapter.hintFamily === "tagged_runner_credit_denial") {
     return (

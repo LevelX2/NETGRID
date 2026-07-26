@@ -17,6 +17,7 @@ import {
 } from "./corp-punish-route-quote-input";
 
 const DATA_SIFTERS = "onr_proteus_048_data-sifters";
+const CHANCE_OBSERVATION = "onr_v1_284_chance-observation";
 const CLOSED_ACCOUNTS = "onr_v1_285_closed-accounts";
 const PUNITIVE = "onr_v1_301_punitive-counterstrike";
 const SCORCHED = "onr_v1_302_scorched-earth";
@@ -71,6 +72,30 @@ describe("decision-local Corp punish route quote input", () => {
     expect(requests).toEqual(
       buildBoundedCorpPunishRouteRequests(structuredClone(input)),
     );
+  });
+
+  it("recognizes a reviewed Trace -> tag head without inventing its bid or cost", () => {
+    const input = punishInput({ runnerTags: 0, runnerHandCount: 5 });
+    input.playerView.own.gripOrHq = [
+      operation("chance", CHANCE_OBSERVATION),
+      operation("scorched", SCORCHED),
+    ];
+
+    expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([
+      expect.objectContaining({
+        steps: [
+          expect.objectContaining({
+            kind: "trace_tag",
+            sourceCardInstanceId: "chance",
+            sourceCapabilityId: "ability:on_play:0",
+          }),
+          expect.objectContaining({
+            kind: "meat_damage",
+            sourceCardInstanceId: "scorched",
+          }),
+        ],
+      }),
+    ]);
   });
 
   it("deterministically caps expanded visible combinations at eight routes and six steps", () => {

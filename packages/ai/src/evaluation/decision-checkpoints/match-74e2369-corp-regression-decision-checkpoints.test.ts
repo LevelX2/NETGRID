@@ -15,7 +15,10 @@ describe("match 74e2369 exact Corp decision checkpoints", () => {
       projectConsultantsTychoJson,
     ],
     ["protects repeatedly accessed R&D", protectRdJson],
-    ["allocates a quote-certified HQ defense before a generic economy operation", nightShiftJson],
+    [
+      "starts the exact staged Tycho score project before a background asset",
+      nightShiftJson,
+    ],
     [
       "retains both agendas and Night Shift while discarding Liche",
       discardLicheJson,

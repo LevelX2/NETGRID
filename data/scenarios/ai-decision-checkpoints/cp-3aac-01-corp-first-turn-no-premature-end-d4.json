@@ -4559,7 +4559,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "type": "draw_card"
+        "type": "gain_credit"
       }
     ],
     "forbiddenActions": [
@@ -4568,8 +4568,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
-      "acceptableCapabilities": ["draw_for_plan"],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "forbiddenPlanKinds": ["corp.complete_turn"],
       "forbiddenCapabilities": [
         "complete_turn_after_productive_routes_exhausted"

@@ -15,26 +15,29 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const BEHAVIOR_FIXTURES = [
-  ["defers dead first positional ICE in Seed 002", deadFirstSeed002Json],
   [
-    "defers unfunded dead first positional ICE in Seed 004",
+    "defers dead first positional ICE via parent-bound protection draw in Seed 002",
+    deadFirstSeed002Json,
+  ],
+  [
+    "defers unfunded dead first positional ICE via parent-bound protection draw in Seed 004",
     deadFirstSeed004Json,
   ],
   [
-    "takes exact basic liquidity without reopening the protected Seed 003 scoreline at d208",
+    "continues the bound protected Seed 003 scoreline at d208",
     scorelineSeed003D208Json,
   ],
   [
-    "stops overbuilding and takes exact basic liquidity at d219",
+    "continues the bound protected Seed 003 scoreline at d219",
     scorelineSeed003D219Json,
   ],
-  ["continues the Seed 004 scoreline at d55", scorelineSeed004D55Json],
   [
-    "continues the Seed 004 scoreline with exact basic liquidity at d65",
-    scorelineSeed004D65Json,
+    "develops parent-bound protection for the Seed 004 scoreline at d55",
+    scorelineSeed004D55Json,
   ],
+  ["continues the bound Seed 004 scoreline at d65", scorelineSeed004D65Json],
   [
-    "defers the late Seed 004 scoreline into exact basic liquidity at d247",
+    "continues the late bound Seed 004 scoreline at d247",
     scorelineSeed004D247Json,
   ],
   [
@@ -131,10 +134,13 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
       candidate.expectation = {
         acceptableActions: [{ type: "draw_card" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
-          acceptableCapabilities: ["draw_for_plan"],
+          acceptablePlanIds: [
+            "plan:corp.defend_servers:server-defense-portfolio",
+          ],
+          acceptablePlanKinds: ["corp.defend_servers"],
+          acceptableCapabilities: ["develop_score_protection"],
           requiredAssessmentEvidence: [
-            "corp_option_development_below_hand_capacity",
+            "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_193_corporate-coup_2:remote_1:remote_1",
           ],
         },
         forbiddenActions: [{ type: "advance_card" }],

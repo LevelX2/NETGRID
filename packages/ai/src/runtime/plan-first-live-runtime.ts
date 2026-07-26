@@ -7137,7 +7137,7 @@ function buildCorpDomain(
             Number.isSafeInteger(cardsDrawn) &&
             (cardsDrawn ?? 0) > 0 &&
             Number.isSafeInteger(netHandDelta) &&
-            (netHandDelta ?? 0) > 0
+            (netHandDelta ?? -1) >= 0
           ? ({
               knowledge: "known" as const,
               actionId: candidate.actionId,
