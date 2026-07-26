@@ -400,6 +400,12 @@ wenn sein Vertrag dies erlaubt.
 Persistenter Bestand relevanter Planinstanzen der eigenen Seite. Er enthält
 nicht nur den momentan ausführenden Plan.
 
+Im Live-Server wird das residente Portfolio serverprivat mit dem Match
+gespeichert und vor der nächsten KI-Vorbereitung oder -Ausführung
+wiederhergestellt. Ein Prozessneustart darf daher kein neues Portfolio für
+denselben Matchzustand vortäuschen; ein akzeptierter Undo verwirft den
+zustandsgebundenen Bestand bewusst und verlangt eine frische Revalidierung.
+
 ### Executor
 
 Die eine Planinstanz, die die aktuelle freiwillige Entscheidung besitzt. Bei

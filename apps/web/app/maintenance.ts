@@ -457,6 +457,7 @@ export function aiTracePlanLabel(value: string): string {
     "runner.cash_out_credit_bank": "Credit-Bank auszahlen",
     "corp.create_score_window": "Score-Fenster schaffen",
     "corp.build_credit_bank": "Credit-Bank aufbauen",
+    "corp.hand_and_agenda_management": "Hand und Agenden verwalten",
     "corp.rez_defense": "Verteidigung rezzen",
     simple_hq_or_rnd_pressure: "HQ/R&D-Druck",
     simple_rez: "ICE rezzen",

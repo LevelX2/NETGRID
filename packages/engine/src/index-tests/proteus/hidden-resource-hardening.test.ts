@@ -97,6 +97,27 @@ function addRunnerGripCard(
   return cardId;
 }
 
+function addRunnerStackCard(
+  state: GameState,
+  definitionId: CardDefinitionId,
+  id: string,
+): CardInstanceId {
+  const cardId = id as CardInstanceId;
+  state.runner.stack.push(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId,
+    owner: "runner",
+    controller: "runner",
+    zone: { side: "runner", zone: "stack" },
+    faceup: false,
+    rezzed: false,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
+}
+
 function addCorpHqCard(
   state: GameState,
   definitionId: CardDefinitionId,
@@ -281,6 +302,104 @@ function accessStartActionFor(
 }
 
 describe("PRO011 hidden resource timing hardening", () => {
+  it("uses Airport Locker in Runner main and still offers it during an ICE encounter", () => {
+    let state = runnerState("pro011-airport-locker-main");
+    const lockerId = installHiddenResource(
+      state,
+      "onr_proteus_128_airport-locker",
+      "pro011_airport_locker_main",
+    );
+    const programId = addRunnerStackCard(
+      state,
+      "onr_v1_014_codecracker",
+      "pro011_airport_locker_program",
+    );
+    const mainAction = getLegalActions(state, "runner").find(
+      (candidate) =>
+        candidate.payload?.cardId === lockerId &&
+        candidate.payload?.cardImplementationAbilityTiming === "runner_main",
+    );
+    expect(mainAction).toBeDefined();
+
+    const before = structuredClone(state);
+    const opened = applyLegal(state, "runner", mainAction!);
+    expect(opened.ok).toBe(true);
+    state = opened.state;
+    expect(state.runner.credits).toBe(25);
+    expectHiddenResourceTrashed(
+      state,
+      lockerId,
+      "onr_proteus_128_airport-locker",
+    );
+    expect(state.pendingChoice?.source).toContain("p3_38.search_stack_install");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+      (option) => option.value === programId,
+    )?.id;
+    expect(optionId).toBeDefined();
+    const resolved = resolveChoice(state, "runner", String(optionId));
+    expect(resolved.ok).toBe(true);
+    state = resolved.state;
+    expect(state.runner.rig.programs).toContain(programId);
+    expect(state.runner.stack).not.toContain(programId);
+    expect(state.runner.credits).toBe(23);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_proteus_128_airport-locker",
+      hiddenZoneAction: "p3_38_search_stack_install",
+      installedProgramDefinitionId: "onr_v1_014_codecracker",
+      installed: true,
+    });
+    expectReplayStable(before, state);
+
+    const encounter = runnerState("pro011-airport-locker-encounter");
+    const encounterLockerId = installHiddenResource(
+      encounter,
+      "onr_proteus_128_airport-locker",
+      "pro011_airport_locker_encounter",
+    );
+    addRunnerStackCard(
+      encounter,
+      "onr_v1_014_codecracker",
+      "pro011_airport_locker_encounter_program",
+    );
+    const iceId = addCorpServerCard(
+      encounter,
+      "onr_v1_232_crystal-wall",
+      "pro011_airport_locker_ice",
+      "hq",
+      "ice",
+    );
+    encounter.cardInstances[iceId] = {
+      ...encounter.cardInstances[iceId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    encounter.phase = "run";
+    encounter.timingPoint = "run.encounter_ice";
+    encounter.activeSide = "runner";
+    encounter.run = {
+      runId: "pro011_airport_locker_run",
+      attackedServerId: "hq",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+      approachedIceId: iceId,
+      encounteredIceId: iceId,
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: false,
+      accessCount: 1,
+    };
+
+    expect(
+      getLegalActions(encounter, "runner").some(
+        (candidate) =>
+          candidate.payload?.cardId === encounterLockerId &&
+          candidate.payload?.cardImplementationAbilityTiming === "during_run",
+      ),
+    ).toBe(true);
+  });
+
   it("projects preparable Chiba and Swiss abilities only to the owning runner", () => {
     const state = runnerState("hidden-bank-preselection-view");
     const chibaId = installHiddenResource(
@@ -1035,8 +1154,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(
       getLegalActions(state, "runner").filter(
         (candidate) =>
-          candidate.payload?.cardImplementationAbilityTiming ===
-          "access_start",
+          candidate.payload?.cardImplementationAbilityTiming === "access_start",
       ),
     ).toHaveLength(2);
     expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
@@ -1134,8 +1252,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(
       getLegalActions(state, "runner").filter(
         (candidate) =>
-          candidate.payload?.cardImplementationAbilityTiming ===
-          "access_start",
+          candidate.payload?.cardImplementationAbilityTiming === "access_start",
       ),
     ).toHaveLength(2);
     expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
@@ -1161,11 +1278,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       );
       expect(state.runner.credits).toBe(creditsBefore - 4);
       expect(state.run?.accessCount).toBe(index === 0 ? 3 : 5);
-      expectHiddenResourceTrashed(
-        state,
-        moleId,
-        "onr_proteus_142_hq-mole",
-      );
+      expectHiddenResourceTrashed(state, moleId, "onr_proteus_142_hq-mole");
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "activated_card_ability",
         cardDefinitionId: "onr_proteus_142_hq-mole",

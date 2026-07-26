@@ -15,12 +15,21 @@ import type {
   PointerEvent as ReactPointerEvent,
   ReactNode,
 } from "react";
+import type { AiPlanFirstDecisionDebug } from "@netgrid/shared";
 
 import {
   aiDecisionDebugDeckStrategySummary,
   aiDecisionDebugHqHandRows,
 } from "../../app/ai-decision-debug-ui";
-import { humanAiDecisionProbeReportSource } from "../../app/human-ai-decision-probe";
+import { serializeAiPlanFirstDecisionVisibleJsonExport } from "../../app/ai-plan-first-decision-export";
+import {
+  aiPlanFirstDispositionSummary,
+  aiPlanFirstIntentFitLabel,
+  aiPlanFirstPriorityLabel,
+  aiPlanFirstQuoteStatusLabel,
+  aiPlanFirstStepLabel,
+  parseAiPlanFirstDecisionDebug,
+} from "../../app/ai-plan-first-decision-ui";
 import {
   aiTraceActionRows,
   aiTraceDebugGapNotes,
@@ -28,7 +37,6 @@ import {
   aiTracePlanLabel,
   aiTraceScoreRows,
   aiTraceTitle,
-  findForbiddenMaintenanceMarkers,
   safeStringList,
   type MaintenanceAiTraceDetail,
   type MaintenanceAiTraceActionRow,
@@ -38,7 +46,6 @@ import {
   clampOverlayPosition,
   type OverlayPositionPreference,
 } from "../../lib/overlay-position";
-import type { AiDecisionPreview } from "../../lib/client-api";
 
 export type AiDecisionDebugOverlayStatus =
   | "off"
@@ -58,26 +65,16 @@ export function FloatingAiDecisionDebugOverlay({
   position,
   status,
   error,
-  preview,
-  previewError,
-  previewLoading,
-  canRequestPreview,
   trace,
   traceCount,
-  onRequestPreview,
   onPosition,
   onClose,
 }: {
   position: RunOverlayPositionPreference;
   status: AiDecisionDebugOverlayStatus;
   error: string;
-  preview: AiDecisionPreview | null;
-  previewError: string;
-  previewLoading: boolean;
-  canRequestPreview: boolean;
   trace: MaintenanceAiTraceDetail | null;
   traceCount: number;
-  onRequestPreview(): void;
   onPosition(position: RunOverlayPositionPreference): void;
   onClose(): void;
 }) {
@@ -157,16 +154,16 @@ export function FloatingAiDecisionDebugOverlay({
           transform: "none",
         }
       : {};
-  const exportTrace = preview ? aiDecisionPreviewAsTrace(preview) : trace;
-  const exportMode: "trace" | "preview" = preview ? "preview" : "trace";
+  const exportTrace = trace;
+  const exportMode: "trace" = "trace";
   const statusText = exportTrace
     ? aiDecisionDebugWindowHeaderStatusLabel(exportTrace, exportMode)
     : aiDecisionDebugStatusLabel(status, traceCount);
   const windowClassName = `aiDecisionDebugWindow ${collapsed ? "is-collapsed" : ""}`;
-  const exportButtonTitle =
-    preview && exportStatus === "idle"
-      ? "KI-Vorschlag als redigierten Meldeexport kopieren"
-      : aiDecisionDebugHeaderExportTitle(exportStatus, Boolean(exportTrace));
+  const exportButtonTitle = aiDecisionDebugHeaderExportTitle(
+    exportStatus,
+    Boolean(exportTrace),
+  );
   const copyAiDecisionDebugJson = async () => {
     if (!exportTrace) {
       setExportStatus("copy_failed");
@@ -193,19 +190,19 @@ export function FloatingAiDecisionDebugOverlay({
       style={positionStyle}
       data-testid="ai-decision-debug-overlay"
     >
-      <section className={windowClassName} aria-label="KI-Bewertung">
+      <section className={windowClassName} aria-label="KI-Entscheidung">
         <div
           className="aiDecisionDebugHead actionPanelFloatingDragHandle"
           onPointerDown={startDrag}
           onPointerMove={dragOverlay}
           onPointerUp={stopDrag}
           onPointerCancel={stopDrag}
-          title="KI-Bewertungsfenster verschieben"
-          aria-label="KI-Bewertungsfenster verschieben"
+          title="KI-Entscheidungsfenster verschieben"
+          aria-label="KI-Entscheidungsfenster verschieben"
         >
           <div className="aiDecisionDebugTitle">
             <Brain size={16} aria-hidden="true" />
-            <strong>KI-Bewertung</strong>
+            <strong>KI-Entscheidung</strong>
             <span>{statusText}</span>
           </div>
           <div className="actionPanelFloatingControls">
@@ -236,8 +233,8 @@ export function FloatingAiDecisionDebugOverlay({
               aria-expanded={!collapsed}
               aria-label={
                 collapsed
-                  ? "KI-Bewertungsfenster ausklappen"
-                  : "KI-Bewertungsfenster einklappen"
+                  ? "KI-Entscheidungsfenster ausklappen"
+                  : "KI-Entscheidungsfenster einklappen"
               }
               title={collapsed ? "Ausklappen" : "Einklappen"}
             >
@@ -248,7 +245,7 @@ export function FloatingAiDecisionDebugOverlay({
               type="button"
               onPointerDown={(event) => event.stopPropagation()}
               onClick={onClose}
-              aria-label="KI-Bewertungsfenster ausblenden"
+              aria-label="KI-Entscheidungsfenster ausblenden"
               title="Ausblenden"
             >
               <PanelTopClose size={14} />
@@ -256,28 +253,9 @@ export function FloatingAiDecisionDebugOverlay({
           </div>
         </div>
         <div className="aiDecisionDebugBody" hidden={collapsed}>
-          <div className="aiDecisionDebugTraceHead">
-            <button
-              className="button secondary"
-              type="button"
-              onClick={onRequestPreview}
-              disabled={!canRequestPreview || previewLoading}
-            >
-              {previewLoading
-                ? "KI-Vorschlag wird berechnet …"
-                : "Was würde die KI tun?"}
-            </button>
-            <span>
-              {canRequestPreview
-                ? "Read-only · aktuelle eigene LegalActions"
-                : "Nur im aktuellen eigenen Entscheidungsfenster verfügbar"}
-            </span>
-          </div>
           <AiDecisionDebugOverlayBody
             status={status}
             error={error}
-            preview={preview}
-            previewError={previewError}
             trace={trace}
           />
         </div>
@@ -292,31 +270,12 @@ export function FloatingAiDecisionDebugOverlay({
 function AiDecisionDebugOverlayBody({
   status,
   error,
-  preview,
-  previewError,
   trace,
 }: {
   status: AiDecisionDebugOverlayStatus;
   error: string;
-  preview: AiDecisionPreview | null;
-  previewError: string;
   trace: MaintenanceAiTraceDetail | null;
 }) {
-  if (preview) {
-    return (
-      <AiDecisionDebugTraceView
-        trace={aiDecisionPreviewAsTrace(preview)}
-        mode="preview"
-      />
-    );
-  }
-  if (previewError) {
-    return (
-      <p className="aiDecisionDebugNotice error" role="alert">
-        {previewError}
-      </p>
-    );
-  }
   if (status === "error") {
     return (
       <p className="aiDecisionDebugNotice error" role="alert">
@@ -324,68 +283,12 @@ function AiDecisionDebugOverlayBody({
       </p>
     );
   }
-  if (!trace) {
-    return (
-      <p className="aiDecisionDebugNotice" role="status">
-        {status === "activating"
-          ? "KI-Trace wird aktiviert."
-          : "Warte auf die nächste KI-Entscheidung."}
-      </p>
-    );
-  }
-  return <AiDecisionDebugTraceView trace={trace} />;
-}
-
-function aiDecisionPreviewAsTrace(
-  preview: AiDecisionPreview,
-): MaintenanceAiTraceDetail {
-  const score =
-    typeof preview.detail.score === "number" ? preview.detail.score : undefined;
-  const confidence =
-    typeof preview.detail.confidence === "number"
-      ? preview.detail.confidence
-      : preview.confidence;
-  const planKind =
-    typeof preview.detail.planKind === "string"
-      ? preview.detail.planKind
-      : undefined;
-  return {
-    traceId: `ai_preview_${preview.matchId}_${preview.stateVersion}`,
-    matchId: preview.matchId,
-    eventId: "preview",
-    stateVersion: preview.stateVersion,
-    matchVersion: preview.matchVersion,
-    side: preview.side,
-    turn: preview.stateVersion,
-    decisionIndex: 0,
-    selectedActionId: preview.actionId,
-    selectedActionType: preview.actionType,
-    ...(planKind ? { planKind } : {}),
-    ...(score !== undefined ? { score } : {}),
-    ...(confidence !== undefined ? { confidence } : {}),
-    createdAt: preview.generatedAt,
-    schemaVersion: "ai-decision-preview-v1",
-    meta: {},
-    detail: {
-      ...preview.detail,
-      selectedActionId: preview.actionId,
-      selectedActionType: preview.actionType,
-      debugSelectionMatchesApplied: true,
-      summary: preview.explanation,
-      reasonCode: preview.reasonCode,
-      fallbackUsed: preview.fallbackUsed,
-      timeoutUsed: preview.timeoutUsed === true,
-      selectedChoices: preview.selectedChoices,
-      advisorProfileId: preview.advisorProfileId,
-      advisorDifficulty: preview.advisorDifficulty,
-      advisorMode: preview.advisorMode,
-    },
-  };
-}
-
-function aiDecisionPreviewTitle(trace: MaintenanceAiTraceDetail): string {
-  const side = trace.side === "runner" ? "Runner" : "Korp";
-  return `KI-Vorschlag ab aktuellem Zustand · ${side} · ${aiDecisionTraceSelectedActionLabel(trace)}`;
+  if (trace) return <AiDecisionDebugTraceView trace={trace} />;
+  return (
+    <p className="aiDecisionDebugNotice" role="status">
+      Warte auf die vorbereitete nächste KI-Entscheidung.
+    </p>
+  );
 }
 
 function aiDecisionTraceSelectedActionLabel(
@@ -403,35 +306,347 @@ function aiDecisionDebugWindowHeaderStatusLabel(
   trace: MaintenanceAiTraceDetail,
   mode: "trace" | "preview",
 ): string {
-  const metaRows = aiDecisionDebugOverlayMetaRows(trace, mode);
-  const planLayer = aiDecisionDebugPlanLayer(trace.detail);
-  const selectedPlan = planLayer.entries.find((entry) => entry.selected);
-  const actionLabel = aiDecisionTraceSelectedActionLabel(trace);
-  const planLabel =
-    selectedPlan !== undefined
-      ? aiDecisionDebugPlanTitle(selectedPlan)
-      : aiDecisionDebugMetaRowValue(metaRows, "Plan");
-  const planScoreLabel =
-    selectedPlan !== undefined
-      ? aiDecisionDebugPlanScoreLabel(selectedPlan)
-      : undefined;
-  const actionScoreLabel = aiDecisionDebugOverlayScoreValue(metaRows);
-  const parts = uniqueDisplayStrings(
-    [
-      actionLabel,
-      planLabel && planLabel !== "-" && planLabel !== actionLabel
-        ? planLabel
-        : undefined,
-      planScoreLabel,
-      actionScoreLabel && actionScoreLabel !== "-"
-        ? `${aiDecisionDebugOverlayScoreLabel(metaRows)} ${actionScoreLabel}`
-        : undefined,
-    ].filter((part): part is string => Boolean(part)),
+  const planFirstDecision = parseAiPlanFirstDecisionDebug(
+    trace.detail.planFirstDecision,
   );
-  return parts.length > 0 ? parts.join(" · ") : "KI-Entscheidung";
+  const actionLabel = aiDecisionTraceSelectedActionLabel(trace);
+  if (!planFirstDecision) return `${actionLabel} · Plan-first-Daten fehlen`;
+  if (planFirstDecision.lane === "engine_window") {
+    return `${actionLabel} · Engine-/Pflichtfenster`;
+  }
+  return [
+    actionLabel,
+    planFirstDecision.selectedPlan
+      ? aiTracePlanLabel(planFirstDecision.selectedPlan.moduleId)
+      : undefined,
+    planFirstDecision.priority?.effectiveClass,
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(" · ");
 }
 
 function AiDecisionDebugTraceView({
+  trace,
+  mode = "trace",
+}: {
+  trace: MaintenanceAiTraceDetail;
+  mode?: "trace" | "preview";
+}) {
+  const decision = parseAiPlanFirstDecisionDebug(
+    trace.detail.planFirstDecision,
+  );
+  if (!decision) {
+    return (
+      <div className="aiDecisionDebugContent">
+        <AiDecisionDebugCollapsibleSection
+          title="Plan-first-Vertrag fehlt"
+          summary="Fail-closed"
+          defaultOpen
+        >
+          <p className="aiDecisionDebugNotice error" role="alert">
+            Diese Diagnose enthält keinen aktuellen side-sicheren
+            Plan-first-Vertrag. Unstrukturierte Alt-Diagnosen und Score-Rankings
+            werden nicht angezeigt.
+          </p>
+          <AiDecisionDebugRows
+            rows={[
+              [
+                "Gewählte LegalAction",
+                aiDecisionTraceSelectedActionLabel(trace),
+              ],
+              ["Action-ID", trace.selectedActionId ?? "-"],
+              ["StateVersion", String(trace.stateVersion)],
+            ]}
+          />
+        </AiDecisionDebugCollapsibleSection>
+      </div>
+    );
+  }
+  return (
+    <AiDecisionDebugPlanFirstTraceView
+      trace={trace}
+      mode={mode}
+      decision={decision}
+    />
+  );
+}
+
+function AiDecisionDebugPlanFirstTraceView({
+  trace,
+  mode,
+  decision,
+}: {
+  trace: MaintenanceAiTraceDetail;
+  mode: "trace" | "preview";
+  decision: AiPlanFirstDecisionDebug;
+}) {
+  const detail = trace.detail;
+  const actionLabel = aiDecisionTraceSelectedActionLabel(trace);
+  const selectedPlan = decision.selectedPlan;
+  const priorityLabel = aiPlanFirstPriorityLabel(decision.priority);
+  const dispositionSummary = aiPlanFirstDispositionSummary(decision);
+  const nextActionRows: Array<[string, string]> = [
+    ...(selectedPlan
+      ? ([
+          ["Plan", aiTracePlanLabel(selectedPlan.moduleId)],
+          ["Priorität", priorityLabel],
+        ] as Array<[string, string]>)
+      : []),
+    ...(decision.route?.stepId
+      ? ([
+          [
+            "Aktueller Schritt",
+            aiDecisionDebugPlanStepLabel(decision.route.stepId),
+          ],
+        ] as Array<[string, string]>)
+      : []),
+  ];
+  const technicalDecisionRows: Array<[string, string]> = [
+    [
+      "Entscheidungsquelle",
+      decision.selectionAuthority === "resident_plan_instance"
+        ? "aus einer gespeicherten Planinstanz"
+        : "aus einem Engine-/Pflichtfenster",
+    ],
+    ...(selectedPlan
+      ? ([
+          ["Plan-ID", selectedPlan.instanceId],
+          [
+            "Root → ausführender Plan",
+            `${decision.rootPlanInstanceId} → ${decision.leafExecutorInstanceId}`,
+          ],
+        ] as Array<[string, string]>)
+      : []),
+    ...(decision.route
+      ? ([
+          [
+            "Gebundene Route",
+            `${decision.route.semanticActionType} → ${decision.route.actionId}`,
+          ],
+        ] as Array<[string, string]>)
+      : []),
+    ...(selectedPlan?.parentInstanceId
+      ? ([["Parent", selectedPlan.parentInstanceId]] as Array<[string, string]>)
+      : []),
+    ...(selectedPlan?.parentNeedId || decision.priority?.parentNeedId
+      ? ([
+          [
+            "Gebundener Need",
+            selectedPlan?.parentNeedId ??
+              decision.priority?.parentNeedId ??
+              "-",
+          ],
+        ] as Array<[string, string]>)
+      : []),
+    ...(decision.engineQuoteEvidence.status !== "not_reported"
+      ? ([
+          [
+            "Engine-Quote",
+            aiPlanFirstQuoteStatusLabel(decision.engineQuoteEvidence.status),
+          ],
+        ] as Array<[string, string]>)
+      : []),
+  ];
+  const unknownDispositions = decision.dispositions
+    .filter((entry) => entry.disposition === "assessment_unknown")
+    .map(
+      (entry) =>
+        `${entry.actionId} · ${entry.ownerModuleId} · ${entry.evidenceCode}`,
+    );
+  const nonproductiveDispositions = decision.dispositions
+    .filter((entry) => entry.disposition === "explicitly_nonproductive")
+    .map(
+      (entry) =>
+        `${entry.actionId} · ${entry.ownerModuleId} · ${entry.evidenceCode}`,
+    );
+  const alternativeWhyNot = aiDecisionDebugRecordList(detail.actionAlternatives)
+    .filter((alternative) => alternative.selected !== true)
+    .flatMap((alternative) =>
+      safeStringList(alternative.whyNot, 3).map(
+        (reason) => `${String(alternative.actionId ?? "-")} · ${reason}`,
+      ),
+    )
+    .slice(0, 16);
+
+  return (
+    <div className="aiDecisionDebugContent">
+      <AiDecisionDebugCollapsibleSection
+        title="Nächste Aktion"
+        summary={actionLabel}
+        defaultOpen
+      >
+        {mode === "preview" ? (
+          <p className="aiDecisionDebugNotice" role="status">
+            <strong>Read-only KI-Vorschlag, keine Regelentscheidung.</strong>{" "}
+            Das residente Planportfolio wird side-safe gelesen, aber durch die
+            Vorschau nicht fortgeschrieben.
+          </p>
+        ) : null}
+        <AiDecisionDebugRows rows={nextActionRows} />
+        {decision.priority?.effectiveClass === "P6" ? (
+          <p className="aiDecisionDebugNotice">
+            P6 gilt ausschließlich für den ausgewiesenen engen, endlichen
+            Abschluss- oder befristeten Übergangsvertrag. Es entsteht keine
+            allgemeine Auffangkategorie.
+          </p>
+        ) : null}
+        {decision.engineQuoteEvidence.status === "unknown" ||
+        dispositionSummary.unknown > 0 ? (
+          <p className="aiDecisionDebugNotice error" role="status">
+            Unknown bleibt fail-closed: Die betroffenen Actionpfade tragen keine
+            positive Routenbehauptung und beweisen weder Routenausschöpfung noch
+            Zugabschluss.
+          </p>
+        ) : null}
+        {detail.fallbackUsed === true || detail.timeoutUsed === true ? (
+          <p className="aiDecisionDebugNotice error" role="alert">
+            Vertragsabweichung: Der Trace meldet{" "}
+            {detail.fallbackUsed === true ? "einen Fallback" : "einen Timeout"}.
+            Die Plan-first-Erklärung erfindet dafür keine Ersatzsemantik.
+          </p>
+        ) : null}
+      </AiDecisionDebugCollapsibleSection>
+
+      {decision.portfolio.length > 0 ? (
+        <AiDecisionDebugCollapsibleSection
+          title="Welche Pläne verfolgt die KI?"
+          summary={`${decision.portfolio.length} aktive Planinstanzen · ausgewählt: ${selectedPlan ? aiTracePlanLabel(selectedPlan.moduleId) : "keine"}`}
+          defaultOpen={false}
+        >
+          <div className="aiDecisionDebugCompactList">
+            {decision.portfolio.map((plan) => {
+              const selected = plan.instanceId === selectedPlan?.instanceId;
+              return (
+                <div key={plan.instanceId}>
+                  <span>
+                    {aiTracePlanLabel(plan.moduleId)} · {plan.phase} ·{" "}
+                    {plan.viability}
+                  </span>
+                  <strong>
+                    {plan.instanceId === decision.leafExecutorInstanceId
+                      ? "führt diese Aktion aus"
+                      : plan.instanceId === decision.rootPlanInstanceId
+                        ? "übergeordneter Plan"
+                        : "begleitender Plan"}
+                  </strong>
+                  {selected ? (
+                    <AiDecisionDebugRows
+                      rows={[
+                        ["Bleibt als Ziel", plan.persistencePolicy],
+                        [
+                          "Stand im Plan",
+                          `${plan.phase} · ${plan.milestone}`,
+                        ],
+                        [
+                          "Benötigt noch",
+                          plan.openNeedIds.length > 0
+                            ? plan.openNeedIds.join(", ")
+                            : "nichts",
+                        ],
+                      ]}
+                    />
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        </AiDecisionDebugCollapsibleSection>
+      ) : null}
+
+      <AiDecisionDebugCollapsibleSection
+        title="Warum passt das gerade?"
+        summary="Strategische Einordnung · entscheidet die Aktion nicht allein"
+        defaultOpen={false}
+      >
+        <p className="aiDecisionDebugNotice">
+          Die Signale zeigen, welche Ziele oder Gefahren die KI gerade sieht.
+          Sie erklären den Kontext; die konkrete Aktion kommt weiterhin aus der
+          ausgewählten Planinstanz und einer legalen Engine-Route.
+        </p>
+        <AiDecisionDebugRows
+          rows={[
+            [
+              "Strategic Intent",
+              decision.strategicContext.primaryStrategyId ??
+                "Nicht ausgewiesen",
+            ],
+            [
+              "Intent-Phase",
+              decision.strategicContext.phase ?? "Nicht ausgewiesen",
+            ],
+            [
+              "Intent-Fit",
+              aiPlanFirstIntentFitLabel(decision.strategicContext.intentFit),
+            ],
+          ]}
+        />
+        <AiDecisionDebugChips
+          title="Aktuelle Goal-/Threat-Signale"
+          items={decision.strategicContext.signals.map(
+            (signal) =>
+              `${signal.kind}/${signal.scope} · ${signal.planModuleId} · ${signal.evidenceCode} · ${signal.guarantee}`,
+          )}
+          tone="muted"
+        />
+      </AiDecisionDebugCollapsibleSection>
+
+      <AiDecisionDebugMemory detail={detail} />
+      <AiDecisionDebugPrivateHand detail={detail} />
+
+      <AiDecisionDebugCollapsibleSection
+        title="Technische Prüfung und Alternativen"
+        summary={`${dispositionSummary.explicitlyNonproductive} verworfen · ${dispositionSummary.unknown} unklar`}
+        defaultOpen={false}
+      >
+        <AiDecisionDebugRows
+          rows={[
+            ...technicalDecisionRows,
+            [
+              "Quote-Status",
+              aiPlanFirstQuoteStatusLabel(decision.engineQuoteEvidence.status),
+            ],
+            [
+              "Priority-Validierung",
+              decision.priority?.validationReasonCodes.join(", ") ??
+                "Engine-/Pflichtfenster",
+            ],
+          ]}
+        />
+        <AiDecisionDebugChips
+          title="Engine-Quote-Evidence"
+          items={decision.engineQuoteEvidence.evidenceCodes}
+          tone={
+            decision.engineQuoteEvidence.status === "unknown"
+              ? "warning"
+              : "muted"
+          }
+        />
+        <AiDecisionDebugChips
+          title="Assessment-Evidence"
+          items={decision.assessmentEvidenceCodes}
+          tone="muted"
+        />
+        <AiDecisionDebugChips
+          title="Unknown · fail-closed"
+          items={unknownDispositions}
+          tone="warning"
+        />
+        <AiDecisionDebugChips
+          title="Explizit nichtproduktive Route Heads"
+          items={nonproductiveDispositions}
+          tone="muted"
+        />
+        <AiDecisionDebugChips
+          title="whyNot der übrigen LegalActions"
+          items={alternativeWhyNot}
+          tone="muted"
+        />
+      </AiDecisionDebugCollapsibleSection>
+    </div>
+  );
+}
+
+function AiDecisionDebugLegacyTraceView({
   trace,
   mode = "trace",
 }: {
@@ -463,7 +678,7 @@ function AiDecisionDebugTraceView({
     aiDecisionDebugIsCurrentWhyNot,
   );
   const title =
-    mode === "preview" ? aiDecisionPreviewTitle(trace) : aiTraceTitle(trace);
+    aiTraceTitle(trace);
   return (
     <div className="aiDecisionDebugContent">
       <AiDecisionDebugCollapsibleSection
@@ -598,102 +813,7 @@ export function serializeAiDecisionDebugVisibleJsonExport(
   mode: "trace" | "preview",
   exportedAt: string,
 ): string {
-  const detail = trace.detail;
-  const actionRows = aiTraceActionRows(detail, 32);
-  const rankedAlternatives = aiDecisionDebugRecordList(
-    detail.rankedAlternatives,
-  ).slice(0, mode === "preview" ? 12 : 4);
-  const planLayer = aiDecisionDebugPlanLayer(detail);
-  const memory = aiDecisionDebugMemoryExport(detail);
-  const privateHand = aiDecisionDebugPrivateHandExport(detail);
-  const payload = {
-    schemaVersion: "netgrid-ai-decision-display-export-v1",
-    redaction: "client-visible-ai-decision-debug-projection",
-    exportedAt,
-    mode,
-    source: {
-      traceId: trace.traceId,
-      eventId: trace.eventId,
-      turn: trace.turn,
-      decisionIndex: trace.decisionIndex,
-      ...(mode === "preview"
-        ? humanAiDecisionProbeReportSource({
-            matchId: trace.matchId,
-            matchVersion: trace.matchVersion,
-            stateVersion: trace.stateVersion,
-            side: trace.side,
-            selectedActionId: trace.selectedActionId,
-            selectedActionType: trace.selectedActionType,
-            detail,
-          })
-        : {
-            matchId: trace.matchId,
-            stateVersion: trace.stateVersion,
-            matchVersion: trace.matchVersion,
-            side: trace.side,
-            selectedActionId: trace.selectedActionId,
-            selectedActionType: trace.selectedActionType,
-          }),
-      planKind: trace.planKind,
-      score: trace.score,
-      confidence: trace.confidence,
-      createdAt: trace.createdAt,
-      sourceSchemaVersion: trace.schemaVersion,
-    },
-    display: {
-      title:
-        mode === "preview"
-          ? aiDecisionPreviewTitle(trace)
-          : aiTraceTitle(trace),
-      metaRows: aiDecisionDebugOverlayMetaRows(trace, mode),
-      warnings: [
-        ...(detail.fallbackUsed === true ? ["Fallback genutzt"] : []),
-        ...(detail.timeoutUsed === true ? ["Timeout genutzt"] : []),
-      ],
-      reasons: safeStringList(detail.visibleReasons, 5),
-      exclusions: safeStringList(detail.whyNot, 5).filter(
-        aiDecisionDebugIsCurrentWhyNot,
-      ),
-      planLayer: {
-        summaryRows: planLayer.summaryRows,
-        mappedActionIds: planLayer.mappedActionIds,
-        plans: planLayer.entries.map(aiDecisionDebugPlanExport),
-        rawDiagnostic: planLayer.fallbackItems,
-      },
-      runPlan: aiDecisionDebugRunPlanExport(detail),
-      actionRanking: actionRows.map((action) => ({
-        rank: action.rank,
-        label: action.label,
-        selected: action.selected,
-        debugSelected: action.debugSelected,
-        excluded: action.excluded,
-        actionId: action.actionId,
-        actionType: action.actionType,
-        source: action.source,
-        score: action.score,
-        priority: action.priority,
-        metrics: action.metrics,
-        reason: action.reason,
-        scoreRows: action.scoreRows,
-      })),
-      semanticActionRanking: rankedAlternatives.map((alternative, index) => ({
-        rank:
-          typeof alternative.rank === "number" ? alternative.rank : index + 1,
-        label: aiDecisionDebugSemanticRankingLabel(alternative),
-        score:
-          typeof alternative.score === "number" ? alternative.score : undefined,
-      })),
-      scoreRows: aiTraceScoreRows(detail, 8),
-      deckStrategy: aiDecisionDebugDeckStrategySummary(detail),
-      memory,
-      privateHand,
-      followUpNotes: aiTraceDebugGapNotes(detail).slice(0, 3),
-    },
-  };
-  const output = `${JSON.stringify(payload, null, 2)}\n`;
-  if (findForbiddenMaintenanceMarkers(output).length > 0)
-    throw new Error("ai_decision_debug_export_redaction_failed");
-  return output;
+  return serializeAiPlanFirstDecisionVisibleJsonExport(trace, mode, exportedAt);
 }
 
 function aiDecisionDebugPlanExport(plan: AiDecisionDebugPlanEntry) {
@@ -728,10 +848,10 @@ function aiDecisionDebugHeaderExportTitle(
   status: AiDecisionDebugExportStatus,
   available: boolean,
 ): string {
-  if (!available) return "Noch keine KI-Bewertung für JSON-Export verfügbar";
+  if (!available) return "Noch keine KI-Entscheidung für JSON-Export verfügbar";
   switch (status) {
     case "idle":
-      return "KI-Bewertung als JSON kopieren";
+      return "KI-Entscheidung als JSON kopieren";
     case "copied":
       return "JSON kopiert";
     case "copy_failed":
@@ -1433,9 +1553,9 @@ function AiDecisionDebugPrivateHand({
     if (rows.length === 0) return null;
     return (
       <AiDecisionDebugCollapsibleSection
-        title="KI-Privathand"
+        title="Aktuelle Hand der KI"
         summary={aiDecisionDebugPrivateHandHeaderSummary(privateHand)}
-        defaultOpen={false}
+        defaultOpen
       >
         <AiDecisionDebugRows rows={rows} />
       </AiDecisionDebugCollapsibleSection>
@@ -1443,9 +1563,9 @@ function AiDecisionDebugPrivateHand({
   }
   return (
     <AiDecisionDebugCollapsibleSection
-      title="KI-Privathand"
+      title="Aktuelle Hand der KI"
       summary={aiDecisionDebugPrivateHandHeaderSummary(privateHand)}
-      defaultOpen={false}
+      defaultOpen
     >
       <AiDecisionDebugRows rows={privateHand.rows} />
       <div className="aiDecisionDebugActions">
@@ -2352,7 +2472,7 @@ function aiDecisionDebugPlanStepLabel(
       : "Such-Engine installieren",
   };
   if (value === "probe_central" && runTarget) return runTarget;
-  return labels[value] ?? value;
+  return labels[value] ?? aiPlanFirstStepLabel(value);
 }
 
 function aiDecisionDebugDevelopmentCardVerb(
@@ -2522,15 +2642,14 @@ function AiDecisionDebugMemory({
     return null;
   return (
     <AiDecisionDebugCollapsibleSection
-      title="KI-Speicher"
+      title="Was weiß die KI?"
       summary={aiDecisionDebugMemoryHeaderSummary({
-        rows,
         facts,
         hypotheses,
         uncertainty,
         invalidations,
       })}
-      defaultOpen={false}
+      defaultOpen
     >
       <AiDecisionDebugRows rows={rows} />
       <AiDecisionDebugChips title="Bekannt" items={facts} tone="muted" />
@@ -2554,20 +2673,17 @@ function AiDecisionDebugMemory({
 }
 
 function aiDecisionDebugMemoryHeaderSummary({
-  rows,
   facts,
   hypotheses,
   uncertainty,
   invalidations,
 }: {
-  rows: Array<[string, string]>;
   facts: string[];
   hypotheses: string[];
   uncertainty: string[];
   invalidations: string[];
 }): string {
   return [
-    `${rows.length} Werte`,
     facts.length > 0 ? `${facts.length} bekannt` : undefined,
     hypotheses.length > 0 ? `${hypotheses.length} Hypothesen` : undefined,
     uncertainty.length > 0 ? `${uncertainty.length} unsicher` : undefined,
@@ -2583,8 +2699,6 @@ function aiDecisionDebugMemoryRows(
   detail: Record<string, unknown>,
 ): Array<[string, string]> {
   const rows: Array<[string, string]> = [];
-  if (typeof detail.memoryVersion === "string")
-    rows.push(["Version", detail.memoryVersion]);
   const memoryItems = aiDecisionDebugDetailSectionItems(
     detail,
     "semantic_memory",
@@ -2981,7 +3095,7 @@ function aiDecisionDebugStatusLabel(
   if (status === "waiting")
     return traceCount > 0 ? `${traceCount} geladen` : "Wartet";
   if (status === "live")
-    return traceCount > 0 ? `${traceCount} Traces` : "Live";
+    return traceCount > 0 ? `${traceCount} KI-Trace` : "Live";
   if (status === "error") return "Fehler";
   return "Aus";
 }

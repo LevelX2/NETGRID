@@ -85,6 +85,15 @@ Wenn ein neuer Stand fachlich besser ist, darf der alte Stand ersetzt, gelöscht
 - Das Startscript setzt die verbindlichen LAN-/Origin-/URL-Umgebungsvariablen, insbesondere `NETGRID_PUBLIC_HOST`, `NETGRID_WEB_BASE_URL`, `NETGRID_SERVER_BASE_URL`, `NETGRID_ALLOWED_ORIGINS` und `NEXT_PUBLIC_NETGRID_SERVER_URL`.
 - Direkte Prozessstarts sind nur für isolierte Tests, gezielte Diagnose oder bewusst abweichende Experimente zulässig; dann müssen sie im Chat ausdrücklich als Abweichung benannt und danach wieder auf den Script-Startpfad zurückgeführt werden.
 
+### Kritische Worktree-, Port- und Datenbank-Isolation
+
+- Die Standardports `3100` (Webclient) und `8787` (Server) sind ausschließlich für den normalen lokalen Betrieb aus dem primären `main`-Checkout reserviert.
+- `scripts/start-netgrid.ps1` und insbesondere seine Neustartoptionen dürfen nicht aus einem separaten Worktree ausgeführt werden. Ein Worktree darf die auf den Standardports laufende Hauptinstanz niemals stoppen, neu starten oder ersetzen.
+- Muss ein Thread seinen Worktree im Browser oder gegen einen realen Server testen, verwendet er für Webclient und Server nachweislich freie, vom Standardbetrieb abweichende Ports. Alle zugehörigen URL-, Origin- und Public-Host-Variablen müssen konsistent auf diese Testports zeigen.
+- Jeder Worktree-Server verwendet eine ausdrücklich gesetzte, isolierte SQLite-Datei über `NETGRID_SQLITE_STORAGE_PATH` und bei Bedarf `NETGRID_ACCOUNT_SQLITE_PATH`. Er darf weder implizit noch explizit die Datenbank des primären `main`-Checkouts verwenden.
+- Vor dem Start prüft der Thread Portbelegung und Zielpfade. Er beendet ausschließlich Prozesse, die er im selben Thread selbst gestartet hat; fremde Listener und die Hauptinstanz bleiben unangetastet.
+- Wenn der Testaufbau keine getrennten Ports und keine isolierte Datenbank sicherstellen kann, darf aus dem Worktree kein Server oder Webclient gestartet werden. Nach dem Test werden die eigenen Testprozesse wieder beendet.
+
 ## Abschlusskommandos
 
 Wenn der Nutzer `Finito`, `Ende`, `Finale` oder `Endfinale` schreibt, gelten die globalen Abschlusskommandos aus dem Skill `abschlusskommandos`.

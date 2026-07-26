@@ -550,7 +550,11 @@ describe("formatChronicleEvent", () => {
       "Die Korp kann Credits bezahlen und ein legales Ziel für die Umleitung wählen.",
     );
     expect(choiceOpened.chips).toEqual(
-      expect.arrayContaining(["Vortex", "Entscheidung offen", "Redirect möglich"]),
+      expect.arrayContaining([
+        "Vortex",
+        "Entscheidung offen",
+        "Redirect möglich",
+      ]),
     );
     expect(choiceOpened.title).not.toContain("leitet den Run nicht um");
   });
@@ -1601,6 +1605,85 @@ describe("formatChronicleEvent", () => {
       ]),
     );
     expect(item.chips).not.toContain("+0 Credits");
+  });
+
+  it("shows Corporate Downsizing agenda reveals, payout and R&D shuffle", () => {
+    const event = makeEvent("resolve_choice", {
+      actor: "corp",
+      aiReasonCode: "corp.score_agenda",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
+      sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+      sourceTitle: "Corporate Downsizing",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+      publicRevealTitles: "Simple Agenda||Hostile Takeover",
+      shownCardDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+      shownCount: 2,
+      shuffledIntoRndCount: 2,
+      combinedAgendaPoints: 5,
+      gainedCredits: 10,
+    });
+
+    const runnerItem = formatChronicleEvent(event, "runner");
+    const corpItem = formatChronicleEvent(event, "corp");
+
+    expect(runnerItem.title).toBe(
+      "Die Korp-KI hat 2 Agenden aus HQ mit Corporate Downsizing vorgezeigt, 2 Karten in R&D gemischt und 10 Credits erhalten.",
+    );
+    expect(runnerItem.description).toBe(
+      "Gezeigt: Simple Agenda und Hostile Takeover. Kombinierte Agendapunkte: 5 Agendapunkte.",
+    );
+    expect(runnerItem.chips).toEqual(
+      expect.arrayContaining([
+        "Corporate Downsizing",
+        "HQ Reveal",
+        "2 Agenden",
+        "5 Agendapunkte",
+        "+10 Credits",
+        "2 nach R&D",
+      ]),
+    );
+    expect(corpItem.title).toBe(
+      "Du hast 2 Agenden aus HQ mit Corporate Downsizing vorgezeigt, 2 Karten in R&D gemischt und 10 Credits erhalten.",
+    );
+    expect(shouldSuppressChronicleEventItem(event)).toBe(false);
+  });
+
+  it("shows Corporate Downsizing zero selections without inferring HQ contents", () => {
+    const event = makeEvent("resolve_choice", {
+      actor: "corp",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
+      sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+      sourceTitle: "Corporate Downsizing",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionIds: "",
+      publicRevealTitles: "",
+      shownCardDefinitionIds: "",
+      shownCount: 0,
+      shuffledIntoRndCount: 0,
+      combinedAgendaPoints: 0,
+      gainedCredits: 0,
+    });
+
+    const item = formatChronicleEvent(event, "runner");
+
+    expect(item.title).toBe(
+      "Die Korp hat mit Corporate Downsizing keine Agenda aus HQ vorgezeigt, keine Karte in R&D gemischt und 0 Credits erhalten.",
+    );
+    expect(item.description).toBe("Kombinierte Agendapunkte: 0 Agendapunkte.");
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Corporate Downsizing",
+        "0 Agenden",
+        "0 Agendapunkte",
+        "+0 Credits",
+        "0 nach R&D",
+      ]),
+    );
+    expect(JSON.stringify(item)).not.toContain("hqAgendaChoiceCount");
+    expect(shouldSuppressChronicleEventItem(event)).toBe(false);
   });
 
   it("shows Smith's Pawnshop choices with the corrected 2-credit gain", () => {

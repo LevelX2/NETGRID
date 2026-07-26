@@ -1678,6 +1678,53 @@ export function formatChronicleEvent(
         chips.push("Start-of-turn");
         break;
       }
+      if (hiddenZoneAction === "scored_agenda_hq_agenda_shuffle_credits") {
+        const revealedTitles = publicRevealTitlesFromPayload(payload);
+        const shownCount =
+          numberValue(payload.shownCount) ?? revealedTitles.length;
+        const shuffledIntoRndCount =
+          numberValue(payload.shuffledIntoRndCount) ?? shownCount;
+        const combinedAgendaPoints =
+          numberValue(payload.combinedAgendaPoints) ?? 0;
+        const gainedCredits = numberValue(payload.gainedCredits) ?? 0;
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          "Corporate Downsizing";
+        const agendaPointsText = `${combinedAgendaPoints} Agendapunkt${combinedAgendaPoints === 1 ? "" : "e"}`;
+        category = "agenda";
+        importance = shownCount > 0 ? "important" : "normal";
+        visibility = "public";
+        cardDefinitionId = sourceDefinitionId ?? cardDefinitionId;
+        cardTitle = source;
+        title =
+          shownCount > 0
+            ? phrase(
+                subject,
+                `${agendaRevealCountText(shownCount)} aus HQ mit ${source} vorgezeigt, ${cardCountText(shuffledIntoRndCount)} in R&D gemischt und ${creditText(gainedCredits)} erhalten`,
+              )
+            : phrase(
+                subject,
+                `mit ${source} keine Agenda aus HQ vorgezeigt, keine Karte in R&D gemischt und ${creditText(gainedCredits)} erhalten`,
+              );
+        description = [
+          revealedTitles.length > 0
+            ? `Gezeigt: ${joinChronicleParts(revealedTitles)}.`
+            : undefined,
+          `Kombinierte Agendapunkte: ${agendaPointsText}.`,
+        ]
+          .filter((part): part is string => Boolean(part))
+          .join(" ");
+        chips.push(
+          source,
+          "HQ Reveal",
+          `${shownCount} ${shownCount === 1 ? "Agenda" : "Agenden"}`,
+          agendaPointsText,
+          `+${gainedCredits} ${creditLabel(gainedCredits)}`,
+          `${shuffledIntoRndCount} nach R&D`,
+        );
+        break;
+      }
       if (
         hiddenZoneAction ===
         "schematics_search_engine_expose_installed_cards_finish"
@@ -4974,7 +5021,8 @@ function formatChronicleEffect(
           chips.push("Nicht bezahlt", "Kein Redirect");
         } else if (event.publicPayload.deflectorChoiceOpened === true) {
           title = `${source}: ${subroutineChip} eröffnet der Korp eine Wahl zur Umleitung des Runs`;
-          description = "Die Korp kann Credits bezahlen und ein legales Ziel für die Umleitung wählen.";
+          description =
+            "Die Korp kann Credits bezahlen und ein legales Ziel für die Umleitung wählen.";
           chips.push("Entscheidung offen", "Redirect möglich");
         } else {
           title = `${source}: ${subroutineChip} leitet den Run nicht um`;

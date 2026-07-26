@@ -4,9 +4,12 @@ import {
   buildAiDecisionInput,
   chooseAiAction,
   isAiDeckSnapshotRuntimeError,
+  residentPlanPortfolioSnapshot,
+  restoreResidentPlanPortfolioMemorySnapshot,
   selectAiDecisionSideForState,
   type AiDeckSnapshotRuntimeErrorCode,
   type AiDeckSnapshotRuntimeExpectation,
+  type ResidentPlanPortfolio,
 } from "@netgrid/ai";
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import {
@@ -143,7 +146,9 @@ export type ConnectionQuality = ApiConnectionQuality;
 const AI_DECISION_DETAIL_SECTION_TRACE_LIMIT = 8;
 const AI_DECISION_DETAIL_SECTION_PRIORITY_IDS = [
   "runner_run_plan",
-  "tactical_plan",
+  "plan_execution",
+  "plan_portfolio",
+  "plan_action_routes",
 ] as const;
 
 export type MatchSettings = {
@@ -379,6 +384,15 @@ export type StoredMatch = {
   undoSnapshots: UndoSnapshot[];
   stateSnapshots: StateSnapshot[];
   aiDecisionTraces?: AiDecisionTraceRecord[];
+  /**
+   * Server-private, state-bound AI runtime data. It never enters PlayerViews,
+   * events, replays, or public projections.
+   */
+  aiPlanRuntime?: {
+    residentPlanPortfolioBySide?: Partial<
+      Record<Side, ResidentPlanPortfolio>
+    >;
+  };
   pendingUndo?: PendingUndoRequest;
   actionPersistenceBaseline?: ActionPersistenceBaseline;
 };
@@ -742,6 +756,27 @@ export type PreviewAiResult =
       error: SafeErrorPayload;
     };
 
+/**
+ * A diagnostic prepared from the active server AI decision.  Unlike the
+ * human-side advisor preview this is bound to the next server step and is
+ * consumed by that step while the state version still matches.
+ */
+export type PreparedAiDecisionDebug = {
+  matchId: string;
+  matchVersion: number;
+  stateVersion: number;
+  side: Side;
+  preparedAt: string;
+  actionId: string;
+  actionType: LegalAction["type"];
+  actionLabel: string;
+  detail: Record<string, unknown>;
+};
+
+export type PrepareAiDecisionDebugResult =
+  | { ok: true; prepared: PreparedAiDecisionDebug }
+  | { ok: false; error: SafeErrorPayload };
+
 type AiDecisionChooser = typeof chooseAiAction;
 type EngineActionApplier = typeof applyAction;
 type EngineRandomizedIceInstallSelectionApplier =
@@ -758,6 +793,12 @@ type AiStepResult =
       code: AiStepFailureCode;
       engineErrorCode?: EngineError["code"];
     };
+
+type PreparedAiDecision = {
+  stateVersion: number;
+  side: Side;
+  decision: AiDecision;
+};
 
 export class InMemoryMatchStorage implements MultiplayerStorage {
   private readonly records = new Map<string, StoredMatch>();
@@ -794,6 +835,12 @@ export class MultiplayerService {
   private readonly applyEngineAction: EngineActionApplier;
   private readonly applyEngineRandomizedIceInstallSelection: EngineRandomizedIceInstallSelectionApplier;
   private readonly persistenceObservers = new Set<MatchPersistenceObserver>();
+  /**
+   * Deliberately process-local: this binds a visible, prepared decision to the
+   * immediately following AI step without persisting diagnostic material.
+   * A restart or state-version change simply discards it and recomputes.
+   */
+  private readonly preparedAiDecisions = new Map<string, PreparedAiDecision>();
 
   constructor(
     private readonly storage: MultiplayerStorage,
@@ -859,6 +906,40 @@ export class MultiplayerService {
       await this.storage.save(record);
     }
     for (const observer of this.persistenceObservers) await observer(record);
+  }
+
+  /**
+   * The plan portfolio is the authority for the next plan-first decision.
+   * Process-local AI memory alone would silently replace it after a server
+   * restart, even though the match state has not changed.
+   */
+  private restoreResidentPlanPortfolioFor(
+    record: StoredMatch,
+    input: AiDecisionInput,
+  ): void {
+    const snapshot =
+      record.aiPlanRuntime?.residentPlanPortfolioBySide?.[input.side];
+    if (!snapshot) return;
+    restoreResidentPlanPortfolioMemorySnapshot(input, snapshot);
+  }
+
+  private captureResidentPlanPortfolioFor(
+    record: StoredMatch,
+    input: AiDecisionInput,
+  ): boolean {
+    const snapshot = residentPlanPortfolioSnapshot(input);
+    if (!snapshot) return false;
+    const previous =
+      record.aiPlanRuntime?.residentPlanPortfolioBySide?.[input.side];
+    if (JSON.stringify(previous) === JSON.stringify(snapshot)) return false;
+    record.aiPlanRuntime = {
+      ...record.aiPlanRuntime,
+      residentPlanPortfolioBySide: {
+        ...record.aiPlanRuntime?.residentPlanPortfolioBySide,
+        [input.side]: snapshot,
+      },
+    };
+    return true;
   }
 
   private async ensurePersistedResultSnapshots(
@@ -2754,6 +2835,222 @@ export class MultiplayerService {
     });
   }
 
+  async prepareAiDecisionDebug(input: {
+    matchId: string;
+    requesterSide: Side;
+    sessionToken: string;
+    knownStateVersion?: number;
+    knownMatchVersion?: number;
+  }): Promise<PrepareAiDecisionDebugResult> {
+    return this.withMatchLock(input.matchId, async () => {
+      const record = await this.mustLoad(input.matchId, {
+        includeStateSnapshots: false,
+      });
+      if (!record)
+        return {
+          ok: false,
+          error: safeError("not_found", "Dieses private Match ist nicht verfügbar."),
+        };
+      const session = this.authenticate(
+        record,
+        input.requesterSide,
+        input.sessionToken,
+      );
+      if (!session)
+        return {
+          ok: false,
+          error: safeError("unauthorized", "Die Session ist nicht gültig."),
+        };
+      if (this.isAiSide(record, input.requesterSide) && record.match.mode !== "ai_vs_ai")
+        return {
+          ok: false,
+          error: safeError(
+            "ai_session_forbidden",
+            "Nur eine menschliche Session darf die KI-Diagnose anfordern.",
+          ),
+        };
+      if (record.match.mode === "ai_vs_ai" && !isHostSession(record, session))
+        return {
+          ok: false,
+          error: safeError(
+            "host_required",
+            "Nur die Beobachtersession darf die KI-Diagnose anfordern.",
+          ),
+        };
+      if (record.match.status !== "active" || !record.gameState)
+        return {
+          ok: false,
+          error: safeError("match_not_active", "Das Match ist noch nicht aktiv."),
+        };
+      const activeAiSide = this.aiControllableSide(record);
+      if (!activeAiSide)
+        return {
+          ok: false,
+          error: safeError(
+            "ai_not_active",
+            "Aktuell ist keine KI am Zug.",
+            record.gameState,
+            input.requesterSide,
+          ),
+        };
+      if (
+        input.knownStateVersion !== undefined &&
+        input.knownStateVersion !== record.gameState.stateVersion
+      )
+        return {
+          ok: false,
+          error: safeError(
+            "stale_state",
+            "Der Spielzustand ist veraltet.",
+            record.gameState,
+            input.requesterSide,
+          ),
+        };
+      if (
+        input.knownMatchVersion !== undefined &&
+        input.knownMatchVersion !== record.match.matchVersion
+      )
+        return {
+          ok: false,
+          error: safeError(
+            "stale_match",
+            "Der Matchzustand ist veraltet.",
+            record.gameState,
+            input.requesterSide,
+          ),
+        };
+
+      const legalActions = getLegalActions(record.gameState, activeAiSide);
+      if (legalActions.length === 0)
+        return {
+          ok: false,
+          error: safeError(
+            "ai_no_action",
+            "Die KI hat aktuell keine legalen Aktionen.",
+            record.gameState,
+            input.requesterSide,
+          ),
+        };
+      const cached = this.preparedAiDecisions.get(record.match.matchId);
+      let decision: AiDecision;
+      if (
+        cached &&
+        cached.stateVersion === record.gameState.stateVersion &&
+        cached.side === activeAiSide
+      ) {
+        decision = cached.decision;
+      } else {
+        this.preparedAiDecisions.delete(record.match.matchId);
+        let aiInput: AiDecisionInput;
+        try {
+          const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(
+            record,
+            activeAiSide,
+          );
+          const controller = record.match.aiControllers?.[activeAiSide];
+          aiInput = buildAiDecisionInput(record.gameState, activeAiSide, {
+            difficulty: controller?.difficulty ?? "normal",
+            profileId:
+              controller?.profileId ??
+              `${activeAiSide}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
+            decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${activeAiSide}`,
+            actionNumber: record.gameState.stateVersion,
+            ownDeckSnapshot,
+            expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, activeAiSide),
+          });
+          this.restoreResidentPlanPortfolioFor(record, aiInput);
+        } catch (error) {
+          if (isAiDeckSnapshotRuntimeError(error))
+            return {
+              ok: false,
+              error: safeError(
+                error.code,
+                aiDeckSnapshotErrorMessage(error.code),
+                record.gameState,
+                input.requesterSide,
+              ),
+            };
+          throw error;
+        }
+        decision = this.chooseAiAction(aiInput, {
+          quoteCorpPunishRoute: (request) =>
+            quoteCorpPunishRoute(record.gameState!, request),
+          quoteRandomizedIceInstallSelection: (request) =>
+            quoteRandomizedIceInstallSelection(record.gameState!, request),
+        });
+        this.preparedAiDecisions.set(record.match.matchId, {
+          stateVersion: record.gameState.stateVersion,
+          side: activeAiSide,
+          decision,
+        });
+        if (this.captureResidentPlanPortfolioFor(record, aiInput))
+          await this.persist(record);
+      }
+      if (decision.selectionKind === "engine_randomized_ice_install_selection")
+        return {
+          ok: false,
+          error: safeError(
+            "ai_randomized_selection_requires_execution",
+            "Die Engine wählt diese zufällige Auswahl erst beim Ausführen.",
+            record.gameState,
+            input.requesterSide,
+          ),
+        };
+      const legalAction = legalActionForAiDecision(decision, legalActions);
+      if (!legalAction)
+        return {
+          ok: false,
+          error: safeError(
+            "ai_decision_action_not_legal",
+            "Die vorbereitete KI-Aktion ist nicht mehr legal.",
+            record.gameState,
+            input.requesterSide,
+          ),
+        };
+      const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
+      if (!safeDebug?.planFirstDecision)
+        return {
+          ok: false,
+          error: safeError(
+            "ai_debug_contract_missing",
+            "Für die nächste KI-Aktion liegt kein aktueller Plan-first-Diagnosevertrag vor.",
+            record.gameState,
+            input.requesterSide,
+          ),
+        };
+      return {
+        ok: true,
+        prepared: {
+          matchId: record.match.matchId,
+          matchVersion: record.match.matchVersion,
+          stateVersion: record.gameState.stateVersion,
+          side: activeAiSide,
+          preparedAt: this.now(),
+          actionId: legalAction.actionId,
+          actionType: legalAction.type,
+          actionLabel: legalAction.label,
+          detail: {
+            ...aiDecisionTraceJson(
+              safeDebug,
+              activeAiSide,
+              legalAction,
+              "detailed",
+            ),
+            // This endpoint is an explicitly requested local developer
+            // inspector, not a PlayerView, event, replay or normal preview.
+            // It is intentionally scoped to the authenticated current match
+            // session and never persisted in the event stream.
+            aiPrivateHandPreview: developerAiPrivateHandPreview(
+              record.gameState,
+              activeAiSide,
+              legalActions,
+            ),
+          },
+        },
+      };
+    });
+  }
+
   async previewAi(input: {
     matchId: string;
     requesterSide: Side;
@@ -3932,6 +4229,9 @@ export class MultiplayerService {
       (event) => event.stateVersionAfter <= snapshot.stateVersion,
     );
     record.gameState = { ...clone(snapshot.gameState), eventLog };
+    // A rewind deliberately invalidates the state-bound plan authority. A
+    // later decision may rebuild it, but must never reuse a future portfolio.
+    delete record.aiPlanRuntime;
     record.eventLog =
       targetIndex >= 0
         ? record.eventLog.slice(0, targetIndex)
@@ -4728,33 +5028,47 @@ export class MultiplayerService {
       return { ok: false, code: "ai_no_action" };
     const legalActions = getLegalActions(state, side);
     if (legalActions.length === 0) return { ok: false, code: "ai_no_action" };
-    const controller = record.match.aiControllers?.[side];
-    let input: AiDecisionInput;
-    try {
-      const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(
-        record,
-        side,
-      );
-      input = buildAiDecisionInput(state, side, {
-        difficulty: controller?.difficulty ?? "normal",
-        profileId:
-          controller?.profileId ??
-          `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
-        decisionId: `${record.match.matchId}:${state.stateVersion}:${side}`,
-        actionNumber: state.stateVersion,
-        ownDeckSnapshot,
-        expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, side),
+    const prepared = this.preparedAiDecisions.get(record.match.matchId);
+    let decision: AiDecision;
+    if (
+      prepared &&
+      prepared.stateVersion === state.stateVersion &&
+      prepared.side === side
+    ) {
+      // The decision shown in the inspector is the decision applied below.
+      decision = prepared.decision;
+    } else {
+      this.preparedAiDecisions.delete(record.match.matchId);
+      const controller = record.match.aiControllers?.[side];
+      let input: AiDecisionInput;
+      try {
+        const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(
+          record,
+          side,
+        );
+        input = buildAiDecisionInput(state, side, {
+          difficulty: controller?.difficulty ?? "normal",
+          profileId:
+            controller?.profileId ??
+            `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
+          decisionId: `${record.match.matchId}:${state.stateVersion}:${side}`,
+          actionNumber: state.stateVersion,
+          ownDeckSnapshot,
+          expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, side),
+        });
+        this.restoreResidentPlanPortfolioFor(record, input);
+      } catch (error) {
+        if (isAiDeckSnapshotRuntimeError(error))
+          return { ok: false, code: error.code };
+        throw error;
+      }
+      decision = this.chooseAiAction(input, {
+        quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
+        quoteRandomizedIceInstallSelection: (request) =>
+          quoteRandomizedIceInstallSelection(state, request),
       });
-    } catch (error) {
-      if (isAiDeckSnapshotRuntimeError(error))
-        return { ok: false, code: error.code };
-      throw error;
+      this.captureResidentPlanPortfolioFor(record, input);
     }
-    const decision = this.chooseAiAction(input, {
-      quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
-      quoteRandomizedIceInstallSelection: (request) =>
-        quoteRandomizedIceInstallSelection(state, request),
-    });
     const directLegalAction =
       decision.selectionKind === "engine_randomized_ice_install_selection"
         ? undefined
@@ -4857,6 +5171,7 @@ export class MultiplayerService {
       record.aiDecisionTraces = traces;
     }
     record.gameState = result.state;
+    this.preparedAiDecisions.delete(record.match.matchId);
     record.eventLog.push(toEventRecord(record.match.matchId, event, barrier));
     record.match.matchVersion += 1;
     record.match.updatedAt = occurredAt;
@@ -5652,6 +5967,8 @@ function replayDecisionDebug(
   const result: Record<string, unknown> = {};
   result.schemaVersion = safeDebug.schemaVersion;
   result.aiLevel = safeDebug.aiLevel;
+  if (safeDebug.planFirstDecision)
+    result.planFirstDecision = safeDebug.planFirstDecision;
   if (typeof safeDebug.summary === "string") result.summary = safeDebug.summary;
   if (typeof safeDebug.planKind === "string")
     result.planKind = safeDebug.planKind;
@@ -5828,6 +6145,9 @@ function aiDecisionTraceJson(
     result.actionAlternatives = debug.actionAlternatives.slice(0, 32);
   if (Array.isArray(debug.scoreBreakdown))
     result.scoreBreakdown = debug.scoreBreakdown.slice(0, 16);
+  if (debug.planFirstDecision) {
+    result.planFirstDecision = debug.planFirstDecision;
+  }
   if (debug.decisionChain) {
     result.decisionChain = aiDecisionTraceDecisionChain(
       debug.decisionChain,
@@ -7287,6 +7607,62 @@ function advancedCard(
     };
   }
   return undefined;
+}
+
+/**
+ * Developer-inspector-only snapshot of the acting AI's current hand.  It is
+ * built at the diagnostic boundary and is never attached to PlayerViews,
+ * public events, replays, or persisted decision traces.
+ */
+function developerAiPrivateHandPreview(
+  state: GameState,
+  side: Side,
+  legalActions: LegalAction[],
+): Record<string, unknown> {
+  const legalActionsByCardId = new Map<string, LegalAction[]>();
+  for (const action of legalActions) {
+    const cardId = action.payload?.cardId;
+    if (typeof cardId !== "string") continue;
+    const actions = legalActionsByCardId.get(cardId) ?? [];
+    actions.push(action);
+    legalActionsByCardId.set(cardId, actions);
+  }
+  const cards = handFor(state, side).map((instanceId) => {
+    const instance = state.cardInstances[instanceId];
+    const definition = instance
+      ? CARD_DEFINITIONS_BY_ID[instance.definitionId]
+      : undefined;
+    const actions = legalActionsByCardId.get(instanceId) ?? [];
+    return {
+      instanceId,
+      definitionId: instance?.definitionId ?? "unknown",
+      title: definition?.title ?? instance?.definitionId ?? "Unbekannte Karte",
+      type: definition?.type ?? "unknown",
+      ...(typeof definition?.cost === "number"
+        ? { playCost: definition.cost }
+        : {}),
+      ...(typeof definition?.rulesText === "string"
+        ? { rulesText: definition.rulesText }
+        : {}),
+      availability: actions.length > 0 ? "legal_now" : "not_legal_now",
+      legalActions: actions.map((action) => ({
+        actionType: action.type,
+        label: action.label,
+        ...(typeof action.payload?.creditCost === "number"
+          ? { creditCost: action.payload.creditCost }
+          : {}),
+      })),
+    };
+  });
+  return {
+    schemaVersion: "developer-ai-hand-v1",
+    scope: "local_developer_inspector_only",
+    side,
+    credits: side === "corp" ? state.corp.credits : state.runner.credits,
+    handCount: cards.length,
+    visibility: "developer_inspector_not_persisted",
+    cards,
+  };
 }
 
 function addedCards(before: GameState, after: GameState, side: Side): string[] {

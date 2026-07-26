@@ -19,7 +19,9 @@ import {
   beliefStateInvariantSignature,
   buildAiDecisionInputDto,
   chooseAiAction as chooseRuntimeAiAction,
+  residentPlanPortfolioSnapshot,
   reconstructBeliefState,
+  resetResidentPlanPortfolioMemory,
 } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import {
@@ -87,6 +89,7 @@ import {
 import {
   AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION,
   AI_DECISION_DEBUG_SCHEMA_VERSION,
+  AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
@@ -1552,6 +1555,12 @@ describe("Backend 0.5 private storage maintenance", () => {
     ).toMatchObject({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       actor: "corp",
+      planFirstDecision: {
+        schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+        selectionAuthority: expect.stringMatching(
+          /^(?:resident_plan_instance|engine_window)$/,
+        ),
+      },
     });
     expect(
       detailedRunnerReplay.replay.timeline.find((step) => step.decisionDebug)
@@ -1596,6 +1605,13 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(summaryTrace).toMatchObject({
         schemaVersion: "ai-decision-trace-v1",
         traceMode: "summary",
+        planFirstDecision: {
+          schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+          selectionAuthority: expect.stringMatching(
+            /^(?:resident_plan_instance|engine_window)$/,
+          ),
+          strategicContext: { authority: "diagnostic_only" },
+        },
         decisionChain: {
           traceLevel: "summary",
           schemaVersion: AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION,
@@ -1623,6 +1639,13 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(detailedTrace).toMatchObject({
         schemaVersion: "ai-decision-trace-v1",
         traceMode: "detailed",
+        planFirstDecision: {
+          schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+          selectionAuthority: expect.stringMatching(
+            /^(?:resident_plan_instance|engine_window)$/,
+          ),
+          strategicContext: { authority: "diagnostic_only" },
+        },
         decisionChain: {
           traceLevel: "detailed",
           schemaVersion: AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION,
@@ -12286,32 +12309,91 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(after?.gameState?.stateVersion).toBe(before.gameState.stateVersion);
   });
 
-  it("keeps tactical plan ranking detail sections in AI previews", async () => {
+  it("keeps the structured plan-first authority contract in AI previews", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {
-      tokenSalt: "ai-preview-tactical-plan-sections",
+      tokenSalt: "ai-preview-plan-first-contract",
       chooseAiAction: (input): AiDecision => {
         const action = input.legalActions[0];
         if (!action)
           throw new Error("Missing legal action for AI preview test");
         return {
           actionId: action.actionId,
-          reasonCode: "test.preview_tactical_plan",
-          explanation: "Test decision with late tactical-plan diagnostics.",
+          reasonCode: "test.preview_plan_first_contract",
+          explanation: "Test decision with structured plan-first diagnostics.",
           consideredActionIds: input.legalActions.map(
             (candidate) => candidate.actionId,
           ),
           fallbackUsed: false,
-          evidence: ["test_preview_tactical_plan"],
+          evidence: ["test_preview_plan_first_contract"],
           timeoutUsed: false,
           profileId: input.profileId,
           confidence: 0.9,
           decisionDebug: {
             schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
             aiLevel: 2,
-            planKind: "runner.build_credit_base",
+            planKind: "runner.economy",
             selectedActionType: action.type,
-            score: 100,
+            planFirstDecision: {
+              schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+              stateVersion: input.playerView.stateVersion,
+              lane: "plan",
+              selectionAuthority: "resident_plan_instance",
+              rootPlanInstanceId: "plan:runner.pressure_central:rd",
+              leafExecutorInstanceId: "plan:runner.economy:fund-rd",
+              selectedPlan: {
+                instanceId: "plan:runner.economy:fund-rd",
+                dedupeKey: "fund-rd",
+                moduleId: "runner.economy",
+                moduleVersion: "1",
+                viability: "ready",
+                portfolioRole: "foreground",
+                executionState: "executor",
+                persistencePolicy: "flexible_support",
+                phase: "fund_parent_need",
+                milestone: "open",
+                parentInstanceId: "plan:runner.pressure_central:rd",
+                parentNeedId: "run-funding:rd",
+                openNeedIds: [],
+                blockers: [],
+                evidenceCodes: ["exact_parent_funding_need"],
+              },
+              priority: {
+                requestedClass: "P5",
+                effectiveClass: "P5",
+                reasonCode: "required_parent_support",
+                horizon: "current_turn",
+                readiness: "executable_now",
+                intentFit: "aligned",
+                validationReasonCodes: ["priority_claim_accepted"],
+                delegatedFromPlanInstanceId: "plan:runner.pressure_central:rd",
+                parentNeedId: "run-funding:rd",
+              },
+              route: {
+                planInstanceId: "plan:runner.economy:fund-rd",
+                stepId: "fund_run",
+                capabilityId: "gain_credits",
+                purpose: "Fund the exact R&D route.",
+                actionId: action.actionId,
+                actionType: action.type,
+                semanticActionType: "economy.gain_credit",
+                stateVersion: input.playerView.stateVersion,
+              },
+              strategicContext: {
+                authority: "diagnostic_only",
+                primaryStrategyId: "runner.rnd_pressure",
+                phase: "develop",
+                intentFit: "aligned",
+                signals: [],
+              },
+              engineQuoteEvidence: {
+                status: "certified",
+                evidenceCodes: ["engine_certified_basic_liquidity"],
+              },
+              assessmentEvidenceCodes: ["exact_parent_funding_need"],
+              dispositions: [],
+              portfolio: [],
+            },
             actionAlternatives: [
               {
                 rank: 1,
@@ -12319,62 +12401,7 @@ describe("MVP 0.2 multiplayer service", () => {
                 actionType: action.type,
                 label: action.label,
                 selected: true,
-                priority: 100,
-              },
-            ],
-            detailSections: [
-              {
-                id: "semantic_runtime",
-                title: "Semantic Runtime",
-                items: ["semantic_runtime_scope:test"],
-              },
-              {
-                id: "strategic_runtime",
-                title: "Strategic Runtime",
-                items: ["strategy:test"],
-              },
-              {
-                id: "strategy_portfolio",
-                title: "Strategy Portfolio",
-                items: ["portfolio:test"],
-              },
-              {
-                id: "selection_score",
-                title: "Selection Score",
-                items: ["selection:test"],
-              },
-              {
-                id: "action_semantic_projection",
-                title: "Action Semantic Projection",
-                items: ["projection:test"],
-              },
-              {
-                id: "ability_semantic_binding",
-                title: "Ability Semantic Binding",
-                items: ["ability:test"],
-              },
-              {
-                id: "target_context",
-                title: "Target Context",
-                items: ["target:test"],
-              },
-              {
-                id: "compatibility_signals",
-                title: "Compatibility Signals",
-                items: ["compatibility:test"],
-              },
-              {
-                id: "coverage_gaps",
-                title: "Coverage Gaps",
-                items: ["coverage:test"],
-              },
-              {
-                id: "tactical_plan",
-                title: "Tactical Plan",
-                items: [
-                  "plan_alternative_count:2",
-                  "plan_rank|rank=1|id=runner.build_credit_base|type=runner.build_credit_base|priority=100|status=active|step=gain_credits|selected=true|scores=Credit-Bedarf:700",
-                ],
+                whyChosen: ["selected_by_plan:plan:runner.economy:fund-rd"],
               },
             ],
           },
@@ -12384,7 +12411,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
-      seed: "ai-preview-tactical-plan-sections",
+      seed: "ai-preview-plan-first-contract",
       corpDifficulty: "normal",
     });
     await submitChoice(
@@ -12396,7 +12423,7 @@ describe("MVP 0.2 multiplayer service", () => {
         reconnectToken: created.hostReconnectToken,
       },
       "keep",
-      "preview-tactical-plan-setup",
+      "preview-plan-first-contract-setup",
     );
     const record = await storage.load(created.matchId);
     if (!record?.gameState) throw new Error("Missing AI preview test state");
@@ -12429,16 +12456,101 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(preview.ok).toBe(true);
     if (!preview.ok) throw new Error(preview.error.message);
-    const detailSections = preview.preview.detail.detailSections as
-      | Array<{ id?: string; items?: string[] }>
-      | undefined;
-    expect(detailSections?.length ?? 0).toBeLessThanOrEqual(8);
-    const tacticalPlanSection = detailSections?.find(
-      (section) => section.id === "tactical_plan",
+    expect(preview.preview.detail.planFirstDecision).toMatchObject({
+      schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+      selectionAuthority: "resident_plan_instance",
+      rootPlanInstanceId: "plan:runner.pressure_central:rd",
+      leafExecutorInstanceId: "plan:runner.economy:fund-rd",
+      selectedPlan: {
+        parentInstanceId: "plan:runner.pressure_central:rd",
+        parentNeedId: "run-funding:rd",
+      },
+      route: {
+        actionId: expect.any(String),
+        stepId: "fund_run",
+      },
+      strategicContext: { authority: "diagnostic_only" },
+    });
+    expect(JSON.stringify(preview.preview.detail)).not.toMatch(
+      /Tactical Plan|plan_rank\||raw action score/i,
     );
-    expect(tacticalPlanSection?.items).toEqual(
-      expect.arrayContaining([expect.stringContaining("plan_rank|")]),
-    );
+  });
+
+  it("restores the resident plan portfolio before preparing an AI decision after a server restart", async () => {
+    resetResidentPlanPortfolioMemory();
+    try {
+      const storage = new InMemoryMatchStorage();
+      const restoredBeforeChoice: boolean[] = [];
+      const choose = (input: Parameters<typeof chooseRuntimeAiAction>[0], options?: Parameters<typeof chooseRuntimeAiAction>[1]) => {
+        restoredBeforeChoice.push(Boolean(residentPlanPortfolioSnapshot(input)));
+        return chooseRuntimeAiAction(input, options);
+      };
+      const service = new MultiplayerService(storage, {
+        tokenSalt: "resident-portfolio-restart",
+        chooseAiAction: choose,
+      });
+      const created = await service.createMatch({
+        mode: "human_runner_vs_corp_ai",
+        hostSide: "runner",
+        seed: "resident-portfolio-restart",
+        corpDifficulty: "normal",
+        aiPacingMode: "paced",
+      });
+      const runner = {
+        side: "runner" as const,
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      };
+      await forceSetupComplete(service, created.matchId);
+      let current = await bootstrap(service, created.matchId, runner);
+      expect(current.playerView.activeSide).toBe("corp");
+      const mandatory = await service.advanceAi({
+        matchId: created.matchId,
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        knownStateVersion: current.playerView.stateVersion,
+        knownMatchVersion: current.matchVersion,
+        mode: "single_step",
+      });
+      expect(mandatory.ok).toBe(true);
+      if (!mandatory.ok) throw new Error(mandatory.error.message);
+      current = mandatory.requesterPayload;
+      expect(current.playerView.timingPoint).toBe("corp_action.main");
+
+      const first = await service.prepareAiDecisionDebug({
+        matchId: created.matchId,
+        requesterSide: "runner",
+        sessionToken: created.hostSessionToken,
+        knownStateVersion: current.playerView.stateVersion,
+        knownMatchVersion: current.matchVersion,
+      });
+      expect(first.ok).toBe(true);
+      const persisted = await storage.load(created.matchId);
+      expect(
+        persisted?.aiPlanRuntime?.residentPlanPortfolioBySide?.corp?.instances
+          .length,
+      ).toBeGreaterThan(0);
+      expect(restoredBeforeChoice.at(-1)).toBe(false);
+
+      // A new service stands in for a process restart: prepared decisions and
+      // process-local memory are gone, while the match record remains.
+      resetResidentPlanPortfolioMemory();
+      const restarted = new MultiplayerService(storage, {
+        tokenSalt: "resident-portfolio-restart",
+        chooseAiAction: choose,
+      });
+      const afterRestart = await restarted.prepareAiDecisionDebug({
+        matchId: created.matchId,
+        requesterSide: "runner",
+        sessionToken: created.hostSessionToken,
+        knownStateVersion: current.playerView.stateVersion,
+        knownMatchVersion: current.matchVersion,
+      });
+      expect(afterRestart.ok).toBe(true);
+      expect(restoredBeforeChoice.at(-1)).toBe(true);
+    } finally {
+      resetResidentPlanPortfolioMemory();
+    }
   });
 
   it("binds session AI previews to the human side without leaking hidden opponent cards or mutating the match", async () => {

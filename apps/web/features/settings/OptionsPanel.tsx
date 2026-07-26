@@ -883,7 +883,7 @@ function GameplaySettings({
                 onAiDecisionDebugOverlayEnabled(event.target.checked)
               }
             />
-            KI-Bewertungsfenster anzeigen
+            KI-Entscheidungsfenster anzeigen
           </label>
           <label
             className={`settingsToggle ${exposedCardHighlightEnabled ? "checked" : ""}`}
@@ -928,11 +928,12 @@ function GameplaySettings({
         Scrollen sichtbar. Der Cyberspace-Hintergrund legt eine ruhige
         Netzwerklandschaft hinter das Spielfeld. Das schwebende Aktionsfenster
         zeigt mögliche Nicht-Run-Aktionen lokal verschiebbar an. Das
-        KI-Bewertungsfenster zeigt lokale, redigierte KI-Trace-Daten für
-        laufende KI-Matches. Exposed-Karten hervorheben markiert öffentlich
-        exposed Karten mindestens zehn Sekunden lang, auch über Run- und Zugende
-        hinweg. Der Spielstandsstreifen zeigt Credits, Agenda-Punkte und
-        aktuelle Aktionen platzsparend über dem Spielfeld.
+        KI-Entscheidungsfenster erklärt die side-safe Planinstanz, ihren
+        aktuellen Step und die exakt gebundene LegalAction. Exposed-Karten
+        hervorheben markiert öffentlich exposed Karten mindestens zehn Sekunden
+        lang, auch über Run- und Zugende hinweg. Der Spielstandsstreifen zeigt
+        Credits, Agenda-Punkte und aktuelle Aktionen platzsparend über dem
+        Spielfeld.
       </p>
     </div>
   );

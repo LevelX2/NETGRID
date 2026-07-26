@@ -49,6 +49,18 @@ export type AiDecisionPreview = {
   detail: Record<string, unknown>;
 };
 
+export type PreparedAiDecisionDebug = {
+  matchId: string;
+  matchVersion: number;
+  stateVersion: number;
+  side: Side;
+  preparedAt: string;
+  actionId: string;
+  actionType: LegalAction["type"];
+  actionLabel: string;
+  detail: Record<string, unknown>;
+};
+
 export type PublicMatchEntry = ApiPublicMatchListEntry;
 
 export type PublicMatchesResponse = {
@@ -395,6 +407,47 @@ export async function fetchAiDecisionPreview(
         "KI-Preview konnte nicht geladen werden.",
     );
   return previewPayload.preview;
+}
+
+export async function fetchPreparedAiDecisionDebug(
+  session: SessionInfo,
+  payload: ClientPayload,
+): Promise<PreparedAiDecisionDebug> {
+  let response: Response;
+  try {
+    response = await fetch(
+      `${SERVER_HTTP}/api/matches/${encodeURIComponent(session.matchId)}/ai-decision-debug`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${session.sessionToken}`,
+        },
+        body: JSON.stringify({
+          side: session.side,
+          knownStateVersion: payload.playerView.stateVersion,
+          knownMatchVersion: payload.matchVersion,
+        }),
+      },
+    );
+  } catch {
+    throw new ServerConnectionError();
+  }
+  const result = (await response.json()) as {
+    ok?: boolean;
+    prepared?: PreparedAiDecisionDebug;
+    error?: { message?: string };
+  };
+  // The prepared-decision inspector is an explicit local developer surface.
+  // Its separately authenticated payload deliberately contains the acting
+  // AI's hand snapshot; normal PlayerViews, events and advisor previews still
+  // retain the generic redaction guard above.
+  if (!response.ok || !result.prepared)
+    throw new Error(
+      result.error?.message ??
+        "Die nächste KI-Entscheidung konnte nicht vorbereitet werden.",
+    );
+  return result.prepared;
 }
 
 export async function postJson<T>(path: string, body: unknown): Promise<T> {

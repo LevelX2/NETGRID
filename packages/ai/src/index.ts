@@ -197,6 +197,12 @@ export type {
   PlanPortfolioSnapshot,
 } from "./plans/plan-portfolio";
 export {
+  residentPlanPortfolioSnapshot,
+  resetResidentPlanPortfolioMemory,
+  restoreResidentPlanPortfolioMemorySnapshot,
+} from "./plans/resident-plan-portfolio-memory";
+export type { ResidentPlanPortfolio } from "./plans/resident-plan-portfolio";
+export {
   compareCreditDemandPriority,
   createCorpCreditDemand,
   createCreditDemand,
