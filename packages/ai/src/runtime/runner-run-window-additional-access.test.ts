@@ -23,10 +23,13 @@ describe("Runner additional-access run-window admission", () => {
       }),
     ).toEqual({
       admissible: true,
+      value: 500,
       evidenceCodes: [
         "runner_visible_additional_access_effect_plan_admissible",
         "runner_additional_access_effect_server:rd",
         "runner_additional_access_parent_purpose:multiaccess",
+        "runner_additional_access_current_engine_legal_route_funded",
+        "runner_additional_access_positive_effect_preferred_over_continue",
       ],
     });
   });
@@ -49,7 +52,7 @@ describe("Runner additional-access run-window admission", () => {
     });
   });
 
-  it("does not spend for additional access without a bound multiaccess parent", () => {
+  it("binds a current Engine-legal additional-access effect to the exact run window", () => {
     expect(
       assessRunnerAdditionalAccessRunWindowAction({
         candidate: additionalAccessCandidate({
@@ -59,10 +62,15 @@ describe("Runner additional-access run-window admission", () => {
         runOriginPurpose: "information",
       }),
     ).toEqual({
-      admissible: false,
+      admissible: true,
+      value: 500,
       evidenceCodes: [
-        "runner_additional_access_requires_bound_multiaccess_parent",
-        "runner_additional_access_parent_purpose:information",
+        "runner_visible_additional_access_effect_plan_admissible",
+        "runner_additional_access_effect_server:rd",
+        "runner_additional_access_exact_engine_window_parent",
+        "runner_additional_access_prior_parent_purpose:information",
+        "runner_additional_access_current_engine_legal_route_funded",
+        "runner_additional_access_positive_effect_preferred_over_continue",
       ],
     });
   });

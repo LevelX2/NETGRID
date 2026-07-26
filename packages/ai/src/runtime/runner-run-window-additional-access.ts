@@ -32,9 +32,7 @@ export function assessRunnerAdditionalAccessRunWindowAction(params: {
   if (!params.activeServerId) {
     return {
       admissible: false,
-      evidenceCodes: [
-        "runner_additional_access_requires_visible_active_run",
-      ],
+      evidenceCodes: ["runner_additional_access_requires_visible_active_run"],
     };
   }
   const scopedServers = runnerAdditionalAccessEffectServerScopes(
@@ -43,9 +41,7 @@ export function assessRunnerAdditionalAccessRunWindowAction(params: {
   if (scopedServers.length === 0) {
     return {
       admissible: false,
-      evidenceCodes: [
-        "runner_additional_access_effect_server_scope_unknown",
-      ],
+      evidenceCodes: ["runner_additional_access_effect_server_scope_unknown"],
     };
   }
   if (!scopedServers.includes(params.activeServerId)) {
@@ -57,21 +53,22 @@ export function assessRunnerAdditionalAccessRunWindowAction(params: {
       ],
     };
   }
-  if (params.runOriginPurpose !== "multiaccess") {
-    return {
-      admissible: false,
-      evidenceCodes: [
-        "runner_additional_access_requires_bound_multiaccess_parent",
-        `runner_additional_access_parent_purpose:${params.runOriginPurpose ?? "unknown"}`,
-      ],
-    };
-  }
+  const parentEvidence =
+    params.runOriginPurpose === "multiaccess"
+      ? ["runner_additional_access_parent_purpose:multiaccess"]
+      : [
+          "runner_additional_access_exact_engine_window_parent",
+          `runner_additional_access_prior_parent_purpose:${params.runOriginPurpose ?? "unknown"}`,
+        ];
   return {
     admissible: true,
+    value: 500,
     evidenceCodes: [
       "runner_visible_additional_access_effect_plan_admissible",
       `runner_additional_access_effect_server:${params.activeServerId}`,
-      "runner_additional_access_parent_purpose:multiaccess",
+      ...parentEvidence,
+      "runner_additional_access_current_engine_legal_route_funded",
+      "runner_additional_access_positive_effect_preferred_over_continue",
     ],
   };
 }

@@ -13124,13 +13124,27 @@ function runnerRunWindowActionAssessment(
   if (!input.playerView.run) {
     if (restrictedRunSequenceAction) {
       const serverId = restrictedRunSequenceAction.payload?.serverId;
+      const costProfile =
+        restrictedRunSequenceAction.payload?.restrictedActionGrantCostProfile;
+      const costFree =
+        costProfile === "no_click" &&
+        restrictedRunSequenceAction.costs.every(
+          (cost) => (cost.clicks ?? 0) === 0,
+        );
       return {
         admissible: typeof serverId === "string" && serverId.length > 0,
+        ...(costFree ? { value: 250 } : {}),
         evidenceCodes: [
           "runner_engine_restricted_run_sequence_continuation",
           `runner_restricted_run_sequence_action:${restrictedRunSequenceAction.actionId}`,
           `runner_restricted_run_sequence_target:${typeof serverId === "string" ? serverId : "unknown"}`,
           `runner_restricted_run_sequence_remaining:${Number(restrictedRunSequenceAction.payload?.restrictedActionGrantRemainingActions)}`,
+          ...(costFree
+            ? [
+                "runner_restricted_run_sequence_cost_profile:no_click",
+                "runner_restricted_run_sequence_cost_free_route_preferred",
+              ]
+            : []),
         ],
       };
     }

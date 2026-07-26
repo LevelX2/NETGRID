@@ -9,17 +9,17 @@ import { simulateAiGame } from "../simulation";
 import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
 
 describe("Proteus R&D Mole plan-first run-window coverage", () => {
-  it("converts the exact stateVersion-52 multiaccess window before beginning access", () => {
+  it("converts the exact stateVersion-105 multiaccess window before beginning access", () => {
     let capture: AiSimulationDecisionCheckpointCapture | undefined;
     const summary = simulateAiGame({
-      seed: "proteus-pilot-qualifier-01",
-      maxActions: 55,
+      seed: "proteus-pilot-qualifier-09",
+      maxActions: 108,
       runnerDeck: deck("proteus_runner_rd_bad_publicity_2026_05_25"),
       corpDeck: deck("proteus_corp_region_fast_score_2026_05_25"),
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
       testOnlyDecisionCheckpointCapture: {
-        actionIndices: [52],
+        actionIndices: [105],
         capture: (snapshot) => {
           capture = snapshot;
         },
@@ -27,15 +27,15 @@ describe("Proteus R&D Mole plan-first run-window coverage", () => {
     });
 
     expect(capture).toBeDefined();
-    if (!capture) throw new Error("Missing stateVersion-52 capture");
-    expect(capture.state.stateVersion).toBe(52);
+    if (!capture) throw new Error("Missing stateVersion-105 capture");
+    expect(capture.state.stateVersion).toBe(105);
     expect(capture.state.timingPoint).toBe("game.checkpoint");
     expect(capture.state.run).toMatchObject({
       attackedServerId: "rd",
       accessCount: 1,
       position: { kind: "server", serverId: "rd" },
     });
-    expect(capture.input.playerView.own.credits).toBe(4);
+    expect(capture.input.playerView.own.credits).toBe(8);
     expect(
       capture.input.legalActions.map((action) => ({
         type: action.type,
@@ -46,9 +46,9 @@ describe("Proteus R&D Mole plan-first run-window coverage", () => {
     ).toEqual([
       {
         type: "activated_card_ability",
-        source: "runner_onr_proteus_147_r-and-d-mole_2",
+        source: "runner_onr_proteus_147_r-and-d-mole_1",
         costs: [{ credits: 4 }],
-        payload: { cardId: "runner_onr_proteus_147_r-and-d-mole_2" },
+        payload: { cardId: "runner_onr_proteus_147_r-and-d-mole_1" },
       },
       {
         type: "continue_run",
@@ -61,7 +61,7 @@ describe("Proteus R&D Mole plan-first run-window coverage", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: capture.input.legalActions,
       observerSide: "runner",
-      stateVersion: 52,
+      stateVersion: 105,
       visibleSourceDefinitionsByInstanceId:
         visibleSourceDefinitionsByInstanceId(capture.input.playerView),
       cardSemanticProfilesByDefinitionId:
@@ -86,20 +86,22 @@ describe("Proteus R&D Mole plan-first run-window coverage", () => {
     expect(summary.actionSequence).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          stateVersionBefore: 52,
+          stateVersionBefore: 105,
           actionType: "activated_card_ability",
           eventType: "activated_card_ability",
           planKind: "runner.convert_run_window",
           fallbackUsed: false,
           evidence: expect.arrayContaining([
             "plan_action_assessment_evidence:runner_additional_access_effect_server:rd",
-            "plan_action_assessment_evidence:runner_additional_access_parent_purpose:multiaccess",
+            "plan_action_assessment_evidence:runner_additional_access_exact_engine_window_parent",
+            "plan_action_assessment_evidence:runner_additional_access_current_engine_legal_route_funded",
             "plan_action_assessment_evidence:runner_visible_additional_access_effect_plan_admissible",
+            "plan_action_assessment_evidence:runner_additional_access_positive_effect_preferred_over_continue",
             "plan_step_capability:convert_active_run_window",
           ]),
         }),
         expect.objectContaining({
-          stateVersionBefore: 53,
+          stateVersionBefore: 106,
           actionType: "continue_run",
           targetServerId: "rd",
         }),

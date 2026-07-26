@@ -17,6 +17,61 @@ import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decisio
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
 describe("plan-first Engine-restricted run contract", () => {
+  it("prefers the cost-free restricted run over a click-costing run to the same server", () => {
+    resetResidentPlanPortfolioMemory();
+    const ordinaryRun = legalAction(
+      "runner.start_run.archives",
+      "runner",
+      "start_run",
+      "Run Archives",
+      { credits: 0, clicks: 1 },
+      {
+        source: "basic_action",
+        payload: { serverId: "archives", effectKind: "run" },
+      },
+    );
+    const restrictedRun = legalAction(
+      "runner.start_run.archives.restricted",
+      "runner",
+      "start_run",
+      "Restricted run Archives",
+      { credits: 0, clicks: 0 },
+      {
+        source: "engine_restricted_action",
+        payload: {
+          serverId: "archives",
+          effectKind: "run",
+          restrictedActionGrantActionType: "start_run",
+          restrictedActionGrantCostProfile: "no_click",
+          restrictedActionGrantRemainingActions: 1,
+        },
+      },
+    );
+    const input = aiInput("runner", [ordinaryRun, restrictedRun]);
+    input.playerView.own.clicks = 2;
+    input.playerView.opponent.deckCount = 10;
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [
+        safeRuntimeRunTarget(ordinaryRun.actionId, "archives"),
+        safeRuntimeRunTarget(restrictedRun.actionId, "archives"),
+      ],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: restrictedRun.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_action_assessment_evidence:runner_engine_restricted_run_sequence_continuation",
+        "plan_action_assessment_evidence:runner_restricted_run_sequence_cost_profile:no_click",
+        "plan_step_capability:continue_engine_restricted_run_sequence",
+      ]),
+    );
+  });
+
   it("keeps Wilson's exact run-only actions owned by the restricted run window", () => {
     resetResidentPlanPortfolioMemory();
     const runHq = wilsonRun("hq");

@@ -13,13 +13,13 @@ describe("All-Nighter restricted run-window plan-first coverage", () => {
       label: "Fast Advance central-origin continuation",
       slotId: "strategy_panel_fast_advance_chrome_rush",
       seed: "ai-behavior-baseline-v1-03",
-      actionIndex: 51,
+      actionIndex: 135,
     },
     {
       label: "Hybrid central-origin continuation",
       slotId: "strategy_panel_hybrid_score_punish_cheap_bag",
       seed: "ai-behavior-baseline-v1-05",
-      actionIndex: 12,
+      actionIndex: 11,
     },
   ])(
     "converts the exact $label state without a remote-disposition conflict",
@@ -59,12 +59,12 @@ describe("All-Nighter restricted run-window plan-first coverage", () => {
         expect.arrayContaining([
           expect.objectContaining({
             actionId:
-              "runner.start_run.remote_1.bonus_run.onr_v1_076_all-nighter",
+              "runner.start_run.archives.bonus_run.onr_v1_076_all-nighter",
             side: "runner",
             type: "start_run",
             costs: [],
             payload: expect.objectContaining({
-              serverId: "remote_1",
+              serverId: "archives",
               effectKind: "run",
               restrictedActionGrantActionType: "start_run",
               restrictedActionGrantCostProfile: "no_click",
@@ -87,6 +87,7 @@ describe("All-Nighter restricted run-window plan-first coverage", () => {
             evidence: expect.arrayContaining([
               "plan_action_assessment_evidence:runner_engine_restricted_run_sequence_continuation",
               "plan_action_assessment_evidence:runner_restricted_run_sequence_remaining:1",
+              "plan_action_assessment_evidence:runner_restricted_run_sequence_cost_profile:no_click",
               "plan_step_capability:continue_engine_restricted_run_sequence",
             ]),
           }),
