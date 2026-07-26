@@ -24,28 +24,50 @@ Keine Aussage in diesem Dokument schaltet Proteus-Karten frei. Die Proteus-Daten
 - `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/run-breach-multiaccess-spec.md`
 - `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/full-archives-access-spec.md`
 
+## Regelauslegungsnachtrag: Airport Locker
+
+Stand: 2026-07-26
+
+`Airport Locker` ist nicht auf einen Run oder einen ICE-Encounter beschränkt.
+Der Satz „You may use this ability during an encounter with a piece of ice.“
+erlaubt die Nutzung während eines Encounters zusätzlich zu den normalen
+Zeitpunkten für Spezialeffekte. Er enthält insbesondere kein „only“.
+
+Diese Lesart folgt dem allgemeinen Ruling in
+`docs/source/Netrunner Errata 1.70.md`: Spezialeffekte dürfen grundsätzlich
+zu den normalen Rez-Zeitpunkten benutzt werden; Formulierungen der Art „You
+may use this ability whenever ...“ erweitern diese normalen Zeitpunkte. Die
+Errata zu `Self-Modifying Code` verwendet für die funktional entsprechende
+Stack-Suche genau die zusätzliche Encounter-Erlaubnis.
+
+Die Runtime bildet die beiden für `Airport Locker` relevanten Fenster
+deklarativ ab: `runner_main` für die normale Nutzung außerhalb eines Runs und
+`during_run` zusammen mit `current_encounter_ice` für die zusätzliche Nutzung
+im aktuellen ICE-Encounter. Beide Profile verwenden dieselben Kosten und
+denselben generischen Stack-Search-/Install-Effekt.
+
 ## Proteus-Zielgruppe
 
 Der Cluster `hidden_runner_resources` umfasst 16 Proteus-Karten. Alle bleiben `deepen`, weil vor Runtime-Umsetzung mindestens der gemeinsame Hidden-Resource-Vertrag und danach enge Resolver nötig sind.
 
-| Karte | Primäres Fenster | Zusatzcluster |
-| --- | --- | --- |
-| `onr_proteus_128_airport-locker` Airport Locker | Encounter, Stack-Search, Install | `hidden_zone_search_install_tutor` |
-| `onr_proteus_129_back-door-to-netwatch` Back Door to Netwatch | Trace-Erfolg, Trace-Effekt-Cancel | `bad_publicity_loss_gate`, `trace_link_modifiers`, `tag_flow`, `prevention_avoid_replacement` |
-| `onr_proteus_132_bolt-hole` Bolt-Hole | Damage-Prevention | `damage_prevention_and_core_hand_size`, `prevention_avoid_replacement` |
-| `onr_proteus_133_chiba-bank-account` Chiba Bank Account | Kosten-/Penalty-Zahlung | `economy_draw_basics` |
-| `onr_proteus_136_credit-subversion` Credit Subversion | Erfolgreicher HQ-Run | `trash_forfeit_sabotage`, `run_event_basics` |
-| `onr_proteus_137_death-from-above` Death from Above | Erfolgreicher Remote-Run vor Access | `trash_forfeit_sabotage` |
-| `onr_proteus_140_expendable-family-member` Expendable Family Member | Tag-Avoid | `tag_flow`, `prevention_avoid_replacement` |
-| `onr_proteus_141_get-ready-to-rumble` Get Ready to Rumble | Nach erfolgreichem Meat Damage | `random_die_resolution`, `damage_prevention_and_core_hand_size` |
-| `onr_proteus_142_hq-mole` HQ Mole | HQ-Access-Multiaccess | `access_breach_multiaccess_ambush` |
-| `onr_proteus_143_liberated-savings-account` Liberated Savings Account | Kosten-/Penalty-Zahlung | `access_breach_multiaccess_ambush`, `economy_draw_basics` |
-| `onr_proteus_145_mercenary-subcontract` Mercenary Subcontract | Während aktuellem Access | `trash_forfeit_sabotage` |
-| `onr_proteus_147_r-and-d-mole` R&D Mole | R&D-Access-Multiaccess | `access_breach_multiaccess_ambush` |
-| `onr_proteus_149_simulacrum` Simulacrum | Encounter-Pass eines AP ICE | keine Zusatzfamilie außer Hidden Resource |
-| `onr_proteus_152_swiss-bank-account` Swiss Bank Account | Kosten-/Penalty-Zahlung | `economy_draw_basics` |
-| `onr_proteus_153_time-to-collect` Time to Collect | Resource-Trash-Prevention | `prevention_avoid_replacement` |
-| `onr_proteus_154_wired-switchboard` Wired Switchboard | Trace-Link-Boost | `trace_link_modifiers` |
+| Karte                                                                 | Primäres Fenster                                                                             | Zusatzcluster                                                                                 |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `onr_proteus_128_airport-locker` Airport Locker                       | Normale Spezialeffekt-Zeitpunkte plus zusätzliche Encounter-Erlaubnis, Stack-Search, Install | `hidden_zone_search_install_tutor`                                                            |
+| `onr_proteus_129_back-door-to-netwatch` Back Door to Netwatch         | Trace-Erfolg, Trace-Effekt-Cancel                                                            | `bad_publicity_loss_gate`, `trace_link_modifiers`, `tag_flow`, `prevention_avoid_replacement` |
+| `onr_proteus_132_bolt-hole` Bolt-Hole                                 | Damage-Prevention                                                                            | `damage_prevention_and_core_hand_size`, `prevention_avoid_replacement`                        |
+| `onr_proteus_133_chiba-bank-account` Chiba Bank Account               | Kosten-/Penalty-Zahlung                                                                      | `economy_draw_basics`                                                                         |
+| `onr_proteus_136_credit-subversion` Credit Subversion                 | Erfolgreicher HQ-Run                                                                         | `trash_forfeit_sabotage`, `run_event_basics`                                                  |
+| `onr_proteus_137_death-from-above` Death from Above                   | Erfolgreicher Remote-Run vor Access                                                          | `trash_forfeit_sabotage`                                                                      |
+| `onr_proteus_140_expendable-family-member` Expendable Family Member   | Tag-Avoid                                                                                    | `tag_flow`, `prevention_avoid_replacement`                                                    |
+| `onr_proteus_141_get-ready-to-rumble` Get Ready to Rumble             | Nach erfolgreichem Meat Damage                                                               | `random_die_resolution`, `damage_prevention_and_core_hand_size`                               |
+| `onr_proteus_142_hq-mole` HQ Mole                                     | HQ-Access-Multiaccess                                                                        | `access_breach_multiaccess_ambush`                                                            |
+| `onr_proteus_143_liberated-savings-account` Liberated Savings Account | Kosten-/Penalty-Zahlung                                                                      | `access_breach_multiaccess_ambush`, `economy_draw_basics`                                     |
+| `onr_proteus_145_mercenary-subcontract` Mercenary Subcontract         | Während aktuellem Access                                                                     | `trash_forfeit_sabotage`                                                                      |
+| `onr_proteus_147_r-and-d-mole` R&D Mole                               | R&D-Access-Multiaccess                                                                       | `access_breach_multiaccess_ambush`                                                            |
+| `onr_proteus_149_simulacrum` Simulacrum                               | Encounter-Pass eines AP ICE                                                                  | keine Zusatzfamilie außer Hidden Resource                                                     |
+| `onr_proteus_152_swiss-bank-account` Swiss Bank Account               | Kosten-/Penalty-Zahlung                                                                      | `economy_draw_basics`                                                                         |
+| `onr_proteus_153_time-to-collect` Time to Collect                     | Resource-Trash-Prevention                                                                    | `prevention_avoid_replacement`                                                                |
+| `onr_proteus_154_wired-switchboard` Wired Switchboard                 | Trace-Link-Boost                                                                             | `trace_link_modifiers`                                                                        |
 
 ## Gemeinsamer Zustandsvertrag
 

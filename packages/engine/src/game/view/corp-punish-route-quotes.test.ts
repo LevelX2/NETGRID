@@ -121,6 +121,130 @@ describe("Corp punish-route quote request", () => {
     });
   });
 
+  it("certifies tagged Closed Accounts from its exact current LegalAction and lose-all implementation", () => {
+    const state = corpActionState("punish-route-closed-accounts-execute");
+    state.runner.tags = 1;
+    state.runner.credits = 9;
+    const closedAccounts = addCorpCardToHqForTest(
+      state,
+      "onr_v1_285_closed-accounts",
+      "closed-accounts",
+    );
+
+    const result = quoteCorpPunishRoute(
+      state,
+      routeRequest(state, [
+        step("credit-denial", 0, "other_punish", closedAccounts),
+      ]),
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        totalClicks: 1,
+        totalActionCredits: 1,
+        tagTrigger: {
+          kind: "existing_tag",
+          status: "satisfied",
+          currentRunnerTags: 1,
+        },
+        responsePaymentEnvelope: {
+          corpCreditsAvailable: 20,
+          runnerCreditsVisible: 9,
+          totalCorpCredits: { minimum: 1, maximum: 1 },
+        },
+        damageEnvelope: {
+          rawDamage: { total: 0 },
+          effectiveDamage: { minimum: 0, maximum: 0 },
+        },
+        guarantee: "guaranteed",
+        responseKnowledge: "public_exact",
+        steps: [
+          {
+            kind: "other_punish",
+            sourceCardDefinitionId: "onr_v1_285_closed-accounts",
+            sourceCapabilityId: "ability:on_play:0",
+            clicks: 1,
+            credits: 1,
+            currentLegalAction: {
+              side: "corp",
+              type: "play_operation",
+              source: closedAccounts,
+              payload: { cardId: closedAccounts },
+              costs: [{ clicks: 1, credits: 1 }],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it("certifies a Closed Accounts funding horizon only when adding the exact fixed gap produces its LegalAction", () => {
+    const state = corpActionState("punish-route-closed-accounts-fund");
+    state.runner.tags = 1;
+    state.runner.credits = 7;
+    state.corp.credits = 0;
+    const closedAccounts = addCorpCardToHqForTest(
+      state,
+      "onr_v1_285_closed-accounts",
+      "closed-accounts",
+    );
+    const request = routeRequest(state, [
+      step("credit-denial", 0, "other_punish", closedAccounts),
+    ]);
+    const before = structuredClone(state);
+
+    const result = quoteCorpPunishRoute(state, request);
+
+    expect(result).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        totalClicks: 1,
+        totalActionCredits: 1,
+        responsePaymentEnvelope: {
+          corpCreditsAvailable: 0,
+          runnerCreditsVisible: 7,
+          totalCorpCredits: { minimum: 1, maximum: 1 },
+        },
+        steps: [
+          {
+            sourceCardDefinitionId: "onr_v1_285_closed-accounts",
+            credits: 1,
+          },
+        ],
+      },
+    });
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.quote.steps[0]).not.toHaveProperty("currentLegalAction");
+    expect(state).toEqual(before);
+  });
+
+  it("keeps Closed Accounts fail-closed when the tag condition is not met", () => {
+    const state = corpActionState("punish-route-closed-accounts-untagged");
+    const closedAccounts = addCorpCardToHqForTest(
+      state,
+      "onr_v1_285_closed-accounts",
+      "closed-accounts",
+    );
+
+    expect(
+      quoteCorpPunishRoute(
+        state,
+        routeRequest(state, [
+          step("credit-denial", 0, "other_punish", closedAccounts),
+        ]),
+      ),
+    ).toMatchObject({
+      ok: true,
+      quote: {
+        complete: false,
+        incompleteReasons: ["head_legal_action_unavailable"],
+      },
+    });
+  });
+
   it("keeps hidden Runner twins identical and normalizes hidden-id probes with missing ids", () => {
     const left = corpActionState("punish-route-hidden-twin");
     const tag = addCorpCardToHqForTest(
