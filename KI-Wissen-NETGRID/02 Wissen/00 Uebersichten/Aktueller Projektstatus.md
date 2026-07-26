@@ -130,8 +130,10 @@ Stand: 2026-07-25
   exakten Karteninstanz. Unbekannte Engine-Zahlungsquotes bleiben blockiert
   und werden nicht geschätzt.
 - PF16-Final-Review und vollständige Pre-Commit-Gates einschließlich der
-  60-Spiele-Baseline sind grün. Offen sind PF16-Commit, Abgleich mit aktuellem
-  `main`, lokale Integration und verifizierter Worktree-/Branch-Cleanup.
+  60-Spiele-Baseline sind grün. PF16 ist als `ec18fcb8f` abgeschlossen und
+  über den geprüften Integrationsstand `94051e77e` lokal in `main` enthalten;
+  Worktree und gemergter Arbeitsbranch
+  `codex/ai-plan-first-runtime-cutover` sind verifiziert entfernt.
 - Die verifizierte PF15-Code-Freeze-Baseline umfasst 60 Spiele und 11.012
   Entscheidungen. Sie wurde im vollständigen dirty PF15-Arbeitsbaum auf
   Parent `527833085` gemessen; dieser Arbeitsstand wurde anschließend mit

@@ -1,10 +1,11 @@
 # AI Plan-first Runtime Cutover – Final Review
 
-Status: **PF16-Gates grün; lokale Integration ausstehend**
+Status: **abgeschlossen; lokal auf `main` integriert**
 
 Stand: 2026-07-25
 
-Arbeitsbranch: `codex/ai-plan-first-runtime-cutover`
+Abschlussintegration: `main` über `94051e77e` (historischer Arbeitsbranch
+`codex/ai-plan-first-runtime-cutover` entfernt)
 
 PF15-Code-Freeze: `4b0c459f6`
 
@@ -25,10 +26,10 @@ PF15 ist vollständig verifiziert und committed. PF16 hat den Legacy-Livegraph
 bereinigt, den kurzlebigen Goal-/Threat-Signalvertrag und die
 Strategic-Intent-Revalidierung präzisiert sowie Wissen und Status an den
 erreichten Stand angeglichen. Alle PF16-Pre-Commit-Gates einschließlich der
-finalen Behavior-Baseline sind grün. Die lokale Integration des aktuellen `main`
-und der anschließende Worktree-/Branch-Abschluss sind nachgelagerte
-Abschlussoperationen und zum Zeitpunkt dieser Reviewfassung noch nicht
-vollzogen.
+finalen Behavior-Baseline sind grün. PF16 wurde als `ec18fcb8f` committed,
+der aktuelle lokale `main` defensiv abgeglichen und die geprüfte Integration
+als `94051e77e` lokal auf `main` abgeschlossen. Der zugehörige Worktree und
+der gemergte Arbeitsbranch sind anschließend verifiziert entfernt worden.
 
 ## 2. Autoritativer Endvertrag
 
@@ -197,14 +198,15 @@ aber ausdrücklich sichtbar:
 
 Alle PF16-Pre-Commit-Gates einschließlich des finalen
 Behavior-Baseline-Laufs sind grün; dieses Review enthält den exakten
-Laufstand. PF16 ist damit commitfähig. Danach folgen gemäß Paketprozess:
+Laufstand. Der Paketprozess wurde vollständig abgeschlossen:
 
-1. PF16-Commit `docs(ai): close plan-first runtime cutover`;
-2. defensiver Abgleich des aktuellen lokalen `main` in den Arbeitsbranch;
-3. Wiederholung der relevanten integrierten Abschlussgates;
-4. lokaler Fast-forward nach `main`;
-5. Prüfung des sauberen Main-Stands;
-6. verifizierte Entfernung des Cutover-Worktrees;
-7. Löschung des gemergten Arbeitsbranches.
+1. PF16 wurde als `ec18fcb8f` committed;
+2. der aktuelle lokale `main` wurde defensiv in den Arbeitsbranch abgeglichen;
+3. die relevanten integrierten Abschlussgates wurden erneut ausgeführt;
+4. die lokale Integration nach `main` liegt als `94051e77e` vor;
+5. der Main-Stand wurde sauber geprüft;
+6. der Cutover-Worktree wurde verifiziert entfernt;
+7. der gemergte Arbeitsbranch wurde gelöscht.
 
-Erst nach diesen Schritten ist das übergeordnete `/Goal` abgeschlossen.
+Das übergeordnete `/Goal` ist damit abgeschlossen. Remote-Push oder
+Pull-Request waren nicht Teil dieses Abschlusses.

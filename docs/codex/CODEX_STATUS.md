@@ -306,10 +306,12 @@ und
 
 - PF16 hat den Legacy-Livegraph bereinigt, den nicht autoritativen
   Goal-/Threat-Signalvertrag einschließlich Strategic-Intent-Rückkanal
-  typisiert und den Resource-Lifecycle-Vertrag verifiziert. Final Review und
-  vollständige Pre-Commit-Gates einschließlich der 60-Spiele-Baseline sind
-  grün. Offen sind PF16-Commit, lokale Integration nach `main` und der
-  verifizierte Worktree-/Branch-Cleanup.
+  typisiert und den Resource-Lifecycle-Vertrag verifiziert. Der Abschluss ist
+  lokal auf `main` integriert: PF16 liegt als `ec18fcb8f` vor, die geprüfte
+  Integration als `94051e77e`; Worktree und gemergter Arbeitsbranch
+  `codex/ai-plan-first-runtime-cutover` sind verifiziert entfernt. Die
+  vollständigen Pre-Commit- und Integrationsgates einschließlich der
+  60-Spiele-Baseline sind grün.
 - `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts` und
   `apps/server/src/multiplayer.test.ts` sind weiterhin groß. Die priorisierten
   Corp-AI-Scoring-, Choice- und Triage-Owner liegen wieder innerhalb ihrer
