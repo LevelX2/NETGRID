@@ -321,7 +321,7 @@ describe("Corp defensive draw context", () => {
     });
   });
 
-  it("requires an identity-bound exact draw projection and the full click horizon", () => {
+  it("requires an identity-bound exact draw projection", () => {
     const setup = targetedScoreDefenseDrawSetup();
 
     for (const drawActionProjection of [
@@ -345,9 +345,64 @@ describe("Corp defensive draw context", () => {
         }),
       ).toBeUndefined();
     }
+  });
 
+  it("allows a capacity-safe last-click draw as multi-turn progress but not under a hard same-turn reserve", () => {
+    const setup = targetedScoreDefenseDrawSetup();
     setup.input.playerView.own.clicks = 1;
-    expect(corpMissingConcreteScoreDefenseDrawNeed(setup.args)).toBeUndefined();
+    const lastClickNeed: CorpFundedRemoteAccessRiskNeed = {
+      ...setup.need,
+      baseline: {
+        ...setup.need.baseline,
+        availableCorpClicks: 1,
+      },
+    };
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        protectionNeed: lastClickNeed,
+      }),
+    ).toMatchObject({
+      cleanupReplacementDraw: false,
+      evidence: expect.arrayContaining([
+        "score_defense_draw_followup_horizon:multi_turn_progress",
+        "projected_hand_after_draw:4",
+      ]),
+    });
+
+    const reservedNeed: CorpFundedRemoteAccessRiskNeed = {
+      ...lastClickNeed,
+      scoreReserve: {
+        ...lastClickNeed.scoreReserve,
+        hardClickReserve: 1,
+      },
+      baseline: {
+        ...lastClickNeed.baseline,
+        hardClickReserve: 1,
+      },
+    };
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        protectionNeed: reservedNeed,
+      }),
+    ).toBeUndefined();
+
+    const fullHandSetup = targetedScoreDefenseDrawSetup(5);
+    fullHandSetup.input.playerView.own.clicks = 1;
+    const fullHandLastClickNeed: CorpFundedRemoteAccessRiskNeed = {
+      ...fullHandSetup.need,
+      baseline: {
+        ...fullHandSetup.need.baseline,
+        availableCorpClicks: 1,
+      },
+    };
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...fullHandSetup.args,
+        protectionNeed: fullHandLastClickNeed,
+      }),
+    ).toBeUndefined();
   });
 
   it("preserves the hard-click reserve and permits only capacity-safe draw-plus-install sequences", () => {
