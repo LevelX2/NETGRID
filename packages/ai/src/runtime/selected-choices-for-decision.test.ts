@@ -662,7 +662,13 @@ describe("selectedChoicesForDecision", () => {
       {
         kind: "select_cards",
         source: "scored_agenda.hq_agenda_shuffle_credits:downsizing_source:2:7",
-        continuation: { family: "corp_scored_agenda_hq_shuffle", originActionId: "corp.score-conversion", agendaInstanceId: "downsizing_source", creditPerAgendaPoint: 2, createdAtStateVersion: 7 },
+        continuation: {
+          family: "corp_scored_agenda_hq_shuffle",
+          originActionId: "corp.score-conversion",
+          agendaInstanceId: "downsizing_source",
+          creditPerAgendaPoint: 2,
+          createdAtStateVersion: 7,
+        },
         minSelections: 0,
         maxSelections: 2,
         options: [
@@ -900,10 +906,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it.each([
-    [
-      "incomplete",
-      incompleteOptionalRezQuote(),
-    ],
+    ["incomplete", incompleteOptionalRezQuote()],
     [
       "unaffordable",
       {
@@ -938,10 +941,7 @@ describe("selectedChoicesForDecision", () => {
       "different option",
       { ...optionalRezQuote(), optionId: "different-option" },
     ],
-    [
-      "stale state",
-      { ...optionalRezQuote(), stateVersion: 6 },
-    ],
+    ["stale state", { ...optionalRezQuote(), stateVersion: 6 }],
     [
       "malformed payment",
       { ...optionalRezQuote(), regularCreditsRequired: 99 },
@@ -954,10 +954,7 @@ describe("selectedChoicesForDecision", () => {
       "new_remote target",
       { ...optionalRezQuote(), targetServerId: "new_remote" },
     ],
-    [
-      "central target",
-      { ...optionalRezQuote(), targetServerId: "hq" },
-    ],
+    ["central target", { ...optionalRezQuote(), targetServerId: "hq" }],
     [
       "duplicate modifier ids",
       {
@@ -990,19 +987,22 @@ describe("selectedChoicesForDecision", () => {
     ["option value", { optionValue: "different-card" }],
     ["visible card id", { optionCardId: "different-card" }],
     ["visible definition", { optionDefinitionId: "different-definition" }],
-  ])("fails closed for an optional rez with mismatched %s", (_label, options) => {
-    expect(() =>
-      selectedChoicesForDecision(
-        optionalRezInput(optionalRezQuote(), options),
-        resolveChoiceAction(),
-        unusedDependencies(),
-      ),
-    ).toThrowError(
-      expect.objectContaining({
-        code: "window_origin_missing",
-      }),
-    );
-  });
+  ])(
+    "fails closed for an optional rez with mismatched %s",
+    (_label, options) => {
+      expect(() =>
+        selectedChoicesForDecision(
+          optionalRezInput(optionalRezQuote(), options),
+          resolveChoiceAction(),
+          unusedDependencies(),
+        ),
+      ).toThrowError(
+        expect.objectContaining({
+          code: "window_origin_missing",
+        }),
+      );
+    },
+  );
 
   it.each([
     [
@@ -1079,7 +1079,11 @@ describe("selectedChoicesForDecision", () => {
         kind: "select_option",
         source:
           "p3_34.move_advancement:onr_v1_347_vapor-ops:vapor_1:source_card:all:8",
-        continuation: { family: "corp_advancement_counter", originActionId: "corp.score-conversion", createdAtStateVersion: 7 },
+        continuation: {
+          family: "corp_advancement_counter",
+          originActionId: "corp.score-conversion",
+          createdAtStateVersion: 7,
+        },
         minSelections: 1,
         maxSelections: 1,
         options: [
@@ -1151,7 +1155,11 @@ describe("selectedChoicesForDecision", () => {
       kind: "select_option",
       source:
         "p3_34.move_advancement:onr_v1_347_vapor-ops:vapor_1:source_card:all:8",
-      continuation: { family: "corp_advancement_counter", originActionId: "corp.score-conversion", createdAtStateVersion: 7 },
+      continuation: {
+        family: "corp_advancement_counter",
+        originActionId: "corp.score-conversion",
+        createdAtStateVersion: 7,
+      },
       minSelections: 1,
       maxSelections: 1,
       options: [
@@ -1254,7 +1262,13 @@ function scoredAgendaCleanupInput(): AiDecisionInput {
     {
       kind: "select_cards",
       source: "scored_agenda.hq_agenda_shuffle_credits:downsizing_source:2:7",
-      continuation: { family: "corp_scored_agenda_hq_shuffle", originActionId: "corp.score-conversion", agendaInstanceId: "downsizing_source", creditPerAgendaPoint: 2, createdAtStateVersion: 7 },
+      continuation: {
+        family: "corp_scored_agenda_hq_shuffle",
+        originActionId: "corp.score-conversion",
+        agendaInstanceId: "downsizing_source",
+        creditPerAgendaPoint: 2,
+        createdAtStateVersion: 7,
+      },
       minSelections: 0,
       maxSelections: 1,
       options: [

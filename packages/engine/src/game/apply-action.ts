@@ -43,7 +43,12 @@ export function applyAction(
 ): EngineResult {
   if (!defaultApplyActionCoreHost)
     throw new Error("ApplyActionCore-Host ist nicht initialisiert.");
-  return buildApplyAction(defaultApplyActionCoreHost, state, playerAction, options);
+  return buildApplyAction(
+    defaultApplyActionCoreHost,
+    state,
+    playerAction,
+    options,
+  );
 }
 
 export function buildApplyAction(
@@ -154,7 +159,8 @@ function scoreChoiceContinuation(
   if (choice.side !== "corp") return undefined;
   if (
     choice.source.startsWith("p3_34.distribute_advancement:") ||
-    choice.source.startsWith("p3_34.move_advancement:")
+    choice.source.startsWith("p3_34.move_advancement:") ||
+    choice.source.startsWith("v1919.systematic_layoffs_advancement:")
   ) {
     return {
       family: "corp_advancement_counter",

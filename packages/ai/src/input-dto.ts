@@ -766,9 +766,7 @@ function sanitizeInstalledCorpRezCostQuote(
     !isNonNegativeSafeInteger(quote.expiresAtStateVersion) ||
     !isNonNegativeSafeInteger(quote.baseCredits) ||
     !isNonNegativeSafeInteger(quote.finalCredits) ||
-    !isNonNegativeSafeInteger(
-      quote.mandatoryAdditionalCosts?.agendaPoints,
-    ) ||
+    !isNonNegativeSafeInteger(quote.mandatoryAdditionalCosts?.agendaPoints) ||
     !modifiersValid ||
     (reductionSourceDefinitionIds === undefined &&
       increaseSourceDefinitionIds === undefined &&
@@ -784,12 +782,8 @@ function sanitizeInstalledCorpRezCostQuote(
     mandatoryAdditionalCosts: {
       agendaPoints: quote.mandatoryAdditionalCosts.agendaPoints,
     },
-    ...(reductionSourceDefinitionIds
-      ? { reductionSourceDefinitionIds }
-      : {}),
-    ...(increaseSourceDefinitionIds
-      ? { increaseSourceDefinitionIds }
-      : {}),
+    ...(reductionSourceDefinitionIds ? { reductionSourceDefinitionIds } : {}),
+    ...(increaseSourceDefinitionIds ? { increaseSourceDefinitionIds } : {}),
   };
 }
 
@@ -986,10 +980,17 @@ function sanitizeVisibleChoiceRequest(
   const cardSearchPresentation = sanitizeCardSearchPresentation(
     choice.cardSearchPresentation,
   );
+  const continuation = sanitizeScoreChoiceContinuation(
+    choice.continuation,
+    playerViewStateVersion,
+    playerViewSide,
+    choice.side,
+  );
   return {
     choiceId: choice.choiceId,
     side: choice.side,
     source: choice.source,
+    ...(continuation ? { continuation } : {}),
     prompt: choice.prompt,
     kind: choice.kind,
     options: choice.options.map((option) => {
@@ -1034,6 +1035,34 @@ function sanitizeVisibleChoiceRequest(
     ...(stackSearchResolution ? { stackSearchResolution } : {}),
     ...(cardSearchPresentation ? { cardSearchPresentation } : {}),
   };
+}
+
+function sanitizeScoreChoiceContinuation(
+  value: VisibleChoiceRequest["continuation"],
+  stateVersion: number,
+  playerViewSide: Side,
+  choiceSide: Side,
+): VisibleChoiceRequest["continuation"] | undefined {
+  if (playerViewSide !== "corp" || choiceSide !== "corp" || !value)
+    return undefined;
+  if (
+    typeof value.originActionId !== "string" ||
+    value.originActionId.length === 0 ||
+    value.createdAtStateVersion !== stateVersion
+  ) {
+    return undefined;
+  }
+  if (value.family === "corp_advancement_counter") return { ...value };
+  if (
+    value.family === "corp_scored_agenda_hq_shuffle" &&
+    typeof value.agendaInstanceId === "string" &&
+    value.agendaInstanceId.length > 0 &&
+    Number.isSafeInteger(value.creditPerAgendaPoint) &&
+    value.creditPerAgendaPoint > 0
+  ) {
+    return { ...value };
+  }
+  return undefined;
 }
 
 function sanitizeCorpOptionalRezChoiceQuote(
@@ -1141,9 +1170,7 @@ function sanitizeCorpOptionalRezChoiceQuote(
       increaseSourceDefinitionIds,
     );
   if (
-    (cardType !== "ice" &&
-      cardType !== "asset" &&
-      cardType !== "upgrade") ||
+    (cardType !== "ice" && cardType !== "asset" && cardType !== "upgrade") ||
     (cardType === "ice") !== (quote.installedZone === "serverIce") ||
     !mandatoryAdditionalCosts ||
     typeof mandatoryAdditionalCosts !== "object" ||
@@ -1166,13 +1193,12 @@ function sanitizeCorpOptionalRezChoiceQuote(
     quote.regularCreditsRequired !==
       quote.finalCredits - quote.temporaryCreditsApplied ||
     quote.creditPayable !==
-      (quote.regularCreditsAvailable >= quote.regularCreditsRequired) ||
+      quote.regularCreditsAvailable >= quote.regularCreditsRequired ||
     quote.regularCreditsAvailable !== expected.ownCredits ||
     quote.additionalCostsPayable !==
-      (expected.ownAgendaPoints >=
-        (mandatoryAdditionalCosts as { agendaPoints: number }).agendaPoints) ||
-    quote.affordable !==
-      (quote.creditPayable && quote.additionalCostsPayable)
+      expected.ownAgendaPoints >=
+        (mandatoryAdditionalCosts as { agendaPoints: number }).agendaPoints ||
+    quote.affordable !== (quote.creditPayable && quote.additionalCostsPayable)
   )
     return undefined;
 
@@ -1186,9 +1212,7 @@ function sanitizeCorpOptionalRezChoiceQuote(
       agendaPoints: (mandatoryAdditionalCosts as { agendaPoints: number })
         .agendaPoints,
     },
-    ...(reductionSourceDefinitionIds
-      ? { reductionSourceDefinitionIds }
-      : {}),
+    ...(reductionSourceDefinitionIds ? { reductionSourceDefinitionIds } : {}),
     ...(increaseSourceDefinitionIds ? { increaseSourceDefinitionIds } : {}),
     temporaryCreditsAvailable: quote.temporaryCreditsAvailable,
     temporaryCreditsApplied: quote.temporaryCreditsApplied,
@@ -1214,9 +1238,7 @@ function sanitizedStringArray(value: unknown): string[] | undefined {
   const strings = value as string[];
   if (
     new Set(strings).size !== strings.length ||
-    strings.some(
-      (entry, index) => index > 0 && strings[index - 1]! >= entry,
-    )
+    strings.some((entry, index) => index > 0 && strings[index - 1]! >= entry)
   )
     return undefined;
   return strings.slice();

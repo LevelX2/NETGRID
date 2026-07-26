@@ -763,27 +763,26 @@ export type CorpOptionalRezChoiceQuoteBinding = {
   stateVersion: number;
 };
 
-export type CorpOptionalRezChoiceQuote =
-  CorpOptionalRezChoiceQuoteBinding &
-    (
-      | { complete: false }
-      | {
-          complete: true;
-          cardType: "ice" | "asset" | "upgrade";
-          baseCredits: number;
-          finalCredits: number;
-          mandatoryAdditionalCosts: VisibleMandatoryCorpRezCosts;
-          reductionSourceDefinitionIds?: CardDefinitionId[];
-          increaseSourceDefinitionIds?: CardDefinitionId[];
-          temporaryCreditsAvailable: number;
-          temporaryCreditsApplied: number;
-          regularCreditsAvailable: number;
-          regularCreditsRequired: number;
-          creditPayable: boolean;
-          additionalCostsPayable: boolean;
-          affordable: boolean;
-        }
-    );
+export type CorpOptionalRezChoiceQuote = CorpOptionalRezChoiceQuoteBinding &
+  (
+    | { complete: false }
+    | {
+        complete: true;
+        cardType: "ice" | "asset" | "upgrade";
+        baseCredits: number;
+        finalCredits: number;
+        mandatoryAdditionalCosts: VisibleMandatoryCorpRezCosts;
+        reductionSourceDefinitionIds?: CardDefinitionId[];
+        increaseSourceDefinitionIds?: CardDefinitionId[];
+        temporaryCreditsAvailable: number;
+        temporaryCreditsApplied: number;
+        regularCreditsAvailable: number;
+        regularCreditsRequired: number;
+        creditPayable: boolean;
+        additionalCostsPayable: boolean;
+        affordable: boolean;
+      }
+  );
 
 export type ChoiceOption = {
   id: string;

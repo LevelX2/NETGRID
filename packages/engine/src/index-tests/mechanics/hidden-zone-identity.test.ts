@@ -285,21 +285,21 @@ describe("MVP 0.98a Identity and modifiers", () => {
     expect(CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics).toContain(
       "identity_ability",
     );
-    expect(CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
-      "hosting",
-    );
-    expect(CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
-      "virus",
-    );
-    expect(CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
-      "purge",
-    );
-    expect(CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
-      "prevention",
-    );
-    expect(CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
-      "replacement",
-    );
+    expect(
+      CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics,
+    ).not.toContain("hosting");
+    expect(
+      CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics,
+    ).not.toContain("virus");
+    expect(
+      CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics,
+    ).not.toContain("purge");
+    expect(
+      CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics,
+    ).not.toContain("prevention");
+    expect(
+      CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics,
+    ).not.toContain("replacement");
   });
 
   it("searches the Runner stack through a private Choice and deterministic shuffle", () => {
@@ -521,9 +521,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         expect(definition?.mechanics).toContain("hidden_zone_tool");
       }
     }
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
-      "playable_mvp",
-    );
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+    ).toBe("playable_mvp");
   });
 
   it("resolves Forgotten Backup Chip trash search through a private PendingChoice and replay-safe StateHash", () => {
@@ -952,7 +952,10 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     installRunnerProgramForTest(state, "simple_decoder");
     installRunnerProgramForTest(state, "simple_fracter");
     installRunnerProgramForTest(state, "simple_fracter");
-    const targetProgramId = putRunnerCardOnTopOfStack(state, "onr_v1_042_mouse");
+    const targetProgramId = putRunnerCardOnTopOfStack(
+      state,
+      "onr_v1_042_mouse",
+    );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -960,11 +963,12 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "play_event" && String(action.payload?.cardId) === eventId,
+        action.type === "play_event" &&
+        String(action.payload?.cardId) === eventId,
     );
-    expect(state.pendingChoice?.options.map((option) => option.value)).toContain(
-      "stack",
-    );
+    expect(
+      state.pendingChoice?.options.map((option) => option.value),
+    ).toContain("stack");
     state = applyChoice(state, "runner", "source_stack");
     const targetOption = state.pendingChoice?.options.find(
       (option) => option.value === targetProgramId,

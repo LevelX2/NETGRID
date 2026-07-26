@@ -61,9 +61,57 @@ describe("AI input DTO score-conversion contract", () => {
       creditsPerX: 1,
       maximumX: { kind: "context" },
     });
-    expect(input.playerView.servers[0]?.root[0]).not.toHaveProperty(
-      "playCost",
+    expect(input.playerView.servers[0]?.root[0]).not.toHaveProperty("playCost");
+  });
+
+  it("preserves only a current Corp score-choice continuation", () => {
+    const action = conversionAction();
+    const view = playerView(action);
+    view.pendingChoice = {
+      choiceId: "score-choice",
+      side: "corp",
+      source: "p3_34.distribute_advancement:test",
+      prompt: "Choose agenda",
+      kind: "select_option",
+      options: [{ id: "agenda", label: "Agenda", value: "agenda:2" }],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 1,
+      visibility: "public",
+      continuation: {
+        family: "corp_advancement_counter",
+        originActionId: "corp.play_operation.test",
+        createdAtStateVersion: 1,
+      },
+    };
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "continuation",
+      decisionId: "continuation:1",
+      actionNumber: 1,
+      profileId: "continuation-test",
+    });
+    expect(input.playerView.pendingChoice?.continuation).toEqual(
+      view.pendingChoice.continuation,
     );
+    view.pendingChoice.continuation!.createdAtStateVersion = 0;
+    expect(
+      buildAiDecisionInputDto({
+        side: "corp",
+        playerView: view,
+        eventTail: [],
+        legalActions: [action],
+        difficulty: "normal",
+        seed: "continuation",
+        decisionId: "continuation:2",
+        actionNumber: 1,
+        profileId: "continuation-test",
+      }).playerView.pendingChoice?.continuation,
+    ).toBeUndefined();
   });
 
   it("preserves only explicitly public resolved effects for plan-phase communication", () => {
@@ -114,7 +162,9 @@ describe("AI input DTO score-conversion contract", () => {
       profileId: "public-resolved-effects-dto-test",
     });
 
-    expect(input.playerView.publicEvents[0]?.publicPayload.resolvedEffects).toEqual([
+    expect(
+      input.playerView.publicEvents[0]?.publicPayload.resolvedEffects,
+    ).toEqual([
       expect.objectContaining({
         effectId: "conference-credit",
         kind: "gain_credits",

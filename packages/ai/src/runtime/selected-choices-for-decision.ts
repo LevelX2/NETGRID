@@ -561,7 +561,8 @@ function residentCorpScoreChoiceBinding(
     continuation.selectedActionId.length > 0 &&
     choiceContinuation?.family === "corp_advancement_counter" &&
     choiceContinuation.originActionId === continuation.selectedActionId &&
-    choiceContinuation.createdAtStateVersion === input.playerView.stateVersion &&
+    choiceContinuation.createdAtStateVersion ===
+      input.playerView.stateVersion &&
     continuation.selectedAtStateVersion === portfolio.stateVersion &&
     portfolio.stateVersion + 1 === input.playerView.stateVersion &&
     choice.stateVersion === input.playerView.stateVersion &&
@@ -625,7 +626,8 @@ function residentCorpScoredAgendaHqShuffleBinding(
     .sort();
   const exactContinuation =
     choiceContinuation?.family === "corp_scored_agenda_hq_shuffle" &&
-    choiceContinuation.createdAtStateVersion === input.playerView.stateVersion &&
+    choiceContinuation.createdAtStateVersion ===
+      input.playerView.stateVersion &&
     action.side === "corp" &&
     action.type === "resolve_choice" &&
     action.source === "game_rule" &&
@@ -641,7 +643,8 @@ function residentCorpScoredAgendaHqShuffleBinding(
     portfolio !== undefined &&
     executor !== undefined &&
     moduleState?.kind === "score" &&
-    moduleState.signal?.agendaInstanceId === choiceContinuation.agendaInstanceId &&
+    moduleState.signal?.agendaInstanceId ===
+      choiceContinuation.agendaInstanceId &&
     continuation?.family === "corp_scored_agenda_on_score" &&
     typeof continuation.selectedActionId === "string" &&
     continuation.selectedActionId.length > 0 &&
@@ -979,12 +982,11 @@ function isExactOptionalRezChoiceQuoteBinding(
       quote.finalCredits - quote.temporaryCreditsApplied &&
     quote.regularCreditsAvailable === input.playerView.own.credits &&
     quote.creditPayable ===
-      (quote.regularCreditsAvailable >= quote.regularCreditsRequired) &&
+      quote.regularCreditsAvailable >= quote.regularCreditsRequired &&
     quote.additionalCostsPayable ===
-      (input.playerView.own.agendaPoints >=
-        quote.mandatoryAdditionalCosts.agendaPoints) &&
-    quote.affordable ===
-      (quote.creditPayable && quote.additionalCostsPayable)
+      input.playerView.own.agendaPoints >=
+        quote.mandatoryAdditionalCosts.agendaPoints &&
+    quote.affordable === (quote.creditPayable && quote.additionalCostsPayable)
   );
 }
 
@@ -1002,9 +1004,7 @@ function validDefinitionIdList(value: readonly string[] | undefined): boolean {
     value === undefined ||
     (value.every(nonEmptyString) &&
       new Set(value).size === value.length &&
-      value.every(
-        (entry, index) => index === 0 || value[index - 1]! < entry,
-      ))
+      value.every((entry, index) => index === 0 || value[index - 1]! < entry))
   );
 }
 
