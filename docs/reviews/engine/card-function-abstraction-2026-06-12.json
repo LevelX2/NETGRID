@@ -33,11 +33,13 @@
     "status": "baseline_enforced",
     "tokenSource": "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus packages/shared/src/card-definitions.ts",
     "tokenCount": 1317,
-    "baselineCount": 72,
+    "baselineCount": 73,
     "summary": {
+      "runtime_state_field_uses_card_name": 1,
       "new_unclassified_card_name_leak": 72
     },
     "fingerprints": [
+      "packages/engine/src/game/apply-action.ts|163|37|systematic_layoffs|Systematic Layoffs|runtime_state_field_uses_card_name",
       "scripts/audit-ai-action-capacity-contracts.mjs|19|15|valu-pak-software-bundle|Valu-Pak Software Bundle|new_unclassified_card_name_leak",
       "scripts/audit-ai-action-capacity-contracts.mjs|20|15|preying-mantis|Preying Mantis|new_unclassified_card_name_leak",
       "scripts/audit-ai-action-capacity-contracts.mjs|21|15|quest-for-cattekin|Quest for Cattekin|new_unclassified_card_name_leak",
