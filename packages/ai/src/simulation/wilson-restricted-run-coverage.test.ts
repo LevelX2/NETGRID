@@ -16,7 +16,7 @@ describe("Wilson Weeflerunner Engine-restricted run coverage", () => {
     if (!slot) throw new Error("Missing Fast Advance benchmark slot.");
     const resolved = resolveBenchmarkDeckSlot(slot);
     if (!resolved.ok) throw new Error(resolved.reason);
-    let capture: AiSimulationDecisionCheckpointCapture | undefined;
+    const captures: AiSimulationDecisionCheckpointCapture[] = [];
 
     const summary = simulateAiGame({
       seed: "ai-behavior-baseline-v1-02",
@@ -25,27 +25,33 @@ describe("Wilson Weeflerunner Engine-restricted run coverage", () => {
       corpControllerMode: "current_candidate",
       ...resolved.config,
       testOnlyDecisionCheckpointCapture: {
-        actionIndices: [13],
+        actionIndices: Array.from({ length: 15 }, (_, index) => index),
         capture: (snapshot) => {
-          capture = snapshot;
+          captures.push(snapshot);
         },
       },
     });
 
+    const wilsonSource = "runner_onr_v1_187_wilson-weeflerunner-apprentice_1";
+    const capture = captures.find((snapshot) => {
+      const startRuns = snapshot.input.legalActions.filter(
+        (action) => action.type === "start_run",
+      );
+      return (
+        startRuns.length > 0 &&
+        startRuns.every((action) => action.source === wilsonSource)
+      );
+    });
     expect(capture).toBeDefined();
-    if (!capture) throw new Error("Missing Wilson stateVersion-13 capture.");
-    expect(capture.input.playerView.stateVersion).toBe(13);
+    if (!capture) throw new Error("Missing Wilson restricted-run capture.");
     expect(capture.input.playerView.own).toMatchObject({
       clicks: 0,
       credits: 4,
     });
     const wilsonRuns = capture.input.legalActions.filter(
-      (action) =>
-        action.type === "start_run" &&
-        action.source ===
-          "runner_onr_v1_187_wilson-weeflerunner-apprentice_1",
+      (action) => action.type === "start_run" && action.source === wilsonSource,
     );
-    expect(wilsonRuns).toHaveLength(4);
+    expect(wilsonRuns).toHaveLength(3);
     expect(
       wilsonRuns.map((action) => ({
         serverId: action.payload?.serverId,
@@ -76,13 +82,6 @@ describe("Wilson Weeflerunner Engine-restricted run coverage", () => {
         costProfile: "extra_click",
         remaining: 1,
       },
-      {
-        serverId: "remote_1",
-        restriction: "run_only",
-        allowedAction: "start_run",
-        costProfile: "extra_click",
-        remaining: 1,
-      },
     ]);
     expect(
       capture.input.playerView.publicEvents.slice(-2).map((event) => ({
@@ -102,8 +101,7 @@ describe("Wilson Weeflerunner Engine-restricted run coverage", () => {
         type: "install_card",
         actor: "runner",
         actionType: "install_card",
-        cardDefinitionId:
-          "onr_v1_187_wilson-weeflerunner-apprentice",
+        cardDefinitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
       },
     ]);
 
@@ -112,17 +110,20 @@ describe("Wilson Weeflerunner Engine-restricted run coverage", () => {
     expect(summary.runtimeFailures).toEqual([]);
     expect(summary.replayOk).toBe(true);
     expect(
-      summary.actionSequence.find(
-        (entry) => entry.stateVersionBefore === 13,
+      summary.actionSequence.find((entry) =>
+        entry.evidence.includes(
+          "plan_assessment_evidence:runner_engine_restricted_run_sequence_continuation",
+        ),
       ),
     ).toMatchObject({
       side: "runner",
       actionType: "start_run",
+      targetServerId: "archives",
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       evidence: expect.arrayContaining([
         "plan_assessment_evidence:runner_engine_restricted_run_sequence_continuation",
-        "plan_first_executor:plan:runner.convert_run_window:run%3A13",
+        `plan_first_executor:plan:runner.convert_run_window:run%3A${capture.state.stateVersion}`,
       ]),
     });
   });

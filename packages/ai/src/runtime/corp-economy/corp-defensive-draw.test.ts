@@ -204,7 +204,7 @@ describe("Corp defensive draw context", () => {
     });
   });
 
-  it("fails closed on unknown or already productive direct install routing", () => {
+  it("defers an unknown install branch while keeping the exact current draw head", () => {
     const setup = targetedScoreDefenseDrawSetup();
 
     expect(
@@ -212,7 +212,17 @@ describe("Corp defensive draw context", () => {
         ...setup.args,
         directInstallRouteState: { knowledge: "unknown" },
       }),
-    ).toBeUndefined();
+    ).toMatchObject({
+      parentProjectId: setup.need.parentProjectId,
+      evidence: expect.arrayContaining([
+        "direct_install_route_disposition:unknown_deferred",
+      ]),
+    });
+  });
+
+  it("fails closed when a productive direct install route is already known", () => {
+    const setup = targetedScoreDefenseDrawSetup();
+
     expect(
       corpMissingConcreteScoreDefenseDrawNeed({
         ...setup.args,
@@ -238,7 +248,7 @@ describe("Corp defensive draw context", () => {
     ).toBeUndefined();
   });
 
-  it("fails closed unless the funded protection baseline is current, known, and unsatisfied", () => {
+  it("fails closed unless the current unsatisfied baseline is known or only its later subset route is unknown", () => {
     const setup = targetedScoreDefenseDrawSetup();
     const protectedBaseline: KnownCorpFundedScoreProtectionAssessment = {
       ...setup.need.baseline,
@@ -286,6 +296,29 @@ describe("Corp defensive draw context", () => {
         },
       }),
     ).toBeUndefined();
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        protectionNeed: {
+          ...setup.need,
+          baseline: {
+            knowledge: "unknown",
+            fundedProtection: false,
+            unknownReason: "subset_assessment_unknown",
+            availableCorpCredits: 13,
+            availableCorpClicks: 2,
+            totalScoreReserveCredits: 0,
+            hardClickReserve: 0,
+            evidence: [],
+          },
+        },
+      }),
+    ).toMatchObject({
+      parentProjectId: setup.need.parentProjectId,
+      evidence: expect.arrayContaining([
+        "funded_protection_baseline:subset_unknown_deferred",
+      ]),
+    });
   });
 
   it("requires an identity-bound exact draw projection and the full click horizon", () => {

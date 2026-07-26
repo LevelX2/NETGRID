@@ -96,16 +96,13 @@ describe("match D153 card hint consumer contract", () => {
         (tool) => tool.cardId === JUNKYARD,
       ),
     ).toBe(false);
-    expect(result.decision?.actionId).toBe("runner.end_turn");
+    expect(result.decision?.actionId).toBe("runner.gain_credit");
     expect(result.decision?.fallbackUsed).toBe(false);
-    expect(result.decision?.decisionDebug?.planKind).toBe(
-      "runner.complete_turn",
-    );
+    expect(result.decision?.decisionDebug?.planKind).toBe("runner.economy");
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        "plan_step_capability:complete_turn_after_productive_routes_exhausted",
-        "plan_assessment_evidence:runner_immediate_credit_route_has_no_bound_funding_need",
-        "plan_assessment_evidence:productive_legal_routes_exhausted",
+        "plan_step_capability:gain_general_liquid_credits",
+        "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
         "plan_priority_class:P6",
       ]),
     );

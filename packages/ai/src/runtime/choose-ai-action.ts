@@ -1,12 +1,17 @@
 import {
   type AiDecision,
   type AiDecisionInput,
+  type CorpPunishRouteQuoteRequest,
+  type CorpPunishRouteQuoteResult,
   type EngineRandomizedIceInstallSelectionQuoteResult,
   type EngineRandomizedIceInstallSelectionRequest,
 } from "@netgrid/shared";
 
 export type AiDecisionRuntimeOptions = {
   persistTacticalPlanMemory?: boolean;
+  quoteCorpPunishRoute?: (
+    request: CorpPunishRouteQuoteRequest,
+  ) => CorpPunishRouteQuoteResult;
   quoteRandomizedIceInstallSelection?: (
     request: EngineRandomizedIceInstallSelectionRequest,
   ) => EngineRandomizedIceInstallSelectionQuoteResult;

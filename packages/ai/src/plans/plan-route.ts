@@ -237,7 +237,14 @@ function candidateMatchesTarget(
   target: PlanTargetRef,
 ): boolean {
   if (target.kind === "server") {
-    return candidate.runProjectionSummary?.serverId === target.id;
+    return (
+      candidate.runProjectionSummary?.serverId === target.id ||
+      candidate.targetContext?.selectedTargets.some(
+        (candidateTarget) =>
+          candidateTarget.targetId === target.id &&
+          candidateTarget.targetKind === "server",
+      ) === true
+    );
   }
   if (
     (candidate.sourceCardInstanceId === target.id ||

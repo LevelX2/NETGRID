@@ -71,6 +71,35 @@ describe("plan instance identity and orthogonal states", () => {
       planInstanceIdForProposal(changedPhase),
     );
   });
+
+  it("persists an exact parent need edge and rejects an orphan need edge", () => {
+    const parentInstanceId = "plan:corp.score_agenda:general";
+    const proposal: PlanProposal = {
+      ...readyRunnerProposal(),
+      parentInstanceId,
+      parentNeedId: "score-funding",
+    };
+
+    expect(instantiatePlanProposal(proposal, 7)).toMatchObject({
+      parentInstanceId,
+      parentNeedId: "score-funding",
+    });
+
+    expect(() =>
+      instantiatePlanProposal(
+        {
+          ...readyRunnerProposal(),
+          parentNeedId: "score-funding",
+        },
+        7,
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        name: "PlanResolutionFailure",
+        code: "invalid_plan_identity",
+      }),
+    );
+  });
 });
 
 function readyRunnerProposal(): PlanProposal {

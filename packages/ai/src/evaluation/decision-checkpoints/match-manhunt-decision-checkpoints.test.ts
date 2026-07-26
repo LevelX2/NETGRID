@@ -65,16 +65,16 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("completes the turn when score material is unobservable and all routes are closed", () => {
+  it("uses exact basic liquidity when score material is unobservable and the draw route is closed", () => {
     const noTagWindow = mutateFixture(cp02Json, (fixture) => {
       moveCorpCardsToArchives(fixture, new Set([CHANCE_OBSERVATION]));
       fixture.expectation = {
-        acceptableActions: [{ type: "end_turn" }],
+        acceptableActions: [{ type: "gain_credit" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.complete_turn"],
-          acceptableCapabilities: ["complete_turn_after_productive_routes_exhausted"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "productive_legal_routes_exhausted",
+            "corp_engine_certified_basic_liquidity_development",
           ],
         },
       };
@@ -118,9 +118,7 @@ describe("match Manhunt exact decision checkpoints", () => {
       );
       restoreCorpScoredAgendaToRd(fixture);
       fixture.expectation = {
-        acceptableActions: [
-          { type: "draw_card" },
-        ],
+        acceptableActions: [{ type: "draw_card" }],
         planExecution: {
           acceptablePlanKinds: ["corp.hand_and_agenda_management"],
           acceptableCapabilities: ["draw_for_plan"],
@@ -215,9 +213,7 @@ function moveCorpCardsToArchives(
   }
 }
 
-function restoreCorpScoredAgendaToRd(
-  fixture: AiDecisionCheckpointV1,
-): void {
+function restoreCorpScoredAgendaToRd(fixture: AiDecisionCheckpointV1): void {
   const state = fixture.engine.testOnlyGameState;
   const agendaId = state.corp.scoreArea.pop();
   if (!agendaId) throw new Error("Missing scored Corp agenda counterprobe");

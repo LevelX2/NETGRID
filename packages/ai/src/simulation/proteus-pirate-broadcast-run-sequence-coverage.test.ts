@@ -9,32 +9,40 @@ import { simulateAiGame } from "../simulation";
 import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
 
 describe("Proteus restricted multi-run plan-first coverage", () => {
-  it("converts the exact stateVersion-72 R&D sequence leg through the generic run-window plan", () => {
-    let capture: AiSimulationDecisionCheckpointCapture | undefined;
+  it("converts Pirate Broadcast's exact R&D and Archives sequence legs through the generic run-window plan", () => {
+    const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-01",
-      maxActions: 76,
+      maxActions: 90,
       runnerDeck: deck("proteus_runner_rd_bad_publicity_2026_05_25"),
       corpDeck: deck("proteus_corp_region_fast_score_2026_05_25"),
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
       testOnlyDecisionCheckpointCapture: {
-        actionIndices: [72],
+        actionIndices: Array.from({ length: 90 }, (_, index) => index),
         capture: (snapshot) => {
-          capture = snapshot;
+          captures.push(snapshot);
         },
       },
     });
 
-    expect(capture).toBeDefined();
-    if (!capture) throw new Error("Missing stateVersion-72 capture");
-    expect(capture.state.stateVersion).toBe(72);
-    expect(capture.state.timingPoint).toBe("runner_action.main");
-    expect(capture.state.run).toBeUndefined();
-    expect(capture.input.legalActions).toEqual([
+    const rdActionId =
+      "runner.start_run.rd.bonus_run.onr_proteus_116_pirate-broadcast";
+    const rdCapture = captures.find((snapshot) =>
+      snapshot.input.legalActions.some(
+        (action) => action.actionId === rdActionId,
+      ),
+    );
+
+    expect(rdCapture).toBeDefined();
+    if (!rdCapture) {
+      throw new Error("Missing Pirate Broadcast R&D sequence-leg capture");
+    }
+    expect(rdCapture.state.timingPoint).toBe("runner_action.main");
+    expect(rdCapture.state.run).toBeUndefined();
+    expect(rdCapture.input.legalActions).toEqual([
       expect.objectContaining({
-        actionId:
-          "runner.start_run.rd.bonus_run.onr_proteus_116_pirate-broadcast",
+        actionId: rdActionId,
         side: "runner",
         type: "start_run",
         source: "game_rule",
@@ -50,18 +58,17 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
     ]);
 
     const candidates = buildActionSemanticCandidates({
-      legalActions: capture.input.legalActions,
+      legalActions: rdCapture.input.legalActions,
       observerSide: "runner",
-      stateVersion: 72,
+      stateVersion: rdCapture.state.stateVersion,
       visibleSourceDefinitionsByInstanceId:
-        visibleSourceDefinitionsByInstanceId(capture.input.playerView),
+        visibleSourceDefinitionsByInstanceId(rdCapture.input.playerView),
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
     });
     expect(candidates).toEqual([
       expect.objectContaining({
-        actionId:
-          "runner.start_run.rd.bonus_run.onr_proteus_116_pirate-broadcast",
+        actionId: rdActionId,
         actionType: "start_run",
         semanticActionType: "run.start",
         runProjectionSummary: expect.objectContaining({
@@ -73,37 +80,45 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
 
     expect(summary.errors).toEqual([]);
     expect(summary.runtimeFailures).toEqual([]);
-    expect(summary.actionSequence).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          stateVersionBefore: 72,
-          actionType: "start_run",
-          targetServerId: "rd",
-          planKind: "runner.convert_run_window",
-          reasonCode: "plan_first.runner.convert_run_window",
-          fallbackUsed: false,
-          evidence: expect.arrayContaining([
-            "plan_action_assessment_evidence:runner_engine_restricted_run_sequence_continuation",
-            "plan_action_assessment_evidence:runner_restricted_run_sequence_action:runner.start_run.rd.bonus_run.onr_proteus_116_pirate-broadcast",
-            "plan_action_assessment_evidence:runner_restricted_run_sequence_remaining:1",
-            "plan_action_assessment_evidence:runner_restricted_run_sequence_target:rd",
-            "plan_step_capability:continue_engine_restricted_run_sequence",
-          ]),
-        }),
-        expect.objectContaining({
-          stateVersionBefore: 75,
-          actionType: "start_run",
-          targetServerId: "archives",
-          planKind: "runner.convert_run_window",
-          reasonCode: "plan_first.runner.convert_run_window",
-          fallbackUsed: false,
-          evidence: expect.arrayContaining([
-            "plan_action_assessment_evidence:runner_engine_restricted_run_sequence_continuation",
-            "plan_action_assessment_evidence:runner_restricted_run_sequence_target:archives",
-          ]),
-        }),
+    expect(
+      summary.actionSequence.find((entry) =>
+        entry.evidence.includes(
+          `plan_action_assessment_evidence:runner_restricted_run_sequence_action:${rdActionId}`,
+        ),
+      ),
+    ).toMatchObject({
+      actionType: "start_run",
+      targetServerId: "rd",
+      planKind: "runner.convert_run_window",
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      evidence: expect.arrayContaining([
+        "plan_action_assessment_evidence:runner_engine_restricted_run_sequence_continuation",
+        "plan_action_assessment_evidence:runner_restricted_run_sequence_remaining:1",
+        "plan_action_assessment_evidence:runner_restricted_run_sequence_target:rd",
+        "plan_step_capability:continue_engine_restricted_run_sequence",
       ]),
-    );
+    });
+
+    const archivesActionId =
+      "runner.start_run.archives.bonus_run.onr_proteus_116_pirate-broadcast";
+    expect(
+      summary.actionSequence.find((entry) =>
+        entry.evidence.includes(
+          `plan_action_assessment_evidence:runner_restricted_run_sequence_action:${archivesActionId}`,
+        ),
+      ),
+    ).toMatchObject({
+      actionType: "start_run",
+      targetServerId: "archives",
+      planKind: "runner.convert_run_window",
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      evidence: expect.arrayContaining([
+        "plan_action_assessment_evidence:runner_engine_restricted_run_sequence_continuation",
+        "plan_action_assessment_evidence:runner_restricted_run_sequence_target:archives",
+      ]),
+    });
   });
 });
 

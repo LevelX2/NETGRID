@@ -70,6 +70,12 @@ export function createTurnCompletionPlanModule(side: Side): PlanModule {
 }
 
 function turnCompletionIsAdmissible(context: PlanSchedulerContext): boolean {
+  if (
+    context.input.side === "corp" &&
+    context.input.playerView.own.clicks > 0
+  ) {
+    return false;
+  }
   const explicitlyNonproductive = new Set(
     (context.actionDispositions ?? [])
       .filter((entry) => entry.disposition === "explicitly_nonproductive")

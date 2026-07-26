@@ -673,9 +673,7 @@
           "corp_onr_proteus_032_misleading-access-menus_3",
           "corp_onr_v1_297_overtime-incentives_2"
         ],
-        "scoreArea": [
-          "corp_onr_v1_194_corporate-downsizing_3"
-        ],
+        "scoreArea": ["corp_onr_v1_194_corporate-downsizing_3"],
         "servers": [
           {
             "id": "hq",
@@ -692,9 +690,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_279_wall-of-static_3"
-            ],
+            "ice": ["corp_onr_v1_279_wall-of-static_3"],
             "root": []
           },
           {
@@ -8723,9 +8719,7 @@
       "selectedStepKind": "gain_credits",
       "selectedActionId": "corp.gain_credit",
       "selectedActionType": "gain_credit",
-      "blockedBy": [
-        "missing_credits"
-      ],
+      "blockedBy": ["missing_credits"],
       "creditDemands": [
         {
           "schemaVersion": "credit-demand-v1",
@@ -8740,9 +8734,7 @@
           "currentCredits": 2,
           "targetCredits": 5,
           "gap": 3,
-          "acceptedCreditRestrictions": [
-            "general"
-          ],
+          "acceptedCreditRestrictions": ["general"],
           "evidence": [
             "reserve_source:runtime_context",
             "reserve_family:corp_fast_advance",
@@ -8838,9 +8830,7 @@
             "currentCredits": 3,
             "targetCredits": 5,
             "gap": 2,
-            "acceptedCreditRestrictions": [
-              "general"
-            ],
+            "acceptedCreditRestrictions": ["general"],
             "evidence": [
               "reserve_source:runtime_context",
               "reserve_family:corp_fast_advance",
@@ -8993,13 +8983,8 @@
               "currentActions": 0,
               "targetActions": 1,
               "gap": 1,
-              "acceptedRestrictions": [
-                "unrestricted",
-                "install_only"
-              ],
-              "requiredActionTypes": [
-                "install_card"
-              ],
+              "acceptedRestrictions": ["unrestricted", "install_only"],
+              "requiredActionTypes": ["install_card"],
               "evidence": [
                 "action_demand_source_plan:corp.establish_scoring_remote:new_remote",
                 "action_demand_source_step:build_remote",
@@ -10194,13 +10179,8 @@
               "currentActions": 0,
               "targetActions": 1,
               "gap": 1,
-              "acceptedRestrictions": [
-                "unrestricted",
-                "install_only"
-              ],
-              "requiredActionTypes": [
-                "install_card"
-              ],
+              "acceptedRestrictions": ["unrestricted", "install_only"],
+              "requiredActionTypes": ["install_card"],
               "evidence": [
                 "action_demand_source_plan:corp.establish_scoring_remote:remote_1",
                 "action_demand_source_step:find_remote_protection",
@@ -10350,9 +10330,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 87,
-      "blockerIds": [
-        "corp.fast_advance:reserve_shortfall"
-      ],
+      "blockerIds": ["corp.fast_advance:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 248,
       "state": {
@@ -10466,9 +10444,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.fast_advance",
-          "evidence": [
-            "continued:corp.fast_advance"
-          ]
+          "evidence": ["continued:corp.fast_advance"]
         },
         "commitment": {
           "strategyId": "corp.fast_advance",
@@ -10687,9 +10663,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 82,
@@ -10747,9 +10721,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 59,
@@ -10781,10 +10753,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10803,9 +10772,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -10836,10 +10803,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10896,10 +10860,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10957,10 +10918,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11081,10 +11039,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11140,10 +11095,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11192,7 +11144,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "end_turn"
+        "type": "gain_credit"
       }
     ],
     "forbiddenActions": [
@@ -11201,19 +11153,12 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.complete_turn"
-      ],
-      "acceptableCapabilities": [
-        "complete_turn_after_productive_routes_exhausted"
-      ],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_virus_purge_has_no_visible_strategic_pressure",
-        "productive_legal_routes_exhausted"
+        "corp_engine_certified_basic_liquidity_development"
       ],
-      "forbiddenCapabilities": [
-        "purge_visible_runner_viruses"
-      ]
+      "forbiddenCapabilities": ["purge_visible_runner_viruses"]
     }
   }
 }

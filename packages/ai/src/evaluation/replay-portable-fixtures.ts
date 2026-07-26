@@ -1,4 +1,10 @@
-import type { AiDecisionInput, LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  PlayerView,
+  Side,
+  VisibleCard,
+} from "@netgrid/shared";
 
 export const REPLAY_PORTABLE_FIXTURE_SCHEMA_VERSION =
   "replay-portable-fixture-v1" as const;
@@ -83,7 +89,11 @@ export function coverageRunGapPortableFixture(): ReplayPortableDecisionFixture {
 
 export function coverageRunGapNoRunNegativeFixture(): ReplayPortableDecisionFixture {
   const draw = legalAction("portable.no_run.draw", "draw_card", "Draw 1");
-  const gain = legalAction("portable.no_run.gain_credit", "gain_credit", "Gain 1");
+  const gain = legalAction(
+    "portable.no_run.gain_credit",
+    "gain_credit",
+    "Gain 1",
+  );
   const input = aiInput([draw, gain]);
   input.playerView.own.credits = 3;
   input.playerView.own.clicks = 2;
@@ -102,7 +112,8 @@ export function coverageRunGapNoRunNegativeFixture(): ReplayPortableDecisionFixt
     expected: {
       actionId: "not_start_run",
       actionType: "start_run",
-      reason: "Without a start_run LegalAction, the portable fixture must not select one.",
+      reason:
+        "Without a start_run LegalAction, the portable fixture must not select one.",
     },
     noRuntimeEffect: true,
     productiveUseAllowed: false,
@@ -222,7 +233,7 @@ function legalAction(
     label,
     source: "basic_action",
     timingPoint: "runner_action.main",
-    costs: [{ credits: 0 }],
+    costs: [{ credits: 0, clicks: 1 }],
     targetRequirements: [],
     visibility: "public",
     expiresAtStateVersion: 14,

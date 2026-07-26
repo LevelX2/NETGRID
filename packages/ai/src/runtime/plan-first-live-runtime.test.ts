@@ -20,11 +20,83 @@ import { instantiatePlanProposal } from "../plans/plan-instance";
 import type { PlanInstance } from "../plans/plan-kernel-types";
 import type { RunnerRestrictedProgramInstallSequenceCommitment } from "../plans/runner-tactical-plan-modules";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
+import { runnerCentralPressureHasExecutableEventRun } from "./plan-first-live-runtime";
 import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 describe("authoritative plan-first live runtime", () => {
+  it("admits an owned event-run head only when its current pressure route is executable", () => {
+    const signal = {
+      pressureId: "central-pressure:rd",
+      serverId: "rd",
+      reachable: true,
+      marginalValue: 5,
+      runActionIds: ["inside-job"],
+    } as unknown as Parameters<
+      typeof runnerCentralPressureHasExecutableEventRun
+    >[0];
+    const candidates = [
+      {
+        actionId: "inside-job",
+        semanticActionType: "play.runner_event",
+        runProjectionSummary: { serverId: "rd" },
+      },
+    ] as unknown as Parameters<
+      typeof runnerCentralPressureHasExecutableEventRun
+    >[1];
+    const runTargets = [
+      {
+        actionId: "inside-job",
+        targetServerId: "rd",
+        pathPassability: "reachable",
+        recommendation: "run_now",
+        score: 50,
+        knownAccessState: "unknown",
+      },
+    ] as unknown as Parameters<
+      typeof runnerCentralPressureHasExecutableEventRun
+    >[2];
+
+    expect(
+      runnerCentralPressureHasExecutableEventRun(
+        signal,
+        candidates,
+        runTargets,
+      ),
+    ).toBe(true);
+    expect(
+      runnerCentralPressureHasExecutableEventRun(
+        { ...signal, reachable: false },
+        candidates,
+        runTargets,
+      ),
+    ).toBe(false);
+    expect(
+      runnerCentralPressureHasExecutableEventRun(
+        { ...signal, marginalValue: 0 },
+        candidates,
+        runTargets,
+      ),
+    ).toBe(false);
+    expect(
+      runnerCentralPressureHasExecutableEventRun(
+        {
+          ...signal,
+          runActionExclusions: { "inside-job": ["unpayable_current_route"] },
+        },
+        candidates,
+        runTargets,
+      ),
+    ).toBe(false);
+    expect(
+      runnerCentralPressureHasExecutableEventRun(signal, candidates, [
+        { ...runTargets[0]!, pathPassability: "blocked_missing_coverage" },
+      ]),
+    ).toBe(false);
+  });
+
   it("routes a voluntary Runner action through a resident executor", () => {
     resetResidentPlanPortfolioMemory();
     const action = legalAction(
@@ -48,6 +120,46 @@ describe("authoritative plan-first live runtime", () => {
       },
     });
     expect(decision.evidence).toContain("plan_first_lane:plan");
+  });
+
+  it("selects an exact terminal-win route even when an unrelated Basic Credit projection is malformed", () => {
+    resetResidentPlanPortfolioMemory();
+    const malformedCredit = legalAction(
+      "malformed-credit",
+      "runner",
+      "gain_credit",
+      "Malformed Basic Credit",
+      { credits: 0, clicks: 0 },
+    );
+    const end = legalAction(
+      "end",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [malformedCredit, end]);
+    input.playerView.own.clicks = 1;
+
+    const malformedDecision = liveContext().chooseSemanticRuntimeAction(
+      input,
+      {},
+    );
+    expect(malformedDecision).toMatchObject({
+      actionId: "end",
+      fallbackUsed: false,
+      reasonCode: "plan_first.runner.secure_terminal_win",
+      decisionDebug: {
+        planKind: "runner.secure_terminal_win",
+      },
+    });
+    expect(malformedDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P1",
+        "plan_assessment_evidence:corp_visible_empty_rd_forced_mandatory_draw",
+      ]),
+    );
   });
 
   it("dispositions unbound Social Engineering instead of routing it through generic development", () => {
@@ -625,7 +737,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("keeps an installed program tutor uncovered when a real deck target has no plan", () => {
+  it("leaves an unowned program tutor unselected while an exact economy route acts", () => {
     resetResidentPlanPortfolioMemory();
     const search = legalAction(
       "short-circuit-search",
@@ -673,9 +785,18 @@ describe("authoritative plan-first live runtime", () => {
       },
     });
 
-    expect(() =>
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("missing_plan_module_coverage");
+    const tutorDecision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(tutorDecision).toMatchObject({
+      actionId: "credit",
+      fallbackUsed: false,
+      reasonCode: "plan_first.runner.economy",
+      decisionDebug: {
+        planKind: "runner.economy",
+      },
+    });
+    expect(tutorDecision.evidence).toContain(
+      "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
+    );
   });
 
   it("groups every legal install variant of one program-search source into one stable plan", () => {
@@ -993,8 +1114,8 @@ describe("authoritative plan-first live runtime", () => {
         ],
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
-      actionId: endTurn.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
   });
@@ -1094,8 +1215,8 @@ describe("authoritative plan-first live runtime", () => {
         ],
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
-      actionId: endTurn.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
   });
@@ -1373,7 +1494,14 @@ describe("authoritative plan-first live runtime", () => {
       { credits: 0 },
       { source: "game_rule" },
     );
-    const input = aiInput("runner", [cash, endTurn]);
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [cash, credit, endTurn]);
     input.playerView.own.credits = 0;
     input.playerView.own.clicks = 3;
     input.playerView.opponent.deckCount = 10;
@@ -1440,8 +1568,8 @@ describe("authoritative plan-first live runtime", () => {
     }).chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
-      actionId: endTurn.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
     expect(JSON.stringify(decision.decisionDebug)).toContain(
@@ -1644,20 +1772,569 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("fails closed when Corp economy has no parent-bound need", () => {
+  it("uses the exact finite Corp liquidity plan instead of EndTurn", () => {
     resetResidentPlanPortfolioMemory();
-    const action = legalAction(
+    const credit = legalAction(
       "credit",
       "corp",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
     );
-    const input = aiInput("corp", [action]);
+    const end = legalAction(
+      "end",
+      "corp",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("corp", [credit, end]);
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.own.clicks = 1;
     input.playerView.own.credits = 4;
-    expect(() =>
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("missing_plan_module_coverage");
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "corp.economy" },
+    });
+    expect(
+      JSON.stringify(residentPlanPortfolioSnapshot(input) ?? {}),
+    ).toContain('"kind":"develop_liquidity"');
+  });
+
+  it("keeps a malformed Corp Basic Credit unknown and does not select EndTurn", () => {
+    resetResidentPlanPortfolioMemory();
+    const malformedCredit = legalAction(
+      "malformed-credit",
+      "corp",
+      "gain_credit",
+      "Malformed Gain 1 Credit",
+      { credits: 0, clicks: 2 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const end = legalAction(
+      "end",
+      "corp",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("corp", [malformedCredit, end]);
+    input.playerView.own.clicks = 2;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+
+    expect(() => liveContext().chooseSemanticRuntimeAction(input, {})).toThrow(
+      expect.objectContaining({
+        code: "missing_plan_module_coverage",
+        context: expect.objectContaining({
+          unresolvedActionIds: [malformedCredit.actionId],
+        }),
+      }),
+    );
+    expect(
+      JSON.stringify(residentPlanPortfolioSnapshot(input) ?? {}),
+    ).not.toContain('"kind":"develop_liquidity"');
+  });
+
+  it("reactivates a reached Corp liquidity target only after later same-turn state progress", () => {
+    resetResidentPlanPortfolioMemory();
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      {
+        source: "basic_action",
+        payload: { gainCreditsAmount: 1 },
+      },
+    );
+    const end = legalAction(
+      "end",
+      "corp",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("corp", [credit, end]);
+    input.playerView.turnSerial = 3;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.credits = 5;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+    });
+    expect(
+      JSON.stringify(residentPlanPortfolioSnapshot(input) ?? {}),
+    ).toContain('"targetCredits":7');
+
+    const afterExternalProgress = structuredClone(input);
+    afterExternalProgress.playerView.stateVersion += 1;
+    afterExternalProgress.playerView.own.clicks = 1;
+    afterExternalProgress.playerView.own.credits = 7;
+    for (const action of afterExternalProgress.legalActions) {
+      action.expiresAtStateVersion =
+        afterExternalProgress.playerView.stateVersion;
+    }
+    afterExternalProgress.playerView.legalActions =
+      afterExternalProgress.legalActions;
+
+    const context = liveContext();
+    expect(
+      context.chooseSemanticRuntimeAction(afterExternalProgress, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+    });
+    expect(
+      JSON.stringify(
+        residentPlanPortfolioSnapshot(afterExternalProgress) ?? {},
+      ),
+    ).toContain('"targetCredits":8');
+
+    expect(
+      context.chooseSemanticRuntimeAction(afterExternalProgress, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+    });
+    expect(
+      JSON.stringify(
+        residentPlanPortfolioSnapshot(afterExternalProgress) ?? {},
+      ),
+    ).toContain('"targetCredits":8');
+  });
+
+  it("resolves a two-card HQ overflow through two exact revalidated steps", () => {
+    resetResidentPlanPortfolioMemory();
+    const installA = pacificaOverflowInstall(
+      "a-install-pacifica",
+      "pacifica-a",
+      "remote_1",
+    );
+    const installB = pacificaOverflowInstall(
+      "b-install-pacifica",
+      "pacifica-b",
+      "remote_1",
+    );
+    const input = aiInput("corp", [installA, installB]);
+    input.playerView.own.clicks = 2;
+    input.playerView.own.credits = 10;
+    input.playerView.own.gripOrHq = [
+      pacificaCard("pacifica-a"),
+      pacificaCard("pacifica-b"),
+      ...corpOverflowFillers(5),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+    const context = liveContext();
+
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installA.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installA.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+    const selectedSnapshot = structuredClone(
+      residentPlanPortfolioSnapshot(input),
+    );
+    const firstReceipt = hqOverflowReceipt(selectedSnapshot);
+    expect(firstReceipt).toMatchObject({
+      turnKey: "corp:0",
+      initialOverflowCount: 2,
+      maximumConversions: 2,
+      remainingConversions: 1,
+      selectedAtStateVersion: 1,
+      expectedOverflowAfterSelectedConversion: 1,
+    });
+
+    const afterFirst = structuredClone(input);
+    afterFirst.playerView.stateVersion = 2;
+    afterFirst.playerView.own.clicks = 1;
+    afterFirst.playerView.own.gripOrHq =
+      afterFirst.playerView.own.gripOrHq.filter(
+        (card) => card.instanceId !== "pacifica-a",
+      );
+    afterFirst.legalActions = [structuredClone(installB)];
+    afterFirst.legalActions[0]!.expiresAtStateVersion = 2;
+    afterFirst.playerView.legalActions = afterFirst.legalActions;
+
+    expect(context.chooseSemanticRuntimeAction(afterFirst, {})).toMatchObject({
+      actionId: installB.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+    expect(
+      hqOverflowReceipt(residentPlanPortfolioSnapshot(afterFirst)),
+    ).toMatchObject({
+      turnKey: "corp:0",
+      initialOverflowCount: 2,
+      maximumConversions: 2,
+      remainingConversions: 0,
+      selectedAtStateVersion: 2,
+      expectedOverflowAfterSelectedConversion: 0,
+    });
+
+    const malformedReceipts: Array<(receipt: Record<string, unknown>) => void> =
+      [
+        (receipt) => {
+          receipt.initialOverflowCount = Number.NaN;
+        },
+        (receipt) => {
+          receipt.maximumConversions = -1;
+        },
+        (receipt) => {
+          receipt.remainingConversions = 3;
+        },
+        (receipt) => {
+          delete receipt.selectedAtStateVersion;
+        },
+        (receipt) => {
+          receipt.expectedOverflowAfterSelectedConversion = Number.NaN;
+        },
+      ];
+    for (const mutate of malformedReceipts) {
+      const malformed = structuredClone(selectedSnapshot)!;
+      mutate(hqOverflowReceipt(malformed)!);
+      resetResidentPlanPortfolioMemory();
+      restoreResidentPlanPortfolioMemorySnapshot(afterFirst, malformed);
+      expect(() =>
+        context.chooseSemanticRuntimeAction(afterFirst, {}),
+      ).toThrowError("invalid_plan_identity");
+    }
+  });
+
+  it("limits HQ-overflow conversion to the exact current overflow", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = pacificaOverflowInstall(
+      "install-pacifica",
+      "pacifica",
+      "remote_1",
+    );
+    const input = aiInput("corp", [install]);
+    input.playerView.own.clicks = 2;
+    input.playerView.own.credits = 10;
+    input.playerView.own.gripOrHq = [
+      pacificaCard("pacifica"),
+      ...corpOverflowFillers(5),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+    ];
+    install.expiresAtStateVersion = input.playerView.stateVersion;
+    input.playerView.legalActions = input.legalActions;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+    expect(
+      hqOverflowReceipt(residentPlanPortfolioSnapshot(input)),
+    ).toMatchObject({
+      initialOverflowCount: 1,
+      maximumConversions: 1,
+      remainingConversions: 0,
+      selectedAtStateVersion: 1,
+      expectedOverflowAfterSelectedConversion: 0,
+    });
+  });
+
+  it("reactivates an exhausted HQ-overflow root for one later support-draw card", () => {
+    resetResidentPlanPortfolioMemory();
+    const installPacifica = pacificaOverflowInstall(
+      "install-pacifica",
+      "pacifica",
+      "remote_1",
+    );
+    const draw = legalAction("draw", "corp", "draw_card", "Draw a card", {
+      credits: 0,
+      clicks: 1,
+    });
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const end = legalAction(
+      "end",
+      "corp",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const playOvertime = legalAction(
+      "play-overtime",
+      "corp",
+      "play_operation",
+      "Play Overtime Incentives",
+      { credits: 4, clicks: 1 },
+      {
+        source: "overtime",
+        visibility: "private_to_actor",
+        payload: {
+          cardId: "overtime",
+          sourceDefinitionId: "onr_v1_297_overtime-incentives",
+          gainActionsAmount: 2,
+          actionCapacityTiming: "immediate",
+          actionCapacityRestriction: "unrestricted",
+          actionCapacityReliability: "guaranteed",
+          actionCapacityExpiresAt: "side_turn_end",
+          scoreConversionCapability: "gain_action_capacity",
+          scoreConversionTiming: "immediate",
+        },
+      },
+    );
+    const input = aiInput("corp", [installPacifica, draw, credit, end]);
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 10;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.own.gripOrHq = [
+      pacificaCard("pacifica"),
+      ...corpOverflowFillers(5),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+    const context = liveContext();
+
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installPacifica.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+    expect(
+      hqOverflowReceipt(residentPlanPortfolioSnapshot(input)),
+    ).toMatchObject({
+      initialOverflowCount: 1,
+      maximumConversions: 1,
+      remainingConversions: 0,
+      selectedAtStateVersion: 1,
+      expectedOverflowAfterSelectedConversion: 0,
+    });
+
+    const supportDraw = structuredClone(input);
+    supportDraw.playerView.stateVersion = 2;
+    supportDraw.playerView.own.clicks = 2;
+    supportDraw.playerView.own.gripOrHq =
+      supportDraw.playerView.own.gripOrHq.filter(
+        (card) => card.instanceId !== "pacifica",
+      );
+    Object.assign(supportDraw, {
+      ownDeckSnapshot: {
+        deckSnapshotId: "hq-overflow-reactivation-deck",
+        side: "corp",
+        cards: [{ cardId: "onr_v1_220_tycho-extension", quantity: 3 }],
+      },
+    });
+    supportDraw.legalActions = [
+      structuredClone(draw),
+      structuredClone(credit),
+      structuredClone(end),
+    ];
+    for (const action of supportDraw.legalActions) {
+      action.expiresAtStateVersion = supportDraw.playerView.stateVersion;
+    }
+    supportDraw.playerView.legalActions = supportDraw.legalActions;
+
+    expect(context.chooseSemanticRuntimeAction(supportDraw, {})).toMatchObject({
+      actionId: draw.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+    expect(
+      hqOverflowReceipt(residentPlanPortfolioSnapshot(supportDraw)),
+    ).toMatchObject({
+      remainingConversions: 0,
+      selectedAtStateVersion: 1,
+      expectedOverflowAfterSelectedConversion: 0,
+    });
+
+    const afterSupportDraw = structuredClone(supportDraw);
+    afterSupportDraw.playerView.stateVersion = 3;
+    afterSupportDraw.playerView.own.clicks = 1;
+    afterSupportDraw.playerView.own.gripOrHq.push(
+      visibleCard("overtime", "corp", "operation", {
+        definitionId: "onr_v1_297_overtime-incentives",
+        title: "Overtime Incentives",
+        cost: 4,
+      }),
+    );
+    afterSupportDraw.legalActions = [
+      structuredClone(playOvertime),
+      structuredClone(credit),
+      structuredClone(draw),
+      structuredClone(end),
+    ];
+    for (const action of afterSupportDraw.legalActions) {
+      action.expiresAtStateVersion = afterSupportDraw.playerView.stateVersion;
+    }
+    afterSupportDraw.playerView.legalActions = afterSupportDraw.legalActions;
+    expect(
+      buildActionSemanticCandidates(afterSupportDraw).find(
+        (candidate) => candidate.actionId === playOvertime.actionId,
+      ),
+    ).toMatchObject({
+      sourceCardInstanceId: "overtime",
+      sourceDefinitionId: "onr_v1_297_overtime-incentives",
+      economyProjection: {
+        cardsConsumed: 1,
+        netHandDelta: -1,
+      },
+    });
+
+    expect(
+      context.chooseSemanticRuntimeAction(afterSupportDraw, {}),
+    ).toMatchObject({
+      actionId: playOvertime.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+    expect(
+      context.chooseSemanticRuntimeAction(afterSupportDraw, {}),
+    ).toMatchObject({
+      actionId: playOvertime.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+    expect(
+      hqOverflowReceipt(residentPlanPortfolioSnapshot(afterSupportDraw)),
+    ).toMatchObject({
+      initialOverflowCount: 1,
+      maximumConversions: 1,
+      remainingConversions: 0,
+      selectedAtStateVersion: 3,
+      expectedOverflowAfterSelectedConversion: 0,
+    });
+
+    const noNewOverflow = structuredClone(afterSupportDraw);
+    noNewOverflow.playerView.stateVersion = 4;
+    noNewOverflow.playerView.own.gripOrHq =
+      noNewOverflow.playerView.own.gripOrHq.filter(
+        (card) => card.instanceId !== "overtime",
+      );
+    noNewOverflow.legalActions = [
+      structuredClone(credit),
+      structuredClone(draw),
+      structuredClone(end),
+    ];
+    for (const action of noNewOverflow.legalActions) {
+      action.expiresAtStateVersion = noNewOverflow.playerView.stateVersion;
+    }
+    noNewOverflow.playerView.legalActions = noNewOverflow.legalActions;
+    expect(
+      context.chooseSemanticRuntimeAction(noNewOverflow, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+  });
+
+  it("keeps agendas and new remotes out of the HQ-overflow parent", () => {
+    resetResidentPlanPortfolioMemory();
+    const installExisting = pacificaOverflowInstall(
+      "install-pacifica-existing",
+      "pacifica",
+      "remote_1",
+    );
+    const installNew = pacificaOverflowInstall(
+      "install-pacifica-new",
+      "pacifica",
+      "new_remote",
+    );
+    const installAgenda = legalAction(
+      "install-agenda",
+      "corp",
+      "install_card",
+      "Install Executive Extraction",
+      { credits: 0, clicks: 1 },
+      {
+        source: "agenda",
+        payload: {
+          cardId: "agenda",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const input = aiInput("corp", [installExisting, installNew, installAgenda]);
+    input.playerView.own.clicks = 1;
+    input.playerView.own.credits = 10;
+    input.playerView.own.gripOrHq = [
+      pacificaCard("pacifica"),
+      visibleCard("agenda", "corp", "agenda", {
+        definitionId: "onr_v1_201_executive-extraction",
+        title: "Executive Extraction",
+      }),
+      ...corpOverflowFillers(4),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+
+    liveContext().chooseSemanticRuntimeAction(input, {});
+    const overflow = residentPlanPortfolioSnapshot(input)?.instances.find(
+      (instance) =>
+        instance.moduleId === "corp.hand_and_agenda_management" &&
+        instance.dedupeKey === "resolve-hq-overflow:corp:0",
+    );
+    const state = overflow?.moduleState as
+      | {
+          signal?: {
+            actionIds?: unknown;
+          };
+        }
+      | undefined;
+    expect(state?.signal?.actionIds).toEqual([installExisting.actionId]);
   });
 
   it("does not claim a blocked Corp upgrade placement as an executable hand-plan route", () => {
@@ -1753,6 +2430,10 @@ describe("authoritative plan-first live runtime", () => {
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
+      {
+        source: "basic_action",
+        payload: { gainCreditsAmount: 1 },
+      },
     );
     const end = legalAction(
       "end",
@@ -1763,7 +2444,11 @@ describe("authoritative plan-first live runtime", () => {
       { source: "game_rule" },
     );
     const input = aiInput("corp", [rez, credit]);
+    input.playerView.own.clicks = 1;
     input.playerView.own.credits = 4;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
     input.playerView.servers = [
       server(
         "remote_1",
@@ -1778,9 +2463,11 @@ describe("authoritative plan-first live runtime", () => {
       ),
     ];
 
-    expect(() =>
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("missing_plan_module_coverage");
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
   });
 
   it("develops a reviewed finite economy campaign from the visible card state", () => {
@@ -1840,9 +2527,14 @@ describe("authoritative plan-first live runtime", () => {
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
     );
     const input = aiInput("corp", [install, credit]);
+    input.playerView.own.clicks = 1;
     input.playerView.own.credits = 4;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
     input.playerView.own.gripOrHq = [
       visibleCard("vapor-card", "corp", "asset", {
         definitionId: "onr_v1_347_vapor-ops",
@@ -1851,12 +2543,14 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.servers = [server("remote_1")];
 
-    expect(() =>
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("missing_plan_module_coverage");
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
   });
 
-  it("admits full-hand Night Shift through its exact net-zero hand cycle", () => {
+  it("does not use Night Shift as generic development or overflow reduction without a parent need", () => {
     const nightShift = legalAction(
       "night-shift",
       "corp",
@@ -1896,6 +2590,7 @@ describe("authoritative plan-first live runtime", () => {
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
     );
     const end = legalAction(
       "end",
@@ -1937,17 +2632,23 @@ describe("authoritative plan-first live runtime", () => {
         ],
       ),
     ];
-    const fullHandDecision = liveContext().chooseSemanticRuntimeAction(
-      fullHand,
-      {},
-    );
-    expect(fullHandDecision).toMatchObject({
-      actionId: "night-shift",
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
-      fallbackUsed: false,
+    expect(
+      buildActionSemanticCandidates(fullHand).find(
+        (candidate) => candidate.actionId === "night-shift",
+      ),
+    ).toMatchObject({
+      semanticActionType: "economy.gain_credit",
+      economyProjection: {
+        cardsDrawn: 1,
+        cardsConsumed: 1,
+        netHandDelta: 0,
+        netLiquidCreditGain: 2,
+      },
     });
-    expect(fullHandDecision.evidence).toContain(
-      "plan_step_capability:draw_for_plan",
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(fullHand, {}),
+    ).toThrow(
+      expect.objectContaining({ code: "missing_plan_module_coverage" }),
     );
 
     resetResidentPlanPortfolioMemory();
@@ -1975,13 +2676,11 @@ describe("authoritative plan-first live runtime", () => {
       ),
     );
     overflow.playerView.servers = fullHand.playerView.servers;
-    expect(
+    expect(() =>
       liveContext().chooseSemanticRuntimeAction(overflow, {}),
-    ).toMatchObject({
-      actionId: "night-shift",
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
-      fallbackUsed: false,
-    });
+    ).toThrow(
+      expect.objectContaining({ code: "missing_plan_module_coverage" }),
+    );
 
     resetResidentPlanPortfolioMemory();
     const drawBound = aiInput("corp", [nightShift, draw]);
@@ -1992,22 +2691,141 @@ describe("authoritative plan-first live runtime", () => {
         definitionId: "onr_v1_295_night-shift",
       }),
     ];
-    expect(
+    expect(() =>
       liveContext().chooseSemanticRuntimeAction(drawBound, {}),
-    ).toMatchObject({
-      actionId: "night-shift",
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
-      fallbackUsed: false,
-    });
+    ).toThrow(
+      expect.objectContaining({ code: "missing_plan_module_coverage" }),
+    );
   });
 
-  it("ends the Corp turn when no parent-bound productive route remains", () => {
+  it("limits score-material observation to one exact basic draw per Corp turn", () => {
+    resetResidentPlanPortfolioMemory();
+    const draw = legalAction("draw", "corp", "draw_card", "Draw a card", {
+      credits: 0,
+      clicks: 1,
+    });
     const credit = legalAction(
       "credit",
       "corp",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    const end = legalAction(
+      "end",
+      "corp",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("corp", [draw, credit, end]);
+    input.playerView.own.clicks = 2;
+    input.playerView.own.credits = 5;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.own.gripOrHq = Array.from({ length: 5 }, (_, index) =>
+      visibleCard(`full-hand-${index}`, "corp", "operation", {
+        definitionId: "onr_v1_284_chance-observation",
+      }),
+    );
+    Object.assign(input, {
+      ownDeckSnapshot: {
+        deckSnapshotId: "score-material-observation-deck",
+        side: "corp",
+        cards: [{ cardId: "onr_v1_220_tycho-extension", quantity: 3 }],
+      },
+    });
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = 1;
+    }
+    input.playerView.legalActions = input.legalActions;
+    const context = liveContext();
+
+    const firstDecision = context.chooseSemanticRuntimeAction(input, {});
+    expect(firstDecision).toMatchObject({
+      actionId: "draw",
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+    });
+    expect(firstDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_root:plan:corp.score_agenda:general",
+        "plan_first_executor:plan:corp.hand_and_agenda_management:draw-for-score-material",
+        "plan_priority_class:P4",
+        "plan_priority_delegated_from:plan:corp.score_agenda:general",
+        "plan_priority_need:score-material:general",
+        "plan_assessment_evidence:corp_score_campaign_missing_agenda_material",
+      ]),
+    );
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: "draw",
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+    });
+    const residentPortfolio = JSON.stringify(
+      residentPlanPortfolioSnapshot(input),
+    );
+    expect(residentPortfolio).toContain(
+      '"drawAttemptState":{"turnKey":"corp:0","remainingAttempts":0,"selectedAtStateVersion":1}',
+    );
+    expect(residentPortfolio).toContain(
+      '"rootForegroundInstanceId":"plan:corp.score_agenda:general"',
+    );
+    expect(residentPortfolio).toContain(
+      '"executorInstanceId":"plan:corp.hand_and_agenda_management:draw-for-score-material"',
+    );
+    expect(residentPortfolio).toContain(
+      '"parentInstanceId":"plan:corp.score_agenda:general"',
+    );
+    expect(residentPortfolio).toContain(
+      '"parentNeedId":"score-material:general"',
+    );
+    expect(residentPortfolio).toContain(
+      '"openNeedIds":["score-material:general"]',
+    );
+    expect(residentPortfolio).toContain('"phase":"select_agenda"');
+    expect(residentPortfolio).toContain(
+      '"persistencePolicy":"flexible_support"',
+    );
+
+    const afterDraw = structuredClone(input);
+    afterDraw.playerView.stateVersion = 2;
+    afterDraw.playerView.own.clicks = 1;
+    afterDraw.playerView.own.gripOrHq.push(
+      visibleCard("observed-non-agenda", "corp", "operation", {
+        definitionId: "onr_v1_284_chance-observation",
+      }),
+    );
+    for (const action of afterDraw.legalActions) {
+      action.expiresAtStateVersion = 2;
+    }
+    afterDraw.playerView.legalActions = afterDraw.legalActions;
+    expect(context.chooseSemanticRuntimeAction(afterDraw, {})).toMatchObject({
+      actionId: "credit",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+
+    const nextTurn = structuredClone(input);
+    nextTurn.playerView.stateVersion = 3;
+    nextTurn.playerView.turnSerial = 1;
+    for (const action of nextTurn.legalActions) {
+      action.expiresAtStateVersion = 3;
+    }
+    nextTurn.playerView.legalActions = nextTurn.legalActions;
+    expect(context.chooseSemanticRuntimeAction(nextTurn, {})).toMatchObject({
+      actionId: "draw",
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+    });
+  });
+
+  it("uses the finite transitional Corp liquidity plan only for exact Basic Credit", () => {
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
     );
     const end = legalAction(
       "end",
@@ -2022,110 +2840,49 @@ describe("authoritative plan-first live runtime", () => {
     const belowCap = aiInput("corp", [credit, end]);
     belowCap.playerView.own.clicks = 3;
     belowCap.playerView.own.credits = 5;
-    const reserveDecision = liveContext().chooseSemanticRuntimeAction(
-      belowCap,
-      {},
-    );
-    expect(reserveDecision).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
-      fallbackUsed: false,
-    });
-
-    resetResidentPlanPortfolioMemory();
-    const overflowLastClick = aiInput("corp", [credit, end]);
-    overflowLastClick.playerView.own.clicks = 1;
-    overflowLastClick.playerView.own.credits = 10;
-    overflowLastClick.playerView.own.gripOrHq = Array.from(
-      { length: 6 },
-      (_, index) =>
-        visibleCard(`overflow-${index}`, "corp", "operation", {
-          definitionId: "onr_v1_284_chance-observation",
-        }),
-    );
-    const overflowDecision = liveContext().chooseSemanticRuntimeAction(
-      overflowLastClick,
-      {},
-    );
-    expect(overflowDecision).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
-      fallbackUsed: false,
-    });
-    expect(overflowDecision.evidence ?? []).toContain(
-      "plan_assessment_evidence:corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
-    );
-    expect((overflowDecision.evidence ?? []).join("\n")).not.toContain(
-      "convert_overflow_capacity",
-    );
-
-    resetResidentPlanPortfolioMemory();
-    const twoClicksOverflow = aiInput("corp", [credit, end]);
-    twoClicksOverflow.playerView.own.clicks = 2;
-    twoClicksOverflow.playerView.own.credits = 11;
-    twoClicksOverflow.playerView.own.gripOrHq =
-      overflowLastClick.playerView.own.gripOrHq;
-    const firstCapacityConversion = liveContext().chooseSemanticRuntimeAction(
-      twoClicksOverflow,
-      {},
-    );
-    expect(firstCapacityConversion).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
-      fallbackUsed: false,
-    });
-    expect(firstCapacityConversion.evidence ?? []).toContain(
-      "plan_assessment_evidence:corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
-    );
-
-    const laterOverflow = structuredClone(twoClicksOverflow);
-    laterOverflow.playerView.stateVersion += 1;
-    laterOverflow.playerView.own.clicks = 3;
-    laterOverflow.playerView.own.credits = 12;
-    for (const action of laterOverflow.legalActions) {
-      action.expiresAtStateVersion = laterOverflow.playerView.stateVersion;
+    for (const action of belowCap.legalActions) {
+      action.expiresAtStateVersion = belowCap.playerView.stateVersion;
     }
-    laterOverflow.playerView.legalActions = laterOverflow.legalActions;
+    belowCap.playerView.legalActions = belowCap.legalActions;
     expect(
-      liveContext().chooseSemanticRuntimeAction(laterOverflow, {}),
+      liveContext().chooseSemanticRuntimeAction(belowCap, {}),
     ).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-
-    resetResidentPlanPortfolioMemory();
-    const noOverflow = aiInput("corp", [credit, end]);
-    noOverflow.playerView.own.clicks = 1;
-    noOverflow.playerView.own.credits = 11;
-    noOverflow.playerView.own.gripOrHq =
-      overflowLastClick.playerView.own.gripOrHq.slice(0, 5);
     expect(
-      liveContext().chooseSemanticRuntimeAction(noOverflow, {}),
-    ).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
-      fallbackUsed: false,
-    });
+      JSON.stringify(residentPlanPortfolioSnapshot(belowCap) ?? {}),
+    ).toContain('"kind":"develop_liquidity"');
 
-    resetResidentPlanPortfolioMemory();
-    const atCap = aiInput("corp", [credit, end]);
-    atCap.playerView.own.clicks = 3;
-    atCap.playerView.own.credits = 10;
-    expect(liveContext().chooseSemanticRuntimeAction(atCap, {})).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
+    const laterTurn = structuredClone(belowCap);
+    laterTurn.playerView.stateVersion = 2;
+    laterTurn.playerView.turnSerial = 1;
+    laterTurn.playerView.own.credits = 8;
+    for (const action of laterTurn.legalActions) {
+      action.expiresAtStateVersion = 2;
+    }
+    laterTurn.playerView.legalActions = laterTurn.legalActions;
+    expect(
+      liveContext().chooseSemanticRuntimeAction(laterTurn, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
+    expect(
+      JSON.stringify(residentPlanPortfolioSnapshot(laterTurn) ?? {}),
+    ).toContain('"kind":"develop_liquidity"');
   });
 
-  it("does not synthesize an economy child for legacy central rez reserve", () => {
+  it("does not synthesize a defense-funding child for legacy central rez reserve", () => {
     const credit = legalAction(
       "credit",
       "corp",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
     );
     const end = legalAction(
       "end",
@@ -2136,6 +2893,9 @@ describe("authoritative plan-first live runtime", () => {
       { source: "game_rule" },
     );
     const input = aiInput("corp", [credit, end]);
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
     input.playerView.own.clicks = 1;
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
@@ -2161,6 +2921,7 @@ describe("authoritative plan-first live runtime", () => {
             projectedServerId: "hq",
             expiresAtStateVersion: 1,
             complete: true,
+            costKind: "fixed",
             baseCredits: 8,
             finalCredits: 8,
             mandatoryAdditionalCosts: { agendaPoints: 0 },
@@ -2172,40 +2933,34 @@ describe("authoritative plan-first live runtime", () => {
     ];
 
     resetResidentPlanPortfolioMemory();
-    const blockedFundingDecision = liveContext().chooseSemanticRuntimeAction(
-      input,
-      {},
-    );
-    expect(blockedFundingDecision).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    expect(blockedFundingDecision.evidence ?? []).toContain(
-      "plan_assessment_evidence:corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
-    );
-    expect(blockedFundingDecision.evidence).not.toContain(
-      "plan_assessment_evidence:corp_defense_reserve_funding_required:hq",
-    );
+    expect(
+      JSON.stringify(residentPlanPortfolioSnapshot(input) ?? {}),
+    ).not.toContain("corp_defense_reserve_funding_required:hq");
+    expect(
+      JSON.stringify(residentPlanPortfolioSnapshot(input) ?? {}),
+    ).not.toContain('"kind":"parent_funding"');
 
     resetResidentPlanPortfolioMemory();
     const reachableFunding = structuredClone(input);
     reachableFunding.playerView.own.credits = 7;
-    const fundedDecision = liveContext().chooseSemanticRuntimeAction(
-      reachableFunding,
-      {},
-    );
-    expect(fundedDecision).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
+    expect(
+      liveContext().chooseSemanticRuntimeAction(reachableFunding, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    expect(fundedDecision.evidence ?? []).toContain(
-      "plan_assessment_evidence:corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
-    );
-    expect(fundedDecision.evidence).not.toContain(
-      "plan_assessment_evidence:corp_defense_reserve_funding_required:hq",
-    );
+    expect(
+      JSON.stringify(residentPlanPortfolioSnapshot(reachableFunding) ?? {}),
+    ).not.toContain("corp_defense_reserve_funding_required:hq");
+    expect(
+      JSON.stringify(residentPlanPortfolioSnapshot(reachableFunding) ?? {}),
+    ).not.toContain('"kind":"parent_funding"');
   });
 
   it("persists one effect-targeted score-protection draw attempt while keeping same-state retries deterministic", () => {
@@ -2224,6 +2979,7 @@ describe("authoritative plan-first live runtime", () => {
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
     );
     const end = legalAction(
       "end",
@@ -2271,6 +3027,7 @@ describe("authoritative plan-first live runtime", () => {
           postInstallRezQuoteProjectedServerId: "remote_1",
           postInstallRezQuoteExpiresAtStateVersion: 10,
           postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
           postInstallRezQuoteBaseCredits: 2,
           postInstallRezQuoteFinalCredits: 2,
           postInstallRezQuoteMandatoryAgendaPointCost: 0,
@@ -2404,15 +3161,17 @@ describe("authoritative plan-first live runtime", () => {
       }),
     );
     expect(context.chooseSemanticRuntimeAction(afterDraw, {})).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
     });
 
     resetResidentPlanPortfolioMemory();
     restoreResidentPlanPortfolioMemorySnapshot(afterDraw, selectedSnapshot);
     expect(context.chooseSemanticRuntimeAction(afterDraw, {})).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
     });
 
     resetResidentPlanPortfolioMemory();
@@ -2523,6 +3282,7 @@ describe("authoritative plan-first live runtime", () => {
           postInstallRezQuoteProjectedServerId: "hq",
           postInstallRezQuoteExpiresAtStateVersion: 1,
           postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
           postInstallRezQuoteBaseCredits: 7,
           postInstallRezQuoteFinalCredits: 7,
           postInstallRezQuoteMandatoryAgendaPointCost: 0,
@@ -2574,6 +3334,7 @@ describe("authoritative plan-first live runtime", () => {
             projectedServerId: "hq",
             expiresAtStateVersion: 1,
             complete: true,
+            costKind: "fixed",
             baseCredits: 0,
             finalCredits: 0,
             mandatoryAdditionalCosts: { agendaPoints: 0 },
@@ -2589,6 +3350,7 @@ describe("authoritative plan-first live runtime", () => {
             projectedServerId: "hq",
             expiresAtStateVersion: 1,
             complete: true,
+            costKind: "fixed",
             baseCredits: 2,
             finalCredits: 2,
             mandatoryAdditionalCosts: { agendaPoints: 0 },
@@ -2615,9 +3377,17 @@ describe("authoritative plan-first live runtime", () => {
     resetResidentPlanPortfolioMemory();
     const blockedParent = structuredClone(input);
     blockedParent.legalActions = [credit, installPocketVr];
+    blockedParent.playerView.legalActions = blockedParent.legalActions;
     expect(() =>
       liveContext().chooseSemanticRuntimeAction(blockedParent, {}),
-    ).toThrowError("missing_plan_module_coverage");
+    ).toThrow(
+      expect.objectContaining({
+        code: "missing_plan_module_coverage",
+        context: expect.objectContaining({
+          unresolvedActionIds: [credit.actionId, installPocketVr.actionId],
+        }),
+      }),
+    );
     expect(
       residentPlanPortfolioSnapshot(blockedParent)?.instances.some(
         (instance) =>
@@ -2650,6 +3420,7 @@ describe("authoritative plan-first live runtime", () => {
           postInstallRezQuoteProjectedServerId: "remote_1",
           postInstallRezQuoteExpiresAtStateVersion: 1,
           postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
           postInstallRezQuoteBaseCredits: 2,
           postInstallRezQuoteFinalCredits: 2,
           postInstallRezQuoteMandatoryAgendaPointCost: 0,
@@ -2710,13 +3481,13 @@ describe("authoritative plan-first live runtime", () => {
       '"parentInstanceId":"plan:corp.defend_servers:server-defense-portfolio"',
     );
     expect(portfolio).toContain(
-      '"parentNeedId":"install:remote_1"',
+      '"parentNeedId":"install:remote_1:install-data-wall-remote-1"',
     );
     expect(portfolio).toContain('"parentPriorityClass":"P2"');
     expect(portfolio).not.toContain('"kind":"score_protection_draw"');
   });
 
-  it("rejects unbound Night Shift while retaining finite hand management", () => {
+  it("does not invent a generic Night Shift or draw plan after a reserve target is absent", () => {
     const nightShift = legalAction(
       "night-shift",
       "corp",
@@ -2750,7 +3521,9 @@ describe("authoritative plan-first live runtime", () => {
     ];
     expect(() =>
       liveContext().chooseSemanticRuntimeAction(reserve, {}),
-    ).toThrowError("missing_plan_module_coverage");
+    ).toThrow(
+      expect.objectContaining({ code: "missing_plan_module_coverage" }),
+    );
 
     const bbsPayout = legalAction(
       "bbs-payout",
@@ -2793,13 +3566,11 @@ describe("authoritative plan-first live runtime", () => {
         ],
       ),
     ];
-    expect(
+    expect(() =>
       liveContext().chooseSemanticRuntimeAction(afterReserve, {}),
-    ).toMatchObject({
-      actionId: "draw",
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
-      fallbackUsed: false,
-    });
+    ).toThrow(
+      expect.objectContaining({ code: "missing_plan_module_coverage" }),
+    );
   });
 
   it("routes an explicit fortified-server defense upgrade through the global defense plan", () => {
@@ -2957,9 +3728,14 @@ describe("authoritative plan-first live runtime", () => {
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
     );
     const input = aiInput("corp", [rez, credit]);
+    input.playerView.own.clicks = 1;
     input.playerView.own.credits = 10;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
     input.playerView.servers = [
       server(
         "hq",
@@ -2980,9 +3756,11 @@ describe("authoritative plan-first live runtime", () => {
       ),
     ];
 
-    expect(() =>
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("missing_plan_module_coverage");
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
   });
 
   it("does not let the score plan claim advancement of a visible asset", () => {
@@ -3001,6 +3779,7 @@ describe("authoritative plan-first live runtime", () => {
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
     );
     const endTurn = legalAction(
       "end",
@@ -3011,7 +3790,11 @@ describe("authoritative plan-first live runtime", () => {
       { source: "game_rule" },
     );
     const input = aiInput("corp", [advanceAsset, credit, endTurn]);
+    input.playerView.own.clicks = 1;
     input.playerView.own.credits = 4;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
     input.playerView.servers = [
       server(
         "remote_1",
@@ -3026,8 +3809,8 @@ describe("authoritative plan-first live runtime", () => {
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
   });
@@ -3139,7 +3922,60 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("fails closed on an advance with missing cost semantics without aborting another plan action", () => {
+  it("scores an exact visible zero-requirement agenda instead of advancing it", () => {
+    resetResidentPlanPortfolioMemory();
+    const scoreAgenda = legalAction(
+      "score-effective-zero",
+      "corp",
+      "score_agenda",
+      "Score Corporate Downsizing",
+      { credits: 0, clicks: 0 },
+      {
+        source: "effective-zero-agenda",
+        payload: { cardId: "effective-zero-agenda" },
+      },
+    );
+    const dominatedAdvance = legalAction(
+      "advance-effective-zero",
+      "corp",
+      "advance_card",
+      "Advance Corporate Downsizing",
+      { credits: 1, clicks: 1 },
+      {
+        source: "effective-zero-agenda",
+        payload: { cardId: "effective-zero-agenda" },
+      },
+    );
+    const input = aiInput("corp", [dominatedAdvance, scoreAgenda]);
+    input.playerView.own.clicks = 2;
+    input.playerView.own.credits = 26;
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("effective-zero-agenda", "corp", "agenda", {
+            definitionId: "onr_v1_194_corporate-downsizing",
+            advancementCounters: 0,
+            advancementRequirement: 0,
+          }),
+        ],
+      ),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: "score-effective-zero",
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toContain(
+      "plan_assessment_evidence:corp_same_turn_score_conversion:score_ready",
+    );
+  });
+
+  it("keeps an advance with missing cost semantics unknown while another owner acts", () => {
     resetResidentPlanPortfolioMemory();
     const advanceAgenda = legalAction(
       "advance-agenda-without-cost",
@@ -3153,18 +3989,75 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     advanceAgenda.costs = [];
-    const credit = legalAction(
-      "credit",
+    const installEconomy = legalAction(
+      "install-bbs",
       "corp",
-      "gain_credit",
-      "Gain 1 Credit",
+      "install_card",
+      "Install BBS Whispering Campaign",
       { credits: 0, clicks: 1 },
+      {
+        source: "bbs-card",
+        payload: {
+          cardId: "bbs-card",
+          serverId: "remote_2",
+          placement: "root",
+        },
+      },
     );
-    const draw = legalAction("draw", "corp", "draw_card", "Draw 1", {
-      credits: 0,
-      clicks: 1,
+    const input = aiInput("corp", [advanceAgenda, installEconomy]);
+    input.playerView.own.credits = 4;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("bbs-card", "corp", "asset", {
+        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        title: "BBS Whispering Campaign",
+      }),
+    ];
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("agenda-unknown-cost", "corp", "agenda", {
+            definitionId: "onr_v1_189_artificial-security-directors",
+            advancementCounters: 1,
+            advancementRequirement: 3,
+          }),
+        ],
+      ),
+      server("remote_2"),
+    ];
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installEconomy.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
     });
-    const input = aiInput("corp", [advanceAgenda, credit, draw]);
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "corp.score_agenda",
+      ),
+    ).toMatchObject({
+      viability: "blocked",
+    });
+  });
+
+  it("keeps an advance with unknown score facts unresolved instead of declaring it nonproductive", () => {
+    resetResidentPlanPortfolioMemory();
+    const advanceAgenda = legalAction(
+      "advance-agenda-without-cost",
+      "corp",
+      "advance_card",
+      "Advance agenda without projected cost",
+      { credits: 1, clicks: 1 },
+      {
+        source: "agenda-unknown-cost",
+        payload: { cardId: "agenda-unknown-cost" },
+      },
+    );
+    advanceAgenda.costs = [];
+    advanceAgenda.expiresAtStateVersion = 1;
+    const input = aiInput("corp", [advanceAgenda]);
     input.playerView.own.credits = 4;
     input.playerView.own.clicks = 2;
     input.playerView.servers = [
@@ -3181,17 +4074,85 @@ describe("authoritative plan-first live runtime", () => {
       ),
     ];
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: "draw",
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
-      fallbackUsed: false,
+    let failure: unknown;
+    try {
+      liveContext().chooseSemanticRuntimeAction(input, {});
+    } catch (caught) {
+      failure = caught;
+    }
+
+    expect(failure).toMatchObject({
+      code: "missing_plan_module_coverage",
+      context: {
+        unresolvedActionIds: ["advance-agenda-without-cost"],
+      },
     });
-    expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).toContain(
-      "corp_score_protection_assessment_unknown:remote_1:missing_action_semantics",
-    );
   });
 
-  it("explicitly rejects an advance that its unprotected score project marks infeasible", () => {
+  it("keeps an ICE install with an incomplete Engine rez quote unresolved", () => {
+    resetResidentPlanPortfolioMemory();
+    const installIce = legalAction(
+      "install-ice-with-unknown-rez-cost",
+      "corp",
+      "install_card",
+      "Install ICE with incomplete rez quote",
+      { credits: 0, clicks: 1 },
+      {
+        source: "ice-unknown-rez-cost",
+        payload: {
+          cardId: "ice-unknown-rez-cost",
+          sourceDefinitionId: "onr_v1_237_data-wall",
+          serverId: "remote_1",
+          placement: "ice",
+          postInstallRezQuoteCardId: "ice-unknown-rez-cost",
+          postInstallRezQuoteTargetServerId: "remote_1",
+          postInstallRezQuoteProjectedServerId: "remote_1",
+          postInstallRezQuoteExpiresAtStateVersion: 1,
+          postInstallRezQuoteComplete: false,
+        },
+      },
+    );
+    installIce.expiresAtStateVersion = 1;
+    const input = aiInput("corp", [installIce]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("ice-unknown-rez-cost", "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        strength: 0,
+        subtypes: ["wall"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+    ];
+    input.playerView.opponent.rig = [
+      visibleCard("runner-blink", "runner", "program", {
+        definitionId: "onr_v1_007_blink",
+        strength: 5,
+        subtypes: ["icebreaker", "random"],
+      }),
+    ];
+
+    let failure: unknown;
+    try {
+      liveContext().chooseSemanticRuntimeAction(input, {});
+    } catch (caught) {
+      failure = caught;
+    }
+
+    expect(failure).toMatchObject({
+      code: "missing_plan_module_coverage",
+      context: {
+        unresolvedActionIds: ["install-ice-with-unknown-rez-cost"],
+      },
+    });
+  });
+
+  it("keeps a fully quoted current advance executable while later score protection remains open", () => {
     resetResidentPlanPortfolioMemory();
     const advance = legalAction(
       "advance-coup",
@@ -3210,8 +4171,12 @@ describe("authoritative plan-first live runtime", () => {
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
     );
     const input = aiInput("corp", [advance, credit]);
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
     input.playerView.own.credits = 10;
     input.playerView.own.clicks = 1;
     input.playerView.servers = [
@@ -3229,9 +4194,15 @@ describe("authoritative plan-first live runtime", () => {
       ),
     ];
 
-    expect(() =>
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("missing_plan_module_coverage");
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(decision).toMatchObject({
+      actionId: "advance-coup",
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+    const scorePortfolio = JSON.stringify(residentPlanPortfolioSnapshot(input));
+    expect(scorePortfolio).toContain('"protectionNeed"');
+    expect(scorePortfolio).toContain('"fundedProtection":false');
   });
 
   it("does not treat generic access damage as a tag-punish conversion", () => {
@@ -3269,6 +4240,7 @@ describe("authoritative plan-first live runtime", () => {
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
     );
     const endTurn = legalAction(
       "end",
@@ -3284,7 +4256,11 @@ describe("authoritative plan-first live runtime", () => {
       credit,
       endTurn,
     ]);
+    input.playerView.own.clicks = 1;
     input.playerView.own.credits = 4;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
     input.playerView.opponent.tags = 1;
     input.playerView.own.gripOrHq = [
       visibleCard("virus-test-site-1", "corp", "asset", {
@@ -3324,15 +4300,11 @@ describe("authoritative plan-first live runtime", () => {
       evidence: ["test_ambush_plan_explicitly_rejected"],
     } satisfies CorpStrategicIntentProfile;
 
-    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
-    expect(decision).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    expect(decision.decisionDebug?.planKind).not.toBe(
-      "corp.execute_punish_sequence",
-    );
   });
 
   it("routes a strict score plan through global defense when Data Wall makes exact 1/2 progress against Blink", () => {
@@ -3372,6 +4344,7 @@ describe("authoritative plan-first live runtime", () => {
           postInstallRezQuoteProjectedServerId: "remote_1",
           postInstallRezQuoteExpiresAtStateVersion: stateVersion,
           postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
           postInstallRezQuoteBaseCredits: 1,
           postInstallRezQuoteFinalCredits: 1,
           postInstallRezQuoteMandatoryAgendaPointCost: 0,
@@ -3411,7 +4384,6 @@ describe("authoritative plan-first live runtime", () => {
         subtypes: ["icebreaker", "random"],
       }),
     ];
-
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     expect(decision).toMatchObject({
       actionId: "install-ice",
@@ -3468,6 +4440,7 @@ describe("authoritative plan-first live runtime", () => {
           postInstallRezQuoteProjectedServerId: "remote_1",
           postInstallRezQuoteExpiresAtStateVersion: stateVersion,
           postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
           postInstallRezQuoteBaseCredits: 1,
           postInstallRezQuoteFinalCredits: 1,
           postInstallRezQuoteMandatoryAgendaPointCost: 0,
@@ -3592,7 +4565,14 @@ describe("authoritative plan-first live runtime", () => {
       { credits: 0, clicks: 0 },
       { source: "game_rule" },
     );
-    const input = aiInput("corp", [installProtected, endTurn]);
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("corp", [installProtected, credit, endTurn]);
     for (const action of input.legalActions)
       action.expiresAtStateVersion = stateVersion;
     input.playerView.stateVersion = stateVersion;
@@ -3655,6 +4635,7 @@ describe("authoritative plan-first live runtime", () => {
     const unprotectedInput = structuredClone(input);
     unprotectedInput.decisionId = "equal-layer-parent-baseline:2:corp";
     unprotectedInput.playerView.stateVersion = 2;
+    unprotectedInput.playerView.own.clicks = 1;
     unprotectedInput.playerView.own.credits = 0;
     for (const action of unprotectedInput.legalActions)
       action.expiresAtStateVersion = 2;
@@ -3676,57 +4657,35 @@ describe("authoritative plan-first live runtime", () => {
     ];
 
     resetResidentPlanPortfolioMemory();
-    const unprotectedDecision = liveContext().chooseSemanticRuntimeAction(
-      unprotectedInput,
-      {},
-    );
-    expect(unprotectedDecision).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
+    expect(
+      liveContext().chooseSemanticRuntimeAction(unprotectedInput, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    const unprotectedPortfolio = JSON.stringify(
-      residentPlanPortfolioSnapshot(unprotectedInput),
-    );
-    expect(unprotectedPortfolio).toContain(
-      '"runnerAccessSuccessProbability":{"numerator":1,"denominator":1}',
-    );
-    expect(unprotectedPortfolio).toContain('"fundedProtection":false');
-    expect(unprotectedPortfolio).toContain('"protectsScore":false');
 
     const unknownInput = structuredClone(input);
     unknownInput.decisionId = "equal-layer-parent-baseline:3:corp";
     unknownInput.playerView.stateVersion = 3;
+    unknownInput.playerView.own.clicks = 1;
     unknownInput.playerView.own.credits = 0;
     for (const action of unknownInput.legalActions)
       action.expiresAtStateVersion = 3;
-    const unknownDataWall =
-      unknownInput.playerView.servers.find(
-        (candidate) => candidate.id === "remote_1",
-      )!.ice[1]!;
+    const unknownDataWall = unknownInput.playerView.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    )!.ice[1]!;
     unknownDataWall.rezzed = false;
     delete unknownDataWall.effectiveRezCostQuote;
 
     resetResidentPlanPortfolioMemory();
-    const unknownDecision = liveContext().chooseSemanticRuntimeAction(
-      unknownInput,
-      {},
-    );
-    expect(unknownDecision).toMatchObject({
-      actionId: "end",
-      reasonCode: "plan_first.corp.complete_turn",
+    expect(
+      liveContext().chooseSemanticRuntimeAction(unknownInput, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    const unknownPortfolio = JSON.stringify(
-      residentPlanPortfolioSnapshot(unknownInput),
-    );
-    expect(unknownPortfolio).toContain(
-      '"instanceId":"plan:corp.score_agenda:agenda%3Aagenda-protected%3Aremote_1"',
-    );
-    expect(unknownPortfolio).toContain('"knowledge":"unknown"');
-    expect(unknownPortfolio).not.toContain(
-      '"evidenceCode":"corp_funded_protected_score_install:remote_1"',
-    );
   });
 
   it("prefers the exact satisfying prepared-remote route over a merely progressing new-remote route", () => {
@@ -3787,6 +4746,7 @@ describe("authoritative plan-first live runtime", () => {
           postInstallRezQuoteProjectedServerId: "remote_1",
           postInstallRezQuoteExpiresAtStateVersion: stateVersion,
           postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
           postInstallRezQuoteBaseCredits: 1,
           postInstallRezQuoteFinalCredits: 1,
           postInstallRezQuoteMandatoryAgendaPointCost: 0,
@@ -3811,6 +4771,7 @@ describe("authoritative plan-first live runtime", () => {
           postInstallRezQuoteProjectedServerId: "remote_2",
           postInstallRezQuoteExpiresAtStateVersion: stateVersion,
           postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
           postInstallRezQuoteBaseCredits: 1,
           postInstallRezQuoteFinalCredits: 1,
           postInstallRezQuoteMandatoryAgendaPointCost: 0,
@@ -3990,6 +4951,7 @@ describe("authoritative plan-first live runtime", () => {
           projectedServerId: "remote_1",
           expiresAtStateVersion: stateVersion,
           complete: true as const,
+          costKind: "fixed" as const,
           baseCredits: 4,
           finalCredits: 4,
           mandatoryAdditionalCosts: { agendaPoints: 0 },
@@ -4023,14 +4985,36 @@ describe("authoritative plan-first live runtime", () => {
     resetResidentPlanPortfolioMemory();
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     const portfolio = JSON.stringify(residentPlanPortfolioSnapshot(input));
+    const scoreParentInstanceId =
+      "plan:corp.score_agenda:agenda%3Aagenda-terminal%3Aremote_1";
+    const fundingNeedId = "score-support:agenda:agenda-terminal:remote_1";
+    const economyChildInstanceId =
+      "plan:corp.economy:score-support%3Aagenda%3Aagenda-terminal%3Aremote_1";
 
     expect(decision).toMatchObject({
       actionId: "credit",
       reasonCode: "plan_first.corp.economy",
     });
-    expect(portfolio).toContain(
-      '"parentInstanceId":"plan:corp.score_agenda:agenda%3Aagenda-terminal%3Aremote_1"',
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        `plan_first_root:${scoreParentInstanceId}`,
+        `plan_first_executor:${economyChildInstanceId}`,
+        "plan_priority_class:P1",
+        `plan_priority_delegated_from:${scoreParentInstanceId}`,
+        `plan_priority_need:${fundingNeedId}`,
+      ]),
     );
+    expect(portfolio).toContain(
+      `"rootForegroundInstanceId":"${scoreParentInstanceId}"`,
+    );
+    expect(portfolio).toContain(
+      `"executorInstanceId":"${economyChildInstanceId}"`,
+    );
+    expect(portfolio).toContain(
+      `"parentInstanceId":"${scoreParentInstanceId}"`,
+    );
+    expect(portfolio).toContain(`"parentNeedId":"${fundingNeedId}"`);
+    expect(portfolio).toContain(`"openNeedIds":["${fundingNeedId}"]`);
     expect(portfolio).toContain('"delegatedPriorityClass":"P1"');
     expect(portfolio).toContain(
       '"evidenceCode":"corp_score_protection_funding_gap:remote_1:',
@@ -4067,15 +5051,36 @@ describe("authoritative plan-first live runtime", () => {
         definitionId: "onr_v1_352_chester-mix",
       }),
     ];
+    Object.assign(input, {
+      ownDeckSnapshot: {
+        deckSnapshotId: "generic-score-material-parent-deck",
+        side: "corp",
+        cards: [{ cardId: "onr_v1_220_tycho-extension", quantity: 3 }],
+      },
+    });
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(decision).toMatchObject({
       actionId: "draw",
       reasonCode: "plan_first.corp.hand_and_agenda_management",
       fallbackUsed: false,
     });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_root:plan:corp.score_agenda:general",
+        "plan_first_executor:plan:corp.hand_and_agenda_management:draw-for-score-material",
+        "plan_priority_class:P4",
+        "plan_priority_delegated_from:plan:corp.score_agenda:general",
+        "plan_priority_need:score-material:general",
+      ]),
+    );
   });
 
-  it("keeps an advanceable action-capacity asset in generic card development until a score project owns it", () => {
+  it("does not invent a generic card-development root without an exact parent need", () => {
     resetResidentPlanPortfolioMemory();
     const pacifica = visibleCard("pacifica", "corp", "asset", {
       definitionId: "onr_v1_334_pacifica-regional-ai",
@@ -4120,15 +5125,101 @@ describe("authoritative plan-first live runtime", () => {
       server("remote_1"),
     ];
 
-    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(() => liveContext().chooseSemanticRuntimeAction(input, {})).toThrow(
+      expect.objectContaining({ code: "missing_plan_module_coverage" }),
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.some(
+        (instance) =>
+          instance.moduleId === "corp.hand_and_agenda_management" &&
+          instance.dedupeKey.startsWith("develop:"),
+      ) ?? false,
+    ).toBe(false);
+  });
 
-    expect([
-      installNewRemote.actionId,
-      installExistingRemote.actionId,
-    ]).toContain(decision.actionId);
+  it("binds score-acceleration setup to the exact blocked score parent and need", () => {
+    resetResidentPlanPortfolioMemory();
+    const agenda = visibleCard("agenda", "corp", "agenda", {
+      definitionId: "onr_v1_201_executive-extraction",
+      title: "Executive Extraction",
+    });
+    const chicago = visibleCard("chicago", "corp", "asset", {
+      definitionId: "onr_v1_312_chicago-branch",
+      title: "Chicago Branch",
+    });
+    const installAgenda = legalAction(
+      "install-agenda",
+      "corp",
+      "install_card",
+      "Install Executive Extraction in remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: agenda.instanceId,
+        payload: {
+          cardId: agenda.instanceId,
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const installChicago = legalAction(
+      "install-chicago",
+      "corp",
+      "install_card",
+      "Install Chicago Branch in remote 2",
+      { credits: 3, clicks: 1 },
+      {
+        source: chicago.instanceId,
+        payload: {
+          cardId: chicago.instanceId,
+          serverId: "remote_2",
+          placement: "root",
+        },
+      },
+    );
+    const input = aiInput("corp", [installAgenda, installChicago]);
+    input.playerView.own.clicks = 1;
+    input.playerView.own.credits = 10;
+    input.playerView.own.gripOrHq = [agenda, chicago];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+      server("remote_2"),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    const parentInstanceId =
+      "plan:corp.score_agenda:agenda%3Aagenda%3Aremote_1";
+    const parentNeedId = "score-setup:agenda:agenda:remote_1:chicago";
+
     expect(decision).toMatchObject({
+      actionId: installChicago.actionId,
       reasonCode: "plan_first.corp.hand_and_agenda_management",
       fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        `plan_first_root:${parentInstanceId}`,
+        "plan_first_executor:plan:corp.hand_and_agenda_management:score-setup%3Aagenda%3Aagenda%3Aremote_1%3Achicago",
+        "plan_priority_class:P4",
+        `plan_priority_delegated_from:${parentInstanceId}`,
+        `plan_priority_need:${parentNeedId}`,
+        "plan_assessment_evidence:corp_score_acceleration_campaign_setup:onr_v1_312_chicago-branch:agenda:agenda:remote_1",
+      ]),
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.instanceId === parentInstanceId,
+      ),
+    ).toMatchObject({
+      openNeedIds: [parentNeedId],
+      viability: "ready",
     });
   });
 
@@ -4353,10 +5444,26 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toContain(
       "plan_first_executor:plan:runner.economy:resource-lifecycle-support%3Aloan-1",
     );
-    expect(decision.evidence).toContain(
-      "plan_portfolio_blocker:plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1:waiting_for_bound_funding_support",
-    );
     expect(decision.evidence).toContain("plan_priority_class:P5");
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      rootForegroundInstanceId:
+        "plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1",
+      executorInstanceId:
+        "plan:runner.economy:resource-lifecycle-support%3Aloan-1",
+      instances: expect.arrayContaining([
+        expect.objectContaining({
+          instanceId:
+            "plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1",
+          openNeedIds: ["resource-lifecycle-support:loan-1"],
+        }),
+        expect.objectContaining({
+          instanceId: "plan:runner.economy:resource-lifecycle-support%3Aloan-1",
+          parentInstanceId:
+            "plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1",
+          parentNeedId: "resource-lifecycle-support:loan-1",
+        }),
+      ]),
+    });
   });
 
   it("requires a full exact Loan funding route instead of shortening the lifecycle gap", () => {
@@ -4404,7 +5511,8 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
-    expect(decision.actionId).toBe(standardEnd.actionId);
+    expect(decision.actionId).toBe(credit.actionId);
+    expect(decision.reasonCode).toBe("plan_first.runner.economy");
     expect((decision.evidence ?? []).join("\n")).not.toContain(
       "resource-lifecycle-support:loan-1",
     );
@@ -4456,7 +5564,8 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
-    expect(decision.actionId).toBe(standardEnd.actionId);
+    expect(decision.actionId).toBe(credit.actionId);
+    expect(decision.reasonCode).toBe("plan_first.runner.economy");
     expect(decision.actionId).not.toBe(loanEnd.actionId);
     expect((decision.evidence ?? []).join("\n")).not.toContain(
       "resource-lifecycle-support:loan-1",
@@ -4554,7 +5663,8 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
-    expect(decision.actionId).toBe(standardEnd.actionId);
+    expect(decision.actionId).toBe(credit.actionId);
+    expect(decision.reasonCode).toBe("plan_first.runner.economy");
     expect(decision.actionId).not.toBe(loanEnd.actionId);
     expect(decision.evidence).toContain(
       "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1:runner_loan_from_chiba_leave_deferred_until_capacity_spent",
@@ -4747,7 +5857,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("uses a finite P6 portfolio reserve instead of an unbounded credit-surplus loop", () => {
+  it("uses finite P6 reserve and current-turn liquidity plans without an unbounded cross-turn loop", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
       "end",
@@ -4785,24 +5895,24 @@ describe("authoritative plan-first live runtime", () => {
     reserveSatisfied.playerView.own.clicks = 3;
     reserveSatisfied.playerView.own.credits = 20;
     reserveSatisfied.playerView.opponent.deckCount = 10;
-    const completed = liveContext().chooseSemanticRuntimeAction(
+    const continued = liveContext().chooseSemanticRuntimeAction(
       reserveSatisfied,
       {},
     );
-    expect(completed).toMatchObject({
-      actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+    expect(continued).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
-    expect(completed.evidence ?? []).toContain(
-      "plan_assessment_evidence:runner_immediate_credit_route_has_no_bound_funding_need",
+    expect(continued.evidence ?? []).toContain(
+      "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
     );
-    expect(JSON.stringify(residentPlanPortfolioSnapshot(reserveSatisfied))).not.toContain(
-      "runner-neutral-liquidity-progress",
-    );
+    expect(
+      JSON.stringify(residentPlanPortfolioSnapshot(reserveSatisfied)),
+    ).toContain('"kind":"develop_liquidity"');
   });
 
-  it("rejects every legal install route while the card plan preserves its credit floor", () => {
+  it("does not end the turn with clicks remaining after install routes are rejected", () => {
     resetResidentPlanPortfolioMemory();
     const cardInstanceId = "deferred-program";
     const directInstall = legalAction(
@@ -4854,15 +5964,11 @@ describe("authoritative plan-first live runtime", () => {
       finalInstallFit: -500,
     });
 
-    expect(
+    expect(() =>
       liveContext({
         evaluateRunnerHandDevelopment: () => [deferred],
       }).chooseSemanticRuntimeAction(input, {}),
-    ).toMatchObject({
-      actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
-      fallbackUsed: false,
-    });
+    ).toThrowError("end_turn_with_usable_capacity");
   });
 
   it("uses its finite economy plan instead of generic option development when hand capacity is full", () => {
@@ -5547,13 +6653,31 @@ describe("authoritative plan-first live runtime", () => {
         "plan_assessment_evidence:runner_run_support_fund_concrete_gap:remote_1:concrete_funding_gap_admitted";
       if (expectsFunding) {
         expect(decision.evidence).toContain(fundingEvidence);
+        expect(decision.evidence).toContain("plan_priority_class:P2");
+        expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+          rootForegroundInstanceId:
+            "plan:runner.contest_remote:remote%3Aremote_1",
+          executorInstanceId:
+            "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+          instances: expect.arrayContaining([
+            expect.objectContaining({
+              instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+              openNeedIds: ["run-support:remote:remote_1"],
+            }),
+            expect.objectContaining({
+              instanceId: "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+              parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+              parentNeedId: "run-support:remote:remote_1",
+            }),
+          ]),
+        });
       } else {
         expect(decision.evidence).not.toContain(fundingEvidence);
       }
     },
   );
 
-  it("completes through the Rules-provided EndTurn when restricted run capacity has no admissible target", () => {
+  it("does not end the turn with clicks remaining when a run has no known payoff", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
       "runner.end_turn",
@@ -5587,18 +6711,14 @@ describe("authoritative plan-first live runtime", () => {
       score: -420,
     };
 
-    expect(
+    expect(() =>
       liveContext({
         evaluateRunnerRunTargets: () => [noPayoff],
       }).chooseSemanticRuntimeAction(input, {}),
-    ).toMatchObject({
-      actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
-      fallbackUsed: false,
-    });
+    ).toThrowError("end_turn_with_usable_capacity");
   });
 
-  it("completes through the Rules-provided EndTurn when the only reachable Remote is explicitly nonproductive", () => {
+  it("does not end the turn with clicks remaining when a run has negative payoff", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
       "runner.end_turn",
@@ -5635,15 +6755,11 @@ describe("authoritative plan-first live runtime", () => {
       score: -1_000,
     };
 
-    expect(
+    expect(() =>
       liveContext({
         evaluateRunnerRunTargets: () => [negativePayoff],
       }).chooseSemanticRuntimeAction(input, {}),
-    ).toMatchObject({
-      actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
-      fallbackUsed: false,
-    });
+    ).toThrowError("end_turn_with_usable_capacity");
   });
 
   it("fails closed when a positive reachable Remote action has no plan route", () => {
@@ -6046,7 +7162,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("does not let a generic card plan mask a missing productive route for a same-turn access event", () => {
+  it("leaves an unowned same-turn access event unselected while an exact economy route acts", () => {
     resetResidentPlanPortfolioMemory();
     const prepareAccess = legalAction(
       "prepare-access",
@@ -6091,17 +7207,26 @@ describe("authoritative plan-first live runtime", () => {
         { kind: "same_turn_access" as const, satisfied: true },
       ],
     };
-    expect(() =>
-      liveContext({
-        evaluateRunnerHandDevelopment: () => [development],
-        buildRunnerEconomyPosture: () => ({
-          minimumCreditFloor: 0,
-          desiredCreditReserve: 0,
-          fundingNeed: false,
-          evidence: [],
-        }),
-      }).chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("missing_plan_module_coverage");
+    const accessDecision = liveContext({
+      evaluateRunnerHandDevelopment: () => [development],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 0,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+    expect(accessDecision).toMatchObject({
+      actionId: "credit",
+      fallbackUsed: false,
+      reasonCode: "plan_first.runner.economy",
+      decisionDebug: {
+        planKind: "runner.economy",
+      },
+    });
+    expect(accessDecision.evidence).toContain(
+      "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
+    );
   });
 
   it("opens Valu-Pak only for a concrete multi-program commitment", () => {
@@ -6523,8 +7648,8 @@ describe("authoritative plan-first live runtime", () => {
         }),
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
-      actionId: endTurn.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
   });
@@ -7169,8 +8294,8 @@ describe("authoritative plan-first live runtime", () => {
     ]);
     resetResidentPlanPortfolioMemory();
     expect(context.chooseSemanticRuntimeAction(dtoAccessed, {})).toMatchObject({
-      actionId: endTurn.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
 
@@ -7180,8 +8305,8 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       context.chooseSemanticRuntimeAction(stateVersionOnly, {}),
     ).toMatchObject({
-      actionId: endTurn.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
 
@@ -7189,8 +8314,8 @@ describe("authoritative plan-first live runtime", () => {
     delete missingTurn.playerView.turnSerial;
     resetResidentPlanPortfolioMemory();
     expect(context.chooseSemanticRuntimeAction(missingTurn, {})).toMatchObject({
-      actionId: endTurn.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
 
@@ -7217,8 +8342,8 @@ describe("authoritative plan-first live runtime", () => {
         {},
       );
       expect(decision, malformed.label).toMatchObject({
-        actionId: endTurn.actionId,
-        reasonCode: "plan_first.runner.complete_turn",
+        actionId: credit.actionId,
+        reasonCode: "plan_first.runner.economy",
         fallbackUsed: false,
       });
       expect(decision.evidence, malformed.label).toContain(
@@ -8175,8 +9300,8 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
   });
@@ -8948,6 +10073,61 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     ...overrides,
   } as unknown as SemanticRuntimeDecisionContextDependencies;
   return createSemanticRuntimeDecisionContext(dependencies);
+}
+
+function pacificaOverflowInstall(
+  actionId: string,
+  cardId: string,
+  serverId: string,
+) {
+  return legalAction(
+    actionId,
+    "corp",
+    "install_card",
+    `Install Pacifica Regional AI in ${serverId}`,
+    { credits: 0, clicks: 1 },
+    {
+      source: cardId,
+      payload: {
+        cardId,
+        serverId,
+        placement: "root",
+      },
+    },
+  );
+}
+
+function pacificaCard(instanceId: string) {
+  return visibleCard(instanceId, "corp", "asset", {
+    definitionId: "onr_v1_334_pacifica-regional-ai",
+    title: "Pacifica Regional AI",
+  });
+}
+
+function corpOverflowFillers(count: number) {
+  return Array.from({ length: count }, (_, index) =>
+    visibleCard(`overflow-filler-${index}`, "corp", "operation", {
+      definitionId: "onr_v1_284_chance-observation",
+    }),
+  );
+}
+
+function hqOverflowReceipt(
+  portfolio: ReturnType<typeof residentPlanPortfolioSnapshot>,
+): Record<string, unknown> | undefined {
+  const overflow = portfolio?.instances.find(
+    (instance) =>
+      instance.moduleId === "corp.hand_and_agenda_management" &&
+      instance.dedupeKey === "resolve-hq-overflow:corp:0",
+  );
+  const state = overflow?.moduleState as
+    | {
+        signal?: {
+          overflowResolutionState?: Record<string, unknown>;
+        };
+      }
+    | undefined;
+  return state?.signal?.overflowResolutionState;
 }
 
 function valuPakNumericContractFixture(params: {

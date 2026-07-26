@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type {
   ActionSemanticCandidate,
@@ -246,6 +246,179 @@ describe("Corp core plan modules", () => {
       semanticActionTypes: ["score.agenda"],
     });
     expect(JSON.stringify(materialized.continuation)).not.toContain("actionId");
+  });
+
+  it("keeps the agenda-less score root supportable only through its exact current tactical material signal", () => {
+    const module = corpModule("corp.score_agenda");
+    const corpContext = context([], {
+      scoreProjects: [
+        {
+          projectId: "general",
+          agendaPoints: 0,
+          phase: "select_agenda",
+          sameTurnCloseout: false,
+          terminalScore: false,
+          feasible: false,
+          evidenceCode: "corp_score_campaign_missing_agenda_material",
+        },
+      ],
+    });
+    corpContext.transientSignals = [
+      {
+        schemaVersion: "transient-plan-signal-v1",
+        signalId: "corp-score-material:general",
+        side: "corp",
+        observedAtStateVersion: 10,
+        planModuleId: "corp.score_agenda",
+        planDedupeKey: "general",
+        kind: "goal",
+        scope: "tactical",
+        evidenceCode: "corp_score_campaign_missing_agenda_material",
+        guarantee: "robust_but_reactive",
+        target: { kind: "capability", id: "score-material:general" },
+      },
+    ];
+    const proposal = module.discover(corpContext)[0]!;
+    const instance = instantiatePlanProposal(proposal, 10);
+    const rawAssessment = module.assess(
+      instance,
+      corpContext,
+      emptyPortfolio(),
+    );
+    const validated = requireValidatedPlanAssessment(
+      {
+        ...rawAssessment,
+        transientSignals: [...corpContext.transientSignals!],
+      },
+      CORP_PLAN_PRIORITY_POLICY,
+      10,
+    );
+
+    expect(proposal).toMatchObject({
+      dedupeKey: "general",
+      initialViability: "ready",
+      phase: "select_agenda",
+      persistencePolicy: "sticky_goal",
+      target: { kind: "capability", id: "score-material:general" },
+    });
+    expect(proposal.moduleState).not.toHaveProperty(
+      "signal.agendaDefinitionId",
+    );
+    expect(validated).toMatchObject({
+      intentFit: "tactical_override",
+      readiness: "executable_with_support",
+      priorityValidation: { effectiveClass: "P4" },
+      resourceGaps: [
+        {
+          needId: "score-material:general",
+          capability: "draw_score_agenda_material",
+          minimum: 1,
+          available: 0,
+          deadline: "multi_turn",
+        },
+      ],
+    });
+  });
+
+  it("publishes score setup only as the exact concrete parent's source-scoped need", () => {
+    const module = corpModule("corp.score_agenda");
+    const setupNeed = {
+      needId: "score-setup:agenda:agenda-1:remote_1:chicago",
+      actionId: "install-chicago",
+      sourceCardInstanceId: "chicago",
+      sourceDefinitionId: "onr_v1_312_chicago-branch",
+    };
+    const corpContext = context([], {
+      scoreProjects: [
+        {
+          projectId: "agenda:agenda-1:remote_1",
+          agendaDefinitionId: "onr_v1_201_executive-extraction",
+          agendaPoints: 2,
+          agendaInstanceId: "agenda-1",
+          serverId: "remote_1",
+          phase: "install_agenda",
+          sameTurnCloseout: false,
+          setupNeed,
+          terminalScore: false,
+          feasible: false,
+          evidenceCode: "corp_last_click_score_install_deferred:remote_1",
+        },
+      ],
+    });
+    const proposal = module.discover(corpContext)[0]!;
+    const instance = instantiatePlanProposal(proposal, 10);
+    const assessment = module.assess(instance, corpContext, emptyPortfolio());
+
+    expect(proposal.initialViability).toBe("ready");
+    expect(assessment).toMatchObject({
+      readiness: "executable_with_support",
+      resourceGaps: [
+        {
+          needId: setupNeed.needId,
+          capability: "install_score_acceleration_support",
+          minimum: 1,
+          available: 0,
+          deadline: "multi_turn",
+        },
+      ],
+    });
+
+    const malformedContext = context([], {
+      scoreProjects: [
+        {
+          ...(corpContext.domain as CorpCorePlanDomain).scoreProjects[0]!,
+          setupNeed: {
+            ...setupNeed,
+            needId: "score-setup:foreign-parent:chicago",
+          },
+        },
+      ],
+    });
+    expect(() => module.discover(malformedContext)).toThrow(
+      expect.objectContaining({ code: "invalid_support_graph" }),
+    );
+  });
+
+  it("does not claim generic score intent fit from a mismatched material signal", () => {
+    const module = corpModule("corp.score_agenda");
+    const corpContext = context([], {
+      scoreProjects: [
+        {
+          projectId: "general",
+          agendaPoints: 0,
+          phase: "select_agenda",
+          sameTurnCloseout: false,
+          terminalScore: false,
+          feasible: false,
+          evidenceCode: "corp_score_campaign_missing_agenda_material",
+        },
+      ],
+    });
+    corpContext.transientSignals = [
+      {
+        schemaVersion: "transient-plan-signal-v1",
+        signalId: "corp-score-material:foreign",
+        side: "corp",
+        observedAtStateVersion: 10,
+        planModuleId: "corp.score_agenda",
+        planDedupeKey: "general",
+        kind: "goal",
+        scope: "tactical",
+        evidenceCode: "corp_score_campaign_missing_agenda_material",
+        guarantee: "robust_but_reactive",
+        target: { kind: "capability", id: "score-material:general" },
+      },
+    ];
+    const instance = instantiatePlanProposal(
+      module.discover(corpContext)[0]!,
+      10,
+    );
+    const assessment = module.assess(instance, corpContext, emptyPortfolio());
+
+    expect(assessment.intentFit).toBe("none");
+    expect(() =>
+      requireValidatedPlanAssessment(assessment, CORP_PLAN_PRIORITY_POLICY, 10),
+    ).toThrowError("priority_claim_rejected");
   });
 
   it("does not let defense absorb a score action", () => {
@@ -1220,6 +1393,7 @@ describe("Corp core plan modules", () => {
         projectedServerId: "rd",
         expiresAtStateVersion: 10,
         complete: true,
+        costKind: "fixed",
         baseCredits: 0,
         finalCredits: 4,
         mandatoryAdditionalCosts: { agendaPoints: 0 },
@@ -1236,6 +1410,215 @@ describe("Corp core plan modules", () => {
       true,
     );
   });
+
+  it.each([
+    ["fixed exact", "fixed", 1, true, undefined],
+    [
+      "paid ETR first frontier",
+      "paid_end_the_run_subroutines",
+      3,
+      true,
+      undefined,
+    ],
+    [
+      "paid ETR selected-cost drift",
+      "paid_end_the_run_subroutines",
+      1,
+      false,
+      undefined,
+    ],
+    [
+      "paid ETR malformed arithmetic",
+      "paid_end_the_run_subroutines",
+      3,
+      false,
+      "malformed_arithmetic",
+    ],
+    ["alternate subtype exact", "alternate_subtype", 5, true, undefined],
+    [
+      "alternate subtype selected-cost drift",
+      "alternate_subtype",
+      1,
+      false,
+      undefined,
+    ],
+    [
+      "alternate subtype cross-family payload",
+      "alternate_subtype",
+      5,
+      false,
+      "cross_family_field",
+    ],
+    ["X fail-closed", "x_strength", 1, false, undefined],
+  ] as const)(
+    "binds the source selected rez cost to the current post-install quote: %s",
+    (_label, costModel, selectedCredits, expectedExecutable, corruption) => {
+      const install = {
+        ...cardAction("install-rd", "install.card", "new-rd-ice"),
+        targetContext: targetContext("rd", "server"),
+      };
+      const projection = knownInstallProjection({
+        actionId: install.actionId,
+        sourceCardInstanceId: install.sourceCardInstanceId!,
+        sourceDefinitionId: install.sourceDefinitionId!,
+        targetServerId: "rd",
+        effect: "progress",
+        probability: { numerator: 0, denominator: 1 },
+        totalCredits: selectedCredits,
+      });
+      const signal = {
+        kind: "generic",
+        defenseId: "install:rd",
+        serverId: "rd",
+        phase: "install_ice",
+        sourceDefinitionIds: [install.sourceDefinitionId!],
+        actionIds: [install.actionId],
+        urgent: false,
+        value: 80,
+        evidenceCode: "visible_rd_need",
+        installRoute: {
+          disposition: "productive",
+          projection,
+        },
+      } satisfies CorpDefenseSignal;
+      const corpContext = context(
+        [install],
+        { defenseNeeds: [signal] },
+        { credits: 0, clicks: 3 },
+      );
+      const quoteFields = postInstallRezQuoteFieldsForTest(costModel);
+      if (corruption === "malformed_arithmetic") {
+        quoteFields.postInstallRezQuoteVariableFirstEndTheRunFinalCredits = 4;
+      } else if (corruption === "cross_family_field") {
+        quoteFields.postInstallRezQuoteVariableMinSubroutines = 0;
+      }
+      Object.assign(corpContext.input.legalActions[0]!.payload!, quoteFields);
+
+      expect(
+        corpDefensePortfolioHasExecutableRoute(corpContext, [signal]),
+      ).toBe(expectedExecutable);
+    },
+  );
+
+  it.each([
+    ["fixed exact", "fixed", 1, true, undefined],
+    [
+      "paid ETR first frontier",
+      "paid_end_the_run_subroutines",
+      3,
+      true,
+      undefined,
+    ],
+    [
+      "paid ETR selected-cost drift",
+      "paid_end_the_run_subroutines",
+      1,
+      false,
+      undefined,
+    ],
+    [
+      "paid ETR malformed arithmetic",
+      "paid_end_the_run_subroutines",
+      3,
+      false,
+      "malformed_arithmetic",
+    ],
+    ["alternate subtype exact", "alternate_subtype", 5, true, undefined],
+    [
+      "alternate subtype selected-cost drift",
+      "alternate_subtype",
+      1,
+      false,
+      undefined,
+    ],
+    ["X fail-closed", "x_strength", 1, false, undefined],
+  ] as const)(
+    "binds an existing selected rez cost to the current installed quote: %s",
+    (_label, costModel, selectedCredits, expectedExecutable, corruption) => {
+      const install = {
+        ...cardAction("install-rd", "install.card", "new-rd-ice"),
+        targetContext: targetContext("rd", "server"),
+      };
+      const sourceProjection = knownInstallProjection({
+        actionId: install.actionId,
+        sourceCardInstanceId: install.sourceCardInstanceId!,
+        sourceDefinitionId: install.sourceDefinitionId!,
+        targetServerId: "rd",
+        effect: "progress",
+        probability: { numerator: 0, denominator: 1 },
+        totalCredits: 1,
+      });
+      const existingSelection = {
+        iceInstanceId: "existing-rd-ice",
+        iceDefinitionId: "existing-rd-ice-definition",
+        credits: selectedCredits,
+        source: "engine_rez_cost_quote" as const,
+      };
+      const selectedRezCosts = [
+        ...sourceProjection.selectedRezCosts,
+        existingSelection,
+      ];
+      const projection = {
+        ...sourceProjection,
+        selectedRezCosts,
+        after: {
+          ...sourceProjection.after,
+          selectedRezCosts,
+          totalSelectedRezCost: selectedRezCosts.reduce(
+            (total, cost) => total + cost.credits,
+            0,
+          ),
+        },
+      } satisfies KnownCorpFundedIceInstallRouteProjection;
+      const signal = {
+        kind: "generic",
+        defenseId: "install:rd",
+        serverId: "rd",
+        phase: "install_ice",
+        sourceDefinitionIds: [install.sourceDefinitionId!],
+        actionIds: [install.actionId],
+        urgent: false,
+        value: 80,
+        evidenceCode: "visible_rd_need",
+        installRoute: {
+          disposition: "productive",
+          projection,
+        },
+      } satisfies CorpDefenseSignal;
+      const corpContext = context(
+        [install],
+        { defenseNeeds: [signal] },
+        { credits: 0, clicks: 3 },
+      );
+      const effectiveRezCostQuote = installedRezQuoteForTest(
+        costModel,
+        existingSelection.iceInstanceId,
+      );
+      if (
+        corruption === "malformed_arithmetic" &&
+        effectiveRezCostQuote.complete &&
+        effectiveRezCostQuote.costKind === "variable" &&
+        effectiveRezCostQuote.variableParameter.kind ===
+          "paid_end_the_run_subroutines"
+      ) {
+        effectiveRezCostQuote.variableParameter.firstEndTheRunFinalCredits = 4;
+      }
+      corpContext.input.playerView.servers
+        .find((server) => server.id === "rd")!
+        .ice.push({
+          instanceId: existingSelection.iceInstanceId,
+          definitionId: existingSelection.iceDefinitionId,
+          known: true,
+          type: "ice",
+          rezzed: false,
+          effectiveRezCostQuote,
+        });
+
+      expect(
+        corpDefensePortfolioHasExecutableRoute(corpContext, [signal]),
+      ).toBe(expectedExecutable);
+    },
+  );
 
   it.each([
     ["current", true],
@@ -1339,6 +1722,7 @@ describe("Corp core plan modules", () => {
                   : {
                       ...quoteBinding,
                       complete: true as const,
+                      costKind: "fixed" as const,
                       baseCredits: 1,
                       finalCredits: 1,
                       mandatoryAdditionalCosts: { agendaPoints: 0 },
@@ -1430,6 +1814,7 @@ describe("Corp core plan modules", () => {
       projectedServerId: "rd",
       expiresAtStateVersion: 10,
       complete: true,
+      costKind: "fixed",
       baseCredits: 99,
       finalCredits: 0,
       mandatoryAdditionalCosts: { agendaPoints: 0 },
@@ -1734,7 +2119,7 @@ describe("Corp core plan modules", () => {
     ).toBe("draw-for-rd-ice");
   });
 
-  it("raises an exact score-protection draw delegation to P4 without transferring ICE ownership to the score plan", () => {
+  it("keeps an exact score-protection draw at its own P5 until the scheduler validates its P4 parent", () => {
     const draw = candidate(
       "draw-for-score-remote-ice",
       "draw_card",
@@ -1749,6 +2134,7 @@ describe("Corp core plan modules", () => {
           serverId: "remote_1",
           phase: "draw_for_ice",
           parentProjectId: "agenda:agenda-1:remote_1",
+          parentNeedId: "score-protection:agenda-1:remote_1",
           delegatedPriorityClass: "P4",
           actionId: draw.actionId,
           drawAttemptState: {
@@ -1760,20 +2146,33 @@ describe("Corp core plan modules", () => {
         },
       ],
     });
-    const instance = instantiatePlanProposal(
-      module.discover(corpContext)[0]!,
-      10,
-    );
+    const proposal = module.discover(corpContext)[0]!;
+    const instance = instantiatePlanProposal(proposal, 10);
     const planAssessment = requireValidatedPlanAssessment(
       module.assess(instance, corpContext, emptyPortfolio()),
       CORP_PLAN_PRIORITY_POLICY,
       10,
     );
 
-    expect(planAssessment.priorityValidation.effectiveClass).toBe("P4");
-    expect(
-      module.materialize(instance, planAssessment, corpContext).candidates,
-    ).toEqual([
+    expect(planAssessment.priorityValidation.effectiveClass).toBe("P5");
+    const materialized = module.materialize(
+      instance,
+      planAssessment,
+      corpContext,
+    );
+    expect(proposal.parentInstanceId).toBe(
+      "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+    );
+    expect(proposal.parentNeedId).toBe("score-protection:agenda-1:remote_1");
+    expect(materialized.step).toMatchObject({
+      stepId: `${instance.instanceId}:develop_score_protection`,
+      capability: {
+        capabilityId: "develop_score_protection",
+        semanticActionTypes: ["draw.card"],
+      },
+    });
+    expect(materialized.step.target).toBeUndefined();
+    expect(materialized.candidates).toEqual([
       expect.objectContaining({
         candidate: expect.objectContaining({ actionId: draw.actionId }),
         stepValue: 1,
@@ -1781,7 +2180,7 @@ describe("Corp core plan modules", () => {
     ]);
   });
 
-  it("selects the score parent before its child route and keeps priority, evidence, action, and parent identity aligned", () => {
+  it("selects the score parent before materializing its P5 child route and keeps evidence, action, and parent identity aligned", () => {
     const p4Install = {
       ...cardAction("a-p4-install", "install.card", "p4-ice"),
       targetContext: targetContext("remote_2", "server"),
@@ -1802,6 +2201,7 @@ describe("Corp core plan modules", () => {
           serverId: "remote_2",
           phase: "install_ice",
           parentProjectId: "agenda:development:remote_2",
+          parentNeedId: "score-protection:development:remote_2",
           delegatedPriorityClass: "P4",
           actionId: p4Install.actionId,
           sourceCardInstanceId: p4Install.sourceCardInstanceId!,
@@ -1829,6 +2229,7 @@ describe("Corp core plan modules", () => {
           serverId: "remote_1",
           phase: "draw_for_ice",
           parentProjectId: p1ParentProjectId,
+          parentNeedId: "score-protection:terminal:remote_1",
           delegatedPriorityClass: "P1",
           actionId: p1Draw.actionId,
           drawAttemptState: {
@@ -1866,8 +2267,9 @@ describe("Corp core plan modules", () => {
     expect(proposal.parentInstanceId).toBe(
       "plan:corp.score_agenda:agenda%3Aterminal%3Aremote_1",
     );
+    expect(proposal.parentNeedId).toBe("score-protection:terminal:remote_1");
     expect(planAssessment).toMatchObject({
-      priorityValidation: { effectiveClass: "P1" },
+      priorityValidation: { effectiveClass: "P5" },
       evidenceCodes: ["p1_parent_requires_targeted_draw"],
       withinClassValue: 1,
     });
@@ -1892,6 +2294,7 @@ describe("Corp core plan modules", () => {
           serverId: "remote_1",
           phase: "draw_for_ice",
           parentProjectId: "agenda:development:remote_1",
+          parentNeedId: "score-protection:development:remote_1",
           delegatedPriorityClass: "P4",
           actionId: scoreDraw.actionId,
           drawAttemptState: {
@@ -1967,6 +2370,7 @@ describe("Corp core plan modules", () => {
           serverId: "remote_1",
           phase: "draw_for_ice",
           parentProjectId: "agenda:agenda-1:remote_1",
+          parentNeedId: "score-protection:agenda-1:remote_1",
           delegatedPriorityClass: "P4",
           actionId: draw.actionId,
           drawAttemptState: {
@@ -1981,6 +2385,7 @@ describe("Corp core plan modules", () => {
           serverId: "remote_1",
           phase: "draw_for_ice",
           parentProjectId: "agenda:agenda-1:remote_1",
+          parentNeedId: "score-protection:agenda-1:remote_1",
           delegatedPriorityClass: "P4",
           actionId: nightShift.actionId,
           drawAttemptState: {
@@ -2316,11 +2721,7 @@ describe("Corp core plan modules", () => {
     const module = corpModule("corp.defend_servers");
     const proposal = module.discover(corpContext)[0]!;
     const instance = instantiatePlanProposal(proposal, 10);
-    const assessed = module.assess(
-      instance,
-      corpContext,
-      emptyPortfolio(),
-    );
+    const assessed = module.assess(instance, corpContext, emptyPortfolio());
 
     expect(
       module
@@ -2372,11 +2773,7 @@ describe("Corp core plan modules", () => {
     const module = corpModule("corp.defend_servers");
     const proposal = module.discover(corpContext)[0]!;
     const instance = instantiatePlanProposal(proposal, 10);
-    const assessed = module.assess(
-      instance,
-      corpContext,
-      emptyPortfolio(),
-    );
+    const assessed = module.assess(instance, corpContext, emptyPortfolio());
 
     expect(proposal.initialViability).toBe("ready");
     expect(assessed.priorityClaim.requestedClass).toBe("P5");
@@ -2420,6 +2817,7 @@ describe("Corp core plan modules", () => {
         serverId: "new_remote",
         phase: "install_ice",
         parentProjectId: "agenda:agenda-1:new_remote",
+        parentNeedId: "score-protection:agenda-1:new_remote",
         delegatedPriorityClass: "P4",
         actionId,
         sourceCardInstanceId: `${definitionId}-instance`,
@@ -2504,6 +2902,7 @@ describe("Corp core plan modules", () => {
           serverId: "new_remote",
           phase: "draw_for_ice",
           parentProjectId: "agenda:agenda-1:new_remote",
+          parentNeedId: "score-protection:agenda-1:new_remote",
           delegatedPriorityClass: "P4",
           actionId: draw.actionId,
           drawAttemptState: {
@@ -2537,7 +2936,7 @@ describe("Corp core plan modules", () => {
       corpContext,
     );
 
-    expect(planAssessment.priorityValidation.effectiveClass).toBe("P4");
+    expect(planAssessment.priorityValidation.effectiveClass).toBe("P5");
     expect(
       bindBestCurrentPlanRoute({
         side: "corp",
@@ -2562,6 +2961,7 @@ describe("Corp core plan modules", () => {
           serverId: "remote_1",
           phase: "install_ice",
           parentProjectId: "agenda:agenda-1:remote_1",
+          parentNeedId: "score-protection:agenda-1:remote_1",
           delegatedPriorityClass: "P4",
           actionId: "missing-install",
           sourceCardInstanceId: "missing-ice",
@@ -2586,6 +2986,7 @@ describe("Corp core plan modules", () => {
           serverId: "remote_1",
           phase: "draw_for_ice",
           parentProjectId: "agenda:agenda-1:remote_1",
+          parentNeedId: "score-protection:agenda-1:remote_1",
           delegatedPriorityClass: "P4",
           actionId: draw.actionId,
           drawAttemptState: {
@@ -2620,6 +3021,7 @@ describe("Corp core plan modules", () => {
       serverId: "remote_1",
       phase: "install_ice",
       parentProjectId: "agenda:agenda-1:remote_1",
+      parentNeedId: "score-protection:agenda-1:remote_1",
       delegatedPriorityClass: "P4",
       actionId: install.actionId,
       sourceCardInstanceId: install.sourceCardInstanceId,
@@ -2685,6 +3087,7 @@ describe("Corp core plan modules", () => {
       serverId: "remote_1",
       phase: "install_ice",
       parentProjectId: "agenda:agenda-1:remote_1",
+      parentNeedId: "score-protection:agenda-1:remote_1",
       delegatedPriorityClass: "P4",
       actionId: install.actionId,
       sourceCardInstanceId: install.sourceCardInstanceId!,
@@ -2787,6 +3190,7 @@ describe("Corp core plan modules", () => {
             gap: 5,
             actionIds: ["credit"],
             parentPlanInstanceId: "plan:corp.score_agenda:score-1",
+            parentNeedId: "score-support:score-1",
             delegatedPriorityClass: "P4",
             urgentForScore: true,
             evidenceCode: "score_needs_credits",
@@ -2811,11 +3215,95 @@ describe("Corp core plan modules", () => {
     );
 
     expect(open[0]?.parentInstanceId).toBe("plan:corp.score_agenda:score-1");
+    expect(open[0]?.parentNeedId).toBe("score-support:score-1");
     expect(satisfied).toEqual([]);
   });
 
   it.each(["P1", "P2", "P3", "P4"] as const)(
-    "inherits %s and the exact parent for a score-project funding delegation",
+    "keeps a %s score parent ready with its exact open funding gap",
+    (priorityClass) => {
+      const score = corpModule("corp.score_agenda");
+      const project = {
+        ...scoreProject(
+          `funding-parent-${priorityClass}`,
+          priorityClass,
+          `score_parent_needs_funding_${priorityClass}`,
+        ),
+        feasible: false,
+        fundingGap: 2,
+      };
+      const corpContext = context([], { scoreProjects: [project] });
+      const proposal = score.discover(corpContext)[0]!;
+      const instance = instantiatePlanProposal(proposal, 10);
+      const planAssessment = requireValidatedPlanAssessment(
+        score.assess(instance, corpContext, emptyPortfolio()),
+        CORP_PLAN_PRIORITY_POLICY,
+        10,
+      );
+
+      expect(proposal).toMatchObject({
+        initialViability: "ready",
+        blockers: [],
+      });
+      expect(planAssessment).toMatchObject({
+        readiness: "executable_with_support",
+        priorityValidation: { effectiveClass: priorityClass },
+        feasibility: { currentRouteHeadPossible: false },
+        resourceGaps: [
+          {
+            needId: `score-support:funding-parent-${priorityClass}`,
+            capability: "credits",
+            minimum: 2,
+            available: 0,
+          },
+        ],
+      });
+    },
+  );
+
+  it("keeps an exact current advance executable when its funding gap belongs only to later protection", () => {
+    const score = corpModule("corp.score_agenda");
+    const project = {
+      ...scoreProject(
+        "current-advance-with-future-protection-gap",
+        "P4",
+        "score_advance_with_future_protection_gap",
+      ),
+      fundingGap: 2,
+    };
+    const advance = targetAction(
+      "advance-current-agenda",
+      "score.advance_card",
+      project.agendaInstanceId!,
+      "card",
+    );
+    const corpContext = context([advance], { scoreProjects: [project] });
+    const proposal = score.discover(corpContext)[0]!;
+    const instance = instantiatePlanProposal(proposal, 10);
+    const planAssessment = requireValidatedPlanAssessment(
+      score.assess(instance, corpContext, emptyPortfolio()),
+      CORP_PLAN_PRIORITY_POLICY,
+      10,
+    );
+
+    expect(proposal).toMatchObject({
+      initialViability: "ready",
+      blockers: [],
+    });
+    expect(planAssessment).toMatchObject({
+      readiness: "executable_now",
+      feasibility: { currentRouteHeadPossible: true },
+      resourceGaps: [],
+    });
+    expect(
+      score
+        .materialize(instance, planAssessment, corpContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([advance.actionId]);
+  });
+
+  it.each(["P1", "P2", "P3", "P4"] as const)(
+    "inherits the exact %s score-parent priority for a funding delegation",
     (delegatedPriorityClass) => {
       const economy = corpModule("corp.economy");
       const credit = candidate("credit", "gain_credit", "economy.gain_credit");
@@ -2828,6 +3316,7 @@ describe("Corp core plan modules", () => {
             gap: 1,
             actionIds: ["credit"],
             parentPlanInstanceId,
+            parentNeedId: `score-support:score-${delegatedPriorityClass}`,
             delegatedPriorityClass,
             urgentForScore: true,
             evidenceCode: `score_needs_credits_${delegatedPriorityClass}`,
@@ -2845,6 +3334,9 @@ describe("Corp core plan modules", () => {
       const instance = instantiatePlanProposal(proposal, 10);
 
       expect(proposal.parentInstanceId).toBe(parentPlanInstanceId);
+      expect(proposal.parentNeedId).toBe(
+        `score-support:score-${delegatedPriorityClass}`,
+      );
       const planAssessment = requireValidatedPlanAssessment(
         economy.assess(instance, corpContext, emptyPortfolio()),
         CORP_PLAN_PRIORITY_POLICY,
@@ -2879,6 +3371,7 @@ describe("Corp core plan modules", () => {
           gap: 3,
           actionIds: [],
           parentPlanInstanceId,
+          parentNeedId: "score-support:score-P1",
           delegatedPriorityClass: "P1",
           urgentForScore: true,
           evidenceCode: "score_needs_credits_P1",
@@ -2890,9 +3383,7 @@ describe("Corp core plan modules", () => {
           },
         },
       ],
-      scoreProjects: [
-        scoreProject("score-P1", "P1", "score_needs_credits_P1"),
-      ],
+      scoreProjects: [scoreProject("score-P1", "P1", "score_needs_credits_P1")],
     });
 
     const proposal = economy.discover(corpContext)[0]!;
@@ -3215,6 +3706,7 @@ describe("Corp core plan modules", () => {
       actionIds: [basicCredit.actionId],
       parentPlanInstanceId:
         "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+      parentNeedId: `score-support:${project.projectId}`,
       delegatedPriorityClass: "P1" as const,
       urgentForScore: true,
       evidenceCode: project.evidenceCode,
@@ -3248,6 +3740,7 @@ describe("Corp core plan modules", () => {
     );
     expect(proposal).toMatchObject({
       parentInstanceId: scoreFunding.parentPlanInstanceId,
+      parentNeedId: scoreFunding.parentNeedId,
       initialViability: "ready",
     });
     const planAssessment = requireValidatedPlanAssessment(
@@ -3303,7 +3796,7 @@ describe("Corp core plan modules", () => {
     } satisfies CorpDefenseSignal;
     const defenseFunding = {
       kind: "parent_funding" as const,
-      needId: "defense-support:hq:pocket-vr",
+      needId: "defense-reserve:hq:pocket-vr",
       gap: 4,
       actionIds: [basicCredit.actionId],
       immediateDefenseConversion: true,
@@ -3338,9 +3831,32 @@ describe("Corp core plan modules", () => {
       reliability: "guaranteed",
       headActionId: "basic-credit",
     });
-    expect(proposal.parentInstanceId).toBe(
-      defenseFunding.parentPlanInstanceId,
+    expect(proposal.parentInstanceId).toBe(defenseFunding.parentPlanInstanceId);
+    expect(proposal.parentNeedId).toBe(defenseFunding.parentNeedId);
+    const defense = corpModule("corp.defend_servers");
+    const defenseProposal = defense.discover(corpContext)[0]!;
+    const defenseInstance = instantiatePlanProposal(defenseProposal, 10);
+    const defenseAssessment = requireValidatedPlanAssessment(
+      defense.assess(defenseInstance, corpContext, emptyPortfolio()),
+      CORP_PLAN_PRIORITY_POLICY,
+      10,
     );
+    expect(defenseProposal).toMatchObject({
+      initialViability: "ready",
+      blockers: [],
+    });
+    expect(defenseAssessment).toMatchObject({
+      readiness: "executable_with_support",
+      priorityValidation: { effectiveClass: "P2" },
+      resourceGaps: [
+        {
+          needId: defenseParent.defenseId,
+          capability: "credits",
+          minimum: 4,
+          available: 0,
+        },
+      ],
+    });
     const planAssessment = requireValidatedPlanAssessment(
       economy.assess(instance, corpContext, emptyPortfolio()),
       CORP_PLAN_PRIORITY_POLICY,
@@ -3370,8 +3886,29 @@ describe("Corp core plan modules", () => {
           "plan:corp.defend_servers:wrong-defense-portfolio",
       },
     ],
+    ["mismatched gap", { gap: 3 }],
+    [
+      "mismatched target server",
+      {
+        incrementalDefenseReserve: {
+          targetCredits: 9,
+          serverId: "rd",
+          iceInstanceId: "pocket-vr",
+        },
+      },
+    ],
+    [
+      "mismatched ICE",
+      {
+        incrementalDefenseReserve: {
+          targetCredits: 9,
+          serverId: "hq",
+          iceInstanceId: "different-ice",
+        },
+      },
+    ],
   ] as const)(
-    "fails closed on a %s exact parent for a defense-funding child",
+    "fails closed on a %s exact contract for a defense-funding child",
     (_label, parentBinding) => {
       const economy = corpModule("corp.economy");
       const basicCredit = candidate(
@@ -3411,7 +3948,7 @@ describe("Corp core plan modules", () => {
             economyNeeds: [
               {
                 kind: "parent_funding",
-                needId: "defense-support:hq:pocket-vr",
+                needId: "defense-reserve:hq:pocket-vr",
                 gap: 4,
                 actionIds: [basicCredit.actionId],
                 immediateDefenseConversion: true,
@@ -3432,6 +3969,33 @@ describe("Corp core plan modules", () => {
       ).toThrowError(/missing_plan_module_coverage/);
     },
   );
+
+  it("fails closed when a defense-reserve child loses every optional parent-binding field", () => {
+    const economy = corpModule("corp.economy");
+    const basicCredit = candidate(
+      "basic-credit",
+      "gain_credit",
+      "economy.gain_credit",
+    );
+
+    expect(() =>
+      economy.discover(
+        context([basicCredit], {
+          economyNeeds: [
+            {
+              kind: "parent_funding",
+              needId: "defense-reserve:hq:pocket-vr",
+              gap: 4,
+              actionIds: [basicCredit.actionId],
+              urgentForScore: false,
+              evidenceCode:
+                "corp_defense_exact_route_funding_required:hq:pocket-vr",
+            },
+          ],
+        }),
+      ),
+    ).toThrowError(/missing_plan_module_coverage/);
+  });
 
   it("rejects malformed or already-reached incremental defense reserve contracts", () => {
     const basicCredit = candidate(
@@ -3805,6 +4369,7 @@ function context(
                     serverId === "new_remote" ? "remote_1" : serverId,
                   postInstallRezQuoteExpiresAtStateVersion: 10,
                   postInstallRezQuoteComplete: true,
+                  postInstallRezQuoteCostKind: "fixed",
                   postInstallRezQuoteBaseCredits:
                     postInstallRezCreditsByActionId.get(value.actionId) ?? 0,
                   postInstallRezQuoteFinalCredits:
@@ -3869,6 +4434,126 @@ function candidateTargetIdsForTest(
   );
 }
 
+type TestRezCostModel =
+  | "fixed"
+  | "paid_end_the_run_subroutines"
+  | "alternate_subtype"
+  | "x_strength";
+
+function postInstallRezQuoteFieldsForTest(
+  costModel: TestRezCostModel,
+): Record<string, string | number | boolean> {
+  const common = {
+    postInstallRezQuoteBaseCredits: 1,
+    postInstallRezQuoteFinalCredits: 1,
+  };
+  if (costModel === "fixed") {
+    return {
+      ...common,
+      postInstallRezQuoteCostKind: "fixed",
+    };
+  }
+  if (costModel === "paid_end_the_run_subroutines") {
+    return {
+      ...common,
+      postInstallRezQuoteCostKind: "variable",
+      postInstallRezQuoteVariableRezKind: costModel,
+      postInstallRezQuoteVariableAdditionalCreditsPerSubroutine: 2,
+      postInstallRezQuoteVariableMinSubroutines: 0,
+      postInstallRezQuoteVariableMinSubroutinesFinalCredits: 1,
+      postInstallRezQuoteVariableFirstEndTheRunSubroutineCount: 1,
+      postInstallRezQuoteVariableFirstEndTheRunFinalCredits: 3,
+    };
+  }
+  if (costModel === "alternate_subtype") {
+    return {
+      ...common,
+      postInstallRezQuoteCostKind: "variable",
+      postInstallRezQuoteVariableRezKind: costModel,
+      postInstallRezQuoteVariableBaseSubtypes: "sentry",
+      postInstallRezQuoteVariableBaseSubtypesFinalCredits: 1,
+      postInstallRezQuoteVariableAlternateSubtypes: "wall",
+      postInstallRezQuoteVariableAlternateSubtypesAdditionalCredits: 4,
+      postInstallRezQuoteVariableAlternateSubtypesFinalCredits: 5,
+    };
+  }
+  return {
+    ...common,
+    postInstallRezQuoteCostKind: "variable",
+    postInstallRezQuoteVariableRezKind: costModel,
+    postInstallRezQuoteVariableAdditionalCreditsPerValue: 1,
+    postInstallRezQuoteVariableMinValue: 0,
+    postInstallRezQuoteVariableMaxValue: 6,
+    postInstallRezQuoteVariableMinValueFinalCredits: 1,
+    postInstallRezQuoteVariableMaxValueFinalCredits: 7,
+    postInstallRezQuoteVariableEffectiveStrengthFromValue: true,
+  };
+}
+
+function installedRezQuoteForTest(
+  costModel: TestRezCostModel,
+  iceInstanceId: string,
+): VisibleCorpRezCostQuote {
+  const common = {
+    context: "installed" as const,
+    cardId: iceInstanceId,
+    targetServerId: "rd" as const,
+    projectedServerId: "rd" as const,
+    expiresAtStateVersion: 10,
+    complete: true as const,
+    baseCredits: 1,
+    finalCredits: 1,
+    mandatoryAdditionalCosts: { agendaPoints: 0 },
+  };
+  if (costModel === "fixed") {
+    return {
+      ...common,
+      costKind: "fixed",
+    };
+  }
+  if (costModel === "paid_end_the_run_subroutines") {
+    return {
+      ...common,
+      costKind: "variable",
+      variableParameter: {
+        kind: costModel,
+        additionalCreditsPerSubroutine: 2,
+        minSubroutines: 0,
+        minSubroutinesFinalCredits: 1,
+        firstEndTheRunSubroutineCount: 1,
+        firstEndTheRunFinalCredits: 3,
+      },
+    };
+  }
+  if (costModel === "alternate_subtype") {
+    return {
+      ...common,
+      costKind: "variable",
+      variableParameter: {
+        kind: costModel,
+        baseSubtypes: ["sentry"],
+        baseSubtypesFinalCredits: 1,
+        alternateSubtypes: ["wall"],
+        alternateSubtypesAdditionalCredits: 4,
+        alternateSubtypesFinalCredits: 5,
+      },
+    };
+  }
+  return {
+    ...common,
+    costKind: "variable",
+    variableParameter: {
+      kind: costModel,
+      additionalCreditsPerValue: 1,
+      minValue: 0,
+      maxValue: 6,
+      minValueFinalCredits: 1,
+      maxValueFinalCredits: 7,
+      effectiveStrengthFromValue: true,
+    },
+  };
+}
+
 function knownInstallProjection<
   Effect extends "no_progress" | "progress" | "satisfied",
 >(params: {
@@ -3883,6 +4568,7 @@ function knownInstallProjection<
   availableCredits?: number;
   availableClicks?: number;
   preservesReserves?: boolean;
+  minimumAdditionalCreditsToSatisfy?: number;
 }): KnownCorpFundedIceInstallRouteProjection & { effect: Effect } {
   const protection = {
     knowledge: "known" as const,
@@ -3922,6 +4608,21 @@ function knownInstallProjection<
     preservesHardClickReserve: true,
     evidence: [],
   };
+  const minimumAdditionalCreditsToSatisfy =
+    params.minimumAdditionalCreditsToSatisfy ??
+    (params.preservesReserves === false ? params.totalCredits : undefined);
+  const afterAssessment = {
+    ...fundedAssessment,
+    ...(minimumAdditionalCreditsToSatisfy !== undefined
+      ? {
+          minimumSatisfyingRezCost: params.totalCredits,
+          minimumSatisfyingRezCosts: selectedRezCosts,
+          minimumSatisfyingProtection: protection,
+          minimumAdditionalCreditsToSatisfy,
+          minimumAdditionalClicksToSatisfy: 0,
+        }
+      : {}),
+  };
   return {
     knowledge: "known",
     actionId: params.actionId,
@@ -3929,7 +4630,7 @@ function knownInstallProjection<
     sourceDefinitionId: params.sourceDefinitionId,
     targetServerId: params.targetServerId,
     before: fundedAssessment,
-    after: fundedAssessment,
+    after: afterAssessment,
     effect: params.effect,
     evidence: [],
     installCredits: params.installCredits ?? 0,

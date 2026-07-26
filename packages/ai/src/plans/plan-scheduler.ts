@@ -45,7 +45,7 @@ export type PlanSchedulerContext = {
 
 export type PlanActionDisposition = {
   actionId: string;
-  disposition: "explicitly_nonproductive";
+  disposition: "explicitly_nonproductive" | "assessment_unknown";
   ownerModuleId: PlanModuleId;
   evidenceCode: string;
 };
@@ -230,14 +230,10 @@ export function runPlanScheduler(
     code: `resident:${reconciled.instances.length}`,
   });
 
-  const validatedAssessments = reconciled.instances
+  const rawValidatedAssessments = reconciled.instances
     .filter((instance) => instance.viability === "ready")
     .map((instance) => {
-      const module = moduleForInstance(
-        params.registry,
-        instance,
-        context,
-      );
+      const module = moduleForInstance(params.registry, instance, context);
       const assessment = requireValidatedPlanAssessment(
         bindExactTransientPlanSignals(
           module.assess(instance, context, reconciled),
@@ -255,16 +251,19 @@ export function runPlanScheduler(
         priorityClass: assessment.priorityValidation.effectiveClass,
       });
       return assessment;
-    })
-    .sort(compareValidatedPlanAssessments);
-  assertVoluntaryActionPlanCoverage(
-    params.registry,
-    context,
+    });
+  const supportBindings = bindExactParentSupport(
+    rawValidatedAssessments,
     reconciled,
-    validatedAssessments,
+    context,
+  );
+  const validatedAssessments = supportBindings.assessments.sort(
+    compareValidatedPlanAssessments,
   );
   const assessments = validatedAssessments.filter(
-    (assessment) => assessment.readiness === "executable_now",
+    (assessment) =>
+      assessment.readiness === "executable_now" &&
+      !supportBindings.ineligibleProviderInstanceIds.has(assessment.instanceId),
   );
   if (assessments.length === 0) {
     throw schedulerFailure(
@@ -314,13 +313,14 @@ export function runPlanScheduler(
       ? { continuation: materialized.continuation }
       : {}),
   });
+  assertSelectedActionContracts(context, selected, materialized, route);
   assertEngineRandomizedIceInstallNearTie(
     context,
     materialized,
     instance.instanceId,
   );
   assertEarlyEndTurnRoute(context, route, materialized, module.moduleId);
-  const portfolio = reconcileResidentPlanPortfolio({
+  const selectedPortfolio = reconcileResidentPlanPortfolio({
     side: params.registry.side,
     stateVersion: context.input.playerView.stateVersion,
     timingPoint: context.input.playerView.timingPoint,
@@ -338,6 +338,10 @@ export function runPlanScheduler(
     code: route.head.semanticActionType,
     instanceId: instance.instanceId,
   });
+  const portfolio = bindAssessmentOpenNeeds(
+    selectedPortfolio,
+    validatedAssessments,
+  );
   return {
     lane: "plan",
     route,
@@ -353,6 +357,152 @@ export function runPlanScheduler(
       : {}),
     diagnostics,
   };
+}
+
+function bindExactParentSupport(
+  assessments: readonly ValidatedPlanAssessment[],
+  portfolio: ResidentPlanPortfolio,
+  context: PlanSchedulerContext,
+): {
+  assessments: ValidatedPlanAssessment[];
+  ineligibleProviderInstanceIds: Set<string>;
+} {
+  const assessmentByInstanceId = new Map(
+    assessments.map((assessment) => [assessment.instanceId, assessment]),
+  );
+  const instanceById = new Map(
+    portfolio.instances.map((instance) => [instance.instanceId, instance]),
+  );
+  const ineligibleProviderInstanceIds = new Set<string>();
+  const exactBindings = new Map<
+    string,
+    {
+      parent: ValidatedPlanAssessment;
+      needId: string;
+    }
+  >();
+  const providerIdsByNeed = new Map<string, string[]>();
+
+  for (const provider of portfolio.instances) {
+    if (provider.parentNeedId === undefined) continue;
+    ineligibleProviderInstanceIds.add(provider.instanceId);
+    const parentInstanceId = provider.parentInstanceId;
+    const parent = parentInstanceId
+      ? instanceById.get(parentInstanceId)
+      : undefined;
+    if (!parent || parent.side !== provider.side) {
+      throw invalidSupportGraphFailure(
+        context,
+        provider.instanceId,
+        "Bind every support provider to a resident same-side parent.",
+      );
+    }
+    const parentAssessment = assessmentByInstanceId.get(parent.instanceId);
+    if (
+      !parentAssessment ||
+      parentAssessment.readiness !== "executable_with_support"
+    ) {
+      continue;
+    }
+    const exactNeed = parentAssessment.resourceGaps.find(
+      (gap) => gap.needId === provider.parentNeedId,
+    );
+    if (!exactNeed) continue;
+    const bindingKey = `${parent.instanceId}\u0000${exactNeed.needId}`;
+    const providerIds = providerIdsByNeed.get(bindingKey) ?? [];
+    providerIds.push(provider.instanceId);
+    providerIdsByNeed.set(bindingKey, providerIds);
+    exactBindings.set(provider.instanceId, {
+      parent: parentAssessment,
+      needId: exactNeed.needId,
+    });
+  }
+
+  for (const providerIds of providerIdsByNeed.values()) {
+    if (providerIds.length <= 1) continue;
+    throw invalidSupportGraphFailure(
+      context,
+      providerIds[0],
+      "Bind each open parent need to exactly one resident provider plan; express route alternatives inside that provider.",
+      providerIds,
+    );
+  }
+
+  const decorated = assessments.map((assessment) => {
+    if (assessment.readiness !== "executable_now") return assessment;
+    const binding = exactBindings.get(assessment.instanceId);
+    if (!binding) return assessment;
+    ineligibleProviderInstanceIds.delete(assessment.instanceId);
+    const parentClass = binding.parent.priorityValidation.effectiveClass;
+    const ownClass = assessment.priorityValidation.effectiveClass;
+    const effectiveClass =
+      priorityRank(parentClass) < priorityRank(ownClass)
+        ? parentClass
+        : ownClass;
+    return {
+      ...assessment,
+      priorityValidation: {
+        ...assessment.priorityValidation,
+        effectiveClass,
+        delegatedFromPlanInstanceId: binding.parent.instanceId,
+        needId: binding.needId,
+        reasonCodes: [
+          ...new Set([
+            ...assessment.priorityValidation.reasonCodes,
+            `delegated_parent_support:${binding.parent.instanceId}:${binding.needId}`,
+          ]),
+        ],
+      },
+    };
+  });
+  return {
+    assessments: decorated,
+    ineligibleProviderInstanceIds,
+  };
+}
+
+function invalidSupportGraphFailure(
+  context: PlanSchedulerContext,
+  planInstanceId: string | undefined,
+  removalCondition: string,
+  unresolvedActionIds?: readonly string[],
+): PlanResolutionFailure {
+  return new PlanResolutionFailure("invalid_support_graph", {
+    side: context.input.side,
+    stateVersion: context.input.playerView.stateVersion,
+    timingPoint: context.input.playerView.timingPoint,
+    legalActionTypes: context.input.legalActions.map((action) => action.type),
+    ...(unresolvedActionIds ? { unresolvedActionIds } : {}),
+    owner: "support_graph",
+    removalCondition,
+    ...(planInstanceId ? { planInstanceId } : {}),
+  });
+}
+
+function bindAssessmentOpenNeeds(
+  portfolio: ResidentPlanPortfolio,
+  assessments: readonly ValidatedPlanAssessment[],
+): ResidentPlanPortfolio {
+  const assessmentByInstanceId = new Map(
+    assessments.map((assessment) => [assessment.instanceId, assessment]),
+  );
+  return {
+    ...portfolio,
+    instances: portfolio.instances.map((instance) => {
+      const assessment = assessmentByInstanceId.get(instance.instanceId);
+      if (!assessment) return instance;
+      return {
+        ...instance,
+        openNeedIds: sortedUnique(
+          assessment.resourceGaps.map((gap) => gap.needId),
+        ),
+      };
+    }),
+  };
+}
+
+function priorityRank(priorityClass: string): number {
+  return Number(priorityClass.slice(1));
 }
 
 function bindExactTransientPlanSignals(
@@ -508,18 +658,6 @@ function assertEarlyEndTurnRoute(
     everyRestrictedRunIsExplicitlyNonproductive;
   if (restrictedCapacityForgoProven) return;
 
-  const exhaustedVoluntaryRoutes =
-    moduleId === `${context.input.side}.complete_turn` &&
-    remainingActionIds.length > 0 &&
-    remainingActionIds.every((actionId) =>
-      (context.actionDispositions ?? []).some(
-        (entry) =>
-          entry.actionId === actionId &&
-          entry.disposition === "explicitly_nonproductive",
-      ),
-    );
-  if (exhaustedVoluntaryRoutes) return;
-
   throw new PlanResolutionFailure("end_turn_with_usable_capacity", {
     side: context.input.side,
     stateVersion: context.input.playerView.stateVersion,
@@ -528,7 +666,7 @@ function assertEarlyEndTurnRoute(
     unresolvedActionIds: remainingActionIds,
     owner: "rules_contract",
     removalCondition:
-      "Bind early standard EndTurn to a structurally proven terminal-win or restricted-capacity-forgo plan justification.",
+      "Bind early standard EndTurn to a structurally proven terminal win or restricted-capacity-forgo justification.",
     planInstanceId: route.planInstanceId,
     stepId: route.step.stepId,
     candidateCount: materialized.candidates.length,
@@ -549,87 +687,55 @@ function sameStrings(
   );
 }
 
-function assertVoluntaryActionPlanCoverage(
-  registry: SidePlanRegistry,
+function assertSelectedActionContracts(
   context: PlanSchedulerContext,
-  portfolio: ResidentPlanPortfolio,
-  assessments: readonly ValidatedPlanAssessment[],
+  selectedAssessment: ValidatedPlanAssessment,
+  materialized: PlanMaterialization,
+  selectedRoute: PlanRoute,
 ): void {
-  const planOwnersByActionId = new Map<string, Set<string>>();
-  for (const assessment of assessments) {
-    if (assessment.readiness !== "executable_now") continue;
-    const instance = portfolio.instances.find(
-      (entry) => entry.instanceId === assessment.instanceId,
-    );
-    if (!instance) continue;
-    const module = moduleForInstance(registry, instance, context);
-    const materialization = module.materialize(instance, assessment, context);
-    for (const entry of materialization.candidates) {
-      bindBestCurrentPlanRoute({
-        side: registry.side,
-        stateVersion: context.input.playerView.stateVersion,
-        timingPoint: context.input.playerView.timingPoint,
-        planInstanceId: instance.instanceId,
-        step: materialization.step,
-        candidates: [entry],
-        ...(materialization.continuation
-          ? { continuation: materialization.continuation }
-          : {}),
-      });
-      const owners =
-        planOwnersByActionId.get(entry.candidate.actionId) ?? new Set<string>();
-      owners.add(module.moduleId);
-      planOwnersByActionId.set(entry.candidate.actionId, owners);
-    }
-  }
-  const dispositionByActionId = new Map(
-    (context.actionDispositions ?? []).map((entry) => [entry.actionId, entry]),
+  const selectedMaterializedCandidate = materialized.candidates.find(
+    (entry) => entry.candidate.actionId === selectedRoute.head.actionId,
   );
-  const contradictoryActionIds = [...planOwnersByActionId.keys()].filter(
-    (actionId) => dispositionByActionId.has(actionId),
+  const selectedCurrentCandidate = context.actionCandidates.find(
+    (candidate) => candidate.actionId === selectedRoute.head.actionId,
   );
-  if (contradictoryActionIds.length > 0) {
-    const conflicts = contradictoryActionIds
-      .map((actionId) => {
-        const disposition = dispositionByActionId.get(actionId)!;
-        const routeOwners = [
-          ...(planOwnersByActionId.get(actionId) ?? []),
-        ].join("+");
-        return `${disposition.evidenceCode}@${disposition.ownerModuleId}->${routeOwners}[${actionId}]`;
-      })
-      .join(",");
+  const selectedLegalAction = context.input.legalActions.find(
+    (action) => action.actionId === selectedRoute.head.actionId,
+  );
+  const selectedRouteIsCurrentAndOwned =
+    selectedRoute.planInstanceId === selectedAssessment.instanceId &&
+    selectedRoute.head.planInstanceId === selectedAssessment.instanceId &&
+    selectedRoute.head.stateVersion === context.input.playerView.stateVersion &&
+    selectedMaterializedCandidate !== undefined &&
+    selectedCurrentCandidate !== undefined &&
+    selectedCurrentCandidate.stateVersion ===
+      context.input.playerView.stateVersion &&
+    selectedCurrentCandidate.legalActionRef.actionId ===
+      selectedRoute.head.actionId &&
+    selectedLegalAction !== undefined &&
+    selectedLegalAction.type === selectedRoute.head.actionType;
+  if (!selectedRouteIsCurrentAndOwned) {
     throw schedulerFailure(
       "missing_plan_module_coverage",
       context,
-      undefined,
-      assessments.length,
-      `Actions cannot be both executable plan routes and explicitly nonproductive dispositions. Conflicts=${conflicts}.`,
-      contradictoryActionIds,
+      selectedAssessment.instanceId,
+      materialized.candidates.length,
+      "Bind the selected route to the selected resident plan, its current materialization, and the exact current LegalAction.",
+      [selectedRoute.head.actionId],
     );
   }
-  const unresolvedActionIds = context.actionCandidates
-    .filter(
-      (candidate) =>
-        !isStandardEndTurnCandidate(candidate) &&
-        !planOwnersByActionId.has(candidate.actionId) &&
-        !dispositionByActionId.has(candidate.actionId),
-    )
-    .map((candidate) => candidate.actionId);
-  if (unresolvedActionIds.length > 0) {
-    const unresolvedDetails = context.actionCandidates
-      .filter((candidate) => unresolvedActionIds.includes(candidate.actionId))
-      .map(
-        (candidate) =>
-          `${candidate.actionId}{semantic=${candidate.semanticActionType},sourceKind=${candidate.sourceKind},sourceDefinition=${candidate.sourceDefinitionId ?? "none"}}`,
-      )
-      .join(",");
+
+  const conflictingDisposition = (context.actionDispositions ?? []).find(
+    (entry) => entry.actionId === selectedRoute.head.actionId,
+  );
+  if (conflictingDisposition) {
     throw schedulerFailure(
       "missing_plan_module_coverage",
       context,
-      undefined,
-      assessments.length,
-      `Unresolved=${unresolvedDetails}. Materialize each voluntary LegalAction in an executable plan route or reject it through exactly one registered owner module with a concrete nonproductive disposition. A family-level ownership declaration is not plan coverage.`,
-      unresolvedActionIds,
+      selectedAssessment.instanceId,
+      materialized.candidates.length,
+      `The selected executable plan route cannot also have a terminal action classification. Conflict=${conflictingDisposition.evidenceCode}@${conflictingDisposition.ownerModuleId}[${selectedRoute.head.actionId}].`,
+      [selectedRoute.head.actionId],
     );
   }
 }
@@ -684,7 +790,7 @@ function assertActionDispositions(
         context,
         undefined,
         dispositions.length,
-        `Invalid nonproductive action disposition reasons=${invalidReasons.join(",")} action=${entry.actionId} owner=${entry.ownerModuleId}. Each current non-EndTurn action may be explicitly rejected by one registered owner with concrete evidence exactly once.`,
+        `Invalid action classification reasons=${invalidReasons.join(",")} action=${entry.actionId} owner=${entry.ownerModuleId}. Each current non-EndTurn action may be classified by one registered owner with concrete evidence exactly once.`,
       );
     }
     seen.add(entry.actionId);
@@ -799,7 +905,9 @@ function schedulerFailure(
 
 function unresolvedVoluntaryActionIds(context: PlanSchedulerContext): string[] {
   const explicitlyNonproductive = new Set(
-    (context.actionDispositions ?? []).map((entry) => entry.actionId),
+    (context.actionDispositions ?? [])
+      .filter((entry) => entry.disposition === "explicitly_nonproductive")
+      .map((entry) => entry.actionId),
   );
   return context.actionCandidates
     .filter(

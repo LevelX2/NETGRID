@@ -10,7 +10,10 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
   it.each([
-    ["draws through the explicit hand-development plan at historical D9", defensiveDrawD9Json],
+    [
+      "draws through the explicit hand-development plan at historical D9",
+      defensiveDrawD9Json,
+    ],
     [
       "draws through the explicit hand-development plan at D10",
       defensiveDrawD10Json,
@@ -24,19 +27,21 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("does not reward an optional draw when the current hand is full", () => {
+  it("uses exact basic liquidity instead of an optional draw when the current hand is full", () => {
     const checkpoint = fixture(defensiveDrawD9Json);
     checkpoint.engine.testOnlyGameState.corp.maxHandSize = 4;
     checkpoint.engine.stateHash = hashGameState(
       checkpoint.engine.testOnlyGameState,
     );
     checkpoint.expectation = {
-      acceptableActions: [{ type: "end_turn" }],
+      acceptableActions: [{ type: "gain_credit" }],
       forbiddenActions: [{ type: "draw_card" }],
       planExecution: {
-        acceptablePlanKinds: ["corp.complete_turn"],
-        acceptableCapabilities: ["complete_turn_after_productive_routes_exhausted"],
-        requiredAssessmentEvidence: ["productive_legal_routes_exhausted"],
+        acceptablePlanKinds: ["corp.economy"],
+        acceptableCapabilities: ["develop_or_convert_corp_economy"],
+        requiredAssessmentEvidence: [
+          "corp_engine_certified_basic_liquidity_development",
+        ],
       },
     };
 
@@ -124,8 +129,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
             decision.decisionDebug?.planKind ===
               "corp.hand_and_agenda_management") &&
           !decision.decisionDebug?.scoreBreakdown?.some(
-            (component) =>
-              component.key === "corp_seeded_near_tie_variation",
+            (component) => component.key === "corp_seeded_near_tie_variation",
           ),
       ),
     ).toBe(true);

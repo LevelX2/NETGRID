@@ -494,6 +494,117 @@ describe("Corp same-turn score conversion", () => {
     expect(path).toMatchObject({ desiredAdvancementCounters: 3 });
     expect(path).not.toHaveProperty("overadvanceReason");
   });
+
+  it("uses an exact visible zero requirement instead of the printed agenda requirement", () => {
+    const agenda = card("corporate-downsizing", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      advancementRequirement: 0,
+      advancementCounters: 0,
+    });
+    const input = corpInput({
+      clicks: 2,
+      credits: 26,
+      hq: [],
+      root: [agenda],
+      actions: [
+        action(
+          "score-corporate-downsizing",
+          "score_agenda",
+          agenda.instanceId,
+          {
+            cardId: agenda.instanceId,
+          },
+        ),
+        {
+          ...action(
+            "advance-corporate-downsizing",
+            "advance_card",
+            agenda.instanceId,
+            { cardId: agenda.instanceId },
+          ),
+          costs: [{ clicks: 1, credits: 1 }],
+        },
+      ],
+    });
+
+    expect(bestCorpSameTurnScoreConversionPath(input)).toMatchObject({
+      agendaCardId: agenda.instanceId,
+      advancementRequirement: 0,
+      desiredAdvancementCounters: 0,
+      clicksRequired: 0,
+      creditsRequired: 0,
+      steps: [
+        expect.objectContaining({
+          kind: "score_ready",
+          actionId: "score-corporate-downsizing",
+        }),
+      ],
+    });
+  });
+
+  it("uses the printed agenda requirement when the visible runtime value is absent", () => {
+    const agenda = card("printed-requirement-fallback", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      advancementCounters: 3,
+    });
+    const input = corpInput({
+      clicks: 2,
+      credits: 26,
+      hq: [],
+      root: [agenda],
+      actions: [
+        action(
+          "score-printed-requirement-fallback",
+          "score_agenda",
+          agenda.instanceId,
+          {
+            cardId: agenda.instanceId,
+          },
+        ),
+      ],
+    });
+
+    expect(bestCorpSameTurnScoreConversionPath(input)).toMatchObject({
+      agendaCardId: agenda.instanceId,
+      advancementRequirement: 3,
+      initialAdvancementCounters: 3,
+      desiredAdvancementCounters: 3,
+      clicksRequired: 0,
+      creditsRequired: 0,
+      steps: [
+        expect.objectContaining({
+          kind: "score_ready",
+          actionId: "score-printed-requirement-fallback",
+        }),
+      ],
+    });
+  });
+
+  it("does not replace an invalid visible requirement with the printed value", () => {
+    const agenda = card("invalid-current-requirement", "agenda", {
+      definitionId: "onr_v1_194_corporate-downsizing",
+      advancementRequirement: Number.NaN,
+      advancementCounters: 0,
+    });
+    const input = corpInput({
+      clicks: 3,
+      credits: 3,
+      hq: [],
+      root: [agenda],
+      actions: [
+        action(
+          "advance-invalid-requirement",
+          "advance_card",
+          agenda.instanceId,
+          {
+            cardId: agenda.instanceId,
+          },
+        ),
+      ],
+    });
+
+    expect(bestCorpSameTurnScoreConversionPath(input)).toBeUndefined();
+  });
 });
 
 function corpInput(params: {

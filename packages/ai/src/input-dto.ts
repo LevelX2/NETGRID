@@ -2,9 +2,13 @@ import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
+  CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type AiDifficulty,
   type CorpOptionalRezChoiceQuote,
+  type CorpPunishRouteIncompleteReason,
+  type CorpPunishRouteQuote,
+  type CorpPunishRouteQuoteSet,
   type CounterDisplay,
   type ChoiceRequirement,
   type Cost,
@@ -20,6 +24,7 @@ import {
   type VisibleChoiceRequest,
   type VisibleCorpRezCostQuote,
   type VisibleEffectiveIceRunQuote,
+  type VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
 
 export type BuildAiDecisionInputDtoParams = {
@@ -68,12 +73,32 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "postInstallRezQuoteProjectedServerId",
   "postInstallRezQuoteExpiresAtStateVersion",
   "postInstallRezQuoteComplete",
+  "postInstallRezQuoteCostKind",
   "postInstallRezQuoteBaseCredits",
   "postInstallRezQuoteFinalCredits",
   "postInstallRezQuoteMandatoryAgendaPointCost",
   "postInstallRezQuoteMandatoryAdditionalCostKind",
   "postInstallRezQuoteReductionSourceDefinitionIds",
   "postInstallRezQuoteIncreaseSourceDefinitionIds",
+  "postInstallRezQuoteVariableRezKind",
+  "postInstallRezQuoteVariableAdditionalCreditsPerValue",
+  "postInstallRezQuoteVariableMinValue",
+  "postInstallRezQuoteVariableMaxValue",
+  "postInstallRezQuoteVariableMinValueFinalCredits",
+  "postInstallRezQuoteVariableMaxValueFinalCredits",
+  "postInstallRezQuoteVariableEffectiveStrengthFromValue",
+  "postInstallRezQuoteVariableTraceBaseFromValue",
+  "postInstallRezQuoteVariableTraceBidLimitFromValue",
+  "postInstallRezQuoteVariableAdditionalCreditsPerSubroutine",
+  "postInstallRezQuoteVariableMinSubroutines",
+  "postInstallRezQuoteVariableMinSubroutinesFinalCredits",
+  "postInstallRezQuoteVariableFirstEndTheRunSubroutineCount",
+  "postInstallRezQuoteVariableFirstEndTheRunFinalCredits",
+  "postInstallRezQuoteVariableBaseSubtypes",
+  "postInstallRezQuoteVariableBaseSubtypesFinalCredits",
+  "postInstallRezQuoteVariableAlternateSubtypes",
+  "postInstallRezQuoteVariableAlternateSubtypesAdditionalCredits",
+  "postInstallRezQuoteVariableAlternateSubtypesFinalCredits",
   "agendaPointCost",
   "selfRezAdditionalCostKind",
   "rootRezCreditOutcomeQuoteSchemaVersion",
@@ -478,6 +503,7 @@ function sanitizePlayerView(
   view: PlayerView,
   publicEvents: PublicGameEvent[],
 ): PlayerView {
+  const corpPunishRouteQuoteSet = sanitizeCorpPunishRouteQuoteSet(view);
   return {
     side: view.side,
     stateVersion: view.stateVersion,
@@ -582,6 +608,7 @@ function sanitizePlayerView(
           ),
         }
       : {}),
+    ...(corpPunishRouteQuoteSet ? { corpPunishRouteQuoteSet } : {}),
     ...(view.run
       ? {
           run: {
@@ -641,6 +668,511 @@ function sanitizePlayerView(
     agendaPointsToWin: view.agendaPointsToWin,
     ...(view.gameEndReason ? { gameEndReason: view.gameEndReason } : {}),
   };
+}
+
+export function sanitizeCorpPunishRouteQuoteSet(
+  view: PlayerView,
+): CorpPunishRouteQuoteSet | undefined {
+  const quoteSet = view.corpPunishRouteQuoteSet;
+  if (
+    view.side !== "corp" ||
+    !quoteSet ||
+    quoteSet.schemaVersion !== CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION ||
+    quoteSet.visibility !== "private_to_actor" ||
+    quoteSet.side !== "corp" ||
+    !nonNegativeInteger(quoteSet.stateVersion) ||
+    quoteSet.stateVersion !== view.stateVersion ||
+    quoteSet.timingPoint !== view.timingPoint ||
+    !validCompleteState(
+      quoteSet.complete,
+      quoteSet.incompleteReasons,
+      quoteSet.complete && quoteSet.routes.length === 0,
+    ) ||
+    !nonNegativeInteger(quoteSet.runnerHandCount) ||
+    quoteSet.runnerHandCount !== view.opponent.handCount ||
+    !nonNegativeInteger(quoteSet.runnerTags) ||
+    quoteSet.runnerTags !== view.opponent.tags ||
+    !nonNegativeInteger(quoteSet.runnerCreditsVisible) ||
+    quoteSet.runnerCreditsVisible !== view.opponent.credits ||
+    !uniqueNonblankStrings(quoteSet.routes.map((route) => route.routeId)) ||
+    !uniqueNonblankStrings(
+      quoteSet.routes.map((route) => route.requestFingerprint),
+    ) ||
+    quoteSet.routes.some(
+      (route) => !validCorpPunishRouteQuote(route, quoteSet, view),
+    )
+  )
+    return undefined;
+
+  return {
+    schemaVersion: CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+    visibility: "private_to_actor",
+    side: "corp",
+    stateVersion: quoteSet.stateVersion,
+    timingPoint: quoteSet.timingPoint,
+    complete: quoteSet.complete,
+    incompleteReasons: quoteSet.incompleteReasons.slice(),
+    runnerHandCount: quoteSet.runnerHandCount,
+    runnerTags: quoteSet.runnerTags,
+    runnerCreditsVisible: quoteSet.runnerCreditsVisible,
+    routes: quoteSet.routes.map((route) => ({
+      schemaVersion: CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+      visibility: "private_to_actor",
+      matchId: route.matchId,
+      side: "corp",
+      routeId: route.routeId,
+      campaignId: route.campaignId,
+      campaignIdOrigin: route.campaignIdOrigin,
+      stateVersion: route.stateVersion,
+      timingPoint: route.timingPoint,
+      requestFingerprint: route.requestFingerprint,
+      requestEcho: {
+        schemaVersion: CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+        matchId: route.requestEcho.matchId,
+        side: "corp",
+        stateVersion: route.requestEcho.stateVersion,
+        timingPoint: route.requestEcho.timingPoint,
+        campaignId: route.requestEcho.campaignId,
+        routeId: route.requestEcho.routeId,
+        steps: route.requestEcho.steps.map((step) => ({ ...step })),
+      },
+      complete: route.complete,
+      incompleteReasons: route.incompleteReasons.slice(),
+      steps: route.steps.map((step, index) => ({
+        stepId: step.stepId,
+        order: step.order,
+        kind: step.kind,
+        sourceCardInstanceId: step.sourceCardInstanceId,
+        sourceCardDefinitionId: step.sourceCardDefinitionId,
+        sourceCapabilityId: step.sourceCapabilityId,
+        clicks: step.clicks,
+        credits: step.credits,
+        ...(index === 0 && step.currentLegalAction
+          ? { currentLegalAction: sanitizeLegalAction(step.currentLegalAction) }
+          : {}),
+      })),
+      totalClicks: route.totalClicks,
+      totalActionCredits: route.totalActionCredits,
+      tagTrigger: { ...route.tagTrigger },
+      responsePaymentEnvelope: {
+        responseKind: route.responsePaymentEnvelope.responseKind,
+        paymentKnowledge: route.responsePaymentEnvelope.paymentKnowledge,
+        corpCreditsAvailable:
+          route.responsePaymentEnvelope.corpCreditsAvailable,
+        runnerCreditsVisible:
+          route.responsePaymentEnvelope.runnerCreditsVisible,
+        corpResponseCredits: {
+          ...route.responsePaymentEnvelope.corpResponseCredits,
+        },
+        totalCorpCredits: {
+          ...route.responsePaymentEnvelope.totalCorpCredits,
+        },
+        runnerResponseCredits: {
+          ...route.responsePaymentEnvelope.runnerResponseCredits,
+        },
+      },
+      damageEnvelope: {
+        runnerHandCount: route.damageEnvelope.runnerHandCount,
+        rawDamage: { ...route.damageEnvelope.rawDamage },
+        effectiveDamage: { ...route.damageEnvelope.effectiveDamage },
+        visiblePrevention: {
+          knowledge: route.damageEnvelope.visiblePrevention.knowledge,
+          maximumPreventableDamage:
+            route.damageEnvelope.visiblePrevention.maximumPreventableDamage,
+          creditCost: {
+            ...route.damageEnvelope.visiblePrevention.creditCost,
+          },
+        },
+        visiblePiercing: {
+          knowledge: route.damageEnvelope.visiblePiercing.knowledge,
+          maximumBypassedDamage:
+            route.damageEnvelope.visiblePiercing.maximumBypassedDamage,
+          creditCost: {
+            ...route.damageEnvelope.visiblePiercing.creditCost,
+          },
+        },
+      },
+      guarantee: route.guarantee,
+      responseKnowledge: route.responseKnowledge,
+    })),
+  };
+}
+
+function validCorpPunishRouteQuote(
+  route: CorpPunishRouteQuote,
+  quoteSet: CorpPunishRouteQuoteSet,
+  view: PlayerView,
+): boolean {
+  if (
+    route.schemaVersion !== CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION ||
+    route.visibility !== "private_to_actor" ||
+    !nonblank(route.matchId) ||
+    route.side !== "corp" ||
+    !nonblank(route.routeId) ||
+    !nonblank(route.campaignId) ||
+    route.campaignIdOrigin !== "request_binding" ||
+    route.stateVersion !== quoteSet.stateVersion ||
+    route.timingPoint !== quoteSet.timingPoint ||
+    !validPunishRequestEcho(route) ||
+    route.requestFingerprint !== punishRequestFingerprint(route.requestEcho) ||
+    !validCompleteState(
+      route.complete,
+      route.incompleteReasons,
+      route.complete && route.steps.length === 0,
+    )
+  )
+    return false;
+
+  if (!route.complete) return validCanonicalIncompletePunishRoute(route);
+
+  if (
+    !nonNegativeInteger(route.totalClicks) ||
+    !nonNegativeInteger(route.totalActionCredits) ||
+    !validOrderedPunishSteps(route, quoteSet, view) ||
+    route.steps.reduce((sum, step) => sum + step.clicks, 0) !==
+      route.totalClicks ||
+    route.steps.reduce((sum, step) => sum + step.credits, 0) !==
+      route.totalActionCredits ||
+    !validTagTrigger(route, quoteSet) ||
+    !validResponsePaymentEnvelope(route, quoteSet, view) ||
+    !validDamageEnvelope(route, quoteSet) ||
+    (route.responseKnowledge !== "public_exact" &&
+      route.responseKnowledge !== "public_bounded" &&
+      route.responseKnowledge !== "unknown")
+  )
+    return false;
+
+  return (
+    route.guarantee === "guaranteed" ||
+    route.guarantee === "conditional_on_runner_response" ||
+    route.guarantee === "not_guaranteed" ||
+    route.guarantee === "unknown"
+  );
+}
+
+function validPunishRequestEcho(route: CorpPunishRouteQuote): boolean {
+  const request = route.requestEcho;
+  return (
+    request.schemaVersion === CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION &&
+    request.matchId === route.matchId &&
+    request.side === "corp" &&
+    request.stateVersion === route.stateVersion &&
+    request.timingPoint === route.timingPoint &&
+    request.campaignId === route.campaignId &&
+    request.routeId === route.routeId &&
+    request.steps.length >= 1 &&
+    request.steps.length <= 6 &&
+    uniqueNonblankStrings(request.steps.map((step) => step.stepId)) &&
+    uniqueNonblankStrings(
+      request.steps.map(
+        (step) =>
+          `${step.sourceCardInstanceId}\u0000${step.sourceCapabilityId}`,
+      ),
+    ) &&
+    uniqueNonblankStrings(
+      request.steps.map((step) => step.sourceCardInstanceId),
+    ) &&
+    request.steps.every(
+      (step, index) =>
+        step.order === index &&
+        validPunishStepKind(step.kind) &&
+        nonblank(step.sourceCardInstanceId) &&
+        nonblank(step.sourceCapabilityId),
+    ) &&
+    (!route.complete ||
+      request.steps.every((requested, index) => {
+        const quoted = route.steps[index];
+        return (
+          quoted !== undefined &&
+          requested.stepId === quoted.stepId &&
+          requested.order === quoted.order &&
+          requested.kind === quoted.kind &&
+          requested.sourceCardInstanceId === quoted.sourceCardInstanceId &&
+          requested.sourceCapabilityId === quoted.sourceCapabilityId
+        );
+      }))
+  );
+}
+
+function validCanonicalIncompletePunishRoute(
+  route: CorpPunishRouteQuote,
+): boolean {
+  return (
+    route.steps.length === 0 &&
+    route.totalClicks === 0 &&
+    route.totalActionCredits === 0 &&
+    route.tagTrigger.kind === "unknown" &&
+    route.tagTrigger.status === "unknown" &&
+    route.tagTrigger.currentRunnerTags === 0 &&
+    route.tagTrigger.requiredRunnerTags === 0 &&
+    route.responsePaymentEnvelope.responseKind === "unknown" &&
+    route.responsePaymentEnvelope.paymentKnowledge === "unknown" &&
+    route.responsePaymentEnvelope.corpCreditsAvailable === 0 &&
+    route.responsePaymentEnvelope.runnerCreditsVisible === 0 &&
+    zeroRange(route.responsePaymentEnvelope.corpResponseCredits) &&
+    zeroRange(route.responsePaymentEnvelope.totalCorpCredits) &&
+    zeroRange(route.responsePaymentEnvelope.runnerResponseCredits) &&
+    route.damageEnvelope.runnerHandCount === 0 &&
+    route.damageEnvelope.rawDamage.meat === 0 &&
+    route.damageEnvelope.rawDamage.net === 0 &&
+    route.damageEnvelope.rawDamage.core === 0 &&
+    route.damageEnvelope.rawDamage.total === 0 &&
+    zeroRange(route.damageEnvelope.effectiveDamage) &&
+    route.damageEnvelope.visiblePrevention.knowledge === "unknown" &&
+    route.damageEnvelope.visiblePrevention.maximumPreventableDamage === 0 &&
+    zeroRange(route.damageEnvelope.visiblePrevention.creditCost) &&
+    route.damageEnvelope.visiblePiercing.knowledge === "unknown" &&
+    route.damageEnvelope.visiblePiercing.maximumBypassedDamage === 0 &&
+    zeroRange(route.damageEnvelope.visiblePiercing.creditCost) &&
+    route.guarantee === "unknown" &&
+    route.responseKnowledge === "unknown"
+  );
+}
+
+function validCompleteState(
+  complete: boolean,
+  reasons: CorpPunishRouteIncompleteReason[],
+  structurallyIncomplete: boolean,
+): boolean {
+  return (
+    typeof complete === "boolean" &&
+    reasons.every(isCorpPunishRouteIncompleteReason) &&
+    (complete
+      ? reasons.length === 0 && !structurallyIncomplete
+      : reasons.length > 0)
+  );
+}
+
+function validOrderedPunishSteps(
+  route: CorpPunishRouteQuote,
+  quoteSet: CorpPunishRouteQuoteSet,
+  view: PlayerView,
+): boolean {
+  if (
+    !uniqueNonblankStrings(route.steps.map((step) => step.stepId)) ||
+    route.steps.some(
+      (step, index) =>
+        step.order !== index ||
+        !nonblank(step.sourceCardInstanceId) ||
+        !nonblank(step.sourceCardDefinitionId) ||
+        !nonblank(step.sourceCapabilityId) ||
+        !validPunishStepKind(step.kind) ||
+        !nonNegativeInteger(step.clicks) ||
+        !nonNegativeInteger(step.credits) ||
+        (index > 0 && step.currentLegalAction !== undefined),
+    )
+  )
+    return false;
+
+  const head = route.steps[0];
+  const action = head?.currentLegalAction;
+  const visibleCurrentAction = action
+    ? view.legalActions.find(
+        (candidate) => candidate.actionId === action.actionId,
+      )
+    : undefined;
+  return (
+    !action ||
+    (visibleCurrentAction !== undefined &&
+      action.side === "corp" &&
+      action.source === head.sourceCardInstanceId &&
+      action.timingPoint === quoteSet.timingPoint &&
+      action.expiresAtStateVersion === quoteSet.stateVersion &&
+      action.source === visibleCurrentAction.source &&
+      action.timingPoint === visibleCurrentAction.timingPoint &&
+      action.expiresAtStateVersion ===
+        visibleCurrentAction.expiresAtStateVersion &&
+      action.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) ===
+        head.clicks &&
+      action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0) ===
+        head.credits)
+  );
+}
+
+function validTagTrigger(
+  route: CorpPunishRouteQuote,
+  quoteSet: CorpPunishRouteQuoteSet,
+): boolean {
+  const trigger = route.tagTrigger;
+  if (
+    !nonNegativeInteger(trigger.currentRunnerTags) ||
+    trigger.currentRunnerTags !== quoteSet.runnerTags ||
+    !nonNegativeInteger(trigger.requiredRunnerTags)
+  )
+    return false;
+  switch (trigger.kind) {
+    case "existing_tag":
+      return trigger.status === "satisfied";
+    case "direct_tag_step":
+      return (
+        trigger.status === "projected" &&
+        nonblank(trigger.sourceStepId) &&
+        route.steps.some((step) => step.stepId === trigger.sourceStepId)
+      );
+    case "trace_tag_step":
+      return (
+        trigger.status === "response_required" &&
+        nonblank(trigger.sourceStepId) &&
+        route.steps.some((step) => step.stepId === trigger.sourceStepId) &&
+        nonNegativeInteger(trigger.baseTraceStrength)
+      );
+    case "none":
+      return (
+        trigger.status === "not_required" && trigger.requiredRunnerTags === 0
+      );
+    case "unknown":
+      return trigger.status === "unknown";
+    default:
+      return false;
+  }
+}
+
+function validResponsePaymentEnvelope(
+  route: CorpPunishRouteQuote,
+  quoteSet: CorpPunishRouteQuoteSet,
+  view: PlayerView,
+): boolean {
+  const envelope = route.responsePaymentEnvelope;
+  return (
+    (envelope.responseKind === "none" ||
+      envelope.responseKind === "runner_optional" ||
+      envelope.responseKind === "trace_bid" ||
+      envelope.responseKind === "mixed" ||
+      envelope.responseKind === "unknown") &&
+    (envelope.paymentKnowledge === "exact_public" ||
+      envelope.paymentKnowledge === "bounded_public" ||
+      envelope.paymentKnowledge === "unknown") &&
+    nonNegativeInteger(envelope.corpCreditsAvailable) &&
+    envelope.corpCreditsAvailable === view.own.credits &&
+    nonNegativeInteger(envelope.runnerCreditsVisible) &&
+    envelope.runnerCreditsVisible === quoteSet.runnerCreditsVisible &&
+    validRange(envelope.corpResponseCredits) &&
+    validRange(envelope.totalCorpCredits) &&
+    envelope.totalCorpCredits.minimum ===
+      route.totalActionCredits + envelope.corpResponseCredits.minimum &&
+    envelope.totalCorpCredits.maximum ===
+      route.totalActionCredits + envelope.corpResponseCredits.maximum &&
+    validRange(envelope.runnerResponseCredits) &&
+    envelope.runnerResponseCredits.maximum <= quoteSet.runnerCreditsVisible
+  );
+}
+
+function validDamageEnvelope(
+  route: CorpPunishRouteQuote,
+  quoteSet: CorpPunishRouteQuoteSet,
+): boolean {
+  const envelope = route.damageEnvelope;
+  const raw = envelope.rawDamage;
+  return (
+    (envelope.visiblePrevention.knowledge === "none_visible" ||
+      envelope.visiblePrevention.knowledge === "exact_public" ||
+      envelope.visiblePrevention.knowledge === "bounded_public" ||
+      envelope.visiblePrevention.knowledge === "unknown") &&
+    (envelope.visiblePiercing.knowledge === "none_visible" ||
+      envelope.visiblePiercing.knowledge === "exact_public" ||
+      envelope.visiblePiercing.knowledge === "bounded_public" ||
+      envelope.visiblePiercing.knowledge === "unknown") &&
+    nonNegativeInteger(envelope.runnerHandCount) &&
+    envelope.runnerHandCount === quoteSet.runnerHandCount &&
+    nonNegativeInteger(raw.meat) &&
+    nonNegativeInteger(raw.net) &&
+    nonNegativeInteger(raw.core) &&
+    nonNegativeInteger(raw.total) &&
+    raw.total === raw.meat + raw.net + raw.core &&
+    validRange(envelope.effectiveDamage) &&
+    envelope.effectiveDamage.maximum <= raw.total &&
+    nonNegativeInteger(envelope.visiblePrevention.maximumPreventableDamage) &&
+    envelope.visiblePrevention.maximumPreventableDamage <= raw.total &&
+    validRange(envelope.visiblePrevention.creditCost) &&
+    nonNegativeInteger(envelope.visiblePiercing.maximumBypassedDamage) &&
+    envelope.visiblePiercing.maximumBypassedDamage <= raw.total &&
+    validRange(envelope.visiblePiercing.creditCost)
+  );
+}
+
+function validPunishStepKind(
+  value: CorpPunishRouteQuote["steps"][number]["kind"],
+): boolean {
+  return (
+    value === "tag" ||
+    value === "trace_tag" ||
+    value === "meat_damage" ||
+    value === "net_damage" ||
+    value === "core_damage" ||
+    value === "other_punish"
+  );
+}
+
+function validRange(range: { minimum: number; maximum: number }): boolean {
+  return (
+    nonNegativeInteger(range.minimum) &&
+    nonNegativeInteger(range.maximum) &&
+    range.minimum <= range.maximum
+  );
+}
+
+function zeroRange(range: { minimum: number; maximum: number }): boolean {
+  return range.minimum === 0 && range.maximum === 0;
+}
+
+function punishRequestFingerprint(
+  request: CorpPunishRouteQuote["requestEcho"],
+): string {
+  return encodePunishFingerprintParts([
+    CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+    request.matchId,
+    request.side,
+    String(request.stateVersion),
+    request.timingPoint,
+    request.campaignId,
+    request.routeId,
+    String(request.steps.length),
+    ...request.steps.flatMap((step) => [
+      step.stepId,
+      String(step.order),
+      step.kind,
+      step.sourceCardInstanceId,
+      step.sourceCapabilityId,
+    ]),
+  ]);
+}
+
+function encodePunishFingerprintParts(parts: readonly string[]): string {
+  return `${parts.length};${parts
+    .map((part) => `${part.length}:${part}`)
+    .join("")}`;
+}
+
+function uniqueNonblankStrings(values: readonly string[]): boolean {
+  return values.every(nonblank) && new Set(values).size === values.length;
+}
+
+function nonblank(value: string): boolean {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function nonNegativeInteger(value: number): boolean {
+  return Number.isFinite(value) && Number.isInteger(value) && value >= 0;
+}
+
+function isCorpPunishRouteIncompleteReason(
+  value: CorpPunishRouteIncompleteReason,
+): boolean {
+  return (
+    value === "malformed_route_request" ||
+    value === "source_unavailable" ||
+    value === "source_zone_unsupported" ||
+    value === "source_identity_unknown" ||
+    value === "source_capability_missing" ||
+    value === "source_capability_unsupported" ||
+    value === "source_effects_unsupported" ||
+    value === "source_condition_unsatisfied" ||
+    value === "head_legal_action_unavailable" ||
+    value === "cost_quote_incomplete" ||
+    value === "response_window_unknown" ||
+    value === "damage_prevention_quote_incomplete" ||
+    value === "future_state_transition_unavailable"
+  );
 }
 
 function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
@@ -766,9 +1298,7 @@ function sanitizeInstalledCorpRezCostQuote(
     !isNonNegativeSafeInteger(quote.expiresAtStateVersion) ||
     !isNonNegativeSafeInteger(quote.baseCredits) ||
     !isNonNegativeSafeInteger(quote.finalCredits) ||
-    !isNonNegativeSafeInteger(
-      quote.mandatoryAdditionalCosts?.agendaPoints,
-    ) ||
+    !isNonNegativeSafeInteger(quote.mandatoryAdditionalCosts?.agendaPoints) ||
     !modifiersValid ||
     (reductionSourceDefinitionIds === undefined &&
       increaseSourceDefinitionIds === undefined &&
@@ -776,21 +1306,190 @@ function sanitizeInstalledCorpRezCostQuote(
   ) {
     return { ...binding, complete: false };
   }
-  return {
+  const common = {
     ...binding,
-    complete: true,
+    complete: true as const,
     baseCredits: quote.baseCredits,
     finalCredits: quote.finalCredits,
     mandatoryAdditionalCosts: {
       agendaPoints: quote.mandatoryAdditionalCosts.agendaPoints,
     },
-    ...(reductionSourceDefinitionIds
-      ? { reductionSourceDefinitionIds }
-      : {}),
-    ...(increaseSourceDefinitionIds
-      ? { increaseSourceDefinitionIds }
-      : {}),
+    ...(reductionSourceDefinitionIds ? { reductionSourceDefinitionIds } : {}),
+    ...(increaseSourceDefinitionIds ? { increaseSourceDefinitionIds } : {}),
   };
+  if (quote.costKind === "fixed") {
+    return { ...common, costKind: "fixed" };
+  }
+  const variableParameter = sanitizeVisibleVariableCorpRezCostParameter(
+    quote.variableParameter,
+    quote.finalCredits,
+  );
+  return variableParameter
+    ? {
+        ...common,
+        costKind: "variable",
+        variableParameter,
+      }
+    : { ...binding, complete: false };
+}
+
+function sanitizeVisibleVariableCorpRezCostParameter(
+  value: unknown,
+  finalBaseCredits: number,
+): VisibleVariableCorpRezCostParameter | undefined {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    !isNonNegativeSafeInteger(finalBaseCredits)
+  ) {
+    return undefined;
+  }
+  const parameter = value as Record<string, unknown>;
+  if (parameter.kind === "x_strength") {
+    const additionalCreditsPerValue = parameter.additionalCreditsPerValue;
+    const minValue = parameter.minValue;
+    const maxValue = parameter.maxValue;
+    const minValueFinalCredits = parameter.minValueFinalCredits;
+    const maxValueFinalCredits = parameter.maxValueFinalCredits;
+    if (
+      !isPositiveSafeInteger(additionalCreditsPerValue) ||
+      !isNonNegativeSafeInteger(minValue) ||
+      !isNonNegativeSafeInteger(maxValue) ||
+      maxValue < minValue ||
+      !isNonNegativeSafeInteger(minValueFinalCredits) ||
+      !isNonNegativeSafeInteger(maxValueFinalCredits) ||
+      minValueFinalCredits !==
+        safeCreditTotal(
+          finalBaseCredits,
+          minValue,
+          additionalCreditsPerValue,
+        ) ||
+      maxValueFinalCredits !==
+        safeCreditTotal(
+          finalBaseCredits,
+          maxValue,
+          additionalCreditsPerValue,
+        ) ||
+      parameter.effectiveStrengthFromValue !== true ||
+      !optionalTrue(parameter.traceBaseFromValue) ||
+      !optionalTrue(parameter.traceBidLimitFromValue)
+    ) {
+      return undefined;
+    }
+    return {
+      kind: "x_strength",
+      additionalCreditsPerValue,
+      minValue,
+      maxValue,
+      minValueFinalCredits,
+      maxValueFinalCredits,
+      effectiveStrengthFromValue: true,
+      ...(parameter.traceBaseFromValue === true
+        ? { traceBaseFromValue: true }
+        : {}),
+      ...(parameter.traceBidLimitFromValue === true
+        ? { traceBidLimitFromValue: true }
+        : {}),
+    };
+  }
+  if (parameter.kind === "paid_end_the_run_subroutines") {
+    const additionalCreditsPerSubroutine =
+      parameter.additionalCreditsPerSubroutine;
+    const minSubroutines = parameter.minSubroutines;
+    const minSubroutinesFinalCredits = parameter.minSubroutinesFinalCredits;
+    const firstEndTheRunSubroutineCount =
+      parameter.firstEndTheRunSubroutineCount;
+    const firstEndTheRunFinalCredits = parameter.firstEndTheRunFinalCredits;
+    if (
+      !isPositiveSafeInteger(additionalCreditsPerSubroutine) ||
+      !isNonNegativeSafeInteger(minSubroutines) ||
+      !isNonNegativeSafeInteger(minSubroutinesFinalCredits) ||
+      !isPositiveSafeInteger(firstEndTheRunSubroutineCount) ||
+      firstEndTheRunSubroutineCount !== Math.max(1, minSubroutines) ||
+      !isNonNegativeSafeInteger(firstEndTheRunFinalCredits) ||
+      minSubroutinesFinalCredits !==
+        safeCreditTotal(
+          finalBaseCredits,
+          minSubroutines,
+          additionalCreditsPerSubroutine,
+        ) ||
+      firstEndTheRunFinalCredits !==
+        safeCreditTotal(
+          finalBaseCredits,
+          firstEndTheRunSubroutineCount,
+          additionalCreditsPerSubroutine,
+        )
+    ) {
+      return undefined;
+    }
+    return {
+      kind: "paid_end_the_run_subroutines",
+      additionalCreditsPerSubroutine,
+      minSubroutines,
+      minSubroutinesFinalCredits,
+      firstEndTheRunSubroutineCount,
+      firstEndTheRunFinalCredits,
+    };
+  }
+  if (parameter.kind !== "alternate_subtype") return undefined;
+  const baseSubtypes = sanitizedCanonicalSubtypes(parameter.baseSubtypes);
+  const alternateSubtypes = sanitizedCanonicalSubtypes(
+    parameter.alternateSubtypes,
+  );
+  const baseSubtypesFinalCredits = parameter.baseSubtypesFinalCredits;
+  const alternateSubtypesAdditionalCredits =
+    parameter.alternateSubtypesAdditionalCredits;
+  const alternateSubtypesFinalCredits = parameter.alternateSubtypesFinalCredits;
+  if (
+    !baseSubtypes ||
+    !alternateSubtypes ||
+    baseSubtypes.join(",") === alternateSubtypes.join(",") ||
+    !isNonNegativeSafeInteger(baseSubtypesFinalCredits) ||
+    baseSubtypesFinalCredits !== finalBaseCredits ||
+    !isPositiveSafeInteger(alternateSubtypesAdditionalCredits) ||
+    !isNonNegativeSafeInteger(alternateSubtypesFinalCredits) ||
+    alternateSubtypesFinalCredits !==
+      safeCreditTotal(finalBaseCredits, 1, alternateSubtypesAdditionalCredits)
+  ) {
+    return undefined;
+  }
+  return {
+    kind: "alternate_subtype",
+    baseSubtypes,
+    baseSubtypesFinalCredits,
+    alternateSubtypes,
+    alternateSubtypesAdditionalCredits,
+    alternateSubtypesFinalCredits,
+  };
+}
+
+function isPositiveSafeInteger(value: unknown): value is number {
+  return isNonNegativeSafeInteger(value) && value > 0;
+}
+
+function safeCreditTotal(
+  base: number,
+  quantity: number,
+  creditsPerUnit: number,
+): number | undefined {
+  const additional = quantity * creditsPerUnit;
+  const total = base + additional;
+  return isNonNegativeSafeInteger(additional) && isNonNegativeSafeInteger(total)
+    ? total
+    : undefined;
+}
+
+function optionalTrue(value: unknown): boolean {
+  return value === undefined || value === true;
+}
+
+function sanitizedCanonicalSubtypes(value: unknown): string[] | undefined {
+  const subtypes = sanitizedStringArray(value);
+  return subtypes &&
+    subtypes.length > 0 &&
+    subtypes.every((subtype) => /^[a-z0-9]+(?:_[a-z0-9]+)*$/.test(subtype))
+    ? subtypes
+    : undefined;
 }
 
 function sanitizeCounterDisplay(display: CounterDisplay): CounterDisplay {
@@ -1141,9 +1840,7 @@ function sanitizeCorpOptionalRezChoiceQuote(
       increaseSourceDefinitionIds,
     );
   if (
-    (cardType !== "ice" &&
-      cardType !== "asset" &&
-      cardType !== "upgrade") ||
+    (cardType !== "ice" && cardType !== "asset" && cardType !== "upgrade") ||
     (cardType === "ice") !== (quote.installedZone === "serverIce") ||
     !mandatoryAdditionalCosts ||
     typeof mandatoryAdditionalCosts !== "object" ||
@@ -1166,13 +1863,12 @@ function sanitizeCorpOptionalRezChoiceQuote(
     quote.regularCreditsRequired !==
       quote.finalCredits - quote.temporaryCreditsApplied ||
     quote.creditPayable !==
-      (quote.regularCreditsAvailable >= quote.regularCreditsRequired) ||
+      quote.regularCreditsAvailable >= quote.regularCreditsRequired ||
     quote.regularCreditsAvailable !== expected.ownCredits ||
     quote.additionalCostsPayable !==
-      (expected.ownAgendaPoints >=
-        (mandatoryAdditionalCosts as { agendaPoints: number }).agendaPoints) ||
-    quote.affordable !==
-      (quote.creditPayable && quote.additionalCostsPayable)
+      expected.ownAgendaPoints >=
+        (mandatoryAdditionalCosts as { agendaPoints: number }).agendaPoints ||
+    quote.affordable !== (quote.creditPayable && quote.additionalCostsPayable)
   )
     return undefined;
 
@@ -1186,9 +1882,7 @@ function sanitizeCorpOptionalRezChoiceQuote(
       agendaPoints: (mandatoryAdditionalCosts as { agendaPoints: number })
         .agendaPoints,
     },
-    ...(reductionSourceDefinitionIds
-      ? { reductionSourceDefinitionIds }
-      : {}),
+    ...(reductionSourceDefinitionIds ? { reductionSourceDefinitionIds } : {}),
     ...(increaseSourceDefinitionIds ? { increaseSourceDefinitionIds } : {}),
     temporaryCreditsAvailable: quote.temporaryCreditsAvailable,
     temporaryCreditsApplied: quote.temporaryCreditsApplied,
@@ -1214,9 +1908,7 @@ function sanitizedStringArray(value: unknown): string[] | undefined {
   const strings = value as string[];
   if (
     new Set(strings).size !== strings.length ||
-    strings.some(
-      (entry, index) => index > 0 && strings[index - 1]! >= entry,
-    )
+    strings.some((entry, index) => index > 0 && strings[index - 1]! >= entry)
   )
     return undefined;
   return strings.slice();

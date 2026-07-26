@@ -899,9 +899,7 @@
           "corp_onr_v1_196_corporate-war_2",
           "corp_onr_v1_327_i-got-a-rock_1"
         ],
-        "rd": [
-          "corp_onr_v1_302_scorched-earth_2"
-        ],
+        "rd": ["corp_onr_v1_302_scorched-earth_2"],
         "archives": [
           "corp_onr_v1_309_bbs-whispering-campaign_1",
           "corp_onr_v1_304_systematic-layoffs_3",
@@ -972,9 +970,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_244_filter_3"
-            ],
+            "ice": ["corp_onr_v1_244_filter_3"],
             "root": []
           }
         ]
@@ -2454,9 +2450,7 @@
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
-                  "selectedOptionIds": [
-                    "mulligan"
-                  ]
+                  "selectedOptionIds": ["mulligan"]
                 },
                 "idempotencyKey": "ai-sim-0"
               },
@@ -2476,10 +2470,7 @@
                     "choiceId": "setup_mulligan_runner_0",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -2538,9 +2529,7 @@
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-1"
               },
@@ -2560,10 +2549,7 @@
                     "choiceId": "setup_mulligan_corp_1",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -3700,9 +3686,7 @@
                     "choiceId": "p3_34_advancement_distribution_19",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "placement_corp_onr_v1_196_corporate-war_3_2"
-                    ]
+                    "optionIds": ["placement_corp_onr_v1_196_corporate-war_3_2"]
                   }
                 ],
                 "payload": {
@@ -4182,9 +4166,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -7616,9 +7598,7 @@
                 "clientKnownStateVersion": 88,
                 "selectedChoices": {
                   "choiceId": "op_trace.88.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_3.corp.bid.88",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-88"
               },
@@ -7638,9 +7618,7 @@
                     "choiceId": "op_trace.88.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_3.corp.bid.88",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0"
-                    ]
+                    "optionIds": ["bid_0"]
                   }
                 ],
                 "payload": {
@@ -7707,9 +7685,7 @@
                 "clientKnownStateVersion": 89,
                 "selectedChoices": {
                   "choiceId": "op_trace.88.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_3.runner.bid.89",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-89"
               },
@@ -7729,10 +7705,7 @@
                     "choiceId": "op_trace.88.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_3.runner.bid.89",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -9373,9 +9346,7 @@
                 "clientKnownStateVersion": 116,
                 "selectedChoices": {
                   "choiceId": "op_trace.116.onr_v1_283_audit-of-call-records.corp_onr_v1_283_audit-of-call-records_3.corp.bid.116",
-                  "selectedOptionIds": [
-                    "bid_1"
-                  ]
+                  "selectedOptionIds": ["bid_1"]
                 },
                 "idempotencyKey": "ai-sim-116"
               },
@@ -9470,9 +9441,7 @@
                 "clientKnownStateVersion": 117,
                 "selectedChoices": {
                   "choiceId": "op_trace.116.onr_v1_283_audit-of-call-records.corp_onr_v1_283_audit-of-call-records_3.runner.bid.117",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-117"
               },
@@ -9492,11 +9461,7 @@
                     "choiceId": "op_trace.116.onr_v1_283_audit-of-call-records.corp_onr_v1_283_audit-of-call-records_3.runner.bid.117",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2"]
                   }
                 ],
                 "payload": {
@@ -11009,9 +10974,7 @@
                 "clientKnownStateVersion": 138,
                 "selectedChoices": {
                   "choiceId": "discard_corp_138",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_302_scorched-earth_3"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_302_scorched-earth_3"]
                 },
                 "idempotencyKey": "ai-sim-138"
               },
@@ -14486,9 +14449,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -15596,9 +15557,7 @@
                 "clientKnownStateVersion": 218,
                 "selectedChoices": {
                   "choiceId": "discard_corp_218",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_307_urban-renewal_1"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_307_urban-renewal_1"]
                 },
                 "idempotencyKey": "ai-sim-218"
               },
@@ -17647,9 +17606,7 @@
                 "clientKnownStateVersion": 250,
                 "selectedChoices": {
                   "choiceId": "op_trace.250.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_2.corp.bid.250",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-250"
               },
@@ -17669,12 +17626,7 @@
                     "choiceId": "op_trace.250.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_2.corp.bid.250",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3"]
                   }
                 ],
                 "payload": {
@@ -17741,9 +17693,7 @@
                 "clientKnownStateVersion": 251,
                 "selectedChoices": {
                   "choiceId": "op_trace.250.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_2.runner.bid.251",
-                  "selectedOptionIds": [
-                    "bid_5"
-                  ]
+                  "selectedOptionIds": ["bid_5"]
                 },
                 "idempotencyKey": "ai-sim-251"
               },
@@ -18292,9 +18242,7 @@
                 "clientKnownStateVersion": 260,
                 "selectedChoices": {
                   "choiceId": "discard_runner_260",
-                  "selectedOptionIds": [
-                    "card_runner_onr_proteus_142_hq-mole_3"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_proteus_142_hq-mole_3"]
                 },
                 "idempotencyKey": "ai-sim-260"
               },
@@ -19506,9 +19454,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -19799,9 +19745,7 @@
                     "choiceId": "p3_34_advancement_distribution_285",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "placement_corp_onr_v1_196_corporate-war_1_2"
-                    ]
+                    "optionIds": ["placement_corp_onr_v1_196_corporate-war_1_2"]
                   }
                 ],
                 "payload": {
@@ -21054,9 +20998,7 @@
                 "clientKnownStateVersion": 306,
                 "selectedChoices": {
                   "choiceId": "op_trace.306.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_1.corp.bid.306",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-306"
               },
@@ -21076,9 +21018,7 @@
                     "choiceId": "op_trace.306.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_1.corp.bid.306",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0"
-                    ]
+                    "optionIds": ["bid_0"]
                   }
                 ],
                 "payload": {
@@ -21145,9 +21085,7 @@
                 "clientKnownStateVersion": 307,
                 "selectedChoices": {
                   "choiceId": "op_trace.306.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_1.runner.bid.307",
-                  "selectedOptionIds": [
-                    "bid_5"
-                  ]
+                  "selectedOptionIds": ["bid_5"]
                 },
                 "idempotencyKey": "ai-sim-307"
               },
@@ -23045,9 +22983,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -38358,9 +38294,7 @@
       },
       "selectedStepKind": "build_remote",
       "selectedActionId": "corp.install_card.corp_onr_v1_244_filter_3.new_remote.corp_onr_v1_244_filter_3",
-      "blockedBy": [
-        "missing_remote_protection"
-      ],
+      "blockedBy": ["missing_remote_protection"],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
       "updatedAtStateVersion": 418
@@ -38472,9 +38406,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 195,
-      "blockerIds": [
-        "corp.tag_trace_punish:reserve_shortfall"
-      ],
+      "blockerIds": ["corp.tag_trace_punish:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 428,
       "state": {
@@ -38520,9 +38452,7 @@
               "support": 85,
               "final": 94
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -38611,9 +38541,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.tag_trace_punish",
-          "evidence": [
-            "continued:corp.tag_trace_punish"
-          ]
+          "evidence": ["continued:corp.tag_trace_punish"]
         },
         "commitment": {
           "strategyId": "corp.tag_trace_punish",
@@ -38825,9 +38753,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -38885,9 +38811,7 @@
               "family": "corp_asset_economy",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -38918,10 +38842,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -38940,9 +38861,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -38973,10 +38892,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -39030,10 +38946,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -39223,10 +39136,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -39268,10 +39178,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -39320,23 +39227,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "end_turn"
+        "type": "gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanIds": [
-        "plan:corp.complete_turn:standard-turn-completion"
-      ],
-      "acceptablePlanKinds": [
-        "corp.complete_turn"
-      ],
-      "acceptableCapabilities": [
-        "complete_turn_after_productive_routes_exhausted"
-      ],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
-        "corp_score_protection_assessment_unknown:remote_1:subset_assessment_unknown",
-        "productive_legal_routes_exhausted"
+        "corp_engine_certified_basic_liquidity_development"
       ]
     }
   }

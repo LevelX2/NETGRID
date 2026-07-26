@@ -3627,7 +3627,9 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "end_turn"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_237_data-wall",
+        "targetServerId": "rd"
       }
     ],
     "forbiddenActions": [
@@ -3637,17 +3639,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.complete_turn"
-      ],
-      "acceptableCapabilities": [
-        "complete_turn_after_productive_routes_exhausted"
-      ],
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
       "requiredAssessmentEvidence": [
-        "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
-        "corp_ice_install_has_no_engine_certified_access_probability_reduction",
-        "corp_immediate_liquid_route_has_no_open_need_or_exact_plan",
-        "productive_legal_routes_exhausted"
+        "engine_certified_global_defense_access_probability_reduced"
       ]
     }
   }

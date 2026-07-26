@@ -9461,24 +9461,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "end_turn"
+        "type": "gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanIds": [
-        "plan:corp.complete_turn:standard-turn-completion"
-      ],
-      "acceptablePlanKinds": [
-        "corp.complete_turn"
-      ],
-      "acceptableCapabilities": [
-        "complete_turn_after_productive_routes_exhausted"
-      ],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
-        "corp_ice_install_has_no_engine_certified_access_probability_reduction",
-        "corp_root_rez_has_no_exact_engine_certified_economy_or_defense_route",
-        "productive_legal_routes_exhausted"
+        "corp_engine_certified_basic_liquidity_development"
       ]
     }
   }

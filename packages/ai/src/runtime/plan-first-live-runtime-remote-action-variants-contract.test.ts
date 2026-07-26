@@ -55,11 +55,7 @@ describe("plan-first Remote same-server action variants", () => {
         },
       },
     );
-    const input = aiInput("runner", [
-      direct,
-      insideJob,
-      redundantInsideJob,
-    ]);
+    const input = aiInput("runner", [direct, insideJob, redundantInsideJob]);
     input.playerView.own.credits = 10;
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
@@ -74,20 +70,14 @@ describe("plan-first Remote same-server action variants", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [
-        visibleCard("remote-target", "corp", "agenda"),
-      ]),
+      server("remote_1", [], [visibleCard("remote-target", "corp", "agenda")]),
     ];
 
     const decision = liveContext({
       evaluateRunnerRunTargets: () => [
         remoteTarget(insideJob.actionId, 340, "run_now"),
         remoteTarget(direct.actionId, 300, "run_now"),
-        remoteTarget(
-          redundantInsideJob.actionId,
-          -120,
-          "do_not_run_now",
-        ),
+        remoteTarget(redundantInsideJob.actionId, -120, "do_not_run_now"),
       ],
     }).chooseSemanticRuntimeAction(input, {});
 
@@ -99,11 +89,9 @@ describe("plan-first Remote same-server action variants", () => {
         planKind: "runner.contest_remote",
       },
     });
-    const alternatives =
-      decision.decisionDebug?.actionAlternatives ?? [];
+    const alternatives = decision.decisionDebug?.actionAlternatives ?? [];
     expect(
-      alternatives.find((entry) => entry.actionId === direct.actionId)
-        ?.whyNot,
+      alternatives.find((entry) => entry.actionId === direct.actionId)?.whyNot,
     ).toEqual(
       expect.arrayContaining([
         "not_selected_by_plan:plan:runner.contest_remote:remote%3Aremote_1",
@@ -115,11 +103,7 @@ describe("plan-first Remote same-server action variants", () => {
       evaluateRunnerRunTargets: () => [
         remoteTarget(direct.actionId, 400, "run_now"),
         remoteTarget(insideJob.actionId, 340, "run_now"),
-        remoteTarget(
-          redundantInsideJob.actionId,
-          -120,
-          "do_not_run_now",
-        ),
+        remoteTarget(redundantInsideJob.actionId, -120, "do_not_run_now"),
       ],
     }).chooseSemanticRuntimeAction(input, {});
     expect(directPreferred).toMatchObject({
@@ -168,6 +152,19 @@ describe("plan-first Remote same-server action variants", () => {
       fallbackUsed: false,
       decisionDebug: { planKind: "runner.complete_turn" },
     });
+    const rejectedAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === rejectedRun.actionId,
+      );
+    expect(rejectedAlternative?.selected).toBe(false);
+    expect(rejectedAlternative?.whyNot).toEqual(
+      expect.arrayContaining([
+        "not_selected_by_plan:plan:runner.complete_turn:standard-turn-completion",
+      ]),
+    );
+    expect(decision.evidence).toContain(
+      "plan_assessment_evidence:runner_remote_run_below_material_value:remote_1:-120:do_not_run_now",
+    );
   });
 });
 

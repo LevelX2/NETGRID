@@ -76,16 +76,11 @@ describe("shared plan scheduler", () => {
         target: { kind: "server", id: "remote_1" },
       },
     ];
-    const tactical = module(
-      "runner",
-      "runner.contest_remote",
-      "P4",
-      action,
-    );
+    const tactical = module("runner", "runner.contest_remote", "P4", action);
     const discover = vi.fn((context: PlanSchedulerContext) => {
-      expect(context.transientSignals?.map((signal) => signal.signalId)).toEqual(
-        ["runner-visible-remote-window"],
-      );
+      expect(
+        context.transientSignals?.map((signal) => signal.signalId),
+      ).toEqual(["runner-visible-remote-window"]);
       return [
         {
           ...proposal("runner", "runner.contest_remote"),
@@ -169,12 +164,7 @@ describe("shared plan scheduler", () => {
           ...signal,
         },
       ];
-      const tactical = module(
-        "runner",
-        "runner.contest_remote",
-        "P4",
-        action,
-      );
+      const tactical = module("runner", "runner.contest_remote", "P4", action);
       tactical.discover = () => [
         {
           ...proposal("runner", "runner.contest_remote"),
@@ -228,12 +218,7 @@ describe("shared plan scheduler", () => {
       },
     ];
     const discover = vi.fn();
-    const tactical = module(
-      "runner",
-      "runner.contest_remote",
-      "P4",
-      action,
-    );
+    const tactical = module("runner", "runner.contest_remote", "P4", action);
     tactical.discover = discover;
 
     expect(() =>
@@ -278,69 +263,44 @@ describe("shared plan scheduler", () => {
     );
   });
 
-  it("does not let a ready maintenance plan hide an unowned voluntary action", () => {
+  it("allows a selected plan route while an unrelated voluntary action remains unowned", () => {
     const maintenance = candidate("maintenance");
     const unexplained = candidate("unexplained");
-    const schedulerContext = context("runner", [
-      maintenance,
-      unexplained,
-    ]);
+    const schedulerContext = context("runner", [maintenance, unexplained]);
 
-    expect(() =>
-      runPlanScheduler({
-        context: schedulerContext,
-        registry: createSidePlanRegistry({
-          side: "runner",
-          priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
-          modules: [
-            module(
-              "runner",
-              "runner.economy",
-              "P6",
-              maintenance,
-            ),
-          ],
-        }),
-        resolveEngineWindow: () => undefined,
+    const result = runPlanScheduler({
+      context: schedulerContext,
+      registry: createSidePlanRegistry({
+        side: "runner",
+        priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+        modules: [module("runner", "runner.economy", "P6", maintenance)],
       }),
-    ).toThrow(
-      expect.objectContaining({
-        code: "missing_plan_module_coverage",
-        context: expect.objectContaining({
-          unresolvedActionIds: ["unexplained"],
-        }),
-      }),
-    );
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(result.lane).toBe("plan");
+    if (result.lane !== "plan") throw new Error("Expected plan lane.");
+    expect(result.route.head.actionId).toBe(maintenance.actionId);
   });
 
-  it("rejects a legal later step that the resident plan does not materialize", () => {
+  it("does not require the selected resident plan to materialize an unrelated legal step", () => {
     const prepare = candidate("prepare");
     const laterStep = candidate("later-step");
     const schedulerContext = context("runner", [prepare, laterStep]);
 
-    expect(() =>
-      runPlanScheduler({
-        context: schedulerContext,
-        registry: createSidePlanRegistry({
-          side: "runner",
-          priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
-          modules: [
-            module("runner", "runner.pressure", "P4", prepare),
-          ],
-        }),
-        resolveEngineWindow: () => undefined,
+    const result = runPlanScheduler({
+      context: schedulerContext,
+      registry: createSidePlanRegistry({
+        side: "runner",
+        priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+        modules: [module("runner", "runner.pressure", "P4", prepare)],
       }),
-    ).toThrow(
-      expect.objectContaining({
-        code: "missing_plan_module_coverage",
-        context: expect.objectContaining({
-          unresolvedActionIds: ["later-step"],
-          removalCondition: expect.stringContaining(
-            "Materialize each voluntary LegalAction",
-          ),
-        }),
-      }),
-    );
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(result.lane).toBe("plan");
+    if (result.lane !== "plan") throw new Error("Expected plan lane.");
+    expect(result.route.head.actionId).toBe(prepare.actionId);
   });
 
   it("fails when an executable route is simultaneously declared nonproductive", () => {
@@ -361,9 +321,7 @@ describe("shared plan scheduler", () => {
         registry: createSidePlanRegistry({
           side: "runner",
           priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
-          modules: [
-            module("runner", "runner.economy", "P5", action),
-          ],
+          modules: [module("runner", "runner.economy", "P5", action)],
         }),
         resolveEngineWindow: () => undefined,
       }),
@@ -373,7 +331,7 @@ describe("shared plan scheduler", () => {
         context: expect.objectContaining({
           unresolvedActionIds: ["contradiction"],
           removalCondition: expect.stringContaining(
-            "both executable plan routes and explicitly nonproductive",
+            "cannot also have a terminal action classification",
           ),
         }),
       }),
@@ -409,12 +367,7 @@ describe("shared plan scheduler", () => {
   it("counts every individually bindable candidate of a plan as coverage", () => {
     const lower = candidate("lower");
     const higher = candidate("higher");
-    const planModule = module(
-      "runner",
-      "runner.economy",
-      "P5",
-      lower,
-    );
+    const planModule = module("runner", "runner.economy", "P5", lower);
     planModule.materialize = () => ({
       step: {
         stepId: "execute",
@@ -446,7 +399,7 @@ describe("shared plan scheduler", () => {
     }
   });
 
-  it("fails coverage immediately when any advertised candidate cannot bind the concrete step", () => {
+  it("allows an unselected advertised candidate that cannot bind the concrete step", () => {
     const valid = candidate("valid");
     const invalid = {
       ...candidate("invalid"),
@@ -458,12 +411,7 @@ describe("shared plan scheduler", () => {
       },
       semanticActionType: "draw.card",
     };
-    const planModule = module(
-      "runner",
-      "runner.economy",
-      "P5",
-      valid,
-    );
+    const planModule = module("runner", "runner.economy", "P5", valid);
     planModule.materialize = () => ({
       step: {
         stepId: "execute",
@@ -479,26 +427,19 @@ describe("shared plan scheduler", () => {
       ],
     });
 
-    expect(() =>
-      runPlanScheduler({
-        context: context("runner", [valid, invalid]),
-        registry: createSidePlanRegistry({
-          side: "runner",
-          priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
-          modules: [planModule],
-        }),
-        resolveEngineWindow: () => undefined,
+    const result = runPlanScheduler({
+      context: context("runner", [valid, invalid]),
+      registry: createSidePlanRegistry({
+        side: "runner",
+        priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+        modules: [planModule],
       }),
-    ).toThrow(
-      expect.objectContaining({
-        code: "step_capability_mismatch",
-        context: expect.objectContaining({
-          planInstanceId: "plan:runner.economy:general",
-          legalActionTypes: ["draw_card"],
-          candidateCount: 1,
-        }),
-      }),
-    );
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(result.lane).toBe("plan");
+    if (result.lane !== "plan") throw new Error("Expected plan lane.");
+    expect(result.route.head.actionId).toBe(valid.actionId);
   });
 
   it("keeps a blocked higher-class plan resident without letting it execute", () => {
@@ -513,12 +454,7 @@ describe("shared plan scheduler", () => {
         evidenceCode: "waiting_for_bound_support",
       },
     ];
-    const waitingModule = module(
-      "runner",
-      "runner.waiting",
-      "P2",
-      waiting,
-    );
+    const waitingModule = module("runner", "runner.waiting", "P2", waiting);
     waitingModule.assess = (instance) => ({
       ...assessment(instance.instanceId, "runner", "P2"),
       readiness: "blocked",
@@ -562,7 +498,7 @@ describe("shared plan scheduler", () => {
     }
   });
 
-  it("fails closed when every assessed resident plan is blocked", () => {
+  it("fails closed with unused clicks when every assessed resident plan is blocked", () => {
     const waiting = candidate("waiting");
     const schedulerContext = context("runner", [waiting]);
     schedulerContext.actionDispositions = [
@@ -573,12 +509,8 @@ describe("shared plan scheduler", () => {
         evidenceCode: "waiting_for_bound_support",
       },
     ];
-    const waitingModule = module(
-      "runner",
-      "runner.waiting",
-      "P2",
-      waiting,
-    );
+    schedulerContext.input.playerView.own.clicks = 2;
+    const waitingModule = module("runner", "runner.waiting", "P2", waiting);
     waitingModule.assess = (instance) => ({
       ...assessment(instance.instanceId, "runner", "P2"),
       readiness: "blocked",
@@ -611,6 +543,9 @@ describe("shared plan scheduler", () => {
     ).toThrow(
       expect.objectContaining({
         code: "missing_plan_module_coverage",
+        context: expect.objectContaining({
+          removalCondition: expect.stringContaining("Unused action capacity=2"),
+        }),
       }),
     );
   });
@@ -643,6 +578,141 @@ describe("shared plan scheduler", () => {
       expect.objectContaining({ code: "end_turn_with_usable_capacity" }),
     );
   });
+
+  it("rejects Runner EndTurn when a remaining action is undispositioned", () => {
+    const endTurn = standardEndTurnCandidate("runner");
+    const alternative = candidate("runner.undispositioned", "runner");
+    const schedulerContext = context("runner", [alternative, endTurn]);
+    schedulerContext.input.playerView.own.clicks = 2;
+
+    expect(() =>
+      runPlanScheduler({
+        context: schedulerContext,
+        registry: createSidePlanRegistry({
+          side: "runner",
+          priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+          modules: [
+            module(
+              "runner",
+              "runner.complete_turn",
+              "P5",
+              endTurn,
+              -10_000,
+              "turn_flow.end_turn",
+            ),
+          ],
+        }),
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: "end_turn_with_usable_capacity",
+        context: expect.objectContaining({
+          unresolvedActionIds: [alternative.actionId],
+        }),
+      }),
+    );
+  });
+
+  it.each([
+    ["corp", "explicitly_nonproductive", CORP_PLAN_PRIORITY_POLICY],
+    ["runner", "assessment_unknown", RUNNER_PLAN_PRIORITY_POLICY],
+    ["corp", "assessment_unknown", CORP_PLAN_PRIORITY_POLICY],
+  ] as const)(
+    "rejects %s EndTurn with clicks remaining when every alternative is %s",
+    (side, disposition, policy) => {
+      const endTurn = standardEndTurnCandidate(side);
+      const alternative = candidate(`${side}.alternative`, side);
+      const schedulerContext = context(side, [alternative, endTurn]);
+      schedulerContext.input.playerView.own.clicks = 2;
+      schedulerContext.actionDispositions = [
+        {
+          actionId: alternative.actionId,
+          disposition,
+          ownerModuleId: `${side}.economy`,
+          evidenceCode:
+            disposition === "assessment_unknown"
+              ? "test_alternative_assessment_is_unknown"
+              : "test_alternative_is_nonproductive",
+        },
+      ];
+      const dispositionOwner = module(
+        side,
+        `${side}.economy`,
+        "P5",
+        alternative,
+      );
+      dispositionOwner.discover = () => [];
+
+      expect(() =>
+        runPlanScheduler({
+          context: schedulerContext,
+          registry: createSidePlanRegistry({
+            side,
+            priorityPolicy: policy,
+            modules: [
+              dispositionOwner,
+              module(
+                side,
+                `${side}.complete_turn`,
+                "P5",
+                endTurn,
+                -10_000,
+                "turn_flow.end_turn",
+              ),
+            ],
+          }),
+          resolveEngineWindow: () => undefined,
+        }),
+      ).toThrow(
+        expect.objectContaining({
+          code: "end_turn_with_usable_capacity",
+        }),
+      );
+    },
+  );
+
+  it.each(["corp.economy", "corp.hand_development"] as const)(
+    "allows a known productive route while an assessment remains unknown under %s",
+    (unknownOwnerModuleId) => {
+      const known = candidate("corp.known", "corp");
+      const unknown = candidate("corp.unknown", "corp");
+      const schedulerContext = context("corp", [known, unknown]);
+      schedulerContext.actionDispositions = [
+        {
+          actionId: unknown.actionId,
+          disposition: "assessment_unknown",
+          ownerModuleId: unknownOwnerModuleId,
+          evidenceCode: "test_unknown_sibling",
+        },
+      ];
+      const modules = [module("corp", "corp.economy", "P6", known)];
+      if (unknownOwnerModuleId !== "corp.economy") {
+        const unknownOwner = module(
+          "corp",
+          unknownOwnerModuleId,
+          "P5",
+          unknown,
+        );
+        unknownOwner.discover = () => [];
+        modules.push(unknownOwner);
+      }
+
+      const result = runPlanScheduler({
+        context: schedulerContext,
+        registry: createSidePlanRegistry({
+          side: "corp",
+          priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+          modules,
+        }),
+        resolveEngineWindow: () => undefined,
+      });
+
+      expect(result.lane).toBe("plan");
+      if (result.lane !== "plan") throw new Error("Expected plan lane.");
+      expect(result.route.head.actionId).toBe(known.actionId);
+    },
+  );
 
   it("accepts early EndTurn only for the structurally proven terminal-win plan", () => {
     const endTurn = standardEndTurnCandidate();
@@ -779,9 +849,7 @@ describe("shared plan scheduler", () => {
     const registry = createSidePlanRegistry({
       side: "runner",
       priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
-      modules: [
-        module("runner", "runner.economy", "P5", action),
-      ],
+      modules: [module("runner", "runner.economy", "P5", action)],
     });
     const valid = {
       actionId: action.actionId,
@@ -791,9 +859,7 @@ describe("shared plan scheduler", () => {
     };
     const invalidCases: Array<{
       candidates: ActionSemanticCandidate[];
-      dispositions: NonNullable<
-        PlanSchedulerContext["actionDispositions"]
-      >;
+      dispositions: NonNullable<PlanSchedulerContext["actionDispositions"]>;
     }> = [
       {
         candidates: [action],
@@ -805,9 +871,7 @@ describe("shared plan scheduler", () => {
       },
       {
         candidates: [action],
-        dispositions: [
-          { ...valid, ownerModuleId: "runner.pressure" },
-        ],
+        dispositions: [{ ...valid, ownerModuleId: "runner.pressure" }],
       },
       {
         candidates: [action],
@@ -820,10 +884,7 @@ describe("shared plan scheduler", () => {
     ];
 
     for (const invalidCase of invalidCases) {
-      const schedulerContext = context(
-        "runner",
-        invalidCase.candidates,
-      );
+      const schedulerContext = context("runner", invalidCase.candidates);
       schedulerContext.actionDispositions = invalidCase.dispositions;
       expect(() =>
         runPlanScheduler({
@@ -869,6 +930,289 @@ describe("shared plan scheduler", () => {
     expect(result.lane).toBe("engine_window");
     expect(discover).not.toHaveBeenCalled();
   });
+
+  it("selects an exact support leaf with the validated priority of its persistent parent", () => {
+    const credit = candidate("corp-credit", "corp");
+    const competingSetup = candidate("corp-competing-setup", "corp");
+    const parentInstanceId = "plan:corp.score_agenda:general";
+
+    const parent = module("corp", "corp.score_agenda", "P4", credit, 1);
+    parent.assess = (instance) => ({
+      ...assessment(instance.instanceId, "corp", "P4"),
+      readiness: "executable_with_support",
+      feasibility: {
+        currentRouteHeadPossible: false,
+        projectedActionCount: 2,
+        opponentCanReact: true,
+        confidence: "belief_supported",
+      },
+      resourceGaps: [
+        {
+          needId: "score-funding",
+          capability: "credits",
+          minimum: 1,
+          available: 0,
+          deadline: "multi_turn",
+        },
+      ],
+    });
+
+    const support = module("corp", "corp.economy", "P6", credit, 1);
+    support.discover = () => [
+      {
+        ...proposal("corp", "corp.economy"),
+        dedupeKey: "score-funding",
+        parentInstanceId,
+        parentNeedId: "score-funding",
+      },
+    ];
+    const competitor = module(
+      "corp",
+      "corp.hand_and_agenda_management",
+      "P5",
+      competingSetup,
+      1,
+    );
+
+    const result = runPlanScheduler({
+      context: context("corp", [credit, competingSetup]),
+      registry: createSidePlanRegistry({
+        side: "corp",
+        priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+        modules: [parent, support, competitor],
+      }),
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(result.lane).toBe("plan");
+    if (result.lane !== "plan") throw new Error("Expected plan lane.");
+    expect(result.route.head.actionId).toBe(credit.actionId);
+    expect(result.selectedAssessment.priorityValidation.effectiveClass).toBe(
+      "P4",
+    );
+    expect(
+      result.selectedAssessment.priorityValidation.delegatedFromPlanInstanceId,
+    ).toBe(parentInstanceId);
+    expect(result.selectedAssessment.priorityValidation.needId).toBe(
+      "score-funding",
+    );
+    expect(result.portfolio.rootForegroundInstanceId).toBe(parentInstanceId);
+    expect(result.portfolio.executorInstanceId).toBe(
+      "plan:corp.economy:score-funding",
+    );
+    expect(
+      result.portfolio.instances.find(
+        (instance) => instance.instanceId === parentInstanceId,
+      )?.openNeedIds,
+    ).toEqual(["score-funding"]);
+  });
+
+  it("does not delegate parent priority to a provider for a different need", () => {
+    const credit = candidate("corp-credit", "corp");
+    const competingSetup = candidate("corp-competing-setup", "corp");
+    const parentInstanceId = "plan:corp.score_agenda:general";
+    const parent = module("corp", "corp.score_agenda", "P4", credit, 1);
+    parent.assess = (instance) => ({
+      ...assessment(instance.instanceId, "corp", "P4"),
+      readiness: "executable_with_support",
+      feasibility: {
+        currentRouteHeadPossible: false,
+        projectedActionCount: 2,
+        opponentCanReact: true,
+        confidence: "belief_supported",
+      },
+      resourceGaps: [
+        {
+          needId: "score-funding",
+          capability: "credits",
+          minimum: 1,
+          available: 0,
+          deadline: "multi_turn",
+        },
+      ],
+    });
+    const foreignSupport = module("corp", "corp.economy", "P4", credit, 1);
+    foreignSupport.discover = () => [
+      {
+        ...proposal("corp", "corp.economy"),
+        dedupeKey: "foreign-funding",
+        parentInstanceId,
+        parentNeedId: "foreign-funding",
+      },
+    ];
+    const competitor = module(
+      "corp",
+      "corp.hand_and_agenda_management",
+      "P5",
+      competingSetup,
+      1,
+    );
+
+    const result = runPlanScheduler({
+      context: context("corp", [credit, competingSetup]),
+      registry: createSidePlanRegistry({
+        side: "corp",
+        priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+        modules: [parent, foreignSupport, competitor],
+      }),
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(result.lane).toBe("plan");
+    if (result.lane !== "plan") throw new Error("Expected plan lane.");
+    expect(result.route.head.actionId).toBe(competingSetup.actionId);
+    expect(result.selectedAssessment.priorityValidation.effectiveClass).toBe(
+      "P5",
+    );
+  });
+
+  it("rejects two resident provider plans for the same exact parent need", () => {
+    const credit = candidate("corp-credit", "corp");
+    const parentInstanceId = "plan:corp.score_agenda:general";
+    const parent = module("corp", "corp.score_agenda", "P4", credit, 1);
+    parent.assess = (instance) => ({
+      ...assessment(instance.instanceId, "corp", "P4"),
+      readiness: "executable_with_support",
+      feasibility: {
+        currentRouteHeadPossible: false,
+        projectedActionCount: 2,
+        opponentCanReact: true,
+        confidence: "belief_supported",
+      },
+      resourceGaps: [
+        {
+          needId: "score-funding",
+          capability: "credits",
+          minimum: 1,
+          available: 0,
+          deadline: "multi_turn",
+        },
+      ],
+    });
+    const economySupport = module("corp", "corp.economy", "P6", credit, 1);
+    economySupport.discover = () => [
+      {
+        ...proposal("corp", "corp.economy"),
+        dedupeKey: "score-funding-economy",
+        parentInstanceId,
+        parentNeedId: "score-funding",
+      },
+    ];
+    const alternateSupport = module(
+      "corp",
+      "corp.parent_support",
+      "P6",
+      credit,
+      1,
+    );
+    alternateSupport.discover = () => [
+      {
+        ...proposal("corp", "corp.parent_support"),
+        dedupeKey: "score-funding-alternate",
+        parentInstanceId,
+        parentNeedId: "score-funding",
+      },
+    ];
+
+    expect(() =>
+      runPlanScheduler({
+        context: context("corp", [credit]),
+        registry: createSidePlanRegistry({
+          side: "corp",
+          priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+          modules: [parent, economySupport, alternateSupport],
+        }),
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrowError(
+      expect.objectContaining({
+        name: "PlanResolutionFailure",
+        code: "invalid_support_graph",
+      }),
+    );
+  });
+
+  it("keeps an executable P1 parent ahead of a P4 parent's exact funding child", () => {
+    const fundingCredit = candidate("corp-credit", "corp");
+    const terminalAction = candidate("corp-terminal-score", "corp");
+    const supportParentInstanceId = "plan:corp.score_agenda:development-score";
+    const supportParent = module(
+      "corp",
+      "corp.score_agenda",
+      "P4",
+      fundingCredit,
+      1,
+    );
+    supportParent.discover = () => [
+      {
+        ...proposal("corp", "corp.score_agenda"),
+        dedupeKey: "development-score",
+      },
+    ];
+    supportParent.assess = (instance) => ({
+      ...assessment(instance.instanceId, "corp", "P4"),
+      readiness: "executable_with_support",
+      feasibility: {
+        currentRouteHeadPossible: false,
+        projectedActionCount: 2,
+        opponentCanReact: true,
+        confidence: "belief_supported",
+      },
+      resourceGaps: [
+        {
+          needId: "development-score-funding",
+          capability: "credits",
+          minimum: 1,
+          available: 0,
+          deadline: "multi_turn",
+        },
+      ],
+    });
+    const support = module("corp", "corp.economy", "P5", fundingCredit, 1);
+    support.discover = () => [
+      {
+        ...proposal("corp", "corp.economy"),
+        dedupeKey: "development-score-funding",
+        parentInstanceId: supportParentInstanceId,
+        parentNeedId: "development-score-funding",
+      },
+    ];
+    const terminalParent = module(
+      "corp",
+      "corp.terminal_score",
+      "P1",
+      terminalAction,
+      1,
+    );
+
+    const result = runPlanScheduler({
+      context: context("corp", [fundingCredit, terminalAction]),
+      registry: createSidePlanRegistry({
+        side: "corp",
+        priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+        modules: [supportParent, support, terminalParent],
+      }),
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(result.lane).toBe("plan");
+    if (result.lane !== "plan") throw new Error("Expected plan lane.");
+    expect(result.route.head.actionId).toBe(terminalAction.actionId);
+    expect(result.selectedAssessment.priorityValidation.effectiveClass).toBe(
+      "P1",
+    );
+    expect(result.portfolio.rootForegroundInstanceId).toBe(
+      "plan:corp.terminal_score:general",
+    );
+    expect(result.portfolio.executorInstanceId).toBe(
+      "plan:corp.terminal_score:general",
+    );
+    expect(
+      result.portfolio.instances.find(
+        (instance) => instance.instanceId === supportParentInstanceId,
+      )?.openNeedIds,
+    ).toEqual(["development-score-funding"]);
+  });
 });
 
 function module(
@@ -898,7 +1242,10 @@ function module(
   };
 }
 
-function proposal(side: Side, moduleId: PlanProposal["moduleId"]): PlanProposal {
+function proposal(
+  side: Side,
+  moduleId: PlanProposal["moduleId"],
+): PlanProposal {
   return {
     moduleId,
     moduleVersion: "1",
@@ -947,7 +1294,7 @@ function assessment(
       requestedClass: priorityClass,
       reasonCode: reason[priorityClass],
       horizon: priorityClass === "P3" ? "current_turn" : "multi_turn",
-      ...((priorityClass === "P1" || priorityClass === "P2")
+      ...(priorityClass === "P1" || priorityClass === "P2"
         ? {
             witness: {
               kind:
@@ -1021,12 +1368,14 @@ function context(
   };
 }
 
-function standardEndTurnCandidate(): ActionSemanticCandidate {
+function standardEndTurnCandidate(
+  side: Side = "runner",
+): ActionSemanticCandidate {
   return {
-    ...candidate("runner.end_turn"),
+    ...candidate(`${side}.end_turn`, side),
     actionType: "end_turn",
     legalActionRef: {
-      actionId: "runner.end_turn",
+      actionId: `${side}.end_turn`,
       actionType: "end_turn",
       originalPayloadKeys: [],
     },

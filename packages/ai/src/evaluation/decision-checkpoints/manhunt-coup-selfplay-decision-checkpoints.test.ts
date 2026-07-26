@@ -52,29 +52,22 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("fails closed at matchpoint while exact remote score protection remains unknown", () => {
+  it("takes exact basic liquidity at matchpoint while remote score protection remains unknown", () => {
     const result = runAiDecisionCheckpoint(fixture(deckoutCloseoutJson));
 
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("also completes the turn with no finite need while exact score protection remains unknown", () => {
+  it("also takes exact basic liquidity with a relaxed deckout clock", () => {
     const relaxedClock = mutateFixture(deckoutCloseoutJson, (checkpoint) => {
       moveArchivesCardsToRd(checkpoint, 6);
       checkpoint.expectation = {
-        acceptableActions: [{ type: "end_turn" }],
+        acceptableActions: [{ type: "gain_credit" }],
         planExecution: {
-          acceptablePlanIds: [
-            "plan:corp.complete_turn:standard-turn-completion",
-          ],
-          acceptablePlanKinds: ["corp.complete_turn"],
-          acceptableCapabilities: [
-            "complete_turn_after_productive_routes_exhausted",
-          ],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
-            "corp_score_protection_assessment_unknown:remote_1:subset_assessment_unknown",
-            "productive_legal_routes_exhausted",
+            "corp_engine_certified_basic_liquidity_development",
           ],
         },
       };

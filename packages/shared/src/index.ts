@@ -2310,6 +2310,222 @@ export type VisibleRunnerPaymentSupportAbility = {
   trashesSource: boolean;
 };
 
+export const CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION =
+  "corp-punish-route-quote-v1" as const;
+
+export type CorpPunishRouteIncompleteReason =
+  | "malformed_route_request"
+  | "source_unavailable"
+  | "source_zone_unsupported"
+  | "source_identity_unknown"
+  | "source_capability_missing"
+  | "source_capability_unsupported"
+  | "source_effects_unsupported"
+  | "source_condition_unsatisfied"
+  | "head_legal_action_unavailable"
+  | "cost_quote_incomplete"
+  | "response_window_unknown"
+  | "damage_prevention_quote_incomplete"
+  | "future_state_transition_unavailable";
+
+export type CorpPunishRouteStepKind =
+  | "tag"
+  | "trace_tag"
+  | "meat_damage"
+  | "net_damage"
+  | "core_damage"
+  | "other_punish";
+
+export type CorpPunishRouteStepRequest = {
+  stepId: string;
+  order: number;
+  kind: CorpPunishRouteStepKind;
+  sourceCardInstanceId: CardInstanceId;
+  sourceCapabilityId: string;
+};
+
+/**
+ * Caller-selected, ordered route description. The caller owns campaign and
+ * route identity; the Engine certifies only state-bound rules facts.
+ */
+export type CorpPunishRouteQuoteRequest = {
+  schemaVersion: typeof CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION;
+  matchId: string;
+  side: "corp";
+  stateVersion: number;
+  timingPoint: TimingPointId;
+  campaignId: string;
+  routeId: string;
+  steps: CorpPunishRouteStepRequest[];
+};
+
+/**
+ * One exact Engine-known source capability in an ordered Corp punish route.
+ *
+ * Only the current head may carry `currentLegalAction`. Future steps remain
+ * source/capability bindings until the Engine reaches and re-quotes them in
+ * their actual state.
+ */
+export type CorpPunishRouteStepQuote = {
+  stepId: string;
+  order: number;
+  kind: CorpPunishRouteStepKind;
+  sourceCardInstanceId: CardInstanceId;
+  sourceCardDefinitionId: CardDefinitionId;
+  sourceCapabilityId: string;
+  clicks: number;
+  credits: number;
+  currentLegalAction?: LegalAction;
+};
+
+export type CorpPunishRouteTagTriggerQuote =
+  | {
+      kind: "existing_tag";
+      status: "satisfied";
+      currentRunnerTags: number;
+      requiredRunnerTags: number;
+    }
+  | {
+      kind: "direct_tag_step";
+      status: "projected";
+      currentRunnerTags: number;
+      requiredRunnerTags: number;
+      sourceStepId: string;
+    }
+  | {
+      kind: "trace_tag_step";
+      status: "response_required";
+      currentRunnerTags: number;
+      requiredRunnerTags: number;
+      sourceStepId: string;
+      baseTraceStrength: number;
+    }
+  | {
+      kind: "none";
+      status: "not_required";
+      currentRunnerTags: number;
+      requiredRunnerTags: 0;
+    }
+  | {
+      kind: "unknown";
+      status: "unknown";
+      currentRunnerTags: number;
+      requiredRunnerTags: number;
+    };
+
+export type CorpPunishRouteResponsePaymentEnvelope = {
+  responseKind: "none" | "runner_optional" | "trace_bid" | "mixed" | "unknown";
+  paymentKnowledge: "exact_public" | "bounded_public" | "unknown";
+  corpCreditsAvailable: number;
+  runnerCreditsVisible: number;
+  /** Credits spent while resolving responses after action costs are paid. */
+  corpResponseCredits: {
+    minimum: number;
+    maximum: number;
+  };
+  /** Action credits plus Corp response credits. Fund conservatively to maximum. */
+  totalCorpCredits: {
+    minimum: number;
+    maximum: number;
+  };
+  runnerResponseCredits: {
+    minimum: number;
+    maximum: number;
+  };
+};
+
+export type CorpPunishRouteDamageEnvelope = {
+  runnerHandCount: number;
+  rawDamage: {
+    meat: number;
+    net: number;
+    core: number;
+    total: number;
+  };
+  effectiveDamage: {
+    minimum: number;
+    maximum: number;
+  };
+  visiblePrevention: {
+    knowledge: "none_visible" | "exact_public" | "bounded_public" | "unknown";
+    maximumPreventableDamage: number;
+    creditCost: {
+      minimum: number;
+      maximum: number;
+    };
+  };
+  visiblePiercing: {
+    knowledge: "none_visible" | "exact_public" | "bounded_public" | "unknown";
+    maximumBypassedDamage: number;
+    creditCost: {
+      minimum: number;
+      maximum: number;
+    };
+  };
+};
+
+export type CorpPunishRouteQuote = {
+  schemaVersion: typeof CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION;
+  visibility: "private_to_actor";
+  matchId: string;
+  side: "corp";
+  routeId: string;
+  /**
+   * Stable caller-owned campaign binding echoed by the Engine. The Engine
+   * certifies route facts but never invents strategic campaign identity.
+   */
+  campaignId: string;
+  campaignIdOrigin: "request_binding";
+  stateVersion: number;
+  timingPoint: TimingPointId;
+  requestFingerprint: string;
+  requestEcho: CorpPunishRouteQuoteRequest;
+  complete: boolean;
+  incompleteReasons: CorpPunishRouteIncompleteReason[];
+  steps: CorpPunishRouteStepQuote[];
+  totalClicks: number;
+  /** Fixed credits paid by the ordered LegalAction sequence itself. */
+  totalActionCredits: number;
+  tagTrigger: CorpPunishRouteTagTriggerQuote;
+  responsePaymentEnvelope: CorpPunishRouteResponsePaymentEnvelope;
+  damageEnvelope: CorpPunishRouteDamageEnvelope;
+  guarantee:
+    | "guaranteed"
+    | "conditional_on_runner_response"
+    | "not_guaranteed"
+    | "unknown";
+  responseKnowledge: "public_exact" | "public_bounded" | "unknown";
+};
+
+export type CorpPunishRouteQuoteResult =
+  | {
+      ok: true;
+      quote: CorpPunishRouteQuote;
+    }
+  | {
+      ok: false;
+      error: EngineError;
+    };
+
+/**
+ * Corp-only, actor-private transport collection. Each route remains
+ * independently complete or fail-closed; one unsupported route never masks or
+ * invalidates a sibling route.
+ */
+export type CorpPunishRouteQuoteSet = {
+  schemaVersion: typeof CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION;
+  visibility: "private_to_actor";
+  side: "corp";
+  stateVersion: number;
+  timingPoint: TimingPointId;
+  complete: boolean;
+  incompleteReasons: CorpPunishRouteIncompleteReason[];
+  runnerHandCount: number;
+  runnerTags: number;
+  runnerCreditsVisible: number;
+  routes: CorpPunishRouteQuote[];
+};
+
 export type VisibleCard = {
   instanceId: CardInstanceId;
   known: boolean;
@@ -2414,6 +2630,8 @@ export type PlayerView = {
   };
   /** Present only in the Corp's own PlayerView; never a Runner-information surface. */
   corpCentralAccessQuotes?: CorpCentralAccessQuote[];
+  /** Present only in the Corp's own PlayerView; never a Runner-information surface. */
+  corpPunishRouteQuoteSet?: CorpPunishRouteQuoteSet;
   run?: {
     runId?: string;
     attackedServerId: Exclude<ServerId, "new_remote">;

@@ -5,6 +5,7 @@ import type {
   PlanAssessment,
   PriorityClass,
   PriorityClaim,
+  ResourceGap,
 } from "./plan-assessment";
 import type {
   PlanBlocker,
@@ -72,7 +73,29 @@ export type RunnerFundingNeedSignal =
         status: "portfolio_reserve_open";
       };
       evidenceCode: string;
-    });
+    })
+  | {
+      kind: "develop_liquidity";
+      needId: string;
+      actionIds: string[];
+      currentCreditsAtRevalidation: number;
+      targetCredits: number;
+      gap: number;
+      projectedCreditGain: 1;
+      priorityClass: "P6";
+      cadence: {
+        kind: "remaining_turn_capacity";
+        maximumConversions: number;
+      };
+      completion: {
+        kind: "target_credits_or_no_clicks";
+      };
+      revalidation: {
+        stateVersion: number;
+        status: "turn_liquidity_open";
+      };
+      evidenceCode: string;
+    };
 
 export type RunnerCoverageGapSignal = {
   gapId: string;
@@ -294,7 +317,9 @@ function resourceLifecycleModule(): PlanModule {
           } satisfies ResourceLifecycleState,
           priorityClass: signal.priorityClass,
           target: { kind: "card", id: signal.sourceCardInstanceId },
-          routeExists: resourceLifecycleCandidates(context, signal).length > 0,
+          routeExists:
+            resourceLifecycleCandidates(context, signal).length > 0 ||
+            signal.supportNeedId !== undefined,
           blockerCode: `resource_lifecycle_${signal.phase}`,
           evidenceCode:
             signal.evidenceCodes[0] ??
@@ -303,25 +328,23 @@ function resourceLifecycleModule(): PlanModule {
         if (!signal.supportNeedId) return lifecycleProposal;
         return {
           ...lifecycleProposal,
-          blockers: [
-            {
-              code: "waiting_for_bound_funding_support",
-              owner: "plan_module",
-              removable: true,
-              resumeCondition: { code: signal.supportNeedId },
-            },
-          ],
           resumeConditions: [{ code: signal.supportNeedId }],
         };
       }),
     assess: (instance, context, portfolio) => {
       const signal = state<ResourceLifecycleState>(instance).signal;
+      const resourceGaps = exactRunnerParentFundingResourceGaps(
+        context,
+        instance,
+        signal.supportNeedId,
+      );
       return assessment(
         instance,
         signal.priorityClass,
         resourceLifecycleCandidates(context, signal).length > 0,
         signal.value,
         portfolio.executorInstanceId,
+        resourceGaps,
       );
     },
     materialize: (instance, _assessment, context) => {
@@ -586,12 +609,17 @@ function economyModule(): PlanModule {
             routeExists: validSupportContract && routeExists,
             blockerCode: validSupportContract
               ? "no_compatible_credit_route"
-              : need.kind === "parent_plan_support"
-                ? "orphaned_funding_need"
-                : "invalid_funding_need_revalidation",
+              : need.kind === "develop_liquidity"
+                ? "invalid_turn_liquidity_revalidation"
+                : need.kind === "parent_plan_support"
+                  ? "orphaned_funding_need"
+                  : "invalid_funding_need_revalidation",
             evidenceCode: need.evidenceCode,
             ...(need.kind === "parent_plan_support"
-              ? { parentInstanceId: need.parentPlanInstanceId }
+              ? {
+                  parentInstanceId: need.parentPlanInstanceId,
+                  parentNeedId: need.needId,
+                }
               : {}),
           });
         }),
@@ -599,6 +627,7 @@ function economyModule(): PlanModule {
       const need = state<EconomyState>(instance).need;
       const parentIsResidentAndMaterial =
         need.kind === "portfolio_reserve" ||
+        need.kind === "develop_liquidity" ||
         portfolio.instances.some((candidate) =>
           runnerFundingParentIsResidentAndMaterial(candidate, need),
         );
@@ -614,7 +643,7 @@ function economyModule(): PlanModule {
         instance,
         need.priorityClass,
         routeExists,
-        need.gap * 10,
+        need.kind === "develop_liquidity" ? -9_999 : need.gap * 10,
         portfolio.executorInstanceId,
       );
       if (!parentIsResidentAndMaterial && need.kind === "parent_plan_support") {
@@ -652,7 +681,10 @@ function economyModule(): PlanModule {
               ),
             ],
           },
-          purpose: `Close the bound credit gap ${need.needId}.`,
+          purpose:
+            need.kind === "develop_liquidity"
+              ? "Develop one exact unit of unrestricted Runner liquidity with the current basic credit action."
+              : `Close the bound credit gap ${need.needId}.`,
         },
         candidates,
       };
@@ -885,6 +917,7 @@ function proposal(params: {
   blockerCode: string;
   evidenceCode: string;
   parentInstanceId?: string;
+  parentNeedId?: string;
 }): PlanProposal {
   const blockers: PlanBlocker[] = params.routeExists
     ? []
@@ -925,6 +958,9 @@ function proposal(params: {
     ...(params.parentInstanceId
       ? { parentInstanceId: params.parentInstanceId }
       : {}),
+    ...(params.parentNeedId !== undefined
+      ? { parentNeedId: params.parentNeedId }
+      : {}),
     phase: moduleStatePhase(params.moduleState),
     milestone: "need_open",
     moduleState: structuredClone(params.moduleState),
@@ -942,6 +978,7 @@ function assessment(
   routeExists: boolean,
   withinClassValue: number,
   currentExecutorId: string | undefined,
+  resourceGaps: readonly ResourceGap[] = [],
 ): PlanAssessment {
   const priorityClaim: PriorityClaim =
     priorityClass === "P1"
@@ -997,7 +1034,11 @@ function assessment(
     priorityClaim,
     intentFit:
       priorityClass === "P4" || priorityClass === "P5" ? "aligned" : "none",
-    readiness: routeExists ? "executable_now" : "blocked",
+    readiness: routeExists
+      ? "executable_now"
+      : resourceGaps.length > 0
+        ? "executable_with_support"
+        : "blocked",
     ...(routeExists
       ? {
           nextStepPreview: {
@@ -1009,16 +1050,20 @@ function assessment(
       : {}),
     feasibility: {
       currentRouteHeadPossible: routeExists,
-      projectedActionCount: routeExists ? 1 : 0,
+      projectedActionCount: routeExists
+        ? 1
+        : resourceGaps.length > 0
+          ? resourceGaps.length + 1
+          : 0,
       opponentCanReact: false,
       confidence: "visible_state_forced",
     },
-    resourceGaps: [],
+    resourceGaps: resourceGaps.map((gap) => ({ ...gap })),
     expectedOutcome: {
       outcomeKind: "plan_progress",
-      minimumValue: routeExists ? 1 : 0,
-      expectedValue: routeExists ? 1 : 0,
-      maximumValue: routeExists ? 1 : 0,
+      minimumValue: routeExists || resourceGaps.length > 0 ? 1 : 0,
+      expectedValue: routeExists || resourceGaps.length > 0 ? 1 : 0,
+      maximumValue: routeExists || resourceGaps.length > 0 ? 1 : 0,
       terminal: priorityClass === "P1",
       guarantee: "visible_state_forced",
     },
@@ -1028,22 +1073,68 @@ function assessment(
       switchingCost: currentExecutorId === instance.instanceId ? 1 : 0,
       progressAtRisk: currentExecutorId === instance.instanceId ? 1 : 0,
     },
-    blockers: routeExists ? [] : structuredClone(instance.blockers),
+    blockers:
+      routeExists || resourceGaps.length > 0
+        ? []
+        : structuredClone(instance.blockers),
     withinClassValue,
     evidenceCodes: instance.evidenceRefs.map((entry) => entry.code),
   };
+}
+
+function exactRunnerParentFundingResourceGaps(
+  context: PlanSchedulerContext,
+  parent: PlanInstance,
+  supportNeedId: string | undefined,
+): ResourceGap[] {
+  if (supportNeedId === undefined) return [];
+  const exactNeeds = domain(context).fundingNeeds.filter(
+    (
+      need,
+    ): need is Extract<
+      RunnerFundingNeedSignal,
+      { kind: "parent_plan_support" }
+    > =>
+      need.kind === "parent_plan_support" &&
+      need.needId === supportNeedId &&
+      need.parentPlanInstanceId === parent.instanceId &&
+      need.gap > 0,
+  );
+  if (exactNeeds.length !== 1) return [];
+  const [need] = exactNeeds;
+  if (
+    !need ||
+    !validRunnerFundingNeedContract(need, context.input.playerView.stateVersion)
+  ) {
+    return [];
+  }
+  return [
+    {
+      needId: need.needId,
+      capability: "credits",
+      minimum: need.gap,
+      available: 0,
+      deadline: "current_turn",
+    },
+  ];
 }
 
 function economyCandidates(
   context: PlanSchedulerContext,
   need: RunnerFundingNeedSignal,
 ): PlanMaterialization["candidates"] {
-  const routeActionIds = new Set(need.routeActionIds);
+  const routeActionIds = new Set(
+    need.kind === "develop_liquidity" ? need.actionIds : need.routeActionIds,
+  );
   return context.actionCandidates
     .filter(
       (candidate) =>
         routeActionIds.has(candidate.actionId) &&
-        runnerFundingRouteCandidateIsMaterializable(candidate),
+        (need.kind === "develop_liquidity"
+          ? runnerExactBasicLiquidCreditCandidate(candidate) &&
+            candidate.economyProjection?.netLiquidCreditGain ===
+              need.projectedCreditGain
+          : runnerFundingRouteCandidateIsMaterializable(candidate)),
     )
     .map((candidate) => ({
       candidate,
@@ -1055,6 +1146,30 @@ function validRunnerFundingNeedContract(
   need: RunnerFundingNeedSignal,
   stateVersion: number,
 ): boolean {
+  if (need.kind === "develop_liquidity") {
+    const actionIds = [...new Set(need.actionIds)];
+    return (
+      need.needId.startsWith("economy-liquidity-development:") &&
+      actionIds.length === need.actionIds.length &&
+      actionIds.length === 1 &&
+      Number.isSafeInteger(need.currentCreditsAtRevalidation) &&
+      Number.isSafeInteger(need.targetCredits) &&
+      Number.isSafeInteger(need.gap) &&
+      need.currentCreditsAtRevalidation >= 0 &&
+      need.targetCredits >= 0 &&
+      need.gap > 0 &&
+      need.targetCredits === need.currentCreditsAtRevalidation + need.gap &&
+      need.projectedCreditGain === 1 &&
+      need.priorityClass === "P6" &&
+      need.cadence.kind === "remaining_turn_capacity" &&
+      Number.isSafeInteger(need.cadence.maximumConversions) &&
+      need.cadence.maximumConversions === need.gap &&
+      need.completion.kind === "target_credits_or_no_clicks" &&
+      need.revalidation.stateVersion === stateVersion &&
+      need.revalidation.status === "turn_liquidity_open" &&
+      need.evidenceCode.trim().length > 0
+    );
+  }
   if (
     !Number.isFinite(need.targetCredits) ||
     !Number.isFinite(need.currentCreditsAtRevalidation) ||
@@ -1106,6 +1221,37 @@ function validRunnerFundingNeedContract(
     need.driver.targetId.length > 0 &&
     need.driver.reasonCode.length > 0 &&
     need.revalidation.status === "material_parent_open"
+  );
+}
+
+export function runnerExactBasicLiquidCreditCandidate(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  const projection = candidate.economyProjection;
+  return (
+    candidate.sourceKind === "basic_action" &&
+    candidate.actionType === "gain_credit" &&
+    candidate.semanticActionType === "economy.gain_credit" &&
+    candidate.costProfile.clickCost === 1 &&
+    (candidate.costProfile.creditCost === undefined ||
+      candidate.costProfile.creditCost === 0) &&
+    candidate.costProfile.additionalCosts.length === 0 &&
+    projection?.kind === "immediate_liquid" &&
+    projection.timing === "immediate" &&
+    projection.creditRestriction === "general" &&
+    projection.clickCost === 1 &&
+    projection.creditCost === 0 &&
+    projection.grossLiquidCreditGain === 1 &&
+    projection.netLiquidCreditGain === 1 &&
+    projection.cardsDrawn === 0 &&
+    projection.cardsConsumed === 0 &&
+    projection.netHandDelta === 0 &&
+    projection.payoutMode === "fixed" &&
+    projection.reliability === "guaranteed" &&
+    ((projection.source === "basic_action_contract" &&
+      projection.confidence === "medium") ||
+      (projection.source === "legal_action_payload" &&
+        projection.confidence === "high"))
   );
 }
 

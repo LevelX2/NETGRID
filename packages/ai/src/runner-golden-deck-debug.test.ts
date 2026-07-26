@@ -9,7 +9,10 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import benchmarkSnapshotsData from "../../../data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json";
-import { buildDeckCapabilityProfile, type DeckCapabilityProfile } from "./deck-capabilities";
+import {
+  buildDeckCapabilityProfile,
+  type DeckCapabilityProfile,
+} from "./deck-capabilities";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import { chooseRunnerAction } from "./index";
@@ -130,7 +133,9 @@ describe("Runner Golden Deck strategy and debug", () => {
         }),
       ]),
     );
-    expect(JSON.stringify(goals)).not.toMatch(/onr_v1_|Blink|deckHash|privatePayload/i);
+    expect(JSON.stringify(goals)).not.toMatch(
+      /onr_v1_|Blink|deckHash|privatePayload/i,
+    );
   });
 
   it("runs unknown reachable R&D and exposes redacted strategy debug", () => {
@@ -175,9 +180,7 @@ describe("Runner Golden Deck strategy and debug", () => {
 
     expect(decision.actionId).toBe("run-rd");
     expect(decision.fallbackUsed).toBe(false);
-    expect(decision.decisionDebug?.planKind).toBe(
-      "runner.pressure_central",
-    );
+    expect(decision.decisionDebug?.planKind).toBe("runner.pressure_central");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_step_capability:pressure_rd_information",
@@ -190,9 +193,7 @@ describe("Runner Golden Deck strategy and debug", () => {
         (alternative) => alternative.actionId === "run-rd",
       )?.whyChosen,
     ).toEqual(
-      expect.arrayContaining([
-        "selected_for_step:pressure_rd_information",
-      ]),
+      expect.arrayContaining(["selected_for_step:pressure_rd_information"]),
     );
     expect(debugText).not.toMatch(
       /local_realistic_runner_blink_pressure_rig_snapshot_v1|onr_v1_|Blink|cardInstances|privatePayload|fullGameState/i,
@@ -213,10 +214,15 @@ describe("Runner Golden Deck strategy and debug", () => {
         }),
       ],
       legalActions: [
-        legalAction("install-access-card", "install_card", "Install Access Payoff", {
-          source: "access-card",
-          payload: { cardId: "access-card" },
-        }),
+        legalAction(
+          "install-access-card",
+          "install_card",
+          "Install Access Payoff",
+          {
+            source: "access-card",
+            payload: { cardId: "access-card" },
+          },
+        ),
       ],
     });
 
@@ -227,9 +233,7 @@ describe("Runner Golden Deck strategy and debug", () => {
 
     expect(decision.actionId).toBe("install-access-card");
     expect(decision.fallbackUsed).toBe(false);
-    expect(decision.decisionDebug?.planKind).toBe(
-      "runner.pressure_central",
-    );
+    expect(decision.decisionDebug?.planKind).toBe("runner.pressure_central");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_step_capability:develop_onr_v1_129_hq-interface",
@@ -241,7 +245,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     );
   });
 
-  it("ends after rejecting stale known-low R&D and keeps the reason visible in debug", () => {
+  it("uses last productive liquidity after rejecting stale known-low R&D and keeps the reason visible in debug", () => {
     const input = goldenInput({
       credits: 6,
       stateVersion: 3,
@@ -282,14 +286,13 @@ describe("Runner Golden Deck strategy and debug", () => {
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
     });
-    const runAlternative =
-      decision.decisionDebug?.actionAlternatives?.find(
-        (alternative) => alternative.actionId === "run-rd",
-      );
+    const runAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === "run-rd",
+    );
 
-    expect(decision.actionId).toBe("end-turn");
+    expect(decision.actionId).toBe("gain-credit");
     expect(decision.fallbackUsed).toBe(false);
-    expect(decision.decisionDebug?.planKind).toBe("runner.complete_turn");
+    expect(decision.decisionDebug?.planKind).toBe("runner.economy");
     expect(runAlternative?.whyNot).toEqual(
       expect.arrayContaining([
         "candidate_plan_evidence:runner_central_pressure_known_no_current_payoff:rd",
@@ -508,7 +511,8 @@ function goldenBlinkSnapshot(): AiDeckStrategyDeckSnapshot {
       candidate.deckSnapshotId ===
       "local_realistic_runner_blink_pressure_rig_snapshot_v1",
   );
-  if (!snapshot) throw new Error("Missing Blink Pressure Rig benchmark snapshot");
+  if (!snapshot)
+    throw new Error("Missing Blink Pressure Rig benchmark snapshot");
   return {
     deckSnapshotId: snapshot.deckSnapshotId,
     side: snapshot.side,
@@ -658,7 +662,9 @@ function rdAccessEvent(
 function tacticalPlanDebugText(
   debug: ReturnType<typeof chooseRunnerAction>["decisionDebug"],
 ): string {
-  return debug?.detailSections
-    ?.find((section) => section.id === "tactical_plan")
-    ?.items.join("\n") ?? "";
+  return (
+    debug?.detailSections
+      ?.find((section) => section.id === "tactical_plan")
+      ?.items.join("\n") ?? ""
+  );
 }

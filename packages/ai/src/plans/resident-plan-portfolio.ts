@@ -153,7 +153,11 @@ export function reconcileResidentPlanPortfolio(
       );
       continue;
     }
-    const retained = refreshFromProposal(previous, proposal, params.stateVersion);
+    const retained = refreshFromProposal(
+      previous,
+      proposal,
+      params.stateVersion,
+    );
     nextInstances.push(retained);
     transitions.push(
       transition(
@@ -306,10 +310,7 @@ export function applyPlanOutcomeReceipt(
   if (portfolio.executorInstanceId === updated.instanceId && terminal) {
     delete next.executorInstanceId;
   }
-  if (
-    portfolio.rootForegroundInstanceId === updated.instanceId &&
-    terminal
-  ) {
+  if (portfolio.rootForegroundInstanceId === updated.instanceId && terminal) {
     delete next.rootForegroundInstanceId;
   }
   assertResidentPlanPortfolio(next, timingPoint);
@@ -323,7 +324,9 @@ export function assertResidentPlanPortfolio(
   const executors = portfolio.instances.filter(
     (instance) => instance.executionState === "executor",
   );
-  const ids = new Set(portfolio.instances.map((instance) => instance.instanceId));
+  const ids = new Set(
+    portfolio.instances.map((instance) => instance.instanceId),
+  );
   const duplicateCount = portfolio.instances.length - ids.size;
   const executor = portfolio.executorInstanceId
     ? portfolio.instances.find(
@@ -361,9 +364,7 @@ export function assertResidentPlanPortfolio(
 function assignExecutor(
   portfolio: ResidentPlanPortfolio,
   selectedId: string | undefined,
-  reason: NonNullable<
-    ReconcileResidentPlanPortfolioParams["selectionReason"]
-  >,
+  reason: NonNullable<ReconcileResidentPlanPortfolioParams["selectionReason"]>,
   timingPoint: string,
 ): ResidentPlanPortfolio {
   const previousExecutorId = portfolio.instances.find(
@@ -493,7 +494,9 @@ function rootAncestorId(
   selected: PlanInstance,
   instances: readonly PlanInstance[],
 ): string {
-  const byId = new Map(instances.map((instance) => [instance.instanceId, instance]));
+  const byId = new Map(
+    instances.map((instance) => [instance.instanceId, instance]),
+  );
   const visited = new Set<string>();
   let current = selected;
   while (current.parentInstanceId) {
@@ -522,10 +525,14 @@ function refreshFromProposal(
   if (proposal.parentInstanceId)
     next.parentInstanceId = proposal.parentInstanceId;
   else delete next.parentInstanceId;
+  if (proposal.parentNeedId !== undefined)
+    next.parentNeedId = proposal.parentNeedId;
+  else delete next.parentNeedId;
   next.phase = proposal.phase;
   next.milestone = proposal.milestone;
   next.moduleState = structuredClone(proposal.moduleState);
   next.blockers = structuredClone(proposal.blockers);
+  if (proposal.initialViability !== "ready") next.openNeedIds = [];
   next.resumeConditions = structuredClone(proposal.resumeConditions);
   next.completionConditions = structuredClone(proposal.completionConditions);
   next.abandonmentConditions = structuredClone(proposal.abandonmentConditions);
@@ -551,15 +558,11 @@ function retentionDecision(
   if (
     (instance.openNeedIds.length > 0 &&
       instance.retentionPolicy.protectedWhileNeedOpen) ||
-    (instance.commitmentId &&
-      instance.retentionPolicy.protectedWhileCommitted)
+    (instance.commitmentId && instance.retentionPolicy.protectedWhileCommitted)
   ) {
     return { retain: true, code: "retention_protected" };
   }
-  if (
-    instance.target &&
-    instance.retentionPolicy.abandonWhenTargetMissing
-  ) {
+  if (instance.target && instance.retentionPolicy.abandonWhenTargetMissing) {
     return {
       retain: false,
       code: "proposal_missing_target_contract",
@@ -592,8 +595,7 @@ function completedRecord(
       instance.viability === "completed" ? "completed" : "abandoned",
     terminalAtStateVersion: stateVersion,
     retainUntilStateVersion:
-      stateVersion +
-      instance.retentionPolicy.completedHistoryStateVersionTtl,
+      stateVersion + instance.retentionPolicy.completedHistoryStateVersionTtl,
     finalProgress: structuredClone(instance.progress),
   };
 }
@@ -641,8 +643,7 @@ function assertPortfolioInput(
 ): void {
   if (
     params.previous &&
-    (params.previous.schemaVersion !==
-      RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION ||
+    (params.previous.schemaVersion !== RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION ||
       params.previous.side !== params.side ||
       params.previous.stateVersion > params.stateVersion)
   ) {

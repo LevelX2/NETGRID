@@ -84,17 +84,14 @@ function expectMissingPlanModuleCoverage(
   return planFailure;
 }
 
-function expectExhaustedRunnerTurn(decision: RunnerDecision): void {
-  expect(decision.actionId).toBe("end-turn");
-  expect(decision.fallbackUsed).toBe(false);
-  expect(decision.evidence).toEqual(
-    expect.arrayContaining([
-      "plan_first_runtime:true",
-      "plan_module:runner.complete_turn",
-      "plan_step_capability:complete_turn_after_productive_routes_exhausted",
-      "plan_assessment_evidence:productive_legal_routes_exhausted",
-    ]),
-  );
+function expectLastProductiveRunnerLiquidity(decision: RunnerDecision): void {
+  expectPlanDecision(decision, {
+    actionId: "gain-credit",
+    planKind: "runner.economy",
+    capability: "gain_general_liquid_credits",
+    priorityClass: "P6",
+    assessmentEvidence: "runner_engine_certified_basic_liquidity_development",
+  });
 }
 
 describe("Semantic AI runtime cutover — Runner plan and memory contracts", () => {
@@ -262,7 +259,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("keeps Broker held and fails closed above the finite reserve after a stable bank-build plan", () => {
+  it("keeps Broker held and uses last productive liquidity above the finite reserve", () => {
     const bankSource = visibleCard(
       "runner-credit-bank-source",
       "runner",
@@ -310,17 +307,24 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
-      legalAction("end-turn", "runner", "end_turn", "End turn", {
-        credits: 0,
-      }, {
-        source: "game_rule",
-      }),
+      legalAction(
+        "end-turn",
+        "runner",
+        "end_turn",
+        "End turn",
+        {
+          credits: 0,
+        },
+        {
+          source: "game_rule",
+        },
+      ),
     ]);
     payoutInput.playerView.own.credits = 6;
     payoutInput.playerView.opponent.deckCount = 10;
     payoutInput.playerView.own.rig = [bankSource];
 
-    expectExhaustedRunnerTurn(chooseRunnerAction(payoutInput));
+    expectLastProductiveRunnerLiquidity(chooseRunnerAction(payoutInput));
   });
 
   it("prefers a productive central run over the first empty Broker build", () => {
@@ -434,11 +438,18 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
-      legalAction("end-turn", "runner", "end_turn", "End turn", {
-        credits: 0,
-      }, {
-        source: "game_rule",
-      }),
+      legalAction(
+        "end-turn",
+        "runner",
+        "end_turn",
+        "End turn",
+        {
+          credits: 0,
+        },
+        {
+          source: "game_rule",
+        },
+      ),
       legalAction("draw", "runner", "draw_card", "Draw", {
         credits: 0,
       }),
@@ -464,7 +475,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("fails closed at the finite reserve instead of installing a redundant breaker or taking Basic Credit", () => {
+  it("uses last productive liquidity instead of installing a redundant breaker at the finite reserve", () => {
     const cyfermasterHand = visibleCard(
       "cyfermaster-hand",
       "runner",
@@ -512,10 +523,10 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       }),
     ];
 
-    expectExhaustedRunnerTurn(chooseRunnerAction(input));
+    expectLastProductiveRunnerLiquidity(chooseRunnerAction(input));
   });
 
-  it("fails closed at the finite reserve instead of preparing a redundant wall breaker or taking Basic Credit", () => {
+  it("uses last productive liquidity instead of preparing a redundant wall breaker at the finite reserve", () => {
     const dwarf = visibleCard("dwarf-hand", "runner", "program", {
       definitionId: "onr_v1_021_dwarf",
       title: "Dwarf",
@@ -543,11 +554,18 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
-      legalAction("end-turn", "runner", "end_turn", "End turn", {
-        credits: 0,
-      }, {
-        source: "game_rule",
-      }),
+      legalAction(
+        "end-turn",
+        "runner",
+        "end_turn",
+        "End turn",
+        {
+          credits: 0,
+        },
+        {
+          source: "game_rule",
+        },
+      ),
     ]);
     input.playerView.own.credits = 5;
     input.playerView.opponent.deckCount = 10;
@@ -562,7 +580,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       }),
     ];
 
-    expectExhaustedRunnerTurn(chooseRunnerAction(input));
+    expectLastProductiveRunnerLiquidity(chooseRunnerAction(input));
   });
 
   it("keeps loading Broker below its multi-load value target", () => {
@@ -592,11 +610,18 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
-      legalAction("end-turn", "runner", "end_turn", "End turn", {
-        credits: 0,
-      }, {
-        source: "game_rule",
-      }),
+      legalAction(
+        "end-turn",
+        "runner",
+        "end_turn",
+        "End turn",
+        {
+          credits: 0,
+        },
+        {
+          source: "game_rule",
+        },
+      ),
     ]);
     input.playerView.own.credits = 6;
     input.playerView.opponent.deckCount = 10;
@@ -628,7 +653,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(actionAlternative(decision, "broker-take")?.selected).toBe(false);
   });
 
-  it("fails closed above the finite reserve instead of cashing out Broker or taking Basic Credit", () => {
+  it("uses last productive liquidity instead of cashing out Broker above the finite reserve", () => {
     const input = aiInput("runner", [
       legalAction(
         "broker-take",
@@ -663,13 +688,10 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       }),
     ];
 
-    expectMissingPlanModuleCoverage(
-      () => chooseRunnerAction(input),
-      ["activated_card_ability", "gain_credit"],
-    );
+    expectLastProductiveRunnerLiquidity(chooseRunnerAction(input));
   });
 
-  it("defers Broker cashout and fails closed above the finite reserve without a parent plan", () => {
+  it("defers Broker cashout to last productive liquidity without a parent plan", () => {
     const input = aiInput("runner", [
       legalAction(
         "broker-take",
@@ -712,7 +734,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       }),
     ];
 
-    expectExhaustedRunnerTurn(chooseRunnerAction(input));
+    expectLastProductiveRunnerLiquidity(chooseRunnerAction(input));
   });
 
   it("stops loading Broker when stored credits and runner pool are comfortable", () => {
@@ -1097,11 +1119,18 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
-      legalAction("end-turn", "runner", "end_turn", "End turn", {
-        credits: 0,
-      }, {
-        source: "game_rule",
-      }),
+      legalAction(
+        "end-turn",
+        "runner",
+        "end_turn",
+        "End turn",
+        {
+          credits: 0,
+        },
+        {
+          source: "game_rule",
+        },
+      ),
       legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
     ]);
     input.playerView.own.credits = 13;
@@ -1246,9 +1275,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         expect.stringContaining(
           "module:runner.recurring_economy|phase:hold|viability:blocked",
         ),
-        expect.stringContaining(
-          "blocker:recurring_economy_waiting_for_value",
-        ),
+        expect.stringContaining("blocker:recurring_economy_waiting_for_value"),
       ]),
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
@@ -1688,7 +1715,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("fails closed at the finite reserve instead of repeating stale R&D or taking Basic Credit", () => {
+  it("uses last productive liquidity instead of repeating stale R&D at the finite reserve", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-rd",
@@ -1736,6 +1763,6 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       },
     ];
 
-    expectExhaustedRunnerTurn(chooseRunnerAction(input));
+    expectLastProductiveRunnerLiquidity(chooseRunnerAction(input));
   });
 });

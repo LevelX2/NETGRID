@@ -12,14 +12,14 @@ describe("All-Nighter restricted run-window plan-first coverage", () => {
     {
       label: "Fast Advance central-origin continuation",
       slotId: "strategy_panel_fast_advance_chrome_rush",
-      seed: "ai-behavior-baseline-v1-01",
-      actionIndex: 121,
+      seed: "ai-behavior-baseline-v1-03",
+      actionIndex: 51,
     },
     {
-      label: "Hybrid remote-origin continuation",
+      label: "Hybrid central-origin continuation",
       slotId: "strategy_panel_hybrid_score_punish_cheap_bag",
-      seed: "ai-behavior-baseline-v1-10",
-      actionIndex: 80,
+      seed: "ai-behavior-baseline-v1-05",
+      actionIndex: 12,
     },
   ])(
     "converts the exact $label state without a remote-disposition conflict",

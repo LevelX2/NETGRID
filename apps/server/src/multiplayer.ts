@@ -18,6 +18,7 @@ import {
   hashState,
   isHiddenInfoBarrierEvent,
   replayEvents,
+  quoteCorpPunishRoute,
   quoteRandomizedIceInstallSelection,
 } from "@netgrid/engine";
 import {
@@ -2896,6 +2897,8 @@ export class MultiplayerService {
       }
       const decision = this.chooseAiAction(aiInput, {
         persistTacticalPlanMemory: false,
+        quoteCorpPunishRoute: (request) =>
+          quoteCorpPunishRoute(record.gameState, request),
         quoteRandomizedIceInstallSelection: (request) =>
           quoteRandomizedIceInstallSelection(record.gameState, request),
       });
@@ -4739,6 +4742,7 @@ export class MultiplayerService {
       throw error;
     }
     const decision = this.chooseAiAction(input, {
+      quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
       quoteRandomizedIceInstallSelection: (request) =>
         quoteRandomizedIceInstallSelection(state, request),
     });

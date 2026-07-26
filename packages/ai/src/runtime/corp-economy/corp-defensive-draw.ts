@@ -100,10 +100,11 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
     input.side !== "corp" ||
     !input.legalActions.includes(action) ||
     protectionNeed.observedAtStateVersion !== stateVersion ||
-    protectionNeed.baseline.knowledge !== "known" ||
+    (protectionNeed.baseline.knowledge === "unknown" &&
+      protectionNeed.baseline.unknownReason !== "subset_assessment_unknown") ||
     protectionNeed.baseline.fundedProtection ||
-    directInstallRouteState.knowledge !== "known" ||
-    directInstallRouteState.disposition !== "effect_missing" ||
+    (directInstallRouteState.knowledge === "known" &&
+      directInstallRouteState.disposition !== "effect_missing") ||
     drawActionProjection.knowledge !== "known" ||
     drawActionProjection.actionId !== action.actionId ||
     drawActionProjection.observedAtStateVersion !== stateVersion ||
@@ -170,8 +171,12 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
       `protection_need:${protectionNeed.needId}`,
       `parent_project:${protectionNeed.parentProjectId}`,
       `target_server:${protectionNeed.targetServerId}`,
-      "funded_protection_baseline:known_unprotected",
-      "direct_install_route_disposition:effect_missing",
+      protectionNeed.baseline.knowledge === "known"
+        ? "funded_protection_baseline:known_unprotected"
+        : "funded_protection_baseline:subset_unknown_deferred",
+      directInstallRouteState.knowledge === "known"
+        ? "direct_install_route_disposition:effect_missing"
+        : "direct_install_route_disposition:unknown_deferred",
       `score_defense_cleanup_replacement_draw:${cleanupReplacementDraw}`,
       "score_defense_draw_install_click_horizon:true",
       `score_defense_draw_action_click_cost:${drawActionProjection.clickCost}`,
@@ -210,7 +215,8 @@ function corpScoreDefenseEffectSuitableIceDensity(
   if (
     snapshot?.side !== "corp" ||
     !positiveSafeInteger(remainingDeckCount) ||
-    need.baseline.knowledge !== "known" ||
+    (need.baseline.knowledge === "unknown" &&
+      need.baseline.unknownReason !== "subset_assessment_unknown") ||
     !Array.isArray(input.playerView.opponent.rig)
   ) {
     return unknownScoreDefenseDensity(
@@ -219,7 +225,9 @@ function corpScoreDefenseEffectSuitableIceDensity(
     );
   }
   const selectedIceInstanceIds = new Set(
-    need.baseline.selectedRezCosts.map((cost) => cost.iceInstanceId),
+    need.baseline.knowledge === "known"
+      ? need.baseline.selectedRezCosts.map((cost) => cost.iceInstanceId)
+      : [],
   );
   const currentServer = input.playerView.servers.find(
     (server) => server.id === need.targetServerId,
@@ -256,6 +264,12 @@ function corpScoreDefenseEffectSuitableIceDensity(
     if (!resolvedDefinitionId) continue;
     const definition = CARD_DEFINITIONS_BY_ID[resolvedDefinitionId];
     if (definition?.type !== "ice") continue;
+    if (need.baseline.knowledge === "unknown") {
+      if (!definition.mechanics?.includes("end_the_run")) continue;
+      remainingSuitableIceCount += remainingCopies;
+      suitableDefinitionIds.push(entry.cardId);
+      continue;
+    }
     const after = assessCorpScoreProtection({
       serverIce: [
         ...currentFundedIce,
@@ -305,6 +319,11 @@ function corpScoreDefenseEffectSuitableIceDensity(
     suitableDefinitionIds: uniqueSuitableDefinitionIds,
     evidence: [
       "score_defense_effect_density_confidence:deck_snapshot",
+      `score_defense_effect_density_basis:${
+        need.baseline.knowledge === "known"
+          ? "exact_access_probability_reduction"
+          : "known_end_the_run_ice_under_subset_unknown"
+      }`,
       `remaining_deck_count:${remainingDeckCount}`,
       `remaining_score_defense_effect_suitable_ice_count:${boundedSuitableIceCount}`,
       `remaining_score_defense_effect_suitable_ice_density:${density.toFixed(4)}`,

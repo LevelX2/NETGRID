@@ -14,6 +14,10 @@ export {
   getPlayerView,
   playerViewFor,
 } from "./player-view";
+export {
+  corpPunishRouteRequestFingerprint,
+  quoteCorpPunishRoute,
+} from "./view/corp-punish-route-quotes";
 export { hashGameState, hashState } from "./hash";
 export { replayEvents, replayGameEvents } from "./replay";
 export { validateGameState, validateGameStateForDebug } from "./validation";

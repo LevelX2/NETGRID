@@ -7,9 +7,7 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import {
-  createSemanticRuntimeCorpCentralRezContext,
-} from "./semantic-runtime-corp-central-rez-context";
+import { createSemanticRuntimeCorpCentralRezContext } from "./semantic-runtime-corp-central-rez-context";
 
 describe("createSemanticRuntimeCorpCentralRezContext", () => {
   it("flags R&D rez funding need when visible central pressure meets unrezzed ICE", () => {
@@ -24,9 +22,9 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
       ],
     });
 
-    expect(context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input)).toBe(
-      true,
-    );
+    expect(
+      context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input),
+    ).toBe(true);
   });
 
   it("does not create R&D funding bias without visible central pressure", () => {
@@ -40,9 +38,9 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
       ],
     });
 
-    expect(context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input)).toBe(
-      false,
-    );
+    expect(
+      context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input),
+    ).toBe(false);
   });
 
   it("fails closed instead of reconstructing a central rez floor without an engine quote", () => {
@@ -52,14 +50,16 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
       events: rdPressureEvents(),
       servers: [
         server("hq"),
-        server("rd", [corpCard("rd-ice", "ice", { rezzed: false, rezCost: 99 })]),
+        server("rd", [
+          corpCard("rd-ice", "ice", { rezzed: false, rezCost: 99 }),
+        ]),
         server("archives"),
       ],
     });
 
-    expect(context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input)).toBe(
-      false,
-    );
+    expect(
+      context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input),
+    ).toBe(false);
   });
 
   it("counts label-only central pressure events", () => {
@@ -85,9 +85,9 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
       ],
     });
 
-    expect(context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input)).toBe(
-      true,
-    );
+    expect(
+      context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input),
+    ).toBe(true);
   });
 
   it("treats visible R&D Interface as R&D pressure before the next run", () => {
@@ -107,9 +107,9 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
       ],
     });
 
-    expect(context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input)).toBe(
-      true,
-    );
+    expect(
+      context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input),
+    ).toBe(true);
   });
 
   it("penalizes R&D ICE installs that cannot be rezzed under R&D pressure", () => {
@@ -161,13 +161,15 @@ function testContext() {
   });
 }
 
-function corpInput(options: {
-  credits?: number;
-  gripOrHq?: VisibleCard[];
-  runnerRig?: VisibleCard[];
-  servers?: PlayerView["servers"];
-  events?: PublicGameEvent[];
-} = {}): AiDecisionInput {
+function corpInput(
+  options: {
+    credits?: number;
+    gripOrHq?: VisibleCard[];
+    runnerRig?: VisibleCard[];
+    servers?: PlayerView["servers"];
+    events?: PublicGameEvent[];
+  } = {},
+): AiDecisionInput {
   const events = options.events ?? [];
   return {
     side: "corp",
@@ -314,6 +316,7 @@ function centralIce(
       projectedServerId: serverId,
       expiresAtStateVersion: 1,
       complete: true,
+      costKind: "fixed",
       baseCredits: rezCost,
       finalCredits: rezCost,
       mandatoryAdditionalCosts: { agendaPoints: 0 },

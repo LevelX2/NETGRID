@@ -6,6 +6,7 @@ import {
   type LegalAction,
   type PlayerView,
   type VisibleCard,
+  type VisibleCorpRezCostQuote,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { buildAiDecisionInputDto } from "./input-dto";
@@ -32,6 +33,163 @@ describe("AI input DTO Corp rez projection contract", () => {
       view.servers[0]?.ice[0]?.effectiveRezCostQuote,
     );
   });
+
+  it.each([
+    [
+      "X-strength",
+      {
+        postInstallRezQuoteVariableRezKind: "x_strength",
+        postInstallRezQuoteVariableAdditionalCreditsPerValue: 1,
+        postInstallRezQuoteVariableMinValue: 0,
+        postInstallRezQuoteVariableMaxValue: 8,
+        postInstallRezQuoteVariableMinValueFinalCredits: 3,
+        postInstallRezQuoteVariableMaxValueFinalCredits: 11,
+        postInstallRezQuoteVariableEffectiveStrengthFromValue: true,
+        postInstallRezQuoteVariableTraceBaseFromValue: true,
+        postInstallRezQuoteVariableTraceBidLimitFromValue: true,
+      },
+    ],
+    [
+      "paid ETR",
+      {
+        postInstallRezQuoteVariableRezKind: "paid_end_the_run_subroutines",
+        postInstallRezQuoteVariableAdditionalCreditsPerSubroutine: 2,
+        postInstallRezQuoteVariableMinSubroutines: 0,
+        postInstallRezQuoteVariableMinSubroutinesFinalCredits: 3,
+        postInstallRezQuoteVariableFirstEndTheRunSubroutineCount: 1,
+        postInstallRezQuoteVariableFirstEndTheRunFinalCredits: 5,
+      },
+    ],
+    [
+      "alternate subtype",
+      {
+        postInstallRezQuoteVariableRezKind: "alternate_subtype",
+        postInstallRezQuoteVariableBaseSubtypes: "sentry",
+        postInstallRezQuoteVariableBaseSubtypesFinalCredits: 3,
+        postInstallRezQuoteVariableAlternateSubtypes: "wall",
+        postInstallRezQuoteVariableAlternateSubtypesAdditionalCredits: 1,
+        postInstallRezQuoteVariableAlternateSubtypesFinalCredits: 4,
+      },
+    ],
+  ] as const)(
+    "preserves the complete %s post-install quote payload allowlist",
+    (_label, variablePayload) => {
+      const action = iceInstallAction();
+      action.payload = {
+        ...action.payload,
+        postInstallRezQuoteCostKind: "variable",
+        ...variablePayload,
+      };
+      const view = playerView(action);
+      const input = buildAiDecisionInputDto({
+        side: "corp",
+        playerView: view,
+        eventTail: [],
+        legalActions: [action],
+        difficulty: "normal",
+        seed: "variable-rez-payload-allowlist",
+        decisionId: "variable-rez-payload-allowlist:corp:1",
+        actionNumber: 1,
+        profileId: "rez-projection-dto-test",
+      });
+
+      expect(input.legalActions[0]?.payload).toEqual(action.payload);
+      expect(input.playerView.legalActions[0]?.payload).toEqual(action.payload);
+    },
+  );
+
+  it.each([
+    ["X-strength", "x_strength"],
+    ["paid ETR", "paid_end_the_run_subroutines"],
+    ["alternate subtype", "alternate_subtype"],
+  ] as const)(
+    "preserves an exact complete installed %s parameter quote",
+    (_label, kind) => {
+      const action = iceInstallAction();
+      const view = playerView(action);
+      const quote = variableInstalledRezQuote(kind);
+      view.servers[0]!.ice[0]!.effectiveRezCostQuote = quote;
+      const input = buildAiDecisionInputDto({
+        side: "corp",
+        playerView: view,
+        eventTail: [],
+        legalActions: [action],
+        difficulty: "normal",
+        seed: "variable-installed-rez-quote",
+        decisionId: "variable-installed-rez-quote:corp:1",
+        actionNumber: 1,
+        profileId: "rez-projection-dto-test",
+      });
+
+      expect(
+        input.playerView.servers[0]?.ice[0]?.effectiveRezCostQuote,
+      ).toEqual(quote);
+      expect(
+        input.playerView.servers[0]?.ice[0]?.effectiveRezCostQuote,
+      ).not.toBe(quote);
+    },
+  );
+
+  it.each([
+    [
+      "X-strength payment bounds",
+      "x_strength",
+      (parameter: Record<string, unknown>) => {
+        parameter.maxValueFinalCredits = 99;
+      },
+    ],
+    [
+      "paid-ETR first-effect frontier",
+      "paid_end_the_run_subroutines",
+      (parameter: Record<string, unknown>) => {
+        parameter.firstEndTheRunFinalCredits = 4;
+      },
+    ],
+    [
+      "alternate-subtype payment branch",
+      "alternate_subtype",
+      (parameter: Record<string, unknown>) => {
+        parameter.alternateSubtypesFinalCredits = 3;
+      },
+    ],
+    [
+      "alternate-subtype canonical labels",
+      "alternate_subtype",
+      (parameter: Record<string, unknown>) => {
+        parameter.alternateSubtypes = ["Code Gate"];
+      },
+    ],
+  ] as const)(
+    "downgrades malformed variable quote %s to incomplete",
+    (_label, kind, mutate) => {
+      const action = iceInstallAction();
+      const view = playerView(action);
+      const quote = structuredClone(
+        variableInstalledRezQuote(kind),
+      ) as unknown as Record<string, unknown>;
+      mutate(quote.variableParameter as Record<string, unknown>);
+      view.servers[0]!.ice[0]!.effectiveRezCostQuote =
+        quote as unknown as VisibleCorpRezCostQuote;
+      const input = buildAiDecisionInputDto({
+        side: "corp",
+        playerView: view,
+        eventTail: [],
+        legalActions: [action],
+        difficulty: "normal",
+        seed: "malformed-variable-installed-rez-quote",
+        decisionId: "malformed-variable-installed-rez-quote:corp:1",
+        actionNumber: 1,
+        profileId: "rez-projection-dto-test",
+      });
+
+      expect(
+        input.playerView.servers[0]?.ice[0]?.effectiveRezCostQuote,
+      ).toMatchObject({
+        context: "installed",
+        complete: false,
+      });
+    },
+  );
 
   it("drops a maliciously enriched Corp rez quote from a Runner view", () => {
     const action = iceInstallAction();
@@ -86,32 +244,35 @@ describe("AI input DTO Corp rez projection contract", () => {
         quote.increaseSourceDefinitionIds = ["same"];
       },
     ],
-  ])("downgrades an installed quote with %s to incomplete", (_label, mutate) => {
-    const action = iceInstallAction();
-    const view = playerView(action);
-    const quote = view.servers[0]?.ice[0]
-      ?.effectiveRezCostQuote as unknown as Record<string, unknown>;
-    mutate(quote);
+  ])(
+    "downgrades an installed quote with %s to incomplete",
+    (_label, mutate) => {
+      const action = iceInstallAction();
+      const view = playerView(action);
+      const quote = view.servers[0]?.ice[0]
+        ?.effectiveRezCostQuote as unknown as Record<string, unknown>;
+      mutate(quote);
 
-    const input = buildAiDecisionInputDto({
-      side: "corp",
-      playerView: view,
-      eventTail: [],
-      legalActions: [action],
-      difficulty: "normal",
-      seed: "malformed-installed-rez-quote",
-      decisionId: "malformed-installed-rez-quote:corp:1",
-      actionNumber: 1,
-      profileId: "rez-projection-dto-test",
-    });
+      const input = buildAiDecisionInputDto({
+        side: "corp",
+        playerView: view,
+        eventTail: [],
+        legalActions: [action],
+        difficulty: "normal",
+        seed: "malformed-installed-rez-quote",
+        decisionId: "malformed-installed-rez-quote:corp:1",
+        actionNumber: 1,
+        profileId: "rez-projection-dto-test",
+      });
 
-    expect(
-      input.playerView.servers[0]?.ice[0]?.effectiveRezCostQuote,
-    ).toMatchObject({
-      context: "installed",
-      complete: false,
-    });
-  });
+      expect(
+        input.playerView.servers[0]?.ice[0]?.effectiveRezCostQuote,
+      ).toMatchObject({
+        context: "installed",
+        complete: false,
+      });
+    },
+  );
 
   it("preserves the complete Engine-certified root-rez credit outcome quote", () => {
     const action = rootRezCreditAction();
@@ -282,9 +443,9 @@ describe("AI input DTO Corp rez projection contract", () => {
       profileId: "rez-projection-dto-test",
     });
 
-    expect(
-      input.playerView.pendingChoice?.options[0],
-    ).not.toHaveProperty("hqInstallRezOptionQuote");
+    expect(input.playerView.pendingChoice?.options[0]).not.toHaveProperty(
+      "hqInstallRezOptionQuote",
+    );
   });
 
   it("drops an optional-rez quote when the card is in the wrong server zone", () => {
@@ -305,9 +466,9 @@ describe("AI input DTO Corp rez projection contract", () => {
       profileId: "rez-projection-dto-test",
     });
 
-    expect(
-      input.playerView.pendingChoice?.options[0],
-    ).not.toHaveProperty("hqInstallRezOptionQuote");
+    expect(input.playerView.pendingChoice?.options[0]).not.toHaveProperty(
+      "hqInstallRezOptionQuote",
+    );
   });
 
   it.each([
@@ -346,9 +507,9 @@ describe("AI input DTO Corp rez projection contract", () => {
       profileId: "rez-projection-dto-test",
     });
 
-    expect(
-      input.playerView.pendingChoice?.options[0],
-    ).not.toHaveProperty("hqInstallRezOptionQuote");
+    expect(input.playerView.pendingChoice?.options[0]).not.toHaveProperty(
+      "hqInstallRezOptionQuote",
+    );
   });
 
   it("drops an optional-rez quote from a non-Corp actor view", () => {
@@ -367,9 +528,9 @@ describe("AI input DTO Corp rez projection contract", () => {
       profileId: "rez-projection-dto-test",
     });
 
-    expect(
-      input.playerView.pendingChoice?.options[0],
-    ).not.toHaveProperty("hqInstallRezOptionQuote");
+    expect(input.playerView.pendingChoice?.options[0]).not.toHaveProperty(
+      "hqInstallRezOptionQuote",
+    );
   });
 });
 
@@ -400,6 +561,7 @@ function iceInstallAction(): LegalAction {
       postInstallRezQuoteProjectedServerId: "hq",
       postInstallRezQuoteExpiresAtStateVersion: 12,
       postInstallRezQuoteComplete: true,
+      postInstallRezQuoteCostKind: "fixed",
       postInstallRezQuoteBaseCredits: 5,
       postInstallRezQuoteFinalCredits: 3,
       postInstallRezQuoteMandatoryAgendaPointCost: 1,
@@ -462,6 +624,7 @@ function playerView(action: LegalAction): PlayerView {
       projectedServerId: "hq",
       expiresAtStateVersion: 12,
       complete: true,
+      costKind: "fixed",
       baseCredits: 5,
       finalCredits: 3,
       mandatoryAdditionalCosts: { agendaPoints: 1 },
@@ -600,6 +763,65 @@ function optionalRezQuote(): Extract<
     creditPayable: true,
     additionalCostsPayable: true,
     affordable: true,
+  };
+}
+
+function variableInstalledRezQuote(
+  kind: "x_strength" | "paid_end_the_run_subroutines" | "alternate_subtype",
+): VisibleCorpRezCostQuote {
+  const binding = {
+    context: "installed" as const,
+    cardId: "installed-ice",
+    targetServerId: "hq" as const,
+    projectedServerId: "hq" as const,
+    expiresAtStateVersion: 12,
+    complete: true as const,
+    costKind: "variable" as const,
+    baseCredits: 5,
+    finalCredits: 3,
+    mandatoryAdditionalCosts: { agendaPoints: 1 },
+    reductionSourceDefinitionIds: ["rez-reducer"],
+    increaseSourceDefinitionIds: ["rez-increaser"],
+  };
+  if (kind === "x_strength") {
+    return {
+      ...binding,
+      variableParameter: {
+        kind,
+        additionalCreditsPerValue: 1,
+        minValue: 0,
+        maxValue: 8,
+        minValueFinalCredits: 3,
+        maxValueFinalCredits: 11,
+        effectiveStrengthFromValue: true,
+        traceBaseFromValue: true,
+        traceBidLimitFromValue: true,
+      },
+    };
+  }
+  if (kind === "paid_end_the_run_subroutines") {
+    return {
+      ...binding,
+      variableParameter: {
+        kind,
+        additionalCreditsPerSubroutine: 2,
+        minSubroutines: 0,
+        minSubroutinesFinalCredits: 3,
+        firstEndTheRunSubroutineCount: 1,
+        firstEndTheRunFinalCredits: 5,
+      },
+    };
+  }
+  return {
+    ...binding,
+    variableParameter: {
+      kind,
+      baseSubtypes: ["sentry"],
+      baseSubtypesFinalCredits: 3,
+      alternateSubtypes: ["wall"],
+      alternateSubtypesAdditionalCredits: 1,
+      alternateSubtypesFinalCredits: 4,
+    },
   };
 }
 

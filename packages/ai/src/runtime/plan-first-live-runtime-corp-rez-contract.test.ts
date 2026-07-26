@@ -110,12 +110,9 @@ describe("plan-first Corp conditional root-rez contract", () => {
       server("archives"),
     ];
 
-    const firstDecision = liveContext().chooseSemanticRuntimeAction(input, {});
-    expect(firstDecision).toMatchObject({
-      actionId: "end-turn",
-      reasonCode: "plan_first.corp.complete_turn",
-      fallbackUsed: false,
-    });
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(input, {}),
+    ).toThrowError("missing_plan_module_coverage");
   });
 
   it("marks Chester Mix nonproductive without a bound productive same-fort ICE route", () => {
@@ -144,8 +141,8 @@ describe("plan-first Corp conditional root-rez contract", () => {
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: "end-turn",
-      reasonCode: "plan_first.corp.complete_turn",
+      actionId: gainCredit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
   });
@@ -444,8 +441,8 @@ describe("plan-first Corp conditional root-rez contract", () => {
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: "end-turn",
-      reasonCode: "plan_first.corp.complete_turn",
+      actionId: gainCredit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
   });
@@ -498,7 +495,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       expect(
         liveContext().chooseSemanticRuntimeAction(input, {}),
       ).toMatchObject({
-        actionId: includeDecline ? alternative.actionId : "end-turn",
+        actionId: alternative.actionId,
         fallbackUsed: false,
       });
     },
@@ -541,11 +538,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       title: "Data Masons",
       rezzed: false,
     });
-    const rdIce = corpIce(
-      "rd-data-wall",
-      "onr_v1_237_data-wall",
-      "Data Wall",
-    );
+    const rdIce = corpIce("rd-data-wall", "onr_v1_237_data-wall", "Data Wall");
     const installCentralIce = (serverId: "hq" | "rd") =>
       legalAction(
         `install-${serverId}-ice`,
@@ -582,17 +575,15 @@ describe("plan-first Corp conditional root-rez contract", () => {
     ]);
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [rdIce];
-    input.playerView.corpCentralAccessQuotes = ["hq", "rd"].map(
-      (serverId) => ({
-        serverId: serverId as "hq" | "rd",
-        stateVersion: 1,
-        complete: true as const,
-        effectiveAccessCount: 1,
-        isMultiaccess: false,
-        sourceDefinitionIds: [],
-        serverBoundEffects: [],
-      }),
-    );
+    input.playerView.corpCentralAccessQuotes = ["hq", "rd"].map((serverId) => ({
+      serverId: serverId as "hq" | "rd",
+      stateVersion: 1,
+      complete: true as const,
+      effectiveAccessCount: 1,
+      isMultiaccess: false,
+      sourceDefinitionIds: [],
+      serverBoundEffects: [],
+    }));
     input.playerView.servers = [
       server("hq", [
         corpIce("installed-wall", "onr_v1_237_data-wall", "Data Wall", true),
@@ -805,8 +796,8 @@ describe("plan-first Corp conditional root-rez contract", () => {
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: "end-turn",
-      reasonCode: "plan_first.corp.complete_turn",
+      actionId: gainCredit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
   });

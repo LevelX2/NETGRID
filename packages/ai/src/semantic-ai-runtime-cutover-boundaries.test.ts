@@ -79,6 +79,7 @@ describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", (
         projectedServerId: "remote_1",
         expiresAtStateVersion: 1,
         complete: true,
+        costKind: "fixed",
         baseCredits: 3,
         finalCredits: 3,
         mandatoryAdditionalCosts: { agendaPoints: 0 },
@@ -241,9 +242,7 @@ describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", (
     );
 
     expect(decision.actionId).toBe("end-turn");
-    expect(decision.evidence).toContain(
-      "fallback_action_policy:end_turn",
-    );
+    expect(decision.evidence).toContain("fallback_action_policy:end_turn");
   });
 
   it("fails closed for a sole Armageddon replacement instead of masking a coverage gap", () => {
@@ -259,8 +258,7 @@ describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", (
           payload: {
             cardId: "armageddon-instance",
             serverId: "rd",
-            proteusRunnerVirusFollowup:
-              "doom_counter_instead_of_rd_access",
+            proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
             counterType: "doom",
             counterDelta: 1,
           },

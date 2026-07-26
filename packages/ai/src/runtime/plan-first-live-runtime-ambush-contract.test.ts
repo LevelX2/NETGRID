@@ -31,11 +31,9 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const input = corpInput([install, gain, end], [trap]);
     setCorpIntent(input, false);
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: end.actionId,
-      reasonCode: "plan_first.corp.complete_turn",
-      fallbackUsed: false,
-    });
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(input, {}),
+    ).toThrowError(PlanResolutionFailure);
   });
 
   it("rejects the exact Ambush install when Corp intent is absent", () => {
@@ -46,27 +44,27 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const end = endTurn();
     const input = corpInput([install, gain, end], [trap]);
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: end.actionId,
-      reasonCode: "plan_first.corp.complete_turn",
-      fallbackUsed: false,
-    });
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(input, {}),
+    ).toThrowError(PlanResolutionFailure);
   });
 
   it("rejects an Experimental AI install until it has a visible program payoff", () => {
     resetResidentPlanPortfolioMemory();
     const trap = experimentalAi();
-    const install = installAmbush(trap, "new_remote", "install-experimental-ai");
+    const install = installAmbush(
+      trap,
+      "new_remote",
+      "install-experimental-ai",
+    );
     const gain = gainCredit();
     const end = endTurn();
     const input = corpInput([install, gain, end], [trap]);
     setCorpIntent(input, true);
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: end.actionId,
-      reasonCode: "plan_first.corp.complete_turn",
-      fallbackUsed: false,
-    });
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(input, {}),
+    ).toThrowError(PlanResolutionFailure);
 
     input.playerView.opponent.rig = [
       visibleCard("visible-runner-program", "runner", "program", {
@@ -85,11 +83,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
   it("lets an exact Ambush plan own an agenda install while its unsafe score parent stays blocked", () => {
     resetResidentPlanPortfolioMemory();
     const trap = fetalAi();
-    const install = installAmbush(
-      trap,
-      "new_remote",
-      "install-fetal-ai",
-    );
+    const install = installAmbush(trap, "new_remote", "install-fetal-ai");
     const input = corpInput([install, gainCredit(), endTurn()], [trap]);
     input.playerView.own.credits = 5;
     setCorpIntent(input, true);
@@ -104,12 +98,12 @@ describe("plan-first Corp ambush preplanning contract", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
-        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
+        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Afetal-ai%3Asetup%3Anew_remote",
       ]),
     );
 
     const portfolio = residentPlanPortfolioSnapshot(input);
-    expect(portfolio?.executorInstanceId).toBe(
+    expect(portfolio?.rootForegroundInstanceId).toBe(
       "plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
     );
     expect(
@@ -183,12 +177,12 @@ describe("plan-first Corp ambush preplanning contract", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
-        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
+        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Afetal-ai%3Asetup%3Anew_remote",
       ]),
     );
 
     const portfolio = residentPlanPortfolioSnapshot(input);
-    expect(portfolio?.executorInstanceId).toBe(
+    expect(portfolio?.rootForegroundInstanceId).toBe(
       "plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
     );
     expect(
@@ -208,16 +202,9 @@ describe("plan-first Corp ambush preplanning contract", () => {
       "remote_1",
       "install-trap-protected",
     );
-    const installNew = installAmbush(
-      trap,
-      "new_remote",
-      "install-trap-new",
-    );
+    const installNew = installAmbush(trap, "new_remote", "install-trap-new");
     const gain = gainCredit();
-    const input = corpInput(
-      [installNew, installProtected, gain],
-      [trap],
-    );
+    const input = corpInput([installNew, installProtected, gain], [trap]);
     setCorpIntent(input, true);
     input.playerView.servers = [
       server("hq"),
@@ -290,11 +277,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       "remote_1",
       "install-trap-protected",
     );
-    const installNew = installAmbush(
-      trap,
-      "new_remote",
-      "install-trap-new",
-    );
+    const installNew = installAmbush(trap, "new_remote", "install-trap-new");
     const input = corpInput(
       [installNew, installProtected, gainCredit()],
       [trap],
@@ -379,18 +362,17 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("remote_1", [], [developedTrap]),
     ];
     const end = endTurn();
-    input.legalActions = [advanceAmbush(developedTrap), gain, end].map((action) => ({
-      ...action,
-      expiresAtStateVersion: 4,
-    }));
+    input.legalActions = [advanceAmbush(developedTrap), gain, end].map(
+      (action) => ({
+        ...action,
+        expiresAtStateVersion: 4,
+      }),
+    );
     input.playerView.legalActions = input.legalActions;
 
-    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
-    expect(decision).toMatchObject({
-      actionId: end.actionId,
-      reasonCode: "plan_first.corp.complete_turn",
-      fallbackUsed: false,
-    });
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(input, {}),
+    ).toThrowError(PlanResolutionFailure);
   });
 
   it("abandons the resident Ambush normally after access or trash moves its source to Archives", () => {
@@ -419,22 +401,36 @@ describe("plan-first Corp ambush preplanning contract", () => {
     input.playerView.stateVersion = 2;
     input.actionNumber = 2;
     input.playerView.own.gripOrHq = [];
+    const scoringAgenda = visibleCard("scoring-agenda", "corp", "agenda", {
+      definitionId: "onr_v1_189_artificial-security-directors",
+      title: "Artificial Security Directors",
+      advancementCounters: 1,
+      advancementRequirement: 3,
+      agendaPoints: 2,
+    });
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives", [], [trap]),
       server("remote_1", [], []),
+      server("remote_2", [], [scoringAgenda]),
     ];
     const end = endTurn();
+    const advanceScore = {
+      ...advanceAmbush(scoringAgenda),
+      actionId: "advance-scoring-agenda",
+      expiresAtStateVersion: 3,
+    };
     input.legalActions = [
+      advanceScore,
       { ...gain, expiresAtStateVersion: 3 },
       { ...end, expiresAtStateVersion: 3 },
     ];
     input.playerView.legalActions = input.legalActions;
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: end.actionId,
-      reasonCode: "plan_first.corp.complete_turn",
+      actionId: advanceScore.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
     });
     const portfolio = residentPlanPortfolioSnapshot(input);
@@ -446,8 +442,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     expect(portfolio?.transitions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          instanceId:
-            "plan:corp.ambush_and_bluff:ambush%3Avacant-soulkiller",
+          instanceId: "plan:corp.ambush_and_bluff:ambush%3Avacant-soulkiller",
           reason: "target_disappeared",
           detailCode: "proposal_missing_target_contract",
         }),
@@ -488,9 +483,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("remote_1", [], []),
       server("remote_2", [], [trap]),
     ];
-    input.legalActions = [
-      { ...gain, expiresAtStateVersion: 3 },
-    ];
+    input.legalActions = [{ ...gain, expiresAtStateVersion: 3 }];
     input.playerView.legalActions = input.legalActions;
 
     try {
@@ -633,13 +626,10 @@ function advanceAmbush(card: VisibleCard): LegalAction {
 }
 
 function gainCredit(): LegalAction {
-  return legalAction(
-    "gain-credit",
-    "corp",
-    "gain_credit",
-    "Gain 1 Credit",
-    { credits: 0, clicks: 1 },
-  );
+  return legalAction("gain-credit", "corp", "gain_credit", "Gain 1 Credit", {
+    credits: 0,
+    clicks: 1,
+  });
 }
 
 function endTurn(): LegalAction {

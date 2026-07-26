@@ -228,6 +228,72 @@ describe("resident plan portfolio", () => {
     ).toThrow(expect.objectContaining({ code: "executor_invariant_broken" }));
   });
 
+  it("preserves an exact parent need across refresh and clears it when omitted", () => {
+    const parent = proposal("runner.pressure", "rd");
+    const supportWithNeed = proposal("runner.economy", "fund-rd", {
+      parentInstanceId: "plan:runner.pressure:rd",
+      parentNeedId: "need:credits:runner-pressure-rd",
+    });
+    const initial = reconcileResidentPlanPortfolio({
+      side: "runner",
+      stateVersion: 75,
+      timingPoint: "runner_action.main",
+      proposals: [parent, supportWithNeed],
+    });
+    const initialSupport = initial.instances.find(
+      (instance) => instance.instanceId === "plan:runner.economy:fund-rd",
+    );
+
+    expect(initialSupport).toMatchObject({
+      parentInstanceId: "plan:runner.pressure:rd",
+      parentNeedId: "need:credits:runner-pressure-rd",
+    });
+
+    const persisted = JSON.parse(
+      JSON.stringify(initial),
+    ) as ResidentPlanPortfolio;
+    const refreshed = reconcileResidentPlanPortfolio({
+      side: "runner",
+      stateVersion: 76,
+      timingPoint: "runner_action.main",
+      proposals: [parent, supportWithNeed],
+      previous: persisted,
+    });
+    const refreshedSupport = refreshed.instances.find(
+      (instance) => instance.instanceId === "plan:runner.economy:fund-rd",
+    );
+
+    expect(refreshedSupport).toMatchObject({
+      parentInstanceId: "plan:runner.pressure:rd",
+      parentNeedId: "need:credits:runner-pressure-rd",
+      createdAtStateVersion: 75,
+      updatedAtStateVersion: 76,
+    });
+
+    const cleared = reconcileResidentPlanPortfolio({
+      side: "runner",
+      stateVersion: 77,
+      timingPoint: "runner_action.main",
+      proposals: [
+        parent,
+        proposal("runner.economy", "fund-rd", {
+          parentInstanceId: "plan:runner.pressure:rd",
+        }),
+      ],
+      previous: refreshed,
+    });
+    const clearedSupport = cleared.instances.find(
+      (instance) => instance.instanceId === "plan:runner.economy:fund-rd",
+    );
+
+    expect(clearedSupport).toMatchObject({
+      parentInstanceId: "plan:runner.pressure:rd",
+      createdAtStateVersion: 75,
+      updatedAtStateVersion: 77,
+    });
+    expect(clearedSupport).not.toHaveProperty("parentNeedId");
+  });
+
   it("does not accept action-id-shaped outcome receipts", () => {
     const portfolio = reconcileResidentPlanPortfolio({
       side: "runner",
@@ -292,6 +358,7 @@ function proposal(
     side?: PlanProposal["side"];
     executionClass?: PlanProposal["executionClass"];
     parentInstanceId?: string;
+    parentNeedId?: string;
     dormantStateVersionTtl?: number;
     completedHistoryStateVersionTtl?: number;
   } = {},
@@ -317,6 +384,9 @@ function proposal(
     },
     ...(overrides.parentInstanceId
       ? { parentInstanceId: overrides.parentInstanceId }
+      : {}),
+    ...(overrides.parentNeedId !== undefined
+      ? { parentNeedId: overrides.parentNeedId }
       : {}),
     phase: "execute",
     milestone: "start",

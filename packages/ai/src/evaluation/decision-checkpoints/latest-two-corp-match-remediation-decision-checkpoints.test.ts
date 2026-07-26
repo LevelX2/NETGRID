@@ -11,8 +11,14 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("latest two Corp matches remediation decision checkpoints", () => {
   it.each([
     ["converts the financed protected scoreline", convertScorelineJson],
-    ["keeps the only protected score remote root open", keepScoreRemoteOpenJson],
-    ["minimizes agenda points exposed on a contested remote", minimizeAgendaRiskJson],
+    [
+      "keeps the only protected score remote root open",
+      keepScoreRemoteOpenJson,
+    ],
+    [
+      "minimizes agenda points exposed on a contested remote",
+      minimizeAgendaRiskJson,
+    ],
     [
       "does not expose a game-ending agenda on a still-reachable remote",
       startMatchpointJson,
@@ -134,7 +140,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-B2-NO-MATCHPOINT-CONTROL";
       fixture.expectation = {
-        acceptableActions: [{ type: "end_turn" }],
+        acceptableActions: [{ actionId: "corp.gain_credit" }],
       };
     });
 

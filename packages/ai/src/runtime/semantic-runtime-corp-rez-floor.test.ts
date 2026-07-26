@@ -1,9 +1,11 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import {
-  semanticRuntimeCorpRemoteRezFloorAssessment,
-} from "./semantic-runtime-corp-rez-floor";
+import { semanticRuntimeCorpRemoteRezFloorAssessment } from "./semantic-runtime-corp-rez-floor";
 
 describe("semanticRuntimeCorpRemoteRezFloorAssessment", () => {
   it("blocks scoreline installs that leave no reserve for the next advance", () => {
@@ -112,28 +114,25 @@ describe("semanticRuntimeCorpRemoteRezFloorAssessment", () => {
     ["negative action cost", 3, -1],
     ["fractional action cost", 3, 0.5],
     ["action cost above bank", 3, 4],
-  ])(
-    "fails closed for %s",
-    (_label, currentCredits, actionCreditCost) => {
-      const assessment = semanticRuntimeCorpRemoteRezFloorAssessment(
-        corpInput(currentCredits),
-        corpAction("advance-scoreline", "advance_card"),
-        testDependencies({ actionCreditCost }),
-      );
+  ])("fails closed for %s", (_label, currentCredits, actionCreditCost) => {
+    const assessment = semanticRuntimeCorpRemoteRezFloorAssessment(
+      corpInput(currentCredits),
+      corpAction("advance-scoreline", "advance_card"),
+      testDependencies({ actionCreditCost }),
+    );
 
-      expect(assessment).toMatchObject({
-        knowledge: "unknown",
-        rezFloor: undefined,
-        requiredCreditsAfterAction: undefined,
-        creditsAfterAction: undefined,
-        blockedByFloor: true,
-        evidence: expect.arrayContaining([
-          "remote_rez_floor_knowledge:unknown",
-          "remote_rez_floor:invalid_credit_input",
-        ]),
-      });
-    },
-  );
+    expect(assessment).toMatchObject({
+      knowledge: "unknown",
+      rezFloor: undefined,
+      requiredCreditsAfterAction: undefined,
+      creditsAfterAction: undefined,
+      blockedByFloor: true,
+      evidence: expect.arrayContaining([
+        "remote_rez_floor_knowledge:unknown",
+        "remote_rez_floor:invalid_credit_input",
+      ]),
+    });
+  });
 });
 
 function corpInput(credits: number): AiDecisionInput {
@@ -163,6 +162,7 @@ function corpInput(credits: number): AiDecisionInput {
                 targetServerId: "remote_1",
                 projectedServerId: "remote_1",
                 expiresAtStateVersion: 1,
+                costKind: "fixed",
                 baseCredits: 2,
                 finalCredits: 2,
                 mandatoryAdditionalCosts: { agendaPoints: 0 },
@@ -191,10 +191,12 @@ function corpAction(
   } as unknown as LegalAction;
 }
 
-function testDependencies(overrides: {
-  actionCreditCost?: number;
-  actionIsScoreLine?: boolean;
-} = {}) {
+function testDependencies(
+  overrides: {
+    actionCreditCost?: number;
+    actionIsScoreLine?: boolean;
+  } = {},
+) {
   return {
     actionServerId: () => "remote_1",
     isRemoteServerTarget: () => true,

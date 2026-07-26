@@ -293,6 +293,7 @@ function iceInstall(source: VisibleCard, serverId: "hq" | "rd"): LegalAction {
         postInstallRezQuoteProjectedServerId: serverId,
         postInstallRezQuoteExpiresAtStateVersion: 1,
         postInstallRezQuoteComplete: true,
+        postInstallRezQuoteCostKind: "fixed",
         postInstallRezQuoteBaseCredits: 1,
         postInstallRezQuoteFinalCredits: 1,
         postInstallRezQuoteMandatoryAgendaPointCost: 0,

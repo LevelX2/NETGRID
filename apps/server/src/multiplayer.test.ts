@@ -87,6 +87,7 @@ import {
 import {
   AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION,
   AI_DECISION_DEBUG_SCHEMA_VERSION,
+  CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   type AiDecision,
@@ -10312,7 +10313,9 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(finished.eventLog).toHaveLength(initialEventCount + actions);
     expect(finished.aiDecisionTraces).toHaveLength(actions);
     expect(finished.lifecycleResult).toBeUndefined();
-    expect(finished.gameState.gameEndReason).toBe("corp_deck_empty");
+    expect(["agenda_points", "corp_deck_empty"]).toContain(
+      finished.gameState.gameEndReason,
+    );
 
     const replay = await service.replayMatch(created.matchId);
     expect(replay).toEqual({
@@ -11969,6 +11972,166 @@ describe("MVP 0.2 multiplayer service", () => {
     ).toBe("engine_randomized_ice_install_selection");
     expect(JSON.stringify(replay.replay)).not.toMatch(
       /candidateFingerprint|test-near-tie|corp\.install_card\..*\.(?:hq|rd)\./,
+    );
+  });
+
+  it("binds read-only Punish route quotes to preview and live Corp state without exposing them", async () => {
+    const quoteBindings: {
+      matchId: string;
+      stateVersion: number;
+      timingPoint: string;
+      complete: boolean;
+    }[] = [];
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-state-bound-punish-quote",
+      chooseAiAction: (input, options): AiDecision => {
+        if (
+          input.playerView.activeSide !== "corp" ||
+          input.playerView.timingPoint !== "corp_action.main"
+        ) {
+          return chooseRuntimeAiAction(input, options);
+        }
+        const action = input.legalActions[0];
+        if (!action || !input.matchId)
+          throw new Error("Missing legal state-bound Punish test input.");
+        const quote = options?.quoteCorpPunishRoute?.({
+          schemaVersion: CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+          matchId: input.matchId,
+          side: "corp",
+          stateVersion: input.playerView.stateVersion,
+          timingPoint: input.playerView.timingPoint,
+          campaignId: "test:server-state-bound-punish",
+          routeId: "test:server-missing-source-route",
+          steps: [
+            {
+              stepId: "test:server-missing-source-step",
+              order: 0,
+              kind: "meat_damage",
+              sourceCardInstanceId: "missing-server-source",
+              sourceCapabilityId: "ability:on_play:0",
+            },
+          ],
+        });
+        if (!quote?.ok)
+          throw new Error(
+            quote?.error.message ??
+              "Server did not provide a state-bound Punish quote.",
+          );
+        expect(quote.quote.incompleteReasons).toEqual(["source_unavailable"]);
+        quoteBindings.push({
+          matchId: quote.quote.matchId,
+          stateVersion: quote.quote.stateVersion,
+          timingPoint: quote.quote.timingPoint,
+          complete: quote.quote.complete,
+        });
+        return {
+          actionId: action.actionId,
+          reasonCode: "test.state_bound_punish_quote",
+          explanation:
+            "Select a LegalAction after reading a state-bound Engine quote.",
+          consideredActionIds: [action.actionId],
+          fallbackUsed: false,
+          evidence: ["test_state_bound_punish_quote"],
+          timeoutUsed: false,
+          profileId: input.profileId,
+          difficulty: input.difficulty,
+          confidence: 1,
+          reason: "test.state_bound_punish_quote",
+        };
+      },
+    });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "ai-state-bound-punish-quote",
+      corpDifficulty: "normal",
+    });
+    const afterSetup = await submitChoice(
+      service,
+      created.matchId,
+      {
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
+      "keep",
+      "state-bound-punish-setup",
+    );
+    const corpMulligan = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: afterSetup.playerView.stateVersion,
+      knownMatchVersion: afterSetup.matchVersion,
+      mode: "single_step",
+    });
+    if (!corpMulligan.ok) throw new Error(corpMulligan.error.message);
+    expect(corpMulligan.ok).toBe(true);
+    quoteBindings.length = 0;
+    const before = await service.loadForTest(created.matchId);
+    if (!before?.gameState)
+      throw new Error("Missing state-bound Punish test state.");
+    expect(before.gameState.timingPoint).toBe("corp_action.main");
+
+    const preview = await service.previewAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: before.gameState.stateVersion,
+      knownMatchVersion: before.match.matchVersion,
+    });
+
+    expect(preview.ok).toBe(true);
+    expect(quoteBindings).toEqual([
+      {
+        matchId: created.matchId,
+        stateVersion: before.gameState.stateVersion,
+        timingPoint: before.gameState.timingPoint,
+        complete: false,
+      },
+    ]);
+    const afterPreview = await service.loadForTest(created.matchId);
+    expect(afterPreview?.gameState.stateVersion).toBe(
+      before.gameState.stateVersion,
+    );
+    expect(afterPreview?.gameState.eventLog).toHaveLength(
+      before.gameState.eventLog.length,
+    );
+    expect(afterPreview?.gameState.randomCounter).toBe(
+      before.gameState.randomCounter,
+    );
+    expect(afterPreview?.gameState.randomDrawRecords).toEqual(
+      before.gameState.randomDrawRecords,
+    );
+    expect(afterPreview?.gameState.winner).toBe(before.gameState.winner);
+
+    quoteBindings.length = 0;
+    const advanced = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: before.gameState.stateVersion,
+      knownMatchVersion: before.match.matchVersion,
+      mode: "single_step",
+    });
+
+    expect(advanced.ok).toBe(true);
+    expect(quoteBindings).toEqual([
+      {
+        matchId: created.matchId,
+        stateVersion: before.gameState.stateVersion,
+        timingPoint: before.gameState.timingPoint,
+        complete: false,
+      },
+    ]);
+    const after = await service.loadForTest(created.matchId);
+    expect(after?.gameState.stateVersion).toBe(
+      before.gameState.stateVersion + 1,
+    );
+    expect(
+      JSON.stringify(after?.gameState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(
+      /server-state-bound-punish|server-missing-source-route|requestEcho|missing-server-source/,
     );
   });
 

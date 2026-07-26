@@ -842,14 +842,14 @@ function visibleInstalledCorpCards(input: AiDecisionInput): VisibleCard[] {
 }
 
 function advancementRequirement(card: VisibleCard): number | undefined {
-  return (
-    positiveInteger(card.advancementRequirement) ??
-    (card.definitionId
-      ? positiveInteger(
-          CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement,
-        )
-      : undefined)
-  );
+  if (card.advancementRequirement !== undefined) {
+    return nonNegativeInteger(card.advancementRequirement);
+  }
+  return card.definitionId
+    ? positiveInteger(
+        CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement,
+      )
+    : undefined;
 }
 
 function isVisibleAgenda(card: VisibleCard): boolean {
@@ -915,6 +915,12 @@ function numberPayload(action: LegalAction, key: string): number | undefined {
 
 function positiveInteger(value: unknown): number | undefined {
   return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : undefined;
+}
+
+function nonNegativeInteger(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0
     ? value
     : undefined;
 }

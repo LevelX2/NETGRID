@@ -887,9 +887,7 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_237_data-wall_2"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_2"],
             "root": []
           },
           {
@@ -997,9 +995,7 @@
         }
       },
       "specialZones": {
-        "setAside": [
-          "runner_onr_v1_144_tycho-mem-chip_2"
-        ],
+        "setAside": ["runner_onr_v1_144_tycho-mem-chip_2"],
         "removedFromGame": []
       },
       "cardInstances": {
@@ -9718,9 +9714,7 @@
       },
       "selectedStepKind": "protect_remote",
       "selectedActionId": "corp.install_card.corp_onr_v1_261_quandary_2.remote_1.corp_onr_v1_261_quandary_2.4",
-      "blockedBy": [
-        "score_window_contestable"
-      ],
+      "blockedBy": ["score_window_contestable"],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
       "progressBaseline": {
@@ -9756,9 +9750,7 @@
         "milestone": "find_remote_protection",
         "progress": 0.5,
         "selectedStepKind": "find_remote_protection",
-        "actionCandidateIds": [
-          "corp.draw_card"
-        ],
+        "actionCandidateIds": ["corp.draw_card"],
         "cadence": {
           "turnKey": "corp:turn:19",
           "maxActionsPerTurn": 4,
@@ -9962,9 +9954,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 109,
-      "blockerIds": [
-        "corp.fast_advance:reserve_shortfall"
-      ],
+      "blockerIds": ["corp.fast_advance:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 255,
       "state": {
@@ -10094,9 +10084,7 @@
               "support": 80,
               "final": 92
             },
-            "supportGaps": [
-              "low_tagOrTrace_support"
-            ],
+            "supportGaps": ["low_tagOrTrace_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -10117,9 +10105,7 @@
               "support": 78,
               "final": 91
             },
-            "supportGaps": [
-              "low_bait_support"
-            ],
+            "supportGaps": ["low_bait_support"],
             "evidence": [
               "strategy:corp.asset_economy",
               "confidence:high",
@@ -10265,10 +10251,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10321,10 +10304,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10423,10 +10403,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10542,10 +10519,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10692,9 +10666,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.central_stabilize"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.central_stabilize"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -10726,10 +10698,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10902,10 +10871,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10947,10 +10913,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10999,7 +10962,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "end_turn"
+        "actionId": "corp.gain_credit"
       }
     ],
     "forbiddenActions": [
@@ -11011,8 +10974,11 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.complete_turn"],
-      "acceptableCapabilities": ["complete_turn_after_productive_routes_exhausted"]
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_basic_liquidity_development"
+      ]
     }
   }
 }

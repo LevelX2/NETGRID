@@ -118,6 +118,7 @@ export type PlanProposal = {
   retentionPolicy: PlanRetentionPolicy;
   target?: PlanTargetRef;
   parentInstanceId?: string;
+  parentNeedId?: string;
   phase: string;
   milestone: string;
   moduleState: unknown;
@@ -144,6 +145,7 @@ export type PlanInstance = {
   retentionPolicy: PlanRetentionPolicy;
   target?: PlanTargetRef;
   parentInstanceId?: string;
+  parentNeedId?: string;
   openNeedIds: string[];
   phase: string;
   milestone: string;
@@ -167,6 +169,8 @@ export type PlanInstanceStateIssue =
   | "module_side_mismatch"
   | "blank_dedupe_key"
   | "blank_phase"
+  | "blank_parent_need_id"
+  | "parent_need_without_parent"
   | "non_ready_executor"
   | "non_ready_preempted"
   | "terminal_plan_assigned"

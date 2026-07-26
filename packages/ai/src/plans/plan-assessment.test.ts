@@ -171,6 +171,130 @@ describe("plan assessment and priority claims", () => {
     );
   });
 
+  it("rejects empty, whitespace-only, and duplicate resource-gap need ids", () => {
+    const emptyNeed = supportAssessmentFor("corp.empty-need");
+    emptyNeed.resourceGaps[0]!.needId = " \t";
+    expect(
+      validatePriorityClaim(emptyNeed, CORP_PLAN_PRIORITY_POLICY),
+    ).toMatchObject({
+      status: "rejected",
+      reasonCodes: ["invalid_resource_gap_need_id"],
+    });
+
+    const duplicateNeed = supportAssessmentFor("corp.duplicate-need");
+    duplicateNeed.resourceGaps.push({
+      ...duplicateNeed.resourceGaps[0]!,
+      capability: "draw",
+    });
+    expect(
+      validatePriorityClaim(duplicateNeed, CORP_PLAN_PRIORITY_POLICY),
+    ).toMatchObject({
+      status: "rejected",
+      reasonCodes: ["duplicate_resource_gap_need_id"],
+    });
+  });
+
+  it.each([
+    {
+      label: "zero minimum",
+      minimum: 0,
+      available: 0,
+      reasonCode: "invalid_resource_gap_minimum",
+    },
+    {
+      label: "non-finite minimum",
+      minimum: Number.NaN,
+      available: 0,
+      reasonCode: "invalid_resource_gap_minimum",
+    },
+    {
+      label: "negative availability",
+      minimum: 2,
+      available: -1,
+      reasonCode: "invalid_resource_gap_available",
+    },
+    {
+      label: "non-finite availability",
+      minimum: 2,
+      available: Number.POSITIVE_INFINITY,
+      reasonCode: "invalid_resource_gap_available",
+    },
+    {
+      label: "already satisfied amount",
+      minimum: 2,
+      available: 2,
+      reasonCode: "resource_gap_not_open",
+    },
+  ])(
+    "rejects a resource gap with $label",
+    ({ minimum, available, reasonCode }) => {
+      const assessment = supportAssessmentFor("corp.invalid-amount");
+      assessment.resourceGaps[0] = {
+        ...assessment.resourceGaps[0]!,
+        minimum,
+        available,
+      };
+
+      expect(
+        validatePriorityClaim(assessment, CORP_PLAN_PRIORITY_POLICY),
+      ).toMatchObject({
+        status: "rejected",
+        reasonCodes: [reasonCode],
+      });
+    },
+  );
+
+  it("requires support readiness to expose a gap without a direct route head", () => {
+    const missingGap = supportAssessmentFor("corp.support-without-gap");
+    missingGap.resourceGaps = [];
+    expect(
+      validatePriorityClaim(missingGap, CORP_PLAN_PRIORITY_POLICY),
+    ).toMatchObject({
+      status: "rejected",
+      reasonCodes: ["support_readiness_without_gap"],
+    });
+
+    const assessment = supportAssessmentFor("corp.support-with-route");
+    assessment.feasibility.currentRouteHeadPossible = true;
+
+    expect(
+      validatePriorityClaim(assessment, CORP_PLAN_PRIORITY_POLICY),
+    ).toMatchObject({
+      status: "rejected",
+      reasonCodes: ["support_readiness_with_route_head"],
+    });
+  });
+
+  it.each(["executable_now", "blocked"] as const)(
+    "rejects resource gaps on %s assessments",
+    (readiness) => {
+      const assessment = supportAssessmentFor(`corp.${readiness}-with-gap`);
+      assessment.readiness = readiness;
+      if (readiness === "executable_now") {
+        assessment.feasibility.currentRouteHeadPossible = true;
+      } else {
+        assessment.blockers = [
+          {
+            code: "visible_blocker",
+            owner: "resource_ledger",
+            removable: true,
+          },
+        ];
+      }
+
+      expect(
+        validatePriorityClaim(assessment, CORP_PLAN_PRIORITY_POLICY),
+      ).toMatchObject({
+        status: "rejected",
+        reasonCodes: [
+          readiness === "executable_now"
+            ? "executable_now_with_resource_gap"
+            : "blocked_with_resource_gap",
+        ],
+      });
+    },
+  );
+
   it("cannot encode a future action id in the step preview contract", () => {
     const assessment = assessmentFor(
       "runner.pressure",
@@ -184,6 +308,26 @@ describe("plan assessment and priority claims", () => {
     );
   });
 });
+
+function supportAssessmentFor(instanceId: string): PlanAssessment {
+  const assessment = assessmentFor(instanceId, "corp", "P4", 10);
+  assessment.readiness = "executable_with_support";
+  assessment.feasibility = {
+    ...assessment.feasibility,
+    currentRouteHeadPossible: false,
+    projectedActionCount: 2,
+  };
+  assessment.resourceGaps = [
+    {
+      needId: "score-funding",
+      capability: "credits",
+      minimum: 2,
+      available: 1,
+      deadline: "current_turn",
+    },
+  ];
+  return assessment;
+}
 
 function assessmentFor(
   instanceId: string,

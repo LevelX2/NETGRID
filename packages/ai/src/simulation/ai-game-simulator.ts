@@ -4,6 +4,7 @@ import {
   createGame,
   getPlayerView,
   hashState,
+  quoteCorpPunishRoute,
   quoteRandomizedIceInstallSelection,
   replayEvents,
 } from "@netgrid/engine";
@@ -317,6 +318,8 @@ export function createAiGameSimulator(
             ...config,
             aiDecisionRuntimeOptions: {
               ...config.aiDecisionRuntimeOptions,
+              quoteCorpPunishRoute: (request) =>
+                quoteCorpPunishRoute(state, request),
               quoteRandomizedIceInstallSelection: (request) =>
                 quoteRandomizedIceInstallSelection(state, request),
             },

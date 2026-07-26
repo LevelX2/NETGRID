@@ -13869,15 +13869,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "end_turn"
+        "actionId": "corp.gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.complete_turn"],
-      "acceptableCapabilities": [
-        "complete_turn_after_productive_routes_exhausted"
-      ],
-      "requiredAssessmentEvidence": ["productive_legal_routes_exhausted"]
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_basic_liquidity_development"
+      ]
     }
   }
 }

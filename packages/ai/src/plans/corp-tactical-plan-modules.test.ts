@@ -58,12 +58,8 @@ describe("Corp tactical plan modules", () => {
     ).toEqual([]);
   });
 
-  it("admits preparation and immediate execution without a nonexistent parent", () => {
-    const prepare = cardAction(
-      "prepare",
-      "play.corp_operation",
-      "punish-card",
-    );
+  it("keeps preparation as a root and rejects rootless legacy execution", () => {
+    const prepare = cardAction("prepare", "play.corp_operation", "punish-card");
     const trace = cardAction("trace", "trace.initiate", "punish-card");
     const campaignModule = tacticalModule("corp.punish_campaign");
     const sequenceModule = tacticalModule("corp.execute_punish_sequence");
@@ -74,19 +70,14 @@ describe("Corp tactical plan modules", () => {
       punishCampaigns: [punishSignal("trace")],
     });
     const campaign = campaignModule.discover(prepareContext)[0]!;
-    const sequence = sequenceModule.discover(traceContext)[0]!;
 
     expect(campaign.persistencePolicy).toBe("sticky_goal");
-    expect(sequence.persistencePolicy).toBe("locked_sequence");
-    expect(sequence.parentInstanceId).toBeUndefined();
+    expect(campaign.parentInstanceId).toBeUndefined();
+    expect(sequenceModule.discover(traceContext)).toEqual([]);
   });
 
   it("assigns a bound punish-support rez to the preparation campaign", () => {
-    const rez = cardAction(
-      "rez-support",
-      "corp_window.rez",
-      "punish-card",
-    );
+    const rez = cardAction("rez-support", "corp_window.rez", "punish-card");
     const planDomain = domain({
       punishCampaigns: [
         {
@@ -139,27 +130,20 @@ describe("Corp tactical plan modules", () => {
     ).toEqual(["install-paris-hq"]);
   });
 
-  it("does not claim P1 for an uncertain terminal line", () => {
+  it("claims P1 only for a strong terminal quote on the persistent root", () => {
     const kill = cardAction("kill", "damage.net", "punish-card");
-    const module = tacticalModule("corp.execute_punish_sequence");
+    const module = tacticalModule("corp.punish_campaign");
     const uncertainContext = context([kill], {
-      punishCampaigns: [
-        {
-          ...punishSignal("kill"),
-          terminalCondition: "runner_flatline",
-          visibleTerminalProjection: true,
-          guarantee: "belief_supported",
-        },
-      ],
+      punishCampaigns: [quotedPunishSignal("kill", "belief_supported", true)],
     });
     const strongContext = context([kill], {
       punishCampaigns: [
-        {
-          ...punishSignal("kill"),
-          terminalCondition: "runner_flatline",
-          visibleTerminalProjection: true,
-          guarantee: "visible_state_forced",
-        },
+        quotedPunishSignal("kill", "visible_state_forced", true),
+      ],
+    });
+    const reactiveContext = context([kill], {
+      punishCampaigns: [
+        quotedPunishSignal("kill", "robust_but_reactive", true),
       ],
     });
     const uncertainInstance = instantiatePlanProposal(
@@ -170,46 +154,44 @@ describe("Corp tactical plan modules", () => {
       module.discover(strongContext)[0]!,
       10,
     );
+    const reactiveInstance = instantiatePlanProposal(
+      module.discover(reactiveContext)[0]!,
+      10,
+    );
 
     expect(
-      module.assess(
-        uncertainInstance,
-        uncertainContext,
-        emptyPortfolio(),
-      ).priorityClaim.requestedClass,
-    ).toBe("P3");
+      module.assess(uncertainInstance, uncertainContext, emptyPortfolio())
+        .priorityClaim.requestedClass,
+    ).toBe("P4");
     expect(
-      module.assess(
-        strongInstance,
-        strongContext,
-        emptyPortfolio(),
-      ).priorityClaim.requestedClass,
+      module.assess(strongInstance, strongContext, emptyPortfolio())
+        .priorityClaim.requestedClass,
+    ).toBe("P1");
+    expect(
+      module.assess(reactiveInstance, reactiveContext, emptyPortfolio())
+        .priorityClaim.requestedClass,
     ).toBe("P1");
   });
 
-  it("branches punish continuation semantically without future action ids", () => {
+  it("executes only the quoted current head and waits for a StateVersion requote", () => {
     const trace = cardAction("trace", "trace.initiate", "punish-card");
     const module = tacticalModule("corp.execute_punish_sequence");
     const corpContext = context([trace], {
-      punishCampaigns: [punishSignal("trace")],
+      punishCampaigns: [quotedPunishSignal("trace")],
     });
     const instance = instantiatePlanProposal(
       module.discover(corpContext)[0]!,
       10,
     );
-    const materialized = module.materialize(
-      instance,
-      {} as never,
-      corpContext,
-    );
+    const materialized = module.materialize(instance, {} as never, corpContext);
 
-    expect(materialized.continuation?.nextCapability.capabilityId).toBe(
-      "resolve_trace_tag",
-    );
-    expect(JSON.stringify(materialized.continuation)).not.toContain("actionId");
+    expect(
+      materialized.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["trace"]);
+    expect(materialized.continuation).toBeUndefined();
   });
 
-  it("starts an immediate trace sequence with the operation that creates the trace", () => {
+  it("binds a synthetic complete quote to its exact current trace head", () => {
     const operation = cardAction(
       "play-trace-operation",
       "play.corp_operation",
@@ -219,20 +201,27 @@ describe("Corp tactical plan modules", () => {
     const corpContext = context([operation], {
       punishCampaigns: [
         {
-          ...punishSignal("trace"),
+          ...quotedPunishSignal("trace"),
           initiatingSemanticActionType: "play.corp_operation",
+          actionIds: [operation.actionId],
+          routeContract: {
+            ...quotedPunishSignal("trace").routeContract!,
+            currentHeadActionId: operation.actionId,
+          },
         },
       ],
     });
-    const instance = instantiatePlanProposal(
-      module.discover(corpContext)[0]!,
-      10,
-    );
+    const proposal = module.discover(corpContext)[0]!;
+    const instance = instantiatePlanProposal(proposal, 10);
 
+    expect(proposal.parentInstanceId).toBe(
+      "plan:corp.punish_campaign:campaign",
+    );
+    expect(proposal.parentNeedId).toBe("punish-execution:campaign:route");
     expect(
-      module.materialize(instance, {} as never, corpContext).candidates.map(
-        (entry) => entry.candidate.actionId,
-      ),
+      module
+        .materialize(instance, {} as never, corpContext)
+        .candidates.map((entry) => entry.candidate.actionId),
     ).toEqual(["play-trace-operation"]);
   });
 
@@ -446,6 +435,8 @@ describe("Corp tactical plan modules", () => {
     };
     const handSignal = {
       handPlanId: "draw-for-plan",
+      parentPlanInstanceId: "plan:corp.score_agenda:general",
+      parentNeedId: "score-material:general",
       phase: "draw_for_plan" as const,
       agendaCount: 0,
       handSize: 1,
@@ -476,15 +467,100 @@ describe("Corp tactical plan modules", () => {
     );
   });
 
+  it("admits draw and card development only as exact support while preserving HQ overflow as a root", () => {
+    const draw = candidate("draw", "draw_card", "draw.card");
+    const develop = cardAction(
+      "install-score-support",
+      "install.card",
+      "score-support",
+    );
+    const module = tacticalModule("corp.hand_and_agenda_management");
+    const proposals = module.discover(
+      context([draw, develop], {
+        handManagement: [
+          {
+            handPlanId: "unbound-draw",
+            phase: "draw_for_plan",
+            agendaCount: 0,
+            handSize: 2,
+            maximumHandSize: 5,
+            actionIds: [draw.actionId],
+            concretePurposeCode: "generic_draw",
+            value: 10,
+            evidenceCode: "generic_draw_without_parent",
+          },
+          {
+            handPlanId: "partial-card-support",
+            parentPlanInstanceId: "plan:corp.score_agenda:agenda",
+            phase: "develop_card",
+            sourceDefinitionIds: ["score-support"],
+            actionIds: [develop.actionId],
+            agendaCount: 1,
+            handSize: 2,
+            maximumHandSize: 5,
+            concretePurposeCode: "partial_support",
+            value: 20,
+            evidenceCode: "partial_support_without_need",
+          },
+          {
+            handPlanId: "bound-card-support",
+            parentPlanInstanceId: "plan:corp.score_agenda:agenda",
+            parentNeedId: "score-setup:agenda:score-support",
+            phase: "develop_card",
+            sourceDefinitionIds: ["score-support"],
+            actionIds: [develop.actionId],
+            agendaCount: 1,
+            handSize: 2,
+            maximumHandSize: 5,
+            concretePurposeCode: "exact_support",
+            value: 30,
+            evidenceCode: "exact_parent_support",
+          },
+          {
+            handPlanId: "resolve-hq-overflow:corp:1",
+            phase: "resolve_hq_overflow",
+            agendaCount: 1,
+            handSize: 6,
+            maximumHandSize: 5,
+            actionIds: [develop.actionId],
+            exactActionRoute: true,
+            concretePurposeCode: "resolve_overflow",
+            overflowResolutionState: {
+              turnKey: "corp:1",
+              initialOverflowCount: 1,
+              maximumConversions: 1,
+              remainingConversions: 1,
+            },
+            value: 40,
+            evidenceCode: "exact_hq_overflow",
+          },
+        ],
+      }),
+    );
+
+    expect(proposals.map((proposal) => proposal.dedupeKey)).toEqual([
+      "bound-card-support",
+      "resolve-hq-overflow:corp:1",
+    ]);
+    expect(proposals[0]).toMatchObject({
+      persistencePolicy: "flexible_support",
+      parentInstanceId: "plan:corp.score_agenda:agenda",
+      parentNeedId: "score-setup:agenda:score-support",
+    });
+    expect(proposals[1]).toMatchObject({
+      persistencePolicy: "sticky_goal",
+    });
+    expect(proposals[1]).not.toHaveProperty("parentInstanceId");
+    expect(proposals[1]).not.toHaveProperty("parentNeedId");
+  });
+
   it("leaves an unneeded purge ownerless so coverage failure is visible", () => {
     const purge = candidate(
       "purge",
       "purge_virus_counters",
       "counter.purge_runner_virus",
     );
-    expect(
-      corpTacticalActionFamilyOwner(purge, domain({})),
-    ).toBeUndefined();
+    expect(corpTacticalActionFamilyOwner(purge, domain({}))).toBeUndefined();
   });
 });
 
@@ -494,9 +570,7 @@ function tacticalModule(moduleId: string) {
   )!;
 }
 
-function punishSignal(
-  phase: "prepare" | "trace" | "tag" | "damage" | "kill",
-) {
+function punishSignal(phase: "prepare" | "trace" | "tag" | "damage" | "kill") {
   return {
     campaignId: "campaign",
     phase,
@@ -506,6 +580,46 @@ function punishSignal(
     visibleTerminalProjection: false,
     value: 30,
     evidenceCode: "visible_punish_line",
+  };
+}
+
+function quotedPunishSignal(
+  phase: "trace" | "tag" | "damage" | "kill",
+  guarantee:
+    | "belief_supported"
+    | "visible_state_forced"
+    | "robust_but_reactive" = "visible_state_forced",
+  terminal = false,
+) {
+  return {
+    ...punishSignal(phase),
+    actionIds: [phase === "kill" ? "kill" : phase],
+    initiatingSemanticActionType:
+      phase === "trace"
+        ? "trace.initiate"
+        : phase === "tag"
+          ? "tag.apply"
+          : "damage.net",
+    guarantee,
+    ...(terminal ? { terminalCondition: "runner_flatline" as const } : {}),
+    visibleTerminalProjection: terminal,
+    routeContract: {
+      contractVersion: "corp_punish_route_signal_v1" as const,
+      quoteStatus: "complete" as const,
+      quoteStateVersion: 10,
+      routeId: "route",
+      totalClicks: 1,
+      totalActionCredits: 0,
+      corpResponseCredits: 0,
+      totalCorpCredits: 0,
+      fundingGap: 0,
+      fundingActionIds: [],
+      horizon: "execute" as const,
+      executionNeedId: "punish-execution:campaign:route",
+      fundingNeedId: "punish-funding:campaign:route",
+      currentHeadStepId: "head",
+      currentHeadActionId: phase === "kill" ? "kill" : phase,
+    },
   };
 }
 
@@ -563,9 +677,7 @@ function context(
   };
 }
 
-function domain(
-  overrides: Partial<CorpTacticalPlanDomain>,
-): CorpPlanDomain {
+function domain(overrides: Partial<CorpTacticalPlanDomain>): CorpPlanDomain {
   const core: CorpCorePlanDomain = {
     scoreProjects: [],
     remoteProjects: [],

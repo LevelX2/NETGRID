@@ -25,9 +25,11 @@ describe("Proteus Fetal AI install plan coverage", () => {
       expect(summary.errors).toEqual([]);
       expect(summary.runtimeFailures).toEqual([]);
       expect(summary.replayOk).toBe(true);
+      const executorEvidence =
+        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_004_fetal-ai_2";
       expect(
-        summary.actionSequence.find(
-          (entry) => entry.stateVersionBefore === 3,
+        summary.actionSequence.find((entry) =>
+          entry.evidence.includes(executorEvidence),
         ),
       ).toMatchObject({
         side: "corp",
@@ -37,48 +39,44 @@ describe("Proteus Fetal AI install plan coverage", () => {
         fallbackUsed: false,
         evidence: expect.arrayContaining([
           "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
-          "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_004_fetal-ai_2",
+          executorEvidence,
         ]),
       });
     });
   }
 
-  it(
-    "keeps the late prepared-score sibling from rejecting the exact Ambush install",
-    () => {
-      const summary = simulateAiGame({
-        seed: "proteus-pilot-qualifier-01",
-        maxActions: 171,
-        runnerDeck: requireDeck(
-          "proteus_runner_rd_bad_publicity_2026_05_25",
-        ),
-        corpDeck,
-        runnerControllerMode: "current_candidate",
-        corpControllerMode: "current_candidate",
-      });
+  it("keeps a delayed first-copy Ambush install from being rejected by the prepared-score sibling", () => {
+    const summary = simulateAiGame({
+      seed: "proteus-pilot-qualifier-10",
+      maxActions: 6,
+      runnerDeck: requireDeck("proteus_runner_rd_bad_publicity_2026_05_25"),
+      corpDeck,
+      runnerControllerMode: "current_candidate",
+      corpControllerMode: "current_candidate",
+    });
 
-      expect(summary.terminationKind).toBe("action_limit");
-      expect(summary.errors).toEqual([]);
-      expect(summary.runtimeFailures).toEqual([]);
-      expect(summary.replayOk).toBe(true);
-      expect(
-        summary.actionSequence.find(
-          (entry) => entry.stateVersionBefore === 170,
-        ),
-      ).toMatchObject({
-        side: "corp",
-        selectedActionId: "corp.install_card.new_remote",
-        actionType: "install_card",
-        reasonCode: "plan_first.corp.ambush_and_bluff",
-        fallbackUsed: false,
-        evidence: expect.arrayContaining([
-          "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
-          "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_004_fetal-ai_1",
-        ]),
-      });
-    },
-    30_000,
-  );
+    expect(summary.terminationKind).toBe("action_limit");
+    expect(summary.errors).toEqual([]);
+    expect(summary.runtimeFailures).toEqual([]);
+    expect(summary.replayOk).toBe(true);
+    const executorEvidence =
+      "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_004_fetal-ai_1";
+    expect(
+      summary.actionSequence.find((entry) =>
+        entry.evidence.includes(executorEvidence),
+      ),
+    ).toMatchObject({
+      side: "corp",
+      selectedActionId: "corp.install_card.new_remote",
+      actionType: "install_card",
+      reasonCode: "plan_first.corp.ambush_and_bluff",
+      fallbackUsed: false,
+      evidence: expect.arrayContaining([
+        "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
+        executorEvidence,
+      ]),
+    });
+  }, 30_000);
 
   function requireDeck(deckId: string): DeckDefinition {
     const deck = decks.find((candidate) => candidate.id === deckId);

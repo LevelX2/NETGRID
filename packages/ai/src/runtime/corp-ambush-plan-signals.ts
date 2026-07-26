@@ -19,33 +19,21 @@ export function buildCorpAmbushPlanSignals(params: {
   const continuedSourceIds = new Set(
     continued.map((signal) => signal.sourceInstanceId),
   );
-  const installCandidates = params.candidates.filter(
-    (candidate) =>
-      corpCandidateIsAmbushInstall(candidate) &&
-      candidate.sourceCardInstanceId !== undefined &&
-      !continuedSourceIds.has(candidate.sourceCardInstanceId),
-  );
-  if (installCandidates.length === 0) return continued;
-
-  const strategicIntent = (
-    params.input as AiDecisionInputWithDeckCapabilities
-  ).ownCorpStrategicIntent;
+  const strategicIntent = (params.input as AiDecisionInputWithDeckCapabilities)
+    .ownCorpStrategicIntent;
   if (!strategicIntent || !corpIntentSupportsAmbush(strategicIntent)) {
     return continued;
   }
-
-  const grouped = new Map<string, ActionSemanticCandidate[]>();
-  for (const candidate of installCandidates) {
-    const sourceId = candidate.sourceCardInstanceId!;
-    const current = grouped.get(sourceId) ?? [];
-    current.push(candidate);
-    grouped.set(sourceId, current);
-  }
-
-  const planned = [...grouped.entries()].flatMap(
-    ([sourceInstanceId, sourceCandidates]): CorpAmbushSignal[] => {
-      const source = visibleGripCard(params.input, sourceInstanceId);
-      if (!source?.definitionId || source.known !== true) return [];
+  const planned = params.input.playerView.own.gripOrHq.flatMap(
+    (source): CorpAmbushSignal[] => {
+      if (
+        continuedSourceIds.has(source.instanceId) ||
+        source.known !== true ||
+        !source.definitionId ||
+        !definitionSupportsAmbushPlan(source.definitionId)
+      ) {
+        return [];
+      }
       if (
         params.input.playerView.servers.some(
           (server) =>
@@ -59,87 +47,110 @@ export function buildCorpAmbushPlanSignals(params: {
       }
       if (!ambushVisibleConditionsSatisfied(params.input, source.definitionId))
         return [];
-
-      const ranked = sourceCandidates
-        .flatMap((candidate) => {
-          const serverId = candidateTargetIds(candidate).find(
-            isAmbushRemoteInstallServer,
-          );
-          if (!serverId) return [];
-          const legalAction = params.input.legalActions.find(
-            (action) => action.actionId === candidate.actionId,
-          );
-          if (!legalAction) {
-            throw ambushContractFailure(
-              params.input,
-              [candidate.actionId],
-              "Every planned ambush install must bind its current exact LegalAction.",
-            );
-          }
-          const creditCost = candidate.costProfile.creditCost ?? 0;
-          if (!Number.isFinite(creditCost)) {
-            throw ambushContractFailure(
-              params.input,
-              [candidate.actionId],
-              "Every planned ambush install must project a finite credit cost.",
-            );
-          }
-          if (
-            creditCost > params.input.playerView.own.credits ||
-            ambushInstallBlockedByFundingIntent(params.input, creditCost)
-          ) {
-            return [];
-          }
-          const server = params.input.playerView.servers.find(
-            (entry) => entry.id === serverId,
-          );
-          if (serverId !== "new_remote" && (!server || server.root.length > 0))
-            return [];
-          return [
-            {
-              candidate,
-              serverId,
-              serverValue:
-                serverId === "new_remote"
-                  ? 80
-                  : 100 + Math.min(4, server?.ice.length ?? 0) * 25,
-            },
-          ];
-        })
-        .sort(
-          (left, right) =>
-            right.serverValue - left.serverValue ||
-            left.serverId.localeCompare(right.serverId) ||
-            left.candidate.actionId.localeCompare(right.candidate.actionId),
-        );
-      const selected = ranked[0];
-      if (!selected) return [];
-      const advancementTarget = ambushAdvancementTarget(
-        source.definitionId,
-      );
       return [
-        {
-          commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
-          ambushId: `ambush:${sourceInstanceId}`,
-          sourceDefinitionId: source.definitionId,
-          sourceInstanceId,
-          actionIds: [selected.candidate.actionId],
-          serverId: selected.serverId,
-          phase: "install",
-          purposeCode: `establish_ambush:${source.definitionId}:${selected.serverId}`,
-          assignedDomainPlanIds: ["corp.ambush_bluff"],
-          duplicateAlreadyInstalled: false,
-          affordableOrSupportable: true,
-          plannedAtStateVersion: params.input.playerView.stateVersion,
-          plannedAdvancementTarget: advancementTarget,
-          value: 100 + selected.serverValue,
-          evidenceCode: `corp_ambush_preplanned_exact_install:${source.definitionId}:${selected.serverId}`,
-        },
+        visibleGripAmbushSignal(
+          params.input,
+          params.candidates,
+          source,
+          undefined,
+        ),
       ];
     },
   );
 
   return [...continued, ...planned];
+}
+
+function visibleGripAmbushSignal(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  source: VisibleCard,
+  previous: CorpAmbushSignal | undefined,
+): CorpAmbushSignal {
+  const ranked = candidates
+    .filter(
+      (candidate) =>
+        corpCandidateIsAmbushInstall(candidate) &&
+        candidate.sourceCardInstanceId === source.instanceId,
+    )
+    .flatMap((candidate) => {
+      const serverId = candidateTargetIds(candidate).find(
+        isAmbushRemoteInstallServer,
+      );
+      if (!serverId) return [];
+      const legalAction = input.legalActions.find(
+        (action) =>
+          action.actionId === candidate.actionId &&
+          action.side === "corp" &&
+          action.type === "install_card",
+      );
+      const creditCost = legalAction
+        ? exactLegalActionCreditCost(legalAction)
+        : undefined;
+      if (creditCost === undefined) return [];
+      const server = input.playerView.servers.find(
+        (entry) => entry.id === serverId,
+      );
+      if (serverId !== "new_remote" && (!server || server.root.length > 0))
+        return [];
+      return [
+        {
+          candidate,
+          creditCost,
+          serverId,
+          serverValue:
+            (serverId === previous?.serverId ? 20 : 0) +
+            (serverId === "new_remote"
+              ? 80
+              : 100 + Math.min(4, server?.ice.length ?? 0) * 25),
+        },
+      ];
+    })
+    .sort(
+      (left, right) =>
+        right.serverValue - left.serverValue ||
+        left.serverId.localeCompare(right.serverId) ||
+        left.candidate.actionId.localeCompare(right.candidate.actionId),
+    );
+  const selected = ranked[0];
+  const serverId = selected?.serverId ?? previous?.serverId ?? "new_remote";
+  const plannedAtStateVersion =
+    previous?.plannedAtStateVersion ?? input.playerView.stateVersion;
+  const plannedAdvancementTarget =
+    previous?.plannedAdvancementTarget ??
+    ambushAdvancementTarget(source.definitionId!);
+  const fundingGap = selected
+    ? Math.max(0, selected.creditCost - input.playerView.own.credits)
+    : undefined;
+  return {
+    commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
+    ambushId: `ambush:${source.instanceId}`,
+    sourceDefinitionId: source.definitionId!,
+    sourceInstanceId: source.instanceId,
+    actionIds: selected ? [selected.candidate.actionId] : [],
+    serverId,
+    phase: "install",
+    purposeCode: `establish_ambush:${source.definitionId}:${serverId}`,
+    assignedDomainPlanIds: ["corp.ambush_bluff"],
+    duplicateAlreadyInstalled: false,
+    affordableOrSupportable: true,
+    plannedAtStateVersion,
+    plannedAdvancementTarget,
+    value: selected ? 100 + selected.serverValue : 100,
+    evidenceCode: selected
+      ? `corp_ambush_preplanned_exact_install:${source.definitionId}:${serverId}`
+      : `corp_ambush_visible_root_route_unknown:${source.definitionId}:${serverId}`,
+    ...(selected && fundingGap !== undefined
+      ? {
+          installRoute: {
+            actionId: selected.candidate.actionId,
+            creditCost: selected.creditCost,
+            fundingGap,
+            costSource: "legal_action" as const,
+          },
+        }
+      : {}),
+  };
 }
 
 export function corpCandidateIsAmbushInstall(
@@ -187,7 +198,8 @@ export function corpAmbushAdvanceDispositionEvidence(
       current.sourceInstanceId === candidate.sourceCardInstanceId ||
       candidateTargetIds(candidate).includes(current.sourceInstanceId),
   );
-  if (!signal || signal.actionIds.includes(candidate.actionId)) return undefined;
+  if (!signal || signal.actionIds.includes(candidate.actionId))
+    return undefined;
   if (signal.phase !== "trigger") return undefined;
   return [
     "corp_ambush_advance_target_already_reached",
@@ -204,6 +216,11 @@ function continuedAmbushSignals(params: {
   if (!params.previous) return [];
   return params.previous.instances.flatMap((instance): CorpAmbushSignal[] => {
     if (instance.moduleId !== "corp.ambush_and_bluff") return [];
+    const moduleState = instance.moduleState as {
+      kind?: string;
+      signal?: Partial<CorpAmbushSignal>;
+    };
+    if (moduleState.kind !== "ambush") return [];
     const signal = (
       instance.moduleState as {
         kind?: string;
@@ -226,10 +243,24 @@ function continuedAmbushSignals(params: {
     }
     const sourceInstanceId = signal.sourceInstanceId;
     const plannedAdvancementTarget = signal.plannedAdvancementTarget!;
-    const location = installedCardLocation(
-      params.input,
-      sourceInstanceId,
-    );
+    const visibleGripSource = visibleGripCard(params.input, sourceInstanceId);
+    if (visibleGripSource) {
+      if (
+        visibleGripSource.known !== true ||
+        visibleGripSource.definitionId !== signal.sourceDefinitionId
+      ) {
+        return [];
+      }
+      return [
+        visibleGripAmbushSignal(
+          params.input,
+          params.candidates,
+          visibleGripSource,
+          signal as CorpAmbushSignal,
+        ),
+      ];
+    }
+    const location = installedCardLocation(params.input, sourceInstanceId);
     if (!location) return [];
     if (location.serverId === "archives") return [];
     if (
@@ -255,14 +286,8 @@ function continuedAmbushSignals(params: {
         `Resident ambush ${sourceInstanceId} has ambiguous trigger actions; bind the exact on-access ability semantics.`,
       );
     }
-    const currentCounters = Math.max(
-      0,
-      location.card.advancementCounters ?? 0,
-    );
-    const advancementTarget = Math.max(
-      0,
-      Math.floor(plannedAdvancementTarget),
-    );
+    const currentCounters = Math.max(0, location.card.advancementCounters ?? 0);
+    const advancementTarget = Math.max(0, Math.floor(plannedAdvancementTarget));
     const advanceCandidates = params.candidates.filter(
       (candidate) =>
         candidate.semanticActionType === "score.advance_card" &&
@@ -298,11 +323,7 @@ function continuedAmbushSignals(params: {
         duplicateAlreadyInstalled: false,
         affordableOrSupportable: selected !== undefined || phase === "trigger",
         value:
-          phase === "trigger" && selected
-            ? 800
-            : phase === "advance"
-              ? 300
-              : 0,
+          phase === "trigger" && selected ? 800 : phase === "advance" ? 300 : 0,
         evidenceCode: selected
           ? `corp_ambush_sequence_exact_${phase}:${signal.sourceInstanceId}`
           : `corp_ambush_sequence_waiting_for_access:${signal.sourceInstanceId}`,
@@ -317,6 +338,14 @@ function corpIntentSupportsAmbush(intent: CorpStrategicIntentProfile): boolean {
     intent.punishPlan.includes("corp.ambush_bluff") &&
     !intent.rejectedIntents.includes("corp.ambush_bluff_blocked") &&
     intent.confidence !== "low"
+  );
+}
+
+function definitionSupportsAmbushPlan(definitionId: string): boolean {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  return (
+    hint?.strategyAnchors?.includes("corp.ambush_bluff") === true ||
+    hint?.lineSupport?.includes("corp.ambush_bluff") === true
   );
 }
 
@@ -359,21 +388,6 @@ function ambushAdvancementTarget(definitionId: string): number {
     : 0;
 }
 
-function ambushInstallBlockedByFundingIntent(
-  input: AiDecisionInput,
-  creditCost: number,
-): boolean {
-  const intent = (input as AiDecisionInputWithDeckCapabilities)
-    .ownStrategicIntentState;
-  return (
-    creditCost > 0 &&
-    intent?.side === "corp" &&
-    intent.phase === "fund" &&
-    intent.reserve.kind === "credits" &&
-    intent.reserve.satisfied === false
-  );
-}
-
 function visibleGripCard(
   input: AiDecisionInput,
   instanceId: string,
@@ -381,6 +395,21 @@ function visibleGripCard(
   return input.playerView.own.gripOrHq.find(
     (card) => card.instanceId === instanceId,
   );
+}
+
+function exactLegalActionCreditCost(
+  action: AiDecisionInput["legalActions"][number],
+): number | undefined {
+  let total = 0;
+  for (const cost of action.costs) {
+    if (cost.credits === undefined) continue;
+    if (!Number.isSafeInteger(cost.credits) || cost.credits < 0) {
+      return undefined;
+    }
+    total += cost.credits;
+    if (!Number.isSafeInteger(total)) return undefined;
+  }
+  return total;
 }
 
 function installedCardLocation(

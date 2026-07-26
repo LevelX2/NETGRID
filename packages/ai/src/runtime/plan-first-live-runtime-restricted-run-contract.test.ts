@@ -124,21 +124,32 @@ describe("plan-first Engine-restricted run contract", () => {
       score: -420,
     };
 
-    expect(
-      liveContext({
-        evaluateRunnerRunTargets: () => [noPayoffRemote],
-      }).chooseSemanticRuntimeAction(input, {}),
-    ).toMatchObject({
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [noPayoffRemote],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
       actionId: end.actionId,
       reasonCode: "plan_first.runner.complete_turn",
       fallbackUsed: false,
     });
+    const runAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === runRemote.actionId,
+    );
+    expect(runAlternative?.selected).toBe(false);
+    expect(runAlternative?.whyNot).toEqual(
+      expect.arrayContaining([
+        "not_selected_by_plan:plan:runner.complete_turn:standard-turn-completion",
+      ]),
+    );
+    expect(decision.evidence).toContain(
+      "plan_assessment_evidence:runner_remote_run_known_no_current_payoff:remote_1:do_not_run_now",
+    );
   });
 });
 
 function wilsonRun(serverId: "hq" | "remote_1"): LegalAction {
-  const sourceId =
-    "runner_onr_v1_187_wilson-weeflerunner-apprentice_1";
+  const sourceId = "runner_onr_v1_187_wilson-weeflerunner-apprentice_1";
   return legalAction(
     `runner.start_run.${sourceId}.${serverId}.${sourceId}.gain_run_only_action`,
     "runner",
@@ -152,8 +163,7 @@ function wilsonRun(serverId: "hq" | "remote_1"): LegalAction {
         abilityFamily: "run-access",
         abilityId: "gain_run_only_action",
         effectKind: "gain_credits",
-        sourceDefinitionId:
-          "onr_v1_187_wilson-weeflerunner-apprentice",
+        sourceDefinitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
         gainActionsAmount: 1,
         actionCapacityTiming: "immediate",
         actionCapacityRestriction: "run_only",

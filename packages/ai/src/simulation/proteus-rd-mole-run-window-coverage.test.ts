@@ -9,17 +9,17 @@ import { simulateAiGame } from "../simulation";
 import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
 
 describe("Proteus R&D Mole plan-first run-window coverage", () => {
-  it("converts the exact stateVersion-51 multiaccess window before beginning access", () => {
+  it("converts the exact stateVersion-52 multiaccess window before beginning access", () => {
     let capture: AiSimulationDecisionCheckpointCapture | undefined;
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-01",
-      maxActions: 54,
+      maxActions: 55,
       runnerDeck: deck("proteus_runner_rd_bad_publicity_2026_05_25"),
       corpDeck: deck("proteus_corp_region_fast_score_2026_05_25"),
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
       testOnlyDecisionCheckpointCapture: {
-        actionIndices: [51],
+        actionIndices: [52],
         capture: (snapshot) => {
           capture = snapshot;
         },
@@ -27,8 +27,8 @@ describe("Proteus R&D Mole plan-first run-window coverage", () => {
     });
 
     expect(capture).toBeDefined();
-    if (!capture) throw new Error("Missing stateVersion-51 capture");
-    expect(capture.state.stateVersion).toBe(51);
+    if (!capture) throw new Error("Missing stateVersion-52 capture");
+    expect(capture.state.stateVersion).toBe(52);
     expect(capture.state.timingPoint).toBe("game.checkpoint");
     expect(capture.state.run).toMatchObject({
       attackedServerId: "rd",
@@ -61,7 +61,7 @@ describe("Proteus R&D Mole plan-first run-window coverage", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: capture.input.legalActions,
       observerSide: "runner",
-      stateVersion: 51,
+      stateVersion: 52,
       visibleSourceDefinitionsByInstanceId:
         visibleSourceDefinitionsByInstanceId(capture.input.playerView),
       cardSemanticProfilesByDefinitionId:
@@ -74,9 +74,7 @@ describe("Proteus R&D Mole plan-first run-window coverage", () => {
     expect(moleCandidate).toMatchObject({
       actionType: "activated_card_ability",
       semanticActionType: "card_ability.unknown",
-      effectTargets: expect.arrayContaining([
-        "access.rnd_hidden_multiaccess",
-      ]),
+      effectTargets: expect.arrayContaining(["access.rnd_hidden_multiaccess"]),
       runAccessDecisionModel: {
         coverageStatus: "covered",
         payoffs: expect.arrayContaining(["additional_access"]),
@@ -88,7 +86,7 @@ describe("Proteus R&D Mole plan-first run-window coverage", () => {
     expect(summary.actionSequence).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          stateVersionBefore: 51,
+          stateVersionBefore: 52,
           actionType: "activated_card_ability",
           eventType: "activated_card_ability",
           planKind: "runner.convert_run_window",
@@ -101,7 +99,7 @@ describe("Proteus R&D Mole plan-first run-window coverage", () => {
           ]),
         }),
         expect.objectContaining({
-          stateVersionBefore: 52,
+          stateVersionBefore: 53,
           actionType: "continue_run",
           targetServerId: "rd",
         }),
@@ -111,9 +109,9 @@ describe("Proteus R&D Mole plan-first run-window coverage", () => {
 });
 
 function deck(deckId: string): DeckDefinition {
-  const result = (
-    proteusDecksJson as { decks: DeckDefinition[] }
-  ).decks.find((candidate) => candidate.id === deckId);
+  const result = (proteusDecksJson as { decks: DeckDefinition[] }).decks.find(
+    (candidate) => candidate.id === deckId,
+  );
   if (!result) throw new Error(`Missing Proteus pilot deck ${deckId}`);
   return structuredClone(result);
 }

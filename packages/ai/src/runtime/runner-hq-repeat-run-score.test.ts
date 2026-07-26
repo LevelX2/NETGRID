@@ -42,7 +42,7 @@ describe("staleKnownHqRepeatRunPenalty", () => {
     expect(staleKnownHqRepeatRunPenalty(input, runHq)).toBe(0);
   });
 
-  it("ends after rejecting a repeated run on a fully known low-value one-card HQ", () => {
+  it("develops exact basic liquidity after rejecting a repeated low-value HQ run", () => {
     const runHq = runAction("run-hq", "hq");
     const gain = action("gain", "gain_credit");
     const end = action("end", "end_turn");
@@ -82,14 +82,22 @@ describe("staleKnownHqRepeatRunPenalty", () => {
     });
 
     const decision = chooseRunnerAction(input);
-    const runAlternative =
-      decision.decisionDebug?.actionAlternatives?.find(
-        (alternative) => alternative.actionId === runHq.actionId,
-      );
+    const runAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === runHq.actionId,
+    );
 
-    expect(decision.actionId).toBe("end");
+    expect(decision.actionId).toBe("gain");
     expect(decision.fallbackUsed).toBe(false);
-    expect(decision.decisionDebug?.planKind).toBe("runner.complete_turn");
+    expect(decision.reasonCode).toBe("plan_first.runner.economy");
+    expect(decision.decisionDebug?.planKind).toBe("runner.economy");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P6",
+        "plan_module:runner.economy",
+        "plan_step_capability:gain_general_liquid_credits",
+        "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
+      ]),
+    );
     expect(runAlternative?.whyNot).toEqual(
       expect.arrayContaining([
         "candidate_plan_evidence:runner_central_pressure_known_no_current_payoff:hq",

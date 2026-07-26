@@ -145,7 +145,7 @@ describe("Runner core plan modules", () => {
     ).toEqual([["leave-loan-1"], ["leave-loan-2"]]);
   });
 
-  it("keeps two Loan lifecycle funding children bound to their exact blocked parents", () => {
+  it("keeps two Loan lifecycle funding children bound to their exact supportable parents", () => {
     const lifecycle = coreModule("runner.resource_lifecycle");
     const economy = coreModule("runner.economy");
     const parentOne =
@@ -232,27 +232,46 @@ describe("Runner core plan modules", () => {
     expect(
       parentProposals.map((proposal) => ({
         id: instantiatePlanProposal(proposal, 10).instanceId,
-        blocker: proposal.blockers[0],
+        initialViability: proposal.initialViability,
+        blockers: proposal.blockers,
       })),
     ).toEqual([
       {
         id: parentOne,
-        blocker: expect.objectContaining({
-          code: "waiting_for_bound_funding_support",
-          resumeCondition: {
-            code: "resource-lifecycle-support:loan-1",
-          },
-        }),
+        initialViability: "ready",
+        blockers: [],
       },
       {
         id: parentTwo,
-        blocker: expect.objectContaining({
-          code: "waiting_for_bound_funding_support",
-          resumeCondition: {
-            code: "resource-lifecycle-support:loan-2",
-          },
-        }),
+        initialViability: "ready",
+        blockers: [],
       },
+    ]);
+    const portfolio = emptyPortfolio();
+    portfolio.instances = parentProposals.map((proposal) =>
+      instantiatePlanProposal(proposal, 10),
+    );
+    expect(
+      portfolio.instances.map((instance) =>
+        lifecycle.assess(instance, runnerContext, portfolio),
+      ),
+    ).toEqual([
+      expect.objectContaining({
+        readiness: "executable_with_support",
+        resourceGaps: [
+          expect.objectContaining({
+            needId: "resource-lifecycle-support:loan-1",
+          }),
+        ],
+      }),
+      expect.objectContaining({
+        readiness: "executable_with_support",
+        resourceGaps: [
+          expect.objectContaining({
+            needId: "resource-lifecycle-support:loan-2",
+          }),
+        ],
+      }),
     ]);
     expect(
       childProposals.map((proposal) => ({
@@ -629,6 +648,14 @@ describe("Runner core plan modules", () => {
     });
     const [proposal] = economy.discover(runnerContext);
     const instance = instantiatePlanProposal(proposal!, 10);
+    expect(proposal).toMatchObject({
+      parentInstanceId: parentPlanInstanceId,
+      parentNeedId: "fund-remote-1",
+    });
+    expect(instance).toMatchObject({
+      parentInstanceId: parentPlanInstanceId,
+      parentNeedId: "fund-remote-1",
+    });
     const readyParent = structuredClone(instance);
     readyParent.instanceId = parentPlanInstanceId;
     readyParent.moduleId = "runner.contest_remote";
@@ -761,12 +788,108 @@ describe("Runner core plan modules", () => {
     const instance = instantiatePlanProposal(proposal!, 10);
 
     expect(proposal?.parentInstanceId).toBeUndefined();
+    expect(proposal?.parentNeedId).toBeUndefined();
     expect(
       economy.assess(instance, runnerContext, emptyPortfolio()),
     ).toMatchObject({
       priorityClaim: { requestedClass: "P6" },
       readiness: "executable_now",
     });
+  });
+
+  it("develops exact basic-credit liquidity through a finite current-turn P6 plan", () => {
+    const economy = coreModule("runner.economy");
+    const credit = exactBasicCreditCandidate("basic-credit");
+    const runnerContext = context([credit], {
+      fundingNeeds: [turnLiquidityNeed(credit.actionId, 4, 3)],
+    });
+    const [proposal] = economy.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+
+    expect(proposal).toMatchObject({
+      dedupeKey: "economy-liquidity-development:runner:1",
+      initialViability: "ready",
+    });
+    expect(proposal?.parentInstanceId).toBeUndefined();
+    expect(proposal?.parentNeedId).toBeUndefined();
+    expect(
+      economy.assess(instance, runnerContext, emptyPortfolio()),
+    ).toMatchObject({
+      priorityClaim: { requestedClass: "P6" },
+      readiness: "executable_now",
+    });
+    expect(
+      economy.materialize(instance, {} as never, runnerContext),
+    ).toMatchObject({
+      step: {
+        purpose:
+          "Develop one exact unit of unrestricted Runner liquidity with the current basic credit action.",
+      },
+      candidates: [
+        {
+          candidate: { actionId: credit.actionId },
+          stepValue: 1,
+        },
+      ],
+    });
+    expect(turnLiquidityNeed(credit.actionId, 5, 2)).toMatchObject({
+      needId: "economy-liquidity-development:runner:1",
+      currentCreditsAtRevalidation: 5,
+      targetCredits: 7,
+      gap: 2,
+      cadence: { maximumConversions: 2 },
+    });
+  });
+
+  it("fails closed when the current-turn liquidity signal is stale or internally unbounded", () => {
+    const economy = coreModule("runner.economy");
+    const credit = exactBasicCreditCandidate("basic-credit");
+
+    for (const invalidNeed of [
+      {
+        ...turnLiquidityNeed(credit.actionId, 4, 3),
+        revalidation: {
+          stateVersion: 9,
+          status: "turn_liquidity_open" as const,
+        },
+      },
+      {
+        ...turnLiquidityNeed(credit.actionId, 4, 3),
+        cadence: {
+          kind: "remaining_turn_capacity" as const,
+          maximumConversions: 4,
+        },
+      },
+    ]) {
+      const [proposal] = economy.discover(
+        context([credit], { fundingNeeds: [invalidNeed] }),
+      );
+      expect(proposal).toMatchObject({
+        initialViability: "blocked",
+        blockers: [{ code: "invalid_turn_liquidity_revalidation" }],
+      });
+    }
+  });
+
+  it("does not materialize an unprojected or card-sourced action as basic liquidity", () => {
+    const economy = coreModule("runner.economy");
+    const unprojected = exactBasicCreditCandidate("unprojected-credit");
+    delete unprojected.economyProjection;
+    const cardCredit = exactBasicCreditCandidate("card-credit");
+    cardCredit.sourceKind = "card";
+    cardCredit.sourceDefinitionId = "test-card-credit";
+
+    for (const rejected of [unprojected, cardCredit]) {
+      const [proposal] = economy.discover(
+        context([rejected], {
+          fundingNeeds: [turnLiquidityNeed(rejected.actionId, 4, 1)],
+        }),
+      );
+      expect(proposal).toMatchObject({
+        initialViability: "blocked",
+        blockers: [{ code: "no_compatible_credit_route" }],
+      });
+    }
   });
 
   it("materializes only the exact head of the selected funding route", () => {
@@ -1506,6 +1629,50 @@ function candidate(
           } as const,
         }
       : {}),
+  };
+}
+
+function exactBasicCreditCandidate(actionId: string): ActionSemanticCandidate {
+  const value = candidate(actionId);
+  value.costProfile.clickCost = 1;
+  value.costProfile.creditCost = 0;
+  value.economyProjection = {
+    ...value.economyProjection!,
+    source: "basic_action_contract",
+    confidence: "medium",
+  };
+  return value;
+}
+
+function turnLiquidityNeed(
+  actionId: string,
+  currentCredits: number,
+  remainingClicks: number,
+): Extract<
+  RunnerCorePlanDomain["fundingNeeds"][number],
+  { kind: "develop_liquidity" }
+> {
+  return {
+    kind: "develop_liquidity",
+    needId: "economy-liquidity-development:runner:1",
+    actionIds: [actionId],
+    currentCreditsAtRevalidation: currentCredits,
+    targetCredits: currentCredits + remainingClicks,
+    gap: remainingClicks,
+    projectedCreditGain: 1,
+    priorityClass: "P6",
+    cadence: {
+      kind: "remaining_turn_capacity",
+      maximumConversions: remainingClicks,
+    },
+    completion: {
+      kind: "target_credits_or_no_clicks",
+    },
+    revalidation: {
+      stateVersion: 10,
+      status: "turn_liquidity_open",
+    },
+    evidenceCode: "runner_engine_certified_basic_liquidity_development",
   };
 }
 

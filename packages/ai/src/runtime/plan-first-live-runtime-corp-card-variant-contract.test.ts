@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
@@ -23,8 +27,7 @@ const ANNUAL_REVIEWS = "onr_v1_282_annual-reviews";
 const OVERTIME_INCENTIVES = "onr_v1_297_overtime-incentives";
 const DATA_WALL = "onr_v1_237_data-wall";
 const PRECISION_BRIBERY = "onr_proteus_146_precision-bribery";
-const CORPORATE_GUARD_R_TEMPS =
-  "onr_proteus_046_corporate-guard-r-temps";
+const CORPORATE_GUARD_R_TEMPS = "onr_proteus_046_corporate-guard-r-temps";
 const VIRAL_BREEDING_GROUND = "onr_proteus_009_viral-breeding-ground";
 
 describe("plan-first Corp card variant contracts", () => {
@@ -160,7 +163,9 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.consideredActionIds).toContain(
       fixture.annualReviews.actionId,
     );
-    expect(portfolio).toContain(`"actionIds":["${fixture.basicDraw.actionId}"]`);
+    expect(portfolio).toContain(
+      `"actionIds":["${fixture.basicDraw.actionId}"]`,
+    );
     expect(portfolio).not.toContain(fixture.annualReviews.actionId);
     expect(debug).not.toContain("develop%3Aannual-reviews");
     expect(debug).not.toContain("corp_card_development");
@@ -187,27 +192,18 @@ describe("plan-first Corp card variant contracts", () => {
   });
 
   it("routes a visible HQ agenda through its exact P4 remote-lock removal step", () => {
-    const agenda = corpCard(
-      "agenda-lock",
-      VIRAL_BREEDING_GROUND,
-      "agenda",
-      {
-        title: "Viral Breeding Ground",
-        advancementRequirement: 4,
-        agendaPoints: 2,
-      },
-    );
+    const agenda = corpCard("agenda-lock", VIRAL_BREEDING_GROUND, "agenda", {
+      title: "Viral Breeding Ground",
+      advancementRequirement: 4,
+      agendaPoints: 2,
+    });
     const unlock = precisionBriberyUnlock();
     const input = aiInput("corp", [unlock, endTurn()]);
     input.decisionId = "corp-card-variant:precision-bribery:score-parent";
     input.playerView.own.credits = 5;
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [agenda];
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     bindCurrentStateVersion(input);
 
     const decision = chooseCorpAction(input);
@@ -230,7 +226,14 @@ describe("plan-first Corp card variant contracts", () => {
 
   it("marks remote-lock removal nonproductive without an exact score parent", () => {
     const unlock = precisionBriberyUnlock();
-    const input = aiInput("corp", [unlock, endTurn()]);
+    const gain = legalAction(
+      "corp.gain_credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("corp", [unlock, gain, endTurn()]);
     input.decisionId = "corp-card-variant:precision-bribery:no-parent";
     input.playerView.own.credits = 5;
     input.playerView.own.clicks = 3;
@@ -239,21 +242,17 @@ describe("plan-first Corp card variant contracts", () => {
         title: "Data Wall",
       }),
     ];
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     bindCurrentStateVersion(input);
 
     const decision = chooseCorpAction(input);
 
-    expect(decision.actionId).toBe("end-turn");
-    expect(decision.decisionDebug?.planKind).toBe("corp.complete_turn");
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.decisionDebug?.planKind).toBe("corp.economy");
     expect(decision.consideredActionIds).toContain(unlock.actionId);
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_assessment_evidence:productive_legal_routes_exhausted",
+        "plan_assessment_evidence:corp_engine_certified_basic_liquidity_development",
       ]),
     );
   });
@@ -270,16 +269,19 @@ describe("plan-first Corp card variant contracts", () => {
     );
     const x1 = corporateGuardRTemps(source, 1);
     const x2 = corporateGuardRTemps(source, 2);
-    const input = aiInput("corp", [x1, x2, endTurn()]);
+    const gain = legalAction(
+      "corp.gain_credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("corp", [x1, x2, gain, endTurn()]);
     input.decisionId = "corp-card-variant:future-recurring:no-parent";
     input.playerView.own.credits = 5;
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [source];
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     bindCurrentStateVersion(input);
     const guardCandidates = buildActionSemanticCandidates({
       legalActions: input.legalActions,
@@ -321,14 +323,14 @@ describe("plan-first Corp card variant contracts", () => {
 
     const decision = chooseCorpAction(input);
 
-    expect(decision.actionId).toBe("end-turn");
-    expect(decision.decisionDebug?.planKind).toBe("corp.complete_turn");
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.decisionDebug?.planKind).toBe("corp.economy");
     expect(decision.consideredActionIds).toEqual(
       expect.arrayContaining([x1.actionId, x2.actionId]),
     );
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_assessment_evidence:productive_legal_routes_exhausted",
+        "plan_assessment_evidence:corp_engine_certified_basic_liquidity_development",
       ]),
     );
   });
@@ -349,15 +351,10 @@ function scoreConversionFixture(params: {
     advancementRequirement: 3,
     agendaPoints: params.agendaPoints,
   });
-  const overtime = corpCard(
-    "overtime-1",
-    OVERTIME_INCENTIVES,
-    "operation",
-    {
-      title: "Overtime Incentives",
-      cost: 4,
-    },
-  );
+  const overtime = corpCard("overtime-1", OVERTIME_INCENTIVES, "operation", {
+    title: "Overtime Incentives",
+    cost: 4,
+  });
   const installPrepared = installAgenda(agenda, "remote_1");
   const installNew = installAgenda(agenda, "new_remote");
   const overtimeAction = params.includeOvertime
@@ -406,15 +403,10 @@ function annualReviewsFixture(params: {
   annualReviews: LegalAction;
   basicDraw: LegalAction;
 } {
-  const annual = corpCard(
-    "annual-reviews",
-    ANNUAL_REVIEWS,
-    "operation",
-    {
-      title: "Annual Reviews",
-      cost: 0,
-    },
-  );
+  const annual = corpCard("annual-reviews", ANNUAL_REVIEWS, "operation", {
+    title: "Annual Reviews",
+    cost: 0,
+  });
   const agenda = corpCard("agenda-score", HOSTILE_TAKEOVER, "agenda", {
     title: "Hostile Takeover",
     advancementRequirement: 3,
@@ -603,10 +595,7 @@ function precisionBriberyUnlock(): LegalAction {
   return action;
 }
 
-function corporateGuardRTemps(
-  source: VisibleCard,
-  xValue: 1 | 2,
-): LegalAction {
+function corporateGuardRTemps(source: VisibleCard, xValue: 1 | 2): LegalAction {
   return legalAction(
     `play-guard-temps-${xValue}`,
     "corp",

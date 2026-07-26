@@ -65,6 +65,7 @@ export type PlanReadiness =
 export type PlanIntentFit = "aligned" | "tactical_override" | "none";
 
 export type ResourceGap = {
+  needId: string;
   capability: string;
   minimum: number;
   available: number;
@@ -128,6 +129,8 @@ export type PriorityClaimValidation = {
   status: "accepted" | "rejected";
   requestedClass: PriorityClass;
   effectiveClass?: PriorityClass;
+  delegatedFromPlanInstanceId?: string;
+  needId?: string;
   reasonCodes: string[];
 };
 
@@ -178,7 +181,7 @@ export function validatePriorityClaim(
   policy: PlanPriorityPolicy,
 ): PriorityClaimValidation {
   const claim = assessment.priorityClaim;
-  const reasons: string[] = [];
+  const reasons = validateResourceGaps(assessment.resourceGaps);
   if (assessment.side !== policy.side) reasons.push("policy_side_mismatch");
   if (!claimReasonMatchesClass(claim)) reasons.push("reason_class_mismatch");
   if (
@@ -242,25 +245,32 @@ export function validatePriorityClaim(
   ) {
     reasons.push("p3_not_expiring");
   }
-  if (
-    assessment.readiness === "executable_now" &&
-    (!assessment.feasibility.currentRouteHeadPossible ||
-      assessment.blockers.length > 0 ||
-      assessment.resourceGaps.length > 0)
-  ) {
-    reasons.push("executable_now_without_route");
+  if (assessment.readiness === "executable_now") {
+    if (!assessment.feasibility.currentRouteHeadPossible) {
+      reasons.push("executable_now_without_route");
+    }
+    if (assessment.blockers.length > 0) {
+      reasons.push("executable_now_with_blocker");
+    }
+    if (assessment.resourceGaps.length > 0) {
+      reasons.push("executable_now_with_resource_gap");
+    }
   }
-  if (
-    assessment.readiness === "blocked" &&
-    assessment.blockers.length === 0
-  ) {
-    reasons.push("blocked_without_blocker");
+  if (assessment.readiness === "blocked") {
+    if (assessment.blockers.length === 0) {
+      reasons.push("blocked_without_blocker");
+    }
+    if (assessment.resourceGaps.length > 0) {
+      reasons.push("blocked_with_resource_gap");
+    }
   }
-  if (
-    assessment.readiness === "executable_with_support" &&
-    assessment.resourceGaps.length === 0
-  ) {
-    reasons.push("support_readiness_without_gap");
+  if (assessment.readiness === "executable_with_support") {
+    if (assessment.resourceGaps.length === 0) {
+      reasons.push("support_readiness_without_gap");
+    }
+    if (assessment.feasibility.currentRouteHeadPossible) {
+      reasons.push("support_readiness_with_route_head");
+    }
   }
   if (!Number.isFinite(assessment.withinClassValue)) {
     reasons.push("non_finite_within_class_value");
@@ -278,6 +288,39 @@ export function validatePriorityClaim(
     effectiveClass: claim.requestedClass,
     reasonCodes: ["priority_claim_validated"],
   };
+}
+
+function validateResourceGaps(resourceGaps: readonly ResourceGap[]): string[] {
+  const reasons: string[] = [];
+  const seenNeedIds = new Set<string>();
+  for (const resourceGap of resourceGaps) {
+    if (resourceGap.needId.trim().length === 0) {
+      reasons.push("invalid_resource_gap_need_id");
+    } else if (seenNeedIds.has(resourceGap.needId)) {
+      reasons.push("duplicate_resource_gap_need_id");
+    } else {
+      seenNeedIds.add(resourceGap.needId);
+    }
+
+    const minimumIsValid =
+      Number.isFinite(resourceGap.minimum) && resourceGap.minimum > 0;
+    const availableIsValid =
+      Number.isFinite(resourceGap.available) && resourceGap.available >= 0;
+    if (!minimumIsValid) {
+      reasons.push("invalid_resource_gap_minimum");
+    }
+    if (!availableIsValid) {
+      reasons.push("invalid_resource_gap_available");
+    }
+    if (
+      minimumIsValid &&
+      availableIsValid &&
+      resourceGap.available >= resourceGap.minimum
+    ) {
+      reasons.push("resource_gap_not_open");
+    }
+  }
+  return reasons;
 }
 
 export function requireValidatedPlanAssessment(

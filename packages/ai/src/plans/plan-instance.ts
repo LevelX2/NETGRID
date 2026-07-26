@@ -53,6 +53,9 @@ export function instantiatePlanProposal(
     ...(proposal.parentInstanceId
       ? { parentInstanceId: proposal.parentInstanceId }
       : {}),
+    ...(proposal.parentNeedId !== undefined
+      ? { parentNeedId: proposal.parentNeedId }
+      : {}),
     openNeedIds: [],
     phase: proposal.phase,
     milestone: proposal.milestone,
@@ -119,6 +122,15 @@ export function planInstanceStateIssues(
   }
   if (!instance.dedupeKey.trim()) issues.push("blank_dedupe_key");
   if (!instance.phase.trim()) issues.push("blank_phase");
+  if (instance.parentNeedId !== undefined && !instance.parentNeedId.trim()) {
+    issues.push("blank_parent_need_id");
+  }
+  if (
+    instance.parentNeedId !== undefined &&
+    !instance.parentInstanceId?.trim()
+  ) {
+    issues.push("parent_need_without_parent");
+  }
   if (
     instance.executionState === "executor" &&
     instance.viability !== "ready"

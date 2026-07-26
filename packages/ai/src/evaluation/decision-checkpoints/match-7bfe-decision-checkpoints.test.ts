@@ -56,11 +56,18 @@ describe("match 7BFE exact decision checkpoints", () => {
     expectCheckpointToPass(fixtureWithCredits);
   });
 
-  it("keeps score-material draw available before the final action", () => {
+  it("uses exact basic liquidity before the final action", () => {
     const earlierWindow = mutateFixture(cp05Json, (fixture) => {
       fixture.engine.testOnlyGameState.corp.clicks = 2;
       fixture.expectation = {
-        acceptableActions: [{ type: "end_turn" }],
+        acceptableActions: [{ type: "gain_credit" }],
+        planExecution: {
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
+          requiredAssessmentEvidence: [
+            "corp_engine_certified_basic_liquidity_development",
+          ],
+        },
       };
     });
 

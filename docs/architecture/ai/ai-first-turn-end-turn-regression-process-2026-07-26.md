@@ -50,8 +50,11 @@ Restklick-Guard dagegen nicht übergehen.
 Die spielgleiche Regression wird zuerst auf unverändertem Code als roter
 Decision-Checkpoint gesichert. Danach werden der harte End-Turn-Vertrag,
 Engine-zertifizierte Variable-Rez-Quotes, parentgebundene
-Verteidigungsfinanzierung und die Unknown-Evidence so korrigiert, dass die
-Corp keine verbleibenden Klicks aufgrund unvollständiger Fakten verwirft.
+Verteidigungsfinanzierung, die Unknown-Evidence und der enge befristete
+P6-Liquiditätsübergang so korrigiert, dass die Corp keine verbleibenden Klicks
+aufgrund unvollständiger Fakten verwirft. Dieser Übergang ist kein Bestandteil
+der Zielarchitektur; dort handelt Basic Credit nur als Route eines fachlichen
+Economy-Plans oder eines exakten Parentbedarfs.
 
 Der abgeschlossene Arbeitsbranch wird lokal nach `main` integriert. Worktree
 und Branch werden erst nach erfolgreicher Main-Verifikation entfernt.
@@ -77,11 +80,30 @@ Der historische detached Baseline-Worktree bleibt unangetastet.
 3. `unknown` ist weder `productive` noch `explicitly_nonproductive`.
 4. `productive_routes_exhausted` darf nur aus vollständig bewerteten
    LegalActions folgen.
-5. Ein Standard-`end_turn` darf bei verbliebenen normalen Klicks nicht durch
+5. Unknown blockiert den eigenen unbewiesenen Actionpfad und jeden
+   Exhaustion-/EndTurn-Beweis, aber nicht eine unabhängig exakt
+   materialisierte produktive Route. Strategische Planfortsetzungen dürfen
+   hypothesenbasiert und revalidierbar bleiben; nur der aktuelle
+   LegalAction-Step muss vollständig legal, bezahlbar und zielgebunden sein.
+6. Ein Standard-`end_turn` darf bei verbliebenen normalen Klicks nicht durch
    fehlende Quote- oder Planabdeckung freigegeben werden.
-6. Finanzierung bleibt Economy-Support des exakten Defense-Parents.
-7. Die KI wählt ausschließlich aus aktuellen `LegalActions`.
-8. Checkpoint, Debug und Reports bleiben side-safe.
+7. Echte Verteidigungsfinanzierung bleibt Economy-Support des exakten
+   Defense-Parents. Der befristete P6-Liquiditätsübergang ist davon getrennt,
+   darf keinen Defense-Parent vortäuschen und entfällt nach vollständiger
+   fachlicher Plan-/Parentabdeckung. Draw besitzt nie eine neutrale P6-Route.
+8. Die KI wählt ausschließlich aus aktuellen `LegalActions`.
+9. Checkpoint, Debug und Reports bleiben side-safe.
+10. Technische Gates sind kein Ersatz für fachliche Spielbeobachtung. Nach
+    der Integration dieses Fixes wird die nächste breite
+    KI-Verhaltensänderung erst nach einem menschlichen Playtest-Checkpoint
+    auf der wieder spielbaren Main-Fassung begonnen.
+11. `productive`, `explicitly_nonproductive` und `assessment_unknown`
+    klassifizieren ausschließlich aktuelle Route Heads. Sie dürfen einen
+    residenten Parent weder löschen noch seine Priorität ersetzen.
+12. Action-Dispositionen bleiben Coverage-/Diagnoseevidence des zuständigen
+    Planmoduls. Wiederholt unowned Action-Familien werden durch eine
+    generische Planfamilie geschlossen, nicht durch Karten-, Match- oder
+    StateVersion-Ausnahmen.
 
 ## Nicht-Ziele
 
@@ -161,20 +183,90 @@ Commit:
 - Variable Quote-Union in exakte Defense-Projektionen übernehmen.
 - Einen nachweisbaren Funding-Gap als Economy-Child des exakten
   `corp.defend_servers`-Parents materialisieren.
+- Draw niemals als neutralen P6-Ersatzplan materialisieren. Draw konkurriert
+  nur als Teilschritt eines residenten Parents mit exakter Parent-ID, exaktem
+  `parentNeedId` und aktueller LegalAction.
+- Basic Credit nur als fachlich gebundene Economy-/Parent-Route oder innerhalb
+  des engen, pro Zug endlichen und befristeten P6-Sicherheitsübergangs
+  materialisieren. Dessen Removal Condition ist die vollständige fachliche
+  Abdeckung der verbleibenden normalen Zugkapazität; er ist keine
+  Zielarchitektur und darf keine fehlende Planabdeckung kaschieren.
+- Blockierte Mehrzugpläne resident halten. Fehlende aktuelle Ausführbarkeit
+  des Endziels löscht weder den Parent noch seinen belegten Finanzierungs-,
+  Material- oder Setup-Bedarf.
+- Score-Material-Draw, Score-Setup, Defense-Funding und weitere
+  Supportaktionen ausschließlich über den jeweils exakten Parent-Bedarf
+  führen. Generische `draw-for-corp-plan`-, `develop-corp-hand-options`- und
+  autonome `develop:<card>`-Wurzeln sind kein zulässiger Ersatz.
 - Unknown-Aktionen getrennt von bewiesen unproduktiven Aktionen führen.
+- Unknown darf eine andere exakt materialisierte produktive Route nicht
+  global blockieren; es darf ausschließlich TurnCompletion und die eigene
+  unbewiesene Route sperren.
 - `corp.complete_turn` nur bei erfülltem harten End-Turn-Vertrag zulassen.
 - Evidence für unknown und bewiesene Wirkungslosigkeit trennen.
 
 Done-Gate:
 
 - unveränderter Match-Checkpoint grün;
-- erwartete Folgeauswahl ist produktiv und parentgebunden;
+- erwartete Folgeauswahl ist ein einmaliger Score-Material-Draw als
+  `flexible_support`-Child von `plan:corp.score_agenda:general` mit dem
+  exakten Bedarf `score-material:general`;
+- getrennte Funding-Gap-Gegenproben bleiben exakt parentgebunden;
+- Score-Setup erbt die Parent-Priorität ausschließlich über den Scheduler;
+- ungebundene Draw-/Card-Setup-Catch-alls erzeugen keine autonomen
+  Planinstanzen;
 - Gegenproben erlauben legales End-Turn nur im richtigen Zustand;
 - fokussierte AI-Tests und AI-Typecheck grün.
 
 Commit:
 
 `fix(ai): prevent premature plan-first turn completion`
+
+### ET03a – Persistente Ambush- und Punish-Kampagnen
+
+- Eine konkrete Ambush-Kampagne als stabilen Root resident halten, auch wenn
+  Funding oder die aktuelle Setup-Route fehlt.
+- Ambush-Funding und -Setup als getrennte Children mit exakter Parent-ID und
+  exaktem Bedarf führen.
+- Eine Punish-/Damage-Kampagne nicht pro aktuell legaler Einzelkarte, sondern
+  als eine zusammenhängende Route modellieren.
+- Tag-/Trace-Trigger, mehrere Damage-Schritte, Gesamtcredits, Gesamtklicks,
+  sichtbare Damage-Prävention und Runner-Handzahl gemeinsam bewerten.
+- Die Route nicht auf eine feste Kartenfolge zuschneiden. Aus den aktuell
+  sichtbaren Komponenten wird die kürzeste ausreichend starke Route gewählt;
+  unnötige Damage-Schritte werden weder reserviert noch ausgeführt.
+- Deckstrategie und eigener Decksnapshot beschreiben unterstützte
+  Komponentenrollen und langfristige Kampagnenviabilität. Eine fehlende
+  Komponente hält den lauernden Root in `watch_window` oder dormant, erzeugt
+  aber keinen Targeted-Basic-Draw-Bedarf und keine Draw-Schleife. Aktiver
+  Komponentenaufbau ist nur ein ausdrücklich begründeter Sondermodus.
+- Funding wird erst zum Child, wenn der Fundingklick und die gesamte
+  verbleibende Route noch in dasselbe gültige Opportunity-Fenster passen.
+- Die geschützte Punish-Ausführung erst öffnen, wenn eine
+  Engine-zertifizierte vollständige Route vorliegt. Unvollständige oder
+  veraltete Quotes blockieren nur die betreffende Route; der Kampagnen-Root
+  bleibt resident.
+- Verdeckte Runnerantworten niemals aus FullState in die Corp-Quote leaken.
+  Sie senken den Garantiegrad, ersetzen aber keine fehlenden Regelfakten.
+
+Done-Gate:
+
+- Ambush-Root, Funding-Child und Setup-Child sind über Zustandswechsel
+  instanzstabil und exakt parentgebunden;
+- ein unbezahlbarer oder temporär nicht ausführbarer Ambush verschwindet nicht
+  vor der Discovery;
+- genau ein stabiler Punish-Root hält die gesamte ausgewählte Tag-/Damage-Route;
+- drei Runner-Handkarten und vier sicher wirksame Damage benötigen keinen
+  zusätzlichen Zwei-Damage-Schritt; vier Handkarten werden durch exakt vier
+  Damage noch nicht als lethal bewertet;
+- fehlende Damage-Komponenten lassen andere Score-, Defense- oder
+  Economy-Pläne handeln, ohne einen planlosen oder targeted Draw zu erfinden;
+- Teilfinanzierung startet keine nicht vollständig finanzierbare
+  Commit-Sequenz;
+- nach jedem Tag-/Trace-/Damage-Ergebnis wird die Route aus aktuellem
+  Enginezustand neu gequotet;
+- Hidden-Twin-, Redaction-, Parent-/Need- und Gesamtketten-Gegenproben sind
+  grün.
 
 ### ET04 – Breite Verifikation
 
@@ -199,6 +291,9 @@ Commit:
 ### ET05 – Review, Wissen, Integration und Cleanup
 
 - Evidence-/Final-Review und Current-State-Wissen aktualisieren.
+- Die integrierte Fassung als bewusst kleines, menschlich prüfbares
+  Playtest-Inkrement kennzeichnen; technische Gates nicht als alleinigen
+  Nachweis guter Spielstärke darstellen.
 - `main` in den Arbeitsbranch integrieren, falls `main` weitergelaufen ist.
 - finale relevante Checks wiederholen.
 - Arbeitsbranch lokal nach `main` integrieren.

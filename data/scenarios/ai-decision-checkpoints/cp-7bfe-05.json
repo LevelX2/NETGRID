@@ -11830,7 +11830,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "end_turn"
+        "type": "gain_credit"
       }
     ],
     "forbiddenActions": [
@@ -11842,6 +11842,13 @@
         "sourceDefinitionId": "onr_v1_244_filter",
         "targetServerId": "hq"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_basic_liquidity_development"
+      ]
+    }
   }
 }

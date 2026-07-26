@@ -1271,9 +1271,7 @@
               "corp_onr_v1_261_quandary_1",
               "corp_onr_v1_236_data-raven_1"
             ],
-            "root": [
-              "corp_onr_v1_193_corporate-coup_1"
-            ]
+            "root": ["corp_onr_v1_193_corporate-coup_1"]
           },
           {
             "id": "remote_2",
@@ -1343,16 +1341,10 @@
           "runner_onr_v1_035_invisibility_2",
           "runner_onr_proteus_133_chiba-bank-account_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_203_hostile-takeover_1"
-        ],
+        "scoreArea": ["corp_onr_v1_203_hostile-takeover_1"],
         "rig": {
-          "programs": [
-            "runner_onr_v1_035_invisibility_1"
-          ],
-          "hardware": [
-            "runner_onr_v1_144_tycho-mem-chip_1"
-          ],
+          "programs": ["runner_onr_v1_035_invisibility_1"],
+          "hardware": ["runner_onr_v1_144_tycho-mem-chip_1"],
           "resources": [
             "runner_onr_proteus_128_airport-locker_1",
             "runner_onr_classic_045_elena-laskova_1"
@@ -2764,9 +2756,7 @@
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-0"
               },
@@ -2786,10 +2776,7 @@
                     "choiceId": "setup_mulligan_runner_0",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -2849,9 +2836,7 @@
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-1"
               },
@@ -2871,10 +2856,7 @@
                     "choiceId": "setup_mulligan_corp_1",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -3433,9 +3415,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -6302,9 +6282,7 @@
                 "clientKnownStateVersion": 61,
                 "selectedChoices": {
                   "choiceId": "run_58.corp_onr_v1_221_asp_1.0.trace.corp.bid.61",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-61"
               },
@@ -6408,9 +6386,7 @@
                 "clientKnownStateVersion": 62,
                 "selectedChoices": {
                   "choiceId": "run_58.corp_onr_v1_221_asp_1.0.trace.runner.bid.62",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-62"
               },
@@ -6430,13 +6406,7 @@
                     "choiceId": "run_58.corp_onr_v1_221_asp_1.0.trace.runner.bid.62",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3",
-                      "bid_4"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4"]
                   }
                 ],
                 "payload": {
@@ -7566,9 +7536,7 @@
                 "clientKnownStateVersion": 82,
                 "selectedChoices": {
                   "choiceId": "discard_corp_82",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_342_solo-squad_1"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_342_solo-squad_1"]
                 },
                 "idempotencyKey": "ai-sim-82"
               },
@@ -8251,9 +8219,7 @@
                 "clientKnownStateVersion": 94,
                 "selectedChoices": {
                   "choiceId": "v1911_temporary_program_install_source_94",
-                  "selectedOptionIds": [
-                    "source_stack"
-                  ]
+                  "selectedOptionIds": ["source_stack"]
                 },
                 "idempotencyKey": "ai-sim-94"
               },
@@ -8273,9 +8239,7 @@
                     "choiceId": "v1911_temporary_program_install_source_94",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "source_stack"
-                    ]
+                    "optionIds": ["source_stack"]
                   }
                 ],
                 "payload": {
@@ -8373,9 +8337,7 @@
                 "clientKnownStateVersion": 95,
                 "selectedChoices": {
                   "choiceId": "v1911_temporary_program_install_stack_install_95",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_035_invisibility_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_035_invisibility_1"]
                 },
                 "idempotencyKey": "ai-sim-95"
               },
@@ -13711,9 +13673,7 @@
                 "clientKnownStateVersion": 182,
                 "selectedChoices": {
                   "choiceId": "p3_37_search_stack_to_grip_182",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_035_invisibility_2"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_035_invisibility_2"]
                 },
                 "idempotencyKey": "ai-sim-182"
               },
@@ -15521,9 +15481,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -17657,9 +17615,7 @@
                 "clientKnownStateVersion": 245,
                 "selectedChoices": {
                   "choiceId": "run_237.corp_onr_v1_221_asp_2.0.trace.corp.bid.245",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-245"
               },
@@ -17744,9 +17700,7 @@
                 "clientKnownStateVersion": 246,
                 "selectedChoices": {
                   "choiceId": "run_237.corp_onr_v1_221_asp_2.0.trace.runner.bid.246",
-                  "selectedOptionIds": [
-                    "bid_7"
-                  ]
+                  "selectedOptionIds": ["bid_7"]
                 },
                 "idempotencyKey": "ai-sim-246"
               },
@@ -17955,9 +17909,7 @@
                 "clientKnownStateVersion": 248,
                 "selectedChoices": {
                   "choiceId": "run_237.corp_onr_v1_221_asp_2.0.trace.runner.bid.246",
-                  "selectedOptionIds": [
-                    "bid_7"
-                  ]
+                  "selectedOptionIds": ["bid_7"]
                 },
                 "idempotencyKey": "ai-sim-248"
               },
@@ -18302,9 +18254,7 @@
                 "clientKnownStateVersion": 254,
                 "selectedChoices": {
                   "choiceId": "discard_runner_254",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_165_junkyard-bbs_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_165_junkyard-bbs_1"]
                 },
                 "idempotencyKey": "ai-sim-254"
               },
@@ -18587,9 +18537,7 @@
                 "clientKnownStateVersion": 258,
                 "selectedChoices": {
                   "choiceId": "choice_card_implementation_hq_to_new_remote_install_rez_258",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_236_data-raven_2"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_236_data-raven_2"]
                 },
                 "idempotencyKey": "ai-sim-258"
               },
@@ -18712,9 +18660,7 @@
                 "clientKnownStateVersion": 259,
                 "selectedChoices": {
                   "choiceId": "choice_card_implementation_hq_to_new_remote_install_rez_rez_259",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_236_data-raven_2"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_236_data-raven_2"]
                 },
                 "idempotencyKey": "ai-sim-259"
               },
@@ -18734,9 +18680,7 @@
                     "choiceId": "choice_card_implementation_hq_to_new_remote_install_rez_rez_259",
                     "minSelections": 0,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "card_corp_onr_v1_236_data-raven_2"
-                    ]
+                    "optionIds": ["card_corp_onr_v1_236_data-raven_2"]
                   }
                 ],
                 "payload": {
@@ -19189,9 +19133,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -19929,9 +19871,7 @@
                 "clientKnownStateVersion": 278,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_hide_278",
-                  "selectedOptionIds": [
-                    "hide_2"
-                  ]
+                  "selectedOptionIds": ["hide_2"]
                 },
                 "idempotencyKey": "ai-sim-278"
               },
@@ -19951,11 +19891,7 @@
                     "choiceId": "secret_spend_guess_then_targeted_bypass_run_hide_278",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "hide_2",
-                      "hide_3",
-                      "hide_4"
-                    ]
+                    "optionIds": ["hide_2", "hide_3", "hide_4"]
                   }
                 ],
                 "payload": {
@@ -20013,9 +19949,7 @@
                 "clientKnownStateVersion": 279,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_guess_279",
-                  "selectedOptionIds": [
-                    "guess_3"
-                  ]
+                  "selectedOptionIds": ["guess_3"]
                 },
                 "idempotencyKey": "ai-sim-279"
               },
@@ -20109,9 +20043,7 @@
                 "clientKnownStateVersion": 280,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_target_280",
-                  "selectedOptionIds": [
-                    "ice_corp_onr_v1_221_asp_1"
-                  ]
+                  "selectedOptionIds": ["ice_corp_onr_v1_221_asp_1"]
                 },
                 "idempotencyKey": "ai-sim-280"
               },
@@ -20534,9 +20466,7 @@
                 "clientKnownStateVersion": 287,
                 "selectedChoices": {
                   "choiceId": "run_281.corp_onr_v1_221_asp_2.0.trace.corp.bid.287",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-287"
               },
@@ -20637,9 +20567,7 @@
                 "clientKnownStateVersion": 288,
                 "selectedChoices": {
                   "choiceId": "run_281.corp_onr_v1_221_asp_2.0.trace.runner.bid.288",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-288"
               },
@@ -20659,13 +20587,7 @@
                     "choiceId": "run_281.corp_onr_v1_221_asp_2.0.trace.runner.bid.288",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3",
-                      "bid_4"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4"]
                   }
                 ],
                 "payload": {
@@ -22830,9 +22752,7 @@
                 "clientKnownStateVersion": 327,
                 "selectedChoices": {
                   "choiceId": "v1911_temporary_program_install_source_327",
-                  "selectedOptionIds": [
-                    "source_heap"
-                  ]
+                  "selectedOptionIds": ["source_heap"]
                 },
                 "idempotencyKey": "ai-sim-327"
               },
@@ -22852,9 +22772,7 @@
                     "choiceId": "v1911_temporary_program_install_source_327",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "source_heap"
-                    ]
+                    "optionIds": ["source_heap"]
                   }
                 ],
                 "payload": {
@@ -22946,9 +22864,7 @@
                 "clientKnownStateVersion": 328,
                 "selectedChoices": {
                   "choiceId": "v1911_temporary_program_install_heap_install_328",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_011_cloak_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_011_cloak_1"]
                 },
                 "idempotencyKey": "ai-sim-328"
               },
@@ -27018,9 +26934,7 @@
                 "clientKnownStateVersion": 398,
                 "selectedChoices": {
                   "choiceId": "discard_corp_398",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_358_dr-dreff_1"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_358_dr-dreff_1"]
                 },
                 "idempotencyKey": "ai-sim-398"
               },
@@ -27978,9 +27892,7 @@
                 "clientKnownStateVersion": 413,
                 "selectedChoices": {
                   "choiceId": "v1911_temporary_program_install_source_413",
-                  "selectedOptionIds": [
-                    "source_heap"
-                  ]
+                  "selectedOptionIds": ["source_heap"]
                 },
                 "idempotencyKey": "ai-sim-413"
               },
@@ -28000,9 +27912,7 @@
                     "choiceId": "v1911_temporary_program_install_source_413",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "source_heap"
-                    ]
+                    "optionIds": ["source_heap"]
                   }
                 ],
                 "payload": {
@@ -28094,9 +28004,7 @@
                 "clientKnownStateVersion": 414,
                 "selectedChoices": {
                   "choiceId": "v1911_temporary_program_install_heap_install_414",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_035_invisibility_2"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_035_invisibility_2"]
                 },
                 "idempotencyKey": "ai-sim-414"
               },
@@ -37684,9 +37592,7 @@
           "milestone": "find_remote_protection",
           "progress": 0.7,
           "selectedStepKind": "find_remote_protection",
-          "actionCandidateIds": [
-            "corp.draw_card"
-          ],
+          "actionCandidateIds": ["corp.draw_card"],
           "cadence": {
             "turnKey": "corp:turn:29",
             "maxActionsPerTurn": 1,
@@ -37967,9 +37873,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.damage_kill",
-          "evidence": [
-            "continued:corp.damage_kill"
-          ]
+          "evidence": ["continued:corp.damage_kill"]
         },
         "commitment": {
           "strategyId": "corp.damage_kill",
@@ -38213,10 +38117,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -38238,9 +38139,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -38298,9 +38197,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -38331,10 +38228,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -38388,10 +38282,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -38578,10 +38469,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -38623,10 +38511,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -38668,10 +38553,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -38720,7 +38602,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "end_turn"
+        "type": "gain_credit"
       }
     ],
     "forbiddenActions": [
@@ -38730,17 +38612,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanModuleIds": [
-        "corp.complete_turn"
-      ],
-      "acceptableCapabilityIds": [
-        "complete_turn_after_productive_routes_exhausted"
-      ],
-      "requiredEvidenceIncludes": [
-        "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
-        "corp_current_turn_scoreline_unreachable:remote_1",
-        "corp_prepared_score_parent_dominates_sibling_route",
-        "productive_legal_routes_exhausted"
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_basic_liquidity_development"
       ]
     }
   }

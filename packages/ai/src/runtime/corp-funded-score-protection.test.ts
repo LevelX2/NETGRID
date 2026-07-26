@@ -3,6 +3,7 @@ import {
   type LegalAction,
   type VisibleCard,
   type VisibleCorpRezCostQuote,
+  type VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
@@ -154,11 +155,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
   });
 
   it("uses the engine-certified effective rez cost instead of printed card data", () => {
-    const wall = fundedIce(
-      "data-wall",
-      "onr_v1_238_data-wall-2-0",
-      false,
-    );
+    const wall = fundedIce("data-wall", "onr_v1_238_data-wall-2-0", false);
     const assessment = fundedAssessment({
       serverIce: [
         {
@@ -184,11 +181,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
   });
 
   it("fails closed on missing, incomplete, or non-credit rez obligations", () => {
-    const wall = fundedIce(
-      "data-wall",
-      "onr_v1_238_data-wall-2-0",
-      false,
-    );
+    const wall = fundedIce("data-wall", "onr_v1_238_data-wall-2-0", false);
     const { effectiveRezCostQuote: _missingQuote, ...withoutQuote } = wall;
     expect(
       fundedAssessment({
@@ -243,11 +236,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
   });
 
   it("fails closed when an effective rez quote drifts by card, server, or state", () => {
-    const wall = fundedIce(
-      "data-wall",
-      "onr_v1_238_data-wall-2-0",
-      false,
-    );
+    const wall = fundedIce("data-wall", "onr_v1_238_data-wall-2-0", false);
     for (const effectiveRezCostQuote of [
       { ...wall.effectiveRezCostQuote!, cardId: "other-card" },
       { ...wall.effectiveRezCostQuote!, targetServerId: "remote_2" as const },
@@ -267,11 +256,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
   });
 
   it("admits a post-install quote only for the explicitly scoped projected card", () => {
-    const wall = fundedIce(
-      "data-wall",
-      "onr_v1_238_data-wall-2-0",
-      false,
-    );
+    const wall = fundedIce("data-wall", "onr_v1_238_data-wall-2-0", false);
     const projectedWall = {
       ...wall,
       effectiveRezCostQuote: {
@@ -316,11 +301,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
   });
 
   it("preserves duplicate modifier source ids from stacked engine modifiers", () => {
-    const wall = fundedIce(
-      "data-wall",
-      "onr_v1_238_data-wall-2-0",
-      false,
-    );
+    const wall = fundedIce("data-wall", "onr_v1_238_data-wall-2-0", false);
     expect(
       fundedAssessment({
         serverIce: [
@@ -338,6 +319,178 @@ describe("assessBestFundedCorpScoreProtection", () => {
     ).toMatchObject({
       knowledge: "known",
       fundedProtection: true,
+    });
+  });
+
+  it("certifies Sandstorm's first ETR as the exact minimum funding frontier", () => {
+    const assessment = fundedAssessment({
+      serverIce: [
+        fundedIce("filter", "onr_v1_244_filter", true),
+        variableFundedIce(
+          "sandstorm",
+          "onr_proteus_036_sandstorm",
+          sandstormRezParameter(),
+        ),
+      ],
+      corpCredits: 5,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      fundedProtection: false,
+      totalSelectedRezCost: 0,
+      minimumSatisfyingRezCost: 6,
+      minimumAdditionalCreditsToSatisfy: 1,
+      protection: {
+        runnerAccessSuccessProbability: HALF,
+        protectsScore: false,
+      },
+      minimumSatisfyingRezCosts: [
+        {
+          iceInstanceId: "sandstorm",
+          iceDefinitionId: "onr_proteus_036_sandstorm",
+          credits: 6,
+          source: "engine_rez_cost_quote",
+          variableRezChoice: {
+            kind: "paid_end_the_run_subroutines",
+            subroutineCount: 1,
+          },
+        },
+      ],
+      minimumSatisfyingProtection: {
+        runnerAccessSuccessProbability: QUARTER,
+        protectsScore: true,
+      },
+    });
+  });
+
+  it("selects the exact alternate subtype when only that Engine option protects", () => {
+    const assessment = fundedAssessment({
+      serverIce: [
+        variableFundedIce(
+          "credit-blocks",
+          "onr_proteus_017_credit-blocks",
+          creditBlocksRezParameter(),
+        ),
+      ],
+      corpCredits: 7,
+      runnerRig: [runnerProgram("codeslinger", "onr_v1_015_codeslinger")],
+      runnerCredits: 10,
+      threshold: HALF,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      fundedProtection: true,
+      totalSelectedRezCost: 7,
+      minimumSatisfyingRezCost: 7,
+      selectedRezCosts: [
+        {
+          iceInstanceId: "credit-blocks",
+          credits: 7,
+          variableRezChoice: {
+            kind: "alternate_subtype",
+            selectedSubtypes: ["wall"],
+          },
+        },
+      ],
+      minimumSatisfyingRezCosts: [
+        {
+          iceInstanceId: "credit-blocks",
+          credits: 7,
+          variableRezChoice: {
+            kind: "alternate_subtype",
+            selectedSubtypes: ["wall"],
+          },
+        },
+      ],
+      minimumSatisfyingProtection: {
+        runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+        protectsScore: true,
+      },
+    });
+  });
+
+  it("keeps alternate rez options mutually exclusive for one ICE", () => {
+    const assessment = fundedAssessment({
+      serverIce: [
+        variableFundedIce(
+          "credit-blocks",
+          "onr_proteus_017_credit-blocks",
+          creditBlocksRezParameter(),
+        ),
+      ],
+      corpCredits: 7,
+      threshold: QUARTER,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      fundedProtection: false,
+      selectedRezCosts: [
+        {
+          iceInstanceId: "credit-blocks",
+          credits: 6,
+          variableRezChoice: {
+            kind: "alternate_subtype",
+            selectedSubtypes: ["sentry"],
+          },
+        },
+      ],
+      protection: {
+        runnerAccessSuccessProbability: HALF,
+        protectsScore: false,
+      },
+    });
+    if (assessment.knowledge !== "known") {
+      throw new Error("expected known alternate-subtype assessment");
+    }
+    expect(assessment.selectedRezCosts).toHaveLength(1);
+    expect(
+      new Set(assessment.selectedRezCosts.map((cost) => cost.iceInstanceId))
+        .size,
+    ).toBe(assessment.selectedRezCosts.length);
+    expect(assessment.minimumSatisfyingRezCost).toBeUndefined();
+    expect(assessment.minimumSatisfyingRezCosts).toBeUndefined();
+    expect(assessment.minimumSatisfyingProtection).toBeUndefined();
+  });
+
+  it("fails closed on an X-strength option outside the direct-access model", () => {
+    const assessment = fundedAssessment({
+      serverIce: [
+        variableFundedIce(
+          "homing-missile",
+          "onr_proteus_025_homing-missile",
+          homingMissileRezParameter(),
+        ),
+      ],
+      corpCredits: 12,
+      threshold: HALF,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "unknown",
+      fundedProtection: false,
+      unknownReason: "unsupported_variable_rez_effect",
+    });
+  });
+
+  it("fails closed on malformed installed variable-rez arithmetic", () => {
+    const malformed = {
+      ...sandstormRezParameter(),
+      firstEndTheRunFinalCredits: 7,
+    } satisfies VisibleVariableCorpRezCostParameter;
+    const assessment = fundedAssessment({
+      serverIce: [
+        variableFundedIce("sandstorm", "onr_proteus_036_sandstorm", malformed),
+      ],
+      corpCredits: 7,
+      threshold: HALF,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "unknown",
+      unknownReason: "unsupported_variable_rez_effect",
     });
   });
 });
@@ -370,8 +523,7 @@ describe("corpFundedScoreProtectionCertifiesBinding", () => {
       need,
       expectedParentProjectId:
         overrides.expectedParentProjectId ?? "agenda:agenda-1:remote_1",
-      expectedTargetServerId:
-        overrides.expectedTargetServerId ?? "remote_1",
+      expectedTargetServerId: overrides.expectedTargetServerId ?? "remote_1",
       observedAtStateVersion: overrides.observedAtStateVersion ?? 7,
     });
 
@@ -390,9 +542,7 @@ describe("corpFundedScoreProtectionCertifiesBinding", () => {
     expect(
       certifies(need, { expectedParentProjectId: "agenda:foreign:remote_1" }),
     ).toBe(false);
-    expect(certifies(need, { expectedTargetServerId: "remote_2" })).toBe(
-      false,
-    );
+    expect(certifies(need, { expectedTargetServerId: "remote_2" })).toBe(false);
     expect(certifies(need, { observedAtStateVersion: 8 })).toBe(false);
   });
 
@@ -822,14 +972,147 @@ describe("projectCorpFundedIceInstallRoute", () => {
           ...setup.action,
           payload: {
             ...setup.action.payload,
-            postInstallRezQuoteReductionSourceDefinitionIds:
-              "encoder,encoder",
+            postInstallRezQuoteReductionSourceDefinitionIds: "encoder,encoder",
           },
         },
       }),
     ).toMatchObject({
       knowledge: "known",
       effect: "progress",
+    });
+  });
+
+  it("projects Sandstorm's exact first-ETR choice and one-credit funding gap", () => {
+    const setup = routeSetup({
+      source: handIce("sandstorm", "onr_proteus_036_sandstorm"),
+      targetServerId: "remote_1",
+      currentIce: [fundedIce("filter", "onr_v1_244_filter", true)],
+      corpCredits: 6,
+    });
+    const action = variableInstallAction(setup.action, sandstormRezParameter());
+
+    const route = projectCorpFundedIceInstallRoute({
+      ...setup,
+      action,
+    });
+
+    expect(route).toMatchObject({
+      knowledge: "known",
+      effect: "no_progress",
+      funded: false,
+      installCredits: 1,
+      creditsAfterDefense: 5,
+      selectedRezCosts: [],
+      after: {
+        availableCorpCredits: 5,
+        minimumSatisfyingRezCost: 6,
+        minimumAdditionalCreditsToSatisfy: 1,
+        minimumSatisfyingRezCosts: [
+          {
+            iceInstanceId: "sandstorm",
+            credits: 6,
+            variableRezChoice: {
+              kind: "paid_end_the_run_subroutines",
+              subroutineCount: 1,
+            },
+          },
+        ],
+        minimumSatisfyingProtection: {
+          runnerAccessSuccessProbability: QUARTER,
+          protectsScore: true,
+        },
+      },
+    });
+  });
+
+  it("projects an exact alternate-subtype post-install choice", () => {
+    const setup = routeSetup({
+      source: handIce("credit-blocks", "onr_proteus_017_credit-blocks"),
+      targetServerId: "new_remote",
+      corpCredits: 7,
+      runnerRig: [runnerProgram("codeslinger", "onr_v1_015_codeslinger")],
+      runnerCredits: 10,
+    });
+    const action = variableInstallAction(
+      setup.action,
+      creditBlocksRezParameter(),
+    );
+
+    const route = projectCorpFundedIceInstallRoute({
+      ...setup,
+      action,
+    });
+
+    expect(route).toMatchObject({
+      knowledge: "known",
+      effect: "satisfied",
+      funded: true,
+      selectedRezCosts: [
+        {
+          iceInstanceId: "credit-blocks",
+          credits: 7,
+          variableRezChoice: {
+            kind: "alternate_subtype",
+            selectedSubtypes: ["wall"],
+          },
+        },
+      ],
+      after: {
+        protection: {
+          runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+          protectsScore: true,
+        },
+      },
+    });
+  });
+
+  it("fails a post-install X-strength route closed after exact quote parsing", () => {
+    const setup = routeSetup({
+      source: handIce("homing-missile", "onr_proteus_025_homing-missile"),
+      targetServerId: "new_remote",
+      corpCredits: 12,
+    });
+    const action = variableInstallAction(
+      setup.action,
+      homingMissileRezParameter(),
+    );
+
+    expect(
+      projectCorpFundedIceInstallRoute({
+        ...setup,
+        action,
+      }),
+    ).toMatchObject({
+      knowledge: "unknown",
+      effect: "unknown",
+      unknownReason: "after_assessment_unknown",
+      evidence: expect.arrayContaining([
+        "afterUnknownReason:unsupported_variable_rez_effect",
+      ]),
+    });
+  });
+
+  it("classifies malformed post-install variable arithmetic as quote drift", () => {
+    const setup = routeSetup({
+      source: handIce("sandstorm", "onr_proteus_036_sandstorm"),
+      targetServerId: "new_remote",
+      corpCredits: 7,
+    });
+    const malformed = {
+      ...sandstormRezParameter(),
+      firstEndTheRunFinalCredits: 7,
+    } satisfies VisibleVariableCorpRezCostParameter;
+    const action = variableInstallAction(setup.action, malformed);
+
+    expect(
+      projectCorpFundedIceInstallRoute({
+        ...setup,
+        action,
+      }),
+    ).toMatchObject({
+      knowledge: "unknown",
+      effect: "unknown",
+      unknownReason: "post_install_rez_quote_drift",
     });
   });
 });
@@ -850,6 +1133,8 @@ function routeSetup(params: {
   currentIce?: CorpFundedScoreProtectionIceInput[];
   corpCredits: number;
   scoreReserve?: CorpScoreReserve;
+  runnerRig?: VisibleCard[];
+  runnerCredits?: number;
 }) {
   const currentIce = params.currentIce ?? [];
   const scoreReserve = params.scoreReserve ?? NO_RESERVE;
@@ -857,6 +1142,10 @@ function routeSetup(params: {
     serverIce: currentIce,
     corpCredits: params.corpCredits,
     scoreReserve,
+    ...(params.runnerRig ? { runnerRig: params.runnerRig } : {}),
+    ...(params.runnerCredits !== undefined
+      ? { runnerCredits: params.runnerCredits }
+      : {}),
   });
   const need = needFor(params.targetServerId, baseline, scoreReserve);
   const action = installAction(
@@ -879,8 +1168,8 @@ function routeSetup(params: {
             ice: currentIce,
           },
         }),
-    runnerRig: [blink()],
-    runnerCredits: 0,
+    runnerRig: params.runnerRig ?? [blink()],
+    runnerCredits: params.runnerCredits ?? 0,
     projectedInstallCredits:
       params.targetServerId === "new_remote" ? 0 : currentIce.length,
     projectedInstallClicks: 1,
@@ -913,11 +1202,13 @@ function fundedAssessment(params: {
   corpClicks?: number;
   scoreReserve?: CorpScoreReserve;
   threshold?: typeof QUARTER | typeof HALF;
+  runnerRig?: VisibleCard[];
+  runnerCredits?: number;
 }): CorpFundedScoreProtectionAssessment {
   return assessBestFundedCorpScoreProtection({
     serverIce: params.serverIce,
-    runnerRig: [blink()],
-    runnerCredits: 0,
+    runnerRig: params.runnerRig ?? [blink()],
+    runnerCredits: params.runnerCredits ?? 0,
     targetServerId: "remote_1",
     observedAtStateVersion: 7,
     availableCorpCredits: params.corpCredits,
@@ -925,6 +1216,67 @@ function fundedAssessment(params: {
     scoreReserve: params.scoreReserve ?? NO_RESERVE,
     maximumRunnerAccessSuccessProbability: params.threshold ?? QUARTER,
   });
+}
+
+function variableInstallAction(
+  action: LegalAction,
+  parameter: VisibleVariableCorpRezCostParameter,
+): LegalAction {
+  const variablePayload =
+    parameter.kind === "x_strength"
+      ? {
+          postInstallRezQuoteVariableRezKind: parameter.kind,
+          postInstallRezQuoteVariableAdditionalCreditsPerValue:
+            parameter.additionalCreditsPerValue,
+          postInstallRezQuoteVariableMinValue: parameter.minValue,
+          postInstallRezQuoteVariableMaxValue: parameter.maxValue,
+          postInstallRezQuoteVariableMinValueFinalCredits:
+            parameter.minValueFinalCredits,
+          postInstallRezQuoteVariableMaxValueFinalCredits:
+            parameter.maxValueFinalCredits,
+          postInstallRezQuoteVariableEffectiveStrengthFromValue:
+            parameter.effectiveStrengthFromValue,
+          ...(parameter.traceBaseFromValue
+            ? { postInstallRezQuoteVariableTraceBaseFromValue: true }
+            : {}),
+          ...(parameter.traceBidLimitFromValue
+            ? { postInstallRezQuoteVariableTraceBidLimitFromValue: true }
+            : {}),
+        }
+      : parameter.kind === "paid_end_the_run_subroutines"
+        ? {
+            postInstallRezQuoteVariableRezKind: parameter.kind,
+            postInstallRezQuoteVariableAdditionalCreditsPerSubroutine:
+              parameter.additionalCreditsPerSubroutine,
+            postInstallRezQuoteVariableMinSubroutines: parameter.minSubroutines,
+            postInstallRezQuoteVariableMinSubroutinesFinalCredits:
+              parameter.minSubroutinesFinalCredits,
+            postInstallRezQuoteVariableFirstEndTheRunSubroutineCount:
+              parameter.firstEndTheRunSubroutineCount,
+            postInstallRezQuoteVariableFirstEndTheRunFinalCredits:
+              parameter.firstEndTheRunFinalCredits,
+          }
+        : {
+            postInstallRezQuoteVariableRezKind: parameter.kind,
+            postInstallRezQuoteVariableBaseSubtypes:
+              parameter.baseSubtypes.join(","),
+            postInstallRezQuoteVariableBaseSubtypesFinalCredits:
+              parameter.baseSubtypesFinalCredits,
+            postInstallRezQuoteVariableAlternateSubtypes:
+              parameter.alternateSubtypes.join(","),
+            postInstallRezQuoteVariableAlternateSubtypesAdditionalCredits:
+              parameter.alternateSubtypesAdditionalCredits,
+            postInstallRezQuoteVariableAlternateSubtypesFinalCredits:
+              parameter.alternateSubtypesFinalCredits,
+          };
+  return {
+    ...action,
+    payload: {
+      ...action.payload,
+      postInstallRezQuoteCostKind: "variable",
+      ...variablePayload,
+    },
+  };
 }
 
 function installAction(
@@ -967,10 +1319,85 @@ function installAction(
         serverId === "new_remote" ? "remote_1" : serverId,
       postInstallRezQuoteExpiresAtStateVersion: 7,
       postInstallRezQuoteComplete: true,
+      postInstallRezQuoteCostKind: "fixed",
       postInstallRezQuoteBaseCredits: source.rezCost ?? 0,
       postInstallRezQuoteFinalCredits: source.rezCost ?? 0,
       postInstallRezQuoteMandatoryAgendaPointCost: 0,
     },
+  };
+}
+
+function variableFundedIce(
+  instanceId: string,
+  definitionId: string,
+  variableParameter: VisibleVariableCorpRezCostParameter,
+): CorpFundedScoreProtectionIceInput {
+  const card = definition(definitionId);
+  return {
+    instanceId,
+    definitionId,
+    known: true,
+    rezzed: false,
+    ...(card.strength !== undefined ? { strength: card.strength } : {}),
+    subtypes: card.subtypes.slice(),
+    effectiveRezCostQuote: {
+      context: "installed",
+      cardId: instanceId,
+      targetServerId: "remote_1",
+      projectedServerId: "remote_1",
+      expiresAtStateVersion: 7,
+      complete: true,
+      costKind: "variable",
+      baseCredits: card.rezCost ?? 0,
+      finalCredits: card.rezCost ?? 0,
+      mandatoryAdditionalCosts: { agendaPoints: 0 },
+      variableParameter,
+    },
+  };
+}
+
+function sandstormRezParameter(): Extract<
+  VisibleVariableCorpRezCostParameter,
+  { kind: "paid_end_the_run_subroutines" }
+> {
+  return {
+    kind: "paid_end_the_run_subroutines",
+    additionalCreditsPerSubroutine: 2,
+    minSubroutines: 0,
+    minSubroutinesFinalCredits: 4,
+    firstEndTheRunSubroutineCount: 1,
+    firstEndTheRunFinalCredits: 6,
+  };
+}
+
+function creditBlocksRezParameter(): Extract<
+  VisibleVariableCorpRezCostParameter,
+  { kind: "alternate_subtype" }
+> {
+  return {
+    kind: "alternate_subtype",
+    baseSubtypes: ["sentry"],
+    baseSubtypesFinalCredits: 6,
+    alternateSubtypes: ["wall"],
+    alternateSubtypesAdditionalCredits: 1,
+    alternateSubtypesFinalCredits: 7,
+  };
+}
+
+function homingMissileRezParameter(): Extract<
+  VisibleVariableCorpRezCostParameter,
+  { kind: "x_strength" }
+> {
+  return {
+    kind: "x_strength",
+    additionalCreditsPerValue: 1,
+    minValue: 0,
+    maxValue: 8,
+    minValueFinalCredits: 4,
+    maxValueFinalCredits: 12,
+    effectiveStrengthFromValue: true,
+    traceBaseFromValue: true,
+    traceBidLimitFromValue: true,
   };
 }
 
@@ -999,6 +1426,7 @@ function fundedIce(
       projectedServerId: "remote_1",
       expiresAtStateVersion: 7,
       complete: true,
+      costKind: "fixed",
       baseCredits: card.rezCost ?? 0,
       finalCredits: card.rezCost ?? 0,
       mandatoryAdditionalCosts: { agendaPoints: 0 },
@@ -1022,9 +1450,13 @@ function handIce(instanceId: string, definitionId: string): VisibleCard {
 }
 
 function blink(): VisibleCard {
-  const card = definition("onr_v1_007_blink");
+  return runnerProgram("blink", "onr_v1_007_blink");
+}
+
+function runnerProgram(instanceId: string, definitionId: string): VisibleCard {
+  const card = definition(definitionId);
   return {
-    instanceId: "blink",
+    instanceId,
     definitionId: card.id,
     known: true,
     title: card.title,

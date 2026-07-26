@@ -21,21 +21,24 @@ const BEHAVIOR_FIXTURES = [
     deadFirstSeed004Json,
   ],
   [
-    "completes the protected Seed 003 turn without unbound overflow credit at d208",
+    "takes exact basic liquidity without reopening the protected Seed 003 scoreline at d208",
     scorelineSeed003D208Json,
   ],
   [
-    "stops overbuilding and completes the protected Seed 003 turn at d219",
+    "stops overbuilding and takes exact basic liquidity at d219",
     scorelineSeed003D219Json,
   ],
   ["continues the Seed 004 scoreline at d55", scorelineSeed004D55Json],
-  ["continues the Seed 004 scoreline at d65", scorelineSeed004D65Json],
   [
-    "defers the late Seed 004 scoreline without unbound funding at d247",
+    "continues the Seed 004 scoreline with exact basic liquidity at d65",
+    scorelineSeed004D65Json,
+  ],
+  [
+    "defers the late Seed 004 scoreline into exact basic liquidity at d247",
     scorelineSeed004D247Json,
   ],
   [
-    "does not invent central protection or funding at Seed 004 matchpoint",
+    "does not invent central protection and takes exact basic liquidity at Seed 004 matchpoint",
     matchpointSeed004Json,
   ],
 ] as const;
@@ -141,7 +144,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("does not force central protection or unbound funding below runner matchpoint", () => {
+  it("does not force central protection and takes exact basic liquidity below runner matchpoint", () => {
     const checkpoint = mutateFixture(matchpointSeed004Json, (candidate) => {
       const state = candidate.engine.testOnlyGameState;
       const scoredCards = [...state.runner.scoreArea];
@@ -156,7 +159,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         };
       }
       candidate.expectation = {
-        acceptableActions: [{ type: "end_turn" }],
+        acceptableActions: [{ type: "gain_credit" }],
         forbiddenActions: [
           {
             type: "install_card",
@@ -165,16 +168,10 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.complete_turn"],
-          acceptableCapabilities: [
-            "complete_turn_after_productive_routes_exhausted",
-          ],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_basic_credit_has_no_finite_reserve_or_parent_funding_need",
-            "corp_ice_install_has_no_engine_certified_access_probability_reduction",
-            "corp_last_click_score_install_deferred:remote_1",
-            "corp_prepared_score_parent_dominates_sibling_route",
-            "productive_legal_routes_exhausted",
+            "corp_engine_certified_basic_liquidity_development",
           ],
         },
       };

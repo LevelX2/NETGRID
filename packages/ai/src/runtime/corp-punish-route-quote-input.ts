@@ -1,0 +1,362 @@
+import {
+  CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+  type AiDecisionInput,
+  type CorpPunishRouteIncompleteReason,
+  type CorpPunishRouteQuote,
+  type CorpPunishRouteQuoteRequest,
+  type CorpPunishRouteQuoteResult,
+  type CorpPunishRouteQuoteSet,
+  type CorpPunishRouteStepKind,
+  type PlayerView,
+  type VisibleCard,
+} from "@netgrid/shared";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
+import { sanitizeCorpPunishRouteQuoteSet } from "../input-dto";
+
+const MAX_PUNISH_ROUTES = 8;
+const MAX_PUNISH_ROUTE_STEPS = 6;
+const PUNISH_CAMPAIGN_ID = "corp-punish:visible-fixed-damage";
+const ON_PLAY_CAPABILITY_ID = "ability:on_play:0";
+
+type PunishComponentAdapter = {
+  kind: Extract<CorpPunishRouteStepKind, "tag" | "meat_damage">;
+  definitionId: string;
+  hintFamily: "direct_tag" | "fixed_meat_damage";
+  routeOrder: number;
+  sourceCapabilityId: typeof ON_PLAY_CAPABILITY_ID;
+};
+
+/**
+ * Narrow Vertical-Slice adapter. An entry only states which Engine capability
+ * may be probed; it never supplies costs, damage totals or condition outcomes.
+ * New cards require an explicit adapter and matching hint-family validation.
+ */
+const PUNISH_COMPONENT_ADAPTER_LIST: readonly PunishComponentAdapter[] = [
+  {
+    definitionId: "onr_proteus_048_data-sifters",
+    kind: "tag",
+    hintFamily: "direct_tag",
+    routeOrder: 0,
+    sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
+  },
+  {
+    definitionId: "onr_v1_301_punitive-counterstrike",
+    kind: "meat_damage",
+    hintFamily: "fixed_meat_damage",
+    routeOrder: 20,
+    sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
+  },
+  {
+    definitionId: "onr_v1_302_scorched-earth",
+    kind: "meat_damage",
+    hintFamily: "fixed_meat_damage",
+    routeOrder: 10,
+    sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
+  },
+];
+
+const PUNISH_COMPONENT_ADAPTERS: ReadonlyMap<string, PunishComponentAdapter> =
+  new Map(
+    PUNISH_COMPONENT_ADAPTER_LIST.map(
+      (adapter): readonly [string, PunishComponentAdapter] => [
+        adapter.definitionId,
+        adapter,
+      ],
+    ),
+  );
+
+type VisiblePunishComponent = {
+  card: VisibleCard;
+  adapter: PunishComponentAdapter;
+};
+
+export type QuoteCorpPunishRoute = (
+  request: CorpPunishRouteQuoteRequest,
+) => CorpPunishRouteQuoteResult;
+
+export function withDecisionLocalCorpPunishRouteQuotes(
+  input: AiDecisionInput,
+  quoteCorpPunishRoute: QuoteCorpPunishRoute | undefined,
+): AiDecisionInput {
+  if (
+    input.side !== "corp" ||
+    input.playerView.side !== "corp" ||
+    input.playerView.corpPunishRouteQuoteSet !== undefined ||
+    !quoteCorpPunishRoute
+  ) {
+    return input;
+  }
+  const requests = buildBoundedCorpPunishRouteRequests(input);
+  if (requests.length === 0) return input;
+
+  const validQuotes: CorpPunishRouteQuote[] = [];
+  for (const request of requests) {
+    let result: CorpPunishRouteQuoteResult;
+    try {
+      result = quoteCorpPunishRoute(structuredClone(request));
+    } catch {
+      continue;
+    }
+    if (!result.ok || !quoteMatchesRequest(result.quote, request)) continue;
+    const sanitized = sanitizeSingleQuote(input.playerView, result.quote);
+    if (sanitized) validQuotes.push(sanitized);
+  }
+  const quoteSet = sanitizedDecisionQuoteSet(input.playerView, validQuotes);
+  if (!quoteSet) return input;
+  return {
+    ...input,
+    playerView: {
+      ...input.playerView,
+      corpPunishRouteQuoteSet: quoteSet,
+    },
+  };
+}
+
+export function buildBoundedCorpPunishRouteRequests(
+  input: AiDecisionInput,
+): CorpPunishRouteQuoteRequest[] {
+  if (
+    input.side !== "corp" ||
+    input.playerView.side !== "corp" ||
+    typeof input.matchId !== "string" ||
+    input.matchId.trim().length === 0
+  ) {
+    return [];
+  }
+  const components = input.playerView.own.gripOrHq
+    .map(visiblePunishComponent)
+    .filter(
+      (component): component is VisiblePunishComponent =>
+        component !== undefined,
+    )
+    .sort(
+      (left, right) =>
+        left.adapter.routeOrder - right.adapter.routeOrder ||
+        left.card.instanceId.localeCompare(right.card.instanceId),
+    );
+  const tags = components.filter(
+    (component) => component.adapter.kind === "tag",
+  );
+  const damage = components.filter(
+    (component) => component.adapter.kind === "meat_damage",
+  );
+  if (damage.length === 0) return [];
+  const tagHeads =
+    input.playerView.opponent.tags > 0
+      ? [undefined]
+      : tags.length > 0
+        ? tags
+        : [];
+  if (tagHeads.length === 0) return [];
+
+  const routeComponents = tagHeads.flatMap((tag) => {
+    const maximumDamageSteps = MAX_PUNISH_ROUTE_STEPS - (tag ? 1 : 0);
+    return boundedDamageCombinations(damage, maximumDamageSteps).map(
+      (damageSteps) => [...(tag ? [tag] : []), ...damageSteps],
+    );
+  });
+  const selectedRoutes = selectBoundedRoutes(routeComponents);
+  return selectedRoutes.map((route, routeIndex) => {
+    const routeId = `visible-fixed-damage:${routeIndex}:${route
+      .map((component) => component.card.instanceId)
+      .join("+")}`;
+    return {
+      schemaVersion: CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+      matchId: input.matchId!,
+      side: "corp",
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      campaignId: PUNISH_CAMPAIGN_ID,
+      routeId,
+      steps: route.map((component, order) => ({
+        stepId: `${routeId}:step:${order}`,
+        order,
+        kind: component.adapter.kind,
+        sourceCardInstanceId: component.card.instanceId,
+        sourceCapabilityId: component.adapter.sourceCapabilityId,
+      })),
+    };
+  });
+}
+
+function visiblePunishComponent(
+  card: VisibleCard,
+): VisiblePunishComponent | undefined {
+  if (
+    card.known !== true ||
+    card.owner !== "corp" ||
+    card.controller !== "corp" ||
+    card.type !== "operation" ||
+    typeof card.definitionId !== "string"
+  ) {
+    return undefined;
+  }
+  const adapter = PUNISH_COMPONENT_ADAPTERS.get(card.definitionId);
+  if (!adapter || !hintMatchesAdapter(adapter)) return undefined;
+  return { card, adapter };
+}
+
+function hintMatchesAdapter(adapter: PunishComponentAdapter): boolean {
+  const hint = AI_HINTS_BY_CARD.get(adapter.definitionId);
+  if (!hint || hint.side !== "corp" || hint.cardType !== "operation")
+    return false;
+  // `amount` proves that this is a reviewed finite role family only. Route
+  // ordering never reads the number; all actual effects and costs come solely
+  // from the state-bound Engine quote.
+  if (adapter.hintFamily === "direct_tag") {
+    return (
+      hint.effects?.some(
+        (effect) =>
+          effect.kind === "tag_source" &&
+          effect.scope === "runner" &&
+          effect.timing === "action" &&
+          effect.finite === true &&
+          Number.isSafeInteger(effect.amount) &&
+          Number(effect.amount) > 0,
+      ) === true && hint.effects.every((effect) => effect.kind !== "trace")
+    );
+  }
+  return (
+    hint.conditions?.some(
+      (condition) => condition.kind === "requires_runner_tagged",
+    ) === true &&
+    hint.effects?.some(
+      (effect) =>
+        effect.kind === "damage" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        effect.finite === true &&
+        Number.isSafeInteger(effect.amount) &&
+        Number(effect.amount) > 0,
+    ) === true
+  );
+}
+
+function boundedDamageCombinations(
+  damage: readonly VisiblePunishComponent[],
+  maximumSteps: number,
+): VisiblePunishComponent[][] {
+  const combinations = damage
+    .slice(0, MAX_PUNISH_ROUTES - 1)
+    .map((component) => [component]);
+  const longestLength = Math.min(maximumSteps, damage.length);
+  for (let length = 2; length <= longestLength; length += 1) {
+    combinations.push(damage.slice(0, length));
+  }
+  return selectBoundedRoutes(combinations);
+}
+
+function selectBoundedRoutes(
+  routes: readonly VisiblePunishComponent[][],
+): VisiblePunishComponent[][] {
+  const unique = [
+    ...new Map(
+      routes.map((route) => [routeComponentKey(route), route]),
+    ).values(),
+  ];
+  if (unique.length <= MAX_PUNISH_ROUTES) return unique;
+  const selected = unique.slice(0, MAX_PUNISH_ROUTES - 1);
+  const longest = [...unique].sort(
+    (left, right) =>
+      right.length - left.length ||
+      routeComponentKey(left).localeCompare(routeComponentKey(right)),
+  )[0]!;
+  if (
+    !selected.some(
+      (route) => routeComponentKey(route) === routeComponentKey(longest),
+    )
+  ) {
+    selected.push(longest);
+  }
+  return selected;
+}
+
+function routeComponentKey(route: readonly VisiblePunishComponent[]): string {
+  return route.map((component) => component.card.instanceId).join("\u0000");
+}
+
+function quoteMatchesRequest(
+  quote: CorpPunishRouteQuote,
+  request: CorpPunishRouteQuoteRequest,
+): boolean {
+  return (
+    quote.matchId === request.matchId &&
+    quote.side === request.side &&
+    quote.stateVersion === request.stateVersion &&
+    quote.timingPoint === request.timingPoint &&
+    quote.campaignId === request.campaignId &&
+    quote.routeId === request.routeId &&
+    quote.requestEcho.matchId === request.matchId &&
+    quote.requestEcho.side === request.side &&
+    quote.requestEcho.stateVersion === request.stateVersion &&
+    quote.requestEcho.timingPoint === request.timingPoint &&
+    quote.requestEcho.campaignId === request.campaignId &&
+    quote.requestEcho.routeId === request.routeId
+  );
+}
+
+function sanitizeSingleQuote(
+  view: PlayerView,
+  quote: CorpPunishRouteQuote,
+): CorpPunishRouteQuote | undefined {
+  const quoteSet = quoteSetForRoutes(view, true, [], [quote]);
+  return sanitizeQuoteSet(view, quoteSet)?.routes[0];
+}
+
+function sanitizedDecisionQuoteSet(
+  view: PlayerView,
+  quotes: readonly CorpPunishRouteQuote[],
+): CorpPunishRouteQuoteSet | undefined {
+  const completeRoutes = quotes.filter((quote) => quote.complete);
+  if (completeRoutes.length > 0) {
+    return sanitizeQuoteSet(
+      view,
+      quoteSetForRoutes(view, true, [], quotes.slice()),
+    );
+  }
+  const incompleteReasons = uniqueIncompleteReasons(
+    quotes.flatMap((quote) => quote.incompleteReasons),
+  );
+  if (incompleteReasons.length === 0) return undefined;
+  return sanitizeQuoteSet(
+    view,
+    quoteSetForRoutes(view, false, incompleteReasons, []),
+  );
+}
+
+function quoteSetForRoutes(
+  view: PlayerView,
+  complete: boolean,
+  incompleteReasons: CorpPunishRouteIncompleteReason[],
+  routes: CorpPunishRouteQuote[],
+): CorpPunishRouteQuoteSet {
+  return {
+    schemaVersion: CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+    visibility: "private_to_actor",
+    side: "corp",
+    stateVersion: view.stateVersion,
+    timingPoint: view.timingPoint,
+    complete,
+    incompleteReasons,
+    runnerHandCount: view.opponent.handCount,
+    runnerTags: view.opponent.tags,
+    runnerCreditsVisible: view.opponent.credits,
+    routes,
+  };
+}
+
+function sanitizeQuoteSet(
+  view: PlayerView,
+  quoteSet: CorpPunishRouteQuoteSet,
+): CorpPunishRouteQuoteSet | undefined {
+  return sanitizeCorpPunishRouteQuoteSet({
+    ...view,
+    corpPunishRouteQuoteSet: quoteSet,
+  });
+}
+
+function uniqueIncompleteReasons(
+  reasons: readonly CorpPunishRouteIncompleteReason[],
+): CorpPunishRouteIncompleteReason[] {
+  return [...new Set(reasons)].sort();
+}

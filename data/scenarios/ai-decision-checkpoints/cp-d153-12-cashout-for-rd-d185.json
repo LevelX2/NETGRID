@@ -956,9 +956,7 @@
           "corp_onr_v1_347_vapor-ops_2",
           "corp_onr_v1_281_accounts-receivable_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_189_artificial-security-directors_1"
-        ],
+        "scoreArea": ["corp_onr_v1_189_artificial-security-directors_1"],
         "servers": [
           {
             "id": "hq",
@@ -974,9 +972,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_271_tko-2-0_1"
-            ],
+            "ice": ["corp_onr_v1_271_tko-2-0_1"],
             "root": []
           },
           {
@@ -1063,9 +1059,7 @@
             "runner_onr_v1_039_krash_2",
             "runner_onr_v1_068_startup-immolator_3"
           ],
-          "hardware": [
-            "runner_onr_v1_145_wutech-mem-chip_1"
-          ],
+          "hardware": ["runner_onr_v1_145_wutech-mem-chip_1"],
           "resources": [
             "runner_onr_v1_173_restrictive-net-zoning_1",
             "runner_onr_v1_173_restrictive-net-zoning_2",
@@ -12234,9 +12228,7 @@
               "support": 80,
               "final": 64
             },
-            "supportGaps": [
-              "low_threat_assessment_support"
-            ],
+            "supportGaps": ["low_threat_assessment_support"],
             "evidence": [
               "strategy:runner.remote_contest",
               "confidence:medium",
@@ -12320,9 +12312,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -12499,10 +12489,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -12616,9 +12603,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -12681,10 +12666,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -12703,9 +12685,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -12736,10 +12716,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -12920,10 +12897,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -13008,10 +12982,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -13248,17 +13219,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.end_turn"
+        "actionId": "runner.gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.complete_turn"],
-      "acceptableCapabilities": [
-        "complete_turn_after_productive_routes_exhausted"
-      ],
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
       "requiredAssessmentEvidence": [
-        "runner_immediate_credit_route_has_no_bound_funding_need",
-        "productive_legal_routes_exhausted"
+        "runner_engine_certified_basic_liquidity_development"
       ]
     }
   }

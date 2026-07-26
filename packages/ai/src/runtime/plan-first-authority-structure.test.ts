@@ -35,9 +35,7 @@ describe("plan-first live authority structure", () => {
     expect(publicEntrypoints).toContain(
       "createAiLiveRuntimeComposition(aiLiveRuntimeDependencies)",
     );
-    expect(decisionContext).toContain(
-      'from "./plan-first-live-runtime";',
-    );
+    expect(decisionContext).toContain('from "./plan-first-live-runtime";');
     expect(decisionContext).toContain("choosePlanFirstLiveAction,");
     expect(occurrences(decisionContext, /\bchoosePlanFirstLiveAction\(/g)).toBe(
       1,
@@ -84,10 +82,7 @@ describe("plan-first live authority structure", () => {
     const liveSources = [
       readSource("ai-runtime-public-entrypoints.ts"),
       readSource("runtime", "ai-live-runtime-composition.ts"),
-      readSource(
-        "runtime",
-        "semantic-runtime-orchestration-composition.ts",
-      ),
+      readSource("runtime", "semantic-runtime-orchestration-composition.ts"),
       readSource("runtime", "semantic-runtime-entrypoints-composition.ts"),
       readSource("runtime", "semantic-runtime-decision-composition.ts"),
       readSource("runtime", "semantic-runtime-decision-context.ts"),
@@ -121,10 +116,7 @@ describe("plan-first live authority structure", () => {
     const simulationEntrypoints = readSource(
       "ai-simulation-public-entrypoints.ts",
     );
-    const simulator = readSource(
-      "simulation",
-      "ai-game-simulator.ts",
-    );
+    const simulator = readSource("simulation", "ai-game-simulator.ts");
 
     for (const source of [simulationEntrypoints, simulator]) {
       expect(source).not.toContain('from "./tactical-plans"');
@@ -207,13 +199,9 @@ describe("plan-first live authority structure", () => {
     expect(satisfiedSource).toContain(
       "need.observedAtStateVersion === observedAtStateVersion",
     );
-    expect(satisfiedSource).toContain(
-      'need.baseline.knowledge === "known"',
-    );
+    expect(satisfiedSource).toContain('need.baseline.knowledge === "known"');
     expect(satisfiedSource).toContain("need.baseline.fundedProtection");
-    expect(satisfiedSource).toContain(
-      "need.baseline.protection.protectsScore",
-    );
+    expect(satisfiedSource).toContain("need.baseline.protection.protectsScore");
     expect(satisfiedSource).not.toMatch(
       /\b(?:ice|layer|quality|dynamicProtection)\b/i,
     );
@@ -228,7 +216,7 @@ describe("plan-first live authority structure", () => {
       "function corpDefenseReserveNeeds(",
     );
     const reserveEnd = planFirstRuntime.indexOf(
-      "\nfunction corpTaggedPayoffFundingNeeds(",
+      "\nfunction punishSignals(",
       reserveStart,
     );
 
@@ -251,8 +239,9 @@ describe("plan-first live authority structure", () => {
     );
     expect(reserveSource).toContain('moduleId: "corp.defend_servers"');
     expect(reserveSource).toContain(
-      "parentPriorityClass: corpGenericDefensePriorityClass([need])",
+      "const fundingPriority = corpGenericDefensePriorityClass([need])",
     );
+    expect(reserveSource).toContain("parentPriorityClass: fundingPriority");
     expect(reserveSource).not.toMatch(
       /\b(?:source|definition)\.rezCost\b|CARD_DEFINITIONS_BY_ID/,
     );

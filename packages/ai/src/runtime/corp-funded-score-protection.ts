@@ -4,6 +4,8 @@ import {
   type ServerId,
   type VisibleCard,
   type VisibleCorpRezCostQuote,
+  type VisibleEffectiveIceRunQuote,
+  type VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
 import { corpIcePlacementActionCostAgreementFact } from "./corp-ice-placement/corp-ice-placement";
 import {
@@ -34,6 +36,15 @@ export type CorpSelectedRezCost = Readonly<{
   iceDefinitionId: string;
   credits: number;
   source: "engine_rez_cost_quote";
+  variableRezChoice?:
+    | Readonly<{
+        kind: "paid_end_the_run_subroutines";
+        subroutineCount: number;
+      }>
+    | Readonly<{
+        kind: "alternate_subtype";
+        selectedSubtypes: readonly string[];
+      }>;
 }>;
 
 type CorpFundedScoreProtectionAssessmentBase = Readonly<{
@@ -58,6 +69,8 @@ export type KnownCorpFundedScoreProtectionAssessment =
       preservesScoreCreditReserve: boolean;
       preservesHardClickReserve: boolean;
       minimumSatisfyingRezCost?: number;
+      minimumSatisfyingRezCosts?: readonly CorpSelectedRezCost[];
+      minimumSatisfyingProtection?: KnownCorpScoreProtectionAssessment;
       minimumAdditionalCreditsToSatisfy?: number;
       minimumAdditionalClicksToSatisfy?: number;
     }>;
@@ -76,6 +89,7 @@ export type UnknownCorpFundedScoreProtectionAssessment =
         | "incomplete_rez_cost_quote"
         | "rez_cost_quote_drift"
         | "unsupported_mandatory_rez_cost"
+        | "unsupported_variable_rez_effect"
         | "search_space_exceeded"
         | "subset_assessment_unknown";
     }>;
@@ -229,7 +243,7 @@ type CompleteRezQuoteRead =
   | Readonly<{
       status: "known";
       definitionId: string;
-      finalCredits: number;
+      options: readonly CertifiedFundedRezOption[];
     }>
   | Readonly<{
       status: "unknown";
@@ -237,8 +251,15 @@ type CompleteRezQuoteRead =
         | "missing_rez_cost_quote"
         | "incomplete_rez_cost_quote"
         | "rez_cost_quote_drift"
-        | "unsupported_mandatory_rez_cost";
+        | "unsupported_mandatory_rez_cost"
+        | "unsupported_variable_rez_effect";
     }>;
+
+type CertifiedFundedRezOption = Readonly<{
+  finalCredits: number;
+  projectedIce: CorpFundedScoreProtectionIceInput;
+  variableRezChoice?: CorpSelectedRezCost["variableRezChoice"];
+}>;
 
 type PostInstallRezQuoteRead =
   | Readonly<{
@@ -328,24 +349,36 @@ export function assessBestFundedCorpScoreProtection(
         ],
       );
     }
-    candidates.push({
-      ice,
-      selectedCost: {
-        iceInstanceId: ice.instanceId,
-        iceDefinitionId: quote.definitionId,
-        credits: quote.finalCredits,
-        source: "engine_rez_cost_quote",
-      },
-    });
+    for (const option of quote.options) {
+      candidates.push({
+        ice: option.projectedIce,
+        selectedCost: {
+          iceInstanceId: ice.instanceId,
+          iceDefinitionId: quote.definitionId,
+          credits: option.finalCredits,
+          source: "engine_rez_cost_quote",
+          ...(option.variableRezChoice
+            ? { variableRezChoice: option.variableRezChoice }
+            : {}),
+        },
+      });
+    }
   }
-  if (candidates.length > MAX_EXACT_REZ_CANDIDATES) {
+  const candidateIceCount = new Set(
+    candidates.map((candidate) => candidate.ice.instanceId),
+  ).size;
+  if (
+    candidateIceCount > MAX_EXACT_REZ_CANDIDATES ||
+    exactRezSelectionCount(candidates) > 2 ** MAX_EXACT_REZ_CANDIDATES
+  ) {
     return unknownFundedAssessment(
       input,
       "search_space_exceeded",
       reserve.totalCredits,
       [
         "fundedScoreProtectionKnown:false",
-        `rezCandidateCount:${candidates.length}`,
+        `rezCandidateCount:${candidateIceCount}`,
+        `rezOptionCount:${candidates.length}`,
         `maximumExactRezCandidateCount:${MAX_EXACT_REZ_CANDIDATES}`,
       ],
     );
@@ -358,10 +391,10 @@ export function assessBestFundedCorpScoreProtection(
   );
   let bestSatisfying: EnumeratedAssessment | undefined;
   let bestProgress: EnumeratedAssessment | undefined;
-  let minimumSatisfyingRezCost: number | undefined;
+  let minimumSatisfying: EnumeratedAssessment | undefined;
   for (const selection of selections) {
-    const selectedIds = new Set(
-      selection.map((candidate) => candidate.ice.instanceId),
+    const selectedById = new Map(
+      selection.map((candidate) => [candidate.ice.instanceId, candidate.ice]),
     );
     const selectedRezCosts = selection.map(
       (candidate) => candidate.selectedCost,
@@ -380,8 +413,8 @@ export function assessBestFundedCorpScoreProtection(
     }
     const protection = assessCorpScoreProtection({
       serverIce: input.serverIce.map((ice) => ({
-        ...ice,
-        rezzed: ice.rezzed === true || selectedIds.has(ice.instanceId),
+        ...(selectedById.get(ice.instanceId) ?? ice),
+        rezzed: ice.rezzed === true || selectedById.has(ice.instanceId),
       })),
       runnerRig: input.runnerRig,
       runnerCredits: input.runnerCredits,
@@ -407,10 +440,10 @@ export function assessBestFundedCorpScoreProtection(
     };
     if (
       protection.protectsScore &&
-      (minimumSatisfyingRezCost === undefined ||
-        totalRezCost < minimumSatisfyingRezCost)
+      (!minimumSatisfying ||
+        satisfyingAssessmentIsBetter(assessment, minimumSatisfying))
     ) {
-      minimumSatisfyingRezCost = totalRezCost;
+      minimumSatisfying = assessment;
     }
     if (totalRezCost <= availableRezCredits) {
       if (protection.protectsScore) {
@@ -449,16 +482,16 @@ export function assessBestFundedCorpScoreProtection(
     preservesScoreCreditReserve &&
     preservesHardClickReserve;
   const minimumAdditionalCreditsToSatisfy =
-    minimumSatisfyingRezCost === undefined
+    minimumSatisfying === undefined
       ? undefined
       : Math.max(
           0,
           reserve.totalCredits +
-            minimumSatisfyingRezCost -
-          input.availableCorpCredits,
+            minimumSatisfying.totalRezCost -
+            input.availableCorpCredits,
         );
   const minimumAdditionalClicksToSatisfy =
-    minimumSatisfyingRezCost === undefined
+    minimumSatisfying === undefined
       ? undefined
       : Math.max(0, reserve.hardClickReserve - input.availableCorpClicks);
 
@@ -477,12 +510,13 @@ export function assessBestFundedCorpScoreProtection(
     preservesScoreCreditReserve,
     preservesHardClickReserve,
     fundedProtection,
-    ...(minimumSatisfyingRezCost !== undefined
+    ...(minimumSatisfying !== undefined
       ? {
-          minimumSatisfyingRezCost,
+          minimumSatisfyingRezCost: minimumSatisfying.totalRezCost,
+          minimumSatisfyingRezCosts: minimumSatisfying.selectedRezCosts,
+          minimumSatisfyingProtection: minimumSatisfying.protection,
           minimumAdditionalCreditsToSatisfy: minimumAdditionalCreditsToSatisfy!,
-          minimumAdditionalClicksToSatisfy:
-            minimumAdditionalClicksToSatisfy!,
+          minimumAdditionalClicksToSatisfy: minimumAdditionalClicksToSatisfy!,
         }
       : {}),
     evidence: [
@@ -496,9 +530,10 @@ export function assessBestFundedCorpScoreProtection(
       `preservesScoreCreditReserve:${preservesScoreCreditReserve}`,
       `preservesHardClickReserve:${preservesHardClickReserve}`,
       `fundedProtection:${fundedProtection}`,
-      ...(minimumSatisfyingRezCost !== undefined
+      ...(minimumSatisfying !== undefined
         ? [
-            `minimumSatisfyingRezCost:${minimumSatisfyingRezCost}`,
+            `minimumSatisfyingRezCost:${minimumSatisfying.totalRezCost}`,
+            `minimumSatisfyingRezCostCount:${minimumSatisfying.selectedRezCosts.length}`,
             `minimumAdditionalCreditsToSatisfy:${minimumAdditionalCreditsToSatisfy}`,
             `minimumAdditionalClicksToSatisfy:${minimumAdditionalClicksToSatisfy}`,
           ]
@@ -613,7 +648,10 @@ export function projectCorpFundedIceInstallRoute(
         sourceDefinitionId: sourceCard.definitionId,
       },
       "source_binding_drift",
-      ["fundedIceInstallRouteKnown:false", "sourceOwnershipOrDefinitionDrift:true"],
+      [
+        "fundedIceInstallRouteKnown:false",
+        "sourceOwnershipOrDefinitionDrift:true",
+      ],
     );
   }
   const targetServerId = action.payload.serverId;
@@ -665,7 +703,9 @@ export function projectCorpFundedIceInstallRoute(
         "fundedIceInstallRouteKnown:false",
         "baselineRecomputeDrift:true",
         ...(recomputedBaseline.knowledge === "unknown"
-          ? [`baselineRecomputeUnknownReason:${recomputedBaseline.unknownReason}`]
+          ? [
+              `baselineRecomputeUnknownReason:${recomputedBaseline.unknownReason}`,
+            ]
           : []),
       ],
     );
@@ -890,19 +930,142 @@ function readCompleteFundedRezQuote(
   ) {
     return { status: "unknown", reason: "rez_cost_quote_drift" };
   }
-  if (
-    quote.mandatoryAdditionalCosts.agendaPoints > 0
-  ) {
+  if (quote.mandatoryAdditionalCosts.agendaPoints > 0) {
     return {
       status: "unknown",
       reason: "unsupported_mandatory_rez_cost",
     };
   }
+  const options = fundedRezOptionsForQuote(ice, quote);
+  if (!options) {
+    return {
+      status: "unknown",
+      reason:
+        quote.costKind === "variable"
+          ? "unsupported_variable_rez_effect"
+          : "rez_cost_quote_drift",
+    };
+  }
   return {
     status: "known",
     definitionId: ice.definitionId,
-    finalCredits: quote.finalCredits,
+    options,
   };
+}
+
+function fundedRezOptionsForQuote(
+  ice: CorpFundedScoreProtectionIceInput,
+  quote: Extract<VisibleCorpRezCostQuote, { complete: true }>,
+): readonly CertifiedFundedRezOption[] | undefined {
+  if (quote.costKind === "fixed") {
+    return [{ finalCredits: quote.finalCredits, projectedIce: ice }];
+  }
+  const definition = ice.definitionId
+    ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
+    : undefined;
+  if (
+    !definition ||
+    definition.type !== "ice" ||
+    !nonNegativeSafeInteger(definition.strength) ||
+    ice.strength !== definition.strength ||
+    !sameCanonicalStrings(ice.subtypes, definition.subtypes)
+  ) {
+    return undefined;
+  }
+  const parameter = quote.variableParameter;
+  if (parameter.kind === "x_strength") {
+    // Trace/run-lock effects are deliberately outside the exact direct-access
+    // model. The Engine quote remains known; this consumer stays fail-closed.
+    return undefined;
+  }
+  if (parameter.kind === "paid_end_the_run_subroutines") {
+    if (
+      !positiveSafeInteger(parameter.additionalCreditsPerSubroutine) ||
+      !nonNegativeSafeInteger(parameter.minSubroutines) ||
+      parameter.minSubroutinesFinalCredits !==
+        safeVariableCreditTotal(
+          quote.finalCredits,
+          parameter.minSubroutines,
+          parameter.additionalCreditsPerSubroutine,
+        ) ||
+      parameter.firstEndTheRunSubroutineCount !==
+        Math.max(1, parameter.minSubroutines) ||
+      parameter.firstEndTheRunFinalCredits !==
+        safeVariableCreditTotal(
+          quote.finalCredits,
+          parameter.firstEndTheRunSubroutineCount,
+          parameter.additionalCreditsPerSubroutine,
+        )
+    ) {
+      return undefined;
+    }
+    const effectiveRunQuote: VisibleEffectiveIceRunQuote = {
+      iceInstanceId: ice.instanceId,
+      iceDefinitionId: definition.id,
+      effectiveStrength: definition.strength,
+      subroutines: Array.from(
+        { length: parameter.firstEndTheRunSubroutineCount },
+        (_, index) => ({
+          id: `${definition.id}_variable_etr_${index + 1}`,
+          type: "end_the_run" as const,
+        }),
+      ),
+    };
+    return [
+      {
+        finalCredits: parameter.firstEndTheRunFinalCredits,
+        projectedIce: { ...ice, effectiveRunQuote },
+        variableRezChoice: {
+          kind: "paid_end_the_run_subroutines",
+          subroutineCount: parameter.firstEndTheRunSubroutineCount,
+        },
+      },
+    ];
+  }
+  if (
+    !canonicalSubtypeArray(parameter.baseSubtypes) ||
+    !canonicalSubtypeArray(parameter.alternateSubtypes) ||
+    !sameCanonicalStrings(ice.subtypes, parameter.baseSubtypes) ||
+    parameter.baseSubtypesFinalCredits !== quote.finalCredits ||
+    parameter.alternateSubtypesFinalCredits !==
+      safeVariableCreditTotal(
+        quote.finalCredits,
+        1,
+        parameter.alternateSubtypesAdditionalCredits,
+      )
+  ) {
+    return undefined;
+  }
+  const subroutines = (definition.subroutines ?? []).map((subroutine) => ({
+    ...subroutine,
+  }));
+  return [
+    {
+      finalCredits: parameter.baseSubtypesFinalCredits,
+      projectedIce: ice,
+      variableRezChoice: {
+        kind: "alternate_subtype",
+        selectedSubtypes: parameter.baseSubtypes.slice(),
+      },
+    },
+    {
+      finalCredits: parameter.alternateSubtypesFinalCredits,
+      projectedIce: {
+        ...ice,
+        subtypes: parameter.alternateSubtypes.slice(),
+        effectiveRunQuote: {
+          iceInstanceId: ice.instanceId,
+          iceDefinitionId: definition.id,
+          effectiveStrength: definition.strength,
+          subroutines,
+        },
+      },
+      variableRezChoice: {
+        kind: "alternate_subtype",
+        selectedSubtypes: parameter.alternateSubtypes.slice(),
+      },
+    },
+  ];
 }
 
 function readPostInstallRezQuote(
@@ -922,29 +1085,32 @@ function readPostInstallRezQuote(
     };
   }
   const projectedServerId = payload.postInstallRezQuoteProjectedServerId;
+  const costKind = payload.postInstallRezQuoteCostKind;
   const baseCredits = payload.postInstallRezQuoteBaseCredits;
   const finalCredits = payload.postInstallRezQuoteFinalCredits;
   const mandatoryAgendaPointCost =
     payload.postInstallRezQuoteMandatoryAgendaPointCost;
-  const mandatoryKind =
-    payload.postInstallRezQuoteMandatoryAdditionalCostKind;
+  const mandatoryKind = payload.postInstallRezQuoteMandatoryAdditionalCostKind;
   const reductionSourceDefinitionIds = commaSeparatedIds(
     payload.postInstallRezQuoteReductionSourceDefinitionIds,
   );
   const increaseSourceDefinitionIds = commaSeparatedIds(
     payload.postInstallRezQuoteIncreaseSourceDefinitionIds,
   );
+  const variableParameter =
+    costKind === "variable"
+      ? postInstallVariableRezParameter(payload, finalCredits)
+      : undefined;
   if (
     payload.postInstallRezQuoteCardId !== sourceCardInstanceId ||
     payload.postInstallRezQuoteTargetServerId !== targetServerId ||
-    !validTargetProjectedServerBinding(
-      targetServerId,
-      projectedServerId,
-    ) ||
+    !validTargetProjectedServerBinding(targetServerId, projectedServerId) ||
     payload.postInstallRezQuoteExpiresAtStateVersion !==
       observedAtStateVersion ||
     !nonNegativeSafeInteger(baseCredits) ||
     !nonNegativeSafeInteger(finalCredits) ||
+    (costKind !== "fixed" && costKind !== "variable") ||
+    (costKind === "variable" && variableParameter === undefined) ||
     !nonNegativeSafeInteger(mandatoryAgendaPointCost) ||
     (mandatoryAgendaPointCost > 0
       ? mandatoryKind !== "agenda_point"
@@ -972,6 +1138,12 @@ function readPostInstallRezQuote(
       projectedServerId,
       expiresAtStateVersion: observedAtStateVersion,
       complete: true,
+      ...(costKind === "variable"
+        ? {
+            costKind: "variable" as const,
+            variableParameter: variableParameter!,
+          }
+        : { costKind: "fixed" as const }),
       baseCredits,
       finalCredits,
       mandatoryAdditionalCosts: { agendaPoints: 0 },
@@ -982,6 +1154,146 @@ function readPostInstallRezQuote(
         ? { increaseSourceDefinitionIds }
         : {}),
     },
+  };
+}
+
+function postInstallVariableRezParameter(
+  payload: NonNullable<LegalAction["payload"]>,
+  finalBaseCredits: unknown,
+): VisibleVariableCorpRezCostParameter | undefined {
+  if (!nonNegativeSafeInteger(finalBaseCredits)) return undefined;
+  const kind = payload.postInstallRezQuoteVariableRezKind;
+  if (kind === "x_strength") {
+    const additionalCreditsPerValue =
+      payload.postInstallRezQuoteVariableAdditionalCreditsPerValue;
+    const minValue = payload.postInstallRezQuoteVariableMinValue;
+    const maxValue = payload.postInstallRezQuoteVariableMaxValue;
+    const minValueFinalCredits =
+      payload.postInstallRezQuoteVariableMinValueFinalCredits;
+    const maxValueFinalCredits =
+      payload.postInstallRezQuoteVariableMaxValueFinalCredits;
+    if (
+      !positiveSafeInteger(additionalCreditsPerValue) ||
+      !nonNegativeSafeInteger(minValue) ||
+      !nonNegativeSafeInteger(maxValue) ||
+      maxValue < minValue ||
+      !nonNegativeSafeInteger(minValueFinalCredits) ||
+      !nonNegativeSafeInteger(maxValueFinalCredits) ||
+      minValueFinalCredits !==
+        safeVariableCreditTotal(
+          finalBaseCredits,
+          minValue,
+          additionalCreditsPerValue,
+        ) ||
+      maxValueFinalCredits !==
+        safeVariableCreditTotal(
+          finalBaseCredits,
+          maxValue,
+          additionalCreditsPerValue,
+        ) ||
+      payload.postInstallRezQuoteVariableEffectiveStrengthFromValue !== true ||
+      !optionalTrueValue(
+        payload.postInstallRezQuoteVariableTraceBaseFromValue,
+      ) ||
+      !optionalTrueValue(
+        payload.postInstallRezQuoteVariableTraceBidLimitFromValue,
+      )
+    ) {
+      return undefined;
+    }
+    return {
+      kind,
+      additionalCreditsPerValue,
+      minValue,
+      maxValue,
+      minValueFinalCredits,
+      maxValueFinalCredits,
+      effectiveStrengthFromValue: true,
+      ...(payload.postInstallRezQuoteVariableTraceBaseFromValue === true
+        ? { traceBaseFromValue: true }
+        : {}),
+      ...(payload.postInstallRezQuoteVariableTraceBidLimitFromValue === true
+        ? { traceBidLimitFromValue: true }
+        : {}),
+    };
+  }
+  if (kind === "paid_end_the_run_subroutines") {
+    const additionalCreditsPerSubroutine =
+      payload.postInstallRezQuoteVariableAdditionalCreditsPerSubroutine;
+    const minSubroutines = payload.postInstallRezQuoteVariableMinSubroutines;
+    const minSubroutinesFinalCredits =
+      payload.postInstallRezQuoteVariableMinSubroutinesFinalCredits;
+    const firstEndTheRunSubroutineCount =
+      payload.postInstallRezQuoteVariableFirstEndTheRunSubroutineCount;
+    const firstEndTheRunFinalCredits =
+      payload.postInstallRezQuoteVariableFirstEndTheRunFinalCredits;
+    if (
+      !positiveSafeInteger(additionalCreditsPerSubroutine) ||
+      !nonNegativeSafeInteger(minSubroutines) ||
+      !nonNegativeSafeInteger(minSubroutinesFinalCredits) ||
+      !nonNegativeSafeInteger(firstEndTheRunSubroutineCount) ||
+      !nonNegativeSafeInteger(firstEndTheRunFinalCredits) ||
+      firstEndTheRunSubroutineCount !== Math.max(1, minSubroutines) ||
+      minSubroutinesFinalCredits !==
+        safeVariableCreditTotal(
+          finalBaseCredits,
+          minSubroutines,
+          additionalCreditsPerSubroutine,
+        ) ||
+      firstEndTheRunFinalCredits !==
+        safeVariableCreditTotal(
+          finalBaseCredits,
+          firstEndTheRunSubroutineCount,
+          additionalCreditsPerSubroutine,
+        )
+    ) {
+      return undefined;
+    }
+    return {
+      kind,
+      additionalCreditsPerSubroutine,
+      minSubroutines,
+      minSubroutinesFinalCredits,
+      firstEndTheRunSubroutineCount,
+      firstEndTheRunFinalCredits,
+    };
+  }
+  if (kind !== "alternate_subtype") return undefined;
+  const baseSubtypes = canonicalCommaSeparatedSubtypes(
+    payload.postInstallRezQuoteVariableBaseSubtypes,
+  );
+  const alternateSubtypes = canonicalCommaSeparatedSubtypes(
+    payload.postInstallRezQuoteVariableAlternateSubtypes,
+  );
+  const baseSubtypesFinalCredits =
+    payload.postInstallRezQuoteVariableBaseSubtypesFinalCredits;
+  const alternateSubtypesAdditionalCredits =
+    payload.postInstallRezQuoteVariableAlternateSubtypesAdditionalCredits;
+  const alternateSubtypesFinalCredits =
+    payload.postInstallRezQuoteVariableAlternateSubtypesFinalCredits;
+  if (
+    !baseSubtypes ||
+    !alternateSubtypes ||
+    baseSubtypes.join(",") === alternateSubtypes.join(",") ||
+    baseSubtypesFinalCredits !== finalBaseCredits ||
+    !positiveSafeInteger(alternateSubtypesAdditionalCredits) ||
+    !nonNegativeSafeInteger(alternateSubtypesFinalCredits) ||
+    alternateSubtypesFinalCredits !==
+      safeVariableCreditTotal(
+        finalBaseCredits,
+        1,
+        alternateSubtypesAdditionalCredits,
+      )
+  ) {
+    return undefined;
+  }
+  return {
+    kind,
+    baseSubtypes,
+    baseSubtypesFinalCredits,
+    alternateSubtypes,
+    alternateSubtypesAdditionalCredits,
+    alternateSubtypesFinalCredits,
   };
 }
 
@@ -1032,6 +1344,62 @@ function commaSeparatedIds(value: unknown): string[] | undefined {
   if (typeof value !== "string" || value.length === 0) return undefined;
   const ids = value.split(",");
   return validDefinitionIdList(ids) ? ids : undefined;
+}
+
+function canonicalCommaSeparatedSubtypes(value: unknown): string[] | undefined {
+  if (typeof value !== "string" || value.length === 0) return undefined;
+  const subtypes = value.split(",");
+  return subtypes.every(
+    (subtype, index) =>
+      /^[a-z0-9]+(?:_[a-z0-9]+)*$/.test(subtype) &&
+      (index === 0 || subtypes[index - 1]! < subtype),
+  )
+    ? subtypes
+    : undefined;
+}
+
+function canonicalSubtypeArray(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every(
+      (subtype, index) =>
+        typeof subtype === "string" &&
+        /^[a-z0-9]+(?:_[a-z0-9]+)*$/.test(subtype) &&
+        (index === 0 || value[index - 1]! < subtype),
+    )
+  );
+}
+
+function sameCanonicalStrings(
+  left: readonly string[] | undefined,
+  right: readonly string[] | undefined,
+): boolean {
+  if (!left || !right || left.length !== right.length) return false;
+  const sortedLeft = [...left].sort(compareTechnicalStrings);
+  const sortedRight = [...right].sort(compareTechnicalStrings);
+  return sortedLeft.every((value, index) => value === sortedRight[index]);
+}
+
+function positiveSafeInteger(value: unknown): value is number {
+  return nonNegativeSafeInteger(value) && value > 0;
+}
+
+function safeVariableCreditTotal(
+  baseCredits: number,
+  quantity: number,
+  creditsPerUnit: number,
+): number | undefined {
+  const additionalCredits = quantity * creditsPerUnit;
+  const totalCredits = baseCredits + additionalCredits;
+  return nonNegativeSafeInteger(additionalCredits) &&
+    nonNegativeSafeInteger(totalCredits)
+    ? totalCredits
+    : undefined;
+}
+
+function optionalTrueValue(value: unknown): boolean {
+  return value === undefined || value === true;
 }
 
 function normalizeScoreReserve(reserve: CorpScoreReserve):
@@ -1085,19 +1453,43 @@ function normalizeScoreReserve(reserve: CorpScoreReserve):
 function enumerateRezSelections(
   candidates: readonly RezCandidate[],
 ): RezCandidate[][] {
+  const groups = rezCandidateGroups(candidates);
   const selections: RezCandidate[][] = [];
   const visit = (index: number, selected: RezCandidate[]): void => {
-    if (index >= candidates.length) {
+    if (index >= groups.length) {
       selections.push(selected.slice());
       return;
     }
     visit(index + 1, selected);
-    selected.push(candidates[index]!);
-    visit(index + 1, selected);
-    selected.pop();
+    for (const option of groups[index]!) {
+      selected.push(option);
+      visit(index + 1, selected);
+      selected.pop();
+    }
   };
   visit(0, []);
   return selections;
+}
+
+function exactRezSelectionCount(candidates: readonly RezCandidate[]): number {
+  let count = 1;
+  for (const group of rezCandidateGroups(candidates)) {
+    count *= group.length + 1;
+    if (!Number.isSafeInteger(count)) return Number.POSITIVE_INFINITY;
+  }
+  return count;
+}
+
+function rezCandidateGroups(
+  candidates: readonly RezCandidate[],
+): RezCandidate[][] {
+  const groups = new Map<string, RezCandidate[]>();
+  for (const candidate of candidates) {
+    const group = groups.get(candidate.ice.instanceId) ?? [];
+    group.push(candidate);
+    groups.set(candidate.ice.instanceId, group);
+  }
+  return [...groups.values()];
 }
 
 function satisfyingAssessmentIsBetter(
@@ -1151,7 +1543,11 @@ function progressAssessmentIsBetter(
 function selectedRezKey(costs: readonly CorpSelectedRezCost[]): string {
   return JSON.stringify(
     costs
-      .map((cost) => cost.iceInstanceId)
+      .map((cost) => ({
+        iceInstanceId: cost.iceInstanceId,
+        variableRezChoice: cost.variableRezChoice,
+      }))
+      .map((cost) => JSON.stringify(cost))
       .sort(compareTechnicalStrings),
   );
 }

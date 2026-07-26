@@ -156,6 +156,54 @@ describe("plan route binding", () => {
     ).toThrow(expect.objectContaining({ code: "step_target_mismatch" }));
   });
 
+  it("binds an install action to its exact Engine-selected server target", () => {
+    const install = {
+      ...candidate(
+        "install-ice-remote-1",
+        "install_card",
+        "install.card",
+        "corp-ice-definition",
+      ),
+      actorSide: "corp" as const,
+      observerSide: "corp" as const,
+      targetContext: {
+        selectedTargets: [
+          {
+            targetId: "remote_1",
+            targetKind: "server" as const,
+            targetSide: "corp" as const,
+            visibilityScope: "public" as const,
+            evidence: [],
+          },
+        ],
+        targetKind: "server" as const,
+        targetZones: [],
+        targetSide: "corp" as const,
+        hiddenInfoPolicy: "side_safe" as const,
+        availableTargetsStatus: "engine_provided" as const,
+        targetProfileMatches: [],
+        targetConstraintResults: [],
+      },
+    };
+
+    expect(
+      bindBestCurrentPlanRoute({
+        ...baseParams(),
+        side: "corp",
+        step: {
+          stepId: "install_exact_remote_ice",
+          capability: {
+            capabilityId: "install_ice",
+            semanticActionTypes: ["install.card"],
+          },
+          target: { kind: "server", id: "remote_1" },
+          purpose: "Install the exact ICE on the exact selected server.",
+        },
+        candidates: [routeCandidate(install, 20)],
+      }).head.actionId,
+    ).toBe("install-ice-remote-1");
+  });
+
   it("binds an exact source instance when the action operates on that ICE", () => {
     const rez = {
       ...candidate(

@@ -9,7 +9,7 @@ import { MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS } from "./benchmark-deck-slots";
 import { resolveBenchmarkDeckSlot } from "./benchmark-deck-slot-resolver";
 
 describe("Corp mixed draw score-protection coverage", () => {
-  it("keeps the rejected Day Shift draw alternative out of generic hand plans at stateVersion 59", () => {
+  it("keeps Day Shift out of the exact defense-draw and following HQ-overflow routes", () => {
     const slot = MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.find(
       (candidate) =>
         candidate.slotId === "strategy_panel_fast_advance_chrome_rush",
@@ -18,27 +18,32 @@ describe("Corp mixed draw score-protection coverage", () => {
     const resolved = resolveBenchmarkDeckSlot(slot);
     if (!resolved.ok) throw new Error(resolved.reason);
 
-    let capture: AiSimulationDecisionCheckpointCapture | undefined;
+    const captures = new Map<number, AiSimulationDecisionCheckpointCapture>();
     const summary = simulateAiGame({
       ...resolved.config,
       seed: "ai-behavior-baseline-v1-05",
-      maxActions: 62,
+      maxActions: 27,
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
       testOnlyDecisionCheckpointCapture: {
-        actionIndices: [59],
+        actionIndices: [25, 26],
         capture: (snapshot) => {
-          capture = snapshot;
+          captures.set(snapshot.state.stateVersion, snapshot);
         },
       },
     });
 
-    expect(capture).toBeDefined();
-    if (!capture) throw new Error("Missing stateVersion-59 capture");
-    expect(capture.state.stateVersion).toBe(59);
-    expect(capture.state.timingPoint).toBe("corp_action.main");
+    const defenseDrawCapture = captures.get(25);
+    const overflowCapture = captures.get(26);
+    expect(defenseDrawCapture).toBeDefined();
+    expect(overflowCapture).toBeDefined();
+    if (!defenseDrawCapture || !overflowCapture) {
+      throw new Error("Missing stateVersion-25/26 capture");
+    }
+    expect(defenseDrawCapture.state.timingPoint).toBe("corp_action.main");
+    expect(overflowCapture.state.timingPoint).toBe("corp_action.main");
 
-    const dayShiftAction = capture.input.legalActions.find(
+    const dayShiftAction = defenseDrawCapture.input.legalActions.find(
       (action) =>
         action.actionId ===
         "corp.play_operation.corp_onr_v1_288_day-shift_1.corp_onr_v1_288_day-shift_1",
@@ -56,11 +61,13 @@ describe("Corp mixed draw score-protection coverage", () => {
     });
 
     const candidates = buildActionSemanticCandidates({
-      legalActions: capture.input.legalActions,
+      legalActions: defenseDrawCapture.input.legalActions,
       observerSide: "corp",
-      stateVersion: 59,
+      stateVersion: defenseDrawCapture.state.stateVersion,
       visibleSourceDefinitionsByInstanceId:
-        visibleSourceDefinitionsByInstanceId(capture.input.playerView),
+        visibleSourceDefinitionsByInstanceId(
+          defenseDrawCapture.input.playerView,
+        ),
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
     });
@@ -88,24 +95,43 @@ describe("Corp mixed draw score-protection coverage", () => {
 
     expect(summary.errors).toEqual([]);
     expect(summary.runtimeFailures).toEqual([]);
-    expect(summary.actionSequence).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          stateVersionBefore: 59,
-          selectedActionId: "corp.draw_card",
-          planKind: "corp.defend_servers",
-          reasonCode: "plan_first.corp.defend_servers",
-          fallbackUsed: false,
-        }),
-      ]),
+    const defenseDraw = summary.actionSequence.find(
+      (entry) => entry.stateVersionBefore === 25,
     );
-    expect(summary.actionSequence).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          stateVersionBefore: 59,
-          selectedActionId: dayShiftAction?.actionId,
-        }),
-      ]),
+    const overflowConversion = summary.actionSequence.find(
+      (entry) => entry.stateVersionBefore === 26,
     );
+    expect(defenseDraw).toMatchObject({
+      selectedActionId: "corp.draw_card",
+      actionType: "draw_card",
+      planKind: "corp.defend_servers",
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      evidence: expect.arrayContaining([
+        "plan_priority_class:P4",
+        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_214_project-babylon_1%3Anew_remote",
+        "plan_step_capability:develop_score_protection",
+      ]),
+    });
+    expect(overflowConversion).toMatchObject({
+      selectedActionId: "corp.install_card.rd",
+      actionType: "install_card",
+      targetServerId: "rd",
+      planKind: "corp.hand_and_agenda_management",
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+      evidence: expect.arrayContaining([
+        "plan_assessment_evidence:corp_hq_overflow_exact_conversion:1",
+        "plan_step_capability:resolve_hq_overflow",
+      ]),
+    });
+    expect(overflowConversion?.actionType).not.toBe("gain_credit");
+    expect(overflowConversion?.actionType).not.toBe("draw_card");
+    expect(overflowConversion?.actionType).not.toBe("end_turn");
+    expect(
+      summary.actionSequence
+        .filter((entry) => [25, 26].includes(entry.stateVersionBefore))
+        .map((entry) => entry.selectedActionId),
+    ).not.toContain(dayShiftAction?.actionId);
   });
 });

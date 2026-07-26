@@ -4,7 +4,7 @@
   "source": {
     "kind": "captured_match",
     "findingId": "MATCH-3AAC-D4-CORP-FIRST-TURN-PREMATURE-END",
-    "capturedAt": "2026-07-26T05:56:12.162Z",
+    "capturedAt": "2026-07-26T06:26:59.305Z",
     "matchId": "match_3aac786cca427bd0",
     "decisionIndex": 4,
     "stateVersion": 4
@@ -974,9 +974,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_proteus_044_walking-wall_1"
-            ],
+            "ice": ["corp_onr_proteus_044_walking-wall_1"],
             "root": []
           },
           {
@@ -2618,9 +2616,7 @@
             "support": 85,
             "final": 81
           },
-          "supportGaps": [
-            "low_ambush_support"
-          ],
+          "supportGaps": ["low_ambush_support"],
           "evidence": [
             "strategy:corp.damage_kill",
             "confidence:high",
@@ -2642,9 +2638,7 @@
               "support": 85,
               "final": 73
             },
-            "supportGaps": [
-              "low_traceSupport_support"
-            ],
+            "supportGaps": ["low_traceSupport_support"],
             "evidence": [
               "strategy:corp.tag_trace_punish",
               "confidence:high",
@@ -2665,9 +2659,7 @@
               "support": 75,
               "final": 70
             },
-            "supportGaps": [
-              "low_scorePlan_support"
-            ],
+            "supportGaps": ["low_scorePlan_support"],
             "evidence": [
               "strategy:corp.overadvance_value",
               "confidence:high",
@@ -2688,9 +2680,7 @@
               "support": 75,
               "final": 68
             },
-            "supportGaps": [
-              "low_scorePlan_support"
-            ],
+            "supportGaps": ["low_scorePlan_support"],
             "evidence": [
               "strategy:corp.action_tempo",
               "confidence:high",
@@ -2732,9 +2722,7 @@
               "support": 52,
               "final": 56
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.ambush_bluff",
               "confidence:medium",
@@ -2755,9 +2743,7 @@
               "support": 60,
               "final": 46
             },
-            "supportGaps": [
-              "low_scoreAcceleration_support"
-            ],
+            "supportGaps": ["low_scoreAcceleration_support"],
             "evidence": [
               "strategy:corp.fast_advance",
               "confidence:medium",
@@ -2824,18 +2810,14 @@
             "severity": "soft",
             "reason": "support_gap",
             "removalCondition": "resolve support gap low_ambush_support",
-            "evidence": [
-              "support_gap:low_ambush_support"
-            ]
+            "evidence": ["support_gap:low_ambush_support"]
           }
         ],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.damage_kill",
-          "evidence": [
-            "continued:corp.damage_kill"
-          ]
+          "evidence": ["continued:corp.damage_kill"]
         },
         "commitment": {
           "strategyId": "corp.damage_kill",
@@ -3079,10 +3061,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3202,10 +3181,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3360,9 +3336,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 94,
@@ -3455,10 +3429,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3477,9 +3448,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -3510,10 +3479,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3570,10 +3536,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3629,10 +3592,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3686,10 +3646,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3772,12 +3729,320 @@
             "signals": [
               {
                 "kind": "generic",
-                "defenseId": "install:rd",
+                "defenseId": "install:rd:corp.install_card.corp_onr_proteus_036_sandstorm_1.rd.corp_onr_proteus_036_sandstorm_1.0",
                 "serverId": "rd",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_proteus_044_walking-wall"
+                "sourceDefinitionIds": ["onr_proteus_036_sandstorm"],
+                "actionIds": [
+                  "corp.install_card.corp_onr_proteus_036_sandstorm_1.rd.corp_onr_proteus_036_sandstorm_1.0"
                 ],
+                "urgent": true,
+                "installRoute": {
+                  "disposition": "funding_only",
+                  "projection": {
+                    "knowledge": "known",
+                    "actionId": "corp.install_card.corp_onr_proteus_036_sandstorm_1.rd.corp_onr_proteus_036_sandstorm_1.0",
+                    "sourceCardInstanceId": "corp_onr_proteus_036_sandstorm_1",
+                    "sourceDefinitionId": "onr_proteus_036_sandstorm",
+                    "targetServerId": "rd",
+                    "before": {
+                      "knowledge": "known",
+                      "availableCorpCredits": 5,
+                      "availableCorpClicks": 3,
+                      "totalScoreReserveCredits": 0,
+                      "hardClickReserve": 0,
+                      "scoreReserveFingerprint": "clicks:0",
+                      "protection": {
+                        "knowledge": "known",
+                        "runnerAccessSuccessProbability": {
+                          "numerator": 1,
+                          "denominator": 1
+                        },
+                        "maximumRunnerAccessSuccessProbability": {
+                          "numerator": 1,
+                          "denominator": 2
+                        },
+                        "protectsScore": false,
+                        "requiredRandomBreakSuccesses": 0,
+                        "randomBreaks": [],
+                        "runnerCreditsRemainingOnBestAccessPath": 5,
+                        "evidence": [
+                          "scoreProtectionKnown:true",
+                          "scoreProtectionScope:visible_direct_access_prevention",
+                          "rezzedIceCount:0",
+                          "runnerAccessSuccessProbability:1/1",
+                          "maximumRunnerAccessSuccessProbability:1/2",
+                          "requiredRandomBreakSuccesses:0",
+                          "protectsScore:false"
+                        ]
+                      },
+                      "selectedRezCosts": [],
+                      "totalSelectedRezCost": 0,
+                      "creditsAfterDefense": 5,
+                      "clicksAfterDefense": 3,
+                      "preservesScoreCreditReserve": true,
+                      "preservesHardClickReserve": true,
+                      "fundedProtection": false,
+                      "evidence": [
+                        "fundedScoreProtectionKnown:true",
+                        "scoreReserveCredits:0",
+                        "hardClickReserve:0",
+                        "availableRezCredits:5",
+                        "selectedRezCost:0",
+                        "creditsAfterDefense:5",
+                        "clicksAfterDefense:3",
+                        "preservesScoreCreditReserve:true",
+                        "preservesHardClickReserve:true",
+                        "fundedProtection:false"
+                      ]
+                    },
+                    "after": {
+                      "knowledge": "known",
+                      "availableCorpCredits": 5,
+                      "availableCorpClicks": 2,
+                      "totalScoreReserveCredits": 0,
+                      "hardClickReserve": 0,
+                      "scoreReserveFingerprint": "clicks:0",
+                      "protection": {
+                        "knowledge": "known",
+                        "runnerAccessSuccessProbability": {
+                          "numerator": 1,
+                          "denominator": 1
+                        },
+                        "maximumRunnerAccessSuccessProbability": {
+                          "numerator": 1,
+                          "denominator": 2
+                        },
+                        "protectsScore": false,
+                        "requiredRandomBreakSuccesses": 0,
+                        "randomBreaks": [],
+                        "runnerCreditsRemainingOnBestAccessPath": 5,
+                        "evidence": [
+                          "scoreProtectionKnown:true",
+                          "scoreProtectionScope:visible_direct_access_prevention",
+                          "rezzedIceCount:0",
+                          "runnerAccessSuccessProbability:1/1",
+                          "maximumRunnerAccessSuccessProbability:1/2",
+                          "requiredRandomBreakSuccesses:0",
+                          "protectsScore:false"
+                        ]
+                      },
+                      "selectedRezCosts": [],
+                      "totalSelectedRezCost": 0,
+                      "creditsAfterDefense": 5,
+                      "clicksAfterDefense": 2,
+                      "preservesScoreCreditReserve": true,
+                      "preservesHardClickReserve": true,
+                      "fundedProtection": false,
+                      "minimumSatisfyingRezCost": 6,
+                      "minimumAdditionalCreditsToSatisfy": 1,
+                      "minimumAdditionalClicksToSatisfy": 0,
+                      "evidence": [
+                        "fundedScoreProtectionKnown:true",
+                        "scoreReserveCredits:0",
+                        "hardClickReserve:0",
+                        "availableRezCredits:5",
+                        "selectedRezCost:0",
+                        "creditsAfterDefense:5",
+                        "clicksAfterDefense:2",
+                        "preservesScoreCreditReserve:true",
+                        "preservesHardClickReserve:true",
+                        "fundedProtection:false",
+                        "minimumSatisfyingRezCost:6",
+                        "minimumAdditionalCreditsToSatisfy:1",
+                        "minimumAdditionalClicksToSatisfy:0"
+                      ]
+                    },
+                    "effect": "no_progress",
+                    "installCredits": 0,
+                    "installClicks": 1,
+                    "installCostSource": "legal_action_agreed_projection",
+                    "selectedRezCosts": [],
+                    "creditsAfterDefense": 5,
+                    "clicksAfterDefense": 2,
+                    "preservesScoreCreditReserve": true,
+                    "preservesHardClickReserve": true,
+                    "preservesReserves": true,
+                    "funded": false,
+                    "evidence": [
+                      "fundedIceInstallRouteKnown:true",
+                      "routeEffect:no_progress",
+                      "installCredits:0",
+                      "installClicks:1",
+                      "installCostSource:legal_action_agreed_projection",
+                      "sourceRezCost:4",
+                      "sourceRezCostSource:engine_post_install_rez_quote",
+                      "creditsAfterDefense:5",
+                      "clicksAfterDefense:2",
+                      "preservesReserves:true",
+                      "funded:false"
+                    ]
+                  }
+                },
+                "value": 1,
+                "evidenceCode": "corp_defense_exact_route_funding_required:rd:corp.install_card.corp_onr_proteus_036_sandstorm_1.rd.corp_onr_proteus_036_sandstorm_1.0"
+              },
+              {
+                "kind": "generic",
+                "defenseId": "install:rd:corp.install_card.corp_onr_proteus_017_credit-blocks_2.rd.corp_onr_proteus_017_credit-blocks_2.0",
+                "serverId": "rd",
+                "phase": "install_ice",
+                "sourceDefinitionIds": ["onr_proteus_017_credit-blocks"],
+                "actionIds": [
+                  "corp.install_card.corp_onr_proteus_017_credit-blocks_2.rd.corp_onr_proteus_017_credit-blocks_2.0"
+                ],
+                "urgent": true,
+                "installRoute": {
+                  "disposition": "funding_only",
+                  "projection": {
+                    "knowledge": "known",
+                    "actionId": "corp.install_card.corp_onr_proteus_017_credit-blocks_2.rd.corp_onr_proteus_017_credit-blocks_2.0",
+                    "sourceCardInstanceId": "corp_onr_proteus_017_credit-blocks_2",
+                    "sourceDefinitionId": "onr_proteus_017_credit-blocks",
+                    "targetServerId": "rd",
+                    "before": {
+                      "knowledge": "known",
+                      "availableCorpCredits": 5,
+                      "availableCorpClicks": 3,
+                      "totalScoreReserveCredits": 0,
+                      "hardClickReserve": 0,
+                      "scoreReserveFingerprint": "clicks:0",
+                      "protection": {
+                        "knowledge": "known",
+                        "runnerAccessSuccessProbability": {
+                          "numerator": 1,
+                          "denominator": 1
+                        },
+                        "maximumRunnerAccessSuccessProbability": {
+                          "numerator": 1,
+                          "denominator": 2
+                        },
+                        "protectsScore": false,
+                        "requiredRandomBreakSuccesses": 0,
+                        "randomBreaks": [],
+                        "runnerCreditsRemainingOnBestAccessPath": 5,
+                        "evidence": [
+                          "scoreProtectionKnown:true",
+                          "scoreProtectionScope:visible_direct_access_prevention",
+                          "rezzedIceCount:0",
+                          "runnerAccessSuccessProbability:1/1",
+                          "maximumRunnerAccessSuccessProbability:1/2",
+                          "requiredRandomBreakSuccesses:0",
+                          "protectsScore:false"
+                        ]
+                      },
+                      "selectedRezCosts": [],
+                      "totalSelectedRezCost": 0,
+                      "creditsAfterDefense": 5,
+                      "clicksAfterDefense": 3,
+                      "preservesScoreCreditReserve": true,
+                      "preservesHardClickReserve": true,
+                      "fundedProtection": false,
+                      "evidence": [
+                        "fundedScoreProtectionKnown:true",
+                        "scoreReserveCredits:0",
+                        "hardClickReserve:0",
+                        "availableRezCredits:5",
+                        "selectedRezCost:0",
+                        "creditsAfterDefense:5",
+                        "clicksAfterDefense:3",
+                        "preservesScoreCreditReserve:true",
+                        "preservesHardClickReserve:true",
+                        "fundedProtection:false"
+                      ]
+                    },
+                    "after": {
+                      "knowledge": "known",
+                      "availableCorpCredits": 5,
+                      "availableCorpClicks": 2,
+                      "totalScoreReserveCredits": 0,
+                      "hardClickReserve": 0,
+                      "scoreReserveFingerprint": "clicks:0",
+                      "protection": {
+                        "knowledge": "known",
+                        "runnerAccessSuccessProbability": {
+                          "numerator": 1,
+                          "denominator": 1
+                        },
+                        "maximumRunnerAccessSuccessProbability": {
+                          "numerator": 1,
+                          "denominator": 2
+                        },
+                        "protectsScore": false,
+                        "requiredRandomBreakSuccesses": 0,
+                        "randomBreaks": [],
+                        "runnerCreditsRemainingOnBestAccessPath": 5,
+                        "evidence": [
+                          "scoreProtectionKnown:true",
+                          "scoreProtectionScope:visible_direct_access_prevention",
+                          "rezzedIceCount:0",
+                          "runnerAccessSuccessProbability:1/1",
+                          "maximumRunnerAccessSuccessProbability:1/2",
+                          "requiredRandomBreakSuccesses:0",
+                          "protectsScore:false"
+                        ]
+                      },
+                      "selectedRezCosts": [],
+                      "totalSelectedRezCost": 0,
+                      "creditsAfterDefense": 5,
+                      "clicksAfterDefense": 2,
+                      "preservesScoreCreditReserve": true,
+                      "preservesHardClickReserve": true,
+                      "fundedProtection": false,
+                      "minimumSatisfyingRezCost": 6,
+                      "minimumAdditionalCreditsToSatisfy": 1,
+                      "minimumAdditionalClicksToSatisfy": 0,
+                      "evidence": [
+                        "fundedScoreProtectionKnown:true",
+                        "scoreReserveCredits:0",
+                        "hardClickReserve:0",
+                        "availableRezCredits:5",
+                        "selectedRezCost:0",
+                        "creditsAfterDefense:5",
+                        "clicksAfterDefense:2",
+                        "preservesScoreCreditReserve:true",
+                        "preservesHardClickReserve:true",
+                        "fundedProtection:false",
+                        "minimumSatisfyingRezCost:6",
+                        "minimumAdditionalCreditsToSatisfy:1",
+                        "minimumAdditionalClicksToSatisfy:0"
+                      ]
+                    },
+                    "effect": "no_progress",
+                    "installCredits": 0,
+                    "installClicks": 1,
+                    "installCostSource": "legal_action_agreed_projection",
+                    "selectedRezCosts": [],
+                    "creditsAfterDefense": 5,
+                    "clicksAfterDefense": 2,
+                    "preservesScoreCreditReserve": true,
+                    "preservesHardClickReserve": true,
+                    "preservesReserves": true,
+                    "funded": false,
+                    "evidence": [
+                      "fundedIceInstallRouteKnown:true",
+                      "routeEffect:no_progress",
+                      "installCredits:0",
+                      "installClicks:1",
+                      "installCostSource:legal_action_agreed_projection",
+                      "sourceRezCost:6",
+                      "sourceRezCostSource:engine_post_install_rez_quote",
+                      "creditsAfterDefense:5",
+                      "clicksAfterDefense:2",
+                      "preservesReserves:true",
+                      "funded:false"
+                    ]
+                  }
+                },
+                "value": 1,
+                "evidenceCode": "corp_defense_exact_route_funding_required:rd:corp.install_card.corp_onr_proteus_017_credit-blocks_2.rd.corp_onr_proteus_017_credit-blocks_2.0"
+              },
+              {
+                "kind": "generic",
+                "defenseId": "install:rd:corp.install_card.corp_onr_proteus_044_walking-wall_1.rd.corp_onr_proteus_044_walking-wall_1.0",
+                "serverId": "rd",
+                "phase": "install_ice",
+                "sourceDefinitionIds": ["onr_proteus_044_walking-wall"],
                 "actionIds": [
                   "corp.install_card.corp_onr_proteus_044_walking-wall_1.rd.corp_onr_proteus_044_walking-wall_1.0"
                 ],
@@ -3940,6 +4205,161 @@
                 },
                 "value": 1,
                 "evidenceCode": "engine_certified_global_defense_access_probability_reduced"
+              },
+              {
+                "kind": "generic",
+                "defenseId": "install:rd:corp.install_card.corp_onr_proteus_039_sphinx-2006_1.rd.corp_onr_proteus_039_sphinx-2006_1.0",
+                "serverId": "rd",
+                "phase": "install_ice",
+                "sourceDefinitionIds": ["onr_proteus_039_sphinx-2006"],
+                "actionIds": [
+                  "corp.install_card.corp_onr_proteus_039_sphinx-2006_1.rd.corp_onr_proteus_039_sphinx-2006_1.0"
+                ],
+                "urgent": true,
+                "installRoute": {
+                  "disposition": "funding_only",
+                  "projection": {
+                    "knowledge": "known",
+                    "actionId": "corp.install_card.corp_onr_proteus_039_sphinx-2006_1.rd.corp_onr_proteus_039_sphinx-2006_1.0",
+                    "sourceCardInstanceId": "corp_onr_proteus_039_sphinx-2006_1",
+                    "sourceDefinitionId": "onr_proteus_039_sphinx-2006",
+                    "targetServerId": "rd",
+                    "before": {
+                      "knowledge": "known",
+                      "availableCorpCredits": 5,
+                      "availableCorpClicks": 3,
+                      "totalScoreReserveCredits": 0,
+                      "hardClickReserve": 0,
+                      "scoreReserveFingerprint": "clicks:0",
+                      "protection": {
+                        "knowledge": "known",
+                        "runnerAccessSuccessProbability": {
+                          "numerator": 1,
+                          "denominator": 1
+                        },
+                        "maximumRunnerAccessSuccessProbability": {
+                          "numerator": 1,
+                          "denominator": 2
+                        },
+                        "protectsScore": false,
+                        "requiredRandomBreakSuccesses": 0,
+                        "randomBreaks": [],
+                        "runnerCreditsRemainingOnBestAccessPath": 5,
+                        "evidence": [
+                          "scoreProtectionKnown:true",
+                          "scoreProtectionScope:visible_direct_access_prevention",
+                          "rezzedIceCount:0",
+                          "runnerAccessSuccessProbability:1/1",
+                          "maximumRunnerAccessSuccessProbability:1/2",
+                          "requiredRandomBreakSuccesses:0",
+                          "protectsScore:false"
+                        ]
+                      },
+                      "selectedRezCosts": [],
+                      "totalSelectedRezCost": 0,
+                      "creditsAfterDefense": 5,
+                      "clicksAfterDefense": 3,
+                      "preservesScoreCreditReserve": true,
+                      "preservesHardClickReserve": true,
+                      "fundedProtection": false,
+                      "evidence": [
+                        "fundedScoreProtectionKnown:true",
+                        "scoreReserveCredits:0",
+                        "hardClickReserve:0",
+                        "availableRezCredits:5",
+                        "selectedRezCost:0",
+                        "creditsAfterDefense:5",
+                        "clicksAfterDefense:3",
+                        "preservesScoreCreditReserve:true",
+                        "preservesHardClickReserve:true",
+                        "fundedProtection:false"
+                      ]
+                    },
+                    "after": {
+                      "knowledge": "known",
+                      "availableCorpCredits": 5,
+                      "availableCorpClicks": 2,
+                      "totalScoreReserveCredits": 0,
+                      "hardClickReserve": 0,
+                      "scoreReserveFingerprint": "clicks:0",
+                      "protection": {
+                        "knowledge": "known",
+                        "runnerAccessSuccessProbability": {
+                          "numerator": 1,
+                          "denominator": 1
+                        },
+                        "maximumRunnerAccessSuccessProbability": {
+                          "numerator": 1,
+                          "denominator": 2
+                        },
+                        "protectsScore": false,
+                        "requiredRandomBreakSuccesses": 0,
+                        "randomBreaks": [],
+                        "runnerCreditsRemainingOnBestAccessPath": 5,
+                        "evidence": [
+                          "scoreProtectionKnown:true",
+                          "scoreProtectionScope:visible_direct_access_prevention",
+                          "rezzedIceCount:0",
+                          "runnerAccessSuccessProbability:1/1",
+                          "maximumRunnerAccessSuccessProbability:1/2",
+                          "requiredRandomBreakSuccesses:0",
+                          "protectsScore:false"
+                        ]
+                      },
+                      "selectedRezCosts": [],
+                      "totalSelectedRezCost": 0,
+                      "creditsAfterDefense": 5,
+                      "clicksAfterDefense": 2,
+                      "preservesScoreCreditReserve": true,
+                      "preservesHardClickReserve": true,
+                      "fundedProtection": false,
+                      "minimumSatisfyingRezCost": 6,
+                      "minimumAdditionalCreditsToSatisfy": 1,
+                      "minimumAdditionalClicksToSatisfy": 0,
+                      "evidence": [
+                        "fundedScoreProtectionKnown:true",
+                        "scoreReserveCredits:0",
+                        "hardClickReserve:0",
+                        "availableRezCredits:5",
+                        "selectedRezCost:0",
+                        "creditsAfterDefense:5",
+                        "clicksAfterDefense:2",
+                        "preservesScoreCreditReserve:true",
+                        "preservesHardClickReserve:true",
+                        "fundedProtection:false",
+                        "minimumSatisfyingRezCost:6",
+                        "minimumAdditionalCreditsToSatisfy:1",
+                        "minimumAdditionalClicksToSatisfy:0"
+                      ]
+                    },
+                    "effect": "no_progress",
+                    "installCredits": 0,
+                    "installClicks": 1,
+                    "installCostSource": "legal_action_agreed_projection",
+                    "selectedRezCosts": [],
+                    "creditsAfterDefense": 5,
+                    "clicksAfterDefense": 2,
+                    "preservesScoreCreditReserve": true,
+                    "preservesHardClickReserve": true,
+                    "preservesReserves": true,
+                    "funded": false,
+                    "evidence": [
+                      "fundedIceInstallRouteKnown:true",
+                      "routeEffect:no_progress",
+                      "installCredits:0",
+                      "installClicks:1",
+                      "installCostSource:legal_action_agreed_projection",
+                      "sourceRezCost:6",
+                      "sourceRezCostSource:engine_post_install_rez_quote",
+                      "creditsAfterDefense:5",
+                      "clicksAfterDefense:2",
+                      "preservesReserves:true",
+                      "funded:false"
+                    ]
+                  }
+                },
+                "value": 1,
+                "evidenceCode": "corp_defense_exact_route_funding_required:rd:corp.install_card.corp_onr_proteus_039_sphinx-2006_1.rd.corp_onr_proteus_039_sphinx-2006_1.0"
               }
             ],
             "centralAllocation": {
@@ -4139,7 +4559,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [
@@ -4148,15 +4568,9 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.economy"
-      ],
-      "acceptableCapabilities": [
-        "develop_or_convert_corp_economy"
-      ],
-      "forbiddenPlanKinds": [
-        "corp.complete_turn"
-      ],
+      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
+      "acceptableCapabilities": ["draw_for_plan"],
+      "forbiddenPlanKinds": ["corp.complete_turn"],
       "forbiddenCapabilities": [
         "complete_turn_after_productive_routes_exhausted"
       ]

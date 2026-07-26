@@ -12,7 +12,7 @@ import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decisio
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
 describe("plan-first Runner run-lock parent-plan contract", () => {
-  it("ends the turn when a run lock has no pressure route or bound funding need", () => {
+  it("uses last productive liquidity when a run lock has no pressure route or bound funding need", () => {
     resetResidentPlanPortfolioMemory();
     const gainCredit = legalAction(
       "runner.gain_credit",
@@ -33,14 +33,14 @@ describe("plan-first Runner run-lock parent-plan contract", () => {
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
-      actionId: endTurn.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      actionId: gainCredit.actionId,
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_step_capability:complete_turn_after_productive_routes_exhausted",
-        "plan_assessment_evidence:runner_immediate_credit_route_has_no_bound_funding_need",
+        "plan_step_capability:gain_general_liquid_credits",
+        "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
       ]),
     );
   });
@@ -81,9 +81,7 @@ describe("plan-first Runner run-lock parent-plan contract", () => {
       },
     });
     expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        "plan_step_capability:pressure_hq_access",
-      ]),
+      expect.arrayContaining(["plan_step_capability:pressure_hq_access"]),
     );
   });
 });
@@ -105,11 +103,7 @@ function runLockInput(
   input.playerView.opponent.agendaPoints = 4;
   input.playerView.opponent.handCount = 5;
   input.playerView.opponent.deckCount = 20;
-  input.playerView.servers = [
-    server("hq"),
-    server("rd"),
-    server("archives"),
-  ];
+  input.playerView.servers = [server("hq"), server("rd"), server("archives")];
   input.playerView.turnSerial = 7;
   input.eventTail = [
     {

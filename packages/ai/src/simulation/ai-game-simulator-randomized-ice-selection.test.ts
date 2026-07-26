@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   type AiDecision,
 } from "@netgrid/shared";
@@ -8,6 +9,89 @@ import { chooseAiAction } from "../index";
 import { createAiGameSimulator } from "./ai-game-simulator";
 
 describe("AI game simulator randomized ICE-install selection", () => {
+  it("binds Punish route quotes to the current simulation state and overrides foreign callbacks", () => {
+    let stateBoundQuotes = 0;
+    let foreignQuotes = 0;
+    const simulator = createAiGameSimulator({
+      chooseDecisionForSimulation: (side, input, config): AiDecision => {
+        if (
+          side === "corp" &&
+          stateBoundQuotes === 0 &&
+          input.playerView.timingPoint === "corp_action.main"
+        ) {
+          if (!input.matchId)
+            throw new Error(
+              "Simulation Punish quote is missing match binding.",
+            );
+          const quote = config.aiDecisionRuntimeOptions?.quoteCorpPunishRoute?.(
+            {
+              schemaVersion: CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+              matchId: input.matchId,
+              side: "corp",
+              stateVersion: input.playerView.stateVersion,
+              timingPoint: input.playerView.timingPoint,
+              campaignId: "test:simulation-state-bound-punish",
+              routeId: "test:missing-source-route",
+              steps: [
+                {
+                  stepId: "test:missing-source-step",
+                  order: 0,
+                  kind: "meat_damage",
+                  sourceCardInstanceId: "missing-source",
+                  sourceCapabilityId: "ability:on_play:0",
+                },
+              ],
+            },
+          );
+          expect(quote?.ok).toBe(true);
+          if (!quote?.ok)
+            throw new Error(
+              quote?.error.message ??
+                "Simulator did not provide a state-bound Punish quote.",
+            );
+          expect(quote.quote).toMatchObject({
+            matchId: input.matchId,
+            stateVersion: input.playerView.stateVersion,
+            timingPoint: input.playerView.timingPoint,
+            complete: false,
+            incompleteReasons: ["source_unavailable"],
+          });
+          stateBoundQuotes += 1;
+        }
+        return chooseAiAction(input, config.aiDecisionRuntimeOptions);
+      },
+      simulationSideUsesSemanticRuntime: () => true,
+      runnerHandUseDiagnosticsForSimulationAction: () => ({}),
+      runnerReserveDiagnosticsForSimulationAction: () => ({}),
+      runnerCentralPressureDiagnosticsForSimulationAction: () => ({}),
+      runnerBreakerCoverageDiagnosticsForSimulationAction: () => ({}),
+      runnerEconomySetupDiagnosticsForSimulationAction: () => ({}),
+      tagPunishWindowDiagnosticsForSimulationAction: () => ({}),
+      corpFutureRunIceDiagnosticsForSimulationAction: () => ({}),
+      qualityTagsForAction: () => [],
+    });
+
+    const summary = simulator.simulateAiGame({
+      seed: "punish-state-bound-callback",
+      maxActions: 12,
+      aiDecisionRuntimeOptions: {
+        quoteCorpPunishRoute: () => {
+          foreignQuotes += 1;
+          throw new Error("foreign Punish quote callback must be overridden");
+        },
+      },
+    });
+
+    expect(stateBoundQuotes).toBe(1);
+    expect(foreignQuotes).toBe(0);
+    expect(summary.errors).toEqual([]);
+    expect(summary.runtimeFailures).toEqual([]);
+    expect(summary.replayOk).toBe(true);
+    expect(JSON.stringify(summary)).not.toMatch(
+      /simulation-state-bound-punish|missing-source-route|requestEcho/,
+    );
+  });
+
   it("quotes, applies, traces, and replays the Engine-selected LegalAction", () => {
     let randomizedSelections = 0;
     const simulator = createAiGameSimulator({

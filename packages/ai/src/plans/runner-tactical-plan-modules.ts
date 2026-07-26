@@ -4,6 +4,7 @@ import type {
   PlanAssessment,
   PriorityClass,
   PriorityClaim,
+  ResourceGap,
 } from "./plan-assessment";
 import type { PlanInstance, PlanProposal } from "./plan-kernel-types";
 import type { PlanOutcomeReceipt } from "./resident-plan-portfolio";
@@ -35,10 +36,7 @@ export type RunnerPressureSignal = {
   runActionExclusions?: Record<string, string[]>;
   preparationActionIds?: string[];
   supportNeedId?: string;
-  routePreparation?:
-    | "release_run_lock"
-    | "develop_payoff"
-    | "targeted_bypass";
+  routePreparation?: "release_run_lock" | "develop_payoff" | "targeted_bypass";
   targetedBypassCommitment?: RunnerTargetedBypassCommitment;
   encounterCreditSpendLimit?: number;
   accessCommitment?: RunnerRunAccessCommitmentSignal;
@@ -115,7 +113,9 @@ export type RunnerRestrictedProgramInstallSequenceCommitment = {
   minimumHandBuffer: number;
   ordinaryClicksAfterOpening: number;
   targetSteps: RunnerRestrictedProgramInstallSequenceStep[];
-  admissionReason: "multiple_productive_programs" | "acute_temporary_credit_bridge";
+  admissionReason:
+    | "multiple_productive_programs"
+    | "acute_temporary_credit_bridge";
   evidenceCodes: string[];
 };
 
@@ -435,7 +435,7 @@ function centralPressureModule(): PlanModule {
           signal.evidenceCode,
           undefined,
           signal.routePreparation === "develop_payoff" ||
-          signal.routePreparation === "targeted_bypass"
+            signal.routePreparation === "targeted_bypass"
             ? {
                 phase: "develop_payoff",
                 blockerCode: "central_pressure_payoff_route_unavailable",
@@ -453,6 +453,11 @@ function centralPressureModule(): PlanModule {
         current.signal.reachable &&
         current.signal.marginalValue > 0 &&
         candidates.length > 0;
+      const resourceGaps = exactRunnerParentFundingResourceGaps(
+        context,
+        instance,
+        current.signal.supportNeedId,
+      );
       const result = assessment(
         instance,
         current.signal.priorityClass,
@@ -463,6 +468,7 @@ function centralPressureModule(): PlanModule {
         current.signal.routePreparation === "targeted_bypass"
           ? "belief_supported"
           : "visible_state_forced",
+        resourceGaps,
       );
       if (!routeExists && current.signal.supportNeedId) {
         result.blockers = [
@@ -518,7 +524,7 @@ function centralPressureModule(): PlanModule {
               ? `Execute the preflighted targeted bypass route on ${current.signal.serverId}.`
               : current.signal.routePreparation === "develop_payoff"
                 ? `Develop ${current.signal.purpose} payoff for ${current.signal.serverId}.`
-              : `Execute ${current.signal.purpose} pressure on ${current.signal.serverId}.`,
+                : `Execute ${current.signal.purpose} pressure on ${current.signal.serverId}.`,
         },
         candidates,
       };
@@ -553,6 +559,11 @@ function remoteContestModule(): PlanModule {
         current.signal.reachable &&
         current.signal.marginalValue > 0 &&
         remoteCandidates(context, current.signal).length > 0;
+      const resourceGaps = exactRunnerParentFundingResourceGaps(
+        context,
+        instance,
+        current.signal.supportNeedId,
+      );
       const result = assessment(
         instance,
         priorityClass,
@@ -563,6 +574,7 @@ function remoteContestModule(): PlanModule {
         current.signal.routePreparation === "targeted_bypass"
           ? "belief_supported"
           : "visible_state_forced",
+        resourceGaps,
       );
       if (priorityClass === "P4") {
         result.intentFit = "tactical_override";
@@ -611,9 +623,7 @@ function remoteContestModule(): PlanModule {
   };
 }
 
-function remotePriority(
-  signal: RunnerRemoteContestSignal,
-): "P2" | "P4" | "P6" {
+function remotePriority(signal: RunnerRemoteContestSignal): "P2" | "P4" | "P6" {
   if (signal.knownAgendaThreat) return "P2";
   return signal.constrainedActionCapacity ? "P6" : "P4";
 }
@@ -656,7 +666,7 @@ function developmentModule(): PlanModule {
                   ? "development_funding_route_unavailable_this_turn"
                   : signal.phase === "prepare_restricted_sequence"
                     ? "productive_program_bundle_not_ready"
-                  : "development_action_route_unavailable",
+                    : "development_action_route_unavailable",
               ...(signal.evidenceCodes
                 ? { evidenceCodes: signal.evidenceCodes }
                 : {}),
@@ -697,9 +707,9 @@ function developmentModule(): PlanModule {
                   ? "execute_next_committed_program_install"
                   : completingRestrictedSequence
                     ? "complete_committed_program_install_sequence"
-              : funding
-                ? `fund_${current.signal.definitionId}`
-                : `develop_${current.signal.definitionId}`,
+                    : funding
+                      ? `fund_${current.signal.definitionId}`
+                      : `develop_${current.signal.definitionId}`,
             semanticActionTypes: current.signal.semanticActionTypes,
             ...(funding ||
             openingRestrictedSequence ||
@@ -708,9 +718,7 @@ function developmentModule(): PlanModule {
             current.signal.targetKind === "capability"
               ? {}
               : {
-                  requiredSourceDefinitionIds: [
-                    current.signal.definitionId,
-                  ],
+                  requiredSourceDefinitionIds: [current.signal.definitionId],
                 }),
           },
           ...(funding ||
@@ -726,16 +734,16 @@ function developmentModule(): PlanModule {
                 },
               }),
           purpose: openingRestrictedSequence
-              ? "Open a Valu-Pak sequence only for a concrete, resource-feasible ordered program-install commitment."
-              : preparingRestrictedSequence
-                ? "Keep Valu-Pak resident while waiting for a concrete bundle of currently meaningful, jointly feasible programs."
+            ? "Open a Valu-Pak sequence only for a concrete, resource-feasible ordered program-install commitment."
+            : preparingRestrictedSequence
+              ? "Keep Valu-Pak resident while waiting for a concrete bundle of currently meaningful, jointly feasible programs."
               : executingRestrictedSequence
                 ? "Execute the next program in the committed Valu-Pak installation order."
                 : completingRestrictedSequence
                   ? "Close the completed Valu-Pak installation sequence without ending the Runner turn."
-            : funding
-              ? `Fund the resident ${current.signal.definitionId} development plan.`
-              : `Develop ${current.signal.definitionId} for ${current.signal.purposeCode ?? "assigned domain plan"}.`,
+                  : funding
+                    ? `Fund the resident ${current.signal.definitionId} development plan.`
+                    : `Develop ${current.signal.definitionId} for ${current.signal.purposeCode ?? "assigned domain plan"}.`,
         },
         candidates: developmentCandidates(context, current.signal),
       };
@@ -876,6 +884,7 @@ function assessment(
   executorId: string | undefined,
   p2Reason: "score_threat" | undefined = undefined,
   guarantee: GuaranteeLevel = "visible_state_forced",
+  resourceGaps: readonly ResourceGap[] = [],
 ): PlanAssessment {
   const claim: PriorityClaim =
     priorityClass === "P1"
@@ -918,24 +927,28 @@ function assessment(
                 reasonCode: "strategic_campaign",
                 horizon: "multi_turn",
               }
-          : priorityClass === "P5"
-            ? {
-                requestedClass: "P5",
-                reasonCode: "development_need",
-                horizon: "multi_turn",
-              }
-            : {
-                requestedClass: "P6",
-                reasonCode: "neutral_progress",
-                horizon: "current_turn",
-              };
+            : priorityClass === "P5"
+              ? {
+                  requestedClass: "P5",
+                  reasonCode: "development_need",
+                  horizon: "multi_turn",
+                }
+              : {
+                  requestedClass: "P6",
+                  reasonCode: "neutral_progress",
+                  horizon: "current_turn",
+                };
   return {
     instanceId: instance.instanceId,
     side: "runner",
     priorityClaim: claim,
     intentFit:
       priorityClass === "P4" || priorityClass === "P5" ? "aligned" : "none",
-    readiness: routeExists ? "executable_now" : "blocked",
+    readiness: routeExists
+      ? "executable_now"
+      : resourceGaps.length > 0
+        ? "executable_with_support"
+        : "blocked",
     ...(routeExists
       ? {
           nextStepPreview: {
@@ -947,16 +960,20 @@ function assessment(
       : {}),
     feasibility: {
       currentRouteHeadPossible: routeExists,
-      projectedActionCount: routeExists ? 1 : 0,
+      projectedActionCount: routeExists
+        ? 1
+        : resourceGaps.length > 0
+          ? resourceGaps.length + 1
+          : 0,
       opponentCanReact: priorityClass !== "P3",
       confidence: guarantee,
     },
-    resourceGaps: [],
+    resourceGaps: resourceGaps.map((gap) => ({ ...gap })),
     expectedOutcome: {
       outcomeKind: "tactical_progress",
-      minimumValue: routeExists ? value : 0,
-      expectedValue: routeExists ? value : 0,
-      maximumValue: routeExists ? value : 0,
+      minimumValue: routeExists || resourceGaps.length > 0 ? value : 0,
+      expectedValue: routeExists || resourceGaps.length > 0 ? value : 0,
+      maximumValue: routeExists || resourceGaps.length > 0 ? value : 0,
       terminal: false,
       guarantee,
     },
@@ -966,10 +983,40 @@ function assessment(
       switchingCost: executorId === instance.instanceId ? 2 : 0,
       progressAtRisk: executorId === instance.instanceId ? 2 : 0,
     },
-    blockers: routeExists ? [] : structuredClone(instance.blockers),
+    blockers:
+      routeExists || resourceGaps.length > 0
+        ? []
+        : structuredClone(instance.blockers),
     withinClassValue: value,
     evidenceCodes: instance.evidenceRefs.map((entry) => entry.code),
   };
+}
+
+function exactRunnerParentFundingResourceGaps(
+  context: PlanSchedulerContext,
+  parent: PlanInstance,
+  supportNeedId: string | undefined,
+): ResourceGap[] {
+  if (supportNeedId === undefined) return [];
+  const exactNeeds = domain(context).fundingNeeds.filter(
+    (need) =>
+      need.kind === "parent_plan_support" &&
+      need.needId === supportNeedId &&
+      need.parentPlanInstanceId === parent.instanceId &&
+      need.gap > 0,
+  );
+  if (exactNeeds.length !== 1) return [];
+  const [need] = exactNeeds;
+  if (!need) return [];
+  return [
+    {
+      needId: need.needId,
+      capability: "credits",
+      minimum: need.gap,
+      available: 0,
+      deadline: "current_turn",
+    },
+  ];
 }
 
 function pressureCandidates(
@@ -980,9 +1027,7 @@ function pressureCandidates(
     signal.routePreparation === "develop_payoff" ||
     signal.routePreparation === "targeted_bypass"
   ) {
-    const preparationActionIds = new Set(
-      signal.preparationActionIds ?? [],
-    );
+    const preparationActionIds = new Set(signal.preparationActionIds ?? []);
     return context.actionCandidates
       .filter((candidate) => preparationActionIds.has(candidate.actionId))
       .map((candidate) => ({
@@ -990,38 +1035,36 @@ function pressureCandidates(
         stepValue: signal.marginalValue,
       }));
   }
-  const runCandidates = context.actionCandidates
-    .filter(
-      (candidate) =>
-        (signal.runActionIds?.length
-          ? signal.runActionIds.includes(candidate.actionId)
-          : (candidate.semanticActionType === "run.start" &&
-              candidate.runProjectionSummary?.serverId === signal.serverId) ||
-            (candidate.semanticActionType === "play.runner_event" &&
-              candidate.sourceDefinitionId !== undefined &&
-              candidate.runProjectionSummary?.serverId === signal.serverId &&
-              (signal.sourceDefinitionIds ?? []).includes(
-                candidate.sourceDefinitionId,
-              ))) &&
-        signal.reachable &&
-        signal.marginalValue > 0,
-    );
+  const runCandidates = context.actionCandidates.filter(
+    (candidate) =>
+      (signal.runActionIds?.length
+        ? signal.runActionIds.includes(candidate.actionId)
+        : (candidate.semanticActionType === "run.start" &&
+            candidate.runProjectionSummary?.serverId === signal.serverId) ||
+          (candidate.semanticActionType === "play.runner_event" &&
+            candidate.sourceDefinitionId !== undefined &&
+            candidate.runProjectionSummary?.serverId === signal.serverId &&
+            (signal.sourceDefinitionIds ?? []).includes(
+              candidate.sourceDefinitionId,
+            ))) &&
+      signal.reachable &&
+      signal.marginalValue > 0,
+  );
   const directRunAvailable = runCandidates.some(
     (candidate) => candidate.semanticActionType === "run.start",
   );
-  return runCandidates
-    .map((candidate) => ({
-      candidate,
-      stepValue:
-        signal.marginalValue +
-        runnerCardRunRoutePreference(
-          context,
-          candidate,
-          signal.serverId,
-          directRunAvailable,
-        ) +
-        (signal.runActionValues?.[candidate.actionId] ?? 0),
-    }));
+  return runCandidates.map((candidate) => ({
+    candidate,
+    stepValue:
+      signal.marginalValue +
+      runnerCardRunRoutePreference(
+        context,
+        candidate,
+        signal.serverId,
+        directRunAvailable,
+      ) +
+      (signal.runActionValues?.[candidate.actionId] ?? 0),
+  }));
 }
 
 function runnerCardRunRoutePreference(
@@ -1055,11 +1098,7 @@ function runnerCardRunHasVisibleDifferentialPayoff(
     (entry) => entry.id === serverId,
   );
   if (!server) return false;
-  if (
-    candidate.conditions.some(
-      (condition) => condition.status === "absent",
-    )
-  ) {
+  if (candidate.conditions.some((condition) => condition.status === "absent")) {
     return false;
   }
   if (
@@ -1099,9 +1138,7 @@ function remoteCandidates(
     signal.routePreparation === "prepare_access_payoff" ||
     signal.routePreparation === "targeted_bypass"
   ) {
-    const preparationActionIds = new Set(
-      signal.preparationActionIds ?? [],
-    );
+    const preparationActionIds = new Set(signal.preparationActionIds ?? []);
     return context.actionCandidates
       .filter((candidate) => preparationActionIds.has(candidate.actionId))
       .map((candidate) => ({
@@ -1109,18 +1146,17 @@ function remoteCandidates(
         stepValue: signal.marginalValue,
       }));
   }
-  return context.actionCandidates
-    .flatMap((candidate) => {
-      const assessment = signal.runActionAssessments[candidate.actionId];
-      if (
-        assessment?.verdict !== "executable" ||
-        !signal.reachable ||
-        signal.marginalValue <= 0
-      ) {
-        return [];
-      }
-      return [{ candidate, stepValue: assessment.stepValue }];
-    });
+  return context.actionCandidates.flatMap((candidate) => {
+    const assessment = signal.runActionAssessments[candidate.actionId];
+    if (
+      assessment?.verdict !== "executable" ||
+      !signal.reachable ||
+      signal.marginalValue <= 0
+    ) {
+      return [];
+    }
+    return [{ candidate, stepValue: assessment.stepValue }];
+  });
 }
 
 function developmentCandidates(
@@ -1255,12 +1291,8 @@ function runWindowCandidateValue(
     if (candidate.actionType === "continue_run")
       return (assessedValue ?? 0) - 5_000;
   }
-  if (
-    encounterIntent === "mitigate_threat" &&
-    assessedValue === undefined
-  ) {
-    if (candidate.semanticActionType === "breaker.break_subroutine")
-      return 450;
+  if (encounterIntent === "mitigate_threat" && assessedValue === undefined) {
+    if (candidate.semanticActionType === "breaker.break_subroutine") return 450;
     if (candidate.semanticActionType === "breaker.boost_strength") return 350;
     if (candidate.actionType === "continue_run") return 0;
   }

@@ -25,7 +25,7 @@ describe("match e653f50a Corp remediation decision checkpoints", () => {
       validHostileSameTurnJson,
     ],
     [
-      "protects R&D before starting a background scoring remote",
+      "uses exact basic liquidity instead of unaffordable R&D protection or a background scoring remote",
       rdBeforeBackgroundRemoteJson,
     ],
     [

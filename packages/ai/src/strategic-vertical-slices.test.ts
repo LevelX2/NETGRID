@@ -177,24 +177,19 @@ describe("Deck strategy runtime vertical slices", () => {
         "plan_step_capability:punish_damage",
       ]),
     );
-    expect(noWindow.actionId).toBe("end-turn");
+    expect(noWindow.actionId).toBe("gain-credit");
     expect(noWindow.evidence).toEqual(
-      expect.arrayContaining(["plan_module:corp.complete_turn"]),
+      expect.arrayContaining(["plan_module:corp.economy"]),
     );
   });
 
   it("keeps Corp scoreline terminal windows above setup, but avoids contestable advances", () => {
-    const scoringAgenda = visibleCard(
-      "scoring-agenda",
-      "corp",
-      "agenda",
-      {
-        definitionId: "simple_agenda",
-        title: "Simple Agenda",
-        advancementRequirement: 3,
-        advancementCounters: 3,
-      },
-    );
+    const scoringAgenda = visibleCard("scoring-agenda", "corp", "agenda", {
+      definitionId: "simple_agenda",
+      title: "Simple Agenda",
+      advancementRequirement: 3,
+      advancementCounters: 3,
+    });
     const score = legalAction("score-agenda", "corp", "score_agenda", "Score", {
       source: scoringAgenda.instanceId,
       payload: {
@@ -274,7 +269,7 @@ describe("Deck strategy runtime vertical slices", () => {
         "plan_priority_class:P3",
       ]),
     );
-    expect(contestableDecision.actionId).toBe("end-turn");
+    expect(contestableDecision.actionId).toBe("gain-credit");
   });
 
   it("uses ICE-tax defense when affordable and economy when the defensive line is unfunded", () => {
@@ -292,15 +287,18 @@ describe("Deck strategy runtime vertical slices", () => {
         projectedServerId: "rd",
         expiresAtStateVersion: 1,
         complete: true,
+        costKind: "fixed",
         baseCredits: 1,
         finalCredits: 1,
         mandatoryAdditionalCosts: { agendaPoints: 0 },
       },
     });
     const expensiveIce = visibleCard("expensive-rd-wall", "corp", "ice", {
-      definitionId: "onr_v1_279_wall-of-static",
-      title: "Wall of Static",
-      rezCost: 3,
+      definitionId: "onr_v1_237_data-wall",
+      title: "Data Wall",
+      rezCost: 2,
+      strength: 0,
+      subtypes: ["wall"],
     });
     const rez = legalAction("rez-ice", "corp", "rez_ice", "Rez Wall", {
       cost: 1,
@@ -324,28 +322,54 @@ describe("Deck strategy runtime vertical slices", () => {
       },
       strategyId: "corp.ice_tax_glacier",
     });
+    const unfundedInstall = legalAction(
+      "install-expensive-ice",
+      "corp",
+      "install_card",
+      "Install ICE",
+      {
+        cost: 0,
+        source: expensiveIce.instanceId,
+        payload: {
+          cardId: expensiveIce.instanceId,
+          sourceDefinitionId: "onr_v1_237_data-wall",
+          placement: "ice",
+          serverId: "remote_1",
+          iceInstallBaseCost: 0,
+          iceInstallAdditionalCost: 0,
+          iceInstallReduction: 0,
+          iceInstallTotalCost: 0,
+          postInstallRezQuoteCardId: expensiveIce.instanceId,
+          postInstallRezQuoteTargetServerId: "remote_1",
+          postInstallRezQuoteProjectedServerId: "remote_1",
+          postInstallRezQuoteExpiresAtStateVersion: 1,
+          postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
+          postInstallRezQuoteBaseCredits: 2,
+          postInstallRezQuoteFinalCredits: 2,
+          postInstallRezQuoteMandatoryAgendaPointCost: 0,
+        },
+      },
+    );
+    unfundedInstall.expiresAtStateVersion = 1;
     const unfundedInput = strategicInput({
       side: "corp",
       snapshot: corpIceTaxSnapshot(),
       actions: [
-        legalAction(
-          "install-expensive-ice",
-          "corp",
-          "install_card",
-          "Install ICE",
-          {
-            cost: 100,
-            source: expensiveIce.instanceId,
-            payload: { placement: "ice", serverId: "rd" },
-          },
-        ),
+        unfundedInstall,
         gain,
         legalAction("end-turn", "corp", "end_turn", "End turn", {
           source: "game_rule",
         }),
       ],
-      credits: 2,
+      credits: 1,
       gripOrHq: [expensiveIce],
+      servers: [
+        server("hq"),
+        server("rd"),
+        server("archives"),
+        server("remote_1"),
+      ],
       targetVector: {
         kind: "coverage",
         evidence: ["dsr08:corp_ice_tax_unfunded"],
@@ -363,7 +387,7 @@ describe("Deck strategy runtime vertical slices", () => {
         "plan_step_capability:allocate_server_defense",
       ]),
     );
-    expect(unfunded.actionId).toBe("end-turn");
+    expect(unfunded.actionId).toBe("gain-credit");
   });
 
   it("runs Runner remote-contest windows but lets acute hand safety override pressure", () => {
@@ -595,7 +619,12 @@ function legalAction(
     label,
     source: options.source ?? "basic_action",
     timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
-    costs: [{ credits: options.cost ?? 0 }],
+    costs: [
+      {
+        credits: options.cost ?? 0,
+        ...(type === "gain_credit" ? { clicks: 1 } : {}),
+      },
+    ],
     targetRequirements: [],
     visibility: "public",
     expiresAtStateVersion: 2,

@@ -1,8 +1,8 @@
 # KI-Planebene – modulares Zielkonzept
 
 Status: **Work in Progress**
-Dokumentversion: `0.7`
-Stand: 2026-07-25
+Dokumentversion: `0.8`
+Stand: 2026-07-26
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
 
@@ -96,26 +96,27 @@ erfüllbar wäre:**
 - Terminalprojektion erhält keinen Zugriff auf vollständige gegnerische
   Hidden-Zonen. Sie bleibt engine-semantisch, aber strikt side-safe.
 
-### 2.2 Abgleich mit dem Runtime-Cutover-Worktree
+### 2.2 Abgleich mit dem abgeschlossenen Runtime-Cutover
 
-Version 0.7 ist der aktuelle fachliche Zielvertrag und spiegelt zugleich den
-erreichten Cutover-Stand im Worktree
-`C:\Projekte\NETGRID_AI_PLAN_FIRST_RUNTIME_CUTOVER` auf
-`codex/ai-plan-first-runtime-cutover` wider. PF00 bis PF15 sind committed;
-PF15 wurde mit Commit `4b0c459f6` und vollständig grünem Done-Gate
-abgeschlossen. PF16 bereinigt nun ausschließlich verbleibende
-Legacy-Verträge, aktualisiert Wissen und Status und führt den finalen
-Main-Abgleich aus.
+Version 0.8 ist der aktuelle fachliche Zielvertrag. PF00 bis PF16 sind
+committed; PF15 wurde mit Commit `4b0c459f6` und vollständig grünem Done-Gate
+abgeschlossen. PF16 wurde mit Commit `ec18fcb8f` abgeschlossen, lokal nach
+`main` integriert und der frühere Worktree
+`C:\Projekte\NETGRID_AI_PLAN_FIRST_RUNTIME_CUTOVER` samt Arbeitsbranch
+entfernt. Der aktuelle Regression-Worktree baut auf diesem integrierten Stand
+auf.
 
-Für PF15 erreicht und vollständig verifiziert sowie für die neuen
-PF16-Verträge implementiert und fokussiert verifiziert sind insbesondere die
-folgenden Punkte. Die PF16-Pre-Commit-Gesamtverifikation ist abgeschlossen:
+Für PF15 und PF16 erreicht und vollständig verifiziert sind insbesondere die
+folgenden Punkte:
 
 - Die produktive Live- und Simulationsentscheidung läuft ausschließlich
   Plan-first. Für jede freiwillige aktuelle LegalAction existiert entweder
-  genau eine ausführbare Planroute oder genau eine konkrete
-  `explicitly_nonproductive`-Disposition; Action-over-Plan-, neutrale
-  Credit- und andere kaschierende Fallbacks sind entfernt.
+  eine ausführbare Planroute oder genau eine konkrete Disposition als
+  `explicitly_nonproductive` beziehungsweise `assessment_unknown`;
+  unklassifizierte Actions bleiben ein Abdeckungsfehler. Unknown darf keine
+  Routenausschöpfung und kein EndTurn beweisen, verhindert aber nicht die
+  Ausführung einer unabhängig exakt gebundenen produktiven Route.
+  Action-over-Plan- und andere kaschierende Fallbacks sind entfernt.
 - Das residente PlanPortfolio bewertet alle relevanten Planinstanzen neu und
   wählt genau einen Leaf-Executor. Parent, Child, Priority Claim, Evidence,
   Assessment, Step und aktuelle Action-ID bleiben durchgängig gebunden.
@@ -193,15 +194,10 @@ Plan-first-Einstieg. Historische TacticalGoal-/Semantic-Runtime-Verträge
 bleiben nur als isolierte Test-/Evaluationsdiagnostik erhalten und werden
 durch Authority-/Module-Boundarytests vom produktiven Graphen ausgeschlossen.
 
-PF16-Implementierung, Final Review, Dokumentations-/Statusabgleich und
-Pre-Commit-Gates sind abgeschlossen. Noch offen sind ausschließlich der
-PF16-Commit, die Integration des aktuellen `main` sowie die finalen Gates auf
-dem integrierten Stand.
-
-Der sequenzielle Paket- und Gate-Stand wird im
-`ai-plan-first-runtime-cutover-process-2026-07-23.md` fortgeschrieben. Dieses
-Zieldokument definiert den Architekturvertrag und markiert ausdrücklich,
-welche Teile im aktuellen Worktree noch nicht abgeschlossen sind.
+PF16-Implementierung, Final Review, Dokumentations-/Statusabgleich, Commit,
+Main-Integration und Cleanup sind abgeschlossen. Der aktuelle
+Regression-Prozess wird getrennt im
+`ai-first-turn-end-turn-regression-process-2026-07-26.md` fortgeschrieben.
 
 ## 3. Ausgangsproblem
 
@@ -638,6 +634,16 @@ Vorhaben und ermöglicht Outcome-basierte Fortschrittsprüfung.
 Der folgende Typ ist konzeptionell. Die endgültigen TypeScript-Namen werden im
 Implementierungsplan festgelegt.
 
+Der Vertrag ist die stabile Außenschnittstelle, nicht die Grenze fachlicher
+Intelligenz. Ein Planmodul darf intern beliebig viele spezialisierte
+Unterfunktionen für Deckstrategie, Opportunity-Erkennung, Komponentenbestand,
+Routenbildung, Engine-Quotes, Risiko, Finanzierung und Continuation verwenden
+und schrittweise verbessern. Diese Details bleiben modulowned. Der Scheduler
+sieht ausschließlich Proposal, persistente Instanz, Assessment, Needs, Step,
+Route und Outcome. Neue fachliche Bedingungen dürfen daher kein
+kartenspezifisches Scheduler-Sonderrecht und keinen zweiten globalen
+Actionscore erzeugen.
+
 ```ts
 type PlanModule = {
   moduleId: string;
@@ -748,6 +754,49 @@ type PlanRoute = {
 Nur `head` verweist auf eine LegalAction der aktuellen StateVersion. Nach
 deren Anwendung wird die Fortsetzung gegen die neue LegalAction-Menge erneut
 materialisiert.
+
+### 9.5.1 Certainty-Grenze zwischen Plan und aktuellem Step
+
+Plan-first bedeutet nicht, dass eine vollständige mehrstufige Aktionsfolge
+schon bei Discovery sicher feststehen muss. Eine Planinstanz darf eine
+Hypothese, ein Erkundungsziel, alternative Fortsetzungen, offene
+Informationen und revalidierbare Annahmen enthalten. Diese strategische
+Unsicherheit ist ein normaler Bestandteil des Plans und kann seine Bewertung
+senken oder einen Informations-, Entwicklungs- oder Sondierungsschritt
+erzeugen; sie macht den Plan nicht allein deshalb unzulässig.
+
+Exakt und fail-closed gebunden sein müssen dagegen der aktuelle `head`, seine
+Legalität, Kosten, Ziele, Choices und die unmittelbar behauptete Regelwirkung.
+Nach der Anwendung wird der Plan anhand der neuen side-sicheren Beobachtung
+fortgesetzt, umgeplant, blockiert oder abgebrochen. Der Kernel darf deshalb
+„zukünftige Planwirkung ungewiss“ niemals mit „aktuelle LegalAction
+unbekannt“ gleichsetzen.
+
+`assessment_unknown` bezeichnet nur, dass ein konkreter aktueller
+Action-/Assessmentpfad keine belastbare Behauptung tragen darf. Die
+Klassifikation verhindert, dass der Scheduler daraus
+`productive_routes_exhausted` oder TurnCompletion ableitet. Sie ist kein
+globaler Stillstandsbeweis: Eine andere aktuelle, exakt materialisierte
+produktive Route darf regulär konkurrieren und ausgeführt werden. Fehlt
+dagegen selbst für die auszuführende Action die unmittelbare Kosten-,
+Legalitäts- oder Zielbindung, bleibt dieser Route die Ausführung verwehrt.
+
+`productive`, `explicitly_nonproductive` und `assessment_unknown` sind
+ausschließlich Klassifikationen eines aktuellen Route Heads in einer
+konkreten StateVersion. Sie entscheiden weder über die Lebensberechtigung
+noch über die Priorität der zugehörigen Parent-Planinstanz. Ein aktuell
+abgelehnter Agenda-Install darf beispielsweise den residenten Scoreplan nicht
+entfernen, wenn dessen nächster Schutz-, Entwicklungs- oder Funding-Step
+weiter revalidierbar ist.
+
+Action-Dispositionen sind Coverage- und Diagnoseevidence des jeweils
+zuständigen Planmoduls. Sie sind kein negativer Action-Chooser und dürfen die
+Planpriorisierung nicht dadurch ersetzen, dass zunächst fast alle
+LegalActions ausgeschlossen werden. Wiederholt unowned oder ausschließlich
+wegen späterer Planunsicherheit abgelehnte Action-Familien belegen eine
+fehlende beziehungsweise falsch geschnittene Planfamilie. Sie werden durch
+einen generischen Planvertrag geschlossen, nicht durch match-, karten- oder
+StateVersion-spezifische Freischaltungen.
 
 ### 9.6 `evaluateRoute`
 
@@ -1255,10 +1304,33 @@ Der Economy-Resolver bewertet diese Routen im Kontext des angefragten
 R&D-Steps. Er startet nicht automatisch eine neue langfristige
 Wirtschaftsstrategie.
 
-Basic Credit ist ausschließlich zulässig, wenn die Route eine endliche,
-quantifizierte Zielreserve oder einen konkreten Parent-Fundingbedarf
-verkleinert. „Credit ist immer nützlich“, ein allgemeiner Überschuss oder
-fehlende Attraktivität anderer Actions ist kein eigener Planfortschritt.
+Basic Credit ist in Parent-Funding- und Reserve-Routen ausschließlich
+zulässig, wenn die Route eine endliche, quantifizierte Zielreserve oder einen
+konkreten Parent-Fundingbedarf verkleinert.
+
+Bis die verbleibende normale Zugkapazität vollständig durch fachliche Pläne
+und exakte Parentbedarfe abgedeckt ist, existiert genau ein enger, befristeter
+P6-Liquiditätsplan als Übergangs- und Sicherheitsvertrag. Er ist ausdrücklich
+kein Bestandteil der Zielarchitektur, keine Reserve und kein
+Defense-Support. Der Zielzustand bindet auch Basic Credit ausschließlich an
+einen fachlichen Economy-Plan oder einen exakten Parentbedarf. Der
+Übergangsplan bindet ausschließlich die aktuelle, vollständig projizierte
+Basic-Credit-LegalAction und konvertiert höchstens die beim Erkennen noch
+verbleibende normale Zugkapazität in allgemeine Liquidität. Sein Zugziel ist
+endlich:
+`targetCredits = currentCredits + remainingClicks`; jede Ausführung erhöht
+Credits um eins und senkt verbleibende Klicks um eins, ohne das Ziel zu
+verschieben. Höher priorisierte Pläne schlagen ihn. Eine
+`assessment_unknown`-Action kann ihn nicht ersetzen und bleibt für ihren
+eigenen Pfad fail-closed; sie verhindert seine unabhängig exakte Ausführung
+aber nicht. Solange irgendeine Action unknown bleibt, darf daraus niemals
+TurnCompletion entstehen. Draw, Installation, Run oder EndTurn dürfen diese
+Übergangsausnahme nicht mitbenutzen. Draw besitzt niemals eine neutrale
+P6-Route.
+
+„Credit ist immer nützlich“, ein allgemeiner Überschuss oder fehlende
+Attraktivität anderer Actions genügt außerhalb dieses eng typisierten
+Zugkapazitätsplans weiterhin nicht als Planfortschritt.
 
 ### 15.3 Keine planfremde Rohscore-Rettung
 
@@ -1517,7 +1589,8 @@ folgenden Aussagen gelten:
 
 1. Die Action-ID ist Route eines aktuell ausführbaren Plan-Steps.
 2. Genau ein fachlich zuständiges Planmodul dispositioniert die Action-ID mit
-   einem konkreten Nichtproduktivitäts- oder Nichtbindungsgrund.
+   einem konkreten Nichtproduktivitätsgrund oder als
+   `assessment_unknown`.
 
 Eine residente, derzeit nicht ausführbare Planinstanz erklärt den Zustand
 des Portfolios, aber deckt keine aktuelle freiwillige LegalAction ab. Ebenso
@@ -1526,6 +1599,15 @@ oder ein separates `actionPlanOwnerships`-Register. Solche Informationen
 dürfen Discovery und Diagnose unterstützen; Planabdeckung entsteht
 ausschließlich durch eine aktuelle Route oder die konkrete Disposition genau
 dieser Action-ID.
+
+Eine `assessment_unknown`-Disposition ist dabei keine
+Nichtproduktivitätsbehauptung. Sie hält die betreffende Action aus
+Ausführung und Exhaustion-Beweis heraus, darf aber eine andere exakt
+materialisierte produktive Route nicht blockieren. Erst wenn der Scheduler
+TurnCompletion erwägt, muss jede verbleibende freiwillige Action entweder
+ausgeführt beziehungsweise materialisiert oder ausdrücklich als
+`explicitly_nonproductive` bewiesen sein. Unknown blockiert dann
+TurnCompletion fail-closed.
 
 Eine Action darf nie gleichzeitig materialisierte Route und Disposition sein.
 Ebenso darf ein Modul nicht eine Variante als gebunden erklären und über eine
@@ -1698,6 +1780,9 @@ Beispiele:
 - Highlighter-Runs mit wachsender Zugriffstiefe: echter Fortschritt;
 - BBS mit verbleibenden Countern und konkretem Fundingziel: Fortschritt;
 - Basic Credit bis zur nachgewiesenen Zielreserve: Fortschritt;
+- Basic Credit innerhalb des pro Zug fixierten befristeten
+  P6-Übergangsziels:
+  Fortschritt;
 - derselbe HQ-Run ohne neue Information, Payoff oder Strategienutzen:
   möglicherweise Sättigung.
 
@@ -1868,8 +1953,13 @@ Schedulerfehler kaschieren.
     autoritative Klasse.
 17. Ausgewählte Actions erfüllen Capability und Target ihres Steps
     semantisch.
-18. Basic Credit verkleinert ausschließlich eine endliche Zielreserve oder
-    einen konkreten Parent-Fundingbedarf.
+18. Basic Credit verkleinert ausschließlich einen exakten
+    Parent-Fundingbedarf oder verfolgt ein eigenständig admission-geprüftes
+    Economy-Ziel mit endlichem Zielwert. Der befristete P6-Übergangsvertrag
+    darf ausschließlich die aktuelle Basic-Credit-Action innerhalb seines
+    fixierten Zugziels binden und weder fehlende Planabdeckung noch unbekannte
+    Assessments kaschieren. Im Zielzustand entfällt auch diese Ausnahme. Draw
+    besitzt nie eine neutrale Route.
 19. Run-, Access-, Jack-out-, Pump- und Break-Actions benötigen explizit
     positive planlokale Assessments; ein fehlender Eintrag bedeutet
     `Default-Deny`.
@@ -2307,7 +2397,8 @@ Das Modul unterscheidet:
 - eigenständige langfristige Economy-Engine;
 - Bankaufbau mit Cadence;
 - Auszahlung zu einem konkreten Konversionszweck;
-- Basic Credit als endliche Reserve- oder Parent-Funding-Route.
+- Basic Credit als endliche Reserve-, Parent-Funding- oder eng typisierte
+  befristete P6-Zugkapazitätsroute während des Übergangs.
 
 Die Schwelle „genug Geld“ ist kontextabhängig. Sie berücksichtigt:
 
@@ -2890,6 +2981,31 @@ viability: dormant
 Der Plan darf über mehrere Züge bestehen, während Scoring oder Economy den
 Vordergrund übernimmt.
 
+Der Normalzustand dieser Kampagne ist ein lauerndes `watch_window`, kein aktiv
+abzuarbeitender Komponentenaufbau. Fehlende Damage-, Tag- oder
+Trace-Komponenten sind beobachtete Kampagnenfakten, aber noch keine offenen
+Action-Needs. Insbesondere erzeugt die Kampagne keinen wiederholten
+Targeted-Basic-Draw. Sie wird bei relevanten Änderungen an eigener Hand,
+öffentlichem Runnerzustand, Triggern, Credits oder Klicks neu bewertet und
+übernimmt erst dann den Vordergrund, wenn eine ausreichend vollständige Route
+das Opportunity-Gate erreicht.
+
+Die ausgewählte Route ist variabel. Sie verwendet nur so viele aktuell
+vorhandene Komponenten, wie nach Runner-Handzahl und sichtbarer Prävention
+notwendig sind. Vier sicher wirksame Damage sind bei drei Runner-Handkarten
+lethal; bei vier Handkarten sind exakt vier Damage noch keine Flatline. Ein
+zusätzlicher Damage-Step darf daher weder pauschal verlangt noch unnötig
+ausgeführt werden.
+
+Der erste produktive Stand muss nicht jede Punish-Kartenfamilie optimal
+beherrschen. Abnahmeziel ist ein repräsentativer vertikaler Slice, der
+Opportunity-Root, variable Route, Engine-Quote, Parent-Support,
+Schedulerübergabe und Requote-Continuation vollständig durchläuft. Noch nicht
+unterstützte Capabilities bleiben explizit unknown und fail-closed. Weitere
+Karten, Reaktionszweige und Bewertungsbedingungen werden iterativ über
+konkrete Spielsituationen und Szenarioverträge innerhalb des Moduls ergänzt,
+ohne den gemeinsamen Planmodul- oder Schedulervertrag zu verändern.
+
 Tag-Druck, Credit-Denial und Damage bleiben zunächst Modi dieser gemeinsamen
 Kampagne. Das Modul priorisiert seine internen Linien selbst. Eine spätere
 Trennung ist nur nötig, wenn Spiel-Evidence zeigt, dass ihre Lebenszyklen und
@@ -2920,6 +3036,11 @@ Vor Beginn wird die ganze Route geprüft:
 - Runner-Handpuffer;
 - Damage-Summe und Prävention;
 - legale Reihenfolge.
+
+Ein Funding-Step wird nur geöffnet, wenn sein Klick und die gesamte
+verbleibende Route noch in dasselbe gültige Punish-Fenster passen. Ein
+langfristig fehlender Credit oder eine fehlende Karte rechtfertigt für sich
+noch keine aktive Verfolgung der lauernden Kampagne.
 
 Eine planfremde Aktion wie Closed Accounts darf eine weiterhin lethal
 Drei-Aktionen-Flatline-Sequenz nicht aufbrechen.
@@ -3029,37 +3150,37 @@ R&D-Plan fordert 5 Credits an
 
 ### 30.1 Runner
 
-| Aktionsfamilie                           | Planherkunft                                                                          |
-| ---------------------------------------- | ------------------------------------------------------------------------------------- |
-| Basic Credit                             | endliche Economy-Reserve oder konkreter Parent-Fundingbedarf                          |
-| Draw                                     | Coverage-, Defense-, Handentwicklungs- oder konkreter Support-Step                    |
-| Programm/Hardware/Ressource installieren | verlangte Fähigkeit des Rig-, Defense-, Economy- oder Strategieplans                  |
-| Event spielen                            | Route des aktiven Plans mit vollständigem Follow-up-Vertrag                           |
-| Run starten                              | Central-, Remote- oder gebundener Run-Plan                                            |
-| Run-Ability/Run-Event                    | Route des auslösenden Runplans                                                        |
-| Tag entfernen                            | Defense-and-Recovery                                                                  |
-| Run fortsetzen/Jack-out/Pump/Break       | explizit positiv bewerteter Step des auslösenden Runplans                             |
-| Access stehlen/trashen/ablehnen          | explizit positiv bewerteter Auflösungs-Step des auslösenden Runplans                  |
-| Ability aktivieren                       | Step-Route eines Plans, nicht freie Kartennutzung                                     |
-| Discard                                  | Cleanup-Resolution unter Plan- und Keep-Kontext                                       |
-| EndTurn                                  | `runner.complete_turn`; bei regelbewiesenem Corp-Deckout `runner.secure_terminal_win` |
+| Aktionsfamilie                           | Planherkunft                                                                             |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Basic Credit                             | endliche Economy-Reserve, konkreter Parent-Fundingbedarf oder befristeter P6-Übergang    |
+| Draw                                     | Coverage-, Defense-, Handentwicklungs- oder konkreter Support-Step                       |
+| Programm/Hardware/Ressource installieren | verlangte Fähigkeit des Rig-, Defense-, Economy- oder Strategieplans                     |
+| Event spielen                            | Route des aktiven Plans mit vollständigem Follow-up-Vertrag                              |
+| Run starten                              | Central-, Remote- oder gebundener Run-Plan                                               |
+| Run-Ability/Run-Event                    | Route des auslösenden Runplans                                                           |
+| Tag entfernen                            | Defense-and-Recovery                                                                     |
+| Run fortsetzen/Jack-out/Pump/Break       | explizit positiv bewerteter Step des auslösenden Runplans                                |
+| Access stehlen/trashen/ablehnen          | explizit positiv bewerteter Auflösungs-Step des auslösenden Runplans                     |
+| Ability aktivieren                       | Step-Route eines Plans, nicht freie Kartennutzung                                        |
+| Discard                                  | Cleanup-Resolution unter Plan- und Keep-Kontext                                          |
+| EndTurn                                  | `runner.complete_turn`; bei regelbewiesenem Corp-Deckout `runner.secure_terminal_win`    |
 
 ### 30.2 Corp
 
-| Aktionsfamilie             | Planherkunft                                                                     |
-| -------------------------- | -------------------------------------------------------------------------------- |
-| Basic Credit               | endliche Economy-/Rezreserve oder konkreter Parent-Fundingbedarf                 |
-| Draw                       | Hand-/Agenda-Management, Economy oder konkreter Supportbedarf                    |
-| ICE installieren           | ausschließlich `corp.defend_servers`; andere Pläne veröffentlichen Schutzbedarfe |
-| Asset/Upgrade installieren | Economy-, Ambush-, Remote- oder Strategieplan                                    |
-| Agenda installieren        | Scoreplan mit Exposure-/Commitment-Vertrag                                       |
-| Advance/Score              | Scoreplan                                                                        |
-| Operation spielen          | Economy-, Score-, Punish-, Defense- oder Handplan                                |
-| ICE/Asset rezzen           | aktuelle Defense-/Economy-/Ambush-Response                                       |
-| Trace-Bid/Choice           | auslösender Punish-/Defense-/Scoreplan                                           |
-| Ability aktivieren         | Step-Route eines Plans                                                           |
-| Discard                    | Hand-/Agenda-Management oder Cleanup-Resolution                                  |
-| EndTurn                    | `corp.complete_turn`                                                             |
+| Aktionsfamilie             | Planherkunft                                                                                 |
+| -------------------------- | -------------------------------------------------------------------------------------------- |
+| Basic Credit               | endliche Economy-/Rezreserve, konkreter Parent-Fundingbedarf oder befristeter P6-Übergang    |
+| Draw                       | Hand-/Agenda-Management, Economy oder konkreter Supportbedarf                                |
+| ICE installieren           | ausschließlich `corp.defend_servers`; andere Pläne veröffentlichen Schutzbedarfe             |
+| Asset/Upgrade installieren | Economy-, Ambush-, Remote- oder Strategieplan                                                |
+| Agenda installieren        | Scoreplan mit Exposure-/Commitment-Vertrag                                                   |
+| Advance/Score              | Scoreplan                                                                                    |
+| Operation spielen          | Economy-, Score-, Punish-, Defense- oder Handplan                                            |
+| ICE/Asset rezzen           | aktuelle Defense-/Economy-/Ambush-Response                                                   |
+| Trace-Bid/Choice           | auslösender Punish-/Defense-/Scoreplan                                                       |
+| Ability aktivieren         | Step-Route eines Plans                                                                       |
+| Discard                    | Hand-/Agenda-Management oder Cleanup-Resolution                                              |
+| EndTurn                    | `corp.complete_turn`                                                                         |
 
 ### 30.3 Coverage-Gate
 
@@ -3162,10 +3283,12 @@ Jedes Modul besitzt eine interne Schema- oder Modulversion. Änderungen an
   Bei belastbarem R&D-Fokus darf der Defense-Plan ohne höherrangige HQ-Evidence
   bewusst HQ-ICE zurückhalten und eine andere reguläre Planaktion konkurrieren
   lassen.
-- **Kernentscheidung:** Eine Zentral-Rezreserve ist ausschließlich ein
-  endlicher, Engine-gequoteter Need von `corp.defend_servers`. Score- und
-  Remote-Parents dürfen ihn exakt anfordern und ihre Klasse delegieren, aber
-  weder die Reserve ownen noch einen parallelen Plan oder Action-Owner bilden.
+- **Kernentscheidung:** Es gibt keine autonome Zentral-Rezreserve. Ein
+  Finanzierungsgap entsteht ausschließlich aus einer konkreten,
+  Engine-gequoteten Route von `corp.defend_servers` und wird als Economy-Child
+  an genau diesen Parent gebunden. Score- und Remote-Parents dürfen den
+  Schutzbedarf und ihre Klasse delegieren, aber weder einen parallelen
+  Reserveplan noch einen zweiten Action-Owner bilden.
 - **Kernentscheidung:** Randomisierung ist nur für ausdrücklich zugelassene,
   fachlich nahezu gleichwertige Routen desselben Steps erlaubt. Auswahl,
   RNG-Verbrauch, `RandomDrawRecord` und Anwendung erfolgen atomar in der
@@ -3173,8 +3296,14 @@ Jedes Modul besitzt eine interne Schema- oder Modulversion. Änderungen an
 - **Kernentscheidung:** Eine reine Finanzierungslücke ist kein Grund für
   zielgerichteten Defense-Draw. Unbekannte oder unvollständige Defense-Facts
   enden fail-closed.
-- **Kernentscheidung:** Basic Credit ist nur für endliche Reserven oder
-  konkrete Parent-Fundingbedarfe produktiv.
+- **Befristeter Übergangs-/Sicherheitsvertrag, kein Zielzustand:** Basic Credit
+  ist vorübergehend auch über den eng typisierten, pro Zug endlichen
+  P6-Liquiditätsplan produktiv. Seine Removal Condition ist die vollständige
+  fachliche Abdeckung verbleibender normaler Zugkapazität durch Economy-Pläne
+  und exakte Parentbedarfe. Die Zielarchitektur kennt keine neutrale
+  Basic-Credit- oder Draw-Route. Unknown blockiert den eigenen unbewiesenen
+  Pfad und jeden Exhaustion-/EndTurn-Beweis, aber nicht eine unabhängig
+  exakte produktive Route.
 - **Kernentscheidung:** Run-/Access-/Jack-out-/Pump-/Break-Routen verlangen
   explizit positive planlokale Assessments; fehlende Assessments sind
   `Default-Deny`.
@@ -3981,8 +4110,8 @@ Jedes Modul testet:
   `admissible === true`; fehlende Assessments materialisieren keine Route;
 - Choice-Payload-Auflösung verändert weder `actionId` noch Executor oder
   Plan-Step und scheitert ohne vollständige Domainlogik fail-closed;
-- Basic Credit besitzt ohne endliches Reserve- oder Parent-Fundingziel keine
-  produktive Route;
+- Basic Credit besitzt ohne endliches Reserve-, Parent-Funding- oder den
+  befristeten eng typisierten P6-Übergangsvertrag keine produktive Route;
 - mehrere Same-Turn-Installationspfade derselben Agenda werden entweder als
   getrennte exakte Planalternativen geführt oder erst nach einer
   deterministischen Commitment-Auswahl dispositioniert;
@@ -4130,6 +4259,24 @@ Nach Modul- und Checkpointtests:
 - Plan-Churn-, EndTurn-, Action-Coverage- und Commitment-Metriken;
 - qualitative Vollaudits ausgewählter Spiele;
 - getrennte Bewertung von technischer Sicherheit und Play Strength.
+
+Technische Gates beweisen Regelkonformität, Hidden-Info-Sicherheit,
+Replaysicherheit und die Einhaltung der Architekturverträge. Sie beweisen
+nicht allein, dass die resultierenden Spielentscheidungen fachlich sinnvoll
+sind. Nach einer Änderung an Planerkennung, Planfortbestand,
+Portfolioauswahl, Ressourcenpriorisierung oder TurnCompletion wird deshalb
+zuerst ein kleines integriertes und spielbares Inkrement bereitgestellt.
+Bevor der nächste breite Verhaltensumbau beginnt, folgt ein menschlicher
+Playtest-Checkpoint mit mindestens einem vollständig gespeicherten Spiel und
+einer qualitativen Prüfung der auffälligen Entscheidungen.
+
+Der Checkpoint darf die Architektur nicht durch unstrukturierte
+Einzelfallheuristiken ersetzen. Er ist aber die verbindliche Rückkopplung
+zwischen formaler Vertragsevidence und tatsächlichem Spielbedarf. Neue
+Findings werden spielgleich als Decision-Checkpoint gesichert; erst danach
+wird der nächste Ausbauabschnitt begonnen. Mehrtägige, ausschließlich
+theoretische Verhaltensausbauten ohne zwischenzeitlich spielbare Fassung sind
+damit kein zulässiger Standardprozess.
 
 ### 40.8 Hidden-Info-Äquivalenz
 
@@ -4340,6 +4487,15 @@ Rahmen nicht verändert. Beispiele:
 
 ## 45. Änderungsverlauf
 
+### 0.8 – 2026-07-26
+
+- PF16-Status auf Commit `ec18fcb8f`, lokale Main-Integration und Cleanup
+  aktualisiert.
+- Neutralen P6-Liquiditätsplan als engen befristeten
+  Übergangs-/Sicherheitsvertrag statt Zielarchitektur eingeordnet; Draw bleibt
+  ausgeschlossen, der Zielzustand bindet Basic Credit an einen fachlichen
+  Economy-Plan oder exakten Parentbedarf.
+
 ### 0.7 – 2026-07-25
 
 - PF15 nach Commit `4b0c459f6` und vollständig grünem Code-Freeze-Gate als
@@ -4417,8 +4573,9 @@ Rahmen nicht verändert. Beispiele:
 - `funding_only` vom echten Effektmangel getrennt: reine Finanzierungslücken
   fordern Economy-Support an und dürfen keinen zielgerichteten Defense-Draw
   erzeugen; unbekannte oder unvollständige Facts bleiben fail-closed.
-- Basic Credit auf endliche Reserven und konkrete Parent-Fundingbedarfe
-  begrenzt; neutrale Credit- und „do something“-Fallbackpläne entfernt.
+- Basic Credit auf endliche Reserven, konkrete Parent-Fundingbedarfe und den
+  eng typisierten, pro Zug endlichen P6-Liquiditätsplan begrenzt; freie
+  Credit- und „do something“-Fallbacks bleiben entfernt.
 - Run-, Access-, Jack-out-, Pump- und Break-Actions an explizite
   planlokale Assessments mit `Default-Deny` bei fehlender Bewertung gebunden.
 - Choice-Payload-Auflösung als zulässige Nachbearbeitung einer bereits

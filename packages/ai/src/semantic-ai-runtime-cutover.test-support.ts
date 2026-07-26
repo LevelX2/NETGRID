@@ -175,10 +175,15 @@ export function legalAction(
     type,
     label,
     source:
-      options.source ??
-      (type === "end_turn" ? "game_rule" : "basic_action"),
+      options.source ?? (type === "end_turn" ? "game_rule" : "basic_action"),
     timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
-    costs: [cost],
+    costs: [
+      type === "gain_credit" &&
+      (options.source === undefined || options.source === "basic_action") &&
+      cost.clicks === undefined
+        ? { ...cost, clicks: 1 }
+        : cost,
+    ],
     targetRequirements: [],
     visibility: options.visibility ?? "public",
     expiresAtStateVersion: 2,

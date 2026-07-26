@@ -7,9 +7,18 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const FIXTURES = [
-  ["does not force a contestable active agenda advance", contestableAdvanceJson],
-  ["stops adding unfunded ICE to an overbuilt score remote", scorelineOverbuildJson],
-  ["continues a run when bad-publicity credits still fund the path", declinedRezContinueJson],
+  [
+    "does not force a contestable active agenda advance",
+    contestableAdvanceJson,
+  ],
+  [
+    "uses exact basic liquidity instead of adding unfunded ICE to an overbuilt score remote",
+    scorelineOverbuildJson,
+  ],
+  [
+    "continues a run when bad-publicity credits still fund the path",
+    declinedRezContinueJson,
+  ],
 ] as const;
 
 describe("Rent-I-Con versus CODE ROT cycle-two remediation checkpoints", () => {

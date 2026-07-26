@@ -23,7 +23,7 @@ describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("ends the turn when no productive route is certified", () => {
+  it("uses last productive liquidity when no stronger route is certified", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(safeLowCreditAdvanceJson) as AiDecisionCheckpointV1,
     );

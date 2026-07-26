@@ -16,6 +16,10 @@ export {
 } from "../randomized-ice-install-selection";
 export { applyGameAction } from "../apply-game-action";
 export { getPlayerView, playerViewFor } from "../player-view";
+export {
+  corpPunishRouteRequestFingerprint,
+  quoteCorpPunishRoute,
+} from "../view/corp-punish-route-quotes";
 export { replayEvents, replayGameEvents } from "../replay";
 export { redactPublicEventForSide } from "../view/public-event-view";
 export { hashGameState, hashState } from "../hash";
@@ -40,6 +44,8 @@ export type {
   CardType,
   CounterType,
   CorpServer,
+  CorpPunishRouteQuoteRequest,
+  CorpPunishRouteQuoteResult,
   CreateGameConfig,
   DeckDefinition,
   DeckPublicMetadata,
