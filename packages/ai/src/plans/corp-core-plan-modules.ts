@@ -2455,6 +2455,8 @@ function selectedDefensePortfolioBand(
   );
   const genericPriority = selectedGenericBand.priorityClass;
   const genericCandidates = selectedGenericBand.candidates;
+  const genericBandAvailable =
+    genericCandidates.length > 0 || selectedGenericBand.supportable;
   const scoreCandidates = scoreProtectionRoute
     ? [
         {
@@ -2469,7 +2471,7 @@ function selectedDefensePortfolioBand(
     : [];
   if (
     scoreProtectionRoute &&
-    (genericCandidates.length === 0 ||
+    (!genericBandAvailable ||
       defensePriorityRank(scoreProtectionRoute.signal.delegatedPriorityClass) <
         defensePriorityRank(genericPriority))
   ) {
@@ -2480,7 +2482,7 @@ function selectedDefensePortfolioBand(
       candidates: scoreCandidates,
     };
   }
-  if (genericCandidates.length > 0 || !scoreProtectionRoute) {
+  if (genericBandAvailable || !scoreProtectionRoute) {
     return {
       kind: "generic",
       eligibleSignals: selectedGenericBand.eligibleSignals,
@@ -2504,6 +2506,7 @@ function selectedGenericDefensePortfolioBand(
   eligibleSignals: readonly CorpGenericDefenseSignal[];
   priorityClass: "P2" | "P3" | "P5" | "P6";
   candidates: PlanMaterialization["candidates"];
+  supportable: boolean;
 }> {
   const windowEligibleSignals = urgentDefenseBand(context, signals);
   const priorityClasses = ["P2", "P3", "P5", "P6"] as const;
@@ -2517,11 +2520,15 @@ function selectedGenericDefensePortfolioBand(
       prioritySignals,
       centralAllocation,
     );
-    if (candidates.length > 0) {
+    const supportable = genericDefenseBandHasExactFundingSupport(
+      prioritySignals,
+    );
+    if (candidates.length > 0 || supportable) {
       return {
         eligibleSignals: prioritySignals,
         priorityClass,
         candidates,
+        supportable,
       };
     }
   }
@@ -2532,7 +2539,24 @@ function selectedGenericDefensePortfolioBand(
     ),
     priorityClass,
     candidates: [],
+    supportable: false,
   };
+}
+
+function genericDefenseBandHasExactFundingSupport(
+  signals: readonly CorpGenericDefenseSignal[],
+): boolean {
+  return signals.some((signal) => {
+    if (
+      signal.phase !== "install_ice" ||
+      signal.installRoute?.disposition !== "funding_only"
+    ) {
+      return false;
+    }
+    const gap =
+      signal.installRoute.projection.after.minimumAdditionalCreditsToSatisfy;
+    return typeof gap === "number" && Number.isSafeInteger(gap) && gap > 0;
+  });
 }
 
 function genericDefensePortfolioCandidates(

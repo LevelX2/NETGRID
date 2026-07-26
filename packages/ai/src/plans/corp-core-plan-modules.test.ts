@@ -4007,6 +4007,11 @@ describe("Corp core plan modules", () => {
       "gain_credit",
       "economy.gain_credit",
     );
+    const scoreProtectionDraw = candidate(
+      "score-protection-draw",
+      "draw_card",
+      "draw.card",
+    );
     const defenseParent = {
       kind: "generic" as const,
       defenseId: "install:hq",
@@ -4050,9 +4055,26 @@ describe("Corp core plan modules", () => {
       evidenceCode: defenseParent.evidenceCode,
     };
     const corpContext = context(
-      [basicCredit],
+      [basicCredit, scoreProtectionDraw],
       {
-        defenseNeeds: [defenseParent],
+        defenseNeeds: [
+          defenseParent,
+          {
+            kind: "score_protection_draw",
+            defenseId: "score:draw:p4",
+            serverId: "remote_1",
+            phase: "draw_for_ice",
+            parentProjectId: "agenda:foreign-p4:remote_1",
+            parentNeedId: "score-protection:foreign-p4:remote_1",
+            delegatedPriorityClass: "P4",
+            actionId: scoreProtectionDraw.actionId,
+            drawAttemptState: {
+              turnKey: "corp:1",
+              remainingAttempts: 1,
+            },
+            evidenceCode: "foreign_p4_score_protection_draw",
+          },
+        ],
         economyNeeds: [defenseFunding],
       },
       { credits: 5, clicks: 1 },

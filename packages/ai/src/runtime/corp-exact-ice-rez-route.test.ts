@@ -8,6 +8,8 @@ import type { CardInstanceId, GameState } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildAiDecisionInputDto } from "../input-dto";
+import { chooseAiAction } from "../index";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import {
   projectExactCorpIceRezRoute,
   readExactInstalledCorpIceRezQuote,
@@ -55,6 +57,76 @@ describe("exact Corp ICE rez route", () => {
         complete: true,
         mandatoryAdditionalCosts: { agendaPoints: 0 },
       },
+    });
+  });
+
+  it("accepts an Engine-certified Olivia Salazar rez receipt without using printed rezCost", () => {
+    const fixture = engineOliviaIceRezWindow();
+    const ordinaryProjection = projectExactCorpIceRezRoute({
+      input: fixture.input,
+      candidate: fixture.ordinaryCandidate,
+      sourceCard: fixture.sourceCard,
+      targetServerId: "remote_1",
+    });
+    const discountedProjection = projectExactCorpIceRezRoute({
+      input: fixture.input,
+      candidate: fixture.discountedCandidate,
+      sourceCard: fixture.sourceCard,
+      targetServerId: "remote_1",
+    });
+
+    expect(ordinaryProjection).toMatchObject({
+      actionId: fixture.ordinaryAction.actionId,
+      totalRezCredits: 4,
+      quote: {
+        context: "installed",
+        complete: true,
+        finalCredits: 4,
+      },
+    });
+    expect(discountedProjection).toMatchObject({
+      actionId: fixture.discountedAction.actionId,
+      totalRezCredits: 2,
+      quote: {
+        context: "installed",
+        complete: true,
+        finalCredits: 2,
+        reductionSourceDefinitionIds: ["onr_v1_363_olivia-salazar"],
+      },
+    });
+
+    const missingReceipt = structuredClone(fixture.input);
+    const action = missingReceipt.legalActions.find(
+      (candidate) => candidate.actionId === fixture.discountedAction.actionId,
+    )!;
+    delete action.payload!.rezCostPaid;
+    expect(
+      readExactInstalledCorpIceRezQuote({
+        input: missingReceipt,
+        candidate: fixture.discountedCandidate,
+        sourceCard: missingReceipt.playerView.servers
+          .find((server) => server.id === "remote_1")!
+          .ice.find((ice) => ice.instanceId === fixture.sourceCard.instanceId)!,
+        targetServerId: "remote_1",
+      }),
+    ).toBeUndefined();
+  });
+
+  it("keeps ordinary and Olivia-discounted quotes as distinct executable routes for one ICE", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineOliviaIceRezWindow();
+
+    const decision = chooseAiAction(fixture.input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect([
+      fixture.ordinaryAction.actionId,
+      fixture.discountedAction.actionId,
+    ]).toContain(decision.actionId);
+    expect(decision).toMatchObject({
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
     });
   });
 
@@ -294,11 +366,120 @@ function engineIceRezWindow(definitionId: string, agendaPoints: number) {
   return { input, candidate, sourceCard, engineAction: rezAction };
 }
 
+function engineOliviaIceRezWindow() {
+  let state = createGameAfterSetup({
+    seed: "exact-ice-rez-olivia-salazar",
+  });
+  state.activeSide = "runner";
+  state.phase = "runner_action_phase";
+  state.timingPoint = "runner_action.main";
+  delete state.pendingChoice;
+  state.runner.clicks = 4;
+  state.runner.credits = 0;
+  state.corp.credits = 10;
+  state.corp.servers.push({
+    id: "remote_1",
+    kind: "remote",
+    label: "Remote 1",
+    ice: [],
+    root: [],
+  });
+  const iceId = "exact_olivia_filter" as CardInstanceId;
+  const oliviaId = "exact_olivia_source" as CardInstanceId;
+  addUnrezzedIce(
+    state,
+    iceId,
+    "onr_v1_232_crystal-wall",
+    "remote_1",
+  );
+  const remote = state.corp.servers.find(
+    (candidate) => candidate.id === "remote_1",
+  )!;
+  remote.root.push(oliviaId);
+  state.cardInstances[oliviaId] = {
+    instanceId: oliviaId,
+    definitionId: "onr_v1_363_olivia-salazar",
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    faceup: true,
+    rezzed: true,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  const startRun = getLegalActions(state, "runner").find(
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === "remote_1",
+  );
+  if (!startRun) throw new Error("Engine did not expose the remote run");
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side: "runner",
+    actionId: startRun.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey: "start-olivia",
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  state = result.state;
+  const rezActions = getLegalActions(state, "corp").filter(
+    (action) =>
+      action.type === "rez_ice" && action.payload?.cardId === iceId,
+  );
+  const ordinaryAction = rezActions.find(
+    (action) => action.payload?.discountedRezSourceCardId === undefined,
+  );
+  const discountedAction = rezActions.find(
+    (action) => action.payload?.discountedRezSourceCardId === oliviaId,
+  );
+  if (!ordinaryAction || !discountedAction) {
+    throw new Error("Engine did not expose both exact ICE rez variants");
+  }
+  const input = buildAiDecisionInputDto({
+    side: "corp",
+    playerView: getPlayerView(state, "corp"),
+    eventTail: [],
+    legalActions: rezActions,
+    difficulty: "normal",
+    seed: state.seed,
+    decisionId: "exact-ice-rez-olivia",
+    actionNumber: 1,
+    profileId: "exact-olivia-rez-test",
+  });
+  const candidates = buildActionSemanticCandidates({
+    legalActions: input.legalActions,
+    observerSide: "corp",
+    stateVersion: input.playerView.stateVersion,
+    visibleSourceDefinitionsByInstanceId: {
+      [iceId]: "onr_v1_232_crystal-wall",
+    },
+  });
+  const ordinaryCandidate = candidates.find(
+    (candidate) => candidate.actionId === ordinaryAction.actionId,
+  );
+  const discountedCandidate = candidates.find(
+    (candidate) => candidate.actionId === discountedAction.actionId,
+  );
+  const sourceCard = input.playerView.servers
+    .find((server) => server.id === "remote_1")
+    ?.ice.find((ice) => ice.instanceId === iceId);
+  if (!ordinaryCandidate || !discountedCandidate || !sourceCard) {
+    throw new Error("Engine-backed Olivia fixture is incomplete");
+  }
+  return {
+    input,
+    sourceCard,
+    ordinaryAction,
+    discountedAction,
+    ordinaryCandidate,
+    discountedCandidate,
+  };
+}
+
 function addUnrezzedIce(
   state: GameState,
   instanceId: CardInstanceId,
   definitionId: string,
-  serverId: "rd",
+  serverId: "rd" | "remote_1",
 ): void {
   const server = state.corp.servers.find(
     (candidate) => candidate.id === serverId,

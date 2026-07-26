@@ -7396,7 +7396,7 @@ function buildCorpDomain(
           return [
             {
               kind: "generic",
-              defenseId: `rez:${targetId ?? candidate.actionId}`,
+              defenseId: `rez:${targetId ?? "unknown"}:${candidate.actionId}`,
               serverId: rezServerId,
               phase: "rez_response" as const,
               sourceDefinitionIds: candidate.sourceDefinitionId
@@ -8008,7 +8008,11 @@ function corpHqOverflowCandidateIsExactCurrentConversion(
   if (
     candidate.sourceKind !== "card" ||
     !candidate.sourceCardInstanceId ||
-    !candidate.sourceDefinitionId
+    !candidate.sourceDefinitionId ||
+    candidate.semanticActionType ===
+      "score_conversion.place_advancement" ||
+    candidate.semanticActionType ===
+      "score_conversion.move_advancement"
   ) {
     return false;
   }

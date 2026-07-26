@@ -2299,16 +2299,42 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     );
-    const input = aiInput("corp", [installExisting, installNew, installAgenda]);
+    const teamRestructuring = legalAction(
+      "play-team-restructuring",
+      "corp",
+      "play_operation",
+      "Play Team Restructuring",
+      { credits: 2, clicks: 1 },
+      {
+        source: "team-restructuring",
+        payload: {
+          cardId: "team-restructuring",
+          sourceDefinitionId: "onr_v1_305_team-restructuring",
+          scoreConversionCapability: "place_advancement",
+          scoreConversionTiming: "immediate",
+          advancementCounterAmount: 1,
+        },
+      },
+    );
+    const input = aiInput("corp", [
+      installExisting,
+      installNew,
+      installAgenda,
+      teamRestructuring,
+    ]);
     input.playerView.own.clicks = 1;
     input.playerView.own.credits = 10;
     input.playerView.own.gripOrHq = [
       pacificaCard("pacifica"),
+      visibleCard("team-restructuring", "corp", "operation", {
+        definitionId: "onr_v1_305_team-restructuring",
+        title: "Team Restructuring",
+      }),
       visibleCard("agenda", "corp", "agenda", {
         definitionId: "onr_v1_201_executive-extraction",
         title: "Executive Extraction",
       }),
-      ...corpOverflowFillers(4),
+      ...corpOverflowFillers(3),
     ];
     input.playerView.servers = [
       server("hq"),

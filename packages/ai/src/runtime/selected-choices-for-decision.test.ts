@@ -741,6 +741,96 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it.each([
+    ["draws when R&D can still pay the following mandatory draw", 8, "draw"],
+    ["skips when the extra draw would consume the mandatory-draw card", 1, "skip"],
+    ["skips when R&D is already empty", 0, "skip"],
+  ] as const)("%s", (_label, rdCount, expectedOptionId) => {
+    const input = inputWithChoice(
+      {
+        kind: "select_option",
+        source: "scored_agenda.start_draw_choice:employee:7",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          { id: "draw", label: "Zusätzliche Karte ziehen", value: "draw" },
+          { id: "skip", label: "Überspringen", value: "skip" },
+        ],
+      },
+      {
+        scoreArea: [
+          {
+            ...visibleCard("employee", "agenda"),
+            definitionId: "onr_v1_199_employee-empowerment",
+          },
+        ],
+      },
+    );
+    input.playerView.timingPoint = "corp_draw.mandatory_draw";
+    input.playerView.pendingChoice!.visibility = "public";
+    input.playerView.own.stackOrRdCount = rdCount;
+    const action = resolveChoiceActionForInput(input);
+
+    expect(
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: [expectedOptionId],
+    });
+  });
+
+  it("keeps an unbound scored-agenda start draw fail-closed", () => {
+    const input = inputWithChoice({
+      kind: "select_option",
+      source: "scored_agenda.start_draw_choice:missing-employee:7",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        { id: "draw", label: "Zusätzliche Karte ziehen", value: "draw" },
+        { id: "skip", label: "Überspringen", value: "skip" },
+      ],
+    });
+    input.playerView.timingPoint = "corp_draw.mandatory_draw";
+    input.playerView.pendingChoice!.visibility = "public";
+    input.playerView.own.stackOrRdCount = 8;
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
+  it("keeps a stale scored-agenda start draw fail-closed", () => {
+    const input = inputWithChoice(
+      {
+        kind: "select_option",
+        source: "scored_agenda.start_draw_choice:employee:7",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          { id: "draw", label: "Zusätzliche Karte ziehen", value: "draw" },
+          { id: "skip", label: "Überspringen", value: "skip" },
+        ],
+      },
+      { scoreArea: [visibleCard("employee", "agenda")] },
+    );
+    input.playerView.timingPoint = "corp_draw.mandatory_draw";
+    input.playerView.pendingChoice!.visibility = "public";
+    input.playerView.pendingChoice!.stateVersion = 6;
+    input.playerView.own.stackOrRdCount = 8;
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
+  it.each([
     [
       "different scored agenda",
       (input: AiDecisionInput) => {
@@ -1463,6 +1553,7 @@ function resolveChoiceActionForInput(input: AiDecisionInput): LegalAction {
   if (!choice) throw new Error("Missing pending choice.");
   return {
     ...resolveChoiceAction(input.side),
+    timingPoint: input.playerView.timingPoint,
     expiresAtStateVersion: input.playerView.stateVersion,
     choiceRequirements: [
       {

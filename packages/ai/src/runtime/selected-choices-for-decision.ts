@@ -214,6 +214,23 @@ export function selectedChoicesForDecision(
   }
   if (
     input.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith("scored_agenda.start_draw_choice:")
+  ) {
+    return resolved(
+      [
+        selectedCorpScoredAgendaStartDrawChoiceOptionId(
+          input,
+          action,
+          choice,
+          selectableOptions,
+        ),
+      ],
+      "corp_scored_agenda_start_draw",
+    );
+  }
+  if (
+    input.side === "corp" &&
     choice.kind === "select_cards" &&
     choice.source.startsWith(
       "card_implementation.installed_hardware_trash_by_counter:",
@@ -541,6 +558,72 @@ function unresolvedChoiceFailure(
     owner: "window_resolution",
     removalCondition,
   });
+}
+
+function selectedCorpScoredAgendaStartDrawChoiceOptionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+): string {
+  const sourceMatch =
+    /^scored_agenda\.start_draw_choice:([^:]+):([0-9]+)$/.exec(
+      choice.source,
+    );
+  const sourceCardId = sourceMatch?.[1];
+  const sourceStateVersion = Number(sourceMatch?.[2]);
+  const sourceCard = sourceCardId
+    ? input.playerView.own.scoreArea.find(
+        (card) =>
+          card.instanceId === sourceCardId &&
+          card.known &&
+          card.type === "agenda",
+      )
+    : undefined;
+  const draw = selectableOptions.find(
+    (option) => option.id === "draw" && option.value === "draw",
+  );
+  const skip = selectableOptions.find(
+    (option) => option.id === "skip" && option.value === "skip",
+  );
+  const exactOptions =
+    selectableOptions.length === 2 && draw !== undefined && skip !== undefined;
+  const requirement = action.choiceRequirements?.[0];
+  const exactActionBinding =
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === 2 &&
+    requirement.optionIds.includes("draw") &&
+    requirement.optionIds.includes("skip");
+  const rdCount = input.playerView.own.stackOrRdCount;
+  if (
+    input.playerView.timingPoint !== "corp_draw.mandatory_draw" ||
+    choice.side !== "corp" ||
+    choice.stateVersion !== input.playerView.stateVersion ||
+    choice.visibility !== "public" ||
+    choice.minSelections !== 1 ||
+    choice.maxSelections !== 1 ||
+    sourceStateVersion !== input.playerView.stateVersion ||
+    !sourceCard ||
+    !exactOptions ||
+    !exactActionBinding ||
+    !Number.isSafeInteger(rdCount) ||
+    rdCount < 0
+  ) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Bind the optional scored-agenda start draw to its exact public source agenda, current Engine choice/action contract, and visible R&D count.",
+    );
+  }
+  return rdCount >= 2 ? draw.id : skip.id;
 }
 
 function residentCorpScoreChoiceBinding(

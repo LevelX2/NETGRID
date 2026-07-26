@@ -216,16 +216,133 @@ export function readExactInstalledCorpIceRezQuote(params: {
     actionCredits += credits;
     if (!Number.isSafeInteger(actionCredits)) return undefined;
   }
+  const actionCertifiedQuote =
+    action.payload?.discountedRezSourceCardId === undefined
+      ? ordinaryRezActionQuote(action.payload, quote)
+      : discountedRezActionQuote(action.payload, quote, actionCredits);
   if (
-    actionCredits !== quote.finalCredits ||
+    !actionCertifiedQuote ||
+    actionCredits !== actionCertifiedQuote.finalCredits ||
     actionCredits > input.playerView.own.credits
   ) {
     return undefined;
   }
   return {
-    quote,
-    totalRezCredits: quote.finalCredits,
+    quote: actionCertifiedQuote,
+    totalRezCredits: actionCertifiedQuote.finalCredits,
   };
+}
+
+function ordinaryRezActionQuote(
+  payload: AiDecisionInput["legalActions"][number]["payload"],
+  quote: Extract<VisibleCorpRezCostQuote, { complete: true }>,
+): Extract<VisibleCorpRezCostQuote, { complete: true }> | undefined {
+  if (
+    payload?.discountedRezSourceDefinitionId !== undefined ||
+    payload?.discountedRezCostBase !== undefined ||
+    payload?.temporaryDerezAfterRun !== undefined
+  ) {
+    return undefined;
+  }
+  return quote;
+}
+
+/**
+ * Olivia-style rez actions are already exact, Engine-generated LegalActions.
+ * Validate their public quote receipt against the ordinary installed quote and
+ * project that receipt; never reconstruct the discount from printed rezCost.
+ */
+function discountedRezActionQuote(
+  payload: AiDecisionInput["legalActions"][number]["payload"],
+  ordinaryQuote: Extract<VisibleCorpRezCostQuote, { complete: true }>,
+  actionCredits: number,
+): Extract<VisibleCorpRezCostQuote, { complete: true }> | undefined {
+  if (
+    ordinaryQuote.costKind !== "fixed" ||
+    !payload ||
+    !nonBlankString(payload.discountedRezSourceCardId) ||
+    !nonBlankString(payload.discountedRezSourceDefinitionId) ||
+    payload.temporaryDerezAfterRun !== true ||
+    payload.serverId !== ordinaryQuote.targetServerId ||
+    !nonNegativeSafeInteger(payload.discountedRezCostBase) ||
+    !nonNegativeSafeInteger(payload.rezCostPaid) ||
+    payload.rezCostPaid !== actionCredits ||
+    !nonNegativeSafeInteger(payload.rezCostReductionAmount) ||
+    payload.rezCostReductionAmount > ordinaryQuote.baseCredits
+  ) {
+    return undefined;
+  }
+  const surchargeAmount = payload.corpRezCostSurchargeAmount ?? 0;
+  if (
+    !nonNegativeSafeInteger(surchargeAmount) ||
+    ordinaryQuote.finalCredits < surchargeAmount ||
+    payload.discountedRezCostBase !==
+      ordinaryQuote.finalCredits - surchargeAmount ||
+    ordinaryQuote.baseCredits -
+      payload.rezCostReductionAmount +
+      surchargeAmount !==
+      actionCredits
+  ) {
+    return undefined;
+  }
+  const reductionSourceDefinitionIds = commaSeparatedDefinitionIds(
+    payload.rezCostReductionSourceDefinitionIds,
+  );
+  if (
+    !reductionSourceDefinitionIds ||
+    !reductionSourceDefinitionIds.includes(
+      payload.discountedRezSourceDefinitionId,
+    ) ||
+    !(ordinaryQuote.reductionSourceDefinitionIds ?? []).every((definitionId) =>
+      reductionSourceDefinitionIds.includes(definitionId),
+    )
+  ) {
+    return undefined;
+  }
+  const increaseSourceDefinitionIds =
+    ordinaryQuote.increaseSourceDefinitionIds;
+  if (surchargeAmount > 0) {
+    if (
+      !nonBlankString(payload.corpRezCostSurchargeSourceDefinitionId) ||
+      !increaseSourceDefinitionIds?.includes(
+        payload.corpRezCostSurchargeSourceDefinitionId,
+      )
+    ) {
+      return undefined;
+    }
+  } else if (
+    payload.corpRezCostSurchargeSourceDefinitionId !== undefined
+  ) {
+    return undefined;
+  }
+  const sortedReductionSourceDefinitionIds = [
+    ...reductionSourceDefinitionIds,
+  ].sort();
+  if (
+    !definitionIdListsDisjoint(
+      sortedReductionSourceDefinitionIds,
+      increaseSourceDefinitionIds,
+    )
+  ) {
+    return undefined;
+  }
+  return {
+    ...ordinaryQuote,
+    finalCredits: actionCredits,
+    reductionSourceDefinitionIds: sortedReductionSourceDefinitionIds,
+  };
+}
+
+function commaSeparatedDefinitionIds(value: unknown): string[] | undefined {
+  if (typeof value !== "string" || value.length === 0) return undefined;
+  const values = value.split(",");
+  return values.every(nonBlankString) && new Set(values).size === values.length
+    ? values
+    : undefined;
+}
+
+function nonBlankString(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0;
 }
 
 export function exactCorpIceRezRoutesEqual(
