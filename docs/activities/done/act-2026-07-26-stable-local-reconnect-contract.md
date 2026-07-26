@@ -1,19 +1,33 @@
 ---
 activityId: act-2026-07-26-stable-local-reconnect-contract
-status: inbox
+status: done
 kind: fix
 area: server
 priority: hotfix
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-07-26
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-26
+completedAt: 2026-07-26
+branch: codex/activities-worktree-20260726-001
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/http-server.ts
+  - apps/server/src/multiplayer.test.ts
+  - apps/web/app/session-recovery.ts
+  - apps/web/app/session-recovery.test.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/maintenance.ts
+  - apps/web/app/maintenance.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/server test -- multiplayer.test.ts
+  - corepack pnpm --filter @netgrid/web test -- session-recovery.test.ts maintenance.test.ts
+  - git diff --check
+outcome: normal-reconnect-idempotent
 ---
 
 # Stabilen lokalen Reconnect-Vertrag wiederherstellen
@@ -118,4 +132,18 @@ machen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der normale Reconnect prüft nun das bestehende Session-/Reconnect-Tokenpaar
+inklusive Side-Bindung und gibt es unverändert zurück. Die Tokens werden dabei
+nicht mehr rotiert oder widerrufen; mehrfaches Reconnecten bleibt möglich.
+
+Der bereits vorhandene, ausdrücklich ausgelöste Wartungs-Fortsetzungszugang
+ist als separater Recovery-Tokenpfad erhalten. Nur dieser Pfad widerruft die
+alten Tokens und stellt ein neues Paar aus.
+
+Die persistierte Recovery-Sitzung gewinnt bei gleichem Match und gleicher Side
+gegen eine abweichende Tab-Kopie. Offene Tabs übernehmen Änderungen an dieser
+persistierten Sitzung über das `storage`-Event.
+
+Checks: Server- und Web-Typecheck sowie die vollständigen betroffenen
+Server-/Web-Vitest-Läufe sind grün; `git diff --check` ist grün. Keine offenen
+Folgepunkte.

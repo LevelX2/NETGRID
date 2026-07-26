@@ -1906,6 +1906,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect("error" in oldBootstrap).toBe(true);
       const oldReconnect = await service.reconnectMatch(created.matchId, {
         side: "runner",
+        sessionToken: created.hostSessionToken,
         reconnectToken: created.hostReconnectToken,
       });
       expect("error" in oldReconnect).toBe(true);
@@ -1918,6 +1919,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           body: JSON.stringify({
             side: "runner",
             reconnectToken: recovery.access,
+            recovery: true,
           }),
         },
       );
@@ -5229,6 +5231,7 @@ describe("MVP 0.2 multiplayer service", () => {
     nowMs = startMs + 7_000;
     const reconnected = await service.reconnectMatch(created.matchId, {
       side: "corp",
+      sessionToken: corp.sessionToken,
       reconnectToken: corp.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
@@ -5386,6 +5389,7 @@ describe("MVP 0.2 multiplayer service", () => {
     nowMs = startMs + 6_000;
     const reconnected = await service.reconnectMatch(matchId, {
       side: "corp",
+      sessionToken: corp.sessionToken,
       reconnectToken: corp.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
@@ -5531,6 +5535,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     const corpReconnect = await service.reconnectMatch(created.matchId, {
       side: "corp",
+      sessionToken: corp.sessionToken,
       reconnectToken: corp.reconnectToken,
     });
     expect("error" in corpReconnect).toBe(false);
@@ -5648,17 +5653,29 @@ describe("MVP 0.2 multiplayer service", () => {
     const { service, runner, matchId } = await joinedMatch();
     const reconnected = await service.reconnectMatch(matchId, {
       side: runner.side,
+      sessionToken: runner.sessionToken,
       reconnectToken: runner.reconnectToken,
-      displayName: "Runner Reloaded",
     });
 
     expect("error" in reconnected).toBe(false);
     const result = reconnected as JoinMatchResult & { eventTail: unknown[] };
     expect(result.side).toBe("runner");
-    expect(result.sessionToken).not.toBe(runner.sessionToken);
+    expect(result.sessionToken).toBe(runner.sessionToken);
+    expect(result.reconnectToken).toBe(runner.reconnectToken);
     expect(result.playerView.side).toBe("runner");
     expect(result.legalActions).toEqual(result.playerView.legalActions);
     expect(result.eventTail.length).toBeGreaterThan(0);
+
+    const repeatedReconnect = await service.reconnectMatch(matchId, {
+      side: runner.side,
+      sessionToken: runner.sessionToken,
+      reconnectToken: runner.reconnectToken,
+    });
+    expect("error" in repeatedReconnect).toBe(false);
+    if ("error" in repeatedReconnect)
+      throw new Error(repeatedReconnect.error.message);
+    expect(repeatedReconnect.sessionToken).toBe(runner.sessionToken);
+    expect(repeatedReconnect.reconnectToken).toBe(runner.reconnectToken);
 
     const accessMatch = await joinedMatch("mp-win-1");
     await submit(
@@ -5693,6 +5710,7 @@ describe("MVP 0.2 multiplayer service", () => {
       accessMatch.matchId,
       {
         side: "runner",
+        sessionToken: accessMatch.runner.sessionToken,
         reconnectToken: accessMatch.runner.reconnectToken,
       },
     );
@@ -5745,6 +5763,7 @@ describe("MVP 0.2 multiplayer service", () => {
       encounterMatch.matchId,
       {
         side: "runner",
+        sessionToken: encounterMatch.runner.sessionToken,
         reconnectToken: encounterMatch.runner.reconnectToken,
       },
     );
@@ -5789,6 +5808,7 @@ describe("MVP 0.2 multiplayer service", () => {
       first.matchId,
       {
         side: "runner",
+        sessionToken: first.runner.sessionToken,
         reconnectToken: first.runner.reconnectToken,
       },
     );
@@ -5833,6 +5853,7 @@ describe("MVP 0.2 multiplayer service", () => {
       declineMatch.matchId,
       {
         side: "runner",
+        sessionToken: declineMatch.runner.sessionToken,
         reconnectToken: declineMatch.runner.reconnectToken,
       },
     );
@@ -6214,6 +6235,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "corp",
+      sessionToken: match.corp.sessionToken,
       reconnectToken: match.corp.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
@@ -6289,6 +6311,7 @@ describe("MVP 0.2 multiplayer service", () => {
       match.matchId,
       {
         side: "runner",
+        sessionToken: match.runner.sessionToken,
         reconnectToken: match.runner.reconnectToken,
       },
     );
@@ -6413,6 +6436,7 @@ describe("MVP 0.2 multiplayer service", () => {
       match.matchId,
       {
         side: "runner",
+        sessionToken: match.runner.sessionToken,
         reconnectToken: match.runner.reconnectToken,
       },
     );
@@ -6543,6 +6567,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnectedCorp = await match.service.reconnectMatch(match.matchId, {
       side: "corp",
+      sessionToken: match.corp.sessionToken,
       reconnectToken: match.corp.reconnectToken,
     });
     expect("error" in reconnectedCorp).toBe(false);
@@ -6661,6 +6686,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnectedCorp = await service.reconnectMatch(created.matchId, {
       side: "corp",
+      sessionToken: created.hostSessionToken,
       reconnectToken: created.hostReconnectToken,
     });
     expect("error" in reconnectedCorp).toBe(false);
@@ -7009,6 +7035,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnectedCorp = await match.service.reconnectMatch(match.matchId, {
       side: "corp",
+      sessionToken: match.corp.sessionToken,
       reconnectToken: match.corp.reconnectToken,
     });
     expect("error" in reconnectedCorp).toBe(false);
@@ -7086,6 +7113,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "runner",
+      sessionToken: match.runner.sessionToken,
       reconnectToken: match.runner.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
@@ -7194,6 +7222,7 @@ describe("MVP 0.2 multiplayer service", () => {
       match.matchId,
       {
         side: "runner",
+        sessionToken: match.runner.sessionToken,
         reconnectToken: match.runner.reconnectToken,
       },
     );
@@ -7302,6 +7331,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "runner",
+      sessionToken: match.runner.sessionToken,
       reconnectToken: match.runner.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
@@ -7379,6 +7409,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "runner",
+      sessionToken: match.runner.sessionToken,
       reconnectToken: match.runner.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
@@ -7477,6 +7508,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "corp",
+      sessionToken: match.corp.sessionToken,
       reconnectToken: match.corp.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
@@ -7595,6 +7627,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "runner",
+      sessionToken: match.runner.sessionToken,
       reconnectToken: match.runner.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
@@ -7717,6 +7750,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "runner",
+      sessionToken: match.runner.sessionToken,
       reconnectToken: match.runner.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
@@ -7850,6 +7884,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await service.reconnectMatch(created.matchId, {
       side: "runner",
+      sessionToken: created.hostSessionToken,
       reconnectToken: created.hostReconnectToken,
     });
     if ("error" in reconnected) throw new Error(reconnected.error.message);
@@ -9562,6 +9597,7 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(corpBootstrap.pendingUndo).toBeUndefined();
       const reconnected = await match.service.reconnectMatch(match.matchId, {
         side: "runner",
+        sessionToken: match.runner.sessionToken,
         reconnectToken: match.runner.reconnectToken,
       });
       expect("error" in reconnected).toBe(false);
@@ -9624,6 +9660,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const reconnected = await service.reconnectMatch(created.matchId, {
       side: "runner",
+      sessionToken: created.hostSessionToken,
       reconnectToken: created.hostReconnectToken,
     });
     expect("error" in reconnected).toBe(false);
@@ -10268,6 +10305,7 @@ describe("MVP 0.2 multiplayer service", () => {
         expect(lastPayload.winner).toBeUndefined();
         const reconnected = await service.reconnectMatch(created.matchId, {
           side: "runner",
+          sessionToken,
           reconnectToken,
         });
         expect("error" in reconnected).toBe(false);
@@ -11519,6 +11557,7 @@ describe("MVP 0.2 multiplayer service", () => {
     if ("error" in corpBootstrap) throw new Error(corpBootstrap.error.message);
     const corpReconnect = await service.reconnectMatch(created.matchId, {
       side: "corp",
+      sessionToken: created.hostSessionToken,
       reconnectToken: created.hostReconnectToken,
     });
     expect("error" in corpReconnect).toBe(false);
@@ -11674,6 +11713,7 @@ describe("MVP 0.2 multiplayer service", () => {
     if ("error" in livePayload) throw new Error(livePayload.error.message);
     const reconnected = await service.reconnectMatch(created.matchId, {
       side: "runner",
+      sessionToken: joined.sessionToken,
       reconnectToken: joined.reconnectToken,
     });
     expect("error" in reconnected).toBe(false);
@@ -12481,8 +12521,13 @@ describe("MVP 0.2 multiplayer service", () => {
     try {
       const storage = new InMemoryMatchStorage();
       const restoredBeforeChoice: boolean[] = [];
-      const choose = (input: Parameters<typeof chooseRuntimeAiAction>[0], options?: Parameters<typeof chooseRuntimeAiAction>[1]) => {
-        restoredBeforeChoice.push(Boolean(residentPlanPortfolioSnapshot(input)));
+      const choose = (
+        input: Parameters<typeof chooseRuntimeAiAction>[0],
+        options?: Parameters<typeof chooseRuntimeAiAction>[1],
+      ) => {
+        restoredBeforeChoice.push(
+          Boolean(residentPlanPortfolioSnapshot(input)),
+        );
         return chooseRuntimeAiAction(input, options);
       };
       const service = new MultiplayerService(storage, {
@@ -13818,6 +13863,7 @@ async function expectOldTokensRejected(
   expect("error" in bootstrapResult).toBe(true);
   const reconnectResult = await service.reconnectMatch(matchId, {
     side,
+    sessionToken,
     reconnectToken,
   });
   expect("error" in reconnectResult).toBe(true);
