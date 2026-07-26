@@ -4102,11 +4102,20 @@ export default function Page() {
       actionMatchesContext(action, selectedActionContext)
     )
       setSelectedActionContext(null);
+    const paymentSupportContinuation = pendingPaymentSupportContinuation(
+      session.matchId,
+      action,
+      stateVersion,
+    );
     if (actionBelongsToRunnerPaymentSupportWindow(action)) {
       setPaymentSupportPreselection(null);
       paymentSupportSubmittedKeyRef.current = null;
-      setPaymentSupportContinuation(null);
       paymentSupportContinuationSubmittedKeyRef.current = null;
+      // A support ability is chosen inside an already-authoritative payment
+      // window. Its original action is still revalidated from fresh
+      // LegalActions below, but the player must not be asked to select the
+      // same break/pump/install action a second time.
+      setPaymentSupportContinuation(paymentSupportContinuation);
     }
     sendSocketMessage("submit_action", {
       matchId: session.matchId,

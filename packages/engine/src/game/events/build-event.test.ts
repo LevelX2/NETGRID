@@ -60,6 +60,36 @@ describe("game event builder", () => {
     expect(toPublicEvent(event)).not.toHaveProperty("privatePayload");
   });
 
+  it("labels a deferred action as an opened payment window", () => {
+    const previous = createGame({
+      seed: "arch-60-payment-window-event",
+      setupMode: "completed",
+    });
+    const next = nextState(previous);
+    const legalAction = {
+      ...mandatoryDrawLegalAction(previous),
+      type: "break_subroutine",
+      label: "Rent-I-Con: Subroutine brechen",
+      payload: { runnerCostPenaltySupportWindowOpened: true },
+    } satisfies LegalAction;
+
+    const event = buildEventWithHost(
+      testBuildEventHost(),
+      previous.stateVersion,
+      next.stateVersion,
+      hashState(next),
+      previous,
+      next,
+      legalAction,
+      playerActionFor(previous, legalAction),
+    );
+
+    expect(event.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      label: "Kostenfenster geöffnet.",
+    });
+  });
+
   it("publishes normalized ability metadata without execution discriminators", () => {
     const previous = createGame({
       seed: "arch-60-normalized-ability-event",

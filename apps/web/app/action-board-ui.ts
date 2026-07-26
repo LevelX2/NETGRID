@@ -2720,6 +2720,8 @@ export function runAwareActionButtonLabel(
   view: PlayerView,
   action: LegalAction,
 ): string {
+  if (action.payload?.runnerCostPenaltySupportContinuation === true)
+    return paymentSupportContinuationLabel(action);
   const base = actionButtonLabel(action);
   if (!view.run) return base;
   const iceLabel = runCurrentIceLabel(view);
@@ -2920,6 +2922,8 @@ export function runWindowActionButtonLabel(
   view: PlayerView,
   action: LegalAction,
 ): string {
+  if (action.payload?.runnerCostPenaltySupportContinuation === true)
+    return paymentSupportContinuationLabel(action);
   const activeIceId = activeRunIceInstanceId(view);
   if (isSelfModifyingCodeAction(action)) {
     return "SMC: Programm suchen";
@@ -2936,6 +2940,16 @@ export function runWindowActionButtonLabel(
     return compactRunWindowBreakerLabel(view, action);
   }
   return runAwareActionButtonLabel(view, action);
+}
+
+function paymentSupportContinuationLabel(action: LegalAction): string {
+  const originalLabel = action.label.replace(
+    /^Ohne weiteren Bank-Support fortfahren:\s*/i,
+    "",
+  );
+  return originalLabel
+    ? `Zahlung abschließen: ${originalLabel}`
+    : "Zahlung abschließen";
 }
 
 export function runBreakerActionHint(

@@ -273,6 +273,8 @@ function runnerActionsPerTurn(state: GameState): number {
 }
 
 function publicLabel(legalAction: LegalAction): string {
+  if (legalAction.payload?.runnerCostPenaltySupportWindowOpened === true)
+    return "Kostenfenster geöffnet.";
   if (
     legalAction.type === "install_card" &&
     legalAction.payload?.hiddenRunnerResourceInstall === true
