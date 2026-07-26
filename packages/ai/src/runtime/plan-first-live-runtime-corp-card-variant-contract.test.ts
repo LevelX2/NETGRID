@@ -163,15 +163,13 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.consideredActionIds).toContain(
       fixture.annualReviews.actionId,
     );
-    expect(portfolio).toContain(
-      `"actionIds":["${fixture.basicDraw.actionId}"]`,
-    );
+    expect(portfolio).toContain(`"actionId":"${fixture.basicDraw.actionId}"`);
     expect(portfolio).not.toContain(fixture.annualReviews.actionId);
     expect(debug).not.toContain("develop%3Aannual-reviews");
     expect(debug).not.toContain("corp_card_development");
   });
 
-  it("keeps Annual Reviews executable as P5 when its exact net +2 projection fits HQ capacity", () => {
+  it("uses safe Annual Reviews as the denser draw step of the exact score-material parent", () => {
     const fixture = annualReviewsFixture({
       startingHandSize: 3,
       includeBlockedScoreParent: false,
@@ -185,7 +183,7 @@ describe("plan-first Corp card variant contracts", () => {
     );
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_class:P5",
+        "plan_priority_class:P4",
         "plan_assessment_evidence:corp_score_campaign_missing_agenda_material",
       ]),
     );

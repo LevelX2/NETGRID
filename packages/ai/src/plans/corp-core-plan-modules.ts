@@ -2846,9 +2846,7 @@ function selectedScoreProtectionRoute(
           candidate,
         })),
       )
-      .sort((left, right) =>
-        technicalCompare(left.candidate.actionId, right.candidate.actionId),
-      )[0];
+      .sort(compareScoreProtectionDrawRoutes)[0];
     if (drawRoute) parentRoutes.push(drawRoute);
   }
   return parentRoutes.sort(
@@ -2860,6 +2858,66 @@ function selectedScoreProtectionRoute(
         right.signal.parentProjectId,
       ),
   )[0];
+}
+
+function compareScoreProtectionDrawRoutes(
+  left: SelectedScoreProtectionRoute,
+  right: SelectedScoreProtectionRoute,
+): number {
+  const leftProjection = exactScoreProtectionDrawProjection(left.candidate);
+  const rightProjection = exactScoreProtectionDrawProjection(right.candidate);
+  if (leftProjection && rightProjection) {
+    const densityComparison =
+      rightProjection.cardsDrawn * leftProjection.clickCost -
+      leftProjection.cardsDrawn * rightProjection.clickCost;
+    if (densityComparison !== 0) return densityComparison;
+    const cardsDrawnComparison =
+      rightProjection.cardsDrawn - leftProjection.cardsDrawn;
+    if (cardsDrawnComparison !== 0) return cardsDrawnComparison;
+    const creditCostComparison =
+      leftProjection.creditCost - rightProjection.creditCost;
+    if (creditCostComparison !== 0) return creditCostComparison;
+    const handDeltaComparison =
+      leftProjection.netHandDelta - rightProjection.netHandDelta;
+    if (handDeltaComparison !== 0) return handDeltaComparison;
+  } else if (leftProjection || rightProjection) {
+    return leftProjection ? -1 : 1;
+  }
+  return technicalCompare(left.candidate.actionId, right.candidate.actionId);
+}
+
+function exactScoreProtectionDrawProjection(
+  candidate: ActionSemanticCandidate,
+):
+  | {
+      cardsDrawn: number;
+      clickCost: number;
+      creditCost: number;
+      netHandDelta: number;
+    }
+  | undefined {
+  if (candidate.semanticActionType === "draw.card") {
+    return { cardsDrawn: 1, clickCost: 1, creditCost: 0, netHandDelta: 1 };
+  }
+  const cardsDrawn = candidate.economyProjection?.cardsDrawn;
+  const clickCost = candidate.costProfile.clickCost;
+  const creditCost = candidate.costProfile.creditCost;
+  const netHandDelta = candidate.economyProjection?.netHandDelta;
+  return Number.isSafeInteger(cardsDrawn) &&
+    (cardsDrawn ?? 0) > 0 &&
+    Number.isSafeInteger(clickCost) &&
+    (clickCost ?? 0) > 0 &&
+    Number.isSafeInteger(creditCost) &&
+    (creditCost ?? -1) >= 0 &&
+    Number.isSafeInteger(netHandDelta) &&
+    (netHandDelta ?? -1) >= 0
+    ? {
+        cardsDrawn: cardsDrawn!,
+        clickCost: clickCost!,
+        creditCost: creditCost!,
+        netHandDelta: netHandDelta!,
+      }
+    : undefined;
 }
 
 function compareScoreProtectionInstallRoutes(

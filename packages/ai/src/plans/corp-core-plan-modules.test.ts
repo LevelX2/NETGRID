@@ -2381,7 +2381,7 @@ describe("Corp core plan modules", () => {
     ).toEqual([urgentDefense.actionId]);
   });
 
-  it("selects exactly one technically stable targeted draw route", () => {
+  it("selects exactly one densest targeted draw route with a technical tie-break", () => {
     const draw = candidate("basic-draw", "draw_card", "draw.card");
     const nightShift = candidate(
       "night-shift",
@@ -2449,7 +2449,7 @@ describe("Corp core plan modules", () => {
 
     expect(
       materialized.candidates.map((entry) => entry.candidate.actionId),
-    ).toEqual(["basic-draw"]);
+    ).toEqual(["night-shift"]);
     expect(
       bindBestCurrentPlanRoute({
         side: "corp",
@@ -2458,7 +2458,7 @@ describe("Corp core plan modules", () => {
         planInstanceId: instance.instanceId,
         ...materialized,
       }).head.actionId,
-    ).toBe("basic-draw");
+    ).toBe("night-shift");
   });
 
   it("leaves shared basic support actions open while closing defense-exclusive actions through the global allocation", () => {

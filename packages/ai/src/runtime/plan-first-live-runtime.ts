@@ -7564,7 +7564,7 @@ function buildCorpDomain(
           .filter(
             (candidate) =>
               !defenseDispositionActionIds.has(candidate.actionId) &&
-              exactCurrentBasicCorpDrawCandidate(input, candidate),
+              exactCurrentCorpScoreMaterialDrawCandidate(input, candidate),
           )
           .map((candidate) => candidate.actionId);
   const scoreSetupBinding = corpScoreAccelerationSetupBinding(
@@ -7608,7 +7608,7 @@ function buildCorpDomain(
             maximumHandSize: input.playerView.own.maxHandSize,
             actionIds: scoreMaterialDrawRouteActionIds,
             concretePurposeCode:
-              "Draw one currently legal card, observe its identity, then revalidate the blocked score-material campaign.",
+              "Execute one currently legal Engine-described draw action, observe every drawn identity, then revalidate the blocked score-material campaign.",
             uncertainty: {
               kind: "draw_then_observe" as const,
               unknownOutcome: "drawn_card_identity" as const,
@@ -7727,6 +7727,60 @@ function exactCurrentBasicCorpDrawCandidate(
     input.playerView.own.stackOrRdCount > 0 &&
     Number.isSafeInteger(input.playerView.own.gripOrHq.length) &&
     Number.isSafeInteger(input.playerView.own.maxHandSize)
+  );
+}
+
+function exactCurrentCorpScoreMaterialDrawCandidate(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  if (exactCurrentBasicCorpDrawCandidate(input, candidate)) return true;
+  if (
+    !corpCandidateProjectsCardDraw(candidate) ||
+    !corpDrawCandidatePreservesHandCapacity(input, candidate) ||
+    candidate.costProfile.additionalCosts.length > 0
+  ) {
+    return false;
+  }
+  const projection = candidate.economyProjection;
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  const cardsDrawn = projection?.cardsDrawn;
+  const netHandDelta = projection?.netHandDelta;
+  const clickCost = candidate.costProfile.clickCost;
+  const creditCost = candidate.costProfile.creditCost;
+  if (
+    action?.side !== "corp" ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.targetRequirements.length > 0 ||
+    (action.choiceRequirements?.length ?? 0) > 0 ||
+    projection?.timing !== "immediate" ||
+    projection.reliability !== "guaranteed" ||
+    !Number.isSafeInteger(cardsDrawn) ||
+    (cardsDrawn ?? 0) <= 0 ||
+    !Number.isSafeInteger(netHandDelta) ||
+    (netHandDelta ?? -1) < 0 ||
+    !Number.isSafeInteger(clickCost) ||
+    (clickCost ?? 0) <= 0 ||
+    !Number.isSafeInteger(creditCost) ||
+    (creditCost ?? -1) < 0
+  ) {
+    return false;
+  }
+  const totalClicks = action.costs.reduce(
+    (sum, cost) => sum + (cost.clicks ?? 0),
+    0,
+  );
+  const totalCredits = action.costs.reduce(
+    (sum, cost) => sum + (cost.credits ?? 0),
+    0,
+  );
+  return (
+    totalClicks === clickCost &&
+    totalCredits === creditCost &&
+    totalClicks <= input.playerView.own.clicks &&
+    totalCredits <= input.playerView.own.credits
   );
 }
 
