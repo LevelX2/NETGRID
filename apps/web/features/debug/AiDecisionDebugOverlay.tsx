@@ -2646,7 +2646,6 @@ function AiDecisionDebugMemory({
     <AiDecisionDebugCollapsibleSection
       title="Was weiß die KI?"
       summary={aiDecisionDebugMemoryHeaderSummary({
-        rows,
         facts,
         hypotheses,
         uncertainty,
@@ -2676,20 +2675,17 @@ function AiDecisionDebugMemory({
 }
 
 function aiDecisionDebugMemoryHeaderSummary({
-  rows,
   facts,
   hypotheses,
   uncertainty,
   invalidations,
 }: {
-  rows: Array<[string, string]>;
   facts: string[];
   hypotheses: string[];
   uncertainty: string[];
   invalidations: string[];
 }): string {
   return [
-    `${rows.length} Werte`,
     facts.length > 0 ? `${facts.length} bekannt` : undefined,
     hypotheses.length > 0 ? `${hypotheses.length} Hypothesen` : undefined,
     uncertainty.length > 0 ? `${uncertainty.length} unsicher` : undefined,
@@ -2705,8 +2701,6 @@ function aiDecisionDebugMemoryRows(
   detail: Record<string, unknown>,
 ): Array<[string, string]> {
   const rows: Array<[string, string]> = [];
-  if (typeof detail.memoryVersion === "string")
-    rows.push(["Version", detail.memoryVersion]);
   const memoryItems = aiDecisionDebugDetailSectionItems(
     detail,
     "semantic_memory",
