@@ -7,6 +7,7 @@ import type {
 } from "../action-semantic-candidate-types";
 import {
   CORP_PLAN_PRIORITY_POLICY,
+  compareValidatedPlanAssessments,
   requireValidatedPlanAssessment,
 } from "./plan-assessment";
 import {
@@ -16,6 +17,7 @@ import {
   corpDefensePortfolioHasExecutableRoute,
   corpDefensePlacementDispositions,
   corpEconomyActionIsOwned,
+  corpScorePriorityClass,
   createCorpCorePlanModules,
   assessCorpEconomyFundingRoute,
   type CorpDefenseSignal,
@@ -246,6 +248,147 @@ describe("Corp core plan modules", () => {
       semanticActionTypes: ["score.agenda"],
     });
     expect(JSON.stringify(materialized.continuation)).not.toContain("actionId");
+  });
+
+  it.each([
+    {
+      caseName: "terminal score with a same-turn closeout",
+      terminalScore: true,
+      sameTurnCloseout: true,
+      deadlinePressure: false,
+      expectedPriorityClass: "P1",
+      expectedHorizon: "current_turn",
+      expectedWitnessGuarantee: "visible_state_forced",
+    },
+    {
+      caseName: "terminal score without a closeout",
+      terminalScore: true,
+      sameTurnCloseout: false,
+      deadlinePressure: false,
+      expectedPriorityClass: "P4",
+      expectedHorizon: "multi_turn",
+      expectedWitnessGuarantee: undefined,
+    },
+    {
+      caseName: "deadline score route without a closeout",
+      terminalScore: false,
+      sameTurnCloseout: false,
+      deadlinePressure: true,
+      expectedPriorityClass: "P3",
+      expectedHorizon: "current_turn",
+      expectedWitnessGuarantee: undefined,
+    },
+    {
+      caseName: "ordinary score route",
+      terminalScore: false,
+      sameTurnCloseout: false,
+      deadlinePressure: false,
+      expectedPriorityClass: "P4",
+      expectedHorizon: "multi_turn",
+      expectedWitnessGuarantee: undefined,
+    },
+  ] as const)(
+    "classifies $caseName from existing scoreline signals",
+    ({
+      caseName,
+      expectedHorizon,
+      expectedPriorityClass,
+      expectedWitnessGuarantee,
+      ...scorelineSignals
+    }) => {
+      const advance = targetAction(
+        `advance-${caseName}`,
+        "score.advance_card",
+        `agenda-${caseName}`,
+        "card",
+      );
+      const module = corpModule("corp.score_agenda");
+      const project = {
+        ...scoreProject(
+          `score-${caseName}`,
+          "P4",
+          `score_priority_case:${caseName}`,
+        ),
+        agendaInstanceId: `agenda-${caseName}`,
+        ...scorelineSignals,
+      };
+      const corpContext = context([advance], { scoreProjects: [project] });
+      const instance = instantiatePlanProposal(
+        module.discover(corpContext)[0]!,
+        10,
+      );
+      const planAssessment = requireValidatedPlanAssessment(
+        module.assess(instance, corpContext, emptyPortfolio()),
+        CORP_PLAN_PRIORITY_POLICY,
+        10,
+      );
+
+      expect(corpScorePriorityClass(project)).toBe(expectedPriorityClass);
+      expect(planAssessment.priorityValidation.effectiveClass).toBe(
+        expectedPriorityClass,
+      );
+      expect(planAssessment.priorityClaim.horizon).toBe(expectedHorizon);
+      expect(planAssessment.priorityClaim.witness?.guarantee).toBe(
+        expectedWitnessGuarantee,
+      );
+    },
+  );
+
+  it("keeps a same-turn closeout ahead of a higher-value terminal route without a closeout", () => {
+    const module = corpModule("corp.score_agenda");
+    const closeoutAction = targetAction(
+      "advance-same-turn-closeout",
+      "score.advance_card",
+      "agenda-same-turn-closeout",
+      "card",
+    );
+    const uncertainTerminalAction = targetAction(
+      "advance-uncertain-terminal",
+      "score.advance_card",
+      "agenda-uncertain-terminal",
+      "card",
+    );
+    const corpContext = context([closeoutAction, uncertainTerminalAction], {
+      scoreProjects: [
+        {
+          ...scoreProject("same-turn-closeout", "P3", "same_turn_closeout"),
+          agendaInstanceId: "agenda-same-turn-closeout",
+        },
+        {
+          ...scoreProject(
+            "uncertain-terminal",
+            "P4",
+            "uncertain_terminal_route",
+          ),
+          agendaInstanceId: "agenda-uncertain-terminal",
+          terminalScore: true,
+        },
+      ],
+    });
+    const assessments = module
+      .discover(corpContext)
+      .map((proposal) =>
+        requireValidatedPlanAssessment(
+          module.assess(
+            instantiatePlanProposal(proposal, 10),
+            corpContext,
+            emptyPortfolio(),
+          ),
+          CORP_PLAN_PRIORITY_POLICY,
+          10,
+        ),
+      )
+      .sort(compareValidatedPlanAssessments);
+
+    expect(assessments.map((assessment) => assessment.instanceId)).toEqual([
+      "plan:corp.score_agenda:same-turn-closeout",
+      "plan:corp.score_agenda:uncertain-terminal",
+    ]);
+    expect(
+      assessments.map(
+        (assessment) => assessment.priorityValidation.effectiveClass,
+      ),
+    ).toEqual(["P3", "P4"]);
   });
 
   it("keeps the agenda-less score root supportable only through its exact current tactical material signal", () => {
@@ -3347,6 +3490,56 @@ describe("Corp core plan modules", () => {
     ).toEqual([advance.actionId]);
   });
 
+  it("keeps an exact current terminal install executable while its later score route remains unknown", () => {
+    const score = corpModule("corp.score_agenda");
+    const install = {
+      ...cardAction(
+        "install-current-terminal-agenda",
+        "install.card",
+        "agenda-def",
+      ),
+      targetContext: targetContext("remote_1", "server"),
+    };
+    const project = {
+      projectId: "current-terminal-install-with-uncertain-later-route",
+      agendaDefinitionId: "agenda-def",
+      agendaPoints: 2,
+      serverId: "remote_1",
+      actionIds: [install.actionId],
+      phase: "install_agenda" as const,
+      sameTurnCloseout: false,
+      terminalScore: true,
+      feasible: true,
+      evidenceCode: "score_install_with_uncertain_later_route",
+      uncertainty: {
+        kind: "later_score_route" as const,
+        knowledge: "unknown" as const,
+        reason: "later_score_route_not_engine_proven",
+        currentActionScope: "exact_install_only" as const,
+      },
+    };
+    const corpContext = context([install], { scoreProjects: [project] });
+    const proposal = score.discover(corpContext)[0]!;
+    const instance = instantiatePlanProposal(proposal, 10);
+    const planAssessment = requireValidatedPlanAssessment(
+      score.assess(instance, corpContext, emptyPortfolio()),
+      CORP_PLAN_PRIORITY_POLICY,
+      10,
+    );
+
+    expect(planAssessment).toMatchObject({
+      readiness: "executable_now",
+      priorityValidation: { effectiveClass: "P4" },
+      feasibility: { currentRouteHeadPossible: true },
+      resourceGaps: [],
+    });
+    expect(
+      score
+        .materialize(instance, planAssessment, corpContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([install.actionId]);
+  });
+
   it.each(["P1", "P2", "P3", "P4"] as const)(
     "inherits the exact %s score-parent priority for a funding delegation",
     (delegatedPriorityClass) => {
@@ -4715,7 +4908,7 @@ function scoreProject(
     phase: "advance_agenda",
     terminalScore: priorityClass === "P1",
     preventsTerminalSteal: priorityClass === "P2",
-    sameTurnCloseout: priorityClass === "P3",
+    sameTurnCloseout: priorityClass === "P1" || priorityClass === "P3",
     feasible: true,
     evidenceCode,
   };

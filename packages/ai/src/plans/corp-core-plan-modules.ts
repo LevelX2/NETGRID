@@ -415,7 +415,7 @@ export type CorpScorePriorityClass = "P1" | "P2" | "P3" | "P4";
 export function corpScorePriorityClass(
   signal: CorpScoreProjectSignal,
 ): CorpScorePriorityClass {
-  if (signal.terminalScore) return "P1";
+  if (signal.terminalScore && signal.sameTurnCloseout) return "P1";
   if (signal.preventsTerminalSteal) return "P2";
   if (signal.sameTurnCloseout || signal.deadlinePressure) return "P3";
   return "P4";
