@@ -27,6 +27,7 @@ export function visibleChoice(
       choiceId: choice.choiceId,
       side: choice.side,
       source: choice.source,
+      ...(choice.continuation ? { continuation: choice.continuation } : {}),
       prompt: choice.prompt,
       kind: choice.kind,
       options: choice.options.map((option) => {
@@ -88,7 +89,9 @@ function choiceOptionValueIsHiddenInstalledCorpExposeTarget(
   if (
     !choice.source.startsWith("p3_36.expose_installed_card:") &&
     !choice.source.startsWith("p3_36.expose_installed_cards") &&
-    !choice.source.startsWith("card_implementation.multi_expose_installed_corp_cards")
+    !choice.source.startsWith(
+      "card_implementation.multi_expose_installed_corp_cards",
+    )
   )
     return false;
   if (typeof option.value !== "string") return false;
@@ -113,7 +116,9 @@ function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
       choice.source.startsWith("v1911.aujourdoui_top5") ||
       choice.source.startsWith("v1912.search_stack") ||
       choice.source.startsWith("runner.stack_search_to_grip") ||
-      choice.source.startsWith("v1911.temporary_program_install_stack_install") ||
+      choice.source.startsWith(
+        "v1911.temporary_program_install_stack_install",
+      ) ||
       choice.source.startsWith("p3_38.search_stack_install") ||
       choice.source.startsWith("p3_38.stack_or_trash_program_install"))
   );
@@ -151,7 +156,9 @@ function stackSearchResolutionForChoice(
       choice.source.startsWith("runner.stack_search_to_grip") ||
       choice.source.startsWith("v1911.aujourdoui_top5") ||
       choice.source.startsWith("v1911.hidden_stack_program_install") ||
-      choice.source.startsWith("v1911.temporary_program_install_stack_install") ||
+      choice.source.startsWith(
+        "v1911.temporary_program_install_stack_install",
+      ) ||
       choice.source.startsWith("p3_38.search_stack_install") ||
       (choice.source.startsWith("p3_38.stack_or_trash_program_install") &&
         choice.source.includes(":stack:"))
@@ -159,7 +166,9 @@ function stackSearchResolutionForChoice(
         : "hidden",
     destination:
       choice.source.startsWith("v1911.hidden_stack_program_install") ||
-      choice.source.startsWith("v1911.temporary_program_install_stack_install") ||
+      choice.source.startsWith(
+        "v1911.temporary_program_install_stack_install",
+      ) ||
       choice.source.startsWith("p3_38.search_stack_install") ||
       choice.source.startsWith("p3_38.stack_or_trash_program_install")
         ? "install_program"
@@ -324,7 +333,9 @@ function agendaPurgeChoiceCardIdForOption(
 ): CardInstanceId | undefined {
   if (
     choice.kind !== "select_option" ||
-    !choice.source.startsWith("card_implementation.agenda_purge_install_targets:")
+    !choice.source.startsWith(
+      "card_implementation.agenda_purge_install_targets:",
+    )
   )
     return undefined;
   if (typeof option.value !== "string") return undefined;

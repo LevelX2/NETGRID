@@ -1685,10 +1685,17 @@ function sanitizeVisibleChoiceRequest(
   const cardSearchPresentation = sanitizeCardSearchPresentation(
     choice.cardSearchPresentation,
   );
+  const continuation = sanitizeScoreChoiceContinuation(
+    choice.continuation,
+    playerViewStateVersion,
+    playerViewSide,
+    choice.side,
+  );
   return {
     choiceId: choice.choiceId,
     side: choice.side,
     source: choice.source,
+    ...(continuation ? { continuation } : {}),
     prompt: choice.prompt,
     kind: choice.kind,
     options: choice.options.map((option) => {
@@ -1733,6 +1740,34 @@ function sanitizeVisibleChoiceRequest(
     ...(stackSearchResolution ? { stackSearchResolution } : {}),
     ...(cardSearchPresentation ? { cardSearchPresentation } : {}),
   };
+}
+
+function sanitizeScoreChoiceContinuation(
+  value: VisibleChoiceRequest["continuation"],
+  stateVersion: number,
+  playerViewSide: Side,
+  choiceSide: Side,
+): VisibleChoiceRequest["continuation"] | undefined {
+  if (playerViewSide !== "corp" || choiceSide !== "corp" || !value)
+    return undefined;
+  if (
+    typeof value.originActionId !== "string" ||
+    value.originActionId.length === 0 ||
+    value.createdAtStateVersion !== stateVersion
+  ) {
+    return undefined;
+  }
+  if (value.family === "corp_advancement_counter") return { ...value };
+  if (
+    value.family === "corp_scored_agenda_hq_shuffle" &&
+    typeof value.agendaInstanceId === "string" &&
+    value.agendaInstanceId.length > 0 &&
+    Number.isSafeInteger(value.creditPerAgendaPoint) &&
+    value.creditPerAgendaPoint > 0
+  ) {
+    return { ...value };
+  }
+  return undefined;
 }
 
 function sanitizeCorpOptionalRezChoiceQuote(

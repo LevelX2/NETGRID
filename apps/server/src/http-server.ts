@@ -3118,10 +3118,17 @@ async function routeHttp(
         )
           return;
         const body = await readJson(request);
-        const side = body.side === "corp" ? "corp" : "runner";
+        const requesterSide = body.side === "corp" ? "corp" : "runner";
+        const targetSide =
+          body.targetSide === "corp"
+            ? "corp"
+            : body.targetSide === "runner"
+              ? "runner"
+              : requesterSide;
         const preview = await service.previewAi({
           matchId,
-          side,
+          requesterSide,
+          targetSide,
           sessionToken:
             bearerToken(request) ??
             (typeof body.sessionToken === "string" ? body.sessionToken : ""),
