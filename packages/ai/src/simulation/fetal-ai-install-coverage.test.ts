@@ -14,23 +14,26 @@ describe("Proteus Fetal AI install plan coverage", () => {
     it(`keeps the exact preplanned Ambush install covered against ${runnerDeckId}`, () => {
       const summary = simulateAiGame({
         seed: "proteus-pilot-qualifier-02",
-        maxActions: 4,
+        maxActions: 6,
         runnerDeck: requireDeck(runnerDeckId),
         corpDeck,
         runnerControllerMode: "current_candidate",
         corpControllerMode: "current_candidate",
       });
 
-      expect(summary.terminationKind).toBe("action_limit");
+      expect(summary.terminationKind, fetalDiagnostic(summary)).toBe(
+        "action_limit",
+      );
       expect(summary.errors).toEqual([]);
       expect(summary.runtimeFailures).toEqual([]);
       expect(summary.replayOk).toBe(true);
       const executorEvidence =
-        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_004_fetal-ai_2";
+        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_004_fetal-ai_2%3Asetup%3Anew_remote";
       expect(
         summary.actionSequence.find((entry) =>
           entry.evidence.includes(executorEvidence),
         ),
+        fetalDiagnostic(summary),
       ).toMatchObject({
         side: "corp",
         selectedActionId: "corp.install_card.new_remote",
@@ -41,6 +44,20 @@ describe("Proteus Fetal AI install plan coverage", () => {
           "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
           executorEvidence,
         ]),
+      });
+      expect(
+        summary.actionSequence.find(
+          (entry) =>
+            entry.side === "corp" &&
+            entry.actionType === "advance_card" &&
+            entry.evidence.includes(
+              "plan_first_executor:plan:corp.score_agenda:agenda%3Acorp_onr_proteus_004_fetal-ai_2%3Aremote_1",
+            ),
+        ),
+        fetalDiagnostic(summary),
+      ).toMatchObject({
+        reasonCode: "plan_first.corp.score_agenda",
+        fallbackUsed: false,
       });
     });
   }
@@ -60,11 +77,12 @@ describe("Proteus Fetal AI install plan coverage", () => {
     expect(summary.runtimeFailures).toEqual([]);
     expect(summary.replayOk).toBe(true);
     const executorEvidence =
-      "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_004_fetal-ai_1";
+      "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_004_fetal-ai_1%3Asetup%3Anew_remote";
     expect(
       summary.actionSequence.find((entry) =>
         entry.evidence.includes(executorEvidence),
       ),
+      fetalDiagnostic(summary),
     ).toMatchObject({
       side: "corp",
       selectedActionId: "corp.install_card.new_remote",
@@ -82,5 +100,30 @@ describe("Proteus Fetal AI install plan coverage", () => {
     const deck = decks.find((candidate) => candidate.id === deckId);
     if (!deck) throw new Error(`Missing Proteus test deck ${deckId}.`);
     return deck;
+  }
+
+  function fetalDiagnostic(summary: ReturnType<typeof simulateAiGame>): string {
+    return JSON.stringify(
+      {
+        terminationKind: summary.terminationKind,
+        errors: summary.errors,
+        runtimeFailures: summary.runtimeFailures,
+        actions: summary.actionSequence.map((entry, index) => ({
+          index,
+          side: entry.side,
+          actionId: entry.selectedActionId,
+          actionType: entry.actionType,
+          reasonCode: entry.reasonCode,
+          executor: entry.evidence.find((value) =>
+            value.startsWith("plan_first_executor:"),
+          ),
+          ambushAssessment: entry.evidence.find((value) =>
+            value.startsWith("plan_assessment_evidence:corp_ambush"),
+          ),
+        })),
+      },
+      undefined,
+      2,
+    );
   }
 });

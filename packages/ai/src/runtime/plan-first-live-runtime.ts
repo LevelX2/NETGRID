@@ -6186,10 +6186,16 @@ function corpActionDispositions(
       );
       continue;
     }
-    const ambushAdvanceDisposition = corpAmbushAdvanceDispositionEvidence(
-      candidate,
-      domain.ambushes,
-    );
+    const exactScoreProjectOwnsAdvance =
+      candidate.semanticActionType === "score.advance_card" &&
+      domain.scoreProjects.some(
+        (signal) =>
+          signal.feasible &&
+          signal.actionIds?.includes(candidate.actionId) === true,
+      );
+    const ambushAdvanceDisposition = exactScoreProjectOwnsAdvance
+      ? undefined
+      : corpAmbushAdvanceDispositionEvidence(candidate, domain.ambushes);
     if (ambushAdvanceDisposition) {
       add(
         candidate.actionId,
