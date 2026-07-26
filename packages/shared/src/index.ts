@@ -763,27 +763,26 @@ export type CorpOptionalRezChoiceQuoteBinding = {
   stateVersion: number;
 };
 
-export type CorpOptionalRezChoiceQuote =
-  CorpOptionalRezChoiceQuoteBinding &
-    (
-      | { complete: false }
-      | {
-          complete: true;
-          cardType: "ice" | "asset" | "upgrade";
-          baseCredits: number;
-          finalCredits: number;
-          mandatoryAdditionalCosts: VisibleMandatoryCorpRezCosts;
-          reductionSourceDefinitionIds?: CardDefinitionId[];
-          increaseSourceDefinitionIds?: CardDefinitionId[];
-          temporaryCreditsAvailable: number;
-          temporaryCreditsApplied: number;
-          regularCreditsAvailable: number;
-          regularCreditsRequired: number;
-          creditPayable: boolean;
-          additionalCostsPayable: boolean;
-          affordable: boolean;
-        }
-    );
+export type CorpOptionalRezChoiceQuote = CorpOptionalRezChoiceQuoteBinding &
+  (
+    | { complete: false }
+    | {
+        complete: true;
+        cardType: "ice" | "asset" | "upgrade";
+        baseCredits: number;
+        finalCredits: number;
+        mandatoryAdditionalCosts: VisibleMandatoryCorpRezCosts;
+        reductionSourceDefinitionIds?: CardDefinitionId[];
+        increaseSourceDefinitionIds?: CardDefinitionId[];
+        temporaryCreditsAvailable: number;
+        temporaryCreditsApplied: number;
+        regularCreditsAvailable: number;
+        regularCreditsRequired: number;
+        creditPayable: boolean;
+        additionalCostsPayable: boolean;
+        affordable: boolean;
+      }
+  );
 
 export type ChoiceOption = {
   id: string;
@@ -2220,24 +2219,81 @@ export type VisiblePostInstallCorpRezCostQuoteBinding = {
 type VisibleCompleteCorpRezCostQuoteFields = {
   complete: true;
   projectedServerId: Exclude<ServerId, "new_remote">;
+  /**
+   * Printed/base credit component before public Engine modifiers.
+   *
+   * Consumers must still use `finalCredits` as the exact payment base. This
+   * field exists to make every applied modifier auditable, not as a fallback.
+   */
   baseCredits: number;
+  /**
+   * Exact credit payment after public Engine modifiers and before a certified
+   * variable-rez parameter adds its own credits.
+   */
   finalCredits: number;
   mandatoryAdditionalCosts: VisibleMandatoryCorpRezCosts;
   reductionSourceDefinitionIds?: CardDefinitionId[];
   increaseSourceDefinitionIds?: CardDefinitionId[];
 };
 
+export type VisibleVariableCorpRezCostParameter =
+  | {
+      kind: "x_strength";
+      additionalCreditsPerValue: number;
+      minValue: number;
+      maxValue: number;
+      minValueFinalCredits: number;
+      maxValueFinalCredits: number;
+      effectiveStrengthFromValue: true;
+      traceBaseFromValue?: true;
+      traceBidLimitFromValue?: true;
+    }
+  | {
+      kind: "paid_end_the_run_subroutines";
+      additionalCreditsPerSubroutine: number;
+      minSubroutines: number;
+      minSubroutinesFinalCredits: number;
+      firstEndTheRunSubroutineCount: number;
+      firstEndTheRunFinalCredits: number;
+    }
+  | {
+      kind: "alternate_subtype";
+      baseSubtypes: string[];
+      baseSubtypesFinalCredits: number;
+      alternateSubtypes: string[];
+      alternateSubtypesAdditionalCredits: number;
+      alternateSubtypesFinalCredits: number;
+    };
+
+type VisibleFixedCorpRezCostQuoteFields =
+  VisibleCompleteCorpRezCostQuoteFields & {
+    costKind: "fixed";
+    variableParameter?: never;
+  };
+
+type VisibleVariableCorpRezCostQuoteFields =
+  VisibleCompleteCorpRezCostQuoteFields & {
+    costKind: "variable";
+    variableParameter: VisibleVariableCorpRezCostParameter;
+  };
+
 export type VisibleCorpRezCostQuote =
   | (VisibleInstalledCorpRezCostQuoteBinding & {
       complete: false;
     })
   | (VisibleInstalledCorpRezCostQuoteBinding &
-      VisibleCompleteCorpRezCostQuoteFields)
+      (
+        | VisibleFixedCorpRezCostQuoteFields
+        | VisibleVariableCorpRezCostQuoteFields
+      ))
   | (VisiblePostInstallCorpRezCostQuoteBinding & {
       complete: false;
     })
   | (VisiblePostInstallCorpRezCostQuoteBinding &
-      VisibleCompleteCorpRezCostQuoteFields);
+      (
+        | VisibleFixedCorpRezCostQuoteFields
+        | VisibleVariableCorpRezCostQuoteFields
+      ));
 
 export type VisibleCardLifecycleMarker = {
   kind: "temporary_return_to_grip";

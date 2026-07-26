@@ -16,6 +16,7 @@ import type {
   LegalAction,
   ServerId,
   VisibleCorpRezCostQuote,
+  VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
 import {
   CARD_DEFINITIONS_BY_ID,
@@ -40,6 +41,7 @@ import type {
   CardRezCostModifierImplementation,
   CardSelfRezAdditionalCostImplementation,
   CardSelfRezCostModifierImplementation,
+  CardVariableRezImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
@@ -112,6 +114,171 @@ function isExactNonNegativeInteger(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 }
 
+function exactNonNegativeIntegerSum(
+  left: number,
+  right: number,
+): number | undefined {
+  const sum = left + right;
+  return isExactNonNegativeInteger(sum) ? sum : undefined;
+}
+
+function exactNonNegativeIntegerProduct(
+  left: number,
+  right: number,
+): number | undefined {
+  const product = left * right;
+  return isExactNonNegativeInteger(product) ? product : undefined;
+}
+
+function stableVisibleSubtypeList(
+  subtypes: readonly string[],
+): string[] | undefined {
+  if (
+    subtypes.length === 0 ||
+    subtypes.some(
+      (subtype) =>
+        subtype.length === 0 ||
+        subtype !==
+          subtype
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "_")
+            .replace(/^_+|_+$/g, ""),
+    ) ||
+    new Set(subtypes).size !== subtypes.length
+  )
+    return undefined;
+  return [...subtypes].sort();
+}
+
+function projectVariableCorpRezParameter(
+  variableRez: CardVariableRezImplementation,
+  finalBaseCredits: number,
+): VisibleVariableCorpRezCostParameter | undefined {
+  if (
+    variableRez.visibility !== "public" ||
+    !isExactNonNegativeInteger(finalBaseCredits)
+  )
+    return undefined;
+
+  if (variableRez.kind === "x_strength") {
+    if (
+      !isExactNonNegativeInteger(variableRez.additionalCostPerValue) ||
+      variableRez.additionalCostPerValue <= 0 ||
+      !isExactNonNegativeInteger(variableRez.minValue) ||
+      !isExactNonNegativeInteger(variableRez.maxValue) ||
+      variableRez.maxValue < variableRez.minValue
+    )
+      return undefined;
+    const minAdditionalCredits = exactNonNegativeIntegerProduct(
+      variableRez.minValue,
+      variableRez.additionalCostPerValue,
+    );
+    const maxAdditionalCredits = exactNonNegativeIntegerProduct(
+      variableRez.maxValue,
+      variableRez.additionalCostPerValue,
+    );
+    const minValueFinalCredits =
+      minAdditionalCredits === undefined
+        ? undefined
+        : exactNonNegativeIntegerSum(finalBaseCredits, minAdditionalCredits);
+    const maxValueFinalCredits =
+      maxAdditionalCredits === undefined
+        ? undefined
+        : exactNonNegativeIntegerSum(finalBaseCredits, maxAdditionalCredits);
+    if (
+      minValueFinalCredits === undefined ||
+      maxValueFinalCredits === undefined
+    )
+      return undefined;
+    return {
+      kind: variableRez.kind,
+      additionalCreditsPerValue: variableRez.additionalCostPerValue,
+      minValue: variableRez.minValue,
+      maxValue: variableRez.maxValue,
+      minValueFinalCredits,
+      maxValueFinalCredits,
+      effectiveStrengthFromValue: true,
+      ...(variableRez.traceBaseFromValue
+        ? { traceBaseFromValue: true as const }
+        : {}),
+      ...(variableRez.traceBidLimitFromValue
+        ? { traceBidLimitFromValue: true as const }
+        : {}),
+    };
+  }
+
+  if (variableRez.kind === "paid_end_the_run_subroutines") {
+    if (
+      !isExactNonNegativeInteger(variableRez.additionalCostPerSubroutine) ||
+      variableRez.additionalCostPerSubroutine <= 0 ||
+      !isExactNonNegativeInteger(variableRez.minSubroutines)
+    )
+      return undefined;
+    const firstEndTheRunSubroutineCount = Math.max(
+      1,
+      variableRez.minSubroutines,
+    );
+    const minAdditionalCredits = exactNonNegativeIntegerProduct(
+      variableRez.minSubroutines,
+      variableRez.additionalCostPerSubroutine,
+    );
+    const firstAdditionalCredits = exactNonNegativeIntegerProduct(
+      firstEndTheRunSubroutineCount,
+      variableRez.additionalCostPerSubroutine,
+    );
+    const minSubroutinesFinalCredits =
+      minAdditionalCredits === undefined
+        ? undefined
+        : exactNonNegativeIntegerSum(finalBaseCredits, minAdditionalCredits);
+    const firstEndTheRunFinalCredits =
+      firstAdditionalCredits === undefined
+        ? undefined
+        : exactNonNegativeIntegerSum(finalBaseCredits, firstAdditionalCredits);
+    if (
+      minSubroutinesFinalCredits === undefined ||
+      firstEndTheRunFinalCredits === undefined
+    )
+      return undefined;
+    return {
+      kind: variableRez.kind,
+      additionalCreditsPerSubroutine: variableRez.additionalCostPerSubroutine,
+      minSubroutines: variableRez.minSubroutines,
+      minSubroutinesFinalCredits,
+      firstEndTheRunSubroutineCount,
+      firstEndTheRunFinalCredits,
+    };
+  }
+
+  if (
+    !isExactNonNegativeInteger(variableRez.additionalCost) ||
+    variableRez.additionalCost <= 0
+  )
+    return undefined;
+  const baseSubtypes = stableVisibleSubtypeList(variableRez.baseSubtypes);
+  const alternateSubtypes = stableVisibleSubtypeList(
+    variableRez.alternateSubtypes,
+  );
+  const alternateSubtypesFinalCredits = exactNonNegativeIntegerSum(
+    finalBaseCredits,
+    variableRez.additionalCost,
+  );
+  if (
+    !baseSubtypes ||
+    !alternateSubtypes ||
+    baseSubtypes.join(",") === alternateSubtypes.join(",") ||
+    alternateSubtypesFinalCredits === undefined
+  )
+    return undefined;
+  return {
+    kind: variableRez.kind,
+    baseSubtypes,
+    baseSubtypesFinalCredits: finalBaseCredits,
+    alternateSubtypes,
+    alternateSubtypesAdditionalCredits: variableRez.additionalCost,
+    alternateSubtypesFinalCredits,
+  };
+}
+
 /**
  * Converts the authoritative rez quote into a consumer-safe, explicitly
  * complete projection. Unsupported or non-integral costs fail closed.
@@ -131,8 +298,7 @@ function projectExactCorpRezCost(
   if (
     !instance ||
     definition?.type !== "ice" ||
-    !isExactNonNegativeInteger(definition.rezCost) ||
-    cardImplementationForDefinitionId(definition.id)?.variableRez !== undefined
+    !isExactNonNegativeInteger(definition.rezCost)
   )
     return incompleteCorpRezCostProjection(
       originalState,
@@ -185,13 +351,27 @@ function projectExactCorpRezCost(
     );
 
   const agendaPointCost = selfRezAgendaPointCostForIce(definition);
+  const variableRez = cardImplementationForDefinitionId(
+    definition.id,
+  )?.variableRez;
+  const variableParameter = variableRez
+    ? projectVariableCorpRezParameter(variableRez, quote.finalCredits)
+    : undefined;
+  if (variableRez && !variableParameter)
+    return incompleteCorpRezCostProjection(
+      originalState,
+      context,
+      cardId,
+      targetServerId,
+      projectedServerId,
+    );
   const reductionSourceDefinitionIds = quote.modifiers
     .filter((modifier) => modifier.kind === "reduction")
     .map((modifier) => modifier.sourceDefinitionId);
   const increaseSourceDefinitionIds = quote.modifiers
     .filter((modifier) => modifier.kind === "increase")
     .map((modifier) => modifier.sourceDefinitionId);
-  const completeFields = {
+  const commonCompleteFields = {
     cardId,
     projectedServerId,
     expiresAtStateVersion: originalState.stateVersion,
@@ -206,6 +386,16 @@ function projectExactCorpRezCost(
       ? { increaseSourceDefinitionIds }
       : {}),
   };
+  const completeFields = variableParameter
+    ? {
+        ...commonCompleteFields,
+        costKind: "variable" as const,
+        variableParameter,
+      }
+    : {
+        ...commonCompleteFields,
+        costKind: "fixed" as const,
+      };
   if (context === "installed") {
     if (targetServerId === "new_remote")
       throw new Error("Installed-Rez-Quote braucht einen bestehenden Server.");
@@ -281,8 +471,7 @@ export function projectInstalledCorpSequenceRezPayment(
     : undefined;
   const serverId =
     instance?.zone.side === "corp" &&
-    (instance.zone.zone === "serverIce" ||
-      instance.zone.zone === "serverRoot")
+    (instance.zone.zone === "serverIce" || instance.zone.zone === "serverRoot")
       ? instance.zone.serverId
       : undefined;
   const server = serverId
@@ -371,8 +560,7 @@ export function projectInstalledCorpSequenceRezPayment(
     temporaryCreditsAvailable,
     quote.finalCredits,
   );
-  const regularCreditsRequired =
-    quote.finalCredits - temporaryCreditsApplied;
+  const regularCreditsRequired = quote.finalCredits - temporaryCreditsApplied;
   const regularCreditsAvailable = state.corp.credits;
   const creditPayable = regularCreditsAvailable >= regularCreditsRequired;
   const additionalCostsPayable =
@@ -582,11 +770,23 @@ export function projectCorpIceRezCostAfterInstall(
 export function corpIcePostInstallRezProjectionPayload(
   projection: VisibleCorpRezCostQuote,
 ): NonNullable<LegalAction["payload"]> {
+  const certifiedVariableParameter =
+    projection.complete && projection.costKind === "variable"
+      ? projectCertifiedVariableRezPayload(
+          projection.variableParameter,
+          projection.finalCredits,
+        )
+      : undefined;
   const certifiedComplete =
     projection.complete &&
     isExactNonNegativeInteger(projection.baseCredits) &&
     isExactNonNegativeInteger(projection.finalCredits) &&
-    isExactNonNegativeInteger(projection.mandatoryAdditionalCosts.agendaPoints);
+    isExactNonNegativeInteger(
+      projection.mandatoryAdditionalCosts.agendaPoints,
+    ) &&
+    (projection.costKind === "fixed" ||
+      (projection.costKind === "variable" &&
+        certifiedVariableParameter !== undefined));
   const agendaPointCost = projection.complete
     ? projection.mandatoryAdditionalCosts.agendaPoints
     : 0;
@@ -602,9 +802,12 @@ export function corpIcePostInstallRezProjectionPayload(
       : {}),
     ...(certifiedComplete
       ? {
+          postInstallRezQuoteCostKind:
+            projection.costKind === "variable" ? "variable" : "fixed",
           postInstallRezQuoteBaseCredits: projection.baseCredits,
           postInstallRezQuoteFinalCredits: projection.finalCredits,
           postInstallRezQuoteMandatoryAgendaPointCost: agendaPointCost,
+          ...(certifiedVariableParameter ?? {}),
           ...(agendaPointCost > 0
             ? {
                 postInstallRezQuoteMandatoryAdditionalCostKind: "agenda_point",
@@ -624,6 +827,156 @@ export function corpIcePostInstallRezProjectionPayload(
             : {}),
         }
       : {}),
+  };
+}
+
+function projectCertifiedVariableRezPayload(
+  parameter: VisibleVariableCorpRezCostParameter,
+  finalBaseCredits: number,
+): NonNullable<LegalAction["payload"]> | undefined {
+  if (!isExactNonNegativeInteger(finalBaseCredits)) return undefined;
+  if (parameter.kind === "x_strength") {
+    if (
+      !isExactNonNegativeInteger(parameter.additionalCreditsPerValue) ||
+      parameter.additionalCreditsPerValue <= 0 ||
+      !isExactNonNegativeInteger(parameter.minValue) ||
+      !isExactNonNegativeInteger(parameter.maxValue) ||
+      parameter.maxValue < parameter.minValue ||
+      !isExactNonNegativeInteger(parameter.minValueFinalCredits) ||
+      !isExactNonNegativeInteger(parameter.maxValueFinalCredits)
+    )
+      return undefined;
+    const minAdditionalCredits = exactNonNegativeIntegerProduct(
+      parameter.minValue,
+      parameter.additionalCreditsPerValue,
+    );
+    const maxAdditionalCredits = exactNonNegativeIntegerProduct(
+      parameter.maxValue,
+      parameter.additionalCreditsPerValue,
+    );
+    const expectedMinValueFinalCredits =
+      minAdditionalCredits === undefined
+        ? undefined
+        : exactNonNegativeIntegerSum(finalBaseCredits, minAdditionalCredits);
+    const expectedMaxValueFinalCredits =
+      maxAdditionalCredits === undefined
+        ? undefined
+        : exactNonNegativeIntegerSum(finalBaseCredits, maxAdditionalCredits);
+    if (
+      parameter.minValueFinalCredits !== expectedMinValueFinalCredits ||
+      parameter.maxValueFinalCredits !== expectedMaxValueFinalCredits
+    )
+      return undefined;
+    return {
+      postInstallRezQuoteVariableRezKind: parameter.kind,
+      postInstallRezQuoteVariableAdditionalCreditsPerValue:
+        parameter.additionalCreditsPerValue,
+      postInstallRezQuoteVariableMinValue: parameter.minValue,
+      postInstallRezQuoteVariableMaxValue: parameter.maxValue,
+      postInstallRezQuoteVariableMinValueFinalCredits:
+        parameter.minValueFinalCredits,
+      postInstallRezQuoteVariableMaxValueFinalCredits:
+        parameter.maxValueFinalCredits,
+      postInstallRezQuoteVariableEffectiveStrengthFromValue:
+        parameter.effectiveStrengthFromValue,
+      ...(parameter.traceBaseFromValue
+        ? { postInstallRezQuoteVariableTraceBaseFromValue: true }
+        : {}),
+      ...(parameter.traceBidLimitFromValue
+        ? { postInstallRezQuoteVariableTraceBidLimitFromValue: true }
+        : {}),
+    };
+  }
+  if (parameter.kind === "paid_end_the_run_subroutines") {
+    if (
+      !isExactNonNegativeInteger(parameter.additionalCreditsPerSubroutine) ||
+      parameter.additionalCreditsPerSubroutine <= 0 ||
+      !isExactNonNegativeInteger(parameter.minSubroutines) ||
+      !isExactNonNegativeInteger(parameter.minSubroutinesFinalCredits) ||
+      !isExactNonNegativeInteger(parameter.firstEndTheRunSubroutineCount) ||
+      parameter.firstEndTheRunSubroutineCount < 1 ||
+      !isExactNonNegativeInteger(parameter.firstEndTheRunFinalCredits)
+    )
+      return undefined;
+    const expectedFirstEndTheRunSubroutineCount = Math.max(
+      1,
+      parameter.minSubroutines,
+    );
+    const minAdditionalCredits = exactNonNegativeIntegerProduct(
+      parameter.minSubroutines,
+      parameter.additionalCreditsPerSubroutine,
+    );
+    const firstAdditionalCredits = exactNonNegativeIntegerProduct(
+      expectedFirstEndTheRunSubroutineCount,
+      parameter.additionalCreditsPerSubroutine,
+    );
+    const expectedMinSubroutinesFinalCredits =
+      minAdditionalCredits === undefined
+        ? undefined
+        : exactNonNegativeIntegerSum(finalBaseCredits, minAdditionalCredits);
+    const expectedFirstEndTheRunFinalCredits =
+      firstAdditionalCredits === undefined
+        ? undefined
+        : exactNonNegativeIntegerSum(finalBaseCredits, firstAdditionalCredits);
+    if (
+      parameter.firstEndTheRunSubroutineCount !==
+        expectedFirstEndTheRunSubroutineCount ||
+      parameter.minSubroutinesFinalCredits !==
+        expectedMinSubroutinesFinalCredits ||
+      parameter.firstEndTheRunFinalCredits !==
+        expectedFirstEndTheRunFinalCredits
+    )
+      return undefined;
+    return {
+      postInstallRezQuoteVariableRezKind: parameter.kind,
+      postInstallRezQuoteVariableAdditionalCreditsPerSubroutine:
+        parameter.additionalCreditsPerSubroutine,
+      postInstallRezQuoteVariableMinSubroutines: parameter.minSubroutines,
+      postInstallRezQuoteVariableMinSubroutinesFinalCredits:
+        parameter.minSubroutinesFinalCredits,
+      postInstallRezQuoteVariableFirstEndTheRunSubroutineCount:
+        parameter.firstEndTheRunSubroutineCount,
+      postInstallRezQuoteVariableFirstEndTheRunFinalCredits:
+        parameter.firstEndTheRunFinalCredits,
+    };
+  }
+  const certifiedBaseSubtypes = stableVisibleSubtypeList(
+    parameter.baseSubtypes,
+  );
+  const certifiedAlternateSubtypes = stableVisibleSubtypeList(
+    parameter.alternateSubtypes,
+  );
+  const expectedAlternateSubtypesFinalCredits = exactNonNegativeIntegerSum(
+    finalBaseCredits,
+    parameter.alternateSubtypesAdditionalCredits,
+  );
+  if (
+    !certifiedBaseSubtypes ||
+    !certifiedAlternateSubtypes ||
+    certifiedBaseSubtypes.join(",") !== parameter.baseSubtypes.join(",") ||
+    certifiedAlternateSubtypes.join(",") !==
+      parameter.alternateSubtypes.join(",") ||
+    certifiedBaseSubtypes.join(",") === certifiedAlternateSubtypes.join(",") ||
+    !isExactNonNegativeInteger(parameter.baseSubtypesFinalCredits) ||
+    parameter.baseSubtypesFinalCredits !== finalBaseCredits ||
+    !isExactNonNegativeInteger(parameter.alternateSubtypesAdditionalCredits) ||
+    parameter.alternateSubtypesAdditionalCredits <= 0 ||
+    !isExactNonNegativeInteger(parameter.alternateSubtypesFinalCredits) ||
+    parameter.alternateSubtypesFinalCredits !==
+      expectedAlternateSubtypesFinalCredits
+  )
+    return undefined;
+  return {
+    postInstallRezQuoteVariableRezKind: parameter.kind,
+    postInstallRezQuoteVariableBaseSubtypes: parameter.baseSubtypes.join(","),
+    postInstallRezQuoteVariableBaseSubtypesFinalCredits:
+      parameter.baseSubtypesFinalCredits,
+    postInstallRezQuoteVariableAlternateSubtypes:
+      parameter.alternateSubtypes.join(","),
+    postInstallRezQuoteVariableAlternateSubtypesAdditionalCredits:
+      parameter.alternateSubtypesAdditionalCredits,
+    postInstallRezQuoteVariableAlternateSubtypesFinalCredits:
+      parameter.alternateSubtypesFinalCredits,
   };
 }
 
