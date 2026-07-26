@@ -11934,7 +11934,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
   });
 
-  it("binds read-only Punish route quotes to preview and live Corp state without exposing them", async () => {
+  it("rejects foreign-side Punish previews while binding live Corp quotes without exposing them", async () => {
     const quoteBindings: {
       matchId: string;
       stateVersion: number;
@@ -12034,21 +12034,18 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const preview = await service.previewAi({
       matchId: created.matchId,
-      side: "runner",
+      requesterSide: "runner",
+      targetSide: "corp",
       sessionToken: created.hostSessionToken,
       knownStateVersion: before.gameState.stateVersion,
       knownMatchVersion: before.match.matchVersion,
     });
 
-    expect(preview.ok).toBe(true);
-    expect(quoteBindings).toEqual([
-      {
-        matchId: created.matchId,
-        stateVersion: before.gameState.stateVersion,
-        timingPoint: before.gameState.timingPoint,
-        complete: false,
-      },
-    ]);
+    expect(preview).toMatchObject({
+      ok: false,
+      error: { code: "preview_side_forbidden" },
+    });
+    expect(quoteBindings).toEqual([]);
     const afterPreview = await service.loadForTest(created.matchId);
     expect(afterPreview?.gameState.stateVersion).toBe(
       before.gameState.stateVersion,
