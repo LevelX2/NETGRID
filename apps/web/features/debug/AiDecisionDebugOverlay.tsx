@@ -69,8 +69,6 @@ export function FloatingAiDecisionDebugOverlay({
   previewError,
   previewLoading,
   canRequestPreview,
-  trace,
-  traceCount,
   onRequestPreview,
   onPosition,
   onClose,
@@ -82,8 +80,6 @@ export function FloatingAiDecisionDebugOverlay({
   previewError: string;
   previewLoading: boolean;
   canRequestPreview: boolean;
-  trace: MaintenanceAiTraceDetail | null;
-  traceCount: number;
   onRequestPreview(): void;
   onPosition(position: RunOverlayPositionPreference): void;
   onClose(): void;
@@ -164,11 +160,11 @@ export function FloatingAiDecisionDebugOverlay({
           transform: "none",
         }
       : {};
-  const exportTrace = preview ? aiDecisionPreviewAsTrace(preview) : trace;
-  const exportMode: "trace" | "preview" = preview ? "preview" : "trace";
+  const exportTrace = preview ? aiDecisionPreviewAsTrace(preview) : null;
+  const exportMode: "trace" | "preview" = "preview";
   const statusText = exportTrace
     ? aiDecisionDebugWindowHeaderStatusLabel(exportTrace, exportMode)
-    : aiDecisionDebugStatusLabel(status, traceCount);
+    : aiDecisionDebugStatusLabel(status);
   const windowClassName = `aiDecisionDebugWindow ${collapsed ? "is-collapsed" : ""}`;
   const exportButtonTitle =
     preview && exportStatus === "idle"
@@ -285,7 +281,7 @@ export function FloatingAiDecisionDebugOverlay({
             error={error}
             preview={preview}
             previewError={previewError}
-            trace={trace}
+            canRequestPreview={canRequestPreview}
           />
         </div>
       </section>
@@ -301,13 +297,13 @@ function AiDecisionDebugOverlayBody({
   error,
   preview,
   previewError,
-  trace,
+  canRequestPreview,
 }: {
   status: AiDecisionDebugOverlayStatus;
   error: string;
   preview: AiDecisionPreview | null;
   previewError: string;
-  trace: MaintenanceAiTraceDetail | null;
+  canRequestPreview: boolean;
 }) {
   if (preview) {
     return (
@@ -331,16 +327,13 @@ function AiDecisionDebugOverlayBody({
       </p>
     );
   }
-  if (!trace) {
-    return (
-      <p className="aiDecisionDebugNotice" role="status">
-        {status === "activating"
-          ? "KI-Trace wird aktiviert."
-          : "Warte auf die nächste KI-Entscheidung."}
-      </p>
-    );
-  }
-  return <AiDecisionDebugTraceView trace={trace} />;
+  return (
+    <p className="aiDecisionDebugNotice" role="status">
+      {canRequestPreview
+        ? "Wähle „Was würde die KI tun?“. Die Auskunft ist read-only, an deine aktuellen LegalActions gebunden und zeigt keinen gegnerischen Server-Trace."
+        : "Für dieses Fenster gibt es außerhalb deines aktuellen Entscheidungsfensters keine Auskunft. Es zeigt weder verdeckte Informationen noch gegnerische Server-Traces."}
+    </p>
+  );
 }
 
 function aiDecisionPreviewAsTrace(
@@ -3194,13 +3187,10 @@ function aiDecisionDebugRecordList(
 
 function aiDecisionDebugStatusLabel(
   status: AiDecisionDebugOverlayStatus,
-  traceCount: number,
 ): string {
   if (status === "activating") return "Aktivierung";
-  if (status === "waiting")
-    return traceCount > 0 ? `${traceCount} geladen` : "Wartet";
-  if (status === "live")
-    return traceCount > 0 ? `${traceCount} Traces` : "Live";
+  if (status === "waiting") return "Bereit";
+  if (status === "live") return "Live";
   if (status === "error") return "Fehler";
   return "Aus";
 }

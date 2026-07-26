@@ -208,11 +208,6 @@ import {
   type SessionInfo,
 } from "./session-recovery";
 import {
-  latestMaintenanceAiTraceId,
-  type MaintenanceAiTraceDetail,
-  type MaintenanceAiTraceIndexEntry,
-} from "./maintenance";
-import {
   ACTION_CUE_SETTINGS_STORAGE_KEY,
   ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
   AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY,
@@ -240,9 +235,6 @@ import { reconnectUrlForSession } from "../lib/session-url";
 import { NETGRID_APP_STATUS_LABEL } from "../lib/app-build-info";
 import {
   bootstrap,
-  enableAiDecisionDebugTracing,
-  fetchAiDecisionDebugTraceDetail,
-  fetchAiDecisionDebugTraceIndex,
   fetchAiDecisionPreview,
   fetchPublicMatches,
   fetchPersonalRecentGameResults,
@@ -807,11 +799,6 @@ export default function Page() {
     useState("");
   const [aiDecisionDebugPreviewLoading, setAiDecisionDebugPreviewLoading] =
     useState(false);
-  const [aiDecisionDebugTraceIndex, setAiDecisionDebugTraceIndex] = useState<
-    MaintenanceAiTraceIndexEntry[]
-  >([]);
-  const [aiDecisionDebugTrace, setAiDecisionDebugTrace] =
-    useState<MaintenanceAiTraceDetail | null>(null);
   const [statusPanelsVisible, setStatusPanelsVisible] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
   const [discardChoiceSelection, setDiscardChoiceSelection] = useState<{
@@ -879,8 +866,6 @@ export default function Page() {
   const paymentSupportSubmittedKeyRef = useRef<string | null>(null);
   const paymentSupportContinuationSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
-  const aiDecisionDebugEnabledMatchRef = useRef<string | null>(null);
-  const aiDecisionDebugTraceIdRef = useRef<string | null>(null);
   const aiDecisionDebugPreviewRequestKeyRef = useRef<string | null>(null);
   const aiDecisionDebugPreviewContextRef = useRef<ActionContext | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
@@ -2676,10 +2661,6 @@ export default function Page() {
       setAiDecisionDebugPreview(null);
       setAiDecisionDebugPreviewError("");
       setAiDecisionDebugPreviewLoading(false);
-      setAiDecisionDebugTraceIndex([]);
-      setAiDecisionDebugTrace(null);
-      aiDecisionDebugEnabledMatchRef.current = null;
-      aiDecisionDebugTraceIdRef.current = null;
       aiDecisionDebugPreviewRequestKeyRef.current = null;
       const previewContext = aiDecisionDebugPreviewContextRef.current;
       if (previewContext) {
@@ -2693,94 +2674,15 @@ export default function Page() {
       }
       return;
     }
-    let closed = false;
-    const enableTracing = async () => {
-      if (aiDecisionDebugEnabledMatchRef.current === aiDecisionDebugMatchId) {
-        setAiDecisionDebugStatus((current) =>
-          current === "off" ? "waiting" : current,
-        );
-        return;
-      }
-      setAiDecisionDebugStatus("activating");
-      setAiDecisionDebugError("");
-      setAiDecisionDebugPreview(null);
-      setAiDecisionDebugPreviewError("");
-      setAiDecisionDebugPreviewLoading(false);
-      aiDecisionDebugPreviewRequestKeyRef.current = null;
-      setAiDecisionDebugTraceIndex([]);
-      setAiDecisionDebugTrace(null);
-      aiDecisionDebugTraceIdRef.current = null;
-      try {
-        await enableAiDecisionDebugTracing(aiDecisionDebugMatchId);
-        if (closed) return;
-        aiDecisionDebugEnabledMatchRef.current = aiDecisionDebugMatchId;
-        setAiDecisionDebugStatus("waiting");
-      } catch (error) {
-        if (closed) return;
-        setAiDecisionDebugStatus("error");
-        setAiDecisionDebugError(
-          error instanceof Error
-            ? error.message
-            : "KI-Trace konnte nicht aktiviert werden.",
-        );
-      }
-    };
-    void enableTracing();
-    return () => {
-      closed = true;
-    };
+    // Das Spiel-Fenster darf keine Maintenance-Trace-API verwenden: Sie ist
+    // absichtlich admin-authentifiziert und könnte bei einer Freigabe die
+    // Trennung zwischen eigener PlayerView und Serverdiagnostik verwischen.
+    // Der read-only Preview-Endpunkt ist an die aktuelle Match-Session und
+    // deren eigene LegalActions gebunden und liefert den redigierten
+    // Plan-first-Vertrag dafür direkt.
+    setAiDecisionDebugStatus("waiting");
+    setAiDecisionDebugError("");
   }, [aiDecisionDebugOverlayEnabled, aiDecisionDebugMatchId]);
-
-  useEffect(() => {
-    if (
-      !aiDecisionDebugOverlayEnabled ||
-      !aiDecisionDebugMatchId ||
-      aiDecisionDebugStatus === "off" ||
-      aiDecisionDebugStatus === "error"
-    )
-      return;
-    let closed = false;
-    const loadLatestTrace = async () => {
-      try {
-        const traces = await fetchAiDecisionDebugTraceIndex(
-          aiDecisionDebugMatchId,
-        );
-        if (closed) return;
-        setAiDecisionDebugTraceIndex(traces);
-        const latestTraceId = latestMaintenanceAiTraceId(traces);
-        if (!latestTraceId) {
-          setAiDecisionDebugStatus("waiting");
-          return;
-        }
-        if (latestTraceId !== aiDecisionDebugTraceIdRef.current) {
-          const detail = await fetchAiDecisionDebugTraceDetail(latestTraceId);
-          if (closed) return;
-          aiDecisionDebugTraceIdRef.current = latestTraceId;
-          setAiDecisionDebugTrace(detail);
-        }
-        setAiDecisionDebugStatus("live");
-        setAiDecisionDebugError("");
-      } catch (error) {
-        if (closed) return;
-        setAiDecisionDebugStatus("error");
-        setAiDecisionDebugError(
-          error instanceof Error
-            ? error.message
-            : "KI-Trace konnte nicht geladen werden.",
-        );
-      }
-    };
-    void loadLatestTrace();
-    const timer = window.setInterval(() => void loadLatestTrace(), 1500);
-    return () => {
-      closed = true;
-      window.clearInterval(timer);
-    };
-  }, [
-    aiDecisionDebugOverlayEnabled,
-    aiDecisionDebugMatchId,
-    aiDecisionDebugStatus,
-  ]);
 
   useEffect(() => {
     aiDecisionDebugPreviewRequestKeyRef.current = null;
@@ -6361,8 +6263,6 @@ export default function Page() {
                 previewError={aiDecisionDebugPreviewError}
                 previewLoading={aiDecisionDebugPreviewLoading}
                 canRequestPreview={canRequestHumanAiDecisionPreview}
-                trace={aiDecisionDebugTrace}
-                traceCount={aiDecisionDebugTraceIndex.length}
                 onRequestPreview={() => void requestHumanAiDecisionPreview()}
                 onPosition={setAiDecisionDebugOverlayPosition}
                 onClose={() => setAiDecisionDebugOverlayEnabled(false)}
