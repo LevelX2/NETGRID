@@ -1001,12 +1001,15 @@ function jennyJettInput(params: {
 function corpInput(
   actions: LegalAction[],
   timingPoint: PlayerView["timingPoint"] = "corp_action.main",
+  stateVersion = 1,
 ): AiDecisionInput {
   const timedActions = actions.map((action) => ({
     ...action,
     timingPoint,
+    expiresAtStateVersion: stateVersion,
   }));
   const input = aiInput("corp", timedActions);
+  input.playerView.stateVersion = stateVersion;
   input.playerView.timingPoint = timingPoint;
   input.playerView.legalActions = timedActions;
   input.legalActions = timedActions;
@@ -1116,9 +1119,8 @@ function rootRezEconomyInput(
       },
     },
   );
-  const input = corpInput([rez, declineRez()], "run.movement_rez_window");
+  const input = corpInput([rez, declineRez()], "run.movement_rez_window", 2);
   input.playerView.own.credits = 5;
-  input.playerView.stateVersion = 2;
   input.playerView.run = {
     runId: "root-rez-economy-run",
     attackedServerId: "remote_1",

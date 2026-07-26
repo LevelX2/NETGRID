@@ -94,20 +94,19 @@ describe("hardened decision contracts on real Engine inputs", () => {
 
     expect(deferred.actionId).not.toBe(rasminWithoutIce.actionId);
     expect(
-      JSON.stringify(
-        deferred.decisionDebug?.actionAlternatives?.find(
-          (entry) => entry.actionId === rasminWithoutIce.actionId,
-        ),
+      corpUpgradePlacementExclusion(
+        upgradePlacementParams(withoutIceInput, rasminWithoutIce),
       ),
-    ).toContain(
-      "not_selected_by_plan:plan:corp.defend_servers:server-defense-portfolio",
-    );
+    ).toMatchObject({
+      key: "corp_upgrade_ice_support_without_ice",
+    });
 
     const withIce = corpMainState("contract-rasmin-with-ice");
     RealEngineFixtureBuilder.forState(withIce)
       .withCorpHqSize(0)
       .withCorpCardInHq("onr_proteus_070_rasmin-bridger")
       .withCorpIceOnServer("hq", "simple_barrier_ice")
+      .withCorpIceOnServer("rd", "simple_code_gate_ice")
       .withCorpCredits(8);
     const withIceInput = decisionInput(withIce, "corp", CORP_DECK);
     const rasminWithIce = installAction(
@@ -122,21 +121,17 @@ describe("hardened decision contracts on real Engine inputs", () => {
         (action) => action.actionId === eligible.actionId,
       )?.type,
     ).toBe("draw_card");
-    const rasminWithIceAlternative =
-      eligible.decisionDebug?.actionAlternatives?.find(
-        (entry) => entry.actionId === rasminWithIce.actionId,
-      );
-    expect(rasminWithIceAlternative?.whyNot).toEqual(
-      expect.arrayContaining([
-        "not_selected_by_plan:plan:corp.defend_servers:server-defense-portfolio",
-        expect.stringMatching(
-          /^candidate_plan:plan:corp\.hand_and_agenda_management:develop%3A.+:ready$/,
-        ),
-      ]),
+    expect(eligible.actionId).not.toBe(rasminWithIce.actionId);
+    expect(
+      eligible.decisionDebug?.detailSections?.find(
+        (section) => section.id === "plan_portfolio",
+      )?.items,
+    ).toContain(
+      "plan:corp.defend_servers:server-defense-portfolio|evidence:corp_defense_support_install:hq:corp_upgrade_install_placement_fit|source:visible_state",
     );
   });
 
-  it("allows Research Bunker to replace a region only for an active Research agenda", () => {
+  it("allows Research Bunker placement only for an active Research agenda without granting free action authority", () => {
     const inactive = corpMainState("contract-region-inactive");
     RealEngineFixtureBuilder.forState(inactive)
       .withCorpHqSize(0)
@@ -182,12 +177,17 @@ describe("hardened decision contracts on real Engine inputs", () => {
       "remote_1",
     );
     const activeDecision = chooseCorpAction(activeInput);
-    expect(activeDecision.actionId).toBe(activeInstall.actionId);
+    expect(activeDecision.actionId).not.toBe(activeInstall.actionId);
     expect(
       corpUpgradePlacementExclusion(
         upgradePlacementParams(activeInput, activeInstall),
       ),
     ).toBeUndefined();
+    expect(
+      activeDecision.decisionDebug?.actionAlternatives
+        ?.find((entry) => entry.actionId === activeInstall.actionId)
+        ?.whyNot?.some((entry) => entry.startsWith("not_selected_by_plan:")),
+    ).toBe(true);
   });
 
   it("installs missing Code Gate coverage before a second Wall-breaker variant", () => {

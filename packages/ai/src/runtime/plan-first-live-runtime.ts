@@ -14605,8 +14605,13 @@ function corpDefensiveUpgradePlacement(
   }
   const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
   const assignedToDefense =
-    hint?.roles?.includes("run_defense") === true &&
-    hint?.planRoles?.includes("remote_upgrade_rez_support") === true;
+    (hint?.roles?.includes("run_defense") === true &&
+      hint?.planRoles?.includes("remote_upgrade_rez_support") === true) ||
+    (hint?.roles?.includes("remote_support") === true &&
+      hint?.remoteRole?.kind === "scoring_protection" &&
+      hint.remoteRole.serverScope === "fort" &&
+      hint.functionSignals?.includes("remote.scoring_protection") === true &&
+      hint.functionSignals.includes("run.corp_pay_or_end_run"));
   const legalAction = input.legalActions.find(
     (action) => action.actionId === candidate.actionId,
   );
