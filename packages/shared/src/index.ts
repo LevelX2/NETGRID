@@ -834,6 +834,7 @@ export type ChoiceRequest = {
   source: string;
   sourceCardInstanceId?: CardInstanceId;
   sourceCardDefinitionId?: CardDefinitionId;
+  continuation?: ScoreChoiceContinuation;
   prompt: string;
   kind: ChoiceKind;
   options: ChoiceOption[];
@@ -844,6 +845,20 @@ export type ChoiceRequest = {
   stackSearchResolution?: StackSearchResolution;
   cardSearchPresentation?: CardSearchPresentation;
 };
+
+export type ScoreChoiceContinuation =
+  | {
+      family: "corp_advancement_counter";
+      originActionId: string;
+      createdAtStateVersion: number;
+    }
+  | {
+      family: "corp_scored_agenda_hq_shuffle";
+      originActionId: string;
+      agendaInstanceId: CardInstanceId;
+      creditPerAgendaPoint: number;
+      createdAtStateVersion: number;
+    };
 
 export type PendingChoice = ChoiceRequest;
 

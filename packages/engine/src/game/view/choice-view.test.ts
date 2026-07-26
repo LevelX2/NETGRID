@@ -74,6 +74,27 @@ describe("ChoiceView projection", () => {
     expect(replayEvents(state, [result.event]).ok).toBe(true);
   });
 
+  it("projects a structured score continuation only to its owning side", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "score-choice" }));
+    state.pendingChoice = {
+      ...choiceRequest(state, "corp"),
+      continuation: {
+        family: "corp_advancement_counter",
+        originActionId: "origin-score-action",
+        createdAtStateVersion: state.stateVersion,
+      },
+    };
+
+    const corpView = getPlayerView(state, "corp");
+    const runnerView = getPlayerView(state, "runner");
+
+    expect(corpView.pendingChoice?.continuation).toEqual(
+      state.pendingChoice.continuation,
+    );
+    expect(runnerView.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(runnerView)).not.toContain("origin-score-action");
+  });
+
   it("projects private top-zone arrange choices with card details only to the acting side", () => {
     const runnerState = toRunnerTurn(
       createGameAfterSetup({ seed: "choice-view-runner-stack-top5" }),

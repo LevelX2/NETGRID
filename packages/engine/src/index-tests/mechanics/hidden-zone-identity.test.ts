@@ -1396,6 +1396,11 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
     state.cardInstances[agendaId]!.advancementCounters = 3;
     const creditsBefore = state.corp.credits;
+    const scoreAction = getLegalActions(state, "corp").find(
+      (action) =>
+        action.type === "score_agenda" && action.payload?.cardId === agendaId,
+    );
+    expect(scoreAction).toBeDefined();
     state = apply(
       state,
       "corp",
@@ -1405,6 +1410,13 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.pendingChoice?.source).toContain(
       "scored_agenda.hq_agenda_shuffle_credits",
     );
+    expect(state.pendingChoice?.continuation).toEqual({
+      family: "corp_scored_agenda_hq_shuffle",
+      originActionId: scoreAction!.actionId,
+      agendaInstanceId: agendaId,
+      creditPerAgendaPoint: 2,
+      createdAtStateVersion: state.stateVersion,
+    });
     state = applyChoices(state, "corp", [`card_${shownAgendaId}`]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,

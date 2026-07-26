@@ -98,6 +98,12 @@ export function buildApplyAction(
     next.stateVersion = before + 1;
     if (next.pendingChoice) {
       next.pendingChoice.stateVersion = next.stateVersion;
+      const continuation = scoreChoiceContinuation(
+        next.pendingChoice,
+        legalAction,
+      );
+      if (continuation) next.pendingChoice.continuation = continuation;
+      else delete next.pendingChoice.continuation;
     }
     const validation = validateGameState(next);
     if (!validation.ok) {
@@ -138,6 +144,46 @@ export function buildApplyAction(
         ? [toPublicEvent(event)]
         : next.eventLog.map(toPublicEvent),
     stateHash,
+  };
+}
+
+function scoreChoiceContinuation(
+  choice: NonNullable<GameState["pendingChoice"]>,
+  legalAction: LegalAction,
+): NonNullable<GameState["pendingChoice"]>["continuation"] | undefined {
+  if (choice.side !== "corp") return undefined;
+  if (
+    choice.source.startsWith("p3_34.distribute_advancement:") ||
+    choice.source.startsWith("p3_34.move_advancement:")
+  ) {
+    return {
+      family: "corp_advancement_counter",
+      originActionId: legalAction.actionId,
+      createdAtStateVersion: choice.stateVersion,
+    };
+  }
+  const sourceParts = choice.source.split(":");
+  const agendaInstanceId = sourceParts[1];
+  const creditPerAgendaPoint = Number(sourceParts[2]);
+  if (
+    sourceParts.length !== 4 ||
+    sourceParts[0] !== "scored_agenda.hq_agenda_shuffle_credits" ||
+    legalAction.type !== "score_agenda" ||
+    agendaInstanceId === undefined ||
+    legalAction.source !== agendaInstanceId ||
+    legalAction.payload?.cardId !== agendaInstanceId ||
+    !Number.isSafeInteger(creditPerAgendaPoint) ||
+    creditPerAgendaPoint <= 0 ||
+    String(creditPerAgendaPoint) !== sourceParts[2]
+  ) {
+    return undefined;
+  }
+  return {
+    family: "corp_scored_agenda_hq_shuffle",
+    originActionId: legalAction.actionId,
+    agendaInstanceId,
+    creditPerAgendaPoint,
+    createdAtStateVersion: choice.stateVersion,
   };
 }
 

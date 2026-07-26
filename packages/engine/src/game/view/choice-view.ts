@@ -27,6 +27,7 @@ export function visibleChoice(
       choiceId: choice.choiceId,
       side: choice.side,
       source: choice.source,
+      ...(choice.continuation ? { continuation: choice.continuation } : {}),
       prompt: choice.prompt,
       kind: choice.kind,
       options: choice.options.map((option) => {
