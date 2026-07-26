@@ -270,6 +270,12 @@ export type CorpCorePlanDomain = {
   defenseNeeds: CorpDefenseSignal[];
   centralDefenseAllocation?: CorpCentralDefenseAllocation;
   centralDefenseHqHoldCadence?: CorpCentralDefenseHqHoldCadence;
+  centralDefenseHqHoldSelection?: {
+    selectedActionId: string;
+    sourceCardInstanceId: string;
+    selectedAtStateVersion: number;
+    targetServerId: "rd";
+  };
   economyNeeds: CorpEconomyNeedSignal[];
 };
 
@@ -280,12 +286,9 @@ type DefenseState = {
   signals: CorpDefenseSignal[];
   centralAllocation?: CorpCentralDefenseAllocation;
   hqHoldCadence?: CorpCentralDefenseHqHoldCadence;
-  hqHoldSelection?: {
-    selectedActionId: string;
-    sourceCardInstanceId: string;
-    selectedAtStateVersion: number;
-    targetServerId: "rd";
-  };
+  hqHoldSelection?: NonNullable<
+    CorpCorePlanDomain["centralDefenseHqHoldSelection"]
+  >;
 };
 type EconomyState = { kind: "economy"; signal: CorpEconomyNeedSignal };
 
@@ -530,6 +533,11 @@ function defenseModule(): PlanModule {
             ...(currentDomain.centralDefenseHqHoldCadence
               ? {
                   hqHoldCadence: currentDomain.centralDefenseHqHoldCadence,
+                }
+              : {}),
+            ...(currentDomain.centralDefenseHqHoldSelection
+              ? {
+                  hqHoldSelection: currentDomain.centralDefenseHqHoldSelection,
                 }
               : {}),
           } satisfies DefenseState,
@@ -2703,12 +2711,16 @@ function selectedExactGenericDefenseRoutes(
     } else if (allocation?.status === "known") {
       const selectedCentralRoutes =
         allocation.selectedServerId === "hq" ? hqRoutes : rdRoutes;
+      const fallbackCentralRoutes =
+        allocation.selectedServerId === "hq" ? rdRoutes : hqRoutes;
       eligibleRoutes =
         selectedCentralRoutes.length > 0
           ? selectedCentralRoutes
-          : exactIceRoutes.filter(
-              (route) => centralServerForRoute(route) === undefined,
-            );
+          : fallbackCentralRoutes.length > 0
+            ? fallbackCentralRoutes
+            : exactIceRoutes.filter(
+                (route) => centralServerForRoute(route) === undefined,
+              );
     }
   }
   if (

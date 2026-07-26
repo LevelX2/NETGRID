@@ -115,6 +115,80 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
       },
     });
   });
+  it("counts one visible Archives instance only once when the PlayerView exposes it through both Archives projections", () => {
+    const value = withSnapshot(input());
+    const archived = asset("archived");
+    value.playerView.own.heapOrArchives.push(archived);
+    value.playerView.servers
+      .find((server) => server.id === "archives")!
+      .root.push(archived);
+    (
+      value as AiDecisionInput & {
+        ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
+      }
+    ).ownDeckSnapshot.cards.push({
+      cardId: "simple_economy_asset",
+      quantity: 1,
+    });
+
+    expect(
+      allocateCorpCentralDefenseFromAiFacts({ input: value }),
+    ).toMatchObject({ status: "known" });
+  });
+  it("fails closed when the two Corp Archives projections contain different instances", () => {
+    const value = withSnapshot(input());
+    value.playerView.own.heapOrArchives.push(asset("archived-a"));
+    value.playerView.servers
+      .find((server) => server.id === "archives")!
+      .root.push(asset("archived-b"));
+    (
+      value as AiDecisionInput & {
+        ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
+      }
+    ).ownDeckSnapshot.cards.push({
+      cardId: "simple_economy_asset",
+      quantity: 2,
+    });
+
+    expect(
+      allocateCorpCentralDefenseFromAiFacts({ input: value }),
+    ).toMatchObject({ status: "unknown" });
+  });
+  it("fails closed when an Archives instance is missing from the server mirror", () => {
+    const value = withSnapshot(input());
+    value.playerView.own.heapOrArchives.push(asset("archived"));
+    (
+      value as AiDecisionInput & {
+        ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
+      }
+    ).ownDeckSnapshot.cards.push({
+      cardId: "simple_economy_asset",
+      quantity: 1,
+    });
+
+    expect(
+      allocateCorpCentralDefenseFromAiFacts({ input: value }),
+    ).toMatchObject({ status: "unknown" });
+  });
+  it("fails closed when one Archives instance has conflicting visible facts", () => {
+    const value = withSnapshot(input());
+    value.playerView.own.heapOrArchives.push(asset("archived"));
+    value.playerView.servers
+      .find((server) => server.id === "archives")!
+      .root.push(agenda("archived"));
+
+    expect(
+      allocateCorpCentralDefenseFromAiFacts({ input: value }),
+    ).toMatchObject({ status: "unknown" });
+  });
+  it("fails closed when one instance appears in two distinct canonical zones", () => {
+    const value = withSnapshot(input());
+    value.playerView.own.scoreArea.push(agenda("a"));
+
+    expect(
+      allocateCorpCentralDefenseFromAiFacts({ input: value }),
+    ).toMatchObject({ status: "unknown" });
+  });
   it("uses Highlighter/Vienna quote facts without inspecting Runner text", () => {
     const value = withSnapshot(input());
     value.playerView.corpCentralAccessQuotes![1] = {

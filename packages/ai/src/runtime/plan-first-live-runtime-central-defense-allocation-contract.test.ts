@@ -12,6 +12,7 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
+  restoreResidentPlanPortfolioMemorySnapshot,
 } from "../plans/resident-plan-portfolio-memory";
 import {
   aiInput,
@@ -28,6 +29,7 @@ const CORPORATE_WAR_DEFINITION_ID = "onr_v1_196_corporate-war";
 const CORPORATE_DOWNSIZING_DEFINITION_ID = "onr_v1_194_corporate-downsizing";
 const TYCHO_EXTENSION_DEFINITION_ID = "onr_v1_220_tycho-extension";
 const FILLER_DEFINITION_ID = "onr_v1_284_chance-observation";
+const DATA_MASONS_DEFINITION_ID = "onr_v1_317_data-masons";
 
 describe("plan-first live Corp central-defense allocation contract", () => {
   it("selects HQ from complete exact facts when HQ has the material agenda risk", () => {
@@ -73,6 +75,350 @@ describe("plan-first live Corp central-defense allocation contract", () => {
       reasonCode: "plan_first.corp.defend_servers",
       fallbackUsed: false,
     });
+  });
+
+  it("funds and then installs the exact productive HQ fallback when allocated R&D is already protected", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = centralDefenseInput({
+      hqCards: [dataWall()],
+      rdDefinitionIds: [
+        CORPORATE_DOWNSIZING_DEFINITION_ID,
+        CORPORATE_WAR_DEFINITION_ID,
+        CORPORATE_DOWNSIZING_DEFINITION_ID,
+        CORPORATE_WAR_DEFINITION_ID,
+        CORPORATE_DOWNSIZING_DEFINITION_ID,
+        FILLER_DEFINITION_ID,
+      ],
+      hqAccessCount: 1,
+      rdAccessCount: 3,
+    });
+    const protectedRdIce = visibleCard(
+      "protected-rd-data-wall",
+      "corp",
+      "ice",
+      {
+        definitionId: DATA_WALL_DEFINITION_ID,
+        rezzed: true,
+        strength: 0,
+        subtypes: ["wall"],
+      },
+    );
+    const credit = legalAction(
+      "gain-defense-credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    credit.expiresAtStateVersion = 1;
+    fixture.input.playerView.own.credits = 0;
+    fixture.input.playerView.servers = [
+      server("hq"),
+      server("rd", [protectedRdIce]),
+      server("archives"),
+    ];
+    fixture.input.legalActions = [fixture.installHq, fixture.installRd, credit];
+    fixture.input.playerView.legalActions = fixture.input.legalActions;
+    attachOwnDeckSnapshot(fixture.input, {
+      deckSnapshotId: "central-defense-funded-fallback-contract-deck",
+      side: "corp",
+      cards: definitionCounts([
+        ...fixture.input.playerView.own.gripOrHq.map(
+          (card) => card.definitionId!,
+        ),
+        CORPORATE_DOWNSIZING_DEFINITION_ID,
+        CORPORATE_WAR_DEFINITION_ID,
+        CORPORATE_DOWNSIZING_DEFINITION_ID,
+        CORPORATE_WAR_DEFINITION_ID,
+        CORPORATE_DOWNSIZING_DEFINITION_ID,
+        FILLER_DEFINITION_ID,
+        DATA_WALL_DEFINITION_ID,
+      ]),
+    });
+
+    const fundingDecision = liveContext().chooseSemanticRuntimeAction(
+      fixture.input,
+      {},
+    );
+    expect(fundingDecision).toMatchObject({
+      selectionKind: "direct",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    const fundingPortfolio = residentPlanPortfolioSnapshot(fixture.input);
+    const defenseParent = fundingPortfolio?.instances.find(
+      (instance) => instance.moduleId === "corp.defend_servers",
+    );
+    expect(defenseParent?.instanceId).toBe(
+      "plan:corp.defend_servers:server-defense-portfolio",
+    );
+    expect(defenseParent?.moduleState).toMatchObject({
+      kind: "defense",
+      centralAllocation: {
+        status: "known",
+        selectedServerId: "rd",
+        canonicalNearTieCandidateServerIds: [],
+      },
+    });
+    const fundingChild = fundingPortfolio?.instances.find(
+      (instance) =>
+        instance.moduleId === "corp.economy" &&
+        instance.parentInstanceId === defenseParent?.instanceId,
+    );
+    expect(fundingChild).toMatchObject({
+      parentInstanceId: defenseParent?.instanceId,
+      parentNeedId: `install:hq:${fixture.installHq.actionId}`,
+      moduleState: {
+        kind: "economy",
+        signal: {
+          kind: "parent_funding",
+          gap: 1,
+          parentPlanInstanceId: defenseParent?.instanceId,
+          parentPriorityClass: "P2",
+          incrementalDefenseReserve: {
+            targetCredits: 1,
+            serverId: "hq",
+            iceInstanceId: "data-wall",
+          },
+        },
+      },
+    });
+
+    const fundedInput = structuredClone(fixture.input);
+    fundedInput.decisionId = "central-defense-runtime-contract:2:corp";
+    fundedInput.playerView.stateVersion = 2;
+    fundedInput.playerView.own.credits = 1;
+    fundedInput.playerView.own.clicks = 2;
+    fundedInput.playerView.corpCentralAccessQuotes =
+      fundedInput.playerView.corpCentralAccessQuotes!.map((quote) => ({
+        ...quote,
+        stateVersion: 2,
+      }));
+    for (const action of fundedInput.legalActions) {
+      action.expiresAtStateVersion = 2;
+      if (action.payload?.postInstallRezQuoteCardId) {
+        action.payload.postInstallRezQuoteExpiresAtStateVersion = 2;
+      }
+    }
+
+    expect(
+      liveContext().chooseSemanticRuntimeAction(fundedInput, {}),
+    ).toMatchObject({
+      selectionKind: "direct",
+      actionId: fixture.installHq.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+  });
+
+  it("keeps an exact consumed HQ-hold selection through resident refresh and does not reopen it", () => {
+    resetResidentPlanPortfolioMemory();
+    const dataMasonsOne = visibleCard("data-masons-1", "corp", "asset", {
+      definitionId: DATA_MASONS_DEFINITION_ID,
+      title: "Data Masons",
+      rezzed: false,
+    });
+    const dataMasonsTwo = visibleCard("data-masons-2", "corp", "asset", {
+      definitionId: DATA_MASONS_DEFINITION_ID,
+      title: "Data Masons",
+      rezzed: false,
+    });
+    const hqCards = [
+      agenda("hq-corporate-downsizing", CORPORATE_DOWNSIZING_DEFINITION_ID),
+      dataWall(),
+      filler("hq-filler-1"),
+      filler("hq-filler-2"),
+      filler("hq-filler-3"),
+    ];
+    const rdDefinitionIds = [
+      TYCHO_EXTENSION_DEFINITION_ID,
+      FILLER_DEFINITION_ID,
+      FILLER_DEFINITION_ID,
+      FILLER_DEFINITION_ID,
+      FILLER_DEFINITION_ID,
+      FILLER_DEFINITION_ID,
+      FILLER_DEFINITION_ID,
+      FILLER_DEFINITION_ID,
+      FILLER_DEFINITION_ID,
+      FILLER_DEFINITION_ID,
+    ];
+    const first = centralDefenseInput({
+      hqCards,
+      rdDefinitionIds,
+      hqAccessCount: 1,
+      rdAccessCount: 2,
+    });
+    first.input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [dataMasonsOne]),
+      server("remote_2", [], [dataMasonsTwo]),
+    ];
+    attachOwnDeckSnapshot(first.input, {
+      deckSnapshotId: "central-defense-runtime-contract-deck",
+      side: "corp",
+      cards: definitionCounts([
+        ...hqCards.map((card) => card.definitionId!),
+        ...rdDefinitionIds,
+        DATA_MASONS_DEFINITION_ID,
+        DATA_MASONS_DEFINITION_ID,
+      ]),
+    });
+
+    expect(
+      liveContext().chooseSemanticRuntimeAction(first.input, {}),
+    ).toMatchObject({
+      selectionKind: "direct",
+      actionId: first.installRd.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+    const consumedPortfolio = residentPlanPortfolioSnapshot(first.input);
+    expect(
+      consumedPortfolio?.instances.find(
+        (instance) => instance.moduleId === "corp.defend_servers",
+      )?.moduleState,
+    ).toMatchObject({
+      hqHoldCadence: { status: "consumed" },
+      hqHoldSelection: {
+        selectedActionId: first.installRd.actionId,
+        sourceCardInstanceId: "data-wall",
+        selectedAtStateVersion: 1,
+        targetServerId: "rd",
+      },
+    });
+
+    const second = structuredClone(first.input);
+    second.decisionId = "central-defense-runtime-contract:2:corp";
+    second.playerView.stateVersion = 2;
+    second.playerView.own.gripOrHq = second.playerView.own.gripOrHq.filter(
+      (card) => card.instanceId !== "data-wall",
+    );
+    second.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("data-wall", "corp", "ice", {
+          definitionId: DATA_WALL_DEFINITION_ID,
+          subtypes: ["wall"],
+          rezzed: true,
+        }),
+      ]),
+      server("archives"),
+      server("remote_1", [], [dataMasonsOne]),
+      server("remote_2", [], [dataMasonsTwo]),
+    ];
+    second.playerView.corpCentralAccessQuotes =
+      second.playerView.corpCentralAccessQuotes!.map((quote) => ({
+        ...quote,
+        stateVersion: 2,
+      }));
+    const rezDataMasonsOne = rezAction(dataMasonsOne, "rez-data-masons-1");
+    rezDataMasonsOne.expiresAtStateVersion = 2;
+    const secondCredit = legalAction(
+      "gain-credit-after-hq-hold",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    secondCredit.expiresAtStateVersion = 2;
+    second.legalActions = [rezDataMasonsOne, secondCredit];
+    second.playerView.legalActions = second.legalActions;
+    expect(liveContext().chooseSemanticRuntimeAction(second, {})).toMatchObject(
+      {
+        actionId: rezDataMasonsOne.actionId,
+        reasonCode: "plan_first.corp.defend_servers",
+        fallbackUsed: false,
+      },
+    );
+    expect(
+      residentPlanPortfolioSnapshot(second)?.instances.find(
+        (instance) => instance.moduleId === "corp.defend_servers",
+      )?.moduleState,
+    ).toMatchObject({
+      hqHoldCadence: { status: "consumed" },
+      hqHoldSelection: {
+        selectedActionId: first.installRd.actionId,
+        sourceCardInstanceId: "data-wall",
+        selectedAtStateVersion: 1,
+        targetServerId: "rd",
+      },
+    });
+
+    const third = structuredClone(second);
+    third.decisionId = "central-defense-runtime-contract:3:corp";
+    third.playerView.stateVersion = 3;
+    third.playerView.own.gripOrHq.push(filler("drawn-filler"));
+    third.playerView.own.stackOrRdCount -= 1;
+    third.playerView.servers = third.playerView.servers.map((currentServer) =>
+      currentServer.id === "remote_1"
+        ? server("remote_1", [], [{ ...dataMasonsOne, rezzed: true }])
+        : currentServer,
+    );
+    third.playerView.corpCentralAccessQuotes =
+      third.playerView.corpCentralAccessQuotes!.map((quote) => ({
+        ...quote,
+        stateVersion: 3,
+      }));
+    const rezDataMasonsTwo = rezAction(dataMasonsTwo, "rez-data-masons-2");
+    rezDataMasonsTwo.expiresAtStateVersion = 3;
+    const thirdCredit = legalAction(
+      "gain-credit-after-resident-refresh",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    thirdCredit.expiresAtStateVersion = 3;
+    third.legalActions = [rezDataMasonsTwo, thirdCredit];
+    third.playerView.legalActions = third.legalActions;
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(third, {}),
+    ).not.toThrow();
+    expect(
+      residentPlanPortfolioSnapshot(third)?.instances.find(
+        (instance) => instance.moduleId === "corp.defend_servers",
+      )?.moduleState,
+    ).toMatchObject({
+      hqHoldCadence: { status: "consumed" },
+      hqHoldSelection: {
+        selectedActionId: first.installRd.actionId,
+        sourceCardInstanceId: "data-wall",
+        selectedAtStateVersion: 1,
+        targetServerId: "rd",
+      },
+    });
+
+    const missingSelection = structuredClone(consumedPortfolio!);
+    const missingSelectionDefense = missingSelection.instances.find(
+      (instance) => instance.moduleId === "corp.defend_servers",
+    );
+    const missingSelectionState = missingSelectionDefense?.moduleState as
+      | { hqHoldSelection?: unknown }
+      | undefined;
+    if (!missingSelectionState) {
+      throw new Error("test fixture requires the resident defense state");
+    }
+    delete missingSelectionState.hqHoldSelection;
+    resetResidentPlanPortfolioMemory();
+    restoreResidentPlanPortfolioMemorySnapshot(second, missingSelection);
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(second, {}),
+    ).toThrowError("invalid_plan_identity");
+
+    resetResidentPlanPortfolioMemory();
+    restoreResidentPlanPortfolioMemorySnapshot(second, consumedPortfolio);
+    const selectedCardAbsent = structuredClone(second);
+    selectedCardAbsent.playerView.servers =
+      selectedCardAbsent.playerView.servers.map((currentServer) =>
+        currentServer.id === "rd" ? server("rd") : currentServer,
+      );
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(selectedCardAbsent, {}),
+    ).toThrowError("invalid_plan_identity");
   });
 
   it("emits only an Engine randomized command for the canonical HQ/R&D near tie", () => {
@@ -298,6 +644,20 @@ function iceInstall(source: VisibleCard, serverId: "hq" | "rd"): LegalAction {
         postInstallRezQuoteFinalCredits: 1,
         postInstallRezQuoteMandatoryAgendaPointCost: 0,
       },
+    },
+  );
+}
+
+function rezAction(source: VisibleCard, actionId: string): LegalAction {
+  return legalAction(
+    actionId,
+    "corp",
+    "rez_card",
+    `Rez ${source.title}`,
+    { credits: 0 },
+    {
+      source: source.instanceId,
+      payload: { cardId: source.instanceId },
     },
   );
 }
