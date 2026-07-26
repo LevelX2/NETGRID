@@ -137,7 +137,7 @@ export type MatchFormat = ApiMatchFormat;
 export type MatchCardPool = ApiMatchCardPool;
 export type AiPacingMode = ApiAiPacingMode;
 export type AiDecisionTraceMode = "off" | "summary" | "detailed";
-export type TokenKind = "join" | "session" | "reconnect";
+export type TokenKind = "join" | "session" | "reconnect" | "recovery";
 export type UndoStatus = "requested" | "accepted" | "declined" | "blocked";
 export type SeriesPlayerSlot = ApiSeriesPlayerSlot;
 export type SeriesStatus = ApiSeriesStatus;
@@ -389,9 +389,7 @@ export type StoredMatch = {
    * events, replays, or public projections.
    */
   aiPlanRuntime?: {
-    residentPlanPortfolioBySide?: Partial<
-      Record<Side, ResidentPlanPortfolio>
-    >;
+    residentPlanPortfolioBySide?: Partial<Record<Side, ResidentPlanPortfolio>>;
   };
   pendingUndo?: PendingUndoRequest;
   actionPersistenceBaseline?: ActionPersistenceBaseline;
@@ -1766,6 +1764,98 @@ export class MultiplayerService {
 
   async reconnectMatch(
     matchId: string,
+    input: {
+      side: Side;
+      sessionToken: string;
+      reconnectToken: string;
+    },
+  ): Promise<ReconnectResult | { error: SafeErrorPayload }> {
+    const record = await this.mustLoad(matchId);
+    if (!record)
+      return {
+        error: safeError(
+          "not_found",
+          "Dieses private Match ist nicht verfügbar.",
+        ),
+      };
+    const sessionToken = this.findToken(record, input.sessionToken, "session");
+    const reconnectToken = this.findToken(
+      record,
+      input.reconnectToken,
+      "reconnect",
+    );
+    if (!sessionToken || !reconnectToken)
+      return {
+        error: safeError("invalid_token", "Reconnect ist nicht möglich."),
+      };
+    const session = record.sessions.find(
+      (candidate) =>
+        candidate.side === input.side &&
+        candidate.sessionTokenHash === sessionToken.tokenHash &&
+        candidate.reconnectTokenHash === reconnectToken.tokenHash,
+    );
+    if (!session)
+      return {
+        error: safeError("invalid_token", "Reconnect ist nicht möglich."),
+      };
+
+    const now = this.now();
+    record.sessions = record.sessions.map((candidate) =>
+      candidate.sessionId === session.sessionId
+        ? {
+            ...candidate,
+            lastSeenAt: now,
+          }
+        : candidate,
+    );
+    this.syncPlayerClock(record, now);
+    record.match.updatedAt = now;
+    await this.persist(record);
+
+    const payload = this.shouldUseLobbyPayload(record)
+      ? this.lobbyPayloadFor(record, input.side)
+      : this.payloadFor(record, input.side);
+    return {
+      matchId,
+      isPublic: record.match.isPublic,
+      sessionToken: input.sessionToken,
+      reconnectToken: input.reconnectToken,
+      side: input.side,
+      webSocketUrl: this.webSocketUrl(),
+      playerView: isSidePayload(payload)
+        ? payload.playerView
+        : (undefined as unknown as PlayerView),
+      legalActions: isSidePayload(payload) ? payload.legalActions : [],
+      matchVersion: record.match.matchVersion,
+      eventTail: payload.eventTail,
+      matchStatus: payload.matchStatus,
+      ...(!isSidePayload(payload) && payload.startLobby
+        ? { lobby: payload.startLobby }
+        : {}),
+      ...(isSidePayload(payload) && payload.pendingChoice
+        ? { pendingChoice: payload.pendingChoice }
+        : {}),
+      ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
+      ...(isSidePayload(payload) && payload.pendingUndo
+        ? { pendingUndo: payload.pendingUndo }
+        : {}),
+      ...(isSidePayload(payload) && payload.aiTurnPresentation
+        ? { aiTurnPresentation: payload.aiTurnPresentation }
+        : {}),
+      ...(isSidePayload(payload) && payload.winner
+        ? { winner: payload.winner }
+        : {}),
+      ...(isSidePayload(payload) && payload.finalStateHash
+        ? { finalStateHash: payload.finalStateHash }
+        : {}),
+      ...(isSidePayload(payload) && payload.resultSummary
+        ? { resultSummary: payload.resultSummary }
+        : {}),
+    };
+  }
+
+  async recoverMatch(
+    matchId: string,
     input: { side: Side; reconnectToken: string; displayName?: string },
   ): Promise<ReconnectResult | { error: SafeErrorPayload }> {
     const record = await this.mustLoad(matchId);
@@ -1776,15 +1866,17 @@ export class MultiplayerService {
           "Dieses private Match ist nicht verfügbar.",
         ),
       };
-    const token = this.findToken(record, input.reconnectToken, "reconnect");
-    if (!token)
+    const recoveryToken = this.findToken(
+      record,
+      input.reconnectToken,
+      "recovery",
+    );
+    if (!recoveryToken || recoveryToken.allowedSide !== input.side)
       return {
         error: safeError("invalid_token", "Reconnect ist nicht möglich."),
       };
     const session = record.sessions.find(
-      (candidate) =>
-        candidate.side === input.side &&
-        candidate.reconnectTokenHash === token.tokenHash,
+      (candidate) => candidate.side === input.side,
     );
     if (!session)
       return {
@@ -1794,6 +1886,7 @@ export class MultiplayerService {
     const now = this.now();
     const sessionToken = generateToken();
     const reconnectToken = generateToken();
+    this.revokeTokenByHash(record, "recovery", recoveryToken.tokenHash, now);
     this.revokeTokenByHash(record, "session", session.sessionTokenHash, now);
     this.revokeTokenByHash(
       record,
@@ -1849,10 +1942,10 @@ export class MultiplayerService {
       ...(isSidePayload(payload) && payload.pendingChoice
         ? { pendingChoice: payload.pendingChoice }
         : {}),
-      ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(isSidePayload(payload) && payload.pendingUndo
         ? { pendingUndo: payload.pendingUndo }
         : {}),
+      ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(isSidePayload(payload) && payload.aiTurnPresentation
         ? { aiTurnPresentation: payload.aiTurnPresentation }
         : {}),
@@ -2849,7 +2942,10 @@ export class MultiplayerService {
       if (!record)
         return {
           ok: false,
-          error: safeError("not_found", "Dieses private Match ist nicht verfügbar."),
+          error: safeError(
+            "not_found",
+            "Dieses private Match ist nicht verfügbar.",
+          ),
         };
       const session = this.authenticate(
         record,
@@ -2861,7 +2957,10 @@ export class MultiplayerService {
           ok: false,
           error: safeError("unauthorized", "Die Session ist nicht gültig."),
         };
-      if (this.isAiSide(record, input.requesterSide) && record.match.mode !== "ai_vs_ai")
+      if (
+        this.isAiSide(record, input.requesterSide) &&
+        record.match.mode !== "ai_vs_ai"
+      )
         return {
           ok: false,
           error: safeError(
@@ -2880,7 +2979,10 @@ export class MultiplayerService {
       if (record.match.status !== "active" || !record.gameState)
         return {
           ok: false,
-          error: safeError("match_not_active", "Das Match ist noch nicht aktiv."),
+          error: safeError(
+            "match_not_active",
+            "Das Match ist noch nicht aktiv.",
+          ),
         };
       const activeAiSide = this.aiControllableSide(record);
       if (!activeAiSide)
@@ -2956,7 +3058,10 @@ export class MultiplayerService {
             decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${activeAiSide}`,
             actionNumber: record.gameState.stateVersion,
             ownDeckSnapshot,
-            expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, activeAiSide),
+            expectedDeckSnapshot: aiDeckSnapshotExpectationFor(
+              record,
+              activeAiSide,
+            ),
           });
           this.restoreResidentPlanPortfolioFor(record, aiInput);
         } catch (error) {
@@ -4057,7 +4162,7 @@ export class MultiplayerService {
           : candidate,
       );
       record.tokens.push(
-        this.tokenRecord(matchId, input.side, "reconnect", access, now),
+        this.tokenRecord(matchId, input.side, "recovery", access, now),
       );
       record.match.matchVersion += 1;
       record.match.updatedAt = now;

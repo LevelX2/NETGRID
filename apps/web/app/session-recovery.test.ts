@@ -47,8 +47,13 @@ describe("session recovery storage", () => {
     expect(localStorage.getItem("netgrid.recentSessions")).toBeTruthy();
   });
 
-  it("falls back from tab storage to recoverable local storage", () => {
-    const serializedSession = JSON.stringify(session);
+  it("uses the persisted recovery session for a tab with stale credentials", () => {
+    const staleTabSession = {
+      ...session,
+      sessionToken: "stale_session_secret",
+      reconnectToken: "stale_reconnect_secret"
+    };
+    const serializedSession = JSON.stringify(staleTabSession);
     const serializedRecovery = serializeRecoverableSessionForStorage(session);
     const sessionStorage = memoryStorage({ "netgrid-mvp-0-3-session": serializedSession });
     const localStorage = memoryStorage({ "netgrid.recovery.v1": serializedRecovery });
@@ -60,6 +65,15 @@ describe("session recovery storage", () => {
     sessionStorage.removeItem("netgrid-mvp-0-3-session");
     expect(loadStoredSession()).toEqual(session);
     expect(localStorage.getItem("netgrid.recovery.v1")).toBe(serializedRecovery);
+  });
+
+  it("keeps a tab-local session when it belongs to another match or side", () => {
+    const otherTabSession = { ...session, matchId: "match_other", side: "corp" as const };
+    const sessionStorage = memoryStorage({ "netgrid-mvp-0-3-session": JSON.stringify(otherTabSession) });
+    const localStorage = memoryStorage({ "netgrid.recovery.v1": serializeRecoverableSessionForStorage(session) });
+    stubWindow(localStorage, sessionStorage);
+
+    expect(loadStoredSession()).toEqual(otherTabSession);
   });
 });
 

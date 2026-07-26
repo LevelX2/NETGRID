@@ -342,6 +342,7 @@ export function buildMaintenanceRecoveryLink(
   url.searchParams.set("matchId", access.matchId);
   url.searchParams.set("side", access.side);
   url.searchParams.set("reconnectToken", access.access);
+  url.searchParams.set("recovery", "1");
   return url.toString();
 }
 
