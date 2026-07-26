@@ -48617,11 +48617,7 @@
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_128_airport-locker",
       "cardType": "resource",
-      "conditions": [
-        {
-          "kind": "requires_encounter"
-        }
-      ],
+      "conditions": [],
       "effects": [
         {
           "kind": "global_modifier",
@@ -48658,6 +48654,18 @@
           "scope": "runner",
           "target": "hidden.reveals_on_trash",
           "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "program",
+          "timing": "runner_turn"
+        },
+        {
+          "kind": "install",
+          "scope": "runner",
+          "target": "program",
+          "timing": "runner_turn"
         },
         {
           "kind": "search",
@@ -48714,7 +48722,7 @@
         "hintReviewed": true,
         "needsHumanReview": false,
         "reviewedBy": "codex",
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-26",
         "strategyCovered": false
       },
       "requiredMechanics": [],
@@ -48747,10 +48755,10 @@
             "program_affordable_after_install",
             "program_preserves_run_goal"
           ],
-          "purpose": "install_answer_to_current_ice",
+          "purpose": "install_best_program_for_current_rig_need_or_encounter",
           "schemaVersion": "target-profile-v1",
           "targetType": "program",
-          "timing": "during_ice_encounter"
+          "timing": "activated_ability"
         }
       ],
       "valueHints": {},
@@ -48762,6 +48770,7 @@
         "effect_timing:during_ice_encounter",
         "effect_timing:during_run",
         "effect_timing:persistent",
+        "effect_timing:runner_turn",
         "effect:global_modifier",
         "effect:install",
         "effect:prevention_replacement",
