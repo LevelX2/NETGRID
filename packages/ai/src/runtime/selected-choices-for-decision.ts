@@ -175,9 +175,10 @@ export function selectedChoicesForDecision(
   }
   if (
     input.side === "corp" &&
-    (choice.source.startsWith("p3_34.distribute_advancement") ||
-      choice.source.startsWith("p3_34.move_advancement") ||
-      choice.source.startsWith("v1919.systematic_layoffs_advancement"))
+    (choice.continuation?.family === "corp_advancement_counter" ||
+      choice.source.startsWith("p3_34.distribute_advancement:") ||
+      choice.source.startsWith("p3_34.move_advancement:") ||
+      choice.source.startsWith("v1919.systematic_layoffs_advancement:"))
   ) {
     const scoreBinding = residentCorpScoreChoiceBinding(
       input,
@@ -196,7 +197,8 @@ export function selectedChoicesForDecision(
   }
   if (
     input.side === "corp" &&
-    choice.source.startsWith("scored_agenda.hq_agenda_shuffle_credits:")
+    (choice.continuation?.family === "corp_scored_agenda_hq_shuffle" ||
+      choice.source.startsWith("scored_agenda.hq_agenda_shuffle_credits:"))
   ) {
     const binding = residentCorpScoredAgendaHqShuffleBinding(
       input,
@@ -543,6 +545,7 @@ function residentCorpScoreChoiceBinding(
       }
     | undefined;
   const continuation = moduleState?.choiceContinuation;
+  const choiceContinuation = choice.continuation;
   const targetCardId =
     typeof continuation?.targetCardId === "string"
       ? continuation.targetCardId
@@ -556,6 +559,9 @@ function residentCorpScoreChoiceBinding(
     continuation?.family === "corp_advancement_counter" &&
     typeof continuation.selectedActionId === "string" &&
     continuation.selectedActionId.length > 0 &&
+    choiceContinuation?.family === "corp_advancement_counter" &&
+    choiceContinuation.originActionId === continuation.selectedActionId &&
+    choiceContinuation.createdAtStateVersion === input.playerView.stateVersion &&
     continuation.selectedAtStateVersion === portfolio.stateVersion &&
     portfolio.stateVersion + 1 === input.playerView.stateVersion &&
     choice.stateVersion === input.playerView.stateVersion &&
@@ -604,10 +610,7 @@ function residentCorpScoredAgendaHqShuffleBinding(
       }
     | undefined;
   const continuation = moduleState?.choiceContinuation;
-  const sourceParts = choice.source.split(":");
-  const sourceCardId = sourceParts[1];
-  const creditPerAgendaPoint = Number(sourceParts[2]);
-  const sourceStateVersion = Number(sourceParts[3]);
+  const choiceContinuation = choice.continuation;
   const knownHqAgendaIds = input.playerView.own.gripOrHq
     .filter((card) => card.known && card.type === "agenda")
     .map((card) => card.instanceId)
@@ -621,15 +624,8 @@ function residentCorpScoredAgendaHqShuffleBinding(
     .filter((cardId): cardId is string => cardId !== undefined)
     .sort();
   const exactContinuation =
-    sourceParts.length === 4 &&
-    sourceParts[0] === "scored_agenda.hq_agenda_shuffle_credits" &&
-    sourceCardId !== undefined &&
-    Number.isSafeInteger(creditPerAgendaPoint) &&
-    creditPerAgendaPoint > 0 &&
-    String(creditPerAgendaPoint) === sourceParts[2] &&
-    Number.isSafeInteger(sourceStateVersion) &&
-    String(sourceStateVersion) === sourceParts[3] &&
-    sourceStateVersion === input.playerView.stateVersion &&
+    choiceContinuation?.family === "corp_scored_agenda_hq_shuffle" &&
+    choiceContinuation.createdAtStateVersion === input.playerView.stateVersion &&
     action.side === "corp" &&
     action.type === "resolve_choice" &&
     action.source === "game_rule" &&
@@ -645,12 +641,13 @@ function residentCorpScoredAgendaHqShuffleBinding(
     portfolio !== undefined &&
     executor !== undefined &&
     moduleState?.kind === "score" &&
-    moduleState.signal?.agendaInstanceId === sourceCardId &&
+    moduleState.signal?.agendaInstanceId === choiceContinuation.agendaInstanceId &&
     continuation?.family === "corp_scored_agenda_on_score" &&
     typeof continuation.selectedActionId === "string" &&
     continuation.selectedActionId.length > 0 &&
+    choiceContinuation.originActionId === continuation.selectedActionId &&
     continuation.selectedAtStateVersion === portfolio.stateVersion &&
-    continuation.targetCardId === sourceCardId &&
+    continuation.targetCardId === choiceContinuation.agendaInstanceId &&
     portfolio.stateVersion + 1 === input.playerView.stateVersion &&
     choice.kind === "select_cards" &&
     choice.visibility === "hidden_info_barrier" &&
@@ -666,7 +663,7 @@ function residentCorpScoredAgendaHqShuffleBinding(
       (card) =>
         card.known &&
         card.type === "agenda" &&
-        card.instanceId === sourceCardId,
+        card.instanceId === choiceContinuation.agendaInstanceId,
     );
   if (!exactContinuation || !executor) {
     throw new PlanResolutionFailure("window_origin_missing", {
