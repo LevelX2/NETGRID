@@ -207,7 +207,7 @@ import {
   type RecentSessionInfo,
   type SessionInfo,
 } from "./session-recovery";
-import { latestAiDecisionDebugEventTrace } from "./ai-decision-debug-event-trace";
+import { preparedAiDecisionDebugTrace } from "./ai-decision-debug-prepared-trace";
 import {
   ACTION_CUE_SETTINGS_STORAGE_KEY,
   ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
@@ -237,6 +237,7 @@ import { NETGRID_APP_STATUS_LABEL } from "../lib/app-build-info";
 import {
   bootstrap,
   fetchAiDecisionPreview,
+  fetchPreparedAiDecisionDebug,
   fetchPublicMatches,
   fetchPersonalRecentGameResults,
   fromInitialResponse,
@@ -246,6 +247,7 @@ import {
   postJson,
   serverErrorNotice,
   type AiDecisionPreview,
+  type PreparedAiDecisionDebug,
   type PublicMatchEntry,
 } from "../lib/client-api";
 import {
@@ -794,6 +796,8 @@ export default function Page() {
   const [aiDecisionDebugStatus, setAiDecisionDebugStatus] =
     useState<AiDecisionDebugOverlayStatus>("off");
   const [aiDecisionDebugError, setAiDecisionDebugError] = useState("");
+  const [preparedAiDecisionDebug, setPreparedAiDecisionDebug] =
+    useState<PreparedAiDecisionDebug | null>(null);
   const [aiDecisionDebugPreview, setAiDecisionDebugPreview] =
     useState<AiDecisionPreview | null>(null);
   const [aiDecisionDebugPreviewError, setAiDecisionDebugPreviewError] =
@@ -867,6 +871,7 @@ export default function Page() {
   const paymentSupportSubmittedKeyRef = useRef<string | null>(null);
   const paymentSupportContinuationSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
+  const reconnectInFlightRef = useRef(false);
   const aiDecisionDebugPreviewRequestKeyRef = useRef<string | null>(null);
   const aiDecisionDebugPreviewContextRef = useRef<ActionContext | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
@@ -2546,23 +2551,27 @@ export default function Page() {
     activeMatchIsGame && aiDecisionDebugOverlayEnabled && session,
   );
   const canRequestHumanAiDecisionPreview =
-    aiDecisionDebugOverlayEnabled &&
     humanAiDecisionProbeAvailable(session, payload);
+  const humanAiAdvice = aiDecisionDebugPreview
+    ? humanAiAdviceSentence(aiDecisionDebugPreview)
+    : null;
   const aiDecisionDebugPreviewStateKey =
     session && payload
       ? `${session.matchId}:${session.side}:${payload.matchVersion}:${payload.playerView.stateVersion}`
       : "";
+  const aiDecisionDebugPreparationKey =
+    aiDecisionDebugOverlayEnabled &&
+    session &&
+    payload &&
+    aiTurnPresentation?.canAdvanceAi
+      ? `${session.matchId}:${payload.matchVersion}:${payload.playerView.stateVersion}`
+      : "";
   const aiDecisionDebugTrace = useMemo(
     () =>
-      session && payload
-        ? latestAiDecisionDebugEventTrace({
-            matchId: session.matchId,
-            matchVersion: payload.matchVersion,
-            eventTail: payload.eventTail,
-            observedAt: new Date().toISOString(),
-          })
+      preparedAiDecisionDebug
+        ? preparedAiDecisionDebugTrace(preparedAiDecisionDebug)
         : null,
-    [payload, session],
+    [preparedAiDecisionDebug],
   );
   const floatingPanelHasHiddenContextActions = Boolean(
     !activeView?.run &&
@@ -2671,31 +2680,41 @@ export default function Page() {
     if (!aiDecisionDebugOverlayEnabled || !aiDecisionDebugMatchId) {
       setAiDecisionDebugStatus("off");
       setAiDecisionDebugError("");
-      setAiDecisionDebugPreview(null);
-      setAiDecisionDebugPreviewError("");
-      setAiDecisionDebugPreviewLoading(false);
-      aiDecisionDebugPreviewRequestKeyRef.current = null;
-      const previewContext = aiDecisionDebugPreviewContextRef.current;
-      if (previewContext) {
-        setSelectedActionContext((current) =>
-          current?.kind === previewContext.kind &&
-          current.id === previewContext.id
-            ? null
-            : current,
-        );
-        aiDecisionDebugPreviewContextRef.current = null;
-      }
+      setPreparedAiDecisionDebug(null);
       return;
     }
-    // Das Spiel-Fenster darf keine Maintenance-Trace-API verwenden: Sie ist
-    // absichtlich admin-authentifiziert und könnte bei einer Freigabe die
-    // Trennung zwischen eigener PlayerView und Serverdiagnostik verwischen.
-    // Der read-only Preview-Endpunkt ist an die aktuelle Match-Session und
-    // deren eigene LegalActions gebunden und liefert den redigierten
-    // Plan-first-Vertrag dafür direkt.
     setAiDecisionDebugStatus("waiting");
     setAiDecisionDebugError("");
   }, [aiDecisionDebugOverlayEnabled, aiDecisionDebugMatchId]);
+
+  useEffect(() => {
+    if (!aiDecisionDebugPreparationKey || !session || !payload) {
+      setPreparedAiDecisionDebug(null);
+      return;
+    }
+    let current = true;
+    setAiDecisionDebugStatus("activating");
+    setAiDecisionDebugError("");
+    void fetchPreparedAiDecisionDebug(session, payload)
+      .then((prepared) => {
+        if (!current) return;
+        setPreparedAiDecisionDebug(prepared);
+        setAiDecisionDebugStatus("live");
+      })
+      .catch((error) => {
+        if (!current) return;
+        setPreparedAiDecisionDebug(null);
+        setAiDecisionDebugStatus("error");
+        setAiDecisionDebugError(
+          error instanceof Error
+            ? error.message
+            : "Die nächste KI-Entscheidung konnte nicht vorbereitet werden.",
+        );
+      });
+    return () => {
+      current = false;
+    };
+  }, [aiDecisionDebugPreparationKey, payload, session]);
 
   useEffect(() => {
     aiDecisionDebugPreviewRequestKeyRef.current = null;
@@ -2727,16 +2746,6 @@ export default function Page() {
     setAiDecisionDebugPreviewLoading(true);
     setAiDecisionDebugPreview(null);
     setAiDecisionDebugPreviewError("");
-    const existingPreviewContext = aiDecisionDebugPreviewContextRef.current;
-    if (existingPreviewContext) {
-      setSelectedActionContext((current) =>
-        current?.kind === existingPreviewContext.kind &&
-        current.id === existingPreviewContext.id
-          ? null
-          : current,
-      );
-      aiDecisionDebugPreviewContextRef.current = null;
-    }
     try {
       const preview = await fetchAiDecisionPreview(session, payload);
       if (aiDecisionDebugPreviewRequestKeyRef.current !== requestKey) return;
@@ -2753,18 +2762,6 @@ export default function Page() {
         );
         return;
       }
-      const previousContext = aiDecisionDebugPreviewContextRef.current;
-      const nextContext = humanAiDecisionProbeActionContext(legalAction);
-      setSelectedActionContext((current) => {
-        if (
-          previousContext &&
-          current?.kind === previousContext.kind &&
-          current.id === previousContext.id
-        )
-          return nextContext;
-        return nextContext ?? current;
-      });
-      aiDecisionDebugPreviewContextRef.current = nextContext;
       setAiDecisionDebugPreview(preview);
       setAiDecisionDebugPreviewError("");
     } catch (error) {
@@ -3900,49 +3897,55 @@ export default function Page() {
     baseSession: SessionInfo,
     fallbackNotice = "Wiederverbindung konnte nicht gestartet werden.",
   ) => {
-    let reconnected: JoinMatchResponse;
+    if (reconnectInFlightRef.current) return false;
+    reconnectInFlightRef.current = true;
     try {
-      reconnected = await postJson<JoinMatchResponse>(
-        `/api/matches/${encodeURIComponent(baseSession.matchId)}/reconnect`,
-        {
-          side: baseSession.side,
-          reconnectToken: baseSession.reconnectToken,
-          displayName: baseSession.displayName,
-        },
-      );
-    } catch (error) {
-      setNotice(serverErrorNotice(error, fallbackNotice));
-      return false;
+      let reconnected: JoinMatchResponse;
+      try {
+        reconnected = await postJson<JoinMatchResponse>(
+          `/api/matches/${encodeURIComponent(baseSession.matchId)}/reconnect`,
+          {
+            side: baseSession.side,
+            reconnectToken: baseSession.reconnectToken,
+            displayName: baseSession.displayName,
+          },
+        );
+      } catch (error) {
+        setNotice(serverErrorNotice(error, fallbackNotice));
+        return false;
+      }
+      if (reconnected.error) {
+        setNotice(reconnected.error.message);
+        setSession(
+          baseSession.sessionToken.trim() && baseSession.webSocketUrl.trim()
+            ? baseSession
+            : null,
+        );
+        setPayload(null);
+        setLobby(null);
+        setConnection("offline");
+        return false;
+      }
+      const nextSession = {
+        ...baseSession,
+        sessionToken: reconnected.sessionToken,
+        reconnectToken: reconnected.reconnectToken,
+        webSocketUrl: reconnected.webSocketUrl,
+      };
+      persistSession(nextSession);
+      setSession(nextSession);
+      if (reconnected.lobby || !reconnected.playerView) {
+        setPayload(null);
+        setLobby(lobbyFromJoinedResponse(reconnected));
+      } else {
+        setPayload(fromJoinedResponse(reconnected));
+        setLobby(null);
+      }
+      setNotice("Wiederverbindung abgeschlossen.");
+      return true;
+    } finally {
+      reconnectInFlightRef.current = false;
     }
-    if (reconnected.error) {
-      setNotice(reconnected.error.message);
-      setSession(
-        baseSession.sessionToken.trim() && baseSession.webSocketUrl.trim()
-          ? baseSession
-          : null,
-      );
-      setPayload(null);
-      setLobby(null);
-      setConnection("offline");
-      return false;
-    }
-    const nextSession = {
-      ...baseSession,
-      sessionToken: reconnected.sessionToken,
-      reconnectToken: reconnected.reconnectToken,
-      webSocketUrl: reconnected.webSocketUrl,
-    };
-    persistSession(nextSession);
-    setSession(nextSession);
-    if (reconnected.lobby || !reconnected.playerView) {
-      setPayload(null);
-      setLobby(lobbyFromJoinedResponse(reconnected));
-    } else {
-      setPayload(fromJoinedResponse(reconnected));
-      setLobby(null);
-    }
-    setNotice("Wiederverbindung abgeschlossen.");
-    return true;
   };
 
   const reconnect = async () => {
@@ -4697,6 +4700,7 @@ export default function Page() {
     if (!session || !payload || !aiTurnPresentation?.canAdvanceAi) return false;
     if (!ensureSocketConnected()) return false;
     try {
+      setPreparedAiDecisionDebug(null);
       setAiDecisionDebugPreview(null);
       setAiDecisionDebugPreviewError("");
       sendSocketMessage("advance_ai", {
@@ -6091,6 +6095,10 @@ export default function Page() {
               canForfeit={canForfeit}
               canCancelSimulation={canCancelSimulation}
               rightRailCollapsed={rightRailCollapsed}
+              canRequestHumanAiAdvice={canRequestHumanAiDecisionPreview}
+              humanAiAdvice={humanAiAdvice}
+              humanAiAdviceError={aiDecisionDebugPreviewError}
+              humanAiAdviceLoading={aiDecisionDebugPreviewLoading}
               onWorkspace={setActiveMatchWorkspace}
               onToggleUndoPanel={() => setUndoPanelOpen((open) => !open)}
               onReconnect={reconnect}
@@ -6102,6 +6110,14 @@ export default function Page() {
               onToggleRightRail={() =>
                 setRightRailCollapsed((current) => !current)
               }
+              onRequestHumanAiAdvice={() =>
+                void requestHumanAiDecisionPreview()
+              }
+              onCloseHumanAiAdvice={() => {
+                setAiDecisionDebugPreview(null);
+                setAiDecisionDebugPreviewError("");
+                setAiDecisionDebugPreviewLoading(false);
+              }}
             />
 
             {matchDetailsOpen ? (
@@ -6274,13 +6290,8 @@ export default function Page() {
                   aiDecisionDebugTrace ? "live" : aiDecisionDebugStatus
                 }
                 error={aiDecisionDebugError}
-                preview={aiDecisionDebugPreview}
-                previewError={aiDecisionDebugPreviewError}
-                previewLoading={aiDecisionDebugPreviewLoading}
-                canRequestPreview={canRequestHumanAiDecisionPreview}
                 trace={aiDecisionDebugTrace}
                 traceCount={aiDecisionDebugTrace ? 1 : 0}
-                onRequestPreview={() => void requestHumanAiDecisionPreview()}
                 onPosition={setAiDecisionDebugOverlayPosition}
                 onClose={() => setAiDecisionDebugOverlayEnabled(false)}
               />
@@ -6963,4 +6974,31 @@ export default function Page() {
       </CardImagePreferenceContext.Provider>
     </CardScaleSettingsContext.Provider>
   );
+}
+
+function humanAiAdviceSentence(preview: AiDecisionPreview): string {
+  const label = preview.actionLabel.trim();
+  switch (preview.actionType) {
+    case "start_run":
+      return label
+        ? `Mit deinem Deck würde die KI jetzt einen Run auf ${label} starten.`
+        : "Mit deinem Deck würde die KI jetzt einen Run starten.";
+    case "play_event":
+    case "play_operation":
+      return label
+        ? `Mit deinem Deck würde die KI jetzt ${label} spielen.`
+        : "Mit deinem Deck würde die KI jetzt eine Karte spielen.";
+    case "install_card":
+      return label
+        ? `Mit deinem Deck würde die KI jetzt ${label} installieren.`
+        : "Mit deinem Deck würde die KI jetzt eine Karte installieren.";
+    case "gain_credit":
+      return "Mit deinem Deck würde die KI jetzt Credits nehmen.";
+    case "draw_card":
+      return "Mit deinem Deck würde die KI jetzt eine Karte ziehen.";
+    default:
+      return label
+        ? `Mit deinem Deck würde die KI jetzt ${label} wählen.`
+        : "Mit deinem Deck würde die KI jetzt die nächste verfügbare Aktion wählen.";
+  }
 }

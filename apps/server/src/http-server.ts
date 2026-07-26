@@ -3146,6 +3146,40 @@ async function routeHttp(
         }
         return;
       }
+      if (request.method === "POST" && action === "ai-decision-debug") {
+        if (
+          !checkRateLimit(
+            response,
+            rateLimiter,
+            "ai_advance",
+            request,
+            deploymentConfig,
+            `ai-decision-debug:${matchId}`,
+          )
+        )
+          return;
+        const body = await readJson(request);
+        const requesterSide = body.side === "corp" ? "corp" : "runner";
+        const prepared = await service.prepareAiDecisionDebug({
+          matchId,
+          requesterSide,
+          sessionToken:
+            bearerToken(request) ??
+            (typeof body.sessionToken === "string" ? body.sessionToken : ""),
+          ...(typeof body.knownStateVersion === "number"
+            ? { knownStateVersion: body.knownStateVersion }
+            : {}),
+          ...(typeof body.knownMatchVersion === "number"
+            ? { knownMatchVersion: body.knownMatchVersion }
+            : {}),
+        });
+        if (prepared.ok) {
+          sendJson(response, 200, { ok: true, prepared: prepared.prepared });
+        } else {
+          sendJson(response, 409, prepared);
+        }
+        return;
+      }
     }
 
     sendJson(response, 404, {

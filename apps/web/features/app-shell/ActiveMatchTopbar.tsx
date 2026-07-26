@@ -2,6 +2,7 @@
 
 import {
   Cable,
+  Brain,
   ChevronDown,
   ChevronUp,
   Flag,
@@ -9,7 +10,8 @@ import {
   PanelRightOpen,
   Play,
   Square,
-  RotateCcw
+  RotateCcw,
+  X,
 } from "lucide-react";
 import type { RefObject } from "react";
 import {
@@ -44,6 +46,10 @@ export function ActiveMatchTopbar({
   canForfeit,
   canCancelSimulation,
   rightRailCollapsed,
+  canRequestHumanAiAdvice,
+  humanAiAdvice,
+  humanAiAdviceError,
+  humanAiAdviceLoading,
   onWorkspace,
   onToggleUndoPanel,
   onReconnect,
@@ -52,7 +58,9 @@ export function ActiveMatchTopbar({
   onLeaveMatch,
   onRequestForfeitMatch,
   onRequestCancelSimulation,
-  onToggleRightRail
+  onToggleRightRail,
+  onRequestHumanAiAdvice,
+  onCloseHumanAiAdvice,
 }: {
   topbarRef: RefObject<HTMLElement | null>;
   appName: string;
@@ -73,6 +81,10 @@ export function ActiveMatchTopbar({
   canForfeit: boolean;
   canCancelSimulation: boolean;
   rightRailCollapsed: boolean;
+  canRequestHumanAiAdvice: boolean;
+  humanAiAdvice: string | null;
+  humanAiAdviceError: string;
+  humanAiAdviceLoading: boolean;
   onWorkspace(workspace: ActiveMatchWorkspace): void;
   onToggleUndoPanel(): void;
   onReconnect(): void;
@@ -82,6 +94,8 @@ export function ActiveMatchTopbar({
   onRequestForfeitMatch(): void;
   onRequestCancelSimulation(): void;
   onToggleRightRail(): void;
+  onRequestHumanAiAdvice(): void;
+  onCloseHumanAiAdvice(): void;
 }) {
   const undoLabel = pendingUndo?.needsResponse ? "Zurücknahme beantworten" : "Zurücknahme anfragen";
   const matchDetailsLabel = matchDetailsOpen ? "Aktives Spiel: Status ausblenden" : "Aktives Spiel: Status einblenden";
@@ -109,6 +123,16 @@ export function ActiveMatchTopbar({
             type="button"
           >
             <RotateCcw size={16} />
+          </button>
+          <button
+            className="button iconOnly"
+            onClick={onRequestHumanAiAdvice}
+            disabled={!canRequestHumanAiAdvice || humanAiAdviceLoading}
+            title="KI für mein Deck fragen"
+            aria-label="KI für mein Deck fragen"
+            type="button"
+          >
+            <Brain size={16} />
           </button>
           {connection !== "online" ? (
             <button className="button" onClick={onReconnect} disabled={!canReconnect} title="Wieder verbinden" type="button">
@@ -167,6 +191,34 @@ export function ActiveMatchTopbar({
           >
             {rightRailCollapsed ? <PanelRightOpen size={16} /> : <PanelRightClose size={16} />}
           </button>
+        </div>
+      ) : null}
+      {humanAiAdvice || humanAiAdviceError || humanAiAdviceLoading ? (
+        <div className="humanAiAdviceOverlay" role="presentation">
+          <section
+            className="humanAiAdviceDialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="KI für mein Deck"
+          >
+            <div className="humanAiAdviceHeader">
+              <strong>KI für mein Deck</strong>
+              <button
+                className="button iconOnly"
+                type="button"
+                onClick={onCloseHumanAiAdvice}
+                aria-label="Hinweis schließen"
+                title="Schließen"
+              >
+                <X size={15} />
+              </button>
+            </div>
+            <p>
+              {humanAiAdviceLoading
+                ? "Die KI prüft die aktuelle Situation …"
+                : humanAiAdviceError || humanAiAdvice}
+            </p>
+          </section>
         </div>
       ) : null}
     </header>
