@@ -2352,12 +2352,42 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     );
+    const installIceRemote = legalAction(
+      "install-data-wall-remote-1",
+      "corp",
+      "install_card",
+      "Install Data Wall on Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "data-wall",
+        payload: {
+          cardId: "data-wall",
+          sourceDefinitionId: "onr_v1_237_data-wall",
+          serverId: "remote_1",
+          placement: "ice",
+          iceInstallBaseCost: 0,
+          iceInstallAdditionalCost: 0,
+          iceInstallReduction: 0,
+          iceInstallTotalCost: 0,
+          postInstallRezQuoteCardId: "data-wall",
+          postInstallRezQuoteTargetServerId: "remote_1",
+          postInstallRezQuoteProjectedServerId: "remote_1",
+          postInstallRezQuoteExpiresAtStateVersion: 1,
+          postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
+          postInstallRezQuoteBaseCredits: 1,
+          postInstallRezQuoteFinalCredits: 1,
+          postInstallRezQuoteMandatoryAgendaPointCost: 0,
+        },
+      },
+    );
     const input = aiInput("corp", [
       installExisting,
       installNew,
       installAgenda,
       teamRestructuring,
       installIceArchives,
+      installIceRemote,
     ]);
     input.playerView.own.clicks = 1;
     input.playerView.own.credits = 10;
@@ -2370,6 +2400,9 @@ describe("authoritative plan-first live runtime", () => {
       visibleCard("data-wall", "corp", "ice", {
         definitionId: "onr_v1_237_data-wall",
         title: "Data Wall",
+        rezCost: 1,
+        strength: 0,
+        subtypes: ["wall"],
       }),
       visibleCard("agenda", "corp", "agenda", {
         definitionId: "onr_v1_201_executive-extraction",
@@ -2383,12 +2416,19 @@ describe("authoritative plan-first live runtime", () => {
       server("archives"),
       server("remote_1"),
     ];
+    input.playerView.opponent.rig = [
+      visibleCard("runner-blink", "runner", "program", {
+        definitionId: "onr_v1_007_blink",
+        strength: 5,
+        subtypes: ["icebreaker", "random"],
+      }),
+    ];
     for (const action of input.legalActions) {
       action.expiresAtStateVersion = input.playerView.stateVersion;
     }
     input.playerView.legalActions = input.legalActions;
 
-    liveContext().chooseSemanticRuntimeAction(input, {});
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     const overflow = residentPlanPortfolioSnapshot(input)?.instances.find(
       (instance) =>
         instance.moduleId === "corp.hand_and_agenda_management" &&
@@ -2404,6 +2444,102 @@ describe("authoritative plan-first live runtime", () => {
     expect(state?.signal?.actionIds).toEqual([installExisting.actionId]);
     expect(state?.signal?.actionIds).not.toContain(teamRestructuring.actionId);
     expect(state?.signal?.actionIds).not.toContain(installIceArchives.actionId);
+    expect(state?.signal?.actionIds).not.toContain(installIceRemote.actionId);
+    expect(decision).toMatchObject({
+      actionId: installIceRemote.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+    const defense = residentPlanPortfolioSnapshot(input)?.instances.find(
+      (instance) => instance.moduleId === "corp.defend_servers",
+    );
+    expect(JSON.stringify(defense)).toContain(installIceRemote.actionId);
+    expect(JSON.stringify(defense)).not.toContain(installIceArchives.actionId);
+  });
+
+  it("delegates an HQ-overflow ICE to global defense for server allocation", () => {
+    resetResidentPlanPortfolioMemory();
+    const installArchives = legalAction(
+      "install-data-wall-archives",
+      "corp",
+      "install_card",
+      "Install Data Wall in Archives",
+      { credits: 0, clicks: 1 },
+      {
+        source: "data-wall",
+        payload: {
+          cardId: "data-wall",
+          sourceDefinitionId: "onr_v1_237_data-wall",
+          serverId: "archives",
+          placement: "ice",
+        },
+      },
+    );
+    const installRemote = legalAction(
+      "install-data-wall-remote-1",
+      "corp",
+      "install_card",
+      "Install Data Wall on Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "data-wall",
+        payload: {
+          cardId: "data-wall",
+          sourceDefinitionId: "onr_v1_237_data-wall",
+          serverId: "remote_1",
+          placement: "ice",
+          iceInstallBaseCost: 0,
+          iceInstallAdditionalCost: 0,
+          iceInstallReduction: 0,
+          iceInstallTotalCost: 0,
+          postInstallRezQuoteCardId: "data-wall",
+          postInstallRezQuoteTargetServerId: "remote_1",
+          postInstallRezQuoteProjectedServerId: "remote_1",
+          postInstallRezQuoteExpiresAtStateVersion: 1,
+          postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
+          postInstallRezQuoteBaseCredits: 1,
+          postInstallRezQuoteFinalCredits: 1,
+          postInstallRezQuoteMandatoryAgendaPointCost: 0,
+        },
+      },
+    );
+    const input = aiInput("corp", [installArchives, installRemote]);
+    input.playerView.own.clicks = 1;
+    input.playerView.own.credits = 10;
+    input.playerView.own.gripOrHq = [
+      visibleCard("data-wall", "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        title: "Data Wall",
+        rezCost: 1,
+        strength: 0,
+        subtypes: ["wall"],
+      }),
+      ...corpOverflowFillers(5),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+    ];
+    input.playerView.opponent.rig = [
+      visibleCard("runner-blink", "runner", "program", {
+        definitionId: "onr_v1_007_blink",
+        strength: 5,
+        subtypes: ["icebreaker", "random"],
+      }),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installRemote.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
   });
 
   it("does not claim a blocked Corp upgrade placement as an executable hand-plan route", () => {
