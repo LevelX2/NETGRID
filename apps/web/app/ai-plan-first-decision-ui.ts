@@ -22,11 +22,11 @@ export function aiPlanFirstPriorityLabel(
     NonNullable<AiPlanFirstDecisionDebug["priority"]>["effectiveClass"],
     string
   > = {
-    P1: "P1 · Terminaler Sieg oder Verlustverhinderung",
-    P2: "P2 · Akute Bedrohung",
-    P3: "P3 · Auslaufende Konversion",
-    P4: "P4 · Strategischer Hauptplan",
-    P5: "P5 · Exakt gebundener Setup-/Supportbedarf",
+    P1: "P1 · Sieg sichern oder Niederlage abwenden",
+    P2: "P2 · Akute Gefahr abwehren",
+    P3: "P3 · Zeitkritische Chance nutzen",
+    P4: "P4 · Hauptplan voranbringen",
+    P5: "P5 · Gewählten Plan vorbereiten oder unterstützen",
     P6:
       priority.p6Contract === "temporary_bounded_liquidity_transition"
         ? "P6 · Eng befristeter Liquiditätsübergang"

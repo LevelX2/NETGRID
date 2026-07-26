@@ -27,7 +27,7 @@ describe("plan-first AI decision display", () => {
       strategicContext: { authority: "diagnostic_only" },
     });
     expect(aiPlanFirstPriorityLabel(decision?.priority)).toBe(
-      "P5 · Exakt gebundener Setup-/Supportbedarf",
+      "P5 · Gewählten Plan vorbereiten oder unterstützen",
     );
     expect(
       decision

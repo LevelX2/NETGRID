@@ -384,39 +384,46 @@ function AiDecisionDebugPlanFirstTraceView({
   const selectedPlan = decision.selectedPlan;
   const priorityLabel = aiPlanFirstPriorityLabel(decision.priority);
   const dispositionSummary = aiPlanFirstDispositionSummary(decision);
-  const title =
-    aiTraceTitle(trace);
-  const decisionRows: Array<[string, string]> = [
-    [
-      "Autorität",
-      decision.selectionAuthority === "resident_plan_instance"
-        ? "Persistente Planinstanz"
-        : "Engine-/Pflichtfenster",
-    ],
+  const nextActionRows: Array<[string, string]> = [
     ...(selectedPlan
       ? ([
-          [
-            "Planinstanz",
-            `${aiTracePlanLabel(selectedPlan.moduleId)} · ${selectedPlan.instanceId}`,
-          ],
+          ["Plan", aiTracePlanLabel(selectedPlan.moduleId)],
           ["Priorität", priorityLabel],
+        ] as Array<[string, string]>)
+      : []),
+    ...(decision.route?.stepId
+      ? ([
           [
-            "Aktueller Step",
-            `${decision.route?.stepId ?? "-"} · ${decision.route?.capabilityId ?? "-"}`,
-          ],
-          [
-            "Exakter Route Head",
-            decision.route
-              ? `${decision.route.semanticActionType} → ${decision.route.actionId}`
-              : "-",
+            "Aktueller Schritt",
+            aiDecisionDebugPlanStepLabel(decision.route.stepId),
           ],
         ] as Array<[string, string]>)
       : []),
-    ["Gewählte LegalAction", `${actionLabel} · ${trace.selectedActionId}`],
+  ];
+  const technicalDecisionRows: Array<[string, string]> = [
     [
-      "Root → Leaf",
-      `${decision.rootPlanInstanceId} → ${decision.leafExecutorInstanceId}`,
+      "Entscheidungsquelle",
+      decision.selectionAuthority === "resident_plan_instance"
+        ? "aus einer gespeicherten Planinstanz"
+        : "aus einem Engine-/Pflichtfenster",
     ],
+    ...(selectedPlan
+      ? ([
+          ["Plan-ID", selectedPlan.instanceId],
+          [
+            "Root → ausführender Plan",
+            `${decision.rootPlanInstanceId} → ${decision.leafExecutorInstanceId}`,
+          ],
+        ] as Array<[string, string]>)
+      : []),
+    ...(decision.route
+      ? ([
+          [
+            "Gebundene Route",
+            `${decision.route.semanticActionType} → ${decision.route.actionId}`,
+          ],
+        ] as Array<[string, string]>)
+      : []),
     ...(selectedPlan?.parentInstanceId
       ? ([["Parent", selectedPlan.parentInstanceId]] as Array<[string, string]>)
       : []),
@@ -430,10 +437,14 @@ function AiDecisionDebugPlanFirstTraceView({
           ],
         ] as Array<[string, string]>)
       : []),
-    [
-      "Engine-Quote",
-      aiPlanFirstQuoteStatusLabel(decision.engineQuoteEvidence.status),
-    ],
+    ...(decision.engineQuoteEvidence.status !== "not_reported"
+      ? ([
+          [
+            "Engine-Quote",
+            aiPlanFirstQuoteStatusLabel(decision.engineQuoteEvidence.status),
+          ],
+        ] as Array<[string, string]>)
+      : []),
   ];
   const unknownDispositions = decision.dispositions
     .filter((entry) => entry.disposition === "assessment_unknown")
@@ -459,8 +470,8 @@ function AiDecisionDebugPlanFirstTraceView({
   return (
     <div className="aiDecisionDebugContent">
       <AiDecisionDebugCollapsibleSection
-        title="Was macht die KI jetzt?"
-        summary={`Als Nächstes: ${actionLabel}`}
+        title="Nächste Aktion"
+        summary={actionLabel}
         defaultOpen
       >
         {mode === "preview" ? (
@@ -470,22 +481,7 @@ function AiDecisionDebugPlanFirstTraceView({
             Vorschau nicht fortgeschrieben.
           </p>
         ) : null}
-        <div className="aiDecisionDebugTraceHead">
-          <strong>{title}</strong>
-          <span>
-            {new Date(trace.createdAt).toLocaleTimeString("de-DE", {
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            })}
-          </span>
-        </div>
-        <p className="aiDecisionDebugNotice">
-          Diese vorbereitete LegalAction wird beim nächsten KI-Schritt
-          ausgeführt. Priorität und Plan erklären die Wahl, sie ersetzen die
-          Engine-Regeln nicht.
-        </p>
-        <AiDecisionDebugRows rows={decisionRows} />
+        <AiDecisionDebugRows rows={nextActionRows} />
         {decision.priority?.effectiveClass === "P6" ? (
           <p className="aiDecisionDebugNotice">
             P6 gilt ausschließlich für den ausgewiesenen engen, endlichen
@@ -603,6 +599,7 @@ function AiDecisionDebugPlanFirstTraceView({
       >
         <AiDecisionDebugRows
           rows={[
+            ...technicalDecisionRows,
             [
               "Quote-Status",
               aiPlanFirstQuoteStatusLabel(decision.engineQuoteEvidence.status),
@@ -2464,6 +2461,8 @@ function aiDecisionDebugPlanStepLabel(
       : "Breaker installieren",
     probe_central: "Zentralserver-Run prüfen",
     rez_outer_ice: "äußeres ICE rezzen",
+    resolve_headquarter_overflow: "Handkartenlimit erfüllen",
+    resolve_hq_overflow: "Handkartenlimit erfüllen",
     run_target: runTarget || "Run auf Zielserver prüfen",
     score_agenda: "Agenda punkten",
     search_for_answer: coverage
@@ -2474,7 +2473,11 @@ function aiDecisionDebugPlanStepLabel(
       : "Such-Engine installieren",
   };
   if (value === "probe_central" && runTarget) return runTarget;
-  return labels[value] ?? value;
+  return labels[value] ?? aiDecisionDebugReadableStepId(value);
+}
+
+function aiDecisionDebugReadableStepId(value: string): string {
+  return value.replace(/[._-]+/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function aiDecisionDebugDevelopmentCardVerb(
