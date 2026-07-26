@@ -1,6 +1,31 @@
 # AI First-Turn End-Turn Regression Process
 
-Status: active
+Status: completed
+
+## Abschlussstand
+
+Der Runtime-Nachlauf ist bis zum Integrationsstand `c64a14f8f` lokal nach
+`main` übernommen. Er umfasst insbesondere den wiederhergestellten harten
+EndTurn-Vertrag, Engine-zertifizierte statische und variable Rez-Quotes,
+parentgebundene Funding-Routen, residente Mehrzugpläne, getrennte
+Unknown-Evidence, ausschließliche ICE-Ownership von `corp.defend_servers`,
+HQ-Overflow-Gegenproben und die exakt gebundene
+Employee-Empowerment-Choice.
+
+Verifiziert wurden zuletzt:
+
+- vollständiger AI-Typecheck;
+- `4.152/4.152` AI-Tests;
+- fokussierte Integrationsläufe mit `376/376` Tests;
+- drei exakte Integrationsseeds ohne harte Fehler;
+- akzeptierte 60-Spiele-Baseline mit `13.309` Entscheidungen ohne harte
+  Fehler;
+- sauberer lokaler Main-Stand und laufende Server-/Web-Endpunkte.
+
+Das Playtest-Inkrement wurde bewusst vor der abschließenden
+Dokumentationspflege nach `main` integriert. Nach Commit und Integration
+dieses Abschlussstands werden der saubere Arbeitsworktree und der gemergte
+Arbeitsbranch entfernt; sie sind keine fortbestehenden Entwicklungsstränge.
 
 ## Quelle und Befund
 

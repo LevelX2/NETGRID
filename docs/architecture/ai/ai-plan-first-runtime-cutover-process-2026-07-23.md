@@ -1,11 +1,11 @@
 # KI-Plan-first-Runtime-Cutover – sequenzieller Umsetzungsprozess
 
-Status: **implementing**
+Status: **completed – historisches Ausführungsartefakt**
 Quelle/Vorgabe: Nutzerauftrag und
-`docs/architecture/ai/ai-plan-layer-target-state-wip.md` Version `0.7`
+`docs/architecture/ai/ai-plan-layer-target-state-wip.md` Version `0.9`
 Primärer Agent: `release-implementation-agent`
-Branch: `codex/ai-plan-first-runtime-cutover`
-Worktree: `C:\Projekte\NETGRID_AI_PLAN_FIRST_RUNTIME_CUTOVER`
+Historischer Branch: `codex/ai-plan-first-runtime-cutover`
+Historischer Worktree: `C:\Projekte\NETGRID_AI_PLAN_FIRST_RUNTIME_CUTOVER`
 
 Aktueller Paketstand:
 
@@ -25,8 +25,8 @@ Aktueller Paketstand:
 - PF13: abgeschlossen, Commit `790259a4a`
 - PF14: abgeschlossen, Commit `533eeefaf`
 - PF15: abgeschlossen, Commit `4b0c459f6`
-- PF16: Runtime-Cleanup, Vertragsarbeit, vollständige Gates und Final Review
-  abgeschlossen; PF16-Commit und Main-Integration ausstehend
+- PF16: abgeschlossen, Commit `ec18fcb8f`, lokal nach `main` integriert;
+  Worktree und Arbeitsbranch entfernt
 
 ## Zielprüfung
 
@@ -159,12 +159,15 @@ Diese Lane ist kein strategischer Fallback.
 Ein neutraler Grundplan ist eine echte Planinstanz und kein freier
 Actionsieger:
 
-- Basic Credit zur monotonen Liquiditätserhöhung;
+- Basic Credit für eine endliche fachliche Economy-Reserve, einen exakten
+  Parent-Fundingbedarf oder den ausdrücklich befristeten
+  P6-Sicherheitsübergang;
 - zwingender sichtbarer Hand-/Survivalbedarf;
 - zwingender Cleanup-/Overflow-Bedarf.
 
 Draw, Probe-Run, allgemeine Boardentwicklung und EndTurn sind keine neutralen
-Universalpläne.
+Universalpläne. P6 ist kein Zielzustand und kein Nachweis, dass Credit
+planlos produktiv wäre.
 
 ### D. Klassifizierter Fehler
 
@@ -1064,8 +1067,40 @@ benannt ist.
   Workspace-Typecheck, Contracts, Package-/Source-Struktur, Doctrine,
   Proteus sowie die finale Baseline mit 60 Spielen, 11.012 Entscheidungen
   und 0 harten Fehlern.
-- Final Review und Wissensabgleich sind abgeschlossen. Noch offen sind der
-  PF16-Commit, der Main-Abgleich und die lokale Abschlussintegration.
+- Final Review und Wissensabgleich wurden mit Commit `ec18fcb8f`
+  abgeschlossen. Main-Abgleich, lokale Integration und Cleanup des
+  damaligen PF16-Worktrees und -Branches sind ebenfalls abgeschlossen.
+
+### Post-Cutover-Regressionsnachweis vom 2026-07-26
+
+Der erste menschliche Playtest nach PF16 deckte mehrere zu enge aktuelle
+Route-Head-Verträge auf. Der bis `c64a14f8f` lokal nach `main` integrierte
+Nachlauf änderte nicht die Plan-first-Autorität, sondern härtete sie:
+
+- Mehrzugpläne dürfen resident, hypothesenbasiert und in späteren Schritten
+  offen bleiben. Exakt gebunden sein müssen nur der aktuelle LegalAction-Head,
+  dessen Kosten, Ziel, Choices und unmittelbar behauptete Wirkung.
+- `assessment_unknown` blockiert ausschließlich den unbewiesenen aktuellen
+  Pfad. Es löscht keinen Parent, senkt nicht dessen Priority Claim und beweist
+  weder `productive_routes_exhausted` noch EndTurn.
+- Standard-EndTurn ist bei verbleibender normaler Klickkapazität hart
+  gesperrt. Die vollständige Disposition anderer Actions hebt diese Sperre
+  nicht auf.
+- Alle ICE-Installationen gehören `corp.defend_servers`, auch bei
+  HQ-Overflow. Vollständig gequotete Post-Install-Funding-Gaps erzeugen einen
+  Economy-Child des exakten Defense-Parents.
+- Reguläre und Olivia-artige Discount-Rez-LegalActions derselben
+  ICE-Instanz bleiben getrennte, actiongebundene Routen; gedruckte `rezCost`
+  sind keine Ersatzquelle.
+- Der optionale Employee-Empowerment-Draw wird als exakt gebundene
+  Engine-Choice der bereits gewählten Action aufgelöst und erzeugt keinen
+  neuen Plan.
+
+Der Nachlauf ist mit vollständigem AI-Typecheck, `4.152/4.152` AI-Tests,
+fokussierten Integrationsläufen und einer akzeptierten 60-Spiele-Baseline mit
+`13.309` Entscheidungen ohne harte Fehler belegt. Der Prozessstand ist damit
+ein technisch freigegebenes, menschlich erneut zu prüfendes Playtest-
+Inkrement; technische Gates ersetzen keine Bewertung der Spielqualität.
 
 ### Finale Checks
 

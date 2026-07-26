@@ -1,7 +1,7 @@
 # KI-Planebene – modulares Zielkonzept
 
 Status: **Work in Progress**
-Dokumentversion: `0.8`
+Dokumentversion: `0.9`
 Stand: 2026-07-26
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
@@ -98,13 +98,13 @@ erfüllbar wäre:**
 
 ### 2.2 Abgleich mit dem abgeschlossenen Runtime-Cutover
 
-Version 0.8 ist der aktuelle fachliche Zielvertrag. PF00 bis PF16 sind
+Version 0.9 ist der aktuelle fachliche Zielvertrag. PF00 bis PF16 sind
 committed; PF15 wurde mit Commit `4b0c459f6` und vollständig grünem Done-Gate
 abgeschlossen. PF16 wurde mit Commit `ec18fcb8f` abgeschlossen, lokal nach
 `main` integriert und der frühere Worktree
 `C:\Projekte\NETGRID_AI_PLAN_FIRST_RUNTIME_CUTOVER` samt Arbeitsbranch
-entfernt. Der aktuelle Regression-Worktree baut auf diesem integrierten Stand
-auf.
+entfernt. Die nachfolgende First-Turn-/EndTurn-Regressionshärtung wurde bis
+zum Integrationsstand `c64a14f8f` ebenfalls lokal nach `main` übernommen.
 
 Für PF15 und PF16 erreicht und vollständig verifiziert sind insbesondere die
 folgenden Punkte:
@@ -195,9 +195,52 @@ bleiben nur als isolierte Test-/Evaluationsdiagnostik erhalten und werden
 durch Authority-/Module-Boundarytests vom produktiven Graphen ausgeschlossen.
 
 PF16-Implementierung, Final Review, Dokumentations-/Statusabgleich, Commit,
-Main-Integration und Cleanup sind abgeschlossen. Der aktuelle
-Regression-Prozess wird getrennt im
-`ai-first-turn-end-turn-regression-process-2026-07-26.md` fortgeschrieben.
+Main-Integration und Cleanup sind abgeschlossen. Der anschließende
+Regressionsprozess ist im historischen Ausführungsartefakt
+`ai-first-turn-end-turn-regression-process-2026-07-26.md` dokumentiert.
+
+### 2.3 Post-Cutover-Regressionshärtung vom 26.07.2026
+
+Der menschliche Playtest nach dem Cutover belegte keinen Bedarf an einer
+neuen Action-over-Plan-Schicht, sondern mehrere zu enge beziehungsweise
+falsch gebundene aktuelle Route-Head-Verträge. Der bis `c64a14f8f` nach
+`main` integrierte Nachlauf präzisiert deshalb:
+
+- Eine residente Planinstanz darf mehrzügig, hypothesenbasiert und in späteren
+  Schritten offen sein. Vollständig exakt sein müssen nur der aktuelle Route
+  Head, seine Legalität, Kosten, Ziele, Choices und seine unmittelbar
+  behauptete Wirkung. Ein unbekannter aktueller Head löscht oder entwertet
+  den Parent nicht.
+- `productive`, `explicitly_nonproductive` und `assessment_unknown`
+  klassifizieren ausschließlich aktuelle Actionpfade. Unknown blockiert den
+  eigenen unbewiesenen Pfad, aber weder eine fremde exakt materialisierte
+  Route noch die fortbestehende Planinstanz. Es beweist insbesondere niemals
+  Routenausschöpfung oder EndTurn.
+- Ein Standard-EndTurn bleibt bei normaler verbleibender Klickkapazität hart
+  gesperrt. Die vollständige Disposition anderer Actions kann diese Sperre
+  nicht aufheben.
+- Jede ICE-Installation bleibt Eigentum von `corp.defend_servers`, auch wenn
+  Handüberlauf vorliegt. Handmanagement darf eine ICE-Server-Auswahl nicht als
+  eigene Overflow-Konversion beanspruchen.
+- Fehlende aktuelle Rez-Finanzierung macht eine ICE-Installation nicht
+  automatisch unproduktiv. Ein vollständiger Engine-Quote mit
+  Post-Install-Funding-Gap erzeugt Economy-Support des exakten
+  Defense-Parents; dessen Priority-Band bleibt für die Parent-first-Auswahl
+  maßgeblich.
+- Mehrere aktuelle Engine-Rezvarianten für dasselbe ICE, etwa reguläres
+  Rezzen und eine Olivia-artige Discount-Action, bleiben getrennte exakte
+  Routen. Sie dürfen weder über die Karteninstanz zusammengeführt noch aus
+  gedruckten `rezCost` rekonstruiert werden.
+- Engine-Choices hinter einer bereits gewählten Action sind keine neuen
+  strategischen Pläne. Der Employee-Empowerment-Resolver bindet Agendaquelle,
+  StateVersion, `resolve_choice`-Action und `draw`/`skip` vollständig; er
+  zieht bei mindestens zwei sichtbaren R&D-Karten und überspringt sonst.
+
+Der integrierte Nachlauf ist mit vollständigem AI-Typecheck, `4.152/4.152`
+AI-Tests, fokussierten Integrationsläufen und einer akzeptierten
+60-Spiele-Baseline mit `13.309` Entscheidungen ohne harte Fehler belegt.
+Diese technische Evidence ersetzt nicht den menschlichen Playtest; sie macht
+den integrierten Stand wieder zu einem bewusst prüfbaren Inkrement.
 
 ## 3. Ausgangsproblem
 
@@ -1865,20 +1908,21 @@ fachlichen Karten- oder Domainplan ausgeführt werden. Der Scheduler darf
 mehrere gleich benannte EndTurn-Aktionen insbesondere nicht als
 „automatisches Fenster“ zusammenfassen und die erste auswählen.
 
-`*.complete_turn` ist nur bereit, wenn es die verbleibende Kapazität
-vollständig strukturell klassifiziert und einer der folgenden Fälle belegt
-ist:
+`*.complete_turn` ist für den Standard-Zugabschluss nur bereit, wenn keine
+normale Klickkapazität mehr verbleibt. Ein verbleibender normaler Klick sperrt
+Standard-EndTurn hart; weder `explicitly_nonproductive` noch
+`assessment_unknown` noch die vollständige Disposition aller übrigen
+LegalActions darf diese Kapazität als verbraucht umdeuten.
 
-- keine produktive planfähige LegalAction-Route mehr besteht; oder
-- ausschließlich eingeschränkte Zusatzkapazität für Runs verbleibt und die
-  Runanalyse kein erreichbares, positives und sicher zulässiges Ziel findet.
-
-Ein sicher nutzbarer Bonus-Run bleibt produktiv und muss über den gebundenen
-Runplan ausgeführt werden. Ein blockierter, bekanntermaßen wertloser oder
-unter dem erforderlichen Handpuffer liegender Bonus-Run darf dagegen bewusst
-verfallen. Bei Sicherheitsgefahr liefert `runner.defense_and_recovery` den
-P2-Grund; bei bloß fehlendem Nutzen übernimmt `runner.complete_turn` P6.
-Der regelbewiesene Corp-Deckout-Zugabschluss bleibt ein eigener terminaler
+Nur wenn ausschließlich eingeschränkte, null Klick kostende
+Runner-Run-Kapazität verbleibt, darf der eng typisierte
+`forgo_restricted_capacity`-Pfad deren Verfallen belegen. Ein sicher nutzbarer
+Bonus-Run bleibt produktiv und muss über den gebundenen Runplan ausgeführt
+werden. Ein blockierter, bekannt wertloser oder unter dem erforderlichen
+Handpuffer liegender Bonus-Run darf dagegen bewusst verfallen. Bei
+Sicherheitsgefahr liefert `runner.defense_and_recovery` den P2-Grund; bei
+bloß fehlendem Nutzen übernimmt `runner.complete_turn` P6. Der
+regelbewiesene Corp-Deckout-Zugabschluss bleibt ein eigener terminaler
 P1-Plan und ist kein allgemeiner EndTurn-Sonderwert.
 
 Wenn der normative Regelvertrag bestätigt, dass ein Zug nicht freiwillig
@@ -2722,6 +2766,10 @@ Teil eines eigenen weiterhin echten Defense-Steps sind, werden vom globalen
 `corp.defend_servers`-Modul mit ihrem konkreten Allokationsgrund
 dispositioniert. Weder „ICE-Installation“ als Actionfamilie noch eine
 allgemeine Defense-Rolle deckt diese Geschwistervarianten ab.
+Auch ein HQ-Overflow macht Handmanagement nicht zum ICE-Owner:
+`corp.hand_and_agenda_management` darf ICE weder als Discard-Konversion
+installieren noch die Serverwahl treffen. Es meldet nur den Overflow-Bedarf;
+jede ICE-Installation bleibt eine Route von `corp.defend_servers`.
 
 Ziehen nach ICE ist damit kein allgemeiner Handkarten-Fallback. Der Plan
 unterscheidet mindestens drei Zustände: eine ausführbare produktive
@@ -2812,6 +2860,15 @@ StateVersion und Action gebunden, bleibt der betroffene Defense-Step
 diagnostisch blockiert und schlägt fail-closed fehl. Die Lücke wird in Engine,
 Planmodul oder Kartenwissen geschlossen, nicht durch einen Ersatzwert,
 Targeted Draw, Basic Credit oder Action-Fallback kaschiert.
+
+Liefert die Engine für dieselbe ICE-Instanz mehrere aktuelle LegalActions,
+etwa reguläres Rezzen und eine Olivia-artige Discount-Variante, bleiben diese
+Actions getrennte Route Heads. Jedes Receipt bindet mindestens Quelle,
+Server, StateVersion, Basiskosten, tatsächlich bezahlten Betrag,
+Reduktions-/Aufschlagsquellen und gegebenenfalls das temporäre Derez. Eine
+gemeinsame Karteninstanz ist kein Grund, Action-Identitäten oder Quotes
+zusammenzuführen. Ein unvollständiges Receipt bleibt
+`assessment_unknown`.
 
 Verantwortung:
 
@@ -3213,6 +3270,13 @@ gewählte Action und darf nur deren Payload vervollständigen. Ein Test muss
 beweisen, dass seine Ausgabe weder `actionId` noch Planinstanz oder Step
 verändern kann.
 
+Der optionale Employee-Empowerment-Start-of-turn-Draw ist ein belegter
+Referenzfall: Der Resolver bindet exakte Agendaquelle, StateVersion,
+`resolve_choice`-Action und ausschließlich die Engine-Optionen `draw` und
+`skip`. Bei mindestens zwei sichtbaren Karten in R&D wählt er `draw`, sonst
+`skip`. Fehlende oder veraltete Bindung scheitert fail-closed und erzeugt
+weder einen neuen Plan noch eine andere Action-ID.
+
 ## 31. Planinterne Weiterentwicklung
 
 ### 31.1 Zulässige Verfeinerung
@@ -3584,7 +3648,9 @@ Vor `EndTurn` prüft der Scheduler:
 - sichere und positiv bewertete Ziele eingeschränkter Zusatzkapazität;
 - die Identität der konkreten EndTurn-Action.
 
-Nur wenn der EndTurn-Vertrag erfüllt ist, materialisiert
+Verbleibt normale Klickkapazität, ist Standard-EndTurn unabhängig von der
+Disposition aller anderen Actions gesperrt. Nur wenn der EndTurn-Vertrag
+erfüllt ist, materialisiert
 `*.complete_turn` die Standardaction `sourceKind = game_rule`. Eine
 kartengebundene Action mit demselben LegalAction-Typ wird dadurch niemals
 automatisch ausgewählt.
@@ -4158,6 +4224,13 @@ Jedes Modul testet:
 - ein belegter R&D-Fokus kann ohne höherrangige HQ-Evidence einen bewussten
   HQ-Hold erzeugen, aber niemals die Installation eines wirkungslosen
   R&D-ICE;
+- HQ-Overflow delegiert jede ICE-Installation an `corp.defend_servers` und
+  erzeugt keine konkurrierende Handmanagement-Ownership;
+- reguläre und discountierte Engine-Rezactions derselben ICE-Instanz bleiben
+  getrennte, actiongebundene Routen;
+- ein vollständig gequoteter Funding-Gap erhält den exakten Defense-Parent
+  und dessen Priority-Band; ein fremder niedriger priorisierter Scoreplan
+  darf ihn nicht verdrängen;
 - Rezreserve bleibt ausschließlich ein endlicher quotierter Need von
   `corp.defend_servers`; Score-/Remote-Parents delegieren nur Ursprung und
   Prioritätsklasse;
@@ -4492,6 +4565,22 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 0.9 – 2026-07-26
+
+- Post-Cutover-Regressionshärtung bis zum lokalen Main-Integrationsstand
+  `c64a14f8f` aufgenommen.
+- Die Certainty-Grenze als ausführbaren Mehrzugplan mit exakt gebundenem
+  aktuellem Route Head bestätigt; Unknown klassifiziert keinen gesamten
+  Parent und beweist keine Routenausschöpfung.
+- Standard-EndTurn bei verbleibender normaler Klickkapazität hart gesperrt;
+  ausschließlich eingeschränkte null Klick kostende Runner-Kapazität und der
+  terminale Deckoutpfad bleiben enge Sonderverträge.
+- ICE-Ownership bei HQ-Overflow, actiongetrennte reguläre/discountierte
+  Rez-Quotes, parentgebundenes Defense-Funding und den
+  Employee-Empowerment-Choice-Vertrag ergänzt.
+- Aktuelle Verifikation mit `4.152/4.152` AI-Tests und akzeptierter
+  60-Spiele-Baseline über `13.309` Entscheidungen dokumentiert.
 
 ### 0.8 – 2026-07-26
 
