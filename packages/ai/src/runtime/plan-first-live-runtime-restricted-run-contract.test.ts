@@ -6,6 +6,7 @@ import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
   aiInput,
   legalAction,
@@ -89,7 +90,7 @@ describe("plan-first Engine-restricted run contract", () => {
     });
   });
 
-  it("still rejects an ordinary Remote run with no current payoff", () => {
+  it("preserves the hard EndTurn contract when the only ordinary Remote run has no current payoff", () => {
     resetResidentPlanPortfolioMemory();
     const runRemote = legalAction(
       "runner.start_run.remote_1",
@@ -124,27 +125,27 @@ describe("plan-first Engine-restricted run contract", () => {
       score: -420,
     };
 
-    const decision = liveContext({
-      evaluateRunnerRunTargets: () => [noPayoffRemote],
-    }).chooseSemanticRuntimeAction(input, {});
+    let failure: unknown;
+    try {
+      liveContext({
+        evaluateRunnerRunTargets: () => [noPayoffRemote],
+      }).chooseSemanticRuntimeAction(input, {});
+    } catch (error) {
+      failure = error;
+    }
 
-    expect(decision).toMatchObject({
-      actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
-      fallbackUsed: false,
+    expect(failure).toBeInstanceOf(PlanResolutionFailure);
+    expect(failure).toMatchObject({
+      code: "end_turn_with_usable_capacity",
+      context: {
+        side: "runner",
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: ["end_turn", "start_run"],
+        unresolvedActionIds: [runRemote.actionId],
+        owner: "rules_contract",
+      },
     });
-    const runAlternative = decision.decisionDebug?.actionAlternatives?.find(
-      (alternative) => alternative.actionId === runRemote.actionId,
-    );
-    expect(runAlternative?.selected).toBe(false);
-    expect(runAlternative?.whyNot).toEqual(
-      expect.arrayContaining([
-        "not_selected_by_plan:plan:runner.complete_turn:standard-turn-completion",
-      ]),
-    );
-    expect(decision.evidence).toContain(
-      "plan_assessment_evidence:runner_remote_run_known_no_current_payoff:remote_1:do_not_run_now",
-    );
   });
 });
 

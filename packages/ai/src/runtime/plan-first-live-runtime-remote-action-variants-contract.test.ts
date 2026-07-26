@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import {
   aiInput,
@@ -113,7 +114,7 @@ describe("plan-first Remote same-server action variants", () => {
     });
   });
 
-  it("does not turn a same-server variant assessed as nonproductive into an executable route", () => {
+  it("does not promote a low-value variant or bypass the hard EndTurn contract", () => {
     resetResidentPlanPortfolioMemory();
     const rejectedRun = legalAction(
       "run-empty-remote",
@@ -141,30 +142,29 @@ describe("plan-first Remote same-server action variants", () => {
       server("remote_1"),
     ];
 
-    const decision = liveContext({
-      evaluateRunnerRunTargets: () => [
-        remoteTarget(rejectedRun.actionId, -120, "do_not_run_now"),
-      ],
-    }).chooseSemanticRuntimeAction(input, {});
-    expect(decision).toMatchObject({
-      actionId: endTurn.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
-      fallbackUsed: false,
-      decisionDebug: { planKind: "runner.complete_turn" },
+    let failure: unknown;
+    try {
+      liveContext({
+        evaluateRunnerRunTargets: () => [
+          remoteTarget(rejectedRun.actionId, -120, "do_not_run_now"),
+        ],
+      }).chooseSemanticRuntimeAction(input, {});
+    } catch (error) {
+      failure = error;
+    }
+
+    expect(failure).toBeInstanceOf(PlanResolutionFailure);
+    expect(failure).toMatchObject({
+      code: "end_turn_with_usable_capacity",
+      context: {
+        side: "runner",
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: ["end_turn", "start_run"],
+        unresolvedActionIds: [rejectedRun.actionId],
+        owner: "rules_contract",
+      },
     });
-    const rejectedAlternative =
-      decision.decisionDebug?.actionAlternatives?.find(
-        (alternative) => alternative.actionId === rejectedRun.actionId,
-      );
-    expect(rejectedAlternative?.selected).toBe(false);
-    expect(rejectedAlternative?.whyNot).toEqual(
-      expect.arrayContaining([
-        "not_selected_by_plan:plan:runner.complete_turn:standard-turn-completion",
-      ]),
-    );
-    expect(decision.evidence).toContain(
-      "plan_assessment_evidence:runner_remote_run_below_material_value:remote_1:-120:do_not_run_now",
-    );
   });
 });
 
