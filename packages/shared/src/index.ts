@@ -2391,6 +2391,43 @@ export type VisibleCorpScoreContinuationQuote =
       terminalScore: boolean;
     };
 
+/**
+ * Corp-private, Engine-certified capability evidence for a card that can bank
+ * its own advancement counters, cash them out, and later move them to one
+ * installed advanceable card. This quote describes no future LegalAction;
+ * callers must still observe and select the current Engine action.
+ */
+export const CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION =
+  "corp-counter-bank-preparation-quote-v1" as const;
+
+export type VisibleCorpCounterBankPreparationQuote = {
+  schemaVersion: typeof CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION;
+  context: "corp_counter_bank_preparation";
+  sourceCardId: CardInstanceId;
+  expiresAtStateVersion: number;
+  location:
+    | { kind: "corp_hq" }
+    | {
+        kind: "installed_root";
+        serverId: Exclude<ServerId, "new_remote">;
+      };
+  advancementCounters: number;
+  advanceableBeforeRez: true;
+  activatedAbilitiesRequireRez: true;
+  cashout: {
+    advancementCounterCost: 1;
+    creditGain: 1;
+    actionCost: 0;
+  };
+  transfer: {
+    actionCost: 1;
+    minimumSourceCounters: 1;
+    source: "source_card";
+    target: "chosen_installed_advanceable_card";
+    maximum: "all";
+  };
+};
+
 export type VisibleCardLifecycleMarker = {
   kind: "temporary_return_to_grip";
   label: string;
@@ -2696,6 +2733,8 @@ export type VisibleCard = {
   effectiveRezResourceExchangeQuote?: VisibleCorpIceRezResourceExchangeQuote;
   /** Present only for the Corp's installed agendas. */
   scoreContinuationQuote?: VisibleCorpScoreContinuationQuote;
+  /** Present only in the Corp's own HQ or on an own installed root card. */
+  counterBankPreparationQuote?: VisibleCorpCounterBankPreparationQuote;
 };
 
 export type PlayerView = {

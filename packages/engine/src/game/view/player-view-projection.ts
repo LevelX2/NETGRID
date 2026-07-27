@@ -38,6 +38,7 @@ import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-e
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
 import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continuation-quote";
+import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-bank-preparation-quote";
 
 export function buildPlayerViewProjection(
   state: GameState,
@@ -83,10 +84,17 @@ export function buildPlayerViewProjection(
                 side === "corp" && visibleRoot.type === "agenda"
                   ? visibleCorpScoreContinuationQuote(state, id, server.id)
                   : undefined;
+              const counterBankPreparationQuote =
+                side === "corp"
+                  ? visibleCorpCounterBankPreparationQuote(state, id)
+                  : undefined;
               return {
                 ...visibleRoot,
                 ...(continuationQuote
                   ? { scoreContinuationQuote: continuationQuote }
+                  : {}),
+                ...(counterBankPreparationQuote
+                  ? { counterBankPreparationQuote }
                   : {}),
               };
             }),
@@ -197,7 +205,17 @@ export function buildPlayerViewProjection(
           credits: state.corp.credits,
           clicks: state.corp.clicks,
           agendaPoints: agendaPoints(state, "corp"),
-          gripOrHq: state.corp.hq.map((id) => visibleOwnCard(state, id)),
+          gripOrHq: state.corp.hq.map((id) => {
+            const visibleCard = visibleOwnCard(state, id);
+            const counterBankPreparationQuote =
+              visibleCorpCounterBankPreparationQuote(state, id);
+            return {
+              ...visibleCard,
+              ...(counterBankPreparationQuote
+                ? { counterBankPreparationQuote }
+                : {}),
+            };
+          }),
           stackOrRdCount: state.corp.rd.length,
           heapOrArchives: state.corp.archives.map((id) =>
             visibleOwnCard(state, id),

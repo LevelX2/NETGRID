@@ -8,6 +8,79 @@ import type {
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO score-conversion contract", () => {
+  it("preserves only a current Corp-bound counter-bank preparation quote", () => {
+    const action = conversionAction();
+    const view = playerView(action);
+    view.own.gripOrHq = [
+      {
+        instanceId: "vapor",
+        definitionId: "onr_v1_347_vapor-ops",
+        title: "Vapor Ops",
+        owner: "corp",
+        controller: "corp",
+        type: "asset",
+        known: true,
+        counterBankPreparationQuote: {
+          schemaVersion: "corp-counter-bank-preparation-quote-v1",
+          context: "corp_counter_bank_preparation",
+          sourceCardId: "vapor",
+          expiresAtStateVersion: 1,
+          location: { kind: "corp_hq" },
+          advancementCounters: 2,
+          advanceableBeforeRez: true,
+          activatedAbilitiesRequireRez: true,
+          cashout: {
+            advancementCounterCost: 1,
+            creditGain: 1,
+            actionCost: 0,
+          },
+          transfer: {
+            actionCost: 1,
+            minimumSourceCounters: 1,
+            source: "source_card",
+            target: "chosen_installed_advanceable_card",
+            maximum: "all",
+          },
+        },
+      },
+    ];
+
+    const corpInput = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "counter-bank-dto",
+      decisionId: "counter-bank-dto:corp:1",
+      actionNumber: 1,
+      profileId: "counter-bank-dto-test",
+    });
+    expect(
+      corpInput.playerView.own.gripOrHq[0]?.counterBankPreparationQuote,
+    ).toMatchObject({
+      sourceCardId: "vapor",
+      location: { kind: "corp_hq" },
+      advancementCounters: 2,
+    });
+
+    view.side = "runner";
+    const runnerInput = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [],
+      difficulty: "normal",
+      seed: "counter-bank-dto-runner",
+      decisionId: "counter-bank-dto:runner:1",
+      actionNumber: 1,
+      profileId: "counter-bank-dto-test",
+    });
+    expect(runnerInput.playerView.own.gripOrHq[0]).not.toHaveProperty(
+      "counterBankPreparationQuote",
+    );
+  });
+
   it("preserves explicit play costs only for known cards", () => {
     const action = conversionAction();
     const view = playerView(action);

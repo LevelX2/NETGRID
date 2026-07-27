@@ -13,6 +13,7 @@ import {
   moveCorpCardToArchives,
   moveCorpCardToHq,
   moveRunnerCardToGrip,
+  originalsetReorderCounterRunlockGame,
   putCorpIceOnServer,
   putCorpRootInRemote,
   removeEverywhere,
@@ -24,6 +25,53 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 import { overadvanceViewFields } from "./card-view";
 
 describe("PlayerView projection", () => {
+  it("projects Vapor Ops counter-bank evidence only to the Corp", () => {
+    const state = originalsetReorderCounterRunlockGame(
+      "vapor-counter-bank-projection",
+    );
+    const vaporId = moveCorpCardToHq(state, "onr_v1_347_vapor-ops");
+
+    const hqVapor = getPlayerView(state, "corp").own.gripOrHq.find(
+      (card) => card.instanceId === vaporId,
+    );
+    expect(hqVapor?.counterBankPreparationQuote).toEqual({
+      schemaVersion: "corp-counter-bank-preparation-quote-v1",
+      context: "corp_counter_bank_preparation",
+      sourceCardId: vaporId,
+      expiresAtStateVersion: state.stateVersion,
+      location: { kind: "corp_hq" },
+      advancementCounters: 0,
+      advanceableBeforeRez: true,
+      activatedAbilitiesRequireRez: true,
+      cashout: {
+        advancementCounterCost: 1,
+        creditGain: 1,
+        actionCost: 0,
+      },
+      transfer: {
+        actionCost: 1,
+        minimumSourceCounters: 1,
+        source: "source_card",
+        target: "chosen_installed_advanceable_card",
+        maximum: "all",
+      },
+    });
+
+    putCorpRootInRemote(state, "onr_v1_347_vapor-ops");
+    state.cardInstances[vaporId]!.advancementCounters = 3;
+    const rootVapor = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "remote_1")
+      ?.root.find((card) => card.instanceId === vaporId);
+    expect(rootVapor?.counterBankPreparationQuote).toMatchObject({
+      sourceCardId: vaporId,
+      location: { kind: "installed_root", serverId: "remote_1" },
+      advancementCounters: 3,
+    });
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "counterBankPreparationQuote",
+    );
+  });
+
   it("certifies next-turn agenda cash after using surplus unrestricted Corp clicks", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "corp-score-continuation-quote" }),

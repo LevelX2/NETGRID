@@ -1,6 +1,7 @@
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
+  CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
@@ -23,6 +24,7 @@ import {
   type TraceSuccessEffect,
   type VisibleCard,
   type VisibleChoiceRequest,
+  type VisibleCorpCounterBankPreparationQuote,
   type VisibleCorpIceRezResourceExchangeQuote,
   type VisibleCorpRezCostQuote,
   type VisibleCorpScoreContinuationQuote,
@@ -528,7 +530,17 @@ function sanitizePlayerView(
       credits: view.own.credits,
       clicks: view.own.clicks,
       agendaPoints: view.own.agendaPoints,
-      gripOrHq: view.own.gripOrHq.map(sanitizeVisibleCard),
+      gripOrHq: view.own.gripOrHq.map((card) =>
+        sanitizeVisibleCardWithOptions(card, {
+          allowCorpCounterBankPreparationQuote:
+            view.side === "corp" &&
+            card.known &&
+            card.owner === "corp" &&
+            card.controller === "corp",
+          expectedCorpCounterBankLocation: "corp_hq",
+          expectedCorpCounterBankStateVersion: view.stateVersion,
+        }),
+      ),
       stackOrRdCount: view.own.stackOrRdCount,
       heapOrArchives: view.own.heapOrArchives.map(sanitizeVisibleCard),
       scoreArea: view.own.scoreArea.map(sanitizeVisibleCard),
@@ -588,6 +600,14 @@ function sanitizePlayerView(
             card.type === "agenda",
           expectedCorpScoreServerId: server.id,
           expectedCorpScoreStateVersion: view.stateVersion,
+          allowCorpCounterBankPreparationQuote:
+            view.side === "corp" &&
+            card.known &&
+            card.owner === "corp" &&
+            card.controller === "corp",
+          expectedCorpCounterBankLocation: "installed_root",
+          expectedCorpCounterBankServerId: server.id,
+          expectedCorpCounterBankStateVersion: view.stateVersion,
         }),
       ),
       ...(server.counterDisplays
@@ -1311,12 +1331,17 @@ function sanitizeVisibleCardWithOptions(
     allowCorpScoreContinuationQuote?: boolean;
     expectedCorpScoreServerId?: PlayerView["servers"][number]["id"];
     expectedCorpScoreStateVersion?: number;
+    allowCorpCounterBankPreparationQuote?: boolean;
+    expectedCorpCounterBankLocation?: "corp_hq" | "installed_root";
+    expectedCorpCounterBankServerId?: PlayerView["servers"][number]["id"];
+    expectedCorpCounterBankStateVersion?: number;
   } = {},
 ): VisibleCard {
   const effectiveRezCostQuote = card.effectiveRezCostQuote;
   const effectiveRezResourceExchangeQuote =
     card.effectiveRezResourceExchangeQuote;
   const scoreContinuationQuote = card.scoreContinuationQuote;
+  const counterBankPreparationQuote = card.counterBankPreparationQuote;
   const includeEffectiveRezCostQuote =
     options.allowCorpRezCostQuote === true &&
     effectiveRezCostQuote?.context === "installed" &&
@@ -1343,6 +1368,24 @@ function sanitizeVisibleCardWithOptions(
     scoreContinuationQuote.serverId === options.expectedCorpScoreServerId &&
     scoreContinuationQuote.expiresAtStateVersion ===
       options.expectedCorpScoreStateVersion;
+  const counterBankLocationMatches =
+    counterBankPreparationQuote !== undefined &&
+    counterBankPreparationQuote.location.kind ===
+      options.expectedCorpCounterBankLocation &&
+    (counterBankPreparationQuote.location.kind !== "installed_root" ||
+      counterBankPreparationQuote.location.serverId ===
+        options.expectedCorpCounterBankServerId);
+  const includeCounterBankPreparationQuote =
+    options.allowCorpCounterBankPreparationQuote === true &&
+    counterBankPreparationQuote?.context === "corp_counter_bank_preparation" &&
+    counterBankPreparationQuote.sourceCardId === card.instanceId &&
+    counterBankPreparationQuote.expiresAtStateVersion ===
+      options.expectedCorpCounterBankStateVersion &&
+    counterBankLocationMatches;
+  const sanitizedCounterBankPreparationQuote =
+    includeCounterBankPreparationQuote && counterBankPreparationQuote
+      ? sanitizeCorpCounterBankPreparationQuote(counterBankPreparationQuote)
+      : undefined;
   return {
     instanceId: card.instanceId,
     known: card.known,
@@ -1426,6 +1469,64 @@ function sanitizeVisibleCardWithOptions(
           ),
         }
       : {}),
+    ...(sanitizedCounterBankPreparationQuote
+      ? {
+          counterBankPreparationQuote: sanitizedCounterBankPreparationQuote,
+        }
+      : {}),
+  };
+}
+
+function sanitizeCorpCounterBankPreparationQuote(
+  quote: VisibleCorpCounterBankPreparationQuote,
+): VisibleCorpCounterBankPreparationQuote | undefined {
+  const location = quote.location;
+  if (
+    quote.schemaVersion !==
+      CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION ||
+    quote.context !== "corp_counter_bank_preparation" ||
+    !nonblank(quote.sourceCardId) ||
+    !isNonNegativeSafeInteger(quote.expiresAtStateVersion) ||
+    !isNonNegativeSafeInteger(quote.advancementCounters) ||
+    quote.advanceableBeforeRez !== true ||
+    quote.activatedAbilitiesRequireRez !== true ||
+    quote.cashout.advancementCounterCost !== 1 ||
+    quote.cashout.creditGain !== 1 ||
+    quote.cashout.actionCost !== 0 ||
+    quote.transfer.actionCost !== 1 ||
+    quote.transfer.minimumSourceCounters !== 1 ||
+    quote.transfer.source !== "source_card" ||
+    quote.transfer.target !== "chosen_installed_advanceable_card" ||
+    quote.transfer.maximum !== "all" ||
+    (location.kind !== "corp_hq" &&
+      (location.kind !== "installed_root" || !nonblank(location.serverId)))
+  ) {
+    return undefined;
+  }
+  return {
+    schemaVersion: CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
+    context: "corp_counter_bank_preparation",
+    sourceCardId: quote.sourceCardId,
+    expiresAtStateVersion: quote.expiresAtStateVersion,
+    location:
+      location.kind === "corp_hq"
+        ? { kind: "corp_hq" }
+        : { kind: "installed_root", serverId: location.serverId },
+    advancementCounters: quote.advancementCounters,
+    advanceableBeforeRez: true,
+    activatedAbilitiesRequireRez: true,
+    cashout: {
+      advancementCounterCost: 1,
+      creditGain: 1,
+      actionCost: 0,
+    },
+    transfer: {
+      actionCost: 1,
+      minimumSourceCounters: 1,
+      source: "source_card",
+      target: "chosen_installed_advanceable_card",
+      maximum: "all",
+    },
   };
 }
 
