@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-4e-hidden-trash-sabotage-cost-penalty
-status: blocked
+status: done
 kind: implementation
 area: cards
 priority: normal
@@ -8,7 +8,7 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-27
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 4e
 proReferences:

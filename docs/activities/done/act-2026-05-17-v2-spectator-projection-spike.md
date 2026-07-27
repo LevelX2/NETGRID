@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-v2-spectator-projection-spike
-status: in-progress
+status: done
 kind: architecture
 area: shared
 priority: normal
@@ -8,7 +8,7 @@ primaryAgent: architecture-review-agent
 requiresImplementation: false
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-07-20
 branch: codex/activity-worker-3
 releaseTarget: V2.4
 blockedBy: []
@@ -57,4 +57,10 @@ Für V2.4 soll vorab geklärt werden, wie eine eigene Zuschauerprojektion ausseh
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen als historische Architekturvorbereitung: Der aktuelle Prozess,
+Implementation Review und Final Review liegen unter
+`docs/architecture/public-match-spectator-replay-process-2026-07-20.md`,
+`docs/reviews/architecture/public-match-spectator-replay-implementation-review-2026-07-20.md`
+und `docs/reviews/public-match-spectator-replay-final-review-2026-07-20.md`.
+Der Final Review ist freigabefähig und bestätigt die getrennte,
+hidden-info-sichere Zuschauerprojektion samt Reconnect- und Replay-Grenzen.

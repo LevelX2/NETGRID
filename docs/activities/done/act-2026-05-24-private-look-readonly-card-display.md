@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-private-look-readonly-card-display
-status: in_progress
+status: done
 kind: fix
 area: web
 priority: high

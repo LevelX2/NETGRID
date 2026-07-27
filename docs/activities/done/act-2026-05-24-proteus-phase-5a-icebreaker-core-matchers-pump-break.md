@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-5a-icebreaker-core-matchers-pump-break
-status: blocked
+status: done
 kind: implementation
 area: cards
 priority: normal
@@ -8,7 +8,7 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-27
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 5a
 proReferences:

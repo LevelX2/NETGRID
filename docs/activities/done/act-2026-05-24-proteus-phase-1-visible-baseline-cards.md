@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-1-visible-baseline-cards
-status: blocked
+status: done
 kind: concept
 area: cards
 priority: high
@@ -8,7 +8,7 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-29
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1
 proReferences:
@@ -105,3 +105,8 @@ Blockiert am 2026-05-24 vor Codeänderungen. Der Abgleich gegen `docs/releases/p
 Das Paket wurde nicht teilweise umgesetzt, weil die Akzeptanzkriterien eine eindeutige per-card Umsetzung oder eine begründete No-Engine-Einordnung für alle Zielkarten verlangen. Eine falsche Registry-/Coverage-Promotion würde Proteus-Karten als implementiert erscheinen lassen, obwohl LegalAction-, Revalidation-, Visibility-, Replay- und StateHash-Gates nicht erfüllt sind.
 
 Folgeplanung am 2026-05-24: Der Scope wurde planning-only in `docs/releases/proteus/phase-1-slice-handoff-2026-05-24.md` und sieben kleinere Inbox-Pakete aufgeteilt. Der kleinste direkte Umsetzungsschnitt ist `act-2026-05-24-proteus-phase-1a-reuse-only-baseline`; die übrigen Pakete schneiden die fehlenden Funktionsbausteine nach Mechanikfamilien.
+
+Statuspflege 2026-07-27: Alle sieben Nachfolgepakete sind abgeschlossen oder
+durch erledigte Folgepakete aufgelöst. Diese Umbrella-Activity ist damit
+erledigt; der historische Blocker bleibt als Begründung für den damaligen
+Paketzuschnitt erhalten.

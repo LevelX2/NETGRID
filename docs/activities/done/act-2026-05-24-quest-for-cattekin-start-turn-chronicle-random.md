@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-quest-for-cattekin-start-turn-chronicle-random
-status: in_progress
+status: done
 kind: fix
 area: cards
 priority: high
