@@ -348,6 +348,54 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
+  it("carries the chosen Filter/Rent-I-Con rez through the real Engine run and trashes the breaker", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
+      runnerCredits: 1,
+      runnerPrograms: ["onr_classic_031_rent-i-con"],
+    });
+    const decision = chooseAiAction(fixture.input, {
+      persistTacticalPlanMemory: false,
+    });
+    expect(decision.actionId).toBe(fixture.engineAction.actionId);
+
+    let state = applyEngineAction(
+      fixture.state,
+      "corp",
+      fixture.engineAction.actionId,
+      "rez-filter",
+    );
+    const rentIConId = "exact_runner_program_0" as CardInstanceId;
+    expect(state.corp.credits).toBe(10);
+    expect(state.cardInstances[fixture.sourceCard.instanceId]?.rezzed).toBe(
+      true,
+    );
+
+    const breakAction = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "break_subroutine" &&
+        action.source === rentIConId &&
+        action.payload?.subroutineIndex === 0,
+    );
+    expect(breakAction).toBeDefined();
+    expect(breakAction?.costs).toEqual([{ credits: 1 }]);
+    state = applyEngineAction(
+      state,
+      "runner",
+      breakAction!.actionId,
+      "break-filter",
+    );
+    expect(state.runner.credits).toBe(0);
+
+    state = completeCurrentRunnerRun(state);
+    expect(state.run).toBeUndefined();
+    expect(state.runner.rig.programs).not.toContain(rentIConId);
+    expect(state.cardInstances[rentIConId]?.zone).toEqual({
+      side: "runner",
+      zone: "heap",
+    });
+  });
+
   it("does not promote a free break without a certified consumed resource", () => {
     const fixture = engineIceRezWindow("onr_v1_238_data-wall-2-0", 0, {
       runnerCredits: 0,
@@ -660,4 +708,50 @@ function addUnrezzedIce(
     advancementCounters: 0,
     strengthModifier: 0,
   };
+}
+
+function applyEngineAction(
+  state: GameState,
+  side: "corp" | "runner",
+  actionId: string,
+  idempotencyKey: string,
+): GameState {
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId,
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
+}
+
+function completeCurrentRunnerRun(initial: GameState): GameState {
+  let state = initial;
+  for (let step = 0; step < 8 && state.run; step += 1) {
+    const action = getLegalActions(state, "runner").find(
+      (candidate) =>
+        candidate.type === "continue_run" ||
+        candidate.type === "access_card",
+    );
+    if (!action) {
+      throw new Error(
+        `Engine did not expose a deterministic run-completion action at ${state.run.phase}: ${getLegalActions(
+          state,
+          "runner",
+        )
+          .map((candidate) => candidate.type)
+          .join(",")}`,
+      );
+    }
+    state = applyEngineAction(
+      state,
+      "runner",
+      action.actionId,
+      `complete-run-${step}`,
+    );
+  }
+  if (state.run) throw new Error("Engine did not complete the deterministic run");
+  return state;
 }

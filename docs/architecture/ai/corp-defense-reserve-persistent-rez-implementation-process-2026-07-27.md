@@ -127,7 +127,9 @@ Facts/Quotes aktuell
 | R5 | nur ein Advancement offen, freie Corp-Klicks liefern sichere Credits | geringere Folgereserve, zulässige Rez |
 | R6 | alle kommenden Corp-Klicks sind für Score-Fortsetzung gebunden | keine Klick-Credit-Anrechnung |
 | R7 | Runner hat nach dem aktuellen Run keine Angriffskapazität mehr | keine unnötige Sofort-Rezreserve |
-| R8 | mehrere ICE/Server | minimales exaktes, nach Priorität ausgewähltes Reserveportfolio |
+| R8a | mehrere unrezzte ICE nacheinander auf dem aktuell angegriffenen Server | äußere Rez darf die unmittelbar danach nötige, vollständig gequotete innere Rez nicht unfinanzierbar machen |
+| R8b | mehrere wichtige Server mit konkurrierenden unrezzten ICE | minimales exaktes, nach Parent-Priorität und Runner-Angriffskapazität ausgewähltes Reserveportfolio |
+| R8c | ein günstigeres hinreichendes Stop-ICE auf Server A lässt zugleich die notwendige Rez auf wichtigem Server B finanzieren | globales Portfolio wählt die günstigere Stopproute statt der lokal stärkeren, teureren Alternative |
 | R9 | kostenlose, persistente zugriffsrelevante Rez bei kostenloser Passage auf wichtigem Server | `free_persistent_defense` zulässig |
 | R10 | R9 auf unwichtigem Server oder bei höherem Claim | keine automatische Rez |
 | R11 | temporäres Derez oder stale/unvollständiger Quote | keine persistente/geschätzte Route |
