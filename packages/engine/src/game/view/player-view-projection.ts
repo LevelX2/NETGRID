@@ -34,6 +34,7 @@ import {
 } from "./card-view";
 import { visibleChoice } from "./choice-view";
 import { toPublicEventForSide } from "./public-event-view";
+import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
 
@@ -55,10 +56,17 @@ export function buildPlayerViewProjection(
       );
       const effectiveRezCostQuote =
         side === "corp" ? projectInstalledCorpIceRezCost(state, id) : undefined;
+      const effectiveRezResourceExchangeQuote =
+        side === "corp"
+          ? visibleCorpIceRezResourceExchangeQuote(state, id, visibleIce)
+          : undefined;
       return {
         ...visibleIce,
         ...(effectiveRunQuote ? { effectiveRunQuote } : {}),
         ...(effectiveRezCostQuote ? { effectiveRezCostQuote } : {}),
+        ...(effectiveRezResourceExchangeQuote
+          ? { effectiveRezResourceExchangeQuote }
+          : {}),
       };
     });
     return {

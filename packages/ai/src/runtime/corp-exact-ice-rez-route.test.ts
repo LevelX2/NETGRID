@@ -286,6 +286,131 @@ describe("exact Corp ICE rez route", () => {
       }),
     ).toBeUndefined();
   });
+
+  it("uses an Engine-certified current-run resource exchange when access remains possible", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
+      runnerCredits: 1,
+      runnerPrograms: ["onr_classic_031_rent-i-con"],
+    });
+    const sourceQuote = fixture.sourceCard.effectiveRezResourceExchangeQuote;
+    expect(sourceQuote).toMatchObject({
+      context: "installed",
+      complete: true,
+      runnerBreak: {
+        requiredCredits: 1,
+        pumpCredits: 0,
+        breakCredits: 1,
+        breakUses: 1,
+        canPayFromCurrentCredits: true,
+        paymentEvidenceSource: "engine_icebreaker_ability",
+        consumedCards: [
+          {
+            kind: "trash_at_run_end_after_break",
+            evidenceSource: "engine_icebreaker_ability",
+          },
+        ],
+      },
+    });
+    expect(
+      JSON.stringify(getPlayerView(fixture.state, "runner")),
+    ).not.toContain("effectiveRezResourceExchangeQuote");
+
+    const projection = projectExactCorpIceRezRoute({
+      input: fixture.input,
+      candidate: fixture.candidate,
+      sourceCard: fixture.sourceCard,
+      targetServerId: "rd",
+    });
+    expect(projection).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      sourceDefinitionId: "onr_v1_244_filter",
+      routeKind: "exact_resource_exchange",
+      totalRezCredits: 0,
+      before: {
+        runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+      },
+      after: {
+        runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+      },
+      resourceExchange: {
+        runnerRequiredCredits: 1,
+        runnerPumpCredits: 0,
+        runnerBreakCredits: 1,
+        runnerBreakUses: 1,
+        runnerBreakerDefinitionId: "onr_classic_031_rent-i-con",
+        runnerConsumedCardInstanceIds: ["exact_runner_program_0"],
+      },
+    });
+    expect(
+      chooseAiAction(fixture.input, { persistTacticalPlanMemory: false })
+        .actionId,
+    ).toBe(fixture.engineAction.actionId);
+  });
+
+  it("does not promote a free break without a certified consumed resource", () => {
+    const fixture = engineIceRezWindow("onr_v1_238_data-wall-2-0", 0, {
+      runnerCredits: 0,
+      runnerPrograms: ["onr_v1_037_japanese-water-torture"],
+      runnerProgramStrengthModifiers: [10],
+    });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      runnerBreak: {
+        requiredCredits: 0,
+        consumedCards: [],
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toBeUndefined();
+  });
+
+  it.each([
+    [
+      "an incomplete resource quote",
+      (sourceCard: any) => {
+        sourceCard.effectiveRezResourceExchangeQuote.complete = false;
+      },
+    ],
+    [
+      "an unknown payment evidence source",
+      (sourceCard: any) => {
+        sourceCard.effectiveRezResourceExchangeQuote.runnerBreak.paymentEvidenceSource =
+          "unknown";
+      },
+    ],
+    [
+      "an unknown run-end consumption",
+      (sourceCard: any) => {
+        sourceCard.effectiveRezResourceExchangeQuote.runnerBreak.consumedCards[0].kind =
+          "unknown";
+      },
+    ],
+  ])("fails closed for %s", (_label, mutate) => {
+    const fixture = mutableFixture(
+      engineIceRezWindow("onr_v1_244_filter", 0, {
+        runnerCredits: 1,
+        runnerPrograms: ["onr_classic_031_rent-i-con"],
+      }),
+    );
+    mutate(fixture.sourceCard);
+
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toBeUndefined();
+  });
 });
 
 type MutableExactRezFixture = ReturnType<typeof mutableFixture>;
@@ -301,7 +426,15 @@ function mutableFixture(
   return { input, candidate, sourceCard };
 }
 
-function engineIceRezWindow(definitionId: string, agendaPoints: number) {
+function engineIceRezWindow(
+  definitionId: string,
+  agendaPoints: number,
+  options?: {
+    runnerCredits?: number;
+    runnerPrograms?: readonly string[];
+    runnerProgramStrengthModifiers?: readonly number[];
+  },
+) {
   let state = createGameAfterSetup({
     seed: `exact-ice-rez-${definitionId}-${agendaPoints}`,
   });
@@ -310,11 +443,21 @@ function engineIceRezWindow(definitionId: string, agendaPoints: number) {
   state.timingPoint = "runner_action.main";
   delete state.pendingChoice;
   state.runner.clicks = 4;
-  state.runner.credits = 0;
+  state.runner.credits = options?.runnerCredits ?? 0;
   state.corp.credits = 10;
   state.corpBonusAgendaPoints = agendaPoints;
   const iceId =
     `exact_ice_${agendaPoints}` as CardInstanceId;
+  for (const [index, runnerProgram] of (
+    options?.runnerPrograms ?? []
+  ).entries()) {
+    addInstalledRunnerProgram(
+      state,
+      `exact_runner_program_${index}` as CardInstanceId,
+      runnerProgram,
+      options?.runnerProgramStrengthModifiers?.[index] ?? 0,
+    );
+  }
   addUnrezzedIce(state, iceId, definitionId, "rd");
   const startRun = getLegalActions(state, "runner").find(
     (action) =>
@@ -363,7 +506,27 @@ function engineIceRezWindow(definitionId: string, agendaPoints: number) {
   if (!candidate || !sourceCard) {
     throw new Error("Engine-backed ICE rez fixture is incomplete");
   }
-  return { input, candidate, sourceCard, engineAction: rezAction };
+  return { input, candidate, sourceCard, engineAction: rezAction, state };
+}
+
+function addInstalledRunnerProgram(
+  state: GameState,
+  instanceId: CardInstanceId,
+  definitionId: string,
+  strengthModifier: number,
+): void {
+  state.runner.rig.programs.push(instanceId);
+  state.cardInstances[instanceId] = {
+    instanceId,
+    definitionId,
+    owner: "runner",
+    controller: "runner",
+    zone: { side: "runner", zone: "rig" },
+    faceup: true,
+    rezzed: true,
+    advancementCounters: 0,
+    strengthModifier,
+  };
 }
 
 function engineOliviaIceRezWindow() {

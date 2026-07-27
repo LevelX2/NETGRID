@@ -2310,6 +2310,48 @@ export type VisibleCorpRezCostQuote =
         | VisibleVariableCorpRezCostQuoteFields
       ));
 
+/**
+ * Engine-certified current-run resource exchange for a legal Corp ICE rez.
+ *
+ * The quote deliberately stays side-safe: it may only describe an installed
+ * Runner card that is already visible to the Corp. An incomplete quote carries
+ * no inferred cost or effect, so consumers cannot fall back to printed card
+ * data or card hints.
+ */
+export type VisibleCorpIceRezResourceExchangeQuote =
+  | {
+      context: "installed";
+      cardId: CardInstanceId;
+      targetServerId: Exclude<ServerId, "new_remote">;
+      projectedServerId: Exclude<ServerId, "new_remote">;
+      expiresAtStateVersion: number;
+      complete: false;
+    }
+  | {
+      context: "installed";
+      cardId: CardInstanceId;
+      targetServerId: Exclude<ServerId, "new_remote">;
+      projectedServerId: Exclude<ServerId, "new_remote">;
+      expiresAtStateVersion: number;
+      complete: true;
+      runnerBreak: {
+        breakerCardId: CardInstanceId;
+        breakerDefinitionId: CardDefinitionId;
+        requiredCredits: number;
+        pumpCredits: number;
+        breakCredits: number;
+        breakUses: number;
+        canPayFromCurrentCredits: boolean;
+        paymentEvidenceSource: "engine_icebreaker_ability";
+        consumedCards: Array<{
+          cardId: CardInstanceId;
+          definitionId: CardDefinitionId;
+          kind: "trash_at_run_end_after_break";
+          evidenceSource: "engine_icebreaker_ability";
+        }>;
+      };
+    };
+
 export type VisibleCardLifecycleMarker = {
   kind: "temporary_return_to_grip";
   label: string;
@@ -2612,6 +2654,7 @@ export type VisibleCard = {
   runnerPaymentSupportAbilities?: VisibleRunnerPaymentSupportAbility[];
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
   effectiveRezCostQuote?: VisibleCorpRezCostQuote;
+  effectiveRezResourceExchangeQuote?: VisibleCorpIceRezResourceExchangeQuote;
 };
 
 export type PlayerView = {

@@ -1,21 +1,29 @@
 ---
 activityId: act-2026-07-26-corp-ice-rez-resource-exchange-value
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-26
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-27
+completedAt: 2026-07-27
+branch: codex/activities-worktree-20260727-001
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/engine/src/game/view/visible-rez-resource-exchange-quote.ts
+  - packages/ai/src/runtime/corp-exact-ice-rez-route.ts
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+  - packages/ai/src/runtime/corp-exact-ice-rez-route.test.ts
+  - packages/engine/src/game/view/visible-rez-resource-exchange-quote.test.ts
 checks:
   - corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-exact-ice-rez-route.test.ts src/runtime/corp-score-protection-assessment.test.ts src/runtime/plan-first-live-runtime.test.ts
   - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/view/visible-rez-resource-exchange-quote.test.ts
+  - corepack pnpm --filter @netgrid/engine typecheck
 ---
 
 # Corp-ICE-Rezentscheidung um exakten Ressourcenabtausch erweitern
@@ -125,33 +133,33 @@ Die Ursache liegt im aktuellen Wirkungsvertrag:
 
 ## Akzeptanzkriterien
 
-- [ ] Die Corp-Rezentscheidung unterscheidet nachvollziehbar zwischen
+- [x] Die Corp-Rezentscheidung unterscheidet nachvollziehbar zwischen
       unmittelbarem Zugriffsschutz und exakt belegtem Ressourcenabtausch.
-- [ ] Im reproduzierten Filter-/Rent-I-Con-Szenario bleibt der Zugriff
+- [x] Im reproduzierten Filter-/Rent-I-Con-Szenario bleibt der Zugriff
       zunächst möglich, die Rezroute wird aber wegen 0 Corp-Credits,
       1 erforderlichem Runner-Credit und sicherem Rent-I-Con-Selbst-Trash als
       produktive Route von `corp.defend_servers` anerkannt.
-- [ ] Die ausgewählte LegalAction ist weiterhin die originale
+- [x] Die ausgewählte LegalAction ist weiterhin die originale
       Engine-Aktion zum Rezzen genau dieser Filter-Instanz auf genau diesem
       Server und wird beim Apply erneut durch die Engine validiert.
-- [ ] Kein Test oder produktiver Pfad erkennt die Karten anhand ihres Titels
+- [x] Kein Test oder produktiver Pfad erkennt die Karten anhand ihres Titels
       oder ihrer Definition-ID.
-- [ ] Kosten, Breakpfad und Verbrauch/Selbst-Trash stammen vollständig aus
+- [x] Kosten, Breakpfad und Verbrauch/Selbst-Trash stammen vollständig aus
       Engine-zertifizierten und für die Corp zulässigen Fakten. Kartenhinweise
       sind keine Wirkungs- oder Kostenautorität.
-- [ ] Unknown oder unvollständige Fakten bleiben fail-closed: Es entstehen
+- [x] Unknown oder unvollständige Fakten bleiben fail-closed: Es entstehen
       weder ein Ressourcenwert noch ein gedruckter oder heuristischer
       Ersatzwert.
-- [ ] Ein kostenloses, problemlos und ohne relevanten Verbrauch brechbares
+- [x] Ein kostenloses, problemlos und ohne relevanten Verbrauch brechbares
       ICE wird nicht automatisch als produktiv eingestuft.
-- [ ] Die Änderung erzeugt keinen eigenständigen Rez-/Attrition-Plan und
+- [x] Die Änderung erzeugt keinen eigenständigen Rez-/Attrition-Plan und
       verändert nicht die Parent-Priorität des zuständigen
       `corp.defend_servers`-Plans.
-- [ ] DecisionDebug/`whyNot` unterscheidet mindestens zwischen
+- [x] DecisionDebug/`whyNot` unterscheidet mindestens zwischen
       `access_reduction`, `exact_resource_exchange` und
       `resource_exchange_unknown`, ohne verdeckte Runner-Informationen
       offenzulegen.
-- [ ] Die fokussierten Tests und der AI-Typecheck sind grün.
+- [x] Die fokussierten Tests und der AI-Typecheck sind grün.
 
 ## Umsetzungshinweise
 
@@ -177,4 +185,16 @@ Die Ursache liegt im aktuellen Wirkungsvertrag:
 
 ## Ergebnisnotiz
 
-Noch nicht umgesetzt.
+Erledigt am 27.07.2026. Die Corp-PlayerView enthält für einen isolierten,
+aktuellen Rezpfad eine Engine-zertifizierte, zustandsversionsgebundene
+Ressourcen-Projektion. Sie weist getrennt aus, welche Runner-Credits der
+Breakpfad benötigt und ob die eingesetzte sichtbare Breaker-Karte sicher am
+Run-Ende getrasht wird. Unbekannte, komplexe oder nicht isolierte Pfade bleiben
+unvollständig. `corp.defend_servers` akzeptiert bei unveränderter
+Zugriffswahrscheinlichkeit ausschließlich einen vollständigen positiven
+Ressourcenabtausch; die originale `rez_ice`-LegalAction bleibt erhalten.
+
+Die Diagnose-Evidence trennt `access_reduction`,
+`exact_resource_exchange` und `resource_exchange_unknown`. Die Regressionen
+decken Filter/Rent-I-Con, einen kostenlosen Break ohne Verbrauch, unvollständige
+Evidenz sowie die Corp-seitige Sichtbarkeitsgrenze ab.

@@ -23,6 +23,7 @@ import {
   type TraceSuccessEffect,
   type VisibleCard,
   type VisibleChoiceRequest,
+  type VisibleCorpIceRezResourceExchangeQuote,
   type VisibleCorpRezCostQuote,
   type VisibleEffectiveIceRunQuote,
   type VisibleVariableCorpRezCostParameter,
@@ -1298,6 +1299,8 @@ function sanitizeVisibleCardWithOptions(
   } = {},
 ): VisibleCard {
   const effectiveRezCostQuote = card.effectiveRezCostQuote;
+  const effectiveRezResourceExchangeQuote =
+    card.effectiveRezResourceExchangeQuote;
   const includeEffectiveRezCostQuote =
     options.allowCorpRezCostQuote === true &&
     effectiveRezCostQuote?.context === "installed" &&
@@ -1306,6 +1309,16 @@ function sanitizeVisibleCardWithOptions(
     effectiveRezCostQuote.projectedServerId ===
       options.expectedCorpRezServerId &&
     effectiveRezCostQuote.expiresAtStateVersion ===
+      options.expectedCorpRezStateVersion;
+  const includeEffectiveRezResourceExchangeQuote =
+    options.allowCorpRezCostQuote === true &&
+    effectiveRezResourceExchangeQuote?.context === "installed" &&
+    effectiveRezResourceExchangeQuote.cardId === card.instanceId &&
+    effectiveRezResourceExchangeQuote.targetServerId ===
+      options.expectedCorpRezServerId &&
+    effectiveRezResourceExchangeQuote.projectedServerId ===
+      options.expectedCorpRezServerId &&
+    effectiveRezResourceExchangeQuote.expiresAtStateVersion ===
       options.expectedCorpRezStateVersion;
   return {
     instanceId: card.instanceId,
@@ -1374,6 +1387,72 @@ function sanitizeVisibleCardWithOptions(
           ),
         }
       : {}),
+    ...(includeEffectiveRezResourceExchangeQuote &&
+    effectiveRezResourceExchangeQuote
+      ? {
+          effectiveRezResourceExchangeQuote:
+            sanitizeInstalledCorpIceRezResourceExchangeQuote(
+              effectiveRezResourceExchangeQuote,
+            ),
+        }
+      : {}),
+  };
+}
+
+function sanitizeInstalledCorpIceRezResourceExchangeQuote(
+  quote: Extract<
+    VisibleCorpIceRezResourceExchangeQuote,
+    { context: "installed" }
+  >,
+): VisibleCorpIceRezResourceExchangeQuote {
+  const binding = {
+    context: "installed" as const,
+    cardId: quote.cardId,
+    targetServerId: quote.targetServerId,
+    projectedServerId: quote.projectedServerId,
+    expiresAtStateVersion: quote.expiresAtStateVersion,
+  };
+  if (
+    !quote.complete ||
+    quote.projectedServerId !== quote.targetServerId ||
+    !isNonNegativeSafeInteger(quote.expiresAtStateVersion) ||
+    !isNonNegativeSafeInteger(quote.runnerBreak.requiredCredits) ||
+    !isNonNegativeSafeInteger(quote.runnerBreak.pumpCredits) ||
+    !isNonNegativeSafeInteger(quote.runnerBreak.breakCredits) ||
+    quote.runnerBreak.requiredCredits !==
+      quote.runnerBreak.pumpCredits + quote.runnerBreak.breakCredits ||
+    !isNonNegativeSafeInteger(quote.runnerBreak.breakUses) ||
+    quote.runnerBreak.breakUses <= 0 ||
+    quote.runnerBreak.paymentEvidenceSource !== "engine_icebreaker_ability" ||
+    quote.runnerBreak.consumedCards.some(
+      (card) =>
+        card.kind !== "trash_at_run_end_after_break" ||
+        card.evidenceSource !== "engine_icebreaker_ability" ||
+        card.cardId !== quote.runnerBreak.breakerCardId ||
+        card.definitionId !== quote.runnerBreak.breakerDefinitionId,
+    )
+  ) {
+    return { ...binding, complete: false };
+  }
+  return {
+    ...binding,
+    complete: true,
+    runnerBreak: {
+      breakerCardId: quote.runnerBreak.breakerCardId,
+      breakerDefinitionId: quote.runnerBreak.breakerDefinitionId,
+      requiredCredits: quote.runnerBreak.requiredCredits,
+      pumpCredits: quote.runnerBreak.pumpCredits,
+      breakCredits: quote.runnerBreak.breakCredits,
+      breakUses: quote.runnerBreak.breakUses,
+      canPayFromCurrentCredits: quote.runnerBreak.canPayFromCurrentCredits,
+      paymentEvidenceSource: "engine_icebreaker_ability",
+      consumedCards: quote.runnerBreak.consumedCards.map((card) => ({
+        cardId: card.cardId,
+        definitionId: card.definitionId,
+        kind: "trash_at_run_end_after_break" as const,
+        evidenceSource: "engine_icebreaker_ability" as const,
+      })),
+    },
   };
 }
 

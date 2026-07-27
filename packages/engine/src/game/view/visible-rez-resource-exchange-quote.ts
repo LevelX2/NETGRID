@@ -1,0 +1,336 @@
+import {
+  CARD_DEFINITIONS_BY_ID,
+  type CardInstanceId,
+  type GameState,
+  type VisibleCard,
+  type VisibleCorpIceRezResourceExchangeQuote,
+  type VisibleEffectiveIceRunQuote,
+} from "@netgrid/shared";
+import {
+  icebreakerAbilitiesForDefinition,
+  type RuntimeIcebreakerAbility,
+} from "../../ability-engine/icebreaker-abilities";
+import { visibleRunnerRigCardForViewer } from "./card-view";
+import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
+
+type CompleteRunnerBreak = Extract<
+  VisibleCorpIceRezResourceExchangeQuote,
+  { complete: true }
+>["runnerBreak"];
+
+type BreakRead =
+  | { kind: "exact"; quote: CompleteRunnerBreak }
+  | { kind: "not_applicable" }
+  | { kind: "unknown" };
+
+/**
+ * Projects one deterministic, direct current-run breaker exchange from the
+ * Engine's card-implementation descriptors. The projection is intentionally
+ * conservative: it is available only for an isolated approached ICE and it
+ * fails closed as soon as an alternate runner funding source, unsupported
+ * ability effect, or incomplete visible card would affect the result.
+ */
+export function visibleCorpIceRezResourceExchangeQuote(
+  state: GameState,
+  iceId: CardInstanceId,
+  visibleIce: VisibleCard,
+): VisibleCorpIceRezResourceExchangeQuote | undefined {
+  const server = state.corp.servers.find((candidate) =>
+    candidate.ice.includes(iceId),
+  );
+  if (!server || !visibleIce.known || !visibleIce.definitionId) {
+    return undefined;
+  }
+  const binding = {
+    context: "installed" as const,
+    cardId: iceId,
+    targetServerId: server.id,
+    projectedServerId: server.id,
+    expiresAtStateVersion: state.stateVersion,
+  };
+  const source = state.cardInstances[iceId];
+  if (
+    !source ||
+    source.rezzed ||
+    state.run?.attackedServerId !== server.id ||
+    server.ice.length !== 1
+  ) {
+    return { ...binding, complete: false };
+  }
+  const projectedRunQuote = visibleEffectiveIceRunQuote(state, iceId, {
+    ...visibleIce,
+    known: true,
+    rezzed: true,
+  });
+  if (!projectedRunQuote) return { ...binding, complete: false };
+  const endTheRunCount = hardEndTheRunSubroutineCount(projectedRunQuote);
+  if (endTheRunCount <= 0 || !hasOnlyDirectBreakCosts(projectedRunQuote)) {
+    return { ...binding, complete: false };
+  }
+  const runnerRig = [
+    ...state.runner.rig.programs,
+    ...state.runner.rig.hardware,
+    ...state.runner.rig.resources,
+  ].map((cardId) => visibleRunnerRigCardForViewer(state, cardId, "corp"));
+  if (runnerRig.some((card) => !validVisibleRunnerCard(card))) {
+    return { ...binding, complete: false };
+  }
+  const reads = runnerRig.map((breaker) =>
+    quoteRunnerBreak({
+      breaker,
+      ice: visibleIce,
+      endTheRunCount,
+      additionalBreakCost:
+        projectedRunQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
+      runnerCredits: state.runner.credits,
+    }),
+  );
+  if (reads.some((read) => read.kind === "unknown")) {
+    return { ...binding, complete: false };
+  }
+  const choices = reads
+    .flatMap((read) => (read.kind === "exact" ? [read.quote] : []))
+    .sort(compareRunnerBreakQuotes);
+  const best = choices[0];
+  return best
+    ? { ...binding, complete: true, runnerBreak: best }
+    : {
+        ...binding,
+        complete: false,
+      };
+}
+
+function hardEndTheRunSubroutineCount(
+  quote: VisibleEffectiveIceRunQuote,
+): number {
+  return quote.subroutines.filter(
+    (subroutine) =>
+      subroutine.type === "end_the_run" ||
+      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn",
+  ).length;
+}
+
+function hasOnlyDirectBreakCosts(quote: VisibleEffectiveIceRunQuote): boolean {
+  return (
+    Number.isSafeInteger(
+      quote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
+    ) &&
+    (quote.breakSubroutineAdditionalCostPerSubroutine ?? 0) >= 0 &&
+    quote.conditionalEncounterEffects === undefined &&
+    quote.encounterTemporaryTraceCredits === undefined
+  );
+}
+
+function validVisibleRunnerCard(card: VisibleCard): boolean {
+  if (
+    card.known !== true ||
+    !card.definitionId ||
+    !CARD_DEFINITIONS_BY_ID[card.definitionId]
+  ) {
+    return false;
+  }
+  return !(card.counterDisplays ?? []).some(
+    (display) => display.creditPool !== undefined && display.amount > 0,
+  );
+}
+
+function quoteRunnerBreak(params: {
+  breaker: VisibleCard;
+  ice: VisibleCard;
+  endTheRunCount: number;
+  additionalBreakCost: number;
+  runnerCredits: number;
+}): BreakRead {
+  const { breaker, ice, endTheRunCount, additionalBreakCost, runnerCredits } =
+    params;
+  if (!breaker.definitionId || !ice.definitionId) return { kind: "unknown" };
+  const breakerDefinition = CARD_DEFINITIONS_BY_ID[breaker.definitionId];
+  const iceDefinition = CARD_DEFINITIONS_BY_ID[ice.definitionId];
+  if (!breakerDefinition || !iceDefinition) return { kind: "unknown" };
+  if (
+    !breakerDefinition.subtypes.some(
+      (subtype) => normalizeSubtype(subtype) === "icebreaker",
+    )
+  ) {
+    return { kind: "not_applicable" };
+  }
+  if (
+    !nonNegativeSafeInteger(breaker.strength) ||
+    !nonNegativeSafeInteger(ice.strength) ||
+    !Array.isArray(ice.subtypes)
+  ) {
+    return { kind: "unknown" };
+  }
+  const abilities = icebreakerAbilitiesForDefinition(breakerDefinition);
+  const matchingBreakAbilities = abilities.filter(
+    (ability) =>
+      ability.type === "break_subroutine" &&
+      breakAbilityMatchesIce(ability, ice.subtypes ?? iceDefinition.subtypes),
+  );
+  if (matchingBreakAbilities.length === 0) return { kind: "not_applicable" };
+  const quotes: CompleteRunnerBreak[] = [];
+  for (const ability of matchingBreakAbilities) {
+    const quote = quoteBreakAbility({
+      ability,
+      abilities,
+      breaker,
+      ice,
+      endTheRunCount,
+      additionalBreakCost,
+      runnerCredits,
+    });
+    if (quote.kind === "unknown") return quote;
+    if (quote.kind === "exact") quotes.push(quote.quote);
+  }
+  const best = quotes.sort(compareRunnerBreakQuotes)[0];
+  return best ? { kind: "exact", quote: best } : { kind: "unknown" };
+}
+
+function breakAbilityMatchesIce(
+  ability: RuntimeIcebreakerAbility,
+  iceSubtypes: readonly string[],
+): boolean {
+  if (ability.selectedIceSubtypeFromBreaker || ability.subroutineBreakTags) {
+    return false;
+  }
+  if (ability.iceSubtype) {
+    return iceSubtypes.some(
+      (subtype) =>
+        normalizeSubtype(subtype) === normalizeSubtype(ability.iceSubtype!),
+    );
+  }
+  if (ability.iceSubtypes) {
+    return ability.iceSubtypes.some((candidate) =>
+      iceSubtypes.some(
+        (subtype) => normalizeSubtype(subtype) === normalizeSubtype(candidate),
+      ),
+    );
+  }
+  return true;
+}
+
+function quoteBreakAbility(params: {
+  ability: RuntimeIcebreakerAbility;
+  abilities: readonly RuntimeIcebreakerAbility[];
+  breaker: VisibleCard;
+  ice: VisibleCard;
+  endTheRunCount: number;
+  additionalBreakCost: number;
+  runnerCredits: number;
+}): BreakRead {
+  const {
+    ability,
+    abilities,
+    breaker,
+    ice,
+    endTheRunCount,
+    additionalBreakCost,
+    runnerCredits,
+  } = params;
+  const breakCount = ability.count;
+  if (
+    ability.onUseEndRun ||
+    ability.postBreakStealthLoss !== undefined ||
+    ability.specialEffects?.some(
+      (effect) => effect.kind !== "run_end_trash_source_if_used",
+    ) ||
+    !validCreditCost(ability.cost.credits) ||
+    !nonNegativeSafeInteger(breakCount) ||
+    breakCount <= 0 ||
+    !breaker.definitionId
+  ) {
+    return { kind: "unknown" };
+  }
+  const requiredStrength = ice.strength!;
+  const currentStrength = breaker.strength!;
+  const pumps =
+    requiredStrength > currentStrength
+      ? quoteRequiredPumps(abilities, requiredStrength, currentStrength)
+      : { kind: "exact" as const, cost: 0 };
+  if (pumps.kind === "unknown") return pumps;
+  const breakUses = Math.ceil(endTheRunCount / breakCount);
+  const breakCredits =
+    breakUses * ability.cost.credits + endTheRunCount * additionalBreakCost;
+  const requiredCredits = pumps.cost + breakCredits;
+  if (!Number.isSafeInteger(requiredCredits) || requiredCredits < 0) {
+    return { kind: "unknown" };
+  }
+  return {
+    kind: "exact",
+    quote: {
+      breakerCardId: breaker.instanceId,
+      breakerDefinitionId: breaker.definitionId,
+      requiredCredits,
+      pumpCredits: pumps.cost,
+      breakCredits,
+      breakUses,
+      canPayFromCurrentCredits:
+        Number.isSafeInteger(runnerCredits) && runnerCredits >= requiredCredits,
+      paymentEvidenceSource: "engine_icebreaker_ability",
+      consumedCards: ability.specialEffects?.some(
+        (effect) => effect.kind === "run_end_trash_source_if_used",
+      )
+        ? [
+            {
+              cardId: breaker.instanceId,
+              definitionId: breaker.definitionId,
+              kind: "trash_at_run_end_after_break",
+              evidenceSource: "engine_icebreaker_ability",
+            },
+          ]
+        : [],
+    },
+  };
+}
+
+function quoteRequiredPumps(
+  abilities: readonly RuntimeIcebreakerAbility[],
+  requiredStrength: number,
+  currentStrength: number,
+): { kind: "exact"; cost: number } | { kind: "unknown" } {
+  const pumps = abilities.filter((ability) => ability.type === "pump_strength");
+  if (pumps.length === 0) return { kind: "unknown" };
+  const costs = pumps.flatMap((ability) => {
+    const amount = ability.amount;
+    if (
+      ability.variableStrength ||
+      ability.onUseEndRun ||
+      !validCreditCost(ability.cost.credits) ||
+      !nonNegativeSafeInteger(amount) ||
+      amount <= 0
+    ) {
+      return [];
+    }
+    const uses = Math.ceil((requiredStrength - currentStrength) / amount);
+    const cost = uses * ability.cost.credits;
+    return Number.isSafeInteger(cost) && cost >= 0 ? [cost] : [];
+  });
+  if (costs.length === 0) return { kind: "unknown" };
+  return { kind: "exact", cost: Math.min(...costs) };
+}
+
+function validCreditCost(value: unknown): value is number {
+  return nonNegativeSafeInteger(value);
+}
+
+function nonNegativeSafeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
+function compareRunnerBreakQuotes(
+  left: CompleteRunnerBreak,
+  right: CompleteRunnerBreak,
+): number {
+  return (
+    left.requiredCredits - right.requiredCredits ||
+    left.consumedCards.length - right.consumedCards.length ||
+    left.breakerCardId.localeCompare(right.breakerCardId)
+  );
+}
+
+function normalizeSubtype(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}

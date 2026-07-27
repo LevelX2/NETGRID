@@ -7391,8 +7391,7 @@ function buildCorpDomain(
                 urgent: false,
                 rezWindowVerdict: "nonproductive" as const,
                 value: 0,
-                evidenceCode:
-                  "corp_ice_rez_missing_exact_engine_certified_access_reduction",
+                evidenceCode: "corp_ice_rez_resource_exchange_unknown",
               },
             ];
           }
@@ -7414,7 +7413,9 @@ function buildCorpDomain(
                 : ("open" as const),
               value: exactIceRezRoute ? 1 : 0,
               evidenceCode: exactIceRezRoute
-                ? `engine_certified_ice_rez_access_probability_reduced:${rezServerId}:${candidate.actionId}`
+                ? exactIceRezRoute.routeKind === "access_reduction"
+                  ? `engine_certified_ice_rez_access_reduction:${rezServerId}:${candidate.actionId}`
+                  : `engine_certified_ice_rez_exact_resource_exchange:${rezServerId}:${candidate.actionId}`
                 : "visible_non_ice_rez_window",
             },
           ];

@@ -18,6 +18,16 @@ export type CorpExactIceRezRouteProjection = Readonly<{
   quote: Extract<VisibleCorpRezCostQuote, { complete: true }>;
   before: KnownCorpScoreProtectionAssessment;
   after: KnownCorpScoreProtectionAssessment;
+  routeKind: "access_reduction" | "exact_resource_exchange";
+  resourceExchange?: Readonly<{
+    runnerRequiredCredits: number;
+    runnerPumpCredits: number;
+    runnerBreakCredits: number;
+    runnerBreakUses: number;
+    runnerBreakerInstanceId: string;
+    runnerBreakerDefinitionId: string;
+    runnerConsumedCardInstanceIds: readonly string[];
+  }>;
   effect: "progress" | "satisfied";
   totalRezCredits: number;
 }>;
@@ -126,14 +136,22 @@ export function projectExactCorpIceRezRoute(params: {
   if (before.knowledge !== "known" || after.knowledge !== "known") {
     return undefined;
   }
-  if (
-    compareExactProbabilities(
-      after.runnerAccessSuccessProbability,
-      before.runnerAccessSuccessProbability,
-    ) !== -1
-  ) {
-    return undefined;
-  }
+  const probabilityComparison = compareExactProbabilities(
+    after.runnerAccessSuccessProbability,
+    before.runnerAccessSuccessProbability,
+  );
+  if (probabilityComparison === undefined) return undefined;
+  const resourceExchange =
+    probabilityComparison === 0
+      ? readExactCurrentRunResourceExchange({
+          input,
+          sourceCard,
+          targetServerId,
+          after,
+          totalRezCredits,
+        })
+      : undefined;
+  if (probabilityComparison !== -1 && !resourceExchange) return undefined;
   return {
     actionId: candidate.actionId,
     sourceCardInstanceId: sourceCard.instanceId,
@@ -142,8 +160,72 @@ export function projectExactCorpIceRezRoute(params: {
     quote,
     before,
     after,
+    routeKind: resourceExchange
+      ? "exact_resource_exchange"
+      : "access_reduction",
+    ...(resourceExchange ? { resourceExchange } : {}),
     effect: after.protectsScore ? "satisfied" : "progress",
     totalRezCredits,
+  };
+}
+
+function readExactCurrentRunResourceExchange(params: {
+  input: AiDecisionInput;
+  sourceCard: VisibleCard;
+  targetServerId: string;
+  after: KnownCorpScoreProtectionAssessment;
+  totalRezCredits: number;
+}):
+  | NonNullable<CorpExactIceRezRouteProjection["resourceExchange"]>
+  | undefined {
+  const { input, sourceCard, targetServerId, after, totalRezCredits } = params;
+  const quote = sourceCard.effectiveRezResourceExchangeQuote;
+  if (
+    quote?.context !== "installed" ||
+    quote.complete !== true ||
+    quote.cardId !== sourceCard.instanceId ||
+    quote.targetServerId !== targetServerId ||
+    quote.projectedServerId !== targetServerId ||
+    quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !nonNegativeSafeInteger(quote.runnerBreak.requiredCredits) ||
+    !nonNegativeSafeInteger(quote.runnerBreak.pumpCredits) ||
+    !nonNegativeSafeInteger(quote.runnerBreak.breakCredits) ||
+    quote.runnerBreak.requiredCredits !==
+      quote.runnerBreak.pumpCredits + quote.runnerBreak.breakCredits ||
+    !nonNegativeSafeInteger(quote.runnerBreak.breakUses) ||
+    quote.runnerBreak.breakUses <= 0 ||
+    quote.runnerBreak.canPayFromCurrentCredits !== true ||
+    quote.runnerBreak.paymentEvidenceSource !== "engine_icebreaker_ability" ||
+    !nonNegativeSafeInteger(input.playerView.opponent.credits) ||
+    after.runnerCreditsRemainingOnBestAccessPath !==
+      input.playerView.opponent.credits - quote.runnerBreak.requiredCredits ||
+    (quote.runnerBreak.requiredCredits <= totalRezCredits &&
+      quote.runnerBreak.consumedCards.length === 0)
+  ) {
+    return undefined;
+  }
+  const consumedCardInstanceIds: string[] = [];
+  for (const consumed of quote.runnerBreak.consumedCards) {
+    if (
+      consumed.kind !== "trash_at_run_end_after_break" ||
+      consumed.evidenceSource !== "engine_icebreaker_ability" ||
+      consumed.cardId !== quote.runnerBreak.breakerCardId ||
+      consumed.definitionId !== quote.runnerBreak.breakerDefinitionId ||
+      !nonBlankString(consumed.cardId) ||
+      !nonBlankString(consumed.definitionId)
+    ) {
+      return undefined;
+    }
+    consumedCardInstanceIds.push(consumed.cardId);
+  }
+  return {
+    runnerRequiredCredits: quote.runnerBreak.requiredCredits,
+    runnerPumpCredits: quote.runnerBreak.pumpCredits,
+    runnerBreakCredits: quote.runnerBreak.breakCredits,
+    runnerBreakUses: quote.runnerBreak.breakUses,
+    runnerBreakerInstanceId: quote.runnerBreak.breakerCardId,
+    runnerBreakerDefinitionId: quote.runnerBreak.breakerDefinitionId,
+    runnerConsumedCardInstanceIds: consumedCardInstanceIds,
   };
 }
 
@@ -354,6 +436,7 @@ export function exactCorpIceRezRoutesEqual(
     left.sourceCardInstanceId === right.sourceCardInstanceId &&
     left.sourceDefinitionId === right.sourceDefinitionId &&
     left.targetServerId === right.targetServerId &&
+    left.routeKind === right.routeKind &&
     left.effect === right.effect &&
     left.totalRezCredits === right.totalRezCredits &&
     compareExactProbabilities(
@@ -374,6 +457,10 @@ export function exactCorpIceRezRoutesEqual(
     left.quote.finalCredits === right.quote.finalCredits &&
     left.quote.mandatoryAdditionalCosts.agendaPoints ===
       right.quote.mandatoryAdditionalCosts.agendaPoints &&
+    exactResourceExchangesEqual(
+      left.resourceExchange,
+      right.resourceExchange,
+    ) &&
     definitionIdListsEqual(
       left.quote.reductionSourceDefinitionIds,
       right.quote.reductionSourceDefinitionIds,
@@ -381,6 +468,26 @@ export function exactCorpIceRezRoutesEqual(
     definitionIdListsEqual(
       left.quote.increaseSourceDefinitionIds,
       right.quote.increaseSourceDefinitionIds,
+    )
+  );
+}
+
+function exactResourceExchangesEqual(
+  left: CorpExactIceRezRouteProjection["resourceExchange"],
+  right: CorpExactIceRezRouteProjection["resourceExchange"],
+): boolean {
+  if (left === undefined || right === undefined) return left === right;
+  return (
+    left.runnerRequiredCredits === right.runnerRequiredCredits &&
+    left.runnerPumpCredits === right.runnerPumpCredits &&
+    left.runnerBreakCredits === right.runnerBreakCredits &&
+    left.runnerBreakUses === right.runnerBreakUses &&
+    left.runnerBreakerInstanceId === right.runnerBreakerInstanceId &&
+    left.runnerBreakerDefinitionId === right.runnerBreakerDefinitionId &&
+    left.runnerConsumedCardInstanceIds.length ===
+      right.runnerConsumedCardInstanceIds.length &&
+    left.runnerConsumedCardInstanceIds.every(
+      (value, index) => value === right.runnerConsumedCardInstanceIds[index],
     )
   );
 }
