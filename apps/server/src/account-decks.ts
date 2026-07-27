@@ -17,7 +17,12 @@ import {
   type DeckValidationContext,
   type EditableDeck,
 } from "@netgrid/decks";
-import { SqliteMatchStorage } from "./storage-sqlite";
+import {
+  configureSqliteConnection,
+  runSqliteStorageOperation,
+  runSqliteTransaction,
+  SqliteMatchStorage,
+} from "./storage-sqlite";
 
 export const DEFAULT_ACCOUNT_DECK_LIMIT = 50;
 
@@ -200,16 +205,14 @@ export class SqliteAccountDeckStorage implements AccountDeckStorage {
     });
     schemaOwner.close();
     this.db = new DatabaseSync(dbPath);
-    this.db.exec("PRAGMA foreign_keys = ON");
-    this.db.exec("PRAGMA busy_timeout = 5000");
+    configureSqliteConnection(this.db);
   }
 
   async createWithinLimit(
     record: AccountDeckRecord,
     limit: number,
   ): Promise<boolean> {
-    this.db.exec("BEGIN IMMEDIATE");
-    try {
+    return runSqliteTransaction(this.db, () => {
       const used = Number(
         (
           this.db
@@ -220,16 +223,11 @@ export class SqliteAccountDeckStorage implements AccountDeckStorage {
         ).count,
       );
       if (used >= limit) {
-        this.db.exec("ROLLBACK");
         return false;
       }
       this.insert(record);
-      this.db.exec("COMMIT");
       return true;
-    } catch (error) {
-      this.db.exec("ROLLBACK");
-      throw error;
-    }
+    });
   }
 
   async listForOwner(ownerAccountId: string): Promise<AccountDeckRecord[]> {
@@ -258,29 +256,31 @@ export class SqliteAccountDeckStorage implements AccountDeckStorage {
     record: AccountDeckRecord,
     expectedVersion: number,
   ): Promise<boolean> {
-    const result = this.db
-      .prepare(
-        `UPDATE account_decks SET deck_version = ?, name = ?, side = ?, identity_card_id = ?,
+    const result = runSqliteStorageOperation(() =>
+      this.db
+        .prepare(
+          `UPDATE account_decks SET deck_version = ?, name = ?, side = ?, identity_card_id = ?,
         card_pool_snapshot_id = ?, card_pool_version = ?, format_profile_id = ?, format_profile_version = ?,
         validation_status = ?, deck_json = ?, updated_at = ?
        WHERE cloud_deck_id = ? AND owner_account_id = ? AND deck_version = ? AND deleted_at IS NULL`,
-      )
-      .run(
-        record.deckVersion,
-        record.deck.name,
-        record.deck.side,
-        record.deck.identityCardId,
-        record.deck.cardPoolSnapshotId,
-        record.deck.cardPoolVersion ?? null,
-        record.deck.formatProfileId,
-        record.deck.formatProfileVersion ?? null,
-        record.validationStatus,
-        serializeDeck(record.deck),
-        record.updatedAt,
-        record.cloudDeckId,
-        record.ownerAccountId,
-        expectedVersion,
-      );
+        )
+        .run(
+          record.deckVersion,
+          record.deck.name,
+          record.deck.side,
+          record.deck.identityCardId,
+          record.deck.cardPoolSnapshotId,
+          record.deck.cardPoolVersion ?? null,
+          record.deck.formatProfileId,
+          record.deck.formatProfileVersion ?? null,
+          record.validationStatus,
+          serializeDeck(record.deck),
+          record.updatedAt,
+          record.cloudDeckId,
+          record.ownerAccountId,
+          expectedVersion,
+        ),
+    );
     return Number(result.changes) === 1;
   }
 
@@ -289,19 +289,24 @@ export class SqliteAccountDeckStorage implements AccountDeckStorage {
     cloudDeckId: string,
     deletedAt: string,
   ): Promise<boolean> {
-    const result = this.db
-      .prepare(
-        "UPDATE account_decks SET deleted_at = ?, updated_at = ? WHERE cloud_deck_id = ? AND owner_account_id = ? AND deleted_at IS NULL",
-      )
-      .run(deletedAt, deletedAt, cloudDeckId, ownerAccountId);
+    const result = runSqliteStorageOperation(() =>
+      this.db
+        .prepare(
+          "UPDATE account_decks SET deleted_at = ?, updated_at = ? WHERE cloud_deck_id = ? AND owner_account_id = ? AND deleted_at IS NULL",
+        )
+        .run(deletedAt, deletedAt, cloudDeckId, ownerAccountId),
+    );
     return Number(result.changes) === 1;
   }
 
   async deleteAllForOwner(ownerAccountId: string): Promise<number> {
     return Number(
-      this.db
-        .prepare("DELETE FROM account_decks WHERE owner_account_id = ?")
-        .run(ownerAccountId).changes,
+      runSqliteStorageOperation(
+        () =>
+          this.db
+            .prepare("DELETE FROM account_decks WHERE owner_account_id = ?")
+            .run(ownerAccountId).changes,
+      ),
     );
   }
 

@@ -30,6 +30,7 @@ export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
 export const DEFAULT_SQLITE_STORAGE_PATH =
   "data/runtime/multiplayer/netgrid.sqlite";
 export const DEFAULT_STORAGE_BACKUP_DIR = "data/runtime/backups";
+export const SQLITE_BUSY_TIMEOUT_MS = 750;
 const PUBLIC_MATCH_BACKFILL_META_KEY = "public_match_backfill_v1_completed_at";
 const PARTIAL_STATE_SNAPSHOTS = Symbol("partialStateSnapshots");
 
@@ -370,12 +371,79 @@ export class StorageError extends Error {
       | "action_persistence_conflict"
       | "backup_invalid"
       | "backup_checksum_mismatch"
-      | "backup_schema_unsupported",
+      | "backup_schema_unsupported"
+      | "storage_temporarily_unavailable",
     message: string,
   ) {
     super(message);
     this.name = "StorageError";
   }
+}
+
+export function configureSqliteConnection(
+  database: DatabaseSync,
+  options: { enableWal?: boolean } = {},
+): void {
+  database.exec("PRAGMA foreign_keys = ON");
+  database.exec(`PRAGMA busy_timeout = ${SQLITE_BUSY_TIMEOUT_MS}`);
+  if (options.enableWal) database.exec("PRAGMA journal_mode = WAL");
+}
+
+export function runSqliteTransaction<T>(
+  database: DatabaseSync,
+  work: () => T,
+): T {
+  let transactionStarted = false;
+  try {
+    database.exec("BEGIN IMMEDIATE");
+    transactionStarted = true;
+    const result = work();
+    database.exec("COMMIT");
+    return result;
+  } catch (error) {
+    if (transactionStarted) rollbackSqliteTransaction(database);
+    throw storageErrorForSqliteFailure(error);
+  }
+}
+
+export function runSqliteStorageOperation<T>(work: () => T): T {
+  try {
+    return work();
+  } catch (error) {
+    throw storageErrorForSqliteFailure(error);
+  }
+}
+
+function rollbackSqliteTransaction(database: DatabaseSync): void {
+  try {
+    database.exec("ROLLBACK");
+  } catch {
+    // SQLite can already have rolled back after a failed COMMIT.
+  }
+}
+
+function storageErrorForSqliteFailure(error: unknown): Error {
+  if (error instanceof StorageError) return error;
+  if (isTransientSqliteLockError(error))
+    return new StorageError(
+      "storage_temporarily_unavailable",
+      "Storage ist wegen eines kurzzeitigen SQLite-Zugriffskonflikts vorübergehend nicht verfügbar.",
+    );
+  return error instanceof Error
+    ? error
+    : new Error("SQLite-Storage-Vorgang fehlgeschlagen.");
+}
+
+function isTransientSqliteLockError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const code =
+    "code" in error && typeof error.code === "string" ? error.code : "";
+  if (code === "SQLITE_BUSY" || code === "SQLITE_LOCKED") return true;
+  const message = error instanceof Error ? error.message : "";
+  return (
+    /\bSQLITE_(BUSY|LOCKED)\b/.test(message) ||
+    /\bdatabase(?: table)? is (?:busy|locked)\b/i.test(message)
+  );
 }
 
 export class SqliteMatchStorage implements MultiplayerStorage {
@@ -392,8 +460,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     try {
       openedDb = new DatabaseSync(this.dbPath);
       this.db = openedDb;
-      this.db.exec("PRAGMA foreign_keys = ON");
-      this.db.exec("PRAGMA journal_mode = DELETE");
+      configureSqliteConnection(this.db, { enableWal: true });
       this.ensureSchema();
       this.backfillExistingMatchesAsPublic();
     } catch (error) {
@@ -3041,15 +3108,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   }
 
   private transaction<T>(work: () => T): T {
-    this.db.exec("BEGIN IMMEDIATE");
-    try {
-      const result = work();
-      this.db.exec("COMMIT");
-      return result;
-    } catch (error) {
-      this.db.exec("ROLLBACK");
-      throw error;
-    }
+    return runSqliteTransaction(this.db, work);
   }
 }
 

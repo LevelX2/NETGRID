@@ -3,7 +3,12 @@ import { mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { envValue, LOCAL_DEFAULT_TOKEN_SALT } from "./internet-hardening";
-import { SqliteMatchStorage } from "./storage-sqlite";
+import {
+  configureSqliteConnection,
+  runSqliteStorageOperation,
+  runSqliteTransaction,
+  SqliteMatchStorage,
+} from "./storage-sqlite";
 
 export const ACCOUNT_SESSION_COOKIE_NAME = "ng_account_session";
 export const ACCOUNT_SESSION_MAX_AGE_DAYS = 14;
@@ -348,13 +353,14 @@ export class SqliteAccountStorage implements AccountStorage {
     });
     schemaOwner.close();
     this.db = new DatabaseSync(dbPath);
-    this.db.exec("PRAGMA foreign_keys = ON");
+    configureSqliteConnection(this.db);
   }
 
   async saveAccount(account: AccountRecord): Promise<void> {
-    this.db
-      .prepare(
-        `INSERT INTO accounts (
+    runSqliteStorageOperation(() =>
+      this.db
+        .prepare(
+          `INSERT INTO accounts (
           account_id, login_name, login_name_normalized, display_name, status, role,
           credential_version, created_at, updated_at, deleted_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -367,19 +373,20 @@ export class SqliteAccountStorage implements AccountStorage {
           credential_version = excluded.credential_version,
           updated_at = excluded.updated_at,
           deleted_at = excluded.deleted_at`,
-      )
-      .run(
-        account.accountId,
-        account.loginName,
-        account.loginNameNormalized,
-        account.displayName,
-        account.status,
-        account.role,
-        account.credentialVersion,
-        account.createdAt,
-        account.updatedAt,
-        account.deletedAt ?? null,
-      );
+        )
+        .run(
+          account.accountId,
+          account.loginName,
+          account.loginNameNormalized,
+          account.displayName,
+          account.status,
+          account.role,
+          account.credentialVersion,
+          account.createdAt,
+          account.updatedAt,
+          account.deletedAt ?? null,
+        ),
+    );
   }
 
   async loadAccount(accountId: string): Promise<AccountRecord | undefined> {
@@ -411,9 +418,10 @@ export class SqliteAccountStorage implements AccountStorage {
   async savePasswordCredential(
     credential: AccountPasswordCredentialRecord,
   ): Promise<void> {
-    this.db
-      .prepare(
-        `INSERT INTO account_password_credentials (
+    runSqliteStorageOperation(() =>
+      this.db
+        .prepare(
+          `INSERT INTO account_password_credentials (
           account_id, algorithm, parameters_version, salt, password_hash, key_length,
           cost, block_size, parallelization, max_memory, changed_at, must_change
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -429,21 +437,22 @@ export class SqliteAccountStorage implements AccountStorage {
           max_memory = excluded.max_memory,
           changed_at = excluded.changed_at,
           must_change = excluded.must_change`,
-      )
-      .run(
-        credential.accountId,
-        credential.algorithm,
-        credential.parametersVersion,
-        credential.salt,
-        credential.passwordHash,
-        credential.keyLength,
-        credential.cost,
-        credential.blockSize,
-        credential.parallelization,
-        credential.maxMemory,
-        credential.changedAt,
-        credential.mustChange ? 1 : 0,
-      );
+        )
+        .run(
+          credential.accountId,
+          credential.algorithm,
+          credential.parametersVersion,
+          credential.salt,
+          credential.passwordHash,
+          credential.keyLength,
+          credential.cost,
+          credential.blockSize,
+          credential.parallelization,
+          credential.maxMemory,
+          credential.changedAt,
+          credential.mustChange ? 1 : 0,
+        ),
+    );
   }
 
   async loadPasswordCredential(
@@ -458,9 +467,10 @@ export class SqliteAccountStorage implements AccountStorage {
   }
 
   async saveCredential(credential: AccountCredentialRecord): Promise<void> {
-    this.db
-      .prepare(
-        `INSERT INTO account_credentials (
+    runSqliteStorageOperation(() =>
+      this.db
+        .prepare(
+          `INSERT INTO account_credentials (
           credential_id, account_id, public_key, sign_count, label, created_at, last_used_at, revoked_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(credential_id) DO UPDATE SET
@@ -469,17 +479,18 @@ export class SqliteAccountStorage implements AccountStorage {
           label = excluded.label,
           last_used_at = excluded.last_used_at,
           revoked_at = excluded.revoked_at`,
-      )
-      .run(
-        credential.credentialId,
-        credential.accountId,
-        credential.publicKey,
-        credential.signCount,
-        credential.label ?? null,
-        credential.createdAt,
-        credential.lastUsedAt ?? null,
-        credential.revokedAt ?? null,
-      );
+        )
+        .run(
+          credential.credentialId,
+          credential.accountId,
+          credential.publicKey,
+          credential.signCount,
+          credential.label ?? null,
+          credential.createdAt,
+          credential.lastUsedAt ?? null,
+          credential.revokedAt ?? null,
+        ),
+    );
   }
 
   async loadCredential(
@@ -492,9 +503,10 @@ export class SqliteAccountStorage implements AccountStorage {
   }
 
   async saveSession(session: AccountSessionRecord): Promise<void> {
-    this.db
-      .prepare(
-        `INSERT INTO account_sessions (
+    runSqliteStorageOperation(() =>
+      this.db
+        .prepare(
+          `INSERT INTO account_sessions (
           session_id, account_id, session_token_hash, csrf_token_hash, credential_version,
           auth_strength, created_at, last_seen_at, expires_at, revoked_at, device_label
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -507,20 +519,21 @@ export class SqliteAccountStorage implements AccountStorage {
           expires_at = excluded.expires_at,
           revoked_at = excluded.revoked_at,
           device_label = excluded.device_label`,
-      )
-      .run(
-        session.sessionId,
-        session.accountId,
-        session.sessionTokenHash,
-        session.csrfTokenHash,
-        session.credentialVersion,
-        session.authStrength,
-        session.createdAt,
-        session.lastSeenAt,
-        session.expiresAt,
-        session.revokedAt ?? null,
-        session.deviceLabel ?? null,
-      );
+        )
+        .run(
+          session.sessionId,
+          session.accountId,
+          session.sessionTokenHash,
+          session.csrfTokenHash,
+          session.credentialVersion,
+          session.authStrength,
+          session.createdAt,
+          session.lastSeenAt,
+          session.expiresAt,
+          session.revokedAt ?? null,
+          session.deviceLabel ?? null,
+        ),
+    );
   }
 
   async loadSession(
@@ -554,9 +567,10 @@ export class SqliteAccountStorage implements AccountStorage {
   }
 
   async saveInvite(invite: AccountInviteRecord): Promise<void> {
-    this.db
-      .prepare(
-        `INSERT INTO account_invites (
+    runSqliteStorageOperation(() =>
+      this.db
+        .prepare(
+          `INSERT INTO account_invites (
         invite_id, invite_token_hash, target_account_id, created_by_account_id,
         created_at, expires_at, used_at, revoked_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -565,17 +579,18 @@ export class SqliteAccountStorage implements AccountStorage {
         expires_at = excluded.expires_at,
         used_at = excluded.used_at,
         revoked_at = excluded.revoked_at`,
-      )
-      .run(
-        invite.inviteId,
-        invite.inviteTokenHash,
-        invite.targetAccountId,
-        invite.createdByAccountId ?? null,
-        invite.createdAt,
-        invite.expiresAt,
-        invite.usedAt ?? null,
-        invite.revokedAt ?? null,
-      );
+        )
+        .run(
+          invite.inviteId,
+          invite.inviteTokenHash,
+          invite.targetAccountId,
+          invite.createdByAccountId ?? null,
+          invite.createdAt,
+          invite.expiresAt,
+          invite.usedAt ?? null,
+          invite.revokedAt ?? null,
+        ),
+    );
   }
 
   async loadInviteByTokenHash(
@@ -588,18 +603,21 @@ export class SqliteAccountStorage implements AccountStorage {
   }
 
   async claimInvite(inviteId: string, usedAt: string): Promise<boolean> {
-    const result = this.db
-      .prepare(
-        "UPDATE account_invites SET used_at = ? WHERE invite_id = ? AND used_at IS NULL AND revoked_at IS NULL AND expires_at > ?",
-      )
-      .run(usedAt, inviteId, usedAt);
+    const result = runSqliteStorageOperation(() =>
+      this.db
+        .prepare(
+          "UPDATE account_invites SET used_at = ? WHERE invite_id = ? AND used_at IS NULL AND revoked_at IS NULL AND expires_at > ?",
+        )
+        .run(usedAt, inviteId, usedAt),
+    );
     return Number(result.changes) === 1;
   }
 
   async saveResetToken(resetToken: AccountResetTokenRecord): Promise<void> {
-    this.db
-      .prepare(
-        `INSERT INTO account_reset_tokens (
+    runSqliteStorageOperation(() =>
+      this.db
+        .prepare(
+          `INSERT INTO account_reset_tokens (
         reset_id, reset_token_hash, target_account_id, created_by_account_id,
         created_at, expires_at, used_at, revoked_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -608,17 +626,18 @@ export class SqliteAccountStorage implements AccountStorage {
         expires_at = excluded.expires_at,
         used_at = excluded.used_at,
         revoked_at = excluded.revoked_at`,
-      )
-      .run(
-        resetToken.resetId,
-        resetToken.resetTokenHash,
-        resetToken.targetAccountId,
-        resetToken.createdByAccountId ?? null,
-        resetToken.createdAt,
-        resetToken.expiresAt,
-        resetToken.usedAt ?? null,
-        resetToken.revokedAt ?? null,
-      );
+        )
+        .run(
+          resetToken.resetId,
+          resetToken.resetTokenHash,
+          resetToken.targetAccountId,
+          resetToken.createdByAccountId ?? null,
+          resetToken.createdAt,
+          resetToken.expiresAt,
+          resetToken.usedAt ?? null,
+          resetToken.revokedAt ?? null,
+        ),
+    );
   }
 
   async loadResetTokenByHash(
@@ -631,17 +650,18 @@ export class SqliteAccountStorage implements AccountStorage {
   }
 
   async claimResetToken(resetId: string, usedAt: string): Promise<boolean> {
-    const result = this.db
-      .prepare(
-        "UPDATE account_reset_tokens SET used_at = ? WHERE reset_id = ? AND used_at IS NULL AND revoked_at IS NULL AND expires_at > ?",
-      )
-      .run(usedAt, resetId, usedAt);
+    const result = runSqliteStorageOperation(() =>
+      this.db
+        .prepare(
+          "UPDATE account_reset_tokens SET used_at = ? WHERE reset_id = ? AND used_at IS NULL AND revoked_at IS NULL AND expires_at > ?",
+        )
+        .run(usedAt, resetId, usedAt),
+    );
     return Number(result.changes) === 1;
   }
 
   async deleteAccountPrivateData(account: AccountRecord): Promise<void> {
-    this.db.exec("BEGIN IMMEDIATE");
-    try {
+    runSqliteTransaction(this.db, () => {
       this.db
         .prepare("DELETE FROM account_series_results WHERE account_id = ?")
         .run(account.accountId);
@@ -690,11 +710,7 @@ export class SqliteAccountStorage implements AccountStorage {
           account.deletedAt ?? account.updatedAt,
           account.accountId,
         );
-      this.db.exec("COMMIT");
-    } catch (error) {
-      this.db.exec("ROLLBACK");
-      throw error;
-    }
+    });
   }
 
   close(): void {

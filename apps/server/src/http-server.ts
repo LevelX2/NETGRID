@@ -3204,6 +3204,19 @@ async function routeHttp(
       sendJson(response, mapped.status, mapped.payload);
       return;
     }
+    if (
+      error instanceof StorageError &&
+      error.code === "storage_temporarily_unavailable"
+    ) {
+      sendJson(response, 503, {
+        error: {
+          code: error.code,
+          message:
+            "Die Datenbank ist kurzzeitig belegt. Bitte führe die Anfrage gleich noch einmal aus.",
+        },
+      });
+      return;
+    }
     sendJson(response, 500, {
       error: { code: "server_error", message: "Serverfehler." },
     });

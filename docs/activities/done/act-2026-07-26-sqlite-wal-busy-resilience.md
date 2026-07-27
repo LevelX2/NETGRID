@@ -1,18 +1,20 @@
 ---
 activityId: act-2026-07-26-sqlite-wal-busy-resilience
-status: inbox
+status: done
 kind: fix
 area: server
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-07-26
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-27
+completedAt: 2026-07-27
+branch: codex/activities-worktree-20260727-001
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
+resultArtifacts:
+  - apps/server/src/storage-sqlite.ts
+  - apps/server/src/storage-sqlite-locking.test.ts
 checks:
   - corepack pnpm --filter @netgrid/server exec vitest run src/storage-sqlite-locking.test.ts
   - corepack pnpm --filter @netgrid/server typecheck
@@ -140,27 +142,27 @@ Aktueller technischer Stand:
 
 ## Akzeptanzkriterien
 
-- [ ] Die reguläre gemeinsame SQLite meldet nach Initialisierung
+- [x] Die reguläre gemeinsame SQLite meldet nach Initialisierung
       `journal_mode = wal`; kein produktiver Storage setzt sie anschließend
       zurück auf `delete`.
-- [ ] Alle vier produktiven Verbindungen verwenden denselben zentral
+- [x] Alle vier produktiven Verbindungen verwenden denselben zentral
       benannten kurzen `busy_timeout`.
-- [ ] Der bisherige isolierte 5000-ms-Wert in `account-decks.ts` ist
+- [x] Der bisherige isolierte 5000-ms-Wert in `account-decks.ts` ist
       entfernt.
-- [ ] Eine normale kurze Leser-/Writer-Überlappung führt im isolierten
+- [x] Eine normale kurze Leser-/Writer-Überlappung führt im isolierten
       Grobtest weder zu `database is locked` am Match-Commit noch zum
       Prozessabbruch.
-- [ ] Eine länger gehaltene Sperre endet nach dem kurzen Timeout als
+- [x] Eine länger gehaltene Sperre endet nach dem kurzen Timeout als
       typisierter vorübergehender Fehler des betroffenen Vorgangs; der
       Storage bleibt anschließend benutzbar.
-- [ ] Ein fehlgeschlagener Vorgang hinterlässt keine im Grobtest erkennbare
+- [x] Ein fehlgeschlagener Vorgang hinterlässt keine im Grobtest erkennbare
       Teilpersistenz.
-- [ ] Der bestehende Backup-Pfad über `VACUUM INTO` kann mit einer im WAL-
+- [x] Der bestehende Backup-Pfad über `VACUUM INTO` kann mit einer im WAL-
       Modus geöffneten temporären Datenbank weiterhin einmal erfolgreich
       ausgeführt und gelesen werden. Dafür genügt eine kleine Assertion im
       selben fokussierten Test; kein separater Backup-Testkatalog.
-- [ ] Der fokussierte Locking-Test und der Server-Typecheck sind grün.
-- [ ] Es werden keine darüber hinausgehenden breiten Testläufe verlangt,
+- [x] Der fokussierte Locking-Test und der Server-Typecheck sind grün.
+- [x] Es werden keine darüber hinausgehenden breiten Testläufe verlangt,
       sofern der kleine Grobtest keinen konkreten weiteren Defekt aufdeckt.
 
 ## Umsetzungshinweise
@@ -193,4 +195,21 @@ Aktueller technischer Stand:
 
 ## Ergebnisnotiz
 
-Noch nicht umgesetzt.
+- Der gemeinsame Wert `SQLITE_BUSY_TIMEOUT_MS = 750` ms liegt bewusst im
+  vorgesehenen kurzen Bereich: Er fängt kurze Kollisionen ab, ohne den
+  synchronen Node-Event-Loop für mehrere Sekunden zu blockieren.
+- `SqliteMatchStorage` setzt beim regulären Öffnen WAL; die drei weiteren
+  produktiven Verbindungen übernehmen denselben verbindungsbezogenen Timeout,
+  ohne den Journalmodus zurückzusetzen.
+- Produktive Transaktionen rollen nach einem Fehler kontrolliert zurück und
+  übersetzen `SQLITE_BUSY`/`SQLITE_LOCKED` (einschließlich der begrenzten
+  node:sqlite-Kompatibilitätsmeldung) in den typisierten, temporären Fehler
+  `storage_temporarily_unavailable`. HTTP-Anfragen erhalten dafür 503; es gibt
+  keinen automatischen Transaktions-Retry.
+- Der isolierte Test prüft WAL und alle vier Timeouts, eine Leser-/Writer-
+  Überlappung, den langen Writer-Lock ohne Teilpersistenz und die anschließende
+  Wiederverwendbarkeit derselben Storage-Instanz. Der bestehende `VACUUM INTO`-
+  Backup wird dabei ebenfalls geöffnet und per `integrity_check` bestätigt.
+- Erfolgreiche Checks am 27.07.2026:
+  `corepack pnpm --filter @netgrid/server exec vitest run src/storage-sqlite-locking.test.ts`
+  (1 Test) und `corepack pnpm --filter @netgrid/server typecheck`.
