@@ -2,7 +2,7 @@
 
 ## Status
 
-In Umsetzung – Paket 1 aktiv.
+Abgeschlossen – lokal auf `main` integriert.
 
 ## Quelle und Gesamtziel
 
@@ -65,6 +65,7 @@ haben; Infrastrukturdrift ist kein Verhaltenstest.
 - Done-Gate: sauberer Worktree auf `codex/ai-remote-defense-credit-pools`,
   keine fremden Änderungen übernommen, Prozessvertrag committed.
 - Commit: `docs(ai): add remote defense credit-pool process`.
+- Ergebnis: erfüllt mit `da5089d35`.
 
 ### Paket 2 – Spielgleiche Checkpoints und rote Evidence
 
@@ -78,6 +79,7 @@ haben; Infrastrukturdrift ist kein Verhaltenstest.
 - Done-Gate: Captures validiert; rot nur bei `behavior_regression`, bereits
   grüne historische Archive-Regression ausdrücklich dokumentiert.
 - Commit: `test(ai): capture remote defense credit-pool regressions`.
+- Ergebnis: erfüllt mit `2669c393e`.
 
 ### Paket 3 – Bestehende Defense-Bewertung vervollständigen
 
@@ -88,6 +90,10 @@ haben; Infrastrukturdrift ist kein Verhaltenstest.
 - Done-Gate: keine neue Planautorität, vollständige Quote-/Pool-Bindung,
   Auswahl bleibt brecher-, Kosten- und Synergieabhängig.
 - Commit: `fix(ai): evaluate visible breaker credit pools for remote defense`.
+- Ergebnis: erfüllt mit `b40162d51`; die bestehende
+  `corp.defend_servers`-/Score-Protection-Projektion verwendet nun das
+  kanonische sichtbare Run-Credit-Budget für passende Breaker-Credits und
+  deren Verbrauch über mehrere ICE.
 
 ### Paket 4 – Unveränderte Checkpoints und breite Verifikation
 
@@ -96,6 +102,9 @@ haben; Infrastrukturdrift ist kein Verhaltenstest.
 - Checks: fokussierte Vitest-Suiten, AI-Typecheck, `git diff --check` und
   soweit vertretbar die vollständige AI-Test-Suite.
 - Commit: `test(ai): verify remote defense credit-pool coverage`.
+- Ergebnis: erfüllt mit `e417a4d88`; der historische EFA215-Checkpoint, die
+  Breaker-/Pool-Gegenproben, der leere wiederverwendbare Remote und die
+  bestehenden Rent-I-Con-Regressionen sind abgedeckt.
 
 ### Paket 5 – Evidence, Wissenspflege und Integration
 
@@ -104,6 +113,8 @@ haben; Infrastrukturdrift ist kein Verhaltenstest.
 - Done-Gate: Worktree sauber, Main verifiziert, Worktree und gemergter Branch
   entfernt.
 - Commit: `docs(ai): record remote defense credit-pool remediation`.
+- Ergebnis: erfüllt mit diesem Abschlusscommit; der Final Review liegt unter
+  `docs/reviews/ai/ai-match-efa215-remote-defense-credit-pools-final-review-2026-07-27.md`.
 
 ## Verifikationsregeln
 
