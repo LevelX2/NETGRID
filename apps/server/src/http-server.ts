@@ -1436,6 +1436,50 @@ async function routeHttp(
       return;
     }
 
+    const accountRejoinRoute =
+      /^\/api\/account\/matches\/([^/]+)\/rejoin$/.exec(url.pathname);
+    if (accountRejoinRoute && request.method === "POST") {
+      if (!accountAuth || !accountStatistics)
+        return sendJson(response, 503, accountUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(
+        response,
+        request,
+        deploymentConfig,
+        accountAuth,
+      );
+      if (!auth) return;
+      const matchId = decodeURIComponent(accountRejoinRoute[1] ?? "");
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "lifecycle",
+          request,
+          deploymentConfig,
+          `account-rejoin:${matchId}`,
+        )
+      )
+        return;
+      const binding = (await accountStatistics.bindingsForMatch(matchId)).find(
+        (candidate) => candidate.accountId === auth.account.accountId,
+      );
+      if (!binding)
+        return sendJson(response, 404, {
+          error: {
+            code: "not_found",
+            message: "Dieses Match ist nicht verfügbar.",
+          },
+        });
+      const rejoined = await service.rejoinBoundAccountMatch(
+        matchId,
+        binding.participantSlot,
+      );
+      if (!("error" in rejoined))
+        void realtime.refreshSide(matchId, opposite(rejoined.side));
+      sendJson(response, "error" in rejoined ? 404 : 200, rejoined);
+      return;
+    }
+
     if (
       url.pathname === "/api/account/match-history" &&
       request.method === "GET"
