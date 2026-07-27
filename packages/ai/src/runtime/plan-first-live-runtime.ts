@@ -193,6 +193,10 @@ import {
   corpSameTurnScoreConversionPaths,
   type CorpScoreConversionStep,
 } from "../plans/tactical-plan-corp-score-conversion";
+import {
+  corpCounterBankScoreProjects,
+  isQuotedCorpCounterBankInHq,
+} from "../plans/corp-counter-bank-score-plan";
 
 export type PlanFirstLiveDependencies = {
   buildActionSemanticCandidates: (
@@ -6948,6 +6952,10 @@ function buildCorpDomain(
   const directScoreProjects = candidates.flatMap((candidate) =>
     scoreProjectForCandidate(input, candidate, scorelineFeasibility),
   );
+  const counterBankScoreProjects = corpCounterBankScoreProjects(
+    input,
+    candidates,
+  );
   const remoteCreationUnlockScoreProjects = candidates.flatMap((candidate) =>
     corpRemoteCreationUnlockScoreProjects(input, candidate),
   );
@@ -6955,6 +6963,7 @@ function buildCorpDomain(
     corpNextTurnScoreContinuationProjects(input);
   const proposedScoreProjects = [
     ...directScoreProjects,
+    ...counterBankScoreProjects,
     ...remoteCreationUnlockScoreProjects,
     ...nextTurnScoreContinuationProjects,
     ...candidates.flatMap((candidate) => {
@@ -8065,6 +8074,7 @@ function corpHqOverflowCandidateIsExactCurrentConversion(
   const source = input.playerView.own.gripOrHq.find(
     (card) => card.instanceId === candidate.sourceCardInstanceId,
   );
+  if (isQuotedCorpCounterBankInHq(input, source)) return false;
   const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
   const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,
@@ -14924,6 +14934,12 @@ function uniqueScoreProjects(
   const phaseRank: Record<CorpScoreProjectSignal["phase"], number> = {
     select_agenda: -1,
     unlock_remote_creation: 0,
+    install_counter_bank: 1,
+    advance_counter_bank: 2,
+    install_agenda_from_counter_bank: 3,
+    rez_counter_bank_for_handoff: 4,
+    rez_counter_bank_for_liquidation: 4,
+    liquidate_counter_bank: 5,
     install_agenda: 1,
     advance_agenda: 2,
     convert_agenda: 3,
