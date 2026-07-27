@@ -48,6 +48,10 @@ sind über vollständige Engine-/KI-Spielszenarien regressionsgeschützt.
 - Ein Score-Fortsetzungsbedarf wird nur reserviert, wenn Zielagenda,
   verbleibende Schritte, Deadline und alle erforderlichen Quotes vollständig
   sichtbar und gebunden sind.
+- `corp.score_agenda` ist alleiniger Eigentümer dieser Berechnung. Es
+  veröffentlicht die Engine-zertifizierte Zeitreserve; `corp.defend_servers`
+  darf sie ausschließlich konsumieren und nicht aus Kartentext oder eigener
+  Zukunftsschätzung rekonstruieren.
 - Die Schutzreserve vor dem nächsten Corp-Zug umfasst nur Routen, die der
   Runner mit seiner nachgewiesenen verbleibenden Aktionskapazität erreichen
   kann; sie summiert keine pauschale Gesamtheit aller ICE.
@@ -68,8 +72,11 @@ sind über vollständige Engine-/KI-Spielszenarien regressionsgeschützt.
 ## Controller-Invarianten
 
 1. Nur Engine-LegalActions bleiben ausführbare Route Heads.
-2. `corp.defend_servers` besitzt die globale ICE-, Rez- und Reservewahl.
-3. Score-Parents delegieren Claim und Priorität, aber keine ICE-Auswahl.
+2. `corp.score_agenda` besitzt den Score-Fortsetzungsbedarf einschließlich
+   freier Klick-Credit-Konversion; `corp.defend_servers` besitzt die globale
+   ICE-, Rez- und Reservewahl.
+3. Score-Parents delegieren einen servergebundenen Claim und Priorität, aber
+   keine ICE-Auswahl.
 4. Reservekomponenten sind zeitgestuft, eindeutig identifiziert und dürfen
    nicht doppelt gezählt werden.
 5. Unvollständige, stale oder nicht gebundene Quotes erzeugen keinen
@@ -86,6 +93,9 @@ sind über vollständige Engine-/KI-Spielszenarien regressionsgeschützt.
 - Ein Fachkonflikt zwischen terminalem Zugriffsschutz und einer gebundenen
   Score-Reserve wird nicht still geglättet; der P1/P2-Vertrag wird in einem
   Test als expliziter Vorrang gesichert.
+- Greift der Runner den gebundenen Agenda-Server selbst an, hat dessen
+  produktive aktuelle Rez Vorrang vor der späteren Advancement-Cashreserve
+  derselben Agenda; der Score-Parent wird nach dem Run revalidiert.
 - Tests mit künstlichem `AiDecisionInput` ohne Engine-Zustandsübergang dürfen
   keine neue Spielerhaltensentscheidung allein beweisen.
 - Wenn ein benötigter Testzustand mit dem aktiven Kartenpool nicht real
@@ -107,33 +117,33 @@ Facts/Quotes aktuell
 
 ## Paketfolge
 
-| Paket | Ziel | Done-Gate | Commit |
-|---|---|---|---|
-| P0 | Prozessvertrag und Testmatrix | Artefakt vollständig, Diff-Check | `docs(ai): define defense reserve rez process` |
-| P1 | Bestehende reale Rez-/Break-Grundwahrheiten als Engine-/KI-Regressionsbasis sichern | fokussierte Tests grün | `test(ai): establish rez reserve scenario baseline` |
-| P2 | Gewünschte Konflikt- und Zeitreserve-Szenarien zuerst als Tests formulieren und die fehlenden Engine-Facts minimal ergänzen | neue Szenarien beweisen Facts, alte unverändert grün | `test(engine): specify timed defense reserve facts` |
-| P3 | Gemeinsame Defense-Claims, zeitgestufte Reserve und globale Rez-/Decline-Auswahl implementieren | alle P1/P2-Szenarien grün, Quote-/Safety-Guards grün | `fix(ai): preserve defense reserve across rez windows` |
-| P4 | Persistente kostenlose Defense-Rez, vollständige Regressionen und Dokumentationsrückführung | fokussierte und paketnahe Gates grün | `test(ai): cover persistent free defense rez` |
-| P5 | Finaler Worktree-Check, Integration nach `main` und verifizierter Cleanup | main grün, Worktree/Branch entfernt | Merge nach `main` |
+| Paket | Ziel                                                                                                                        | Done-Gate                                            | Commit                                                 |
+| ----- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------ |
+| P0    | Prozessvertrag und Testmatrix                                                                                               | Artefakt vollständig, Diff-Check                     | `docs(ai): define defense reserve rez process`         |
+| P1    | Bestehende reale Rez-/Break-Grundwahrheiten als Engine-/KI-Regressionsbasis sichern                                         | fokussierte Tests grün                               | `test(ai): establish rez reserve scenario baseline`    |
+| P2    | Gewünschte Konflikt- und Zeitreserve-Szenarien zuerst als Tests formulieren und die fehlenden Engine-Facts minimal ergänzen | neue Szenarien beweisen Facts, alte unverändert grün | `test(engine): specify timed defense reserve facts`    |
+| P3    | Gemeinsame Defense-Claims, zeitgestufte Reserve und globale Rez-/Decline-Auswahl implementieren                             | alle P1/P2-Szenarien grün, Quote-/Safety-Guards grün | `fix(ai): preserve defense reserve across rez windows` |
+| P4    | Persistente kostenlose Defense-Rez, vollständige Regressionen und Dokumentationsrückführung                                 | fokussierte und paketnahe Gates grün                 | `test(ai): cover persistent free defense rez`          |
+| P5    | Finaler Worktree-Check, Integration nach `main` und verifizierter Cleanup                                                   | main grün, Worktree/Branch entfernt                  | Merge nach `main`                                      |
 
 ## Szenario-Matrix
 
-| ID | Reale Spielkonstellation | Erwartung |
-|---|---|---|
-| R1 | Filter gegen Rent-I-Con: 0 Corp, 1 Runner, sicherer Run-End-Trash | Rez; Breaker wird nach dem Run getrasht |
-| R2 | kostenloser Break ohne Verbrauch | keine reine Ressourcenabtauschroute |
-| R3 | produktive R&D-Rez unterschreitet die unmittelbar nötige Score-Remote-Rez-/Advance-Reserve, Runner hat weitere Klicks | Decline mit Reserve-Evidence |
-| R4 | dieselbe Lage mit ausreichender Liquidität | R&D-Rez, spätere Remote-Rez bleibt bezahlbar |
-| R5 | nur ein Advancement offen, freie Corp-Klicks liefern sichere Credits | geringere Folgereserve, zulässige Rez |
-| R6 | alle kommenden Corp-Klicks sind für Score-Fortsetzung gebunden | keine Klick-Credit-Anrechnung |
-| R7 | Runner hat nach dem aktuellen Run keine Angriffskapazität mehr | keine unnötige Sofort-Rezreserve |
-| R8a | mehrere unrezzte ICE nacheinander auf dem aktuell angegriffenen Server | äußere Rez darf die unmittelbar danach nötige, vollständig gequotete innere Rez nicht unfinanzierbar machen |
-| R8b | mehrere wichtige Server mit konkurrierenden unrezzten ICE | minimales exaktes, nach Parent-Priorität und Runner-Angriffskapazität ausgewähltes Reserveportfolio |
-| R8c | ein günstigeres hinreichendes Stop-ICE auf Server A lässt zugleich die notwendige Rez auf wichtigem Server B finanzieren | globales Portfolio wählt die günstigere Stopproute statt der lokal stärkeren, teureren Alternative |
-| R9 | kostenlose, persistente zugriffsrelevante Rez bei kostenloser Passage auf wichtigem Server | `free_persistent_defense` zulässig |
-| R10 | R9 auf unwichtigem Server oder bei höherem Claim | keine automatische Rez |
-| R11 | temporäres Derez oder stale/unvollständiger Quote | keine persistente/geschätzte Route |
-| R12 | terminale unmittelbare Gefahr gegen gebundene Reserve | explizit getestete lexikographische Vorrangregel |
+| ID  | Reale Spielkonstellation                                                                                                 | Erwartung                                                                                                                                      |
+| --- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | Filter gegen Rent-I-Con: 0 Corp, 1 Runner, sicherer Run-End-Trash                                                        | Rez; Breaker wird nach dem Run getrasht                                                                                                        |
+| R2  | kostenloser Break ohne Verbrauch                                                                                         | keine reine Ressourcenabtauschroute                                                                                                            |
+| R3  | produktive R&D-Rez unterschreitet die unmittelbar nötige Score-Remote-Rez-/Advance-Reserve, Runner hat weitere Klicks    | Decline mit Reserve-Evidence                                                                                                                   |
+| R4  | dieselbe Lage mit ausreichender Liquidität                                                                               | R&D-Rez, spätere Remote-Rez bleibt bezahlbar                                                                                                   |
+| R5  | nur ein Advancement offen, freie Corp-Klicks liefern sichere Credits                                                     | geringere Folgereserve, zulässige Rez                                                                                                          |
+| R6  | alle kommenden Corp-Klicks sind für Score-Fortsetzung gebunden                                                           | keine Klick-Credit-Anrechnung                                                                                                                  |
+| R7  | Runner hat nach dem aktuellen Run keine Angriffskapazität mehr                                                           | keine unnötige Sofort-Rezreserve                                                                                                               |
+| R8a | mehrere unrezzte ICE nacheinander auf dem aktuell angegriffenen Server                                                   | unvollständiger äußerer Ressourcenquote wird fail-closed declined; eine innere Stopprez wird dadurch nie „auf Verdacht“ unfinanzierbar gemacht |
+| R8b | mehrere wichtige Server mit konkurrierenden unrezzten ICE                                                                | minimales exaktes, nach Parent-Priorität und Runner-Angriffskapazität ausgewähltes Reserveportfolio                                            |
+| R8c | ein günstigeres hinreichendes Stop-ICE auf Server A lässt zugleich die notwendige Rez auf wichtigem Server B finanzieren | globales Portfolio wählt die günstigere Stopproute statt der lokal stärkeren, teureren Alternative                                             |
+| R9  | kostenlose, persistente zugriffsrelevante Rez bei kostenloser Passage auf wichtigem Server                               | `free_persistent_defense` zulässig                                                                                                             |
+| R10 | R9 auf unwichtigem Server oder bei höherem Claim                                                                         | keine automatische Rez                                                                                                                         |
+| R11 | temporäres Derez oder stale/unvollständiger Quote                                                                        | keine persistente/geschätzte Route                                                                                                             |
+| R12 | terminale unmittelbare Gefahr gegen gebundene Reserve                                                                    | explizit getestete lexikographische Vorrangregel                                                                                               |
 
 ## Verifikationsregeln
 
