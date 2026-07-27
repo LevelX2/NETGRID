@@ -4,6 +4,7 @@ import type { ApiPublicMatchListEntry } from "@netgrid/shared";
 import {
   filterAndSortPublicMatches,
   publicGamesFilterLabel,
+  shouldRefreshPublicGames,
   type PublicGamesFilter,
 } from "./public-games-model";
 
@@ -60,5 +61,32 @@ describe("public games model", () => {
     expect(publicGamesFilterLabel(filter)).toBe(label);
     expect(result).toHaveLength(filter === "all" ? 3 : 1);
     if (filter !== "all") expect(result[0]?.status).toBe(filter);
+  });
+
+  it("refreshes the visible setup list even when a local recovery session exists", () => {
+    expect(
+      shouldRefreshPublicGames({
+        hasActivePlayerView: false,
+        entryTab: "games",
+        activeMatchWorkspace: "game",
+      }),
+    ).toBe(true);
+  });
+
+  it("uses the active workspace only while rendering an active player view", () => {
+    expect(
+      shouldRefreshPublicGames({
+        hasActivePlayerView: true,
+        entryTab: "games",
+        activeMatchWorkspace: "game",
+      }),
+    ).toBe(false);
+    expect(
+      shouldRefreshPublicGames({
+        hasActivePlayerView: true,
+        entryTab: "play",
+        activeMatchWorkspace: "games",
+      }),
+    ).toBe(true);
   });
 });

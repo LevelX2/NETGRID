@@ -29,3 +29,17 @@ export function publicGamesFilterLabel(filter: PublicGamesFilter): string {
   if (filter === "finished") return "Abgeschlossen";
   return "Alle";
 }
+
+export function shouldRefreshPublicGames({
+  hasActivePlayerView,
+  entryTab,
+  activeMatchWorkspace,
+}: {
+  hasActivePlayerView: boolean;
+  entryTab: string;
+  activeMatchWorkspace: string;
+}): boolean {
+  return hasActivePlayerView
+    ? activeMatchWorkspace === "games"
+    : entryTab === "games";
+}

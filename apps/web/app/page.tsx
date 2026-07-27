@@ -421,6 +421,7 @@ import {
 import { runHiddenContextActionHint } from "../features/actions/run-hidden-context-hint";
 import { RecentGamesPanel } from "../features/recent/RecentGamesPanel";
 import { PublicGamesPanel } from "../features/games/PublicGamesPanel";
+import { shouldRefreshPublicGames } from "../features/games/public-games-model";
 import {
   effectiveAiTurnPresentation,
   removePendingUndo,
@@ -3810,9 +3811,11 @@ export default function Page() {
   };
 
   useEffect(() => {
-    const visible = session
-      ? activeMatchWorkspace === "games"
-      : entryTab === "games";
+    const visible = shouldRefreshPublicGames({
+      hasActivePlayerView: Boolean(session && payload && activeView),
+      entryTab,
+      activeMatchWorkspace,
+    });
     if (!visible) return;
     void refreshOpenLanMatches();
     const timer = window.setInterval(() => {
