@@ -1,19 +1,31 @@
 ---
 activityId: act-2026-07-27-heap-search-order-for-top-heap-effects
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-27
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-27
+completedAt: 2026-07-27
+branch: codex/heap-search-order
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/hidden-zone/search-choice-activations.ts
+  - packages/engine/src/game/hidden-zone/search-choice-handlers.ts
+  - apps/web/features/actions/CardChoicePanel.tsx
+  - apps/web/features/actions/card-choice-order-badge.ts
+  - packages/engine/src/game/hidden-zone/search-choice-activations.test.ts
+  - packages/engine/src/index-tests/mechanics/hidden-zone-identity.test.ts
+  - apps/web/app/card-choice-panel.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine test -- src/game/hidden-zone/search-choice-activations.test.ts src/index-tests/mechanics/hidden-zone-identity.test.ts
+  - corepack pnpm --filter @netgrid/web test -- app/card-choice-panel.test.ts
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
 ---
 
 # Heap-Reihenfolge bei Sucheffekten und Top-Heap-Karten klären und darstellen
@@ -49,7 +61,7 @@ verschleiern.
   (`docs/source/Netrunner Errata 1.70.md`, allgemeine Rulings „Trash“ und
   „Dealing & Taking Damage“).
 - Es gibt in Errata v1.70 keinen kartenspezifischen Eintrag zu `Junkyard
-  BBS`; der gedruckte Text „Bring the top card from your trash into your
+BBS`; der gedruckte Text „Bring the top card from your trash into your
   hand“ verwendet die allgemeine Reihenfolgenregel direkt.
 - Die moderne Null-Signal-Regelreferenz behandelt den Discard Pile anders,
   ist aber nicht die führende Regelquelle für diese Original-Netrunner-Karte.
@@ -98,6 +110,16 @@ verschleiern.
 
 ## Ergebnisnotiz
 
-Noch offen. Die Regelgrundlage ist geklärt; umzusetzen und abzusichern sind
-die ordnungserhaltende Choice-Erzeugung und die sichtbare Kennzeichnung der
-Heap-Spitze.
+Erledigt. Die gemeinsamen Heap-Choice-Erzeuger für `Forgotten Backup Chip`,
+`Gideon's Pawnshop` und die Heap-Seite von `Sneak Preview` erhalten die
+Reihenfolge von `state.runner.heap`; die technische Sortierung nach
+Karteninstanz-ID wurde entfernt. Der Dialog nummeriert den Heap vom
+Heap-Boden bis zur ausdrücklich markierten Heap-Spitze und erklärt, dass
+`Junkyard BBS` die Spitze zurückholt.
+
+Die Engine-Regressionen decken nicht auswählbare Karten, die Auswahl eines
+Programms unterhalb der Spitze, die nachfolgende wirksame Spitze sowie den
+Selbst-Trash des gespielten Events ab. Dadurch ist sichtbar, dass der
+gespielte Event selbst die oberste Heap-Karte sein kann. Runner-Choice,
+Corp-Redaktion, Replay und StateHash bleiben im bestehenden Vertragslauf
+abgesichert.

@@ -644,7 +644,7 @@ function startTemporaryProgramInstallChoice(
 ): void {
   const sourceCards =
     input.sourceZone === "heap"
-      ? host.state.runner.heap.slice().sort()
+      ? host.state.runner.heap
       : host.state.runner.stack;
   const targets = host.install.temporaryProgramInstallableProgramIds(input.sourceZone);
   const options = sourceCards.map((cardId) => {

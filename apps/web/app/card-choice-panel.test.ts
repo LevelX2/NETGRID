@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { PlayerView } from "@netgrid/shared";
 
 import {
+  cardChoiceHeapPositionBadge,
+  cardChoiceHeapPositionHint,
   cardChoiceOrderBadge,
   cardChoiceReadonlyPositionBadge,
   cardChoiceReadonlyPositionHint,
@@ -95,6 +97,48 @@ describe("read-only R&D position labels", () => {
       cardChoiceReadonlyPositionBadge(singleCardChoice, "card_a"),
     ).toBeNull();
     expect(cardChoiceReadonlyPositionHint(singleCardChoice)).toBeNull();
+  });
+});
+
+describe("Heap positions", () => {
+  const choice: VisibleChoice = {
+    ...orderedChoice("p3_37.search_trash_to_grip:source:definition:program:1"),
+    cardSearchPresentation: {
+      sourceZone: "heap",
+      selectableFilter: "program",
+      reveal: "hidden",
+      destination: "grip",
+      shuffleAfter: false,
+      showNonMatchingCards: true,
+    },
+  };
+
+  it("marks the source-order bottom and the Junkyard BBS-relevant top", () => {
+    expect(cardChoiceHeapPositionBadge(choice, "card_a")).toEqual({
+      label: "1 · Heap-Boden",
+      ariaLabel: "Position 1: unterste Karte des Heaps",
+    });
+    expect(cardChoiceHeapPositionBadge(choice, "card_b")).toEqual({
+      label: "2",
+      ariaLabel: "Position 2 von 3 im Heap",
+    });
+    expect(cardChoiceHeapPositionBadge(choice, "card_c")).toEqual({
+      label: "3 · Heap-Spitze",
+      ariaLabel: "Position 3: oberste Karte des Heaps",
+    });
+  });
+
+  it("explains the source order and keeps single-card searches explicit", () => {
+    expect(cardChoiceHeapPositionHint(choice)).toBe(
+      "Die Reihenfolge folgt dem Heap: 1 ist der Heap-Boden; 3 ist die Heap-Spitze und kann mit Junkyard BBS in den Grip genommen werden.",
+    );
+    const singleCardChoice: VisibleChoice = {
+      ...choice,
+      options: [choice.options[0]!],
+    };
+    expect(cardChoiceHeapPositionHint(singleCardChoice)).toBe(
+      "Die markierte Karte ist die Heap-Spitze und kann mit Junkyard BBS in den Grip genommen werden.",
+    );
   });
 });
 

@@ -63,6 +63,42 @@ export function cardChoiceReadonlyPositionHint(
   return `Die Nummerierung folgt der R&D-Reihenfolge: 1 ist die R&D-Spitze; ${cardOptions.length} ist die unterste der ${cardOptions.length} angesehenen Karten.`;
 }
 
+export function cardChoiceHeapPositionBadge(
+  choice: VisibleChoice,
+  optionId: string,
+): { label: string; ariaLabel: string } | null {
+  const cardOptions = heapCardOptions(choice);
+  const optionIndex = cardOptions.findIndex((option) => option.id === optionId);
+  if (optionIndex < 0) return null;
+  const position = optionIndex + 1;
+  if (position === cardOptions.length) {
+    return {
+      label: `${position} · Heap-Spitze`,
+      ariaLabel: `Position ${position}: oberste Karte des Heaps`,
+    };
+  }
+  if (position === 1) {
+    return {
+      label: "1 · Heap-Boden",
+      ariaLabel: "Position 1: unterste Karte des Heaps",
+    };
+  }
+  return {
+    label: String(position),
+    ariaLabel: `Position ${position} von ${cardOptions.length} im Heap`,
+  };
+}
+
+export function cardChoiceHeapPositionHint(
+  choice: VisibleChoice,
+): string | null {
+  const cardOptions = heapCardOptions(choice);
+  if (cardOptions.length === 0) return null;
+  if (cardOptions.length === 1)
+    return "Die markierte Karte ist die Heap-Spitze und kann mit Junkyard BBS in den Grip genommen werden.";
+  return `Die Reihenfolge folgt dem Heap: 1 ist der Heap-Boden; ${cardOptions.length} ist die Heap-Spitze und kann mit Junkyard BBS in den Grip genommen werden.`;
+}
+
 export function isRunnerStackTopChooseOneArrangeRestChoice(
   choice: VisibleChoice,
 ): boolean {
@@ -79,6 +115,16 @@ function readonlyRdCardOptions(choice: VisibleChoice): VisibleChoice["options"] 
     choice.kind !== "select_cards" ||
     !choice.source.startsWith("p3_33.private_look:") ||
     choice.source.split(":")[3] !== "rd"
+  ) {
+    return [];
+  }
+  return choice.options.filter((option) => option.id !== "done");
+}
+
+function heapCardOptions(choice: VisibleChoice): VisibleChoice["options"] {
+  if (
+    choice.kind !== "select_cards" ||
+    choice.cardSearchPresentation?.sourceZone !== "heap"
   ) {
     return [];
   }

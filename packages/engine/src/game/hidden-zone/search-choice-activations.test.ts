@@ -96,10 +96,11 @@ describe("hidden-zone search choice activations", () => {
   it("builds p3_37 search-to-grip pending choices with stable payload markers", () => {
     const stackProgram = "stack_program" as CardInstanceId;
     const stackResource = "stack_resource" as CardInstanceId;
-    const heapProgram = "heap_program" as CardInstanceId;
+    const heapProgram = "z_heap_program" as CardInstanceId;
+    const heapResource = "a_heap_resource" as CardInstanceId;
     const host = makeHost({
       stack: [stackProgram, stackResource],
-      heap: [heapProgram],
+      heap: [heapProgram, heapResource],
       definitions: {
         [stackProgram]: card("stack_program_def", "program", "Stack Program"),
         [stackResource]: card(
@@ -108,6 +109,7 @@ describe("hidden-zone search choice activations", () => {
           "Stack Resource",
         ),
         [heapProgram]: card("heap_program_def", "program", "Heap Program"),
+        [heapResource]: card("heap_resource_def", "resource", "Heap Resource"),
       },
     });
 
@@ -146,6 +148,12 @@ describe("hidden-zone search choice activations", () => {
       searchedZone: "runner_heap",
       searchFilter: "program",
     });
+    expect(
+      (host.state.pendingChoice as unknown as { options: unknown[] }).options,
+    ).toMatchObject([
+      { value: heapProgram },
+      { value: heapResource, selectable: false },
+    ]);
   });
 
   it("builds top-n take matching activation with stable cost and reveal metadata", () => {
