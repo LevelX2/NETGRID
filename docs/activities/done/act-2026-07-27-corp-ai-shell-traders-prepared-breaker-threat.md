@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-07-27-corp-ai-shell-traders-prepared-breaker-threat
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-27
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-27
+completedAt: 2026-07-27
+branch: codex/activities-worktree-20260727-205225
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - data/scenarios/ai-decision-checkpoints/cp-0c77a1fb-01-prepared-shell-traders-breaker-score-threat.json
+  - packages/ai/src/evaluation/decision-checkpoints/match-0c77a1fb-prepared-shell-traders-breaker-score-threat-decision-checkpoint.test.ts
+  - docs/reviews/ai/corp-ai-shell-traders-prepared-breaker-threat-final-review-2026-07-27.md
+  - docs/reviews/ai/ai-match-0c77a1fb-prepared-shell-traders-breaker-hint-consumer-audit-2026-07-27.json
+checks:
+  - pnpm --filter @netgrid/ai typecheck (grün)
+  - fokussierte Checkpoint-, Score-Protection-, DTO- und Shell-Traders-Tests (76 grün)
+  - erweiterte betroffene Runtime-/Checkpoint-Suite (146 grün)
+  - Deck-Hint-/Consumer-Audit (keine neuen Findings; zwei unabhängige Bestandsblocker)
+  - git diff --check (grün)
 relatedActivities:
   - act-2026-06-23-ai-shell-traders-full-test-gate
   - act-2026-07-26-corp-ice-rez-resource-exchange-value
@@ -160,4 +169,12 @@ die vom Engine-Pfad belegten Pump-/Breakkosten gerechnet.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Der historische D9-Checkpoint reproduzierte vor der Korrektur die
+unsichere `Corporate Retreat`-Installation auf `remote_1`. Die Corp-KI
+bewertet einen öffentlich vorbereiteten Shell-Traders-Breaker jetzt mit
+automatischer Counter-Entfernung, verbleibenden Kosten, Credits, Memory und
+konkretem ICE-Pfad. Der Checkpoint wählt danach legal `draw_card` im
+`corp.defend_servers`-Plan. Der vollständige KI-Testlauf lieferte wegen eines
+Wrapper-Zeitlimits keinen verwertbaren Abschlussstatus; die gezielten und
+erweiterten betroffenen Tests sind grün. Der Hint-/Consumer-Audit enthält zwei
+unabhängige Bestandsblocker, aber keine neuen Findings aus dieser Änderung.

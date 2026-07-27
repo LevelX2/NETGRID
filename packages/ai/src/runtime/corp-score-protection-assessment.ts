@@ -83,6 +83,7 @@ export type UnknownCorpScoreProtectionAssessment =
         | "invalid_effective_run_quote"
         | "unsupported_runner_credit_pools"
         | "unsupported_runner_access_effect"
+        | "unsupported_public_staged_breaker"
         | "unsupported_breaker_combination"
         | "unsupported_random_break_strategy"
         | "unsupported_access_relevant_ice_effect"
@@ -113,6 +114,14 @@ export type CorpScoreProtectionIceInput = Readonly<{
 export type CorpScoreProtectionAssessmentInput = Readonly<{
   serverIce: readonly CorpScoreProtectionIceInput[];
   runnerRig: readonly VisibleCard[];
+  /**
+   * Public, engine-derived delayed-install cards. A Corp-side projection may
+   * use these only when the corresponding installed delayed-install source,
+   * counter cost, memory fit, and Runner credits can all be certified.
+   */
+  runnerSetAside?: readonly VisibleCard[];
+  runnerMemoryUsed?: number;
+  runnerMemoryLimit?: number;
   runnerCredits: number;
   maximumRunnerAccessSuccessProbability: ExactProbability;
 }>;
@@ -174,6 +183,24 @@ const MAX_SAFE_BIGINT = BigInt(Number.MAX_SAFE_INTEGER);
 export function assessCorpScoreProtection(
   input: CorpScoreProtectionAssessmentInput,
 ): CorpScoreProtectionAssessment {
+  const stagedBreakers = visiblePreparedRunnerBreakerCandidates(input);
+  if (stagedBreakers.status === "unknown") {
+    return unknownAssessment(
+      input.maximumRunnerAccessSuccessProbability,
+      "unsupported_public_staged_breaker",
+      [
+        "scoreProtectionKnown:false",
+        "publicStagedBreakerKnown:false",
+        `publicStagedBreakerReason:${stagedBreakers.reason}`,
+      ],
+    );
+  }
+  if (stagedBreakers.candidates.length > 0) {
+    return assessCorpScoreProtectionWithPreparedBreakers(
+      input,
+      stagedBreakers.candidates,
+    );
+  }
   const threshold = rationalFromExactProbability(
     input.maximumRunnerAccessSuccessProbability,
   );
@@ -373,6 +400,7 @@ export function assessCorpScoreProtection(
       `runnerAccessSuccessProbability:${accessProbability.numerator}/${accessProbability.denominator}`,
       `maximumRunnerAccessSuccessProbability:${exactThreshold.numerator}/${exactThreshold.denominator}`,
       `requiredRandomBreakSuccesses:${requiredRandomBreakSuccesses}`,
+      `runnerCreditsRemainingOnBestAccessPath:${bestPath.credits}`,
       `protectsScore:${protectsScore}`,
     ],
   };
@@ -757,10 +785,12 @@ function pruneDominatedStates(
       state.creditBudget.nonNoisyIcebreakerCredits,
       state.creditBudget.killerCredits,
       state.creditBudget.stealthNonNoisyIcebreakerCredits,
-      ...Object.entries(state.creditBudget.hostedIcebreakerCreditsByBreakerInstanceId)
+      ...Object.entries(
+        state.creditBudget.hostedIcebreakerCreditsByBreakerInstanceId,
+      )
         .sort(([left], [right]) => compareCanonicalStrings(left, right))
-        .map(([breakerInstanceId, credits]) =>
-          `${breakerInstanceId}:${credits}`,
+        .map(
+          ([breakerInstanceId, credits]) => `${breakerInstanceId}:${credits}`,
         ),
     ].join(",");
     const key = `${budgetKey}|${strengthKey}`;
@@ -1032,6 +1062,189 @@ function exactRandomBreakChoice(
     successProbabilityPerAttempt: perAttempt,
     combinedSuccessProbability: combined,
   };
+}
+
+type PreparedRunnerBreakerCandidate = Readonly<{
+  card: VisibleCard;
+  installCreditCost: number;
+  evidence: readonly string[];
+}>;
+
+type PreparedRunnerBreakerCandidateRead =
+  | Readonly<{
+      status: "known";
+      candidates: readonly PreparedRunnerBreakerCandidate[];
+    }>
+  | Readonly<{
+      status: "unknown";
+      reason:
+        | "invalid_set_aside_card"
+        | "invalid_shell_counter"
+        | "invalid_runner_memory"
+        | "staged_breaker_memory_unknown";
+    }>;
+
+/**
+ * Models only a public, Engine-materialized delayed install. It deliberately
+ * requires the installed source, public Shell counters, memory facts, and the
+ * resulting paid counter-removal credits instead of reconstructing a threat
+ * from historic events or card-name heuristics.
+ */
+function visiblePreparedRunnerBreakerCandidates(
+  input: CorpScoreProtectionAssessmentInput,
+): PreparedRunnerBreakerCandidateRead {
+  const setAside = input.runnerSetAside;
+  if (setAside === undefined) return { status: "known", candidates: [] };
+
+  const setAsideIds = setAside.map((card) => card.instanceId);
+  if (
+    setAsideIds.some((instanceId) => !validIdentifier(instanceId)) ||
+    new Set(setAsideIds).size !== setAsideIds.length
+  ) {
+    return { status: "unknown", reason: "invalid_set_aside_card" };
+  }
+
+  const automaticRemovals = input.runnerRig.filter((card) => {
+    if (
+      card.known !== true ||
+      card.type !== "resource" ||
+      card.owner !== "runner" ||
+      !card.definitionId
+    ) {
+      return false;
+    }
+    const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+    return Boolean(
+      definition &&
+      definition.side === "runner" &&
+      definition.mechanics.includes("shell_counter") &&
+      definition.mechanics.includes("delayed_install"),
+    );
+  }).length;
+  if (automaticRemovals === 0) return { status: "known", candidates: [] };
+
+  const candidates: PreparedRunnerBreakerCandidate[] = [];
+  for (const card of setAside) {
+    const shellCounters = card.counters?.shell;
+    if (shellCounters === undefined) continue;
+    if (!nonNegativeSafeInteger(shellCounters)) {
+      return { status: "unknown", reason: "invalid_shell_counter" };
+    }
+    if (shellCounters === 0 || !cardIsIcebreaker(card)) continue;
+    if (
+      !validRunnerRigCard(card) ||
+      input.runnerRig.some(
+        (installedCard) => installedCard.instanceId === card.instanceId,
+      )
+    ) {
+      return { status: "unknown", reason: "invalid_set_aside_card" };
+    }
+    if (
+      !nonNegativeSafeInteger(input.runnerMemoryUsed) ||
+      !nonNegativeSafeInteger(input.runnerMemoryLimit) ||
+      input.runnerMemoryUsed > input.runnerMemoryLimit
+    ) {
+      return { status: "unknown", reason: "invalid_runner_memory" };
+    }
+    if (!nonNegativeSafeInteger(card.memoryCost)) {
+      return { status: "unknown", reason: "staged_breaker_memory_unknown" };
+    }
+    if (input.runnerMemoryUsed + card.memoryCost > input.runnerMemoryLimit) {
+      continue;
+    }
+    const startTurnRemovals = Math.min(shellCounters, automaticRemovals);
+    const installCreditCost = shellCounters - startTurnRemovals;
+    if (installCreditCost > input.runnerCredits) continue;
+    candidates.push({
+      card,
+      installCreditCost,
+      evidence: [
+        "publicStagedBreaker:true",
+        `publicStagedBreakerInstanceId:${card.instanceId}`,
+        `publicStagedBreakerDefinitionId:${card.definitionId}`,
+        `publicStagedBreakerShellCounters:${shellCounters}`,
+        `publicStagedBreakerStartTurnRemovals:${startTurnRemovals}`,
+        `publicStagedBreakerPaidCounterRemovals:${installCreditCost}`,
+        `publicStagedBreakerInstallCreditCost:${installCreditCost}`,
+        "publicStagedBreakerMemoryFits:true",
+        "publicStagedBreakerImmediateInstall:true",
+      ],
+    });
+  }
+  return { status: "known", candidates };
+}
+
+function assessCorpScoreProtectionWithPreparedBreakers(
+  input: CorpScoreProtectionAssessmentInput,
+  candidates: readonly PreparedRunnerBreakerCandidate[],
+): CorpScoreProtectionAssessment {
+  const {
+    runnerSetAside: _runnerSetAside,
+    runnerMemoryUsed: _runnerMemoryUsed,
+    runnerMemoryLimit: _runnerMemoryLimit,
+    ...baseInput
+  } = input;
+  void _runnerSetAside;
+  void _runnerMemoryUsed;
+  void _runnerMemoryLimit;
+
+  const base = assessCorpScoreProtection(baseInput);
+  const assessments: Array<
+    Readonly<{
+      assessment: KnownCorpScoreProtectionAssessment;
+      stagedEvidence: readonly string[];
+    }>
+  > = [];
+  if (base.knowledge === "known") {
+    assessments.push({ assessment: base, stagedEvidence: [] });
+  } else if (base.unknownReason !== "unsupported_runner_credit_pools") {
+    return base;
+  }
+
+  for (const candidate of candidates) {
+    const assessment = assessCorpScoreProtection({
+      ...baseInput,
+      runnerRig: [...input.runnerRig, candidate.card],
+      runnerCredits: input.runnerCredits - candidate.installCreditCost,
+    });
+    if (assessment.knowledge === "unknown") return assessment;
+    assessments.push({
+      assessment,
+      stagedEvidence: candidate.evidence,
+    });
+  }
+  const selected = assessments.reduce((best, candidate) =>
+    scoreProtectionAssessmentIsMoreDangerous(
+      candidate.assessment,
+      best.assessment,
+    )
+      ? candidate
+      : best,
+  );
+  return {
+    ...selected.assessment,
+    evidence: [
+      ...selected.assessment.evidence,
+      `publicStagedBreakerCandidateCount:${candidates.length}`,
+      ...selected.stagedEvidence,
+    ],
+  };
+}
+
+function scoreProtectionAssessmentIsMoreDangerous(
+  candidate: KnownCorpScoreProtectionAssessment,
+  current: KnownCorpScoreProtectionAssessment,
+): boolean {
+  const probabilityComparison = compareExactProbabilities(
+    candidate.runnerAccessSuccessProbability,
+    current.runnerAccessSuccessProbability,
+  );
+  if (probabilityComparison === undefined) return false;
+  if (probabilityComparison !== 0) return probabilityComparison > 0;
+  return (
+    candidate.runnerCreditsRemainingOnBestAccessPath >
+    current.runnerCreditsRemainingOnBestAccessPath
+  );
 }
 
 function unknownAssessment(

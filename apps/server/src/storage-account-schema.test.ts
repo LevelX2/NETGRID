@@ -18,6 +18,7 @@ describe("SQLite schema contract", () => {
       db.exec("PRAGMA foreign_keys = OFF");
       for (const table of [
         "account_decks",
+        "account_match_start_preferences",
         "account_reset_tokens",
         "account_invites",
         "account_sessions",
@@ -27,11 +28,15 @@ describe("SQLite schema contract", () => {
       ]) {
         db.exec(`DROP TABLE IF EXISTS ${table}`);
       }
-      db.prepare("UPDATE storage_meta SET value = '1' WHERE key = 'schema_version'").run();
+      db.prepare(
+        "UPDATE storage_meta SET value = '1' WHERE key = 'schema_version'",
+      ).run();
       db.close();
       db = undefined;
 
-      expect(() => new SqliteMatchStorage({ dbPath, backupDir })).toThrow(/aktuelle Schema/);
+      expect(() => new SqliteMatchStorage({ dbPath, backupDir })).toThrow(
+        /aktuelle Schema/,
+      );
       expect(await readdir(backupDir)).toHaveLength(0);
     } finally {
       db?.close();
@@ -40,7 +45,9 @@ describe("SQLite schema contract", () => {
   });
 
   it("rejects schema 2 without creating a migration backup", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "netgrid-account-statistics-schema-"));
+    const dir = await mkdtemp(
+      join(tmpdir(), "netgrid-account-statistics-schema-"),
+    );
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     let db: DatabaseSync | undefined;
@@ -48,11 +55,19 @@ describe("SQLite schema contract", () => {
       const initial = new SqliteMatchStorage({ dbPath, backupDir });
       initial.close();
       db = new DatabaseSync(dbPath);
-      for (const table of ["account_series_results", "account_game_results", "account_match_participants"]) {
+      for (const table of [
+        "account_series_results",
+        "account_game_results",
+        "account_match_participants",
+      ]) {
         db.exec(`DROP TABLE ${table}`);
       }
-      db.prepare("DELETE FROM storage_meta WHERE key = 'account_statistics_since'").run();
-      db.prepare("UPDATE storage_meta SET value = '2' WHERE key = 'schema_version'").run();
+      db.prepare(
+        "DELETE FROM storage_meta WHERE key = 'account_statistics_since'",
+      ).run();
+      db.prepare(
+        "UPDATE storage_meta SET value = '2' WHERE key = 'schema_version'",
+      ).run();
       db.close();
       db = undefined;
 

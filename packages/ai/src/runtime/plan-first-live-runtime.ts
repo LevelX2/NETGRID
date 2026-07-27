@@ -8317,15 +8317,6 @@ function scoreProjectForCandidate(
         projectId,
         serverId,
       );
-    const stagedProtectionUnknownReason =
-      protectionNeed?.baseline.knowledge === "unknown" &&
-      protectionNeed.baseline.unknownReason === "subset_assessment_unknown" &&
-      serverId !== undefined &&
-      corpScoreInstallHasVisibleStagedEtrIce(input, serverId)
-        ? protectionNeed.baseline.unknownReason
-        : undefined;
-    const stagedProtectionUnderUncertainty =
-      stagedProtectionUnknownReason !== undefined;
     const fundingGap =
       protectionNeed?.baseline.knowledge === "known"
         ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
@@ -8335,7 +8326,7 @@ function scoreProjectForCandidate(
       (scorelineFeasibility?.deadline !== "current_turn_only" &&
         scorelineFeasibility?.feasible !== false &&
         scoreActionSemanticsKnown &&
-        (protectedScoreWindow || stagedProtectionUnderUncertainty) &&
+        protectedScoreWindow &&
         developmentClickAvailable &&
         (fundingGap ?? 0) === 0);
     return [
@@ -8352,16 +8343,6 @@ function scoreProjectForCandidate(
         sameTurnCloseout,
         deadlinePressure,
         ...(protectionNeed ? { protectionNeed } : {}),
-        ...(stagedProtectionUnderUncertainty
-          ? {
-              uncertainty: {
-                kind: "later_score_route" as const,
-                knowledge: "unknown" as const,
-                reason: stagedProtectionUnknownReason!,
-                currentActionScope: "exact_install_only" as const,
-              },
-            }
-          : {}),
         terminalScore: matchpointTarget,
         ...(fundingGap !== undefined && fundingGap > 0 ? { fundingGap } : {}),
         feasible,
@@ -8373,15 +8354,13 @@ function scoreProjectForCandidate(
               ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
               : !developmentClickAvailable
                 ? `corp_last_click_score_install_deferred:${serverId ?? "unbound"}`
-                : stagedProtectionUnderUncertainty
-                  ? `corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:${serverId ?? "unbound"}`
-                  : protectionNeed?.baseline.knowledge === "unknown"
-                    ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
-                    : fundingGap !== undefined && fundingGap > 0
-                      ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                      : protectedScoreWindow
-                        ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
-                        : `corp_score_protection_required:${serverId ?? "unbound"}`,
+                : protectionNeed?.baseline.knowledge === "unknown"
+                  ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
+                  : fundingGap !== undefined && fundingGap > 0
+                    ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
+                    : protectedScoreWindow
+                      ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
+                      : `corp_score_protection_required:${serverId ?? "unbound"}`,
       },
     ];
   }
@@ -8642,26 +8621,6 @@ function visibleOwnCardByInstanceId(
   ].find((card) => card.instanceId === instanceId);
 }
 
-function corpScoreInstallHasVisibleStagedEtrIce(
-  input: AiDecisionInput,
-  serverId: string,
-): boolean {
-  if (serverId === "new_remote") return false;
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  return (
-    server?.ice.some((ice) => {
-      if (!ice.known || !ice.definitionId) return false;
-      const definition = CARD_DEFINITIONS_BY_ID[ice.definitionId];
-      return (
-        definition?.type === "ice" &&
-        definition.mechanics.includes("end_the_run")
-      );
-    }) === true
-  );
-}
-
 function visibleAgendaAdvanceCanCloseThisTurn(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
@@ -8822,6 +8781,13 @@ function corpFundedScoreProtectionNeed(
   const baseline = assessBestFundedCorpScoreProtection({
     serverIce,
     runnerRig: input.playerView.opponent.rig ?? [],
+    runnerSetAside: input.playerView.specialZones?.setAside ?? [],
+    ...(input.playerView.opponent.memoryUsed !== undefined
+      ? { runnerMemoryUsed: input.playerView.opponent.memoryUsed }
+      : {}),
+    ...(input.playerView.opponent.memoryLimit !== undefined
+      ? { runnerMemoryLimit: input.playerView.opponent.memoryLimit }
+      : {}),
     runnerCredits: input.playerView.opponent.credits,
     targetServerId:
       serverId as CorpFundedRemoteAccessRiskNeed["targetServerId"],
@@ -9028,6 +8994,13 @@ function corpGlobalDefenseInstallRouteAssessment(
   const baseline = assessBestFundedCorpScoreProtection({
     serverIce,
     runnerRig: input.playerView.opponent.rig ?? [],
+    runnerSetAside: input.playerView.specialZones?.setAside ?? [],
+    ...(input.playerView.opponent.memoryUsed !== undefined
+      ? { runnerMemoryUsed: input.playerView.opponent.memoryUsed }
+      : {}),
+    ...(input.playerView.opponent.memoryLimit !== undefined
+      ? { runnerMemoryLimit: input.playerView.opponent.memoryLimit }
+      : {}),
     runnerCredits: input.playerView.opponent.credits,
     targetServerId:
       serverId as CorpFundedRemoteAccessRiskNeed["targetServerId"],
@@ -9079,6 +9052,13 @@ function corpGlobalDefenseInstallRouteAssessment(
     visibleCorpHand: input.playerView.own.gripOrHq,
     ...(server ? { currentServer: { id: server.id, ice: serverIce } } : {}),
     runnerRig: input.playerView.opponent.rig ?? [],
+    runnerSetAside: input.playerView.specialZones?.setAside ?? [],
+    ...(input.playerView.opponent.memoryUsed !== undefined
+      ? { runnerMemoryUsed: input.playerView.opponent.memoryUsed }
+      : {}),
+    ...(input.playerView.opponent.memoryLimit !== undefined
+      ? { runnerMemoryLimit: input.playerView.opponent.memoryLimit }
+      : {}),
     runnerCredits: input.playerView.opponent.credits,
     projectedInstallCredits,
     projectedInstallClicks,
@@ -9268,6 +9248,13 @@ function corpScoreProtectionInstallRouteScan(
           }
         : {}),
       runnerRig: input.playerView.opponent.rig ?? [],
+      runnerSetAside: input.playerView.specialZones?.setAside ?? [],
+      ...(input.playerView.opponent.memoryUsed !== undefined
+        ? { runnerMemoryUsed: input.playerView.opponent.memoryUsed }
+        : {}),
+      ...(input.playerView.opponent.memoryLimit !== undefined
+        ? { runnerMemoryLimit: input.playerView.opponent.memoryLimit }
+        : {}),
       runnerCredits: input.playerView.opponent.credits,
       projectedInstallCredits,
       projectedInstallClicks,

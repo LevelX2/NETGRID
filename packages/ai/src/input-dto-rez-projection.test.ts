@@ -34,6 +34,30 @@ describe("AI input DTO Corp rez projection contract", () => {
     );
   });
 
+  it("preserves public opponent memory facts for Corp delayed-install projections", () => {
+    const action = iceInstallAction();
+    const view = playerView(action);
+    view.opponent.memoryUsed = 2;
+    view.opponent.memoryLimit = 4;
+
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "public-opponent-memory",
+      decisionId: "public-opponent-memory:corp:1",
+      actionNumber: 1,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(input.playerView.opponent).toMatchObject({
+      memoryUsed: 2,
+      memoryLimit: 4,
+    });
+  });
+
   it.each([
     [
       "X-strength",

@@ -77,7 +77,7 @@ export function scoringWindowAccessAssessment(
   const runnerPathCandidates = visibleRunnerBreakerPathCandidates(
     input,
     visibleRunnerContestCredits,
-    visibleRunnerExtraCredits > 0,
+    input.side === "corp" && input.playerView.activeSide === "corp",
   );
   const baseRunnerPathCandidate = runnerPathCandidates[0]!;
   const visibleRunnerIcebreakerCount =

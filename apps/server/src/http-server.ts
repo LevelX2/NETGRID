@@ -84,6 +84,11 @@ import {
   type AccountDeckRecord,
 } from "./account-decks";
 import {
+  AccountMatchStartPreferenceService,
+  AccountMatchStartPreferencesError,
+  SqliteAccountMatchStartPreferenceStorage,
+} from "./account-match-start-preferences";
+import {
   ACCOUNT_SESSION_COOKIE_NAME,
   ACCOUNT_SESSION_MAX_AGE_DAYS,
   SqliteAccountStorage,
@@ -195,6 +200,7 @@ export type NetgridServerOptions = {
   maintenanceAuth?: MaintenanceAuthService;
   accountAuth?: AccountAuthService;
   accountDecks?: AccountDeckService;
+  accountMatchStartPreferences?: AccountMatchStartPreferenceService;
   accountStatistics?: AccountMatchStatisticsService;
 };
 
@@ -847,6 +853,7 @@ export function createNetgridHttpServer(
     );
   const accountAuth = options.accountAuth;
   const accountDecks = options.accountDecks;
+  const accountMatchStartPreferences = options.accountMatchStartPreferences;
   const accountStatistics = options.accountStatistics;
   const removeAccountStatisticsObserver = accountStatistics
     ? activeService.addPersistenceObserver((record) =>
@@ -876,6 +883,7 @@ export function createNetgridHttpServer(
         maintenanceAuth,
         accountAuth,
         accountDecks,
+        accountMatchStartPreferences,
         accountStatistics,
         request,
         response,
@@ -905,6 +913,7 @@ export function createNetgridHttpServer(
               if (cleanupTimer) clearInterval(cleanupTimer);
               removeAccountStatisticsObserver?.();
               accountDecks?.close();
+              accountMatchStartPreferences?.close();
               accountStatistics?.close();
               accountAuth?.close();
               activeService.closeStorage();
@@ -923,12 +932,17 @@ export async function startNetgridServer(
     service?: MultiplayerService;
     accountAuth?: AccountAuthService;
     accountDecks?: AccountDeckService;
+    accountMatchStartPreferences?: AccountMatchStartPreferenceService;
     accountStatistics?: AccountMatchStatisticsService;
   } = {},
 ): Promise<NetgridServerHandle & { url: string; bindUrl: string }> {
+  const accountDecks = options.accountDecks ?? createConfiguredAccountDecks();
   const handle = createNetgridHttpServer(options.service, {
     accountAuth: options.accountAuth ?? createConfiguredAccountAuth(),
-    accountDecks: options.accountDecks ?? createConfiguredAccountDecks(),
+    accountDecks,
+    accountMatchStartPreferences:
+      options.accountMatchStartPreferences ??
+      createConfiguredAccountMatchStartPreferences(undefined, accountDecks),
     accountStatistics:
       options.accountStatistics ?? createConfiguredAccountStatistics(),
   });
@@ -975,6 +989,18 @@ export function createConfiguredAccountStatistics(
   );
 }
 
+export function createConfiguredAccountMatchStartPreferences(
+  env: NodeJS.ProcessEnv | undefined = process.env,
+  accountDecks: AccountDeckService = createConfiguredAccountDecks(env),
+): AccountMatchStartPreferenceService {
+  const dbPath = resolveConfiguredAccountSqlitePath(env);
+  const backupDir = resolveConfiguredStorageBackupDir(env);
+  return new AccountMatchStartPreferenceService(
+    new SqliteAccountMatchStartPreferenceStorage({ dbPath, backupDir }),
+    accountDecks,
+  );
+}
+
 function startMaintenanceCleanupTimer(
   service: MultiplayerService,
 ): ReturnType<typeof setInterval> | undefined {
@@ -1003,6 +1029,7 @@ async function routeHttp(
   maintenanceAuth: MaintenanceAuthService,
   accountAuth: AccountAuthService | undefined,
   accountDecks: AccountDeckService | undefined,
+  accountMatchStartPreferences: AccountMatchStartPreferenceService | undefined,
   accountStatistics: AccountMatchStatisticsService | undefined,
   request: IncomingMessage,
   response: ServerResponse,
@@ -1562,6 +1589,77 @@ async function routeHttp(
       return;
     }
 
+    if (
+      url.pathname === "/api/account/match-start-preferences" &&
+      request.method === "GET"
+    ) {
+      if (!accountAuth || !accountMatchStartPreferences)
+        return sendJson(response, 503, accountUnavailablePayload());
+      const auth = await ensureAccountAuthenticated(
+        response,
+        request,
+        accountAuth,
+      );
+      if (!auth) return;
+      response.setHeader("cache-control", "no-store");
+      sendJson(
+        response,
+        200,
+        await accountMatchStartPreferences.load(auth.account.accountId),
+      );
+      return;
+    }
+
+    if (
+      url.pathname === "/api/account/match-start-preferences" &&
+      request.method === "PUT"
+    ) {
+      if (!accountAuth || !accountMatchStartPreferences)
+        return sendJson(response, 503, accountUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(
+        response,
+        request,
+        deploymentConfig,
+        accountAuth,
+      );
+      if (!auth) return;
+      const body = await readJson(request);
+      try {
+        const saved = await accountMatchStartPreferences.save(
+          auth.account.accountId,
+          body.preferences,
+        );
+        response.setHeader("cache-control", "no-store");
+        sendJson(response, 200, saved);
+      } catch (error) {
+        if (error instanceof AccountMatchStartPreferencesError) {
+          sendJson(response, 400, accountMatchStartPreferencesErrorPayload());
+          return;
+        }
+        throw error;
+      }
+      return;
+    }
+
+    if (
+      url.pathname === "/api/account/match-start-preferences" &&
+      request.method === "DELETE"
+    ) {
+      if (!accountAuth || !accountMatchStartPreferences)
+        return sendJson(response, 503, accountUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(
+        response,
+        request,
+        deploymentConfig,
+        accountAuth,
+      );
+      if (!auth) return;
+      await accountMatchStartPreferences.delete(auth.account.accountId);
+      response.setHeader("cache-control", "no-store");
+      sendJson(response, 200, { ok: true });
+      return;
+    }
+
     if (url.pathname === "/api/account/export" && request.method === "GET") {
       if (!accountAuth || !accountDecks)
         return sendJson(response, 503, accountDecksUnavailablePayload());
@@ -1576,15 +1674,25 @@ async function routeHttp(
       const statistics = accountStatistics
         ? await accountStatistics.exportForAccount(auth.account.accountId)
         : undefined;
+      const matchStartPreferences = accountMatchStartPreferences
+        ? await accountMatchStartPreferences.load(auth.account.accountId)
+        : undefined;
       response.setHeader("cache-control", "no-store");
       sendJson(response, 200, {
-        schemaVersion: statistics
-          ? "netgrid-account-export-v2"
-          : "netgrid-account-export-v1",
+        schemaVersion: matchStartPreferences
+          ? statistics
+            ? "netgrid-account-export-v3"
+            : "netgrid-account-export-v2"
+          : statistics
+            ? "netgrid-account-export-v2"
+            : "netgrid-account-export-v1",
         exportedAt: new Date().toISOString(),
         account,
         decks: decks.decks.map(accountDeckPublicView),
         ...(statistics ? { statistics } : {}),
+        ...(matchStartPreferences
+          ? { matchStartPreferences: matchStartPreferences.preferences }
+          : {}),
       });
       return;
     }
@@ -1608,6 +1716,7 @@ async function routeHttp(
       if (!deleted)
         return sendJson(response, 401, accountInvalidCredentialsPayload());
       await accountDecks.deleteAll(auth.account.accountId);
+      await accountMatchStartPreferences?.delete(auth.account.accountId);
       await accountStatistics?.deleteAccountData(auth.account.accountId);
       response.setHeader(
         "set-cookie",
@@ -3817,6 +3926,21 @@ function accountDecksUnavailablePayload(): {
       code: "account_decks_unavailable",
       message:
         "Die persönliche Deckbibliothek ist in diesem Serverprozess nicht aktiviert.",
+    },
+  };
+}
+
+function accountMatchStartPreferencesErrorPayload(): {
+  error: {
+    code: "account_match_start_preferences_invalid";
+    message: string;
+  };
+} {
+  return {
+    error: {
+      code: "account_match_start_preferences_invalid",
+      message:
+        "Die Matchstart-Vorbelegung enthält nicht erlaubte oder ungültige Werte.",
     },
   };
 }

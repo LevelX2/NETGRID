@@ -102,6 +102,9 @@ export type CorpBestFundedScoreProtectionInput = Readonly<{
   serverIce: readonly CorpFundedScoreProtectionIceInput[];
   postInstallQuoteCardId?: string;
   runnerRig: readonly VisibleCard[];
+  runnerSetAside?: readonly VisibleCard[];
+  runnerMemoryUsed?: number;
+  runnerMemoryLimit?: number;
   runnerCredits: number;
   targetServerId: VisibleCorpRezCostQuote["targetServerId"];
   observedAtStateVersion: number;
@@ -221,6 +224,9 @@ export type CorpFundedIceInstallRouteInput = Readonly<{
     ice: readonly CorpFundedScoreProtectionIceInput[];
   }>;
   runnerRig: readonly VisibleCard[];
+  runnerSetAside?: readonly VisibleCard[];
+  runnerMemoryUsed?: number;
+  runnerMemoryLimit?: number;
   runnerCredits: number;
   projectedInstallCredits: number;
   projectedInstallClicks: number;
@@ -417,6 +423,13 @@ export function assessBestFundedCorpScoreProtection(
         rezzed: ice.rezzed === true || selectedById.has(ice.instanceId),
       })),
       runnerRig: input.runnerRig,
+      ...(input.runnerSetAside ? { runnerSetAside: input.runnerSetAside } : {}),
+      ...(input.runnerMemoryUsed !== undefined
+        ? { runnerMemoryUsed: input.runnerMemoryUsed }
+        : {}),
+      ...(input.runnerMemoryLimit !== undefined
+        ? { runnerMemoryLimit: input.runnerMemoryLimit }
+        : {}),
       runnerCredits: input.runnerCredits,
       maximumRunnerAccessSuccessProbability:
         input.maximumRunnerAccessSuccessProbability,
@@ -678,6 +691,13 @@ export function projectCorpFundedIceInstallRoute(
   const recomputedBaseline = assessBestFundedCorpScoreProtection({
     serverIce: currentIce,
     runnerRig: input.runnerRig,
+    ...(input.runnerSetAside ? { runnerSetAside: input.runnerSetAside } : {}),
+    ...(input.runnerMemoryUsed !== undefined
+      ? { runnerMemoryUsed: input.runnerMemoryUsed }
+      : {}),
+    ...(input.runnerMemoryLimit !== undefined
+      ? { runnerMemoryLimit: input.runnerMemoryLimit }
+      : {}),
     runnerCredits: input.runnerCredits,
     targetServerId: need.targetServerId,
     observedAtStateVersion: input.currentStateVersion,
@@ -817,6 +837,13 @@ export function projectCorpFundedIceInstallRoute(
     serverIce: [...currentIce, projectedSource],
     postInstallQuoteCardId: sourceCard.instanceId,
     runnerRig: input.runnerRig,
+    ...(input.runnerSetAside ? { runnerSetAside: input.runnerSetAside } : {}),
+    ...(input.runnerMemoryUsed !== undefined
+      ? { runnerMemoryUsed: input.runnerMemoryUsed }
+      : {}),
+    ...(input.runnerMemoryLimit !== undefined
+      ? { runnerMemoryLimit: input.runnerMemoryLimit }
+      : {}),
     runnerCredits: input.runnerCredits,
     targetServerId: need.targetServerId,
     observedAtStateVersion: input.currentStateVersion,
