@@ -2795,6 +2795,10 @@ function compareGenericExactInstallRoutes(
   if (probabilityComparison !== undefined && probabilityComparison !== 0) {
     return probabilityComparison;
   }
+  const runnerCreditTaxComparison =
+    left.projection.after.protection.runnerCreditsRemainingOnBestAccessPath -
+    right.projection.after.protection.runnerCreditsRemainingOnBestAccessPath;
+  if (runnerCreditTaxComparison !== 0) return runnerCreditTaxComparison;
   const costComparison =
     knownExactInstallRouteCreditCost(left.projection) -
     knownExactInstallRouteCreditCost(right.projection);
@@ -2975,6 +2979,10 @@ function compareScoreProtectionInstallRoutes(
   if (probabilityComparison !== undefined && probabilityComparison !== 0) {
     return probabilityComparison;
   }
+  const runnerCreditTaxComparison =
+    leftProjection.after.protection.runnerCreditsRemainingOnBestAccessPath -
+    rightProjection.after.protection.runnerCreditsRemainingOnBestAccessPath;
+  if (runnerCreditTaxComparison !== 0) return runnerCreditTaxComparison;
   if (
     knownExactInstallRouteCreditCost(leftProjection) !==
     knownExactInstallRouteCreditCost(rightProjection)

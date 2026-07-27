@@ -7037,7 +7037,23 @@ function buildCorpDomain(
     project,
     scan: corpScoreProtectionInstallRouteScan(input, candidates, project),
   }));
+  const hasResidentScoreProtectionProject = scoreProtectionProjects.some(
+    (project) =>
+      project.serverId !== undefined &&
+      project.serverId !== "new_remote" &&
+      project.phase !== "install_agenda" &&
+      project.feasible,
+  );
   for (const { project, scan } of scoreProtectionRouteScans) {
+    // A future agenda in a not-yet-created remote must not preempt an
+    // existing, resident score project. Without a resident project it remains
+    // a valid score-protection route in its own right.
+    if (
+      project.serverId === "new_remote" &&
+      hasResidentScoreProtectionProject
+    ) {
+      continue;
+    }
     if (
       (project.fundingGap ?? 0) === 0 &&
       scan.fundingGap !== undefined &&
@@ -7049,6 +7065,12 @@ function buildCorpDomain(
   }
   const selectedScoreProtectionSignals: CorpDefenseSignal[] = [];
   for (const { project, scan } of scoreProtectionRouteScans) {
+    if (
+      project.serverId === "new_remote" &&
+      hasResidentScoreProtectionProject
+    ) {
+      continue;
+    }
     if (
       project.feasible &&
       project.phase === "install_agenda" &&
@@ -8874,9 +8896,9 @@ type CorpGlobalDefenseInstallRouteAssessment =
 
 /**
  * Admits a non-score ICE install only when the Engine-quoted route reduces
- * the exact visible Runner access probability.  It intentionally has no
- * positional or layer-count substitute: unknown quotes or access facts close
- * the route rather than manufacturing a generic defense priority.
+ * the exact visible Runner access probability or the Runner's exact remaining
+ * credits on the best access path. Unknown quotes or access facts close the
+ * route rather than manufacturing a positional or layer-count substitute.
  */
 function corpGlobalDefenseInstallRoute(
   input: AiDecisionInput,

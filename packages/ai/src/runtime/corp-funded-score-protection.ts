@@ -861,11 +861,14 @@ export function projectCorpFundedIceInstallRoute(
   }
   const preservesReserves =
     after.preservesScoreCreditReserve && after.preservesHardClickReserve;
+  const runnerCreditTaxProgress =
+    after.protection.runnerCreditsRemainingOnBestAccessPath <
+    need.baseline.protection.runnerCreditsRemainingOnBestAccessPath;
   const effect = !preservesReserves
     ? "no_progress"
     : after.fundedProtection && !need.baseline.fundedProtection
       ? "satisfied"
-      : probabilityComparison < 0
+      : probabilityComparison < 0 || runnerCreditTaxProgress
         ? "progress"
         : "no_progress";
 
@@ -900,6 +903,9 @@ export function projectCorpFundedIceInstallRoute(
       `clicksAfterDefense:${after.clicksAfterDefense}`,
       `preservesReserves:${preservesReserves}`,
       `funded:${after.fundedProtection}`,
+      `runnerCreditsRemainingBefore:${need.baseline.protection.runnerCreditsRemainingOnBestAccessPath}`,
+      `runnerCreditsRemainingAfter:${after.protection.runnerCreditsRemainingOnBestAccessPath}`,
+      `runnerCreditTaxProgress:${runnerCreditTaxProgress}`,
     ],
   };
 }
@@ -1526,6 +1532,15 @@ function progressAssessmentIsBetter(
   );
   if (comparison === undefined) return false;
   if (comparison !== 0) return comparison < 0;
+  if (
+    candidate.protection.runnerCreditsRemainingOnBestAccessPath !==
+    current.protection.runnerCreditsRemainingOnBestAccessPath
+  ) {
+    return (
+      candidate.protection.runnerCreditsRemainingOnBestAccessPath <
+      current.protection.runnerCreditsRemainingOnBestAccessPath
+    );
+  }
   if (candidate.totalRezCost !== current.totalRezCost) {
     return candidate.totalRezCost < current.totalRezCost;
   }

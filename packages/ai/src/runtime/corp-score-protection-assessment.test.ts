@@ -518,38 +518,85 @@ describe("assessCorpScoreProtection", () => {
     });
   });
 
-  it("fails closed when visible alternate Runner credit pools can fund breaking", () => {
-    const cloakDefinition = CARD_DEFINITIONS_BY_ID["onr_v1_011_cloak"]!;
-    const cloak = {
-      instanceId: "cloak",
-      definitionId: cloakDefinition.id,
-      title: cloakDefinition.title,
-      type: cloakDefinition.type,
-      subtypes: cloakDefinition.subtypes.slice(),
-      known: true,
-      owner: "runner",
-      counterDisplays: [
-        {
-          id: "cloak-recurring",
-          amount: 1,
-          displayKind: "recurring_credit",
-          label: "Recurring credits",
-          ariaLabel: "Recurring credits",
-          creditPool: {
-            kind: "recurring_credit",
-            uses: ["using_icebreaker_during_run_non_noisy"],
-          },
-        },
-      ],
-    } as VisibleCard;
+  it("uses a matching visible non-noisy credit pool for the compatible breaker", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("wall", "onr_v1_238_data-wall-2-0")],
+      serverIce: [ice("filter", "onr_v1_244_filter")],
       runnerRig: [
-        runnerProgram(
-          "stable-wall-breaker",
-          "onr_v1_037_japanese-water-torture",
+        runnerProgram("decoder", "simple_decoder"),
+        recurringCreditPool(
+          "cloak",
+          "onr_v1_011_cloak",
+          "using_icebreaker_during_run_non_noisy",
         ),
-        cloak,
+      ],
+      runnerCredits: 0,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+      runnerCreditsRemainingOnBestAccessPath: 0,
+      protectsScore: false,
+    });
+  });
+
+  it("does not spend a killer-only credit pool through a non-killer breaker", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [ice("filter", "onr_v1_244_filter")],
+      runnerRig: [
+        runnerProgram("decoder", "simple_decoder"),
+        recurringCreditPool(
+          "killer-bank",
+          "onr_v1_011_cloak",
+          "using_killer_during_run",
+        ),
+      ],
+      runnerCredits: 0,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      protectsScore: true,
+    });
+  });
+
+  it("consumes a visible recurring breaker credit across consecutive ICE", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [
+        ice("outer-filter", "onr_v1_244_filter"),
+        ice("inner-filter", "onr_v1_244_filter"),
+      ],
+      runnerRig: [
+        runnerProgram("decoder", "simple_decoder"),
+        recurringCreditPool(
+          "cloak",
+          "onr_v1_011_cloak",
+          "using_icebreaker_during_run_non_noisy",
+        ),
+      ],
+      runnerCredits: 0,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      protectsScore: true,
+    });
+  });
+
+  it("fails closed when restricted breaker credits have no visible icebreaker", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [ice("filter", "onr_v1_244_filter")],
+      runnerRig: [
+        recurringCreditPool(
+          "cloak",
+          "onr_v1_011_cloak",
+          "using_icebreaker_during_run_non_noisy",
+        ),
       ],
       runnerCredits: 0,
       maximumRunnerAccessSuccessProbability: QUARTER,
@@ -680,6 +727,39 @@ function runnerProgram(instanceId: string, definitionId: string): VisibleCard {
     known: true,
     strength: definition.strength,
     owner: "runner",
+  } as VisibleCard;
+}
+
+function recurringCreditPool(
+  instanceId: string,
+  definitionId: string,
+  use:
+    | "using_icebreaker_during_run_non_noisy"
+    | "using_killer_during_run",
+): VisibleCard {
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  if (!definition) throw new Error(`Missing test card ${definitionId}`);
+  return {
+    instanceId,
+    definitionId,
+    title: definition.title,
+    type: definition.type,
+    subtypes: definition.subtypes.slice(),
+    known: true,
+    owner: "runner",
+    counterDisplays: [
+      {
+        id: `${instanceId}-recurring`,
+        amount: 1,
+        displayKind: "recurring_credit",
+        label: "Recurring credits",
+        ariaLabel: "Recurring credits",
+        creditPool: {
+          kind: "recurring_credit",
+          uses: [use],
+        },
+      },
+    ],
   } as VisibleCard;
 }
 

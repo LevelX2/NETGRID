@@ -620,6 +620,36 @@ describe("projectCorpFundedIceInstallRoute", () => {
     });
   });
 
+  it("recognizes recurring-credit-aware Runner tax even when access stays certain", () => {
+    const route = routeFor({
+      source: handIce("sleeper", "onr_v1_270_sleeper"),
+      targetServerId: "remote_1",
+      currentIce: [fundedIce("filter", "onr_v1_244_filter", true)],
+      corpCredits: 5,
+      runnerRig: [
+        runnerProgram("decoder", "simple_decoder"),
+        recurringCreditPool("cloak", "using_icebreaker_during_run_non_noisy"),
+      ],
+      runnerCredits: 1,
+    });
+
+    expect(route).toMatchObject({
+      knowledge: "known",
+      effect: "progress",
+      after: {
+        protection: {
+          runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+          runnerCreditsRemainingOnBestAccessPath: 0,
+        },
+      },
+      evidence: expect.arrayContaining([
+        "runnerCreditsRemainingBefore:1",
+        "runnerCreditsRemainingAfter:0",
+        "runnerCreditTaxProgress:true",
+      ]),
+    });
+  });
+
   it("classifies a second necessary ETR as satisfied", () => {
     const route = routeFor({
       source: handIce("data-wall", "onr_v1_238_data-wall-2-0"),
@@ -1123,6 +1153,8 @@ function routeFor(params: {
   currentIce?: CorpFundedScoreProtectionIceInput[];
   corpCredits: number;
   scoreReserve?: CorpScoreReserve;
+  runnerRig?: VisibleCard[];
+  runnerCredits?: number;
 }) {
   return projectCorpFundedIceInstallRoute(routeSetup(params));
 }
@@ -1464,6 +1496,35 @@ function runnerProgram(instanceId: string, definitionId: string): VisibleCard {
     strength: card.strength,
     subtypes: card.subtypes.slice(),
     owner: "runner",
+  } as VisibleCard;
+}
+
+function recurringCreditPool(
+  instanceId: string,
+  use: "using_icebreaker_during_run_non_noisy",
+): VisibleCard {
+  const card = definition("onr_v1_011_cloak");
+  return {
+    instanceId,
+    definitionId: card.id,
+    known: true,
+    title: card.title,
+    type: "program",
+    subtypes: card.subtypes.slice(),
+    owner: "runner",
+    counterDisplays: [
+      {
+        id: `${instanceId}-recurring`,
+        amount: 1,
+        displayKind: "recurring_credit",
+        label: "Recurring credits",
+        ariaLabel: "Recurring credits",
+        creditPool: {
+          kind: "recurring_credit",
+          uses: [use],
+        },
+      },
+    ],
   } as VisibleCard;
 }
 

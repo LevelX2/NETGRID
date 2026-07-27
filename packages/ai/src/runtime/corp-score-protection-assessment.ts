@@ -7,8 +7,18 @@ import {
 } from "@netgrid/shared";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../actions/risk-action-projection";
 import { creditsToBreakEndTheRunSubroutinesWithBreaker } from "../visible-run-analysis";
-import type { BreakAssessment } from "../run-analysis/visible-run-analysis-contracts";
-import { visibleRunnerRunPathCreditBudgetForRig } from "../run-analysis/visible-run-credit-budget";
+import type {
+  BreakAssessment,
+  MutableRunnerRunPathCreditBudget,
+} from "../run-analysis/visible-run-analysis-contracts";
+import {
+  cloneRunnerRunPathCreditBudget,
+  normalizeRunnerRunPathCreditBudget,
+  projectBreakerCreditPayment,
+  runnerRunPathCreditBudgetWithVisiblePools,
+  spendBreakerCreditsAndApplySideEffects,
+  visibleRunnerRunPathCreditBudgetForRig,
+} from "../run-analysis/visible-run-credit-budget";
 
 export type ExactProbability = Readonly<{
   numerator: number;
@@ -124,6 +134,7 @@ type RandomBreakChoice = Readonly<{
 
 type AccessPathState = {
   credits: number;
+  creditBudget: MutableRunnerRunPathCreditBudget;
   probability: Rational;
   breakerStrengths: Map<string, number>;
   randomBreaks: RandomBreakChoice[];
@@ -221,22 +232,28 @@ export function assessCorpScoreProtection(
     );
   }
   const visiblePools = visibleRunnerRunPathCreditBudgetForRig(input.runnerRig);
-  if (
+  const hasRestrictedBreakerCredits =
     visiblePools.icebreakerCredits > 0 ||
     visiblePools.nonNoisyIcebreakerCredits > 0 ||
     visiblePools.killerCredits > 0 ||
     visiblePools.stealthNonNoisyIcebreakerCredits > 0 ||
     Object.values(visiblePools.hostedIcebreakerCreditsByBreakerInstanceId).some(
       (amount) => amount > 0,
-    )
+    );
+  if (
+    hasRestrictedBreakerCredits &&
+    !input.runnerRig.some((card) => cardIsIcebreaker(card))
   ) {
     return unknownAssessment(
       input.maximumRunnerAccessSuccessProbability,
       "unsupported_runner_credit_pools",
-      ["scoreProtectionKnown:false", "visibleRunnerCreditPools:true"],
+      [
+        "scoreProtectionKnown:false",
+        "visibleRunnerCreditPools:true",
+        "visibleIcebreakerMissing:true",
+      ],
     );
   }
-
   const activeIce = input.serverIce
     .filter((card) => card.rezzed === true)
     .slice()
@@ -264,6 +281,12 @@ export function assessCorpScoreProtection(
   let states: AccessPathState[] = [
     {
       credits: input.runnerCredits,
+      creditBudget: normalizeRunnerRunPathCreditBudget(
+        runnerRunPathCreditBudgetWithVisiblePools(
+          input.runnerCredits,
+          input.runnerRig,
+        ),
+      ),
       probability: ONE,
       breakerStrengths: new Map(
         input.runnerRig
@@ -536,7 +559,8 @@ function accessPreservingBreakStates(params: {
       !assessment ||
       !Number.isSafeInteger(assessment.cost) ||
       assessment.cost < 0 ||
-      assessment.cost > params.state.credits
+      !projectBreakerCreditPayment(params.state.creditBudget, assessment)
+        .affordable
     ) {
       continue;
     }
@@ -579,7 +603,8 @@ function accessPreservingBreakStates(params: {
           assessment !== undefined &&
           Number.isSafeInteger(assessment.cost) &&
           assessment.cost >= 0 &&
-          assessment.cost <= params.state.credits,
+          projectBreakerCreditPayment(params.state.creditBudget, assessment)
+            .affordable,
       );
     if (
       new Set(
@@ -610,6 +635,10 @@ function accessPreservingBreakStates(params: {
   const states: AccessPathState[] = [];
   for (const { assessment, riskProfile } of breakOptions) {
     if (riskProfile) continue;
+    const nextCreditBudget = cloneRunnerRunPathCreditBudget(
+      params.state.creditBudget,
+    );
+    spendBreakerCreditsAndApplySideEffects(nextCreditBudget, assessment);
     const nextStrengths = new Map(params.state.breakerStrengths);
     if (assessment.carriesStrengthAcrossIce) {
       nextStrengths.set(
@@ -618,7 +647,8 @@ function accessPreservingBreakStates(params: {
       );
     }
     states.push({
-      credits: params.state.credits - assessment.cost,
+      credits: nextCreditBudget.credits,
+      creditBudget: nextCreditBudget,
       probability: params.state.probability,
       breakerStrengths: nextStrengths,
       randomBreaks: params.state.randomBreaks,
@@ -704,6 +734,7 @@ function independentlyCombinedRandomBreakState(params: {
     knowledge: "known",
     state: {
       credits: params.state.credits,
+      creditBudget: cloneRunnerRunPathCreditBudget(params.state.creditBudget),
       probability: multiplyRational(params.state.probability, combined),
       breakerStrengths: nextStrengths,
       randomBreaks: [...params.state.randomBreaks, ...choices],
@@ -720,7 +751,19 @@ function pruneDominatedStates(
       .sort(([left], [right]) => compareCanonicalStrings(left, right))
       .map(([instanceId, strength]) => `${instanceId}:${strength}`)
       .join(",");
-    const key = `${state.credits}|${strengthKey}`;
+    const budgetKey = [
+      state.creditBudget.credits,
+      state.creditBudget.icebreakerCredits,
+      state.creditBudget.nonNoisyIcebreakerCredits,
+      state.creditBudget.killerCredits,
+      state.creditBudget.stealthNonNoisyIcebreakerCredits,
+      ...Object.entries(state.creditBudget.hostedIcebreakerCreditsByBreakerInstanceId)
+        .sort(([left], [right]) => compareCanonicalStrings(left, right))
+        .map(([breakerInstanceId, credits]) =>
+          `${breakerInstanceId}:${credits}`,
+        ),
+    ].join(",");
+    const key = `${budgetKey}|${strengthKey}`;
     const current = bestByResources.get(key);
     if (!current || accessPathIsBetter(state, current)) {
       bestByResources.set(key, state);
