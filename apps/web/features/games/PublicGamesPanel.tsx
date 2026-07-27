@@ -12,6 +12,7 @@ import {
   publicMatchTarget,
 } from "../match-start/public-match-navigation";
 import {
+  canRejoinPublicMatch,
   filterAndSortPublicMatches,
   publicGamesFilterLabel,
   type PublicGamesFilter,
@@ -25,21 +26,31 @@ export function PublicGamesPanel({
   error,
   updatedAt,
   canJoinOpen,
+  rejoinableMatchIds,
+  rejoiningMatchId,
   onRefresh,
   onJoinOpen,
+  onRejoin,
 }: {
   matches: PublicMatchEntry[];
   loading: boolean;
   error: string;
   updatedAt: string | null;
   canJoinOpen: boolean;
+  rejoinableMatchIds: readonly string[];
+  rejoiningMatchId: string | null;
   onRefresh(): void;
   onJoinOpen(entry: PublicMatchEntry): void;
+  onRejoin(entry: PublicMatchEntry): void;
 }) {
   const [filter, setFilter] = useState<PublicGamesFilter>("all");
   const visibleMatches = useMemo(
     () => filterAndSortPublicMatches(matches, filter),
     [filter, matches],
+  );
+  const rejoinableMatchIdSet = useMemo(
+    () => new Set(rejoinableMatchIds),
+    [rejoinableMatchIds],
   );
 
   return (
@@ -95,7 +106,10 @@ export function PublicGamesPanel({
               <PublicGameCard
                 entry={entry}
                 canJoinOpen={canJoinOpen}
+                canRejoin={canRejoinPublicMatch(entry, rejoinableMatchIdSet)}
+                rejoining={rejoiningMatchId === entry.matchId}
                 onJoinOpen={onJoinOpen}
+                onRejoin={onRejoin}
               />
             </li>
           ))}
@@ -113,11 +127,17 @@ export function PublicGamesPanel({
 function PublicGameCard({
   entry,
   canJoinOpen,
+  canRejoin,
+  rejoining,
   onJoinOpen,
+  onRejoin,
 }: {
   entry: PublicMatchEntry;
   canJoinOpen: boolean;
+  canRejoin: boolean;
+  rejoining: boolean;
   onJoinOpen(entry: PublicMatchEntry): void;
+  onRejoin(entry: PublicMatchEntry): void;
 }) {
   const target = publicMatchTarget(entry);
   const gamebookTarget = publicGamebookTarget(entry);
@@ -175,6 +195,24 @@ function PublicGameCard({
             <ActionIcon size={15} />
             {publicMatchActionLabel(entry.status)}
           </button>
+        ) : canRejoin ? (
+          <>
+            <button
+              className="button primary"
+              onClick={() => onRejoin(entry)}
+              type="button"
+              disabled={rejoining}
+            >
+              <LogIn size={15} />
+              {rejoining ? "Spiel wird fortgesetzt ..." : "Spiel fortsetzen"}
+            </button>
+            {target ? (
+              <Link className="button" href={target}>
+                <Eye size={15} />
+                Zuschauen
+              </Link>
+            ) : null}
+          </>
         ) : target ? (
           <Link className="button primary" href={target}>
             <ActionIcon size={15} />

@@ -72,6 +72,20 @@ describe("account-bound active-match rejoin HTTP API", () => {
       };
       expect(createdResponse.status).toBe(201);
 
+      const unauthenticatedActivePublicMatches = await fetch(
+        `${baseUrl}/api/account/active-public-match-ids`,
+      );
+      expect(unauthenticatedActivePublicMatches.status).toBe(401);
+
+      const ownActivePublicMatches = await fetch(
+        `${baseUrl}/api/account/active-public-match-ids`,
+        { headers: { cookie } },
+      );
+      expect(ownActivePublicMatches.status).toBe(200);
+      await expect(ownActivePublicMatches.json()).resolves.toEqual(
+        expect.objectContaining({ matchIds: [created.matchId] }),
+      );
+
       const unauthenticated = await fetch(
         `${baseUrl}/api/account/matches/${encodeURIComponent(created.matchId)}/rejoin`,
         { method: "POST", headers: { origin: ORIGIN } },
@@ -121,6 +135,13 @@ describe("account-bound active-match rejoin HTTP API", () => {
         },
       );
       expect(foreign.status).toBe(404);
+      const foreignActivePublicMatches = await fetch(
+        `${baseUrl}/api/account/active-public-match-ids`,
+        { headers: { cookie: secondCookie } },
+      );
+      await expect(foreignActivePublicMatches.json()).resolves.toEqual(
+        expect.objectContaining({ matchIds: [] }),
+      );
 
       const rejoinResponse = await fetch(
         `${baseUrl}/api/account/matches/${encodeURIComponent(created.matchId)}/rejoin`,
@@ -183,6 +204,13 @@ describe("account-bound active-match rejoin HTTP API", () => {
         },
       );
       expect(terminal.status).toBe(404);
+      const terminalActivePublicMatches = await fetch(
+        `${baseUrl}/api/account/active-public-match-ids`,
+        { headers: { cookie } },
+      );
+      await expect(terminalActivePublicMatches.json()).resolves.toEqual(
+        expect.objectContaining({ matchIds: [] }),
+      );
     } finally {
       await handle.close();
     }

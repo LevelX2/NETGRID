@@ -10,7 +10,10 @@ import { dirname, resolve } from "node:path";
 import { WebSocket, WebSocketServer } from "ws";
 import { isAiDeckSnapshotRuntimeError } from "@netgrid/ai";
 import { simulateAiGame } from "@netgrid/ai/simulation";
-import type { ApiMatchCardPool } from "@netgrid/shared";
+import type {
+  ApiAccountActivePublicMatchIds,
+  ApiMatchCardPool,
+} from "@netgrid/shared";
 import {
   createConnectionAuditLoggerFromEnv,
   noopConnectionAuditLogger,
@@ -1433,6 +1436,50 @@ async function routeHttp(
         generatedAt: new Date().toISOString(),
         results: await service.listPersonalRecentGameResults(matchIds, limit),
       });
+      return;
+    }
+
+    if (
+      url.pathname === "/api/account/active-public-match-ids" &&
+      request.method === "GET"
+    ) {
+      if (!accountAuth || !accountStatistics)
+        return sendJson(response, 503, accountUnavailablePayload());
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "account_read",
+          request,
+          deploymentConfig,
+          "account-active-public-match-ids",
+        )
+      )
+        return;
+      const auth = await ensureAccountAuthenticated(
+        response,
+        request,
+        accountAuth,
+      );
+      if (!auth) return;
+      const ownMatchIds = new Set(
+        (
+          await accountStatistics.bindingsForAccount(auth.account.accountId)
+        ).map((binding) => binding.matchId),
+      );
+      const matchIds = (await service.listPublicMatches())
+        .filter(
+          (entry) =>
+            entry.status === "active" && ownMatchIds.has(entry.matchId),
+        )
+        .map((entry) => entry.matchId);
+      const payload: ApiAccountActivePublicMatchIds = {
+        schemaVersion: "netgrid-account-active-public-match-ids-v1",
+        generatedAt: new Date().toISOString(),
+        matchIds,
+      };
+      response.setHeader("cache-control", "no-store");
+      sendJson(response, 200, payload);
       return;
     }
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { ApiPublicMatchListEntry } from "@netgrid/shared";
 import {
+  canRejoinPublicMatch,
   filterAndSortPublicMatches,
   publicGamesFilterLabel,
   shouldRefreshPublicGames,
@@ -88,5 +89,17 @@ describe("public games model", () => {
         activeMatchWorkspace: "games",
       }),
     ).toBe(true);
+  });
+
+  it("allows account rejoin only for an active match from the private account capability list", () => {
+    const match = entry("own-active", "active", "2026-07-20T11:00:00.000Z");
+    expect(canRejoinPublicMatch(match, new Set([match.matchId]))).toBe(true);
+    expect(canRejoinPublicMatch(match, new Set())).toBe(false);
+    expect(
+      canRejoinPublicMatch(
+        entry("own-finished", "finished", "2026-07-20T12:00:00.000Z"),
+        new Set(["own-finished"]),
+      ),
+    ).toBe(false);
   });
 });

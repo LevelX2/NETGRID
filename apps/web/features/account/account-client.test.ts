@@ -2,7 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 import {
   changeAccountPassword,
   inviteTokenFromLocation,
+  loadAccountActivePublicMatchIds,
   loginAccount,
+  rejoinAccountPublicMatch,
   resetTokenFromLocation,
   restoreAccountSession,
 } from "./account-client";
@@ -108,6 +110,51 @@ describe("account client", () => {
         code: "account_invalid_credentials",
         status: 401,
       }),
+    );
+  });
+
+  it("uses the private account endpoints for match recovery and sends CSRF only on rejoin", async () => {
+    const fetcher = vi.fn(
+      async (_url: string | URL | Request, init?: RequestInit) =>
+        new Response(
+          JSON.stringify(
+            init?.method === "GET"
+              ? {
+                  schemaVersion: "netgrid-account-active-public-match-ids-v1",
+                  generatedAt: "2026-07-27T10:00:00.000Z",
+                  matchIds: ["match_own"],
+                }
+              : {
+                  matchId: "match_own",
+                  isPublic: true,
+                  side: "runner",
+                  sessionToken: "new-session-token",
+                  reconnectToken: "new-reconnect-token",
+                  webSocketUrl: "ws://127.0.0.1:8787/ws",
+                  legalActions: [],
+                  matchVersion: 4,
+                },
+          ),
+          { status: 200 },
+        ),
+    ) as unknown as typeof fetch;
+    await expect(loadAccountActivePublicMatchIds(fetcher)).resolves.toEqual(
+      expect.objectContaining({ matchIds: ["match_own"] }),
+    );
+    await rejoinAccountPublicMatch(
+      { matchId: "match_own", csrfToken: "account-csrf" },
+      fetcher,
+    );
+    const [getUrl, getInit] = (fetcher as unknown as ReturnType<typeof vi.fn>)
+      .mock.calls[0] as [string, RequestInit];
+    const [postUrl, postInit] = (fetcher as unknown as ReturnType<typeof vi.fn>)
+      .mock.calls[1] as [string, RequestInit];
+    expect(getUrl).toContain("/api/account/active-public-match-ids");
+    expect(getInit.method).toBe("GET");
+    expect(new Headers(getInit.headers).get("x-netgrid-csrf")).toBeNull();
+    expect(postUrl).toContain("/api/account/matches/match_own/rejoin");
+    expect(new Headers(postInit.headers).get("x-netgrid-csrf")).toBe(
+      "account-csrf",
     );
   });
 });

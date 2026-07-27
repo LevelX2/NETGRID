@@ -464,6 +464,10 @@ import {
   zoneHighlighted,
 } from "../features/game-board/board-view-helpers";
 import { AccountPanel } from "../features/account/AccountPanel";
+import {
+  loadAccountActivePublicMatchIds,
+  rejoinAccountPublicMatch,
+} from "../features/account/account-client";
 import { useAccountSession } from "../features/account/useAccountSession";
 import {
   createAccountDeck,
@@ -579,6 +583,7 @@ export default function Page() {
   const [testSetupMode, setTestSetupMode] = useState(false);
   const [displayName, setDisplayName] = useState("Teilnehmer A");
   const accountSession = useAccountSession();
+  const accountIdRef = useRef<string | null>(null);
   const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] =
     useState(false);
   const [countdownSeconds, setCountdownSeconds] = useState<3 | 5 | 10>(3);
@@ -591,6 +596,12 @@ export default function Page() {
   const [openLanLoading, setOpenLanLoading] = useState(false);
   const [openLanError, setOpenLanError] = useState("");
   const [openLanUpdatedAt, setOpenLanUpdatedAt] = useState<string | null>(null);
+  const [accountRejoinableMatchIds, setAccountRejoinableMatchIds] = useState<
+    string[]
+  >([]);
+  const [accountRejoiningMatchId, setAccountRejoiningMatchId] = useState<
+    string | null
+  >(null);
   const [recentGameResults, setRecentGameResults] = useState<
     ApiRecentResultEntry[]
   >([]);
@@ -873,6 +884,7 @@ export default function Page() {
   const paymentSupportContinuationSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const reconnectInFlightRef = useRef(false);
+  const accountRejoinInFlightRef = useRef(false);
   const aiDecisionDebugPreviewRequestKeyRef = useRef<string | null>(null);
   const aiDecisionDebugPreviewContextRef = useRef<ActionContext | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
@@ -3753,6 +3765,21 @@ export default function Page() {
       : { corpDeckSnapshotId: selection.snapshotId };
   }
 
+  const refreshAccountRejoinablePublicMatchIds = async () => {
+    const accountId = accountSession.account?.accountId;
+    if (!accountId) {
+      setAccountRejoinableMatchIds([]);
+      return;
+    }
+    try {
+      const response = await loadAccountActivePublicMatchIds();
+      if (accountIdRef.current !== accountId) return;
+      setAccountRejoinableMatchIds(response.matchIds);
+    } catch {
+      if (accountIdRef.current === accountId) setAccountRejoinableMatchIds([]);
+    }
+  };
+
   const refreshOpenLanMatches = async (silent = false) => {
     if (!silent) setOpenLanLoading(true);
     setOpenLanError("");
@@ -3766,6 +3793,7 @@ export default function Page() {
       }
       setOpenLanMatches(response.matches ?? []);
       setOpenLanUpdatedAt(new Date().toISOString());
+      void refreshAccountRejoinablePublicMatchIds();
     } catch (error) {
       setOpenLanMatches([]);
       setOpenLanError(
@@ -3811,6 +3839,11 @@ export default function Page() {
   };
 
   useEffect(() => {
+    accountIdRef.current = accountSession.account?.accountId ?? null;
+    if (!accountIdRef.current) setAccountRejoinableMatchIds([]);
+  }, [accountSession.account?.accountId]);
+
+  useEffect(() => {
     const visible = shouldRefreshPublicGames({
       hasActivePlayerView: Boolean(session && payload && activeView),
       entryTab,
@@ -3824,7 +3857,12 @@ export default function Page() {
     return () => {
       window.clearInterval(timer);
     };
-  }, [activeMatchWorkspace, entryTab, session?.matchId]);
+  }, [
+    activeMatchWorkspace,
+    entryTab,
+    session?.matchId,
+    accountSession.account?.accountId,
+  ]);
 
   useEffect(() => {
     if (entryTab !== "recent" || session || !accountSession.account) return;
@@ -3860,6 +3898,59 @@ export default function Page() {
     setJoinMatchId(entry.matchId);
     setJoinToken("");
     setJoinLinkInput("");
+  };
+
+  const rejoinAccountPublicGame = async (entry: PublicMatchEntry) => {
+    const account = accountSession.account;
+    if (
+      entry.status !== "active" ||
+      !account ||
+      !accountSession.csrfToken ||
+      accountRejoinInFlightRef.current
+    )
+      return;
+    accountRejoinInFlightRef.current = true;
+    setAccountRejoiningMatchId(entry.matchId);
+    try {
+      const rejoined = await rejoinAccountPublicMatch({
+        matchId: entry.matchId,
+        csrfToken: accountSession.csrfToken,
+      });
+      if (rejoined.error) {
+        setNotice(rejoined.error.message);
+        return;
+      }
+      if (!rejoined.playerView) {
+        setNotice(
+          "Dieses Match kann nicht als aktives Spiel fortgesetzt werden.",
+        );
+        return;
+      }
+      closeSocket();
+      const nextSession: SessionInfo = {
+        matchId: rejoined.matchId,
+        side: rejoined.side,
+        sessionToken: rejoined.sessionToken,
+        reconnectToken: rejoined.reconnectToken,
+        webSocketUrl: rejoined.webSocketUrl,
+        displayName: account.displayName,
+      };
+      persistSession(nextSession);
+      setSession(nextSession);
+      setPayload(fromJoinedResponse(rejoined));
+      setLobby(null);
+      setEntryTab("play");
+      setActiveMatchWorkspace("game");
+      setNotice("Spiel fortgesetzt.");
+      void refreshOpenLanMatches(true);
+    } catch (error) {
+      setNotice(
+        serverErrorNotice(error, "Spiel konnte nicht fortgesetzt werden."),
+      );
+    } finally {
+      accountRejoinInFlightRef.current = false;
+      setAccountRejoiningMatchId(null);
+    }
   };
 
   const joinMatch = async () => {
@@ -5947,8 +6038,11 @@ export default function Page() {
                       error={openLanError}
                       updatedAt={openLanUpdatedAt}
                       canJoinOpen={!session}
+                      rejoinableMatchIds={accountRejoinableMatchIds}
+                      rejoiningMatchId={accountRejoiningMatchId}
                       onRefresh={() => void refreshOpenLanMatches()}
                       onJoinOpen={selectOpenLanMatch}
+                      onRejoin={rejoinAccountPublicGame}
                     />
                   ) : null}
                   {entryTab === "catalog" ? (
@@ -6779,8 +6873,11 @@ export default function Page() {
                   error: openLanError,
                   updatedAt: openLanUpdatedAt,
                   canJoinOpen: false,
+                  rejoinableMatchIds: accountRejoinableMatchIds,
+                  rejoiningMatchId: accountRejoiningMatchId,
                   onRefresh: () => void refreshOpenLanMatches(),
                   onJoinOpen: selectOpenLanMatch,
+                  onRejoin: rejoinAccountPublicGame,
                 }}
                 recentGamesPanelProps={{
                   results: recentGameResults,

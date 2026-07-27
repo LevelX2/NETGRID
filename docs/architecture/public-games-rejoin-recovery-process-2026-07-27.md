@@ -1,8 +1,8 @@
 # Öffentliche Spiele trotz Recovery-Sitzung und Account-Rejoin
 
-Status: in Arbeit (`REC-001` aktiv)  
-Stand: 2026-07-27  
-Arbeitsbranch: `codex/public-games-rejoin-recovery`  
+Status: abgeschlossen
+Stand: 2026-07-27
+Arbeitsbranch: `codex/public-games-rejoin-recovery` (lokal integriert)
 Arbeits-Worktree: `C:\Projekte\NETGRID_PUBLIC_GAMES_REJOIN_RECOVERY`
 
 ## Quelle und Vorgabe
@@ -123,12 +123,24 @@ prepared
 
 ## Paketfolge
 
-| Paket | Titel | Commit-Vorschlag |
-| --- | --- | --- |
-| REC-001 | Vertrag und Prozess festlegen | `docs: define recovery list and account rejoin contract` |
-| REC-002 | Öffentliche Liste im Recovery-Zustand laden | `fix(web): refresh public games during session recovery` |
-| REC-003 | Autoritativen Account-Rejoin ergänzen | `feat(account): allow bound players to rejoin active matches` |
-| REC-004 | Rejoin in der Spieleliste und Abschlussgates | `feat(web): rejoin own active matches from games` |
+| Paket   | Titel                                        | Commit-Vorschlag                                              |
+| ------- | -------------------------------------------- | ------------------------------------------------------------- |
+| REC-001 | Vertrag und Prozess festlegen                | `docs: define recovery list and account rejoin contract`      |
+| REC-002 | Öffentliche Liste im Recovery-Zustand laden  | `fix(web): refresh public games during session recovery`      |
+| REC-003 | Autoritativen Account-Rejoin ergänzen        | `feat(account): allow bound players to rejoin active matches` |
+| REC-004 | Rejoin in der Spieleliste und Abschlussgates | `feat(web): rejoin own active matches from games`             |
+
+## Umsetzungsstand
+
+| Paket   | Commit                 | Status        |
+| ------- | ---------------------- | ------------- |
+| REC-001 | `c6958bddc`            | abgeschlossen |
+| REC-002 | `717ad794c`            | abgeschlossen |
+| REC-003 | `81c23737d`            | abgeschlossen |
+| REC-004 | dieser Abschlusscommit | abgeschlossen |
+
+Die finale Security- und Testbewertung steht in
+`docs/reviews/account-bound-public-match-rejoin-final-review-2026-07-27.md`.
 
 ## Paketdetails
 

@@ -1,3 +1,8 @@
+import type {
+  ApiAccountActivePublicMatchIds,
+  ApiJoinMatchResponse,
+} from "@netgrid/shared";
+
 export const ACCOUNT_SERVER_HTTP =
   process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 
@@ -116,6 +121,25 @@ export function changeAccountPassword(
       newPassword: input.newPassword,
     }),
   });
+}
+
+export function loadAccountActivePublicMatchIds(
+  fetcher: AccountFetch = fetch,
+): Promise<ApiAccountActivePublicMatchIds> {
+  return accountRequest(fetcher, "/api/account/active-public-match-ids", {
+    method: "GET",
+  });
+}
+
+export function rejoinAccountPublicMatch(
+  input: { matchId: string; csrfToken: string },
+  fetcher: AccountFetch = fetch,
+): Promise<ApiJoinMatchResponse> {
+  return accountRequest(
+    fetcher,
+    `/api/account/matches/${encodeURIComponent(input.matchId)}/rejoin`,
+    mutation(input.csrfToken),
+  );
 }
 
 export function createAccountInvite(

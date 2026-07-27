@@ -43,3 +43,10 @@ export function shouldRefreshPublicGames({
     ? activeMatchWorkspace === "games"
     : entryTab === "games";
 }
+
+export function canRejoinPublicMatch(
+  entry: ApiPublicMatchListEntry,
+  rejoinableMatchIds: ReadonlySet<string>,
+): boolean {
+  return entry.status === "active" && rejoinableMatchIds.has(entry.matchId);
+}

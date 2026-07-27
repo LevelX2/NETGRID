@@ -1975,7 +1975,9 @@ export class MultiplayerService {
       return {
         error: safeError("not_found", "Dieses Match ist nicht verfügbar."),
       };
-    const session = record.sessions.find((candidate) => candidate.side === side);
+    const session = record.sessions.find(
+      (candidate) => candidate.side === side,
+    );
     if (!session)
       return {
         error: safeError("not_found", "Dieses Match ist nicht verfügbar."),
@@ -2025,7 +2027,9 @@ export class MultiplayerService {
       matchVersion: record.match.matchVersion,
       eventTail: payload.eventTail,
       matchStatus: payload.matchStatus,
-      ...(payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
+      ...(payload.pendingChoice
+        ? { pendingChoice: payload.pendingChoice }
+        : {}),
       ...(payload.pendingUndo ? { pendingUndo: payload.pendingUndo } : {}),
       ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(payload.aiTurnPresentation
@@ -2035,7 +2039,9 @@ export class MultiplayerService {
       ...(payload.finalStateHash
         ? { finalStateHash: payload.finalStateHash }
         : {}),
-      ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {}),
+      ...(payload.resultSummary
+        ? { resultSummary: payload.resultSummary }
+        : {}),
     };
   }
 

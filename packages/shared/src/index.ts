@@ -7,6 +7,7 @@ import type { AbilityPayloadDiscriminators } from "./ability-payload";
 import proteusCardsData from "../../../data/cards/proteus-cards.json";
 import classicCardsData from "../../../data/cards/classic-cards.json";
 export type {
+  ApiAccountActivePublicMatchIds,
   ApiAccountMatchHistory,
   ApiAccountMatchHistoryEntry,
   ApiAccountSeriesStatistics,

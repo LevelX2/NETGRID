@@ -232,6 +232,12 @@ export type ApiAccountMatchHistory = {
   nextCursor?: string;
 };
 
+export type ApiAccountActivePublicMatchIds = {
+  schemaVersion: "netgrid-account-active-public-match-ids-v1";
+  generatedAt: string;
+  matchIds: string[];
+};
+
 export type ApiMatchResultSnapshot = {
   schemaVersion: "netgrid-match-result-v1";
   matchId: string;

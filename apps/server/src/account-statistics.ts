@@ -93,6 +93,9 @@ export type AccountStatisticsStorage = {
   listMatchParticipants(
     matchId: string,
   ): Promise<AccountMatchParticipantBinding[]>;
+  listMatchParticipantsForAccount(
+    accountId: string,
+  ): Promise<AccountMatchParticipantBinding[]>;
   recordGameResult(record: AccountGameResultRecord): Promise<void>;
   recordSeriesResult(record: AccountSeriesResultRecord): Promise<void>;
   listGameResultsForAccount(
@@ -159,6 +162,15 @@ export class InMemoryAccountStatisticsStorage implements AccountStatisticsStorag
       .sort((left, right) =>
         left.participantSlot.localeCompare(right.participantSlot),
       )
+      .map((binding) => clone(binding));
+  }
+
+  async listMatchParticipantsForAccount(
+    accountId: string,
+  ): Promise<AccountMatchParticipantBinding[]> {
+    return [...this.bindings.values()]
+      .filter((binding) => binding.accountId === accountId)
+      .sort((left, right) => right.boundAt.localeCompare(left.boundAt))
       .map((binding) => clone(binding));
   }
 
@@ -254,6 +266,18 @@ export class SqliteAccountStatisticsStorage implements AccountStatisticsStorage 
        FROM account_match_participants WHERE match_id = ? ORDER BY participant_slot ASC`,
       )
       .all(matchId) as AccountMatchParticipantBinding[];
+  }
+
+  async listMatchParticipantsForAccount(
+    accountId: string,
+  ): Promise<AccountMatchParticipantBinding[]> {
+    return this.db
+      .prepare(
+        `SELECT match_id AS matchId, participant_slot AS participantSlot, account_id AS accountId,
+        bound_at AS boundAt, binding_source AS bindingSource
+       FROM account_match_participants WHERE account_id = ? ORDER BY bound_at DESC`,
+      )
+      .all(accountId) as AccountMatchParticipantBinding[];
   }
 
   async recordGameResult(record: AccountGameResultRecord): Promise<void> {
@@ -553,6 +577,12 @@ export class AccountMatchStatisticsService {
 
   bindingsForMatch(matchId: string): Promise<AccountMatchParticipantBinding[]> {
     return this.storage.listMatchParticipants(matchId);
+  }
+
+  bindingsForAccount(
+    accountId: string,
+  ): Promise<AccountMatchParticipantBinding[]> {
+    return this.storage.listMatchParticipantsForAccount(accountId);
   }
 
   async recordTerminalMatch(record: StoredMatch): Promise<void> {
