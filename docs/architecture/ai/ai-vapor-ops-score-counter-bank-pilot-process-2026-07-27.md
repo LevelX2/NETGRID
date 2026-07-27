@@ -1,6 +1,6 @@
 # Vapor Ops Counter-Bank im Agenda-Scoreplan – Pilotprozess
 
-Status: **in Umsetzung**
+Status: **lokal verifiziert, bereit für Main-Integration**
 
 Stand: 2026-07-27
 
@@ -148,6 +148,19 @@ Umgesetzt am 2026-07-27:
 - Done-Gate: Die fokussierte Suite, AI-Typecheck, `check:ai`, relevante
   Engine-/Shared-Typechecks sowie Format- und Diff-Gate sind grün.
 - Commit: `test(ai): cover vapor counter-bank score pilot`
+
+Abschlussreview am 2026-07-27:
+
+- Die fokussierten Tests decken sichere Installation, deckabgeleiteten
+  Aufbau ohne Agenda, Agenda-Handoff, verlorene Remote-Sicherheit, fehlendes
+  Corp-Main-Window, stale/inkonsistente Quote und Nicht-Agenda-Ziele ab.
+- Der Live-Runtime-Test zeigt zusätzlich, dass eine gültige Vapor-Installation
+  bei HQ-Überlauf den Scoreplan als Parent behält und nicht als generische
+  Overflow-Konversion ausgeführt wird.
+- Erfolgreiche Gates im Worktree:
+  `@netgrid/ai typecheck`, die beiden fokussierten Vitest-Dateien (161 Tests),
+  `pnpm check:ai`, `@netgrid/shared typecheck`, `@netgrid/engine typecheck`,
+  `git diff --check` und der Prettier-Check der geänderten Dateien.
 
 ## Testmatrix
 

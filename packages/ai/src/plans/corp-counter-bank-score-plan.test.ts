@@ -53,6 +53,47 @@ describe("corpCounterBankScoreProjects", () => {
     );
   });
 
+  it("rejects unsafe, stale, and internally inconsistent preparation evidence", () => {
+    const install = current(
+      legalAction(
+        "install-vapor",
+        "corp",
+        "install_card",
+        "Install Vapor Ops",
+        { credits: 0, clicks: 1 },
+        {
+          source: "vapor",
+          payload: { cardId: "vapor", serverId: "remote_1", placement: "root" },
+        },
+      ),
+    );
+    const input = withDeck(aiInput("corp", [install]));
+    input.playerView.own.gripOrHq = [vapor("vapor", "corp_hq")];
+    input.playerView.servers = [server("remote_1")];
+
+    expect(
+      corpCounterBankScoreProjects(input, [candidate(install, "install.card")]),
+    ).toEqual([]);
+
+    input.playerView.servers = [secureRemote("remote_1")];
+    input.playerView.own.gripOrHq[0]!.counterBankPreparationQuote = {
+      ...input.playerView.own.gripOrHq[0]!.counterBankPreparationQuote!,
+      expiresAtStateVersion: 0,
+    };
+    expect(
+      corpCounterBankScoreProjects(input, [candidate(install, "install.card")]),
+    ).toEqual([]);
+
+    input.playerView.own.gripOrHq[0]!.counterBankPreparationQuote = {
+      ...input.playerView.own.gripOrHq[0]!.counterBankPreparationQuote!,
+      expiresAtStateVersion: 1,
+      advancementCounters: 1,
+    };
+    expect(
+      corpCounterBankScoreProjects(input, [candidate(install, "install.card")]),
+    ).toEqual([]);
+  });
+
   it("builds the bank to the deck-derived agenda threshold without requiring an agenda to be installed", () => {
     const advance = current(
       legalAction(
@@ -168,10 +209,43 @@ describe("corpCounterBankScoreProjects", () => {
       }),
     );
 
-    input.playerView.timingPoint = "corp_discard.select_cards";
+    input.playerView.activeSide = "runner";
+    input.playerView.timingPoint = "runner_action.main";
     expect(
       corpCounterBankScoreProjects(input, [
         candidate(cashout, "economy.gain_credit"),
+      ]),
+    ).toEqual([]);
+  });
+
+  it("does not bind a non-agenda installed target to the agenda-score counter-bank handoff", () => {
+    const installAsset = current(
+      legalAction(
+        "install-asset",
+        "corp",
+        "install_card",
+        "Install an asset",
+        { credits: 0, clicks: 1 },
+        {
+          source: "asset",
+          payload: { cardId: "asset", serverId: "remote_1", placement: "root" },
+        },
+      ),
+    );
+    const input = withDeck(aiInput("corp", [installAsset]));
+    input.playerView.own.gripOrHq = [
+      visibleCard("asset", "corp", "asset", {
+        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        title: "BBS Whispering Campaign",
+      }),
+    ];
+    input.playerView.servers = [
+      secureRemote("remote_1", [vapor("vapor", "installed_root", 3)]),
+    ];
+
+    expect(
+      corpCounterBankScoreProjects(input, [
+        candidate(installAsset, "install.card"),
       ]),
     ).toEqual([]);
   });

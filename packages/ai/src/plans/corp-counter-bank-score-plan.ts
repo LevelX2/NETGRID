@@ -391,6 +391,7 @@ function counterBankQuoteForCard(
     quote.expiresAtStateVersion !== input.playerView.stateVersion ||
     !Number.isSafeInteger(quote.advancementCounters) ||
     quote.advancementCounters < 0 ||
+    quote.advancementCounters !== Math.max(0, card.advancementCounters ?? 0) ||
     quote.advanceableBeforeRez !== true ||
     quote.activatedAbilitiesRequireRez !== true ||
     quote.cashout.advancementCounterCost !== 1 ||

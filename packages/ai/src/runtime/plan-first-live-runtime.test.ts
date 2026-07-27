@@ -2760,7 +2760,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("installs a quoted Vapor Ops counter bank into a secure existing remote through the score plan", () => {
+  it("installs a quoted Vapor Ops counter bank from HQ overflow into a secure existing remote through the score plan", () => {
     resetResidentPlanPortfolioMemory();
     const install = legalAction(
       "install-vapor-secure-remote",
@@ -2823,6 +2823,7 @@ describe("authoritative plan-first live runtime", () => {
           },
         },
       }),
+      ...corpOverflowFillers(5),
     ];
     input.playerView.servers = [
       server("remote_1", [
