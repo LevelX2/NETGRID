@@ -1,9 +1,13 @@
 # Corp Defense Reserve und persistente ICE-Rezbewertung – Umsetzungsprozess
 
-Status: in Bearbeitung
+Status: abgeschlossen (lokal nach `main` integriert)
 Datum: 2026-07-27
-Arbeitsbranch: `codex/corp-defense-reserve-persistent-rez`
-Arbeits-Worktree: `C:\Projekte\NETGRID_corp-defense-reserve-persistent-rez`
+Abschluss-Commit auf `main`: `459f99bdc`
+Ehemaliger Arbeitsbranch: `codex/corp-defense-reserve-persistent-rez` (nach
+Integration entfernt)
+Ehemaliger Arbeits-Worktree:
+`C:\Projekte\NETGRID_corp-defense-reserve-persistent-rez` (nach Integration
+entfernt)
 
 ## Quelle/Vorgabe
 
