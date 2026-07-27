@@ -693,6 +693,78 @@ describe("assessCorpScoreProtection", () => {
       unknownReason: "unsupported_access_relevant_ice_effect",
     });
   });
+
+  it("counts a public Shell-counter breaker after its mandatory next-turn removal", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [ice("filter", "onr_v1_244_filter")],
+      runnerRig: [shellTraders()],
+      runnerSetAside: [preparedRentICon()],
+      runnerMemoryUsed: 0,
+      runnerMemoryLimit: 4,
+      runnerCredits: 3,
+      maximumRunnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+      protectsScore: false,
+      runnerCreditsRemainingOnBestAccessPath: 0,
+    });
+    expect(assessment.evidence).toEqual(
+      expect.arrayContaining([
+        "publicStagedBreaker:true",
+        "publicStagedBreakerShellCounters:3",
+        "publicStagedBreakerStartTurnRemovals:1",
+        "publicStagedBreakerPaidCounterRemovals:2",
+        "publicStagedBreakerInstallCreditCost:2",
+        "publicStagedBreakerMemoryFits:true",
+      ]),
+    );
+  });
+
+  it.each([
+    ["is hidden", { known: false }, 0, 4, 3, "unknown"],
+    ["does not fit memory", {}, 3, 4, 3, "protected"],
+    ["cannot pay the remaining counters", {}, 0, 4, 1, "protected"],
+  ] as const)(
+    "does not treat a prepared breaker as an immediate threat when it %s",
+    (
+      _label,
+      cardPatch,
+      runnerMemoryUsed,
+      runnerMemoryLimit,
+      runnerCredits,
+      expected,
+    ) => {
+      const assessment = assessCorpScoreProtection({
+        serverIce: [ice("filter", "onr_v1_244_filter")],
+        runnerRig: [shellTraders()],
+        runnerSetAside: [{ ...preparedRentICon(), ...cardPatch }],
+        runnerMemoryUsed,
+        runnerMemoryLimit,
+        runnerCredits,
+        maximumRunnerAccessSuccessProbability: {
+          numerator: 0,
+          denominator: 1,
+        },
+      });
+
+      if (expected === "unknown") {
+        expect(assessment).toMatchObject({
+          knowledge: "unknown",
+          protectsScore: false,
+          unknownReason: "unsupported_public_staged_breaker",
+        });
+        return;
+      }
+      expect(assessment).toMatchObject({
+        knowledge: "known",
+        runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+        protectsScore: true,
+      });
+    },
+  );
 });
 
 function ice(instanceId: string, definitionId: string): VisibleCard {
@@ -730,12 +802,37 @@ function runnerProgram(instanceId: string, definitionId: string): VisibleCard {
   } as VisibleCard;
 }
 
+function shellTraders(): VisibleCard {
+  const definition = CARD_DEFINITIONS_BY_ID["onr_v1_176_the-shell-traders"];
+  if (!definition) throw new Error("Missing The Shell Traders definition");
+  return {
+    instanceId: "shell-traders",
+    definitionId: definition.id,
+    title: definition.title,
+    type: definition.type,
+    subtypes: definition.subtypes.slice(),
+    known: true,
+    owner: "runner",
+  } as VisibleCard;
+}
+
+function preparedRentICon(): VisibleCard {
+  const card = runnerProgram(
+    "prepared-rent-i-con",
+    "onr_classic_031_rent-i-con",
+  );
+  const definition = CARD_DEFINITIONS_BY_ID["onr_classic_031_rent-i-con"]!;
+  return {
+    ...card,
+    memoryCost: definition.memoryCost,
+    counters: { shell: 3 },
+  } as VisibleCard;
+}
+
 function recurringCreditPool(
   instanceId: string,
   definitionId: string,
-  use:
-    | "using_icebreaker_during_run_non_noisy"
-    | "using_killer_during_run",
+  use: "using_icebreaker_during_run_non_noisy" | "using_killer_during_run",
 ): VisibleCard {
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition) throw new Error(`Missing test card ${definitionId}`);

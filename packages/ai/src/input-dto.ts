@@ -574,6 +574,12 @@ function sanitizePlayerView(
       ...(view.opponent.rig
         ? { rig: view.opponent.rig.map(sanitizeVisibleCard) }
         : {}),
+      ...(view.opponent.memoryUsed !== undefined
+        ? { memoryUsed: view.opponent.memoryUsed }
+        : {}),
+      ...(view.opponent.memoryLimit !== undefined
+        ? { memoryLimit: view.opponent.memoryLimit }
+        : {}),
     },
     servers: view.servers.map((server) => ({
       id: server.id,
