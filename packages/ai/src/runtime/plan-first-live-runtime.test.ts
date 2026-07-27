@@ -1,9 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
+import {
+  CARD_DEFINITIONS_BY_ID,
+  CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
+} from "@netgrid/shared";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { buildRunnerEconomyPosture } from "../runner-economy-posture";
 import {
+  attachOwnDeckSnapshot,
   aiInput,
   legalAction,
   safeRuntimeRunTarget,
@@ -2751,6 +2756,100 @@ describe("authoritative plan-first live runtime", () => {
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: credit.actionId,
       reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+  });
+
+  it("installs a quoted Vapor Ops counter bank into a secure existing remote through the score plan", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-vapor-secure-remote",
+      "corp",
+      "install_card",
+      "Install Vapor Ops in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "vapor-card",
+        payload: {
+          cardId: "vapor-card",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    const dataWall = CARD_DEFINITIONS_BY_ID["onr_v1_238_data-wall-2-0"];
+    if (!dataWall || dataWall.type !== "ice") {
+      throw new Error("Missing Data Wall test definition.");
+    }
+    const dataWallStrength = dataWall.strength ?? 0;
+    const input = aiInput("corp", [install, credit]);
+    input.playerView.own.clicks = 2;
+    input.playerView.own.credits = 4;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.own.gripOrHq = [
+      visibleCard("vapor-card", "corp", "asset", {
+        definitionId: "onr_v1_347_vapor-ops",
+        title: "Vapor Ops",
+        counterBankPreparationQuote: {
+          schemaVersion: CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
+          context: "corp_counter_bank_preparation",
+          sourceCardId: "vapor-card",
+          expiresAtStateVersion: input.playerView.stateVersion,
+          location: { kind: "corp_hq" },
+          advancementCounters: 0,
+          advanceableBeforeRez: true,
+          activatedAbilitiesRequireRez: true,
+          cashout: {
+            advancementCounterCost: 1,
+            creditGain: 1,
+            actionCost: 0,
+          },
+          transfer: {
+            actionCost: 1,
+            minimumSourceCounters: 1,
+            source: "source_card",
+            target: "chosen_installed_advanceable_card",
+            maximum: "all",
+          },
+        },
+      }),
+    ];
+    input.playerView.servers = [
+      server("remote_1", [
+        visibleCard("data-wall", "corp", "ice", {
+          definitionId: dataWall.id,
+          title: dataWall.title,
+          subtypes: dataWall.subtypes,
+          strength: dataWallStrength,
+          rezzed: true,
+          effectiveRunQuote: {
+            iceInstanceId: "data-wall",
+            iceDefinitionId: dataWall.id,
+            effectiveStrength: dataWallStrength,
+            subroutines: dataWall.subroutines ?? [],
+          },
+        }),
+      ]),
+    ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "vapor-ops-score-bank-runtime-test",
+      side: "corp",
+      cards: [{ cardId: "simple_agenda", quantity: 3 }],
+    });
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
     });
   });

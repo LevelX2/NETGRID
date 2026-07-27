@@ -42,6 +42,12 @@ import {
 export type CorpScorePhase =
   | "select_agenda"
   | "unlock_remote_creation"
+  | "install_counter_bank"
+  | "advance_counter_bank"
+  | "install_agenda_from_counter_bank"
+  | "rez_counter_bank_for_handoff"
+  | "rez_counter_bank_for_liquidation"
+  | "liquidate_counter_bank"
   | "install_agenda"
   | "convert_agenda"
   | "advance_agenda"
@@ -83,6 +89,19 @@ export type CorpScoreProjectSignal = {
     actionId: string;
     sourceCardInstanceId: string;
     sourceDefinitionId: string;
+  };
+  /**
+   * Narrow, Engine-certified preparation state for an advanceable Corp asset
+   * that can later move its own advancement counters to an agenda. This is a
+   * score-plan concern, never a generic hand-development or economy route.
+   */
+  counterBank?: {
+    sourceCardInstanceId: string;
+    sourceDefinitionId: string;
+    serverId: string;
+    advancementCounters: number;
+    counterTarget: number;
+    quoteStateVersion: number;
   };
   terminalScore: boolean;
   preventsTerminalSteal?: boolean;
@@ -1374,6 +1393,47 @@ function scoreCapability(signal: CorpScoreProjectSignal): PlanStepCapability {
       capabilityId: "unlock_score_remote_creation",
       semanticActionTypes: ["card_ability.trigger"],
     };
+  if (
+    signal.phase === "install_counter_bank" ||
+    signal.phase === "install_agenda_from_counter_bank"
+  )
+    return {
+      capabilityId:
+        signal.phase === "install_counter_bank"
+          ? "install_score_counter_bank"
+          : "install_counter_bank_score_agenda",
+      semanticActionTypes: ["install.card"],
+      ...(signal.phase === "install_counter_bank" && signal.counterBank
+        ? {
+            requiredSourceDefinitionIds: [
+              signal.counterBank.sourceDefinitionId,
+            ],
+          }
+        : signal.agendaDefinitionId
+          ? { requiredSourceDefinitionIds: [signal.agendaDefinitionId] }
+          : {}),
+    };
+  if (signal.phase === "advance_counter_bank")
+    return {
+      capabilityId: "advance_score_counter_bank",
+      semanticActionTypes: ["score.advance_card"],
+    };
+  if (
+    signal.phase === "rez_counter_bank_for_handoff" ||
+    signal.phase === "rez_counter_bank_for_liquidation"
+  )
+    return {
+      capabilityId:
+        signal.phase === "rez_counter_bank_for_handoff"
+          ? "rez_counter_bank_for_score_handoff"
+          : "rez_counter_bank_for_liquidation",
+      semanticActionTypes: ["corp_window.rez"],
+    };
+  if (signal.phase === "liquidate_counter_bank")
+    return {
+      capabilityId: "liquidate_score_counter_bank",
+      semanticActionTypes: ["economy.gain_credit"],
+    };
   if (signal.phase === "convert_agenda")
     return {
       capabilityId: "convert_score_agenda",
@@ -1413,6 +1473,14 @@ function nextScoreCapability(
       capabilityId: "advance_installed_agenda",
       semanticActionTypes: ["score.advance_card"],
     };
+  if (phase === "install_agenda_from_counter_bank")
+    return {
+      capabilityId: "rez_or_transfer_counter_bank_to_installed_agenda",
+      semanticActionTypes: [
+        "corp_window.rez",
+        "score_conversion.move_advancement",
+      ],
+    };
   if (phase === "advance_agenda")
     return {
       capabilityId: "score_advanced_agenda",
@@ -1432,7 +1500,8 @@ export function corpScorePlanTarget(signal: CorpScoreProjectSignal) {
       kind: "capability" as const,
       id: "rules_legal_score_action",
     };
-  return signal.phase === "install_agenda"
+  return signal.phase === "install_agenda" ||
+    signal.phase === "install_agenda_from_counter_bank"
     ? {
         kind: "card" as const,
         id: signal.agendaDefinitionId ?? signal.projectId,
@@ -1467,13 +1536,40 @@ function scoreCandidates(
         return true;
       }
       if (signal.phase === "unlock_remote_creation") return true;
-      if (signal.phase === "install_agenda")
+      if (
+        signal.phase === "install_counter_bank" &&
+        signal.counterBank !== undefined
+      )
+        return (
+          candidate.sourceCardInstanceId ===
+            signal.counterBank.sourceCardInstanceId &&
+          candidate.sourceDefinitionId ===
+            signal.counterBank.sourceDefinitionId &&
+          candidateTargetIds(candidate).includes(signal.counterBank.serverId)
+        );
+      if (
+        signal.phase === "install_agenda" ||
+        signal.phase === "install_agenda_from_counter_bank"
+      )
         return (
           signal.agendaDefinitionId !== undefined &&
           candidate.sourceDefinitionId === signal.agendaDefinitionId &&
           (!signal.serverId ||
             candidateTargetIds(candidate).includes(signal.serverId))
         );
+      if (
+        (signal.phase === "advance_counter_bank" ||
+          signal.phase === "rez_counter_bank_for_handoff" ||
+          signal.phase === "rez_counter_bank_for_liquidation" ||
+          signal.phase === "liquidate_counter_bank") &&
+        signal.counterBank !== undefined
+      ) {
+        return (
+          candidate.sourceCardInstanceId ===
+            signal.counterBank.sourceCardInstanceId &&
+          candidate.sourceDefinitionId === signal.counterBank.sourceDefinitionId
+        );
+      }
       const agendaId = signal.agendaInstanceId ?? signal.agendaDefinitionId;
       if (!agendaId) return false;
       return (

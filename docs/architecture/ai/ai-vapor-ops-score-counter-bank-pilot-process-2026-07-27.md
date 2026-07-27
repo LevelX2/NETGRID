@@ -123,6 +123,23 @@ Runner-Zug fallen.
   Parent ist an Remote, Vapor-Instanz und State-Evidence gebunden.
 - Commit: `feat(ai): prepare vapor counter banks for agenda scoring`
 
+Umgesetzt am 2026-07-27:
+
+- `corp.score_agenda` besitzt nun die abgegrenzten Phasen für Installation,
+  Aufbau, Agenda-Handoff, erforderliches Rez und Liquidation einer
+  Counter-Bank.
+- Die Sicherheitsprüfung verwendet die vorhandene sichtbare
+  Remote-Contestability-Analyse einschließlich Runner-Rig und
+  Kreditressourcen; sie akzeptiert nur eine aktuell nicht erreichbare,
+  bestehende Remote mit mindestens einem bewertbaren ICE.
+- Die Schwelle stammt aus den sichtbaren Agenda-Anforderungen, ansonsten aus
+  dem eigenen Deck-Snapshot. Ohne eine solche eigene Evidence wird keine
+  Bank-Schwelle erfunden.
+- Ein gültiges Counter-Bank-Zitat sperrt Vapor für die generische
+  HQ-Overflow-Konversion. Cashout ist ausschließlich bei verlorener
+  Sicherheitsbedingung, ohne aktuelle Score-Handoff-Route und nur im
+  `corp_action.main` zulässig.
+
 ### VOP-04 – Szenarien, Regression und Abschlussreview
 
 - Ziel: Den gesamten Pfad sowie Ablehnungen und Liquidation regressionssicher
