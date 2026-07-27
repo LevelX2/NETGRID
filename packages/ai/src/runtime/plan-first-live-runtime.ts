@@ -164,6 +164,7 @@ import {
 } from "./corp-funded-score-protection";
 import { compareExactProbabilities } from "./corp-score-protection-assessment";
 import { projectExactCorpIceRezRoute } from "./corp-exact-ice-rez-route";
+import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
 import {
   runnerRunLockReleaseProjection,
   runnerRunLockReleaseScoreComponent,
@@ -6950,9 +6951,12 @@ function buildCorpDomain(
   const remoteCreationUnlockScoreProjects = candidates.flatMap((candidate) =>
     corpRemoteCreationUnlockScoreProjects(input, candidate),
   );
+  const nextTurnScoreContinuationProjects =
+    corpNextTurnScoreContinuationProjects(input);
   const proposedScoreProjects = [
     ...directScoreProjects,
     ...remoteCreationUnlockScoreProjects,
+    ...nextTurnScoreContinuationProjects,
     ...candidates.flatMap((candidate) => {
       const conversion = sameTurnScoreConversionProjectForCandidate(
         input,
@@ -7376,7 +7380,18 @@ function buildCorpDomain(
                   targetServerId: rezServerId,
                 })
               : undefined;
-          if (sourceType === "ice" && !exactIceRezRoute) {
+          const scoreReserveAdmission = exactIceRezRoute
+            ? assessCorpExactIceRezAgainstScoreReserves({
+                input,
+                route: exactIceRezRoute,
+                scoreProjects,
+              })
+            : undefined;
+          const productiveIceRezRoute =
+            exactIceRezRoute && scoreReserveAdmission?.preservesReserve
+              ? exactIceRezRoute
+              : undefined;
+          if (sourceType === "ice" && !productiveIceRezRoute) {
             return [
               {
                 kind: "generic",
@@ -7391,7 +7406,9 @@ function buildCorpDomain(
                 urgent: false,
                 rezWindowVerdict: "nonproductive" as const,
                 value: 0,
-                evidenceCode: "corp_ice_rez_resource_exchange_unknown",
+                evidenceCode: exactIceRezRoute
+                  ? `corp_ice_rez_preserves_score_reserve_required:${scoreReserveAdmission?.requiredCreditsAfterRez ?? "unknown"}`
+                  : "corp_ice_rez_resource_exchange_unknown",
               },
             ];
           }
@@ -7407,15 +7424,20 @@ function buildCorpDomain(
               actionIds: [candidate.actionId],
               ...(targetId ? { targetIceInstanceId: targetId } : {}),
               urgent: input.playerView.run !== undefined,
-              ...(exactIceRezRoute ? { rezRoute: exactIceRezRoute } : {}),
-              rezWindowVerdict: exactIceRezRoute
+              ...(productiveIceRezRoute
+                ? { rezRoute: productiveIceRezRoute }
+                : {}),
+              rezWindowVerdict: productiveIceRezRoute
                 ? ("productive" as const)
                 : ("open" as const),
-              value: exactIceRezRoute ? 1 : 0,
-              evidenceCode: exactIceRezRoute
-                ? exactIceRezRoute.routeKind === "access_reduction"
+              value: productiveIceRezRoute ? 1 : 0,
+              evidenceCode: productiveIceRezRoute
+                ? productiveIceRezRoute.routeKind === "access_reduction"
                   ? `engine_certified_ice_rez_access_reduction:${rezServerId}:${candidate.actionId}`
-                  : `engine_certified_ice_rez_exact_resource_exchange:${rezServerId}:${candidate.actionId}`
+                  : productiveIceRezRoute.routeKind ===
+                      "exact_resource_exchange"
+                    ? `engine_certified_ice_rez_exact_resource_exchange:${rezServerId}:${candidate.actionId}`
+                    : `engine_certified_ice_rez_free_persistent_defense:${rezServerId}:${candidate.actionId}`
                 : "visible_non_ice_rez_window",
             },
           ];
@@ -8013,10 +8035,8 @@ function corpHqOverflowCandidateIsExactCurrentConversion(
     candidate.sourceKind !== "card" ||
     !candidate.sourceCardInstanceId ||
     !candidate.sourceDefinitionId ||
-    candidate.semanticActionType ===
-      "score_conversion.place_advancement" ||
-    candidate.semanticActionType ===
-      "score_conversion.move_advancement"
+    candidate.semanticActionType === "score_conversion.place_advancement" ||
+    candidate.semanticActionType === "score_conversion.move_advancement"
   ) {
     return false;
   }
@@ -8114,6 +8134,71 @@ function corpRemoteCreationLockRemovalAction(
   )
     ? action
     : undefined;
+}
+
+/**
+ * The score plan is the single owner of the next-turn score budget. It accepts
+ * only the Engine's private continuation receipt and publishes the resulting
+ * cash floor for sibling plans to preserve.
+ */
+function corpNextTurnScoreContinuationProjects(
+  input: AiDecisionInput,
+): CorpScoreProjectSignal[] {
+  return input.playerView.servers.flatMap((server) =>
+    server.root.flatMap((agenda) => {
+      const quote = agenda.scoreContinuationQuote;
+      if (
+        !agenda.known ||
+        !visibleCardIsAgenda(input, agenda) ||
+        quote?.context !== "installed_agenda" ||
+        quote.complete !== true ||
+        quote.agendaCardId !== agenda.instanceId ||
+        quote.serverId !== server.id ||
+        quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+        !Number.isSafeInteger(quote.remainingAdvancementCounters) ||
+        quote.remainingAdvancementCounters < 0 ||
+        !Number.isSafeInteger(quote.creditsRequiredBeforeNextCorpTurn) ||
+        quote.creditsRequiredBeforeNextCorpTurn < 0 ||
+        !Number.isSafeInteger(quote.nextCorpTurnGuaranteedFlexibleClicks) ||
+        quote.nextCorpTurnGuaranteedFlexibleClicks <
+          quote.remainingAdvancementCounters ||
+        !Number.isSafeInteger(quote.certifiedCreditGainFromFreeClicks) ||
+        quote.certifiedCreditGainFromFreeClicks < 0
+      ) {
+        return [];
+      }
+      const agendaPoints = requireVisibleAgendaPoints(input, agenda);
+      return [
+        {
+          projectId: corpScoreProjectId(agenda.instanceId, server.id),
+          agendaDefinitionId: agenda.definitionId ?? agenda.instanceId,
+          agendaPoints,
+          agendaInstanceId: agenda.instanceId,
+          serverId: server.id,
+          phase:
+            quote.remainingAdvancementCounters === 0
+              ? ("score_agenda" as const)
+              : ("advance_agenda" as const),
+          sameTurnCloseout: false,
+          ...(quote.terminalScore ? { deadlinePressure: true } : {}),
+          terminalScore: quote.terminalScore,
+          feasible: true,
+          continuationReserve: {
+            agendaCardId: quote.agendaCardId,
+            serverId: quote.serverId,
+            requiredCreditsBeforeNextCorpTurn:
+              quote.creditsRequiredBeforeNextCorpTurn,
+            remainingAdvancementCounters: quote.remainingAdvancementCounters,
+            nextCorpTurnGuaranteedFlexibleClicks:
+              quote.nextCorpTurnGuaranteedFlexibleClicks,
+            certifiedCreditGainFromFreeClicks:
+              quote.certifiedCreditGainFromFreeClicks,
+          },
+          evidenceCode: `engine_certified_next_turn_score_continuation:${agenda.instanceId}:${server.id}`,
+        },
+      ];
+    }),
+  );
 }
 
 function corpRemoteCreationUnlockScoreProjects(

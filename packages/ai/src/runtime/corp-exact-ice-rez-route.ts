@@ -18,7 +18,10 @@ export type CorpExactIceRezRouteProjection = Readonly<{
   quote: Extract<VisibleCorpRezCostQuote, { complete: true }>;
   before: KnownCorpScoreProtectionAssessment;
   after: KnownCorpScoreProtectionAssessment;
-  routeKind: "access_reduction" | "exact_resource_exchange";
+  routeKind:
+    | "access_reduction"
+    | "exact_resource_exchange"
+    | "free_persistent_defense";
   resourceExchange?: Readonly<{
     runnerRequiredCredits: number;
     runnerPumpCredits: number;
@@ -128,9 +131,7 @@ export function projectExactCorpIceRezRoute(params: {
   const after = assessCorpScoreProtection({
     ...assessmentInput,
     serverIce: serverIce.map((ice) =>
-      ice.instanceId === sourceCard.instanceId
-        ? { ...ice, rezzed: true }
-        : ice,
+      ice.instanceId === sourceCard.instanceId ? { ...ice, rezzed: true } : ice,
     ),
   });
   if (before.knowledge !== "known" || after.knowledge !== "known") {
@@ -151,7 +152,23 @@ export function projectExactCorpIceRezRoute(params: {
           totalRezCredits,
         })
       : undefined;
-  if (probabilityComparison !== -1 && !resourceExchange) return undefined;
+  const freePersistentDefense =
+    probabilityComparison === 0 &&
+    !resourceExchange &&
+    isFreePersistentDefenseOnWorthwhileCurrentServer({
+      input,
+      candidate,
+      sourceCard,
+      targetServerId,
+      totalRezCredits,
+    });
+  if (
+    probabilityComparison !== -1 &&
+    !resourceExchange &&
+    !freePersistentDefense
+  ) {
+    return undefined;
+  }
   return {
     actionId: candidate.actionId,
     sourceCardInstanceId: sourceCard.instanceId,
@@ -162,11 +179,52 @@ export function projectExactCorpIceRezRoute(params: {
     after,
     routeKind: resourceExchange
       ? "exact_resource_exchange"
-      : "access_reduction",
+      : freePersistentDefense
+        ? "free_persistent_defense"
+        : "access_reduction",
     ...(resourceExchange ? { resourceExchange } : {}),
     effect: after.protectsScore ? "satisfied" : "progress",
     totalRezCredits,
   };
+}
+
+function isFreePersistentDefenseOnWorthwhileCurrentServer(params: {
+  input: AiDecisionInput;
+  candidate: ActionSemanticCandidate;
+  sourceCard: VisibleCard;
+  targetServerId: string;
+  totalRezCredits: number;
+}): boolean {
+  const { input, candidate, sourceCard, targetServerId, totalRezCredits } =
+    params;
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  const resourceExchangeQuote = sourceCard.effectiveRezResourceExchangeQuote;
+  if (
+    totalRezCredits !== 0 ||
+    action?.payload?.temporaryDerezAfterRun === true ||
+    input.playerView.run?.attackedServerId !== targetServerId ||
+    // A complete Engine exchange quote is issued only for a direct current
+    // end-the-run path; do not reconstruct that fact from card text here.
+    resourceExchangeQuote?.complete !== true
+  ) {
+    return false;
+  }
+  const runnerBreak = resourceExchangeQuote.runnerBreak;
+  if (
+    runnerBreak.requiredCredits !== 0 ||
+    runnerBreak.canPayFromCurrentCredits !== true
+  ) {
+    return false;
+  }
+  if (targetServerId === "hq" || targetServerId === "rd") return true;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  return (
+    server?.root.some((card) => card.known && card.type === "agenda") === true
+  );
 }
 
 function readExactCurrentRunResourceExchange(params: {
@@ -271,8 +329,7 @@ export function readExactInstalledCorpIceRezQuote(params: {
     return undefined;
   }
   const { quote } = quoteRead;
-  const mandatoryAgendaPoints =
-    quote.mandatoryAdditionalCosts.agendaPoints;
+  const mandatoryAgendaPoints = quote.mandatoryAdditionalCosts.agendaPoints;
   const actionAgendaPoints = action.payload?.agendaPointCost ?? 0;
   if (
     !nonNegativeSafeInteger(actionAgendaPoints) ||
@@ -381,8 +438,7 @@ function discountedRezActionQuote(
   ) {
     return undefined;
   }
-  const increaseSourceDefinitionIds =
-    ordinaryQuote.increaseSourceDefinitionIds;
+  const increaseSourceDefinitionIds = ordinaryQuote.increaseSourceDefinitionIds;
   if (surchargeAmount > 0) {
     if (
       !nonBlankString(payload.corpRezCostSurchargeSourceDefinitionId) ||
@@ -392,9 +448,7 @@ function discountedRezActionQuote(
     ) {
       return undefined;
     }
-  } else if (
-    payload.corpRezCostSurchargeSourceDefinitionId !== undefined
-  ) {
+  } else if (payload.corpRezCostSurchargeSourceDefinitionId !== undefined) {
     return undefined;
   }
   const sortedReductionSourceDefinitionIds = [
@@ -496,9 +550,7 @@ function nonNegativeSafeInteger(value: unknown): value is number {
   return Number.isSafeInteger(value) && (value as number) >= 0;
 }
 
-function validDefinitionIdList(
-  values: readonly string[] | undefined,
-): boolean {
+function validDefinitionIdList(values: readonly string[] | undefined): boolean {
   return (
     values === undefined ||
     (Array.isArray(values) &&

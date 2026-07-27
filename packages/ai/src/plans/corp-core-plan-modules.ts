@@ -66,6 +66,18 @@ export type CorpScoreProjectSignal = {
     currentActionScope: "exact_install_only";
   };
   fundingGap?: number;
+  /**
+   * Published only by corp.score_agenda from an Engine continuation quote.
+   * corp.defend_servers may preserve this request but must never reconstruct it.
+   */
+  continuationReserve?: {
+    agendaCardId: string;
+    serverId: string;
+    requiredCreditsBeforeNextCorpTurn: number;
+    remainingAdvancementCounters: number;
+    nextCorpTurnGuaranteedFlexibleClicks: number;
+    certifiedCreditGainFromFreeClicks: number;
+  };
   setupNeed?: {
     needId: string;
     actionId: string;
@@ -2520,9 +2532,8 @@ function selectedGenericDefensePortfolioBand(
       prioritySignals,
       centralAllocation,
     );
-    const supportable = genericDefenseBandHasExactFundingSupport(
-      prioritySignals,
-    );
+    const supportable =
+      genericDefenseBandHasExactFundingSupport(prioritySignals);
     if (candidates.length > 0 || supportable) {
       return {
         eligibleSignals: prioritySignals,
