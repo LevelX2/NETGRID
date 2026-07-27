@@ -86,7 +86,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
         },
         "http://127.0.0.1:3000/maintenance"
       )
-    ).toBe("http://127.0.0.1:3000/?matchId=match_abc&side=runner&reconnectToken=recovery_access_secret");
+    ).toBe("http://127.0.0.1:3000/?matchId=match_abc&side=runner&reconnectToken=recovery_access_secret&recovery=1");
   });
 
   it("uses the loopback backend for locally opened maintenance pages", () => {

@@ -240,6 +240,19 @@ describe("V1.0.5 action board UI helpers", () => {
       breakerContinuation,
     ]);
     expect(split.contextualActions).toEqual([]);
+    expect(
+      runWindowActionButtonLabel(
+        view("runner", {
+          run: {
+            runId: "run_payment_support",
+            attackedServerId: "hq",
+            phase: "encounter_ice",
+            successful: false,
+          },
+        }),
+        breakerContinuation,
+      ),
+    ).toBe("Zahlung abschließen: Subroutine brechen");
   });
 
   it("keeps the explicit restricted-sequence closeout visible and labeled", () => {

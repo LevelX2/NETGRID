@@ -197,13 +197,13 @@ import {
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
 import {
   clearStoredSession,
-  loadCurrentTabSession,
   loadRecentSession,
   loadStoredSession,
   persistSession,
   rememberRecentSession,
   removeRecentSession,
   storedSessionMatches,
+  subscribeToRecoverableSessionChanges,
   type RecentSessionInfo,
   type SessionInfo,
 } from "./session-recovery";
@@ -932,6 +932,29 @@ export default function Page() {
     sessionRef.current = session;
   }, [session]);
 
+  useEffect(
+    () =>
+      subscribeToRecoverableSessionChanges((storedSession) => {
+        const currentSession = sessionRef.current;
+        if (
+          !storedSession ||
+          !currentSession ||
+          storedSession.matchId !== currentSession.matchId ||
+          storedSession.side !== currentSession.side
+        )
+          return;
+        if (
+          storedSession.sessionToken === currentSession.sessionToken &&
+          storedSession.reconnectToken === currentSession.reconnectToken &&
+          storedSession.webSocketUrl === currentSession.webSocketUrl
+        )
+          return;
+        sessionRef.current = storedSession;
+        setSession(storedSession);
+      }),
+    [],
+  );
+
   const { closeSocket, ensureSocketConnected, sendSocketMessage } =
     useMatchTransport({
       session,
@@ -959,7 +982,9 @@ export default function Page() {
     const matchId = params.get("matchId");
     const token = params.get("joinToken");
     const reconnectToken = params.get("reconnectToken");
+    const reconnectSessionToken = params.get("sessionToken");
     const reconnectSide = params.get("side");
+    const recovery = params.get("recovery") === "1";
     const storedDisplayName = readLocalStorage(
       DISPLAY_NAME_STORAGE_KEY,
     )?.trim();
@@ -1070,7 +1095,7 @@ export default function Page() {
       setSeed(createMatchSeed());
     }
     setMatchStartSettingsLoaded(true);
-    const storedSession = loadCurrentTabSession();
+    const storedSession = loadStoredSession();
     if (
       matchId &&
       reconnectToken &&
@@ -1082,12 +1107,22 @@ export default function Page() {
         {
           matchId,
           side: reconnectSide,
-          sessionToken: "",
+          sessionToken:
+            reconnectSessionToken ||
+            (storedSession?.matchId === matchId &&
+            storedSession.side === reconnectSide
+              ? storedSession.sessionToken
+              : ""),
           reconnectToken,
-          webSocketUrl: "",
+          webSocketUrl:
+            storedSession?.matchId === matchId &&
+            storedSession.side === reconnectSide
+              ? storedSession.webSocketUrl
+              : "",
           displayName: storedDisplayName || "Du",
         },
         "Wiederverbindung konnte nicht geladen werden.",
+        recovery,
       );
       return;
     }
@@ -2550,8 +2585,10 @@ export default function Page() {
   const showAiDecisionDebugOverlay = Boolean(
     activeMatchIsGame && aiDecisionDebugOverlayEnabled && session,
   );
-  const canRequestHumanAiDecisionPreview =
-    humanAiDecisionProbeAvailable(session, payload);
+  const canRequestHumanAiDecisionPreview = humanAiDecisionProbeAvailable(
+    session,
+    payload,
+  );
   const humanAiAdvice = aiDecisionDebugPreview
     ? humanAiAdviceSentence(aiDecisionDebugPreview)
     : null;
@@ -3896,6 +3933,7 @@ export default function Page() {
   const reconnectSession = async (
     baseSession: SessionInfo,
     fallbackNotice = "Wiederverbindung konnte nicht gestartet werden.",
+    recovery = false,
   ) => {
     if (reconnectInFlightRef.current) return false;
     reconnectInFlightRef.current = true;
@@ -3906,7 +3944,12 @@ export default function Page() {
           `/api/matches/${encodeURIComponent(baseSession.matchId)}/reconnect`,
           {
             side: baseSession.side,
-            reconnectToken: baseSession.reconnectToken,
+            ...(recovery
+              ? { reconnectToken: baseSession.reconnectToken, recovery: true }
+              : {
+                  sessionToken: baseSession.sessionToken,
+                  reconnectToken: baseSession.reconnectToken,
+                }),
             displayName: baseSession.displayName,
           },
         );
@@ -4102,11 +4145,20 @@ export default function Page() {
       actionMatchesContext(action, selectedActionContext)
     )
       setSelectedActionContext(null);
+    const paymentSupportContinuation = pendingPaymentSupportContinuation(
+      session.matchId,
+      action,
+      stateVersion,
+    );
     if (actionBelongsToRunnerPaymentSupportWindow(action)) {
       setPaymentSupportPreselection(null);
       paymentSupportSubmittedKeyRef.current = null;
-      setPaymentSupportContinuation(null);
       paymentSupportContinuationSubmittedKeyRef.current = null;
+      // A support ability is chosen inside an already-authoritative payment
+      // window. Its original action is still revalidated from fresh
+      // LegalActions below, but the player must not be asked to select the
+      // same break/pump/install action a second time.
+      setPaymentSupportContinuation(paymentSupportContinuation);
     }
     sendSocketMessage("submit_action", {
       matchId: session.matchId,
@@ -6286,9 +6338,7 @@ export default function Page() {
             {showAiDecisionDebugOverlay ? (
               <FloatingAiDecisionDebugOverlay
                 position={aiDecisionDebugOverlayPosition}
-                status={
-                  aiDecisionDebugTrace ? "live" : aiDecisionDebugStatus
-                }
+                status={aiDecisionDebugTrace ? "live" : aiDecisionDebugStatus}
                 error={aiDecisionDebugError}
                 trace={aiDecisionDebugTrace}
                 traceCount={aiDecisionDebugTrace ? 1 : 0}

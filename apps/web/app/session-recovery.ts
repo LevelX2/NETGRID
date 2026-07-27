@@ -99,13 +99,34 @@ export function loadRecentSessions(): RecentSessionInfo[] {
 }
 
 export function loadStoredSession(): SessionInfo | null {
+  const recoverable = loadRecoverableSession();
   const sessionStored = loadCurrentTabSession();
-  if (sessionStored) return sessionStored;
-  return loadRecoverableSession();
+  if (!recoverable || !sessionStored) return recoverable ?? sessionStored;
+  if (
+    recoverable.matchId !== sessionStored.matchId ||
+    recoverable.side !== sessionStored.side
+  )
+    return sessionStored;
+  return recoverable;
 }
 
 export function loadCurrentTabSession(): SessionInfo | null {
   return loadSessionStorageSession();
+}
+
+export function subscribeToRecoverableSessionChanges(
+  onChange: (session: SessionInfo | null) => void,
+): () => void {
+  const onStorage = (event: StorageEvent) => {
+    if (
+      event.storageArea !== window.localStorage ||
+      event.key !== RECOVERY_STORAGE_KEY
+    )
+      return;
+    onChange(parseRecoverableSessionFromStorage(event.newValue));
+  };
+  window.addEventListener("storage", onStorage);
+  return () => window.removeEventListener("storage", onStorage);
 }
 
 export function storedSessionMatches(recent: RecentSessionInfo | null): boolean {

@@ -2852,15 +2852,19 @@ async function routeHttp(
           MultiplayerService["reconnectMatch"]
         >[1] = {
           side,
+          sessionToken:
+            typeof body.sessionToken === "string" ? body.sessionToken : "",
           reconnectToken:
             typeof body.reconnectToken === "string" ? body.reconnectToken : "",
         };
+        const recoveryInput: Parameters<MultiplayerService["recoverMatch"]>[1] =
+          reconnectInput;
         if (typeof body.displayName === "string")
-          reconnectInput.displayName = body.displayName;
-        const reconnected = await service.reconnectMatch(
-          matchId,
-          reconnectInput,
-        );
+          recoveryInput.displayName = body.displayName;
+        const reconnected =
+          body.recovery === true
+            ? await service.recoverMatch(matchId, recoveryInput)
+            : await service.reconnectMatch(matchId, reconnectInput);
         sendJson(response, "error" in reconnected ? 403 : 200, reconnected);
         return;
       }
