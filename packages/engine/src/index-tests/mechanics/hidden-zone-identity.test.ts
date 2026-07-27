@@ -608,6 +608,13 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       ...state.cardInstances[targetProgramId]!,
       zone: { side: "runner", zone: "heap" },
     };
+    const topProgramId = moveRunnerCardToGrip(state, "simple_fracter");
+    removeEverywhere(state, topProgramId);
+    state.runner.heap.push(topProgramId);
+    state.cardInstances[topProgramId] = {
+      ...state.cardInstances[topProgramId]!,
+      zone: { side: "runner", zone: "heap" },
+    };
 
     state = apply(
       state,
@@ -642,10 +649,23 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       label: "Simple Economy Event",
       selectable: false,
     });
+    expect(runnerChoice?.options.map((option) => option.value)).toEqual([
+      displayOnlyEventId,
+      targetProgramId,
+      topProgramId,
+      eventId,
+    ]);
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(() => applyChoice(state, "runner", String(eventOption?.id))).toThrow(
       "Eine gewaehlte Option ist fuer diesen Effekt nicht auswaehlbar.",
     );
+    state = applyChoice(state, "runner", String(programOption?.id));
+    expect(state.runner.heap).toEqual([
+      displayOnlyEventId,
+      topProgramId,
+      eventId,
+    ]);
+    expect(state.runner.heap.at(-1)).toBe(eventId);
   });
 
   it("lets Mantis choose any Runner stack card instead of only programs", () => {
@@ -902,6 +922,16 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-reveal"));
     state.runner.credits = 20;
     const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
+    const displayOnlyEventId = moveRunnerCardToGrip(
+      state,
+      "simple_economy_event",
+    );
+    removeEverywhere(state, displayOnlyEventId);
+    state.runner.heap.push(displayOnlyEventId);
+    state.cardInstances[displayOnlyEventId] = {
+      ...state.cardInstances[displayOnlyEventId]!,
+      zone: { side: "runner", zone: "heap" },
+    };
     const targetProgramId = moveRunnerCardToGrip(state, "simple_decoder");
     removeEverywhere(state, targetProgramId);
     state.runner.heap.push(targetProgramId);
@@ -921,6 +951,11 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.pendingChoice?.source).toContain(
       "p3_38.stack_or_trash_program_install",
     );
+    expect(
+      getPlayerView(state, "runner").pendingChoice?.options.map(
+        (option) => option.value,
+      ),
+    ).toEqual([displayOnlyEventId, targetProgramId, eventId]);
     const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
       (option) => option.value === targetProgramId,
     )?.id;

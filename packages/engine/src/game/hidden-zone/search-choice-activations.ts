@@ -146,10 +146,7 @@ export function startSearchTrashToGripActivation(
     sourceCardId: input.sourceCardId,
     sourceDefinitionId: input.sourceDefinitionId,
     filter: input.filter,
-    options: host.state.runner.heap
-      .slice()
-      .sort()
-      .map((cardId) => {
+    options: host.state.runner.heap.map((cardId) => {
         const definition = host.cards.definitionFor(cardId);
         const selectable = targets.includes(cardId);
         return {

@@ -21,6 +21,8 @@ import { CardView } from "../cards/CardView";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
 import { type CardDisplayMode } from "../settings/settings-model";
 import {
+  cardChoiceHeapPositionBadge,
+  cardChoiceHeapPositionHint,
   cardChoiceOrderBadge,
   cardChoiceReadonlyPositionBadge,
   cardChoiceReadonlyPositionHint,
@@ -160,7 +162,12 @@ export function CardChoicePanel({
                 const readonlyPositionBadge = readonlyPrivateLook
                   ? cardChoiceReadonlyPositionBadge(choice, option.id)
                   : null;
-                const visibleOrderBadge = orderBadge ?? readonlyPositionBadge;
+                const heapPositionBadge = cardChoiceHeapPositionBadge(
+                  choice,
+                  option.id,
+                );
+                const visibleOrderBadge =
+                  heapPositionBadge ?? orderBadge ?? readonlyPositionBadge;
                 return (
                   <div className={`cardChoiceOptionSlot ${active ? "selected" : ""}${selectable ? "" : " displayOnly"}`} key={option.id}>
                     {visibleOrderBadge ? (
@@ -368,11 +375,12 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
   if (choice.source.includes("sneak_preview_free_mu")) {
     return "Die gewählten installierten Programme werden getrasht; danach wird das Sneak-Preview-Programm kostenlos installiert.";
   }
+  const heapPositionHint = cardChoiceHeapPositionHint(choice);
   if (resolution?.destination === "install_program") {
-    return `Die gewählte Programmkarte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}direkt installiert${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}${presentation?.temporaryReturnAtEndOfTurn || choice.source.includes("sneak_preview") ? "; am Zugende kehrt sie in den Grip zurück, falls sie noch installiert ist" : ""}.`;
+    return `${heapPositionHint ? `${heapPositionHint} ` : ""}Die gewählte Programmkarte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}direkt installiert${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}${presentation?.temporaryReturnAtEndOfTurn || choice.source.includes("sneak_preview") ? "; am Zugende kehrt sie in den Grip zurück, falls sie noch installiert ist" : ""}.`;
   }
   if (resolution?.destination === "grip") {
-    return `Die gewählte Karte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}in den Grip genommen${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}.`;
+    return `${heapPositionHint ? `${heapPositionHint} ` : ""}Die gewählte Karte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}in den Grip genommen${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}.`;
   }
   if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder")) return "Wähle die ICE im Fenster nacheinander in der neuen Reihenfolge vor diesem Server.";
   if (choice.source.includes("corp_rd_arrange")) return "Die gewählte Reihenfolge wird für die R&D-Spitze übernommen.";
