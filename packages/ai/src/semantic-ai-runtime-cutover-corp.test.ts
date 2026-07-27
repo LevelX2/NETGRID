@@ -1111,6 +1111,76 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     expectRejectedByPlan(decision, "protect-rd");
   });
 
+  it("strengthens a reusable empty remote with exact ICE when no higher-priority route exists", () => {
+    const input = aiInput("corp", [
+      legalAction(
+        "strengthen-empty-remote",
+        "corp",
+        "install_card",
+        "Install Data Wall before an empty remote",
+        { clicks: 1, credits: 0 },
+        {
+          source: "data-wall-for-empty-remote",
+          payload: {
+            cardId: "data-wall-for-empty-remote",
+            placement: "ice",
+            serverId: "remote_1",
+            iceInstallBaseCost: 0,
+            iceInstallAdditionalCost: 0,
+            iceInstallReduction: 0,
+            iceInstallTotalCost: 0,
+            postInstallRezQuoteCardId: "data-wall-for-empty-remote",
+            postInstallRezQuoteTargetServerId: "remote_1",
+            postInstallRezQuoteProjectedServerId: "remote_1",
+            postInstallRezQuoteExpiresAtStateVersion: 1,
+            postInstallRezQuoteComplete: true,
+            postInstallRezQuoteCostKind: "fixed",
+            postInstallRezQuoteBaseCredits: 1,
+            postInstallRezQuoteFinalCredits: 1,
+            postInstallRezQuoteMandatoryAgendaPointCost: 0,
+          },
+        },
+      ),
+      legalAction(
+        "end-turn",
+        "corp",
+        "end_turn",
+        "End turn",
+        { credits: 0 },
+        { source: "game_rule" },
+      ),
+    ]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.clicks = 1;
+    input.playerView.opponent.credits = 0;
+    input.playerView.opponent.rig = [];
+    input.playerView.own.gripOrHq = [
+      visibleCard("data-wall-for-empty-remote", "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        title: "Data Wall",
+        strength: 0,
+        subtypes: ["wall"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("strengthen-empty-remote");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.defend_servers",
+        "plan_step_capability:allocate_server_defense",
+        "plan_assessment_evidence:engine_certified_global_defense_access_probability_reduced",
+      ]),
+    );
+  });
+
   it("defers a new naked remote agenda install for a safe draw or economy action", () => {
     const input = aiInput("corp", [
       legalAction(

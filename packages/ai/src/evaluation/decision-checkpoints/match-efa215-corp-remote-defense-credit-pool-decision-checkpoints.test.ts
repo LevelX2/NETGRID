@@ -9,10 +9,26 @@ const PROJECT_BABYLON = "corp_onr_v1_214_project-babylon_1";
 
 describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", () => {
   it("protects Project Babylon with an additional ICE despite a visible recurring breaker credit", () => {
-    expectCheckpointToPass(fixture(projectBabylonCreditPoolJson));
+    const protectedRemote = fixture(projectBabylonCreditPoolJson);
+    protectedRemote.expectation.acceptableActions = [
+      {
+        type: "install_card",
+        targetServerId: "remote_1",
+        sourceDefinitionId: "onr_v1_270_sleeper",
+      },
+    ];
+    protectedRemote.expectation.planExecution = {
+      acceptablePlanKinds: ["corp.defend_servers"],
+      acceptableCapabilities: [
+        "allocate_server_defense",
+        "develop_score_protection",
+      ],
+    };
+
+    expectCheckpointToPass(protectedRemote);
   });
 
-  it("does not turn an empty remote into a blind additional-ICE target", () => {
+  it("defends the urgent Archives agenda before preparing an empty remote", () => {
     const noResidentPayoff = mutateFixture(projectBabylonCreditPoolJson, (checkpoint) => {
       const state = checkpoint.engine.testOnlyGameState;
       const remote = state.corp.servers.find((server) => server.id === "remote_1");
@@ -24,7 +40,17 @@ describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", ()
       project.zone = { side: "corp", zone: "archives" };
       project.faceup = true;
       checkpoint.expectation = {
-        forbiddenActions: [{ type: "install_card", targetServerId: "remote_1" }],
+        acceptableActions: [
+          { type: "install_card", targetServerId: "archives" },
+        ],
+        forbiddenActions: [
+          { type: "advance_card" },
+          { type: "install_card", targetServerId: "remote_1" },
+        ],
+        planExecution: {
+          acceptablePlanKinds: ["corp.defend_servers"],
+          acceptableCapabilities: ["allocate_server_defense"],
+        },
       };
     });
 

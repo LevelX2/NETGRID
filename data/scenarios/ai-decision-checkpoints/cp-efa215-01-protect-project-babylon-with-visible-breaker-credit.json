@@ -9733,7 +9733,8 @@
         "corp.defend_servers"
       ],
       "acceptableCapabilities": [
-        "allocate_server_defense"
+        "allocate_server_defense",
+        "develop_score_protection"
       ]
     }
   }
