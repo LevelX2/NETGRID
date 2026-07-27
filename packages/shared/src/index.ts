@@ -2352,6 +2352,44 @@ export type VisibleCorpIceRezResourceExchangeQuote =
       };
     };
 
+/**
+ * Corp-private, Engine-certified continuation budget for one installed agenda.
+ *
+ * The quote deliberately exposes only guaranteed unrestricted Corp clicks for
+ * the next Corp turn. Optional or restricted action grants are not converted
+ * into credit capacity. This lets the score plan publish a conservative cash
+ * reserve without teaching a downstream defense plan to interpret card text.
+ */
+export type VisibleCorpScoreContinuationQuote =
+  | {
+      context: "installed_agenda";
+      agendaCardId: CardInstanceId;
+      serverId: Exclude<ServerId, "new_remote">;
+      expiresAtStateVersion: number;
+      complete: false;
+      reason:
+        | "not_agenda"
+        | "not_installed_root"
+        | "not_completable_next_corp_turn";
+    }
+  | {
+      context: "installed_agenda";
+      agendaCardId: CardInstanceId;
+      serverId: Exclude<ServerId, "new_remote">;
+      expiresAtStateVersion: number;
+      complete: true;
+      remainingAdvancementCounters: number;
+      advancementCreditCostPerCounter: 1;
+      advancementClickCostPerCounter: 1;
+      scoreActionCreditCost: 0;
+      scoreActionClickCost: 0;
+      nextCorpTurnGuaranteedFlexibleClicks: number;
+      freeCreditClicksAfterAdvancement: number;
+      certifiedCreditGainFromFreeClicks: number;
+      creditsRequiredBeforeNextCorpTurn: number;
+      terminalScore: boolean;
+    };
+
 export type VisibleCardLifecycleMarker = {
   kind: "temporary_return_to_grip";
   label: string;
@@ -2655,6 +2693,8 @@ export type VisibleCard = {
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
   effectiveRezCostQuote?: VisibleCorpRezCostQuote;
   effectiveRezResourceExchangeQuote?: VisibleCorpIceRezResourceExchangeQuote;
+  /** Present only for the Corp's installed agendas. */
+  scoreContinuationQuote?: VisibleCorpScoreContinuationQuote;
 };
 
 export type PlayerView = {

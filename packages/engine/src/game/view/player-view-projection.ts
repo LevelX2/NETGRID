@@ -37,6 +37,7 @@ import { toPublicEventForSide } from "./public-event-view";
 import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
+import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continuation-quote";
 
 export function buildPlayerViewProjection(
   state: GameState,
@@ -76,7 +77,19 @@ export function buildPlayerViewProjection(
       root:
         server.id === "archives"
           ? visibleCorpArchives(state, side)
-          : server.root.map((id) => visibleCorpCard(state, id, side, "root")),
+          : server.root.map((id) => {
+              const visibleRoot = visibleCorpCard(state, id, side, "root");
+              const continuationQuote =
+                side === "corp" && visibleRoot.type === "agenda"
+                  ? visibleCorpScoreContinuationQuote(state, id, server.id)
+                  : undefined;
+              return {
+                ...visibleRoot,
+                ...(continuationQuote
+                  ? { scoreContinuationQuote: continuationQuote }
+                  : {}),
+              };
+            }),
       ...counterDisplaysField([
         ...(poxCounterDisplaysForServer(state, server.id) ?? []),
         ...(purgeableRunnerVirusCounterDisplaysForServer(state, server.id) ??

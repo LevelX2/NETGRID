@@ -76,10 +76,10 @@ function visibleKnownCardWithReferenceViewer(
   const visibleBaseStrength =
     typeof runStartStrength === "number"
       ? runStartStrength
-      : variableIceStrength ??
+      : (variableIceStrength ??
         (definition.strengthModel.kind === "fixed"
           ? definition.strengthModel.value
-          : undefined);
+          : undefined));
   const visibleStrength =
     visibleBaseStrength !== undefined
       ? definition.type === "ice"
@@ -1350,7 +1350,7 @@ function hiddenVisibleCardId(id: CardInstanceId): CardInstanceId {
   return `hidden_${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }
 
-function serverDifficultyIncreaseFromRunCounters(
+export function serverDifficultyIncreaseFromRunCounters(
   state: GameState,
   agendaId: CardInstanceId,
 ): number {
@@ -1370,7 +1370,7 @@ function serverDifficultyIncreaseFromRunCounters(
   );
 }
 
-function serverDifficultyReductionFromUpgrades(
+export function serverDifficultyReductionFromUpgrades(
   state: GameState,
   agendaId: CardInstanceId,
 ): number {

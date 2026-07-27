@@ -25,6 +25,7 @@ import {
   type VisibleChoiceRequest,
   type VisibleCorpIceRezResourceExchangeQuote,
   type VisibleCorpRezCostQuote,
+  type VisibleCorpScoreContinuationQuote,
   type VisibleEffectiveIceRunQuote,
   type VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
@@ -577,7 +578,18 @@ function sanitizePlayerView(
           expectedCorpRezStateVersion: view.stateVersion,
         }),
       ),
-      root: server.root.map(sanitizeVisibleCard),
+      root: server.root.map((card) =>
+        sanitizeVisibleCardWithOptions(card, {
+          allowCorpScoreContinuationQuote:
+            view.side === "corp" &&
+            card.known &&
+            card.owner === "corp" &&
+            card.controller === "corp" &&
+            card.type === "agenda",
+          expectedCorpScoreServerId: server.id,
+          expectedCorpScoreStateVersion: view.stateVersion,
+        }),
+      ),
       ...(server.counterDisplays
         ? {
             counterDisplays: server.counterDisplays.map(sanitizeCounterDisplay),
@@ -1296,11 +1308,15 @@ function sanitizeVisibleCardWithOptions(
     allowCorpRezCostQuote?: boolean;
     expectedCorpRezServerId?: PlayerView["servers"][number]["id"];
     expectedCorpRezStateVersion?: number;
+    allowCorpScoreContinuationQuote?: boolean;
+    expectedCorpScoreServerId?: PlayerView["servers"][number]["id"];
+    expectedCorpScoreStateVersion?: number;
   } = {},
 ): VisibleCard {
   const effectiveRezCostQuote = card.effectiveRezCostQuote;
   const effectiveRezResourceExchangeQuote =
     card.effectiveRezResourceExchangeQuote;
+  const scoreContinuationQuote = card.scoreContinuationQuote;
   const includeEffectiveRezCostQuote =
     options.allowCorpRezCostQuote === true &&
     effectiveRezCostQuote?.context === "installed" &&
@@ -1320,6 +1336,13 @@ function sanitizeVisibleCardWithOptions(
       options.expectedCorpRezServerId &&
     effectiveRezResourceExchangeQuote.expiresAtStateVersion ===
       options.expectedCorpRezStateVersion;
+  const includeScoreContinuationQuote =
+    options.allowCorpScoreContinuationQuote === true &&
+    scoreContinuationQuote?.context === "installed_agenda" &&
+    scoreContinuationQuote.agendaCardId === card.instanceId &&
+    scoreContinuationQuote.serverId === options.expectedCorpScoreServerId &&
+    scoreContinuationQuote.expiresAtStateVersion ===
+      options.expectedCorpScoreStateVersion;
   return {
     instanceId: card.instanceId,
     known: card.known,
@@ -1396,6 +1419,77 @@ function sanitizeVisibleCardWithOptions(
             ),
         }
       : {}),
+    ...(includeScoreContinuationQuote && scoreContinuationQuote
+      ? {
+          scoreContinuationQuote: sanitizeInstalledCorpScoreContinuationQuote(
+            scoreContinuationQuote,
+          ),
+        }
+      : {}),
+  };
+}
+
+function sanitizeInstalledCorpScoreContinuationQuote(
+  quote: Extract<
+    VisibleCorpScoreContinuationQuote,
+    {
+      context: "installed_agenda";
+    }
+  >,
+): VisibleCorpScoreContinuationQuote {
+  const binding = {
+    context: "installed_agenda" as const,
+    agendaCardId: quote.agendaCardId,
+    serverId: quote.serverId,
+    expiresAtStateVersion: quote.expiresAtStateVersion,
+  };
+  if (!quote.complete) {
+    return {
+      ...binding,
+      complete: false,
+      reason: quote.reason,
+    };
+  }
+  if (
+    !isNonNegativeSafeInteger(quote.expiresAtStateVersion) ||
+    !isNonNegativeSafeInteger(quote.remainingAdvancementCounters) ||
+    quote.advancementCreditCostPerCounter !== 1 ||
+    quote.advancementClickCostPerCounter !== 1 ||
+    quote.scoreActionCreditCost !== 0 ||
+    quote.scoreActionClickCost !== 0 ||
+    !isNonNegativeSafeInteger(quote.nextCorpTurnGuaranteedFlexibleClicks) ||
+    quote.nextCorpTurnGuaranteedFlexibleClicks <
+      quote.remainingAdvancementCounters ||
+    !isNonNegativeSafeInteger(quote.freeCreditClicksAfterAdvancement) ||
+    quote.freeCreditClicksAfterAdvancement !==
+      quote.nextCorpTurnGuaranteedFlexibleClicks -
+        quote.remainingAdvancementCounters ||
+    !isNonNegativeSafeInteger(quote.certifiedCreditGainFromFreeClicks) ||
+    quote.certifiedCreditGainFromFreeClicks !==
+      quote.freeCreditClicksAfterAdvancement ||
+    !isNonNegativeSafeInteger(quote.creditsRequiredBeforeNextCorpTurn) ||
+    typeof quote.terminalScore !== "boolean"
+  ) {
+    return {
+      ...binding,
+      complete: false,
+      reason: "not_completable_next_corp_turn",
+    };
+  }
+  return {
+    ...binding,
+    complete: true,
+    remainingAdvancementCounters: quote.remainingAdvancementCounters,
+    advancementCreditCostPerCounter: 1,
+    advancementClickCostPerCounter: 1,
+    scoreActionCreditCost: 0,
+    scoreActionClickCost: 0,
+    nextCorpTurnGuaranteedFlexibleClicks:
+      quote.nextCorpTurnGuaranteedFlexibleClicks,
+    freeCreditClicksAfterAdvancement: quote.freeCreditClicksAfterAdvancement,
+    certifiedCreditGainFromFreeClicks: quote.certifiedCreditGainFromFreeClicks,
+    creditsRequiredBeforeNextCorpTurn: quote.creditsRequiredBeforeNextCorpTurn,
+    terminalScore: quote.terminalScore,
   };
 }
 

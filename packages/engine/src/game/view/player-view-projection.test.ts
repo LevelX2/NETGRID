@@ -24,6 +24,38 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 import { overadvanceViewFields } from "./card-view";
 
 describe("PlayerView projection", () => {
+  it("certifies next-turn agenda cash after using surplus unrestricted Corp clicks", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "corp-score-continuation-quote" }),
+    );
+    const agendaId = putCorpRootInRemote(state, "simple_agenda");
+    state.cardInstances[agendaId]!.advancementCounters = 2;
+
+    const corpAgenda = getPlayerView(state, "corp")
+      .servers.flatMap((server) => server.root)
+      .find((card) => card.instanceId === agendaId);
+    const runnerView = getPlayerView(state, "runner");
+
+    expect(corpAgenda?.scoreContinuationQuote).toEqual({
+      context: "installed_agenda",
+      agendaCardId: agendaId,
+      serverId: "remote_1",
+      expiresAtStateVersion: state.stateVersion,
+      complete: true,
+      remainingAdvancementCounters: 1,
+      advancementCreditCostPerCounter: 1,
+      advancementClickCostPerCounter: 1,
+      scoreActionCreditCost: 0,
+      scoreActionClickCost: 0,
+      nextCorpTurnGuaranteedFlexibleClicks: 3,
+      freeCreditClicksAfterAdvancement: 2,
+      certifiedCreditGainFromFreeClicks: 2,
+      creditsRequiredBeforeNextCorpTurn: 0,
+      terminalScore: false,
+    });
+    expect(JSON.stringify(runnerView)).not.toContain("scoreContinuationQuote");
+  });
+
   it("projects a side-safe temporary return marker only while the program remains installed", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "temporary-return-view-marker" }),
@@ -75,10 +107,9 @@ describe("PlayerView projection", () => {
       side: "runner",
       zone: "grip",
     };
-    const returnedProgram = getPlayerView(
-      state,
-      "runner",
-    ).own.gripOrHq.find((card) => card.instanceId === programId);
+    const returnedProgram = getPlayerView(state, "runner").own.gripOrHq.find(
+      (card) => card.instanceId === programId,
+    );
     expect(returnedProgram).not.toHaveProperty("lifecycleMarkers");
 
     removeEverywhere(state, programId);
