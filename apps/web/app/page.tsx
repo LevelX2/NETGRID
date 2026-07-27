@@ -441,6 +441,7 @@ import {
 } from "../features/debug/DiagnosticsDrawer";
 import { AiPacingControls } from "../features/debug/AiPacingControls";
 import { MatchHostConsole } from "../features/match-start/MatchHostConsole";
+import { accountMatchStartPreferencesFromUi } from "../features/match-start/account-match-start-preferences";
 import { MatchJoinConsole } from "../features/match-start/MatchJoinConsole";
 import { MatchResumePanel } from "../features/match-start/MatchResumePanel";
 import { StartLobbyPanel } from "../features/match-start/StartLobbyPanel";
@@ -468,6 +469,13 @@ import {
   loadAccountActivePublicMatchIds,
   rejoinAccountPublicMatch,
 } from "../features/account/account-client";
+import {
+  loadAccountMatchStartPreferences,
+  resetAccountMatchStartPreferences,
+  saveAccountMatchStartPreferences,
+  type AccountMatchStartDeckSelection,
+  type AccountMatchStartPreferences,
+} from "../features/account/account-match-start-preferences-client";
 import { useAccountSession } from "../features/account/useAccountSession";
 import {
   createAccountDeck,
@@ -584,6 +592,18 @@ export default function Page() {
   const [displayName, setDisplayName] = useState("Teilnehmer A");
   const accountSession = useAccountSession();
   const accountIdRef = useRef<string | null>(null);
+  const accountMatchStartPreferencesBaselineRef = useRef<string | null>(null);
+  const previousAccountSessionStatusRef = useRef<
+    "guest" | "authenticated" | null
+  >(null);
+  const [
+    accountMatchStartPreferencesLoadedFor,
+    setAccountMatchStartPreferencesLoadedFor,
+  ] = useState<string | null>(null);
+  const [
+    accountMatchStartPreferencesResetting,
+    setAccountMatchStartPreferencesResetting,
+  ] = useState(false);
   const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] =
     useState(false);
   const [countdownSeconds, setCountdownSeconds] = useState<3 | 5 | 10>(3);
@@ -672,6 +692,7 @@ export default function Page() {
   const [accountDeckQuota, setAccountDeckQuota] =
     useState<AccountDeckQuota | null>(null);
   const [standardDecks, setStandardDecks] = useState<StandardDeck[]>([]);
+  const [standardDecksLoaded, setStandardDecksLoaded] = useState(false);
   const [accountDeckBusy, setAccountDeckBusy] = useState(false);
   const [savedDeckFingerprints, setSavedDeckFingerprints] = useState<
     Record<string, string>
@@ -1400,6 +1421,9 @@ export default function Page() {
           setStandardDecks([]);
           setDeckSnapshots([]);
         }
+      })
+      .finally(() => {
+        if (!cancelled) setStandardDecksLoaded(true);
       });
     return () => {
       cancelled = true;
@@ -1696,7 +1720,13 @@ export default function Page() {
   }, [cuePositionLoaded, cuePosition]);
 
   useEffect(() => {
-    if (!matchStartSettingsLoaded || !localDecksLoaded) return;
+    if (
+      !matchStartSettingsLoaded ||
+      !localDecksLoaded ||
+      accountSession.status !== "guest" ||
+      previousAccountSessionStatusRef.current === "authenticated"
+    )
+      return;
     window.localStorage.setItem(
       MATCH_START_SETTINGS_STORAGE_KEY,
       serializeMatchStartSettingsForStorage({
@@ -1764,6 +1794,7 @@ export default function Page() {
     selectedParticipantBRunnerLocalDeckId,
     selectedParticipantBCorpLocalDeckId,
     localDecksLoaded,
+    accountSession.status,
   ]);
 
   useEffect(() => {
@@ -1939,6 +1970,349 @@ export default function Page() {
         deck.deckId === selectedParticipantBCorpLocalDeckId &&
         deck.side === "corp",
     ) ?? null;
+  const currentAccountMatchStartPreferences =
+    accountMatchStartPreferencesFromUi({
+      playMode,
+      humanSideSelection,
+      humanAiSideSelection,
+      matchFormat,
+      seriesGamesPlanned,
+      matchCardPool,
+      runnerDifficulty,
+      corpDifficulty,
+      aiDeckPolicy,
+      countdownSeconds,
+      playerClockMode,
+      playerClockMinutes,
+      playerClockGraceSeconds,
+      runnerDeckSource,
+      corpDeckSource,
+      selectedRunnerSnapshotId,
+      selectedCorpSnapshotId,
+      selectedRunnerLocalDeckId,
+      selectedCorpLocalDeckId,
+      runnerSnapshots,
+      corpSnapshots,
+    });
+  const currentAccountMatchStartPreferencesSignature = JSON.stringify(
+    currentAccountMatchStartPreferences,
+  );
+
+  function resetAccountMatchStartPreferencesToDefaults() {
+    setMode("host");
+    setPlayMode("human_vs_human");
+    setHumanSideSelection("random");
+    setHumanAiSideSelection("random");
+    setMatchFormat("rules_match");
+    setSeriesGamesPlanned(2);
+    setMatchCardPool("originalset");
+    setRunnerDifficulty("normal");
+    setCorpDifficulty("normal");
+    setAiDeckPolicy("selected");
+    setCountdownSeconds(3);
+    setPlayerClockMode("none");
+    setPlayerClockMinutes(10);
+    setPlayerClockGraceSeconds(10);
+    setRunnerDeckSource("snapshot");
+    setCorpDeckSource("snapshot");
+    setSelectedRunnerSnapshotId(DEFAULT_RUNNER_SNAPSHOT_ID);
+    setSelectedCorpSnapshotId(DEFAULT_CORP_SNAPSHOT_ID);
+  }
+
+  function applyAccountMatchStartDeckSelection(
+    side: "runner" | "corp",
+    cardPool: MatchCardPool,
+    selection: AccountMatchStartDeckSelection | undefined,
+  ): boolean {
+    const fallback = () => {
+      const snapshots = deckSnapshots.filter(
+        (snapshot) =>
+          snapshot.side === side &&
+          snapshot.validation.ok &&
+          snapshotAllowedForMatchCardPool(snapshot, cardPool),
+      );
+      const defaultSnapshot =
+        snapshots.find((snapshot) =>
+          side === "runner"
+            ? snapshot.deckSnapshotId === DEFAULT_RUNNER_SNAPSHOT_ID
+            : snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID,
+        ) ?? snapshots[0];
+      if (side === "runner") {
+        setRunnerDeckSource("snapshot");
+        if (defaultSnapshot)
+          setSelectedRunnerSnapshotId(defaultSnapshot.deckSnapshotId);
+      } else {
+        setCorpDeckSource("snapshot");
+        if (defaultSnapshot)
+          setSelectedCorpSnapshotId(defaultSnapshot.deckSnapshotId);
+      }
+      return false;
+    };
+    if (!selection) return fallback();
+    if (selection.kind === "random_standard") {
+      if (side === "runner") setRunnerDeckSource("random_standard");
+      else setCorpDeckSource("random_standard");
+      return true;
+    }
+    if (selection.kind === "account") {
+      const accountDeck = localDecks.find(
+        (deck) =>
+          deck.deckId === selection.cloudDeckId &&
+          deck.side === side &&
+          editableDeckAllowedForMatchCardPool(deck, cardPool),
+      );
+      if (!accountDeck) return fallback();
+      if (side === "runner") {
+        setRunnerDeckSource("local");
+        setSelectedRunnerLocalDeckId(accountDeck.deckId);
+      } else {
+        setCorpDeckSource("local");
+        setSelectedCorpLocalDeckId(accountDeck.deckId);
+      }
+      return true;
+    }
+    const standard = deckSnapshots.find(
+      (snapshot) =>
+        snapshot.sourceDeckId === selection.standardDeckId &&
+        snapshot.side === side &&
+        snapshot.validation.ok &&
+        snapshotAllowedForMatchCardPool(snapshot, cardPool),
+    );
+    if (!standard) return fallback();
+    if (side === "runner") {
+      setRunnerDeckSource("snapshot");
+      setSelectedRunnerSnapshotId(standard.deckSnapshotId);
+    } else {
+      setCorpDeckSource("snapshot");
+      setSelectedCorpSnapshotId(standard.deckSnapshotId);
+    }
+    return true;
+  }
+
+  function applyAccountMatchStartPreferences(
+    preferences: AccountMatchStartPreferences,
+  ) {
+    setMode("host");
+    setPlayMode(preferences.playMode);
+    setHumanSideSelection(preferences.humanSideSelection);
+    setHumanAiSideSelection(preferences.humanAiSideSelection);
+    setMatchFormat(preferences.matchFormat);
+    setSeriesGamesPlanned(preferences.seriesGamesPlanned);
+    setMatchCardPool(preferences.matchCardPool);
+    setRunnerDifficulty(preferences.runnerDifficulty);
+    setCorpDifficulty(preferences.corpDifficulty);
+    setAiDeckPolicy(preferences.aiDeckPolicy);
+    setCountdownSeconds(preferences.countdownSeconds);
+    setPlayerClockMode(preferences.playerClockMode);
+    setPlayerClockMinutes(preferences.playerClockMinutes);
+    setPlayerClockGraceSeconds(preferences.playerClockGraceSeconds);
+    const runnerDeckUsable = applyAccountMatchStartDeckSelection(
+      "runner",
+      preferences.matchCardPool,
+      preferences.runnerDeck,
+    );
+    const corpDeckUsable = applyAccountMatchStartDeckSelection(
+      "corp",
+      preferences.matchCardPool,
+      preferences.corpDeck,
+    );
+    return { runnerDeckUsable, corpDeckUsable };
+  }
+
+  useEffect(() => {
+    if (accountSession.status === "loading") return;
+    const accountId = accountSession.account?.accountId;
+    if (!accountId) {
+      accountMatchStartPreferencesBaselineRef.current = null;
+      setAccountMatchStartPreferencesLoadedFor(null);
+      return;
+    }
+    if (
+      !matchStartSettingsLoaded ||
+      !localDecksLoaded ||
+      !standardDecksLoaded ||
+      accountMatchStartPreferencesLoadedFor === accountId
+    )
+      return;
+    let cancelled = false;
+    void loadAccountMatchStartPreferences()
+      .then((response) => {
+        if (cancelled) return;
+        accountMatchStartPreferencesBaselineRef.current = null;
+        if (!response.preferences) {
+          resetAccountMatchStartPreferencesToDefaults();
+        } else {
+          const applied = applyAccountMatchStartPreferences(
+            response.preferences,
+          );
+          const invalidSlots = new Set(response.invalidDeckSlots);
+          if (!applied.runnerDeckUsable) invalidSlots.add("runner");
+          if (!applied.corpDeckUsable) invalidSlots.add("corp");
+          if (invalidSlots.size > 0)
+            setNotice(
+              `Gespeicherte ${[...invalidSlots]
+                .map((side) => (side === "runner" ? "Runner-" : "Korp-"))
+                .join(
+                  "und ",
+                )}Deckauswahl ist nicht mehr gültig. Die Standardauswahl wird verwendet.`,
+            );
+        }
+        setAccountMatchStartPreferencesLoadedFor(accountId);
+      })
+      .catch((error) => {
+        if (!cancelled)
+          setNotice(
+            error instanceof Error
+              ? error.message
+              : "Account-Vorbelegungen konnten nicht geladen werden.",
+          );
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    accountMatchStartPreferencesLoadedFor,
+    accountSession.account?.accountId,
+    accountSession.status,
+    localDecksLoaded,
+    matchStartSettingsLoaded,
+    standardDecksLoaded,
+  ]);
+
+  useEffect(() => {
+    const accountId = accountSession.account?.accountId;
+    if (
+      accountSession.status !== "authenticated" ||
+      !accountId ||
+      accountMatchStartPreferencesLoadedFor !== accountId
+    )
+      return;
+    if (accountMatchStartPreferencesBaselineRef.current === null) {
+      accountMatchStartPreferencesBaselineRef.current =
+        currentAccountMatchStartPreferencesSignature;
+      return;
+    }
+    if (
+      accountMatchStartPreferencesBaselineRef.current ===
+      currentAccountMatchStartPreferencesSignature
+    )
+      return;
+    const timeout = window.setTimeout(() => {
+      void saveAccountMatchStartPreferences(
+        currentAccountMatchStartPreferences,
+        accountSession.csrfToken,
+      )
+        .then((response) => {
+          accountMatchStartPreferencesBaselineRef.current = JSON.stringify(
+            response.preferences ?? currentAccountMatchStartPreferences,
+          );
+          if (response.invalidDeckSlots.length > 0)
+            setNotice(
+              "Eine gespeicherte Deckauswahl ist nicht mehr gültig. Die Standardauswahl wird verwendet.",
+            );
+        })
+        .catch((error) => {
+          setNotice(
+            error instanceof Error
+              ? error.message
+              : "Account-Vorbelegungen konnten nicht gespeichert werden.",
+          );
+        });
+    }, 350);
+    return () => window.clearTimeout(timeout);
+  }, [
+    accountMatchStartPreferencesLoadedFor,
+    accountSession.account?.accountId,
+    accountSession.csrfToken,
+    accountSession.status,
+    currentAccountMatchStartPreferences,
+    currentAccountMatchStartPreferencesSignature,
+  ]);
+
+  const resetSavedAccountMatchStartPreferences = async () => {
+    if (!accountSession.account) return;
+    setAccountMatchStartPreferencesResetting(true);
+    try {
+      await resetAccountMatchStartPreferences(accountSession.csrfToken);
+      resetAccountMatchStartPreferencesToDefaults();
+      accountMatchStartPreferencesBaselineRef.current = null;
+      setNotice("Gespeicherte Account-Vorbelegungen wurden zurückgesetzt.");
+    } catch (error) {
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : "Account-Vorbelegungen konnten nicht zurückgesetzt werden.",
+      );
+    } finally {
+      setAccountMatchStartPreferencesResetting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (accountSession.status === "loading") return;
+    const previous = previousAccountSessionStatusRef.current;
+    previousAccountSessionStatusRef.current = accountSession.status;
+    if (accountSession.status !== "guest" || previous !== "authenticated")
+      return;
+    const stored = parseMatchStartSettingsFromStorage(
+      readLocalStorage(MATCH_START_SETTINGS_STORAGE_KEY),
+    );
+    if (!stored) return;
+    hasStoredMatchStartSettingsRef.current = true;
+    if (stored.mode) setMode(stored.mode);
+    if (stored.playMode) setPlayMode(stored.playMode);
+    if (stored.humanSideSelection)
+      setHumanSideSelection(stored.humanSideSelection);
+    if (stored.humanAiSideSelection)
+      setHumanAiSideSelection(stored.humanAiSideSelection);
+    if (stored.matchFormat) setMatchFormat(stored.matchFormat);
+    if (stored.seriesGamesPlanned)
+      setSeriesGamesPlanned(stored.seriesGamesPlanned);
+    if (stored.matchCardPool) setMatchCardPool(stored.matchCardPool);
+    if (stored.runnerDifficulty) setRunnerDifficulty(stored.runnerDifficulty);
+    if (stored.corpDifficulty) setCorpDifficulty(stored.corpDifficulty);
+    if (stored.aiDeckPolicy) setAiDeckPolicy(stored.aiDeckPolicy);
+    if (typeof stored.testSetupMode === "boolean")
+      setTestSetupMode(stored.testSetupMode);
+    if (stored.countdownSeconds) setCountdownSeconds(stored.countdownSeconds);
+    if (stored.playerClockMode) setPlayerClockMode(stored.playerClockMode);
+    if (stored.playerClockMinutes)
+      setPlayerClockMinutes(stored.playerClockMinutes);
+    if (stored.playerClockGraceSeconds !== undefined)
+      setPlayerClockGraceSeconds(stored.playerClockGraceSeconds);
+    if (typeof stored.seed === "string")
+      setSeed(normalizeMatchSeed(stored.seed));
+    if (stored.runnerDeckSource) setRunnerDeckSource(stored.runnerDeckSource);
+    if (stored.corpDeckSource) setCorpDeckSource(stored.corpDeckSource);
+    if (stored.participantBRunnerDeckSource)
+      setParticipantBRunnerDeckSource(stored.participantBRunnerDeckSource);
+    if (stored.participantBCorpDeckSource)
+      setParticipantBCorpDeckSource(stored.participantBCorpDeckSource);
+    if (typeof stored.selectedRunnerSnapshotId === "string")
+      setSelectedRunnerSnapshotId(stored.selectedRunnerSnapshotId);
+    if (typeof stored.selectedCorpSnapshotId === "string")
+      setSelectedCorpSnapshotId(stored.selectedCorpSnapshotId);
+    if (typeof stored.selectedParticipantBRunnerSnapshotId === "string")
+      setSelectedParticipantBRunnerSnapshotId(
+        stored.selectedParticipantBRunnerSnapshotId,
+      );
+    if (typeof stored.selectedParticipantBCorpSnapshotId === "string")
+      setSelectedParticipantBCorpSnapshotId(
+        stored.selectedParticipantBCorpSnapshotId,
+      );
+    if (typeof stored.selectedRunnerLocalDeckId === "string")
+      setSelectedRunnerLocalDeckId(stored.selectedRunnerLocalDeckId);
+    if (typeof stored.selectedCorpLocalDeckId === "string")
+      setSelectedCorpLocalDeckId(stored.selectedCorpLocalDeckId);
+    if (typeof stored.selectedParticipantBRunnerLocalDeckId === "string")
+      setSelectedParticipantBRunnerLocalDeckId(
+        stored.selectedParticipantBRunnerLocalDeckId,
+      );
+    if (typeof stored.selectedParticipantBCorpLocalDeckId === "string")
+      setSelectedParticipantBCorpLocalDeckId(
+        stored.selectedParticipantBCorpLocalDeckId,
+      );
+  }, [accountSession.status]);
   const randomStandardMetadata = { deckName: "Zufälliges Standard-Deck" };
   const participantARunnerMetadata =
     runnerDeckSource === RANDOM_STANDARD_DECK_SOURCE
@@ -3497,6 +3871,15 @@ export default function Page() {
 
   const createMatch = async () => {
     setNotice("");
+    if (
+      accountSession.account &&
+      accountMatchStartPreferencesLoadedFor !== accountSession.account.accountId
+    ) {
+      setNotice(
+        "Deine Account-Vorbelegungen werden noch geladen. Bitte starte das Match gleich erneut.",
+      );
+      return;
+    }
     const matchSeed = normalizeMatchSeed(seed);
     setSeed(matchSeed);
     let deckPayload: Record<string, unknown>;
@@ -5859,118 +6242,150 @@ export default function Page() {
                           onDiscardRecentSession={discardRecentSession}
                         />
                       ) : activeStartTab === "host" ? (
-                        <MatchHostConsole
-                          playMode={playMode}
-                          matchFormat={effectiveStartMatchFormat}
-                          seriesGamesPlanned={seriesGamesPlanned}
-                          matchCardPool={matchCardPool}
-                          displayName={displayName}
-                          identityKind={
-                            accountSession.account ? "account" : "guest"
-                          }
-                          isHumanVsAi={isHumanVsAi}
-                          humanAiSideSelection={humanAiSideSelection}
-                          gameMode={gameMode}
-                          runnerDifficulty={runnerDifficulty}
-                          corpDifficulty={corpDifficulty}
-                          aiDeckPolicyUsesPrimaryDeckSlots={
-                            aiDeckPolicyUsesPrimaryDeckSlots
-                          }
-                          runnerSnapshots={runnerSnapshots}
-                          corpSnapshots={corpSnapshots}
-                          localDecks={matchStartLocalDecks}
-                          runnerDeckSource={runnerDeckSource}
-                          corpDeckSource={corpDeckSource}
-                          selectedRunnerSnapshotId={selectedRunnerSnapshotId}
-                          selectedCorpSnapshotId={selectedCorpSnapshotId}
-                          selectedRunnerLocalDeckId={selectedRunnerLocalDeckId}
-                          selectedCorpLocalDeckId={selectedCorpLocalDeckId}
-                          isHumanVsHuman={isHumanVsHuman}
-                          testSetupMode={testSetupMode}
-                          startSummary={startSummary}
-                          hasAiOpponent={hasAiOpponent}
-                          humanSideSelection={humanSideSelection}
-                          countdownSeconds={countdownSeconds}
-                          isPublic={isPublic}
-                          playerClockMode={playerClockMode}
-                          playerClockMinutes={playerClockMinutes}
-                          playerClockGraceSeconds={playerClockGraceSeconds}
-                          playerClockDetailControlsDisabled={
-                            playerClockDetailControlsDisabled
-                          }
-                          seed={seed}
-                          aiTraceStartMode={aiTraceStartMode}
-                          aiDeckPolicy={aiDeckPolicy}
-                          participantBRunnerDeckSource={
-                            participantBRunnerDeckSource
-                          }
-                          participantBCorpDeckSource={
-                            participantBCorpDeckSource
-                          }
-                          selectedParticipantBRunnerSnapshotId={
-                            selectedParticipantBRunnerSnapshotId
-                          }
-                          selectedParticipantBCorpSnapshotId={
-                            selectedParticipantBCorpSnapshotId
-                          }
-                          selectedParticipantBRunnerLocalDeckId={
-                            selectedParticipantBRunnerLocalDeckId
-                          }
-                          selectedParticipantBCorpLocalDeckId={
-                            selectedParticipantBCorpLocalDeckId
-                          }
-                          aiSlotDisabled={aiSlotDisabled}
-                          visibleDeckMetadataEntries={
-                            visibleDeckMetadataEntries
-                          }
-                          onPlayMode={updatePlayMode}
-                          onMatchFormat={setMatchFormat}
-                          onSeriesGamesPlanned={setSeriesGamesPlanned}
-                          onMatchCardPool={setMatchCardPool}
-                          onDisplayName={updateDisplayName}
-                          onHumanAiSideSelection={setHumanAiSideSelection}
-                          onRunnerDifficulty={setRunnerDifficulty}
-                          onCorpDifficulty={setCorpDifficulty}
-                          onRunnerDeckSource={setRunnerDeckSource}
-                          onCorpDeckSource={setCorpDeckSource}
-                          onSelectedRunnerSnapshotId={
-                            setSelectedRunnerSnapshotId
-                          }
-                          onSelectedCorpSnapshotId={setSelectedCorpSnapshotId}
-                          onSelectedRunnerLocalDeckId={
-                            setSelectedRunnerLocalDeckId
-                          }
-                          onSelectedCorpLocalDeckId={setSelectedCorpLocalDeckId}
-                          onCreateMatch={createMatch}
-                          onHumanSideSelection={setHumanSideSelection}
-                          onCountdownSeconds={setCountdownSeconds}
-                          onIsPublic={setIsPublic}
-                          onPlayerClockMode={setPlayerClockMode}
-                          onPlayerClockMinutes={setPlayerClockMinutes}
-                          onPlayerClockGraceSeconds={setPlayerClockGraceSeconds}
-                          onSeed={setSeed}
-                          onAiTraceStartMode={setAiTraceStartMode}
-                          onTestSetupMode={setTestSetupMode}
-                          onAiDeckPolicy={setAiDeckPolicy}
-                          onParticipantBRunnerDeckSource={
-                            setParticipantBRunnerDeckSource
-                          }
-                          onParticipantBCorpDeckSource={
-                            setParticipantBCorpDeckSource
-                          }
-                          onSelectedParticipantBRunnerSnapshotId={
-                            setSelectedParticipantBRunnerSnapshotId
-                          }
-                          onSelectedParticipantBCorpSnapshotId={
-                            setSelectedParticipantBCorpSnapshotId
-                          }
-                          onSelectedParticipantBRunnerLocalDeckId={
-                            setSelectedParticipantBRunnerLocalDeckId
-                          }
-                          onSelectedParticipantBCorpLocalDeckId={
-                            setSelectedParticipantBCorpLocalDeckId
-                          }
-                        />
+                        <>
+                          <MatchHostConsole
+                            playMode={playMode}
+                            matchFormat={effectiveStartMatchFormat}
+                            seriesGamesPlanned={seriesGamesPlanned}
+                            matchCardPool={matchCardPool}
+                            displayName={displayName}
+                            identityKind={
+                              accountSession.account ? "account" : "guest"
+                            }
+                            isHumanVsAi={isHumanVsAi}
+                            humanAiSideSelection={humanAiSideSelection}
+                            gameMode={gameMode}
+                            runnerDifficulty={runnerDifficulty}
+                            corpDifficulty={corpDifficulty}
+                            aiDeckPolicyUsesPrimaryDeckSlots={
+                              aiDeckPolicyUsesPrimaryDeckSlots
+                            }
+                            runnerSnapshots={runnerSnapshots}
+                            corpSnapshots={corpSnapshots}
+                            localDecks={matchStartLocalDecks}
+                            runnerDeckSource={runnerDeckSource}
+                            corpDeckSource={corpDeckSource}
+                            selectedRunnerSnapshotId={selectedRunnerSnapshotId}
+                            selectedCorpSnapshotId={selectedCorpSnapshotId}
+                            selectedRunnerLocalDeckId={
+                              selectedRunnerLocalDeckId
+                            }
+                            selectedCorpLocalDeckId={selectedCorpLocalDeckId}
+                            isHumanVsHuman={isHumanVsHuman}
+                            testSetupMode={testSetupMode}
+                            startSummary={startSummary}
+                            hasAiOpponent={hasAiOpponent}
+                            humanSideSelection={humanSideSelection}
+                            countdownSeconds={countdownSeconds}
+                            isPublic={isPublic}
+                            playerClockMode={playerClockMode}
+                            playerClockMinutes={playerClockMinutes}
+                            playerClockGraceSeconds={playerClockGraceSeconds}
+                            playerClockDetailControlsDisabled={
+                              playerClockDetailControlsDisabled
+                            }
+                            seed={seed}
+                            aiTraceStartMode={aiTraceStartMode}
+                            aiDeckPolicy={aiDeckPolicy}
+                            participantBRunnerDeckSource={
+                              participantBRunnerDeckSource
+                            }
+                            participantBCorpDeckSource={
+                              participantBCorpDeckSource
+                            }
+                            selectedParticipantBRunnerSnapshotId={
+                              selectedParticipantBRunnerSnapshotId
+                            }
+                            selectedParticipantBCorpSnapshotId={
+                              selectedParticipantBCorpSnapshotId
+                            }
+                            selectedParticipantBRunnerLocalDeckId={
+                              selectedParticipantBRunnerLocalDeckId
+                            }
+                            selectedParticipantBCorpLocalDeckId={
+                              selectedParticipantBCorpLocalDeckId
+                            }
+                            aiSlotDisabled={aiSlotDisabled}
+                            visibleDeckMetadataEntries={
+                              visibleDeckMetadataEntries
+                            }
+                            onPlayMode={updatePlayMode}
+                            onMatchFormat={setMatchFormat}
+                            onSeriesGamesPlanned={setSeriesGamesPlanned}
+                            onMatchCardPool={setMatchCardPool}
+                            onDisplayName={updateDisplayName}
+                            onHumanAiSideSelection={setHumanAiSideSelection}
+                            onRunnerDifficulty={setRunnerDifficulty}
+                            onCorpDifficulty={setCorpDifficulty}
+                            onRunnerDeckSource={setRunnerDeckSource}
+                            onCorpDeckSource={setCorpDeckSource}
+                            onSelectedRunnerSnapshotId={
+                              setSelectedRunnerSnapshotId
+                            }
+                            onSelectedCorpSnapshotId={setSelectedCorpSnapshotId}
+                            onSelectedRunnerLocalDeckId={
+                              setSelectedRunnerLocalDeckId
+                            }
+                            onSelectedCorpLocalDeckId={
+                              setSelectedCorpLocalDeckId
+                            }
+                            onCreateMatch={createMatch}
+                            onHumanSideSelection={setHumanSideSelection}
+                            onCountdownSeconds={setCountdownSeconds}
+                            onIsPublic={setIsPublic}
+                            onPlayerClockMode={setPlayerClockMode}
+                            onPlayerClockMinutes={setPlayerClockMinutes}
+                            onPlayerClockGraceSeconds={
+                              setPlayerClockGraceSeconds
+                            }
+                            onSeed={setSeed}
+                            onAiTraceStartMode={setAiTraceStartMode}
+                            onTestSetupMode={setTestSetupMode}
+                            onAiDeckPolicy={setAiDeckPolicy}
+                            onParticipantBRunnerDeckSource={
+                              setParticipantBRunnerDeckSource
+                            }
+                            onParticipantBCorpDeckSource={
+                              setParticipantBCorpDeckSource
+                            }
+                            onSelectedParticipantBRunnerSnapshotId={
+                              setSelectedParticipantBRunnerSnapshotId
+                            }
+                            onSelectedParticipantBCorpSnapshotId={
+                              setSelectedParticipantBCorpSnapshotId
+                            }
+                            onSelectedParticipantBRunnerLocalDeckId={
+                              setSelectedParticipantBRunnerLocalDeckId
+                            }
+                            onSelectedParticipantBCorpLocalDeckId={
+                              setSelectedParticipantBCorpLocalDeckId
+                            }
+                          />
+                          {accountSession.account ? (
+                            <div className="accountMatchStartPreferences">
+                              <span>
+                                {accountMatchStartPreferencesLoadedFor ===
+                                accountSession.account.accountId
+                                  ? "Deine Matchstart-Vorbelegung wird privat im Account gespeichert."
+                                  : "Account-Vorbelegung wird geladen …"}
+                              </span>
+                              <button
+                                className="button subtle"
+                                type="button"
+                                disabled={
+                                  accountMatchStartPreferencesResetting ||
+                                  accountMatchStartPreferencesLoadedFor !==
+                                    accountSession.account.accountId
+                                }
+                                onClick={() =>
+                                  void resetSavedAccountMatchStartPreferences()
+                                }
+                              >
+                                Vorbelegungen zurücksetzen
+                              </button>
+                            </div>
+                          ) : null}
+                        </>
                       ) : (
                         <MatchJoinConsole
                           joinMatchIdTrimmed={joinMatchIdTrimmed}

@@ -1335,6 +1335,12 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         );
         CREATE INDEX IF NOT EXISTS idx_account_decks_owner_active
           ON account_decks(owner_account_id, deleted_at, updated_at);
+        CREATE TABLE IF NOT EXISTS account_match_start_preferences (
+          account_id TEXT PRIMARY KEY,
+          preferences_json TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
+        );
         CREATE TABLE IF NOT EXISTS matches (
           match_id TEXT PRIMARY KEY,
           status TEXT NOT NULL,

@@ -1,19 +1,31 @@
 ---
 activityId: act-2026-07-27-account-matchstart-preferences
-status: inbox
+status: done
 kind: concept
 area: web
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-07-27
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-27
+completedAt: 2026-07-27
+branch: codex/activities-worktree-20260727-205225
 releaseTarget: V2.x account follow-up
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/account-match-start-preferences.ts
+  - apps/server/src/account-match-start-preferences-http.test.ts
+  - apps/web/features/account/account-match-start-preferences-client.ts
+  - apps/web/features/match-start/account-match-start-preferences.ts
+  - docs/reviews/account-matchstart-preferences-final-review-2026-07-27.md
+checks:
+  - pnpm --filter @netgrid/server typecheck (grün)
+  - pnpm --filter @netgrid/web typecheck (grün)
+  - fokussierte Server- und bestehende Account-HTTP-/Session-Regressionen (12 grün)
+  - fokussierte Web-Client-/Vorbelegungs-/Local-Storage-Regressionen (6 grün)
+  - vollständige Websuite (715 grün)
+  - vollständige Serversuite (213/214 grün; ein unveränderter SQLite-OPTIMIZE-Bestandstest auch auf main rot)
+  - git diff --check (grün)
 ---
 
 # Accountgebundene Matchstart-Vorbelegungen
@@ -73,26 +85,26 @@ anderen Gerät. Der Gastmodus behält die vorhandene browserlokale Speicherung.
 ## Akzeptanzkriterien
 
 - [ ] Ein angemeldeter Nutzer erhält nach erneuter Anmeldung oder auf einem
-  zweiten Gerät die zuletzt gespeicherten, gültigen Matchstart-Vorbelegungen.
+      zweiten Gerät die zuletzt gespeicherten, gültigen Matchstart-Vorbelegungen.
 - [ ] Die gespeicherten Werte werden serverseitig auf eine explizite
-  Allowlist, Typen und zulässige Werte geprüft; unbekannte oder ungültige
-  Felder verändern keine Vorbelegung.
+      Allowlist, Typen und zulässige Werte geprüft; unbekannte oder ungültige
+      Felder verändern keine Vorbelegung.
 - [ ] Account A kann Präferenzen von Account B weder lesen noch ändern;
-  schreibende Requests folgen dem bestehenden Session-, CSRF- und
-  Origin-Vertrag.
+      schreibende Requests folgen dem bestehenden Session-, CSRF- und
+      Origin-Vertrag.
 - [ ] Ungültig gewordene Deck- oder Formatreferenzen blockieren keinen
-  Matchstart, werden nicht still an einen neuen Deckwert umgebogen und fallen
-  nachvollziehbar auf die reguläre Auswahl zurück.
+      Matchstart, werden nicht still an einen neuen Deckwert umgebogen und fallen
+      nachvollziehbar auf die reguläre Auswahl zurück.
 - [ ] Der Gastmodus nutzt weiterhin ausschließlich die bestehende lokale
-  Speicherung und wird durch An- oder Abmeldung nicht mit fremden
-  Accountwerten vermischt.
+      Speicherung und wird durch An- oder Abmeldung nicht mit fremden
+      Accountwerten vermischt.
 - [ ] Export, Löschung, Backup und Wiederherstellung behandeln die
-  Präferenzdaten konsistent.
+      Präferenzdaten konsistent.
 - [ ] Es gibt Server-, Client- und Regressionstests für Laden, Speichern,
-  Zurücksetzen, Mehrgerätefall, Owner-Grenze und die ausgeschlossenen
-  sensitiven Felder.
+      Zurücksetzen, Mehrgerätefall, Owner-Grenze und die ausgeschlossenen
+      sensitiven Felder.
 - [ ] Kein Account-Präferenzwert gelangt in Match-, WebSocket-, Lobby-,
-  Gegner-, PlayerView-, Replay-, StateHash- oder KI-Payloads.
+      Gegner-, PlayerView-, Replay-, StateHash- oder KI-Payloads.
 
 ## Umsetzungshinweise
 
@@ -116,4 +128,12 @@ anderen Gerät. Der Gastmodus behält die vorhandene browserlokale Speicherung.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Der neue private, versionierte Accountdatensatz speichert nur
+Allowlist-geprüfte Matchstart-Vorbelegungen und primäre, servervalidierte
+Deckreferenzen. Session, CSRF, Origin, Owner-Grenze, zweiter Geräte-Login,
+Fallback ungültiger Decks, Reset, Export, Accountlöschung und SQLite-
+Backup/Restore sind abgedeckt. Gast-Local-Storage bleibt getrennt und wird bei
+Abmeldung wiederhergestellt; Match-, Lobby-, PlayerView-, Replay-, StateHash-
+und KI-Verträge bleiben unverändert. Die vollständige Serversuite enthält
+einen unveränderten, auf `main` reproduzierten SQLite-OPTIMIZE-Bestandstest;
+alle betroffenen und neuen Accountprüfungen sind grün.

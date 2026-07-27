@@ -676,6 +676,11 @@ export class SqliteAccountStorage implements AccountStorage {
         .run(account.accountId);
       this.db
         .prepare(
+          "DELETE FROM account_match_start_preferences WHERE account_id = ?",
+        )
+        .run(account.accountId);
+      this.db
+        .prepare(
           "DELETE FROM account_invites WHERE target_account_id = ? OR created_by_account_id = ?",
         )
         .run(account.accountId, account.accountId);
