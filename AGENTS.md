@@ -73,6 +73,7 @@ Wenn ein neuer Stand fachlich besser ist, darf der alte Stand ersetzt, gelöscht
 
 - `main` ist der lokale Integrationsbranch.
 - Arbeiten auf `main` ist erlaubt, wenn die Änderung klein und nicht kollisionskritisch ist.
+- Neue oder ergänzte Activity-Pakete unter `docs/activities/` werden direkt im primären `main`-Checkout angelegt und committed. Dafür wird kein Worktree verwendet, außer der Nutzer verlangt für genau diese Activity-Arbeit ausdrücklich einen Worktree.
 - Bei erwarteter Parallelität auf derselben Datei oder potenziellen Kollisionen arbeitet der Thread mit einem separaten Branch mit Präfix `codex/` (z. B. für mehrere aktive Änderungsstränge).
 - Andere Threads dürfen bereits eigene Commit-Stände haben; wir richten den Fokus auf Konflikte gezielt im Integrationspunkt (`main`) aus.
 - Remote `origin` ist konfiguriert; Pushes, Pull Requests und Remote-Integrationen erfolgen nur auf Nutzerwunsch oder über die dafür vorgesehenen Abschluss-/GitHub-Workflows.
