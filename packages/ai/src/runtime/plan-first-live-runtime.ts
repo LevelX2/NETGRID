@@ -117,6 +117,10 @@ import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import { withDecisionLocalCorpPunishRouteQuotes } from "./corp-punish-route-quote-input";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
+  buildCorpHandInventoryFacts,
+  type CorpHandDomainRouteClaimInput,
+} from "./corp-hand-inventory-facts";
+import {
   buildCorpAmbushPlanSignals,
   corpAmbushAdvanceDispositionEvidence,
   corpCandidateIsAmbushInstall,
@@ -5998,12 +6002,21 @@ function corpContext(
       ? { ...candidate, sourceDefinitionId: visibleSource.definitionId }
       : candidate;
   });
-  const domain = buildCorpDomain(input, sourceBoundCandidates, previous);
+  const baseDomain = buildCorpDomain(input, sourceBoundCandidates, previous);
   const actionDispositions = corpActionDispositions(
     input,
     sourceBoundCandidates,
-    domain,
+    baseDomain,
   );
+  const handInventoryFacts = buildCorpHandInventoryFacts({
+    input,
+    candidates: sourceBoundCandidates,
+    domainClaims: corpHandDomainRouteClaims(baseDomain),
+    actionDispositions,
+  });
+  const domain: CorpPlanDomain = handInventoryFacts
+    ? { ...baseDomain, handInventoryFacts }
+    : baseDomain;
   return {
     input,
     actionCandidates: sourceBoundCandidates,
@@ -6012,6 +6025,161 @@ function corpContext(
     turnKey: turnKey(input),
     domain,
   };
+}
+
+function corpHandDomainRouteClaims(
+  domain: CorpPlanDomain,
+): CorpHandDomainRouteClaimInput[] {
+  const claims: CorpHandDomainRouteClaimInput[] = [];
+  const add = (claim: {
+    ownerModuleId: `corp.${string}`;
+    dedupeKey: string;
+    actionIds?: readonly string[];
+    sourceInstanceIds?: readonly (string | undefined)[];
+    readiness: CorpHandDomainRouteClaimInput["readiness"];
+    evidenceCode: string;
+    parentNeedId?: string;
+  }) => {
+    claims.push({
+      ownerModuleId: claim.ownerModuleId,
+      planInstanceId: planInstanceIdForProposal({
+        moduleId: claim.ownerModuleId,
+        dedupeKey: claim.dedupeKey,
+      }),
+      ...(claim.parentNeedId ? { parentNeedId: claim.parentNeedId } : {}),
+      readiness: claim.readiness,
+      actionIds: [...new Set(claim.actionIds ?? [])].sort(),
+      sourceInstanceIds: [
+        ...new Set(
+          (claim.sourceInstanceIds ?? []).filter(
+            (instanceId): instanceId is string => Boolean(instanceId),
+          ),
+        ),
+      ].sort(),
+      evidenceCode: claim.evidenceCode,
+    });
+  };
+
+  for (const signal of domain.scoreProjects) {
+    const actionIds = signal.actionIds ?? [];
+    add({
+      ownerModuleId: "corp.score_agenda",
+      dedupeKey: signal.projectId,
+      actionIds,
+      sourceInstanceIds: [
+        signal.agendaInstanceId,
+        signal.setupNeed?.sourceCardInstanceId,
+        signal.counterBank?.sourceCardInstanceId,
+      ],
+      readiness:
+        signal.feasible && actionIds.length > 0
+          ? "executable_now"
+          : (signal.fundingGap ?? 0) > 0
+            ? "executable_with_support"
+            : "blocked",
+      evidenceCode: signal.evidenceCode,
+      ...(signal.setupNeed?.needId
+        ? { parentNeedId: signal.setupNeed.needId }
+        : {}),
+    });
+  }
+  for (const signal of domain.economyNeeds) {
+    const sourceInstanceId =
+      "sourceInstanceId" in signal ? signal.sourceInstanceId : undefined;
+    const supportRequired = "gap" in signal && signal.gap > 0;
+    add({
+      ownerModuleId: "corp.economy",
+      dedupeKey: signal.needId,
+      actionIds: signal.actionIds,
+      sourceInstanceIds: [sourceInstanceId],
+      readiness:
+        signal.actionIds.length > 0
+          ? "executable_now"
+          : supportRequired
+            ? "executable_with_support"
+            : "blocked",
+      evidenceCode: signal.evidenceCode,
+      ...("parentNeedId" in signal && signal.parentNeedId
+        ? { parentNeedId: signal.parentNeedId }
+        : {}),
+    });
+  }
+  for (const signal of domain.defenseNeeds) {
+    const actionIds =
+      signal.kind === "generic" ? (signal.actionIds ?? []) : [signal.actionId];
+    const sourceInstanceId =
+      signal.kind === "score_protection_install" ||
+      signal.kind === "score_protection_staging_install"
+        ? signal.sourceCardInstanceId
+        : undefined;
+    add({
+      ownerModuleId: "corp.defend_servers",
+      dedupeKey: "server-defense-portfolio",
+      actionIds,
+      sourceInstanceIds: [sourceInstanceId],
+      readiness: actionIds.length > 0 ? "executable_now" : "blocked",
+      evidenceCode: signal.evidenceCode,
+      ...(signal.kind !== "generic"
+        ? { parentNeedId: signal.parentNeedId }
+        : {}),
+    });
+  }
+  for (const signal of domain.punishCampaigns) {
+    const actionIds = [
+      ...(signal.actionIds ?? []),
+      ...(signal.routeContract?.currentHeadActionId
+        ? [signal.routeContract.currentHeadActionId]
+        : []),
+    ];
+    add({
+      ownerModuleId: "corp.punish_campaign",
+      dedupeKey: signal.campaignId,
+      actionIds,
+      readiness:
+        signal.feasible && actionIds.length > 0
+          ? "executable_now"
+          : signal.routeContract && signal.routeContract.fundingGap > 0
+            ? "executable_with_support"
+            : "blocked",
+      evidenceCode: signal.evidenceCode,
+      ...(signal.routeContract?.executionNeedId
+        ? { parentNeedId: signal.routeContract.executionNeedId }
+        : {}),
+    });
+  }
+  for (const signal of domain.ambushes) {
+    add({
+      ownerModuleId: "corp.ambush_and_bluff",
+      dedupeKey: signal.ambushId,
+      actionIds: signal.actionIds,
+      sourceInstanceIds: [signal.sourceInstanceId],
+      readiness:
+        signal.actionIds.length > 0 && signal.affordableOrSupportable
+          ? "executable_now"
+          : !signal.affordableOrSupportable
+            ? "executable_with_support"
+            : "blocked",
+      evidenceCode: signal.evidenceCode,
+    });
+  }
+  for (const signal of domain.handManagement) {
+    const actionIds = signal.actionIds ?? [];
+    add({
+      ownerModuleId: "corp.hand_and_agenda_management",
+      dedupeKey: signal.handPlanId,
+      actionIds,
+      sourceInstanceIds: [signal.sourceInstanceId],
+      readiness:
+        signal.routeAllowed === false
+          ? "blocked"
+          : actionIds.length > 0
+            ? "executable_now"
+            : "blocked",
+      evidenceCode: signal.evidenceCode,
+      ...(signal.parentNeedId ? { parentNeedId: signal.parentNeedId } : {}),
+    });
+  }
+  return claims;
 }
 
 function corpTransientPlanSignals(
@@ -11826,6 +11994,34 @@ function decisionFromScheduler(
               }),
       };
     });
+  const corpHandInventoryFacts =
+    input.side === "corp"
+      ? (context.domain as CorpPlanDomain | undefined)?.handInventoryFacts
+      : undefined;
+  const corpHandInventorySection = corpHandInventoryFacts
+    ? [
+        {
+          id: "corp_hand_inventory",
+          title: "Corp-private hand inventory",
+          items: [
+            `authority:${corpHandInventoryFacts.authority}`,
+            `selection_influence:${corpHandInventoryFacts.selectionInfluence}`,
+            `pressure:${corpHandInventoryFacts.pressure.status}|hand:${corpHandInventoryFacts.pressure.handSize}|maximum:${corpHandInventoryFacts.pressure.maximumHandSize}|available_slots:${corpHandInventoryFacts.pressure.availableSlots}|overflow:${corpHandInventoryFacts.pressure.overflowCount}`,
+            ...corpHandInventoryFacts.records.map(
+              (record) =>
+                `${record.sourceInstanceId}|definition:${record.sourceDefinitionId}|duplicates:${record.duplicateCount}|actions:${record.legalActionIds.join(",") || "none"}|claims:${
+                  record.domainClaims
+                    .map(
+                      (claim) =>
+                        `${claim.ownerModuleId}:${claim.readiness}:${claim.planInstanceId}`,
+                    )
+                    .join(",") || "none"
+                }|dispositions:${record.dispositions.join(",") || "none"}`,
+            ),
+          ],
+        },
+      ]
+    : [];
   const detailSections =
     result.lane === "plan"
       ? [
@@ -11882,6 +12078,7 @@ function decisionFromScheduler(
                   ],
             ),
           },
+          ...corpHandInventorySection,
         ]
       : [
           {
@@ -11889,6 +12086,7 @@ function decisionFromScheduler(
             title: "Engine window",
             items: [`leaf_plan:${planId}`, `selected_action:${actionId}`],
           },
+          ...corpHandInventorySection,
         ];
   const planFirstDecision = planFirstDecisionDebug({
     input,

@@ -11,6 +11,10 @@ import { rolesMatch } from "./role-match";
 import { isRunnerNonAdditiveUtilityRole } from "./runner-role-classification";
 import { createAiHintsByCard } from "../ai-hints";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
+import {
+  corpHandDuplicateCount,
+  corpHandPressureAssessment,
+} from "./corp-hand-inventory-facts";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -79,9 +83,14 @@ export function discardKeepScore(
     input.side === "runner" &&
     rolesMatch(roles, ["program_search", "breaker_search"]) &&
     runnerHasDeckBreakerCoverageUnavailableOutsideStack(input);
-  const duplicateCount = input.playerView.own.gripOrHq.filter(
-    (candidate) => candidate.definitionId === card.definitionId,
-  ).length;
+  const duplicateCount =
+    input.side === "corp"
+      ? corpHandDuplicateCount(input, card.definitionId)
+      : input.playerView.own.gripOrHq.filter(
+          (candidate) => candidate.definitionId === card.definitionId,
+        ).length;
+  const corpHandPressure =
+    input.side === "corp" ? corpHandPressureAssessment(input) : undefined;
   const installedSameDefinition =
     input.side === "runner" &&
     (input.playerView.own.rig ?? []).some(
@@ -229,6 +238,12 @@ export function discardKeepScore(
       type === "operation" &&
       rolesMatch(roles, ["economy"])
         ? ["discard_score:corp_economy_operation"]
+        : []),
+      ...(corpHandPressure
+        ? [`discard_score:corp_hand_pressure:${corpHandPressure.status}`]
+        : []),
+      ...(input.side === "corp" && duplicateCount > 1
+        ? [`discard_score:corp_hand_duplicate_count:${duplicateCount}`]
         : []),
       ...(runnerMissingBreakerSearchAccess
         ? ["discard_score:runner_missing_breaker_search_access"]

@@ -1,6 +1,6 @@
 # Corp-Handverwertung und Opening-Rush – Worktree-Paketprozess
 
-Status: **P0 bis P2 abgeschlossen; P3 aktiv**
+Status: **P0 bis P3 abgeschlossen; P4 aktiv**
 
 Stand: 2026-07-28
 
@@ -283,6 +283,29 @@ wählt weder Plan noch Executor.
 Commit:
 `feat(ai): assess corp hand route coverage`
 
+Ergebnis:
+
+- `CorpHandInventoryFacts` erfasst ausschließlich bekannte eigene HQ-Karten
+  sowie aktuelle instanzgebundene `LegalAction`-IDs, exakte Kosten-,
+  Economy-, Kapazitäts- und Zielprojektionen, Handdelta und Duplikate.
+- Ein expliziter Adapter projiziert die bereits vorhandenen Score-, Economy-,
+  Defense-, Punish-, Ambush- und Handmanagement-Signale als Domainclaims. Der
+  Faktendienst selbst besitzt weder Plan- noch Executor-Auswahl.
+- Unbeanspruchte oder blockierte Karten bleiben mit
+  `blocked_funding`, `strategic_hold`, `redundant`,
+  `unsafe_current_route` oder `unsupported_domain_contract` diagnostisch
+  sichtbar. Im historischen D5-Checkpoint besitzt jede der vier bekannten
+  HQ-Karten mindestens einen Claim oder eine Disposition.
+- Die vorhandene Discard-/Keep-Bewertung verwendet denselben
+  Duplikat-/Handdruck-Faktenpfad nur als Evidence; es wurde kein paralleler
+  Discard-Scorer eingeführt.
+- Der vollständige Handinventarabschnitt erscheint nur im side-privaten
+  Corp-Decision-Debug. Für Runner-Eingaben liefert der Builder keinen
+  Corp-Bestand; die bestehende Replay-Perspektivenredaktion bleibt
+  unverändert.
+- 325 fokussierte Fakten-, Planmodul-, Plan-first-, Discard-/Choice- und
+  Checkpoint-Tests sowie der AI-Typecheck sind grün.
+
 ### P4 – Plan-first-konformes Verwerten vor Suchen
 
 Ziel:
@@ -511,4 +534,8 @@ Markiere das Goal erst danach als complete.
   behält seine Action bei und folgt der neuen Single-Owner-Zuordnung. Drei
   separat gegen `main` bestätigte rote Score-Checkpoints bleiben als
   vorhandene Baseline außerhalb dieses Pakets dokumentiert.
-- P3: aktiv.
+- P3: abgeschlossen; das autoritätslose Handinventar ist an die vorhandenen
+  Domainclaims und den bestehenden Keep-/Discard-Pfad angebunden. Der
+  historische D5-Checkpoint weist vollständige Claim-/Disposition-Coverage
+  für alle vier bekannten HQ-Karten nach.
+- P4: aktiv.

@@ -30,6 +30,27 @@ describe("discard keep score", () => {
     );
   });
 
+  it("reuses Corp hand pressure and duplicate facts as discard evidence", () => {
+    const card = corpCard("duplicate-operation", "operation");
+    const result = score(
+      card,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        extraGrip: [{ ...card, instanceId: "duplicate-operation-2" }],
+      },
+    );
+
+    expect(result.evidence).toContain(
+      "discard_score:corp_hand_pressure:under_capacity",
+    );
+    expect(result.evidence).toContain(
+      "discard_score:corp_hand_duplicate_count:2",
+    );
+  });
+
   it("never discounts Corp agendas merely because HQ contains a duplicate", () => {
     const tycho = {
       ...corpCard("onr_v1_220_tycho-extension", "agenda"),

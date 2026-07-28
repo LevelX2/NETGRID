@@ -1,4 +1,5 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { CorpHandInventoryFacts } from "../runtime/corp-hand-inventory-facts";
 import type {
   GuaranteeLevel,
   PlanAssessment,
@@ -138,6 +139,7 @@ export type CorpTacticalPlanDomain = {
   punishCampaigns: CorpPunishCampaignSignal[];
   ambushes: CorpAmbushSignal[];
   handManagement: CorpHandManagementSignal[];
+  handInventoryFacts?: CorpHandInventoryFacts;
 };
 
 export type CorpPlanDomain = CorpCorePlanDomain & CorpTacticalPlanDomain;
