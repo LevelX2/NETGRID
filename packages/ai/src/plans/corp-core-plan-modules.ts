@@ -33,6 +33,7 @@ import type {
   CorpCentralDefenseAllocation,
   CorpCentralDefenseHqHoldCadence,
 } from "../runtime/corp-central-defense-allocation";
+import type { CorpOpeningRushDecision } from "../runtime/corp-opening-rush";
 import {
   exactCorpIceRezRoutesEqual,
   projectExactCorpIceRezRoute,
@@ -84,6 +85,7 @@ export type CorpScoreProjectSignal = {
     nextCorpTurnGuaranteedFlexibleClicks: number;
     certifiedCreditGainFromFreeClicks: number;
   };
+  openingRush?: CorpOpeningRushDecision;
   setupNeed?: {
     needId: string;
     actionId: string;

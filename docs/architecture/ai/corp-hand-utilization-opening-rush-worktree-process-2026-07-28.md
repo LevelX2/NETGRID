@@ -1,6 +1,6 @@
 # Corp-Handverwertung und Opening-Rush – Worktree-Paketprozess
 
-Status: **P0 bis P5 abgeschlossen; P6 aktiv**
+Status: **P0 bis P6 abgeschlossen; P7 aktiv**
 
 Stand: 2026-07-28
 
@@ -575,4 +575,14 @@ Markiere das Goal erst danach als complete.
   erst im letzten relevanten Runfenster. Setup! und Vapor Ops behalten ihre
   vorhandenen Ambush- beziehungsweise Score-Owner. Lesley Major bleibt als
   enger, fail-closed Follow-up ohne generischen Asset-Fallback dokumentiert.
-- P6: aktiv.
+- P6: abgeschlossen; eine unsichere frühe P4-Agenda-Installationslinie kann
+  ausschließlich innerhalb von `corp.score_agenda` seed-deterministisch
+  angenommen oder abgelehnt werden. Die Quote bindet Agenda, bestehendes
+  Zielremote, LegalAction, Installkosten, Score-/Rezreserve, erstes
+  Contest-Fenster, exakte Restwahrscheinlichkeit und öffentliche
+  Random-Breaker. Die Standardgrenze 1/4 darf nur bis maximal 1/2 gelockert
+  werden. Öffentliche Set-aside-Breaker, unbekannte Projektionen, gebrochene
+  Reserven, leere Remotes, späte Züge und akute Centrals blockieren. 40
+  kontrollierte Seeds ergeben 18 Annahmen und 22 Ablehnungen; derselbe
+  Opportunity-Key bleibt über State-Revalidierungen stabil.
+- P7: aktiv.

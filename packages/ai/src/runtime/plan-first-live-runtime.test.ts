@@ -5302,6 +5302,228 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("varies one qualified opening rush by seed without rerolling the opportunity", () => {
+    const dataWall = CARD_DEFINITIONS_BY_ID["onr_v1_238_data-wall-2-0"]!;
+    const installAgenda = legalAction(
+      "install-agenda",
+      "corp",
+      "install_card",
+      "Install agenda in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "agenda-1",
+        payload: {
+          cardId: "agenda-1",
+          sourceDefinitionId: "onr_v1_189_artificial-security-directors",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const accounts = legalAction(
+      "accounts",
+      "corp",
+      "play_operation",
+      "Play Accounts Receivable",
+      { credits: 5, clicks: 1 },
+      {
+        source: "accounts-card",
+        payload: {
+          cardId: "accounts-card",
+          gainCreditsAmount: 9,
+        },
+      },
+    );
+    const openingInput = (seed: string) => {
+      const input = aiInput("corp", [installAgenda, accounts]);
+      input.seed = seed;
+      input.playerView.turnSerial = 2;
+      input.playerView.own.credits = 5;
+      input.playerView.own.clicks = 3;
+      input.playerView.own.gripOrHq = [
+        visibleCard("agenda-1", "corp", "agenda", {
+          definitionId: "onr_v1_189_artificial-security-directors",
+          advancementRequirement: 3,
+          agendaPoints: 1,
+        }),
+        visibleCard("accounts-card", "corp", "operation", {
+          definitionId: "onr_v1_281_accounts-receivable",
+        }),
+      ];
+      input.playerView.opponent.rig = [
+        visibleCard("blink", "runner", "program", {
+          definitionId: "onr_v1_007_blink",
+          strength: 5,
+          subtypes: ["icebreaker", "random"],
+        }),
+      ];
+      input.playerView.servers = [
+        server("hq"),
+        server("rd"),
+        server("archives"),
+        server("remote_1", [
+          visibleCard("data-wall", "corp", "ice", {
+            definitionId: dataWall.id,
+            rezCost: dataWall.rezCost!,
+            strength: dataWall.strength!,
+            subtypes: dataWall.subtypes,
+            rezzed: true,
+          }),
+        ]),
+      ];
+      for (const action of input.legalActions) {
+        action.expiresAtStateVersion = input.playerView.stateVersion;
+      }
+      input.playerView.legalActions = input.legalActions;
+      return input;
+    };
+
+    resetResidentPlanPortfolioMemory();
+    const accepted = openingInput("opening-seed-0");
+    expect(
+      liveContext().chooseSemanticRuntimeAction(accepted, {}),
+    ).toMatchObject({
+      actionId: "install-agenda",
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+    const acceptedPortfolio = JSON.stringify(
+      residentPlanPortfolioSnapshot(accepted),
+    );
+    expect(acceptedPortfolio).toContain('"admission":"accepted"');
+    expect(acceptedPortfolio).toContain(
+      '"opportunityKey":"opening-rush:2:agenda-1:remote_1"',
+    );
+
+    resetResidentPlanPortfolioMemory();
+    const declined = openingInput("opening-seed-1");
+    expect(
+      liveContext().chooseSemanticRuntimeAction(declined, {}),
+    ).toMatchObject({
+      actionId: "accounts",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    expect(JSON.stringify(residentPlanPortfolioSnapshot(declined))).toContain(
+      '"admission":"declined"',
+    );
+
+    const revalidated = structuredClone(accepted);
+    revalidated.playerView.stateVersion = 2;
+    revalidated.playerView.own.credits = 6;
+    revalidated.decisionId = "opening-rush-revalidated";
+    for (const action of revalidated.legalActions) {
+      action.expiresAtStateVersion = 2;
+    }
+    revalidated.playerView.legalActions = revalidated.legalActions;
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(revalidated, {}),
+    ).toMatchObject({
+      actionId: "install-agenda",
+      reasonCode: "plan_first.corp.score_agenda",
+    });
+    expect(JSON.stringify(residentPlanPortfolioSnapshot(revalidated))).toContain(
+      '"hashBucket":21',
+    );
+  });
+
+  it("keeps a public Shell-Traders breaker outside opening-rush admission", () => {
+    const dataWall = CARD_DEFINITIONS_BY_ID["onr_v1_238_data-wall-2-0"]!;
+    const installAgenda = legalAction(
+      "install-agenda",
+      "corp",
+      "install_card",
+      "Install agenda in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "agenda-1",
+        payload: {
+          cardId: "agenda-1",
+          sourceDefinitionId: "onr_v1_189_artificial-security-directors",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const accounts = legalAction(
+      "accounts",
+      "corp",
+      "play_operation",
+      "Play Accounts Receivable",
+      { credits: 5, clicks: 1 },
+      {
+        source: "accounts-card",
+        payload: {
+          cardId: "accounts-card",
+          gainCreditsAmount: 9,
+        },
+      },
+    );
+    const input = aiInput("corp", [installAgenda, accounts]);
+    input.seed = "opening-seed-0";
+    input.playerView.turnSerial = 2;
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("agenda-1", "corp", "agenda", {
+        definitionId: "onr_v1_189_artificial-security-directors",
+        advancementRequirement: 3,
+        agendaPoints: 1,
+      }),
+      visibleCard("accounts-card", "corp", "operation", {
+        definitionId: "onr_v1_281_accounts-receivable",
+      }),
+    ];
+    input.playerView.opponent.rig = [
+      visibleCard("blink", "runner", "program", {
+        definitionId: "onr_v1_007_blink",
+        strength: 5,
+        subtypes: ["icebreaker", "random"],
+      }),
+    ];
+    input.playerView.specialZones = {
+      setAside: [
+        visibleCard("rent-i-con", "runner", "program", {
+          definitionId: "onr_classic_031_rent-i-con",
+          strength: 0,
+          subtypes: ["icebreaker", "ai"],
+        }),
+      ],
+      removedFromGame: [],
+      setAsideCount: 1,
+      removedFromGameCount: 0,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("data-wall", "corp", "ice", {
+          definitionId: dataWall.id,
+          rezCost: dataWall.rezCost!,
+          strength: dataWall.strength!,
+          subtypes: dataWall.subtypes,
+          rezzed: true,
+        }),
+      ]),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+
+    resetResidentPlanPortfolioMemory();
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: "accounts",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).toContain(
+      '"reason":"public_staged_breaker"',
+    );
+  });
+
   it("prefers the exact satisfying prepared-remote route over a merely progressing new-remote route", () => {
     const agendaDefinitionId = "onr_v1_189_artificial-security-directors";
     const iceDefinitionId = "onr_v1_237_data-wall";

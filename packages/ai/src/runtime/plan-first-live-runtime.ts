@@ -130,6 +130,7 @@ import {
   type CorpDrawAdmissionPriority,
   type CorpDrawCapacityReleaseRoute,
 } from "./corp-draw-admission";
+import { assessCorpOpeningRush } from "./corp-opening-rush";
 import {
   buildCorpAmbushPlanSignals,
   corpAmbushAdvanceDispositionEvidence,
@@ -7450,7 +7451,7 @@ function buildCorpDomain(
       )
       .map((project) => project.agendaInstanceId!),
   );
-  const concreteScoreProjects = uniqueScoreProjects(
+  const concreteScoreProjectsBeforeOpeningRush = uniqueScoreProjects(
     proposedScoreProjects.filter(
       (project) =>
         !(
@@ -7460,6 +7461,33 @@ function buildCorpDomain(
           agendaInstancesWithPreparedRemote.has(project.agendaInstanceId)
         ),
     ),
+  );
+  const concreteScoreProjects = concreteScoreProjectsBeforeOpeningRush.map(
+    (project) => {
+      const actionId =
+        project.actionIds?.length === 1 ? project.actionIds[0] : undefined;
+      const openingRush = assessCorpOpeningRush({
+        input,
+        project,
+        candidate: actionId
+          ? candidates.find((candidate) => candidate.actionId === actionId)
+          : undefined,
+        centralDefenseAllocation,
+      });
+      if (!openingRush) return project;
+      if (openingRush.status === "qualified") {
+        return {
+          ...project,
+          openingRush,
+          feasible: openingRush.admission === "accepted",
+          evidenceCode: `corp_opening_rush_${openingRush.admission}:${openingRush.quote.opportunityKey}`,
+        };
+      }
+      return {
+        ...project,
+        openingRush,
+      };
+    },
   );
   const scoreMaterialMissing =
     ownAgendas === 0 &&
@@ -7496,7 +7524,11 @@ function buildCorpDomain(
     .filter(
       (project) =>
         project.protectionNeed !== undefined &&
-        !corpScoreProtectionIsSatisfied(input, project),
+        !corpScoreProtectionIsSatisfied(input, project) &&
+        !(
+          project.openingRush?.status === "qualified" &&
+          project.openingRush.admission === "accepted"
+        ),
     )
     .sort(compareCorpScoreProtectionProjects);
   const scoreProtectionRouteScans = scoreProtectionProjects.map((project) => ({
