@@ -2342,6 +2342,10 @@ export type VisibleCorpIceRezResourceExchangeQuote =
         pumpCredits: number;
         breakCredits: number;
         breakUses: number;
+        /** Unrestricted credits required after current run-only pools apply. */
+        normalCreditsRequired: number;
+        /** Current run-only or restricted credits applied before that amount. */
+        nonNormalRunCreditsApplied: number;
         canPayFromCurrentCredits: boolean;
         paymentEvidenceSource: "engine_icebreaker_ability";
         consumedCards: Array<{

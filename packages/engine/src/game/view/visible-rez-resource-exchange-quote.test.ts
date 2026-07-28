@@ -5,8 +5,14 @@ import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-e
 
 const FILTER = "onr_v1_244_filter";
 const RENT_I_CON = "onr_classic_031_rent-i-con";
+const VEWY_VEWY_QUIET = "onr_v1_071_vewy-vewy-quiet";
+const CHIBA_BANK_ACCOUNT = "onr_proteus_133_chiba-bank-account";
 const FILTER_ID = "resource_exchange_filter" as CardInstanceId;
 const RENT_I_CON_ID = "resource_exchange_rent_i_con" as CardInstanceId;
+const VEWY_VEWY_QUIET_ID =
+  "resource_exchange_vewy_vewy_quiet" as CardInstanceId;
+const CONCEALED_RESOURCE_ID =
+  "resource_exchange_concealed_resource" as CardInstanceId;
 
 describe("visible Corp ICE rez resource exchange quote", () => {
   it("certifies the visible Filter/Rent-I-Con current-run exchange", () => {
@@ -28,6 +34,8 @@ describe("visible Corp ICE rez resource exchange quote", () => {
         pumpCredits: 0,
         breakCredits: 1,
         breakUses: 1,
+        normalCreditsRequired: 1,
+        nonNormalRunCreditsApplied: 0,
         canPayFromCurrentCredits: true,
         paymentEvidenceSource: "engine_icebreaker_ability",
         consumedCards: [
@@ -51,6 +59,49 @@ describe("visible Corp ICE rez resource exchange quote", () => {
     expect(
       visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),
     ).toMatchObject({ complete: false });
+  });
+
+  it("uses eligible run-credit pools while ignoring an inactive concealed resource", () => {
+    const { state, visibleIce } = resourceExchangeState();
+    state.runner.credits = 0;
+    state.runner.rig.programs.push(VEWY_VEWY_QUIET_ID);
+    state.cardInstances[VEWY_VEWY_QUIET_ID] = {
+      instanceId: VEWY_VEWY_QUIET_ID,
+      definitionId: VEWY_VEWY_QUIET,
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+      counters: { bit: 2 },
+    };
+    state.runner.rig.resources.push(CONCEALED_RESOURCE_ID);
+    state.cardInstances[CONCEALED_RESOURCE_ID] = {
+      instanceId: CONCEALED_RESOURCE_ID,
+      definitionId: CHIBA_BANK_ACCOUNT,
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: false,
+      rezzed: false,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),
+    ).toMatchObject({
+      complete: true,
+      runnerBreak: {
+        breakerCardId: RENT_I_CON_ID,
+        requiredCredits: 1,
+        normalCreditsRequired: 0,
+        nonNormalRunCreditsApplied: 1,
+        canPayFromCurrentCredits: true,
+      },
+    });
   });
 });
 

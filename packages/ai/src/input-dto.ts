@@ -1628,6 +1628,11 @@ function sanitizeInstalledCorpIceRezResourceExchangeQuote(
       quote.runnerBreak.pumpCredits + quote.runnerBreak.breakCredits ||
     !isNonNegativeSafeInteger(quote.runnerBreak.breakUses) ||
     quote.runnerBreak.breakUses <= 0 ||
+    !isNonNegativeSafeInteger(quote.runnerBreak.normalCreditsRequired) ||
+    !isNonNegativeSafeInteger(quote.runnerBreak.nonNormalRunCreditsApplied) ||
+    quote.runnerBreak.requiredCredits !==
+      quote.runnerBreak.normalCreditsRequired +
+        quote.runnerBreak.nonNormalRunCreditsApplied ||
     quote.runnerBreak.paymentEvidenceSource !== "engine_icebreaker_ability" ||
     quote.runnerBreak.consumedCards.some(
       (card) =>
@@ -1649,6 +1654,8 @@ function sanitizeInstalledCorpIceRezResourceExchangeQuote(
       pumpCredits: quote.runnerBreak.pumpCredits,
       breakCredits: quote.runnerBreak.breakCredits,
       breakUses: quote.runnerBreak.breakUses,
+      normalCreditsRequired: quote.runnerBreak.normalCreditsRequired,
+      nonNormalRunCreditsApplied: quote.runnerBreak.nonNormalRunCreditsApplied,
       canPayFromCurrentCredits: quote.runnerBreak.canPayFromCurrentCredits,
       paymentEvidenceSource: "engine_icebreaker_ability",
       consumedCards: quote.runnerBreak.consumedCards.map((card) => ({

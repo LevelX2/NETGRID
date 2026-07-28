@@ -12,6 +12,10 @@ import {
 } from "../../ability-engine/icebreaker-abilities";
 import { visibleRunnerRigCardForViewer } from "./card-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
+import {
+  availableRunnerRunCredits,
+  runDurationPaymentHost,
+} from "../run/run-duration-payment";
 
 type CompleteRunnerBreak = Extract<
   VisibleCorpIceRezResourceExchangeQuote,
@@ -27,8 +31,9 @@ type BreakRead =
  * Projects one deterministic, direct current-run breaker exchange from the
  * Engine's card-implementation descriptors. The projection is intentionally
  * conservative: it is available only for an isolated approached ICE and it
- * fails closed as soon as an alternate runner funding source, unsupported
- * ability effect, or incomplete visible card would affect the result.
+ * fails closed as soon as an unsupported ability effect or incomplete visible
+ * card would affect the result. Current run-credit pools are resolved through
+ * the same Engine payment authority that executes breaker payments.
  */
 export function visibleCorpIceRezResourceExchangeQuote(
   state: GameState,
@@ -72,10 +77,13 @@ export function visibleCorpIceRezResourceExchangeQuote(
     ...state.runner.rig.hardware,
     ...state.runner.rig.resources,
   ].map((cardId) => visibleRunnerRigCardForViewer(state, cardId, "corp"));
-  if (runnerRig.some((card) => !validVisibleRunnerCard(card))) {
+  const activeRunnerRig = runnerRig.filter(
+    (card) => !cardIsInactiveConcealedRunnerResource(card),
+  );
+  if (activeRunnerRig.some((card) => !validVisibleRunnerCard(card))) {
     return { ...binding, complete: false };
   }
-  const reads = runnerRig.map((breaker) =>
+  const reads = activeRunnerRig.map((breaker) =>
     quoteRunnerBreak({
       breaker,
       ice: visibleIce,
@@ -83,6 +91,10 @@ export function visibleCorpIceRezResourceExchangeQuote(
       additionalBreakCost:
         projectedRunQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
       runnerCredits: state.runner.credits,
+      runnerAvailableCredits: availableRunnerRunCredits(
+        runDurationPaymentHost(state),
+        breaker.instanceId,
+      ),
     }),
   );
   if (reads.some((read) => read.kind === "unknown")) {
@@ -122,15 +134,17 @@ function hasOnlyDirectBreakCosts(quote: VisibleEffectiveIceRunQuote): boolean {
 }
 
 function validVisibleRunnerCard(card: VisibleCard): boolean {
-  if (
-    card.known !== true ||
-    !card.definitionId ||
-    !CARD_DEFINITIONS_BY_ID[card.definitionId]
-  ) {
-    return false;
-  }
-  return !(card.counterDisplays ?? []).some(
-    (display) => display.creditPool !== undefined && display.amount > 0,
+  if (card.known !== true || !card.definitionId) return false;
+  return CARD_DEFINITIONS_BY_ID[card.definitionId] !== undefined;
+}
+
+function cardIsInactiveConcealedRunnerResource(card: VisibleCard): boolean {
+  return (
+    card.known === false &&
+    card.concealed === true &&
+    card.hiddenRunnerResource === true &&
+    card.type === "resource" &&
+    card.rezzed === false
   );
 }
 
@@ -140,9 +154,16 @@ function quoteRunnerBreak(params: {
   endTheRunCount: number;
   additionalBreakCost: number;
   runnerCredits: number;
+  runnerAvailableCredits: number;
 }): BreakRead {
-  const { breaker, ice, endTheRunCount, additionalBreakCost, runnerCredits } =
-    params;
+  const {
+    breaker,
+    ice,
+    endTheRunCount,
+    additionalBreakCost,
+    runnerCredits,
+    runnerAvailableCredits,
+  } = params;
   if (!breaker.definitionId || !ice.definitionId) return { kind: "unknown" };
   const breakerDefinition = CARD_DEFINITIONS_BY_ID[breaker.definitionId];
   const iceDefinition = CARD_DEFINITIONS_BY_ID[ice.definitionId];
@@ -178,6 +199,7 @@ function quoteRunnerBreak(params: {
       endTheRunCount,
       additionalBreakCost,
       runnerCredits,
+      runnerAvailableCredits,
     });
     if (quote.kind === "unknown") return quote;
     if (quote.kind === "exact") quotes.push(quote.quote);
@@ -217,6 +239,7 @@ function quoteBreakAbility(params: {
   endTheRunCount: number;
   additionalBreakCost: number;
   runnerCredits: number;
+  runnerAvailableCredits: number;
 }): BreakRead {
   const {
     ability,
@@ -226,6 +249,7 @@ function quoteBreakAbility(params: {
     endTheRunCount,
     additionalBreakCost,
     runnerCredits,
+    runnerAvailableCredits,
   } = params;
   const breakCount = ability.count;
   if (
@@ -255,6 +279,19 @@ function quoteBreakAbility(params: {
   if (!Number.isSafeInteger(requiredCredits) || requiredCredits < 0) {
     return { kind: "unknown" };
   }
+  if (
+    !nonNegativeSafeInteger(runnerCredits) ||
+    !nonNegativeSafeInteger(runnerAvailableCredits) ||
+    runnerAvailableCredits < runnerCredits
+  ) {
+    return { kind: "unknown" };
+  }
+  const nonNormalRunCreditsAvailable = runnerAvailableCredits - runnerCredits;
+  const nonNormalRunCreditsApplied = Math.min(
+    requiredCredits,
+    nonNormalRunCreditsAvailable,
+  );
+  const normalCreditsRequired = requiredCredits - nonNormalRunCreditsApplied;
   return {
     kind: "exact",
     quote: {
@@ -264,8 +301,9 @@ function quoteBreakAbility(params: {
       pumpCredits: pumps.cost,
       breakCredits,
       breakUses,
-      canPayFromCurrentCredits:
-        Number.isSafeInteger(runnerCredits) && runnerCredits >= requiredCredits,
+      normalCreditsRequired,
+      nonNormalRunCreditsApplied,
+      canPayFromCurrentCredits: runnerAvailableCredits >= requiredCredits,
       paymentEvidenceSource: "engine_icebreaker_ability",
       consumedCards: ability.specialEffects?.some(
         (effect) => effect.kind === "run_end_trash_source_if_used",
@@ -322,7 +360,10 @@ function compareRunnerBreakQuotes(
   right: CompleteRunnerBreak,
 ): number {
   return (
+    Number(right.canPayFromCurrentCredits) -
+      Number(left.canPayFromCurrentCredits) ||
     left.requiredCredits - right.requiredCredits ||
+    left.normalCreditsRequired - right.normalCreditsRequired ||
     left.consumedCards.length - right.consumedCards.length ||
     left.breakerCardId.localeCompare(right.breakerCardId)
   );

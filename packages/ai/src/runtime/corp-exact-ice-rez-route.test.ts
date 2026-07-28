@@ -306,6 +306,8 @@ describe("exact Corp ICE rez route", () => {
         pumpCredits: 0,
         breakCredits: 1,
         breakUses: 1,
+        normalCreditsRequired: 1,
+        nonNormalRunCreditsApplied: 0,
         canPayFromCurrentCredits: true,
         paymentEvidenceSource: "engine_icebreaker_ability",
         consumedCards: [
@@ -342,6 +344,8 @@ describe("exact Corp ICE rez route", () => {
         runnerPumpCredits: 0,
         runnerBreakCredits: 1,
         runnerBreakUses: 1,
+        runnerNormalCreditsRequired: 1,
+        runnerNonNormalRunCreditsApplied: 0,
         runnerBreakerDefinitionId: "onr_classic_031_rent-i-con",
         runnerConsumedCardInstanceIds: ["exact_runner_program_0"],
       },

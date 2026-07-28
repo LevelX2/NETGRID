@@ -9609,8 +9609,9 @@ function corpGlobalDefenseInstallRouteAssessment(
   const establishesMissingCentralCoverage =
     isEmptyCentral &&
     otherCentralAlreadyProtected &&
-    isCorpOpeningTurnSerial(input.playerView.turnSerial) &&
-    sourceDefense.isVisibleIce;
+    sourceDefense.isVisibleIce &&
+    (isCorpOpeningTurnSerial(input.playerView.turnSerial) ||
+      hasStructuredDefenseValue);
   const hasResidentRemoteAgenda = input.playerView.servers.some(
     (candidateServer) =>
       candidateServer.id.startsWith("remote_") &&

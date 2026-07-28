@@ -29,6 +29,8 @@ export type CorpExactIceRezRouteProjection = Readonly<{
     runnerPumpCredits: number;
     runnerBreakCredits: number;
     runnerBreakUses: number;
+    runnerNormalCreditsRequired: number;
+    runnerNonNormalRunCreditsApplied: number;
     runnerBreakerInstanceId: string;
     runnerBreakerDefinitionId: string;
     runnerConsumedCardInstanceIds: readonly string[];
@@ -278,11 +280,17 @@ function readExactCurrentRunResourceExchange(params: {
       quote.runnerBreak.pumpCredits + quote.runnerBreak.breakCredits ||
     !nonNegativeSafeInteger(quote.runnerBreak.breakUses) ||
     quote.runnerBreak.breakUses <= 0 ||
+    !nonNegativeSafeInteger(quote.runnerBreak.normalCreditsRequired) ||
+    !nonNegativeSafeInteger(quote.runnerBreak.nonNormalRunCreditsApplied) ||
+    quote.runnerBreak.requiredCredits !==
+      quote.runnerBreak.normalCreditsRequired +
+        quote.runnerBreak.nonNormalRunCreditsApplied ||
     quote.runnerBreak.canPayFromCurrentCredits !== true ||
     quote.runnerBreak.paymentEvidenceSource !== "engine_icebreaker_ability" ||
     !nonNegativeSafeInteger(input.playerView.opponent.credits) ||
     after.runnerCreditsRemainingOnBestAccessPath !==
-      input.playerView.opponent.credits - quote.runnerBreak.requiredCredits ||
+      input.playerView.opponent.credits -
+        quote.runnerBreak.normalCreditsRequired ||
     (quote.runnerBreak.requiredCredits <= totalRezCredits &&
       quote.runnerBreak.consumedCards.length === 0)
   ) {
@@ -307,6 +315,9 @@ function readExactCurrentRunResourceExchange(params: {
     runnerPumpCredits: quote.runnerBreak.pumpCredits,
     runnerBreakCredits: quote.runnerBreak.breakCredits,
     runnerBreakUses: quote.runnerBreak.breakUses,
+    runnerNormalCreditsRequired: quote.runnerBreak.normalCreditsRequired,
+    runnerNonNormalRunCreditsApplied:
+      quote.runnerBreak.nonNormalRunCreditsApplied,
     runnerBreakerInstanceId: quote.runnerBreak.breakerCardId,
     runnerBreakerDefinitionId: quote.runnerBreak.breakerDefinitionId,
     runnerConsumedCardInstanceIds: consumedCardInstanceIds,
