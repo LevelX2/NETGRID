@@ -4928,7 +4928,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "draw_card"
+        "type": "play_operation",
+        "sourceDefinitionId": "onr_v1_281_accounts-receivable"
       }
     ],
     "forbiddenActions": [
@@ -4939,7 +4940,11 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_immediate_operation_conversion:onr_v1_281_accounts-receivable"
+      ],
       "forbiddenPlanKinds": ["corp.score_agenda"]
     }
   }

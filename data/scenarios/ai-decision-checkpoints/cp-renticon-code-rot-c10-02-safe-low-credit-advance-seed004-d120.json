@@ -13869,7 +13869,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.draw_card"
+        "type": "play_operation",
+        "sourceDefinitionId": "onr_v1_290_efficiency-experts"
       }
     ],
     "forbiddenActions": [
@@ -13878,13 +13879,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanIds": [
-        "plan:corp.defend_servers:server-defense-portfolio"
-      ],
-      "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["develop_score_protection"],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_193_corporate-coup_2:remote_1:remote_1"
+        "corp_engine_certified_immediate_operation_conversion:onr_v1_290_efficiency-experts"
       ]
     }
   }

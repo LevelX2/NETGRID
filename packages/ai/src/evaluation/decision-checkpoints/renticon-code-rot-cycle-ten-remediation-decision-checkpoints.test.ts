@@ -12,26 +12,31 @@ describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
       "draws defense for the first exact Corporate Coup score parent",
       fundExposedRemoteJson,
       "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_1",
+      true,
     ],
     [
-      "keeps the reused Corporate Coup control on the same exact defense draw",
+      "converts exact burst economy before the reused Corporate Coup defense draw",
       safeAdvanceControlJson,
       "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_1",
+      false,
     ],
     [
-      "draws defense for the second exact Corporate Coup score parent",
+      "converts exact burst economy before the second Corporate Coup defense draw",
       safeLowCreditAdvanceJson,
       "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
+      false,
     ],
-  ] as const)("%s", (_label, json, exactScoreParentPlanId) => {
+  ] as const)("%s", (_label, json, exactScoreParentPlanId, expectsDelegation) => {
     const result = runAiDecisionCheckpoint(
       structuredClone(json) as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.decision?.evidence).toContain("plan_priority_class:P4");
-    expect(result.decision?.evidence).toContain(
-      `plan_priority_delegated_from:${exactScoreParentPlanId}`,
-    );
+    if (expectsDelegation) {
+      expect(result.decision?.evidence).toContain(
+        `plan_priority_delegated_from:${exactScoreParentPlanId}`,
+      );
+    }
   });
 });

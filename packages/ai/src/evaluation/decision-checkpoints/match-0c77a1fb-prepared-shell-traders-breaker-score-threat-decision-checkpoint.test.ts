@@ -5,7 +5,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match 0c77a1fb prepared Shell Traders breaker score-threat checkpoint", () => {
-  it("does not install Corporate Retreat into the remote protected only by Filter", () => {
+  it("converts Accounts Receivable without exposing Corporate Retreat behind Filter", () => {
     const result = runAiDecisionCheckpoint(
       preparedShellTradersBreakerJson as AiDecisionCheckpointV1,
     );

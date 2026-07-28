@@ -1,6 +1,6 @@
 # Corp-Handverwertung und Opening-Rush – Worktree-Paketprozess
 
-Status: **P0 bis P6 abgeschlossen; P7 aktiv**
+Status: **P0 bis P7 abgeschlossen; Integration und Cleanup verifiziert**
 
 Stand: 2026-07-28
 
@@ -472,6 +472,23 @@ Dateisystem; der gemergte Branch ist ohne Force gelöscht.
 Commit:
 `docs(ai): close corp hand utilization and opening rush`
 
+Ergebnis:
+
+- Der unveränderte `main`-Volltest wurde mit 54 Fehlern in 21 Dateien
+  reproduziert. Der finale Arbeitsstand besitzt exakt dieselben 54 Fehler in
+  denselben 21 Dateien, aber 22 zusätzliche grüne Tests und vier zusätzliche
+  grüne Testdateien.
+- Elf zunächst zusätzliche Erwartungsabweichungen wurden einzeln geprüft und
+  geschlossen. Historische Checkpoints bilden nun die beabsichtigte
+  Konvertieren-vor-Draw-Reihenfolge ab; Fetal AI und R&D Mole bleiben in
+  kontrollierten deterministischen Spielverläufen gedeckt.
+- Typecheck, `check:ai`, Paketgrenzen, 161 Runtime-Tests und
+  `git diff --check` sind grün. Das im Prozess notierte
+  `check:ai:full`-Script existiert im Repository nicht; der fehlende Befehl
+  ist im Final Review als bestehende Infrastrukturabweichung dokumentiert.
+- Führender Abschlussnachweis ist
+  `docs/reviews/ai/corp-hand-utilization-opening-rush-final-review-2026-07-28.md`.
+
 ## Verifikationsregeln
 
 - Jedes Paket führt zuerst seine fokussierten Tests und danach den
@@ -585,4 +602,8 @@ Markiere das Goal erst danach als complete.
   Reserven, leere Remotes, späte Züge und akute Centrals blockieren. 40
   kontrollierte Seeds ergeben 18 Annahmen und 22 Ablehnungen; derselbe
   Opportunity-Key bleibt über State-Revalidierungen stabil.
-- P7: aktiv.
+- P7: abgeschlossen; der finale serielle AI-Testlauf entspricht mit 54 roten
+  Tests in 21 Dateien exakt der unveränderten `main`-Baseline. 4.155 von
+  4.209 Tests und 492 von 513 Testdateien sind grün. Typecheck, `check:ai`,
+  Paketgrenzen und Diff-Gate sind grün; Integration und Cleanup wurden nach
+  dem P7-Commit durch den Controller verifiziert.

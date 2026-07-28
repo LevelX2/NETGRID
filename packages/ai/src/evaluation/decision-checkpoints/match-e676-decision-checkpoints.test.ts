@@ -15,7 +15,7 @@ describe("match e676 exact decision checkpoints", () => {
       true,
     ],
     [
-      "draws missing score material without rezzing Chester Mix",
+      "avoids a full-HQ draw without rezzing Chester Mix",
       chesterBeforeHqIceJson,
       false,
     ],

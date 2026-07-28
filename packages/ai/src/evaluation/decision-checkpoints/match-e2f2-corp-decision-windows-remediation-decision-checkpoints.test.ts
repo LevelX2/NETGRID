@@ -23,7 +23,7 @@ describe("match e2f2 Corp decision-window remediation checkpoints", () => {
       keepPositiveMenusRezJson,
     ],
     [
-      "draws the missing score material instead of forcing Annual Reviews",
+      "converts Overtime before drawing into saturated HQ instead of forcing Annual Reviews",
       annualReviewsOverSaturatedCreditJson,
     ],
     [
@@ -57,10 +57,10 @@ describe("match e2f2 Corp decision-window remediation checkpoints", () => {
     if (json === annualReviewsOverSaturatedCreditJson) {
       expect(result.decision?.evidence).toEqual(
         expect.arrayContaining([
-          "plan_priority_class:P4",
+          "plan_priority_class:P5",
           "plan_module:corp.hand_and_agenda_management",
-          "plan_step_capability:draw_for_plan",
-          "plan_assessment_evidence:corp_score_campaign_missing_agenda_material",
+          "plan_step_capability:resolve_hq_overflow",
+          "plan_assessment_evidence:corp_hq_overflow_exact_conversion:1",
         ]),
       );
     }

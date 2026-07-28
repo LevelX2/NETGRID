@@ -6027,7 +6027,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "draw_card"
+        "type": "play_operation",
+        "sourceDefinitionId": "onr_v1_297_overtime-incentives"
       }
     ],
     "contractKind": "correctness",
@@ -6042,9 +6043,9 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
-      "acceptableCapabilities": ["draw_for_plan"],
+      "acceptableCapabilities": ["resolve_hq_overflow"],
       "requiredAssessmentEvidence": [
-        "corp_score_campaign_missing_agenda_material"
+        "corp_hq_overflow_exact_conversion:1"
       ]
     }
   }

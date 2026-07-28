@@ -32,7 +32,7 @@ const BEHAVIOR_FIXTURES = [
     scorelineSeed003D219Json,
   ],
   [
-    "develops parent-bound protection for the Seed 004 scoreline at d55",
+    "converts burst economy before parent-bound protection at Seed 004 d55",
     scorelineSeed004D55Json,
   ],
   ["continues the bound Seed 004 scoreline at d65", scorelineSeed004D65Json],
@@ -132,15 +132,17 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     const checkpoint = mutateFixture(scorelineSeed004D55Json, (candidate) => {
       candidate.engine.testOnlyGameState.runner.credits = 30;
       candidate.expectation = {
-        acceptableActions: [{ type: "draw_card" }],
+        acceptableActions: [
+          {
+            type: "play_operation",
+            sourceDefinitionId: "onr_v1_290_efficiency-experts",
+          },
+        ],
         planExecution: {
-          acceptablePlanIds: [
-            "plan:corp.defend_servers:server-defense-portfolio",
-          ],
-          acceptablePlanKinds: ["corp.defend_servers"],
-          acceptableCapabilities: ["develop_score_protection"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_193_corporate-coup_2:remote_1:remote_1",
+            "corp_engine_certified_immediate_operation_conversion:onr_v1_290_efficiency-experts",
           ],
         },
         forbiddenActions: [{ type: "advance_card" }],

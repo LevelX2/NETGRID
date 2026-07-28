@@ -187,6 +187,23 @@ Stand: 2026-07-25
   und
   `docs/reviews/ai/ai-behavior-baseline-v1-economy-funding-routes-2026-07-21.md`.
 
+- Die Corp-KI verwertet bekannte, exakt projizierte HQ-Karten jetzt vor
+  einem vermeidbaren gleichklassigen Draw. Garantierte sofortige
+  Economy-Operationen gehören `corp.economy`; ein autoritätsloses
+  Handinventar weist Domainclaims oder explizite Dispositionen aus.
+  Draw-Admission bindet Parent-Zweck, Versuchsbudget, Net-Handdelta und
+  Endturn-Overflow und wird nach jeder Konversion vollständig revalidiert.
+  BBS Whispering Campaign und Red Herrings besitzen enge Domainrouten.
+  Frühe unsichere P4-Rushes bleiben `corp.score_agenda` und können innerhalb
+  eines vollständig qualifizierten Fensters seed-deterministisch variieren;
+  öffentliche vorbereitete Breaker und sichere Gegenbeweise blockieren.
+  40 kontrollierte Seeds ergeben 18 Annahmen und 22 Ablehnungen. Der finale
+  AI-Volltest besitzt keine neuen Fehler gegenüber `main` und 22 zusätzliche
+  grüne Tests. Führend sind
+  `docs/architecture/ai/corp-hand-utilization-opening-rush-worktree-process-2026-07-28.md`
+  und
+  `docs/reviews/ai/corp-hand-utilization-opening-rush-final-review-2026-07-28.md`.
+
 - Die Aktionsökonomie besitzt nun denselben durchgängigen Vertrag:
   `PlayerView.own.clicks` liefert den aktuellen Bestand, LegalActions und
   normalisierte Kartenhints projizieren unmittelbare, eingeschränkte,

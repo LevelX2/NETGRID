@@ -9461,7 +9461,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "draw_card"
+        "type": "gain_credit"
       }
     ],
     "forbiddenActions": [
@@ -9471,10 +9471,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
-      "acceptableCapabilities": ["draw_for_plan"],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_score_campaign_missing_agenda_material"
+        "corp_engine_certified_basic_liquidity_development"
       ]
     }
   }

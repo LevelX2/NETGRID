@@ -7,7 +7,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const FIXTURES = [
   [
-    "uses explicit burst funding for the committed scoreline",
+    "converts exact burst economy before the committed scoreline draw",
     advanceOverPassiveSupportJson,
   ],
   [

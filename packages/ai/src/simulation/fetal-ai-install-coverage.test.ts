@@ -65,7 +65,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
   it("keeps a delayed first-copy Ambush install from being rejected by the prepared-score sibling", () => {
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-10",
-      maxActions: 6,
+      maxActions: 21,
       runnerDeck: requireDeck("proteus_runner_rd_bad_publicity_2026_05_25"),
       corpDeck,
       runnerControllerMode: "current_candidate",
