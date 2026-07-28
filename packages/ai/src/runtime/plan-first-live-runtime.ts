@@ -9657,7 +9657,14 @@ function corpGlobalDefenseInstallRouteAssessment(
   ) {
     return { knowledge: "known", disposition: "productive", projection };
   }
-  if (projection.preservesReserves && preferQualitativeSourceProgress) {
+  const qualitativeProgressHasNoKnownFundingGap =
+    (projection.after.minimumAdditionalCreditsToSatisfy ?? 0) === 0 &&
+    (projection.after.minimumAdditionalClicksToSatisfy ?? 0) === 0;
+  if (
+    projection.preservesReserves &&
+    preferQualitativeSourceProgress &&
+    qualitativeProgressHasNoKnownFundingGap
+  ) {
     return { knowledge: "known", disposition: "productive", projection };
   }
   return knownInstallRouteHasUsefulEffectBlockedByFunding(projection)
