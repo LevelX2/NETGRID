@@ -271,7 +271,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBeUndefined();
   });
 
-  it("does not create a rez route without exact access-probability progress", () => {
+  it("uses known encounter pressure on the active run when access probability remains unchanged", () => {
     const fixture = engineIceRezWindow("onr_v1_249_hunter", 0);
 
     expect(
@@ -281,7 +281,14 @@ describe("exact Corp ICE rez route", () => {
         sourceCard: fixture.sourceCard,
         targetServerId: "rd",
       }),
-    ).toBeUndefined();
+    ).toMatchObject({
+      routeKind: "qualitative_encounter_defense",
+      effect: "progress",
+    });
+    expect(
+      chooseAiAction(fixture.input, { persistTacticalPlanMemory: false })
+        .actionId,
+    ).toBe(fixture.engineAction.actionId);
   });
 
   it("uses an Engine-certified current-run resource exchange when access remains possible", () => {

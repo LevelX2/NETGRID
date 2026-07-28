@@ -427,7 +427,12 @@ function structuredRecentPressure(
       return undefined;
     if (event.stateVersionAfter < input.playerView.stateVersion - 32) continue;
     const payload = event.publicPayload as Record<string, unknown>;
-    if (payload.actor !== "runner" || payload.serverId !== serverId) continue;
+    if (
+      payload.actor !== "runner" ||
+      visibleEventServerId(input, payload) !== serverId
+    ) {
+      continue;
+    }
     const actionType =
       typeof payload.actionType === "string" ? payload.actionType : event.type;
     if (actionType !== "access_card" && actionType !== "run_successful")
@@ -441,4 +446,25 @@ function structuredRecentPressure(
     }
   }
   return { events, successful: Math.min(3, turns.size) };
+}
+
+function visibleEventServerId(
+  input: AiDecisionInput,
+  payload: Record<string, unknown>,
+): string | undefined {
+  if (typeof payload.serverId === "string") return payload.serverId;
+  const targetPayload =
+    typeof payload.targets === "object" && payload.targets !== null
+      ? (payload.targets as Record<string, unknown>)
+      : undefined;
+  const visibleLabel =
+    typeof payload.serverLabel === "string"
+      ? payload.serverLabel
+      : typeof targetPayload?.serverLabel === "string"
+        ? targetPayload.serverLabel
+        : undefined;
+  if (!visibleLabel) return undefined;
+  return input.playerView.servers.find(
+    (server) => server.label === visibleLabel,
+  )?.id;
 }

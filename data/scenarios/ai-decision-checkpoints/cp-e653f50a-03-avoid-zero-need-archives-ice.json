@@ -8812,6 +8812,11 @@
         "type": "rez_card",
         "sourceDefinitionId": "onr_v1_320_encoder-inc",
         "targetServerId": "remote_1"
+      },
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_232_crystal-wall",
+        "targetServerId": "remote_1"
       }
     ]
   }

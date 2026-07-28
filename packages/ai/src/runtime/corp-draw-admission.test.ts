@@ -103,6 +103,34 @@ describe("Corp draw admission", () => {
     ).toMatchObject({ disposition: "blocked_end_turn_overflow" });
   });
 
+  it("admits one additional overflow card only for a bounded central-defense search", () => {
+    expect(
+      assessment({
+        purpose: "central_defense_answer_search",
+        handSize: 6,
+        maximumHandSize: 5,
+        currentClicks: 3,
+      }),
+    ).toMatchObject({
+      disposition: "admitted",
+      projectedHandAfterDraw: 7,
+      projectedEndTurnOverflow: 2,
+      evidence: expect.arrayContaining([
+        "corp_draw_existing_end_turn_overflow:1",
+        "corp_draw_additional_end_turn_overflow:1",
+      ]),
+    });
+
+    expect(
+      assessment({
+        purpose: "score_material_search",
+        handSize: 6,
+        maximumHandSize: 5,
+        currentClicks: 3,
+      }),
+    ).toMatchObject({ disposition: "blocked_end_turn_overflow" });
+  });
+
   it("blocks unknown projections and consumed attempt budgets", () => {
     expect(
       assessment({

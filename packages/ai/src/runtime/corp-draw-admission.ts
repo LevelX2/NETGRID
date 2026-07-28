@@ -78,6 +78,13 @@ export function assessCorpDrawAdmission(params: {
   const projectedEndTurnOverflow = validProjection
     ? Math.max(0, projectedHandAfterDraw - params.maximumHandSize)
     : 0;
+  const existingEndTurnOverflow = validProjection
+    ? Math.max(0, params.handSize - params.maximumHandSize)
+    : 0;
+  const additionalEndTurnOverflow = Math.max(
+    0,
+    projectedEndTurnOverflow - existingEndTurnOverflow,
+  );
   const exactCapacityReleaseRoutes = validProjection
     ? params.capacityReleaseRoutes
         .filter(
@@ -122,7 +129,10 @@ export function assessCorpDrawAdmission(params: {
     disposition =
       exactCapacityReleaseRoutes.length > 0
         ? "defer_for_capacity_release"
-        : projectedEndTurnOverflow === 1
+        : projectedEndTurnOverflow === 1 ||
+            (params.purpose === "central_defense_answer_search" &&
+              existingEndTurnOverflow <= 1 &&
+              additionalEndTurnOverflow === 1)
           ? "admitted"
           : "blocked_end_turn_overflow";
   } else if (
@@ -160,7 +170,9 @@ export function assessCorpDrawAdmission(params: {
       `corp_draw_cards_drawn:${cardsDrawn}`,
       `corp_draw_net_hand_delta:${netHandDelta}`,
       `corp_draw_projected_hand:${projectedHandAfterDraw}`,
+      `corp_draw_existing_end_turn_overflow:${existingEndTurnOverflow}`,
       `corp_draw_projected_end_turn_overflow:${projectedEndTurnOverflow}`,
+      `corp_draw_additional_end_turn_overflow:${additionalEndTurnOverflow}`,
       `corp_draw_capacity_release_actions:${
         exactCapacityReleaseRoutes.map((route) => route.actionId).join(",") ||
         "none"

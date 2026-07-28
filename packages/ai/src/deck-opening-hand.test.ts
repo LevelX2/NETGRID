@@ -35,6 +35,31 @@ describe("deck opening hand role classification", () => {
     expect(evaluation.reasons).toContain("no_executable_opening_line");
   });
 
+  it("mulligans the live zero-ICE punish hand even when it contains a remote tag enabler", () => {
+    const evaluation = evaluateCorpOpeningHand(
+      corpOpeningInput(
+        [
+          "onr_v1_287_datapool-by-zetatech",
+          "onr_v1_301_punitive-counterstrike",
+          "onr_v1_302_scorched-earth",
+          "onr_v1_302_scorched-earth",
+          "onr_v1_333_omniscience-foundation",
+        ],
+        ["corp.tag_trace_punish", "corp.damage_kill"],
+      ),
+    );
+
+    expect(evaluation).toMatchObject({
+      decision: "mulligan",
+      reasons: expect.arrayContaining(["no_executable_opening_line"]),
+      evidence: expect.arrayContaining([
+        "opening_ice:0",
+        "opening_executable_strategy_lines:none",
+        "opening_viability_cap:42",
+      ]),
+    });
+  });
+
   it("keeps a legitimate no-ICE fast-advance opening with target, tool and liquidity", () => {
     const evaluation = evaluateCorpOpeningHand(
       corpOpeningInput(

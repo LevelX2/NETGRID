@@ -29,7 +29,9 @@ export function evaluateCorpOpeningHand(
   const handRoleGroups = handCards.map((card) => card.roles);
   const agendaCount = handCards.filter((card) => card.type === "agenda").length;
   const iceCount = handCards.filter((card) => card.type === "ice").length;
-  const economyCount = handCards.filter(corpOpeningCardProvidesLiquidity).length;
+  const economyCount = handCards.filter(
+    corpOpeningCardProvidesLiquidity,
+  ).length;
   const remoteRootCount = countOpeningCardsWithRole(
     handRoleGroups,
     corpOpeningRoleIsRemoteRoot,
@@ -92,9 +94,7 @@ export function evaluateCorpOpeningHand(
   score += strategyAssessment.score;
 
   const lacksExecutableOpening =
-    iceCount === 0 &&
-    economyCount === 0 &&
-    strategyAssessment.executableLines.length === 0;
+    iceCount === 0 && strategyAssessment.executableLines.length === 0;
   if (lacksExecutableOpening) {
     score = Math.min(score, 42);
     reasons.push("no_executable_opening_line");
@@ -142,7 +142,9 @@ function corpOpeningCard(card: VisibleCard): CorpOpeningCard {
   };
 }
 
-function openingTypeFromExactRoles(roles: readonly string[]): string | undefined {
+function openingTypeFromExactRoles(
+  roles: readonly string[],
+): string | undefined {
   if (roles.some((role) => role === "agenda" || role === "corp_score_agenda")) {
     return "agenda";
   }
@@ -187,15 +189,9 @@ function assessCorpOpeningStrategies(
     supports(card, "corp.fast_advance"),
   );
   const agendas = cards.filter((card) => card.type === "agenda");
-  if (
-    strategySet.has("corp.fast_advance") &&
-    fastAdvanceTools.length > 0
-  ) {
+  if (strategySet.has("corp.fast_advance") && fastAdvanceTools.length > 0) {
     supportedLines.push("corp.fast_advance");
-    if (
-      agendas.length > 0 &&
-      (economyCount > 0 || credits >= 5)
-    ) {
+    if (agendas.length > 0 && (economyCount > 0 || credits >= 5)) {
       executableLines.push("corp.fast_advance");
     }
   }
@@ -209,7 +205,7 @@ function assessCorpOpeningStrategies(
   const openingReadyTagEnablers = tagEnablers.filter(
     (card) =>
       !corpOpeningCardNeedsPriorRunnerActivity(card) &&
-      !(card.type === "asset" && iceCount === 0),
+      !(iceCount === 0 && corpOpeningCardRequiresRemoteProtection(card)),
   );
   const punishPayoffs = cards.filter((card) =>
     card.hint?.strategySupportPairs?.some(
@@ -250,7 +246,9 @@ function assessCorpOpeningStrategies(
     }
   }
 
-  const conditionalCardCount = cards.filter(corpOpeningCardIsConditional).length;
+  const conditionalCardCount = cards.filter(
+    corpOpeningCardIsConditional,
+  ).length;
   return {
     score:
       Math.min(18, executableLines.length * 12) +
@@ -262,13 +260,28 @@ function assessCorpOpeningStrategies(
   };
 }
 
-function corpOpeningCardNeedsPriorRunnerActivity(card: CorpOpeningCard): boolean {
+function corpOpeningCardNeedsPriorRunnerActivity(
+  card: CorpOpeningCard,
+): boolean {
   return (card.hint?.conditions ?? []).some((condition) =>
     [
+      "requires_runner_tagged",
       "requires_runner_attempted_run_last_turn",
       "requires_runner_attempted_multiple_runs_last_turn",
       "requires_runner_trashed_node_last_turn",
+      "requires_trace_success",
     ].includes(condition.kind),
+  );
+}
+
+function corpOpeningCardRequiresRemoteProtection(
+  card: CorpOpeningCard,
+): boolean {
+  return (
+    card.type === "asset" ||
+    card.type === "node" ||
+    card.type === "upgrade" ||
+    card.roles.some(corpOpeningRoleIsRemoteRoot)
   );
 }
 
@@ -334,8 +347,7 @@ export function evaluateRunnerOpeningHand(
     ...semanticOpeningEvidence(semanticContext),
   ];
 
-  score +=
-    breakerAccessCount >= 2 ? 24 : breakerAccessCount === 1 ? 18 : 0;
+  score += breakerAccessCount >= 2 ? 24 : breakerAccessCount === 1 ? 18 : 0;
   if (breakerAccessCount === 0) reasons.push("no_opening_breaker_access");
   score +=
     economyCount >= 2
@@ -423,7 +435,9 @@ type RunnerOpeningCapabilities = {
   };
 };
 
-function openingSemanticContext(input: AiDecisionInput): OpeningSemanticContext {
+function openingSemanticContext(
+  input: AiDecisionInput,
+): OpeningSemanticContext {
   const semanticInput = input as AiDecisionInput & {
     ownDeckStrategyProfile?: {
       primaryStrategies: string[];
@@ -458,8 +472,10 @@ function openingSemanticContext(input: AiDecisionInput): OpeningSemanticContext 
       : "missing",
     runnerEconomyTools:
       semanticInput.ownDeckCapabilities?.runner?.economyBankTools?.length ?? 0,
-    runnerOpeningBreakerSearchTools:
-      openingExecutableBreakerSearchToolCount(input, semanticInput),
+    runnerOpeningBreakerSearchTools: openingExecutableBreakerSearchToolCount(
+      input,
+      semanticInput,
+    ),
     corpRemoteProtectionTools:
       semanticInput.ownDeckCapabilities?.corp?.remotePlanProfile
         ?.remoteProtectionToolsKnown ?? 0,

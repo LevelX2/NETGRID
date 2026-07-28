@@ -50,7 +50,7 @@ describe("semantic runtime corp board triage", () => {
     expect(nextDecision).toEqual(withinDecision[0]);
   });
 
-  it("fails closed when the candidate ICE has unsupported access-relevant effects", () => {
+  it("recognizes a concrete ETR path while conservatively ignoring non-access-preventing damage", () => {
     const corticalScrub = iceCard("cortical-scrub", {
       definitionId: "onr_v1_231_cortical-scrub",
       title: "Cortical Scrub",
@@ -79,8 +79,8 @@ describe("semantic runtime corp board triage", () => {
     const triage = semanticRuntimeCorpBoardTriage(input, testDependencies());
 
     expect(triage).toMatchObject({
-      primary: "low_value",
-      severity: "low",
+      primary: "protect_rd",
+      severity: "high",
     });
   });
 

@@ -6815,7 +6815,8 @@ function corpActionDispositions(
       ) &&
       !domain.defenseNeeds.some(
         (signal) =>
-          signal.kind === "score_protection_draw" &&
+          (signal.kind === "score_protection_draw" ||
+            (signal.kind === "generic" && signal.phase === "draw_for_ice")) &&
           corpDefenseSignalOwnsAction(signal, candidate.actionId),
       )
     ) {
@@ -7521,6 +7522,19 @@ function buildCorpDomain(
       project.phase !== "install_agenda" &&
       project.feasible,
   );
+  const ambushes: CorpPlanDomain["ambushes"] = buildCorpAmbushPlanSignals({
+    input,
+    candidates,
+    previous,
+  });
+  const ambushSequenceOwnsCurrentWindow = ambushes.some(
+    (signal) =>
+      input.playerView.own.clicks > 0 &&
+      ((signal.phase === "install" &&
+        signal.installRoute !== undefined &&
+        signal.installRoute.fundingGap === 0) ||
+        (signal.phase === "advance" && signal.actionIds.length > 0)),
+  );
   const scoreProtectionProjects = scoreProjects
     .filter(
       (project) =>
@@ -7715,7 +7729,6 @@ function buildCorpDomain(
     (candidate) => {
       if (defenseDrawAttemptConsumed) return [];
       if (!corpCandidateProjectsCardDraw(candidate)) return [];
-      if (!corpDrawCandidatePreservesHandCapacity(input, candidate)) return [];
       const action = input.legalActions.find(
         (legalAction) => legalAction.actionId === candidate.actionId,
       );
@@ -7788,7 +7801,9 @@ function buildCorpDomain(
               phase: "install_ice" as const,
               sourceDefinitionIds: [candidate.sourceDefinitionId],
               actionIds: [candidate.actionId],
-              urgent: !scoreConversionOwnsCurrentWindow,
+              urgent:
+                !scoreConversionOwnsCurrentWindow &&
+                !ambushSequenceOwnsCurrentWindow,
               installRoute: route,
               value: 1,
               evidenceCode:
@@ -7978,7 +7993,10 @@ function buildCorpDomain(
                   : productiveIceRezRoute.routeKind ===
                       "exact_resource_exchange"
                     ? `engine_certified_ice_rez_exact_resource_exchange:${rezServerId}:${candidate.actionId}`
-                    : `engine_certified_ice_rez_free_persistent_defense:${rezServerId}:${candidate.actionId}`
+                    : productiveIceRezRoute.routeKind ===
+                        "free_persistent_defense"
+                      ? `engine_certified_ice_rez_free_persistent_defense:${rezServerId}:${candidate.actionId}`
+                      : `engine_certified_ice_rez_qualitative_encounter_defense:${rezServerId}:${candidate.actionId}`
                 : "visible_non_ice_rez_window",
             },
           ];
@@ -8045,11 +8063,6 @@ function buildCorpDomain(
         : signal,
     );
   const remoteProjects: CorpCorePlanDomain["remoteProjects"] = [];
-  const ambushes: CorpPlanDomain["ambushes"] = buildCorpAmbushPlanSignals({
-    input,
-    candidates,
-    previous,
-  });
   const immediateFundingActionIds = candidates
     .filter(corpEconomyActionIsOwned)
     .map((candidate) => candidate.actionId);
@@ -9568,8 +9581,28 @@ function corpGlobalDefenseInstallRouteAssessment(
   );
   const isEmptyCentral =
     (serverId === "hq" || serverId === "rd") && serverIce.length === 0;
+  const selectedCentralEvidence =
+    centralAllocation?.status === "known" &&
+    centralAllocation.selectedServerId === serverId &&
+    (serverId === "hq" || serverId === "rd")
+      ? centralAllocation.evidence[serverId]
+      : undefined;
+  const otherCentralAlreadyProtected =
+    serverId === "hq" || serverId === "rd"
+      ? (input.playerView.servers.find(
+          (candidateServer) =>
+            candidateServer.id === (serverId === "hq" ? "rd" : "hq"),
+        )?.ice.length ?? 0) > 0
+      : false;
+  const hasSelectedCentralNeed =
+    otherCentralAlreadyProtected ||
+    (selectedCentralEvidence !== undefined &&
+      (selectedCentralEvidence.recentRunOrAccessEvents > 0 ||
+        selectedCentralEvidence.recentSuccessfulAccessRunnerTurns > 0 ||
+        selectedCentralEvidence.serverBoundEffectIds.length > 0));
   const preferQualitativeSourceProgress =
     isEmptyCentral &&
+    hasSelectedCentralNeed &&
     (sourceDefense.hasMeaningfulTaxOrDamage ||
       sourceDefense.hasEncounterDisruption);
   const projection = projectCorpFundedIceInstallRoute({
@@ -9610,6 +9643,7 @@ function corpGlobalDefenseInstallRouteAssessment(
   if (
     projection.preservesReserves &&
     isEmptyCentral &&
+    hasSelectedCentralNeed &&
     (sourceDefense.hasMeaningfulTaxOrDamage ||
       sourceDefense.hasEncounterDisruption)
   ) {
@@ -10747,8 +10781,18 @@ function corpRequiredEconomyNeeds(
   punishCampaigns: readonly CorpPunishCampaignSignal[],
   immediateFundingActionIds: string[],
 ): CorpCorePlanDomain["economyNeeds"] {
+  const exactAmbushSetupCardIds = new Set(
+    ambushes
+      .filter(
+        (ambush) =>
+          ambush.phase === "install" &&
+          ambush.installRoute !== undefined &&
+          ambush.installRoute.fundingGap === 0,
+      )
+      .map((ambush) => ambush.sourceInstanceId),
+  );
   const scoreSupport = scoreProjects.flatMap((project) =>
-    (project.fundingGap ?? 0) > 0
+    (project.fundingGap ?? 0) > 0 && exactAmbushSetupCardIds.size === 0
       ? [
           {
             kind: "parent_funding" as const,

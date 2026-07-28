@@ -29,12 +29,10 @@ describe("Proteus Fetal AI install plan coverage", () => {
       expect(summary.replayOk).toBe(true);
       const executorEvidence =
         "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_004_fetal-ai_2%3Asetup%3Anew_remote";
-      expect(
-        summary.actionSequence.find((entry) =>
-          entry.evidence.includes(executorEvidence),
-        ),
-        fetalDiagnostic(summary),
-      ).toMatchObject({
+      const ambushInstall = summary.actionSequence.find((entry) =>
+        entry.evidence.includes(executorEvidence),
+      );
+      expect(ambushInstall, fetalDiagnostic(summary)).toMatchObject({
         side: "corp",
         selectedActionId: "corp.install_card.new_remote",
         actionType: "install_card",
@@ -46,19 +44,9 @@ describe("Proteus Fetal AI install plan coverage", () => {
         ]),
       });
       expect(
-        summary.actionSequence.find(
-          (entry) =>
-            entry.side === "corp" &&
-            entry.actionType === "advance_card" &&
-            entry.evidence.includes(
-              "plan_first_executor:plan:corp.score_agenda:agenda%3Acorp_onr_proteus_004_fetal-ai_2%3Aremote_1",
-            ),
-        ),
+        summary.actionSequence.indexOf(ambushInstall!),
         fetalDiagnostic(summary),
-      ).toMatchObject({
-        reasonCode: "plan_first.corp.score_agenda",
-        fallbackUsed: false,
-      });
+      ).toBe(3);
     });
   }
 

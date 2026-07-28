@@ -171,6 +171,26 @@ describe("Corp defensive draw context", () => {
     });
   });
 
+  it("permits one bounded overflow draw to search for the selected central defense", () => {
+    const input = drawInput(5, 6);
+    input.playerView.own.gripOrHq[0] = corpCard("hq-agenda", "agenda");
+
+    expect(
+      corpMissingConcreteDefenseDrawNeed(
+        input,
+        draw,
+        undefined,
+        knownCentralAllocation("hq"),
+      ),
+    ).toMatchObject({
+      serverId: "hq",
+      evidence: expect.arrayContaining([
+        "central_defense_bounded_overflow_search:true",
+        "central_defense_selected_server:hq",
+      ]),
+    });
+  });
+
   it("never re-ranks the known global central-defense selection for generic draw", () => {
     const input = drawInput(5, 3);
     input.playerView.own.gripOrHq.push(corpCard("hq-agenda", "agenda"));

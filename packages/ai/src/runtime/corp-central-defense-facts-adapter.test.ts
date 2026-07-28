@@ -371,6 +371,40 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
       allocateCorpCentralDefenseFromAiFacts({ input: value }),
     ).toMatchObject({ status: "unknown" });
   });
+  it("binds a side-visible access event through the Engine server label when no server id is published", () => {
+    const value = withSnapshot(input());
+    value.playerView.servers.find((server) => server.id === "rd")!.label =
+      "R&D";
+    value.eventTail = [
+      {
+        eventId: "rd-access",
+        stateVersionBefore: 6,
+        stateVersionAfter: 7,
+        turnSerial: 2,
+        stateHashAfter: "rd-access-state-hash" as StateHash,
+        type: "access_card",
+        publicPayload: {
+          actor: "runner",
+          actionType: "access_card",
+          serverLabel: "R&D",
+          targets: { serverLabel: "R&D" },
+        },
+      },
+    ];
+
+    expect(
+      allocateCorpCentralDefenseFromAiFacts({ input: value }),
+    ).toMatchObject({
+      status: "known",
+      selectedServerId: "rd",
+      evidence: {
+        rd: {
+          recentRunOrAccessEvents: 1,
+          recentSuccessfulAccessRunnerTurns: 1,
+        },
+      },
+    });
+  });
   it("keeps the actor-private match, turn, and central quotes in the Corp DTO only", () => {
     const raw = input();
     const corpDto = buildAiDecisionInputDto({

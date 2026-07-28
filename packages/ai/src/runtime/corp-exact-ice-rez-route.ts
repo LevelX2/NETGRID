@@ -9,6 +9,7 @@ import {
   compareExactProbabilities,
   type KnownCorpScoreProtectionAssessment,
 } from "./corp-score-protection-assessment";
+import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 
 export type CorpExactIceRezRouteProjection = Readonly<{
   actionId: string;
@@ -21,7 +22,8 @@ export type CorpExactIceRezRouteProjection = Readonly<{
   routeKind:
     | "access_reduction"
     | "exact_resource_exchange"
-    | "free_persistent_defense";
+    | "free_persistent_defense"
+    | "qualitative_encounter_defense";
   resourceExchange?: Readonly<{
     runnerRequiredCredits: number;
     runnerPumpCredits: number;
@@ -162,10 +164,20 @@ export function projectExactCorpIceRezRoute(params: {
       targetServerId,
       totalRezCredits,
     });
+  const qualitativeEncounterDefense =
+    probabilityComparison === 0 &&
+    !resourceExchange &&
+    !freePersistentDefense &&
+    isQualitativeEncounterDefenseOnCurrentRun({
+      input,
+      sourceCard,
+      targetServerId,
+    });
   if (
     probabilityComparison !== -1 &&
     !resourceExchange &&
-    !freePersistentDefense
+    !freePersistentDefense &&
+    !qualitativeEncounterDefense
   ) {
     return undefined;
   }
@@ -181,11 +193,25 @@ export function projectExactCorpIceRezRoute(params: {
       ? "exact_resource_exchange"
       : freePersistentDefense
         ? "free_persistent_defense"
-        : "access_reduction",
+        : qualitativeEncounterDefense
+          ? "qualitative_encounter_defense"
+          : "access_reduction",
     ...(resourceExchange ? { resourceExchange } : {}),
     effect: after.protectsScore ? "satisfied" : "progress",
     totalRezCredits,
   };
+}
+
+function isQualitativeEncounterDefenseOnCurrentRun(params: {
+  input: AiDecisionInput;
+  sourceCard: VisibleCard;
+  targetServerId: string;
+}): boolean {
+  const { input, sourceCard, targetServerId } = params;
+  if (input.playerView.run?.attackedServerId !== targetServerId) return false;
+
+  const profile = visibleCorpIceDefenseProfile(sourceCard);
+  return profile.hasMeaningfulTaxOrDamage || profile.hasEncounterDisruption;
 }
 
 function isFreePersistentDefenseOnWorthwhileCurrentServer(params: {

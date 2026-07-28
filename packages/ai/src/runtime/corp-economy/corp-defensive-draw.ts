@@ -600,7 +600,11 @@ export function corpMissingConcreteDefenseDrawNeed(
   capacity = corpOptionalDrawCapacity(input, action),
   centralAllocation?: CorpCentralDefenseAllocation,
 ): CorpMissingConcreteDefenseDrawNeed | undefined {
-  if (!capacity.eligible) return undefined;
+  const boundedOverflowSearch =
+    capacity.maxHandSize > 2 &&
+    capacity.projectedDrawCount === 1 &&
+    capacity.handCount <= capacity.maxHandSize + 1;
+  if (!capacity.eligible && !boundedOverflowSearch) return undefined;
   if (input.playerView.own.stackOrRdCount <= 1) return undefined;
   const deckDensity = buildCorpIceDensityProfile(input);
   if (
@@ -625,6 +629,7 @@ export function corpMissingConcreteDefenseDrawNeed(
       ...target.evidence,
       ...deckDensity.evidence,
       ...corpOptionalDrawCapacityEvidence(capacity),
+      `central_defense_bounded_overflow_search:${boundedOverflowSearch}`,
     ],
   };
 }
