@@ -181,6 +181,7 @@ export type CorpScoreProtectionDrawSignal = CorpDefenseSignalBase & {
   parentNeedId: string;
   delegatedPriorityClass: CorpScorePriorityClass;
   actionId: string;
+  cleanupReplacementDraw?: boolean;
   drawAttemptState: {
     turnKey: string;
     remainingAttempts: 1;
@@ -919,7 +920,7 @@ function economyModule(): PlanModule {
             moduleId: "corp.economy",
             dedupeKey: signal.needId,
             moduleState: { kind: "economy", signal } satisfies EconomyState,
-            priorityClass: economyPriority(signal),
+            priorityClass: corpEconomyPriorityClass(signal),
             target:
               signal.kind === "develop_campaign" ||
               signal.kind === "convert_immediate_operation" ||
@@ -941,7 +942,7 @@ function economyModule(): PlanModule {
       const current = state<EconomyState>(instance);
       return assessment(
         instance,
-        economyPriority(current.signal),
+        corpEconomyPriorityClass(current.signal),
         economyCandidates(context, current.signal).length > 0,
         economyAssessmentValue(current.signal),
         portfolio.executorInstanceId,
@@ -1228,7 +1229,9 @@ function validatedEconomyNeeds(
   return currentDomain;
 }
 
-function economyPriority(signal: CorpEconomyNeedSignal): PriorityClass {
+export function corpEconomyPriorityClass(
+  signal: CorpEconomyNeedSignal,
+): PriorityClass {
   if (signal.kind === "parent_funding")
     return signal.delegatedPriorityClass ?? signal.parentPriorityClass ?? "P5";
   if (signal.kind === "convert_immediate_operation") return "P4";
@@ -3536,6 +3539,8 @@ function isValidDefenseSignal(
       nonEmptyString(value.parentNeedId) &&
       scorePriorityClass(value.delegatedPriorityClass) &&
       nonEmptyString(value.actionId) &&
+      (value.cleanupReplacementDraw === undefined ||
+        typeof value.cleanupReplacementDraw === "boolean") &&
       attempt !== undefined &&
       hasOnlyKeys(attempt, SCORE_PROTECTION_DRAW_ATTEMPT_KEYS) &&
       nonEmptyString(attempt.turnKey) &&
@@ -3751,6 +3756,7 @@ const SCORE_PROTECTION_DRAW_SIGNAL_KEYS = new Set([
   "parentNeedId",
   "delegatedPriorityClass",
   "actionId",
+  "cleanupReplacementDraw",
   "drawAttemptState",
   "evidenceCode",
 ]);

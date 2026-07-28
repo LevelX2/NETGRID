@@ -9,7 +9,7 @@ import { MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS } from "./benchmark-deck-slots";
 import { resolveBenchmarkDeckSlot } from "./benchmark-deck-slot-resolver";
 
 describe("Corp mixed draw score-protection coverage", () => {
-  it("keeps Day Shift out of the exact defense-draw and following HQ-overflow routes", () => {
+  it("converts exact economy before a revalidated answer-search draw", () => {
     const slot = MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.find(
       (candidate) =>
         candidate.slotId === "strategy_panel_fast_advance_chrome_rush",
@@ -26,112 +26,107 @@ describe("Corp mixed draw score-protection coverage", () => {
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
       testOnlyDecisionCheckpointCapture: {
-        actionIndices: [25, 26],
+        actionIndices: [4, 5],
         capture: (snapshot) => {
           captures.set(snapshot.state.stateVersion, snapshot);
         },
       },
     });
-
-    const defenseDrawCapture = captures.get(25);
-    const overflowCapture = captures.get(26);
-    expect(defenseDrawCapture).toBeDefined();
-    expect(overflowCapture).toBeDefined();
-    if (!defenseDrawCapture || !overflowCapture) {
-      throw new Error("Missing stateVersion-25/26 capture");
+    const conversionCapture = captures.get(4);
+    const drawCapture = captures.get(5);
+    expect(conversionCapture).toBeDefined();
+    expect(drawCapture).toBeDefined();
+    if (!conversionCapture || !drawCapture) {
+      throw new Error("Missing stateVersion-4/5 capture");
     }
-    expect(defenseDrawCapture.state.timingPoint).toBe("corp_action.main");
-    expect(overflowCapture.state.timingPoint).toBe("corp_action.main");
+    expect(conversionCapture.state.timingPoint).toBe("corp_action.main");
+    expect(drawCapture.state.timingPoint).toBe("corp_action.main");
 
-    const dayShiftAction = defenseDrawCapture.input.legalActions.find(
+    const efficiencyAction = conversionCapture.input.legalActions.find(
       (action) =>
         action.actionId ===
-        "corp.play_operation.corp_onr_v1_288_day-shift_1.corp_onr_v1_288_day-shift_1",
+        "corp.play_operation.corp_onr_v1_290_efficiency-experts_1.corp_onr_v1_290_efficiency-experts_1",
     );
-    expect(dayShiftAction).toMatchObject({
+    const annualReviewsAction = conversionCapture.input.legalActions.find(
+      (action) =>
+        action.actionId ===
+        "corp.play_operation.corp_onr_v1_282_annual-reviews_1.corp_onr_v1_282_annual-reviews_1",
+    );
+    expect(efficiencyAction).toMatchObject({
       side: "corp",
       type: "play_operation",
-      source: "corp_onr_v1_288_day-shift_1",
+      source: "corp_onr_v1_290_efficiency-experts_1",
       costs: [{ clicks: 1, credits: 0 }],
       payload: {
-        cardId: "corp_onr_v1_288_day-shift_1",
-        drawCardsAmount: 2,
-        gainCreditsAmount: 1,
+        cardId: "corp_onr_v1_290_efficiency-experts_1",
+        gainCreditsAmount: 3,
       },
+    });
+    expect(annualReviewsAction).toMatchObject({
+      type: "play_operation",
+      payload: { drawCardsAmount: 3 },
     });
 
     const candidates = buildActionSemanticCandidates({
-      legalActions: defenseDrawCapture.input.legalActions,
+      legalActions: conversionCapture.input.legalActions,
       observerSide: "corp",
-      stateVersion: defenseDrawCapture.state.stateVersion,
+      stateVersion: conversionCapture.state.stateVersion,
       visibleSourceDefinitionsByInstanceId:
         visibleSourceDefinitionsByInstanceId(
-          defenseDrawCapture.input.playerView,
+          conversionCapture.input.playerView,
         ),
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
     });
     expect(
       candidates.find(
-        (candidate) => candidate.actionId === dayShiftAction?.actionId,
+        (candidate) => candidate.actionId === efficiencyAction?.actionId,
       ),
     ).toMatchObject({
       semanticActionType: "economy.gain_credit",
-      sourceDefinitionId: "onr_v1_288_day-shift",
+      sourceDefinitionId: "onr_v1_290_efficiency-experts",
       economyProjection: {
         kind: "immediate_liquid",
-        netLiquidCreditGain: 1,
-        cardsDrawn: 2,
+        netLiquidCreditGain: 3,
+        cardsDrawn: 0,
         cardsConsumed: 1,
-        netHandDelta: 1,
+        netHandDelta: -1,
         reliability: "guaranteed",
         source: "legal_action_payload",
-      },
-      actionCapacityProjection: {
-        kind: "non_action_capacity",
-        followupActionCapacity: 0,
       },
     });
 
     expect(summary.errors).toEqual([]);
     expect(summary.runtimeFailures).toEqual([]);
-    const defenseDraw = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === 25,
+    const conversion = summary.actionSequence.find(
+      (entry) => entry.stateVersionBefore === 4,
     );
-    const overflowConversion = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === 26,
+    const revalidatedDraw = summary.actionSequence.find(
+      (entry) => entry.stateVersionBefore === 5,
     );
-    expect(defenseDraw).toMatchObject({
+    expect(conversion).toMatchObject({
+      selectedActionId: "corp.play_operation",
+      actionType: "play_operation",
+      planKind: "corp.economy",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    expect(revalidatedDraw).toMatchObject({
       selectedActionId: "corp.draw_card",
       actionType: "draw_card",
-      planKind: "corp.defend_servers",
-      reasonCode: "plan_first.corp.defend_servers",
-      fallbackUsed: false,
-      evidence: expect.arrayContaining([
-        "plan_priority_class:P4",
-        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_214_project-babylon_1%3Anew_remote",
-        "plan_step_capability:develop_score_protection",
-      ]),
-    });
-    expect(overflowConversion).toMatchObject({
-      selectedActionId: "corp.install_card.rd",
-      actionType: "install_card",
-      targetServerId: "rd",
       planKind: "corp.hand_and_agenda_management",
       reasonCode: "plan_first.corp.hand_and_agenda_management",
       fallbackUsed: false,
-      evidence: expect.arrayContaining([
-        "plan_assessment_evidence:corp_hq_overflow_exact_conversion:1",
-        "plan_step_capability:resolve_hq_overflow",
-      ]),
     });
-    expect(overflowConversion?.actionType).not.toBe("gain_credit");
-    expect(overflowConversion?.actionType).not.toBe("draw_card");
-    expect(overflowConversion?.actionType).not.toBe("end_turn");
     expect(
       summary.actionSequence
-        .filter((entry) => [25, 26].includes(entry.stateVersionBefore))
+        .filter((entry) => [4, 5].includes(entry.stateVersionBefore))
         .map((entry) => entry.selectedActionId),
-    ).not.toContain(dayShiftAction?.actionId);
+    ).not.toContain(annualReviewsAction?.actionId);
+    expect(
+      drawCapture.input.playerView.own.gripOrHq.some(
+        (card) => card.definitionId === "onr_v1_290_efficiency-experts",
+      ),
+    ).toBe(false);
   });
 });

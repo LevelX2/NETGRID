@@ -43,6 +43,7 @@ import {
   corpDefensePortfolioHasExecutableRoute,
   corpExactBasicLiquidCreditCandidate,
   corpGenericDefensePriorityClass,
+  corpEconomyPriorityClass,
   corpEconomyActionIsOwned,
   createCorpCorePlanModules,
   immediateCorpLiquidCreditGain,
@@ -57,6 +58,7 @@ import {
 } from "../plans/corp-core-plan-modules";
 import {
   corpPunishCampaignOwnsCandidate,
+  corpHandPriorityClass,
   createCorpTacticalPlanModules,
   type CorpPlanDomain,
   type CorpPunishCampaignSignal,
@@ -119,7 +121,14 @@ import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
   buildCorpHandInventoryFacts,
   type CorpHandDomainRouteClaimInput,
+  type CorpHandInventoryFacts,
 } from "./corp-hand-inventory-facts";
+import {
+  assessCorpDrawAdmission,
+  type CorpDrawAdmissionAssessment,
+  type CorpDrawAdmissionPriority,
+  type CorpDrawCapacityReleaseRoute,
+} from "./corp-draw-admission";
 import {
   buildCorpAmbushPlanSignals,
   corpAmbushAdvanceDispositionEvidence,
@@ -6003,20 +6012,34 @@ function corpContext(
       : candidate;
   });
   const baseDomain = buildCorpDomain(input, sourceBoundCandidates, previous);
+  const preArbitrationHandFacts = buildCorpHandInventoryFacts({
+    input,
+    candidates: sourceBoundCandidates,
+    domainClaims: corpHandDomainRouteClaims(baseDomain),
+    actionDispositions: [],
+  });
+  const arbitratedDomain = preArbitrationHandFacts
+    ? arbitrateCorpHandConversionBeforeDraw(
+        input,
+        sourceBoundCandidates,
+        baseDomain,
+        preArbitrationHandFacts,
+      )
+    : baseDomain;
   const actionDispositions = corpActionDispositions(
     input,
     sourceBoundCandidates,
-    baseDomain,
+    arbitratedDomain,
   );
   const handInventoryFacts = buildCorpHandInventoryFacts({
     input,
     candidates: sourceBoundCandidates,
-    domainClaims: corpHandDomainRouteClaims(baseDomain),
+    domainClaims: corpHandDomainRouteClaims(arbitratedDomain),
     actionDispositions,
   });
   const domain: CorpPlanDomain = handInventoryFacts
-    ? { ...baseDomain, handInventoryFacts }
-    : baseDomain;
+    ? { ...arbitratedDomain, handInventoryFacts }
+    : arbitratedDomain;
   return {
     input,
     actionCandidates: sourceBoundCandidates,
@@ -6182,6 +6205,245 @@ function corpHandDomainRouteClaims(
   return claims;
 }
 
+function arbitrateCorpHandConversionBeforeDraw(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  domain: CorpPlanDomain,
+  facts: CorpHandInventoryFacts,
+): CorpPlanDomain {
+  const releaseRoutes = corpExactHandCapacityReleaseRoutes(
+    input,
+    candidates,
+    domain,
+    facts,
+  );
+  const assessments: CorpDrawAdmissionAssessment[] = [];
+  const assess = (params: {
+    routeId: string;
+    ownerModuleId: CorpDrawAdmissionAssessment["ownerModuleId"];
+    actionId: string;
+    purpose: CorpDrawAdmissionAssessment["purpose"];
+    priorityClass: CorpDrawAdmissionPriority;
+    remainingAttempts: 0 | 1;
+    parentProvidesExactSameTurnCapacityRelease?: boolean;
+  }) => {
+    const candidate = candidates.find(
+      (entry) => entry.actionId === params.actionId,
+    );
+    const assessment = assessCorpDrawAdmission({
+      ...params,
+      handSize: facts.pressure.handSize,
+      maximumHandSize: facts.pressure.maximumHandSize,
+      currentClicks: input.playerView.own.clicks,
+      drawProjection: candidate
+        ? exactCurrentCorpDrawAdmissionProjection(input, candidate)
+        : undefined,
+      capacityReleaseRoutes: releaseRoutes,
+      parentProvidesExactSameTurnCapacityRelease:
+        params.parentProvidesExactSameTurnCapacityRelease ?? false,
+    });
+    assessments.push(assessment);
+    return assessment.disposition === "admitted";
+  };
+
+  const defenseNeeds: CorpPlanDomain["defenseNeeds"] =
+    domain.defenseNeeds.flatMap((signal): CorpPlanDomain["defenseNeeds"] => {
+      if (signal.kind === "score_protection_draw") {
+        return assess({
+          routeId: signal.defenseId,
+          ownerModuleId: "corp.defend_servers",
+          actionId: signal.actionId,
+          purpose: "score_defense_answer_search",
+          priorityClass: signal.delegatedPriorityClass,
+          remainingAttempts: signal.drawAttemptState.remainingAttempts,
+          parentProvidesExactSameTurnCapacityRelease:
+            signal.cleanupReplacementDraw === true,
+        })
+          ? [signal]
+          : [];
+      }
+      if (
+        signal.kind !== "generic" ||
+        signal.phase !== "draw_for_ice" ||
+        !signal.actionIds ||
+        signal.actionIds.length === 0
+      ) {
+        return [signal];
+      }
+      const admittedActionIds = signal.actionIds.filter((actionId) =>
+        assess({
+          routeId: `${signal.defenseId}:${actionId}`,
+          ownerModuleId: "corp.defend_servers",
+          actionId,
+          purpose: "central_defense_answer_search",
+          priorityClass: corpGenericDefensePriorityClass([signal]),
+          remainingAttempts: signal.drawAttemptState?.remainingAttempts ?? 0,
+        }),
+      );
+      return [{ ...signal, actionIds: admittedActionIds }];
+    });
+  const handManagement = domain.handManagement.map((signal) => {
+    if (
+      signal.phase !== "draw_for_plan" ||
+      !signal.actionIds ||
+      signal.actionIds.length === 0
+    ) {
+      return signal;
+    }
+    const priorityClass = corpEffectiveHandPriorityClass(domain, signal);
+    const admittedActionIds = signal.actionIds.filter((actionId) =>
+      assess({
+        routeId: `${signal.handPlanId}:${actionId}`,
+        ownerModuleId: "corp.hand_and_agenda_management",
+        actionId,
+        purpose: "score_material_search",
+        priorityClass,
+        remainingAttempts: signal.drawAttemptState?.remainingAttempts ?? 0,
+      }),
+    );
+    return { ...signal, actionIds: admittedActionIds };
+  });
+  return {
+    ...domain,
+    defenseNeeds,
+    handManagement,
+    drawArbitrations: assessments.sort(
+      (left, right) =>
+        left.routeId.localeCompare(right.routeId) ||
+        left.actionId.localeCompare(right.actionId),
+    ),
+  };
+}
+
+function corpExactHandCapacityReleaseRoutes(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  domain: CorpPlanDomain,
+  facts: CorpHandInventoryFacts,
+): CorpDrawCapacityReleaseRoute[] {
+  const routesByActionId = new Map<
+    string,
+    Omit<CorpDrawCapacityReleaseRoute, "clickCost" | "netHandDelta">
+  >();
+  for (const signal of domain.economyNeeds) {
+    const priorityClass = corpEconomyPriorityClass(signal);
+    const withinClassValue =
+      signal.kind === "convert_immediate_operation"
+        ? signal.conversion.netLiquidCreditGain * 20 +
+          signal.conversion.cardsDrawn * 20
+        : signal.kind === "prepare_immediate_operation"
+          ? 50 + signal.futureConversion.strategicEconomyValue * 10
+          : 0;
+    for (const actionId of signal.actionIds) {
+      routesByActionId.set(actionId, {
+        actionId,
+        priorityClass,
+        withinClassValue,
+      });
+    }
+  }
+  for (const signal of domain.handManagement) {
+    const priorityClass = corpEffectiveHandPriorityClass(domain, signal);
+    for (const actionId of signal.actionIds ?? []) {
+      if (routesByActionId.has(actionId)) continue;
+      routesByActionId.set(actionId, {
+        actionId,
+        priorityClass,
+        withinClassValue: signal.value,
+      });
+    }
+  }
+  return facts.records
+    .flatMap((record) => record.actionHandDeltas)
+    .flatMap((delta) => {
+      if (delta.netHandDelta >= 0) return [];
+      const route = routesByActionId.get(delta.actionId);
+      const candidate = candidates.find(
+        (entry) => entry.actionId === delta.actionId,
+      );
+      const legalActionCurrent = input.legalActions.some(
+        (action) =>
+          action.actionId === delta.actionId &&
+          action.expiresAtStateVersion === input.playerView.stateVersion,
+      );
+      if (
+        !route ||
+        !candidate ||
+        !legalActionCurrent ||
+        candidate.costProfile.costKnownStatus !== "known" ||
+        candidate.costProfile.additionalCosts.length > 0 ||
+        !Number.isSafeInteger(candidate.costProfile.clickCost) ||
+        (candidate.costProfile.clickCost ?? 0) <= 0
+      ) {
+        return [];
+      }
+      return [
+        {
+          ...route,
+          clickCost: candidate.costProfile.clickCost!,
+          netHandDelta: delta.netHandDelta,
+        },
+      ];
+    })
+    .sort(
+      (left, right) =>
+        left.priorityClass.localeCompare(right.priorityClass) ||
+        left.actionId.localeCompare(right.actionId),
+    );
+}
+
+function corpEffectiveHandPriorityClass(
+  domain: CorpPlanDomain,
+  signal: CorpPlanDomain["handManagement"][number],
+): CorpDrawAdmissionPriority {
+  if (signal.parentPlanInstanceId) {
+    const parent = domain.scoreProjects.find(
+      (project) =>
+        planInstanceIdForProposal({
+          moduleId: "corp.score_agenda",
+          dedupeKey: project.projectId,
+        }) === signal.parentPlanInstanceId,
+    );
+    if (parent) return corpScorePriorityClass(parent);
+  }
+  return corpHandPriorityClass(signal);
+}
+
+function exactCurrentCorpDrawAdmissionProjection(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+):
+  | {
+      cardsDrawn: number;
+      netHandDelta: number;
+      clickCost: number;
+    }
+  | undefined {
+  if (exactCurrentBasicCorpDrawCandidate(input, candidate)) {
+    return { cardsDrawn: 1, netHandDelta: 1, clickCost: 1 };
+  }
+  const projection = candidate.economyProjection;
+  if (
+    !exactCurrentCorpScoreMaterialDrawCandidate(input, candidate) ||
+    projection?.source !== "legal_action_payload" ||
+    projection.reliability !== "guaranteed" ||
+    projection.confidence !== "high" ||
+    !Number.isSafeInteger(projection.cardsDrawn) ||
+    (projection.cardsDrawn ?? 0) <= 0 ||
+    !Number.isSafeInteger(projection.netHandDelta) ||
+    (projection.netHandDelta ?? -1) < 0 ||
+    !Number.isSafeInteger(candidate.costProfile.clickCost) ||
+    (candidate.costProfile.clickCost ?? 0) <= 0
+  ) {
+    return undefined;
+  }
+  return {
+    cardsDrawn: projection.cardsDrawn!,
+    netHandDelta: projection.netHandDelta,
+    clickCost: candidate.costProfile.clickCost!,
+  };
+}
+
 function corpTransientPlanSignals(
   input: AiDecisionInput,
   domain: CorpPlanDomain,
@@ -6260,6 +6522,24 @@ function corpActionDispositions(
     )
     .map((candidate) => candidate.actionId);
   for (const candidate of candidates) {
+    const drawArbitrations = (domain.drawArbitrations ?? []).filter(
+      (assessment) => assessment.actionId === candidate.actionId,
+    );
+    if (
+      drawArbitrations.length > 0 &&
+      drawArbitrations.every(
+        (assessment) => assessment.disposition !== "admitted",
+      )
+    ) {
+      const assessment = drawArbitrations[0]!;
+      const evidenceCode = `corp_draw_admission:${assessment.disposition}:${assessment.purpose}`;
+      if (assessment.disposition === "blocked_unknown_projection") {
+        addUnknown(candidate.actionId, assessment.ownerModuleId, evidenceCode);
+      } else {
+        add(candidate.actionId, assessment.ownerModuleId, evidenceCode);
+      }
+      continue;
+    }
     const emptyRdOperationEvidence =
       corpEmptyRdDrawOperationDispositionEvidence(input, candidate);
     if (emptyRdOperationEvidence) {
@@ -7380,6 +7660,7 @@ function buildCorpDomain(
           parentNeedId: protectionNeed.needId,
           delegatedPriorityClass: corpScorePriorityClass(project),
           actionId: candidate.actionId,
+          cleanupReplacementDraw: need.cleanupReplacementDraw,
           drawAttemptState: {
             turnKey: currentTurnKey,
             remainingAttempts: 1,
@@ -12022,6 +12303,23 @@ function decisionFromScheduler(
         },
       ]
     : [];
+  const corpDrawArbitrations =
+    input.side === "corp"
+      ? ((context.domain as CorpPlanDomain | undefined)?.drawArbitrations ?? [])
+      : [];
+  const corpDrawArbitrationSection =
+    corpDrawArbitrations.length > 0
+      ? [
+          {
+            id: "corp_draw_arbitration",
+            title: "Corp-private draw admission",
+            items: corpDrawArbitrations.map(
+              (assessment) =>
+                `${assessment.routeId}|action:${assessment.actionId}|purpose:${assessment.purpose}|priority:${assessment.priorityClass}|attempts:${assessment.remainingAttempts}|net_hand:${assessment.netHandDelta}|projected_overflow:${assessment.projectedEndTurnOverflow}|capacity_release:${assessment.exactCapacityReleaseActionIds.join(",") || "none"}|disposition:${assessment.disposition}`,
+            ),
+          },
+        ]
+      : [];
   const detailSections =
     result.lane === "plan"
       ? [
@@ -12079,6 +12377,7 @@ function decisionFromScheduler(
             ),
           },
           ...corpHandInventorySection,
+          ...corpDrawArbitrationSection,
         ]
       : [
           {
@@ -12087,6 +12386,7 @@ function decisionFromScheduler(
             items: [`leaf_plan:${planId}`, `selected_action:${actionId}`],
           },
           ...corpHandInventorySection,
+          ...corpDrawArbitrationSection,
         ];
   const planFirstDecision = planFirstDecisionDebug({
     input,

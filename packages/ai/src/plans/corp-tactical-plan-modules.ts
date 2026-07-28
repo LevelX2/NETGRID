@@ -1,5 +1,6 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { CorpHandInventoryFacts } from "../runtime/corp-hand-inventory-facts";
+import type { CorpDrawAdmissionAssessment } from "../runtime/corp-draw-admission";
 import type {
   GuaranteeLevel,
   PlanAssessment,
@@ -140,6 +141,7 @@ export type CorpTacticalPlanDomain = {
   ambushes: CorpAmbushSignal[];
   handManagement: CorpHandManagementSignal[];
   handInventoryFacts?: CorpHandInventoryFacts;
+  drawArbitrations?: CorpDrawAdmissionAssessment[];
 };
 
 export type CorpPlanDomain = CorpCorePlanDomain & CorpTacticalPlanDomain;
@@ -677,7 +679,7 @@ function handModule(): PlanModule {
             "corp.hand_and_agenda_management",
             signal.handPlanId,
             { kind: "hand", signal } satisfies HandState,
-            handPriority(signal),
+            corpHandPriorityClass(signal),
             handCandidates(context, signal),
             signal.evidenceCode,
             signal.sourceDefinitionIds?.[0]
@@ -696,7 +698,7 @@ function handModule(): PlanModule {
       const current = state<HandState>(instance);
       return assessment(
         instance,
-        handPriority(current.signal),
+        corpHandPriorityClass(current.signal),
         handCandidates(context, current.signal).length > 0,
         current.signal.value,
         portfolio.executorInstanceId,
@@ -1105,7 +1107,7 @@ function handStepSemanticTypes(
   return [...new Set([...semanticActionTypes, ...exactProjectedDrawTypes])];
 }
 
-function handPriority(
+export function corpHandPriorityClass(
   signal: CorpHandManagementSignal,
 ): "P2" | "P3" | "P5" | "P6" {
   if (signal.phase === "agenda_flood_relief") return "P2";

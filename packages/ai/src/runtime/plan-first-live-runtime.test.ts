@@ -5491,6 +5491,111 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("converts a same-class HQ operation before drawing, then revalidates the answer search", () => {
+    resetResidentPlanPortfolioMemory();
+    const accountsCard = visibleCard("accounts-card", "corp", "operation", {
+      definitionId: "onr_v1_281_accounts-receivable",
+    });
+    const accounts = legalAction(
+      "accounts",
+      "corp",
+      "play_operation",
+      "Play Accounts Receivable",
+      { credits: 5, clicks: 1 },
+      {
+        source: accountsCard.instanceId,
+        payload: {
+          cardId: accountsCard.instanceId,
+          gainCreditsAmount: 9,
+        },
+      },
+    );
+    const draw = legalAction("draw", "corp", "draw_card", "Draw a card", {
+      credits: 0,
+      clicks: 1,
+    });
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("corp", [accounts, draw, credit]);
+    input.playerView.own.clicks = 2;
+    input.playerView.own.credits = 5;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.own.gripOrHq = [
+      accountsCard,
+      ...Array.from({ length: 3 }, (_, index) =>
+        visibleCard(`neutral-${index}`, "corp", "operation", {
+          definitionId: "onr_v1_284_chance-observation",
+        }),
+      ),
+    ];
+    Object.assign(input, {
+      ownDeckSnapshot: {
+        deckSnapshotId: "convert-before-score-material-draw",
+        side: "corp",
+        cards: [{ cardId: "onr_v1_220_tycho-extension", quantity: 3 }],
+      },
+    });
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+    const context = liveContext();
+
+    const conversion = context.chooseSemanticRuntimeAction(input, {});
+    expect(conversion).toMatchObject({
+      actionId: accounts.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    expect(
+      conversion.decisionDebug?.detailSections
+        ?.find((section) => section.id === "corp_draw_arbitration")
+        ?.items.join("|"),
+    ).toContain(
+      "action:draw|purpose:score_material_search|priority:P4|attempts:1|net_hand:1|projected_overflow:0|capacity_release:accounts|disposition:defer_for_capacity_release",
+    );
+
+    const afterConversion = structuredClone(input);
+    afterConversion.playerView.stateVersion = 2;
+    afterConversion.playerView.own.clicks = 1;
+    afterConversion.playerView.own.credits = 9;
+    afterConversion.playerView.own.gripOrHq =
+      afterConversion.playerView.own.gripOrHq.filter(
+        (card) => card.instanceId !== accountsCard.instanceId,
+      );
+    afterConversion.legalActions = [
+      structuredClone(draw),
+      structuredClone(credit),
+    ];
+    for (const action of afterConversion.legalActions) {
+      action.expiresAtStateVersion = afterConversion.playerView.stateVersion;
+    }
+    afterConversion.playerView.legalActions = afterConversion.legalActions;
+
+    const revalidatedDraw = context.chooseSemanticRuntimeAction(
+      afterConversion,
+      {},
+    );
+    expect(revalidatedDraw).toMatchObject({
+      actionId: draw.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+    expect(
+      revalidatedDraw.decisionDebug?.detailSections
+        ?.find((section) => section.id === "corp_draw_arbitration")
+        ?.items.join("|"),
+    ).toContain(
+      "action:draw|purpose:score_material_search|priority:P4|attempts:1|net_hand:1|projected_overflow:0|capacity_release:none|disposition:admitted",
+    );
+  });
+
   it("does not invent a generic card-development root without an exact parent need", () => {
     resetResidentPlanPortfolioMemory();
     const pacifica = visibleCard("pacifica", "corp", "asset", {

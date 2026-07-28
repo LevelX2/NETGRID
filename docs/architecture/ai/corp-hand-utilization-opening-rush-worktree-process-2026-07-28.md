@@ -1,6 +1,6 @@
 # Corp-Handverwertung und Opening-Rush – Worktree-Paketprozess
 
-Status: **P0 bis P3 abgeschlossen; P4 aktiv**
+Status: **P0 bis P4 abgeschlossen; P5 aktiv**
 
 Stand: 2026-07-28
 
@@ -340,6 +340,31 @@ zulässig.
 Commit:
 `feat(ai): arbitrate corp hand conversion before draw`
 
+Ergebnis:
+
+- `corp-draw-admission-v1` bewertet jeden zugelassenen Corp-Draw anhand seines
+  konkreten Parent-Zwecks, seiner effektiven Prioritätsklasse, des endlichen
+  Versuchsbudgets, exakter Draw-/Handprojektion und des projizierten
+  Endturn-Overflows.
+- Nur bereits fachlich besessene, exakt projizierte Handkonversionen derselben
+  Prioritätsklasse dürfen einen Draw zunächst verdrängen. Die begrenzte
+  Capacity-Release-Bewertung verändert keine Prioritätsklasse und besitzt
+  keine fremde Kartenaction.
+- Nach einer verdrängenden Konversion wird der Draw im neuen State vollständig
+  neu bewertet. Ein kontrollierter Fast-Advance-Start spielt dadurch
+  Efficiency Experts aus einem vollen HQ und zieht anschließend im
+  revalidierten Zustand.
+- Ein zielgebundener Score-Defense-Draw mit exakt gebundener
+  Same-Turn-Freigabe bleibt zugelassen. Ebenso bleibt ein einzelner,
+  versuchsbegrenzter Answer-Search-Overflow möglich, wenn keine produktive
+  gleichklassige Konversion existiert; größere Multi-Draw-Overflows bleiben
+  gesperrt.
+- Die Corp-private Debugdiagnostik weist Parent-Zweck, effektive Klasse,
+  Handdelta, Overflow, verfügbare Capacity-Release-Actions und die
+  Admission-Disposition aus.
+- 336 fokussierte Draw-, Planmodul-, Plan-first-, historische Checkpoint- und
+  kontrollierte Simulationstests sowie der AI-Typecheck sind grün.
+
 ### P5 – Asset-/Node-Domainpilot
 
 Ziel:
@@ -538,4 +563,8 @@ Markiere das Goal erst danach als complete.
   Domainclaims und den bestehenden Keep-/Discard-Pfad angebunden. Der
   historische D5-Checkpoint weist vollständige Claim-/Disposition-Coverage
   für alle vier bekannten HQ-Karten nach.
-- P4: aktiv.
+- P4: abgeschlossen; gleichklassige exakte Handkonversionen verdrängen einen
+  kapazitätsrelevanten Draw nur bis zur nächsten State-Revalidierung.
+  Zielgebundene Score-Defense- und begrenzte echte Answer-Suchen bleiben
+  erhalten.
+- P5: aktiv.
