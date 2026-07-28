@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import {
   visibleBreakerCardCanAddressIce,
@@ -284,19 +288,19 @@ function visibleRunnerRunCreditPool(
   }, 0);
 }
 
-function visibleSourceIceDefenseProfile(
-  input: AiDecisionInput,
-  action: LegalAction,
+export function visibleCorpIceDefenseProfile(
+  sourceCard: VisibleCard | undefined,
 ): {
   hasImmediateStop: boolean;
   hasMeaningfulTaxOrDamage: boolean;
+  hasEncounterDisruption: boolean;
   evidence: string[];
 } {
-  const sourceCard = visibleActionSourceCard(input, action);
   if (!sourceCard || sourceCard.known === false || sourceCard.type !== "ice") {
     return {
       hasImmediateStop: false,
       hasMeaningfulTaxOrDamage: false,
+      hasEncounterDisruption: false,
       evidence: [],
     };
   }
@@ -347,16 +351,35 @@ function visibleSourceIceDefenseProfile(
         mechanic.includes("trace") ||
         mechanic.includes("tag"),
     );
+  const hasEncounterDisruption =
+    subroutines.some(subroutineLooksLikeEncounterDisruption) ||
+    mechanics.some(
+      (mechanic) =>
+        mechanic === "encounter_tax" ||
+        mechanic === "encounter_ice_strength_bonus" ||
+        mechanic === "next_encounter_penalty" ||
+        mechanic === "jack_out_lock" ||
+        mechanic === "run_rewind",
+    );
   return {
     hasImmediateStop,
     hasMeaningfulTaxOrDamage,
+    hasEncounterDisruption,
     evidence: [
       "effective_defense_source_visible_ice:true",
       `effective_defense_source_definition:${sourceCard.definitionId ?? "unknown"}`,
       `effective_defense_source_stop:${hasImmediateStop}`,
       `effective_defense_source_tax_or_damage:${hasMeaningfulTaxOrDamage}`,
+      `effective_defense_source_encounter_disruption:${hasEncounterDisruption}`,
     ],
   };
+}
+
+function visibleSourceIceDefenseProfile(
+  input: AiDecisionInput,
+  action: LegalAction,
+) {
+  return visibleCorpIceDefenseProfile(visibleActionSourceCard(input, action));
 }
 
 function visibleSubroutineArray(value: unknown): unknown[] {
@@ -408,6 +431,25 @@ function subroutineLooksLikeTaxOrDamage(subroutine: unknown): boolean {
     type === "trash_installed_program" ||
     type === "trash_installed_program_unless_runner_pays" ||
     type === "end_the_run_unless_runner_pays"
+  );
+}
+
+function subroutineLooksLikeEncounterDisruption(subroutine: unknown): boolean {
+  const type = subroutineType(subroutine);
+  return (
+    type === "set_run_encounter_tax" ||
+    type === "set_run_break_subroutine_cost_modifier" ||
+    type === "set_run_future_end_the_run_subroutine" ||
+    type === "set_run_future_strength_bonus" ||
+    type === "set_next_encounter_unless_fully_break_damage" ||
+    type === "set_next_encounter_lock" ||
+    type === "set_next_encounter_no_break_subroutines" ||
+    type === "set_run_jack_out_lock" ||
+    type === "set_runner_run_lock_actions" ||
+    type === "set_run_jack_out_additional_cost" ||
+    type === "set_run_pass_rezzed_ice_program_trash" ||
+    type === "deflect_run" ||
+    type === "rewind_run_to_rezzed_ice_by_die"
   );
 }
 

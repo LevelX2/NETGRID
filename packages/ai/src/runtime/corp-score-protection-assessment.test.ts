@@ -52,6 +52,21 @@ describe("assessCorpScoreProtection", () => {
     });
   });
 
+  it("conservatively keeps access at 1 through known non-ETR encounter disruption", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [ice("shock-r", "onr_v1_268_shock-r")],
+      runnerRig: [],
+      runnerCredits: 0,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+      protectsScore: false,
+    });
+  });
+
   it.each([
     ["Filter", "onr_v1_244_filter"],
     ["Data Wall 2.0", "onr_v1_238_data-wall-2-0"],
@@ -309,14 +324,18 @@ describe("assessCorpScoreProtection", () => {
     });
   });
 
-  it("ignores an unknown installed non-program that cannot be an icebreaker", () => {
+  it("ignores an inactive concealed Runner resource", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [ice("filter", "onr_v1_244_filter")],
       runnerRig: [
         {
           instanceId: "unknown-resource",
           known: false,
+          concealed: true,
+          hiddenRunnerResource: true,
           type: "resource",
+          subtypes: ["hidden_runner_resource"],
+          rezzed: false,
           owner: "runner",
         } as VisibleCard,
       ],

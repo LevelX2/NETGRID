@@ -1,9 +1,28 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import { semanticRuntimeCorpEffectiveDefenseContext } from "./semantic-runtime-corp-effective-defense";
+import {
+  semanticRuntimeCorpEffectiveDefenseContext,
+  visibleCorpIceDefenseProfile,
+} from "./semantic-runtime-corp-effective-defense";
 
 describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
+  it("classifies known non-ETR encounter disruption separately from access prevention", () => {
+    expect(
+      visibleCorpIceDefenseProfile(
+        corpIce("shock-r", {
+          definitionId: "onr_v1_268_shock-r",
+          title: "Shock.r",
+          subtypes: ["sentry", "ap", "stun"],
+        }),
+      ),
+    ).toMatchObject({
+      hasImmediateStop: false,
+      hasMeaningfulTaxOrDamage: false,
+      hasEncounterDisruption: true,
+    });
+  });
+
   it("flags zero-effect variable trace rez actions", () => {
     const context = semanticRuntimeCorpEffectiveDefenseContext(
       corpInput(5),
