@@ -101,6 +101,7 @@ export type CorpFundedScoreProtectionAssessment =
 export type CorpBestFundedScoreProtectionInput = Readonly<{
   serverIce: readonly CorpFundedScoreProtectionIceInput[];
   postInstallQuoteCardId?: string;
+  preferPostInstallSourceProgress?: boolean;
   runnerRig: readonly VisibleCard[];
   runnerSetAside?: readonly VisibleCard[];
   runnerMemoryUsed?: number;
@@ -230,6 +231,7 @@ export type CorpFundedIceInstallRouteInput = Readonly<{
   runnerCredits: number;
   projectedInstallCredits: number;
   projectedInstallClicks: number;
+  preferPostInstallSourceProgress?: boolean;
 }>;
 
 type RezCandidate = Readonly<{
@@ -475,6 +477,7 @@ export function assessBestFundedCorpScoreProtection(
       }
       if (
         !protection.protectsScore &&
+        input.preferPostInstallSourceProgress === true &&
         input.postInstallQuoteCardId !== undefined &&
         selectedById.has(input.postInstallQuoteCardId) &&
         (!bestPostInstallSourceProgress ||
@@ -846,6 +849,9 @@ export function projectCorpFundedIceInstallRoute(
   const after = assessBestFundedCorpScoreProtection({
     serverIce: [...currentIce, projectedSource],
     postInstallQuoteCardId: sourceCard.instanceId,
+    ...(input.preferPostInstallSourceProgress === true
+      ? { preferPostInstallSourceProgress: true }
+      : {}),
     runnerRig: input.runnerRig,
     ...(input.runnerSetAside ? { runnerSetAside: input.runnerSetAside } : {}),
     ...(input.runnerMemoryUsed !== undefined

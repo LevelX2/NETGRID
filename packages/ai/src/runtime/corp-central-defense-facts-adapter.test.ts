@@ -135,6 +135,38 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
       allocateCorpCentralDefenseFromAiFacts({ input: value }),
     ).toMatchObject({ status: "known" });
   });
+  it("does not subtract a Runner-owned set-aside card from the Corp deck inventory", () => {
+    const value = withSnapshot(input());
+    value.playerView.specialZones!.setAside.push({
+      instanceId: "runner-set-aside",
+      definitionId: "onr_v1_144_tycho-mem-chip",
+      type: "hardware",
+      known: true,
+      owner: "runner",
+    });
+    value.playerView.specialZones!.setAsideCount = 1;
+
+    expect(
+      allocateCorpCentralDefenseFromAiFacts({ input: value }),
+    ).toMatchObject({ status: "known" });
+  });
+  it("still subtracts a Corp-owned set-aside card from the Corp deck inventory", () => {
+    const value = withSnapshot(input());
+    value.playerView.specialZones!.setAside.push({
+      ...agenda("corp-set-aside"),
+      owner: "corp",
+    });
+    value.playerView.specialZones!.setAsideCount = 1;
+    (
+      value as AiDecisionInput & {
+        ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
+      }
+    ).ownDeckSnapshot.cards[0]!.quantity = 3;
+
+    expect(
+      allocateCorpCentralDefenseFromAiFacts({ input: value }),
+    ).toMatchObject({ status: "known" });
+  });
   it("fails closed when the two Corp Archives projections contain different instances", () => {
     const value = withSnapshot(input());
     value.playerView.own.heapOrArchives.push(asset("archived-a"));
@@ -376,5 +408,43 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
       profileId: "p",
     });
     expect(runnerDto.playerView.corpCentralAccessQuotes).toBeUndefined();
+  });
+  it("keeps the Engine marker for a concealed Runner resource in the Corp AI DTO", () => {
+    const raw = input();
+    raw.playerView.opponent.rig = [
+      {
+        instanceId: "hidden-runner-resource",
+        known: false,
+        type: "resource",
+        subtypes: ["hidden_runner_resource"],
+        concealed: true,
+        hiddenRunnerResource: true,
+        rezzed: false,
+        owner: "runner",
+        controller: "runner",
+      },
+    ];
+
+    const dto = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: raw.playerView,
+      eventTail: [],
+      legalActions: [],
+      difficulty: "normal",
+      seed: "s",
+      decisionId: "dto-hidden-runner-resource",
+      actionNumber: 8,
+      profileId: "p",
+    });
+
+    expect(dto.playerView.opponent.rig?.[0]).toMatchObject({
+      known: false,
+      type: "resource",
+      subtypes: ["hidden_runner_resource"],
+      concealed: true,
+      hiddenRunnerResource: true,
+      rezzed: false,
+      owner: "runner",
+    });
   });
 });

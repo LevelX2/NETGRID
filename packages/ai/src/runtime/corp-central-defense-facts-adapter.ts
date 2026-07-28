@@ -179,8 +179,10 @@ function centralInventory(
     ...archivesCards,
     ...input.playerView.own.scoreArea,
     ...input.playerView.opponent.scoreArea,
-    ...(input.playerView.specialZones?.removedFromGame ?? []),
-    ...(input.playerView.specialZones?.setAside ?? []),
+    ...(input.playerView.specialZones?.removedFromGame ?? []).filter(
+      cardIsCorpOwned,
+    ),
+    ...(input.playerView.specialZones?.setAside ?? []).filter(cardIsCorpOwned),
     ...input.playerView.servers.flatMap((server) => [
       ...server.ice,
       ...(server.id === "archives" ? [] : server.root),
@@ -203,6 +205,10 @@ function centralInventory(
   const hq = inventoryForCards(hqCards);
   const rd = inventoryForDefinitionCounts(remaining);
   return hq && rd ? { hq, rd } : undefined;
+}
+
+function cardIsCorpOwned(card: VisibleCard): boolean {
+  return card.owner === "corp";
 }
 
 function canonicalCorpArchives(

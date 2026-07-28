@@ -579,6 +579,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
       targetServerId: "remote_1",
       currentIce: [],
       corpCredits: 5,
+      preferPostInstallSourceProgress: true,
     });
 
     expect(route).toMatchObject({
@@ -1161,6 +1162,7 @@ function routeFor(params: {
   scoreReserve?: CorpScoreReserve;
   runnerRig?: VisibleCard[];
   runnerCredits?: number;
+  preferPostInstallSourceProgress?: boolean;
 }) {
   return projectCorpFundedIceInstallRoute(routeSetup(params));
 }
@@ -1173,6 +1175,7 @@ function routeSetup(params: {
   scoreReserve?: CorpScoreReserve;
   runnerRig?: VisibleCard[];
   runnerCredits?: number;
+  preferPostInstallSourceProgress?: boolean;
 }) {
   const currentIce = params.currentIce ?? [];
   const scoreReserve = params.scoreReserve ?? NO_RESERVE;
@@ -1211,6 +1214,9 @@ function routeSetup(params: {
     projectedInstallCredits:
       params.targetServerId === "new_remote" ? 0 : currentIce.length,
     projectedInstallClicks: 1,
+    ...(params.preferPostInstallSourceProgress === true
+      ? { preferPostInstallSourceProgress: true }
+      : {}),
   };
 }
 

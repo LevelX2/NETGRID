@@ -9561,6 +9561,17 @@ function corpGlobalDefenseInstallRouteAssessment(
     scoreReserve,
     baseline,
   };
+  const sourceDefense = visibleCorpIceDefenseProfile(
+    input.playerView.own.gripOrHq.find(
+      (card) => card.instanceId === action.source,
+    ),
+  );
+  const isEmptyCentral =
+    (serverId === "hq" || serverId === "rd") && serverIce.length === 0;
+  const preferQualitativeSourceProgress =
+    isEmptyCentral &&
+    (sourceDefense.hasMeaningfulTaxOrDamage ||
+      sourceDefense.hasEncounterDisruption);
   const projection = projectCorpFundedIceInstallRoute({
     need,
     action,
@@ -9580,6 +9591,9 @@ function corpGlobalDefenseInstallRouteAssessment(
     runnerCredits: input.playerView.opponent.credits,
     projectedInstallCredits,
     projectedInstallClicks,
+    ...(preferQualitativeSourceProgress
+      ? { preferPostInstallSourceProgress: true }
+      : {}),
   });
   if (projection.knowledge !== "known") {
     return {
@@ -9593,13 +9607,9 @@ function corpGlobalDefenseInstallRouteAssessment(
   ) {
     return { knowledge: "known", disposition: "productive", projection };
   }
-  const sourceDefense = visibleCorpIceDefenseProfile(
-    input.playerView.own.gripOrHq.find(
-      (card) => card.instanceId === projection.sourceCardInstanceId,
-    ),
-  );
   if (
     projection.preservesReserves &&
+    isEmptyCentral &&
     (sourceDefense.hasMeaningfulTaxOrDamage ||
       sourceDefense.hasEncounterDisruption)
   ) {

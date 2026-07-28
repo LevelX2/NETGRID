@@ -1442,6 +1442,10 @@ function sanitizeVisibleCardWithOptions(
     ...(card.counterDisplays !== undefined
       ? { counterDisplays: card.counterDisplays.map(sanitizeCounterDisplay) }
       : {}),
+    ...(card.concealed !== undefined ? { concealed: card.concealed } : {}),
+    ...(card.hiddenRunnerResource !== undefined
+      ? { hiddenRunnerResource: card.hiddenRunnerResource }
+      : {}),
     ...(card.hostedOn !== undefined ? { hostedOn: card.hostedOn } : {}),
     ...(card.owner !== undefined ? { owner: card.owner } : {}),
     ...(card.controller !== undefined ? { controller: card.controller } : {}),

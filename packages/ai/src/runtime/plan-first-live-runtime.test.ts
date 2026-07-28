@@ -3537,12 +3537,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(JSON.stringify(firstPortfolio)).toContain(
       '"kind":"score_protection_draw"',
     );
-    expect(JSON.stringify(firstPortfolio)).toContain(
-      '"sourceDefinitionIds":["onr_v1_249_hunter"]',
-    );
-    expect(JSON.stringify(firstPortfolio)).toContain(
-      '"installRoute":{"disposition":"productive"',
-    );
+    expect(JSON.stringify(firstPortfolio)).not.toContain("sourceDefinitionIds");
     expect(JSON.stringify(firstPortfolio)).not.toContain(
       '"kind":"score_protection_install"',
     );
