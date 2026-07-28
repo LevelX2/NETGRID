@@ -38,9 +38,12 @@ Nach eindeutig feststehender Account-Session wartet der Spielstart auf
 Deckbibliothek und Standarddecks und lädt erst dann den Accountdatensatz. Bei
 einem Account ohne Vorbelegung werden Produktstandards gesetzt, ohne alte
 browserlokale Gastwerte in den Account zu kopieren. Änderungen danach werden
-debounced gespeichert. Gäste verwenden weiterhin ausschließlich Local Storage;
-beim Abmelden werden die zuvor lokalen Gastwerte wiederhergestellt. Die
-sichtbare Reset-Aktion entfernt die Accountvorbelegung und setzt die UI auf
+debounced gespeichert. Zusätzlich wird die aktuelle Vorbelegung unmittelbar
+vor dem Erstellen eines Matches erfolgreich gespeichert; bei einem Schreibfehler
+startet das Match nicht. Damit kann ein sofortiger Matchstart die zuletzt
+gewählten Optionen nicht mehr überholen. Gäste verwenden weiterhin ausschließlich
+Local Storage; beim Abmelden werden die zuvor lokalen Gastwerte wiederhergestellt.
+Die sichtbare Reset-Aktion entfernt die Accountvorbelegung und setzt die UI auf
 Produktstandards zurück.
 
 ## Abnahmebelege

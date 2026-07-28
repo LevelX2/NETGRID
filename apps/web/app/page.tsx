@@ -593,6 +593,8 @@ export default function Page() {
   const accountSession = useAccountSession();
   const accountIdRef = useRef<string | null>(null);
   const accountMatchStartPreferencesBaselineRef = useRef<string | null>(null);
+  const accountMatchStartPreferencesRef =
+    useRef<AccountMatchStartPreferences | null>(null);
   const previousAccountSessionStatusRef = useRef<
     "guest" | "authenticated" | null
   >(null);
@@ -1997,6 +1999,7 @@ export default function Page() {
   const currentAccountMatchStartPreferencesSignature = JSON.stringify(
     currentAccountMatchStartPreferences,
   );
+  accountMatchStartPreferencesRef.current = currentAccountMatchStartPreferences;
 
   function resetAccountMatchStartPreferencesToDefaults() {
     setMode("host");
@@ -2198,13 +2201,15 @@ export default function Page() {
     )
       return;
     const timeout = window.setTimeout(() => {
+      const preferences = accountMatchStartPreferencesRef.current;
+      if (!preferences) return;
       void saveAccountMatchStartPreferences(
-        currentAccountMatchStartPreferences,
+        preferences,
         accountSession.csrfToken,
       )
         .then((response) => {
           accountMatchStartPreferencesBaselineRef.current = JSON.stringify(
-            response.preferences ?? currentAccountMatchStartPreferences,
+            response.preferences ?? preferences,
           );
           if (response.invalidDeckSlots.length > 0)
             setNotice(
@@ -2225,7 +2230,6 @@ export default function Page() {
     accountSession.account?.accountId,
     accountSession.csrfToken,
     accountSession.status,
-    currentAccountMatchStartPreferences,
     currentAccountMatchStartPreferencesSignature,
   ]);
 
@@ -3879,6 +3883,28 @@ export default function Page() {
         "Deine Account-Vorbelegungen werden noch geladen. Bitte starte das Match gleich erneut.",
       );
       return;
+    }
+    if (accountSession.account) {
+      try {
+        const saved = await saveAccountMatchStartPreferences(
+          currentAccountMatchStartPreferences,
+          accountSession.csrfToken,
+        );
+        accountMatchStartPreferencesBaselineRef.current = JSON.stringify(
+          saved.preferences ?? currentAccountMatchStartPreferences,
+        );
+        if (saved.invalidDeckSlots.length > 0)
+          setNotice(
+            "Eine gespeicherte Deckauswahl ist nicht mehr gültig. Die Standardauswahl wird verwendet.",
+          );
+      } catch (error) {
+        setNotice(
+          error instanceof Error
+            ? `Matchstart abgebrochen: Deine Account-Vorbelegungen konnten nicht gespeichert werden (${error.message}).`
+            : "Matchstart abgebrochen: Deine Account-Vorbelegungen konnten nicht gespeichert werden.",
+        );
+        return;
+      }
     }
     const matchSeed = normalizeMatchSeed(seed);
     setSeed(matchSeed);
