@@ -49,7 +49,9 @@ import {
   type CorpCorePlanDomain,
   type CorpDefenseSignal,
   type CorpExactIceRezRouteProjection,
+  type CorpEconomyImmediateOperationSignal,
   type CorpEconomyLiquidityDevelopmentSignal,
+  type CorpEconomyOperationThresholdSignal,
   type CorpEconomyReserveSignal,
   type CorpScoreProjectSignal,
 } from "../plans/corp-core-plan-modules";
@@ -6733,7 +6735,10 @@ function corpOpenEconomyPlanOwnsAction(
   return domain.economyNeeds.some(
     (signal) =>
       signal.actionIds.includes(actionId) &&
-      (signal.kind === "develop_campaign" || signal.gap > 0),
+      (signal.kind === "develop_campaign" ||
+        signal.kind === "convert_immediate_operation" ||
+        signal.kind === "prepare_immediate_operation" ||
+        signal.gap > 0),
   );
 }
 
@@ -7555,15 +7560,18 @@ function buildCorpDomain(
     punishCampaigns,
     immediateFundingActionIds,
   );
-  const turnLiquidityDevelopment = corpTurnLiquidityDevelopmentNeed(
-    input,
-    candidates,
-    previous,
-  );
+  const operationThresholdPreparations =
+    corpImmediateOperationThresholdPreparations(input, candidates);
+  const turnLiquidityDevelopment =
+    operationThresholdPreparations.length === 0
+      ? corpTurnLiquidityDevelopmentNeed(input, candidates, previous)
+      : undefined;
   const unboundEconomyNeeds: CorpCorePlanDomain["economyNeeds"] = uniqueBy(
     [
       ...requiredEconomyNeeds,
       ...(turnLiquidityDevelopment ? [turnLiquidityDevelopment] : []),
+      ...operationThresholdPreparations,
+      ...corpImmediateOperationEconomyConversions(input, candidates),
       ...corpEconomyDevelopmentCampaigns(input, candidates),
     ],
     (signal) => signal.needId,
@@ -7572,6 +7580,8 @@ function buildCorpDomain(
     unboundEconomyNeeds.map((signal) => {
       if (
         signal.kind === "develop_campaign" ||
+        signal.kind === "convert_immediate_operation" ||
+        signal.kind === "prepare_immediate_operation" ||
         signal.kind === "develop_liquidity"
       )
         return signal;
@@ -9873,6 +9883,208 @@ function corpEconomyDevelopmentCampaigns(
     }
   }
   return uniqueBy(signals, (signal) => signal.needId);
+}
+
+function corpImmediateOperationEconomyConversions(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+): CorpEconomyImmediateOperationSignal[] {
+  const hqByInstanceId = new Map(
+    input.playerView.own.gripOrHq.map((card) => [card.instanceId, card]),
+  );
+  const legalActionsById = new Map(
+    input.legalActions.map((action) => [action.actionId, action]),
+  );
+  const signals = candidates.flatMap((candidate) => {
+    const sourceInstanceId = candidate.sourceCardInstanceId;
+    const sourceDefinitionId = candidate.sourceDefinitionId;
+    const sourceCard = sourceInstanceId
+      ? hqByInstanceId.get(sourceInstanceId)
+      : undefined;
+    const action = legalActionsById.get(candidate.actionId);
+    const projection = candidate.economyProjection;
+    const grossLiquidCreditGain = projection?.grossLiquidCreditGain;
+    const netLiquidCreditGain = projection?.netLiquidCreditGain;
+    if (
+      !sourceInstanceId ||
+      !sourceDefinitionId ||
+      !sourceCard?.known ||
+      sourceCard.definitionId !== sourceDefinitionId ||
+      visibleKnownCardType(input, sourceCard) !== "operation" ||
+      action?.type !== "play_operation" ||
+      candidate.sourceKind !== "card" ||
+      candidate.semanticActionType !== "economy.gain_credit" ||
+      candidate.costProfile.costKnownStatus !== "known" ||
+      candidate.costProfile.additionalCosts.length > 0 ||
+      candidate.targetContext?.selectedTargets.length ||
+      candidate.projectionIssues.length > 0 ||
+      candidate.hardGates.some((gate) => gate.status === "block") ||
+      projection?.kind !== "immediate_liquid" ||
+      projection.timing !== "immediate" ||
+      projection.creditRestriction !== "general" ||
+      projection.payoutMode !== "fixed" ||
+      projection.reliability !== "guaranteed" ||
+      projection.source !== "legal_action_payload" ||
+      projection.confidence !== "high" ||
+      projection.cardsConsumed !== 1 ||
+      !Number.isSafeInteger(projection.clickCost) ||
+      projection.clickCost !== candidate.costProfile.clickCost ||
+      projection.clickCost <= 0 ||
+      !Number.isSafeInteger(projection.creditCost) ||
+      projection.creditCost !== candidate.costProfile.creditCost ||
+      projection.creditCost < 0 ||
+      typeof grossLiquidCreditGain !== "number" ||
+      !Number.isSafeInteger(grossLiquidCreditGain) ||
+      typeof netLiquidCreditGain !== "number" ||
+      !Number.isSafeInteger(netLiquidCreditGain) ||
+      netLiquidCreditGain < 2 ||
+      grossLiquidCreditGain - projection.creditCost !== netLiquidCreditGain ||
+      !Number.isSafeInteger(projection.cardsDrawn) ||
+      projection.cardsDrawn < 0 ||
+      projection.cardsDrawn > input.playerView.own.stackOrRdCount ||
+      !Number.isSafeInteger(projection.netHandDelta) ||
+      projection.netHandDelta !==
+        projection.cardsDrawn - projection.cardsConsumed ||
+      input.playerView.own.credits < projection.creditCost ||
+      input.playerView.own.clicks < projection.clickCost
+    ) {
+      return [];
+    }
+    return [
+      {
+        kind: "convert_immediate_operation",
+        needId: `economy-immediate-operation:${sourceInstanceId}`,
+        sourceInstanceId,
+        sourceDefinitionId,
+        actionIds: [candidate.actionId],
+        conversion: {
+          clickCost: projection.clickCost,
+          creditCost: projection.creditCost,
+          grossLiquidCreditGain,
+          netLiquidCreditGain,
+          cardsDrawn: projection.cardsDrawn,
+          cardsConsumed: 1,
+          netHandDelta: projection.netHandDelta,
+          payoutMode: "fixed",
+          reliability: "guaranteed",
+          source: "legal_action_payload",
+        },
+        cadence: {
+          kind: "single_action",
+          maximumConversions: 1,
+        },
+        completion: {
+          kind: "source_consumed",
+        },
+        urgentForScore: false,
+        evidenceCode: `corp_engine_certified_immediate_operation_conversion:${sourceDefinitionId}`,
+      } satisfies CorpEconomyImmediateOperationSignal,
+    ];
+  });
+  return uniqueBy(signals, (signal) => signal.needId);
+}
+
+function corpImmediateOperationThresholdPreparations(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+): CorpEconomyOperationThresholdSignal[] {
+  const exactBasicCreditCandidates = candidates.filter(
+    corpExactBasicLiquidCreditCandidate,
+  );
+  if (
+    exactBasicCreditCandidates.length !== 1 ||
+    input.playerView.own.clicks < 2
+  ) {
+    return [];
+  }
+  const fundingCandidate = exactBasicCreditCandidates[0]!;
+  const currentCredits = input.playerView.own.credits;
+  return uniqueBy(
+    input.playerView.own.gripOrHq.flatMap((card) => {
+      if (
+        !card.known ||
+        !card.definitionId ||
+        visibleKnownCardType(input, card) !== "operation" ||
+        candidates.some(
+          (candidate) =>
+            candidate.sourceCardInstanceId === card.instanceId &&
+            candidate.actionType === "play_operation",
+        )
+      ) {
+        return [];
+      }
+      const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+      const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+      const operationCreditCost = definition?.cost;
+      if (
+        definition?.side !== "corp" ||
+        definition.type !== "operation" ||
+        !Number.isSafeInteger(operationCreditCost) ||
+        operationCreditCost !== currentCredits + 1 ||
+        definition.mechanics.includes("play_operation") !== true ||
+        definition.mechanics.includes("gain_credits") !== true ||
+        hint?.aiSupportStatus !== "ai_supported" ||
+        hint.cardType !== "operation" ||
+        hint.quality?.hintReviewed !== true ||
+        hint.quality.confidence !== "high" ||
+        hint.quality.needsHumanReview === true ||
+        hint.roles.includes("economy_operation") !== true ||
+        hint.planRoles.includes("recover_economy") !== true ||
+        hint.functionSignals?.includes("economy.corp_credit_burst") !== true ||
+        !Number.isSafeInteger(hint.valueHints?.economy) ||
+        (hint.valueHints?.economy ?? 0) < 3 ||
+        hint.costProfile?.clicks !== 1 ||
+        (hint.conditions?.length ?? 0) > 0 ||
+        (hint.targetProfiles?.length ?? 0) > 0
+      ) {
+        return [];
+      }
+      const effects = hint.effects ?? [];
+      if (
+        effects.length === 0 ||
+        effects.some(
+          (effect) =>
+            effect.kind !== "economy" ||
+            effect.timing !== "action" ||
+            effect.scope !== "corp" ||
+            effect.resource !== "credits" ||
+            effect.finite !== true,
+        )
+      ) {
+        return [];
+      }
+      return [
+        {
+          kind: "prepare_immediate_operation",
+          needId: `economy-immediate-operation:${card.instanceId}`,
+          sourceInstanceId: card.instanceId,
+          sourceDefinitionId: card.definitionId,
+          actionIds: [fundingCandidate.actionId],
+          threshold: {
+            currentCredits,
+            operationCreditCost,
+            creditsAfterFunding: currentCredits + 1,
+            fundingGap: 1,
+          },
+          futureConversion: {
+            strategicEconomyValue: hint.valueHints!.economy!,
+            classification: "reviewed_pure_burst_economy_operation",
+            evidenceSource: "reviewed_strategic_hint",
+          },
+          cadence: {
+            kind: "single_threshold_credit",
+            maximumConversions: 1,
+          },
+          completion: {
+            kind: "operation_becomes_legal",
+          },
+          urgentForScore: false,
+          evidenceCode: `corp_reviewed_operation_one_credit_threshold:${card.definitionId}`,
+        } satisfies CorpEconomyOperationThresholdSignal,
+      ];
+    }),
+    (signal) => signal.needId,
+  );
 }
 
 function corpRequiredEconomyNeeds(
@@ -15309,7 +15521,9 @@ function corpCardDevelopmentSignals(
         ) === true;
       const ownedByEconomyPlan = economyNeeds.some(
         (signal) =>
-          signal.kind === "develop_campaign" &&
+          (signal.kind === "develop_campaign" ||
+            signal.kind === "convert_immediate_operation" ||
+            signal.kind === "prepare_immediate_operation") &&
           signal.actionIds.includes(candidate.actionId),
       );
       if (

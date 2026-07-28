@@ -4449,6 +4449,118 @@ describe("Corp core plan modules", () => {
     ).toBe("install-campaign");
   });
 
+  it("converts one exactly bound immediate Corp economy operation at P4", () => {
+    const economy = corpModule("corp.economy");
+    const accounts = {
+      ...candidate("play-accounts", "play_operation", "economy.gain_credit"),
+      sourceKind: "card" as const,
+      sourceCardInstanceId: "accounts-card",
+      sourceDefinitionId: "onr_v1_281_accounts-receivable",
+      costProfile: {
+        clickCost: 1,
+        creditCost: 5,
+        costKnownStatus: "known" as const,
+        additionalCosts: [],
+      },
+      economyProjection: {
+        schemaVersion: "action-economy-projection-v1" as const,
+        kind: "immediate_liquid" as const,
+        timing: "immediate" as const,
+        creditRestriction: "general" as const,
+        clickCost: 1,
+        creditCost: 5,
+        grossLiquidCreditGain: 9,
+        netLiquidCreditGain: 4,
+        cardsDrawn: 0,
+        cardsConsumed: 1,
+        netHandDelta: -1,
+        payoutMode: "fixed" as const,
+        repeatable: "unknown" as const,
+        reliability: "guaranteed" as const,
+        source: "legal_action_payload" as const,
+        confidence: "high" as const,
+        evidence: ["test_projection:complete"],
+      },
+    };
+    const signal = {
+      kind: "convert_immediate_operation" as const,
+      needId: "economy-immediate-operation:accounts-card",
+      sourceInstanceId: "accounts-card",
+      sourceDefinitionId: "onr_v1_281_accounts-receivable",
+      actionIds: ["play-accounts"] as [string],
+      conversion: {
+        clickCost: 1,
+        creditCost: 5,
+        grossLiquidCreditGain: 9,
+        netLiquidCreditGain: 4,
+        cardsDrawn: 0,
+        cardsConsumed: 1 as const,
+        netHandDelta: -1,
+        payoutMode: "fixed" as const,
+        reliability: "guaranteed" as const,
+        source: "legal_action_payload" as const,
+      },
+      cadence: {
+        kind: "single_action" as const,
+        maximumConversions: 1 as const,
+      },
+      completion: {
+        kind: "source_consumed" as const,
+      },
+      urgentForScore: false,
+      evidenceCode:
+        "corp_engine_certified_immediate_operation_conversion:onr_v1_281_accounts-receivable",
+    };
+    const corpContext = context(
+      [accounts],
+      { economyNeeds: [signal] },
+      { credits: 5, clicks: 1 },
+    );
+    const proposal = economy.discover(corpContext)[0]!;
+    const instance = instantiatePlanProposal(proposal, 10);
+
+    expect(proposal).toMatchObject({
+      target: { kind: "card", id: "accounts-card" },
+      initialViability: "ready",
+    });
+    expect(
+      economy.assess(instance, corpContext, {
+        executorInstanceId: undefined,
+      } as never),
+    ).toMatchObject({
+      priorityClaim: {
+        requestedClass: "P4",
+        reasonCode: "strategic_campaign",
+      },
+      withinClassValue: 80,
+    });
+    expect(
+      bindBestCurrentPlanRoute({
+        side: "corp",
+        stateVersion: 10,
+        timingPoint: "corp_action.main",
+        planInstanceId: instance.instanceId,
+        ...economy.materialize(instance, {} as never, corpContext),
+      }).head.actionId,
+    ).toBe("play-accounts");
+
+    const driftedContext = context(
+      [
+        {
+          ...accounts,
+          economyProjection: {
+            ...accounts.economyProjection,
+            netLiquidCreditGain: 3,
+          },
+        },
+      ],
+      { economyNeeds: [signal] },
+      { credits: 5, clicks: 1 },
+    );
+    const driftedProposal = economy.discover(driftedContext)[0]!;
+    expect(driftedProposal.initialViability).toBe("blocked");
+  });
+
   it("keeps an admitted campaign resident but blocked without a current action", () => {
     const economy = corpModule("corp.economy");
     const corpContext = context([], {

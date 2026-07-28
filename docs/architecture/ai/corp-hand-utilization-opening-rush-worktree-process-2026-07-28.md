@@ -1,6 +1,6 @@
 # Corp-Handverwertung und Opening-Rush – Worktree-Paketprozess
 
-Status: **P0 und P1 abgeschlossen; P2 aktiv**
+Status: **P0 bis P2 abgeschlossen; P3 aktiv**
 
 Stand: 2026-07-28
 
@@ -226,6 +226,29 @@ und P1–P3-Gegenfälle bleiben stabil.
 
 Commit:
 `feat(ai): route immediate corp economy operations`
+
+Ergebnis:
+
+- `convert_immediate_operation` bindet genau eine bekannte HQ-Operation an
+  ihre aktuelle `LegalAction`, ihre garantierte Projektion, Kosten, Handdelta
+  und den Abschluss `source_consumed`.
+- `prepare_immediate_operation` verwendet bei genau einem fehlenden Credit
+  ausschließlich die Engine-zertifizierte Basic-Credit-Action. Der erwartete
+  Folgeschritt verwendet nur die geprüfte strategische Klassifikation einer
+  reinen Burst-Economy-Operation und ihre sichtbare Kostenschwelle. Hint-Beträge
+  werden ausdrücklich nicht als Sofortprojektion genutzt. Nach dem Credit wird
+  der Vorlauf durch die neu erzeugte Operations-`LegalAction` ersetzt.
+- Der historische D5-Checkpoint entscheidet nun mit `corp.economy` für
+  Accounts Receivable. Synthetische Runtime-Gegenproben decken Accounts bei
+  vier und fünf Credits, Efficiency Experts, Night Shift, exakte
+  Projektionsdrift und leeres R&D ab.
+- Der bestehende Protect-R&D-Checkpoint behält Night Shift als Action, erwartet
+  nach der Single-Owner-Korrektur aber `corp.economy` statt
+  `corp.defend_servers` als ausführenden Plan.
+- Drei bereits auf unverändertem `main` rote Score-Checkpoints bleiben
+  außerhalb P2 rot: `cp-74e2369-03` sowie `cp-e676-01` und `cp-e676-03`. Sie
+  sind durch `corp_score_protection_assessment_unknown` blockiert und werden
+  nicht als P2-Regressionsbeleg gewertet.
 
 ### P3 – Side-sicheres Handinventar und explizite Dispositionen
 
@@ -483,4 +506,9 @@ Markiere das Goal erst danach als complete.
   28 eindeutige Karten und weist neben der erwarteten Behavior-Regression
   zwei vorhandene Consumer-Gaps für BBS Whispering Campaign und Red Herrings
   aus.
-- P2: aktiv; die roten D5-Erwartungen bleiben unverändert.
+- P2: abgeschlossen; D5, Accounts-Schwelle, Efficiency Experts und Night Shift
+  sind über endliche `corp.economy`-Signale abgedeckt. Der Protect-R&D-Fall
+  behält seine Action bei und folgt der neuen Single-Owner-Zuordnung. Drei
+  separat gegen `main` bestätigte rote Score-Checkpoints bleiben als
+  vorhandene Baseline außerhalb dieses Pakets dokumentiert.
+- P3: aktiv.

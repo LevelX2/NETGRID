@@ -2855,7 +2855,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("does not use Night Shift as generic development or overflow reduction without a parent need", () => {
+  it("routes an exact Night Shift conversion through Corp economy instead of generic development", () => {
     const nightShift = legalAction(
       "night-shift",
       "corp",
@@ -2950,11 +2950,13 @@ describe("authoritative plan-first live runtime", () => {
         netLiquidCreditGain: 2,
       },
     });
-    expect(() =>
+    expect(
       liveContext().chooseSemanticRuntimeAction(fullHand, {}),
-    ).toThrow(
-      expect.objectContaining({ code: "missing_plan_module_coverage" }),
-    );
+    ).toMatchObject({
+      actionId: "night-shift",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
 
     resetResidentPlanPortfolioMemory();
     const overflow = aiInput("corp", [
@@ -2981,11 +2983,13 @@ describe("authoritative plan-first live runtime", () => {
       ),
     );
     overflow.playerView.servers = fullHand.playerView.servers;
-    expect(() =>
+    expect(
       liveContext().chooseSemanticRuntimeAction(overflow, {}),
-    ).toThrow(
-      expect.objectContaining({ code: "missing_plan_module_coverage" }),
-    );
+    ).toMatchObject({
+      actionId: "night-shift",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
 
     resetResidentPlanPortfolioMemory();
     const drawBound = aiInput("corp", [nightShift, draw]);
@@ -2996,11 +3000,111 @@ describe("authoritative plan-first live runtime", () => {
         definitionId: "onr_v1_295_night-shift",
       }),
     ];
-    expect(() =>
+    expect(
       liveContext().chooseSemanticRuntimeAction(drawBound, {}),
-    ).toThrow(
-      expect.objectContaining({ code: "missing_plan_module_coverage" }),
+    ).toMatchObject({
+      actionId: "night-shift",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+  });
+
+  it("prepares the one-credit Accounts Receivable threshold and revalidates exact operations", () => {
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
     );
+    const draw = legalAction("draw", "corp", "draw_card", "Draw a card", {
+      credits: 0,
+      clicks: 1,
+    });
+    const accountsCard = visibleCard("accounts-card", "corp", "operation", {
+      definitionId: "onr_v1_281_accounts-receivable",
+    });
+
+    resetResidentPlanPortfolioMemory();
+    const threshold = aiInput("corp", [credit, draw]);
+    threshold.playerView.own.clicks = 2;
+    threshold.playerView.own.credits = 4;
+    threshold.playerView.own.stackOrRdCount = 12;
+    threshold.playerView.own.gripOrHq = [accountsCard];
+    expect(
+      liveContext().chooseSemanticRuntimeAction(threshold, {}),
+    ).toMatchObject({
+      actionId: "credit",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+      evidence: expect.arrayContaining([
+        "plan_assessment_evidence:corp_reviewed_operation_one_credit_threshold:onr_v1_281_accounts-receivable",
+      ]),
+    });
+
+    const accounts = legalAction(
+      "accounts",
+      "corp",
+      "play_operation",
+      "Play Accounts Receivable",
+      { credits: 5, clicks: 1 },
+      {
+        source: "accounts-card",
+        payload: {
+          cardId: "accounts-card",
+          gainCreditsAmount: 9,
+        },
+      },
+    );
+    const efficiency = legalAction(
+      "efficiency",
+      "corp",
+      "play_operation",
+      "Play Efficiency Experts",
+      { credits: 0, clicks: 1 },
+      {
+        source: "efficiency-card",
+        payload: {
+          cardId: "efficiency-card",
+          gainCreditsAmount: 3,
+        },
+      },
+    );
+    resetResidentPlanPortfolioMemory();
+    const ready = aiInput("corp", [accounts, efficiency, credit, draw]);
+    ready.playerView.own.clicks = 1;
+    ready.playerView.own.credits = 5;
+    ready.playerView.own.stackOrRdCount = 12;
+    ready.playerView.own.gripOrHq = [
+      accountsCard,
+      visibleCard("efficiency-card", "corp", "operation", {
+        definitionId: "onr_v1_290_efficiency-experts",
+      }),
+    ];
+    expect(liveContext().chooseSemanticRuntimeAction(ready, {})).toMatchObject({
+      actionId: "accounts",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+
+    resetResidentPlanPortfolioMemory();
+    const efficiencyOnly = aiInput("corp", [efficiency, credit, draw]);
+    efficiencyOnly.playerView.own.clicks = 1;
+    efficiencyOnly.playerView.own.credits = 0;
+    efficiencyOnly.playerView.own.stackOrRdCount = 12;
+    efficiencyOnly.playerView.own.gripOrHq = [
+      visibleCard("efficiency-card", "corp", "operation", {
+        definitionId: "onr_v1_290_efficiency-experts",
+      }),
+    ];
+    expect(
+      liveContext().chooseSemanticRuntimeAction(efficiencyOnly, {}),
+    ).toMatchObject({
+      actionId: "efficiency",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
   });
 
   it("limits score-material observation to one exact basic draw per Corp turn", () => {
@@ -3792,7 +3896,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(portfolio).not.toContain('"kind":"score_protection_draw"');
   });
 
-  it("does not invent a generic Night Shift or draw plan after a reserve target is absent", () => {
+  it("uses exact Night Shift economy while leaving unquoted BBS payout without a generic plan", () => {
     const nightShift = legalAction(
       "night-shift",
       "corp",
@@ -3824,11 +3928,13 @@ describe("authoritative plan-first live runtime", () => {
         definitionId: "onr_v1_295_night-shift",
       }),
     ];
-    expect(() =>
+    expect(
       liveContext().chooseSemanticRuntimeAction(reserve, {}),
-    ).toThrow(
-      expect.objectContaining({ code: "missing_plan_module_coverage" }),
-    );
+    ).toMatchObject({
+      actionId: "night-shift",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
 
     const bbsPayout = legalAction(
       "bbs-payout",

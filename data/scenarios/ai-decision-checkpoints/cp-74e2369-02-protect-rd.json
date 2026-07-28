@@ -4711,10 +4711,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["develop_score_protection"],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_220_tycho-extension_2:remote_1:remote_1"
+        "corp_engine_certified_immediate_operation_conversion:onr_v1_295_night-shift"
       ]
     }
   }
