@@ -9402,10 +9402,10 @@ type CorpGlobalDefenseInstallRouteAssessment =
     }>;
 
 /**
- * Admits a non-score ICE install only when the Engine-quoted route reduces
- * the exact visible Runner access probability or the Runner's exact remaining
- * credits on the best access path. Unknown quotes or access facts close the
- * route rather than manufacturing a positional or layer-count substitute.
+ * Admits a non-score ICE install when the Engine-quoted route improves the
+ * exact visible access path. First-layer central coverage and structured,
+ * visible ICE defense semantics may also establish qualitative progress when
+ * the exact run quote cannot yet express the hidden ICE's encounter effect.
  */
 function corpGlobalDefenseInstallRoute(
   input: AiDecisionInput,
@@ -9594,17 +9594,23 @@ function corpGlobalDefenseInstallRouteAssessment(
             candidateServer.id === (serverId === "hq" ? "rd" : "hq"),
         )?.ice.length ?? 0) > 0
       : false;
-  const hasSelectedCentralNeed =
-    otherCentralAlreadyProtected ||
-    (selectedCentralEvidence !== undefined &&
-      (selectedCentralEvidence.recentRunOrAccessEvents > 0 ||
-        selectedCentralEvidence.recentSuccessfulAccessRunnerTurns > 0 ||
-        selectedCentralEvidence.serverBoundEffectIds.length > 0));
+  const hasSelectedCentralPressure =
+    selectedCentralEvidence !== undefined &&
+    (selectedCentralEvidence.recentRunOrAccessEvents > 0 ||
+      selectedCentralEvidence.recentSuccessfulAccessRunnerTurns > 0 ||
+      selectedCentralEvidence.serverBoundEffectIds.length > 0);
+  const hasStructuredDefenseValue =
+    sourceDefense.hasImmediateStop ||
+    sourceDefense.hasMeaningfulTaxOrDamage ||
+    sourceDefense.hasEncounterDisruption;
+  const establishesMissingCentralCoverage =
+    isEmptyCentral &&
+    otherCentralAlreadyProtected &&
+    sourceDefense.isVisibleIce;
   const preferQualitativeSourceProgress =
     isEmptyCentral &&
-    hasSelectedCentralNeed &&
-    (sourceDefense.hasMeaningfulTaxOrDamage ||
-      sourceDefense.hasEncounterDisruption);
+    (establishesMissingCentralCoverage ||
+      (hasSelectedCentralPressure && hasStructuredDefenseValue));
   const projection = projectCorpFundedIceInstallRoute({
     need,
     action,
@@ -9640,13 +9646,7 @@ function corpGlobalDefenseInstallRouteAssessment(
   ) {
     return { knowledge: "known", disposition: "productive", projection };
   }
-  if (
-    projection.preservesReserves &&
-    isEmptyCentral &&
-    hasSelectedCentralNeed &&
-    (sourceDefense.hasMeaningfulTaxOrDamage ||
-      sourceDefense.hasEncounterDisruption)
-  ) {
+  if (projection.preservesReserves && preferQualitativeSourceProgress) {
     return { knowledge: "known", disposition: "productive", projection };
   }
   return knownInstallRouteHasUsefulEffectBlockedByFunding(projection)

@@ -4,11 +4,15 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
 import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
 } from "./runner-visible-breaker-coverage";
-import { visibleCardDefinition } from "./card-definition-lookup";
+import {
+  runtimeCardDefinitionForAi,
+  visibleCardDefinition,
+} from "./card-definition-lookup";
 import {
   endTheRunSubroutineCount,
   minimumCreditsToBreakEndTheRunSubroutines,
@@ -291,6 +295,7 @@ function visibleRunnerRunCreditPool(
 export function visibleCorpIceDefenseProfile(
   sourceCard: VisibleCard | undefined,
 ): {
+  isVisibleIce: boolean;
   hasImmediateStop: boolean;
   hasMeaningfulTaxOrDamage: boolean;
   hasEncounterDisruption: boolean;
@@ -298,6 +303,7 @@ export function visibleCorpIceDefenseProfile(
 } {
   if (!sourceCard || sourceCard.known === false || sourceCard.type !== "ice") {
     return {
+      isVisibleIce: false,
       hasImmediateStop: false,
       hasMeaningfulTaxOrDamage: false,
       hasEncounterDisruption: false,
@@ -305,6 +311,14 @@ export function visibleCorpIceDefenseProfile(
     };
   }
   const definition = visibleCardDefinition(sourceCard);
+  const runtimeDefinition =
+    sourceCard.definitionId !== undefined
+      ? runtimeCardDefinitionForAi(sourceCard.definitionId)
+      : undefined;
+  const hint =
+    sourceCard.definitionId !== undefined
+      ? AI_HINTS_BY_CARD.get(sourceCard.definitionId)
+      : undefined;
   const subroutines = [
     ...visibleSubroutineArray(
       (sourceCard as { subroutines?: unknown }).subroutines,
@@ -319,6 +333,13 @@ export function visibleCorpIceDefenseProfile(
       (definition as { mechanics?: unknown } | undefined)?.mechanics,
     ),
   ].map((entry) => entry.toLocaleLowerCase("en-US"));
+  const hintSignals = [
+    ...(hint?.roles ?? []),
+    ...(hint?.tacticSignals ?? []),
+    ...(hint?.actionTacticSignals ?? []),
+    ...(hint?.functionSignals ?? []),
+    ...(hint?.effects ?? []).map((effect) => `effect:${effect.kind}`),
+  ].map((entry) => entry.toLocaleLowerCase("en-US"));
   const textInput: {
     title?: string;
     rulesText?: string;
@@ -328,6 +349,7 @@ export function visibleCorpIceDefenseProfile(
     rulesText: [
       sourceCard.rulesText,
       (definition as { rulesText?: string } | undefined)?.rulesText,
+      runtimeDefinition?.text,
     ]
       .filter((value): value is string => typeof value === "string")
       .join(" "),
@@ -342,7 +364,14 @@ export function visibleCorpIceDefenseProfile(
   const hasImmediateStop =
     subroutines.some(subroutineLooksLikeImmediateStop) ||
     mechanics.some((mechanic) => mechanic === "end_the_run") ||
-    rulesTokens.includes("end the run");
+    rulesTokens.includes("end the run") ||
+    hintSignals.some(
+      (signal) =>
+        signal === "etr_ice" ||
+        signal === "effect:etr" ||
+        signal.includes("end_run") ||
+        signal.includes("runner_pay_or_end_run"),
+    );
   const hasMeaningfulTaxOrDamage =
     subroutines.some(subroutineLooksLikeTaxOrDamage) ||
     mechanics.some(
@@ -350,6 +379,14 @@ export function visibleCorpIceDefenseProfile(
         mechanic.includes("damage") ||
         mechanic.includes("trace") ||
         mechanic.includes("tag"),
+    ) ||
+    hintSignals.some(
+      (signal) =>
+        signal.includes("damage") ||
+        signal.includes("trace") ||
+        signal.includes("program_trash") ||
+        signal.includes("encounter_tax") ||
+        signal.includes("runner_pay"),
     );
   const hasEncounterDisruption =
     subroutines.some(subroutineLooksLikeEncounterDisruption) ||
@@ -360,8 +397,16 @@ export function visibleCorpIceDefenseProfile(
         mechanic === "next_encounter_penalty" ||
         mechanic === "jack_out_lock" ||
         mechanic === "run_rewind",
+    ) ||
+    hintSignals.some(
+      (signal) =>
+        signal.includes("program_trash") ||
+        signal.includes("jack_out") ||
+        signal.includes("run_rewind") ||
+        signal.includes("encounter_ice_strength"),
     );
   return {
+    isVisibleIce: true,
     hasImmediateStop,
     hasMeaningfulTaxOrDamage,
     hasEncounterDisruption,

@@ -7,6 +7,45 @@ import {
 } from "./semantic-runtime-corp-effective-defense";
 
 describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
+  it("consumes runtime card text and structured active hints for visible ICE", () => {
+    expect(
+      visibleCorpIceDefenseProfile(
+        corpIce("snowbank", {
+          definitionId: "onr_proteus_038_snowbank",
+          title: "Snowbank",
+        }),
+      ),
+    ).toMatchObject({
+      isVisibleIce: true,
+      hasImmediateStop: true,
+      hasMeaningfulTaxOrDamage: true,
+    });
+    expect(
+      visibleCorpIceDefenseProfile(
+        corpIce("chihuahua", {
+          definitionId: "onr_proteus_014_chihuahua",
+          title: "Chihuahua",
+        }),
+      ),
+    ).toMatchObject({
+      isVisibleIce: true,
+      hasMeaningfulTaxOrDamage: true,
+    });
+    expect(
+      visibleCorpIceDefenseProfile(
+        corpIce("colonel-failure", {
+          definitionId: "onr_proteus_015_colonel-failure",
+          title: "Colonel Failure",
+        }),
+      ),
+    ).toMatchObject({
+      isVisibleIce: true,
+      hasImmediateStop: true,
+      hasMeaningfulTaxOrDamage: true,
+      hasEncounterDisruption: true,
+    });
+  });
+
   it("classifies known non-ETR encounter disruption separately from access prevention", () => {
     expect(
       visibleCorpIceDefenseProfile(
