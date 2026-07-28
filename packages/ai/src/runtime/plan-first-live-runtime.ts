@@ -130,7 +130,10 @@ import {
   type CorpDrawAdmissionPriority,
   type CorpDrawCapacityReleaseRoute,
 } from "./corp-draw-admission";
-import { assessCorpOpeningRush } from "./corp-opening-rush";
+import {
+  assessCorpOpeningRush,
+  isCorpOpeningTurnSerial,
+} from "./corp-opening-rush";
 import {
   buildCorpAmbushPlanSignals,
   corpAmbushAdvanceDispositionEvidence,
@@ -9606,9 +9609,16 @@ function corpGlobalDefenseInstallRouteAssessment(
   const establishesMissingCentralCoverage =
     isEmptyCentral &&
     otherCentralAlreadyProtected &&
+    isCorpOpeningTurnSerial(input.playerView.turnSerial) &&
     sourceDefense.isVisibleIce;
+  const hasResidentRemoteAgenda = input.playerView.servers.some(
+    (candidateServer) =>
+      candidateServer.id.startsWith("remote_") &&
+      candidateServer.root.some((card) => card.known && card.type === "agenda"),
+  );
   const preferQualitativeSourceProgress =
     isEmptyCentral &&
+    !hasResidentRemoteAgenda &&
     (establishesMissingCentralCoverage ||
       (hasSelectedCentralPressure && hasStructuredDefenseValue));
   const projection = projectCorpFundedIceInstallRoute({

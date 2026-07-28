@@ -5,6 +5,18 @@ import type { CorpCentralDefenseAllocation } from "./corp-central-defense-alloca
 import { compareExactProbabilities } from "./corp-score-protection-assessment";
 
 export const CORP_OPENING_RUSH_SCHEMA_VERSION = "corp-opening-rush-v1";
+export const CORP_OPENING_LAST_TURN_SERIAL = 4;
+
+export function isCorpOpeningTurnSerial(
+  turnSerial: number | undefined,
+): turnSerial is number {
+  return (
+    Number.isSafeInteger(turnSerial) &&
+    turnSerial !== undefined &&
+    turnSerial >= 0 &&
+    turnSerial <= CORP_OPENING_LAST_TURN_SERIAL
+  );
+}
 
 export type CorpOpeningRushQuote = Readonly<{
   schemaVersion: typeof CORP_OPENING_RUSH_SCHEMA_VERSION;
@@ -82,10 +94,10 @@ export function assessCorpOpeningRush(params: {
 }): CorpOpeningRushDecision | undefined {
   const { input, project, candidate, centralDefenseAllocation } = params;
   const turnSerial = input.playerView.turnSerial;
-  if (!Number.isSafeInteger(turnSerial) || turnSerial === undefined) {
-    return undefined;
-  }
-  if (turnSerial < 0 || turnSerial > 4) {
+  if (!isCorpOpeningTurnSerial(turnSerial)) {
+    if (turnSerial === undefined || !Number.isSafeInteger(turnSerial)) {
+      return undefined;
+    }
     return blocked("outside_opening_window", [
       `turn_serial:${turnSerial}`,
       "opening_corp_turn_ceiling:3",
@@ -120,9 +132,7 @@ export function assessCorpOpeningRush(params: {
   }
   const targetServer =
     targetServerId && targetServerId !== "new_remote"
-      ? input.playerView.servers.find(
-          (server) => server.id === targetServerId,
-        )
+      ? input.playerView.servers.find((server) => server.id === targetServerId)
       : undefined;
   if (!targetServer || !targetServer.id.startsWith("remote_")) {
     return blocked("missing_existing_remote", [
