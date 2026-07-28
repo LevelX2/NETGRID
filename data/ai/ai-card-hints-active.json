@@ -35871,9 +35871,6 @@
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_access_ambush"
       ],
       "side": "corp",
-      "strategicNotes": [
-        "Remote protection is context-dependent strategy information; agenda steal tax and access condition stay mechanical."
-      ],
       "strategicRole": [
         "defensive_tool"
       ],

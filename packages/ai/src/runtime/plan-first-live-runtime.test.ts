@@ -3896,7 +3896,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(portfolio).not.toContain('"kind":"score_protection_draw"');
   });
 
-  it("uses exact Night Shift economy while leaving unquoted BBS payout without a generic plan", () => {
+  it("routes exact BBS hosted-credit withdrawals through economy and rejects unquoted payouts", () => {
     const nightShift = legalAction(
       "night-shift",
       "corp",
@@ -3947,6 +3947,9 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "bbs-card",
           gainCreditsAmount: 2,
+          cardImplementationTakesHostedCredits: true,
+          hostedCreditTakeAmount: 2,
+          hostedCreditTakeMode: "up_to_amount_if_available",
         },
       },
     );
@@ -3977,8 +3980,208 @@ describe("authoritative plan-first live runtime", () => {
         ],
       ),
     ];
-    expect(() =>
+    expect(
+      buildActionSemanticCandidates(afterReserve).find(
+        (candidate) => candidate.actionId === "bbs-payout",
+      ),
+    ).toMatchObject({
+      actionId: "bbs-payout",
+      sourceKind: "card",
+      sourceCardInstanceId: "bbs-card",
+      semanticActionType: "economy.gain_credit",
+    });
+    expect(
       liveContext().chooseSemanticRuntimeAction(afterReserve, {}),
+    ).toMatchObject({
+      actionId: "bbs-payout",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+
+    const unquotedPayout = legalAction(
+      "bbs-unquoted-payout",
+      "corp",
+      "activated_card_ability",
+      "Take credits from BBS Whispering Campaign",
+      { credits: 0, clicks: 1 },
+      {
+        source: "bbs-card",
+        payload: {
+          cardId: "bbs-card",
+          gainCreditsAmount: 2,
+        },
+      },
+    );
+    resetResidentPlanPortfolioMemory();
+    const unquoted = aiInput("corp", [unquotedPayout, draw]);
+    unquoted.playerView.own.credits = afterReserve.playerView.own.credits;
+    unquoted.playerView.own.stackOrRdCount =
+      afterReserve.playerView.own.stackOrRdCount;
+    unquoted.playerView.own.gripOrHq =
+      afterReserve.playerView.own.gripOrHq;
+    unquoted.playerView.servers = afterReserve.playerView.servers;
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(unquoted, {}),
+    ).toThrow(
+      expect.objectContaining({ code: "missing_plan_module_coverage" }),
+    );
+  });
+
+  it("installs Red Herrings only into the exact visible scoring fort", () => {
+    const install = legalAction(
+      "install-red-herrings",
+      "corp",
+      "install_card",
+      "Install Red Herrings in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "red-herrings",
+        payload: {
+          cardId: "red-herrings",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const scoringFort = aiInput("corp", [install, credit]);
+    scoringFort.playerView.own.credits = 20;
+    scoringFort.playerView.own.gripOrHq = [
+      visibleCard("red-herrings", "corp", "upgrade", {
+        definitionId: "onr_v1_366_red-herrings",
+        title: "Red Herrings",
+      }),
+    ];
+    scoringFort.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("agenda", "corp", "agenda", {
+            definitionId: "onr_v1_195_corporate-retreat",
+            title: "Corporate Retreat",
+            advancementRequirement: 4,
+          }),
+        ],
+      ),
+    ];
+
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(scoringFort, {}),
+    ).toMatchObject({
+      actionId: "install-red-herrings",
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+
+    const emptyFort = aiInput("corp", [install, credit]);
+    emptyFort.playerView.own.credits = 20;
+    emptyFort.playerView.own.gripOrHq = scoringFort.playerView.own.gripOrHq;
+    emptyFort.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+    ];
+    resetResidentPlanPortfolioMemory();
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(emptyFort, {}),
+    ).toThrow(
+      expect.objectContaining({
+        code: "missing_plan_module_coverage",
+        context: expect.objectContaining({
+          unresolvedActionIds: ["credit"],
+        }),
+      }),
+    );
+  });
+
+  it("rezzes Red Herrings only at the latest relevant scoring-fort window", () => {
+    const rez = legalAction(
+      "rez-red-herrings",
+      "corp",
+      "rez_card",
+      "Rez Red Herrings",
+      { credits: 1, clicks: 0 },
+      {
+        source: "red-herrings",
+        payload: {
+          cardId: "red-herrings",
+          serverId: "remote_1",
+        },
+      },
+    );
+    const atWindow = (iceIndex: number) => {
+      const input = aiInput("corp", [rez]);
+      input.playerView.timingPoint = "run.approach_ice";
+      input.playerView.own.credits = 20;
+      input.playerView.run = {
+        attackedServerId: "remote_1",
+        phase: "approach_ice",
+        position: {
+          kind: "ice",
+          serverId: "remote_1",
+          iceIndex,
+        },
+        successful: false,
+      };
+      input.playerView.servers = [
+        server("hq"),
+        server("rd"),
+        server("archives"),
+        server(
+          "remote_1",
+          [
+            visibleCard("inner-ice", "corp", "ice", {
+              definitionId: "onr_v1_237_data-wall",
+              title: "Data Wall",
+              rezzed: true,
+            }),
+            visibleCard("outer-ice", "corp", "ice", {
+              definitionId: "onr_v1_245_fire-wall",
+              title: "Fire Wall",
+              rezzed: true,
+            }),
+          ],
+          [
+            visibleCard("agenda", "corp", "agenda", {
+              definitionId: "onr_v1_195_corporate-retreat",
+              title: "Corporate Retreat",
+              advancementRequirement: 4,
+            }),
+            visibleCard("red-herrings", "corp", "upgrade", {
+              definitionId: "onr_v1_366_red-herrings",
+              title: "Red Herrings",
+              rezzed: false,
+            }),
+          ],
+        ),
+      ];
+      return input;
+    };
+
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(atWindow(0), {}),
+    ).toMatchObject({
+      actionId: "rez-red-herrings",
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+
+    resetResidentPlanPortfolioMemory();
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(atWindow(1), {}),
     ).toThrow(
       expect.objectContaining({ code: "missing_plan_module_coverage" }),
     );

@@ -51,6 +51,7 @@ import {
   type CorpDefenseSignal,
   type CorpExactIceRezRouteProjection,
   type CorpEconomyImmediateOperationSignal,
+  type CorpEconomyInstalledAssetWithdrawalSignal,
   type CorpEconomyLiquidityDevelopmentSignal,
   type CorpEconomyOperationThresholdSignal,
   type CorpEconomyReserveSignal,
@@ -7051,6 +7052,7 @@ function corpActionDispositions(
             input,
             candidate,
             visibleSource,
+            domain.scoreProjects,
           )
         : undefined;
     if (unboundConditionalRezSupportEvidence) {
@@ -7064,6 +7066,7 @@ function corpActionDispositions(
     const defensiveUpgradePlacement = corpDefensiveUpgradePlacement(
       input,
       candidate,
+      domain.scoreProjects,
     );
     if (defensiveUpgradePlacement && !defensiveUpgradePlacement.signal) {
       add(
@@ -7185,6 +7188,7 @@ function corpOpenEconomyPlanOwnsAction(
       signal.actionIds.includes(actionId) &&
       (signal.kind === "develop_campaign" ||
         signal.kind === "convert_immediate_operation" ||
+        signal.kind === "convert_installed_asset_payout" ||
         signal.kind === "prepare_immediate_operation" ||
         signal.gap > 0),
   );
@@ -7723,6 +7727,7 @@ function buildCorpDomain(
         const defensiveUpgradePlacement = corpDefensiveUpgradePlacement(
           input,
           candidate,
+          scoreProjects,
         );
         if (defensiveUpgradePlacement?.signal) {
           return [defensiveUpgradePlacement.signal];
@@ -7785,7 +7790,7 @@ function buildCorpDomain(
                   rezServerId,
                 )
               : undefined;
-          const exactCardRezSupport =
+          const exactCardRezSupportWithoutReserve =
             sourceType !== "ice"
               ? corpExactCardRezSupportAssessment(
                   input,
@@ -7794,6 +7799,24 @@ function buildCorpDomain(
                   rezServerId,
                 )
               : undefined;
+          const exactCardRezReserve = exactCardRezSupportWithoutReserve
+            ? corpCardRoutePreservesScoreReserve(
+                input,
+                candidate,
+                rezServerId,
+                scoreProjects,
+              )
+            : undefined;
+          const exactCardRezSupport =
+            exactCardRezSupportWithoutReserve?.productive === true &&
+            exactCardRezReserve?.preservesReserve !== true
+              ? {
+                  ...exactCardRezSupportWithoutReserve,
+                  productive: false,
+                  value: 0,
+                  evidenceCode: `corp_rez_exact_card_support_breaks_score_reserve:${exactCardRezReserve?.requiredCreditsAfterAction ?? "unknown"}`,
+                }
+              : exactCardRezSupportWithoutReserve;
           if (
             sourceType !== "ice" &&
             !persistentDefenseSupport &&
@@ -8021,6 +8044,7 @@ function buildCorpDomain(
       ...(turnLiquidityDevelopment ? [turnLiquidityDevelopment] : []),
       ...operationThresholdPreparations,
       ...corpImmediateOperationEconomyConversions(input, candidates),
+      ...corpInstalledAssetEconomyWithdrawals(input, candidates),
       ...corpEconomyDevelopmentCampaigns(input, candidates),
     ],
     (signal) => signal.needId,
@@ -8030,6 +8054,7 @@ function buildCorpDomain(
       if (
         signal.kind === "develop_campaign" ||
         signal.kind === "convert_immediate_operation" ||
+        signal.kind === "convert_installed_asset_payout" ||
         signal.kind === "prepare_immediate_operation" ||
         signal.kind === "develop_liquidity"
       )
@@ -8104,6 +8129,7 @@ function buildCorpDomain(
     economyNeeds,
     defenseDispositionActionIds,
     scoreSetupBinding,
+    scoreProjects,
   );
   const hqOverflowResolution = corpHqOverflowResolutionSignal(
     input,
@@ -10428,6 +10454,128 @@ function corpImmediateOperationEconomyConversions(
         urgentForScore: false,
         evidenceCode: `corp_engine_certified_immediate_operation_conversion:${sourceDefinitionId}`,
       } satisfies CorpEconomyImmediateOperationSignal,
+    ];
+  });
+  return uniqueBy(signals, (signal) => signal.needId);
+}
+
+function corpInstalledAssetEconomyWithdrawals(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+): CorpEconomyInstalledAssetWithdrawalSignal[] {
+  const installedRootCardsById = new Map(
+    input.playerView.servers.flatMap((server) =>
+      server.root.map((card) => [card.instanceId, card] as const),
+    ),
+  );
+  const legalActionsById = new Map(
+    input.legalActions.map((action) => [action.actionId, action]),
+  );
+  const signals = candidates.flatMap((candidate) => {
+    const sourceInstanceId = candidate.sourceCardInstanceId;
+    const sourceCard = sourceInstanceId
+      ? installedRootCardsById.get(sourceInstanceId)
+      : undefined;
+    const sourceDefinitionId =
+      candidate.sourceDefinitionId ?? sourceCard?.definitionId;
+    const action = legalActionsById.get(candidate.actionId);
+    const projection = candidate.economyProjection;
+    const hostedCreditTakeMode = action?.payload?.hostedCreditTakeMode;
+    const hostedCreditTakeAmount = action?.payload?.hostedCreditTakeAmount;
+    const grossLiquidCreditGain = projection?.grossLiquidCreditGain;
+    const netLiquidCreditGain = projection?.netLiquidCreditGain;
+    const hint = sourceDefinitionId
+      ? AI_HINTS_BY_CARD.get(sourceDefinitionId)
+      : undefined;
+    if (
+      !sourceInstanceId ||
+      !sourceDefinitionId ||
+      !sourceCard?.known ||
+      sourceCard.definitionId !== sourceDefinitionId ||
+      (candidate.sourceDefinitionId !== undefined &&
+        candidate.sourceDefinitionId !== sourceDefinitionId) ||
+      sourceCard.rezzed !== true ||
+      visibleKnownCardType(input, sourceCard) !== "asset" ||
+      hint?.planRoles?.includes("remote_asset_economy") !== true ||
+      hint.quality?.hintReviewed !== true ||
+      hint.quality.strategyCovered !== true ||
+      hint.quality.confidence !== "high" ||
+      action?.type !== "activated_card_ability" ||
+      action.source !== sourceInstanceId ||
+      action.payload?.cardId !== sourceInstanceId ||
+      action.payload?.cardImplementationTakesHostedCredits !== true ||
+      (hostedCreditTakeMode !== "up_to_amount_if_available" &&
+        hostedCreditTakeMode !== "all") ||
+      typeof hostedCreditTakeAmount !== "number" ||
+      !Number.isSafeInteger(hostedCreditTakeAmount) ||
+      hostedCreditTakeAmount <= 0 ||
+      candidate.sourceKind !== "card" ||
+      candidate.semanticActionType !== "economy.gain_credit" ||
+      candidate.costProfile.costKnownStatus !== "known" ||
+      candidate.costProfile.additionalCosts.length > 0 ||
+      candidate.targetContext?.selectedTargets.length ||
+      candidate.projectionIssues.some(
+        (issue) => issue !== "ability_unresolved",
+      ) ||
+      candidate.hardGates.some((gate) => gate.status === "block") ||
+      projection?.kind !== "immediate_liquid" ||
+      projection.timing !== "immediate" ||
+      projection.creditRestriction !== "general" ||
+      projection.payoutMode !== "fixed" ||
+      projection.reliability !== "guaranteed" ||
+      projection.source !== "legal_action_payload" ||
+      projection.confidence !== "high" ||
+      projection.cardsConsumed !== 0 ||
+      projection.cardsDrawn !== 0 ||
+      projection.netHandDelta !== 0 ||
+      !Number.isSafeInteger(projection.clickCost) ||
+      projection.clickCost !== candidate.costProfile.clickCost ||
+      projection.clickCost <= 0 ||
+      !Number.isSafeInteger(projection.creditCost) ||
+      projection.creditCost !== candidate.costProfile.creditCost ||
+      projection.creditCost < 0 ||
+      typeof grossLiquidCreditGain !== "number" ||
+      !Number.isSafeInteger(grossLiquidCreditGain) ||
+      grossLiquidCreditGain !== hostedCreditTakeAmount ||
+      typeof netLiquidCreditGain !== "number" ||
+      !Number.isSafeInteger(netLiquidCreditGain) ||
+      netLiquidCreditGain <= 0 ||
+      grossLiquidCreditGain - projection.creditCost !== netLiquidCreditGain ||
+      input.playerView.own.credits < projection.creditCost ||
+      input.playerView.own.clicks < projection.clickCost
+    ) {
+      return [];
+    }
+    return [
+      {
+        kind: "convert_installed_asset_payout",
+        needId: `economy-installed-asset-payout:${sourceInstanceId}`,
+        sourceInstanceId,
+        sourceDefinitionId,
+        actionIds: [candidate.actionId],
+        conversion: {
+          clickCost: projection.clickCost,
+          creditCost: projection.creditCost,
+          grossLiquidCreditGain,
+          netLiquidCreditGain,
+          cardsDrawn: 0,
+          cardsConsumed: 0,
+          netHandDelta: 0,
+          payoutMode: "fixed",
+          reliability: "guaranteed",
+          source: "legal_action_payload",
+          hostedCreditTakeMode,
+        },
+        cadence: {
+          kind: "single_action_revalidate",
+          maximumConversions: 1,
+        },
+        completion: {
+          kind: "source_pool_revalidated",
+        },
+        urgentForScore: false,
+        evidenceCode: `corp_engine_certified_installed_asset_payout:${sourceDefinitionId}`,
+      } satisfies CorpEconomyInstalledAssetWithdrawalSignal,
     ];
   });
   return uniqueBy(signals, (signal) => signal.needId);
@@ -14922,6 +15070,67 @@ function corpExactCardRezSupportAssessment(
   ) {
     return undefined;
   }
+  const hint = candidate.sourceDefinitionId
+    ? AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId)
+    : sourceCard.definitionId
+      ? AI_HINTS_BY_CARD.get(sourceCard.definitionId)
+      : undefined;
+  const exactAgendaStealTax =
+    hint?.quality?.hintReviewed === true &&
+    hint.quality.strategyCovered === true &&
+    hint.quality.confidence === "high" &&
+    hint.remoteRole?.kind === "agenda_steal_tax" &&
+    hint.remoteRole.serverScope === "fort" &&
+    hint.planRoles?.includes("remote_upgrade_tax") === true &&
+    hint.planRoles.includes("protect_remote") &&
+    hint.functionSignals?.includes("remote.agenda_steal_tax") === true &&
+    hint.functionSignals.includes("tax.runner_credit") &&
+    hint.effects?.some(
+      (effect) =>
+        effect.kind === "run_tax" &&
+        effect.scope === "accessed_card" &&
+        effect.timing === "on_access" &&
+        typeof effect.amount === "number" &&
+        effect.amount > 0,
+    ) === true &&
+    hint.effects.some(
+      (effect) =>
+        effect.kind === "remote_protection" &&
+        effect.scope === "fort" &&
+        effect.timing === "persistent",
+    );
+  if (exactAgendaStealTax) {
+    if (!visibleKnownAgendaOnServer(input, serverId)) {
+      return {
+        productive: false,
+        serverId,
+        value: 0,
+        evidenceCode:
+          "corp_rez_agenda_steal_tax_has_no_visible_agenda_on_exact_fort",
+      };
+    }
+    const action = input.legalActions.find(
+      (legalAction) => legalAction.actionId === candidate.actionId,
+    );
+    const timing = action
+      ? corpRootRezTimingComponent(input, action, sourceCard)
+      : undefined;
+    if (!timing || timing.value <= 0) {
+      return {
+        productive: false,
+        serverId,
+        value: 0,
+        evidenceCode: `corp_rez_agenda_steal_tax_not_at_latest_relevant_window:${timing?.key ?? "missing_timing_quote"}`,
+      };
+    }
+    return {
+      productive: true,
+      serverId,
+      value: 180,
+      evidenceCode:
+        "corp_rez_agenda_steal_tax_protects_visible_agenda_at_latest_relevant_window",
+    };
+  }
   if (candidate.sourceDefinitionId === "onr_v1_320_encoder-inc") {
     const installedCodeGateIds = input.playerView.servers.flatMap((server) =>
       server.ice.flatMap((ice) => {
@@ -15015,9 +15224,6 @@ function corpExactCardRezSupportAssessment(
               : "corp_rez_tesseract_current_run_is_on_another_fort",
         };
   }
-  const hint = candidate.sourceDefinitionId
-    ? AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId)
-    : undefined;
   const establishesFortWideIceStrengthSupport =
     hint?.effects?.some(
       (effect) =>
@@ -15075,6 +15281,7 @@ function corpConditionalRezSupportWithoutCurrentRouteEvidence(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   sourceCard: VisibleCard,
+  scoreProjects: readonly CorpScoreProjectSignal[],
 ): string | undefined {
   if (!candidate.sourceDefinitionId) return undefined;
   const serverId = candidate.sourceCardInstanceId
@@ -15089,6 +15296,17 @@ function corpConditionalRezSupportWithoutCurrentRouteEvidence(
     );
     if (exactAssessment && !exactAssessment.productive) {
       return exactAssessment.evidenceCode;
+    }
+    if (
+      exactAssessment?.productive === true &&
+      !corpCardRoutePreservesScoreReserve(
+        input,
+        candidate,
+        serverId,
+        scoreProjects,
+      ).preservesReserve
+    ) {
+      return "corp_rez_exact_card_support_breaks_score_reserve";
     }
   }
   const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
@@ -15757,6 +15975,7 @@ type CorpDefensiveUpgradePlacement = {
 function corpDefensiveUpgradePlacement(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpDefensiveUpgradePlacement | undefined {
   if (
     candidate.semanticActionType !== "install.card" ||
@@ -15772,7 +15991,27 @@ function corpDefensiveUpgradePlacement(
       hint?.remoteRole?.kind === "scoring_protection" &&
       hint.remoteRole.serverScope === "fort" &&
       hint.functionSignals?.includes("remote.scoring_protection") === true &&
-      hint.functionSignals.includes("run.corp_pay_or_end_run"));
+      hint.functionSignals.includes("run.corp_pay_or_end_run")) ||
+    (hint?.remoteRole?.kind === "agenda_steal_tax" &&
+      hint.remoteRole.serverScope === "fort" &&
+      hint.planRoles?.includes("remote_upgrade_tax") === true &&
+      hint.planRoles.includes("protect_remote") &&
+      hint.functionSignals?.includes("remote.agenda_steal_tax") === true &&
+      hint.functionSignals.includes("tax.runner_credit") &&
+      hint.effects?.some(
+        (effect) =>
+          effect.kind === "run_tax" &&
+          effect.scope === "accessed_card" &&
+          effect.timing === "on_access" &&
+          typeof effect.amount === "number" &&
+          effect.amount > 0,
+      ) === true &&
+      hint.effects.some(
+        (effect) =>
+          effect.kind === "remote_protection" &&
+          effect.scope === "fort" &&
+          effect.timing === "persistent",
+      ));
   const legalAction = input.legalActions.find(
     (action) => action.actionId === candidate.actionId,
   );
@@ -15857,16 +16096,27 @@ function corpDefensiveUpgradePlacement(
       component.value > 0)
       ? `corp_defense_support_install:${serverId}:${component.key}`
       : `corp_defense_support_rejected:${serverId}:${placement.reason}:${component.key}`;
+  const reserveAssessment = corpCardRoutePreservesScoreReserve(
+    input,
+    candidate,
+    serverId,
+    scoreProjects,
+  );
   if (
-    !activeRegionReplacement &&
-    (placement.recommendation !== "allow" ||
-      placement.candidateActiveUtility.length === 0 ||
-      component.value <= 0)
+    (!activeRegionReplacement &&
+      (placement.recommendation !== "allow" ||
+        placement.candidateActiveUtility.length === 0 ||
+        component.value <= 0)) ||
+    !reserveAssessment.preservesReserve
   ) {
-    return { evidenceCode };
+    return {
+      evidenceCode: reserveAssessment.preservesReserve
+        ? evidenceCode
+        : `corp_defense_support_rejected:${serverId}:score_reserve:${reserveAssessment.requiredCreditsAfterAction}`,
+    };
   }
   return {
-    evidenceCode,
+    evidenceCode: `${evidenceCode}:reserve_after_action:${reserveAssessment.requiredCreditsAfterAction}`,
     signal: {
       kind: "generic",
       defenseId: `install-defense-support:${candidate.sourceCardInstanceId}:${serverId}`,
@@ -15876,9 +16126,38 @@ function corpDefensiveUpgradePlacement(
       actionIds: [candidate.actionId],
       urgent: false,
       value: 100 + Math.max(0, component.value),
-      evidenceCode,
+      evidenceCode: `${evidenceCode}:reserve_after_action:${reserveAssessment.requiredCreditsAfterAction}`,
     },
   };
+}
+
+function corpCardRoutePreservesScoreReserve(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  serverId: string,
+  scoreProjects: readonly CorpScoreProjectSignal[],
+): Readonly<{
+  preservesReserve: boolean;
+  requiredCreditsAfterAction: number;
+}> {
+  const requiredCreditsAfterAction = Math.max(
+    0,
+    ...scoreProjects
+      .filter((project) => project.serverId === serverId)
+      .map(
+        (project) =>
+          project.continuationReserve?.requiredCreditsBeforeNextCorpTurn ?? 0,
+      ),
+  );
+  const creditCost = candidate.costProfile.creditCost;
+  const preservesReserve =
+    candidate.costProfile.costKnownStatus === "known" &&
+    candidate.costProfile.additionalCosts.length === 0 &&
+    Number.isSafeInteger(creditCost) &&
+    creditCost !== undefined &&
+    creditCost >= 0 &&
+    input.playerView.own.credits - creditCost >= requiredCreditsAfterAction;
+  return { preservesReserve, requiredCreditsAfterAction };
 }
 
 type CorpScoreAccelerationSetupBinding = Readonly<{
@@ -15957,6 +16236,7 @@ function corpCardDevelopmentSignals(
   economyNeeds: CorpCorePlanDomain["economyNeeds"],
   defenseDispositionActionIds: ReadonlySet<string>,
   scoreSetupBinding: CorpScoreAccelerationSetupBinding | undefined,
+  scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpPlanDomain["handManagement"] {
   return uniqueBy(
     candidates.flatMap((candidate): CorpPlanDomain["handManagement"] => {
@@ -16001,7 +16281,8 @@ function corpCardDevelopmentSignals(
         (card) => card.instanceId === candidate.sourceCardInstanceId,
       );
       if (!sourceCard) return [];
-      if (corpDefensiveUpgradePlacement(input, candidate)) return [];
+      if (corpDefensiveUpgradePlacement(input, candidate, scoreProjects))
+        return [];
       const ownedByPunishPlan = corpDefinitionSupportsPunishPlan(
         candidate.sourceDefinitionId,
       );
@@ -16021,6 +16302,7 @@ function corpCardDevelopmentSignals(
         (signal) =>
           (signal.kind === "develop_campaign" ||
             signal.kind === "convert_immediate_operation" ||
+            signal.kind === "convert_installed_asset_payout" ||
             signal.kind === "prepare_immediate_operation") &&
           signal.actionIds.includes(candidate.actionId),
       );

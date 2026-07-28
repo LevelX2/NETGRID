@@ -120,6 +120,13 @@ export function corpUpgradeInstallPlacementComponent(
   }
 
   if (
+    hasSignal(signals, "remote.agenda_steal_tax") ||
+    hasSignal(signals, "remote_role:agenda_steal_tax")
+  ) {
+    return agendaStealTaxPlacementComponent(params.serverId, server, evidence);
+  }
+
+  if (
     params.actionSemanticCandidate?.sourceDefinitionId ===
     "onr_v1_358_dr-dreff"
   ) {
@@ -168,6 +175,45 @@ export function corpUpgradeInstallPlacementComponent(
   }
 
   return undefined;
+}
+
+function agendaStealTaxPlacementComponent(
+  serverId: string | undefined,
+  server: VisibleCorpServer | undefined,
+  evidence: string[],
+): AiDecisionScoreComponent {
+  if (!isRemoteServerId(serverId) || serverId === "new_remote") {
+    return {
+      key: "corp_upgrade_install_placement_mismatch",
+      label: "Upgrade-Zielserver unpassend",
+      value: -5200,
+      reason: [
+        ...evidence,
+        "mismatch:agenda_steal_tax_requires_existing_remote",
+      ].join("|"),
+    };
+  }
+  if (serverHasScorelineRoot(server)) {
+    return {
+      key: "corp_upgrade_install_placement_fit",
+      label: "Upgrade-Zielserver passend",
+      value: 1900,
+      reason: [
+        ...evidence,
+        "fit:agenda_steal_tax_active_scoreline_remote",
+      ].join("|"),
+    };
+  }
+  return {
+    key: "corp_upgrade_install_placement_defer",
+    label: "Upgrade-Placement vertagen",
+    value: -2100,
+    reason: [
+      ...evidence,
+      "defer_reason:no_visible_agenda_for_steal_tax",
+      `server_found:${server !== undefined}`,
+    ].join("|"),
+  };
 }
 
 export function corpRegionReplacementComponent(
@@ -488,6 +534,13 @@ function activeUpgradeUtility(
       signals.has("remote.agenda_difficulty_discount"))
   ) {
     utility.add("score.agenda_difficulty_discount");
+  }
+  if (
+    agendas.length > 0 &&
+    (signals.has("remote.agenda_steal_tax") ||
+      signals.has("remote_role:agenda_steal_tax"))
+  ) {
+    utility.add("remote.agenda_steal_tax");
   }
   if (
     agendas.length === 0 &&

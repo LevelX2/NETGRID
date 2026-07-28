@@ -316,6 +316,34 @@ export type CorpEconomyImmediateOperationSignal = CorpEconomySignalBase & {
   };
 };
 
+export type CorpEconomyInstalledAssetWithdrawalSignal =
+  CorpEconomySignalBase & {
+    kind: "convert_installed_asset_payout";
+    sourceInstanceId: string;
+    sourceDefinitionId: string;
+    actionIds: [string];
+    conversion: {
+      clickCost: number;
+      creditCost: number;
+      grossLiquidCreditGain: number;
+      netLiquidCreditGain: number;
+      cardsDrawn: 0;
+      cardsConsumed: 0;
+      netHandDelta: 0;
+      payoutMode: "fixed";
+      reliability: "guaranteed";
+      source: "legal_action_payload";
+      hostedCreditTakeMode: "up_to_amount_if_available" | "all";
+    };
+    cadence: {
+      kind: "single_action_revalidate";
+      maximumConversions: 1;
+    };
+    completion: {
+      kind: "source_pool_revalidated";
+    };
+  };
+
 export type CorpEconomyOperationThresholdSignal = CorpEconomySignalBase & {
   kind: "prepare_immediate_operation";
   sourceInstanceId: string;
@@ -347,6 +375,7 @@ export type CorpEconomyNeedSignal =
   | CorpEconomyLiquidityDevelopmentSignal
   | CorpEconomyDevelopmentSignal
   | CorpEconomyImmediateOperationSignal
+  | CorpEconomyInstalledAssetWithdrawalSignal
   | CorpEconomyOperationThresholdSignal;
 
 export type CorpCorePlanDomain = {
@@ -911,6 +940,7 @@ function economyModule(): PlanModule {
           (signal) =>
             signal.kind === "develop_campaign" ||
             signal.kind === "convert_immediate_operation" ||
+            signal.kind === "convert_installed_asset_payout" ||
             signal.kind === "prepare_immediate_operation" ||
             signal.kind === "develop_liquidity" ||
             signal.gap > 0,
@@ -924,6 +954,7 @@ function economyModule(): PlanModule {
             target:
               signal.kind === "develop_campaign" ||
               signal.kind === "convert_immediate_operation" ||
+              signal.kind === "convert_installed_asset_payout" ||
               signal.kind === "prepare_immediate_operation"
                 ? { kind: "card", id: signal.sourceInstanceId }
                 : { kind: "capability", id: signal.needId },
@@ -1235,6 +1266,7 @@ export function corpEconomyPriorityClass(
   if (signal.kind === "parent_funding")
     return signal.delegatedPriorityClass ?? signal.parentPriorityClass ?? "P5";
   if (signal.kind === "convert_immediate_operation") return "P4";
+  if (signal.kind === "convert_installed_asset_payout") return "P4";
   if (signal.kind === "prepare_immediate_operation") return "P4";
   if (signal.kind === "develop_liquidity") return "P6";
   if (signal.kind === "reserve" && signal.priorityClass)
@@ -1255,6 +1287,9 @@ function economyAssessmentValue(signal: CorpEconomyNeedSignal): number {
       signal.conversion.netLiquidCreditGain * 20 +
       signal.conversion.cardsDrawn * 20
     );
+  }
+  if (signal.kind === "convert_installed_asset_payout") {
+    return signal.conversion.netLiquidCreditGain * 20;
   }
   if (signal.kind === "prepare_immediate_operation") {
     return 50 + signal.futureConversion.strategicEconomyValue * 10;
@@ -3911,6 +3946,7 @@ function economyCandidates(
   const exactFundingHead =
     signal.kind === "develop_campaign" ||
     signal.kind === "convert_immediate_operation" ||
+    signal.kind === "convert_installed_asset_payout" ||
     signal.kind === "prepare_immediate_operation" ||
     signal.kind === "develop_liquidity"
       ? undefined
@@ -3922,6 +3958,10 @@ function economyCandidates(
     signal.kind === "develop_campaign" ? new Set(signal.actionIds) : undefined;
   const immediateOperationActionId =
     signal.kind === "convert_immediate_operation"
+      ? signal.actionIds[0]
+      : undefined;
+  const installedAssetPayoutActionId =
+    signal.kind === "convert_installed_asset_payout"
       ? signal.actionIds[0]
       : undefined;
   const operationThresholdActionId =
@@ -3946,6 +3986,9 @@ function economyCandidates(
           : signal.kind === "convert_immediate_operation"
             ? candidate.actionId === immediateOperationActionId &&
               immediateOperationCandidateMatchesSignal(candidate, signal)
+            : signal.kind === "convert_installed_asset_payout"
+              ? candidate.actionId === installedAssetPayoutActionId &&
+                installedAssetPayoutCandidateMatchesSignal(candidate, signal)
             : signal.kind === "prepare_immediate_operation"
               ? candidate.actionId === operationThresholdActionId &&
                 corpExactBasicLiquidCreditCandidate(candidate)
@@ -3963,6 +4006,8 @@ function economyCandidates(
           ? economyDevelopmentStepValue(context, candidate, signal)
           : signal.kind === "convert_immediate_operation"
             ? economyImmediateOperationStepValue(signal)
+            : signal.kind === "convert_installed_asset_payout"
+              ? economyInstalledAssetPayoutStepValue(signal)
             : signal.kind === "prepare_immediate_operation"
               ? economyOperationThresholdStepValue(signal)
               : signal.kind === "develop_liquidity"
@@ -4265,6 +4310,8 @@ function economyMaterialization(
           ? `Advance the admitted ${signal.sourceDefinitionId} economy campaign from ${signal.phase} to ${signal.completion.expectedState}.`
           : signal.kind === "convert_immediate_operation"
             ? `Convert the Engine-certified immediate ${signal.sourceDefinitionId} operation once, consuming its exact HQ source.`
+            : signal.kind === "convert_installed_asset_payout"
+              ? `Take the exact currently quoted hosted-credit payout from ${signal.sourceDefinitionId}, then revalidate the remaining source pool.`
             : signal.kind === "prepare_immediate_operation"
               ? `Take the exact Engine-certified Basic Credit once to make the reviewed ${signal.sourceDefinitionId} operation legal, then revalidate its new LegalAction.`
               : signal.kind === "develop_liquidity"
@@ -4306,6 +4353,38 @@ function immediateOperationCandidateMatchesSignal(
   );
 }
 
+function installedAssetPayoutCandidateMatchesSignal(
+  candidate: ActionSemanticCandidate,
+  signal: CorpEconomyInstalledAssetWithdrawalSignal,
+): boolean {
+  const projection = candidate.economyProjection;
+  return (
+    candidate.sourceKind === "card" &&
+    candidate.sourceCardInstanceId === signal.sourceInstanceId &&
+    (candidate.sourceDefinitionId === undefined ||
+      candidate.sourceDefinitionId === signal.sourceDefinitionId) &&
+    candidate.semanticActionType === "economy.gain_credit" &&
+    candidate.actionType === "activated_card_ability" &&
+    candidate.costProfile.costKnownStatus === "known" &&
+    candidate.costProfile.additionalCosts.length === 0 &&
+    projection?.kind === "immediate_liquid" &&
+    projection.timing === "immediate" &&
+    projection.creditRestriction === "general" &&
+    projection.clickCost === signal.conversion.clickCost &&
+    projection.creditCost === signal.conversion.creditCost &&
+    projection.grossLiquidCreditGain ===
+      signal.conversion.grossLiquidCreditGain &&
+    projection.netLiquidCreditGain === signal.conversion.netLiquidCreditGain &&
+    projection.cardsDrawn === 0 &&
+    projection.cardsConsumed === 0 &&
+    projection.netHandDelta === 0 &&
+    projection.payoutMode === "fixed" &&
+    projection.reliability === "guaranteed" &&
+    projection.source === "legal_action_payload" &&
+    projection.confidence === "high"
+  );
+}
+
 function economyImmediateOperationStepValue(
   signal: CorpEconomyImmediateOperationSignal,
 ): number {
@@ -4313,6 +4392,12 @@ function economyImmediateOperationStepValue(
     signal.conversion.netLiquidCreditGain * 20 +
     signal.conversion.cardsDrawn * 20
   );
+}
+
+function economyInstalledAssetPayoutStepValue(
+  signal: CorpEconomyInstalledAssetWithdrawalSignal,
+): number {
+  return signal.conversion.netLiquidCreditGain * 20;
 }
 
 function economyOperationThresholdStepValue(

@@ -1,6 +1,6 @@
 # Corp-Handverwertung und Opening-Rush – Worktree-Paketprozess
 
-Status: **P0 bis P4 abgeschlossen; P5 aktiv**
+Status: **P0 bis P5 abgeschlossen; P6 aktiv**
 
 Stand: 2026-07-28
 
@@ -567,4 +567,12 @@ Markiere das Goal erst danach als complete.
   kapazitätsrelevanten Draw nur bis zur nächsten State-Revalidierung.
   Zielgebundene Score-Defense- und begrenzte echte Answer-Suchen bleiben
   erhalten.
-- P5: aktiv.
+- P5: abgeschlossen; BBS Whispering Campaign besitzt neben dem bestehenden
+  Install-/Rez-Campaign-Vertrag nun eine exakt LegalAction-gebundene,
+  revalidierte Hosted-Credit-Auszahlung unter `corp.economy`. Red Herrings
+  verwendet die vorhandene Upgrade-Placement- und Defense-Struktur nur bei
+  sichtbarer Agenda im exakten Remote, erhaltener Score-Reserve und beim Rez
+  erst im letzten relevanten Runfenster. Setup! und Vapor Ops behalten ihre
+  vorhandenen Ambush- beziehungsweise Score-Owner. Lesley Major bleibt als
+  enger, fail-closed Follow-up ohne generischen Asset-Fallback dokumentiert.
+- P6: aktiv.

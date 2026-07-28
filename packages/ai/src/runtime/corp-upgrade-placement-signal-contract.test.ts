@@ -82,6 +82,43 @@ describe("Corp upgrade placement signal contract", () => {
     );
   });
 
+  it("places an agenda-steal tax only beside a visible agenda", () => {
+    const active = placementComponent(
+      "onr_v1_366_red-herrings",
+      "remote_1",
+      {
+        remoteRoot: [
+          visibleCard("remote-agenda", "simple_agenda", "agenda", {
+            advancementRequirement: 3,
+          }),
+        ],
+      },
+    );
+    const empty = placementComponent(
+      "onr_v1_366_red-herrings",
+      "remote_1",
+    );
+
+    expect(active).toEqual(
+      expect.objectContaining({
+        key: "corp_upgrade_install_placement_fit",
+        value: 1900,
+        reason: expect.stringContaining(
+          "fit:agenda_steal_tax_active_scoreline_remote",
+        ),
+      }),
+    );
+    expect(empty).toEqual(
+      expect.objectContaining({
+        key: "corp_upgrade_install_placement_defer",
+        value: -2100,
+        reason: expect.stringContaining(
+          "defer_reason:no_visible_agenda_for_steal_tax",
+        ),
+      }),
+    );
+  });
+
   it("keeps Panic Button as an HQ-only counterexample", () => {
     expect(
       placementComponent("onr_proteus_067_panic-button", "hq"),
