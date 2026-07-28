@@ -35,7 +35,6 @@ export type MatchStartStorageSettings = {
   playerClockMode: MatchStartPlayerClockMode;
   playerClockMinutes: MatchStartPlayerClockMinutes;
   playerClockGraceSeconds: MatchStartPlayerClockGraceSeconds;
-  seed: string;
   runnerDeckSource: MatchStartDeckSource;
   corpDeckSource: MatchStartDeckSource;
   participantBRunnerDeckSource: MatchStartDeckSource;
@@ -98,7 +97,6 @@ export function parseMatchStartSettingsFromStorage(
       next.playerClockMinutes = parsed.playerClockMinutes;
     if (isMatchStartPlayerClockGraceSeconds(parsed.playerClockGraceSeconds))
       next.playerClockGraceSeconds = parsed.playerClockGraceSeconds;
-    if (typeof parsed.seed === "string") next.seed = parsed.seed;
     if (isMatchStartDeckSource(parsed.runnerDeckSource))
       next.runnerDeckSource = parsed.runnerDeckSource;
     if (isMatchStartDeckSource(parsed.corpDeckSource))

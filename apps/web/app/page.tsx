@@ -1065,9 +1065,7 @@ export default function Page() {
         setTestSetupMode(storedMatchStartSettings.testSetupMode);
       if (storedMatchStartSettings.countdownSeconds)
         setCountdownSeconds(storedMatchStartSettings.countdownSeconds);
-      if (typeof storedMatchStartSettings.seed === "string")
-        setSeed(normalizeMatchSeed(storedMatchStartSettings.seed));
-      else setSeed(createMatchSeed());
+      setSeed(createMatchSeed());
       if (storedMatchStartSettings.runnerDeckSource)
         setRunnerDeckSource(storedMatchStartSettings.runnerDeckSource);
       if (storedMatchStartSettings.corpDeckSource)
@@ -1750,7 +1748,6 @@ export default function Page() {
         aiDeckPolicy,
         testSetupMode,
         countdownSeconds,
-        seed,
         runnerDeckSource,
         corpDeckSource,
         participantBRunnerDeckSource,
@@ -1782,7 +1779,6 @@ export default function Page() {
     aiDeckPolicy,
     testSetupMode,
     countdownSeconds,
-    seed,
     runnerDeckSource,
     corpDeckSource,
     participantBRunnerDeckSource,
@@ -2284,8 +2280,7 @@ export default function Page() {
       setPlayerClockMinutes(stored.playerClockMinutes);
     if (stored.playerClockGraceSeconds !== undefined)
       setPlayerClockGraceSeconds(stored.playerClockGraceSeconds);
-    if (typeof stored.seed === "string")
-      setSeed(normalizeMatchSeed(stored.seed));
+    setSeed(createMatchSeed());
     if (stored.runnerDeckSource) setRunnerDeckSource(stored.runnerDeckSource);
     if (stored.corpDeckSource) setCorpDeckSource(stored.corpDeckSource);
     if (stored.participantBRunnerDeckSource)

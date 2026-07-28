@@ -21,7 +21,6 @@ const settings: MatchStartStorageSettings = {
   playerClockMode: "player_clock",
   playerClockMinutes: 20,
   playerClockGraceSeconds: 15,
-  seed: "seed-v1",
   runnerDeckSource: "local",
   corpDeckSource: "snapshot",
   participantBRunnerDeckSource: "random_standard",
@@ -92,7 +91,15 @@ describe("match start local settings storage", () => {
   it("stores no session or token fields in the JSON schema", () => {
     const serialized = serializeMatchStartSettingsForStorage(settings);
     expect(serialized).not.toMatch(
-      /sessionToken|reconnectToken|joinToken|hostSessionToken|hostReconnectToken/i,
+      /seed|sessionToken|reconnectToken|joinToken|hostSessionToken|hostReconnectToken/i,
     );
+  });
+
+  it("ignores legacy persisted seeds so a reload cannot repeat a match seed", () => {
+    const parsed = parseMatchStartSettingsFromStorage(
+      JSON.stringify({ v: 1, seed: "stale-seed", playMode: "human_vs_ai" }),
+    );
+
+    expect(parsed).toEqual({ playMode: "human_vs_ai" });
   });
 });
