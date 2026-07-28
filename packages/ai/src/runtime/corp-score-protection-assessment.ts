@@ -17,7 +17,6 @@ import {
   projectBreakerCreditPayment,
   runnerRunPathCreditBudgetWithVisiblePools,
   spendBreakerCreditsAndApplySideEffects,
-  visibleRunnerRunPathCreditBudgetForRig,
 } from "../run-analysis/visible-run-credit-budget";
 
 export type ExactProbability = Readonly<{
@@ -81,7 +80,6 @@ export type UnknownCorpScoreProtectionAssessment =
         | "unknown_rezzed_ice"
         | "unknown_runner_rig_card"
         | "invalid_effective_run_quote"
-        | "unsupported_runner_credit_pools"
         | "unsupported_runner_access_effect"
         | "unsupported_public_staged_breaker"
         | "unsupported_breaker_combination"
@@ -201,6 +199,9 @@ export function assessCorpScoreProtection(
       stagedBreakers.candidates,
     );
   }
+  const runnerRig = input.runnerRig.filter(
+    (card) => !cardIsInactiveConcealedRunnerResource(card),
+  );
   const threshold = rationalFromExactProbability(
     input.maximumRunnerAccessSuccessProbability,
   );
@@ -229,7 +230,7 @@ export function assessCorpScoreProtection(
       ["scoreProtectionKnown:false", "duplicateIceInstance:true"],
     );
   }
-  const rigInstanceIds = input.runnerRig.map((card) => card.instanceId);
+  const rigInstanceIds = runnerRig.map((card) => card.instanceId);
   if (
     rigInstanceIds.some((instanceId) => !validIdentifier(instanceId)) ||
     new Set(rigInstanceIds).size !== rigInstanceIds.length
@@ -241,7 +242,7 @@ export function assessCorpScoreProtection(
     );
   }
   if (
-    input.runnerRig.some((card) =>
+    runnerRig.some((card) =>
       runnerRigCardRequiresUnsupportedAccessProjection(card),
     )
   ) {
@@ -251,34 +252,11 @@ export function assessCorpScoreProtection(
       ["scoreProtectionKnown:false", "unsupportedRunnerAccessEffect:true"],
     );
   }
-  if (input.runnerRig.some((card) => !validRunnerRigCard(card))) {
+  if (runnerRig.some((card) => !validRunnerRigCard(card))) {
     return unknownAssessment(
       input.maximumRunnerAccessSuccessProbability,
       "unknown_runner_rig_card",
       ["scoreProtectionKnown:false", "unknownRunnerRigCard:true"],
-    );
-  }
-  const visiblePools = visibleRunnerRunPathCreditBudgetForRig(input.runnerRig);
-  const hasRestrictedBreakerCredits =
-    visiblePools.icebreakerCredits > 0 ||
-    visiblePools.nonNoisyIcebreakerCredits > 0 ||
-    visiblePools.killerCredits > 0 ||
-    visiblePools.stealthNonNoisyIcebreakerCredits > 0 ||
-    Object.values(visiblePools.hostedIcebreakerCreditsByBreakerInstanceId).some(
-      (amount) => amount > 0,
-    );
-  if (
-    hasRestrictedBreakerCredits &&
-    !input.runnerRig.some((card) => cardIsIcebreaker(card))
-  ) {
-    return unknownAssessment(
-      input.maximumRunnerAccessSuccessProbability,
-      "unsupported_runner_credit_pools",
-      [
-        "scoreProtectionKnown:false",
-        "visibleRunnerCreditPools:true",
-        "visibleIcebreakerMissing:true",
-      ],
     );
   }
   const activeIce = input.serverIce
@@ -311,12 +289,12 @@ export function assessCorpScoreProtection(
       creditBudget: normalizeRunnerRunPathCreditBudget(
         runnerRunPathCreditBudgetWithVisiblePools(
           input.runnerCredits,
-          input.runnerRig,
+          runnerRig,
         ),
       ),
       probability: ONE,
       breakerStrengths: new Map(
-        input.runnerRig
+        runnerRig
           .filter((card) => cardIsIcebreaker(card))
           .map((card) => [card.instanceId, card.strength!]),
       ),
@@ -331,7 +309,7 @@ export function assessCorpScoreProtection(
       const breakStates = accessPreservingBreakStates({
         state,
         ice,
-        runnerRig: input.runnerRig,
+        runnerRig,
       });
       if (breakStates.knowledge === "unknown") {
         return unknownAssessment(
@@ -527,18 +505,51 @@ function supportedSubroutine(
   subroutine: SubroutineDefinition | VisibleEffectiveSubroutine,
 ): boolean {
   if (isHardEndTheRunSubroutine(subroutine)) return true;
-  if (subroutine.type !== "initiate_trace") return false;
-  const effect = subroutine.traceSuccessEffect;
-  if (effect === undefined) return false;
-  return (
-    effect.type === "none" ||
-    effect.type === "add_tag" ||
-    effect.type === "add_counter" ||
-    effect.type === "add_tag_and_counter" ||
-    effect.type === "add_tags_by_trace_margin_over_runner_link" ||
-    effect.type === "trash_runner_resource_and_add_tag"
+  if (subroutine.type === "initiate_trace") {
+    const effect = subroutine.traceSuccessEffect;
+    if (effect === undefined) return false;
+    return (
+      effect.type === "none" ||
+      effect.type === "add_tag" ||
+      effect.type === "add_counter" ||
+      effect.type === "add_tag_and_counter" ||
+      effect.type === "add_tags_by_trace_margin_over_runner_link" ||
+      effect.type === "trash_runner_resource_and_add_tag"
+    );
+  }
+  return CONSERVATIVE_NON_ACCESS_PREVENTING_SUBROUTINE_TYPES.has(
+    subroutine.type,
   );
 }
+
+/**
+ * These known Corp effects can be ignored safely by the access-probability
+ * model: doing so assumes the Runner still accesses with no tax or damage
+ * reduction. A separate defense-effect classifier may value their public
+ * encounter impact, but this exact model never invents access prevention.
+ */
+const CONSERVATIVE_NON_ACCESS_PREVENTING_SUBROUTINE_TYPES = new Set<
+  SubroutineDefinition["type"]
+>([
+  "corp_gain_credit",
+  "runner_lose_credits",
+  "give_runner_tag",
+  "do_damage",
+  "random_damage",
+  "trash_installed_program",
+  "trash_installed_program_unless_runner_pays",
+  "set_run_encounter_tax",
+  "set_run_break_subroutine_cost_modifier",
+  "set_run_future_strength_bonus",
+  "set_next_encounter_unless_fully_break_damage",
+  "set_next_encounter_lock",
+  "set_next_encounter_no_break_subroutines",
+  "set_run_jack_out_lock",
+  "set_runner_forgo_next_action",
+  "set_run_jack_out_additional_cost",
+  "set_run_pass_rezzed_ice_program_trash",
+  "rewind_run_to_rezzed_ice_by_die",
+]);
 
 function isHardEndTheRunSubroutine(
   subroutine: SubroutineDefinition | VisibleEffectiveSubroutine,
@@ -904,6 +915,16 @@ function runnerRigCardRequiresUnsupportedAccessProjection(
   );
 }
 
+function cardIsInactiveConcealedRunnerResource(card: VisibleCard): boolean {
+  return (
+    card.known === false &&
+    card.concealed === true &&
+    card.hiddenRunnerResource === true &&
+    card.type === "resource" &&
+    card.rezzed === false
+  );
+}
+
 function subtypeKey(value: string): string {
   return value
     .trim()
@@ -1197,7 +1218,7 @@ function assessCorpScoreProtectionWithPreparedBreakers(
   > = [];
   if (base.knowledge === "known") {
     assessments.push({ assessment: base, stagedEvidence: [] });
-  } else if (base.unknownReason !== "unsupported_runner_credit_pools") {
+  } else {
     return base;
   }
 

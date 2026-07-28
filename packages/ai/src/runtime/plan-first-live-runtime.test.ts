@@ -3537,7 +3537,12 @@ describe("authoritative plan-first live runtime", () => {
     expect(JSON.stringify(firstPortfolio)).toContain(
       '"kind":"score_protection_draw"',
     );
-    expect(JSON.stringify(firstPortfolio)).not.toContain("sourceDefinitionIds");
+    expect(JSON.stringify(firstPortfolio)).toContain(
+      '"sourceDefinitionIds":["onr_v1_249_hunter"]',
+    );
+    expect(JSON.stringify(firstPortfolio)).toContain(
+      '"installRoute":{"disposition":"productive"',
+    );
     expect(JSON.stringify(firstPortfolio)).not.toContain(
       '"kind":"score_protection_install"',
     );
@@ -4017,8 +4022,7 @@ describe("authoritative plan-first live runtime", () => {
     unquoted.playerView.own.credits = afterReserve.playerView.own.credits;
     unquoted.playerView.own.stackOrRdCount =
       afterReserve.playerView.own.stackOrRdCount;
-    unquoted.playerView.own.gripOrHq =
-      afterReserve.playerView.own.gripOrHq;
+    unquoted.playerView.own.gripOrHq = afterReserve.playerView.own.gripOrHq;
     unquoted.playerView.servers = afterReserve.playerView.servers;
     expect(() =>
       liveContext().chooseSemanticRuntimeAction(unquoted, {}),
@@ -5423,9 +5427,9 @@ describe("authoritative plan-first live runtime", () => {
       actionId: "install-agenda",
       reasonCode: "plan_first.corp.score_agenda",
     });
-    expect(JSON.stringify(residentPlanPortfolioSnapshot(revalidated))).toContain(
-      '"hashBucket":21',
-    );
+    expect(
+      JSON.stringify(residentPlanPortfolioSnapshot(revalidated)),
+    ).toContain('"hashBucket":21');
   });
 
   it("keeps a public Shell-Traders breaker outside opening-rush admission", () => {

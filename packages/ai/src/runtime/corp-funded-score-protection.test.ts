@@ -585,6 +585,12 @@ describe("projectCorpFundedIceInstallRoute", () => {
       knowledge: "known",
       effect: "no_progress",
       funded: false,
+      selectedRezCosts: [
+        {
+          iceInstanceId: "hunter",
+          source: "engine_rez_cost_quote",
+        },
+      ],
       after: {
         protection: {
           runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },

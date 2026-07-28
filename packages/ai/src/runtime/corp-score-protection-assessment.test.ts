@@ -52,6 +52,21 @@ describe("assessCorpScoreProtection", () => {
     });
   });
 
+  it("conservatively keeps access at 1 through known non-ETR encounter disruption", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [ice("shock-r", "onr_v1_268_shock-r")],
+      runnerRig: [],
+      runnerCredits: 0,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+      protectsScore: false,
+    });
+  });
+
   it.each([
     ["Filter", "onr_v1_244_filter"],
     ["Data Wall 2.0", "onr_v1_238_data-wall-2-0"],
@@ -306,6 +321,32 @@ describe("assessCorpScoreProtection", () => {
       knowledge: "unknown",
       protectsScore: false,
       unknownReason: "unknown_runner_rig_card",
+    });
+  });
+
+  it("ignores an inactive concealed Runner resource", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [ice("filter", "onr_v1_244_filter")],
+      runnerRig: [
+        {
+          instanceId: "unknown-resource",
+          known: false,
+          concealed: true,
+          hiddenRunnerResource: true,
+          type: "resource",
+          subtypes: ["hidden_runner_resource"],
+          rezzed: false,
+          owner: "runner",
+        } as VisibleCard,
+      ],
+      runnerCredits: 0,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      protectsScore: true,
     });
   });
 
@@ -588,7 +629,7 @@ describe("assessCorpScoreProtection", () => {
     });
   });
 
-  it("fails closed when restricted breaker credits have no visible icebreaker", () => {
+  it("ignores restricted breaker credits when no visible icebreaker can spend them", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [ice("filter", "onr_v1_244_filter")],
       runnerRig: [
@@ -603,9 +644,9 @@ describe("assessCorpScoreProtection", () => {
     });
 
     expect(assessment).toMatchObject({
-      knowledge: "unknown",
-      protectsScore: false,
-      unknownReason: "unsupported_runner_credit_pools",
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      protectsScore: true,
     });
   });
 

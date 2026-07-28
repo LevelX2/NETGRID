@@ -397,6 +397,7 @@ export function assessBestFundedCorpScoreProtection(
   );
   let bestSatisfying: EnumeratedAssessment | undefined;
   let bestProgress: EnumeratedAssessment | undefined;
+  let bestPostInstallSourceProgress: EnumeratedAssessment | undefined;
   let minimumSatisfying: EnumeratedAssessment | undefined;
   for (const selection of selections) {
     const selectedById = new Map(
@@ -472,9 +473,18 @@ export function assessBestFundedCorpScoreProtection(
       ) {
         bestProgress = assessment;
       }
+      if (
+        !protection.protectsScore &&
+        input.postInstallQuoteCardId !== undefined &&
+        selectedById.has(input.postInstallQuoteCardId) &&
+        (!bestPostInstallSourceProgress ||
+          progressAssessmentIsBetter(assessment, bestPostInstallSourceProgress))
+      ) {
+        bestPostInstallSourceProgress = assessment;
+      }
     }
   }
-  const best = bestSatisfying ?? bestProgress;
+  const best = bestSatisfying ?? bestPostInstallSourceProgress ?? bestProgress;
   if (!best) {
     return unknownFundedAssessment(
       input,

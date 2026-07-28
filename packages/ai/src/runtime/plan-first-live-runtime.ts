@@ -164,6 +164,7 @@ import {
 } from "./corp-upgrade-placement";
 import { corpKnownAgendaInventory } from "./corp-known-agenda-inventory";
 import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
+import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 import { corpRootRezTimingComponent } from "./corp-scoreline/semantic-runtime-corp-score-ice-components";
 import {
   corpMissingConcreteDefenseDrawNeed,
@@ -9589,6 +9590,18 @@ function corpGlobalDefenseInstallRouteAssessment(
   if (
     projection.preservesReserves &&
     (projection.effect === "progress" || projection.effect === "satisfied")
+  ) {
+    return { knowledge: "known", disposition: "productive", projection };
+  }
+  const sourceDefense = visibleCorpIceDefenseProfile(
+    input.playerView.own.gripOrHq.find(
+      (card) => card.instanceId === projection.sourceCardInstanceId,
+    ),
+  );
+  if (
+    projection.preservesReserves &&
+    (sourceDefense.hasMeaningfulTaxOrDamage ||
+      sourceDefense.hasEncounterDisruption)
   ) {
     return { knowledge: "known", disposition: "productive", projection };
   }
