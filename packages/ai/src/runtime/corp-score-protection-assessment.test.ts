@@ -309,6 +309,28 @@ describe("assessCorpScoreProtection", () => {
     });
   });
 
+  it("ignores an unknown installed non-program that cannot be an icebreaker", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [ice("filter", "onr_v1_244_filter")],
+      runnerRig: [
+        {
+          instanceId: "unknown-resource",
+          known: false,
+          type: "resource",
+          owner: "runner",
+        } as VisibleCard,
+      ],
+      runnerCredits: 0,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      protectsScore: true,
+    });
+  });
+
   it("models two visible independent random breakers instead of treating them as unknown", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [ice("data-wall", "onr_v1_238_data-wall-2-0")],
@@ -588,7 +610,7 @@ describe("assessCorpScoreProtection", () => {
     });
   });
 
-  it("fails closed when restricted breaker credits have no visible icebreaker", () => {
+  it("ignores restricted breaker credits when no visible icebreaker can spend them", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [ice("filter", "onr_v1_244_filter")],
       runnerRig: [
@@ -603,9 +625,9 @@ describe("assessCorpScoreProtection", () => {
     });
 
     expect(assessment).toMatchObject({
-      knowledge: "unknown",
-      protectsScore: false,
-      unknownReason: "unsupported_runner_credit_pools",
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      protectsScore: true,
     });
   });
 
