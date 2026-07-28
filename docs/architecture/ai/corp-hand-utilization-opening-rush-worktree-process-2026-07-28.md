@@ -1,6 +1,6 @@
 # Corp-Handverwertung und Opening-Rush – Worktree-Paketprozess
 
-Status: **P0 aktiv**
+Status: **P0 und P1 abgeschlossen; P2 aktiv**
 
 Stand: 2026-07-28
 
@@ -469,3 +469,18 @@ Markiere das Goal erst danach als complete.
   Gegenbeweise zu ignorieren.
 - Main-Merge, Main-Prüfung, Worktree-Entfernung und Branch-Cleanup sind
   vollständig verifiziert.
+
+## Paketstatus
+
+- P0: abgeschlossen in `88c8bc8e7`
+  (`docs(ai): plan corp hand utilization and opening rush`).
+- P1: abgeschlossen; der D5-Checkpoint ist mit Strict-Warmup ab Decision 4
+  ohne Drift capturiert. Der vollständige Warmup ab Decision 1 bleibt durch
+  die historische randomisierte Central-ICE-Bindung bei StateVersion 3
+  infrastrukturell blockiert. Der unveränderte Zieltest ist ausschließlich
+  mit `behavior_regression` rot. Die neun angrenzenden Shell-Traders-,
+  Draw-/Overflow- und Day-Shift-Gegenproben sind grün. Der Deck-Audit erfasst
+  28 eindeutige Karten und weist neben der erwarteten Behavior-Regression
+  zwei vorhandene Consumer-Gaps für BBS Whispering Campaign und Red Herrings
+  aus.
+- P2: aktiv; die roten D5-Erwartungen bleiben unverändert.

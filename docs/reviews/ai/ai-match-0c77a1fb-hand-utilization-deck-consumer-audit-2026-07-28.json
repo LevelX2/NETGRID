@@ -1,0 +1,2890 @@
+{
+  "schemaVersion": "ai-deck-hint-consumer-audit-v2",
+  "semanticSource": "data/ai/ai-card-hints-active.json",
+  "checkpoint": {
+    "path": "data/scenarios/ai-decision-checkpoints/cp-0c77a1fb-02-accounts-before-defense-draw-d5.json",
+    "checkpointId": "cp-0c77a1fb-02-accounts-before-defense-draw-d5",
+    "matchId": "match_0c77a1fb8540644a",
+    "behaviorPassed": false
+  },
+  "scope": {
+    "side": "corp",
+    "capturedUniqueCards": 28,
+    "auditedUniqueCards": 28,
+    "auditedCardCount": 45,
+    "excludedCardIds": []
+  },
+  "cards": [
+    {
+      "cardId": "onr_proteus_007_project-venice",
+      "title": "Project Venice",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "populatedFields": [
+          "actionCapacityProfiles",
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategySupportPairs",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionCapacityProfiles": [
+            "action-card-semantic-profiles",
+            "legal-action-capacity-contract",
+            "action-capacity-runtime-scoring"
+          ],
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [
+          "corp.install_card.corp_onr_proteus_007_project-venice_1.new_remote.corp_onr_proteus_007_project-venice_1"
+        ],
+        "semanticSignals": [
+          "corp.remote_build",
+          "effect:extra_action",
+          "effect_scope:corp",
+          "effect_timing:start_of_turn",
+          "install.card",
+          "install.placement:root",
+          "install.remote",
+          "setup.install"
+        ],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_proteus_008_project-zurich",
+      "title": "Project Zurich",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategySupportPairs",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_proteus_013_caryatid",
+      "title": "Caryatid",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "ice",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "tacticSignals",
+          "targetProfiles",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "targetProfiles": [
+            "action-card-semantic-profiles",
+            "target-choice-semantics"
+          ],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_proteus_021_dog-pile",
+      "title": "Dog Pile",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "ice",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "strategySupportPairs",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_proteus_062_lesley-major",
+      "title": "Lesley Major",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "upgrade",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "strategySupportPairs",
+          "tacticSignals",
+          "targetProfiles",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "targetProfiles": [
+            "action-card-semantic-profiles",
+            "target-choice-semantics"
+          ],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_195_corporate-retreat",
+      "title": "Corporate Retreat",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_206_marine-arcology",
+      "title": "Marine Arcology",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "functionSignals",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "costProfile": [
+            "breaker-ontology-consumer",
+            "deck-doctrine-strategy",
+            "trace-bid-assessment"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 1,
+        "effectKinds": ["gain_credits"],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_214_project-babylon",
+      "title": "Project Babylon",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategySupportPairs",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_216_security-purge",
+      "title": "Security Purge",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "strategySupportPairs",
+          "tacticSignals",
+          "targetProfiles",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "targetProfiles": [
+            "action-card-semantic-profiles",
+            "target-choice-semantics"
+          ],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_231_cortical-scrub",
+      "title": "Cortical Scrub",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "ice",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "strategySupportPairs",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_237_data-wall",
+      "title": "Data Wall",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "ice",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_238_data-wall-2-0",
+      "title": "Data Wall 2.0",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "ice",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_244_filter",
+      "title": "Filter",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "ice",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_245_fire-wall",
+      "title": "Fire Wall",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "ice",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_252_keeper",
+      "title": "Keeper",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "ice",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_261_quandary",
+      "title": "Quandary",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "ice",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_262_razor-wire",
+      "title": "Razor Wire",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "ice",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_269_shotgun-wire",
+      "title": "Shotgun Wire",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "ice",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_281_accounts-receivable",
+      "title": "Accounts Receivable",
+      "quantity": 3,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "operation",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "functionSignals",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "costProfile": [
+            "breaker-ontology-consumer",
+            "deck-doctrine-strategy",
+            "trace-bid-assessment"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 1,
+        "effectKinds": ["gain_credits"],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [
+          "corp.play_operation.corp_onr_v1_281_accounts-receivable_3.corp_onr_v1_281_accounts-receivable_3"
+        ],
+        "semanticSignals": [
+          "economy.action",
+          "economy.card",
+          "economy.recover",
+          "effect:economy",
+          "effect_scope:corp",
+          "effect_timing:action"
+        ],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_290_efficiency-experts",
+      "title": "Efficiency Experts",
+      "quantity": 3,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "operation",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "functionSignals",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "costProfile": [
+            "breaker-ontology-consumer",
+            "deck-doctrine-strategy",
+            "trace-bid-assessment"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 1,
+        "effectKinds": ["gain_credits"],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [
+          "corp.play_operation.corp_onr_v1_290_efficiency-experts_1.corp_onr_v1_290_efficiency-experts_1"
+        ],
+        "semanticSignals": [
+          "economy.action",
+          "economy.card",
+          "economy.recover",
+          "effect:economy",
+          "effect_scope:corp",
+          "effect_timing:action"
+        ],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_292_management-shake-up",
+      "title": "Management Shake-Up",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "operation",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "remoteRole",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "strategySupportPairs",
+          "tacticSignals",
+          "targetProfiles",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "costProfile": [
+            "breaker-ontology-consumer",
+            "deck-doctrine-strategy",
+            "trace-bid-assessment"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "remoteRole": [
+            "deck-doctrine-strategy",
+            "remote-role-ontology-consumer"
+          ],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "targetProfiles": [
+            "action-card-semantic-profiles",
+            "target-choice-semantics"
+          ],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 1,
+        "effectKinds": ["distribute_advancement_counters"],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_295_night-shift",
+      "title": "Night Shift",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "operation",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "functionSignals",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "costProfile": [
+            "breaker-ontology-consumer",
+            "deck-doctrine-strategy",
+            "trace-bid-assessment"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 1,
+        "effectKinds": ["draw_cards", "gain_credits"],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_297_overtime-incentives",
+      "title": "Overtime Incentives",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "operation",
+        "populatedFields": [
+          "actionCapacityProfiles",
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategySupportPairs",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionCapacityProfiles": [
+            "action-card-semantic-profiles",
+            "legal-action-capacity-contract",
+            "action-capacity-runtime-scoring"
+          ],
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 1,
+        "effectKinds": ["gain_actions"],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "title": "Systematic Layoffs",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "operation",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "remoteRole",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "strategySupportPairs",
+          "tacticSignals",
+          "targetProfiles",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "costProfile": [
+            "breaker-ontology-consumer",
+            "deck-doctrine-strategy",
+            "trace-bid-assessment"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "remoteRole": [
+            "deck-doctrine-strategy",
+            "remote-role-ontology-consumer"
+          ],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "targetProfiles": [
+            "action-card-semantic-profiles",
+            "target-choice-semantics"
+          ],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 1,
+        "effectKinds": ["distribute_advancement_counters"],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_309_bbs-whispering-campaign",
+      "title": "BBS Whispering Campaign",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "asset",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "costProfile",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "remoteRole",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "strategySupportPairs",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "costProfile": [
+            "breaker-ontology-consumer",
+            "deck-doctrine-strategy",
+            "trace-bid-assessment"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "remoteRole": [
+            "deck-doctrine-strategy",
+            "remote-role-ontology-consumer"
+          ],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 1,
+        "effectKinds": ["take_hosted_credits", "trash_source_when_empty"],
+        "limits": [],
+        "hostedCreditContractChecked": true
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": {
+          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "title": "BBS Whispering Campaign",
+          "ownerSide": "corp",
+          "status": "in_deck",
+          "buildActionLegal": false,
+          "cashOutActionLegal": false,
+          "buildActionIds": [],
+          "cashOutActionIds": [],
+          "confidence": "medium",
+          "evidence": [
+            "capability_source:role_or_subtype",
+            "bank_status:in_deck",
+            "bank_build_legal:false",
+            "bank_cashout_legal:false"
+          ]
+        }
+      }
+    },
+    {
+      "cardId": "onr_v1_340_setup",
+      "title": "Setup!",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "asset",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "remoteRole",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategyAnchors",
+          "strategySupportPairs",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "remoteRole": [
+            "deck-doctrine-strategy",
+            "remote-role-ontology-consumer"
+          ],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [
+          "corp.install_card.corp_onr_v1_340_setup_1.new_remote.corp_onr_v1_340_setup_1"
+        ],
+        "semanticSignals": [
+          "access.corp_access_punish",
+          "access.corp_ambush",
+          "corp.remote_build",
+          "damage.payoff.runner",
+          "effect:access_punish",
+          "effect:ambush",
+          "effect:damage",
+          "effect_scope:accessed_card",
+          "effect_scope:remote",
+          "effect_scope:runner",
+          "effect_timing:action",
+          "effect_timing:on_access",
+          "install.card",
+          "install.placement:root",
+          "install.remote",
+          "punish.payoff",
+          "setup.install"
+        ],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_347_vapor-ops",
+      "title": "Vapor Ops",
+      "quantity": 2,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "asset",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicRole",
+          "strategySupportPairs",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 2,
+        "effectKinds": ["gain_credits", "move_advancement_counters"],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "title": "Red Herrings",
+      "quantity": 1,
+      "hint": {
+        "present": true,
+        "reviewed": true,
+        "side": "corp",
+        "cardType": "upgrade",
+        "populatedFields": [
+          "actionTacticSignals",
+          "aiSupportStatus",
+          "cardId",
+          "cardType",
+          "conditions",
+          "effects",
+          "functionSignals",
+          "lineSupport",
+          "manualNotes",
+          "planRoles",
+          "quality",
+          "remoteRole",
+          "requiredMechanics",
+          "riskTags",
+          "roles",
+          "scenarioRefs",
+          "side",
+          "strategicNotes",
+          "strategicRole",
+          "strategyAnchors",
+          "strategySupportPairs",
+          "tacticSignals",
+          "valueHints"
+        ],
+        "consumerContracts": {
+          "actionTacticSignals": [
+            "action-card-semantic-profiles",
+            "semantic-runtime-scoring"
+          ],
+          "aiSupportStatus": ["ai-approval-gates"],
+          "cardId": ["hint-definition-join"],
+          "cardType": ["hint-definition-join", "hint-metadata-gate"],
+          "conditions": [
+            "action-card-semantic-profiles",
+            "semantic-hard-gates"
+          ],
+          "effects": [
+            "deck-capabilities",
+            "action-card-semantic-profiles",
+            "runtime-value-consumers"
+          ],
+          "functionSignals": ["deck-doctrine-strategy"],
+          "lineSupport": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "manualNotes": ["ai-hint-inspector"],
+          "planRoles": [
+            "deck-capabilities",
+            "deck-doctrine-strategy",
+            "tactical-plans"
+          ],
+          "quality": ["hint-quality-gate", "deck-hint-consumer-audit"],
+          "remoteRole": [
+            "deck-doctrine-strategy",
+            "remote-role-ontology-consumer"
+          ],
+          "requiredMechanics": ["hint-metadata-gate", "card-support-gates"],
+          "riskTags": [
+            "action-card-semantic-profiles",
+            "semantic-risk-consumers"
+          ],
+          "roles": [
+            "deck-capabilities",
+            "deck-doctrine-card-roles",
+            "tactical-plans"
+          ],
+          "scenarioRefs": ["hint-metadata-gate", "scenario-coverage"],
+          "side": ["hint-definition-join", "hint-metadata-gate"],
+          "strategicRole": [
+            "deck-doctrine-strategy",
+            "action-card-semantic-profiles"
+          ],
+          "strategyAnchors": ["deck-doctrine-strategy"],
+          "strategySupportPairs": [
+            "deck-opening-hand",
+            "deck-doctrine-strategy"
+          ],
+          "tacticSignals": ["action-card-semantic-profiles"],
+          "valueHints": ["runtime-value-consumers", "deck-opening-hand"]
+        }
+      },
+      "implementation": {
+        "present": true,
+        "abilityCount": 0,
+        "effectKinds": [],
+        "limits": [],
+        "hostedCreditContractChecked": false
+      },
+      "consumers": {
+        "semanticCandidateActionIds": [],
+        "semanticSignals": [],
+        "bankTool": null
+      }
+    }
+  ],
+  "consumers": {
+    "capabilityProfile": {
+      "searchTools": [],
+      "bankTools": [
+        {
+          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "title": "BBS Whispering Campaign",
+          "ownerSide": "corp",
+          "status": "in_deck",
+          "buildActionLegal": false,
+          "cashOutActionLegal": false,
+          "buildActionIds": [],
+          "cashOutActionIds": [],
+          "confidence": "medium",
+          "evidence": [
+            "capability_source:role_or_subtype",
+            "bank_status:in_deck",
+            "bank_build_legal:false",
+            "bank_cashout_legal:false"
+          ]
+        }
+      ]
+    },
+    "strategyProfile": {
+      "primaryStrategies": [
+        "corp.ice_tax_glacier",
+        "corp.fast_advance",
+        "corp.overadvance_value"
+      ],
+      "secondaryStrategies": [
+        "corp.ambush_bluff",
+        "corp.remote_scoring",
+        "corp.economy_rez_reserve",
+        "corp.damage_kill",
+        "corp.rush_score"
+      ],
+      "functionSignalCounts": {
+        "access.archives_safe_exception": 2,
+        "access.corp_net_damage_ambush": 2,
+        "access.punish": 2,
+        "access.rnd_reveal_requirement": 2,
+        "action.corp_extra_action_burst": 1,
+        "action.corp_extra_action_support": 1,
+        "action.corp_recurring_extra_action": 1,
+        "advance.access_window_counter_support": 1,
+        "advance.corp_counter_bank": 2,
+        "advance.corp_counter_placement": 1,
+        "advance.overadvance_payoff": 4,
+        "advance.remote_score_window_support": 1,
+        "condition.requires_installed_advanceable_card": 3,
+        "condition.runner_passed_last_ice_this_fort": 1,
+        "corp_ice.end_run": 18,
+        "corp_ice.outer_ice_scaling": 1,
+        "corp_ice.type_choice_or_mode_choice": 1,
+        "damage.payoff": 7,
+        "draw.corp_draw": 1,
+        "economy.action": 5,
+        "economy.burst": 3,
+        "economy.corp_credit_action": 1,
+        "economy.corp_credit_burst": 7,
+        "economy.corp_installed_credit_pool": 2,
+        "economy.corp_recurring_credit": 2,
+        "economy.corp_two_action_credit_gain": 2,
+        "economy.finite_pool": 2,
+        "economy.generic": 9,
+        "economy.rez_discount": 1,
+        "economy.start_of_turn": 2,
+        "ice.corp_free_rez": 1,
+        "ice.etr": 18,
+        "ice.strength_modifier": 1,
+        "info.corp_reveal_top_rnd_to_runner": 1,
+        "install.corp_rnd_ice_install": 1,
+        "remote.agenda_steal_tax": 1,
+        "remote.ambush": 2,
+        "remote.asset_economy": 2,
+        "risk.loses_ability_on_install_or_rez": 1,
+        "risk.overadvance_investment": 1,
+        "risk.trash_revealed_non_ice": 1,
+        "score.advance_burst": 3,
+        "score.agenda_action": 3,
+        "score.conditional_bonus_agenda_points": 1,
+        "score.free_install_and_rez_ice": 1,
+        "score.overadvance_bonus": 4,
+        "score.overadvance_scaling": 4,
+        "tax.runner_credit": 1,
+        "tempo.corp_action_burst": 1
+      }
+    },
+    "decision": {
+      "actionId": "corp.draw_card",
+      "sourceDefinitionId": null,
+      "legal": true,
+      "semanticCandidatePresent": true,
+      "scoreBreakdown": [],
+      "decisionChain": null
+    }
+  },
+  "result": {
+    "status": "failed",
+    "blockingFindingCount": 3,
+    "warningCount": 0
+  },
+  "blockingFindings": [
+    {
+      "kind": "checkpoint_behavior_failed",
+      "code": "behavior_regression",
+      "message": "Behavior expectation failed for corp.draw_card: forbidden_action,acceptable_action,plan_execution; plan=corp.defend_servers; capabilities=develop_score_protection; assessment=score_plan_requires_effective_ice_draw:agenda:corp_onr_proteus_007_project-venice_1:new_remote:new_remote; runTargets=[]"
+    },
+    {
+      "cardId": "onr_v1_309_bbs-whispering-campaign",
+      "kind": "hosted_credit_take_hint_mismatch",
+      "engineModes": ["up_to_amount_if_available"]
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "hint_field_without_consumer_contract",
+      "fields": ["strategicNotes"]
+    }
+  ],
+  "warnings": []
+}
