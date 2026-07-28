@@ -3900,10 +3900,9 @@ export default function Page() {
       } catch (error) {
         setNotice(
           error instanceof Error
-            ? `Matchstart abgebrochen: Deine Account-Vorbelegungen konnten nicht gespeichert werden (${error.message}).`
-            : "Matchstart abgebrochen: Deine Account-Vorbelegungen konnten nicht gespeichert werden.",
+            ? `Deine Account-Vorbelegungen konnten vor dem Start nicht gespeichert werden (${error.message}). Das Match startet trotzdem.`
+            : "Deine Account-Vorbelegungen konnten vor dem Start nicht gespeichert werden. Das Match startet trotzdem.",
         );
-        return;
       }
     }
     const matchSeed = normalizeMatchSeed(seed);

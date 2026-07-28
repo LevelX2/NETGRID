@@ -61,6 +61,24 @@ describe("account match-start preferences HTTP API", () => {
     try {
       const alpha = await login(baseUrl, "alpha", PASSWORD_A);
       const beta = await login(baseUrl, "beta", PASSWORD_B);
+      const preflight = await fetch(
+        `${baseUrl}/api/account/match-start-preferences`,
+        {
+          method: "OPTIONS",
+          headers: {
+            origin: ORIGIN,
+            "access-control-request-method": "PUT",
+            "access-control-request-headers": "content-type,x-netgrid-csrf",
+          },
+        },
+      );
+      expect(preflight.status).toBe(204);
+      expect(preflight.headers.get("access-control-allow-methods")).toContain(
+        "PUT",
+      );
+      expect(preflight.headers.get("access-control-allow-methods")).toContain(
+        "DELETE",
+      );
       const standards = accountDecks.listStandards();
       const runner = standards.find((deck) => deck.side === "runner")!;
       const corp = standards.find((deck) => deck.side === "corp")!;
