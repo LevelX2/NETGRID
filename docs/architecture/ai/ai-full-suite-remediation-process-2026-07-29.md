@@ -483,6 +483,12 @@ Integration:
   `abeadcca6` mit der kompakten öffentlichen Spieleansicht wurde zuerst in
   den Arbeitsbranch integriert. Der kombinierte Stand wurde anschließend
   per Fast-forward lokal nach `main` übernommen.
+- Während der ersten Main-Abnahme wurde der zuvor fremde Web-Arbeitsstand
+  als `3915d0526` (`fix(web): tighten compact public game rows`) auf `main`
+  abgeschlossen. Die zunächst laufende Hauptinstanz meldete dadurch noch
+  Build 6251, während `main` bereits Build 6252 war. Diese Abweichung wurde
+  erkannt; vollständige Suite, Build und Gates wurden deshalb auf
+  `3915d0526` erneut ausgeführt.
 - Der fremde detached Baseline-Worktree und der parallel geführte
   `codex/ai-match-f809-rd-defense`-Worktree blieben unangetastet.
 - Während der Main-Abnahme entstandene fremde Web- und Wissensänderungen
@@ -492,7 +498,7 @@ Main-Abnahme:
 
 - Vollständige Root-Testsuite grün:
   Shared 16/16, Catalog 20/20, Engine 1.820/1.820, Decks 19/19,
-  AI 4.238/4.238, Web 720/720, Server 214/214 und
+  AI 4.238/4.238, Web 722/722, Server 214/214 und
   Root-Spezifikationen 8/8.
 - Test-Discovery, Produktions-Build, Root-Typecheck und Root-Lint grün.
 - AI-Hint-, Source-Structure-, Economy-, Action-Capacity- und
