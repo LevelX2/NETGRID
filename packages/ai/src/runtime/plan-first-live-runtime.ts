@@ -12540,6 +12540,9 @@ function decisionFromScheduler(
                     : actionDisposition
                       ? [
                           `${actionDisposition.disposition}:${actionDisposition.ownerModuleId}:${actionDisposition.evidenceCode}`,
+                          ...residentPlanEvidence,
+                          ...planRouteEvidence,
+                          ...planActionAssessmentEvidence,
                         ]
                       : [
                           `not_selected_by_plan:${planId}`,

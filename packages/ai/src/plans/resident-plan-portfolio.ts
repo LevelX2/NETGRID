@@ -333,22 +333,13 @@ export function assertResidentPlanPortfolio(
         (instance) => instance.instanceId === portfolio.executorInstanceId,
       )
     : undefined;
-  const hasResidentChild = executor
-    ? portfolio.instances.some(
-        (instance) =>
-          instance.parentInstanceId === executor.instanceId &&
-          instance.viability !== "completed" &&
-          instance.viability !== "abandoned",
-      )
-    : false;
   if (
     portfolio.schemaVersion !== RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION ||
     duplicateCount > 0 ||
     executors.length > 1 ||
     (portfolio.executorInstanceId !== undefined &&
       (executors.length !== 1 || !executor)) ||
-    (executor !== undefined && executor.executionState !== "executor") ||
-    hasResidentChild
+    (executor !== undefined && executor.executionState !== "executor")
   ) {
     throw portfolioFailure(
       "executor_invariant_broken",
@@ -388,23 +379,6 @@ function assignExecutor(
       "Select exactly one resident ready plan as executor.",
     );
   }
-  if (
-    portfolio.instances.some(
-      (instance) =>
-        instance.parentInstanceId === selectedId &&
-        instance.viability !== "completed" &&
-        instance.viability !== "abandoned",
-    )
-  ) {
-    throw portfolioFailure(
-      "executor_invariant_broken",
-      portfolio,
-      timingPoint,
-      selectedId,
-      "Select the active support child, not its parent, as leaf executor.",
-    );
-  }
-
   const rootId = rootAncestorId(selected, portfolio.instances);
   const transitions = [...portfolio.transitions];
   const instances = portfolio.instances.map((instance) => {

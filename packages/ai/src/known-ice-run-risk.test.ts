@@ -151,8 +151,11 @@ describe("known visible ICE run risk", () => {
     const planExclusion = runAlternative?.whyNot?.join("|") ?? "";
 
     expect(decision.actionId).toBe(gain.actionId);
-    expect(runAlternative?.excluded).not.toBe(true);
+    expect(runAlternative?.excluded).toBe(true);
     expect(decision.fallbackUsed).toBe(false);
+    expect(planExclusion).toContain(
+      "explicitly_nonproductive:runner.pressure_central:",
+    );
     expect(planExclusion).toContain(
       "run_route_excluded:recommendation:gain_credits_first",
     );

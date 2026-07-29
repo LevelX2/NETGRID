@@ -63,8 +63,8 @@ gewählt wird. Rohscores allein entscheiden ebenfalls keine Klassifikation.
 | --- | --- | --- | --- |
 | P00 | abgeschlossen | Prozess, `/Goal`, Grenzen und Paketfolge versionieren | Dokumentprüfung, `git diff --check` |
 | P01 | abgeschlossen | Gesamte Testsuite unverändert ausführen, alle roten Tests und gemeinsame Ursachen inventarisieren | `corepack pnpm test`, reproduzierbare fokussierte Gegenläufe |
-| P02 | aktiv | Executor-, Planabdeckungs-, Quote- und Diagnoseinvarianten generisch reparieren | fokussierte Unit-/Integrationstests, AI-Typecheck, Source-Structure |
-| P03 | ausstehend | Corp-Score-, Schutz-, Defense-, Rez- und Economy-Ursachen beheben | positive und negative Corp-Checkpoints, Hidden-Info-Gegenprobe |
+| P02 | abgeschlossen | Executor-, Planabdeckungs-, Quote- und Diagnoseinvarianten generisch reparieren | fokussierte Unit-/Integrationstests, AI-Typecheck, Source-Structure |
+| P03 | aktiv | Corp-Score-, Schutz-, Defense-, Rez- und Economy-Ursachen beheben | positive und negative Corp-Checkpoints, Hidden-Info-Gegenprobe |
 | P04 | ausstehend | Runner-Runrisiko-, Coverage-, Wiederholungs- und Sequenzursachen beheben | positive und negative Runner-Checkpoints, Hidden-Info-Gegenprobe |
 | P05 | ausstehend | Nur nachweislich veraltete Testverträge aktualisieren und Lücken mit Gegenproben schließen | betroffene Tests plus benachbarte Suiten |
 | P06 | ausstehend | Paketübergreifende Gates und vollständige Testsuite schließen; Review- und Wissensstand aktualisieren | Typecheck, Struktur-/Vertragsgates, `corepack pnpm test`, Build |
@@ -212,3 +212,48 @@ evaluation/decision-checkpoints/renticon-code-rot-cycle-nine-remediation-decisio
 
 Die Rohlogs liegen ausschließlich lokal unter `data/local/` und werden nicht
 versioniert.
+
+### P02 – Executor und exakte Dispositionsdiagnostik
+
+Wurzelursachen:
+
+- `resident-plan-portfolio` setzte „residente Kindinstanz vorhanden“ mit
+  „aktives Supportkind ist Leaf-Executor“ gleich. Dadurch konnte ein aktuell
+  wieder ausführbarer Parent nicht handeln, obwohl der Scheduler das frühere
+  oder für den aktuellen Need inaktive Kind korrekt nicht ausgewählt hatte.
+- Eine exakte `explicitly_nonproductive`-Disposition ersetzte in
+  `actionAlternatives.whyNot` sämtliche ergänzende residente Plan-,
+  Runrouten- und Action-Assessment-Evidence. Die Entscheidung blieb richtig,
+  verlor aber sichtbare Gründe wie ICE-Gefahr, Known-Low-Payoff oder Wilson-
+  Spend-Limit.
+- Einzelne Regressionstests verlangten noch die frühere unspezifische Form
+  `not_selected_by_plan`, obwohl die Action inzwischen autoritativ und exakt
+  dispositioniert wird.
+
+Änderungen:
+
+- Der Portfolio-Kernel prüft weiterhin genau einen ready Executor, aber nicht
+  mehr die bloße Existenz inaktiver Kinder. Ob ein Supportkind aktiv ist,
+  bleibt beim aktuellen Assessment, der exakten `parentNeedId`-Bindung und
+  der Schedulerwahl.
+- Neuer Gegenfall: Ein ready Parent darf mit einem residenten Kind ohne
+  aktiven Need Executor sein; das Kind bleibt idle im Background.
+- Exakte Dispositionen behalten ihren autoritativen ersten Grund und führen
+  zusätzlich die zugehörige residente Plan-, Runrouten- und
+  Action-Assessment-Evidence.
+- Betroffene Tests prüfen den aktuellen exakten Dispositionsvertrag. Wo eine
+  Action eine weiterhin echte ungewählte Planroute bleibt, ist
+  `not_selected_by_plan` weiterhin zulässige Diagnose und keine
+  Auswahlautorität.
+
+Ergebnis:
+
+- Alle fünf ursprünglichen `executor_invariant_broken`-Gruppen erreichen nun
+  die normale fachliche Decision-Checkpoint-Auswertung.
+- Runner-Diagnose-, Known-ICE-, Wilson-, Repeat-Run-, Real-Engine-,
+  Portfolio- und Scheduler-Nachbarschaft: 11 Dateien, 270/270 Tests grün.
+- `@netgrid/ai`-Typecheck grün.
+- AI-Source-Structure grün:
+  `production=733`, `runtimeCycles=0`, `typeCycles=0`.
+- Im Corp-Cutover verbleiben acht fachliche Score-Start-Fehlentscheidungen;
+  sie sind bewusst nicht durch den Kernel-Fix kaschiert und gehen in P03.

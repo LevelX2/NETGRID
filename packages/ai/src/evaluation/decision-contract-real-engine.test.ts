@@ -186,7 +186,9 @@ describe("hardened decision contracts on real Engine inputs", () => {
     expect(
       activeDecision.decisionDebug?.actionAlternatives
         ?.find((entry) => entry.actionId === activeInstall.actionId)
-        ?.whyNot?.some((entry) => entry.startsWith("not_selected_by_plan:")),
+        ?.whyNot?.some((entry) =>
+          entry.startsWith("explicitly_nonproductive:"),
+        ),
     ).toBe(true);
   });
 

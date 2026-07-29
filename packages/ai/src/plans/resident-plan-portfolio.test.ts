@@ -211,21 +211,34 @@ describe("resident plan portfolio", () => {
     ]);
   });
 
-  it("rejects a parent as executor while its support child is resident", () => {
+  it("allows a ready parent when its resident child has no active need", () => {
     const parent = proposal("runner.pressure", "rd");
     const child = proposal("runner.economy", "fund-rd", {
       parentInstanceId: "plan:runner.pressure:rd",
     });
 
-    expect(() =>
-      reconcileResidentPlanPortfolio({
-        side: "runner",
-        stateVersion: 70,
-        timingPoint: "runner_action.main",
-        proposals: [parent, child],
-        selectedExecutorInstanceId: "plan:runner.pressure:rd",
-      }),
-    ).toThrow(expect.objectContaining({ code: "executor_invariant_broken" }));
+    const portfolio = reconcileResidentPlanPortfolio({
+      side: "runner",
+      stateVersion: 70,
+      timingPoint: "runner_action.main",
+      proposals: [parent, child],
+      selectedExecutorInstanceId: "plan:runner.pressure:rd",
+    });
+
+    expect(portfolio).toMatchObject({
+      rootForegroundInstanceId: "plan:runner.pressure:rd",
+      executorInstanceId: "plan:runner.pressure:rd",
+    });
+    expect(
+      portfolio.instances.find(
+        (instance) =>
+          instance.instanceId === "plan:runner.economy:fund-rd",
+      ),
+    ).toMatchObject({
+      parentInstanceId: "plan:runner.pressure:rd",
+      executionState: "idle",
+      portfolioRole: "background",
+    });
   });
 
   it("preserves an exact parent need across refresh and clears it when omitted", () => {

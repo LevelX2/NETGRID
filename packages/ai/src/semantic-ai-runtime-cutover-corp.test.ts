@@ -385,8 +385,10 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     );
     expect(runAlternative?.selected).toBe(true);
     expect(
-      drawAlternative?.whyNot?.some((entry) =>
-        entry.startsWith("not_selected_by_plan:"),
+      drawAlternative?.whyNot?.some(
+        (entry) =>
+          entry.startsWith("not_selected_by_plan:") ||
+          entry.startsWith("explicitly_nonproductive:"),
       ),
     ).toBe(true);
   });
@@ -2715,8 +2717,10 @@ function expectRejectedByPlan(
   );
   expect(alternative?.selected).toBe(false);
   expect(
-    alternative?.whyNot?.some((entry) =>
-      entry.startsWith("not_selected_by_plan:"),
+    alternative?.whyNot?.some(
+      (entry) =>
+        entry.startsWith("not_selected_by_plan:") ||
+        entry.startsWith("explicitly_nonproductive:"),
     ),
   ).toBe(true);
 }
