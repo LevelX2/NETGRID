@@ -6781,6 +6781,7 @@ function corpActionDispositions(
         domain.defenseNeeds.filter((signal) =>
           corpDefenseSignalOwnsAction(signal, candidate.actionId),
         ),
+        domain.centralDefenseAllocation,
       )
     ) {
       add(
@@ -7801,6 +7802,11 @@ function buildCorpDomain(
             (serverId === "hq" || serverId === "rd") &&
             centralDefenseAllocation?.status === "known" &&
             centralDefenseAllocation.evidence[serverId].threat === "terminal";
+          const acuteCentralPlacement =
+            (serverId === "hq" || serverId === "rd") &&
+            centralDefenseAllocation?.status === "known" &&
+            centralDefenseAllocation.evidence[serverId].threat === "acute" &&
+            route.progressKind !== "funding_required";
           return [
             {
               kind: "generic",
@@ -7815,13 +7821,25 @@ function buildCorpDomain(
                 // A direct score-protection placement owns sibling setup;
                 // only a terminal central exposure may preempt that parent.
                 (exactScoreProtectionInstallActionIds.size === 0 ||
-                  terminalCentralPlacement),
+                  terminalCentralPlacement ||
+                  acuteCentralPlacement),
               installRoute: route,
-              value: 1,
+              value:
+                route.progressKind === "engine_certified_access"
+                  ? 12
+                  : route.progressKind === "funded_structured_central_defense"
+                    ? 11
+                    : route.progressKind === "staged_central_defense"
+                      ? 9
+                      : 1,
               evidenceCode:
                 route.disposition === "funding_only"
                   ? `corp_defense_exact_route_funding_required:${serverId}:${candidate.actionId}`
-                  : "engine_certified_global_defense_access_probability_reduced",
+                  : route.progressKind === "funded_structured_central_defense"
+                    ? `corp_funded_structured_central_defense:${serverId}:${candidate.actionId}`
+                    : route.progressKind === "staged_central_defense"
+                      ? `corp_staged_central_defense:${serverId}:${candidate.actionId}:rez_gap_${route.rezFundingGap}`
+                      : "engine_certified_global_defense_access_probability_reduced",
             },
           ];
         }
@@ -9403,6 +9421,12 @@ type CorpGlobalDefenseInstallRouteAssessment =
   | Readonly<{
       knowledge: "known";
       disposition: "productive" | "funding_only";
+      progressKind:
+        | "engine_certified_access"
+        | "funded_structured_central_defense"
+        | "staged_central_defense"
+        | "funding_required";
+      rezFundingGap: number;
       projection: KnownCorpFundedIceInstallRouteProjection;
     }>
   | Readonly<{
@@ -9429,6 +9453,12 @@ function corpGlobalDefenseInstallRoute(
 ):
   | Readonly<{
       disposition: "productive" | "funding_only";
+      progressKind:
+        | "engine_certified_access"
+        | "funded_structured_central_defense"
+        | "staged_central_defense"
+        | "funding_required";
+      rezFundingGap: number;
       projection: KnownCorpFundedIceInstallRouteProjection;
     }>
   | undefined {
@@ -9442,6 +9472,8 @@ function corpGlobalDefenseInstallRoute(
     assessment.disposition !== "effect_missing"
     ? {
         disposition: assessment.disposition,
+        progressKind: assessment.progressKind,
+        rezFundingGap: assessment.rezFundingGap,
         projection: assessment.projection,
       }
     : undefined;
@@ -9595,11 +9627,15 @@ function corpGlobalDefenseInstallRouteAssessment(
   );
   const isEmptyCentral =
     (serverId === "hq" || serverId === "rd") && serverIce.length === 0;
-  const selectedCentralEvidence =
+  const targetCentralEvidence =
     centralAllocation?.status === "known" &&
-    centralAllocation.selectedServerId === serverId &&
     (serverId === "hq" || serverId === "rd")
       ? centralAllocation.evidence[serverId]
+      : undefined;
+  const selectedCentralEvidence =
+    centralAllocation?.status === "known" &&
+    centralAllocation.selectedServerId === serverId
+      ? targetCentralEvidence
       : undefined;
   const otherCentralAlreadyProtected =
     serverId === "hq" || serverId === "rd"
@@ -9609,10 +9645,11 @@ function corpGlobalDefenseInstallRouteAssessment(
         )?.ice.length ?? 0) > 0
       : false;
   const hasSelectedCentralPressure =
-    selectedCentralEvidence !== undefined &&
-    (selectedCentralEvidence.recentRunOrAccessEvents > 0 ||
-      selectedCentralEvidence.recentSuccessfulAccessRunnerTurns > 0 ||
-      selectedCentralEvidence.serverBoundEffectIds.length > 0);
+    targetCentralEvidence !== undefined &&
+    (targetCentralEvidence.recentRunOrAccessEvents > 0 ||
+      targetCentralEvidence.recentSuccessfulAccessRunnerTurns > 0 ||
+      targetCentralEvidence.serverBoundEffectIds.length > 0) &&
+    (selectedCentralEvidence !== undefined || otherCentralAlreadyProtected);
   const hasStructuredDefenseValue =
     sourceDefense.hasImmediateStop ||
     sourceDefense.hasMeaningfulTaxOrDamage ||
@@ -9623,14 +9660,8 @@ function corpGlobalDefenseInstallRouteAssessment(
     sourceDefense.isVisibleIce &&
     (isCorpOpeningTurnSerial(input.playerView.turnSerial) ||
       hasStructuredDefenseValue);
-  const hasResidentRemoteAgenda = input.playerView.servers.some(
-    (candidateServer) =>
-      candidateServer.id.startsWith("remote_") &&
-      candidateServer.root.some((card) => card.known && card.type === "agenda"),
-  );
   const preferQualitativeSourceProgress =
     isEmptyCentral &&
-    !hasResidentRemoteAgenda &&
     (establishesMissingCentralCoverage ||
       (hasSelectedCentralPressure && hasStructuredDefenseValue));
   const projection = projectCorpFundedIceInstallRoute({
@@ -9666,22 +9697,60 @@ function corpGlobalDefenseInstallRouteAssessment(
     projection.preservesReserves &&
     (projection.effect === "progress" || projection.effect === "satisfied")
   ) {
-    return { knowledge: "known", disposition: "productive", projection };
+    return {
+      knowledge: "known",
+      disposition: "productive",
+      progressKind: "engine_certified_access",
+      rezFundingGap: 0,
+      projection,
+    };
   }
-  const qualitativeProgressHasNoKnownFundingGap =
-    (projection.after.minimumAdditionalCreditsToSatisfy ?? 0) === 0 &&
-    (projection.after.minimumAdditionalClicksToSatisfy ?? 0) === 0;
-  if (
-    projection.preservesReserves &&
+  const postInstallRezQuoteFinalCredits =
+    action.payload?.postInstallRezQuoteFinalCredits;
+  const postInstallRezCredits =
+    action.payload?.postInstallRezQuoteComplete === true &&
+    typeof postInstallRezQuoteFinalCredits === "number" &&
+    Number.isSafeInteger(postInstallRezQuoteFinalCredits) &&
+    postInstallRezQuoteFinalCredits >= 0
+      ? postInstallRezQuoteFinalCredits
+      : undefined;
+  const creditsAfterInstall =
+    input.playerView.own.credits - projectedInstallCredits;
+  const rezFundingGap =
+    postInstallRezCredits === undefined
+      ? undefined
+      : Math.max(0, postInstallRezCredits - creditsAfterInstall);
+  const selectedCentralThreat = targetCentralEvidence?.threat ?? "none";
+  const fundedStructuredCentralProgress =
     preferQualitativeSourceProgress &&
-    qualitativeProgressHasNoKnownFundingGap
-  ) {
-    return { knowledge: "known", disposition: "productive", projection };
+    projection.preservesReserves &&
+    rezFundingGap === 0;
+  const stagedCentralProgress =
+    preferQualitativeSourceProgress &&
+    projection.preservesReserves &&
+    (selectedCentralThreat === "acute" ||
+      selectedCentralThreat === "terminal") &&
+    projectedInstallClicks === input.playerView.own.clicks &&
+    typeof rezFundingGap === "number" &&
+    rezFundingGap > 0 &&
+    rezFundingGap <= 3;
+  if (fundedStructuredCentralProgress || stagedCentralProgress) {
+    return {
+      knowledge: "known",
+      disposition: "productive",
+      progressKind: fundedStructuredCentralProgress
+        ? "funded_structured_central_defense"
+        : "staged_central_defense",
+      rezFundingGap: rezFundingGap!,
+      projection,
+    };
   }
   return knownInstallRouteHasUsefulEffectBlockedByFunding(projection)
     ? {
         knowledge: "known",
         disposition: "funding_only",
+        progressKind: "funding_required",
+        rezFundingGap: projection.after.minimumAdditionalCreditsToSatisfy ?? 0,
         projection,
       }
     : {

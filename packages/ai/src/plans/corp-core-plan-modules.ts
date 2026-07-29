@@ -146,6 +146,12 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
   rezWindowVerdict?: "productive" | "nonproductive" | "open";
   installRoute?: Readonly<{
     disposition: "productive" | "funding_only";
+    progressKind?:
+      | "engine_certified_access"
+      | "funded_structured_central_defense"
+      | "staged_central_defense"
+      | "funding_required";
+    rezFundingGap?: number;
     projection: KnownCorpFundedIceInstallRouteProjection;
   }>;
   rezRoute?: CorpExactIceRezRouteProjection;
@@ -1951,7 +1957,15 @@ function exactInstallProjectionIsCurrent(
   const action = context.input.legalActions.find(
     (candidate) => candidate.actionId === projection.actionId,
   );
-  const projectedRezCost = projection.selectedRezCosts.find(
+  const routeRezCosts =
+    projection.selectedRezCosts.length > 0
+      ? projection.selectedRezCosts
+      : (projection.after.minimumSatisfyingRezCosts ?? []);
+  const afterRouteRezCosts =
+    projection.selectedRezCosts.length > 0
+      ? projection.after.selectedRezCosts
+      : (projection.after.minimumSatisfyingRezCosts ?? []);
+  const projectedRezCost = routeRezCosts.find(
     (selected) =>
       selected.iceInstanceId === projection.sourceCardInstanceId &&
       selected.iceDefinitionId === projection.sourceDefinitionId &&
@@ -1959,16 +1973,17 @@ function exactInstallProjectionIsCurrent(
   );
   const projectedServerId =
     action?.payload?.postInstallRezQuoteProjectedServerId;
-  const selectedPostInstallRezCredits = action?.payload
-    ? selectedPostInstallRezCreditsFromCurrentQuote(action.payload)
-    : undefined;
+  const selectedPostInstallRezChoiceIsCurrent =
+    action?.payload && projectedRezCost
+      ? postInstallRezSelectionMatchesCurrentQuote(
+          action.payload,
+          projectedRezCost,
+        )
+      : false;
   const selectedRezCostsAreCurrent =
-    selectedRezCostSetsEqual(
-      projection.selectedRezCosts,
-      projection.after.selectedRezCosts,
-    ) &&
-    selectedRezCostsAreUnique(projection.selectedRezCosts) &&
-    projection.selectedRezCosts.every((selected) =>
+    selectedRezCostSetsEqual(routeRezCosts, afterRouteRezCosts) &&
+    selectedRezCostsAreUnique(routeRezCosts) &&
+    routeRezCosts.every((selected) =>
       selected.iceInstanceId === projection.sourceCardInstanceId
         ? selected === projectedRezCost
         : currentInstalledRezQuoteMatchesSelection(
@@ -2005,8 +2020,7 @@ function exactInstallProjectionIsCurrent(
     action.payload.postInstallRezQuoteMandatoryAdditionalCostKind ===
       undefined &&
     validPostInstallRezQuoteModifiers(action.payload) &&
-    selectedPostInstallRezCredits !== undefined &&
-    projectedRezCost?.credits === selectedPostInstallRezCredits &&
+    selectedPostInstallRezChoiceIsCurrent &&
     selectedRezCostsAreCurrent &&
     legalActionResourceCost(action, "credits") === projection.installCredits &&
     legalActionResourceCost(action, "clicks") === projection.installClicks
@@ -2191,6 +2205,61 @@ function selectedPostInstallRezCreditsFromCurrentQuote(
         payload.postInstallRezQuoteVariableAlternateSubtypesFinalCredits,
     },
     finalBaseCredits,
+  );
+}
+
+function postInstallRezSelectionMatchesCurrentQuote(
+  payload: NonNullable<AiDecisionInput["legalActions"][number]["payload"]>,
+  selection: KnownCorpFundedIceInstallRouteProjection["selectedRezCosts"][number],
+): boolean {
+  if (payload.postInstallRezQuoteCostKind === "fixed") {
+    return (
+      selection.variableRezChoice === undefined &&
+      selection.credits ===
+        selectedPostInstallRezCreditsFromCurrentQuote(payload)
+    );
+  }
+  if (payload.postInstallRezQuoteCostKind !== "variable") return false;
+  const choice = selection.variableRezChoice;
+  if (!choice) {
+    return (
+      selection.credits ===
+      selectedPostInstallRezCreditsFromCurrentQuote(payload)
+    );
+  }
+  if (choice.kind === "paid_end_the_run_subroutines") {
+    return (
+      choice.subroutineCount ===
+        payload.postInstallRezQuoteVariableFirstEndTheRunSubroutineCount &&
+      selection.credits ===
+        selectedPostInstallRezCreditsFromCurrentQuote(payload)
+    );
+  }
+  if (
+    choice.kind !== "alternate_subtype" ||
+    payload.postInstallRezQuoteVariableRezKind !== "alternate_subtype"
+  ) {
+    return false;
+  }
+  const selectedSubtypes = canonicalSubtypeArray(choice.selectedSubtypes);
+  const baseSubtypes = canonicalSubtypeCsv(
+    payload.postInstallRezQuoteVariableBaseSubtypes,
+  );
+  const alternateSubtypes = canonicalSubtypeCsv(
+    payload.postInstallRezQuoteVariableAlternateSubtypes,
+  );
+  if (!selectedSubtypes || !baseSubtypes || !alternateSubtypes) return false;
+  const selectedKey = selectedSubtypes.join(",");
+  if (selectedKey === baseSubtypes.join(",")) {
+    return (
+      selection.credits ===
+      payload.postInstallRezQuoteVariableBaseSubtypesFinalCredits
+    );
+  }
+  return (
+    selectedKey === alternateSubtypes.join(",") &&
+    selection.credits ===
+      payload.postInstallRezQuoteVariableAlternateSubtypesFinalCredits
   );
 }
 
@@ -2928,8 +2997,39 @@ function selectedExactGenericDefenseRoutes(
     (route) => centralServerForRoute(route) === "rd",
   );
   let eligibleRoutes = exactIceRoutes;
+  const hqServer = context.input.playerView.servers.find(
+    (server) => server.id === "hq",
+  );
+  const rdServer = context.input.playerView.servers.find(
+    (server) => server.id === "rd",
+  );
+  const exposedCentralServerId =
+    allocation?.status === "known" &&
+    hqServer &&
+    rdServer &&
+    (hqServer.ice.length === 0) !== (rdServer.ice.length === 0)
+      ? hqServer.ice.length === 0
+        ? "hq"
+        : "rd"
+      : undefined;
+  const exposedCentralNeedsFirstLayer =
+    exposedCentralServerId !== undefined &&
+    allocation?.status === "known" &&
+    (allocation.evidence[exposedCentralServerId].threat === "acute" ||
+      allocation.evidence[exposedCentralServerId].threat === "terminal" ||
+      allocation.evidence[exposedCentralServerId]
+        .recentSuccessfulAccessRunnerTurns > 0);
   if (hqRoutes.length > 0 || rdRoutes.length > 0) {
-    if (
+    if (exposedCentralNeedsFirstLayer) {
+      const exposedCentralRoutes =
+        exposedCentralServerId === "hq" ? hqRoutes : rdRoutes;
+      eligibleRoutes = [
+        ...exactIceRoutes.filter(
+          (route) => centralServerForRoute(route) === undefined,
+        ),
+        ...exposedCentralRoutes,
+      ];
+    } else if (
       allocation?.status !== "known" &&
       hqRoutes.length > 0 &&
       rdRoutes.length > 0
@@ -2970,7 +3070,8 @@ function selectedExactGenericDefenseRoutes(
   }
   if (
     allocation?.status === "known" &&
-    allocation.canonicalNearTieCandidateServerIds.length === 2
+    allocation.canonicalNearTieCandidateServerIds.length === 2 &&
+    !exposedCentralNeedsFirstLayer
   ) {
     return eligibleRoutes.map(({ candidate, stepValue }) => ({
       candidate,
@@ -3513,9 +3614,24 @@ function isValidDefenseSignal(
       Number.isFinite(value.value) &&
       (value.phase === "install_ice"
         ? installRoute !== undefined &&
-          hasOnlyKeys(installRoute, new Set(["disposition", "projection"])) &&
+          hasOnlyKeys(
+            installRoute,
+            new Set([
+              "disposition",
+              "progressKind",
+              "rezFundingGap",
+              "projection",
+            ]),
+          ) &&
           (installRoute.disposition === "productive" ||
             installRoute.disposition === "funding_only") &&
+          (installRoute.progressKind === undefined ||
+            installRoute.progressKind === "engine_certified_access" ||
+            installRoute.progressKind === "funded_structured_central_defense" ||
+            installRoute.progressKind === "staged_central_defense" ||
+            installRoute.progressKind === "funding_required") &&
+          (installRoute.rezFundingGap === undefined ||
+            knownNonNegativeInteger(installRoute.rezFundingGap)) &&
           validKnownInstallProjection(installRoute.projection)
         : installRoute === undefined) &&
       (value.rezRoute === undefined ||
@@ -3997,14 +4113,14 @@ function economyCandidates(
             : signal.kind === "convert_installed_asset_payout"
               ? candidate.actionId === installedAssetPayoutActionId &&
                 installedAssetPayoutCandidateMatchesSignal(candidate, signal)
-            : signal.kind === "prepare_immediate_operation"
-              ? candidate.actionId === operationThresholdActionId &&
-                corpExactBasicLiquidCreditCandidate(candidate)
-              : signal.kind === "develop_liquidity"
-                ? candidate.actionId === liquidityActionId &&
+              : signal.kind === "prepare_immediate_operation"
+                ? candidate.actionId === operationThresholdActionId &&
                   corpExactBasicLiquidCreditCandidate(candidate)
-                : candidate.actionId === exactFundingHead &&
-                  immediateCorpLiquidCreditGain(candidate) > 0) &&
+                : signal.kind === "develop_liquidity"
+                  ? candidate.actionId === liquidityActionId &&
+                    corpExactBasicLiquidCreditCandidate(candidate)
+                  : candidate.actionId === exactFundingHead &&
+                    immediateCorpLiquidCreditGain(candidate) > 0) &&
         economyCandidateHasExecutablePayload(context, candidate),
     )
     .map((candidate) => ({
@@ -4016,11 +4132,11 @@ function economyCandidates(
             ? economyImmediateOperationStepValue(signal)
             : signal.kind === "convert_installed_asset_payout"
               ? economyInstalledAssetPayoutStepValue(signal)
-            : signal.kind === "prepare_immediate_operation"
-              ? economyOperationThresholdStepValue(signal)
-              : signal.kind === "develop_liquidity"
-                ? -9_999
-                : immediateCorpLiquidCreditGain(candidate) * 10,
+              : signal.kind === "prepare_immediate_operation"
+                ? economyOperationThresholdStepValue(signal)
+                : signal.kind === "develop_liquidity"
+                  ? -9_999
+                  : immediateCorpLiquidCreditGain(candidate) * 10,
     }));
 }
 
@@ -4320,11 +4436,11 @@ function economyMaterialization(
             ? `Convert the Engine-certified immediate ${signal.sourceDefinitionId} operation once, consuming its exact HQ source.`
             : signal.kind === "convert_installed_asset_payout"
               ? `Take the exact currently quoted hosted-credit payout from ${signal.sourceDefinitionId}, then revalidate the remaining source pool.`
-            : signal.kind === "prepare_immediate_operation"
-              ? `Take the exact Engine-certified Basic Credit once to make the reviewed ${signal.sourceDefinitionId} operation legal, then revalidate its new LegalAction.`
-              : signal.kind === "develop_liquidity"
-                ? `Convert the exact Engine-certified Basic Credit action toward the finite ${signal.turnKey} target of ${signal.targetCredits} credits.`
-                : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
+              : signal.kind === "prepare_immediate_operation"
+                ? `Take the exact Engine-certified Basic Credit once to make the reviewed ${signal.sourceDefinitionId} operation legal, then revalidate its new LegalAction.`
+                : signal.kind === "develop_liquidity"
+                  ? `Convert the exact Engine-certified Basic Credit action toward the finite ${signal.turnKey} target of ${signal.targetCredits} credits.`
+                  : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },
     candidates,
   };

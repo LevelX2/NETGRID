@@ -270,4 +270,12 @@ Der Prozess stoppt ohne heuristischen Workaround, wenn:
   Central-ICE-Near-Tie-Bindung bei D4 blockiert; es wurde kein Rebase
   verwendet. Der formale Audit des identischen 30/45-Decks ist ohne Blocker
   und Warnung grün.
-- P2 bis P6: ausstehend.
+- P2: abgeschlossen. D10, D13, D34 und D45 wählen eine R&D-Installation
+  aus `corp.defend_servers`. Die Aktualitätsprüfung akzeptiert sowohl die
+  tatsächlich projizierte variable Rez-Auswahl als auch bei einer
+  gestaffelten Route die Engine-Mindestkosten. Staging bleibt auf akuten
+  Zentraldruck, den letzten Klick, erhaltene Reserven und höchstens drei
+  fehlende Rez-Credits begrenzt. Die 128 Core-Plan-Modultests, die drei
+  EC735-Zentralverteidigungs-Checkpoints und der bestehende
+  Funding-only-Routentest bleiben grün.
+- P3 bis P6: ausstehend.
