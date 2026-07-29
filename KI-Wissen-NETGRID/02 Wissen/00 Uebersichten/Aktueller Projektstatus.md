@@ -31,9 +31,12 @@ Stand: 2026-07-29
   zu Beitritt, Zuschaueransicht oder Replay. Die öffentliche Liste kann
   zwischen der ausführlichen Kartendarstellung und einer responsiven kompakten
   Zeilenansicht wechseln. Abgeschlossene Einträge zeigen vorhandene
-  Matchpunkte als primäre Wertung getrennt von den Agenda-Punkten. `Meine
-Spiele` ist davon getrennt und liefert nur serverseitig gebundene Matches
-  des angemeldeten Accounts, einschließlich eigener privater Partien.
+  Matchpunkte als primäre Wertung getrennt von den Agenda-Punkten und
+  unterscheiden reguläres Ende, Aufgabe sowie Zeitablauf. Aufgabe und
+  Zeitablauf benennen den verantwortlichen Teilnehmer über die autoritative
+  Verliererseite. `Meine Spiele` ist davon getrennt und liefert nur
+  serverseitig gebundene Matches des angemeldeten Accounts, einschließlich
+  eigener privater Partien.
   Abgeschlossene Ergebnisse liegen als immutable Snapshots in der kompakten
   Matchzeile; warme Listenabrufe hydrieren keine vollständigen Historien mehr.
   Führend sind
