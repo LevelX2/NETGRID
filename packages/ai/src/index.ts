@@ -268,6 +268,38 @@ export {
   type CorpAgendaTurnPlanningSlice,
 } from "./plans/corp-agenda-turn-planning";
 export {
+  advanceTurnPlanCommitment,
+  assertTurnPlanCommitment,
+  certifyCurrentTurnCompletion,
+  createTurnPlanCommitment,
+  CURRENT_TURN_COMPLETION_CERTIFICATE_SCHEMA_VERSION,
+  executionExpectationFromLegalAction,
+  invalidateTurnPlanCommitmentForRestart,
+  rematerializeCommittedTurnStep,
+  TURN_PLAN_COMMITMENT_SCHEMA_VERSION,
+  TurnPlanCommitmentError,
+  validateCommittedTurnPhaseEntry,
+} from "./plans/turn-plan-commitment";
+export type {
+  CampaignRequote,
+  CommittedInvocationRoute,
+  CommittedTurnPlanNode,
+  CommittedTurnPlanPhase,
+  CurrentTurnCompletionCertificate,
+  HardPlanCommitmentRevalidation,
+  TurnPlanCommitment,
+  TurnPlanCommitmentStatus,
+  TurnPlanContinuationEvidence,
+  TurnPlanContinuationResult,
+  TurnPlanExecutionLease,
+  TurnPlanExecutionReceipt,
+  TurnPlanNodeExecutionExpectation,
+  TurnPlanObservationClass,
+  TurnPlanPhaseEntryEvidence,
+  TurnPlanRematerialization,
+  TurnPlanReplanReason,
+} from "./plans/turn-plan-commitment";
+export {
   applyCertifiedTurnProjectionDelta,
   assessTurnObservationBoundary,
   buildProjectedDecisionFrame,

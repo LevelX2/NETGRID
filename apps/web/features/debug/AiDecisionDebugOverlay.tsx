@@ -619,6 +619,44 @@ function AiDecisionDebugPlanFirstTraceView({
               </div>
             ))}
           </div>
+          {decision.turnPlanning.commitment ? (
+            <>
+              <h4>Planbindung und Ausführung</h4>
+              <AiDecisionDebugRows
+                rows={[
+                  ["Commitment", decision.turnPlanning.commitment.commitmentId],
+                  [
+                    "Status",
+                    aiTurnCommitmentStatusLabel(
+                      decision.turnPlanning.commitment.status,
+                    ),
+                  ],
+                  [
+                    "Commitment-Cursor",
+                    `Phase ${decision.turnPlanning.commitment.cursor.phaseIndex + 1} (${decision.turnPlanning.commitment.cursor.phaseId}), Schritt ${decision.turnPlanning.commitment.cursor.nodeIndex + 1} (${decision.turnPlanning.commitment.cursor.nodeId})`,
+                  ],
+                  [
+                    "Phase Entry",
+                    `${aiTurnPhaseEntryStatusLabel(decision.turnPlanning.commitment.phaseEntry.status)} · ${decision.turnPlanning.commitment.phaseEntry.reasonCode}`,
+                  ],
+                  [
+                    "Rematerialisierung",
+                    `${aiTurnRematerializationStatusLabel(decision.turnPlanning.commitment.rematerialization.status)}${decision.turnPlanning.commitment.rematerialization.actionId ? ` · ${decision.turnPlanning.commitment.rematerialization.actionId}` : ""}${decision.turnPlanning.commitment.rematerialization.reasonCode ? ` · ${decision.turnPlanning.commitment.rematerialization.reasonCode}` : ""}`,
+                  ],
+                  [
+                    "Beobachtungsklasse",
+                    decision.turnPlanning.commitment.observationClass ??
+                      "noch nicht klassifiziert",
+                  ],
+                  [
+                    "Replan-Grund",
+                    decision.turnPlanning.commitment.replanReason ??
+                      "kein Replan",
+                  ],
+                ]}
+              />
+            </>
+          ) : null}
           {decision.turnPlanning.boundary ? (
             <AiDecisionDebugRows
               rows={[
@@ -866,6 +904,59 @@ function aiTurnPlanningStopReasonLabel(
       return "neue Planermittlung erforderlich";
     case "bounded_search_horizon":
       return "begrenzter Suchhorizont erreicht";
+  }
+}
+
+function aiTurnCommitmentStatusLabel(
+  value: NonNullable<
+    NonNullable<AiPlanFirstDecisionDebug["turnPlanning"]>["commitment"]
+  >["status"],
+): string {
+  switch (value) {
+    case "prospective":
+      return "nur vorgeschlagen, noch nicht gebunden";
+    case "active":
+      return "aktiv gebunden";
+    case "awaiting_observation":
+      return "wartet auf Beobachtung";
+    case "completed":
+      return "abgeschlossen";
+    case "replanned":
+      return "durch Neuplanung ersetzt";
+    case "invalidated":
+      return "invalidiert";
+  }
+}
+
+function aiTurnPhaseEntryStatusLabel(
+  value: NonNullable<
+    NonNullable<AiPlanFirstDecisionDebug["turnPlanning"]>["commitment"]
+  >["phaseEntry"]["status"],
+): string {
+  switch (value) {
+    case "projection_only":
+      return "nur Projektion";
+    case "validated":
+      return "validiert";
+    case "pending":
+      return "Validierung ausstehend";
+    case "invalid":
+      return "ungültig";
+  }
+}
+
+function aiTurnRematerializationStatusLabel(
+  value: NonNullable<
+    NonNullable<AiPlanFirstDecisionDebug["turnPlanning"]>["commitment"]
+  >["rematerialization"]["status"],
+): string {
+  switch (value) {
+    case "not_attempted":
+      return "noch nicht versucht";
+    case "executable":
+      return "aktuell ausführbar gebunden";
+    case "replan_required":
+      return "Neuplanung erforderlich";
   }
 }
 

@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK07 abgeschlossen; ZK08 aktiv**
+Status: **ZK00 bis ZK08 abgeschlossen; ZK09 aktiv**
 
 Stand: 2026-07-29
 
@@ -931,4 +931,50 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
   mit 17/17 grün.
 - Vollständige AI-Suite: 525 Testdateien und 4295 Tests grün.
 - AI-Typecheck, `check:ai` mit null Runtime-/Typzyklen sowie
+  `git diff --check`: grün.
+
+### ZK08 – abgeschlossen
+
+- `TurnPlanCommitment` speichert Plan-, Phasen-, Knoten-, Cursor-,
+  Runtime-, Rules- und Erwartungsidentität. Persistierte Nodes enthalten
+  konkrete bekannte Karten-, Server-, Ability-, Target- und Choice-Referenzen,
+  aber weder zukünftige `actionId`-Felder noch vollständige
+  `GameState`-/StateHash-Identität.
+- Jede Ausführung erhält erst unmittelbar vor dem Schritt eine kurzlebige
+  `TurnPlanExecutionLease`. Sie wird aus dem aktuellen Planning Head und der
+  exakt aktuellen LegalAction-Menge rematerialisiert und bindet Action-ID,
+  StateVersion, Invocation und semantischen Action-Set-Fingerprint nur für
+  diesen Zustand.
+- Kosten, Target Requirements, Choice Requirements, Payload sowie
+  semantischer Source-/Timing-/Ability-/Effect-Vertrag werden gegen die
+  gespeicherte Erwartung geprüft. Fehlende oder mehrdeutige Routen,
+  Kosten-, Ziel- und Choice-Drift führen zu getrennten typisierten
+  Replangründen; es gibt keinen stillen Ersatz-Head.
+- Erwartete Deltas schreiten den Cursor innerhalb derselben Phase ohne
+  Vollsuche fort. Ein gebundener Phasenwechsel bleibt Teil desselben
+  Commitments, verlangt aber vor dem nächsten Step die exakte Revalidierung
+  von Entry Frame, Root-Assessment, Conditions, Support-Assignments und
+  Resource-Handoffs.
+- Geplante Informationsgrenzen, materielle Outcome-Abweichung, dringliche
+  Interrupts, Rules-/Turnwechsel, ungültige harte PlanCommitments,
+  fehlgeschlagene Kampagnen-Neuquotes und Runtime-Neustart erzeugen
+  ausdrückliche Observation- und Replanklassen. Ein Neustart verwirft das
+  TurnPlanCommitment auch bei identischem sichtbarem Planning-Fingerprint.
+- `CurrentTurnCompletionCertificate` wird ausschließlich aus dem aktuellen
+  realen State, dem aktuellen Standard-EndTurn-Head, aktuellen LegalActions,
+  vollständiger Window-/Cleanup-/Disposition-Prüfung, Pflichtcoverage und
+  tatsächlich verbleibender normaler beziehungsweise beschränkter
+  Action Capacity erzeugt. Ein hypothetisches Zugende kann dieses Zertifikat
+  nicht liefern.
+- Die privilegierte private Buganzeige zeigt Commitment-ID und -Status,
+  Commitment-Cursor, Phase-Entry-Validierung, Rematerialisierungsstatus,
+  Beobachtungsklasse und Replan-Grund. Im jetzigen
+  `projection_contract`-Betrieb ist der Eintrag korrekt als `prospective`
+  und nicht als bereits produktiv gebunden gekennzeichnet. Die vollständigen
+  Karten und Hände beider Seiten bleiben in dieser privaten Betreiberansicht
+  ausdrücklich sichtbar.
+- Fokussiert: Commitment-/Contract-Cluster 25/25, Shared-Sanitizer 16/16 und
+  Web-Debugexport 1/1 grün.
+- Vollständige AI-Suite: 526 Testdateien und 4307 Tests grün.
+- AI-, Shared- und Web-Typecheck, `check:ai`, Formatprüfung sowie
   `git diff --check`: grün.

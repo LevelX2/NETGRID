@@ -286,6 +286,7 @@ export type TurnPlanPhase = {
     milestoneId: string;
     provenance: "resident" | "admitted_child" | "admitted_support";
   };
+  hardPlanCommitmentId?: string;
   rootAssessmentFingerprint: string;
   entryFrameKey: string;
   entryConditions: PlanConditionRef[];
@@ -674,6 +675,12 @@ export function assertTurnPlan(
     phaseIds.add(phase.phaseId);
     if (blank(phase.root.planInstanceId)) {
       issues.push("blank_phase_root_instance_id");
+    }
+    if (
+      phase.hardPlanCommitmentId !== undefined &&
+      blank(phase.hardPlanCommitmentId)
+    ) {
+      issues.push("blank_hard_plan_commitment_id");
     }
     if (!phase.root.moduleId.startsWith(`${plan.side}.`)) {
       issues.push("phase_root_side_mismatch");

@@ -3148,6 +3148,61 @@ export type AiTurnPlanningDebug = {
       }>;
     }>;
   };
+  commitment?: {
+    commitmentId: string;
+    status:
+      | "prospective"
+      | "active"
+      | "awaiting_observation"
+      | "completed"
+      | "replanned"
+      | "invalidated";
+    cursor: {
+      phaseIndex: number;
+      nodeIndex: number;
+      phaseId: string;
+      nodeId: string;
+    };
+    phaseEntry: {
+      phaseId: string;
+      status: "projection_only" | "validated" | "pending" | "invalid";
+      reasonCode: string;
+    };
+    rematerialization: {
+      status: "not_attempted" | "executable" | "replan_required";
+      actionId?: string;
+      leaseId?: string;
+      reasonCode?: string;
+    };
+    observationClass?:
+      | "expected_progress"
+      | "expected_phase_transition"
+      | "expected_no_material_change"
+      | "scheduled_information_boundary"
+      | "material_cost_or_target_drift"
+      | "material_outcome_deviation"
+      | "urgent_interrupt"
+      | "phase_milestone_reached"
+      | "runtime_restarted"
+      | "commitment_invalidated";
+    replanReason?:
+      | "runtime_restarted"
+      | "rules_context_changed"
+      | "turn_changed"
+      | "state_identity_stale"
+      | "current_step_not_legal"
+      | "current_step_ambiguous"
+      | "material_cost_drift"
+      | "material_target_drift"
+      | "material_choice_drift"
+      | "material_outcome_deviation"
+      | "scheduled_information_boundary"
+      | "urgent_interrupt"
+      | "phase_entry_invalid"
+      | "hard_plan_commitment_invalid"
+      | "campaign_requote_invalid"
+      | "commitment_contract_invalid";
+  };
   boundary?: {
     kind: string;
     residualTurnValueBasis: string;
@@ -3742,6 +3797,7 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
       "turnKey",
       "heads",
       "selectedLine",
+      "commitment",
       "boundary",
       "agendaComparison",
       "defenseComparison",
@@ -3758,6 +3814,8 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
     !Array.isArray(candidate.heads) ||
     !candidate.heads.every(isAiTurnPlanningDebugHead) ||
     !isAiTurnPlanningDebugLine(candidate.selectedLine) ||
+    (candidate.commitment !== undefined &&
+      !isAiTurnPlanningDebugCommitment(candidate.commitment)) ||
     (candidate.boundary !== undefined &&
       !isAiTurnPlanningDebugBoundary(candidate.boundary)) ||
     (candidate.agendaComparison !== undefined &&
@@ -3774,6 +3832,119 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
     return false;
   }
   return true;
+}
+
+function isAiTurnPlanningDebugCommitment(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  const cursor = candidate.cursor;
+  const phaseEntry = candidate.phaseEntry;
+  const rematerialization = candidate.rematerialization;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "commitmentId",
+      "status",
+      "cursor",
+      "phaseEntry",
+      "rematerialization",
+      "observationClass",
+      "replanReason",
+    ]) &&
+    typeof candidate.commitmentId === "string" &&
+    [
+      "prospective",
+      "active",
+      "awaiting_observation",
+      "completed",
+      "replanned",
+      "invalidated",
+    ].includes(String(candidate.status)) &&
+    Boolean(cursor && typeof cursor === "object" && !Array.isArray(cursor)) &&
+    hasOnlyAiPlanFirstFields(cursor as Record<string, unknown>, [
+      "phaseIndex",
+      "nodeIndex",
+      "phaseId",
+      "nodeId",
+    ]) &&
+    ["phaseIndex", "nodeIndex"].every(
+      (field) =>
+        typeof (cursor as Record<string, unknown>)[field] === "number" &&
+        Number.isSafeInteger(
+          (cursor as Record<string, unknown>)[field] as number,
+        ) &&
+        Number((cursor as Record<string, unknown>)[field]) >= 0,
+    ) &&
+    ["phaseId", "nodeId"].every(
+      (field) => typeof (cursor as Record<string, unknown>)[field] === "string",
+    ) &&
+    Boolean(
+      phaseEntry &&
+      typeof phaseEntry === "object" &&
+      !Array.isArray(phaseEntry),
+    ) &&
+    hasOnlyAiPlanFirstFields(phaseEntry as Record<string, unknown>, [
+      "phaseId",
+      "status",
+      "reasonCode",
+    ]) &&
+    typeof (phaseEntry as Record<string, unknown>).phaseId === "string" &&
+    ["projection_only", "validated", "pending", "invalid"].includes(
+      String((phaseEntry as Record<string, unknown>).status),
+    ) &&
+    typeof (phaseEntry as Record<string, unknown>).reasonCode === "string" &&
+    Boolean(
+      rematerialization &&
+      typeof rematerialization === "object" &&
+      !Array.isArray(rematerialization),
+    ) &&
+    hasOnlyAiPlanFirstFields(rematerialization as Record<string, unknown>, [
+      "status",
+      "actionId",
+      "leaseId",
+      "reasonCode",
+    ]) &&
+    ["not_attempted", "executable", "replan_required"].includes(
+      String((rematerialization as Record<string, unknown>).status),
+    ) &&
+    ["actionId", "leaseId", "reasonCode"].every(
+      (field) =>
+        (rematerialization as Record<string, unknown>)[field] === undefined ||
+        typeof (rematerialization as Record<string, unknown>)[field] ===
+          "string",
+    ) &&
+    (candidate.observationClass === undefined ||
+      [
+        "expected_progress",
+        "expected_phase_transition",
+        "expected_no_material_change",
+        "scheduled_information_boundary",
+        "material_cost_or_target_drift",
+        "material_outcome_deviation",
+        "urgent_interrupt",
+        "phase_milestone_reached",
+        "runtime_restarted",
+        "commitment_invalidated",
+      ].includes(String(candidate.observationClass))) &&
+    (candidate.replanReason === undefined ||
+      [
+        "runtime_restarted",
+        "rules_context_changed",
+        "turn_changed",
+        "state_identity_stale",
+        "current_step_not_legal",
+        "current_step_ambiguous",
+        "material_cost_drift",
+        "material_target_drift",
+        "material_choice_drift",
+        "material_outcome_deviation",
+        "scheduled_information_boundary",
+        "urgent_interrupt",
+        "phase_entry_invalid",
+        "hard_plan_commitment_invalid",
+        "campaign_requote_invalid",
+        "commitment_contract_invalid",
+      ].includes(String(candidate.replanReason)))
+  );
 }
 
 function isAiTurnPlanningDefenseComparison(value: unknown): boolean {

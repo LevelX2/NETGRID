@@ -12478,8 +12478,8 @@ function turnPlanningProjectionDebug(params: {
     : [];
   const nodeId = turnPlanningFingerprint("turn-node", {
     invocationKey: invocation.invocationKey,
-    actionId: candidate.actionId,
-    stateVersion: stateIdentity.stateVersion,
+    rootPlanInstanceId,
+    leafPlanInstanceId: params.selectedPlan.instanceId,
   });
   const phaseId = turnPlanningFingerprint("turn-phase", {
     rootPlanInstanceId,
@@ -12548,6 +12548,36 @@ function turnPlanningProjectionDebug(params: {
           ],
         },
       ],
+    },
+    commitment: {
+      commitmentId: turnPlanningFingerprint(
+        "prospective-turn-plan-commitment",
+        {
+          lineId,
+          turnKey,
+          stateIdentity,
+          rulesFingerprint: rulesContext.fingerprint,
+        },
+      ),
+      status: "prospective",
+      cursor: {
+        phaseIndex: 0,
+        nodeIndex: 0,
+        phaseId,
+        nodeId,
+      },
+      phaseEntry: {
+        phaseId,
+        status: "projection_only",
+        reasonCode: "commitment_not_bound_in_projection_mode",
+      },
+      rematerialization: {
+        status: "not_attempted",
+        reasonCode: "productive_cutover_not_active",
+      },
+      observationClass: boundary
+        ? "scheduled_information_boundary"
+        : "expected_no_material_change",
     },
     ...(boundary
       ? {

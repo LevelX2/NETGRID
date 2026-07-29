@@ -407,6 +407,27 @@ describe("AI decision debug sanitizing", () => {
               },
             ],
           },
+          commitment: {
+            commitmentId: "commitment:corp:turn:4",
+            status: "active",
+            cursor: {
+              phaseIndex: 0,
+              nodeIndex: 0,
+              phaseId: "phase:score-material",
+              nodeId: "node:corp.draw",
+            },
+            phaseEntry: {
+              phaseId: "phase:score-material",
+              status: "validated",
+              reasonCode: "phase_entry_validated",
+            },
+            rematerialization: {
+              status: "executable",
+              actionId: "corp.draw",
+              leaseId: "lease:corp.draw",
+            },
+            observationClass: "expected_progress",
+          },
           boundary: {
             kind: "private_observation",
             residualTurnValueBasis: "hand_quality_distribution",
@@ -483,6 +504,13 @@ describe("AI decision debug sanitizing", () => {
       ],
       turnPlanning: expect.objectContaining({
         schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
+        commitment: expect.objectContaining({
+          commitmentId: "commitment:corp:turn:4",
+          phaseEntry: expect.objectContaining({ status: "validated" }),
+          rematerialization: expect.objectContaining({
+            status: "executable",
+          }),
+        }),
         selectedLine: expect.objectContaining({
           stopReason: "observation_boundary",
         }),
@@ -504,6 +532,22 @@ describe("AI decision debug sanitizing", () => {
       },
     });
     expect(malformedTurnPlanning?.planFirstDecision).toBeUndefined();
+
+    const untypedReplanReason = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      planFirstDecision: {
+        ...sanitized?.planFirstDecision,
+        turnPlanning: {
+          ...sanitized?.planFirstDecision?.turnPlanning,
+          commitment: {
+            ...sanitized?.planFirstDecision?.turnPlanning?.commitment,
+            replanReason: "free_text_is_not_a_replan_contract",
+          },
+        },
+      },
+    });
+    expect(untypedReplanReason?.planFirstDecision).toBeUndefined();
 
     const p6WithoutNarrowContract = sanitizeAiDecisionDebug({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,

@@ -184,6 +184,27 @@ function trace(): MaintenanceAiTraceDetail {
               },
             ],
           },
+          commitment: {
+            commitmentId: "commitment:corp:turn:2",
+            status: "awaiting_observation",
+            cursor: {
+              phaseIndex: 0,
+              nodeIndex: 0,
+              phaseId: "phase:score-material",
+              nodeId: "node:corp.draw",
+            },
+            phaseEntry: {
+              phaseId: "phase:score-material",
+              status: "validated",
+              reasonCode: "phase_entry_validated",
+            },
+            rematerialization: {
+              status: "replan_required",
+              reasonCode: "scheduled_information_boundary",
+            },
+            observationClass: "scheduled_information_boundary",
+            replanReason: "scheduled_information_boundary",
+          },
           boundary: {
             kind: "private_observation",
             residualTurnValueBasis: "hand_quality_distribution",
