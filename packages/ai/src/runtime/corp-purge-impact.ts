@@ -123,6 +123,22 @@ export function corpPurgeImpactScoreComponent(
   };
 }
 
+/**
+ * Admits a purge plan only when its visible impact is positive even before
+ * scoreline urgency or another competing plan is allowed to decide the window.
+ */
+export function corpPurgeHasVisibleStrategicPressure(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  return (
+    (corpPurgeImpactScoreComponent(input, action, {
+      primary: "low_value",
+      severity: "low",
+    })?.value ?? Number.NEGATIVE_INFINITY) > 0
+  );
+}
+
 function runnerVirusCounterHasActiveEffect(
   entry: VisibleRunnerVirusCounter,
 ): boolean {

@@ -4,7 +4,10 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
-import { corpPurgeImpactScoreComponent } from "./corp-purge-impact";
+import {
+  corpPurgeHasVisibleStrategicPressure,
+  corpPurgeImpactScoreComponent,
+} from "./corp-purge-impact";
 
 describe("corpPurgeImpactScoreComponent", () => {
   it("strongly rejects spending the turn on one counter during scoreline repair", () => {
@@ -84,6 +87,21 @@ describe("corpPurgeImpactScoreComponent", () => {
       "purge_active_runner_counter_types:garbage",
     );
   });
+
+  it("admits the generic purge plan only after visible impact becomes positive", () => {
+    expect(
+      corpPurgeHasVisibleStrategicPressure(
+        inputWithRunnerVirusCounters({ tax: 1 }),
+        runnerVirusPurgeAction(),
+      ),
+    ).toBe(false);
+    expect(
+      corpPurgeHasVisibleStrategicPressure(
+        inputWithRunnerVirusCounters({ tax: 2 }),
+        runnerVirusPurgeAction(),
+      ),
+    ).toBe(true);
+  });
 });
 
 function inputWithVirusCounters(amount: number): AiDecisionInput {
@@ -159,11 +177,11 @@ function runnerVirusPurgeAction(): LegalAction {
 }
 
 function inputWithRunnerVirusCounters(
-  counters: Partial<Record<"highlighter" | "garbage", number>>,
+  counters: Partial<Record<"highlighter" | "garbage" | "tax", number>>,
 ): AiDecisionInput {
   const input = inputWithVirusCounters(0);
   const counterEntries = Object.entries(counters) as Array<
-    ["highlighter" | "garbage", number | undefined]
+    ["highlighter" | "garbage" | "tax", number | undefined]
   >;
   input.playerView.own.identity.counterDisplays = counterEntries.map(
     ([counterType, amount]) => ({
@@ -190,15 +208,25 @@ function inputWithRunnerVirusCounters(
           rulesText:
             "Each Highlighter counter after the first allows you to access an additional card from R&D.",
         } as VisibleCard)
-      : ({
-          instanceId: "garbage-in",
-          definitionId: "onr_proteus_089_garbage-in",
-          title: "Garbage In",
-          type: "program",
-          known: true,
-          rulesText:
-            "Two or more Garbage counters allow you to trash at no cost cards accessed from R&D.",
-        } as VisibleCard),
+      : counterType === "garbage"
+        ? ({
+            instanceId: "garbage-in",
+            definitionId: "onr_proteus_089_garbage-in",
+            title: "Garbage In",
+            type: "program",
+            known: true,
+            rulesText:
+              "Two or more Garbage counters allow you to trash at no cost cards accessed from R&D.",
+          } as VisibleCard)
+        : ({
+            instanceId: "generic-virus-pressure",
+            definitionId: "test_generic_virus_pressure",
+            title: "Generic Virus Pressure",
+            type: "program",
+            known: true,
+            rulesText:
+              "Each visible counter creates a recurring Corp-side cost.",
+          } as VisibleCard),
   );
   input.playerView.publicEvents = [
     {

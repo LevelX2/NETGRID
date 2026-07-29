@@ -118,6 +118,7 @@ import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitio
 import { rolesMatch } from "./role-match";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import { withDecisionLocalCorpPunishRouteQuotes } from "./corp-punish-route-quote-input";
+import { corpPurgeHasVisibleStrategicPressure } from "./corp-purge-impact";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
   buildCorpHandInventoryFacts,
@@ -8132,18 +8133,20 @@ function buildCorpDomain(
         fundingRouteAssessment,
       };
     });
-  const virusPressure: CorpPlanDomain["virusPressure"] = candidates.some(
-    (candidate) =>
-      candidate.semanticActionType === "counter.purge_virus" ||
-      candidate.semanticActionType === "counter.purge_runner_virus",
-  )
+  const purgeAction = input.legalActions.find(
+    (action) =>
+      action.type === "purge_virus_counters" ||
+      action.type === "purge_runner_virus_counters",
+  );
+  const visibleVirusCounters = visibleRunnerVirusCounters(input);
+  const virusPressure: CorpPlanDomain["virusPressure"] = purgeAction
     ? [
         {
           pressureId: "visible-virus-pressure",
-          virusCounters: visibleRunnerVirusCounters(input),
-          strategicDamage: visibleRunnerVirusCounters(input),
-          critical: visibleRunnerVirusCounters(input) >= 3,
-          purgeUseful: visibleRunnerVirusCounters(input) > 0,
+          virusCounters: visibleVirusCounters,
+          strategicDamage: visibleVirusCounters,
+          critical: visibleVirusCounters >= 3,
+          purgeUseful: corpPurgeHasVisibleStrategicPressure(input, purgeAction),
           evidenceCode: "visible_runner_virus_counters",
         },
       ]

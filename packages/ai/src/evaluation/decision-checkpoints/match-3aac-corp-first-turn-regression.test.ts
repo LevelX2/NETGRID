@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3aac-01-corp-first-turn-no-premature-end-d4.json";
+import singleCounterPurgeJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3aac-02-single-tax-counter-no-purge-d67.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 
-describe("match 3aac Corp first-turn regression evidence", () => {
+describe("match 3aac Corp regression evidence", () => {
   it("funds one exact HQ-defense route instead of completing the turn", () => {
     const checkpoint = structuredClone(
       checkpointJson,
@@ -71,5 +72,25 @@ describe("match 3aac Corp first-turn regression evidence", () => {
         `plan_assessment_evidence:corp_defense_exact_route_funding_required:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0`,
       ]),
     );
+  });
+
+  it("rejects a three-action purge for one visible virus counter", () => {
+    const result = runAiDecisionCheckpoint(
+      structuredClone(singleCounterPurgeJson) as AiDecisionCheckpointV1,
+    );
+
+    expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
+    expect(result.selectedAction?.type).not.toBe("purge_runner_virus_counters");
+    expect(
+      result.decision?.decisionDebug?.actionAlternatives?.find(
+        (entry) => entry.actionType === "purge_runner_virus_counters",
+      ),
+    ).toMatchObject({
+      selected: false,
+      excluded: true,
+      whyNot: expect.arrayContaining([
+        "explicitly_nonproductive:corp.respond_to_virus_pressure:corp_virus_purge_has_no_visible_strategic_pressure",
+      ]),
+    });
   });
 });
