@@ -3,6 +3,8 @@ import type {
   EngineResult,
   EngineRandomizedIceInstallSelectionCommand,
   EngineRandomizedIceInstallSelectionResult,
+  EngineRandomizedTurnPlanSelectionCommand,
+  EngineRandomizedTurnPlanSelectionResult,
   GameState,
   LegalAction,
   PlayerAction,
@@ -24,6 +26,10 @@ import {
   applyRandomizedIceInstallSelection,
   configureRandomizedIceInstallSelectionHost,
 } from "../randomized-ice-install-selection";
+import {
+  applyRandomizedTurnPlanSelection,
+  configureRandomizedTurnPlanSelectionHost,
+} from "../randomized-turn-plan-selection";
 
 export type ApplyActionHostCompositionHost = {
   actions?: {
@@ -37,6 +43,11 @@ export type ApplyActionHostCompositionHost = {
       command: EngineRandomizedIceInstallSelectionCommand,
       options?: ApplyActionOptions,
     ) => EngineRandomizedIceInstallSelectionResult;
+    applyRandomizedTurnPlanSelection?: (
+      state: GameState,
+      command: EngineRandomizedTurnPlanSelectionCommand,
+      options?: ApplyActionOptions,
+    ) => EngineRandomizedTurnPlanSelectionResult;
     afterPerformAction?: (state: GameState, legalAction: LegalAction) => void;
   };
   perform: PerformActionExecutionDependencies;
@@ -69,6 +80,9 @@ export function createApplyActionHostComposition(
           applyRandomizedIceInstallSelection:
             host.actions.applyRandomizedIceInstallSelection ??
             applyRandomizedIceInstallSelection,
+          applyRandomizedTurnPlanSelection:
+            host.actions.applyRandomizedTurnPlanSelection ??
+            applyRandomizedTurnPlanSelection,
         },
       }
     : undefined;
@@ -93,6 +107,7 @@ export function configureApplyActionHostComposition(
   const composition = createApplyActionHostComposition(host);
   configureApplyActionCoreHost(composition.applyActionCoreHost);
   configureRandomizedIceInstallSelectionHost(composition.applyActionCoreHost);
+  configureRandomizedTurnPlanSelectionHost(composition.applyActionCoreHost);
   if (composition.applyGameActionHost)
     configureApplyGameActionHost(composition.applyGameActionHost);
   if (composition.replayHost) configureReplayHost(composition.replayHost);

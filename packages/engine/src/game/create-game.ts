@@ -119,6 +119,8 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     seed,
     randomCounter: random.counter,
     randomDrawRecords: random.records,
+    aiTurnPlanRandomCounter: 0,
+    aiTurnPlanRandomDrawRecords: [],
     activeSide: config.setupMode === "completed" ? "corp" : "runner",
     phase: config.setupMode === "completed" ? "corp_draw_phase" : "setup",
     timingPoint:

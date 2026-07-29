@@ -7,6 +7,11 @@ export {
   candidateFingerprint,
   quoteRandomizedIceInstallSelection,
 } from "./randomized-ice-install-selection";
+export {
+  applyRandomizedTurnPlanSelection,
+  quoteRandomizedTurnPlanSelection,
+  turnPlanCandidateFingerprint,
+} from "./randomized-turn-plan-selection";
 export { applyGameAction } from "./apply-game-action";
 export { legalActionsFor } from "./legal-actions";
 export {

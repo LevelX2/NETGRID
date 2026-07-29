@@ -5,6 +5,8 @@ import {
   type CorpPunishRouteQuoteResult,
   type EngineRandomizedIceInstallSelectionQuoteResult,
   type EngineRandomizedIceInstallSelectionRequest,
+  type EngineRandomizedTurnPlanSelectionQuoteResult,
+  type EngineRandomizedTurnPlanSelectionRequest,
 } from "@netgrid/shared";
 
 export type AiDecisionRuntimeOptions = {
@@ -15,6 +17,9 @@ export type AiDecisionRuntimeOptions = {
   quoteRandomizedIceInstallSelection?: (
     request: EngineRandomizedIceInstallSelectionRequest,
   ) => EngineRandomizedIceInstallSelectionQuoteResult;
+  quoteRandomizedTurnPlanSelection?: (
+    request: EngineRandomizedTurnPlanSelectionRequest,
+  ) => EngineRandomizedTurnPlanSelectionQuoteResult;
   practicalMicroRuntime?: PracticalMicroRuntimeOptions;
   practicalTacticOverlay?: PracticalTacticOverlayOptions;
 };

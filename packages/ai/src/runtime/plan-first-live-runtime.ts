@@ -6,6 +6,7 @@ import {
   CORP_FORT_RUN_REZ_SUPPORT_KIND,
   CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
+  ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
   type AiDecision,
   type AiDecisionInput,
   type AiPlanFirstDecisionDebug,
@@ -103,6 +104,7 @@ import {
   type TransientPlanSignal,
 } from "../plans/transient-plan-signals";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+import { buildCorpAgendaTurnPlanningSlice } from "../plans/corp-agenda-turn-planning";
 import {
   buildCanonicalLegalActionInvocation,
   buildSemanticActionSetFingerprint,
@@ -12247,6 +12249,7 @@ function planFirstDecisionDebug(params: {
   try {
     turnPlanning = turnPlanningProjectionDebug({
       input: params.input,
+      context: params.context,
       result: params.result,
       actionCandidate,
       selectedPlan,
@@ -12356,6 +12359,7 @@ function planFirstDecisionDebug(params: {
 
 function turnPlanningProjectionDebug(params: {
   input: AiDecisionInput;
+  context: PlanSchedulerContext;
   result: Extract<PlanSchedulerResult, { lane: "plan" }>;
   actionCandidate: ActionSemanticCandidate | undefined;
   selectedPlan: ResidentPlanPortfolio["instances"][number];
@@ -12428,6 +12432,23 @@ function turnPlanningProjectionDebug(params: {
     params.result.portfolio.instances.find(
       (instance) => instance.instanceId === rootPlanInstanceId,
     ) ?? params.selectedPlan;
+  const agendaProject =
+    params.input.side === "corp" && rootPlan.moduleId === "corp.score_agenda"
+      ? (
+          params.context.domain as CorpPlanDomain | undefined
+        )?.scoreProjects.find(
+          (project) => project.projectId === rootPlan.dedupeKey,
+        )
+      : undefined;
+  const agendaSlice = agendaProject
+    ? buildCorpAgendaTurnPlanningSlice({
+        input: params.input,
+        project: agendaProject,
+        candidates: params.context.actionCandidates,
+        rulesContext,
+        stateIdentity,
+      })
+    : undefined;
   const supportBindings = params.selectedPlan.parentNeedId
     ? [
         {
@@ -12528,10 +12549,39 @@ function turnPlanningProjectionDebug(params: {
     pruneEvents: [],
     evidenceCodes: [
       "turn_planning_projection_contract_only",
+      ...(agendaSlice?.evidenceCodes ?? []),
       ...(boundary
         ? ["observation_boundary_requires_replanning"]
         : ["future_projection_not_yet_available"]),
     ],
+    ...(agendaSlice
+      ? {
+          agendaComparison: {
+            opportunityKey: agendaSlice.opportunityKey,
+            ...(agendaSlice.selectedFamily &&
+            agendaSlice.randomizationEligibility === undefined
+              ? { selectedFamily: agendaSlice.selectedFamily }
+              : {}),
+            selectionReason:
+              agendaSlice.randomizationEligibility !== undefined
+                ? "engine_randomization_pending"
+                : agendaSlice.selectionReason,
+            randomizationEligible:
+              agendaSlice.randomizationEligibility !== undefined,
+            lines: agendaSlice.lines.map((line) => ({
+              lineId: line.lineId,
+              family: line.family,
+              actionCount: line.nodes.length,
+              agendaProgress: line.evaluation.agendaProgress,
+              defense: line.evaluation.defense,
+              economy: line.evaluation.economy,
+              risk: line.evaluation.risk,
+              worstCaseFloor: line.evaluation.worstCaseFloor,
+              expectedValue: line.evaluation.expectedValue,
+            })),
+          },
+        }
+      : {}),
   };
 }
 
@@ -13036,6 +13086,80 @@ function decisionFromScheduler(
         ? `plan_first.${planKind ?? "unknown"}`
         : "plan_first.engine_window",
   };
+  const randomizedAgendaSlice = agendaSliceForRandomizedSelection({
+    input,
+    context,
+    result,
+  });
+  if (randomizedAgendaSlice) {
+    const matchId = input.matchId?.trim();
+    const quoteSelection = options.quoteRandomizedTurnPlanSelection;
+    if (!matchId || !quoteSelection) {
+      throw new PlanResolutionFailure("invalid_support_graph", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map(
+          (legalAction) => legalAction.type,
+        ),
+        unresolvedActionIds: randomizedAgendaSlice.lines.map(
+          (line) => line.currentActionId,
+        ),
+        owner: "rules_contract",
+        planInstanceId: planId,
+        removalCondition:
+          "An admissible Opening-Rush posture mix requires the separate Engine TurnPlan RNG domain.",
+      });
+    }
+    const familyLines = [
+      randomizedAgendaSlice.lines
+        .filter((line) => line.family !== "safe_setup")
+        .sort(
+          (left, right) =>
+            right.evaluation.expectedValue - left.evaluation.expectedValue ||
+            right.evaluation.worstCaseFloor - left.evaluation.worstCaseFloor ||
+            left.lineId.localeCompare(right.lineId),
+        )[0],
+      randomizedAgendaSlice.lines.find((line) => line.family === "safe_setup"),
+    ].filter((line): line is NonNullable<typeof line> => line !== undefined);
+    const quote = quoteSelection({
+      schemaVersion: ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
+      matchId,
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      opportunityKey: randomizedAgendaSlice.opportunityKey,
+      candidates: familyLines.map((line) => ({
+        familyKey: line.family,
+        lineId: line.lineId,
+        actionId: line.currentActionId,
+        weight: 1,
+      })),
+    });
+    if (!quote.ok) {
+      throw new PlanResolutionFailure("invalid_support_graph", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map(
+          (legalAction) => legalAction.type,
+        ),
+        unresolvedActionIds: familyLines.map((line) => line.currentActionId),
+        owner: "rules_contract",
+        planInstanceId: planId,
+        removalCondition:
+          "The Engine must revalidate every weighted Opening-Rush family head before consuming planner randomness.",
+      });
+    }
+    return {
+      ...decisionBase,
+      selectionKind: "engine_randomized_turn_plan_selection",
+      engineCommand: {
+        kind: "engine_randomized_turn_plan_selection",
+        quote: quote.quote,
+      },
+    };
+  }
   if (randomizedIceInstallNearTie) {
     if (result.lane !== "plan") {
       throw new Error(
@@ -13109,6 +13233,46 @@ function decisionFromScheduler(
     actionId,
     ...(selectedChoices ? { selectedChoices } : {}),
   };
+}
+
+function agendaSliceForRandomizedSelection(params: {
+  input: AiDecisionInput;
+  context: PlanSchedulerContext;
+  result: PlanSchedulerResult;
+}) {
+  if (
+    params.input.side !== "corp" ||
+    params.result.lane !== "plan" ||
+    params.result.selectedAssessment.priorityValidation.effectiveClass ===
+      "P1" ||
+    params.result.selectedAssessment.priorityValidation.effectiveClass === "P2"
+  ) {
+    return undefined;
+  }
+  const extended = params.input as AiDecisionInputWithDeckCapabilities;
+  if (!extended.planningRulesContext || !extended.planningStateIdentity) {
+    return undefined;
+  }
+  const domain = params.context.domain as CorpPlanDomain | undefined;
+  return domain?.scoreProjects
+    .filter((project) => project.openingRush?.status === "qualified")
+    .map((project) =>
+      buildCorpAgendaTurnPlanningSlice({
+        input: params.input,
+        project,
+        candidates: params.context.actionCandidates,
+        rulesContext: extended.planningRulesContext!,
+        stateIdentity: extended.planningStateIdentity!,
+      }),
+    )
+    .filter(
+      (slice) =>
+        slice.randomizationEligibility !== undefined &&
+        new Set(slice.lines.map((line) => line.currentActionId)).size >= 2,
+    )
+    .sort((left, right) =>
+      left.opportunityKey.localeCompare(right.opportunityKey),
+    )[0];
 }
 
 function runnerCreditBankSignals(

@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK04 abgeschlossen; ZK05 aktiv**
+Status: **ZK00 bis ZK05 abgeschlossen; ZK06 aktiv**
 
 Stand: 2026-07-29
 
@@ -812,3 +812,38 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
 - Shared Contract/Sanitizer: 16/16 grün; Multiplayer: 148/148 grün;
   Web-Debugexport: 1/1 grün.
 - AI-, Shared-, Server- und Web-Typecheck sowie `git diff --check`: grün.
+
+### ZK05 – abgeschlossen
+
+- `corp.score_agenda` erzeugt für eine konkrete frühe Agenda-Opportunity
+  deterministisch drei getrennte Linienfamilien: reiner Rush, kombinierter
+  Agenda-/Remote-ICE-/Central-ICE-Rush und sicherer Central-/Economy-Aufbau.
+- Aktuelle Heads bleiben an konkrete LegalActions gebunden; spätere
+  Agendaschritte verwenden kanonische Invocations ohne zukünftige
+  `actionId`.
+- Agenda-Root, Defense-Leaf und Economy-Support besitzen getrennte
+  line-prefix-gebundene Claims. Agendaertrag wird nicht durch Schutz- oder
+  Liquiditätsbeiträge doppelt gezählt.
+- Agendaexposition, Schutz, Liquidität, Kontinuität, Expected Value und
+  Worst-Case-Floor werden gemeinsam verglichen; Dominanz und das begrenzte
+  Regret-Band entscheiden vor jeder Zufallsauswahl.
+- Kampagnen unterscheiden Fortsetzung, Warten über den Gegnerzug,
+  blockierte Neuplanung und tatsächliche Objective-Invalidierung. Ein
+  normaler Zugwechsel verwirft die Agenda-Kampagne nicht.
+- Eine zulässige Rush-/Nicht-Rush-Mischung läuft atomar über den neuen
+  Engine-Command `engine_randomized_turn_plan_selection`. Der eigene
+  `aiTurnPlanRandomCounter` samt Record-Stream ist von Game-Effect-RNG
+  getrennt; Quote, LegalActions, Gewichte und Opportunity werden vor
+  Ausführung neu validiert.
+- Der Engine-Command und sein privates Receipt sind replaybar und erreichen
+  denselben StateHash. Der normale `randomCounter` und dessen Records bleiben
+  unverändert.
+- Die private Buganzeige zeigt Familien, Opportunity, Auswahlgrund,
+  Zulässigkeit der Mischentscheidung, Agenda-/Defense-/Economy-Werte,
+  Risiko und Worst Case; beide vollständigen Kartenlagen bleiben sichtbar.
+- Fokussiert: Agenda/Opening Rush 7/7, Engine-RNG 5/5, Shared 16/16,
+  Multiplayer 148/148 und Web-Debugexport 1/1 grün.
+- Vollständige AI-Suite: 523 Testdateien und 4277 Tests grün; vollständige
+  Engine-Suite: 210 Testdateien und 1821 Tests grün.
+- AI-, Engine-, Shared-, Server- und Web-Typecheck sowie `git diff --check`:
+  grün.

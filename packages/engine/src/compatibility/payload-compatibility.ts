@@ -1,9 +1,11 @@
 import type {
   AbilityPayloadDiscriminatorField,
   EngineRandomizedIceInstallSelectionCommand,
+  EngineRandomizedTurnPlanSelectionCommand,
   PlayerAction,
 } from "@netgrid/shared";
 import { ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION } from "@netgrid/shared";
+import { ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION } from "@netgrid/shared";
 
 // Only current execution discriminators that contribute to Action IDs belong
 // here. The order is deterministic because replay and stale-action validation
@@ -103,6 +105,30 @@ export function isReplayRandomizedIceInstallSelectionCommand(
     typeof quote.stateVersion === "number" &&
     typeof quote.timingPoint === "string" &&
     typeof quote.planStepId === "string" &&
+    typeof quote.candidateFingerprint === "string" &&
+    Array.isArray(quote.candidates) &&
+    Array.isArray(quote.legalActions)
+  );
+}
+
+export function isReplayRandomizedTurnPlanSelectionCommand(
+  value: unknown,
+): value is EngineRandomizedTurnPlanSelectionCommand {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Partial<EngineRandomizedTurnPlanSelectionCommand>;
+  const quote = record.quote;
+  return (
+    record.kind === "engine_randomized_turn_plan_selection" &&
+    Boolean(quote && typeof quote === "object") &&
+    quote?.schemaVersion ===
+      ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION &&
+    quote.visibility === "private_to_actor" &&
+    quote.complete === true &&
+    typeof quote.matchId === "string" &&
+    typeof quote.side === "string" &&
+    typeof quote.stateVersion === "number" &&
+    typeof quote.timingPoint === "string" &&
+    typeof quote.opportunityKey === "string" &&
     typeof quote.candidateFingerprint === "string" &&
     Array.isArray(quote.candidates) &&
     Array.isArray(quote.legalActions)

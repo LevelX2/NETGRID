@@ -27,8 +27,8 @@ export function compareSemanticShadowToRuntime(params: {
   runtimeDecision: AiDecision;
 }): SemanticShadowRuntimeComparison {
   if (
-    params.runtimeDecision.selectionKind ===
-    "engine_randomized_ice_install_selection"
+    params.runtimeDecision.selectionKind &&
+    params.runtimeDecision.selectionKind !== "direct"
   ) {
     throw new Error(
       "semantic_shadow_comparison_requires_applied_engine_randomized_decision",

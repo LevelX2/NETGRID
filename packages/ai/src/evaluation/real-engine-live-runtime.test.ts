@@ -84,7 +84,7 @@ function chooseWithoutPersistentMemory(input: AiDecisionInput): string {
   const decision = chooseAiAction(input, {
     persistTacticalPlanMemory: false,
   });
-  if (decision.selectionKind === "engine_randomized_ice_install_selection") {
+  if (decision.selectionKind && decision.selectionKind !== "direct") {
     throw new Error("test_requires_applied_engine_randomized_decision");
   }
   return decision.actionId;

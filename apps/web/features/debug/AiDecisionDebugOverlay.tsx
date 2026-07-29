@@ -634,6 +634,56 @@ function AiDecisionDebugPlanFirstTraceView({
               ]}
             />
           ) : null}
+          {decision.turnPlanning.agendaComparison ? (
+            <>
+              <AiDecisionDebugRows
+                rows={[
+                  [
+                    "Agenda-Familie",
+                    decision.turnPlanning.agendaComparison.selectedFamily
+                      ? aiAgendaLineFamilyLabel(
+                          decision.turnPlanning.agendaComparison.selectedFamily,
+                        )
+                      : "Engine-Auswahl ausstehend",
+                  ],
+                  [
+                    "Auswahlgrund",
+                    decision.turnPlanning.agendaComparison.selectionReason,
+                  ],
+                  [
+                    "Rush-Mischentscheidung",
+                    decision.turnPlanning.agendaComparison.randomizationEligible
+                      ? "zulässig und opportunity-gebunden"
+                      : "nicht zulässig oder klare Präferenz",
+                  ],
+                  [
+                    "Opportunity",
+                    decision.turnPlanning.agendaComparison.opportunityKey,
+                  ],
+                ]}
+              />
+              <div className="aiDecisionDebugCompactList">
+                {decision.turnPlanning.agendaComparison.lines.map((line) => (
+                  <div key={line.lineId}>
+                    <span>{aiAgendaLineFamilyLabel(line.family)}</span>
+                    <strong>
+                      Wert {line.expectedValue} · Worst Case{" "}
+                      {line.worstCaseFloor}
+                    </strong>
+                    <AiDecisionDebugRows
+                      rows={[
+                        ["Aktionen", String(line.actionCount)],
+                        ["Agenda", String(line.agendaProgress)],
+                        ["Defense", String(line.defense)],
+                        ["Economy", String(line.economy)],
+                        ["Risiko", String(line.risk)],
+                      ]}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
           <AiDecisionDebugChips
             title="Planungs-Evidence"
             items={decision.turnPlanning.evidenceCodes}
@@ -733,6 +783,14 @@ function AiDecisionDebugPlanFirstTraceView({
       </AiDecisionDebugCollapsibleSection>
     </div>
   );
+}
+
+function aiAgendaLineFamilyLabel(
+  family: "pure_rush" | "combined_rush" | "safe_setup",
+): string {
+  if (family === "pure_rush") return "Reiner Rush";
+  if (family === "combined_rush") return "Kombinierter Rush";
+  return "Sicherer Aufbau";
 }
 
 function aiTurnPlanningStopReasonLabel(

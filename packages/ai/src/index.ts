@@ -252,6 +252,14 @@ export type {
   ValidatedPriorityObligation,
 } from "./plans/turn-planning-contracts";
 export {
+  buildCorpAgendaTurnPlanningSlice,
+  campaignDisposition,
+  CORP_AGENDA_TURN_SLICE_VERSION,
+  type CorpAgendaLineFamily,
+  type CorpAgendaTurnPlanningLine,
+  type CorpAgendaTurnPlanningSlice,
+} from "./plans/corp-agenda-turn-planning";
+export {
   applyCertifiedTurnProjectionDelta,
   assessTurnObservationBoundary,
   buildProjectedDecisionFrame,

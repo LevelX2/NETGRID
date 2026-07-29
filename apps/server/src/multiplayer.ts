@@ -15,6 +15,7 @@ import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import {
   applyAction,
   applyRandomizedIceInstallSelection,
+  applyRandomizedTurnPlanSelection,
   createGame,
   getLegalActions,
   getPlayerView,
@@ -23,6 +24,7 @@ import {
   replayEvents,
   quoteCorpPunishRoute,
   quoteRandomizedIceInstallSelection,
+  quoteRandomizedTurnPlanSelection,
 } from "@netgrid/engine";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
@@ -66,6 +68,7 @@ import {
   type DeckPublicMetadata,
   type EngineError,
   type EngineRandomizedIceInstallSelectionCommand,
+  type EngineRandomizedTurnPlanSelectionCommand,
   type EngineResult,
   type GameEvent,
   type GameState,
@@ -779,6 +782,8 @@ type AiDecisionChooser = typeof chooseAiAction;
 type EngineActionApplier = typeof applyAction;
 type EngineRandomizedIceInstallSelectionApplier =
   typeof applyRandomizedIceInstallSelection;
+type EngineRandomizedTurnPlanSelectionApplier =
+  typeof applyRandomizedTurnPlanSelection;
 type AiStepFailureCode =
   | "ai_no_action"
   | "ai_decision_action_not_legal"
@@ -832,6 +837,7 @@ export class MultiplayerService {
   private readonly chooseAiAction: AiDecisionChooser;
   private readonly applyEngineAction: EngineActionApplier;
   private readonly applyEngineRandomizedIceInstallSelection: EngineRandomizedIceInstallSelectionApplier;
+  private readonly applyEngineRandomizedTurnPlanSelection: EngineRandomizedTurnPlanSelectionApplier;
   private readonly persistenceObservers = new Set<MatchPersistenceObserver>();
   /**
    * Deliberately process-local: this binds a visible, prepared decision to the
@@ -851,6 +857,7 @@ export class MultiplayerService {
       chooseAiAction?: AiDecisionChooser;
       applyAction?: EngineActionApplier;
       applyRandomizedIceInstallSelection?: EngineRandomizedIceInstallSelectionApplier;
+      applyRandomizedTurnPlanSelection?: EngineRandomizedTurnPlanSelectionApplier;
     } = {},
   ) {
     this.tokenSalt =
@@ -874,6 +881,9 @@ export class MultiplayerService {
     this.applyEngineRandomizedIceInstallSelection =
       options.applyRandomizedIceInstallSelection ??
       applyRandomizedIceInstallSelection;
+    this.applyEngineRandomizedTurnPlanSelection =
+      options.applyRandomizedTurnPlanSelection ??
+      applyRandomizedTurnPlanSelection;
   }
 
   addPersistenceObserver(observer: MatchPersistenceObserver): () => void {
@@ -3166,6 +3176,8 @@ export class MultiplayerService {
             quoteCorpPunishRoute(record.gameState!, request),
           quoteRandomizedIceInstallSelection: (request) =>
             quoteRandomizedIceInstallSelection(record.gameState!, request),
+          quoteRandomizedTurnPlanSelection: (request) =>
+            quoteRandomizedTurnPlanSelection(record.gameState!, request),
         });
         this.preparedAiDecisions.set(record.match.matchId, {
           stateVersion: record.gameState.stateVersion,
@@ -3175,7 +3187,9 @@ export class MultiplayerService {
         if (this.captureResidentPlanPortfolioFor(record, aiInput))
           await this.persist(record);
       }
-      if (decision.selectionKind === "engine_randomized_ice_install_selection")
+      if (
+        decision.selectionKind === "engine_randomized_ice_install_selection"
+      )
         return {
           ok: false,
           error: safeError(
@@ -3185,7 +3199,10 @@ export class MultiplayerService {
             input.requesterSide,
           ),
         };
-      const legalAction = legalActionForAiDecision(decision, legalActions);
+      const legalAction =
+        decision.selectionKind === "engine_randomized_turn_plan_selection"
+          ? decision.engineCommand.quote.legalActions[0]
+          : legalActionForAiDecision(decision, legalActions);
       if (!legalAction)
         return {
           ok: false,
@@ -3239,6 +3256,25 @@ export class MultiplayerService {
               activeAiSide,
               legalActions,
             ),
+            ...(decision.selectionKind ===
+            "engine_randomized_turn_plan_selection"
+              ? {
+                  engineTurnPlanSelection: {
+                    status: "pending_engine_draw",
+                    opportunityKey:
+                      decision.engineCommand.quote.opportunityKey,
+                    candidateFamilies:
+                      decision.engineCommand.quote.candidates.map(
+                        (candidate) => ({
+                          familyKey: candidate.familyKey,
+                          lineId: candidate.lineId,
+                          actionId: candidate.actionId,
+                          weight: candidate.weight,
+                        }),
+                      ),
+                  },
+                }
+              : {}),
           },
         },
       };
@@ -3404,9 +3440,12 @@ export class MultiplayerService {
           quoteCorpPunishRoute(record.gameState, request),
         quoteRandomizedIceInstallSelection: (request) =>
           quoteRandomizedIceInstallSelection(record.gameState, request),
+        quoteRandomizedTurnPlanSelection: (request) =>
+          quoteRandomizedTurnPlanSelection(record.gameState, request),
       });
       if (
-        decision.selectionKind === "engine_randomized_ice_install_selection"
+        decision.selectionKind === "engine_randomized_ice_install_selection" ||
+        decision.selectionKind === "engine_randomized_turn_plan_selection"
       ) {
         return {
           ok: false,
@@ -5260,15 +5299,19 @@ export class MultiplayerService {
         quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
         quoteRandomizedIceInstallSelection: (request) =>
           quoteRandomizedIceInstallSelection(state, request),
+        quoteRandomizedTurnPlanSelection: (request) =>
+          quoteRandomizedTurnPlanSelection(state, request),
       });
       this.captureResidentPlanPortfolioFor(record, input);
     }
     const directLegalAction =
-      decision.selectionKind === "engine_randomized_ice_install_selection"
+      decision.selectionKind === "engine_randomized_ice_install_selection" ||
+      decision.selectionKind === "engine_randomized_turn_plan_selection"
         ? undefined
         : legalActionForAiDecision(decision, legalActions);
     if (
       decision.selectionKind !== "engine_randomized_ice_install_selection" &&
+      decision.selectionKind !== "engine_randomized_turn_plan_selection" &&
       !directLegalAction
     )
       return { ok: false, code: "ai_decision_action_not_legal" };
@@ -5283,6 +5326,28 @@ export class MultiplayerService {
     let legalAction: LegalAction;
     if (decision.selectionKind === "engine_randomized_ice_install_selection") {
       const randomizedResult = this.applyEngineRandomizedIceInstallSelection(
+        state,
+        {
+          ...decision.engineCommand,
+          idempotencyKey:
+            decision.engineCommand.idempotencyKey ??
+            `ai-${side}-${state.stateVersion}`,
+        },
+        { publicEventsMode: "latest" },
+      );
+      if (!randomizedResult.ok) {
+        return {
+          ok: false,
+          code: "ai_engine_action_rejected",
+          engineErrorCode: randomizedResult.error.code,
+        };
+      }
+      result = randomizedResult;
+      legalAction = randomizedResult.receipt.selectedLegalAction;
+    } else if (
+      decision.selectionKind === "engine_randomized_turn_plan_selection"
+    ) {
+      const randomizedResult = this.applyEngineRandomizedTurnPlanSelection(
         state,
         {
           ...decision.engineCommand,
@@ -5886,6 +5951,9 @@ function legalActionForAiDecision(
   if (decision.selectionKind === "engine_randomized_ice_install_selection") {
     return undefined;
   }
+  if (decision.selectionKind === "engine_randomized_turn_plan_selection") {
+    return undefined;
+  }
   return legalActions.find(
     (candidate) => candidate.actionId === decision.actionId,
   );
@@ -5982,7 +6050,9 @@ function replayStateHashChecks(record: StoredMatch): {
     const beforeRandomCounter = replayState.randomCounter;
     const result = isRandomizedIceInstallSelectionCommand(replayAction)
       ? applyRandomizedIceInstallSelection(replayState, replayAction)
-      : applyAction(replayState, replayAction);
+      : isRandomizedTurnPlanSelectionCommand(replayAction)
+        ? applyRandomizedTurnPlanSelection(replayState, replayAction)
+        : applyAction(replayState, replayAction);
     if (!result.ok) {
       byEventId[event.eventId] = {
         ok: false,
@@ -6098,6 +6168,15 @@ function replayActionFromEvent(
       if (!command.quote || typeof command.quote !== "object") return undefined;
       return command as EngineRandomizedIceInstallSelectionCommand;
     }
+    if (
+      "kind" in action &&
+      action.kind === "engine_randomized_turn_plan_selection"
+    ) {
+      const command =
+        action as Partial<EngineRandomizedTurnPlanSelectionCommand>;
+      if (!command.quote || typeof command.quote !== "object") return undefined;
+      return command as EngineRandomizedTurnPlanSelectionCommand;
+    }
     const candidate = action as Partial<PlayerAction>;
     if (candidate.side !== "runner" && candidate.side !== "corp") continue;
     if (
@@ -6118,6 +6197,14 @@ function isRandomizedIceInstallSelectionCommand(
   return (
     "kind" in action &&
     action.kind === "engine_randomized_ice_install_selection"
+  );
+}
+
+function isRandomizedTurnPlanSelectionCommand(
+  action: ReplayableEngineAction,
+): action is EngineRandomizedTurnPlanSelectionCommand {
+  return (
+    "kind" in action && action.kind === "engine_randomized_turn_plan_selection"
   );
 }
 
@@ -6501,11 +6588,18 @@ function minimalAiPreviewDetail(
 }
 
 function replayRandomDrawEntries(record: StoredMatch): ReplayRandomDrawEntry[] {
-  return record.gameState.randomDrawRecords.map((entry) => ({
-    counter: entry.counter,
-    purpose: publicReplayRandomPurpose(entry.purpose),
-    valueHash: `fnv1a:${fnv1a(String(entry.value))}`,
-  }));
+  return [
+    ...record.gameState.randomDrawRecords.map((entry) => ({
+      counter: entry.counter,
+      purpose: publicReplayRandomPurpose(entry.purpose),
+      valueHash: `fnv1a:${fnv1a(String(entry.value))}`,
+    })),
+    ...(record.gameState.aiTurnPlanRandomDrawRecords ?? []).map((entry) => ({
+      counter: entry.counter,
+      purpose: "ai_turn_plan_selection",
+      valueHash: `fnv1a:${fnv1a(String(entry.value))}`,
+    })),
+  ];
 }
 
 function publicReplayRandomPurpose(purpose: string): string {

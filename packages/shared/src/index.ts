@@ -1645,6 +1645,8 @@ export type GameState = {
   seed: string;
   randomCounter: number;
   randomDrawRecords: RandomDrawRecord[];
+  aiTurnPlanRandomCounter?: number;
+  aiTurnPlanRandomDrawRecords?: AiTurnPlanRandomDrawRecord[];
   activeSide: Side;
   phase: Phase;
   timingPoint: TimingPointId;
@@ -1966,6 +1968,49 @@ export type PlayerAction = {
 
 export const ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION =
   "engine-randomized-ice-install-selection-v1" as const;
+export const ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION =
+  "engine-randomized-turn-plan-selection-v1" as const;
+
+export type EngineRandomizedTurnPlanCandidate = {
+  familyKey: string;
+  lineId: string;
+  actionId: string;
+  weight: number;
+};
+
+export type EngineRandomizedTurnPlanSelectionRequest = {
+  schemaVersion: typeof ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION;
+  matchId: string;
+  side: Side;
+  stateVersion: number;
+  timingPoint: TimingPointId;
+  opportunityKey: string;
+  candidates: EngineRandomizedTurnPlanCandidate[];
+};
+
+export type EngineRandomizedTurnPlanSelectionQuote = {
+  schemaVersion: typeof ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION;
+  visibility: "private_to_actor";
+  complete: true;
+  matchId: string;
+  side: Side;
+  stateVersion: number;
+  timingPoint: TimingPointId;
+  opportunityKey: string;
+  candidates: EngineRandomizedTurnPlanCandidate[];
+  candidateFingerprint: string;
+  legalActions: LegalAction[];
+};
+
+export type EngineRandomizedTurnPlanSelectionQuoteResult =
+  | { ok: true; quote: EngineRandomizedTurnPlanSelectionQuote }
+  | { ok: false; error: EngineError };
+
+export type EngineRandomizedTurnPlanSelectionCommand = {
+  kind: "engine_randomized_turn_plan_selection";
+  quote: EngineRandomizedTurnPlanSelectionQuote;
+  idempotencyKey?: string;
+};
 
 export type EngineRandomizedIceInstallCandidate = {
   actionId: string;
@@ -2027,7 +2072,27 @@ export type EngineRandomizedIceInstallSelectionCommand = {
 
 export type ReplayableEngineAction =
   | PlayerAction
-  | EngineRandomizedIceInstallSelectionCommand;
+  | EngineRandomizedIceInstallSelectionCommand
+  | EngineRandomizedTurnPlanSelectionCommand;
+
+export type AiTurnPlanRandomDrawRecord = RandomDrawRecord & {
+  domain: "ai_turn_plan_selection";
+};
+
+export type EngineRandomizedTurnPlanSelectionReceipt = {
+  schemaVersion: typeof ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION;
+  visibility: "private_to_actor";
+  matchId: string;
+  side: Side;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  timingPoint: TimingPointId;
+  opportunityKey: string;
+  candidateFingerprint: string;
+  selectedCandidate: EngineRandomizedTurnPlanCandidate;
+  selectedLegalAction: LegalAction;
+  randomDraw: AiTurnPlanRandomDrawRecord;
+};
 
 export type EngineRandomizedIceInstallSelectionReceipt = {
   schemaVersion: typeof ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION;
@@ -2073,6 +2138,12 @@ export type EngineResult =
 export type EngineRandomizedIceInstallSelectionResult =
   | (Extract<EngineResult, { ok: true }> & {
       receipt: EngineRandomizedIceInstallSelectionReceipt;
+    })
+  | Extract<EngineResult, { ok: false }>;
+
+export type EngineRandomizedTurnPlanSelectionResult =
+  | (Extract<EngineResult, { ok: true }> & {
+      receipt: EngineRandomizedTurnPlanSelectionReceipt;
     })
   | Extract<EngineResult, { ok: false }>;
 
@@ -3084,6 +3155,23 @@ export type AiTurnPlanningDebug = {
     optionalityMinimum: number;
     optionalityMaximum: number;
   };
+  agendaComparison?: {
+    opportunityKey: string;
+    selectedFamily?: "pure_rush" | "combined_rush" | "safe_setup";
+    selectionReason: string;
+    randomizationEligible: boolean;
+    lines: Array<{
+      lineId: string;
+      family: "pure_rush" | "combined_rush" | "safe_setup";
+      actionCount: number;
+      agendaProgress: number;
+      defense: number;
+      economy: number;
+      risk: number;
+      worstCaseFloor: number;
+      expectedValue: number;
+    }>;
+  };
   pruneEvents: Array<{
     candidateId: string;
     reasonCode: string;
@@ -3630,6 +3718,7 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
       "heads",
       "selectedLine",
       "boundary",
+      "agendaComparison",
       "pruneEvents",
       "evidenceCodes",
     ]) ||
@@ -3645,6 +3734,8 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
     !isAiTurnPlanningDebugLine(candidate.selectedLine) ||
     (candidate.boundary !== undefined &&
       !isAiTurnPlanningDebugBoundary(candidate.boundary)) ||
+    (candidate.agendaComparison !== undefined &&
+      !isAiTurnPlanningAgendaComparison(candidate.agendaComparison)) ||
     !Array.isArray(candidate.pruneEvents) ||
     !candidate.pruneEvents.every((entry) =>
       recordHasExactStringFields(entry, ["candidateId", "reasonCode"]),
@@ -3655,6 +3746,62 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
     return false;
   }
   return true;
+}
+
+function isAiTurnPlanningAgendaComparison(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "opportunityKey",
+      "selectedFamily",
+      "selectionReason",
+      "randomizationEligible",
+      "lines",
+    ]) &&
+    typeof candidate.opportunityKey === "string" &&
+    (candidate.selectedFamily === undefined ||
+      ["pure_rush", "combined_rush", "safe_setup"].includes(
+        String(candidate.selectedFamily),
+      )) &&
+    typeof candidate.selectionReason === "string" &&
+    typeof candidate.randomizationEligible === "boolean" &&
+    Array.isArray(candidate.lines) &&
+    candidate.lines.every((entry) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry))
+        return false;
+      const line = entry as Record<string, unknown>;
+      return (
+        hasOnlyAiPlanFirstFields(line, [
+          "lineId",
+          "family",
+          "actionCount",
+          "agendaProgress",
+          "defense",
+          "economy",
+          "risk",
+          "worstCaseFloor",
+          "expectedValue",
+        ]) &&
+        typeof line.lineId === "string" &&
+        ["pure_rush", "combined_rush", "safe_setup"].includes(
+          String(line.family),
+        ) &&
+        [
+          "actionCount",
+          "agendaProgress",
+          "defense",
+          "economy",
+          "risk",
+          "worstCaseFloor",
+          "expectedValue",
+        ].every(
+          (field) =>
+            typeof line[field] === "number" && Number.isFinite(line[field]),
+        )
+      );
+    })
+  );
 }
 
 function isAiTurnPlanningDebugHead(value: unknown): boolean {
@@ -4174,6 +4321,12 @@ export type AiDecision = AiDecisionBase &
     | {
         selectionKind: "engine_randomized_ice_install_selection";
         engineCommand: EngineRandomizedIceInstallSelectionCommand;
+        actionId?: never;
+        selectedChoices?: never;
+      }
+    | {
+        selectionKind: "engine_randomized_turn_plan_selection";
+        engineCommand: EngineRandomizedTurnPlanSelectionCommand;
         actionId?: never;
         selectedChoices?: never;
       }

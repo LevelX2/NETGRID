@@ -2,6 +2,8 @@ import type {
   EngineResult,
   EngineRandomizedIceInstallSelectionCommand,
   EngineRandomizedIceInstallSelectionResult,
+  EngineRandomizedTurnPlanSelectionCommand,
+  EngineRandomizedTurnPlanSelectionResult,
   GameEvent,
   GameState,
   PlayerAction,
@@ -11,6 +13,7 @@ import type {
 import {
   isReplayCompatibilityActionPayload,
   isReplayRandomizedIceInstallSelectionCommand,
+  isReplayRandomizedTurnPlanSelectionCommand,
 } from "../compatibility/payload-compatibility";
 import { hashState } from "./hash";
 import { sanitizeEventPayloadForSurface } from "./view/surface-policy";
@@ -22,6 +25,10 @@ export type ReplayHost = {
       state: GameState,
       command: EngineRandomizedIceInstallSelectionCommand,
     ) => EngineRandomizedIceInstallSelectionResult;
+    applyRandomizedTurnPlanSelection?: (
+      state: GameState,
+      command: EngineRandomizedTurnPlanSelectionCommand,
+    ) => EngineRandomizedTurnPlanSelectionResult;
   };
 };
 
@@ -71,23 +78,40 @@ export function buildReplayEvents(
     }
     const actionPayload =
       event.privatePayload?.[event.publicPayload.actor as Side]?.action;
-    const declaresRandomizedCommand =
+    const declaresRandomizedIceCommand =
       typeof actionPayload === "object" &&
       actionPayload !== null &&
       "kind" in actionPayload &&
       actionPayload.kind === "engine_randomized_ice_install_selection";
+    const declaresRandomizedTurnPlanCommand =
+      typeof actionPayload === "object" &&
+      actionPayload !== null &&
+      "kind" in actionPayload &&
+      actionPayload.kind === "engine_randomized_turn_plan_selection";
     const randomizedCommand = isReplayRandomizedIceInstallSelectionCommand(
       actionPayload,
     )
       ? actionPayload
       : undefined;
+    const randomizedTurnPlanCommand =
+      isReplayRandomizedTurnPlanSelectionCommand(actionPayload)
+        ? actionPayload
+        : undefined;
     const playerAction =
-      !declaresRandomizedCommand &&
+      !declaresRandomizedIceCommand &&
+      !declaresRandomizedTurnPlanCommand &&
       isReplayCompatibilityActionPayload(actionPayload)
         ? actionPayload
         : undefined;
-    if (!randomizedCommand && !playerAction) {
+    if (!randomizedCommand && !randomizedTurnPlanCommand && !playerAction) {
       errors.push(`Event ${event.eventId} has no replayable action.`);
+      continue;
+    }
+    if (
+      randomizedTurnPlanCommand &&
+      !host.actions.applyRandomizedTurnPlanSelection
+    ) {
+      errors.push(`Event ${event.eventId} has no TurnPlan replay application.`);
       continue;
     }
     if (randomizedCommand && !host.actions.applyRandomizedIceInstallSelection) {
@@ -101,7 +125,12 @@ export function buildReplayEvents(
           current,
           randomizedCommand,
         )
-      : host.actions.applyAction(current, playerAction!);
+      : randomizedTurnPlanCommand
+        ? host.actions.applyRandomizedTurnPlanSelection!(
+            current,
+            randomizedTurnPlanCommand,
+          )
+        : host.actions.applyAction(current, playerAction!);
     if (!result.ok) {
       errors.push(`Replay failed at ${event.eventId}: ${result.error.code}`);
       break;

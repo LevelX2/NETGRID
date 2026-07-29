@@ -1,6 +1,7 @@
 import {
   applyAction,
   applyRandomizedIceInstallSelection,
+  applyRandomizedTurnPlanSelection,
   createGameAfterSetup,
   getLegalActions,
 } from "@netgrid/engine";
@@ -310,6 +311,11 @@ function applyDecision(
           ...decision.engineCommand,
           idempotencyKey,
         })
+      : decision.selectionKind === "engine_randomized_turn_plan_selection"
+        ? applyRandomizedTurnPlanSelection(state, {
+            ...decision.engineCommand,
+            idempotencyKey,
+          })
       : applyAction(state, {
           matchId: state.matchId,
           side,
