@@ -106,6 +106,7 @@ import {
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { buildCorpAgendaTurnPlanningSlice } from "../plans/corp-agenda-turn-planning";
 import { buildCorpDefenseTurnPlanningSlice } from "../plans/corp-defense-turn-planning";
+import { assertCorpTurnPlanningModuleRegistry } from "../plans/corp-turn-planning-coverage";
 import {
   buildCanonicalLegalActionInvocation,
   buildSemanticActionSetFingerprint,
@@ -322,11 +323,7 @@ export function choosePlanFirstLiveAction(
       : createSidePlanRegistry({
           side: "corp",
           priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
-          modules: [
-            ...createCorpCorePlanModules(),
-            ...createCorpTacticalPlanModules(),
-            createTurnCompletionPlanModule("corp"),
-          ],
+          modules: currentCorpPlanModules(),
         });
   const windowContext: PlanSchedulerContext = {
     input,
@@ -367,6 +364,18 @@ export function choosePlanFirstLiveAction(
     dependencies,
     options,
   );
+}
+
+function currentCorpPlanModules() {
+  const modules = [
+    ...createCorpCorePlanModules(),
+    ...createCorpTacticalPlanModules(),
+    createTurnCompletionPlanModule("corp"),
+  ];
+  assertCorpTurnPlanningModuleRegistry(
+    modules.map((module) => module.moduleId),
+  );
+  return modules;
 }
 
 function bindSelectedCorpDefenseDrawAttempt(

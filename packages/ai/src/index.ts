@@ -280,6 +280,23 @@ export {
   TurnPlanCommitmentError,
   validateCommittedTurnPhaseEntry,
 } from "./plans/turn-plan-commitment";
+export {
+  assertCompleteCorpTurnPlanningCoverage,
+  assertCorpTurnPlanningModuleRegistry,
+  buildCorpTurnPlanningCoverageReport,
+  CORP_ENGINE_WINDOW_SEMANTIC_PATTERNS,
+  CORP_TURN_PLANNING_COVERAGE_SCHEMA_VERSION,
+  CORP_TURN_PLANNING_MODULE_COVERAGE,
+  CorpTurnPlanningCoverageError,
+  corpTurnPlanningModuleCoverage,
+} from "./plans/corp-turn-planning-coverage";
+export type {
+  CorpTurnPlanningActionCoverage,
+  CorpTurnPlanningCoverageClassification,
+  CorpTurnPlanningCoverageIssueCode,
+  CorpTurnPlanningCoverageReport,
+  CorpTurnPlanningModuleCoverage,
+} from "./plans/corp-turn-planning-coverage";
 export type {
   CampaignRequote,
   CommittedInvocationRoute,

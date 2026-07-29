@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK08 abgeschlossen; ZK09 aktiv**
+Status: **ZK00 bis ZK09 abgeschlossen; ZK10 aktiv**
 
 Stand: 2026-07-29
 
@@ -978,3 +978,39 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
 - Vollständige AI-Suite: 526 Testdateien und 4307 Tests grün.
 - AI-, Shared- und Web-Typecheck, `check:ai`, Formatprüfung sowie
   `git diff --check`: grün.
+
+### ZK09 – abgeschlossen
+
+- Die zehn produktiven Corp-Planmodule besitzen jetzt eine explizite,
+  versionsgebundene Coverage-Deklaration. Jedes Modul ist genau einer
+  Horizontklasse (`current_turn_only`, `campaign_capable` oder
+  `context_dependent`) und konkreten semantischen Aktionsfamilien
+  zugeordnet; ein globales `*`-Produktivfallback ist verboten.
+- Der Coverage-Report gleicht die vollständige aktuelle
+  LegalAction-Menge eins zu eins mit ihren semantischen Kandidaten ab.
+  Jede Aktion muss genau eine gültige Autorität besitzen: einen
+  rematerialisierbaren produktiven Planning Head, eine begründete
+  `explicitly_nonproductive`-/`assessment_unknown`-Disposition oder einen
+  echten Engine-Window-Schritt.
+- Produktive Heads werden gegen Side, StateVersion, aktuellen
+  Semantic-Action-Set-Fingerprint, Action-ID, Modulowner, Horizont,
+  semantische Familie sowie sämtliche aktuellen Target- und
+  Choice-Requirements geprüft. Mehrdeutige Owner und fehlende Bindungen
+  schlagen fail-closed fehl.
+- Jede konkrete mehrzügige Head-Instanz benötigt eine aktuelle
+  Campaign Quote. Die Moduldeklaration allein behauptet damit noch keine
+  ausführbare Mehrzugroute.
+- Support-, Ability-, Trace-, Trash-, Choice-, Special-Zone-,
+  Additional-Action- und verpflichtende Window-Gegenbeispiele sind im
+  Coverage-Korpus vertreten. Die Produktionsruntime prüft beim Aufbau der
+  Corp-Registry, dass Deklaration und tatsächlich registrierte Module nicht
+  auseinanderlaufen.
+- Der synthetische Vertragskorpus erreicht 100 Prozent klassifizierte
+  Abdeckung über alle zehn Owner. Er ist ein fail-closed Struktur- und
+  Gegenbeispielgate; die Messung realer aktueller Planning Heads erfolgt
+  anschließend im ZK10-Shadow und wird nicht vorweggenommen.
+- Fokussiert: Coverage plus vollständige Live-Runtime-Datei 168/168 Tests
+  grün.
+- Vollständige AI-Suite: 527 Testdateien und 4.314 Tests grün.
+- AI-Typecheck, `check:ai` mit `production=743` und null Runtime-/Typzyklen,
+  enge Formatprüfung sowie `git diff --check`: grün.
