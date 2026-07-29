@@ -66,8 +66,8 @@ gewählt wird. Rohscores allein entscheiden ebenfalls keine Klassifikation.
 | P02 | abgeschlossen | Executor-, Planabdeckungs-, Quote- und Diagnoseinvarianten generisch reparieren | fokussierte Unit-/Integrationstests, AI-Typecheck, Source-Structure |
 | P03 | abgeschlossen | Corp-Score-, Schutz-, Defense-, Rez- und Economy-Ursachen beheben | positive und negative Corp-Checkpoints, Hidden-Info-Gegenprobe |
 | P04 | abgeschlossen | Runner-Runrisiko-, Coverage-, Wiederholungs- und Sequenzursachen beheben | positive und negative Runner-Checkpoints, Hidden-Info-Gegenprobe |
-| P05 | aktiv | Nur nachweislich veraltete Testverträge aktualisieren und Lücken mit Gegenproben schließen | betroffene Tests plus benachbarte Suiten |
-| P06 | ausstehend | Paketübergreifende Gates und vollständige Testsuite schließen; Review- und Wissensstand aktualisieren | Typecheck, Struktur-/Vertragsgates, `corepack pnpm test`, Build |
+| P05 | abgeschlossen | Nur nachweislich veraltete Testverträge aktualisieren und Lücken mit Gegenproben schließen | betroffene Tests plus benachbarte Suiten |
+| P06 | aktiv | Paketübergreifende Gates und vollständige Testsuite schließen; Review- und Wissensstand aktualisieren | Typecheck, Struktur-/Vertragsgates, `corepack pnpm test`, Build |
 | P07 | ausstehend | Aktuelles `main` integrieren, dort vollständig verifizieren, Hauptinstanz über das Startscript aktualisieren und Worktree/Branch entfernen | Main-Gates, Server-SHA/Health, Git-/Dateisystem-Cleanup |
 
 Es ist immer genau ein Paket aktiv. Paketgrenzen dürfen nach P01 nur dann
@@ -366,3 +366,60 @@ Ergebnis:
   4 Dateien, 7/7 Tests grün.
 - Kein produktiver Runner-Code musste geändert oder durch
   Karten-ID-Sonderlogik ergänzt werden.
+
+### P05 – Veraltete Verträge, Draw-Sequenzierung und Funding-Routen
+
+Wurzelursachen:
+
+- Mehrere Checkpoints und Corp-Cutover-Tests verlangten weiterhin die in P03
+  entfernte Agenda-Installation auf Basis unsicherer späterer ETR-Annahmen.
+  Die aktuelle Runtime verweigert diese Exposition korrekt und bindet
+  stattdessen Schutzsuche oder sichere Liquidität an den Score-Parent.
+- Ein gezielter Schutz-Draw durfte bei voller HQ sofort ausgeführt werden,
+  obwohl eine exakte, sofortige Geldoperation mit drei verbleibenden Klicks
+  die sichere Reihenfolge „konvertieren, ziehen, installieren“ ermöglichte.
+  Der vermeintliche „exact same-turn capacity release“ war nur ein
+  probabilistischer Treffer des noch unbekannten Draws.
+- Der generische Funding-Router fand bei gleichwertigen Routen sowohl
+  „stärkerer Karten-Credit zuerst“ als auch „Basiscredit zuerst“, entschied
+  deren Reihenfolge am Ende aber alphabetisch nach Action-ID. So verlor
+  Night Shift mit +2 Credits und Draw gegen den schwächeren Basiscredit.
+- Historische Simulationshorizonte erwarteten einen Ambush-Install bereits
+  als erste Corp-Aktion. Die aktuelle Corp deckt in diesem Seed stattdessen
+  zuerst beide offenen Zentralen ab; ein separater späterer Positivseed
+  beweist weiterhin die Ambush-Planabdeckung.
+
+Änderungen:
+
+- Die Draw-Admission darf eine produktive P4-Geldkonvertierung vor einer
+  P3-Score-Schutzsuche sequenzieren, wenn HQ sonst überläuft und
+  Konvertierung, Draw und anschließende Installation noch exakt in denselben
+  Zug passen. P1/P2-Routen und Fälle ohne vollständigen Klickhorizont bleiben
+  unberührt.
+- Funding-Routen mit gleichem Status, Horizont, Gesamtklickaufwand,
+  Schrittzahl, Zuverlässigkeit und Endcredits bevorzugen nun lexikografisch
+  den größeren sofortigen Liquiditätsgewinn je Schritt. Action-IDs sind nur
+  noch der letzte technische Tie-Breaker.
+- Checkpoints akzeptieren einen einzelnen gebundenen Schutz-Draw nur dort,
+  wo keine sofortige bessere Kartenverwertung die vollständige Sequenz
+  erlaubt. Night Shift wird dagegen als exakte Economy-Konvertierung vor
+  Basisliquidität abgesichert.
+- Unsichere Corporate-War-, Tycho- und Black-Ice-QA-Install-Erwartungen
+  wurden auf die nachweislich sichere Schutz- oder Economy-Route migriert.
+  Purge-Gegenproben verbieten weiterhin wirkungslose Virus-Purges.
+- Prioritätsassertionen unterscheiden jetzt P3 für ein bereits exponiertes
+  Score-Projekt von P4 für einen noch strategischen, nicht exponierten
+  Parent. Die Parent-/Need-Bindung bleibt jeweils explizit geprüft.
+
+Ergebnis:
+
+- Fokussierter Restcluster einschließlich Cutover, Corp-Triage, Funding,
+  Draw-Admission, Purge, Score-Schutz, Rent-I-Con/CODE ROT, Fetal AI und
+  Simulationsgegenproben: 15 Dateien, 121/121 Tests grün.
+- Vollständige `@netgrid/ai`-Suite: 517/517 Dateien und 4.238/4.238 Tests
+  grün.
+- `@netgrid/ai`-Typecheck grün.
+- AI-Source-Structure grün:
+  `production=733`, `runtimeCycles=0`, `typeCycles=0`.
+- `git diff --check` grün; produktiver Code bleibt frei von
+  Karten-ID-Sonderbehandlungen.

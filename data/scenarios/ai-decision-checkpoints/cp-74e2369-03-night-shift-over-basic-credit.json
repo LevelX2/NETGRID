@@ -9266,16 +9266,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_220_tycho-extension",
-        "targetServerId": "remote_1"
+        "type": "play_operation",
+        "sourceDefinitionId": "onr_v1_295_night-shift"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["install_score_agenda"],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1"
+        "corp_score_protection_funding_gap:remote_1:3"
       ]
     }
   }

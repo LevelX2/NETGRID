@@ -70,6 +70,22 @@ describe("funding routes", () => {
     });
   });
 
+  it("front-loads the larger exact gain when equal routes use the same actions", () => {
+    const result = searchFundingRoutes({
+      demand: corpDemand({ currentCredits: 0, targetCredits: 3 }),
+      candidates: [
+        liquidCandidate("a-basic-credit", 1, { repeatable: true }),
+        liquidCandidate("z-card-conversion", 2),
+      ],
+      remainingClicks: 3,
+    });
+
+    expect(result.bestRoute.steps.map((step) => step.actionId)).toEqual([
+      "z-card-conversion",
+      "a-basic-credit",
+    ]);
+  });
+
   it("uses the net gain of a currently legal burst and charges its cost once", () => {
     const result = searchFundingRoutes({
       demand: runnerDemand({ currentCredits: 2, targetCredits: 6 }),

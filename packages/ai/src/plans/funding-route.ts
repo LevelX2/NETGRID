@@ -513,8 +513,23 @@ function compareRoutes(left: FundingRoute, right: FundingRoute): number {
     left.steps.length - right.steps.length ||
     reliabilityRank(right.reliability) - reliabilityRank(left.reliability) ||
     right.projectedCredits - left.projectedCredits ||
+    compareFrontLoadedLiquidGain(left, right) ||
     left.routeId.localeCompare(right.routeId)
   );
+}
+
+function compareFrontLoadedLiquidGain(
+  left: FundingRoute,
+  right: FundingRoute,
+): number {
+  const sharedLength = Math.min(left.steps.length, right.steps.length);
+  for (let index = 0; index < sharedLength; index += 1) {
+    const gainDifference =
+      right.steps[index]!.netLiquidCreditGain -
+      left.steps[index]!.netLiquidCreditGain;
+    if (gainDifference !== 0) return gainDifference;
+  }
+  return 0;
 }
 
 function compareOptions(left: RouteOption, right: RouteOption): number {

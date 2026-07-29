@@ -14054,9 +14054,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_196_corporate-war",
-        "targetServerId": "remote_1"
+        "type": "gain_credit"
       }
     ],
     "forbiddenActions": [
@@ -14065,10 +14063,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["install_score_agenda"],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1"
+        "corp_engine_certified_basic_liquidity_development"
       ],
       "forbiddenCapabilities": ["purge_visible_runner_viruses"]
     }

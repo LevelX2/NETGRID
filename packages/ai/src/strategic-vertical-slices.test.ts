@@ -275,7 +275,7 @@ describe("Deck strategy runtime vertical slices", () => {
     expect(contestableDecision.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:corp.score_agenda",
-        "plan_priority_class:P4",
+        "plan_priority_class:P3",
       ]),
     );
   });
