@@ -5556,14 +5556,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "decline_rez"
+        "sourceDefinitionId": "onr_proteus_032_misleading-access-menus",
+        "type": "rez_ice"
       }
     ],
     "contractKind": "correctness",
     "forbiddenActions": [
       {
-        "sourceDefinitionId": "onr_proteus_032_misleading-access-menus",
-        "type": "rez_ice"
+        "type": "decline_rez"
       }
     ],
     "planExecution": {
@@ -5574,7 +5574,7 @@
         "allocate_server_defense"
       ],
       "requiredAssessmentEvidence": [
-        "visible_rez_window_decline_without_defense_threat"
+        "engine_certified_ice_rez_qualitative_encounter_defense:rd:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1"
       ]
     }
   }

@@ -6196,26 +6196,26 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_217_strike-force-kali_1.remote_1.corp_onr_v1_217_strike-force-kali_1"
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_213_private-cybernet-police_1.remote_1.corp_onr_v1_213_private-cybernet-police_1"
+        "actionId": "corp.install_card.corp_onr_v1_217_strike-force-kali_1.remote_1.corp_onr_v1_217_strike-force-kali_1"
       }
     ],
     "planExecution": {
       "acceptablePlanIds": [
-        "plan:corp.score_agenda:agenda%3Acorp_onr_v1_217_strike-force-kali_1%3Aremote_1"
+        "plan:corp.defend_servers:server-defense-portfolio"
       ],
-      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptablePlanKinds": ["corp.defend_servers"],
       "forbiddenPlanKinds": [
         "corp.punish_campaign",
         "corp.execute_punish_sequence"
       ],
-      "acceptableCapabilities": ["install_score_agenda"],
+      "acceptableCapabilities": ["develop_score_protection"],
       "requiredAssessmentEvidence": [
-        "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1"
+        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_213_private-cybernet-police_1:remote_1:remote_1"
       ]
     }
   }

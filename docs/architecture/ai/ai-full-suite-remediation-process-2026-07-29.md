@@ -64,8 +64,8 @@ gewählt wird. Rohscores allein entscheiden ebenfalls keine Klassifikation.
 | P00 | abgeschlossen | Prozess, `/Goal`, Grenzen und Paketfolge versionieren | Dokumentprüfung, `git diff --check` |
 | P01 | abgeschlossen | Gesamte Testsuite unverändert ausführen, alle roten Tests und gemeinsame Ursachen inventarisieren | `corepack pnpm test`, reproduzierbare fokussierte Gegenläufe |
 | P02 | abgeschlossen | Executor-, Planabdeckungs-, Quote- und Diagnoseinvarianten generisch reparieren | fokussierte Unit-/Integrationstests, AI-Typecheck, Source-Structure |
-| P03 | aktiv | Corp-Score-, Schutz-, Defense-, Rez- und Economy-Ursachen beheben | positive und negative Corp-Checkpoints, Hidden-Info-Gegenprobe |
-| P04 | ausstehend | Runner-Runrisiko-, Coverage-, Wiederholungs- und Sequenzursachen beheben | positive und negative Runner-Checkpoints, Hidden-Info-Gegenprobe |
+| P03 | abgeschlossen | Corp-Score-, Schutz-, Defense-, Rez- und Economy-Ursachen beheben | positive und negative Corp-Checkpoints, Hidden-Info-Gegenprobe |
+| P04 | aktiv | Runner-Runrisiko-, Coverage-, Wiederholungs- und Sequenzursachen beheben | positive und negative Runner-Checkpoints, Hidden-Info-Gegenprobe |
 | P05 | ausstehend | Nur nachweislich veraltete Testverträge aktualisieren und Lücken mit Gegenproben schließen | betroffene Tests plus benachbarte Suiten |
 | P06 | ausstehend | Paketübergreifende Gates und vollständige Testsuite schließen; Review- und Wissensstand aktualisieren | Typecheck, Struktur-/Vertragsgates, `corepack pnpm test`, Build |
 | P07 | ausstehend | Aktuelles `main` integrieren, dort vollständig verifizieren, Hauptinstanz über das Startscript aktualisieren und Worktree/Branch entfernen | Main-Gates, Server-SHA/Health, Git-/Dateisystem-Cleanup |
@@ -257,3 +257,71 @@ Ergebnis:
   `production=733`, `runtimeCycles=0`, `typeCycles=0`.
 - Im Corp-Cutover verbleiben acht fachliche Score-Start-Fehlentscheidungen;
   sie sind bewusst nicht durch den Kernel-Fix kaschiert und gehen in P03.
+
+### P03 – Corp-Score, Defense, Rez und Economy
+
+Wurzelursachen:
+
+- Der Live-Adapter erzeugte für eine Agenda-Installation eine angeblich
+  ausführbare „staged ETR uncertainty“, obwohl die aktuelle öffentliche
+  Runner-Lage den späteren Zugriff nicht exakt ausschloss. Das exponierte
+  Agenden hinter nominellem statt tatsächlich ausreichendem Schutz.
+- Materialer oder akuter Zentraldruck war in der globalen Defense-Auswahl
+  nicht stark genug an den ausgewählten Server gebunden. Gleichzeitig konnte
+  eine threat-freie Ausweichzentrale gewählt oder ein bereits geschützter,
+  leerer Remote weiter überbaut werden.
+- Ein bereits installiertes, exponiertes Score-Projekt blieb hinter einer
+  gleichrangigen zusätzlichen Zentral-Schicht zurück. Eine sichtbare Agenda
+  im Archiv erzeugte ebenfalls keine eigenständige dringende Schutzklasse.
+- Der Within-Class-Wert eines Parent-Funding-Plans stieg mit der Größe der
+  Kreditlücke. Dadurch konnte ein weit entfernter Score-Supportpfad eine
+  sofort konvertierbare Economy-/Punish-Aktion verdrängen.
+- Mehrere historische Checkpoints verlangten weiterhin riskante
+  Agenda-Installationen, pauschales Nicht-Rezzen oder ältere unspezifische
+  Evidence, obwohl die neue exakte Route nachweislich sicherer oder
+  produktiver ist.
+
+Änderungen:
+
+- Die Live-Runtime startet keine Agenda-Installation mehr allein aufgrund
+  einer unsicheren späteren ETR-Annahme. Ein aktueller Score-Start braucht
+  eine exakt tragfähige Schutzquote oder einen separat zertifizierten
+  Same-Turn-/Opening-Rush-Pfad.
+- Öffentliche, über Shell Trader beiseite gelegte Breaker fließen mit
+  Memory-Fit und dem exakten nächsten Runner-Start-Rabatt in die
+  Schutzbewertung ein. Der Gegenfall auf bereits laufender Runner-Seite
+  behält die ungekürzten Installationskosten.
+- Zentrale Verteidigung unterscheidet nun material, akut und terminal:
+  Erstabdeckung und akuter Druck sind P3, terminaler Druck P2. Eine
+  akut/terminal ausgewählte Zentrale bleibt gesperrt, solange der sichtbare
+  finanzierte Zugriffspfad fortbesteht; threat-freie bereits geschützte
+  Fallback-Zentralen und dritte leere Remote-Schichten verdrängen sie nicht.
+- Ein exponiertes installiertes Score-Projekt erhält P3-Schutzdruck. Bei
+  gleicher Klasse gewinnt dessen exakte aktuelle ICE-Installation gegen eine
+  weitere Zentral-Schicht; terminaler Zentraldruck bleibt höher. Eine
+  sichtbar im Archiv liegende Agenda erzeugt einen eigenständigen
+  dringenden Archivschutz.
+- Parent-Funding wird innerhalb derselben Klasse nach Nähe zur
+  Ausführbarkeit bewertet: kleine Kreditlücken sind wertvoller als weit
+  entfernte. Die vererbte P1–P4-Priorität bleibt unverändert.
+- Qualitativ wirksames, Engine-zertifiziertes Encounter-ICE wird nicht mehr
+  allein deshalb abgelehnt, weil es die exakte Access-Wahrscheinlichkeit
+  nicht senkt. Ein gezielter einmaliger Schutz-Draw bleibt zulässig, wenn er
+  nicht über das Handlimit führt; sein Turn-Receipt verhindert Wiederholung.
+- Nur fachlich überholte Checkpoints wurden migriert. Positive Gegenproben
+  erhalten Same-Turn-Score, terminale Zentralverteidigung, sichere Advances,
+  leere-R&D- und fehlende-ICE-Fälle.
+
+Ergebnis:
+
+- Die ursprünglichen Corp-Cutover-, First-Turn-, R&D/HQ-Verteidigungs-,
+  Shell-Trader-, Rez-, Economy-, EFA215-, 3bb14-, 7bfe-, 74e2369-, e2f2-,
+  e676- und Rent-I-Con/CODE-ROT-Gruppen sind in ihren fokussierten
+  Nachbarschaften grün.
+- Letzte gemeinsame Corp-Abnahme: 10 Dateien, 74/74 Tests grün.
+- Planmodul-/EFA-Abnahme einschließlich neuer Prioritätsgegenprobe:
+  135/135 Tests grün.
+- `@netgrid/ai`-Typecheck grün.
+- AI-Source-Structure grün:
+  `production=733`, `runtimeCycles=0`, `typeCycles=0`.
+- `git diff --check` grün; keine produktive Karten-ID-Sonderbehandlung.

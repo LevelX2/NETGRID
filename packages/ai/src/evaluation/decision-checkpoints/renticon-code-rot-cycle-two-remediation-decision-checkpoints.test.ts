@@ -8,11 +8,11 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const FIXTURES = [
   [
-    "does not force a contestable active agenda advance",
+    "uses one bounded protection draw while HQ still has exact capacity",
     contestableAdvanceJson,
   ],
   [
-    "starts the exact score plan instead of adding unfunded ICE to the remote",
+    "funds the exact score plan instead of exposing it or adding unfunded ICE",
     scorelineOverbuildJson,
   ],
   [

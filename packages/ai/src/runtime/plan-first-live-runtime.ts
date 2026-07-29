@@ -7520,25 +7520,11 @@ function buildCorpDomain(
         ]
       : []),
   ];
-  const scoreConversionOwnsCurrentWindow = scoreProjects.some(
-    (project) =>
-      project.sameTurnCloseout &&
-      project.phase !== "install_agenda" &&
-      project.feasible,
-  );
   const ambushes: CorpPlanDomain["ambushes"] = buildCorpAmbushPlanSignals({
     input,
     candidates,
     previous,
   });
-  const ambushSequenceOwnsCurrentWindow = ambushes.some(
-    (signal) =>
-      input.playerView.own.clicks > 0 &&
-      ((signal.phase === "install" &&
-        signal.installRoute !== undefined &&
-        signal.installRoute.fundingGap === 0) ||
-        (signal.phase === "advance" && signal.actionIds.length > 0)),
-  );
   const scoreProtectionProjects = scoreProjects
     .filter(
       (project) =>
@@ -7797,10 +7783,28 @@ function buildCorpDomain(
             centralDefenseAllocation,
           );
           if (!route) return [];
-          const terminalCentralPlacement =
+          const selectedCentralThreat =
+            centralDefenseAllocation?.status === "known"
+              ? centralDefenseAllocation.evidence[
+                  centralDefenseAllocation.selectedServerId
+                ].threat
+              : undefined;
+          const targetCentralMissingCoverage =
             (serverId === "hq" || serverId === "rd") &&
-            centralDefenseAllocation?.status === "known" &&
-            centralDefenseAllocation.evidence[serverId].threat === "terminal";
+            input.playerView.servers.some(
+              (server) => server.id === serverId && server.ice.length === 0,
+            );
+          const centralPressure =
+            serverId === "hq" || serverId === "rd"
+              ? selectedCentralThreat === "acute" ||
+                selectedCentralThreat === "terminal" ||
+                (selectedCentralThreat === "material" &&
+                  targetCentralMissingCoverage)
+                ? selectedCentralThreat
+                : undefined
+              : undefined;
+          const visibleAgendaExposure =
+            serverId === "archives" && archivesHasVisibleKnownAgenda(input);
           return [
             {
               kind: "generic",
@@ -7810,17 +7814,15 @@ function buildCorpDomain(
               sourceDefinitionIds: [candidate.sourceDefinitionId],
               actionIds: [candidate.actionId],
               urgent:
-                !scoreConversionOwnsCurrentWindow &&
-                !ambushSequenceOwnsCurrentWindow &&
-                // A direct score-protection placement owns sibling setup;
-                // only a terminal central exposure may preempt that parent.
-                (exactScoreProtectionInstallActionIds.size === 0 ||
-                  terminalCentralPlacement),
+                centralPressure === "terminal" || visibleAgendaExposure,
+              ...(centralPressure ? { centralPressure } : {}),
               installRoute: route,
               value: 1,
               evidenceCode:
                 route.disposition === "funding_only"
                   ? `corp_defense_exact_route_funding_required:${serverId}:${candidate.actionId}`
+                  : visibleAgendaExposure
+                    ? "engine_certified_visible_agenda_exposure_defense"
                   : "engine_certified_global_defense_access_probability_reduced",
             },
           ];
@@ -8871,8 +8873,8 @@ function scoreProjectForCandidate(
       (scorelineFeasibility?.deadline !== "current_turn_only" &&
         scorelineFeasibility?.feasible !== false &&
         scoreActionSemanticsKnown &&
-        protectedScoreWindow &&
         developmentClickAvailable &&
+        protectedScoreWindow &&
         (fundingGap ?? 0) === 0);
     return [
       {
@@ -8950,7 +8952,7 @@ function scoreProjectForCandidate(
     const matchpointTarget =
       input.playerView.own.agendaPoints + agendaPoints >=
       input.playerView.agendaPointsToWin;
-    const deadlinePressure =
+    const scorelineDeadlinePressure =
       scorelineFeasibility?.deadline === "last_draw_window" ||
       scorelineFeasibility?.deadline === "current_turn_only";
     const scoreActionSemanticsKnown =
@@ -8968,7 +8970,7 @@ function scoreProjectForCandidate(
             projectId,
             serverId,
             matchpointTarget,
-            deadlinePressure,
+            scorelineDeadlinePressure,
           )
         : undefined;
     const fundedWindowProtected =
@@ -8979,6 +8981,12 @@ function scoreProjectForCandidate(
         projectId,
         serverId,
       );
+    const exposedInstalledAgenda =
+      candidate.semanticActionType === "score.advance_card" &&
+      protectionNeed !== undefined &&
+      !fundedWindowProtected;
+    const deadlinePressure =
+      scorelineDeadlinePressure || exposedInstalledAgenda;
     const fundingGap =
       protectionNeed?.baseline.knowledge === "known"
         ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
@@ -9512,6 +9520,18 @@ function corpGlobalDefenseInstallRouteAssessment(
       knowledge: "unknown",
       evidenceCode:
         "corp_ice_install_assessment_unknown:action_or_server_binding_unknown",
+    };
+  }
+  if (
+    serverId.startsWith("remote_") &&
+    server?.root.length === 0 &&
+    server.ice.length >= 2
+  ) {
+    return {
+      knowledge: "known",
+      disposition: "effect_missing",
+      evidenceCode:
+        "corp_global_defense_cannot_overlayer_an_unbound_empty_remote",
     };
   }
   const scoreReserve: CorpScoreReserve = {
@@ -10810,6 +10830,11 @@ function corpRequiredEconomyNeeds(
   punishCampaigns: readonly CorpPunishCampaignSignal[],
   immediateFundingActionIds: string[],
 ): CorpCorePlanDomain["economyNeeds"] {
+  const projectsWithCurrentProtectionSupport = new Set(
+    defenseNeeds.flatMap((need) =>
+      need.kind === "generic" ? [] : [need.parentProjectId],
+    ),
+  );
   const exactAmbushSetupCardIds = new Set(
     ambushes
       .filter(
@@ -10821,7 +10846,9 @@ function corpRequiredEconomyNeeds(
       .map((ambush) => ambush.sourceInstanceId),
   );
   const scoreSupport = scoreProjects.flatMap((project) =>
-    (project.fundingGap ?? 0) > 0 && exactAmbushSetupCardIds.size === 0
+    (project.fundingGap ?? 0) > 0 &&
+    exactAmbushSetupCardIds.size === 0 &&
+    !projectsWithCurrentProtectionSupport.has(project.projectId)
       ? [
           {
             kind: "parent_funding" as const,
@@ -16092,6 +16119,18 @@ function mergeDefenseSignals(
           }
         : {}),
       urgent: previous.urgent || value.urgent,
+      ...(previous.centralPressure || value.centralPressure
+        ? {
+            centralPressure:
+              previous.centralPressure === "terminal" ||
+              value.centralPressure === "terminal"
+                ? ("terminal" as const)
+                : previous.centralPressure === "acute" ||
+                    value.centralPressure === "acute"
+                  ? ("acute" as const)
+                  : ("material" as const),
+          }
+        : {}),
       value: Math.max(previous.value, value.value),
     });
   }

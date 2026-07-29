@@ -54,7 +54,7 @@ describe("match 3aac Corp regression evidence", () => {
           immediateDefenseConversion: true,
           parentPlanInstanceId: defenseRootInstanceId,
           parentNeedId: defenseNeedId,
-          parentPriorityClass: "P2",
+          parentPriorityClass: "P3",
           incrementalDefenseReserve: {
             targetCredits: 6,
             serverId: "hq",

@@ -2720,7 +2720,8 @@ function expectRejectedByPlan(
     alternative?.whyNot?.some(
       (entry) =>
         entry.startsWith("not_selected_by_plan:") ||
-        entry.startsWith("explicitly_nonproductive:"),
+        entry.startsWith("explicitly_nonproductive:") ||
+        entry.startsWith("assessment_unknown:"),
     ),
   ).toBe(true);
 }

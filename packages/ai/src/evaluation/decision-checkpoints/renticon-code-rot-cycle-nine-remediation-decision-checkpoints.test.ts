@@ -5,7 +5,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
-  it("converts exact hand-overflow capacity instead of over-layering HQ", () => {
+  it("uses the last click for liquidity instead of over-layering HQ", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(affordableHqIceJson) as AiDecisionCheckpointV1,
     );

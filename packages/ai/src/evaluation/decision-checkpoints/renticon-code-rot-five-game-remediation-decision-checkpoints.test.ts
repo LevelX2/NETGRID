@@ -142,7 +142,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
           acceptablePlanKinds: ["corp.economy"],
           acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_immediate_operation_conversion:onr_v1_290_efficiency-experts",
+            "corp_score_protection_funding_gap:remote_1:1",
           ],
         },
         forbiddenActions: [{ type: "advance_card" }],

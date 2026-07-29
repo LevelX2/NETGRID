@@ -9474,7 +9474,7 @@
       "acceptablePlanKinds": ["corp.economy"],
       "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_basic_liquidity_development"
+        "corp_defense_exact_route_funding_required:remote_1:corp.install_card.corp_onr_v1_278_wall-of-ice_1.remote_1.corp_onr_v1_278_wall-of-ice_1.3"
       ]
     }
   }

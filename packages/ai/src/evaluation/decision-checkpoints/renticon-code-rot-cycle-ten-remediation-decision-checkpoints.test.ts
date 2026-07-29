@@ -9,7 +9,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
   it.each([
     [
-      "draws defense for the first exact Corporate Coup score parent",
+      "funds the first exact Corporate Coup score parent instead of drawing redundant ICE",
       fundExposedRemoteJson,
       "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_1",
       true,
@@ -24,7 +24,7 @@ describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
       "converts exact burst economy before the second Corporate Coup defense draw",
       safeLowCreditAdvanceJson,
       "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
-      false,
+      true,
     ],
   ] as const)("%s", (_label, json, exactScoreParentPlanId, expectsDelegation) => {
     const result = runAiDecisionCheckpoint(

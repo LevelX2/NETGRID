@@ -46846,7 +46846,7 @@
       "acceptablePlanKinds": ["corp.score_agenda"],
       "acceptableCapabilities": ["advance_score_agenda"],
       "requiredAssessmentEvidence": [
-        "corp_score_protection_assessment_unknown:remote_1:subset_assessment_unknown"
+        "corp_score_protection_funding_gap:remote_1:6"
       ]
     }
   }

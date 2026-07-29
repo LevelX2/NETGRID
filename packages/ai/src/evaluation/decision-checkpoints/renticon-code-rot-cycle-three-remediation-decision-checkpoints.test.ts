@@ -10,7 +10,7 @@ import {
 const FIXTURES = [
   ["scores a ready agenda instead of overadvancing it", scoreBeforeOveradvanceJson],
   ["uses the tagged payoff instead of extending a stale remote", tagPayoffJson],
-  ["stops a stale remote from forcing further ICE sprawl", avoidStaleRemoteJson],
+  ["funds the resident score project without extending stale remote sprawl", avoidStaleRemoteJson],
 ] as const;
 
 describe("Rent-I-Con vs. CODE ROT cycle-three remediation checkpoints", () => {
