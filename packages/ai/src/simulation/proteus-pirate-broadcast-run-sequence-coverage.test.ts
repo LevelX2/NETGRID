@@ -15,7 +15,7 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
       seed: "proteus-pilot-qualifier-01",
       maxActions: 105,
       runnerDeck: deck("proteus_runner_rd_bad_publicity_2026_05_25"),
-      corpDeck: deck("proteus_corp_region_fast_score_2026_05_25"),
+      corpDeck: pirateBroadcastCoverageCorpDeck(),
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
       testOnlyDecisionCheckpointCapture: {
@@ -128,4 +128,23 @@ function deck(deckId: string): DeckDefinition {
   );
   if (!result) throw new Error(`Missing Proteus pilot deck ${deckId}`);
   return structuredClone(result);
+}
+
+function pirateBroadcastCoverageCorpDeck(): DeckDefinition {
+  const result = deck("proteus_corp_region_fast_score_2026_05_25");
+  const caryatid = result.cards.find(
+    (card) => card.id === "onr_proteus_013_caryatid",
+  );
+  const scaffolding = result.cards.find(
+    (card) => card.id === "onr_proteus_037_scaffolding",
+  );
+  if (!caryatid || !scaffolding) {
+    throw new Error("Missing Pirate Broadcast coverage ICE");
+  }
+  // This test isolates the restricted multi-run contract. Caryatid is replaced
+  // by the existing cheap scaffolding slot so improved variable-ICE defense
+  // selection cannot turn the scenario into a central-access denial test.
+  scaffolding.quantity += caryatid.quantity;
+  result.cards.splice(result.cards.indexOf(caryatid), 1);
+  return result;
 }

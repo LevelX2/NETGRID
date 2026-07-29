@@ -148,6 +148,12 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
   rezWindowVerdict?: "productive" | "nonproductive" | "open";
   installRoute?: Readonly<{
     disposition: "productive" | "funding_only";
+    progressKind?:
+      | "engine_certified_access"
+      | "funded_structured_central_defense"
+      | "staged_central_defense"
+      | "funding_required";
+    rezFundingGap?: number;
     projection: KnownCorpFundedIceInstallRouteProjection;
   }>;
   rezRoute?: CorpExactIceRezRouteProjection;
@@ -1857,7 +1863,10 @@ function defenseCandidates(
       if (signal.phase === "draw_for_ice")
         return corpCandidateProjectsCardDraw(candidate);
       if (signal.phase === "activate_run_defense")
-        return candidate.semanticActionType === "card_ability.trigger";
+        return (
+          candidate.semanticActionType === "card_ability.trigger" ||
+          candidate.semanticActionType === "play.corp_operation"
+        );
       return (
         candidate.semanticActionType ===
           (signal.phase === "decline_rez"
@@ -1933,7 +1942,11 @@ function exactInstallProjectionMatchesSignal(
     projection.targetServerId !== signal.serverId ||
     signal.sourceDefinitionIds.length !== 1 ||
     signal.sourceDefinitionIds[0] !== projection.sourceDefinitionId ||
-    !exactInstallProjectionIsCurrent(context, projection)
+    !exactInstallProjectionIsCurrent(
+      context,
+      projection,
+      signal.installRoute?.progressKind === "staged_central_defense",
+    )
   ) {
     return false;
   }
@@ -1943,6 +1956,7 @@ function exactInstallProjectionMatchesSignal(
 function exactInstallProjectionIsCurrent(
   context: PlanSchedulerContext,
   projection: KnownCorpFundedIceInstallRouteProjection,
+  useMinimumSatisfyingRoute = false,
 ): boolean {
   if (
     projection.knowledge !== "known" ||
@@ -1960,7 +1974,15 @@ function exactInstallProjectionIsCurrent(
   const action = context.input.legalActions.find(
     (candidate) => candidate.actionId === projection.actionId,
   );
-  const projectedRezCost = projection.selectedRezCosts.find(
+  const routeRezCosts =
+    useMinimumSatisfyingRoute && projection.selectedRezCosts.length === 0
+      ? (projection.after.minimumSatisfyingRezCosts ?? [])
+      : projection.selectedRezCosts;
+  const afterRouteRezCosts =
+    useMinimumSatisfyingRoute && projection.selectedRezCosts.length === 0
+      ? (projection.after.minimumSatisfyingRezCosts ?? [])
+      : projection.after.selectedRezCosts;
+  const projectedRezCost = routeRezCosts.find(
     (selected) =>
       selected.iceInstanceId === projection.sourceCardInstanceId &&
       selected.iceDefinitionId === projection.sourceDefinitionId &&
@@ -1968,16 +1990,17 @@ function exactInstallProjectionIsCurrent(
   );
   const projectedServerId =
     action?.payload?.postInstallRezQuoteProjectedServerId;
-  const selectedPostInstallRezCredits = action?.payload
-    ? selectedPostInstallRezCreditsFromCurrentQuote(action.payload)
-    : undefined;
+  const selectedPostInstallRezChoiceIsCurrent =
+    action?.payload && projectedRezCost
+      ? postInstallRezSelectionMatchesCurrentQuote(
+          action.payload,
+          projectedRezCost,
+        )
+      : false;
   const selectedRezCostsAreCurrent =
-    selectedRezCostSetsEqual(
-      projection.selectedRezCosts,
-      projection.after.selectedRezCosts,
-    ) &&
-    selectedRezCostsAreUnique(projection.selectedRezCosts) &&
-    projection.selectedRezCosts.every((selected) =>
+    selectedRezCostSetsEqual(routeRezCosts, afterRouteRezCosts) &&
+    selectedRezCostsAreUnique(routeRezCosts) &&
+    routeRezCosts.every((selected) =>
       selected.iceInstanceId === projection.sourceCardInstanceId
         ? selected === projectedRezCost
         : currentInstalledRezQuoteMatchesSelection(
@@ -2014,8 +2037,7 @@ function exactInstallProjectionIsCurrent(
     action.payload.postInstallRezQuoteMandatoryAdditionalCostKind ===
       undefined &&
     validPostInstallRezQuoteModifiers(action.payload) &&
-    selectedPostInstallRezCredits !== undefined &&
-    projectedRezCost?.credits === selectedPostInstallRezCredits &&
+    selectedPostInstallRezChoiceIsCurrent &&
     selectedRezCostsAreCurrent &&
     legalActionResourceCost(action, "credits") === projection.installCredits &&
     legalActionResourceCost(action, "clicks") === projection.installClicks
@@ -2200,6 +2222,61 @@ function selectedPostInstallRezCreditsFromCurrentQuote(
         payload.postInstallRezQuoteVariableAlternateSubtypesFinalCredits,
     },
     finalBaseCredits,
+  );
+}
+
+function postInstallRezSelectionMatchesCurrentQuote(
+  payload: NonNullable<AiDecisionInput["legalActions"][number]["payload"]>,
+  selection: KnownCorpFundedIceInstallRouteProjection["selectedRezCosts"][number],
+): boolean {
+  if (payload.postInstallRezQuoteCostKind === "fixed") {
+    return (
+      selection.variableRezChoice === undefined &&
+      selection.credits ===
+        selectedPostInstallRezCreditsFromCurrentQuote(payload)
+    );
+  }
+  if (payload.postInstallRezQuoteCostKind !== "variable") return false;
+  const choice = selection.variableRezChoice;
+  if (!choice) {
+    return (
+      selection.credits ===
+      selectedPostInstallRezCreditsFromCurrentQuote(payload)
+    );
+  }
+  if (choice.kind === "paid_end_the_run_subroutines") {
+    return (
+      choice.subroutineCount ===
+        payload.postInstallRezQuoteVariableFirstEndTheRunSubroutineCount &&
+      selection.credits ===
+        selectedPostInstallRezCreditsFromCurrentQuote(payload)
+    );
+  }
+  if (
+    choice.kind !== "alternate_subtype" ||
+    payload.postInstallRezQuoteVariableRezKind !== "alternate_subtype"
+  ) {
+    return false;
+  }
+  const selectedSubtypes = canonicalSubtypeArray(choice.selectedSubtypes);
+  const baseSubtypes = canonicalSubtypeCsv(
+    payload.postInstallRezQuoteVariableBaseSubtypes,
+  );
+  const alternateSubtypes = canonicalSubtypeCsv(
+    payload.postInstallRezQuoteVariableAlternateSubtypes,
+  );
+  if (!selectedSubtypes || !baseSubtypes || !alternateSubtypes) return false;
+  const selectedKey = selectedSubtypes.join(",");
+  if (selectedKey === baseSubtypes.join(",")) {
+    return (
+      selection.credits ===
+      payload.postInstallRezQuoteVariableBaseSubtypesFinalCredits
+    );
+  }
+  return (
+    selectedKey === alternateSubtypes.join(",") &&
+    selection.credits ===
+      payload.postInstallRezQuoteVariableAlternateSubtypesFinalCredits
   );
 }
 
@@ -3596,9 +3673,24 @@ function isValidDefenseSignal(
       Number.isFinite(value.value) &&
       (value.phase === "install_ice"
         ? installRoute !== undefined &&
-          hasOnlyKeys(installRoute, new Set(["disposition", "projection"])) &&
+          hasOnlyKeys(
+            installRoute,
+            new Set([
+              "disposition",
+              "progressKind",
+              "rezFundingGap",
+              "projection",
+            ]),
+          ) &&
           (installRoute.disposition === "productive" ||
             installRoute.disposition === "funding_only") &&
+          (installRoute.progressKind === undefined ||
+            installRoute.progressKind === "engine_certified_access" ||
+            installRoute.progressKind === "funded_structured_central_defense" ||
+            installRoute.progressKind === "staged_central_defense" ||
+            installRoute.progressKind === "funding_required") &&
+          (installRoute.rezFundingGap === undefined ||
+            knownNonNegativeInteger(installRoute.rezFundingGap)) &&
           validKnownInstallProjection(installRoute.projection)
         : installRoute === undefined) &&
       (value.rezRoute === undefined ||
