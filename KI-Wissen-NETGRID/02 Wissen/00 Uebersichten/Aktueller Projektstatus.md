@@ -325,6 +325,19 @@ Spiele` ist davon getrennt und liefert nur serverseitig gebundene Matches
   Scoreline-Schutz bleibt erhalten. Der 55-Karten-Deckaudit meldet null
   Hint-/Runtime-Lücken und null Strategiewarnungen. Führend ist
   `docs/reviews/ai/match-e653f50a-corp-remediation-final-review-2026-07-19.md`.
+- Das jüngste nicht abgeschlossene Corp-KI-Spiel
+  `match_f8096c690c233533` ist mit 46/46 Entscheidungen geprüft. Finanzierte
+  variable ICE-Routen akzeptieren die tatsächlich von der Engine projizierte
+  Rez-Konfiguration; unter akutem Zentraldruck darf der Defense-Plan eine
+  höchstens drei Credits entfernte ICE-Installation am letzten Klick dosiert
+  stagen. Installation, Bluffwert und revalidierte Rez-Hilfe bleiben
+  ausschließlich in `corp.defend_servers`; Economy finanziert nur den
+  gebundenen Parent, Handmanagement bewahrt höchstens ein bereits bewertetes
+  Defense-Paket. Die vollständige AI-Suite ist mit 4.248/4.248 Tests grün,
+  der 30/45-Deck-Audit meldet null Blocker und Warnungen. D29
+  (verdeckte Choice-Policy) und D37 (riskante Remote-Agenda) bleiben mangels
+  eindeutiger side-sicherer Ursache bewusst offen. Führend ist
+  `docs/reviews/ai/match-f809-corp-defense-remediation-final-review-2026-07-29.md`.
 - Die Planebene besitzt zusätzlich ein begrenztes Planportfolio: kurzfristige
   Score- und Gefahrenpläne bleiben Vordergrund beziehungsweise Interrupt,
   während Broker-/Bank-Zyklen und langfristige Corp-Scoring-Remotes mit

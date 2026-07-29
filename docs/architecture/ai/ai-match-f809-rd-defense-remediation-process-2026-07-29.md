@@ -228,8 +228,12 @@ Commit: `fix(ai): retain executable corp defense packages`
   erstellen;
 - dauerhafte Erkenntnisse in die führende Wissensbasis zurückführen.
 
-Done: Ziel-Checkpoints sind unverändert grün; Gegenproben und
-Sicherheitsverträge sind belegt.
+Done: Alle 46 Entscheidungen sind einzeln bewertet. Ziel-Checkpoints,
+Gegenproben, Typecheck, Deck-Audit und die vollständige AI-Suite mit 518
+Testdateien und 4.248 Tests sind grün. Die erste Full-Suite-Wiederholung deckte
+eine zu breite Anwendung der zukünftigen Mindest-Rez-Konfiguration auf; der
+Fix wurde auf `staged_central_defense` begrenzt und der vollständige Lauf
+anschließend fehlerfrei wiederholt.
 
 Commit: `docs(ai): review match f809 defense remediation`
 
@@ -298,4 +302,12 @@ Der Prozess stoppt ohne heuristischen Workaround, wenn:
   `Rent-to-Own Contract`; die beiden Gegenproben werfen die Rez-Hilfe
   weiterhin ab. Der Checkpoint-Runner bildet die umgekehrte Auswahlsemantik
   „ausgewählt = gegen Zahlung behalten“ nun korrekt ab.
-- P5 und P6: ausstehend.
+- P5: abgeschlossen. Das Abschlussreview
+  `docs/reviews/ai/match-f809-corp-defense-remediation-final-review-2026-07-29.md`
+  enthält die 46/46-Einzelentscheidungstabelle, vier behobene
+  Ursachenklassen und drei bewusst offene, nicht spekulativ korrigierte
+  Punkte. F809-Ziel- und Gegenproben sind 10/10, die zuvor betroffene
+  kombinierte Gruppe 49/49 und die vollständige AI-Suite 4.248/4.248 grün.
+  Der identische 30/45-Deck-Audit meldet Status `ok`, null Blocker und null
+  Warnungen.
+- P6: ausstehend.
