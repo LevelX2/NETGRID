@@ -1080,7 +1080,7 @@ describe("Corp core plan modules", () => {
     ).toEqual(["install-rd"]);
   });
 
-  it("keeps the selected central route when only a non-central alternative is also available", () => {
+  it("keeps a non-central route eligible after central allocation", () => {
     const actions = ["hq", "archives"].map((serverId) => ({
       ...cardAction(`install-${serverId}`, "install.card", "ice-shared"),
       sourceCardInstanceId: "ice-shared-1",
@@ -1112,7 +1112,7 @@ describe("Corp core plan modules", () => {
       module
         .materialize(instance, {} as never, corpContext)
         .candidates.map((entry) => entry.candidate.actionId),
-    ).toEqual(["install-hq"]);
+    ).toEqual(["install-archives"]);
   });
 
   it("fails closed between two central heads when their allocation facts are unknown while another server route remains executable", () => {

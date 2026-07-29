@@ -6,6 +6,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const PROJECT_BABYLON = "corp_onr_v1_214_project-babylon_1";
+const TYCHO_EXTENSION = "corp_onr_v1_220_tycho-extension_1";
 
 describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", () => {
   it("protects Project Babylon with an additional ICE despite a visible recurring breaker credit", () => {
@@ -55,6 +56,42 @@ describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", ()
     });
 
     expectCheckpointToPass(noResidentPayoff);
+  });
+
+  it("keeps terminal R&D protection ahead of a resident score-protection sibling", () => {
+    const terminalCentral = mutateFixture(
+      projectBabylonCreditPoolJson,
+      (checkpoint) => {
+        const state = checkpoint.engine.testOnlyGameState;
+        state.corp.rd = state.corp.rd.filter(
+          (cardId) => cardId !== TYCHO_EXTENSION,
+        );
+        state.runner.scoreArea.push(TYCHO_EXTENSION);
+        const tycho = state.cardInstances[TYCHO_EXTENSION];
+        if (!tycho) throw new Error("Missing Tycho Extension in EFA215 probe");
+        tycho.zone = { side: "runner", zone: "scoreArea" };
+        tycho.faceup = true;
+        tycho.rezzed = true;
+        checkpoint.expectation = {
+          acceptableActions: [
+            {
+              type: "install_card",
+              targetServerId: "rd",
+              sourceDefinitionId: "onr_v1_270_sleeper",
+            },
+          ],
+          forbiddenActions: [
+            { type: "install_card", targetServerId: "remote_1" },
+          ],
+          planExecution: {
+            acceptablePlanKinds: ["corp.defend_servers"],
+            acceptableCapabilities: ["allocate_server_defense"],
+          },
+        };
+      },
+    );
+
+    expectCheckpointToPass(terminalCentral);
   });
 });
 

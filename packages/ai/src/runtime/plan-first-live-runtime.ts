@@ -7796,6 +7796,10 @@ function buildCorpDomain(
             centralDefenseAllocation,
           );
           if (!route) return [];
+          const terminalCentralPlacement =
+            (serverId === "hq" || serverId === "rd") &&
+            centralDefenseAllocation?.status === "known" &&
+            centralDefenseAllocation.evidence[serverId].threat === "terminal";
           return [
             {
               kind: "generic",
@@ -7806,7 +7810,11 @@ function buildCorpDomain(
               actionIds: [candidate.actionId],
               urgent:
                 !scoreConversionOwnsCurrentWindow &&
-                !ambushSequenceOwnsCurrentWindow,
+                !ambushSequenceOwnsCurrentWindow &&
+                // A direct score-protection placement owns sibling setup;
+                // only a terminal central exposure may preempt that parent.
+                (exactScoreProtectionInstallActionIds.size === 0 ||
+                  terminalCentralPlacement),
               installRoute: route,
               value: 1,
               evidenceCode:

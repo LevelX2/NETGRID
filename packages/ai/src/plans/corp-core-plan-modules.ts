@@ -2952,14 +2952,20 @@ function selectedExactGenericDefenseRoutes(
         allocation.selectedServerId === "hq" ? hqRoutes : rdRoutes;
       const fallbackCentralRoutes =
         allocation.selectedServerId === "hq" ? rdRoutes : hqRoutes;
-      eligibleRoutes =
+      const allocatedCentralRoutes =
         selectedCentralRoutes.length > 0
           ? selectedCentralRoutes
           : fallbackCentralRoutes.length > 0
             ? fallbackCentralRoutes
-            : exactIceRoutes.filter(
-                (route) => centralServerForRoute(route) === undefined,
-              );
+            : [];
+      // The allocation orders HQ against R&D. It must not remove an exact
+      // route for Archives or another independently assessed server.
+      eligibleRoutes = [
+        ...exactIceRoutes.filter(
+          (route) => centralServerForRoute(route) === undefined,
+        ),
+        ...allocatedCentralRoutes,
+      ];
     }
   }
   if (
