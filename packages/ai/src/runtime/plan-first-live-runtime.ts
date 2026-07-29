@@ -7814,11 +7814,31 @@ function buildCorpDomain(
             (serverId === "hq" || serverId === "rd") &&
             centralDefenseAllocation?.status === "known" &&
             centralDefenseAllocation.evidence[serverId].threat === "terminal";
-          const acuteCentralPlacement =
+          const targetCentralServer =
+            serverId === "hq" || serverId === "rd"
+              ? input.playerView.servers.find(
+                  (candidateServer) => candidateServer.id === serverId,
+                )
+              : undefined;
+          const otherCentralServer =
+            serverId === "hq" || serverId === "rd"
+              ? input.playerView.servers.find(
+                  (candidateServer) =>
+                    candidateServer.id === (serverId === "hq" ? "rd" : "hq"),
+                )
+              : undefined;
+          const targetCentralEvidence =
             (serverId === "hq" || serverId === "rd") &&
-            centralDefenseAllocation?.status === "known" &&
-            centralDefenseAllocation.evidence[serverId].threat === "acute" &&
-            route.progressKind !== "funding_required";
+            centralDefenseAllocation?.status === "known"
+              ? centralDefenseAllocation.evidence[serverId]
+              : undefined;
+          const acuteCentralPlacement =
+            targetCentralEvidence?.threat === "acute" &&
+            targetCentralServer?.ice.length === 0 &&
+            (otherCentralServer?.ice.length ?? 0) > 0 &&
+            route.progressKind !== "funding_required" &&
+            (candidate.costProfile.clickCost === input.playerView.own.clicks ||
+              targetCentralEvidence.recentSuccessfulAccessRunnerTurns >= 2);
           return [
             {
               kind: "generic",
@@ -7836,6 +7856,8 @@ function buildCorpDomain(
                   terminalCentralPlacement ||
                   acuteCentralPlacement),
               immediateInstallSupport:
+                route.disposition === "productive" &&
+                route.progressKind === "staged_central_defense" &&
                 route.rezFundingGap > 0 &&
                 corpVisibleHandHasActionIceRezSupport(input),
               installRoute: route,
@@ -9675,8 +9697,14 @@ function corpGlobalDefenseInstallRouteAssessment(
     sourceDefense.isVisibleIce &&
     (isCorpOpeningTurnSerial(input.playerView.turnSerial) ||
       hasStructuredDefenseValue);
+  const hasResidentRemoteAgenda = input.playerView.servers.some(
+    (candidateServer) =>
+      candidateServer.id.startsWith("remote_") &&
+      candidateServer.root.some((card) => card.known && card.type === "agenda"),
+  );
   const preferQualitativeSourceProgress =
     isEmptyCentral &&
+    !hasResidentRemoteAgenda &&
     (establishesMissingCentralCoverage ||
       (hasSelectedCentralPressure && hasStructuredDefenseValue));
   const projection = projectCorpFundedIceInstallRoute({

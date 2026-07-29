@@ -3026,12 +3026,7 @@ function selectedExactGenericDefenseRoutes(
     if (exposedCentralNeedsFirstLayer) {
       const exposedCentralRoutes =
         exposedCentralServerId === "hq" ? hqRoutes : rdRoutes;
-      eligibleRoutes = [
-        ...exactIceRoutes.filter(
-          (route) => centralServerForRoute(route) === undefined,
-        ),
-        ...exposedCentralRoutes,
-      ];
+      eligibleRoutes = exposedCentralRoutes;
     } else if (
       allocation?.status !== "known" &&
       hqRoutes.length > 0 &&
