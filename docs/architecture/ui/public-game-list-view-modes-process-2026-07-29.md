@@ -50,9 +50,12 @@ Goal erst nach verifiziertem Cleanup als abgeschlossen.
   Bedienvertrag nicht unangekündigt ändert.
 - Die Darstellungswahl ist lokaler React-Zustand. Eine Persistenz über Reloads,
   Accounts oder Geräte ist nicht Teil der Vorgabe.
-- Kompakt bedeutet eine responsive Zeilendarstellung mit Status, Teilnehmern,
-  wichtigster Statusinformation, Match-ID, Aktualisierungszeit und denselben
-  verfügbaren Aktionen wie in der ausführlichen Karte.
+- Kompakt bedeutet eine feste einzeilige Darstellung mit Status, Teilnehmern,
+  wichtigster Statusinformation und denselben verfügbaren Aktionen wie in der
+  ausführlichen Karte. Sekundäre Metadaten, Match-ID und Aktualisierungszeit
+  werden in diesem Modus zugunsten der geringen Höhe ausgeblendet.
+- Aktionen erscheinen in der kompakten Zeile ausschließlich als Icons. Ihr
+  Text bleibt über Tooltip und zugängliche Beschriftung erhalten.
 - Matchpunkte werden nur angezeigt, wenn der autoritative Ergebnis-Snapshot
   beide Werte enthält. Ältere Snapshots ohne diese optionalen Felder bleiben
   ohne erfundene Ersatzwertung darstellbar.
@@ -82,9 +85,8 @@ Goal erst nach verifiziertem Cleanup als abgeschlossen.
 
 - Rote paketnahe Tests werden innerhalb von `GAMES-LIST-001` eng behoben.
 - Fehlende optionale Matchpunkte führen zu keiner clientseitigen Herleitung.
-- Passt eine kompakte Zeile auf schmalen Viewports nicht in eine horizontale
-  Reihe, darf sie responsiv umbrechen, ohne Aktionen oder Beschriftungen zu
-  verstecken.
+- Die kompakte Darstellung bleibt auch auf schmalen Viewports genau eine
+  Zeile. Inhalt darf gekürzt werden; Status und Aktionsicons bleiben sichtbar.
 - Fachlich widersprüchliche Änderungen auf einem weitergelaufenen `main`
   gelten als Blocker und werden nicht einseitig überschrieben.
 
@@ -141,7 +143,7 @@ Konkrete Arbeit:
 - Einen zugänglichen Umschalter `Ausführlich`/`Kompakt` im Listenheader
   ergänzen.
 - Die Kartenkomponente über einen eindeutigen Darstellungsmodus steuern.
-- Eine responsive kompakte Zeilenansicht für offene, laufende und
+- Eine feste einzeilige kompakte Ansicht für offene, laufende und
   abgeschlossene Spiele gestalten.
 - In beiden Ansichten vorhandene Matchpunkte explizit und Agenda-Punkte
   sekundär ausgeben.
@@ -171,7 +173,10 @@ Done-Gate:
 
 - Der Standard ist `Ausführlich`; der Umschalter meldet seinen Zustand
   zugänglich.
-- `Kompakt` zeigt jede Statusklasse zeilenartig und responsiv.
+- `Kompakt` zeigt jede Statusklasse in einer festen 38-Pixel-Zeile ohne
+  vertikalen Umbruch.
+- Kompakte Aktionen erscheinen als Icons mit Tooltip und zugänglicher
+  Beschriftung.
 - Beide Modi bieten dieselben statusabhängigen Aktionen.
 - Abgeschlossene Spiele zeigen vorhandene Matchpunkte und Agenda-Punkte
   getrennt und eindeutig.
@@ -201,7 +206,8 @@ Done-Gate:
 
 Setze ausschließlich `GAMES-LIST-001` um. Bewahre Filterung, Sortierung,
 Rejoin und alle direkten Aktionen. Rendere Matchpunkte nur aus dem
-Ergebnis-Snapshot. Gestalte die kompakte Ansicht responsiv und zugänglich.
+Ergebnis-Snapshot. Gestalte die kompakte Ansicht einzeilig, sehr niedrig und
+zugänglich.
 Committe erst nach grünem Done-Gate, merge danach lokal nach `main` und
 schließe Worktree sowie Branch verifiziert auf.
 
@@ -220,18 +226,22 @@ schließe Worktree sowie Branch verifiziert auf.
 
 `GAMES-LIST-001` wurde als ein gemeinsames Paket umgesetzt. Die öffentliche
 Spieleliste startet weiterhin in `Ausführlich` und bietet daneben die
-responsive Zeilenansicht `Kompakt`. Beide Modi verwenden dieselbe
+feste 38-Pixel-Zeilenansicht `Kompakt`. Beide Modi verwenden dieselbe
 Kartenkomponente, Filterung und Aktionslogik. Abgeschlossene Einträge zeigen
 vorhandene Matchpunkte primär und Agenda-Punkte sekundär; fehlen die optionalen
 Matchpunktwerte in einem älteren Snapshot, wird keine Ersatzwertung erfunden.
+In der kompakten Zeile bleiben Aktionen als Icon-Buttons mit Tooltip und
+zugänglicher Beschriftung verfügbar.
 
 Paketcommit: dieser Commit.
 
 Grüne Checks:
 
-- 13 gezielte Webtests in zwei Testdateien
+- 15 gezielte Webtests in drei Testdateien
 - `corepack pnpm --filter @netgrid/web typecheck`
 - `corepack pnpm --filter @netgrid/web build`
+- Live-Browser-Smoke: kompakt 38 Pixel, ausführlich 115 Pixel; alle kompakten
+  Aktionsbuttons 28 × 28 Pixel mit Tooltip und `aria-label`
 - Prettier-Prüfung aller Paketdateien
 - `git diff --check`
 

@@ -14,8 +14,8 @@ const recentGamesSource = readFileSync(
 describe("replay return navigation", () => {
   it("keeps replay transitions inside the Next.js router", () => {
     expect(publicGamesSource).toContain('import Link from "next/link"');
-    expect(publicGamesSource).toContain(
-      '<Link className="button primary" href={target}>',
+    expect(publicGamesSource).toMatch(
+      /<Link\s+className="button primary"\s+href=\{target\}/,
     );
     expect(recentGamesSource).toContain('import Link from "next/link"');
     expect(recentGamesSource).toContain("<Link");

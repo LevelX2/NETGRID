@@ -1251,6 +1251,10 @@ select {
   padding: 0;
 }
 
+.publicGamesList.compact {
+  gap: 4px;
+}
+
 .publicGameCard {
   display: grid;
   gap: 12px;
@@ -1352,59 +1356,91 @@ select {
 .publicGameCard.compact {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px 14px;
-  padding: 8px 10px;
+  gap: 8px;
+  box-sizing: border-box;
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
+  overflow: hidden;
+  padding: 4px 8px;
 }
 
 .publicGameCard.compact .publicGameMain {
   min-width: 0;
   align-items: center;
+  overflow: hidden;
 }
 
 .publicGameCard.compact .publicGameMain > div {
   min-width: 0;
   display: flex;
   flex: 1 1 auto;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 5px 12px;
+  gap: 10px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .publicGameCard.compact .publicGameTitle {
+  min-width: 0;
+  flex: 0 1 auto;
   flex-wrap: nowrap;
+  overflow: hidden;
 }
 
-.publicGameCard.compact .publicGameMeta {
+.publicGameCard.compact .publicGameTitle strong,
+.publicGameCard.compact .publicGameJoinInfo,
+.publicGameCard.compact .publicGameResult {
   overflow: hidden;
-  max-width: min(44vw, 580px);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.publicGameCard.compact .publicGameStatus {
+  flex: 0 0 auto;
+  padding: 1px 6px;
+  font-size: 10px;
+}
+
+.publicGameCard.compact .publicGameMeta,
+.publicGameCard.compact .publicGameMain code,
+.publicGameCard.compact .publicGameFooter > span,
+.publicGameCard.compact .publicGameJoinDetails,
+.publicGameCard.compact .publicGameResultSeparator,
+.publicGameCard.compact .publicGameWinner,
+.publicGameCard.compact .publicGameActionLabel {
+  display: none;
 }
 
 .publicGameCard.compact .publicGameJoinInfo,
 .publicGameCard.compact .publicGameResult {
   display: inline-flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
 }
 
-.publicGameCard.compact .publicGameFooter {
-  justify-content: flex-end;
-  flex-wrap: wrap;
+.publicGameCard.compact .publicGameResultScores {
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
-@media (max-width: 900px) {
-  .publicGameCard.compact {
-    grid-template-columns: 1fr;
-  }
+.publicGameCard.compact .publicGameFooter {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
 
-  .publicGameCard.compact .publicGameFooter {
-    justify-content: space-between;
-  }
-
-  .publicGameCard.compact .publicGameMeta {
-    max-width: 100%;
-  }
+.publicGameCard.compact .publicGameFooter .button {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
 }
 
 .recentGamesPanel {
@@ -15599,6 +15635,16 @@ select,
   .publicGameFooter .button {
     justify-content: center;
     width: 100%;
+  }
+
+  .publicGameCard.compact .publicGameMain,
+  .publicGameCard.compact .publicGameFooter {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .publicGameCard.compact .publicGameFooter .button {
+    width: 28px;
   }
 
   .setup.v07Entry::before {

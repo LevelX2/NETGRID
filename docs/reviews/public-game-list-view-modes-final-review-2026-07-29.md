@@ -8,8 +8,8 @@ Status: freigabefähig
 Die öffentliche Spieleliste besitzt jetzt zwei Darstellungen:
 
 - `Ausführlich` bleibt der Standard und bewahrt die bisherige Kartendarstellung.
-- `Kompakt` ordnet Status, Teilnehmer, Metadaten, Ergebnis, Match-ID,
-  Aktualisierung und Aktionen als responsive Zeile an.
+- `Kompakt` reduziert jeden Eintrag auf eine feste 38-Pixel-Zeile mit Status,
+  Teilnehmern, statusrelevanter Kurzinfo und Aktionsicons.
 
 Ein gemeinsamer Umschalter gilt für offene, laufende und abgeschlossene
 Einträge der aktuell gefilterten Liste. Er verwendet echte Buttons,
@@ -45,10 +45,17 @@ Dadurch bleiben die vorhandenen statusabhängigen Aktionen identisch:
 
 ### Responsive Kompaktheit
 
-Auf breiten Viewports verwendet die kompakte Karte eine zweispaltige
-Zeilenstruktur aus Inhalt und Aktionen. Metadaten dürfen mit Ellipse gekürzt
-werden, ohne Status, Teilnehmer, Ergebnis oder Aktionen auszublenden. Unter
-900 Pixeln bricht die Struktur kontrolliert auf eine Spalte um.
+Die kompakte Karte verwendet auf allen Viewports eine zweispaltige
+Einzeilenstruktur aus Inhalt und Aktionen. Sie ist fest 38 Pixel hoch und
+bricht nicht vertikal um. Sekundäre Metadaten, Match-ID, Aktualisierungszeit
+und redundanter Gewinnertext sind in diesem Modus ausgeblendet. Zu lange
+Teilnehmer- oder Statusinformationen werden innerhalb der verfügbaren Breite
+gekürzt.
+
+Alle Aktionen bleiben als 28-Pixel-Icon-Buttons sichtbar. Der ausgeschriebene
+Text bleibt in `title` und `aria-label` als Tooltip- und
+Barrierefreiheitsvertrag erhalten. Die ausführliche Ansicht zeigt weiterhin
+die vollständigen Textbuttons.
 
 ## Grenzen
 
@@ -60,15 +67,17 @@ werden, ohne Status, Teilnehmer, Ergebnis oder Aktionen auszublenden. Unter
 
 ## Verifikation
 
-| Prüfung                                  | Ergebnis                                                         |
-| ---------------------------------------- | ---------------------------------------------------------------- |
-| Spielelistenmodell und Replay-Navigation | 13 Tests bestanden                                               |
-| Matchpunkte vorhanden                    | getrennte Ausgabe `Matchpunkte 10 : 3` und `Agenda-Punkte 7 : 3` |
-| Matchpunkte fehlen                       | keine abgeleitete Ersatzwertung                                  |
-| Web-Typecheck                            | bestanden                                                        |
-| Next.js-Produktionsbuild                 | bestanden                                                        |
-| Prettier der Paketdateien                | bestanden                                                        |
-| `git diff --check`                       | bestanden                                                        |
+| Prüfung                              | Ergebnis                                                         |
+| ------------------------------------ | ---------------------------------------------------------------- |
+| Spielelistenmodell und UI-Navigation | 15 Tests bestanden                                               |
+| Matchpunkte vorhanden                | getrennte Ausgabe `Matchpunkte 10 : 3` und `Agenda-Punkte 7 : 3` |
+| Matchpunkte fehlen                   | keine abgeleitete Ersatzwertung                                  |
+| Web-Typecheck                        | bestanden                                                        |
+| Next.js-Produktionsbuild             | bestanden                                                        |
+| Live-Browser-Höhenvergleich          | kompakt 38 px, ausführlich 115 px                                |
+| Kompakte Aktionen                    | 28 × 28 px, Tooltip und `aria-label` vorhanden                   |
+| Prettier der Paketdateien            | bestanden                                                        |
+| `git diff --check`                   | bestanden                                                        |
 
 ## Freigabe
 
