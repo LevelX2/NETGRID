@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 abgeschlossen; ZK01 aktiv**
+Status: **ZK00 und ZK01 abgeschlossen; ZK02 aktiv**
 
 Stand: 2026-07-29
 
@@ -651,3 +651,25 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
 7. Main-Verifikation erfolgreich ist;
 8. Worktree und gemergter Arbeitsbranch verifiziert entfernt sind;
 9. das explizite Goal erst danach als `complete` markiert wird.
+
+## Ausführungsjournal
+
+### ZK00 – abgeschlossen
+
+- Commit: `0696d7b01`
+- Der isolierte Worktree und der vollständige Controllervertrag wurden auf
+  Basis von `main` bei `9a30f2d84` angelegt.
+
+### ZK01 – abgeschlossen
+
+- Match `match_9b60842fe75c0b39`: 7/7 KI-Decisions klassifiziert,
+  0 fehlende oder verwaiste Traces.
+- D4 und D5 sind auf aktuellem Code bereits fachlich grün und werden als
+  historische Checkpoints konserviert.
+- Der weiterhin problematische generische Last-Click-Overflow-Vertrag ist als
+  erwarteter roter Unit-Vertrag isoliert.
+- Fokussierter Lauf: 20 grün, 1 erwarteter roter Vertrag.
+- AI-Typecheck: grün.
+- `check:ai`: grün.
+- Ausgangsbaseline `test:ai:shards`: 520 Testdateien grün,
+  4250 Tests grün und genau 1 erwarteter roter ZK01-Vertrag.
