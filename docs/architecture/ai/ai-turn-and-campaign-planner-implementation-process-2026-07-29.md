@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK10 abgeschlossen; ZK10a aktiv**
+Status: **ZK00 bis ZK10a abgeschlossen; ZK11 aktiv**
 
 Stand: 2026-07-29
 
@@ -1044,3 +1044,35 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
   `git diff --check`: grün.
 - Führende Kalibrierevidence:
   `docs/reviews/ai/corp-turn-planner-shadow-calibration-2026-07-30.md`.
+
+### ZK10a – abgeschlossen
+
+- Agenda-, Defense- und qualifizierte Opening-Rush-Linien werden als kleine,
+  typisierte Kampagnendatensätze im bestehenden ResidentPlanPortfolio
+  gehalten. Die Schicht besitzt keine eigene Aktionsauswahl und darf den
+  Scheduler nicht überstimmen.
+- Der Zustand unterscheidet
+  `awaiting_opponent_outcome`, `continuable`, `blocked`, `completed` und
+  `abandoned`. Die nächste eigene Corp-Entscheidung erzeugt aus der aktuellen
+  Domain erneut eine Quote; zukünftige Action-IDs werden nicht gespeichert.
+- Nur PublicEvents und der aktuelle sichtbare Corp-Zustand führen Run-, Rez-,
+  Trace-, Access-, Trash- und Remote-Kompromittierungs-Outcomes zurück.
+  Ereignisse werden nach Event-ID dedupliziert und deterministisch geordnet.
+  Verdeckte Gegnerinformationen sind weder Eingabe noch Persistenzbestandteil.
+- Die private privilegierte Buganzeige zeigt Kampagnenstatus, Root,
+  Meilenstein, Ziel, Requote und öffentliche Outcomes. Sie bleibt
+  bestimmungsgemäß nicht seitensicher und zeigt weiterhin die vollständigen
+  Karten und Hände beider Seiten.
+- Restart-/Snapshot-, Replay-, Requote-, Opening-Rush-, Defense- und
+  Terminalstatus-Gegenproben sind grün. Fokussiert: 179/179 AI-Tests,
+  Shared 16/16 und Web-Debugexport 1/1.
+- Vollständige AI-Suite: 529 Testdateien und 4.327 Tests grün. Vier
+  CPU-intensive Simulationstests überschritten nur im parallelen
+  Drei-Shard-Lauf ihr lokales Zeitlimit und liefen anschließend isoliert mit
+  5/5 Tests grün. AI-, Shared- und Web-Typecheck, `check:ai` mit
+  `production=745` und null Runtime-/Typzyklen sowie `git diff --check`:
+  grün.
+- Fortgeschrittene Interrupt-, Prevention-, Deadline- und
+  Mehrfach-Outcome-Taktik bleibt bewusst ZK12.
+- Führende Evidence:
+  `docs/reviews/ai/corp-opponent-campaign-continuity-2026-07-30.md`.

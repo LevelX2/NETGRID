@@ -83,6 +83,15 @@ function expectShadowTurnPlanner(
     planning?.selectedLine.phases.flatMap((phase) => phase.nodes),
   ).toHaveLength(planning?.search?.selectedLineStepCount ?? 0);
   expect(planning?.consideredLines?.length).toBeGreaterThan(0);
+  expect(planning?.campaigns).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        kind: "defense",
+        status: "continuable",
+        requoteStatus: "current",
+      }),
+    ]),
+  );
 }
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {

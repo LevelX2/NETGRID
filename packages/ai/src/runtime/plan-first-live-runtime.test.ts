@@ -5416,6 +5416,14 @@ describe("authoritative plan-first live runtime", () => {
         selectionReason: "best_expected_value",
         randomizationEligible: false,
       },
+      campaigns: [
+        expect.objectContaining({
+          kind: "opening_rush",
+          status: "continuable",
+          openingRushOpportunityKey: "opening-rush:2:agenda-1:remote_1",
+          requoteStatus: "current",
+        }),
+      ],
       shadowComparison: {
         liveActionId: "install-agenda",
       },

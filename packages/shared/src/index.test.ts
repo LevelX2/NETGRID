@@ -479,6 +479,35 @@ describe("AI decision debug sanitizing", () => {
               },
             ],
           },
+          campaigns: [
+            {
+              campaignId: "campaign:agenda:agenda-1:remote_1",
+              kind: "opening_rush",
+              status: "awaiting_opponent_outcome",
+              rootPlanInstanceId: "plan:corp.score_agenda:general",
+              moduleId: "corp.score_agenda",
+              milestoneId: "agenda_installed",
+              targetServerId: "remote_1",
+              targetCardInstanceId: "agenda-1",
+              openingRushOpportunityKey: "opening-rush:2:agenda-1:remote_1",
+              requoteStatus: "awaiting_next_own_turn",
+              requoteReasonCode: "campaign_waits_for_public_opponent_outcomes",
+              publicOutcomes: [
+                {
+                  outcomeId: "event-run:run_declared:campaign",
+                  eventId: "event-run",
+                  eventType: "start_run",
+                  stateVersionAfter: 8,
+                  kind: "run_declared",
+                  milestoneId: "opponent_run_observed",
+                  origin: "public_event",
+                  targetServerId: "remote_1",
+                  evidenceCode: "campaign_public_run",
+                },
+              ],
+              evidenceCodes: ["campaign_status:awaiting_opponent_outcome"],
+            },
+          ],
           shadowComparison: {
             liveActionId: "corp.draw",
             shadowActionId: "corp.draw",
@@ -573,6 +602,13 @@ describe("AI decision debug sanitizing", () => {
           maximumDepth: 2,
           selectedLineStepCount: 2,
         }),
+        campaigns: [
+          expect.objectContaining({
+            kind: "opening_rush",
+            status: "awaiting_opponent_outcome",
+            requoteStatus: "awaiting_next_own_turn",
+          }),
+        ],
       }),
     });
 
@@ -623,6 +659,24 @@ describe("AI decision debug sanitizing", () => {
       },
     });
     expect(untypedShadowComparison?.planFirstDecision).toBeUndefined();
+
+    const untypedCampaignStatus = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      planFirstDecision: {
+        ...sanitized?.planFirstDecision,
+        turnPlanning: {
+          ...sanitized?.planFirstDecision?.turnPlanning,
+          campaigns: [
+            {
+              ...sanitized?.planFirstDecision?.turnPlanning?.campaigns?.[0],
+              status: "free_text_campaign_status",
+            },
+          ],
+        },
+      },
+    });
+    expect(untypedCampaignStatus?.planFirstDecision).toBeUndefined();
 
     const p6WithoutNarrowContract = sanitizeAiDecisionDebug({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,

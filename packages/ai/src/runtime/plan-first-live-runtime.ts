@@ -107,6 +107,10 @@ import {
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { buildCorpAgendaTurnPlanningSlice } from "../plans/corp-agenda-turn-planning";
 import { buildCorpDefenseTurnPlanningSlice } from "../plans/corp-defense-turn-planning";
+import {
+  corpCampaignDescriptors,
+  reconcileCorpCampaignContinuity,
+} from "../plans/corp-opponent-campaign-continuity";
 import { assertCorpTurnPlanningModuleRegistry } from "../plans/corp-turn-planning-coverage";
 import { buildCorpTurnPlannerShadow } from "../plans/corp-turn-planner-shadow";
 import {
@@ -344,6 +348,17 @@ export function choosePlanFirstLiveAction(
     ...(previous ? { previousPortfolio: previous } : {}),
     resolveEngineWindow: resolveEngineWindow,
   });
+  if (input.side === "corp" && result.lane === "plan" && context.domain) {
+    const domain = context.domain as CorpPlanDomain;
+    result.portfolio.campaigns = reconcileCorpCampaignContinuity({
+      input,
+      previous: previous?.campaigns ?? [],
+      descriptors: corpCampaignDescriptors({
+        domain,
+        portfolio: result.portfolio,
+      }),
+    });
+  }
   bindSelectedCoverageSearchAction(input, result);
   bindSelectedRunnerTargetedBypassChoiceContinuation(input, result, candidates);
   bindSelectedCorpScoreChoiceContinuation(input, result);

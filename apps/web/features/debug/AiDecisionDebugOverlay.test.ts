@@ -53,6 +53,13 @@ describe("AI plan-first decision export", () => {
             maximumDepth: 2,
             selectedLineStepCount: 2,
           },
+          campaigns: [
+            {
+              kind: "opening_rush",
+              status: "awaiting_opponent_outcome",
+              requoteStatus: "awaiting_next_own_turn",
+            },
+          ],
         },
       },
     });
@@ -268,6 +275,35 @@ function trace(): MaintenanceAiTraceDetail {
             ],
             rejected: [],
           },
+          campaigns: [
+            {
+              campaignId: "campaign:agenda:agenda-1:remote_1",
+              kind: "opening_rush",
+              status: "awaiting_opponent_outcome",
+              rootPlanInstanceId: "plan:corp.score_agenda:general",
+              moduleId: "corp.score_agenda",
+              milestoneId: "agenda_installed",
+              targetServerId: "remote_1",
+              targetCardInstanceId: "agenda-1",
+              openingRushOpportunityKey: "opening-rush:2:agenda-1:remote_1",
+              requoteStatus: "awaiting_next_own_turn",
+              requoteReasonCode: "campaign_waits_for_public_opponent_outcomes",
+              publicOutcomes: [
+                {
+                  outcomeId: "event-run:run_declared:campaign",
+                  eventId: "event-run",
+                  eventType: "start_run",
+                  stateVersionAfter: 8,
+                  kind: "run_declared",
+                  milestoneId: "opponent_run_observed",
+                  origin: "public_event",
+                  targetServerId: "remote_1",
+                  evidenceCode: "campaign_public_run",
+                },
+              ],
+              evidenceCodes: ["campaign_status:awaiting_opponent_outcome"],
+            },
+          ],
           shadowComparison: {
             liveActionId: "corp.draw",
             shadowActionId: "corp.install",

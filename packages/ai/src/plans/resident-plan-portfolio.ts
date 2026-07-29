@@ -49,6 +49,64 @@ export type CompletedPlanRecord = {
   finalProgress: PlanProgress;
 };
 
+export const RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION =
+  "resident-corp-campaign-v1" as const;
+
+export type ResidentCorpCampaignPublicOutcome = {
+  outcomeId: string;
+  eventId: string;
+  eventType: string;
+  stateVersionAfter: number;
+  kind:
+    | "run_declared"
+    | "run_completed"
+    | "corp_rez"
+    | "trace_resolved"
+    | "access_resolved"
+    | "card_trashed"
+    | "remote_compromised";
+  actor?: Side;
+  targetServerId?: string;
+  targetCardInstanceId?: string;
+  milestoneId: string;
+  origin: "public_event" | "visible_state_derivation";
+  evidenceCode: string;
+};
+
+export type ResidentCorpCampaign = {
+  schemaVersion: typeof RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION;
+  campaignId: string;
+  kind: "agenda" | "defense" | "opening_rush";
+  status:
+    | "awaiting_opponent_outcome"
+    | "continuable"
+    | "blocked"
+    | "completed"
+    | "abandoned";
+  origin: {
+    rootPlanInstanceId: string;
+    moduleId: "corp.score_agenda" | "corp.defend_servers";
+    targetServerId?: string;
+    targetCardInstanceId?: string;
+    openingRushOpportunityKey?: string;
+  };
+  milestoneId: string;
+  createdAtStateVersion: number;
+  updatedAtStateVersion: number;
+  observedThroughStateVersion: number;
+  requote: {
+    status:
+      | "current"
+      | "awaiting_next_own_turn"
+      | "required_now"
+      | "not_applicable";
+    reasonCode: string;
+    lastQuotedAtStateVersion?: number;
+  };
+  publicOutcomes: ResidentCorpCampaignPublicOutcome[];
+  evidenceCodes: string[];
+};
+
 export type ResidentPlanPortfolio = {
   schemaVersion: typeof RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION;
   side: Side;
@@ -58,6 +116,7 @@ export type ResidentPlanPortfolio = {
   instances: PlanInstance[];
   completionHistory: CompletedPlanRecord[];
   transitions: PlanPortfolioTransition[];
+  campaigns?: ResidentCorpCampaign[];
 };
 
 export type ReconcileResidentPlanPortfolioParams = {
@@ -204,6 +263,9 @@ export function reconcileResidentPlanPortfolio(
       params.stateVersion,
     ),
     transitions,
+    ...(params.previous?.campaigns
+      ? { campaigns: structuredClone(params.previous.campaigns) }
+      : {}),
   };
   portfolio = assignExecutor(
     portfolio,
@@ -350,6 +412,35 @@ export function assertResidentPlanPortfolio(
     );
   }
   for (const instance of portfolio.instances) assertValidPlanInstance(instance);
+  if (portfolio.campaigns) {
+    const campaignIds = new Set(
+      portfolio.campaigns.map((campaign) => campaign.campaignId),
+    );
+    if (
+      campaignIds.size !== portfolio.campaigns.length ||
+      portfolio.campaigns.some(
+        (campaign) =>
+          campaign.schemaVersion !== RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION ||
+          campaign.campaignId.trim().length === 0 ||
+          campaign.origin.rootPlanInstanceId.trim().length === 0 ||
+          campaign.milestoneId.trim().length === 0 ||
+          campaign.createdAtStateVersion > campaign.updatedAtStateVersion ||
+          campaign.updatedAtStateVersion > portfolio.stateVersion ||
+          campaign.observedThroughStateVersion > portfolio.stateVersion ||
+          recursiveKeys(campaign).some((key) =>
+            key.toLocaleLowerCase("en-US").includes("actionid"),
+          ),
+      )
+    ) {
+      throw portfolioFailure(
+        "executor_invariant_broken",
+        portfolio,
+        timingPoint,
+        portfolio.executorInstanceId,
+        "Keep resident Corp campaigns unique, state-bound and free of current or future action identifiers.",
+      );
+    }
+  }
 }
 
 function assignExecutor(

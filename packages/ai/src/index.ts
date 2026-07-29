@@ -302,6 +302,12 @@ export {
   CORP_TURN_PLANNER_SHADOW_SCHEMA_VERSION,
 } from "./plans/corp-turn-planner-shadow";
 export type { CorpTurnPlannerShadowResult } from "./plans/corp-turn-planner-shadow";
+export {
+  corpCampaignDescriptors,
+  reconcileCorpCampaignContinuity,
+  CORP_OPPONENT_CAMPAIGN_CONTINUITY_VERSION,
+} from "./plans/corp-opponent-campaign-continuity";
+export type { CorpCampaignDescriptor } from "./plans/corp-opponent-campaign-continuity";
 export type {
   CampaignRequote,
   CommittedInvocationRoute,

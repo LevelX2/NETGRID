@@ -1049,6 +1049,49 @@ function debugForShadow(params: {
           },
         }
       : {}),
+    ...(params.portfolio.campaigns?.length
+      ? {
+          campaigns: params.portfolio.campaigns.map((campaign) => ({
+            campaignId: campaign.campaignId,
+            kind: campaign.kind,
+            status: campaign.status,
+            rootPlanInstanceId: campaign.origin.rootPlanInstanceId,
+            moduleId: campaign.origin.moduleId,
+            milestoneId: campaign.milestoneId,
+            ...(campaign.origin.targetServerId
+              ? { targetServerId: campaign.origin.targetServerId }
+              : {}),
+            ...(campaign.origin.targetCardInstanceId
+              ? { targetCardInstanceId: campaign.origin.targetCardInstanceId }
+              : {}),
+            ...(campaign.origin.openingRushOpportunityKey
+              ? {
+                  openingRushOpportunityKey:
+                    campaign.origin.openingRushOpportunityKey,
+                }
+              : {}),
+            requoteStatus: campaign.requote.status,
+            requoteReasonCode: campaign.requote.reasonCode,
+            publicOutcomes: campaign.publicOutcomes.map((outcome) => ({
+              outcomeId: outcome.outcomeId,
+              eventId: outcome.eventId,
+              eventType: outcome.eventType,
+              stateVersionAfter: outcome.stateVersionAfter,
+              kind: outcome.kind,
+              milestoneId: outcome.milestoneId,
+              origin: outcome.origin,
+              ...(outcome.targetServerId
+                ? { targetServerId: outcome.targetServerId }
+                : {}),
+              ...(outcome.targetCardInstanceId
+                ? { targetCardInstanceId: outcome.targetCardInstanceId }
+                : {}),
+              evidenceCode: outcome.evidenceCode,
+            })),
+            evidenceCodes: [...campaign.evidenceCodes],
+          })),
+        }
+      : {}),
     shadowComparison: {
       liveActionId: params.liveActionId,
       ...(params.shadowHead

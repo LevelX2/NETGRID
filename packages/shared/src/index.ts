@@ -3252,6 +3252,48 @@ export type AiTurnPlanningDebug = {
       reasonCode: string;
     }>;
   };
+  campaigns?: Array<{
+    campaignId: string;
+    kind: "agenda" | "defense" | "opening_rush";
+    status:
+      | "awaiting_opponent_outcome"
+      | "continuable"
+      | "blocked"
+      | "completed"
+      | "abandoned";
+    rootPlanInstanceId: string;
+    moduleId: "corp.score_agenda" | "corp.defend_servers";
+    milestoneId: string;
+    targetServerId?: string;
+    targetCardInstanceId?: string;
+    openingRushOpportunityKey?: string;
+    requoteStatus:
+      | "current"
+      | "awaiting_next_own_turn"
+      | "required_now"
+      | "not_applicable";
+    requoteReasonCode: string;
+    publicOutcomes: Array<{
+      outcomeId: string;
+      eventId: string;
+      eventType: string;
+      stateVersionAfter: number;
+      kind:
+        | "run_declared"
+        | "run_completed"
+        | "corp_rez"
+        | "trace_resolved"
+        | "access_resolved"
+        | "card_trashed"
+        | "remote_compromised";
+      milestoneId: string;
+      origin: "public_event" | "visible_state_derivation";
+      targetServerId?: string;
+      targetCardInstanceId?: string;
+      evidenceCode: string;
+    }>;
+    evidenceCodes: string[];
+  }>;
   shadowComparison?: {
     liveActionId: string;
     shadowActionId?: string;
@@ -3855,6 +3897,7 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
       "boundary",
       "agendaComparison",
       "defenseComparison",
+      "campaigns",
       "shadowComparison",
       "coverage",
       "search",
@@ -3880,6 +3923,8 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
       !isAiTurnPlanningAgendaComparison(candidate.agendaComparison)) ||
     (candidate.defenseComparison !== undefined &&
       !isAiTurnPlanningDefenseComparison(candidate.defenseComparison)) ||
+    (candidate.campaigns !== undefined &&
+      !isAiTurnPlanningCampaigns(candidate.campaigns)) ||
     (candidate.shadowComparison !== undefined &&
       !isAiTurnPlanningShadowComparison(candidate.shadowComparison)) ||
     (candidate.coverage !== undefined &&
@@ -3898,6 +3943,110 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
     return false;
   }
   return true;
+}
+
+function isAiTurnPlanningCampaigns(value: unknown): boolean {
+  if (!Array.isArray(value)) return false;
+  return value.every((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry))
+      return false;
+    const campaign = entry as Record<string, unknown>;
+    if (
+      !hasOnlyAiPlanFirstFields(campaign, [
+        "campaignId",
+        "kind",
+        "status",
+        "rootPlanInstanceId",
+        "moduleId",
+        "milestoneId",
+        "targetServerId",
+        "targetCardInstanceId",
+        "openingRushOpportunityKey",
+        "requoteStatus",
+        "requoteReasonCode",
+        "publicOutcomes",
+        "evidenceCodes",
+      ]) ||
+      ![
+        "campaignId",
+        "rootPlanInstanceId",
+        "moduleId",
+        "milestoneId",
+        "requoteReasonCode",
+      ].every((field) => typeof campaign[field] === "string") ||
+      ![
+        "targetServerId",
+        "targetCardInstanceId",
+        "openingRushOpportunityKey",
+      ].every(
+        (field) =>
+          campaign[field] === undefined || typeof campaign[field] === "string",
+      ) ||
+      !["agenda", "defense", "opening_rush"].includes(String(campaign.kind)) ||
+      ![
+        "awaiting_opponent_outcome",
+        "continuable",
+        "blocked",
+        "completed",
+        "abandoned",
+      ].includes(String(campaign.status)) ||
+      ![
+        "current",
+        "awaiting_next_own_turn",
+        "required_now",
+        "not_applicable",
+      ].includes(String(campaign.requoteStatus)) ||
+      !Array.isArray(campaign.evidenceCodes) ||
+      !campaign.evidenceCodes.every((code) => typeof code === "string") ||
+      !Array.isArray(campaign.publicOutcomes)
+    ) {
+      return false;
+    }
+    return campaign.publicOutcomes.every((outcome) => {
+      if (!outcome || typeof outcome !== "object" || Array.isArray(outcome))
+        return false;
+      const record = outcome as Record<string, unknown>;
+      return (
+        hasOnlyAiPlanFirstFields(record, [
+          "outcomeId",
+          "eventId",
+          "eventType",
+          "stateVersionAfter",
+          "kind",
+          "milestoneId",
+          "origin",
+          "targetServerId",
+          "targetCardInstanceId",
+          "evidenceCode",
+        ]) &&
+        [
+          "outcomeId",
+          "eventId",
+          "eventType",
+          "milestoneId",
+          "evidenceCode",
+        ].every((field) => typeof record[field] === "string") &&
+        typeof record.stateVersionAfter === "number" &&
+        Number.isFinite(record.stateVersionAfter) &&
+        [
+          "run_declared",
+          "run_completed",
+          "corp_rez",
+          "trace_resolved",
+          "access_resolved",
+          "card_trashed",
+          "remote_compromised",
+        ].includes(String(record.kind)) &&
+        ["public_event", "visible_state_derivation"].includes(
+          String(record.origin),
+        ) &&
+        ["targetServerId", "targetCardInstanceId"].every(
+          (field) =>
+            record[field] === undefined || typeof record[field] === "string",
+        )
+      );
+    });
+  });
 }
 
 function isAiTurnPlanningShadowComparison(value: unknown): boolean {

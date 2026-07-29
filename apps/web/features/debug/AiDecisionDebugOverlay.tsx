@@ -617,6 +617,54 @@ function AiDecisionDebugPlanFirstTraceView({
               />
             </>
           ) : null}
+          {decision.turnPlanning.campaigns?.length ? (
+            <>
+              <h4>Kampagnen über den Gegnerzug</h4>
+              <div className="aiDecisionDebugCompactList">
+                {decision.turnPlanning.campaigns.map((campaign) => (
+                  <div key={campaign.campaignId}>
+                    <span>
+                      {campaign.campaignId} · {campaign.kind}
+                    </span>
+                    <strong>
+                      {aiTurnCampaignStatusLabel(campaign.status)} ·{" "}
+                      {campaign.requoteStatus}
+                    </strong>
+                    <AiDecisionDebugRows
+                      rows={[
+                        ["Root", campaign.rootPlanInstanceId],
+                        ["Meilenstein", campaign.milestoneId],
+                        [
+                          "Ziel",
+                          campaign.targetServerId ??
+                            campaign.targetCardInstanceId ??
+                            "kein Einzelziel",
+                        ],
+                        ["Requote", campaign.requoteReasonCode],
+                        [
+                          "Öffentliche Outcomes",
+                          String(campaign.publicOutcomes.length),
+                        ],
+                      ]}
+                    />
+                    <AiDecisionDebugChips
+                      title="Outcome-Rückführung"
+                      items={campaign.publicOutcomes.map(
+                        (outcome) =>
+                          `${outcome.kind} · ${outcome.eventId} · ${outcome.milestoneId}`,
+                      )}
+                      tone="muted"
+                    />
+                    <AiDecisionDebugChips
+                      title="Kampagnen-Evidence"
+                      items={campaign.evidenceCodes}
+                      tone="muted"
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
           {decision.turnPlanning.coverage ? (
             <>
               <h4>Planabdeckung und Suche</h4>
@@ -1046,6 +1094,25 @@ function aiTurnShadowComparisonLabel(
       return "abweichende aktuelle Aktion";
     case "no_shadow_line":
       return "keine vollständige Shadow-Linie";
+  }
+}
+
+function aiTurnCampaignStatusLabel(
+  value: NonNullable<
+    NonNullable<AiPlanFirstDecisionDebug["turnPlanning"]>["campaigns"]
+  >[number]["status"],
+): string {
+  switch (value) {
+    case "awaiting_opponent_outcome":
+      return "wartet auf Gegnerzug";
+    case "continuable":
+      return "fortsetzbar";
+    case "blocked":
+      return "blockiert";
+    case "completed":
+      return "abgeschlossen";
+    case "abandoned":
+      return "beendet";
   }
 }
 

@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import type { PlanProposal } from "./plan-kernel-types";
 import {
   applyPlanOutcomeReceipt,
+  assertResidentPlanPortfolio,
   reconcileResidentPlanPortfolio,
+  RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION,
   type ResidentPlanPortfolio,
 } from "./resident-plan-portfolio";
 
@@ -328,6 +330,60 @@ describe("resident plan portfolio", () => {
         } as never,
         "runner_action.main",
       ),
+    ).toThrow(expect.objectContaining({ code: "executor_invariant_broken" }));
+  });
+
+  it("retains state-bound Corp campaigns without action identifiers", () => {
+    const plan = proposal("corp.score_agenda", "agenda:remote-1", {
+      side: "corp",
+    });
+    const initial = reconcileResidentPlanPortfolio({
+      side: "corp",
+      stateVersion: 85,
+      timingPoint: "corp_action.main",
+      proposals: [plan],
+    });
+    initial.campaigns = [
+      {
+        schemaVersion: RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION,
+        campaignId: "campaign:agenda:remote-1",
+        kind: "agenda",
+        status: "awaiting_opponent_outcome",
+        origin: {
+          rootPlanInstanceId: "plan:corp.score_agenda:agenda%3Aremote-1",
+          moduleId: "corp.score_agenda",
+          targetServerId: "remote_1",
+          targetCardInstanceId: "agenda-1",
+        },
+        milestoneId: "agenda_installed",
+        createdAtStateVersion: 85,
+        updatedAtStateVersion: 85,
+        observedThroughStateVersion: 85,
+        requote: {
+          status: "awaiting_next_own_turn",
+          reasonCode: "await_runner",
+        },
+        publicOutcomes: [],
+        evidenceCodes: ["campaign_wait"],
+      },
+    ];
+    assertResidentPlanPortfolio(initial, "corp_action.main");
+
+    const retained = reconcileResidentPlanPortfolio({
+      side: "corp",
+      stateVersion: 86,
+      timingPoint: "corp_action.main",
+      proposals: [plan],
+      previous: initial,
+    });
+    expect(retained.campaigns).toEqual(initial.campaigns);
+
+    const malformed = structuredClone(retained) as ResidentPlanPortfolio & {
+      campaigns: Array<Record<string, unknown>>;
+    };
+    malformed.campaigns[0]!.futureActionId = "not-allowed";
+    expect(() =>
+      assertResidentPlanPortfolio(malformed, "corp_action.main"),
     ).toThrow(expect.objectContaining({ code: "executor_invariant_broken" }));
   });
 
