@@ -1,16 +1,21 @@
 # KI-Zug- und Kampagnenplaner – Gesamtkonzept
 
-Status: **Überarbeiteter Entwurf nach externer Architekturprüfung**
+Status: **Entscheidungsreifer Entwurf nach Review und Nutzerabstimmung**
 
 Stand: 2026-07-29
 
-Dokumentversion: `0.2`
+Dokumentversion: `0.3`
 
 Reviewstand:
 Das externe Konzeptfeedback vom 29.07.2026 ist punktweise gegen den
 aktuellen Zielvertrag und den aktuellen Code geprüft und in diesem Stand
 disponiert. Die Grundarchitektur ist bestätigt; mehrere Übergangsverträge
 sind geschärft. Produktivcode ist weiterhin nicht freigegeben oder verändert.
+
+Nachgelagerter Entscheidungsstand:
+Die offenen Architekturfragen wurden anschließend einzeln mit dem Nutzer
+geklärt. Abschnitt 1.3 dokumentiert die verbindlichen Ergebnisse. Verbleibende
+Zahlenwerte sind Shadow-Kalibrierung, keine offenen Grundsatzentscheidungen.
 
 Primärer Agent:
 `card-enablement-ai-knowledge-agent`
@@ -54,16 +59,16 @@ Disposition:
 | neuer globaler Scoremonolith | **übernommen** | Ein versioniertes Feature-Register definiert Einheiten, Bereiche, Ownership und Ausschlüsse. Planmodule liefern Fakten und Claims, nicht frei gewichtete globale Linienwerte. |
 | mehrere Pflichten derselben Prioritätsklasse | **übernommen** | `PriorityCoverage` wird als Menge konkreter Pflicht-IDs statt als bloß höchste erreichte Klasse geführt. |
 | Beam-Pruning und Action Capacity | **übernommen** | Schutzfronten nach Pflicht, Root und Meilenstein, Pareto-Erhalt, Upper Bounds, typisiertes Action-Capacity-Ledger und ausschließlich deterministische Budgets werden verbindlich. Beam Search bleibt Arbeitsannahme. |
-| Informationsgrenzen und Recourse | **übernommen** | Kontrollierte deterministische Choices sind keine Beobachtungsgrenze. Echte Grenzen erhalten einen side-sicheren Recourse-Wert. |
-| genau ein Root | **übernommen mit Segmentpräzisierung** | Jedes bindende Liniensegment besitzt genau ein Root. Support-Leaves bleiben diesem Root untergeordnet. Nach Meilenstein/Yield kann ein neues Segment geplant werden; unabhängige Portfolio-Slices sind im ersten Zielstand ausgeschlossen. |
+| Informationsgrenzen und Recourse | **übernommen und nach Nutzerentscheidung vereinfacht** | Kontrollierte deterministische Choices sind keine Beobachtungsgrenze. Eine echte Unsicherheitsgrenze beendet den konkreten TurnPlan; das Modul bewertet nur die unmittelbare Ergebnisverteilung. Hinter der Grenze werden keine Recourse-Phasen vorgeplant. |
+| genau ein Root | **auf Phasenebene übernommen** | Ein vollständiger TurnPlan darf mehrere geordnete Root-Phasen bis Zugende enthalten. Jede Phase besitzt genau ein Root; Support-Leaves bleiben diesem Root untergeordnet. |
 | Handkartennutzung | **teilweise übernommen** | `CorpHandInventoryFacts` existiert bereits und wird vor Draw-Arbitration verwendet. Es wird erweitert und planungswirksam gemacht, nicht durch eine parallele Inventur ersetzt. Cleanup- und Retention-Projektion fehlen tatsächlich und werden ergänzt. |
 | Opening Rush | **übernommen** | Der frühe Economy–Defense–Agenda-Pfad wird eigenes Agenda-Akzeptanzszenario. |
 | Zeitkosten mehrzügiger Werte | **übernommen** | Jeder zukünftige Meilenstein trägt explizite Zug-, Action-Capacity- und Verzögerungskosten. |
 | effect-gebündelte ICE-Auflösung | **übernommen mit Ownership-Präzisierung** | Freiwillige ICE-Allokation gehört Defense; eine von einem anderen Effekt gebündelte Resolution bleibt beim auslösenden Root und nutzt Defense nur als Fachservice. |
 | EndTurn, Coverage und Rules Profile | **übernommen mit Ist-Anpassung** | NETGRID besitzt `RulesBaseline` und `formatProfileId`, keinen aktuellen allgemeinen `rulesProfileId`. Ein Planning-Rules-Fingerprint wird aus den realen Verträgen gebildet. Nur der aktuelle echte Zustand kann Turn Completion autoritativ zertifizieren; ein hypothetisches Zugende bleibt Projektion. |
 | Invocation statt nur Action-ID | **übernommen** | Routendefinierende Targets und Choices gehören vor die Linienbewertung in einen kanonischen Invocation Key. Reine Resolution-Choices bleiben nachgelagert. |
-| Randomisierung ganzer Linien | **Review bestätigt, ursprüngliches Konzept geändert** | Die Linienauswahl ist in Version 1 vollständig deterministisch. RNG bleibt ausschließlich im vorhandenen Same-Step-/Same-Executor-Routenvertrag. |
-| Fortschreibung nach erwartetem Ergebnis | **übernommen** | Erwartete deterministische Progression führt primär zum nächsten Commitment-Node plus P1/P2-Scan. Volle Suche erfolgt nur an Replan- oder Yield-Punkten. |
+| Randomisierung ganzer Linien | **nach Nutzerentscheidung eng begrenzt zugelassen** | RNG ist einmalig und persistent zwischen fachlich vertretbarem Rush/Nicht-Rush oder zertifiziert nahgleichen Linien zulässig. Harte Pflichten, klare Dominanz und Illegalität schließen Randomisierung aus. |
+| Fortschreibung nach erwartetem Ergebnis | **übernommen und auf Phasen erweitert** | Erwartete deterministische Progression führt zum nächsten Node beziehungsweise zur bereits geplanten nächsten Phase plus P1/P2-Scan. Volle Suche erfolgt nur an echten Replan-Punkten. |
 | früher lokaler D5-Fix und frühe Diagnostik | **übernommen** | Der klare Draw-Bug folgt direkt auf Red Evidence. Minimaltraces entstehen vor jeder Verhaltensumschaltung. |
 | vertikale Slices und vollständiges Coverage-Gate | **übernommen** | Agenda und Defense/Economy werden vor allgemeiner Suche vertikal geschlossen. Teilanbindung bleibt Shadow-only. |
 
@@ -95,6 +100,57 @@ Handinventar ist noch `diagnostic_only`, und der AI-Input transportiert noch
 keinen vollständigen Rules-Baseline-Kontext. Das Review benennt damit reale
 Lücken, schlägt an diesen Stellen aber teilweise neue Begriffe oder Typen
 vor, obwohl belastbare Projektverträge bereits vorhanden sind.
+
+### 1.3 Verbindliche Entscheidungen der Nachbesprechung
+
+1. **Konkrete bekannte Objekte dürfen geplant werden.** Zukünftige Steps
+   dürfen eigene bekannte Karteninstanzen, Server, Fähigkeiten, Werte und
+   andere stabile Targets binden. Verboten bleiben zukünftige `actionId`s
+   und kartennamenspezifische Sonderheuristiken im allgemeinen Scheduler.
+2. **Targets werden konkret, typisiert und erweiterbar geführt.** Das
+   Planmodul erzeugt die konkrete Variante; der zentrale Vertrag validiert
+   Karten-, Server-, Ability-, Spieler-, Zonen-, Wert- und
+   Mehrfachzielreferenzen.
+3. **Nachweislich vertauschbare Aktionen werden kanonisiert.** Reihenfolgen
+   bleiben getrennt, sobald Legalität, Kosten, Ressourcen, Trigger,
+   Position, Beobachtung oder Fortsetzung voneinander abhängen.
+4. **Runtime-Neustart erzwingt Neuplanung.** Kampagnen werden requotet,
+   `TurnPlanCommitment`s neu erzeugt und weiterhin gültige harte
+   `PlanCommitment`s als Pflicht übernommen.
+5. **Pruning schützt kleine Pareto-Fronten.** Je viablem
+   `Root × nächstem Meilenstein` bleibt mindestens ein Vertreter; mehrere
+   nichtdominierte Risiko-/Ressourcenprofile dürfen geschützt bleiben.
+6. **Ein TurnPlan darf mehrere Root-Phasen besitzen.** Eine Phase besitzt
+   genau ein Root; der deterministisch planbare Zug wird phasenübergreifend
+   bis Zugende oder echter Unsicherheitsgrenze geplant.
+7. **Phasenwechsel sind kein automatischer Replan.** Erwartete Übergänge zu
+   bereits geplanten Phasen werden fortgeschrieben. Nur Boundary,
+   Abweichung, Invalidierung oder höherklassiger Interrupt öffnet den
+   Restzug neu.
+8. **Cross-Plan-Werte laufen über das Bewertungsregister.** Rein
+   planinterne Fachwerte bleiben im Modul; jeder Wert, der Roots, Phasen
+   oder ganze TurnPlans vergleicht, ist zentral registriert, versioniert,
+   begrenzt und evidenzgebunden.
+9. **Action-Gain erweitert den Planungshorizont.** Das typisierte
+   Action-Capacity-Ledger plant garantierte zusätzliche und eingeschränkte
+   Aktionen mit; die Anfangskapazität begrenzt die Suchtiefe nicht.
+10. **Der Planungshorizont ist modulabhängig.** Module deklarieren
+    `current_turn_only`, `campaign_capable` oder `context_dependent`.
+    Tatsächlich mehrzügige Instanzen benötigen eine Kampagnenquote.
+11. **Unsicherheit beendet den konkreten TurnPlan.** Das zuständige Modul
+    bewertet nur die unmittelbare Ergebnisverteilung und den Zweck der
+    unsicheren Aktion. Hinter Draw, Zufall oder materieller gegnerischer
+    Entscheidung werden keine Recourse-Phasen vorgeplant; nach Beobachtung
+    entsteht ein neuer Restzugplan.
+12. **Opening Rush besitzt reine, kombinierte und sichere Varianten.**
+    Beispielsweise dürfen Agenda, Remote-ICE und Central-ICE gemeinsam als
+    vollständige Zuglinie konkurrieren; ungeschützte Centrals sind ohne
+    konkrete P1-/P2-Pflicht nicht automatisch unzulässig.
+13. **Eng begrenzte Linienrandomisierung ist zulässig.** Sie darf einmalig
+    und persistent zwischen fachlich vertretbarem Rush und Nicht-Rush oder
+    zwischen zertifiziert nahgleichen Linien erfolgen. Klare Dominanz,
+    P1-/P2-Pflichten und illegale Varianten schließen RNG aus. Jeder Draw
+    läuft über den Engine-RNG und wird im Replay festgehalten.
 
 ## 2. Ausgangsbefund
 
@@ -305,13 +361,14 @@ Es wird keine zweite konkurrierende Entscheidungsautorität neben
 Der Scheduler entscheidet künftig auf drei verbundenen Horizonten:
 
 1. **aktueller Step:** exakt eine aktuell vorhandene LegalAction;
-2. **Rest des aktuellen Zuges:** eine bewertete, semantische Zuglinie;
+2. **Rest des aktuellen Zuges:** ein bewerteter, mehrphasiger TurnPlan bis
+   Zugende oder echter Unsicherheitsgrenze;
 3. **zugübergreifende Kampagne:** Meilensteine und inkrementeller
    Fortsetzungswert nach dem Zugende.
 
 Die Ausführung bleibt rollierend:
 
-1. mehrere Restzuglinien entwerfen;
+1. mehrere mehrphasige Restzugpläne entwerfen;
 2. ihre Endzustände und Kampagnenfolgen vergleichen;
 3. die beste Linie binden;
 4. nur den ersten aktuellen LegalAction-Schritt ausführen;
@@ -329,6 +386,8 @@ Unverändert bleiben:
 - ausschließlich aktuelle `LegalActions` als ausführbare Aktionen;
 - genau ein Leaf-Executor pro freiwilliger Entscheidung;
 - keine zukünftigen Action-IDs in Steps, Routes, Commitments oder Kampagnen;
+- konkrete bekannte Karten-, Objekt-, Server- und Ability-IDs dürfen in
+  zukünftigen semantischen Steps gebunden sein;
 - StateVersion-gebundene Revalidierung;
 - residente Planinstanzen;
 - harte lexikografische Prioritätsklassen;
@@ -336,7 +395,8 @@ Unverändert bleiben:
   routendefinierender Targets/Choices und später Auflösung reiner
   Resolution-Choices;
 - `applyAction` als finaler Guardrail;
-- deterministische Entscheidung und Replayfähigkeit.
+- deterministische Reproduzierbarkeit und Replayfähigkeit; explizite
+  zertifizierte RNG-Ausnahmen laufen ausschließlich über den Engine-RNG.
 
 Ergänzt werden:
 
@@ -345,6 +405,8 @@ Ergänzt werden:
 - typisierte `CampaignValueClaim`s und ein zentrales Value-Ownership-Ledger;
 - side-sicherer abstrakter Projektionszustand;
 - `TurnLineCandidate`;
+- `TurnPlanPhase` als ein-Rootige Einheit innerhalb einer mehrphasigen
+  Zuglinie;
 - deterministische Restzugsuche;
 - `TurnPlanCommitment`;
 - ein expliziter Vorrang vorhandener harter `PlanCommitment`s;
@@ -383,7 +445,7 @@ flowchart TD
     C["Aktueller side-sicherer Zustand"] --> B
     B --> D["Planbeiträge: Assessment, Step-Optionen, Kampagnenquote"]
     D --> E["Side-spezifischer PlanScheduler als einziger Dirigent"]
-    E --> F["Bewertete Restzugvarianten"]
+    E --> F["Bewertete mehrphasige Restzugvarianten"]
     F --> G["TurnPlanCommitment"]
     G --> H["Aktueller semantischer Step"]
     H --> I["Aktuelle LegalAction und Choices"]
@@ -429,7 +491,7 @@ Ein Planmodul darf nicht:
 
 Nur der Scheduler entscheidet:
 
-- welches Root-Ziel den Restzug führt;
+- welche geordnete Folge von Root-Phasen den Restzug bildet;
 - welche Planbeiträge zu einer kohärenten Zuglinie kombiniert werden;
 - welcher Supportbedarf wann ausgeführt wird;
 - welche Ressourcen reserviert bleiben;
@@ -471,46 +533,52 @@ Die Kampagne bleibt resident, auch wenn sie:
 
 ### 6.3 Zugplan
 
-Der Zugplan beschreibt eine kohärente Linie vom aktuellen Zustand bis:
+Der Zugplan beschreibt eine kohärente, gegebenenfalls mehrphasige Linie vom
+aktuellen Zustand bis:
 
 - zum regulären Zugende;
-- zum Erreichen eines sicheren Zugmeilensteins;
 - oder zu einer Informationsgrenze, hinter der ohne neue Beobachtung keine
   belastbare weitere Festlegung möglich ist.
 
 Er besitzt keinen eigenen strategischen Zweck. Er ordnet Steps vorhandener
 Planinstanzen zu einer gemeinsamen Linie.
 
-Der bindende Zugplan wird in Root-semantische Segmente gegliedert:
+Der bindende Zugplan wird in Root-semantische Phasen gegliedert:
 
-- jedes Segment besitzt genau ein strategisches Root;
-- andere Planinstanzen handeln darin nur als exakt gebundene Support-,
-  Response- oder Resolution-Leaves;
-- ein allgemeiner „Portfolio-Slice“ für unabhängige Nebenentwicklung ist im
-  ersten Zielstand nicht zulässig;
-- erreicht das Segment seinen Meilenstein und bleibt Action Capacity, entsteht
-  ein typisierter Yield-Punkt;
-- am Yield-Punkt wählt der Scheduler ein neues Root-Segment für den
-  verbleibenden Zug.
+- jede Phase besitzt genau ein strategisches Root;
+- andere Planinstanzen handeln innerhalb dieser Phase nur als exakt
+  gebundene Support-, Response- oder Resolution-Leaves;
+- der vollständige TurnPlan darf mehrere geordnete Root-Phasen enthalten,
+  beispielsweise Broker-Nutzung, Agenda-Vorbereitung und Central-Defense;
+- die Folgephasen werden gemeinsam bis zum deterministisch planbaren
+  Zugende bewertet und gebunden;
+- erreicht eine Phase ihr Ziel, wird bei unveränderten Voraussetzungen zur
+  bereits geplanten nächsten Phase fortgeschrieben;
+- ein Phasenwechsel ist weder automatischer Yield noch neue freie
+  Rootkonkurrenz;
+- eine echte Unsicherheitsgrenze beendet den konkreten TurnPlan und öffnet
+  nach Beobachtung die Planung des verbleibenden Zuges neu.
 
-Die Projektion darf den erwarteten Restwert nach einem Yield berücksichtigen.
-Gebunden und fortgeschrieben wird jedoch immer nur das aktuelle Segment.
-Damit bleibt ein Zug ganzheitlich bewertet, ohne Broker-, Ambush- oder
-Economy-Nebenlinien unbemerkt in ein Agenda-Segment einzuschieben.
+Damit bleibt ein Zug ganzheitlich bewertet, ohne dass ein Root unabhängige
+Broker-, Ambush- oder Economy-Nebenaktionen als eigene Leaves vereinnahmt.
 
 ### 6.4 Aktueller Step
 
 Nur der aktuelle Step wird gegen aktuelle `LegalActions` gebunden. Jede
-spätere Position der Zuglinie besteht aus:
+spätere Position der Zuglinie darf bestehen aus:
 
 - Capability;
-- Ziel;
+- konkreten bekannten Karten-, Objekt-, Server-, Ability- oder anderen
+  typisierten Zielreferenzen;
 - erwarteten Kosten- und Ergebnisintervallen;
 - benötigten Ressourcen;
 - Garantiegrad;
 - erwarteter Beobachtungsart.
 
-Sie enthält keine zukünftige `actionId`.
+Sie enthält keine zukünftige `actionId`. Eine konkrete bekannte
+`cardInstanceId` oder andere stabile Objekt-ID ist dagegen ausdrücklich
+zulässig und wird beim Erreichen des Steps gegen die dann aktuellen
+`LegalActions` rematerialisiert.
 
 ## 7. Neue Kernverträge
 
@@ -544,6 +612,12 @@ Planning-Rules-Kontext. Seine side-sichere Erweiterung ist deshalb ein
 explizites Vorbedingungspaket. Quotes oder Commitments mit abweichendem
 Kontext werden fail-closed abgewiesen.
 
+Ein Server- oder KI-Runtime-Neustart löst unabhängig vom Fingerprint
+`runtime_restarted` aus. Danach werden Kampagnen requotet,
+`TurnPlanCommitment`s verworfen und neu geplant. Ein weiterhin gültiges
+hartes `PlanCommitment` wird revalidiert und bleibt zwingende Vorgabe. Ein
+reiner Client-Reconnect ohne Runtime-Neustart ist kein Replan-Grund.
+
 ### 7.2 Routendefinierende Invocation
 
 Eine Action-ID allein identifiziert nicht immer die zu bewertende Variante.
@@ -565,6 +639,29 @@ type CanonicalLegalActionInvocation = {
 };
 ```
 
+Bekannte Ziele werden über einen erweiterbaren typisierten Vertrag
+referenziert:
+
+```ts
+type PlanTargetRef =
+  | { kind: "card"; cardInstanceId: string }
+  | { kind: "server"; serverId: string }
+  | {
+      kind: "ability";
+      sourceCardInstanceId: string;
+      abilityId: string;
+    }
+  | { kind: "player"; side: Side }
+  | { kind: "zone"; zoneId: string }
+  | { kind: "value"; value: number }
+  | { kind: "target_set"; targets: PlanTargetRef[] };
+```
+
+Die technische Bindung erfolgt bevorzugt über stabile Instanz- und
+Ability-IDs. Kartendefinition und Kartenname dürfen für fachliche Bewertung,
+Trace und Erklärung verwendet werden. Verboten sind nur verteilte
+kartennamenspezifische Sonderentscheidungen im allgemeinen Scheduler.
+
 `invocationKey` ist eine kollisionsfreie kanonische Serialisierung aus:
 
 - StateVersion;
@@ -584,6 +681,12 @@ Regeln:
 - `engine_only`-Targets dürfen von der KI nicht enumeriert werden;
 - die Engine revalidiert die vollständige ausgewählte Invocation weiterhin
   autoritativ.
+
+Das zuständige Planmodul erzeugt die konkrete Variante. Der zentrale
+Semantikvertrag validiert ihre Planungsrolle; weder Scheduler noch einzelne
+Module dürfen widersprüchliche globale Klassifikationen etablieren. Im
+Zweifel ist eine Auswahl `route_defining`, sobald sie Kosten, Ziel, Wirkung
+oder Folgeoptionen verändert.
 
 Die bestehende Zielregel „Choice erst nach Actionwahl“ wird damit nicht
 pauschal aufgehoben, sondern auf `resolution_only` präzisiert.
@@ -628,6 +731,11 @@ Die Domänenlogik bleibt in den Planmodulen:
 
 ```ts
 type TurnPlanningModuleExtension = {
+  horizonCapability:
+    | "current_turn_only"
+    | "campaign_capable"
+    | "context_dependent";
+
   enumerateCurrentPlanningHeads(
     instance: PlanInstance,
     assessment: ValidatedPlanAssessment,
@@ -657,6 +765,10 @@ Normen:
 - Module ohne vollständige Zukunftsprojektion bleiben bis zum Coverage-Gate
   Shadow-only oder liefern bewusst eine aktuelle Single-Step-Linie mit
   `projection_not_supported` als Stopgrund.
+- `current_turn_only`-Module müssen vollständig am aktuellen TurnPlan
+  teilnehmen, benötigen aber keinen künstlichen Fortsetzungswert;
+- `campaign_capable`- und `context_dependent`-Module müssen für eine
+  tatsächlich mehrzügige Instanz eine validierbare Kampagnenquote liefern.
 
 ### 7.5 `CampaignValueClaim`
 
@@ -769,7 +881,7 @@ type ProjectedDecisionFrame = {
   resourceLedger: ProjectedResourceLedger;
   portfolioForecasts: ProjectedPlanProgress[];
   projectedCleanup?: ProjectedCleanupOutcome;
-  pendingBoundary?: ObservationBoundaryEstimate;
+  pendingBoundary?: BoundaryActionAssessment;
   uncertainty: ProjectionUncertainty[];
 };
 ```
@@ -793,7 +905,7 @@ Das Action-Capacity-Ledger bildet nicht nur normale Klicks ab, sondern:
 Es verwendet die vorhandenen `ActionDemand`-, `ActionCapacityRoute`- und
 Ressourcenledger-Verträge als Basis.
 
-### 7.8 Beobachtungsgrenzen und Recourse
+### 7.8 Beobachtungsgrenzen ohne vorgeplante Recourse-Phasen
 
 ```ts
 type TurnBoundaryKind =
@@ -805,16 +917,14 @@ type TurnBoundaryKind =
   | "engine_continuation"
   | "projection_not_supported";
 
-type ObservationBoundaryEstimate = {
+type BoundaryActionAssessment = {
   boundaryKind: Exclude<
     TurnBoundaryKind,
     "none" | "controlled_resolution"
   >;
   immediateValueClaims: CampaignValueClaim[];
-  expectedRecourseClaims: CampaignValueClaim[];
+  immediateOutcome: OutcomeEnvelope;
   remainingActionCapacityAfterBoundary: ProjectedActionCapacityLedger;
-  hitProbabilityBands?: NeedHitProbabilityBand[];
-  worstCaseContinuation: ValueEnvelope;
   uncertainty: ProjectionUncertainty[];
   assumptionIds: string[];
 };
@@ -822,10 +932,13 @@ type ObservationBoundaryEstimate = {
 
 Eine vollständig kontrollierte deterministische Resolution ist keine
 Beobachtungsgrenze. Ein Draw, Search mit unbekanntem Ergebnis, gegnerischer
-Bid oder unsicherer Access-Ausgang ist eine Grenze. Die Linie wird dort mit
-einem side-sicheren Recourse-Wert bewertet, damit ein früher Draw mit
-Restklicks fair gegen eine bis Zugende konkrete Nicht-Draw-Linie verglichen
-werden kann.
+Bid oder unsicherer Access-Ausgang ist eine Grenze. Das zuständige Modul
+bewertet den unmittelbaren Zweck, die bekannte Ergebnisverteilung,
+Action-Capacity-, Hand- und Risikokosten der Grenzaktion. Der konkrete
+TurnPlan endet dort. Nach dem tatsächlichen Ergebnis werden Zustand und
+`LegalActions` neu aufgebaut und der verbleibende Zug vollständig neu
+geplant. Es werden keine hypothetischen Folgephasen oder bedingten
+Commitments hinter der Grenze erzeugt.
 
 ### 7.9 `TurnStepOption`
 
@@ -841,28 +954,37 @@ type TurnStepOption = {
   projectedOutcome: ProjectedOutcomeDelta;
   progressDelta: ProjectedPlanProgress[];
   valueClaims: CampaignValueClaim[];
-  observationBoundary?: ObservationBoundaryEstimate;
+  observationBoundary?: BoundaryActionAssessment;
   guarantee: GuaranteeLevel;
   evidenceCodes: string[];
 };
 ```
 
 Nur `currentPlanningHead.invocation` darf eine aktuelle Action-ID enthalten.
-Alle Optionen hinter dem ersten Zustand werden semantisch beschrieben. Eine
-echte `PlanRoute` entsteht erst nach Linien- und Executorwahl.
+Alle Optionen hinter dem ersten Zustand werden semantisch beschrieben. Sie
+dürfen konkrete bekannte `PlanTargetRef`s binden. Eine echte `PlanRoute`
+entsteht erst nach Linien- und Executorwahl beziehungsweise bei späteren
+Steps nach Rematerialisierung im dann aktuellen Zustand.
 
 ### 7.10 `TurnLineCandidate`
 
 ```ts
+type TurnPlanPhase = {
+  phaseId: string;
+  rootPlanInstanceId: string;
+  targetMilestone: CampaignMilestone | TurnMilestone;
+  stepOptions: TurnStepOption[];
+  protectedValueClaimIds: string[];
+  hardPlanCommitmentId?: string;
+};
+
 type TurnLineCandidate = {
   lineId: string;
   rulesContext: PlanningRulesContext;
   stateVersion: number;
   baseStateHash: string;
   turnKey: string;
-  rootPlanInstanceId: string;
-  targetMilestone: CampaignMilestone | TurnMilestone;
-  stepOptions: TurnStepOption[];
+  phases: TurnPlanPhase[];
   projectedEnd: ProjectedDecisionFrame;
   priorityCoverage: PriorityCoverage;
   validatedValueClaims: CampaignValueClaim[];
@@ -872,11 +994,11 @@ type TurnLineCandidate = {
   rank: LexicographicLineRank;
   stopReason:
     | "projected_turn_end"
-    | "milestone_reached"
     | "observation_boundary"
     | "projection_not_supported";
   stopEnvelope: ProjectedTurnStopEnvelope;
   optimisticUpperBound: ValueEnvelope;
+  randomizationEligibility?: TurnPlanRandomizationEligibility;
 };
 ```
 
@@ -898,10 +1020,12 @@ eine andere Pflicht derselben Klasse erfüllt wurde. Für eine zulässige Linie
 muss `violatedObligationIds` leer sein; `deferredObligationIds` darf nur
 vertraglich aufschiebbare Pflichten enthalten.
 
-Eine Linie besitzt genau ein Root. Andere Owner in `stepOptions` müssen als
-exakte Leaves dieses Roots gebunden sein. Ein ungerechtfertigter Rootwechsel,
-ein verletztes hartes Commitment oder ein ungeklärter exklusiver
-Ressourcenkonflikt macht die Linie ungültig; es ist kein weicher Malus.
+Eine Linie darf mehrere geordnete Phasen besitzen. Jede Phase besitzt genau
+ein Root; andere Owner in ihren `stepOptions` müssen als exakte Leaves
+dieses Phasenroots gebunden sein. Ein nicht als Phasenübergang modellierter
+Rootwechsel, ein verletztes hartes Commitment oder ein ungeklärter
+exklusiver Ressourcenkonflikt macht die Linie ungültig; es ist kein weicher
+Malus.
 
 Ein `projected_turn_end` ist noch keine Erlaubnis zu `end_turn`. Es trägt nur
 Annahmen über die erwartete Restkapazität. Erst im real erreichten Zustand
@@ -924,10 +1048,9 @@ type TurnPlanCommitment = {
   baseStateHash: string;
   lastValidatedAtStateVersion: number;
   sourceLineHash: string;
-  rootPlanInstanceId: string;
+  phases: PlannedTurnPhase[];
+  currentPhaseId: string;
   currentLeafExecutorInstanceId: string;
-  objectiveCode: string;
-  targetMilestone: CampaignMilestone | TurnMilestone;
   remainingNodes: PlannedCapabilityNode[];
   currentNodeId: string;
   hardPlanCommitmentId?: string;
@@ -935,6 +1058,7 @@ type TurnPlanCommitment = {
   quoteIds: string[];
   valueClaimIds: string[];
   assumptionIds: string[];
+  randomizationDecision?: PersistedTurnPlanRandomizationDecision;
   nextExpectedTransition: ExpectedTransitionEnvelope;
   observationPolicy: ObservationPolicy;
   replanTriggers: ReplanTrigger[];
@@ -953,8 +1077,11 @@ gespeichert. Es ist:
 - stärker als ein loser Continuity-Bonus;
 - schwächer als eine atomare Engine-Transaktion;
 - nach jeder tatsächlichen Aktion neu zu validieren;
+- bei erwarteter deterministischer Progression über bereits geplante
+  Phasengrenzen hinweg fortzuschreiben;
 - beim Zugwechsel geschlossen oder in eine Kampagnenwartelage überführt;
-- frei von zukünftigen Action-IDs.
+- frei von zukünftigen Action-IDs, aber nicht von stabilen bekannten
+  Karten-, Objekt-, Server- oder Ability-Referenzen.
 
 ### 7.12 Commitment-Hierarchie
 
@@ -1025,7 +1152,7 @@ des bereits gewählten Executors sehen. Deshalb gilt im Zielstand:
 Assessments und residente Kampagnen
 → nichtautoritative Planning Heads enumerieren
 → semantische Linien projizieren und vergleichen
-→ Root, Linie und aktuellen Leaf-Executor auswählen
+→ Phasenfolge, Linie und aktuellen Leaf-Executor auswählen
 → gewählten Head autoritativ rematerialisieren und revalidieren
 → aktuelle Route binden
 ```
@@ -1044,8 +1171,8 @@ Supportpläne erzeugen Optionen nur:
 
 - für einen exakt offenen Parentbedarf;
 - als Response- oder Resolution-Leaf des gebundenen Roots;
-- oder als selbstständige Linie mit eigenem Root, wenn sie regulär
-  konkurriert.
+- oder als selbstständige Phase mit eigenem Root, wenn sie regulär Teil
+  eines vollständigen TurnPlans wird.
 
 Dadurch kann `corp.economy` nicht allgemein einen Credit anbieten und ihn
 nachträglich irgendeinem Ziel zurechnen. Die Option muss bereits enthalten:
@@ -1055,12 +1182,12 @@ nachträglich irgendeinem Ziel zurechnen. Die Option muss bereits enthalten:
 - bis wann die Ressource benötigt wird;
 - welcher Folge-Step dadurch erreichbar wird.
 
-Ein generischer „Portfolio-Slice“, der mehrere voneinander unabhängige
-P4-/P5-Ziele innerhalb derselben Bindungssequenz zusammenstellt, ist im
-ersten Zielstand nicht zulässig. Erreicht eine Linie ihren Root-Meilenstein
-und besitzt noch Action Capacity, endet ihr Bindungssegment mit
-`milestone_yield`; der verbleibende Zug wird anschließend als neues Segment
-mit neu konkurrierenden Roots geplant.
+Ein Root darf keine unabhängigen P4-/P5-Ziele als eigene Leaves
+vereinnahmen. Solche Ziele können jedoch als ausdrücklich geplante spätere
+Root-Phasen desselben TurnPlans auftreten. Erreicht eine Phase ihr Ziel und
+bleibt Action Capacity, folgt bei unveränderten Voraussetzungen die bereits
+gebundene nächste Phase. Nur wenn keine weitere Phase belastbar vorplanbar
+ist, endet der TurnPlan an einer typisierten Grenze.
 
 ### 8.4 Suchverfahren
 
@@ -1089,10 +1216,11 @@ Ablauf:
 3. nur das zuständige Planmodul um seine fachlich erlaubten semantischen
    Fortsetzungen bitten;
 4. nicht projektierbare Fortsetzungen als Ende dieses Zweigs behandeln;
-5. Claims, Kapazität, harte Commitments und Rootreinheit validieren;
+5. Claims, Kapazität, harte Commitments und Rootreinheit je Phase
+   validieren;
 6. inkompatible oder sicher dominierte Linien verwerfen;
-7. bis realistisch projizierbares Zugende, Root-Meilenstein,
-   Beobachtungsgrenze oder Projektionsende erweitern;
+7. über mehrere Root-Phasen bis zum realistisch projizierbaren Zugende,
+   einer echten Unsicherheitsgrenze oder einem Projektionsende erweitern;
 8. vollständige Linien mit zentral registrierten Komponenten
    lexikografisch bewerten;
 9. beste Linie auswählen;
@@ -1111,6 +1239,11 @@ eine typisierte `ActionDemand`, die gegen vorhandene
 `ActionCapacityRoute`s und das bestehende Plan-Resource-Ledger geprüft wird.
 Damit werden auch eingeschränkte Aktionen, zusätzliche Aktionen,
 Nicht-Klick-Fenster und bereits reservierte Kapazität korrekt behandelt.
+Garantierter Action-Gain erweitert das Ledger und damit den planbaren
+Horizont. Eine Operation, die eine Aktion kostet und zwei neue Aktionen
+erzeugt, erhöht die Restkapazität netto um eine Aktion; folgende Install-,
+Advance- oder andere Steps werden im selben TurnPlan mitgeplant. Zufälliger
+Action-Gain beendet den konkreten Plan an der Unsicherheitsgrenze.
 
 Die Suche erhält ausschließlich deterministische Abbruchbudgets:
 
@@ -1142,9 +1275,11 @@ nach:
 - Beobachtungsgrenzenklasse;
 - Garantie-/Risikoband.
 
-Je relevante Partition bleibt eine zentral konfigurierte Mindestquote
-geschützt, sofern sie nicht hart ungültig oder sicher dominiert ist.
-Zusätzlich gelten:
+Je viablem `Root × nächstem Meilenstein` bleibt mindestens ein
+nichtdominierter Vertreter geschützt. Besitzen mehrere Varianten
+unterschiedliche, nicht gegenseitig dominierte Risiko-, Ressourcen-,
+Fortschritts- oder Unsicherheitsprofile, bleibt eine kleine geschützte
+Pareto-Front erhalten. Zusätzlich gelten:
 
 - Pareto-Erhalt für Wert, Risiko, Restkapazität und Unsicherheit;
 - konservative Upper Bounds für noch nicht vollständige Linien;
@@ -1152,9 +1287,10 @@ Zusätzlich gelten:
 - kein Vergleich inkompatibler Rules Contexts;
 - typisierte Prune-Gründe im Trace.
 
-Die konkrete Partitions- und Quotenwahl ist Kalibrierung; die Pflicht, nicht
-nur nach einer globalen Zwischenpunktzahl zu beschneiden, ist
-Architekturvertrag.
+Die konkrete Maximalgröße dieser Mini-Front ist Kalibrierung; die Pflicht,
+nicht nur nach einer globalen Zwischenpunktzahl zu beschneiden, ist
+Architekturvertrag. Schutz bedeutet nur Fortbestand im Suchraum, nicht
+spätere Auswahl.
 
 ### 8.7 Äquivalenzgruppierung
 
@@ -1173,12 +1309,26 @@ Optionen dürfen nur gruppiert werden, wenn identisch sind:
 Verschiedene Server, Karteninstanzen, ICE-Positionen oder Choice-Payloads
 werden nicht allein wegen desselben LegalAction-Typs zusammengelegt.
 
+Mehrere Schrittfolgen dürfen dagegen auf eine kanonische Reihenfolge
+reduziert werden, wenn nachweislich:
+
+- beide Reihenfolgen legal sind;
+- Kosten, Zugendzustand und Value Claims identisch bleiben;
+- keine Aktion die andere finanziert, freischaltet oder verändert;
+- kein Trigger, keine Position, keine Reservierung und keine Deadline von
+  der Reihenfolge abhängt;
+- keine Unsicherheits- oder Reaktionsgrenze dazwischenliegt.
+
+Zwei ICE an demselben Server sind beispielsweise nicht vertauschbar, wenn
+ihre Installationsreihenfolge die späteren Positionen bestimmt.
+
 ### 8.8 Dominanz
 
 Linie A dominiert Linie B nur, wenn:
 
 - beide dieselben harten Prioritätspflichten erfüllen;
-- beide denselben oder einen kompatiblen Meilenstein verfolgen;
+- beide dieselbe oder eine kompatible Folge von Phasenmeilensteinen
+  verfolgen;
 - beide denselben `PlanningRulesContext` besitzen;
 - keine von beiden ein andersartiges geschütztes Hard-Commitment-Prefix
   trägt;
@@ -1218,10 +1368,11 @@ Zusätzlich sind Linien vor jeder weichen Bewertung ungültig, wenn sie:
 
 - ein aktives und weiterhin legales Hard-Commitment ohne erlaubten
   Breakgrund verletzen;
-- innerhalb eines Bindungssegments mehrere unabhängige Roots besitzen;
+- innerhalb einer einzelnen Phase mehrere unabhängige Roots besitzen;
 - eine Kampagnenwert-Komponente doppelt beanspruchen;
 - Rules-Context-, State- oder Invocation-Invarianten verletzen;
-- einen Planwechsel ohne typisierten Yield- oder Replan-Grund enthalten.
+- einen ungeplanten Rootwechsel ohne Phasenübergang oder Replan-Grund
+  enthalten.
 
 ### 9.2 Versioniertes Bewertungsregister
 
@@ -1256,6 +1407,11 @@ registrierte Komponenten an und erzeugt daraus unter anderem:
 Neue Komponenten brauchen Schema, Wertebereich, Ownership,
 Evidenzanforderung, Gegenproben und Tracefeld. Verteilte Magic Numbers oder
 planlokale, nicht registrierte Globalboni sind unzulässig.
+
+Rein planinterne Fachbewertungen bleiben im zuständigen Modul, etwa der
+Vergleich zweier ICE-Positionen innerhalb derselben Defense-Variante. Sobald
+ein Wert unterschiedliche Roots, Phasen oder vollständige TurnPlans
+gegeneinander beeinflusst, muss er über dieses zentrale Register laufen.
 
 ### 9.3 Risikovektor
 
@@ -1292,7 +1448,8 @@ verwendet. Sie wird auf Linienebene berechnet:
 ```ts
 type LineContinuityVector = {
   preservesActiveTurnCommitment: boolean;
-  preservesRootObjective: boolean;
+  preservesCurrentPhaseRoot: boolean;
+  preservesBoundPhaseSequence: boolean;
   closesFundedParentNeed: boolean;
   reachesPromisedMilestone: boolean;
   switchingCost: number;
@@ -1305,7 +1462,8 @@ unbegründeter Wechsel ist eine ungültige Linie.
 
 Wenn D3 einen Credit exakt für einen Defense-Parent beschafft, enthält die
 Linie danach eine geschlossene oder weiterhin reservierte
-Defense-Fortsetzung. Eine D4-Alternative darf nur übernehmen, wenn:
+Defense-Fortsetzung. Eine nicht bereits als Folgephase gebundene
+D4-Alternative darf nur an einem legitimen Replan-Punkt übernehmen, wenn:
 
 - sie eine höhere harte Prioritätsklasse erfüllt;
 - die Defense-Fortsetzung objektiv unmöglich wurde;
@@ -1314,10 +1472,12 @@ Defense-Fortsetzung. Eine D4-Alternative darf nur übernehmen, wenn:
 
 ### 9.5 Hysterese
 
-Hysterese wird nur an einem echten Replan- oder Yield-Punkt gegen Challenger
+Hysterese wird nur an einem echten Replan-Punkt gegen Challenger
 ausgewertet. Bei erwartetem Fortschritt wird nicht nach jedem Step die volle
-Linienkonkurrenz neu eröffnet. An einem zulässigen Vergleichspunkt bleibt
-die gebundene Linie bei gleichem Prioritätsniveau aktiv, solange ein
+Linienkonkurrenz neu eröffnet. Auch ein erwarteter Übergang zur bereits
+geplanten nächsten Phase ist kein Challenger-Punkt. An einem zulässigen
+Vergleichspunkt bleibt die gebundene Linie bei gleichem Prioritätsniveau
+aktiv, solange ein
 Challenger nicht:
 
 - die konfigurierte Wechselmarge überschreitet;
@@ -1518,23 +1678,34 @@ projizierten Linien:
 ### 11.5 Verbindliches Akzeptanzszenario: Opening Rush
 
 Der erste Agenda-Vertikalschnitt muss ausdrücklich eine Opening-Rush-Lage
-abdecken:
+mit mindestens drei Linienfamilien abdecken:
 
 ```text
-Economy für einen konkreten Fundingbedarf
-→ wirksames ICE vor dem geplanten Scoring-Remote
-→ konkrete Agenda installieren
-→ über den Runnerzug resident bleiben
-→ im nächsten Corpzug nach Revalidierung advancen/scoren
+reiner Rush:
+konkrete Agenda installieren
+→ Remote schützen oder advancen
+
+kombinierter Rush:
+konkrete Agenda installieren
+→ ICE vor Scoring-Remote
+→ ICE vor R&D oder HQ
+
+sicherer Aufbau:
+Centrals schützen
+→ Economy entwickeln
+→ Agenda später installieren
 ```
 
 - im Eröffnungszug ist eine konkrete Agenda-Installation und
   Advancement-Linie legal;
 - HQ und/oder R&D sind noch nicht vollständig entwickelt;
 - ein sichererer Aufbaupfad und ein schnellerer Scorepfad konkurrieren;
-- der Scorepfad darf nur gewinnen, wenn sein Agenda-/Siegfortschritt,
-  seine Schutzannahmen, Restliquidität und gegnerische Recourse gemeinsam
-  den besseren robusten Pfad ergeben;
+- eine kombinierte Linie darf Agenda-, Remote- und Central-Phasen im selben
+  TurnPlan verbinden;
+- Agenda-/Siegfortschritt, eigene Agendaexposition, Schutzannahmen,
+  Restliquidität und sichtbarer Runnerdruck werden gemeinsam bewertet;
+- HQ und R&D dürfen ohne konkrete P1-/P2-Defensepflicht vorübergehend
+  ungeschützt bleiben;
 - ein pauschaler „erst immer Centrals schützen“-Satz ist ebenso unzulässig
   wie ein pauschaler Opening-Rush-Bonus.
 
@@ -1544,6 +1715,14 @@ Schutzbeitrag beanspruchen; Economy-Support darf denselben Scoreertrag nicht
 erneut gutschreiben. `corp.opening_and_board_foundation` darf die frühe
 Opportunity erkennen oder unterstützen, übernimmt aber weder Agenda- noch
 Defense-Ownership.
+
+Sind Rush und Nicht-Rush nach harter Validierung beide fachlich vertretbar
+und dominiert keine Familie die andere eindeutig, darf einmalig über den
+Engine-RNG eine strategische Mischentscheidung erfolgen. Innerhalb der
+gewählten Familie wird die beste konkrete Linie gewählt; zertifiziert
+nahgleiche Linien dürfen ebenfalls Engine-RNG verwenden. Die Entscheidung
+wird in Kampagne und `TurnPlanCommitment` persistiert und bei erwarteter
+Progression nicht neu ausgewürfelt.
 
 ### 11.6 Verhalten über den Gegnerzug
 
@@ -1685,25 +1864,13 @@ Scheduler.
 ### 13.1 Typisierte Grenzen
 
 Nicht jede Choice und nicht jede Zustandsänderung beendet eine Linie.
-Verbindlich unterschieden werden:
-
-```ts
-type TurnBoundaryKind =
-  | "none"
-  | "controlled_resolution"
-  | "private_observation"
-  | "public_random_outcome"
-  | "opponent_response_window"
-  | "engine_continuation"
-  | "projection_not_supported";
-```
+Verbindlich gelten die in Abschnitt 7.8 definierten `TurnBoundaryKind`s:
 
 - `controlled_resolution`: Alle routendefinierenden Choices und Ziele sind
   bereits gebunden; die Resolution ist deterministisch projektierbar. Kein
   Replan.
 - `private_observation`: Draw, Search oder Reveal erzeugt neue eigene
-  Information. Plan hinter der Grenze nur als Recourse, nicht als konkrete
-  Kartenroute.
+  Information. Der konkrete TurnPlan endet dort.
 - `public_random_outcome`: Sichtbarer Zufall mit mehreren relevanten
   Ausgängen.
 - `opponent_response_window`: Der Gegner kann legal und materiell
@@ -1716,23 +1883,23 @@ type TurnBoundaryKind =
 Eine kontrollierte, vollständig bestimmte Choice ist damit ausdrücklich
 keine Beobachtungsgrenze.
 
-### 13.2 Recourse statt Scheinfortsetzung
+### 13.2 Grenzaktion statt Scheinfortsetzung
 
-Eine Linie, die an einer echten Grenze endet, erhält einen
-`ObservationBoundaryEstimate`:
+Eine Linie, die an einer echten Unsicherheitsgrenze endet, trägt ein
+`BoundaryActionAssessment`:
 
 - typisierte Grenze;
-- verbleibende Action Capacity;
+- unmittelbarer fachlicher Zweck;
+- bekannte minimale, erwartete und maximale Ergebniswirkung;
+- verbleibende Action Capacity nach der Grenzaktion;
+- Hand-, Kosten-, Risiko- und Opportunitätswirkung;
 - vor der Grenze erfüllte Pflichten und erreichte Meilensteine;
-- plausible, side-sichere Outcome-Bänder;
-- je Band verfügbare Recourse-Familien;
-- garantierter Floor, erwarteter Wert und Worst Case;
-- Unsicherheits- und Irreversibilitätskosten.
+- Unsicherheitsannahmen.
 
-Der Schätzer darf keine konkrete zukünftige Action-ID, Kartenidentität oder
-Choice vortäuschen. Er bewertet, wie gut die Stellung nach verschiedenen
-Ausgängen weiterplanbar ist. Dadurch ist eine Draw-Linie nicht automatisch
-gut, nur weil sie „neue Optionen“ verspricht.
+Das zuständige Planmodul bewertet diese Aktion selbst. Der Scheduler plant
+keine konkreten oder abstrakten Folgephasen hinter dem Ergebnis. Nach der
+Beobachtung werden Zustand, Inventar und `LegalActions` neu aufgebaut und
+ein neuer TurnPlan für den verbleibenden Zug erzeugt.
 
 ### 13.3 Draw als bewusst geplanter erster Schritt
 
@@ -1751,7 +1918,7 @@ Vor dem Draw bewertet der Scheduler:
 - projizierte Cleanup-/Discard-Kosten;
 - verbleibende typisierte Action Capacity;
 - Wahrscheinlichkeit, einen offenen Rootbedarf zu treffen;
-- Wert der Recourse-Familien nach Treffer und Fehlschlag;
+- unmittelbaren erwarteten Karten-/Informationswert des zuständigen Moduls;
 - Opportunitätskosten gegenüber Linien ohne Draw.
 
 Nach dem Draw:
@@ -1822,8 +1989,9 @@ Die Runtime führt nach jeder Aktion aus:
 5. P1-/P2-Response-Scan ausführen;
 6. Replan-Trigger prüfen;
 7. bei `expected_progress` den nächsten gebundenen Node rematerialisieren;
-8. nur an Boundary, Deviation, Invalidierung oder Yield den Restzug neu
-   suchen.
+8. erwartete Phasengrenzen innerhalb desselben Commitments fortschreiben;
+9. nur an Boundary, Deviation, Invalidierung oder höherklassigem Interrupt
+   den Restzug neu suchen.
 
 Die aktive Kampagnenquote wird dabei aktualisiert, ohne automatisch eine
 vollständige Challenger-Suche zu eröffnen.
@@ -1833,12 +2001,14 @@ vollständige Challenger-Suche zu eröffnen.
 ```ts
 type TurnPlanObservationClass =
   | "expected_progress"
+  | "expected_phase_transition"
   | "expected_no_material_change"
   | "scheduled_information_boundary"
   | "material_cost_or_target_drift"
   | "material_outcome_deviation"
   | "urgent_interrupt"
-  | "milestone_reached"
+  | "phase_milestone_reached"
+  | "runtime_restarted"
   | "commitment_invalidated";
 ```
 
@@ -1854,10 +2024,9 @@ Neuplanung ist erforderlich oder zulässig, wenn:
 - eine geplante Informationsgrenze erreicht wurde;
 - eine gegnerische Reaktion eine neue sichtbare Lage erzeugt;
 - ein P1-/P2-/P3-Interrupt entsteht;
-- der Zielmeilenstein erreicht ist;
 - das Root-Ziel invalidiert wurde;
-- ein expliziter Root-Yield erreicht ist;
-- an einem ohnehin zulässigen Replan-/Yield-Punkt eine neue Linie die
+- die Server- oder KI-Runtime neu gestartet wurde;
+- an einem ohnehin zulässigen Replan-Punkt eine neue Linie die
   Wechselmarge unter vollständiger Bewertung überschreitet.
 
 ### 14.4 Keine ausreichenden Replan-Gründe
@@ -1869,7 +2038,9 @@ Allein nicht ausreichend sind:
 - eine schon vorher bekannte Alternative;
 - dieselbe Faktenlage mit neuer Bewertungsreihenfolge;
 - ein positiver Einzelaktionsscore;
-- ein niedrigerer stabiler Tie-Break-Schlüssel.
+- ein niedrigerer stabiler Tie-Break-Schlüssel;
+- das erwartete Erreichen eines Phasenmeilensteins, wenn eine weitere
+  gebundene Phase folgt.
 
 Insbesondere löst `expected_progress` keine vollständige Beam Search aus.
 Das Commitment wird zum erwarteten nächsten Node fortgeschrieben und nur
@@ -1969,15 +2140,33 @@ Replayvertrag dürfen keine Entscheidung beeinflussen.
 
 ### 17.2 Randomisierung
 
-Die Turn-Line-Suche, die Root-Auswahl und die Wahl des Commitments sind
-vollständig deterministisch. Es gibt keine Randomisierung zwischen ganzen
-Linien, auch nicht bei Nahgleichstand.
+Variantenbildung, harte Validierung, Dominanz, Rangbildung und
+Zulässigkeitsprüfung bleiben deterministisch. Randomisierung darf Bewertung
+nicht ersetzen.
 
-Vorhandene zertifizierte Randomisierung darf ausschließlich nach der
-Linienwahl innerhalb einer bereits gewählten, planlokalen
-Same-Step-Route-Familie stattfinden. Sie muss weiterhin atomar über die
-Engine laufen und im Replay dokumentiert sein. Sie darf weder Root,
-Meilenstein noch Zugsequenz ändern.
+Zulässig sind genau:
+
+1. eine einmalige strategische Mischentscheidung zwischen fachlich
+   vertretbarem Rush und Nicht-Rush, wenn keine P1-/P2-Pflicht verletzt wird
+   und keine Familie die andere eindeutig dominiert;
+2. eine Auswahl zwischen zertifiziert nahgleichen vollständigen Linien;
+3. der bereits vorhandene planlokale Same-Step-Routenvertrag.
+
+```ts
+type TurnPlanRandomizationEligibility = {
+  kind: "rush_posture" | "certified_near_equal";
+  eligibilityContractVersion: string;
+  candidateLineIds: string[];
+  probabilityWeights: number[];
+  evidenceCodes: string[];
+};
+```
+
+Jeder Draw läuft atomar über den Engine-RNG, wird im Replay dokumentiert und
+in Kampagne beziehungsweise `TurnPlanCommitment` persistiert. Erwartete
+Progression oder ein normaler Phasenwechsel würfelt nicht erneut. Klare
+Dominanz, Illegalität, Hard-Commitment-Konflikt oder unterschiedliche harte
+Pflichterfüllung schließen RNG aus.
 
 ### 17.3 Performancebudget
 
@@ -2018,7 +2207,7 @@ type TurnPlannerTrace = {
   consideredLines: RedactedTurnLineTrace[];
   prunedLines: RedactedPrunedLineTrace[];
   selectedLineId: string;
-  selectedRootPlanInstanceId: string;
+  selectedPhases: RedactedTurnPlanPhaseTrace[];
   selectedLeafExecutorInstanceId: string;
   selectedMilestone: string;
   firstStepCapability: string;
@@ -2026,6 +2215,7 @@ type TurnPlannerTrace = {
   choicePayloadFingerprint: string;
   selectedActionId: string;
   validatedValueClaimIds: string[];
+  randomization?: RedactedTurnPlanRandomizationTrace;
   searchStats: TurnSearchStats;
 };
 ```
@@ -2101,9 +2291,11 @@ Nicht Teil des ersten Umsetzungsstands sind:
 - kartennamenspezifische Sonderentscheidungen im Scheduler;
 - apodiktisches Verbot nicht rezfähiger ICE-Installationen;
 - automatische Aufgabe einer Kampagne am Zugende;
-- Festschreiben zukünftiger Karten-, Choice- oder Action-Identitäten;
+- Festschreiben zukünftiger Action-IDs oder unbekannter zukünftiger
+  Kartenidentitäten;
 - Ersetzen aller planlokalen Fachbewertungen durch einen globalen Score;
-- Randomisierung zwischen vollständigen Zuglinien;
+- unkontrollierte Randomisierung zwischen nicht validierten oder klar
+  unterschiedlich guten Zuglinien;
 - ein zweites paralleles Corp-Handinventar neben den bestehenden
   `CorpHandInventoryFacts`.
 
@@ -2115,16 +2307,19 @@ Neu:
 
 - `packages/ai/src/plans/planning-rules-context.ts`
 - `packages/ai/src/plans/turn-planning-head.ts`
+- `packages/ai/src/plans/turn-plan-phase.ts`
+- `packages/ai/src/plans/plan-horizon-capability.ts`
 - `packages/ai/src/plans/canonical-legal-action-invocation.ts`
 - `packages/ai/src/plans/campaign-continuation-quote.ts`
 - `packages/ai/src/plans/campaign-value-claim.ts`
 - `packages/ai/src/plans/campaign-value-policy.ts`
 - `packages/ai/src/plans/projected-decision-frame.ts`
-- `packages/ai/src/plans/observation-boundary-recourse.ts`
+- `packages/ai/src/plans/boundary-action-assessment.ts`
 - `packages/ai/src/plans/turn-plan-types.ts`
 - `packages/ai/src/plans/turn-plan-search.ts`
 - `packages/ai/src/plans/turn-plan-evaluation.ts`
 - `packages/ai/src/plans/line-evaluation-registry.ts`
+- `packages/ai/src/plans/turn-plan-randomization.ts`
 - `packages/ai/src/plans/turn-plan-commitment.ts`
 - `packages/ai/src/plans/turn-plan-observation.ts`
 
@@ -2141,11 +2336,12 @@ Zu erweitern:
 
 Der gemeinsame Inputvertrag muss den kanonischen
 `PlanningRulesContext` transportieren. Die Klassifikation
-`ChoicePlanningRole` wird an der LegalAction-/AI-Vertragsgrenze ergänzt,
-nicht durch Kartennamenslisten im Planner erraten. Betroffen sind
-voraussichtlich `packages/ai/src/input-dto.ts` und die einschlägigen
-Shared-Typen/Exports; der genaue Zuschnitt wird in ZK03 gegen den dann
-aktuellen Vertrag verifiziert.
+`ChoicePlanningRole` wird vom zuständigen Planmodul mit der konkreten
+Variante erzeugt und durch einen zentralen Semantikvertrag validiert. Sie
+wird weder durch Kartennamenslisten im Planner erraten noch darf jedes Modul
+eine widersprüchliche globale Bedeutung etablieren. Betroffen sind
+voraussichtlich `packages/ai/src/input-dto.ts`, die semantischen
+Capability-Verträge und einschlägige Shared-Exports.
 
 ### 21.2 Corp-Policy und Referenzkampagnen
 
@@ -2288,7 +2484,8 @@ Arbeit:
 - `TurnPlanningHeadCandidate` und Modul-Enumerationsvertrag;
 - `CampaignValueClaim`, Ownership-Validator und versioniertes
   Bewertungsregister;
-- Commitment-Hierarchie und Ein-Root-pro-Segment-Invariante;
+- Commitment-Hierarchie, mehrphasiger TurnPlan und
+  Ein-Root-pro-Phase-Invariante;
 - keine zukünftigen Action-IDs;
 - Side-, StateHash-, StateVersion- und TurnKey-Validierung.
 
@@ -2320,7 +2517,7 @@ Arbeit:
   `ActionCapacityRoute`-Verträge wiederverwenden;
 - Credits, Hand, Serverposture, Reservierungen und Planfortschritt
   projizieren;
-- `TurnBoundaryKind` und Recourse-Schätzung;
+- `TurnBoundaryKind` und unmittelbare Grenzaktionsbewertung;
 - `ProjectedTurnStopEnvelope` getrennt vom autoritativen
   `CurrentTurnCompletionCertificate`;
 - planwirksame Erweiterung des bestehenden Handinventars und
@@ -2352,9 +2549,11 @@ Ziel:
 Arbeit:
 
 - `corp.score_agenda` mit Meilensteinen, Planning Heads,
-  Fortsetzungsclaims, Schutzbedarf und Recourse;
+  Fortsetzungsclaims, Schutzbedarf und Grenzaktionsbewertung;
 - begrenzte deterministische Ein-/Zwei-Schritt-Varianten;
-- Opening-Rush-Akzeptanzszenario;
+- reine, kombinierte und sichere Opening-Rush-/Aufbauvarianten;
+- persistierte Engine-RNG-Mischentscheidung für fachlich vertretbare
+  Rush-/Nicht-Rush-Familien;
 - schneller riskanter gegen langsamen robusten Pfad;
 - Pause, Abbruch und Persistenz der Agenda-Kampagne;
 - Claim-Ownership zwischen Agenda, Defense und Economy.
@@ -2418,8 +2617,10 @@ Arbeit:
 - geschützte Root-/Milestone-/Commitment-Fronten;
 - Pareto-Erhalt, konservative Upper Bounds, Äquivalenz und Dominanz;
 - typisierte Action Capacity;
+- garantierter und eingeschränkter Action-Gain;
 - deterministische Knoten-, Tiefen- und Verzweigungsbudgets;
-- kein Wanduhrabbruch und keine Linienrandomisierung.
+- kein Wanduhrabbruch;
+- zertifizierte strategische und Nahgleichstands-RNG-Verträge.
 
 Done-Gate:
 
@@ -2437,11 +2638,12 @@ Commit-Vorschlag:
 feat(ai): search bounded deterministic turn lines
 ```
 
-### Paket ZK08 – Commitment-Ausführung, Yield und Replan
+### Paket ZK08 – Commitment-Ausführung, Phasenwechsel und Replan
 
 Ziel:
 
-- ausgewählte Segmente sicher ausführen, ohne bei erwartetem Fortschritt
+- ausgewählte mehrphasige TurnPlans sicher ausführen, ohne bei erwartetem
+  Fortschritt
   immer wieder die gesamte Konkurrenz zu öffnen.
 
 Arbeit:
@@ -2450,8 +2652,9 @@ Arbeit:
 - autoritative Rematerialisierung des jeweils aktuellen Heads;
 - Receipt-, StateHash- und Rules-Context-Abgleich;
 - `expected_progress` als Node-Fortschritt mit P1-/P2-Scan;
-- vollständige Suche nur bei Boundary, Deviation, Invalidierung oder Yield;
-- Root-Meilenstein-Yield und neues Segment;
+- erwartete Phasenwechsel innerhalb desselben Commitments;
+- vollständige Suche nur bei Boundary, Deviation, Invalidierung,
+  Runtime-Neustart oder höherklassigem Interrupt;
 - tatsächliches `CurrentTurnCompletionCertificate`.
 
 Done-Gate:
@@ -2459,6 +2662,8 @@ Done-Gate:
 - unveränderte Fakten führen zur sicheren Fortsetzung;
 - Draw/Search/Reveal führen an echter Boundary zur Restzug-Neuplanung;
 - kontrollierte Choice-Resolution tut dies nicht;
+- ein erwarteter Phasenmeilenstein führt zur bereits geplanten nächsten
+  Phase und nicht zur freien Rootkonkurrenz;
 - P1-/P2-Interrupts brechen korrekt;
 - unbegründeter Planwechsel und unzulässiger Step bleiben fail-closed.
 
@@ -2480,6 +2685,9 @@ Arbeit:
 - jeder freiwillige Corp-Plan liefert Planning Heads oder ist explizit als
   noch nicht abgedeckt registriert;
 - jedes Modul deklariert seine Projektionsreichweite;
+- jedes Modul deklariert `current_turn_only`, `campaign_capable` oder
+  `context_dependent`;
+- tatsächlich mehrzügige Instanzen liefern eine Kampagnenquote;
 - Supportbeziehungen statt impliziter Übernahme;
 - Remote-/Ambush-Entwicklung gegen Defense und Scorelinie vollständig
   vergleichen;
@@ -2659,10 +2867,11 @@ docs(ai): close turn and campaign planner rollout
 - `expected_progress` schreitet im Commitment fort, ohne vollständige
   Challenger-Suche.
 - Ein materiell besserer Challenger überschreitet die Wechselmarge und
-  übernimmt nur an einem legitimen Replan-/Yield-Punkt.
+  übernimmt nur an einem legitimen Replan-Punkt.
 - Hard-Commitment-Verletzung ist ungültig, nicht nur ein Malus.
-- Nach Root-Meilenstein erzeugt verbleibende Kapazität ein neues Segment
-  statt eines zweiten unabhängigen Roots in derselben Linie.
+- Ein TurnPlan enthält mehrere geordnete Root-Phasen bis Zugende.
+- Ein erwarteter Phasenmeilenstein schreitet zur bereits geplanten nächsten
+  Phase fort, ohne die Rootkonkurrenz neu zu öffnen.
 - P1-/P2-Interrupt unterbricht unabhängig von Hysterese.
 - Nach Interrupt kehrt eine weiterhin viable Kampagne zurück.
 
@@ -2683,9 +2892,11 @@ docs(ai): close turn and campaign planner rollout
   `ActionDemand`s genutzt;
 - Action-Gain-, Bankload-/Cashout- oder ähnliche Projektionen erzeugen
   durch kanonische Zyklenerkennung keine Suchschleife;
-- gleichwertige Linien bleiben deterministisch.
-- variierende Rechnerlast ändert weder Suchende noch Auswahl.
-- keine Randomisierung zwischen ganzen Linien.
+- nachweislich vertauschbare Aktionen werden kanonisiert;
+- abhängige Aktionsreihenfolgen bleiben getrennt;
+- variierende Rechnerlast ändert weder Suchende noch Kandidatenrangfolge;
+- zertifizierte Nahgleichstandsrandomisierung verwendet Engine-RNG und
+  Replayrecord.
 
 ### 23.3 Agenda-Kampagne
 
@@ -2695,11 +2906,14 @@ docs(ai): close turn and campaign planner rollout
 - Remote kompromittiert: Kampagne blockiert oder beendet;
 - Scorefenster verloren: legitime Aufgabe;
 - Boardwert und Kampagnenwert werden nicht doppelt gezählt.
-- Economy → wirksames Remote-ICE → Agenda wird als ein Agenda-Root mit
-  Economy- und Defense-Leaves erkannt.
+- Agenda, wirksames Remote-ICE und Central-ICE werden als kohärenter
+  mehrphasiger TurnPlan erkannt.
+- Reiner Rush, kombinierter Rush und sicherer Aufbau konkurrieren.
 - Opening Rush gewinnt gegen Aufbau, wenn der robuste Gesamtpfad besser ist.
-- Opening Rush verliert gegen Aufbau, wenn Schutz-/Recourse-Floor zu
-  schlecht ist.
+- Opening Rush verliert gegen Aufbau, wenn Risiko und Agendaexposition zu
+  hoch sind.
+- Eine fachlich zulässige Rush-/Nicht-Rush-Mischentscheidung wird einmal
+  ausgewürfelt und anschließend persistent fortgeführt.
 
 ### 23.4 Defense und ICE
 
@@ -2721,14 +2935,18 @@ docs(ai): close turn and campaign planner rollout
 - Draw als erster Schritt, danach legitimer Planwechsel;
 - private Suche oder Reveal als weitere Beobachtungsgrenzen;
 - kontrollierte vollständig gebundene Choice ist keine Grenze;
-- Boundary-Recourse bewertet Treffer-, Fehlschlag- und Worst-Case-Familien;
+- Grenzaktion wird unmittelbar durch ihr Planmodul bewertet;
+- hinter Draw oder Zufall existiert keine vorgeplante Folgephase;
 - planwirksames Handinventar deckt jede aktuelle Hand-LegalAction ab;
 - Cleanup-Projektion wählt die beste legal begründbare Disposition statt
   eines pauschalen Durchschnittsabzugs.
 
 ### 23.6 Persistenz
 
-- Prozessneustart stellt Portfolio und Commitment wieder her;
+- Prozessneustart stellt das Portfolio wieder her, requotet Kampagnen und
+  erzeugt den Restzugplan neu;
+- weiterhin gültige harte `PlanCommitment`s überleben den Neustart nach
+  Revalidierung;
 - Undo verwirft zustandsgebundene Zukunft und revalidiert;
 - neuer Turn schließt Zugcommitment, behält Kampagne;
 - abgeschlossene Kampagne wird nicht neu entdeckt;
@@ -2739,6 +2957,8 @@ docs(ai): close turn and campaign planner rollout
 - kein `GameState` im AI-Input;
 - Hidden-Info-Äquivalenz;
 - keine zukünftigen Action-IDs;
+- konkrete bekannte zukünftige Karten- und Objekt-Targets sind zulässig;
+- unbekannte zukünftige Karteninstanzen sind unzulässig;
 - aktuelle Action muss in `LegalActions` existieren;
 - aktuelle Choices werden erneut validiert;
 - deterministischer StateHash und Replay;
@@ -2752,6 +2972,8 @@ docs(ai): close turn and campaign planner rollout
 
 - jedes Corp-Planmodul besitzt Planning-Head- oder explizite
   Unsupported-Coverage;
+- jedes Modul deklariert seinen Planungshorizont;
+- jede tatsächlich mehrzügige Instanz besitzt eine Kampagnenquote;
 - ein fehlendes Modul blockiert Corp-Cutover;
 - Shadow-Auswahl beeinflusst keine Liveaktion;
 - einfacher Zwei-Schritt-Planer gegen Beam Search auf identischer Evidence;
@@ -2778,12 +3000,14 @@ git diff --check
 Zusätzlich:
 
 - deterministischer Replayvergleich gleicher Seeds;
+- Replayvergleich der strategischen und Nahgleichstands-RNG-Records;
 - Performancevergleich vor/nach Turn-Line-Suche;
 - Vergleich begrenzter Zwei-Schritt-Suche gegen Beam Search;
 - deterministische Budgetausschöpfung unter künstlich variierter
   Rechnerlast;
 - Source-Structure-Gate;
 - serverprivate Persistenz-/Restarttests;
+- zwingende Restzug-Neuplanung nach Runtime-Neustart;
 - Decision-Trace-Redactiontests;
 - 100-%-Coverage-Report der jeweils umzuschaltenden Side;
 - keine offenen Claim-Ownership-, Rules-Context- oder
@@ -2799,7 +3023,7 @@ Die Einführung erfolgt nicht als unkontrollierter Big Bang.
 3. Corp-Agenda als schmaler Vertikalschnitt einschließlich Opening Rush;
 4. Defense-/Economy-Vertikalschnitt D3–D4;
 5. erst danach die anhand der Evidence nötige allgemeine Suche;
-6. Commitment-Ausführung, Boundaries und Yield;
+6. Commitment-Ausführung, Boundaries und erwartete Phasenwechsel;
 7. vollständige Corp-Planabdeckung;
 8. Shadow- und Behavior-Baseline-Vergleich;
 9. Corp-Cutover;
@@ -2819,13 +3043,15 @@ Nach Umsetzung werden mindestens beobachtet:
 - Zahl lokaler `projection_not_supported`-Zweigenden je Planmodul;
 - Planning Heads je Root und Entscheidung;
 - Prune-Gründe und geschützte Frontbelegung;
-- Anteil Linien bis Zugende, Meilenstein oder legitimer
-  Beobachtungsgrenze;
+- Anteil Linien bis Zugende oder legitimer Beobachtungsgrenze;
 - Planwechsel je Zug;
 - Planwechsel ohne typisierten Grund;
 - Commitment-Fortschritte ohne Vollsuche;
-- Vollsuchen je Zug, getrennt nach Boundary, Deviation, Invalidierung und
-  Yield;
+- Vollsuchen je Zug, getrennt nach Boundary, Deviation, Invalidierung,
+  Runtime-Neustart und höherklassigem Interrupt;
+- geplante und erfolgreich fortgeschriebene Phasen je TurnPlan;
+- Action-Gain-Linien mit korrekt erweiterter Restkapazität;
+- strategische und Nahgleichstands-RNG-Entscheidungen samt Persistenz;
 - finanzierte Parentbedarfe ohne anschließende Konversion;
 - Draws bei voller Hand;
 - Anteil legal adressierbarer Handkarten mit Plan-/Disposition-Claim;
@@ -2941,6 +3167,27 @@ Gegenmaßnahme:
 - gewählter Head wird nach der Linienwahl autoritativ rematerialisiert;
 - Abweichung fällt fail-closed aus.
 
+### 27.10 Linienrandomisierung erzeugt Churn oder kaschiert schlechte Werte
+
+Gegenmaßnahme:
+
+- harte Zulässigkeit und Dominanzprüfung immer vor RNG;
+- strategischer Rush-/Nicht-Rush-Draw höchstens einmal je Opportunity;
+- Ergebnis in Kampagne und Turn Commitment persistieren;
+- erneuter Draw nur nach echter Invalidierung oder neuer Opportunity;
+- Wahrscheinlichkeiten und Nahgleichstandsband im Trace.
+
+### 27.11 Mehrphasige Vollzugplanung wird unnötig komplex
+
+Gegenmaßnahme:
+
+- nur deterministisch belastbare Folgephasen planen;
+- an echter Unsicherheit sofort enden und nach Beobachtung neu planen;
+- nachweislich vertauschbare Reihenfolgen kanonisieren;
+- einfache Zwei-Schritt-Suche als Baseline erhalten;
+- Beam Search und größere Pareto-Fronten nur bei belegtem Mehrwert
+  aktivieren.
+
 ## 28. Architekturentscheidungen zur Prüfung
 
 Die externe Prüfung soll insbesondere diese Aussagen bestätigen oder
@@ -2953,71 +3200,77 @@ beanstanden:
    ausführbar.
 3. Turn-Line-Suche ordnet fachlokale Projektionen und Claims, statt
    Planfachlogik durch einen Globalbewerter zu ersetzen.
-4. Ein Bindungssegment besitzt genau einen Root; Support-, Response- und
-   Resolution-Schritte sind Leaves. Nach dem Meilenstein folgt Yield.
-5. Nur der aktuelle Step bindet eine Action-ID; routendefinierende Choices
-   gehören jedoch bereits zur kanonischen Invocation.
-6. `PlanCommitment` steht über `TurnPlanCommitment`; Persistence/Hysterese
+4. Ein vollständiger TurnPlan darf mehrere geordnete Root-Phasen bis
+   Zugende enthalten; jede einzelne Phase besitzt genau ein Root.
+5. Erwartete Phasenübergänge werden ohne Vollsuche fortgeschrieben.
+6. Nur der aktuelle Step bindet eine Action-ID; routendefinierende Choices
+   und konkrete bekannte Karten-, Objekt-, Server- und Ability-Targets
+   dürfen jedoch bereits in zukünftigen semantischen Steps gebunden sein.
+7. `PlanCommitment` steht über `TurnPlanCommitment`; Persistence/Hysterese
    folgt darunter. `locked_sequence` allein erzeugt kein Hard Commitment.
-7. Bei erwartetem Fortschritt schreitet das Commitment fort; Vollsuche
-   erfolgt nur bei Boundary, Deviation, Invalidierung oder Yield.
-8. Draw/Search/Reveal sind nur bei neuer Information Grenzen. Eine
+8. Bei erwartetem Fortschritt schreitet das Commitment fort; Vollsuche
+   erfolgt nur bei Boundary, Deviation, Invalidierung, Runtime-Neustart
+   oder höherklassigem Interrupt.
+9. Draw/Search/Reveal sind nur bei neuer Information Grenzen. Eine
    kontrollierte vollständig gebundene Choice ist keine Grenze.
-9. Kampagnen liefern inkrementelle, eigentumsgebundene Claims, nicht erneut
+10. Hinter einer echten Unsicherheitsgrenze werden keine Folgephasen
+    vorgeplant; das Modul bewertet nur die Grenzaktion selbst.
+11. Kampagnen liefern inkrementelle, eigentumsgebundene Claims, nicht erneut
    den Stellungs- oder Rootwert.
-10. Der mehrzügige Rollout endet am nächsten belastbaren Meilenstein und
-    nutzt danach einen konservativen `value-to-go` oder Boundary-Recourse.
-11. P1–P3, aktive Hard Commitments und unbegründete Planwechsel bleiben
+12. Module deklarieren `current_turn_only`, `campaign_capable` oder
+    `context_dependent`; jede tatsächlich mehrzügige Instanz liefert eine
+    Kampagnenquote.
+13. P1–P3, aktive Hard Commitments und unbegründete Planwechsel bleiben
     harte Gültigkeitsregeln.
-12. Defense besitzt alle freiwilligen ICE-Install-/Rez-/Bluffentscheidungen,
+14. Defense besitzt alle freiwilligen ICE-Install-/Rez-/Bluffentscheidungen,
     auch wenn sie Support eines Agenda-Plans ist; effect-gebündelte
     Resolutions bleiben beim auslösenden Root und nutzen Defense als
     Fachservice.
-13. Nicht sofort rezfähiges ICE ist kontextabhängig zulässig, aber nie
+15. Nicht sofort rezfähiges ICE ist kontextabhängig zulässig, aber nie
     pauschal gut.
-14. Ein am Zugende wartender Agenda-Plan bleibt resident.
-15. Opening Rush ist ein explizites Akzeptanzszenario, keine Doktrin.
-16. Der Projektionsframe bleibt Bewertungsmodell und wird nicht zur zweiten
+16. Ein am Zugende wartender Agenda-Plan bleibt resident.
+17. Opening Rush umfasst reine, kombinierte und sichere Linienfamilien;
+    ungeschützte Centrals sind ohne P1-/P2-Pflicht nicht automatisch
+    unzulässig.
+18. Garantierter Action-Gain erweitert den planbaren Zug; eingeschränkte
+    Kapazität bleibt typisiert.
+19. Nachweislich vertauschbare Schritte werden kanonisiert; abhängige
+    Reihenfolgen bleiben getrennt.
+20. Der Projektionsframe bleibt Bewertungsmodell und wird nicht zur zweiten
     Regelautorität.
-17. Der Rules Context wird aus dem bestehenden `RulesBaseline` und
+21. Der Rules Context wird aus dem bestehenden `RulesBaseline` und
     Formatkontext kanonisch transportiert.
-18. Nicht projektierbare Zukunft beendet nur den Zweig; ein aktueller
+22. Runtime-Neustart erzwingt Neuplanung, während ein gültiges hartes
+    Commitment nach Revalidierung erhalten bleibt.
+23. Nicht projektierbare Zukunft beendet nur den Zweig; ein aktueller
     Bindungsfehler bleibt fail-closed.
-19. Suche und Commitment-Auswahl sind vollständig deterministisch; RNG ist
-    nur innerhalb einer bereits gewählten Same-Step-Route zulässig.
-20. Cutover erfordert vollständige Planabdeckung der jeweiligen Side.
-21. Die allgemeine Beam Search wird erst eingeführt, wenn die
+24. Cross-Plan-Werte sind zentral registriert; rein planinterne Fachwerte
+    bleiben im Modul.
+25. Engine-RNG ist einmalig und persistent für fachlich vertretbares
+    Rush/Nicht-Rush sowie zertifiziert nahgleiche Linien zulässig.
+26. Cutover erfordert vollständige Plan- und Horizontabdeckung der
+    jeweiligen Side.
+27. Die allgemeine Beam Search wird erst eingeführt, wenn die
     Vertikalschnitte ihren Mehrwert gegenüber einer einfacheren begrenzten
     Suche belegen.
 
-## 29. Offene Kalibrierpunkte
+## 29. Verbleibende Kalibrierung ohne offene Grundsatzentscheidung
 
-### 29.1 Vor Implementierung architektonisch festzulegen
+Die zuvor offenen Architekturfragen sind in Abschnitt 1.3 und 28
+entschieden. Vor der paketweisen Umsetzung ist keine weitere fachliche
+Grundsatzentscheidung erforderlich.
 
-- Wo `ChoicePlanningRole` kanonisch geführt wird: bevorzugt an der
-  LegalAction-/AI-Vertragsgrenze, alternativ in einer versionierten
-  semantischen Capability-Registry. Kartennamenslisten sind ausgeschlossen.
-- Welche Bestandteile von `RulesBaseline`, Format und Plannerpolicy den
-  `PlanningRulesContext`-Fingerprint bilden und wie er in
-  `AiDecisionInput` transportiert wird.
-- Welche konkreten Root-/Milestone-/Commitment-Partitionen für geschützte
-  Suchfronten verpflichtend sind.
-- Welcher Root-Meilenstein automatisch Yield erzeugt und wann ein
-  planlokaler Folge-Meilenstein noch zum selben Segment gehört.
-- Welche Mindestfelder das versionierte Bewertungsregister für neue
-  Komponenten verlangt.
-
-Diese Entscheidungen ändern den Implementierungsvertrag und werden deshalb
-in ZK00/ZK03 entschieden, nicht später durch Magic Numbers.
-
-### 29.2 Empirisch im Shadow zu kalibrieren
+Empirisch im Shadow zu kalibrieren bleiben:
 
 - ob eine allgemeine Beam Search gegenüber einer begrenzten
   Zwei-Schritt-Suche materiell nötig ist;
-- genaue Beam-Breite, Partitionsquoten und deterministische Knotenlimits;
+- genaue Beam-Breite, Pareto-Frontgrößen und deterministische Knotenlimits;
 - numerische Wechselmarge je Prioritätsklasse und Spielphase;
 - genaue Bereiche und Gewichte registrierter Wert-/Risikokomponenten;
-- Szenariobänder und Gewichte gegnerischer Recourse;
+- unmittelbare Bewertungsintervalle seltener Zufallsaktionen;
+- Wahrscheinlichkeiten der zulässigen strategischen Rush-/Nicht-Rush-
+  Mischentscheidung;
+- Nahgleichstandsband für zertifizierte Linienrandomisierung;
 - maximaler Kampagnen-Rollouthorizont;
 - TTL pausierter Kampagnen;
 - Performance-Cutoverwerte p50/p95;
@@ -3025,20 +3278,6 @@ in ZK00/ZK03 entschieden, nicht später durch Magic Numbers.
 
 Diese Werte erhalten zentrale Konfigurationen, Traces und Gegenproben. Sie
 werden nicht als verteilte Magic Numbers in Planmodulen implementiert.
-
-### 29.3 Sinnvolle Diskussionspunkte, aber kein aktueller Blocker
-
-- Soll die erste produktive Version nur Agenda und Defense als mehrzügige
-  Kampagnen führen, während übrige Plans bis zu ihrem Vertikalschnitt
-  Single-Step-/Boundary-Heads liefern?
-- Wie konservativ soll der Recourse-Floor bei geringer Evidence sein:
-  worst-case-lastig oder über ein enges Szenarioband?
-- Wie groß darf der Vorteil eines Opening-Rush-Pfads sein, bevor er eine
-  frühe Central-Defense-Lücke rechtfertigt?
-
-Diese Punkte brauchen Szenarien und Shadowdaten; eine rein abstrakte
-Vorabantwort wäre weniger belastbar als der im Paketplan vorgesehene
-Vergleich.
 
 ## 30. Abschlusskriterien des Gesamtvorhabens
 
@@ -3054,11 +3293,16 @@ Das Vorhaben ist erst abgeschlossen, wenn:
 - nicht rezfähige ICE-Installationen differenziert innerhalb des
   Defense-Plans bewertet werden;
 - Agenda-Kampagnen zugübergreifend resident bleiben;
-- Zugvarianten nachvollziehbar und deterministisch bewertet werden;
+- Zugvarianten nachvollziehbar und replaydeterministisch bewertet werden;
 - Wertclaims eindeutig besessen und nicht doppelt gezählt werden;
 - erwarteter Fortschritt ohne unnötige Vollsuche fortgeschrieben wird;
-- echte Boundaries Recourse tragen und kontrollierte Choices nicht
-  fälschlich neu planen;
+- mehrphasige TurnPlans bis Zugende oder echter Unsicherheitsgrenze reichen;
+- echte Boundaries den konkreten TurnPlan beenden und kontrollierte Choices
+  nicht fälschlich neu planen;
+- bekannte zukünftige Karten-/Objekt-Targets ohne zukünftige Action-IDs
+  geplant werden;
+- zulässige Linienrandomisierung einmalig, persistent und über Engine-RNG
+  erfolgt;
 - jede umzuschaltende Side vollständige Planabdeckung besitzt;
 - jeder Planwechsel einen typisierten Grund trägt;
 - alle aktuellen Aktionen weiterhin aus `LegalActions` stammen;
@@ -3070,7 +3314,7 @@ Der zentrale Sollsatz lautet:
 
 > Der Zugplaner optimiert den aktuellen Zug. Die Kampagnenebene liefert den
 > eigentumsgebundenen inkrementellen Wert dessen, was nach diesem Zug noch
-> nicht abgeschlossen ist. Erwarteter Fortschritt führt die gebundene Linie
-> weiter; nur echte Grenzen, Abweichungen, Invalidierungen oder bewusste
-> Yields öffnen den verbleibenden Horizont neu, ohne residente Ziele
+> nicht abgeschlossen ist. Erwarteter Fortschritt führt den gebundenen
+> mehrphasigen TurnPlan weiter; echte Unsicherheit beendet ihn und öffnet
+> nach Beobachtung den verbleibenden Horizont neu, ohne residente Ziele
 > grundlos zu vergessen.
