@@ -51,7 +51,7 @@ describe("Wilson Weeflerunner Engine-restricted run coverage", () => {
     const wilsonRuns = capture.input.legalActions.filter(
       (action) => action.type === "start_run" && action.source === wilsonSource,
     );
-    expect(wilsonRuns).toHaveLength(3);
+    expect(wilsonRuns).toHaveLength(4);
     expect(
       wilsonRuns.map((action) => ({
         serverId: action.payload?.serverId,
@@ -77,6 +77,13 @@ describe("Wilson Weeflerunner Engine-restricted run coverage", () => {
       },
       {
         serverId: "archives",
+        restriction: "run_only",
+        allowedAction: "start_run",
+        costProfile: "extra_click",
+        remaining: 1,
+      },
+      {
+        serverId: "remote_1",
         restriction: "run_only",
         allowedAction: "start_run",
         costProfile: "extra_click",
