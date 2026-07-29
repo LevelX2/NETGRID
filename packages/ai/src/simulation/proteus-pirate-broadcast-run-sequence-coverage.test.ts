@@ -13,13 +13,13 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-01",
-      maxActions: 90,
+      maxActions: 105,
       runnerDeck: deck("proteus_runner_rd_bad_publicity_2026_05_25"),
       corpDeck: deck("proteus_corp_region_fast_score_2026_05_25"),
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
       testOnlyDecisionCheckpointCapture: {
-        actionIndices: Array.from({ length: 90 }, (_, index) => index),
+        actionIndices: Array.from({ length: 105 }, (_, index) => index),
         capture: (snapshot) => {
           captures.push(snapshot);
         },

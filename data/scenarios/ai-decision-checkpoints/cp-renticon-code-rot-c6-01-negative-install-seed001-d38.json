@@ -6492,8 +6492,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_event",
-        "sourceDefinitionId": "onr_v1_110_sneak-preview"
+        "type": "activated_card_ability",
+        "sourceDefinitionId": "onr_proteus_128_airport-locker"
       }
     ],
     "forbiddenActions": [

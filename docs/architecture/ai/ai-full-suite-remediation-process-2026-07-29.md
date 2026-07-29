@@ -65,8 +65,8 @@ gewählt wird. Rohscores allein entscheiden ebenfalls keine Klassifikation.
 | P01 | abgeschlossen | Gesamte Testsuite unverändert ausführen, alle roten Tests und gemeinsame Ursachen inventarisieren | `corepack pnpm test`, reproduzierbare fokussierte Gegenläufe |
 | P02 | abgeschlossen | Executor-, Planabdeckungs-, Quote- und Diagnoseinvarianten generisch reparieren | fokussierte Unit-/Integrationstests, AI-Typecheck, Source-Structure |
 | P03 | abgeschlossen | Corp-Score-, Schutz-, Defense-, Rez- und Economy-Ursachen beheben | positive und negative Corp-Checkpoints, Hidden-Info-Gegenprobe |
-| P04 | aktiv | Runner-Runrisiko-, Coverage-, Wiederholungs- und Sequenzursachen beheben | positive und negative Runner-Checkpoints, Hidden-Info-Gegenprobe |
-| P05 | ausstehend | Nur nachweislich veraltete Testverträge aktualisieren und Lücken mit Gegenproben schließen | betroffene Tests plus benachbarte Suiten |
+| P04 | abgeschlossen | Runner-Runrisiko-, Coverage-, Wiederholungs- und Sequenzursachen beheben | positive und negative Runner-Checkpoints, Hidden-Info-Gegenprobe |
+| P05 | aktiv | Nur nachweislich veraltete Testverträge aktualisieren und Lücken mit Gegenproben schließen | betroffene Tests plus benachbarte Suiten |
 | P06 | ausstehend | Paketübergreifende Gates und vollständige Testsuite schließen; Review- und Wissensstand aktualisieren | Typecheck, Struktur-/Vertragsgates, `corepack pnpm test`, Build |
 | P07 | ausstehend | Aktuelles `main` integrieren, dort vollständig verifizieren, Hauptinstanz über das Startscript aktualisieren und Worktree/Branch entfernen | Main-Gates, Server-SHA/Health, Git-/Dateisystem-Cleanup |
 
@@ -325,3 +325,44 @@ Ergebnis:
 - AI-Source-Structure grün:
   `production=733`, `runtimeCycles=0`, `typeCycles=0`.
 - `git diff --check` grün; keine produktive Karten-ID-Sonderbehandlung.
+
+### P04 – Runner-Runfenster, Sequenzen und Coverage
+
+Wurzelursachen:
+
+- Die All-Nighter-Simulation band ihren Vertrag an zwei historische
+  Action-Indizes. Der frühere Fast-Advance-Pfad spielt All-Nighter nach der
+  verbesserten Corp-Entwicklung nicht mehr; der Hybrid-Pfad erzeugt das
+  Engine-Grant-Fenster weiterhin deterministisch.
+- Pirate Broadcast erzeugt seine korrekten R&D-/Archives-Folgefenster jetzt
+  bei State 96 und 100. Der Test beendete die Simulation bereits nach 90
+  Aktionen und meldete deshalb fälschlich fehlende Runtime-Coverage.
+- Der Wilson-Test verlangte vier Run-Ziele einschließlich `remote_1`.
+  Dieser Remote existiert im aktuellen Seed nicht mehr, weil die Corp keine
+  unsichere Agenda installiert. Die Engine erzeugt korrekt genau einen
+  Restricted-Run pro tatsächlich vorhandenem Server.
+- Ein Runner-Checkpoint akzeptierte ausschließlich Sneak Preview, obwohl die
+  Runtime mit Airport Locker einen legalen, exakt dem offenen
+  Code-Gate-Breaker-Need zugeordneten Programmtutor auswählt. Der negative
+  Cloak-Install bleibt weiterhin verboten.
+
+Änderungen:
+
+- All-Nighter sucht das echte deterministische Grant-Fenster über die
+  Captures des positiven Hybrid-Seeds, statt einen historischen
+  State-Index als fachlichen Vertrag zu behandeln.
+- Der Pirate-Broadcast-Horizont umfasst die weiterhin reproduzierbaren
+  R&D-/Archives-Sequenzbeine.
+- Wilson prüft alle und nur die in der aktuellen PlayerView vorhandenen
+  Server; Kostenprofil, Grant-Restmenge, Plan-Owner und Archives-Auswahl
+  bleiben exakt abgesichert.
+- Der Coverage-Checkpoint akzeptiert den exakten Tutorpfad bei unverändertem
+  Plan, Capability und Evidence; die negative persistente Installation
+  bleibt Gegenprobe.
+
+Ergebnis:
+
+- All-Nighter, Pirate Broadcast, Wilson und der Coverage-Checkpoint:
+  4 Dateien, 7/7 Tests grün.
+- Kein produktiver Runner-Code musste geändert oder durch
+  Karten-ID-Sonderlogik ergänzt werden.

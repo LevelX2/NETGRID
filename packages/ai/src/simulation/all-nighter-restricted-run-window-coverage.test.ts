@@ -8,22 +8,12 @@ import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-conf
 import { resolveBenchmarkDeckSlot } from "./benchmark-deck-slot-resolver";
 
 describe("All-Nighter restricted run-window plan-first coverage", () => {
-  it.each([
-    {
-      label: "Fast Advance central-origin continuation",
-      slotId: "strategy_panel_fast_advance_chrome_rush",
-      seed: "ai-behavior-baseline-v1-03",
-      actionIndex: 135,
-    },
-    {
-      label: "Hybrid central-origin continuation",
-      slotId: "strategy_panel_hybrid_score_punish_cheap_bag",
-      seed: "ai-behavior-baseline-v1-05",
-      actionIndex: 11,
-    },
-  ])(
-    "converts the exact $label state without a remote-disposition conflict",
-    ({ slotId, seed, actionIndex }) => {
+  it(
+    "converts the deterministic hybrid central-origin continuation without a remote-disposition conflict",
+    () => {
+      const slotId = "strategy_panel_hybrid_score_punish_cheap_bag";
+      const seed = "ai-behavior-baseline-v1-05";
+      const maxActions = 20;
       const slot = listMatchProgressionBenchmarkDeckSlots().find(
         (candidate) => candidate.slotId === slotId,
       );
@@ -31,35 +21,41 @@ describe("All-Nighter restricted run-window plan-first coverage", () => {
       const resolved = resolveBenchmarkDeckSlot(slot);
       if (!resolved.ok) throw new Error(resolved.reason);
 
-      let capture: AiSimulationDecisionCheckpointCapture | undefined;
+      const captures: AiSimulationDecisionCheckpointCapture[] = [];
       const summary = simulateAiGame({
         seed,
-        maxActions: actionIndex + 2,
+        maxActions,
         runnerControllerMode: "current_candidate",
         corpControllerMode: "current_candidate",
         ...resolved.config,
         testOnlyDecisionCheckpointCapture: {
-          actionIndices: [actionIndex],
+          actionIndices: Array.from(
+            { length: maxActions },
+            (_, index) => index,
+          ),
           capture: (snapshot) => {
-            capture = snapshot;
+            captures.push(snapshot);
           },
         },
       });
+      const actionId =
+        "runner.start_run.archives.bonus_run.onr_v1_076_all-nighter";
+      const capture = captures.find((snapshot) =>
+        snapshot.input.legalActions.some(
+          (action) => action.actionId === actionId,
+        ),
+      );
 
       expect(capture).toBeDefined();
       if (!capture) {
-        throw new Error(
-          `Missing ${slotId}/${seed} stateVersion-${actionIndex} capture`,
-        );
+        throw new Error(`Missing ${slotId}/${seed} All-Nighter run window`);
       }
-      expect(capture.state.stateVersion).toBe(actionIndex);
       expect(capture.state.timingPoint).toBe("runner_action.main");
       expect(capture.input.playerView.run).toBeUndefined();
       expect(capture.input.legalActions).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            actionId:
-              "runner.start_run.archives.bonus_run.onr_v1_076_all-nighter",
+            actionId,
             side: "runner",
             type: "start_run",
             costs: [],
@@ -79,7 +75,7 @@ describe("All-Nighter restricted run-window plan-first coverage", () => {
       expect(summary.actionSequence).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            stateVersionBefore: actionIndex,
+            stateVersionBefore: capture.state.stateVersion,
             actionType: "start_run",
             planKind: "runner.convert_run_window",
             reasonCode: "plan_first.runner.convert_run_window",

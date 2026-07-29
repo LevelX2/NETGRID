@@ -8,7 +8,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const FIXTURES = [
-  ["rejects a negative persistent install", negativeInstallJson],
+  ["uses the exact program tutor instead of a negative persistent install", negativeInstallJson],
   ["stops a saturated coverage search", saturatedSearchJson],
   ["converts a rich-credit repeat into progress", richCreditRepeatJson],
   [
