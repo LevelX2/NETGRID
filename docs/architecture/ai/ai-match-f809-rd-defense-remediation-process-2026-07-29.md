@@ -1,6 +1,6 @@
 # Match f809 – R&D-Verteidigung und HQ-Behalten-Auswahl
 
-Status: in Arbeit
+Status: abgeschlossen
 
 Stand: 2026-07-29
 
@@ -246,8 +246,12 @@ Commit: `docs(ai): review match f809 defense remediation`
 - Entfernung in Git und Dateisystem prüfen;
 - gemergten Branch ohne Force löschen.
 
-Done: `main` enthält alle Paketcommits; fremde Änderungen bleiben erhalten;
-Worktree und Branch sind verifiziert bereinigt.
+Done: Der Arbeitsbranch wurde nach dem konfliktfreien Merge des aktuellen
+`main` nochmals mit Typecheck und 10/10 F809-Regressionstests geprüft und als
+Merge `90af516ea` lokal in `main` integriert. Dieselben Prüfungen sind auf dem
+Integrationsstand grün. Der eigene Worktree wurde aus Git und dem Dateisystem
+entfernt; der vollständig gemergte Branch wurde ohne Force gelöscht. Der
+fremde Baseline-Worktree und die laufende Hauptinstanz blieben unangetastet.
 
 ## Sicherheitsblocker
 
@@ -310,4 +314,9 @@ Der Prozess stoppt ohne heuristischen Workaround, wenn:
   kombinierte Gruppe 49/49 und die vollständige AI-Suite 4.248/4.248 grün.
   Der identische 30/45-Deck-Audit meldet Status `ok`, null Blocker und null
   Warnungen.
-- P6: ausstehend.
+- P6: abgeschlossen. Der finale Arbeitsbranch und der lokale
+  `main`-Integrationsstand bestehen Typecheck und 10/10 F809-Zieltests.
+  Merge `90af516ea` enthält sämtliche Paketcommits. Worktree
+  `C:\Projekte\NETGRID_AI_MATCH_F809_RD_DEFENSE` und Branch
+  `codex/ai-match-f809-rd-defense` sind verifiziert entfernt; fremde
+  Worktrees und Prozesse wurden nicht verändert.
