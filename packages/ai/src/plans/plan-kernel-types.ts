@@ -40,12 +40,20 @@ export type PlanTargetRef = {
     | "server"
     | "card"
     | "ice"
+    | "ability"
     | "capability"
     | "bank"
     | "window"
-    | "player";
+    | "player"
+    | "zone"
+    | "value"
+    | "target_set";
   id: string;
   label?: string;
+  sourceCardInstanceId?: string;
+  abilityId?: string;
+  value?: number;
+  targets?: PlanTargetRef[];
 };
 
 export type PlanConditionRef = {

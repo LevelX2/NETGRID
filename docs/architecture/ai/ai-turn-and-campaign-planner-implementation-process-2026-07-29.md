@@ -1,13 +1,13 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK02 abgeschlossen; ZK03 aktiv**
+Status: **ZK00 bis ZK03 abgeschlossen; ZK04 aktiv**
 
 Stand: 2026-07-29
 
 Quelle:
 
 - `docs/architecture/ai/ai-turn-and-campaign-planner-concept-2026-07-29.md`;
-- Nutzerfreigaben der dort in Version 0.3 festgeschriebenen
+- Nutzerfreigaben der dort in Version 0.4 festgeschriebenen
   Architekturentscheidungen;
 - die Spielanalysen, die inkonsistente Einzelaktionen, fehlende
   Zentralverteidigung, verfrühten Abwurf und fehlende Plankontinuität belegt
@@ -88,8 +88,9 @@ Shadow-Vergleich und breiter Verifikation.
 - Keine Kartennamen-Sonderfälle als Ersatz für fachliche Modulverträge.
 - Kein allgemeiner Beam Search, solange die vertikalen Schnitte und eine
   begrenzte deterministische Zwei-Schritt-Suche ausreichen.
-- Keine UI-, Netzwerk-, Account-, Datenbank- oder Kartenregeländerung ohne
-  nachgewiesene Notwendigkeit.
+- Keine Netzwerk-, Account-, Datenbank- oder Kartenregeländerung ohne
+  nachgewiesene Notwendigkeit. Die vorhandene privilegierte private
+  KI-Debuganzeige wird ausdrücklich um Zugplanung erweitert.
 - Keine Rückwärtskompatibilität für veraltete interne Plannerartefakte.
 - Kein Push, Pull Request oder Remote-Merge.
 
@@ -98,7 +99,7 @@ Shadow-Vergleich und breiter Verifikation.
 - Engine-Autorität steht vor jeder KI-Entscheidung.
 - Die Prioritätsordnung lautet:
   `Engine > gültiges hartes PlanCommitment > TurnPlanCommitment >
-  Persistence/Hysterese`.
+Persistence/Hysterese`.
 - Genau eine Phase besitzt genau einen Root-Owner; Supportleaves bleiben
   innerhalb dieser Phase gebunden.
 - Ein vollständiger TurnPlan darf mehrere geordnete Rootphasen enthalten.
@@ -120,6 +121,12 @@ Shadow-Vergleich und breiter Verifikation.
   replay-stabilen KI-Zufallspfad und wird zustandsgebunden persistiert.
 - `EndTurn` ist nur bei autoritativem Abschluss im realen aktuellen Zustand
   zulässig, niemals allein aufgrund einer hypothetischen Projektion.
+- Ranking, Caches und Planner-IDs verwenden ausschließlich einen
+  side-sicheren Planning-Fingerprint. Ein optionaler Engine-Freshness-Token
+  darf keine Auswahl beeinflussen.
+- Die privilegierte private Betreiber-Debuganzeige darf und soll beide
+  vollständigen Kartenlagen zeigen. Diese Ausnahme erweitert keine normalen
+  Spieler-, Replay-, WebSocket-, Reconnect-, Log- oder Fehlerflächen.
 
 ## Automatische Fehlerbehandlung
 
@@ -158,7 +165,8 @@ Der Prozess stoppt ohne heuristischen Workaround, wenn:
 `ZK00 Prozessvertrag → ZK01 Red-Evidence → ZK02 D5/Handinventar →`
 `ZK03 Kernverträge → ZK04 Projektionskern → ZK05 Agenda-Vertikalschnitt →`
 `ZK06 Defense/Economy → ZK07 Restzugsuche → ZK08 Commitment-Ausführung →`
-`ZK09 Corp-Abdeckung → ZK10 Corp-Shadow → ZK11 Corp-Cutover →`
+`ZK09 Corp-Abdeckung → ZK10 Corp-Shadow → ZK10a Gegnerzugminimum →`
+`ZK11 Corp-Cutover →`
 `ZK12 Gegnerzug/Kampagnen → ZK13 Runner-Cutover →`
 `ZK14 Gesamtverifikation/Integration`
 
@@ -253,15 +261,24 @@ bereitstellen.
 Konkrete Arbeit:
 
 - `PlanningRulesContext` mit Rules-/Format-/Policy-Fingerprint;
+- `PlanningStateIdentity` ausschließlich aus side-sicherem AI-Input;
 - `PlanTargetRef`, kanonische Invocations und `ChoicePlanningRole`;
-- `TurnPlanningHead`, Horizonklassifikation und Multi-Phase-TurnPlan;
-- Campaign Value Claims samt Ownership;
-- versioniertes Evaluation Registry;
-- zentrale Validatoren für Ziele, Choices, Owner und Werte.
+- getrennte aktuelle `CurrentLegalActionBinding`; keine zukünftige
+  `actionId`;
+- `TurnPlanningHead`, ausführbarer Witness, Horizonklassifikation und
+  Multi-Phase-TurnPlan;
+- Phase Entry, Completion, Transition, Cursor und exakte
+  Need-/Assignment-Bindung;
+- nur residente oder admission-geprüfte spätere Rootphasen;
+- line-prefix-gebundene Campaign Value Claims samt Ownership und
+  Aggregationsmodus;
+- getrennte P1–P3-Obligations und versioniertes P4–P6-Evaluation Registry;
+- zentrale Validatoren für Ziele, Choices, Owner, Werte und Pflichten.
 
 Checks:
 
 - Contract-/Serialization-/Redaction-Tests;
+- Hidden-Äquivalenz-, Prefix-Quote-, Phase- und Need-Binding-Tests;
 - Source-Structure-Gate;
 - AI-Typecheck;
 - `git diff --check`.
@@ -284,8 +301,13 @@ Konkrete Arbeit:
   installierte Karten, Advancement und Planstatus;
 - bekannte Phasenübergänge ohne Vollreplan;
 - Draw, Zufall und materielle Gegnerwahl als Boundary;
+- eng begrenzter abstrakter Restwert hinter einer Boundary, ohne konkrete
+  Recourse-Phase;
 - planwirksame Cleanup-Projektion;
-- kompakter Trace für Angebot, Prunegrund, Bewertung und Boundary.
+- vollständige Klassifikation jeder Handkarteninstanz vor Cleanup;
+- kompakter Trace für Angebot, Prunegrund, Bewertung und Boundary;
+- erstes In-Game-Debug-DTO und Darstellung von Linie, Phasen, Roots,
+  Supportbindung und Boundary in der privilegierten KI-Debuganzeige.
 
 Checks:
 
@@ -313,7 +335,9 @@ Konkrete Arbeit:
 - sichere Aufbauline;
 - mehrzügige Agenda-Meilensteine und harte Fortsetzungsverpflichtungen;
 - einmalige replay-stabile Rush-vs.-Non-Rush-Wahl bei Zulässigkeit und
-  fehlender klarer Dominanz.
+  fehlender klarer Dominanz;
+- Opportunity-, Regret-, Worst-Case- und Persistenzvertrag;
+- getrennte Engine-RNG-Domäne für Planwahl und Game Effects.
 
 Checks:
 
@@ -372,6 +396,9 @@ Konkrete Arbeit:
   beschränkter Aktionen;
 - kanonische Zusammenfassung beweisbar kommutativer Reihenfolgen;
 - geschützte nicht dominierte Vertreter je `Root × next milestone`;
+- faire Mindestexpansion je
+  `Obligation-Signatur × Root × next milestone`;
+- konservativ abgeschlossene Ausgangslinie je geschützter Partition;
 - kleine Paretofronten, Upper Bounds und nachvollziehbare Prunegründe;
 - Beam Search nur bei messbar nachgewiesener Notwendigkeit.
 
@@ -379,6 +406,8 @@ Checks:
 
 - Search-/Capacity-/Canonicalization-/Pareto-Tests;
 - symmetrische und abhängige Reihenfolgen;
+- Root-Enumerationsreihenfolge, Partition-Starvation und
+  Budget-Completeness;
 - deterministische Budgetgrenzen;
 - AI-Typecheck;
 - `git diff --check`.
@@ -404,12 +433,14 @@ Konkrete Arbeit:
 - Replan bei Boundary, Abweichung, Ungültigkeit und Neustart;
 - Neuvalidierung harter PlanCommitments und Kampagnen-Neuquote;
 - autoritatives EndTurn-Zertifikat im realen Zustand.
+- Commitment-Cursor, Phase-Entry-Validierung und Replangründe in der
+  privilegierten KI-Debuganzeige.
 
 Checks:
 
 - Commitment-/Restart-/Invalidation-/EndTurn-Tests;
 - unerwartete Kosten-, Choice- und Zieländerung;
-- Replay-/StateHash-Gegenproben;
+- Replay-/StateHash- und Planning-Fingerprint-Gegenproben;
 - AI-Typecheck;
 - `git diff --check`.
 
@@ -460,6 +491,7 @@ Konkrete Arbeit:
   Campaign-Kohärenz;
 - Policykalibrierung für Frontgrößen, Budgets, Gewichte und
   Zufallswahrscheinlichkeiten;
+- In-Game-Vergleich von produktiver Auswahl und Shadow-TurnPlan;
 - keine Architekturänderung durch bloße Messabweichung.
 
 Checks:
@@ -477,6 +509,34 @@ geschlossen.
 Commit:
 `test(ai): calibrate corp turn planner shadow`
 
+### ZK10a – Minimale Gegnerzug- und Kampagnenpersistenz
+
+Ziel:
+Agenda-, Defense- und Opening-Rush-Kampagnen bereits vor dem Corp-Cutover
+über den Gegnerzug korrekt warten, fortsetzen, blockieren oder beenden.
+
+Konkrete Arbeit:
+
+- `awaiting_opponent_outcome`;
+- öffentliche Event-Rückführung für Run, Rez, Trace, Access, Trash und
+  Remote-Kompromittierung;
+- nächste-eigene-Zug-Requote;
+- Kampagnenstatus in der privilegierten KI-Debuganzeige.
+
+Checks:
+
+- Opponent-turn-/Campaign-/Opening-Rush-Tests;
+- Restart-, Replay- und öffentliche Outcome-Gegenproben;
+- AI-Typecheck;
+- `git diff --check`.
+
+Done-Gate:
+Der Corp-Cutover hängt nicht von einer noch fehlenden minimalen
+Gegnerzugfortsetzung ab.
+
+Commit:
+`feat(ai): persist corp campaigns through opponent turns`
+
 ### ZK11 – Kontrollierter Corp-Cutover
 
 Ziel:
@@ -484,7 +544,7 @@ Den neuen TurnPlanner als alleinige produktive Corp-Auswahl aktivieren.
 
 Konkrete Arbeit:
 
-- Umschaltung erst nach ZK09 und ZK10;
+- Umschaltung erst nach ZK09, ZK10 und ZK10a;
 - alte Einzelaktionsauswahl nur als testbarer Vergleichscode, nicht als
   stiller Runtime-Fallback;
 - Telemetrie/Trace für Planannahme, Fortschritt, Replan und Abschluss;
@@ -504,19 +564,18 @@ Jede produktive Corp-Aktion läuft über einen validierten TurnPlan.
 Commit:
 `feat(ai): cut over corp to committed turn planning`
 
-### ZK12 – Gegnerzug und weitere Kampagnenphasen
+### ZK12 – Weitergehende Gegnerzug- und Interruptlogik
 
 Ziel:
-Mehrzügige Kampagnen über gegnerische Züge, Neustarts und neue öffentliche
-Information hinweg korrekt fortführen.
+Komplexere Gegnerreaktionen und weitere Kampagnenphasen auf dem bereits vor
+Cutover gesicherten Minimum ergänzen.
 
 Konkrete Arbeit:
 
-- Kampagnenmeilensteine, harte Verpflichtungen und Value-Claim-Verbrauch;
-- Gegnerzugbeobachtung ausschließlich aus PlayerView/PublicEvents;
-- Neuquote zu Beginn des eigenen Zuges und bei relevanter öffentlicher
-  Zustandsänderung;
-- Agenda-, Defense- und Economy-Folgemeilensteine.
+- mehrere überlappende Outcome- und Interruptfolgen;
+- komplexe Rez-/Trace-/Prevention-/Ambush-Reaktionen;
+- erweiterte Pause-/Resume-, Deadline- und Value-Claim-Übergänge;
+- Agenda-, Defense- und Economy-Folgemeilensteine jenseits des Minimums.
 
 Checks:
 
@@ -605,8 +664,11 @@ Commit:
   deklariert werden.
 - Determinismustests wiederholen identische Seeds und Inputs und vergleichen
   Plan, Trace, Zufallsrecord und ausgeführte Actionfolge.
-- Hidden-Info-Tests prüfen sowohl Plannerinput als auch Persistenz, Trace,
-  Fehlerpfade und Replaypayloads.
+- Hidden-Info-Tests prüfen Plannerinput, Plannerpersistenz, redigierte
+  Traces, Fehlerpfade und öffentliche Replaypayloads. Die ausdrücklich
+  privilegierte private Betreiber-Debuganzeige bleibt davon ausgenommen und
+  wird separat darauf geprüft, beide vollständigen Kartenlagen plus
+  Zugplanung korrekt anzuzeigen.
 - Cutovertests beweisen ausdrücklich, dass kein stiller alter Aktionsselektor
   mehr produktiv einspringt.
 
@@ -641,7 +703,8 @@ bereinige exakt nach den Git-Regeln.
 
 Der Gesamtprozess ist nur abgeschlossen, wenn:
 
-1. ZK00 bis ZK14 jeweils mit eigenem Commit abgeschlossen sind;
+1. ZK00 bis ZK14 einschließlich ZK10a jeweils mit eigenem Commit
+   abgeschlossen sind;
 2. Corp und Runner vollständig über den TurnPlanner laufen;
 3. Kampagnen, Restzugphasen, Boundaries, Neustart und EndTurn geprüft sind;
 4. Engine-Autorität, Hidden-Info-Schutz, deterministisches Replay und
@@ -685,3 +748,39 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
 - Historische D4-/D5-Checkpoints, F809-ICE-Staging und Accounts-Konversion
   bleiben grün.
 - Fokussierter Lauf: 25/25 grün; AI-Typecheck grün.
+
+### ZK02 – enger Regressionsnachtrag
+
+- Commit: `93b272cce`
+- Die breite Baseline zeigte zwei zu stark blockierte, exakt gebundene
+  Scorematerial-Support-Draws bei vollem HQ und noch einer möglichen
+  Folgeaktion.
+- Ein einzelner Draw bleibt hierfür zulässig, wenn genau eine Folgeaktion
+  verbleibt; der unerwünschte letzte Klick mit sicherem Cleanup-Overflow
+  bleibt blockiert.
+- Gezielter Lauf: 12 grün, 159 nicht betroffene Tests gefiltert;
+  AI-Typecheck grün.
+
+### ZK03 – abgeschlossen
+
+- `PlanningRulesContext` bindet Rules-, Format-, Action-Semantik-,
+  Modulset-, Evaluation- und Kampagnenwert-Policyversionen.
+- `PlanningStateIdentity` entsteht ausschließlich aus dem side-sicheren
+  AI-Input; vollständige Engine-StateHashes beeinflussen weder Planner-IDs
+  noch Ranking oder Cache.
+- Kanonische zukünftige Invocations enthalten konkrete Targets und Choices,
+  aber keine `actionId`; nur der aktuelle Head trägt eine getrennte
+  `CurrentLegalActionBinding` und einen ausführbaren Witness.
+- Mehrphasige TurnPlans besitzen Root-Provenienz, Entry-, Completion-,
+  Transition-, Need-/Assignment- und Cursorverträge.
+- Kampagnenclaims sind line-prefix-gebunden und tragen eine zentrale
+  Aggregationsart; P1–P3 sind von P4–P6-Linienwerten getrennt.
+- Das zweite externe Review wurde kritisch in Konzept, Zielvertrag und
+  Paketprozess integriert. Hypothetische Planinstanzen und ein vorgezogener
+  Universal-Beam-Kernel bleiben ausdrücklich außerhalb von V1.
+- Die verbindliche Projektausnahme ist in `apps/web/AGENTS.md` und im
+  Wissenslog festgehalten: Die privilegierte private KI-Debuganzeige zeigt
+  vollständige Karten beider Seiten und die gesamte Zugplanung.
+- Fokussierte Vertrags-/Inputtests: 15/15 grün.
+- Vollständige AI-Baseline: 521 Testdateien und 4265 Tests grün.
+- AI-Typecheck, `check:ai` und `git diff --check`: grün.

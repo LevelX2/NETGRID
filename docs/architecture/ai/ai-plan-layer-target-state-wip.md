@@ -1,8 +1,8 @@
 # KI-Planebene – modulares Zielkonzept
 
 Status: **Work in Progress**
-Dokumentversion: `0.9`
-Stand: 2026-07-26
+Dokumentversion: `1.0`
+Stand: 2026-07-29
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
 
@@ -22,12 +22,15 @@ Die Leitentscheidung lautet:
 
 > Nur Pläne handeln. Eine Action ist niemals ein unabhängiger
 > Entscheidungskandidat, sondern ausschließlich der aktuelle Route Head eines
-> konkreten Plan-Steps. Der Scheduler wählt zuerst einen Plan und dessen
-> nächsten Step. Erst danach wird innerhalb dieses Steps eine passende
-> vorhandene LegalAction gebunden. Nur bei einem ausdrücklich zertifizierten
-> planlokalen Nahgleichstand darf derselbe Step mehrere vollständig
-> materialisierte Route Heads an die Engine geben; die Engine wählt und
-> vollzieht daraus atomar genau einen.
+> konkreten Plan-Steps. Vor der Executorwahl melden alle relevanten
+> Planinstanzen nichtautoritative, aktuell ausführbar belegte Planning Heads.
+> Der Scheduler vergleicht daraus kohärente Restzuglinien, wählt genau eine
+> Linie sowie ihren aktuellen Leaf-Executor und lässt ausschließlich den
+> ersten Step durch dessen Modul erneut gegen aktuelle `LegalActions`
+> materialisieren. Nur bei einem ausdrücklich zertifizierten planlokalen
+> Nahgleichstand darf derselbe Step mehrere vollständig materialisierte Route
+> Heads an die Engine geben; die Engine wählt und vollzieht daraus atomar
+> genau einen.
 
 Das Dokument ist ausdrücklich ein WIP. Der gemeinsame Planrahmen soll früh
 stabil werden. Einzelne Planmodule dürfen danach schrittweise verfeinert
@@ -498,6 +501,10 @@ eigene Kartensemantik und Deckfähigkeiten
                     |
       leichtgewichtige PlanAssessments
                     |
+  nichtautoritative Planning Heads aller relevanten Pläne
+                    |
+ side-sichere, mehrphasige Restzuglinien + Kampagnenquotes
+                    |
        side-spezifischer PlanScheduler
           /          |           \
  Responses      Vordergrund    Backgrounds
@@ -545,6 +552,10 @@ Der Kernel ist zuständig für:
 - Validierung von Prioritätsansprüchen und Hysterese;
 - typisierte, zyklenfreie Parent-/Need-/Support-Beziehungen;
 - typisierte Ressourcenclaims und Reservierungen;
+- side-sichere Planning-State-Identität;
+- mehrphasige TurnPlans, Priority-Obligations und Kampagnen-Value-Claims;
+- faire deterministische Suchbudgets und zentral validierte
+  Linienbewertung;
 - Schutz laufender Fortsetzungen;
 - globale Safety- und LegalAction-Invarianten;
 - Ergebnisrückführung;
@@ -689,7 +700,8 @@ Unterfunktionen für Deckstrategie, Opportunity-Erkennung, Komponentenbestand,
 Routenbildung, Engine-Quotes, Risiko, Finanzierung und Continuation verwenden
 und schrittweise verbessern. Diese Details bleiben modulowned. Der Scheduler
 sieht ausschließlich Proposal, persistente Instanz, Assessment, Needs, Step,
-Route und Outcome. Neue fachliche Bedingungen dürfen daher kein
+Planning Head, Projektion, Route und Outcome. Neue fachliche Bedingungen
+dürfen daher kein
 kartenspezifisches Scheduler-Sonderrecht und keinen zweiten globalen
 Actionscore erzeugen.
 
@@ -704,11 +716,27 @@ type PlanModule = {
     | "recurring_cycle"
     | "development_project"
     | "strategic_campaign";
+  horizonCapability:
+    | "current_turn_only"
+    | "campaign_capable"
+    | "context_dependent";
 
   discover(context): PlanProposal[];
   instantiate(proposal, context): PlanInstance;
   reconcile(instance, context): PlanReconciliation;
   assessPlan(instance, context): PlanAssessment;
+  enumerateCurrentPlanningHeads(
+    instance,
+    assessment,
+    semanticActions,
+    context,
+  ): TurnPlanningHeadCandidate[];
+  projectSemanticContinuations(
+    instance,
+    frame,
+    rootBinding,
+    context,
+  ): ProjectedTurnStepOption[];
   proposeStep(instance, context): PlanStepProposal;
   materializeRoutes(instance, step, semanticActions, context): PlanRoute[];
   evaluateRoute(instance, step, route, context): RouteEvaluation;
@@ -783,9 +811,24 @@ Bestimmt den fachlich nächsten Step. Ein Step kann beispielsweise verlangen:
 - ein Tag erzeugen;
 - Handpuffer herstellen.
 
+### 9.4.1 Planning Heads und Zukunftsprojektion
+
+`enumerateCurrentPlanningHeads` erzeugt vor der Executorwahl konkrete
+aktuelle Varianten mit getrenntem `CurrentLegalActionBinding` und
+ausführbarem Witness. Diese Heads besitzen keine Ausführungsautorität.
+`projectSemanticContinuations` beschreibt ausschließlich planmodul-eigene
+zukünftige Semantik und enthält keine zukünftige `actionId`.
+
+Zukünftige Rootphasen dürfen in V1 nur residente Planinstanzen oder bereits
+admission-geprüfte Child-/Supportbeziehungen referenzieren. Eine erst durch
+die Projektion entstehende Planinstanz beendet den Ast mit
+`projected_plan_discovery_required`; der reale erreichte Zustand durchläuft
+anschließend normale Discovery und Restzug-Neuplanung.
+
 ### 9.5 `materializeRoutes`
 
-Übersetzt den Step nach der Executorwahl aus verbindlichen
+Übersetzt den nach der Linienwahl gewählten ersten Step erneut und
+autoritativ aus verbindlichen
 `ActionSemanticCandidates` in aktuell mögliche Route Heads. Diese Funktion
 verwendet Action-Semantik, Kartenfähigkeiten, Kosten, Ziele und aktuelle
 LegalActions.
@@ -1118,29 +1161,37 @@ Die side-spezifische Policy validiert für jede Instanz:
 - Hard-/Soft-/Forecast-Claims;
 - Risiken, Opportunity Cost und Kontinuitätskosten.
 
-### Phase 7 – Root-Foreground und Leaf-Executor wählen oder fortsetzen
+### Phase 7 – Planning Heads aller relevanten Pläne enumerieren
 
-Der bisherige Vordergrund bleibt bevorzugt, solange:
+Jede viable Instanz meldet ihre aktuellen, aus `LegalActions` belegten
+Varianten als nichtautoritative Planning Heads. P1–P3 werden als konkrete
+Pflichtobjekte mit Deadline validiert. Ein aktuelles `PlanCommitment` bildet
+einen harten Prefix.
 
-- sein nächster Step fachlich gültig ist;
-- kein höherer Prioritätsrang eingreift;
-- kein ausreichend starker Challenger den Wechsel rechtfertigt;
-- kein Commitment einen Wechsel verbietet.
+### Phase 8 – Restzuglinien projizieren und vergleichen
 
-### Phase 8 – Step bestimmen
+Der Scheduler kombiniert fachlokale Projektionen zu geordneten
+Ein-Root-Phasen bis Zugende, Informationsgrenze,
+`projection_not_supported` oder `projected_plan_discovery_required`.
+Kampagnenwerte sind prefixgebundene inkrementelle Claims. Spätere
+Phasenroots müssen resident oder admission-geprüft sein.
 
-Das gewählte Planmodul liefert genau einen aktuellen Step sowie erlaubte
-Alternativ-Steps.
+### Phase 9 – Linie, Root-Foreground und Leaf-Executor wählen
 
-### Phase 9 – aktuelle Route Heads materialisieren
+Die beste zulässige vollständige Linie bestimmt die Phasenfolge und den
+aktuellen Leaf-Executor. Der bisherige Vordergrund und gültige Commitments
+wirken über die festgelegte Hierarchie, dürfen aber keine verletzte Pflicht
+oder materiell bessere zulässige Linie verdecken.
 
-Nur `ActionSemanticCandidates` vorhandener LegalActions werden verwendet.
-Nicht abbildbare Steps werden als Blocker oder `PlanNeed` zurückgegeben.
-Semantische Fortsetzungen enthalten keine zukünftigen Action-IDs.
+### Phase 10 – gewählten ersten Step autoritativ rematerialisieren
 
-### Phase 10 – Planlokal Aktion wählen
+Nur das zuständige Modul des gewählten Executors übersetzt dessen ersten
+Planning Head erneut aus den unveränderten aktuellen
+`ActionSemanticCandidates` und `LegalActions`. Invocation, Witness, Quote,
+Targets und routendefinierende Choices müssen exakt übereinstimmen.
+Abweichung ist ein fail-closed Bindungsfehler.
 
-Im Normalfall wird genau die beste Route des Steps gewählt. Nur der
+Im Normalfall wird genau die rematerialisierte Route gewählt. Nur der
 zertifizierte Nahgleichstandsvertrag aus Abschnitt 33.2 darf stattdessen eine
 kanonische Same-Step-Routenmenge bis zur atomaren Engine-Auswahl offenhalten.
 Globale Safety-Gates dürfen Aktionen ausschließen, aber keine planfremde
@@ -1156,7 +1207,10 @@ und führt die ausgewählte Invocation durch denselben Regelpfad aus.
 
 ### Phase 12 – Ergebnis zurückführen
 
-Nach der neuen StateVersion beginnt der Zyklus erneut. Das Modul bewertet:
+Nach der neuen StateVersion werden Receipt und TurnPlan-Cursor revalidiert.
+Bei erwartetem Fortschritt wird ohne freie Challenger-Suche zum nächsten Node
+oder zur gebundenen Phase fortgeschritten; an einer echten Boundary wird der
+Restzug neu geplant. Das Modul bewertet:
 
 - erwartete und tatsächliche Zustandsänderung;
 - Planfortschritt;
@@ -3213,37 +3267,37 @@ R&D-Plan fordert 5 Credits an
 
 ### 30.1 Runner
 
-| Aktionsfamilie                           | Planherkunft                                                                             |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Basic Credit                             | endliche Economy-Reserve, konkreter Parent-Fundingbedarf oder befristeter P6-Übergang    |
-| Draw                                     | Coverage-, Defense-, Handentwicklungs- oder konkreter Support-Step                       |
-| Programm/Hardware/Ressource installieren | verlangte Fähigkeit des Rig-, Defense-, Economy- oder Strategieplans                     |
-| Event spielen                            | Route des aktiven Plans mit vollständigem Follow-up-Vertrag                              |
-| Run starten                              | Central-, Remote- oder gebundener Run-Plan                                               |
-| Run-Ability/Run-Event                    | Route des auslösenden Runplans                                                           |
-| Tag entfernen                            | Defense-and-Recovery                                                                     |
-| Run fortsetzen/Jack-out/Pump/Break       | explizit positiv bewerteter Step des auslösenden Runplans                                |
-| Access stehlen/trashen/ablehnen          | explizit positiv bewerteter Auflösungs-Step des auslösenden Runplans                     |
-| Ability aktivieren                       | Step-Route eines Plans, nicht freie Kartennutzung                                        |
-| Discard                                  | Cleanup-Resolution unter Plan- und Keep-Kontext                                          |
-| EndTurn                                  | `runner.complete_turn`; bei regelbewiesenem Corp-Deckout `runner.secure_terminal_win`    |
+| Aktionsfamilie                           | Planherkunft                                                                          |
+| ---------------------------------------- | ------------------------------------------------------------------------------------- |
+| Basic Credit                             | endliche Economy-Reserve, konkreter Parent-Fundingbedarf oder befristeter P6-Übergang |
+| Draw                                     | Coverage-, Defense-, Handentwicklungs- oder konkreter Support-Step                    |
+| Programm/Hardware/Ressource installieren | verlangte Fähigkeit des Rig-, Defense-, Economy- oder Strategieplans                  |
+| Event spielen                            | Route des aktiven Plans mit vollständigem Follow-up-Vertrag                           |
+| Run starten                              | Central-, Remote- oder gebundener Run-Plan                                            |
+| Run-Ability/Run-Event                    | Route des auslösenden Runplans                                                        |
+| Tag entfernen                            | Defense-and-Recovery                                                                  |
+| Run fortsetzen/Jack-out/Pump/Break       | explizit positiv bewerteter Step des auslösenden Runplans                             |
+| Access stehlen/trashen/ablehnen          | explizit positiv bewerteter Auflösungs-Step des auslösenden Runplans                  |
+| Ability aktivieren                       | Step-Route eines Plans, nicht freie Kartennutzung                                     |
+| Discard                                  | Cleanup-Resolution unter Plan- und Keep-Kontext                                       |
+| EndTurn                                  | `runner.complete_turn`; bei regelbewiesenem Corp-Deckout `runner.secure_terminal_win` |
 
 ### 30.2 Corp
 
-| Aktionsfamilie             | Planherkunft                                                                                 |
-| -------------------------- | -------------------------------------------------------------------------------------------- |
-| Basic Credit               | endliche Economy-/Rezreserve, konkreter Parent-Fundingbedarf oder befristeter P6-Übergang    |
-| Draw                       | Hand-/Agenda-Management, Economy oder konkreter Supportbedarf                                |
-| ICE installieren           | ausschließlich `corp.defend_servers`; andere Pläne veröffentlichen Schutzbedarfe             |
-| Asset/Upgrade installieren | Economy-, Ambush-, Remote- oder Strategieplan                                                |
-| Agenda installieren        | Scoreplan mit Exposure-/Commitment-Vertrag                                                   |
-| Advance/Score              | Scoreplan                                                                                    |
-| Operation spielen          | Economy-, Score-, Punish-, Defense- oder Handplan                                            |
-| ICE/Asset rezzen           | aktuelle Defense-/Economy-/Ambush-Response                                                   |
-| Trace-Bid/Choice           | auslösender Punish-/Defense-/Scoreplan                                                       |
-| Ability aktivieren         | Step-Route eines Plans                                                                       |
-| Discard                    | Hand-/Agenda-Management oder Cleanup-Resolution                                              |
-| EndTurn                    | `corp.complete_turn`                                                                         |
+| Aktionsfamilie             | Planherkunft                                                                              |
+| -------------------------- | ----------------------------------------------------------------------------------------- |
+| Basic Credit               | endliche Economy-/Rezreserve, konkreter Parent-Fundingbedarf oder befristeter P6-Übergang |
+| Draw                       | Hand-/Agenda-Management, Economy oder konkreter Supportbedarf                             |
+| ICE installieren           | ausschließlich `corp.defend_servers`; andere Pläne veröffentlichen Schutzbedarfe          |
+| Asset/Upgrade installieren | Economy-, Ambush-, Remote- oder Strategieplan                                             |
+| Agenda installieren        | Scoreplan mit Exposure-/Commitment-Vertrag                                                |
+| Advance/Score              | Scoreplan                                                                                 |
+| Operation spielen          | Economy-, Score-, Punish-, Defense- oder Handplan                                         |
+| ICE/Asset rezzen           | aktuelle Defense-/Economy-/Ambush-Response                                                |
+| Trace-Bid/Choice           | auslösender Punish-/Defense-/Scoreplan                                                    |
+| Ability aktivieren         | Step-Route eines Plans                                                                    |
+| Discard                    | Hand-/Agenda-Management oder Cleanup-Resolution                                           |
+| EndTurn                    | `corp.complete_turn`                                                                      |
 
 ### 30.3 Coverage-Gate
 
@@ -3399,8 +3453,20 @@ Jedes Modul besitzt eine interne Schema- oder Modulversion. Änderungen an
   besitzen den engeren Terminal-/Survival-Vertrag.
 - **Kernentscheidung:** Tactical Goals bleiben kurzlebige Goal-/Threat-Signale
   ohne eigene Handlungsautorität.
-- **Kernentscheidung:** PlanAssessments werden vor der Executorwahl erzeugt;
-  vollständige Route Heads erst danach.
+- **Kernentscheidung:** PlanAssessments und nichtautoritative, aktuell
+  ausführbar belegte Planning Heads werden vor der Executorwahl erzeugt;
+  autoritative Route Heads ausschließlich für den gewählten ersten Step
+  danach rematerialisiert.
+- **Kernentscheidung:** Der Scheduler dirigiert kohärente, mehrphasige
+  Restzuglinien; Planmodule liefern Fachprojektionen und Kampagnenclaims,
+  übernehmen aber nie die globale Kommandoebene.
+- **Kernentscheidung:** Zukünftige Phasenroots sind in V1 resident oder
+  bereits admission-geprüft. Neue Planentdeckung ist eine typisierte
+  Replangrenze, keine hypothetische Portfolioinstanz.
+- **Kernentscheidung:** Planner-IDs, Ranking und Cache verwenden
+  ausschließlich side-sichere Planning-Fingerprints. Die privilegierte
+  private KI-Debuganzeige darf unabhängig davon vollständige Karten beider
+  Seiten und die gesamte Zugplanung anzeigen.
 - **Kernentscheidung:** Viability, Portfolio-Rolle und Execution State sind
   orthogonale Achsen.
 - **Kernentscheidung:** `PlanNeed`, typisierte Ressourcenclaims und
@@ -3444,18 +3510,31 @@ function choosePlannedAction(context): PlannedDecision {
     portfolio,
     context,
   );
-  const { rootForeground, leafExecutor } = continueOrSelectExecutionPath(
+  const planningHeads = enumerateCurrentPlanningHeads(
+    validated,
+    semanticActions,
+    context,
+  );
+  const lines = projectAndEvaluateRemainderTurnLines(
+    planningHeads,
     validated,
     portfolio,
     context,
   );
+  const selectedLine = selectBestValidTurnLine(lines, context);
+  const { rootForeground, leafExecutor, selectedHead } =
+    executionPathFromSelectedLine(selectedLine, portfolio, context);
 
-  if (!leafExecutor) {
+  if (!leafExecutor || !selectedHead) {
     throw new PlanResolutionFailure("no_executable_plan", diagnostics);
   }
 
   const module = registry.moduleFor(leafExecutor.moduleId);
-  const step = module.proposeStep(leafExecutor, context);
+  const step = module.proposeStepFromSelectedPlanningHead(
+    leafExecutor,
+    selectedHead,
+    context,
+  );
   const routes = module.materializeRoutes(
     leafExecutor,
     step,
@@ -3469,6 +3548,7 @@ function choosePlannedAction(context): PlannedDecision {
       diagnostics,
     );
   }
+  assertSelectedHeadRematerializedExactly(selectedHead, viableRoutes, context);
 
   const routeSelection = selectPlanLocalRoute(
     module,
@@ -3526,6 +3606,7 @@ function choosePlannedAction(context): PlannedDecision {
     leafExecutor,
     step,
     preparedInvocations[0],
+    turnPlanCommitmentFrom(selectedLine),
   );
 }
 ```
@@ -4565,6 +4646,27 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 1.0 – 2026-07-29
+
+- zentrale Restzug-Dirigentenschicht ergänzt: nichtautoritative Planning
+  Heads aller relevanten Planinstanzen konkurrieren vor der Executorwahl;
+  nur der gewählte erste Step wird danach autoritativ rematerialisiert;
+- mehrphasige Ein-Root-Phasen, `TurnPlanCommitment`, side-sichere
+  Planning-State-Identität, konkrete Priority-Obligations und
+  prefixgebundene Kampagnen-Value-Claims als gemeinsame Kernelverträge
+  festgeschrieben;
+- hypothetische Phasenroots in V1 auf residente oder bereits
+  admission-geprüfte Beziehungen begrenzt; neue Planentdeckung bildet eine
+  explizite Replangrenze;
+- echte Informationsgrenzen beenden den konkreten TurnPlan; ein eng
+  registrierter abstrakter Restwert bleibt zulässig, konkrete
+  Recourse-Phasen nicht;
+- Phase Entry, Completion, Need-/Assignment-Bindung, Transition und Cursor
+  als einzige Fortschrittswahrheit ergänzt;
+- privilegierte private KI-Debuganzeige ausdrücklich von normalen
+  side-sicheren Datenwegen getrennt: Sie zeigt vollständige Karten beider
+  Seiten sowie den kompletten Zugplan.
 
 ### 0.9 – 2026-07-26
 

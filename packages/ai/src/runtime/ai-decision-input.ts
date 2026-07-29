@@ -40,6 +40,12 @@ import {
   strategicIntentRevalidationPublicEventFacts,
 } from "./strategic-intent-live-revalidation";
 import { buildStrategicRuntimeContext } from "./strategic-runtime-context";
+import {
+  buildPlanningRulesContext,
+  buildPlanningStateIdentity,
+  type PlanningRulesContext,
+  type PlanningStateIdentity,
+} from "../plans/turn-planning-contracts";
 
 export type AiDecisionSideSelection =
   | {
@@ -59,6 +65,14 @@ export type AiDecisionSideSelection =
     };
 
 export type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
+  /**
+   * Productive inputs built by buildAiDecisionInput always carry both
+   * planning contracts. They remain optional on the extended compatibility
+   * type until all isolated test/input builders have migrated; the Turn
+   * Planner boundary must require them fail-closed.
+   */
+  planningRulesContext?: PlanningRulesContext;
+  planningStateIdentity?: PlanningStateIdentity;
   ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
   ownDeckCapabilities?: DeckCapabilityProfile;
   ownDeckStrategyProfile?: AiDeckStrategyProfile;
@@ -101,7 +115,7 @@ export function buildAiDecisionInput(
     ownDeckSnapshot: AiDeckStrategyDeckSnapshot;
     expectedDeckSnapshot?: Omit<AiDeckSnapshotRuntimeExpectation, "side">;
   },
-): AiDecisionInput {
+): AiDecisionInputWithDeckCapabilities {
   const expectedDeckSnapshot = options?.expectedDeckSnapshot;
   const ownDeckSnapshot = assertValidAiDeckSnapshotForRuntime(
     options?.ownDeckSnapshot,
@@ -204,6 +218,18 @@ export function buildAiDecisionInput(
       : undefined;
   const enriched: AiDecisionInputWithDeckCapabilities = {
     ...input,
+    planningRulesContext: buildPlanningRulesContext({
+      rulesBaseline: state.baseline,
+      formatProfileId:
+        playerView.deckMetadata?.own.formatProfileId ??
+        ownDeckSnapshot.formatProfileId ??
+        "unknown-format",
+      cardPoolSnapshotId:
+        playerView.deckMetadata?.own.cardPoolSnapshotId ??
+        ownDeckSnapshot.cardPoolSnapshotId ??
+        "unknown-card-pool",
+    }),
+    planningStateIdentity: buildPlanningStateIdentity(input),
     ownDeckSnapshot,
     ownDeckCapabilities,
     ownDeckStrategyProfile,
