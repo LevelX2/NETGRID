@@ -1221,13 +1221,23 @@ select {
   line-height: 1.15;
 }
 
-.publicGamesFilters {
+.publicGamesToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.publicGamesFilters,
+.publicGamesViewToggle {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.publicGamesFilters .button.active {
+.publicGamesFilters .button.active,
+.publicGamesViewToggle .button.active {
   color: var(--active-control-text);
   border-color: var(--active-control-border);
   background: var(--catalog-active-bg);
@@ -1324,9 +1334,77 @@ select {
   font-weight: 700;
 }
 
+.publicGameResultScores {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.publicGameResultScores strong {
+  color: var(--text);
+}
+
 .publicGameMain code {
   color: var(--muted);
   font-size: 11px;
+}
+
+.publicGameCard.compact {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 8px 10px;
+}
+
+.publicGameCard.compact .publicGameMain {
+  min-width: 0;
+  align-items: center;
+}
+
+.publicGameCard.compact .publicGameMain > div {
+  min-width: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 12px;
+}
+
+.publicGameCard.compact .publicGameTitle {
+  flex-wrap: nowrap;
+}
+
+.publicGameCard.compact .publicGameMeta {
+  overflow: hidden;
+  max-width: min(44vw, 580px);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.publicGameCard.compact .publicGameJoinInfo,
+.publicGameCard.compact .publicGameResult {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.publicGameCard.compact .publicGameFooter {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .publicGameCard.compact {
+    grid-template-columns: 1fr;
+  }
+
+  .publicGameCard.compact .publicGameFooter {
+    justify-content: space-between;
+  }
+
+  .publicGameCard.compact .publicGameMeta {
+    max-width: 100%;
+  }
 }
 
 .recentGamesPanel {

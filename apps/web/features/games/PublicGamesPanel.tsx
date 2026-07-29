@@ -15,10 +15,14 @@ import {
   canRejoinPublicMatch,
   filterAndSortPublicMatches,
   publicGamesFilterLabel,
+  publicGamesViewModeLabel,
+  publicMatchResultScore,
   type PublicGamesFilter,
+  type PublicGamesViewMode,
 } from "./public-games-model";
 
 const FILTERS: PublicGamesFilter[] = ["all", "open", "active", "finished"];
+const VIEW_MODES: PublicGamesViewMode[] = ["detailed", "compact"];
 
 export function PublicGamesPanel({
   matches,
@@ -44,6 +48,7 @@ export function PublicGamesPanel({
   onRejoin(entry: PublicMatchEntry): void;
 }) {
   const [filter, setFilter] = useState<PublicGamesFilter>("all");
+  const [viewMode, setViewMode] = useState<PublicGamesViewMode>("detailed");
   const visibleMatches = useMemo(
     () => filterAndSortPublicMatches(matches, filter),
     [filter, matches],
@@ -76,18 +81,37 @@ export function PublicGamesPanel({
         </button>
       </div>
 
-      <div className="publicGamesFilters" aria-label="Spiele filtern">
-        {FILTERS.map((candidate) => (
-          <button
-            className={`button ${filter === candidate ? "active" : ""}`}
-            key={candidate}
-            onClick={() => setFilter(candidate)}
-            type="button"
-            aria-pressed={filter === candidate}
-          >
-            {publicGamesFilterLabel(candidate)}
-          </button>
-        ))}
+      <div className="publicGamesToolbar">
+        <div className="publicGamesFilters" aria-label="Spiele filtern">
+          {FILTERS.map((candidate) => (
+            <button
+              className={`button ${filter === candidate ? "active" : ""}`}
+              key={candidate}
+              onClick={() => setFilter(candidate)}
+              type="button"
+              aria-pressed={filter === candidate}
+            >
+              {publicGamesFilterLabel(candidate)}
+            </button>
+          ))}
+        </div>
+        <div
+          className="publicGamesViewToggle"
+          role="group"
+          aria-label="Darstellung wählen"
+        >
+          {VIEW_MODES.map((candidate) => (
+            <button
+              className={`button ${viewMode === candidate ? "active" : ""}`}
+              key={candidate}
+              onClick={() => setViewMode(candidate)}
+              type="button"
+              aria-pressed={viewMode === candidate}
+            >
+              {publicGamesViewModeLabel(candidate)}
+            </button>
+          ))}
+        </div>
       </div>
 
       {error ? (
@@ -108,6 +132,7 @@ export function PublicGamesPanel({
                 canJoinOpen={canJoinOpen}
                 canRejoin={canRejoinPublicMatch(entry, rejoinableMatchIdSet)}
                 rejoining={rejoiningMatchId === entry.matchId}
+                viewMode={viewMode}
                 onJoinOpen={onJoinOpen}
                 onRejoin={onRejoin}
               />
@@ -129,6 +154,7 @@ function PublicGameCard({
   canJoinOpen,
   canRejoin,
   rejoining,
+  viewMode,
   onJoinOpen,
   onRejoin,
 }: {
@@ -136,15 +162,17 @@ function PublicGameCard({
   canJoinOpen: boolean;
   canRejoin: boolean;
   rejoining: boolean;
+  viewMode: PublicGamesViewMode;
   onJoinOpen(entry: PublicMatchEntry): void;
   onRejoin(entry: PublicMatchEntry): void;
 }) {
   const target = publicMatchTarget(entry);
   const gamebookTarget = publicGamebookTarget(entry);
+  const resultScore = publicMatchResultScore(entry);
   const ActionIcon =
     entry.status === "open" ? LogIn : entry.status === "active" ? Eye : History;
   return (
-    <article className={`publicGameCard ${entry.status}`}>
+    <article className={`publicGameCard ${entry.status} ${viewMode}`}>
       <div className="publicGameMain">
         <div>
           <div className="publicGameTitle">
@@ -169,10 +197,16 @@ function PublicGameCard({
               {sideLabel(entry.availableSide)}
             </p>
           ) : null}
-          {entry.result ? (
+          {resultScore ? (
             <p className="publicGameResult">
-              Endstand {entry.result.runner.agendaPoints} :{" "}
-              {entry.result.corp.agendaPoints} · {winnerLabel(entry)}
+              <span className="publicGameResultScores">
+                {resultScore.matchPoints ? (
+                  <strong>Matchpunkte {resultScore.matchPoints}</strong>
+                ) : null}
+                <span>Agenda-Punkte {resultScore.agendaPoints}</span>
+              </span>
+              <span aria-hidden="true"> · </span>
+              {winnerLabel(entry)}
             </p>
           ) : null}
         </div>
