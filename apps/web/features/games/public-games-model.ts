@@ -8,6 +8,12 @@ export type PublicMatchResultScore = {
   matchPoints?: string;
 };
 
+export type PublicMatchConclusion = {
+  kind: "regular" | "forfeit" | "time_expired" | "unknown";
+  label: string;
+  compactLabel: string;
+};
+
 const STATUS_PRIORITY: Record<ApiPublicMatchListEntry["status"], number> = {
   open: 0,
   active: 1,
@@ -58,6 +64,65 @@ export function publicMatchResultScore(
     : score;
 }
 
+export function publicMatchConclusion(
+  entry: ApiPublicMatchListEntry,
+): PublicMatchConclusion | null {
+  const result = entry.result;
+  if (!result) return null;
+
+  if (result.reason === "forfeit" || result.reason === "time_expired") {
+    const loserSide =
+      result.loserSide ??
+      (result.winnerSide === "runner"
+        ? "corp"
+        : result.winnerSide === "corp"
+          ? "runner"
+          : undefined);
+    const participant = loserSide ? result[loserSide] : undefined;
+    const participantName = participant?.displayName.trim();
+    const participantLabel = loserSide
+      ? `${participantName || sideLabel(loserSide)} (${sideLabel(loserSide)})`
+      : undefined;
+    const compactParticipantLabel =
+      participantName || (loserSide ? sideLabel(loserSide) : undefined);
+
+    if (result.reason === "forfeit") {
+      return {
+        kind: "forfeit",
+        label: participantLabel
+          ? `Aufgegeben von ${participantLabel}`
+          : "Durch Aufgabe beendet",
+        compactLabel: compactParticipantLabel
+          ? `Aufgabe: ${compactParticipantLabel}`
+          : "Aufgabe",
+      };
+    }
+    return {
+      kind: "time_expired",
+      label: participantLabel
+        ? `Zeit abgelaufen bei ${participantLabel}`
+        : "Durch Zeitablauf beendet",
+      compactLabel: compactParticipantLabel
+        ? `Zeit: ${compactParticipantLabel}`
+        : "Zeitablauf",
+    };
+  }
+
+  if (result.reason === "unknown") {
+    return {
+      kind: "unknown",
+      label: "Abschlussart unbekannt",
+      compactLabel: "Unbekannter Abschluss",
+    };
+  }
+
+  return {
+    kind: "regular",
+    label: "Regulär beendet",
+    compactLabel: "Regulär",
+  };
+}
+
 export function shouldRefreshPublicGames({
   hasActivePlayerView,
   entryTab,
@@ -77,4 +142,8 @@ export function canRejoinPublicMatch(
   rejoinableMatchIds: ReadonlySet<string>,
 ): boolean {
   return entry.status === "active" && rejoinableMatchIds.has(entry.matchId);
+}
+
+function sideLabel(side: "runner" | "corp"): string {
+  return side === "runner" ? "Runner" : "Korp";
 }

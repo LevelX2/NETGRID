@@ -5089,6 +5089,12 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(runnerStored?.gameState.winner).toBeFalsy();
     expect(runnerStored?.match.winner).toBe("corp");
+    expect(runnerStored?.resultSnapshot).toMatchObject({
+      matchStatus: "forfeited",
+      reason: "forfeit",
+      winnerSide: "corp",
+      loserSide: "runner",
+    });
     const runnerReplay = await runnerMatch.service.replayMatch(
       runnerMatch.matchId,
     );

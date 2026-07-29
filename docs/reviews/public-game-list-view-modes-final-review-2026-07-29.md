@@ -19,6 +19,13 @@ Abgeschlossene Spiele zeigen vorhandene Matchpunkte jetzt ausdrücklich vor den
 Agenda-Punkten. Damit ist die eigentliche Matchwertung nicht länger nur
 indirekt über Gewinner und Agenda-Stand erkennbar.
 
+Zusätzlich ist die Abschlussart direkt sichtbar:
+
+- `Regulär beendet` bei normalen Engine-Enden und Draws;
+- `Aufgegeben von <Name> (<Seite>)` bei einer Aufgabe;
+- `Zeit abgelaufen bei <Name> (<Seite>)` bei abgelaufener Spielerzeit;
+- `Abschlussart unbekannt`, wenn kein belastbarer Endgrund vorliegt.
+
 ## Implementation Review
 
 ### Ergebnisdarstellung
@@ -43,6 +50,23 @@ Dadurch bleiben die vorhandenen statusabhängigen Aktionen identisch:
   zuschauen;
 - abgeschlossen: Replay sowie vorhandener Spielprotokoll-Download.
 
+### Abschlussart und verantwortlicher Teilnehmer
+
+Der persistierte `ApiMatchResultSnapshot` transportiert für Aufgabe und
+Zeitablauf die serverseitige `loserSide`. Die UI verwendet diese Seite zur
+Auswahl des bereits öffentlichen Teilnehmernamens. Damit wird die
+Verantwortung weder aus Anzeigenamen noch aus dem Punktestand abgeleitet.
+
+Historische Snapshots besitzen das neue optionale Feld noch nicht. Für
+`forfeit` und `time_expired` ist die Verliererseite durch die Gegenseite der
+autoritativen Gewinnerseite eindeutig bestimmt; nur dort ist dieser
+Legacy-Fallback erlaubt. Bei `unknown` bleibt die Anzeige ausdrücklich
+neutral.
+
+Im kompakten Modus stehen die kurzen Badges `Regulär`, `Aufgabe: <Name>` oder
+`Zeit: <Name>` vor dem Punktestand, damit die Abschlussart auch bei knapper
+Breite sichtbar bleibt.
+
 ### Responsive Kompaktheit
 
 Die kompakte Karte verwendet auf allen Viewports eine zweispaltige
@@ -59,8 +83,9 @@ die vollständigen Textbuttons.
 
 ## Grenzen
 
-- Keine Änderung an Matchpunktberechnung, Shared-Vertrag, Server, Storage,
-  Replay oder Zuschauerprojektion.
+- Keine Änderung an Matchpunktberechnung, Rules Engine, Replay oder
+  Zuschauerprojektion. Der Shared-/Server-Snapshot ergänzt ausschließlich die
+  bereits serverintern vorhandene optionale `loserSide`.
 - Keine Persistenz der Darstellungswahl über Reloads.
 - Keine Änderung am getrennten Bereich `Meine Spiele`.
 - Keine neuen privaten Daten im öffentlichen Listenpayload.
@@ -69,12 +94,15 @@ die vollständigen Textbuttons.
 
 | Prüfung                              | Ergebnis                                                         |
 | ------------------------------------ | ---------------------------------------------------------------- |
-| Spielelistenmodell und UI-Navigation | 15 Tests bestanden                                               |
+| Spielelistenmodell und UI-Navigation | 17 Tests bestanden                                               |
 | Matchpunkte vorhanden                | getrennte Ausgabe `Matchpunkte 10 : 3` und `Agenda-Punkte 7 : 3` |
 | Matchpunkte fehlen                   | keine abgeleitete Ersatzwertung                                  |
+| Abschlussart                         | regulär, Aufgabe, Zeitablauf und unbekannt getrennt              |
+| Forfeit-Snapshot                     | `loserSide` wird serverseitig gespeichert                        |
 | Web-Typecheck                        | bestanden                                                        |
 | Next.js-Produktionsbuild             | bestanden                                                        |
 | Live-Browser-Höhenvergleich          | kompakt 38 px, ausführlich 115 px                                |
+| Live-Browser-Abschlussart            | reguläre Bestandsmatches und 7 historische Aufgaben korrekt      |
 | Kompakte Aktionen                    | 28 × 28 px, Tooltip und `aria-label` vorhanden                   |
 | Prettier der Paketdateien            | bestanden                                                        |
 | `git diff --check`                   | bestanden                                                        |

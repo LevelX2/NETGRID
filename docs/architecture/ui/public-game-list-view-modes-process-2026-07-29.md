@@ -12,6 +12,9 @@ Nutzerbefund vom 2026-07-29:
 - Abgeschlossene Einträge der öffentlichen Spieleliste zeigen bislang nur
   Agenda-Punkte. Die bereits im Ergebnis-Snapshot vorhandenen Matchpunkte
   sollen als eigentliche Spielwertung zusätzlich sichtbar werden.
+- Die Liste soll außerdem eindeutig unterscheiden, ob ein Spiel regulär
+  endete, durch Aufgabe beendet wurde oder eine Spielerzeit ablief. Bei
+  Aufgabe oder Zeitablauf soll der verantwortliche Teilnehmer sichtbar sein.
 - Für offene, laufende und abgeschlossene Spiele soll neben der bestehenden
   ausführlichen Kartendarstellung eine kompakte, zeilenartige Darstellung
   angeboten werden.
@@ -59,11 +62,16 @@ Goal erst nach verifiziertem Cleanup als abgeschlossen.
 - Matchpunkte werden nur angezeigt, wenn der autoritative Ergebnis-Snapshot
   beide Werte enthält. Ältere Snapshots ohne diese optionalen Felder bleiben
   ohne erfundene Ersatzwertung darstellbar.
+- Aufgabe und Zeitablauf verwenden die autoritative `loserSide`. Für ältere
+  Snapshots darf ausschließlich bei diesen beiden eindeutigen Endgründen die
+  Gegenseite der autoritativen Gewinnerseite als Legacy-Fallback dienen.
 
 ## Nicht-Ziele
 
-- Keine Änderung an Matchpunktberechnung, Rules Engine, Serverpersistenz,
-  Replay, Zuschauerprojektion oder Hidden-Info-Vertrag.
+- Keine Änderung an Matchpunktberechnung, Rules Engine, Replay,
+  Zuschauerprojektion oder Hidden-Info-Vertrag. Der Ergebnis-Snapshot ergänzt
+  ausschließlich die bereits serverintern vorhandene optionale
+  Verliererseite.
 - Keine neue Filter-, Such-, Sortier- oder Paginationfunktion.
 - Keine Änderung an `Meine Spiele`.
 - Keine Speicherung der Ansichtspräferenz.
@@ -80,6 +88,7 @@ Goal erst nach verifiziertem Cleanup als abgeschlossen.
 5. Private Daten, LegalActions, Hände, Tokens und Deckinhalte bleiben
    außerhalb des öffentlichen Listenpayloads.
 6. Fremde Änderungen und Worktrees bleiben unangetastet.
+7. Die UI klassifiziert unbekannte Endgründe nicht als regulären Abschluss.
 
 ## Automatische Fehlerbehandlung
 
@@ -147,6 +156,9 @@ Konkrete Arbeit:
   abgeschlossene Spiele gestalten.
 - In beiden Ansichten vorhandene Matchpunkte explizit und Agenda-Punkte
   sekundär ausgeben.
+- Regulären Abschluss, Aufgabe und Zeitablauf unterscheiden; bei Aufgabe oder
+  Zeitablauf den verantwortlichen Teilnehmer aus der serverseitigen
+  Verliererseite benennen.
 - Bestehende Aktionen und Rejoin-Logik unverändert wiederverwenden.
 - Prozess, Abschlussreview, Statuswissen und Projektlog aktualisieren, soweit
   die wiederverwendbare UI-Entscheidung dies erfordert.
@@ -180,6 +192,9 @@ Done-Gate:
 - Beide Modi bieten dieselben statusabhängigen Aktionen.
 - Abgeschlossene Spiele zeigen vorhandene Matchpunkte und Agenda-Punkte
   getrennt und eindeutig.
+- Abgeschlossene Spiele zeigen `Regulär beendet`, `Aufgegeben von <Name>
+(<Seite>)`, `Zeit abgelaufen bei <Name> (<Seite>)` oder einen neutralen
+  unbekannten Abschluss.
 - Snapshots ohne Matchpunkte bleiben korrekt darstellbar.
 - Paketnahe Tests, Typecheck und Diff-Check sind grün.
 
@@ -233,15 +248,26 @@ Matchpunktwerte in einem älteren Snapshot, wird keine Ersatzwertung erfunden.
 In der kompakten Zeile bleiben Aktionen als Icon-Buttons mit Tooltip und
 zugänglicher Beschriftung verfügbar.
 
+Der Ergebnis-Snapshot führt zusätzlich die optionale autoritative
+`loserSide`. Die Liste kennzeichnet reguläre Spiele mit `Regulär beendet`.
+Aufgaben und Zeitabläufe nennen den verantwortlichen Teilnehmer; historische
+Snapshots ohne `loserSide` verwenden nur für diese beiden eindeutigen
+Endgründe die Gegenseite der gespeicherten Gewinnerseite.
+
 Paketcommit: dieser Commit.
 
 Grüne Checks:
 
-- 15 gezielte Webtests in drei Testdateien
+- 17 gezielte Webtests in drei Testdateien
+- Shared-Vertragstest und fokussierter Server-Forfeit-Snapshot-Test
 - `corepack pnpm --filter @netgrid/web typecheck`
 - `corepack pnpm --filter @netgrid/web build`
 - Live-Browser-Smoke: kompakt 38 Pixel, ausführlich 115 Pixel; alle kompakten
   Aktionsbuttons 28 × 28 Pixel mit Tooltip und `aria-label`
+- Live-Browser-Bestandsprobe: reguläre Matches erscheinen als `Regulär
+beendet`; sieben historische Aufgaben ohne `loserSide` werden über den
+  sicheren `winnerSide`-Fallback dem richtigen Teilnehmer und der richtigen
+  Seite zugeordnet
 - Prettier-Prüfung aller Paketdateien
 - `git diff --check`
 

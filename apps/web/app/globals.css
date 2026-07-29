@@ -1348,6 +1348,28 @@ select {
   color: var(--text);
 }
 
+.publicGameConclusion {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.publicGameConclusion.regular {
+  color: var(--success);
+}
+
+.publicGameConclusion.forfeit,
+.publicGameConclusion.time_expired {
+  color: var(--danger);
+}
+
+.publicGameConclusion.unknown {
+  color: var(--muted);
+}
+
 .publicGameMain code {
   color: var(--muted);
   font-size: 11px;
@@ -1423,8 +1445,21 @@ select {
   gap: 6px;
 }
 
+.publicGameCard.compact .publicGameConclusionSeparator {
+  display: none;
+}
+
+.publicGameCard.compact .publicGameConclusion {
+  order: -1;
+  flex: 0 0 auto;
+  padding: 1px 5px;
+  font-size: 10px;
+}
+
 .publicGameCard.compact .publicGameResultScores {
+  min-width: 0;
   flex-wrap: nowrap;
+  overflow: hidden;
   white-space: nowrap;
 }
 

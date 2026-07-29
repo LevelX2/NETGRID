@@ -185,10 +185,12 @@ Reihenfolge Offen, Laufend, Abgeschlossen mit passenden Filtern und direkten
 Aktionen bereit. Die Liste startet ausführlich und lässt sich gemeinsam für
 alle drei Statusklassen auf eine responsive kompakte Zeilenansicht umstellen.
 Abgeschlossene Einträge zeigen vorhandene Matchpunkte als primäre Wertung
-getrennt von den Agenda-Punkten; ältere Snapshots ohne Matchpunkte werden
-nicht im Client nachberechnet. `Meine Spiele` verwendet dagegen ausschließlich
-die authentifizierte Account-Teilnehmerbindung und darf dadurch auch eigene
-private Matches zeigen, niemals aber fremde. Terminale Ergebnisse werden
+getrennt von den Agenda-Punkten. Sie kennzeichnen außerdem reguläre Abschlüsse,
+Aufgaben und Zeitabläufe; bei Aufgabe oder Zeitablauf wird der verantwortliche
+Teilnehmer über die autoritative Verliererseite benannt. Ältere Snapshots ohne
+Matchpunkte werden nicht im Client nachberechnet. `Meine Spiele` verwendet
+dagegen ausschließlich die authentifizierte Account-Teilnehmerbindung und darf
+dadurch auch eigene private Matches zeigen, niemals aber fremde. Terminale Ergebnisse werden
 einmal als immutable Snapshots gespeichert; nach dem historischen Backfill
 lesen Listen nur noch kompakte Matchzeilen. Der gemessene Bestandslauf
 ergänzte 19/19 Snapshots, fünf warme öffentliche Abrufe lagen bei 73 bis

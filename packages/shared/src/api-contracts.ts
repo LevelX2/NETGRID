@@ -248,6 +248,7 @@ export type ApiMatchResultSnapshot = {
   startedAt: string;
   winner: Winner;
   winnerSide?: Side;
+  loserSide?: Side;
   reason: ApiGameResultReason;
   runner: {
     displayName: string;

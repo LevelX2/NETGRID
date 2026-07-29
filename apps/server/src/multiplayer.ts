@@ -6763,6 +6763,9 @@ function matchResultSnapshotFor(
     startedAt: record.match.createdAt,
     winner,
     ...(winner === "runner" || winner === "corp" ? { winnerSide: winner } : {}),
+    ...(record.lifecycleResult?.loserSide
+      ? { loserSide: record.lifecycleResult.loserSide }
+      : {}),
     reason,
     runner: {
       displayName: publicDisplayNameForSide(record, "runner"),

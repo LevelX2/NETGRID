@@ -16,6 +16,7 @@ import {
   filterAndSortPublicMatches,
   publicGamesFilterLabel,
   publicGamesViewModeLabel,
+  publicMatchConclusion,
   publicMatchResultScore,
   type PublicGamesFilter,
   type PublicGamesViewMode,
@@ -169,6 +170,7 @@ function PublicGameCard({
   const target = publicMatchTarget(entry);
   const gamebookTarget = publicGamebookTarget(entry);
   const resultScore = publicMatchResultScore(entry);
+  const conclusion = publicMatchConclusion(entry);
   const ActionIcon =
     entry.status === "open" ? LogIn : entry.status === "active" ? Eye : History;
   return (
@@ -212,6 +214,25 @@ function PublicGameCard({
                 ·{" "}
               </span>
               <span className="publicGameWinner">{winnerLabel(entry)}</span>
+              {conclusion ? (
+                <>
+                  <span
+                    className="publicGameConclusionSeparator"
+                    aria-hidden="true"
+                  >
+                    {" "}
+                    ·{" "}
+                  </span>
+                  <span
+                    className={`publicGameConclusion ${conclusion.kind}`}
+                    title={conclusion.label}
+                  >
+                    {viewMode === "compact"
+                      ? conclusion.compactLabel
+                      : conclusion.label}
+                  </span>
+                </>
+              ) : null}
             </p>
           ) : null}
         </div>

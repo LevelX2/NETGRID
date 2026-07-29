@@ -6,6 +6,7 @@ import {
   filterAndSortPublicMatches,
   publicGamesFilterLabel,
   publicGamesViewModeLabel,
+  publicMatchConclusion,
   publicMatchResultScore,
   shouldRefreshPublicGames,
   type PublicGamesFilter,
@@ -142,6 +143,70 @@ describe("public games model", () => {
     ).toBeNull();
   });
 
+  it("distinguishes regular results from a participant forfeit", () => {
+    const finished = entry(
+      "regular-finished",
+      "finished",
+      "2026-07-20T12:00:00.000Z",
+    );
+    finished.result = resultSnapshot(finished, {
+      winner: "runner",
+      winnerSide: "runner",
+      reason: "agenda_points",
+    });
+    expect(publicMatchConclusion(finished)).toEqual({
+      kind: "regular",
+      label: "Regulär beendet",
+      compactLabel: "Regulär",
+    });
+
+    const forfeited = entry(
+      "forfeited",
+      "finished",
+      "2026-07-20T12:10:00.000Z",
+    );
+    forfeited.result = resultSnapshot(forfeited, {
+      matchStatus: "forfeited",
+      winner: "corp",
+      winnerSide: "corp",
+      loserSide: "runner",
+      reason: "forfeit",
+      runnerDisplayName: "Teilnehmer A",
+    });
+    expect(publicMatchConclusion(forfeited)).toEqual({
+      kind: "forfeit",
+      label: "Aufgegeben von Teilnehmer A (Runner)",
+      compactLabel: "Aufgabe: Teilnehmer A",
+    });
+  });
+
+  it("uses the authoritative winner only as a legacy fallback for terminal loser reasons", () => {
+    const expired = entry("expired", "finished", "2026-07-20T12:20:00.000Z");
+    expired.result = resultSnapshot(expired, {
+      matchStatus: "forfeited",
+      winner: "runner",
+      winnerSide: "runner",
+      reason: "time_expired",
+      corpDisplayName: "Teilnehmer B",
+    });
+    expect(publicMatchConclusion(expired)).toEqual({
+      kind: "time_expired",
+      label: "Zeit abgelaufen bei Teilnehmer B (Korp)",
+      compactLabel: "Zeit: Teilnehmer B",
+    });
+
+    const unknown = entry("unknown", "finished", "2026-07-20T12:30:00.000Z");
+    unknown.result = resultSnapshot(unknown, {
+      winner: "draw",
+      reason: "unknown",
+    });
+    expect(publicMatchConclusion(unknown)).toEqual({
+      kind: "unknown",
+      label: "Abschlussart unbekannt",
+      compactLabel: "Unbekannter Abschluss",
+    });
+  });
+
   it("refreshes the visible setup list even when a local recovery session exists", () => {
     expect(
       shouldRefreshPublicGames({
@@ -181,3 +246,43 @@ describe("public games model", () => {
     ).toBe(false);
   });
 });
+
+function resultSnapshot(
+  match: ApiPublicMatchListEntry,
+  overrides: {
+    matchStatus?: "finished" | "forfeited";
+    winner: "runner" | "corp" | "draw";
+    winnerSide?: "runner" | "corp";
+    loserSide?: "runner" | "corp";
+    reason: "agenda_points" | "forfeit" | "time_expired" | "unknown";
+    runnerDisplayName?: string;
+    corpDisplayName?: string;
+  },
+): NonNullable<ApiPublicMatchListEntry["result"]> {
+  return {
+    schemaVersion: "netgrid-match-result-v1",
+    matchId: match.matchId,
+    matchStatus: overrides.matchStatus ?? "finished",
+    matchMode: match.matchMode,
+    matchFormat: match.matchFormat,
+    finishedAt: match.updatedAt,
+    startedAt: match.createdAt,
+    winner: overrides.winner,
+    ...(overrides.winnerSide ? { winnerSide: overrides.winnerSide } : {}),
+    ...(overrides.loserSide ? { loserSide: overrides.loserSide } : {}),
+    reason: overrides.reason,
+    runner: {
+      displayName: overrides.runnerDisplayName ?? "Runner",
+      agendaPoints: 7,
+      matchPoints: overrides.winner === "runner" ? 10 : 0,
+    },
+    corp: {
+      displayName: overrides.corpDisplayName ?? "Korp",
+      agendaPoints: 3,
+      matchPoints: overrides.winner === "corp" ? 10 : 3,
+    },
+    actionCount: 12,
+    runCount: 4,
+    finalStateHash: "hash",
+  };
+}
