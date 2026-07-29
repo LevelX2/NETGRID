@@ -423,7 +423,16 @@ function discardChoiceExpectationMatches(
         )
       : [],
   );
-  if (!choice || choice.source !== "discard_phase") return false;
+  const selectedOptionsAreRetained =
+    choice?.source.startsWith(
+      "runner.successful_hq_run_corp_pay_to_retain_hq:",
+    ) === true;
+  if (
+    !choice ||
+    (choice.source !== "discard_phase" && !selectedOptionsAreRetained)
+  ) {
+    return false;
+  }
   const definitionIdByInstanceId = new Map(
     input.playerView.own.gripOrHq.map((card) => [
       card.instanceId,
@@ -431,7 +440,9 @@ function discardChoiceExpectationMatches(
     ]),
   );
   const discardedDefinitionIds = choice.options
-    .filter((option) => selectedIds.has(option.id))
+    .filter(
+      (option) => selectedIds.has(option.id) !== selectedOptionsAreRetained,
+    )
     .map(
       (option) =>
         option.card?.definitionId ??
@@ -443,7 +454,9 @@ function discardChoiceExpectationMatches(
     .filter((definitionId): definitionId is string => Boolean(definitionId));
   const discardedInstanceIds = new Set(
     choice.options
-      .filter((option) => selectedIds.has(option.id))
+      .filter(
+        (option) => selectedIds.has(option.id) !== selectedOptionsAreRetained,
+      )
       .map(
         (option) =>
           option.card?.instanceId ??

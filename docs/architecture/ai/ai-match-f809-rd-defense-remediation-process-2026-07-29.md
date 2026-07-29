@@ -287,4 +287,15 @@ Der Prozess stoppt ohne heuristischen Workaround, wenn:
   Ratenzahlungsrisiko werden als gekappte Nachteile bewertet. Die 128
   Core-Plan-, 161 Plan-first-Runtime- und 11
   Authority-Structure-Tests bleiben grün.
-- P4 bis P6: ausstehend.
+- P4: abgeschlossen. Die HQ-Zahlungsauswahl enumeriert nur die erlaubte
+  Anzahl vollständiger Behalten-Sets und ergänzt deren vorhandene
+  Einzelkartenwerte um eine side-sichere Defense-Paketquote. Diese Quote
+  gilt nur bei einem leeren, akut bedrohten Zentralserver und einem
+  generisch aus Hints erkannten Paar aus ICE und Action-Rez-Hilfe; Rez-Kosten
+  und temporäre beziehungsweise Ratenzahlungsnachteile begrenzen den Bonus.
+  Bei bereits geschützten Zentralservern oder ohne jüngsten Zentraldruck
+  bleibt die Quote null. D30 behält `Credit Blocks` und
+  `Rent-to-Own Contract`; die beiden Gegenproben werfen die Rez-Hilfe
+  weiterhin ab. Der Checkpoint-Runner bildet die umgekehrte Auswahlsemantik
+  „ausgewählt = gegen Zahlung behalten“ nun korrekt ab.
+- P5 und P6: ausstehend.

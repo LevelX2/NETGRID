@@ -169,6 +169,10 @@ import {
 import { corpKnownAgendaInventory } from "./corp-known-agenda-inventory";
 import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
 import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
+import {
+  actionIceRezSupportLiability,
+  definitionHasActionIceRezSupport,
+} from "./corp-defense-rez-support-facts";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 import { corpRootRezTimingComponent } from "./corp-scoreline/semantic-runtime-corp-score-ice-components";
 import {
@@ -14947,25 +14951,6 @@ function candidateIsVisibleCorpAgendaInstall(
   return visibleCardIsAgenda(input, visibleSource);
 }
 
-function definitionHasActionIceRezSupport(definitionId: string): boolean {
-  const hint = AI_HINTS_BY_CARD.get(definitionId);
-  return (
-    hint?.side === "corp" &&
-    hint.effects?.some(
-      (effect) =>
-        effect.kind === "rez" &&
-        effect.scope === "ice" &&
-        effect.timing === "action",
-    ) === true &&
-    hint.targetProfiles?.some(
-      (profile) =>
-        "kind" in profile &&
-        profile.kind === "use_target" &&
-        profile.targetType === "installed_ice",
-    ) === true
-  );
-}
-
 function corpVisibleHandHasActionIceRezSupport(
   input: AiDecisionInput,
 ): boolean {
@@ -15061,19 +15046,13 @@ function corpIceRezSupportOperationSignal(
   ) {
     return undefined;
   }
-  const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
-  const tacticSignals = new Set(hint?.tacticSignals ?? []);
-  const temporaryLiability =
-    tacticSignals.has("ice.corp_temporary_rez") &&
-    tacticSignals.has("risk.temporary_rez_liability");
-  const installmentLiability =
-    tacticSignals.has("ice.corp_installment_rez") &&
-    tacticSignals.has("risk.term_counter_payment_liability");
+  const liability = actionIceRezSupportLiability(candidate.sourceDefinitionId);
+  if (!liability) return undefined;
   const relief = quote.finalCredits - creditCost;
-  let liabilityKind = "bounded" as "bounded" | "temporary" | "installment";
+  const liabilityKind = liability;
   let duration = 0;
   let value = 130 + relief * 3;
-  if (temporaryLiability) {
+  if (liability === "temporary") {
     const xValue = action.payload?.xValue;
     if (
       typeof xValue !== "number" ||
@@ -15082,11 +15061,9 @@ function corpIceRezSupportOperationSignal(
     ) {
       return undefined;
     }
-    liabilityKind = "temporary";
     duration = xValue;
     value = 125 + relief * 3 - Math.abs(xValue - 3) * 8;
-  } else if (installmentLiability) {
-    liabilityKind = "installment";
+  } else if (liability === "installment") {
     duration = quote.finalCredits;
     value = 120 + relief * 2 - Math.min(8, quote.finalCredits);
   }

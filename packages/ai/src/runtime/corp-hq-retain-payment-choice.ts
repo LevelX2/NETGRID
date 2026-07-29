@@ -1,5 +1,6 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
+import { quoteCorpDefensePackageRetention } from "./corp-defense-package-retention";
 import { discardOptionInstanceId } from "./discard-choice-option";
 
 type PendingChoice = NonNullable<
@@ -52,12 +53,17 @@ export function selectedCorpHqRetainPaymentOptionIds(
       const instanceId = discardOptionInstanceId(option);
       const card = instanceId ? handByInstanceId.get(instanceId) : undefined;
       return card
-        ? { option, score: scoreKeepCandidate(input, card).total }
+        ? { option, card, score: scoreKeepCandidate(input, card).total }
         : undefined;
     })
     .filter(
-      (entry): entry is { option: PendingChoiceOption; score: number } =>
-        entry !== undefined,
+      (
+        entry,
+      ): entry is {
+        option: PendingChoiceOption;
+        card: VisibleCard;
+        score: number;
+      } => entry !== undefined,
     )
     .sort(
       (left, right) =>
@@ -76,5 +82,46 @@ export function selectedCorpHqRetainPaymentOptionIds(
       .slice(0, count)
       .map((option) => option.id);
   }
-  return ranked.slice(0, count).map((entry) => entry.option.id);
+  const selectedSet = combinations(ranked, count)
+    .map((entries) => {
+      const defenseQuote = quoteCorpDefensePackageRetention(
+        input,
+        entries.map((entry) => entry.card),
+      );
+      return {
+        entries,
+        total:
+          entries.reduce((sum, entry) => sum + entry.score, 0) +
+          defenseQuote.bonus,
+        key: entries
+          .map((entry) => entry.option.id)
+          .sort()
+          .join("|"),
+      };
+    })
+    .sort(
+      (left, right) =>
+        right.total - left.total || left.key.localeCompare(right.key),
+    )[0];
+  return selectedSet?.entries.map((entry) => entry.option.id) ?? [];
+}
+
+function combinations<T>(values: readonly T[], count: number): T[][] {
+  if (count === 0) return [[]];
+  if (count < 0 || count > values.length) return [];
+  const result: T[][] = [];
+  const visit = (start: number, selected: T[]): void => {
+    if (selected.length === count) {
+      result.push([...selected]);
+      return;
+    }
+    const remaining = count - selected.length;
+    for (let index = start; index <= values.length - remaining; index += 1) {
+      selected.push(values[index]!);
+      visit(index + 1, selected);
+      selected.pop();
+    }
+  };
+  visit(0, []);
+  return result;
 }

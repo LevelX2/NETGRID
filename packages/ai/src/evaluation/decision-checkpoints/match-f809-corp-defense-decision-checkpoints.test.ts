@@ -35,6 +35,51 @@ describe("match f809 Corp defense decision checkpoints", () => {
     expectCheckpointToPass(fixture(retainDefenseD30Json));
   });
 
+  it("does not force the defense package when both centrals already have ICE", () => {
+    const checkpoint = fixture(retainDefenseD30Json);
+    const state = checkpoint.engine.testOnlyGameState;
+    const remote = state.corp.servers.find(
+      (server) => server.id === "remote_1",
+    );
+    const rd = state.corp.servers.find((server) => server.id === "rd");
+    const movedIce = remote?.ice[0];
+    if (!remote || !rd || !movedIce) {
+      throw new Error("Missing protected-central control ICE");
+    }
+    remote.ice = remote.ice.filter((cardId) => cardId !== movedIce);
+    rd.ice.push(movedIce);
+    state.cardInstances[movedIce] = {
+      ...state.cardInstances[movedIce]!,
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+    };
+    checkpoint.source.kind = "synthetic_companion";
+    checkpoint.source.findingId = "match-f809-retain-protected-control";
+    checkpoint.engine.stateHash = hashGameState(state);
+    checkpoint.expectation = {
+      discardChoice: {
+        mustDiscardDefinitionIds: ["onr_proteus_051_rent-to-own-contract"],
+      },
+    };
+    expectCheckpointToPass(checkpoint);
+  });
+
+  it("does not force the defense package without recent central pressure", () => {
+    const checkpoint = fixture(retainDefenseD30Json);
+    checkpoint.engine.eventPrefix = [];
+    checkpoint.engine.testOnlyGameState.eventLog = [];
+    checkpoint.source.kind = "synthetic_companion";
+    checkpoint.source.findingId = "match-f809-retain-no-pressure-control";
+    checkpoint.engine.stateHash = hashGameState(
+      checkpoint.engine.testOnlyGameState,
+    );
+    checkpoint.expectation = {
+      discardChoice: {
+        mustDiscardDefinitionIds: ["onr_proteus_051_rent-to-own-contract"],
+      },
+    };
+    expectCheckpointToPass(checkpoint);
+  });
+
   it("revalidates the underfunded R&D rez-support follow-up after installation", () => {
     const checkpoint = derivedRezSupportFixture(3);
     checkpoint.expectation = {
