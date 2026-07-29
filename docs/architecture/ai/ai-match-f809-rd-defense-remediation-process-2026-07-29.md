@@ -8,7 +8,7 @@ Stand: 2026-07-29
 
 - vollständige Einzelprüfung aller 46 Corp-KI-Entscheidungen im jüngsten
   nicht abgeschlossenen Match `match_f8096c690c233533`;
-- StateVersions 16, 25 bis 27, 71, 96 bis 98 sowie 66 als historische
+- StateVersions 16, 25 bis 27, 66, 71 und 100 als historische
   Hauptbelege;
 - formaler Deck-Hint-Consumer-Audit des tatsächlich gespielten Decks
   `Proteus Korp - Variable ICE Gauntlet`
@@ -120,6 +120,13 @@ sowie das billigere Gatekeeper-ICE ab.
 - Keine verdeckten Runner-Daten, keine Kenntnis künftiger Runner-Züge.
 - Jede Folgeaktion wird aus neuen `LegalActions` nach dem State-Wechsel
   materialisiert; keine unrevalidierte Makroaktion.
+- Installation, Staging, Bluffbewertung und Rez-Hilfe bleiben vollständig im
+  Owner `corp.defend_servers`. Economy darf ausschließlich exakt gebundene
+  Finanzierung als Support liefern; Handmanagement darf ein bereits vom
+  Defense-Plan bewertetes Kartenpaket erhalten, aber keine ICE-Aktion
+  ausführen und keine parallele Defense-Policy erzeugen.
+- Kein globaler Aktionsbonus, kein freier Bluff-Scorer und keine
+  kartenspezifische Sonderroute außerhalb des Defense-Plans.
 
 ## Nicht-Ziele
 
@@ -172,6 +179,8 @@ Commit: `test(ai): capture match f809 defense regressions`
 - Last-Click-/Basic-Credit-Vergleich auf den tatsächlichen
   Folge-Rez-Zeitpunkt beziehen;
 - Gründe und Kappen side-sicher im Decision-Debug ausweisen.
+- Plan-Execution-Gegenproben sichern `corp.defend_servers` als einzigen
+  ausführenden Owner; Economy bleibt gebundener Support.
 
 Done: D10, D34 und D45 werden generisch geschlossen; Gegenproben verhindern
 apodiktisches oder wahlloses Installieren.
@@ -200,6 +209,8 @@ Commit: `fix(ai): plan revalidated ice rez support`
 - aktuelle Defense-Route, Rez-Kosten, billigere Alternativen,
   Rez-Hilfe-Synergie, Duplikate und verbleibende Creditreserve einbeziehen;
 - keine zweite unabhängige Discard-Policy schaffen.
+- Handmanagement konsumiert den Defense-Paketquote nur für die
+  Behalten-Auswahl und besitzt weder Installation noch Rez-Hilfe-Aktion.
 
 Done: D30 behält ein ausführbares, kontextgerechtes Paket; Economy-,
 Agenda-, Combo- und Hidden-Info-Gegenproben bleiben stabil.
@@ -251,5 +262,12 @@ Der Prozess stoppt ohne heuristischen Workaround, wenn:
 
 ## Paketstatus
 
-- P0: aktiv.
-- P1 bis P6: ausstehend.
+- P0: abgeschlossen in `541acb2a4`
+  (`docs(ai): start match f809 defense remediation`).
+- P1: abgeschlossen. Fünf Strict-Warmup-Captures ab D5 besitzen jeweils null
+  Drift und schlagen ausschließlich mit `behavior_regression` fehl. Der
+  Voll-Warmup ab D1 ist durch die explizit fail-closed randomisierte
+  Central-ICE-Near-Tie-Bindung bei D4 blockiert; es wurde kein Rebase
+  verwendet. Der formale Audit des identischen 30/45-Decks ist ohne Blocker
+  und Warnung grün.
+- P2 bis P6: ausstehend.
