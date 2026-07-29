@@ -278,4 +278,13 @@ Der Prozess stoppt ohne heuristischen Workaround, wenn:
   fehlende Rez-Credits begrenzt. Die 128 Core-Plan-Modultests, die drei
   EC735-Zentralverteidigungs-Checkpoints und der bestehende
   Funding-only-Routentest bleiben grün.
-- P3 bis P6: ausstehend.
+- P3: abgeschlossen. Eine vorhandene Rez-Hilfe markiert ausschließlich eine
+  unterfinanzierte Defense-Installation als mögliche Sequenz. Nach der
+  Installation akzeptiert `corp.defend_servers` die Hilfe erst nach neuer
+  LegalAction-, Ziel-, Timing-, Kosten-, Zentraldruck- und
+  Reservevalidierung. Direkt finanzierbares ICE sowie fehlender jüngster
+  Zentraldruck sind negative Gegenproben. Temporäre Laufzeit und
+  Ratenzahlungsrisiko werden als gekappte Nachteile bewertet. Die 128
+  Core-Plan-, 161 Plan-first-Runtime- und 11
+  Authority-Structure-Tests bleiben grün.
+- P4 bis P6: ausstehend.

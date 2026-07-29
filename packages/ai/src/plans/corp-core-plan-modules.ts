@@ -1854,7 +1854,10 @@ function defenseCandidates(
       if (signal.phase === "draw_for_ice")
         return corpCandidateProjectsCardDraw(candidate);
       if (signal.phase === "activate_run_defense")
-        return candidate.semanticActionType === "card_ability.trigger";
+        return (
+          candidate.semanticActionType === "card_ability.trigger" ||
+          candidate.semanticActionType === "play.corp_operation"
+        );
       return (
         candidate.semanticActionType ===
           (signal.phase === "decline_rez"

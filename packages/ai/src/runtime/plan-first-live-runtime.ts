@@ -168,6 +168,7 @@ import {
 } from "./corp-upgrade-placement";
 import { corpKnownAgendaInventory } from "./corp-known-agenda-inventory";
 import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
+import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 import { corpRootRezTimingComponent } from "./corp-scoreline/semantic-runtime-corp-score-ice-components";
 import {
@@ -7783,6 +7784,13 @@ function buildCorpDomain(
         if (defensiveUpgradePlacement?.signal) {
           return [defensiveUpgradePlacement.signal];
         }
+        const iceRezSupport = corpIceRezSupportOperationSignal(
+          input,
+          candidate,
+          centralDefenseAllocation,
+          scoreProjects,
+        );
+        if (iceRezSupport) return [iceRezSupport];
         if (candidateIsVisibleCorpIceInstall(input, candidate)) {
           if (exactScoreProtectionInstallActionIds.has(candidate.actionId)) {
             return [];
@@ -7823,6 +7831,9 @@ function buildCorpDomain(
                 (exactScoreProtectionInstallActionIds.size === 0 ||
                   terminalCentralPlacement ||
                   acuteCentralPlacement),
+              immediateInstallSupport:
+                route.rezFundingGap > 0 &&
+                corpVisibleHandHasActionIceRezSupport(input),
               installRoute: route,
               value:
                 route.progressKind === "engine_certified_access"
@@ -14934,6 +14945,163 @@ function candidateIsVisibleCorpAgendaInstall(
   if (candidate.semanticActionType !== "install.card") return false;
   const visibleSource = requireVisibleCandidateSource(input, candidate);
   return visibleCardIsAgenda(input, visibleSource);
+}
+
+function definitionHasActionIceRezSupport(definitionId: string): boolean {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  return (
+    hint?.side === "corp" &&
+    hint.effects?.some(
+      (effect) =>
+        effect.kind === "rez" &&
+        effect.scope === "ice" &&
+        effect.timing === "action",
+    ) === true &&
+    hint.targetProfiles?.some(
+      (profile) =>
+        "kind" in profile &&
+        profile.kind === "use_target" &&
+        profile.targetType === "installed_ice",
+    ) === true
+  );
+}
+
+function corpVisibleHandHasActionIceRezSupport(
+  input: AiDecisionInput,
+): boolean {
+  return input.playerView.own.gripOrHq.some(
+    (card) =>
+      card.known &&
+      typeof card.definitionId === "string" &&
+      definitionHasActionIceRezSupport(card.definitionId),
+  );
+}
+
+function corpIceRezSupportOperationSignal(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  centralAllocation: CorpCentralDefenseAllocation | undefined,
+  scoreProjects: readonly CorpScoreProjectSignal[],
+): CorpDefenseSignal | undefined {
+  if (
+    candidate.actionType !== "play_operation" ||
+    !candidate.sourceDefinitionId ||
+    !definitionHasActionIceRezSupport(candidate.sourceDefinitionId)
+  ) {
+    return undefined;
+  }
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  const targetIceInstanceId = action?.payload?.targetCardId;
+  if (
+    !action ||
+    action.type !== "play_operation" ||
+    typeof targetIceInstanceId !== "string"
+  ) {
+    return undefined;
+  }
+  const matches = input.playerView.servers.flatMap((server) =>
+    server.ice
+      .filter(
+        (ice) =>
+          ice.instanceId === targetIceInstanceId &&
+          ice.known &&
+          ice.type === "ice" &&
+          !ice.rezzed,
+      )
+      .map((ice) => ({ ice, serverId: server.id })),
+  );
+  if (matches.length !== 1) return undefined;
+  const { ice, serverId } = matches[0]!;
+  const centralEvidence =
+    (serverId === "hq" || serverId === "rd") &&
+    centralAllocation?.status === "known"
+      ? centralAllocation.evidence[serverId]
+      : undefined;
+  const urgentCentralDefense =
+    centralEvidence !== undefined &&
+    (centralEvidence.threat === "acute" ||
+      centralEvidence.threat === "terminal" ||
+      centralEvidence.recentSuccessfulAccessRunnerTurns > 0);
+  if (!urgentCentralDefense) return undefined;
+  const quote = ice.effectiveRezCostQuote;
+  if (
+    quote?.complete !== true ||
+    typeof quote.finalCredits !== "number" ||
+    !Number.isSafeInteger(quote.finalCredits) ||
+    quote.finalCredits <= input.playerView.own.credits
+  ) {
+    return undefined;
+  }
+  const creditCost = candidate.costProfile.creditCost;
+  const clickCost = candidate.costProfile.clickCost;
+  if (
+    candidate.costProfile.costKnownStatus !== "known" ||
+    candidate.costProfile.additionalCosts.length > 0 ||
+    typeof creditCost !== "number" ||
+    !Number.isSafeInteger(creditCost) ||
+    creditCost < 0 ||
+    creditCost >= quote.finalCredits ||
+    creditCost > input.playerView.own.credits ||
+    typeof clickCost !== "number" ||
+    !Number.isSafeInteger(clickCost) ||
+    clickCost <= 0 ||
+    clickCost > input.playerView.own.clicks
+  ) {
+    return undefined;
+  }
+  if (
+    !corpCardRoutePreservesScoreReserve(
+      input,
+      candidate,
+      serverId,
+      scoreProjects,
+    ).preservesReserve
+  ) {
+    return undefined;
+  }
+  const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
+  const tacticSignals = new Set(hint?.tacticSignals ?? []);
+  const temporaryLiability =
+    tacticSignals.has("ice.corp_temporary_rez") &&
+    tacticSignals.has("risk.temporary_rez_liability");
+  const installmentLiability =
+    tacticSignals.has("ice.corp_installment_rez") &&
+    tacticSignals.has("risk.term_counter_payment_liability");
+  const relief = quote.finalCredits - creditCost;
+  let liabilityKind = "bounded" as "bounded" | "temporary" | "installment";
+  let duration = 0;
+  let value = 130 + relief * 3;
+  if (temporaryLiability) {
+    const xValue = action.payload?.xValue;
+    if (
+      typeof xValue !== "number" ||
+      !Number.isSafeInteger(xValue) ||
+      xValue < 1
+    ) {
+      return undefined;
+    }
+    liabilityKind = "temporary";
+    duration = xValue;
+    value = 125 + relief * 3 - Math.abs(xValue - 3) * 8;
+  } else if (installmentLiability) {
+    liabilityKind = "installment";
+    duration = quote.finalCredits;
+    value = 120 + relief * 2 - Math.min(8, quote.finalCredits);
+  }
+  return {
+    kind: "generic",
+    defenseId: `rez-support:${serverId}:${targetIceInstanceId}:${candidate.actionId}`,
+    serverId,
+    phase: "activate_run_defense",
+    sourceDefinitionIds: [candidate.sourceDefinitionId],
+    actionIds: [candidate.actionId],
+    targetIceInstanceId,
+    urgent: true,
+    value,
+    evidenceCode: `corp_revalidated_ice_rez_support:${serverId}:${liabilityKind}:duration_${duration}:direct_gap_${quote.finalCredits - input.playerView.own.credits}:action_cost_${creditCost}`,
+  };
 }
 
 function corpRezEstablishesPersistentDefenseSupport(
