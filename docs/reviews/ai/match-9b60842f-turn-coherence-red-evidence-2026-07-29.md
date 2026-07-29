@@ -1,7 +1,6 @@
 # Match 9b60842f – Turn-Coherence Red Evidence
 
-Status: **ZK01-Evidence abgeschlossen; historische D4/D5 bereits grün,
-generischer Draw-Admission-Vertrag rot**
+Status: **ZK01-Evidence und ZK02-Korrektur abgeschlossen**
 
 Stand: 2026-07-29
 
@@ -95,8 +94,10 @@ D5-Zustand. Es wurde kein Rebase verwendet.
 - ein normaler Scorematerial-Draw mit bekanntem Handdelta `+1`;
 - keine Same-Turn-Verbrauchsroute und keine dringende Defense-Antwortsuche;
 - gewünschtes Ergebnis: `blocked_end_turn_overflow`;
-- aktueller Stand: der Vertrag ist als `it.fails` reproduzierbar rot, weil
-  `assessCorpDrawAdmission` die Route noch `admitted`.
+- ZK01-Stand: der Vertrag war als `it.fails` reproduzierbar rot, weil
+  `assessCorpDrawAdmission` die Route noch `admitted`;
+- ZK02-Stand: unveränderte Erwartung grün mit
+  `blocked_end_turn_overflow`.
 
 ## Positive und negative Gegenproben
 
@@ -151,3 +152,6 @@ Draw-Admission-Restvertrag schließen:
 - `corepack pnpm test:ai:shards`:
   520 Testdateien grün, 4250 Tests grün und genau der eine erwartete
   ZK01-Red-Vertrag.
+
+Nach ZK02 sind die fokussierten Match-, Hand-, Draw- und Defense-Gegenproben
+mit 25/25 Tests grün; der AI-Typecheck ist ebenfalls grün.

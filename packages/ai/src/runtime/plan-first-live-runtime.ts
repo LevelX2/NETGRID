@@ -12677,6 +12677,7 @@ function decisionFromScheduler(
             `authority:${corpHandInventoryFacts.authority}`,
             `selection_influence:${corpHandInventoryFacts.selectionInfluence}`,
             `pressure:${corpHandInventoryFacts.pressure.status}|hand:${corpHandInventoryFacts.pressure.handSize}|maximum:${corpHandInventoryFacts.pressure.maximumHandSize}|available_slots:${corpHandInventoryFacts.pressure.availableSlots}|overflow:${corpHandInventoryFacts.pressure.overflowCount}`,
+            `cleanup:hand_if_end_now:${corpHandInventoryFacts.cleanupProjection.handSizeIfTurnEndedNow}|required_discards:${corpHandInventoryFacts.cleanupProjection.requiredDiscardsIfTurnEndedNow}|single_draw_increases_discard:${corpHandInventoryFacts.cleanupProjection.singleCardDrawWouldIncreaseDiscard}`,
             ...corpHandInventoryFacts.records.map(
               (record) =>
                 `${record.sourceInstanceId}|definition:${record.sourceDefinitionId}|duplicates:${record.duplicateCount}|actions:${record.legalActionIds.join(",") || "none"}|claims:${

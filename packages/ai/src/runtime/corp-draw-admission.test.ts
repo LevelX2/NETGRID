@@ -107,14 +107,14 @@ describe("Corp draw admission", () => {
     });
   });
 
-  it("admits one bounded answer-search overflow but blocks larger overflow", () => {
+  it("blocks score-material draws that create cleanup overflow", () => {
     expect(
       assessment({
         handSize: 5,
         maximumHandSize: 5,
         currentClicks: 1,
       }),
-    ).toMatchObject({ disposition: "admitted" });
+    ).toMatchObject({ disposition: "blocked_end_turn_overflow" });
     expect(
       assessment({
         handSize: 5,

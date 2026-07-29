@@ -142,10 +142,9 @@ export function assessCorpDrawAdmission(params: {
     disposition =
       exactCapacityReleaseRoutes.length > 0
         ? "defer_for_capacity_release"
-        : projectedEndTurnOverflow === 1 ||
-            (params.purpose === "central_defense_answer_search" &&
-              existingEndTurnOverflow <= 1 &&
-              additionalEndTurnOverflow === 1)
+        : params.purpose === "central_defense_answer_search" &&
+            existingEndTurnOverflow <= 1 &&
+            additionalEndTurnOverflow === 1
           ? "admitted"
           : "blocked_end_turn_overflow";
   } else if (

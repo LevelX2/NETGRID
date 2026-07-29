@@ -10,7 +10,7 @@ import {
 } from "./corp-hand-inventory-facts";
 
 describe("Corp hand inventory facts", () => {
-  it("records exact own-HQ actions, projections, pressure and domain claims without choosing", () => {
+  it("records exact own-HQ actions, projections and plan-effective cleanup facts", () => {
     const input = corpInput([
       card("project-venice", "project-venice", "agenda"),
       card("accounts", "accounts-receivable", "operation"),
@@ -57,8 +57,8 @@ describe("Corp hand inventory facts", () => {
 
     expect(facts).toMatchObject({
       schemaVersion: CORP_HAND_INVENTORY_FACTS_SCHEMA_VERSION,
-      authority: "diagnostic_only",
-      selectionInfluence: "none",
+      authority: "plan_input",
+      selectionInfluence: "draw_admission_and_cleanup_projection",
       pressure: {
         handSize: 4,
         maximumHandSize: 5,
@@ -66,6 +66,12 @@ describe("Corp hand inventory facts", () => {
         status: "under_capacity",
         actionableCardCount: 4,
         exactCapacityReleaseActions: 2,
+      },
+      cleanupProjection: {
+        handSizeIfTurnEndedNow: 4,
+        requiredDiscardsIfTurnEndedNow: 0,
+        availableSlotsBeforeCleanup: 1,
+        singleCardDrawWouldIncreaseDiscard: false,
       },
     });
     expect(
@@ -157,6 +163,12 @@ describe("Corp hand inventory facts", () => {
       maximumHandSize: 5,
       overflowCount: 1,
       status: "overflow",
+    });
+    expect(facts.cleanupProjection).toEqual({
+      handSizeIfTurnEndedNow: 6,
+      requiredDiscardsIfTurnEndedNow: 1,
+      availableSlotsBeforeCleanup: 0,
+      singleCardDrawWouldIncreaseDiscard: true,
     });
     expect(
       facts.records.every(

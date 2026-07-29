@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 und ZK01 abgeschlossen; ZK02 aktiv**
+Status: **ZK00 bis ZK02 abgeschlossen; ZK03 aktiv**
 
 Stand: 2026-07-29
 
@@ -673,3 +673,15 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
 - `check:ai`: grün.
 - Ausgangsbaseline `test:ai:shards`: 520 Testdateien grün,
   4250 Tests grün und genau 1 erwarteter roter ZK01-Vertrag.
+
+### ZK02 – abgeschlossen
+
+- Nicht dringende Scorematerial-Draws werden blockiert, wenn sie ohne exakte
+  Same-Turn-Verbrauchsroute zusätzlichen Cleanup-Discard erzeugen.
+- Begrenzte Central-Defense-Suche und explizit zertifizierte
+  Score-Defense-Ersatzsuche bleiben zugelassen.
+- `CorpHandInventoryFacts` v2 ist jetzt ein planwirksamer Input mit
+  expliziter Cleanup-Projektion statt rein diagnostischer Ausgabe.
+- Historische D4-/D5-Checkpoints, F809-ICE-Staging und Accounts-Konversion
+  bleiben grün.
+- Fokussierter Lauf: 25/25 grün; AI-Typecheck grün.

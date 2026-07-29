@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { assessCorpDrawAdmission } from "./corp-draw-admission";
 
 describe("Corp draw admission turn-coherence red contract", () => {
-  it.fails("blocks a non-urgent last-click draw that guarantees cleanup overflow", () => {
+  it("blocks a non-urgent last-click draw that guarantees cleanup overflow", () => {
     expect(
       assessCorpDrawAdmission({
         routeId: "red-last-click-overflow",

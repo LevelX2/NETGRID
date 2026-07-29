@@ -3,7 +3,7 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 
 export const CORP_HAND_INVENTORY_FACTS_SCHEMA_VERSION =
-  "corp-hand-inventory-facts-v1" as const;
+  "corp-hand-inventory-facts-v2" as const;
 
 export type CorpHandRouteDisposition =
   | "blocked_funding"
@@ -73,9 +73,15 @@ export type CorpHandInventoryFacts = {
   schemaVersion: typeof CORP_HAND_INVENTORY_FACTS_SCHEMA_VERSION;
   side: "corp";
   stateVersion: number;
-  authority: "diagnostic_only";
-  selectionInfluence: "none";
+  authority: "plan_input";
+  selectionInfluence: "draw_admission_and_cleanup_projection";
   pressure: CorpHandPressureAssessment;
+  cleanupProjection: {
+    handSizeIfTurnEndedNow: number;
+    requiredDiscardsIfTurnEndedNow: number;
+    availableSlotsBeforeCleanup: number;
+    singleCardDrawWouldIncreaseDiscard: boolean;
+  };
   records: CorpHandRouteCoverageRecord[];
 };
 
@@ -155,13 +161,21 @@ export function buildCorpHandInventoryFacts(params: {
       dispositionEvidence: dispositionResult.evidence,
     };
   });
+  const pressure = corpHandPressureAssessment(params.input, records);
   return {
     schemaVersion: CORP_HAND_INVENTORY_FACTS_SCHEMA_VERSION,
     side: "corp",
     stateVersion: params.input.playerView.stateVersion,
-    authority: "diagnostic_only",
-    selectionInfluence: "none",
-    pressure: corpHandPressureAssessment(params.input, records),
+    authority: "plan_input",
+    selectionInfluence: "draw_admission_and_cleanup_projection",
+    pressure,
+    cleanupProjection: {
+      handSizeIfTurnEndedNow: pressure.handSize,
+      requiredDiscardsIfTurnEndedNow: pressure.overflowCount,
+      availableSlotsBeforeCleanup: pressure.availableSlots,
+      singleCardDrawWouldIncreaseDiscard:
+        pressure.handSize >= pressure.maximumHandSize,
+    },
     records: records.sort((left, right) =>
       left.sourceInstanceId.localeCompare(right.sourceInstanceId),
     ),

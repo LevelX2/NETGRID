@@ -16,8 +16,8 @@ describe("match 0c77a1fb Corp hand-utilization checkpoints", () => {
     );
     expect(inventory?.items).toEqual(
       expect.arrayContaining([
-        "authority:diagnostic_only",
-        "selection_influence:none",
+        "authority:plan_input",
+        "selection_influence:draw_admission_and_cleanup_projection",
       ]),
     );
     for (const definitionId of [
