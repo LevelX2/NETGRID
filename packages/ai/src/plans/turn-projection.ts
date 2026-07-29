@@ -58,6 +58,13 @@ export type ProjectedPlanProgress = {
   viability: string;
 };
 
+export type ProjectedRestrictedActionToken = {
+  tokenId: string;
+  remaining: number;
+  allowedActionTypes: string[];
+  expiresAt: string;
+};
+
 export type NeedHitProbabilityBand = {
   needId: string;
   minimumProbability: number;
@@ -104,12 +111,7 @@ export type ProjectedDecisionFrame = {
   timingPointClass: string;
   actionCapacityLedger: {
     unrestricted: ProjectionValueRange;
-    restrictedTokens: Array<{
-      tokenId: string;
-      remaining: number;
-      allowedActionTypes: string[];
-      expiresAt: string;
-    }>;
+    restrictedTokens: ProjectedRestrictedActionToken[];
   };
   ownCredits: ProjectionValueRange;
   ownHand: {
@@ -156,6 +158,11 @@ export type TurnProjectionDelta = {
     | "engine_quote"
     | "plan_module_exact";
   actionCapacityDelta: ProjectionValueRange;
+  restrictedActionCapacityAdds?: ProjectedRestrictedActionToken[];
+  restrictedActionCapacityConsumes?: Array<{
+    tokenId: string;
+    amount: number;
+  }>;
   creditDelta: ProjectionValueRange;
   handCountDelta: ProjectionValueRange;
   knownZoneMoves: Array<{
@@ -374,6 +381,7 @@ export function applyCertifiedTurnProjectionDelta(
   const dispositions = frame.ownHand.dispositions.filter((entry) =>
     zones.get("own_hand")?.includes(entry.instanceId),
   );
+  const restrictedTokens = applyRestrictedCapacityDelta(frame, delta);
   const nextWithoutKey: Omit<ProjectedDecisionFrame, "projectedFrameKey"> = {
     ...structuredClone(frame),
     actionCapacityLedger: {
@@ -384,6 +392,7 @@ export function applyCertifiedTurnProjectionDelta(
           delta.actionCapacityDelta,
         ),
       ),
+      restrictedTokens,
     },
     ownCredits: nonNegativeRange(
       addRanges(frame.ownCredits, delta.creditDelta),
@@ -527,6 +536,7 @@ function validateProjectionDelta(
       else throw error;
     }
   }
+  validateRestrictedCapacityDelta(frame, delta, issues);
   const zoneInstances = new Map(
     frame.ownKnownZones.map((zone) => [zone.zoneId, new Set(zone.instanceIds)]),
   );
@@ -541,6 +551,85 @@ function validateProjectionDelta(
     }
   }
   return issues;
+}
+
+function validateRestrictedCapacityDelta(
+  frame: ProjectedDecisionFrame,
+  delta: TurnProjectionDelta,
+  issues: string[],
+): void {
+  const remainingByTokenId = new Map(
+    frame.actionCapacityLedger.restrictedTokens.map((token) => [
+      token.tokenId,
+      token.remaining,
+    ]),
+  );
+  for (const consume of delta.restrictedActionCapacityConsumes ?? []) {
+    if (
+      consume.tokenId.trim().length === 0 ||
+      !Number.isSafeInteger(consume.amount) ||
+      consume.amount <= 0
+    ) {
+      issues.push("invalid_restricted_capacity_consume");
+      continue;
+    }
+    const remaining = remainingByTokenId.get(consume.tokenId) ?? 0;
+    if (consume.amount > remaining) {
+      issues.push("restricted_capacity_overconsumed");
+      continue;
+    }
+    remainingByTokenId.set(consume.tokenId, remaining - consume.amount);
+  }
+  const addedTokenIds = new Set<string>();
+  for (const add of delta.restrictedActionCapacityAdds ?? []) {
+    if (
+      add.tokenId.trim().length === 0 ||
+      addedTokenIds.has(add.tokenId) ||
+      !Number.isSafeInteger(add.remaining) ||
+      add.remaining <= 0 ||
+      add.allowedActionTypes.length === 0 ||
+      add.allowedActionTypes.some(
+        (actionType) => actionType.trim().length === 0,
+      )
+    ) {
+      issues.push("invalid_restricted_capacity_add");
+      continue;
+    }
+    addedTokenIds.add(add.tokenId);
+  }
+}
+
+function applyRestrictedCapacityDelta(
+  frame: ProjectedDecisionFrame,
+  delta: TurnProjectionDelta,
+): ProjectedRestrictedActionToken[] {
+  const tokens = new Map(
+    frame.actionCapacityLedger.restrictedTokens.map((token) => [
+      token.tokenId,
+      structuredClone(token),
+    ]),
+  );
+  for (const consume of delta.restrictedActionCapacityConsumes ?? []) {
+    const current = tokens.get(consume.tokenId);
+    if (!current) continue;
+    const remaining = current.remaining - consume.amount;
+    if (remaining > 0) tokens.set(consume.tokenId, { ...current, remaining });
+    else tokens.delete(consume.tokenId);
+  }
+  for (const add of delta.restrictedActionCapacityAdds ?? []) {
+    const current = tokens.get(add.tokenId);
+    tokens.set(add.tokenId, {
+      ...structuredClone(add),
+      remaining: (current?.remaining ?? 0) + add.remaining,
+      allowedActionTypes: sortedUnique([
+        ...(current?.allowedActionTypes ?? []),
+        ...add.allowedActionTypes,
+      ]),
+    });
+  }
+  return [...tokens.values()].sort((left, right) =>
+    left.tokenId.localeCompare(right.tokenId),
+  );
 }
 
 function projectedKnownZones(

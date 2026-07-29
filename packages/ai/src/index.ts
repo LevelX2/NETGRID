@@ -285,12 +285,25 @@ export type {
   ProjectedKnownBoardCard,
   ProjectedKnownZoneState,
   ProjectedPlanProgress,
+  ProjectedRestrictedActionToken,
   ProjectedResourceReservation,
   ProjectionUncertainty,
   ProjectionValueRange,
   TurnBoundaryKind,
   TurnProjectionDelta,
 } from "./plans/turn-projection";
+export {
+  searchDeterministicRemainderTurnPlans,
+  TURN_REMAINDER_SEARCH_SCHEMA_VERSION,
+} from "./plans/turn-remainder-search";
+export type {
+  TurnRemainderSearchBudget,
+  TurnRemainderSearchLine,
+  TurnRemainderSearchOffer,
+  TurnRemainderSearchPruneReason,
+  TurnRemainderSearchResult,
+  TurnRemainderSearchStep,
+} from "./plans/turn-remainder-search";
 export {
   compareCreditDemandPriority,
   createCorpCreditDemand,

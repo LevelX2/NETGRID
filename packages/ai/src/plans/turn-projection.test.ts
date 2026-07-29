@@ -83,6 +83,75 @@ describe("turn projection", () => {
     expect(frame.ownCredits).toEqual({ minimum: 5, maximum: 5 });
   });
 
+  it("tracks restricted action tokens exactly and rejects overconsumption", () => {
+    const frame = projectedFrame(decisionInput());
+    const tokenId = "restricted-install-actions";
+    const withToken = applyCertifiedTurnProjectionDelta(frame, {
+      schemaVersion: "turn-projection-delta-v1",
+      deltaId: "add-restricted-capacity",
+      expectedBaseFrameKey: frame.projectedFrameKey,
+      certification: "legal_action_semantics",
+      actionCapacityDelta: { minimum: -1, maximum: -1 },
+      restrictedActionCapacityAdds: [
+        {
+          tokenId,
+          remaining: 3,
+          allowedActionTypes: ["install_card"],
+          expiresAt: "side_turn_end",
+        },
+      ],
+      creditDelta: { minimum: 0, maximum: 0 },
+      handCountDelta: { minimum: 0, maximum: 0 },
+      knownZoneMoves: [],
+      boardUpdates: [],
+      usageAdds: [],
+      publicEventFactAdds: [],
+      reservations: [],
+      portfolioProgress: [],
+      uncertainty: [],
+    });
+    const consumed = applyCertifiedTurnProjectionDelta(withToken, {
+      schemaVersion: "turn-projection-delta-v1",
+      deltaId: "consume-restricted-capacity",
+      expectedBaseFrameKey: withToken.projectedFrameKey,
+      certification: "legal_action_semantics",
+      actionCapacityDelta: { minimum: 0, maximum: 0 },
+      restrictedActionCapacityConsumes: [{ tokenId, amount: 2 }],
+      creditDelta: { minimum: 0, maximum: 0 },
+      handCountDelta: { minimum: 0, maximum: 0 },
+      knownZoneMoves: [],
+      boardUpdates: [],
+      usageAdds: [],
+      publicEventFactAdds: [],
+      reservations: [],
+      portfolioProgress: [],
+      uncertainty: [],
+    });
+
+    expect(consumed.actionCapacityLedger.restrictedTokens).toEqual([
+      expect.objectContaining({ tokenId, remaining: 1 }),
+    ]);
+    expect(() =>
+      applyCertifiedTurnProjectionDelta(consumed, {
+        schemaVersion: "turn-projection-delta-v1",
+        deltaId: "overconsume-restricted-capacity",
+        expectedBaseFrameKey: consumed.projectedFrameKey,
+        certification: "legal_action_semantics",
+        actionCapacityDelta: { minimum: 0, maximum: 0 },
+        restrictedActionCapacityConsumes: [{ tokenId, amount: 2 }],
+        creditDelta: { minimum: 0, maximum: 0 },
+        handCountDelta: { minimum: 0, maximum: 0 },
+        knownZoneMoves: [],
+        boardUpdates: [],
+        usageAdds: [],
+        publicEventFactAdds: [],
+        reservations: [],
+        portfolioProgress: [],
+        uncertainty: [],
+      }),
+    ).toThrowError(/restricted_capacity_overconsumed/);
+  });
+
   it("moves a known own card and advances it only from an exact base frame", () => {
     const input = decisionInput();
     const frame = projectedFrame(input);

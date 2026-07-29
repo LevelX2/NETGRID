@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK06 abgeschlossen; ZK07 aktiv**
+Status: **ZK00 bis ZK07 abgeschlossen; ZK08 aktiv**
 
 Stand: 2026-07-29
 
@@ -887,4 +887,48 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
 - Vollständige AI-Suite: 524 Testdateien und 4285 Tests grün. Shared:
   16/16 grün; Web-Debugexport: 1/1 grün.
 - AI-, Shared-, Server- und Web-Typecheck, `check:ai` sowie
+  `git diff --check`: grün.
+
+### ZK07 – abgeschlossen
+
+- `searchDeterministicRemainderTurnPlans` kombiniert validierte Planning
+  Heads mit einer hart begrenzten, deterministischen Zwei-Schritt-Suche.
+  Suchbudgets sind ausschließlich Knoten-, Tiefen-, Partitions- und
+  Pareto-Budgets; Laufzeit und `Math.random` beeinflussen weder Expansion
+  noch Auswahl.
+- Jede
+  `Obligation-Signatur × Root-Planinstanz × nächster Meilenstein`-Partition
+  erhält vor dem globalen Restbudget mindestens eine Expansion. Je
+  Partition bleibt zusätzlich eine konservativ abgeschlossene
+  Ein-Schritt-Baseline referenzierbar.
+- Nicht dominierte Vertreter bleiben je Partition geschützt. Kleine
+  Paretofronten, konservative Upper Bounds, Abhängigkeits-, Konflikt-,
+  Ressourcen- und Budgetprüfungen erzeugen explizite, deterministisch
+  sortierte Prunegründe.
+- Nur ausdrücklich zertifizierte, gleich gerootete und
+  meilensteingleiche kommutative Aktionen werden zu einer kanonischen
+  Reihenfolge zusammengefasst. Verschiedene Roots verlieren dadurch keine
+  geschützte Repräsentation.
+- Das Aktionskapazitätsledger unterscheidet normale Klicks von typisierten
+  beschränkten Tokens. Garantierte sofortige Aktionsgewinne, Self-Financing,
+  zulässige Folgetypen, Ablauf und exakter Verbrauch werden projiziert;
+  zufällige oder unbekannte Kapazität endet fail-closed.
+- `ProjectedDecisionFrame` unterstützt dazu deterministische
+  Restricted-Token-Adds und -Consumes. Überverbrauch und unvollständige
+  Tokenverträge werden abgewiesen.
+- Aktuelle Heads behalten ihr geprüftes `CurrentLegalActionBinding`.
+  Folgeschritte speichern die vollständige kanonische Invocation mit
+  Karteninstanz, Fähigkeit, Targets und Choices, aber ausdrücklich keine
+  zukünftige `actionId`.
+- Exakte bekannte Kosten, Credits, Handverbrauch, Claims,
+  P1–P3-Coverage und echte Observation Boundaries werden bei jeder
+  Expansion neu geprüft. Hinter Draw, öffentlichem Zufall oder anderer
+  Boundary wird keine konkrete Folgeaktion erfunden.
+- Ein allgemeiner Beam Search war für die geschützten kleinen Fronten nicht
+  erforderlich und wurde nicht eingeführt.
+- Fokussiert: Such-, Projection-, Planning-Contract-, Agenda-, Defense- und
+  Action-Capacity-Cluster mit 49/49 Tests grün; enger Search-/Projection-Lauf
+  mit 17/17 grün.
+- Vollständige AI-Suite: 525 Testdateien und 4295 Tests grün.
+- AI-Typecheck, `check:ai` mit null Runtime-/Typzyklen sowie
   `git diff --check`: grün.
