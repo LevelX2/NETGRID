@@ -3028,6 +3028,69 @@ export type AiPlanFirstDebugDisposition = {
   evidenceCode: string;
 };
 
+export const AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION =
+  "ai-turn-planning-debug-v1" as const;
+
+export type AiTurnPlanningDebug = {
+  schemaVersion: typeof AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION;
+  mode: "projection_contract" | "shadow";
+  stateVersion: number;
+  sideSafePlanningFingerprint: string;
+  planningRulesFingerprint: string;
+  turnKey: string;
+  heads: Array<{
+    candidateId: string;
+    moduleId: string;
+    rootPlanInstanceId: string;
+    actionId: string;
+    semanticActionType: string;
+    invocationKey: string;
+    witnessValid: boolean;
+  }>;
+  selectedLine: {
+    lineId: string;
+    stopReason:
+      | "projected_turn_end"
+      | "observation_boundary"
+      | "projection_not_supported"
+      | "projected_plan_discovery_required"
+      | "bounded_search_horizon";
+    projectedFrameKey: string;
+    cursor: { phaseIndex: number; nodeIndex: number };
+    phases: Array<{
+      phaseId: string;
+      rootPlanInstanceId: string;
+      rootModuleId: string;
+      rootProvenance: "resident" | "admitted_child" | "admitted_support";
+      entryFrameKey: string;
+      completionCode: string;
+      transitionKind: string;
+      supportBindings: Array<{
+        planInstanceId: string;
+        parentNeedId: string;
+        assignmentId: string;
+      }>;
+      nodes: Array<{
+        nodeId: string;
+        semanticActionType: string;
+        boundaryAfter?: string;
+      }>;
+    }>;
+  };
+  boundary?: {
+    kind: string;
+    residualTurnValueBasis: string;
+    optionalityUnit: string;
+    optionalityMinimum: number;
+    optionalityMaximum: number;
+  };
+  pruneEvents: Array<{
+    candidateId: string;
+    reasonCode: string;
+  }>;
+  evidenceCodes: string[];
+};
+
 export type AiPlanFirstDecisionDebug = {
   schemaVersion: typeof AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION;
   stateVersion: number;
@@ -3057,6 +3120,7 @@ export type AiPlanFirstDecisionDebug = {
   assessmentEvidenceCodes: string[];
   dispositions: AiPlanFirstDebugDisposition[];
   portfolio: AiPlanFirstDebugPlanInstance[];
+  turnPlanning?: AiTurnPlanningDebug;
 };
 
 export const AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION =
@@ -3447,7 +3511,10 @@ function sanitizeAiDecisionDetailSections(
 }
 
 function sanitizeAiDecisionDebugJson(value: unknown, depth = 0): unknown {
-  if (depth > 6) return undefined;
+  // Turn-planning phases contain bound support records and action nodes below
+  // the existing plan-first envelope. The object/array size limits still bound
+  // the payload, while this depth preserves the declared typed contract.
+  if (depth > 10) return undefined;
   if (typeof value === "string") return sanitizeAiDecisionDebugString(value);
   if (typeof value === "number")
     return Number.isFinite(value) ? value : undefined;
@@ -3498,6 +3565,7 @@ function sanitizeAiPlanFirstDecisionDebug(
       "assessmentEvidenceCodes",
       "dispositions",
       "portfolio",
+      "turnPlanning",
     ]) ||
     candidate.schemaVersion !== AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION ||
     typeof candidate.stateVersion !== "number" ||
@@ -3516,7 +3584,9 @@ function sanitizeAiPlanFirstDecisionDebug(
     !Array.isArray(candidate.dispositions) ||
     !candidate.dispositions.every(isAiPlanFirstDisposition) ||
     !Array.isArray(candidate.portfolio) ||
-    !candidate.portfolio.every(isAiPlanFirstPlanInstance)
+    !candidate.portfolio.every(isAiPlanFirstPlanInstance) ||
+    (candidate.turnPlanning !== undefined &&
+      !isAiTurnPlanningDebug(candidate.turnPlanning))
   ) {
     return undefined;
   }
@@ -3544,6 +3614,209 @@ function sanitizeAiPlanFirstDecisionDebug(
     return undefined;
   }
   return sanitized as AiPlanFirstDecisionDebug;
+}
+
+function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  if (
+    !hasOnlyAiPlanFirstFields(candidate, [
+      "schemaVersion",
+      "mode",
+      "stateVersion",
+      "sideSafePlanningFingerprint",
+      "planningRulesFingerprint",
+      "turnKey",
+      "heads",
+      "selectedLine",
+      "boundary",
+      "pruneEvents",
+      "evidenceCodes",
+    ]) ||
+    candidate.schemaVersion !== AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION ||
+    (candidate.mode !== "projection_contract" && candidate.mode !== "shadow") ||
+    typeof candidate.stateVersion !== "number" ||
+    !Number.isFinite(candidate.stateVersion) ||
+    typeof candidate.sideSafePlanningFingerprint !== "string" ||
+    typeof candidate.planningRulesFingerprint !== "string" ||
+    typeof candidate.turnKey !== "string" ||
+    !Array.isArray(candidate.heads) ||
+    !candidate.heads.every(isAiTurnPlanningDebugHead) ||
+    !isAiTurnPlanningDebugLine(candidate.selectedLine) ||
+    (candidate.boundary !== undefined &&
+      !isAiTurnPlanningDebugBoundary(candidate.boundary)) ||
+    !Array.isArray(candidate.pruneEvents) ||
+    !candidate.pruneEvents.every((entry) =>
+      recordHasExactStringFields(entry, ["candidateId", "reasonCode"]),
+    ) ||
+    !Array.isArray(candidate.evidenceCodes) ||
+    !candidate.evidenceCodes.every((entry) => typeof entry === "string")
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function isAiTurnPlanningDebugHead(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "candidateId",
+      "moduleId",
+      "rootPlanInstanceId",
+      "actionId",
+      "semanticActionType",
+      "invocationKey",
+      "witnessValid",
+    ]) &&
+    [
+      "candidateId",
+      "moduleId",
+      "rootPlanInstanceId",
+      "actionId",
+      "semanticActionType",
+      "invocationKey",
+    ].every((field) => typeof candidate[field] === "string") &&
+    typeof candidate.witnessValid === "boolean"
+  );
+}
+
+function isAiTurnPlanningDebugLine(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  const cursor = candidate.cursor;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "lineId",
+      "stopReason",
+      "projectedFrameKey",
+      "cursor",
+      "phases",
+    ]) &&
+    typeof candidate.lineId === "string" &&
+    [
+      "projected_turn_end",
+      "observation_boundary",
+      "projection_not_supported",
+      "projected_plan_discovery_required",
+      "bounded_search_horizon",
+    ].includes(String(candidate.stopReason)) &&
+    typeof candidate.projectedFrameKey === "string" &&
+    Boolean(cursor && typeof cursor === "object" && !Array.isArray(cursor)) &&
+    typeof (cursor as Record<string, unknown>).phaseIndex === "number" &&
+    Number.isSafeInteger((cursor as Record<string, unknown>).phaseIndex) &&
+    Number((cursor as Record<string, unknown>).phaseIndex) >= 0 &&
+    typeof (cursor as Record<string, unknown>).nodeIndex === "number" &&
+    Number.isSafeInteger((cursor as Record<string, unknown>).nodeIndex) &&
+    Number((cursor as Record<string, unknown>).nodeIndex) >= 0 &&
+    Array.isArray(candidate.phases) &&
+    candidate.phases.every(isAiTurnPlanningDebugPhase)
+  );
+}
+
+function isAiTurnPlanningDebugPhase(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "phaseId",
+      "rootPlanInstanceId",
+      "rootModuleId",
+      "rootProvenance",
+      "entryFrameKey",
+      "completionCode",
+      "transitionKind",
+      "supportBindings",
+      "nodes",
+    ]) &&
+    [
+      "phaseId",
+      "rootPlanInstanceId",
+      "rootModuleId",
+      "entryFrameKey",
+      "completionCode",
+      "transitionKind",
+    ].every((field) => typeof candidate[field] === "string") &&
+    ["resident", "admitted_child", "admitted_support"].includes(
+      String(candidate.rootProvenance),
+    ) &&
+    Array.isArray(candidate.supportBindings) &&
+    candidate.supportBindings.every((entry) =>
+      recordHasExactStringFields(entry, [
+        "planInstanceId",
+        "parentNeedId",
+        "assignmentId",
+      ]),
+    ) &&
+    Array.isArray(candidate.nodes) &&
+    candidate.nodes.every((entry) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry))
+        return false;
+      const node = entry as Record<string, unknown>;
+      return (
+        hasOnlyAiPlanFirstFields(node, [
+          "nodeId",
+          "semanticActionType",
+          "boundaryAfter",
+        ]) &&
+        typeof node.nodeId === "string" &&
+        typeof node.semanticActionType === "string" &&
+        (node.boundaryAfter === undefined ||
+          typeof node.boundaryAfter === "string")
+      );
+    })
+  );
+}
+
+function isAiTurnPlanningDebugBoundary(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "kind",
+      "residualTurnValueBasis",
+      "optionalityUnit",
+      "optionalityMinimum",
+      "optionalityMaximum",
+    ]) &&
+    [
+      "private_observation",
+      "public_random_outcome",
+      "opponent_response_window",
+      "engine_continuation",
+      "projection_not_supported",
+      "projected_plan_discovery_required",
+    ].includes(String(candidate.kind)) &&
+    [
+      "remaining_capacity",
+      "open_need_hit_distribution",
+      "hand_quality_distribution",
+      "public_outcome_distribution",
+    ].includes(String(candidate.residualTurnValueBasis)) &&
+    [
+      "usable_actions",
+      "need_hit_probability",
+      "hand_quality_band",
+      "public_outcome_band",
+    ].includes(String(candidate.optionalityUnit)) &&
+    typeof candidate.optionalityMinimum === "number" &&
+    Number.isFinite(candidate.optionalityMinimum) &&
+    typeof candidate.optionalityMaximum === "number" &&
+    Number.isFinite(candidate.optionalityMaximum)
+  );
+}
+
+function recordHasExactStringFields(
+  value: unknown,
+  fields: readonly string[],
+): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, fields) &&
+    fields.every((field) => typeof candidate[field] === "string")
+  );
 }
 
 function isAiPlanFirstPlanInstance(

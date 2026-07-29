@@ -1,6 +1,7 @@
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+  AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
   CARD_DEFINITIONS_BY_ID,
   CORP_FORT_RUN_REZ_SUPPORT_KIND,
   CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION,
@@ -8,6 +9,7 @@ import {
   type AiDecision,
   type AiDecisionInput,
   type AiPlanFirstDecisionDebug,
+  type AiTurnPlanningDebug,
   type CardDefinition,
   type CorpPunishRouteQuote,
   type LegalAction,
@@ -101,6 +103,17 @@ import {
   type TransientPlanSignal,
 } from "../plans/transient-plan-signals";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+import {
+  buildCanonicalLegalActionInvocation,
+  buildSemanticActionSetFingerprint,
+  turnPlanningFingerprint,
+} from "../plans/turn-planning-contracts";
+import {
+  applyCertifiedTurnProjectionDelta,
+  assessTurnObservationBoundary,
+  buildProjectedDecisionFrame,
+  certifiedTurnProjectionDeltaFromCandidate,
+} from "../plans/turn-projection";
 import { planInstanceIdForProposal } from "../plans/plan-instance";
 import {
   rememberResidentPlanPortfolio,
@@ -12230,6 +12243,19 @@ function planFirstDecisionDebug(params: {
           assessmentEvidenceCodes,
         )
       : undefined;
+  let turnPlanning: AiTurnPlanningDebug | undefined;
+  try {
+    turnPlanning = turnPlanningProjectionDebug({
+      input: params.input,
+      result: params.result,
+      actionCandidate,
+      selectedPlan,
+    });
+  } catch {
+    // This ZK04 projection trace is diagnostic-only. An unsupported projection
+    // must not alter or abort the already materialized legal plan route.
+    turnPlanning = undefined;
+  }
 
   return {
     ...base,
@@ -12324,6 +12350,188 @@ function planFirstDecisionDebug(params: {
     portfolio: params.result.portfolio.instances.map(
       planFirstDebugPlanInstance,
     ),
+    ...(turnPlanning ? { turnPlanning } : {}),
+  };
+}
+
+function turnPlanningProjectionDebug(params: {
+  input: AiDecisionInput;
+  result: Extract<PlanSchedulerResult, { lane: "plan" }>;
+  actionCandidate: ActionSemanticCandidate | undefined;
+  selectedPlan: ResidentPlanPortfolio["instances"][number];
+}): AiTurnPlanningDebug | undefined {
+  const extendedInput = params.input as AiDecisionInputWithDeckCapabilities;
+  const rulesContext = extendedInput.planningRulesContext;
+  const stateIdentity = extendedInput.planningStateIdentity;
+  const candidate = params.actionCandidate;
+  if (!rulesContext || !stateIdentity || !candidate) {
+    return undefined;
+  }
+
+  const turnKey = `${params.input.side}:turn:${
+    params.input.playerView.turnSerial ?? "unknown"
+  }`;
+  const entryFrame = buildProjectedDecisionFrame({
+    input: params.input,
+    rulesContext,
+    stateIdentity,
+    turnKey,
+  });
+  const isObservationBoundary =
+    candidate.actionType === "draw_card" ||
+    (candidate.economyProjection?.cardsDrawn !== undefined &&
+      candidate.economyProjection.cardsDrawn > 0);
+  const remainingCapacity = {
+    minimum: Math.max(
+      0,
+      entryFrame.actionCapacityLedger.unrestricted.minimum -
+        (candidate.costProfile.clickCost ?? 0),
+    ),
+    maximum: Math.max(
+      0,
+      entryFrame.actionCapacityLedger.unrestricted.maximum -
+        (candidate.costProfile.clickCost ?? 0),
+    ),
+  };
+  const boundary = isObservationBoundary
+    ? assessTurnObservationBoundary({
+        boundaryKind: "private_observation",
+        remainingActionCapacity: remainingCapacity,
+        residualTurnValueBasis: "hand_quality_distribution",
+        immediateOutcomeCodes: ["own_draw_identity_observed"],
+        uncertainty: [{ code: "post_draw_replanning_required" }],
+        assumptionIds: ["current_legal_action_remains_executable"],
+      })
+    : undefined;
+  const projectedCandidate = {
+    ...candidate,
+    stateVersion: stateIdentity.stateVersion,
+  };
+  const delta = certifiedTurnProjectionDeltaFromCandidate({
+    frame: entryFrame,
+    candidate: projectedCandidate,
+    ...(boundary ? { boundary } : {}),
+  });
+  const projectedFrame = applyCertifiedTurnProjectionDelta(entryFrame, delta);
+  const invocation = buildCanonicalLegalActionInvocation({
+    stateIdentity,
+    semanticActionType: candidate.semanticActionType,
+    ...(candidate.sourceCardInstanceId
+      ? { sourceCardInstanceId: candidate.sourceCardInstanceId }
+      : {}),
+    ...(candidate.abilityId ? { sourceAbilityId: candidate.abilityId } : {}),
+  });
+  const rootPlanInstanceId =
+    params.result.portfolio.rootForegroundInstanceId ??
+    params.selectedPlan.instanceId;
+  const rootPlan =
+    params.result.portfolio.instances.find(
+      (instance) => instance.instanceId === rootPlanInstanceId,
+    ) ?? params.selectedPlan;
+  const supportBindings = params.selectedPlan.parentNeedId
+    ? [
+        {
+          planInstanceId: params.selectedPlan.instanceId,
+          parentNeedId: params.selectedPlan.parentNeedId,
+          assignmentId: turnPlanningFingerprint("support-assignment", {
+            planInstanceId: params.selectedPlan.instanceId,
+            parentNeedId: params.selectedPlan.parentNeedId,
+            turnKey,
+          }),
+        },
+      ]
+    : [];
+  const nodeId = turnPlanningFingerprint("turn-node", {
+    invocationKey: invocation.invocationKey,
+    actionId: candidate.actionId,
+    stateVersion: stateIdentity.stateVersion,
+  });
+  const phaseId = turnPlanningFingerprint("turn-phase", {
+    rootPlanInstanceId,
+    leafPlanInstanceId: params.selectedPlan.instanceId,
+    entryFrameKey: entryFrame.projectedFrameKey,
+  });
+  const lineId = turnPlanningFingerprint("turn-line", {
+    phaseId,
+    nodeId,
+    projectedFrameKey: projectedFrame.projectedFrameKey,
+  });
+
+  return {
+    schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
+    mode: "projection_contract",
+    stateVersion: stateIdentity.stateVersion,
+    sideSafePlanningFingerprint: stateIdentity.sideSafePlanningFingerprint,
+    planningRulesFingerprint: rulesContext.fingerprint,
+    turnKey,
+    heads: [
+      {
+        candidateId: `head:${candidate.actionId}`,
+        moduleId: params.selectedPlan.moduleId,
+        rootPlanInstanceId,
+        actionId: candidate.actionId,
+        semanticActionType: candidate.semanticActionType,
+        invocationKey: invocation.invocationKey,
+        witnessValid:
+          params.input.legalActions.some(
+            (action) => action.actionId === candidate.actionId,
+          ) &&
+          buildSemanticActionSetFingerprint(params.input.legalActions).length >
+            0,
+      },
+    ],
+    selectedLine: {
+      lineId,
+      stopReason: boundary
+        ? "observation_boundary"
+        : "projection_not_supported",
+      projectedFrameKey: projectedFrame.projectedFrameKey,
+      cursor: { phaseIndex: 0, nodeIndex: 0 },
+      phases: [
+        {
+          phaseId,
+          rootPlanInstanceId,
+          rootModuleId: rootPlan.moduleId,
+          rootProvenance:
+            params.selectedPlan.parentNeedId !== undefined
+              ? "admitted_support"
+              : "resident",
+          entryFrameKey: entryFrame.projectedFrameKey,
+          completionCode: boundary
+            ? "observation_required"
+            : "future_projection_not_yet_available",
+          transitionKind: boundary
+            ? "observation_boundary"
+            : "projection_not_supported",
+          supportBindings,
+          nodes: [
+            {
+              nodeId,
+              semanticActionType: candidate.semanticActionType,
+              ...(boundary ? { boundaryAfter: boundary.boundaryKind } : {}),
+            },
+          ],
+        },
+      ],
+    },
+    ...(boundary
+      ? {
+          boundary: {
+            kind: boundary.boundaryKind,
+            residualTurnValueBasis: boundary.residualTurnValueBasis,
+            optionalityUnit: boundary.postBoundaryOptionality.unit,
+            optionalityMinimum: boundary.postBoundaryOptionality.minimum,
+            optionalityMaximum: boundary.postBoundaryOptionality.maximum,
+          },
+        }
+      : {}),
+    pruneEvents: [],
+    evidenceCodes: [
+      "turn_planning_projection_contract_only",
+      ...(boundary
+        ? ["observation_boundary_requires_replanning"]
+        : ["future_projection_not_yet_available"]),
+    ],
   };
 }
 

@@ -344,9 +344,9 @@ function AiDecisionDebugTraceView({
           defaultOpen
         >
           <p className="aiDecisionDebugNotice error" role="alert">
-            Diese Diagnose enthält keinen aktuellen side-sicheren
-            Plan-first-Vertrag. Unstrukturierte Alt-Diagnosen und Score-Rankings
-            werden nicht angezeigt.
+            Diese Diagnose enthält keinen aktuellen Plan-first-Vertrag.
+            Unstrukturierte Alt-Diagnosen und Score-Rankings werden nicht
+            angezeigt.
           </p>
           <AiDecisionDebugRows
             rows={[
@@ -478,8 +478,8 @@ function AiDecisionDebugPlanFirstTraceView({
         {mode === "preview" ? (
           <p className="aiDecisionDebugNotice" role="status">
             <strong>Read-only KI-Vorschlag, keine Regelentscheidung.</strong>{" "}
-            Das residente Planportfolio wird side-safe gelesen, aber durch die
-            Vorschau nicht fortgeschrieben.
+            Das residente Planportfolio wird durch die Vorschau nicht
+            fortgeschrieben.
           </p>
         ) : null}
         <AiDecisionDebugRows rows={nextActionRows} />
@@ -533,10 +533,7 @@ function AiDecisionDebugPlanFirstTraceView({
                     <AiDecisionDebugRows
                       rows={[
                         ["Bleibt als Ziel", plan.persistencePolicy],
-                        [
-                          "Stand im Plan",
-                          `${plan.phase} · ${plan.milestone}`,
-                        ],
+                        ["Stand im Plan", `${plan.phase} · ${plan.milestone}`],
                         [
                           "Benötigt noch",
                           plan.openNeedIds.length > 0
@@ -550,6 +547,98 @@ function AiDecisionDebugPlanFirstTraceView({
               );
             })}
           </div>
+        </AiDecisionDebugCollapsibleSection>
+      ) : null}
+
+      {decision.turnPlanning ? (
+        <AiDecisionDebugCollapsibleSection
+          title="Zugplanung"
+          summary={`${decision.turnPlanning.selectedLine.phases.length} Phase(n) · ${aiTurnPlanningStopReasonLabel(decision.turnPlanning.selectedLine.stopReason)}`}
+          defaultOpen
+        >
+          <AiDecisionDebugRows
+            rows={[
+              [
+                "Betriebsart",
+                decision.turnPlanning.mode === "shadow"
+                  ? "Shadow-Planer"
+                  : "Projektionsvertrag",
+              ],
+              ["Zug", decision.turnPlanning.turnKey],
+              ["Gewählte Linie", decision.turnPlanning.selectedLine.lineId],
+              [
+                "Planungsende",
+                aiTurnPlanningStopReasonLabel(
+                  decision.turnPlanning.selectedLine.stopReason,
+                ),
+              ],
+              [
+                "Cursor",
+                `Phase ${decision.turnPlanning.selectedLine.cursor.phaseIndex + 1}, Schritt ${decision.turnPlanning.selectedLine.cursor.nodeIndex + 1}`,
+              ],
+              [
+                "Projizierter Zustand",
+                decision.turnPlanning.selectedLine.projectedFrameKey,
+              ],
+            ]}
+          />
+          <div className="aiDecisionDebugCompactList">
+            {decision.turnPlanning.selectedLine.phases.map((phase, index) => (
+              <div key={phase.phaseId}>
+                <span>
+                  Phase {index + 1} · {aiTracePlanLabel(phase.rootModuleId)}
+                </span>
+                <strong>{phase.completionCode}</strong>
+                <AiDecisionDebugRows
+                  rows={[
+                    ["Root-Plan", phase.rootPlanInstanceId],
+                    ["Herkunft", phase.rootProvenance],
+                    ["Übergang", phase.transitionKind],
+                    [
+                      "Geplante Schritte",
+                      phase.nodes
+                        .map(
+                          (node) =>
+                            `${node.semanticActionType}${node.boundaryAfter ? ` → ${node.boundaryAfter}` : ""}`,
+                        )
+                        .join(" · "),
+                    ],
+                    [
+                      "Support-Bindungen",
+                      phase.supportBindings.length > 0
+                        ? phase.supportBindings
+                            .map(
+                              (binding) =>
+                                `${binding.planInstanceId} → ${binding.parentNeedId}`,
+                            )
+                            .join(" · ")
+                        : "keine",
+                    ],
+                  ]}
+                />
+              </div>
+            ))}
+          </div>
+          {decision.turnPlanning.boundary ? (
+            <AiDecisionDebugRows
+              rows={[
+                ["Beobachtungsgrenze", decision.turnPlanning.boundary.kind],
+                [
+                  "Restwertbasis",
+                  decision.turnPlanning.boundary.residualTurnValueBasis,
+                ],
+                [
+                  "Restoptionen",
+                  `${decision.turnPlanning.boundary.optionalityMinimum}–${decision.turnPlanning.boundary.optionalityMaximum} ${decision.turnPlanning.boundary.optionalityUnit}`,
+                ],
+              ]}
+            />
+          ) : null}
+          <AiDecisionDebugChips
+            title="Planungs-Evidence"
+            items={decision.turnPlanning.evidenceCodes}
+            tone="muted"
+          />
         </AiDecisionDebugCollapsibleSection>
       ) : null}
 
@@ -646,6 +735,25 @@ function AiDecisionDebugPlanFirstTraceView({
   );
 }
 
+function aiTurnPlanningStopReasonLabel(
+  value: NonNullable<
+    AiPlanFirstDecisionDebug["turnPlanning"]
+  >["selectedLine"]["stopReason"],
+): string {
+  switch (value) {
+    case "projected_turn_end":
+      return "Zugende vollständig projiziert";
+    case "observation_boundary":
+      return "Beobachtungsgrenze, danach Neuplanung";
+    case "projection_not_supported":
+      return "weitere Projektion noch nicht unterstützt";
+    case "projected_plan_discovery_required":
+      return "neue Planermittlung erforderlich";
+    case "bounded_search_horizon":
+      return "begrenzter Suchhorizont erreicht";
+  }
+}
+
 function AiDecisionDebugLegacyTraceView({
   trace,
   mode = "trace",
@@ -677,8 +785,7 @@ function AiDecisionDebugLegacyTraceView({
   const relevantExclusions = safeStringList(detail.whyNot, 5).filter(
     aiDecisionDebugIsCurrentWhyNot,
   );
-  const title =
-    aiTraceTitle(trace);
+  const title = aiTraceTitle(trace);
   return (
     <div className="aiDecisionDebugContent">
       <AiDecisionDebugCollapsibleSection
@@ -1547,53 +1654,80 @@ function AiDecisionDebugPrivateHand({
 }: {
   detail: Record<string, unknown>;
 }) {
-  const privateHand = aiDecisionDebugPrivateHandExport(detail);
-  if (privateHand.cards.length === 0) {
-    const rows = privateHand.rows;
-    if (rows.length === 0) return null;
-    return (
-      <AiDecisionDebugCollapsibleSection
-        title="Aktuelle Hand der KI"
-        summary={aiDecisionDebugPrivateHandHeaderSummary(privateHand)}
-        defaultOpen
-      >
-        <AiDecisionDebugRows rows={rows} />
-      </AiDecisionDebugCollapsibleSection>
-    );
-  }
+  const privateHands = aiDecisionDebugPrivateHandsExports(detail);
+  if (privateHands.length === 0) return null;
   return (
     <AiDecisionDebugCollapsibleSection
-      title="Aktuelle Hand der KI"
-      summary={aiDecisionDebugPrivateHandHeaderSummary(privateHand)}
+      title={
+        privateHands.length > 1
+          ? "Vollständige Karten beider Seiten"
+          : "Aktuelle Hand der KI"
+      }
+      summary={privateHands
+        .map(
+          (hand) =>
+            `${hand.sideLabel}: ${hand.cards.length} Karte${hand.cards.length === 1 ? "" : "n"}`,
+        )
+        .join(" · ")}
       defaultOpen
     >
-      <AiDecisionDebugRows rows={privateHand.rows} />
-      <div className="aiDecisionDebugActions">
-        {privateHand.cards.map((card) => {
-          return (
-            <div className="aiDecisionDebugAction" key={card.key}>
-              <div>
-                <strong>
-                  #{card.rank} {card.title}
-                </strong>
-                <span>{card.meta}</span>
+      {privateHands.map((privateHand) => (
+        <div key={privateHand.sideLabel}>
+          <h4>{privateHand.sideLabel}</h4>
+          <AiDecisionDebugRows rows={privateHand.rows} />
+          <div className="aiDecisionDebugActions">
+            {privateHand.cards.map((card) => (
+              <div className="aiDecisionDebugAction" key={card.key}>
+                <div>
+                  <strong>
+                    #{card.rank} {card.title}
+                  </strong>
+                  <span>{card.meta}</span>
+                </div>
+                {card.rulesText ? (
+                  <p>
+                    <strong>Regeltext:</strong> {card.rulesText}
+                  </p>
+                ) : null}
+                {card.legalActions.length > 0 ? (
+                  <p>{card.legalActions.join(" · ")}</p>
+                ) : (
+                  <p>Keine aktuelle LegalAction aus dieser Handkarte.</p>
+                )}
               </div>
-              {card.rulesText ? (
-                <p>
-                  <strong>Regeltext:</strong> {card.rulesText}
-                </p>
-              ) : null}
-              {card.legalActions.length > 0 ? (
-                <p>{card.legalActions.join(" · ")}</p>
-              ) : (
-                <p>Keine aktuelle LegalAction aus dieser Handkarte.</p>
-              )}
-            </div>
-          );
-        })}
-      </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </AiDecisionDebugCollapsibleSection>
   );
+}
+
+function aiDecisionDebugPrivateHandsExports(
+  detail: Record<string, unknown>,
+): Array<
+  ReturnType<typeof aiDecisionDebugPrivateHandExport> & { sideLabel: string }
+> {
+  const completePreview = aiDecisionDebugRecord(
+    detail.developerPrivateHandsPreview,
+  );
+  const completeHands = completePreview
+    ? aiDecisionDebugRecordList(completePreview.hands)
+    : [];
+  if (completeHands.length > 0) {
+    return completeHands.map((preview) => ({
+      ...aiDecisionDebugPrivateHandExportFromPreview(preview),
+      sideLabel:
+        preview.side === "corp"
+          ? "Korp"
+          : preview.side === "runner"
+            ? "Runner"
+            : String(preview.side ?? "Unbekannte Seite"),
+    }));
+  }
+  const fallback = aiDecisionDebugPrivateHandExport(detail);
+  if (fallback.cards.length === 0 && fallback.rows.length === 0) return [];
+  return [{ ...fallback, sideLabel: "KI" }];
 }
 
 function aiDecisionDebugPrivateHandExport(detail: Record<string, unknown>): {
@@ -1610,6 +1744,12 @@ function aiDecisionDebugPrivateHandExport(detail: Record<string, unknown>): {
   const preview = aiDecisionDebugRecord(detail.aiPrivateHandPreview);
   if (!preview)
     return { rows: aiDecisionDebugPrivateHandMissingRows(detail), cards: [] };
+  return aiDecisionDebugPrivateHandExportFromPreview(preview);
+}
+
+function aiDecisionDebugPrivateHandExportFromPreview(
+  preview: Record<string, unknown>,
+): ReturnType<typeof aiDecisionDebugPrivateHandExport> {
   const cards = aiDecisionDebugRecordList(preview.cards);
   const rows: Array<[string, string]> = [
     [

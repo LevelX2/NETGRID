@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK03 abgeschlossen; ZK04 aktiv**
+Status: **ZK00 bis ZK04 abgeschlossen; ZK05 aktiv**
 
 Stand: 2026-07-29
 
@@ -784,3 +784,31 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
 - Fokussierte Vertrags-/Inputtests: 15/15 grün.
 - Vollständige AI-Baseline: 521 Testdateien und 4265 Tests grün.
 - AI-Typecheck, `check:ai` und `git diff --check`: grün.
+
+### ZK04 – abgeschlossen
+
+- `ProjectedDecisionFrame` bildet den bekannten Zustand unveränderlich und
+  fingerprint-stabil für Klicks, Credits, Hand, bekannte Zonen, Board,
+  Serverposturen, Reservierungen, Planfortschritt und Cleanup ab.
+- Nur aktuell gebundene, engine-legale und semantisch zertifizierte Deltas
+  dürfen einen Projektionsframe fortschreiben; ein falscher Basisframe wird
+  fail-closed abgewiesen.
+- Private Beobachtung, öffentlicher Zufall, Gegnerreaktion und noch nicht
+  unterstützte Projektion sind explizite Boundaries. Hinter einer Boundary
+  wird nur begrenzte Optionalität bewertet, keine konkrete Zukunftsaktion
+  erfunden.
+- `CorpHandInventoryFacts` v3 klassifiziert jede eigene HQ-Instanz; unbekannte
+  oder nicht auflösbare Karten bleiben ausdrücklich `assessment_unknown`.
+- Der Plan-first-Debugvertrag transportiert den aktuellen Head, eine
+  Projektionslinie, Phase, Root, Supportbindung, Cursor, Stopgrund und
+  Boundary-Restwert.
+- Die privilegierte private In-Game-Buganzeige zeigt nun ausdrücklich die
+  vollständigen Karten von Korp und Runner sowie die aktuelle Zugplanung.
+  Normale AI-Preview-, Event-, Replay-, Log- und Fehlerpfade erhalten dieses
+  Feld nicht.
+- Projektionstests einschließlich deterministischer Wiederholung: 7/7 grün;
+  Handklassifikation: 4/4 grün.
+- Vollständige AI-Suite: 522 Testdateien und 4272 Tests grün.
+- Shared Contract/Sanitizer: 16/16 grün; Multiplayer: 148/148 grün;
+  Web-Debugexport: 1/1 grün.
+- AI-, Shared-, Server- und Web-Typecheck sowie `git diff --check`: grün.

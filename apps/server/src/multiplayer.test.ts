@@ -1276,7 +1276,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     if (preview.ok) throw new Error("Expected foreign-side preview rejection");
     expect(preview.error.code).toBe("preview_side_forbidden");
     expect(JSON.stringify(preview)).not.toMatch(
-      /aiPrivateHandPreview|privateDeckSnapshots|cardInstances/,
+      /aiPrivateHandPreview|developerPrivateHandsPreview|privateDeckSnapshots|cardInstances/,
     );
     expect(afterPreview?.eventLog.length).toBe(beforePreview?.eventLog.length);
     expect(afterPreview?.gameState?.stateVersion).toBe(
@@ -12576,7 +12576,68 @@ describe("MVP 0.2 multiplayer service", () => {
         knownMatchVersion: current.matchVersion,
       });
       expect(first.ok).toBe(true);
+      if (!first.ok) throw new Error(first.error.message);
+      expect(first.prepared.detail.planFirstDecision).toMatchObject({
+        turnPlanning: {
+          schemaVersion: "ai-turn-planning-debug-v1",
+          mode: "projection_contract",
+          heads: [
+            {
+              actionId: first.prepared.actionId,
+              witnessValid: true,
+            },
+          ],
+          selectedLine: {
+            phases: [
+              {
+                nodes: [
+                  expect.objectContaining({ nodeId: expect.any(String) }),
+                ],
+              },
+            ],
+          },
+        },
+      });
       const persisted = await storage.load(created.matchId);
+      if (!persisted) throw new Error("Missing persisted match");
+      const privateHands = first.prepared.detail
+        .developerPrivateHandsPreview as {
+        schemaVersion: string;
+        hands: Array<{
+          side: "corp" | "runner";
+          cards: Array<{
+            instanceId: string;
+            definitionId: string;
+            title: string;
+          }>;
+        }>;
+      };
+      expect(privateHands.schemaVersion).toBe("developer-private-hands-v1");
+      expect(privateHands.hands.map((hand) => hand.side)).toEqual([
+        "corp",
+        "runner",
+      ]);
+      for (const side of ["corp", "runner"] as const) {
+        const expectedInstanceId: string | undefined =
+          side === "corp"
+            ? persisted.gameState.corp.hq[0]
+            : persisted.gameState.runner.grip[0];
+        if (!expectedInstanceId)
+          throw new Error(`Missing ${side} hand card in test fixture`);
+        const expectedDefinitionId =
+          persisted.gameState.cardInstances[expectedInstanceId]?.definitionId;
+        if (!expectedDefinitionId)
+          throw new Error(`Missing ${side} hand card definition`);
+        expect(
+          privateHands.hands
+            .find((hand) => hand.side === side)
+            ?.cards.find((card) => card.instanceId === expectedInstanceId),
+        ).toMatchObject({
+          instanceId: expectedInstanceId,
+          definitionId: expectedDefinitionId,
+          title: CARD_DEFINITIONS_BY_ID[expectedDefinitionId]?.title,
+        });
+      }
       expect(
         persisted?.aiPlanRuntime?.residentPlanPortfolioBySide?.corp?.instances
           .length,
@@ -12699,7 +12760,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(runnerPreviewJson).not.toContain(hiddenCorpCard.definitionId);
     expect(runnerPreviewJson).not.toContain(hiddenCorpCard.title);
     expect(runnerPreviewJson).not.toMatch(
-      /aiPrivateHandPreview|privateDeckSnapshots|cardInstances/,
+      /aiPrivateHandPreview|developerPrivateHandsPreview|privateDeckSnapshots|cardInstances/,
     );
     const repeatedRunnerPreview = await runnerService.previewAi({
       matchId: runnerMatch.matchId,
@@ -12861,7 +12922,7 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(corpPreviewJson).not.toContain(hiddenRunnerCard.title);
     }
     expect(corpPreviewJson).not.toMatch(
-      /aiPrivateHandPreview|privateDeckSnapshots|cardInstances/,
+      /aiPrivateHandPreview|developerPrivateHandsPreview|privateDeckSnapshots|cardInstances/,
     );
     expect(corpPreviewMemoryFlags).toEqual([false]);
     const corpRecordAfter = await corpService.loadForTest(corpMatch.matchId);
@@ -12891,7 +12952,7 @@ describe("MVP 0.2 multiplayer service", () => {
       throw new Error("Expected observer preview rejection");
     expect(observerPreview.error.code).toBe("preview_mode_forbidden");
     expect(JSON.stringify(observerPreview)).not.toMatch(
-      /aiPrivateHandPreview|privateDeckSnapshots|cardInstances/,
+      /aiPrivateHandPreview|developerPrivateHandsPreview|privateDeckSnapshots|cardInstances/,
     );
   });
 

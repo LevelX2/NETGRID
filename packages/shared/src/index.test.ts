@@ -8,6 +8,7 @@ import {
   DEMO_DECK_IDS,
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+  AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   CARD_DEFINITIONS,
   CARD_DEFINITIONS_BY_ID,
@@ -357,6 +358,65 @@ describe("AI decision debug sanitizing", () => {
           },
         ],
         portfolio: [],
+        turnPlanning: {
+          schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
+          mode: "projection_contract",
+          stateVersion: 12,
+          sideSafePlanningFingerprint: "planning-state:test",
+          planningRulesFingerprint: "planning-rules:test",
+          turnKey: "corp:turn:4",
+          heads: [
+            {
+              candidateId: "head:corp.draw",
+              moduleId: "corp.economy",
+              rootPlanInstanceId: "plan:corp.score_agenda:general",
+              actionId: "corp.draw",
+              semanticActionType: "economy.draw",
+              invocationKey: "invocation:test",
+              witnessValid: true,
+            },
+          ],
+          selectedLine: {
+            lineId: "line:corp.draw",
+            stopReason: "observation_boundary",
+            projectedFrameKey: "projected-frame:test",
+            cursor: { phaseIndex: 0, nodeIndex: 0 },
+            phases: [
+              {
+                phaseId: "phase:score-material",
+                rootPlanInstanceId: "plan:corp.score_agenda:general",
+                rootModuleId: "corp.economy",
+                rootProvenance: "admitted_support",
+                entryFrameKey: "projected-frame:entry",
+                completionCode: "observation_required",
+                transitionKind: "observation_boundary",
+                supportBindings: [
+                  {
+                    planInstanceId: "plan:corp.economy:score-material",
+                    parentNeedId: "score-material:general",
+                    assignmentId: "assignment:score-material",
+                  },
+                ],
+                nodes: [
+                  {
+                    nodeId: "node:corp.draw",
+                    semanticActionType: "economy.draw",
+                    boundaryAfter: "private_observation",
+                  },
+                ],
+              },
+            ],
+          },
+          boundary: {
+            kind: "private_observation",
+            residualTurnValueBasis: "hand_quality_distribution",
+            optionalityUnit: "hand_quality_band",
+            optionalityMinimum: 0,
+            optionalityMaximum: 1,
+          },
+          pruneEvents: [],
+          evidenceCodes: ["turn_planning_projection_contract_only"],
+        },
       },
     });
 
@@ -377,7 +437,29 @@ describe("AI decision debug sanitizing", () => {
       dispositions: [
         expect.objectContaining({ disposition: "assessment_unknown" }),
       ],
+      turnPlanning: expect.objectContaining({
+        schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
+        selectedLine: expect.objectContaining({
+          stopReason: "observation_boundary",
+        }),
+      }),
     });
+
+    const malformedTurnPlanning = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      planFirstDecision: {
+        ...sanitized?.planFirstDecision,
+        turnPlanning: {
+          ...sanitized?.planFirstDecision?.turnPlanning,
+          selectedLine: {
+            ...sanitized?.planFirstDecision?.turnPlanning?.selectedLine,
+            cursor: { phaseIndex: "zero", nodeIndex: 0 },
+          },
+        },
+      },
+    });
+    expect(malformedTurnPlanning?.planFirstDecision).toBeUndefined();
 
     const p6WithoutNarrowContract = sanitizeAiDecisionDebug({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,

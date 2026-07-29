@@ -30,6 +30,12 @@ describe("AI plan-first decision export", () => {
           stepId: "draw_score_material",
           actionId: "corp.draw",
         },
+        turnPlanning: {
+          schemaVersion: "ai-turn-planning-debug-v1",
+          selectedLine: {
+            stopReason: "observation_boundary",
+          },
+        },
       },
     });
     expect(output).not.toMatch(
@@ -135,6 +141,59 @@ function trace(): MaintenanceAiTraceDetail {
         assessmentEvidenceCodes: ["exact_parent_need"],
         dispositions: [],
         portfolio: [],
+        turnPlanning: {
+          schemaVersion: "ai-turn-planning-debug-v1",
+          mode: "projection_contract",
+          stateVersion: 7,
+          sideSafePlanningFingerprint: "planning-state:test",
+          planningRulesFingerprint: "planning-rules:test",
+          turnKey: "corp:turn:2",
+          heads: [
+            {
+              candidateId: "head:corp.draw",
+              moduleId: "corp.economy",
+              rootPlanInstanceId: "plan:corp.score_agenda:general",
+              actionId: "corp.draw",
+              semanticActionType: "economy.draw",
+              invocationKey: "invocation:test",
+              witnessValid: true,
+            },
+          ],
+          selectedLine: {
+            lineId: "line:corp.draw",
+            stopReason: "observation_boundary",
+            projectedFrameKey: "projected-frame:test",
+            cursor: { phaseIndex: 0, nodeIndex: 0 },
+            phases: [
+              {
+                phaseId: "phase:score-material",
+                rootPlanInstanceId: "plan:corp.score_agenda:general",
+                rootModuleId: "corp.economy",
+                rootProvenance: "admitted_support",
+                entryFrameKey: "projected-frame:entry",
+                completionCode: "observation_required",
+                transitionKind: "observation_boundary",
+                supportBindings: [],
+                nodes: [
+                  {
+                    nodeId: "node:corp.draw",
+                    semanticActionType: "economy.draw",
+                    boundaryAfter: "private_observation",
+                  },
+                ],
+              },
+            ],
+          },
+          boundary: {
+            kind: "private_observation",
+            residualTurnValueBasis: "hand_quality_distribution",
+            optionalityUnit: "hand_quality_band",
+            optionalityMinimum: 0,
+            optionalityMaximum: 1,
+          },
+          pruneEvents: [],
+          evidenceCodes: ["observation_boundary_requires_replanning"],
+        },
       },
     },
   };

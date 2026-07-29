@@ -378,7 +378,10 @@ export function buildPlanningRulesContext(params: {
   } satisfies Omit<PlanningRulesContext, "fingerprint">;
   const context: PlanningRulesContext = {
     ...contextWithoutFingerprint,
-    fingerprint: fingerprint("planning-rules", contextWithoutFingerprint),
+    fingerprint: turnPlanningFingerprint(
+      "planning-rules",
+      contextWithoutFingerprint,
+    ),
   };
   assertPlanningRulesContext(context);
   return context;
@@ -399,7 +402,7 @@ export function buildPlanningStateIdentity(
   } = input.playerView;
   return {
     stateVersion,
-    sideSafePlanningFingerprint: fingerprint("planning-state", {
+    sideSafePlanningFingerprint: turnPlanningFingerprint("planning-state", {
       side: input.side,
       playerView: omitActionIds(planningView),
       eventTail: omitActionIds(input.eventTail),
@@ -411,7 +414,7 @@ export function buildPlanningStateIdentity(
 export function buildSemanticActionSetFingerprint(
   legalActions: AiDecisionInput["legalActions"],
 ): string {
-  return fingerprint(
+  return turnPlanningFingerprint(
     "semantic-action-set",
     canonicalLegalActionSemantics(legalActions),
   );
@@ -440,7 +443,7 @@ export function buildCanonicalLegalActionInvocation(params: {
   };
   const invocation = {
     ...route,
-    invocationKey: fingerprint("invocation", {
+    invocationKey: turnPlanningFingerprint("invocation", {
       sideSafePlanningFingerprint:
         params.stateIdentity.sideSafePlanningFingerprint,
       route,
@@ -478,7 +481,10 @@ export function assertPlanningRulesContext(
     issues.push("campaign_value_policy_mismatch");
   }
   const { fingerprint: _fingerprint, ...fingerprintInput } = context;
-  if (context.fingerprint !== fingerprint("planning-rules", fingerprintInput)) {
+  if (
+    context.fingerprint !==
+    turnPlanningFingerprint("planning-rules", fingerprintInput)
+  ) {
     issues.push("rules_fingerprint_mismatch");
   }
   requireNoIssues("invalid_planning_rules_context", issues);
@@ -520,7 +526,7 @@ export function assertCanonicalLegalActionInvocation(
       issues.push("invalid_planning_state_identity");
     }
     const { invocationKey: _invocationKey, ...route } = invocation;
-    const expectedKey = fingerprint("invocation", {
+    const expectedKey = turnPlanningFingerprint("invocation", {
       sideSafePlanningFingerprint: stateIdentity.sideSafePlanningFingerprint,
       route: {
         ...route,
@@ -970,7 +976,7 @@ function validateTargetList(
         validateTargetList(target.targets, issues);
       }
     }
-    const key = canonicalSerialize(target);
+    const key = canonicalTurnPlanningSerialize(target);
     if (targetKeys.has(key)) issues.push("duplicate_target");
     targetKeys.add(key);
   }
@@ -1005,11 +1011,16 @@ function registryDimensionIds(
   return new Set(registry.dimensions.map((dimension) => dimension.dimensionId));
 }
 
-function fingerprint(namespace: string, value: unknown): string {
-  return `fnv1a:${fnv1a(`${namespace}|${canonicalSerialize(value)}`)}`;
+export function turnPlanningFingerprint(
+  namespace: string,
+  value: unknown,
+): string {
+  return `fnv1a:${fnv1a(
+    `${namespace}|${canonicalTurnPlanningSerialize(value)}`,
+  )}`;
 }
 
-function canonicalSerialize(value: unknown): string {
+export function canonicalTurnPlanningSerialize(value: unknown): string {
   return JSON.stringify(canonicalize(value));
 }
 
@@ -1025,7 +1036,9 @@ function canonicalize(value: unknown): unknown {
 }
 
 function compareCanonical(left: unknown, right: unknown): number {
-  return canonicalSerialize(left).localeCompare(canonicalSerialize(right));
+  return canonicalTurnPlanningSerialize(left).localeCompare(
+    canonicalTurnPlanningSerialize(right),
+  );
 }
 
 function omitActionIds(value: unknown): unknown {

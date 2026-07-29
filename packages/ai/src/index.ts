@@ -212,6 +212,7 @@ export {
   buildPlanningRulesContext,
   buildPlanningStateIdentity,
   buildSemanticActionSetFingerprint,
+  canonicalTurnPlanningSerialize,
   CAMPAIGN_VALUE_POLICY_VERSION,
   PLAN_COMMITMENT_PRECEDENCE,
   TURN_ACTION_SEMANTIC_SCHEMA_VERSION,
@@ -220,6 +221,7 @@ export {
   TURN_PLAN_MODULE_SET_FINGERPRINT,
   TURN_PLANNING_CONTRACT_SCHEMA_VERSION,
   TURN_PLANNING_POLICY_VERSION,
+  turnPlanningFingerprint,
   TurnPlanningContractError,
 } from "./plans/turn-planning-contracts";
 export type {
@@ -249,6 +251,30 @@ export type {
   TurnPlanningHeadCandidate,
   ValidatedPriorityObligation,
 } from "./plans/turn-planning-contracts";
+export {
+  applyCertifiedTurnProjectionDelta,
+  assessTurnObservationBoundary,
+  buildProjectedDecisionFrame,
+  certifiedTurnProjectionDeltaFromCandidate,
+  PROJECTED_DECISION_FRAME_SCHEMA_VERSION,
+  TURN_PROJECTION_DELTA_SCHEMA_VERSION,
+  TurnProjectionError,
+} from "./plans/turn-projection";
+export type {
+  BoundaryActionAssessment,
+  BoundaryResidualTurnValueBasis,
+  NeedHitProbabilityBand,
+  ProjectedDecisionFrame,
+  ProjectedHandDisposition,
+  ProjectedKnownBoardCard,
+  ProjectedKnownZoneState,
+  ProjectedPlanProgress,
+  ProjectedResourceReservation,
+  ProjectionUncertainty,
+  ProjectionValueRange,
+  TurnBoundaryKind,
+  TurnProjectionDelta,
+} from "./plans/turn-projection";
 export {
   compareCreditDemandPriority,
   createCorpCreditDemand,

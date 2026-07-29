@@ -72,6 +72,8 @@ describe("Corp hand inventory facts", () => {
         requiredDiscardsIfTurnEndedNow: 0,
         availableSlotsBeforeCleanup: 1,
         singleCardDrawWouldIncreaseDiscard: false,
+        dispositionCoverageComplete: true,
+        assessmentUnknownInstanceIds: [],
       },
     });
     expect(
@@ -93,6 +95,8 @@ describe("Corp hand inventory facts", () => {
         }),
       ],
       dispositions: [],
+      planningDisposition: "current_plan_route",
+      retentionHorizon: "current_turn",
     });
     expect(
       facts?.records
@@ -158,6 +162,22 @@ describe("Corp hand inventory facts", () => {
       "unsupported_domain_contract",
     ]);
     expect(disposition("unsupported")).toEqual(["unsupported_domain_contract"]);
+    expect(
+      facts.records.find((record) => record.sourceInstanceId === "funding"),
+    ).toMatchObject({
+      planningDisposition: "blocked_but_developable",
+      relatedPlanInstanceIds: ["funding-plan"],
+      relatedNeedIds: [],
+    });
+    expect(
+      facts.records.find((record) => record.sourceInstanceId === "hold"),
+    ).toMatchObject({ planningDisposition: "campaign_hold" });
+    expect(
+      facts.records.find((record) => record.sourceInstanceId === "duplicate-a"),
+    ).toMatchObject({
+      planningDisposition: "redundant",
+      redundancyGroupId: "definition:duplicate-card",
+    });
     expect(facts.pressure).toMatchObject({
       handSize: 6,
       maximumHandSize: 5,
@@ -169,6 +189,9 @@ describe("Corp hand inventory facts", () => {
       requiredDiscardsIfTurnEndedNow: 1,
       availableSlotsBeforeCleanup: 0,
       singleCardDrawWouldIncreaseDiscard: true,
+      dispositionCoverageComplete: true,
+      assessmentUnknownInstanceIds: ["unsafe", "unsupported"],
+      discardCandidateInstanceIds: ["duplicate-a", "duplicate-b"],
     });
     expect(
       facts.records.every(
@@ -176,6 +199,34 @@ describe("Corp hand inventory facts", () => {
           record.domainClaims.length > 0 || record.dispositions.length > 0,
       ),
     ).toBe(true);
+  });
+
+  it("classifies every own HQ instance even when an own card definition is unexpectedly missing", () => {
+    const input = corpInput([
+      {
+        instanceId: "unknown-own-card",
+        known: false,
+        owner: "corp",
+        controller: "corp",
+      } as VisibleCard,
+    ]);
+    const facts = buildCorpHandInventoryFacts({
+      input,
+      candidates: [],
+      domainClaims: [],
+      actionDispositions: [],
+    })!;
+
+    expect(facts.records).toHaveLength(1);
+    expect(facts.records[0]).toMatchObject({
+      sourceInstanceId: "unknown-own-card",
+      sourceDefinitionId: "unknown-own-card",
+      planningDisposition: "assessment_unknown",
+    });
+    expect(facts.cleanupProjection).toMatchObject({
+      dispositionCoverageComplete: true,
+      assessmentUnknownInstanceIds: ["unknown-own-card"],
+    });
   });
 
   it("fails closed for Runner input and exposes shared pressure helpers without Corp selection state", () => {
