@@ -10,32 +10,39 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match e676 exact decision checkpoints", () => {
   it.each([
     [
-      "starts the exact Tycho score campaign with staged ETR uncertainty",
+      "builds liquidity instead of exposing Tycho behind uncertain protection",
       unsafeTychoJson,
-      true,
+      [
+        "plan_priority_class:P6",
+        "plan_module:corp.economy",
+        "plan_step_capability:develop_or_convert_corp_economy",
+        "plan_assessment_evidence:corp_engine_certified_basic_liquidity_development",
+      ],
     ],
     [
-      "avoids a full-HQ draw without rezzing Chester Mix",
+      "funds exact remote defense without rezzing Chester Mix",
       chesterBeforeHqIceJson,
-      false,
+      [
+        "plan_module:corp.economy",
+        "plan_step_capability:develop_or_convert_corp_economy",
+        "plan_assessment_evidence:corp_defense_exact_route_funding_required:remote_1:corp.install_card.corp_onr_v1_278_wall-of-ice_1.remote_1.corp_onr_v1_278_wall-of-ice_1.3",
+      ],
     ],
     [
-      "starts the exact Hostile Takeover score campaign with staged ETR uncertainty",
+      "converts Night Shift before exposing Hostile Takeover",
       nightShiftReserveJson,
-      true,
+      [
+        "plan_priority_class:P4",
+        "plan_module:corp.economy",
+        "plan_step_capability:develop_or_convert_corp_economy",
+        "plan_assessment_evidence:corp_engine_certified_immediate_operation_conversion:onr_v1_295_night-shift",
+      ],
     ],
-  ])("%s", (_label, json, expectsP4ScoreInstall) => {
+  ] as const)("%s", (_label, json, expectedEvidence) => {
     const result = expectCheckpointToPass(fixture(json));
-    if (expectsP4ScoreInstall) {
-      expect(result.decision?.evidence).toEqual(
-        expect.arrayContaining([
-          "plan_priority_class:P4",
-          "plan_module:corp.score_agenda",
-          "plan_step_capability:install_score_agenda",
-          "plan_assessment_evidence:corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
-        ]),
-      );
-    }
+    expect(result.decision?.evidence).toEqual(
+      expect.arrayContaining([...expectedEvidence]),
+    );
   });
 
   it("still allows Tycho exposure when Project Consultants converts it this turn", () => {

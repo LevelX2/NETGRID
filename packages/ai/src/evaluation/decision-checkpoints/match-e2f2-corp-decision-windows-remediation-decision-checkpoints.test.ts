@@ -19,7 +19,7 @@ describe("match e2f2 Corp decision-window remediation checkpoints", () => {
     ["declines a zero-yield Data Wall rez", declineZeroYieldDataWallJson],
     ["declines a negative Wall of Static rez", declineNegativeWallStaticJson],
     [
-      "declines Misleading Access Menus without exact access reduction",
+      "rezzes Misleading Access Menus for certified qualitative encounter defense",
       keepPositiveMenusRezJson,
     ],
     [

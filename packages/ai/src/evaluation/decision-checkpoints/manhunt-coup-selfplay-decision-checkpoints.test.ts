@@ -52,29 +52,22 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("starts the deadline-pressured Corporate War score campaign with staged ETR uncertainty", () => {
+  it("does not let deck pressure justify an unprotected Corporate War install", () => {
     const result = runAiDecisionCheckpoint(fixture(deckoutCloseoutJson));
 
     expect(result.ok, diagnostic(result)).toBe(true);
-    expectCorporateWarInstall(result, "P3", "expiring_conversion");
   });
 
-  it("keeps the P4 Corporate War install with a relaxed deckout clock", () => {
+  it("still requires protection with a relaxed deckout clock", () => {
     const relaxedClock = mutateFixture(deckoutCloseoutJson, (checkpoint) => {
       moveArchivesCardsToRd(checkpoint, 6);
       checkpoint.expectation = {
-        acceptableActions: [
-          {
-            type: "install_card",
-            sourceDefinitionId: CORPORATE_WAR,
-            targetServerId: "remote_1",
-          },
-        ],
+        acceptableActions: [{ type: "gain_credit" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.score_agenda"],
-          acceptableCapabilities: ["install_score_agenda"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
+            "corp_engine_certified_basic_liquidity_development",
           ],
         },
       };
@@ -83,7 +76,6 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(relaxedClock);
 
     expect(result.ok, diagnostic(result)).toBe(true);
-    expectCorporateWarInstall(result, "P4", "strategic_campaign");
   });
 });
 
@@ -153,20 +145,4 @@ function diagnostic(
     result.selectedAction?.actionId ?? "no-action",
     result.decision?.reasonCode ?? "no-reason",
   ].join(" | ");
-}
-
-function expectCorporateWarInstall(
-  result: ReturnType<typeof runAiDecisionCheckpoint>,
-  priorityClass: "P3" | "P4",
-  priorityReason: "expiring_conversion" | "strategic_campaign",
-): void {
-  expect(result.decision?.evidence).toEqual(
-    expect.arrayContaining([
-      `plan_priority_class:${priorityClass}`,
-      `plan_priority_reason:${priorityReason}`,
-      "plan_module:corp.score_agenda",
-      "plan_step_capability:install_score_agenda",
-      "plan_assessment_evidence:corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
-    ]),
-  );
 }

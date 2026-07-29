@@ -89,12 +89,20 @@ export function assessCorpDrawAdmission(params: {
     ? params.capacityReleaseRoutes
         .filter(
           (route) =>
-            route.priorityClass === params.priorityClass &&
+            capacityReleaseCanSequenceBeforeDraw({
+              drawPriorityClass: params.priorityClass,
+              drawPurpose: params.purpose,
+              drawClickCost: clickCost,
+              currentClicks: params.currentClicks,
+              projectedEndTurnOverflow,
+              parentProvidesExactSameTurnCapacityRelease:
+                params.parentProvidesExactSameTurnCapacityRelease,
+              route,
+            }) &&
             positiveSafeInteger(route.clickCost) &&
             Number.isSafeInteger(route.netHandDelta) &&
             route.netHandDelta < 0 &&
             route.actionId !== params.actionId &&
-            route.clickCost + clickCost <= params.currentClicks &&
             params.handSize + route.netHandDelta + netHandDelta <=
               params.maximumHandSize,
         )
@@ -120,6 +128,11 @@ export function assessCorpDrawAdmission(params: {
     disposition = "blocked_attempt_budget";
   } else if (!validProjection) {
     disposition = "blocked_unknown_projection";
+  } else if (
+    projectedEndTurnOverflow > 0 &&
+    exactCapacityReleaseRoutes.length > 0
+  ) {
+    disposition = "defer_for_capacity_release";
   } else if (
     params.parentProvidesExactSameTurnCapacityRelease &&
     clickCost + 1 <= params.currentClicks
@@ -181,6 +194,38 @@ export function assessCorpDrawAdmission(params: {
       `corp_draw_admission:${disposition}`,
     ],
   };
+}
+
+function capacityReleaseCanSequenceBeforeDraw(params: {
+  drawPriorityClass: CorpDrawAdmissionPriority;
+  drawPurpose: CorpDrawAdmissionPurpose;
+  drawClickCost: number;
+  currentClicks: number;
+  projectedEndTurnOverflow: number;
+  parentProvidesExactSameTurnCapacityRelease: boolean;
+  route: CorpDrawCapacityReleaseRoute;
+}): boolean {
+  const {
+    drawPriorityClass,
+    drawPurpose,
+    drawClickCost,
+    currentClicks,
+    projectedEndTurnOverflow,
+    parentProvidesExactSameTurnCapacityRelease,
+    route,
+  } = params;
+  if (route.priorityClass === drawPriorityClass) {
+    return route.clickCost + drawClickCost <= currentClicks;
+  }
+  return (
+    drawPriorityClass === "P3" &&
+    route.priorityClass === "P4" &&
+    route.withinClassValue > 0 &&
+    projectedEndTurnOverflow > 0 &&
+    drawPurpose === "score_defense_answer_search" &&
+    parentProvidesExactSameTurnCapacityRelease &&
+    route.clickCost + drawClickCost + 1 <= currentClicks
+  );
 }
 
 function positiveSafeInteger(value: unknown): value is number {

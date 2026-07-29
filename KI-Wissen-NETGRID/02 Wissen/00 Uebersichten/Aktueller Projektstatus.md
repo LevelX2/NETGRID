@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-25
+Stand: 2026-07-29
 
 ## Führender Produktstand
 
@@ -28,12 +28,18 @@ Stand: 2026-07-25
   öffentliche und 19/19 replayfähige terminale Matches.
 - Der globale Bereich `Spiele` ordnet diese öffentlichen Matches als offen,
   laufend und abgeschlossen, filtert nach diesen Zuständen und führt direkt
-  zu Beitritt, Zuschaueransicht oder Replay. `Meine Spiele` ist davon getrennt
-  und liefert nur serverseitig gebundene Matches des angemeldeten Accounts,
-  einschließlich eigener privater Partien. Abgeschlossene Ergebnisse liegen
-  als immutable Snapshots in der kompakten Matchzeile; warme Listenabrufe
-  hydrieren keine vollständigen Historien mehr. Führend ist
-  `docs/reviews/public-game-directory-and-personal-history-final-review-2026-07-20.md`.
+  zu Beitritt, Zuschaueransicht oder Replay. Die öffentliche Liste kann
+  zwischen der ausführlichen Kartendarstellung und einer responsiven kompakten
+  Zeilenansicht wechseln. Abgeschlossene Einträge zeigen vorhandene
+  Matchpunkte als primäre Wertung getrennt von den Agenda-Punkten. `Meine
+Spiele` ist davon getrennt und liefert nur serverseitig gebundene Matches
+  des angemeldeten Accounts, einschließlich eigener privater Partien.
+  Abgeschlossene Ergebnisse liegen als immutable Snapshots in der kompakten
+  Matchzeile; warme Listenabrufe hydrieren keine vollständigen Historien mehr.
+  Führend sind
+  `docs/reviews/public-game-directory-and-personal-history-final-review-2026-07-20.md`
+  und
+  `docs/reviews/public-game-list-view-modes-final-review-2026-07-29.md`.
 
 ## Engine und Karten
 

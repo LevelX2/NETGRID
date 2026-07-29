@@ -17,6 +17,7 @@ import {
   corpDefensePortfolioHasExecutableRoute,
   corpDefensePlacementDispositions,
   corpEconomyActionIsOwned,
+  corpGenericDefensePriorityClass,
   corpScorePriorityClass,
   createCorpCorePlanModules,
   assessCorpEconomyFundingRoute,
@@ -32,7 +33,10 @@ import type { KnownCorpFundedIceInstallRouteProjection } from "../runtime/corp-f
 function knownCentralAllocation(
   selectedServerId: "hq" | "rd",
   nearTie = false,
-): NonNullable<CorpCorePlanDomain["centralDefenseAllocation"]> {
+): Extract<
+  NonNullable<CorpCorePlanDomain["centralDefenseAllocation"]>,
+  { status: "known" }
+> {
   const evidence = {
     threat: "material" as const,
     expectedAgendaLoss: { numerator: 1, denominator: 5 },
@@ -824,6 +828,34 @@ describe("Corp core plan modules", () => {
     expect(planAssessment.priorityValidation.effectiveClass).toBe("P6");
   });
 
+  it("separates acute central pressure from terminal central defense", () => {
+    const base = {
+      kind: "generic" as const,
+      defenseId: "install:rd",
+      serverId: "rd",
+      phase: "install_ice" as const,
+      sourceDefinitionIds: ["ice"],
+      urgent: false,
+      value: 1,
+      evidenceCode: "central_pressure",
+    };
+
+    expect(
+      corpGenericDefensePriorityClass([{ ...base, centralPressure: "acute" }]),
+    ).toBe("P3");
+    expect(
+      corpGenericDefensePriorityClass([
+        { ...base, centralPressure: "material" },
+      ]),
+    ).toBe("P3");
+    expect(
+      corpGenericDefensePriorityClass([
+        { ...base, urgent: true, centralPressure: "terminal" },
+      ]),
+    ).toBe("P2");
+    expect(corpGenericDefensePriorityClass([base])).toBe("P6");
+  });
+
   it("orders central defense by structural HQ agenda exposure before R&D multiaccess", () => {
     const installHq = {
       ...cardAction("install-hq", "install.card", "ice-shared"),
@@ -1043,6 +1075,46 @@ describe("Corp core plan modules", () => {
       ).toEqual([`install-${productiveServerId}`]);
     },
   );
+
+  it("does not fall back from terminal allocated R&D to a threat-free HQ route", () => {
+    const installHq = {
+      ...cardAction("install-hq", "install.card", "ice-shared"),
+      sourceCardInstanceId: "ice-shared-1",
+      targetContext: targetContext("hq", "server"),
+    };
+    const allocation = knownCentralAllocation("rd");
+    const corpContext = context([installHq], {
+      centralDefenseAllocation: {
+        ...allocation,
+        evidence: {
+          hq: { ...allocation.evidence.hq, threat: "none" },
+          rd: { ...allocation.evidence.rd, threat: "terminal" },
+        },
+      },
+      defenseNeeds: [
+        {
+          kind: "generic",
+          defenseId: "install:hq",
+          serverId: "hq",
+          phase: "install_ice",
+          sourceDefinitionIds: ["ice-shared"],
+          urgent: false,
+          value: 100,
+          evidenceCode:
+            "engine_certified_global_defense_access_probability_reduced",
+        },
+      ],
+    });
+    const module = corpModule("corp.defend_servers");
+    const instance = instantiatePlanProposal(
+      module.discover(corpContext)[0]!,
+      10,
+    );
+
+    expect(
+      module.materialize(instance, {} as never, corpContext).candidates,
+    ).toEqual([]);
+  });
 
   it("selects the exact central route class only after global allocation and preserves non-central continuations", () => {
     const actions = ["hq", "rd", "remote_1"].map((serverId) => ({
@@ -2524,6 +2596,95 @@ describe("Corp core plan modules", () => {
     ).toEqual([urgentDefense.actionId]);
   });
 
+  it("protects an exposed P3 score parent before adding an equally ranked central layer", () => {
+    const scoreInstall = {
+      ...cardAction("score-protection-install", "install.card", "score-ice"),
+      targetContext: targetContext("remote_1", "server"),
+    };
+    const centralInstall = {
+      ...cardAction("central-install", "install.card", "central-ice"),
+      targetContext: targetContext("rd", "server"),
+    };
+    const module = corpModule("corp.defend_servers");
+    const scoreProjectId = "agenda:exposed:remote_1";
+    const corpContext = context([scoreInstall, centralInstall], {
+      defenseNeeds: [
+        {
+          kind: "score_protection_install",
+          defenseId: "score:exposed-install",
+          serverId: "remote_1",
+          phase: "install_ice",
+          parentProjectId: scoreProjectId,
+          parentNeedId: "score-protection:exposed:remote_1",
+          delegatedPriorityClass: "P3",
+          actionId: scoreInstall.actionId,
+          sourceCardInstanceId: scoreInstall.sourceCardInstanceId!,
+          sourceDefinitionId: scoreInstall.sourceDefinitionId!,
+          effect: "progress",
+          runnerAccessSuccessProbability: {
+            numerator: 1,
+            denominator: 2,
+          },
+          totalInstallAndRezCredits: 1,
+          projection: knownInstallProjection({
+            actionId: scoreInstall.actionId,
+            sourceCardInstanceId: scoreInstall.sourceCardInstanceId!,
+            sourceDefinitionId: scoreInstall.sourceDefinitionId!,
+            targetServerId: "remote_1",
+            effect: "progress",
+            probability: { numerator: 1, denominator: 2 },
+            totalCredits: 1,
+          }),
+          evidenceCode: "exposed_score_parent_needs_protection",
+        },
+        {
+          kind: "generic",
+          defenseId: "material-rd-layer",
+          serverId: "rd",
+          phase: "install_ice",
+          sourceDefinitionIds: [centralInstall.sourceDefinitionId!],
+          actionIds: [centralInstall.actionId],
+          urgent: false,
+          centralPressure: "material",
+          installRoute: {
+            disposition: "productive",
+            projection: knownInstallProjection({
+              actionId: centralInstall.actionId,
+              sourceCardInstanceId: centralInstall.sourceCardInstanceId!,
+              sourceDefinitionId: centralInstall.sourceDefinitionId!,
+              targetServerId: "rd",
+              effect: "progress",
+              probability: { numerator: 1, denominator: 2 },
+              totalCredits: 1,
+            }),
+          },
+          value: 1,
+          evidenceCode: "material_central_pressure",
+        },
+      ],
+    });
+    const proposal = module.discover(corpContext)[0]!;
+    const instance = instantiatePlanProposal(proposal, 10);
+    const planAssessment = requireValidatedPlanAssessment(
+      module.assess(instance, corpContext, emptyPortfolio()),
+      CORP_PLAN_PRIORITY_POLICY,
+      10,
+    );
+
+    expect(proposal.parentInstanceId).toBe(
+      "plan:corp.score_agenda:agenda%3Aexposed%3Aremote_1",
+    );
+    expect(planAssessment).toMatchObject({
+      priorityValidation: { effectiveClass: "P5" },
+      evidenceCodes: ["exposed_score_parent_needs_protection"],
+    });
+    expect(
+      module
+        .materialize(instance, planAssessment, corpContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([scoreInstall.actionId]);
+  });
+
   it("selects exactly one densest targeted draw route with a technical tie-break", () => {
     const draw = candidate("basic-draw", "draw_card", "draw.card");
     const nightShift = candidate(
@@ -3584,7 +3745,7 @@ describe("Corp core plan modules", () => {
         priorityClaim: {
           requestedClass: delegatedPriorityClass,
         },
-        withinClassValue: 320,
+        withinClassValue: 280,
         evidenceCodes: [`score_needs_credits_${delegatedPriorityClass}`],
       });
       expect(planAssessment.priorityValidation.effectiveClass).toBe(
@@ -3597,6 +3758,39 @@ describe("Corp core plan modules", () => {
       ).toEqual([credit.actionId]);
     },
   );
+
+  it("values a parent-funding route more highly when one credit action nearly closes its gap", () => {
+    const economy = corpModule("corp.economy");
+    const credit = candidate("credit", "gain_credit", "economy.gain_credit");
+    const assessmentValue = (gap: number) => {
+      const projectId = `score-gap-${gap}`;
+      const parentPlanInstanceId = `plan:corp.score_agenda:${projectId}`;
+      const signal = {
+        kind: "parent_funding" as const,
+        needId: `score-support:${projectId}`,
+        gap,
+        actionIds: [credit.actionId],
+        parentPlanInstanceId,
+        parentNeedId: `score-support:${projectId}`,
+        delegatedPriorityClass: "P4" as const,
+        urgentForScore: true,
+        evidenceCode: `score_needs_${gap}_credits`,
+      };
+      const corpContext = context([credit], {
+        economyNeeds: [signal],
+        scoreProjects: [scoreProject(projectId, "P4", signal.evidenceCode)],
+      });
+      const proposal = economy.discover(corpContext)[0]!;
+      const instance = instantiatePlanProposal(proposal, 10);
+      return requireValidatedPlanAssessment(
+        economy.assess(instance, corpContext, emptyPortfolio()),
+        CORP_PLAN_PRIORITY_POLICY,
+        10,
+      ).withinClassValue;
+    };
+
+    expect(assessmentValue(1)).toBeGreaterThan(assessmentValue(10));
+  });
 
   it("keeps an exactly bound score-funding child blocked when no current funding route covers its gap", () => {
     const economy = corpModule("corp.economy");

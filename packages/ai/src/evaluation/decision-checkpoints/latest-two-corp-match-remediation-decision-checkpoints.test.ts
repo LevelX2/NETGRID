@@ -16,13 +16,10 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       keepScoreRemoteOpenJson,
     ],
     [
-      "starts an exact score campaign behind staged ETR",
+      "builds economy instead of exposing an agenda behind breakable staged ETR",
       minimizeAgendaRiskJson,
     ],
-    [
-      "starts the exact matchpoint campaign without claiming guaranteed safety",
-      startMatchpointJson,
-    ],
+    ["funds the matchpoint campaign before exposing it", startMatchpointJson],
   ])("%s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
@@ -120,7 +117,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
           acceptablePlanKinds: ["corp.score_agenda"],
           acceptableCapabilities: ["install_score_agenda"],
           requiredAssessmentEvidence: [
-            "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
+            "corp_funded_protected_score_install:remote_1",
           ],
         },
         selectedScoreBreakdown: {
@@ -154,17 +151,12 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-B2-NO-MATCHPOINT-CONTROL";
       fixture.expectation = {
-        acceptableActions: [
-          {
-            actionId:
-              "corp.install_card.corp_onr_proteus_008_project-zurich_1.remote_1.corp_onr_proteus_008_project-zurich_1",
-          },
-        ],
+        acceptableActions: [{ type: "gain_credit" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.score_agenda"],
-          acceptableCapabilities: ["install_score_agenda"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
+            "corp_engine_certified_basic_liquidity_development",
           ],
         },
       };

@@ -1059,7 +1059,9 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
     expect(actionAlternative(decision, "short-circuit-search")?.whyNot).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("not_selected_by_plan:"),
+        expect.stringContaining(
+          "explicitly_nonproductive:runner.rig_and_coverage:runner_program_search_rejected_visible_answer_already_in_hand:",
+        ),
       ]),
     );
   });

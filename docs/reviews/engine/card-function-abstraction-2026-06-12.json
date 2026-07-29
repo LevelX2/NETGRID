@@ -33,13 +33,11 @@
     "status": "baseline_enforced",
     "tokenSource": "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus packages/shared/src/card-definitions.ts",
     "tokenCount": 1317,
-    "baselineCount": 73,
+    "baselineCount": 72,
     "summary": {
-      "runtime_state_field_uses_card_name": 1,
       "new_unclassified_card_name_leak": 72
     },
     "fingerprints": [
-      "packages/engine/src/game/apply-action.ts|163|37|systematic_layoffs|Systematic Layoffs|runtime_state_field_uses_card_name",
       "scripts/audit-ai-action-capacity-contracts.mjs|19|15|valu-pak-software-bundle|Valu-Pak Software Bundle|new_unclassified_card_name_leak",
       "scripts/audit-ai-action-capacity-contracts.mjs|20|15|preying-mantis|Preying Mantis|new_unclassified_card_name_leak",
       "scripts/audit-ai-action-capacity-contracts.mjs|21|15|quest-for-cattekin|Quest for Cattekin|new_unclassified_card_name_leak",
@@ -148,9 +146,7 @@
         "questForCattekinPermanentActionGain"
       ],
       "targetKind": "start_turn_random_effect_table",
-      "targetState": [
-        "runnerTurnFlags.persistentModifiers[]"
-      ],
+      "targetState": ["runnerTurnFlags.persistentModifiers[]"],
       "params": {
         "dieFaces": 6,
         "outcomes": [
@@ -172,9 +168,7 @@
         "multiServerSuccessSequenceRun"
       ],
       "targetKind": "multi_server_success_sequence",
-      "targetState": [
-        "runnerTurnFlags.pendingSequences[]"
-      ],
+      "targetState": ["runnerTurnFlags.pendingSequences[]"],
       "params": {
         "sequence": "run_each_data_fort",
         "advanceOnSuccessfulRun": true,
@@ -191,10 +185,7 @@
         "delayedAccessEffects"
       ],
       "targetKind": "delayed_agenda_access_replacement",
-      "targetState": [
-        "runDurationEffects[]",
-        "delayedAccessEffects[]"
-      ],
+      "targetState": ["runDurationEffects[]", "delayedAccessEffects[]"],
       "params": {
         "replacementWindow": "agenda_access",
         "delay": "after_current_access_sequence"
@@ -209,9 +200,7 @@
         "codeViralCachePurgePreserveTargets"
       ],
       "targetKind": "purge_replacement_with_runner_virus_counter_cleanup",
-      "targetState": [
-        "replacementEffects[]"
-      ],
+      "targetState": ["replacementEffects[]"],
       "params": {
         "interruptedEvent": "corp_purge_virus_counters",
         "runnerVirusCounterCleanup": true
@@ -244,9 +233,7 @@
         "spendRecurringTraceCreditPool"
       ],
       "targetKind": "recurring_trace_credit_pool",
-      "targetState": [
-        "recurringCreditPools[]"
-      ],
+      "targetState": ["recurringCreditPools[]"],
       "params": {
         "amount": 1,
         "spendWindow": "trace",
@@ -262,9 +249,7 @@
         "runStartInterventions"
       ],
       "targetKind": "start_run_redirect_to_source_fort",
-      "targetState": [
-        "runStartInterventions[]"
-      ],
+      "targetState": ["runStartInterventions[]"],
       "params": {
         "redirectTarget": "source_fort",
         "triggerWindow": "run_start"
@@ -279,9 +264,7 @@
         "overadvance_bonus_agenda_points"
       ],
       "targetKind": "score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points",
-      "targetState": [
-        "scoredAgendaAbilities[]"
-      ],
+      "targetState": ["scoredAgendaAbilities[]"],
       "params": {
         "triggerWindow": "agenda_scored",
         "conditionSource": "agenda_params"

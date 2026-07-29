@@ -11,7 +11,7 @@ const FIXTURES = [
     advanceOverPassiveSupportJson,
   ],
   [
-    "continues the current bound score step despite incomplete future projection",
+    "converts exact economy before advancing into a known protection gap",
     fundUnsafeWindowJson,
   ],
 ] as const;

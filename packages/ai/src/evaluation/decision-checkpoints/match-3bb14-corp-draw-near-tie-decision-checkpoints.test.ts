@@ -11,15 +11,15 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
   it.each([
     [
-      "draws through the exact score-defense child at historical D9",
+      "uses the available ICE to establish missing R&D coverage at historical D9",
       defensiveDrawD9Json,
     ],
     [
-      "draws through the exact score-defense child at D10",
+      "uses the available ICE to establish missing R&D coverage at D10",
       defensiveDrawD10Json,
     ],
     [
-      "uses the last click as capacity-safe multi-turn score-defense progress at D11",
+      "uses the last click for missing R&D coverage at D11",
       defensiveDrawD11Json,
     ],
   ])("%s", (_label, json) => {
@@ -27,20 +27,26 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("uses the full-hand draw as same-turn replacement when the install follow-up fits", () => {
+  it("uses the productive R&D install when HQ is already full", () => {
     const checkpoint = fixture(defensiveDrawD9Json);
     checkpoint.engine.testOnlyGameState.corp.maxHandSize = 4;
     checkpoint.engine.stateHash = hashGameState(
       checkpoint.engine.testOnlyGameState,
     );
     checkpoint.expectation = {
-      acceptableActions: [{ type: "draw_card" }],
+      acceptableActions: [
+        {
+          type: "install_card",
+          sourceDefinitionId: "onr_v1_268_shock-r",
+          targetServerId: "rd",
+        },
+      ],
       forbiddenActions: [{ type: "gain_credit" }],
       planExecution: {
         acceptablePlanKinds: ["corp.defend_servers"],
-        acceptableCapabilities: ["develop_score_protection"],
+        acceptableCapabilities: ["allocate_server_defense"],
         requiredAssessmentEvidence: [
-          "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_213_private-cybernet-police_1:new_remote:new_remote",
+          "engine_certified_global_defense_access_probability_reduced",
         ],
       },
     };
@@ -50,20 +56,26 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("does not overflow HQ with a last-click multi-turn draw before any install follow-up", () => {
+  it("uses a productive defense install instead of overflowing HQ on the last click", () => {
     const checkpoint = fixture(defensiveDrawD11Json);
     checkpoint.engine.testOnlyGameState.corp.maxHandSize = 4;
     checkpoint.engine.stateHash = hashGameState(
       checkpoint.engine.testOnlyGameState,
     );
     checkpoint.expectation = {
-      acceptableActions: [{ type: "gain_credit" }],
+      acceptableActions: [
+        {
+          type: "install_card",
+          sourceDefinitionId: "onr_v1_268_shock-r",
+          targetServerId: "rd",
+        },
+      ],
       forbiddenActions: [{ type: "draw_card" }],
       planExecution: {
-        acceptablePlanKinds: ["corp.economy"],
-        acceptableCapabilities: ["develop_or_convert_corp_economy"],
+        acceptablePlanKinds: ["corp.defend_servers"],
+        acceptableCapabilities: ["allocate_server_defense"],
         requiredAssessmentEvidence: [
-          "corp_engine_certified_basic_liquidity_development",
+          "engine_certified_global_defense_access_probability_reduced",
         ],
       },
     };
@@ -73,7 +85,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("does not install uncertified expensive ICE and funds the exact score parent instead", () => {
+  it("does not install unfunded expensive ICE and funds the exact R&D defense route", () => {
     const checkpoint = fixture(defensiveDrawD9Json);
     const shock =
       checkpoint.engine.testOnlyGameState.cardInstances[
@@ -88,11 +100,10 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
       acceptableActions: [{ type: "gain_credit" }],
       forbiddenActions: [{ type: "install_card" }],
       planExecution: {
-        acceptablePlanIds: [EXACT_SCORE_FUNDING_PLAN_ID],
         acceptablePlanKinds: ["corp.economy"],
         acceptableCapabilities: ["develop_or_convert_corp_economy"],
         requiredAssessmentEvidence: [
-          "corp_score_protection_funding_gap:new_remote:9",
+          "corp_defense_exact_route_funding_required:rd:corp.install_card.corp_onr_v1_268_shock-r_2.rd.corp_onr_v1_268_shock-r_2.0",
         ],
       },
     };
@@ -101,7 +112,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.decision?.evidence).toContain(
-      `plan_priority_delegated_from:${EXACT_SCORE_PARENT_PLAN_ID}`,
+      "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
     );
   });
 
@@ -162,8 +173,3 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
 function fixture(value: unknown): AiDecisionCheckpointV1 {
   return structuredClone(value) as AiDecisionCheckpointV1;
 }
-
-const EXACT_SCORE_PARENT_PLAN_ID =
-  "plan:corp.score_agenda:agenda%3Acorp_onr_v1_213_private-cybernet-police_1%3Anew_remote";
-const EXACT_SCORE_FUNDING_PLAN_ID =
-  "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_213_private-cybernet-police_1%3Anew_remote";

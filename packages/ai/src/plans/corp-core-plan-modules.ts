@@ -25,9 +25,10 @@ import {
   compareExactProbabilities,
   type ExactProbability,
 } from "../runtime/corp-score-protection-assessment";
-import type {
-  CorpFundedRemoteAccessRiskNeed,
-  KnownCorpFundedIceInstallRouteProjection,
+import {
+  assessBestFundedCorpScoreProtection,
+  type CorpFundedRemoteAccessRiskNeed,
+  type KnownCorpFundedIceInstallRouteProjection,
 } from "../runtime/corp-funded-score-protection";
 import type {
   CorpCentralDefenseAllocation,
@@ -142,6 +143,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
   targetIceInstanceId?: string;
   followupIceInstanceId?: string;
   urgent: boolean;
+  centralPressure?: "material" | "acute" | "terminal";
   immediateInstallSupport?: boolean;
   rezWindowVerdict?: "productive" | "nonproductive" | "open";
   installRoute?: Readonly<{
@@ -899,7 +901,15 @@ export function corpGenericDefensePriorityClass(
     )
   )
     return "P2";
-  if (genericSignals.some((signal) => signal.immediateInstallSupport)) {
+  if (
+    genericSignals.some(
+      (signal) =>
+        signal.immediateInstallSupport ||
+        (signal.phase === "install_ice" &&
+          (signal.centralPressure === "material" ||
+            signal.centralPressure === "acute")),
+    )
+  ) {
     return "P3";
   }
   if (
@@ -1309,14 +1319,13 @@ function economyAssessmentValue(signal: CorpEconomyNeedSignal): number {
   if (signal.needId.startsWith("punish-funding:")) {
     return 1_000 + signal.gap * 20;
   }
-  return (
-    (signal.delegatedPriorityClass || signal.parentPriorityClass
+  const readinessValue =
+    signal.delegatedPriorityClass || signal.parentPriorityClass
       ? 300
       : signal.immediateDefenseConversion
         ? 180
-        : 100) +
-    signal.gap * 20
-  );
+        : 100;
+  return Math.max(1, readinessValue - signal.gap * 20);
 }
 
 function proposal(params: {
@@ -2563,12 +2572,23 @@ function scoreResourceGaps(
     });
   }
   const fundingGap = signal.fundingGap;
+  const knownProtectionFundingGap =
+    signal.protectionNeed?.baseline.knowledge === "known"
+      ? (signal.protectionNeed.baseline.minimumAdditionalCreditsToSatisfy ?? 0)
+      : 0;
   const hasExactCurrentAdvanceHead =
     signal.phase === "advance_agenda" &&
     signal.feasible &&
+    knownProtectionFundingGap === 0 &&
+    scoreCandidates(context, signal).length > 0;
+  const hasExactCurrentScopedInstallHead =
+    signal.phase === "install_agenda" &&
+    signal.feasible &&
+    signal.uncertainty?.currentActionScope === "exact_install_only" &&
     scoreCandidates(context, signal).length > 0;
   if (
     !hasExactCurrentAdvanceHead &&
+    !hasExactCurrentScopedInstallHead &&
     typeof fundingGap === "number" &&
     Number.isSafeInteger(fundingGap) &&
     fundingGap > 0
@@ -2761,7 +2781,11 @@ function selectedDefensePortfolioBand(
     scoreProtectionRoute &&
     (!genericBandAvailable ||
       defensePriorityRank(scoreProtectionRoute.signal.delegatedPriorityClass) <
-        defensePriorityRank(genericPriority))
+        defensePriorityRank(genericPriority) ||
+      (scoreProtectionRoute.signal.kind === "score_protection_install" &&
+        defensePriorityRank(
+          scoreProtectionRoute.signal.delegatedPriorityClass,
+        ) === defensePriorityRank(genericPriority)))
   ) {
     return {
       kind: "score",
@@ -3050,18 +3074,35 @@ function selectedExactGenericDefenseRoutes(
         allocation.selectedServerId === "hq" ? hqRoutes : rdRoutes;
       const fallbackCentralRoutes =
         allocation.selectedServerId === "hq" ? rdRoutes : hqRoutes;
+      const fallbackServerId =
+        allocation.selectedServerId === "hq" ? "rd" : "hq";
+      const selectedPressure =
+        allocation.evidence[allocation.selectedServerId].threat;
+      const allocationLocked =
+        (selectedPressure === "acute" || selectedPressure === "terminal") &&
+        selectedCentralAccessRiskRemains(context, allocation);
+      const fallbackServer = context.input.playerView.servers.find(
+        (server) => server.id === fallbackServerId,
+      );
+      const fallbackHasIndependentValue =
+        fallbackServer?.ice.length === 0 ||
+        allocation.evidence[fallbackServerId].threat !== "none";
       const allocatedCentralRoutes =
         selectedCentralRoutes.length > 0
           ? selectedCentralRoutes
-          : fallbackCentralRoutes.length > 0
+          : fallbackCentralRoutes.length > 0 &&
+              !allocationLocked &&
+              fallbackHasIndependentValue
             ? fallbackCentralRoutes
             : [];
       // The allocation orders HQ against R&D. It must not remove an exact
       // route for Archives or another independently assessed server.
       eligibleRoutes = [
-        ...exactIceRoutes.filter(
-          (route) => centralServerForRoute(route) === undefined,
-        ),
+        ...(allocationLocked
+          ? []
+          : exactIceRoutes.filter(
+              (route) => centralServerForRoute(route) === undefined,
+            )),
         ...allocatedCentralRoutes,
       ];
     }
@@ -3082,6 +3123,44 @@ function selectedExactGenericDefenseRoutes(
   return selected
     ? [{ candidate: selected.candidate, stepValue: selected.stepValue }]
     : supportRoutes;
+}
+
+function selectedCentralAccessRiskRemains(
+  context: PlanSchedulerContext,
+  allocation: Extract<CorpCentralDefenseAllocation, { status: "known" }>,
+): boolean {
+  const server = context.input.playerView.servers.find(
+    (candidate) => candidate.id === allocation.selectedServerId,
+  );
+  if (!server) return true;
+  const assessment = assessBestFundedCorpScoreProtection({
+    serverIce: server.ice,
+    runnerRig: context.input.playerView.opponent.rig ?? [],
+    runnerSetAside: context.input.playerView.specialZones?.setAside ?? [],
+    ...(context.input.playerView.opponent.memoryUsed !== undefined
+      ? { runnerMemoryUsed: context.input.playerView.opponent.memoryUsed }
+      : {}),
+    ...(context.input.playerView.opponent.memoryLimit !== undefined
+      ? { runnerMemoryLimit: context.input.playerView.opponent.memoryLimit }
+      : {}),
+    runnerCredits: context.input.playerView.opponent.credits,
+    targetServerId: allocation.selectedServerId,
+    observedAtStateVersion: context.input.playerView.stateVersion,
+    availableCorpCredits: context.input.playerView.own.credits,
+    availableCorpClicks: context.input.playerView.own.clicks,
+    scoreReserve: { creditBreakdown: [], hardClickReserve: 0 },
+    maximumRunnerAccessSuccessProbability: {
+      numerator: 0,
+      denominator: 1,
+    },
+  });
+  if (assessment.knowledge === "unknown") return true;
+  return (
+    compareExactProbabilities(
+      assessment.protection.runnerAccessSuccessProbability,
+      { numerator: 0, denominator: 1 },
+    ) !== 0
+  );
 }
 
 function compareGenericExactInstallRoutes(
@@ -3608,6 +3687,10 @@ function isValidDefenseSignal(
         (Array.isArray(value.actionIds) &&
           value.actionIds.every(nonEmptyString))) &&
       typeof value.urgent === "boolean" &&
+      (value.centralPressure === undefined ||
+        value.centralPressure === "material" ||
+        value.centralPressure === "acute" ||
+        value.centralPressure === "terminal") &&
       typeof value.value === "number" &&
       Number.isFinite(value.value) &&
       (value.phase === "install_ice"
@@ -3863,6 +3946,7 @@ const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "targetIceInstanceId",
   "followupIceInstanceId",
   "urgent",
+  "centralPressure",
   "immediateInstallSupport",
   "rezWindowVerdict",
   "installRoute",

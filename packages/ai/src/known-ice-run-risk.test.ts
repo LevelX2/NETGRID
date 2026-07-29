@@ -97,11 +97,13 @@ describe("known visible ICE run risk", () => {
       (serverView) => serverView.id === "rd",
     )?.ice[0];
 
-    expect(playerViewTrapdoor?.effectiveRunQuote?.subroutines[0]).toMatchObject({
-      type: "deflect_run",
-      deflectorTarget: "subsidiary_data_fort",
-      deflectorAutoBreakIfNoTarget: true,
-    });
+    expect(playerViewTrapdoor?.effectiveRunQuote?.subroutines[0]).toMatchObject(
+      {
+        type: "deflect_run",
+        deflectorTarget: "subsidiary_data_fort",
+        deflectorAutoBreakIfNoTarget: true,
+      },
+    );
 
     const input = buildAiDecisionInputDto({
       side: "runner",
@@ -151,8 +153,11 @@ describe("known visible ICE run risk", () => {
     const planExclusion = runAlternative?.whyNot?.join("|") ?? "";
 
     expect(decision.actionId).toBe(gain.actionId);
-    expect(runAlternative?.excluded).not.toBe(true);
+    expect(runAlternative?.excluded).toBe(true);
     expect(decision.fallbackUsed).toBe(false);
+    expect(planExclusion).toContain(
+      "explicitly_nonproductive:runner.pressure_central:",
+    );
     expect(planExclusion).toContain(
       "run_route_excluded:recommendation:gain_credits_first",
     );

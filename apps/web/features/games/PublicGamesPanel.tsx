@@ -15,10 +15,14 @@ import {
   canRejoinPublicMatch,
   filterAndSortPublicMatches,
   publicGamesFilterLabel,
+  publicGamesViewModeLabel,
+  publicMatchResultScore,
   type PublicGamesFilter,
+  type PublicGamesViewMode,
 } from "./public-games-model";
 
 const FILTERS: PublicGamesFilter[] = ["all", "open", "active", "finished"];
+const VIEW_MODES: PublicGamesViewMode[] = ["detailed", "compact"];
 
 export function PublicGamesPanel({
   matches,
@@ -44,6 +48,7 @@ export function PublicGamesPanel({
   onRejoin(entry: PublicMatchEntry): void;
 }) {
   const [filter, setFilter] = useState<PublicGamesFilter>("all");
+  const [viewMode, setViewMode] = useState<PublicGamesViewMode>("detailed");
   const visibleMatches = useMemo(
     () => filterAndSortPublicMatches(matches, filter),
     [filter, matches],
@@ -76,18 +81,37 @@ export function PublicGamesPanel({
         </button>
       </div>
 
-      <div className="publicGamesFilters" aria-label="Spiele filtern">
-        {FILTERS.map((candidate) => (
-          <button
-            className={`button ${filter === candidate ? "active" : ""}`}
-            key={candidate}
-            onClick={() => setFilter(candidate)}
-            type="button"
-            aria-pressed={filter === candidate}
-          >
-            {publicGamesFilterLabel(candidate)}
-          </button>
-        ))}
+      <div className="publicGamesToolbar">
+        <div className="publicGamesFilters" aria-label="Spiele filtern">
+          {FILTERS.map((candidate) => (
+            <button
+              className={`button ${filter === candidate ? "active" : ""}`}
+              key={candidate}
+              onClick={() => setFilter(candidate)}
+              type="button"
+              aria-pressed={filter === candidate}
+            >
+              {publicGamesFilterLabel(candidate)}
+            </button>
+          ))}
+        </div>
+        <div
+          className="publicGamesViewToggle"
+          role="group"
+          aria-label="Darstellung wählen"
+        >
+          {VIEW_MODES.map((candidate) => (
+            <button
+              className={`button ${viewMode === candidate ? "active" : ""}`}
+              key={candidate}
+              onClick={() => setViewMode(candidate)}
+              type="button"
+              aria-pressed={viewMode === candidate}
+            >
+              {publicGamesViewModeLabel(candidate)}
+            </button>
+          ))}
+        </div>
       </div>
 
       {error ? (
@@ -100,7 +124,7 @@ export function PublicGamesPanel({
           {loading ? "Lade öffentliche Spiele ..." : emptyText(filter)}
         </p>
       ) : (
-        <ol className="publicGamesList">
+        <ol className={`publicGamesList ${viewMode}`}>
           {visibleMatches.map((entry) => (
             <li key={entry.matchId}>
               <PublicGameCard
@@ -108,6 +132,7 @@ export function PublicGamesPanel({
                 canJoinOpen={canJoinOpen}
                 canRejoin={canRejoinPublicMatch(entry, rejoinableMatchIdSet)}
                 rejoining={rejoiningMatchId === entry.matchId}
+                viewMode={viewMode}
                 onJoinOpen={onJoinOpen}
                 onRejoin={onRejoin}
               />
@@ -129,6 +154,7 @@ function PublicGameCard({
   canJoinOpen,
   canRejoin,
   rejoining,
+  viewMode,
   onJoinOpen,
   onRejoin,
 }: {
@@ -136,15 +162,17 @@ function PublicGameCard({
   canJoinOpen: boolean;
   canRejoin: boolean;
   rejoining: boolean;
+  viewMode: PublicGamesViewMode;
   onJoinOpen(entry: PublicMatchEntry): void;
   onRejoin(entry: PublicMatchEntry): void;
 }) {
   const target = publicMatchTarget(entry);
   const gamebookTarget = publicGamebookTarget(entry);
+  const resultScore = publicMatchResultScore(entry);
   const ActionIcon =
     entry.status === "open" ? LogIn : entry.status === "active" ? Eye : History;
   return (
-    <article className={`publicGameCard ${entry.status}`}>
+    <article className={`publicGameCard ${entry.status} ${viewMode}`}>
       <div className="publicGameMain">
         <div>
           <div className="publicGameTitle">
@@ -164,15 +192,26 @@ function PublicGameCard({
           {entry.status === "open" ? (
             <p className="publicGameJoinInfo">
               <Users size={14} />
-              Host: {entry.hostDisplayName ?? "Teilnehmer A"} · belegt:{" "}
-              {sideLabel(entry.hostSide)} · frei:{" "}
-              {sideLabel(entry.availableSide)}
+              <span className="publicGameJoinDetails">
+                Host: {entry.hostDisplayName ?? "Teilnehmer A"} · belegt:{" "}
+                {sideLabel(entry.hostSide)} ·{" "}
+              </span>
+              <span>frei: {sideLabel(entry.availableSide)}</span>
             </p>
           ) : null}
-          {entry.result ? (
+          {resultScore ? (
             <p className="publicGameResult">
-              Endstand {entry.result.runner.agendaPoints} :{" "}
-              {entry.result.corp.agendaPoints} · {winnerLabel(entry)}
+              <span className="publicGameResultScores">
+                {resultScore.matchPoints ? (
+                  <strong>Matchpunkte {resultScore.matchPoints}</strong>
+                ) : null}
+                <span>Agenda-Punkte {resultScore.agendaPoints}</span>
+              </span>
+              <span className="publicGameResultSeparator" aria-hidden="true">
+                {" "}
+                ·{" "}
+              </span>
+              <span className="publicGameWinner">{winnerLabel(entry)}</span>
             </p>
           ) : null}
         </div>
@@ -186,14 +225,17 @@ function PublicGameCard({
             onClick={() => onJoinOpen(entry)}
             type="button"
             disabled={!canJoinOpen}
+            aria-label={publicMatchActionLabel(entry.status)}
             title={
               canJoinOpen
-                ? "Beitritt vorbereiten"
+                ? publicMatchActionLabel(entry.status)
                 : "Beende zuerst dein aktuelles Spiel."
             }
           >
             <ActionIcon size={15} />
-            {publicMatchActionLabel(entry.status)}
+            <span className="publicGameActionLabel">
+              {publicMatchActionLabel(entry.status)}
+            </span>
           </button>
         ) : canRejoin ? (
           <>
@@ -202,27 +244,54 @@ function PublicGameCard({
               onClick={() => onRejoin(entry)}
               type="button"
               disabled={rejoining}
+              aria-label={
+                rejoining ? "Spiel wird fortgesetzt ..." : "Spiel fortsetzen"
+              }
+              title={
+                rejoining ? "Spiel wird fortgesetzt ..." : "Spiel fortsetzen"
+              }
             >
               <LogIn size={15} />
-              {rejoining ? "Spiel wird fortgesetzt ..." : "Spiel fortsetzen"}
+              <span className="publicGameActionLabel">
+                {rejoining ? "Spiel wird fortgesetzt ..." : "Spiel fortsetzen"}
+              </span>
             </button>
             {target ? (
-              <Link className="button" href={target}>
+              <Link
+                className="button"
+                href={target}
+                aria-label="Zuschauen"
+                title="Zuschauen"
+              >
                 <Eye size={15} />
-                Zuschauen
+                <span className="publicGameActionLabel">Zuschauen</span>
               </Link>
             ) : null}
           </>
         ) : target ? (
-          <Link className="button primary" href={target}>
+          <Link
+            className="button primary"
+            href={target}
+            aria-label={publicMatchActionLabel(entry.status)}
+            title={publicMatchActionLabel(entry.status)}
+          >
             <ActionIcon size={15} />
-            {publicMatchActionLabel(entry.status)}
+            <span className="publicGameActionLabel">
+              {publicMatchActionLabel(entry.status)}
+            </span>
           </Link>
         ) : null}
         {gamebookTarget ? (
-          <a className="button" href={gamebookTarget}>
+          <a
+            className="button"
+            href={gamebookTarget}
+            aria-label="Spielprotokoll herunterladen"
+            title="Spielprotokoll herunterladen"
+          >
             <Download size={15} />
-            Spielprotokoll herunterladen
+            <span className="publicGameActionLabel">
+              Spielprotokoll herunterladen
+            </span>
           </a>
         ) : null}
       </div>

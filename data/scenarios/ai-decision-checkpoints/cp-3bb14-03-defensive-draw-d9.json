@@ -3799,7 +3799,9 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "draw_card"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_268_shock-r",
+        "targetServerId": "rd"
       }
     ],
     "forbiddenActions": [
@@ -3809,9 +3811,9 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["develop_score_protection"],
+      "acceptableCapabilities": ["allocate_server_defense"],
       "requiredAssessmentEvidence": [
-        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_213_private-cybernet-police_1:new_remote:new_remote"
+        "engine_certified_global_defense_access_probability_reduced"
       ]
     }
   }

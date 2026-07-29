@@ -16,7 +16,7 @@ describe("match 74e2369 exact Corp decision checkpoints", () => {
     ],
     ["protects repeatedly accessed R&D", protectRdJson],
     [
-      "starts the exact staged Tycho score project before a background asset",
+      "converts Night Shift before funding the protected Tycho score project",
       nightShiftJson,
     ],
     [

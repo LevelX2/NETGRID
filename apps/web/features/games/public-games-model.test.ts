@@ -5,8 +5,11 @@ import {
   canRejoinPublicMatch,
   filterAndSortPublicMatches,
   publicGamesFilterLabel,
+  publicGamesViewModeLabel,
+  publicMatchResultScore,
   shouldRefreshPublicGames,
   type PublicGamesFilter,
+  type PublicGamesViewMode,
 } from "./public-games-model";
 
 function entry(
@@ -62,6 +65,81 @@ describe("public games model", () => {
     expect(publicGamesFilterLabel(filter)).toBe(label);
     expect(result).toHaveLength(filter === "all" ? 3 : 1);
     if (filter !== "all") expect(result[0]?.status).toBe(filter);
+  });
+
+  it.each<[PublicGamesViewMode, string]>([
+    ["detailed", "Ausführlich"],
+    ["compact", "Kompakt"],
+  ])("labels the %s view mode", (mode, label) => {
+    expect(publicGamesViewModeLabel(mode)).toBe(label);
+  });
+
+  it("keeps match points and agenda points as distinct result scores", () => {
+    const finished = entry("finished", "finished", "2026-07-20T12:00:00.000Z");
+    finished.result = {
+      schemaVersion: "netgrid-match-result-v1",
+      matchId: finished.matchId,
+      matchStatus: "finished",
+      matchMode: finished.matchMode,
+      matchFormat: finished.matchFormat,
+      finishedAt: finished.updatedAt,
+      startedAt: finished.createdAt,
+      winner: "runner",
+      winnerSide: "runner",
+      reason: "agenda_points",
+      runner: {
+        displayName: "Runner",
+        agendaPoints: 7,
+        matchPoints: 10,
+      },
+      corp: {
+        displayName: "Korp",
+        agendaPoints: 3,
+        matchPoints: 3,
+      },
+      actionCount: 12,
+      runCount: 4,
+      finalStateHash: "hash",
+    };
+
+    expect(publicMatchResultScore(finished)).toEqual({
+      matchPoints: "10 : 3",
+      agendaPoints: "7 : 3",
+    });
+  });
+
+  it("does not infer missing match points from the winner or agenda score", () => {
+    const finished = entry(
+      "legacy-finished",
+      "finished",
+      "2026-07-20T12:00:00.000Z",
+    );
+    finished.result = {
+      schemaVersion: "netgrid-match-result-v1",
+      matchId: finished.matchId,
+      matchStatus: "finished",
+      matchMode: finished.matchMode,
+      matchFormat: finished.matchFormat,
+      finishedAt: finished.updatedAt,
+      startedAt: finished.createdAt,
+      winner: "corp",
+      winnerSide: "corp",
+      reason: "agenda_points",
+      runner: { displayName: "Runner", agendaPoints: 2 },
+      corp: { displayName: "Korp", agendaPoints: 7 },
+      actionCount: 15,
+      runCount: 3,
+      finalStateHash: "legacy-hash",
+    };
+
+    expect(publicMatchResultScore(finished)).toEqual({
+      agendaPoints: "2 : 7",
+    });
+    expect(
+      publicMatchResultScore(
+        entry("active", "active", "2026-07-20T12:00:00.000Z"),
+      ),
+    ).toBeNull();
   });
 
   it("refreshes the visible setup list even when a local recovery session exists", () => {

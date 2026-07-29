@@ -9,34 +9,48 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
   it.each([
     [
-      "draws defense for the first exact Corporate Coup score parent",
+      "funds the first exact Corporate Coup score parent instead of drawing redundant ICE",
       fundExposedRemoteJson,
       "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_1",
       true,
+      "P3",
     ],
     [
       "converts exact burst economy before the reused Corporate Coup defense draw",
       safeAdvanceControlJson,
       "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_1",
       false,
+      "P4",
     ],
     [
       "converts exact burst economy before the second Corporate Coup defense draw",
       safeLowCreditAdvanceJson,
       "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
-      false,
+      true,
+      "P3",
     ],
-  ] as const)("%s", (_label, json, exactScoreParentPlanId, expectsDelegation) => {
-    const result = runAiDecisionCheckpoint(
-      structuredClone(json) as AiDecisionCheckpointV1,
-    );
-
-    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-    expect(result.decision?.evidence).toContain("plan_priority_class:P4");
-    if (expectsDelegation) {
-      expect(result.decision?.evidence).toContain(
-        `plan_priority_delegated_from:${exactScoreParentPlanId}`,
+  ] as const)(
+    "%s",
+    (
+      _label,
+      json,
+      exactScoreParentPlanId,
+      expectsDelegation,
+      expectedPriorityClass,
+    ) => {
+      const result = runAiDecisionCheckpoint(
+        structuredClone(json) as AiDecisionCheckpointV1,
       );
-    }
-  });
+
+      expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+      expect(result.decision?.evidence).toContain(
+        `plan_priority_class:${expectedPriorityClass}`,
+      );
+      if (expectsDelegation) {
+        expect(result.decision?.evidence).toContain(
+          `plan_priority_delegated_from:${exactScoreParentPlanId}`,
+        );
+      }
+    },
+  );
 });

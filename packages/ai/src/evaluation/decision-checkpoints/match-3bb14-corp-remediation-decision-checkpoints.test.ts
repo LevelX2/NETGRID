@@ -9,15 +9,18 @@ import { scoringWindowAccessAssessment } from "../../runtime/corp-scoreline/sema
 describe("match 3bb14 Corp remediation decision checkpoints", () => {
   it.each([
     [
-      "installs the exact Strike Force Kali scoreline with staged ETR support",
+      "draws exact defense instead of exposing Strike Force Kali to the staged breaker",
       scoredOnlyTimingJson,
-      ["plan_priority_class:P4"],
+      [
+        "plan_priority_class:P4",
+        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_213_private-cybernet-police_1%3Aremote_1",
+      ],
     ],
     [
       "draws defense for the exact Private Cybernet Police score parent",
       realisticScoreHorizonJson,
       [
-        "plan_priority_class:P4",
+        "plan_priority_class:P3",
         "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_213_private-cybernet-police_1%3Aremote_1",
       ],
     ],
@@ -45,7 +48,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
 
     expect(currentAccess.runnerCanReachAccessNow).toBe(true);
     expect(currentAccess.evidence).toContain(
-      "public_staged_breaker_install_credit_cost:3",
+      "public_staged_breaker_install_credit_cost:2",
     );
     expect(exposureAccess.runnerCanReachAccessNow).toBe(true);
     expect(exposureAccess.visibleRunnerIcebreakerCount).toBe(1);
@@ -55,6 +58,16 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     expect(exposureAccess.evidence).toContain(
       "public_staged_breaker_install_credit_cost:2",
     );
+
+    const alreadyAtRunnerTurn = structuredClone(result.input);
+    alreadyAtRunnerTurn.playerView.activeSide = "runner";
+    const runnerTurnRemote = alreadyAtRunnerTurn.playerView.servers.find(
+      (server) => server.id === "remote_1",
+    );
+    expect(
+      scoringWindowAccessAssessment(alreadyAtRunnerTurn, runnerTurnRemote)
+        .evidence,
+    ).toContain("public_staged_breaker_install_credit_cost:3");
   });
 
   it("does not count the staged breaker without its visible install source", () => {

@@ -78,7 +78,7 @@ describe("semantic runtime corp board triage central protection", () => {
     });
   });
 
-  it("does not invent one-click funding when the exact defense gap remains open", () => {
+  it("keeps the R&D protection goal and recognizes exact liquidity progress", () => {
     const rdWall = {
       ...corpAction(
         "install-rd-wall",
@@ -128,9 +128,12 @@ describe("semantic runtime corp board triage central protection", () => {
     );
 
     expect(triage).toMatchObject({
-      primary: "low_value",
+      primary: "protect_rd",
+      targetServerId: "rd",
     });
-    expect(creditComponent?.key).not.toBe("corp_board_triage_alignment");
+    expect(creditComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
   });
 
   it("does not certify unbound HQ ICE ahead of a prepared scoreline", () => {

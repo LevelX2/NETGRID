@@ -2585,6 +2585,7 @@
         "type": "access_card",
         "stateVersionBefore": 10,
         "stateVersionAfter": 11,
+        "turnSerial": 1,
         "stateHashAfter": "fnv1a:fe6a3bb6",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
@@ -2611,6 +2612,7 @@
         "type": "access_card",
         "stateVersionBefore": 11,
         "stateVersionAfter": 12,
+        "turnSerial": 1,
         "stateHashAfter": "fnv1a:9730ef4c",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
@@ -2637,6 +2639,7 @@
         "type": "access_card",
         "stateVersionBefore": 12,
         "stateVersionAfter": 13,
+        "turnSerial": 1,
         "stateHashAfter": "fnv1a:4d21a24d",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
@@ -2663,6 +2666,7 @@
         "type": "access_card",
         "stateVersionBefore": 13,
         "stateVersionAfter": 14,
+        "turnSerial": 1,
         "stateHashAfter": "fnv1a:422bbf3d",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {

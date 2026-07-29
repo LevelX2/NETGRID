@@ -29055,16 +29055,19 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "advance_card",
-        "sourceDefinitionId": "onr_v1_207_netwatch-operations-office"
+        "type": "play_operation",
+        "sourceDefinitionId": "onr_v1_295_night-shift"
       }
     ],
     "planExecution": {
       "acceptablePlanIds": [
-        "plan:corp.score_agenda:agenda%3Acorp_onr_v1_207_netwatch-operations-office_1%3Aremote_1"
+        "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_207_netwatch-operations-office_1%3Aremote_1"
       ],
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["advance_score_agenda"]
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_score_protection_funding_gap:remote_1:1"
+      ]
     }
   }
 }

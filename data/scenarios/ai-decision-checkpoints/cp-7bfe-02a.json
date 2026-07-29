@@ -6537,16 +6537,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_196_corporate-war",
-        "targetServerId": "remote_1"
+        "type": "draw_card"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["install_score_agenda"],
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["develop_score_protection"],
       "requiredAssessmentEvidence": [
-        "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1"
+        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_196_corporate-war_3:remote_1:remote_1"
       ]
     }
   }

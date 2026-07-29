@@ -3892,7 +3892,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(portfolio).toContain(
       '"parentNeedId":"install:remote_1:install-data-wall-remote-1"',
     );
-    expect(portfolio).toContain('"parentPriorityClass":"P2"');
+    expect(portfolio).toContain('"parentPriorityClass":"P6"');
     expect(portfolio).not.toContain('"kind":"score_protection_draw"');
   });
 

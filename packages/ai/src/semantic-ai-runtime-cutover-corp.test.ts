@@ -385,8 +385,10 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     );
     expect(runAlternative?.selected).toBe(true);
     expect(
-      drawAlternative?.whyNot?.some((entry) =>
-        entry.startsWith("not_selected_by_plan:"),
+      drawAlternative?.whyNot?.some(
+        (entry) =>
+          entry.startsWith("not_selected_by_plan:") ||
+          entry.startsWith("explicitly_nonproductive:"),
       ),
     ).toBe(true);
   });
@@ -1382,7 +1384,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     }
   });
 
-  it("starts an exact score plan while later route uncertainty remains explicit", () => {
+  it("defers an exact score install while later route uncertainty remains explicit", () => {
     const agenda = visibleCard("agenda-in-hq", "corp", "agenda", {
       definitionId: "onr_v1_194_corporate-downsizing",
       title: "Corporate Downsizing",
@@ -1431,15 +1433,10 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     ];
 
     const decision = chooseCorpAction(input);
-    expectExactScoreInstallProgression(
-      decision,
-      "install-contestable-agenda",
-      agenda.instanceId,
-      "P4",
-    );
+    expectUnsafeScoreInstallDeferred(decision, "install-contestable-agenda");
   });
 
-  it("starts the minimum-exposure agenda-flood score plan without claiming later safety", () => {
+  it("does not mistake minimum agenda-flood exposure for later safety", () => {
     const minimumAgenda = visibleCard(
       "stalled-flood-minimum-agenda",
       "corp",
@@ -1537,15 +1534,10 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       action.expiresAtStateVersion = input.playerView.stateVersion;
     }
     const decision = chooseCorpAction(input);
-    expectExactScoreInstallProgression(
-      decision,
-      installAction.actionId,
-      minimumAgenda.instanceId,
-      "P4",
-    );
+    expectUnsafeScoreInstallDeferred(decision, installAction.actionId);
   });
 
-  it("starts the exact score plan while leaving an unproven extra ICE route unselected", () => {
+  it("defers the unsafe score install while leaving an unproven extra ICE route unselected", () => {
     const agenda = visibleCard("agenda-in-hq", "corp", "agenda", {
       definitionId: "onr_v1_194_corporate-downsizing",
       title: "Corporate Downsizing",
@@ -1612,16 +1604,11 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
 
     const decision = chooseCorpAction(input);
 
-    expectExactScoreInstallProgression(
-      decision,
-      "install-contestable-agenda",
-      agenda.instanceId,
-      "P4",
-    );
+    expectUnsafeScoreInstallDeferred(decision, "install-contestable-agenda");
     expectRejectedByPlan(decision, "install-contestability-buffer");
   });
 
-  it("starts a terminal score plan without treating finite ICE depth as guaranteed safety", () => {
+  it("does not expose a terminal agenda by treating finite ICE depth as guaranteed safety", () => {
     const agenda = visibleCard("terminal-agenda-in-hq", "corp", "agenda", {
       definitionId: "onr_v1_194_corporate-downsizing",
       title: "Corporate Downsizing",
@@ -1697,21 +1684,11 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     ];
 
     const decision = chooseCorpAction(input);
-    const debugText = JSON.stringify(decision.decisionDebug);
-
-    expectExactScoreInstallProgression(
-      decision,
-      "install-terminal-agenda",
-      agenda.instanceId,
-      "P4",
-    );
+    expectUnsafeScoreInstallDeferred(decision, "install-terminal-agenda");
     expectRejectedByPlan(decision, "install-terminal-score-buffer");
-    expect(debugText).toContain(
-      "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
-    );
   });
 
-  it("starts one exact score plan from a two-agenda hand without claiming later safety", () => {
+  it("does not expose one agenda from a two-agenda hand without proven later safety", () => {
     const agenda = visibleCard("agenda-in-hq", "corp", "agenda", {
       definitionId: "onr_v1_194_corporate-downsizing",
       title: "Corporate Downsizing",
@@ -1771,20 +1748,10 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     ];
 
     const decision = chooseCorpAction(input);
-    const debugText = JSON.stringify(decision.decisionDebug);
-
-    expectExactScoreInstallProgression(
-      decision,
-      "install-portfolio-agenda",
-      agenda.instanceId,
-      "P4",
-    );
-    expect(debugText).toContain(
-      "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
-    );
+    expectUnsafeScoreInstallDeferred(decision, "install-portfolio-agenda");
   });
 
-  it("starts the single exact score plan without claiming that two ICE guarantee safety", () => {
+  it("does not claim that two ICE guarantee safety for a new agenda", () => {
     const agenda = visibleCard("single-agenda-in-hq", "corp", "agenda", {
       definitionId: "onr_v1_194_corporate-downsizing",
       title: "Corporate Downsizing",
@@ -1839,20 +1806,13 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     ];
 
     const decision = chooseCorpAction(input);
-    const debugText = JSON.stringify(decision.decisionDebug);
-
-    expectExactScoreInstallProgression(
+    expectUnsafeScoreInstallDeferred(
       decision,
       "install-single-protected-agenda",
-      agenda.instanceId,
-      "P4",
-    );
-    expect(debugText).toContain(
-      "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
     );
   });
 
-  it("starts a concrete score project while later advancement funding remains revalidated", () => {
+  it("funds safely while later advancement and protection remain revalidated", () => {
     const agenda = visibleCard("funding-open-agenda", "corp", "agenda", {
       definitionId: "onr_v1_194_corporate-downsizing",
       title: "Corporate Downsizing",
@@ -1904,12 +1864,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
 
     const decision = chooseCorpAction(input);
 
-    expectExactScoreInstallProgression(
-      decision,
-      "install-funding-open-agenda",
-      agenda.instanceId,
-      "P4",
-    );
+    expectUnsafeScoreInstallDeferred(decision, "install-funding-open-agenda");
   });
 
   it("continues an exactly quoted score step while later protection remains unknown", () => {
@@ -1989,7 +1944,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     );
   });
 
-  it("starts an exact matchpoint score plan without claiming guaranteed safety", () => {
+  it("does not expose an exact matchpoint agenda without guaranteed safety", () => {
     const agenda = visibleCard("matchpoint-agenda", "corp", "agenda", {
       definitionId: "onr_v1_194_corporate-downsizing",
       title: "Corporate Downsizing",
@@ -2046,17 +2001,7 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
     ];
 
     const decision = chooseCorpAction(input);
-    const debugText = JSON.stringify(decision.decisionDebug);
-
-    expectExactScoreInstallProgression(
-      decision,
-      "install-matchpoint-agenda",
-      agenda.instanceId,
-      "P4",
-    );
-    expect(debugText).toContain(
-      "corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
-    );
+    expectUnsafeScoreInstallDeferred(decision, "install-matchpoint-agenda");
   });
 
   it("advances a protected but contestable remote score line when same-turn closeout is reachable", () => {
@@ -2658,28 +2603,29 @@ function expectCorpLiquidityDevelopment(
   );
 }
 
-function expectExactScoreInstallProgression(
+function expectUnsafeScoreInstallDeferred(
   decision: ReturnType<typeof chooseCorpAction>,
   actionId: string,
-  agendaInstanceId: string,
-  priorityClass: "P1" | "P4",
 ): void {
-  const planInstanceId = `plan:corp.score_agenda:${encodeURIComponent(
-    `agenda:${agendaInstanceId}:remote_1`,
-  )}`;
-  expect(decision.actionId).toBe(actionId);
-  expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
-  expect(decision.fallbackUsed).toBe(false);
-  expect(decision.evidence).toEqual(
-    expect.arrayContaining([
-      `plan_first_root:${planInstanceId}`,
-      `plan_first_executor:${planInstanceId}`,
-      `plan_priority_class:${priorityClass}`,
-      "plan_module:corp.score_agenda",
-      "plan_step_capability:install_score_agenda",
-      "plan_assessment_evidence:corp_exact_score_install_with_staged_etr_and_later_route_uncertainty:remote_1",
-    ]),
+  expectCorpLiquidityDevelopment(decision);
+  const alternative = decision.decisionDebug?.actionAlternatives?.find(
+    (entry) => entry.actionId === actionId,
   );
+  expect(alternative).toMatchObject({
+    selected: false,
+    excluded: true,
+  });
+  expect(
+    alternative?.whyNot?.some(
+      (entry) =>
+        entry.startsWith(
+          "assessment_unknown:corp.score_agenda:corp_score_protection_",
+        ) ||
+        entry.startsWith(
+          "explicitly_nonproductive:corp.score_agenda:corp_score_",
+        ),
+    ),
+  ).toBe(true);
 }
 
 function expectExactScoreAdvanceProgression(
@@ -2698,7 +2644,7 @@ function expectExactScoreAdvanceProgression(
     expect.arrayContaining([
       `plan_first_root:${planInstanceId}`,
       `plan_first_executor:${planInstanceId}`,
-      "plan_priority_class:P4",
+      "plan_priority_class:P3",
       "plan_module:corp.score_agenda",
       "plan_step_capability:advance_score_agenda",
       `plan_assessment_evidence:${protectionEvidence}`,
@@ -2715,8 +2661,11 @@ function expectRejectedByPlan(
   );
   expect(alternative?.selected).toBe(false);
   expect(
-    alternative?.whyNot?.some((entry) =>
-      entry.startsWith("not_selected_by_plan:"),
+    alternative?.whyNot?.some(
+      (entry) =>
+        entry.startsWith("not_selected_by_plan:") ||
+        entry.startsWith("explicitly_nonproductive:") ||
+        entry.startsWith("assessment_unknown:"),
     ),
   ).toBe(true);
 }

@@ -81,6 +81,32 @@ describe("Corp draw admission", () => {
     });
   });
 
+  it("converts exact economy before a full-HQ P3 draw when draw and install still fit", () => {
+    expect(
+      assessment({
+        purpose: "score_defense_answer_search",
+        priorityClass: "P3",
+        handSize: 5,
+        maximumHandSize: 5,
+        currentClicks: 3,
+        parentProvidesExactSameTurnCapacityRelease: true,
+        capacityReleaseRoutes: [
+          {
+            actionId: "convert-exact-economy",
+            priorityClass: "P4",
+            clickCost: 1,
+            netHandDelta: -1,
+            withinClassValue: 80,
+          },
+        ],
+      }),
+    ).toMatchObject({
+      disposition: "defer_for_capacity_release",
+      projectedEndTurnOverflow: 1,
+      exactCapacityReleaseActionIds: ["convert-exact-economy"],
+    });
+  });
+
   it("admits one bounded answer-search overflow but blocks larger overflow", () => {
     expect(
       assessment({

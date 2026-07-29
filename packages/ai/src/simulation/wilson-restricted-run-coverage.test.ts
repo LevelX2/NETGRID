@@ -51,7 +51,10 @@ describe("Wilson Weeflerunner Engine-restricted run coverage", () => {
     const wilsonRuns = capture.input.legalActions.filter(
       (action) => action.type === "start_run" && action.source === wilsonSource,
     );
-    expect(wilsonRuns).toHaveLength(4);
+    const existingServerIds = capture.input.playerView.servers.map(
+      (server) => server.id,
+    );
+    expect(wilsonRuns).toHaveLength(existingServerIds.length);
     expect(
       wilsonRuns.map((action) => ({
         serverId: action.payload?.serverId,
@@ -60,36 +63,15 @@ describe("Wilson Weeflerunner Engine-restricted run coverage", () => {
         costProfile: action.payload?.restrictedActionGrantCostProfile,
         remaining: action.payload?.restrictedActionGrantRemainingActions,
       })),
-    ).toEqual([
-      {
-        serverId: "hq",
+    ).toEqual(
+      existingServerIds.map((serverId) => ({
         restriction: "run_only",
         allowedAction: "start_run",
         costProfile: "extra_click",
         remaining: 1,
-      },
-      {
-        serverId: "rd",
-        restriction: "run_only",
-        allowedAction: "start_run",
-        costProfile: "extra_click",
-        remaining: 1,
-      },
-      {
-        serverId: "archives",
-        restriction: "run_only",
-        allowedAction: "start_run",
-        costProfile: "extra_click",
-        remaining: 1,
-      },
-      {
-        serverId: "remote_1",
-        restriction: "run_only",
-        allowedAction: "start_run",
-        costProfile: "extra_click",
-        remaining: 1,
-      },
-    ]);
+        serverId,
+      })),
+    );
     expect(
       capture.input.playerView.publicEvents.slice(-2).map((event) => ({
         type: event.type,
