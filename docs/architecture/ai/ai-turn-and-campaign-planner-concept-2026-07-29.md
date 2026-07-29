@@ -3752,9 +3752,6 @@ Grundsatzentscheidung erforderlich.
 
 Empirisch im Shadow zu kalibrieren bleiben:
 
-- ob eine allgemeine Beam Search gegenüber einer begrenzten
-  Zwei-Schritt-Suche materiell nötig ist;
-- genaue Beam-Breite, Pareto-Frontgrößen und deterministische Knotenlimits;
 - numerische Wechselmarge je Prioritätsklasse und Spielphase;
 - genaue Bereiche und Gewichte registrierter Wert-/Risikokomponenten;
 - unmittelbare Bewertungsintervalle seltener Zufallsaktionen;
@@ -3763,11 +3760,22 @@ Empirisch im Shadow zu kalibrieren bleiben:
 - Nahgleichstandsband für zertifizierte Linienrandomisierung;
 - maximaler Kampagnen-Rollouthorizont;
 - TTL pausierter Kampagnen;
-- Performance-Cutoverwerte p50/p95;
 - exaktes Cutover-Gate für Runner.
 
 Diese Werte erhalten zentrale Konfigurationen, Traces und Gegenproben. Sie
 werden nicht als verteilte Magic Numbers in Planmodulen implementiert.
+
+ZK10 hat für den Corp-Cutover entschieden:
+
+- Eine allgemeine Beam Search ist nicht erforderlich; die deterministische
+  Zwei-Schritt-Suche mit kleinen geschützten Paretofronten bleibt bestehen.
+- Die Laufzeitmessung beeinflusst die Suche nicht. Für den dokumentierten
+  lokalen D4-/D5-Kalibrierpfad gilt vor ZK11 p95 höchstens 75 ms; gemessen
+  wurden in zwei 400er-Läufen 50,75 ms und 49,21 ms.
+
+Die vollständige Evidence und sämtliche übrigen Corp-Cutover-Schwellen
+stehen in
+`docs/reviews/ai/corp-turn-planner-shadow-calibration-2026-07-30.md`.
 
 ## 30. Abschlusskriterien des Gesamtvorhabens
 

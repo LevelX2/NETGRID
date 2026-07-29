@@ -360,7 +360,7 @@ describe("AI decision debug sanitizing", () => {
         portfolio: [],
         turnPlanning: {
           schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
-          mode: "projection_contract",
+          mode: "shadow",
           stateVersion: 12,
           sideSafePlanningFingerprint: "planning-state:test",
           planningRulesFingerprint: "planning-rules:test",
@@ -479,6 +479,53 @@ describe("AI decision debug sanitizing", () => {
               },
             ],
           },
+          shadowComparison: {
+            liveActionId: "corp.draw",
+            shadowActionId: "corp.draw",
+            shadowRootPlanInstanceId: "plan:corp.score_agenda:general",
+            boundedBaselineActionId: "corp.gain-credit",
+            agreement: true,
+            comparisonClass: "two_step_changes_head",
+            twoStepChangedHead: true,
+          },
+          coverage: {
+            status: "pass",
+            coveragePercent: 100,
+            legalActionCount: 3,
+            productiveActionCount: 2,
+            explicitlyNonproductiveActionCount: 1,
+            assessmentUnknownActionCount: 0,
+            engineWindowActionCount: 0,
+            missingActionCount: 0,
+            conflictingActionCount: 0,
+            issueCodes: [],
+            missingActionIds: [],
+            conflictingActionIds: [],
+          },
+          search: {
+            headCount: 2,
+            lineCount: 2,
+            expandedNodeCount: 3,
+            protectedPartitionCount: 1,
+            conservativeBaselineCount: 1,
+            maximumDepth: 2,
+            maximumExpandedNodes: 64,
+            maximumBranchesPerPartition: 16,
+            maximumParetoLinesPerPartition: 4,
+            selectedLineScalarValue: 42,
+            selectedLineStepCount: 2,
+          },
+          consideredLines: [
+            {
+              lineId: "line:corp.draw",
+              firstActionId: "corp.draw",
+              rootPlanInstanceId: "plan:corp.score_agenda:general",
+              stepCount: 2,
+              scalarValue: 42,
+              stopReason: "observation_boundary",
+              violatedObligationCount: 0,
+            },
+          ],
           pruneEvents: [],
           evidenceCodes: ["turn_planning_projection_contract_only"],
         },
@@ -514,6 +561,18 @@ describe("AI decision debug sanitizing", () => {
         selectedLine: expect.objectContaining({
           stopReason: "observation_boundary",
         }),
+        shadowComparison: expect.objectContaining({
+          liveActionId: "corp.draw",
+          comparisonClass: "two_step_changes_head",
+        }),
+        coverage: expect.objectContaining({
+          status: "pass",
+          coveragePercent: 100,
+        }),
+        search: expect.objectContaining({
+          maximumDepth: 2,
+          selectedLineStepCount: 2,
+        }),
       }),
     });
 
@@ -548,6 +607,22 @@ describe("AI decision debug sanitizing", () => {
       },
     });
     expect(untypedReplanReason?.planFirstDecision).toBeUndefined();
+
+    const untypedShadowComparison = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      planFirstDecision: {
+        ...sanitized?.planFirstDecision,
+        turnPlanning: {
+          ...sanitized?.planFirstDecision?.turnPlanning,
+          shadowComparison: {
+            ...sanitized?.planFirstDecision?.turnPlanning?.shadowComparison,
+            comparisonClass: "free_text_shadow_result",
+          },
+        },
+      },
+    });
+    expect(untypedShadowComparison?.planFirstDecision).toBeUndefined();
 
     const p6WithoutNarrowContract = sanitizeAiDecisionDebug({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,

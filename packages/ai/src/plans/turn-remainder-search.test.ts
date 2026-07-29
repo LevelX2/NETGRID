@@ -13,6 +13,7 @@ import {
   buildCanonicalLegalActionInvocation,
   buildPlanningRulesContext,
   buildPlanningStateIdentity,
+  type CampaignValueClaim,
   type PriorityCoverage,
   type TurnPlanningHeadCandidate,
 } from "./turn-planning-contracts";
@@ -58,6 +59,89 @@ describe("deterministic remainder-turn search", () => {
     expect(first.protectedPartitionKeys).toHaveLength(3);
     expect(first.conservativeBaselineLineIds).toHaveLength(3);
     expect(first.evidenceCodes).toContain("beam_search_not_used");
+  });
+
+  it("keeps follow-up-only offers out of protected roots but admits them after their urgent head", () => {
+    const setup = searchSetup();
+    const urgent = offer(setup, "urgent-defense", {
+      root: "root:defense",
+      milestone: "central-protected",
+      defense: 12,
+    });
+    const followup = offer(setup, "followup-credit", {
+      root: "root:economy",
+      milestone: "reserve-restored",
+      economy: 4,
+      dependencyCandidateIds: [urgent.head.candidateId],
+      rootEligible: false,
+    });
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [followup, urgent],
+    });
+
+    expect(result.protectedPartitionKeys).toHaveLength(1);
+    expect(result.protectedPartitionKeys[0]).toContain("root:defense");
+    expect(
+      result.lines.some(
+        (line) =>
+          line.steps[0]?.candidateId === urgent.head.candidateId &&
+          line.steps[1]?.candidateId === followup.head.candidateId,
+      ),
+    ).toBe(true);
+    expect(
+      result.lines.some(
+        (line) => line.steps[0]?.candidateId === followup.head.candidateId,
+      ),
+    ).toBe(false);
+  });
+
+  it("changes the head only when the bounded second step materially beats the single-step baseline", () => {
+    const setup = searchSetup();
+    const safeDefense = offer(setup, "safe-defense-baseline", {
+      root: "root:defense",
+      milestone: "central-protected",
+      defense: 8,
+    });
+    const agendaSetup = offer(setup, "agenda-setup", {
+      root: "root:agenda",
+      milestone: "score-route-open",
+      agendaProgress: 1,
+    });
+    const agendaConversion = offer(setup, "agenda-conversion", {
+      root: "root:agenda",
+      milestone: "agenda-scored",
+      agendaProgress: 20,
+      dependencyCandidateIds: [agendaSetup.head.candidateId],
+      rootEligible: false,
+    });
+    const offers = [safeDefense, agendaSetup, agendaConversion];
+    const singleStep = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers,
+      budget: { maximumDepth: 1 },
+    });
+    const twoStep = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers,
+    });
+    const selectedSingle = singleStep.lines.find(
+      (line) => line.lineId === singleStep.selectedLineId,
+    );
+    const selectedTwoStep = twoStep.lines.find(
+      (line) => line.lineId === twoStep.selectedLineId,
+    );
+
+    expect(selectedSingle?.steps[0]?.candidateId).toBe(
+      safeDefense.head.candidateId,
+    );
+    expect(selectedTwoStep?.steps.map((step) => step.candidateId)).toEqual([
+      agendaSetup.head.candidateId,
+      agendaConversion.head.candidateId,
+    ]);
+    expect(selectedTwoStep?.scalarValue).toBeGreaterThan(
+      selectedSingle?.scalarValue ?? Number.POSITIVE_INFINITY,
+    );
   });
 
   it("uses guaranteed restricted action capacity for a compatible follow-up", () => {
@@ -273,6 +357,64 @@ describe("deterministic remainder-turn search", () => {
     expect(drawLines[0]?.stopReason).toBe("observation_boundary");
   });
 
+  it("also stops at a public random outcome before choosing the remainder", () => {
+    const setup = searchSetup();
+    const randomEconomy = offer(setup, "random-economy", {
+      root: "root:economy",
+      milestone: "random-income-observed",
+      economy: 5,
+      boundaryAfter: assessTurnObservationBoundary({
+        boundaryKind: "public_random_outcome",
+        remainingActionCapacity: { minimum: 2, maximum: 2 },
+        residualTurnValueBasis: "public_outcome_distribution",
+        immediateOutcomeCodes: ["random_income_observed"],
+      }),
+    });
+    const followup = offer(setup, "random-followup", {
+      root: "root:defense",
+      milestone: "central-protected",
+      defense: 8,
+    });
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [randomEconomy, followup],
+    });
+    const randomLines = result.lines.filter(
+      (line) => line.steps[0]?.candidateId === randomEconomy.head.candidateId,
+    );
+
+    expect(randomLines).not.toHaveLength(0);
+    expect(randomLines.every((line) => line.steps.length === 1)).toBe(true);
+    expect(randomLines[0]?.stopReason).toBe("observation_boundary");
+  });
+
+  it("prunes a two-step line that would count one exclusive payoff twice", () => {
+    const setup = searchSetup();
+    const first = offer(setup, "first-payoff-owner", {
+      root: "root:agenda",
+      milestone: "score-window-created",
+      agendaProgress: 10,
+      valueClaims: [exclusiveClaim("claim:first", "corp.score_agenda")],
+    });
+    const second = offer(setup, "second-payoff-owner", {
+      root: "root:defense",
+      milestone: "same-score-window-protected",
+      defense: 8,
+      valueClaims: [exclusiveClaim("claim:second", "corp.defend_servers")],
+    });
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [first, second],
+    });
+
+    expect(result.pruneEvents).toContainEqual(
+      expect.objectContaining({
+        reasonCode: "conflicting_value_claim",
+      }),
+    );
+    expect(result.lines.every((line) => line.steps.length === 1)).toBe(true);
+  });
+
   it("fails closed on violated obligations, unknown capacity and stale bindings", () => {
     const setup = searchSetup();
     const violated = offer(setup, "violated", {
@@ -365,9 +507,11 @@ function offer(
     semanticActionType?: string;
     capacityProjection?: ActionCapacityProjection;
     dependencyCandidateIds?: string[];
+    rootEligible?: boolean;
     commutativeGroupKey?: string;
     boundaryAfter?: TurnRemainderSearchOffer["boundaryAfter"];
     priorityCoverage?: PriorityCoverage;
+    valueClaims?: CampaignValueClaim[];
   },
 ): TurnRemainderSearchOffer {
   const candidateId = `head:${id}`;
@@ -418,7 +562,7 @@ function offer(
       allRouteDefiningChoicesBound: true,
     },
     evaluationValues,
-    valueClaims: [],
+    valueClaims: params.valueClaims ?? [],
     evidenceCodes: [`offer:${id}`],
   };
   const candidate: ActionSemanticCandidate = {
@@ -495,6 +639,9 @@ function offer(
     ...(params.dependencyCandidateIds
       ? { dependencyCandidateIds: params.dependencyCandidateIds }
       : {}),
+    ...(params.rootEligible !== undefined
+      ? { rootEligible: params.rootEligible }
+      : {}),
     ...(params.commutativeGroupKey
       ? {
           commutativeGroupKey: params.commutativeGroupKey,
@@ -502,6 +649,28 @@ function offer(
         }
       : {}),
     ...(params.boundaryAfter ? { boundaryAfter: params.boundaryAfter } : {}),
+  };
+}
+
+function exclusiveClaim(
+  claimId: string,
+  ownerModuleId: CampaignValueClaim["ownerModuleId"],
+): CampaignValueClaim {
+  return {
+    claimId,
+    campaignId: "campaign:test",
+    ownerModuleId,
+    objectiveKey: "score-window",
+    componentKey: "score_window_progress",
+    evaluationDimensionId: "agenda_progress",
+    aggregationMode: "exclusive",
+    contributionKind: "objective_payoff",
+    beforeQuoteId: "quote:before",
+    afterQuoteId: "quote:after",
+    amount: 10,
+    dependencyKeys: [],
+    conflictKeys: ["score-window-payoff"],
+    status: "quoted",
   };
 }
 

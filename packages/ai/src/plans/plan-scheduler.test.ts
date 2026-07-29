@@ -10,6 +10,7 @@ import {
 import type { PlanProposal } from "./plan-kernel-types";
 import {
   createSidePlanRegistry,
+  enumerateCurrentPlanSchedulerRoutes,
   isStandardEndTurnCandidate,
   runPlanScheduler,
   type PlanModule,
@@ -56,6 +57,62 @@ describe("shared plan scheduler", () => {
         `plan:${side}.economy:general`,
       );
     }
+  });
+
+  it("enumerates every current compatible route deterministically without mutating scheduler authority", () => {
+    const lower = candidate("corp-credit-lower", "corp");
+    const higher = candidate("corp-credit-higher", "corp");
+    const schedulerContext = context("corp", [higher, lower]);
+    const economy = module("corp", "corp.economy", "P5", higher);
+    economy.materialize = () => ({
+      step: {
+        stepId: "execute",
+        capability: {
+          capabilityId: "execute",
+          semanticActionTypes: ["economy.gain_credit"],
+        },
+        purpose: "test",
+      },
+      candidates: [
+        { candidate: lower, stepValue: 1 },
+        { candidate: higher, stepValue: 2 },
+      ],
+    });
+    const registry = createSidePlanRegistry({
+      side: "corp",
+      priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+      modules: [economy],
+    });
+    const result = runPlanScheduler({
+      context: schedulerContext,
+      registry,
+      resolveEngineWindow: () => undefined,
+    });
+    expect(result.lane).toBe("plan");
+    if (result.lane !== "plan") throw new Error("Expected plan lane.");
+    const contextBefore = structuredClone(schedulerContext);
+    const portfolioBefore = structuredClone(result.portfolio);
+
+    const first = enumerateCurrentPlanSchedulerRoutes({
+      context: schedulerContext,
+      registry,
+      portfolio: result.portfolio,
+    });
+    const repeated = enumerateCurrentPlanSchedulerRoutes({
+      context: schedulerContext,
+      registry,
+      portfolio: result.portfolio,
+    });
+
+    expect(repeated).toEqual(first);
+    expect(first.issues).toEqual([]);
+    expect(first.candidates.map((entry) => entry.candidate.actionId)).toEqual([
+      "corp-credit-higher",
+      "corp-credit-lower",
+    ]);
+    expect(result.route.head.actionId).toBe("corp-credit-higher");
+    expect(schedulerContext).toEqual(contextBefore);
+    expect(result.portfolio).toEqual(portfolioBefore);
   });
 
   it("makes a current exact goal signal available to discovery and uses it to authorize only its bound tactical assessment", () => {

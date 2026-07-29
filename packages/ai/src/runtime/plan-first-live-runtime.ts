@@ -98,6 +98,7 @@ import {
   type PlanActionDisposition,
   type PlanSchedulerContext,
   type PlanSchedulerResult,
+  type SidePlanRegistry,
 } from "../plans/plan-scheduler";
 import {
   TRANSIENT_PLAN_SIGNAL_SCHEMA_VERSION,
@@ -107,6 +108,7 @@ import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { buildCorpAgendaTurnPlanningSlice } from "../plans/corp-agenda-turn-planning";
 import { buildCorpDefenseTurnPlanningSlice } from "../plans/corp-defense-turn-planning";
 import { assertCorpTurnPlanningModuleRegistry } from "../plans/corp-turn-planning-coverage";
+import { buildCorpTurnPlannerShadow } from "../plans/corp-turn-planner-shadow";
 import {
   buildCanonicalLegalActionInvocation,
   buildSemanticActionSetFingerprint,
@@ -361,6 +363,7 @@ export function choosePlanFirstLiveAction(
     candidates,
     context,
     result,
+    registry,
     dependencies,
     options,
   );
@@ -1590,12 +1593,18 @@ export function runnerActionDispositions(
       .filter((signal) => signal.reachable && signal.marginalValue > 0)
       .flatMap((signal) => signal.runActionIds ?? []),
   );
+  const recurringEconomyInstallActionIds = new Set(
+    (domain.recurringEconomy ?? [])
+      .filter((signal) => signal.phase === "install")
+      .flatMap((signal) => signal.actionIds),
+  );
   for (const signal of domain.recurringEconomy ?? []) {
     if (signal.phase !== "hold") continue;
     for (const candidate of candidates) {
       if (
         candidate.semanticActionType !== "install.card" ||
-        candidate.sourceDefinitionId !== signal.definitionId
+        candidate.sourceDefinitionId !== signal.definitionId ||
+        recurringEconomyInstallActionIds.has(candidate.actionId)
       ) {
         continue;
       }
@@ -6767,6 +6776,9 @@ function corpActionDispositions(
       }
     }
     if (corpExactOverflowHandConversionPlanOwnsCandidate(domain, candidate)) {
+      continue;
+    }
+    if (corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)) {
       continue;
     }
     const defenseActionDisposition = defenseActionDispositions.get(
@@ -12168,6 +12180,8 @@ function planFirstDecisionDebug(params: {
   input: AiDecisionInput;
   context: PlanSchedulerContext;
   result: PlanSchedulerResult;
+  registry: SidePlanRegistry;
+  selectedChoicesForDecision: PlanFirstLiveDependencies["selectedChoicesForDecision"];
   action: LegalAction;
   planId: string;
   planKind: string | undefined;
@@ -12257,13 +12271,23 @@ function planFirstDecisionDebug(params: {
       : undefined;
   let turnPlanning: AiTurnPlanningDebug | undefined;
   try {
-    turnPlanning = turnPlanningProjectionDebug({
-      input: params.input,
-      context: params.context,
-      result: params.result,
-      actionCandidate,
-      selectedPlan,
-    });
+    turnPlanning =
+      (params.input.side === "corp"
+        ? buildCorpTurnPlannerShadow({
+            input: params.input,
+            context: params.context,
+            registry: params.registry,
+            runtimeResult: params.result,
+            selectedChoicesForDecision: params.selectedChoicesForDecision,
+          })?.debug
+        : undefined) ??
+      turnPlanningProjectionDebug({
+        input: params.input,
+        context: params.context,
+        result: params.result,
+        actionCandidate,
+        selectedPlan,
+      });
   } catch {
     // This ZK04 projection trace is diagnostic-only. An unsupported projection
     // must not alter or abort the already materialized legal plan route.
@@ -12715,6 +12739,7 @@ function decisionFromScheduler(
   candidates: readonly ActionSemanticCandidate[],
   context: PlanSchedulerContext,
   result: PlanSchedulerResult,
+  registry: SidePlanRegistry,
   dependencies: PlanFirstLiveDependencies,
   options: AiDecisionRuntimeOptions,
 ): AiDecision {
@@ -13118,6 +13143,8 @@ function decisionFromScheduler(
     input,
     context,
     result,
+    registry,
+    selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
     action,
     planId,
     planKind,

@@ -14,6 +14,7 @@ describe("match 9b60842f Corp turn-coherence checkpoints", () => {
     expect(result.decision?.decisionDebug?.planKind).toBe(
       "corp.defend_servers",
     );
+    expectShadowTurnPlanner(result, 2);
   });
 
   it("already avoids the historical full-HQ score-material draw on current code", () => {
@@ -24,8 +25,65 @@ describe("match 9b60842f Corp turn-coherence checkpoints", () => {
     expect(result.decision?.decisionDebug?.planKind).toBe(
       "corp.defend_servers",
     );
+    expectShadowTurnPlanner(result, 1);
+  });
+
+  it("repeats the same read-only shadow trace without changing the live decision", () => {
+    const first = runAiDecisionCheckpoint(fixture(continueDefenseD4Json));
+    const repeated = runAiDecisionCheckpoint(fixture(continueDefenseD4Json));
+
+    expect(first.ok, `${first.code}: ${first.message}`).toBe(true);
+    expect(repeated.ok, `${repeated.code}: ${repeated.message}`).toBe(true);
+    expect(repeated.selectedAction).toEqual(first.selectedAction);
+    expect(repeated.decision?.selectedChoices).toEqual(
+      first.decision?.selectedChoices,
+    );
+    expect(
+      repeated.decision?.decisionDebug?.planFirstDecision?.turnPlanning,
+    ).toEqual(first.decision?.decisionDebug?.planFirstDecision?.turnPlanning);
+    expect(
+      first.decision?.decisionDebug?.planFirstDecision?.turnPlanning
+        ?.evidenceCodes,
+    ).toEqual(
+      expect.arrayContaining([
+        "corp_turn_planner_shadow_only",
+        "shadow_result_never_controls_live_action",
+        "bounded_single_step_baseline_compared",
+      ]),
+    );
   });
 });
+
+function expectShadowTurnPlanner(
+  result: ReturnType<typeof runAiDecisionCheckpoint>,
+  minimumSteps: number,
+): void {
+  const planning =
+    result.decision?.decisionDebug?.planFirstDecision?.turnPlanning;
+  expect(planning?.mode).toBe("shadow");
+  expect(planning?.shadowComparison?.liveActionId).toBe(
+    result.selectedAction?.actionId,
+  );
+  expect(
+    planning?.coverage,
+    JSON.stringify(planning, undefined, 2),
+  ).toMatchObject({
+    status: "pass",
+    coveragePercent: 100,
+    missingActionCount: 0,
+    conflictingActionCount: 0,
+  });
+  expect(planning?.search?.headCount).toBeGreaterThan(0);
+  expect(planning?.search?.protectedPartitionCount).toBeGreaterThan(0);
+  expect(
+    planning?.search?.selectedLineStepCount,
+    JSON.stringify(planning, undefined, 2),
+  ).toBeGreaterThanOrEqual(minimumSteps);
+  expect(
+    planning?.selectedLine.phases.flatMap((phase) => phase.nodes),
+  ).toHaveLength(planning?.search?.selectedLineStepCount ?? 0);
+  expect(planning?.consideredLines?.length).toBeGreaterThan(0);
+}
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
   return structuredClone(value) as AiDecisionCheckpointV1;

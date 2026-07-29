@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK09 abgeschlossen; ZK10 aktiv**
+Status: **ZK00 bis ZK10 abgeschlossen; ZK10a aktiv**
 
 Stand: 2026-07-29
 
@@ -1014,3 +1014,33 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
 - Vollständige AI-Suite: 527 Testdateien und 4.314 Tests grün.
 - AI-Typecheck, `check:ai` mit `production=743` und null Runtime-/Typzyklen,
   enge Formatprüfung sowie `git diff --check`: grün.
+
+### ZK10 – abgeschlossen
+
+- Der neue Corp-TurnPlanner läuft ausschließlich als lesender Shadow hinter
+  der weiterhin autoritativen Plan-first-Auswahl. Seine Linie und seine
+  Choices können die produktive Aktion nicht verändern.
+- Die reale aktuelle Corp-LegalAction-Menge erreicht in D4, D5 und
+  Opening Rush 100 Prozent Coverage ohne fehlende oder konkurrierende Owner.
+  Die Diagnose zeigt konkrete Heads, Phasen, Boundaries, Claims,
+  Ein-Schritt-Vergleich, Suchbudget und verworfene Linien.
+- Die deterministische Zwei-Schritt-Suche behält geschützte Fronten und
+  genügt für den ersten Corp-Cutover; ein allgemeiner Beam Search wurde
+  nicht eingeführt.
+- Zwei wiederholte 400er-Messreihen des vollständigen Checkpoint-Laufs
+  einschließlich Shadow ergaben p95 50,75 ms und 49,21 ms. Das dokumentierte
+  ZK11-Gate beträgt p95 höchstens 75 ms; Wanduhrzeit beeinflusst die
+  Entscheidung nicht.
+- Die 60-Spiele-Behavior-Baseline enthält nach zwei generischen
+  Planbesitz-Korrekturen null illegale Aktionen und null Runtime-, Replay-,
+  Hidden-Info-, Fallback-, Timeout- oder No-LegalAction-Fehler.
+- Ein Action-Limit bleibt als exakt auf dem ZK10-Ausgangsstand reproduzierte
+  Fremdbaseline offen: Der Runner sammelt im späten Spiel lange Credits,
+  bevor dasselbe Spiel mit erweitertem Limit nach 525 Aktionen regulär
+  endet. Es wurde keine Metrik-Sonderregel eingebaut.
+- Vollständige AI-Suite: 528 Testdateien und 4.322 Tests grün. Shared:
+  16/16 grün; Web-Debugexport: 1/1 grün. AI-, Shared- und Web-Typecheck,
+  `check:ai` mit `production=744` und null Runtime-/Typzyklen sowie
+  `git diff --check`: grün.
+- Führende Kalibrierevidence:
+  `docs/reviews/ai/corp-turn-planner-shadow-calibration-2026-07-30.md`.

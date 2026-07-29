@@ -297,6 +297,11 @@ export type {
   CorpTurnPlanningCoverageReport,
   CorpTurnPlanningModuleCoverage,
 } from "./plans/corp-turn-planning-coverage";
+export {
+  buildCorpTurnPlannerShadow,
+  CORP_TURN_PLANNER_SHADOW_SCHEMA_VERSION,
+} from "./plans/corp-turn-planner-shadow";
+export type { CorpTurnPlannerShadowResult } from "./plans/corp-turn-planner-shadow";
 export type {
   CampaignRequote,
   CommittedInvocationRoute,

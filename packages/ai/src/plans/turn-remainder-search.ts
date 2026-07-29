@@ -38,6 +38,7 @@ export type TurnRemainderSearchOffer = {
   incompatibleCandidateIds?: string[];
   commutativeGroupKey?: string;
   commutativityCertified?: boolean;
+  rootEligible?: boolean;
   boundaryAfter?: BoundaryActionAssessment;
 };
 
@@ -758,7 +759,9 @@ function buildPartitions(
   offers: readonly TurnRemainderSearchOffer[],
 ): Partition[] {
   const byKey = new Map<string, TurnRemainderSearchOffer[]>();
-  for (const offer of offers) {
+  for (const offer of offers.filter(
+    (candidate) => candidate.rootEligible !== false,
+  )) {
     const key = partitionKeyFor(offer);
     byKey.set(key, [...(byKey.get(key) ?? []), offer]);
   }

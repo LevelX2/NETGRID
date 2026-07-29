@@ -593,6 +593,23 @@ export function buildCorpTurnPlanningCoverageReport(params: {
           evidenceCodes: [disposition.evidenceCode],
         };
       }
+      if (
+        candidate.actionType === "end_turn" &&
+        candidate.semanticActionType === "turn_flow.end_turn" &&
+        candidate.sourceKind === "game_rule" &&
+        params.input.playerView.own.clicks > 0
+      ) {
+        return {
+          actionId: candidate.actionId,
+          actionType: candidate.actionType,
+          semanticActionType: candidate.semanticActionType,
+          classification: "explicitly_nonproductive",
+          ownerModuleId: "corp.complete_turn",
+          horizonCapability: "current_turn_only",
+          campaignQuoteStatus: "not_required",
+          evidenceCodes: ["turn_completion_deferred_usable_capacity"],
+        };
+      }
       issues.push({
         code: "productive_action_without_owner",
         actionId: candidate.actionId,

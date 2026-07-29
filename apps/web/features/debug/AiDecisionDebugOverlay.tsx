@@ -582,6 +582,124 @@ function AiDecisionDebugPlanFirstTraceView({
               ],
             ]}
           />
+          {decision.turnPlanning.shadowComparison ? (
+            <>
+              <h4>Shadow-Vergleich</h4>
+              <AiDecisionDebugRows
+                rows={[
+                  [
+                    "Produktive Aktion",
+                    decision.turnPlanning.shadowComparison.liveActionId,
+                  ],
+                  [
+                    "Shadow-Aktion",
+                    decision.turnPlanning.shadowComparison.shadowActionId ??
+                      "keine vollständige Shadow-Linie",
+                  ],
+                  [
+                    "Ergebnis",
+                    aiTurnShadowComparisonLabel(
+                      decision.turnPlanning.shadowComparison.comparisonClass,
+                    ),
+                  ],
+                  [
+                    "Begrenzte Ein-Schritt-Baseline",
+                    decision.turnPlanning.shadowComparison
+                      .boundedBaselineActionId ?? "nicht verfügbar",
+                  ],
+                  [
+                    "Zwei-Schritt-Suche änderte den Head",
+                    decision.turnPlanning.shadowComparison.twoStepChangedHead
+                      ? "ja"
+                      : "nein",
+                  ],
+                ]}
+              />
+            </>
+          ) : null}
+          {decision.turnPlanning.coverage ? (
+            <>
+              <h4>Planabdeckung und Suche</h4>
+              <AiDecisionDebugRows
+                rows={[
+                  [
+                    "Coverage",
+                    `${decision.turnPlanning.coverage.status === "pass" ? "vollständig" : "unvollständig"} · ${decision.turnPlanning.coverage.coveragePercent}%`,
+                  ],
+                  [
+                    "Aktionsklassen",
+                    `${decision.turnPlanning.coverage.productiveActionCount} produktiv · ${decision.turnPlanning.coverage.explicitlyNonproductiveActionCount} nicht produktiv · ${decision.turnPlanning.coverage.assessmentUnknownActionCount} unbekannt · ${decision.turnPlanning.coverage.engineWindowActionCount} Engine`,
+                  ],
+                  [
+                    "Lücken/Konflikte",
+                    `${decision.turnPlanning.coverage.missingActionCount}/${decision.turnPlanning.coverage.conflictingActionCount}`,
+                  ],
+                  [
+                    "Heads/Linien",
+                    decision.turnPlanning.search
+                      ? `${decision.turnPlanning.search.headCount}/${decision.turnPlanning.search.lineCount}`
+                      : "nicht ausgewiesen",
+                  ],
+                  [
+                    "Suchknoten/Partitionen",
+                    decision.turnPlanning.search
+                      ? `${decision.turnPlanning.search.expandedNodeCount}/${decision.turnPlanning.search.protectedPartitionCount}`
+                      : "nicht ausgewiesen",
+                  ],
+                  [
+                    "Suchbudget",
+                    decision.turnPlanning.search
+                      ? `Tiefe ${decision.turnPlanning.search.maximumDepth} · Knoten ${decision.turnPlanning.search.maximumExpandedNodes} · Äste ${decision.turnPlanning.search.maximumBranchesPerPartition} · Pareto ${decision.turnPlanning.search.maximumParetoLinesPerPartition}`
+                      : "nicht ausgewiesen",
+                  ],
+                ]}
+              />
+              <AiDecisionDebugChips
+                title="Coverage-Befunde"
+                items={[
+                  ...decision.turnPlanning.coverage.issueCodes,
+                  ...decision.turnPlanning.coverage.missingActionIds.map(
+                    (actionId) => `ohne Owner: ${actionId}`,
+                  ),
+                  ...decision.turnPlanning.coverage.conflictingActionIds.map(
+                    (actionId) => `Owner-Konflikt: ${actionId}`,
+                  ),
+                ]}
+                tone={
+                  decision.turnPlanning.coverage.status === "pass"
+                    ? "muted"
+                    : "warning"
+                }
+              />
+            </>
+          ) : null}
+          {decision.turnPlanning.consideredLines?.length ? (
+            <>
+              <h4>Verglichene Zuglinien</h4>
+              <div className="aiDecisionDebugCompactList">
+                {decision.turnPlanning.consideredLines.map((line) => (
+                  <div key={line.lineId}>
+                    <span>
+                      {line.firstActionId} · {line.stepCount} Schritt(e)
+                    </span>
+                    <strong>
+                      Wert {line.scalarValue} ·{" "}
+                      {aiTurnPlanningStopReasonLabel(line.stopReason)}
+                    </strong>
+                    <AiDecisionDebugRows
+                      rows={[
+                        ["Root", line.rootPlanInstanceId],
+                        [
+                          "Verletzte Pflichten",
+                          String(line.violatedObligationCount),
+                        ],
+                      ]}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
           <div className="aiDecisionDebugCompactList">
             {decision.turnPlanning.selectedLine.phases.map((phase, index) => (
               <div key={phase.phaseId}>
@@ -764,6 +882,13 @@ function AiDecisionDebugPlanFirstTraceView({
             </>
           ) : null}
           <AiDecisionDebugChips
+            title="Beschnittene Linien"
+            items={decision.turnPlanning.pruneEvents.map(
+              (entry) => `${entry.candidateId} · ${entry.reasonCode}`,
+            )}
+            tone="muted"
+          />
+          <AiDecisionDebugChips
             title="Planungs-Evidence"
             items={decision.turnPlanning.evidenceCodes}
             tone="muted"
@@ -904,6 +1029,23 @@ function aiTurnPlanningStopReasonLabel(
       return "neue Planermittlung erforderlich";
     case "bounded_search_horizon":
       return "begrenzter Suchhorizont erreicht";
+  }
+}
+
+function aiTurnShadowComparisonLabel(
+  value: NonNullable<
+    NonNullable<AiPlanFirstDecisionDebug["turnPlanning"]>["shadowComparison"]
+  >["comparisonClass"],
+): string {
+  switch (value) {
+    case "agreement":
+      return "Livepolicy und Shadow wählen dieselbe Aktion";
+    case "two_step_changes_head":
+      return "die Zwei-Schritt-Suche ändert die erste Aktion";
+    case "different_current_head":
+      return "abweichende aktuelle Aktion";
+    case "no_shadow_line":
+      return "keine vollständige Shadow-Linie";
   }
 }
 

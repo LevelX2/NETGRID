@@ -3252,6 +3252,60 @@ export type AiTurnPlanningDebug = {
       reasonCode: string;
     }>;
   };
+  shadowComparison?: {
+    liveActionId: string;
+    shadowActionId?: string;
+    shadowRootPlanInstanceId?: string;
+    boundedBaselineActionId?: string;
+    agreement: boolean;
+    comparisonClass:
+      | "agreement"
+      | "two_step_changes_head"
+      | "different_current_head"
+      | "no_shadow_line";
+    twoStepChangedHead: boolean;
+  };
+  coverage?: {
+    status: "pass" | "fail";
+    coveragePercent: number;
+    legalActionCount: number;
+    productiveActionCount: number;
+    explicitlyNonproductiveActionCount: number;
+    assessmentUnknownActionCount: number;
+    engineWindowActionCount: number;
+    missingActionCount: number;
+    conflictingActionCount: number;
+    issueCodes: string[];
+    missingActionIds: string[];
+    conflictingActionIds: string[];
+  };
+  search?: {
+    headCount: number;
+    lineCount: number;
+    expandedNodeCount: number;
+    protectedPartitionCount: number;
+    conservativeBaselineCount: number;
+    maximumDepth: number;
+    maximumExpandedNodes: number;
+    maximumBranchesPerPartition: number;
+    maximumParetoLinesPerPartition: number;
+    selectedLineScalarValue: number;
+    selectedLineStepCount: number;
+  };
+  consideredLines?: Array<{
+    lineId: string;
+    firstActionId: string;
+    rootPlanInstanceId: string;
+    stepCount: number;
+    scalarValue: number;
+    stopReason:
+      | "projected_turn_end"
+      | "observation_boundary"
+      | "projection_not_supported"
+      | "projected_plan_discovery_required"
+      | "bounded_search_horizon";
+    violatedObligationCount: number;
+  }>;
   pruneEvents: Array<{
     candidateId: string;
     reasonCode: string;
@@ -3801,6 +3855,10 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
       "boundary",
       "agendaComparison",
       "defenseComparison",
+      "shadowComparison",
+      "coverage",
+      "search",
+      "consideredLines",
       "pruneEvents",
       "evidenceCodes",
     ]) ||
@@ -3822,6 +3880,14 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
       !isAiTurnPlanningAgendaComparison(candidate.agendaComparison)) ||
     (candidate.defenseComparison !== undefined &&
       !isAiTurnPlanningDefenseComparison(candidate.defenseComparison)) ||
+    (candidate.shadowComparison !== undefined &&
+      !isAiTurnPlanningShadowComparison(candidate.shadowComparison)) ||
+    (candidate.coverage !== undefined &&
+      !isAiTurnPlanningCoverage(candidate.coverage)) ||
+    (candidate.search !== undefined &&
+      !isAiTurnPlanningSearch(candidate.search)) ||
+    (candidate.consideredLines !== undefined &&
+      !isAiTurnPlanningConsideredLines(candidate.consideredLines)) ||
     !Array.isArray(candidate.pruneEvents) ||
     !candidate.pruneEvents.every((entry) =>
       recordHasExactStringFields(entry, ["candidateId", "reasonCode"]),
@@ -3832,6 +3898,141 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
     return false;
   }
   return true;
+}
+
+function isAiTurnPlanningShadowComparison(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "liveActionId",
+      "shadowActionId",
+      "shadowRootPlanInstanceId",
+      "boundedBaselineActionId",
+      "agreement",
+      "comparisonClass",
+      "twoStepChangedHead",
+    ]) &&
+    typeof candidate.liveActionId === "string" &&
+    [
+      "shadowActionId",
+      "shadowRootPlanInstanceId",
+      "boundedBaselineActionId",
+    ].every(
+      (field) =>
+        candidate[field] === undefined || typeof candidate[field] === "string",
+    ) &&
+    typeof candidate.agreement === "boolean" &&
+    [
+      "agreement",
+      "two_step_changes_head",
+      "different_current_head",
+      "no_shadow_line",
+    ].includes(String(candidate.comparisonClass)) &&
+    typeof candidate.twoStepChangedHead === "boolean"
+  );
+}
+
+function isAiTurnPlanningCoverage(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "status",
+      "coveragePercent",
+      "legalActionCount",
+      "productiveActionCount",
+      "explicitlyNonproductiveActionCount",
+      "assessmentUnknownActionCount",
+      "engineWindowActionCount",
+      "missingActionCount",
+      "conflictingActionCount",
+      "issueCodes",
+      "missingActionIds",
+      "conflictingActionIds",
+    ]) &&
+    (candidate.status === "pass" || candidate.status === "fail") &&
+    [
+      "coveragePercent",
+      "legalActionCount",
+      "productiveActionCount",
+      "explicitlyNonproductiveActionCount",
+      "assessmentUnknownActionCount",
+      "engineWindowActionCount",
+      "missingActionCount",
+      "conflictingActionCount",
+    ].every(
+      (field) =>
+        typeof candidate[field] === "number" &&
+        Number.isFinite(candidate[field]),
+    ) &&
+    Array.isArray(candidate.issueCodes) &&
+    candidate.issueCodes.every((entry) => typeof entry === "string") &&
+    Array.isArray(candidate.missingActionIds) &&
+    candidate.missingActionIds.every((entry) => typeof entry === "string") &&
+    Array.isArray(candidate.conflictingActionIds) &&
+    candidate.conflictingActionIds.every((entry) => typeof entry === "string")
+  );
+}
+
+function isAiTurnPlanningSearch(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  const fields = [
+    "headCount",
+    "lineCount",
+    "expandedNodeCount",
+    "protectedPartitionCount",
+    "conservativeBaselineCount",
+    "maximumDepth",
+    "maximumExpandedNodes",
+    "maximumBranchesPerPartition",
+    "maximumParetoLinesPerPartition",
+    "selectedLineScalarValue",
+    "selectedLineStepCount",
+  ];
+  return (
+    hasOnlyAiPlanFirstFields(candidate, fields) &&
+    fields.every(
+      (field) =>
+        typeof candidate[field] === "number" &&
+        Number.isFinite(candidate[field]),
+    )
+  );
+}
+
+function isAiTurnPlanningConsideredLines(value: unknown): boolean {
+  if (!Array.isArray(value)) return false;
+  return value.every((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry))
+      return false;
+    const line = entry as Record<string, unknown>;
+    return (
+      hasOnlyAiPlanFirstFields(line, [
+        "lineId",
+        "firstActionId",
+        "rootPlanInstanceId",
+        "stepCount",
+        "scalarValue",
+        "stopReason",
+        "violatedObligationCount",
+      ]) &&
+      ["lineId", "firstActionId", "rootPlanInstanceId"].every(
+        (field) => typeof line[field] === "string",
+      ) &&
+      ["stepCount", "scalarValue", "violatedObligationCount"].every(
+        (field) =>
+          typeof line[field] === "number" && Number.isFinite(line[field]),
+      ) &&
+      [
+        "projected_turn_end",
+        "observation_boundary",
+        "projection_not_supported",
+        "projected_plan_discovery_required",
+        "bounded_search_horizon",
+      ].includes(String(line.stopReason))
+    );
+  });
 }
 
 function isAiTurnPlanningDebugCommitment(value: unknown): boolean {

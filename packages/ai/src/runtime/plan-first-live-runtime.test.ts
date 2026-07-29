@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   CARD_DEFINITIONS_BY_ID,
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
+  CURRENT_RULES_BASELINE,
 } from "@netgrid/shared";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
@@ -30,6 +31,10 @@ import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decisio
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+import {
+  buildPlanningRulesContext,
+  buildPlanningStateIdentity,
+} from "../plans/turn-planning-contracts";
 
 describe("authoritative plan-first live runtime", () => {
   it("admits an owned event-run head only when its current pressure route is executable", () => {
@@ -5374,17 +5379,46 @@ describe("authoritative plan-first live runtime", () => {
         action.expiresAtStateVersion = input.playerView.stateVersion;
       }
       input.playerView.legalActions = input.legalActions;
+      Object.assign(input, {
+        planningRulesContext: buildPlanningRulesContext({
+          rulesBaseline: CURRENT_RULES_BASELINE,
+          formatProfileId: "opening-rush-shadow-test",
+          cardPoolSnapshotId: "opening-rush-shadow-test",
+        }),
+        planningStateIdentity: buildPlanningStateIdentity(input),
+      });
       return input;
     };
 
     resetResidentPlanPortfolioMemory();
     const accepted = openingInput("opening-seed-0");
-    expect(
-      liveContext().chooseSemanticRuntimeAction(accepted, {}),
-    ).toMatchObject({
+    const acceptedDecision = liveContext().chooseSemanticRuntimeAction(
+      accepted,
+      {},
+    );
+    expect(acceptedDecision).toMatchObject({
       actionId: "install-agenda",
       reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
+    });
+    expect(
+      acceptedDecision.decisionDebug?.planFirstDecision?.turnPlanning,
+    ).toMatchObject({
+      mode: "shadow",
+      coverage: {
+        status: "pass",
+        coveragePercent: 100,
+        missingActionCount: 0,
+        conflictingActionCount: 0,
+      },
+      agendaComparison: {
+        opportunityKey: "opening-rush:2:agenda-1:remote_1",
+        selectionReason: "best_expected_value",
+        randomizationEligible: false,
+      },
+      shadowComparison: {
+        liveActionId: "install-agenda",
+      },
     });
     const acceptedPortfolio = JSON.stringify(
       residentPlanPortfolioSnapshot(accepted),
@@ -5396,12 +5430,26 @@ describe("authoritative plan-first live runtime", () => {
 
     resetResidentPlanPortfolioMemory();
     const declined = openingInput("opening-seed-1");
-    expect(
-      liveContext().chooseSemanticRuntimeAction(declined, {}),
-    ).toMatchObject({
+    const declinedDecision = liveContext().chooseSemanticRuntimeAction(
+      declined,
+      {},
+    );
+    expect(declinedDecision).toMatchObject({
       actionId: "accounts",
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
+    });
+    expect(
+      declinedDecision.decisionDebug?.planFirstDecision?.turnPlanning,
+    ).toMatchObject({
+      mode: "shadow",
+      coverage: {
+        status: "pass",
+        coveragePercent: 100,
+      },
+      shadowComparison: {
+        liveActionId: "accounts",
+      },
     });
     expect(JSON.stringify(residentPlanPortfolioSnapshot(declined))).toContain(
       '"admission":"declined"',

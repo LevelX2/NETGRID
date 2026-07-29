@@ -22,6 +22,7 @@ import {
 } from "./resident-plan-portfolio";
 import {
   bindBestCurrentPlanRoute,
+  matchPlanStepCandidate,
   type PlanRoute,
   type PlanRouteCandidate,
   type PlanRouteStep,
@@ -148,6 +149,24 @@ export type PlanSchedulerResult =
       diagnostics: SchedulerDiagnosticEvent[];
     };
 
+export type PlanSchedulerPlanningRouteCandidate = {
+  instance: PlanInstance;
+  assessment: ValidatedPlanAssessment;
+  step: PlanRouteStep;
+  candidate: ActionSemanticCandidate;
+  stepValue: number;
+  continuation?: SemanticContinuation;
+};
+
+export type PlanSchedulerPlanningEnumeration = {
+  candidates: PlanSchedulerPlanningRouteCandidate[];
+  issues: Array<{
+    instanceId: string;
+    moduleId: PlanModuleId;
+    code: "materialization_failed" | "no_current_compatible_candidate";
+  }>;
+};
+
 export type RunPlanSchedulerParams = {
   context: PlanSchedulerContext;
   registry: SidePlanRegistry;
@@ -230,33 +249,12 @@ export function runPlanScheduler(
     code: `resident:${reconciled.instances.length}`,
   });
 
-  const rawValidatedAssessments = reconciled.instances
-    .filter((instance) => instance.viability === "ready")
-    .map((instance) => {
-      const module = moduleForInstance(params.registry, instance, context);
-      const assessment = requireValidatedPlanAssessment(
-        bindExactTransientPlanSignals(
-          module.assess(instance, context, reconciled),
-          instance,
-          context,
-        ),
-        params.registry.priorityPolicy,
-        context.input.playerView.stateVersion,
-      );
-      diagnostics.push({
-        stage: "assess",
-        code: "validated",
-        instanceId: instance.instanceId,
-        moduleId: module.moduleId,
-        priorityClass: assessment.priorityValidation.effectiveClass,
-      });
-      return assessment;
-    });
-  const supportBindings = bindExactParentSupport(
-    rawValidatedAssessments,
-    reconciled,
+  const supportBindings = currentPlanAssessmentState({
+    registry: params.registry,
     context,
-  );
+    portfolio: reconciled,
+    diagnostics,
+  });
   const validatedAssessments = supportBindings.assessments.sort(
     compareValidatedPlanAssessments,
   );
@@ -356,6 +354,163 @@ export function runPlanScheduler(
         }
       : {}),
     diagnostics,
+  };
+}
+
+/**
+ * Enumerates current, already assessed plan-step variants for diagnostics and
+ * turn-planner shadow evaluation. The result has no execution authority and
+ * never creates LegalActions.
+ */
+export function enumerateCurrentPlanSchedulerRoutes(params: {
+  context: PlanSchedulerContext;
+  registry: SidePlanRegistry;
+  portfolio: ResidentPlanPortfolio;
+}): PlanSchedulerPlanningEnumeration {
+  assertRegistry(params.registry, params.context);
+  assertActionDispositions(params.registry, params.context);
+  const transientSignals = requireCurrentTransientPlanSignals(
+    params.context.transientSignals,
+    {
+      side: params.registry.side,
+      stateVersion: params.context.input.playerView.stateVersion,
+      timingPoint: "plan_discovery",
+    },
+  );
+  const context: PlanSchedulerContext =
+    transientSignals.length > 0
+      ? { ...params.context, transientSignals }
+      : params.context;
+  const supportBindings = currentPlanAssessmentState({
+    registry: params.registry,
+    context,
+    portfolio: params.portfolio,
+  });
+  const issues: PlanSchedulerPlanningEnumeration["issues"] = [];
+  const candidates: PlanSchedulerPlanningRouteCandidate[] = [];
+
+  for (const assessment of supportBindings.assessments) {
+    if (
+      assessment.readiness !== "executable_now" ||
+      supportBindings.ineligibleProviderInstanceIds.has(assessment.instanceId)
+    ) {
+      continue;
+    }
+    const instance = params.portfolio.instances.find(
+      (candidate) => candidate.instanceId === assessment.instanceId,
+    );
+    if (!instance) continue;
+    const module = moduleForInstance(params.registry, instance, context);
+    let materialized: PlanMaterialization;
+    try {
+      materialized = module.materialize(instance, assessment, context);
+    } catch {
+      issues.push({
+        instanceId: instance.instanceId,
+        moduleId: instance.moduleId,
+        code: "materialization_failed",
+      });
+      continue;
+    }
+    const compatible = materialized.candidates
+      .filter(
+        (entry) =>
+          matchPlanStepCandidate(
+            materialized.step,
+            entry.candidate,
+            entry.sourceRoles ?? [],
+            context.input.playerView.stateVersion,
+          ).status === "compatible",
+      )
+      .sort(
+        (left, right) =>
+          right.stepValue - left.stepValue ||
+          left.candidate.actionId.localeCompare(right.candidate.actionId),
+      );
+    if (compatible.length === 0) {
+      issues.push({
+        instanceId: instance.instanceId,
+        moduleId: instance.moduleId,
+        code: "no_current_compatible_candidate",
+      });
+      continue;
+    }
+    for (const entry of compatible) {
+      candidates.push({
+        instance: structuredClone(instance),
+        assessment: structuredClone(assessment),
+        step: structuredClone(materialized.step),
+        candidate: structuredClone(entry.candidate),
+        stepValue: entry.stepValue,
+        ...(materialized.continuation
+          ? { continuation: structuredClone(materialized.continuation) }
+          : {}),
+      });
+    }
+  }
+
+  return {
+    candidates: candidates.sort(
+      (left, right) =>
+        compareValidatedPlanAssessments(left.assessment, right.assessment) ||
+        left.instance.instanceId.localeCompare(right.instance.instanceId) ||
+        right.stepValue - left.stepValue ||
+        left.candidate.actionId.localeCompare(right.candidate.actionId),
+    ),
+    issues: issues.sort(
+      (left, right) =>
+        left.instanceId.localeCompare(right.instanceId) ||
+        left.code.localeCompare(right.code),
+    ),
+  };
+}
+
+function currentPlanAssessmentState(params: {
+  registry: SidePlanRegistry;
+  context: PlanSchedulerContext;
+  portfolio: ResidentPlanPortfolio;
+  diagnostics?: SchedulerDiagnosticEvent[];
+}): {
+  assessments: ValidatedPlanAssessment[];
+  ineligibleProviderInstanceIds: Set<string>;
+} {
+  const rawValidatedAssessments = params.portfolio.instances
+    .filter((instance) => instance.viability === "ready")
+    .map((instance) => {
+      const module = moduleForInstance(
+        params.registry,
+        instance,
+        params.context,
+      );
+      const assessment = requireValidatedPlanAssessment(
+        bindExactTransientPlanSignals(
+          module.assess(instance, params.context, params.portfolio),
+          instance,
+          params.context,
+        ),
+        params.registry.priorityPolicy,
+        params.context.input.playerView.stateVersion,
+      );
+      params.diagnostics?.push({
+        stage: "assess",
+        code: "validated",
+        instanceId: instance.instanceId,
+        moduleId: module.moduleId,
+        priorityClass: assessment.priorityValidation.effectiveClass,
+      });
+      return assessment;
+    });
+  const supportBindings = bindExactParentSupport(
+    rawValidatedAssessments,
+    params.portfolio,
+    params.context,
+  );
+  return {
+    assessments: supportBindings.assessments.sort(
+      compareValidatedPlanAssessments,
+    ),
+    ineligibleProviderInstanceIds:
+      supportBindings.ineligibleProviderInstanceIds,
   };
 }
 
