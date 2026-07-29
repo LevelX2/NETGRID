@@ -178,8 +178,7 @@ export function selectedChoicesForDecision(
     input.side === "corp" &&
     (choice.continuation?.family === "corp_advancement_counter" ||
       choice.source.startsWith("p3_34.distribute_advancement:") ||
-      choice.source.startsWith("p3_34.move_advancement:") ||
-      choice.source.startsWith("v1919.systematic_layoffs_advancement:"))
+      choice.source.startsWith("p3_34.move_advancement:"))
   ) {
     const scoreBinding = residentCorpScoreChoiceBinding(
       input,
@@ -567,9 +566,7 @@ function selectedCorpScoredAgendaStartDrawChoiceOptionId(
   selectableOptions: PendingChoiceOptions,
 ): string {
   const sourceMatch =
-    /^scored_agenda\.start_draw_choice:([^:]+):([0-9]+)$/.exec(
-      choice.source,
-    );
+    /^scored_agenda\.start_draw_choice:([^:]+):([0-9]+)$/.exec(choice.source);
   const sourceCardId = sourceMatch?.[1];
   const sourceStateVersion = Number(sourceMatch?.[2]);
   const sourceCard = sourceCardId

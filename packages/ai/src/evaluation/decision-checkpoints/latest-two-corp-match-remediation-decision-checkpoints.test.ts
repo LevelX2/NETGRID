@@ -19,10 +19,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       "builds economy instead of exposing an agenda behind breakable staged ETR",
       minimizeAgendaRiskJson,
     ],
-    [
-      "funds the matchpoint campaign before exposing it",
-      startMatchpointJson,
-    ],
+    ["funds the matchpoint campaign before exposing it", startMatchpointJson],
   ])("%s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

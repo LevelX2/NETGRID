@@ -938,18 +938,14 @@
           "corp_onr_v1_318_department-of-truth-enhancement_2",
           "corp_onr_v1_296_off-site-backups_2"
         ],
-        "archives": [
-          "corp_onr_v1_296_off-site-backups_1"
-        ],
+        "archives": ["corp_onr_v1_296_off-site-backups_1"],
         "scoreArea": [],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_254_liche_1"
-            ],
+            "ice": ["corp_onr_v1_254_liche_1"],
             "root": []
           },
           {
@@ -970,9 +966,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_278_wall-of-ice_2"
-            ],
+            "ice": ["corp_onr_v1_278_wall-of-ice_2"],
             "root": []
           }
         ]
@@ -3454,10 +3448,7 @@
       "selectedStepKind": "protect_remote",
       "selectedActionId": "corp.install_card.corp_onr_v1_254_liche_1.hq.corp_onr_v1_254_liche_1.0",
       "selectedActionType": "install_card",
-      "blockedBy": [
-        "central_protection_floor",
-        "missing_remote_protection"
-      ],
+      "blockedBy": ["central_protection_floor", "missing_remote_protection"],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "selected_new_plan",
       "progressBaseline": {
@@ -3671,9 +3662,7 @@
               "support": 85,
               "final": 74
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -3709,10 +3698,7 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
@@ -3899,10 +3885,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4054,9 +4037,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 92,
@@ -4114,9 +4095,7 @@
               "family": "corp_asset_economy",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 69,
@@ -4147,10 +4126,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4169,9 +4145,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 34,
@@ -4203,10 +4177,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4261,10 +4232,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4319,10 +4287,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4514,10 +4479,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4574,10 +4536,12 @@
         "targetServerId": "remote_1"
       }
     ],
-  "planExecution": {
-    "acceptablePlanKinds": ["corp.score_agenda"],
-    "acceptableCapabilities": ["install_score_agenda"],
-    "requiredAssessmentEvidence": ["corp_same_turn_score_conversion:install_score_target"]
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
+      "requiredAssessmentEvidence": [
+        "corp_same_turn_score_conversion:install_score_target"
+      ]
     }
   }
 }

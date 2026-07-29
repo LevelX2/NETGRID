@@ -59,16 +59,16 @@ gewählt wird. Rohscores allein entscheiden ebenfalls keine Klassifikation.
 
 ## Sequenzielle Pakete
 
-| Paket | Status | Inhalt | Mindest-Gates |
-| --- | --- | --- | --- |
-| P00 | abgeschlossen | Prozess, `/Goal`, Grenzen und Paketfolge versionieren | Dokumentprüfung, `git diff --check` |
-| P01 | abgeschlossen | Gesamte Testsuite unverändert ausführen, alle roten Tests und gemeinsame Ursachen inventarisieren | `corepack pnpm test`, reproduzierbare fokussierte Gegenläufe |
-| P02 | abgeschlossen | Executor-, Planabdeckungs-, Quote- und Diagnoseinvarianten generisch reparieren | fokussierte Unit-/Integrationstests, AI-Typecheck, Source-Structure |
-| P03 | abgeschlossen | Corp-Score-, Schutz-, Defense-, Rez- und Economy-Ursachen beheben | positive und negative Corp-Checkpoints, Hidden-Info-Gegenprobe |
-| P04 | abgeschlossen | Runner-Runrisiko-, Coverage-, Wiederholungs- und Sequenzursachen beheben | positive und negative Runner-Checkpoints, Hidden-Info-Gegenprobe |
-| P05 | abgeschlossen | Nur nachweislich veraltete Testverträge aktualisieren und Lücken mit Gegenproben schließen | betroffene Tests plus benachbarte Suiten |
-| P06 | aktiv | Paketübergreifende Gates und vollständige Testsuite schließen; Review- und Wissensstand aktualisieren | Typecheck, Struktur-/Vertragsgates, `corepack pnpm test`, Build |
-| P07 | ausstehend | Aktuelles `main` integrieren, dort vollständig verifizieren, Hauptinstanz über das Startscript aktualisieren und Worktree/Branch entfernen | Main-Gates, Server-SHA/Health, Git-/Dateisystem-Cleanup |
+| Paket | Status        | Inhalt                                                                                                                                     | Mindest-Gates                                                       |
+| ----- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| P00   | abgeschlossen | Prozess, `/Goal`, Grenzen und Paketfolge versionieren                                                                                      | Dokumentprüfung, `git diff --check`                                 |
+| P01   | abgeschlossen | Gesamte Testsuite unverändert ausführen, alle roten Tests und gemeinsame Ursachen inventarisieren                                          | `corepack pnpm test`, reproduzierbare fokussierte Gegenläufe        |
+| P02   | abgeschlossen | Executor-, Planabdeckungs-, Quote- und Diagnoseinvarianten generisch reparieren                                                            | fokussierte Unit-/Integrationstests, AI-Typecheck, Source-Structure |
+| P03   | abgeschlossen | Corp-Score-, Schutz-, Defense-, Rez- und Economy-Ursachen beheben                                                                          | positive und negative Corp-Checkpoints, Hidden-Info-Gegenprobe      |
+| P04   | abgeschlossen | Runner-Runrisiko-, Coverage-, Wiederholungs- und Sequenzursachen beheben                                                                   | positive und negative Runner-Checkpoints, Hidden-Info-Gegenprobe    |
+| P05   | abgeschlossen | Nur nachweislich veraltete Testverträge aktualisieren und Lücken mit Gegenproben schließen                                                 | betroffene Tests plus benachbarte Suiten                            |
+| P06   | abgeschlossen | Paketübergreifende Gates und vollständige Testsuite schließen; Review- und Wissensstand aktualisieren                                      | Typecheck, Struktur-/Vertragsgates, `corepack pnpm test`, Build     |
+| P07   | aktiv         | Aktuelles `main` integrieren, dort vollständig verifizieren, Hauptinstanz über das Startscript aktualisieren und Worktree/Branch entfernen | Main-Gates, Server-SHA/Health, Git-/Dateisystem-Cleanup             |
 
 Es ist immer genau ein Paket aktiv. Paketgrenzen dürfen nach P01 nur dann
 verfeinert werden, wenn die Baseline mehrere unabhängige Wurzelursachen
@@ -127,17 +127,17 @@ Der Root-Lauf arbeitet die Workspace-Pakete sequenziell ab und brach
 vertragsgemäß am roten AI-Paket ab. Deshalb wurden Server, Web,
 Test-Discovery und Root-Spezifikationen ergänzend isoliert ausgeführt.
 
-| Bereich | Ergebnis |
-| --- | --- |
-| Shared | 1/1 Dateien, 16/16 Tests grün |
-| Catalog | 3/3 Dateien, 20/20 Tests grün |
-| Engine | 209/209 Dateien, 1.820/1.820 Tests grün |
-| Decks | 1/1 Dateien, 19/19 Tests grün |
-| AI | 30 rote, 487 grüne Dateien; 80 rote, 4.153 grüne Tests |
-| Web | 70/70 Dateien, 716/716 Tests grün |
-| Server | 1 rote, 22 grüne Dateien; 1 roter, 213 grüne Tests |
-| Root-Spezifikationen | 3/3 Dateien, 8/8 Tests grün |
-| Test-Discovery | vollständig grün |
+| Bereich              | Ergebnis                                               |
+| -------------------- | ------------------------------------------------------ |
+| Shared               | 1/1 Dateien, 16/16 Tests grün                          |
+| Catalog              | 3/3 Dateien, 20/20 Tests grün                          |
+| Engine               | 209/209 Dateien, 1.820/1.820 Tests grün                |
+| Decks                | 1/1 Dateien, 19/19 Tests grün                          |
+| AI                   | 30 rote, 487 grüne Dateien; 80 rote, 4.153 grüne Tests |
+| Web                  | 70/70 Dateien, 716/716 Tests grün                      |
+| Server               | 1 rote, 22 grüne Dateien; 1 roter, 213 grüne Tests     |
+| Root-Spezifikationen | 3/3 Dateien, 8/8 Tests grün                            |
+| Test-Discovery       | vollständig grün                                       |
 
 Die 30 roten AI-Dateien sind:
 
@@ -423,3 +423,54 @@ Ergebnis:
   `production=733`, `runtimeCycles=0`, `typeCycles=0`.
 - `git diff --check` grün; produktiver Code bleibt frei von
   Karten-ID-Sonderbehandlungen.
+
+### P06 – Paketübergreifende Gates und Gesamtabnahme im Worktree
+
+Wurzelursachen:
+
+- Der Server-Wartungstest meldete trotz erfolgreichem `VACUUM` keine
+  physische Verkleinerung. Die SQLite-Verbindung arbeitet im WAL-Modus:
+  `VACUUM` schrieb den kompakten Stand zunächst in die WAL-Datei, während
+  `databaseSizeBytes()` noch die unveränderte Hauptdatei maß. Damit waren
+  Integrität und logische Kompaktheit korrekt, aber die zurückgegebene
+  physische Größen- und Freigabeinformation veraltet.
+- Engine- und KI-Runtime enthielten noch einen toten historischen
+  Source-Präfix für eine einzelne Advancement-Karte. Der aktuelle generische
+  Vertrag verwendet `ChoiceRequest.continuation.family =
+"corp_advancement_counter"` beziehungsweise die generischen
+  Distribute-/Move-Advancement-Quellen; der alte Fallback war weder Erzeuger
+  noch vollständiger Binder und verletzte nur noch das Architektur-Gate.
+- Das abgeleitete Proteus-Readiness-Inventar führte für öffentlich gestufte
+  Shell-Trader-Effekte noch 13 statt der aktuellen 15 generischen
+  Effektbelege. Die Runtime war bereits korrekt; nur das generierte Inventar
+  war veraltet.
+
+Änderungen:
+
+- Nach `VACUUM` und `PRAGMA optimize` führt die Storage-Wartung
+  `PRAGMA wal_checkpoint(TRUNCATE)` aus. Integritätsprüfung und
+  Größenmessung sehen damit denselben dauerhaft geschriebenen Stand.
+- Der ungenutzte kartenbezogene Advancement-Source-Fallback wurde in Engine
+  und KI entfernt. Die generische Continuation- und Source-Bindung bleibt
+  vollständig getestet.
+- Card-Function-Abstraction-Report und Proteus-Readiness-Inventar wurden mit
+  den vorhandenen Generatoren aktualisiert. Der Abstraction-Baselinewert
+  sinkt exakt um den entfernten Runtime-Fund; das Readiness-Inventar ändert
+  semantisch nur die Shell-Trader-Effektzahl von 13 auf 15.
+- Das Changed-Format-Gate hat ausschließlich die 18 bereits auf diesem
+  Arbeitsbranch geänderten Dateien mechanisch formatiert.
+
+Ergebnis:
+
+- Vollständiger Produktions-Build grün.
+- Vollständige Root-Testsuite grün:
+  Shared 16/16, Catalog 20/20, Engine 1.820/1.820, Decks 19/19,
+  AI 4.238/4.238, Web 716/716, Server 214/214 und
+  Root-Spezifikationen 8/8.
+- Test-Discovery deckt jede physische Paket-Testdatei ab.
+- Root-Typecheck, Root-Lint, AI-Vertrags-, Hint-, Economy-,
+  Action-Capacity- und Approval-Gates grün.
+- AI- und Engine-Source-Structure ohne Runtime- oder Typzyklen; Engine-
+  Architektur-, Credit-Gain-, Package-Boundary-, Card-Function-Abstraction-,
+  Proteus-Readiness- und Proteus-Family-Scenario-Gates grün.
+- `format:changed` und `git diff --check` grün.

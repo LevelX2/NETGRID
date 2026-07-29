@@ -16,8 +16,7 @@ describe("resident plan portfolio", () => {
       stateVersion: 10,
       timingPoint: "runner_action.main",
       proposals,
-      selectedExecutorInstanceId:
-        "plan:runner.development_0:card-0",
+      selectedExecutorInstanceId: "plan:runner.development_0:card-0",
     });
 
     expect(portfolio.instances).toHaveLength(7);
@@ -231,8 +230,7 @@ describe("resident plan portfolio", () => {
     });
     expect(
       portfolio.instances.find(
-        (instance) =>
-          instance.instanceId === "plan:runner.economy:fund-rd",
+        (instance) => instance.instanceId === "plan:runner.economy:fund-rd",
       ),
     ).toMatchObject({
       parentInstanceId: "plan:runner.pressure:rd",
@@ -356,9 +354,7 @@ describe("resident plan portfolio", () => {
         side: "runner",
         stateVersion: 90,
         timingPoint: "runner_action.main",
-        proposals: [
-          proposal("corp.economy", "wrong-side", { side: "corp" }),
-        ],
+        proposals: [proposal("corp.economy", "wrong-side", { side: "corp" })],
       }),
     ).toThrow(expect.objectContaining({ code: "invalid_plan_identity" }));
   });

@@ -5567,12 +5567,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.defend_servers"
-      ],
-      "acceptableCapabilities": [
-        "allocate_server_defense"
-      ],
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
       "requiredAssessmentEvidence": [
         "engine_certified_ice_rez_qualitative_encounter_defense:rd:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1"
       ]

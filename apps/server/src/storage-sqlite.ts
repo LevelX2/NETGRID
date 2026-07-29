@@ -1029,6 +1029,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
 
     this.db.exec("VACUUM");
     this.db.exec("PRAGMA optimize");
+    this.db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
     const integrityCheck = this.integrityCheck();
     const afterBytes = this.databaseSizeBytes();
 

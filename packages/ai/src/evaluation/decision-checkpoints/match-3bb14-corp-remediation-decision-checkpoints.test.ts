@@ -65,10 +65,8 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
       (server) => server.id === "remote_1",
     );
     expect(
-      scoringWindowAccessAssessment(
-        alreadyAtRunnerTurn,
-        runnerTurnRemote,
-      ).evidence,
+      scoringWindowAccessAssessment(alreadyAtRunnerTurn, runnerTurnRemote)
+        .evidence,
     ).toContain("public_staged_breaker_install_credit_cost:3");
   });
 

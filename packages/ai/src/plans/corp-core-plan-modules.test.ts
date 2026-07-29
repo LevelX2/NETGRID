@@ -841,9 +841,7 @@ describe("Corp core plan modules", () => {
     };
 
     expect(
-      corpGenericDefensePriorityClass([
-        { ...base, centralPressure: "acute" },
-      ]),
+      corpGenericDefensePriorityClass([{ ...base, centralPressure: "acute" }]),
     ).toBe("P3");
     expect(
       corpGenericDefensePriorityClass([
@@ -2600,11 +2598,7 @@ describe("Corp core plan modules", () => {
 
   it("protects an exposed P3 score parent before adding an equally ranked central layer", () => {
     const scoreInstall = {
-      ...cardAction(
-        "score-protection-install",
-        "install.card",
-        "score-ice",
-      ),
+      ...cardAction("score-protection-install", "install.card", "score-ice"),
       targetContext: targetContext("remote_1", "server"),
     };
     const centralInstall = {
@@ -3784,9 +3778,7 @@ describe("Corp core plan modules", () => {
       };
       const corpContext = context([credit], {
         economyNeeds: [signal],
-        scoreProjects: [
-          scoreProject(projectId, "P4", signal.evidenceCode),
-        ],
+        scoreProjects: [scoreProject(projectId, "P4", signal.evidenceCode)],
       });
       const proposal = economy.discover(corpContext)[0]!;
       const instance = instantiatePlanProposal(proposal, 10);

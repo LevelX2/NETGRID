@@ -2502,8 +2502,7 @@ function scoreResourceGaps(
   const fundingGap = signal.fundingGap;
   const knownProtectionFundingGap =
     signal.protectionNeed?.baseline.knowledge === "known"
-      ? (signal.protectionNeed.baseline
-          .minimumAdditionalCreditsToSatisfy ?? 0)
+      ? (signal.protectionNeed.baseline.minimumAdditionalCreditsToSatisfy ?? 0)
       : 0;
   const hasExactCurrentAdvanceHead =
     signal.phase === "advance_agenda" &&
@@ -2984,10 +2983,9 @@ function selectedExactGenericDefenseRoutes(
       const allocationLocked =
         (selectedPressure === "acute" || selectedPressure === "terminal") &&
         selectedCentralAccessRiskRemains(context, allocation);
-      const fallbackServer =
-        context.input.playerView.servers.find(
-          (server) => server.id === fallbackServerId,
-        );
+      const fallbackServer = context.input.playerView.servers.find(
+        (server) => server.id === fallbackServerId,
+      );
       const fallbackHasIndependentValue =
         fallbackServer?.ice.length === 0 ||
         allocation.evidence[fallbackServerId].threat !== "none";
@@ -4083,14 +4081,14 @@ function economyCandidates(
             : signal.kind === "convert_installed_asset_payout"
               ? candidate.actionId === installedAssetPayoutActionId &&
                 installedAssetPayoutCandidateMatchesSignal(candidate, signal)
-            : signal.kind === "prepare_immediate_operation"
-              ? candidate.actionId === operationThresholdActionId &&
-                corpExactBasicLiquidCreditCandidate(candidate)
-              : signal.kind === "develop_liquidity"
-                ? candidate.actionId === liquidityActionId &&
+              : signal.kind === "prepare_immediate_operation"
+                ? candidate.actionId === operationThresholdActionId &&
                   corpExactBasicLiquidCreditCandidate(candidate)
-                : candidate.actionId === exactFundingHead &&
-                  immediateCorpLiquidCreditGain(candidate) > 0) &&
+                : signal.kind === "develop_liquidity"
+                  ? candidate.actionId === liquidityActionId &&
+                    corpExactBasicLiquidCreditCandidate(candidate)
+                  : candidate.actionId === exactFundingHead &&
+                    immediateCorpLiquidCreditGain(candidate) > 0) &&
         economyCandidateHasExecutablePayload(context, candidate),
     )
     .map((candidate) => ({
@@ -4102,11 +4100,11 @@ function economyCandidates(
             ? economyImmediateOperationStepValue(signal)
             : signal.kind === "convert_installed_asset_payout"
               ? economyInstalledAssetPayoutStepValue(signal)
-            : signal.kind === "prepare_immediate_operation"
-              ? economyOperationThresholdStepValue(signal)
-              : signal.kind === "develop_liquidity"
-                ? -9_999
-                : immediateCorpLiquidCreditGain(candidate) * 10,
+              : signal.kind === "prepare_immediate_operation"
+                ? economyOperationThresholdStepValue(signal)
+                : signal.kind === "develop_liquidity"
+                  ? -9_999
+                  : immediateCorpLiquidCreditGain(candidate) * 10,
     }));
 }
 
@@ -4406,11 +4404,11 @@ function economyMaterialization(
             ? `Convert the Engine-certified immediate ${signal.sourceDefinitionId} operation once, consuming its exact HQ source.`
             : signal.kind === "convert_installed_asset_payout"
               ? `Take the exact currently quoted hosted-credit payout from ${signal.sourceDefinitionId}, then revalidate the remaining source pool.`
-            : signal.kind === "prepare_immediate_operation"
-              ? `Take the exact Engine-certified Basic Credit once to make the reviewed ${signal.sourceDefinitionId} operation legal, then revalidate its new LegalAction.`
-              : signal.kind === "develop_liquidity"
-                ? `Convert the exact Engine-certified Basic Credit action toward the finite ${signal.turnKey} target of ${signal.targetCredits} credits.`
-                : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
+              : signal.kind === "prepare_immediate_operation"
+                ? `Take the exact Engine-certified Basic Credit once to make the reviewed ${signal.sourceDefinitionId} operation legal, then revalidate its new LegalAction.`
+                : signal.kind === "develop_liquidity"
+                  ? `Convert the exact Engine-certified Basic Credit action toward the finite ${signal.turnKey} target of ${signal.targetCredits} credits.`
+                  : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },
     candidates,
   };

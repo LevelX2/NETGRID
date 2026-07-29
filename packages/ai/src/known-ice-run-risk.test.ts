@@ -97,11 +97,13 @@ describe("known visible ICE run risk", () => {
       (serverView) => serverView.id === "rd",
     )?.ice[0];
 
-    expect(playerViewTrapdoor?.effectiveRunQuote?.subroutines[0]).toMatchObject({
-      type: "deflect_run",
-      deflectorTarget: "subsidiary_data_fort",
-      deflectorAutoBreakIfNoTarget: true,
-    });
+    expect(playerViewTrapdoor?.effectiveRunQuote?.subroutines[0]).toMatchObject(
+      {
+        type: "deflect_run",
+        deflectorTarget: "subsidiary_data_fort",
+        deflectorAutoBreakIfNoTarget: true,
+      },
+    );
 
     const input = buildAiDecisionInputDto({
       side: "runner",

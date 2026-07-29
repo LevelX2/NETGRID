@@ -7813,8 +7813,7 @@ function buildCorpDomain(
               phase: "install_ice" as const,
               sourceDefinitionIds: [candidate.sourceDefinitionId],
               actionIds: [candidate.actionId],
-              urgent:
-                centralPressure === "terminal" || visibleAgendaExposure,
+              urgent: centralPressure === "terminal" || visibleAgendaExposure,
               ...(centralPressure ? { centralPressure } : {}),
               installRoute: route,
               value: 1,
@@ -7823,7 +7822,7 @@ function buildCorpDomain(
                   ? `corp_defense_exact_route_funding_required:${serverId}:${candidate.actionId}`
                   : visibleAgendaExposure
                     ? "engine_certified_visible_agenda_exposure_defense"
-                  : "engine_certified_global_defense_access_probability_reduced",
+                    : "engine_certified_global_defense_access_probability_reduced",
             },
           ];
         }

@@ -38,19 +38,19 @@ describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
       expectsDelegation,
       expectedPriorityClass,
     ) => {
-    const result = runAiDecisionCheckpoint(
-      structuredClone(json) as AiDecisionCheckpointV1,
-    );
-
-    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-    expect(result.decision?.evidence).toContain(
-      `plan_priority_class:${expectedPriorityClass}`,
-    );
-    if (expectsDelegation) {
-      expect(result.decision?.evidence).toContain(
-        `plan_priority_delegated_from:${exactScoreParentPlanId}`,
+      const result = runAiDecisionCheckpoint(
+        structuredClone(json) as AiDecisionCheckpointV1,
       );
-    }
+
+      expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+      expect(result.decision?.evidence).toContain(
+        `plan_priority_class:${expectedPriorityClass}`,
+      );
+      if (expectsDelegation) {
+        expect(result.decision?.evidence).toContain(
+          `plan_priority_delegated_from:${exactScoreParentPlanId}`,
+        );
+      }
     },
   );
 });
