@@ -6786,7 +6786,6 @@ function corpActionDispositions(
         domain.defenseNeeds.filter((signal) =>
           corpDefenseSignalOwnsAction(signal, candidate.actionId),
         ),
-        domain.centralDefenseAllocation,
       )
     ) {
       add(
@@ -7845,13 +7844,11 @@ function buildCorpDomain(
               evidenceCode:
                 route.disposition === "funding_only"
                   ? `corp_defense_exact_route_funding_required:${serverId}:${candidate.actionId}`
-                  : route.progressKind === "funded_structured_central_defense"
-                    ? `corp_funded_structured_central_defense:${serverId}:${candidate.actionId}`
-                    : route.progressKind === "staged_central_defense"
-                      ? `corp_staged_central_defense:${serverId}:${candidate.actionId}:rez_gap_${route.rezFundingGap}`
-                      : visibleAgendaExposure
-                        ? "engine_certified_visible_agenda_exposure_defense"
-                        : "engine_certified_global_defense_access_probability_reduced",
+                  : route.progressKind === "staged_central_defense"
+                    ? `corp_staged_central_defense:${serverId}:${candidate.actionId}:rez_gap_${route.rezFundingGap}`
+                    : visibleAgendaExposure
+                      ? "engine_certified_visible_agenda_exposure_defense"
+                      : "engine_certified_global_defense_access_probability_reduced",
             },
           ];
         }
@@ -9755,10 +9752,13 @@ function corpGlobalDefenseInstallRouteAssessment(
       ? undefined
       : Math.max(0, postInstallRezCredits - creditsAfterInstall);
   const selectedCentralThreat = targetCentralEvidence?.threat ?? "none";
+  const qualitativeProgressHasNoKnownFundingGap =
+    (projection.after.minimumAdditionalCreditsToSatisfy ?? 0) === 0 &&
+    (projection.after.minimumAdditionalClicksToSatisfy ?? 0) === 0;
   const fundedStructuredCentralProgress =
     preferQualitativeSourceProgress &&
     projection.preservesReserves &&
-    rezFundingGap === 0;
+    qualitativeProgressHasNoKnownFundingGap;
   const stagedCentralProgress =
     preferQualitativeSourceProgress &&
     projection.preservesReserves &&

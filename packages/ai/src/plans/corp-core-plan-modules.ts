@@ -1942,7 +1942,11 @@ function exactInstallProjectionMatchesSignal(
     projection.targetServerId !== signal.serverId ||
     signal.sourceDefinitionIds.length !== 1 ||
     signal.sourceDefinitionIds[0] !== projection.sourceDefinitionId ||
-    !exactInstallProjectionIsCurrent(context, projection)
+    !exactInstallProjectionIsCurrent(
+      context,
+      projection,
+      signal.installRoute?.progressKind === "staged_central_defense",
+    )
   ) {
     return false;
   }
@@ -1952,6 +1956,7 @@ function exactInstallProjectionMatchesSignal(
 function exactInstallProjectionIsCurrent(
   context: PlanSchedulerContext,
   projection: KnownCorpFundedIceInstallRouteProjection,
+  useMinimumSatisfyingRoute = false,
 ): boolean {
   if (
     projection.knowledge !== "known" ||
@@ -1970,13 +1975,13 @@ function exactInstallProjectionIsCurrent(
     (candidate) => candidate.actionId === projection.actionId,
   );
   const routeRezCosts =
-    projection.selectedRezCosts.length > 0
-      ? projection.selectedRezCosts
-      : (projection.after.minimumSatisfyingRezCosts ?? []);
+    useMinimumSatisfyingRoute && projection.selectedRezCosts.length === 0
+      ? (projection.after.minimumSatisfyingRezCosts ?? [])
+      : projection.selectedRezCosts;
   const afterRouteRezCosts =
-    projection.selectedRezCosts.length > 0
-      ? projection.after.selectedRezCosts
-      : (projection.after.minimumSatisfyingRezCosts ?? []);
+    useMinimumSatisfyingRoute && projection.selectedRezCosts.length === 0
+      ? (projection.after.minimumSatisfyingRezCosts ?? [])
+      : projection.after.selectedRezCosts;
   const projectedRezCost = routeRezCosts.find(
     (selected) =>
       selected.iceInstanceId === projection.sourceCardInstanceId &&
@@ -3024,34 +3029,8 @@ function selectedExactGenericDefenseRoutes(
     (route) => centralServerForRoute(route) === "rd",
   );
   let eligibleRoutes = exactIceRoutes;
-  const hqServer = context.input.playerView.servers.find(
-    (server) => server.id === "hq",
-  );
-  const rdServer = context.input.playerView.servers.find(
-    (server) => server.id === "rd",
-  );
-  const exposedCentralServerId =
-    allocation?.status === "known" &&
-    hqServer &&
-    rdServer &&
-    (hqServer.ice.length === 0) !== (rdServer.ice.length === 0)
-      ? hqServer.ice.length === 0
-        ? "hq"
-        : "rd"
-      : undefined;
-  const exposedCentralNeedsFirstLayer =
-    exposedCentralServerId !== undefined &&
-    allocation?.status === "known" &&
-    (allocation.evidence[exposedCentralServerId].threat === "acute" ||
-      allocation.evidence[exposedCentralServerId].threat === "terminal" ||
-      allocation.evidence[exposedCentralServerId]
-        .recentSuccessfulAccessRunnerTurns > 0);
   if (hqRoutes.length > 0 || rdRoutes.length > 0) {
-    if (exposedCentralNeedsFirstLayer) {
-      const exposedCentralRoutes =
-        exposedCentralServerId === "hq" ? hqRoutes : rdRoutes;
-      eligibleRoutes = exposedCentralRoutes;
-    } else if (
+    if (
       allocation?.status !== "known" &&
       hqRoutes.length > 0 &&
       rdRoutes.length > 0
@@ -3109,8 +3088,7 @@ function selectedExactGenericDefenseRoutes(
   }
   if (
     allocation?.status === "known" &&
-    allocation.canonicalNearTieCandidateServerIds.length === 2 &&
-    !exposedCentralNeedsFirstLayer
+    allocation.canonicalNearTieCandidateServerIds.length === 2
   ) {
     return eligibleRoutes.map(({ candidate, stepValue }) => ({
       candidate,
