@@ -57,6 +57,12 @@ Eine kompakte Rollenübersicht liegt in `agents/README.md`.
 - UI, Server, menschliche Spieler und KI dürfen nur `PlayerActions` einreichen, die aus `LegalActions` abgeleitet wurden.
 - `applyAction` validiert Seite, actionId, stateVersion, Timingpunkt, Kosten, Ziele und Choices erneut.
 - Keine verdeckten Kartendaten dürfen in PlayerViews, PublicEvents, KI-Inputs, WebSocket-Payloads, Reconnect-Payloads, Undo-Previews, öffentlichen Replays, Logs oder Client-Fehlern leaken.
+- Die private, privilegierte Bug-/KI-Debuganzeige des lokalen Projektbetreibers
+  ist ausdrücklich keine side-sichere Spieler- oder öffentliche
+  Observability-Fläche: Sie darf und soll zur Playtest-Kontrolle die
+  vollständigen Karten und Hände beider Seiten anzeigen. Diese Ausnahme darf
+  nicht auf PlayerViews, PublicEvents, öffentliche Replays, normale
+  WebSocket-/Reconnect-Payloads, Logs oder Client-Fehler ausgeweitet werden.
 - Deterministisches Replay und StateHash sind Pflicht.
 - Zufall läuft über Seed, RandomCounter und RandomDrawRecords.
 - Kartenpool, Mechaniken und Produktfunktionen werden nur über den aktuell gültigen Release- und Gate-Stand erweitert.

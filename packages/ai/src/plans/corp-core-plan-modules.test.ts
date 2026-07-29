@@ -828,6 +828,160 @@ describe("Corp core plan modules", () => {
     expect(planAssessment.priorityValidation.effectiveClass).toBe("P6");
   });
 
+  it("keeps a funding-only ICE install inside the defense plan when no better immediate route exists", () => {
+    const install = {
+      ...cardAction("install-staged-rd", "install.card", "staged-ice"),
+      targetContext: targetContext("rd", "server"),
+    };
+    const defense = fundingOnlyDefenseSignal(install, "no_progress");
+    const module = corpModule("corp.defend_servers");
+    const corpContext = context(
+      [install],
+      { defenseNeeds: [defense] },
+      { credits: 0, clicks: 3 },
+    );
+    const instance = instantiatePlanProposal(
+      module.discover(corpContext)[0]!,
+      10,
+    );
+
+    expect(
+      module
+        .materialize(instance, {} as never, corpContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["install-staged-rd"]);
+  });
+
+  it("keeps exact funding ahead of a funding-only ICE install", () => {
+    const install = {
+      ...cardAction("install-after-funding", "install.card", "funded-ice"),
+      targetContext: targetContext("rd", "server"),
+    };
+    const gainCredit = candidate(
+      "gain-before-install",
+      "gain_credit",
+      "economy.gain_credit",
+    );
+    const defense = fundingOnlyDefenseSignal(install, "progress");
+    const module = corpModule("corp.defend_servers");
+    const corpContext = context(
+      [install, gainCredit],
+      {
+        defenseNeeds: [defense],
+        economyNeeds: [
+          {
+            kind: "parent_funding",
+            needId: `defense-reserve:rd:${install.sourceCardInstanceId}`,
+            gap: 2,
+            actionIds: [gainCredit.actionId],
+            immediateDefenseConversion: true,
+            parentPlanInstanceId:
+              "plan:corp.defend_servers:server-defense-portfolio",
+            parentNeedId: defense.defenseId,
+            incrementalDefenseReserve: {
+              targetCredits: 2,
+              serverId: "rd",
+              iceInstanceId: install.sourceCardInstanceId!,
+            },
+            urgentForScore: false,
+            evidenceCode: defense.evidenceCode,
+          },
+        ],
+      },
+      { credits: 0, clicks: 3 },
+    );
+    const instance = instantiatePlanProposal(
+      module.discover(corpContext)[0]!,
+      10,
+    );
+    const planAssessment = requireValidatedPlanAssessment(
+      module.assess(instance, corpContext, emptyPortfolio()),
+      CORP_PLAN_PRIORITY_POLICY,
+      10,
+    );
+
+    expect(planAssessment).toMatchObject({
+      readiness: "executable_with_support",
+      resourceGaps: [
+        {
+          needId: defense.defenseId,
+          capability: "credits",
+          minimum: 2,
+        },
+      ],
+    });
+    expect(
+      module
+        .materialize(instance, planAssessment, corpContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["install-after-funding"]);
+  });
+
+  it("uses an executable productive defense install instead of a funding-only staging route", () => {
+    const stagedInstall = {
+      ...cardAction("install-staged", "install.card", "staged-ice"),
+      targetContext: targetContext("rd", "server"),
+    };
+    const productiveInstall = {
+      ...cardAction("install-productive", "install.card", "productive-ice"),
+      targetContext: targetContext("rd", "server"),
+    };
+    const module = corpModule("corp.defend_servers");
+    const corpContext = context(
+      [stagedInstall, productiveInstall],
+      {
+        defenseNeeds: [
+          fundingOnlyDefenseSignal(stagedInstall, "progress"),
+          productiveDefenseSignal(productiveInstall),
+        ],
+      },
+      { credits: 0, clicks: 3 },
+    );
+    const instance = instantiatePlanProposal(
+      module.discover(corpContext)[0]!,
+      10,
+    );
+
+    expect(
+      module
+        .materialize(instance, {} as never, corpContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["install-productive"]);
+  });
+
+  it("rejects a no-progress staging bluff on an already protected unpressured central", () => {
+    const install = {
+      ...cardAction("install-weak-bluff", "install.card", "bluff-ice"),
+      targetContext: targetContext("rd", "server"),
+    };
+    const defense = fundingOnlyDefenseSignal(install, "no_progress");
+    const module = corpModule("corp.defend_servers");
+    const corpContext = context(
+      [install],
+      { defenseNeeds: [defense] },
+      { credits: 0, clicks: 3 },
+    );
+    corpContext.input.playerView.servers.find(
+      (server) => server.id === "rd",
+    )!.ice = [
+      {
+        instanceId: "existing-rd-ice",
+        definitionId: "existing-rd-ice-definition",
+        type: "ice",
+        known: true,
+        rezzed: false,
+      },
+    ];
+    const instance = instantiatePlanProposal(
+      module.discover(corpContext)[0]!,
+      10,
+    );
+
+    expect(
+      module.materialize(instance, {} as never, corpContext).candidates,
+    ).toEqual([]);
+  });
+
   it("separates acute central pressure from terminal central defense", () => {
     const base = {
       kind: "generic" as const,
@@ -5210,6 +5364,74 @@ function knownInstallProjection<
     preservesReserves: params.preservesReserves !== false,
     funded: params.preservesReserves !== false,
   } as KnownCorpFundedIceInstallRouteProjection & { effect: Effect };
+}
+
+function fundingOnlyDefenseSignal(
+  install: ActionSemanticCandidate,
+  effect: "no_progress" | "progress",
+): CorpDefenseSignal {
+  return {
+    kind: "generic",
+    defenseId: `install:rd:${install.actionId}`,
+    serverId: "rd",
+    phase: "install_ice",
+    sourceDefinitionIds: [install.sourceDefinitionId!],
+    actionIds: [install.actionId],
+    urgent: false,
+    installRoute: {
+      disposition: "funding_only",
+      progressKind: "funding_required",
+      rezFundingGap: 2,
+      projection: knownInstallProjection({
+        actionId: install.actionId,
+        sourceCardInstanceId: install.sourceCardInstanceId!,
+        sourceDefinitionId: install.sourceDefinitionId!,
+        targetServerId: "rd",
+        effect,
+        probability: { numerator: 1, denominator: 2 },
+        totalCredits: 2,
+        availableCredits: 0,
+        availableClicks: 3,
+        preservesReserves: false,
+        minimumAdditionalCreditsToSatisfy: 2,
+      }),
+    },
+    value: 10,
+    evidenceCode: `funding_only:${install.actionId}`,
+  };
+}
+
+function productiveDefenseSignal(
+  install: ActionSemanticCandidate,
+): CorpDefenseSignal {
+  return {
+    kind: "generic",
+    defenseId: `install:rd:${install.actionId}`,
+    serverId: "rd",
+    phase: "install_ice",
+    sourceDefinitionIds: [install.sourceDefinitionId!],
+    actionIds: [install.actionId],
+    urgent: false,
+    installRoute: {
+      disposition: "productive",
+      progressKind: "funded_structured_central_defense",
+      rezFundingGap: 0,
+      projection: knownInstallProjection({
+        actionId: install.actionId,
+        sourceCardInstanceId: install.sourceCardInstanceId!,
+        sourceDefinitionId: install.sourceDefinitionId!,
+        targetServerId: "rd",
+        effect: "progress",
+        probability: { numerator: 0, denominator: 1 },
+        totalCredits: 0,
+        availableCredits: 0,
+        availableClicks: 3,
+        preservesReserves: true,
+      }),
+    },
+    value: 20,
+    evidenceCode: `productive:${install.actionId}`,
+  };
 }
 
 function emptyPortfolio(): ResidentPlanPortfolio {

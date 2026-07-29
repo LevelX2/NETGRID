@@ -684,6 +684,47 @@ function AiDecisionDebugPlanFirstTraceView({
               </div>
             </>
           ) : null}
+          {decision.turnPlanning.defenseComparison ? (
+            <>
+              <h4>Defense-/Economy-Linien</h4>
+              <div className="aiDecisionDebugCompactList">
+                {decision.turnPlanning.defenseComparison.lines.map((line) => (
+                  <div key={line.lineId}>
+                    <span>
+                      {line.targetServerId} ·{" "}
+                      {aiDefenseLineDispositionLabel(line.disposition)}
+                    </span>
+                    <strong>
+                      Wert {line.totalValue} ·{" "}
+                      {line.rezReadyAfterLine
+                        ? "danach rezbereit"
+                        : "Rez-Finanzierung noch offen"}
+                    </strong>
+                    <AiDecisionDebugRows
+                      rows={[
+                        ["Aktionen", String(line.actionCount)],
+                        [
+                          "Funding-Gap",
+                          `${line.fundingGapBefore} → ${line.fundingGapAfter}`,
+                        ],
+                        ["Defense", String(line.defenseValue)],
+                        ["Economy", String(line.economyValue)],
+                        ["Bluffwert", String(line.bluffValue)],
+                      ]}
+                    />
+                  </div>
+                ))}
+              </div>
+              <AiDecisionDebugChips
+                title="Verworfene Defense-Linien"
+                items={decision.turnPlanning.defenseComparison.rejected.map(
+                  (entry) =>
+                    `${entry.defenseId}${entry.actionId ? ` · ${entry.actionId}` : ""} · ${entry.reasonCode}`,
+                )}
+                tone="muted"
+              />
+            </>
+          ) : null}
           <AiDecisionDebugChips
             title="Planungs-Evidence"
             items={decision.turnPlanning.evidenceCodes}
@@ -791,6 +832,22 @@ function aiAgendaLineFamilyLabel(
   if (family === "pure_rush") return "Reiner Rush";
   if (family === "combined_rush") return "Kombinierter Rush";
   return "Sicherer Aufbau";
+}
+
+function aiDefenseLineDispositionLabel(
+  disposition:
+    | "install_rez_ready"
+    | "fund_then_install"
+    | "stage_for_later_rez"
+    | "bounded_bluff",
+): string {
+  if (disposition === "install_rez_ready")
+    return "ICE installieren, Rezreserve steht";
+  if (disposition === "fund_then_install")
+    return "zuerst finanzieren, dann ICE installieren";
+  if (disposition === "stage_for_later_rez")
+    return "ICE jetzt vorbereiten, später rezzen";
+  return "begrenzter Bluff innerhalb des Defense-Plans";
 }
 
 function aiTurnPlanningStopReasonLabel(

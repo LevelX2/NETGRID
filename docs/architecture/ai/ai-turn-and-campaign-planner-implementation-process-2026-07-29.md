@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK05 abgeschlossen; ZK06 aktiv**
+Status: **ZK00 bis ZK06 abgeschlossen; ZK07 aktiv**
 
 Stand: 2026-07-29
 
@@ -847,3 +847,44 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
   Engine-Suite: 210 Testdateien und 1821 Tests grün.
 - AI-, Engine-, Shared-, Server- und Web-Typecheck sowie `git diff --check`:
   grün.
+
+### ZK06 – abgeschlossen
+
+- Der neue Defense-/Economy-Vertikalschnitt vergleicht konkrete
+  `install_rez_ready`-, `fund_then_install`-, `stage_for_later_rez`- und
+  `bounded_bluff`-Linien. Aktueller Head, projizierter Installationsschritt,
+  Funding-Gap, Rezbereitschaft und line-prefix-gebundene Claims bleiben
+  getrennt nachvollziehbar.
+- Exakte Finanzierung ist an den konkreten Defense-Parent, Need,
+  Zielserver und die ICE-Instanz gebunden. Economy besitzt nur die
+  Verringerung des Funding-Gaps; Defense beziehungsweise Bluffwert werden
+  nicht doppelt gezählt.
+- Eine aktuell noch nicht rezbare ICE-Installation bleibt innerhalb von
+  `corp.defend_servers` zulässig, wenn Installation und spätere
+  Finanzierung glaubwürdig sind. Das ist weder ein pauschales Verbot noch
+  ein pauschaler Bonus: sofort produktive Defense wird vor Staging
+  eingeordnet, exakte Finanzierung hält den Parent als
+  `executable_with_support`, und ein reiner Bluff bleibt auf drei
+  Bewertungspunkte begrenzt.
+- Schwaches Staging wird abgewiesen, insbesondere bei ungebundenem
+  nichtzentralem Ziel, unglaubwürdigem Finanzierungshorizont oder bereits
+  geschütztem, nicht bedrohtem Central ohne Fortschrittswirkung.
+- Bestehende HQ-, R&D-, Remote- und Rez-Defense-Owner bleiben erhalten.
+  Funding-only-Routen passieren jetzt beide zuvor pauschal sperrenden
+  Defense-Filter, ohne eine Sonderroute außerhalb des Defense-Plans
+  einzuführen.
+- Die privilegierte private Buganzeige zeigt Defense-/Economy-Linien,
+  Funding-Gaps, Rezbereitschaft, Defense-, Economy- und Bluffwert sowie
+  verworfene Linien. Die vollständigen Karten und Hände beider Seiten
+  bleiben dort ausdrücklich sichtbar.
+- Diese private Debugausnahme ist zusätzlich als verbindliches
+  Projektprinzip direkt in `AGENTS.md` verankert; normale PlayerViews,
+  Events, Replays, WebSocket-/Reconnect-Payloads, Logs und Clientfehler
+  bleiben davon unberührt.
+- Fokussiert einschließlich D3/D4, F809 und Opening-Central-Defense:
+  6 Testdateien und 164 Tests grün. Defense-/Core-Planmodule allein:
+  140/140 grün.
+- Vollständige AI-Suite: 524 Testdateien und 4285 Tests grün. Shared:
+  16/16 grün; Web-Debugexport: 1/1 grün.
+- AI-, Shared-, Server- und Web-Typecheck, `check:ai` sowie
+  `git diff --check`: grün.

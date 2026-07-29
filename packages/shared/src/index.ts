@@ -3172,6 +3172,31 @@ export type AiTurnPlanningDebug = {
       expectedValue: number;
     }>;
   };
+  defenseComparison?: {
+    selectedLineId?: string;
+    lines: Array<{
+      lineId: string;
+      targetServerId: string;
+      disposition:
+        | "install_rez_ready"
+        | "fund_then_install"
+        | "stage_for_later_rez"
+        | "bounded_bluff";
+      actionCount: number;
+      fundingGapBefore: number;
+      fundingGapAfter: number;
+      rezReadyAfterLine: boolean;
+      bluffValue: number;
+      defenseValue: number;
+      economyValue: number;
+      totalValue: number;
+    }>;
+    rejected: Array<{
+      defenseId: string;
+      actionId?: string;
+      reasonCode: string;
+    }>;
+  };
   pruneEvents: Array<{
     candidateId: string;
     reasonCode: string;
@@ -3719,6 +3744,7 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
       "selectedLine",
       "boundary",
       "agendaComparison",
+      "defenseComparison",
       "pruneEvents",
       "evidenceCodes",
     ]) ||
@@ -3736,6 +3762,8 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
       !isAiTurnPlanningDebugBoundary(candidate.boundary)) ||
     (candidate.agendaComparison !== undefined &&
       !isAiTurnPlanningAgendaComparison(candidate.agendaComparison)) ||
+    (candidate.defenseComparison !== undefined &&
+      !isAiTurnPlanningDefenseComparison(candidate.defenseComparison)) ||
     !Array.isArray(candidate.pruneEvents) ||
     !candidate.pruneEvents.every((entry) =>
       recordHasExactStringFields(entry, ["candidateId", "reasonCode"]),
@@ -3746,6 +3774,79 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
     return false;
   }
   return true;
+}
+
+function isAiTurnPlanningDefenseComparison(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "selectedLineId",
+      "lines",
+      "rejected",
+    ]) &&
+    (candidate.selectedLineId === undefined ||
+      typeof candidate.selectedLineId === "string") &&
+    Array.isArray(candidate.lines) &&
+    candidate.lines.every((entry) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry))
+        return false;
+      const line = entry as Record<string, unknown>;
+      return (
+        hasOnlyAiPlanFirstFields(line, [
+          "lineId",
+          "targetServerId",
+          "disposition",
+          "actionCount",
+          "fundingGapBefore",
+          "fundingGapAfter",
+          "rezReadyAfterLine",
+          "bluffValue",
+          "defenseValue",
+          "economyValue",
+          "totalValue",
+        ]) &&
+        typeof line.lineId === "string" &&
+        typeof line.targetServerId === "string" &&
+        [
+          "install_rez_ready",
+          "fund_then_install",
+          "stage_for_later_rez",
+          "bounded_bluff",
+        ].includes(String(line.disposition)) &&
+        typeof line.rezReadyAfterLine === "boolean" &&
+        [
+          "actionCount",
+          "fundingGapBefore",
+          "fundingGapAfter",
+          "bluffValue",
+          "defenseValue",
+          "economyValue",
+          "totalValue",
+        ].every(
+          (field) =>
+            typeof line[field] === "number" && Number.isFinite(line[field]),
+        )
+      );
+    }) &&
+    Array.isArray(candidate.rejected) &&
+    candidate.rejected.every((entry) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry))
+        return false;
+      const rejected = entry as Record<string, unknown>;
+      return (
+        hasOnlyAiPlanFirstFields(rejected, [
+          "defenseId",
+          "actionId",
+          "reasonCode",
+        ]) &&
+        typeof rejected.defenseId === "string" &&
+        (rejected.actionId === undefined ||
+          typeof rejected.actionId === "string") &&
+        typeof rejected.reasonCode === "string"
+      );
+    })
+  );
 }
 
 function isAiTurnPlanningAgendaComparison(value: unknown): boolean {

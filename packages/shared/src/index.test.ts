@@ -433,6 +433,31 @@ describe("AI decision debug sanitizing", () => {
               },
             ],
           },
+          defenseComparison: {
+            selectedLineId: "line:defense",
+            lines: [
+              {
+                lineId: "line:defense",
+                targetServerId: "rd",
+                disposition: "fund_then_install",
+                actionCount: 2,
+                fundingGapBefore: 2,
+                fundingGapAfter: 0,
+                rezReadyAfterLine: true,
+                bluffValue: 0,
+                defenseValue: 18,
+                economyValue: 8,
+                totalValue: 26,
+              },
+            ],
+            rejected: [
+              {
+                defenseId: "central-defense:hq",
+                actionId: "install-hq",
+                reasonCode: "productive_defense_install_available",
+              },
+            ],
+          },
           pruneEvents: [],
           evidenceCodes: ["turn_planning_projection_contract_only"],
         },

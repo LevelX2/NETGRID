@@ -252,6 +252,14 @@ export type {
   ValidatedPriorityObligation,
 } from "./plans/turn-planning-contracts";
 export {
+  assessFundingOnlyIceStaging,
+  buildCorpDefenseTurnPlanningSlice,
+  CORP_DEFENSE_TURN_SLICE_VERSION,
+  type CorpDefenseLineDisposition,
+  type CorpDefenseTurnPlanningLine,
+  type CorpDefenseTurnPlanningSlice,
+} from "./plans/corp-defense-turn-planning";
+export {
   buildCorpAgendaTurnPlanningSlice,
   campaignDisposition,
   CORP_AGENDA_TURN_SLICE_VERSION,

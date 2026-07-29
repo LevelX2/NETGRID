@@ -105,6 +105,7 @@ import {
 } from "../plans/transient-plan-signals";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { buildCorpAgendaTurnPlanningSlice } from "../plans/corp-agenda-turn-planning";
+import { buildCorpDefenseTurnPlanningSlice } from "../plans/corp-defense-turn-planning";
 import {
   buildCanonicalLegalActionInvocation,
   buildSemanticActionSetFingerprint,
@@ -12449,6 +12450,19 @@ function turnPlanningProjectionDebug(params: {
         stateIdentity,
       })
     : undefined;
+  const corpDomain =
+    params.input.side === "corp"
+      ? (params.context.domain as CorpPlanDomain | undefined)
+      : undefined;
+  const defenseSlice = corpDomain
+    ? buildCorpDefenseTurnPlanningSlice({
+        input: params.input,
+        defenseNeeds: corpDomain.defenseNeeds,
+        economyNeeds: corpDomain.economyNeeds,
+        candidates: params.context.actionCandidates,
+        stateIdentity,
+      })
+    : undefined;
   const supportBindings = params.selectedPlan.parentNeedId
     ? [
         {
@@ -12550,6 +12564,7 @@ function turnPlanningProjectionDebug(params: {
     evidenceCodes: [
       "turn_planning_projection_contract_only",
       ...(agendaSlice?.evidenceCodes ?? []),
+      ...(defenseSlice?.evidenceCodes ?? []),
       ...(boundary
         ? ["observation_boundary_requires_replanning"]
         : ["future_projection_not_yet_available"]),
@@ -12579,6 +12594,30 @@ function turnPlanningProjectionDebug(params: {
               worstCaseFloor: line.evaluation.worstCaseFloor,
               expectedValue: line.evaluation.expectedValue,
             })),
+          },
+        }
+      : {}),
+    ...(defenseSlice &&
+    (defenseSlice.lines.length > 0 || defenseSlice.rejected.length > 0)
+      ? {
+          defenseComparison: {
+            ...(defenseSlice.selectedLineId
+              ? { selectedLineId: defenseSlice.selectedLineId }
+              : {}),
+            lines: defenseSlice.lines.map((line) => ({
+              lineId: line.lineId,
+              targetServerId: line.targetServerId,
+              disposition: line.disposition,
+              actionCount: line.nodes.length,
+              fundingGapBefore: line.fundingGapBefore,
+              fundingGapAfter: line.fundingGapAfter,
+              rezReadyAfterLine: line.rezReadyAfterLine,
+              bluffValue: line.bluffValue,
+              defenseValue: line.defenseValue,
+              economyValue: line.economyValue,
+              totalValue: line.totalValue,
+            })),
+            rejected: defenseSlice.rejected.map((entry) => ({ ...entry })),
           },
         }
       : {}),

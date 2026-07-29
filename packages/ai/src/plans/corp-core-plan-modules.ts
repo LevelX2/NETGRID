@@ -40,6 +40,7 @@ import {
   projectExactCorpIceRezRoute,
   type CorpExactIceRezRouteProjection,
 } from "../runtime/corp-exact-ice-rez-route";
+import { assessFundingOnlyIceStaging } from "../runtime/corp-defense-staging-policy";
 
 export type CorpScorePhase =
   | "select_agenda"
@@ -1800,9 +1801,15 @@ function defenseCandidates(
   }
   if (signal.phase === "install_ice") {
     const route = signal.installRoute;
+    const stagingAssessment = assessFundingOnlyIceStaging({
+      input: context.input,
+      signal,
+      productiveAlternativeExists: false,
+      fundingAlternativeExists: false,
+    });
     if (
       !route ||
-      route.disposition !== "productive" ||
+      (route.disposition !== "productive" && !stagingAssessment.admissible) ||
       !exactInstallProjectionMatchesSignal(context, signal, route.projection)
     ) {
       return [];
@@ -2996,12 +3003,13 @@ function selectedExactGenericDefenseRoutes(
       ): signal is CorpGenericDefenseSignal & {
         phase: "install_ice";
         installRoute: {
-          disposition: "productive";
+          disposition: "productive" | "funding_only";
           projection: KnownCorpFundedIceInstallRouteProjection;
         };
       } =>
         signal.phase === "install_ice" &&
-        signal.installRoute?.disposition === "productive",
+        (signal.installRoute?.disposition === "productive" ||
+          signal.installRoute?.disposition === "funding_only"),
     )
     .flatMap((signal) =>
       defenseCandidates(context, signal).map((route) => ({
@@ -3144,13 +3152,21 @@ function selectedCentralAccessRiskRemains(
 function compareGenericExactInstallRoutes(
   left: {
     candidate: ActionSemanticCandidate;
+    signal: CorpGenericDefenseSignal;
     projection: KnownCorpFundedIceInstallRouteProjection;
   },
   right: {
     candidate: ActionSemanticCandidate;
+    signal: CorpGenericDefenseSignal;
     projection: KnownCorpFundedIceInstallRouteProjection;
   },
 ): number {
+  if (
+    left.signal.installRoute?.disposition !==
+    right.signal.installRoute?.disposition
+  ) {
+    return left.signal.installRoute?.disposition === "productive" ? -1 : 1;
+  }
   if (left.projection.effect !== right.projection.effect) {
     return left.projection.effect === "satisfied" ? -1 : 1;
   }
