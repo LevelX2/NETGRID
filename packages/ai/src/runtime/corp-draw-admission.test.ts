@@ -129,6 +129,20 @@ describe("Corp draw admission", () => {
     ).toMatchObject({ disposition: "blocked_end_turn_overflow" });
   });
 
+  it("admits one bounded score-material draw at full HQ when a follow-up action remains", () => {
+    expect(
+      assessment({
+        handSize: 5,
+        maximumHandSize: 5,
+        currentClicks: 2,
+      }),
+    ).toMatchObject({
+      disposition: "admitted",
+      projectedHandAfterDraw: 6,
+      projectedEndTurnOverflow: 1,
+    });
+  });
+
   it("admits one additional overflow card only for a bounded central-defense search", () => {
     expect(
       assessment({

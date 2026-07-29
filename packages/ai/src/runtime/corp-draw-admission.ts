@@ -146,7 +146,13 @@ export function assessCorpDrawAdmission(params: {
             existingEndTurnOverflow <= 1 &&
             additionalEndTurnOverflow === 1
           ? "admitted"
-          : "blocked_end_turn_overflow";
+          : params.purpose === "score_material_search" &&
+              existingEndTurnOverflow === 0 &&
+              additionalEndTurnOverflow === 1 &&
+              netHandDelta === 1 &&
+              clickCost + 1 <= params.currentClicks
+            ? "admitted"
+            : "blocked_end_turn_overflow";
   } else if (
     netHandDelta > 0 &&
     projectedHandAfterDraw >= params.maximumHandSize &&
