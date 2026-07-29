@@ -1,6 +1,6 @@
 # KI-Gesamttestsuite – sequenzieller Bereinigungsprozess
 
-Status: **aktiv**
+Status: **abgeschlossen**
 
 Stand: 2026-07-29
 
@@ -68,7 +68,7 @@ gewählt wird. Rohscores allein entscheiden ebenfalls keine Klassifikation.
 | P04   | abgeschlossen | Runner-Runrisiko-, Coverage-, Wiederholungs- und Sequenzursachen beheben                                                                   | positive und negative Runner-Checkpoints, Hidden-Info-Gegenprobe    |
 | P05   | abgeschlossen | Nur nachweislich veraltete Testverträge aktualisieren und Lücken mit Gegenproben schließen                                                 | betroffene Tests plus benachbarte Suiten                            |
 | P06   | abgeschlossen | Paketübergreifende Gates und vollständige Testsuite schließen; Review- und Wissensstand aktualisieren                                      | Typecheck, Struktur-/Vertragsgates, `corepack pnpm test`, Build     |
-| P07   | aktiv         | Aktuelles `main` integrieren, dort vollständig verifizieren, Hauptinstanz über das Startscript aktualisieren und Worktree/Branch entfernen | Main-Gates, Server-SHA/Health, Git-/Dateisystem-Cleanup             |
+| P07   | abgeschlossen | Aktuelles `main` integrieren, dort vollständig verifizieren, Hauptinstanz über das Startscript aktualisieren und Worktree/Branch entfernen | Main-Gates, Server-SHA/Health, Git-/Dateisystem-Cleanup             |
 
 Es ist immer genau ein Paket aktiv. Paketgrenzen dürfen nach P01 nur dann
 verfeinert werden, wenn die Baseline mehrere unabhängige Wurzelursachen
@@ -474,3 +474,45 @@ Ergebnis:
   Architektur-, Credit-Gain-, Package-Boundary-, Card-Function-Abstraction-,
   Proteus-Readiness- und Proteus-Family-Scenario-Gates grün.
 - `format:changed` und `git diff --check` grün.
+
+### P07 – Integration, Main-Abnahme und lokaler Abschluss
+
+Integration:
+
+- Der seit Prozessstart hinzugekommene lokale `main`-Commit
+  `abeadcca6` mit der kompakten öffentlichen Spieleansicht wurde zuerst in
+  den Arbeitsbranch integriert. Der kombinierte Stand wurde anschließend
+  per Fast-forward lokal nach `main` übernommen.
+- Der fremde detached Baseline-Worktree und der parallel geführte
+  `codex/ai-match-f809-rd-defense`-Worktree blieben unangetastet.
+- Während der Main-Abnahme entstandene fremde Web- und Wissensänderungen
+  wurden weder formatiert noch gestaged oder committed.
+
+Main-Abnahme:
+
+- Vollständige Root-Testsuite grün:
+  Shared 16/16, Catalog 20/20, Engine 1.820/1.820, Decks 19/19,
+  AI 4.238/4.238, Web 720/720, Server 214/214 und
+  Root-Spezifikationen 8/8.
+- Test-Discovery, Produktions-Build, Root-Typecheck und Root-Lint grün.
+- AI-Hint-, Source-Structure-, Economy-, Action-Capacity- und
+  Approval-Consistency-Gates grün.
+- Engine-Architektur-, Engine-Source-Structure-, Credit-Gain-,
+  Package-Boundary-, Card-Function-Abstraction-, Proteus-Readiness-,
+  Readiness-Inventory- und Family-Scenario-Gates grün.
+- Das zunächst rote `format:changed` war kein Quellcodefehler: Der
+  absichtlich zeitgestempelte lokale E2E-Buildpfad `.next-e2e-*` war nicht
+  als generiertes Artefakt ignoriert und wurde deshalb als 150 unversionierte
+  Prettier-Eingaben erfasst. `apps/web/.next-e2e-*/` ist nun generisch
+  ignoriert; der vorhandene Nutzerordner blieb unverändert. Danach waren
+  `format:changed` und `git diff --check` grün.
+
+Cleanup und Laufzeit:
+
+- Der eigene saubere Worktree
+  `C:\Projekte\NETGRID_AI_FULL_SUITE_REMEDIATION` und der vollständig
+  integrierte Branch `codex/ai-full-suite-remediation` wurden entfernt.
+- Die lokale Hauptinstanz wird nach dem Abschluss-Commit ausschließlich aus
+  dem primären `main`-Checkout über `scripts/start-netgrid.ps1` neu gestartet
+  und anschließend gegen den finalen `main`-SHA und die Health-Endpunkte
+  geprüft.

@@ -8,6 +8,7 @@ AGENTS.local.md
 node_modules/
 .pnpm-store/
 .next/
+apps/web/.next-e2e-*/
 apps/web/next-env.d.ts
 dist/
 coverage/
