@@ -279,6 +279,16 @@ Stand: 2026-07-30
 - Die Plan-first-Live-Runtime ist der einzige produktive Entscheidungsweg;
   historisch benannte Semantic-Runtime-Fassaden rufen ausschließlich diesen
   Einstieg auf.
+- Die Corp-Planprovider sind auch source-seitig klar getrennt:
+  Defense-Domain-Signale, Economy-/Liquiditätssignale,
+  Score-/Defense-Execution-Continuity und ownerbezogene
+  Action-Disposition-Contributors liegen in eigenen `plans/`-Modulen.
+  `plan-first-live-runtime.ts` bindet nur gemeinsam genutzte Fakten über
+  typisierte read-only Adapter an. Ein vollständiger Vorher-/Nachher-Lauf mit
+  60 Spielen und 12.527 Entscheidungen war einschließlich aller
+  ActionSequences, StateHashes, Debug-Evidence und bekannten roten
+  Coverage-Befunde exakt identisch. Führend ist
+  `docs/reviews/ai/corp-plan-architecture-source-cleanup-final-review-2026-07-30.md`.
 - `@netgrid/ai` exportiert nur Live-Verträge; Simulation, Selfplay und
   Benchmarks liegen unter `@netgrid/ai/simulation`.
 - Alte Corp-/Runner-Planer, Baseline-Selectoren, Shadow-/META-/Readiness-

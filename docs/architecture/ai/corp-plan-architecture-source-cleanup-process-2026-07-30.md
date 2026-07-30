@@ -2,7 +2,7 @@
 
 Stand: 2026-07-30
 
-Status: aktiv
+Status: abgeschlossen
 
 Quelle/Vorgabe: Nutzerauftrag vom 30.07.2026
 
@@ -442,3 +442,95 @@ eine reine Paritätsprüfung: CP50 muss Konfiguration, ActionSequences,
 StateHashes, TerminationKinds, Runtime-Failure-Evidence, Hard-Gate-Zähler und
 Verhaltensmetriken exakt reproduzieren. Jede neue oder verschwundene
 Abweichung wäre eine unzulässige Verhaltensänderung.
+
+## Abschlussstand CP10 bis CP40
+
+Die vier Strukturpakete wurden sequenziell und jeweils separat committed:
+
+| Paket | Ergebnis                                                | Commit      |
+| ----- | ------------------------------------------------------- | ----------- |
+| CP10  | read-only Score-/Defense-Continuity-Adapter             | `14dd566b6` |
+| CP20  | Economy- und Liquiditätssignale                         | `9eab51c5d` |
+| CP30  | Defense-Domain-Signale und Rez-Quote-Adapter            | `215945c2e` |
+| CP40  | geordnete ownerbezogene Action-Disposition-Contributors | `ec8732aa0` |
+
+Neue fachliche Module:
+
+- `packages/ai/src/plans/corp-score-defense-continuity.ts`
+- `packages/ai/src/plans/corp-economy-domain-signals.ts`
+- `packages/ai/src/plans/corp-defense-domain-signals.ts`
+- `packages/ai/src/plans/corp-action-disposition-contributors.ts`
+
+Geteilte Kosten-, Archive-, Karten- und Domain-Fakten bleiben dort, wo sie
+bereits von mehreren fachlichen Pfaden benötigt werden. Die neuen Provider
+konsumieren sie über typisierte read-only Faktenadapter. Diese Adapter
+erzeugen keine Actions, Planinstanzen, Prioritäten oder Executor-Auswahl.
+
+Die historische First-Match-Reihenfolge der Dispositionen liegt unverändert
+im einzelnen Action-Contributor. Der globale Collector baut nur den
+Defense-Disposition-Index, bestimmt die exakte Basic-Credit-Action und ruft
+den Contributor in ursprünglicher Kandidatenreihenfolge auf. Owner,
+Dispositionstyp und Evidence-Code bleiben Teil jedes Beitrags.
+
+`plan-first-live-runtime.ts` sank gegenüber der Basis von 18.050 auf 16.275
+Zeilen. Die entfernten 1.775 Zeilen sind ausschließlich verschobene
+Provider- und Kompositionslogik.
+
+## CP50-Ergebnis – Nachher-Baseline und Vollverifikation
+
+Die Standard-Baseline wurde auf `ec8732aa0` mit dem CP00-JSON als
+Vergleich erneut ausgeführt:
+
+```text
+Slots: 6
+Seeds: 10 je Slot
+Spiele: 60
+MaxActions: 480
+Controller: Runner und Corp current_candidate
+Worker: 4
+Entscheidungen: 12.527
+comparableToBaseline: true
+```
+
+Lokale, nicht versionierte Nachher-Artefakte:
+
+- `data/local/corp-plan-architecture-cleanup-after-2026-07-30.json`
+- `data/local/corp-plan-architecture-cleanup-after-2026-07-30.md`
+- `data/local/corp-plan-architecture-cleanup-after-2026-07-30-raw.json.gz`
+
+Der kanonische kompakte Result-Block ist nach Entfernung ausschließlich der
+Laufmetadaten `generatedAt` und `gitHead` exakt identisch. Zusätzlich sind
+alle sechs vollständigen Raw-Slots bytewertgleich als JSON-Struktur. Damit
+stimmen alle 60 Spielzusammenfassungen und sämtliche 12.527
+`actionSequence`-Einträge einschließlich Auswahl, Timingpunkt, Debug-Evidence,
+StateHash, Termination, Fehlerklassifikation und Replay-Evidence exakt
+überein.
+
+Der vorhandene rote Gate-Stand ist erwartungsgemäß unverändert:
+
+| Gate                                               | Vorher | Nachher |
+| -------------------------------------------------- | -----: | ------: |
+| Illegal Actions                                    |      7 |       7 |
+| Runtime Errors                                     |      7 |       7 |
+| `missing_plan_module_coverage` / Owner `scheduler` |      7 |       7 |
+| Action-Limit-Spiele                                |      1 |       1 |
+| Replayfehler                                       |      0 |       0 |
+| Fallbacks                                          |      0 |       0 |
+| Timeouts                                           |      0 |       0 |
+| Hidden-Info-Findings                               |      0 |       0 |
+| `no_legal_action_failure`                          |      0 |       0 |
+
+Diese bekannten Startbefunde wurden nicht behoben, abgeschwächt oder
+umklassifiziert, weil dies den verhaltensneutralen Auftrag verletzt hätte.
+
+Abschlussgates:
+
+- AI-Shard 1: 180 Testdateien, 1.738 Tests grün;
+- AI-Shard 2: 179 Testdateien, 1.489 Tests grün;
+- AI-Shard 3: 179 Testdateien, 1.145 Tests grün;
+- Workspace-Typecheck grün;
+- `check:ai` grün, `production=752`, `runtimeCycles=0`, `typeCycles=0`;
+- `check:package-boundaries` grün, `files=1990`;
+- `check:engine-source-structure` grün, `production=1012`,
+  `relativeCycles=0`;
+- geänderte Dateien formatiert und `git diff --check` grün.
