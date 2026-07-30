@@ -4,6 +4,7 @@ import {
   AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
   CARD_DEFINITIONS_BY_ID,
   CORP_FORT_RUN_REZ_SUPPORT_KIND,
+  CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND,
   CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
@@ -16467,6 +16468,7 @@ const CORP_FORT_RUN_REZ_SUPPORT_QUOTE_PAYLOAD_FIELDS = [
   "cardImplementationFortRunRezSupportQuoteStateVersion",
   "cardImplementationFortRunRezSupportQuoteActionId",
   "cardImplementationFortRunRezSupportQuoteRezCredits",
+  "cardImplementationFortRunRezSupportQuoteFollowupCredits",
   "cardImplementationFortRunRezSupportQuoteInstallCredits",
   "cardImplementationFortRunRezSupportQuoteTotalCredits",
   "cardImplementationFortRunRezSupportQuoteTotalCreditsPayable",
@@ -16513,6 +16515,8 @@ function corpFortRunRezSupportAssessment(
   const payload = legalAction.payload;
   const rezCredits =
     payload?.cardImplementationFortRunRezSupportQuoteRezCredits;
+  const followupCredits =
+    payload?.cardImplementationFortRunRezSupportQuoteFollowupCredits;
   const installCredits =
     payload?.cardImplementationFortRunRezSupportQuoteInstallCredits;
   const totalCredits =
@@ -16529,8 +16533,10 @@ function corpFortRunRezSupportAssessment(
     legalAction.source !== candidate.sourceCardInstanceId ||
     payload?.cardImplementationFortRunRezSupportQuoteSchemaVersion !==
       CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION ||
-    payload.cardImplementationFortRunRezSupportQuoteKind !==
-      CORP_FORT_RUN_REZ_SUPPORT_KIND ||
+    (payload.cardImplementationFortRunRezSupportQuoteKind !==
+      CORP_FORT_RUN_REZ_SUPPORT_KIND &&
+      payload.cardImplementationFortRunRezSupportQuoteKind !==
+        CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND) ||
     payload.cardImplementationFortRunRezSupportQuoteComplete !== true ||
     payload.cardImplementationFortRunRezSupportQuoteSourceCardInstanceId !==
       candidate.sourceCardInstanceId ||
@@ -16541,6 +16547,7 @@ function corpFortRunRezSupportAssessment(
     payload.cardImplementationFortRunRezSupportQuoteActionId !==
       candidate.actionId ||
     !isFiniteNonNegativeInteger(rezCredits) ||
+    !isFiniteNonNegativeInteger(followupCredits) ||
     !isFiniteNonNegativeInteger(installCredits) ||
     !isFiniteNonNegativeInteger(totalCredits) ||
     !isFiniteNonNegativeInteger(currentCredits) ||
@@ -16550,8 +16557,14 @@ function corpFortRunRezSupportAssessment(
     ) ||
     !Number.isSafeInteger(listedRezCredits) ||
     rezCredits !== listedRezCredits ||
-    !Number.isSafeInteger(rezCredits + installCredits) ||
-    totalCredits !== rezCredits + installCredits ||
+    (payload.cardImplementationFortRunRezSupportQuoteKind ===
+      CORP_FORT_RUN_REZ_SUPPORT_KIND &&
+      followupCredits !== installCredits) ||
+    (payload.cardImplementationFortRunRezSupportQuoteKind ===
+      CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND &&
+      installCredits !== 0) ||
+    !Number.isSafeInteger(rezCredits + followupCredits) ||
+    totalCredits !== rezCredits + followupCredits ||
     typeof payload.cardImplementationFortRunRezSupportQuoteTotalCreditsPayable !==
       "boolean" ||
     payload.cardImplementationFortRunRezSupportQuoteTotalCreditsPayable !==
@@ -16581,7 +16594,10 @@ function corpFortRunRezSupportAssessment(
   return {
     productive: true,
     evidenceCode:
-      "corp_rez_fort_run_support_same_fort_run_with_affordable_hq_ice_install",
+      payload.cardImplementationFortRunRezSupportQuoteKind ===
+      CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND
+        ? "corp_rez_fort_run_support_same_fort_run_with_affordable_temporary_hq_ice_encounter"
+        : "corp_rez_fort_run_support_same_fort_run_with_affordable_hq_ice_install",
   };
 }
 

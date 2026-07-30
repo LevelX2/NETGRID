@@ -371,6 +371,45 @@ describe("run rez window", () => {
     ).not.toThrow();
   });
 
+  it("certifies Dr. Dreff's cheapest temporary HQ ICE encounter payment", () => {
+    const state = makeState({
+      timingPoint: "run.approach_ice",
+      rootDefinitionId: "onr_v1_358_dr-dreff",
+    });
+    state.run!.phase = "approach_ice";
+    const hqIceId = "hq_data_raven" as CardInstanceId;
+    state.corp.credits = 3;
+    state.corp.hq.push(hqIceId);
+    state.cardInstances[hqIceId] = instance(
+      hqIceId,
+      "onr_v1_236_data-raven",
+      {
+        zone: { side: "corp", zone: "hq" },
+        faceup: false,
+      },
+    );
+    const { host } = hostFor(state);
+
+    const dreffRez = buildCorpApproachActions(host).find(
+      (action) => action.type === "rez_card" && action.source === "root_1",
+    );
+
+    expect(dreffRez?.payload).toMatchObject({
+      cardImplementationFortRunRezSupportQuoteKind:
+        "temporary_hq_ice_encounter_after_successful_run",
+      cardImplementationFortRunRezSupportQuoteComplete: true,
+      cardImplementationFortRunRezSupportQuoteFollowupCredits: 2,
+      cardImplementationFortRunRezSupportQuoteInstallCredits: 0,
+      cardImplementationFortRunRezSupportQuoteTotalCredits: 2,
+      cardImplementationFortRunRezSupportQuoteTotalCreditsPayable: true,
+      cardImplementationFortRunRezSupportQuoteHasOwnHqIce: true,
+    });
+    expect(JSON.stringify(dreffRez?.payload)).not.toContain(hqIceId);
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(state, "root_1", dreffRez!),
+    ).not.toThrow();
+  });
+
   it("omits fort-run support fields for nonmatching roots and before the exact final run window", () => {
     const nonJennyState = makeState({ timingPoint: "run.approach_ice" });
     const nonJennyAction = buildCorpApproachActions(

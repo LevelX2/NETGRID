@@ -1898,6 +1898,8 @@ export const CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION =
   "corp-fort-run-rez-support-quote-v1" as const;
 export const CORP_FORT_RUN_REZ_SUPPORT_KIND =
   "install_hq_ice_innermost_after_successful_run" as const;
+export const CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND =
+  "temporary_hq_ice_encounter_after_successful_run" as const;
 
 /**
  * Engine-certified, actor-private support quote for rezzing a source with the
@@ -1907,13 +1909,18 @@ export const CORP_FORT_RUN_REZ_SUPPORT_KIND =
  */
 export type CorpFortRunRezSupportQuote = {
   schemaVersion: typeof CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION;
-  fortRunKind: typeof CORP_FORT_RUN_REZ_SUPPORT_KIND;
+  fortRunKind:
+    | typeof CORP_FORT_RUN_REZ_SUPPORT_KIND
+    | typeof CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND;
   complete: true;
   sourceCardInstanceId: CardInstanceId;
   targetServerId: Exclude<ServerId, "new_remote">;
   stateVersion: number;
   actionId: string;
   rezCredits: number;
+  /** Minimum actor-private HQ follow-up payment among the currently eligible ICE. */
+  followupCredits: number;
+  /** Existing-ICE install payment; zero for a temporary encounter. */
   installCredits: number;
   totalCredits: number;
   totalCreditsPayable: boolean;

@@ -23,6 +23,7 @@ import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   CORP_FORT_RUN_REZ_SUPPORT_KIND,
+  CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND,
   CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION,
 } from "@netgrid/shared";
 import {
@@ -1560,6 +1561,17 @@ export function quoteCorpFortRunRezSupport(
     ? state.corp.servers.find((candidate) => candidate.id === serverId)
     : undefined;
   const run = state.run;
+  const fortRunKind = definitionHasFortRunWindowKind(
+    sourceDefinitionId ?? "card_implementation",
+    CORP_FORT_RUN_REZ_SUPPORT_KIND,
+  )
+    ? CORP_FORT_RUN_REZ_SUPPORT_KIND
+    : definitionHasFortRunWindowKind(
+          sourceDefinitionId ?? "card_implementation",
+          CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND,
+        )
+      ? CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND
+      : undefined;
   if (
     !source ||
     source.owner !== "corp" ||
@@ -1571,10 +1583,7 @@ export function quoteCorpFortRunRezSupport(
     !serverId ||
     !server ||
     !server.root.includes(sourceCardInstanceId) ||
-    !definitionHasFortRunWindowKind(
-      sourceDefinitionId,
-      CORP_FORT_RUN_REZ_SUPPORT_KIND,
-    ) ||
+    !fortRunKind ||
     !run ||
     run.attackedServerId !== serverId ||
     run.delayedSuccessfulRun !== undefined ||
@@ -1602,32 +1611,49 @@ export function quoteCorpFortRunRezSupport(
     run.position.serverId === serverId;
   if (!finalIceWindow && !finalServerWindow) return undefined;
 
-  const installCredits = server.ice.length;
-  if (!isExactNonNegativeInteger(installCredits)) return undefined;
-  const totalCredits = rezCredits + installCredits;
-  if (!Number.isSafeInteger(totalCredits)) return undefined;
-  const hasOwnHqIce = state.corp.hq.some((cardId) => {
+  const eligibleHqIceCosts = state.corp.hq.flatMap((cardId) => {
     const instance = state.cardInstances[cardId];
     const definition = instance
       ? CARD_DEFINITIONS_BY_ID[instance.definitionId]
       : undefined;
-    return (
-      instance?.owner === "corp" &&
-      instance.controller === "corp" &&
-      instance.zone.side === "corp" &&
-      instance.zone.zone === "hq" &&
-      definition?.type === "ice"
-    );
+    if (
+      instance?.owner !== "corp" ||
+      instance.controller !== "corp" ||
+      instance.zone.side !== "corp" ||
+      instance.zone.zone !== "hq" ||
+      definition?.type !== "ice"
+    ) {
+      return [];
+    }
+    const followupCost =
+      fortRunKind === CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND
+        ? Math.max(0, Math.floor(rezCostForCard(state, cardId) / 2))
+        : server.ice.length;
+    return isExactNonNegativeInteger(followupCost) ? [followupCost] : [];
   });
+  const hasOwnHqIce = eligibleHqIceCosts.length > 0;
+  const followupCredits = hasOwnHqIce
+    ? Math.min(...eligibleHqIceCosts)
+    : 0;
+  const installCredits =
+    fortRunKind === CORP_FORT_RUN_REZ_SUPPORT_KIND ? followupCredits : 0;
+  if (
+    !isExactNonNegativeInteger(followupCredits) ||
+    !isExactNonNegativeInteger(installCredits)
+  )
+    return undefined;
+  const totalCredits = rezCredits + followupCredits;
+  if (!Number.isSafeInteger(totalCredits)) return undefined;
   return {
     schemaVersion: CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION,
-    fortRunKind: CORP_FORT_RUN_REZ_SUPPORT_KIND,
+    fortRunKind,
     complete: true,
     sourceCardInstanceId,
     targetServerId: serverId,
     stateVersion: state.stateVersion,
     actionId,
     rezCredits,
+    followupCredits,
     installCredits,
     totalCredits,
     totalCreditsPayable: state.corp.credits >= totalCredits,
@@ -1649,6 +1675,8 @@ export function corpFortRunRezSupportQuotePayload(
     cardImplementationFortRunRezSupportQuoteStateVersion: quote.stateVersion,
     cardImplementationFortRunRezSupportQuoteActionId: quote.actionId,
     cardImplementationFortRunRezSupportQuoteRezCredits: quote.rezCredits,
+    cardImplementationFortRunRezSupportQuoteFollowupCredits:
+      quote.followupCredits,
     cardImplementationFortRunRezSupportQuoteInstallCredits:
       quote.installCredits,
     cardImplementationFortRunRezSupportQuoteTotalCredits: quote.totalCredits,
@@ -1794,6 +1822,7 @@ const FORT_RUN_REZ_SUPPORT_QUOTE_PAYLOAD_FIELDS = [
   "cardImplementationFortRunRezSupportQuoteStateVersion",
   "cardImplementationFortRunRezSupportQuoteActionId",
   "cardImplementationFortRunRezSupportQuoteRezCredits",
+  "cardImplementationFortRunRezSupportQuoteFollowupCredits",
   "cardImplementationFortRunRezSupportQuoteInstallCredits",
   "cardImplementationFortRunRezSupportQuoteTotalCredits",
   "cardImplementationFortRunRezSupportQuoteTotalCreditsPayable",
