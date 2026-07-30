@@ -13145,6 +13145,12 @@ select,
   border-bottom: 1px solid color-mix(in srgb, var(--line), transparent 55%);
 }
 
+.aiDecisionDebugCompactList > div.selected {
+  padding-inline: 6px;
+  border-left: 2px solid color-mix(in srgb, var(--runner), var(--line) 25%);
+  background: color-mix(in srgb, var(--runner), transparent 92%);
+}
+
 .aiDecisionDebugRows span,
 .aiDecisionDebugCompactList span {
   min-width: 0;

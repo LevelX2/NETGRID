@@ -44,10 +44,12 @@ import {
   type MaintenanceAiTraceActionRow,
 } from "../../app/maintenance";
 import { copyTextToClipboard } from "../../lib/clipboard";
+import { readLocalStorage } from "../../lib/local-storage";
 import {
   clampOverlayPosition,
   type OverlayPositionPreference,
 } from "../../lib/overlay-position";
+import { AI_DECISION_DEBUG_DISCLOSURE_STORAGE_KEY } from "../../lib/storage-keys";
 
 export type AiDecisionDebugOverlayStatus =
   | "off"
@@ -82,7 +84,11 @@ export function FloatingAiDecisionDebugOverlay({
 }) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
-  const [collapsed, setCollapsed] = useState(false);
+  const [windowOpen, setWindowOpen] = useAiDecisionDebugDisclosure(
+    "window",
+    true,
+  );
+  const collapsed = !windowOpen;
   const [exportStatus, setExportStatus] =
     useState<AiDecisionDebugExportStatus>("idle");
 
@@ -231,7 +237,7 @@ export function FloatingAiDecisionDebugOverlay({
               className="button iconOnly"
               type="button"
               onPointerDown={(event) => event.stopPropagation()}
-              onClick={() => setCollapsed((current) => !current)}
+              onClick={() => setWindowOpen((current) => !current)}
               aria-expanded={!collapsed}
               aria-label={
                 collapsed
@@ -298,10 +304,14 @@ function aiDecisionTraceSelectedActionLabel(
 ): string {
   const action =
     trace.detail.selectedActionType ?? trace.selectedActionType ?? "KI-Aktion";
+  const preparedLabel =
+    typeof trace.detail.selectedActionLabel === "string"
+      ? trace.detail.selectedActionLabel
+      : undefined;
   const label = aiDecisionDebugRecordList(trace.detail.actionAlternatives).find(
     (entry) => entry.actionId === trace.selectedActionId,
   )?.label;
-  return String(label ?? action);
+  return String(preparedLabel ?? label ?? action);
 }
 
 function aiDecisionDebugWindowHeaderStatusLabel(
@@ -387,7 +397,21 @@ function AiDecisionDebugPlanFirstTraceView({
   const selectedPlan = decision.selectedPlan;
   const priorityLabel = aiPlanFirstPriorityLabel(decision.priority);
   const dispositionSummary = aiPlanFirstDispositionSummary(decision);
+  const actionAlternativeLabels = new Map(
+    aiDecisionDebugRecordList(detail.actionAlternatives).flatMap(
+      (alternative) =>
+        typeof alternative.actionId === "string" &&
+        typeof alternative.label === "string"
+          ? [[alternative.actionId, alternative.label] as const]
+          : [],
+    ),
+  );
   const nextActionRows: Array<[string, string]> = [
+    ["Gewählte Aktion", actionLabel],
+    ...(trace.selectedActionId
+      ? ([["Action-ID", trace.selectedActionId]] as Array<[string, string]>)
+      : []),
+    ["StateVersion", String(trace.stateVersion)],
     ...(selectedPlan
       ? ([
           ["Plan", aiTracePlanLabel(selectedPlan.moduleId)],
@@ -757,26 +781,38 @@ function AiDecisionDebugPlanFirstTraceView({
             <>
               <h4>Verglichene Zuglinien</h4>
               <div className="aiDecisionDebugCompactList">
-                {decision.turnPlanning.consideredLines.map((line) => (
-                  <div key={line.lineId}>
-                    <span>
-                      {line.firstActionId} · {line.stepCount} Schritt(e)
-                    </span>
-                    <strong>
-                      Wert {line.scalarValue} ·{" "}
-                      {aiTurnPlanningStopReasonLabel(line.stopReason)}
-                    </strong>
-                    <AiDecisionDebugRows
-                      rows={[
-                        ["Root", line.rootPlanInstanceId],
-                        [
-                          "Verletzte Pflichten",
-                          String(line.violatedObligationCount),
-                        ],
-                      ]}
-                    />
-                  </div>
-                ))}
+                {decision.turnPlanning.consideredLines.map((line) => {
+                  const selected =
+                    line.lineId === decision.turnPlanning?.selectedLine.lineId;
+                  return (
+                    <div
+                      className={selected ? "selected" : undefined}
+                      key={line.lineId}
+                    >
+                      <span>
+                        {actionAlternativeLabels.get(line.firstActionId) ??
+                          line.firstActionId}{" "}
+                        · {line.stepCount} Schritt(e)
+                      </span>
+                      <strong>
+                        {selected ? "Ausgewählt · " : ""}
+                        Wert {line.scalarValue} ·{" "}
+                        {aiTurnPlanningStopReasonLabel(line.stopReason)}
+                      </strong>
+                      <AiDecisionDebugRows
+                        rows={[
+                          ["Linien-ID", line.lineId],
+                          ["Erste Action-ID", line.firstActionId],
+                          ["Root", line.rootPlanInstanceId],
+                          [
+                            "Verletzte Pflichten",
+                            String(line.violatedObligationCount),
+                          ],
+                        ]}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </>
           ) : null}
@@ -1348,10 +1384,13 @@ function AiDecisionDebugLegacyTraceView({
                   </div>
                 ) : null}
                 {action.scoreRows.length > 0 ? (
-                  <details className="aiDecisionDebugActionDetails">
+                  <AiDecisionDebugPersistentDetails
+                    className="aiDecisionDebugActionDetails"
+                    disclosureId={`legacy-action-score:${action.actionId}`}
+                  >
                     <summary>Score-Faktoren</summary>
                     <AiDecisionDebugRows rows={action.scoreRows} />
-                  </details>
+                  </AiDecisionDebugPersistentDetails>
                 ) : null}
               </div>
             ))}
@@ -1711,7 +1750,11 @@ function AiDecisionDebugSelectedPlanOverview({
     : metaRows;
   return (
     <div className="aiDecisionDebugPlanFocus">
-      <details className="aiDecisionDebugPlanFocusCard" open>
+      <AiDecisionDebugPersistentDetails
+        className="aiDecisionDebugPlanFocusCard"
+        disclosureId="legacy-selected-plan"
+        defaultOpen
+      >
         <summary>
           <strong>Ausgewählter Plan</strong>
           <span>
@@ -1728,15 +1771,22 @@ function AiDecisionDebugSelectedPlanOverview({
         </summary>
         <AiDecisionDebugRows rows={selectedPlanRows} />
         {selectedPlan?.scores.length ? (
-          <details className="aiDecisionDebugActionDetails">
+          <AiDecisionDebugPersistentDetails
+            className="aiDecisionDebugActionDetails"
+            disclosureId={`legacy-selected-plan-score:${selectedPlan.id}`}
+          >
             <summary>
               Planbewertung {aiDecisionDebugPlanScoreLabel(selectedPlan) ?? ""}
             </summary>
             <AiDecisionDebugRows rows={selectedPlan.scores} />
-          </details>
+          </AiDecisionDebugPersistentDetails>
         ) : null}
-      </details>
-      <details className="aiDecisionDebugPlanActions" open>
+      </AiDecisionDebugPersistentDetails>
+      <AiDecisionDebugPersistentDetails
+        className="aiDecisionDebugPlanActions"
+        disclosureId="legacy-plan-actions"
+        defaultOpen
+      >
         <summary className="aiDecisionDebugPlanActionsTitle">
           <strong>Planrelevante Aktionen</strong>
           <span>
@@ -1766,7 +1816,7 @@ function AiDecisionDebugSelectedPlanOverview({
             LegalAction gemappt oder bewertet.
           </p>
         )}
-      </details>
+      </AiDecisionDebugPersistentDetails>
     </div>
   );
 }
@@ -1792,14 +1842,17 @@ function AiDecisionDebugPlanActionCard({
       </div>
       <AiDecisionDebugRows rows={aiDecisionDebugPlanActionRows(action)} />
       {scoreRows.length > 0 ? (
-        <details className="aiDecisionDebugActionDetails">
+        <AiDecisionDebugPersistentDetails
+          className="aiDecisionDebugActionDetails"
+          disclosureId={`legacy-plan-action-score:${action.actionId}`}
+        >
           <summary>
             {action.score !== undefined
               ? `Action-Score ${action.score} aufklappen`
               : "Action-Score aufklappen"}
           </summary>
           <AiDecisionDebugRows rows={scoreRows} />
-        </details>
+        </AiDecisionDebugPersistentDetails>
       ) : null}
       <p>{aiDecisionDebugPlanActionReasonLabel(action.reason)}</p>
     </div>
@@ -2129,80 +2182,40 @@ function AiDecisionDebugPrivateHand({
 }: {
   detail: Record<string, unknown>;
 }) {
-  const privateHands = aiDecisionDebugPrivateHandsExports(detail);
-  if (privateHands.length === 0) return null;
+  const privateHand = aiDecisionDebugPrivateHandExport(detail);
+  if (privateHand.cards.length === 0 && privateHand.rows.length === 0)
+    return null;
   return (
     <AiDecisionDebugCollapsibleSection
-      title={
-        privateHands.length > 1
-          ? "Vollständige Karten beider Seiten"
-          : "Aktuelle Hand der KI"
-      }
-      summary={privateHands
-        .map(
-          (hand) =>
-            `${hand.sideLabel}: ${hand.cards.length} Karte${hand.cards.length === 1 ? "" : "n"}`,
-        )
-        .join(" · ")}
+      title="Aktuelle Hand der KI"
+      summary={aiDecisionDebugPrivateHandHeaderSummary(privateHand)}
       defaultOpen
     >
-      {privateHands.map((privateHand) => (
-        <div key={privateHand.sideLabel}>
-          <h4>{privateHand.sideLabel}</h4>
-          <AiDecisionDebugRows rows={privateHand.rows} />
-          <div className="aiDecisionDebugActions">
-            {privateHand.cards.map((card) => (
-              <div className="aiDecisionDebugAction" key={card.key}>
-                <div>
-                  <strong>
-                    #{card.rank} {card.title}
-                  </strong>
-                  <span>{card.meta}</span>
-                </div>
-                {card.rulesText ? (
-                  <p>
-                    <strong>Regeltext:</strong> {card.rulesText}
-                  </p>
-                ) : null}
-                {card.legalActions.length > 0 ? (
-                  <p>{card.legalActions.join(" · ")}</p>
-                ) : (
-                  <p>Keine aktuelle LegalAction aus dieser Handkarte.</p>
-                )}
-              </div>
-            ))}
+      <AiDecisionDebugRows rows={privateHand.rows} />
+      <div className="aiDecisionDebugActions">
+        {privateHand.cards.map((card) => (
+          <div className="aiDecisionDebugAction" key={card.key}>
+            <div>
+              <strong>
+                #{card.rank} {card.title}
+              </strong>
+              <span>{card.meta}</span>
+            </div>
+            {card.rulesText ? (
+              <p>
+                <strong>Regeltext:</strong> {card.rulesText}
+              </p>
+            ) : null}
+            {card.legalActions.length > 0 ? (
+              <p>{card.legalActions.join(" · ")}</p>
+            ) : (
+              <p>Keine aktuelle LegalAction aus dieser Handkarte.</p>
+            )}
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </AiDecisionDebugCollapsibleSection>
   );
-}
-
-function aiDecisionDebugPrivateHandsExports(
-  detail: Record<string, unknown>,
-): Array<
-  ReturnType<typeof aiDecisionDebugPrivateHandExport> & { sideLabel: string }
-> {
-  const completePreview = aiDecisionDebugRecord(
-    detail.developerPrivateHandsPreview,
-  );
-  const completeHands = completePreview
-    ? aiDecisionDebugRecordList(completePreview.hands)
-    : [];
-  if (completeHands.length > 0) {
-    return completeHands.map((preview) => ({
-      ...aiDecisionDebugPrivateHandExportFromPreview(preview),
-      sideLabel:
-        preview.side === "corp"
-          ? "Korp"
-          : preview.side === "runner"
-            ? "Runner"
-            : String(preview.side ?? "Unbekannte Seite"),
-    }));
-  }
-  const fallback = aiDecisionDebugPrivateHandExport(detail);
-  if (fallback.cards.length === 0 && fallback.rows.length === 0) return [];
-  return [{ ...fallback, sideLabel: "KI" }];
 }
 
 function aiDecisionDebugPrivateHandExport(detail: Record<string, unknown>): {
@@ -2635,10 +2648,14 @@ function AiDecisionDebugPlanLayer({
                   </div>
                 ) : null}
                 {plan.scores.length > 0 ? (
-                  <details className="aiDecisionDebugActionDetails" open>
+                  <AiDecisionDebugPersistentDetails
+                    className="aiDecisionDebugActionDetails"
+                    disclosureId={`legacy-plan-factor:${plan.id}`}
+                    defaultOpen
+                  >
                     <summary>Bewertungsfaktoren</summary>
                     <AiDecisionDebugRows rows={plan.scores} />
-                  </details>
+                  </AiDecisionDebugPersistentDetails>
                 ) : null}
               </div>
             );
@@ -3168,6 +3185,91 @@ function aiDecisionDebugPlanCapabilityLabel(value: string): string {
   return labels[value] ?? value;
 }
 
+function aiDecisionDebugDisclosurePreferences(): Record<string, boolean> {
+  if (typeof window === "undefined") return {};
+  try {
+    const stored = readLocalStorage(AI_DECISION_DEBUG_DISCLOSURE_STORAGE_KEY);
+    if (!stored) return {};
+    const parsed = JSON.parse(stored) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+      return {};
+    return Object.fromEntries(
+      Object.entries(parsed).filter(
+        (entry): entry is [string, boolean] => typeof entry[1] === "boolean",
+      ),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function writeAiDecisionDebugDisclosure(
+  disclosureId: string,
+  open: boolean,
+): void {
+  if (typeof window === "undefined") return;
+  try {
+    const preferences = aiDecisionDebugDisclosurePreferences();
+    preferences[disclosureId] = open;
+    window.localStorage.setItem(
+      AI_DECISION_DEBUG_DISCLOSURE_STORAGE_KEY,
+      JSON.stringify(preferences),
+    );
+  } catch {
+    // A blocked storage backend must not make the debug inspector unusable.
+  }
+}
+
+function useAiDecisionDebugDisclosure(
+  disclosureId: string,
+  defaultOpen: boolean,
+) {
+  const [open, setOpen] = useState(
+    () => aiDecisionDebugDisclosurePreferences()[disclosureId] ?? defaultOpen,
+  );
+  useEffect(() => {
+    setOpen(
+      aiDecisionDebugDisclosurePreferences()[disclosureId] ?? defaultOpen,
+    );
+  }, [defaultOpen, disclosureId]);
+  const setPersistentOpen = (
+    next: boolean | ((current: boolean) => boolean),
+  ) => {
+    setOpen((current) => {
+      const resolved = typeof next === "function" ? next(current) : next;
+      writeAiDecisionDebugDisclosure(disclosureId, resolved);
+      return resolved;
+    });
+  };
+  return [open, setPersistentOpen] as const;
+}
+
+function AiDecisionDebugPersistentDetails({
+  disclosureId,
+  className,
+  children,
+  defaultOpen = false,
+}: {
+  disclosureId: string;
+  className: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useAiDecisionDebugDisclosure(
+    disclosureId,
+    defaultOpen,
+  );
+  return (
+    <details
+      className={className}
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      {children}
+    </details>
+  );
+}
+
 function AiDecisionDebugCollapsibleSection({
   title,
   summary,
@@ -3180,9 +3282,10 @@ function AiDecisionDebugCollapsibleSection({
   defaultOpen?: boolean;
 }) {
   return (
-    <details
+    <AiDecisionDebugPersistentDetails
       className="aiDecisionDebugSection aiDecisionDebugCollapsible"
-      open={defaultOpen}
+      disclosureId={`section:${title}`}
+      defaultOpen={defaultOpen}
     >
       <summary>
         <strong>{title}</strong>
@@ -3191,7 +3294,7 @@ function AiDecisionDebugCollapsibleSection({
         ) : null}
       </summary>
       {children}
-    </details>
+    </AiDecisionDebugPersistentDetails>
   );
 }
 

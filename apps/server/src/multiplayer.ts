@@ -3249,11 +3249,6 @@ export class MultiplayerService {
               activeAiSide,
               legalActions,
             ),
-            developerPrivateHandsPreview: developerPrivateHandsPreview(
-              record.gameState,
-              activeAiSide,
-              legalActions,
-            ),
             ...(decision.selectionKind ===
             "engine_randomized_turn_plan_selection"
               ? {
@@ -7974,32 +7969,6 @@ function developerAiPrivateHandPreview(
     handCount: cards.length,
     visibility: "developer_inspector_not_persisted",
     cards,
-  };
-}
-
-/**
- * Complete two-sided card view for the explicitly privileged local developer
- * inspector. This deliberately includes hidden opponent hand identities. It
- * must never be reused by PlayerViews, events, replays, logs, errors, or the
- * normal AI preview route.
- */
-function developerPrivateHandsPreview(
-  state: GameState,
-  activeAiSide: Side,
-  activeAiLegalActions: LegalAction[],
-): Record<string, unknown> {
-  return {
-    schemaVersion: "developer-private-hands-v1",
-    scope: "local_developer_inspector_only",
-    activeAiSide,
-    visibility: "complete_cards_both_sides_not_persisted",
-    hands: (["corp", "runner"] as const).map((side) =>
-      developerAiPrivateHandPreview(
-        state,
-        side,
-        side === activeAiSide ? activeAiLegalActions : [],
-      ),
-    ),
   };
 }
 

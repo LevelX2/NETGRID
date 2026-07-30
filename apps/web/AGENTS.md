@@ -7,9 +7,9 @@
   keine gegnerischen Hidden-Informationen leaken.
 - Die ausdrücklich privilegierte private KI-Debuganzeige des lokalen
   Projektbetreibers ist die bekannte Ausnahme: Sie darf und soll zur
-  Playtest-Kontrolle die vollständigen Karten beider Seiten sowie die
-  Zugplanung anzeigen. Diese Daten dürfen nicht in PlayerView, PublicEvents,
-  öffentliche Replays, normale WebSocket-/Reconnect-Payloads, Logs oder
-  Clientfehler übernommen werden.
+  Playtest-Kontrolle die vollständige Hand der aktiven KI sowie die Zugplanung
+  anzeigen, nicht jedoch die Hand des menschlichen Spielers. Diese Daten dürfen
+  nicht in PlayerView, PublicEvents, öffentliche Replays, normale
+  WebSocket-/Reconnect-Payloads, Logs oder Clientfehler übernommen werden.
 - MVP 0.1 UI may be minimal and desktop-oriented.
 - MVP 0.2 UI must support two browser windows/devices, join link, connection status, waiting states, reconnect state, and undo prompts.

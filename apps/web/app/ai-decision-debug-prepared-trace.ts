@@ -24,8 +24,25 @@ export function preparedAiDecisionDebugTrace(
       ...prepared.detail,
       selectedActionId: prepared.actionId,
       selectedActionType: prepared.actionType,
+      selectedActionLabel: prepared.actionLabel,
       debugSelectionMatchesApplied: true,
       preparedForExecution: true,
     },
   };
+}
+
+export function preparedAiDecisionDebugMatchesState(
+  prepared: PreparedAiDecisionDebug | null,
+  expected: {
+    matchId: string;
+    matchVersion: number;
+    stateVersion: number;
+  },
+): boolean {
+  return Boolean(
+    prepared &&
+    prepared.matchId === expected.matchId &&
+    prepared.matchVersion === expected.matchVersion &&
+    prepared.stateVersion === expected.stateVersion,
+  );
 }

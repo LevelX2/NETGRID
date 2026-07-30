@@ -262,11 +262,12 @@ Stand: 2026-07-30
   Runtime-Restart und vollständige getrennte Side-Coverage sind abgenommen.
   Produktiv gilt `cutover`; `legacy_compare` bleibt ein expliziter
   Diagnosemodus ohne Fallbackautorität.
-- Die privilegierte private Betreiber-Buganzeige zeigt bestimmungsgemäß
-  sämtliche Karten und Hände beider Seiten sowie die vollständige
-  Zugplanung. Für diese Ansicht gilt keine seitensichere Reduktion. Normale
-  PlayerViews, PublicEvents, Zuschauerpayloads, öffentliche Replays und Logs
-  bleiben getrennt. Führend ist
+- Die privilegierte private Betreiber-Buganzeige zeigt bestimmungsgemäß die
+  vollständige Hand der jeweils aktiven KI sowie die vollständige Zugplanung,
+  nicht jedoch die Hand des menschlichen Spielers. Für die KI-Daten dieser
+  Ansicht gilt keine seitensichere Reduktion. Normale PlayerViews,
+  PublicEvents, Zuschauerpayloads, öffentliche Replays und Logs bleiben
+  getrennt. Führend ist
   `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
 - Corp-Score- und Defense-Plan können eine exakte Same-Turn-Linie aus
   Remote-ICE und gebundener Agenda ausführen. Eine eng gegatete zentrale

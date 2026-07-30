@@ -207,7 +207,10 @@ import {
   type RecentSessionInfo,
   type SessionInfo,
 } from "./session-recovery";
-import { preparedAiDecisionDebugTrace } from "./ai-decision-debug-prepared-trace";
+import {
+  preparedAiDecisionDebugMatchesState,
+  preparedAiDecisionDebugTrace,
+} from "./ai-decision-debug-prepared-trace";
 import {
   ACTION_CUE_SETTINGS_STORAGE_KEY,
   ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
@@ -831,6 +834,10 @@ export default function Page() {
   const [aiDecisionDebugStatus, setAiDecisionDebugStatus] =
     useState<AiDecisionDebugOverlayStatus>("off");
   const [aiDecisionDebugError, setAiDecisionDebugError] = useState("");
+  const [
+    aiDecisionDebugFailedPreparationKey,
+    setAiDecisionDebugFailedPreparationKey,
+  ] = useState("");
   const [preparedAiDecisionDebug, setPreparedAiDecisionDebug] =
     useState<PreparedAiDecisionDebug | null>(null);
   const [aiDecisionDebugPreview, setAiDecisionDebugPreview] =
@@ -2989,6 +2996,20 @@ export default function Page() {
     aiTurnPresentation?.canAdvanceAi
       ? `${session.matchId}:${payload.matchVersion}:${payload.playerView.stateVersion}`
       : "";
+  const aiDecisionDebugPreparationReady = Boolean(
+    session &&
+    payload &&
+    preparedAiDecisionDebugMatchesState(preparedAiDecisionDebug, {
+      matchId: session.matchId,
+      matchVersion: payload.matchVersion,
+      stateVersion: payload.playerView.stateVersion,
+    }),
+  );
+  const aiDecisionDebugShouldWaitForPreparation = Boolean(
+    aiDecisionDebugPreparationKey &&
+    aiDecisionDebugFailedPreparationKey !== aiDecisionDebugPreparationKey &&
+    !aiDecisionDebugPreparationReady,
+  );
   const aiDecisionDebugTrace = useMemo(
     () =>
       preparedAiDecisionDebug
@@ -3113,20 +3134,24 @@ export default function Page() {
   useEffect(() => {
     if (!aiDecisionDebugPreparationKey || !session || !payload) {
       setPreparedAiDecisionDebug(null);
+      setAiDecisionDebugFailedPreparationKey("");
       return;
     }
     let current = true;
     setAiDecisionDebugStatus("activating");
     setAiDecisionDebugError("");
+    setAiDecisionDebugFailedPreparationKey("");
     void fetchPreparedAiDecisionDebug(session, payload)
       .then((prepared) => {
         if (!current) return;
         setPreparedAiDecisionDebug(prepared);
+        setAiDecisionDebugFailedPreparationKey("");
         setAiDecisionDebugStatus("live");
       })
       .catch((error) => {
         if (!current) return;
         setPreparedAiDecisionDebug(null);
+        setAiDecisionDebugFailedPreparationKey(aiDecisionDebugPreparationKey);
         setAiDecisionDebugStatus("error");
         setAiDecisionDebugError(
           error instanceof Error
@@ -3783,6 +3808,7 @@ export default function Page() {
       payload.winner ||
       connection !== "online" ||
       priorityWindowHoldEnabled ||
+      aiDecisionDebugShouldWaitForPreparation ||
       interactionPresentationBlocked
     )
       return;
@@ -3828,6 +3854,7 @@ export default function Page() {
     actionCueAutoDismissMs,
     actionCueQueue.length,
     aiTurnPresentation?.canAdvanceAi,
+    aiDecisionDebugShouldWaitForPreparation,
     connection,
     currentActionCue,
     interactionPresentationBlocked,
@@ -5247,6 +5274,12 @@ export default function Page() {
     mode: "single_step" | "until_human" = "single_step",
   ): boolean => {
     if (!session || !payload || !aiTurnPresentation?.canAdvanceAi) return false;
+    if (aiDecisionDebugShouldWaitForPreparation) {
+      setNotice(
+        "Die nächste KI-Entscheidung wird noch für die Debuganzeige vorbereitet.",
+      );
+      return false;
+    }
     if (!ensureSocketConnected()) return false;
     try {
       setPreparedAiDecisionDebug(null);

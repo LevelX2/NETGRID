@@ -144,9 +144,10 @@
   Coverage-Verträge. Produktiv gilt `cutover`; `legacy_compare` ist nur ein
   ausdrücklich gesetzter Diagnosemodus und kein Fallback.
 - Die privilegierte private Betreiber-Buganzeige zeigt absichtlich die
-  vollständigen Karten und Hände beider Seiten sowie den vollständigen
-  Zugplan mit Varianten, Commitment, Lease, Boundaries, Coverage und
-  Kampagnenstatus. Für diese Ansicht gilt keine seitensichere Reduktion.
+  vollständige Hand der jeweils aktiven KI sowie den vollständigen Zugplan mit
+  Varianten, Commitment, Lease, Boundaries, Coverage und Kampagnenstatus. Die
+  Hand des menschlichen Spielers bleibt aus dieser Anzeige ausgeschlossen. Für
+  die KI-Daten dieser Ansicht gilt keine seitensichere Reduktion.
 - PF15 ist mit Commit `4b0c459f6` als fail-closed Plan-first-Runtime-Cutover
   abgeschlossen. Die produktive Arbitration wählt zuerst eine residente
   `PlanInstance`, deren Step und aktuelle Route; eine Action besitzt außerhalb

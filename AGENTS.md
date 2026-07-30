@@ -60,7 +60,8 @@ Eine kompakte Rollenübersicht liegt in `agents/README.md`.
 - Die private, privilegierte Bug-/KI-Debuganzeige des lokalen Projektbetreibers
   ist ausdrücklich keine side-sichere Spieler- oder öffentliche
   Observability-Fläche: Sie darf und soll zur Playtest-Kontrolle die
-  vollständigen Karten und Hände beider Seiten anzeigen. Diese Ausnahme darf
+  vollständige Hand der jeweils aktiven KI und ihre Zugplanung anzeigen, nicht
+  jedoch die Hand des menschlichen Spielers. Diese Ausnahme darf
   nicht auf PlayerViews, PublicEvents, öffentliche Replays, normale
   WebSocket-/Reconnect-Payloads, Logs oder Client-Fehler ausgeweitet werden.
 - Deterministisches Replay und StateHash sind Pflicht.

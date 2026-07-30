@@ -58,9 +58,10 @@ Owner-, Horizon- und Coverage-Verträge. Produktiv gilt `cutover`;
 `legacy_compare` ist ausschließlich ein expliziter Diagnosemodus.
 
 Die privilegierte private Betreiber-Buganzeige ist bewusst keine
-seitensichere Spieleransicht: Sie zeigt sämtliche Karten und Hände beider
-Seiten sowie den vollständigen Zugplan mit Heads, Varianten, Phasen,
-Commitment, Lease, Boundaries, Coverage und Kampagnenstatus. Normale
+seitensichere Spieleransicht: Sie zeigt die vollständige Hand der aktiven KI
+sowie den vollständigen Zugplan mit Heads, Varianten, Phasen, Commitment,
+Lease, Boundaries, Coverage und Kampagnenstatus, nicht jedoch die Hand des
+menschlichen Spielers. Normale
 PlayerViews, PublicEvents, Zuschauerpayloads, öffentliche Replays und
 gewöhnliche Logs bleiben davon getrennt. Führend ist
 `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.

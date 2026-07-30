@@ -3473,8 +3473,9 @@ Jedes Modul besitzt eine interne Schema- oder Modulversion. Änderungen an
   Replangrenze, keine hypothetische Portfolioinstanz.
 - **Kernentscheidung:** Planner-IDs, Ranking und Cache verwenden
   ausschließlich side-sichere Planning-Fingerprints. Die privilegierte
-  private KI-Debuganzeige darf unabhängig davon vollständige Karten beider
-  Seiten und die gesamte Zugplanung anzeigen.
+  private KI-Debuganzeige darf unabhängig davon die vollständige Hand der
+  jeweils aktiven KI und die gesamte Zugplanung anzeigen; die Hand des
+  menschlichen Spielers bleibt ausgeschlossen.
 - **Kernentscheidung:** Viability, Portfolio-Rolle und Execution State sind
   orthogonale Achsen.
 - **Kernentscheidung:** `PlanNeed`, typisierte Ressourcenclaims und
@@ -4665,8 +4666,9 @@ Rahmen nicht verändert. Beispiele:
   Gegnerzug und Runtime-Neustart umgesetzt;
 - vollständige Side-Coverage, getrennte Cutover-Gates, Replay/RNG,
   Hidden-Info, Restart und private Betreiberdiagnostik abgenommen;
-- private Buganzeige als bewusst vollständige Betreiberansicht bestätigt:
-  sämtliche Karten beider Seiten und der komplette Zugplan bleiben sichtbar;
+- private Buganzeige als bewusst privilegierte Betreiberansicht bestätigt:
+  die vollständige Hand der aktiven KI und der komplette Zugplan bleiben
+  sichtbar; die Menschenhand bleibt ausgeschlossen;
 - Abschlussverifikation und verbleibende Play-Strength-Punkte in
   `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`
   festgehalten.
@@ -4689,8 +4691,8 @@ Rahmen nicht verändert. Beispiele:
 - Phase Entry, Completion, Need-/Assignment-Bindung, Transition und Cursor
   als einzige Fortschrittswahrheit ergänzt;
 - privilegierte private KI-Debuganzeige ausdrücklich von normalen
-  side-sicheren Datenwegen getrennt: Sie zeigt vollständige Karten beider
-  Seiten sowie den kompletten Zugplan.
+  side-sicheren Datenwegen getrennt: Sie zeigt die vollständige Hand der
+  aktiven KI sowie den kompletten Zugplan, nicht jedoch die Menschenhand.
 
 ### 0.9 – 2026-07-26
 

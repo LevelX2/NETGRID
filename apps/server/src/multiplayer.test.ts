@@ -12613,44 +12613,36 @@ describe("MVP 0.2 multiplayer service", () => {
       );
       const persisted = await storage.load(created.matchId);
       if (!persisted) throw new Error("Missing persisted match");
-      const privateHands = first.prepared.detail
-        .developerPrivateHandsPreview as {
+      const privateHand = first.prepared.detail.aiPrivateHandPreview as {
         schemaVersion: string;
-        hands: Array<{
-          side: "corp" | "runner";
-          cards: Array<{
-            instanceId: string;
-            definitionId: string;
-            title: string;
-          }>;
+        side: "corp" | "runner";
+        cards: Array<{
+          instanceId: string;
+          definitionId: string;
+          title: string;
         }>;
       };
-      expect(privateHands.schemaVersion).toBe("developer-private-hands-v1");
-      expect(privateHands.hands.map((hand) => hand.side)).toEqual([
-        "corp",
-        "runner",
-      ]);
-      for (const side of ["corp", "runner"] as const) {
-        const expectedInstanceId: string | undefined =
-          side === "corp"
-            ? persisted.gameState.corp.hq[0]
-            : persisted.gameState.runner.grip[0];
-        if (!expectedInstanceId)
-          throw new Error(`Missing ${side} hand card in test fixture`);
-        const expectedDefinitionId =
-          persisted.gameState.cardInstances[expectedInstanceId]?.definitionId;
-        if (!expectedDefinitionId)
-          throw new Error(`Missing ${side} hand card definition`);
-        expect(
-          privateHands.hands
-            .find((hand) => hand.side === side)
-            ?.cards.find((card) => card.instanceId === expectedInstanceId),
-        ).toMatchObject({
-          instanceId: expectedInstanceId,
-          definitionId: expectedDefinitionId,
-          title: CARD_DEFINITIONS_BY_ID[expectedDefinitionId]?.title,
-        });
-      }
+      expect(privateHand.schemaVersion).toBe("developer-ai-hand-v1");
+      expect(privateHand.side).toBe("corp");
+      const expectedInstanceId = persisted.gameState.corp.hq[0];
+      if (!expectedInstanceId)
+        throw new Error("Missing corp hand card in test fixture");
+      const expectedDefinitionId =
+        persisted.gameState.cardInstances[expectedInstanceId]?.definitionId;
+      if (!expectedDefinitionId)
+        throw new Error("Missing corp hand card definition");
+      expect(
+        privateHand.cards.find(
+          (card) => card.instanceId === expectedInstanceId,
+        ),
+      ).toMatchObject({
+        instanceId: expectedInstanceId,
+        definitionId: expectedDefinitionId,
+        title: CARD_DEFINITIONS_BY_ID[expectedDefinitionId]?.title,
+      });
+      expect(first.prepared.detail).not.toHaveProperty(
+        "developerPrivateHandsPreview",
+      );
       expect(
         persisted?.aiPlanRuntime?.residentPlanPortfolioBySide?.corp?.instances
           .length,

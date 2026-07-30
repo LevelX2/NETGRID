@@ -60,18 +60,19 @@ Neuplanung aus.
 
 Die privilegierte private Betreiber-Buganzeige zeigt absichtlich:
 
-- vollständige Karten und Hände beider Seiten;
+- die vollständige Hand der jeweils aktiven KI, nicht die Hand des Menschen;
 - Planning Heads, Varianten, Phasen und ausgewählte Linie;
 - Commitment, Lease, Rematerialisierung und Replangrund;
 - Coverage, Suchbudget, Kampagnenstatus und öffentliche Outcomes;
 - Live-/Vergleichsdaten.
 
-Für diese private Buganzeige gilt keine seitensichere
-Informationsbeschränkung. Der Server-Restarttest prüft sowohl den aktuellen
-`turn_plan_commitment`-Vertrag als auch vollständige Karteninstanz,
-Definition und Titel für Corp und Runner. Normale PlayerViews, PublicEvents,
-öffentliche Replays, Zuschauerpayloads und gewöhnliche Logs bleiben von
-dieser Betreiberansicht getrennt.
+Für die Daten der aktiven KI in dieser privaten Buganzeige gilt keine
+seitensichere Informationsbeschränkung. Der Server-Restarttest prüft sowohl
+den aktuellen `turn_plan_commitment`-Vertrag als auch Karteninstanz, Definition
+und Titel der aktiven KI-Hand und den Ausschluss einer zweiten
+Menschenhand-Payload. Normale PlayerViews, PublicEvents, öffentliche Replays,
+Zuschauerpayloads und gewöhnliche Logs bleiben von dieser Betreiberansicht
+getrennt.
 
 ## Testmatrix
 
@@ -137,7 +138,7 @@ Vollständige Rohdaten bleiben unversioniert unter `data/local/`.
 - Engine: 210 Testdateien, 1.822 Tests grün;
 - Server: 23 Testdateien, 214 Tests grün;
 - Shared: 1 Testdatei, 16 Tests grün;
-- Web: 71 Testdateien, 725 Tests grün;
+- Web: 72 Testdateien, 727 Tests grün;
 - gesamter Workspace-Typecheck: grün;
 - `check:ai`: null Hard Errors,
   `production=748`, null Runtime- und Typzyklen;
