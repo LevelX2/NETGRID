@@ -2577,6 +2577,116 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("converts a full agenda hand into meaningful central defense instead of drawing into discard", () => {
+    resetResidentPlanPortfolioMemory();
+    const stateVersion = 1;
+    const installHqIce = legalAction(
+      "install-data-wall-hq",
+      "corp",
+      "install_card",
+      "Install Data Wall on HQ",
+      { credits: 1, clicks: 1 },
+      {
+        source: "data-wall",
+        payload: {
+          cardId: "data-wall",
+          sourceDefinitionId: "onr_v1_237_data-wall",
+          serverId: "hq",
+          placement: "ice",
+          iceInstallBaseCost: 1,
+          iceInstallAdditionalCost: 0,
+          iceInstallReduction: 0,
+          iceInstallTotalCost: 1,
+          postInstallRezQuoteCardId: "data-wall",
+          postInstallRezQuoteTargetServerId: "hq",
+          postInstallRezQuoteProjectedServerId: "hq",
+          postInstallRezQuoteExpiresAtStateVersion: stateVersion,
+          postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
+          postInstallRezQuoteBaseCredits: 1,
+          postInstallRezQuoteFinalCredits: 1,
+          postInstallRezQuoteMandatoryAgendaPointCost: 0,
+        },
+      },
+    );
+    const draw = legalAction(
+      "draw",
+      "corp",
+      "draw_card",
+      "Draw a card",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action" },
+    );
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("corp", [draw, credit, installHqIce]);
+    input.playerView.own.clicks = 2;
+    input.playerView.own.credits = 5;
+    input.playerView.own.maxHandSize = 5;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.own.gripOrHq = [
+      visibleCard("agenda", "corp", "agenda", {
+        definitionId: "onr_v1_201_executive-extraction",
+        title: "Executive Extraction",
+        advancementRequirement: 3,
+        agendaPoints: 2,
+      }),
+      visibleCard("data-wall", "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        title: "Data Wall",
+        rezCost: 1,
+        strength: 0,
+        subtypes: ["wall"],
+      }),
+      ...corpOverflowFillers(3),
+    ];
+    input.playerView.servers = [
+      server("hq", [
+        visibleCard("hq-data-wall", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          title: "Data Wall",
+          rezCost: 1,
+          strength: 0,
+          subtypes: ["wall"],
+          rezzed: true,
+        }),
+      ]),
+      server("rd", [
+        visibleCard("rd-data-wall", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          title: "Data Wall",
+          rezCost: 1,
+          strength: 0,
+          subtypes: ["wall"],
+          rezzed: true,
+        }),
+      ]),
+      server("archives"),
+    ];
+    input.playerView.opponent.rig = [];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installHqIce.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toContain(
+      `plan_assessment_evidence:corp_agenda_capacity_defense_conversion:hq:${installHqIce.actionId}`,
+    );
+  });
+
   it("does not claim a blocked Corp upgrade placement as an executable hand-plan route", () => {
     resetResidentPlanPortfolioMemory();
     const install = legalAction(

@@ -98,7 +98,7 @@ Der Prozess stoppt ohne Fallback, wenn:
 `PREPARED -> RUN_FOLLOWUP_OWNER -> CORP_DRAW_CAPACITY ->
 RUNNER_SEARCH_BINDING -> MATCHPOINT_CONDUCTOR -> VERIFIED -> MERGED -> CLEANED`
 
-Genau ein Paket ist aktiv. Aktueller Zustand: `RUN_FOLLOWUP_OWNER`.
+Genau ein Paket ist aktiv. Aktueller Zustand: `CORP_DRAW_CAPACITY`.
 
 - F0 abgeschlossen mit Commit `d9dee38e2`.
 - F1 bindet den Engine-Discriminator
@@ -110,6 +110,20 @@ Genau ein Paket ist aktiv. Aktueller Zustand: `RUN_FOLLOWUP_OWNER`.
   Coverage-Vertrag sind fokussiert grün. Der AI-Typecheck ist mit explizit
   erhöhtem Node-Heap grün; der Standardscript-Aufruf erreichte zuvor nur das
   lokale 4-GB-Heaplimit und meldete keinen TypeScript-Befund.
+- F1 abgeschlossen mit Commit `8f7f7e70f`.
+- F2 trennt die Zuständigkeiten bewusst: Die Draw-Zulassung erkennt nur den
+  exakten Konflikt aus Handüberlauf, bekannter Agenda und bereits legaler,
+  qualitativ sinnvoller ICE-Konversion. Auswahl, Zielserver, Defense-Wert und
+  Routenpriorität bleiben beim Corp-Defense-Plan.
+- Der Defense-Plan besitzt dafür die Route
+  `agenda_capacity_defense_conversion`. Sie darf auch eine derzeit nicht
+  finanzierbare Rez-Kante als dosierte Tax-, Bluff- oder
+  Folgezugsvorbereitung installieren, benötigt aber eine aktuelle vollständige
+  Engine-Rez-Quote und ein ICE mit sichtbarem Stop-, Tax-, Damage- oder
+  Encounter-Disruption-Beitrag.
+- Kapazitätssichere Draws und echte Suchlagen ohne konkrete
+  Handkonvertierung bleiben zulässig. Die vier zuständigen Defense-, Draw-,
+  Modul- und Live-Runtime-Testdateien sind mit 330 Tests grün.
 
 ## Paketfolge
 

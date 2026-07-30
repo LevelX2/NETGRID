@@ -7596,9 +7596,12 @@ function buildCorpDomain(
                       ? 10
                       : route.progressKind === "score_material_capacity_release"
                         ? 10
-                        : route.progressKind === "staged_central_defense"
-                          ? 9
-                          : 1,
+                        : route.progressKind ===
+                            "agenda_capacity_defense_conversion"
+                          ? 10
+                          : route.progressKind === "staged_central_defense"
+                            ? 9
+                            : 1,
               evidenceCode:
                 route.disposition === "funding_only"
                   ? `corp_defense_exact_route_funding_required:${serverId}:${candidate.actionId}`
@@ -7606,11 +7609,14 @@ function buildCorpDomain(
                     ? `corp_scoreline_central_tax_allocation:${serverId}:${candidate.actionId}`
                     : route.progressKind === "score_material_capacity_release"
                       ? `corp_score_material_capacity_release:${serverId}:${candidate.actionId}`
-                      : route.progressKind === "staged_central_defense"
-                        ? `corp_staged_central_defense:${serverId}:${candidate.actionId}:rez_gap_${route.rezFundingGap}`
-                        : visibleAgendaExposure
-                          ? "engine_certified_visible_agenda_exposure_defense"
-                          : "engine_certified_global_defense_access_probability_reduced",
+                      : route.progressKind ===
+                          "agenda_capacity_defense_conversion"
+                        ? `corp_agenda_capacity_defense_conversion:${serverId}:${candidate.actionId}`
+                        : route.progressKind === "staged_central_defense"
+                          ? `corp_staged_central_defense:${serverId}:${candidate.actionId}:rez_gap_${route.rezFundingGap}`
+                          : visibleAgendaExposure
+                            ? "engine_certified_visible_agenda_exposure_defense"
+                            : "engine_certified_global_defense_access_probability_reduced",
             },
           ];
         }

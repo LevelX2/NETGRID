@@ -191,6 +191,32 @@ describe("Corp defensive draw context", () => {
     });
   });
 
+  it("does not draw into agenda overflow when a meaningful central ICE conversion is already legal", () => {
+    const input = drawInput(5, 5);
+    input.playerView.stateVersion = 5;
+    input.playerView.own.gripOrHq[0] = corpCard("hq-agenda", "agenda");
+    input.playerView.own.gripOrHq[1] = centralIce("hq-defense-ice");
+    const install = corpAction(
+      "corp.install.hq-defense-ice.hq",
+      "install_card",
+      { placement: "ice", serverId: "hq" },
+      "hq-defense-ice",
+    );
+    install.costs = [{ clicks: 1 }];
+    install.expiresAtStateVersion = 5;
+    input.legalActions.push(install);
+    input.playerView.legalActions.push(install);
+
+    expect(
+      corpMissingConcreteDefenseDrawNeed(
+        input,
+        draw,
+        undefined,
+        knownCentralAllocation("hq"),
+      ),
+    ).toBeUndefined();
+  });
+
   it("never re-ranks the known global central-defense selection for generic draw", () => {
     const input = drawInput(5, 3);
     input.playerView.own.gripOrHq.push(corpCard("hq-agenda", "agenda"));
@@ -512,6 +538,37 @@ describe("Corp defensive draw context", () => {
           cardsDrawn: 2,
           netHandDelta: 2,
         },
+      }),
+    ).toBeUndefined();
+  });
+
+  it("does not use a targeted cleanup draw to displace a known agenda when meaningful ICE is already installable", () => {
+    const setup = targetedScoreDefenseDrawSetup(5);
+    setup.input.playerView.own.gripOrHq[0] = corpCard("hq-agenda", "agenda");
+    setup.input.playerView.own.gripOrHq[1] = centralIce("remote-defense-ice");
+    setup.input.playerView.own.clicks = 3;
+    const install = corpAction(
+      "corp.install.remote-defense-ice.remote-1",
+      "install_card",
+      { placement: "ice", serverId: "remote_1" },
+      "remote-defense-ice",
+    );
+    install.costs = [{ clicks: 1 }];
+    install.expiresAtStateVersion = 13;
+    setup.input.legalActions.push(install);
+    setup.input.playerView.legalActions.push(install);
+    const need = {
+      ...setup.need,
+      baseline: {
+        ...setup.need.baseline,
+        availableCorpClicks: 3,
+      },
+    };
+
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...setup.args,
+        protectionNeed: need,
       }),
     ).toBeUndefined();
   });

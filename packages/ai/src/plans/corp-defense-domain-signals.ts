@@ -96,6 +96,7 @@ export type CorpGlobalDefenseInstallRouteAssessment =
         | "scoreline_central_tax_allocation"
         | "staged_central_defense"
         | "score_material_capacity_release"
+        | "agenda_capacity_defense_conversion"
         | "funding_required";
       rezFundingGap: number;
       projection: KnownCorpFundedIceInstallRouteProjection;
@@ -131,6 +132,7 @@ export function corpGlobalDefenseInstallRoute(
         | "scoreline_central_tax_allocation"
         | "staged_central_defense"
         | "score_material_capacity_release"
+        | "agenda_capacity_defense_conversion"
         | "funding_required";
       rezFundingGap: number;
       projection: KnownCorpFundedIceInstallRouteProjection;
@@ -384,10 +386,34 @@ export function corpGlobalDefenseInstallRouteAssessment(
       action.source,
       serverId,
     );
+  const agendaCapacityDefenseConversion =
+    (serverId === "hq" || serverId === "rd") &&
+    input.playerView.own.gripOrHq.length >= input.playerView.own.maxHandSize &&
+    input.playerView.own.gripOrHq.some(
+      (card) => card.known && card.type === "agenda",
+    ) &&
+    input.playerView.own.clicks >= 1 &&
+    sourceDefense.isVisibleIce &&
+    (sourceDefense.hasImmediateStop ||
+      sourceDefense.hasMeaningfulTaxOrDamage ||
+      sourceDefense.hasEncounterDisruption) &&
+    ((centralAllocation?.status === "known" &&
+      centralAllocation.selectedServerId === serverId) ||
+      (centralAllocation?.status !== "known" &&
+        structurallyLeastProtectedCentral)) &&
+    action.source !== "basic_action" &&
+    action.source !== "game_rule" &&
+    corpIceInstallHasCurrentCompleteRezQuote(
+      input,
+      action,
+      action.source,
+      serverId,
+    );
   if (
     (serverId === "hq" || serverId === "rd") &&
     centralAllocation?.status !== "known" &&
     !scoreMaterialCapacityRelease &&
+    !agendaCapacityDefenseConversion &&
     !boundedUnknownCentralCoverage
   ) {
     return {
@@ -504,7 +530,8 @@ export function corpGlobalDefenseInstallRouteAssessment(
       { numerator: 0, denominator: 1 },
     ) === 0 &&
     !scorelineCentralTaxAllocation &&
-    !scoreMaterialCapacityRelease
+    !scoreMaterialCapacityRelease &&
+    !agendaCapacityDefenseConversion
   ) {
     return {
       knowledge: "known",
@@ -565,6 +592,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
   const preferQualitativeSourceProgress =
     scorelineCentralTaxAllocation ||
     scoreMaterialCapacityRelease ||
+    agendaCapacityDefenseConversion ||
     boundedUnknownCentralCoverage ||
     (isEmptyCentral &&
       !hasResidentRemoteAgenda &&
@@ -656,10 +684,15 @@ export function corpGlobalDefenseInstallRouteAssessment(
     projection.preservesReserves &&
     sourceRezCredits !== undefined &&
     Math.max(0, sourceRezCredits - creditsAfterInstall) <= 3;
+  const agendaCapacityDefenseProgress =
+    agendaCapacityDefenseConversion &&
+    projection.preservesReserves &&
+    sourceRezCredits !== undefined;
   if (
     fundedStructuredCentralProgress ||
     scorelineCentralTaxProgress ||
     scoreMaterialCapacityProgress ||
+    agendaCapacityDefenseProgress ||
     stagedCentralProgress
   ) {
     return {
@@ -669,9 +702,11 @@ export function corpGlobalDefenseInstallRouteAssessment(
         ? "scoreline_central_tax_allocation"
         : scoreMaterialCapacityProgress
           ? "score_material_capacity_release"
-          : fundedStructuredCentralProgress
-            ? "funded_structured_central_defense"
-            : "staged_central_defense",
+          : agendaCapacityDefenseProgress
+            ? "agenda_capacity_defense_conversion"
+            : fundedStructuredCentralProgress
+              ? "funded_structured_central_defense"
+              : "staged_central_defense",
       rezFundingGap: rezFundingGap!,
       projection,
     };

@@ -155,6 +155,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
       | "scoreline_central_tax_allocation"
       | "staged_central_defense"
       | "score_material_capacity_release"
+      | "agenda_capacity_defense_conversion"
       | "funding_required";
     rezFundingGap?: number;
     projection: KnownCorpFundedIceInstallRouteProjection;
@@ -1970,6 +1971,8 @@ function exactInstallProjectionMatchesSignal(
         signal.installRoute?.progressKind ===
           "score_material_capacity_release" ||
         signal.installRoute?.progressKind ===
+          "agenda_capacity_defense_conversion" ||
+        signal.installRoute?.progressKind ===
           "funded_structured_central_defense",
     )
   ) {
@@ -3084,6 +3087,8 @@ function selectedExactGenericDefenseRoutes(
       (route.signal.installRoute?.progressKind ===
         "score_material_capacity_release" ||
         route.signal.installRoute?.progressKind ===
+          "agenda_capacity_defense_conversion" ||
+        route.signal.installRoute?.progressKind ===
           "funded_structured_central_defense"),
   );
   let eligibleRoutes = exactIceRoutes;
@@ -3782,6 +3787,8 @@ function isValidDefenseSignal(
             installRoute.progressKind === "scoreline_central_tax_allocation" ||
             installRoute.progressKind === "staged_central_defense" ||
             installRoute.progressKind === "score_material_capacity_release" ||
+            installRoute.progressKind ===
+              "agenda_capacity_defense_conversion" ||
             installRoute.progressKind === "funding_required") &&
           (installRoute.rezFundingGap === undefined ||
             knownNonNegativeInteger(installRoute.rezFundingGap)) &&
