@@ -140,7 +140,11 @@ export function discardKeepScore(
     corpHasVisibleAgendaDevelopmentTarget(input, dependencies);
   const corpConditionalPayoff =
     input.side === "corp"
-      ? corpConditionalPayoffKeepAdjustment(input, card.definitionId)
+      ? corpConditionalPayoffKeepAdjustment(
+          input,
+          card.definitionId,
+          duplicateCount,
+        )
       : { value: 0, evidence: [] as string[] };
 
   if (input.side === "corp") {
@@ -411,12 +415,10 @@ function runnerHasDeckBreakerCoverageUnavailableOutsideStack(
 function corpConditionalPayoffKeepAdjustment(
   input: AiDecisionInput,
   definitionId: string,
+  duplicateCount: number,
 ): { value: number; evidence: string[] } {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
-  const signals = new Set(
-    (hint as { tacticSignals?: readonly string[] } | undefined)
-      ?.tacticSignals ?? [],
-  );
+  const signals = cardSemanticSignals(hint);
   const runnerTags = input.playerView.opponent.tags;
   const ownAgendaPoints = input.playerView.own.agendaPoints;
   const reachableTagSource = corpHasReachableTagSource(input);
@@ -443,18 +445,33 @@ function corpConditionalPayoffKeepAdjustment(
     };
   }
   if (signals.has("tag.corp_persistent_source")) {
+    const value = diminishedConditionalEnablerValue(
+      runnerTags < 2 ? 240 : 120,
+      duplicateCount,
+    );
     return {
-      value: runnerTags < 2 ? 240 : 120,
-      evidence: ["discard_score:corp_tag_source_enabler"],
+      value,
+      evidence: [
+        "discard_score:corp_tag_source_enabler",
+        ...(duplicateCount > 1
+          ? ["discard_score:corp_conditional_enabler_duplicate_diminished"]
+          : []),
+      ],
     };
   }
   if (
     signals.has("tag.source") &&
     corpHasReachableCardWithAnySignal(input, ["tag.payoff", "damage.payoff"])
   ) {
+    const value = diminishedConditionalEnablerValue(320, duplicateCount);
     return {
-      value: 320,
-      evidence: ["discard_score:corp_tag_source_enabler"],
+      value,
+      evidence: [
+        "discard_score:corp_tag_source_enabler",
+        ...(duplicateCount > 1
+          ? ["discard_score:corp_conditional_enabler_duplicate_diminished"]
+          : []),
+      ],
     };
   }
   if (signals.has("risk.requires_tagged_runner") && runnerTags <= 0) {
@@ -480,6 +497,13 @@ function corpConditionalPayoffKeepAdjustment(
   return { value: 0, evidence: [] };
 }
 
+function diminishedConditionalEnablerValue(
+  fullValue: number,
+  duplicateCount: number,
+): number {
+  return Math.ceil(fullValue / Math.max(1, duplicateCount));
+}
+
 function corpHasReachableTagSource(input: AiDecisionInput): boolean {
   return corpHasReachableCardWithAnySignal(input, ["tag.source"]);
 }
@@ -500,7 +524,8 @@ function corpHasReachableCardWithAnySignal(
   if (
     activeVisibleCards.some(
       (card) =>
-        card.definitionId && cardHasAnyTacticSignal(card.definitionId, signals),
+        card.definitionId &&
+        cardHasAnySemanticSignal(card.definitionId, signals),
     )
   ) {
     return true;
@@ -521,21 +546,33 @@ function corpHasReachableCardWithAnySignal(
   }
   return snapshot.cards.some(
     (entry) =>
-      cardHasAnyTacticSignal(entry.cardId, signals) &&
+      cardHasAnySemanticSignal(entry.cardId, signals) &&
       entry.quantity > (visibleCountByDefinitionId.get(entry.cardId) ?? 0),
   );
 }
 
-function cardHasAnyTacticSignal(
+function cardHasAnySemanticSignal(
   definitionId: string,
   signals: readonly string[],
 ): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
-  const cardSignals = new Set(
-    (hint as { tacticSignals?: readonly string[] } | undefined)
-      ?.tacticSignals ?? [],
-  );
+  const cardSignals = cardSemanticSignals(hint);
   return signals.some((signal) => cardSignals.has(signal));
+}
+
+function cardSemanticSignals(hint: unknown): ReadonlySet<string> {
+  const structured = hint as
+    | {
+        tacticSignals?: readonly string[];
+        actionTacticSignals?: readonly string[];
+        functionSignals?: readonly string[];
+      }
+    | undefined;
+  return new Set([
+    ...(structured?.tacticSignals ?? []),
+    ...(structured?.actionTacticSignals ?? []),
+    ...(structured?.functionSignals ?? []),
+  ]);
 }
 
 function corpCardIsReviewedAdvancementBurst(definitionId: string): boolean {

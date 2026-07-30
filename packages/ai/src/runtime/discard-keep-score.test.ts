@@ -175,6 +175,67 @@ describe("discard keep score", () => {
     expect(paired.evidence).toContain("discard_score:corp_tag_source_enabler");
   });
 
+  it("recognizes an access-tag agenda through reviewed action/function signals", () => {
+    const markedAccounts = corpCard(
+      "onr_proteus_005_marked-accounts",
+      "agenda",
+    );
+    const payoff = corpCard("onr_v1_327_i-got-a-rock", "asset");
+    const result = score(
+      markedAccounts,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        agendaPoints: 3,
+        extraGrip: [payoff],
+      },
+    );
+
+    expect(result.evidence).toContain("discard_score:corp_tag_source_enabler");
+  });
+
+  it("applies diminishing conditional-enabler value to redundant Corp copies", () => {
+    const tagSource = corpCard("onr_v1_283_audit-of-call-records", "operation");
+    const duplicateTwo = {
+      ...tagSource,
+      instanceId: "tag-source-2",
+    };
+    const duplicateThree = {
+      ...tagSource,
+      instanceId: "tag-source-3",
+    };
+    const payoff = corpCard("onr_v1_327_i-got-a-rock", "asset");
+    const unique = score(
+      tagSource,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        agendaPoints: 3,
+        extraGrip: [payoff],
+      },
+    );
+    const redundant = score(
+      tagSource,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        agendaPoints: 3,
+        extraGrip: [duplicateTwo, duplicateThree, payoff],
+      },
+    );
+
+    expect(unique.baseValue).toBeGreaterThan(redundant.baseValue + 250);
+    expect(redundant.evidence).toContain(
+      "discard_score:corp_conditional_enabler_duplicate_diminished",
+    );
+  });
+
   it("ignores substring-only Corp discard role noise", () => {
     const benignRole = score(corpCard("benign-role", "operation"), [
       "neutral_support",
