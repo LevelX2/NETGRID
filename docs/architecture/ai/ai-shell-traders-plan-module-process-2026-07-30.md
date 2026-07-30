@@ -116,7 +116,7 @@ aber keine Scheduler-Sonderautorität erhalten.
 `PREPARED -> DOMAIN_AND_OWNER -> TARGET_AND_MU_POLICY ->
 CONDUCTOR_AND_DEBUG -> VERIFIED -> MERGED -> CLEANED`
 
-Genau ein Paket ist aktiv. Aktueller Zustand: `VERIFIED`.
+Der Paketprozess ist abgeschlossen. Endzustand: `CLEANED`.
 
 ## Paketfolge
 
@@ -297,6 +297,11 @@ Ergebnis:
   korrigiert: Ein konkreter Neustartgrund bleibt vor einer allgemein
   geplanten Informationsgrenze sichtbar. Der zweite Volltest ist vollständig
   grün.
+- Der Arbeitsbranch wurde per Fast-forward bis `018ab3285` nach `main`
+  integriert.
+- `C:\Projekte\NETGRID_AI_SHELL_TRADERS_PIPELINE` und der gemergte Branch
+  `codex/ai-shell-traders-pipeline` wurden entfernt. Der fremde detached
+  Baseline-Worktree blieb unangetastet.
 
 ## Automatische Fehlerbehandlung
 
