@@ -98,7 +98,7 @@ Der Prozess stoppt ohne Fallback, wenn:
 `PREPARED -> RUN_FOLLOWUP_OWNER -> CORP_DRAW_CAPACITY ->
 RUNNER_SEARCH_BINDING -> MATCHPOINT_CONDUCTOR -> VERIFIED -> MERGED -> CLEANED`
 
-Genau ein Paket ist aktiv. Aktueller Zustand: `RUNNER_SEARCH_BINDING`.
+Genau ein Paket ist aktiv. Aktueller Zustand: `MATCHPOINT_CONDUCTOR`.
 
 - F0 abgeschlossen mit Commit `d9dee38e2`.
 - F1 bindet den Engine-Discriminator
@@ -136,6 +136,17 @@ Genau ein Paket ist aktiv. Aktueller Zustand: `RUNNER_SEARCH_BINDING`.
   recycelt. Nicht passende oder nicht oberste Heap-Karten bleiben ohne
   Coverage-Owner. Die fünf zuständigen Runtime-, Choice-, Coverage- und
   Planmodul-Testdateien sind mit 271 Tests sowie AI-Typecheck grün.
+- F3 abgeschlossen mit Commit `af507ac78`.
+- F4 erhebt eine konkrete Breaker-Lücke für genau den betroffenen Remote auf
+  P2, wenn die öffentliche Stellung sowohl einen terminalen Punktestand als
+  auch einen sichtbar fortgeschrittenen unbekannten beziehungsweise
+  Agenda-Payload zeigt. Damit übernimmt weiterhin der Coverage-Plan die
+  Detailaktion; der Dirigent erhält nur das belegte Dringlichkeitssignal.
+- Im Matchpoint-Checkpoint gewinnt die exakt gebundene
+  Junkyard-BBS-/Rent-I-Con-Recovery bei 11 Credits gegen generische Economy.
+  Ohne Advancement bleibt dieselbe Lücke P5. Die sechs betroffenen
+  Coverage-, Terminal-Threat-, Contest-, Scheduler- und Planmodul-Testdateien
+  sind mit 271 Tests grün.
 
 ## Paketfolge
 

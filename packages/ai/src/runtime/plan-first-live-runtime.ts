@@ -168,6 +168,7 @@ import { buildRunnerRemoteTrashAccessContext } from "../simulation/remote-trash-
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 import { rolesMatch } from "./role-match";
 import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
+import { runnerTerminalContestThreat } from "./runner-terminal-contest-threat";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import { withDecisionLocalCorpPunishRouteQuotes } from "./corp-punish-route-quote-input";
 import { corpPurgeHasVisibleStrategicPressure } from "./corp-purge-impact";
@@ -13548,6 +13549,8 @@ function uniqueCoverageGaps(
   });
   for (const evaluation of runTargets) {
     if (evaluation.recommendation !== "find_breaker_first") continue;
+    const terminalRemoteCoverageThreat =
+      runnerCoverageGapIsTerminalRemoteThreat(input, evaluation);
     const preciseCoverage = missingBreakerCoverageKind(
       input.playerView,
       evaluation.targetServerId,
@@ -13577,12 +13580,15 @@ function uniqueCoverageGaps(
       gapId: `coverage:${role}`,
       requiredRole: role,
       targetServerId: evaluation.targetServerId,
-      priorityClass: evaluation.scoreThreat
-        ? "P2"
-        : visibleAnswer
-          ? "P4"
-          : "P5",
-      evidenceCode: evaluation.evidence[0] ?? `missing_${role}`,
+      priorityClass:
+        evaluation.scoreThreat || terminalRemoteCoverageThreat
+          ? "P2"
+          : visibleAnswer
+            ? "P4"
+            : "P5",
+      evidenceCode: terminalRemoteCoverageThreat
+        ? `terminal_remote_coverage:${evaluation.targetServerId}`
+        : (evaluation.evidence[0] ?? `missing_${role}`),
       deckHasAnswer,
       answerInHand: visibleAnswer !== undefined,
       ...(answerInstallCost !== undefined ? { answerInstallCost } : {}),
@@ -13677,6 +13683,31 @@ function uniqueCoverageGaps(
     }
   }
   return [...result.values()];
+}
+
+function runnerCoverageGapIsTerminalRemoteThreat(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  if (evaluation.targetKind !== "remote") return false;
+  const terminalThreat = runnerTerminalContestThreat(input);
+  if (!terminalThreat) return false;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === evaluation.targetServerId,
+  );
+  if (
+    !server?.root.some(
+      (card) =>
+        (card.known === false || card.type === "agenda") &&
+        (card.advancementCounters ?? 0) > 0,
+    )
+  ) {
+    return false;
+  }
+  return (
+    terminalThreat.kind === "opponent_matchpoint" ||
+    terminalThreat.remoteServerIds.includes(evaluation.targetServerId)
+  );
 }
 
 function runnerCoverageFundingActionIds(

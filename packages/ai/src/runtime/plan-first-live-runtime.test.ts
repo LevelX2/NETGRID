@@ -11227,6 +11227,140 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("prioritizes an exact recovery route for a publicly advanced matchpoint remote over generic economy", () => {
+    resetResidentPlanPortfolioMemory();
+    const junkyard = legalAction(
+      "use-junkyard-bbs",
+      "runner",
+      "activated_card_ability",
+      "Junkyard BBS nutzen",
+      { credits: 1, clicks: 1 },
+      {
+        source: "junkyard-bbs",
+        payload: {
+          cardId: "junkyard-bbs",
+          sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+          targetCardId: "rent-i-con-top",
+          targetCardDefinitionId: "onr_classic_031_rent-i-con",
+          cardImplementationTopTrashTargetId: "rent-i-con-top",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const run = legalAction(
+      "run-remote",
+      "runner",
+      "start_run",
+      "Run remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const input = aiInput("runner", [run, junkyard, credit]);
+    input.playerView.own.credits = 11;
+    input.playerView.own.clicks = 2;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.own.rig = [
+      visibleCard("junkyard-bbs", "runner", "resource", {
+        definitionId: "onr_v1_165_junkyard-bbs",
+      }),
+    ];
+    input.playerView.own.heapOrArchives = [
+      visibleCard("rent-i-con-top", "runner", "program", {
+        definitionId: "onr_classic_031_rent-i-con",
+        title: "Rent-I-Con",
+        subtypes: ["icebreaker", "ai"],
+        rulesText: "1 credit: Break 1 ice subroutine.",
+      }),
+    ];
+    const remote = server("remote_1", [
+      visibleCard("remote-wall", "corp", "ice", {
+        rezzed: true,
+        subtypes: ["wall"],
+      }),
+    ]);
+    remote.root = [
+      {
+        instanceId: "advanced-remote-root",
+        known: false,
+        advancementCounters: 2,
+      },
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      remote,
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      scoreThreat: false,
+      score: 150,
+      evidence: ["missing_coverage:breaker_wall"],
+    };
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [],
+          searchAccess: { tools: [] },
+          economyBankTools: [],
+        },
+      }),
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: junkyard.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P2",
+        "plan_assessment_evidence:terminal_remote_coverage:remote_1",
+        "plan_step_capability:search_answer_breaker_wall",
+      ]),
+    );
+
+    resetResidentPlanPortfolioMemory();
+    const unadvanced = structuredClone(input);
+    unadvanced.playerView.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    )!.root[0]!.advancementCounters = 0;
+    liveContext({
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [],
+          searchAccess: { tools: [] },
+          economyBankTools: [],
+        },
+      }),
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(unadvanced, {});
+    const unadvancedCoverage = residentPlanPortfolioSnapshot(
+      unadvanced,
+    )?.instances.find(
+      (instance) => instance.moduleId === "runner.rig_and_coverage",
+    )?.moduleState as
+      | { gap?: { priorityClass?: string; evidenceCode?: string } }
+      | undefined;
+    expect(unadvancedCoverage?.gap).toMatchObject({
+      priorityClass: "P5",
+      evidenceCode: "missing_coverage:breaker_wall",
+    });
+  });
+
   it("does not recycle a rejected coverage search as generic draw support", () => {
     resetResidentPlanPortfolioMemory();
     const temple = legalAction(
