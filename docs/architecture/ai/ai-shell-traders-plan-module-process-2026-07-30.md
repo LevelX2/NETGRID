@@ -116,7 +116,7 @@ aber keine Scheduler-Sonderautorität erhalten.
 `PREPARED -> DOMAIN_AND_OWNER -> TARGET_AND_MU_POLICY ->
 CONDUCTOR_AND_DEBUG -> VERIFIED -> MERGED -> CLEANED`
 
-Genau ein Paket ist aktiv. Aktueller Zustand: `PREPARED`.
+Genau ein Paket ist aktiv. Aktueller Zustand: `DOMAIN_AND_OWNER`.
 
 ## Paketfolge
 
@@ -165,6 +165,16 @@ Done-Gate:
 Commit:
 
 - `feat(ai): own Shell Traders delayed install pipeline`
+
+Ergebnis:
+
+- `runner.shell_traders_pipeline` besitzt die exakt gebundenen
+  Vorbereitungs- und Counter-Aktionen.
+- Quelle, Ziel, LegalAction, Counter, Coverage und MU sind Teil des
+  typisierten Domainvertrags.
+- Generische Handentwicklung lässt diese Aktionen aus; abgelehnte
+  Fertigstellungen bleiben ausdrücklich beim Fachmodul.
+- Positive und negative Modul-/Signalgates sind grün.
 
 ### S2 – Ziel-, Counter- und MU-/Ersatzpolitik
 

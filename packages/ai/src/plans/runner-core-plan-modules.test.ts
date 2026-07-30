@@ -18,6 +18,7 @@ describe("Runner core plan modules", () => {
       createRunnerCorePlanModules().map((module) => module.moduleId),
     ).toEqual([
       "runner.score_installed_agenda",
+      "runner.shell_traders_pipeline",
       "runner.resource_lifecycle",
       "runner.credit_bank",
       "runner.recurring_economy",
@@ -25,6 +26,83 @@ describe("Runner core plan modules", () => {
       "runner.rig_and_coverage",
       "runner.defense_and_recovery",
     ]);
+  });
+
+  it("binds a Shell Traders pipeline to its exact source, target, and action", () => {
+    const module = coreModule("runner.shell_traders_pipeline");
+    const prepare = candidate(
+      "prepare-dwarf",
+      "trigger_ability",
+      "card.persistent_development",
+      "onr_v1_176_the-shell-traders",
+    );
+    prepare.sourceCardInstanceId = "shell-traders-1";
+    const runnerContext = context([prepare], {
+      shellTradersPipelines: [
+        {
+          pipelineId: "shell-traders-1:dwarf-1:prepare",
+          phase: "prepare",
+          sourceCardInstanceId: "shell-traders-1",
+          sourceDefinitionId: "onr_v1_176_the-shell-traders",
+          targetCardInstanceId: "dwarf-1",
+          targetDefinitionId: "onr_v1_107_dwarf",
+          targetCardType: "program",
+          actionIds: [prepare.actionId],
+          priorityClass: "P2",
+          value: 12,
+          shellCountersBefore: 0,
+          shellCountersAfterAction: 3,
+          targetInstallCost: 5,
+          targetMemoryCost: 1,
+          freeMemory: 1,
+          replacementAssessment: {
+            status: "not_needed",
+            requiredMemory: 0,
+            selectedProgramInstanceIds: [],
+            freedMemory: 0,
+            displacedValue: 0,
+          },
+          coverageBinding: {
+            gapId: "coverage:wall:remote-1",
+            requiredRole: "breaker_wall",
+            targetServerId: "remote-1",
+          },
+          targetRoles: ["breaker_wall"],
+          evidenceCodes: [
+            "runner_shell_traders_coverage:breaker_wall:remote-1",
+          ],
+        },
+      ],
+    });
+    const [proposal] = module.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+
+    expect(proposal).toMatchObject({
+      moduleId: "runner.shell_traders_pipeline",
+      target: {
+        kind: "card",
+        id: "dwarf-1",
+        sourceCardInstanceId: "shell-traders-1",
+      },
+      initialViability: "ready",
+    });
+    expect(
+      module
+        .materialize(instance, {} as never, runnerContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["prepare-dwarf"]);
+  });
+
+  it("does not invent a Shell Traders pipeline without a domain signal", () => {
+    const module = coreModule("runner.shell_traders_pipeline");
+    const prepare = candidate(
+      "prepare-dwarf",
+      "trigger_ability",
+      "card.persistent_development",
+      "onr_v1_176_the-shell-traders",
+    );
+
+    expect(module.discover(context([prepare], {}))).toEqual([]);
   });
 
   it("keeps credit-bank cashouts outside generic funding-route search", () => {
@@ -1524,6 +1602,7 @@ function context(
     creditBanks?: RunnerCorePlanDomain["creditBanks"];
     installedAgendaScores?: RunnerCorePlanDomain["installedAgendaScores"];
     resourceLifecycle?: RunnerCorePlanDomain["resourceLifecycle"];
+    shellTradersPipelines?: RunnerCorePlanDomain["shellTradersPipelines"];
     defense?: Partial<RunnerCorePlanDomain["defense"]>;
   },
 ): PlanSchedulerContext {
@@ -1533,6 +1612,7 @@ function context(
     creditBanks: overrides.creditBanks ?? [],
     installedAgendaScores: overrides.installedAgendaScores ?? [],
     resourceLifecycle: overrides.resourceLifecycle ?? [],
+    shellTradersPipelines: overrides.shellTradersPipelines ?? [],
     defense: {
       activeTags: 0,
       visibleTagPunish: false,

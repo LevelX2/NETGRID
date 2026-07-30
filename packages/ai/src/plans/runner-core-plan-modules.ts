@@ -205,6 +205,39 @@ export type RunnerResourceLifecycleSignal = {
   evidenceCodes: string[];
 };
 
+export type RunnerShellTradersPipelineSignal = {
+  pipelineId: string;
+  phase: "prepare" | "progress" | "hold";
+  sourceCardInstanceId: string;
+  sourceDefinitionId: "onr_v1_176_the-shell-traders";
+  targetCardInstanceId: string;
+  targetDefinitionId: string;
+  targetCardType: "program" | "hardware";
+  actionIds: string[];
+  rejectedActionIds?: string[];
+  priorityClass: "P2" | "P4" | "P5";
+  value: number;
+  shellCountersBefore: number;
+  shellCountersAfterAction: number;
+  targetInstallCost: number;
+  targetMemoryCost: number;
+  freeMemory: number;
+  replacementAssessment: Readonly<{
+    status: "not_needed" | "available" | "harmful" | "unknown";
+    requiredMemory: number;
+    selectedProgramInstanceIds: string[];
+    freedMemory: number;
+    displacedValue: number;
+  }>;
+  coverageBinding?: Readonly<{
+    gapId: string;
+    requiredRole: RunnerCoverageGapSignal["requiredRole"];
+    targetServerId?: string;
+  }>;
+  targetRoles: string[];
+  evidenceCodes: string[];
+};
+
 export type RunnerCorePlanDomain = {
   fundingNeeds: RunnerFundingNeedSignal[];
   coverageGaps: RunnerCoverageGapSignal[];
@@ -213,6 +246,7 @@ export type RunnerCorePlanDomain = {
   recurringEconomy?: RunnerRecurringEconomySignal[];
   installedAgendaScores?: RunnerInstalledAgendaScoreSignal[];
   resourceLifecycle?: RunnerResourceLifecycleSignal[];
+  shellTradersPipelines?: RunnerShellTradersPipelineSignal[];
 };
 
 export type RunnerCorePlanDependencies = {
@@ -286,6 +320,11 @@ type ResourceLifecycleState = {
   phase: RunnerResourceLifecycleSignal["phase"];
   signal: RunnerResourceLifecycleSignal;
 };
+type ShellTradersPipelineState = {
+  kind: "shell_traders_pipeline";
+  phase: RunnerShellTradersPipelineSignal["phase"];
+  signal: RunnerShellTradersPipelineSignal;
+};
 
 export function createRunnerCorePlanModules(
   dependencies: RunnerCorePlanDependencies = {},
@@ -294,6 +333,7 @@ export function createRunnerCorePlanModules(
     dependencies.rolesForDefinitionId ?? rolesForDeckDoctrineCard;
   return [
     installedAgendaScoreModule(),
+    shellTradersPipelineModule(),
     resourceLifecycleModule(),
     creditBankModule(),
     recurringEconomyModule(),
@@ -301,6 +341,82 @@ export function createRunnerCorePlanModules(
     coverageModule(rolesForDefinitionId),
     defenseModule(),
   ];
+}
+
+function shellTradersPipelineModule(): PlanModule {
+  return {
+    moduleId: "runner.shell_traders_pipeline",
+    side: "runner",
+    discover: (context) =>
+      (domain(context).shellTradersPipelines ?? []).map((signal) =>
+        proposal({
+          moduleId: "runner.shell_traders_pipeline",
+          dedupeKey: signal.pipelineId,
+          moduleState: {
+            kind: "shell_traders_pipeline",
+            phase: signal.phase,
+            signal,
+          } satisfies ShellTradersPipelineState,
+          priorityClass: signal.priorityClass,
+          target: {
+            kind: "card",
+            id: signal.targetCardInstanceId,
+            sourceCardInstanceId: signal.sourceCardInstanceId,
+          },
+          routeExists:
+            shellTradersPipelineCandidates(context, signal).length > 0,
+          blockerCode:
+            signal.phase === "hold"
+              ? "shell_traders_pipeline_held"
+              : "shell_traders_exact_route_unavailable",
+          evidenceCode:
+            signal.evidenceCodes[0] ??
+            "runner_shell_traders_pipeline_visible_state",
+        }),
+      ),
+    assess: (instance, context, portfolio) => {
+      const signal = state<ShellTradersPipelineState>(instance).signal;
+      const candidates = shellTradersPipelineCandidates(context, signal);
+      return assessment(
+        instance,
+        signal.priorityClass,
+        candidates.length > 0,
+        signal.value,
+        portfolio.executorInstanceId,
+      );
+    },
+    materialize: (instance, _assessment, context) => {
+      const signal = state<ShellTradersPipelineState>(instance).signal;
+      const candidates = shellTradersPipelineCandidates(context, signal);
+      return {
+        step: {
+          stepId: `${instance.instanceId}:${signal.phase}:${signal.targetCardInstanceId}`,
+          capability: {
+            capabilityId: `shell_traders_${signal.phase}`,
+            semanticActionTypes: [
+              ...new Set(
+                candidates.map((entry) => entry.candidate.semanticActionType),
+              ),
+            ],
+            legalActionTypes: ["trigger_ability"],
+            requiredSourceDefinitionIds: [signal.sourceDefinitionId],
+          },
+          target: {
+            kind: "card",
+            id: signal.targetCardInstanceId,
+            sourceCardInstanceId: signal.sourceCardInstanceId,
+          },
+          purpose:
+            signal.phase === "prepare"
+              ? "Prepare the exact program or hardware target for delayed free installation."
+              : signal.phase === "progress"
+                ? "Progress the exact prepared target without sacrificing a more valuable rig."
+                : "Hold the prepared target until its completion or replacement is useful.",
+        },
+        candidates,
+      };
+    },
+  };
 }
 
 function resourceLifecycleModule(): PlanModule {
@@ -1288,6 +1404,29 @@ function runnerFundingParentIsResidentAndMaterial(
     typeof moduleState.signal.marginalValue === "number" &&
     moduleState.signal.marginalValue > 0
   );
+}
+
+function shellTradersPipelineCandidates(
+  context: PlanSchedulerContext,
+  signal: RunnerShellTradersPipelineSignal,
+): PlanMaterialization["candidates"] {
+  const actionIds = new Set(signal.actionIds);
+  return context.actionCandidates
+    .filter(
+      (candidate) =>
+        actionIds.has(candidate.actionId) &&
+        candidate.actionType === "trigger_ability" &&
+        candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
+        !context.actionDispositions?.some(
+          (disposition) =>
+            disposition.actionId === candidate.actionId &&
+            disposition.disposition === "explicitly_nonproductive",
+        ),
+    )
+    .map((candidate) => ({
+      candidate,
+      stepValue: signal.value,
+    }));
 }
 
 function bankCandidates(

@@ -120,6 +120,7 @@ import {
   knownInstallRouteHasUsefulEffectBlockedByFunding,
   type CorpDefenseDomainSignalFacts,
 } from "../plans/corp-defense-domain-signals";
+import { buildRunnerShellTradersPipelineSignals } from "./shell-traders-plan-signals";
 import {
   collectCorpActionDispositions,
   type CorpActionDispositionContributorFacts,
@@ -1750,6 +1751,18 @@ export function runnerActionDispositions(
       );
     }
   }
+  for (const signal of domain.shellTradersPipelines ?? []) {
+    for (const actionId of signal.rejectedActionIds ?? []) {
+      add(
+        actionId,
+        "runner.shell_traders_pipeline",
+        signal.evidenceCodes.find(
+          (evidenceCode) =>
+            evidenceCode.includes("rejected") || evidenceCode.includes("holds"),
+        ) ?? "runner_shell_traders_pipeline_action_held",
+      );
+    }
+  }
   if (domain.defense.forgoUnsafeRunCapacity) {
     for (const candidate of candidates) {
       if (candidate.semanticActionType !== "run.start") continue;
@@ -2500,6 +2513,12 @@ function buildRunnerDomain(
     _deckCapabilities,
     strategicIntent,
   );
+  const shellTradersPipelines = buildRunnerShellTradersPipelineSignals({
+    input,
+    candidates,
+    coverageGaps,
+    handDevelopment,
+  });
   const recurringEconomy = runnerRecurringEconomySignals(input, candidates);
   const resourceLifecycle = runnerResourceLifecycleSignals(input, candidates);
   const installedAgendaScores = runnerInstalledAgendaScoreSignals(
@@ -3635,6 +3654,10 @@ function buildRunnerDomain(
           ...(signal.rejectedActionIds ?? []),
         ]),
         ...(installedAgendaScores ?? []).flatMap((signal) => signal.actionIds),
+        ...shellTradersPipelines.flatMap((signal) => [
+          ...signal.actionIds,
+          ...(signal.rejectedActionIds ?? []),
+        ]),
       ]);
       if (
         candidate !== undefined &&
@@ -3994,6 +4017,7 @@ function buildRunnerDomain(
     recurringEconomy,
     resourceLifecycle,
     installedAgendaScores,
+    shellTradersPipelines,
     defense,
     terminalWins:
       input.playerView.opponent.deckCount === 0 &&
