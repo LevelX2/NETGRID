@@ -1,6 +1,6 @@
 # Vier KI-Folgearbeiten vor dem Shell-Traders-Planmodul
 
-Status: in Umsetzung
+Status: verifiziert, bereit zur lokalen Integration
 
 Quelle:
 
@@ -98,7 +98,7 @@ Der Prozess stoppt ohne Fallback, wenn:
 `PREPARED -> RUN_FOLLOWUP_OWNER -> CORP_DRAW_CAPACITY ->
 RUNNER_SEARCH_BINDING -> MATCHPOINT_CONDUCTOR -> VERIFIED -> MERGED -> CLEANED`
 
-Genau ein Paket ist aktiv. Aktueller Zustand: `MATCHPOINT_CONDUCTOR`.
+Genau ein Paket ist aktiv. Aktueller Zustand: `VERIFIED`.
 
 - F0 abgeschlossen mit Commit `d9dee38e2`.
 - F1 bindet den Engine-Discriminator
@@ -147,6 +147,32 @@ Genau ein Paket ist aktiv. Aktueller Zustand: `MATCHPOINT_CONDUCTOR`.
   Ohne Advancement bleibt dieselbe Lücke P5. Die sechs betroffenen
   Coverage-, Terminal-Threat-, Contest-, Scheduler- und Planmodul-Testdateien
   sind mit 271 Tests grün.
+- F4 abgeschlossen mit Commit `ba43e5f57`.
+- F5 hat die zunächst zu breite Corp-Handkonvertierung auf einen
+  Defense-Plan-eigenen Vertrag zurückgeführt: Ein Draw wird nur verdrängt,
+  wenn der Defense-Plan selbst eine aktuelle legale
+  `agenda_capacity_defense_conversion` materialisiert.
+- Ein leerer Zentralserver bleibt auch bei unbekannter Zentralallokation ein
+  gebundenes Defense-Ziel. Das ICE darf als dosierte, noch nicht zwingend
+  finanzierbare Rez-Vorbereitung installiert werden, sofern eine vollständige
+  Engine-Rez-Quote und sichtbarer Defense-Nutzen vorliegen.
+- Der Zugdirigent lässt eine bloß redundante zusätzliche
+  Handdruck-Installation nur dann hinter einen konkreten Score-Remote-Plan
+  zurücktreten, wenn beide Zentralserver bereits ICE besitzen, eine konkrete
+  Agenda-Installationsaktion gebunden ist und noch mindestens drei Klicks für
+  eine kohärente Linie vorhanden sind. Dadurch bleiben echte
+  Missing-Coverage-Züge und kürzere Defense-Züge unangetastet.
+- Zwei ältere Erwartungen wurden bewusst aktualisiert: Bei vollem HQ und
+  leerem beziehungsweise belastetem Zentralserver ist die konkrete
+  Defense-Installation wertvoller als ein Basis-Credit oder eine
+  nicht-handentlastende Rez-Aktion. Der Score-Remote-Checkpoint behält dagegen
+  seinen Vorrang vor redundantem Zentral-Layering.
+- Gesamtverifikation:
+  - 74 Decision-Checkpoint-Dateien mit 415 Tests grün;
+  - vollständige KI-Suite mit 538 Dateien und 4.380 Tests grün;
+  - `@netgrid/ai`-Typecheck grün;
+  - `check:ai` grün, einschließlich Hint-Metadaten und Source-Struktur;
+  - Paketgrenzen grün (`1.990` geprüfte Dateien).
 
 ## Paketfolge
 
