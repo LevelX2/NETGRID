@@ -1,6 +1,6 @@
 # Corp-Agenda-, Defense- und Discard-Remediation
 
-Status: aktiv – A1 bis A6 abgeschlossen, A7 aktiv
+Status: abgeschlossen – A1 bis A7 abgeschlossen
 
 Quelle: laufendes Match `match_5f7924e4893ba855`, StateVersion 65,
 33 von 33 Corp-KI-Entscheidungen geprüft.
@@ -226,6 +226,17 @@ Done-Gate:
 - Merge nach `main` erfolgreich.
 - Worktree fehlt in Git-Liste und Dateisystem.
 - Gemergter Branch ist mit `git branch -d` entfernt.
+
+Ergebnis:
+
+- Der Arbeitsbranch wurde per Fast-Forward von `7fccb04c1` bis
+  `b7e0419ec` lokal nach `main` integriert.
+- Der fokussierte Match-Checkpoint blieb auf `main` mit 7 von 7 Tests grün;
+  auch der AI-Typecheck blieb grün.
+- Der Worktree `C:\Projekte\NETGRID_AI_AGENDA_DEFENSE_DISCARD` wurde aus der
+  Git-Worktree-Liste und anschließend vollständig aus dem Dateisystem
+  entfernt.
+- Der gemergte Branch `codex/ai-agenda-defense-discard` wurde gelöscht.
 
 ## Automatische Fehlerbehandlung
 
