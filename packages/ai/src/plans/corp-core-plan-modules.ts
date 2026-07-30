@@ -1752,7 +1752,7 @@ function defenseCandidates(
           action.expiresAtStateVersion ===
             context.input.playerView.stateVersion &&
           action.payload?.placement === "ice" &&
-          action.payload.serverId === "new_remote" &&
+          action.payload.serverId === signal.serverId &&
           action.targetRequirements.length === 0 &&
           (action.choiceRequirements?.length ?? 0) === 0 &&
           totalClicks === 1 &&
@@ -3776,7 +3776,7 @@ function isValidDefenseSignal(
     return (
       hasOnlyKeys(value, SCORE_PROTECTION_STAGING_INSTALL_SIGNAL_KEYS) &&
       value.phase === "install_ice" &&
-      value.serverId === "new_remote" &&
+      nonEmptyString(value.serverId) &&
       nonEmptyString(value.parentProjectId) &&
       nonEmptyString(value.parentNeedId) &&
       scorePriorityClass(value.delegatedPriorityClass) &&

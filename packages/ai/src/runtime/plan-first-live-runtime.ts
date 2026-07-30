@@ -7682,6 +7682,24 @@ function corpCandidateProjectsCardDraw(
   );
 }
 
+function corpResidentScoreAgendaInstanceId(
+  previous: ResidentPlanPortfolio | undefined,
+  input: AiDecisionInput,
+): string | undefined {
+  const root = previous?.instances.find(
+    (instance) =>
+      instance.instanceId === previous.rootForegroundInstanceId &&
+      instance.moduleId === "corp.score_agenda",
+  );
+  if (!root) return undefined;
+  return input.playerView.own.gripOrHq.find(
+    (card) =>
+      card.definitionId !== undefined &&
+      root.dedupeKey.includes(`:${card.instanceId}:`) &&
+      visibleCardIsAgenda(input, card),
+  )?.instanceId;
+}
+
 function buildCorpDomain(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -7816,9 +7834,37 @@ function buildCorpDomain(
       };
     },
   );
+  const residentScoreAgendaInstanceId = corpResidentScoreAgendaInstanceId(
+    previous,
+    input,
+  );
+  const residentPreparedScoreProject =
+    residentScoreAgendaInstanceId === undefined
+      ? undefined
+      : concreteScoreProjects.find(
+          (project) =>
+            project.agendaInstanceId === residentScoreAgendaInstanceId &&
+            project.phase === "install_agenda" &&
+            project.serverId !== undefined &&
+            project.serverId !== "new_remote" &&
+            project.feasible,
+        );
+  const continuityBoundScoreProjects = residentPreparedScoreProject
+    ? concreteScoreProjects.map((project) =>
+        project.phase === "install_agenda" &&
+        project.serverId === residentPreparedScoreProject.serverId &&
+        project.agendaInstanceId !== residentScoreAgendaInstanceId
+          ? {
+              ...project,
+              feasible: false,
+              evidenceCode: `corp_resident_score_parent_dominates_sibling_agenda:${residentScoreAgendaInstanceId}:${project.serverId}`,
+            }
+          : project,
+      )
+    : concreteScoreProjects;
   const scoreMaterialMissing =
     ownAgendas === 0 &&
-    concreteScoreProjects.length === 0 &&
+    continuityBoundScoreProjects.length === 0 &&
     knownAgendaInventory !== undefined &&
     knownAgendaInventory.remainingStealableAgendaPoints !== 0;
   const scoreMaterialDrawSupportAvailable =
@@ -7826,7 +7872,7 @@ function buildCorpDomain(
     legalCorpDraw &&
     corpScoreMaterialDrawHasSafeConversionWindow(input);
   const scoreProjects: CorpScoreProjectSignal[] = [
-    ...concreteScoreProjects,
+    ...continuityBoundScoreProjects,
     ...(scoreMaterialMissing
       ? [
           {
@@ -7851,6 +7897,12 @@ function buildCorpDomain(
       (project) =>
         project.protectionNeed !== undefined &&
         !corpScoreProtectionIsSatisfied(input, project) &&
+        !(
+          project.phase === "install_agenda" &&
+          project.serverId !== undefined &&
+          project.serverId !== "new_remote" &&
+          corpRemoteHasBoundedStagedIce(input, project.serverId)
+        ) &&
         !(
           project.openingRush?.status === "qualified" &&
           project.openingRush.admission === "accepted"
@@ -7943,14 +7995,24 @@ function buildCorpDomain(
         const action = input.legalActions.find(
           (legalAction) => legalAction.actionId === signal.actionId,
         );
-        const creditCost =
+        const installCreditCost =
           action?.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0) ??
           Number.MAX_SAFE_INTEGER;
-        return [{ signal, creditCost }];
+        const rezCreditCost =
+          action?.payload?.postInstallRezQuoteComplete === true &&
+          typeof action.payload.postInstallRezQuoteFinalCredits === "number"
+            ? action.payload.postInstallRezQuoteFinalCredits
+            : Number.MAX_SAFE_INTEGER;
+        return [
+          {
+            signal,
+            totalStagingCreditCost: installCreditCost + rezCreditCost,
+          },
+        ];
       })
       .sort(
         (left, right) =>
-          left.creditCost - right.creditCost ||
+          left.totalStagingCreditCost - right.totalStagingCreditCost ||
           technicalIdCompare(left.signal.actionId, right.signal.actionId),
       )[0]?.signal;
     if (stagingInstallSignal) {
@@ -9183,8 +9245,6 @@ function scoreProjectForCandidate(
     const matchpointTarget =
       input.playerView.own.agendaPoints + agendaPoints >=
       input.playerView.agendaPointsToWin;
-    const developmentClickAvailable =
-      input.playerView.own.clicks >= 2 || deadlinePressure;
     const scoreActionSemanticsKnown = hasExactNonNegativeCostProfile(candidate);
     const protectionNeed =
       serverId !== undefined && !sameTurnCloseout && scoreActionSemanticsKnown
@@ -9198,6 +9258,13 @@ function scoreProjectForCandidate(
             deadlinePressure,
           )
         : undefined;
+    const boundedStagedScoreWindow =
+      serverId !== undefined &&
+      serverId !== "new_remote" &&
+      corpRemoteHasBoundedStagedIce(input, serverId);
+    const developmentClickAvailable =
+      input.playerView.own.clicks >= (boundedStagedScoreWindow ? 1 : 2) ||
+      deadlinePressure;
     const protectedScoreWindow =
       sameTurnCloseout ||
       corpScoreProtectionNeedIsSatisfied(
@@ -9205,7 +9272,8 @@ function scoreProjectForCandidate(
         protectionNeed,
         projectId,
         serverId,
-      );
+      ) ||
+      boundedStagedScoreWindow;
     const fundingGap =
       protectionNeed?.baseline.knowledge === "known"
         ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
@@ -9247,9 +9315,11 @@ function scoreProjectForCandidate(
                   ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
                   : fundingGap !== undefined && fundingGap > 0
                     ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                    : protectedScoreWindow
-                      ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
-                      : `corp_score_protection_required:${serverId ?? "unbound"}`,
+                    : boundedStagedScoreWindow
+                      ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
+                      : protectedScoreWindow
+                        ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
+                        : `corp_score_protection_required:${serverId ?? "unbound"}`,
       },
     ];
   }
@@ -10353,15 +10423,13 @@ function corpScoreProtectionStagingInstallSignal(
   | undefined {
   const need = project.protectionNeed;
   if (
-    project.serverId !== "new_remote" ||
-    need?.targetServerId !== "new_remote" ||
-    need.baseline.knowledge !== "unknown" ||
-    need.baseline.unknownReason !== "subset_assessment_unknown" ||
-    scan.directInstallRouteState.knowledge !== "unknown" ||
+    !project.serverId ||
+    need?.targetServerId !== project.serverId ||
+    !scoreProtectionStagingMayBackstopDirectRoute(need, scan) ||
     !candidateIsVisibleCorpIceInstall(input, candidate) ||
     !candidate.sourceCardInstanceId ||
     !candidate.sourceDefinitionId ||
-    !candidateTargetIds(candidate).includes("new_remote")
+    !candidateTargetIds(candidate).includes(project.serverId)
   ) {
     return undefined;
   }
@@ -10372,8 +10440,7 @@ function corpScoreProtectionStagingInstallSignal(
   const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
   if (
     source?.definitionId !== candidate.sourceDefinitionId ||
-    definition?.type !== "ice" ||
-    !definition.mechanics.includes("end_the_run")
+    definition?.type !== "ice"
   ) {
     return undefined;
   }
@@ -10387,9 +10454,15 @@ function corpScoreProtectionStagingInstallSignal(
     action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.timingPoint !== input.playerView.timingPoint ||
     action.payload?.placement !== "ice" ||
-    action.payload.serverId !== "new_remote" ||
+    action.payload.serverId !== project.serverId ||
     action.targetRequirements.length > 0 ||
-    (action.choiceRequirements?.length ?? 0) > 0
+    (action.choiceRequirements?.length ?? 0) > 0 ||
+    !corpIceInstallHasCurrentCompleteRezQuote(
+      input,
+      action,
+      candidate.sourceCardInstanceId,
+      project.serverId,
+    )
   ) {
     return undefined;
   }
@@ -10412,10 +10485,16 @@ function corpScoreProtectionStagingInstallSignal(
   ) {
     return undefined;
   }
+  if (
+    project.serverId === "new_remote" &&
+    !corpNewRemoteScoreProtectionPairFitsCurrentTurn(input, project, action)
+  ) {
+    return undefined;
+  }
   return {
     kind: "score_protection_staging_install",
     defenseId: `score-protection-staging-install:${project.projectId}:${candidate.actionId}`,
-    serverId: "new_remote",
+    serverId: project.serverId,
     phase: "install_ice",
     parentProjectId: project.projectId,
     parentNeedId: need.needId,
@@ -10423,8 +10502,91 @@ function corpScoreProtectionStagingInstallSignal(
     actionId: candidate.actionId,
     sourceCardInstanceId: candidate.sourceCardInstanceId,
     sourceDefinitionId: candidate.sourceDefinitionId,
-    evidenceCode: `score_protection_staging_install:${project.projectId}:new_remote`,
+    evidenceCode: `score_protection_staging_install:${project.projectId}:${project.serverId}:bounded_deterrence`,
   };
+}
+
+function scoreProtectionStagingMayBackstopDirectRoute(
+  need: CorpFundedRemoteAccessRiskNeed,
+  scan: CorpScoreProtectionInstallRouteScan,
+): boolean {
+  if (scan.productiveRoutes.length > 0) return false;
+  if (
+    need.baseline.knowledge === "unknown" &&
+    need.baseline.unknownReason === "subset_assessment_unknown" &&
+    scan.directInstallRouteState.knowledge === "unknown"
+  ) {
+    return true;
+  }
+  return (
+    need.baseline.knowledge === "known" &&
+    need.baseline.protection.protectsScore === false &&
+    scan.directInstallRouteState.knowledge === "known" &&
+    scan.directInstallRouteState.disposition === "effect_missing"
+  );
+}
+
+function corpIceInstallHasCurrentCompleteRezQuote(
+  input: AiDecisionInput,
+  action: LegalAction,
+  sourceCardInstanceId: string,
+  targetServerId: string,
+): boolean {
+  const payload = action.payload;
+  return (
+    payload?.postInstallRezQuoteComplete === true &&
+    payload.postInstallRezQuoteCardId === sourceCardInstanceId &&
+    payload.postInstallRezQuoteTargetServerId === targetServerId &&
+    payload.postInstallRezQuoteExpiresAtStateVersion ===
+      input.playerView.stateVersion &&
+    typeof payload.postInstallRezQuoteFinalCredits === "number" &&
+    Number.isSafeInteger(payload.postInstallRezQuoteFinalCredits) &&
+    payload.postInstallRezQuoteFinalCredits >= 0
+  );
+}
+
+function corpNewRemoteScoreProtectionPairFitsCurrentTurn(
+  input: AiDecisionInput,
+  project: CorpScoreProjectSignal,
+  iceAction: LegalAction,
+): boolean {
+  const agendaAction = input.legalActions.find(
+    (action) =>
+      project.actionIds?.includes(action.actionId) === true &&
+      action.side === "corp" &&
+      action.type === "install_card" &&
+      action.payload?.placement === "root" &&
+      action.payload.serverId === "new_remote" &&
+      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      action.timingPoint === input.playerView.timingPoint,
+  );
+  if (!agendaAction) return false;
+  const total = (action: LegalAction, resource: "clicks" | "credits") =>
+    action.costs.reduce((sum, cost) => sum + (cost[resource] ?? 0), 0);
+  return (
+    total(agendaAction, "clicks") + total(iceAction, "clicks") <=
+      input.playerView.own.clicks &&
+    total(agendaAction, "credits") + total(iceAction, "credits") <=
+      input.playerView.own.credits
+  );
+}
+
+function corpRemoteHasBoundedStagedIce(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) =>
+      candidate.id === serverId &&
+      !["hq", "rd", "archives"].includes(candidate.id),
+  );
+  return (
+    server?.ice.some(
+      (ice) =>
+        ice.definitionId !== undefined &&
+        CARD_DEFINITIONS_BY_ID[ice.definitionId]?.type === "ice",
+    ) === true
+  );
 }
 
 function knownInstallRouteHasUsefulEffectBlockedByFunding(

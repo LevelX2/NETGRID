@@ -246,7 +246,7 @@ function exactScoreProtectionStagingCandidate(
       candidate.semanticActionType === "install.card" &&
       candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
       candidate.sourceDefinitionId === signal.sourceDefinitionId &&
-      candidateTargetIds(candidate).includes("new_remote"),
+      candidateTargetIds(candidate).includes(signal.serverId),
   );
 }
 
@@ -609,7 +609,7 @@ function createScoreProtectionStagingLine(
       baseStateVersion: params.stateIdentity.stateVersion,
       projectedFrameKey: turnPlanningFingerprint("defense-frame", {
         lineId,
-        targetServerId: "new_remote",
+        targetServerId: signal.serverId,
         fundingGapAfter,
       }),
       linePrefixHash: turnPlanningFingerprint("defense-prefix", [
@@ -651,7 +651,7 @@ function createScoreProtectionStagingLine(
   return {
     lineId,
     defenseId: signal.defenseId,
-    targetServerId: "new_remote",
+    targetServerId: signal.serverId,
     disposition: "stage_for_later_rez",
     currentActionId: signal.actionId,
     nodes: [
