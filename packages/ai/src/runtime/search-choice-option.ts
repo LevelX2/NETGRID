@@ -24,6 +24,7 @@ export type SearchChoiceScoringContext = {
   readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
   readonly requiredCoverage?: RequiredCapabilityKind;
   readonly preferredServerId?: string;
+  readonly preferredCardInstanceId?: string;
 };
 
 export function selectedSearchChoiceOptionIds(
@@ -56,6 +57,19 @@ export function selectedSearchChoiceOptionIds(
     context,
     hasDirectCoverageAnswer,
   );
+  const preferredOption = context.preferredCardInstanceId
+    ? selectableOptions.find(
+        (option) => option.card?.instanceId === context.preferredCardInstanceId,
+      )
+    : undefined;
+  if (preferredOption) {
+    return [
+      preferredOption,
+      ...ranked.filter((option) => option.id !== preferredOption.id),
+    ]
+      .slice(0, count)
+      .map((option) => option.id);
+  }
   if (!isTakeOneArrangeRestChoice(choice)) {
     return ranked.slice(0, count).map((option) => option.id);
   }

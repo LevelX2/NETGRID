@@ -372,6 +372,12 @@ export function selectedChoicesForDecision(
         ...(coverageBinding
           ? {
               requiredCoverage: coverageBinding.requiredCoverage,
+              ...(coverageBinding.targetCardInstanceId
+                ? {
+                    preferredCardInstanceId:
+                      coverageBinding.targetCardInstanceId,
+                  }
+                : {}),
             }
           : {}),
         ...(preferredServerId ? { preferredServerId } : {}),
@@ -834,6 +840,7 @@ function runnerCoverageSearchChoiceBinding(
       actionId: string;
       requiredCoverage: RequiredCapabilityKind;
       serverId?: string;
+      targetCardInstanceId?: string;
     }
   | undefined {
   if (input.side !== "runner") return undefined;
@@ -857,6 +864,8 @@ function runnerCoverageSearchChoiceBinding(
             actionId?: unknown;
             sourceCardInstanceId?: unknown;
             sourceDefinitionId?: unknown;
+            targetCardInstanceId?: unknown;
+            targetDefinitionId?: unknown;
           }>;
         };
       }
@@ -883,7 +892,15 @@ function runnerCoverageSearchChoiceBinding(
         typeof candidate.sourceCardInstanceId === "string" &&
         typeof candidate.sourceDefinitionId === "string" &&
         choice.source.includes(`:${candidate.sourceCardInstanceId}:`) &&
-        choice.source.includes(`:${candidate.sourceDefinitionId}:`),
+        choice.source.includes(`:${candidate.sourceDefinitionId}:`) &&
+        (candidate.targetCardInstanceId === undefined ||
+          (typeof candidate.targetCardInstanceId === "string" &&
+            choice.options.some(
+              (option) =>
+                option.card?.instanceId === candidate.targetCardInstanceId &&
+                (candidate.targetDefinitionId === undefined ||
+                  option.card?.definitionId === candidate.targetDefinitionId),
+            ))),
     ) ?? [];
   if (bindings.length !== 1) {
     throw coverageSearchChoiceBindingFailure(
@@ -906,6 +923,9 @@ function runnerCoverageSearchChoiceBinding(
     requiredCoverage: moduleState.gap.requiredRole as RequiredCapabilityKind,
     ...(typeof moduleState.gap.targetServerId === "string"
       ? { serverId: moduleState.gap.targetServerId }
+      : {}),
+    ...(typeof binding.targetCardInstanceId === "string"
+      ? { targetCardInstanceId: binding.targetCardInstanceId }
       : {}),
   };
 }

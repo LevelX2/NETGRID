@@ -10937,6 +10937,296 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("binds a heap search to the concrete breaker gap, server, source and recovery target", () => {
+    resetResidentPlanPortfolioMemory();
+    const gideon = legalAction(
+      "play-gideons-pawnshop",
+      "runner",
+      "play_event",
+      "Gideon's Pawnshop spielen",
+      { credits: 1, clicks: 1 },
+      {
+        source: "gideon-card",
+        payload: {
+          cardId: "gideon-card",
+          sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
+          cardImplementationEffectKind: "search_trash_to_grip",
+          cardImplementationSearchFilter: "any_card",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const run = legalAction(
+      "run-hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const input = aiInput("runner", [run, gideon, credit]);
+    input.decisionId = "heap-coverage-search:1";
+    input.playerView.stateVersion = 1;
+    input.playerView.own.credits = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("gideon-card", "runner", "event", {
+        definitionId: "onr_v1_089_gideons-pawnshop",
+      }),
+    ];
+    input.playerView.own.heapOrArchives = [
+      visibleCard("rent-i-con-heap", "runner", "program", {
+        definitionId: "onr_classic_031_rent-i-con",
+        title: "Rent-I-Con",
+        subtypes: ["icebreaker", "ai"],
+        rulesText: "1 credit: Break 1 ice subroutine.",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq", [
+        visibleCard("hq-code-gate", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["code gate"],
+        }),
+      ]),
+      server("rd"),
+      server("archives"),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget("run-hq", "hq"),
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      scoreThreat: true,
+      score: 500,
+      evidence: ["missing_coverage:breaker_code_gate"],
+    };
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [
+            {
+              cardId: "onr_classic_031_rent-i-con",
+              title: "Rent-I-Con",
+              coverage: ["universal"],
+              risks: [],
+              restrictions: [],
+              quantityKnownInDeck: 1,
+              locations: ["discarded"],
+              confidence: "high",
+              evidence: ["test_visible_heap_breaker"],
+            },
+          ],
+          searchAccess: {
+            tools: [],
+            canSearchProgramsNow: false,
+            canSearchBreakersNow: false,
+            evidence: [],
+          },
+          economyBankTools: [],
+        },
+      }),
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: gideon.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P2",
+        "plan_step_capability:search_answer_breaker_code_gate",
+      ]),
+    );
+    const executor = residentPlanPortfolioSnapshot(input)?.instances.find(
+      (instance) => instance.moduleId === "runner.rig_and_coverage",
+    );
+    expect(executor?.moduleState).toMatchObject({
+      phase: "search_answer",
+      gap: {
+        requiredRole: "breaker_code_gate",
+        targetServerId: "hq",
+        directSearchActionIds: [gideon.actionId],
+        directSearchChoiceBindings: [
+          {
+            actionId: gideon.actionId,
+            sourceCardInstanceId: "gideon-card",
+            sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
+            targetCardInstanceId: "rent-i-con-heap",
+            targetDefinitionId: "onr_classic_031_rent-i-con",
+          },
+        ],
+      },
+    });
+
+    const resolve = legalAction(
+      "resolve-gideon-search",
+      "runner",
+      "resolve_choice",
+      "Choose a heap card",
+      { credits: 0, clicks: 0 },
+    );
+    const choiceInput = aiInput("runner", [resolve]);
+    choiceInput.decisionId = "heap-coverage-search:2";
+    choiceInput.playerView.stateVersion = 2;
+    choiceInput.playerView.pendingChoice = {
+      choiceId: "gideon-search-choice",
+      side: "runner",
+      kind: "select_cards",
+      source:
+        "p3_37.search_trash_to_grip:gideon-card:onr_v1_089_gideons-pawnshop:any_card:private:2",
+      prompt: "Choose a heap card",
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 2,
+      visibility: "hidden_info_barrier",
+      options: [
+        {
+          id: "choose-bound-rent-i-con",
+          label: "Rent-I-Con",
+          card: visibleCard("rent-i-con-heap", "runner", "program", {
+            definitionId: "onr_classic_031_rent-i-con",
+          }),
+        },
+        {
+          id: "choose-other-breaker",
+          label: "Other universal breaker",
+          card: visibleCard("other-breaker", "runner", "program", {
+            definitionId: "onr_v1_007_blink",
+          }),
+        },
+      ],
+    };
+    expect(
+      selectedChoicesForDecision(choiceInput, resolve, {
+        evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+        evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+        discardKeepScore: () => ({ total: 0 }),
+        selectedRunnerProgramInstallTrashOptionIds: () => [],
+        selectedRunnerForcedProgramTrashOptionIds: () => [],
+        selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+        extractAiFeatures: () => ({
+          credits: 4,
+          memoryRemaining: 4,
+          rigRoles: new Set(),
+          rigDefinitionIds: new Set(),
+        }),
+        rolesForCardId: () => ["breaker_universal"],
+      } as Parameters<typeof selectedChoicesForDecision>[2]),
+    ).toEqual({
+      choiceId: "gideon-search-choice",
+      selectedOptionIds: ["choose-bound-rent-i-con"],
+    });
+  });
+
+  it("binds exact top-heap recovery only when that target closes the current breaker gap", () => {
+    resetResidentPlanPortfolioMemory();
+    const junkyard = legalAction(
+      "use-junkyard-bbs",
+      "runner",
+      "activated_card_ability",
+      "Junkyard BBS nutzen",
+      { credits: 1, clicks: 1 },
+      {
+        source: "junkyard-bbs",
+        payload: {
+          cardId: "junkyard-bbs",
+          sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+          targetCardId: "rent-i-con-top",
+          targetCardDefinitionId: "onr_classic_031_rent-i-con",
+          cardImplementationTopTrashTargetId: "rent-i-con-top",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const run = legalAction(
+      "run-remote",
+      "runner",
+      "start_run",
+      "Run remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const input = aiInput("runner", [run, junkyard, credit]);
+    input.playerView.own.credits = 4;
+    input.playerView.own.rig = [
+      visibleCard("junkyard-bbs", "runner", "resource", {
+        definitionId: "onr_v1_165_junkyard-bbs",
+      }),
+    ];
+    input.playerView.own.heapOrArchives = [
+      visibleCard("rent-i-con-top", "runner", "program", {
+        definitionId: "onr_classic_031_rent-i-con",
+        title: "Rent-I-Con",
+        subtypes: ["icebreaker", "ai"],
+        rulesText: "1 credit: Break 1 ice subroutine.",
+      }),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      scoreThreat: true,
+      score: 500,
+      evidence: ["missing_coverage:breaker_wall"],
+    };
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [],
+          searchAccess: { tools: [] },
+          economyBankTools: [],
+        },
+      }),
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: junkyard.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toContain(
+      "plan_step_capability:search_answer_breaker_wall",
+    );
+
+    resetResidentPlanPortfolioMemory();
+    const wrongTop = structuredClone(input);
+    wrongTop.playerView.own.heapOrArchives = [
+      visibleCard("economy-top", "runner", "event", {
+        definitionId: "onr_classic_037_finders-keepers",
+      }),
+    ];
+    const rejected = liveContext({
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [],
+          searchAccess: { tools: [] },
+          economyBankTools: [],
+        },
+      }),
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(wrongTop, {});
+    expect(rejected.reasonCode).not.toBe("plan_first.runner.rig_and_coverage");
+    expect(rejected.evidence).not.toContain(
+      "plan_step_capability:search_answer_breaker_wall",
+    );
+  });
+
   it("does not recycle a rejected coverage search as generic draw support", () => {
     resetResidentPlanPortfolioMemory();
     const temple = legalAction(

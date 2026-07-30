@@ -167,6 +167,7 @@ import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { buildRunnerRemoteTrashAccessContext } from "../simulation/remote-trash-access-context";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 import { rolesMatch } from "./role-match";
+import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import { withDecisionLocalCorpPunishRouteQuotes } from "./corp-punish-route-quote-input";
 import { corpPurgeHasVisibleStrategicPressure } from "./corp-purge-impact";
@@ -1087,6 +1088,7 @@ function bindSelectedCoverageSearchAction(
           directSearchActionIds?: Array<unknown>;
           directSearchChoiceBindings?: Array<{
             actionId?: unknown;
+            targetCardInstanceId?: unknown;
           }>;
           rejectedSearchActionIds?: Array<unknown>;
         };
@@ -13561,15 +13563,16 @@ function uniqueCoverageGaps(
       answerInstallCost === undefined
         ? undefined
         : Math.max(0, answerInstallCost - input.playerView.own.credits);
-    const deckHasAnswer =
-      visibleAnswer !== undefined ||
-      runnerDeckHasCoverageAnswer(deckCapabilities, role);
     const supportActions = coverageSupportActionIds(
       input,
       candidates,
       deckCapabilities,
       role,
     );
+    const deckHasAnswer =
+      visibleAnswer !== undefined ||
+      runnerDeckHasCoverageAnswer(deckCapabilities, role) ||
+      supportActions.directSearchActionIds.length > 0;
     result.set(role, {
       gapId: `coverage:${role}`,
       requiredRole: role,
@@ -13643,6 +13646,10 @@ function uniqueCoverageGaps(
         deckCapabilities,
         role,
       );
+      const deckHasAnswer =
+        state.inDeckKnown ||
+        state.inHand ||
+        supportActions.directSearchActionIds.length > 0;
       result.set(role, {
         gapId: `coverage:${role}`,
         requiredRole: role,
@@ -13654,7 +13661,7 @@ function uniqueCoverageGaps(
           coverageSearchInterrupt && state.searchableNow
             ? `visible_${coverage}_coverage_search_interrupt`
             : `deck_strategy_open_${coverage}_coverage`,
-        deckHasAnswer: state.inDeckKnown || state.inHand,
+        deckHasAnswer,
         answerInHand: visibleAnswer !== undefined,
         ...(answerInstallCost !== undefined ? { answerInstallCost } : {}),
         ...(fundingGap !== undefined ? { fundingGap } : {}),
@@ -13716,15 +13723,19 @@ function coverageSupportActionIds(
   | "searchEngineSetupActionIds"
   | "drawForAnswerActionIds"
 > {
-  const deckHasAnswer = runnerDeckHasCoverageAnswer(
+  const deckHasStackAnswer = runnerDeckHasCoverageAnswer(
     deckCapabilities,
     requiredRole,
   );
+  const recoveryBindings = candidates.flatMap((candidate) => {
+    const target = runnerCoverageRecoveryTarget(input, candidate, requiredRole);
+    return target ? [{ candidate, target }] : [];
+  });
   const searchTools = (
     deckCapabilities.runner?.searchAccess.tools ?? []
   ).filter((tool) => tool.canSearchBreakers);
   const searchToolIds = new Set(searchTools.map((tool) => tool.cardId));
-  const matchingSearchCandidates = candidates.filter((candidate) => {
+  const matchingStackSearchCandidates = candidates.filter((candidate) => {
     const sourceDefinitionId = runnerCandidateSourceDefinitionId(
       input,
       candidate,
@@ -13735,23 +13746,39 @@ function coverageSupportActionIds(
       candidate.semanticActionType !== "install.card"
     );
   });
-  const directSearchCandidates = deckHasAnswer ? matchingSearchCandidates : [];
-  const matchingSearchActionIds = new Set(
-    matchingSearchCandidates.map((candidate) => candidate.actionId),
+  const stackSearchCandidates = deckHasStackAnswer
+    ? matchingStackSearchCandidates
+    : [];
+  const directSearchCandidates = uniqueBy(
+    [
+      ...stackSearchCandidates,
+      ...recoveryBindings.map((binding) => binding.candidate),
+    ],
+    (candidate) => candidate.actionId,
   );
-  const searchEngineSetupCandidates = (deckHasAnswer ? candidates : []).filter(
-    (candidate) => {
-      const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-        input,
-        candidate,
-      );
-      return (
-        candidate.semanticActionType === "install.card" &&
-        sourceDefinitionId !== undefined &&
-        searchToolIds.has(sourceDefinitionId)
-      );
-    },
+  const recoveryByActionId = new Map(
+    recoveryBindings.map((binding) => [
+      binding.candidate.actionId,
+      binding.target,
+    ]),
   );
+  const matchingSearchActionIds = new Set([
+    ...matchingStackSearchCandidates.map((candidate) => candidate.actionId),
+    ...recoveryBindings.map((binding) => binding.candidate.actionId),
+  ]);
+  const searchEngineSetupCandidates = (
+    deckHasStackAnswer ? candidates : []
+  ).filter((candidate) => {
+    const sourceDefinitionId = runnerCandidateSourceDefinitionId(
+      input,
+      candidate,
+    );
+    return (
+      candidate.semanticActionType === "install.card" &&
+      sourceDefinitionId !== undefined &&
+      searchToolIds.has(sourceDefinitionId)
+    );
+  });
   const searchEngineSetupActionIds = new Set(
     searchEngineSetupCandidates.map((candidate) => candidate.actionId),
   );
@@ -13769,19 +13796,30 @@ function coverageSupportActionIds(
         input,
         candidate,
       );
+      const recoveryTarget = recoveryByActionId.get(candidate.actionId);
       return sourceCardInstanceId && sourceDefinitionId
         ? [
             {
               actionId: candidate.actionId,
               sourceCardInstanceId,
               sourceDefinitionId,
+              ...(recoveryTarget
+                ? {
+                    targetCardInstanceId: recoveryTarget.instanceId,
+                    ...(recoveryTarget.definitionId
+                      ? {
+                          targetDefinitionId: recoveryTarget.definitionId,
+                        }
+                      : {}),
+                  }
+                : {}),
             },
           ]
         : [];
     }),
-    rejectedSearchActionIds: deckHasAnswer
+    rejectedSearchActionIds: deckHasStackAnswer
       ? []
-      : matchingSearchCandidates.map((candidate) => candidate.actionId),
+      : matchingStackSearchCandidates.map((candidate) => candidate.actionId),
     searchEngineSetupActionIds: searchEngineSetupCandidates.map(
       (candidate) => candidate.actionId,
     ),
@@ -13797,6 +13835,57 @@ function coverageSupportActionIds(
       )
       .map((candidate) => candidate.actionId),
   };
+}
+
+function runnerCoverageRecoveryTarget(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  requiredRole: RunnerCorePlanDomain["coverageGaps"][number]["requiredRole"],
+): VisibleCard | undefined {
+  if (
+    candidate.semanticActionType === "install.card" ||
+    (candidate.actionType !== "play_event" &&
+      candidate.actionType !== "activated_card_ability" &&
+      candidate.actionType !== "trigger_ability")
+  ) {
+    return undefined;
+  }
+  const sourceDefinitionId = runnerCandidateSourceDefinitionId(
+    input,
+    candidate,
+  );
+  const hint = sourceDefinitionId
+    ? AI_HINTS_BY_CARD.get(sourceDefinitionId)
+    : undefined;
+  const recoveryKind =
+    hint?.functionSignals?.includes("setup.top_trash_recovery") === true
+      ? "top"
+      : hint?.functionSignals?.includes("setup.card_recovery") === true ||
+          hint?.functionSignals?.includes("setup.recovery") === true
+        ? "search"
+        : undefined;
+  if (!recoveryKind) return undefined;
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  const exactTargetCardId =
+    typeof action?.payload?.targetCardId === "string"
+      ? action.payload.targetCardId
+      : typeof action?.payload?.cardImplementationTopTrashTargetId === "string"
+        ? action.payload.cardImplementationTopTrashTargetId
+        : undefined;
+  const visibleHeapCards = input.playerView.own.heapOrArchives.filter(
+    (card) => card.known,
+  );
+  const targets =
+    recoveryKind === "top" || exactTargetCardId
+      ? visibleHeapCards.filter((card) => card.instanceId === exactTargetCardId)
+      : visibleHeapCards;
+  return targets.find((card) =>
+    visibleCardCoversRequiredCoverage(card, requiredRole, (cardId) =>
+      rolesForDeckDoctrineCard(cardId ?? ""),
+    ),
+  );
 }
 
 function runnerDeckHasCoverageAnswer(

@@ -119,6 +119,8 @@ export type RunnerCoverageGapSignal = {
     actionId: string;
     sourceCardInstanceId: string;
     sourceDefinitionId: string;
+    targetCardInstanceId?: string;
+    targetDefinitionId?: string;
   }>;
   rejectedSearchActionIds?: string[];
   searchEngineSetupActionIds: string[];

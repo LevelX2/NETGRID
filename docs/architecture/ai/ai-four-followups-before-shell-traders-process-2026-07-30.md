@@ -98,7 +98,7 @@ Der Prozess stoppt ohne Fallback, wenn:
 `PREPARED -> RUN_FOLLOWUP_OWNER -> CORP_DRAW_CAPACITY ->
 RUNNER_SEARCH_BINDING -> MATCHPOINT_CONDUCTOR -> VERIFIED -> MERGED -> CLEANED`
 
-Genau ein Paket ist aktiv. Aktueller Zustand: `CORP_DRAW_CAPACITY`.
+Genau ein Paket ist aktiv. Aktueller Zustand: `RUNNER_SEARCH_BINDING`.
 
 - F0 abgeschlossen mit Commit `d9dee38e2`.
 - F1 bindet den Engine-Discriminator
@@ -124,6 +124,18 @@ Genau ein Paket ist aktiv. Aktueller Zustand: `CORP_DRAW_CAPACITY`.
 - Kapazitätssichere Draws und echte Suchlagen ohne konkrete
   Handkonvertierung bleiben zulässig. Die vier zuständigen Defense-, Draw-,
   Modul- und Live-Runtime-Testdateien sind mit 330 Tests grün.
+- F2 abgeschlossen mit Commit `19dc43a27`.
+- F3 bindet Stack-Suchen und sichtbare Heap-Recovery nur dann als
+  Coverage-Support, wenn sie die konkrete fehlende Breaker-Klasse abdecken.
+  Top-of-Heap-Recovery benötigt zusätzlich die exakte aktuelle Zielkarte.
+- Planproposal und Choice-Fortsetzung tragen Action-, Source-, Coverage-,
+  Server- und – soweit vor der Wahl bekannt – Karteninstanzbindung. Die
+  Auswahl der gebundenen Karteninstanz ist verbindlich; ein bloßer
+  Scoring-Bonus kann das Ziel nicht mehr verdrängen.
+- Eine abgelehnte Stack-Suche wird nicht als generischer Draw-Support
+  recycelt. Nicht passende oder nicht oberste Heap-Karten bleiben ohne
+  Coverage-Owner. Die fünf zuständigen Runtime-, Choice-, Coverage- und
+  Planmodul-Testdateien sind mit 271 Tests sowie AI-Typecheck grün.
 
 ## Paketfolge
 
