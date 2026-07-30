@@ -16,8 +16,12 @@
   aus.
 - `corp.create_score_window` kann vollständige Same-Turn-Scorepfade aus
   Installation, Aktionsgewinn, Advancement-Platzierung, Countertransfer und
-  Basic Advances generisch kombinieren. Ungeschützte Agenda-Installationen
-  sind nur bei garantiertem Closeout zulässig.
+  Basic Advances generisch kombinieren. Gewöhnliche ungeschützte
+  Agenda-Installationen sind nur bei garantiertem Closeout zulässig. Eine
+  eng gebundene Same-Turn-Linie aus Defense-ICE und exakt zugehöriger Agenda
+  darf stattdessen ein bezahlbares Stop-ICE oder dosiert eine sichtbare
+  Steuer-/Disruptionswirkung als gestuften Schutz akzeptieren; dies bleibt
+  vollständig im Score-/Defense-Plan und wird im nächsten Zug neu bewertet.
 - Corp-Entscheidungsfenster bewerten Rez-Kosten gegen sichtbaren marginalen
   Tax und Stop-Wirkung, Mehrkarten-Draw getrennt vom kontextuellen ersten Draw
   und Basic Credits gegen eine konkrete Überschussgrenze. Wiederholter
@@ -171,6 +175,13 @@
   als an den exakten Defense-Parent gebundener Economy-Bedarf; Wirkung und
   Reserve werden getrennt und nur mit Engine-zertifizierten Quotes bewertet.
   Unbekannte Kosten bleiben fail-closed.
+- Besteuernde oder disruptive ICE-Dubletten ohne unmittelbaren Stop-Effekt
+  können in einer laufenden Scoreline auf der letzten Aktion als zusätzliche
+  HQ-/R&D-Schicht zugewiesen werden. Dafür verlangt der Defense-Plan einen
+  sichtbaren Scoring-Remote, exakte Zentralzuweisung, vollständige
+  Installations-/Rez-Quote und keine sichtbare passende Breaker-Antwort. Der
+  Pfad bewahrt stärkere Stop-ICE-Ressourcen für Scoring-Remotes und darf
+  weder P1/P2 noch eine sichere Scorelinie verdrängen.
 - Bei `Loan from Chiba` gehören Erwerb und Entwicklung zum Economy-Modul.
   Halten, Verlassen und die dafür nötige Zahlung beziehungsweise das
   Verlustrisiko gehören nach der Installation in einen

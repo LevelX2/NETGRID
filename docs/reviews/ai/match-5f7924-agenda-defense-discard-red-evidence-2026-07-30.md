@@ -13,13 +13,13 @@ Runtime-SQLite capturt. Jeder Capture meldete `warmupDriftCount = 0`.
 Future-Events oder gegnerische Hidden-Info sind nicht Bestandteil der
 Entscheidungseingaben.
 
-| Fixture | Decision | StateVersion | Vertrag vor Fix |
-|---|---:|---:|---|
-| `cp-5f7924-00-opening-central-defense-control-d3.json` | 3 | 3 | Data Wall vor HQ über Defense-Plan |
-| `cp-5f7924-01-turn7-agenda-defense-d23.json` | 23 | 44 | Agenda oder ICE am gebundenen neuen Remote statt Draw |
-| `cp-5f7924-02-turn9-agenda-defense-d28.json` | 28 | 55 | Agenda oder ICE am gebundenen neuen Remote statt Credit |
-| `cp-5f7924-03-marked-accounts-discard-d32.json` | 32 | 59 | Marked Accounts behalten, eine von drei Jack Attacks abwerfen |
-| `cp-5f7924-04-conditional-upgrade-discard-control-d26.json` | 26 | 47 | inaktive Dedicated Response Team abwerfen |
+| Fixture                                                     | Decision | StateVersion | Vertrag vor Fix                                               |
+| ----------------------------------------------------------- | -------: | -----------: | ------------------------------------------------------------- |
+| `cp-5f7924-00-opening-central-defense-control-d3.json`      |        3 |            3 | Data Wall vor HQ über Defense-Plan                            |
+| `cp-5f7924-01-turn7-agenda-defense-d23.json`                |       23 |           44 | Agenda oder ICE am gebundenen neuen Remote statt Draw         |
+| `cp-5f7924-02-turn9-agenda-defense-d28.json`                |       28 |           55 | Agenda oder ICE am gebundenen neuen Remote statt Credit       |
+| `cp-5f7924-03-marked-accounts-discard-d32.json`             |       32 |           59 | Marked Accounts behalten, eine von drei Jack Attacks abwerfen |
+| `cp-5f7924-04-conditional-upgrade-discard-control-d26.json` |       26 |           47 | inaktive Dedicated Response Team abwerfen                     |
 
 ## Unveränderter aktueller Code
 
@@ -89,3 +89,38 @@ produktiven Discard-Keep-Bewertung.
 
 Die drei historischen Zielerwartungen bleiben für den Fix unverändert. Ein
 späteres Grün muss aus produktiver Plan-/Cleanup-Logik entstehen.
+
+## Grüner Abschlussstand
+
+Die Zielverträge sind ohne Fixture-Abschwächung grün:
+
+- Zug 7 beginnt mit einer gebundenen ICE-zu-Agenda-Linie; nach Anwendung des
+  ersten exakten Engine-Schritts installiert die Neuplanung genau die vom
+  Root-Plan gebundene Agenda.
+- Zug 9 beginnt dieselbe gebundene Linie. Nach ICE und Agenda verwendet die
+  KI die dritte Aktion für Jack Attack vor R&D. Die Auswahl bleibt im
+  Defense-Plan und trägt
+  `corp_scoreline_central_tax_allocation:rd:<actionId>`.
+- Cleanup behält Marked Accounts und wirft eine der drei Jack-Attack-
+  Dubletten ab.
+- Die Dedicated-Response-Team- und Opening-Central-Defense-Kontrollen bleiben
+  grün.
+
+Die zentrale Jack-Attack-Zuweisung ist kein allgemeiner ICE-Bonus. Sie gilt
+nur bei sichtbarem Scoring-Remote, letzter Corp-Aktion, mehreren gleichen
+besteuernden/disruptiven ICE auf HQ, fehlendem unmittelbarem Stop-Effekt,
+fehlender sichtbarer Breaker-Antwort, exakter Zentralzuweisung und
+vollständiger aktueller Installations-/Rez-Quote. Ein Rez-Funding-Gap über
+drei Credits wird nicht zugelassen.
+
+Verifikation:
+
+- Decision-Checkpoints: 73 Dateien, 406 Tests grün.
+- Vollständige `@netgrid/ai`-Suite: 533 Dateien, 4.348 Tests grün.
+- `@netgrid/ai`-Typecheck und `git diff --check` grün.
+
+Die zunächst breitere Fassung erzeugte 44 Fehler in 17 Testdateien, vor allem
+durch ungebundene Agenda-Installationen und zusätzliche ICE-Schichten auf
+beliebigen Remotes. Diese Fassung wurde nicht übernommen. Die finale Logik
+verlangt exakte unmittelbare Plan-/Lease-Receipts und hält qualitative
+zentrale Steuer-ICE-Zuweisung von Remote-Score-Protection getrennt.

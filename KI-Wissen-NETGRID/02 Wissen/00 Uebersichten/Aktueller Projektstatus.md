@@ -268,6 +268,14 @@ Stand: 2026-07-30
   PlayerViews, PublicEvents, Zuschauerpayloads, öffentliche Replays und Logs
   bleiben getrennt. Führend ist
   `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
+- Corp-Score- und Defense-Plan können eine exakte Same-Turn-Linie aus
+  Remote-ICE und gebundener Agenda ausführen. Eine eng gegatete zentrale
+  Steuer-/Disruptions-ICE-Zuweisung verhindert auf der letzten Aktion einen
+  inkonsistenten Draw, ohne allgemeine ICE- oder ungeschützte
+  Agenda-Installationen freizugeben. Cleanup berücksichtigt abnehmenden
+  Dublettenwert; Marked Accounts nutzt den korrekten `on_access`-Vertrag.
+  Führend ist
+  `docs/reviews/ai/match-5f7924-agenda-defense-discard-final-review-2026-07-30.md`.
 - Die Plan-first-Live-Runtime ist der einzige produktive Entscheidungsweg;
   historisch benannte Semantic-Runtime-Fassaden rufen ausschließlich diesen
   Einstieg auf.

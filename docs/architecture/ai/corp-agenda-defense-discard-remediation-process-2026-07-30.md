@@ -1,6 +1,6 @@
 # Corp-Agenda-, Defense- und Discard-Remediation
 
-Status: aktiv – A1 und A2 abgeschlossen, A3 aktiv
+Status: aktiv – A1 bis A6 abgeschlossen, A7 aktiv
 
 Quelle: laufendes Match `match_5f7924e4893ba855`, StateVersion 65,
 33 von 33 Corp-KI-Entscheidungen geprüft.
@@ -140,7 +140,19 @@ Done-Gate:
 - Gegenproben grün.
 - Fokussierte TurnPlanner-/Defense-Tests grün.
 
-Commit: `fix(ai): plan bound agenda defense turn lines`
+Commits:
+
+- `923013ae2 fix(ai): bind agenda defense turn lines`
+- `9599a4a64 fix(ai): bound scoreline defense allocation`
+
+Die zweite Härtung begrenzt die zunächst zu breite Zulassung auf einen
+exakten unmittelbar fortgesetzten Score-Plan. Zusätzlich darf der
+Defense-Plan auf der letzten Aktion eine Handdubletten-Steuer-/Disruption-ICE
+vor dem zentral zugewiesenen Server installieren, wenn ein sichtbarer
+Scoring-Remote besteht, kein sichtbarer Breaker das ICE abdeckt und die
+aktuelle Installations-/Rez-Quote vollständig ist. Dieser P3-Pfad schlägt
+dann einen unsicheren Score-Protection-Draw, nicht aber allgemeine
+Score-, P1- oder P2-Pflichten.
 
 ### Paket A4: Cleanup- und Keep-Score-Korrektur
 
@@ -162,20 +174,20 @@ Done-Gate:
 - Cleanup-Checkpoint und Gegenproben grün.
 - Bestehende Runner-/Corp-Discard-Tests grün.
 
-Commit: `fix(ai): align corp cleanup with plan retention`
+Commit: `08c4fb857 fix(ai): devalue redundant discard enablers`
 
 ### Paket A5: Marked-Accounts-Hint und Consumer-Vertrag
 
-Ziel: Aktiver und kompilierter Hint bilden den Access-Vertrag außerhalb
-Archives korrekt ab.
+Ziel: Der aktive Hint und sein Runtime-Consumer bilden den Access-Vertrag
+außerhalb Archives korrekt ab.
 
 Done-Gate:
 
-- Hint-, Compiler- und Kartenconsumer-Gates grün.
+- Hint- und Kartenconsumer-Gates grün.
 - Deck-Audit enthält kein neues Marked-Accounts-Finding.
 - Nicht ursächliche bestehende Findings bleiben sichtbar dokumentiert.
 
-Commit: `fix(ai): align marked accounts access semantics`
+Commit: `399773e76 fix(ai): align Marked Accounts access timing`
 
 ### Paket A6: Breite Verifikation und Abschlussdokumentation
 
@@ -191,6 +203,16 @@ Done-Gate:
 - Evidence-, Final-Review- und Wissenslog aktualisiert.
 
 Commit: `docs(ai): finalize agenda defense discard remediation`
+
+Ergebnis:
+
+- 73 Decision-Checkpoint-Dateien mit 406 Tests grün.
+- Vollständige AI-Suite mit 533 Dateien und 4.348 Tests grün.
+- AI-Typecheck und `git diff --check` grün.
+- Die zwischenzeitlich 44 fehlgeschlagenen Tests waren echte Regressionen
+  einer zu breiten Staging-Zulassung. Nach Bindung an exakte
+  Execution-Lease-/Score-Receipts und der separaten zentralen
+  Steuer-ICE-Zuweisung sind sie vollständig beseitigt.
 
 ### Paket A7: Lokale Integration und Cleanup
 
