@@ -6653,6 +6653,23 @@ function corpExactHandCapacityReleaseRoutes(
       });
     }
   }
+  for (const signal of domain.defenseNeeds) {
+    if (
+      signal.kind !== "generic" ||
+      signal.phase !== "install_ice" ||
+      signal.installRoute?.progressKind !== "score_material_capacity_release"
+    ) {
+      continue;
+    }
+    for (const actionId of signal.actionIds ?? []) {
+      if (routesByActionId.has(actionId)) continue;
+      routesByActionId.set(actionId, {
+        actionId,
+        priorityClass: "P5",
+        withinClassValue: signal.value,
+      });
+    }
+  }
   for (const signal of domain.handManagement) {
     const priorityClass = corpEffectiveHandPriorityClass(domain, signal);
     for (const actionId of signal.actionIds ?? []) {
@@ -6904,6 +6921,15 @@ function corpActionDispositions(
             "corp_basic_credit_assessment_unknown:incomplete_exact_liquid_projection",
           );
         }
+      } else if (
+        !corpOpenEconomyPlanOwnsAction(domain, candidate.actionId) &&
+        input.playerView.own.credits >= corpVisibleLiquidityDemandTarget(input)
+      ) {
+        add(
+          candidate.actionId,
+          "corp.economy",
+          "corp_basic_credit_rejected_visible_liquidity_demand_satisfied",
+        );
       }
       continue;
     }
@@ -8241,10 +8267,11 @@ function buildCorpDomain(
                 ? { centralPressure: "material" as const }
                 : {}),
               immediateInstallSupport:
-                route.disposition === "productive" &&
-                route.progressKind === "staged_central_defense" &&
-                route.rezFundingGap > 0 &&
-                corpVisibleHandHasActionIceRezSupport(input),
+                route.progressKind === "score_material_capacity_release" ||
+                (route.disposition === "productive" &&
+                  route.progressKind === "staged_central_defense" &&
+                  route.rezFundingGap > 0 &&
+                  corpVisibleHandHasActionIceRezSupport(input)),
               installRoute: route,
               value:
                 route.progressKind === "engine_certified_access"
@@ -8253,6 +8280,9 @@ function buildCorpDomain(
                     ? 11
                     : route.progressKind === "scoreline_central_tax_allocation"
                       ? 10
+                      : route.progressKind ===
+                          "score_material_capacity_release"
+                        ? 10
                       : route.progressKind === "staged_central_defense"
                         ? 9
                         : 1,
@@ -8261,6 +8291,9 @@ function buildCorpDomain(
                   ? `corp_defense_exact_route_funding_required:${serverId}:${candidate.actionId}`
                   : route.progressKind === "scoreline_central_tax_allocation"
                     ? `corp_scoreline_central_tax_allocation:${serverId}:${candidate.actionId}`
+                    : route.progressKind ===
+                        "score_material_capacity_release"
+                      ? `corp_score_material_capacity_release:${serverId}:${candidate.actionId}`
                     : route.progressKind === "staged_central_defense"
                       ? `corp_staged_central_defense:${serverId}:${candidate.actionId}:rez_gap_${route.rezFundingGap}`
                       : visibleAgendaExposure
@@ -8882,17 +8915,7 @@ function corpTurnLiquidityDevelopmentNeed(
     currentTurnKey,
   );
   const currentCredits = input.playerView.own.credits;
-  const residentTargetReached =
-    resident !== undefined && resident.targetCredits <= currentCredits;
-  if (
-    residentTargetReached &&
-    input.playerView.stateVersion <= resident.revalidatedAtStateVersion
-  ) {
-    return undefined;
-  }
-  const targetCredits = residentTargetReached
-    ? currentCredits + remainingClicks
-    : (resident?.targetCredits ?? currentCredits + remainingClicks);
+  const targetCredits = corpVisibleLiquidityDemandTarget(input);
   if (!Number.isSafeInteger(targetCredits) || targetCredits <= currentCredits) {
     return undefined;
   }
@@ -8920,6 +8943,73 @@ function corpTurnLiquidityDevelopmentNeed(
     urgentForScore: false,
     evidenceCode: "corp_engine_certified_basic_liquidity_development",
   };
+}
+
+/**
+ * Keeps generic liquidity tied to visible, currently useful spending routes.
+ * The target deliberately has no fixed credit ceiling: a genuinely expensive
+ * visible score-and-defense route may raise it, while an empty demand
+ * portfolio cannot renew itself merely because clicks remain.
+ */
+function corpVisibleLiquidityDemandTarget(input: AiDecisionInput): number {
+  const exactCurrentActionCosts = input.legalActions.flatMap((action) => {
+    const credits = action.costs.reduce(
+      (sum, cost) => sum + (cost.credits ?? 0),
+      0,
+    );
+    return Number.isSafeInteger(credits) && credits >= 0 ? [credits] : [];
+  });
+  const postInstallRezCosts = input.legalActions.flatMap((action) => {
+    const quoted =
+      action.payload?.postInstallRezQuoteComplete === true
+        ? action.payload.postInstallRezQuoteFinalCredits
+        : undefined;
+    return typeof quoted === "number" &&
+      Number.isSafeInteger(quoted) &&
+      quoted >= 0
+      ? [quoted]
+      : [];
+  });
+  const installedRezCosts = input.playerView.servers.flatMap((server) =>
+    [...server.ice, ...server.root].flatMap((card) => {
+      if (!card.known || card.rezzed === true || !card.definitionId) return [];
+      const rezCost = CARD_DEFINITIONS_BY_ID[card.definitionId]?.rezCost;
+      return typeof rezCost === "number" &&
+        Number.isSafeInteger(rezCost) &&
+        rezCost >= 0
+        ? [rezCost]
+        : [];
+    }),
+  );
+  const visibleAgendaAdvanceCosts = input.playerView.own.gripOrHq.flatMap(
+    (card) => {
+      if (!card.known || card.type !== "agenda" || !card.definitionId) {
+        return [];
+      }
+      const advancementRequirement =
+        CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement;
+      return typeof advancementRequirement === "number" &&
+        Number.isSafeInteger(advancementRequirement) &&
+        advancementRequirement >= 0
+        ? [advancementRequirement]
+        : [];
+    },
+  );
+  const defenseReserve = Math.max(
+    0,
+    ...postInstallRezCosts,
+    ...installedRezCosts,
+  );
+  const cheapestVisibleScoreCost =
+    visibleAgendaAdvanceCosts.length > 0
+      ? Math.min(...visibleAgendaAdvanceCosts)
+      : 0;
+  return Math.max(
+    0,
+    ...exactCurrentActionCosts,
+    defenseReserve,
+    cheapestVisibleScoreCost + defenseReserve,
+  );
 }
 
 function corpExactOverflowHandConversionPlanOwnsCandidate(
@@ -9868,6 +9958,7 @@ type CorpGlobalDefenseInstallRouteAssessment =
         | "funded_structured_central_defense"
         | "scoreline_central_tax_allocation"
         | "staged_central_defense"
+        | "score_material_capacity_release"
         | "funding_required";
       rezFundingGap: number;
       projection: KnownCorpFundedIceInstallRouteProjection;
@@ -9901,6 +9992,7 @@ function corpGlobalDefenseInstallRoute(
         | "funded_structured_central_defense"
         | "scoreline_central_tax_allocation"
         | "staged_central_defense"
+        | "score_material_capacity_release"
         | "funding_required";
       rezFundingGap: number;
       projection: KnownCorpFundedIceInstallRouteProjection;
@@ -9994,6 +10086,39 @@ function corpGlobalDefenseInstallRouteAssessment(
     (card) => card.instanceId === action.source,
   );
   const sourceDefense = visibleCorpIceDefenseProfile(sourceCard);
+  const scoreMaterialCapacityRelease =
+    input.playerView.own.gripOrHq.length >
+      input.playerView.own.maxHandSize &&
+    !input.playerView.own.gripOrHq.some(
+      (card) => card.known && card.type === "agenda",
+    ) &&
+    input.playerView.own.clicks >= 2 &&
+    input.legalActions.some(
+      (legalAction) =>
+        legalAction.side === "corp" &&
+        legalAction.type === "draw_card" &&
+        legalAction.source === "basic_action" &&
+        legalAction.expiresAtStateVersion === input.playerView.stateVersion,
+    ) &&
+    sourceDefense.isVisibleIce &&
+    (sourceDefense.hasImmediateStop ||
+      sourceDefense.hasMeaningfulTaxOrDamage ||
+      sourceDefense.hasEncounterDisruption) &&
+    (sourceDefense.hasImmediateStop ||
+      (candidate.sourceDefinitionId !== undefined &&
+        corpHandDuplicateCount(input, candidate.sourceDefinitionId) > 1)) &&
+    (archivesHasVisibleKnownAgenda(input)
+      ? serverId === "archives"
+      : centralAllocation?.status === "known" &&
+        centralAllocation.selectedServerId === serverId) &&
+    action.source !== "basic_action" &&
+    action.source !== "game_rule" &&
+    corpIceInstallHasCurrentCompleteRezQuote(
+      input,
+      action,
+      action.source,
+      serverId,
+    );
   if (
     serverId.startsWith("remote_") &&
     server?.root.length === 0 &&
@@ -10101,7 +10226,8 @@ function corpGlobalDefenseInstallRouteAssessment(
       baseline.protection.runnerAccessSuccessProbability,
       { numerator: 0, denominator: 1 },
     ) === 0 &&
-    !scorelineCentralTaxAllocation
+    !scorelineCentralTaxAllocation &&
+    !scoreMaterialCapacityRelease
   ) {
     return {
       knowledge: "known",
@@ -10161,6 +10287,7 @@ function corpGlobalDefenseInstallRouteAssessment(
       hasStructuredDefenseValue);
   const preferQualitativeSourceProgress =
     scorelineCentralTaxAllocation ||
+    scoreMaterialCapacityRelease ||
     (isEmptyCentral &&
       !hasResidentRemoteAgenda &&
       (establishesMissingCentralCoverage ||
@@ -10246,9 +10373,15 @@ function corpGlobalDefenseInstallRouteAssessment(
     projection.preservesReserves &&
     sourceRezCredits !== undefined &&
     Math.max(0, sourceRezCredits - creditsAfterInstall) <= 3;
+  const scoreMaterialCapacityProgress =
+    scoreMaterialCapacityRelease &&
+    projection.preservesReserves &&
+    sourceRezCredits !== undefined &&
+    Math.max(0, sourceRezCredits - creditsAfterInstall) <= 3;
   if (
     fundedStructuredCentralProgress ||
     scorelineCentralTaxProgress ||
+    scoreMaterialCapacityProgress ||
     stagedCentralProgress
   ) {
     return {
@@ -10256,6 +10389,8 @@ function corpGlobalDefenseInstallRouteAssessment(
       disposition: "productive",
       progressKind: scorelineCentralTaxProgress
         ? "scoreline_central_tax_allocation"
+        : scoreMaterialCapacityProgress
+          ? "score_material_capacity_release"
         : fundedStructuredCentralProgress
           ? "funded_structured_central_defense"
           : "staged_central_defense",
@@ -10540,21 +10675,7 @@ function corpScoreProtectionStagingInstallSignal(
     source !== undefined &&
     corpHandDuplicateCount(input, candidate.sourceDefinitionId) > 1 &&
     (sourceDefense.hasMeaningfulTaxOrDamage ||
-      sourceDefense.hasEncounterDisruption) &&
-    !(input.playerView.opponent.rig ?? []).some((breaker) =>
-      visibleBreakerCardCanAddressIce(breaker, source, {
-        visibleBreakerRoles,
-        visibleCardText: (card) =>
-          [
-            card.title,
-            card.definitionId,
-            ...(card.subtypes ?? []),
-            card.rulesText,
-          ]
-            .filter(Boolean)
-            .join(" "),
-      }),
-    );
+      sourceDefense.hasEncounterDisruption);
   if (
     source?.definitionId !== candidate.sourceDefinitionId ||
     definition?.type !== "ice" ||
@@ -10640,7 +10761,8 @@ function scoreProtectionStagingMayBackstopDirectRoute(
     need.baseline.knowledge === "known" &&
     need.baseline.protection.protectsScore === false &&
     scan.directInstallRouteState.knowledge === "known" &&
-    scan.directInstallRouteState.disposition === "effect_missing"
+    (scan.directInstallRouteState.disposition === "effect_missing" ||
+      scan.directInstallRouteState.disposition === "funding_only")
   );
 }
 
@@ -11240,6 +11362,12 @@ function corpImmediateOperationEconomyConversions(
         projection.cardsDrawn - projection.cardsConsumed ||
       input.playerView.own.credits < projection.creditCost ||
       input.playerView.own.clicks < projection.clickCost
+    ) {
+      return [];
+    }
+    if (
+      projection.cardsDrawn === 0 &&
+      input.playerView.own.credits >= corpVisibleLiquidityDemandTarget(input)
     ) {
       return [];
     }

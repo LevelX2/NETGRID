@@ -154,6 +154,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
       | "funded_structured_central_defense"
       | "scoreline_central_tax_allocation"
       | "staged_central_defense"
+      | "score_material_capacity_release"
       | "funding_required";
     rezFundingGap?: number;
     projection: KnownCorpFundedIceInstallRouteProjection;
@@ -3756,6 +3757,7 @@ function isValidDefenseSignal(
             installRoute.progressKind === "funded_structured_central_defense" ||
             installRoute.progressKind === "scoreline_central_tax_allocation" ||
             installRoute.progressKind === "staged_central_defense" ||
+            installRoute.progressKind === "score_material_capacity_release" ||
             installRoute.progressKind === "funding_required") &&
           (installRoute.rezFundingGap === undefined ||
             knownNonNegativeInteger(installRoute.rezFundingGap)) &&

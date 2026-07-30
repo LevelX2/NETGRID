@@ -86,7 +86,7 @@ MULTI_ICE -> HINT_CONTRACTS -> VERIFIED -> MERGED -> CLEANED`
 
 Nur der jeweils nächste Zustand darf betreten werden.
 
-Aktueller Zustand: `RED_EVIDENCE`
+Aktueller Zustand: `ECONOMY_AND_DRAW`
 
 - P0 abgeschlossen mit Commit `31751964b`.
 - P1: acht Zieltests reproduzieren `behavior_regression`; der
@@ -95,6 +95,13 @@ Aktueller Zustand: `RED_EVIDENCE`
 - D88 besitzt nur noch eine Corp-Aktion. Der fachliche Zielvertrag ist deshalb
   ein kontrollierter Score-Material-Ersatzdraw mit anschließendem Cleanup,
   nicht die unmögliche Zweischrittfolge Installation plus Draw.
+- P2: Die sichtbare Liquiditätsnachfrage ersetzt das selbst erneuernde
+  Klick-zu-Credit-Ziel. Der Defense-Plan darf bei realem HQ-Überlauf eine
+  gebundene ICE-Installation als Handplatzfreigabe für den anschließenden
+  Score-Material-Draw ausgeben; der Draw bleibt eine geplante
+  Informationsgrenze. Bereits brechbares Steuer-/Stör-ICE bleibt dabei als
+  begrenzte Score-Schutz-Stufe zulässig, ohne eine Rez- oder
+  Installationspflicht zu erzeugen.
 
 ## Paketfolge
 

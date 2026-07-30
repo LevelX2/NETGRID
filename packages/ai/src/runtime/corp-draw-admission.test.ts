@@ -107,14 +107,14 @@ describe("Corp draw admission", () => {
     });
   });
 
-  it("blocks score-material draws that create cleanup overflow", () => {
+  it("admits one final-click replacement draw but blocks larger cleanup overflow", () => {
     expect(
       assessment({
         handSize: 5,
         maximumHandSize: 5,
         currentClicks: 1,
       }),
-    ).toMatchObject({ disposition: "blocked_end_turn_overflow" });
+    ).toMatchObject({ disposition: "admitted" });
     expect(
       assessment({
         handSize: 5,
