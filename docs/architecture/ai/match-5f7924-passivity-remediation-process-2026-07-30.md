@@ -1,6 +1,6 @@
 # Match 5F7924: Paketprozess zur Passivitätskorrektur
 
-Status: verifiziert, Integration ausstehend
+Status: abgeschlossen
 
 Quelle:
 
@@ -86,7 +86,7 @@ MULTI_ICE -> HINT_CONTRACTS -> VERIFIED -> MERGED -> CLEANED`
 
 Nur der jeweils nächste Zustand darf betreten werden.
 
-Aktueller Zustand: `VERIFIED`
+Aktueller Zustand: `CLEANED`
 
 - P0 abgeschlossen mit Commit `31751964b`.
 - P1: acht Zieltests reproduzieren `behavior_regression`; der
@@ -123,6 +123,9 @@ Aktueller Zustand: `VERIFIED`
   Typechecks, Struktur-, Boundary-, Hint-, Format- und Diff-Gates sind grün.
 - Abschlussreview:
   `docs/reviews/ai/match-5f7924-passivity-remediation-final-review-2026-07-30.md`.
+- P7: Der Arbeitsbranch wurde per Fast-Forward nach `main` integriert. Der
+  saubere Worktree ist aus Git und Dateisystem entfernt, der gemergte
+  Arbeitsbranch gelöscht und der Main-Checkout anschließend sauber geprüft.
 
 ## Paketfolge
 
