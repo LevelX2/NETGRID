@@ -27,15 +27,15 @@ in dieses Artefakt übernommen.
 
 ## Vollständige Decision-Klassifikation
 
-| Decision | StateVersion | Auswahl | stärkste sichtbare Alternative | Status | Begründung |
-| --- | ---: | --- | --- | --- | --- |
-| D1 | 1 | Setup-Choice | keine | plausibel | einziges Enginefenster; Plan-first-Engine-Lane |
-| D2 | 2 | Corp Mandatory Draw | keine | plausibel | verpflichtendes Enginefenster |
-| D3 | 3 | Basic Credit | ICE auf HQ/R&D oder weitere Entwicklung | plausibel als Einzelschritt, Sequenzanker | `corp.economy` finanzierte ausdrücklich den Defense-Parent `corp.defend_servers` für HQ |
-| D4 | 4 | Pattel Antibody in neuem Remote | ICE auf HQ/R&D, Credit oder Draw | historisches Finding; auf aktuellem Code nicht reproduzierbar | historisch übernahm `corp.ambush_and_bluff` ohne typisierten Abbruchgrund; der aktuelle Chooser wählt im identischen Zustand `Credit Blocks` vor R&D über `corp.defend_servers` |
-| D5 | 5 | Draw bei voller HQ-Hand | Credit oder ICE auf HQ/R&D | historisches Finding; auf aktuellem Code nicht reproduzierbar | historisch behandelte `corp.hand_and_agenda_management` einen Scorematerial-Draw als P4; aktuell gewinnt im identischen Zustand die R&D-Defense-Installation |
-| D6 | 6 | End Turn | keine weitere normale Action | plausibel als Folge | nach Verbrauch aller drei Klicks ist `corp.complete_turn` korrekt |
-| D7 | 7 | Discard-Choice | andere bekannte HQ-Karte | Folgefenster, nicht Primärursache | der Pflichtdiscard entsteht erst durch D5; die Choice selbst ist nicht die Ursache des verlorenen Zugtempos |
+| Decision | StateVersion | Auswahl                         | stärkste sichtbare Alternative          | Status                                                        | Begründung                                                                                                                                                                      |
+| -------- | -----------: | ------------------------------- | --------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1       |            1 | Setup-Choice                    | keine                                   | plausibel                                                     | einziges Enginefenster; Plan-first-Engine-Lane                                                                                                                                  |
+| D2       |            2 | Corp Mandatory Draw             | keine                                   | plausibel                                                     | verpflichtendes Enginefenster                                                                                                                                                   |
+| D3       |            3 | Basic Credit                    | ICE auf HQ/R&D oder weitere Entwicklung | plausibel als Einzelschritt, Sequenzanker                     | `corp.economy` finanzierte ausdrücklich den Defense-Parent `corp.defend_servers` für HQ                                                                                         |
+| D4       |            4 | Pattel Antibody in neuem Remote | ICE auf HQ/R&D, Credit oder Draw        | historisches Finding; auf aktuellem Code nicht reproduzierbar | historisch übernahm `corp.ambush_and_bluff` ohne typisierten Abbruchgrund; der aktuelle Chooser wählt im identischen Zustand `Credit Blocks` vor R&D über `corp.defend_servers` |
+| D5       |            5 | Draw bei voller HQ-Hand         | Credit oder ICE auf HQ/R&D              | historisches Finding; auf aktuellem Code nicht reproduzierbar | historisch behandelte `corp.hand_and_agenda_management` einen Scorematerial-Draw als P4; aktuell gewinnt im identischen Zustand die R&D-Defense-Installation                    |
+| D6       |            6 | End Turn                        | keine weitere normale Action            | plausibel als Folge                                           | nach Verbrauch aller drei Klicks ist `corp.complete_turn` korrekt                                                                                                               |
+| D7       |            7 | Discard-Choice                  | andere bekannte HQ-Karte                | Folgefenster, nicht Primärursache                             | der Pflichtdiscard entsteht erst durch D5; die Choice selbst ist nicht die Ursache des verlorenen Zugtempos                                                                     |
 
 Damit ist der vollständige Denominator geschlossen. D1/D2 sowie D6/D7 bilden
 jeweils abgeschlossene Engine- beziehungsweise Parent-Child-Fenster. D3 bis

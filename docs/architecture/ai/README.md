@@ -126,6 +126,23 @@
 
 ## Plan-first-Cutover-Stand
 
+- Der Zug- und Kampagnenplaner ist für Corp und Runner produktiv. Vor der
+  Ausführung konkurrieren validierte Planning Heads als deterministisch
+  begrenzte Restzuglinien; nur der aktuelle Head der gewählten Linie wird
+  über `TurnPlanCommitment`, Execution Lease und aktuelle `LegalActions`
+  autoritativ rematerialisiert. Informations-, Reaktions-, Engine- und
+  Zufallsgrenzen lösen typisierte Neuplanung aus.
+- Agenda-, Defense-, Opening-Rush- und Runner-Kampagnen können über
+  Zuggrenzen und öffentliche Gegneroutcomes resident bleiben. Ein
+  Runtime-Neustart stellt das Portfolio wieder her, verwirft das alte
+  Zugcommitment und plant aus dem aktuellen Zustand neu.
+- Corp und Runner besitzen getrennte vollständige Owner-, Horizon- und
+  Coverage-Verträge. Produktiv gilt `cutover`; `legacy_compare` ist nur ein
+  ausdrücklich gesetzter Diagnosemodus und kein Fallback.
+- Die privilegierte private Betreiber-Buganzeige zeigt absichtlich die
+  vollständigen Karten und Hände beider Seiten sowie den vollständigen
+  Zugplan mit Varianten, Commitment, Lease, Boundaries, Coverage und
+  Kampagnenstatus. Für diese Ansicht gilt keine seitensichere Reduktion.
 - PF15 ist mit Commit `4b0c459f6` als fail-closed Plan-first-Runtime-Cutover
   abgeschlossen. Die produktive Arbitration wählt zuerst eine residente
   `PlanInstance`, deren Step und aktuelle Route; eine Action besitzt außerhalb
@@ -176,9 +193,13 @@
   Zielzustandskonzept für die modulare Plan-first-KI mit gemeinsamem
   Planrahmen, getrennten Runner-/Corp-Schedulern, aktuellen und angestrebten
   Planmodulen, Zugausführung, Commitments, Diagnostik und Abnahme. Der
-  PF15-Runtime-Kern, PF16-Livegraph-Cleanup, Final Review und Pre-Commit-Gates
-  sind abgeschlossen; Main-Abgleich und integrierte Abschlussgates stehen
-  noch aus.
+  gemeinsame TurnPlanner- und Kampagnencutover ist für beide Seiten
+  abgeschlossen; das Dokument bleibt für spätere Modulverfeinerungen WIP.
+- `ai-turn-and-campaign-planner-concept-2026-07-29.md`,
+  `ai-turn-and-campaign-planner-implementation-process-2026-07-29.md` und
+  `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`:
+  freigegebener Gesamtvertrag, sequenzielle Paketumsetzung und aktuelle
+  Abschluss-/Gatematrix.
 - `docs/reviews/ai/ai-plan-first-runtime-cutover-final-review-2026-07-25.md`:
   PF16-Endvertrag, Akzeptanz- und Gatematrix, Baseline-Provenienz sowie
   sichtbare Folgepunkte.

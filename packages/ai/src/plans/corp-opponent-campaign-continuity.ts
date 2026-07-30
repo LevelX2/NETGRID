@@ -364,8 +364,7 @@ function reconcileReactionState(params: {
       lastTransitionAtStateVersion: stateVersion,
     };
   }
-  const resumes =
-    observedReaction || params.previous?.status === "paused";
+  const resumes = observedReaction || params.previous?.status === "paused";
   return {
     status: resumes ? "resumable" : "idle",
     openWindowKinds: [],

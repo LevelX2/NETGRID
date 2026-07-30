@@ -13,10 +13,7 @@ import {
   type ModifierKind,
   type Side,
 } from "@netgrid/shared";
-import {
-  cardPoolVersionForDecks,
-  metadataForDeck,
-} from "../card-pool";
+import { cardPoolVersionForDecks, metadataForDeck } from "../card-pool";
 import { hashStateSnapshot } from "../state-hash";
 
 const STANDARD_AGENDA_POINTS_TO_WIN = 7;
@@ -39,7 +36,8 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     config.runnerDeckMetadata ??
     metadataForDeck(runnerDeckDefinition, cardPoolVersion);
   const corpDeckMetadata =
-    config.corpDeckMetadata ?? metadataForDeck(corpDeckDefinition, cardPoolVersion);
+    config.corpDeckMetadata ??
+    metadataForDeck(corpDeckDefinition, cardPoolVersion);
 
   const runnerIdentity = createInstance(
     "runner",
@@ -282,9 +280,11 @@ function createInstance(
     controller: side,
     zone,
     faceup:
-      side === "runner" || CARD_DEFINITIONS_BY_ID[definitionId]?.type === "identity",
+      side === "runner" ||
+      CARD_DEFINITIONS_BY_ID[definitionId]?.type === "identity",
     rezzed:
-      side === "runner" || CARD_DEFINITIONS_BY_ID[definitionId]?.type === "identity",
+      side === "runner" ||
+      CARD_DEFINITIONS_BY_ID[definitionId]?.type === "identity",
     advancementCounters: 0,
     strengthModifier: 0,
   };

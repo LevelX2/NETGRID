@@ -90,9 +90,7 @@ describe("plan-first AI decision display", () => {
     expect(aiPlanFirstSelectionAuthorityLabel("engine_window")).toBe(
       "aus einem Engine-/Pflichtfenster",
     );
-    expect(aiTurnPlanningModeLabel("cutover")).toBe(
-      "Verbindlicher Zugplaner",
-    );
+    expect(aiTurnPlanningModeLabel("cutover")).toBe("Verbindlicher Zugplaner");
     expect(aiTurnPlanningModeLabel("shadow")).toBe("Shadow-Vergleich");
   });
 

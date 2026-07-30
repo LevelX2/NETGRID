@@ -1,20 +1,20 @@
 # KI-Zug- und Kampagnenplaner – Gesamtkonzept
 
-Status: **Freigegebener Zielvertrag nach zweitem Review und
-Nutzerabstimmung; Umsetzung läuft**
+Status: **Umgesetzt und mit ZK00 bis ZK14 abgenommen**
 
-Version: **0.4**
+Version: **0.5**
 
-Stand: 2026-07-29
+Stand: 2026-07-30
 
-Dokumentversion: `0.4`
+Dokumentversion: `0.5`
 
 Reviewstand:
 Das externe Konzeptfeedback vom 29.07.2026 ist punktweise gegen den
 aktuellen Zielvertrag und den aktuellen Code geprüft und in diesem Stand
 disponiert. Die Grundarchitektur ist bestätigt; mehrere Übergangsverträge
-sind geschärft. Die freigegebene Umsetzung läuft sequenziell im zugehörigen
-Worktree-Paketprozess.
+sind geschärft. Die freigegebene Umsetzung wurde sequenziell im zugehörigen
+Worktree-Paketprozess abgeschlossen. Führende Abnahme-Evidence ist
+`docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
 
 Nachgelagerter Entscheidungsstand:
 Die offenen Architekturfragen wurden anschließend einzeln mit dem Nutzer
@@ -44,10 +44,10 @@ Plan-first-KI um:
 6. eine klare Trennung zwischen aktuellem LegalAction-Schritt, Zugplan und
    mehrzügigem strategischem Vorhaben.
 
-Das Dokument ist bewusst ein Konzept- und Umsetzungsartefakt. Es verändert
-noch keinen Produktivcode und keine KI-Gewichte. Nach externer Prüfung sollen
-die bestätigten Festlegungen in den führenden Zielvertrag übernommen und
-danach paketweise implementiert werden.
+Das Dokument bleibt als Konzept- und Umsetzungsherleitung erhalten. Die
+bestätigten Festlegungen sind in den führenden Zielvertrag übernommen und
+paketweise produktiv implementiert. Der aktuelle Runtime- und Gate-Stand
+liegt im Abschlussreview.
 
 ### 1.1 Disposition des externen Reviews
 

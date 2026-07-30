@@ -27,65 +27,65 @@ regulär durch Corp-Agenda-Punkte. Er enthält keinen illegalen Zug und keinen
 Runtime-, Replay-, Hidden-Info-, Fallback-, Timeout- oder
 No-LegalAction-Fehler.
 
-| Metric | Value |
-| --- | ---: |
-| illegalActions | 0 |
-| replayFailures | 0 |
-| actionLimitGames | 1 |
-| fallbackActions | 0 |
-| timeoutActions | 0 |
-| runtimeErrors | 0 |
-| classifiedRuntimeFailures | 0 |
-| unclassifiedRuntimeFailures | 0 |
-| classifiedActionLimitGames | 1 |
-| unclassifiedActionLimitGames | 0 |
-| hiddenInfoFindings | 0 |
-| noLegalActionFailures | 0 |
-| redactionSafe | yes |
+| Metric                       | Value |
+| ---------------------------- | ----: |
+| illegalActions               |     0 |
+| replayFailures               |     0 |
+| actionLimitGames             |     1 |
+| fallbackActions              |     0 |
+| timeoutActions               |     0 |
+| runtimeErrors                |     0 |
+| classifiedRuntimeFailures    |     0 |
+| unclassifiedRuntimeFailures  |     0 |
+| classifiedActionLimitGames   |     1 |
+| unclassifiedActionLimitGames |     0 |
+| hiddenInfoFindings           |     0 |
+| noLegalActionFailures        |     0 |
+| redactionSafe                |   yes |
 
 ### Runtime failure classifications
 
 | Code | Count |
-| --- | ---: |
-| none | 0 |
+| ---- | ----: |
+| none |     0 |
 
 | Owner | Count |
-| --- | ---: |
-| none | 0 |
+| ----- | ----: |
+| none  |     0 |
 
 ### Action-limit classifications
 
-| Slot | Seed | Classified | Last owner | Last plan | Last step | No-progress cluster | No-progress subcluster |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| strategy_panel_fast_advance_chrome_rush | ai-behavior-baseline-v1-02 | yes | plan_module | plan:corp.defend_servers:server-defense-portfolio | plan:corp.defend_servers:server-defense-portfolio:develop_score_protection | action_limit_low_value_repeat | runner_late_gain_credit_real_reserve |
+| Slot                                    | Seed                       | Classified | Last owner  | Last plan                                         | Last step                                                                  | No-progress cluster           | No-progress subcluster               |
+| --------------------------------------- | -------------------------- | ---------- | ----------- | ------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------- | ------------------------------------ |
+| strategy_panel_fast_advance_chrome_rush | ai-behavior-baseline-v1-02 | yes        | plan_module | plan:corp.defend_servers:server-defense-portfolio | plan:corp.defend_servers:server-defense-portfolio:develop_score_protection | action_limit_low_value_repeat | runner_late_gain_credit_real_reserve |
 
 ## Behavioural metrics
 
-| Metric | Value |
-| --- | ---: |
-| Missed score window rate | 0.108 |
-| Advanced remote contest skip rate | 0.866 |
-| Plan conversion rate | 0.667 |
-| Strategic no-progress repeats / 100 decisions | 3.827 |
-| Clearly dominated plan choices / 100 decisions | 0 |
-| Trace findings / 100 decisions | 1.122 |
-| Action-capacity use rate | n/a |
-| Action-capacity plan conversion rate | n/a |
-| Action-capacity expiration rate | n/a |
-| Action-capacity misconversion rate | n/a |
-| Premature Runner end turns / 100 decisions | 0 |
-| Redundant low-value Runner persistent install rate | n/a |
+| Metric                                             | Value |
+| -------------------------------------------------- | ----: |
+| Missed score window rate                           | 0.108 |
+| Advanced remote contest skip rate                  | 0.866 |
+| Plan conversion rate                               | 0.667 |
+| Strategic no-progress repeats / 100 decisions      | 3.827 |
+| Clearly dominated plan choices / 100 decisions     |     0 |
+| Trace findings / 100 decisions                     | 1.122 |
+| Action-capacity use rate                           |   n/a |
+| Action-capacity plan conversion rate               |   n/a |
+| Action-capacity expiration rate                    |   n/a |
+| Action-capacity misconversion rate                 |   n/a |
+| Premature Runner end turns / 100 decisions         |     0 |
+| Redundant low-value Runner persistent install rate |   n/a |
 
 ## Deck slots
 
-| Slot | Runner | Corp | Games | Decisions | Missed score rate | Remote contest skip rate | Plan conversion rate | No-progress / 100 | Dominated / 100 | Limits |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| progression_tuning_origin_rig_vs_tax | rig_economy_pressure | remote_scoring | 10 | 1680 | 0.143 | 0.882 | 0.764 | 2.143 | 0 | 0 |
-| progression_tuning_origin_pressure_vs_tax | event_pressure | remote_scoring | 10 | 1667 | 0.125 | 0.864 | 0.628 | 6.239 | 0 | 0 |
-| snapshot_holdout_origin_pressure_vs_tag_ops | event_pressure | tag_punish | 10 | 1879 | 0.000 | 0.727 | 0.698 | 4.683 | 0 | 0 |
-| strategy_panel_fast_advance_chrome_rush | rig_economy_pressure | fast_advance | 10 | 3244 | 0.054 | 0.794 | 0.578 | 4.346 | 0 | 1 |
-| strategy_panel_net_damage_black_ice | central_multiaccess | net_damage | 10 | 2273 | 0.286 | 0.920 | 0.709 | 2.86 | 0 | 0 |
-| strategy_panel_hybrid_score_punish_cheap_bag | rig_economy_pressure | hybrid_score_punish | 10 | 2898 | 0.130 | 0.887 | 0.686 | 3.037 | 0 | 0 |
+| Slot                                         | Runner               | Corp                | Games | Decisions | Missed score rate | Remote contest skip rate | Plan conversion rate | No-progress / 100 | Dominated / 100 | Limits |
+| -------------------------------------------- | -------------------- | ------------------- | ----: | --------: | ----------------: | -----------------------: | -------------------: | ----------------: | --------------: | -----: |
+| progression_tuning_origin_rig_vs_tax         | rig_economy_pressure | remote_scoring      |    10 |      1680 |             0.143 |                    0.882 |                0.764 |             2.143 |               0 |      0 |
+| progression_tuning_origin_pressure_vs_tax    | event_pressure       | remote_scoring      |    10 |      1667 |             0.125 |                    0.864 |                0.628 |             6.239 |               0 |      0 |
+| snapshot_holdout_origin_pressure_vs_tag_ops  | event_pressure       | tag_punish          |    10 |      1879 |             0.000 |                    0.727 |                0.698 |             4.683 |               0 |      0 |
+| strategy_panel_fast_advance_chrome_rush      | rig_economy_pressure | fast_advance        |    10 |      3244 |             0.054 |                    0.794 |                0.578 |             4.346 |               0 |      1 |
+| strategy_panel_net_damage_black_ice          | central_multiaccess  | net_damage          |    10 |      2273 |             0.286 |                    0.920 |                0.709 |              2.86 |               0 |      0 |
+| strategy_panel_hybrid_score_punish_cheap_bag | rig_economy_pressure | hybrid_score_punish |    10 |      2898 |             0.130 |                    0.887 |                0.686 |             3.037 |               0 |      0 |
 
 ## Outcome context
 
@@ -115,15 +115,15 @@ Baseline git head: 3e0080cf3
 Candidate git head: c72842d70
 Incompatibilities: none
 
-| Metric | Candidate minus baseline |
-| --- | ---: |
-| missedScoreWindowRate | +0.011 |
-| advancedRemoteContestSkipRate | +0.025 |
-| planConversionRate | +0.021 |
-| strategicNoProgressRatePer100Decisions | -0.552 |
-| clearlyDominatedPlanChoiceRatePer100Decisions | 0 |
-| findingRatePer100Decisions | -0.173 |
-| averageActions | +14.95 |
+| Metric                                        | Candidate minus baseline |
+| --------------------------------------------- | -----------------------: |
+| missedScoreWindowRate                         |                   +0.011 |
+| advancedRemoteContestSkipRate                 |                   +0.025 |
+| planConversionRate                            |                   +0.021 |
+| strategicNoProgressRatePer100Decisions        |                   -0.552 |
+| clearlyDominatedPlanChoiceRatePer100Decisions |                        0 |
+| findingRatePer100Decisions                    |                   -0.173 |
+| averageActions                                |                   +14.95 |
 
 ## Metric interpretation
 

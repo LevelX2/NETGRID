@@ -130,4 +130,3 @@ Suche, Kampagnenquote und Vergleichsdaten. Sie zeigt außerdem weiterhin
 bewusst sämtliche Karten und Hände beider Seiten. Für dieses privilegierte
 Diagnosewerkzeug gilt keine seitensichere Informationsreduktion. Öffentliche
 PlayerViews, Events, Replays und normale Logs bleiben davon getrennt.
-

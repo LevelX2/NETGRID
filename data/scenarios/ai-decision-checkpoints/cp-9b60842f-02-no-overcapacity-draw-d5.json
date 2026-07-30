@@ -989,9 +989,7 @@
             "kind": "remote",
             "label": "Remote 1",
             "ice": [],
-            "root": [
-              "corp_onr_proteus_068_pattel-antibody_1"
-            ]
+            "root": ["corp_onr_proteus_068_pattel-antibody_1"]
           }
         ]
       },

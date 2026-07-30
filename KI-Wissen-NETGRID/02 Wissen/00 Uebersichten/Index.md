@@ -75,10 +75,13 @@
 ## KI
 
 - Die Semantic Runtime ist der einzige Live-Entscheidungsweg.
-- Das führende, noch nicht vollständig implementierte WIP-Zielbild für eine
-  autoritative modulare Plan-first-Auswahl mit gemeinsamem Planrahmen,
-  getrennten Runner-/Corp-Schedulern und verfeinerbaren Planmodulen liegt in
-  `docs/architecture/ai/ai-plan-layer-target-state-wip.md`.
+- Das führende WIP-Zielbild für eine autoritative modulare
+  Plan-first-Auswahl mit gemeinsamem Planrahmen, getrennten
+  Runner-/Corp-Schedulern und verfeinerbaren Planmodulen liegt in
+  `docs/architecture/ai/ai-plan-layer-target-state-wip.md`. Der gemeinsame
+  TurnPlanner-, Commitment- und Kampagnenvertrag ist für beide Seiten
+  produktiv umgesetzt; führende Abnahme-Evidence ist
+  `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
 - Live-API: `@netgrid/ai`; Simulation: `@netgrid/ai/simulation`.
 - Current-State-Cleanup:
   - `docs/architecture/ai/ai-current-state-cleanup-process-2026-07-09.md`

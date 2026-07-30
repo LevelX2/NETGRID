@@ -31,9 +31,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const input = corpInput([install, gain, end], [trap]);
     setCorpIntent(input, false);
 
-    expect(
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toMatchObject({
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: gain.actionId,
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
@@ -48,9 +46,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const end = endTurn();
     const input = corpInput([install, gain, end], [trap]);
 
-    expect(
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toMatchObject({
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: gain.actionId,
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
@@ -70,9 +66,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const input = corpInput([install, gain, end], [trap]);
     setCorpIntent(input, true);
 
-    expect(
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toMatchObject({
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: gain.actionId,
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,

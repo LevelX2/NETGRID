@@ -290,8 +290,7 @@ describe("exact Corp ICE rez route", () => {
       chooseAiAction(fixture.input, {
         persistTacticalPlanMemory: false,
         corpTurnPlannerMode: "legacy_compare",
-      })
-        .actionId,
+      }).actionId,
     ).toBe(fixture.engineAction.actionId);
   });
 
@@ -358,8 +357,7 @@ describe("exact Corp ICE rez route", () => {
       chooseAiAction(fixture.input, {
         persistTacticalPlanMemory: false,
         corpTurnPlannerMode: "legacy_compare",
-      })
-        .actionId,
+      }).actionId,
     ).toBe(fixture.engineAction.actionId);
   });
 
@@ -438,8 +436,7 @@ describe("exact Corp ICE rez route", () => {
       chooseAiAction(fixture.input, {
         persistTacticalPlanMemory: false,
         corpTurnPlannerMode: "legacy_compare",
-      })
-        .actionId,
+      }).actionId,
     ).toBe(fixture.engineAction.actionId);
   });
 
@@ -562,8 +559,7 @@ describe("exact Corp ICE rez route", () => {
       chooseAiAction(fixture.input, {
         persistTacticalPlanMemory: false,
         corpTurnPlannerMode: "legacy_compare",
-      })
-        .actionId,
+      }).actionId,
     ).toBe(rez.actionId);
   });
 

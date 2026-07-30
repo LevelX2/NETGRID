@@ -3187,9 +3187,7 @@ export class MultiplayerService {
         if (this.captureResidentPlanPortfolioFor(record, aiInput))
           await this.persist(record);
       }
-      if (
-        decision.selectionKind === "engine_randomized_ice_install_selection"
-      )
+      if (decision.selectionKind === "engine_randomized_ice_install_selection")
         return {
           ok: false,
           error: safeError(
@@ -3261,8 +3259,7 @@ export class MultiplayerService {
               ? {
                   engineTurnPlanSelection: {
                     status: "pending_engine_draw",
-                    opportunityKey:
-                      decision.engineCommand.quote.opportunityKey,
+                    opportunityKey: decision.engineCommand.quote.opportunityKey,
                     candidateFamilies:
                       decision.engineCommand.quote.candidates.map(
                         (candidate) => ({

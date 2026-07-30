@@ -2,9 +2,17 @@
 
 Status: **Work in Progress**
 Dokumentversion: `1.0`
-Stand: 2026-07-29
+Stand: 2026-07-30
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
+
+Umsetzungsstand:
+Der gemeinsame TurnPlanner-, TurnPlanCommitment- und Kampagnenvertrag ist
+für Corp und Runner produktiv umgesetzt und mit ZK00 bis ZK14 abgenommen.
+Führende Evidence:
+`docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
+Das Dokument bleibt WIP für spätere Modulverfeinerungen; der produktive
+Cutover selbst ist kein offener Zielzustand mehr.
 
 ## 1. Zweck und Führungsanspruch
 
@@ -4646,6 +4654,22 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 1.1 – 2026-07-30
+
+- gemeinsamen TurnPlanner für Corp und Runner produktiv umgestellt: jede
+  freiwillige Aktion läuft über Planning Head, TurnPlanCommitment, Lease und
+  autoritative Rematerialisierung;
+- deterministische Restzuglinien, mehrphasige Roots, Informations- und
+  Reaktionsgrenzen sowie serverprivate Kampagnenpersistenz bis durch
+  Gegnerzug und Runtime-Neustart umgesetzt;
+- vollständige Side-Coverage, getrennte Cutover-Gates, Replay/RNG,
+  Hidden-Info, Restart und private Betreiberdiagnostik abgenommen;
+- private Buganzeige als bewusst vollständige Betreiberansicht bestätigt:
+  sämtliche Karten beider Seiten und der komplette Zugplan bleiben sichtbar;
+- Abschlussverifikation und verbleibende Play-Strength-Punkte in
+  `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`
+  festgehalten.
 
 ### 1.0 – 2026-07-29
 

@@ -320,16 +320,16 @@ function applyDecision(
             ...decision.engineCommand,
             idempotencyKey,
           })
-      : applyAction(state, {
-          matchId: state.matchId,
-          side,
-          actionId: decision.actionId,
-          clientKnownStateVersion: state.stateVersion,
-          ...(decision.selectedChoices
-            ? { selectedChoices: decision.selectedChoices }
-            : {}),
-          idempotencyKey,
-        });
+        : applyAction(state, {
+            matchId: state.matchId,
+            side,
+            actionId: decision.actionId,
+            clientKnownStateVersion: state.stateVersion,
+            ...(decision.selectedChoices
+              ? { selectedChoices: decision.selectedChoices }
+              : {}),
+            idempotencyKey,
+          });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;
 }

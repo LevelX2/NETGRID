@@ -94,6 +94,7 @@ import {
   CURRENT_RULES_BASELINE,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   type AiDecision,
+  type AiPlanFirstDecisionDebug,
   type ApiCreateMatchResponse,
   type CardInstanceId,
   type ChoiceRequest,
@@ -12577,27 +12578,39 @@ describe("MVP 0.2 multiplayer service", () => {
       });
       expect(first.ok).toBe(true);
       if (!first.ok) throw new Error(first.error.message);
-      expect(first.prepared.detail.planFirstDecision).toMatchObject({
+      const planFirstDecision = first.prepared.detail
+        .planFirstDecision as AiPlanFirstDecisionDebug;
+      expect(planFirstDecision).toMatchObject({
+        selectionAuthority: "turn_plan_commitment",
         turnPlanning: {
           schemaVersion: "ai-turn-planning-debug-v1",
-          mode: "projection_contract",
-          heads: [
-            {
+          mode: "cutover",
+          commitment: {
+            status: "active",
+            rematerialization: {
+              status: "executable",
               actionId: first.prepared.actionId,
-              witnessValid: true,
             },
-          ],
-          selectedLine: {
-            phases: [
-              {
-                nodes: [
-                  expect.objectContaining({ nodeId: expect.any(String) }),
-                ],
-              },
-            ],
           },
         },
       });
+      expect(planFirstDecision.turnPlanning?.selectedLine.phases).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            nodes: expect.arrayContaining([
+              expect.objectContaining({ nodeId: expect.any(String) }),
+            ]),
+          }),
+        ]),
+      );
+      expect(planFirstDecision.turnPlanning?.heads).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            actionId: first.prepared.actionId,
+            witnessValid: true,
+          }),
+        ]),
+      );
       const persisted = await storage.load(created.matchId);
       if (!persisted) throw new Error("Missing persisted match");
       const privateHands = first.prepared.detail

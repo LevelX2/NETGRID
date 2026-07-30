@@ -2733,9 +2733,7 @@
               "support": 90,
               "final": 62
             },
-            "supportGaps": [
-              "low_bait_support"
-            ],
+            "supportGaps": ["low_bait_support"],
             "evidence": [
               "strategy:corp.asset_economy",
               "confidence:medium",
@@ -2774,10 +2772,7 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
@@ -2903,10 +2898,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3080,10 +3072,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3199,10 +3188,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3289,9 +3275,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.central_stabilize"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.central_stabilize"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -3323,10 +3307,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3382,10 +3363,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3509,10 +3487,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3672,9 +3647,7 @@
               "serverId": "new_remote",
               "phase": "install",
               "purposeCode": "establish_ambush:onr_proteus_068_pattel-antibody:new_remote",
-              "assignedDomainPlanIds": [
-                "corp.ambush_bluff"
-              ],
+              "assignedDomainPlanIds": ["corp.ambush_bluff"],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": true,
               "plannedAtStateVersion": 3,
@@ -3764,9 +3737,7 @@
               "serverId": "new_remote",
               "phase": "install",
               "purposeCode": "establish_ambush:onr_proteus_068_pattel-antibody:new_remote",
-              "assignedDomainPlanIds": [
-                "corp.ambush_bluff"
-              ],
+              "assignedDomainPlanIds": ["corp.ambush_bluff"],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": true,
               "plannedAtStateVersion": 3,
@@ -3856,9 +3827,7 @@
               "serverId": "new_remote",
               "phase": "install",
               "purposeCode": "establish_ambush:onr_proteus_068_pattel-antibody:new_remote",
-              "assignedDomainPlanIds": [
-                "corp.ambush_bluff"
-              ],
+              "assignedDomainPlanIds": ["corp.ambush_bluff"],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": true,
               "plannedAtStateVersion": 3,
@@ -3948,9 +3917,7 @@
               "serverId": "new_remote",
               "phase": "install",
               "purposeCode": "establish_ambush:onr_proteus_068_pattel-antibody:new_remote",
-              "assignedDomainPlanIds": [
-                "corp.ambush_bluff"
-              ],
+              "assignedDomainPlanIds": ["corp.ambush_bluff"],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": true,
               "plannedAtStateVersion": 3,
@@ -4036,9 +4003,7 @@
                 "defenseId": "install:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0",
                 "serverId": "hq",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_proteus_017_credit-blocks"
-                ],
+                "sourceDefinitionIds": ["onr_proteus_017_credit-blocks"],
                 "actionIds": [
                   "corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0"
                 ],
@@ -4155,9 +4120,7 @@
                           "source": "engine_rez_cost_quote",
                           "variableRezChoice": {
                             "kind": "alternate_subtype",
-                            "selectedSubtypes": [
-                              "sentry"
-                            ]
+                            "selectedSubtypes": ["sentry"]
                           }
                         }
                       ],
@@ -4242,9 +4205,7 @@
                 "defenseId": "install:rd:corp.install_card.corp_onr_proteus_017_credit-blocks_2.rd.corp_onr_proteus_017_credit-blocks_2.0",
                 "serverId": "rd",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_proteus_017_credit-blocks"
-                ],
+                "sourceDefinitionIds": ["onr_proteus_017_credit-blocks"],
                 "actionIds": [
                   "corp.install_card.corp_onr_proteus_017_credit-blocks_2.rd.corp_onr_proteus_017_credit-blocks_2.0"
                 ],
@@ -4361,9 +4322,7 @@
                           "source": "engine_rez_cost_quote",
                           "variableRezChoice": {
                             "kind": "alternate_subtype",
-                            "selectedSubtypes": [
-                              "sentry"
-                            ]
+                            "selectedSubtypes": ["sentry"]
                           }
                         }
                       ],
@@ -4561,9 +4520,7 @@
               "kind": "parent_funding",
               "needId": "defense-reserve:hq:corp_onr_proteus_017_credit-blocks_2",
               "gap": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "immediateDefenseConversion": true,
               "parentPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
               "parentNeedId": "install:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0",
@@ -4662,9 +4619,7 @@
               "kind": "parent_funding",
               "needId": "defense-reserve:rd:corp_onr_proteus_017_credit-blocks_2",
               "gap": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "immediateDefenseConversion": true,
               "parentPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
               "parentNeedId": "install:rd:corp.install_card.corp_onr_proteus_017_credit-blocks_2.rd.corp_onr_proteus_017_credit-blocks_2.0",
@@ -4765,9 +4720,7 @@
               "currentCreditsAtRevalidation": 5,
               "gap": 3,
               "projectedCreditGain": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "priorityClass": "P6",
               "cadence": {
                 "kind": "remaining_turn_capacity",
@@ -4938,9 +4891,7 @@
             "kind": "capability",
             "id": "score-material:general"
           },
-          "openNeedIds": [
-            "score-material:general"
-          ],
+          "openNeedIds": ["score-material:general"],
           "phase": "select_agenda",
           "milestone": "admitted",
           "moduleState": {
@@ -5081,9 +5032,7 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.defend_servers"
-      ]
+      "acceptablePlanKinds": ["corp.defend_servers"]
     }
   }
 }

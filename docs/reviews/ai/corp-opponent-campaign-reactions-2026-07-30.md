@@ -14,12 +14,12 @@ Claim-Disposition; sie erzeugt oder wählt keine Aktion.
 
 ## Zustandsvertrag
 
-| Feld | Werte | Bedeutung |
-| --- | --- | --- |
-| Reaktion | `idle`, `paused`, `resumable`, `expired`, `terminal` | Aktueller Reaktionszustand der Kampagne |
-| Offene Fenster | `rez`, `trace`, `prevention`, `ambush` | Sortierte, deduplizierte öffentliche Fenstertypen |
-| Deadline | `none`, `current_run_end`, `next_own_turn` | Zeitpunkt der nächsten notwendigen Auflösung oder Neuquote |
-| Claim | `active`, `reserved`, `requote_required`, `released` | Nichtnumerische Besitzdisposition des bereits bekannten Kampagnenwerts |
+| Feld           | Werte                                                | Bedeutung                                                              |
+| -------------- | ---------------------------------------------------- | ---------------------------------------------------------------------- |
+| Reaktion       | `idle`, `paused`, `resumable`, `expired`, `terminal` | Aktueller Reaktionszustand der Kampagne                                |
+| Offene Fenster | `rez`, `trace`, `prevention`, `ambush`               | Sortierte, deduplizierte öffentliche Fenstertypen                      |
+| Deadline       | `none`, `current_run_end`, `next_own_turn`           | Zeitpunkt der nächsten notwendigen Auflösung oder Neuquote             |
+| Claim          | `active`, `reserved`, `requote_required`, `released` | Nichtnumerische Besitzdisposition des bereits bekannten Kampagnenwerts |
 
 Öffnet der Gegnerzug mehrere Fenster, bleibt der Claim reserviert. Erst wenn
 alle öffentlich als aufgelöst erkennbar sind und die aktuelle Corp-Domain die

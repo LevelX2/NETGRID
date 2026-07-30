@@ -1,6 +1,7 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK13 abgeschlossen; ZK14 aktiv**
+Status: **ZK00 bis ZK14 fachlich abgeschlossen; nachgelagerter lokaler
+Git-Abschluss gemäß Integrationsregeln**
 
 Stand: 2026-07-29
 
@@ -1188,3 +1189,33 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
   bleibt bestimmungsgemäß ohne seitensichere Reduktion.
 - Führende Evidence:
   `docs/reviews/ai/runner-turn-planner-cutover-2026-07-30.md`.
+
+### ZK14 – abgeschlossen
+
+- Die vollständige Konzepttestmatrix ist über die fokussierten
+  ZK03-bis-ZK13-Verträge und den abschließenden Gesamtlauf abgedeckt:
+  Zugkohärenz, D3–D5, Varianten und RNG, Agenda, Opening Rush, Defense,
+  Draw, Kampagnen, Gegnerzug, Restart, Replay, StateHash, Redaction,
+  Coverage und getrennter Side-Cutover.
+- Abschlusslauf: AI 531/4.338, Engine 210/1.822, Server 23/214, Shared
+  1/16 und Web 71/725 Testdateien/Tests grün. Der gesamte
+  Workspace-Typecheck, `check:ai`, Engine-Source-Structure, Package
+  Boundaries, Proteus-Readiness und Deck-Doctrine-Strategie sind grün.
+- Der Abschlusslauf fand genau eine veraltete Server-Testannahme: Der
+  Restartvertrag erwartete noch `projection_contract`, obwohl die Corp seit
+  ZK11 produktiv `cutover` nutzt. Der Test prüft nun
+  `turn_plan_commitment`, aktives Commitment, ausführbare
+  Rematerialisierung, vollständige Heads und die mehrphasige Linie. Seine
+  Prüfung vollständiger Karten beider Seiten in der privaten Buganzeige
+  bleibt unverändert erhalten.
+- Der aktuelle Performancevergleich über je 400 Corp- und Runner-Messungen
+  ergibt im p95 Corp `54,95 ms` (`legacy_compare`) zu `55,69 ms`
+  (`cutover`) sowie Runner `75,51 ms` zu `69,79 ms`. Das verbindliche
+  Corp-Gate von höchstens 75 ms ist erfüllt; auf den Runner-Checkpoints
+  entsteht keine p95-Regression.
+- Engine-Autorität, LegalAction-Rematerialisierung, deterministische
+  Suchbudgets und RNG-Trennung, Owner-Exklusivität, öffentliche
+  Hidden-Info-Sicherheit sowie die absichtlich vollständige private
+  Betreiber-Buganzeige sind im Abschlussreview dispositioniert.
+- Führende Evidence:
+  `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.

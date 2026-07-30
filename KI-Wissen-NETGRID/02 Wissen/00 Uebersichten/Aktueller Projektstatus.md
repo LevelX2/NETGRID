@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-29
+Stand: 2026-07-30
 
 ## Führender Produktstand
 
@@ -253,6 +253,21 @@ Stand: 2026-07-29
   Hint-Quality und Target-Profile-Gates stehen bei null offenen Fällen.
   Führend sind der Vollbestandsaudit, der Remediationprozess und das
   Abschlussreview vom 18.07.2026.
+- Der Zug- und Kampagnenplaner ist für Corp und Runner produktiv. Fachmodule
+  melden aktuelle Planning Heads; der TurnPlanner wählt daraus eine
+  deterministisch begrenzte Restzuglinie. Der aktuelle Head wird als
+  `TurnPlanCommitment` mit Execution Lease gegen die aktuellen
+  `LegalActions` rematerialisiert. Mehrphasige Zuglinien, typisierte
+  Informations-/Reaktionsgrenzen, gegnerzugübergreifende Kampagnen,
+  Runtime-Restart und vollständige getrennte Side-Coverage sind abgenommen.
+  Produktiv gilt `cutover`; `legacy_compare` bleibt ein expliziter
+  Diagnosemodus ohne Fallbackautorität.
+- Die privilegierte private Betreiber-Buganzeige zeigt bestimmungsgemäß
+  sämtliche Karten und Hände beider Seiten sowie die vollständige
+  Zugplanung. Für diese Ansicht gilt keine seitensichere Reduktion. Normale
+  PlayerViews, PublicEvents, Zuschauerpayloads, öffentliche Replays und Logs
+  bleiben getrennt. Führend ist
+  `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
 - Die Plan-first-Live-Runtime ist der einzige produktive Entscheidungsweg;
   historisch benannte Semantic-Runtime-Fassaden rufen ausschließlich diesen
   Einstieg auf.

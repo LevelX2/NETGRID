@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-29
+Stand: 2026-07-30
 
 ## Einstieg
 
@@ -43,6 +43,27 @@ Diagnostik wird dort nicht rekonstruiert. Der vorhandene SQLite-KI-Trace und
 die Replayperspektive persistieren die redigierte Struktur im bestehenden
 Pfad; `AiDecisionDebug.decisionChain` bleibt eine getrennte tiefere
 Trace-Ebene und keine sichtbare Auswahlautorität.
+
+Der darauf aufbauende Zug- und Kampagnenplaner ist für Corp und Runner
+produktiv umgestellt. Fachmodule melden aktuelle Planning Heads; der
+TurnPlanner vergleicht daraus deterministisch begrenzte, gegebenenfalls
+mehrphasige Restzuglinien. Der gewählte aktuelle Head wird über
+`TurnPlanCommitment`, Execution Lease und die aktuellen `LegalActions`
+rematerialisiert. Draw, Suche, gegnerische Reaktion, Engine-Fortsetzung und
+öffentlicher Zufall besitzen typisierte Planungsgrenzen. Agenda-, Defense-,
+Opening-Rush- und Runner-Kampagnen können über Zug- und Gegnerwechsel
+resident bleiben; nach Runtime-Neustart wird aus dem wiederhergestellten
+Portfolio neu geplant. Corp und Runner besitzen vollständige getrennte
+Owner-, Horizon- und Coverage-Verträge. Produktiv gilt `cutover`;
+`legacy_compare` ist ausschließlich ein expliziter Diagnosemodus.
+
+Die privilegierte private Betreiber-Buganzeige ist bewusst keine
+seitensichere Spieleransicht: Sie zeigt sämtliche Karten und Hände beider
+Seiten sowie den vollständigen Zugplan mit Heads, Varianten, Phasen,
+Commitment, Lease, Boundaries, Coverage und Kampagnenstatus. Normale
+PlayerViews, PublicEvents, Zuschauerpayloads, öffentliche Replays und
+gewöhnliche Logs bleiben davon getrennt. Führend ist
+`docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
 
 PF15 des Plan-first-Runtime-Cutovers ist mit Commit `4b0c459f6`
 abgeschlossen. Residente `PlanInstance`s sind die einzige persistente
