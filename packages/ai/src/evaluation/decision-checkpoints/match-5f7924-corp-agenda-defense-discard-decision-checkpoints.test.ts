@@ -46,13 +46,33 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
       (action) => action.actionId === decision.actionId,
     );
 
-    expect(selected).toMatchObject({
+    expect(
+      selected,
+      JSON.stringify({
+        selected,
+        assessmentEvidenceCodes:
+          decision.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes,
+        defenseComparison:
+          decision.decisionDebug?.planFirstDecision?.turnPlanning
+            ?.defenseComparison,
+      }),
+    ).toMatchObject({
       type: "install_card",
       payload: {
         placement: "ice",
       },
     });
-    expect(["hq", "rd", "remote_1"]).toContain(selected?.payload?.serverId);
+    expect(["hq", "rd"]).toContain(selected?.payload?.serverId);
+    expect(
+      input.playerView.own.gripOrHq.find(
+        (card) => card.instanceId === selected?.source,
+      )?.definitionId,
+    ).toBe("onr_v1_251_jack-attack");
+    expect(
+      decision.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.some(
+        (code) => code.includes("corp_scoreline_central_tax_allocation:"),
+      ),
+    ).toBe(true);
   });
 
   it("retains Marked Accounts and discards one of three Jack Attacks", () => {

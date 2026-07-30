@@ -152,6 +152,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     progressKind?:
       | "engine_certified_access"
       | "funded_structured_central_defense"
+      | "scoreline_central_tax_allocation"
       | "staged_central_defense"
       | "funding_required";
     rezFundingGap?: number;
@@ -907,7 +908,9 @@ export function corpGenericDefensePriorityClass(
       (signal) =>
         signal.immediateInstallSupport ||
         (signal.phase === "install_ice" &&
-          (signal.centralPressure === "material" ||
+          (signal.installRoute?.progressKind ===
+            "scoreline_central_tax_allocation" ||
+            signal.centralPressure === "material" ||
             signal.centralPressure === "acute")),
     )
   ) {
@@ -1953,6 +1956,7 @@ function exactInstallProjectionMatchesSignal(
       context,
       projection,
       signal.installRoute?.progressKind === "staged_central_defense",
+      signal.installRoute?.progressKind === "scoreline_central_tax_allocation",
     )
   ) {
     return false;
@@ -1964,6 +1968,7 @@ function exactInstallProjectionIsCurrent(
   context: PlanSchedulerContext,
   projection: KnownCorpFundedIceInstallRouteProjection,
   useMinimumSatisfyingRoute = false,
+  useExactPostInstallSourceQuote = false,
 ): boolean {
   if (
     projection.knowledge !== "known" ||
@@ -1997,25 +2002,27 @@ function exactInstallProjectionIsCurrent(
   );
   const projectedServerId =
     action?.payload?.postInstallRezQuoteProjectedServerId;
-  const selectedPostInstallRezChoiceIsCurrent =
-    action?.payload && projectedRezCost
+  const selectedPostInstallRezChoiceIsCurrent = useExactPostInstallSourceQuote
+    ? action?.payload?.postInstallRezQuoteComplete === true
+    : action?.payload && projectedRezCost
       ? postInstallRezSelectionMatchesCurrentQuote(
           action.payload,
           projectedRezCost,
         )
       : false;
   const selectedRezCostsAreCurrent =
-    selectedRezCostSetsEqual(routeRezCosts, afterRouteRezCosts) &&
-    selectedRezCostsAreUnique(routeRezCosts) &&
-    routeRezCosts.every((selected) =>
-      selected.iceInstanceId === projection.sourceCardInstanceId
-        ? selected === projectedRezCost
-        : currentInstalledRezQuoteMatchesSelection(
-            context,
-            selected,
-            projectedServerId,
-          ),
-    );
+    useExactPostInstallSourceQuote ||
+    (selectedRezCostSetsEqual(routeRezCosts, afterRouteRezCosts) &&
+      selectedRezCostsAreUnique(routeRezCosts) &&
+      routeRezCosts.every((selected) =>
+        selected.iceInstanceId === projection.sourceCardInstanceId
+          ? selected === projectedRezCost
+          : currentInstalledRezQuoteMatchesSelection(
+              context,
+              selected,
+              projectedServerId,
+            ),
+      ));
   return (
     action?.expiresAtStateVersion === context.input.playerView.stateVersion &&
     action.side === "corp" &&
@@ -2773,6 +2780,27 @@ function selectedDefensePortfolioBand(
     context,
     validSignals,
   );
+  const scorelineCentralTaxSignals = genericSignals.filter(
+    (signal) =>
+      signal.phase === "install_ice" &&
+      signal.installRoute?.progressKind === "scoreline_central_tax_allocation",
+  );
+  const scorelineCentralTaxCandidates = genericDefensePortfolioCandidates(
+    context,
+    scorelineCentralTaxSignals,
+    centralAllocation,
+  );
+  if (
+    scoreProtectionRoute?.signal.kind === "score_protection_draw" &&
+    scorelineCentralTaxCandidates.length > 0
+  ) {
+    return {
+      kind: "generic",
+      eligibleSignals: scorelineCentralTaxSignals,
+      priorityClass: "P3",
+      candidates: scorelineCentralTaxCandidates,
+    };
+  }
   const genericPriority = selectedGenericBand.priorityClass;
   const genericCandidates = selectedGenericBand.candidates;
   const genericBandAvailable =
@@ -3726,6 +3754,7 @@ function isValidDefenseSignal(
           (installRoute.progressKind === undefined ||
             installRoute.progressKind === "engine_certified_access" ||
             installRoute.progressKind === "funded_structured_central_defense" ||
+            installRoute.progressKind === "scoreline_central_tax_allocation" ||
             installRoute.progressKind === "staged_central_defense" ||
             installRoute.progressKind === "funding_required") &&
           (installRoute.rezFundingGap === undefined ||

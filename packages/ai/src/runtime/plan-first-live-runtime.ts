@@ -155,9 +155,14 @@ import { corpPurgeHasVisibleStrategicPressure } from "./corp-purge-impact";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
   buildCorpHandInventoryFacts,
+  corpHandDuplicateCount,
   type CorpHandDomainRouteClaimInput,
   type CorpHandInventoryFacts,
 } from "./corp-hand-inventory-facts";
+import {
+  visibleBreakerCardCanAddressIce,
+  visibleBreakerRoles,
+} from "./runner-visible-breaker-coverage";
 import {
   assessCorpDrawAdmission,
   type CorpDrawAdmissionAssessment,
@@ -7691,7 +7696,26 @@ function corpResidentScoreAgendaInstanceId(
       instance.instanceId === previous.rootForegroundInstanceId &&
       instance.moduleId === "corp.score_agenda",
   );
-  if (!root) return undefined;
+  const lease = previous?.turnPlanExecutionLease;
+  const commitment = previous?.turnPlanCommitment;
+  const currentNode =
+    commitment?.phases[commitment.cursor.phaseIndex]?.nodes[
+      commitment.cursor.nodeIndex
+    ];
+  const stagedIceInstanceId = currentNode?.invocation.sourceCardInstanceId;
+  const exactImmediateStagingReceipt =
+    root !== undefined &&
+    lease !== undefined &&
+    commitment !== undefined &&
+    lease.commitmentId === commitment.commitmentId &&
+    lease.actionType === "install_card" &&
+    lease.stateIdentity.stateVersion + 1 === input.playerView.stateVersion &&
+    currentNode?.invocation.semanticActionType === "install.card" &&
+    stagedIceInstanceId !== undefined &&
+    input.playerView.servers.some((server) =>
+      server.ice.some((ice) => ice.instanceId === stagedIceInstanceId),
+    );
+  if (!exactImmediateStagingReceipt) return undefined;
   return input.playerView.own.gripOrHq.find(
     (card) =>
       card.definitionId !== undefined &&
@@ -7752,8 +7776,17 @@ function buildCorpDomain(
         ]
       : [];
   const scorelineFeasibility = corpScorelineFeasibilityForDecisionInput(input);
+  const residentScoreAgendaInstanceId = corpResidentScoreAgendaInstanceId(
+    previous,
+    input,
+  );
   const directScoreProjects = candidates.flatMap((candidate) =>
-    scoreProjectForCandidate(input, candidate, scorelineFeasibility),
+    scoreProjectForCandidate(
+      input,
+      candidate,
+      scorelineFeasibility,
+      residentScoreAgendaInstanceId,
+    ),
   );
   const counterBankScoreProjects = corpCounterBankScoreProjects(
     input,
@@ -7834,10 +7867,6 @@ function buildCorpDomain(
       };
     },
   );
-  const residentScoreAgendaInstanceId = corpResidentScoreAgendaInstanceId(
-    previous,
-    input,
-  );
   const residentPreparedScoreProject =
     residentScoreAgendaInstanceId === undefined
       ? undefined
@@ -7899,6 +7928,7 @@ function buildCorpDomain(
         !corpScoreProtectionIsSatisfied(input, project) &&
         !(
           project.phase === "install_agenda" &&
+          project.agendaInstanceId === residentScoreAgendaInstanceId &&
           project.serverId !== undefined &&
           project.serverId !== "new_remote" &&
           corpRemoteHasBoundedStagedIce(input, project.serverId)
@@ -8206,6 +8236,10 @@ function buildCorpDomain(
               actionIds: [candidate.actionId],
               urgent: centralPressure === "terminal" || visibleAgendaExposure,
               ...(centralPressure ? { centralPressure } : {}),
+              ...(centralPressure === undefined &&
+              route.progressKind === "scoreline_central_tax_allocation"
+                ? { centralPressure: "material" as const }
+                : {}),
               immediateInstallSupport:
                 route.disposition === "productive" &&
                 route.progressKind === "staged_central_defense" &&
@@ -8217,17 +8251,21 @@ function buildCorpDomain(
                   ? 12
                   : route.progressKind === "funded_structured_central_defense"
                     ? 11
-                    : route.progressKind === "staged_central_defense"
-                      ? 9
-                      : 1,
+                    : route.progressKind === "scoreline_central_tax_allocation"
+                      ? 10
+                      : route.progressKind === "staged_central_defense"
+                        ? 9
+                        : 1,
               evidenceCode:
                 route.disposition === "funding_only"
                   ? `corp_defense_exact_route_funding_required:${serverId}:${candidate.actionId}`
-                  : route.progressKind === "staged_central_defense"
-                    ? `corp_staged_central_defense:${serverId}:${candidate.actionId}:rez_gap_${route.rezFundingGap}`
-                    : visibleAgendaExposure
-                      ? "engine_certified_visible_agenda_exposure_defense"
-                      : "engine_certified_global_defense_access_probability_reduced",
+                  : route.progressKind === "scoreline_central_tax_allocation"
+                    ? `corp_scoreline_central_tax_allocation:${serverId}:${candidate.actionId}`
+                    : route.progressKind === "staged_central_defense"
+                      ? `corp_staged_central_defense:${serverId}:${candidate.actionId}:rez_gap_${route.rezFundingGap}`
+                      : visibleAgendaExposure
+                        ? "engine_certified_visible_agenda_exposure_defense"
+                        : "engine_certified_global_defense_access_probability_reduced",
             },
           ];
         }
@@ -9223,6 +9261,7 @@ function scoreProjectForCandidate(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   scorelineFeasibility: CorpScorelineFeasibility | undefined,
+  residentScoreAgendaInstanceId?: string,
 ): CorpScoreProjectSignal[] {
   if (candidateIsVisibleCorpAgendaInstall(input, candidate)) {
     const agenda = requireVisibleCandidateSource(input, candidate);
@@ -9261,6 +9300,7 @@ function scoreProjectForCandidate(
     const boundedStagedScoreWindow =
       serverId !== undefined &&
       serverId !== "new_remote" &&
+      candidate.sourceCardInstanceId === residentScoreAgendaInstanceId &&
       corpRemoteHasBoundedStagedIce(input, serverId);
     const developmentClickAvailable =
       input.playerView.own.clicks >= (boundedStagedScoreWindow ? 1 : 2) ||
@@ -9826,6 +9866,7 @@ type CorpGlobalDefenseInstallRouteAssessment =
       progressKind:
         | "engine_certified_access"
         | "funded_structured_central_defense"
+        | "scoreline_central_tax_allocation"
         | "staged_central_defense"
         | "funding_required";
       rezFundingGap: number;
@@ -9858,6 +9899,7 @@ function corpGlobalDefenseInstallRoute(
       progressKind:
         | "engine_certified_access"
         | "funded_structured_central_defense"
+        | "scoreline_central_tax_allocation"
         | "staged_central_defense"
         | "funding_required";
       rezFundingGap: number;
@@ -9948,6 +9990,10 @@ function corpGlobalDefenseInstallRouteAssessment(
         "corp_ice_install_assessment_unknown:action_or_server_binding_unknown",
     };
   }
+  const sourceCard = input.playerView.own.gripOrHq.find(
+    (card) => card.instanceId === action.source,
+  );
+  const sourceDefense = visibleCorpIceDefenseProfile(sourceCard);
   if (
     serverId.startsWith("remote_") &&
     server?.root.length === 0 &&
@@ -9982,6 +10028,49 @@ function corpGlobalDefenseInstallRouteAssessment(
     numerator: 1,
     denominator: 2,
   };
+  const hasResidentRemoteAgenda = input.playerView.servers.some(
+    (candidateServer) =>
+      candidateServer.id.startsWith("remote_") &&
+      candidateServer.root.some((card) => card.known && card.type === "agenda"),
+  );
+  const sourceHasNoVisibleBreakerAnswer =
+    sourceCard !== undefined &&
+    !(input.playerView.opponent.rig ?? []).some((breaker) =>
+      visibleBreakerCardCanAddressIce(breaker, sourceCard, {
+        visibleBreakerRoles,
+        visibleCardText: (card) =>
+          [
+            card.title,
+            card.definitionId,
+            ...(card.subtypes ?? []),
+            card.rulesText,
+          ]
+            .filter(Boolean)
+            .join(" "),
+      }),
+    );
+  const scorelineCentralTaxAllocation =
+    (serverId === "hq" || serverId === "rd") &&
+    centralAllocation?.status === "known" &&
+    centralAllocation.selectedServerId === serverId &&
+    serverIce.length > 0 &&
+    hasResidentRemoteAgenda &&
+    projectedInstallClicks === input.playerView.own.clicks &&
+    candidate.sourceDefinitionId !== undefined &&
+    corpHandDuplicateCount(input, candidate.sourceDefinitionId) > 1 &&
+    sourceDefense.isVisibleIce &&
+    !sourceDefense.hasImmediateStop &&
+    (sourceDefense.hasMeaningfulTaxOrDamage ||
+      sourceDefense.hasEncounterDisruption) &&
+    sourceHasNoVisibleBreakerAnswer &&
+    action.source !== "basic_action" &&
+    action.source !== "game_rule" &&
+    corpIceInstallHasCurrentCompleteRezQuote(
+      input,
+      action,
+      action.source,
+      serverId,
+    );
   const baseline = assessBestFundedCorpScoreProtection({
     serverIce,
     runnerRig: input.playerView.opponent.rig ?? [],
@@ -10011,7 +10100,8 @@ function corpGlobalDefenseInstallRouteAssessment(
     compareExactProbabilities(
       baseline.protection.runnerAccessSuccessProbability,
       { numerator: 0, denominator: 1 },
-    ) === 0
+    ) === 0 &&
+    !scorelineCentralTaxAllocation
   ) {
     return {
       knowledge: "known",
@@ -10034,11 +10124,6 @@ function corpGlobalDefenseInstallRouteAssessment(
     scoreReserve,
     baseline,
   };
-  const sourceDefense = visibleCorpIceDefenseProfile(
-    input.playerView.own.gripOrHq.find(
-      (card) => card.instanceId === action.source,
-    ),
-  );
   const isEmptyCentral =
     (serverId === "hq" || serverId === "rd") && serverIce.length === 0;
   const targetCentralEvidence =
@@ -10074,16 +10159,12 @@ function corpGlobalDefenseInstallRouteAssessment(
     sourceDefense.isVisibleIce &&
     (isCorpOpeningTurnSerial(input.playerView.turnSerial) ||
       hasStructuredDefenseValue);
-  const hasResidentRemoteAgenda = input.playerView.servers.some(
-    (candidateServer) =>
-      candidateServer.id.startsWith("remote_") &&
-      candidateServer.root.some((card) => card.known && card.type === "agenda"),
-  );
   const preferQualitativeSourceProgress =
-    isEmptyCentral &&
-    !hasResidentRemoteAgenda &&
-    (establishesMissingCentralCoverage ||
-      (hasSelectedCentralPressure && hasStructuredDefenseValue));
+    scorelineCentralTaxAllocation ||
+    (isEmptyCentral &&
+      !hasResidentRemoteAgenda &&
+      (establishesMissingCentralCoverage ||
+        (hasSelectedCentralPressure && hasStructuredDefenseValue)));
   const projection = projectCorpFundedIceInstallRoute({
     need,
     action,
@@ -10155,13 +10236,29 @@ function corpGlobalDefenseInstallRouteAssessment(
     typeof rezFundingGap === "number" &&
     rezFundingGap > 0 &&
     rezFundingGap <= 3;
-  if (fundedStructuredCentralProgress || stagedCentralProgress) {
+  const sourceRezCredits =
+    action.payload?.postInstallRezQuoteComplete === true &&
+    typeof action.payload.postInstallRezQuoteFinalCredits === "number"
+      ? action.payload.postInstallRezQuoteFinalCredits
+      : undefined;
+  const scorelineCentralTaxProgress =
+    scorelineCentralTaxAllocation &&
+    projection.preservesReserves &&
+    sourceRezCredits !== undefined &&
+    Math.max(0, sourceRezCredits - creditsAfterInstall) <= 3;
+  if (
+    fundedStructuredCentralProgress ||
+    scorelineCentralTaxProgress ||
+    stagedCentralProgress
+  ) {
     return {
       knowledge: "known",
       disposition: "productive",
-      progressKind: fundedStructuredCentralProgress
-        ? "funded_structured_central_defense"
-        : "staged_central_defense",
+      progressKind: scorelineCentralTaxProgress
+        ? "scoreline_central_tax_allocation"
+        : fundedStructuredCentralProgress
+          ? "funded_structured_central_defense"
+          : "staged_central_defense",
       rezFundingGap: rezFundingGap!,
       projection,
     };
@@ -10423,8 +10520,8 @@ function corpScoreProtectionStagingInstallSignal(
   | undefined {
   const need = project.protectionNeed;
   if (
-    !project.serverId ||
-    need?.targetServerId !== project.serverId ||
+    project.serverId !== "new_remote" ||
+    need?.targetServerId !== "new_remote" ||
     !scoreProtectionStagingMayBackstopDirectRoute(need, scan) ||
     !candidateIsVisibleCorpIceInstall(input, candidate) ||
     !candidate.sourceCardInstanceId ||
@@ -10438,9 +10535,30 @@ function corpScoreProtectionStagingInstallSignal(
     candidate.sourceCardInstanceId,
   );
   const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
+  const sourceDefense = visibleCorpIceDefenseProfile(source);
+  const boundedNonEtrDeterrence =
+    source !== undefined &&
+    corpHandDuplicateCount(input, candidate.sourceDefinitionId) > 1 &&
+    (sourceDefense.hasMeaningfulTaxOrDamage ||
+      sourceDefense.hasEncounterDisruption) &&
+    !(input.playerView.opponent.rig ?? []).some((breaker) =>
+      visibleBreakerCardCanAddressIce(breaker, source, {
+        visibleBreakerRoles,
+        visibleCardText: (card) =>
+          [
+            card.title,
+            card.definitionId,
+            ...(card.subtypes ?? []),
+            card.rulesText,
+          ]
+            .filter(Boolean)
+            .join(" "),
+      }),
+    );
   if (
     source?.definitionId !== candidate.sourceDefinitionId ||
-    definition?.type !== "ice"
+    definition?.type !== "ice" ||
+    (!definition.mechanics.includes("end_the_run") && !boundedNonEtrDeterrence)
   ) {
     return undefined;
   }

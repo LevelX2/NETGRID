@@ -424,6 +424,7 @@ function createDefenseLine(
       : route.projection.effect === "progress"
         ? 18
         : 0) +
+    (route.progressKind === "scoreline_central_tax_allocation" ? 16 : 0) +
     (signal.evidenceCode.includes("visible_agenda_exposure_defense") ? 20 : 0);
   const economyValue = Math.min(fundingGain, fundingGapBefore) * 4;
   const totalValue =
