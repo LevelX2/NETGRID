@@ -37214,7 +37214,7 @@
           "kind": "tag_source",
           "resource": "tags",
           "scope": "runner",
-          "timing": "scored_activated"
+          "timing": "on_access"
         }
       ],
       "lineSupport": [
@@ -37285,7 +37285,7 @@
       ],
       "actionTacticSignals": [
         "effect_scope:runner",
-        "effect_timing:scored_activated",
+        "effect_timing:on_access",
         "effect:tag_source",
         "tag.source"
       ],
