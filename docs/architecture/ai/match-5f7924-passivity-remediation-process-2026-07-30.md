@@ -1,6 +1,6 @@
 # Match 5F7924: Paketprozess zur Passivitätskorrektur
 
-Status: aktiv
+Status: verifiziert, Integration ausstehend
 
 Quelle:
 
@@ -86,7 +86,7 @@ MULTI_ICE -> HINT_CONTRACTS -> VERIFIED -> MERGED -> CLEANED`
 
 Nur der jeweils nächste Zustand darf betreten werden.
 
-Aktueller Zustand: `HINT_CONTRACTS`
+Aktueller Zustand: `VERIFIED`
 
 - P0 abgeschlossen mit Commit `31751964b`.
 - P1: acht Zieltests reproduzieren `behavior_regression`; der
@@ -116,6 +116,13 @@ Aktueller Zustand: `HINT_CONTRACTS`
   konsumierte Top-Level-`hiddenInfoPolicy` ist entfernt; die konkrete
   Zielprofil-Policy bleibt erhalten. Deck-Hint-Consumer-Audit, Metadaten-,
   Qualitäts- und Doctrine-Gate sind ohne Befund grün.
+- P6: Die eng begrenzte Score-Defense-Kontinuität, endliche
+  Liquiditätsnachfrage, Kapazitätsfreigabe mit Draw-Grenze und exakten
+  Rez-Quotes sind gemeinsam abgenommen. Die vollständige AI-Suite ist mit
+  534/4.360, Engine mit 210/1.824 und Shared mit 1/16 grün. Alle relevanten
+  Typechecks, Struktur-, Boundary-, Hint-, Format- und Diff-Gates sind grün.
+- Abschlussreview:
+  `docs/reviews/ai/match-5f7924-passivity-remediation-final-review-2026-07-30.md`.
 
 ## Paketfolge
 
