@@ -16446,6 +16446,7 @@
         "economy.corp_counter_cashout_action",
         "economy.action",
         "economy.finite_pool",
+        "economy.temporary_resource_bank",
         "score.agenda_action",
         "score.economy_counter_bank"
       ]
@@ -34852,7 +34853,6 @@
           "timing": "during_run"
         }
       ],
-      "hiddenInfoPolicy": "corp_side_only_until_revealed_by_effect",
       "lineSupport": [
         "corp.ice_tax_glacier",
         "corp.remote_scoring"

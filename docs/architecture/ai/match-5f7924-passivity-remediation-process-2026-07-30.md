@@ -86,7 +86,7 @@ MULTI_ICE -> HINT_CONTRACTS -> VERIFIED -> MERGED -> CLEANED`
 
 Nur der jeweils nächste Zustand darf betreten werden.
 
-Aktueller Zustand: `MULTI_ICE`
+Aktueller Zustand: `HINT_CONTRACTS`
 
 - P0 abgeschlossen mit Commit `31751964b`.
 - P1: acht Zieltests reproduzieren `behavior_regression`; der
@@ -110,6 +110,12 @@ Aktueller Zustand: `MULTI_ICE`
   angegangene ICE. Weitere ICE-Schichten werden nach jeder Begegnung aus dem
   dann gültigen Zustand neu bewertet, statt die gesamte Route vorab zu
   behaupten.
+- P4 abgeschlossen mit Commit `a102450b0`.
+- P5: Corporate Coup weist den tatsächlich konsumierten Vertrag
+  `economy.temporary_resource_bank` aus. Dr. Dreffs redundante, nicht
+  konsumierte Top-Level-`hiddenInfoPolicy` ist entfernt; die konkrete
+  Zielprofil-Policy bleibt erhalten. Deck-Hint-Consumer-Audit, Metadaten-,
+  Qualitäts- und Doctrine-Gate sind ohne Befund grün.
 
 ## Paketfolge
 
