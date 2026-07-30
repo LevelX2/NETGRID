@@ -119,6 +119,7 @@ describe("PracticalTacticOverlay", () => {
 
     const decision = chooseAiAction(benchmarkCase.input, {
       practicalTacticOverlay: { enabled: true },
+      runnerTurnPlannerMode: "legacy_compare",
     });
 
     expect(decision.evidence).toEqual(

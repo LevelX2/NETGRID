@@ -44,7 +44,9 @@ describe("staleKnownRndRepeatRunPenalty", () => {
       ],
     });
 
-    const decision = chooseRunnerAction(input);
+    const decision = chooseRunnerAction(input, {
+      runnerTurnPlannerMode: "legacy_compare",
+    });
     const runAlternative = decision.decisionDebug?.actionAlternatives?.find(
       (alternative) => alternative.actionId === runRd.actionId,
     );

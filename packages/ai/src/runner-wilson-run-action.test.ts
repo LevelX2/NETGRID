@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { CURRENT_RULES_BASELINE } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -7,7 +8,7 @@ import type {
   VisibleCard,
   VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
-import { chooseRunnerAction } from "./index";
+import { buildPlanningRulesContext, chooseRunnerAction } from "./index";
 import { resetTacticalPlanMemory } from "./tactical-plans";
 
 const WILSON_DEFINITION_ID = "onr_v1_187_wilson-weeflerunner-apprentice";
@@ -48,15 +49,15 @@ describe("Runner Wilson run action utilization", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe(wilson.actionId);
-    expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
+    expect(
+      input.legalActions.some(
+        (action) => action.actionId === decision.actionId,
+      ),
+    ).toBe(true);
     expect(decision.fallbackUsed).toBe(false);
-    expect(decision.decisionDebug?.planKind).toBe(
-      "runner.pressure_central",
-    );
+    expect(decision.decisionDebug?.planKind).toBe("runner.pressure_central");
     expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        "plan_step_capability:pressure_rd_information",
-      ]),
+      expect.arrayContaining(["plan_step_capability:pressure_rd_information"]),
     );
     expect(
       decision.decisionDebug?.actionAlternatives?.find(
@@ -94,7 +95,11 @@ describe("Runner Wilson run action utilization", () => {
     });
 
     expect(decision.actionId).toBe(wilson.actionId);
-    expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
+    expect(
+      input.legalActions.some(
+        (action) => action.actionId === decision.actionId,
+      ),
+    ).toBe(true);
   });
 
   it("prefers the Wilson-only run action for the same planned target", () => {
@@ -116,11 +121,13 @@ describe("Runner Wilson run action utilization", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe(wilsonRun.actionId);
-    expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
+    expect(
+      input.legalActions.some(
+        (action) => action.actionId === decision.actionId,
+      ),
+    ).toBe(true);
     expect(decision.fallbackUsed).toBe(false);
-    expect(decision.decisionDebug?.planKind).toBe(
-      "runner.pressure_central",
-    );
+    expect(decision.decisionDebug?.planKind).toBe("runner.pressure_central");
     expect(
       decision.decisionDebug?.actionAlternatives?.find(
         (alternative) => alternative.actionId === wilsonRun.actionId,
@@ -132,7 +139,9 @@ describe("Runner Wilson run action utilization", () => {
       ]),
     );
     expect(debugText).toContain("run_action_spending_cap_target_server:rd");
-    expect(debugText).not.toMatch(/cardInstances|privatePayload|FullState|decklist|hidden-card/i);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|FullState|decklist|hidden-card/i,
+    );
   });
 
   it("uses the Wilson-only run instead of ending while Wilson remains optional", () => {
@@ -154,7 +163,11 @@ describe("Runner Wilson run action utilization", () => {
     });
 
     expect(decision.actionId).toBe(wilsonRun.actionId);
-    expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
+    expect(
+      input.legalActions.some(
+        (action) => action.actionId === decision.actionId,
+      ),
+    ).toBe(true);
   });
 
   it("skips Wilson when visible breaker spending would exceed the cap", () => {
@@ -186,11 +199,13 @@ describe("Runner Wilson run action utilization", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe(runRd.actionId);
-    expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
+    expect(
+      input.legalActions.some(
+        (action) => action.actionId === decision.actionId,
+      ),
+    ).toBe(true);
     expect(decision.fallbackUsed).toBe(false);
-    expect(decision.decisionDebug?.planKind).toBe(
-      "runner.pressure_central",
-    );
+    expect(decision.decisionDebug?.planKind).toBe("runner.pressure_central");
     expect(
       decision.decisionDebug?.actionAlternatives?.find(
         (alternative) => alternative.actionId === wilson.actionId,
@@ -214,7 +229,9 @@ function runnerInput(params: {
   servers: PlayerView["servers"];
   legalActions: LegalAction[];
   rig?: VisibleCard[];
-}): AiDecisionInput {
+}): AiDecisionInput & {
+  planningRulesContext: ReturnType<typeof buildPlanningRulesContext>;
+} {
   const view: PlayerView = {
     stateVersion: 1,
     turnSerial: 0,
@@ -265,6 +282,11 @@ function runnerInput(params: {
     decisionId: "runner-wilson-run-action-test:runner",
     actionNumber: 1,
     profileId: "runner-ai-v1.4.2-normal",
+    planningRulesContext: buildPlanningRulesContext({
+      rulesBaseline: CURRENT_RULES_BASELINE,
+      formatProfileId: "runner-wilson-run-action-test",
+      cardPoolSnapshotId: "runner-wilson-run-action-test",
+    }),
   };
 }
 
@@ -332,7 +354,7 @@ function legalAction(
     costs: options.costs ?? [{ clicks: 1 }],
     targetRequirements: [],
     visibility: "public",
-    expiresAtStateVersion: 2,
+    expiresAtStateVersion: 1,
     ...(options.payload ? { payload: options.payload } : {}),
   };
 }

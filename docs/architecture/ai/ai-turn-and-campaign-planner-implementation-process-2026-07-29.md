@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK12 abgeschlossen; ZK13 aktiv**
+Status: **ZK00 bis ZK13 abgeschlossen; ZK14 aktiv**
 
 Stand: 2026-07-29
 
@@ -1149,3 +1149,42 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
   grün.
 - Führende Evidence:
   `docs/reviews/ai/corp-opponent-campaign-reactions-2026-07-30.md`.
+
+### ZK13 – abgeschlossen
+
+- Alle 13 registrierten Runner-Planmodule besitzen einen expliziten
+  Horizon-, Owner- und semantischen Coverage-Vertrag ohne globales
+  Produktivfallback. Economy, Draw/Install, Rig/Breaker, Run, Access,
+  Multiaccess, Agenda, Terminalpfade und Zugabschluss sind abgedeckt.
+- Jede produktive Runner-Aktion läuft standardmäßig über einen aktuellen
+  Planning Head, einen deterministischen Restzugplan, ein
+  `TurnPlanCommitment`, eine Execution Lease und die autoritative
+  Rematerialisierung. `legacy_compare` bleibt ausschließlich eine explizite
+  Test- und Diagnoserückschaltung; einen stillen Runtime-Fallback gibt es
+  nicht.
+- Draw, Runstart, Run-/Breaker-/Access-Fortsetzung und öffentlicher Zufall
+  besitzen Runner-spezifische Beobachtungs- und Engine-Boundaries. Der
+  vorhandene `RunnerRunPlan` wird nur als revalidierter Domainkontext
+  einbezogen und besitzt keine zweite Ausführungsautorität.
+- Der erste Baselinelauf entdeckte einen echten modulübergreifenden
+  Ownership-Konflikt: Eine abgelehnte Defense-Draw-Nutzung von Night Shift
+  sperrte zugleich die unabhängig ausführbare Economy-Konversion. Die
+  globale Disposition respektiert nun andere exakt validierte Planrouten;
+  der exakte Seed endet nach 164 Entscheidungen regulär und ist als
+  Regressionstest gebunden.
+- Behavior Baseline: 60 Spiele und 13.641 Entscheidungen ohne illegale
+  Aktionen sowie ohne Runtime-, Replay-, Hidden-Info-, Fallback-, Timeout-
+  oder No-LegalAction-Fehler. Das einzige klassifizierte Action-Limit ist
+  die bekannte Runner-Spätspielklasse und endet mit erweitertem Limit nach
+  501 Aktionen regulär.
+- Vollständige AI-Suite während des Cutovers: 530 Testdateien und 4.337
+  Tests grün. Nach der Ownership-Korrektur liefen 276 fokussierte
+  Runner-/Runtime-/Coverage-/Baseline-Tests grün. AI-, Shared- und
+  Web-Typecheck, `check:ai`, Source-Structure mit `production=748`,
+  Proteus-Readiness, Deck-Doctrine-Gate, private Debugexport-Prüfung,
+  Formatprüfung und `git diff --check`: grün.
+- Die private privilegierte Buganzeige zeigt vollständige Runner- und
+  Corp-Zugplanung sowie sämtliche Karten und Hände beider Seiten. Sie
+  bleibt bestimmungsgemäß ohne seitensichere Reduktion.
+- Führende Evidence:
+  `docs/reviews/ai/runner-turn-planner-cutover-2026-07-30.md`.

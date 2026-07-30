@@ -173,6 +173,7 @@ export function runAiDecisionCheckpoint(
         `plan=${decision.decisionDebug?.planKind ?? "none"}`,
         `capabilities=${planCapabilities.join("|") || "none"}`,
         `assessment=${planAssessmentEvidence.join("|") || "none"}`,
+        `turnPlanner=${JSON.stringify(decision.decisionDebug?.planFirstDecision?.turnPlanning?.shadowComparison ?? null)}`,
         `runTargets=${JSON.stringify(runTargetSummary)}`,
       ].join("; "),
       input,

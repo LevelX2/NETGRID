@@ -34,22 +34,19 @@ describe("simulation runtime failure classification", () => {
       side: "runner",
       stateVersion: 9,
       timingPoint: "runner_action.main",
+      removalCondition: "Register the missing plan module.",
       planInstanceId: "plan:runner.coverage:code_gate",
       stepId: "find_breaker",
       legalActionTypes: ["install_card"],
       unresolvedActionIds: ["runner.install_card"],
     });
     expect(simulationRuntimeFailureToken(failure)).toBe(
-      "runtime_failure:missing_plan_module_coverage classified:true owner:plan_registry side:runner stateVersion:9 timing:runner_action.main plan:plan:runner.coverage:code_gate step:find_breaker legalActionTypes:install_card unresolvedActionIds:runner.install_card",
+      "runtime_failure:missing_plan_module_coverage classified:true owner:plan_registry side:runner stateVersion:9 timing:runner_action.main removalCondition:Register the missing plan module. plan:plan:runner.coverage:code_gate step:find_breaker legalActionTypes:install_card unresolvedActionIds:runner.install_card",
     );
   });
 
   it.each([
-    [
-      "invalid_side_plan_registry",
-      "invalid_plan_identity",
-      "plan_registry",
-    ],
+    ["invalid_side_plan_registry", "invalid_plan_identity", "plan_registry"],
     [
       "plan_first_selected_action_not_legal",
       "stale_or_future_action_reference",

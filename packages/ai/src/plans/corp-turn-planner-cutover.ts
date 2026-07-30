@@ -2,6 +2,7 @@ import type { AiDecisionInput, AiTurnPlanningDebug } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { CorpTurnPlannerShadowResult } from "./corp-turn-planner-shadow";
+import type { RunnerTurnPlannerShadowResult } from "./runner-turn-planner-shadow";
 import type { PlanConditionRef, PlanModuleId } from "./plan-kernel-types";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
@@ -29,9 +30,14 @@ import {
 
 export const CORP_TURN_PLANNER_CUTOVER_VERSION =
   "corp-turn-planner-cutover-v1" as const;
+export const TURN_PLANNER_CUTOVER_VERSION = "turn-planner-cutover-v2" as const;
 
-export type CorpTurnPlannerCutoverResult = {
-  planner: CorpTurnPlannerShadowResult;
+type TurnPlannerShadowResult =
+  | CorpTurnPlannerShadowResult
+  | RunnerTurnPlannerShadowResult;
+
+export type TurnPlannerCutoverResult = {
+  planner: TurnPlannerShadowResult;
   head: TurnPlanningHeadCandidate;
   selectedPlanInstanceId: string;
   commitment: TurnPlanCommitment;
@@ -39,6 +45,8 @@ export type CorpTurnPlannerCutoverResult = {
   debug: AiTurnPlanningDebug;
   replanReason?: TurnPlanReplanReason;
 };
+
+export type CorpTurnPlannerCutoverResult = TurnPlannerCutoverResult;
 
 export function resolveCorpTurnPlannerCutover(params: {
   input: AiDecisionInput;
@@ -49,8 +57,20 @@ export function resolveCorpTurnPlannerCutover(params: {
   stateIdentity: PlanningStateIdentity;
   runtimeInstanceId: string;
 }): CorpTurnPlannerCutoverResult {
+  return resolveTurnPlannerCutover(params);
+}
+
+export function resolveTurnPlannerCutover(params: {
+  input: AiDecisionInput;
+  planner: TurnPlannerShadowResult;
+  portfolio: ResidentPlanPortfolio;
+  candidates: readonly ActionSemanticCandidate[];
+  rulesContext: PlanningRulesContext;
+  stateIdentity: PlanningStateIdentity;
+  runtimeInstanceId: string;
+}): TurnPlannerCutoverResult {
   requireCutoverReady(params);
-  const turnKey = `corp:turn:${params.input.playerView.turnSerial ?? "unknown"}`;
+  const turnKey = `${params.input.side}:turn:${params.input.playerView.turnSerial ?? "unknown"}`;
   const continuation = continueResidentCommitment({
     ...params,
     turnKey,
@@ -102,7 +122,7 @@ export function resolveCorpTurnPlannerCutover(params: {
 
 function continueResidentCommitment(params: {
   input: AiDecisionInput;
-  planner: CorpTurnPlannerShadowResult;
+  planner: TurnPlannerShadowResult;
   portfolio: ResidentPlanPortfolio;
   candidates: readonly ActionSemanticCandidate[];
   rulesContext: PlanningRulesContext;
@@ -213,7 +233,7 @@ function continueResidentCommitment(params: {
 
 function createCurrentCommitment(params: {
   input: AiDecisionInput;
-  planner: CorpTurnPlannerShadowResult;
+  planner: TurnPlannerShadowResult;
   portfolio: ResidentPlanPortfolio;
   candidates: readonly ActionSemanticCandidate[];
   rulesContext: PlanningRulesContext;
@@ -227,7 +247,7 @@ function createCurrentCommitment(params: {
   if (!line || !head || !selectedPlanInstanceId) {
     throw cutoverFailure(
       params.input,
-      "A passing Corp cutover requires one selected deterministic TurnPlan line and a current executable head.",
+      `A passing ${params.input.side} cutover requires one selected deterministic TurnPlan line and a current executable head.`,
     );
   }
   const plan = turnPlanFromLine({
@@ -259,7 +279,7 @@ function createCurrentCommitment(params: {
   if (rematerialized.kind === "replan_required") {
     throw cutoverFailure(
       params.input,
-      `The selected Corp TurnPlan head must rematerialize before execution (${rematerialized.reason}; ${rematerialized.evidenceCodes.join(",")}).`,
+      `The selected ${params.input.side} TurnPlan head must rematerialize before execution (${rematerialized.reason}; ${rematerialized.evidenceCodes.join(",")}).`,
     );
   }
   return {
@@ -272,14 +292,14 @@ function createCurrentCommitment(params: {
 
 function turnPlanFromLine(params: {
   input: AiDecisionInput;
-  planner: CorpTurnPlannerShadowResult;
+  planner: TurnPlannerShadowResult;
   portfolio: ResidentPlanPortfolio;
   candidates: readonly ActionSemanticCandidate[];
   rulesContext: PlanningRulesContext;
   stateIdentity: PlanningStateIdentity;
   runtimeInstanceId: string;
   turnKey: string;
-  line: NonNullable<CorpTurnPlannerShadowResult["selectedLine"]>;
+  line: NonNullable<TurnPlannerShadowResult["selectedLine"]>;
 }): TurnPlan {
   const groups: Array<{
     key: string;
@@ -376,7 +396,7 @@ function turnPlanFromLine(params: {
   return {
     schemaVersion: TURN_PLANNING_CONTRACT_SCHEMA_VERSION,
     planId: params.line.lineId,
-    side: "corp",
+    side: params.input.side,
     turnKey: params.turnKey,
     stateIdentity: structuredClone(params.stateIdentity),
     planningRulesFingerprint: params.rulesContext.fingerprint,
@@ -427,8 +447,8 @@ function turnPlanFromLine(params: {
 function nodeExpectations(
   plan: TurnPlan,
   input: AiDecisionInput,
-  planner: CorpTurnPlannerShadowResult,
-  line: NonNullable<CorpTurnPlannerShadowResult["selectedLine"]>,
+  planner: TurnPlannerShadowResult,
+  line: NonNullable<TurnPlannerShadowResult["selectedLine"]>,
 ): TurnPlanNodeExecutionExpectation[] {
   let stepIndex = 0;
   return plan.phases.flatMap((phase) =>
@@ -535,13 +555,13 @@ function continuationEvidence(
 
 function planInstanceIdForHead(
   head: TurnPlanningHeadCandidate,
-  planner: CorpTurnPlannerShadowResult,
+  planner: TurnPlannerShadowResult,
 ): string {
   const exact = planner.headBindings.find(
     (binding) => binding.candidateId === head.candidateId,
   );
   if (!exact) {
-    throw new Error("corp_turn_planner_selected_plan_instance_missing");
+    throw new Error("turn_planner_selected_plan_instance_missing");
   }
   return exact.planInstanceId;
 }
@@ -652,10 +672,14 @@ function cutoverDebug(
       ...source.evidenceCodes.filter(
         (code) =>
           code !== "corp_turn_planner_shadow_only" &&
+          code !== "runner_turn_planner_shadow_only" &&
           code !== "shadow_result_never_controls_live_action",
       ),
-      CORP_TURN_PLANNER_CUTOVER_VERSION,
-      "corp_turn_planner_cutover_authority",
+      TURN_PLANNER_CUTOVER_VERSION,
+      ...(head.side === "corp"
+        ? [CORP_TURN_PLANNER_CUTOVER_VERSION]
+        : ["runner-turn-planner-cutover-v1"]),
+      `${head.side}_turn_planner_cutover_authority`,
       "legacy_single_action_selection_comparison_only",
       ...(replanReason ? [`turn_plan_replanned:${replanReason}`] : []),
     ],
@@ -664,13 +688,13 @@ function cutoverDebug(
 
 function requireCutoverReady(params: {
   input: AiDecisionInput;
-  planner: CorpTurnPlannerShadowResult;
+  planner: TurnPlannerShadowResult;
   stateIdentity: PlanningStateIdentity;
 }): void {
   const coverage = params.planner.coverage;
   const selected = params.planner.selectedHead;
   if (
-    params.input.side !== "corp" ||
+    (params.input.side !== "corp" && params.input.side !== "runner") ||
     coverage.status !== "pass" ||
     coverage.coveragePercent !== 100 ||
     coverage.missingActionCount !== 0 ||
@@ -683,7 +707,12 @@ function requireCutoverReady(params: {
   ) {
     throw cutoverFailure(
       params.input,
-      "Corp TurnPlanner cutover requires 100% classified LegalActions and one current executable selected head.",
+      `${params.input.side} TurnPlanner cutover requires 100% classified LegalActions and one current executable selected head; coverage=${coverage.status}/${coverage.coveragePercent}; issues=${coverage.issues
+        .map(
+          (issue) =>
+            `${issue.code}:${issue.actionId ?? "global"}:${issue.moduleId ?? "none"}:${issue.detail}`,
+        )
+        .join("|")}; selected=${selected?.currentBinding.actionId ?? "none"}.`,
     );
   }
 }

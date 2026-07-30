@@ -30,6 +30,16 @@ export type CorpTurnPlanningModuleCoverage = {
     | "turn_completion";
 };
 
+export type TurnPlanningCoverageConfiguration = {
+  side: "corp" | "runner";
+  modules: readonly Pick<
+    CorpTurnPlanningModuleCoverage,
+    "moduleId" | "horizonCapability" | "semanticActionPatterns"
+  >[];
+  engineWindowSemanticPatterns: readonly string[];
+  completeTurnModuleId: PlanModuleId;
+};
+
 export const CORP_TURN_PLANNING_MODULE_COVERAGE: readonly CorpTurnPlanningModuleCoverage[] =
   [
     {
@@ -265,13 +275,21 @@ export function buildCorpTurnPlanningCoverageReport(params: {
   heads: readonly TurnPlanningHeadCandidate[];
   dispositions: readonly PlanActionDisposition[];
   engineWindowActionIds: readonly string[];
+  configuration?: TurnPlanningCoverageConfiguration;
 }): CorpTurnPlanningCoverageReport {
+  const configuration: TurnPlanningCoverageConfiguration =
+    params.configuration ?? {
+      side: "corp",
+      modules: CORP_TURN_PLANNING_MODULE_COVERAGE,
+      engineWindowSemanticPatterns: CORP_ENGINE_WINDOW_SEMANTIC_PATTERNS,
+      completeTurnModuleId: "corp.complete_turn",
+    };
   const issues: CorpTurnPlanningCoverageReport["issues"] = [];
   const stateVersion = params.input.playerView.stateVersion;
-  if (params.input.side !== "corp") {
+  if (params.input.side !== configuration.side) {
     issues.push({
       code: "input_side_not_corp",
-      detail: `expected=corp actual=${params.input.side}`,
+      detail: `expected=${configuration.side} actual=${params.input.side}`,
     });
   }
   const legalActionIds = sortedUnique(
@@ -294,7 +312,7 @@ export function buildCorpTurnPlanningCoverageReport(params: {
   }
   for (const candidate of params.candidates) {
     if (
-      candidate.actorSide !== "corp" ||
+      candidate.actorSide !== configuration.side ||
       candidate.stateVersion !== stateVersion
     ) {
       issues.push({
@@ -319,7 +337,7 @@ export function buildCorpTurnPlanningCoverageReport(params: {
     } else if (
       !semanticMatchesAny(
         candidate.semanticActionType,
-        CORP_ENGINE_WINDOW_SEMANTIC_PATTERNS,
+        configuration.engineWindowSemanticPatterns,
       )
     ) {
       issues.push({
@@ -355,7 +373,7 @@ export function buildCorpTurnPlanningCoverageReport(params: {
     }
     if (
       !legalAction ||
-      legalAction.side !== "corp" ||
+      legalAction.side !== configuration.side ||
       legalAction.expiresAtStateVersion !== stateVersion ||
       head.currentBinding.semanticActionSetFingerprint !==
         semanticActionSetFingerprint ||
@@ -367,8 +385,7 @@ export function buildCorpTurnPlanningCoverageReport(params: {
         code: "current_head_legal_binding_mismatch",
         actionId: head.currentBinding.actionId,
         moduleId: head.moduleId,
-        detail:
-          "Head must bind the current Corp LegalAction and exact semantic action set.",
+        detail: `Head must bind the current ${configuration.side} LegalAction and exact semantic action set (legalSide=${legalAction?.side ?? "missing"} legalExpiry=${legalAction?.expiresAtStateVersion ?? "missing"} state=${stateVersion} bindingSet=${head.currentBinding.semanticActionSetFingerprint} witnessSet=${head.executableWitness.semanticActionSetFingerprint} expectedSet=${semanticActionSetFingerprint}).`,
       });
     }
     if (legalAction) {
@@ -394,7 +411,10 @@ export function buildCorpTurnPlanningCoverageReport(params: {
         });
       }
     }
-    const moduleCoverage = moduleCoverageFor(head.moduleId);
+    const moduleCoverage = moduleCoverageFor(
+      head.moduleId,
+      configuration.modules,
+    );
     if (!moduleCoverage) {
       valid = false;
       issues.push({
@@ -498,7 +518,10 @@ export function buildCorpTurnPlanningCoverageReport(params: {
     const candidate = params.candidates.find(
       (entry) => entry.actionId === disposition.actionId,
     );
-    const moduleCoverage = moduleCoverageFor(disposition.ownerModuleId);
+    const moduleCoverage = moduleCoverageFor(
+      disposition.ownerModuleId,
+      configuration.modules,
+    );
     if (
       !candidate ||
       !moduleCoverage ||
@@ -582,7 +605,10 @@ export function buildCorpTurnPlanningCoverageReport(params: {
         };
       }
       if (disposition) {
-        const moduleCoverage = moduleCoverageFor(disposition.ownerModuleId);
+        const moduleCoverage = moduleCoverageFor(
+          disposition.ownerModuleId,
+          configuration.modules,
+        );
         return {
           actionId: candidate.actionId,
           actionType: candidate.actionType,
@@ -612,7 +638,7 @@ export function buildCorpTurnPlanningCoverageReport(params: {
           actionType: candidate.actionType,
           semanticActionType: candidate.semanticActionType,
           classification: "explicitly_nonproductive",
-          ownerModuleId: "corp.complete_turn",
+          ownerModuleId: configuration.completeTurnModuleId,
           horizonCapability: "current_turn_only",
           campaignQuoteStatus: "not_required",
           evidenceCodes: [
@@ -636,7 +662,7 @@ export function buildCorpTurnPlanningCoverageReport(params: {
       };
     });
 
-  const modules = CORP_TURN_PLANNING_MODULE_COVERAGE.map((module) => ({
+  const modules = configuration.modules.map((module) => ({
     moduleId: module.moduleId,
     horizonCapability: module.horizonCapability,
     productiveActionCount: actions.filter(
@@ -765,10 +791,14 @@ export function corpTurnPlanningModuleCoverage(
 
 function moduleCoverageFor(
   moduleId: PlanModuleId,
+  modules: readonly Pick<
+    CorpTurnPlanningModuleCoverage,
+    "moduleId" | "horizonCapability" | "semanticActionPatterns"
+  >[] = CORP_TURN_PLANNING_MODULE_COVERAGE,
 ): CorpTurnPlanningModuleCoverage | undefined {
-  return CORP_TURN_PLANNING_MODULE_COVERAGE.find(
-    (entry) => entry.moduleId === moduleId,
-  );
+  return modules.find((entry) => entry.moduleId === moduleId) as
+    | CorpTurnPlanningModuleCoverage
+    | undefined;
 }
 
 function semanticMatchesAny(

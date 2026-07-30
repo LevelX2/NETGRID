@@ -303,6 +303,23 @@ export {
 } from "./plans/corp-turn-planner-shadow";
 export type { CorpTurnPlannerShadowResult } from "./plans/corp-turn-planner-shadow";
 export {
+  assertRunnerTurnPlanningModuleRegistry,
+  buildRunnerTurnPlanningCoverageReport,
+  RUNNER_ENGINE_WINDOW_SEMANTIC_PATTERNS,
+  RUNNER_TURN_PLANNING_COVERAGE_SCHEMA_VERSION,
+  RUNNER_TURN_PLANNING_MODULE_COVERAGE,
+  runnerTurnPlanningModuleCoverage,
+} from "./plans/runner-turn-planning-coverage";
+export type {
+  RunnerTurnPlanningCoverageReport,
+  RunnerTurnPlanningModuleCoverage,
+} from "./plans/runner-turn-planning-coverage";
+export {
+  buildRunnerTurnPlannerShadow,
+  RUNNER_TURN_PLANNER_SHADOW_SCHEMA_VERSION,
+} from "./plans/runner-turn-planner-shadow";
+export type { RunnerTurnPlannerShadowResult } from "./plans/runner-turn-planner-shadow";
+export {
   corpCampaignDescriptors,
   reconcileCorpCampaignContinuity,
   CORP_OPPONENT_CAMPAIGN_CONTINUITY_VERSION,
@@ -311,8 +328,13 @@ export type { CorpCampaignDescriptor } from "./plans/corp-opponent-campaign-cont
 export {
   CORP_TURN_PLANNER_CUTOVER_VERSION,
   resolveCorpTurnPlannerCutover,
+  resolveTurnPlannerCutover,
+  TURN_PLANNER_CUTOVER_VERSION,
 } from "./plans/corp-turn-planner-cutover";
-export type { CorpTurnPlannerCutoverResult } from "./plans/corp-turn-planner-cutover";
+export type {
+  CorpTurnPlannerCutoverResult,
+  TurnPlannerCutoverResult,
+} from "./plans/corp-turn-planner-cutover";
 export type {
   CampaignRequote,
   CommittedInvocationRoute,

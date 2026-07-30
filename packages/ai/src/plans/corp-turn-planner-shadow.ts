@@ -546,7 +546,7 @@ function headsForRoute(params: {
     params.input,
     action,
   );
-  const invocations = currentInvocationVariants({
+  const invocations = currentTurnPlanningInvocationVariants({
     stateIdentity: params.stateIdentity,
     action,
     candidate: params.route.candidate,
@@ -821,7 +821,7 @@ function boundedUtility(value: number): number {
   return Math.max(-10_000, Math.min(10_000, Math.round(value)));
 }
 
-function currentInvocationVariants(params: {
+export function currentTurnPlanningInvocationVariants(params: {
   stateIdentity: PlanningStateIdentity;
   action: LegalAction;
   candidate: ActionSemanticCandidate;

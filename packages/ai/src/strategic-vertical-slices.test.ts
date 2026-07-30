@@ -89,16 +89,21 @@ describe("Deck strategy runtime vertical slices", () => {
       strategyId: "runner.rnd_pressure",
     });
 
-    const first = chooseRunnerAction(input);
-    const second = chooseRunnerAction({
-      ...input,
-      decisionId: input.decisionId.replace(":1", ":2"),
-      actionNumber: 2,
-      playerView: {
-        ...input.playerView,
-        stateVersion: 2,
-      },
+    const first = chooseRunnerAction(input, {
+      runnerTurnPlannerMode: "legacy_compare",
     });
+    const second = chooseRunnerAction(
+      {
+        ...input,
+        decisionId: input.decisionId.replace(":1", ":2"),
+        actionNumber: 2,
+        playerView: {
+          ...input.playerView,
+          stateVersion: 2,
+        },
+      },
+      { runnerTurnPlannerMode: "legacy_compare" },
+    );
 
     expect(first.actionId).toBe("run-rd");
     expect(first.evidence).toEqual(
@@ -175,9 +180,7 @@ describe("Deck strategy runtime vertical slices", () => {
       chooseCorpAction(taggedInput, {
         corpTurnPlannerMode: "legacy_compare",
       }),
-    ).toThrow(
-      /missing_plan_module_coverage/,
-    );
+    ).toThrow(/missing_plan_module_coverage/);
     const noWindow = chooseCorpAction(noWindowInput, {
       corpTurnPlannerMode: "legacy_compare",
     });
@@ -476,8 +479,12 @@ describe("Deck strategy runtime vertical slices", () => {
       strategyId: "runner.remote_contest",
     });
 
-    const remoteDecision = chooseRunnerAction(remoteInput);
-    const safetyDecision = chooseRunnerAction(safetyInput);
+    const remoteDecision = chooseRunnerAction(remoteInput, {
+      runnerTurnPlannerMode: "legacy_compare",
+    });
+    const safetyDecision = chooseRunnerAction(safetyInput, {
+      runnerTurnPlannerMode: "legacy_compare",
+    });
 
     expect(remoteDecision.actionId).toBe("run-remote");
     expect(remoteDecision.evidence).toEqual(

@@ -23,6 +23,9 @@ describe("Wilson Weeflerunner Engine-restricted run coverage", () => {
       maxActions: 16,
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
+      aiDecisionRuntimeOptions: {
+        runnerTurnPlannerMode: "legacy_compare",
+      },
       ...resolved.config,
       testOnlyDecisionCheckpointCapture: {
         actionIndices: Array.from({ length: 16 }, (_, index) => index),

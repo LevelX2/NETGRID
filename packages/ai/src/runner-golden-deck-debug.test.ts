@@ -175,6 +175,7 @@ describe("Runner Golden Deck strategy and debug", () => {
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
+      runnerTurnPlannerMode: "legacy_compare",
     });
     const debugText = JSON.stringify(decision.decisionDebug);
 
@@ -228,6 +229,7 @@ describe("Runner Golden Deck strategy and debug", () => {
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
+      runnerTurnPlannerMode: "legacy_compare",
     });
     const debugText = JSON.stringify(decision.decisionDebug);
 
@@ -285,6 +287,7 @@ describe("Runner Golden Deck strategy and debug", () => {
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
+      runnerTurnPlannerMode: "legacy_compare",
     });
     const runAlternative = decision.decisionDebug?.actionAlternatives?.find(
       (alternative) => alternative.actionId === "run-rd",
@@ -403,6 +406,7 @@ describe("Runner Golden Deck strategy and debug", () => {
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
+      runnerTurnPlannerMode: "legacy_compare",
     });
 
     expect(decision.actionId).toBe("gain-credit");

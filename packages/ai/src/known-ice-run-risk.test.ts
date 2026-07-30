@@ -69,6 +69,7 @@ describe("known visible ICE run risk", () => {
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
+      runnerTurnPlannerMode: "legacy_compare",
     });
     const run = input.legalActions.find(
       (action) =>
@@ -142,6 +143,7 @@ describe("known visible ICE run risk", () => {
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
+      runnerTurnPlannerMode: "legacy_compare",
     });
     const alternatives = new Map(
       decision.decisionDebug?.actionAlternatives?.map((entry) => [
@@ -191,6 +193,7 @@ describe("known visible ICE run risk", () => {
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
+      runnerTurnPlannerMode: "legacy_compare",
     });
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
@@ -244,6 +247,7 @@ describe("known visible ICE run risk", () => {
     const [evaluation] = evaluateRunnerRunTargets({ input });
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
+      runnerTurnPlannerMode: "legacy_compare",
     });
 
     expect(evaluation).toMatchObject({
@@ -337,6 +341,7 @@ describe("known visible ICE run risk", () => {
 
       const decision = chooseRunnerAction(input, {
         persistTacticalPlanMemory: false,
+        runnerTurnPlannerMode: "legacy_compare",
       });
 
       expect(decision.actionId).toBe(gain.actionId);

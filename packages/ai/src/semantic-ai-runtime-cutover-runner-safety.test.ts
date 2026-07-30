@@ -97,9 +97,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         "plan_step_capability:draw_for_answer_breaker_wall",
       ]),
     );
-    expect(decision.decisionDebug?.planKind).toBe(
-      "runner.rig_and_coverage",
-    );
+    expect(decision.decisionDebug?.planKind).toBe("runner.rig_and_coverage");
     expect(decision.decisionDebug?.detailSections).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -154,9 +152,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       ),
     ];
 
-    expect(
-      missingBreakerCoverageKind(input.playerView, "remote_1"),
-    ).toBe("breaker_wall");
+    expect(missingBreakerCoverageKind(input.playerView, "remote_1")).toBe(
+      "breaker_wall",
+    );
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("draw");
@@ -252,9 +250,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe(continueIntoEtr.actionId);
-    expect(decision.reasonCode).toBe(
-      "plan_first.runner.convert_run_window",
-    );
+    expect(decision.reasonCode).toBe("plan_first.runner.convert_run_window");
     expect(debugText).toContain(
       "encounter_action_excluded:pump_cannot_lead_to_useful_break",
     );
@@ -377,9 +373,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe(pump.actionId);
-    expect(decision.reasonCode).toBe(
-      "plan_first.runner.convert_run_window",
-    );
+    expect(decision.reasonCode).toBe("plan_first.runner.convert_run_window");
     expect(debugText).not.toContain("pump_cannot_reach_break_strength:true");
 
     input.playerView.own.rig = [codecracker];
@@ -493,9 +487,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe(continueIntoEtr.actionId);
-    expect(decision.reasonCode).toBe(
-      "plan_first.runner.convert_run_window",
-    );
+    expect(decision.reasonCode).toBe("plan_first.runner.convert_run_window");
     expect(debugText).toContain(
       "encounter_action_excluded:break_cannot_preserve_access_path",
     );
@@ -547,9 +539,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe(trash.actionId);
-    expect(decision.reasonCode).toBe(
-      "plan_first.runner.convert_run_window",
-    );
+    expect(decision.reasonCode).toBe("plan_first.runner.convert_run_window");
     expect(JSON.stringify(decision.decisionDebug)).not.toContain(
       "runner_central_access_trash_low_corp_investment",
     );
@@ -610,9 +600,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("draw");
-    expect(decision.reasonCode).toBe(
-      "plan_first.runner.defense_and_recovery",
-    );
+    expect(decision.reasonCode).toBe("plan_first.runner.defense_and_recovery");
     expect(decision.decisionDebug?.planKind).toBe(
       "runner.defense_and_recovery",
     );
@@ -684,7 +672,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     ];
     input.playerView.stateVersion = 39;
 
-    const decision = chooseRunnerAction(input);
+    const decision = chooseRunnerAction(input, {
+      runnerTurnPlannerMode: "legacy_compare",
+    });
 
     expect(decision.actionId).toBe("draw");
     expect(decision.decisionDebug?.planKind).toBe(
@@ -721,23 +711,23 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [
-        visibleCard("agenda", "corp", "agenda", {
-          definitionId: "simple_agenda",
-        }),
-      ]),
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("agenda", "corp", "agenda", {
+            definitionId: "simple_agenda",
+          }),
+        ],
+      ),
     ];
 
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("run-remote");
-    expect(decision.reasonCode).toBe(
-      "plan_first.runner.contest_remote",
-    );
+    expect(decision.reasonCode).toBe("plan_first.runner.contest_remote");
     expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
-    expect(decision.evidence).toContain(
-      "plan_step_capability:contest_remote",
-    );
+    expect(decision.evidence).toContain("plan_step_capability:contest_remote");
     expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
       expect.objectContaining({
         actionId: "draw",
@@ -872,9 +862,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("draw");
-    expect(decision.reasonCode).toBe(
-      "plan_first.runner.defense_and_recovery",
-    );
+    expect(decision.reasonCode).toBe("plan_first.runner.defense_and_recovery");
     expect(decision.evidence).toContain(
       "plan_step_capability:build_required_hand_buffer",
     );

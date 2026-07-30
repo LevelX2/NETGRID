@@ -19,6 +19,9 @@ describe("Proteus Fetal AI install plan coverage", () => {
         corpDeck,
         runnerControllerMode: "current_candidate",
         corpControllerMode: "current_candidate",
+        aiDecisionRuntimeOptions: {
+          runnerTurnPlannerMode: "legacy_compare",
+        },
       });
 
       expect(summary.terminationKind, fetalDiagnostic(summary)).toBe(
@@ -61,6 +64,9 @@ describe("Proteus Fetal AI install plan coverage", () => {
       corpDeck,
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
+      aiDecisionRuntimeOptions: {
+        runnerTurnPlannerMode: "legacy_compare",
+      },
     });
 
     expect(summary.terminationKind).toBe("action_limit");

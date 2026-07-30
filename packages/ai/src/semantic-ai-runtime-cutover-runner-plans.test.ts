@@ -1601,7 +1601,9 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       cards: [{ cardId: "onr_v1_053_ramming-piston", quantity: 1 }],
     });
 
-    const followupDecision = chooseRunnerAction(followupInput);
+    const followupDecision = chooseRunnerAction(followupInput, {
+      runnerTurnPlannerMode: "legacy_compare",
+    });
 
     expectPlanDecision(followupDecision, {
       actionId: "draw",
@@ -1695,7 +1697,9 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       },
     ];
 
-    const followupDecision = chooseRunnerAction(followupInput);
+    const followupDecision = chooseRunnerAction(followupInput, {
+      runnerTurnPlannerMode: "legacy_compare",
+    });
     const selected = followupInput.legalActions.find(
       (action) => action.actionId === followupDecision.actionId,
     );
@@ -1765,6 +1769,10 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       },
     ];
 
-    expectLastProductiveRunnerLiquidity(chooseRunnerAction(input));
+    expectLastProductiveRunnerLiquidity(
+      chooseRunnerAction(input, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    );
   });
 });

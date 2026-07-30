@@ -66,7 +66,10 @@ function runCapturedSeed(seed: string, actionIndex: number) {
     runnerControllerMode: "current_candidate",
     corpControllerMode: "current_candidate",
     ...resolved.config,
-    aiDecisionRuntimeOptions: { corpTurnPlannerMode: "legacy_compare" },
+    aiDecisionRuntimeOptions: {
+      corpTurnPlannerMode: "legacy_compare",
+      runnerTurnPlannerMode: "legacy_compare",
+    },
     testOnlyDecisionCheckpointCapture: {
       actionIndices: [actionIndex],
       capture: (snapshot) => {

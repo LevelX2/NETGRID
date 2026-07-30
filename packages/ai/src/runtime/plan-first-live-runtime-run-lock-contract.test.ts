@@ -30,7 +30,9 @@ describe("plan-first Runner run-lock parent-plan contract", () => {
     );
     const input = runLockInput([gainCredit, endTurn], 4, 6);
 
-    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {
+      runnerTurnPlannerMode: "legacy_compare",
+    });
 
     expect(decision).toMatchObject({
       actionId: gainCredit.actionId,
@@ -70,7 +72,9 @@ describe("plan-first Runner run-lock parent-plan contract", () => {
     );
     const input = runLockInput([release, gainCredit], 6, 2);
 
-    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {
+      runnerTurnPlannerMode: "legacy_compare",
+    });
 
     expect(decision).toMatchObject({
       actionId: release.actionId,

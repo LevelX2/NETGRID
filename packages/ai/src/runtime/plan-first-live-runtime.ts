@@ -114,9 +114,11 @@ import {
 import { assertCorpTurnPlanningModuleRegistry } from "../plans/corp-turn-planning-coverage";
 import { buildCorpTurnPlannerShadow } from "../plans/corp-turn-planner-shadow";
 import {
-  resolveCorpTurnPlannerCutover,
-  type CorpTurnPlannerCutoverResult,
+  resolveTurnPlannerCutover,
+  type TurnPlannerCutoverResult,
 } from "../plans/corp-turn-planner-cutover";
+import { assertRunnerTurnPlanningModuleRegistry } from "../plans/runner-turn-planning-coverage";
+import { buildRunnerTurnPlannerShadow } from "../plans/runner-turn-planner-shadow";
 import {
   buildCanonicalLegalActionInvocation,
   buildPlanningStateIdentity,
@@ -310,10 +312,7 @@ export function choosePlanFirstLiveAction(
     input,
     options.quoteCorpPunishRoute,
   );
-  if (
-    input.side === "corp" &&
-    (input as AiDecisionInputWithDeckCapabilities).planningRulesContext
-  ) {
+  if ((input as AiDecisionInputWithDeckCapabilities).planningRulesContext) {
     Object.assign(input, {
       planningStateIdentity: buildPlanningStateIdentity(input),
     });
@@ -336,11 +335,7 @@ export function choosePlanFirstLiveAction(
       ? createSidePlanRegistry({
           side: "runner",
           priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
-          modules: [
-            ...createRunnerCorePlanModules(),
-            ...createRunnerTacticalPlanModules(),
-            createTurnCompletionPlanModule("runner"),
-          ],
+          modules: currentRunnerPlanModules(),
         })
       : createSidePlanRegistry({
           side: "corp",
@@ -358,8 +353,8 @@ export function choosePlanFirstLiveAction(
       ? runnerContext(input, candidates, dependencies, previous)
       : corpContext(input, candidates, previous);
   rememberCurrentStrategicIntent(input, options);
-  let corpTurnPlannerCutover: CorpTurnPlannerCutoverResult | undefined;
-  let corpTurnPlanningDebug: AiTurnPlanningDebug | undefined;
+  let turnPlannerCutover: TurnPlannerCutoverResult | undefined;
+  let turnPlanningDebug: AiTurnPlanningDebug | undefined;
   let result = runPlanScheduler({
     context,
     registry,
@@ -407,7 +402,7 @@ export function choosePlanFirstLiveAction(
           selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
           authorityMode: "shadow",
         });
-        corpTurnPlanningDebug = planner?.debug;
+        turnPlanningDebug = planner?.debug;
       }
     } else {
       const planner = buildCorpTurnPlannerShadow({
@@ -421,7 +416,7 @@ export function choosePlanFirstLiveAction(
       if (!planner) {
         throw new Error("corp_turn_planner_cutover_result_missing");
       }
-      corpTurnPlannerCutover = resolveCorpTurnPlannerCutover({
+      turnPlannerCutover = resolveTurnPlannerCutover({
         input,
         planner,
         portfolio: result.portfolio,
@@ -430,12 +425,71 @@ export function choosePlanFirstLiveAction(
         stateIdentity: planningInput.planningStateIdentity!,
         runtimeInstanceId: "corp-turn-planner-runtime-v1",
       });
-      corpTurnPlanningDebug = corpTurnPlannerCutover.debug;
-      result = applyCorpTurnPlannerCutoverSelection(
+      turnPlanningDebug = turnPlannerCutover.debug;
+      result = applyTurnPlannerCutoverSelection(
         input,
         candidates,
         result,
-        corpTurnPlannerCutover,
+        turnPlannerCutover,
+      );
+    }
+  }
+  if (input.side === "runner" && result.lane === "plan" && context.domain) {
+    const planningInput = input as AiDecisionInputWithDeckCapabilities;
+    const hasTurnPlanningContracts =
+      planningInput.planningRulesContext !== undefined &&
+      planningInput.planningStateIdentity !== undefined;
+    if (
+      options.runnerTurnPlannerMode !== "legacy_compare" &&
+      !hasTurnPlanningContracts
+    ) {
+      throw new PlanResolutionFailure("missing_plan_module_coverage", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map((action) => action.type),
+        unresolvedActionIds: input.legalActions.map(
+          (action) => action.actionId,
+        ),
+        owner: "rules_contract",
+        removalCondition:
+          "The productive Runner TurnPlanner requires current planning rules and state identity contracts.",
+      });
+    }
+    const planner = hasTurnPlanningContracts
+      ? buildRunnerTurnPlannerShadow({
+          input,
+          context,
+          registry,
+          runtimeResult: result,
+          selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
+          authorityMode:
+            options.runnerTurnPlannerMode === "legacy_compare"
+              ? "shadow"
+              : "cutover",
+        })
+      : undefined;
+    if (options.runnerTurnPlannerMode === "legacy_compare") {
+      turnPlanningDebug = planner?.debug;
+    } else {
+      if (!planner) {
+        throw new Error("runner_turn_planner_cutover_result_missing");
+      }
+      turnPlannerCutover = resolveTurnPlannerCutover({
+        input,
+        planner,
+        portfolio: result.portfolio,
+        candidates,
+        rulesContext: planningInput.planningRulesContext!,
+        stateIdentity: planningInput.planningStateIdentity!,
+        runtimeInstanceId: "runner-turn-planner-runtime-v1",
+      });
+      turnPlanningDebug = turnPlannerCutover.debug;
+      result = applyTurnPlannerCutoverSelection(
+        input,
+        candidates,
+        result,
+        turnPlannerCutover,
       );
     }
   }
@@ -461,15 +515,15 @@ export function choosePlanFirstLiveAction(
     registry,
     dependencies,
     options,
-    corpTurnPlanningDebug,
+    turnPlanningDebug,
   );
 }
 
-function applyCorpTurnPlannerCutoverSelection(
+function applyTurnPlannerCutoverSelection(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   result: Extract<PlanSchedulerResult, { lane: "plan" }>,
-  cutover: CorpTurnPlannerCutoverResult,
+  cutover: TurnPlannerCutoverResult,
 ): Extract<PlanSchedulerResult, { lane: "plan" }> {
   const binding = cutover.planner.headBindings.find(
     (entry) => entry.candidateId === cutover.head.candidateId,
@@ -495,8 +549,7 @@ function applyCorpTurnPlannerCutoverSelection(
       legalActionTypes: input.legalActions.map((action) => action.type),
       unresolvedActionIds: [cutover.head.currentBinding.actionId],
       owner: "plan_registry",
-      removalCondition:
-        "Bind the Corp TurnPlanner winner to its exact current plan instance, semantic candidate and LegalAction witness.",
+      removalCondition: `Bind the ${input.side} TurnPlanner winner to its exact current plan instance, semantic candidate and LegalAction witness.`,
     });
   }
   const portfolio = selectResidentPlanPortfolioExecutor({
@@ -545,7 +598,7 @@ function applyCorpTurnPlannerCutoverSelection(
       ...result.diagnostics,
       {
         stage: "select",
-        code: "corp_turn_planner_cutover_winner",
+        code: `${input.side}_turn_planner_cutover_winner`,
         instanceId: cutover.selectedPlanInstanceId,
         moduleId: cutover.head.moduleId,
         priorityClass: cutover.head.priorityClass,
@@ -554,7 +607,7 @@ function applyCorpTurnPlannerCutoverSelection(
         ? [
             {
               stage: "reconcile" as const,
-              code: `corp_turn_plan_replanned:${cutover.replanReason}`,
+              code: `${input.side}_turn_plan_replanned:${cutover.replanReason}`,
               instanceId: cutover.selectedPlanInstanceId,
               moduleId: cutover.head.moduleId,
             },
@@ -571,6 +624,18 @@ function currentCorpPlanModules() {
     createTurnCompletionPlanModule("corp"),
   ];
   assertCorpTurnPlanningModuleRegistry(
+    modules.map((module) => module.moduleId),
+  );
+  return modules;
+}
+
+function currentRunnerPlanModules() {
+  const modules = [
+    ...createRunnerCorePlanModules(),
+    ...createRunnerTacticalPlanModules(),
+    createTurnCompletionPlanModule("runner"),
+  ];
+  assertRunnerTurnPlanningModuleRegistry(
     modules.map((module) => module.moduleId),
   );
   return modules;
@@ -6770,7 +6835,9 @@ function corpActionDispositions(
       drawArbitrations.length > 0 &&
       drawArbitrations.every(
         (assessment) => assessment.disposition !== "admitted",
-      )
+      ) &&
+      !corpOpenEconomyPlanOwnsAction(domain, candidate.actionId) &&
+      !corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)
     ) {
       const assessment = drawArbitrations[0]!;
       const evidenceCode = `corp_draw_admission:${assessment.disposition}:${assessment.purpose}`;
@@ -12950,7 +13017,7 @@ function decisionFromScheduler(
   registry: SidePlanRegistry,
   dependencies: PlanFirstLiveDependencies,
   options: AiDecisionRuntimeOptions,
-  corpTurnPlanningDebug?: AiTurnPlanningDebug,
+  turnPlanningDebug?: AiTurnPlanningDebug,
 ): AiDecision {
   const randomizedIceInstallNearTie =
     result.lane === "plan"
@@ -13358,9 +13425,7 @@ function decisionFromScheduler(
     planId,
     planKind,
     assessmentEvidenceCodes: planEvidence,
-    ...(corpTurnPlanningDebug
-      ? { turnPlanningDebug: corpTurnPlanningDebug }
-      : {}),
+    ...(turnPlanningDebug ? { turnPlanningDebug } : {}),
   });
   const decisionBase = {
     reasonCode:

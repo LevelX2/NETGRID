@@ -17,6 +17,12 @@ export type AiDecisionRuntimeOptions = {
    * TurnPlanner observe it without action-by-action fallback.
    */
   corpTurnPlannerMode?: "cutover" | "legacy_compare";
+  /**
+   * Explicit Runner rollback/diagnostic gate. Productive Runner decisions
+   * default to `cutover`; `legacy_compare` keeps the former scheduler winner
+   * while emitting the same complete planner diagnostics.
+   */
+  runnerTurnPlannerMode?: "cutover" | "legacy_compare";
   quoteCorpPunishRoute?: (
     request: CorpPunishRouteQuoteRequest,
   ) => CorpPunishRouteQuoteResult;

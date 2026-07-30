@@ -19,6 +19,7 @@ describe("replay portable fixtures", () => {
 
     const decision = chooseRunnerAction(fixture.input, {
       persistTacticalPlanMemory: false,
+      runnerTurnPlannerMode: "legacy_compare",
     });
     const selected = fixture.input.legalActions.find(
       (action) => action.actionId === decision.actionId,
@@ -45,14 +46,15 @@ describe("replay portable fixtures", () => {
 
     const decision = chooseRunnerAction(fixture.input, {
       persistTacticalPlanMemory: false,
+      runnerTurnPlannerMode: "legacy_compare",
     });
     const selected = fixture.input.legalActions.find(
       (action) => action.actionId === decision.actionId,
     );
 
     expect(selected?.type).not.toBe("start_run");
-    expect(fixture.input.legalActions.some((action) => action.type === "start_run")).toBe(
-      false,
-    );
+    expect(
+      fixture.input.legalActions.some((action) => action.type === "start_run"),
+    ).toBe(false);
   });
 });

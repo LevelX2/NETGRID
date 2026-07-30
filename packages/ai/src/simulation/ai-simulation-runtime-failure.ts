@@ -12,6 +12,7 @@ export type AiSimulationRuntimeFailure = {
   side: Side;
   stateVersion: number;
   timingPoint: string;
+  removalCondition?: string;
   planInstanceId?: string;
   stepId?: string;
   legalActionTypes?: string[];
@@ -24,6 +25,7 @@ export function classifiedSimulationRuntimeFailure(params: {
   side: Side;
   stateVersion: number;
   timingPoint: string;
+  removalCondition?: string;
   planInstanceId?: string;
   stepId?: string;
   legalActionTypes?: readonly string[];
@@ -36,6 +38,9 @@ export function classifiedSimulationRuntimeFailure(params: {
     side: params.side,
     stateVersion: nonNegativeInteger(params.stateVersion),
     timingPoint: redactedToken(params.timingPoint, "unknown"),
+    ...(params.removalCondition
+      ? { removalCondition: redactedText(params.removalCondition) }
+      : {}),
     ...(params.planInstanceId
       ? { planInstanceId: redactedToken(params.planInstanceId) }
       : {}),
@@ -72,6 +77,7 @@ export function classifySimulationRuntimeFailure(
       side: error.context.side,
       stateVersion: error.context.stateVersion,
       timingPoint: error.context.timingPoint,
+      removalCondition: error.context.removalCondition,
       ...(error.context.planInstanceId
         ? { planInstanceId: error.context.planInstanceId }
         : {}),
@@ -110,22 +116,23 @@ export function simulationRuntimeFailureToken(
     `side:${failure.side}`,
     `stateVersion:${failure.stateVersion}`,
     `timing:${failure.timingPoint}`,
-    ...(failure.planInstanceId
-      ? [`plan:${failure.planInstanceId}`]
+    ...(failure.removalCondition
+      ? [`removalCondition:${failure.removalCondition}`]
       : []),
+    ...(failure.planInstanceId ? [`plan:${failure.planInstanceId}`] : []),
     ...(failure.stepId ? [`step:${failure.stepId}`] : []),
     ...(failure.legalActionTypes
       ? [`legalActionTypes:${failure.legalActionTypes.join(",") || "none"}`]
       : []),
     ...(failure.unresolvedActionIds
-      ? [`unresolvedActionIds:${failure.unresolvedActionIds.join(",") || "none"}`]
+      ? [
+          `unresolvedActionIds:${failure.unresolvedActionIds.join(",") || "none"}`,
+        ]
       : []),
   ].join(" ");
 }
 
-function knownBoundaryFailureFor(
-  error: unknown,
-):
+function knownBoundaryFailureFor(error: unknown):
   | {
       code: string;
       owner: PlanResolutionFailureOwner;
@@ -157,4 +164,12 @@ function redactedToken(value: string, fallback = ""): string {
     .replace(/[^a-zA-Z0-9_.:-]+/g, "_")
     .slice(0, 160);
   return normalized || fallback;
+}
+
+function redactedText(value: string): string {
+  return value
+    .trim()
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/\s+/g, " ")
+    .slice(0, 240);
 }

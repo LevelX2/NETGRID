@@ -131,6 +131,16 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "runner.economy",
         memoryVersion: "resident-plan-portfolio-v2",
+        planFirstDecision: {
+          selectionAuthority: "turn_plan_commitment",
+          turnPlanning: {
+            mode: "cutover",
+            coverage: {
+              status: "pass",
+              coveragePercent: 100,
+            },
+          },
+        },
       },
     });
     expect(decision.evidence).toContain("plan_first_lane:plan");
@@ -641,6 +651,15 @@ describe("authoritative plan-first live runtime", () => {
         fallbackUsed: false,
       });
       expect(decision.evidence).toContain("plan_first_lane:plan");
+      expect(
+        decision.decisionDebug?.planFirstDecision?.turnPlanning,
+      ).toMatchObject({
+        mode: "cutover",
+        coverage: {
+          status: "pass",
+          coveragePercent: 100,
+        },
+      });
       expect(legacyChoices).not.toHaveBeenCalled();
     },
   );
@@ -1472,7 +1491,7 @@ describe("authoritative plan-first live runtime", () => {
         ),
         planFirstDecision: {
           schemaVersion: "ai-plan-first-decision-debug-v1",
-          selectionAuthority: "resident_plan_instance",
+          selectionAuthority: "turn_plan_commitment",
           rootPlanInstanceId: expect.stringContaining(
             "runner.develop_board_and_hand:card%3Atarget-program",
           ),
@@ -6778,7 +6797,11 @@ describe("authoritative plan-first live runtime", () => {
     later.playerView.own.clicks = 0;
     later.playerView.opponent.deckCount = 1;
 
-    expect(context.chooseSemanticRuntimeAction(later, {})).toMatchObject({
+    expect(
+      context.chooseSemanticRuntimeAction(later, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
       actionId: "end",
       reasonCode: "plan_first.runner.complete_turn",
       fallbackUsed: false,
@@ -8440,7 +8463,11 @@ describe("authoritative plan-first live runtime", () => {
         definitionId: "onr_v1_007_blink",
       }),
     ];
-    expect(context.chooseSemanticRuntimeAction(afterOpen, {})).toMatchObject({
+    expect(
+      context.chooseSemanticRuntimeAction(afterOpen, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
       actionId: "restricted-install-program-a",
       fallbackUsed: false,
       decisionDebug: {
@@ -8465,7 +8492,9 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
     expect(
-      context.chooseSemanticRuntimeAction(afterFirstInstall, {}),
+      context.chooseSemanticRuntimeAction(afterFirstInstall, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
     ).toMatchObject({
       actionId: "restricted-install-program-b",
       fallbackUsed: false,
@@ -8486,7 +8515,9 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
     expect(
-      context.chooseSemanticRuntimeAction(afterSecondInstall, {}),
+      context.chooseSemanticRuntimeAction(afterSecondInstall, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
     ).toMatchObject({
       actionId: "stop-valu-pak",
       reasonCode: "plan_first.runner.develop_board_and_hand",
@@ -8937,7 +8968,11 @@ describe("authoritative plan-first live runtime", () => {
       transitions: [],
     });
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+    expect(
+      liveContext().chooseSemanticRuntimeAction(input, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
       actionId: "restricted-install-program-b",
       reasonCode: "plan_first.runner.develop_board_and_hand",
       fallbackUsed: false,
@@ -9090,7 +9125,9 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.opponent.deckCount = 0;
 
-    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {
+      runnerTurnPlannerMode: "legacy_compare",
+    });
     expect(decision).toMatchObject({
       actionId: "end",
       reasonCode: "plan_first.runner.secure_terminal_win",
@@ -9269,7 +9306,11 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     resetResidentPlanPortfolioMemory();
-    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+    expect(
+      context.chooseSemanticRuntimeAction(input, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
       actionId: runHq.actionId,
       reasonCode: "plan_first.runner.pressure_central",
       fallbackUsed: false,
@@ -9321,7 +9362,11 @@ describe("authoritative plan-first live runtime", () => {
       9, 9,
     ]);
     resetResidentPlanPortfolioMemory();
-    expect(context.chooseSemanticRuntimeAction(dtoAccessed, {})).toMatchObject({
+    expect(
+      context.chooseSemanticRuntimeAction(dtoAccessed, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
       actionId: credit.actionId,
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
@@ -9331,7 +9376,9 @@ describe("authoritative plan-first live runtime", () => {
     stateVersionOnly.playerView.stateVersion = 40;
     resetResidentPlanPortfolioMemory();
     expect(
-      context.chooseSemanticRuntimeAction(stateVersionOnly, {}),
+      context.chooseSemanticRuntimeAction(stateVersionOnly, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
     ).toMatchObject({
       actionId: credit.actionId,
       reasonCode: "plan_first.runner.economy",
@@ -9341,7 +9388,11 @@ describe("authoritative plan-first live runtime", () => {
     const missingTurn = structuredClone(input);
     delete missingTurn.playerView.turnSerial;
     resetResidentPlanPortfolioMemory();
-    expect(context.chooseSemanticRuntimeAction(missingTurn, {})).toMatchObject({
+    expect(
+      context.chooseSemanticRuntimeAction(missingTurn, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
       actionId: credit.actionId,
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
@@ -9365,10 +9416,9 @@ describe("authoritative plan-first live runtime", () => {
       const malformedHistory = structuredClone(dtoAccessed);
       malformed.mutate(malformedHistory.eventTail[0]!);
       resetResidentPlanPortfolioMemory();
-      const decision = context.chooseSemanticRuntimeAction(
-        malformedHistory,
-        {},
-      );
+      const decision = context.chooseSemanticRuntimeAction(malformedHistory, {
+        runnerTurnPlannerMode: "legacy_compare",
+      });
       expect(decision, malformed.label).toMatchObject({
         actionId: credit.actionId,
         reasonCode: "plan_first.runner.economy",
@@ -9395,7 +9445,11 @@ describe("authoritative plan-first live runtime", () => {
       },
     });
     resetResidentPlanPortfolioMemory();
-    expect(context.chooseSemanticRuntimeAction(refreshed, {})).toMatchObject({
+    expect(
+      context.chooseSemanticRuntimeAction(refreshed, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
       actionId: runHq.actionId,
       reasonCode: "plan_first.runner.pressure_central",
       fallbackUsed: false,
@@ -9405,7 +9459,11 @@ describe("authoritative plan-first live runtime", () => {
     nextTurn.playerView.turnSerial = 10;
     nextTurn.playerView.stateVersion = 30;
     resetResidentPlanPortfolioMemory();
-    expect(context.chooseSemanticRuntimeAction(nextTurn, {})).toMatchObject({
+    expect(
+      context.chooseSemanticRuntimeAction(nextTurn, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
       actionId: runHq.actionId,
       reasonCode: "plan_first.runner.pressure_central",
       fallbackUsed: false,
@@ -9486,7 +9544,11 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     resetResidentPlanPortfolioMemory();
-    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+    expect(
+      context.chooseSemanticRuntimeAction(input, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
       actionId: runRd.actionId,
       reasonCode: "plan_first.runner.pressure_central",
       fallbackUsed: false,
@@ -9550,13 +9612,15 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     resetResidentPlanPortfolioMemory();
-    expect(context.chooseSemanticRuntimeAction(bothConsumed, {})).toMatchObject(
-      {
-        actionId: credit.actionId,
-        reasonCode: "plan_first.runner.economy",
-        fallbackUsed: false,
-      },
-    );
+    expect(
+      context.chooseSemanticRuntimeAction(bothConsumed, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
 
     const converted = structuredClone(bothConsumed);
     converted.playerView.stateVersion = 38;
@@ -9574,7 +9638,11 @@ describe("authoritative plan-first live runtime", () => {
       },
     });
     resetResidentPlanPortfolioMemory();
-    expect(context.chooseSemanticRuntimeAction(converted, {})).toMatchObject({
+    expect(
+      context.chooseSemanticRuntimeAction(converted, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
       actionId: runRd.actionId,
       reasonCode: "plan_first.runner.pressure_central",
       fallbackUsed: false,
@@ -9639,7 +9707,9 @@ describe("authoritative plan-first live runtime", () => {
     );
     resetResidentPlanPortfolioMemory();
     expect(
-      context.chooseSemanticRuntimeAction(convertedDuringMultiaccess, {}),
+      context.chooseSemanticRuntimeAction(convertedDuringMultiaccess, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
     ).toMatchObject({
       actionId: runRd.actionId,
       reasonCode: "plan_first.runner.pressure_central",
@@ -9679,7 +9749,9 @@ describe("authoritative plan-first live runtime", () => {
     );
     resetResidentPlanPortfolioMemory();
     expect(
-      context.chooseSemanticRuntimeAction(laterUnconvertedRun, {}),
+      context.chooseSemanticRuntimeAction(laterUnconvertedRun, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
     ).toMatchObject({
       actionId: credit.actionId,
       reasonCode: "plan_first.runner.economy",
@@ -9847,7 +9919,9 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       liveContext({
         evaluateRunnerRunTargets: () => [target],
-      }).chooseSemanticRuntimeAction(input, {}),
+      }).chooseSemanticRuntimeAction(input, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
     ).toMatchObject({
       actionId: "credit",
       reasonCode: "plan_first.runner.economy",
@@ -9936,7 +10010,9 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext({
       evaluateRunnerRunTargets: () => [target],
-    }).chooseSemanticRuntimeAction(input, {});
+    }).chooseSemanticRuntimeAction(input, {
+      runnerTurnPlannerMode: "legacy_compare",
+    });
 
     expect(decision).toMatchObject({
       actionId: "credit",
@@ -10035,7 +10111,11 @@ describe("authoritative plan-first live runtime", () => {
       ),
     ];
 
-    expect(context.chooseSemanticRuntimeAction(accessInput, {})).toMatchObject({
+    expect(
+      context.chooseSemanticRuntimeAction(accessInput, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
       actionId: "trash-krumz",
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
@@ -10098,7 +10178,11 @@ describe("authoritative plan-first live runtime", () => {
     };
     accessInput.playerView.servers = [server("hq", [], [krumz])];
 
-    expect(context.chooseSemanticRuntimeAction(accessInput, {})).toMatchObject({
+    expect(
+      context.chooseSemanticRuntimeAction(accessInput, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
       actionId: "trash-krumz",
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
@@ -10827,6 +10911,21 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toContain(
       "plan_step_capability:search_answer_breaker_ap",
     );
+    expect(
+      decision.decisionDebug?.planFirstDecision?.turnPlanning,
+    ).toMatchObject({
+      mode: "cutover",
+      coverage: {
+        status: "pass",
+        coveragePercent: 100,
+      },
+      commitment: {
+        rematerialization: {
+          status: "executable",
+          actionId: "search-ap-action",
+        },
+      },
+    });
 
     const resolve = legalAction(
       "resolve-search-choice",
@@ -11017,8 +11116,7 @@ describe("authoritative plan-first live runtime", () => {
 
     resetResidentPlanPortfolioMemory();
     const cutover = liveContext().chooseSemanticRuntimeAction(input, {});
-    const cutoverDebug =
-      cutover.decisionDebug?.planFirstDecision?.turnPlanning;
+    const cutoverDebug = cutover.decisionDebug?.planFirstDecision?.turnPlanning;
     const stored = residentPlanPortfolioSnapshot(input);
     expect(cutover).toMatchObject({ actionId: credit.actionId });
     expect(cutover.decisionDebug?.planFirstDecision).toMatchObject({
