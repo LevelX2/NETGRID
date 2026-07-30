@@ -9786,6 +9786,156 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("owns the exact post-pass derez-and-end-run ability inside the active run plan", () => {
+    resetResidentPlanPortfolioMemory();
+    const derez = legalAction(
+      "runner.trigger_ability.disgruntled-derez",
+      "runner",
+      "trigger_ability",
+      "Disgruntled Ice Technician: ICE derezzen und Run beenden",
+      { credits: 0, clicks: 0 },
+      {
+        source: "disgruntled-event",
+        payload: {
+          cardId: "disgruntled-event",
+          sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          targetIceId: "banpei",
+          targetIceDefinitionId: "onr_v1_223_banpei",
+          runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
+          paymentAmount: 0,
+        },
+      },
+    );
+    const input = aiInput("runner", [derez]);
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("banpei", "corp", "ice", {
+          definitionId: "onr_v1_223_banpei",
+          rezzed: true,
+        }),
+      ]),
+      server("archives"),
+    ];
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: derez.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          turnPlanning: {
+            coverage: {
+              status: "pass",
+              coveragePercent: 100,
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it("explicitly rejects post-pass derez when it would abandon a visible agenda", () => {
+    resetResidentPlanPortfolioMemory();
+    const derez = legalAction(
+      "runner.trigger_ability.disgruntled-derez",
+      "runner",
+      "trigger_ability",
+      "Disgruntled Ice Technician: ICE derezzen und Run beenden",
+      { credits: 0, clicks: 0 },
+      {
+        source: "disgruntled-event",
+        payload: {
+          cardId: "disgruntled-event",
+          sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          targetIceId: "banpei",
+          targetIceDefinitionId: "onr_v1_223_banpei",
+          runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
+          paymentAmount: 0,
+        },
+      },
+    );
+    const continueRun = legalAction(
+      "runner.continue_run.remote",
+      "runner",
+      "continue_run",
+      "Continue to remote",
+      { credits: 0, clicks: 0 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const input = aiInput("runner", [derez, continueRun]);
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.run = {
+      attackedServerId: "remote_1",
+      phase: "movement",
+      position: { kind: "server", serverId: "remote_1" },
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("banpei", "corp", "ice", {
+            definitionId: "onr_v1_223_banpei",
+            rezzed: true,
+          }),
+        ],
+        [
+          visibleCard("visible-agenda", "corp", "agenda", {
+            definitionId: "onr_v1_203_hostile-takeover",
+          }),
+        ],
+      ),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(decision).toMatchObject({
+      actionId: continueRun.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          turnPlanning: {
+            coverage: {
+              status: "pass",
+              coveragePercent: 100,
+            },
+          },
+        },
+      },
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.convert_run_window",
+      ),
+    ).toMatchObject({
+      moduleState: {
+        signal: {
+          actionAssessments: {
+            [derez.actionId]: {
+              admissible: false,
+              evidenceCodes: [
+                "runner_post_pass_derez_and_end_run_would_abandon_known_agenda",
+                "runner_run_target:remote_1",
+              ],
+            },
+          },
+        },
+      },
+    });
+  });
+
   it("revalidates a parent run and jacks out before witnessed future-encounter damage", () => {
     resetResidentPlanPortfolioMemory();
     const jackOut = legalAction("jack-out", "runner", "jack_out", "Jack out", {

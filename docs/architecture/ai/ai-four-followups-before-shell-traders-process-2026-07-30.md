@@ -98,7 +98,18 @@ Der Prozess stoppt ohne Fallback, wenn:
 `PREPARED -> RUN_FOLLOWUP_OWNER -> CORP_DRAW_CAPACITY ->
 RUNNER_SEARCH_BINDING -> MATCHPOINT_CONDUCTOR -> VERIFIED -> MERGED -> CLEANED`
 
-Genau ein Paket ist aktiv. Aktueller Zustand: `PREPARED`.
+Genau ein Paket ist aktiv. Aktueller Zustand: `RUN_FOLLOWUP_OWNER`.
+
+- F0 abgeschlossen mit Commit `d9dee38e2`.
+- F1 bindet den Engine-Discriminator
+  `derez_fully_broken_passed_ice_and_end_run` an
+  `runner.convert_run_window`. Das aktuelle Run- und ICE-Ziel wird exakt
+  geprüft; ein sichtbarer Agenda-Payoff erzeugt eine explizite Ablehnung
+  statt fehlenden Planbesitzes.
+- Positive und negative Post-Pass-Fälle, Run-Window-Module und
+  Coverage-Vertrag sind fokussiert grün. Der AI-Typecheck ist mit explizit
+  erhöhtem Node-Heap grün; der Standardscript-Aufruf erreichte zuvor nur das
+  lokale 4-GB-Heaplimit und meldete keinen TypeScript-Befund.
 
 ## Paketfolge
 

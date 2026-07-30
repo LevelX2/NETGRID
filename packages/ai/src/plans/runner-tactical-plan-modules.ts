@@ -1262,6 +1262,11 @@ function runWindowCandidates(
           ]?.evidenceCodes.includes(
             "runner_engine_restricted_run_sequence_continuation",
           ) === true ||
+          signal.actionAssessments?.[
+            candidate.actionId
+          ]?.evidenceCodes.includes(
+            "runner_post_pass_derez_and_end_run_plan_admissible",
+          ) === true ||
           candidate.semanticActionType.startsWith("access.")),
     )
     .map((candidate) => ({

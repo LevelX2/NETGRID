@@ -14276,10 +14276,25 @@ function isRunnerRunWindowCandidate(
     isRunWindowSemantic(candidate) ||
     runnerCandidateHasVisibleAdditionalAccessEffect(candidate) ||
     runnerRestrictedRunSequenceAction(input, candidate) !== undefined ||
+    runnerPostPassDerezAndEndRunAction(input, candidate) !== undefined ||
     (candidate.sourceDefinitionId === "onr_proteus_091_lockjaw" &&
       runnerCandidateIsCardAbility(candidate) &&
       (input.playerView.timingPoint === "run.encounter_ice" ||
         input.playerView.timingPoint === "run.jack_out_window"))
+  );
+}
+
+function runnerPostPassDerezAndEndRunAction(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): LegalAction | undefined {
+  if (!runnerCandidateIsCardAbility(candidate)) return undefined;
+  return input.legalActions.find(
+    (action) =>
+      action.actionId === candidate.actionId &&
+      action.type === "trigger_ability" &&
+      action.payload?.runnerUtilityAbility ===
+        "derez_fully_broken_passed_ice_and_end_run",
   );
 }
 
@@ -14422,6 +14437,7 @@ function runnerRunWindowActionAssessment(
     | {
         purpose?: "access" | "multiaccess" | "information" | "contest";
         encounterCreditSpendLimit?: number;
+        accessCommitment?: RunnerRunAccessCommitmentSignal;
       }
     | undefined,
 ): RunnerRunWindowActionAssessment {
@@ -14480,6 +14496,17 @@ function runnerRunWindowActionAssessment(
           ],
         };
   }
+  const postPassDerezAndEndRun = runnerPostPassDerezAndEndRunAction(
+    input,
+    candidate,
+  );
+  if (postPassDerezAndEndRun) {
+    return runnerPostPassDerezAndEndRunAssessment(
+      input,
+      postPassDerezAndEndRun,
+      runOrigin,
+    );
+  }
   if (
     (action.type === "pump_breaker" || action.type === "break_subroutine") &&
     input.playerView.run.phase !== "encounter_ice"
@@ -14499,6 +14526,7 @@ function runnerRunWindowActionAssessment(
     candidate.semanticActionType === "run.jack_out" ||
     candidate.semanticActionType === "breaker.boost_strength" ||
     candidate.semanticActionType === "breaker.break_subroutine" ||
+    postPassDerezAndEndRun !== undefined ||
     (candidate.sourceDefinitionId === "onr_proteus_091_lockjaw" &&
       runnerCandidateIsCardAbility(candidate) &&
       (input.playerView.timingPoint === "run.encounter_ice" ||
@@ -14546,6 +14574,79 @@ function runnerRunWindowActionAssessment(
           `runner_run_window_action:${action.type}`,
         ],
       };
+}
+
+function runnerPostPassDerezAndEndRunAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+  runOrigin:
+    | {
+        purpose?: "access" | "multiaccess" | "information" | "contest";
+        encounterCreditSpendLimit?: number;
+        accessCommitment?: RunnerRunAccessCommitmentSignal;
+      }
+    | undefined,
+): RunnerRunWindowActionAssessment {
+  const run = input.playerView.run;
+  const targetIceId = action.payload?.targetIceId;
+  const targetMatches =
+    typeof targetIceId === "string"
+      ? input.playerView.servers.flatMap((server) =>
+          server.ice
+            .filter((ice) => ice.instanceId === targetIceId)
+            .map((ice) => ({ serverId: server.id, ice })),
+        )
+      : [];
+  if (
+    !run ||
+    run.phase !== "movement" ||
+    input.playerView.timingPoint !== "run.jack_out_window" ||
+    targetMatches.length !== 1 ||
+    targetMatches[0]!.serverId !== run.attackedServerId ||
+    targetMatches[0]!.ice.rezzed !== true
+  ) {
+    return {
+      admissible: false,
+      evidenceCodes: [
+        "runner_post_pass_derez_and_end_run_target_not_exactly_visible",
+        `runner_post_pass_target:${typeof targetIceId === "string" ? targetIceId : "missing"}`,
+      ],
+    };
+  }
+  const committedPayoff = runOrigin?.accessCommitment?.payoff;
+  if (
+    visibleKnownAgendaOnServer(input, run.attackedServerId) ||
+    committedPayoff === "agenda" ||
+    committedPayoff === "score_threat"
+  ) {
+    return {
+      admissible: false,
+      evidenceCodes: [
+        "runner_post_pass_derez_and_end_run_would_abandon_known_agenda",
+        `runner_run_target:${run.attackedServerId}`,
+      ],
+    };
+  }
+  const targetDefinition = targetMatches[0]!.ice.definitionId
+    ? CARD_DEFINITIONS_BY_ID[targetMatches[0]!.ice.definitionId!]
+    : undefined;
+  const rezCost =
+    targetDefinition?.type === "ice" &&
+    Number.isFinite(targetDefinition.rezCost)
+      ? Math.max(0, targetDefinition.rezCost ?? 0)
+      : 0;
+  const paidCredits = legalActionCreditCost(action);
+  return {
+    admissible: true,
+    value: 140 + Math.min(8, rezCost) * 40 - paidCredits * 60,
+    evidenceCodes: [
+      "runner_post_pass_derez_and_end_run_plan_admissible",
+      `runner_post_pass_target:${targetIceId}`,
+      `runner_post_pass_target_rez_cost:${rezCost}`,
+      `runner_post_pass_paid_credits:${paidCredits}`,
+      `runner_run_target:${run.attackedServerId}`,
+    ],
+  };
 }
 
 function runnerExactRunWindowPhaseActionIds(
