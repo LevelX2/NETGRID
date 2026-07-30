@@ -86,6 +86,13 @@ MULTI_ICE -> HINT_CONTRACTS -> VERIFIED -> MERGED -> CLEANED`
 
 Nur der jeweils nächste Zustand darf betreten werden.
 
+Aktueller Zustand: `RED_EVIDENCE`
+
+- P0 abgeschlossen mit Commit `31751964b`.
+- P1: acht Zieltests reproduzieren `behavior_regression`; der
+  Dr.-Dreff-Gegenfall auf dem falschen Server sowie die sieben bestehenden
+  frühen Match-Checkpoints bleiben grün.
+
 ## Paketfolge
 
 ### P0 – Prozess und Preflight
