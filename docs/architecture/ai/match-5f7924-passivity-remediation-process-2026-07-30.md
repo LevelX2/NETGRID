@@ -86,7 +86,7 @@ MULTI_ICE -> HINT_CONTRACTS -> VERIFIED -> MERGED -> CLEANED`
 
 Nur der jeweils nächste Zustand darf betreten werden.
 
-Aktueller Zustand: `ECONOMY_AND_DRAW`
+Aktueller Zustand: `MULTI_ICE`
 
 - P0 abgeschlossen mit Commit `31751964b`.
 - P1: acht Zieltests reproduzieren `behavior_regression`; der
@@ -102,6 +102,14 @@ Aktueller Zustand: `ECONOMY_AND_DRAW`
   Informationsgrenze. Bereits brechbares Steuer-/Stör-ICE bleibt dabei als
   begrenzte Score-Schutz-Stufe zulässig, ohne eine Rez- oder
   Installationspflicht zu erzeugen.
+- P2 abgeschlossen mit Commit `32035d080`.
+- P3 abgeschlossen mit Commit `c3f1dcc9f`: Die actor-private Fort-Run-Quote
+  deckt nun sowohl eine dauerhafte HQ-ICE-Installation als auch eine temporäre
+  HQ-ICE-Begegnung mit dem günstigsten aktuell zahlbaren Folgekostenwert ab.
+- P4: Die Ressourcen-Austauschquote bindet sich an das exakt aktuell
+  angegangene ICE. Weitere ICE-Schichten werden nach jeder Begegnung aus dem
+  dann gültigen Zustand neu bewertet, statt die gesamte Route vorab zu
+  behaupten.
 
 ## Paketfolge
 

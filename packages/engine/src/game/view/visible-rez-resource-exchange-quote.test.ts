@@ -50,11 +50,20 @@ describe("visible Corp ICE rez resource exchange quote", () => {
     });
   });
 
-  it("fails closed when the current server path is no longer isolated", () => {
+  it("certifies the exact current encounter on a layered server", () => {
     const { state, visibleIce } = resourceExchangeState();
     state.corp.servers
       .find((server) => server.id === "rd")!
       .ice.push("other_ice" as CardInstanceId);
+
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),
+    ).toMatchObject({ complete: true });
+  });
+
+  it("fails closed when the requested ICE is not the exact approached layer", () => {
+    const { state, visibleIce } = resourceExchangeState();
+    state.run!.approachedIceId = "other_ice" as CardInstanceId;
 
     expect(
       visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),

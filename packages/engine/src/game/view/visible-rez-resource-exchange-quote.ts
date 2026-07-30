@@ -30,10 +30,11 @@ type BreakRead =
 /**
  * Projects one deterministic, direct current-run breaker exchange from the
  * Engine's card-implementation descriptors. The projection is intentionally
- * conservative: it is available only for an isolated approached ICE and it
- * fails closed as soon as an unsupported ability effect or incomplete visible
- * card would affect the result. Current run-credit pools are resolved through
- * the same Engine payment authority that executes breaker payments.
+ * conservative: it is available only for the exact currently approached ICE
+ * and it fails closed as soon as an unsupported ability effect or incomplete
+ * visible card would affect that encounter. Other layers are deliberately not
+ * folded into this quote; after the encounter the Engine projects the then
+ * current layer again from the mutated state.
  */
 export function visibleCorpIceRezResourceExchangeQuote(
   state: GameState,
@@ -54,11 +55,16 @@ export function visibleCorpIceRezResourceExchangeQuote(
     expiresAtStateVersion: state.stateVersion,
   };
   const source = state.cardInstances[iceId];
+  const run = state.run;
   if (
     !source ||
     source.rezzed ||
-    state.run?.attackedServerId !== server.id ||
-    server.ice.length !== 1
+    !run ||
+    run.attackedServerId !== server.id ||
+    run.position.kind !== "ice" ||
+    run.position.serverId !== server.id ||
+    run.approachedIceId !== iceId ||
+    server.ice[run.position.iceIndex] !== iceId
   ) {
     return { ...binding, complete: false };
   }
