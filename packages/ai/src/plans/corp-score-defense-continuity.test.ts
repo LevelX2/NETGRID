@@ -76,6 +76,38 @@ describe("corp score defense continuity", () => {
     ).toBe("agenda-1");
   });
 
+  it("carries a new-remote staging receipt onto the uniquely created remote", () => {
+    const input = decisionInput(11);
+    const previous = portfolio({
+      executorInstanceId: "defense-child",
+      instances: [
+        scoreRoot("new_remote"),
+        {
+          instanceId: "defense-child",
+          moduleId: "corp.defend_servers",
+          parentInstanceId: "score-root",
+          dedupeKey: "defense:new_remote",
+          updatedAtStateVersion: 10,
+          moduleState: {
+            kind: "defense",
+            signals: [
+              {
+                kind: "score_protection_staging_install",
+                serverId: "new_remote",
+                parentProjectId: "agenda:agenda-1:new_remote",
+                sourceCardInstanceId: "ice-1",
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(
+      corpResidentScoreAgendaInstanceId(previous, input, visibleCardIsAgenda),
+    ).toBe("agenda-1");
+  });
+
   it("fails closed without an immediate or resident staging receipt", () => {
     const input = decisionInput(11);
     const previous = portfolio({
@@ -113,16 +145,16 @@ function decisionInput(stateVersion: number): AiDecisionInput {
   } as unknown as AiDecisionInput;
 }
 
-function scoreRoot() {
+function scoreRoot(serverId = "remote_1") {
   return {
     instanceId: "score-root",
     moduleId: "corp.score_agenda",
-    dedupeKey: "agenda:agenda-1:remote_1",
+    dedupeKey: `agenda:agenda-1:${serverId}`,
     moduleState: {
       kind: "score",
       signal: {
         agendaInstanceId: "agenda-1",
-        serverId: "remote_1",
+        serverId,
       },
     },
   };

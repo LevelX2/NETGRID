@@ -342,6 +342,11 @@ corepack pnpm --filter @netgrid/ai typecheck
 corepack pnpm test:ai:shards
 ```
 
+`test:ai:shards` ist der normale vollständige lokale AI-Lauf. Er startet drei
+feste Shards parallel und hält jeden Shard auf genau einem Vitest-Worker.
+`test:ai:shards:serial` ist nur der dokumentierte Fallback bei nachgewiesenem
+Speicherdruck oder Instabilität.
+
 Das Realitätsgate aus
 `docs/reviews/ai/ai-test-realism-audit-2026-07-12.md` und
 `packages/ai/src/evaluation/real-engine-live-runtime.test.ts` verbindet

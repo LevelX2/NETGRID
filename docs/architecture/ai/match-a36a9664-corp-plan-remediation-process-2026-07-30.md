@@ -1,6 +1,6 @@
 # Match A36A9664: Corp-Plan-Remediation
 
-Status: aktiv – Paket P5
+Status: aktiv – Paket P6
 
 Quelle:
 
@@ -294,20 +294,28 @@ Ziel:
 - alle Korrekturen gemeinsam absichern und dauerhafte Verträge
   dokumentieren.
 
-Arbeit:
+Umgesetzt:
 
-- vollständigen Deck-Hint-/Consumer-Audit wiederholen;
-- fokussierte und breite AI-Gates ausführen;
-- Final-Report und aktuellen Wissenslog ergänzen;
-- offene Nicht-Ziele und Follow-ups abgrenzen.
+- vollständiger Deck-Hint-/Consumer- und Action-Capacity-Audit wiederholt;
+- alle fokussierten und breiten AI-Gates einschließlich der drei festen
+  Parallelshards ausgeführt;
+- Engine- und AI-Replay-Verträge gegengeprüft;
+- die im breiten Shadow-Lauf sichtbare `new_remote`-Receipt-Lücke generisch
+  über die konkrete, eindeutig zuordenbare ICE-Instanz geschlossen;
+- den begrenzten Rush gegen sichtbare Breaker-Antworten, Mehrpunkt- und
+  Matchpoint-Exposition abgesichert;
+- Final-Report, Testvertrag und aktuellen Wissenslog ergänzt;
+- den vollständigen AI-Normallauf technisch auf drei parallele,
+  jeweils einworkerige Shards umgestellt.
 
 Checks:
 
 - alle neuen Checkpoints und Gegenproben grün;
-- `corepack pnpm --filter @netgrid/ai typecheck`;
-- `corepack pnpm --filter @netgrid/ai test`;
-- relevante Engine-/Replay-/Hint-Gates;
-- `git diff --check`.
+- AI-Typecheck mit explizitem 6-GB-Node-Heap grün;
+- vollständige AI-Suite 540/4.405 seriell und über den parallelen
+  Standardpfad grün;
+- relevante Engine-/Replay-/Hint-/Action-Capacity-/Strukturgates grün;
+- `format:changed` und `git diff --check` grün.
 
 Commit:
 

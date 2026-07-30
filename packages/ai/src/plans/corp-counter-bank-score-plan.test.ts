@@ -242,9 +242,7 @@ describe("corpCounterBankScoreProjects", () => {
     ];
 
     expect(
-      corpCounterBankScoreProjects(input, [
-        candidate(rez, "corp_window.rez"),
-      ]),
+      corpCounterBankScoreProjects(input, [candidate(rez, "corp_window.rez")]),
     ).toContainEqual(
       expect.objectContaining({
         phase: "rez_counter_bank_for_handoff",

@@ -6027,14 +6027,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_operation",
-        "sourceDefinitionId": "onr_v1_297_overtime-incentives"
+        "type": "gain_credit"
       }
     ],
     "contractKind": "correctness",
     "forbiddenActions": [
       {
-        "type": "gain_credit"
+        "type": "play_operation",
+        "sourceDefinitionId": "onr_v1_297_overtime-incentives"
       },
       {
         "sourceDefinitionId": "onr_v1_282_annual-reviews",
@@ -6042,10 +6042,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
-      "acceptableCapabilities": ["resolve_hq_overflow"],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_hq_overflow_exact_conversion:1"
+        "corp_engine_certified_basic_liquidity_development"
       ]
     }
   }

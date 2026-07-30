@@ -53,7 +53,8 @@
     "typecheck": "corepack pnpm -r --if-present typecheck",
     "test": "corepack pnpm -r --if-present test && corepack pnpm check:test-discovery && vitest run tests/specs --passWithNoTests",
     "test:contracts": "corepack pnpm --filter @netgrid/shared test && corepack pnpm check:test-discovery && vitest run tests/specs",
-    "test:ai:shards": "corepack pnpm --filter @netgrid/ai test:shard:1 && corepack pnpm --filter @netgrid/ai test:shard:2 && corepack pnpm --filter @netgrid/ai test:shard:3",
+    "test:ai:shards": "node scripts/run-ai-test-shards.mjs",
+    "test:ai:shards:serial": "corepack pnpm --filter @netgrid/ai test:shard:1 && corepack pnpm --filter @netgrid/ai test:shard:2 && corepack pnpm --filter @netgrid/ai test:shard:3",
     "build": "corepack pnpm -r --if-present build",
     "format:check": "prettier --check .",
     "format:changed": "node scripts/check-format-changed.mjs"

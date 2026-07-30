@@ -86,6 +86,18 @@ Wenn ein neuer Stand fachlich besser ist, darf der alte Stand ersetzt, gelöscht
 - Remote `origin` ist konfiguriert; Pushes, Pull Requests und Remote-Integrationen erfolgen nur auf Nutzerwunsch oder über die dafür vorgesehenen Abschluss-/GitHub-Workflows.
 - Lokale Laufzeitdaten, SQLite-Dateien, temporäre Daten, Build-Artefakte, Caches und Secrets werden nicht versioniert.
 
+## Testbetrieb
+
+- Der normale vollständige lokale AI-Lauf ist
+  `corepack pnpm test:ai:shards`. Er startet drei feste Shards parallel und
+  begrenzt jeden Shard auf einen Vitest-Worker.
+- `corepack pnpm --filter @netgrid/ai test` ist der serielle paketnahe
+  Diagnosepfad. `corepack pnpm test:ai:shards:serial` wird nur bei
+  nachgewiesenem Speicherdruck oder Instabilität verwendet.
+- Mehr als drei parallele AI-Shards oder mehr als ein Worker je Shard werden
+  nicht ungeprüft aktiviert. Dafür sind zuerst Laufzeit, Spitzen-RAM,
+  Determinismus und Stabilität zu messen und die neue Grenze zu dokumentieren.
+
 ## Lokaler Start- und Serverbetrieb
 
 - Lokale NETGRID-App, Webclient und Multiplayer-Backend werden standardmäßig über `scripts/start-netgrid.ps1` gestartet.

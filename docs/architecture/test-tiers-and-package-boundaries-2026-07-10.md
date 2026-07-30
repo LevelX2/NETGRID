@@ -14,11 +14,19 @@ kleiner Lauf ersetzt keinen paketnahen Test nach einer fachlichen Änderung.
 | AI-Shards | `corepack pnpm test:ai:shards`                                         | Vollständige AI-Suite in drei stabilen Vitest-Shards     |
 | Full Gate | `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build` | Projektweiter Abschluss vor Integration                  |
 
-Die drei AI-Shards können zur Diagnose einzeln mit
+Der Sammelbefehl startet die drei festen AI-Shards im lokalen Normalfall
+parallel. Jeder Shard bleibt intern auf genau einen Vitest-Worker begrenzt.
+Damit nutzt der vollständige AI-Lauf mehrere CPU-Kerne, ohne die
+Determinismus-, Speicher- und Zustandsrisiken einer beliebig hohen
+Worker-Anzahl innerhalb eines Testprozesses einzugehen. Der Sammelbefehl wartet
+alle drei Ergebnisse ab und schlägt fehl, sobald mindestens ein Shard rot ist.
+
+Die Shards können zur Diagnose einzeln mit
 `corepack pnpm --filter @netgrid/ai test:shard:1`, `:2` oder `:3` ausgeführt
-werden. Der Sammelbefehl läuft absichtlich sequenziell und bricht beim ersten
-Fehler ab. CI oder getrennte lokale Prozesse dürfen dieselben festen Shards
-parallel ausführen.
+werden. Für nachweislich speicherarme oder instabile Umgebungen gibt es den
+bewussten Fallback `corepack pnpm test:ai:shards:serial`. Mehr als die drei
+festen Parallelprozesse oder mehr als ein Worker je Shard werden erst nach
+einer dokumentierten Laufzeit-, RAM- und Stabilitätsmessung zum neuen Standard.
 
 Tests mit Timeout oder abgebrochene Prozesse gelten nicht als bestanden.
 

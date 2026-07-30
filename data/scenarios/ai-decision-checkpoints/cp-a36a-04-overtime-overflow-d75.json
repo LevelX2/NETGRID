@@ -1150,9 +1150,7 @@
           "corp_onr_v1_304_systematic-layoffs_3",
           "corp_onr_v1_312_chicago-branch_2"
         ],
-        "scoreArea": [
-          "corp_onr_v1_194_corporate-downsizing_1"
-        ],
+        "scoreArea": ["corp_onr_v1_194_corporate-downsizing_1"],
         "servers": [
           {
             "id": "hq",
@@ -1168,9 +1166,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_proteus_032_misleading-access-menus_1"
-            ],
+            "ice": ["corp_onr_proteus_032_misleading-access-menus_1"],
             "root": []
           },
           {
@@ -1188,9 +1184,7 @@
               "corp_onr_v1_279_wall-of-static_3",
               "corp_onr_v1_237_data-wall_1"
             ],
-            "root": [
-              "corp_onr_v1_347_vapor-ops_3"
-            ]
+            "root": ["corp_onr_v1_347_vapor-ops_3"]
           }
         ]
       },
@@ -1253,9 +1247,7 @@
           "corp_onr_v1_194_corporate-downsizing_2"
         ],
         "rig": {
-          "programs": [
-            "runner_onr_v1_011_cloak_1"
-          ],
+          "programs": ["runner_onr_v1_011_cloak_1"],
           "hardware": [],
           "resources": [
             "runner_onr_v1_176_the-shell-traders_3",
@@ -7899,9 +7891,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.fast_advance",
-          "evidence": [
-            "continued:corp.fast_advance"
-          ]
+          "evidence": ["continued:corp.fast_advance"]
         },
         "commitment": {
           "strategyId": "corp.fast_advance",
@@ -8120,9 +8110,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 82,
@@ -8180,9 +8168,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 59,
@@ -8214,10 +8200,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8236,9 +8219,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -8269,10 +8250,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8329,10 +8307,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8390,10 +8365,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8514,10 +8486,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8573,10 +8542,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8656,9 +8622,7 @@
           "milestone": "productive_routes_exhausted",
           "moduleState": {
             "kind": "turn_completion",
-            "standardEndTurnActionIds": [
-              "corp.end_turn"
-            ]
+            "standardEndTurnActionIds": ["corp.end_turn"]
           },
           "blockers": [],
           "resumeConditions": [],
@@ -9019,10 +8983,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:6",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:6", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -9083,9 +9044,7 @@
             "kind": "capability",
             "id": "score-material:general"
           },
-          "openNeedIds": [
-            "score-material:general"
-          ],
+          "openNeedIds": ["score-material:general"],
           "phase": "select_agenda",
           "milestone": "admitted",
           "moduleState": {

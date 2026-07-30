@@ -74,3 +74,10 @@ Szenarioerwartung keine strategisch richtige Einzelentscheidung.
 - `corepack pnpm typecheck`
 - `corepack pnpm test`
 - `corepack pnpm build`
+
+Der normale vollständige AI-Abschlusslauf ist
+`corepack pnpm test:ai:shards`: drei feste Shards laufen parallel, jeder davon
+mit genau einem Vitest-Worker. `corepack pnpm --filter @netgrid/ai test` bleibt
+als serieller paketnaher Diagnosepfad erhalten. Nur bei nachgewiesenem
+Speicherdruck oder Instabilität wird auf
+`corepack pnpm test:ai:shards:serial` zurückgefallen.

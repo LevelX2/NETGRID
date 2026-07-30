@@ -52,13 +52,34 @@ describe("turn-planner shadow behavior-baseline regressions", () => {
           entry.targetServerId === "new_remote") &&
         entry.planKind === "corp.defend_servers",
     );
+    const corpActionDiagnostic = JSON.stringify(
+      summary.actionSequence
+        .filter(
+          (entry) =>
+            entry.side === "corp" && (entry.actionsRemainingBefore ?? 0) > 0,
+        )
+        .map((entry) => ({
+          stateVersionBefore: entry.stateVersionBefore,
+          turnNumber: entry.turnNumber,
+          actionsRemainingBefore: entry.actionsRemainingBefore,
+          actionType: entry.actionType,
+          planKind: entry.planKind,
+          targetServerId: entry.targetServerId,
+          targetCardType: entry.targetCardType,
+        })),
+      undefined,
+      2,
+    );
 
     expect(summary.errors).toEqual([]);
     expect(["action_limit", "game_result"]).toContain(summary.terminationKind);
     expect(summary.actions).toBeGreaterThan(0);
     expect(summary.actions).toBeLessThanOrEqual(160);
-    expect(agendaInstallIndex).toBeGreaterThanOrEqual(0);
-    expect(precedingRemoteIceInstallIndex).toBeGreaterThanOrEqual(0);
+    expect(agendaInstallIndex, corpActionDiagnostic).toBeGreaterThanOrEqual(0);
+    expect(
+      precedingRemoteIceInstallIndex,
+      corpActionDiagnostic,
+    ).toBeGreaterThanOrEqual(0);
     expect(agendaInstallIndex).toBeGreaterThan(precedingRemoteIceInstallIndex);
   }, 15_000);
 });

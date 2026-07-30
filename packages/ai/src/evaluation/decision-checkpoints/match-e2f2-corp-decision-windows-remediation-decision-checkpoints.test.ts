@@ -23,7 +23,7 @@ describe("match e2f2 Corp decision-window remediation checkpoints", () => {
       keepPositiveMenusRezJson,
     ],
     [
-      "converts Overtime before drawing into saturated HQ instead of forcing Annual Reviews",
+      "keeps Overtime out of generic overflow without a bound follow-up line",
       annualReviewsOverSaturatedCreditJson,
     ],
     [
@@ -57,10 +57,10 @@ describe("match e2f2 Corp decision-window remediation checkpoints", () => {
     if (json === annualReviewsOverSaturatedCreditJson) {
       expect(result.decision?.evidence).toEqual(
         expect.arrayContaining([
-          "plan_priority_class:P5",
-          "plan_module:corp.hand_and_agenda_management",
-          "plan_step_capability:resolve_hq_overflow",
-          "plan_assessment_evidence:corp_hq_overflow_exact_conversion:1",
+          "plan_priority_class:P6",
+          "plan_module:corp.economy",
+          "plan_step_capability:develop_or_convert_corp_economy",
+          "plan_assessment_evidence:corp_engine_certified_basic_liquidity_development",
         ]),
       );
     }

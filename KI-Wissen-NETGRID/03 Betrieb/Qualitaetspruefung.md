@@ -2,6 +2,12 @@
 
 ## Aktuelle Hinweise
 
+- Der normale vollständige AI-Abschlusslauf ist
+  `corepack pnpm test:ai:shards`. Er führt drei feste Test-Shards parallel aus,
+  jeder mit genau einem Vitest-Worker. Einzelne Shards dienen der Diagnose;
+  `corepack pnpm test:ai:shards:serial` ist nur bei nachgewiesenem
+  Speicherdruck oder Instabilität der Fallback. Zusätzliche Shards oder Worker
+  erfordern zuerst eine dokumentierte Laufzeit-, RAM- und Stabilitätsmessung.
 - `data/decks/demo-decks.json` wurde in Phase 1 gegen `docs/source/Erstes Testdeck.txt` und das konsolidierte MVP-0.1-Konzept normalisiert und als Derived-Datenartefakt eingefroren.
 - Phase 1 hat JSON-Parse, Must-Requirement-Coverage und `playable_mvp`-Card-Coverage bestanden.
 - Vor `pnpm install` Node 24 LTS verwenden; beim Setup war Node `v24.15.0` aktiv und `pnpm` nicht im PATH.

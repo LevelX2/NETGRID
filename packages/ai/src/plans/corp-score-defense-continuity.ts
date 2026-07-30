@@ -108,18 +108,26 @@ export function corpResidentScoreAgendaInstanceId(
     input.playerView.servers.some((server) =>
       server.ice.some((ice) => ice.instanceId === stagedIceInstanceId),
     );
+  const residentScoreStagingServers =
+    typeof recentScoreStagingSignal?.sourceCardInstanceId === "string"
+      ? input.playerView.servers.filter(
+          (server) =>
+            server.id.startsWith("remote_") &&
+            (residentScoreServerId === "new_remote" ||
+              server.id === residentScoreServerId) &&
+            server.ice.some(
+              (ice) =>
+                ice.instanceId ===
+                recentScoreStagingSignal.sourceCardInstanceId,
+            ),
+        )
+      : [];
   const residentScoreStagingReceipt =
     residentScoreAgendaCardInstanceId !== undefined &&
-    residentScoreServerId?.startsWith("remote_") === true &&
+    (residentScoreServerId === "new_remote" ||
+      residentScoreServerId?.startsWith("remote_") === true) &&
     typeof recentScoreStagingSignal?.sourceCardInstanceId === "string" &&
-    input.playerView.servers.some(
-      (server) =>
-        server.id === residentScoreServerId &&
-        server.ice.some(
-          (ice) =>
-            ice.instanceId === recentScoreStagingSignal.sourceCardInstanceId,
-        ),
-    );
+    residentScoreStagingServers.length === 1;
   if (!exactImmediateStagingReceipt && !residentScoreStagingReceipt) {
     return undefined;
   }

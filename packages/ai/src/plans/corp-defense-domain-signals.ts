@@ -172,7 +172,7 @@ export function corpQualitativeIceStagingSignal(
   );
   if (!server) return undefined;
   const unknownAllocationTerminalSecondLayer =
-    isCentral &&
+    serverId === "rd" &&
     centralAllocation?.status !== "known" &&
     server.ice.length === 1 &&
     readKnownCorpCentralAgendaThreat({

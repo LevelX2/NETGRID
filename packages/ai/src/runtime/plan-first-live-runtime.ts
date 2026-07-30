@@ -226,6 +226,10 @@ import {
   definitionHasActionIceRezSupport,
 } from "./corp-defense-rez-support-facts";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
+import {
+  visibleBreakerCardCanAddressIce,
+  visibleBreakerRoles,
+} from "./runner-visible-breaker-coverage";
 import { corpRootRezTimingComponent } from "./corp-scoreline/semantic-runtime-corp-score-ice-components";
 import {
   corpMissingConcreteDefenseDrawNeed,
@@ -7274,7 +7278,11 @@ function buildCorpDomain(
           project.agendaInstanceId === residentScoreAgendaInstanceId &&
           project.serverId !== undefined &&
           project.serverId !== "new_remote" &&
-          corpRemoteHasBoundedStagedIce(input, project.serverId)
+          corpRemoteHasBoundedStagedIce(
+            input,
+            project.serverId,
+            project.agendaPoints,
+          )
         ) &&
         !(
           project.openingRush?.status === "qualified" &&
@@ -7604,6 +7612,16 @@ function buildCorpDomain(
             const coherentScorePlanPrecedesQualitativeStaging =
               (serverId === "hq" || serverId === "rd") &&
               scorePlanPrecedesRedundantCapacityDefense(serverId);
+            const boundScoreProtectionPrecedesQualitativeStaging =
+              selectedScoreProtectionSignals.length > 0;
+            const protectedScoreProjectPrecedesQualitativeStaging =
+              scoreProjects.some(
+                (project) =>
+                  project.feasible &&
+                  project.serverId !== undefined &&
+                  project.serverId !== "new_remote" &&
+                  corpScoreProtectionIsSatisfied(input, project),
+              );
             const exactAlternativeExists = candidates.some(
               (alternative) =>
                 alternative.actionId !== candidate.actionId &&
@@ -7619,7 +7637,9 @@ function buildCorpDomain(
             );
             const qualitativeStaging =
               exactAlternativeExists ||
-              coherentScorePlanPrecedesQualitativeStaging
+              coherentScorePlanPrecedesQualitativeStaging ||
+              boundScoreProtectionPrecedesQualitativeStaging ||
+              protectedScoreProjectPrecedesQualitativeStaging
                 ? undefined
                 : corpQualitativeIceStagingSignal(
                     input,
@@ -8661,7 +8681,7 @@ function scoreProjectForCandidate(
       serverId !== undefined &&
       serverId !== "new_remote" &&
       candidate.sourceCardInstanceId === residentScoreAgendaInstanceId &&
-      corpRemoteHasBoundedStagedIce(input, serverId);
+      corpRemoteHasBoundedStagedIce(input, serverId, agendaPoints);
     const developmentClickAvailable =
       input.playerView.own.clicks >= (boundedStagedScoreWindow ? 1 : 2) ||
       deadlinePressure;
@@ -9612,6 +9632,7 @@ function corpScoreProtectionStagingPairFitsCurrentTurn(
 function corpRemoteHasBoundedStagedIce(
   input: AiDecisionInput,
   serverId: string,
+  exposedAgendaPoints: number,
 ): boolean {
   const server = input.playerView.servers.find(
     (candidate) =>
@@ -9621,10 +9642,32 @@ function corpRemoteHasBoundedStagedIce(
   return (
     server?.ice.some((ice) => {
       const quote = ice.effectiveRezCostQuote;
+      const hasVisibleBreakerAnswer = (
+        input.playerView.opponent.rig ?? []
+      ).some((breaker) =>
+        visibleBreakerCardCanAddressIce(breaker, ice, {
+          visibleBreakerRoles,
+          visibleCardText: (card) =>
+            [
+              card.title,
+              card.definitionId,
+              ...(card.subtypes ?? []),
+              card.rulesText,
+            ]
+              .filter(Boolean)
+              .join(" "),
+        }),
+      );
+      const answeredIceExceedsBoundedRushRisk =
+        hasVisibleBreakerAnswer &&
+        (exposedAgendaPoints > 1 ||
+          input.playerView.opponent.agendaPoints + exposedAgendaPoints >=
+            input.playerView.agendaPointsToWin);
       if (
         ice.rezzed === true ||
         ice.definitionId === undefined ||
         CARD_DEFINITIONS_BY_ID[ice.definitionId]?.type !== "ice" ||
+        answeredIceExceedsBoundedRushRisk ||
         quote?.context !== "installed" ||
         quote.cardId !== ice.instanceId ||
         quote.targetServerId !== serverId ||

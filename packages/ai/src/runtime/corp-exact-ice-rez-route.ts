@@ -237,6 +237,7 @@ function readKnownCurrentRunAccessPathTax(params: {
     (candidate) => candidate.id === targetServerId,
   );
   if (
+    !targetServerId.startsWith("remote_") ||
     run?.attackedServerId !== targetServerId ||
     run.phase !== "approach_ice" ||
     run.position?.kind !== "ice" ||
@@ -246,10 +247,7 @@ function readKnownCurrentRunAccessPathTax(params: {
   ) {
     return undefined;
   }
-  if (
-    targetServerId.startsWith("remote_") &&
-    !server.root.some((card) => card.known && card.type === "agenda")
-  ) {
+  if (!server.root.some((card) => card.known && card.type === "agenda")) {
     return undefined;
   }
   const tax =
