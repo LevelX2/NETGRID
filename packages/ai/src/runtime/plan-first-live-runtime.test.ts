@@ -1899,7 +1899,7 @@ describe("authoritative plan-first live runtime", () => {
     ).not.toContain('"kind":"develop_liquidity"');
   });
 
-  it("reactivates a reached Corp liquidity target only after later same-turn state progress", () => {
+  it("keeps one bounded Corp liquidity target and ends after later same-turn saturation", () => {
     resetResidentPlanPortfolioMemory();
     const credit = legalAction(
       "credit",
@@ -1935,7 +1935,7 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(
       JSON.stringify(residentPlanPortfolioSnapshot(input) ?? {}),
-    ).toContain('"targetCredits":7');
+    ).toContain('"targetCredits":6');
 
     const afterExternalProgress = structuredClone(input);
     afterExternalProgress.playerView.stateVersion += 1;
@@ -1949,29 +1949,31 @@ describe("authoritative plan-first live runtime", () => {
       afterExternalProgress.legalActions;
 
     const context = liveContext();
-    expect(
-      context.chooseSemanticRuntimeAction(afterExternalProgress, {}),
-    ).toMatchObject({
-      actionId: credit.actionId,
-      reasonCode: "plan_first.corp.economy",
+    const saturatedDecision = context.chooseSemanticRuntimeAction(
+      afterExternalProgress,
+      {},
+    );
+    expect(saturatedDecision).toMatchObject({
+      actionId: end.actionId,
+      reasonCode: "plan_first.corp.complete_turn",
     });
     expect(
       JSON.stringify(
         residentPlanPortfolioSnapshot(afterExternalProgress) ?? {},
       ),
-    ).toContain('"targetCredits":8');
+    ).not.toContain('"targetCredits":8');
 
     expect(
       context.chooseSemanticRuntimeAction(afterExternalProgress, {}),
     ).toMatchObject({
-      actionId: credit.actionId,
-      reasonCode: "plan_first.corp.economy",
+      actionId: end.actionId,
+      reasonCode: "plan_first.corp.complete_turn",
     });
     expect(
       JSON.stringify(
         residentPlanPortfolioSnapshot(afterExternalProgress) ?? {},
       ),
-    ).toContain('"targetCredits":8');
+    ).not.toContain('"targetCredits":8');
   });
 
   it("resolves a two-card HQ overflow through two exact revalidated steps", () => {

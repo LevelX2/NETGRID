@@ -9,6 +9,29 @@ import {
 const QUARTER: ExactProbability = { numerator: 1, denominator: 4 };
 
 describe("assessCorpScoreProtection", () => {
+  it("certifies direct access at probability 1 when no ICE is active", () => {
+    const assessment = assessCorpScoreProtection({
+      serverIce: [],
+      runnerRig: [],
+      runnerSetAside: [{ ...preparedRentICon(), known: false }],
+      runnerMemoryUsed: 0,
+      runnerMemoryLimit: 4,
+      runnerCredits: 3,
+      maximumRunnerAccessSuccessProbability: {
+        numerator: 0,
+        denominator: 1,
+      },
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+      protectsScore: false,
+      requiredRandomBreakSuccesses: 0,
+      runnerCreditsRemainingOnBestAccessPath: 3,
+    });
+  });
+
   it("compares exact probabilities without unsafe Number arithmetic", () => {
     expect(
       compareExactProbabilities(

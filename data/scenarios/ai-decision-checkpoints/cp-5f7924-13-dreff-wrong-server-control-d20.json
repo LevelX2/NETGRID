@@ -698,29 +698,21 @@
           "corp_onr_v1_295_night-shift_2",
           "corp_onr_v1_295_night-shift_3"
         ],
-        "archives": [
-          "corp_onr_v1_221_asp_2"
-        ],
+        "archives": ["corp_onr_v1_221_asp_2"],
         "scoreArea": [],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_237_data-wall_2"
-            ],
-            "root": [
-              "corp_onr_v1_358_dr-dreff_1"
-            ]
+            "ice": ["corp_onr_v1_237_data-wall_2"],
+            "root": ["corp_onr_v1_358_dr-dreff_1"]
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_223_banpei_1"
-            ],
+            "ice": ["corp_onr_v1_223_banpei_1"],
             "root": []
           },
           {
@@ -792,13 +784,9 @@
         ],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_classic_031_rent-i-con_2"
-          ],
+          "programs": ["runner_onr_classic_031_rent-i-con_2"],
           "hardware": [],
-          "resources": [
-            "runner_onr_classic_045_elena-laskova_1"
-          ]
+          "resources": ["runner_onr_classic_045_elena-laskova_1"]
         }
       },
       "specialZones": {
@@ -3268,9 +3256,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 6,
-      "blockerIds": [
-        "corp.tag_trace_punish:reserve_shortfall"
-      ],
+      "blockerIds": ["corp.tag_trace_punish:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 31,
       "state": {
@@ -3426,9 +3412,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.tag_trace_punish",
-          "evidence": [
-            "continued:corp.tag_trace_punish"
-          ]
+          "evidence": ["continued:corp.tag_trace_punish"]
         },
         "commitment": {
           "strategyId": "corp.tag_trace_punish",
@@ -3672,10 +3656,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3762,9 +3743,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 89,
@@ -3822,9 +3801,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -3855,10 +3832,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3912,10 +3886,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3970,10 +3941,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4162,10 +4130,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4218,10 +4183,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4310,9 +4272,7 @@
               "serverId": "new_remote",
               "phase": "install",
               "purposeCode": "establish_ambush:onr_proteus_005_marked-accounts:new_remote",
-              "assignedDomainPlanIds": [
-                "corp.ambush_bluff"
-              ],
+              "assignedDomainPlanIds": ["corp.ambush_bluff"],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": true,
               "plannedAtStateVersion": 27,
@@ -4392,9 +4352,7 @@
           "milestone": "productive_routes_exhausted",
           "moduleState": {
             "kind": "turn_completion",
-            "standardEndTurnActionIds": [
-              "corp.end_turn"
-            ]
+            "standardEndTurnActionIds": ["corp.end_turn"]
           },
           "blockers": [],
           "resumeConditions": [],
@@ -4555,9 +4513,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "missing_existing_remote",
-                "evidence": [
-                  "target_server:new_remote"
-                ]
+                "evidence": ["target_server:new_remote"]
               }
             }
           },
@@ -4733,9 +4689,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "missing_existing_remote",
-                "evidence": [
-                  "target_server:new_remote"
-                ]
+                "evidence": ["target_server:new_remote"]
               }
             }
           },

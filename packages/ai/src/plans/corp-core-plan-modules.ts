@@ -696,22 +696,22 @@ function defenseModule(): PlanModule {
       ];
     },
     assess: (instance, context, portfolio) => {
-      const current = state<DefenseState>(instance);
-      const priorityClass: PriorityClass = instance.parentNeedId
-        ? "P5"
-        : defensePriority(context, current.signals, current.centralAllocation);
+      state<DefenseState>(instance);
+      const currentDomain = domain(context);
+      const signals = validDefenseSignals(currentDomain.defenseNeeds, context);
+      const selectedBand = selectedDefensePortfolioBand(
+        context,
+        signals,
+        currentDomain.centralDefenseAllocation,
+      );
+      const priorityClass: PriorityClass =
+        selectedBand.kind === "score" ? "P5" : selectedBand.priorityClass;
       const candidates = defensePortfolioCandidates(
         context,
-        current.signals,
-        current.centralAllocation,
+        signals,
+        currentDomain.centralDefenseAllocation,
       );
-      const resourceGaps = defenseResourceGaps(
-        selectedDefensePortfolioBand(
-          context,
-          current.signals,
-          current.centralAllocation,
-        ),
-      );
+      const resourceGaps = defenseResourceGaps(selectedBand);
       return {
         ...assessment(
           instance,
@@ -719,9 +719,9 @@ function defenseModule(): PlanModule {
           resourceGaps.length === 0 && candidates.length > 0,
           defensePortfolioAssessmentValue(
             context,
-            current.signals,
+            signals,
             priorityClass,
-            current.centralAllocation,
+            currentDomain.centralDefenseAllocation,
           ),
           portfolio.executorInstanceId,
           resourceGaps,
@@ -729,31 +729,33 @@ function defenseModule(): PlanModule {
         evidenceCodes: [
           defensePortfolioEvidenceCode(
             context,
-            current.signals,
-            current.centralAllocation,
+            signals,
+            currentDomain.centralDefenseAllocation,
           ),
         ],
       };
     },
     materialize: (instance, _assessment, context) => {
-      const current = state<DefenseState>(instance);
+      state<DefenseState>(instance);
+      const currentDomain = domain(context);
+      const signals = validDefenseSignals(currentDomain.defenseNeeds, context);
       const selectedBand = selectedDefensePortfolioBand(
         context,
-        current.signals,
-        current.centralAllocation,
+        signals,
+        currentDomain.centralDefenseAllocation,
       );
       const scoreProtectionRoute =
         selectedBand.kind === "score" ? selectedBand.route : undefined;
       const candidates = defensePortfolioCandidates(
         context,
-        current.signals,
-        current.centralAllocation,
+        signals,
+        currentDomain.centralDefenseAllocation,
       );
       const engineRandomizedIceInstallNearTie =
         engineRandomizedCentralIceInstallNearTie(
           context,
           candidates,
-          current.centralAllocation,
+          currentDomain.centralDefenseAllocation,
         );
       const semanticActionTypes = [
         ...new Set(
@@ -994,11 +996,17 @@ function economyModule(): PlanModule {
         ),
     assess: (instance, context, portfolio) => {
       const current = state<EconomyState>(instance);
+      const currentSignal = validatedEconomyNeeds(context).economyNeeds.find(
+        (signal) =>
+          signal.needId === current.signal.needId &&
+          signal.kind === current.signal.kind,
+      );
       return assessment(
         instance,
-        corpEconomyPriorityClass(current.signal),
-        economyCandidates(context, current.signal).length > 0,
-        economyAssessmentValue(current.signal),
+        corpEconomyPriorityClass(currentSignal ?? current.signal),
+        currentSignal !== undefined &&
+          economyCandidates(context, currentSignal).length > 0,
+        economyAssessmentValue(currentSignal ?? current.signal),
         portfolio.executorInstanceId,
       );
     },
@@ -1957,7 +1965,12 @@ function exactInstallProjectionMatchesSignal(
       context,
       projection,
       signal.installRoute?.progressKind === "staged_central_defense",
-      signal.installRoute?.progressKind === "scoreline_central_tax_allocation",
+      signal.installRoute?.progressKind ===
+        "scoreline_central_tax_allocation" ||
+        signal.installRoute?.progressKind ===
+          "score_material_capacity_release" ||
+        signal.installRoute?.progressKind ===
+          "funded_structured_central_defense",
     )
   ) {
     return false;
@@ -3065,6 +3078,14 @@ function selectedExactGenericDefenseRoutes(
   const rdRoutes = exactIceRoutes.filter(
     (route) => centralServerForRoute(route) === "rd",
   );
+  const boundedUnknownAllocationCentralRoutes = exactIceRoutes.filter(
+    (route) =>
+      centralServerForRoute(route) !== undefined &&
+      (route.signal.installRoute?.progressKind ===
+        "score_material_capacity_release" ||
+        route.signal.installRoute?.progressKind ===
+          "funded_structured_central_defense"),
+  );
   let eligibleRoutes = exactIceRoutes;
   if (hqRoutes.length > 0 || rdRoutes.length > 0) {
     if (
@@ -3072,9 +3093,12 @@ function selectedExactGenericDefenseRoutes(
       hqRoutes.length > 0 &&
       rdRoutes.length > 0
     ) {
-      eligibleRoutes = exactIceRoutes.filter(
-        (route) => centralServerForRoute(route) === undefined,
-      );
+      eligibleRoutes = [
+        ...exactIceRoutes.filter(
+          (route) => centralServerForRoute(route) === undefined,
+        ),
+        ...boundedUnknownAllocationCentralRoutes,
+      ];
     } else if (
       allocation?.status === "known" &&
       allocation.canonicalNearTieCandidateServerIds.length === 2 &&

@@ -6538,6 +6538,7 @@ function arbitrateCorpHandConversionBeforeDraw(
     priorityClass: CorpDrawAdmissionPriority;
     remainingAttempts: 0 | 1;
     parentProvidesExactSameTurnCapacityRelease?: boolean;
+    allowFinalClickScoreMaterialReplacement?: boolean;
   }) => {
     const candidate = candidates.find(
       (entry) => entry.actionId === params.actionId,
@@ -6611,6 +6612,8 @@ function arbitrateCorpHandConversionBeforeDraw(
         purpose: "score_material_search",
         priorityClass,
         remainingAttempts: signal.drawAttemptState?.remainingAttempts ?? 0,
+        allowFinalClickScoreMaterialReplacement:
+          signal.handPlanId === "draw-for-score-material",
       }),
     );
     return { ...signal, actionIds: admittedActionIds };
@@ -7095,22 +7098,99 @@ function corpActionDispositions(
     if (corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)) {
       continue;
     }
-    const globalDefenseInstallAssessment = candidateIsVisibleCorpIceInstall(
+    const globalDefenseServerId = candidateIsVisibleCorpIceInstall(
       input,
       candidate,
     )
-      ? candidateTargetIds(candidate)
-          .filter(isCorpInstallServerId)
-          .map((serverId) =>
-            corpGlobalDefenseInstallRouteAssessment(
-              input,
-              candidate,
-              serverId,
-              domain.centralDefenseAllocation,
-            ),
-          )[0]
+      ? candidateTargetIds(candidate).find(isCorpInstallServerId)
+      : undefined;
+    const globalDefenseInstallAssessment = globalDefenseServerId
+      ? corpGlobalDefenseInstallRouteAssessment(
+          input,
+          candidate,
+          globalDefenseServerId,
+          domain.centralDefenseAllocation,
+        )
       : undefined;
     if (globalDefenseInstallAssessment?.knowledge === "unknown") {
+      const allCentralsAlreadyCovered =
+        (globalDefenseServerId === "hq" || globalDefenseServerId === "rd") &&
+        ["hq", "rd"].every(
+          (serverId) =>
+            (input.playerView.servers.find((server) => server.id === serverId)
+              ?.ice.length ?? 0) > 0,
+        );
+      if (allCentralsAlreadyCovered) {
+        add(
+          candidate.actionId,
+          "corp.defend_servers",
+          `corp_additional_central_ice_deferred_without_exact_route:${globalDefenseServerId}`,
+        );
+        continue;
+      }
+      const targetRemote = globalDefenseServerId?.startsWith("remote_")
+        ? input.playerView.servers.find(
+            (server) => server.id === globalDefenseServerId,
+          )
+        : undefined;
+      const quotedAdditionalRemoteLayer =
+        targetRemote !== undefined &&
+        targetRemote.ice.length > 0 &&
+        (() => {
+          const action = input.legalActions.find(
+            (legalAction) => legalAction.actionId === candidate.actionId,
+          );
+          return (
+            action !== undefined &&
+            action.source !== "basic_action" &&
+            action.source !== "game_rule" &&
+            corpIceInstallHasCurrentCompleteRezQuote(
+              input,
+              action,
+              action.source,
+              targetRemote.id,
+            )
+          );
+        })();
+      if (quotedAdditionalRemoteLayer) {
+        add(
+          candidate.actionId,
+          "corp.defend_servers",
+          `corp_additional_remote_ice_deferred_without_exact_route:${globalDefenseServerId}`,
+        );
+        continue;
+      }
+      const nonAgendaRemoteWithoutCapacityPressure =
+        targetRemote !== undefined &&
+        !targetRemote.root.some(
+          (card) => card.known && card.type === "agenda",
+        ) &&
+        input.playerView.own.gripOrHq.length <=
+          input.playerView.own.maxHandSize &&
+        (() => {
+          const action = input.legalActions.find(
+            (legalAction) => legalAction.actionId === candidate.actionId,
+          );
+          return (
+            action !== undefined &&
+            action.source !== "basic_action" &&
+            action.source !== "game_rule" &&
+            corpIceInstallHasCurrentCompleteRezQuote(
+              input,
+              action,
+              action.source,
+              targetRemote.id,
+            )
+          );
+        })();
+      if (nonAgendaRemoteWithoutCapacityPressure) {
+        add(
+          candidate.actionId,
+          "corp.defend_servers",
+          `corp_nonagenda_remote_ice_deferred_without_exact_route:${globalDefenseServerId}`,
+        );
+        continue;
+      }
       addUnknown(
         candidate.actionId,
         "corp.defend_servers",
@@ -7718,13 +7798,80 @@ function corpResidentScoreAgendaInstanceId(
   previous: ResidentPlanPortfolio | undefined,
   input: AiDecisionInput,
 ): string | undefined {
-  const root = previous?.instances.find(
-    (instance) =>
-      instance.instanceId === previous.rootForegroundInstanceId &&
-      instance.moduleId === "corp.score_agenda",
-  );
-  const lease = previous?.turnPlanExecutionLease;
   const commitment = previous?.turnPlanCommitment;
+  const committedRootPlanInstanceId =
+    commitment?.phases[commitment.cursor.phaseIndex]?.root.planInstanceId;
+  const executorScoreAncestor = (() => {
+    if (!previous?.executorInstanceId) return undefined;
+    const visited = new Set<string>();
+    let instanceId: string | undefined = previous.executorInstanceId;
+    while (instanceId && !visited.has(instanceId)) {
+      visited.add(instanceId);
+      const instance = previous.instances.find(
+        (candidate) => candidate.instanceId === instanceId,
+      );
+      if (!instance) return undefined;
+      if (instance.moduleId === "corp.score_agenda") return instance;
+      instanceId = instance.parentInstanceId;
+    }
+    return undefined;
+  })();
+  const root =
+    executorScoreAncestor ??
+    previous?.instances.find(
+      (instance) =>
+        (instance.instanceId === previous.rootForegroundInstanceId ||
+          instance.instanceId === committedRootPlanInstanceId) &&
+        instance.moduleId === "corp.score_agenda",
+    );
+  const residentScoreState = root?.moduleState as
+    | {
+        kind?: unknown;
+        signal?: {
+          agendaInstanceId?: unknown;
+          serverId?: unknown;
+        };
+      }
+    | undefined;
+  const residentScoreAgendaCardInstanceId =
+    residentScoreState?.kind === "score" &&
+    typeof residentScoreState.signal?.agendaInstanceId === "string"
+      ? residentScoreState.signal.agendaInstanceId
+      : undefined;
+  const residentScoreServerId =
+    residentScoreState?.kind === "score" &&
+    typeof residentScoreState.signal?.serverId === "string"
+      ? residentScoreState.signal.serverId
+      : undefined;
+  const residentDefenseExecutor = previous?.instances.find(
+    (instance) =>
+      instance.instanceId === previous.executorInstanceId &&
+      instance.moduleId === "corp.defend_servers" &&
+      instance.parentInstanceId === root?.instanceId,
+  );
+  const residentDefenseState = residentDefenseExecutor?.moduleState as
+    | {
+        kind?: unknown;
+        signals?: Array<{
+          kind?: unknown;
+          serverId?: unknown;
+          parentProjectId?: unknown;
+          sourceCardInstanceId?: unknown;
+        }>;
+      }
+    | undefined;
+  const recentScoreStagingSignal =
+    residentDefenseState?.kind === "defense" &&
+    residentDefenseExecutor?.updatedAtStateVersion ===
+      input.playerView.stateVersion - 1
+      ? residentDefenseState.signals?.find(
+          (signal) =>
+            signal.kind === "score_protection_staging_install" &&
+            signal.serverId === residentScoreServerId &&
+            signal.parentProjectId === root?.dedupeKey,
+        )
+      : undefined;
+  const lease = previous?.turnPlanExecutionLease;
   const currentNode =
     commitment?.phases[commitment.cursor.phaseIndex]?.nodes[
       commitment.cursor.nodeIndex
@@ -7742,7 +7889,32 @@ function corpResidentScoreAgendaInstanceId(
     input.playerView.servers.some((server) =>
       server.ice.some((ice) => ice.instanceId === stagedIceInstanceId),
     );
-  if (!exactImmediateStagingReceipt) return undefined;
+  const residentScoreStagingReceipt =
+    residentScoreAgendaCardInstanceId !== undefined &&
+    residentScoreServerId?.startsWith("remote_") === true &&
+    typeof recentScoreStagingSignal?.sourceCardInstanceId === "string" &&
+    input.playerView.servers.some(
+      (server) =>
+        server.id === residentScoreServerId &&
+        server.ice.some(
+          (ice) =>
+            ice.instanceId === recentScoreStagingSignal.sourceCardInstanceId,
+        ),
+    );
+  if (!exactImmediateStagingReceipt && !residentScoreStagingReceipt) {
+    return undefined;
+  }
+  if (
+    residentScoreAgendaCardInstanceId !== undefined &&
+    input.playerView.own.gripOrHq.some(
+      (card) =>
+        card.instanceId === residentScoreAgendaCardInstanceId &&
+        visibleCardIsAgenda(input, card),
+    )
+  ) {
+    return residentScoreAgendaCardInstanceId;
+  }
+  if (!root) return undefined;
   return input.playerView.own.gripOrHq.find(
     (card) =>
       card.definitionId !== undefined &&
@@ -8230,7 +8402,29 @@ function buildCorpDomain(
             serverId,
             centralDefenseAllocation,
           );
-          if (!route) return [];
+          if (!route) {
+            const exactAlternativeExists = candidates.some(
+              (alternative) =>
+                alternative.actionId !== candidate.actionId &&
+                candidateIsVisibleCorpIceInstall(input, alternative) &&
+                candidateTargetIds(alternative).includes(serverId) &&
+                corpGlobalDefenseInstallRoute(
+                  input,
+                  alternative,
+                  serverId,
+                  centralDefenseAllocation,
+                ) !== undefined,
+            );
+            const qualitativeStaging = exactAlternativeExists
+              ? undefined
+              : corpQualitativeIceStagingSignal(
+                  input,
+                  candidate,
+                  serverId,
+                  centralDefenseAllocation,
+                );
+            return qualitativeStaging ? [qualitativeStaging] : [];
+          }
           const selectedCentralThreat =
             centralDefenseAllocation?.status === "known"
               ? centralDefenseAllocation.evidence[
@@ -8268,11 +8462,10 @@ function buildCorpDomain(
                 ? { centralPressure: "material" as const }
                 : {}),
               immediateInstallSupport:
-                route.progressKind === "score_material_capacity_release" ||
-                (route.disposition === "productive" &&
-                  route.progressKind === "staged_central_defense" &&
-                  route.rezFundingGap > 0 &&
-                  corpVisibleHandHasActionIceRezSupport(input)),
+                route.disposition === "productive" &&
+                route.progressKind === "staged_central_defense" &&
+                route.rezFundingGap > 0 &&
+                corpVisibleHandHasActionIceRezSupport(input),
               installRoute: route,
               value:
                 route.progressKind === "engine_certified_access"
@@ -8281,25 +8474,23 @@ function buildCorpDomain(
                     ? 11
                     : route.progressKind === "scoreline_central_tax_allocation"
                       ? 10
-                      : route.progressKind ===
-                          "score_material_capacity_release"
+                      : route.progressKind === "score_material_capacity_release"
                         ? 10
-                      : route.progressKind === "staged_central_defense"
-                        ? 9
-                        : 1,
+                        : route.progressKind === "staged_central_defense"
+                          ? 9
+                          : 1,
               evidenceCode:
                 route.disposition === "funding_only"
                   ? `corp_defense_exact_route_funding_required:${serverId}:${candidate.actionId}`
                   : route.progressKind === "scoreline_central_tax_allocation"
                     ? `corp_scoreline_central_tax_allocation:${serverId}:${candidate.actionId}`
-                    : route.progressKind ===
-                        "score_material_capacity_release"
+                    : route.progressKind === "score_material_capacity_release"
                       ? `corp_score_material_capacity_release:${serverId}:${candidate.actionId}`
-                    : route.progressKind === "staged_central_defense"
-                      ? `corp_staged_central_defense:${serverId}:${candidate.actionId}:rez_gap_${route.rezFundingGap}`
-                      : visibleAgendaExposure
-                        ? "engine_certified_visible_agenda_exposure_defense"
-                        : "engine_certified_global_defense_access_probability_reduced",
+                      : route.progressKind === "staged_central_defense"
+                        ? `corp_staged_central_defense:${serverId}:${candidate.actionId}:rez_gap_${route.rezFundingGap}`
+                        : visibleAgendaExposure
+                          ? "engine_certified_visible_agenda_exposure_defense"
+                          : "engine_certified_global_defense_access_probability_reduced",
             },
           ];
         }
@@ -8915,14 +9106,26 @@ function corpTurnLiquidityDevelopmentNeed(
     previous,
     currentTurnKey,
   );
+  const residentSaturation = corpResidentVisibleLiquiditySaturation(
+    previous,
+    input,
+  );
   const currentCredits = input.playerView.own.credits;
-  const targetCredits = corpVisibleLiquidityDemandTarget(input);
+  const visibleDemandTarget = corpVisibleLiquidityDemandTarget(input);
+  const targetCredits =
+    visibleDemandTarget > currentCredits
+      ? visibleDemandTarget
+      : (resident?.targetCredits ?? 0) > currentCredits
+        ? resident!.targetCredits
+        : resident === undefined && !residentSaturation
+          ? currentCredits + 1
+          : currentCredits;
   if (!Number.isSafeInteger(targetCredits) || targetCredits <= currentCredits) {
     return undefined;
   }
   return {
     kind: "develop_liquidity",
-    needId: `economy-liquidity-development:${currentTurnKey}`,
+    needId: `economy-visible-liquidity-development:${currentTurnKey}`,
     turnKey: currentTurnKey,
     targetCredits,
     currentCreditsAtRevalidation: currentCredits,
@@ -8971,6 +9174,24 @@ function corpVisibleLiquidityDemandTarget(input: AiDecisionInput): number {
       ? [quoted]
       : [];
   });
+  const postInstallRouteCosts = input.legalActions.flatMap((action) => {
+    const quoted =
+      action.payload?.postInstallRezQuoteComplete === true
+        ? action.payload.postInstallRezQuoteFinalCredits
+        : undefined;
+    const installCredits = action.costs.reduce(
+      (sum, cost) => sum + (cost.credits ?? 0),
+      0,
+    );
+    return typeof quoted === "number" &&
+      Number.isSafeInteger(quoted) &&
+      quoted >= 0 &&
+      Number.isSafeInteger(installCredits) &&
+      installCredits >= 0 &&
+      Number.isSafeInteger(installCredits + quoted)
+      ? [installCredits + quoted]
+      : [];
+  });
   const installedRezCosts = input.playerView.servers.flatMap((server) =>
     [...server.ice, ...server.root].flatMap((card) => {
       if (!card.known || card.rezzed === true || !card.definitionId) return [];
@@ -8982,35 +9203,47 @@ function corpVisibleLiquidityDemandTarget(input: AiDecisionInput): number {
         : [];
     }),
   );
-  const visibleAgendaAdvanceCosts = input.playerView.own.gripOrHq.flatMap(
-    (card) => {
-      if (!card.known || card.type !== "agenda" || !card.definitionId) {
-        return [];
-      }
-      const advancementRequirement =
-        CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement;
-      return typeof advancementRequirement === "number" &&
-        Number.isSafeInteger(advancementRequirement) &&
-        advancementRequirement >= 0
-        ? [advancementRequirement]
-        : [];
-    },
-  );
+  const visibleAgendaAdvanceCosts = [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.servers.flatMap((server) => server.root),
+  ].flatMap((card) => {
+    if (!card.known || card.type !== "agenda" || !card.definitionId) {
+      return [];
+    }
+    const advancementRequirement =
+      CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement;
+    if (
+      typeof advancementRequirement !== "number" ||
+      !Number.isSafeInteger(advancementRequirement) ||
+      advancementRequirement < 0
+    ) {
+      return [];
+    }
+    const currentCounters =
+      typeof card.advancementCounters === "number" &&
+      Number.isSafeInteger(card.advancementCounters) &&
+      card.advancementCounters >= 0
+        ? card.advancementCounters
+        : 0;
+    return [Math.max(0, advancementRequirement - currentCounters)];
+  });
   const defenseReserve = Math.max(
     0,
     ...postInstallRezCosts,
     ...installedRezCosts,
   );
-  const cheapestVisibleScoreCost =
+  const maximumVisibleScoreCost =
     visibleAgendaAdvanceCosts.length > 0
-      ? Math.min(...visibleAgendaAdvanceCosts)
+      ? Math.max(...visibleAgendaAdvanceCosts)
       : 0;
-  return Math.max(
+  const exactVisibleDemand = Math.max(
     0,
     ...exactCurrentActionCosts,
+    ...postInstallRouteCosts,
     defenseReserve,
-    cheapestVisibleScoreCost + defenseReserve,
+    maximumVisibleScoreCost + defenseReserve,
   );
+  return exactVisibleDemand > 0 ? exactVisibleDemand + 1 : 0;
 }
 
 function corpExactOverflowHandConversionPlanOwnsCandidate(
@@ -10016,6 +10249,107 @@ function corpGlobalDefenseInstallRoute(
     : undefined;
 }
 
+function corpQualitativeIceStagingSignal(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  serverId: string,
+  centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
+): CorpDefenseSignal | undefined {
+  const isCentral = serverId === "hq" || serverId === "rd";
+  const isExistingRemote = serverId.startsWith("remote_");
+  if (!isCentral && !isExistingRemote) return undefined;
+  const server = input.playerView.servers.find(
+    (candidateServer) => candidateServer.id === serverId,
+  );
+  if (!server || server.ice.length > 0) return undefined;
+  const bothCentralsEmpty = ["hq", "rd"].every(
+    (centralServerId) =>
+      input.playerView.servers.find(
+        (candidateServer) => candidateServer.id === centralServerId,
+      )?.ice.length === 0,
+  );
+  if (isCentral) {
+    if (
+      centralAllocation?.status === "known"
+        ? centralAllocation.selectedServerId !== serverId
+        : !bothCentralsEmpty
+    ) {
+      return undefined;
+    }
+  } else {
+    const handOverflow =
+      input.playerView.own.gripOrHq.length > input.playerView.own.maxHandSize;
+    const bothCentralsCovered = ["hq", "rd"].every(
+      (centralServerId) =>
+        (input.playerView.servers.find(
+          (candidateServer) => candidateServer.id === centralServerId,
+        )?.ice.length ?? 0) > 0,
+    );
+    if (!handOverflow || server.root.length === 0 || !bothCentralsCovered) {
+      return undefined;
+    }
+  }
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  const sourceCard = input.playerView.own.gripOrHq.find(
+    (card) => card.instanceId === action?.source,
+  );
+  const sourceDefense = visibleCorpIceDefenseProfile(sourceCard);
+  if (
+    !action ||
+    action.side !== "corp" ||
+    action.type !== "install_card" ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.payload?.placement !== "ice" ||
+    action.payload.serverId !== serverId ||
+    action.targetRequirements.length > 0 ||
+    (action.choiceRequirements?.length ?? 0) > 0 ||
+    !candidate.sourceDefinitionId ||
+    !sourceDefense.isVisibleIce ||
+    (!sourceDefense.hasImmediateStop &&
+      !sourceDefense.hasMeaningfulTaxOrDamage &&
+      !sourceDefense.hasEncounterDisruption) ||
+    !hasExactNonNegativeCostProfile(candidate) ||
+    candidate.costProfile.clickCost !== 1 ||
+    candidate.costProfile.creditCost === undefined ||
+    candidate.costProfile.creditCost > input.playerView.own.credits ||
+    !corpIceInstallHasCurrentCompleteRezQuote(
+      input,
+      action,
+      action.source,
+      serverId,
+    ) ||
+    typeof action.payload.postInstallRezQuoteFinalCredits !== "number"
+  ) {
+    return undefined;
+  }
+  const rezCredits = action.payload.postInstallRezQuoteFinalCredits;
+  const creditsAfterInstall =
+    input.playerView.own.credits - candidate.costProfile.creditCost;
+  const rezFundingGap = Math.max(0, rezCredits - creditsAfterInstall);
+  if (rezFundingGap > 3) return undefined;
+  const centralPressure =
+    isCentral && centralAllocation?.status === "known"
+      ? centralAllocation.evidence[serverId].threat
+      : undefined;
+  return {
+    kind: "generic",
+    defenseId: `qualitative-ice-staging:${serverId}:${candidate.actionId}`,
+    serverId,
+    phase: "install_defense_support",
+    sourceDefinitionIds: [candidate.sourceDefinitionId],
+    actionIds: [candidate.actionId],
+    urgent: centralPressure === "terminal",
+    ...(centralPressure && centralPressure !== "none"
+      ? { centralPressure }
+      : {}),
+    immediateInstallSupport: true,
+    value: sourceDefense.hasImmediateStop ? 11 : 9,
+    evidenceCode: `corp_qualitative_ice_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`,
+  };
+}
+
 function corpGlobalDefenseInstallRouteAssessment(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
@@ -10029,15 +10363,6 @@ function corpGlobalDefenseInstallRouteAssessment(
       evidenceCode:
         "corp_global_defense_cannot_invent_an_unbound_new_remote_objective",
     };
-  }
-  if (serverId === "hq" || serverId === "rd") {
-    if (centralAllocation?.status !== "known") {
-      return {
-        knowledge: "unknown",
-        evidenceCode:
-          "corp_ice_install_assessment_unknown:central_defense_allocation_unknown",
-      };
-    }
   }
   if (
     serverId === "archives" &&
@@ -10087,13 +10412,46 @@ function corpGlobalDefenseInstallRouteAssessment(
     (card) => card.instanceId === action.source,
   );
   const sourceDefense = visibleCorpIceDefenseProfile(sourceCard);
+  const centralIceCounts = ["hq", "rd"].map(
+    (centralServerId) =>
+      input.playerView.servers.find(
+        (candidateServer) => candidateServer.id === centralServerId,
+      )?.ice.length ?? Number.MAX_SAFE_INTEGER,
+  );
+  const structurallyLeastProtectedCentral =
+    (serverId === "hq" || serverId === "rd") &&
+    (server?.ice.length ?? Number.MAX_SAFE_INTEGER) ===
+      Math.min(...centralIceCounts);
+  const boundedUnknownCentralCoverage =
+    (serverId === "hq" || serverId === "rd") &&
+    centralAllocation?.status !== "known" &&
+    centralIceCounts.every((count) => count === 0) &&
+    input.playerView.own.clicks >= 1 &&
+    sourceDefense.isVisibleIce &&
+    (sourceDefense.hasImmediateStop ||
+      sourceDefense.hasMeaningfulTaxOrDamage ||
+      sourceDefense.hasEncounterDisruption) &&
+    action.source !== "basic_action" &&
+    action.source !== "game_rule" &&
+    corpIceInstallHasCurrentCompleteRezQuote(
+      input,
+      action,
+      action.source,
+      serverId,
+    );
   const scoreMaterialCapacityRelease =
-    input.playerView.own.gripOrHq.length >
-      input.playerView.own.maxHandSize &&
+    input.playerView.own.gripOrHq.length > input.playerView.own.maxHandSize &&
     !input.playerView.own.gripOrHq.some(
       (card) => card.known && card.type === "agenda",
     ) &&
     input.playerView.own.clicks >= 2 &&
+    (() => {
+      const inventory = corpKnownAgendaInventory(input);
+      return (
+        inventory !== undefined &&
+        inventory.remainingStealableAgendaPoints !== 0
+      );
+    })() &&
     input.legalActions.some(
       (legalAction) =>
         legalAction.side === "corp" &&
@@ -10105,13 +10463,12 @@ function corpGlobalDefenseInstallRouteAssessment(
     (sourceDefense.hasImmediateStop ||
       sourceDefense.hasMeaningfulTaxOrDamage ||
       sourceDefense.hasEncounterDisruption) &&
-    (sourceDefense.hasImmediateStop ||
-      (candidate.sourceDefinitionId !== undefined &&
-        corpHandDuplicateCount(input, candidate.sourceDefinitionId) > 1)) &&
     (archivesHasVisibleKnownAgenda(input)
       ? serverId === "archives"
-      : centralAllocation?.status === "known" &&
-        centralAllocation.selectedServerId === serverId) &&
+      : (centralAllocation?.status === "known" &&
+          centralAllocation.selectedServerId === serverId) ||
+        (centralAllocation?.status !== "known" &&
+          structurallyLeastProtectedCentral)) &&
     action.source !== "basic_action" &&
     action.source !== "game_rule" &&
     corpIceInstallHasCurrentCompleteRezQuote(
@@ -10120,6 +10477,18 @@ function corpGlobalDefenseInstallRouteAssessment(
       action.source,
       serverId,
     );
+  if (
+    (serverId === "hq" || serverId === "rd") &&
+    centralAllocation?.status !== "known" &&
+    !scoreMaterialCapacityRelease &&
+    !boundedUnknownCentralCoverage
+  ) {
+    return {
+      knowledge: "unknown",
+      evidenceCode:
+        "corp_ice_install_assessment_unknown:central_defense_allocation_unknown",
+    };
+  }
   if (
     serverId.startsWith("remote_") &&
     server?.root.length === 0 &&
@@ -10289,6 +10658,7 @@ function corpGlobalDefenseInstallRouteAssessment(
   const preferQualitativeSourceProgress =
     scorelineCentralTaxAllocation ||
     scoreMaterialCapacityRelease ||
+    boundedUnknownCentralCoverage ||
     (isEmptyCentral &&
       !hasResidentRemoteAgenda &&
       (establishesMissingCentralCoverage ||
@@ -10392,9 +10762,9 @@ function corpGlobalDefenseInstallRouteAssessment(
         ? "scoreline_central_tax_allocation"
         : scoreMaterialCapacityProgress
           ? "score_material_capacity_release"
-        : fundedStructuredCentralProgress
-          ? "funded_structured_central_defense"
-          : "staged_central_defense",
+          : fundedStructuredCentralProgress
+            ? "funded_structured_central_defense"
+            : "staged_central_defense",
       rezFundingGap: rezFundingGap!,
       projection,
     };
@@ -10655,14 +11025,23 @@ function corpScoreProtectionStagingInstallSignal(
   | Extract<CorpDefenseSignal, { kind: "score_protection_staging_install" }>
   | undefined {
   const need = project.protectionNeed;
+  const serverId = project.serverId;
+  const existingRemote =
+    serverId?.startsWith("remote_") === true
+      ? input.playerView.servers.find((server) => server.id === serverId)
+      : undefined;
   if (
-    project.serverId !== "new_remote" ||
-    need?.targetServerId !== "new_remote" ||
+    !need ||
+    !serverId ||
+    (serverId !== "new_remote" && !serverId.startsWith("remote_")) ||
+    (serverId !== "new_remote" &&
+      (existingRemote === undefined || existingRemote.ice.length > 0)) ||
+    need.targetServerId !== serverId ||
     !scoreProtectionStagingMayBackstopDirectRoute(need, scan) ||
     !candidateIsVisibleCorpIceInstall(input, candidate) ||
     !candidate.sourceCardInstanceId ||
     !candidate.sourceDefinitionId ||
-    !candidateTargetIds(candidate).includes(project.serverId)
+    !candidateTargetIds(candidate).includes(serverId)
   ) {
     return undefined;
   }
@@ -10694,14 +11073,14 @@ function corpScoreProtectionStagingInstallSignal(
     action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.timingPoint !== input.playerView.timingPoint ||
     action.payload?.placement !== "ice" ||
-    action.payload.serverId !== project.serverId ||
+    action.payload.serverId !== serverId ||
     action.targetRequirements.length > 0 ||
     (action.choiceRequirements?.length ?? 0) > 0 ||
     !corpIceInstallHasCurrentCompleteRezQuote(
       input,
       action,
       candidate.sourceCardInstanceId,
-      project.serverId,
+      serverId,
     )
   ) {
     return undefined;
@@ -10725,16 +11104,13 @@ function corpScoreProtectionStagingInstallSignal(
   ) {
     return undefined;
   }
-  if (
-    project.serverId === "new_remote" &&
-    !corpNewRemoteScoreProtectionPairFitsCurrentTurn(input, project, action)
-  ) {
+  if (!corpScoreProtectionStagingPairFitsCurrentTurn(input, project, action)) {
     return undefined;
   }
   return {
     kind: "score_protection_staging_install",
     defenseId: `score-protection-staging-install:${project.projectId}:${candidate.actionId}`,
-    serverId: project.serverId,
+    serverId,
     phase: "install_ice",
     parentProjectId: project.projectId,
     parentNeedId: need.needId,
@@ -10742,7 +11118,7 @@ function corpScoreProtectionStagingInstallSignal(
     actionId: candidate.actionId,
     sourceCardInstanceId: candidate.sourceCardInstanceId,
     sourceDefinitionId: candidate.sourceDefinitionId,
-    evidenceCode: `score_protection_staging_install:${project.projectId}:${project.serverId}:bounded_deterrence`,
+    evidenceCode: `score_protection_staging_install:${project.projectId}:${serverId}:bounded_deterrence`,
   };
 }
 
@@ -10758,12 +11134,18 @@ function scoreProtectionStagingMayBackstopDirectRoute(
   ) {
     return true;
   }
+  if (
+    need.baseline.knowledge === "known" &&
+    !need.baseline.protection.protectsScore &&
+    scan.directInstallRouteState.knowledge === "unknown"
+  ) {
+    return true;
+  }
   return (
     need.baseline.knowledge === "known" &&
     need.baseline.protection.protectsScore === false &&
     scan.directInstallRouteState.knowledge === "known" &&
-    (scan.directInstallRouteState.disposition === "effect_missing" ||
-      scan.directInstallRouteState.disposition === "funding_only")
+    scan.directInstallRouteState.disposition === "effect_missing"
   );
 }
 
@@ -10786,7 +11168,7 @@ function corpIceInstallHasCurrentCompleteRezQuote(
   );
 }
 
-function corpNewRemoteScoreProtectionPairFitsCurrentTurn(
+function corpScoreProtectionStagingPairFitsCurrentTurn(
   input: AiDecisionInput,
   project: CorpScoreProjectSignal,
   iceAction: LegalAction,
@@ -10797,7 +11179,7 @@ function corpNewRemoteScoreProtectionPairFitsCurrentTurn(
       action.side === "corp" &&
       action.type === "install_card" &&
       action.payload?.placement === "root" &&
-      action.payload.serverId === "new_remote" &&
+      action.payload.serverId === project.serverId &&
       action.expiresAtStateVersion === input.playerView.stateVersion &&
       action.timingPoint === input.playerView.timingPoint,
   );
@@ -10822,11 +11204,26 @@ function corpRemoteHasBoundedStagedIce(
       !["hq", "rd", "archives"].includes(candidate.id),
   );
   return (
-    server?.ice.some(
-      (ice) =>
-        ice.definitionId !== undefined &&
-        CARD_DEFINITIONS_BY_ID[ice.definitionId]?.type === "ice",
-    ) === true
+    server?.ice.some((ice) => {
+      const quote = ice.effectiveRezCostQuote;
+      if (
+        ice.rezzed === true ||
+        ice.definitionId === undefined ||
+        CARD_DEFINITIONS_BY_ID[ice.definitionId]?.type !== "ice" ||
+        quote?.context !== "installed" ||
+        quote.cardId !== ice.instanceId ||
+        quote.targetServerId !== serverId ||
+        quote.projectedServerId !== serverId ||
+        quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+        quote.complete !== true ||
+        quote.mandatoryAdditionalCosts.agendaPoints !== 0
+      ) {
+        return false;
+      }
+      return (
+        Math.max(0, quote.finalCredits - input.playerView.own.credits) <= 3
+      );
+    }) === true
   );
 }
 
@@ -11368,6 +11765,8 @@ function corpImmediateOperationEconomyConversions(
     }
     if (
       projection.cardsDrawn === 0 &&
+      projection.netHandDelta >= 0 &&
+      corpVisibleLiquidityDemandTarget(input) > 0 &&
       input.playerView.own.credits >= corpVisibleLiquidityDemandTarget(input)
     ) {
       return [];
@@ -16989,7 +17388,8 @@ function corpResidentTurnLiquidityDevelopment(
   const instance = previous?.instances.find(
     (candidate) =>
       candidate.moduleId === "corp.economy" &&
-      candidate.dedupeKey === `economy-liquidity-development:${currentTurnKey}`,
+      candidate.dedupeKey ===
+        `economy-visible-liquidity-development:${currentTurnKey}`,
   );
   const moduleState = instance?.moduleState as
     | {
@@ -17002,7 +17402,8 @@ function corpResidentTurnLiquidityDevelopment(
     moduleState?.kind !== "economy" ||
     signal?.kind !== "develop_liquidity" ||
     signal.turnKey !== currentTurnKey ||
-    signal.needId !== `economy-liquidity-development:${currentTurnKey}` ||
+    signal.needId !==
+      `economy-visible-liquidity-development:${currentTurnKey}` ||
     signal.priorityClass !== "P6" ||
     signal.projectedCreditGain !== 1 ||
     signal.cadence?.kind !== "remaining_turn_capacity" ||
@@ -17020,6 +17421,26 @@ function corpResidentTurnLiquidityDevelopment(
     maximumConversions: signal.cadence.maximumConversions!,
     revalidatedAtStateVersion: signal.revalidation!.stateVersion!,
   };
+}
+
+function corpResidentVisibleLiquiditySaturation(
+  previous: ResidentPlanPortfolio | undefined,
+  input: AiDecisionInput,
+): boolean {
+  return (
+    previous?.stateVersion === input.playerView.stateVersion &&
+    previous.turnPlanCommitment?.turnKey ===
+      `corp:turn:${input.playerView.turnSerial ?? "unknown"}` &&
+    previous.instances.some(
+      (instance) =>
+        instance.moduleId === "corp.complete_turn" &&
+        instance.evidenceRefs.some(
+          (reference) =>
+            reference.code ===
+            "corp_basic_credit_rejected_visible_liquidity_demand_satisfied",
+        ),
+    )
+  );
 }
 
 function corpResidentHqOverflowResolution(

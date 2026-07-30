@@ -715,18 +715,14 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_237_data-wall_2"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_2"],
             "root": []
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_223_banpei_1"
-            ],
+            "ice": ["corp_onr_v1_223_banpei_1"],
             "root": []
           },
           {
@@ -793,9 +789,7 @@
           "runner_onr_v1_108_score_2",
           "runner_onr_proteus_133_chiba-bank-account_1"
         ],
-        "scoreArea": [
-          "corp_onr_proteus_005_marked-accounts_1"
-        ],
+        "scoreArea": ["corp_onr_proteus_005_marked-accounts_1"],
         "rig": {
           "programs": [
             "runner_onr_v1_035_invisibility_2",
@@ -812,9 +806,7 @@
         }
       },
       "specialZones": {
-        "setAside": [
-          "runner_onr_classic_031_rent-i-con_2"
-        ],
+        "setAside": ["runner_onr_classic_031_rent-i-con_2"],
         "removedFromGame": []
       },
       "cardInstances": {
@@ -8173,9 +8165,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.tag_trace_punish",
-          "evidence": [
-            "continued:corp.tag_trace_punish"
-          ]
+          "evidence": ["continued:corp.tag_trace_punish"]
         },
         "commitment": {
           "strategyId": "corp.tag_trace_punish",
@@ -8419,10 +8409,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8509,9 +8496,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 89,
@@ -8569,9 +8554,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -8602,10 +8585,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8659,10 +8639,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8717,10 +8694,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8909,10 +8883,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8965,10 +8936,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9054,9 +9022,7 @@
                 "defenseId": "install:hq:corp.install_card.corp_onr_v1_252_keeper_1.hq.corp_onr_v1_252_keeper_1.1",
                 "serverId": "hq",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_v1_252_keeper"
-                ],
+                "sourceDefinitionIds": ["onr_v1_252_keeper"],
                 "actionIds": [
                   "corp.install_card.corp_onr_v1_252_keeper_1.hq.corp_onr_v1_252_keeper_1.1"
                 ],
@@ -9248,9 +9214,7 @@
                 "defenseId": "install:rd:corp.install_card.corp_onr_v1_252_keeper_1.rd.corp_onr_v1_252_keeper_1.1",
                 "serverId": "rd",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_v1_252_keeper"
-                ],
+                "sourceDefinitionIds": ["onr_v1_252_keeper"],
                 "actionIds": [
                   "corp.install_card.corp_onr_v1_252_keeper_1.rd.corp_onr_v1_252_keeper_1.1"
                 ],
@@ -9442,9 +9406,7 @@
                 "defenseId": "install:archives:corp.install_card.corp_onr_v1_252_keeper_1.archives.corp_onr_v1_252_keeper_1.1",
                 "serverId": "archives",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_v1_252_keeper"
-                ],
+                "sourceDefinitionIds": ["onr_v1_252_keeper"],
                 "actionIds": [
                   "corp.install_card.corp_onr_v1_252_keeper_1.archives.corp_onr_v1_252_keeper_1.1"
                 ],
@@ -9687,10 +9649,7 @@
                   "serverBoundEffectIds": []
                 }
               },
-              "canonicalNearTieCandidateServerIds": [
-                "hq",
-                "rd"
-              ],
+              "canonicalNearTieCandidateServerIds": ["hq", "rd"],
               "hqHold": {
                 "status": "ineligible"
               }
@@ -9772,9 +9731,7 @@
               "currentCreditsAtRevalidation": 34,
               "gap": 1,
               "projectedCreditGain": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "priorityClass": "P6",
               "cadence": {
                 "kind": "remaining_turn_capacity",
@@ -9945,9 +9902,7 @@
             "kind": "capability",
             "id": "score-material:general"
           },
-          "openNeedIds": [
-            "score-material:general"
-          ],
+          "openNeedIds": ["score-material:general"],
           "phase": "select_agenda",
           "milestone": "admitted",
           "moduleState": {
@@ -10213,9 +10168,7 @@
                 }
               }
             ],
-            "protectedValueClaimIds": [
-              "fnv1a:969c10f8:defense"
-            ],
+            "protectedValueClaimIds": ["fnv1a:969c10f8:defense"],
             "transition": {
               "kind": "projected_plan_discovery_required"
             }
@@ -10236,12 +10189,8 @@
         "quoteIds": [],
         "valueClaimIds": [],
         "priorityCoverage": {
-          "requiredObligationIds": [
-            "priority-band:P2"
-          ],
-          "satisfiedObligationIds": [
-            "priority-band:P2"
-          ],
+          "requiredObligationIds": ["priority-band:P2"],
+          "satisfiedObligationIds": ["priority-band:P2"],
           "violatedObligationIds": [],
           "deferredObligationIds": []
         },

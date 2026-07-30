@@ -181,27 +181,6 @@ const MAX_SAFE_BIGINT = BigInt(Number.MAX_SAFE_INTEGER);
 export function assessCorpScoreProtection(
   input: CorpScoreProtectionAssessmentInput,
 ): CorpScoreProtectionAssessment {
-  const stagedBreakers = visiblePreparedRunnerBreakerCandidates(input);
-  if (stagedBreakers.status === "unknown") {
-    return unknownAssessment(
-      input.maximumRunnerAccessSuccessProbability,
-      "unsupported_public_staged_breaker",
-      [
-        "scoreProtectionKnown:false",
-        "publicStagedBreakerKnown:false",
-        `publicStagedBreakerReason:${stagedBreakers.reason}`,
-      ],
-    );
-  }
-  if (stagedBreakers.candidates.length > 0) {
-    return assessCorpScoreProtectionWithPreparedBreakers(
-      input,
-      stagedBreakers.candidates,
-    );
-  }
-  const runnerRig = input.runnerRig.filter(
-    (card) => !cardIsInactiveConcealedRunnerResource(card),
-  );
   const threshold = rationalFromExactProbability(
     input.maximumRunnerAccessSuccessProbability,
   );
@@ -230,6 +209,65 @@ export function assessCorpScoreProtection(
       ["scoreProtectionKnown:false", "duplicateIceInstance:true"],
     );
   }
+  const activeIce = input.serverIce
+    .filter((card) => card.rezzed === true)
+    .slice()
+    .reverse();
+  if (activeIce.length === 0) {
+    const exactThreshold = exactProbabilityFromRational(threshold);
+    if (!exactThreshold) {
+      return unknownAssessment(
+        input.maximumRunnerAccessSuccessProbability,
+        "probability_not_safely_representable",
+        [
+          "scoreProtectionKnown:false",
+          "probabilityNotSafelyRepresentable:true",
+        ],
+      );
+    }
+    const accessProbability = { numerator: 1, denominator: 1 } as const;
+    const protectsScore = compareRational(ONE, threshold) <= 0;
+    return {
+      knowledge: "known",
+      runnerAccessSuccessProbability: accessProbability,
+      maximumRunnerAccessSuccessProbability: exactThreshold,
+      protectsScore,
+      requiredRandomBreakSuccesses: 0,
+      randomBreaks: [],
+      runnerCreditsRemainingOnBestAccessPath: input.runnerCredits,
+      evidence: [
+        "scoreProtectionKnown:true",
+        "scoreProtectionScope:visible_direct_access_prevention",
+        "rezzedIceCount:0",
+        "runnerAccessSuccessProbability:1/1",
+        `maximumRunnerAccessSuccessProbability:${exactThreshold.numerator}/${exactThreshold.denominator}`,
+        "requiredRandomBreakSuccesses:0",
+        `runnerCreditsRemainingOnBestAccessPath:${input.runnerCredits}`,
+        `protectsScore:${protectsScore}`,
+      ],
+    };
+  }
+  const stagedBreakers = visiblePreparedRunnerBreakerCandidates(input);
+  if (stagedBreakers.status === "unknown") {
+    return unknownAssessment(
+      input.maximumRunnerAccessSuccessProbability,
+      "unsupported_public_staged_breaker",
+      [
+        "scoreProtectionKnown:false",
+        "publicStagedBreakerKnown:false",
+        `publicStagedBreakerReason:${stagedBreakers.reason}`,
+      ],
+    );
+  }
+  if (stagedBreakers.candidates.length > 0) {
+    return assessCorpScoreProtectionWithPreparedBreakers(
+      input,
+      stagedBreakers.candidates,
+    );
+  }
+  const runnerRig = input.runnerRig.filter(
+    (card) => !cardIsInactiveConcealedRunnerResource(card),
+  );
   const rigInstanceIds = runnerRig.map((card) => card.instanceId);
   if (
     rigInstanceIds.some((instanceId) => !validIdentifier(instanceId)) ||
@@ -259,10 +297,6 @@ export function assessCorpScoreProtection(
       ["scoreProtectionKnown:false", "unknownRunnerRigCard:true"],
     );
   }
-  const activeIce = input.serverIce
-    .filter((card) => card.rezzed === true)
-    .slice()
-    .reverse();
   const supportedIce: SupportedIce[] = [];
   for (const card of activeIce) {
     const readResult = readSupportedIce(card);

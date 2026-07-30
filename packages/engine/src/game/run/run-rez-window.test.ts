@@ -380,14 +380,10 @@ describe("run rez window", () => {
     const hqIceId = "hq_data_raven" as CardInstanceId;
     state.corp.credits = 3;
     state.corp.hq.push(hqIceId);
-    state.cardInstances[hqIceId] = instance(
-      hqIceId,
-      "onr_v1_236_data-raven",
-      {
-        zone: { side: "corp", zone: "hq" },
-        faceup: false,
-      },
-    );
+    state.cardInstances[hqIceId] = instance(hqIceId, "onr_v1_236_data-raven", {
+      zone: { side: "corp", zone: "hq" },
+      faceup: false,
+    });
     const { host } = hostFor(state);
 
     const dreffRez = buildCorpApproachActions(host).find(

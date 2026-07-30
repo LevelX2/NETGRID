@@ -676,7 +676,7 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(discounted.actionId);
   });
 
-  it("fails closed instead of spending for an unverified outer tax before a visible inner stopping ICE", () => {
+  it("certifies the approached outer tax before a visible inner stopping ICE", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
       runnerCredits: 1,
@@ -688,10 +688,6 @@ describe("exact Corp ICE rez route", () => {
       fixture.state,
       "inner-ice-rez-reserve",
     );
-    const decline = input.legalActions.find(
-      (action) => action.type === "decline_rez",
-    );
-    if (!decline) throw new Error("Engine did not expose the rez decline");
     const candidate = buildActionSemanticCandidates({
       legalActions: input.legalActions,
       observerSide: "corp",
@@ -709,13 +705,22 @@ describe("exact Corp ICE rez route", () => {
           .ice.find((ice) => ice.instanceId === fixture.sourceCard.instanceId)!,
         targetServerId: "rd",
       }),
-    ).toBeUndefined();
-    expect(
-      chooseAiAction(input, {
-        persistTacticalPlanMemory: false,
-        corpTurnPlannerMode: "legacy_compare",
-      }).actionId,
-    ).toBe(decline.actionId);
+    ).toMatchObject({
+      actionId: candidate.actionId,
+      sourceDefinitionId: "onr_v1_244_filter",
+      routeKind: "exact_resource_exchange",
+      effect: "progress",
+      totalRezCredits: 0,
+      resourceExchange: {
+        runnerRequiredCredits: 1,
+        runnerConsumedCardInstanceIds: ["exact_runner_program_0"],
+      },
+    });
+    const decision = chooseAiAction(input, {
+      persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
+    });
+    expect(decision.actionId).toBe(candidate.actionId);
   });
 
   it("does not promote a paid free break without a certified consumed resource", () => {

@@ -59,6 +59,7 @@ export function assessCorpDrawAdmission(params: {
     | undefined;
   capacityReleaseRoutes: readonly CorpDrawCapacityReleaseRoute[];
   parentProvidesExactSameTurnCapacityRelease: boolean;
+  allowFinalClickScoreMaterialReplacement?: boolean;
 }): CorpDrawAdmissionAssessment {
   const projection = params.drawProjection;
   const validProjection =
@@ -146,11 +147,13 @@ export function assessCorpDrawAdmission(params: {
             existingEndTurnOverflow <= 1 &&
             additionalEndTurnOverflow === 1
           ? "admitted"
-        : params.purpose === "score_material_search" &&
+          : params.purpose === "score_material_search" &&
               existingEndTurnOverflow === 0 &&
               additionalEndTurnOverflow === 1 &&
               netHandDelta === 1 &&
-              clickCost <= params.currentClicks
+              clickCost <= params.currentClicks &&
+              (clickCost < params.currentClicks ||
+                params.allowFinalClickScoreMaterialReplacement === true)
             ? "admitted"
             : "blocked_end_turn_overflow";
   } else if (
@@ -196,6 +199,9 @@ export function assessCorpDrawAdmission(params: {
         "none"
       }`,
       `corp_draw_capacity_release_value:${boundedCapacityReleaseValue}`,
+      `corp_draw_final_click_score_material_replacement:${
+        params.allowFinalClickScoreMaterialReplacement === true
+      }`,
       `corp_draw_admission:${disposition}`,
     ],
   };

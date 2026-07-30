@@ -31,24 +31,35 @@ describe("turn-planner shadow behavior-baseline regressions", () => {
     );
   });
 
-  it("keeps the exact Paris City Grid trace-support install plan-owned", () => {
-    const { summary, capture } = runCapturedSeed(
-      "ai-behavior-baseline-v1-08",
-      159,
+  it("keeps the superseding ICE-then-agenda remote line clean", () => {
+    const summary = runSeedSummary("ai-behavior-baseline-v1-08", 160);
+    const agendaInstallIndex = summary.actionSequence.findIndex(
+      (entry) =>
+        entry.side === "corp" &&
+        entry.actionType === "install_card" &&
+        entry.targetCardType === "agenda" &&
+        entry.targetServerId?.startsWith("remote_") === true,
     );
-    const actionId =
-      "corp.install_card.corp_onr_v1_365_paris-city-grid_1.remote_1.corp_onr_v1_365_paris-city-grid_1";
-    const diagnostic = captureDiagnostic(capture, actionId);
+    const agendaServerId =
+      summary.actionSequence[agendaInstallIndex]?.targetServerId;
+    const precedingRemoteIceInstallIndex = summary.actionSequence.findIndex(
+      (entry, index) =>
+        index < agendaInstallIndex &&
+        entry.side === "corp" &&
+        entry.actionType === "install_card" &&
+        entry.targetCardType === "ice" &&
+        (entry.targetServerId === agendaServerId ||
+          entry.targetServerId === "new_remote") &&
+        entry.planKind === "corp.defend_servers",
+    );
 
-    expect(capture.side).toBe("corp");
-    expect(capture.state.stateVersion).toBe(159);
-    expect(
-      capture.input.legalActions.some((action) => action.actionId === actionId),
-      JSON.stringify(diagnostic, undefined, 2),
-    ).toBe(true);
-    expect(summary.errors, JSON.stringify(diagnostic, undefined, 2)).toEqual(
-      [],
-    );
+    expect(summary.errors).toEqual([]);
+    expect(["action_limit", "game_result"]).toContain(summary.terminationKind);
+    expect(summary.actions).toBeGreaterThan(0);
+    expect(summary.actions).toBeLessThanOrEqual(160);
+    expect(agendaInstallIndex).toBeGreaterThanOrEqual(0);
+    expect(precedingRemoteIceInstallIndex).toBeGreaterThanOrEqual(0);
+    expect(agendaInstallIndex).toBeGreaterThan(precedingRemoteIceInstallIndex);
   }, 15_000);
 });
 
@@ -83,6 +94,26 @@ function runCapturedSeed(seed: string, actionIndex: number) {
     );
   }
   return { summary, capture };
+}
+
+function runSeedSummary(seed: string, maxActions: number) {
+  const slot = listMatchProgressionBenchmarkDeckSlots().find(
+    (candidate) => candidate.slotId === SLOT_ID,
+  );
+  if (!slot) throw new Error(`Missing benchmark slot ${SLOT_ID}.`);
+  const resolved = resolveBenchmarkDeckSlot(slot);
+  if (!resolved.ok) throw new Error(resolved.reason);
+  return simulateAiGame({
+    seed,
+    maxActions,
+    runnerControllerMode: "current_candidate",
+    corpControllerMode: "current_candidate",
+    ...resolved.config,
+    aiDecisionRuntimeOptions: {
+      corpTurnPlannerMode: "legacy_compare",
+      runnerTurnPlannerMode: "legacy_compare",
+    },
+  });
 }
 
 function captureDiagnostic(

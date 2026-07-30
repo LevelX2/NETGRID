@@ -1632,9 +1632,7 @@ export function quoteCorpFortRunRezSupport(
     return isExactNonNegativeInteger(followupCost) ? [followupCost] : [];
   });
   const hasOwnHqIce = eligibleHqIceCosts.length > 0;
-  const followupCredits = hasOwnHqIce
-    ? Math.min(...eligibleHqIceCosts)
-    : 0;
+  const followupCredits = hasOwnHqIce ? Math.min(...eligibleHqIceCosts) : 0;
   const installCredits =
     fortRunKind === CORP_FORT_RUN_REZ_SUPPORT_KIND ? followupCredits : 0;
   if (

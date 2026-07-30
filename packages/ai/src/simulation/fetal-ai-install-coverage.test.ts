@@ -59,7 +59,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
   it("keeps a delayed first-copy Ambush install from being rejected by the prepared-score sibling", () => {
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-10",
-      maxActions: 21,
+      maxActions: 23,
       runnerDeck: requireDeck("proteus_runner_rd_bad_publicity_2026_05_25"),
       corpDeck,
       runnerControllerMode: "current_candidate",
@@ -69,7 +69,9 @@ describe("Proteus Fetal AI install plan coverage", () => {
       },
     });
 
-    expect(summary.terminationKind).toBe("action_limit");
+    expect(summary.terminationKind, fetalDiagnostic(summary)).toBe(
+      "action_limit",
+    );
     expect(summary.errors).toEqual([]);
     expect(summary.runtimeFailures).toEqual([]);
     expect(summary.replayOk).toBe(true);

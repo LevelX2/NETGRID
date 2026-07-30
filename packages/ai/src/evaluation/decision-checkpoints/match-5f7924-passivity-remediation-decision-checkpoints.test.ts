@@ -148,7 +148,8 @@ function nextDecision(
   const selected = input.legalActions.find(
     (action) => action.actionId === decision.actionId,
   );
-  if (!selected) throw new Error(`Selected action is not legal: ${decision.actionId}`);
+  if (!selected)
+    throw new Error(`Selected action is not legal: ${decision.actionId}`);
   return { input, decision, selected };
 }
 

@@ -68,7 +68,9 @@ export type PlanEarlyEndTurnJustification =
     }
   | {
       kind: "forgo_restricted_capacity";
-      capacityKind: "zero_click_non_basic_run_only";
+      capacityKind:
+        | "zero_click_non_basic_run_only"
+        | "all_current_voluntary_actions_explicitly_nonproductive";
       explicitlyNonproductiveActionIds: string[];
     };
 
@@ -813,6 +815,24 @@ function assertEarlyEndTurnRoute(
     everyRestrictedRunIsExplicitlyNonproductive;
   if (restrictedCapacityForgoProven) return;
 
+  const everyRemainingActionIsExplicitlyNonproductive =
+    exactRestrictedActionSet &&
+    remainingActionIds.every((actionId) =>
+      (context.actionDispositions ?? []).some(
+        (entry) =>
+          entry.actionId === actionId &&
+          entry.disposition === "explicitly_nonproductive",
+      ),
+    );
+  const exhaustedVoluntaryCapacityForgoProven =
+    justification?.kind === "forgo_restricted_capacity" &&
+    justification.capacityKind ===
+      "all_current_voluntary_actions_explicitly_nonproductive" &&
+    context.input.side === "corp" &&
+    moduleId === `${context.input.side}.complete_turn` &&
+    everyRemainingActionIsExplicitlyNonproductive;
+  if (exhaustedVoluntaryCapacityForgoProven) return;
+
   throw new PlanResolutionFailure("end_turn_with_usable_capacity", {
     side: context.input.side,
     stateVersion: context.input.playerView.stateVersion,
@@ -821,7 +841,7 @@ function assertEarlyEndTurnRoute(
     unresolvedActionIds: remainingActionIds,
     owner: "rules_contract",
     removalCondition:
-      "Bind early standard EndTurn to a structurally proven terminal win or restricted-capacity-forgo justification.",
+      "Bind early standard EndTurn to a structurally proven terminal win or an exact restricted-capacity-forgo justification.",
     planInstanceId: route.planInstanceId,
     stepId: route.step.stepId,
     candidateCount: materialized.candidates.length,

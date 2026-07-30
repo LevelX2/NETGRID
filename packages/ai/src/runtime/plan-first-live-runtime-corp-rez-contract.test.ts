@@ -968,6 +968,8 @@ function jennyJettInput(params: {
       cardImplementationFortRunRezSupportQuoteRezCredits: 1,
       cardImplementationFortRunRezSupportQuoteInstallCredits:
         params.installedIceCount,
+      cardImplementationFortRunRezSupportQuoteFollowupCredits:
+        params.installedIceCount,
       cardImplementationFortRunRezSupportQuoteTotalCredits: totalCredits,
       cardImplementationFortRunRezSupportQuoteTotalCreditsPayable:
         params.credits >= totalCredits,

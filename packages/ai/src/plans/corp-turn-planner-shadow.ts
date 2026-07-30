@@ -1054,7 +1054,7 @@ function offersForHeads(params: {
         params.urgentPriorityClass,
       );
       const groupKey = commutativeGroupKey(candidate);
-      const boundary = boundaryForCandidate(params.input, candidate);
+      const boundary = boundaryForCandidate(params.input, candidate, head);
       const boundaryMustBeImmediate =
         boundary !== undefined &&
         head.moduleId === "corp.hand_and_agenda_management";
@@ -1164,6 +1164,7 @@ function priorityCoverageForHead(
 function boundaryForCandidate(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  head?: TurnPlanningHeadCandidate,
 ): BoundaryActionAssessment | undefined {
   const remainingActionCapacity = {
     minimum: Math.max(
@@ -1175,6 +1176,37 @@ function boundaryForCandidate(
       input.playerView.own.clicks - (candidate.costProfile.clickCost ?? 0),
     ),
   };
+  if (
+    head?.moduleId === "corp.defend_servers" &&
+    head.evidenceCodes.includes(
+      "defense_progress_kind:score_material_capacity_release",
+    )
+  ) {
+    return assessTurnObservationBoundary({
+      boundaryKind: "projection_not_supported",
+      remainingActionCapacity,
+      residualTurnValueBasis: "remaining_capacity",
+      immediateOutcomeCodes: ["score_material_draw_capacity_released"],
+      uncertainty: [{ code: "post_capacity_release_draw_replanning_required" }],
+      assumptionIds: ["score_material_capacity_release_route_executable"],
+    });
+  }
+  if (
+    head?.rootPlanInstanceId.startsWith(
+      "plan:corp.economy:economy-visible-liquidity-development%3A",
+    ) &&
+    candidate.semanticActionType === "economy.gain_credit" &&
+    candidate.sourceKind === "basic_action"
+  ) {
+    return assessTurnObservationBoundary({
+      boundaryKind: "projection_not_supported",
+      remainingActionCapacity,
+      residualTurnValueBasis: "remaining_capacity",
+      immediateOutcomeCodes: ["visible_liquidity_target_revalidated"],
+      uncertainty: [{ code: "post_liquidity_target_replanning_required" }],
+      assumptionIds: ["current_liquidity_development_route_executable"],
+    });
+  }
   if (
     candidate.actionType === "draw_card" ||
     (candidate.economyProjection?.cardsDrawn ?? 0) > 0
@@ -1283,17 +1315,17 @@ function debugForShadow(params: {
       line.currentActionId === params.shadowHead?.currentBinding.actionId,
   );
   const selectedBoundary = selectedLine.steps
-    .map((step) =>
-      params.heads.find((head) => head.candidateId === step.candidateId),
-    )
-    .map((head) =>
-      params.candidates.find(
-        (candidate) => candidate.actionId === head?.currentBinding.actionId,
-      ),
-    )
-    .map((candidate) =>
-      candidate ? boundaryForCandidate(params.input, candidate) : undefined,
-    )
+    .map((step) => {
+      const head = params.heads.find(
+        (candidate) => candidate.candidateId === step.candidateId,
+      );
+      const candidate = params.candidates.find(
+        (entry) => entry.actionId === head?.currentBinding.actionId,
+      );
+      return candidate
+        ? boundaryForCandidate(params.input, candidate, head)
+        : undefined;
+    })
     .find(
       (boundary): boundary is BoundaryActionAssessment =>
         boundary !== undefined,
@@ -1725,7 +1757,7 @@ function debugPhases(
           (entry) => entry.actionId === head?.currentBinding.actionId,
         );
         const boundary = candidate
-          ? boundaryForCandidate(input, candidate)
+          ? boundaryForCandidate(input, candidate, head)
           : undefined;
         return {
           nodeId: turnPlanningFingerprint("shadow-turn-node", {

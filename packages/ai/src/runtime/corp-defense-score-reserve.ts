@@ -87,8 +87,13 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
     (currentRunFollowup?.credits ?? 0);
   const availableCreditsAfterRez =
     input.playerView.own.credits - route.totalRezCredits;
+  const consumesNoReservedResources =
+    route.totalRezCredits === 0 &&
+    route.quote.mandatoryAdditionalCosts.agendaPoints === 0;
   return {
-    preservesReserve: availableCreditsAfterRez >= requiredCreditsAfterRez,
+    preservesReserve:
+      consumesNoReservedResources ||
+      availableCreditsAfterRez >= requiredCreditsAfterRez,
     requiredCreditsAfterRez,
     availableCreditsAfterRez,
     scoreProjectIds: scoreClaims.map((claim) => claim.projectId),

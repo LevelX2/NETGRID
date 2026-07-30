@@ -113,6 +113,7 @@ describe("Corp draw admission", () => {
         handSize: 5,
         maximumHandSize: 5,
         currentClicks: 1,
+        allowFinalClickScoreMaterialReplacement: true,
       }),
     ).toMatchObject({ disposition: "admitted" });
     expect(
@@ -120,6 +121,7 @@ describe("Corp draw admission", () => {
         handSize: 5,
         maximumHandSize: 5,
         currentClicks: 1,
+        allowFinalClickScoreMaterialReplacement: true,
         drawProjection: {
           cardsDrawn: 2,
           netHandDelta: 2,
@@ -140,6 +142,29 @@ describe("Corp draw admission", () => {
       disposition: "admitted",
       projectedHandAfterDraw: 6,
       projectedEndTurnOverflow: 1,
+    });
+  });
+
+  it("admits a final-click score-material replacement only when the owning plan authorizes it", () => {
+    expect(
+      assessment({
+        handSize: 5,
+        maximumHandSize: 5,
+        currentClicks: 1,
+      }),
+    ).toMatchObject({ disposition: "blocked_end_turn_overflow" });
+    expect(
+      assessment({
+        handSize: 5,
+        maximumHandSize: 5,
+        currentClicks: 1,
+        allowFinalClickScoreMaterialReplacement: true,
+      }),
+    ).toMatchObject({
+      disposition: "admitted",
+      evidence: expect.arrayContaining([
+        "corp_draw_final_click_score_material_replacement:true",
+      ]),
     });
   });
 

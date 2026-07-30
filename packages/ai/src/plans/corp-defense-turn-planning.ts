@@ -539,6 +539,9 @@ function createDefenseLine(
       `defense_disposition:${classification.disposition}`,
       `defense_target:${signal.serverId}`,
       `rez_funding_gap_after:${fundingGapAfter}`,
+      ...(route.progressKind
+        ? [`defense_progress_kind:${route.progressKind}`]
+        : []),
       "ice_decision_owned_by_corp_defend_servers",
     ],
   };
