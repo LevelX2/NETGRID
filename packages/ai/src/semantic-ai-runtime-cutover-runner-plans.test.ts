@@ -571,6 +571,10 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.gripOrHq = [dwarf];
     input.playerView.own.rig = [
+      visibleCard("shell-traders-installed", "runner", "resource", {
+        definitionId: "onr_v1_176_the-shell-traders",
+        title: "The Shell Traders",
+      }),
       visibleCard("pile-driver-installed", "runner", "program", {
         definitionId: "onr_v1_047_pile-driver",
         title: "Pile Driver",
@@ -859,6 +863,91 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "selected_for_step:search_answer_breaker_wall",
       ]),
     );
+  });
+
+  it("lets the Shell Traders pipeline prepare the exact missing wall breaker", () => {
+    const dwarf = visibleCard("dwarf-card", "runner", "program", {
+      definitionId: "onr_v1_021_dwarf",
+      title: "Dwarf",
+      memoryCost: 1,
+      installCost: 5,
+      subtypes: ["icebreaker"],
+      rulesText: "Break wall subroutine. +1 strength.",
+    });
+    const input = runnerWallCoverageInput([
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction(
+        "prepare-dwarf",
+        "runner",
+        "trigger_ability",
+        "The Shell Traders: Dwarf vorbereiten",
+        { credits: 0, clicks: 1 },
+        {
+          source: "shell-traders-installed",
+          payload: {
+            sourceDefinitionId: "onr_v1_176_the-shell-traders",
+            delayedInstallAbility: "set_aside_from_grip",
+            targetCardId: dwarf.instanceId,
+            targetCardDefinitionId: dwarf.definitionId!,
+            shellCounterAmount: 5,
+          },
+        },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
+    ]);
+    input.playerView.own.gripOrHq = [dwarf];
+    input.playerView.own.rig = [
+      visibleCard("shell-traders-installed", "runner", "resource", {
+        definitionId: "onr_v1_176_the-shell-traders",
+        title: "The Shell Traders",
+      }),
+    ];
+    input.playerView.own.memoryUsed = 0;
+    input.playerView.own.memoryLimit = 4;
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expectPlanDecision(decision, {
+      actionId: "prepare-dwarf",
+      planKind: "runner.shell_traders_pipeline",
+      capability: "shell_traders_prepare",
+      priorityClass: "P2",
+      assessmentEvidence: "runner_shell_traders_source:shell-traders-installed",
+    });
+    expect(
+      decision.decisionDebug?.planFirstDecision?.selectedPlan?.evidenceCodes,
+    ).toEqual(
+      expect.arrayContaining([
+        "runner_shell_traders_target:dwarf-card",
+        expect.stringContaining("runner_shell_traders_counters:"),
+        expect.stringContaining("runner_shell_traders_memory:"),
+        expect.stringContaining("runner_shell_traders_coverage:"),
+      ]),
+    );
+    expect(
+      decision.decisionDebug?.planFirstDecision?.turnPlanning,
+    ).toMatchObject({
+      boundary: {
+        kind: "projected_plan_discovery_required",
+        residualTurnValueBasis: "public_outcome_distribution",
+      },
+      commitment: {
+        observationClass: "scheduled_information_boundary",
+        replanReason: "scheduled_information_boundary",
+      },
+    });
   });
 
   it("keeps Bodyweight event plan display data as play-not-install fallback", () => {

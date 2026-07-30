@@ -69,6 +69,10 @@ describe("Runner core plan modules", () => {
           },
           targetRoles: ["breaker_wall"],
           evidenceCodes: [
+            "runner_shell_traders_phase:prepare",
+            "runner_shell_traders_source:shell-traders-1",
+            "runner_shell_traders_target:dwarf-1",
+            "runner_shell_traders_memory:1:1",
             "runner_shell_traders_coverage:breaker_wall:remote-1",
           ],
         },
@@ -82,9 +86,21 @@ describe("Runner core plan modules", () => {
       target: {
         kind: "card",
         id: "dwarf-1",
-        sourceCardInstanceId: "shell-traders-1",
       },
       initialViability: "ready",
+    });
+    expect(proposal?.evidenceRefs.map((entry) => entry.code)).toEqual([
+      "runner_shell_traders_phase:prepare",
+      "runner_shell_traders_source:shell-traders-1",
+      "runner_shell_traders_target:dwarf-1",
+      "runner_shell_traders_memory:1:1",
+      "runner_shell_traders_coverage:breaker_wall:remote-1",
+    ]);
+    expect(
+      module.assess(instance, runnerContext, emptyPortfolio()).priorityClaim,
+    ).toMatchObject({
+      requestedClass: "P2",
+      reasonCode: "survival_threat",
     });
     expect(
       module

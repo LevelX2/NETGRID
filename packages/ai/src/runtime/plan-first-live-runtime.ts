@@ -11865,10 +11865,12 @@ function turnPlanningProjectionDebug(params: {
     stateIdentity,
     turnKey,
   });
-  const isObservationBoundary =
+  const isDrawObservationBoundary =
     candidate.actionType === "draw_card" ||
     (candidate.economyProjection?.cardsDrawn !== undefined &&
       candidate.economyProjection.cardsDrawn > 0);
+  const isShellTradersBoundary =
+    candidate.sourceDefinitionId === "onr_v1_176_the-shell-traders";
   const remainingCapacity = {
     minimum: Math.max(
       0,
@@ -11881,7 +11883,7 @@ function turnPlanningProjectionDebug(params: {
         (candidate.costProfile.clickCost ?? 0),
     ),
   };
-  const boundary = isObservationBoundary
+  const boundary = isDrawObservationBoundary
     ? assessTurnObservationBoundary({
         boundaryKind: "private_observation",
         remainingActionCapacity: remainingCapacity,
@@ -11890,7 +11892,21 @@ function turnPlanningProjectionDebug(params: {
         uncertainty: [{ code: "post_draw_replanning_required" }],
         assumptionIds: ["current_legal_action_remains_executable"],
       })
-    : undefined;
+    : isShellTradersBoundary
+      ? assessTurnObservationBoundary({
+          boundaryKind: "projected_plan_discovery_required",
+          remainingActionCapacity: remainingCapacity,
+          residualTurnValueBasis: "public_outcome_distribution",
+          immediateOutcomeCodes: [
+            "shell_counter_or_set_aside_state_changed",
+            "free_install_or_memory_choice_may_open",
+          ],
+          uncertainty: [
+            { code: "shell_traders_post_resolution_replanning_required" },
+          ],
+          assumptionIds: ["shell_traders_action_revalidated_by_engine"],
+        })
+      : undefined;
   const projectedCandidate = {
     ...candidate,
     stateVersion: stateIdentity.stateVersion,
@@ -13625,7 +13641,13 @@ function uniqueCoverageGaps(
     );
   });
   for (const evaluation of runTargets) {
-    if (evaluation.recommendation !== "find_breaker_first") continue;
+    if (
+      evaluation.recommendation !== "find_breaker_first" &&
+      evaluation.pathPassability !== "blocked_missing_coverage" &&
+      evaluation.pathPassability !== "blocked_unbreakable"
+    ) {
+      continue;
+    }
     const terminalRemoteCoverageThreat =
       runnerCoverageGapIsTerminalRemoteThreat(input, evaluation);
     const preciseCoverage = missingBreakerCoverageKind(

@@ -23,6 +23,33 @@ describe("applyTargetContextProjection", () => {
       ).primaryProjectionStatus,
     ).toBe("partial_projected");
   });
+
+  it("binds a delayed-install ability to its exact prepared card", () => {
+    const projected = applyTargetContextProjection(
+      candidate(),
+      {
+        ...action("trigger_ability"),
+        side: "runner",
+        source: "shell-traders-1",
+        payload: {
+          delayedInstallAbility: "set_aside_from_grip",
+          targetCardId: "dwarf-1",
+        },
+      },
+      undefined,
+      undefined,
+    );
+
+    expect(projected.targetContext?.selectedTargets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          targetId: "dwarf-1",
+          targetKind: "card",
+          targetSide: "runner",
+        }),
+      ]),
+    );
+  });
 });
 
 function candidate(): ActionSemanticCandidate {

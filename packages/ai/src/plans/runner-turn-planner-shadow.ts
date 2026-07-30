@@ -168,6 +168,7 @@ export function buildRunnerTurnPlannerShadow(params: {
     selectedLine,
     liveActionId,
     selectedHead,
+    candidates: params.context.actionCandidates,
     authorityMode: params.authorityMode ?? "shadow",
   });
   return {
@@ -579,6 +580,21 @@ function boundaryForRunnerCandidate(
       assumptionIds: ["runner_run_plan_context_current"],
     });
   }
+  if (candidate.sourceDefinitionId === "onr_v1_176_the-shell-traders") {
+    return assessTurnObservationBoundary({
+      boundaryKind: "projected_plan_discovery_required",
+      remainingActionCapacity,
+      residualTurnValueBasis: "public_outcome_distribution",
+      immediateOutcomeCodes: [
+        "shell_counter_or_set_aside_state_changed",
+        "free_install_or_memory_choice_may_open",
+      ],
+      uncertainty: [
+        { code: "shell_traders_post_resolution_replanning_required" },
+      ],
+      assumptionIds: ["shell_traders_action_revalidated_by_engine"],
+    });
+  }
   if (
     candidate.randomBadPublicityModel?.randomOutcome ||
     candidate.actionCapacityProjection?.reliability === "random"
@@ -698,9 +714,21 @@ function debugForRunnerPlanner(params: {
   selectedLine: TurnRemainderSearchLine | undefined;
   liveActionId: string;
   selectedHead: TurnPlanningHeadCandidate | undefined;
+  candidates: readonly ActionSemanticCandidate[];
   authorityMode: "shadow" | "cutover";
 }): AiTurnPlanningDebug {
   const selectedLine = params.selectedLine;
+  const finalStepHead = params.heads.find(
+    (head) => head.candidateId === selectedLine?.steps.at(-1)?.candidateId,
+  );
+  const finalStepCandidate = params.candidates.find(
+    (candidate) =>
+      candidate.actionId === finalStepHead?.currentBinding.actionId,
+  );
+  const selectedBoundary =
+    selectedLine?.stopReason === "observation_boundary" && finalStepCandidate
+      ? boundaryForRunnerCandidate(params.input, finalStepCandidate)
+      : undefined;
   const phaseId = selectedLine
     ? turnPlanningFingerprint("runner-debug-phase", {
         lineId: selectedLine.lineId,
@@ -751,9 +779,10 @@ function debugForRunnerPlanner(params: {
                 const boundaryAfter =
                   index === selectedLine.steps.length - 1 &&
                   selectedLine.stopReason === "observation_boundary"
-                    ? debugBoundaryForSemantic(
+                    ? (selectedBoundary?.boundaryKind ??
+                      debugBoundaryForSemantic(
                         step.invocation.semanticActionType,
-                      )
+                      ))
                     : undefined;
                 return {
                   nodeId: turnPlanningFingerprint("runner-debug-node", {
@@ -787,6 +816,19 @@ function debugForRunnerPlanner(params: {
             : "no_shadow_line",
       twoStepChangedHead: false,
     },
+    ...(selectedBoundary
+      ? {
+          boundary: {
+            kind: selectedBoundary.boundaryKind,
+            residualTurnValueBasis: selectedBoundary.residualTurnValueBasis,
+            optionalityUnit: selectedBoundary.postBoundaryOptionality.unit,
+            optionalityMinimum:
+              selectedBoundary.postBoundaryOptionality.minimum,
+            optionalityMaximum:
+              selectedBoundary.postBoundaryOptionality.maximum,
+          },
+        }
+      : {}),
     coverage: {
       status: params.coverage.status,
       coveragePercent: params.coverage.coveragePercent,

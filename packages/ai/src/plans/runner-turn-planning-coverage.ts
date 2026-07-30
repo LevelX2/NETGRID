@@ -78,6 +78,17 @@ const DEVELOPMENT_SEMANTICS = [
 export const RUNNER_TURN_PLANNING_MODULE_COVERAGE: readonly RunnerTurnPlanningModuleCoverage[] =
   [
     {
+      moduleId: "runner.shell_traders_pipeline",
+      horizonCapability: "context_dependent",
+      ownerKind: "resource",
+      semanticActionPatterns: [
+        "card.*",
+        "card_ability.*",
+        "special_zone.*",
+        "choice.resolve",
+      ],
+    },
+    {
       moduleId: "runner.resource_lifecycle",
       horizonCapability: "context_dependent",
       ownerKind: "resource",

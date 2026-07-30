@@ -266,9 +266,7 @@ function uniqueSelectedTargets(targets: readonly LegalTarget[]): LegalTarget[] {
       previous
         ? {
             ...previous,
-            evidence: [
-              ...new Set([...previous.evidence, ...target.evidence]),
-            ],
+            evidence: [...new Set([...previous.evidence, ...target.evidence])],
           }
         : {
             ...target,
@@ -349,8 +347,7 @@ function payloadTargetsForAction(action: LegalAction): LegalTargetSummary[] {
 
   const cardTarget = cardPayloadTargetForAction(
     action,
-    stringPayload(action, "cardId") ??
-      stringPayload(action, "targetCardId"),
+    stringPayload(action, "cardId") ?? stringPayload(action, "targetCardId"),
   );
   if (cardTarget !== undefined) targets.push(cardTarget);
 
@@ -406,6 +403,17 @@ function cardPayloadTargetForAction(
       targetKind: "card",
       targetSide: "corp",
       evidence: [`AI039 legal action payload card target: ${cardId}`],
+    };
+  }
+  if (
+    action.type === "trigger_ability" &&
+    typeof action.payload?.delayedInstallAbility === "string"
+  ) {
+    return {
+      targetId: cardId,
+      targetKind: "card",
+      targetSide: "runner",
+      evidence: [`AI039 delayed install payload card target: ${cardId}`],
     };
   }
   return undefined;

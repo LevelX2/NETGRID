@@ -516,6 +516,7 @@ function AiDecisionDebugPlanFirstTraceView({
           <div className="aiDecisionDebugCompactList">
             {decision.portfolio.map((plan) => {
               const selected = plan.instanceId === selectedPlan?.instanceId;
+              const shellTradersRows = aiShellTradersPlanRows(plan);
               return (
                 <div key={plan.instanceId}>
                   <span>
@@ -540,7 +541,21 @@ function AiDecisionDebugPlanFirstTraceView({
                             ? plan.openNeedIds.join(", ")
                             : "nichts",
                         ],
+                        [
+                          "Konkretes Ziel",
+                          plan.target
+                            ? `${plan.target.kind} · ${plan.target.id}`
+                            : "Nicht gebunden",
+                        ],
+                        ...shellTradersRows,
                       ]}
+                    />
+                  ) : null}
+                  {selected && plan.evidenceCodes.length > 0 ? (
+                    <AiDecisionDebugChips
+                      title="Plan-Evidence"
+                      items={plan.evidenceCodes}
+                      tone="muted"
                     />
                   ) : null}
                 </div>
@@ -1052,6 +1067,31 @@ function AiDecisionDebugPlanFirstTraceView({
       </AiDecisionDebugCollapsibleSection>
     </div>
   );
+}
+
+function aiShellTradersPlanRows(
+  plan: AiPlanFirstDecisionDebug["portfolio"][number],
+): Array<[string, string]> {
+  if (plan.moduleId !== "runner.shell_traders_pipeline") return [];
+  const value = (prefix: string) =>
+    plan.evidenceCodes
+      .find((code) => code.startsWith(prefix))
+      ?.slice(prefix.length);
+  return [
+    ["Shell-Traders-Quelle", value("runner_shell_traders_source:") ?? "-"],
+    ["Vorbereitetes Ziel", value("runner_shell_traders_target:") ?? "-"],
+    ["Zielkarte", value("runner_shell_traders_target_definition:") ?? "-"],
+    ["Shell-Counter", value("runner_shell_traders_counters:") ?? "-"],
+    ["MU Ziel/frei", value("runner_shell_traders_memory:") ?? "-"],
+    [
+      "MU-Ersatz",
+      value("runner_shell_traders_replacement:") ?? "nicht ausgewiesen",
+    ],
+    [
+      "Coverage",
+      value("runner_shell_traders_coverage:") ?? "kein akuter Gap gebunden",
+    ],
+  ];
 }
 
 function aiAgendaLineFamilyLabel(

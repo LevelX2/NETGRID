@@ -116,7 +116,7 @@ aber keine Scheduler-Sonderautorität erhalten.
 `PREPARED -> DOMAIN_AND_OWNER -> TARGET_AND_MU_POLICY ->
 CONDUCTOR_AND_DEBUG -> VERIFIED -> MERGED -> CLEANED`
 
-Genau ein Paket ist aktiv. Aktueller Zustand: `TARGET_AND_MU_POLICY`.
+Genau ein Paket ist aktiv. Aktueller Zustand: `CONDUCTOR_AND_DEBUG`.
 
 ## Paketfolge
 
@@ -244,6 +244,20 @@ Done-Gate:
 Commit:
 
 - `feat(ai): conduct and expose Shell Traders plans`
+
+Ergebnis:
+
+- Akute konkrete Breaker-Coverage kann die Pipeline als P2 binden; normale
+  Vorbereitung bleibt P4/P5 und konkurriert regulär mit Economy, Runs und
+  Handentwicklung.
+- Shell-Traders-Aktionen sind im Runner-Zugplanungsregister erklärt und
+  bilden eine materielle Neuplanungsgrenze. Nach Set-Aside, Counteränderung,
+  Auto-Install oder möglicher MU-Choice wird der Restzug rematerialisiert.
+- Die Plan-Evidence enthält Quelle, Ziel, Kartendefinition, Counter, MU,
+  Ersatzstatus, Rollen und Coverage.
+- Die private Buganzeige zeigt diese Bindungen für den ausgewählten Plan
+  vollständig und bezeichnet das Modul verständlich als
+  „The Shell Traders vorbereiten“.
 
 ### S4 – Gesamtverifikation und Integration
 

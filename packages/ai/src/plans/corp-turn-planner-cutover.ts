@@ -644,9 +644,16 @@ function cutoverDebug(
         leaseId: lease.leaseId,
         reasonCode: "committed_turn_step_rematerialized",
       },
-      observationClass: commitment.observationClass,
-      ...(replanReason ? { replanReason } : {}),
+      observationClass: source.boundary
+        ? "scheduled_information_boundary"
+        : commitment.observationClass,
+      ...(replanReason
+        ? { replanReason }
+        : source.boundary
+          ? { replanReason: "scheduled_information_boundary" }
+          : {}),
     },
+    ...(source.boundary ? { boundary: structuredClone(source.boundary) } : {}),
     shadowComparison: {
       liveActionId: source.shadowComparison?.liveActionId ?? "unavailable",
       shadowActionId: head.currentBinding.actionId,

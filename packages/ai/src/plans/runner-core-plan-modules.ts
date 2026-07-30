@@ -361,7 +361,6 @@ function shellTradersPipelineModule(): PlanModule {
           target: {
             kind: "card",
             id: signal.targetCardInstanceId,
-            sourceCardInstanceId: signal.sourceCardInstanceId,
           },
           routeExists:
             shellTradersPipelineCandidates(context, signal).length > 0,
@@ -372,6 +371,7 @@ function shellTradersPipelineModule(): PlanModule {
           evidenceCode:
             signal.evidenceCodes[0] ??
             "runner_shell_traders_pipeline_visible_state",
+          evidenceCodes: signal.evidenceCodes,
         }),
       ),
     assess: (instance, context, portfolio) => {
@@ -404,7 +404,6 @@ function shellTradersPipelineModule(): PlanModule {
           target: {
             kind: "card",
             id: signal.targetCardInstanceId,
-            sourceCardInstanceId: signal.sourceCardInstanceId,
           },
           purpose:
             signal.phase === "prepare"
@@ -1034,6 +1033,7 @@ function proposal(params: {
   routeExists: boolean;
   blockerCode: string;
   evidenceCode: string;
+  evidenceCodes?: readonly string[];
   parentInstanceId?: string;
   parentNeedId?: string;
 }): PlanProposal {
@@ -1086,7 +1086,9 @@ function proposal(params: {
     resumeConditions: [{ code: "compatible_route_available" }],
     completionConditions: [{ code: "need_satisfied" }],
     abandonmentConditions: [{ code: "need_disappeared" }],
-    evidenceRefs: [{ code: params.evidenceCode, source: "visible_state" }],
+    evidenceRefs: (params.evidenceCodes ?? [params.evidenceCode]).map(
+      (code) => ({ code, source: "visible_state" as const }),
+    ),
   };
 }
 

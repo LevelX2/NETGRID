@@ -456,6 +456,7 @@ export function aiTracePlanLabel(value: string): string {
     "runner.build_credit_base": "Credit-Basis aufbauen",
     "runner.build_credit_bank": "Credit-Bank aufbauen",
     "runner.cash_out_credit_bank": "Credit-Bank auszahlen",
+    "runner.shell_traders_pipeline": "The Shell Traders vorbereiten",
     "corp.create_score_window": "Score-Fenster schaffen",
     "corp.build_credit_bank": "Credit-Bank aufbauen",
     "corp.hand_and_agenda_management": "Hand und Agenden verwalten",
