@@ -92,6 +92,9 @@ Aktueller Zustand: `RED_EVIDENCE`
 - P1: acht Zieltests reproduzieren `behavior_regression`; der
   Dr.-Dreff-Gegenfall auf dem falschen Server sowie die sieben bestehenden
   frühen Match-Checkpoints bleiben grün.
+- D88 besitzt nur noch eine Corp-Aktion. Der fachliche Zielvertrag ist deshalb
+  ein kontrollierter Score-Material-Ersatzdraw mit anschließendem Cleanup,
+  nicht die unmögliche Zweischrittfolge Installation plus Draw.
 
 ## Paketfolge
 

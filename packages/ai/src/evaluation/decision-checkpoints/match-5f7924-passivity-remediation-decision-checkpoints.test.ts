@@ -47,7 +47,6 @@ describe("match 5F7924 passivity remediation checkpoints", () => {
 
   it.each([
     ["D67", capacityReleaseD67Json],
-    ["D88", capacityReleaseD88Json],
     ["D102", richCapacityReleaseJson],
   ])(
     "uses a useful hand-capacity release before the score-material draw at %s",
@@ -55,6 +54,10 @@ describe("match 5F7924 passivity remediation checkpoints", () => {
       expectCapacityReleaseThenDraw(value);
     },
   );
+
+  it("uses the final click at D88 for a score-material replacement draw", () => {
+    expectCheckpointToPass(capacityReleaseD88Json);
+  });
 
   it("exposes an exact current approached-ICE exchange quote on the layered Archives server", () => {
     const result = runAiDecisionCheckpoint(fixture(layeredIceRezJson));
