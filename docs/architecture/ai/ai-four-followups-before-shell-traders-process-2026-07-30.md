@@ -1,6 +1,6 @@
 # Vier KI-Folgearbeiten vor dem Shell-Traders-Planmodul
 
-Status: verifiziert, bereit zur lokalen Integration
+Status: abgeschlossen, lokal in `main` integriert und bereinigt
 
 Quelle:
 
@@ -98,7 +98,7 @@ Der Prozess stoppt ohne Fallback, wenn:
 `PREPARED -> RUN_FOLLOWUP_OWNER -> CORP_DRAW_CAPACITY ->
 RUNNER_SEARCH_BINDING -> MATCHPOINT_CONDUCTOR -> VERIFIED -> MERGED -> CLEANED`
 
-Genau ein Paket ist aktiv. Aktueller Zustand: `VERIFIED`.
+Kein Paket ist mehr aktiv. Abschlusszustand: `CLEANED`.
 
 - F0 abgeschlossen mit Commit `d9dee38e2`.
 - F1 bindet den Engine-Discriminator
@@ -172,7 +172,11 @@ Genau ein Paket ist aktiv. Aktueller Zustand: `VERIFIED`.
   - vollständige KI-Suite mit 538 Dateien und 4.380 Tests grün;
   - `@netgrid/ai`-Typecheck grün;
   - `check:ai` grün, einschließlich Hint-Metadaten und Source-Struktur;
-  - Paketgrenzen grün (`1.990` geprüfte Dateien).
+- Paketgrenzen grün (`1.990` geprüfte Dateien).
+- F6: Branch `codex/ai-followups-before-shell-traders` wurde per
+  Fast-Forward nach `main` integriert. Der zugehörige Worktree und der
+  gemergte Arbeitsbranch wurden entfernt; der fremde Baseline-Worktree blieb
+  unverändert.
 
 ## Paketfolge
 
