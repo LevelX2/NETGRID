@@ -129,6 +129,9 @@ Die Korrekturen bleiben innerhalb der vorgesehenen Planarchitektur:
   Sekunden.
 - Vollständige AI-Suite über den neuen normalen Parallelpfad: dieselben 540
   Dateien und 4.405 Tests grün in 187,3 Sekunden.
+- Kombinierter Abschlussstand nach Integration des zwischenzeitlichen
+  Security-Purge-/TurnPlanner-Main-Stands: 540 Dateien und 4.409 Tests grün
+  in 205,8 Sekunden; AI-Typecheck ebenfalls grün.
 - AI-Replay-/Simulation-Gegenprobe: 3 Dateien, 9 Tests grün.
 - Engine-Replay-Vertrag: 1 Datei, 6 Tests grün.
 - AI-Typecheck mit 6-GB-Node-Heap grün. Der Standardheap von 4 GB reichte
@@ -149,6 +152,20 @@ Der serielle Fallback `corepack pnpm test:ai:shards:serial` bleibt für
 nachgewiesenen Speicherdruck oder Instabilität erhalten. Mehr Shards oder
 Worker werden erst nach dokumentierter Laufzeit-, RAM-, Determinismus- und
 Stabilitätsmessung zum Standard.
+
+## Lokale Integration
+
+- Der während der Arbeit weitergelaufene lokale `main` wurde zweimal
+  defensiv in den Arbeitsbranch eingebunden.
+- Die einzigen Konflikte waren additive Einträge im Juli-Wissenslog. Die
+  automatisch zusammengeführte Plan-Runtime behielt sowohl den neuen
+  `Security Purge`-Defense-Choice-Owner als auch alle A36A9664-Korrekturen.
+- Der verifizierte Branch wurde per Fast-Forward nach lokalem `main`
+  integriert. Finaler Integrationsstand ist `9ecbb05b2`.
+- Der Arbeitsbranch wurde gelöscht. Der Worktree ist nicht mehr registriert
+  und sein Pfad wurde entfernt; ignorierte Installationsreste wurden
+  wiederherstellbar in den Windows-Papierkorb verschoben.
+- Es erfolgte kein Push.
 
 ## Bewusst offene qualitative Fragen
 

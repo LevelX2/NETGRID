@@ -1,6 +1,6 @@
 # Match A36A9664: Corp-Plan-Remediation
 
-Status: aktiv – Paket P6
+Status: abgeschlossen – lokal in `main` integriert
 
 Quelle:
 
@@ -328,17 +328,22 @@ Ziel:
 - aktuellen `main` defensiv in den Arbeitsbranch integrieren, final
   verifizieren, lokal nach `main` mergen und Arbeitsartefakte entfernen.
 
-Arbeit:
+Umgesetzt:
 
-- Arbeitsbranch sauber prüfen;
-- neuen `main`-Stand einbinden;
-- relevante Checks wiederholen;
-- Hauptworkspace prüfen und bevorzugt fast-forward mergen;
-- Main-Status und Diff prüfen;
-- Worktree sauber entfernen und doppelt verifizieren;
-- gemergten Branch mit `git branch -d` löschen.
+- die während der Umsetzung entstandenen Main-Stände `d09db080b` und
+  `0bb60c732` nacheinander defensiv in den Arbeitsbranch eingebunden;
+- die beiden rein additiven Konflikte im Juli-Wissenslog unter Erhalt aller
+  Einträge gelöst; die produktive Plan-Runtime führte beide
+  Verhaltensstränge konfliktfrei zusammen;
+- auf dem kombinierten Stand 540 AI-Testdateien mit 4.409 Tests, den
+  AI-Typecheck und das Format-/Diff-Gate grün ausgeführt;
+- Arbeitsbranch per Fast-Forward bis `9ecbb05b2` nach lokalem `main`
+  integriert;
+- Worktree aus Git entfernt, verbliebene ignorierte Installationsartefakte
+  wiederherstellbar in den Windows-Papierkorb verschoben und den vollständig
+  gemergten Arbeitsbranch gelöscht.
 
-Done-Gate:
+Erfülltes Done-Gate:
 
 - Änderungen auf lokalem `main`;
 - Hauptworkspace sauber;
