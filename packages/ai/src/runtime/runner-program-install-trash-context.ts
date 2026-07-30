@@ -149,10 +149,19 @@ export function createRunnerProgramInstallTrashContext(
     choice: PendingChoice,
     selectableOptions: PendingChoiceOptions,
   ): RunnerProgramInstallTrashAssessment {
-    const sourceCardId = choice.source.split(":")[1] ?? "";
-    const source = input.playerView.own.gripOrHq.find(
-      (card) => card.instanceId === sourceCardId,
-    );
+    const sourceParts = choice.source.split(":");
+    const sourceCardId = choice.source.startsWith(
+      "v1912.delayed_install_memory:",
+    )
+      ? (sourceParts[2] ?? "")
+      : (sourceParts[1] ?? "");
+    const source = choice.source.startsWith("v1912.delayed_install_memory:")
+      ? input.playerView.specialZones?.setAside.find(
+          (card) => card.instanceId === sourceCardId,
+        )
+      : input.playerView.own.gripOrHq.find(
+          (card) => card.instanceId === sourceCardId,
+        );
     return runnerProgramInstallTrashAssessmentFromCards(
       input,
       source,

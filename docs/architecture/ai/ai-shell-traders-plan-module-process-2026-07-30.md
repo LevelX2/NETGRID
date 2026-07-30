@@ -116,7 +116,7 @@ aber keine Scheduler-Sonderautorität erhalten.
 `PREPARED -> DOMAIN_AND_OWNER -> TARGET_AND_MU_POLICY ->
 CONDUCTOR_AND_DEBUG -> VERIFIED -> MERGED -> CLEANED`
 
-Genau ein Paket ist aktiv. Aktueller Zustand: `DOMAIN_AND_OWNER`.
+Genau ein Paket ist aktiv. Aktueller Zustand: `TARGET_AND_MU_POLICY`.
 
 ## Paketfolge
 
@@ -205,6 +205,18 @@ Done-Gate:
 Commit:
 
 - `feat(ai): plan Shell Traders targets and rig replacement`
+
+Ergebnis:
+
+- Die Startzugwahl vergleicht konkrete vorbereitete Ziele nach fehlender
+  Breaker-Coverage, Zielwert, Restcountern, Fertigstellung und MU-Risiko.
+- Eine Fertigstellung, die nur durch Verlust eines einzigartigen anderen
+  Breakers möglich wäre, verliert gegen eine sichere sinnvolle Alternative.
+- Die verpflichtende Shell-Traders-MU-Choice verwendet die bestehende
+  qualitative Minimalersatzpolitik mit der vorbereiteten Karte als
+  tatsächlichem Installationsziel.
+- Mehrere Quellen und Ziele bleiben über Source-, Target- und Choice-IDs
+  getrennt und werden nach jeder Choice aus dem neuen Zustand neu bewertet.
 
 ### S3 – Zugdirigent, Replan und Buganzeige
 

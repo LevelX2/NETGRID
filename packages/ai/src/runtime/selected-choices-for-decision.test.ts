@@ -57,6 +57,39 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
+  it("routes a Shell Traders MU choice through the qualitative program replacement selector", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_cards",
+          source:
+            "v1912.delayed_install_memory:shell-1:prepared-program:paid:17",
+          minSelections: 1,
+          maxSelections: 2,
+          options: [
+            { id: "card_unique", label: "Unique breaker", value: "unique" },
+            {
+              id: "card_redundant",
+              label: "Redundant program",
+              value: "redundant",
+            },
+          ],
+        },
+        { side: "runner" },
+      ),
+      resolveChoiceAction("runner"),
+      {
+        ...unusedDependencies(),
+        selectedRunnerProgramInstallTrashOptionIds: () => ["card_redundant"],
+      },
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["card_redundant"],
+    });
+  });
+
   it("spends a useful Priority Wreck amount while keeping a small reserve", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice(
@@ -742,7 +775,11 @@ describe("selectedChoicesForDecision", () => {
 
   it.each([
     ["draws when R&D can still pay the following mandatory draw", 8, "draw"],
-    ["skips when the extra draw would consume the mandatory-draw card", 1, "skip"],
+    [
+      "skips when the extra draw would consume the mandatory-draw card",
+      1,
+      "skip",
+    ],
     ["skips when R&D is already empty", 0, "skip"],
   ] as const)("%s", (_label, rdCount, expectedOptionId) => {
     const input = inputWithChoice(

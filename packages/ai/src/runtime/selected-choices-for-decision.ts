@@ -141,11 +141,29 @@ export function selectedChoicesForDecision(
     choice.kind === "select_cards" &&
     choice.source.startsWith("runner_start.delayed_install")
   ) {
-    const selectedOptionId =
-      selectedShellTradersStartTurnChoiceOptionId(choice);
+    const selectedOptionId = selectedShellTradersStartTurnChoiceOptionId(
+      choice,
+      {
+        input,
+        rolesForCardId: dependencies.rolesForCardId,
+      },
+    );
     return resolved(
       selectedOptionId !== undefined ? [selectedOptionId] : [],
       "runner_delayed_install",
+    );
+  }
+  if (
+    choice.kind === "select_cards" &&
+    choice.source.startsWith("v1912.delayed_install_memory:")
+  ) {
+    return resolved(
+      dependencies.selectedRunnerProgramInstallTrashOptionIds(
+        input,
+        choice,
+        selectableOptions,
+      ),
+      "runner_delayed_install_memory",
     );
   }
   if (
