@@ -8413,6 +8413,8 @@ function corpHqOverflowCandidateIsExactCurrentConversion(
     candidate.sourceKind !== "card" ||
     !candidate.sourceCardInstanceId ||
     !candidate.sourceDefinitionId ||
+    (candidate.actionCapacityProjection !== undefined &&
+      candidate.actionCapacityProjection.kind !== "non_action_capacity") ||
     candidate.semanticActionType === "score_conversion.place_advancement" ||
     candidate.semanticActionType === "score_conversion.move_advancement"
   ) {

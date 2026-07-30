@@ -927,7 +927,7 @@ describe("shared plan scheduler", () => {
     ) => ({
       ...baseMaterialize(instance, planAssessment, materializationContext),
       earlyEndTurnJustification: {
-        kind: "forgo_restricted_capacity",
+        kind: "forgo_exhausted_voluntary_capacity",
         capacityKind: "all_current_voluntary_actions_explicitly_nonproductive",
         explicitlyNonproductiveActionIds: [credit.actionId],
       },

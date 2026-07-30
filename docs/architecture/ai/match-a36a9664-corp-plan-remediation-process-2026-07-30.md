@@ -1,6 +1,6 @@
 # Match A36A9664: Corp-Plan-Remediation
 
-Status: aktiv – Paket P4
+Status: aktiv – Paket P5
 
 Quelle:
 
@@ -255,13 +255,20 @@ Ziel:
 - normale Aktionskapazität wird nicht ersatzlos aufgegeben und bezahlte
   Zusatzaktionen werden nur mit konkretem Planbedarf erzeugt.
 
-Arbeit:
+Umgesetzt:
 
-- Turn Completion für verbleibende normale Aktionen enger fassen;
-- normale und eingeschränkte Kapazität in Debug-Evidence unterscheiden;
-- Action-Capacity-Operationen aus generischer Overflow-Konversion
-  ausschließen, sofern keine ausführbare Restzuglinie die Zusatzaktionen
-  benötigt.
+- der P6-Liquiditätsplan bindet als endliche Obergrenze
+  `aktuelle Credits + verbleibende normale Aktionen` und bleibt damit nach
+  jeder Basis-Credit-Aktion bis zur vollständigen Nutzung der normalen
+  Zugkapazität stabil;
+- ein höherer sichtbarer Score-/Defense-Bedarf darf das Ziel weiterhin
+  anheben, und stärkere Pläne behalten durch ihre Prioritätsklasse Vorrang;
+- die Debug- und Scheduler-Begründung unterscheidet nun
+  `forgo_exhausted_voluntary_capacity` ausdrücklich von echter
+  `forgo_restricted_capacity`;
+- jede Action-Capacity-Projektion ist aus der generischen
+  HQ-Overflow-Konversion ausgeschlossen; eine solche Karte bleibt nur über
+  ein zuständiges Planmodul mit gebundener Restzuglinie spielbar.
 
 Gegenproben:
 
@@ -273,7 +280,7 @@ Gegenproben:
 Checks:
 
 - D11- und D75-Checkpoints grün;
-- Turn-Completion-, Overflow- und Action-Capacity-Tests;
+- Turn-Completion-, Overflow-, Scheduler- und Action-Capacity-Tests;
 - AI-Typecheck und `git diff --check`.
 
 Commit:

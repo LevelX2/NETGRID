@@ -58,14 +58,12 @@ export function corpTurnLiquidityDevelopmentNeed(
   );
   const currentCredits = input.playerView.own.credits;
   const visibleDemandTarget = corpVisibleLiquidityDemandTarget(input);
-  const targetCredits =
-    visibleDemandTarget > currentCredits
-      ? visibleDemandTarget
-      : (resident?.targetCredits ?? 0) > currentCredits
-        ? resident!.targetCredits
-        : resident === undefined && !residentSaturation
-          ? currentCredits + 1
-          : currentCredits;
+  const targetCredits = Math.max(
+    currentCredits,
+    visibleDemandTarget,
+    resident?.targetCredits ?? 0,
+    !residentSaturation ? currentCredits + remainingClicks : currentCredits,
+  );
   if (!Number.isSafeInteger(targetCredits) || targetCredits <= currentCredits) {
     return undefined;
   }
@@ -97,9 +95,9 @@ export function corpTurnLiquidityDevelopmentNeed(
 
 /**
  * Keeps generic liquidity tied to visible, currently useful spending routes.
- * The target deliberately has no fixed credit ceiling: a genuinely expensive
- * visible score-and-defense route may raise it, while an empty demand
- * portfolio cannot renew itself merely because clicks remain.
+ * A genuinely expensive score-and-defense route may raise the target. If no
+ * stronger route exists, the once-per-turn liquidity root binds all remaining
+ * normal clicks so turn completion cannot silently discard useful capacity.
  */
 export function corpVisibleLiquidityDemandTarget(
   input: AiDecisionInput,

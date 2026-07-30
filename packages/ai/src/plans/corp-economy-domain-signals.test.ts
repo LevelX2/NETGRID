@@ -138,6 +138,70 @@ describe("corp economy domain signals", () => {
     expect(signal?.cadence.maximumConversions).toBe(2);
   });
 
+  it("binds every remaining normal click when no stronger liquidity demand exists", () => {
+    const input = decisionInput({ credits: 5, clicks: 3 });
+
+    expect(
+      corpTurnLiquidityDevelopmentNeed(
+        input,
+        [basicCreditCandidate()],
+        undefined,
+        "corp:23",
+      ),
+    ).toMatchObject({
+      targetCredits: 8,
+      currentCreditsAtRevalidation: 5,
+      gap: 3,
+      cadence: {
+        kind: "remaining_turn_capacity",
+        maximumConversions: 3,
+      },
+    });
+  });
+
+  it("extends a completed resident target only across the finite remaining clicks", () => {
+    const input = decisionInput({ credits: 8, clicks: 2 });
+    const previous = {
+      instances: [
+        {
+          moduleId: "corp.economy",
+          dedupeKey: "economy-visible-liquidity-development:corp:23",
+          moduleState: {
+            kind: "economy",
+            signal: {
+              kind: "develop_liquidity",
+              needId: "economy-visible-liquidity-development:corp:23",
+              turnKey: "corp:23",
+              targetCredits: 8,
+              priorityClass: "P6",
+              projectedCreditGain: 1,
+              cadence: {
+                kind: "remaining_turn_capacity",
+                maximumConversions: 1,
+              },
+              revalidation: {
+                stateVersion: 11,
+              },
+            },
+          },
+        },
+      ],
+    } as unknown as ResidentPlanPortfolio;
+
+    expect(
+      corpTurnLiquidityDevelopmentNeed(
+        input,
+        [basicCreditCandidate()],
+        previous,
+        "corp:23",
+      ),
+    ).toMatchObject({
+      targetCredits: 10,
+      currentCreditsAtRevalidation: 8,
+      gap: 2,
+    });
+  });
+
   it("does not reopen liquidity after the resident completion evidence", () => {
     const input = decisionInput({ credits: 0, clicks: 1 });
     const previous = {

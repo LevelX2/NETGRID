@@ -68,9 +68,12 @@ export type PlanEarlyEndTurnJustification =
     }
   | {
       kind: "forgo_restricted_capacity";
-      capacityKind:
-        | "zero_click_non_basic_run_only"
-        | "all_current_voluntary_actions_explicitly_nonproductive";
+      capacityKind: "zero_click_non_basic_run_only";
+      explicitlyNonproductiveActionIds: string[];
+    }
+  | {
+      kind: "forgo_exhausted_voluntary_capacity";
+      capacityKind: "all_current_voluntary_actions_explicitly_nonproductive";
       explicitlyNonproductiveActionIds: string[];
     };
 
@@ -773,7 +776,8 @@ function assertEarlyEndTurnRoute(
     remainingCandidates.map((candidate) => candidate.actionId),
   );
   const forgoProofActionIds =
-    justification?.kind === "forgo_restricted_capacity"
+    justification?.kind === "forgo_restricted_capacity" ||
+    justification?.kind === "forgo_exhausted_voluntary_capacity"
       ? sortedUnique(justification.explicitlyNonproductiveActionIds)
       : [];
   const exactRestrictedActionSet =
@@ -825,7 +829,7 @@ function assertEarlyEndTurnRoute(
       ),
     );
   const exhaustedVoluntaryCapacityForgoProven =
-    justification?.kind === "forgo_restricted_capacity" &&
+    justification?.kind === "forgo_exhausted_voluntary_capacity" &&
     justification.capacityKind ===
       "all_current_voluntary_actions_explicitly_nonproductive" &&
     context.input.side === "corp" &&
@@ -841,7 +845,7 @@ function assertEarlyEndTurnRoute(
     unresolvedActionIds: remainingActionIds,
     owner: "rules_contract",
     removalCondition:
-      "Bind early standard EndTurn to a structurally proven terminal win or an exact restricted-capacity-forgo justification.",
+      "Bind early standard EndTurn to a structurally proven terminal win, an exact restricted-capacity forgo, or an exact exhausted voluntary-action set.",
     planInstanceId: route.planInstanceId,
     stepId: route.step.stepId,
     candidateCount: materialized.candidates.length,

@@ -66,7 +66,7 @@ export function createTurnCompletionPlanModule(side: Side): PlanModule {
         explicitlyNonproductiveActionIds.length > 0
           ? {
               earlyEndTurnJustification: {
-                kind: "forgo_restricted_capacity" as const,
+                kind: "forgo_exhausted_voluntary_capacity" as const,
                 capacityKind:
                   "all_current_voluntary_actions_explicitly_nonproductive" as const,
                 explicitlyNonproductiveActionIds,

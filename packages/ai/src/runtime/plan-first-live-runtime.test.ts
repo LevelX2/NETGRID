@@ -1899,7 +1899,7 @@ describe("authoritative plan-first live runtime", () => {
     ).not.toContain('"kind":"develop_liquidity"');
   });
 
-  it("keeps one bounded Corp liquidity target and ends after later same-turn saturation", () => {
+  it("extends Corp liquidity only through finite remaining normal actions", () => {
     resetResidentPlanPortfolioMemory();
     const credit = legalAction(
       "credit",
@@ -1935,7 +1935,7 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(
       JSON.stringify(residentPlanPortfolioSnapshot(input) ?? {}),
-    ).toContain('"targetCredits":6');
+    ).toContain('"targetCredits":7');
 
     const afterExternalProgress = structuredClone(input);
     afterExternalProgress.playerView.stateVersion += 1;
@@ -1949,31 +1949,33 @@ describe("authoritative plan-first live runtime", () => {
       afterExternalProgress.legalActions;
 
     const context = liveContext();
-    const saturatedDecision = context.chooseSemanticRuntimeAction(
+    const extendedDecision = context.chooseSemanticRuntimeAction(
       afterExternalProgress,
       {},
     );
-    expect(saturatedDecision).toMatchObject({
-      actionId: end.actionId,
-      reasonCode: "plan_first.corp.complete_turn",
+    expect(extendedDecision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
     });
     expect(
       JSON.stringify(
         residentPlanPortfolioSnapshot(afterExternalProgress) ?? {},
       ),
-    ).not.toContain('"targetCredits":8');
+    ).toContain('"targetCredits":8');
 
-    expect(
-      context.chooseSemanticRuntimeAction(afterExternalProgress, {}),
-    ).toMatchObject({
+    const exhausted = structuredClone(afterExternalProgress);
+    exhausted.playerView.stateVersion += 1;
+    exhausted.playerView.own.clicks = 0;
+    exhausted.playerView.own.credits = 8;
+    exhausted.legalActions = [structuredClone(end)];
+    exhausted.legalActions[0]!.expiresAtStateVersion =
+      exhausted.playerView.stateVersion;
+    exhausted.playerView.legalActions = exhausted.legalActions;
+
+    expect(context.chooseSemanticRuntimeAction(exhausted, {})).toMatchObject({
       actionId: end.actionId,
       reasonCode: "plan_first.corp.complete_turn",
     });
-    expect(
-      JSON.stringify(
-        residentPlanPortfolioSnapshot(afterExternalProgress) ?? {},
-      ),
-    ).not.toContain('"targetCredits":8');
   });
 
   it("resolves a two-card HQ overflow through two exact revalidated steps", () => {
@@ -2126,7 +2128,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("reactivates an exhausted HQ-overflow root for one later support-draw card", () => {
+  it("reactivates overflow for a support draw but never for unbound action capacity", () => {
     resetResidentPlanPortfolioMemory();
     const installPacifica = pacificaOverflowInstall(
       "install-pacifica",
@@ -2283,15 +2285,15 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       context.chooseSemanticRuntimeAction(afterSupportDraw, {}),
     ).toMatchObject({
-      actionId: playOvertime.actionId,
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
     expect(
       context.chooseSemanticRuntimeAction(afterSupportDraw, {}),
     ).toMatchObject({
-      actionId: playOvertime.actionId,
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
     expect(
@@ -2300,7 +2302,7 @@ describe("authoritative plan-first live runtime", () => {
       initialOverflowCount: 1,
       maximumConversions: 1,
       remainingConversions: 0,
-      selectedAtStateVersion: 3,
+      selectedAtStateVersion: 1,
       expectedOverflowAfterSelectedConversion: 0,
     });
 
