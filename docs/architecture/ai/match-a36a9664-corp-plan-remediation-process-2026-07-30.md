@@ -1,6 +1,6 @@
 # Match A36A9664: Corp-Plan-Remediation
 
-Status: aktiv – Paket P0
+Status: aktiv – Paket P2
 
 Quelle:
 
@@ -157,10 +157,10 @@ Arbeit:
 Voraussichtliche Zielzustände:
 
 - D11/SV20: vorzeitiges Zugende mit normalen Aktionen;
-- D24/SV50 sowie D42–D46/SV98–105: Agenda-Zulassung und Rez-Reserve;
+- D24/SV50 sowie D42–D46/SV98–106: Agenda-Zulassung und Rez-Reserve;
 - D75/SV174: Overtime ohne gebundene Aktionslücke;
-- D89–D105/SV198–235: Counter Bank und vollständiges Scorebudget;
-- D122/SV267: terminale R&D-Verteidigung.
+- D89–D105/SV203–235: Counter Bank und vollständiges Scorebudget;
+- D122/SV279: terminale R&D-Verteidigung.
 
 Checks:
 
