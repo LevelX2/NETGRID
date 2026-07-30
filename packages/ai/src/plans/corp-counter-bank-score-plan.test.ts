@@ -126,7 +126,7 @@ describe("corpCounterBankScoreProjects", () => {
     );
   });
 
-  it("reserves a funded same-turn install, rez, and transfer route when the bank covers the agenda", () => {
+  it("reserves a funded same-turn install, rez, and transfer route in a new remote when the bank covers the agenda", () => {
     const installAgenda = current(
       legalAction(
         "install-agenda",
@@ -138,7 +138,7 @@ describe("corpCounterBankScoreProjects", () => {
           source: "agenda",
           payload: {
             cardId: "agenda",
-            serverId: "remote_1",
+            serverId: "new_remote",
             placement: "root",
           },
         },
@@ -172,6 +172,85 @@ describe("corpCounterBankScoreProjects", () => {
         actionIds: ["install-agenda"],
         sameTurnCloseout: true,
         agendaInstanceId: "agenda",
+        serverId: "new_remote",
+      }),
+    );
+  });
+
+  it("rejects an agenda install that would replace its bound counter bank", () => {
+    const installAgenda = current(
+      legalAction(
+        "replace-vapor-with-agenda",
+        "corp",
+        "install_card",
+        "Install Simple Agenda",
+        { credits: 0, clicks: 1 },
+        {
+          source: "agenda",
+          payload: {
+            cardId: "agenda",
+            serverId: "remote_1",
+            placement: "root",
+            rootReplacement: "asset_to_agenda",
+          },
+        },
+      ),
+    );
+    const rez = current(
+      legalAction(
+        "rez-vapor",
+        "corp",
+        "rez_card",
+        "Rez Vapor Ops",
+        { credits: 0, clicks: 0 },
+        { source: "vapor", payload: { cardId: "vapor", serverId: "remote_1" } },
+      ),
+    );
+    const input = withDeck(aiInput("corp", [installAgenda, rez]));
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [agenda("agenda")];
+    input.playerView.servers = [
+      secureRemote("remote_1", [vapor("vapor", "installed_root", 3)]),
+    ];
+
+    expect(
+      corpCounterBankScoreProjects(input, [
+        candidate(installAgenda, "install.card"),
+        candidate(rez, "corp_window.rez"),
+      ]).filter(
+        (project) => project.phase === "install_agenda_from_counter_bank",
+      ),
+    ).toEqual([]);
+  });
+
+  it("rezzes the bank for a funded handoff to an agenda in another remote", () => {
+    const rez = current(
+      legalAction(
+        "rez-vapor",
+        "corp",
+        "rez_card",
+        "Rez Vapor Ops",
+        { credits: 0, clicks: 0 },
+        { source: "vapor", payload: { cardId: "vapor", serverId: "remote_1" } },
+      ),
+    );
+    const input = withDeck(aiInput("corp", [rez]));
+    input.playerView.own.clicks = 1;
+    input.playerView.servers = [
+      secureRemote("remote_1", [vapor("vapor", "installed_root", 3)]),
+      server("remote_2", [], [agenda("agenda")]),
+    ];
+
+    expect(
+      corpCounterBankScoreProjects(input, [
+        candidate(rez, "corp_window.rez"),
+      ]),
+    ).toContainEqual(
+      expect.objectContaining({
+        phase: "rez_counter_bank_for_handoff",
+        actionIds: ["rez-vapor"],
+        agendaInstanceId: "agenda",
+        serverId: "remote_2",
       }),
     );
   });

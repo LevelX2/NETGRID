@@ -154,12 +154,18 @@ function counterBankAgendaInstallProjects(
       return [];
     }
     return candidates.flatMap((candidate) => {
-      const serverId = exactRootInstallTarget(
+      const targetServerId = exactRootInstallTarget(
         input,
         candidate,
         agenda.instanceId,
       );
-      if (serverId !== bank.serverId) return [];
+      if (
+        !targetServerId ||
+        targetServerId === bank.serverId ||
+        rootInstallReplacesCounterBank(input, candidate, bank)
+      ) {
+        return [];
+      }
       const installAction = exactCurrentLegalAction(input, candidate.actionId);
       if (!installAction) return [];
       const rezAction = bank.card.rezzed
@@ -182,18 +188,19 @@ function counterBankAgendaInstallProjects(
       return [
         {
           ...counterBankProject({
-            projectId: `counter-bank:handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}`,
+            projectId: `counter-bank:handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}:${targetServerId}`,
             sourceCard: bank.card,
             sourceServerId: bank.serverId,
             quote: bank.quote,
             counterTarget: requirement,
             actionIds: [candidate.actionId],
             phase: "install_agenda_from_counter_bank",
-            evidenceCode: `engine_certified_counter_bank_same_turn_handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}`,
+            evidenceCode: `engine_certified_counter_bank_cross_remote_handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}:${targetServerId}`,
           }),
           agendaDefinitionId: agenda.definitionId ?? agenda.instanceId,
           agendaPoints,
           agendaInstanceId: agenda.instanceId,
+          serverId: targetServerId,
           sameTurnCloseout: true,
           terminalScore:
             input.playerView.own.agendaPoints + agendaPoints >=
@@ -219,18 +226,22 @@ function counterBankHandoffRezProjects(
   );
   if (!rez || input.playerView.own.clicks < bank.quote.transfer.actionCost)
     return [];
-  const agenda = input.playerView.servers
-    .find((server) => server.id === bank.serverId)
-    ?.root.find((card) => {
-      const requirement = agendaAdvancementRequirement(card);
-      return (
-        isKnownAgenda(card) &&
-        requirement !== undefined &&
-        bank.quote.advancementCounters >=
-          Math.max(0, requirement - (card.advancementCounters ?? 0))
-      );
-    });
-  if (!agenda) return [];
+  const target = input.playerView.servers
+    .filter((server) => server.id !== bank.serverId)
+    .flatMap((server) =>
+      server.root.flatMap((card) => {
+        const requirement = agendaAdvancementRequirement(card);
+        return isKnownAgenda(card) &&
+          requirement !== undefined &&
+          bank.quote.advancementCounters >=
+            Math.max(0, requirement - (card.advancementCounters ?? 0))
+          ? [{ agenda: card, serverId: server.id }]
+          : [];
+      }),
+    )
+    .sort((left, right) => left.serverId.localeCompare(right.serverId))[0];
+  if (!target) return [];
+  const { agenda, serverId: targetServerId } = target;
   const remaining = Math.max(
     0,
     (agendaAdvancementRequirement(agenda) ?? 0) -
@@ -240,18 +251,19 @@ function counterBankHandoffRezProjects(
   return [
     {
       ...counterBankProject({
-        projectId: `counter-bank:rez-handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}`,
+        projectId: `counter-bank:rez-handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}:${targetServerId}`,
         sourceCard: bank.card,
         sourceServerId: bank.serverId,
         quote: bank.quote,
         counterTarget: remaining,
         actionIds: [rez.actionId],
         phase: "rez_counter_bank_for_handoff",
-        evidenceCode: `engine_certified_counter_bank_rez_for_same_turn_handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}`,
+        evidenceCode: `engine_certified_counter_bank_rez_for_cross_remote_handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}:${targetServerId}`,
       }),
       agendaDefinitionId: agenda.definitionId ?? agenda.instanceId,
       agendaPoints: agenda.agendaPoints ?? 0,
       agendaInstanceId: agenda.instanceId,
+      serverId: targetServerId,
       sameTurnCloseout: true,
       terminalScore:
         input.playerView.own.agendaPoints + (agenda.agendaPoints ?? 0) >=
@@ -472,9 +484,22 @@ function exactRootInstallTarget(
     action.payload?.cardId === sourceCardId &&
     action.payload?.placement === "root" &&
     typeof serverId === "string" &&
-    input.playerView.servers.some((server) => server.id === serverId)
+    (serverId === "new_remote" ||
+      input.playerView.servers.some((server) => server.id === serverId))
     ? serverId
     : undefined;
+}
+
+function rootInstallReplacesCounterBank(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  bank: InstalledCounterBank,
+): boolean {
+  const action = exactCurrentLegalAction(input, candidate.actionId);
+  return (
+    action?.payload?.serverId === bank.serverId &&
+    action.payload?.rootReplacement === "asset_to_agenda"
+  );
 }
 
 function exactCounterBankRezAction(
