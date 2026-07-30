@@ -334,8 +334,7 @@ function makeHost(
             temporaryCreditsRemaining,
             finalCredits,
           );
-          const corpCreditsSpent =
-            finalCredits - temporaryCreditsSpent;
+          const corpCreditsSpent = finalCredits - temporaryCreditsSpent;
           if (corpCreditsRemaining < corpCreditsSpent)
             throw new Error("mandatory test rez is unpayable");
           temporaryCreditsRemaining -= temporaryCreditsSpent;
@@ -344,8 +343,7 @@ function makeHost(
       },
       projectHqInstallRezOptionQuote: (choice, option) => {
         const sequence = state.hqInstallRezSequence;
-        const cardId =
-          sequence?.selectedCardIds[sequence.nextCardIndex - 1];
+        const cardId = sequence?.selectedCardIds[sequence.nextCardIndex - 1];
         const cardDefinition = cardId ? definitions[cardId] : undefined;
         const cardInstance = cardId ? cardInstances[cardId] : undefined;
         if (
@@ -363,10 +361,8 @@ function makeHost(
           sequence.temporaryCreditsRemaining,
           finalCredits,
         );
-        const regularCreditsRequired =
-          finalCredits - temporaryCreditsApplied;
-        const creditPayable =
-          state.corp.credits >= regularCreditsRequired;
+        const regularCreditsRequired = finalCredits - temporaryCreditsApplied;
+        const creditPayable = state.corp.credits >= regularCreditsRequired;
         return {
           schemaVersion: CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
           kind: CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
@@ -405,8 +401,7 @@ function makeHost(
         return {
           temporaryCreditsSpent: quote.temporaryCreditsApplied,
           temporaryCreditsRemaining:
-            quote.temporaryCreditsAvailable -
-            quote.temporaryCreditsApplied,
+            quote.temporaryCreditsAvailable - quote.temporaryCreditsApplied,
           corpCreditsSpent: quote.regularCreditsRequired,
         };
       },
@@ -921,7 +916,7 @@ describe("corp install rez sequence handlers", () => {
     });
   });
 
-  it("opens Security Purge target choices for each revealed ICE", () => {
+  it("opens Security Purge as a blocking Runner review before Corp target choices", () => {
     const servers = [
       { id: "hq", label: "HQ", kind: "hq", ice: [], root: [] },
       { id: "rd", label: "R&D", kind: "rd", ice: [], root: [] },
@@ -960,6 +955,42 @@ describe("corp install rez sequence handlers", () => {
     ]);
     expect(host.state.corp.archives).toEqual([]);
     expect(host.state.pendingChoice).toMatchObject({
+      side: "runner",
+      source:
+        "card_implementation.agenda_purge_runner_review:agenda_purge_agenda:ice_1,operation_1,ice_2:8",
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "public",
+    });
+    expect(
+      host.state.pendingChoice?.options
+        .filter((option) => option.selectable === false)
+        .map((option) => option.value),
+    ).toEqual(["ice_1", "operation_1", "ice_2"]);
+    expect(
+      host.state.pendingChoice?.options.find((option) => option.id === "done"),
+    ).toMatchObject({ label: "Ansehen beenden", value: "done" });
+    expect(host.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "agenda_purge_runner_review",
+      revealedCount: 3,
+      revealedIceCount: 2,
+      pendingTrashCount: 1,
+      installedIceCount: 0,
+      trashedCount: 0,
+      agendaPurgeInstallContract: "corp_server_choice_per_ice",
+      agendaPurgeRunnerReviewOpened: true,
+      agendaPurgeTargetChoiceOpened: false,
+      publicRevealDefinitionIds: "ice_1_def,operation_1_def,ice_2_def",
+    });
+
+    host.playerAction = playerAction(["done"]);
+    host.legalAction.side = "runner";
+    host.legalAction.payload = {};
+    const reviewResult = handleCorpInstallRezSequenceChoice(host);
+
+    expect(reviewResult.handled).toBe(true);
+    expect(host.state.pendingChoice).toMatchObject({
       side: "corp",
       source:
         "card_implementation.agenda_purge_install_targets:agenda_purge_agenda:ice_1,operation_1,ice_2:8",
@@ -968,11 +999,6 @@ describe("corp install rez sequence handlers", () => {
       maxSelections: 2,
       visibility: "hidden_info_barrier",
     });
-    expect(
-      host.state.pendingChoice?.options
-        .filter((option) => option.selectable === false)
-        .map((option) => option.value),
-    ).toEqual(["ice_1", "operation_1", "ice_2"]);
     expect(
       host.state.pendingChoice?.options
         .filter((option) => option.selectable !== false)
@@ -990,15 +1016,9 @@ describe("corp install rez sequence handlers", () => {
       "ice_2|new_remote",
     ]);
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "agenda_purge_rd_top3_target_choice",
-      revealedCount: 3,
-      revealedIceCount: 2,
-      pendingTrashCount: 1,
-      installedIceCount: 0,
-      trashedCount: 0,
-      agendaPurgeInstallContract: "corp_server_choice_per_ice",
+      hiddenZoneAction: "agenda_purge_runner_review_completed",
+      agendaPurgeRunnerReviewResolved: true,
       agendaPurgeTargetChoiceOpened: true,
-      publicRevealDefinitionIds: "ice_1_def,operation_1_def,ice_2_def",
     });
   });
 
@@ -1030,6 +1050,10 @@ describe("corp install rez sequence handlers", () => {
       host,
       "agenda_purge_agenda" as CardInstanceId,
     );
+    host.playerAction = playerAction(["done"]);
+    host.legalAction.side = "runner";
+    host.legalAction.payload = {};
+    handleCorpInstallRezSequenceChoice(host);
     const rdOption = host.state.pendingChoice?.options.find(
       (option) => option.value === "ice_1|rd",
     )?.id;
@@ -1039,6 +1063,7 @@ describe("corp install rez sequence handlers", () => {
     expect(rdOption).toBeDefined();
     expect(newRemoteOption).toBeDefined();
     host.playerAction = playerAction([rdOption!, newRemoteOption!]);
+    host.legalAction.side = "corp";
     host.legalAction.payload = {};
 
     const result = handleCorpInstallRezSequenceChoice(host);
@@ -1075,11 +1100,60 @@ describe("corp install rez sequence handlers", () => {
       installedIceCount: 2,
       trashedCount: 1,
       agendaPurgeInstallContract: "corp_server_choice_per_ice",
+      agendaPurgeRunnerReviewResolved: true,
       agendaPurgeTargetChoiceResolved: true,
       publicRevealDefinitionIds: "ice_1_def,operation_1_def,ice_2_def",
       installedIceDefinitionIds: "ice_1_def,ice_2_def",
       installedIceServerLabels: "R&D,Remote 2",
       trashedDefinitionIds: "operation_1_def",
+    });
+  });
+
+  it("trashes non-ICE faceup only after the Runner ends the Security Purge review", () => {
+    const host = makeHost({
+      rd: ["operation_1", "asset_1", "upgrade_1"] as CardInstanceId[],
+      scoreArea: ["agenda_purge_agenda"] as CardInstanceId[],
+    });
+
+    resolveAgendaPurgeInstallTargets(
+      host,
+      "agenda_purge_agenda" as CardInstanceId,
+    );
+    expect(host.state.corp.archives).toEqual([]);
+    expect(host.state.pendingChoice?.side).toBe("runner");
+
+    host.playerAction = playerAction(["done"]);
+    host.legalAction.side = "runner";
+    host.legalAction.payload = {};
+    const result = handleCorpInstallRezSequenceChoice(host);
+
+    expect(result.deletePendingChoice).toBe(true);
+    expect(result.trashedCardIds).toEqual([
+      "operation_1",
+      "asset_1",
+      "upgrade_1",
+    ]);
+    expect(host.state.pendingChoice).toBeUndefined();
+    expect(host.state.corp.rd).toEqual([]);
+    expect(host.state.corp.archives).toEqual([
+      "upgrade_1",
+      "asset_1",
+      "operation_1",
+    ]);
+    expect(
+      host.state.corp.archives.every(
+        (cardId) => host.state.cardInstances[cardId]?.faceup === true,
+      ),
+    ).toBe(true);
+    expect(host.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "agenda_purge_runner_review_completed",
+      agendaPurgeRunnerReviewResolved: true,
+      agendaPurgeTargetChoiceOpened: false,
+      agendaPurgeTargetChoiceResolved: true,
+      revealedIceCount: 0,
+      installedIceCount: 0,
+      trashedCount: 3,
+      trashedDefinitionIds: "operation_1_def,asset_1_def,upgrade_1_def",
     });
   });
 

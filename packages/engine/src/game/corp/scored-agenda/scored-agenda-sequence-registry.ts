@@ -10,7 +10,9 @@ import {
 } from "./scored-agenda-free-rez-sequence";
 import {
   isAgendaPurgeInstallTargetChoiceSource,
+  isAgendaPurgeRunnerReviewChoiceSource,
   resolveAgendaPurgeInstallTargetChoice,
+  resolveAgendaPurgeRunnerReviewChoice,
 } from "./agenda-purge-install-target-sequence";
 import type {
   CorpInstallRezSequenceHandlerHost,
@@ -41,6 +43,11 @@ export const SCORED_AGENDA_CHOICE_RESOLVERS: readonly ScoredAgendaChoiceResolver
       id: "hq_to_new_remote_install_rez_install_choice",
       matches: isHqToNewRemoteInstallRezChoiceSource,
       resolve: resolveHqToNewRemoteInstallRezChoice,
+    },
+    {
+      id: "agenda_purge_runner_review_choice",
+      matches: isAgendaPurgeRunnerReviewChoiceSource,
+      resolve: resolveAgendaPurgeRunnerReviewChoice,
     },
     {
       id: "agenda_purge_target_choice",

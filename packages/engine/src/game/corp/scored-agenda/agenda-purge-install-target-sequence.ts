@@ -29,6 +29,8 @@ import {
 type SequencePayload = Record<string, string | number | boolean>;
 const SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE =
   "card_implementation.agenda_purge_install_targets";
+const SECURITY_PURGE_RUNNER_REVIEW_CHOICE_SOURCE =
+  "card_implementation.agenda_purge_runner_review";
 
 export type AgendaPurgeStep =
   | "reveal_top_rd"
@@ -51,6 +53,10 @@ export function isAgendaPurgeInstallTargetChoiceSource(
   return source.startsWith(`${SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE}:`);
 }
 
+export function isAgendaPurgeRunnerReviewChoiceSource(source: string): boolean {
+  return source.startsWith(`${SECURITY_PURGE_RUNNER_REVIEW_CHOICE_SOURCE}:`);
+}
+
 export function resolveAgendaPurgeInstallTargets(
   host: CorpInstallRezSequenceHandlerHost,
   agendaId: CardInstanceId,
@@ -69,33 +75,23 @@ export function resolveAgendaPurgeInstallTargets(
     (cardId) => !revealedIceIds.includes(cardId),
   );
   const basePayload = agendaPurgeBasePayload(host, agendaId, revealedIds);
-  if (revealedIceIds.length > 0) {
-    host.state.pendingChoice = {
-      choiceId: `choice_agenda_purge_install_targets_${host.state.stateVersion + 1}`,
-      side: "corp",
-      source: `${SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE}:${agendaId}:${revealedIds.join(",")}:${host.state.stateVersion + 1}`,
-      prompt: "Security Purge: Zielserver fuer aufgedeckte ICE waehlen.",
-      kind: "select_option",
-      options: agendaPurgeInstallTargetOptions(
-        host,
-        revealedIds,
-        revealedIceIds,
-      ),
-      minSelections: revealedIceIds.length,
-      maxSelections: revealedIceIds.length,
-      stateVersion: host.state.stateVersion + 1,
-      visibility: "hidden_info_barrier",
-    };
+  if (revealedIds.length > 0) {
+    host.state.pendingChoice = agendaPurgeRunnerReviewChoice(
+      host,
+      agendaId,
+      revealedIds,
+    );
     applySequencePayloadPatch(host.legalAction, {
       ...basePayload,
-      ...hiddenZoneChoicePayload("agenda_purge_rd_top3_target_choice"),
+      ...hiddenZoneChoicePayload("agenda_purge_runner_review"),
       ...corpSequenceContextPayload({
-        step: SECURITY_PURGE_STEPS.chooseInstallTargets,
+        step: SECURITY_PURGE_STEPS.revealTopRd,
         revealedIceCount: revealedIceIds.length,
         pendingTrashCount: pendingTrashIds.length,
         installedIceCount: 0,
         trashedCount: 0,
-        agendaPurgeTargetChoiceOpened: true,
+        agendaPurgeRunnerReviewOpened: true,
+        agendaPurgeTargetChoiceOpened: false,
         agendaPurgeTargetChoiceCount: revealedIceIds.length,
       }),
     });
@@ -136,6 +132,111 @@ export function resolveAgendaPurgeInstallTargets(
         installedIceCount: 0,
         trashedCount: trashedIds.length,
         agendaPurgeTargetChoiceOpened: false,
+        trashedDefinitionIds: trashedIds
+          .map((id) => host.cards.definitionFor(id).id)
+          .join(","),
+      }),
+    },
+  });
+}
+
+export function resolveAgendaPurgeRunnerReviewChoice(
+  host: CorpInstallRezSequenceHandlerHost,
+): CorpInstallRezSequenceHandlerResult {
+  const choice = requireChoice(
+    host,
+    "Security-Purge-Runner-Anzeige ist nicht offen.",
+  );
+  if (host.legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf die Security-Purge-Anzeige beenden.");
+  const [, agendaIdText, revealedText] = choice.source.split(":");
+  const agendaId = agendaIdText as CardInstanceId | undefined;
+  if (
+    !agendaId ||
+    !host.state.corp.scoreArea.includes(agendaId) ||
+    host.cards.scoredAgendaKind(agendaId) !==
+      "reveal_top_rd_install_and_rez_ice_trash_rest"
+  )
+    throw new Error("Security Purge ist nicht mehr in der Korp-ScoreArea.");
+  const revealedIds = revealedText
+    ? revealedText
+        .split(",")
+        .filter(Boolean)
+        .map((id) => id as CardInstanceId)
+    : [];
+  validateAgendaPurgeRevealedCards(host, revealedIds);
+  validateAgendaPurgeRunnerReviewSelection(host, choice);
+  const revealedIceIds = agendaPurgeIceIds(host, revealedIds);
+  const pendingTrashIds = revealedIds.filter(
+    (cardId) => !revealedIceIds.includes(cardId),
+  );
+
+  if (revealedIceIds.length > 0) {
+    host.state.pendingChoice = agendaPurgeInstallTargetChoice(
+      host,
+      agendaId,
+      revealedIds,
+      revealedIceIds,
+    );
+    return applySequenceResolution(host.legalAction, {
+      result: {
+        handled: true,
+        shownCardDefinitionIds: revealedIds.map(
+          (id) => host.cards.definitionFor(id).id,
+        ),
+        shownCount: revealedIds.length,
+      },
+      stateChanged: true,
+      payloadPatch: {
+        ...agendaPurgeBasePayload(host, agendaId, revealedIds),
+        ...hiddenZoneChoicePayload("agenda_purge_runner_review_completed"),
+        ...corpSequenceContextPayload({
+          step: SECURITY_PURGE_STEPS.chooseInstallTargets,
+          revealedIceCount: revealedIceIds.length,
+          pendingTrashCount: pendingTrashIds.length,
+          installedIceCount: 0,
+          trashedCount: 0,
+          agendaPurgeRunnerReviewOpened: false,
+          agendaPurgeRunnerReviewResolved: true,
+          agendaPurgeTargetChoiceOpened: true,
+          agendaPurgeTargetChoiceCount: revealedIceIds.length,
+        }),
+      },
+    });
+  }
+
+  const trashedIds: CardInstanceId[] = [];
+  for (const cardId of revealedIds) {
+    host.zones.removeFromAllZones(cardId);
+    host.zones.moveCardToArchivesFaceup(cardId);
+    trashedIds.push(cardId);
+  }
+  delete host.state.pendingChoice;
+  return applySequenceResolution(host.legalAction, {
+    result: {
+      handled: true,
+      deletePendingChoice: true,
+      installedCardIds: [],
+      trashedCardIds: trashedIds,
+      shownCardDefinitionIds: revealedIds.map(
+        (id) => host.cards.definitionFor(id).id,
+      ),
+      shownCount: revealedIds.length,
+    },
+    stateChanged: true,
+    payloadPatch: {
+      ...agendaPurgeBasePayload(host, agendaId, revealedIds),
+      ...hiddenZoneChoicePayload("agenda_purge_runner_review_completed"),
+      ...corpSequenceContextPayload({
+        step: SECURITY_PURGE_STEPS.trashNonIce,
+        revealedIceCount: 0,
+        pendingTrashCount: 0,
+        installedIceCount: 0,
+        trashedCount: trashedIds.length,
+        agendaPurgeRunnerReviewOpened: false,
+        agendaPurgeRunnerReviewResolved: true,
+        agendaPurgeTargetChoiceOpened: false,
+        agendaPurgeTargetChoiceResolved: true,
         trashedDefinitionIds: trashedIds
           .map((id) => host.cards.definitionFor(id).id)
           .join(","),
@@ -229,6 +330,8 @@ export function resolveAgendaPurgeInstallTargetChoice(
         pendingTrashCount: 0,
         installedIceCount: installedIce.length,
         trashedCount: trashedIds.length,
+        agendaPurgeRunnerReviewOpened: false,
+        agendaPurgeRunnerReviewResolved: true,
         agendaPurgeTargetChoiceOpened: false,
         agendaPurgeTargetChoiceResolved: true,
         installedIceDefinitionIds: installedIce
@@ -267,6 +370,63 @@ function agendaPurgeBasePayload(
   };
 }
 
+function agendaPurgeRunnerReviewChoice(
+  host: CorpInstallRezSequenceHandlerHost,
+  agendaId: CardInstanceId,
+  revealedIds: readonly CardInstanceId[],
+): ChoiceRequest {
+  const nextStateVersion = host.state.stateVersion + 1;
+  return {
+    choiceId: `choice_agenda_purge_runner_review_${nextStateVersion}`,
+    side: "runner",
+    source: `${SECURITY_PURGE_RUNNER_REVIEW_CHOICE_SOURCE}:${agendaId}:${revealedIds.join(",")}:${nextStateVersion}`,
+    prompt: "Security Purge: die aufgedeckten R&D-Karten ansehen.",
+    kind: "select_cards",
+    options: [
+      ...agendaPurgeRevealedCardOptions(host, revealedIds),
+      { id: "done", label: "Ansehen beenden", value: "done" },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: nextStateVersion,
+    visibility: "public",
+  };
+}
+
+function agendaPurgeInstallTargetChoice(
+  host: CorpInstallRezSequenceHandlerHost,
+  agendaId: CardInstanceId,
+  revealedIds: readonly CardInstanceId[],
+  revealedIceIds: readonly CardInstanceId[],
+): ChoiceRequest {
+  const nextStateVersion = host.state.stateVersion + 1;
+  return {
+    choiceId: `choice_agenda_purge_install_targets_${nextStateVersion}`,
+    side: "corp",
+    source: `${SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE}:${agendaId}:${revealedIds.join(",")}:${nextStateVersion}`,
+    prompt: "Security Purge: Zielserver für aufgedeckte ICE wählen.",
+    kind: "select_option",
+    options: agendaPurgeInstallTargetOptions(host, revealedIds, revealedIceIds),
+    minSelections: revealedIceIds.length,
+    maxSelections: revealedIceIds.length,
+    stateVersion: nextStateVersion,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+function agendaPurgeRevealedCardOptions(
+  host: CorpInstallRezSequenceHandlerHost,
+  revealedIds: readonly CardInstanceId[],
+): ChoiceRequest["options"] {
+  return revealedIds.map((cardId) => ({
+    id: `agenda_purge_revealed_${cardId}`,
+    label: host.cards.definitionFor(cardId).title,
+    publicLabel: "Security-Purge-R&D-Karte",
+    value: cardId,
+    selectable: false,
+  }));
+}
+
 function agendaPurgeIceIds(
   host: CorpInstallRezSequenceHandlerHost,
   revealedIds: readonly CardInstanceId[],
@@ -292,13 +452,7 @@ function agendaPurgeInstallTargetOptions(
     })),
     { serverId: "new_remote", label: "neues Remote" },
   ];
-  const revealedCardOptions = revealedIds.map((cardId) => ({
-    id: `agenda_purge_revealed_${cardId}`,
-    label: host.cards.definitionFor(cardId).title,
-    publicLabel: "Security-Purge-R&D-Karte",
-    value: cardId,
-    selectable: false,
-  }));
+  const revealedCardOptions = agendaPurgeRevealedCardOptions(host, revealedIds);
   const targetOptions = iceIds.flatMap((cardId) => {
     const title = host.cards.definitionFor(cardId).title;
     return serverTargets.map((target) => ({
@@ -330,6 +484,28 @@ function validateAgendaPurgeRevealedCards(
     if (host.state.corp.rd[index] !== cardId)
       throw new Error("Die Security-Purge-R&D-Karten sind nicht mehr gueltig.");
   }
+}
+
+function validateAgendaPurgeRunnerReviewSelection(
+  host: CorpInstallRezSequenceHandlerHost,
+  choice: ChoiceRequest,
+): void {
+  const selectedOptionIds = selectedChoiceIds(
+    requirePlayerAction(host).selectedChoices,
+  );
+  if (
+    selectedOptionIds.length !== 1 ||
+    selectedOptionIds[0] !== "done" ||
+    !choice.options.some(
+      (option) =>
+        option.id === "done" &&
+        option.value === "done" &&
+        option.selectable !== false,
+    )
+  )
+    throw new Error(
+      "Die Security-Purge-Anzeige muss mit „Ansehen beenden“ bestätigt werden.",
+    );
 }
 
 function selectedAgendaPurgeTargets(

@@ -2285,7 +2285,10 @@ export function cardChoiceIsReadonlyPrivateLook(
     choice.kind !== "select_cards" ||
     !(
       choice.source.startsWith("p3_33.private_look:") ||
-      choice.source.startsWith("p3_38.mystery_box_corp_review:")
+      choice.source.startsWith("p3_38.mystery_box_corp_review:") ||
+      choice.source.startsWith(
+        "card_implementation.agenda_purge_runner_review:",
+      )
     )
   )
     return false;

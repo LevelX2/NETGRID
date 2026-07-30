@@ -24,7 +24,10 @@ import {
   applySequencePayloadPatch,
   corpSequenceContextPayload,
 } from "./scored-agenda-sequence-types";
-import { isAgendaPurgeInstallTargetChoiceSource } from "./agenda-purge-install-target-sequence";
+import {
+  isAgendaPurgeInstallTargetChoiceSource,
+  isAgendaPurgeRunnerReviewChoiceSource,
+} from "./agenda-purge-install-target-sequence";
 
 describe("scored agenda sequence contract matrix", () => {
   it("keeps score-time resolver kinds unique and explicit", () => {
@@ -182,12 +185,19 @@ describe("scored agenda sequence contract matrix", () => {
         resolverId: "scored_agenda_free_rez_choice",
       },
       {
-        source: "card_implementation.hq_to_new_remote_install_rez:data_fort_agenda:8",
+        source:
+          "card_implementation.hq_to_new_remote_install_rez:data_fort_agenda:8",
         resolverId: "hq_to_new_remote_install_rez_install_choice",
       },
       {
-        source: "card_implementation.hq_to_new_remote_rez:data_fort_agenda:remote_1:4:8",
+        source:
+          "card_implementation.hq_to_new_remote_rez:data_fort_agenda:remote_1:4:8",
         resolverId: "hq_to_new_remote_rez_choice",
+      },
+      {
+        source:
+          "card_implementation.agenda_purge_runner_review:agenda_purge_agenda:ice_1:8",
+        resolverId: "agenda_purge_runner_review_choice",
       },
       {
         source:
@@ -202,6 +212,16 @@ describe("scored agenda sequence contract matrix", () => {
       ).map((resolver) => resolver.id);
       expect(matchingIds).toEqual([candidate.resolverId]);
     }
+    expect(
+      isAgendaPurgeRunnerReviewChoiceSource(
+        "card_implementation.agenda_purge_runner_review:agenda:ice:8",
+      ),
+    ).toBe(true);
+    expect(
+      isAgendaPurgeInstallTargetChoiceSource(
+        "card_implementation.agenda_purge_install_targets:agenda:ice:8",
+      ),
+    ).toBe(true);
   });
 
   it("routes each registered scored-agenda flow choice source to exactly one resolver", () => {

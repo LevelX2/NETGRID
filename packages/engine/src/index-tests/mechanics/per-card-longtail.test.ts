@@ -2027,9 +2027,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runnerTurnFlags?.valuPakProgramInstallActionsRemaining).toBe(
       0,
     );
-    expect(
-      state.runnerTurnFlags?.valuPakTemporaryProgramInstallCredits,
-    ).toBe(0);
+    expect(state.runnerTurnFlags?.valuPakTemporaryProgramInstallCredits).toBe(
+      0,
+    );
     expect(
       state.runnerTurnFlags?.restrictedActionGrants?.valu_pak_program_install,
     ).toBe(undefined);
@@ -2042,12 +2042,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       runnerClicksAfter: 3,
     });
     const resumedActions = getLegalActions(state, "runner");
-    expect(
-      resumedActions.some((action) => action.type === "gain_credit"),
-    ).toBe(true);
-    expect(
-      resumedActions.some((action) => action.type === "draw_card"),
-    ).toBe(true);
+    expect(resumedActions.some((action) => action.type === "gain_credit")).toBe(
+      true,
+    );
+    expect(resumedActions.some((action) => action.type === "draw_card")).toBe(
+      true,
+    );
     expect(
       resumedActions.some(
         (action) => action.type === "stop_restricted_action_sequence",
@@ -5084,8 +5084,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"|ACME/,
     );
-    const assetRezOption =
-      getPlayerView(state, "corp").pendingChoice?.options[0];
+    const assetRezOption = getPlayerView(state, "corp").pendingChoice
+      ?.options[0];
     expect(assetRezOption?.card).toMatchObject({
       instanceId: assetId,
       definitionId: "onr_v1_308_acme-savings-and-loan",
@@ -5440,19 +5440,19 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
 
     expect(state.pendingChoice).toMatchObject({
-      side: "corp",
-      kind: "select_option",
-      minSelections: 2,
-      maxSelections: 2,
-      visibility: "hidden_info_barrier",
+      side: "runner",
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "public",
     });
-    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
-    const corpChoice = getPlayerView(state, "corp").pendingChoice;
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
     expect(
-      corpChoice?.options.filter((option) => option.selectable === false),
+      runnerChoice?.options.filter((option) => option.selectable === false),
     ).toHaveLength(3);
     expect(
-      corpChoice?.options
+      runnerChoice?.options
         .filter((option) => option.selectable === false)
         .map((option) => option.card?.definitionId),
     ).toEqual([
@@ -5461,14 +5461,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "simple_economy_operation",
     ]);
     expect(
-      corpChoice?.options.filter((option) => option.selectable !== false)
-        .length,
-    ).toBe(10);
-    expect(
-      corpChoice?.options
-        .filter((option) => option.selectable !== false)
-        .every((option) => option.card?.type === "ice"),
-    ).toBe(true);
+      runnerChoice?.options.find((option) => option.id === "done"),
+    ).toMatchObject({ label: "Ansehen beenden", value: "done" });
     expect(
       state.corp.servers.some((server) =>
         server.ice.includes(installedBarrierId),
@@ -5484,20 +5478,84 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       actionType: "score_agenda",
       cardDefinitionId: "onr_v1_216_security-purge",
       abilityId: "agenda_purge",
-      hiddenZoneAction: "agenda_purge_rd_top3_target_choice",
+      hiddenZoneAction: "agenda_purge_runner_review",
       revealedCount: 3,
       revealedIceCount: 2,
       pendingTrashCount: 1,
       installedIceCount: 0,
       trashedCount: 0,
       agendaPurgeInstallContract: "corp_server_choice_per_ice",
-      agendaPurgeTargetChoiceOpened: true,
+      agendaPurgeRunnerReviewOpened: true,
+      agendaPurgeTargetChoiceOpened: false,
       publicRevealDefinitionIds:
         "simple_barrier_ice,simple_code_gate_ice,simple_economy_operation",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"/,
     );
+
+    const reviewLegal = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "resolve_choice",
+    );
+    const wrongSideReview = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: reviewLegal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: { choiceId: state.pendingChoice?.choiceId },
+      idempotencyKey: "v1922-security-purge-review-wrong-side",
+    });
+    expect(wrongSideReview.ok).toBe(false);
+    if (!wrongSideReview.ok)
+      expect(wrongSideReview.error.code).toBe("ERR_UNKNOWN_ACTION");
+
+    const staleReview = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: reviewLegal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: { choiceId: state.pendingChoice?.choiceId },
+      idempotencyKey: "v1922-security-purge-review-stale",
+    });
+    expect(staleReview.ok).toBe(false);
+    if (!staleReview.ok) expect(staleReview.error.code).toBe("ERR_STALE_STATE");
+
+    state = applyChoices(state, "runner", ["done"]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      actor: "runner",
+      abilityId: "agenda_purge",
+      hiddenZoneAction: "agenda_purge_runner_review_completed",
+      agendaPurgeRunnerReviewResolved: true,
+      agendaPurgeTargetChoiceOpened: true,
+      installedIceCount: 0,
+      trashedCount: 0,
+      publicRevealDefinitionIds:
+        "simple_barrier_ice,simple_code_gate_ice,simple_economy_operation",
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      kind: "select_option",
+      minSelections: 2,
+      maxSelections: 2,
+      visibility: "hidden_info_barrier",
+    });
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    const corpChoice = getPlayerView(state, "corp").pendingChoice;
+    expect(
+      corpChoice?.options.filter((option) => option.selectable === false),
+    ).toHaveLength(3);
+    expect(
+      corpChoice?.options.filter((option) => option.selectable !== false)
+        .length,
+    ).toBe(8);
+    expect(
+      corpChoice?.options
+        .filter((option) => option.selectable !== false)
+        .every((option) => option.card?.type === "ice"),
+    ).toBe(true);
 
     const resolveLegal = mustAction(
       state,
