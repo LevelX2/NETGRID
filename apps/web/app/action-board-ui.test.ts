@@ -1898,6 +1898,34 @@ describe("V1.0.5 action board UI helpers", () => {
           showNonMatchingCards: true,
         },
       };
+    const securityPurgeRunnerReviewChoice: NonNullable<
+      PlayerView["pendingChoice"]
+    > = {
+      ...technicianPrivateLookChoice,
+      choiceId: "choice_agenda_purge_runner_review_8",
+      side: "runner",
+      source:
+        "card_implementation.agenda_purge_runner_review:security_purge:corp_rd_1,corp_rd_2:8",
+      prompt: "Security Purge: die aufgedeckten R&D-Karten ansehen.",
+      options: [
+        {
+          id: "agenda_purge_revealed_corp_rd_1",
+          label: "Agenda",
+          value: "corp_rd_1",
+          selectable: false,
+          card: card("corp_rd_1", "Agenda", "agenda", false),
+        },
+        {
+          id: "agenda_purge_revealed_corp_rd_2",
+          label: "ICE",
+          value: "corp_rd_2",
+          selectable: false,
+          card: card("corp_rd_2", "ICE", "ice", false),
+        },
+        { id: "done", label: "Ansehen beenden", value: "done" },
+      ],
+      visibility: "public",
+    };
 
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
@@ -1908,12 +1936,18 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseCardChoicePanel(technicianPrivateLookChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(protocolFilesPrivateLookChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(mysteryBoxCorpReviewChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(securityPurgeRunnerReviewChoice)).toBe(
+      true,
+    );
     expect(cardChoiceUsesReadableCards(organDonorChoice)).toBe(false);
     expect(cardChoiceUsesReadableCards(forgottenBackupChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(heapSearchChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(stackTopFiveChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(technicianPrivateLookChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(mysteryBoxCorpReviewChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(securityPurgeRunnerReviewChoice)).toBe(
+      true,
+    );
     expect(cardChoiceIsReadonlyPrivateLook(technicianPrivateLookChoice)).toBe(
       true,
     );
@@ -1924,10 +1958,16 @@ describe("V1.0.5 action board UI helpers", () => {
       true,
     );
     expect(
+      cardChoiceIsReadonlyPrivateLook(securityPurgeRunnerReviewChoice),
+    ).toBe(true);
+    expect(
       cardChoiceReadonlyConfirmationOptionId(technicianPrivateLookChoice),
     ).toBe("done");
     expect(
       cardChoiceReadonlyConfirmationOptionId(mysteryBoxCorpReviewChoice),
+    ).toBe("done");
+    expect(
+      cardChoiceReadonlyConfirmationOptionId(securityPurgeRunnerReviewChoice),
     ).toBe("done");
     expect(cardChoiceUsesOrderedSelection(stackTopFiveChoice)).toBe(true);
     expect(cardChoiceUsesOrderedSelection(organDonorChoice)).toBe(false);

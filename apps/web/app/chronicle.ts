@@ -6019,6 +6019,8 @@ function securityPurgeChronicleSummary(
     numberValue(payload.revealedIceCount) ?? installedIceCount;
   const trashedCount = numberValue(payload.trashedCount) ?? 0;
   const pendingTrashCount = numberValue(payload.pendingTrashCount) ?? 0;
+  const runnerReviewOpened = payload.agendaPurgeRunnerReviewOpened === true;
+  const runnerReviewResolved = payload.agendaPurgeRunnerReviewResolved === true;
   const revealedTitles = titlesForDefinitionIds(
     stringValue(payload.publicRevealDefinitionIds),
   );
@@ -6047,6 +6049,29 @@ function securityPurgeChronicleSummary(
   const targetChoiceOpened =
     payload.securityPurgeTargetChoiceOpened === true ||
     payload.agendaPurgeTargetChoiceOpened === true;
+  if (
+    runnerReviewResolved &&
+    revealedIceCount === 0 &&
+    installedIceCount === 0 &&
+    trashedCount > 0
+  ) {
+    const trashDescription =
+      trashedTitles.length > 0
+        ? `Offen getrasht: ${joinChronicleParts(trashedTitles)}`
+        : `${trashedCount} ${trashedCount === 1 ? "Karte wurde" : "Karten wurden"} offen getrasht`;
+    return {
+      title: `${revealedCount} Security-Purge-${revealedCount === 1 ? "Karte" : "Karten"} angesehen; kein ICE gefunden`,
+      description: [revealedDescription, trashDescription]
+        .filter((part): part is string => Boolean(part))
+        .join(". "),
+      chips: [
+        "Security Purge",
+        revealedCount > 0 ? `Top ${revealedCount}` : "R&D Reveal",
+        "Kein ICE",
+        `${trashedCount} Trash`,
+      ],
+    };
+  }
   if (targetChoiceResolved) {
     const singleInstalledTitle = installedTitles[0];
     const singleServerLabel = installedServerLabels[0];
@@ -6078,6 +6103,45 @@ function securityPurgeChronicleSummary(
         `${installedIceCount} ICE`,
         ...installedServerLabels,
         `${trashedCount} Trash`,
+      ],
+    };
+  }
+  if (runnerReviewResolved && targetChoiceOpened) {
+    const iceText =
+      revealedIceTitles.length > 0
+        ? `ICE zur Installation: ${joinChronicleParts(revealedIceTitles)}`
+        : `${revealedIceCount} ICE gefunden`;
+    return {
+      title: `${revealedCount} Security-Purge-${revealedCount === 1 ? "Karte" : "Karten"} angesehen`,
+      description: [
+        revealedDescription,
+        `${iceText}; die Korp wählt jetzt die Zielserver`,
+        `${pendingTrashCount} Nicht-ICE ${pendingTrashCount === 1 ? "wird" : "werden"} anschließend offen getrasht`,
+      ]
+        .filter((part): part is string => Boolean(part))
+        .join(". "),
+      chips: [
+        "Security Purge",
+        "Runner bestätigt",
+        `${revealedIceCount} ICE`,
+        `${pendingTrashCount} Trash offen`,
+      ],
+    };
+  }
+  if (runnerReviewOpened) {
+    return {
+      title: `${agendaTitle} gescored und ${revealedCount} R&D-Karten aufgedeckt`,
+      description: [
+        revealedDescription,
+        "Der Runner sieht die Karten an; erst nach seiner Bestätigung wird der Effekt fortgesetzt",
+      ]
+        .filter((part): part is string => Boolean(part))
+        .join(". "),
+      chips: [
+        "Score",
+        "R&D Reveal",
+        revealedCount > 0 ? `Top ${revealedCount}` : "",
+        "Runner-Anzeige offen",
       ],
     };
   }

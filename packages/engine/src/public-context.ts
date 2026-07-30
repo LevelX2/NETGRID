@@ -1592,6 +1592,8 @@ export function publicContextForAction(
     }
     for (const key of [
       "agendaPurgeWaivesPrintedRezCosts",
+      "agendaPurgeRunnerReviewOpened",
+      "agendaPurgeRunnerReviewResolved",
       "agendaPurgeTargetChoiceOpened",
       "agendaPurgeTargetChoiceResolved",
     ]) {
@@ -2026,15 +2028,13 @@ export function publicContextForAction(
     if (legalAction.payload.valuPakSequenceStopped === true)
       context.valuPakSequenceStopped = true;
     if (
-      typeof legalAction.payload.valuPakRestrictedActionsForgone ===
-      "number"
+      typeof legalAction.payload.valuPakRestrictedActionsForgone === "number"
     ) {
       context.valuPakRestrictedActionsForgone =
         legalAction.payload.valuPakRestrictedActionsForgone;
     }
     if (
-      typeof legalAction.payload.valuPakTemporaryCreditsReturned ===
-      "number"
+      typeof legalAction.payload.valuPakTemporaryCreditsReturned === "number"
     ) {
       context.valuPakTemporaryCreditsReturned =
         legalAction.payload.valuPakTemporaryCreditsReturned;

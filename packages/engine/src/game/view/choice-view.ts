@@ -332,10 +332,10 @@ function agendaPurgeChoiceCardIdForOption(
   option: ChoiceRequest["options"][number],
 ): CardInstanceId | undefined {
   if (
-    choice.kind !== "select_option" ||
     !choice.source.startsWith(
       "card_implementation.agenda_purge_install_targets:",
-    )
+    ) &&
+    !choice.source.startsWith("card_implementation.agenda_purge_runner_review:")
   )
     return undefined;
   if (typeof option.value !== "string") return undefined;

@@ -6521,6 +6521,25 @@ describe("formatChronicleEvent", () => {
         pendingTrashCount: 2,
         installedIceCount: 0,
         trashedCount: 0,
+        agendaPurgeRunnerReviewOpened: true,
+        agendaPurgeTargetChoiceOpened: false,
+      }),
+      "runner",
+    );
+    const securityPurgeReview = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_216_security-purge",
+        agendaAbility: "agenda_purge",
+        hiddenZoneAction: "agenda_purge_runner_review_completed",
+        publicRevealDefinitionIds:
+          "onr_v1_274_tutor,simple_economy_operation,simple_economy_asset",
+        revealedCount: 3,
+        revealedIceCount: 1,
+        pendingTrashCount: 2,
+        installedIceCount: 0,
+        trashedCount: 0,
+        agendaPurgeRunnerReviewResolved: true,
         agendaPurgeTargetChoiceOpened: true,
       }),
       "runner",
@@ -6535,12 +6554,32 @@ describe("formatChronicleEvent", () => {
         revealedIceCount: 1,
         installedIceCount: 1,
         trashedCount: 2,
+        agendaPurgeRunnerReviewResolved: true,
         agendaPurgeTargetChoiceResolved: true,
         publicRevealDefinitionIds:
           "onr_v1_274_tutor,simple_economy_operation,simple_economy_asset",
         installedIceDefinitionIds: "onr_v1_274_tutor",
         installedIceServerLabels: "R&D",
         trashedDefinitionIds: "simple_economy_operation,simple_economy_asset",
+      }),
+      "runner",
+    );
+    const securityPurgeNoIce = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_216_security-purge",
+        agendaAbility: "agenda_purge",
+        hiddenZoneAction: "agenda_purge_runner_review_completed",
+        publicRevealDefinitionIds:
+          "simple_economy_operation,simple_economy_asset",
+        revealedCount: 2,
+        revealedIceCount: 0,
+        installedIceCount: 0,
+        trashedCount: 2,
+        trashedDefinitionIds: "simple_economy_operation,simple_economy_asset",
+        agendaPurgeRunnerReviewResolved: true,
+        agendaPurgeTargetChoiceOpened: false,
+        agendaPurgeTargetChoiceResolved: true,
       }),
       "runner",
     );
@@ -6592,7 +6631,13 @@ describe("formatChronicleEvent", () => {
       "Aufgedeckt: Tutor, Simple Economy Operation, Simple Economy Asset.",
     );
     expect(securityPurge.description).toContain(
-      "ICE zur Installation: Tutor; die Korp wählt Zielserver.",
+      "Der Runner sieht die Karten an; erst nach seiner Bestätigung wird der Effekt fortgesetzt.",
+    );
+    expect(securityPurgeReview.title).toBe(
+      "Du hast 3 Security-Purge-Karten angesehen.",
+    );
+    expect(securityPurgeReview.description).toContain(
+      "ICE zur Installation: Tutor; die Korp wählt jetzt die Zielserver.",
     );
     expect(securityPurgeResolve.title).toBe(
       "Die Korp hat Tutor durch Security Purge vor R&D installiert und gerezzt.",
@@ -6604,6 +6649,12 @@ describe("formatChronicleEvent", () => {
       "Installiert und gerezzt: Tutor vor R&D.",
     );
     expect(securityPurgeResolve.description).toContain("Getrasht:");
+    expect(securityPurgeNoIce.title).toBe(
+      "Du hast 2 Security-Purge-Karten angesehen; kein ICE gefunden.",
+    );
+    expect(securityPurgeNoIce.description).toContain(
+      "Offen getrasht: Simple Economy Operation und Simple Economy Asset.",
+    );
     expect(shield.title).toBe("Du hast 2 Schaden mit Shield verhindert.");
     expect(shield.chips).toContain("2 verhindert");
     expect(boardwalk.title).toBe(
