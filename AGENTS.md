@@ -70,6 +70,41 @@ Eine kompakte Rollenübersicht liegt in `agents/README.md`.
 - Keine offiziellen Artworks, Card Frames, Logos, Card Backs oder externen Kartendatenbank-Abhängigkeiten ohne eigenes Asset-/Rechts-Gate.
 - Agentendateien dürfen diese globalen NETGRID-Prinzipien konkretisieren, aber nicht abschwächen.
 
+### Verbindlicher KI-Architektur-Preflight
+
+Vor jeder Änderung an KI-Verhalten, KI-Entscheidungen, Choice-Auflösung,
+Planung, Bewertung oder `packages/ai/` sind zusätzlich und vor dem ersten
+Codepatch zu lesen:
+
+1. `packages/ai/AGENTS.md`
+2. `docs/architecture/ai/README.md`
+3. die für den betroffenen Owner relevanten Abschnitte aus
+   `docs/architecture/ai/ai-plan-layer-target-state-wip.md`
+
+Vor der Implementierung muss feststehen:
+
+- welcher bestehende Plan oder Controller fachlicher Owner der Entscheidung
+  ist;
+- ob die Änderung eine Planwahl, eine planinterne Route, eine
+  Engine-Fortsetzung oder nur die Payload einer bereits gewählten Action
+  betrifft;
+- welche bestehende Planinstanz, Continuation beziehungsweise
+  `PlanExecutionOrigin` erhalten oder erweitert werden muss;
+- welche Parallel-, Override-, Fallback- oder Resolverlogik dadurch gerade
+  **nicht** neu entstehen darf.
+
+Ein Choice-Resolver darf ausschließlich die Payload einer bereits vom
+zuständigen Plan gewählten und exakt gebundenen `LegalAction` vervollständigen.
+Er darf keine Server-, Ziel-, Karten-, Ressourcen- oder Strategieentscheidung
+duplizieren, die einem Planmodul gehört. Benötigt eine Choice solche
+Domainlogik, wird zuerst der zuständige Plan erweitert und die Choice daran
+gebunden. Ein lokaler Resolver-Shortcut ist unzulässig, auch wenn er legal und
+deterministisch wäre.
+
+Bei KI-Fixes müssen Tests neben dem Ergebnis auch die Ownership sichern:
+zuständiger Plan/Step/Route bleibt gleich, die Choice ändert weder `actionId`
+noch Executor, und es entsteht keine zweite Entscheidungsautorität.
+
 ## Version-0-Umgebung und Legacy-Stand
 
 NETGRID ist bis auf Weiteres eine private Version-0-/Vor-Produktionsumgebung. Es gibt keinen Produktivbetrieb, keine externen Nutzer, keine stabilen Datenmigrationszusagen und keine Pflicht zur Rückwärtskompatibilität für Code, APIs, Datenformate, lokale Runtime-/SQLite-Daten, Replays, Testdaten, UI-Zustände oder Dokumentationsstände.

@@ -542,10 +542,9 @@ function headsForRoute(params: {
     params.route.instance.moduleId,
   );
   if (!action || !moduleCoverage) return [];
-  const selectedChoices = params.selectedChoicesForDecision(
-    params.input,
-    action,
-  );
+  const selectedChoices =
+    planBoundCorpDefenseChoices(params.route, action, params.input) ??
+    params.selectedChoicesForDecision(params.input, action);
   const invocations = currentTurnPlanningInvocationVariants({
     stateIdentity: params.stateIdentity,
     action,
@@ -971,7 +970,11 @@ function choiceBindings(
   if (!selectedChoices) return undefined;
   const bindings: CanonicalChoiceBinding[] = [];
   for (const requirement of requirements) {
-    const value = selectedChoices[requirement.choiceId];
+    const value =
+      selectedChoices.choiceId === requirement.choiceId &&
+      Array.isArray(selectedChoices.selectedOptionIds)
+        ? selectedChoices.selectedOptionIds
+        : selectedChoices[requirement.choiceId];
     const selectedOptionIds = choiceOptionIds(value);
     if (
       selectedOptionIds.length < requirement.minSelections ||
@@ -1828,6 +1831,69 @@ function shadowComparisonClass(
     return "two_step_changes_head";
   }
   return "different_current_head";
+}
+
+function planBoundCorpDefenseChoices(
+  route: PlanSchedulerPlanningRouteCandidate,
+  action: LegalAction,
+  input: AiDecisionInput,
+): AiDecision["selectedChoices"] | undefined {
+  if (
+    route.instance.moduleId !== "corp.defend_servers" ||
+    action.type !== "resolve_choice"
+  ) {
+    return undefined;
+  }
+  const moduleState = route.instance.moduleState as
+    | {
+        kind?: unknown;
+        signals?: Array<{
+          kind?: unknown;
+          phase?: unknown;
+          actionIds?: unknown;
+          choiceResolution?: {
+            kind?: unknown;
+            choiceId?: unknown;
+            sourceStateVersion?: unknown;
+            targets?: Array<{ optionId?: unknown }>;
+          };
+        }>;
+      }
+    | undefined;
+  const signal = moduleState?.signals?.find(
+    (candidate) =>
+      candidate.kind === "generic" &&
+      candidate.phase === "resolve_install_targets" &&
+      Array.isArray(candidate.actionIds) &&
+      candidate.actionIds.length === 1 &&
+      candidate.actionIds[0] === action.actionId &&
+      candidate.choiceResolution?.kind === "agenda_purge_install_targets",
+  );
+  const resolution = signal?.choiceResolution;
+  const targets = resolution?.targets;
+  const requirement = action.choiceRequirements?.[0];
+  const optionIds =
+    targets?.map((target) =>
+      typeof target.optionId === "string" ? target.optionId : "",
+    ) ?? [];
+  if (
+    moduleState?.kind !== "defense" ||
+    resolution?.sourceStateVersion !== input.playerView.stateVersion ||
+    typeof resolution.choiceId !== "string" ||
+    action.choiceRequirements?.length !== 1 ||
+    requirement?.choiceId !== resolution.choiceId ||
+    !Array.isArray(targets) ||
+    optionIds.length < requirement.minSelections ||
+    optionIds.length > requirement.maxSelections ||
+    new Set(optionIds).size !== optionIds.length ||
+    optionIds.some((optionId) => !requirement.optionIds.includes(optionId))
+  ) {
+    return undefined;
+  }
+  return {
+    choiceId: resolution.choiceId,
+    selectedOptionIds: optionIds,
+  };
 }
 
 function findRootPlanInstanceId(

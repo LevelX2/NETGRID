@@ -12,6 +12,7 @@ import {
 } from "./corp-turn-planning-coverage";
 import type { PlanModuleId } from "./plan-kernel-types";
 import type { PlanActionDisposition } from "./plan-scheduler";
+import { currentTurnPlanningInvocationVariants } from "./corp-turn-planner-shadow";
 import { createTurnCompletionPlanModule } from "./turn-completion-plan-module";
 import {
   buildCanonicalLegalActionInvocation,
@@ -46,6 +47,11 @@ describe("Corp turn planning coverage", () => {
         (entry) => entry.moduleId === "corp.defend_servers",
       )?.semanticActionPatterns,
     ).toContain("play.corp_operation");
+    expect(
+      CORP_TURN_PLANNING_MODULE_COVERAGE.find(
+        (entry) => entry.moduleId === "corp.defend_servers",
+      )?.semanticActionPatterns,
+    ).toContain("choice.resolve");
   });
 
   it("reports 100 percent classified current Corp LegalActions across every owner", () => {
@@ -118,6 +124,57 @@ describe("Corp turn planning coverage", () => {
         }),
       ]),
     );
+  });
+
+  it("binds the Engine choice payload shape into a canonical planning invocation", () => {
+    const variants = currentTurnPlanningInvocationVariants({
+      stateIdentity: identity(),
+      action: {
+        actionId: "action:defense-choice",
+        side: "corp",
+        type: "resolve_choice",
+        label: "Resolve defense targets",
+        source: "game_rule",
+        timingPoint: "corp_action.main",
+        visibility: "private_to_actor",
+        expiresAtStateVersion: 40,
+        targetRequirements: [],
+        choiceRequirements: [
+          {
+            choiceId: "choice:defense-targets",
+            minSelections: 2,
+            maxSelections: 2,
+            optionIds: ["target_hq", "target_rd"],
+          },
+        ],
+        costs: [],
+      },
+      candidate: candidate(
+        "action:defense-choice",
+        "resolve_choice",
+        "choice.resolve",
+      ),
+      selectedChoices: {
+        choiceId: "choice:defense-targets",
+        selectedOptionIds: ["target_hq", "target_rd"],
+      },
+    });
+
+    expect(variants).toHaveLength(1);
+    expect(variants[0]?.boundChoices).toEqual([
+      {
+        choiceId: "choice:defense-targets",
+        role: "route_defining",
+        value: {
+          kind: "target_list",
+          values: [
+            { kind: "value", id: "target_hq" },
+            { kind: "value", id: "target_rd" },
+          ],
+          ordering: "ordered",
+        },
+      },
+    ]);
   });
 
   it("is deterministic under candidate, head and disposition enumeration order", () => {

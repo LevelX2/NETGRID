@@ -276,7 +276,10 @@ export class NetgridRealtimeServer {
       this.recordConnectionAudit({ event: "ws_open", origin, clientKey });
       socket.on(
         "message",
-        (raw) => void this.handleMessage(socket, raw.toString()),
+        (raw) =>
+          void this.handleMessage(socket, raw.toString()).catch((error) =>
+            this.handleMessageFailure(socket, error),
+          ),
       );
       socket.on(
         "close",
@@ -738,6 +741,29 @@ export class NetgridRealtimeServer {
       matchId: context?.matchId,
       side: context?.side,
       errorCode: error.name || "websocket_error",
+    });
+  }
+
+  private handleMessageFailure(socket: WebSocket, error: unknown): void {
+    const context = this.findContext(socket) ?? this.socketContexts.get(socket);
+    const meta = this.socketClients.get(socket);
+    this.recordConnectionAudit({
+      event: "ws_error",
+      clientKey: meta?.clientKey,
+      matchId: context?.matchId,
+      side: context?.side,
+      errorCode:
+        error instanceof Error && error.name
+          ? error.name
+          : "message_handler_failure",
+    });
+    send(socket, {
+      type: "error",
+      payload: {
+        code: "server_operation_failed",
+        message:
+          "Die Serveraktion konnte nicht verarbeitet werden. Bitte versuche es erneut.",
+      },
     });
   }
 

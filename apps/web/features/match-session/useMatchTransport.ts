@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { ApiServerMessage } from "@netgrid/shared";
 
@@ -21,6 +21,8 @@ export function useMatchTransport({
 }: MatchTransportOptions) {
   const socketRef = useRef<WebSocket | null>(null);
   const onMessageRef = useRef(onMessage);
+  const manualReconnectRef = useRef(false);
+  const [reconnectGeneration, setReconnectGeneration] = useState(0);
 
   useEffect(() => {
     onMessageRef.current = onMessage;
@@ -62,16 +64,32 @@ export function useMatchTransport({
           },
         }),
       );
+      if (manualReconnectRef.current) {
+        manualReconnectRef.current = false;
+        setNotice("Wiederverbindung abgeschlossen.");
+      }
     };
     socket.onclose = () => {
-      if (socketRef.current === socket) setConnection("offline");
+      if (socketRef.current !== socket) return;
+      setConnection("offline");
+      if (manualReconnectRef.current) {
+        manualReconnectRef.current = false;
+        setNotice("Wiederverbindung zum Multiplayer-Server fehlgeschlagen.");
+      }
     };
     socket.onerror = () => {
-      if (socketRef.current === socket) setConnection("offline");
+      if (socketRef.current !== socket) return;
+      setConnection("offline");
+      if (manualReconnectRef.current) {
+        manualReconnectRef.current = false;
+        setNotice("Wiederverbindung zum Multiplayer-Server fehlgeschlagen.");
+      }
     };
     socket.onmessage = (event) => {
       if (socketRef.current !== socket) return;
-      onMessageRef.current(JSON.parse(event.data as string) as ApiServerMessage);
+      onMessageRef.current(
+        JSON.parse(event.data as string) as ApiServerMessage,
+      );
     };
     return () => {
       if (socketRef.current === socket) socketRef.current = null;
@@ -82,9 +100,16 @@ export function useMatchTransport({
     session?.sessionToken,
     session?.side,
     session?.webSocketUrl,
+    reconnectGeneration,
     setConnection,
     setNotice,
   ]);
+
+  const reconnectSocket = () => {
+    manualReconnectRef.current = true;
+    setNotice("Wiederverbindung wird hergestellt.");
+    setReconnectGeneration((generation) => generation + 1);
+  };
 
   const ensureSocketConnected = () => {
     if (socketRef.current?.readyState === WebSocket.OPEN) return true;
@@ -104,5 +129,10 @@ export function useMatchTransport({
     socketRef.current?.close();
   };
 
-  return { closeSocket, ensureSocketConnected, sendSocketMessage };
+  return {
+    closeSocket,
+    ensureSocketConnected,
+    reconnectSocket,
+    sendSocketMessage,
+  };
 }

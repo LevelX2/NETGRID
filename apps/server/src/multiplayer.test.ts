@@ -9494,6 +9494,92 @@ describe("MVP 0.2 multiplayer service", () => {
     }
   });
 
+  it("keeps the WebSocket server alive when an AI operation throws", async () => {
+    const auditEvents: ConnectionAuditEvent[] = [];
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ws-ai-failure-boundary",
+      publicWebBaseUrl: "http://127.0.0.1:3100",
+      publicServerBaseUrl: "http://127.0.0.1:0",
+    });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "ws-ai-failure-boundary",
+    });
+    service.advanceAi = async () => {
+      throw new Error("private test failure details");
+    };
+    const handle = createNetgridHttpServer(service, {
+      connectionAudit: { record: (event) => auditEvents.push(event) },
+    });
+    const baseUrl = await listen(handle);
+    const socket = new WebSocket(`${baseUrl.replace("http", "ws")}/ws`);
+
+    try {
+      await waitForOpen(socket);
+      socket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: {
+            matchId: created.matchId,
+            sessionToken: created.hostSessionToken,
+            side: created.hostSide,
+          },
+        }),
+      );
+      await waitForMessage(socket, "state_update");
+
+      const operationError = waitForMessage(socket, "error");
+      socket.send(
+        JSON.stringify({
+          type: "advance_ai",
+          payload: {
+            knownStateVersion: 0,
+            knownMatchVersion: 0,
+            mode: "single_step",
+          },
+        }),
+      );
+      expect(await operationError).toEqual({
+        type: "error",
+        payload: {
+          code: "server_operation_failed",
+          message:
+            "Die Serveraktion konnte nicht verarbeitet werden. Bitte versuche es erneut.",
+        },
+      });
+
+      const pong = waitForMessage(socket, "pong");
+      socket.send(
+        JSON.stringify({
+          type: "ping",
+          payload: { clientTime: 123 },
+        }),
+      );
+      expect(await pong).toMatchObject({
+        type: "pong",
+        payload: { clientTime: 123 },
+      });
+      expect((await fetch(`${baseUrl}/health`)).status).toBe(200);
+      expect(auditEvents).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            event: "ws_error",
+            matchId: created.matchId,
+            side: created.hostSide,
+            errorCode: "Error",
+          }),
+        ]),
+      );
+      expect(JSON.stringify(auditEvents)).not.toContain(
+        "private test failure details",
+      );
+    } finally {
+      socket.close();
+      await handle.close();
+    }
+  });
+
   it("clears pending undo prompts over WebSocket after a response", async () => {
     const match = await joinedMatch("ws-undo-clear");
     const mandatory = await submit(

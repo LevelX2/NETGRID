@@ -75,6 +75,8 @@
 ## KI
 
 - Die Semantic Runtime ist der einzige Live-Entscheidungsweg.
+- [[../Architektur/KI-Aenderungen Architektur-Preflight]]:
+  verbindliche Ownership- und Plan-first-Prüfung vor jedem KI-Codepatch.
 - Das führende WIP-Zielbild für eine autoritative modulare
   Plan-first-Auswahl mit gemeinsamem Planrahmen, getrennten
   Runner-/Corp-Schedulern und verfeinerbaren Planmodulen liegt in
