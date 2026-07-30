@@ -7601,6 +7601,9 @@ function buildCorpDomain(
             return [];
           }
           if (!route) {
+            const coherentScorePlanPrecedesQualitativeStaging =
+              (serverId === "hq" || serverId === "rd") &&
+              scorePlanPrecedesRedundantCapacityDefense(serverId);
             const exactAlternativeExists = candidates.some(
               (alternative) =>
                 alternative.actionId !== candidate.actionId &&
@@ -7614,15 +7617,17 @@ function buildCorpDomain(
                   CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
                 ) !== undefined,
             );
-            const qualitativeStaging = exactAlternativeExists
-              ? undefined
-              : corpQualitativeIceStagingSignal(
-                  input,
-                  candidate,
-                  serverId,
-                  centralDefenseAllocation,
-                  CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
-                );
+            const qualitativeStaging =
+              exactAlternativeExists ||
+              coherentScorePlanPrecedesQualitativeStaging
+                ? undefined
+                : corpQualitativeIceStagingSignal(
+                    input,
+                    candidate,
+                    serverId,
+                    centralDefenseAllocation,
+                    CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
+                  );
             return qualitativeStaging ? [qualitativeStaging] : [];
           }
           const selectedCentralThreat =
@@ -7883,7 +7888,10 @@ function buildCorpDomain(
                     : productiveIceRezRoute.routeKind ===
                         "free_persistent_defense"
                       ? `engine_certified_ice_rez_free_persistent_defense:${rezServerId}:${candidate.actionId}`
-                      : `engine_certified_ice_rez_qualitative_encounter_defense:${rezServerId}:${candidate.actionId}`
+                      : productiveIceRezRoute.routeKind ===
+                          "known_access_path_tax"
+                        ? `engine_certified_ice_rez_known_access_path_tax:${rezServerId}:${productiveIceRezRoute.knownAccessPathTax ?? 0}:${candidate.actionId}`
+                        : `engine_certified_ice_rez_qualitative_encounter_defense:${rezServerId}:${candidate.actionId}`
                 : "visible_non_ice_rez_window",
             },
           ];

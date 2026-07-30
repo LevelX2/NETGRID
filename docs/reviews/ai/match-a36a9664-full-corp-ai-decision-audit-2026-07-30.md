@@ -135,31 +135,35 @@ ebenfalls nicht wirksam sperren.
 Breaker, Runner-Zahlungsmittel, Rez-Kosten und die erwartete
 Schutzentwicklung gemeinsam bewertet werden.
 
-### 3. Die zweite Agenda hatte zwei ICE, aber keine finanzierte zweite Schicht
+### 3. Die zweite Agenda hatte eine finanzierte zweite Schicht, die nicht gerezzt wurde
 
 D42 installierte Corporate Downsizing in denselben Remote. Zu diesem
 Zeitpunkt lagen dort die gerezzte Wall of Static und die ungerezzte Data
-Wall. D43 und D44 verbrauchten die Credits für zwei Advancement-Schritte. Beim
-Runner-Angriff auf D46 lehnte die KI das Rezzen von Data Wall mit
+Wall. Nach D44 besaß die Corp noch zwei Credits. Das anschließende Advance
+ließ einen Credit übrig; der exakte Engine-Rez-Preis von Data Wall betrug
+ebenfalls einen Credit. Beim Runner-Angriff auf D46 lehnte die KI das Rezzen
+dennoch mit
 `corp_rez_rejected_by_exact_window_assessment:corp_ice_rez_resource_exchange_unknown`
 ab. Corporate Downsizing wurde gestohlen.
 
 Das ist nicht in erster Linie ein ICE-Anzahlfehler. Die zweite Schicht war
-vorhanden, aber der mehrzügige Agenda-Plan hatte ihre Rez-Reserve nicht
-gesichert. Er installierte und advancete die Agenda bis auf einen Credit
-herunter und besaß damit keinen belastbaren Ausführungsplan für den erwarteten
-Gegenangriff.
+vorhanden und exakt bezahlbar. Die bekannte Vorher-/Nachher-Bewertung zeigte
+zudem, dass das Rezzen dem Runner einen zusätzlichen Credit auf seinem besten
+Zugriffspfad abverlangt. Weil die Zugriffs-Wahrscheinlichkeit dabei gleich
+blieb und die Engine im Mehr-ICE-Kontext keinen vollständigen
+Einzel-Resource-Exchange-Quote ausgab, wertete der Defense-Plan diese sichere
+Steuerwirkung trotzdem nicht als produktive Rez-Route.
 
-**Klare Fehlerursache:** Der Agenda-Plan bindet Installations-, Advance- und
-Scoringkosten, aber nicht zuverlässig die für seinen Planungshorizont
-notwendige Defense-Reserve. Eine nominelle ungerezzte Schicht wird dadurch
-wie Schutz gezählt, obwohl sie im entscheidenden Fenster nicht aktiviert
-werden kann.
+**Klare Fehlerursache:** Der Rez-Teil des Defense-Plans erkennt eine
+engine-berechnete positive Zugriffspfad-Steuerwirkung nicht, wenn die
+Zugriffs-Wahrscheinlichkeit unverändert bleibt und der engere
+Resource-Exchange-Quote unvollständig ist.
 
-**Erforderliche Änderung:** Der Scoring-Plan muss für jeden mehrzügigen
-Agenda-Pfad einen Schutzkorridor mit konkreter Rez-Reserve oder einen bewusst
-akzeptierten Rush-Risikomodus ausweisen. Verbraucht ein Advance-Schritt diese
-Reserve, ist vor der Aktion neu zu planen.
+**Erforderliche Änderung:** Im exakten Rez-Fenster darf der Defense-Plan eine
+bezahlte ICE-Aktivierung als produktiv erkennen, wenn das angegriffene
+Agenda-Remote, die aktuell erreichte ICE-Instanz und eine positive Differenz
+der bekannten Runner-Restcredits eindeutig gebunden sind. Unvollständige
+Quotes, andere ICE-Positionen und leere Remotes bleiben ausgeschlossen.
 
 ### 4. Zusätzliches ICE wird ohne sofortigen exakten Effekt zu häufig verworfen
 
@@ -305,132 +309,132 @@ Legende:
 - **Prüffall:** Nicht sicher falsch, aber für ein belastbares Urteil fehlt
   noch eine engere Reproduktion oder Engine-Evidence.
 
-| ID | Zustand | Zug | Gewählte Aktion | Urteil und Begründung |
-|---|---:|---:|---|---|
-| D1 | SV1 | 1 | Starthand behalten | **Korrekt/vertretbar.** Frühe Zentralverteidigung, Economy und Scoring-Material ergaben eine spielbare Hand. |
-| D2 | SV2 | 1 | Pflichtkarte ziehen | **Erzwungen.** |
-| D3 | SV3 | 1 | Data Wall vor HQ installieren | **Korrekt/vertretbar.** Günstige frühe HQ-Schicht. |
-| D4 | SV4 | 1 | Misleading Access Menus vor R&D installieren | **Korrekt/vertretbar.** Beide Zentralserver waren nach Zug 1 abgedeckt. |
-| D5 | SV5 | 1 | Karte ziehen | **Korrekt/vertretbar.** Freier Handplatz und noch eine Aktion. |
-| D6 | SV6 | 1 | Zug beenden | **Erzwungen.** |
-| D7 | SV10 | 2 | Misleading Access Menus rezzen | **Korrekt/vertretbar.** Direkte R&D-Steuer im Run. |
-| D8 | SV15 | 2 | Data Wall rezzen | **Korrekt/vertretbar.** Direkte HQ-Verteidigung. |
-| D9 | SV18 | 3 | Pflichtkarte ziehen | **Erzwungen.** |
-| D10 | SV19 | 3 | 1 Credit | **Korrekt/vertretbar.** Isoliert eine sichere Aktion. |
-| D11 | SV20 | 3 | Zug mit zwei Aktionen beenden | **Struktureller Fehler.** Zwei normale Aktionen wurden ohne kompensierenden Nutzen aufgegeben. |
-| D12 | SV21 | 3 | Vapor Ops abwerfen | **Korrekt/vertretbar.** Früher Handüberlauf; Scoring- und Defense-Material konnte höher priorisiert werden. |
-| D13 | SV30 | 5 | Pflichtkarte ziehen | **Erzwungen.** |
-| D14 | SV31 | 5 | Efficiency Experts spielen | **Korrekt/vertretbar.** Effiziente frühe Finanzierung. |
-| D15 | SV32 | 5 | Corporate Downsizing installieren | **Korrekt/vertretbar.** Beginn einer schnellen, in diesem Fenster ausführbaren Scoring-Linie. |
-| D16 | SV33 | 5 | Management Shake-Up spielen | **Korrekt/vertretbar.** Stellte die benötigte Zusatzkapazität für den Zug her. |
-| D17 | SV34 | 5 | Advancement-Ziele wählen | **Erzwungen/korrekt.** Die Wahl setzte die begonnene Scoring-Linie um. |
-| D18 | SV35 | 5 | Corporate Downsizing scoren | **Korrekt/vertretbar.** Erfolgreicher Abschluss der gebundenen Linie. |
-| D19 | SV36 | 5 | HQ-Agenda für Reveal-Effekt wählen | **Korrekt/vertretbar.** Legale konkrete Zielwahl des Score-Effekts. |
-| D20 | SV37 | 5 | Zug beenden | **Erzwungen.** |
-| D21 | SV47 | 7 | Pflichtkarte ziehen | **Erzwungen.** |
-| D22 | SV48 | 7 | Annual Reviews spielen | **Korrekt/vertretbar.** Schuf Informationen und Material für die Restplanung. |
-| D23 | SV49 | 7 | Wall of Static in neuem Remote installieren | **Fehlerfolge.** Ein Remote-Projekt war plausibel, aber das sichtbare Rent-I-Con beantwortete diese Einzelschicht. |
-| D24 | SV50 | 7 | Corporate War hinter Wall of Static installieren | **Struktureller Fehler.** Sichtbar überwindbarer Einzelschutz wurde als ausreichender Rush zugelassen. |
-| D25 | SV51 | 7 | Zug beenden | **Erzwungen.** |
-| D26 | SV55 | 8 | Wall of Static rezzen | **Korrekt/vertretbar.** Innerhalb des angegriffenen Remotes war die Steuerwirkung besser als kampfloses Aufgeben. |
-| D27 | SV63 | 9 | Pflichtkarte ziehen | **Erzwungen.** |
-| D28 | SV64 | 9 | Karte ziehen | **Korrekt/vertretbar.** Suche nach neuem Score- und Entwicklungs­material. |
-| D29 | SV65 | 9 | Data Wall vor Remote 1 installieren | **Korrekt/vertretbar.** Zweite Schicht war sinnvoll, kam aber für die gestohlene Corporate War zu spät. |
-| D30 | SV66 | 9 | 1 Credit | **Korrekt/vertretbar.** Finanzierte künftige Entwicklung. |
-| D31 | SV67 | 9 | Zug beenden | **Erzwungen.** |
-| D32 | SV75 | 11 | Pflichtkarte ziehen | **Erzwungen.** |
-| D33 | SV76 | 11 | Karte ziehen | **Korrekt/vertretbar.** Weiterhin vertretbare Materialsuche. |
-| D34 | SV77 | 11 | Chicago Branch in Remote 1 installieren | **Korrekt/vertretbar.** Boardentwicklung und Handkonversion; der Root konkurrierte nicht mit einer aktuellen Agenda. |
-| D35 | SV78 | 11 | 1 Credit | **Korrekt/vertretbar.** Letzte Finanzierungsaktion. |
-| D36 | SV79 | 11 | Zug beenden | **Erzwungen.** |
-| D37 | SV86 | 12 | Data Wall nicht rezzen | **Prüffall.** Der Runner hatte sichtbare Werkzeuge; der Trace lieferte für die Mehrschichtroute keine belastbare Austauschquote. |
-| D38 | SV88 | 12 | Root-Karte nicht rezzen | **Korrekt/vertretbar.** Kein exakt gebundener Nutzen im aktuellen Run-Fenster. |
-| D39 | SV89 | 12 | Weitere Rez-Option ablehnen | **Prüffall.** Ergebnis kann ökonomisch richtig sein, die Begründung blieb aber mehrschichtig unvollständig. |
-| D40 | SV93 | 12 | Weitere Root-Rez-Option ablehnen | **Korrekt/vertretbar.** Kein nachgewiesener unmittelbarer Verteidigungsgewinn. |
-| D41 | SV97 | 13 | Pflichtkarte ziehen | **Erzwungen.** |
-| D42 | SV98 | 13 | Corporate Downsizing in Remote 1 installieren | **Struktureller Fehler.** Die Mehrzuglinie besaß keine abgesicherte Rez-Reserve für die zweite ICE-Schicht. |
-| D43 | SV99 | 13 | Corporate Downsizing advancen | **Struktureller Fehler.** Verbrauchte Schutzbudget ohne tragfähige Reaktion auf den erwartbaren Run. |
-| D44 | SV100 | 13 | Corporate Downsizing advancen | **Struktureller Fehler.** Zweiter Advance vertiefte dieselbe unfinanzierte Linie. |
-| D45 | SV101 | 13 | Zug beenden | **Erzwungen.** |
-| D46 | SV106 | 14 | Data Wall nicht rezzen | **Fehlerfolge.** Bei nur einem Corp-Credit war der Verzicht nachvollziehbar; der Scoring-Plan hatte diesen Zustand selbst erzeugt. |
-| D47 | SV114 | 15 | Pflichtkarte ziehen | **Erzwungen.** |
-| D48 | SV115 | 15 | Vapor Ops in Remote 1 installieren | **Korrekt/vertretbar.** Sinnvoller Beginn eines Counter-Bank-Projekts. |
-| D49 | SV116 | 15 | Vapor Ops advancen | **Korrekt/vertretbar.** Erster gebundener Counter-Aufbau. |
-| D50 | SV117 | 15 | Karte ziehen | **Korrekt/vertretbar.** Suche nach Agenda und Route. |
-| D51 | SV118 | 15 | Zug beenden | **Erzwungen.** |
-| D52 | SV119 | 15 | Management Shake-Up abwerfen | **Korrekt/vertretbar.** Handüberlauf; aktuell keine gebundene Action-Capacity-Lücke. |
-| D53 | SV125 | 16 | Vapor Ops nicht rezzen | **Korrekt/vertretbar.** Noch kein ausführbarer Counter-Handoff. |
-| D54 | SV127 | 16 | Vapor Ops erneut nicht rezzen | **Korrekt/vertretbar.** Kein aktueller Nutzen. |
-| D55 | SV128 | 16 | Root-Rez-Option ablehnen | **Korrekt/vertretbar.** Bank sollte nicht ohne Zielroute aktiviert werden. |
-| D56 | SV132 | 16 | Weitere Root-Rez-Option ablehnen | **Korrekt/vertretbar.** Gleicher Run, keine neue Handoff-Lage. |
-| D57 | SV136 | 17 | Pflichtkarte ziehen | **Erzwungen.** |
-| D58 | SV137 | 17 | Efficiency Experts spielen | **Korrekt/vertretbar.** Finanzierte Bankaufbau und Folgezüge. |
-| D59 | SV138 | 17 | Vapor Ops advancen | **Korrekt/vertretbar.** Zweiter Counter. |
-| D60 | SV139 | 17 | Vapor Ops advancen | **Korrekt/vertretbar.** Bank war nun vollständig geladen. |
-| D61 | SV140 | 17 | Zug beenden | **Erzwungen.** |
-| D62 | SV146 | 19 | Pflichtkarte ziehen | **Erzwungen.** |
-| D63 | SV147 | 19 | Efficiency Experts spielen | **Korrekt/vertretbar.** Noch vertretbare Finanzierung bei bevorstehendem Scoringbedarf. |
-| D64 | SV148 | 19 | Karte ziehen | **Korrekt/vertretbar.** Agenda-/Routensuche nach geschafftem Handplatz. |
-| D65 | SV149 | 19 | 1 Credit | **Korrekt/vertretbar.** Letzte Aktion und noch keine Agenda-Route. |
-| D66 | SV150 | 19 | Zug beenden | **Erzwungen.** |
-| D67 | SV151 | 19 | Systematic Layoffs abwerfen | **Korrekt/vertretbar.** Ohne Agenda auf HQ aktuell keine gebundene Beschleunigungsroute. |
-| D68 | SV160 | 21 | Pflichtkarte ziehen | **Erzwungen.** |
-| D69 | SV161 | 21 | Misleading Access Menus vor HQ installieren | **Korrekt/vertretbar.** Zusätzliche Zentralsteuer und Handkonversion. |
-| D70 | SV162 | 21 | Karte ziehen | **Korrekt/vertretbar.** Suche nach Score-Material. |
-| D71 | SV163 | 21 | 1 Credit | **Korrekt/vertretbar.** Letzte Aktion. |
-| D72 | SV164 | 21 | Zug beenden | **Erzwungen.** |
-| D73 | SV165 | 21 | Chicago Branch abwerfen | **Korrekt/vertretbar.** Redundante Root-Entwicklung war schwächer als Bank, ICE und Economy. |
-| D74 | SV173 | 23 | Pflichtkarte ziehen | **Erzwungen.** |
-| D75 | SV174 | 23 | Overtime Incentives spielen | **Struktureller Fehler.** Vier Credits nur zur Handentlastung; keine gebundene Verwendung der Zusatzaktion. |
-| D76 | SV175 | 23 | Karte ziehen | **Fehlerfolge.** Informationsgewinn war sinnvoll, aber die vorausgehende Kapazitätsoperation war unnötig. |
-| D77 | SV176 | 23 | 1 Credit | **Fehlerfolge.** Bestandteil der ökonomisch schlechteren Overtime-Linie. |
-| D78 | SV177 | 23 | 1 Credit | **Fehlerfolge.** Ohne Overtime hätte dieselbe Kernlinie mehr Credits behalten. |
-| D79 | SV178 | 23 | 1 Credit | **Fehlerfolge.** Verwendete die erkaufte Aktion ohne besonderen Mehrwert. |
-| D80 | SV179 | 23 | Zug beenden | **Erzwungen.** |
-| D81 | SV180 | 23 | Karte abwerfen | **Korrekt/vertretbar.** Cleanup war nach der gewählten Linie regelnotwendig; kein Agenda-Abwurffehler belegt. |
-| D82 | SV188 | 25 | Pflichtkarte ziehen | **Erzwungen.** |
-| D83 | SV189 | 25 | 1 Credit | **Korrekt/vertretbar.** Finanzierte die konkrete Accounts-Receivable-Linie. |
-| D84 | SV190 | 25 | Accounts Receivable spielen | **Korrekt/vertretbar.** Bei niedrigerem Kreditstand effizient. |
-| D85 | SV191 | 25 | Karte ziehen | **Korrekt/vertretbar.** Informationsschritt nach Handkonversion. |
-| D86 | SV192 | 25 | Zug beenden | **Erzwungen.** |
-| D87 | SV193 | 25 | Zweite Vapor Ops abwerfen | **Korrekt/vertretbar.** Eine Bank war bereits vollständig geladen; die zweite Kopie war redundant. |
-| D88 | SV202 | 27 | Pflichtkarte ziehen | **Erzwungen.** |
-| D89 | SV203 | 27 | 1 Credit | **Struktureller Fehler.** Geladene Bank und Corporate-War-Perspektive wurden nicht zu einer Route verbunden. |
-| D90 | SV204 | 27 | 1 Credit | **Struktureller Fehler.** Zweite passive Vorbereitung ohne korrektes Routenbudget. |
-| D91 | SV205 | 27 | 1 Credit | **Struktureller Fehler.** Dritte Aktion ohne Board- oder Scorefortschritt. |
-| D92 | SV206 | 27 | Zug beenden | **Fehlerfolge.** Der Zugplan hatte keine Counter-Bank-Nutzung erzeugt. |
-| D93 | SV207 | 27 | Karte abwerfen | **Korrekt/vertretbar.** Kein klarer Agenda-Abwurffehler; der Schaden lag im ausgebliebenen Plan. |
-| D94 | SV217 | 29 | Pflichtkarte ziehen | **Erzwungen.** |
-| D95 | SV218 | 29 | 1 Credit | **Struktureller Fehler.** Weiteres Warten trotz geladener Bank. |
-| D96 | SV219 | 29 | 1 Credit | **Struktureller Fehler.** Reserve wurde nicht aus einer konkreten Route berechnet. |
-| D97 | SV220 | 29 | 1 Credit | **Struktureller Fehler.** Sechste passive Kreditaktion über zwei Züge. |
-| D98 | SV221 | 29 | Zug beenden | **Fehlerfolge.** Noch immer kein Agenda-/Bank-Handoff. |
-| D99 | SV222 | 29 | Karte abwerfen | **Korrekt/vertretbar.** Kein kausaler Agenda-Abwurffehler belegt. |
-| D100 | SV230 | 31 | Pflichtkarte ziehen | **Erzwungen.** |
-| D101 | SV231 | 31 | Corporate War über Vapor Ops installieren | **Struktureller Fehler.** `rootReplacement` zerstörte die gebundene Counter Bank. |
-| D102 | SV232 | 31 | Systematic Layoffs spielen | **Fehlerfolge.** Legal und beschleunigend, aber gegenüber dem möglichen Cross-Remote-Handoff klar unterlegen. |
-| D103 | SV233 | 31 | Advancement-Ziel wählen | **Erzwungen/Fehlerfolge.** Innerhalb der falschen Layoffs-Linie war Corporate War das richtige Ziel. |
-| D104 | SV234 | 31 | Corporate War advancen | **Fehlerfolge.** Vervollständigte die falsche und zu teure Route. |
-| D105 | SV235 | 31 | Corporate War scoren | **Fehlerfolge mit Notfallnutzen.** Verhinderte bei 5 Runner-Punkten ein unmittelbares Agenda-Verlustfenster, löste aber wegen des schlechten Routenbudgets den Creditverlust aus. |
-| D106 | SV236 | 31 | Zug beenden | **Erzwungen.** |
-| D107 | SV248 | 33 | Pflichtkarte ziehen | **Erzwungen.** |
-| D108 | SV249 | 33 | Karte ziehen | **Korrekt/vertretbar.** Suche nach weiterer Agenda oder Entwicklung. |
-| D109 | SV250 | 33 | 1 Credit | **Korrekt/vertretbar.** Aufbau nach dem Corporate-War-Creditverlust. |
-| D110 | SV251 | 33 | 1 Credit | **Korrekt/vertretbar.** Weiterer notwendiger Wiederaufbau. |
-| D111 | SV252 | 33 | Zug beenden | **Erzwungen.** |
-| D112 | SV253 | 33 | Karte abwerfen | **Korrekt/vertretbar.** Kein belegter Agenda-Abwurf. |
-| D113 | SV262 | 35 | Pflichtkarte ziehen | **Erzwungen.** |
-| D114 | SV263 | 35 | 1 Credit | **Korrekt/vertretbar.** Accounts Receivable benötigte Finanzierung. |
-| D115 | SV264 | 35 | 1 Credit | **Korrekt/vertretbar.** Zweiter Schritt zum konkreten Operationsbudget. |
-| D116 | SV265 | 35 | 1 Credit | **Korrekt/vertretbar.** Erreichte das benötigte Kostenfenster. |
-| D117 | SV266 | 35 | Zug beenden | **Erzwungen.** |
-| D118 | SV267 | 35 | Karte abwerfen | **Korrekt/vertretbar.** Handcleanup; kein eindeutiger strategischer Fehlabwurf. |
-| D119 | SV276 | 37 | Pflichtkarte ziehen | **Erzwungen.** |
-| D120 | SV277 | 37 | Accounts Receivable spielen | **Korrekt/vertretbar.** Nettogewinn und Handkonversion waren in dieser Economy-Lage sinnvoll. |
-| D121 | SV278 | 37 | Karte ziehen | **Korrekt/vertretbar.** Bei 5:5 nachvollziehbare Agenda-/Antwortsuche. |
-| D122 | SV279 | 37 | 1 Credit statt R&D-ICE | **Struktureller Fehler.** Terminale R&D-Gefahr wurde wegen `unknown/deferred_without_exact_route` nicht verteidigt. |
-| D123 | SV280 | 37 | Zug beenden | **Fehlerfolge.** Keine Aktion blieb, aber die letzte Aktion hatte die tödliche Defense-Alternative verworfen. |
-| D124 | SV281 | 37 | Karte abwerfen | **Prüffall.** Für den unmittelbar folgenden Spielverlust nicht kausal; eine eigenständige Qualitätsaussage benötigt einen isolierten Cleanup-Checkpoint. |
+| ID   | Zustand | Zug | Gewählte Aktion                                  | Urteil und Begründung                                                                                                                                                             |
+| ---- | ------: | --: | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1   |     SV1 |   1 | Starthand behalten                               | **Korrekt/vertretbar.** Frühe Zentralverteidigung, Economy und Scoring-Material ergaben eine spielbare Hand.                                                                      |
+| D2   |     SV2 |   1 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D3   |     SV3 |   1 | Data Wall vor HQ installieren                    | **Korrekt/vertretbar.** Günstige frühe HQ-Schicht.                                                                                                                                |
+| D4   |     SV4 |   1 | Misleading Access Menus vor R&D installieren     | **Korrekt/vertretbar.** Beide Zentralserver waren nach Zug 1 abgedeckt.                                                                                                           |
+| D5   |     SV5 |   1 | Karte ziehen                                     | **Korrekt/vertretbar.** Freier Handplatz und noch eine Aktion.                                                                                                                    |
+| D6   |     SV6 |   1 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D7   |    SV10 |   2 | Misleading Access Menus rezzen                   | **Korrekt/vertretbar.** Direkte R&D-Steuer im Run.                                                                                                                                |
+| D8   |    SV15 |   2 | Data Wall rezzen                                 | **Korrekt/vertretbar.** Direkte HQ-Verteidigung.                                                                                                                                  |
+| D9   |    SV18 |   3 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D10  |    SV19 |   3 | 1 Credit                                         | **Korrekt/vertretbar.** Isoliert eine sichere Aktion.                                                                                                                             |
+| D11  |    SV20 |   3 | Zug mit zwei Aktionen beenden                    | **Struktureller Fehler.** Zwei normale Aktionen wurden ohne kompensierenden Nutzen aufgegeben.                                                                                    |
+| D12  |    SV21 |   3 | Vapor Ops abwerfen                               | **Korrekt/vertretbar.** Früher Handüberlauf; Scoring- und Defense-Material konnte höher priorisiert werden.                                                                       |
+| D13  |    SV30 |   5 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D14  |    SV31 |   5 | Efficiency Experts spielen                       | **Korrekt/vertretbar.** Effiziente frühe Finanzierung.                                                                                                                            |
+| D15  |    SV32 |   5 | Corporate Downsizing installieren                | **Korrekt/vertretbar.** Beginn einer schnellen, in diesem Fenster ausführbaren Scoring-Linie.                                                                                     |
+| D16  |    SV33 |   5 | Management Shake-Up spielen                      | **Korrekt/vertretbar.** Stellte die benötigte Zusatzkapazität für den Zug her.                                                                                                    |
+| D17  |    SV34 |   5 | Advancement-Ziele wählen                         | **Erzwungen/korrekt.** Die Wahl setzte die begonnene Scoring-Linie um.                                                                                                            |
+| D18  |    SV35 |   5 | Corporate Downsizing scoren                      | **Korrekt/vertretbar.** Erfolgreicher Abschluss der gebundenen Linie.                                                                                                             |
+| D19  |    SV36 |   5 | HQ-Agenda für Reveal-Effekt wählen               | **Korrekt/vertretbar.** Legale konkrete Zielwahl des Score-Effekts.                                                                                                               |
+| D20  |    SV37 |   5 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D21  |    SV47 |   7 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D22  |    SV48 |   7 | Annual Reviews spielen                           | **Korrekt/vertretbar.** Schuf Informationen und Material für die Restplanung.                                                                                                     |
+| D23  |    SV49 |   7 | Wall of Static in neuem Remote installieren      | **Fehlerfolge.** Ein Remote-Projekt war plausibel, aber das sichtbare Rent-I-Con beantwortete diese Einzelschicht.                                                                |
+| D24  |    SV50 |   7 | Corporate War hinter Wall of Static installieren | **Struktureller Fehler.** Sichtbar überwindbarer Einzelschutz wurde als ausreichender Rush zugelassen.                                                                            |
+| D25  |    SV51 |   7 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D26  |    SV55 |   8 | Wall of Static rezzen                            | **Korrekt/vertretbar.** Innerhalb des angegriffenen Remotes war die Steuerwirkung besser als kampfloses Aufgeben.                                                                 |
+| D27  |    SV63 |   9 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D28  |    SV64 |   9 | Karte ziehen                                     | **Korrekt/vertretbar.** Suche nach neuem Score- und Entwicklungs­material.                                                                                                        |
+| D29  |    SV65 |   9 | Data Wall vor Remote 1 installieren              | **Korrekt/vertretbar.** Zweite Schicht war sinnvoll, kam aber für die gestohlene Corporate War zu spät.                                                                           |
+| D30  |    SV66 |   9 | 1 Credit                                         | **Korrekt/vertretbar.** Finanzierte künftige Entwicklung.                                                                                                                         |
+| D31  |    SV67 |   9 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D32  |    SV75 |  11 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D33  |    SV76 |  11 | Karte ziehen                                     | **Korrekt/vertretbar.** Weiterhin vertretbare Materialsuche.                                                                                                                      |
+| D34  |    SV77 |  11 | Chicago Branch in Remote 1 installieren          | **Korrekt/vertretbar.** Boardentwicklung und Handkonversion; der Root konkurrierte nicht mit einer aktuellen Agenda.                                                              |
+| D35  |    SV78 |  11 | 1 Credit                                         | **Korrekt/vertretbar.** Letzte Finanzierungsaktion.                                                                                                                               |
+| D36  |    SV79 |  11 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D37  |    SV86 |  12 | Data Wall nicht rezzen                           | **Prüffall.** Der Runner hatte sichtbare Werkzeuge; der Trace lieferte für die Mehrschichtroute keine belastbare Austauschquote.                                                  |
+| D38  |    SV88 |  12 | Root-Karte nicht rezzen                          | **Korrekt/vertretbar.** Kein exakt gebundener Nutzen im aktuellen Run-Fenster.                                                                                                    |
+| D39  |    SV89 |  12 | Weitere Rez-Option ablehnen                      | **Prüffall.** Ergebnis kann ökonomisch richtig sein, die Begründung blieb aber mehrschichtig unvollständig.                                                                       |
+| D40  |    SV93 |  12 | Weitere Root-Rez-Option ablehnen                 | **Korrekt/vertretbar.** Kein nachgewiesener unmittelbarer Verteidigungsgewinn.                                                                                                    |
+| D41  |    SV97 |  13 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D42  |    SV98 |  13 | Corporate Downsizing in Remote 1 installieren    | **Struktureller Fehler.** Die Mehrzuglinie besaß keine abgesicherte Rez-Reserve für die zweite ICE-Schicht.                                                                       |
+| D43  |    SV99 |  13 | Corporate Downsizing advancen                    | **Struktureller Fehler.** Verbrauchte Schutzbudget ohne tragfähige Reaktion auf den erwartbaren Run.                                                                              |
+| D44  |   SV100 |  13 | Corporate Downsizing advancen                    | **Struktureller Fehler.** Zweiter Advance vertiefte dieselbe unfinanzierte Linie.                                                                                                 |
+| D45  |   SV101 |  13 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D46  |   SV106 |  14 | Data Wall nicht rezzen                           | **Fehlerfolge.** Bei nur einem Corp-Credit war der Verzicht nachvollziehbar; der Scoring-Plan hatte diesen Zustand selbst erzeugt.                                                |
+| D47  |   SV114 |  15 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D48  |   SV115 |  15 | Vapor Ops in Remote 1 installieren               | **Korrekt/vertretbar.** Sinnvoller Beginn eines Counter-Bank-Projekts.                                                                                                            |
+| D49  |   SV116 |  15 | Vapor Ops advancen                               | **Korrekt/vertretbar.** Erster gebundener Counter-Aufbau.                                                                                                                         |
+| D50  |   SV117 |  15 | Karte ziehen                                     | **Korrekt/vertretbar.** Suche nach Agenda und Route.                                                                                                                              |
+| D51  |   SV118 |  15 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D52  |   SV119 |  15 | Management Shake-Up abwerfen                     | **Korrekt/vertretbar.** Handüberlauf; aktuell keine gebundene Action-Capacity-Lücke.                                                                                              |
+| D53  |   SV125 |  16 | Vapor Ops nicht rezzen                           | **Korrekt/vertretbar.** Noch kein ausführbarer Counter-Handoff.                                                                                                                   |
+| D54  |   SV127 |  16 | Vapor Ops erneut nicht rezzen                    | **Korrekt/vertretbar.** Kein aktueller Nutzen.                                                                                                                                    |
+| D55  |   SV128 |  16 | Root-Rez-Option ablehnen                         | **Korrekt/vertretbar.** Bank sollte nicht ohne Zielroute aktiviert werden.                                                                                                        |
+| D56  |   SV132 |  16 | Weitere Root-Rez-Option ablehnen                 | **Korrekt/vertretbar.** Gleicher Run, keine neue Handoff-Lage.                                                                                                                    |
+| D57  |   SV136 |  17 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D58  |   SV137 |  17 | Efficiency Experts spielen                       | **Korrekt/vertretbar.** Finanzierte Bankaufbau und Folgezüge.                                                                                                                     |
+| D59  |   SV138 |  17 | Vapor Ops advancen                               | **Korrekt/vertretbar.** Zweiter Counter.                                                                                                                                          |
+| D60  |   SV139 |  17 | Vapor Ops advancen                               | **Korrekt/vertretbar.** Bank war nun vollständig geladen.                                                                                                                         |
+| D61  |   SV140 |  17 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D62  |   SV146 |  19 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D63  |   SV147 |  19 | Efficiency Experts spielen                       | **Korrekt/vertretbar.** Noch vertretbare Finanzierung bei bevorstehendem Scoringbedarf.                                                                                           |
+| D64  |   SV148 |  19 | Karte ziehen                                     | **Korrekt/vertretbar.** Agenda-/Routensuche nach geschafftem Handplatz.                                                                                                           |
+| D65  |   SV149 |  19 | 1 Credit                                         | **Korrekt/vertretbar.** Letzte Aktion und noch keine Agenda-Route.                                                                                                                |
+| D66  |   SV150 |  19 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D67  |   SV151 |  19 | Systematic Layoffs abwerfen                      | **Korrekt/vertretbar.** Ohne Agenda auf HQ aktuell keine gebundene Beschleunigungsroute.                                                                                          |
+| D68  |   SV160 |  21 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D69  |   SV161 |  21 | Misleading Access Menus vor HQ installieren      | **Korrekt/vertretbar.** Zusätzliche Zentralsteuer und Handkonversion.                                                                                                             |
+| D70  |   SV162 |  21 | Karte ziehen                                     | **Korrekt/vertretbar.** Suche nach Score-Material.                                                                                                                                |
+| D71  |   SV163 |  21 | 1 Credit                                         | **Korrekt/vertretbar.** Letzte Aktion.                                                                                                                                            |
+| D72  |   SV164 |  21 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D73  |   SV165 |  21 | Chicago Branch abwerfen                          | **Korrekt/vertretbar.** Redundante Root-Entwicklung war schwächer als Bank, ICE und Economy.                                                                                      |
+| D74  |   SV173 |  23 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D75  |   SV174 |  23 | Overtime Incentives spielen                      | **Struktureller Fehler.** Vier Credits nur zur Handentlastung; keine gebundene Verwendung der Zusatzaktion.                                                                       |
+| D76  |   SV175 |  23 | Karte ziehen                                     | **Fehlerfolge.** Informationsgewinn war sinnvoll, aber die vorausgehende Kapazitätsoperation war unnötig.                                                                         |
+| D77  |   SV176 |  23 | 1 Credit                                         | **Fehlerfolge.** Bestandteil der ökonomisch schlechteren Overtime-Linie.                                                                                                          |
+| D78  |   SV177 |  23 | 1 Credit                                         | **Fehlerfolge.** Ohne Overtime hätte dieselbe Kernlinie mehr Credits behalten.                                                                                                    |
+| D79  |   SV178 |  23 | 1 Credit                                         | **Fehlerfolge.** Verwendete die erkaufte Aktion ohne besonderen Mehrwert.                                                                                                         |
+| D80  |   SV179 |  23 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D81  |   SV180 |  23 | Karte abwerfen                                   | **Korrekt/vertretbar.** Cleanup war nach der gewählten Linie regelnotwendig; kein Agenda-Abwurffehler belegt.                                                                     |
+| D82  |   SV188 |  25 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D83  |   SV189 |  25 | 1 Credit                                         | **Korrekt/vertretbar.** Finanzierte die konkrete Accounts-Receivable-Linie.                                                                                                       |
+| D84  |   SV190 |  25 | Accounts Receivable spielen                      | **Korrekt/vertretbar.** Bei niedrigerem Kreditstand effizient.                                                                                                                    |
+| D85  |   SV191 |  25 | Karte ziehen                                     | **Korrekt/vertretbar.** Informationsschritt nach Handkonversion.                                                                                                                  |
+| D86  |   SV192 |  25 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D87  |   SV193 |  25 | Zweite Vapor Ops abwerfen                        | **Korrekt/vertretbar.** Eine Bank war bereits vollständig geladen; die zweite Kopie war redundant.                                                                                |
+| D88  |   SV202 |  27 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D89  |   SV203 |  27 | 1 Credit                                         | **Struktureller Fehler.** Geladene Bank und Corporate-War-Perspektive wurden nicht zu einer Route verbunden.                                                                      |
+| D90  |   SV204 |  27 | 1 Credit                                         | **Struktureller Fehler.** Zweite passive Vorbereitung ohne korrektes Routenbudget.                                                                                                |
+| D91  |   SV205 |  27 | 1 Credit                                         | **Struktureller Fehler.** Dritte Aktion ohne Board- oder Scorefortschritt.                                                                                                        |
+| D92  |   SV206 |  27 | Zug beenden                                      | **Fehlerfolge.** Der Zugplan hatte keine Counter-Bank-Nutzung erzeugt.                                                                                                            |
+| D93  |   SV207 |  27 | Karte abwerfen                                   | **Korrekt/vertretbar.** Kein klarer Agenda-Abwurffehler; der Schaden lag im ausgebliebenen Plan.                                                                                  |
+| D94  |   SV217 |  29 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D95  |   SV218 |  29 | 1 Credit                                         | **Struktureller Fehler.** Weiteres Warten trotz geladener Bank.                                                                                                                   |
+| D96  |   SV219 |  29 | 1 Credit                                         | **Struktureller Fehler.** Reserve wurde nicht aus einer konkreten Route berechnet.                                                                                                |
+| D97  |   SV220 |  29 | 1 Credit                                         | **Struktureller Fehler.** Sechste passive Kreditaktion über zwei Züge.                                                                                                            |
+| D98  |   SV221 |  29 | Zug beenden                                      | **Fehlerfolge.** Noch immer kein Agenda-/Bank-Handoff.                                                                                                                            |
+| D99  |   SV222 |  29 | Karte abwerfen                                   | **Korrekt/vertretbar.** Kein kausaler Agenda-Abwurffehler belegt.                                                                                                                 |
+| D100 |   SV230 |  31 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D101 |   SV231 |  31 | Corporate War über Vapor Ops installieren        | **Struktureller Fehler.** `rootReplacement` zerstörte die gebundene Counter Bank.                                                                                                 |
+| D102 |   SV232 |  31 | Systematic Layoffs spielen                       | **Fehlerfolge.** Legal und beschleunigend, aber gegenüber dem möglichen Cross-Remote-Handoff klar unterlegen.                                                                     |
+| D103 |   SV233 |  31 | Advancement-Ziel wählen                          | **Erzwungen/Fehlerfolge.** Innerhalb der falschen Layoffs-Linie war Corporate War das richtige Ziel.                                                                              |
+| D104 |   SV234 |  31 | Corporate War advancen                           | **Fehlerfolge.** Vervollständigte die falsche und zu teure Route.                                                                                                                 |
+| D105 |   SV235 |  31 | Corporate War scoren                             | **Fehlerfolge mit Notfallnutzen.** Verhinderte bei 5 Runner-Punkten ein unmittelbares Agenda-Verlustfenster, löste aber wegen des schlechten Routenbudgets den Creditverlust aus. |
+| D106 |   SV236 |  31 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D107 |   SV248 |  33 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D108 |   SV249 |  33 | Karte ziehen                                     | **Korrekt/vertretbar.** Suche nach weiterer Agenda oder Entwicklung.                                                                                                              |
+| D109 |   SV250 |  33 | 1 Credit                                         | **Korrekt/vertretbar.** Aufbau nach dem Corporate-War-Creditverlust.                                                                                                              |
+| D110 |   SV251 |  33 | 1 Credit                                         | **Korrekt/vertretbar.** Weiterer notwendiger Wiederaufbau.                                                                                                                        |
+| D111 |   SV252 |  33 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D112 |   SV253 |  33 | Karte abwerfen                                   | **Korrekt/vertretbar.** Kein belegter Agenda-Abwurf.                                                                                                                              |
+| D113 |   SV262 |  35 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D114 |   SV263 |  35 | 1 Credit                                         | **Korrekt/vertretbar.** Accounts Receivable benötigte Finanzierung.                                                                                                               |
+| D115 |   SV264 |  35 | 1 Credit                                         | **Korrekt/vertretbar.** Zweiter Schritt zum konkreten Operationsbudget.                                                                                                           |
+| D116 |   SV265 |  35 | 1 Credit                                         | **Korrekt/vertretbar.** Erreichte das benötigte Kostenfenster.                                                                                                                    |
+| D117 |   SV266 |  35 | Zug beenden                                      | **Erzwungen.**                                                                                                                                                                    |
+| D118 |   SV267 |  35 | Karte abwerfen                                   | **Korrekt/vertretbar.** Handcleanup; kein eindeutiger strategischer Fehlabwurf.                                                                                                   |
+| D119 |   SV276 |  37 | Pflichtkarte ziehen                              | **Erzwungen.**                                                                                                                                                                    |
+| D120 |   SV277 |  37 | Accounts Receivable spielen                      | **Korrekt/vertretbar.** Nettogewinn und Handkonversion waren in dieser Economy-Lage sinnvoll.                                                                                     |
+| D121 |   SV278 |  37 | Karte ziehen                                     | **Korrekt/vertretbar.** Bei 5:5 nachvollziehbare Agenda-/Antwortsuche.                                                                                                            |
+| D122 |   SV279 |  37 | 1 Credit statt R&D-ICE                           | **Struktureller Fehler.** Terminale R&D-Gefahr wurde wegen `unknown/deferred_without_exact_route` nicht verteidigt.                                                               |
+| D123 |   SV280 |  37 | Zug beenden                                      | **Fehlerfolge.** Keine Aktion blieb, aber die letzte Aktion hatte die tödliche Defense-Alternative verworfen.                                                                     |
+| D124 |   SV281 |  37 | Karte abwerfen                                   | **Prüffall.** Für den unmittelbar folgenden Spielverlust nicht kausal; eine eigenständige Qualitätsaussage benötigt einen isolierten Cleanup-Checkpoint.                          |
 
 ## Einordnung der Abwurflogik
 

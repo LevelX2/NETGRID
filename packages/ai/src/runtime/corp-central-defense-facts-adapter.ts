@@ -26,6 +26,52 @@ const IMPORTANT_TRASHABLE_MECHANICS = new Set([
   "install_ice",
 ]);
 
+export type CorpKnownCentralAgendaThreat = Readonly<{
+  serverId: CorpCentralDefenseServerId;
+  threat: "none" | "material" | "terminal";
+  matchpoint: number;
+  maximumAccessibleAgendaPointValue: number;
+}>;
+
+export function readKnownCorpCentralAgendaThreat(params: {
+  input: AiDecisionInput;
+  serverId: CorpCentralDefenseServerId;
+}): CorpKnownCentralAgendaThreat | undefined {
+  const { input, serverId } = params;
+  if (input.side !== "corp") return undefined;
+  const quotes = quotesForCurrentView(input);
+  const inventory = centralInventory(input);
+  const quote = quotes?.[serverId];
+  const cards = inventory?.[serverId];
+  const matchpoint =
+    input.playerView.agendaPointsToWin - input.playerView.opponent.agendaPoints;
+  if (
+    !quote ||
+    !cards ||
+    cards.populationCardCount < 1 ||
+    !Number.isSafeInteger(matchpoint) ||
+    matchpoint < 1
+  ) {
+    return undefined;
+  }
+  const maximumAccessibleAgendaPointValue = maximumAgendaPointValueForAccesses(
+    cards,
+    quote.effectiveAccessCount,
+  );
+  if (maximumAccessibleAgendaPointValue === undefined) return undefined;
+  return {
+    serverId,
+    threat:
+      maximumAccessibleAgendaPointValue >= matchpoint
+        ? "terminal"
+        : maximumAccessibleAgendaPointValue > 0
+          ? "material"
+          : "none",
+    matchpoint,
+    maximumAccessibleAgendaPointValue,
+  };
+}
+
 export function allocateCorpCentralDefenseFromAiFacts(params: {
   input: AiDecisionInput;
   hqHoldCadence?: CorpCentralDefenseHqHoldCadence;
@@ -366,21 +412,11 @@ function factsFor(
   const matchpoint =
     input.playerView.agendaPointsToWin - input.playerView.opponent.agendaPoints;
   if (!Number.isSafeInteger(matchpoint) || matchpoint < 1) return undefined;
-  let accessesRemaining = Math.min(
+  const maximumAccessibleAgendaPointValue = maximumAgendaPointValueForAccesses(
+    cards,
     quote.effectiveAccessCount,
-    cards.agendaCardCount,
   );
-  let maximumAccessibleAgendaPointValue = 0;
-  for (const [points, count] of [...cards.agendaPointCounts].sort(
-    ([left], [right]) => right - left,
-  )) {
-    const accessibleOfDefinition = Math.min(accessesRemaining, count);
-    maximumAccessibleAgendaPointValue += points * accessibleOfDefinition;
-    accessesRemaining -= accessibleOfDefinition;
-    if (accessesRemaining === 0) break;
-  }
-  if (!Number.isSafeInteger(maximumAccessibleAgendaPointValue))
-    return undefined;
+  if (maximumAccessibleAgendaPointValue === undefined) return undefined;
   const { agendaPointCounts: _agendaPointCounts, ...publicCardFacts } = cards;
   void _agendaPointCounts;
   const threat =
@@ -405,6 +441,26 @@ function factsFor(
     },
     cards: publicCardFacts,
   } as const;
+}
+
+function maximumAgendaPointValueForAccesses(
+  cards: Inventory,
+  accessCount: number,
+): number | undefined {
+  if (!Number.isSafeInteger(accessCount) || accessCount < 1) return undefined;
+  let accessesRemaining = Math.min(accessCount, cards.agendaCardCount);
+  let maximumAccessibleAgendaPointValue = 0;
+  for (const [points, count] of [...cards.agendaPointCounts].sort(
+    ([left], [right]) => right - left,
+  )) {
+    const accessibleOfDefinition = Math.min(accessesRemaining, count);
+    maximumAccessibleAgendaPointValue += points * accessibleOfDefinition;
+    accessesRemaining -= accessibleOfDefinition;
+    if (accessesRemaining === 0) break;
+  }
+  return Number.isSafeInteger(maximumAccessibleAgendaPointValue)
+    ? maximumAccessibleAgendaPointValue
+    : undefined;
 }
 
 function structuredRecentPressure(

@@ -1,6 +1,6 @@
 # Match A36A9664: Corp-Plan-Remediation
 
-Status: aktiv – Paket P3
+Status: aktiv – Paket P4
 
 Quelle:
 
@@ -157,7 +157,8 @@ Arbeit:
 Voraussichtliche Zielzustände:
 
 - D11/SV20: vorzeitiges Zugende mit normalen Aktionen;
-- D24/SV50 sowie D42–D46/SV98–106: Agenda-Zulassung und Rez-Reserve;
+- D24/SV50 sowie D46/SV106: Agenda-Zulassung und bezahlte zweite
+  Rez-Schicht;
 - D75/SV174: Overtime ohne gebundene Aktionslücke;
 - D89–D105/SV203–235: Counter Bank und vollständiges Scorebudget;
 - D122/SV279: terminale R&D-Verteidigung.
@@ -210,17 +211,25 @@ Ziel:
 - Scoring-Projekte binden wirksamen, bezahlbaren Schutz für ihren Horizont,
   während Rush- und Notfalllinien möglich bleiben.
 
-Arbeit:
+Umgesetzt:
 
-- sichtbare Breaker-/Kostenlage und Rez-Reserve im Agenda-Projektvertrag
-  zusammenführen;
-- Advance-Schritte an der Reservegrenze revalidieren;
-- zusätzlichen ICE-Aufbau über ein planklassenabhängiges Defense-Zielband
-  zulassen;
-- terminale HQ-/R&D-Gefahr bei `unknown` konservativ im Defense-Plan
-  behandeln;
-- vollständige Kosten der gewählten Scoringroute in den bedingten
-  Credit-Schwellenwert einbeziehen.
+- eine bezahlte, exakt erreichte ICE-Schicht wird bei unveränderter
+  Zugriffswahrscheinlichkeit als produktiv erkannt, wenn die bekannte
+  Vorher-/Nachher-Bewertung eine positive Runner-Pfadsteuer ausweist;
+- der Fallback bleibt an das aktuell angegriffene ICE und bei Remotes an eine
+  sichtbare Agenda gebunden; unvollständige Gratis-Resource-Quotes werden
+  nicht überdeckt;
+- terminales Zentralrisiko wird unabhängig von einer unsicheren
+  Breaker-Kombinationsanalyse aus vollständigem Deckinventar,
+  Zugriffszahl und Matchpoint bestimmt;
+- bei `unknown` darf der Defense-Plan genau die zweite zentrale Schicht
+  vorbereiten, nicht beliebig weiter stapeln;
+- ein kohärenter ausführbarer Score-Plan behält Vorrang vor dieser
+  qualitativen Zusatzschicht;
+- die korrigierte Cross-Remote-Counter-Bank-Route vermeidet die teure
+  Layoffs-Ersatzroute; die vorhandene konkrete Kandidatenreserve enthält
+  Aktionskosten, verbleibende Advancement-Kosten und den bedingten
+  Post-Score-Floor, während terminale Notfallwertung bewusst zulässig bleibt.
 
 Gegenproben:
 
@@ -231,7 +240,7 @@ Gegenproben:
 
 Checks:
 
-- alle zugehörigen Match-Checkpoints grün;
+- D24, D46, D89, D101 und D122 grün;
 - zentrale Defense-, Remote-Projekt-, Conditional-Score- und Scheduler-Tests;
 - AI-Typecheck und `git diff --check`.
 

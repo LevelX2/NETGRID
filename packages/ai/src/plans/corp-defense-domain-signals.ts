@@ -15,6 +15,7 @@ import {
 import { corpHandDuplicateCount } from "../runtime/corp-hand-inventory-facts";
 import { corpKnownAgendaInventory } from "../runtime/corp-known-agenda-inventory";
 import { isCorpOpeningTurnSerial } from "../runtime/corp-opening-rush";
+import { readKnownCorpCentralAgendaThreat } from "../runtime/corp-central-defense-facts-adapter";
 import { compareExactProbabilities } from "../runtime/corp-score-protection-assessment";
 import {
   visibleBreakerCardCanAddressIce,
@@ -169,7 +170,18 @@ export function corpQualitativeIceStagingSignal(
   const server = input.playerView.servers.find(
     (candidateServer) => candidateServer.id === serverId,
   );
-  if (!server || server.ice.length > 0) return undefined;
+  if (!server) return undefined;
+  const unknownAllocationTerminalSecondLayer =
+    isCentral &&
+    centralAllocation?.status !== "known" &&
+    server.ice.length === 1 &&
+    readKnownCorpCentralAgendaThreat({
+      input,
+      serverId: serverId as "hq" | "rd",
+    })?.threat === "terminal";
+  if (server.ice.length > 0 && !unknownAllocationTerminalSecondLayer) {
+    return undefined;
+  }
   const bothCentralsEmpty = ["hq", "rd"].every(
     (centralServerId) =>
       input.playerView.servers.find(
@@ -178,9 +190,10 @@ export function corpQualitativeIceStagingSignal(
   );
   if (isCentral) {
     if (
-      centralAllocation?.status === "known"
+      !unknownAllocationTerminalSecondLayer &&
+      (centralAllocation?.status === "known"
         ? centralAllocation.selectedServerId !== serverId
-        : !bothCentralsEmpty
+        : !bothCentralsEmpty)
     ) {
       return undefined;
     }
@@ -237,8 +250,9 @@ export function corpQualitativeIceStagingSignal(
     input.playerView.own.credits - candidate.costProfile.creditCost;
   const rezFundingGap = Math.max(0, rezCredits - creditsAfterInstall);
   if (rezFundingGap > 3) return undefined;
-  const centralPressure =
-    isCentral && centralAllocation?.status === "known"
+  const centralPressure = unknownAllocationTerminalSecondLayer
+    ? "terminal"
+    : isCentral && centralAllocation?.status === "known"
       ? centralAllocation.evidence[serverId].threat
       : undefined;
   return {
@@ -253,8 +267,14 @@ export function corpQualitativeIceStagingSignal(
       ? { centralPressure }
       : {}),
     immediateInstallSupport: true,
-    value: sourceDefense.hasImmediateStop ? 11 : 9,
-    evidenceCode: `corp_qualitative_ice_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`,
+    value: unknownAllocationTerminalSecondLayer
+      ? 18
+      : sourceDefense.hasImmediateStop
+        ? 11
+        : 9,
+    evidenceCode: unknownAllocationTerminalSecondLayer
+      ? `corp_terminal_central_second_layer_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`
+      : `corp_qualitative_ice_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`,
   };
 }
 

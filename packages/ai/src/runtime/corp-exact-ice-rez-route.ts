@@ -22,8 +22,10 @@ export type CorpExactIceRezRouteProjection = Readonly<{
   routeKind:
     | "access_reduction"
     | "exact_resource_exchange"
+    | "known_access_path_tax"
     | "free_persistent_defense"
     | "qualitative_encounter_defense";
+  knownAccessPathTax?: number;
   resourceExchange?: Readonly<{
     runnerRequiredCredits: number;
     runnerPumpCredits: number;
@@ -166,10 +168,22 @@ export function projectExactCorpIceRezRoute(params: {
       targetServerId,
       totalRezCredits,
     });
+  const knownAccessPathTax =
+    probabilityComparison === 0 && !resourceExchange && !freePersistentDefense
+      ? readKnownCurrentRunAccessPathTax({
+          input,
+          sourceCard,
+          targetServerId,
+          before,
+          after,
+          totalRezCredits,
+        })
+      : undefined;
   const qualitativeEncounterDefense =
     probabilityComparison === 0 &&
     !resourceExchange &&
     !freePersistentDefense &&
+    knownAccessPathTax === undefined &&
     isQualitativeEncounterDefenseOnCurrentRun({
       input,
       sourceCard,
@@ -179,6 +193,7 @@ export function projectExactCorpIceRezRoute(params: {
     probabilityComparison !== -1 &&
     !resourceExchange &&
     !freePersistentDefense &&
+    knownAccessPathTax === undefined &&
     !qualitativeEncounterDefense
   ) {
     return undefined;
@@ -195,13 +210,52 @@ export function projectExactCorpIceRezRoute(params: {
       ? "exact_resource_exchange"
       : freePersistentDefense
         ? "free_persistent_defense"
-        : qualitativeEncounterDefense
-          ? "qualitative_encounter_defense"
-          : "access_reduction",
+        : knownAccessPathTax !== undefined
+          ? "known_access_path_tax"
+          : qualitativeEncounterDefense
+            ? "qualitative_encounter_defense"
+            : "access_reduction",
     ...(resourceExchange ? { resourceExchange } : {}),
+    ...(knownAccessPathTax !== undefined ? { knownAccessPathTax } : {}),
     effect: after.protectsScore ? "satisfied" : "progress",
     totalRezCredits,
   };
+}
+
+function readKnownCurrentRunAccessPathTax(params: {
+  input: AiDecisionInput;
+  sourceCard: VisibleCard;
+  targetServerId: string;
+  before: KnownCorpScoreProtectionAssessment;
+  after: KnownCorpScoreProtectionAssessment;
+  totalRezCredits: number;
+}): number | undefined {
+  const { input, sourceCard, targetServerId, before, after, totalRezCredits } =
+    params;
+  const run = input.playerView.run;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  if (
+    run?.attackedServerId !== targetServerId ||
+    run.phase !== "approach_ice" ||
+    run.position?.kind !== "ice" ||
+    run.position.serverId !== targetServerId ||
+    server?.ice[run.position.iceIndex]?.instanceId !== sourceCard.instanceId ||
+    totalRezCredits <= 0
+  ) {
+    return undefined;
+  }
+  if (
+    targetServerId.startsWith("remote_") &&
+    !server.root.some((card) => card.known && card.type === "agenda")
+  ) {
+    return undefined;
+  }
+  const tax =
+    before.runnerCreditsRemainingOnBestAccessPath -
+    after.runnerCreditsRemainingOnBestAccessPath;
+  return Number.isSafeInteger(tax) && tax > 0 ? tax : undefined;
 }
 
 function isQualitativeEncounterDefenseOnCurrentRun(params: {
@@ -528,6 +582,7 @@ export function exactCorpIceRezRoutesEqual(
     left.sourceDefinitionId === right.sourceDefinitionId &&
     left.targetServerId === right.targetServerId &&
     left.routeKind === right.routeKind &&
+    left.knownAccessPathTax === right.knownAccessPathTax &&
     left.effect === right.effect &&
     left.totalRezCredits === right.totalRezCredits &&
     compareExactProbabilities(

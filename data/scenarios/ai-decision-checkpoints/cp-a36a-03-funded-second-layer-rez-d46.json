@@ -1,13 +1,13 @@
 {
   "schemaVersion": "ai-decision-checkpoint-v1",
-  "checkpointId": "cp-a36a-03-underfunded-agenda-d43",
+  "checkpointId": "cp-a36a-03-funded-second-layer-rez-d46",
   "source": {
     "kind": "captured_match",
-    "findingId": "a36a-underfunded-agenda-route",
-    "capturedAt": "2026-07-30T20:44:51.493Z",
+    "findingId": "a36a-funded-agenda-defense-rez",
+    "capturedAt": "2026-07-30T20:55:48.181Z",
     "matchId": "match_a36a9664458303fc",
-    "decisionIndex": 43,
-    "stateVersion": 99
+    "decisionIndex": 46,
+    "stateVersion": 106
   },
   "compatibility": {
     "engineSchemaVersion": "0.99.0",
@@ -91,8 +91,8 @@
     ]
   },
   "engine": {
-    "stateVersion": 99,
-    "stateHash": "fnv1a:d3025097",
+    "stateVersion": 106,
+    "stateHash": "fnv1a:627c9e17",
     "testOnlyGameState": {
       "matchId": "match_a36a9664458303fc",
       "baseline": {
@@ -107,7 +107,7 @@
         "aiControllerSchemaVersion": "0.99.0",
         "simulationSchemaVersion": "0.99.0"
       },
-      "stateVersion": 99,
+      "stateVersion": 106,
       "seed": "match-ms7sk6it-p5hms1",
       "randomCounter": 167,
       "randomDrawRecords": [
@@ -950,12 +950,12 @@
       "aiTurnPlanRandomCounter": 0,
       "aiTurnPlanRandomDrawRecords": [],
       "activeSide": "corp",
-      "phase": "corp_action_phase",
-      "timingPoint": "corp_action.main",
+      "phase": "run",
+      "timingPoint": "run.approach_ice",
       "corp": {
         "identity": "corp_corp_identity_001_0",
-        "credits": 3,
-        "clicks": 2,
+        "credits": 1,
+        "clicks": 0,
         "maxHandSize": 5,
         "badPublicity": 0,
         "hq": [
@@ -1002,26 +1002,20 @@
           "corp_onr_v1_282_annual-reviews_2",
           "corp_onr_v1_312_chicago-branch_3"
         ],
-        "scoreArea": [
-          "corp_onr_v1_194_corporate-downsizing_1"
-        ],
+        "scoreArea": ["corp_onr_v1_194_corporate-downsizing_1"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_237_data-wall_2"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_2"],
             "root": []
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_proteus_032_misleading-access-menus_1"
-            ],
+            "ice": ["corp_onr_proteus_032_misleading-access-menus_1"],
             "root": []
           },
           {
@@ -1039,27 +1033,24 @@
               "corp_onr_v1_279_wall-of-static_3",
               "corp_onr_v1_237_data-wall_1"
             ],
-            "root": [
-              "corp_onr_v1_194_corporate-downsizing_2"
-            ]
+            "root": ["corp_onr_v1_194_corporate-downsizing_2"]
           }
         ]
       },
       "runner": {
         "identity": "runner_runner_identity_001_0",
-        "credits": 5,
+        "credits": 4,
         "clicks": 0,
         "maxHandSize": 5,
         "coreDamage": 0,
         "tags": 0,
-        "memoryUsed": 0,
+        "memoryUsed": 2,
         "memoryLimit": 4,
         "grip": [
           "runner_onr_v1_144_tycho-mem-chip_1",
           "runner_onr_v1_071_vewy-vewy-quiet_2",
           "runner_onr_v1_087_forgotten-backup-chip_1",
-          "runner_onr_classic_043_running-interference_2",
-          "runner_onr_classic_031_rent-i-con_3"
+          "runner_onr_classic_043_running-interference_2"
         ],
         "stack": [
           "runner_onr_proteus_133_chiba-bank-account_1",
@@ -1103,21 +1094,15 @@
           "runner_onr_v1_114_temple-microcode-outlet_3",
           "runner_onr_classic_031_rent-i-con_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_196_corporate-war_3"
-        ],
+        "scoreArea": ["corp_onr_v1_196_corporate-war_3"],
         "rig": {
-          "programs": [],
+          "programs": ["runner_onr_classic_031_rent-i-con_3"],
           "hardware": [],
-          "resources": [
-            "runner_onr_v1_176_the-shell-traders_3"
-          ]
+          "resources": ["runner_onr_v1_176_the-shell-traders_3"]
         }
       },
       "specialZones": {
-        "setAside": [
-          "runner_onr_v1_011_cloak_1"
-        ],
+        "setAside": ["runner_onr_v1_011_cloak_1"],
         "removedFromGame": []
       },
       "cardInstances": {
@@ -1184,7 +1169,7 @@
           "controller": "runner",
           "zone": {
             "side": "runner",
-            "zone": "grip"
+            "zone": "rig"
           },
           "faceup": true,
           "rezzed": true,
@@ -1378,7 +1363,7 @@
           "advancementCounters": 0,
           "strengthModifier": 0,
           "counters": {
-            "shell": 6
+            "shell": 5
           }
         },
         "runner_onr_v1_035_invisibility_1": {
@@ -1912,7 +1897,7 @@
           },
           "faceup": false,
           "rezzed": false,
-          "advancementCounters": 0,
+          "advancementCounters": 2,
           "strengthModifier": 0
         },
         "corp_onr_v1_194_corporate-downsizing_3": {
@@ -2468,17 +2453,17 @@
         "stoleResearchAgendaThisTurn": false,
         "stoleGrayOpsAgendaThisTurn": false,
         "stoleBlackOpsAgendaThisTurn": false,
-        "runAttemptsThisTurn": 0,
-        "runAttemptsLastTurn": 1,
+        "runAttemptsThisTurn": 1,
+        "runAttemptsLastTurn": 0,
         "trashedAdvertisementThisTurn": false,
         "trashedTransactionsThisTurn": false,
         "nextAgendaAccessCreditGainPending": false,
         "successfulHqRunThisTurn": false,
         "successfulRunThisTurn": false,
         "damagePreventionUsage": {},
-        "runnerActionsTakenThisTurn": 0,
+        "runnerActionsTakenThisTurn": 4,
         "stolenAgendaIdsThisTurn": [],
-        "runAttemptsThisGame": 6,
+        "runAttemptsThisGame": 7,
         "trashedNodeThisTurn": false,
         "trashedNodeLastTurn": false,
         "installedResourceIdsThisTurn": [],
@@ -2512,7 +2497,26 @@
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
         "pdcaUsedSourceIdsThisTurn": []
       },
-      "turnSerial": 12
+      "turnSerial": 13,
+      "run": {
+        "runId": "run_106",
+        "attackedServerId": "remote_1",
+        "phase": "approach_ice",
+        "position": {
+          "kind": "ice",
+          "serverId": "remote_1",
+          "iceIndex": 1
+        },
+        "brokenSubroutineIndexes": [],
+        "resolvedSubroutineIndexes": [],
+        "bartmossUsedBreakerIdsThisEncounter": [],
+        "aardvarkInterceptionIceIds": [],
+        "blinkUsedSubroutinesByBreakerThisEncounter": {},
+        "successful": false,
+        "accessCount": 1,
+        "badPublicityCredits": 0,
+        "approachedIceId": "corp_onr_v1_237_data-wall_1"
+      }
     },
     "eventPrefix": [
       {
@@ -5393,6 +5397,211 @@
             "redactedKind": "installed_card"
           }
         }
+      },
+      {
+        "eventId": "evt_100",
+        "type": "advance_card",
+        "stateVersionBefore": 99,
+        "stateVersionAfter": 100,
+        "turnSerial": 12,
+        "stateHashAfter": "fnv1a:ff512c53",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "advance_card",
+          "label": "Korp advanced eine Karte.",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 2,
+          "turnActionOrdinalEnd": 2,
+          "serverLabel": "Remote 1",
+          "redactedKind": "installed_card",
+          "targets": {
+            "serverLabel": "Remote 1",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_101",
+        "type": "advance_card",
+        "stateVersionBefore": 100,
+        "stateVersionAfter": 101,
+        "turnSerial": 12,
+        "stateHashAfter": "fnv1a:c46e06ef",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "advance_card",
+          "label": "Korp advanced eine Karte.",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 3,
+          "turnActionOrdinalEnd": 3,
+          "serverLabel": "Remote 1",
+          "redactedKind": "installed_card",
+          "targets": {
+            "serverLabel": "Remote 1",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_102",
+        "type": "end_turn",
+        "stateVersionBefore": 101,
+        "stateVersionAfter": 102,
+        "turnSerial": 13,
+        "stateHashAfter": "fnv1a:efaa7b55",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "resolvedEffects": [
+            {
+              "effectId": "runner.start.delayed_install.runner_onr_v1_176_the-shell-traders_3.runner_onr_v1_011_cloak_1",
+              "kind": "counter_change",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 5,
+              "reason": "start_of_turn",
+              "counterType": "shell",
+              "removedCounterAmount": 1,
+              "remainingCounters": 5,
+              "sourceDefinitionId": "onr_v1_176_the-shell-traders",
+              "sourceTitle": "The Shell Traders",
+              "cardDefinitionId": "onr_v1_011_cloak",
+              "cardTitle": "Cloak"
+            }
+          ],
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_103",
+        "type": "gain_credit",
+        "stateVersionBefore": 102,
+        "stateVersionAfter": 103,
+        "turnSerial": 13,
+        "stateHashAfter": "fnv1a:eb82cf17",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "gain_credit",
+          "label": "1 Credit nehmen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 1,
+          "turnActionOrdinalEnd": 1,
+          "amount": 1,
+          "gainCreditsAmount": 1,
+          "effectKind": "gain_credits",
+          "amounts": {
+            "amount": 1,
+            "gainCreditsAmount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_104",
+        "type": "install_card",
+        "stateVersionBefore": 103,
+        "stateVersionAfter": 104,
+        "turnSerial": 13,
+        "stateHashAfter": "fnv1a:ebc39b37",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "install_card",
+          "label": "Rent-I-Con installieren",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 2,
+          "turnActionOrdinalEnd": 2,
+          "zoneLabel": "Rig",
+          "installCostPaid": 3,
+          "runnerInstallNormalCreditsPaid": 3,
+          "runnerInstallHostedCreditsPaid": 0,
+          "runnerInstallRecurringCreditsPaid": 0,
+          "runnerInstallTemporaryCreditsPaid": 0,
+          "runnerCreditsAfter": 3,
+          "effectKind": "install_card",
+          "amounts": {
+            "runnerCreditsAfter": 3
+          },
+          "visibility": {
+            "class": "public"
+          },
+          "cardDefinitionId": "onr_classic_031_rent-i-con",
+          "title": "Rent-I-Con"
+        }
+      },
+      {
+        "eventId": "evt_105",
+        "type": "gain_credit",
+        "stateVersionBefore": 104,
+        "stateVersionAfter": 105,
+        "turnSerial": 13,
+        "stateHashAfter": "fnv1a:39ef143d",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "gain_credit",
+          "label": "1 Credit nehmen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 3,
+          "turnActionOrdinalEnd": 3,
+          "amount": 1,
+          "gainCreditsAmount": 1,
+          "effectKind": "gain_credits",
+          "amounts": {
+            "amount": 1,
+            "gainCreditsAmount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_106",
+        "type": "start_run",
+        "stateVersionBefore": 105,
+        "stateVersionAfter": 106,
+        "turnSerial": 13,
+        "stateHashAfter": "fnv1a:627c9e17",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "start_run",
+          "label": "Run auf Remote 1",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 4,
+          "turnActionOrdinalEnd": 4,
+          "serverLabel": "Remote 1",
+          "serverId": "remote_1",
+          "baseAccessCount": 1,
+          "installedAccessBonus": 0,
+          "effectiveAccessCount": 1,
+          "runPhase": "approach_ice",
+          "effectKind": "run",
+          "targets": {
+            "serverLabel": "Remote 1"
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
       }
     ]
   },
@@ -5407,16 +5616,14 @@
       "primaryStrategyId": "corp.fast_advance",
       "phase": "fund",
       "transitionStatus": "continued",
-      "decisionsCommitted": 42,
-      "blockerIds": [
-        "corp.fast_advance:reserve_shortfall"
-      ],
+      "decisionsCommitted": 45,
+      "blockerIds": ["corp.fast_advance:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
-      "updatedAtStateVersion": 98,
+      "updatedAtStateVersion": 101,
       "state": {
         "schemaVersion": "strategic-intent-state-v1",
         "side": "corp",
-        "stateVersion": 98,
+        "stateVersion": 101,
         "source": {
           "deckStrategyProfile": "ai_internal_strategy_profile",
           "deckCapabilities": "ai_internal",
@@ -5472,12 +5679,12 @@
         "roleStatuses": [
           {
             "roleId": "corp.score_window",
-            "status": "in_deck_unseen",
+            "status": "visible",
             "source": "player_view",
             "evidence": [
               "legal_score:false",
               "legal_advance:false",
-              "remote_with_agenda:false"
+              "remote_with_agenda:true"
             ]
           }
         ],
@@ -5495,13 +5702,13 @@
         "reserve": {
           "kind": "credits",
           "required": 5,
-          "available": 3,
+          "available": 1,
           "satisfied": false,
           "evidence": [
             "reserve_source:runtime_context",
             "reserve_family:corp_fast_advance",
             "reserve_required:5",
-            "reserve_available:3",
+            "reserve_available:1",
             "relevant_action_min_cost:none"
           ]
         },
@@ -5515,7 +5722,7 @@
               "reserve_source:runtime_context",
               "reserve_family:corp_fast_advance",
               "reserve_required:5",
-              "reserve_available:3",
+              "reserve_available:1",
               "relevant_action_min_cost:none"
             ]
           }
@@ -5524,18 +5731,16 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.fast_advance",
-          "evidence": [
-            "continued:corp.fast_advance"
-          ]
+          "evidence": ["continued:corp.fast_advance"]
         },
         "commitment": {
           "strategyId": "corp.fast_advance",
-          "decisionsCommitted": 42,
+          "decisionsCommitted": 45,
           "switchMargin": 12,
           "minCommitmentDecisions": 2,
           "evidence": [
             "commitment_status:continued",
-            "decisions_committed:42",
+            "decisions_committed:45",
             "switch_margin:12"
           ]
         },
@@ -5555,16 +5760,16 @@
                 "support": 100,
                 "final": 92
               },
-              "selectionScore": 86,
+              "selectionScore": 96,
               "roleStatuses": [
                 {
                   "roleId": "corp.score_window",
-                  "status": "in_deck_unseen",
+                  "status": "visible",
                   "source": "player_view",
                   "evidence": [
                     "legal_score:false",
                     "legal_advance:false",
-                    "remote_with_agenda:false"
+                    "remote_with_agenda:true"
                   ]
                 }
               ],
@@ -5582,13 +5787,13 @@
               "reserve": {
                 "kind": "credits",
                 "required": 5,
-                "available": 3,
+                "available": 1,
                 "satisfied": false,
                 "evidence": [
                   "reserve_source:runtime_context",
                   "reserve_family:corp_fast_advance",
                   "reserve_required:5",
-                  "reserve_available:3",
+                  "reserve_available:1",
                   "relevant_action_min_cost:none"
                 ]
               },
@@ -5598,8 +5803,8 @@
                 "runtime_status:productive",
                 "final:92",
                 "anchor:87",
-                "selection_score:86",
-                "role_bonus:2",
+                "selection_score:96",
+                "role_bonus:12",
                 "target_bonus:0",
                 "reserve_bonus:-10",
                 "scoreline_feasible:true",
@@ -5620,16 +5825,16 @@
                 "support": 100,
                 "final": 72
               },
-              "selectionScore": 66,
+              "selectionScore": 76,
               "roleStatuses": [
                 {
                   "roleId": "corp.score_window",
-                  "status": "in_deck_unseen",
+                  "status": "visible",
                   "source": "player_view",
                   "evidence": [
                     "legal_score:false",
                     "legal_advance:false",
-                    "remote_with_agenda:false"
+                    "remote_with_agenda:true"
                   ]
                 }
               ],
@@ -5647,13 +5852,13 @@
               "reserve": {
                 "kind": "credits",
                 "required": 5,
-                "available": 3,
+                "available": 1,
                 "satisfied": false,
                 "evidence": [
                   "reserve_source:runtime_context",
                   "reserve_family:corp_scoreline",
                   "reserve_required:5",
-                  "reserve_available:3",
+                  "reserve_available:1",
                   "relevant_action_min_cost:none"
                 ]
               },
@@ -5663,8 +5868,8 @@
                 "runtime_status:productive",
                 "final:72",
                 "anchor:53",
-                "selection_score:66",
-                "role_bonus:2",
+                "selection_score:76",
+                "role_bonus:12",
                 "target_bonus:0",
                 "reserve_bonus:-10",
                 "scoreline_feasible:true",
@@ -5685,16 +5890,16 @@
                 "support": 100,
                 "final": 65
               },
-              "selectionScore": 59,
+              "selectionScore": 69,
               "roleStatuses": [
                 {
                   "roleId": "corp.score_window",
-                  "status": "in_deck_unseen",
+                  "status": "visible",
                   "source": "player_view",
                   "evidence": [
                     "legal_score:false",
                     "legal_advance:false",
-                    "remote_with_agenda:false"
+                    "remote_with_agenda:true"
                   ]
                 }
               ],
@@ -5712,13 +5917,13 @@
               "reserve": {
                 "kind": "credits",
                 "required": 5,
-                "available": 3,
+                "available": 1,
                 "satisfied": false,
                 "evidence": [
                   "reserve_source:runtime_context",
                   "reserve_family:corp_scoreline",
                   "reserve_required:5",
-                  "reserve_available:3",
+                  "reserve_available:1",
                   "relevant_action_min_cost:none"
                 ]
               },
@@ -5728,8 +5933,8 @@
                 "runtime_status:productive",
                 "final:65",
                 "anchor:0",
-                "selection_score:59",
-                "role_bonus:2",
+                "selection_score:69",
+                "role_bonus:12",
                 "target_bonus:0",
                 "reserve_bonus:-10",
                 "scoreline_feasible:true",
@@ -5745,9 +5950,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 82,
@@ -5761,7 +5964,7 @@
                   "status": "visible",
                   "source": "capability",
                   "evidence": [
-                    "legal_install_ice:true",
+                    "legal_install_ice:false",
                     "visible_ice:4",
                     "ice_known:4"
                   ]
@@ -5778,14 +5981,14 @@
               "reserve": {
                 "kind": "credits",
                 "required": 5,
-                "available": 3,
+                "available": 1,
                 "satisfied": false,
                 "evidence": [
                   "reserve_source:runtime_context",
                   "reserve_family:corp_ice_tax",
                   "reserve_required:5",
-                  "reserve_available:3",
-                  "relevant_action_min_cost:0"
+                  "reserve_available:1",
+                  "relevant_action_min_cost:none"
                 ]
               },
               "evidence": [
@@ -5805,9 +6008,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 59,
@@ -5821,7 +6022,7 @@
                   "status": "visible",
                   "source": "capability",
                   "evidence": [
-                    "legal_install_ice:true",
+                    "legal_install_ice:false",
                     "visible_ice:4",
                     "ice_known:4"
                   ]
@@ -5839,10 +6040,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5861,23 +6059,21 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
                 "support": 100,
                 "final": 55
               },
-              "selectionScore": 77,
+              "selectionScore": 61,
               "roleStatuses": [
                 {
                   "roleId": "corp.economy",
-                  "status": "active",
+                  "status": "in_deck_unseen",
                   "source": "capability",
                   "evidence": [
-                    "legal_gain_credit:true",
+                    "legal_gain_credit:false",
                     "bank_tools:0",
                     "rez_economy_tools:6"
                   ]
@@ -5894,10 +6090,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5905,8 +6098,8 @@
                 "runtime_status:supporting",
                 "final:55",
                 "anchor:0",
-                "selection_score:77",
-                "role_bonus:18",
+                "selection_score:61",
+                "role_bonus:2",
                 "target_bonus:4",
                 "reserve_bonus:0"
               ]
@@ -5926,16 +6119,16 @@
                 "support": 100,
                 "final": 40
               },
-              "selectionScore": 42,
+              "selectionScore": 52,
               "roleStatuses": [
                 {
                   "roleId": "corp.score_window",
-                  "status": "in_deck_unseen",
+                  "status": "visible",
                   "source": "player_view",
                   "evidence": [
                     "legal_score:false",
                     "legal_advance:false",
-                    "remote_with_agenda:false"
+                    "remote_with_agenda:true"
                   ]
                 }
               ],
@@ -5954,10 +6147,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5965,8 +6155,8 @@
                 "runtime_status:blocked",
                 "final:40",
                 "anchor:0",
-                "selection_score:42",
-                "role_bonus:2",
+                "selection_score:52",
+                "role_bonus:12",
                 "target_bonus:0",
                 "reserve_bonus:0",
                 "scoreline_feasible:true",
@@ -5989,14 +6179,14 @@
                 "support": 100,
                 "final": 40
               },
-              "selectionScore": 58,
+              "selectionScore": 42,
               "roleStatuses": [
                 {
                   "roleId": "corp.draw_engine",
-                  "status": "active",
+                  "status": "in_deck_unseen",
                   "source": "player_view",
                   "evidence": [
-                    "legal_draw:true",
+                    "legal_draw:false",
                     "legal_trigger:false",
                     "legal_activated:false",
                     "legal_strategy_engine:false"
@@ -6015,10 +6205,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6026,8 +6213,8 @@
                 "runtime_status:blocked",
                 "final:40",
                 "anchor:0",
-                "selection_score:58",
-                "role_bonus:18",
+                "selection_score:42",
+                "role_bonus:2",
                 "target_bonus:0",
                 "reserve_bonus:0"
               ]
@@ -6047,16 +6234,16 @@
                 "support": 100,
                 "final": 40
               },
-              "selectionScore": 32,
+              "selectionScore": 42,
               "roleStatuses": [
                 {
                   "roleId": "corp.score_window",
-                  "status": "in_deck_unseen",
+                  "status": "visible",
                   "source": "player_view",
                   "evidence": [
                     "legal_score:false",
                     "legal_advance:false",
-                    "remote_with_agenda:false"
+                    "remote_with_agenda:true"
                   ]
                 }
               ],
@@ -6074,13 +6261,13 @@
               "reserve": {
                 "kind": "credits",
                 "required": 5,
-                "available": 3,
+                "available": 1,
                 "satisfied": false,
                 "evidence": [
                   "reserve_source:runtime_context",
                   "reserve_family:corp_overadvance",
                   "reserve_required:5",
-                  "reserve_available:3",
+                  "reserve_available:1",
                   "relevant_action_min_cost:none"
                 ]
               },
@@ -6090,8 +6277,8 @@
                 "runtime_status:blocked",
                 "final:40",
                 "anchor:0",
-                "selection_score:32",
-                "role_bonus:2",
+                "selection_score:42",
+                "role_bonus:12",
                 "target_bonus:0",
                 "reserve_bonus:-10",
                 "scoreline_feasible:true",
@@ -6115,14 +6302,14 @@
                 "support": 65,
                 "final": 26
               },
-              "selectionScore": 48,
+              "selectionScore": 32,
               "roleStatuses": [
                 {
                   "roleId": "corp.economy",
-                  "status": "active",
+                  "status": "in_deck_unseen",
                   "source": "capability",
                   "evidence": [
-                    "legal_gain_credit:true",
+                    "legal_gain_credit:false",
                     "bank_tools:0",
                     "rez_economy_tools:6"
                   ]
@@ -6139,10 +6326,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6150,8 +6334,8 @@
                 "runtime_status:diagnostic_only",
                 "final:26",
                 "anchor:0",
-                "selection_score:48",
-                "role_bonus:18",
+                "selection_score:32",
+                "role_bonus:2",
                 "target_bonus:4",
                 "reserve_bonus:0"
               ]
@@ -6179,7 +6363,7 @@
                   "status": "in_deck_unseen",
                   "source": "player_view",
                   "evidence": [
-                    "legal_draw:true",
+                    "legal_draw:false",
                     "legal_trigger:false",
                     "legal_activated:false",
                     "legal_strategy_engine:false"
@@ -6198,10 +6382,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6244,84 +6425,55 @@
         "primary_strategy:corp.fast_advance",
         "phase:fund",
         "transition:continued",
-        "decisions_committed:42"
+        "decisions_committed:45"
       ]
     },
     "residentPlanPortfolio": {
       "schemaVersion": "resident-plan-portfolio-v2",
       "side": "corp",
-      "stateVersion": 98,
+      "stateVersion": 101,
       "instances": [
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A12",
-          "dedupeKey": "economy-visible-liquidity-development:corp:12",
-          "moduleId": "corp.economy",
+          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "dedupeKey": "standard-turn-completion",
+          "moduleId": "corp.complete_turn",
           "moduleVersion": "1",
           "side": "corp",
           "strategyLineIds": [],
-          "executionClass": "development_project",
+          "executionClass": "bounded_sequence",
           "viability": "ready",
-          "portfolioRole": "background",
-          "executionState": "idle",
-          "persistencePolicy": "sticky_goal",
+          "portfolioRole": "foreground",
+          "executionState": "executor",
+          "persistencePolicy": "locked_sequence",
           "retentionPolicy": {
-            "blockedStateVersionTtl": 2,
-            "dormantStateVersionTtl": 2,
-            "completedHistoryStateVersionTtl": 4,
+            "blockedStateVersionTtl": 0,
+            "dormantStateVersionTtl": 0,
+            "completedHistoryStateVersionTtl": 2,
             "abandonWhenTargetMissing": true,
-            "protectedWhileNeedOpen": true,
-            "protectedWhileCommitted": true
+            "protectedWhileNeedOpen": false,
+            "protectedWhileCommitted": false
           },
           "target": {
-            "kind": "capability",
-            "id": "economy-visible-liquidity-development:corp:12"
+            "kind": "player",
+            "id": "corp"
           },
           "openNeedIds": [],
-          "phase": "economy",
-          "milestone": "admitted",
+          "phase": "complete_turn",
+          "milestone": "productive_routes_exhausted",
           "moduleState": {
-            "kind": "economy",
-            "signal": {
-              "kind": "develop_liquidity",
-              "needId": "economy-visible-liquidity-development:corp:12",
-              "turnKey": "corp:12",
-              "targetCredits": 7,
-              "currentCreditsAtRevalidation": 3,
-              "gap": 4,
-              "projectedCreditGain": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
-              "priorityClass": "P6",
-              "cadence": {
-                "kind": "remaining_turn_capacity",
-                "maximumConversions": 3
-              },
-              "completion": {
-                "kind": "target_credits_or_no_clicks"
-              },
-              "revalidation": {
-                "stateVersion": 98,
-                "status": "turn_liquidity_open"
-              },
-              "urgentForScore": false,
-              "evidenceCode": "corp_engine_certified_basic_liquidity_development"
-            }
+            "kind": "turn_completion",
+            "standardEndTurnActionIds": ["corp.end_turn"]
           },
           "blockers": [],
-          "resumeConditions": [
-            {
-              "code": "route_becomes_available"
-            }
-          ],
+          "resumeConditions": [],
           "completionConditions": [
             {
-              "code": "domain_goal_satisfied"
+              "code": "turn_ended"
             }
           ],
           "abandonmentConditions": [
             {
-              "code": "target_invalidated"
+              "code": "productive_route_available"
             }
           ],
           "resourceClaimIds": [],
@@ -6329,14 +6481,14 @@
           "progress": {
             "status": "not_started",
             "value": 0,
-            "milestone": "admitted",
+            "milestone": "productive_routes_exhausted",
             "reasonCode": "plan_instance_created"
           },
-          "createdAtStateVersion": 98,
-          "updatedAtStateVersion": 98,
+          "createdAtStateVersion": 101,
+          "updatedAtStateVersion": 101,
           "evidenceRefs": [
             {
-              "code": "corp_engine_certified_basic_liquidity_development",
+              "code": "productive_legal_routes_exhausted",
               "source": "visible_state"
             }
           ]
@@ -6349,9 +6501,9 @@
           "side": "corp",
           "strategyLineIds": [],
           "executionClass": "development_project",
-          "viability": "ready",
-          "portfolioRole": "foreground",
-          "executionState": "executor",
+          "viability": "blocked",
+          "portfolioRole": "background",
+          "executionState": "idle",
           "persistencePolicy": "sticky_goal",
           "retentionPolicy": {
             "blockedStateVersionTtl": 2,
@@ -6362,11 +6514,11 @@
             "protectedWhileCommitted": true
           },
           "target": {
-            "kind": "capability",
-            "id": "rules_legal_score_action"
+            "kind": "card",
+            "id": "corp_onr_v1_194_corporate-downsizing_2"
           },
           "openNeedIds": [],
-          "phase": "install_agenda",
+          "phase": "advance_agenda",
           "milestone": "admitted",
           "moduleState": {
             "kind": "score",
@@ -6375,143 +6527,37 @@
               "agendaDefinitionId": "onr_v1_194_corporate-downsizing",
               "agendaPoints": 2,
               "agendaInstanceId": "corp_onr_v1_194_corporate-downsizing_2",
-              "actionIds": [
-                "corp.install_card.corp_onr_v1_194_corporate-downsizing_2.remote_1.corp_onr_v1_194_corporate-downsizing_2"
-              ],
               "serverId": "remote_1",
-              "phase": "install_agenda",
+              "phase": "advance_agenda",
               "sameTurnCloseout": false,
-              "deadlinePressure": false,
-              "protectionNeed": {
-                "needId": "score-protection:agenda:corp_onr_v1_194_corporate-downsizing_2:remote_1",
-                "parentProjectId": "agenda:corp_onr_v1_194_corporate-downsizing_2:remote_1",
-                "targetServerId": "remote_1",
-                "observedAtStateVersion": 98,
-                "objective": {
-                  "kind": "funded_remote_access_risk",
-                  "maximumRunnerAccessSuccessProbability": {
-                    "numerator": 1,
-                    "denominator": 4
-                  },
-                  "policySource": "corp_score_default_strict_access_risk"
-                },
-                "scoreReserve": {
-                  "creditBreakdown": [
-                    {
-                      "reserveId": "score_action:corp.install_card.corp_onr_v1_194_corporate-downsizing_2.remote_1.corp_onr_v1_194_corporate-downsizing_2",
-                      "credits": 0
-                    },
-                    {
-                      "reserveId": "remaining_advancement:corp_onr_v1_194_corporate-downsizing_2",
-                      "credits": 3
-                    },
-                    {
-                      "reserveId": "post_score_floor:corp_onr_v1_194_corporate-downsizing_2",
-                      "credits": 0
-                    }
-                  ],
-                  "hardClickReserve": 0
-                },
-                "baseline": {
-                  "knowledge": "known",
-                  "availableCorpCredits": 3,
-                  "availableCorpClicks": 3,
-                  "totalScoreReserveCredits": 3,
-                  "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|117:score_action:corp.install_card.corp_onr_v1_194_corporate-downsizing_2.remote_1.corp_onr_v1_194_corporate-downsizing_2=0|55:post_score_floor:corp_onr_v1_194_corporate-downsizing_2=0|60:remaining_advancement:corp_onr_v1_194_corporate-downsizing_2=3",
-                  "protection": {
-                    "knowledge": "known",
-                    "runnerAccessSuccessProbability": {
-                      "numerator": 0,
-                      "denominator": 1
-                    },
-                    "maximumRunnerAccessSuccessProbability": {
-                      "numerator": 1,
-                      "denominator": 4
-                    },
-                    "protectsScore": true,
-                    "requiredRandomBreakSuccesses": 0,
-                    "randomBreaks": [],
-                    "runnerCreditsRemainingOnBestAccessPath": 5,
-                    "evidence": [
-                      "scoreProtectionKnown:true",
-                      "scoreProtectionScope:visible_direct_access_prevention",
-                      "rezzedIceCount:1",
-                      "runnerAccessSuccessProbability:0/1",
-                      "maximumRunnerAccessSuccessProbability:1/4",
-                      "requiredRandomBreakSuccesses:0",
-                      "runnerCreditsRemainingOnBestAccessPath:5",
-                      "protectsScore:true"
-                    ]
-                  },
-                  "selectedRezCosts": [],
-                  "totalSelectedRezCost": 0,
-                  "creditsAfterDefense": 3,
-                  "clicksAfterDefense": 3,
-                  "preservesScoreCreditReserve": true,
-                  "preservesHardClickReserve": true,
-                  "fundedProtection": true,
-                  "minimumSatisfyingRezCost": 0,
-                  "minimumSatisfyingRezCosts": [],
-                  "minimumSatisfyingProtection": {
-                    "knowledge": "known",
-                    "runnerAccessSuccessProbability": {
-                      "numerator": 0,
-                      "denominator": 1
-                    },
-                    "maximumRunnerAccessSuccessProbability": {
-                      "numerator": 1,
-                      "denominator": 4
-                    },
-                    "protectsScore": true,
-                    "requiredRandomBreakSuccesses": 0,
-                    "randomBreaks": [],
-                    "runnerCreditsRemainingOnBestAccessPath": 5,
-                    "evidence": [
-                      "scoreProtectionKnown:true",
-                      "scoreProtectionScope:visible_direct_access_prevention",
-                      "rezzedIceCount:1",
-                      "runnerAccessSuccessProbability:0/1",
-                      "maximumRunnerAccessSuccessProbability:1/4",
-                      "requiredRandomBreakSuccesses:0",
-                      "runnerCreditsRemainingOnBestAccessPath:5",
-                      "protectsScore:true"
-                    ]
-                  },
-                  "minimumAdditionalCreditsToSatisfy": 0,
-                  "minimumAdditionalClicksToSatisfy": 0,
-                  "evidence": [
-                    "fundedScoreProtectionKnown:true",
-                    "scoreReserveCredits:3",
-                    "hardClickReserve:0",
-                    "availableRezCredits:0",
-                    "selectedRezCost:0",
-                    "creditsAfterDefense:3",
-                    "clicksAfterDefense:3",
-                    "preservesScoreCreditReserve:true",
-                    "preservesHardClickReserve:true",
-                    "fundedProtection:true",
-                    "minimumSatisfyingRezCost:0",
-                    "minimumSatisfyingRezCostCount:0",
-                    "minimumAdditionalCreditsToSatisfy:0",
-                    "minimumAdditionalClicksToSatisfy:0"
-                  ]
-                }
-              },
               "terminalScore": false,
               "feasible": true,
-              "evidenceCode": "corp_funded_protected_score_install:remote_1",
+              "continuationReserve": {
+                "agendaCardId": "corp_onr_v1_194_corporate-downsizing_2",
+                "serverId": "remote_1",
+                "requiredCreditsBeforeNextCorpTurn": 0,
+                "remainingAdvancementCounters": 1,
+                "nextCorpTurnGuaranteedFlexibleClicks": 3,
+                "certifiedCreditGainFromFreeClicks": 2
+              },
+              "evidenceCode": "engine_certified_next_turn_score_continuation:corp_onr_v1_194_corporate-downsizing_2:remote_1",
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:12",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:12", "opening_corp_turn_ceiling:3"]
               }
             }
           },
-          "blockers": [],
+          "blockers": [
+            {
+              "code": "no_current_corp_route",
+              "owner": "plan_module",
+              "removable": true,
+              "resumeCondition": {
+                "code": "route_becomes_available"
+              }
+            }
+          ],
           "resumeConditions": [
             {
               "code": "route_becomes_available"
@@ -6536,10 +6582,10 @@
             "reasonCode": "plan_instance_created"
           },
           "createdAtStateVersion": 98,
-          "updatedAtStateVersion": 98,
+          "updatedAtStateVersion": 101,
           "evidenceRefs": [
             {
-              "code": "corp_funded_protected_score_install:remote_1",
+              "code": "engine_certified_next_turn_score_continuation:corp_onr_v1_194_corporate-downsizing_2:remote_1",
               "source": "visible_state"
             }
           ]
@@ -6676,10 +6722,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:6",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:6", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -6740,9 +6783,7 @@
             "kind": "capability",
             "id": "score-material:general"
           },
-          "openNeedIds": [
-            "score-material:general"
-          ],
+          "openNeedIds": ["score-material:general"],
           "phase": "select_agenda",
           "milestone": "admitted",
           "moduleState": {
@@ -6794,38 +6835,38 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A12",
-          "stateVersion": 98,
+          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "stateVersion": 101,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
           "instanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_2%3Aremote_1",
-          "stateVersion": 98,
-          "reason": "discovered",
-          "detailCode": "new_proposal"
+          "stateVersion": 101,
+          "reason": "retained",
+          "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
-          "stateVersion": 98,
+          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A12",
+          "stateVersion": 101,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
           "instanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_196_corporate-war_3%3Anew_remote",
-          "stateVersion": 98,
+          "stateVersion": 101,
           "reason": "retained",
           "detailCode": "retention_protected"
         },
         {
           "instanceId": "plan:corp.score_agenda:general",
-          "stateVersion": 98,
+          "stateVersion": 101,
           "reason": "retained",
           "detailCode": "retention_protected"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_2%3Aremote_1",
-          "stateVersion": 98,
+          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "stateVersion": 101,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
           "toExecutionState": "executor",
@@ -6845,8 +6886,8 @@
           },
           "milestoneId": "install_agenda",
           "createdAtStateVersion": 3,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_agenda_scored"
@@ -6857,7 +6898,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_agenda_scored",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -7221,14 +7262,14 @@
             "targetServerId": "remote_1",
             "targetCardInstanceId": "corp_onr_v1_194_corporate-downsizing_2"
           },
-          "milestoneId": "install_agenda",
+          "milestoneId": "advance_agenda",
           "createdAtStateVersion": 77,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "current",
             "reasonCode": "campaign_requoted_after_public_opponent_outcomes",
-            "lastQuotedAtStateVersion": 98
+            "lastQuotedAtStateVersion": 101
           },
           "reaction": {
             "status": "idle",
@@ -7236,7 +7277,7 @@
             "deadline": "none",
             "claimDisposition": "active",
             "reasonCode": "campaign_has_no_open_reaction_window",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -7341,9 +7382,11 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
+            "corp_funded_protected_score_advance:remote_1",
             "corp_funded_protected_score_install:remote_1",
             "corp_last_click_score_install_deferred:remote_1",
-            "corp_score_protection_required:remote_1"
+            "corp_score_protection_required:remote_1",
+            "engine_certified_next_turn_score_continuation:corp_onr_v1_194_corporate-downsizing_2:remote_1"
           ]
         },
         {
@@ -7358,8 +7401,8 @@
           },
           "milestoneId": "install_agenda",
           "createdAtStateVersion": 3,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_card_missing"
@@ -7370,7 +7413,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_card_missing",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -7735,8 +7778,8 @@
           },
           "milestoneId": "install_agenda",
           "createdAtStateVersion": 49,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_card_missing"
@@ -7747,7 +7790,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_card_missing",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -7919,8 +7962,8 @@
           },
           "milestoneId": "advance_agenda",
           "createdAtStateVersion": 50,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_card_missing"
@@ -7931,7 +7974,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_card_missing",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -8146,8 +8189,8 @@
           },
           "milestoneId": "install_ice",
           "createdAtStateVersion": 3,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_card_publicly_trashed"
@@ -8158,7 +8201,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_card_publicly_trashed",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -8464,8 +8507,8 @@
           },
           "milestoneId": "install_ice",
           "createdAtStateVersion": 3,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_card_publicly_trashed"
@@ -8476,7 +8519,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_card_publicly_trashed",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -8782,8 +8825,8 @@
           },
           "milestoneId": "install_ice",
           "createdAtStateVersion": 3,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_card_publicly_trashed"
@@ -8794,7 +8837,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_card_publicly_trashed",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -9100,8 +9143,8 @@
           },
           "milestoneId": "install_ice",
           "createdAtStateVersion": 3,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_card_publicly_trashed"
@@ -9112,7 +9155,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_card_publicly_trashed",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -9418,8 +9461,8 @@
           },
           "milestoneId": "install_ice",
           "createdAtStateVersion": 3,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_card_publicly_trashed"
@@ -9430,7 +9473,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_card_publicly_trashed",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -9736,8 +9779,8 @@
           },
           "milestoneId": "install_ice",
           "createdAtStateVersion": 3,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_card_publicly_trashed"
@@ -9748,7 +9791,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_card_publicly_trashed",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -10078,8 +10121,8 @@
           },
           "milestoneId": "install_ice",
           "createdAtStateVersion": 3,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_card_publicly_trashed"
@@ -10090,7 +10133,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_card_publicly_trashed",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -10420,8 +10463,8 @@
           },
           "milestoneId": "install_ice",
           "createdAtStateVersion": 3,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_card_publicly_trashed"
@@ -10432,7 +10475,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_card_publicly_trashed",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -10762,8 +10805,8 @@
           },
           "milestoneId": "install_ice",
           "createdAtStateVersion": 65,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "not_applicable",
             "reasonCode": "campaign_target_card_publicly_trashed"
@@ -10774,7 +10817,7 @@
             "deadline": "none",
             "claimDisposition": "released",
             "reasonCode": "campaign_target_card_publicly_trashed",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -10892,8 +10935,8 @@
           },
           "milestoneId": "rez_response",
           "createdAtStateVersion": 77,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "required_now",
             "reasonCode": "campaign_claim_requires_current_domain_requote"
@@ -10904,7 +10947,7 @@
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_claim_requires_current_domain_requote",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -11023,8 +11066,8 @@
           },
           "milestoneId": "rez_response",
           "createdAtStateVersion": 3,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "required_now",
             "reasonCode": "campaign_claim_requires_current_domain_requote"
@@ -11035,7 +11078,7 @@
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_claim_requires_current_domain_requote",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -11366,8 +11409,8 @@
           },
           "milestoneId": "rez_response",
           "createdAtStateVersion": 3,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "required_now",
             "reasonCode": "campaign_claim_requires_current_domain_requote"
@@ -11378,7 +11421,7 @@
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_claim_requires_current_domain_requote",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -11685,8 +11728,8 @@
           },
           "milestoneId": "rez_response",
           "createdAtStateVersion": 55,
-          "updatedAtStateVersion": 98,
-          "observedThroughStateVersion": 98,
+          "updatedAtStateVersion": 101,
+          "observedThroughStateVersion": 101,
           "requote": {
             "status": "required_now",
             "reasonCode": "campaign_claim_requires_current_domain_requote"
@@ -11697,7 +11740,7 @@
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_claim_requires_current_domain_requote",
-            "lastTransitionAtStateVersion": 98
+            "lastTransitionAtStateVersion": 101
           },
           "publicOutcomes": [
             {
@@ -11897,76 +11940,62 @@
       ],
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v1",
-        "commitmentId": "fnv1a:13c87ae4",
-        "sourcePlanId": "fnv1a:7591ff5e",
-        "sourceLineHash": "fnv1a:50d254bd",
+        "commitmentId": "fnv1a:fcce50d8",
+        "sourcePlanId": "fnv1a:1249ad38",
+        "sourceLineHash": "fnv1a:d45f2776",
         "side": "corp",
         "turnKey": "corp:turn:12",
         "planningRulesFingerprint": "fnv1a:d9f60908",
         "runtimeInstanceId": "corp-turn-planner-runtime-v1",
         "createdAtStateIdentity": {
-          "stateVersion": 98,
-          "sideSafePlanningFingerprint": "fnv1a:b203ab83"
+          "stateVersion": 101,
+          "sideSafePlanningFingerprint": "fnv1a:13f7f8a3"
         },
         "lastValidatedStateIdentity": {
-          "stateVersion": 98,
-          "sideSafePlanningFingerprint": "fnv1a:b203ab83"
+          "stateVersion": 101,
+          "sideSafePlanningFingerprint": "fnv1a:13f7f8a3"
         },
         "phases": [
           {
-            "phaseId": "fnv1a:b6f11df8",
+            "phaseId": "fnv1a:e887666f",
             "root": {
-              "planInstanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_2%3Aremote_1",
-              "moduleId": "corp.score_agenda",
-              "milestoneId": "agenda_advanced",
+              "planInstanceId": "plan:corp.complete_turn:standard-turn-completion",
+              "moduleId": "corp.complete_turn",
+              "milestoneId": "complete_turn_after_productive_routes_exhausted",
               "provenance": "resident"
             },
-            "rootAssessmentFingerprint": "fnv1a:ee39fa01",
-            "entryFrameKey": "fnv1a:2ae04a9a",
+            "rootAssessmentFingerprint": "fnv1a:38077574",
+            "entryFrameKey": "fnv1a:b2ff9507",
             "entryConditions": [],
             "completionCondition": {
-              "code": "turn_plan_milestone:agenda_advanced"
+              "code": "turn_plan_milestone:complete_turn_after_productive_routes_exhausted"
             },
             "supportLeaves": [],
             "nodes": [
               {
-                "nodeId": "fnv1a:092d2d2c",
+                "nodeId": "fnv1a:7ab74603",
                 "invocation": {
-                  "semanticActionType": "install.card",
-                  "sourceCardInstanceId": "corp_onr_v1_194_corporate-downsizing_2",
-                  "boundTargets": [
-                    {
-                      "slotId": "server",
-                      "values": [
-                        {
-                          "kind": "server",
-                          "id": "remote_1"
-                        }
-                      ],
-                      "ordering": "single"
-                    }
-                  ],
+                  "semanticActionType": "turn_flow.end_turn",
+                  "boundTargets": [],
                   "boundChoices": [],
-                  "routeKey": "fnv1a:32ccd83b"
+                  "routeKey": "fnv1a:dce8a629"
                 },
                 "expectation": {
-                  "nodeId": "fnv1a:092d2d2c",
-                  "actionType": "install_card",
-                  "semanticActionFingerprint": "fnv1a:25fb7eb5",
-                  "costFingerprint": "fnv1a:1ac78dfa",
+                  "nodeId": "fnv1a:7ab74603",
+                  "actionType": "end_turn",
+                  "semanticActionFingerprint": "fnv1a:fffb8eae",
+                  "costFingerprint": "fnv1a:8f25a8d4",
                   "targetRequirementFingerprint": "fnv1a:531ed5b6",
                   "choiceRequirementFingerprint": "fnv1a:205cdce0",
-                  "payloadFingerprint": "fnv1a:e845136c",
+                  "payloadFingerprint": "fnv1a:1fed88c4",
                   "expectedStateDeltaCodes": [
-                    "action_applied:install.card",
-                    "milestone_attempted:agenda_advanced"
+                    "action_applied:turn_flow.end_turn",
+                    "milestone_attempted:complete_turn_after_productive_routes_exhausted"
                   ]
                 }
               }
             ],
-            "protectedValueClaimIds": [
-              "fnv1a:8059a1ae:agenda"
-            ],
+            "protectedValueClaimIds": [],
             "transition": {
               "kind": "projected_plan_discovery_required"
             }
@@ -11977,22 +12006,15 @@
           "nodeIndex": 0
         },
         "phaseEntry": {
-          "phaseId": "fnv1a:b6f11df8",
+          "phaseId": "fnv1a:e887666f",
           "status": "validated",
-          "validatedAtStateVersion": 98,
+          "validatedAtStateVersion": 101,
           "reasonCode": "initial_phase_entry_validated"
         },
         "hardPlanCommitmentIds": [],
-        "campaignIds": [
-          "campaign:agenda:corp_onr_v1_194_corporate-downsizing_2:remote_1"
-        ],
-        "quoteIds": [
-          "fnv1a:3a836747",
-          "fnv1a:84025568"
-        ],
-        "valueClaimIds": [
-          "fnv1a:8059a1ae:agenda"
-        ],
+        "campaignIds": [],
+        "quoteIds": [],
+        "valueClaimIds": [],
         "priorityCoverage": {
           "requiredObligationIds": [],
           "satisfiedObligationIds": [],
@@ -12000,56 +12022,52 @@
           "deferredObligationIds": []
         },
         "nextExpectedTransition": {
-          "expectationId": "fnv1a:e867a3b3",
-          "phaseId": "fnv1a:b6f11df8",
-          "nodeId": "fnv1a:092d2d2c",
-          "routeKey": "fnv1a:32ccd83b",
+          "expectationId": "fnv1a:d744c173",
+          "phaseId": "fnv1a:e887666f",
+          "nodeId": "fnv1a:7ab74603",
+          "routeKey": "fnv1a:dce8a629",
           "expectedStateDeltaCodes": [
-            "action_applied:install.card",
-            "milestone_attempted:agenda_advanced"
+            "action_applied:turn_flow.end_turn",
+            "milestone_attempted:complete_turn_after_productive_routes_exhausted"
           ]
         },
         "status": "active",
         "observationClass": "expected_no_material_change"
       },
       "turnPlanExecutionLease": {
-        "leaseId": "fnv1a:6a8371b7",
-        "commitmentId": "fnv1a:13c87ae4",
-        "sourcePlanId": "fnv1a:7591ff5e",
-        "phaseId": "fnv1a:b6f11df8",
-        "nodeId": "fnv1a:092d2d2c",
-        "routeKey": "fnv1a:32ccd83b",
+        "leaseId": "fnv1a:654d4cff",
+        "commitmentId": "fnv1a:fcce50d8",
+        "sourcePlanId": "fnv1a:1249ad38",
+        "phaseId": "fnv1a:e887666f",
+        "nodeId": "fnv1a:7ab74603",
+        "routeKey": "fnv1a:dce8a629",
         "stateIdentity": {
-          "stateVersion": 98,
-          "sideSafePlanningFingerprint": "fnv1a:b203ab83"
+          "stateVersion": 101,
+          "sideSafePlanningFingerprint": "fnv1a:13f7f8a3"
         },
         "currentBinding": {
-          "actionId": "corp.install_card.corp_onr_v1_194_corporate-downsizing_2.remote_1.corp_onr_v1_194_corporate-downsizing_2",
-          "stateVersion": 98,
-          "semanticActionSetFingerprint": "fnv1a:803b1453",
-          "invocationKey": "fnv1a:c912eca1"
+          "actionId": "corp.end_turn",
+          "stateVersion": 101,
+          "semanticActionSetFingerprint": "fnv1a:b84a54da",
+          "invocationKey": "fnv1a:ddafabf9"
         },
-        "actionType": "install_card",
-        "expectationId": "fnv1a:e867a3b3"
+        "actionType": "end_turn",
+        "expectationId": "fnv1a:d744c173"
       },
-      "rootForegroundInstanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_2%3Aremote_1",
-      "executorInstanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_2%3Aremote_1"
+      "rootForegroundInstanceId": "plan:corp.complete_turn:standard-turn-completion",
+      "executorInstanceId": "plan:corp.complete_turn:standard-turn-completion"
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "gain_credit"
-      },
-      {
-        "targetServerId": "remote_1",
-        "type": "install_card"
-      }
-    ],
     "forbiddenActions": [
       {
-        "sourceDefinitionId": "onr_v1_194_corporate-downsizing",
-        "type": "advance_card"
+        "type": "decline_rez"
+      }
+    ],
+    "acceptableActions": [
+      {
+        "sourceDefinitionId": "onr_v1_237_data-wall",
+        "type": "rez_ice"
       }
     ]
   }

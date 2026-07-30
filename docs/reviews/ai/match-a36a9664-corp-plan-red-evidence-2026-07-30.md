@@ -30,15 +30,15 @@ Sechs Zustände reproduzieren auf unverändertem aktuellem Code exakt als
 `behavior_regression`. Ein historischer Fehler ist bereits behoben und bleibt
 als grüner Checkpoint erhalten.
 
-| Checkpoint | Decision/State | Erwartung | Aktuelle Auswahl | Status |
-|---|---|---|---|---|
-| `cp-a36a-01-turn-completion-d11` | D11/SV20 | normalen Credit nehmen, Zug nicht mit zwei Aktionen beenden | `corp.end_turn` | **rot – behavior_regression** |
-| `cp-a36a-02-unsafe-corporate-war-d24` | D24/SV50 | Corporate War nicht hinter sichtbar beantwortbare Einzelschicht legen | Chicago Branch in neuem Remote entwickeln | **grün – aktuell nicht reproduzierbar** |
-| `cp-a36a-03-underfunded-agenda-d43` | D43/SV99 | Defense-Reserve erhalten statt weiter advancen | Corporate Downsizing advancen | **rot – behavior_regression** |
-| `cp-a36a-04-overtime-overflow-d75` | D75/SV174 | keine Action-Capacity-Operation ohne gebundene Aktionslücke | Overtime Incentives spielen | **rot – behavior_regression** |
-| `cp-a36a-05-counter-bank-replacement-d101` | D101/SV231 | Corporate War in neuen Remote statt über die Bank installieren | Corporate War ersetzt Vapor Ops in `remote_1` | **rot – behavior_regression** |
-| `cp-a36a-06-terminal-rd-defense-d122` | D122/SV279 | ICE vor R&D statt Credit bei terminaler Zentralgefahr | Basis-Credit | **rot – behavior_regression** |
-| `cp-a36a-07-counter-bank-ready-d89` | D89/SV203 | geladene Bank für Cross-Remote-Score nutzen | Basis-Credit für falsche Schutzlücke | **rot – behavior_regression** |
+| Checkpoint                                 | Decision/State | Erwartung                                                             | Aktuelle Auswahl                              | Status                                  |
+| ------------------------------------------ | -------------- | --------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------- |
+| `cp-a36a-01-turn-completion-d11`           | D11/SV20       | normalen Credit nehmen, Zug nicht mit zwei Aktionen beenden           | `corp.end_turn`                               | **rot – behavior_regression**           |
+| `cp-a36a-02-unsafe-corporate-war-d24`      | D24/SV50       | Corporate War nicht hinter sichtbar beantwortbare Einzelschicht legen | Chicago Branch in neuem Remote entwickeln     | **grün – aktuell nicht reproduzierbar** |
+| `cp-a36a-03-funded-second-layer-rez-d46`   | D46/SV106      | exakt bezahlbare zweite Agenda-Defense-Schicht rezzen                 | Rez ablehnen                                  | **rot – behavior_regression**           |
+| `cp-a36a-04-overtime-overflow-d75`         | D75/SV174      | keine Action-Capacity-Operation ohne gebundene Aktionslücke           | Overtime Incentives spielen                   | **rot – behavior_regression**           |
+| `cp-a36a-05-counter-bank-replacement-d101` | D101/SV231     | Corporate War in neuen Remote statt über die Bank installieren        | Corporate War ersetzt Vapor Ops in `remote_1` | **rot – behavior_regression**           |
+| `cp-a36a-06-terminal-rd-defense-d122`      | D122/SV279     | ICE vor R&D statt Credit bei terminaler Zentralgefahr                 | Basis-Credit                                  | **rot – behavior_regression**           |
+| `cp-a36a-07-counter-bank-ready-d89`        | D89/SV203      | geladene Bank für Cross-Remote-Score nutzen                           | Basis-Credit für falsche Schutzlücke          | **rot – behavior_regression**           |
 
 ## Gegenfaktische Bewertung
 
@@ -59,13 +59,15 @@ bereits auf aktuellem Code behoben. Der Checkpoint verbietet die alte
 Corporate-War-Installation weiterhin, akzeptiert aber die heutige
 Planentwicklung. Für D24 erfolgt kein weiterer Verhaltensfix.
 
-### D43 – unfinanzierte zweite Schutzschicht
+### D46 – finanzierte zweite Schutzschicht wird nicht aktiviert
 
-Die Runtime begründet den Advance mit
-`corp_funded_protected_score_advance:remote_1`, obwohl die Corp danach nur
-einen Credit besitzt und Data Wall im nächsten Run nicht belastbar rezzen
-kann. Als positive Menge sind Basis-Credit und eine weitere Installation in
-den gebundenen Remote zugelassen; der konkrete Advance ist verboten.
+Die Corp besitzt beim Angriff noch genau einen Credit; der vollständige
+Engine-Rez-Quote der aktuell erreichten Data Wall verlangt genau einen
+Credit. Die bekannte Schutzbewertung zeigt bei unveränderter
+Zugriffswahrscheinlichkeit eine zusätzliche Runner-Pfadsteuer von einem
+Credit. Die Runtime lehnt das Rezzen dennoch wegen
+`corp_ice_rez_resource_exchange_unknown` ab. Der Checkpoint verlangt die
+konkrete `rez_ice`-Action und verbietet `decline_rez`.
 
 ### D75 – Action Capacity als Handmüllentsorgung
 
