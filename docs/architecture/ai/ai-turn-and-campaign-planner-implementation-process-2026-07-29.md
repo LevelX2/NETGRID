@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK11 abgeschlossen; ZK12 aktiv**
+Status: **ZK00 bis ZK12 abgeschlossen; ZK13 aktiv**
 
 Stand: 2026-07-29
 
@@ -1115,3 +1115,37 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
   Proteus-Readiness, Deck-Doctrine-Gate sowie `git diff --check`: grün.
 - Führende Evidence:
   `docs/reviews/ai/ai-behavior-baseline-v1-turn-planner-cutover-2026-07-29.md`.
+
+### ZK12 – abgeschlossen
+
+- Der bestehende Kampagnenzustand führt öffentliche Rez-, Trace-,
+  Prevention- und Ambush-Reaktionsfenster typisiert zurück. Mehrere
+  überlappende Fenster werden als kleine sortierte Menge gehalten; Event-IDs
+  verhindern Doppelverarbeitung.
+- `idle`, `paused`, `resumable`, `expired` und `terminal` beschreiben nur den
+  Reaktionsstatus. `current_run_end` und `next_own_turn` sind die beiden
+  notwendigen Deadlines. Der zugehörige Claim ist genau einmal `active`,
+  `reserved`, `requote_required` oder `released`; eine numerische
+  Doppelzählung findet in dieser Persistenzschicht nicht statt.
+- Offene Reaktionsfenster pausieren die Kampagne im Gegnerzug. Nach
+  vollständiger öffentlicher Auflösung und aktueller Domainquote wird sie am
+  eigenen Zug resumiert. Ein bis dahin offenes Fenster blockiert fail-closed
+  und verlangt eine neue Quote. Abschluss oder sichtbarer Zielverlust geben
+  den Claim frei.
+- Run-Ende schließt noch offene laufgebundene Reaktionsfenster
+  deterministisch. Kompromittierung, Trash und Zielverlust behalten ihre
+  stärkeren terminalen beziehungsweise blockierenden Übergänge.
+- Die Kontinuitätsschicht speichert keine Action-ID und besitzt weder
+  Scheduler- noch Ausführungsautorität. Sie verarbeitet ausschließlich
+  PublicEvents und den aktuellen sichtbaren Corp-Zustand.
+- Die private privilegierte Buganzeige zeigt Reaktionsstatus, offene Fenster,
+  Deadline, Claim-Disposition und Übergangsgrund vollständig zusätzlich zu
+  allen Karten und Händen beider Seiten; sie bleibt absichtlich nicht
+  seitensicher.
+- Fokussierte Campaign-, Restart-, Commitment-, Agenda-, Defense- und
+  Live-Runtime-Suite: 206/206 Tests grün. Shared-Sanitizer 16/16 und
+  Web-Debugoverlay 1/1 grün. Vollständige AI-Suite: 529 Testdateien und
+  4.335 Tests grün. AI-, Shared- und Web-Typecheck sowie `git diff --check`:
+  grün.
+- Führende Evidence:
+  `docs/reviews/ai/corp-opponent-campaign-reactions-2026-07-30.md`.

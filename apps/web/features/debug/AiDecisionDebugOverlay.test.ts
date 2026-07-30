@@ -58,6 +58,10 @@ describe("AI plan-first decision export", () => {
               kind: "opening_rush",
               status: "awaiting_opponent_outcome",
               requoteStatus: "awaiting_next_own_turn",
+              reactionStatus: "paused",
+              openReactionWindowKinds: ["trace"],
+              reactionDeadline: "current_run_end",
+              claimDisposition: "reserved",
             },
           ],
         },
@@ -288,6 +292,11 @@ function trace(): MaintenanceAiTraceDetail {
               openingRushOpportunityKey: "opening-rush:2:agenda-1:remote_1",
               requoteStatus: "awaiting_next_own_turn",
               requoteReasonCode: "campaign_waits_for_public_opponent_outcomes",
+              reactionStatus: "paused",
+              openReactionWindowKinds: ["trace"],
+              reactionDeadline: "current_run_end",
+              claimDisposition: "reserved",
+              reactionReasonCode: "campaign_paused_for_public_reaction_windows",
               publicOutcomes: [
                 {
                   outcomeId: "event-run:run_declared:campaign",

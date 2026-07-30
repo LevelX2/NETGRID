@@ -229,6 +229,153 @@ describe("Corp opponent-turn campaign continuity", () => {
       requote: { status: "awaiting_next_own_turn" },
     });
   });
+
+  it("pauses overlapping public reaction windows and resumes only after all are resolved", () => {
+    const initial = reconcileCorpCampaignContinuity({
+      input: decisionInput({ stateVersion: 10, activeSide: "corp" }),
+      previous: [],
+      descriptors: [agendaDescriptor()],
+    });
+    const openEvents = [
+      event(11, "rez_window_opened", {
+        actor: "corp",
+        actionType: "rez_window_opened",
+        serverId: "remote_1",
+        rezWindowOpened: true,
+      }),
+      event(12, "trace_started", {
+        actor: "corp",
+        actionType: "trace_started",
+        traceStarted: true,
+      }),
+      event(13, "prevention_window_opened", {
+        actor: "runner",
+        actionType: "prevention_window_opened",
+        preventionWindowOpened: true,
+      }),
+      event(14, "trace_resolved", {
+        actor: "corp",
+        actionType: "trace_resolved",
+        traceSuccessful: false,
+      }),
+    ];
+    const paused = reconcileCorpCampaignContinuity({
+      input: decisionInput({
+        stateVersion: 14,
+        activeSide: "runner",
+        events: openEvents,
+      }),
+      previous: initial,
+      descriptors: [agendaDescriptor()],
+    });
+
+    expect(paused[0]).toMatchObject({
+      status: "awaiting_opponent_outcome",
+      requote: {
+        reasonCode: "campaign_paused_for_public_reaction_windows",
+      },
+      reaction: {
+        status: "paused",
+        openWindowKinds: ["prevention", "rez"],
+        deadline: "current_run_end",
+        claimDisposition: "reserved",
+      },
+    });
+
+    const resolvedEvents = [
+      ...openEvents,
+      event(15, "rez_window_resolved", {
+        actor: "corp",
+        actionType: "rez_window_resolved",
+        serverId: "remote_1",
+        rezWindowResolved: true,
+      }),
+      event(16, "prevention_window_resolved", {
+        actor: "runner",
+        actionType: "prevention_window_resolved",
+        preventionWindowResolved: true,
+      }),
+      event(17, "end_run", {
+        actor: "runner",
+        actionType: "end_run",
+        serverId: "remote_1",
+        runEnded: true,
+      }),
+    ];
+    const resumed = reconcileCorpCampaignContinuity({
+      input: decisionInput({
+        stateVersion: 18,
+        activeSide: "corp",
+        events: resolvedEvents,
+      }),
+      previous: paused,
+      descriptors: [agendaDescriptor()],
+    });
+
+    expect(resumed[0]).toMatchObject({
+      status: "continuable",
+      requote: {
+        status: "current",
+        reasonCode: "campaign_resumed_after_public_reactions",
+      },
+      reaction: {
+        status: "resumable",
+        openWindowKinds: [],
+        deadline: "none",
+        claimDisposition: "active",
+      },
+    });
+  });
+
+  it("expires an unresolved reaction deadline without granting action authority", () => {
+    const initial = reconcileCorpCampaignContinuity({
+      input: decisionInput({ stateVersion: 10, activeSide: "corp" }),
+      previous: [],
+      descriptors: [agendaDescriptor()],
+    });
+    const opened = event(11, "ambush_triggered", {
+      actor: "corp",
+      actionType: "ambush_triggered",
+      serverId: "remote_1",
+      ambushTriggered: true,
+    });
+    const paused = reconcileCorpCampaignContinuity({
+      input: decisionInput({
+        stateVersion: 11,
+        activeSide: "runner",
+        events: [opened],
+      }),
+      previous: initial,
+      descriptors: [agendaDescriptor()],
+    });
+    const expired = reconcileCorpCampaignContinuity({
+      input: decisionInput({
+        stateVersion: 12,
+        activeSide: "corp",
+        events: [opened],
+      }),
+      previous: paused,
+      descriptors: [agendaDescriptor()],
+    });
+
+    expect(expired[0]).toMatchObject({
+      status: "blocked",
+      requote: {
+        status: "required_now",
+        reasonCode: "campaign_reaction_deadline_expired_before_own_turn",
+      },
+      reaction: {
+        status: "expired",
+        openWindowKinds: ["ambush"],
+        claimDisposition: "requote_required",
+      },
+    });
+    expect(
+      Object.keys(expired[0] ?? {}).some((key) =>
+        key.toLocaleLowerCase("en-US").includes("actionid"),
+      ),
+    ).toBe(false);
+  });
 });
 
 function openingRushDescriptor(): CorpCampaignDescriptor {

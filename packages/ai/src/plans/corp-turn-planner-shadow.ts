@@ -1440,6 +1440,11 @@ function debugForShadow(params: {
               : {}),
             requoteStatus: campaign.requote.status,
             requoteReasonCode: campaign.requote.reasonCode,
+            reactionStatus: campaign.reaction.status,
+            openReactionWindowKinds: [...campaign.reaction.openWindowKinds],
+            reactionDeadline: campaign.reaction.deadline,
+            claimDisposition: campaign.reaction.claimDisposition,
+            reactionReasonCode: campaign.reaction.reasonCode,
             publicOutcomes: campaign.publicOutcomes.map((outcome) => ({
               outcomeId: outcome.outcomeId,
               eventId: outcome.eventId,

@@ -492,6 +492,11 @@ describe("AI decision debug sanitizing", () => {
               openingRushOpportunityKey: "opening-rush:2:agenda-1:remote_1",
               requoteStatus: "awaiting_next_own_turn",
               requoteReasonCode: "campaign_waits_for_public_opponent_outcomes",
+              reactionStatus: "paused",
+              openReactionWindowKinds: ["trace"],
+              reactionDeadline: "current_run_end",
+              claimDisposition: "reserved",
+              reactionReasonCode: "campaign_paused_for_public_reaction_windows",
               publicOutcomes: [
                 {
                   outcomeId: "event-run:run_declared:campaign",

@@ -191,6 +191,19 @@ function reconcileCampaign(
             ? { lastQuotedAtStateVersion: stateVersion }
             : {}),
         },
+        reaction: {
+          status: "idle",
+          openWindowKinds: [],
+          deadline:
+            input.playerView.activeSide === "runner" ? "next_own_turn" : "none",
+          claimDisposition:
+            input.playerView.activeSide === "runner" ? "reserved" : "active",
+          reasonCode:
+            input.playerView.activeSide === "runner"
+              ? "campaign_waits_for_public_opponent_reactions"
+              : "campaign_has_no_open_reaction_window",
+          lastTransitionAtStateVersion: stateVersion,
+        },
         publicOutcomes: [],
         evidenceCodes: [
           CORP_OPPONENT_CAMPAIGN_CONTINUITY_VERSION,
@@ -212,6 +225,12 @@ function reconcileCampaign(
     ...newOutcomes,
   ]).slice(-32);
   base.observedThroughStateVersion = stateVersion;
+  base.reaction = reconcileReactionState({
+    input,
+    previous: previous?.reaction,
+    outcomes: base.publicOutcomes,
+    descriptorCurrentlyAdmitted: descriptor?.currentlyAdmitted === true,
+  });
 
   const terminal = visibleTerminalStatus(input, base);
   const compromised = base.publicOutcomes.some(
@@ -224,6 +243,14 @@ function reconcileCampaign(
     base.requote = {
       status: "not_applicable",
       reasonCode: terminal.reasonCode,
+    };
+    base.reaction = {
+      status: "terminal",
+      openWindowKinds: [],
+      deadline: "none",
+      claimDisposition: "released",
+      reasonCode: terminal.reasonCode,
+      lastTransitionAtStateVersion: stateVersion,
     };
     base.evidenceCodes = sortedUnique([
       ...base.evidenceCodes,
@@ -238,16 +265,26 @@ function reconcileCampaign(
       status: "awaiting_next_own_turn",
       reasonCode: compromised
         ? "campaign_remote_compromised_awaiting_own_turn_requote"
-        : "campaign_waits_for_public_opponent_outcomes",
+        : base.reaction.openWindowKinds.length > 0
+          ? "campaign_paused_for_public_reaction_windows"
+          : "campaign_waits_for_public_opponent_outcomes",
+    };
+  } else if (base.reaction.status === "expired") {
+    base.status = "blocked";
+    base.requote = {
+      status: "required_now",
+      reasonCode: base.reaction.reasonCode,
     };
   } else if (descriptor?.currentlyAdmitted) {
     base.status = "continuable";
     base.requote = {
       status: "current",
       reasonCode:
-        base.publicOutcomes.length > 0
-          ? "campaign_requoted_after_public_opponent_outcomes"
-          : "campaign_current_quote_available",
+        base.reaction.status === "resumable"
+          ? "campaign_resumed_after_public_reactions"
+          : base.publicOutcomes.length > 0
+            ? "campaign_requoted_after_public_opponent_outcomes"
+            : "campaign_current_quote_available",
       lastQuotedAtStateVersion: stateVersion,
     };
   } else {
@@ -267,6 +304,107 @@ function reconcileCampaign(
     `campaign_requote:${base.requote.status}`,
   ]);
   return base;
+}
+
+function reconcileReactionState(params: {
+  input: AiDecisionInput;
+  previous: ResidentCorpCampaign["reaction"] | undefined;
+  outcomes: readonly ResidentCorpCampaignPublicOutcome[];
+  descriptorCurrentlyAdmitted: boolean;
+}): ResidentCorpCampaign["reaction"] {
+  const openWindowKinds = new Set<
+    ResidentCorpCampaign["reaction"]["openWindowKinds"][number]
+  >();
+  let observedReaction = false;
+  for (const outcome of params.outcomes) {
+    const transition = reactionTransitionForOutcome(outcome.kind);
+    if (!transition) {
+      if (outcome.kind === "run_completed") openWindowKinds.clear();
+      continue;
+    }
+    observedReaction = true;
+    if (transition.state === "opened") openWindowKinds.add(transition.kind);
+    else openWindowKinds.delete(transition.kind);
+  }
+  const sortedOpenWindows = [...openWindowKinds].sort();
+  const stateVersion = params.input.playerView.stateVersion;
+  if (params.input.playerView.activeSide === "runner") {
+    return {
+      status: sortedOpenWindows.length > 0 ? "paused" : "idle",
+      openWindowKinds: sortedOpenWindows,
+      deadline:
+        sortedOpenWindows.length > 0 ? "current_run_end" : "next_own_turn",
+      claimDisposition: "reserved",
+      reasonCode:
+        sortedOpenWindows.length > 0
+          ? "campaign_paused_for_public_reaction_windows"
+          : observedReaction
+            ? "campaign_reactions_resolved_awaiting_next_own_turn"
+            : "campaign_waits_for_public_opponent_reactions",
+      lastTransitionAtStateVersion: stateVersion,
+    };
+  }
+  if (sortedOpenWindows.length > 0) {
+    return {
+      status: "expired",
+      openWindowKinds: sortedOpenWindows,
+      deadline: "none",
+      claimDisposition: "requote_required",
+      reasonCode: "campaign_reaction_deadline_expired_before_own_turn",
+      lastTransitionAtStateVersion: stateVersion,
+    };
+  }
+  if (!params.descriptorCurrentlyAdmitted) {
+    return {
+      status: "expired",
+      openWindowKinds: [],
+      deadline: "none",
+      claimDisposition: "requote_required",
+      reasonCode: "campaign_claim_requires_current_domain_requote",
+      lastTransitionAtStateVersion: stateVersion,
+    };
+  }
+  const resumes =
+    observedReaction || params.previous?.status === "paused";
+  return {
+    status: resumes ? "resumable" : "idle",
+    openWindowKinds: [],
+    deadline: "none",
+    claimDisposition: "active",
+    reasonCode: resumes
+      ? "campaign_reactions_resolved_and_claim_revalidated"
+      : "campaign_has_no_open_reaction_window",
+    lastTransitionAtStateVersion: stateVersion,
+  };
+}
+
+function reactionTransitionForOutcome(
+  kind: ResidentCorpCampaignPublicOutcome["kind"],
+):
+  | {
+      kind: ResidentCorpCampaign["reaction"]["openWindowKinds"][number];
+      state: "opened" | "resolved";
+    }
+  | undefined {
+  const transitions: Partial<
+    Record<
+      ResidentCorpCampaignPublicOutcome["kind"],
+      {
+        kind: ResidentCorpCampaign["reaction"]["openWindowKinds"][number];
+        state: "opened" | "resolved";
+      }
+    >
+  > = {
+    rez_window_opened: { kind: "rez", state: "opened" },
+    rez_window_resolved: { kind: "rez", state: "resolved" },
+    trace_started: { kind: "trace", state: "opened" },
+    trace_resolved: { kind: "trace", state: "resolved" },
+    prevention_window_opened: { kind: "prevention", state: "opened" },
+    prevention_window_resolved: { kind: "prevention", state: "resolved" },
+    ambush_triggered: { kind: "ambush", state: "opened" },
+    ambush_resolved: { kind: "ambush", state: "resolved" },
+  };
+  return transitions[kind];
 }
 
 function publicOutcomesForCampaign(
@@ -359,21 +497,81 @@ function outcomesForEvent(
   }
   if (
     sameServer &&
+    (actionType === "rez_window_opened" || payload.rezWindowOpened === true)
+  ) {
+    add(
+      "rez_window_opened",
+      "campaign_rez_window_open",
+      "campaign_public_rez_window_open",
+    );
+  }
+  if (
+    sameServer &&
+    (actionType === "rez_window_resolved" || payload.rezWindowResolved === true)
+  ) {
+    add(
+      "rez_window_resolved",
+      "campaign_rez_window_resolved",
+      "campaign_public_rez_window_resolved",
+    );
+  }
+  if (
+    sameServer &&
     (["rez_ice", "rez_card"].includes(actionType) ||
       payload.rezzed === true ||
       typeof payload.rezCostPaid === "number")
   ) {
     add("corp_rez", "campaign_defense_rezzed", "campaign_public_rez");
   }
+  if (actionType === "trace_started" || payload.traceStarted === true) {
+    add(
+      "trace_started",
+      "campaign_trace_window_open",
+      "campaign_public_trace_started",
+    );
+  }
   if (
-    actionType.includes("trace") ||
-    payload.traceStarted === true ||
+    actionType === "trace_resolved" ||
     typeof payload.traceSuccessful === "boolean"
   ) {
     add(
       "trace_resolved",
       "campaign_trace_outcome_observed",
       "campaign_public_trace",
+    );
+  }
+  if (
+    actionType === "prevention_window_opened" ||
+    payload.preventionWindowOpened === true
+  ) {
+    add(
+      "prevention_window_opened",
+      "campaign_prevention_window_open",
+      "campaign_public_prevention_window_open",
+    );
+  }
+  if (
+    actionType === "prevention_window_resolved" ||
+    payload.preventionWindowResolved === true
+  ) {
+    add(
+      "prevention_window_resolved",
+      "campaign_prevention_window_resolved",
+      "campaign_public_prevention_window_resolved",
+    );
+  }
+  if (actionType === "ambush_triggered" || payload.ambushTriggered === true) {
+    add(
+      "ambush_triggered",
+      "campaign_ambush_window_open",
+      "campaign_public_ambush_triggered",
+    );
+  }
+  if (actionType === "ambush_resolved" || payload.ambushResolved === true) {
+    add(
+      "ambush_resolved",
+      "campaign_ambush_window_resolved",
+      "campaign_public_ambush_resolved",
     );
   }
   const accessEvent =

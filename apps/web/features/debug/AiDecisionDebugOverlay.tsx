@@ -648,10 +648,21 @@ function AiDecisionDebugPlanFirstTraceView({
                         ],
                         ["Requote", campaign.requoteReasonCode],
                         [
+                          "Reaktionsstatus",
+                          `${campaign.reactionStatus} · ${campaign.reactionDeadline}`,
+                        ],
+                        ["Claim", campaign.claimDisposition],
+                        ["Reaktionsgrund", campaign.reactionReasonCode],
+                        [
                           "Öffentliche Outcomes",
                           String(campaign.publicOutcomes.length),
                         ],
                       ]}
+                    />
+                    <AiDecisionDebugChips
+                      title="Offene Reaktionsfenster"
+                      items={campaign.openReactionWindowKinds}
+                      tone="muted"
                     />
                     <AiDecisionDebugChips
                       title="Outcome-Rückführung"

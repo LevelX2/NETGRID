@@ -65,8 +65,15 @@ export type ResidentCorpCampaignPublicOutcome = {
   kind:
     | "run_declared"
     | "run_completed"
+    | "rez_window_opened"
+    | "rez_window_resolved"
     | "corp_rez"
+    | "trace_started"
     | "trace_resolved"
+    | "prevention_window_opened"
+    | "prevention_window_resolved"
+    | "ambush_triggered"
+    | "ambush_resolved"
     | "access_resolved"
     | "card_trashed"
     | "remote_compromised";
@@ -107,6 +114,14 @@ export type ResidentCorpCampaign = {
       | "not_applicable";
     reasonCode: string;
     lastQuotedAtStateVersion?: number;
+  };
+  reaction: {
+    status: "idle" | "paused" | "resumable" | "expired" | "terminal";
+    openWindowKinds: Array<"rez" | "trace" | "prevention" | "ambush">;
+    deadline: "none" | "current_run_end" | "next_own_turn";
+    claimDisposition: "active" | "reserved" | "requote_required" | "released";
+    reasonCode: string;
+    lastTransitionAtStateVersion: number;
   };
   publicOutcomes: ResidentCorpCampaignPublicOutcome[];
   evidenceCodes: string[];
@@ -448,6 +463,10 @@ export function assertResidentPlanPortfolio(
           campaign.createdAtStateVersion > campaign.updatedAtStateVersion ||
           campaign.updatedAtStateVersion > portfolio.stateVersion ||
           campaign.observedThroughStateVersion > portfolio.stateVersion ||
+          campaign.reaction.lastTransitionAtStateVersion >
+            portfolio.stateVersion ||
+          new Set(campaign.reaction.openWindowKinds).size !==
+            campaign.reaction.openWindowKinds.length ||
           recursiveKeys(campaign).some((key) =>
             key.toLocaleLowerCase("en-US").includes("actionid"),
           ),

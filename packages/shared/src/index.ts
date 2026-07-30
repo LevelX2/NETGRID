@@ -3274,6 +3274,11 @@ export type AiTurnPlanningDebug = {
       | "required_now"
       | "not_applicable";
     requoteReasonCode: string;
+    reactionStatus: "idle" | "paused" | "resumable" | "expired" | "terminal";
+    openReactionWindowKinds: Array<"rez" | "trace" | "prevention" | "ambush">;
+    reactionDeadline: "none" | "current_run_end" | "next_own_turn";
+    claimDisposition: "active" | "reserved" | "requote_required" | "released";
+    reactionReasonCode: string;
     publicOutcomes: Array<{
       outcomeId: string;
       eventId: string;
@@ -3282,8 +3287,15 @@ export type AiTurnPlanningDebug = {
       kind:
         | "run_declared"
         | "run_completed"
+        | "rez_window_opened"
+        | "rez_window_resolved"
         | "corp_rez"
+        | "trace_started"
         | "trace_resolved"
+        | "prevention_window_opened"
+        | "prevention_window_resolved"
+        | "ambush_triggered"
+        | "ambush_resolved"
         | "access_resolved"
         | "card_trashed"
         | "remote_compromised";
@@ -3972,6 +3984,11 @@ function isAiTurnPlanningCampaigns(value: unknown): boolean {
         "openingRushOpportunityKey",
         "requoteStatus",
         "requoteReasonCode",
+        "reactionStatus",
+        "openReactionWindowKinds",
+        "reactionDeadline",
+        "claimDisposition",
+        "reactionReasonCode",
         "publicOutcomes",
         "evidenceCodes",
       ]) ||
@@ -3981,6 +3998,7 @@ function isAiTurnPlanningCampaigns(value: unknown): boolean {
         "moduleId",
         "milestoneId",
         "requoteReasonCode",
+        "reactionReasonCode",
       ].every((field) => typeof campaign[field] === "string") ||
       ![
         "targetServerId",
@@ -4004,6 +4022,19 @@ function isAiTurnPlanningCampaigns(value: unknown): boolean {
         "required_now",
         "not_applicable",
       ].includes(String(campaign.requoteStatus)) ||
+      !["idle", "paused", "resumable", "expired", "terminal"].includes(
+        String(campaign.reactionStatus),
+      ) ||
+      !["none", "current_run_end", "next_own_turn"].includes(
+        String(campaign.reactionDeadline),
+      ) ||
+      !["active", "reserved", "requote_required", "released"].includes(
+        String(campaign.claimDisposition),
+      ) ||
+      !Array.isArray(campaign.openReactionWindowKinds) ||
+      !campaign.openReactionWindowKinds.every((kind) =>
+        ["rez", "trace", "prevention", "ambush"].includes(String(kind)),
+      ) ||
       !Array.isArray(campaign.evidenceCodes) ||
       !campaign.evidenceCodes.every((code) => typeof code === "string") ||
       !Array.isArray(campaign.publicOutcomes)
@@ -4039,8 +4070,15 @@ function isAiTurnPlanningCampaigns(value: unknown): boolean {
         [
           "run_declared",
           "run_completed",
+          "rez_window_opened",
+          "rez_window_resolved",
           "corp_rez",
+          "trace_started",
           "trace_resolved",
+          "prevention_window_opened",
+          "prevention_window_resolved",
+          "ambush_triggered",
+          "ambush_resolved",
           "access_resolved",
           "card_trashed",
           "remote_compromised",
