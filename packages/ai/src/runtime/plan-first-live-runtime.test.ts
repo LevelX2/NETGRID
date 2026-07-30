@@ -35,6 +35,10 @@ import {
   buildPlanningRulesContext,
   buildPlanningStateIdentity,
 } from "../plans/turn-planning-contracts";
+import {
+  exportAiRuntimeCheckpoint,
+  restoreAiRuntimeCheckpoint,
+} from "../evaluation/decision-checkpoints/runtime-checkpoint";
 
 describe("authoritative plan-first live runtime", () => {
   it("admits an owned event-run head only when its current pressure route is executable", () => {
@@ -3792,16 +3796,13 @@ describe("authoritative plan-first live runtime", () => {
     const blockedParent = structuredClone(input);
     blockedParent.legalActions = [credit, installPocketVr];
     blockedParent.playerView.legalActions = blockedParent.legalActions;
-    expect(() =>
+    expect(
       liveContext().chooseSemanticRuntimeAction(blockedParent, {}),
-    ).toThrow(
-      expect.objectContaining({
-        code: "missing_plan_module_coverage",
-        context: expect.objectContaining({
-          unresolvedActionIds: [credit.actionId, installPocketVr.actionId],
-        }),
-      }),
-    );
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
     expect(
       residentPlanPortfolioSnapshot(blockedParent)?.instances.some(
         (instance) =>
@@ -4098,16 +4099,13 @@ describe("authoritative plan-first live runtime", () => {
       server("remote_1"),
     ];
     resetResidentPlanPortfolioMemory();
-    expect(() =>
+    expect(
       liveContext().chooseSemanticRuntimeAction(emptyFort, {}),
-    ).toThrow(
-      expect.objectContaining({
-        code: "missing_plan_module_coverage",
-        context: expect.objectContaining({
-          unresolvedActionIds: ["credit"],
-        }),
-      }),
-    );
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
   });
 
   it("rezzes Red Herrings only at the latest relevant scoring-fort window", () => {
@@ -4501,6 +4499,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("corp", [scoreAgenda]);
     input.playerView.stateVersion = 11;
+    scoreAgenda.expiresAtStateVersion = 11;
     input.decisionId = "score-downsizing:11";
     input.playerView.servers = [
       server(
@@ -5404,7 +5403,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       acceptedDecision.decisionDebug?.planFirstDecision?.turnPlanning,
     ).toMatchObject({
-      mode: "shadow",
+      mode: "cutover",
       coverage: {
         status: "pass",
         coveragePercent: 100,
@@ -5450,7 +5449,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       declinedDecision.decisionDebug?.planFirstDecision?.turnPlanning,
     ).toMatchObject({
-      mode: "shadow",
+      mode: "cutover",
       coverage: {
         status: "pass",
         coveragePercent: 100,
@@ -11002,6 +11001,118 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.actionId).toBe("gain-credit");
     expect(decision.evidence).toContain("plan_priority_class:P6");
     expect(decision.actionId).not.toBe("search-ap-action");
+  });
+  it("uses cutover by default and preserves legacy comparison only as an explicit rollback mode", () => {
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("corp", [credit]);
+    input.playerView.own.credits = 0;
+    input.playerView.own.clicks = 1;
+
+    resetResidentPlanPortfolioMemory();
+    const cutover = liveContext().chooseSemanticRuntimeAction(input, {});
+    const cutoverDebug =
+      cutover.decisionDebug?.planFirstDecision?.turnPlanning;
+    const stored = residentPlanPortfolioSnapshot(input);
+    expect(cutover).toMatchObject({ actionId: credit.actionId });
+    expect(cutover.decisionDebug?.planFirstDecision).toMatchObject({
+      selectionAuthority: "turn_plan_commitment",
+      turnPlanning: {
+        mode: "cutover",
+        commitment: {
+          status: "active",
+          rematerialization: {
+            status: "executable",
+            actionId: credit.actionId,
+          },
+        },
+      },
+    });
+    expect(stored?.turnPlanCommitment?.status).toBe("active");
+    expect(stored?.turnPlanExecutionLease).toMatchObject({
+      commitmentId: stored?.turnPlanCommitment?.commitmentId,
+      currentBinding: { actionId: credit.actionId },
+    });
+
+    const repeated = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(repeated.actionId).toBe(cutover.actionId);
+    expect(
+      repeated.decisionDebug?.planFirstDecision?.turnPlanning?.commitment,
+    ).toEqual(cutoverDebug?.commitment);
+
+    resetResidentPlanPortfolioMemory();
+    const legacyComparison = liveContext().chooseSemanticRuntimeAction(input, {
+      corpTurnPlannerMode: "legacy_compare",
+    });
+    expect(legacyComparison.decisionDebug?.planFirstDecision).toMatchObject({
+      selectionAuthority: "resident_plan_instance",
+      turnPlanning: {
+        mode: "shadow",
+        evidenceCodes: expect.arrayContaining([
+          "corp_turn_planner_shadow_only",
+          "shadow_result_never_controls_live_action",
+        ]),
+      },
+    });
+    expect(residentPlanPortfolioSnapshot(input)?.turnPlanCommitment).toBe(
+      undefined,
+    );
+  });
+
+  it("invalidates a persisted turn execution lease on restart and replans before acting", () => {
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("corp", [credit]);
+    input.playerView.own.credits = 0;
+    input.playerView.own.clicks = 1;
+    const deckSnapshotId = "turn-planner-restart-test";
+
+    resetResidentPlanPortfolioMemory();
+    liveContext().chooseSemanticRuntimeAction(input, {});
+    const checkpoint = exportAiRuntimeCheckpoint(input, deckSnapshotId);
+    expect(
+      checkpoint.residentPlanPortfolio?.turnPlanExecutionLease,
+    ).toBeDefined();
+
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(input, deckSnapshotId, checkpoint);
+    const restored = residentPlanPortfolioSnapshot(input);
+    expect(restored?.turnPlanCommitment).toMatchObject({
+      status: "replanned",
+      replanReason: "runtime_restarted",
+    });
+    expect(restored?.turnPlanExecutionLease).toBeUndefined();
+
+    const replanned = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(replanned).toMatchObject({ actionId: credit.actionId });
+    expect(
+      replanned.decisionDebug?.planFirstDecision?.turnPlanning,
+    ).toMatchObject({
+      mode: "cutover",
+      commitment: {
+        status: "active",
+        replanReason: "runtime_restarted",
+        rematerialization: {
+          status: "executable",
+          actionId: credit.actionId,
+        },
+      },
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.turnPlanExecutionLease,
+    ).toBeDefined();
   });
 });
 

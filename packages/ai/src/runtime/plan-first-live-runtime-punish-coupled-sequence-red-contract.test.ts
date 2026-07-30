@@ -8,7 +8,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { afterEach, describe, expect, it } from "vitest";
-import { chooseCorpAction } from "../index";
+import { chooseCorpAction as chooseCorpActionRuntime } from "../index";
 import type { PlanInstance } from "../plans/plan-kernel-types";
 import {
   resetResidentPlanPortfolioMemory,
@@ -31,6 +31,11 @@ const SCORCHED_DEFINITION_ID = "onr_v1_302_scorched-earth";
 const PUNITIVE_DEFINITION_ID = "onr_v1_301_punitive-counterstrike";
 const CLOSED_ACCOUNTS_DEFINITION_ID = "onr_v1_285_closed-accounts";
 const AGENDA_DEFINITION_ID = "onr_v1_203_hostile-takeover";
+
+const chooseCorpAction = (input: AiDecisionInput) =>
+  chooseCorpActionRuntime(input, {
+    corpTurnPlannerMode: "legacy_compare",
+  });
 
 describe("plan-first coupled Corp punish sequence contract", () => {
   afterEach(() => {
@@ -639,6 +644,9 @@ function coupledPunishInput(params: {
     endTurn(params.stateVersion),
   ];
   const input = aiInput("corp", actions);
+  for (const action of actions) {
+    action.expiresAtStateVersion = params.stateVersion;
+  }
   input.decisionId = "coupled-punish-sequence:corp";
   input.actionNumber = params.stateVersion;
   input.playerView.stateVersion = params.stateVersion;

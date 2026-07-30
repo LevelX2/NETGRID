@@ -125,6 +125,7 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     const playDecision = chooseCorpAction(input, {
       quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
       persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
     });
     expect(playDecision.actionId).toBe(actions[0]!.actionId);
     expect(playDecision.fallbackUsed).toBe(false);
@@ -146,6 +147,7 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
 
     const choiceDecision = chooseCorpAction(decisionInput(state), {
       persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
     });
     expect(decisionActionType(state, choiceDecision)).toBe("resolve_choice");
     expect(choiceDecision.selectedChoices).toEqual({
@@ -197,6 +199,7 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     const fundingDecision = chooseCorpAction(initialInput, {
       quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
       persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
     });
     expect(decisionActionType(state, fundingDecision)).toBe("gain_credit");
     expect(fundingDecision.evidence).toContain(
@@ -213,11 +216,13 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     const playDecision = chooseCorpAction(fundedInput, {
       quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
       persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
     });
     expect(playDecision.actionId).toBe(fundedActions[0]!.actionId);
     state = applyDecision(state, playDecision);
     const choiceDecision = chooseCorpAction(decisionInput(state), {
       persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
     });
     expect(decisionActionType(state, choiceDecision)).toBe("resolve_choice");
     expect(choiceDecision.selectedChoices?.selectedOptionIds).toHaveLength(1);

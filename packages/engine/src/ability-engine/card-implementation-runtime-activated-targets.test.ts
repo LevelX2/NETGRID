@@ -9,6 +9,33 @@ import {
 import { actionCapacityLegalActionPayloadForEffects } from "./card-implementation-action-capacity";
 
 describe("activatedAbilityPayload advancement semantics", () => {
+  it("publishes a deterministic controller draw for abstract action planning", () => {
+    const ability: ActivatedCardAbilityImplementation = {
+      kind: "activated",
+      timing: "corp_main",
+      costs: [{ kind: "action", amount: 1 }],
+      effects: [
+        {
+          kind: "draw_cards",
+          recipient: "corp",
+          amount: 2,
+          visibility: "public",
+        },
+      ],
+    };
+    const state = {
+      cardInstances: {
+        source: { controller: "corp" },
+      },
+    } as unknown as GameState;
+
+    expect(
+      activatedAbilityPayload("source" as never, ability, 0, state),
+    ).toMatchObject({
+      drawCardsAmount: 2,
+    });
+  });
+
   it("publishes the exact visible all-available hosted-credit cashout", () => {
     const ability: ActivatedCardAbilityImplementation = {
       kind: "activated",

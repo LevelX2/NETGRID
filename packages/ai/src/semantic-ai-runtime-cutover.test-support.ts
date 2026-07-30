@@ -4,21 +4,27 @@ import type { AiDeckStrategyProfile } from "./deck-doctrine-strategy";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import type { SemanticRuntimeDependencies } from "./runtime/semantic-runtime";
 import type { SemanticRuntimeChoice } from "./runtime/semantic-runtime-types";
-import type {
-  AiDecisionInput,
-  AiDifficulty,
-  LegalAction,
-  PlayerView,
-  PublicGameEvent,
-  Side,
-  VisibleCard,
+import {
+  CURRENT_RULES_BASELINE,
+  type AiDecisionInput,
+  type AiDifficulty,
+  type LegalAction,
+  type PlayerView,
+  type PublicGameEvent,
+  type Side,
+  type VisibleCard,
 } from "@netgrid/shared";
+import {
+  buildPlanningRulesContext,
+  buildPlanningStateIdentity,
+} from "./plans/turn-planning-contracts";
 
 export function aiInput(
   side: Side,
   legalActions: LegalAction[],
 ): AiDecisionInput {
-  return {
+  for (const action of legalActions) action.expiresAtStateVersion = 1;
+  const input: AiDecisionInput = {
     side,
     playerView: playerView(side, legalActions),
     eventTail: [],
@@ -29,6 +35,15 @@ export function aiInput(
     actionNumber: 1,
     profileId: `${side}-semantic-runtime-cutover-test`,
   };
+  Object.assign(input, {
+    planningRulesContext: buildPlanningRulesContext({
+      rulesBaseline: CURRENT_RULES_BASELINE,
+      formatProfileId: "semantic-runtime-cutover-test",
+      cardPoolSnapshotId: "semantic-runtime-cutover-test",
+    }),
+    planningStateIdentity: buildPlanningStateIdentity(input),
+  });
+  return input;
 }
 
 export function playerView(

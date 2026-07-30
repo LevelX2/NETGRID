@@ -171,10 +171,16 @@ describe("Deck strategy runtime vertical slices", () => {
       strategyId: "corp.tag_trace_punish",
     });
 
-    expect(() => chooseCorpAction(taggedInput)).toThrow(
+    expect(() =>
+      chooseCorpAction(taggedInput, {
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toThrow(
       /missing_plan_module_coverage/,
     );
-    const noWindow = chooseCorpAction(noWindowInput);
+    const noWindow = chooseCorpAction(noWindowInput, {
+      corpTurnPlannerMode: "legacy_compare",
+    });
 
     expect(noWindow.actionId).toBe("draw-score-material");
     expect(noWindow.evidence).toEqual(
@@ -261,8 +267,12 @@ describe("Deck strategy runtime vertical slices", () => {
       strategyId: "corp.remote_scoring",
     });
 
-    const scoreDecision = chooseCorpAction(scoreInput);
-    const contestableDecision = chooseCorpAction(contestableInput);
+    const scoreDecision = chooseCorpAction(scoreInput, {
+      corpTurnPlannerMode: "legacy_compare",
+    });
+    const contestableDecision = chooseCorpAction(contestableInput, {
+      corpTurnPlannerMode: "legacy_compare",
+    });
 
     expect(scoreDecision.actionId).toBe("score-agenda");
     expect(scoreDecision.evidence).toEqual(
@@ -385,8 +395,12 @@ describe("Deck strategy runtime vertical slices", () => {
       strategyId: "corp.ice_tax_glacier",
     });
 
-    const funded = chooseCorpAction(fundedInput);
-    const unfunded = chooseCorpAction(unfundedInput);
+    const funded = chooseCorpAction(fundedInput, {
+      corpTurnPlannerMode: "legacy_compare",
+    });
+    const unfunded = chooseCorpAction(unfundedInput, {
+      corpTurnPlannerMode: "legacy_compare",
+    });
 
     expect(funded.actionId).toBe("rez-ice");
     expect(funded.evidence).toEqual(

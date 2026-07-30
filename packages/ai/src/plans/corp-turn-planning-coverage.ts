@@ -64,6 +64,7 @@ export const CORP_TURN_PLANNING_MODULE_COVERAGE: readonly CorpTurnPlanningModule
         "corp_window.decline_rez",
         "draw.card",
         "card_ability.*",
+        "play.corp_operation",
         "economy.gain_credit",
         "turn_flow.stop_restricted_action_sequence",
       ],
@@ -153,8 +154,10 @@ export const CORP_TURN_PLANNING_MODULE_COVERAGE: readonly CorpTurnPlanningModule
         "trash.resources",
         "install.card",
         "play.corp_operation",
+        "economy.gain_credit",
         "card_ability.*",
         "score.advance_card",
+        "score_conversion.*",
         "turn_flow.stop_restricted_action_sequence",
       ],
     },
@@ -597,8 +600,13 @@ export function buildCorpTurnPlanningCoverageReport(params: {
         candidate.actionType === "end_turn" &&
         candidate.semanticActionType === "turn_flow.end_turn" &&
         candidate.sourceKind === "game_rule" &&
-        params.input.playerView.own.clicks > 0
+        (params.input.playerView.own.clicks > 0 ||
+          [...validHeadsByActionId.entries()].some(
+            ([actionId, currentHeads]) =>
+              actionId !== candidate.actionId && currentHeads.length > 0,
+          ))
       ) {
+        const usableCapacity = params.input.playerView.own.clicks > 0;
         return {
           actionId: candidate.actionId,
           actionType: candidate.actionType,
@@ -607,7 +615,11 @@ export function buildCorpTurnPlanningCoverageReport(params: {
           ownerModuleId: "corp.complete_turn",
           horizonCapability: "current_turn_only",
           campaignQuoteStatus: "not_required",
-          evidenceCodes: ["turn_completion_deferred_usable_capacity"],
+          evidenceCodes: [
+            usableCapacity
+              ? "turn_completion_deferred_usable_capacity"
+              : "turn_completion_deferred_productive_route",
+          ],
         };
       }
       issues.push({

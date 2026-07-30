@@ -31,11 +31,18 @@ import {
 import type { PlanModuleId, PlanTargetRef } from "./plan-kernel-types";
 import {
   enumerateCurrentPlanSchedulerRoutes,
+  type PlanActionDisposition,
   type PlanSchedulerContext,
   type PlanSchedulerPlanningRouteCandidate,
   type PlanSchedulerResult,
   type SidePlanRegistry,
 } from "./plan-scheduler";
+import {
+  compareValidatedPlanAssessments,
+  type PriorityClass,
+  type ValidatedPlanAssessment,
+} from "./plan-assessment";
+import type { PlanRouteStep, SemanticContinuation } from "./plan-route";
 import {
   buildCanonicalLegalActionInvocation,
   buildSemanticActionSetFingerprint,
@@ -71,6 +78,7 @@ type PlanningInput = AiDecisionInput & {
 
 type HeadVariant = {
   invocation: CanonicalLegalActionInvocation;
+  requiredTargetIds?: string[];
   nextMilestoneId: string;
   instanceHorizon: "current_turn" | "multi_turn";
   campaignQuote?: CampaignMilestoneQuote;
@@ -78,6 +86,7 @@ type HeadVariant = {
   valueClaims: CampaignValueClaim[];
   evidenceCodes: string[];
   variantKey: string;
+  priorityClass?: PriorityClass;
 };
 
 export type CorpTurnPlannerShadowResult = {
@@ -87,6 +96,17 @@ export type CorpTurnPlannerShadowResult = {
   liveActionId: string;
   shadowActionId?: string;
   agreement: boolean;
+  heads: TurnPlanningHeadCandidate[];
+  selectedLine?: TurnRemainderSearchLine;
+  selectedHead?: TurnPlanningHeadCandidate;
+  selectedPlanInstanceId?: string;
+  headBindings: Array<{
+    candidateId: string;
+    planInstanceId: string;
+    assessment: ValidatedPlanAssessment;
+    step: PlanRouteStep;
+    continuation?: SemanticContinuation;
+  }>;
 };
 
 export function buildCorpTurnPlannerShadow(params: {
@@ -98,6 +118,7 @@ export function buildCorpTurnPlannerShadow(params: {
     input: AiDecisionInput,
     action: LegalAction,
   ) => AiDecision["selectedChoices"] | undefined;
+  authorityMode?: "shadow" | "cutover";
 }): CorpTurnPlannerShadowResult | undefined {
   const input = params.input as PlanningInput;
   const rulesContext = input.planningRulesContext;
@@ -139,7 +160,7 @@ export function buildCorpTurnPlannerShadow(params: {
     agendaSlices,
     defenseSlice,
   });
-  const heads = planningRoutes.flatMap((route) =>
+  const rawHeadRecords = planningRoutes.flatMap((route) =>
     headsForRoute({
       input,
       stateIdentity,
@@ -148,14 +169,72 @@ export function buildCorpTurnPlannerShadow(params: {
       agendaSlices,
       defenseSlice,
       selectedChoicesForDecision: params.selectedChoicesForDecision,
-    }),
+    }).map((head) => ({ head, route })),
   );
+  const deduplicatedHeadRecords = [
+    ...rawHeadRecords
+      .sort(
+        (left, right) =>
+          compareValidatedPlanAssessments(
+            left.route.assessment,
+            right.route.assessment,
+          ) || left.head.candidateId.localeCompare(right.head.candidateId),
+      )
+      .reduce((records, record) => {
+        const key = [
+          record.head.rootPlanInstanceId,
+          record.head.moduleId,
+          record.head.nextMilestoneId,
+          record.head.invocation.invocationKey,
+          record.head.currentBinding.actionId,
+        ].join(":");
+        if (!records.has(key)) records.set(key, record);
+        return records;
+      }, new Map<string, (typeof rawHeadRecords)[number]>())
+      .values(),
+  ];
+  const authoritativeModuleByActionId = new Map<string, PlanModuleId>();
+  for (const record of deduplicatedHeadRecords) {
+    if (
+      !authoritativeModuleByActionId.has(record.head.currentBinding.actionId)
+    ) {
+      authoritativeModuleByActionId.set(
+        record.head.currentBinding.actionId,
+        record.head.moduleId,
+      );
+    }
+  }
+  const headRecords = deduplicatedHeadRecords.filter(
+    (record) =>
+      authoritativeModuleByActionId.get(record.head.currentBinding.actionId) ===
+      record.head.moduleId,
+  );
+  const heads = headRecords.map((record) => record.head);
+  const coverageDispositions = dispositionsForUnmaterializedSpecializedLines({
+    existing: params.context.actionDispositions ?? [],
+    heads,
+    agendaSlices,
+    defenseSlice,
+    domain,
+    candidates: params.context.actionCandidates,
+  });
+  const preferredRootCandidateIds = selectedAgendaHeadCandidateIds(
+    headRecords,
+    agendaSlices,
+  );
+  for (const head of heads) {
+    if (
+      head.currentBinding.actionId === params.runtimeResult.route.head.actionId
+    ) {
+      preferredRootCandidateIds.add(head.candidateId);
+    }
+  }
   const coverage = buildCorpTurnPlanningCoverageReport({
     input,
     stateIdentity,
     candidates: params.context.actionCandidates,
     heads,
-    dispositions: params.context.actionDispositions ?? [],
+    dispositions: coverageDispositions,
     engineWindowActionIds: [],
   });
   const entryFrame = buildProjectedDecisionFrame({
@@ -170,6 +249,8 @@ export function buildCorpTurnPlannerShadow(params: {
     heads,
     candidates: params.context.actionCandidates,
     urgentPriorityClass,
+    preferredRootCandidateIds,
+    moduleSelectedActionId: params.runtimeResult.route.head.actionId,
   });
   const search = searchDeterministicRemainderTurnPlans({
     entryFrame,
@@ -180,15 +261,37 @@ export function buildCorpTurnPlannerShadow(params: {
     offers,
     budget: { maximumDepth: 1 },
   });
-  const selectedLine = search.lines.find(
+  const selectedSearchLine = search.lines.find(
     (line) => line.lineId === search.selectedLineId,
   );
+  const plannerBaselineRecord = [...headRecords].sort(
+    (left, right) =>
+      compareValidatedPlanAssessments(
+        left.route.assessment,
+        right.route.assessment,
+      ) ||
+      right.route.stepValue - left.route.stepValue ||
+      left.head.candidateId.localeCompare(right.head.candidateId),
+  )[0];
+  const liveActionId = params.runtimeResult.route.head.actionId;
+  const selectedLine =
+    selectedSearchLine ??
+    fallbackLine(
+      input,
+      stateIdentity,
+      plannerBaselineRecord?.head.currentBinding.actionId ?? liveActionId,
+      heads,
+    );
   const shadowHead = selectedLine?.steps[0]
     ? heads.find(
         (head) => head.candidateId === selectedLine.steps[0]!.candidateId,
       )
     : undefined;
-  const liveActionId = params.runtimeResult.route.head.actionId;
+  const selectedPlanInstanceId = shadowHead
+    ? headRecords.find(
+        (record) => record.head.candidateId === shadowHead.candidateId,
+      )?.route.instance.instanceId
+    : undefined;
   const shadowActionId = shadowHead?.currentBinding.actionId;
   const boundedSingleStepLine = boundedSingleStepSearch.lines.find(
     (line) => line.lineId === boundedSingleStepSearch.selectedLineId,
@@ -216,6 +319,7 @@ export function buildCorpTurnPlannerShadow(params: {
     enumerationIssues: enumeration.issues,
     portfolio: params.runtimeResult.portfolio,
     candidates: params.context.actionCandidates,
+    authorityMode: params.authorityMode ?? "shadow",
   });
   return {
     schemaVersion: CORP_TURN_PLANNER_SHADOW_SCHEMA_VERSION,
@@ -224,7 +328,130 @@ export function buildCorpTurnPlannerShadow(params: {
     liveActionId,
     ...(shadowActionId ? { shadowActionId } : {}),
     agreement: shadowActionId === liveActionId,
+    heads: structuredClone(heads),
+    ...(selectedLine ? { selectedLine: structuredClone(selectedLine) } : {}),
+    ...(shadowHead ? { selectedHead: structuredClone(shadowHead) } : {}),
+    ...(selectedPlanInstanceId ? { selectedPlanInstanceId } : {}),
+    headBindings: headRecords.map((record) => ({
+      candidateId: record.head.candidateId,
+      planInstanceId: record.route.instance.instanceId,
+      assessment: structuredClone(record.route.assessment),
+      step: structuredClone(record.route.step),
+      ...(record.route.continuation
+        ? { continuation: structuredClone(record.route.continuation) }
+        : {}),
+    })),
   };
+}
+
+function dispositionsForUnmaterializedSpecializedLines(params: {
+  existing: readonly PlanActionDisposition[];
+  heads: readonly TurnPlanningHeadCandidate[];
+  agendaSlices: Array<{
+    projectId: string;
+    slice: CorpAgendaTurnPlanningSlice;
+  }>;
+  defenseSlice: CorpDefenseTurnPlanningSlice | undefined;
+  domain: CorpPlanDomain | undefined;
+  candidates: readonly ActionSemanticCandidate[];
+}): PlanActionDisposition[] {
+  const dispositions = params.existing.map((entry) => structuredClone(entry));
+  const classifiedActionIds = new Set([
+    ...dispositions.map((entry) => entry.actionId),
+    ...params.heads.map((head) => head.currentBinding.actionId),
+  ]);
+  const specializedLines = [
+    ...params.agendaSlices.flatMap(({ slice }) => slice.lines),
+    ...(params.defenseSlice?.lines ?? []),
+  ].sort(
+    (left, right) =>
+      left.currentActionId.localeCompare(right.currentActionId) ||
+      left.lineId.localeCompare(right.lineId),
+  );
+  for (const line of specializedLines) {
+    if (classifiedActionIds.has(line.currentActionId)) continue;
+    const ownerModuleId = line.nodes[0]?.ownerModuleId;
+    if (!ownerModuleId) continue;
+    dispositions.push({
+      actionId: line.currentActionId,
+      disposition: "explicitly_nonproductive",
+      ownerModuleId,
+      evidenceCode: "turn_planning_specialized_line_provider_not_executable",
+    });
+    classifiedActionIds.add(line.currentActionId);
+  }
+  if (!params.domain) return dispositions;
+  const addClaim = (
+    actionId: string,
+    ownerModuleId: PlanModuleId,
+    evidenceCode: string,
+  ): void => {
+    if (!actionId || classifiedActionIds.has(actionId)) return;
+    dispositions.push({
+      actionId,
+      disposition: "explicitly_nonproductive",
+      ownerModuleId,
+      evidenceCode: `turn_planning_domain_claim_provider_not_executable:${evidenceCode}`,
+    });
+    classifiedActionIds.add(actionId);
+  };
+  for (const signal of params.domain.scoreProjects) {
+    for (const actionId of signal.actionIds ?? []) {
+      addClaim(actionId, "corp.score_agenda", signal.evidenceCode);
+    }
+  }
+  for (const signal of params.domain.defenseNeeds) {
+    const actionIds =
+      signal.kind === "generic" ? (signal.actionIds ?? []) : [signal.actionId];
+    for (const actionId of actionIds) {
+      addClaim(actionId, "corp.defend_servers", signal.evidenceCode);
+    }
+  }
+  for (const signal of params.domain.economyNeeds) {
+    for (const actionId of signal.actionIds) {
+      addClaim(actionId, "corp.economy", signal.evidenceCode);
+    }
+  }
+  for (const signal of params.domain.punishCampaigns) {
+    for (const actionId of signal.actionIds ?? []) {
+      addClaim(actionId, "corp.punish_campaign", signal.evidenceCode);
+    }
+    if (signal.routeContract?.currentHeadActionId) {
+      addClaim(
+        signal.routeContract.currentHeadActionId,
+        "corp.execute_punish_sequence",
+        signal.evidenceCode,
+      );
+    }
+  }
+  for (const signal of params.domain.ambushes) {
+    for (const actionId of signal.actionIds) {
+      addClaim(actionId, "corp.ambush_and_bluff", signal.evidenceCode);
+    }
+  }
+  for (const signal of params.domain.handManagement) {
+    const actionIds =
+      signal.actionIds ??
+      params.candidates
+        .filter(
+          (candidate) =>
+            (!signal.sourceInstanceId ||
+              candidate.sourceCardInstanceId === signal.sourceInstanceId) &&
+            (!signal.sourceDefinitionIds ||
+              signal.sourceDefinitionIds.includes(
+                candidate.sourceDefinitionId ?? "",
+              )),
+        )
+        .map((candidate) => candidate.actionId);
+    for (const actionId of actionIds) {
+      addClaim(
+        actionId,
+        "corp.hand_and_agenda_management",
+        signal.evidenceCode,
+      );
+    }
+  }
+  return dispositions;
 }
 
 function includeSpecializedCurrentRoutes(params: {
@@ -330,32 +557,46 @@ function headsForRoute(params: {
     params.agendaSlices,
     params.defenseSlice,
   );
+  const specializedActionOwned = specializedPlanningLineOwnsAction(
+    action.actionId,
+    params.agendaSlices,
+    params.defenseSlice,
+  );
   const variants =
     specialized.length > 0
       ? specialized.flatMap((variant) =>
-          invocations.map((invocation) => ({
-            ...variant,
-            invocation,
-            variantKey: `${variant.variantKey}:${invocation.invocationKey}`,
-          })),
+          invocations
+            .filter((invocation) =>
+              invocationContainsRequiredTargets(
+                invocation,
+                variant.requiredTargetIds ?? [],
+              ),
+            )
+            .map((invocation) => ({
+              ...variant,
+              invocation,
+              variantKey: `${variant.variantKey}:${invocation.invocationKey}`,
+            })),
         )
-      : invocations.map(
-          (invocation): HeadVariant => ({
-            invocation,
-            nextMilestoneId: params.route.step.capability.capabilityId,
-            instanceHorizon: "current_turn",
-            evaluationValues: genericEvaluationValues(params.route),
-            valueClaims: [],
-            evidenceCodes: [
-              "current_plan_module_head",
-              "shadow_single_step_projection",
-              ...(params.route.continuation
-                ? ["semantic_continuation_requires_real_state"]
-                : ["future_projection_not_supported"]),
-            ],
-            variantKey: invocation.invocationKey,
-          }),
-        );
+      : specializedActionOwned
+        ? []
+        : invocations.map(
+            (invocation): HeadVariant => ({
+              invocation,
+              nextMilestoneId: params.route.step.capability.capabilityId,
+              instanceHorizon: "current_turn",
+              evaluationValues: genericEvaluationValues(params.route),
+              valueClaims: [],
+              evidenceCodes: [
+                "current_plan_module_head",
+                "shadow_single_step_projection",
+                ...(params.route.continuation
+                  ? ["semantic_continuation_requires_real_state"]
+                  : ["future_projection_not_supported"]),
+              ],
+              variantKey: invocation.invocationKey,
+            }),
+          );
   const rootPlanInstanceId = findRootPlanInstanceId(
     params.route.instance.instanceId,
     params.portfolio,
@@ -389,7 +630,9 @@ function headsForRoute(params: {
       stepFingerprint,
       horizonCapability: moduleCoverage.horizonCapability,
       instanceHorizon: variant.instanceHorizon,
-      priorityClass: params.route.assessment.priorityValidation.effectiveClass,
+      priorityClass:
+        variant.priorityClass ??
+        params.route.assessment.priorityValidation.effectiveClass,
       invocation: variant.invocation,
       currentBinding: {
         actionId: action.actionId,
@@ -422,6 +665,23 @@ function headsForRoute(params: {
   });
 }
 
+function specializedPlanningLineOwnsAction(
+  actionId: string,
+  agendaSlices: Array<{
+    projectId: string;
+    slice: CorpAgendaTurnPlanningSlice;
+  }>,
+  defenseSlice: CorpDefenseTurnPlanningSlice | undefined,
+): boolean {
+  return (
+    agendaSlices.some(({ slice }) =>
+      slice.lines.some((line) => line.currentActionId === actionId),
+    ) ||
+    defenseSlice?.lines.some((line) => line.currentActionId === actionId) ===
+      true
+  );
+}
+
 function specializedVariants(
   route: PlanSchedulerPlanningRouteCandidate,
   agendaSlices: Array<{
@@ -439,9 +699,11 @@ function specializedVariants(
         .filter(
           (line) =>
             line.currentActionId === route.candidate.actionId &&
-            line.nodes[0]?.ownerModuleId === route.instance.moduleId,
+            line.nodes[0]?.ownerModuleId === route.instance.moduleId &&
+            (slice.selectedFamily === undefined ||
+              line.family === slice.selectedFamily),
         )
-        .map(agendaVariant) ?? []
+        .map((line) => agendaVariant(line, route)) ?? []
     );
   }
   if (
@@ -455,7 +717,7 @@ function specializedVariants(
             line.currentActionId === route.candidate.actionId &&
             line.nodes[0]?.ownerModuleId === route.instance.moduleId,
         )
-        .map(defenseVariant) ?? []
+        .map((line) => defenseVariant(line, route)) ?? []
     );
   }
   return [];
@@ -463,13 +725,16 @@ function specializedVariants(
 
 function agendaVariant(
   line: CorpAgendaTurnPlanningLine,
+  route: PlanSchedulerPlanningRouteCandidate,
 ): Omit<HeadVariant, "invocation"> {
   return {
     nextMilestoneId: line.campaignQuote.nextMilestoneId,
     instanceHorizon: "multi_turn",
     campaignQuote: structuredClone(line.campaignQuote),
     evaluationValues: {
-      agenda_progress: line.evaluation.agendaProgress,
+      agenda_progress: boundedUtility(
+        line.evaluation.agendaProgress + route.stepValue,
+      ),
       defense: line.evaluation.defense,
       economy: line.evaluation.economy,
       continuity: line.evaluation.continuity,
@@ -487,13 +752,18 @@ function agendaVariant(
 
 function defenseVariant(
   line: CorpDefenseTurnPlanningLine,
+  route: PlanSchedulerPlanningRouteCandidate,
 ): Omit<HeadVariant, "invocation"> {
+  const currentNode = line.nodes[0];
   return {
+    ...(currentNode?.invocation.semanticActionType === "install.card"
+      ? { requiredTargetIds: [line.targetServerId] }
+      : {}),
     nextMilestoneId: line.campaignQuote.nextMilestoneId,
     instanceHorizon: "multi_turn",
     campaignQuote: structuredClone(line.campaignQuote),
     evaluationValues: {
-      defense: line.defenseValue,
+      defense: boundedUtility(line.defenseValue + route.stepValue),
       economy: line.economyValue,
       flexibility: line.bluffValue,
       risk: line.fundingGapAfter,
@@ -505,7 +775,21 @@ function defenseVariant(
       "domain_projected_campaign_quote",
     ],
     variantKey: line.lineId,
+    ...(line.priorityClass ? { priorityClass: line.priorityClass } : {}),
   };
+}
+
+function invocationContainsRequiredTargets(
+  invocation: CanonicalLegalActionInvocation,
+  requiredTargetIds: readonly string[],
+): boolean {
+  if (requiredTargetIds.length === 0) return true;
+  const boundTargetIds = new Set(
+    invocation.boundTargets.flatMap((slot) =>
+      slot.values.map((value) => value.id),
+    ),
+  );
+  return requiredTargetIds.every((targetId) => boundTargetIds.has(targetId));
 }
 
 function genericEvaluationValues(
@@ -566,7 +850,20 @@ function targetBindingVariants(
   action: LegalAction,
   candidate: ActionSemanticCandidate,
 ): CanonicalLegalActionInvocation["boundTargets"][] {
-  if (action.targetRequirements.length === 0) return [[]];
+  if (action.targetRequirements.length === 0) {
+    const resolvedServerId = action.payload?.serverId;
+    return typeof resolvedServerId === "string" && resolvedServerId.length > 0
+      ? [
+          [
+            {
+              slotId: "server",
+              values: [{ kind: "server", id: resolvedServerId }],
+              ordering: "single",
+            },
+          ],
+        ]
+      : [[]];
+  }
   if (
     action.targetRequirements.some(
       (requirement) => requirement.visibility === "engine_only",
@@ -657,7 +954,7 @@ function targetRef(kind: TargetRequirement["kind"], id: string): PlanTargetRef {
       kind === "server"
         ? "server"
         : kind === "subroutine"
-          ? "value"
+          ? "capability"
           : kind === "side"
             ? "player"
             : "card",
@@ -726,6 +1023,8 @@ function offersForHeads(params: {
   heads: readonly TurnPlanningHeadCandidate[];
   candidates: readonly ActionSemanticCandidate[];
   urgentPriorityClass: string | undefined;
+  preferredRootCandidateIds: ReadonlySet<string>;
+  moduleSelectedActionId: string;
 }): TurnRemainderSearchOffer[] {
   const candidateIdsByActionId = new Map<string, string[]>();
   for (const head of params.heads) {
@@ -756,18 +1055,39 @@ function offersForHeads(params: {
       );
       const groupKey = commutativeGroupKey(candidate);
       const boundary = boundaryForCandidate(params.input, candidate);
+      const boundaryMustBeImmediate =
+        boundary !== undefined &&
+        head.moduleId === "corp.hand_and_agenda_management";
       return {
         head,
         candidate,
+        rootPreferenceRank: params.preferredRootCandidateIds.has(
+          head.candidateId,
+        )
+          ? 1
+          : 0,
+        moduleCandidatePreferenceRank:
+          head.currentBinding.actionId === params.moduleSelectedActionId
+            ? 1
+            : 0,
         obligationSignature:
           priorityCoverage.requiredObligationIds.join(",") || "no_urgent",
         priorityCoverage,
         ...(dependencyCandidateIds.length > 0
           ? { dependencyCandidateIds, rootEligible: false }
           : {}),
-        incompatibleCandidateIds: (
-          candidateIdsByActionId.get(head.currentBinding.actionId) ?? []
-        ).filter((candidateId) => candidateId !== head.candidateId),
+        incompatibleCandidateIds: [
+          ...new Set([
+            ...(
+              candidateIdsByActionId.get(head.currentBinding.actionId) ?? []
+            ).filter((candidateId) => candidateId !== head.candidateId),
+            ...(boundaryMustBeImmediate
+              ? params.heads
+                  .map((candidateHead) => candidateHead.candidateId)
+                  .filter((candidateId) => candidateId !== head.candidateId)
+              : []),
+          ]),
+        ].sort(),
         ...(groupKey
           ? {
               commutativeGroupKey: groupKey,
@@ -778,6 +1098,38 @@ function offersForHeads(params: {
       } satisfies TurnRemainderSearchOffer;
     });
   });
+}
+
+function selectedAgendaHeadCandidateIds(
+  records: readonly {
+    head: TurnPlanningHeadCandidate;
+    route: PlanSchedulerPlanningRouteCandidate;
+  }[],
+  slices: readonly {
+    projectId: string;
+    slice: CorpAgendaTurnPlanningSlice;
+  }[],
+): Set<string> {
+  const selected = new Set<string>();
+  for (const record of records) {
+    const agenda = slices.find(
+      ({ projectId }) => projectId === record.route.instance.dedupeKey,
+    );
+    const family = agenda?.slice.selectedFamily;
+    if (
+      family &&
+      agenda.slice.opportunityKey.startsWith("opening-rush:") &&
+      agenda.slice.lines.some(
+        (line) =>
+          line.family === family &&
+          line.currentActionId === record.head.currentBinding.actionId,
+      ) &&
+      record.head.evidenceCodes.includes(`agenda_line_family:${family}`)
+    ) {
+      selected.add(record.head.candidateId);
+    }
+  }
+  return selected;
 }
 
 function highestUrgentPriorityClass(
@@ -895,6 +1247,7 @@ function debugForShadow(params: {
   }>;
   portfolio: Extract<PlanSchedulerResult, { lane: "plan" }>["portfolio"];
   candidates: readonly ActionSemanticCandidate[];
+  authorityMode: "shadow" | "cutover";
 }): AiTurnPlanningDebug {
   const selectedLine =
     params.selectedLine ??
@@ -948,7 +1301,7 @@ function debugForShadow(params: {
 
   return {
     schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
-    mode: "shadow",
+    mode: params.authorityMode,
     stateVersion: params.stateIdentity.stateVersion,
     sideSafePlanningFingerprint:
       params.stateIdentity.sideSafePlanningFingerprint,
@@ -978,7 +1331,8 @@ function debugForShadow(params: {
               turnKey: params.input.playerView.turnSerial,
               stateIdentity: params.stateIdentity,
             }),
-            status: "prospective",
+            status:
+              params.authorityMode === "cutover" ? "active" : "prospective",
             cursor: {
               phaseIndex: 0,
               nodeIndex: 0,
@@ -988,12 +1342,26 @@ function debugForShadow(params: {
             },
             phaseEntry: {
               phaseId: phases[0]?.phaseId ?? "shadow:no-phase",
-              status: "projection_only",
-              reasonCode: "shadow_never_executes",
+              status:
+                params.authorityMode === "cutover"
+                  ? "validated"
+                  : "projection_only",
+              reasonCode:
+                params.authorityMode === "cutover"
+                  ? "cutover_initial_phase_entry_validated"
+                  : "shadow_never_executes",
             },
             rematerialization: {
-              status: "not_attempted",
-              reasonCode: "shadow_never_executes",
+              status:
+                params.authorityMode === "cutover"
+                  ? "executable"
+                  : "not_attempted",
+              ...(params.authorityMode === "cutover"
+                ? {
+                    actionId: selectedHead.currentBinding.actionId,
+                    reasonCode: "cutover_current_head_rematerialized",
+                  }
+                : { reasonCode: "shadow_never_executes" }),
             },
             observationClass:
               selectedLine.stopReason === "observation_boundary"
@@ -1175,8 +1543,15 @@ function debugForShadow(params: {
       reasonCode: event.reasonCode,
     })),
     evidenceCodes: [
-      "corp_turn_planner_shadow_only",
-      "shadow_result_never_controls_live_action",
+      ...(params.authorityMode === "cutover"
+        ? [
+            "corp_turn_planner_cutover_authority",
+            "legacy_single_action_selection_comparison_only",
+          ]
+        : [
+            "corp_turn_planner_shadow_only",
+            "shadow_result_never_controls_live_action",
+          ]),
       "bounded_single_step_baseline_compared",
       `coverage_status:${params.coverage.status}`,
       `coverage_percent:${params.coverage.coveragePercent}`,
@@ -1213,6 +1588,7 @@ function fallbackLine(
     obligationSignature: "shadow-empty",
     rootPlanInstanceId: head?.rootPlanInstanceId ?? "shadow:no-root",
     nextMilestoneId: head?.nextMilestoneId ?? "shadow:no-milestone",
+    priorityClass: head?.priorityClass ?? "P6",
     steps: head
       ? [
           {

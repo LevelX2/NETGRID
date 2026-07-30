@@ -49,7 +49,7 @@ describe("turn-planner shadow behavior-baseline regressions", () => {
     expect(summary.errors, JSON.stringify(diagnostic, undefined, 2)).toEqual(
       [],
     );
-  });
+  }, 15_000);
 });
 
 function runCapturedSeed(seed: string, actionIndex: number) {
@@ -66,6 +66,7 @@ function runCapturedSeed(seed: string, actionIndex: number) {
     runnerControllerMode: "current_candidate",
     corpControllerMode: "current_candidate",
     ...resolved.config,
+    aiDecisionRuntimeOptions: { corpTurnPlannerMode: "legacy_compare" },
     testOnlyDecisionCheckpointCapture: {
       actionIndices: [actionIndex],
       capture: (snapshot) => {

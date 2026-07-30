@@ -6,6 +6,9 @@ import type {
   CorpDefenseSignal,
   CorpEconomyNeedSignal,
   CorpGenericDefenseSignal,
+  CorpScoreProtectionDrawSignal,
+  CorpScoreProtectionInstallSignal,
+  CorpScoreProtectionStagingInstallSignal,
 } from "./corp-core-plan-modules";
 import {
   assessFundingOnlyIceStaging,
@@ -179,6 +182,182 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       admissible: false,
       reasonCode: "productive_defense_install_available",
     });
+  });
+
+  it("keeps an exact new-remote ICE staging step inside the delegated score-protection defense plan", () => {
+    const input = decisionInput();
+    const staging: CorpScoreProtectionStagingInstallSignal = {
+      kind: "score_protection_staging_install",
+      defenseId: "score-protection-staging-install:agenda-1:install-remote",
+      serverId: "new_remote",
+      phase: "install_ice",
+      parentProjectId: "agenda-1",
+      parentNeedId: "score-protection:agenda-1",
+      delegatedPriorityClass: "P4",
+      actionId: "install-remote",
+      sourceCardInstanceId: "ice-1",
+      sourceDefinitionId: "ice-definition",
+      evidenceCode: "score_protection_staging_install:agenda-1:new_remote",
+    };
+    input.legalActions = [
+      {
+        actionId: "install-remote",
+        side: "corp",
+        type: "install_card",
+        label: "Install ICE",
+        source: "ice-1",
+        timingPoint: "corp_action.main",
+        costs: [{ clicks: 1 }],
+        targetRequirements: [],
+        choiceRequirements: [],
+        visibility: "private_to_actor",
+        expiresAtStateVersion: 30,
+        payload: {
+          placement: "ice",
+          serverId: "new_remote",
+          postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCardId: "ice-1",
+          postInstallRezQuoteTargetServerId: "new_remote",
+          postInstallRezQuoteProjectedServerId: "remote_1",
+          postInstallRezQuoteExpiresAtStateVersion: 30,
+          postInstallRezQuoteFinalCredits: 1,
+        },
+      },
+    ];
+    input.playerView.legalActions = structuredClone(input.legalActions);
+
+    const slice = buildSlice(
+      input,
+      [staging],
+      [],
+      [installCandidate("install-remote", "ice-1", "new_remote")],
+    );
+
+    expect(slice.lines).toHaveLength(1);
+    expect(slice.lines[0]).toMatchObject({
+      disposition: "stage_for_later_rez",
+      targetServerId: "new_remote",
+      currentActionId: "install-remote",
+      rezReadyAfterLine: true,
+      priorityClass: "P4",
+      bluffValue: 0,
+    });
+    expect(slice.lines[0]?.nodes).toEqual([
+      expect.objectContaining({
+        ownerModuleId: "corp.defend_servers",
+        projectedOnly: false,
+      }),
+    ]);
+    expect(slice.lines[0]?.evidenceCodes).toEqual(
+      expect.arrayContaining([
+        "score_protection_staging_delegated_to_defense_plan",
+        "ice_decision_owned_by_corp_defend_servers",
+      ]),
+    );
+  });
+
+  it("turns a funded exact score-protection ICE route into a delegated defense line", () => {
+    const input = decisionInput();
+    const generic = defenseSignal({
+      disposition: "productive",
+      effect: "satisfied",
+      fundingGap: 0,
+    });
+    const signal: CorpScoreProtectionInstallSignal = {
+      kind: "score_protection_install",
+      defenseId: "score-protection-install:agenda-1:install-rd",
+      serverId: "rd",
+      phase: "install_ice",
+      parentProjectId: "agenda-1",
+      parentNeedId: "score-protection:agenda-1",
+      delegatedPriorityClass: "P4",
+      actionId: "install-rd",
+      sourceCardInstanceId: "ice-1",
+      sourceDefinitionId: "ice-definition",
+      effect: "satisfied",
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      totalInstallAndRezCredits: 2,
+      projection: generic.installRoute!
+        .projection as CorpScoreProtectionInstallSignal["projection"],
+      evidenceCode: "score_protection_satisfied:agenda-1:rd",
+    };
+
+    const slice = buildSlice(
+      input,
+      [signal],
+      [],
+      [installCandidate("install-rd", "ice-1", "rd")],
+    );
+
+    expect(slice.lines).toHaveLength(1);
+    expect(slice.lines[0]).toMatchObject({
+      currentActionId: "install-rd",
+      disposition: "install_rez_ready",
+      targetServerId: "rd",
+      priorityClass: "P4",
+      defenseValue: 30,
+    });
+    expect(slice.lines[0]?.valueClaims[0]).toMatchObject({
+      ownerModuleId: "corp.defend_servers",
+      objectiveKey: "score-protection:agenda-1",
+      dependencyKeys: ["score-protection:agenda-1"],
+    });
+    expect(slice.lines[0]?.evidenceCodes).toContain(
+      "score_protection_install_delegated_to_defense_plan",
+    );
+  });
+
+  it("ends a score-protection draw phase at the observation boundary and replans", () => {
+    const input = decisionInput();
+    const signal: CorpScoreProtectionDrawSignal = {
+      kind: "score_protection_draw",
+      defenseId: "score-defense-draw:agenda-1:draw",
+      serverId: "new_remote",
+      phase: "draw_for_ice",
+      parentProjectId: "agenda-1",
+      parentNeedId: "score-protection:agenda-1",
+      delegatedPriorityClass: "P4",
+      actionId: "draw",
+      cleanupReplacementDraw: true,
+      drawAttemptState: {
+        turnKey: "corp:4",
+        remainingAttempts: 1,
+      },
+      evidenceCode: "score_plan_requires_effective_ice_draw:agenda-1",
+    };
+    const draw = baseCandidate("draw", "draw.card", "basic_action");
+    draw.sourceKind = "basic_action";
+    draw.economyProjection = {
+      schemaVersion: "action-economy-projection-v1",
+      kind: "non_economy",
+      timing: "immediate",
+      creditRestriction: "general",
+      clickCost: 1,
+      creditCost: 0,
+      cardsDrawn: 1,
+      cardsConsumed: 0,
+      netHandDelta: 1,
+      repeatable: true,
+      reliability: "guaranteed",
+      source: "basic_action_contract",
+      confidence: "high",
+      evidence: [],
+    };
+
+    const slice = buildSlice(input, [signal], [], [draw]);
+
+    expect(slice.lines[0]).toMatchObject({
+      disposition: "draw_for_ice",
+      currentActionId: "draw",
+      priorityClass: "P4",
+      campaignQuote: {
+        nextMilestoneId: "replan_after_score_protection_draw",
+        expiresAt: "current_turn_end",
+      },
+    });
+    expect(slice.lines[0]?.evidenceCodes).toContain(
+      "observation_boundary_after_draw",
+    );
   });
 });
 

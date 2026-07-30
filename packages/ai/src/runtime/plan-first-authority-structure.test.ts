@@ -41,7 +41,7 @@ describe("plan-first live authority structure", () => {
       1,
     );
     expect(decisionContext).toContain("return choosePlanFirstLiveAction(");
-    expect(planFirstRuntime).toContain("const result = runPlanScheduler({");
+    expect(planFirstRuntime).toContain("let result = runPlanScheduler({");
     expect(occurrences(planFirstRuntime, /\brunPlanScheduler\(/g)).toBe(1);
   });
 

@@ -37,6 +37,24 @@ export function aiPlanFirstPriorityLabel(
   return labels[priority.effectiveClass];
 }
 
+export function aiPlanFirstSelectionAuthorityLabel(
+  authority: AiPlanFirstDecisionDebug["selectionAuthority"],
+): string {
+  if (authority === "turn_plan_commitment")
+    return "aus dem verbindlichen Zugplan";
+  if (authority === "resident_plan_instance")
+    return "aus einer gespeicherten Planinstanz";
+  return "aus einem Engine-/Pflichtfenster";
+}
+
+export function aiTurnPlanningModeLabel(
+  mode: NonNullable<AiPlanFirstDecisionDebug["turnPlanning"]>["mode"],
+): string {
+  if (mode === "cutover") return "Verbindlicher Zugplaner";
+  if (mode === "shadow") return "Shadow-Vergleich";
+  return "Projektionsvertrag";
+}
+
 /** Turns a runtime route key into the short, player-readable current step. */
 export function aiPlanFirstStepLabel(value: string): string {
   const decoded = decodeRouteSegment(value);

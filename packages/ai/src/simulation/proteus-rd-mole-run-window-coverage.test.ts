@@ -18,6 +18,7 @@ describe("Proteus R&D Mole plan-first run-window coverage", () => {
       corpDeck: deck("proteus_corp_region_fast_score_2026_05_25"),
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
+      aiDecisionRuntimeOptions: { corpTurnPlannerMode: "legacy_compare" },
       testOnlyDecisionCheckpointCapture: {
         actionIndices: [68],
         capture: (snapshot) => {

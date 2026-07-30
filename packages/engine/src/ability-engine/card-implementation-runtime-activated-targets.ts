@@ -49,6 +49,16 @@ export function activatedAbilityPayload(
         : sum,
     0,
   );
+  const controller = state?.cardInstances[cardId]?.controller;
+  const directCardDraw = ability.effects.reduce(
+    (sum, effect) =>
+      effect.kind === "draw_cards" &&
+      (effect.recipient === "controller" ||
+        (controller !== undefined && effect.recipient === controller))
+        ? sum + effect.amount
+        : sum,
+    0,
+  );
   const advancementDistribution = distributeAdvancementCountersEffect(ability);
   const advancementMove = ability.effects.find(
     (effect) => effect.kind === "move_advancement_counters",
@@ -78,6 +88,7 @@ export function activatedAbilityPayload(
     ...(hostedCreditTakeAmount + directCreditGain > 0
       ? { gainCreditsAmount: hostedCreditTakeAmount + directCreditGain }
       : {}),
+    ...(directCardDraw > 0 ? { drawCardsAmount: directCardDraw } : {}),
     ...(hostedCreditAddAmount > 0
       ? {
           cardImplementationAddsHostedCredits: true,

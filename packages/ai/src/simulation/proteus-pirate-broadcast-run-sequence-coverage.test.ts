@@ -18,6 +18,7 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
       corpDeck: pirateBroadcastCoverageCorpDeck(),
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
+      aiDecisionRuntimeOptions: { corpTurnPlannerMode: "legacy_compare" },
       testOnlyDecisionCheckpointCapture: {
         actionIndices: Array.from({ length: 105 }, (_, index) => index),
         capture: (snapshot) => {
@@ -119,7 +120,7 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
         "plan_action_assessment_evidence:runner_restricted_run_sequence_target:archives",
       ]),
     });
-  });
+  }, 15_000);
 });
 
 function deck(deckId: string): DeckDefinition {

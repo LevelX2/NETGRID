@@ -48,7 +48,9 @@ describe("match series 70BE real Engine regressions", () => {
     const selectedTypes: string[] = [];
     for (let step = 0; step < 5; step += 1) {
       const input = decisionInput(state, "corp", CORP_DECK);
-      const decision = chooseCorpAction(input);
+      const decision = chooseCorpAction(input, {
+        corpTurnPlannerMode: "legacy_compare",
+      });
       const action = input.legalActions.find(
         (candidate) => candidate.actionId === decision.actionId,
       );
@@ -157,7 +159,9 @@ describe("match series 70BE real Engine regressions", () => {
       (action) => action.type === "draw_card",
     );
     const choiceInput = decisionInput(state, "corp", CORP_DECK);
-    const decision = chooseCorpAction(choiceInput);
+    const decision = chooseCorpAction(choiceInput, {
+      corpTurnPlannerMode: "legacy_compare",
+    });
 
     expect(choiceInput.playerView.pendingChoice?.source).toContain(
       "runner_draw.draw_tax_rez",

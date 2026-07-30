@@ -14,7 +14,7 @@ describe("match 9b60842f Corp turn-coherence checkpoints", () => {
     expect(result.decision?.decisionDebug?.planKind).toBe(
       "corp.defend_servers",
     );
-    expectShadowTurnPlanner(result, 2);
+    expectCutoverTurnPlanner(result, 2);
   });
 
   it("already avoids the historical full-HQ score-material draw on current code", () => {
@@ -25,10 +25,10 @@ describe("match 9b60842f Corp turn-coherence checkpoints", () => {
     expect(result.decision?.decisionDebug?.planKind).toBe(
       "corp.defend_servers",
     );
-    expectShadowTurnPlanner(result, 1);
+    expectCutoverTurnPlanner(result, 1);
   });
 
-  it("repeats the same read-only shadow trace without changing the live decision", () => {
+  it("repeats the same committed turn trace and live decision deterministically", () => {
     const first = runAiDecisionCheckpoint(fixture(continueDefenseD4Json));
     const repeated = runAiDecisionCheckpoint(fixture(continueDefenseD4Json));
 
@@ -46,24 +46,34 @@ describe("match 9b60842f Corp turn-coherence checkpoints", () => {
         ?.evidenceCodes,
     ).toEqual(
       expect.arrayContaining([
-        "corp_turn_planner_shadow_only",
-        "shadow_result_never_controls_live_action",
+        "corp_turn_planner_cutover_authority",
+        "legacy_single_action_selection_comparison_only",
         "bounded_single_step_baseline_compared",
       ]),
     );
   });
 });
 
-function expectShadowTurnPlanner(
+function expectCutoverTurnPlanner(
   result: ReturnType<typeof runAiDecisionCheckpoint>,
   minimumSteps: number,
 ): void {
   const planning =
     result.decision?.decisionDebug?.planFirstDecision?.turnPlanning;
-  expect(planning?.mode).toBe("shadow");
-  expect(planning?.shadowComparison?.liveActionId).toBe(
+  expect(planning?.mode).toBe("cutover");
+  expect(
+    result.decision?.decisionDebug?.planFirstDecision?.selectionAuthority,
+  ).toBe("turn_plan_commitment");
+  expect(planning?.shadowComparison?.shadowActionId).toBe(
     result.selectedAction?.actionId,
   );
+  expect(planning?.commitment).toMatchObject({
+    status: "active",
+    rematerialization: {
+      status: "executable",
+      actionId: result.selectedAction?.actionId,
+    },
+  });
   expect(
     planning?.coverage,
     JSON.stringify(planning, undefined, 2),

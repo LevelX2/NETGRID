@@ -582,7 +582,7 @@ function invocationFor(
                   id === "archives" ||
                   id.startsWith("remote_")
                     ? ("server" as const)
-                    : ("value" as const),
+                    : ("card" as const),
                 id,
               })),
               ordering: "unordered" as const,

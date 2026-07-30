@@ -612,6 +612,29 @@ describe("AI decision debug sanitizing", () => {
       }),
     });
 
+    const cutover = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      planFirstDecision: {
+        ...sanitized?.planFirstDecision,
+        selectionAuthority: "turn_plan_commitment",
+        turnPlanning: {
+          ...sanitized?.planFirstDecision?.turnPlanning,
+          mode: "cutover",
+        },
+      },
+    });
+    expect(cutover?.planFirstDecision).toMatchObject({
+      selectionAuthority: "turn_plan_commitment",
+      turnPlanning: {
+        mode: "cutover",
+        commitment: {
+          status: "active",
+          rematerialization: { status: "executable" },
+        },
+      },
+    });
+
     const malformedTurnPlanning = sanitizeAiDecisionDebug({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       aiLevel: 2,

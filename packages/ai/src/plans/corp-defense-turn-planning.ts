@@ -5,7 +5,11 @@ import type {
   CorpDefenseSignal,
   CorpEconomyNeedSignal,
   CorpGenericDefenseSignal,
+  CorpScoreProtectionDrawSignal,
+  CorpScoreProtectionInstallSignal,
+  CorpScoreProtectionStagingInstallSignal,
 } from "./corp-core-plan-modules";
+import type { PriorityClass } from "./plan-assessment";
 import { assessFundingOnlyIceStaging } from "../runtime/corp-defense-staging-policy";
 export { assessFundingOnlyIceStaging } from "../runtime/corp-defense-staging-policy";
 import {
@@ -24,7 +28,8 @@ export type CorpDefenseLineDisposition =
   | "install_rez_ready"
   | "fund_then_install"
   | "stage_for_later_rez"
-  | "bounded_bluff";
+  | "bounded_bluff"
+  | "draw_for_ice";
 
 export type CorpDefenseTurnPlanningLine = {
   lineId: string;
@@ -45,6 +50,7 @@ export type CorpDefenseTurnPlanningLine = {
   defenseValue: number;
   economyValue: number;
   totalValue: number;
+  priorityClass?: PriorityClass;
   campaignQuote: CampaignMilestoneQuote;
   valueClaims: CampaignValueClaim[];
   evidenceCodes: string[];
@@ -74,6 +80,21 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
       signal.kind === "generic" &&
       signal.phase === "install_ice" &&
       signal.installRoute !== undefined,
+  );
+  const scoreProtectionStagingInstalls = params.defenseNeeds.filter(
+    (signal): signal is CorpScoreProtectionStagingInstallSignal =>
+      signal.kind === "score_protection_staging_install" &&
+      signal.phase === "install_ice",
+  );
+  const scoreProtectionInstalls = params.defenseNeeds.filter(
+    (signal): signal is CorpScoreProtectionInstallSignal =>
+      signal.kind === "score_protection_install" &&
+      signal.phase === "install_ice",
+  );
+  const scoreProtectionDraws = params.defenseNeeds.filter(
+    (signal): signal is CorpScoreProtectionDrawSignal =>
+      signal.kind === "score_protection_draw" &&
+      signal.phase === "draw_for_ice",
   );
   const productiveExists = genericInstalls.some(
     (signal) =>
@@ -147,6 +168,55 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
       }),
     ];
   });
+  for (const signal of scoreProtectionStagingInstalls) {
+    const installCandidate = exactScoreProtectionStagingCandidate(
+      params.candidates,
+      signal,
+    );
+    if (!installCandidate) {
+      rejected.push({
+        defenseId: signal.defenseId,
+        actionId: signal.actionId,
+        reasonCode: "exact_score_protection_staging_head_missing",
+      });
+      continue;
+    }
+    lines.push(
+      createScoreProtectionStagingLine(params, signal, installCandidate),
+    );
+  }
+  for (const signal of scoreProtectionInstalls) {
+    const installCandidate = exactScoreProtectionInstallCandidate(
+      params.candidates,
+      signal,
+    );
+    if (!installCandidate) {
+      rejected.push({
+        defenseId: signal.defenseId,
+        actionId: signal.actionId,
+        reasonCode: "exact_score_protection_install_head_missing",
+      });
+      continue;
+    }
+    lines.push(
+      createScoreProtectionInstallLine(params, signal, installCandidate),
+    );
+  }
+  for (const signal of scoreProtectionDraws) {
+    const drawCandidate = exactScoreProtectionDrawCandidate(
+      params.candidates,
+      signal,
+    );
+    if (!drawCandidate) {
+      rejected.push({
+        defenseId: signal.defenseId,
+        actionId: signal.actionId,
+        reasonCode: "exact_score_protection_draw_head_missing",
+      });
+      continue;
+    }
+    lines.push(createScoreProtectionDrawLine(params, signal, drawCandidate));
+  }
   lines.sort(compareDefenseLines);
   return {
     schemaVersion: CORP_DEFENSE_TURN_SLICE_VERSION,
@@ -164,6 +234,46 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
       "bluff_value_bounded",
     ],
   };
+}
+
+function exactScoreProtectionStagingCandidate(
+  candidates: readonly ActionSemanticCandidate[],
+  signal: CorpScoreProtectionStagingInstallSignal,
+): ActionSemanticCandidate | undefined {
+  return candidates.find(
+    (candidate) =>
+      candidate.actionId === signal.actionId &&
+      candidate.semanticActionType === "install.card" &&
+      candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
+      candidate.sourceDefinitionId === signal.sourceDefinitionId &&
+      candidateTargetIds(candidate).includes("new_remote"),
+  );
+}
+
+function exactScoreProtectionInstallCandidate(
+  candidates: readonly ActionSemanticCandidate[],
+  signal: CorpScoreProtectionInstallSignal,
+): ActionSemanticCandidate | undefined {
+  return candidates.find(
+    (candidate) =>
+      candidate.actionId === signal.actionId &&
+      candidate.semanticActionType === "install.card" &&
+      candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
+      candidate.sourceDefinitionId === signal.sourceDefinitionId &&
+      candidateTargetIds(candidate).includes(signal.serverId),
+  );
+}
+
+function exactScoreProtectionDrawCandidate(
+  candidates: readonly ActionSemanticCandidate[],
+  signal: CorpScoreProtectionDrawSignal,
+): ActionSemanticCandidate | undefined {
+  return candidates.find(
+    (candidate) =>
+      candidate.actionId === signal.actionId &&
+      (candidate.semanticActionType === "draw.card" ||
+        (candidate.economyProjection?.cardsDrawn ?? 0) > 0),
+  );
 }
 
 function exactInstallCandidate(
@@ -309,11 +419,12 @@ function createDefenseLine(
   const fundingGapAfter = Math.max(0, fundingGapBefore - fundingGain);
   const rezReadyAfterLine = route.projection.funded || fundingGapAfter === 0;
   const defenseValue =
-    route.projection.effect === "satisfied"
+    (route.projection.effect === "satisfied"
       ? 30
       : route.projection.effect === "progress"
         ? 18
-        : 0;
+        : 0) +
+    (signal.evidenceCode.includes("visible_agenda_exposure_defense") ? 20 : 0);
   const economyValue = Math.min(fundingGain, fundingGapBefore) * 4;
   const totalValue =
     defenseValue +
@@ -428,6 +539,320 @@ function createDefenseLine(
       `defense_target:${signal.serverId}`,
       `rez_funding_gap_after:${fundingGapAfter}`,
       "ice_decision_owned_by_corp_defend_servers",
+    ],
+  };
+}
+
+function createScoreProtectionStagingLine(
+  params: {
+    input: AiDecisionInput;
+    stateIdentity: PlanningStateIdentity;
+  },
+  signal: CorpScoreProtectionStagingInstallSignal,
+  install: ActionSemanticCandidate,
+): CorpDefenseTurnPlanningLine {
+  const invocation = invocationFor(params.stateIdentity, install);
+  const nodeId = turnPlanningFingerprint("defense-line-node", {
+    defenseId: signal.defenseId,
+    index: 0,
+    invocationKey: invocation.invocationKey,
+  });
+  const lineId = turnPlanningFingerprint("defense-line", {
+    defenseId: signal.defenseId,
+    disposition: "stage_for_later_rez",
+    nodes: [invocation.invocationKey],
+  });
+  const legalAction = params.input.legalActions.find(
+    (action) => action.actionId === signal.actionId,
+  );
+  const installCredits =
+    legalAction?.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0) ??
+    install.costProfile.creditCost ??
+    0;
+  const creditsAfterInstall = Math.max(
+    0,
+    params.input.playerView.own.credits - installCredits,
+  );
+  const quotedRezCredits =
+    legalAction?.payload?.postInstallRezQuoteComplete === true &&
+    legalAction.payload.postInstallRezQuoteCardId ===
+      signal.sourceCardInstanceId &&
+    legalAction.payload.postInstallRezQuoteExpiresAtStateVersion ===
+      params.stateIdentity.stateVersion &&
+    typeof legalAction.payload.postInstallRezQuoteFinalCredits === "number"
+      ? legalAction.payload.postInstallRezQuoteFinalCredits
+      : undefined;
+  const fundingGapAfter =
+    quotedRezCredits === undefined
+      ? 0
+      : Math.max(0, quotedRezCredits - creditsAfterInstall);
+  const rezReadyAfterLine =
+    quotedRezCredits !== undefined && fundingGapAfter === 0;
+  const defenseValue = rezReadyAfterLine ? 18 : 12;
+  const totalValue = defenseValue - fundingGapAfter * 3;
+  const campaignId = "campaign:corp.defend_servers";
+  const beforeQuoteId = turnPlanningFingerprint("defense-before", {
+    defenseId: signal.defenseId,
+    state: params.stateIdentity.sideSafePlanningFingerprint,
+  });
+  const afterQuoteId = turnPlanningFingerprint("defense-after", {
+    lineId,
+    fundingGapAfter,
+    rezReadyAfterLine,
+  });
+  const campaignQuote: CampaignMilestoneQuote = {
+    quoteId: afterQuoteId,
+    campaignId,
+    quoteVersion: CORP_DEFENSE_TURN_SLICE_VERSION,
+    basis: {
+      kind: "projected_frame",
+      baseStateVersion: params.stateIdentity.stateVersion,
+      projectedFrameKey: turnPlanningFingerprint("defense-frame", {
+        lineId,
+        targetServerId: "new_remote",
+        fundingGapAfter,
+      }),
+      linePrefixHash: turnPlanningFingerprint("defense-prefix", [
+        invocation.invocationKey,
+      ]),
+    },
+    currentMilestoneId: signal.phase,
+    nextMilestoneId: rezReadyAfterLine
+      ? "score_remote_ice_staged_rez_ready"
+      : "score_remote_ice_staged_for_later_rez",
+    commitment: "soft",
+    remainingValue: Math.max(0, totalValue),
+    expiresAt: "next_own_turn",
+    revalidationCodes: [
+      "parent_score_project_still_current",
+      "parent_protection_need_still_current",
+      "staged_ice_still_installed",
+      "rez_quote_current",
+    ],
+  };
+  const valueClaims: CampaignValueClaim[] = [
+    {
+      claimId: `${lineId}:defense`,
+      campaignId,
+      ownerModuleId: "corp.defend_servers",
+      objectiveKey: `score-protection:${signal.parentProjectId}`,
+      componentKey: "staged_remote_defense",
+      evaluationDimensionId: "defense",
+      aggregationMode: "delta_from_previous_prefix",
+      contributionKind: "risk_reduction",
+      beforeQuoteId,
+      afterQuoteId,
+      amount: defenseValue,
+      dependencyKeys: [signal.parentNeedId],
+      conflictKeys: [`server:new_remote:ice:${signal.sourceCardInstanceId}`],
+      status: "quoted",
+    },
+  ];
+  return {
+    lineId,
+    defenseId: signal.defenseId,
+    targetServerId: "new_remote",
+    disposition: "stage_for_later_rez",
+    currentActionId: signal.actionId,
+    nodes: [
+      {
+        nodeId,
+        ownerModuleId: "corp.defend_servers",
+        invocation,
+        projectedOnly: false,
+      },
+    ],
+    fundingGapBefore: fundingGapAfter,
+    fundingGapAfter,
+    rezReadyAfterLine,
+    bluffValue: 0,
+    defenseValue,
+    economyValue: 0,
+    totalValue,
+    priorityClass: signal.delegatedPriorityClass,
+    campaignQuote,
+    valueClaims,
+    evidenceCodes: [
+      "defense_disposition:stage_for_later_rez",
+      "defense_target:new_remote",
+      `rez_funding_gap_after:${fundingGapAfter}`,
+      signal.evidenceCode,
+      `score_protection_parent:${signal.parentProjectId}`,
+      `score_protection_need:${signal.parentNeedId}`,
+      "score_protection_staging_delegated_to_defense_plan",
+      "ice_decision_owned_by_corp_defend_servers",
+    ],
+  };
+}
+
+function createScoreProtectionInstallLine(
+  params: {
+    input: AiDecisionInput;
+    stateIdentity: PlanningStateIdentity;
+  },
+  signal: CorpScoreProtectionInstallSignal,
+  install: ActionSemanticCandidate,
+): CorpDefenseTurnPlanningLine {
+  const genericSignal: CorpGenericDefenseSignal = {
+    kind: "generic",
+    defenseId: signal.defenseId,
+    serverId: signal.serverId,
+    phase: "install_ice",
+    sourceDefinitionIds: [signal.sourceDefinitionId],
+    actionIds: [signal.actionId],
+    urgent:
+      signal.delegatedPriorityClass === "P1" ||
+      signal.delegatedPriorityClass === "P2",
+    installRoute: {
+      disposition: "productive",
+      progressKind: "engine_certified_access",
+      rezFundingGap: 0,
+      projection: signal.projection,
+    },
+    value: signal.effect === "satisfied" ? 30 : 18,
+    evidenceCode: signal.evidenceCode,
+  };
+  const line = createDefenseLine(params, genericSignal, install, undefined, {
+    disposition: signal.projection.funded
+      ? "install_rez_ready"
+      : "stage_for_later_rez",
+    bluffValue: 0,
+  });
+  return {
+    ...line,
+    priorityClass: signal.delegatedPriorityClass,
+    valueClaims: line.valueClaims.map((claim) =>
+      claim.ownerModuleId === "corp.defend_servers"
+        ? {
+            ...claim,
+            objectiveKey: `score-protection:${signal.parentProjectId}`,
+            dependencyKeys: [signal.parentNeedId],
+          }
+        : claim,
+    ),
+    evidenceCodes: [
+      ...line.evidenceCodes,
+      signal.evidenceCode,
+      `score_protection_parent:${signal.parentProjectId}`,
+      `score_protection_need:${signal.parentNeedId}`,
+      "score_protection_install_delegated_to_defense_plan",
+    ],
+  };
+}
+
+function createScoreProtectionDrawLine(
+  params: {
+    input: AiDecisionInput;
+    stateIdentity: PlanningStateIdentity;
+  },
+  signal: CorpScoreProtectionDrawSignal,
+  draw: ActionSemanticCandidate,
+): CorpDefenseTurnPlanningLine {
+  const invocation = invocationFor(params.stateIdentity, draw);
+  const nodeId = turnPlanningFingerprint("defense-line-node", {
+    defenseId: signal.defenseId,
+    index: 0,
+    invocationKey: invocation.invocationKey,
+  });
+  const lineId = turnPlanningFingerprint("defense-line", {
+    defenseId: signal.defenseId,
+    disposition: "draw_for_ice",
+    nodes: [invocation.invocationKey],
+  });
+  const economyValue =
+    Math.max(0, draw.economyProjection?.netLiquidCreditGain ?? 0) * 2;
+  const defenseValue = 12;
+  const totalValue = defenseValue + economyValue;
+  const campaignId = "campaign:corp.defend_servers";
+  const beforeQuoteId = turnPlanningFingerprint("defense-before", {
+    defenseId: signal.defenseId,
+    state: params.stateIdentity.sideSafePlanningFingerprint,
+  });
+  const afterQuoteId = turnPlanningFingerprint("defense-after", {
+    lineId,
+    observationBoundary: "own_draw_identity",
+  });
+  const campaignQuote: CampaignMilestoneQuote = {
+    quoteId: afterQuoteId,
+    campaignId,
+    quoteVersion: CORP_DEFENSE_TURN_SLICE_VERSION,
+    basis: {
+      kind: "projected_frame",
+      baseStateVersion: params.stateIdentity.stateVersion,
+      projectedFrameKey: turnPlanningFingerprint("defense-frame", {
+        lineId,
+        targetServerId: signal.serverId,
+        observationBoundary: "own_draw_identity",
+      }),
+      linePrefixHash: turnPlanningFingerprint("defense-prefix", [
+        invocation.invocationKey,
+      ]),
+    },
+    currentMilestoneId: signal.phase,
+    nextMilestoneId: "replan_after_score_protection_draw",
+    commitment:
+      signal.delegatedPriorityClass === "P1" ||
+      signal.delegatedPriorityClass === "P2"
+        ? "hard"
+        : "soft",
+    remainingValue: totalValue,
+    expiresAt: "current_turn_end",
+    revalidationCodes: [
+      "own_draw_resolved",
+      "replan_remaining_turn_after_private_observation",
+      "parent_score_project_still_current",
+      "parent_protection_need_still_current",
+    ],
+  };
+  return {
+    lineId,
+    defenseId: signal.defenseId,
+    targetServerId: signal.serverId,
+    disposition: "draw_for_ice",
+    currentActionId: signal.actionId,
+    nodes: [
+      {
+        nodeId,
+        ownerModuleId: "corp.defend_servers",
+        invocation,
+        projectedOnly: false,
+      },
+    ],
+    fundingGapBefore: 0,
+    fundingGapAfter: 0,
+    rezReadyAfterLine: false,
+    bluffValue: 0,
+    defenseValue,
+    economyValue,
+    totalValue,
+    priorityClass: signal.delegatedPriorityClass,
+    campaignQuote,
+    valueClaims: [
+      {
+        claimId: `${lineId}:defense`,
+        campaignId,
+        ownerModuleId: "corp.defend_servers",
+        objectiveKey: `score-protection:${signal.parentProjectId}`,
+        componentKey: "ice_search_opportunity",
+        evaluationDimensionId: "defense",
+        aggregationMode: "delta_from_previous_prefix",
+        contributionKind: "option_preservation",
+        beforeQuoteId,
+        afterQuoteId,
+        amount: defenseValue,
+        dependencyKeys: [signal.parentNeedId],
+        conflictKeys: [`score-protection-draw:${signal.parentProjectId}`],
+        status: "quoted",
+      },
+    ],
+    evidenceCodes: [
+      "defense_disposition:draw_for_ice",
+      `defense_target:${signal.serverId}`,
+      signal.evidenceCode,
+      `score_protection_parent:${signal.parentProjectId}`,
+      `score_protection_need:${signal.parentNeedId}`,
+      "observation_boundary_after_draw",
+      "score_protection_draw_delegated_to_defense_plan",
     ],
   };
 }

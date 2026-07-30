@@ -3085,11 +3085,13 @@ function selectedExactGenericDefenseRoutes(
       // The allocation orders HQ against R&D. It must not remove an exact
       // route for Archives or another independently assessed server.
       eligibleRoutes = [
-        ...(allocationLocked
-          ? []
-          : exactIceRoutes.filter(
-              (route) => centralServerForRoute(route) === undefined,
-            )),
+        ...exactIceRoutes.filter(
+          (route) =>
+            centralServerForRoute(route) === undefined &&
+            (!allocationLocked ||
+              route.signal.urgent ||
+              isVisibleAgendaExposureDefense(route.signal)),
+        ),
         ...allocatedCentralRoutes,
       ];
     }
@@ -3161,6 +3163,10 @@ function compareGenericExactInstallRoutes(
     projection: KnownCorpFundedIceInstallRouteProjection;
   },
 ): number {
+  const urgencyComparison =
+    genericDefenseRouteUrgencyRank(right.signal) -
+    genericDefenseRouteUrgencyRank(left.signal);
+  if (urgencyComparison !== 0) return urgencyComparison;
   if (
     left.signal.installRoute?.disposition !==
     right.signal.installRoute?.disposition
@@ -3188,6 +3194,23 @@ function compareGenericExactInstallRoutes(
     costComparison ||
     technicalCompare(left.candidate.actionId, right.candidate.actionId)
   );
+}
+
+function genericDefenseRouteUrgencyRank(
+  signal: CorpGenericDefenseSignal,
+): number {
+  if (isVisibleAgendaExposureDefense(signal)) return 600;
+  if (signal.centralPressure === "terminal") return 500;
+  if (signal.centralPressure === "acute") return 400;
+  if (signal.urgent) return 300;
+  if (signal.centralPressure === "material") return 200;
+  return 0;
+}
+
+function isVisibleAgendaExposureDefense(
+  signal: CorpGenericDefenseSignal,
+): boolean {
+  return signal.evidenceCode.includes("visible_agenda_exposure_defense");
 }
 
 export function corpDefensePortfolioHasExecutableRoute(

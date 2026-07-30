@@ -3104,7 +3104,7 @@ export const AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION =
 
 export type AiTurnPlanningDebug = {
   schemaVersion: typeof AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION;
-  mode: "projection_contract" | "shadow";
+  mode: "projection_contract" | "shadow" | "cutover";
   stateVersion: number;
   sideSafePlanningFingerprint: string;
   planningRulesFingerprint: string;
@@ -3236,7 +3236,8 @@ export type AiTurnPlanningDebug = {
         | "install_rez_ready"
         | "fund_then_install"
         | "stage_for_later_rez"
-        | "bounded_bluff";
+        | "bounded_bluff"
+        | "draw_for_ice";
       actionCount: number;
       fundingGapBefore: number;
       fundingGapAfter: number;
@@ -3359,7 +3360,10 @@ export type AiPlanFirstDecisionDebug = {
   schemaVersion: typeof AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION;
   stateVersion: number;
   lane: "plan" | "engine_window";
-  selectionAuthority: "resident_plan_instance" | "engine_window";
+  selectionAuthority:
+    | "resident_plan_instance"
+    | "turn_plan_commitment"
+    | "engine_window";
   rootPlanInstanceId: string;
   leafExecutorInstanceId: string;
   selectedPlan?: AiPlanFirstDebugPlanInstance;
@@ -3836,6 +3840,7 @@ function sanitizeAiPlanFirstDecisionDebug(
     !Number.isFinite(candidate.stateVersion) ||
     (candidate.lane !== "plan" && candidate.lane !== "engine_window") ||
     (candidate.selectionAuthority !== "resident_plan_instance" &&
+      candidate.selectionAuthority !== "turn_plan_commitment" &&
       candidate.selectionAuthority !== "engine_window") ||
     typeof candidate.rootPlanInstanceId !== "string" ||
     typeof candidate.leafExecutorInstanceId !== "string" ||
@@ -3856,7 +3861,8 @@ function sanitizeAiPlanFirstDecisionDebug(
   }
   if (
     candidate.lane === "plan" &&
-    (candidate.selectionAuthority !== "resident_plan_instance" ||
+    ((candidate.selectionAuthority !== "resident_plan_instance" &&
+      candidate.selectionAuthority !== "turn_plan_commitment") ||
       candidate.engineWindowAction !== undefined ||
       !isAiPlanFirstPlanInstance(candidate.selectedPlan) ||
       !isAiPlanFirstPriority(candidate.priority) ||
@@ -3906,7 +3912,9 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
       "evidenceCodes",
     ]) ||
     candidate.schemaVersion !== AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION ||
-    (candidate.mode !== "projection_contract" && candidate.mode !== "shadow") ||
+    (candidate.mode !== "projection_contract" &&
+      candidate.mode !== "shadow" &&
+      candidate.mode !== "cutover") ||
     typeof candidate.stateVersion !== "number" ||
     !Number.isFinite(candidate.stateVersion) ||
     typeof candidate.sideSafePlanningFingerprint !== "string" ||
@@ -4334,6 +4342,7 @@ function isAiTurnPlanningDefenseComparison(value: unknown): boolean {
           "fund_then_install",
           "stage_for_later_rez",
           "bounded_bluff",
+          "draw_for_ice",
         ].includes(String(line.disposition)) &&
         typeof line.rezReadyAfterLine === "boolean" &&
         [

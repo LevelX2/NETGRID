@@ -31,9 +31,13 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const input = corpInput([install, gain, end], [trap]);
     setCorpIntent(input, false);
 
-    expect(() =>
+    expect(
       liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError(PlanResolutionFailure);
+    ).toMatchObject({
+      actionId: gain.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
   });
 
   it("rejects the exact Ambush install when Corp intent is absent", () => {
@@ -44,9 +48,13 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const end = endTurn();
     const input = corpInput([install, gain, end], [trap]);
 
-    expect(() =>
+    expect(
       liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError(PlanResolutionFailure);
+    ).toMatchObject({
+      actionId: gain.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
   });
 
   it("rejects an Experimental AI install until it has a visible program payoff", () => {
@@ -62,9 +70,13 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const input = corpInput([install, gain, end], [trap]);
     setCorpIntent(input, true);
 
-    expect(() =>
+    expect(
       liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError(PlanResolutionFailure);
+    ).toMatchObject({
+      actionId: gain.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
 
     input.playerView.opponent.rig = [
       visibleCard("visible-runner-program", "runner", "program", {
@@ -708,5 +720,15 @@ function liveContext() {
     selectedChoicesForDecision: () => undefined,
     practicalMicroRuntimeCandidates: () => [],
   } as unknown as SemanticRuntimeDecisionContextDependencies;
-  return createSemanticRuntimeDecisionContext(dependencies);
+  const context = createSemanticRuntimeDecisionContext(dependencies);
+  return {
+    chooseSemanticRuntimeAction: (
+      input: Parameters<typeof context.chooseSemanticRuntimeAction>[0],
+      options: Parameters<typeof context.chooseSemanticRuntimeAction>[1],
+    ) =>
+      context.chooseSemanticRuntimeAction(input, {
+        corpTurnPlannerMode: "legacy_compare",
+        ...options,
+      }),
+  };
 }

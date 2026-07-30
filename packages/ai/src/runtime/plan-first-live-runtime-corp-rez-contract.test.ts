@@ -1009,6 +1009,9 @@ function corpInput(
     expiresAtStateVersion: stateVersion,
   }));
   const input = aiInput("corp", timedActions);
+  for (const action of timedActions) {
+    action.expiresAtStateVersion = stateVersion;
+  }
   input.playerView.stateVersion = stateVersion;
   input.playerView.timingPoint = timingPoint;
   input.playerView.legalActions = timedActions;
@@ -1216,5 +1219,15 @@ function liveContext() {
     selectedChoicesForDecision: () => undefined,
     practicalMicroRuntimeCandidates: () => [],
   } as unknown as SemanticRuntimeDecisionContextDependencies;
-  return createSemanticRuntimeDecisionContext(dependencies);
+  const context = createSemanticRuntimeDecisionContext(dependencies);
+  return {
+    chooseSemanticRuntimeAction: (
+      input: Parameters<typeof context.chooseSemanticRuntimeAction>[0],
+      options: Parameters<typeof context.chooseSemanticRuntimeAction>[1],
+    ) =>
+      context.chooseSemanticRuntimeAction(input, {
+        corpTurnPlannerMode: "legacy_compare",
+        ...options,
+      }),
+  };
 }

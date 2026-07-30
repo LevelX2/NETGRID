@@ -11,6 +11,7 @@ import { resetTacticalPlanMemory } from "./tactical-plans";
 import { getStrategicIntentMemorySnapshot } from "./strategic-intent-memory";
 import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
 import { PlanResolutionFailure } from "./plans/plan-resolution-failure";
+import { buildPlanningStateIdentity } from "./plans/turn-planning-contracts";
 import {
   chooseSemanticRuntimeAction,
   type SemanticRuntimeDependencies,
@@ -698,14 +699,6 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
         { source: "game_rule" },
       ),
       legalAction(
-        "end-turn",
-        "corp",
-        "end_turn",
-        "End turn",
-        { credits: 0 },
-        { source: "game_rule" },
-      ),
-      legalAction(
         "score",
         "corp",
         "score_agenda",
@@ -728,6 +721,9 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
       server("archives"),
       server("remote_1", [], [agenda]),
     ];
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
 
     const decision = chooseCorpAction(input);
 

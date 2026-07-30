@@ -25,6 +25,7 @@ import {
   restoreResidentPlanPortfolioMemorySnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
+import { invalidateTurnPlanCommitmentForRestart } from "../../plans/turn-plan-commitment";
 
 export const AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION =
   "ai-runtime-checkpoint-v1" as const;
@@ -80,8 +81,16 @@ export function restoreAiRuntimeCheckpoint(
     deckSnapshotId,
   );
   restoreRunnerRunPlanMemorySnapshot(input, checkpoint.runnerRunPlan);
-  restoreResidentPlanPortfolioMemorySnapshot(
-    input,
-    checkpoint.residentPlanPortfolio,
-  );
+  const residentPlanPortfolio = checkpoint.residentPlanPortfolio
+    ? structuredClone(checkpoint.residentPlanPortfolio)
+    : undefined;
+  if (residentPlanPortfolio?.turnPlanCommitment) {
+    residentPlanPortfolio.turnPlanCommitment =
+      invalidateTurnPlanCommitmentForRestart(
+        residentPlanPortfolio.turnPlanCommitment,
+        "checkpoint-restored-runtime",
+      ).commitment;
+    delete residentPlanPortfolio.turnPlanExecutionLease;
+  }
+  restoreResidentPlanPortfolioMemorySnapshot(input, residentPlanPortfolio);
 }

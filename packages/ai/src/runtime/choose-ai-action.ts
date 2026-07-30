@@ -11,6 +11,12 @@ import {
 
 export type AiDecisionRuntimeOptions = {
   persistTacticalPlanMemory?: boolean;
+  /**
+   * Explicit rollback/diagnostic gate. Productive Corp decisions default to
+   * `cutover`; `legacy_compare` keeps the former scheduler winner and lets the
+   * TurnPlanner observe it without action-by-action fallback.
+   */
+  corpTurnPlannerMode?: "cutover" | "legacy_compare";
   quoteCorpPunishRoute?: (
     request: CorpPunishRouteQuoteRequest,
   ) => CorpPunishRouteQuoteResult;

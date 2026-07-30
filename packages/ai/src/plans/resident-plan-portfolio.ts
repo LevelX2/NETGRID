@@ -11,6 +11,11 @@ import type {
   PlanProposal,
 } from "./plan-kernel-types";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import {
+  assertTurnPlanCommitment,
+  type TurnPlanCommitment,
+  type TurnPlanExecutionLease,
+} from "./turn-plan-commitment";
 
 export const RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION =
   "resident-plan-portfolio-v2" as const;
@@ -117,6 +122,8 @@ export type ResidentPlanPortfolio = {
   completionHistory: CompletedPlanRecord[];
   transitions: PlanPortfolioTransition[];
   campaigns?: ResidentCorpCampaign[];
+  turnPlanCommitment?: TurnPlanCommitment;
+  turnPlanExecutionLease?: TurnPlanExecutionLease;
 };
 
 export type ReconcileResidentPlanPortfolioParams = {
@@ -265,6 +272,20 @@ export function reconcileResidentPlanPortfolio(
     transitions,
     ...(params.previous?.campaigns
       ? { campaigns: structuredClone(params.previous.campaigns) }
+      : {}),
+    ...(params.previous?.turnPlanCommitment
+      ? {
+          turnPlanCommitment: structuredClone(
+            params.previous.turnPlanCommitment,
+          ),
+        }
+      : {}),
+    ...(params.previous?.turnPlanExecutionLease
+      ? {
+          turnPlanExecutionLease: structuredClone(
+            params.previous.turnPlanExecutionLease,
+          ),
+        }
       : {}),
   };
   portfolio = assignExecutor(
@@ -441,6 +462,48 @@ export function assertResidentPlanPortfolio(
       );
     }
   }
+  if (portfolio.turnPlanCommitment) {
+    assertTurnPlanCommitment(portfolio.turnPlanCommitment);
+    const lease = portfolio.turnPlanExecutionLease;
+    if (
+      lease &&
+      (lease.commitmentId !== portfolio.turnPlanCommitment.commitmentId ||
+        lease.sourcePlanId !== portfolio.turnPlanCommitment.sourcePlanId ||
+        lease.stateIdentity.stateVersion > portfolio.stateVersion)
+    ) {
+      throw portfolioFailure(
+        "executor_invariant_broken",
+        portfolio,
+        timingPoint,
+        portfolio.executorInstanceId,
+        "Keep a pending TurnPlan execution lease bound to the persisted commitment and no later than the current portfolio state.",
+      );
+    }
+  } else if (portfolio.turnPlanExecutionLease) {
+    throw portfolioFailure(
+      "executor_invariant_broken",
+      portfolio,
+      timingPoint,
+      portfolio.executorInstanceId,
+      "Persist a TurnPlan execution lease only together with its commitment.",
+    );
+  }
+}
+
+export function selectResidentPlanPortfolioExecutor(params: {
+  portfolio: ResidentPlanPortfolio;
+  selectedExecutorInstanceId: string;
+  timingPoint: string;
+  reason: "executor_selected" | "preempted_by_validated_value";
+}): ResidentPlanPortfolio {
+  const selected = assignExecutor(
+    structuredClone(params.portfolio),
+    params.selectedExecutorInstanceId,
+    params.reason,
+    params.timingPoint,
+  );
+  assertResidentPlanPortfolio(selected, params.timingPoint);
+  return selected;
 }
 
 function assignExecutor(

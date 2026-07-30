@@ -32,6 +32,8 @@ export type TurnRemainderSearchBudget = {
 export type TurnRemainderSearchOffer = {
   head: TurnPlanningHeadCandidate;
   candidate: ActionSemanticCandidate;
+  rootPreferenceRank?: number;
+  moduleCandidatePreferenceRank?: number;
   obligationSignature: string;
   priorityCoverage: PriorityCoverage;
   dependencyCandidateIds?: string[];
@@ -56,6 +58,9 @@ export type TurnRemainderSearchLine = {
   obligationSignature: string;
   rootPlanInstanceId: string;
   nextMilestoneId: string;
+  priorityClass: TurnPlanningHeadCandidate["priorityClass"];
+  rootPreferenceRank?: number;
+  moduleCandidatePreferenceRank?: number;
   steps: TurnRemainderSearchStep[];
   projectedFrame: ProjectedDecisionFrame;
   evaluationValues: Record<string, number>;
@@ -242,7 +247,15 @@ export function searchDeterministicRemainderTurnPlans(params: {
         anyPrefixAtIndex = true;
         if (prefix.line.stopReason === "observation_boundary") continue;
         const partitionFloor = baselineByPartition.get(partition.partitionKey);
-        for (const offer of validOffers) {
+        const followupOffers = [...validOffers].sort((left, right) => {
+          const leftBound = dependencySatisfiedByPrefix(prefix, left);
+          const rightBound = dependencySatisfiedByPrefix(prefix, right);
+          return (
+            Number(rightBound) - Number(leftBound) ||
+            compareOffers(left, right, registry)
+          );
+        });
+        for (const offer of followupOffers) {
           if (expandedNodeCount >= effectiveNodeBudget) {
             pruneEvents.push(
               pruneEvent(
@@ -528,6 +541,16 @@ function applyOffer(params: {
       params.offer.head.rootPlanInstanceId,
     nextMilestoneId:
       params.prefix?.line.nextMilestoneId ?? params.offer.head.nextMilestoneId,
+    priorityClass:
+      params.prefix?.line.priorityClass ?? params.offer.head.priorityClass,
+    rootPreferenceRank:
+      params.prefix?.line.rootPreferenceRank ??
+      params.offer.rootPreferenceRank ??
+      0,
+    moduleCandidatePreferenceRank:
+      params.prefix?.line.moduleCandidatePreferenceRank ??
+      params.offer.moduleCandidatePreferenceRank ??
+      0,
     steps,
     projectedFrame,
     evaluationValues,
@@ -567,6 +590,19 @@ function applyOffer(params: {
       ]),
     },
   };
+}
+
+function dependencySatisfiedByPrefix(
+  prefix: SearchState,
+  offer: TurnRemainderSearchOffer,
+): boolean {
+  const dependencies = offer.dependencyCandidateIds ?? [];
+  return (
+    dependencies.length > 0 &&
+    dependencies.every((candidateId) =>
+      prefix.usedCandidateIds.includes(candidateId),
+    )
+  );
 }
 
 function capacityApplication(
@@ -857,6 +893,8 @@ function compareOffers(
     priorityRank(left.head.priorityClass) -
       priorityRank(right.head.priorityClass) ||
     scalarOfferValue(right, registry) - scalarOfferValue(left, registry) ||
+    (right.moduleCandidatePreferenceRank ?? 0) -
+      (left.moduleCandidatePreferenceRank ?? 0) ||
     left.head.candidateId.localeCompare(right.head.candidateId)
   );
 }
@@ -866,13 +904,21 @@ function compareLines(
   right: TurnRemainderSearchLine,
   registry: TurnPlanEvaluationRegistry,
 ): number {
+  const sameRootPreference =
+    left.rootPlanInstanceId === right.rootPlanInstanceId
+      ? (right.rootPreferenceRank ?? 0) - (left.rootPreferenceRank ?? 0)
+      : 0;
   return (
     left.priorityCoverage.violatedObligationIds.length -
       right.priorityCoverage.violatedObligationIds.length ||
     right.priorityCoverage.satisfiedObligationIds.length -
       left.priorityCoverage.satisfiedObligationIds.length ||
+    priorityRank(left.priorityClass) - priorityRank(right.priorityClass) ||
+    sameRootPreference ||
     scalarEvaluation(right.evaluationValues, registry) -
       scalarEvaluation(left.evaluationValues, registry) ||
+    (right.moduleCandidatePreferenceRank ?? 0) -
+      (left.moduleCandidatePreferenceRank ?? 0) ||
     right.projectedFrame.actionCapacityLedger.unrestricted.minimum -
       left.projectedFrame.actionCapacityLedger.unrestricted.minimum ||
     right.projectedFrame.ownCredits.minimum -

@@ -27,7 +27,9 @@ import {
   aiPlanFirstIntentFitLabel,
   aiPlanFirstPriorityLabel,
   aiPlanFirstQuoteStatusLabel,
+  aiPlanFirstSelectionAuthorityLabel,
   aiPlanFirstStepLabel,
+  aiTurnPlanningModeLabel,
   parseAiPlanFirstDecisionDebug,
 } from "../../app/ai-plan-first-decision-ui";
 import {
@@ -404,9 +406,7 @@ function AiDecisionDebugPlanFirstTraceView({
   const technicalDecisionRows: Array<[string, string]> = [
     [
       "Entscheidungsquelle",
-      decision.selectionAuthority === "resident_plan_instance"
-        ? "aus einer gespeicherten Planinstanz"
-        : "aus einem Engine-/Pflichtfenster",
+      aiPlanFirstSelectionAuthorityLabel(decision.selectionAuthority),
     ],
     ...(selectedPlan
       ? ([
@@ -560,9 +560,7 @@ function AiDecisionDebugPlanFirstTraceView({
             rows={[
               [
                 "Betriebsart",
-                decision.turnPlanning.mode === "shadow"
-                  ? "Shadow-Planer"
-                  : "Projektionsvertrag",
+                aiTurnPlanningModeLabel(decision.turnPlanning.mode),
               ],
               ["Zug", decision.turnPlanning.turnKey],
               ["Gewählte Linie", decision.turnPlanning.selectedLine.lineId],
@@ -584,15 +582,23 @@ function AiDecisionDebugPlanFirstTraceView({
           />
           {decision.turnPlanning.shadowComparison ? (
             <>
-              <h4>Shadow-Vergleich</h4>
+              <h4>
+                {decision.turnPlanning.mode === "cutover"
+                  ? "Vergleich mit alter Einzelaktionsauswahl"
+                  : "Shadow-Vergleich"}
+              </h4>
               <AiDecisionDebugRows
                 rows={[
                   [
-                    "Produktive Aktion",
+                    decision.turnPlanning.mode === "cutover"
+                      ? "Alte Einzelaktionsauswahl"
+                      : "Produktive Aktion",
                     decision.turnPlanning.shadowComparison.liveActionId,
                   ],
                   [
-                    "Shadow-Aktion",
+                    decision.turnPlanning.mode === "cutover"
+                      ? "Verbindliche Zugplan-Aktion"
+                      : "Shadow-Aktion",
                     decision.turnPlanning.shadowComparison.shadowActionId ??
                       "keine vollständige Shadow-Linie",
                   ],
@@ -1050,7 +1056,8 @@ function aiDefenseLineDispositionLabel(
     | "install_rez_ready"
     | "fund_then_install"
     | "stage_for_later_rez"
-    | "bounded_bluff",
+    | "bounded_bluff"
+    | "draw_for_ice",
 ): string {
   if (disposition === "install_rez_ready")
     return "ICE installieren, Rezreserve steht";
@@ -1058,6 +1065,8 @@ function aiDefenseLineDispositionLabel(
     return "zuerst finanzieren, dann ICE installieren";
   if (disposition === "stage_for_later_rez")
     return "ICE jetzt vorbereiten, später rezzen";
+  if (disposition === "draw_for_ice")
+    return "ICE suchen, danach Restzug neu planen";
   return "begrenzter Bluff innerhalb des Defense-Plans";
 }
 

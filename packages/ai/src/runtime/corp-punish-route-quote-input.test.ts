@@ -296,10 +296,12 @@ describe("decision-local Corp punish route quote input", () => {
       const first = chooseCorpAction(input, {
         quoteCorpPunishRoute: callback,
         persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
       });
       const second = chooseCorpAction(input, {
         quoteCorpPunishRoute: callback,
         persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
       });
 
       expect(first.actionId).toBe("play-data-sifters");

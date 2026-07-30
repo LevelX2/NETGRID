@@ -41,6 +41,11 @@ describe("Corp turn planning coverage", () => {
         entry.semanticActionPatterns.includes("*"),
       ),
     ).toBe(false);
+    expect(
+      CORP_TURN_PLANNING_MODULE_COVERAGE.find(
+        (entry) => entry.moduleId === "corp.defend_servers",
+      )?.semanticActionPatterns,
+    ).toContain("play.corp_operation");
   });
 
   it("reports 100 percent classified current Corp LegalActions across every owner", () => {
@@ -146,6 +151,33 @@ describe("Corp turn planning coverage", () => {
     expect(() => assertCompleteCorpTurnPlanningCoverage(report)).toThrowError(
       /productive_action_without_owner/,
     );
+  });
+
+  it("defers a zero-click end turn while an exact productive score route remains", () => {
+    const setup = coverageSetup();
+    const report = buildCorpTurnPlanningCoverageReport({
+      ...setup,
+      input: {
+        ...setup.input,
+        playerView: {
+          ...setup.input.playerView,
+          own: { clicks: 0 },
+        },
+      } as typeof setup.input,
+      heads: setup.heads.filter(
+        (head) => head.currentBinding.actionId !== "action:end",
+      ),
+    });
+
+    expect(report.actions).toContainEqual(
+      expect.objectContaining({
+        actionId: "action:end",
+        classification: "explicitly_nonproductive",
+        ownerModuleId: "corp.complete_turn",
+        evidenceCodes: ["turn_completion_deferred_productive_route"],
+      }),
+    );
+    expect(report.status).toBe("pass");
   });
 
   it("rejects missing campaign quotes, horizon drift and alien semantic families", () => {

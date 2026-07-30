@@ -1,6 +1,6 @@
 # KI-Zug- und Kampagnenplaner – Worktree-Paketprozess
 
-Status: **ZK00 bis ZK10a abgeschlossen; ZK11 aktiv**
+Status: **ZK00 bis ZK11 abgeschlossen; ZK12 aktiv**
 
 Stand: 2026-07-29
 
@@ -1076,3 +1076,42 @@ Der Gesamtprozess ist nur abgeschlossen, wenn:
   Mehrfach-Outcome-Taktik bleibt bewusst ZK12.
 - Führende Evidence:
   `docs/reviews/ai/corp-opponent-campaign-continuity-2026-07-30.md`.
+
+### ZK11 – abgeschlossen
+
+- Der Corp-TurnPlanner ist die alleinige produktive Auswahl. Der bisherige
+  Einzelaktionspfad bleibt ausschließlich über den expliziten
+  `legacy_compare`-Modus für Vergleichs- und eng abgegrenzte
+  Altvertragsprüfungen erreichbar; es gibt keinen stillen Runtime-Fallback.
+- Jede produktive Corp-Aktion besitzt vor Ausführung einen validierten,
+  rematerialisierbaren Planning Head, eine aktive TurnPlan-Commitment- und
+  Lease-Bindung sowie vollständige Coverage. Fehlende, mehrdeutige oder
+  veraltete Bindungen schlagen fail-closed fehl.
+- Die Variantenbewertung bewahrt die konkrete Kandidatenpräferenz des
+  Fachplans nur innerhalb desselben Plan-Roots. Beobachtungsgebundene
+  Hand-/Agenda-Material-Züge werden unmittelbar ausgeführt und erzwingen
+  danach Neuplanung; fremde P4-Zwischenschritte dürfen ihren Restaktionswert
+  nicht künstlich doppelt zählen.
+- Der Defense-Plan bindet ICE-Installationen an das tatsächlich bewertete
+  Serverziel. Sichtbar exponierte Agendas, terminale Zentraldrucklagen,
+  Score-Protection und gleichwertige HQ-/R&D-Reihenfolgen sind durch
+  Entscheidungspunkte und Modulprüfungen abgedeckt. ICE-Staging und Bluff
+  bleiben ausschließlich Defense-Plan-Entscheidungen.
+- Die private privilegierte Buganzeige zeigt den vollständigen TurnPlan,
+  Commitment-, Lease-, Boundary-, Coverage-, Kampagnen- und
+  Vergleichsstatus sowie weiterhin sämtliche Karten und Hände beider Seiten.
+  Für diese Anzeige gilt bestimmungsgemäß keine seitensichere Reduktion.
+- Behavior Baseline: 60 Spiele und 12.744 Entscheidungen ohne illegale
+  Aktionen sowie ohne Runtime-, Replay-, Hidden-Info-, Fallback-, Timeout-
+  oder No-LegalAction-Fehler. Das einzige Action-Limit
+  (`strategy_panel_fast_advance_chrome_rush`, Seed 02) ist als bereits
+  dokumentierte fremde Runner-Spätspielbaseline klassifiziert und endet mit
+  erweitertem Limit nach 581 Aktionen regulär.
+- D4-/D5-Cutovermessung über 400 Stichproben nach 20 Warmups:
+  p50 47,27 ms, p95 63,08 ms, p99 73,13 ms, Maximum 80,05 ms. Das
+  festgelegte ZK11-Gate p95 höchstens 75 ms ist erfüllt.
+- Vollständige AI-Suite: 529 Testdateien und 4.333 Tests grün. AI-, Shared-,
+  Engine- und Web-Typecheck, `check:ai` mit `production=746`,
+  Proteus-Readiness, Deck-Doctrine-Gate sowie `git diff --check`: grün.
+- Führende Evidence:
+  `docs/reviews/ai/ai-behavior-baseline-v1-turn-planner-cutover-2026-07-29.md`.

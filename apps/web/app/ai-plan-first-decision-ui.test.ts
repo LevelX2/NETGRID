@@ -4,7 +4,9 @@ import {
   aiPlanFirstDispositionSummary,
   aiPlanFirstPriorityLabel,
   aiPlanFirstQuoteStatusLabel,
+  aiPlanFirstSelectionAuthorityLabel,
   aiPlanFirstStepLabel,
+  aiTurnPlanningModeLabel,
   parseAiPlanFirstDecisionDebug,
 } from "./ai-plan-first-decision-ui";
 
@@ -76,6 +78,22 @@ describe("plan-first AI decision display", () => {
         "plan:corp_hand_and_agenda_management:resolve_hq_overflow%3Acorp%3A26:resolve_hq_overflow",
       ),
     ).toBe("Handkartenlimit erfüllen");
+  });
+
+  it("labels committed turn-plan authority distinctly from comparison and engine lanes", () => {
+    expect(aiPlanFirstSelectionAuthorityLabel("turn_plan_commitment")).toBe(
+      "aus dem verbindlichen Zugplan",
+    );
+    expect(aiPlanFirstSelectionAuthorityLabel("resident_plan_instance")).toBe(
+      "aus einer gespeicherten Planinstanz",
+    );
+    expect(aiPlanFirstSelectionAuthorityLabel("engine_window")).toBe(
+      "aus einem Engine-/Pflichtfenster",
+    );
+    expect(aiTurnPlanningModeLabel("cutover")).toBe(
+      "Verbindlicher Zugplaner",
+    );
+    expect(aiTurnPlanningModeLabel("shadow")).toBe("Shadow-Vergleich");
   });
 
   it("fails closed for legacy-only data and exposes Unknown without estimates", () => {

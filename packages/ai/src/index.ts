@@ -308,6 +308,11 @@ export {
   CORP_OPPONENT_CAMPAIGN_CONTINUITY_VERSION,
 } from "./plans/corp-opponent-campaign-continuity";
 export type { CorpCampaignDescriptor } from "./plans/corp-opponent-campaign-continuity";
+export {
+  CORP_TURN_PLANNER_CUTOVER_VERSION,
+  resolveCorpTurnPlannerCutover,
+} from "./plans/corp-turn-planner-cutover";
+export type { CorpTurnPlannerCutoverResult } from "./plans/corp-turn-planner-cutover";
 export type {
   CampaignRequote,
   CommittedInvocationRoute,

@@ -118,6 +118,7 @@ describe("exact Corp ICE rez route", () => {
 
     const decision = chooseAiAction(fixture.input, {
       persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
     });
 
     expect([
@@ -286,7 +287,10 @@ describe("exact Corp ICE rez route", () => {
       effect: "progress",
     });
     expect(
-      chooseAiAction(fixture.input, { persistTacticalPlanMemory: false })
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      })
         .actionId,
     ).toBe(fixture.engineAction.actionId);
   });
@@ -351,7 +355,10 @@ describe("exact Corp ICE rez route", () => {
       },
     });
     expect(
-      chooseAiAction(fixture.input, { persistTacticalPlanMemory: false })
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      })
         .actionId,
     ).toBe(fixture.engineAction.actionId);
   });
@@ -364,6 +371,7 @@ describe("exact Corp ICE rez route", () => {
     });
     const decision = chooseAiAction(fixture.input, {
       persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
     });
     expect(decision.actionId).toBe(fixture.engineAction.actionId);
 
@@ -427,7 +435,10 @@ describe("exact Corp ICE rez route", () => {
       totalRezCredits: 0,
     });
     expect(
-      chooseAiAction(fixture.input, { persistTacticalPlanMemory: false })
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      })
         .actionId,
     ).toBe(fixture.engineAction.actionId);
   });
@@ -500,7 +511,10 @@ describe("exact Corp ICE rez route", () => {
       }).preservesReserve,
     ).toBe(false);
     expect(
-      chooseAiAction(input, { persistTacticalPlanMemory: false }).actionId,
+      chooseAiAction(input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }).actionId,
     ).toBe(decline.actionId);
   });
 
@@ -515,7 +529,10 @@ describe("exact Corp ICE rez route", () => {
     );
 
     expect(
-      chooseAiAction(input, { persistTacticalPlanMemory: false }).actionId,
+      chooseAiAction(input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }).actionId,
     ).toBe(
       input.legalActions.find(
         (action) =>
@@ -542,7 +559,10 @@ describe("exact Corp ICE rez route", () => {
       creditsRequiredBeforeNextCorpTurn: 3,
     });
     expect(
-      chooseAiAction(fixture.input, { persistTacticalPlanMemory: false })
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      })
         .actionId,
     ).toBe(rez.actionId);
   });
@@ -628,7 +648,10 @@ describe("exact Corp ICE rez route", () => {
     // One remote would leave enough cash (7 - 2 >= 3); two still-attackable
     // remotes require both certified three-credit rez quotes.
     expect(
-      chooseAiAction(input, { persistTacticalPlanMemory: false }).actionId,
+      chooseAiAction(input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }).actionId,
     ).toBe(decline.actionId);
   });
 
@@ -650,7 +673,10 @@ describe("exact Corp ICE rez route", () => {
       throw new Error("Engine did not expose the discounted rez");
 
     expect(
-      chooseAiAction(input, { persistTacticalPlanMemory: false }).actionId,
+      chooseAiAction(input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }).actionId,
     ).toBe(discounted.actionId);
   });
 
@@ -689,7 +715,10 @@ describe("exact Corp ICE rez route", () => {
       }),
     ).toBeUndefined();
     expect(
-      chooseAiAction(input, { persistTacticalPlanMemory: false }).actionId,
+      chooseAiAction(input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }).actionId,
     ).toBe(decline.actionId);
   });
 

@@ -114,7 +114,12 @@ import {
 import { assertCorpTurnPlanningModuleRegistry } from "../plans/corp-turn-planning-coverage";
 import { buildCorpTurnPlannerShadow } from "../plans/corp-turn-planner-shadow";
 import {
+  resolveCorpTurnPlannerCutover,
+  type CorpTurnPlannerCutoverResult,
+} from "../plans/corp-turn-planner-cutover";
+import {
   buildCanonicalLegalActionInvocation,
+  buildPlanningStateIdentity,
   buildSemanticActionSetFingerprint,
   turnPlanningFingerprint,
 } from "../plans/turn-planning-contracts";
@@ -129,7 +134,10 @@ import {
   rememberResidentPlanPortfolio,
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
-import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
+import {
+  selectResidentPlanPortfolioExecutor,
+  type ResidentPlanPortfolio,
+} from "../plans/resident-plan-portfolio";
 import { createTurnCompletionPlanModule } from "../plans/turn-completion-plan-module";
 import {
   missingBreakerCoverageKind,
@@ -302,6 +310,14 @@ export function choosePlanFirstLiveAction(
     input,
     options.quoteCorpPunishRoute,
   );
+  if (
+    input.side === "corp" &&
+    (input as AiDecisionInputWithDeckCapabilities).planningRulesContext
+  ) {
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+  }
   const candidates = attachActiveRunContext(
     input,
     dependencies.buildActionSemanticCandidates({
@@ -342,7 +358,9 @@ export function choosePlanFirstLiveAction(
       ? runnerContext(input, candidates, dependencies, previous)
       : corpContext(input, candidates, previous);
   rememberCurrentStrategicIntent(input, options);
-  const result = runPlanScheduler({
+  let corpTurnPlannerCutover: CorpTurnPlannerCutoverResult | undefined;
+  let corpTurnPlanningDebug: AiTurnPlanningDebug | undefined;
+  let result = runPlanScheduler({
     context,
     registry,
     ...(previous ? { previousPortfolio: previous } : {}),
@@ -358,6 +376,68 @@ export function choosePlanFirstLiveAction(
         portfolio: result.portfolio,
       }),
     });
+    const planningInput = input as AiDecisionInputWithDeckCapabilities;
+    const hasTurnPlanningContracts =
+      planningInput.planningRulesContext !== undefined &&
+      planningInput.planningStateIdentity !== undefined;
+    if (
+      options.corpTurnPlannerMode !== "legacy_compare" &&
+      !hasTurnPlanningContracts
+    ) {
+      throw new PlanResolutionFailure("missing_plan_module_coverage", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map((action) => action.type),
+        unresolvedActionIds: input.legalActions.map(
+          (action) => action.actionId,
+        ),
+        owner: "rules_contract",
+        removalCondition:
+          "The productive Corp TurnPlanner requires current planning rules and state identity contracts.",
+      });
+    }
+    if (options.corpTurnPlannerMode === "legacy_compare") {
+      if (hasTurnPlanningContracts) {
+        const planner = buildCorpTurnPlannerShadow({
+          input,
+          context,
+          registry,
+          runtimeResult: result,
+          selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
+          authorityMode: "shadow",
+        });
+        corpTurnPlanningDebug = planner?.debug;
+      }
+    } else {
+      const planner = buildCorpTurnPlannerShadow({
+        input,
+        context,
+        registry,
+        runtimeResult: result,
+        selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
+        authorityMode: "cutover",
+      });
+      if (!planner) {
+        throw new Error("corp_turn_planner_cutover_result_missing");
+      }
+      corpTurnPlannerCutover = resolveCorpTurnPlannerCutover({
+        input,
+        planner,
+        portfolio: result.portfolio,
+        candidates,
+        rulesContext: planningInput.planningRulesContext!,
+        stateIdentity: planningInput.planningStateIdentity!,
+        runtimeInstanceId: "corp-turn-planner-runtime-v1",
+      });
+      corpTurnPlanningDebug = corpTurnPlannerCutover.debug;
+      result = applyCorpTurnPlannerCutoverSelection(
+        input,
+        candidates,
+        result,
+        corpTurnPlannerCutover,
+      );
+    }
   }
   bindSelectedCoverageSearchAction(input, result);
   bindSelectedRunnerTargetedBypassChoiceContinuation(input, result, candidates);
@@ -381,7 +461,107 @@ export function choosePlanFirstLiveAction(
     registry,
     dependencies,
     options,
+    corpTurnPlanningDebug,
   );
+}
+
+function applyCorpTurnPlannerCutoverSelection(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  result: Extract<PlanSchedulerResult, { lane: "plan" }>,
+  cutover: CorpTurnPlannerCutoverResult,
+): Extract<PlanSchedulerResult, { lane: "plan" }> {
+  const binding = cutover.planner.headBindings.find(
+    (entry) => entry.candidateId === cutover.head.candidateId,
+  );
+  const candidate = candidates.find(
+    (entry) => entry.actionId === cutover.head.currentBinding.actionId,
+  );
+  const legalAction = input.legalActions.find(
+    (action) => action.actionId === cutover.head.currentBinding.actionId,
+  );
+  if (
+    !binding ||
+    binding.planInstanceId !== cutover.selectedPlanInstanceId ||
+    !candidate ||
+    !legalAction ||
+    candidate.stateVersion !== input.playerView.stateVersion ||
+    legalAction.expiresAtStateVersion !== input.playerView.stateVersion
+  ) {
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [cutover.head.currentBinding.actionId],
+      owner: "plan_registry",
+      removalCondition:
+        "Bind the Corp TurnPlanner winner to its exact current plan instance, semantic candidate and LegalAction witness.",
+    });
+  }
+  const portfolio = selectResidentPlanPortfolioExecutor({
+    portfolio: result.portfolio,
+    selectedExecutorInstanceId: cutover.selectedPlanInstanceId,
+    timingPoint: input.playerView.timingPoint,
+    reason:
+      result.portfolio.executorInstanceId === cutover.selectedPlanInstanceId
+        ? "executor_selected"
+        : "preempted_by_validated_value",
+  });
+  portfolio.turnPlanCommitment = structuredClone(cutover.commitment);
+  portfolio.turnPlanExecutionLease = structuredClone(cutover.lease);
+  return {
+    lane: "plan",
+    route: {
+      planInstanceId: cutover.selectedPlanInstanceId,
+      step: structuredClone(binding.step),
+      head: {
+        planInstanceId: cutover.selectedPlanInstanceId,
+        stepId: binding.step.stepId,
+        actionId: legalAction.actionId,
+        actionType: legalAction.type,
+        semanticActionType: candidate.semanticActionType,
+        stateVersion: input.playerView.stateVersion,
+        ...(binding.step.target
+          ? { target: structuredClone(binding.step.target) }
+          : {}),
+      },
+      ...(binding.continuation
+        ? { continuation: structuredClone(binding.continuation) }
+        : {}),
+    },
+    selectedAssessment: structuredClone(binding.assessment),
+    portfolio,
+    ...(result.engineRandomizedIceInstallNearTie?.candidates.some(
+      (entry) => entry.actionId === legalAction.actionId,
+    )
+      ? {
+          engineRandomizedIceInstallNearTie: structuredClone(
+            result.engineRandomizedIceInstallNearTie,
+          ),
+        }
+      : {}),
+    diagnostics: [
+      ...result.diagnostics,
+      {
+        stage: "select",
+        code: "corp_turn_planner_cutover_winner",
+        instanceId: cutover.selectedPlanInstanceId,
+        moduleId: cutover.head.moduleId,
+        priorityClass: cutover.head.priorityClass,
+      },
+      ...(cutover.replanReason
+        ? [
+            {
+              stage: "reconcile" as const,
+              code: `corp_turn_plan_replanned:${cutover.replanReason}`,
+              instanceId: cutover.selectedPlanInstanceId,
+              moduleId: cutover.head.moduleId,
+            },
+          ]
+        : []),
+    ],
+  };
 }
 
 function currentCorpPlanModules() {
@@ -6790,15 +6970,32 @@ function corpActionDispositions(
         continue;
       }
     }
+    const defenseActionDisposition = defenseActionDispositions.get(
+      candidate.actionId,
+    );
+    if (
+      candidateIsVisibleCorpIceInstall(input, candidate) &&
+      defenseActionDisposition?.startsWith(
+        "corp_defense_exact_route_requires_parent_funding:",
+      )
+    ) {
+      add(candidate.actionId, "corp.defend_servers", defenseActionDisposition);
+      continue;
+    }
+    if (
+      defenseActionDisposition &&
+      !corpOpenEconomyPlanOwnsAction(domain, candidate.actionId) &&
+      !corpDefenseTurnPlanningSliceMayOwnAction(domain, candidate.actionId)
+    ) {
+      add(candidate.actionId, "corp.defend_servers", defenseActionDisposition);
+      continue;
+    }
     if (corpExactOverflowHandConversionPlanOwnsCandidate(domain, candidate)) {
       continue;
     }
     if (corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)) {
       continue;
     }
-    const defenseActionDisposition = defenseActionDispositions.get(
-      candidate.actionId,
-    );
     const globalDefenseInstallAssessment = candidateIsVisibleCorpIceInstall(
       input,
       candidate,
@@ -6820,15 +7017,6 @@ function corpActionDispositions(
         "corp.defend_servers",
         globalDefenseInstallAssessment.evidenceCode,
       );
-      continue;
-    }
-    if (
-      candidateIsVisibleCorpIceInstall(input, candidate) &&
-      defenseActionDisposition?.startsWith(
-        "corp_defense_exact_route_requires_parent_funding:",
-      )
-    ) {
-      add(candidate.actionId, "corp.defend_servers", defenseActionDisposition);
       continue;
     }
     if (
@@ -6857,10 +7045,6 @@ function corpActionDispositions(
         "corp.respond_to_virus_pressure",
         "corp_virus_purge_has_no_visible_strategic_pressure",
       );
-      continue;
-    }
-    if (defenseActionDisposition) {
-      add(candidate.actionId, "corp.defend_servers", defenseActionDisposition);
       continue;
     }
     if (
@@ -7327,6 +7511,19 @@ function corpExactExecutableNonEconomyPlanOwnsAction(
   );
 }
 
+function corpDefenseTurnPlanningSliceMayOwnAction(
+  domain: CorpPlanDomain,
+  actionId: string,
+): boolean {
+  return domain.defenseNeeds.some((signal) => {
+    if (signal.kind !== "generic") return signal.actionId === actionId;
+    return (
+      signal.phase === "install_ice" &&
+      signal.installRoute?.projection.actionId === actionId
+    );
+  });
+}
+
 function corpEmptyRdDrawOperationDispositionEvidence(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
@@ -7634,7 +7831,8 @@ function buildCorpDomain(
     if (
       project.feasible &&
       project.phase === "install_agenda" &&
-      project.uncertainty?.currentActionScope === "exact_install_only"
+      project.uncertainty?.currentActionScope === "exact_install_only" &&
+      (project.fundingGap ?? 0) === 0
     ) {
       continue;
     }
@@ -12201,6 +12399,7 @@ function planFirstDecisionDebug(params: {
   planId: string;
   planKind: string | undefined;
   assessmentEvidenceCodes: readonly string[];
+  turnPlanningDebug?: AiTurnPlanningDebug;
 }): AiPlanFirstDecisionDebug {
   const strategicIntent = (params.input as AiDecisionInputWithDeckCapabilities)
     .ownStrategicIntentState;
@@ -12284,35 +12483,29 @@ function planFirstDecisionDebug(params: {
           assessmentEvidenceCodes,
         )
       : undefined;
-  let turnPlanning: AiTurnPlanningDebug | undefined;
-  try {
-    turnPlanning =
-      (params.input.side === "corp"
-        ? buildCorpTurnPlannerShadow({
-            input: params.input,
-            context: params.context,
-            registry: params.registry,
-            runtimeResult: params.result,
-            selectedChoicesForDecision: params.selectedChoicesForDecision,
-          })?.debug
-        : undefined) ??
-      turnPlanningProjectionDebug({
+  let turnPlanning = params.turnPlanningDebug;
+  if (!turnPlanning) {
+    try {
+      turnPlanning = turnPlanningProjectionDebug({
         input: params.input,
         context: params.context,
         result: params.result,
         actionCandidate,
         selectedPlan,
       });
-  } catch {
-    // This ZK04 projection trace is diagnostic-only. An unsupported projection
-    // must not alter or abort the already materialized legal plan route.
-    turnPlanning = undefined;
+    } catch {
+      // Runner projection remains diagnostic-only until its separate cutover.
+      turnPlanning = undefined;
+    }
   }
 
   return {
     ...base,
     lane: "plan",
-    selectionAuthority: "resident_plan_instance",
+    selectionAuthority:
+      params.turnPlanningDebug?.mode === "cutover"
+        ? "turn_plan_commitment"
+        : "resident_plan_instance",
     rootPlanInstanceId:
       params.result.portfolio.rootForegroundInstanceId ?? params.planId,
     leafExecutorInstanceId:
@@ -12757,6 +12950,7 @@ function decisionFromScheduler(
   registry: SidePlanRegistry,
   dependencies: PlanFirstLiveDependencies,
   options: AiDecisionRuntimeOptions,
+  corpTurnPlanningDebug?: AiTurnPlanningDebug,
 ): AiDecision {
   const randomizedIceInstallNearTie =
     result.lane === "plan"
@@ -13164,6 +13358,9 @@ function decisionFromScheduler(
     planId,
     planKind,
     assessmentEvidenceCodes: planEvidence,
+    ...(corpTurnPlanningDebug
+      ? { turnPlanningDebug: corpTurnPlanningDebug }
+      : {}),
   });
   const decisionBase = {
     reasonCode:
