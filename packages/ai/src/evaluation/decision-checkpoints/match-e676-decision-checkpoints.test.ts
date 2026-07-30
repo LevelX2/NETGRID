@@ -10,13 +10,13 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match e676 exact decision checkpoints", () => {
   it.each([
     [
-      "builds liquidity instead of exposing Tycho behind uncertain protection",
+      "uses known ICE to cover R&D without exposing Tycho",
       unsafeTychoJson,
       [
-        "plan_priority_class:P6",
-        "plan_module:corp.economy",
-        "plan_step_capability:develop_or_convert_corp_economy",
-        "plan_assessment_evidence:corp_engine_certified_basic_liquidity_development",
+        "plan_priority_class:P5",
+        "plan_module:corp.defend_servers",
+        "plan_step_capability:allocate_server_defense",
+        "plan_assessment_evidence:corp_agenda_capacity_defense_conversion:rd:corp.install_card.corp_onr_v1_254_liche_1.rd.corp_onr_v1_254_liche_1.0",
       ],
     ],
     [

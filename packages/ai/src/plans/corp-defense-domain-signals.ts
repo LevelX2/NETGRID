@@ -334,7 +334,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
   const boundedUnknownCentralCoverage =
     (serverId === "hq" || serverId === "rd") &&
     centralAllocation?.status !== "known" &&
-    centralIceCounts.every((count) => count === 0) &&
+    server?.ice.length === 0 &&
     input.playerView.own.clicks >= 1 &&
     sourceDefense.isVisibleIce &&
     (sourceDefense.hasImmediateStop ||
@@ -397,10 +397,10 @@ export function corpGlobalDefenseInstallRouteAssessment(
     (sourceDefense.hasImmediateStop ||
       sourceDefense.hasMeaningfulTaxOrDamage ||
       sourceDefense.hasEncounterDisruption) &&
-    ((centralAllocation?.status === "known" &&
-      centralAllocation.selectedServerId === serverId) ||
-      (centralAllocation?.status !== "known" &&
-        structurallyLeastProtectedCentral)) &&
+    (centralAllocation?.status === "known"
+      ? centralAllocation.selectedServerId === serverId &&
+        centralDefenseAllocationHasMaterialPressure(centralAllocation, serverId)
+      : boundedUnknownCentralCoverage) &&
     action.source !== "basic_action" &&
     action.source !== "game_rule" &&
     corpIceInstallHasCurrentCompleteRezQuote(
@@ -725,4 +725,23 @@ export function corpGlobalDefenseInstallRouteAssessment(
         evidenceCode:
           "corp_ice_install_has_no_engine_certified_access_probability_reduction",
       };
+}
+
+function centralDefenseAllocationHasMaterialPressure(
+  allocation: Extract<
+    NonNullable<CorpCorePlanDomain["centralDefenseAllocation"]>,
+    { status: "known" }
+  >,
+  serverId: "hq" | "rd",
+): boolean {
+  const evidence = allocation.evidence[serverId];
+  return (
+    evidence.threat !== "none" ||
+    evidence.expectedAgendaLoss.numerator > 0 ||
+    evidence.expectedTrashableLoss.numerator > 0 ||
+    evidence.isMultiaccess ||
+    evidence.recentRunOrAccessEvents > 0 ||
+    evidence.recentSuccessfulAccessRunnerTurns > 0 ||
+    evidence.serverBoundEffectIds.length > 0
+  );
 }

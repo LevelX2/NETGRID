@@ -111,10 +111,17 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
       current.expectation = {
         acceptableActions: [
           {
-            type: "rez_card",
-            sourceDefinitionId: "onr_v1_313_city-surveillance",
+            type: "install_card",
+            sourceDefinitionId: "onr_v1_279_wall-of-static",
           },
         ],
+        planExecution: {
+          acceptablePlanKinds: ["corp.defend_servers"],
+          acceptableCapabilities: ["allocate_server_defense"],
+          requiredAssessmentEvidence: [
+            "corp_agenda_capacity_defense_conversion:hq:corp.install_card.corp_onr_v1_279_wall-of-static_2.hq.corp_onr_v1_279_wall-of-static_2.5",
+          ],
+        },
       };
     });
 
@@ -122,7 +129,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
 
     expect(result.ok, diagnostic(result)).toBe(true);
     expect(result.decision?.decisionDebug?.planKind).toBe(
-      "corp.punish_campaign",
+      "corp.defend_servers",
     );
   });
 

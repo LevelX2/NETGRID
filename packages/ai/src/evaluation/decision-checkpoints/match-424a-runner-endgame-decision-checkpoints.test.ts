@@ -119,7 +119,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
         planExecution: {
           acceptablePlanKinds: ["runner.rig_and_coverage"],
           acceptableCapabilities: ["draw_for_answer_breaker_ap"],
-          requiredAssessmentEvidence: ["target:remote_1"],
+          requiredAssessmentEvidence: ["terminal_remote_coverage:remote_1"],
         },
       };
     });

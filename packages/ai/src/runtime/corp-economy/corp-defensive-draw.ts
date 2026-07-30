@@ -16,7 +16,6 @@ import {
   compareExactProbabilities,
   type CorpScoreProtectionIceInput,
 } from "../corp-score-protection-assessment";
-import { visibleCorpIceDefenseProfile } from "../semantic-runtime-corp-effective-defense";
 
 const CORP_SAFE_DRAW_CAPACITY_VALUE = 100;
 const CORP_LOW_HAND_VALUE = 450;
@@ -83,6 +82,7 @@ export type CorpMissingConcreteScoreDefenseDrawNeedInput = Readonly<{
   directInstallRouteState: CorpScoreDefenseDirectInstallRouteState;
   drawActionProjection: CorpScoreDefenseDrawActionProjection;
   attemptState: CorpScoreDefenseDrawAttemptState;
+  agendaCapacityDefenseConversionAvailable?: boolean;
 }>;
 
 export function corpMissingConcreteScoreDefenseDrawNeed(
@@ -148,7 +148,7 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
   const projectedHandAfterDraw = handCount + drawActionProjection.netHandDelta;
   if (
     projectedHandAfterDraw > maxHandSize &&
-    corpHasImmediateMeaningfulDefenseHandConversion(input)
+    args.agendaCapacityDefenseConversionAvailable === true
   ) {
     return undefined;
   }
@@ -607,14 +607,6 @@ export function corpMissingConcreteDefenseDrawNeed(
   capacity = corpOptionalDrawCapacity(input, action),
   centralAllocation?: CorpCentralDefenseAllocation,
 ): CorpMissingConcreteDefenseDrawNeed | undefined {
-  const projectedHandAfterDraw =
-    capacity.handCount + capacity.projectedDrawCount;
-  if (
-    projectedHandAfterDraw > capacity.maxHandSize &&
-    corpHasImmediateMeaningfulDefenseHandConversion(input)
-  ) {
-    return undefined;
-  }
   const boundedOverflowSearch =
     capacity.maxHandSize > 2 &&
     capacity.projectedDrawCount === 1 &&
@@ -647,64 +639,6 @@ export function corpMissingConcreteDefenseDrawNeed(
       `central_defense_bounded_overflow_search:${boundedOverflowSearch}`,
     ],
   };
-}
-
-/**
- * Reports an exact, currently legal way to convert a known HQ card into
- * meaningful server defense before an optional draw would create overflow.
- *
- * This is deliberately a draw-admission fact, not an action owner: the Corp
- * Defense Plan remains solely responsible for evaluating and selecting the
- * concrete ICE installation.
- */
-export function corpHasImmediateMeaningfulDefenseHandConversion(
-  input: AiDecisionInput,
-): boolean {
-  if (
-    input.side !== "corp" ||
-    !input.playerView.own.gripOrHq.some(
-      (card) => card.known && card.type === "agenda",
-    )
-  ) {
-    return false;
-  }
-  const stateVersion = input.playerView.stateVersion;
-  return input.legalActions.some((action) => {
-    if (
-      action.side !== "corp" ||
-      action.type !== "install_card" ||
-      action.payload?.placement !== "ice" ||
-      action.expiresAtStateVersion !== stateVersion ||
-      typeof action.source !== "string" ||
-      action.source === "basic_action" ||
-      action.source === "game_rule"
-    ) {
-      return false;
-    }
-    const sourceCard = input.playerView.own.gripOrHq.find(
-      (card) => card.instanceId === action.source,
-    );
-    const defense = visibleCorpIceDefenseProfile(sourceCard);
-    if (
-      !defense.isVisibleIce ||
-      (!defense.hasImmediateStop &&
-        !defense.hasMeaningfulTaxOrDamage &&
-        !defense.hasEncounterDisruption)
-    ) {
-      return false;
-    }
-    const targetServerId = corpActionServerId(action);
-    if (targetServerId === "hq" || targetServerId === "rd") {
-      return true;
-    }
-    const targetServer = input.playerView.servers.find(
-      (server) => server.id === targetServerId,
-    );
-    return (
-      targetServer?.id.startsWith("remote_") === true &&
-      targetServer.root.some((card) => card.known && card.type === "agenda")
-    );
-  });
 }
 
 function corpMissingConcreteCentralDefenseTarget(

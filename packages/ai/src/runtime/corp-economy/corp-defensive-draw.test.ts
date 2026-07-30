@@ -569,6 +569,7 @@ describe("Corp defensive draw context", () => {
       corpMissingConcreteScoreDefenseDrawNeed({
         ...setup.args,
         protectionNeed: need,
+        agendaCapacityDefenseConversionAvailable: true,
       }),
     ).toBeUndefined();
   });

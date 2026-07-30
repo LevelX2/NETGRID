@@ -28543,14 +28543,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_251_jack-attack"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_basic_liquidity_development"
+        "corp_agenda_capacity_defense_conversion:rd:corp.install_card.corp_onr_v1_251_jack-attack_2.rd.corp_onr_v1_251_jack-attack_2.3"
       ]
     }
   }

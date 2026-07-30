@@ -2670,6 +2670,30 @@ describe("authoritative plan-first live runtime", () => {
       server("archives"),
     ];
     input.playerView.opponent.rig = [];
+    input.playerView.corpCentralAccessQuotes = ["hq", "rd"].map((serverId) => ({
+      serverId: serverId as "hq" | "rd",
+      stateVersion,
+      complete: true as const,
+      effectiveAccessCount: 1,
+      isMultiaccess: false,
+      sourceDefinitionIds: [],
+      serverBoundEffects: [],
+    }));
+    input.playerView.specialZones = {
+      setAside: [],
+      removedFromGame: [],
+      setAsideCount: 0,
+      removedFromGameCount: 0,
+    };
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "agenda-capacity-defense-conversion",
+      side: "corp",
+      cards: [
+        { cardId: "onr_v1_201_executive-extraction", quantity: 1 },
+        { cardId: "onr_v1_237_data-wall", quantity: 3 },
+        { cardId: "onr_v1_284_chance-observation", quantity: 23 },
+      ],
+    });
     for (const action of input.legalActions) {
       action.expiresAtStateVersion = stateVersion;
     }

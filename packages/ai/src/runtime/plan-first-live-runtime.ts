@@ -7288,6 +7288,51 @@ function buildCorpDomain(
       project.evidenceCode = `corp_score_protection_funding_gap:${project.serverId ?? "unbound"}:${scan.fundingGap}`;
     }
   }
+  const coherentScoreHandConversionAvailable =
+    input.playerView.own.clicks >= 3 &&
+    scoreProjects.some(
+      (project) =>
+        project.phase === "install_agenda" &&
+        project.actionIds?.some((actionId) => {
+          const action = input.legalActions.find(
+            (legalAction) => legalAction.actionId === actionId,
+          );
+          const sourceCard = input.playerView.own.gripOrHq.find(
+            (card) => card.instanceId === action?.source,
+          );
+          return (
+            action?.type === "install_card" &&
+            action.expiresAtStateVersion === input.playerView.stateVersion &&
+            sourceCard?.known === true &&
+            sourceCard.type === "agenda"
+          );
+        }) === true,
+    );
+  const scorePlanPrecedesRedundantCapacityDefense = (
+    serverId: "hq" | "rd",
+  ): boolean =>
+    coherentScoreHandConversionAvailable &&
+    (input.playerView.servers.find((server) => server.id === serverId)?.ice
+      .length ?? 0) > 0;
+  const agendaCapacityDefenseConversionAvailable = candidates.some(
+    (candidate) => {
+      if (!candidateIsVisibleCorpIceInstall(input, candidate)) return false;
+      const serverId = candidateTargetIds(candidate).find(
+        isCorpInstallServerId,
+      );
+      if (serverId !== "hq" && serverId !== "rd") return false;
+      if (scorePlanPrecedesRedundantCapacityDefense(serverId)) return false;
+      return (
+        corpGlobalDefenseInstallRoute(
+          input,
+          candidate,
+          serverId,
+          centralDefenseAllocation,
+          CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
+        )?.progressKind === "agenda_capacity_defense_conversion"
+      );
+    },
+  );
   const selectedScoreProtectionSignals: CorpDefenseSignal[] = [];
   for (const { project, scan } of scoreProtectionRouteScans) {
     if (
@@ -7418,6 +7463,7 @@ function buildCorpDomain(
         protectionNeed,
         directInstallRouteState: scan.directInstallRouteState,
         drawActionProjection,
+        agendaCapacityDefenseConversionAvailable,
         attemptState: {
           residentAttemptedThisTurn: residentDrawAttempt !== undefined,
           eventTailAttemptedThisTurn: eventDrawAttempted,
@@ -7523,6 +7569,13 @@ function buildCorpDomain(
             centralDefenseAllocation,
             CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
           );
+          if (
+            (serverId === "hq" || serverId === "rd") &&
+            scorePlanPrecedesRedundantCapacityDefense(serverId) &&
+            route?.progressKind === "agenda_capacity_defense_conversion"
+          ) {
+            return [];
+          }
           if (!route) {
             const exactAlternativeExists = candidates.some(
               (alternative) =>
