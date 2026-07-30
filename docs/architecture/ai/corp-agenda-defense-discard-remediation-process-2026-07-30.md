@@ -1,6 +1,6 @@
 # Corp-Agenda-, Defense- und Discard-Remediation
 
-Status: aktiv
+Status: aktiv – A1 und A2 abgeschlossen, A3 aktiv
 
 Quelle: laufendes Match `match_5f7924e4893ba855`, StateVersion 65,
 33 von 33 Corp-KI-Entscheidungen geprüft.
