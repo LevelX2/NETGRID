@@ -972,7 +972,8 @@ function validateTargetList(
     }
     if (
       target.kind === "value" &&
-      (target.value === undefined || !Number.isFinite(target.value))
+      target.value !== undefined &&
+      !Number.isFinite(target.value)
     ) {
       issues.push("invalid_value_target");
     }

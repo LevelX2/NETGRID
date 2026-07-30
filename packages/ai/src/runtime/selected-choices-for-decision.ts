@@ -248,6 +248,23 @@ export function selectedChoicesForDecision(
   }
   if (
     input.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith(
+      "card_implementation.agenda_purge_install_targets:",
+    )
+  ) {
+    return resolved(
+      selectedCorpAgendaPurgeInstallTargetOptionIds(
+        input,
+        action,
+        choice,
+        selectableOptions,
+      ),
+      "corp_agenda_purge_install_targets",
+    );
+  }
+  if (
+    input.side === "corp" &&
     choice.kind === "select_cards" &&
     choice.source.startsWith(
       "card_implementation.installed_hardware_trash_by_counter:",
@@ -645,6 +662,206 @@ function selectedCorpScoredAgendaStartDrawChoiceOptionId(
     );
   }
   return rdCount >= 2 ? draw.id : skip.id;
+}
+
+function selectedCorpAgendaPurgeInstallTargetOptionIds(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+): string[] {
+  const sourceMatch =
+    /^card_implementation\.agenda_purge_install_targets:([^:]+):([^:]+):([0-9]+)$/.exec(
+      choice.source,
+    );
+  const sourceAgendaId = sourceMatch?.[1];
+  const revealedIds = sourceMatch?.[2]?.split(",").filter(Boolean) ?? [];
+  const sourceStateVersion = Number(sourceMatch?.[3]);
+  const sourceAgenda = sourceAgendaId
+    ? input.playerView.own.scoreArea.find(
+        (card) =>
+          card.instanceId === sourceAgendaId &&
+          card.known &&
+          card.type === "agenda",
+      )
+    : undefined;
+  const targetServerIds = input.playerView.servers.map((server) => server.id);
+  const allowedTargetServerIds = new Set([...targetServerIds, "new_remote"]);
+  const revealedIdSet = new Set(revealedIds);
+  const optionsByCardId = new Map<
+    string,
+    Map<string, PendingChoiceOptions[number]>
+  >();
+  let optionsAreExact = selectableOptions.length > 0;
+  for (const option of selectableOptions) {
+    const valueParts =
+      typeof option.value === "string" ? option.value.split("|") : [];
+    const [cardId, serverId] = valueParts;
+    if (
+      valueParts.length !== 2 ||
+      !cardId ||
+      !serverId ||
+      !revealedIdSet.has(cardId) ||
+      !allowedTargetServerIds.has(serverId) ||
+      option.id !== `agenda_purge_${cardId}_${serverId}`
+    ) {
+      optionsAreExact = false;
+      continue;
+    }
+    const optionsByServerId =
+      optionsByCardId.get(cardId) ??
+      new Map<string, PendingChoiceOptions[number]>();
+    if (optionsByServerId.has(serverId)) optionsAreExact = false;
+    optionsByServerId.set(serverId, option);
+    optionsByCardId.set(cardId, optionsByServerId);
+  }
+  const expectedTargetServerIds = [...targetServerIds, "new_remote"];
+  for (const optionsByServerId of optionsByCardId.values()) {
+    if (
+      optionsByServerId.size !== expectedTargetServerIds.length ||
+      expectedTargetServerIds.some(
+        (serverId) => !optionsByServerId.has(serverId),
+      )
+    ) {
+      optionsAreExact = false;
+    }
+  }
+  const revealedOptionsAreExact = revealedIds.every((cardId) =>
+    choice.options.some(
+      (option) =>
+        option.id === `agenda_purge_revealed_${cardId}` &&
+        option.value === cardId &&
+        option.selectable === false,
+    ),
+  );
+  const requirement = action.choiceRequirements?.[0];
+  const choiceOptionIds = choice.options.map((option) => option.id);
+  const exactActionBinding =
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === choiceOptionIds.length &&
+    choiceOptionIds.every((optionId) =>
+      requirement.optionIds.includes(optionId),
+    );
+  const exactChoiceContract =
+    choice.side === "corp" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    sourceStateVersion === input.playerView.stateVersion &&
+    choice.minSelections === choice.maxSelections &&
+    choice.minSelections > 0 &&
+    choice.minSelections === optionsByCardId.size &&
+    revealedIds.length > 0 &&
+    new Set(revealedIds).size === revealedIds.length &&
+    sourceAgenda !== undefined &&
+    targetServerIds.length > 0 &&
+    optionsAreExact &&
+    revealedOptionsAreExact &&
+    exactActionBinding;
+  if (!exactChoiceContract) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Bind Security Purge to its exact scored agenda, current hidden Corp choice/action contract, revealed-card set and complete visible target-server matrix.",
+    );
+  }
+
+  const portfolio = residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "corp.defend_servers" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signals?: Array<{
+          kind?: unknown;
+          phase?: unknown;
+          actionIds?: unknown;
+          choiceResolution?: {
+            kind?: unknown;
+            choiceId?: unknown;
+            sourceAgendaId?: unknown;
+            sourceStateVersion?: unknown;
+            revealedCardIds?: unknown;
+            targets?: Array<{
+              cardId?: unknown;
+              serverId?: unknown;
+              optionId?: unknown;
+            }>;
+          };
+        }>;
+      }
+    | undefined;
+  const signal = moduleState?.signals?.find(
+    (candidate) =>
+      candidate.kind === "generic" &&
+      candidate.phase === "resolve_install_targets" &&
+      Array.isArray(candidate.actionIds) &&
+      candidate.actionIds.length === 1 &&
+      candidate.actionIds[0] === action.actionId &&
+      candidate.choiceResolution?.kind === "agenda_purge_install_targets" &&
+      candidate.choiceResolution.choiceId === choice.choiceId,
+  );
+  const planResolution = signal?.choiceResolution;
+  const planTargets = planResolution?.targets;
+  const planRevealedCardIds = Array.isArray(planResolution?.revealedCardIds)
+    ? planResolution.revealedCardIds
+    : undefined;
+  const selectedOptionIds =
+    planTargets?.map((target) =>
+      typeof target.optionId === "string" ? target.optionId : "",
+    ) ?? [];
+  const exactPlanBinding =
+    portfolio?.side === "corp" &&
+    portfolio.stateVersion === input.playerView.stateVersion &&
+    executor !== undefined &&
+    moduleState?.kind === "defense" &&
+    planResolution !== undefined &&
+    planResolution.sourceAgendaId === sourceAgendaId &&
+    planResolution.sourceStateVersion === input.playerView.stateVersion &&
+    planRevealedCardIds !== undefined &&
+    planRevealedCardIds.length === revealedIds.length &&
+    revealedIds.every(
+      (cardId, index) => planRevealedCardIds[index] === cardId,
+    ) &&
+    Array.isArray(planTargets) &&
+    planTargets.length === choice.minSelections &&
+    new Set(
+      planTargets.map((target) =>
+        typeof target.cardId === "string" ? target.cardId : "",
+      ),
+    ).size === planTargets.length &&
+    planTargets.every((target) => {
+      if (
+        typeof target.cardId !== "string" ||
+        typeof target.serverId !== "string" ||
+        typeof target.optionId !== "string"
+      ) {
+        return false;
+      }
+      return (
+        optionsByCardId.get(target.cardId)?.get(target.serverId)?.id ===
+        target.optionId
+      );
+    });
+  if (!exactPlanBinding) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Materialize Security Purge only from the current corp.defend_servers executor and its exact plan-bound ICE-to-server allocation.",
+    );
+  }
+  return selectedOptionIds;
 }
 
 function residentCorpScoreChoiceBinding(

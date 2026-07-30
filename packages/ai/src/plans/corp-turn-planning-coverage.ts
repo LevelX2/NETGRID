@@ -76,6 +76,7 @@ export const CORP_TURN_PLANNING_MODULE_COVERAGE: readonly CorpTurnPlanningModule
         "card_ability.*",
         "play.corp_operation",
         "economy.gain_credit",
+        "choice.resolve",
         "turn_flow.stop_restricted_action_sequence",
       ],
     },

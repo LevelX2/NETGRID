@@ -41,6 +41,7 @@ import {
 } from "../plans/plan-assessment";
 import {
   assessCorpEconomyFundingRoute,
+  corpAgendaPurgeDefenseChoiceSignal,
   corpScorePriorityClass,
   corpScorePlanTarget,
   corpDefenseActionDispositions,
@@ -7086,6 +7087,11 @@ function buildCorpDomain(
     input,
     hqHoldCadence: centralDefenseHqHoldCadence,
   });
+  const agendaPurgeDefenseChoice = corpAgendaPurgeDefenseChoiceSignal(
+    input,
+    candidates,
+    centralDefenseAllocation,
+  );
   const residentDrawAttempt = corpResidentDefenseDrawAttempt(previous, input);
   const residentScoreMaterialDrawAttempt = corpResidentScoreMaterialDrawAttempt(
     previous,
@@ -7956,6 +7962,7 @@ function buildCorpDomain(
       ...selectedScoreProtectionSignals,
       ...defenseDrawSignals,
       ...consumedDefenseDrawSignals,
+      ...(agendaPurgeDefenseChoice ? [agendaPurgeDefenseChoice] : []),
     ]);
   const genuineCurrentDefenseThreat = mergedDefenseNeeds.some(
     (signal) =>
@@ -11611,6 +11618,13 @@ function actionIsCurrentlyAffordable(
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
+  if (
+    context.input.playerView.pendingChoice?.source.startsWith(
+      "card_implementation.agenda_purge_install_targets:",
+    )
+  ) {
+    return undefined;
+  }
   const actionIds = new Set(
     context.input.legalActions.map((action) => action.actionId),
   );

@@ -998,13 +998,17 @@ export default function Page() {
     [],
   );
 
-  const { closeSocket, ensureSocketConnected, sendSocketMessage } =
-    useMatchTransport({
-      session,
-      onMessage: applyServerMessage,
-      setConnection,
-      setNotice,
-    });
+  const {
+    closeSocket,
+    ensureSocketConnected,
+    reconnectSocket,
+    sendSocketMessage,
+  } = useMatchTransport({
+    session,
+    onMessage: applyServerMessage,
+    setConnection,
+    setNotice,
+  });
   const {
     allCatalogCards,
     catalogDetailsById,
@@ -4508,7 +4512,7 @@ export default function Page() {
         setPayload(fromJoinedResponse(reconnected));
         setLobby(null);
       }
-      setNotice("Wiederverbindung abgeschlossen.");
+      reconnectSocket();
       return true;
     } finally {
       reconnectInFlightRef.current = false;

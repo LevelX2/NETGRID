@@ -135,6 +135,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
   phase:
     | "install_ice"
     | "install_defense_support"
+    | "resolve_install_targets"
     | "draw_for_ice"
     | "rez_response"
     | "activate_run_defense"
@@ -162,6 +163,18 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
   }>;
   rezRoute?: CorpExactIceRezRouteProjection;
   value: number;
+  choiceResolution?: {
+    kind: "agenda_purge_install_targets";
+    choiceId: string;
+    sourceAgendaId: string;
+    sourceStateVersion: number;
+    revealedCardIds: string[];
+    targets: Array<{
+      cardId: string;
+      serverId: string;
+      optionId: string;
+    }>;
+  };
   drawAttemptState?: {
     turnKey: string;
     remainingAttempts: 0 | 1;
@@ -437,6 +450,208 @@ export function corpCoreActionOwner(
   semanticFamily: keyof typeof CORP_CORE_ACTION_OWNERSHIP,
 ): (typeof CORP_CORE_ACTION_OWNERSHIP)[typeof semanticFamily] {
   return CORP_CORE_ACTION_OWNERSHIP[semanticFamily];
+}
+
+export function corpAgendaPurgeDefenseChoiceSignal(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  centralAllocation: CorpCentralDefenseAllocation | undefined,
+): CorpGenericDefenseSignal | undefined {
+  const choice = input.playerView.pendingChoice;
+  if (
+    input.side !== "corp" ||
+    choice?.side !== "corp" ||
+    choice.kind !== "select_option" ||
+    choice.visibility !== "hidden_info_barrier" ||
+    choice.stateVersion !== input.playerView.stateVersion
+  ) {
+    return undefined;
+  }
+  const sourceMatch =
+    /^card_implementation\.agenda_purge_install_targets:([^:]+):([^:]+):([0-9]+)$/.exec(
+      choice.source,
+    );
+  const sourceAgendaId = sourceMatch?.[1];
+  const revealedCardIds =
+    sourceMatch?.[2]?.split(",").filter((cardId) => cardId.length > 0) ?? [];
+  const sourceStateVersion = Number(sourceMatch?.[3]);
+  const sourceAgenda = sourceAgendaId
+    ? input.playerView.own.scoreArea.find(
+        (card) =>
+          card.instanceId === sourceAgendaId &&
+          card.known &&
+          card.type === "agenda" &&
+          nonEmptyString(card.definitionId),
+      )
+    : undefined;
+  const action = input.legalActions.find(
+    (legalAction) =>
+      legalAction.side === "corp" &&
+      legalAction.type === "resolve_choice" &&
+      legalAction.source === "game_rule" &&
+      legalAction.timingPoint === input.playerView.timingPoint &&
+      legalAction.expiresAtStateVersion === input.playerView.stateVersion &&
+      legalAction.choiceRequirements?.length === 1 &&
+      legalAction.choiceRequirements[0]?.choiceId === choice.choiceId,
+  );
+  const candidate = action
+    ? candidates.find(
+        (entry) =>
+          entry.actionId === action.actionId &&
+          entry.semanticActionType === "choice.resolve",
+      )
+    : undefined;
+  const requirement = action?.choiceRequirements?.[0];
+  const choiceOptionIds = choice.options.map((option) => option.id);
+  const actionChoiceContractIsExact =
+    requirement !== undefined &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === choiceOptionIds.length &&
+    choiceOptionIds.every((optionId) =>
+      requirement.optionIds.includes(optionId),
+    );
+  if (
+    !sourceAgendaId ||
+    !sourceAgenda?.definitionId ||
+    !action ||
+    !candidate ||
+    !actionChoiceContractIsExact ||
+    sourceStateVersion !== input.playerView.stateVersion ||
+    revealedCardIds.length === 0 ||
+    new Set(revealedCardIds).size !== revealedCardIds.length ||
+    choice.minSelections <= 0 ||
+    choice.minSelections !== choice.maxSelections
+  ) {
+    return undefined;
+  }
+
+  const targetServerIds = input.playerView.servers.map((server) => server.id);
+  const completeTargetServerIds = [...targetServerIds, "new_remote"];
+  const allowedTargetServerIds = new Set(completeTargetServerIds);
+  const revealedCardIdSet = new Set(revealedCardIds);
+  const optionsByCardId = new Map<
+    string,
+    Map<string, { optionId: string; serverId: string }>
+  >();
+  for (const option of choice.options.filter(
+    (candidateOption) => candidateOption.selectable !== false,
+  )) {
+    const parts =
+      typeof option.value === "string" ? option.value.split("|") : [];
+    const [cardId, serverId] = parts;
+    if (
+      parts.length !== 2 ||
+      !cardId ||
+      !serverId ||
+      !revealedCardIdSet.has(cardId) ||
+      !allowedTargetServerIds.has(serverId) ||
+      option.id !== `agenda_purge_${cardId}_${serverId}`
+    ) {
+      return undefined;
+    }
+    const byServer =
+      optionsByCardId.get(cardId) ??
+      new Map<string, { optionId: string; serverId: string }>();
+    if (byServer.has(serverId)) return undefined;
+    byServer.set(serverId, { optionId: option.id, serverId });
+    optionsByCardId.set(cardId, byServer);
+  }
+  if (
+    optionsByCardId.size !== choice.minSelections ||
+    [...optionsByCardId.values()].some(
+      (byServer) =>
+        byServer.size !== completeTargetServerIds.length ||
+        completeTargetServerIds.some((serverId) => !byServer.has(serverId)),
+    )
+  ) {
+    return undefined;
+  }
+
+  const plannedLayers = new Map<string, number>();
+  const targets = [...optionsByCardId.entries()].map(([cardId, byServer]) => {
+    const serverId = [...byServer.keys()].sort((left, right) => {
+      const difference =
+        corpAgendaPurgeDefenseTargetValue(
+          input,
+          right,
+          centralAllocation,
+          plannedLayers,
+        ) -
+        corpAgendaPurgeDefenseTargetValue(
+          input,
+          left,
+          centralAllocation,
+          plannedLayers,
+        );
+      return difference || technicalCompare(left, right);
+    })[0]!;
+    plannedLayers.set(serverId, (plannedLayers.get(serverId) ?? 0) + 1);
+    return {
+      cardId,
+      serverId,
+      optionId: byServer.get(serverId)!.optionId,
+    };
+  });
+  if (targets.length !== choice.minSelections || !targets[0]) return undefined;
+
+  return {
+    kind: "generic",
+    defenseId: `agenda-purge-install-targets:${choice.choiceId}`,
+    serverId: targets[0].serverId,
+    phase: "resolve_install_targets",
+    sourceDefinitionIds: [sourceAgenda.definitionId],
+    actionIds: [action.actionId],
+    urgent: true,
+    value: 1_000,
+    evidenceCode: "agenda_purge_ice_allocation_owned_by_corp_defend_servers",
+    choiceResolution: {
+      kind: "agenda_purge_install_targets",
+      choiceId: choice.choiceId,
+      sourceAgendaId,
+      sourceStateVersion,
+      revealedCardIds,
+      targets,
+    },
+  };
+}
+
+function corpAgendaPurgeDefenseTargetValue(
+  input: AiDecisionInput,
+  serverId: string,
+  centralAllocation: CorpCentralDefenseAllocation | undefined,
+  plannedLayers: ReadonlyMap<string, number>,
+): number {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  const installedLayers = server?.ice.length ?? 0;
+  const additionalLayers = plannedLayers.get(serverId) ?? 0;
+  const layerPenalty = (installedLayers + additionalLayers) * 1_500;
+  if (serverId === "new_remote") return -layerPenalty;
+  const visibleAgendaCount =
+    server?.root.filter((card) => card.known && card.type === "agenda")
+      .length ?? 0;
+  if (serverId.startsWith("remote_") && visibleAgendaCount > 0) {
+    return 5_000 + visibleAgendaCount * 250 - layerPenalty;
+  }
+  if (
+    centralAllocation?.status === "known" &&
+    serverId === centralAllocation.selectedServerId
+  ) {
+    return 4_000 - layerPenalty;
+  }
+  if (serverId === "hq" || serverId === "rd") {
+    return (
+      (centralAllocation?.status === "known" ? 3_000 : 2_750) - layerPenalty
+    );
+  }
+  if (serverId.startsWith("remote_") && (server?.root.length ?? 0) > 0) {
+    return 2_500 - layerPenalty;
+  }
+  if (serverId === "archives") return 750 - layerPenalty;
+  if (serverId.startsWith("remote_")) return 500 - layerPenalty;
+  return 250 - layerPenalty;
 }
 
 export function corpEconomyActionIsOwned(
@@ -901,6 +1116,7 @@ export function corpGenericDefensePriorityClass(
         signal.urgent &&
         (signal.phase === "install_ice" ||
           signal.phase === "install_defense_support" ||
+          signal.phase === "resolve_install_targets" ||
           signal.phase === "activate_run_defense" ||
           (signal.phase === "rez_response" &&
             signal.rezWindowVerdict === "productive")),
@@ -1861,6 +2077,27 @@ function defenseCandidates(
           candidate.sourceDefinitionId === signal.rezRoute!.sourceDefinitionId,
       )
       .map((candidate) => ({ candidate, stepValue: 1 }));
+  }
+  if (signal.phase === "resolve_install_targets" && signal.choiceResolution) {
+    const resolution = signal.choiceResolution;
+    return context.actionCandidates
+      .filter(
+        (candidate) =>
+          signal.actionIds?.includes(candidate.actionId) === true &&
+          candidate.semanticActionType === "choice.resolve" &&
+          context.input.legalActions.some(
+            (action) =>
+              action.actionId === candidate.actionId &&
+              action.side === "corp" &&
+              action.type === "resolve_choice" &&
+              action.timingPoint === context.input.playerView.timingPoint &&
+              action.expiresAtStateVersion ===
+                context.input.playerView.stateVersion &&
+              action.choiceRequirements?.length === 1 &&
+              action.choiceRequirements[0]?.choiceId === resolution.choiceId,
+          ),
+      )
+      .map((candidate) => ({ candidate, stepValue: signal.value }));
   }
   return context.actionCandidates
     .filter((candidate) => {
@@ -2932,6 +3169,12 @@ function genericDefensePortfolioCandidates(
   eligibleSignals: readonly CorpGenericDefenseSignal[],
   centralAllocation?: CorpCentralDefenseAllocation,
 ): PlanMaterialization["candidates"] {
+  const targetChoiceSignals = eligibleSignals.filter(
+    (signal) => signal.phase === "resolve_install_targets",
+  );
+  if (targetChoiceSignals.length > 0) {
+    return selectedDirectDefenseRoute(context, targetChoiceSignals);
+  }
   const urgentRezSignals = eligibleSignals.filter(
     (signal) => signal.urgent && !isDefensePlacementPhase(signal.phase),
   );
@@ -3794,6 +4037,12 @@ function isValidDefenseSignal(
             knownNonNegativeInteger(installRoute.rezFundingGap)) &&
           validKnownInstallProjection(installRoute.projection)
         : installRoute === undefined) &&
+      (value.choiceResolution === undefined ||
+        (value.phase === "resolve_install_targets" &&
+          validAgendaPurgeDefenseChoiceResolution(
+            value.choiceResolution,
+            value,
+          ))) &&
       (value.rezRoute === undefined ||
         (value.phase === "rez_response" &&
           validExactIceRezRoute(value.rezRoute))) &&
@@ -3871,6 +4120,63 @@ function isValidDefenseSignal(
   return false;
 }
 
+function validAgendaPurgeDefenseChoiceResolution(
+  resolutionValue: unknown,
+  signalValue: Record<string, unknown>,
+): boolean {
+  if (!resolutionValue || typeof resolutionValue !== "object") return false;
+  const resolution = resolutionValue as Record<string, unknown>;
+  const revealedCardIds = resolution.revealedCardIds;
+  const targets = resolution.targets;
+  const actionIds = signalValue.actionIds;
+  if (
+    !hasOnlyKeys(
+      resolution,
+      new Set([
+        "kind",
+        "choiceId",
+        "sourceAgendaId",
+        "sourceStateVersion",
+        "revealedCardIds",
+        "targets",
+      ]),
+    ) ||
+    resolution.kind !== "agenda_purge_install_targets" ||
+    !nonEmptyString(resolution.choiceId) ||
+    !nonEmptyString(resolution.sourceAgendaId) ||
+    !knownNonNegativeInteger(resolution.sourceStateVersion) ||
+    !Array.isArray(revealedCardIds) ||
+    revealedCardIds.length === 0 ||
+    !revealedCardIds.every(nonEmptyString) ||
+    new Set(revealedCardIds).size !== revealedCardIds.length ||
+    !Array.isArray(targets) ||
+    targets.length === 0 ||
+    !Array.isArray(actionIds) ||
+    actionIds.length !== 1 ||
+    !nonEmptyString(actionIds[0])
+  ) {
+    return false;
+  }
+  const targetRecords = targets as Array<Record<string, unknown>>;
+  return (
+    targetRecords.every(
+      (target) =>
+        target !== null &&
+        typeof target === "object" &&
+        hasOnlyKeys(target, new Set(["cardId", "serverId", "optionId"])) &&
+        nonEmptyString(target.cardId) &&
+        revealedCardIds.includes(target.cardId) &&
+        nonEmptyString(target.serverId) &&
+        nonEmptyString(target.optionId),
+    ) &&
+    new Set(targetRecords.map((target) => target.cardId)).size ===
+      targetRecords.length &&
+    new Set(targetRecords.map((target) => target.optionId)).size ===
+      targetRecords.length &&
+    signalValue.serverId === targetRecords[0]?.serverId
+  );
+}
+
 function isGenericDefenseSignal(
   signal: CorpDefenseSignal,
 ): signal is CorpGenericDefenseSignal {
@@ -3901,6 +4207,7 @@ function genericDefensePhase(
   return (
     value === "install_ice" ||
     value === "install_defense_support" ||
+    value === "resolve_install_targets" ||
     value === "draw_for_ice" ||
     value === "rez_response" ||
     value === "activate_run_defense" ||
@@ -4032,6 +4339,7 @@ const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "rezRoute",
   "value",
   "evidenceCode",
+  "choiceResolution",
   "drawAttemptState",
 ]);
 
@@ -4154,7 +4462,11 @@ function defensePortfolioAssessmentValue(
 }
 
 function isDefensePlacementPhase(phase: CorpDefenseSignal["phase"]): boolean {
-  return phase === "install_ice" || phase === "install_defense_support";
+  return (
+    phase === "install_ice" ||
+    phase === "install_defense_support" ||
+    phase === "resolve_install_targets"
+  );
 }
 
 function dedupeRouteCandidates(

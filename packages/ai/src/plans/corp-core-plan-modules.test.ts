@@ -12,6 +12,7 @@ import {
 } from "./plan-assessment";
 import {
   CORP_CORE_ACTION_OWNERSHIP,
+  corpAgendaPurgeDefenseChoiceSignal,
   corpCoreActionOwner,
   corpDefenseActionDispositions,
   corpDefensePortfolioHasExecutableRoute,
@@ -65,6 +66,108 @@ describe("Corp core plan modules", () => {
       "install.ice": "corp.defend_servers",
     });
     expect(CORP_CORE_ACTION_OWNERSHIP).not.toHaveProperty("corp_window.rez");
+  });
+
+  it("assigns Security Purge ICE targets through corp.defend_servers", () => {
+    const revealedCardIds = ["keeper-1", "razor-wire-1"];
+    const serverIds = ["hq", "rd", "remote_1", "new_remote"];
+    const options = revealedCardIds.flatMap((cardId) =>
+      serverIds.map((serverId) => ({
+        id: `agenda_purge_${cardId}_${serverId}`,
+        label: `${cardId} -> ${serverId}`,
+        value: `${cardId}|${serverId}`,
+        selectable: true,
+      })),
+    );
+    const choiceId = "security-purge-targets";
+    const actionId = "resolve-security-purge";
+    const choiceCandidate = candidate(
+      actionId,
+      "resolve_choice",
+      "choice.resolve",
+    );
+    const input = {
+      side: "corp",
+      legalActions: [
+        {
+          actionId,
+          side: "corp",
+          type: "resolve_choice",
+          source: "game_rule",
+          timingPoint: "corp_action.main",
+          expiresAtStateVersion: 10,
+          choiceRequirements: [
+            {
+              choiceId,
+              minSelections: 2,
+              maxSelections: 2,
+              optionIds: options.map((option) => option.id),
+            },
+          ],
+          targetRequirements: [],
+          costs: [],
+        },
+      ],
+      playerView: {
+        stateVersion: 10,
+        timingPoint: "corp_action.main",
+        pendingChoice: {
+          choiceId,
+          side: "corp",
+          kind: "select_option",
+          visibility: "hidden_info_barrier",
+          source:
+            "card_implementation.agenda_purge_install_targets:security-purge-1:keeper-1,razor-wire-1:10",
+          stateVersion: 10,
+          minSelections: 2,
+          maxSelections: 2,
+          options,
+        },
+        servers: [
+          { id: "hq", label: "HQ", ice: [], root: [] },
+          { id: "rd", label: "R&D", ice: [], root: [] },
+          { id: "remote_1", label: "Remote 1", ice: [], root: [] },
+        ],
+        own: {
+          scoreArea: [
+            {
+              instanceId: "security-purge-1",
+              definitionId: "corp_onr_v1_216_security-purge",
+              type: "agenda",
+              known: true,
+            },
+          ],
+        },
+      },
+    } as unknown as AiDecisionInput;
+
+    expect(
+      corpAgendaPurgeDefenseChoiceSignal(
+        input,
+        [choiceCandidate],
+        knownCentralAllocation("hq"),
+      ),
+    ).toMatchObject({
+      kind: "generic",
+      phase: "resolve_install_targets",
+      actionIds: [actionId],
+      evidenceCode: "agenda_purge_ice_allocation_owned_by_corp_defend_servers",
+      choiceResolution: {
+        choiceId,
+        targets: [
+          {
+            cardId: "keeper-1",
+            serverId: "hq",
+            optionId: "agenda_purge_keeper-1_hq",
+          },
+          {
+            cardId: "razor-wire-1",
+            serverId: "rd",
+            optionId: "agenda_purge_razor-wire-1_rd",
+          },
+        ],
+      },
+    });
   });
 
   it.each([

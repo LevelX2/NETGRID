@@ -585,6 +585,129 @@ describe("selectedChoicesForDecision", () => {
     ).toThrowError("window_origin_missing");
   });
 
+  it("assigns each Security Purge ICE to one visible server", () => {
+    const input = inputWithChoice(
+      {
+        kind: "select_option",
+        source:
+          "card_implementation.agenda_purge_install_targets:security_purge:ice_a,operation_a,ice_b:7",
+        minSelections: 2,
+        maxSelections: 2,
+        options: [
+          {
+            id: "agenda_purge_revealed_ice_a",
+            label: "ICE A",
+            value: "ice_a",
+            selectable: false,
+          },
+          {
+            id: "agenda_purge_revealed_operation_a",
+            label: "Operation A",
+            value: "operation_a",
+            selectable: false,
+          },
+          {
+            id: "agenda_purge_revealed_ice_b",
+            label: "ICE B",
+            value: "ice_b",
+            selectable: false,
+          },
+          ...["hq", "rd", "archives", "new_remote"].flatMap((serverId) => [
+            {
+              id: `agenda_purge_ice_a_${serverId}`,
+              label: `ICE A: ${serverId}`,
+              value: `ice_a|${serverId}`,
+            },
+            {
+              id: `agenda_purge_ice_b_${serverId}`,
+              label: `ICE B: ${serverId}`,
+              value: `ice_b|${serverId}`,
+            },
+          ]),
+        ],
+      },
+      {
+        scoreArea: [visibleCard("security_purge", "agenda")],
+        servers: [
+          { id: "hq", label: "HQ", ice: [], root: [] },
+          { id: "rd", label: "R&D", ice: [], root: [] },
+          { id: "archives", label: "Archive", ice: [], root: [] },
+        ],
+      },
+    );
+    rememberAgendaPurgeDefenseChoice(input, [
+      {
+        cardId: "ice_a",
+        serverId: "hq",
+        optionId: "agenda_purge_ice_a_hq",
+      },
+      {
+        cardId: "ice_b",
+        serverId: "rd",
+        optionId: "agenda_purge_ice_b_rd",
+      },
+    ]);
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["agenda_purge_ice_a_hq", "agenda_purge_ice_b_rd"],
+    });
+  });
+
+  it("keeps a malformed Security Purge target matrix fail-closed", () => {
+    const input = inputWithChoice(
+      {
+        kind: "select_option",
+        source:
+          "card_implementation.agenda_purge_install_targets:security_purge:ice_a,ice_b:7",
+        minSelections: 2,
+        maxSelections: 2,
+        options: [
+          {
+            id: "agenda_purge_revealed_ice_a",
+            label: "ICE A",
+            value: "ice_a",
+            selectable: false,
+          },
+          {
+            id: "agenda_purge_revealed_ice_b",
+            label: "ICE B",
+            value: "ice_b",
+            selectable: false,
+          },
+          {
+            id: "agenda_purge_ice_a_hq",
+            label: "ICE A: HQ",
+            value: "ice_a|hq",
+          },
+          {
+            id: "agenda_purge_ice_a_new_remote",
+            label: "ICE A: neues Remote",
+            value: "ice_a|new_remote",
+          },
+        ],
+      },
+      {
+        scoreArea: [visibleCard("security_purge", "agenda")],
+        servers: [{ id: "hq", label: "HQ", ice: [], root: [] }],
+      },
+    );
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
   it("fails closed for an optional unknown choice instead of picking first", () => {
     expect(() =>
       selectedChoicesForDecision(
@@ -1362,9 +1485,7 @@ function inputWithChoice(
       pendingChoice: {
         choiceId: "choice_multi",
         side,
-        source:
-          choice.source ??
-          "card_implementation.agenda_purge_install_targets:test",
+        source: choice.source ?? "test.unknown_choice",
         ...(choice.continuation ? { continuation: choice.continuation } : {}),
         prompt: "Choose targets",
         kind: choice.kind,
@@ -1443,6 +1564,47 @@ function rememberResidentScoreChoiceContinuation(
             selectedAtStateVersion: priorInput.playerView.stateVersion,
             targetCardId,
           },
+        },
+      },
+    ],
+    completionHistory: [],
+    transitions: [],
+  } as never);
+}
+
+function rememberAgendaPurgeDefenseChoice(
+  input: AiDecisionInput,
+  targets: Array<{ cardId: string; serverId: string; optionId: string }>,
+): void {
+  rememberResidentPlanPortfolio(input, {
+    schemaVersion: "resident-plan-portfolio-v2",
+    side: "corp",
+    stateVersion: input.playerView.stateVersion,
+    rootForegroundInstanceId:
+      "plan:corp.defend_servers:server-defense-portfolio",
+    executorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    instances: [
+      {
+        instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        moduleId: "corp.defend_servers",
+        executionState: "executor",
+        moduleState: {
+          kind: "defense",
+          signals: [
+            {
+              kind: "generic",
+              phase: "resolve_install_targets",
+              actionIds: ["corp.resolve_choice"],
+              choiceResolution: {
+                kind: "agenda_purge_install_targets",
+                choiceId: "choice_multi",
+                sourceAgendaId: "security_purge",
+                sourceStateVersion: input.playerView.stateVersion,
+                revealedCardIds: ["ice_a", "operation_a", "ice_b"],
+                targets,
+              },
+            },
+          ],
         },
       },
     ],
