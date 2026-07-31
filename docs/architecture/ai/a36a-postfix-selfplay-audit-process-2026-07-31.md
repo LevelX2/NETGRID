@@ -109,6 +109,14 @@ parallele Bewertungs- oder Fallbackautorität.
 rot; Engine-/Replay-Integrität bleibt grün. Der rote Checkpoint-Commit darf
 keine Verhaltensänderung enthalten.
 
+**Rotnachweis:** Auf dem mit `main` abgeglichenen Stand reproduzieren die
+Checkpoints D45, D47 und Zustand 107 exakt die drei Befunde. Der fokussierte
+Lauf umfasst 43 Tests: 39 bestehende beziehungsweise Gegenfalltests sind
+grün; rot bleiben D45, D47, der Zustand-107-Runtimefehler und die neue
+planlokale Ziel-Gegenprobe. Der Roomy-Hand-Gegenfall bestätigt, dass
+Bodyweight™ Synthetic Blood bei ausreichender Cleanup-Kapazität weiterhin
+zulässig ist.
+
 ### P2 – Semantische Provider- und Doctrine-Grundlage
 
 - Breaker und Breaker-Unterstützung generisch trennen. Eine Karte, die
@@ -138,7 +146,7 @@ additiv sein.
 
 - Der bestehende Fluss bleibt
   `ownDeckStrategyProfile → Strategic Intent → Planmodule/PlanNeeds →
-  TurnPlanner`.
+TurnPlanner`.
 - `runner.rig_and_coverage` veröffentlicht konkrete Coverage- und
   Recovery-Bedarfe aus der generischen Doctrine.
 - `runner.develop_board_and_hand` kann dafür geeignete persistente

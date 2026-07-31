@@ -25,6 +25,8 @@ export type AiDecisionCheckpointActionMatcher = {
   actionId?: string;
   type?: string;
   sourceDefinitionId?: string;
+  targetCardInstanceId?: string;
+  targetDefinitionId?: string;
   targetServerId?: string;
 };
 

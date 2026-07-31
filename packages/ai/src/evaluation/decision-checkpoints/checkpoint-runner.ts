@@ -507,5 +507,29 @@ function actionMatches(
     ].find((card) => card.instanceId === sourceId);
     if (source?.definitionId !== matcher.sourceDefinitionId) return false;
   }
+  const targetCardInstanceId =
+    typeof action.payload?.targetCardId === "string"
+      ? action.payload.targetCardId
+      : undefined;
+  if (
+    matcher.targetCardInstanceId &&
+    targetCardInstanceId !== matcher.targetCardInstanceId
+  ) {
+    return false;
+  }
+  if (matcher.targetDefinitionId) {
+    const target = targetCardInstanceId
+      ? [
+          ...input.playerView.own.gripOrHq,
+          ...(input.playerView.own.rig ?? []),
+          ...input.playerView.own.scoreArea,
+          ...input.playerView.servers.flatMap((server) => [
+            ...server.ice,
+            ...server.root,
+          ]),
+        ].find((card) => card.instanceId === targetCardInstanceId)
+      : undefined;
+    if (target?.definitionId !== matcher.targetDefinitionId) return false;
+  }
   return true;
 }
