@@ -1,12 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import type { ApiPublicMatchListEntry } from "@netgrid/shared";
+import type {
+  ApiGameResultReason,
+  ApiPublicMatchListEntry,
+} from "@netgrid/shared";
 import {
   canRejoinPublicMatch,
   filterAndSortPublicMatches,
   publicGamesFilterLabel,
   publicGamesViewModeLabel,
   publicMatchConclusion,
+  publicMatchParticipants,
   publicMatchResultScore,
   shouldRefreshPublicGames,
   type PublicGamesFilter,
@@ -143,7 +147,7 @@ describe("public games model", () => {
     ).toBeNull();
   });
 
-  it("distinguishes regular results from a participant forfeit", () => {
+  it("distinguishes agenda results from a participant forfeit", () => {
     const finished = entry(
       "regular-finished",
       "finished",
@@ -155,9 +159,9 @@ describe("public games model", () => {
       reason: "agenda_points",
     });
     expect(publicMatchConclusion(finished)).toEqual({
-      kind: "regular",
-      label: "Regulär beendet",
-      compactLabel: "Regulär",
+      kind: "agenda_points",
+      label: "Sieg durch Agenda-Punkte",
+      compactLabel: "Agenda-Sieg",
     });
 
     const forfeited = entry(
@@ -178,6 +182,91 @@ describe("public games model", () => {
       label: "Aufgegeben von Teilnehmer A (Runner)",
       compactLabel: "Aufgabe: Teilnehmer A",
     });
+  });
+
+  it.each<[ApiGameResultReason, "runner" | "corp" | "draw", string, string]>([
+    ["flatline", "corp", "Sieg durch Flatline des Runners", "Flatline"],
+    [
+      "corp_deck_empty",
+      "runner",
+      "Sieg, weil die Korp nicht mehr aus R&D ziehen konnte",
+      "R&D leer",
+    ],
+    [
+      "bad_publicity_7",
+      "runner",
+      "Sieg durch 7 Bad Publicity der Korp",
+      "Bad Publicity",
+    ],
+    ["draw", "draw", "Unentschieden", "Unentschieden"],
+    ["unknown", "draw", "Abschlussart unbekannt", "Unbekannter Abschluss"],
+  ])(
+    "maps %s to its authoritative detailed and compact conclusion",
+    (reason, winner, label, compactLabel) => {
+      const finished = entry(
+        `finished-${reason}`,
+        "finished",
+        "2026-07-20T12:00:00.000Z",
+      );
+      finished.result = resultSnapshot(finished, {
+        winner,
+        ...(winner === "draw" ? {} : { winnerSide: winner }),
+        reason,
+      });
+
+      expect(publicMatchConclusion(finished)).toEqual({
+        kind: reason,
+        label,
+        compactLabel,
+      });
+    },
+  );
+
+  it("marks exactly the authoritative participant as winner even when names and scores cannot distinguish them", () => {
+    const finished = entry(
+      "same-name-finished",
+      "finished",
+      "2026-07-20T12:00:00.000Z",
+    );
+    finished.result = resultSnapshot(finished, {
+      winner: "corp",
+      winnerSide: "corp",
+      reason: "flatline",
+      runnerDisplayName: "Alex",
+      corpDisplayName: "Alex",
+    });
+    finished.result.runner.agendaPoints = 6;
+    finished.result.corp.agendaPoints = 0;
+
+    expect(publicMatchParticipants(finished)).toEqual([
+      { side: "runner", displayName: "Alex", isWinner: false },
+      { side: "corp", displayName: "Alex", isWinner: true },
+    ]);
+  });
+
+  it("marks no participant for a draw and uses the list winner only as a historical side fallback", () => {
+    const drawn = entry("drawn", "finished", "2026-07-20T12:00:00.000Z");
+    drawn.result = resultSnapshot(drawn, {
+      winner: "draw",
+      reason: "draw",
+      runnerDisplayName: "Alice",
+      corpDisplayName: "Bob",
+    });
+    expect(
+      publicMatchParticipants(drawn).map(({ isWinner }) => isWinner),
+    ).toEqual([false, false]);
+
+    const historical = entry(
+      "historical",
+      "finished",
+      "2026-07-20T12:05:00.000Z",
+    );
+    historical.winner = "runner";
+    historical.participantNames = { runner: "Alice", corp: "Bob" };
+    expect(publicMatchParticipants(historical)).toEqual([
+      { side: "runner", displayName: "Alice", isWinner: true },
+      { side: "corp", displayName: "Bob", isWinner: false },
+    ]);
   });
 
   it("uses the authoritative winner only as a legacy fallback for terminal loser reasons", () => {
@@ -254,7 +343,7 @@ function resultSnapshot(
     winner: "runner" | "corp" | "draw";
     winnerSide?: "runner" | "corp";
     loserSide?: "runner" | "corp";
-    reason: "agenda_points" | "forfeit" | "time_expired" | "unknown";
+    reason: ApiGameResultReason;
     runnerDisplayName?: string;
     corpDisplayName?: string;
   },
