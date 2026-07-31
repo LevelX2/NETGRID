@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
 import {
   chronicleActionUseByEventId,
+  chronicleEventProjectionPlan,
   chronicleRunGroupLabelFromEvent,
   chronicleStartTurnEffectGroupFromEvent,
   chronicleTurnNumberByEventId,
@@ -1359,7 +1360,7 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(item.title).toBe(
-      "Du hast Simple Barrier ICE in HQ mit SeeYa aufgedeckt.",
+      "Du hast Simple Barrier ICE in HQ mit SeeYa vorübergehend offengelegt.",
     );
     expect(item.category).toBe("card");
     expect(item.chips).toContain("Expose");
@@ -1406,13 +1407,13 @@ describe("formatChronicleEvent", () => {
     const iceItem = formatChronicleEvent(iceInRemoteOne, "corp");
 
     expect(firstItem.title).toBe(
-      "Die Runner-KI hat mit SeeYa Simple Upgrade in Remote 1 · Root 1 aufgedeckt.",
+      "Die Runner-KI hat mit SeeYa Simple Upgrade in Remote 1 · Root 1 vorübergehend offengelegt.",
     );
     expect(secondItem.title).toBe(
-      "Die Runner-KI hat mit SeeYa Simple Upgrade in Remote 2 · Root 2 aufgedeckt.",
+      "Die Runner-KI hat mit SeeYa Simple Upgrade in Remote 2 · Root 2 vorübergehend offengelegt.",
     );
     expect(iceItem.title).toBe(
-      "Die Runner-KI hat mit SeeYa Simple Barrier ICE als ICE 2 vor Remote 1 aufgedeckt.",
+      "Die Runner-KI hat mit SeeYa Simple Barrier ICE als ICE 2 vor Remote 1 vorübergehend offengelegt.",
     );
     expect(firstItem.chips).toEqual(
       expect.arrayContaining(["SeeYa", "Expose", "Remote 1 · Root 1"]),
@@ -1422,6 +1423,140 @@ describe("formatChronicleEvent", () => {
     expect(shouldSuppressChronicleEventItem(remoteOne)).toBe(false);
     expect(shouldSuppressChronicleEventItem(sameCardInRemoteTwo)).toBe(false);
     expect(shouldSuppressChronicleEventItem(iceInRemoteOne)).toBe(false);
+  });
+
+  it.each([
+    {
+      label: "menschlicher Runner aus eigener Sicht",
+      viewer: "runner" as const,
+      aiExplanation: undefined,
+      expectedSubject: "Du hast",
+    },
+    {
+      label: "menschlicher Runner aus Korp-Sicht",
+      viewer: "corp" as const,
+      aiExplanation: undefined,
+      expectedSubject: "Der Runner hat",
+    },
+    {
+      label: "Runner-KI aus Korp-Sicht",
+      viewer: "corp" as const,
+      aiExplanation: "Expose the selected installed Corp card.",
+      expectedSubject: "Die Runner-KI hat",
+    },
+  ])(
+    "summarizes Mouse activation and resolved expose once for $label",
+    ({ viewer, aiExplanation, expectedSubject }) => {
+      const activation = makeEvent("activated_card_ability", {
+        eventId: "evt_mouse_activation",
+        actor: "runner",
+        label: "Mouse: installierte Korp-Karte exposen",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 3,
+        turnActionOrdinalEnd: 3,
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "expose_installed_card_choice",
+        sourceDefinitionId: "onr_v1_042_mouse",
+      });
+      const result = makeEvent("resolve_choice", {
+        eventId: "evt_mouse_result",
+        actor: "runner",
+        ...(aiExplanation ? { aiExplanation } : {}),
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "expose_installed_card_review",
+        publicRevealKind: "expose",
+        publicRevealDefinitionId: "onr_v1_190_bioweapons-engineering",
+        cardDefinitionId: "onr_v1_190_bioweapons-engineering",
+        title: "Bioweapons Engineering",
+        sourceDefinitionId: "onr_v1_042_mouse",
+        sourceTitle: "Mouse",
+        exposedServerId: "remote_1",
+        exposedServerLabel: "Remote 1",
+        exposedArea: "root",
+        exposedIndex: 0,
+      });
+      const events = [activation, result];
+      const projectionPlan = chronicleEventProjectionPlan(events);
+      const visibleItems = events
+        .filter(
+          (event) =>
+            !shouldSuppressChronicleEventItem(
+              event,
+              projectionPlan.suppressedEventIds,
+            ),
+        )
+        .map((event) =>
+          formatChronicleEvent(event, viewer, {
+            actionUse: projectionPlan.actionUseByEventId[event.eventId] ?? null,
+          }),
+        );
+
+      expect(visibleItems).toHaveLength(1);
+      expect(visibleItems[0]).toMatchObject({
+        title: `${expectedSubject} mit Mouse Bioweapons Engineering in Remote 1 · Root 1 vorübergehend offengelegt.`,
+        cardDefinitionId: "onr_v1_190_bioweapons-engineering",
+        cardTitle: "Bioweapons Engineering",
+        actionUse: {
+          label: "3",
+          clicks: 1,
+          start: 3,
+          end: 3,
+        },
+      });
+      expect(visibleItems[0]?.chips).toEqual(
+        expect.arrayContaining(["Mouse", "Expose", "Remote 1 · Root 1"]),
+      );
+      expect(visibleItems[0]?.title).not.toMatch(
+        /angesehen|eingesehen|aufgedeckt/,
+      );
+    },
+  );
+
+  it("keeps unresolved or unrelated single-expose activations visible", () => {
+    const activation = makeEvent("activated_card_ability", {
+      eventId: "evt_mouse_unresolved",
+      actor: "runner",
+      actionCostClicks: 1,
+      turnActionOrdinalStart: 2,
+      turnActionOrdinalEnd: 2,
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "expose_installed_card_choice",
+      sourceDefinitionId: "onr_v1_042_mouse",
+    });
+    const unrelatedSeeYaResult = makeEvent("resolve_choice", {
+      eventId: "evt_seeya_result",
+      actor: "runner",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "expose_installed_card_review",
+      publicRevealKind: "expose",
+      publicRevealDefinitionId: "simple_upgrade",
+      sourceDefinitionId: "onr_v1_058_seeya",
+    });
+    const batchExpose = makeEvent("resolve_choice", {
+      eventId: "evt_batch_expose",
+      actor: "runner",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction:
+        "schematics_search_engine_expose_installed_cards_review",
+      publicRevealKind: "expose",
+      sourceDefinitionId: "onr_v1_149_schematics-search-engine",
+    });
+    const projectionPlan = chronicleEventProjectionPlan([
+      activation,
+      unrelatedSeeYaResult,
+      batchExpose,
+    ]);
+
+    expect(projectionPlan.suppressedEventIds.size).toBe(0);
+    expect(
+      shouldSuppressChronicleEventItem(
+        activation,
+        projectionPlan.suppressedEventIds,
+      ),
+    ).toBe(false);
+    expect(
+      projectionPlan.actionUseByEventId[unrelatedSeeYaResult.eventId],
+    ).toBe(undefined);
   });
 
   it("shows Schematics Search Engine HQ access exposes in the chronicle", () => {
