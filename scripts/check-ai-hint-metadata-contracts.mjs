@@ -10,7 +10,9 @@ const REPO_ROOT = path.resolve(
 );
 
 function readJson(relativePath) {
-  return JSON.parse(fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8"));
+  return JSON.parse(
+    fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8"),
+  );
 }
 
 function openingPairIsConsumed(pair) {

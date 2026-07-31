@@ -343,34 +343,33 @@ export type CorpEconomyImmediateOperationSignal = CorpEconomySignalBase & {
   };
 };
 
-export type CorpEconomyVisibleCardWithdrawalSignal =
-  CorpEconomySignalBase & {
-    kind: "convert_visible_card_payout";
-    sourceInstanceId: string;
-    sourceDefinitionId: string;
-    sourceZone: "installed_root" | "score_area";
-    actionIds: [string];
-    conversion: {
-      clickCost: number;
-      creditCost: number;
-      grossLiquidCreditGain: number;
-      netLiquidCreditGain: number;
-      cardsDrawn: 0;
-      cardsConsumed: 0;
-      netHandDelta: 0;
-      payoutMode: "fixed";
-      reliability: "guaranteed";
-      source: "legal_action_payload";
-      hostedCreditTakeMode: "up_to_amount_if_available" | "all";
-    };
-    cadence: {
-      kind: "single_action_revalidate";
-      maximumConversions: 1;
-    };
-    completion: {
-      kind: "source_pool_revalidated";
-    };
+export type CorpEconomyVisibleCardWithdrawalSignal = CorpEconomySignalBase & {
+  kind: "convert_visible_card_payout";
+  sourceInstanceId: string;
+  sourceDefinitionId: string;
+  sourceZone: "installed_root" | "score_area";
+  actionIds: [string];
+  conversion: {
+    clickCost: number;
+    creditCost: number;
+    grossLiquidCreditGain: number;
+    netLiquidCreditGain: number;
+    cardsDrawn: 0;
+    cardsConsumed: 0;
+    netHandDelta: 0;
+    payoutMode: "fixed";
+    reliability: "guaranteed";
+    source: "legal_action_payload";
+    hostedCreditTakeMode: "up_to_amount_if_available" | "all";
   };
+  cadence: {
+    kind: "single_action_revalidate";
+    maximumConversions: 1;
+  };
+  completion: {
+    kind: "source_pool_revalidated";
+  };
+};
 
 export type CorpEconomyOperationThresholdSignal = CorpEconomySignalBase & {
   kind: "prepare_immediate_operation";

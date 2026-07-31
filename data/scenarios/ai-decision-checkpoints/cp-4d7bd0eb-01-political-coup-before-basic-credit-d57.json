@@ -916,17 +916,13 @@
           "corp_onr_v1_318_department-of-truth-enhancement_1",
           "corp_onr_v1_292_management-shake-up_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_209_political-coup_1"
-        ],
+        "scoreArea": ["corp_onr_v1_209_political-coup_1"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_266_scramble_1"
-            ],
+            "ice": ["corp_onr_v1_266_scramble_1"],
             "root": []
           },
           {
@@ -952,9 +948,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_223_banpei_1"
-            ],
+            "ice": ["corp_onr_v1_223_banpei_1"],
             "root": [
               "corp_onr_v1_353_chimera_1",
               "corp_onr_v1_312_chicago-branch_1"
@@ -1018,9 +1012,7 @@
           "runner_onr_classic_031_rent-i-con_3",
           "runner_onr_classic_031_rent-i-con_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_200_encryption-breakthrough_2"
-        ],
+        "scoreArea": ["corp_onr_v1_200_encryption-breakthrough_2"],
         "rig": {
           "programs": [
             "runner_onr_v1_035_invisibility_2",
@@ -1028,9 +1020,7 @@
             "runner_onr_classic_031_rent-i-con_2"
           ],
           "hardware": [],
-          "resources": [
-            "runner_onr_v1_165_junkyard-bbs_1"
-          ]
+          "resources": ["runner_onr_v1_165_junkyard-bbs_1"]
         }
       },
       "specialZones": {
@@ -6019,9 +6009,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 56,
-      "blockerIds": [
-        "corp.ice_tax_glacier:reserve_shortfall"
-      ],
+      "blockerIds": ["corp.ice_tax_glacier:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 122,
       "state": {
@@ -6109,9 +6097,7 @@
               "support": 90,
               "final": 77
             },
-            "supportGaps": [
-              "low_bait_support"
-            ],
+            "supportGaps": ["low_bait_support"],
             "evidence": [
               "strategy:corp.asset_economy",
               "confidence:high",
@@ -6174,9 +6160,7 @@
               "support": 80,
               "final": 65
             },
-            "supportGaps": [
-              "low_tagOrTrace_support"
-            ],
+            "supportGaps": ["low_tagOrTrace_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -6241,9 +6225,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.ice_tax_glacier",
-          "evidence": [
-            "continued:corp.ice_tax_glacier"
-          ]
+          "evidence": ["continued:corp.ice_tax_glacier"]
         },
         "commitment": {
           "strategyId": "corp.ice_tax_glacier",
@@ -6355,10 +6337,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6409,10 +6388,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6595,10 +6571,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6745,9 +6718,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.central_stabilize"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.central_stabilize"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -6779,10 +6750,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6837,10 +6805,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6963,10 +6928,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7024,10 +6986,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7183,9 +7142,7 @@
               "serverId": "remote_1",
               "phase": "trigger",
               "purposeCode": "wait_for_or_convert_committed_ambush_access",
-              "assignedDomainPlanIds": [
-                "corp.ambush_bluff"
-              ],
+              "assignedDomainPlanIds": ["corp.ambush_bluff"],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": true,
               "plannedAtStateVersion": 109,
@@ -7417,9 +7374,7 @@
               "currentCreditsAtRevalidation": 0,
               "gap": 11,
               "projectedCreditGain": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "priorityClass": "P6",
               "cadence": {
                 "kind": "remaining_turn_capacity",
@@ -7800,9 +7755,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "missing_existing_remote",
-                "evidence": [
-                  "target_server:new_remote"
-                ]
+                "evidence": ["target_server:new_remote"]
               }
             }
           },
@@ -7863,9 +7816,7 @@
             "kind": "capability",
             "id": "score-material:general"
           },
-          "openNeedIds": [
-            "score-material:general"
-          ],
+          "openNeedIds": ["score-material:general"],
           "phase": "select_agenda",
           "milestone": "admitted",
           "moduleState": {
@@ -11994,12 +11945,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.economy"
-      ],
-      "acceptableCapabilities": [
-        "develop_or_convert_corp_economy"
-      ],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
         "corp_engine_certified_visible_card_payout:onr_v1_209_political-coup"
       ]
