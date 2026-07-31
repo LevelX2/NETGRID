@@ -1,7 +1,4 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type CardDefinitionId,
-} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID, type CardDefinitionId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { CardAccessEffectImplementation } from "../../ability-engine/definition-types";
 import {
@@ -46,7 +43,8 @@ function accessEffects(
 describe("node access rez contract", () => {
   it("keeps the active Corp asset access inventory explicit and complete", () => {
     const actual = CARD_IMPLEMENTATIONS.filter((implementation) => {
-      const definition = CARD_DEFINITIONS_BY_ID[implementation.cardDefinitionId];
+      const definition =
+        CARD_DEFINITIONS_BY_ID[implementation.cardDefinitionId];
       return (
         definition?.side === "corp" &&
         definition.type === "asset" &&

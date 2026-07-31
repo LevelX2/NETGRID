@@ -7279,13 +7279,10 @@ function buildCorpDomain(
       };
     },
   );
-  const targetBoundScoreProjects = bindScoreInstallVariantsToBestServer(
-    concreteScoreProjects,
-  );
   const residentPreparedScoreProject =
     residentScoreAgendaInstanceId === undefined
       ? undefined
-      : targetBoundScoreProjects.find(
+      : concreteScoreProjects.find(
           (project) =>
             project.agendaInstanceId === residentScoreAgendaInstanceId &&
             project.phase === "install_agenda" &&
@@ -7294,18 +7291,24 @@ function buildCorpDomain(
             project.feasible,
         );
   const continuityBoundScoreProjects = residentPreparedScoreProject
-    ? targetBoundScoreProjects.map((project) =>
-        project.phase === "install_agenda" &&
-        project.serverId === residentPreparedScoreProject.serverId &&
-        project.agendaInstanceId !== residentScoreAgendaInstanceId
+    ? concreteScoreProjects.map((project) => {
+        if (project.phase !== "install_agenda") return project;
+        const competingTargetForResidentAgenda =
+          project.agendaInstanceId === residentScoreAgendaInstanceId &&
+          project.serverId !== residentPreparedScoreProject.serverId;
+        const competingAgendaForResidentTarget =
+          project.serverId === residentPreparedScoreProject.serverId &&
+          project.agendaInstanceId !== residentScoreAgendaInstanceId;
+        return competingTargetForResidentAgenda ||
+          competingAgendaForResidentTarget
           ? {
               ...project,
               feasible: false,
-              evidenceCode: `corp_resident_score_parent_dominates_sibling_agenda:${residentScoreAgendaInstanceId}:${project.serverId}`,
+              evidenceCode: `corp_resident_score_parent_dominates_sibling_route:${residentScoreAgendaInstanceId}:${residentPreparedScoreProject.serverId}`,
             }
-          : project,
-      )
-    : targetBoundScoreProjects;
+          : project;
+      })
+    : concreteScoreProjects;
   const scoreMaterialMissing =
     ownAgendas === 0 &&
     continuityBoundScoreProjects.length === 0 &&
@@ -7558,7 +7561,8 @@ function buildCorpDomain(
             } as const)
           : ({ knowledge: "unknown" as const } as const);
       const deterministicParentContinuationActionId =
-        project.phase === "advance_agenda"
+        project.phase === "advance_agenda" &&
+        corpTurnCommitmentContainsExactAgendaAdvance(previous, project)
           ? project.actionIds?.find((actionId) =>
               input.legalActions.some(
                 (legalAction) =>
@@ -9325,51 +9329,20 @@ function corpScoreProjectAssessmentIsUnknown(
   );
 }
 
-/**
- * Server choices are variants of one agenda install, not independent score
- * campaigns. Compare them once and expose only the best current binding to the
- * scheduler. A later state change performs a normal replan and may choose a
- * different server; within the current state defense support cannot drift to
- * a sibling target merely because that sibling has a convenient ICE action.
- */
-function bindScoreInstallVariantsToBestServer(
-  projects: readonly CorpScoreProjectSignal[],
-): CorpScoreProjectSignal[] {
-  const selectedByAgenda = new Map<string, CorpScoreProjectSignal>();
-  for (const project of projects) {
-    if (
-      project.phase !== "install_agenda" ||
-      !project.agendaInstanceId ||
-      !project.serverId
-    ) {
-      continue;
-    }
-    const current = selectedByAgenda.get(project.agendaInstanceId);
-    if (!current || compareScoreInstallVariants(project, current) < 0) {
-      selectedByAgenda.set(project.agendaInstanceId, project);
-    }
-  }
-  return projects.filter((project) => {
-    if (
-      project.phase !== "install_agenda" ||
-      !project.agendaInstanceId ||
-      !project.serverId
-    ) {
-      return true;
-    }
-    return selectedByAgenda.get(project.agendaInstanceId) === project;
-  });
-}
-
-function compareScoreInstallVariants(
-  left: CorpScoreProjectSignal,
-  right: CorpScoreProjectSignal,
-): number {
-  if (left.feasible !== right.feasible) return left.feasible ? -1 : 1;
-  if ((left.serverId === "new_remote") !== (right.serverId === "new_remote")) {
-    return left.serverId === "new_remote" ? 1 : -1;
-  }
-  return compareCorpScoreProtectionProjects(left, right);
+function corpTurnCommitmentContainsExactAgendaAdvance(
+  previous: ResidentPlanPortfolio | undefined,
+  project: CorpScoreProjectSignal,
+): boolean {
+  if (!project.agendaInstanceId) return false;
+  return (
+    previous?.turnPlanCommitment?.phases.some((phase) =>
+      phase.nodes.some(
+        (node) =>
+          node.invocation.semanticActionType === "score.advance_card" &&
+          node.invocation.sourceCardInstanceId === project.agendaInstanceId,
+      ),
+    ) === true
+  );
 }
 
 function compareCorpScoreProtectionProjects(
@@ -10191,6 +10164,13 @@ function corpEconomyDevelopmentCampaigns(
       finitePoolCredits > 0
         ? ("finite_pool" as const)
         : ("automatic_start_of_turn" as const);
+    if (
+      phase === "rez" &&
+      cadence === "finite_pool" &&
+      input.playerView.timingPoint !== "corp_action.main"
+    ) {
+      return;
+    }
     const horizonTurns = 3;
     const projectedCredits =
       cadence === "finite_pool"

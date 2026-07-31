@@ -2,9 +2,11 @@
 
 ## Status
 
-Freigegebener Umsetzungsprozess. Die Pakete werden sequenziell im Worktree
-`C:\Projekte\NETGRID_AI_E6ACA07C_ANALYSIS` auf Branch
-`codex/ai-replay-e6aca07c-analysis` umgesetzt und einzeln committed.
+Umsetzung und Paketprüfung abgeschlossen. Die Pakete wurden sequenziell im
+Worktree `C:\Projekte\NETGRID_AI_E6ACA07C_ANALYSIS` auf Branch
+`codex/ai-replay-e6aca07c-analysis` umgesetzt und einzeln committed. Der
+abschließende Main-Abgleich, Integrationslauf und die Worktree-Entfernung
+stehen noch aus.
 
 ## Quelle und Ausgangslage
 
@@ -213,3 +215,52 @@ breit ausgeführt.
   nicht still erweiterter Follow-up dokumentiert.
 - Arbeitsbranch ist lokal nach `main` integriert; Worktree und Branch sind
   verifiziert entfernt.
+
+## Abschlussresultat vor Integration
+
+### Umgesetzte Korrekturen
+
+- `Setup!` löst den Access-Schaden nun unabhängig vom Rez-Zustand über die
+  bestehende Engine-Access-Pipeline aus. Archives-Ausnahme, Replay und
+  StateHash bleiben intakt.
+- `corp.defend_servers` bewertet bekannte Runner-Pfadkosten über die exakte
+  Engine-Quote des ganzen Pfads. Zusätzliche ICE-Schichten bleiben ohne harte
+  Obergrenze möglich, verlieren aber bei hohem Rez-Gap und geringer
+  Zusatzwirkung relativ an Wert.
+- Score-Unterstützung behält residente Agenda- und Serverbindung. Ungebundene
+  Servervarianten bleiben echte Alternativen; erst eine vorhandene Bindung
+  sperrt konkurrierende Varianten derselben Agenda.
+- Eine Advance-Aktion verdrängt einen Defense-/Draw-Schritt nur, wenn genau
+  diese Agenda-Advance-Aktion bereits als Knoten des laufenden Zugplans
+  gebunden war. Bloß neu entstandene Legalität reicht nicht.
+- Die generische Score-Köderroute gehört weiterhin
+  `corp.ambush_and_bluff`; der Zugdirigent bleibt globale Auswahlinstanz.
+- Endliche Economy-Pools werden innerhalb von `corp.economy` von Installation
+  über Rez bis Auszahlung geführt. Eine aktionsgebundene Auszahlung wird nur
+  im eigenen `corp_action.main`-Fenster aktiviert und nicht im Runner-Zug
+  vorzeitig offengelegt.
+
+### Doctrine-Befund
+
+`corp.ice_tax_glacier` ist im untersuchten Deck die primäre Strategie und
+liefert passenden strategischen Kontext. Für keinen der reproduzierten Fehler
+war ihre Gewichtung jedoch die kausale Auswahlursache. Die Korrekturen lagen
+in Engine-Quote, Plan-Ownership, Zielbindung, Zugplan-Commitment und
+Economy-Timing. Deshalb wurde keine zusätzliche Doctrine-Gewichtung und kein
+kartenspezifischer Strategiepfad ergänzt.
+
+### Verifikation
+
+- Alle zehn e6aca-Entscheidungskontrollen einschließlich der beiden
+  Schicht-Gegenproben bestehen.
+- Die fünf im ersten vollständigen AI-Lauf gefundenen Querregressionen wurden
+  gegen ihre bestehenden Invarianten korrigiert; die zugehörigen 24
+  Checkpoint- und 53 Runtime-/Simulationskontrollen sind grün.
+- `corepack pnpm test:ai:shards`: drei parallele Shards grün mit 1.768,
+  1.516 und 1.160 Tests.
+- AI-Typecheck, AI-Hint-/Source-Struktur, Economy-Verträge,
+  Deckstrategieprüfung, Deck-Hint-Consumer-Audit und Formatprüfung sind grün.
+- Der Engine-Gesamtlauf aus P1 bestand mit 210 Dateien und 1.825 Tests. Seit
+  diesem Lauf wurde kein Engine-Produktionscode mehr geändert.
+- Es wurden keine Server gestartet, keine Standardports berührt und keine
+  Runtime-Datenbank beschrieben.

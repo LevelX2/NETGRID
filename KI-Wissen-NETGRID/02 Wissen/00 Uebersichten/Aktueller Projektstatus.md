@@ -187,7 +187,9 @@ Stand: 2026-07-30
   harte Blocker aber nicht ohne garantierte Route. Planportfolio-
   Reservierungen verhindern Doppelverwendung derselben Credits.
 - Corporate Coup und BBS sind finite Auszahlungspools ohne strategisches
-  Halten; Broker bleibt eine eigenständige Aufbau-/Cashout-Bank. Gemischte
+  Halten; Broker bleibt eine eigenständige Aufbau-/Cashout-Bank. Die Corp-KI
+  führt solche Pools generisch von Installation über Rez bis Auszahlung und
+  aktiviert aktionsgebundene Pools nur im eigenen Aktionsfenster. Gemischte
   Actions verrechnen Kartenverbrauch und Draw als Netto-Handdelta,
   verzögerte Economy braucht einen passenden Reserveplan. Der vergleichbare
   Abschlusslauf über 60 Spiele und 10.957 Entscheidungen hat keine Hard

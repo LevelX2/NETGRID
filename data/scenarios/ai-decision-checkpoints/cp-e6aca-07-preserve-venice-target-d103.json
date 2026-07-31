@@ -1284,9 +1284,7 @@
           "corp_onr_v1_347_vapor-ops_1",
           "corp_onr_v1_366_red-herrings_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_216_security-purge_1"
-        ],
+        "scoreArea": ["corp_onr_v1_216_security-purge_1"],
         "servers": [
           {
             "id": "hq",
@@ -1327,29 +1325,21 @@
               "corp_onr_v1_244_filter_1",
               "corp_onr_v1_237_data-wall_2"
             ],
-            "root": [
-              "corp_onr_v1_309_bbs-whispering-campaign_1"
-            ]
+            "root": ["corp_onr_v1_309_bbs-whispering-campaign_1"]
           },
           {
             "id": "remote_2",
             "kind": "remote",
             "label": "Remote 2",
-            "ice": [
-              "corp_onr_v1_231_cortical-scrub_2"
-            ],
-            "root": [
-              "corp_onr_v1_340_setup_1"
-            ]
+            "ice": ["corp_onr_v1_231_cortical-scrub_2"],
+            "root": ["corp_onr_v1_340_setup_1"]
           },
           {
             "id": "remote_3",
             "kind": "remote",
             "label": "Remote 3",
             "ice": [],
-            "root": [
-              "corp_onr_v1_309_bbs-whispering-campaign_2"
-            ]
+            "root": ["corp_onr_v1_309_bbs-whispering-campaign_2"]
           }
         ]
       },
@@ -1426,9 +1416,7 @@
         }
       },
       "specialZones": {
-        "setAside": [
-          "runner_onr_classic_031_rent-i-con_2"
-        ],
+        "setAside": ["runner_onr_classic_031_rent-i-con_2"],
         "removedFromGame": []
       },
       "cardInstances": {
@@ -10384,9 +10372,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 7,
-      "blockerIds": [
-        "corp.ice_tax_glacier:reserve_shortfall"
-      ],
+      "blockerIds": ["corp.ice_tax_glacier:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 247,
       "state": {
@@ -10537,9 +10523,7 @@
               "support": 80,
               "final": 69
             },
-            "supportGaps": [
-              "low_tagOrTrace_support"
-            ],
+            "supportGaps": ["low_tagOrTrace_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -10604,9 +10588,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.ice_tax_glacier",
-          "evidence": [
-            "continued:corp.ice_tax_glacier"
-          ]
+          "evidence": ["continued:corp.ice_tax_glacier"]
         },
         "commitment": {
           "strategyId": "corp.ice_tax_glacier",
@@ -10718,10 +10700,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10839,10 +10818,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11119,9 +11095,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.central_stabilize"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.central_stabilize"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -11153,10 +11127,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11211,10 +11182,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11334,10 +11302,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11473,10 +11438,7 @@
                   "serverBoundEffectIds": []
                 }
               },
-              "canonicalNearTieCandidateServerIds": [
-                "hq",
-                "rd"
-              ],
+              "canonicalNearTieCandidateServerIds": ["hq", "rd"],
               "hqHold": {
                 "status": "ineligible"
               }
@@ -11560,9 +11522,7 @@
               "currentCreditsAtRevalidation": 2,
               "gap": 10,
               "projectedCreditGain": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "priorityClass": "P6",
               "cadence": {
                 "kind": "remaining_turn_capacity",
@@ -11744,10 +11704,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:30",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:30", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -11914,10 +11871,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:30",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:30", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -12093,10 +12047,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:30",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:30", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -12409,9 +12360,7 @@
                 "boundaryAfter": "private_observation"
               }
             ],
-            "protectedValueClaimIds": [
-              "fnv1a:f4d56696:defense"
-            ],
+            "protectedValueClaimIds": ["fnv1a:f4d56696:defense"],
             "transition": {
               "kind": "observation_boundary"
             }

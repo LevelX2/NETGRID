@@ -1287,9 +1287,7 @@
           "corp_onr_v1_290_efficiency-experts_3",
           "corp_onr_v1_347_vapor-ops_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_216_security-purge_1"
-        ],
+        "scoreArea": ["corp_onr_v1_216_security-purge_1"],
         "servers": [
           {
             "id": "hq",
@@ -1395,9 +1393,7 @@
           "corp_onr_v1_214_project-babylon_1"
         ],
         "rig": {
-          "programs": [
-            "runner_onr_v1_035_invisibility_1"
-          ],
+          "programs": ["runner_onr_v1_035_invisibility_1"],
           "hardware": [],
           "resources": [
             "runner_onr_v1_176_the-shell-traders_2",
@@ -8821,9 +8817,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 3,
-      "blockerIds": [
-        "corp.ice_tax_glacier:reserve_shortfall"
-      ],
+      "blockerIds": ["corp.ice_tax_glacier:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 195,
       "state": {
@@ -8974,9 +8968,7 @@
               "support": 80,
               "final": 69
             },
-            "supportGaps": [
-              "low_tagOrTrace_support"
-            ],
+            "supportGaps": ["low_tagOrTrace_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -9287,10 +9279,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9473,10 +9462,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9558,9 +9544,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.central_stabilize"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.central_stabilize"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -9592,10 +9576,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9650,10 +9631,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9773,10 +9751,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9862,9 +9837,7 @@
                 "defenseId": "install-defense-support:corp_onr_v1_366_red-herrings_1:remote_1",
                 "serverId": "remote_1",
                 "phase": "install_defense_support",
-                "sourceDefinitionIds": [
-                  "onr_v1_366_red-herrings"
-                ],
+                "sourceDefinitionIds": ["onr_v1_366_red-herrings"],
                 "actionIds": [
                   "corp.install_card.corp_onr_v1_366_red-herrings_1.remote_1.corp_onr_v1_366_red-herrings_1"
                 ],
@@ -9910,10 +9883,7 @@
                   "serverBoundEffectIds": []
                 }
               },
-              "canonicalNearTieCandidateServerIds": [
-                "hq",
-                "rd"
-              ],
+              "canonicalNearTieCandidateServerIds": ["hq", "rd"],
               "hqHold": {
                 "status": "ineligible"
               }
@@ -10084,9 +10054,7 @@
               "currentCreditsAtRevalidation": 4,
               "gap": 7,
               "projectedCreditGain": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "priorityClass": "P6",
               "cadence": {
                 "kind": "remaining_turn_capacity",
@@ -10183,10 +10151,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:24",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:24", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -10441,12 +10406,8 @@
         "quoteIds": [],
         "valueClaimIds": [],
         "priorityCoverage": {
-          "requiredObligationIds": [
-            "priority-band:P3"
-          ],
-          "satisfiedObligationIds": [
-            "priority-band:P3"
-          ],
+          "requiredObligationIds": ["priority-band:P3"],
+          "satisfiedObligationIds": ["priority-band:P3"],
           "violatedObligationIds": [],
           "deferredObligationIds": []
         },
