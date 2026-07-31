@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-07-31-accessed-unrezzed-root-temporary-visibility
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-31
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-31
+completedAt: 2026-07-31
+branch: codex/activities-worktree-20260731-203648
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/access/access-flow-context.ts
+  - packages/engine/src/game/view/card-view.ts
+  - packages/engine/src/game/view/player-view-projection.test.ts
+  - packages/engine/src/index-tests/proteus/agenda-suite.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/agenda-suite.test.ts src/game/access/access-flow.test.ts src/game/view/player-view-projection.test.ts
+  - corepack pnpm --filter @netgrid/engine test
+  - corepack pnpm format:changed
 ---
 
 # Accessete ungerezzte Root-Karten nur für den Breach sichtbar halten
@@ -75,22 +83,22 @@ erzeugen.
 
 ## Akzeptanzkriterien
 
-- [ ] Ein ungerezztes Root-Upgrade ist vor seinem Access für den Runner
+- [x] Ein ungerezztes Root-Upgrade ist vor seinem Access für den Runner
       verdeckt, während des eigenen Access sichtbar und bleibt für den Rest
       desselben Breaches sichtbar.
-- [ ] Nach Breach-/Run-Ende ist dasselbe weiterhin ungerezzte Upgrade wieder
+- [x] Nach Breach-/Run-Ende ist dasselbe weiterhin ungerezzte Upgrade wieder
       verdeckt; Titel, Definition und Regeltext fehlen in der aktuellen
       Runner-PlayerView.
-- [ ] Ein gerezztes oder anderweitig dauerhaft sichtbares Upgrade bleibt nach
+- [x] Ein gerezztes oder anderweitig dauerhaft sichtbares Upgrade bleibt nach
       dem Breach korrekt offen.
-- [ ] Access allein setzt keinen aktiven Kartenstatus und löst keinen Effekt
+- [x] Access allein setzt keinen aktiven Kartenstatus und löst keinen Effekt
       aus, der Rez oder eine andere ausdrückliche Aktivierung verlangt.
-- [ ] Reconnect und Undo rekonstruieren die Sichtbarkeit aus dem jeweiligen
+- [x] Reconnect und Undo rekonstruieren die Sichtbarkeit aus dem jeweiligen
       Breach-Zustand, ohne zusätzliche Hidden-Info preiszugeben.
-- [ ] PublicEvents und Chronik dürfen den rechtmäßig beobachteten Access
+- [x] PublicEvents und Chronik dürfen den rechtmäßig beobachteten Access
       side-sicher dokumentieren, machen die installierte Karte aber nicht als
       aktuelle öffentliche Boardkarte sichtbar.
-- [ ] Replay und StateHash bleiben deterministisch; fokussierte Tests decken
+- [x] Replay und StateHash bleiben deterministisch; fokussierte Tests decken
       HQ-Multiaccess, Remote-Root, Breach-Ende und dauerhafte Sichtbarkeits-
       Gegenfälle ab.
 
@@ -107,4 +115,11 @@ erzeugen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der Access mutiert installierte Root-Karten sowie Karten in HQ und R&D nicht
+mehr dauerhaft auf `faceup`. Die Runner-PlayerView leitet die temporäre
+Sichtbarkeit bereits accesseter installierter Root-Karten stattdessen aus der
+laufenden Breach-Queue ab. Damit bleiben sie innerhalb desselben Breaches
+sichtbar und werden bei Run-Ende, Reconnect oder Undo automatisch wieder
+verdeckt. Archives behalten ihre bestehende dauerhafte Aufdeckung. Remote-,
+HQ- und R&D-Zugriffe, Hidden-Info-Gegenfälle sowie Replay und StateHash sind
+durch fokussierte und vollständige Engine-Tests abgesichert.

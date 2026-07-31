@@ -332,7 +332,12 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     fetal = apply(fetal, "runner", (action) => action.type === "access_card");
     expect(fetal.run?.accessedCardId).toBe(fetalId);
     expect(fetal.runner.heap).toHaveLength(heapBefore + 2);
-    expect(fetal.cardInstances[fetalId]?.faceup).toBe(true);
+    expect(fetal.cardInstances[fetalId]?.faceup).toBe(false);
+    expect(getPlayerView(fetal, "runner").run?.accessedCard).toMatchObject({
+      instanceId: fetalId,
+      known: true,
+      definitionId: FETAL_AI,
+    });
     expect(fetal.cardInstances["pro013_marked_hidden_rd"]?.faceup).toBe(false);
     expect(fetal.eventLog.at(-1)?.publicPayload).toMatchObject({
       damageType: "net",
@@ -344,7 +349,32 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       "runner",
       (action) => action.type === "steal_agenda",
     );
+    const declineSteal = mustAction(
+      fetal,
+      "runner",
+      (action) => action.type === "decline_trash",
+    );
     expect(steal.costs).toEqual([{ credits: 2 }]);
+    expect(declineSteal).toMatchObject({
+      label: "Fetal AI nicht stehlen",
+      costs: [],
+      payload: {
+        cardId: fetalId,
+        stealCost: 2,
+        stealAdditionalCost: 2,
+        stealCostSourceDefinitionIds: FETAL_AI,
+      },
+    });
+    const declinedFetal = apply(
+      structuredClone(fetal),
+      "runner",
+      (action) => action.actionId === declineSteal.actionId,
+    );
+    expect(declinedFetal.runner.credits).toBe(fetal.runner.credits);
+    expect(declinedFetal.corp.rd).toContain(fetalId);
+    expect(declinedFetal.runner.scoreArea).not.toContain(fetalId);
+    expect(declinedFetal.run).toBeUndefined();
+    expectReplayStable(before, declinedFetal);
     const staleZone = structuredClone(fetal);
     staleZone.cardInstances[fetalId] = {
       ...staleZone.cardInstances[fetalId]!,
@@ -382,7 +412,12 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     marked = accessTopCard(marked, "rd");
     expect(marked.run?.accessedCardId).toBe(markedId);
     expect(marked.runner.tags).toBe(1);
-    expect(marked.cardInstances[markedId]?.faceup).toBe(true);
+    expect(marked.cardInstances[markedId]?.faceup).toBe(false);
+    expect(getPlayerView(marked, "runner").run?.accessedCard).toMatchObject({
+      instanceId: markedId,
+      known: true,
+      definitionId: MARKED_ACCOUNTS,
+    });
     expect(marked.cardInstances["pro013_fetal_hidden_rd"]?.faceup).toBe(false);
     expect(marked.eventLog.at(-1)?.publicPayload).toMatchObject({
       tagsAdded: 1,
@@ -397,6 +432,70 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     );
     markedArchives = accessTopCard(markedArchives, "archives");
     expect(markedArchives.runner.tags).toBe(0);
+  });
+
+  it("quotes combined self and server steal costs atomically and allows declining them", () => {
+    let state = baseState("pro013-combined-steal-cost");
+    state.runner.credits = 7;
+    const redHerringsId = addCorpCard(
+      state,
+      "onr_v1_366_red-herrings",
+      "pro013_combined_red_herrings",
+      "remote_1",
+    );
+    state.cardInstances[redHerringsId] = {
+      ...state.cardInstances[redHerringsId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const fetalId = addCorpCard(
+      state,
+      FETAL_AI,
+      "pro013_combined_fetal_ai",
+      "remote_1",
+    );
+    addRunnerGripCard(state, "onr_v1_010_cascade", "pro013_combined_net_1");
+    addRunnerGripCard(state, "onr_v1_011_cloak", "pro013_combined_net_2");
+    openAccess(state, "remote_1");
+    const before = structuredClone(state);
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const actions = getLegalActions(state, "runner");
+    expect(
+      actions.map((action) => ({
+        type: action.type,
+        costs: action.costs,
+        payload: action.payload,
+      })),
+    ).toMatchObject([
+      {
+        type: "steal_agenda",
+        costs: [{ credits: 7 }],
+        payload: {
+          stealCost: 7,
+          stealAdditionalCost: 7,
+          stealCostSourceDefinitionIds: `${FETAL_AI},onr_v1_366_red-herrings`,
+        },
+      },
+      {
+        type: "decline_trash",
+        costs: [],
+        payload: {
+          stealCost: 7,
+          stealAdditionalCost: 7,
+          stealCostSourceDefinitionIds: `${FETAL_AI},onr_v1_366_red-herrings`,
+        },
+      },
+    ]);
+
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+    expect(state.runner.credits).toBe(7);
+    expect(state.runner.scoreArea).not.toContain(fetalId);
+    expect(
+      state.corp.servers.find((server) => server.id === "remote_1")?.root,
+    ).toContain(fetalId);
+    expect(state.run).toBeUndefined();
+    expectReplayStable(before, state);
   });
 
   it("keeps Marked Accounts access context when Fall Guy avoids the tag", () => {
@@ -423,7 +522,12 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     expect(state.run?.accessedCardId).toBe(markedId);
     expect(state.runner.tags).toBe(0);
     expect(state.pendingChoice?.source).toContain("event_modification");
-    expect(state.cardInstances[markedId]?.faceup).toBe(true);
+    expect(state.cardInstances[markedId]?.faceup).toBe(false);
+    expect(getPlayerView(state, "runner").run?.accessedCard).toMatchObject({
+      instanceId: markedId,
+      known: true,
+      definitionId: MARKED_ACCOUNTS,
+    });
     expect(state.cardInstances["pro013_fetal_stays_hidden_rd"]?.faceup).toBe(
       false,
     );

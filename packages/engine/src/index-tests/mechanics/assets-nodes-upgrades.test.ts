@@ -1878,6 +1878,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     const stealAction = getLegalActions(state, "runner").find(
       (action) => action.type === "steal_agenda",
     );
+    const declineStealAction = getLegalActions(state, "runner").find(
+      (action) => action.type === "decline_trash",
+    );
     expect(stealAction?.costs).toEqual([{ credits: 5 }]);
     expect(stealAction?.payload).toMatchObject({
       stealCost: 5,
@@ -1885,6 +1888,35 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       stealCostSourceDefinitionIds: "onr_v1_366_red-herrings",
       stealCostSourceTitles: "Red Herrings",
     });
+    expect(declineStealAction).toMatchObject({
+      label: "Simple Agenda nicht stehlen",
+      costs: [],
+      payload: {
+        cardId: agendaId,
+        stealCost: 5,
+        stealAdditionalCost: 5,
+        stealCostSourceDefinitionIds: "onr_v1_366_red-herrings",
+      },
+    });
+
+    const declined = apply(
+      structuredClone(state),
+      "runner",
+      (action) => action.actionId === declineStealAction?.actionId,
+    );
+    expect(declined.runner.credits).toBe(7);
+    expect(declined.runner.scoreArea).not.toContain(agendaId);
+    expect(
+      declined.corp.servers.find((server) => server.id === "remote_1")?.root,
+    ).toContain(agendaId);
+    expect(declined.run).toBeUndefined();
+    expect(validateGameState(declined).ok).toBe(true);
+    const declinedReplay = replayEvents(
+      initial,
+      declined.eventLog.slice(replayStart),
+    );
+    expect(declinedReplay.ok).toBe(true);
+    expect(hashState(declinedReplay.state)).toBe(hashState(declined));
 
     const stale = structuredClone(state);
     stale.cardInstances[redHerringsId] = {
@@ -1899,6 +1931,15 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         actionId: stealAction!.actionId,
         clientKnownStateVersion: stale.stateVersion,
         idempotencyKey: "v1918-red-herrings-stale",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(stale, {
+        matchId: stale.matchId,
+        side: "runner",
+        actionId: declineStealAction!.actionId,
+        clientKnownStateVersion: stale.stateVersion,
+        idempotencyKey: "v1918-red-herrings-decline-stale",
       }).ok,
     ).toBe(false);
 

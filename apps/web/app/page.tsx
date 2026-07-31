@@ -101,6 +101,11 @@ import {
   appendPendingAccessPresentationEvents,
   dismissPendingAccessPresentationEvent,
 } from "./access-presentation-queue";
+import {
+  confirmedNextAccessAction,
+  shouldKeepAccessRevealOpen,
+  type PendingAccessContinuation,
+} from "./access-reveal-ui";
 import { matchOverlayPresentation } from "./match-overlay-presentation";
 import { latestSuccessfulRunOutcomePresentation } from "./successful-run-outcome-presentation";
 import {
@@ -916,6 +921,9 @@ export default function Page() {
   const corpRunAutoPassSubmittedKeyRef = useRef<string | null>(null);
   const paymentSupportSubmittedKeyRef = useRef<string | null>(null);
   const paymentSupportContinuationSubmittedKeyRef = useRef<string | null>(null);
+  const pendingAccessContinuationRef = useRef<PendingAccessContinuation | null>(
+    null,
+  );
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const reconnectInFlightRef = useRef(false);
   const accountRejoinInFlightRef = useRef(false);
@@ -2692,9 +2700,15 @@ export default function Page() {
     ? retainedAccessRevealEvent(payload.eventTail, lastDismissedAccessEventId)
     : null;
   const queuedAccessRevealEvent =
+    (pendingAccessContinuationRef.current &&
+    latestAccessRevealEvent?.eventId !==
+      pendingAccessContinuationRef.current.accessEventId
+      ? latestAccessRevealEvent
+      : null) ??
     pendingAccessPresentationEvents.find(
       (event) => !dismissedAccessEventIds.includes(event.eventId),
-    ) ?? null;
+    ) ??
+    null;
   const accessRevealEvent = queuedAccessRevealEvent ?? retainedAccessReveal;
   const accessRevealUsesCurrentState = Boolean(
     accessRevealEvent &&
@@ -3447,6 +3461,7 @@ export default function Page() {
       payload?.eventTail.at(-1)?.eventId ?? null;
     setDismissedAccessEventIds([]);
     setPendingAccessPresentationEvents([]);
+    pendingAccessContinuationRef.current = null;
     setDismissedSuccessfulRunOutcomeEventId(null);
   }, [payload?.matchId]);
 
@@ -4706,6 +4721,49 @@ export default function Page() {
     });
     return true;
   };
+
+  useEffect(() => {
+    const continuation = pendingAccessContinuationRef.current;
+    if (!continuation) return;
+    if (!session || !payload || connection !== "online") {
+      pendingAccessContinuationRef.current = null;
+      return;
+    }
+    if (
+      latestAccessRevealEvent &&
+      latestAccessRevealEvent.eventId !== continuation.accessEventId
+    ) {
+      pendingAccessContinuationRef.current = null;
+      setPendingAccessPresentationEvents((events) =>
+        dismissPendingAccessPresentationEvent(
+          events,
+          continuation.accessEventId,
+        ),
+      );
+      setDismissedAccessEventIds((eventIds) =>
+        eventIds.includes(continuation.accessEventId)
+          ? eventIds
+          : [...eventIds, continuation.accessEventId].slice(-30),
+      );
+      return;
+    }
+    if (continuation.nextAccessSubmitted) return;
+    const nextAccessAction = confirmedNextAccessAction(
+      continuation,
+      payload.playerView,
+      payload.legalActions,
+    );
+    if (!nextAccessAction) return;
+    continuation.nextAccessSubmitted = true;
+    if (!submitAction(nextAccessAction))
+      continuation.nextAccessSubmitted = false;
+  }, [
+    connection,
+    latestAccessRevealEvent?.eventId,
+    payload?.legalActions,
+    payload?.playerView,
+    session,
+  ]);
 
   useEffect(() => {
     if (!paymentSupportPreselection) return;
@@ -7499,7 +7557,23 @@ export default function Page() {
                 displayMode={cardDisplayMode}
                 disabled={matchEnded || connection !== "online"}
                 damageImpact={accessDamageImpact}
-                onAction={submitAction}
+                onAction={(action) => {
+                  const breach = payload?.playerView.run?.breach;
+                  const continueAccess = shouldKeepAccessRevealOpen(
+                    action,
+                    accessReveal.hasMoreAccesses,
+                  );
+                  const submitted = submitAction(action);
+                  if (submitted && continueAccess && breach && payload) {
+                    pendingAccessContinuationRef.current = {
+                      accessEventId: accessReveal.eventId,
+                      breachId: breach.breachId,
+                      fromStateVersion: payload.playerView.stateVersion,
+                      nextAccessSubmitted: false,
+                    };
+                  }
+                  return submitted;
+                }}
                 onChoiceOption={submitChoiceOption}
                 onDamageDismiss={() => setCurrentDamageImpact(null)}
                 onDismiss={() =>

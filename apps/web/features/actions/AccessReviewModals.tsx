@@ -1,10 +1,4 @@
-import {
-  Award as AgendaIcon,
-  Check,
-  Eye,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Award as AgendaIcon, Check, Eye, Trash2, X } from "lucide-react";
 import type { LegalAction, Side, VisibleChoiceRequest } from "@netgrid/shared";
 import type { DamageImpactCue } from "../../app/action-cues";
 import type { AccessPresentationOutcomeKind } from "../../app/access-presentation";
@@ -13,6 +7,7 @@ import {
   accessDecisionDisplayLabel,
   accessDecisionLabel,
   accessRevealActionGroups,
+  shouldKeepAccessRevealOpen,
 } from "../../app/access-reveal-ui";
 import { interactionAmbienceClassName } from "../../app/action-board-ui";
 import { CardView } from "../cards/CardView";
@@ -41,6 +36,8 @@ export type AccessReveal = {
   serverLocationPhrase: string;
   description: string;
   progressStatus?: string;
+  accessSourceLabel?: string;
+  hasMoreAccesses?: boolean;
   card?: DisplayVisibleCard;
   revealedCards?: DisplayVisibleCard[];
   actions: LegalAction[];
@@ -78,7 +75,7 @@ export function AccessRevealModal({
   displayMode: CardDisplayMode;
   disabled: boolean;
   damageImpact?: DamageImpactCue | null;
-  onAction(action: LegalAction): void;
+  onAction(action: LegalAction): boolean | void;
   onChoiceOption?: (
     action: LegalAction,
     choiceId: string,
@@ -105,7 +102,12 @@ export function AccessRevealModal({
     .filter(Boolean)
     .join(" ");
   const runAction = (action: LegalAction) => {
-    onAction(action);
+    const submitted = onAction(action);
+    if (
+      submitted !== false &&
+      shouldKeepAccessRevealOpen(action, reveal.hasMoreAccesses)
+    )
+      return;
     onDismiss();
   };
   const runChoiceOption = (selectedOptionId: string) => {
@@ -137,7 +139,7 @@ export function AccessRevealModal({
         ? "HQ Reveal"
         : isSecurityPurgeReveal
           ? "R&D Reveal"
-          : reveal.progressStatus ?? "Zugriff";
+          : (reveal.progressStatus ?? "Zugriff");
   const visibleRevealedCards = reveal.revealedCards ?? [];
   const singleRevealedCard =
     visibleRevealedCards.length === 1 ? visibleRevealedCards[0] : null;
@@ -165,6 +167,9 @@ export function AccessRevealModal({
           <div className="accessRevealHeadingText">
             <p className="eyebrow">{eyebrow}</p>
             <h2 id="access-reveal-title">{title}</h2>
+            {reveal.accessSourceLabel ? (
+              <p className="accessRevealSource">{reveal.accessSourceLabel}</p>
+            ) : null}
             <p>{reveal.description}</p>
           </div>
           <div className="accessRevealHeaderActions">
@@ -181,10 +186,7 @@ export function AccessRevealModal({
           </div>
         </div>
         {visibleRevealedCards.length > 1 ? (
-          <div
-            className="exposeReviewCards"
-            data-testid={revealedCardsTestId}
-          >
+          <div className="exposeReviewCards" data-testid={revealedCardsTestId}>
             {visibleRevealedCards.map((card, index) => (
               <div
                 className="exposeReviewCard"
@@ -258,80 +260,95 @@ export function AccessRevealModal({
                 ) : null}
                 <p className="accessRevealStatus">{statusText}</p>
                 <div className="accessRevealActions">
-              {choiceOptions.length > 0
-                ? choiceOptions.map((option) => (
+                  {choiceOptions.length > 0
+                    ? choiceOptions.map((option) => (
+                        <button
+                          className="button accessRevealActionButton primary"
+                          key={option.id}
+                          onClick={() => runChoiceOption(option.id)}
+                          disabled={disabled || !onChoiceOption}
+                          type="button"
+                          data-testid={`gypsy-rd-reveal-choice-${option.id}`}
+                        >
+                          {option.id === "reveal_next" ? (
+                            <Eye size={15} />
+                          ) : (
+                            <Check size={15} />
+                          )}
+                          <span className="accessRevealActionLabel">
+                            {option.label}
+                          </span>
+                        </button>
+                      ))
+                    : primaryActions.map((action) => {
+                        const label = accessDecisionLabel(
+                          action,
+                          reveal.serverLabel,
+                          {
+                            cardType: reveal.card?.type,
+                            hasMoreAccesses: reveal.hasMoreAccesses,
+                          },
+                        );
+                        const displayLabel = accessDecisionDisplayLabel(
+                          action,
+                          reveal.serverLabel,
+                          {
+                            cardType: reveal.card?.type,
+                            hasMoreAccesses: reveal.hasMoreAccesses,
+                          },
+                        );
+                        return (
+                          <button
+                            className={`button accessRevealActionButton primary ${action.type === "trash_accessed_card" || action.type === "trash_resource" ? "dangerButton" : ""}`}
+                            key={action.actionId}
+                            onClick={() => runAction(action)}
+                            disabled={disabled}
+                            aria-label={label}
+                            title={label}
+                          >
+                            {action.type === "trash_accessed_card" ||
+                            action.type === "trash_resource" ? (
+                              <Trash2 size={15} />
+                            ) : (
+                              <AgendaIcon size={15} />
+                            )}
+                            <span className="accessRevealActionLabel">
+                              {displayLabel}
+                            </span>
+                            <CostChips action={action} />
+                          </button>
+                        );
+                      })}
+                  {choiceOptions.length === 0 && declineAction ? (
                     <button
-                      className="button accessRevealActionButton primary"
-                      key={option.id}
-                      onClick={() => runChoiceOption(option.id)}
-                      disabled={disabled || !onChoiceOption}
-                      type="button"
-                      data-testid={`gypsy-rd-reveal-choice-${option.id}`}
+                      className="button accessRevealActionButton"
+                      onClick={() => runAction(declineAction)}
+                      disabled={disabled}
                     >
-                      {option.id === "reveal_next" ? (
-                        <Eye size={15} />
-                      ) : (
-                        <Check size={15} />
-                      )}
+                      <Check size={15} />
                       <span className="accessRevealActionLabel">
-                        {option.label}
+                        {accessDecisionLabel(
+                          declineAction,
+                          reveal.serverLabel,
+                          {
+                            cardType: reveal.card?.type,
+                            hasMoreAccesses: reveal.hasMoreAccesses,
+                          },
+                        )}
                       </span>
                     </button>
-                  ))
-                : primaryActions.map((action) => {
-                    const label = accessDecisionLabel(
-                      action,
-                      reveal.serverLabel,
-                    );
-                    const displayLabel = accessDecisionDisplayLabel(
-                      action,
-                      reveal.serverLabel,
-                    );
-                    return (
-                      <button
-                        className={`button accessRevealActionButton primary ${action.type === "trash_accessed_card" || action.type === "trash_resource" ? "dangerButton" : ""}`}
-                        key={action.actionId}
-                        onClick={() => runAction(action)}
-                        disabled={disabled}
-                        aria-label={label}
-                        title={label}
-                      >
-                        {action.type === "trash_accessed_card" ||
-                        action.type === "trash_resource" ? (
-                          <Trash2 size={15} />
-                        ) : (
-                          <AgendaIcon size={15} />
-                        )}
-                        <span className="accessRevealActionLabel">
-                          {displayLabel}
-                        </span>
-                        <CostChips action={action} />
-                      </button>
-                    );
-                  })}
-              {choiceOptions.length === 0 && declineAction ? (
-                <button
-                  className="button accessRevealActionButton"
-                  onClick={() => runAction(declineAction)}
-                  disabled={disabled}
-                >
-                  <Check size={15} />
-                  <span className="accessRevealActionLabel">
-                    {accessDecisionLabel(declineAction, reveal.serverLabel)}
-                  </span>
-                </button>
-              ) : null}
-              {choiceOptions.length === 0 && reveal.actions.length === 0 ? (
-                <button
-                  className="button accessRevealActionButton"
-                  onClick={onDismiss}
-                >
-                  <Check size={15} />
-                  <span className="accessRevealActionLabel">
-                    {reveal.dismissLabel ?? "OK"}
-                  </span>
-                </button>
-              ) : null}
+                  ) : null}
+                  {choiceOptions.length === 0 && reveal.actions.length === 0 ? (
+                    <button
+                      className="button accessRevealActionButton"
+                      onClick={onDismiss}
+                    >
+                      <Check size={15} />
+                      <span className="accessRevealActionLabel">
+                        {reveal.dismissLabel ?? "OK"}
+                      </span>
+                    </button>
+                  ) : null}
                 </div>
               </>
             )}
@@ -363,7 +380,8 @@ function AccessDamageStage({
       <strong className="accessDamageTitle">{typeLabel}</strong>
       <p className="accessRevealStatus">{damageSentence}</p>
       <div className="accessDamageStats">
-        {cue.runnerGripBefore !== undefined && cue.runnerGripAfter !== undefined ? (
+        {cue.runnerGripBefore !== undefined &&
+        cue.runnerGripAfter !== undefined ? (
           <span>
             Grip {cue.runnerGripBefore} -&gt; {cue.runnerGripAfter}
           </span>

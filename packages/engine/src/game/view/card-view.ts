@@ -1174,6 +1174,20 @@ function corpViewerCanSeeCorpCard(
   );
 }
 
+function runnerAccessedInstalledRootDuringCurrentBreach(
+  state: GameState,
+  id: CardInstanceId,
+  instance: CardInstance,
+): boolean {
+  if (instance.zone.side !== "corp" || instance.zone.zone !== "serverRoot")
+    return false;
+  return (
+    state.run?.breach?.queue.some(
+      (entry) => entry.cardInstanceId === id && entry.status !== "pending",
+    ) ?? false
+  );
+}
+
 export function visibleCorpCard(
   state: GameState,
   id: CardInstanceId,
@@ -1195,6 +1209,9 @@ export function visibleCorpCard(
   const viewedInstalledExposeCard =
     viewer === "runner" &&
     pendingInstalledCorpExposeReviewCardIds(state).has(id);
+  const accessedInstalledRootDuringBreach =
+    viewer === "runner" &&
+    runnerAccessedInstalledRootDuringCurrentBreach(state, id, instance);
   const privateRunnerRdAccess =
     viewer === "corp" &&
     accessed &&
@@ -1206,6 +1223,7 @@ export function visibleCorpCard(
     (!privateRunnerRdAccess &&
       (instance.faceup || instance.rezzed || exposedBySpyCounter)) ||
     (viewer === "runner" && accessed) ||
+    accessedInstalledRootDuringBreach ||
     viewedApproachedIce ||
     viewedInstalledExposeCard ||
     state.corp.scoreArea.includes(id) ||

@@ -96,6 +96,10 @@ export function accessRevealFromLatestEvent(
       accessOrigin,
     ),
     ...(progressStatus ? { progressStatus } : {}),
+    accessSourceLabel: accessSourceLabel(serverLabel, accessOrigin, card.type),
+    ...(accessHasMoreCandidates(event.publicPayload) !== null
+      ? { hasMoreAccesses: accessHasMoreCandidates(event.publicPayload)! }
+      : {}),
     card,
     actions,
     trashStatus:
@@ -183,6 +187,10 @@ export function accessRevealFromCurrentRun(
       accessOrigin,
     ),
     ...(progressStatus ? { progressStatus } : {}),
+    accessSourceLabel: accessSourceLabel(serverLabel, accessOrigin, card.type),
+    ...(view.run?.breach
+      ? { hasMoreAccesses: view.run.breach.remainingCount > 0 }
+      : {}),
     card,
     actions,
     trashStatus:
@@ -718,6 +726,46 @@ function accessProgressStatus(payload: Record<string, unknown>): string | null {
     return null;
   const accessNumber = Math.floor(accessIndex) + 1;
   return `Zugriff ${accessNumber} von ${Math.max(accessNumber, effectiveAccessCount)}`;
+}
+
+function accessHasMoreCandidates(
+  payload: Record<string, unknown>,
+): boolean | null {
+  const accessIndex = payloadNumber(payload, "accessIndex");
+  const effectiveAccessCount = payloadPositiveInteger(
+    payload,
+    "effectiveAccessCount",
+  );
+  if (
+    accessIndex === null ||
+    !Number.isInteger(accessIndex) ||
+    accessIndex < 0 ||
+    effectiveAccessCount === null
+  )
+    return null;
+  return accessIndex + 1 < effectiveAccessCount;
+}
+
+function accessSourceLabel(
+  serverLabel: string,
+  accessOrigin: AccessOrigin | null,
+  cardType: string | undefined,
+): string {
+  if (serverLabel === "HQ" && accessOrigin === "hq")
+    return "Zufällige HQ-Handkarte";
+  if (serverLabel === "HQ" && accessOrigin === "central_root")
+    return cardType === "upgrade"
+      ? "Installiertes HQ-Upgrade"
+      : "Installierte Karte im HQ-Root";
+  if (serverLabel === "R&D" && accessOrigin === "central_root")
+    return cardType === "upgrade"
+      ? "Installiertes R&D-Upgrade"
+      : "Installierte Karte im R&D-Root";
+  if (accessOrigin === "remote_root")
+    return `Installierte Karte in ${serverLabel}`;
+  if (accessOrigin === "rd") return "Oberste R&D-Karte";
+  if (accessOrigin === "archives") return "Archivkarte";
+  return `Karte aus ${serverLabel}`;
 }
 
 function accessRevealDescription(
