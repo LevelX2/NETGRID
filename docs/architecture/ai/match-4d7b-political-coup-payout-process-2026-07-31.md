@@ -1,6 +1,6 @@
 # Match 4D7B Political-Coup-Auszahlung – Umsetzungsprozess
 
-Status: Umsetzung und Verifikation abgeschlossen; lokale Integration ausstehend
+Status: abgeschlossen und lokal in `main` integriert
 Datum: 2026-07-31  
 Quelle: aktives Match `match_4d7bd0eba9138d83`, Decision 57,
 StateVersion 123
@@ -154,9 +154,11 @@ Sicherheits- oder Fachblocker.
 
 ## Verifikationsstand
 
-- P0 bis P4 abgeschlossen.
+- P0 bis P5 abgeschlossen.
 - Der Live-Checkpoint war vor dem Fix rot und ist einschließlich des
   Ein-Credit-Gegenfalls nach dem Fix grün.
 - Plans-, Runtime-, Checkpoint- und Drei-Shard-Gesamtlauf sind grün.
 - Final Review:
   `docs/reviews/ai/match-4d7b-political-coup-payout-final-review-2026-07-31.md`.
+- Arbeitsbranch wurde per Fast-Forward lokal nach `main` integriert; der
+  isolierte Worktree und Branch wurden nach der grünen Main-Prüfung entfernt.
