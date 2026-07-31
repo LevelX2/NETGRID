@@ -491,13 +491,21 @@ import {
   createAccountDeck,
   deleteAccountDeck,
   loadAccountDecks,
-  loadStandardDecks,
   snapshotAccountDeck,
   updateAccountDeck,
   type AccountDeck,
   type AccountDeckQuota,
   type StandardDeck,
 } from "../features/account/account-deck-client";
+import {
+  INITIAL_STANDARD_DECK_CATALOG_STATE,
+  beginStandardDeckCatalogLoad,
+  completeStandardDeckCatalogLoad,
+  failStandardDeckCatalogLoad,
+  requestStandardDeckCatalog,
+  standardDeckCatalogBlocksSources,
+  standardDeckCatalogDiagnostic,
+} from "../features/account/standard-deck-catalog-state";
 
 const APP_NAME = "NETGRID";
 const APP_STATUS_LABEL = NETGRID_APP_STATUS_LABEL;
@@ -705,6 +713,11 @@ export default function Page() {
     useState<AccountDeckQuota | null>(null);
   const [standardDecks, setStandardDecks] = useState<StandardDeck[]>([]);
   const [standardDecksLoaded, setStandardDecksLoaded] = useState(false);
+  const [standardDeckCatalogState, setStandardDeckCatalogState] = useState(
+    INITIAL_STANDARD_DECK_CATALOG_STATE,
+  );
+  const standardDeckCatalogRequestIdRef = useRef(0);
+  const standardDeckCatalogAttemptRef = useRef(0);
   const [accountDeckBusy, setAccountDeckBusy] = useState(false);
   const [savedDeckFingerprints, setSavedDeckFingerprints] = useState<
     Record<string, string>
@@ -1431,27 +1444,45 @@ export default function Page() {
     };
   }, [accountSession.status, accountSession.account?.accountId]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void loadStandardDecks()
+  const reloadStandardDeckCatalog = useCallback(() => {
+    const requestId = standardDeckCatalogRequestIdRef.current + 1;
+    standardDeckCatalogRequestIdRef.current = requestId;
+    const attempt = standardDeckCatalogAttemptRef.current + 1;
+    standardDeckCatalogAttemptRef.current = attempt;
+    setStandardDeckCatalogState((current) =>
+      beginStandardDeckCatalogLoad(current, attempt),
+    );
+    void requestStandardDeckCatalog()
       .then((data) => {
-        if (cancelled) return;
-        setStandardDecks(data.catalog.decks ?? []);
-        setDeckSnapshots(data.catalog.snapshots ?? []);
+        if (standardDeckCatalogRequestIdRef.current !== requestId) return;
+        setStandardDecks(data.catalog.decks);
+        setDeckSnapshots(data.catalog.snapshots);
+        setStandardDeckCatalogState((current) =>
+          completeStandardDeckCatalogLoad(current, new Date().toISOString()),
+        );
       })
-      .catch(() => {
-        if (!cancelled) {
-          setStandardDecks([]);
-          setDeckSnapshots([]);
-        }
+      .catch((error) => {
+        if (standardDeckCatalogRequestIdRef.current !== requestId) return;
+        const occurredAt = new Date().toISOString();
+        setStandardDeckCatalogState((current) =>
+          failStandardDeckCatalogLoad(
+            current,
+            standardDeckCatalogDiagnostic(error, attempt, occurredAt),
+          ),
+        );
       })
       .finally(() => {
-        if (!cancelled) setStandardDecksLoaded(true);
+        if (standardDeckCatalogRequestIdRef.current === requestId)
+          setStandardDecksLoaded(true);
       });
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  useEffect(() => {
+    reloadStandardDeckCatalog();
+    return () => {
+      standardDeckCatalogRequestIdRef.current += 1;
+    };
+  }, [reloadStandardDeckCatalog]);
 
   useEffect(() => {
     const firstRunner =
@@ -2428,6 +2459,17 @@ export default function Page() {
   const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
   const aiDeckPolicyUsesPrimaryDeckSlots =
     aiDeckPolicy === "selected" || aiDeckPolicy === "same_as_participant_a";
+  const standardDeckCatalogBlocksStart = standardDeckCatalogBlocksSources(
+    standardDeckCatalogState,
+    [
+      runnerDeckSource,
+      corpDeckSource,
+      ...((isHumanVsHuman && testSetupMode) ||
+      ((isHumanVsAi || isAiVsAiStartSeries) && aiDeckPolicy === "selected")
+        ? [participantBRunnerDeckSource, participantBCorpDeckSource]
+        : []),
+    ],
+  );
   const openLanJoinableIds = new Set(
     openLanMatches
       .filter((entry) => entry.status === "open")
@@ -3925,6 +3967,12 @@ export default function Page() {
 
   const createMatch = async () => {
     setNotice("");
+    if (standardDeckCatalogBlocksStart) {
+      setNotice(
+        "Standarddecks konnten nicht geladen werden. Wähle zwei persönliche Decks oder lade den Standarddeck-Katalog erneut.",
+      );
+      return;
+    }
     if (
       accountSession.account &&
       accountMatchStartPreferencesLoadedFor !== accountSession.account.accountId
@@ -6387,6 +6435,10 @@ export default function Page() {
                             runnerSnapshots={runnerSnapshots}
                             corpSnapshots={corpSnapshots}
                             localDecks={matchStartLocalDecks}
+                            standardDeckCatalogState={standardDeckCatalogState}
+                            standardDeckCatalogBlocksStart={
+                              standardDeckCatalogBlocksStart
+                            }
                             runnerDeckSource={runnerDeckSource}
                             corpDeckSource={corpDeckSource}
                             selectedRunnerSnapshotId={selectedRunnerSnapshotId}
@@ -6452,6 +6504,9 @@ export default function Page() {
                             }
                             onSelectedCorpLocalDeckId={
                               setSelectedCorpLocalDeckId
+                            }
+                            onReloadStandardDeckCatalog={
+                              reloadStandardDeckCatalog
                             }
                             onCreateMatch={createMatch}
                             onHumanSideSelection={setHumanSideSelection}

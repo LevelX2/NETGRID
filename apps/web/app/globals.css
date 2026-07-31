@@ -749,6 +749,69 @@ select {
   gap: 10px;
 }
 
+.standardDeckCatalogStatus {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--focus), var(--line) 42%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--focus), var(--panel) 92%);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.standardDeckCatalogStatus.error {
+  border-color: color-mix(in srgb, var(--danger), var(--line) 35%);
+  background: color-mix(in srgb, var(--danger), var(--panel) 92%);
+}
+
+.standardDeckCatalogStatusHeading,
+.standardDeckCatalogStatusActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.standardDeckCatalogStatus p,
+.standardDeckCatalogStatus small {
+  margin: 0;
+  color: var(--muted);
+}
+
+.standardDeckCatalogStatus details {
+  min-width: min(100%, 280px);
+}
+
+.standardDeckCatalogStatus summary {
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.standardDeckCatalogStatus dl {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0 0;
+}
+
+.standardDeckCatalogStatus dl div {
+  display: grid;
+  grid-template-columns: minmax(90px, auto) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.standardDeckCatalogStatus dt {
+  color: var(--muted);
+}
+
+.standardDeckCatalogStatus dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .matchStartConsole {
   display: grid;
   gap: 14px;
@@ -9653,6 +9716,36 @@ select {
   font-weight: 900;
   line-height: 1;
   text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
+  pointer-events: auto;
+  cursor: help;
+}
+
+.rovingSubmarineRunLockedBadge {
+  position: absolute;
+  right: 6px;
+  top: 54px;
+  z-index: 46;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(100% - 12px);
+  min-height: 20px;
+  padding: 2px 7px;
+  border: 1px solid rgb(240 177 93 / 0.88);
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    rgb(112 52 24 / 0.96),
+    rgb(48 28 28 / 0.97)
+  );
+  color: #ffe8bd;
+  box-shadow:
+    0 4px 9px rgb(0 0 0 / 0.36),
+    inset 0 1px 1px rgb(255 229 184 / 0.2);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.58);
   pointer-events: auto;
   cursor: help;
 }

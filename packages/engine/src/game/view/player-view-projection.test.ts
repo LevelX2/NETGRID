@@ -15,6 +15,8 @@ import {
   moveCorpCardToArchives,
   moveCorpCardToHq,
   moveRunnerCardToGrip,
+  ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
+  ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
   originalsetReorderCounterRunlockGame,
   putCorpIceOnServer,
   putCorpRootInRemote,
@@ -263,6 +265,57 @@ describe("PlayerView projection", () => {
     expect(JSON.stringify(runnerView.publicEvents)).not.toContain(
       "Simple Agenda",
     );
+  });
+
+  it("projects Roving Submarine as locked only while its rezzed run gate is closed", () => {
+    const state = createGameAfterSetup({
+      seed: "roving-submarine-run-lock-view",
+      runnerDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
+      corpDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
+    });
+    const rovingId = putCorpRootInRemote(state, "onr_v1_368_roving-submarine");
+    const roving = state.cardInstances[rovingId]!;
+    roving.rezzed = true;
+    roving.faceup = true;
+    roving.counters = {};
+
+    const lockedRunnerCard = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "remote_1")
+      ?.root.find((card) => card.instanceId === rovingId);
+    const lockedCorpCard = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "remote_1")
+      ?.root.find((card) => card.instanceId === rovingId);
+    expect(lockedRunnerCard?.counterDisplays).toEqual([
+      {
+        id: "roving_submarine_run_locked",
+        amount: 1,
+        displayKind: "generic_counter",
+        label: "Fort gesperrt",
+        ariaLabel:
+          "Roving Submarine: Dieses Fort ist derzeit gesperrt, weil die Korp im maßgeblichen letzten Korpzug keine Karte in oder vor diesem Fort installiert und dort keine Karte entwickelt hat.",
+        usageHint: "status_marker",
+      },
+    ]);
+    expect(lockedCorpCard?.counterDisplays).toEqual(
+      lockedRunnerCard?.counterDisplays,
+    );
+
+    roving.counters = { mark: 1 };
+    const allowedRunnerCard = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "remote_1")
+      ?.root.find((card) => card.instanceId === rovingId);
+    expect(allowedRunnerCard?.counterDisplays).toBeUndefined();
+    expect(JSON.stringify(allowedRunnerCard)).not.toContain("1 Mark");
+
+    roving.rezzed = false;
+    roving.faceup = false;
+    roving.counters = {};
+    const hiddenRunnerCard = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "remote_1")
+      ?.root.at(0);
+    expect(hiddenRunnerCard).toMatchObject({ known: false, rezzed: false });
+    expect(hiddenRunnerCard).not.toHaveProperty("title");
+    expect(hiddenRunnerCard).not.toHaveProperty("counterDisplays");
   });
 
   it.each([

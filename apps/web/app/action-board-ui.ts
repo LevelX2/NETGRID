@@ -666,6 +666,8 @@ export function counterDisplayTooltipText(
 ): string {
   const amount = safeCounterDisplayAmount(display.amount);
   const countLabel = `${amount} ${counterDisplayShortLabel(display.label)}`;
+  if (display.id === "roving_submarine_run_locked")
+    return "Roving Submarine: Dieses Fort ist derzeit gesperrt, weil die Korp im maßgeblichen letzten Korpzug keine Karte in oder vor diesem Fort installiert und dort keine Karte entwickelt hat. Nach einer passenden Installation oder Entwicklung im relevanten Korpzug ist der Run wieder erlaubt und der Badge verschwindet.";
   if (display.id === "pattel")
     return `Pattel’s Virus: Jeder Pattel-Counter reduziert die Stärke dieses ICE um 1. Die Pattel-Counter gelten technisch als Virus-Counter und werden durch Virus-Purge entfernt.`;
   switch (display.counterType) {
@@ -745,6 +747,17 @@ export function counterDisplayTooltipText(
         return `Virus-Counter: Kartenabhängiger Virus-Counter. Die konkrete Wirkung steht auf der Karte oder im aktuellen Run-Kontext. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
       return display.ariaLabel;
   }
+}
+
+export function cardSpecificCounterDisplayBadgePresentation(
+  display: NonNullable<VisibleCard["counterDisplays"]>[number],
+): { className: string; testId: string; text: string } | null {
+  if (display.id !== "roving_submarine_run_locked") return null;
+  return {
+    className: "rovingSubmarineRunLockedBadge",
+    testId: "roving-submarine-run-locked-badge",
+    text: "Fort gesperrt",
+  };
 }
 
 export function counterDisplaysForRendering(

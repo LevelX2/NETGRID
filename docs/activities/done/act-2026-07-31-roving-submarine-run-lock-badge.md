@@ -1,19 +1,35 @@
 ---
 activityId: act-2026-07-31-roving-submarine-run-lock-badge
-status: inbox
+status: done
 kind: fix
 area: ui
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-31
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-31
+completedAt: 2026-07-31
+branch: codex/activities-worktree-20260731-213714
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/view/card-view.ts
+  - packages/engine/src/game/view/player-view-projection.test.ts
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/action-board-ui.test.ts
+  - apps/web/features/cards/CardBadges.tsx
+  - apps/web/app/globals.css
+checks:
+  - engine-focused-9-tests-pass
+  - web-focused-121-tests-pass
+  - engine-full-1830-tests-pass
+  - web-full-740-tests-pass
+  - engine-typecheck-pass
+  - web-typecheck-pass
+  - engine-build-pass
+  - web-build-pass
+  - format-changed-pass
+  - git-diff-check-pass
 ---
 
 # Roving-Submarine-Run-Sperre verständlich anzeigen
@@ -61,8 +77,8 @@ Aktivität der Korp im maßgeblichen letzten Korpzug gefehlt hat.
   lesbar bleiben.
 - Einen zugänglichen Tooltip beziehungsweise Hilfetext anbieten, zum Beispiel:
   `Roving Submarine: Dieses Fort ist derzeit gesperrt, weil die Korp im
-  maßgeblichen letzten Korpzug keine Karte in oder vor diesem Fort installiert
-  und dort keine Karte entwickelt hat.`
+maßgeblichen letzten Korpzug keine Karte in oder vor diesem Fort installiert
+und dort keine Karte entwickelt hat.`
 - Im Tooltip zusätzlich positiv erklären, wann die Sperre entfällt: Nach einer
   passenden Installation oder Entwicklung im relevanten Korpzug ist der Run
   wieder erlaubt und der Badge verschwindet.
@@ -84,25 +100,25 @@ Aktivität der Korp im maßgeblichen letzten Korpzug gefehlt hat.
 
 ## Akzeptanzkriterien
 
-- [ ] Bei einer gerezzten `Roving Submarine` ohne erfüllte Korp-Aktivität zeigt
-  die bekannte Karte den Badge `Fort gesperrt`.
-- [ ] Der Tooltip erklärt verständlich, dass im relevanten letzten Korpzug
-  keine Karte in oder vor diesem Fort installiert und dort keine Karte
-  entwickelt wurde.
-- [ ] Sobald der bestehende Engine-Zustand den Run erlaubt, verschwindet der
-  Sperr-Badge; ein technischer `1 Mark`-Badge wird nicht ersatzweise gezeigt.
-- [ ] Badge und Tooltip behaupten nicht, dass das Fort gesperrt ist, wenn
-  `validateActivityGatedFortRun` beziehungsweise die zugehörige
-  LegalAction-Projektion den Run erlaubt.
-- [ ] Der Badge liegt sichtbar unterhalb der Namens-/Kostenzeile und überdeckt
-  weder Kartenname noch Rez-/Trashkosten in Bild-, Text- und Kompaktmodus.
-- [ ] Verdeckte beziehungsweise dem Betrachter nicht bekannte Korp-Karten
-  erhalten keinen kartenspezifischen Titel oder Sperrhinweis.
-- [ ] Engine-/PlayerView-Regressionen decken gesperrten und erlaubten Zustand
-  ab; Web-Regressionen decken Badge-Text, Tooltip, kartenspezifische CSS-Klasse
-  und das Unterdrücken des generischen Mark-Badges ab.
-- [ ] Relevante Engine- und Web-Tests, Typechecks sowie `format:changed` sind
-  erfolgreich.
+- [x] Bei einer gerezzten `Roving Submarine` ohne erfüllte Korp-Aktivität zeigt
+      die bekannte Karte den Badge `Fort gesperrt`.
+- [x] Der Tooltip erklärt verständlich, dass im relevanten letzten Korpzug
+      keine Karte in oder vor diesem Fort installiert und dort keine Karte
+      entwickelt wurde.
+- [x] Sobald der bestehende Engine-Zustand den Run erlaubt, verschwindet der
+      Sperr-Badge; ein technischer `1 Mark`-Badge wird nicht ersatzweise gezeigt.
+- [x] Badge und Tooltip behaupten nicht, dass das Fort gesperrt ist, wenn
+      `validateActivityGatedFortRun` beziehungsweise die zugehörige
+      LegalAction-Projektion den Run erlaubt.
+- [x] Der Badge liegt sichtbar unterhalb der Namens-/Kostenzeile und überdeckt
+      weder Kartenname noch Rez-/Trashkosten in Bild-, Text- und Kompaktmodus.
+- [x] Verdeckte beziehungsweise dem Betrachter nicht bekannte Korp-Karten
+      erhalten keinen kartenspezifischen Titel oder Sperrhinweis.
+- [x] Engine-/PlayerView-Regressionen decken gesperrten und erlaubten Zustand
+      ab; Web-Regressionen decken Badge-Text, Tooltip, kartenspezifische CSS-Klasse
+      und das Unterdrücken des generischen Mark-Badges ab.
+- [x] Relevante Engine- und Web-Tests, Typechecks sowie `format:changed` sind
+      erfolgreich.
 
 ## Umsetzungshinweise
 
@@ -126,4 +142,9 @@ Aktivität der Korp im maßgeblichen letzten Korpzug gefehlt hat.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die PlayerView projiziert für eine bekannte, gerezzte `Roving Submarine` nur
+dann einen kartenspezifischen Sperrstatus, wenn der bestehende Aktivitätsmarker
+fehlt. Der erlaubte Zustand unterdrückt den technischen `1 Mark`-Badge; eine
+verdeckte oder ungerezzte Karte erhält keine Sperrinformation. Der Webclient
+zeigt `Fort gesperrt` in einer eigenen Badge-Zeile unter Name und Kosten und
+erklärt Ursache sowie Aufhebung der Sperre im Tooltip.

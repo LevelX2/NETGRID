@@ -757,7 +757,36 @@ function specialCounterDisplays(
       counterType: "breaker_strength_penalty",
       usageHint: "status_marker",
     }),
-    ...singleCounterDisplay(counters.mark, markCounterDisplay),
+    ...markCounterDisplays(definition, instance, markCounterDisplay),
+  ];
+}
+
+function markCounterDisplays(
+  definition: CardDefinition,
+  instance: CardInstance,
+  markCounterDisplay: Parameters<typeof singleCounterDisplay>[1],
+): NonNullable<VisibleCard["counterDisplays"]> {
+  if (definition.id !== "onr_v1_368_roving-submarine") {
+    return singleCounterDisplay(instance.counters?.mark, markCounterDisplay);
+  }
+  if (
+    !instance.rezzed ||
+    instance.zone.side !== "corp" ||
+    instance.zone.zone !== "serverRoot" ||
+    Math.floor(instance.counters?.mark ?? 0) > 0
+  ) {
+    return [];
+  }
+  return [
+    {
+      id: "roving_submarine_run_locked",
+      amount: 1,
+      displayKind: "generic_counter",
+      label: "Fort gesperrt",
+      ariaLabel:
+        "Roving Submarine: Dieses Fort ist derzeit gesperrt, weil die Korp im maßgeblichen letzten Korpzug keine Karte in oder vor diesem Fort installiert und dort keine Karte entwickelt hat.",
+      usageHint: "status_marker",
+    },
   ];
 }
 

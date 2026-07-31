@@ -34,6 +34,7 @@ import {
   cardChoiceIsReadonlyPrivateLook,
   cardChoiceReadonlyConfirmationOptionId,
   cardCreditCounterVisual,
+  cardSpecificCounterDisplayBadgePresentation,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   choiceInteractionAmbience,
@@ -3026,6 +3027,27 @@ describe("V1.0.6 resource and card-display helpers", () => {
       }),
     ).toBe(
       "Project Zurich: 2 zusätzliche Credits zu Beginn jedes Corp-Zugs. Der Wert stammt aus den Overadvance-Countern beim Scoren.",
+    );
+  });
+
+  it("maps the Roving Submarine run lock to a dedicated readable badge", () => {
+    const display = {
+      id: "roving_submarine_run_locked",
+      amount: 1,
+      displayKind: "generic_counter" as const,
+      label: "Fort gesperrt",
+      ariaLabel:
+        "Roving Submarine: Dieses Fort ist derzeit gesperrt, weil die Korp im maßgeblichen letzten Korpzug keine Karte in oder vor diesem Fort installiert und dort keine Karte entwickelt hat.",
+      usageHint: "status_marker" as const,
+    };
+
+    expect(cardSpecificCounterDisplayBadgePresentation(display)).toEqual({
+      className: "rovingSubmarineRunLockedBadge",
+      testId: "roving-submarine-run-locked-badge",
+      text: "Fort gesperrt",
+    });
+    expect(counterDisplayTooltipText(display)).toBe(
+      "Roving Submarine: Dieses Fort ist derzeit gesperrt, weil die Korp im maßgeblichen letzten Korpzug keine Karte in oder vor diesem Fort installiert und dort keine Karte entwickelt hat. Nach einer passenden Installation oder Entwicklung im relevanten Korpzug ist der Run wieder erlaubt und der Badge verschwindet.",
     );
   });
 
