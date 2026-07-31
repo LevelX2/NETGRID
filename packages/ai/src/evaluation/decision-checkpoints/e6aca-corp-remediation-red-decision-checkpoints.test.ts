@@ -1,3 +1,4 @@
+import { hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
 import rezFreeEtrDecoyJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e6aca-01-rez-free-etr-decoy-d70.json";
@@ -13,14 +14,47 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("e6aca Corp remediation red decision checkpoints", () => {
   it.each([
-    ["rejects declining a free effective ETR in the decoy remote", rezFreeEtrDecoyJson],
-    ["continues the already started Zurich score line", continueZurichScoreJson],
-    ["rejects declining a free effective ETR over the agenda", rezFreeEtrAgendaJson],
-    ["activates installed BBS economy instead of drawing past it", activateBbsEconomyJson],
-    ["preserves the exact Accounts Receivable threshold", preserveAccountsThresholdJson],
-    ["owns the Vapor Ops install as a typed decoy route", bindVaporDecoyRouteJson],
-    ["does not drift away from the bound Venice score remote", preserveVeniceTargetJson],
-    ["prices an unfunded fifth R&D layer against its opportunity cost", avoidUnfundedRdOverstackJson],
+    [
+      "rejects declining a free effective ETR in the decoy remote",
+      rezFreeEtrDecoyJson,
+    ],
+    [
+      "rejects declining a free effective ETR over the agenda",
+      rezFreeEtrAgendaJson,
+    ],
+    [
+      "prices an unfunded fifth R&D layer against its opportunity cost",
+      avoidUnfundedRdOverstackJson,
+    ],
+    [
+      "preserves the exact Accounts Receivable threshold",
+      preserveAccountsThresholdJson,
+    ],
+  ])("passes the corrected defense behavior: %s", (_label, json) => {
+    const result = runAiDecisionCheckpoint(
+      structuredClone(json) as AiDecisionCheckpointV1,
+    );
+
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  });
+
+  it.each([
+    [
+      "continues the already started Zurich score line",
+      continueZurichScoreJson,
+    ],
+    [
+      "activates installed BBS economy instead of drawing past it",
+      activateBbsEconomyJson,
+    ],
+    [
+      "owns the Vapor Ops install as a typed decoy route",
+      bindVaporDecoyRouteJson,
+    ],
+    [
+      "does not drift away from the bound Venice score remote",
+      preserveVeniceTargetJson,
+    ],
   ])("captures the pre-fix behavior regression: %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(
       structuredClone(json) as AiDecisionCheckpointV1,
@@ -29,4 +63,65 @@ describe("e6aca Corp remediation red decision checkpoints", () => {
     expect(result.ok).toBe(false);
     expect(result.code).toBe("behavior_regression");
   });
+
+  it("still permits a funded fifth R&D layer", () => {
+    const checkpoint = mutateFixture(
+      avoidUnfundedRdOverstackJson,
+      (fixture) => {
+        fixture.engine.testOnlyGameState.corp.credits = 20;
+        fixture.expectation = {
+          acceptableActions: [
+            {
+              actionId:
+                "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+            },
+          ],
+        };
+      },
+    );
+
+    expectCheckpointToPass(checkpoint);
+  });
+
+  it("still permits an unfunded third layer as bounded staging", () => {
+    const checkpoint = mutateFixture(
+      avoidUnfundedRdOverstackJson,
+      (fixture) => {
+        const state = fixture.engine.testOnlyGameState;
+        const rd = state.corp.servers.find((server) => server.id === "rd");
+        if (!rd) throw new Error("Missing R&D server");
+        const movedIce = rd.ice.splice(2);
+        for (const cardId of movedIce) {
+          state.corp.archives.push(cardId);
+          state.cardInstances[cardId] = {
+            ...state.cardInstances[cardId]!,
+            zone: { side: "corp", zone: "archives" },
+            faceup: true,
+            rezzed: false,
+          };
+        }
+        fixture.expectation = {
+          acceptableActions: [{ type: "install_card", targetServerId: "rd" }],
+        };
+      },
+    );
+
+    expectCheckpointToPass(checkpoint);
+  });
 });
+
+function mutateFixture(
+  value: unknown,
+  mutation: (fixture: AiDecisionCheckpointV1) => void,
+): AiDecisionCheckpointV1 {
+  const fixture = structuredClone(value) as AiDecisionCheckpointV1;
+  mutation(fixture);
+  fixture.source.kind = "synthetic_companion";
+  fixture.engine.stateHash = hashGameState(fixture.engine.testOnlyGameState);
+  return fixture;
+}
+
+function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {
+  const result = runAiDecisionCheckpoint(checkpoint);
+  expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+}

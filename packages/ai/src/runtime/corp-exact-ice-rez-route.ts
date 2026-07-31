@@ -33,6 +33,7 @@ export type CorpExactIceRezRouteProjection = Readonly<{
     runnerBreakUses: number;
     runnerNormalCreditsRequired: number;
     runnerNonNormalRunCreditsApplied: number;
+    runnerNormalCreditsLostOnAccessPath: number;
     runnerBreakerInstanceId: string;
     runnerBreakerDefinitionId: string;
     runnerConsumedCardInstanceIds: readonly string[];
@@ -154,6 +155,7 @@ export function projectExactCorpIceRezRoute(params: {
           input,
           sourceCard,
           targetServerId,
+          before,
           after,
           totalRezCredits,
         })
@@ -311,12 +313,14 @@ function readExactCurrentRunResourceExchange(params: {
   input: AiDecisionInput;
   sourceCard: VisibleCard;
   targetServerId: string;
+  before: KnownCorpScoreProtectionAssessment;
   after: KnownCorpScoreProtectionAssessment;
   totalRezCredits: number;
 }):
   | NonNullable<CorpExactIceRezRouteProjection["resourceExchange"]>
   | undefined {
-  const { input, sourceCard, targetServerId, after, totalRezCredits } = params;
+  const { input, sourceCard, targetServerId, before, after, totalRezCredits } =
+    params;
   const quote = sourceCard.effectiveRezResourceExchangeQuote;
   if (
     quote?.context !== "installed" ||
@@ -340,11 +344,22 @@ function readExactCurrentRunResourceExchange(params: {
     quote.runnerBreak.canPayFromCurrentCredits !== true ||
     quote.runnerBreak.paymentEvidenceSource !== "engine_icebreaker_ability" ||
     !nonNegativeSafeInteger(input.playerView.opponent.credits) ||
-    after.runnerCreditsRemainingOnBestAccessPath !==
-      input.playerView.opponent.credits -
-        quote.runnerBreak.normalCreditsRequired ||
     (quote.runnerBreak.requiredCredits <= totalRezCredits &&
       quote.runnerBreak.consumedCards.length === 0)
+  ) {
+    return undefined;
+  }
+  // The Engine quote is exact for the currently approached ICE. The full
+  // access path may contain later ICE competing for the same recurring pool,
+  // so the current ICE's `normalCreditsRequired` is not necessarily the
+  // complete path delta. Compare the two exact path assessments instead of
+  // requiring an invalid single-ICE absolute balance.
+  const runnerNormalCreditsLostOnAccessPath =
+    before.runnerCreditsRemainingOnBestAccessPath -
+    after.runnerCreditsRemainingOnBestAccessPath;
+  if (
+    !nonNegativeSafeInteger(runnerNormalCreditsLostOnAccessPath) ||
+    runnerNormalCreditsLostOnAccessPath > quote.runnerBreak.requiredCredits
   ) {
     return undefined;
   }
@@ -370,6 +385,7 @@ function readExactCurrentRunResourceExchange(params: {
     runnerNormalCreditsRequired: quote.runnerBreak.normalCreditsRequired,
     runnerNonNormalRunCreditsApplied:
       quote.runnerBreak.nonNormalRunCreditsApplied,
+    runnerNormalCreditsLostOnAccessPath,
     runnerBreakerInstanceId: quote.runnerBreak.breakerCardId,
     runnerBreakerDefinitionId: quote.runnerBreak.breakerDefinitionId,
     runnerConsumedCardInstanceIds: consumedCardInstanceIds,

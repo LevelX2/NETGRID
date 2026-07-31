@@ -707,7 +707,14 @@ export function corpGlobalDefenseInstallRouteAssessment(
   const agendaCapacityDefenseProgress =
     agendaCapacityDefenseConversion &&
     projection.preservesReserves &&
-    sourceRezCredits !== undefined;
+    sourceRezCredits !== undefined &&
+    corpAgendaCapacityIceStagingHasProportionateOpportunityCost({
+      serverIce,
+      sourceRezCredits,
+      creditsAfterInstall,
+      projectedInstallCredits,
+      selectedCentralThreat,
+    });
   if (
     fundedStructuredCentralProgress ||
     scorelineCentralTaxProgress ||
@@ -745,6 +752,39 @@ export function corpGlobalDefenseInstallRouteAssessment(
         evidenceCode:
           "corp_ice_install_has_no_engine_certified_access_probability_reduction",
       };
+}
+
+/**
+ * Hand relief may justify staging ICE before it can be rezzed, especially for
+ * the first few layers. It is not, however, a blank cheque for spending the
+ * whole credit pool on another unfunded outer layer while several inner
+ * layers are still unrezzed. Exact access improvement remains admitted by the
+ * primary projection above; this only bounds the qualitative
+ * agenda-capacity conversion route.
+ */
+function corpAgendaCapacityIceStagingHasProportionateOpportunityCost(params: {
+  serverIce: readonly Readonly<{ rezzed?: boolean }>[];
+  sourceRezCredits: number;
+  creditsAfterInstall: number;
+  projectedInstallCredits: number;
+  selectedCentralThreat: string;
+}): boolean {
+  const rezFundingGap = Math.max(
+    0,
+    params.sourceRezCredits - params.creditsAfterInstall,
+  );
+  const unrezzedLayerCount = params.serverIce.filter(
+    (ice) => ice.rezzed === false,
+  ).length;
+
+  return (
+    rezFundingGap <= 3 ||
+    params.serverIce.length < 3 ||
+    params.projectedInstallCredits === 0 ||
+    ((params.selectedCentralThreat === "acute" ||
+      params.selectedCentralThreat === "terminal") &&
+      unrezzedLayerCount === 0)
+  );
 }
 
 function centralDefenseAllocationHasMaterialPressure(

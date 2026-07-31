@@ -361,6 +361,42 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
+  it("keeps a current exact exchange when a recurring credit shifts cash onto later ICE", () => {
+    const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
+      runnerCredits: 8,
+      runnerPrograms: ["onr_classic_031_rent-i-con", "onr_v1_035_invisibility"],
+      runnerProgramBitCounters: [0, 1],
+      futureIceDefinitionId: "onr_v1_261_quandary",
+      futureIceRezzed: true,
+    });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      runnerBreak: {
+        requiredCredits: 1,
+        normalCreditsRequired: 0,
+        nonNormalRunCreditsApplied: 1,
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "exact_resource_exchange",
+      resourceExchange: {
+        runnerRequiredCredits: 1,
+        runnerNormalCreditsRequired: 0,
+        runnerNonNormalRunCreditsApplied: 1,
+        runnerNormalCreditsLostOnAccessPath: 1,
+        runnerConsumedCardInstanceIds: ["exact_runner_program_0"],
+      },
+    });
+  });
+
   it("carries the chosen Filter/Rent-I-Con rez through the real Engine run and trashes the breaker", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
@@ -806,7 +842,9 @@ function engineIceRezWindow(
     runnerCredits?: number;
     runnerPrograms?: readonly string[];
     runnerProgramStrengthModifiers?: readonly number[];
+    runnerProgramBitCounters?: readonly number[];
     futureIceDefinitionId?: string;
+    futureIceRezzed?: boolean;
   },
 ) {
   let state = createGameAfterSetup({
@@ -830,14 +868,23 @@ function engineIceRezWindow(
       runnerProgram,
       options?.runnerProgramStrengthModifiers?.[index] ?? 0,
     );
+    const bitCounters = options?.runnerProgramBitCounters?.[index] ?? 0;
+    if (bitCounters > 0) {
+      state.cardInstances[
+        `exact_runner_program_${index}` as CardInstanceId
+      ]!.counters = { bit: bitCounters };
+    }
   }
   if (options?.futureIceDefinitionId) {
-    addUnrezzedIce(
-      state,
-      `exact_future_ice_${agendaPoints}` as CardInstanceId,
-      options.futureIceDefinitionId,
-      "rd",
-    );
+    const futureIceId = `exact_future_ice_${agendaPoints}` as CardInstanceId;
+    addUnrezzedIce(state, futureIceId, options.futureIceDefinitionId, "rd");
+    if (options.futureIceRezzed) {
+      state.cardInstances[futureIceId] = {
+        ...state.cardInstances[futureIceId]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
   }
   addUnrezzedIce(state, iceId, definitionId, "rd");
   const startRun = getLegalActions(state, "runner").find(
