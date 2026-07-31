@@ -10597,6 +10597,18 @@ select {
   line-height: 1.12;
 }
 
+.accessRevealHeader .accessRevealSource {
+  width: fit-content;
+  margin: 7px 0 0;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, transparent);
+  border-radius: 999px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .accessRevealHeader p:last-child {
   margin: 5px 0 0;
   color: var(--muted);

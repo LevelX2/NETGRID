@@ -14,7 +14,10 @@ import {
   type RunnerAccessActionHost,
 } from "./access-actions";
 
-function demoDefinition(type: CardDefinition["type"], trashCost?: number): CardDefinition {
+function demoDefinition(
+  type: CardDefinition["type"],
+  trashCost?: number,
+): CardDefinition {
   const found = Object.values(CARD_DEFINITIONS_BY_ID).find(
     (candidate) => candidate.type === type,
   );
@@ -41,16 +44,20 @@ function instance(
   } as unknown as CardInstance;
 }
 
-function makeHost(overrides: {
-  accessedCardId?: string;
-  cardType?: CardDefinition["type"];
-  trashCost?: number;
-  serverId?: string;
-  breach?: NonNullable<GameState["run"]>["breach"];
-  corpArchives?: string[];
-  runnerCredits?: number;
-  purgeableCorpCounters?: NonNullable<GameState["purgeableRunnerVirusCounters"]>["corp"];
-} = {}): RunnerAccessActionHost {
+function makeHost(
+  overrides: {
+    accessedCardId?: string;
+    cardType?: CardDefinition["type"];
+    trashCost?: number;
+    serverId?: string;
+    breach?: NonNullable<GameState["run"]>["breach"];
+    corpArchives?: string[];
+    runnerCredits?: number;
+    purgeableCorpCounters?: NonNullable<
+      GameState["purgeableRunnerVirusCounters"]
+    >["corp"];
+  } = {},
+): RunnerAccessActionHost {
   const serverId = overrides.serverId ?? "remote_1";
   const cardType = overrides.cardType ?? "asset";
   const definitions: Record<string, CardDefinition> = {
@@ -72,7 +79,11 @@ function makeHost(overrides: {
       accessedDefinition.id,
       overrides.corpArchives?.includes(cardId)
         ? { side: "corp", zone: "archives" }
-        : ({ side: "corp", zone: "serverRoot", serverId } as CardInstance["zone"]),
+        : ({
+            side: "corp",
+            zone: "serverRoot",
+            serverId,
+          } as CardInstance["zone"]),
     ),
   };
   const servers: CorpServer[] = [
@@ -96,7 +107,11 @@ function makeHost(overrides: {
     },
     cardInstances,
     ...(overrides.purgeableCorpCounters
-      ? { purgeableRunnerVirusCounters: { corp: overrides.purgeableCorpCounters } }
+      ? {
+          purgeableRunnerVirusCounters: {
+            corp: overrides.purgeableCorpCounters,
+          },
+        }
       : {}),
     run:
       overrides.accessedCardId === undefined && !overrides.breach
@@ -120,7 +135,8 @@ function makeHost(overrides: {
         const found = Object.values(definitions).find(
           (candidate) => candidate.id === instance.definitionId,
         );
-        if (!found) throw new Error(`missing definition ${instance.definitionId}`);
+        if (!found)
+          throw new Error(`missing definition ${instance.definitionId}`);
         return found;
       },
       cardInstanceFor: (lookupId) => cardInstances[lookupId]!,
@@ -174,8 +190,66 @@ describe("access action generation", () => {
 
     expect(accessActions.map((action) => action.type)).toEqual(["access_card"]);
     expect(accessActions[0]!.actionId).toBe("runner.access_card");
-    expect(finishActions.map((action) => action.type)).toEqual(["continue_run"]);
+    expect(finishActions.map((action) => action.type)).toEqual([
+      "continue_run",
+    ]);
     expect(finishActions[0]!.actionId).toBe("runner.continue_run");
+  });
+
+  it("offers only the next access between breach candidates", () => {
+    const host = makeHost({
+      breach: {
+        breachId: "breach_1",
+        serverId: "hq",
+        accessMode: "multi",
+        completed: false,
+        accessedSummaries: [
+          {
+            entryId: "entry_0",
+            status: "declined",
+            cardDefinitionId: "simple_upgrade",
+          },
+        ],
+        currentIndex: 1,
+        queue: [
+          {
+            entryId: "entry_0",
+            serverId: "hq",
+            cardInstanceId: "previous_card",
+            status: "declined",
+            zone: "remote_root",
+            hiddenInfo: true,
+          },
+          {
+            entryId: "entry_1",
+            serverId: "hq",
+            cardInstanceId: "next_card",
+            status: "pending",
+            zone: "hq",
+            hiddenInfo: true,
+          },
+        ],
+      } as NonNullable<GameState["run"]>["breach"],
+    });
+    host.callbacks.successfulRunProgramActions = () => {
+      throw new Error(
+        "successful-run actions must not reopen between accesses",
+      );
+    };
+    host.callbacks.runnerDuringRunCardImplementationLegalActions = () => {
+      throw new Error("during-run actions must not open between accesses");
+    };
+    host.callbacks.hiddenStackInstallRunActions = () => {
+      throw new Error("hidden-stack actions must not open between accesses");
+    };
+
+    expect(buildRunnerAccessActions(host).legalActions).toMatchObject([
+      {
+        actionId: "runner.access_card",
+        type: "access_card",
+        source: "game_rule",
+      },
+    ]);
   });
 
   it("keeps normal R&D access legal when Armageddon offers its optional replacement", () => {
@@ -229,7 +303,9 @@ describe("access action generation", () => {
       actionId: "runner.steal_agenda.agenda",
     });
     expect(agendaActions[0]!.payload).toBeUndefined();
-    expect(assetActions.some((action) => action.type === "steal_agenda")).toBe(false);
+    expect(assetActions.some((action) => action.type === "steal_agenda")).toBe(
+      false,
+    );
   });
 
   it("builds stable trash and decline actions for trashable accessed cards", () => {

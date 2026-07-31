@@ -326,7 +326,7 @@ describe("access flow execution", () => {
       stateChanged: true,
     });
     expect(state.run?.accessedCardId).toBe("asset");
-    expect(state.cardInstances.asset!.faceup).toBe(true);
+    expect(state.cardInstances.asset!.faceup).toBe(false);
     expect(effects).toEqual(["asset"]);
     expect(legalAction.payload).toMatchObject({
       accessedCardId: "asset",
@@ -393,6 +393,7 @@ describe("access flow execution", () => {
       source: "run",
     } as unknown as LegalAction;
     handleAccessExecution(host, rootAction);
+    expect(state.cardInstances.hq_root!.faceup).toBe(false);
     expect(rootAction.payload).toMatchObject({
       serverId: "hq",
       accessIndex: 0,

@@ -1,19 +1,26 @@
 ---
 activityId: act-2026-07-31-breach-between-access-timing-contract
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-31
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-31
+completedAt: 2026-07-31
+branch: codex/activities-worktree-20260731-203648
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/access/access-actions.ts
+  - packages/engine/src/game/access/access-actions.test.ts
+  - packages/engine/src/game/view/player-view-projection.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/access/access-actions.test.ts src/game/view/player-view-projection.test.ts src/index-tests/mechanics/hidden-zone-identity.test.ts src/index-tests/originalset/agenda-scorearea-recurring.test.ts src/index-tests/proteus/hidden-resource-hardening.test.ts
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/engine test
+  - corepack pnpm format:changed
 ---
 
 # Timingvertrag zwischen zwei Access-Kandidaten härten
@@ -89,24 +96,24 @@ entstehen.
 
 ## Akzeptanzkriterien
 
-- [ ] Nach Abschluss eines nichtletzten Accesses enthält der lineare
+- [x] Nach Abschluss eines nichtletzten Accesses enthält der lineare
       Zwischenzustand keine allgemeine `during_run`-, Hidden-Stack-Install-,
       Korp-Rez- oder Korp-During-Run-Action ohne exakte Timinggrundlage.
-- [ ] `Self-Modifying Code`, Mystery Box und mindestens eine weitere
+- [x] `Self-Modifying Code`, Mystery Box und mindestens eine weitere
       `during_run`-Familie besitzen positive Tests in einem echten
       Paid-Ability-Fenster und negative Tests zwischen zwei Accesses.
-- [ ] Zugriffseffekte, Ambush-/Prevention-Choices und regelkonforme Reactions
+- [x] Zugriffseffekte, Ambush-/Prevention-Choices und regelkonforme Reactions
       werden vollständig aufgelöst und nicht von einer automatischen
       Fortsetzung übersprungen.
-- [ ] Der normale Multiaccess-Fall liefert nach aktualisierter StateVersion
+- [x] Der normale Multiaccess-Fall liefert nach aktualisierter StateVersion
       genau die nächste `access_card`-LegalAction; nach dem letzten Kandidaten
       wird der Breach deterministisch beendet.
-- [ ] Falsche Side, stale `actionId`/`stateVersion` und eine nicht zur
+- [x] Falsche Side, stale `actionId`/`stateVersion` und eine nicht zur
       aktuellen Queue-Position gehörende Access-Action werden weiterhin von
       `applyAction` abgelehnt.
-- [ ] Künftige HQ-/R&D-Kandidaten bleiben bis zu ihrem tatsächlichen Access
+- [x] Künftige HQ-/R&D-Kandidaten bleiben bis zu ihrem tatsächlichen Access
       in PlayerViews, PublicEvents, Reconnect und Chronik verborgen.
-- [ ] Replay und StateHash bleiben für Single-, Multiaccess- und
+- [x] Replay und StateHash bleiben für Single-, Multiaccess- und
       unterbrochene Access-Fälle deterministisch.
 
 ## Umsetzungshinweise
@@ -126,4 +133,12 @@ entstehen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die Engine erkennt den Zustand zwischen zwei Breach-Kandidaten nun explizit
+an der fortgeschrittenen Queue. Dort wird ausschließlich die nächste
+`access_card`-LegalAction erzeugt; Successful-Run-, allgemeine `during_run`-
+und Hidden-Stack-Actions werden nicht erneut abgefragt. Korp-Aktionen bleiben
+am Timingpunkt `access.resolve_card` leer. Pending Choices und Reactions
+werden weiterhin vor diesem Builder aufgelöst. Positive Paid-Window-Tests für
+Self-Modifying Code, Mystery Box und Airport Locker bleiben grün; der neue
+Multiaccess-Test deckt die negative Zwischenphase, Hidden Info, falsche Side,
+stale StateVersion, Replay und StateHash ab.

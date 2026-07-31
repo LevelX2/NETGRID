@@ -75,6 +75,19 @@ export function buildRunnerAccessActions(
 ): RunnerAccessActionBuildResult {
   if (!host.state.run) return { handled: false, legalActions: [] };
   const run = host.state.run;
+  if (isBetweenBreachAccesses(run)) {
+    return {
+      handled: true,
+      legalActions: [
+        host.actions.buildLegalAction(
+          "runner",
+          "access_card",
+          "Karte accessen",
+          "game_rule",
+        ),
+      ],
+    };
+  }
   const successfulRunActions = host.callbacks.successfulRunProgramActions(run);
   if (successfulRunActions.length > 0) {
     const armageddonAccessReplacement = successfulRunActions.some(
@@ -142,7 +155,12 @@ export function buildRunnerAccessActions(
     const accessReplacement = agendaAccessReplacementForDefinition(definition);
     if (accessReplacement?.kind === "install_as_runner_program") {
       const legalActions: LegalAction[] = [];
-      if (runnerAgendaProgramInstallMemoryReachable(host, accessReplacement.memoryCost)) {
+      if (
+        runnerAgendaProgramInstallMemoryReachable(
+          host,
+          accessReplacement.memoryCost,
+        )
+      ) {
         legalActions.push(
           host.actions.buildLegalAction(
             "runner",
@@ -182,27 +200,29 @@ export function buildRunnerAccessActions(
       definition,
     );
     if (stealCostQuote.totalCost > 0) {
+      const declineStealAction = host.actions.buildLegalAction(
+        "runner",
+        "decline_trash",
+        `${definition.title} nicht stehlen`,
+        "game_rule",
+        [],
+        {
+          cardId: run.accessedCardId,
+          ...stealCostQuote.publicPayload,
+        },
+      );
       if (
         host.state.runner.credits +
           runnerCostPenaltySupportCreditCapacity(host.state) <
         stealCostQuote.totalCost
       ) {
+        declineStealAction.payload = {
+          ...(declineStealAction.payload ?? {}),
+          stealBlockedByCost: true,
+        };
         return {
           handled: true,
-          legalActions: [
-            host.actions.buildLegalAction(
-              "runner",
-              "decline_trash",
-              `${definition.title} nicht stehlen`,
-              "game_rule",
-              [],
-              {
-                cardId: run.accessedCardId,
-                ...stealCostQuote.publicPayload,
-                stealBlockedByCost: true,
-              },
-            ),
-          ],
+          legalActions: [declineStealAction],
         };
       }
       return {
@@ -219,6 +239,7 @@ export function buildRunnerAccessActions(
               ...stealCostQuote.publicPayload,
             },
           ),
+          declineStealAction,
         ],
       };
     }
@@ -307,8 +328,7 @@ export function buildRunnerAccessActions(
             ...(upgradeTrashRecurringCreditsAvailable > 0 &&
             definition.type === "upgrade"
               ? {
-                  v1922RunnerProgramAbility:
-                    "upgrade_trash_recurring_credit",
+                  v1922RunnerProgramAbility: "upgrade_trash_recurring_credit",
                   upgradeTrashRecurringCreditsAvailable,
                 }
               : {}),
@@ -397,12 +417,15 @@ function runnerAgendaProgramInstallMemoryReachable(
   });
 }
 
-function agendaAccessReplacementForDefinition(definition: CardDefinition):
+function agendaAccessReplacementForDefinition(
+  definition: CardDefinition,
+):
   | NonNullable<
       ReturnType<typeof cardImplementationForDefinitionId>
     >["agendaAccessReplacement"]
   | undefined {
-  return cardImplementationForDefinitionId(definition.id)?.agendaAccessReplacement;
+  return cardImplementationForDefinitionId(definition.id)
+    ?.agendaAccessReplacement;
 }
 
 function hiddenResourceCurrentAccessTrashActions(
@@ -418,8 +441,9 @@ function hiddenResourceCurrentAccessTrashActions(
     .sort()
     .flatMap((sourceCardId) => {
       const sourceDefinition = host.cards.definitionFor(sourceCardId);
-      const utility =
-        cardImplementationForDefinitionId(sourceDefinition.id)?.runnerUtilityLongtail;
+      const utility = cardImplementationForDefinitionId(
+        sourceDefinition.id,
+      )?.runnerUtilityLongtail;
       if (utility?.kind !== "hidden_resource_current_access_free_trash")
         return [];
       if (utility.cost.kind !== "credit_and_trash_source") return [];
@@ -454,7 +478,8 @@ export function canFreeTrashCurrentAccessCard(
   run: ActiveRun,
   definition: CardDefinition,
 ): boolean {
-  return freeTrashAccessSourceForCurrentAccessCard(host, run, definition).enabled;
+  return freeTrashAccessSourceForCurrentAccessCard(host, run, definition)
+    .enabled;
 }
 
 export function freeTrashAccessSourceForCurrentAccessCard(
@@ -512,7 +537,12 @@ export function effectiveAccessTrashCost(
     zone.zone === "serverRoot" &&
     (definition.type === "asset" || definition.type === "upgrade")
   ) {
-    const quote = quoteAccessTrashCost(host.state, cardId, definition, baseCost);
+    const quote = quoteAccessTrashCost(
+      host.state,
+      cardId,
+      definition,
+      baseCost,
+    );
     return {
       ...quote,
       sourceDefinitionIds: quote.modifiers.map(
@@ -571,6 +601,15 @@ function hasPendingAccessCandidate(
   if (server.id === "hq") return host.state.corp.hq.length > 0;
   if (server.id === "archives") return host.state.corp.archives.length > 0;
   return server.root.length > 0;
+}
+
+function isBetweenBreachAccesses(run: ActiveRun): boolean {
+  if (run.accessedCardId || !run.breach) return false;
+  const { currentIndex, queue } = run.breach;
+  if (queue[currentIndex]?.status !== "pending") return false;
+  return queue
+    .slice(0, currentIndex)
+    .some((entry) => entry.status !== "pending");
 }
 
 function isCurrentAccessFromArchives(

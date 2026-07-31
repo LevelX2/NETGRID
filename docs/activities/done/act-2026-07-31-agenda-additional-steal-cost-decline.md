@@ -1,19 +1,26 @@
 ---
 activityId: act-2026-07-31-agenda-additional-steal-cost-decline
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-31
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-31
+completedAt: 2026-07-31
+branch: codex/activities-worktree-20260731-203648
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/access/access-actions.ts
+  - packages/engine/src/index-tests/proteus/agenda-suite.test.ts
+  - packages/engine/src/index-tests/mechanics/assets-nodes-upgrades.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/agenda-suite.test.ts src/index-tests/mechanics/assets-nodes-upgrades.test.ts src/game/access/access-actions.test.ts
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/engine test
+  - corepack pnpm format:changed
 ---
 
 # Zusätzliche Agenda-Stehlkosten ablehnen können
@@ -72,20 +79,20 @@ zu stehlen.
 
 ## Akzeptanzkriterien
 
-- [ ] Bei bezahlbaren zusätzlichen Stehlkosten sind Stehlen und Ablehnen als
+- [x] Bei bezahlbaren zusätzlichen Stehlkosten sind Stehlen und Ablehnen als
       getrennte LegalActions verfügbar.
-- [ ] Das Ablehnen zieht keine Credits oder sonstigen Zahlungscounter ein,
+- [x] Das Ablehnen zieht keine Credits oder sonstigen Zahlungscounter ein,
       verschiebt die Agenda nicht und setzt den Breach korrekt fort.
-- [ ] Bei unbezahlbaren zusätzlichen Kosten ist kein illegaler Steal
+- [x] Bei unbezahlbaren zusätzlichen Kosten ist kein illegaler Steal
       verfügbar; bei null Zusatzkosten ist kein freiwilliges Ablehnen
       verfügbar.
-- [ ] Mehrere gleichzeitige zusätzliche Kosten werden als eine aktuelle,
+- [x] Mehrere gleichzeitige zusätzliche Kosten werden als eine aktuelle,
       atomare Kostenquote behandelt.
-- [ ] Stale-, Wrong-Side-, falsche Agenda-, falsche Access-Origin- und
+- [x] Stale-, Wrong-Side-, falsche Agenda-, falsche Access-Origin- und
       veränderte Kostenfälle werden von `applyAction` abgelehnt.
-- [ ] PlayerViews und PublicEvents offenbaren keine verdeckten
+- [x] PlayerViews und PublicEvents offenbaren keine verdeckten
       Stehlkostenquellen vor deren regelgerechter Sichtbarkeit.
-- [ ] Replay, StateHash, Multiaccess und Siegprüfung bleiben deterministisch
+- [x] Replay, StateHash, Multiaccess und Siegprüfung bleiben deterministisch
       und durch fokussierte Regressionen abgesichert.
 
 ## Umsetzungshinweise
@@ -102,4 +109,11 @@ zu stehlen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Bei jeder positiven zusätzlichen Agenda-Stehlkostenquote erzeugt die Engine
+nun eine eigene `decline_trash`-LegalAction mit derselben atomaren Kostenquote
+wie die Stehlaktion. Ist die Quote bezahlbar, stehen Stehlen und Ablehnen zur
+Wahl; ist sie unbezahlbar, bleibt ausschließlich der Ablehnen-Pfad. Kostenlose
+Agendas bleiben verpflichtend zu stehlen. Fetal AI, Red Herrings und deren
+kombinierte Quote sichern Selbstkosten, servergebundene Kosten, Stale-
+Revalidierung, kostenfreies Ablehnen, Multiaccess-Fortsetzung sowie Replay und
+StateHash ab.

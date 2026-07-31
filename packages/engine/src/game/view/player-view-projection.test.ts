@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyAction,
   createGameAfterSetup,
   DEMO_DECKS,
+  getLegalActions,
   getPlayerView,
   hashState,
   replayEvents,
@@ -363,13 +365,64 @@ describe("PlayerView projection", () => {
     ).not.toContain("simple_upgrade");
 
     state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(
+      getPlayerView(state, "runner").servers.find(
+        (server) => server.id === "remote_1",
+      )?.root[0],
+    ).toMatchObject({
+      instanceId: firstUpgradeId,
+      known: true,
+      definitionId: "simple_upgrade",
+      rezzed: false,
+    });
+    expect(state.cardInstances[firstUpgradeId]?.faceup).toBe(false);
     state = apply(state, "runner", (action) => action.type === "decline_trash");
+    const runnerRemoteBetweenAccesses = getPlayerView(
+      state,
+      "runner",
+    ).servers.find((server) => server.id === "remote_1");
+    expect(runnerRemoteBetweenAccesses?.root[0]).toMatchObject({
+      instanceId: firstUpgradeId,
+      known: true,
+      definitionId: "simple_upgrade",
+      rezzed: false,
+    });
+    expect(runnerRemoteBetweenAccesses?.root[2]).toMatchObject({
+      known: false,
+      rezzed: false,
+    });
+    const betweenAccessActions = getLegalActions(state, "runner");
+    expect(betweenAccessActions.map((action) => action.type)).toEqual([
+      "access_card",
+    ]);
+    expect(getLegalActions(state, "corp")).toEqual([]);
+    const staleAccess = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: betweenAccessActions[0]!.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "remote-root-between-access-stale",
+    });
+    expect(staleAccess.ok).toBe(false);
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "runner", (action) => action.type === "decline_trash");
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "runner", (action) => action.type === "decline_trash");
 
     expect(state.run).toBeUndefined();
+    const runnerRemoteAfter = getPlayerView(state, "runner").servers.find(
+      (server) => server.id === "remote_1",
+    );
+    expect(runnerRemoteAfter?.root[0]).toMatchObject({
+      known: false,
+      rezzed: false,
+    });
+    expect(runnerRemoteAfter?.root[2]).toMatchObject({
+      known: false,
+      rezzed: false,
+    });
+    expect(state.cardInstances[firstUpgradeId]?.faceup).toBe(false);
+    expect(state.cardInstances[secondUpgradeId]?.faceup).toBe(false);
     const accessEvents = state.eventLog
       .slice(replayStart)
       .filter((event) => event.publicPayload.actionType === "access_card");

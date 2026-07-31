@@ -1,20 +1,30 @@
 ---
 activityId: act-2026-07-31-hq-multiaccess-dialog-clarity
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-31
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-31
+completedAt: 2026-07-31
+branch: codex/activities-worktree-20260731-203648
 releaseTarget:
 blockedBy:
   - act-2026-07-31-breach-between-access-timing-contract
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/access-reveal-ui.ts
+  - apps/web/features/actions/access-review-derivation.ts
+  - apps/web/features/actions/AccessReviewModals.tsx
+  - apps/web/app/page.tsx
+  - apps/web/app/globals.css
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/access-reveal-ui.test.ts app/access-review-derivation.test.ts app/access-presentation-queue.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/web test
+  - corepack pnpm --filter @netgrid/web build
+  - corepack pnpm format:changed
 ---
 
 # HQ-Mehrfachzugriff im Zugriffsfenster klar führen
@@ -60,7 +70,7 @@ abschließt oder den gesamten Breach beendet.
   HQ-Handkarten offenzulegen.
 - Die Ablehnen-Aktion für Assets und Upgrades kontextgerecht beschriften:
   - bei weiteren Kandidaten beispielsweise `Nicht trashen – weiter zur
-    nächsten Karte`;
+nächsten Karte`;
   - beim letzten Kandidaten beispielsweise `Nicht trashen – Zugriff beenden`.
 - `HQ-Zugriff abschließen` aus dem kartenbezogenen Entscheidungsfenster
   entfernen.
@@ -92,28 +102,28 @@ abschließt oder den gesamten Breach beendet.
 
 ## Akzeptanzkriterien
 
-- [ ] Ein HQ-Breach mit einer Handkarte und mehreren Root-Upgrades zeigt für
+- [x] Ein HQ-Breach mit einer Handkarte und mehreren Root-Upgrades zeigt für
       jede aktuelle Karte ihre korrekte Quelle und einen verständlichen
       Fortschritt.
-- [ ] Solange weitere Kandidaten existieren, klingt die Ablehnen-Aktion nicht
+- [x] Solange weitere Kandidaten existieren, klingt die Ablehnen-Aktion nicht
       nach Ende des Runs oder des gesamten Breaches.
-- [ ] Beim letzten Kandidaten ist erkennbar, dass nur der Zugriffsvorgang
+- [x] Beim letzten Kandidaten ist erkennbar, dass nur der Zugriffsvorgang
       beendet wird; die Formulierung behauptet kein vorzeitiges Run-Ende.
-- [ ] Im linearen Mehrfachzugriff führt ein Klick auf `Nicht trashen – nächste
-      Karte` nach der Serverbestätigung zur nächsten Karte im selben Dialog;
+- [x] Im linearen Mehrfachzugriff führt ein Klick auf `Nicht trashen – nächste
+Karte` nach der Serverbestätigung zur nächsten Karte im selben Dialog;
       es gibt keinen Rücksprung zur allgemeinen Run-Aktionsfläche und keinen
       zweiten Klick auf `Zugriff auf Karte`.
-- [ ] Die Fortsetzung verwendet ausschließlich die nach dem ersten
+- [x] Die Fortsetzung verwendet ausschließlich die nach dem ersten
       `applyAction` neu bestätigte `access_card`-LegalAction mit aktueller
       `actionId` und `stateVersion`.
-- [ ] Wenn statt der nächsten Access-Action eine echte Zwischenentscheidung
+- [x] Wenn statt der nächsten Access-Action eine echte Zwischenentscheidung
       legal wird, zeigt derselbe Dialog diese Entscheidung und setzt erst
       danach fort.
-- [ ] Remote-, R&D- und Archiv-Zugriffe behalten passende, nicht irreführende
+- [x] Remote-, R&D- und Archiv-Zugriffe behalten passende, nicht irreführende
       Beschriftungen.
-- [ ] UI-Regressionen decken nichtfinalen und finalen `decline_trash`, HQ-
+- [x] UI-Regressionen decken nichtfinalen und finalen `decline_trash`, HQ-
       Handkarte, HQ-Root-Upgrade und die fehlende nächste Access-Action ab.
-- [ ] LegalActions, Hidden-Info-Projektion, PublicEvents, Replay und StateHash
+- [x] LegalActions, Hidden-Info-Projektion, PublicEvents, Replay und StateHash
       bleiben unverändert.
 
 ## Umsetzungshinweise
@@ -133,4 +143,13 @@ abschließt oder den gesamten Breach beendet.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Das Zugriffsfenster weist die aktuelle Quelle nun ausdrücklich als zufällige
+HQ-Handkarte oder installiertes HQ-Upgrade aus und kombiniert sie mit dem
+autoritativen Fortschritt. Ablehnen heißt bei weiteren Kandidaten
+`Nicht trashen – nächste Karte`, beim letzten Kandidaten
+`Nicht trashen – Zugriff beenden`; der irreführende Text
+`HQ-Zugriff abschließen` entfällt. Nach jeder fortsetzenden Kartenentscheidung
+bleibt das Fenster offen. Der Client wartet auf einen höheren StateVersion-
+Stand desselben Breaches und reicht nur dann automatisch weiter, wenn exakt
+eine neue `access_card`-LegalAction vorliegt. Choices, Reactions und fehlende
+Fortsetzungsaktionen werden nicht übersprungen.
