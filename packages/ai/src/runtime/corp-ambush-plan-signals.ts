@@ -3,9 +3,11 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-modules";
+import { readCorpCounterBankPreparationQuote } from "../plans/corp-counter-bank-score-plan";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
+import { assessBestFundedCorpScoreProtection } from "./corp-funded-score-protection";
 
 export const CORP_AMBUSH_COMMITMENT_VERSION =
   "corp_ambush_commitment_v1" as const;
@@ -24,6 +26,10 @@ export function buildCorpAmbushPlanSignals(params: {
   if (!strategicIntent || !corpIntentSupportsAmbush(strategicIntent)) {
     return continued;
   }
+  const plannedDecoys = scoreDecoySignals({
+    ...params,
+    continuedSourceIds,
+  });
   const planned = params.input.playerView.own.gripOrHq.flatMap(
     (source): CorpAmbushSignal[] => {
       if (
@@ -58,7 +64,161 @@ export function buildCorpAmbushPlanSignals(params: {
     },
   );
 
-  return [...continued, ...planned];
+  return [...continued, ...plannedDecoys, ...planned];
+}
+
+function scoreDecoySignals(params: {
+  input: AiDecisionInput;
+  candidates: readonly ActionSemanticCandidate[];
+  continuedSourceIds: ReadonlySet<string>;
+}): CorpAmbushSignal[] {
+  if (params.input.playerView.own.clicks < 2) return [];
+  const followupAgenda = params.input.playerView.own.gripOrHq
+    .filter(
+      (card) =>
+        card.known === true &&
+        card.type === "agenda" &&
+        card.definitionId !== undefined,
+    )
+    .sort(
+      (left, right) =>
+        (left.advancementRequirement ?? Number.MAX_SAFE_INTEGER) -
+          (right.advancementRequirement ?? Number.MAX_SAFE_INTEGER) ||
+        (right.agendaPoints ?? 0) - (left.agendaPoints ?? 0) ||
+        left.instanceId.localeCompare(right.instanceId),
+    )[0];
+  if (!followupAgenda) return [];
+
+  return params.input.playerView.own.gripOrHq.flatMap(
+    (source): CorpAmbushSignal[] => {
+      if (
+        params.continuedSourceIds.has(source.instanceId) ||
+        source.known !== true ||
+        !source.definitionId ||
+        !readCorpCounterBankPreparationQuote(params.input, source, "corp_hq")
+      ) {
+        return [];
+      }
+      const routes = params.candidates
+        .filter(
+          (candidate) =>
+            candidate.semanticActionType === "install.card" &&
+            candidate.sourceCardInstanceId === source.instanceId,
+        )
+        .flatMap((candidate) => {
+          const serverId = candidateTargetIds(candidate).find((target) =>
+            target.startsWith("remote_"),
+          );
+          const server = params.input.playerView.servers.find(
+            (entry) => entry.id === serverId,
+          );
+          const action = params.input.legalActions.find(
+            (legalAction) =>
+              legalAction.actionId === candidate.actionId &&
+              legalAction.side === "corp" &&
+              legalAction.type === "install_card" &&
+              legalAction.payload?.placement === "root" &&
+              legalAction.payload.serverId === serverId,
+          );
+          const creditCost = action
+            ? exactLegalActionCreditCost(action)
+            : undefined;
+          if (
+            !serverId ||
+            !server ||
+            server.root.length > 0 ||
+            server.ice.length === 0 ||
+            creditCost === undefined ||
+            creditCost > params.input.playerView.own.credits - 1
+          ) {
+            return [];
+          }
+          const protection = assessBestFundedCorpScoreProtection({
+            serverIce: server.ice,
+            runnerRig: params.input.playerView.opponent.rig ?? [],
+            runnerSetAside:
+              params.input.playerView.specialZones?.setAside ?? [],
+            ...(params.input.playerView.opponent.memoryUsed !== undefined
+              ? {
+                  runnerMemoryUsed: params.input.playerView.opponent.memoryUsed,
+                }
+              : {}),
+            ...(params.input.playerView.opponent.memoryLimit !== undefined
+              ? {
+                  runnerMemoryLimit:
+                    params.input.playerView.opponent.memoryLimit,
+                }
+              : {}),
+            runnerCredits: params.input.playerView.opponent.credits,
+            targetServerId: server.id,
+            observedAtStateVersion: params.input.playerView.stateVersion,
+            availableCorpCredits: params.input.playerView.own.credits,
+            availableCorpClicks: params.input.playerView.own.clicks,
+            scoreReserve: { creditBreakdown: [], hardClickReserve: 0 },
+            maximumRunnerAccessSuccessProbability: {
+              numerator: 1,
+              denominator: 2,
+            },
+          });
+          if (
+            protection.knowledge !== "known" ||
+            protection.protection.runnerAccessSuccessProbability.numerator === 0
+          ) {
+            return [];
+          }
+          return [
+            {
+              candidate,
+              serverId,
+              creditCost,
+              value:
+                140 +
+                Math.min(3, server.ice.length) * 10 +
+                Math.min(
+                  20,
+                  protection.protection.runnerCreditsRemainingOnBestAccessPath,
+                ),
+            },
+          ];
+        })
+        .sort(
+          (left, right) =>
+            right.value - left.value ||
+            left.serverId.localeCompare(right.serverId) ||
+            left.candidate.actionId.localeCompare(right.candidate.actionId),
+        );
+      const selected = routes[0];
+      if (!selected) return [];
+      return [
+        {
+          commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
+          ambushId: `score-decoy:${source.instanceId}:${selected.serverId}:${followupAgenda.instanceId}`,
+          sourceDefinitionId: source.definitionId,
+          sourceInstanceId: source.instanceId,
+          actionIds: [selected.candidate.actionId],
+          serverId: selected.serverId,
+          phase: "install",
+          patternKind: "score_decoy",
+          followupAgendaInstanceId: followupAgenda.instanceId,
+          runnerCreditsAtPlanStart: params.input.playerView.opponent.credits,
+          purposeCode: `establish_score_decoy_then_reassess_followup:${followupAgenda.instanceId}:${selected.serverId}`,
+          assignedDomainPlanIds: ["corp.ambush_bluff"],
+          duplicateAlreadyInstalled: false,
+          affordableOrSupportable: true,
+          plannedAtStateVersion: params.input.playerView.stateVersion,
+          plannedAdvancementTarget: 1,
+          value: selected.value,
+          evidenceCode: `corp_score_decoy_preplanned_exact_install:${source.instanceId}:${selected.serverId}:${followupAgenda.instanceId}`,
+          installRoute: {
+            actionId: selected.candidate.actionId,
+            creditCost: selected.creditCost,
+            fundingGap: 0,
+            costSource: "legal_action",
+          },
+        },
+      ];
+    },
+  );
 }
 
 function visibleGripAmbushSignal(

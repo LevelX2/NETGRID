@@ -1,4 +1,7 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import {
+  CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
+  type AiDecisionInput,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
@@ -85,6 +88,108 @@ describe("Corp ambush plan signal duplicate scope", () => {
         title: "TRAP!",
       });
     }
+  });
+
+  it("qualifies an Engine-quoted contestable counter bank as a generic score decoy", () => {
+    const counterBank = visibleCard(
+      "synthetic-counter-bank-1",
+      "corp",
+      "asset",
+      {
+        definitionId: "synthetic_counter_bank",
+        advancementCounters: 0,
+        counterBankPreparationQuote: {
+          schemaVersion: CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
+          context: "corp_counter_bank_preparation",
+          sourceCardId: "synthetic-counter-bank-1",
+          expiresAtStateVersion: 1,
+          location: { kind: "corp_hq" },
+          advancementCounters: 0,
+          advanceableBeforeRez: true,
+          activatedAbilitiesRequireRez: true,
+          cashout: {
+            advancementCounterCost: 1,
+            creditGain: 1,
+            actionCost: 0,
+          },
+          transfer: {
+            actionCost: 1,
+            minimumSourceCounters: 1,
+            source: "source_card",
+            target: "chosen_installed_advanceable_card",
+            maximum: "all",
+          },
+        },
+      },
+    );
+    const agenda = visibleCard("followup-agenda-1", "corp", "agenda", {
+      definitionId: "simple_agenda",
+      advancementRequirement: 3,
+      agendaPoints: 2,
+    });
+    const install = legalAction(
+      "install-synthetic-counter-bank-remote-1",
+      "corp",
+      "install_card",
+      "Install the quoted counter bank",
+      { credits: 0, clicks: 1 },
+      {
+        source: counterBank.instanceId,
+        payload: {
+          cardId: counterBank.instanceId,
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const input = aiInput("corp", [install]);
+    input.playerView.own.gripOrHq = [counterBank, agenda];
+    input.playerView.opponent.credits = 4;
+    input.playerView.opponent.rig = [
+      visibleCard("generic-breaker-1", "runner", "program", {
+        definitionId: "onr_classic_031_rent-i-con",
+        subtypes: ["icebreaker"],
+        strength: 2,
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-code-gate-1", "corp", "ice", {
+          definitionId: "onr_v1_261_quandary",
+          rezzed: true,
+          subtypes: ["code_gate"],
+          strength: 2,
+        }),
+      ]),
+    ];
+    setAmbushIntent(input);
+
+    expect(
+      buildCorpAmbushPlanSignals({
+        input,
+        candidates: [
+          ambushInstallCandidate(
+            install.actionId,
+            counterBank.instanceId,
+            counterBank.definitionId!,
+            "remote_1",
+          ),
+        ],
+        previous: undefined,
+      }),
+    ).toContainEqual(
+      expect.objectContaining({
+        patternKind: "score_decoy",
+        sourceInstanceId: counterBank.instanceId,
+        followupAgendaInstanceId: agenda.instanceId,
+        serverId: "remote_1",
+        actionIds: [install.actionId],
+        plannedAdvancementTarget: 1,
+      }),
+    );
   });
 });
 

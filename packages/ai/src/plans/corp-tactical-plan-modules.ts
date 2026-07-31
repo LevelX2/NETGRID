@@ -76,6 +76,9 @@ export type CorpAmbushSignal = {
   actionIds: string[];
   serverId: string;
   phase: "install" | "advance" | "trigger";
+  patternKind?: "access_ambush" | "score_decoy";
+  followupAgendaInstanceId?: string;
+  runnerCreditsAtPlanStart?: number;
   purposeCode?: string;
   assignedDomainPlanIds: string[];
   duplicateAlreadyInstalled: boolean;
@@ -553,11 +556,12 @@ function ambushModule(): PlanModule {
           return [rootProposal];
         }
         const setupNeedId = ambushSetupNeedId(signal);
+        const setupPriority = ambushSetupPriority(signal);
         const setupProposal = proposal(
           "corp.ambush_and_bluff",
           `${signal.ambushId}:setup:${signal.serverId}`,
           { kind: "ambush_setup", signal } satisfies AmbushState,
-          "P5",
+          setupPriority,
           ambushCandidates(context, signal),
           `${signal.evidenceCode}:${admission.reasonCode}`,
           { kind: "server", id: signal.serverId },
@@ -577,7 +581,7 @@ function ambushModule(): PlanModule {
       if (current.kind === "ambush_setup") {
         return assessment(
           instance,
-          "P5",
+          ambushSetupPriority(current.signal),
           ambushCandidates(context, current.signal).length > 0,
           current.signal.value,
           portfolio.executorInstanceId,
@@ -607,7 +611,9 @@ function ambushModule(): PlanModule {
           }`,
           capability: {
             capabilityId: isSetup
-              ? "ambush_setup"
+              ? current.signal.patternKind === "score_decoy"
+                ? "decoy_setup"
+                : "ambush_setup"
               : `ambush_${current.signal.phase}`,
             semanticActionTypes: ambushSemanticTypes(current.signal.phase),
             requiredSourceDefinitionIds: [current.signal.sourceDefinitionId],
@@ -631,6 +637,10 @@ function ambushPriority(signal: CorpAmbushSignal): "P3" | "P4" | "P5" {
   if (signal.phase === "trigger") return "P3";
   if (signal.phase === "advance") return "P4";
   return "P5";
+}
+
+function ambushSetupPriority(signal: CorpAmbushSignal): "P4" | "P5" {
+  return signal.patternKind === "score_decoy" ? "P4" : "P5";
 }
 
 function ambushRootResourceGaps(signal: CorpAmbushSignal): ResourceGap[] {

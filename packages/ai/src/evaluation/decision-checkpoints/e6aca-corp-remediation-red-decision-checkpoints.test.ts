@@ -30,6 +30,18 @@ describe("e6aca Corp remediation red decision checkpoints", () => {
       "preserves the exact Accounts Receivable threshold",
       preserveAccountsThresholdJson,
     ],
+    [
+      "continues the already started Zurich score line",
+      continueZurichScoreJson,
+    ],
+    [
+      "owns the Vapor Ops install as a typed decoy route",
+      bindVaporDecoyRouteJson,
+    ],
+    [
+      "does not drift away from the bound Venice score remote",
+      preserveVeniceTargetJson,
+    ],
   ])("passes the corrected defense behavior: %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(
       structuredClone(json) as AiDecisionCheckpointV1,
@@ -40,20 +52,8 @@ describe("e6aca Corp remediation red decision checkpoints", () => {
 
   it.each([
     [
-      "continues the already started Zurich score line",
-      continueZurichScoreJson,
-    ],
-    [
       "activates installed BBS economy instead of drawing past it",
       activateBbsEconomyJson,
-    ],
-    [
-      "owns the Vapor Ops install as a typed decoy route",
-      bindVaporDecoyRouteJson,
-    ],
-    [
-      "does not drift away from the bound Venice score remote",
-      preserveVeniceTargetJson,
     ],
   ])("captures the pre-fix behavior regression: %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(

@@ -83,6 +83,7 @@ export type CorpMissingConcreteScoreDefenseDrawNeedInput = Readonly<{
   drawActionProjection: CorpScoreDefenseDrawActionProjection;
   attemptState: CorpScoreDefenseDrawAttemptState;
   agendaCapacityDefenseConversionAvailable?: boolean;
+  deterministicParentContinuationActionId?: string;
 }>;
 
 export function corpMissingConcreteScoreDefenseDrawNeed(
@@ -142,6 +143,23 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
     protectionNeed.baseline.availableCorpCredits !==
       input.playerView.own.credits ||
     protectionNeed.baseline.availableCorpClicks !== clicks
+  ) {
+    return undefined;
+  }
+  const deterministicParentContinuation =
+    args.deterministicParentContinuationActionId === undefined
+      ? undefined
+      : input.legalActions.find(
+          (candidate) =>
+            candidate.actionId ===
+              args.deterministicParentContinuationActionId &&
+            candidate.side === "corp" &&
+            candidate.type === "advance_card" &&
+            candidate.expiresAtStateVersion === stateVersion,
+        );
+  if (
+    deterministicParentContinuation &&
+    clicks <= drawActionProjection.clickCost + hardClickReserve
   ) {
     return undefined;
   }

@@ -7279,10 +7279,13 @@ function buildCorpDomain(
       };
     },
   );
+  const targetBoundScoreProjects = bindScoreInstallVariantsToBestServer(
+    concreteScoreProjects,
+  );
   const residentPreparedScoreProject =
     residentScoreAgendaInstanceId === undefined
       ? undefined
-      : concreteScoreProjects.find(
+      : targetBoundScoreProjects.find(
           (project) =>
             project.agendaInstanceId === residentScoreAgendaInstanceId &&
             project.phase === "install_agenda" &&
@@ -7291,7 +7294,7 @@ function buildCorpDomain(
             project.feasible,
         );
   const continuityBoundScoreProjects = residentPreparedScoreProject
-    ? concreteScoreProjects.map((project) =>
+    ? targetBoundScoreProjects.map((project) =>
         project.phase === "install_agenda" &&
         project.serverId === residentPreparedScoreProject.serverId &&
         project.agendaInstanceId !== residentScoreAgendaInstanceId
@@ -7302,7 +7305,7 @@ function buildCorpDomain(
             }
           : project,
       )
-    : concreteScoreProjects;
+    : targetBoundScoreProjects;
   const scoreMaterialMissing =
     ownAgendas === 0 &&
     continuityBoundScoreProjects.length === 0 &&
@@ -7554,6 +7557,18 @@ function buildCorpDomain(
               netHandDelta: netHandDelta!,
             } as const)
           : ({ knowledge: "unknown" as const } as const);
+      const deterministicParentContinuationActionId =
+        project.phase === "advance_agenda"
+          ? project.actionIds?.find((actionId) =>
+              input.legalActions.some(
+                (legalAction) =>
+                  legalAction.actionId === actionId &&
+                  legalAction.type === "advance_card" &&
+                  legalAction.expiresAtStateVersion ===
+                    input.playerView.stateVersion,
+              ),
+            )
+          : undefined;
       const need = corpMissingConcreteScoreDefenseDrawNeed({
         input,
         action,
@@ -7561,6 +7576,11 @@ function buildCorpDomain(
         directInstallRouteState: scan.directInstallRouteState,
         drawActionProjection,
         agendaCapacityDefenseConversionAvailable,
+        ...(deterministicParentContinuationActionId
+          ? {
+              deterministicParentContinuationActionId,
+            }
+          : {}),
         attemptState: {
           residentAttemptedThisTurn: residentDrawAttempt !== undefined,
           eventTailAttemptedThisTurn: eventDrawAttempted,
@@ -9303,6 +9323,53 @@ function corpScoreProjectAssessmentIsUnknown(
       "corp_score_protection_assessment_unknown:",
     ) || project.protectionNeed?.baseline.knowledge === "unknown"
   );
+}
+
+/**
+ * Server choices are variants of one agenda install, not independent score
+ * campaigns. Compare them once and expose only the best current binding to the
+ * scheduler. A later state change performs a normal replan and may choose a
+ * different server; within the current state defense support cannot drift to
+ * a sibling target merely because that sibling has a convenient ICE action.
+ */
+function bindScoreInstallVariantsToBestServer(
+  projects: readonly CorpScoreProjectSignal[],
+): CorpScoreProjectSignal[] {
+  const selectedByAgenda = new Map<string, CorpScoreProjectSignal>();
+  for (const project of projects) {
+    if (
+      project.phase !== "install_agenda" ||
+      !project.agendaInstanceId ||
+      !project.serverId
+    ) {
+      continue;
+    }
+    const current = selectedByAgenda.get(project.agendaInstanceId);
+    if (!current || compareScoreInstallVariants(project, current) < 0) {
+      selectedByAgenda.set(project.agendaInstanceId, project);
+    }
+  }
+  return projects.filter((project) => {
+    if (
+      project.phase !== "install_agenda" ||
+      !project.agendaInstanceId ||
+      !project.serverId
+    ) {
+      return true;
+    }
+    return selectedByAgenda.get(project.agendaInstanceId) === project;
+  });
+}
+
+function compareScoreInstallVariants(
+  left: CorpScoreProjectSignal,
+  right: CorpScoreProjectSignal,
+): number {
+  if (left.feasible !== right.feasible) return left.feasible ? -1 : 1;
+  if ((left.serverId === "new_remote") !== (right.serverId === "new_remote")) {
+    return left.serverId === "new_remote" ? 1 : -1;
+  }
+  return compareCorpScoreProtectionProjects(left, right);
 }
 
 function compareCorpScoreProtectionProjects(

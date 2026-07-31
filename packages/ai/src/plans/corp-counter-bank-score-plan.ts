@@ -39,8 +39,10 @@ export function corpCounterBankScoreProjects(
 
 /**
  * A counter-bank quote means this card must never be treated as an arbitrary
- * one-click HQ-overflow conversion. Its installation is owned exclusively by
- * the score plan above.
+ * one-click HQ-overflow conversion. Its mechanical build and transfer route
+ * belongs to the score plan; a separately qualified bluff/decoy proposal may
+ * offer the same exact install to the conductor without duplicating those
+ * mechanics.
  */
 export function isQuotedCorpCounterBankInHq(
   input: AiDecisionInput,
@@ -48,7 +50,7 @@ export function isQuotedCorpCounterBankInHq(
 ): boolean {
   return (
     card !== undefined &&
-    counterBankQuoteForCard(input, card, "corp_hq") !== undefined
+    readCorpCounterBankPreparationQuote(input, card, "corp_hq") !== undefined
   );
 }
 
@@ -61,7 +63,7 @@ function counterBankInstallProjects(
   const counterTarget = counterBankTargetFromKnownDeck(input);
   if (counterTarget === undefined) return [];
   return input.playerView.own.gripOrHq.flatMap((card) => {
-    const quote = counterBankQuoteForCard(input, card, "corp_hq");
+    const quote = readCorpCounterBankPreparationQuote(input, card, "corp_hq");
     if (!quote || !card.definitionId) return [];
     return candidates.flatMap((candidate) => {
       const serverId = exactRootInstallTarget(
@@ -375,7 +377,7 @@ function counterBankProject(params: {
 function installedCounterBanks(input: AiDecisionInput): InstalledCounterBank[] {
   return input.playerView.servers.flatMap((server) =>
     server.root.flatMap((card) => {
-      const quote = counterBankQuoteForCard(
+      const quote = readCorpCounterBankPreparationQuote(
         input,
         card,
         "installed_root",
@@ -386,7 +388,7 @@ function installedCounterBanks(input: AiDecisionInput): InstalledCounterBank[] {
   );
 }
 
-function counterBankQuoteForCard(
+export function readCorpCounterBankPreparationQuote(
   input: AiDecisionInput,
   card: VisibleCard,
   expectedLocation: "corp_hq" | "installed_root",
