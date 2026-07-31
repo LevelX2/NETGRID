@@ -3122,7 +3122,6 @@
       "quality": {
         "benchmarkCovered": false,
         "confidence": "high",
-        "focusedDecisionTest": "packages/ai/src/index.test.ts::keeps the Data Wall versus Japanese Water Torture repro generic through visible break cost",
         "hintReviewed": true,
         "needsHumanReview": false,
         "reviewedBy": "codex",
@@ -16268,7 +16267,7 @@
       "quality": {
         "benchmarkCovered": true,
         "confidence": "medium",
-        "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Corporate Boon extra-action ability as scored-agenda tempo",
+        "focusedDecisionTest": "packages/ai/src/plans/tactical-plan-corp-score-conversion.test.ts::uses a legal Corporate Boon counter action through the shared projection",
         "hintReviewed": true,
         "needsHumanReview": false,
         "reviewedBy": "codex-agenda-semantic-review-v1",
@@ -18136,6 +18135,7 @@
       "quality": {
         "benchmarkCovered": true,
         "confidence": "medium",
+        "focusedDecisionTest": "packages/ai/src/evaluation/decision-checkpoints/match-4d7b-political-coup-payout-decision-checkpoints.test.ts::uses a guaranteed three-credit scored-card payout before Basic Credit",
         "hintReviewed": true,
         "needsHumanReview": false,
         "reviewedBy": "codex-economy-contract-v1",
@@ -18228,7 +18228,7 @@
       "quality": {
         "benchmarkCovered": false,
         "confidence": "medium",
-        "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Political Overthrow scored-agenda economy before basic credit",
+        "focusedDecisionTest": "packages/ai/src/runtime/semantic-runtime-corp-score-economy-and-trace.test.ts::scores visible activated scored-agenda economy abilities above basic credit",
         "hintReviewed": true,
         "needsHumanReview": false,
         "reviewedBy": "codex-economy-contract-v1",
@@ -21346,7 +21346,6 @@
       "quality": {
         "benchmarkCovered": true,
         "confidence": "high",
-        "focusedDecisionTest": "packages/ai/src/index.test.ts::keeps the Data Wall versus Japanese Water Torture repro generic through visible break cost",
         "hintReviewed": true,
         "needsHumanReview": false,
         "reviewedBy": "codex",

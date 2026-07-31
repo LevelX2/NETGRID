@@ -23,6 +23,57 @@ function openingPairIsConsumed(pair) {
   );
 }
 
+function validateFocusedDecisionTest(cardId, reference, hardErrors) {
+  if (typeof reference !== "string") return false;
+  const separatorIndex = reference.indexOf("::");
+  const relativePath = reference.slice(0, separatorIndex).trim();
+  const testTitle = reference.slice(separatorIndex + 2).trim();
+  if (
+    separatorIndex <= 0 ||
+    relativePath.length === 0 ||
+    testTitle.length === 0 ||
+    path.isAbsolute(relativePath) ||
+    !relativePath.endsWith(".test.ts")
+  ) {
+    hardErrors.push({
+      kind: "invalid_focused_decision_test_reference",
+      cardId,
+      reference,
+    });
+    return true;
+  }
+
+  const absolutePath = path.resolve(REPO_ROOT, relativePath);
+  const repositoryRelativePath = path.relative(REPO_ROOT, absolutePath);
+  if (
+    repositoryRelativePath.startsWith(`..${path.sep}`) ||
+    repositoryRelativePath === ".."
+  ) {
+    hardErrors.push({
+      kind: "invalid_focused_decision_test_reference",
+      cardId,
+      reference,
+    });
+    return true;
+  }
+  if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) {
+    hardErrors.push({
+      kind: "missing_focused_decision_test_file",
+      cardId,
+      reference,
+    });
+    return true;
+  }
+  if (!fs.readFileSync(absolutePath, "utf8").includes(testTitle)) {
+    hardErrors.push({
+      kind: "missing_focused_decision_test_title",
+      cardId,
+      reference,
+    });
+  }
+  return true;
+}
+
 export function buildAiHintMetadataContractReport() {
   const hints = readJson("data/ai/ai-card-hints-active.json");
   const contract = readJson("data/ai/ai-hint-metadata-contract-v1.json");
@@ -37,6 +88,7 @@ export function buildAiHintMetadataContractReport() {
   let runtimeMechanicCount = 0;
   let evidenceOnlyMechanicCount = 0;
   let evidenceOnlyScenarioRefCount = 0;
+  let focusedDecisionTestCount = 0;
 
   for (const card of hints.cards ?? []) {
     for (const [key, value] of Object.entries(card.valueHints ?? {})) {
@@ -83,6 +135,15 @@ export function buildAiHintMetadataContractReport() {
       else evidenceOnlyMechanicCount += 1;
     }
     evidenceOnlyScenarioRefCount += (card.scenarioRefs ?? []).length;
+    if (
+      validateFocusedDecisionTest(
+        card.cardId,
+        card.quality?.focusedDecisionTest,
+        hardErrors,
+      )
+    ) {
+      focusedDecisionTestCount += 1;
+    }
   }
 
   return {
@@ -96,6 +157,7 @@ export function buildAiHintMetadataContractReport() {
       runtimeMechanicCount,
       evidenceOnlyMechanicCount,
       evidenceOnlyScenarioRefCount,
+      focusedDecisionTestCount,
     },
     hardErrors,
   };
