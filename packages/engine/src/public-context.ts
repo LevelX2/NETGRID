@@ -152,6 +152,7 @@ export function publicContextForAction(
     "derezzedCount",
     "runFortPassPass",
     "runRootRezPass",
+    "runApproachRootRezPass",
     "highlighterCounterCount",
     "highlighterAccessBonus",
   ]) {

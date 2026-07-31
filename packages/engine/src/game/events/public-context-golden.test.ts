@@ -636,6 +636,23 @@ describe("PublicContext golden payload gate", () => {
       });
     }
   });
+
+  it("forwards the semantic approach root-rez pass marker", () => {
+    const state = goldenState("public-context-approach-root-rez-pass");
+
+    expect(
+      goldenContext(
+        state,
+        goldenAction({
+          side: "corp",
+          type: "decline_rez",
+          payload: { runApproachRootRezPass: true },
+        }),
+      ),
+    ).toMatchObject({
+      runApproachRootRezPass: true,
+    });
+  });
 });
 
 function goldenState(seed: string): GameState {

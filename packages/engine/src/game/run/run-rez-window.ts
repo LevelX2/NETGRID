@@ -119,8 +119,12 @@ export function buildCorpApproachActions(
       host.state,
       "corp",
       "decline_rez",
-      "Nicht rezzen",
+      ice.rezzed
+        ? "Keine weitere Karte rezzen / Begegnung beginnen"
+        : "ICE nicht rezzen",
       "game_rule",
+      [],
+      ice.rezzed ? { runApproachRootRezPass: true } : undefined,
     ),
   );
   return [...actions, ...buildCorpRunRootRezActions(host)];

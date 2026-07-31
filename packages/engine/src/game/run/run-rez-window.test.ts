@@ -324,6 +324,27 @@ describe("run rez window", () => {
     });
   });
 
+  it("marks the approach continuation after an already rezzed ICE as a root rez pass", () => {
+    const state = makeState({
+      timingPoint: "run.approach_ice",
+      iceRezzed: true,
+      rootRezzed: false,
+    });
+    const { host } = hostFor(state);
+
+    const actions = buildCorpApproachActions(host);
+    const decline = actions.find((action) => action.type === "decline_rez");
+
+    expect(actions.map((action) => action.type)).toEqual([
+      "decline_rez",
+      "rez_card",
+    ]);
+    expect(decline).toMatchObject({
+      label: "Keine weitere Karte rezzen / Begegnung beginnen",
+      payload: { runApproachRootRezPass: true },
+    });
+  });
+
   it("certifies Jenny Jett's exact final-window rez and install funding without exposing HQ ICE identity", () => {
     const state = makeState({
       timingPoint: "run.approach_ice",
