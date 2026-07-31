@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyAction,
   createGameAfterSetup,
   DEMO_DECKS,
+  getLegalActions,
   getPlayerView,
   hashState,
   replayEvents,
@@ -389,6 +391,19 @@ describe("PlayerView projection", () => {
       known: false,
       rezzed: false,
     });
+    const betweenAccessActions = getLegalActions(state, "runner");
+    expect(betweenAccessActions.map((action) => action.type)).toEqual([
+      "access_card",
+    ]);
+    expect(getLegalActions(state, "corp")).toEqual([]);
+    const staleAccess = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: betweenAccessActions[0]!.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "remote-root-between-access-stale",
+    });
+    expect(staleAccess.ok).toBe(false);
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "runner", (action) => action.type === "decline_trash");
     state = apply(state, "runner", (action) => action.type === "access_card");

@@ -75,6 +75,19 @@ export function buildRunnerAccessActions(
 ): RunnerAccessActionBuildResult {
   if (!host.state.run) return { handled: false, legalActions: [] };
   const run = host.state.run;
+  if (isBetweenBreachAccesses(run)) {
+    return {
+      handled: true,
+      legalActions: [
+        host.actions.buildLegalAction(
+          "runner",
+          "access_card",
+          "Karte accessen",
+          "game_rule",
+        ),
+      ],
+    };
+  }
   const successfulRunActions = host.callbacks.successfulRunProgramActions(run);
   if (successfulRunActions.length > 0) {
     const armageddonAccessReplacement = successfulRunActions.some(
@@ -588,6 +601,15 @@ function hasPendingAccessCandidate(
   if (server.id === "hq") return host.state.corp.hq.length > 0;
   if (server.id === "archives") return host.state.corp.archives.length > 0;
   return server.root.length > 0;
+}
+
+function isBetweenBreachAccesses(run: ActiveRun): boolean {
+  if (run.accessedCardId || !run.breach) return false;
+  const { currentIndex, queue } = run.breach;
+  if (queue[currentIndex]?.status !== "pending") return false;
+  return queue
+    .slice(0, currentIndex)
+    .some((entry) => entry.status !== "pending");
 }
 
 function isCurrentAccessFromArchives(
