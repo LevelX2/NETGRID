@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-07-31-twenty-four-hour-surveillance-ai-rez-window
-status: inbox
+status: in_progress
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-31
-startedAt:
+startedAt: 2026-07-31
 completedAt:
-branch:
+branch: codex/act-2026-07-31-twenty-four-hour-surveillance
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
