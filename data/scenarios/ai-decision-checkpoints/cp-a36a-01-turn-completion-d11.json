@@ -5637,13 +5637,22 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_proteus_038_snowbank",
+        "targetServerId": "new_remote"
       }
     ],
     "forbiddenActions": [
       {
         "type": "end_turn"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["develop_score_protection"],
+      "requiredAssessmentEvidence": [
+        "score_protection_staging_install:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote:new_remote:bounded_deterrence"
+      ]
+    }
   }
 }

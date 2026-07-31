@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-07-31-ai-remote-defense-layer-continuation
-status: in_progress
+status: done
 kind: fix
 area: ai
 priority: high
@@ -8,13 +8,23 @@ primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-31
 startedAt: 2026-07-31
-completedAt:
+completedAt: 2026-07-31
 branch: codex/act-2026-07-31-twenty-four-hour-surveillance
 releaseTarget:
 blockedBy: []
 resultArtifacts:
   - docs/reviews/ai/match-4d7bd0eba9138d83-complete-ai-analysis-2026-07-31.md
-checks: []
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+  - packages/ai/src/runtime/plan-first-live-runtime.test.ts
+  - data/scenarios/ai-decision-checkpoints/cp-a36a-01-turn-completion-d11.json
+checks:
+  - focused plan-first live runtime 170/170
+  - match a36a9664 Corp plan checkpoints 8/8
+  - AI typecheck
+  - AI hint metadata and source structure gates
+  - card function abstraction gate
+  - AI shards 544/544 files and 4450/4450 tests
+  - format changed
 ---
 
 # Korp-KI setzt eine unvollständige Remote-Verteidigung fort
@@ -63,18 +73,37 @@ sowie vorhandene Score- und Rez-Reserven eingehalten werden.
 
 ## Akzeptanzkriterien
 
-- [ ] Ein noch unzureichend geschützter Score-Remote kann über die erste
+- [x] Ein noch unzureichend geschützter Score-Remote kann über die erste
       ICE-Schicht hinaus eine weitere konkrete Defense-Staging-Route erhalten.
-- [ ] Die Route entsteht nur bei nachweisbarem Zusatznutzen und vollständiger
+- [x] Die Route entsteht nur bei nachweisbarem Zusatznutzen und vollständiger
       Engine-Kostenquote unter Wahrung der Score-/Rez-Reserve.
-- [ ] Bereits hinreichender oder durch zusätzliche unrezbare Schichten nicht
+- [x] Bereits hinreichender oder durch zusätzliche unrezbare Schichten nicht
       sinnvoll verbesserbarer Schutz erzeugt keine pauschale weitere
       ICE-Installation.
-- [ ] `corp.defend_servers` beziehungsweise die bestehende gebundene
+- [x] `corp.defend_servers` beziehungsweise die bestehende gebundene
       Score-Schutzroute bleibt alleiniger Owner; Action-ID, Planinstanz, Step
       und Executor sind in Tests gesichert.
-- [ ] Fokussierte Tests, AI-Strukturgates, Typecheck und AI-Shards sind grün.
+- [x] Fokussierte Tests, AI-Strukturgates, Typecheck und AI-Shards sind grün.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der pauschale Abbruch nach der ersten Remote-ICE-Schicht ist entfernt. Der
+vorhandene `score_protection_staging_install`-Backstop kann nun weitere
+qualitativ schutzwirksame ICE-LegalActions auf demselben Score-Remote an den
+Defense-Plan delegieren, wenn die exakte Schutzprojektion wegen sichtbarer,
+aber noch nicht vollständig modellierbarer Runner-Antworten offen bleibt.
+
+Die Fortsetzung ist nicht an eine Karten-ID, einen Titel oder eine feste
+Schichtzahl gebunden. Sie verlangt eine vollständige Installations- und
+Post-Install-Rez-Quote. Zusätzlich werden alle bereits offenen Rez-Kosten,
+Installationskosten und die Score-Reserve gemeinsam betrachtet. Nur ein
+Finanzierungsdefizit, das höchstens der normalen Basic-Credit-Kapazität des
+nächsten Corp-Zugs entspricht, bleibt als vorbereitende oder Bluff-Schicht
+zulässig. Ein wachsender unbezahlter ICE-Stapel verliert dadurch automatisch
+die Route.
+
+Der Regressionstest sichert die gebundene Action-ID, den Parent-Score-Bedarf,
+`corp.defend_servers` und `develop_score_protection`. Der Gegenfall mit zu
+großem offenem Rez-Portfolio fällt auf Economy zurück. Ein bestehender
+Checkpoint wurde nach vollständiger Zustandsprüfung auf die nun bessere,
+planbesessene Snowbank-Installation geschärft.

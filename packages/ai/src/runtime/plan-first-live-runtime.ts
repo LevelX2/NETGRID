@@ -9595,8 +9595,7 @@ function corpScoreProtectionStagingInstallSignal(
     !need ||
     !serverId ||
     (serverId !== "new_remote" && !serverId.startsWith("remote_")) ||
-    (serverId !== "new_remote" &&
-      (existingRemote === undefined || existingRemote.ice.length > 0)) ||
+    (serverId !== "new_remote" && existingRemote === undefined) ||
     need.targetServerId !== serverId ||
     !scoreProtectionStagingMayBackstopDirectRoute(need, scan) ||
     !candidateIsVisibleCorpIceInstall(input, candidate) ||
@@ -9620,7 +9619,7 @@ function corpScoreProtectionStagingInstallSignal(
   if (
     source?.definitionId !== candidate.sourceDefinitionId ||
     definition?.type !== "ice" ||
-    (!definition.mechanics.includes("end_the_run") && !boundedNonEtrDeterrence)
+    (!sourceDefense.hasImmediateStop && !boundedNonEtrDeterrence)
   ) {
     return undefined;
   }
@@ -9668,6 +9667,16 @@ function corpScoreProtectionStagingInstallSignal(
   if (!corpScoreProtectionStagingPairFitsCurrentTurn(input, project, action)) {
     return undefined;
   }
+  if (
+    !corpScoreProtectionStagingRezPortfolioIsNearTermFundable(
+      input,
+      project,
+      action,
+      existingRemote,
+    )
+  ) {
+    return undefined;
+  }
   return {
     kind: "score_protection_staging_install",
     defenseId: `score-protection-staging-install:${project.projectId}:${candidate.actionId}`,
@@ -9681,6 +9690,85 @@ function corpScoreProtectionStagingInstallSignal(
     sourceDefinitionId: candidate.sourceDefinitionId,
     evidenceCode: `score_protection_staging_install:${project.projectId}:${serverId}:bounded_deterrence`,
   };
+}
+
+function corpScoreProtectionStagingRezPortfolioIsNearTermFundable(
+  input: AiDecisionInput,
+  project: CorpScoreProjectSignal,
+  action: LegalAction,
+  existingRemote: AiDecisionInput["playerView"]["servers"][number] | undefined,
+): boolean {
+  const need = project.protectionNeed;
+  if (!need) return false;
+  const reserveIds = need.scoreReserve.creditBreakdown.map(
+    (entry) => entry.reserveId,
+  );
+  if (new Set(reserveIds).size !== reserveIds.length) return false;
+  const scoreReserveCredits = need.scoreReserve.creditBreakdown.reduce(
+    (sum, entry) =>
+      Number.isSafeInteger(entry.credits) && entry.credits >= 0
+        ? sum + entry.credits
+        : Number.NaN,
+    0,
+  );
+  const installCredits = action.costs.reduce(
+    (sum, cost) => sum + (cost.credits ?? 0),
+    0,
+  );
+  const installClicks = action.costs.reduce(
+    (sum, cost) => sum + (cost.clicks ?? 0),
+    0,
+  );
+  const sourceRezCredits = action.payload?.postInstallRezQuoteFinalCredits;
+  if (
+    !Number.isSafeInteger(scoreReserveCredits) ||
+    !Number.isSafeInteger(installCredits) ||
+    installCredits < 0 ||
+    !Number.isSafeInteger(installClicks) ||
+    installClicks < 0 ||
+    typeof sourceRezCredits !== "number" ||
+    !Number.isSafeInteger(sourceRezCredits) ||
+    sourceRezCredits < 0 ||
+    !Number.isSafeInteger(need.scoreReserve.hardClickReserve) ||
+    need.scoreReserve.hardClickReserve < 0 ||
+    installClicks + need.scoreReserve.hardClickReserve >
+      input.playerView.own.clicks
+  ) {
+    return false;
+  }
+  const existingRemoteId = existingRemote?.id;
+  const pendingExistingRezCredits = (existingRemote?.ice ?? []).reduce(
+    (sum, ice) => {
+      if (!Number.isFinite(sum) || ice.rezzed === true) return sum;
+      const quote = ice.effectiveRezCostQuote;
+      if (
+        quote?.context !== "installed" ||
+        quote.cardId !== ice.instanceId ||
+        quote.targetServerId !== existingRemoteId ||
+        quote.projectedServerId !== existingRemoteId ||
+        quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+        quote.complete !== true ||
+        quote.mandatoryAdditionalCosts.agendaPoints !== 0 ||
+        !Number.isSafeInteger(quote.finalCredits) ||
+        quote.finalCredits < 0
+      ) {
+        return Number.NaN;
+      }
+      return sum + quote.finalCredits;
+    },
+    0,
+  );
+  if (!Number.isSafeInteger(pendingExistingRezCredits)) return false;
+  const pendingRezCredits = pendingExistingRezCredits + sourceRezCredits;
+  const nearTermFundingGap = Math.max(
+    0,
+    installCredits +
+      scoreReserveCredits +
+      pendingRezCredits -
+      input.playerView.own.credits,
+  );
+  const standardNextCorpTurnBasicCreditCapacity = 3;
+  return nearTermFundingGap <= standardNextCorpTurnBasicCreditCapacity;
 }
 
 function scoreProtectionStagingMayBackstopDirectRoute(

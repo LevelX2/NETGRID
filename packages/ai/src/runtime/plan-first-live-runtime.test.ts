@@ -5312,6 +5312,162 @@ describe("authoritative plan-first live runtime", () => {
     ).not.toContain("missing_action_semantics");
   });
 
+  it("continues an unknown score-protection assessment with a near-term-fundable additional ICE layer", () => {
+    const stateVersion = 1;
+    const installAgenda = legalAction(
+      "install-agenda-staged",
+      "corp",
+      "install_card",
+      "Install agenda in staged remote",
+      { credits: 0, clicks: 1 },
+      {
+        source: "agenda-staged",
+        payload: {
+          cardId: "agenda-staged",
+          sourceDefinitionId: "onr_v1_189_artificial-security-directors",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const installIce = legalAction(
+      "install-additional-ice",
+      "corp",
+      "install_card",
+      "Install another protective ICE",
+      { credits: 1, clicks: 1 },
+      {
+        source: "additional-ice",
+        payload: {
+          cardId: "additional-ice",
+          sourceDefinitionId: "onr_v1_237_data-wall",
+          serverId: "remote_1",
+          placement: "ice",
+          iceInstallBaseCost: 1,
+          iceInstallAdditionalCost: 0,
+          iceInstallReduction: 0,
+          iceInstallTotalCost: 1,
+          postInstallRezQuoteCardId: "additional-ice",
+          postInstallRezQuoteTargetServerId: "remote_1",
+          postInstallRezQuoteProjectedServerId: "remote_1",
+          postInstallRezQuoteExpiresAtStateVersion: stateVersion,
+          postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
+          postInstallRezQuoteBaseCredits: 1,
+          postInstallRezQuoteFinalCredits: 1,
+          postInstallRezQuoteMandatoryAgendaPointCost: 0,
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("corp", [installAgenda, installIce, credit]);
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = stateVersion;
+    }
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("agenda-staged", "corp", "agenda", {
+        definitionId: "onr_v1_189_artificial-security-directors",
+        advancementRequirement: 3,
+        agendaPoints: 1,
+      }),
+      visibleCard("additional-ice", "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        rezCost: 1,
+        strength: 0,
+        subtypes: ["wall"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("staged-ice", "corp", "ice", {
+          definitionId: "onr_v1_223_banpei",
+          rezzed: false,
+          strength: 1,
+          subtypes: ["sentry"],
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "staged-ice",
+            targetServerId: "remote_1",
+            projectedServerId: "remote_1",
+            expiresAtStateVersion: stateVersion,
+            complete: true,
+            costKind: "fixed",
+            baseCredits: 2,
+            finalCredits: 2,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+          },
+        }),
+      ]),
+    ];
+    input.playerView.opponent.rig = [
+      visibleCard("runner-blink", "runner", "program", {
+        definitionId: "onr_v1_007_blink",
+        strength: 5,
+        subtypes: ["icebreaker", "random"],
+      }),
+    ];
+    input.playerView.specialZones = {
+      setAside: [
+        visibleCard("rent-i-con", "runner", "program", {
+          definitionId: "onr_classic_031_rent-i-con",
+          strength: 0,
+          subtypes: ["icebreaker", "ai"],
+        }),
+      ],
+      removedFromGame: [],
+      setAsideCount: 1,
+      removedFromGameCount: 0,
+    };
+
+    resetResidentPlanPortfolioMemory();
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: "install-additional-ice",
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.defend_servers",
+        "plan_step_capability:develop_score_protection",
+        "plan_assessment_evidence:score_protection_staging_install:agenda:agenda-staged:remote_1:remote_1:bounded_deterrence",
+      ]),
+    );
+
+    const overextended = structuredClone(input);
+    overextended.decisionId = "score-protection-staging-overextended";
+    const overextendedQuote =
+      overextended.playerView.servers[3]!.ice[0]!.effectiveRezCostQuote;
+    if (overextendedQuote?.complete !== true) {
+      throw new Error("Expected complete staged ICE rez quote");
+    }
+    overextended.playerView.servers[3]!.ice[0]!.effectiveRezCostQuote = {
+      ...overextendedQuote,
+      baseCredits: 8,
+      finalCredits: 8,
+    };
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(overextended, {}),
+    ).toMatchObject({
+      actionId: "credit",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+  });
+
   it("chooses between equal-layer score remotes only from the exact parent protection baseline and fails closed when it becomes unknown", () => {
     const stateVersion = 1;
     const agendaDefinitionId = "onr_v1_189_artificial-security-directors";
