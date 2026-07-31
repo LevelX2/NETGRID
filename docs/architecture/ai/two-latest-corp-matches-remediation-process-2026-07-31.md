@@ -354,6 +354,15 @@ Umgesetzt und vor der Main-Synchronisierung verifiziert:
   `check:ai`, der AI-Typecheck mit 8-GB-Node-Heap und der vollständige
   Drei-Shard-Lauf mit 182/182, 182/182 und 181/181 Testdateien sowie
   1523/1523, 1789/1789 und 1157/1157 Tests.
+- Nach konfliktfreier Synchronisierung mit `main` wurden `check:ai`, der
+  AI-Typecheck und derselbe vollständige Drei-Shard-Lauf erneut mit exakt
+  denselben grünen Nennern ausgeführt.
+- Das repositoryweite Gate `check:card-function-abstraction` bleibt an einer
+  vor diesem Paket vorhandenen Inventarabweichung der Roving-Submarine-
+  Zustandsfelder in `packages/engine/src/game/view/card-view.ts` rot. Keine
+  Datei dieses Pakets gehört zu diesem Befund; der generierte Bericht wurde
+  deshalb nicht aktualisiert und die fremde Baseline nicht ungeprüft
+  übernommen.
 
 ## Verifikationsregeln
 
