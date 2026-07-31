@@ -11,7 +11,7 @@ type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
 >;
 type PendingChoiceOption = PendingChoice["options"][number];
-type DiscardScore = {
+export type DiscardChoiceKeepScore = {
   readonly total: number;
   readonly planDisposition?: ProjectedHandDisposition;
 };
@@ -23,7 +23,7 @@ export function selectedDiscardChoiceOptionIds(
   scoreDiscardCandidate: (
     input: AiDecisionInput,
     card: VisibleCard,
-  ) => DiscardScore,
+  ) => DiscardChoiceKeepScore,
 ): string[] {
   const count = boundedSelectionCount(
     choice.minSelections,
@@ -76,8 +76,8 @@ export function selectedDiscardChoiceOptionIds(
 }
 
 function compareDiscardCandidates(
-  left: { option: PendingChoiceOption; score: DiscardScore },
-  right: { option: PendingChoiceOption; score: DiscardScore },
+  left: { option: PendingChoiceOption; score: DiscardChoiceKeepScore },
+  right: { option: PendingChoiceOption; score: DiscardChoiceKeepScore },
 ): number {
   return (
     discardProtectionRank(left.score.planDisposition) -

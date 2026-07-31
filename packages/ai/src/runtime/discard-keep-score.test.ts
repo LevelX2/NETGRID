@@ -89,6 +89,64 @@ describe("discard keep score", () => {
     );
   });
 
+  it("ranks agenda score efficiency and redundancy only under real Corp overflow", () => {
+    const tycho = corpCard("onr_v1_220_tycho-extension", "agenda");
+    const firstCfo = corpCard(
+      "onr_v1_188_ai-chief-financial-officer",
+      "agenda",
+    );
+    const secondCfo = { ...firstCfo, instanceId: "cfo-duplicate" };
+    const ice = corpCard("overflow-ice", "ice");
+    const moreIce = [
+      ice,
+      { ...ice, instanceId: "overflow-ice-2" },
+      { ...ice, instanceId: "overflow-ice-3" },
+    ];
+    const tychoValue = score(
+      tycho,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        extraGrip: [firstCfo, secondCfo, ...moreIce],
+      },
+    );
+    const cfoValue = score(
+      firstCfo,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        extraGrip: [secondCfo, tycho, ...moreIce],
+      },
+    );
+
+    expect(tychoValue.total).toBeGreaterThan(cfoValue.total);
+    expect(cfoValue.total).toBeLessThan(
+      score(
+        ice,
+        ["ice"],
+        "corp",
+        [],
+        {},
+        {
+          extraGrip: [
+            { ...ice, instanceId: "overflow-ice-2" },
+            { ...ice, instanceId: "overflow-ice-3" },
+            firstCfo,
+            secondCfo,
+            tycho,
+          ],
+        },
+      ).total,
+    );
+    expect(cfoValue.evidence).toContain(
+      "discard_score:corp_redundant_agenda_under_overflow",
+    );
+  });
+
   it("preserves a reviewed advancement burst while a visible agenda can use it", () => {
     const systematicLayoffs = corpCard(
       "onr_v1_304_systematic-layoffs",

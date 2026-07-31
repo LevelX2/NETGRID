@@ -10,6 +10,8 @@ import continueTychoD89Json from "../../../../../data/scenarios/ai-decision-chec
 import installBeforeOverflowD94Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-daed3ad-latest-04-install-score-before-overflow-d94.json";
 import rezHauntingD78Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-daed3ad-latest-05-rez-haunting-d78.json";
 import rezDataWallD84Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-daed3ad-latest-06-rez-data-wall-d84.json";
+import preserveScoreReserveD52Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-daed3ad-latest-07-preserve-score-reserve-d52.json";
+import retainTychoDiscardCfoD97Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-daed3ad-latest-08-retain-tycho-discard-cfo-d97.json";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
@@ -64,6 +66,20 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     ["rezzes the exact affordable Data Wall", rezDataWallD84Json],
   ])("%s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  });
+
+  it("does not spend the score reserve on a pure Washington Grid overflow conversion", () => {
+    const result = runAiDecisionCheckpoint(
+      fixture(preserveScoreReserveD52Json),
+    );
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  });
+
+  it("retains Tycho and discards the lower-value CFO through the hand plan", () => {
+    const result = runAiDecisionCheckpoint(
+      fixture(retainTychoDiscardCfoD97Json),
+    );
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 });

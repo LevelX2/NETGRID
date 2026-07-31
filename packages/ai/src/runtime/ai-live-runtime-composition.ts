@@ -78,7 +78,8 @@ function createRuntimeComposedDependencies(
 export function createAiLiveRuntimeComposition(
   dependencies: AiLiveRuntimeCompositionDependencies,
 ) {
-  const contextDiagnostics = createAiContextDiagnosticsComposition(dependencies);
+  const contextDiagnostics =
+    createAiContextDiagnosticsComposition(dependencies);
   const runnerBaseline = createRunnerBaselineSupportComposition(
     createRuntimeComposedDependencies(dependencies, contextDiagnostics),
   );
@@ -115,11 +116,11 @@ export function createAiLiveRuntimeComposition(
   return createSemanticRuntimeOrchestrationComposition({
     buildActionSemanticCandidates: dependencies.buildActionSemanticCandidates,
     deckCapabilitiesForInput: runnerBaseline.deckCapabilitiesForInput,
-    runnerStrategicIntentForInput:
-      runnerBaseline.runnerStrategicIntentForInput,
+    runnerStrategicIntentForInput: runnerBaseline.runnerStrategicIntentForInput,
     evaluateRunnerHandDevelopment: dependencies.evaluateRunnerHandDevelopment,
     buildRunnerEconomyPosture: dependencies.buildRunnerEconomyPosture,
     evaluateRunnerRunTargets: dependencies.evaluateRunnerRunTargets,
+    discardKeepScore: runnerBaseline.discardKeepScore,
     selectedChoicesForDecision: runnerBaseline.selectedChoicesForDecision,
     runnerEncounterActionExclusion,
   });

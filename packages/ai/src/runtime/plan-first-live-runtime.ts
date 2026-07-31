@@ -65,6 +65,7 @@ import {
   corpPunishCampaignOwnsCandidate,
   corpHandPriorityClass,
   createCorpTacticalPlanModules,
+  type CorpHandManagementSignal,
   type CorpPlanDomain,
   type CorpPunishCampaignSignal,
 } from "../plans/corp-tactical-plan-modules";
@@ -122,6 +123,12 @@ import {
   type CorpDefenseDomainSignalFacts,
 } from "../plans/corp-defense-domain-signals";
 import { buildRunnerShellTradersPipelineSignals } from "./shell-traders-plan-signals";
+import { selectableChoiceOptions } from "./choice-option";
+import { discardOptionInstanceId } from "./discard-choice-option";
+import {
+  selectedDiscardChoiceOptionIds,
+  type DiscardChoiceKeepScore,
+} from "./discard-choice-selection";
 import {
   collectCorpActionDispositions,
   type CorpActionDispositionContributorFacts,
@@ -311,9 +318,14 @@ export type PlanFirstLiveDependencies = {
     actionCandidates: readonly ActionSemanticCandidate[];
     handDevelopmentEvaluations?: readonly RunnerHandDevelopmentEvaluation[];
   }) => RunnerRunTargetEvaluation[];
+  discardKeepScore?: (
+    input: AiDecisionInput,
+    card: VisibleCard,
+  ) => DiscardChoiceKeepScore;
   selectedChoicesForDecision: (
     input: AiDecisionInput,
     action: LegalAction,
+    currentPortfolio?: ResidentPlanPortfolio,
   ) => AiDecision["selectedChoices"] | undefined;
   runnerEncounterActionExclusion: (
     input: AiDecisionInput,
@@ -410,7 +422,7 @@ export function choosePlanFirstLiveAction(
     ? windowContext
     : input.side === "runner"
       ? runnerContext(input, candidates, dependencies, previous)
-      : corpContext(input, candidates, previous);
+      : corpContext(input, candidates, previous, dependencies.discardKeepScore);
   rememberCurrentStrategicIntent(input, options);
   let turnPlannerCutover: TurnPlannerCutoverResult | undefined;
   let turnPlanningDebug: AiTurnPlanningDebug | undefined;
@@ -6446,6 +6458,7 @@ function corpContext(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   previous: ResidentPlanPortfolio | undefined,
+  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
 ): PlanSchedulerContext {
   const sourceBoundCandidates = candidates.map((candidate) => {
     if (candidate.sourceDefinitionId || !candidate.sourceCardInstanceId) {
@@ -6459,7 +6472,25 @@ function corpContext(
       ? { ...candidate, sourceDefinitionId: visibleSource.definitionId }
       : candidate;
   });
-  const baseDomain = buildCorpDomain(input, sourceBoundCandidates, previous);
+  const discoveredDomain = buildCorpDomain(
+    input,
+    sourceBoundCandidates,
+    previous,
+  );
+  const discardWindowSignal = corpDiscardWindowSignal(
+    input,
+    sourceBoundCandidates,
+    discardKeepScore,
+  );
+  const baseDomain: CorpPlanDomain = discardWindowSignal
+    ? {
+        ...discoveredDomain,
+        handManagement: [
+          discardWindowSignal,
+          ...discoveredDomain.handManagement,
+        ],
+      }
+    : discoveredDomain;
   const preArbitrationHandFacts = buildCorpHandInventoryFacts({
     input,
     candidates: sourceBoundCandidates,
@@ -6496,6 +6527,116 @@ function corpContext(
     transientSignals: corpTransientPlanSignals(input, domain),
     turnKey: turnKey(input),
     domain,
+  };
+}
+
+function corpDiscardWindowSignal(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
+): CorpHandManagementSignal | undefined {
+  const choice = input.playerView.pendingChoice;
+  if (
+    input.side !== "corp" ||
+    choice?.kind !== "select_cards" ||
+    choice.source !== "discard_phase"
+  ) {
+    return undefined;
+  }
+  const resolveAction = input.legalActions.find(
+    (action) => action.type === "resolve_choice",
+  );
+  const exactCandidate = resolveAction
+    ? candidates.find(
+        (candidate) =>
+          candidate.actionId === resolveAction.actionId &&
+          candidate.semanticActionType === "choice.resolve",
+      )
+    : undefined;
+  if (!resolveAction || !exactCandidate || !discardKeepScore) {
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: input.legalActions.map((action) => action.actionId),
+      owner: "plan_module",
+      removalCondition:
+        "The Corp hand plan requires the exact discard LegalAction, semantic candidate, and generic keep-value scorer.",
+    });
+  }
+  const selectableOptions = selectableChoiceOptions(choice.options);
+  const knownHandByInstanceId = new Map(
+    input.playerView.own.gripOrHq
+      .filter((card) => card.known && card.definitionId)
+      .map((card) => [card.instanceId, card]),
+  );
+  const optionInstanceIds = selectableOptions.map(discardOptionInstanceId);
+  if (
+    optionInstanceIds.some(
+      (instanceId) => !instanceId || !knownHandByInstanceId.has(instanceId),
+    )
+  ) {
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [resolveAction.actionId],
+      owner: "plan_module",
+      removalCondition:
+        "Bind a Corp discard only when every selectable option maps to a known card in the current HQ PlayerView.",
+    });
+  }
+  const selectedOptionIds = selectedDiscardChoiceOptionIds(
+    input,
+    choice,
+    selectableOptions,
+    discardKeepScore,
+  );
+  const selectedOptionIdSet = new Set(selectedOptionIds);
+  const discardedCardInstanceIds = selectableOptions
+    .filter((option) => selectedOptionIdSet.has(option.id))
+    .map(discardOptionInstanceId)
+    .filter((instanceId): instanceId is string => instanceId !== undefined);
+  const discardedCardInstanceIdSet = new Set(discardedCardInstanceIds);
+  const retainedCardInstanceIds = optionInstanceIds.filter(
+    (instanceId): instanceId is string =>
+      instanceId !== undefined && !discardedCardInstanceIdSet.has(instanceId),
+  );
+  return {
+    handPlanId: `discard-window:${choice.choiceId}:${input.playerView.stateVersion}`,
+    phase: "discard_window",
+    actionIds: [resolveAction.actionId],
+    exactActionRoute: true,
+    agendaCount: input.playerView.own.gripOrHq.filter(
+      (card) =>
+        card.known &&
+        (card.type === "agenda" ||
+          (card.definitionId !== undefined &&
+            CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === "agenda")),
+    ).length,
+    handSize: input.playerView.own.gripOrHq.length,
+    maximumHandSize: input.playerView.own.maxHandSize,
+    concretePurposeCode:
+      "Resolve the current Corp overflow with the plan-bound lowest keep-value cards.",
+    priorityClass: "P5",
+    routeAllowed: true,
+    discardChoiceBinding: {
+      actionId: resolveAction.actionId,
+      choiceId: choice.choiceId,
+      observedAtStateVersion: input.playerView.stateVersion,
+      selectedOptionIds,
+      discardedCardInstanceIds,
+      retainedCardInstanceIds,
+      evidenceCodes: [
+        "corp_discard_owned_by_hand_plan",
+        "corp_discard_selection_bound_to_current_choice",
+        "corp_discard_ranked_by_generic_keep_value",
+      ],
+    },
+    value: 1_000,
+    evidenceCode: "corp_discard_owned_by_hand_plan",
   };
 }
 
@@ -11943,6 +12084,13 @@ function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
   if (
+    context.input.side === "corp" &&
+    context.input.playerView.pendingChoice?.kind === "select_cards" &&
+    context.input.playerView.pendingChoice.source === "discard_phase"
+  ) {
+    return undefined;
+  }
+  if (
     context.input.playerView.pendingChoice?.source.startsWith(
       "card_implementation.agenda_purge_install_targets:",
     )
@@ -12613,7 +12761,7 @@ function decisionFromScheduler(
   if (!action) throw new Error("plan_first_selected_action_not_legal");
   const selectedChoices = randomizedIceInstallNearTie
     ? undefined
-    : dependencies.selectedChoicesForDecision(input, action);
+    : dependencies.selectedChoicesForDecision(input, action, result.portfolio);
   const planId =
     result.lane === "plan"
       ? result.selectedAssessment.instanceId

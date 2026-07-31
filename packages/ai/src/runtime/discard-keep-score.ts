@@ -1,4 +1,8 @@
-import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
+import {
+  CARD_DEFINITIONS_BY_ID,
+  type AiDecisionInput,
+  type VisibleCard,
+} from "@netgrid/shared";
 
 import {
   discardPlanFitBonus,
@@ -14,6 +18,7 @@ import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
   corpHandDuplicateCount,
   corpHandPressureAssessment,
+  type CorpHandPressureAssessment,
 } from "./corp-hand-inventory-facts";
 import type { ProjectedHandDisposition } from "../plans/turn-projection";
 
@@ -156,9 +161,16 @@ export function discardKeepScore(
           duplicateCount,
         )
       : { value: 0, evidence: [] as string[] };
+  const corpAgendaOverflowValue = corpAgendaOverflowKeepAdjustment(
+    input,
+    card.definitionId,
+    type,
+    duplicateCount,
+    corpHandPressure,
+  );
 
   if (input.side === "corp") {
-    if (type === "agenda") baseValue += 330;
+    if (type === "agenda") baseValue += 330 + corpAgendaOverflowValue.value;
     if (type === "ice" || rolesMatch(roles, ["ice", "etr_ice"]))
       baseValue += 320;
     const economyRole = rolesMatch(roles, ["economy"]);
@@ -259,6 +271,7 @@ export function discardKeepScore(
       ...(corpHandPressure
         ? [`discard_score:corp_hand_pressure:${corpHandPressure.status}`]
         : []),
+      ...corpAgendaOverflowValue.evidence,
       ...(input.side === "corp" && duplicateCount > 1
         ? [`discard_score:corp_hand_duplicate_count:${duplicateCount}`]
         : []),
@@ -621,6 +634,46 @@ function corpHasVisibleAgendaDevelopmentTarget(
         dependencies.definitionTypeForCardId(candidate.definitionId) ===
           "agenda"),
   );
+}
+
+function corpAgendaOverflowKeepAdjustment(
+  input: AiDecisionInput,
+  definitionId: string,
+  type: string | undefined,
+  duplicateCount: number,
+  handPressure: CorpHandPressureAssessment | undefined,
+): { value: number; evidence: string[] } {
+  if (
+    input.side !== "corp" ||
+    type !== "agenda" ||
+    handPressure?.status !== "overflow" ||
+    handPressure.agendaCount < 2
+  ) {
+    return { value: 0, evidence: [] };
+  }
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  const agendaPoints = definition?.agendaPoints;
+  const advancementRequirement = definition?.advancementRequirement;
+  if (
+    typeof agendaPoints !== "number" ||
+    typeof advancementRequirement !== "number"
+  ) {
+    return {
+      value: 0,
+      evidence: ["discard_score:corp_agenda_value_unknown"],
+    };
+  }
+  const scoreEfficiencyValue = agendaPoints * 70 - advancementRequirement * 25;
+  const redundantCopyPenalty = Math.max(0, duplicateCount - 1) * 260;
+  return {
+    value: scoreEfficiencyValue - redundantCopyPenalty,
+    evidence: [
+      "discard_score:corp_agenda_overflow_value",
+      ...(redundantCopyPenalty > 0
+        ? ["discard_score:corp_redundant_agenda_under_overflow"]
+        : []),
+    ],
+  };
 }
 
 export function createDiscardKeepScore(

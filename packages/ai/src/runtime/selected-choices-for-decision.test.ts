@@ -1430,6 +1430,69 @@ describe("selectedChoicesForDecision", () => {
       ),
     ).toThrowError("window_origin_missing");
   });
+
+  it("completes a Corp discard only from the exact executor hand-plan binding", () => {
+    const input = corpDiscardChoiceInput();
+    const action = resolveChoiceActionForInput(input);
+    rememberResidentCorpDiscardBinding(input, action.actionId, ["discard_low"]);
+
+    expect(
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["discard_low"],
+    });
+  });
+
+  it("fails closed when a Corp discard has no executor hand-plan binding", () => {
+    const input = corpDiscardChoiceInput();
+    const action = resolveChoiceActionForInput(input);
+
+    expect(() =>
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toThrowError("window_origin_missing");
+  });
+
+  it("keeps Runner discard ranking independent from the Corp hand-plan owner", () => {
+    const input = inputWithChoice(
+      {
+        kind: "select_cards",
+        source: "discard_phase",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          { id: "discard_low", label: "Low", value: "runner_low" },
+          { id: "retain_high", label: "High", value: "runner_high" },
+        ],
+      },
+      {
+        side: "runner",
+        gripOrHq: [
+          {
+            ...visibleCard("runner_low", "asset"),
+            definitionId: "low",
+          },
+          {
+            ...visibleCard("runner_high", "asset"),
+            definitionId: "high",
+          },
+        ],
+      },
+    );
+    const action = resolveChoiceActionForInput(input);
+
+    expect(
+      selectedChoicesForDecision(input, action, {
+        ...unusedDependencies(),
+        discardKeepScore: (_input, card) => ({
+          total: card.instanceId === "runner_low" ? 0 : 100,
+        }),
+      }),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["discard_low"],
+    });
+  });
 });
 
 function inputWithChoice(
@@ -1605,6 +1668,67 @@ function rememberAgendaPurgeDefenseChoice(
               },
             },
           ],
+        },
+      },
+    ],
+    completionHistory: [],
+    transitions: [],
+  } as never);
+}
+
+function corpDiscardChoiceInput(): AiDecisionInput {
+  return inputWithChoice(
+    {
+      kind: "select_cards",
+      source: "discard_phase",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        { id: "discard_low", label: "Low", value: "corp_low" },
+        { id: "retain_high", label: "High", value: "corp_high" },
+      ],
+    },
+    {
+      side: "corp",
+      gripOrHq: [
+        { ...visibleCard("corp_low", "asset"), definitionId: "low" },
+        { ...visibleCard("corp_high", "agenda"), definitionId: "high" },
+      ],
+    },
+  );
+}
+
+function rememberResidentCorpDiscardBinding(
+  input: AiDecisionInput,
+  actionId: string,
+  selectedOptionIds: string[],
+): void {
+  const instanceId = "plan:corp.hand_and_agenda_management:discard-window";
+  rememberResidentPlanPortfolio(input, {
+    schemaVersion: "resident-plan-portfolio-v2",
+    side: "corp",
+    stateVersion: input.playerView.stateVersion,
+    rootForegroundInstanceId: instanceId,
+    executorInstanceId: instanceId,
+    instances: [
+      {
+        instanceId,
+        moduleId: "corp.hand_and_agenda_management",
+        executionState: "executor",
+        moduleState: {
+          kind: "hand",
+          signal: {
+            phase: "discard_window",
+            discardChoiceBinding: {
+              actionId,
+              choiceId: "choice_multi",
+              observedAtStateVersion: input.playerView.stateVersion,
+              selectedOptionIds,
+              discardedCardInstanceIds: ["corp_low"],
+              retainedCardInstanceIds: ["corp_high"],
+              evidenceCodes: ["test_exact_binding"],
+            },
+          },
         },
       },
     ],

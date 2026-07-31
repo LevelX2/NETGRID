@@ -29,6 +29,7 @@ import {
   type CorpTurnPlanningCoverageReport,
 } from "./corp-turn-planning-coverage";
 import type { PlanModuleId, PlanTargetRef } from "./plan-kernel-types";
+import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import {
   enumerateCurrentPlanSchedulerRoutes,
   type PlanActionDisposition,
@@ -117,6 +118,7 @@ export function buildCorpTurnPlannerShadow(params: {
   selectedChoicesForDecision: (
     input: AiDecisionInput,
     action: LegalAction,
+    currentPortfolio?: ResidentPlanPortfolio,
   ) => AiDecision["selectedChoices"] | undefined;
   authorityMode?: "shadow" | "cutover";
 }): CorpTurnPlannerShadowResult | undefined {
@@ -533,6 +535,7 @@ function headsForRoute(params: {
   selectedChoicesForDecision: (
     input: AiDecisionInput,
     action: LegalAction,
+    currentPortfolio?: ResidentPlanPortfolio,
   ) => AiDecision["selectedChoices"] | undefined;
 }): TurnPlanningHeadCandidate[] {
   const action = params.input.legalActions.find(
@@ -544,7 +547,7 @@ function headsForRoute(params: {
   if (!action || !moduleCoverage) return [];
   const selectedChoices =
     planBoundCorpDefenseChoices(params.route, action, params.input) ??
-    params.selectedChoicesForDecision(params.input, action);
+    params.selectedChoicesForDecision(params.input, action, params.portfolio);
   const invocations = currentTurnPlanningInvocationVariants({
     stateIdentity: params.stateIdentity,
     action,

@@ -261,6 +261,29 @@ Umgesetzt und fokussiert verifiziert:
   Reihenfolge generisch verändern.
 - Commit: `fix(ai): bind overflow and discard decisions to hand plans`.
 
+Umgesetzt und fokussiert verifiziert:
+
+- Das Corp-Discard-Fenster ist nicht länger ein automatisches Engine-Fenster.
+  `corp.hand_and_agenda_management` erzeugt stattdessen einen exakten
+  `discard_window`-Step für die aktuelle `resolve_choice`-LegalAction.
+- Der Handplan bewertet die sichtbaren eigenen HQ-Karten, bindet Choice-ID,
+  StateVersion, Option-IDs sowie abgelegte und behaltene Karteninstanzen in
+  seinem `moduleState`. Der Resolver übernimmt ausschließlich diese Bindung
+  und schlägt ohne aktuellen Executor-Handplan fail-closed fehl.
+- Der TurnPlanner erhält dasselbe aktuelle Resident-Portfolio bei der
+  Variantenbildung. Damit bleiben Action-ID, Plan-Owner, Executor und
+  Choice-Payload auch während der Restzugplanung deckungsgleich.
+- Agenda-Keep-Werte unterscheiden unter echtem Overflow generisch nach
+  Agenda-Punkten, Advancement-Aufwand und redundanten Exemplaren. Außerhalb
+  echten Overflows bleibt die bisherige starke Agenda-Schutzwirkung bestehen;
+  es gibt keine Karten-ID- oder Titelregel.
+- Zustand 52 bleibt grün und verbraucht die Score-Reserve nicht für eine reine
+  Washington-Grid-Handentlastung. Entscheidung 97 behält Tycho Extension,
+  legt den niedrigeren redundanten AI Chief Financial Officer ab und weist in
+  der Debugspur `corp.hand_and_agenda_management / discard_window` aus.
+- Grün: elf Match-Checkpoints, 115 fokussierte Choice-/Discard-/Handplan-Tests
+  und der AI-Typecheck mit dem dokumentierten 8-GB-Node-Heap.
+
 ### P6 – F8: Department-of-Truth-Hintvertrag
 
 - Die deklarativen Hints an die bereits implementierte Engine-Semantik

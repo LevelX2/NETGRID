@@ -9,6 +9,7 @@ import {
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { currentTurnPlanningInvocationVariants } from "./corp-turn-planner-shadow";
 import type { PlanModuleId } from "./plan-kernel-types";
+import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import {
   enumerateCurrentPlanSchedulerRoutes,
   type PlanSchedulerContext,
@@ -87,6 +88,7 @@ export function buildRunnerTurnPlannerShadow(params: {
   selectedChoicesForDecision: (
     input: AiDecisionInput,
     action: LegalAction,
+    currentPortfolio?: ResidentPlanPortfolio,
   ) => AiDecision["selectedChoices"] | undefined;
   authorityMode?: "shadow" | "cutover";
 }): RunnerTurnPlannerShadowResult | undefined {
@@ -247,6 +249,7 @@ function headsForRoute(params: {
   selectedChoicesForDecision: (
     input: AiDecisionInput,
     action: LegalAction,
+    currentPortfolio?: ResidentPlanPortfolio,
   ) => AiDecision["selectedChoices"] | undefined;
 }): TurnPlanningHeadCandidate[] {
   const action = params.input.legalActions.find(
@@ -260,7 +263,11 @@ function headsForRoute(params: {
     stateIdentity: params.stateIdentity,
     action,
     candidate: params.route.candidate,
-    selectedChoices: params.selectedChoicesForDecision(params.input, action),
+    selectedChoices: params.selectedChoicesForDecision(
+      params.input,
+      action,
+      params.portfolio,
+    ),
   });
   const rootPlanInstanceId = findRootPlanInstanceId(
     params.route.instance.instanceId,

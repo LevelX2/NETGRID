@@ -14,7 +14,11 @@ import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement
 import { selectedCorpAccessPaymentChoiceOptionId } from "./corp-access-payment-choice";
 import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
-import { selectedDiscardChoiceOptionIds } from "./discard-choice-selection";
+import {
+  selectedDiscardChoiceOptionIds,
+  type DiscardChoiceKeepScore,
+} from "./discard-choice-selection";
+import type { CorpHandManagementSignal } from "../plans/corp-tactical-plan-modules";
 import {
   runnerDamagePreventionChoiceResolution,
   type RunnerOptionalChoiceResolution,
@@ -32,6 +36,7 @@ import { selectedShellTradersStartTurnChoiceOptionId } from "./shell-traders-cho
 import { runnerTagAvoidanceChoiceResolution } from "./tag-avoidance-choice-option";
 import { latestTraceContext } from "./trace-context";
 import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
+import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 import type { StrategicIntentState } from "../strategic-intent-state";
@@ -48,10 +53,6 @@ type PendingChoice = NonNullable<
 >;
 type PendingChoiceOptions = PendingChoice["options"];
 
-type DiscardScore = {
-  readonly total: number;
-};
-
 export type SelectedChoicesForDecisionDependencies = {
   readonly evaluateCorpOpeningHand: (input: AiDecisionInput) => {
     readonly decision: string;
@@ -62,7 +63,7 @@ export type SelectedChoicesForDecisionDependencies = {
   readonly discardKeepScore: (
     input: AiDecisionInput,
     card: VisibleCard,
-  ) => DiscardScore;
+  ) => DiscardChoiceKeepScore;
   readonly selectedRunnerProgramInstallTrashOptionIds: (
     input: AiDecisionInput,
     choice: PendingChoice,
@@ -82,10 +83,42 @@ export type SelectedChoicesForDecisionDependencies = {
   readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
 };
 
+function selectedCorpDiscardOptionIdsFromResidentHandPlan(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) => instance.instanceId === portfolio.executorInstanceId,
+  );
+  const moduleState = executor?.moduleState as
+    | { kind?: unknown; signal?: CorpHandManagementSignal }
+    | undefined;
+  const binding = moduleState?.signal?.discardChoiceBinding;
+  if (
+    executor?.moduleId !== "corp.hand_and_agenda_management" ||
+    moduleState?.kind !== "hand" ||
+    moduleState.signal?.phase !== "discard_window" ||
+    binding?.actionId !== action.actionId ||
+    binding.choiceId !== choice.choiceId ||
+    binding.observedAtStateVersion !== input.playerView.stateVersion
+  ) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The Corp hand plan must bind the exact discard choice and legal action before the resolver completes its payload.",
+    );
+  }
+  return [...binding.selectedOptionIds];
+}
+
 export function selectedChoicesForDecision(
   input: AiDecisionInput,
   action: LegalAction,
   dependencies: SelectedChoicesForDecisionDependencies,
+  currentPortfolio?: ResidentPlanPortfolio,
 ): AiDecision["selectedChoices"] | undefined {
   const choice = input.playerView.pendingChoice;
   if (action.type !== "resolve_choice" || !choice) return undefined;
@@ -117,6 +150,17 @@ export function selectedChoicesForDecision(
     );
   }
   if (choice.kind === "select_cards" && choice.source === "discard_phase") {
+    if (input.side === "corp") {
+      return resolved(
+        selectedCorpDiscardOptionIdsFromResidentHandPlan(
+          input,
+          action,
+          choice,
+          currentPortfolio,
+        ),
+        "resident_corp_hand_discard",
+      );
+    }
     const selected = selectedDiscardChoiceOptionIds(
       input,
       choice,

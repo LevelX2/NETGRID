@@ -133,6 +133,15 @@ export type CorpHandManagementSignal = {
     selectedAtStateVersion?: number;
     expectedOverflowAfterSelectedConversion?: number;
   };
+  discardChoiceBinding?: {
+    actionId: string;
+    choiceId: string;
+    observedAtStateVersion: number;
+    selectedOptionIds: string[];
+    discardedCardInstanceIds: string[];
+    retainedCardInstanceIds: string[];
+    evidenceCodes: string[];
+  };
   actionPriorityOrder?: string[];
   value: number;
   evidenceCode: string;

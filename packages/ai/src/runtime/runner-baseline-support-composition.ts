@@ -27,6 +27,7 @@ import {
   type SelectedChoicesForDecisionDependencies,
 } from "./selected-choices-for-decision";
 import { createVisibleIcebreakerProgramPredicate } from "./visible-icebreaker-program";
+import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 
 export type RunnerBaselineSupportCompositionDependencies =
   RunnerBaselinePlanGuardContextDependencies &
@@ -130,11 +131,13 @@ export function createRunnerBaselineSupportComposition(
   function selectedChoicesForDecision(
     input: AiDecisionInput,
     action: LegalAction,
+    currentPortfolio?: ResidentPlanPortfolio,
   ) {
     return selectedChoicesForRuntimeDecision(
       input,
       action,
       selectedChoicesDependencies,
+      currentPortfolio,
     );
   }
 
@@ -142,6 +145,7 @@ export function createRunnerBaselineSupportComposition(
     runnerHasConditionalPaymentContinueDecision,
     baselineShellTradersPlanIsVisible,
     selectedChoicesForDecision,
+    discardKeepScore,
     deckCapabilitiesForInput,
     runnerStrategicIntentForInput,
     isVisibleIcebreakerProgram,
