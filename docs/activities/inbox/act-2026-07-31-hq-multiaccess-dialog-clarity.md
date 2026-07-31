@@ -11,7 +11,8 @@ startedAt:
 completedAt:
 branch:
 releaseTarget:
-blockedBy: []
+blockedBy:
+  - act-2026-07-31-breach-between-access-timing-contract
 resultArtifacts: []
 checks: []
 ---
@@ -38,6 +39,14 @@ abschließt oder den gesamten Breach beendet.
 - Die Engine bezeichnet `decline_trash` innerhalb eines Breaches bereits als
   `Weiter accessen`; `apps/web/app/access-reveal-ui.ts` ersetzt diese
   Information derzeit pauschal durch `<Server>-Zugriff abschließen`.
+- Nutzerpräzisierung vom 31.07.2026: Der technische Zwei-Action-Vertrag soll
+  nicht als Rücksprung auf die allgemeine Run-Aktionsfläche sichtbar werden.
+  Nach `Nicht trashen – nächste Karte` soll der nächste bestätigte Access im
+  selben Zugriffsfenster erscheinen.
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/run-breach-multiaccess-spec.md`
+  legt bewusst genau eine Queue-Position pro `access_card`-Action fest. Diese
+  Engine-Revalidierung bleibt erhalten; das UI darf die beiden seriellen
+  Actions aber als einen durchgehenden Ablauf präsentieren.
 - Verwandter erledigter Engine-Schnitt:
   `docs/activities/done/act-2026-05-17-hq-access-root-upgrade-sequence.md`.
   Dieses Paket ändert dessen Queue- und Hidden-Info-Vertrag nicht.
@@ -54,9 +63,19 @@ abschließt oder den gesamten Breach beendet.
     nächsten Karte`;
   - beim letzten Kandidaten beispielsweise `Nicht trashen – Zugriff beenden`.
 - `HQ-Zugriff abschließen` aus dem kartenbezogenen Entscheidungsfenster
-  entfernen. Falls der bestehende technische Zwischenschritt über die
-  Aktionsfläche erhalten bleibt, muss der Dialog den nächsten Schritt
-  unmissverständlich ankündigen.
+  entfernen.
+- Im normalen Mehrfachzugriff nach der Entscheidung über die aktuelle Karte
+  nicht zur allgemeinen Run-Aktionsfläche zurückspringen. Das
+  Zugriffsfenster bleibt offen und zeigt nach der autoritativen
+  Zustandsbestätigung direkt die nächste Karte.
+- Der Client darf die nächste Action erst nach Empfang des aktualisierten
+  States und der daraus abgeleiteten exakten `access_card`-LegalAction
+  ausführen. Technische `actionId`-, `stateVersion`- und
+  `applyAction`-Revalidierung werden nicht übersprungen.
+- Falls eine regelkonforme echte Zwischenentscheidung, Reaction oder Choice
+  existiert, diese im selben Zugriffsfluss anzeigen und erst danach zur
+  nächsten Karte weitergehen. Der normale lineare Fall erhält keinen
+  zusätzlichen Bestätigungsklick.
 - Die vorhandenen `LegalActions` und den Breach-Fortschritt als alleinige
   Quelle für Beschriftung und angebotene Aktionen verwenden.
 
@@ -64,8 +83,8 @@ abschließt oder den gesamten Breach beendet.
 
 - Keine Änderung an Access-Anzahl, Kandidatenauswahl, Queue-Reihenfolge,
   Trash-Kosten, Agenda-Steal oder Run-Ende.
-- Keine automatische Action-Einreichung und kein Überspringen eines
-  erforderlichen `LegalAction`-/`applyAction`-Schritts.
+- Keine spekulative Action-Einreichung auf Basis einer erwarteten, aber noch
+  nicht vom aktualisierten State bestätigten nächsten Action.
 - Kein Redesign der gesamten Run-Aktionsfläche oder der übrigen
   Spieloberfläche.
 - Keine Offenlegung noch nicht accesseter HQ-Handkarten oder verdeckter
@@ -80,9 +99,16 @@ abschließt oder den gesamten Breach beendet.
       nach Ende des Runs oder des gesamten Breaches.
 - [ ] Beim letzten Kandidaten ist erkennbar, dass nur der Zugriffsvorgang
       beendet wird; die Formulierung behauptet kein vorzeitiges Run-Ende.
-- [ ] Der Runner findet den nächsten legalen Zugriff ohne Rätselraten; ein
-      eventuell verbleibender Wechsel zur Aktionsfläche wird ausdrücklich
-      erklärt.
+- [ ] Im linearen Mehrfachzugriff führt ein Klick auf `Nicht trashen – nächste
+      Karte` nach der Serverbestätigung zur nächsten Karte im selben Dialog;
+      es gibt keinen Rücksprung zur allgemeinen Run-Aktionsfläche und keinen
+      zweiten Klick auf `Zugriff auf Karte`.
+- [ ] Die Fortsetzung verwendet ausschließlich die nach dem ersten
+      `applyAction` neu bestätigte `access_card`-LegalAction mit aktueller
+      `actionId` und `stateVersion`.
+- [ ] Wenn statt der nächsten Access-Action eine echte Zwischenentscheidung
+      legal wird, zeigt derselbe Dialog diese Entscheidung und setzt erst
+      danach fort.
 - [ ] Remote-, R&D- und Archiv-Zugriffe behalten passende, nicht irreführende
       Beschriftungen.
 - [ ] UI-Regressionen decken nichtfinalen und finalen `decline_trash`, HQ-
@@ -100,6 +126,10 @@ abschließt oder den gesamten Breach beendet.
   beruhen.
 - Die visuelle Quelle darf nur aus bereits runner-sichtbaren Access-Daten
   abgeleitet werden.
+- Vor Umsetzung den blockierenden Timingvertrag aus
+  `act-2026-07-31-breach-between-access-timing-contract` schließen. Erst
+  danach ist belastbar, welche Actions zwischen zwei Access-Kandidaten legal
+  erscheinen dürfen.
 
 ## Ergebnisnotiz
 
