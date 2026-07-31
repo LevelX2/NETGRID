@@ -245,7 +245,7 @@ function assessProtectionAfterRezzing(
 function routePreventsImmediateAccess(
   route: CorpExactIceRezRouteProjection,
 ): boolean {
-  return route.after.runnerAccessSuccessProbability.numerator === 0;
+  return route.after?.runnerAccessSuccessProbability.numerator === 0;
 }
 
 function safeNonNegativeInteger(value: unknown): number {

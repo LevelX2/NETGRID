@@ -361,6 +361,76 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
+  it("uses the exact approached-ICE exchange when the holistic server assessment is unknown", () => {
+    const fixture = engineIceRezWindow("onr_v1_247_haunting-inquisition", 0, {
+      runnerCredits: 16,
+      runnerPrograms: ["onr_classic_030_psychic-friend"],
+    });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      runnerBreak: {
+        requiredCredits: 11,
+        canPayFromCurrentCredits: true,
+        paymentEvidenceSource: "engine_icebreaker_ability",
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "exact_resource_exchange",
+      totalRezCredits: 8,
+      resourceExchange: {
+        runnerRequiredCredits: 11,
+        runnerNormalCreditsRequired: 11,
+      },
+    });
+  });
+
+  it("uses an equal-cost exchange when it consumes all current Runner credits", () => {
+    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+      runnerCredits: 1,
+      runnerPrograms: ["onr_classic_027_early-worm"],
+    });
+
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "exact_resource_exchange",
+      totalRezCredits: 1,
+      resourceExchange: {
+        runnerRequiredCredits: 1,
+        runnerNormalCreditsRequired: 1,
+      },
+    });
+  });
+
+  it("does not promote an equal paid exchange while the Runner keeps normal credits", () => {
+    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+      runnerCredits: 2,
+      runnerPrograms: ["onr_classic_027_early-worm"],
+    });
+
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toBeUndefined();
+  });
+
   it("keeps a current exact exchange when a recurring credit shifts cash onto later ICE", () => {
     const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
       runnerCredits: 8,

@@ -3278,10 +3278,13 @@ function compareExactIceRezRoutes(
   if (left.projection.effect !== right.projection.effect) {
     return left.projection.effect === "satisfied" ? -1 : 1;
   }
-  const probabilityComparison = compareExactProbabilities(
-    left.projection.after.runnerAccessSuccessProbability,
-    right.projection.after.runnerAccessSuccessProbability,
-  );
+  const probabilityComparison =
+    left.projection.after && right.projection.after
+      ? compareExactProbabilities(
+          left.projection.after.runnerAccessSuccessProbability,
+          right.projection.after.runnerAccessSuccessProbability,
+        )
+      : undefined;
   if (probabilityComparison !== undefined && probabilityComparison !== 0) {
     return probabilityComparison;
   }
@@ -4297,6 +4300,23 @@ function validExactIceRezRoute(value: unknown): boolean {
   const quote = route.quote as Record<string, unknown> | undefined;
   const before = route.before as Record<string, unknown> | undefined;
   const after = route.after as Record<string, unknown> | undefined;
+  const resourceExchange = route.resourceExchange as
+    | Record<string, unknown>
+    | undefined;
+  const hasKnownHolisticAssessment =
+    before?.knowledge === "known" &&
+    after?.knowledge === "known" &&
+    validExactProbability(before.runnerAccessSuccessProbability) &&
+    validExactProbability(after.runnerAccessSuccessProbability);
+  const hasExactResourceExchange =
+    route.routeKind === "exact_resource_exchange" &&
+    resourceExchange !== undefined &&
+    knownNonNegativeInteger(resourceExchange.runnerRequiredCredits) &&
+    knownNonNegativeInteger(resourceExchange.runnerPumpCredits) &&
+    knownNonNegativeInteger(resourceExchange.runnerBreakCredits) &&
+    knownNonNegativeInteger(resourceExchange.runnerBreakUses) &&
+    nonEmptyString(resourceExchange.runnerBreakerInstanceId) &&
+    nonEmptyString(resourceExchange.runnerBreakerDefinitionId);
   return (
     nonEmptyString(route.actionId) &&
     nonEmptyString(route.sourceCardInstanceId) &&
@@ -4308,10 +4328,7 @@ function validExactIceRezRoute(value: unknown): boolean {
     quote.targetServerId === route.targetServerId &&
     knownNonNegativeInteger(quote.expiresAtStateVersion) &&
     knownNonNegativeInteger(quote.finalCredits) &&
-    before?.knowledge === "known" &&
-    after?.knowledge === "known" &&
-    validExactProbability(before.runnerAccessSuccessProbability) &&
-    validExactProbability(after.runnerAccessSuccessProbability) &&
+    (hasKnownHolisticAssessment || hasExactResourceExchange) &&
     (route.effect === "progress" || route.effect === "satisfied") &&
     knownNonNegativeInteger(route.totalRezCredits) &&
     quote.finalCredits === route.totalRezCredits

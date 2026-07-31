@@ -8,6 +8,8 @@ import bindNewRemoteD20Json from "../../../../../data/scenarios/ai-decision-chec
 import hardenBoundRemoteD88Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-daed3ad-latest-03-harden-bound-remote-d88.json";
 import continueTychoD89Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-daed3ad-latest-03-continue-tycho-d89.json";
 import installBeforeOverflowD94Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-daed3ad-latest-04-install-score-before-overflow-d94.json";
+import rezHauntingD78Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-daed3ad-latest-05-rez-haunting-d78.json";
+import rezDataWallD84Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-daed3ad-latest-06-rez-data-wall-d84.json";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
@@ -54,6 +56,14 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     continuation.runtime.residentPlanPortfolio = resident;
     const result = runAiDecisionCheckpoint(continuation);
 
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  });
+
+  it.each([
+    ["rezzes the materially taxing Haunting Inquisition", rezHauntingD78Json],
+    ["rezzes the exact affordable Data Wall", rezDataWallD84Json],
+  ])("%s", (_label, json) => {
+    const result = runAiDecisionCheckpoint(fixture(json));
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 });

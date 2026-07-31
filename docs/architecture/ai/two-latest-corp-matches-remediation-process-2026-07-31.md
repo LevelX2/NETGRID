@@ -226,6 +226,25 @@ Umgesetzt und fokussiert verifiziert:
   echte Unsicherheit und sinnvoller Bluff bleiben zulässige Decline-Fälle.
 - Commit: `fix(ai): quote current ice rez actions exactly`.
 
+Umgesetzt und fokussiert verifiziert:
+
+- Die vollständige Engine-Quote der aktuell angebotenen Rez-`LegalAction`
+  darf eine exakte lokale Ressourcenroute belegen, auch wenn die umfassendere
+  Serverprojektion wegen weiterer, noch nicht modellierter Effekte unbekannt
+  bleibt. Nur `exact_resource_exchange` erhält diese eng begrenzte Form;
+  Access-Reduction, qualitative Wirkung und andere Rez-Routen bleiben an die
+  bekannte Gesamtprojektion gebunden.
+- Ein positiver Runneraufwand ist materiell, wenn er die Rez-Kosten übersteigt
+  oder bei Kostengleichstand sämtliche aktuellen Runner-Credits bindet. Ein
+  Gleichstand mit verbleibender Runnerliquidität wird nicht aufgewertet.
+- Quote, Karteninstanz, Zielserver, StateVersion, Breakerinstanz, Pump-/Break-
+  Kosten, Zahlungsquelle und verbrauchte Ressourcen werden weiterhin exakt
+  validiert; Rabatt- und Standard-Rez-Actions bleiben getrennte Routen.
+- D78 rezzt Haunting Inquisition für 8 gegen exakt 11 Runner-Credits; D84
+  rezzt Data Wall für 1 gegen den letzten Runner-Credit.
+- Grün: beide Match-Checkpoints und 223 fokussierte Rez-, Plan- und
+  Nachbarverträge.
+
 ### P5 – F6 und F7: Overflow, Reserve und plangebundener Discard
 
 - Zustand 52 und Discardentscheidung 97 des langen Matches aktuell prüfen.

@@ -17,8 +17,8 @@ export type CorpExactIceRezRouteProjection = Readonly<{
   sourceDefinitionId: string;
   targetServerId: string;
   quote: Extract<VisibleCorpRezCostQuote, { complete: true }>;
-  before: KnownCorpScoreProtectionAssessment;
-  after: KnownCorpScoreProtectionAssessment;
+  before?: KnownCorpScoreProtectionAssessment;
+  after?: KnownCorpScoreProtectionAssessment;
   routeKind:
     | "access_reduction"
     | "exact_resource_exchange"
@@ -141,25 +141,25 @@ export function projectExactCorpIceRezRoute(params: {
       ice.instanceId === sourceCard.instanceId ? { ...ice, rezzed: true } : ice,
     ),
   });
-  if (before.knowledge !== "known" || after.knowledge !== "known") {
-    return undefined;
-  }
-  const probabilityComparison = compareExactProbabilities(
-    after.runnerAccessSuccessProbability,
-    before.runnerAccessSuccessProbability,
-  );
-  if (probabilityComparison === undefined) return undefined;
-  const resourceExchange =
-    probabilityComparison === 0
-      ? readExactCurrentRunResourceExchange({
-          input,
-          sourceCard,
-          targetServerId,
-          before,
-          after,
-          totalRezCredits,
-        })
-      : undefined;
+  const knownBefore = before.knowledge === "known" ? before : undefined;
+  const knownAfter = after.knowledge === "known" ? after : undefined;
+  const assessmentsKnown =
+    knownBefore !== undefined && knownAfter !== undefined;
+  const probabilityComparison = assessmentsKnown
+    ? compareExactProbabilities(
+        knownAfter.runnerAccessSuccessProbability,
+        knownBefore.runnerAccessSuccessProbability,
+      )
+    : undefined;
+  const resourceExchange = readExactCurrentRunResourceExchange({
+    input,
+    sourceCard,
+    targetServerId,
+    ...(assessmentsKnown ? { before: knownBefore, after: knownAfter } : {}),
+    totalRezCredits,
+  });
+  if (!assessmentsKnown && !resourceExchange) return undefined;
+  if (assessmentsKnown && probabilityComparison === undefined) return undefined;
   const freePersistentDefense =
     probabilityComparison === 0 &&
     !resourceExchange &&
@@ -171,13 +171,17 @@ export function projectExactCorpIceRezRoute(params: {
       totalRezCredits,
     });
   const knownAccessPathTax =
-    probabilityComparison === 0 && !resourceExchange && !freePersistentDefense
+    probabilityComparison === 0 &&
+    knownBefore !== undefined &&
+    knownAfter !== undefined &&
+    !resourceExchange &&
+    !freePersistentDefense
       ? readKnownCurrentRunAccessPathTax({
           input,
           sourceCard,
           targetServerId,
-          before,
-          after,
+          before: knownBefore,
+          after: knownAfter,
           totalRezCredits,
         })
       : undefined;
@@ -206,8 +210,7 @@ export function projectExactCorpIceRezRoute(params: {
     sourceDefinitionId: sourceCard.definitionId!,
     targetServerId,
     quote,
-    before,
-    after,
+    ...(assessmentsKnown ? { before: knownBefore, after: knownAfter } : {}),
     routeKind: resourceExchange
       ? "exact_resource_exchange"
       : freePersistentDefense
@@ -219,7 +222,8 @@ export function projectExactCorpIceRezRoute(params: {
             : "access_reduction",
     ...(resourceExchange ? { resourceExchange } : {}),
     ...(knownAccessPathTax !== undefined ? { knownAccessPathTax } : {}),
-    effect: after.protectsScore ? "satisfied" : "progress",
+    effect:
+      assessmentsKnown && knownAfter.protectsScore ? "satisfied" : "progress",
     totalRezCredits,
   };
 }
@@ -313,8 +317,8 @@ function readExactCurrentRunResourceExchange(params: {
   input: AiDecisionInput;
   sourceCard: VisibleCard;
   targetServerId: string;
-  before: KnownCorpScoreProtectionAssessment;
-  after: KnownCorpScoreProtectionAssessment;
+  before?: KnownCorpScoreProtectionAssessment;
+  after?: KnownCorpScoreProtectionAssessment;
   totalRezCredits: number;
 }):
   | NonNullable<CorpExactIceRezRouteProjection["resourceExchange"]>
@@ -344,8 +348,12 @@ function readExactCurrentRunResourceExchange(params: {
     quote.runnerBreak.canPayFromCurrentCredits !== true ||
     quote.runnerBreak.paymentEvidenceSource !== "engine_icebreaker_ability" ||
     !nonNegativeSafeInteger(input.playerView.opponent.credits) ||
-    (quote.runnerBreak.requiredCredits <= totalRezCredits &&
-      quote.runnerBreak.consumedCards.length === 0)
+    (quote.runnerBreak.consumedCards.length === 0 &&
+      (quote.runnerBreak.requiredCredits === 0 ||
+        quote.runnerBreak.requiredCredits < totalRezCredits ||
+        (quote.runnerBreak.requiredCredits === totalRezCredits &&
+          quote.runnerBreak.requiredCredits <
+            input.playerView.opponent.credits)))
   ) {
     return undefined;
   }
@@ -355,8 +363,10 @@ function readExactCurrentRunResourceExchange(params: {
   // complete path delta. Compare the two exact path assessments instead of
   // requiring an invalid single-ICE absolute balance.
   const runnerNormalCreditsLostOnAccessPath =
-    before.runnerCreditsRemainingOnBestAccessPath -
-    after.runnerCreditsRemainingOnBestAccessPath;
+    before && after
+      ? before.runnerCreditsRemainingOnBestAccessPath -
+        after.runnerCreditsRemainingOnBestAccessPath
+      : quote.runnerBreak.normalCreditsRequired;
   if (
     !nonNegativeSafeInteger(runnerNormalCreditsLostOnAccessPath) ||
     runnerNormalCreditsLostOnAccessPath > quote.runnerBreak.requiredCredits
@@ -599,14 +609,8 @@ export function exactCorpIceRezRoutesEqual(
     left.knownAccessPathTax === right.knownAccessPathTax &&
     left.effect === right.effect &&
     left.totalRezCredits === right.totalRezCredits &&
-    compareExactProbabilities(
-      left.before.runnerAccessSuccessProbability,
-      right.before.runnerAccessSuccessProbability,
-    ) === 0 &&
-    compareExactProbabilities(
-      left.after.runnerAccessSuccessProbability,
-      right.after.runnerAccessSuccessProbability,
-    ) === 0 &&
+    exactOptionalProtectionAssessmentsEqual(left.before, right.before) &&
+    exactOptionalProtectionAssessmentsEqual(left.after, right.after) &&
     left.quote.context === right.quote.context &&
     left.quote.complete === right.quote.complete &&
     left.quote.cardId === right.quote.cardId &&
@@ -629,6 +633,19 @@ export function exactCorpIceRezRoutesEqual(
       left.quote.increaseSourceDefinitionIds,
       right.quote.increaseSourceDefinitionIds,
     )
+  );
+}
+
+function exactOptionalProtectionAssessmentsEqual(
+  left: KnownCorpScoreProtectionAssessment | undefined,
+  right: KnownCorpScoreProtectionAssessment | undefined,
+): boolean {
+  if (!left || !right) return left === right;
+  return (
+    compareExactProbabilities(
+      left.runnerAccessSuccessProbability,
+      right.runnerAccessSuccessProbability,
+    ) === 0
   );
 }
 
