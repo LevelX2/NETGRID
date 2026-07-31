@@ -269,6 +269,13 @@ Stand: 2026-07-30
   PublicEvents, Zuschauerpayloads, öffentliche Replays und Logs bleiben
   getrennt. Führend ist
   `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
+- Das KI-Entscheidungsfenster hält den ersten vollständigen
+  Zugplan-Snapshot pro KI-Zug fest. Der ausgewählte Plan und alle betrachteten
+  Alternativen sind in einer kompakten, standardmäßig eingeklappten
+  Vergleichsliste mit Wert, Schrittzahl und Pflichtenbefund sichtbar; beim
+  Aufklappen erscheinen die tatsächliche semantische Schrittfolge,
+  Bewertungskomponenten und planspezifische Evidence. Fenster-, Bereichs- und
+  Planstatus bleiben über nachfolgende Aktionen erhalten.
 - Corp-Score- und Defense-Plan können eine exakte Same-Turn-Linie aus
   Remote-ICE und gebundener Agenda ausführen. Eine eng gegatete zentrale
   Steuer-/Disruptions-ICE-Zuweisung verhindert auf der letzten Aktion einen

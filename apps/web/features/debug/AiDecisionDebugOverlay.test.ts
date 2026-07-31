@@ -358,6 +358,26 @@ function trace(): MaintenanceAiTraceDetail {
               scalarValue: 42,
               stopReason: "observation_boundary",
               violatedObligationCount: 0,
+              steps: [
+                {
+                  candidateId: "head:corp.install",
+                  semanticActionType: "install.card",
+                  rootPlanInstanceId: "plan:corp.score_agenda:general",
+                  nextMilestoneId: "remote-established",
+                  currentActionId: "corp.install",
+                },
+                {
+                  candidateId: "head:corp.draw",
+                  semanticActionType: "economy.draw",
+                  rootPlanInstanceId: "plan:corp.score_agenda:general",
+                  nextMilestoneId: "score-material-ready",
+                },
+              ],
+              evaluationValues: {
+                agendaProgress: 28,
+                economy: 14,
+              },
+              evidenceCodes: ["two_step_plan_compared"],
             },
           ],
           pruneEvents: [],

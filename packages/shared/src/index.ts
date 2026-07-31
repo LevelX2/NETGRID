@@ -3367,6 +3367,15 @@ export type AiTurnPlanningDebug = {
       | "projected_plan_discovery_required"
       | "bounded_search_horizon";
     violatedObligationCount: number;
+    steps: Array<{
+      candidateId: string;
+      semanticActionType: string;
+      rootPlanInstanceId: string;
+      nextMilestoneId: string;
+      currentActionId?: string;
+    }>;
+    evaluationValues: Record<string, number>;
+    evidenceCodes: string[];
   }>;
   pruneEvents: Array<{
     candidateId: string;
@@ -4218,6 +4227,9 @@ function isAiTurnPlanningConsideredLines(value: unknown): boolean {
         "scalarValue",
         "stopReason",
         "violatedObligationCount",
+        "steps",
+        "evaluationValues",
+        "evidenceCodes",
       ]) &&
       ["lineId", "firstActionId", "rootPlanInstanceId"].every(
         (field) => typeof line[field] === "string",
@@ -4226,6 +4238,39 @@ function isAiTurnPlanningConsideredLines(value: unknown): boolean {
         (field) =>
           typeof line[field] === "number" && Number.isFinite(line[field]),
       ) &&
+      Array.isArray(line.steps) &&
+      line.steps.every((entry) => {
+        if (!entry || typeof entry !== "object" || Array.isArray(entry))
+          return false;
+        const step = entry as Record<string, unknown>;
+        return (
+          hasOnlyAiPlanFirstFields(step, [
+            "candidateId",
+            "semanticActionType",
+            "rootPlanInstanceId",
+            "nextMilestoneId",
+            "currentActionId",
+          ]) &&
+          [
+            "candidateId",
+            "semanticActionType",
+            "rootPlanInstanceId",
+            "nextMilestoneId",
+          ].every((field) => typeof step[field] === "string") &&
+          (step.currentActionId === undefined ||
+            typeof step.currentActionId === "string")
+        );
+      }) &&
+      Boolean(
+        line.evaluationValues &&
+        typeof line.evaluationValues === "object" &&
+        !Array.isArray(line.evaluationValues) &&
+        Object.values(line.evaluationValues).every(
+          (entry) => typeof entry === "number" && Number.isFinite(entry),
+        ),
+      ) &&
+      Array.isArray(line.evidenceCodes) &&
+      line.evidenceCodes.every((entry) => typeof entry === "string") &&
       [
         "projected_turn_end",
         "observation_boundary",

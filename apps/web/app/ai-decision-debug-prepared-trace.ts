@@ -1,5 +1,6 @@
 import type { PreparedAiDecisionDebug } from "../lib/client-api";
 
+import { parseAiPlanFirstDecisionDebug } from "./ai-plan-first-decision-ui";
 import type { MaintenanceAiTraceDetail } from "./maintenance";
 
 /** Converts the server-bound next AI decision into the inspector's trace view. */
@@ -29,6 +30,46 @@ export function preparedAiDecisionDebugTrace(
       preparedForExecution: true,
     },
   };
+}
+
+/** Returns only complete turn-planning snapshots suitable for turn retention. */
+export function preparedAiDecisionDebugTurnPlanTrace(
+  prepared: PreparedAiDecisionDebug,
+): MaintenanceAiTraceDetail | null {
+  const trace = preparedAiDecisionDebugTrace(prepared);
+  const decision = parseAiPlanFirstDecisionDebug(
+    trace.detail.planFirstDecision,
+  );
+  return decision?.turnPlanning?.consideredLines?.length ? trace : null;
+}
+
+/**
+ * Keeps the first complete planning snapshot of a turn and replaces it only
+ * when another match or another AI turn begins.
+ */
+export function retainPreparedAiDecisionDebugTurnPlanTrace(
+  current: MaintenanceAiTraceDetail | null,
+  prepared: PreparedAiDecisionDebug,
+): MaintenanceAiTraceDetail | null {
+  const next = preparedAiDecisionDebugTurnPlanTrace(prepared);
+  if (!next) return current;
+  const currentTurnKey = current
+    ? parseAiPlanFirstDecisionDebug(current.detail.planFirstDecision)
+        ?.turnPlanning?.turnKey
+    : undefined;
+  const nextTurnKey = parseAiPlanFirstDecisionDebug(
+    next.detail.planFirstDecision,
+  )?.turnPlanning?.turnKey;
+  if (
+    current &&
+    current.matchId === next.matchId &&
+    current.side === next.side &&
+    currentTurnKey &&
+    currentTurnKey === nextTurnKey
+  ) {
+    return current;
+  }
+  return next;
 }
 
 export function preparedAiDecisionDebugMatchesState(

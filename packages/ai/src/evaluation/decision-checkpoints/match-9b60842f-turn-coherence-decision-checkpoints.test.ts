@@ -93,6 +93,16 @@ function expectCutoverTurnPlanner(
     planning?.selectedLine.phases.flatMap((phase) => phase.nodes),
   ).toHaveLength(planning?.search?.selectedLineStepCount ?? 0);
   expect(planning?.consideredLines?.length).toBeGreaterThan(0);
+  for (const line of planning?.consideredLines ?? []) {
+    expect(line.steps).toHaveLength(line.stepCount);
+    expect(line.steps[0]?.currentActionId).toBe(line.firstActionId);
+    expect(
+      line.steps.slice(1).every((step) => step.currentActionId === undefined),
+    ).toBe(true);
+    expect(Object.values(line.evaluationValues).every(Number.isFinite)).toBe(
+      true,
+    );
+  }
   expect(planning?.campaigns).toEqual(
     expect.arrayContaining([
       expect.objectContaining({

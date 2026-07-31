@@ -877,6 +877,17 @@ function debugForRunnerPlanner(params: {
       stopReason: debugStopReason(line.stopReason),
       violatedObligationCount:
         line.priorityCoverage.violatedObligationIds.length,
+      steps: line.steps.map((step) => ({
+        candidateId: step.candidateId,
+        semanticActionType: step.invocation.semanticActionType,
+        rootPlanInstanceId: step.rootPlanInstanceId,
+        nextMilestoneId: step.nextMilestoneId,
+        ...(step.currentBinding
+          ? { currentActionId: step.currentBinding.actionId }
+          : {}),
+      })),
+      evaluationValues: { ...line.evaluationValues },
+      evidenceCodes: [...line.evidenceCodes],
     })),
     pruneEvents: params.search.pruneEvents.map((event) => ({
       candidateId: event.candidateId,

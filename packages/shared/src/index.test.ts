@@ -558,6 +558,17 @@ describe("AI decision debug sanitizing", () => {
               scalarValue: 42,
               stopReason: "observation_boundary",
               violatedObligationCount: 0,
+              steps: [
+                {
+                  candidateId: "head:corp.draw",
+                  semanticActionType: "economy.draw",
+                  rootPlanInstanceId: "plan:corp.score_agenda:general",
+                  nextMilestoneId: "score-material-ready",
+                  currentActionId: "corp.draw",
+                },
+              ],
+              evaluationValues: { economy: 42 },
+              evidenceCodes: ["score_material_needed"],
             },
           ],
           pruneEvents: [],
