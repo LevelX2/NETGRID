@@ -7772,11 +7772,10 @@ function buildCorpDomain(
                   );
             return qualitativeStaging ? [qualitativeStaging] : [];
           }
-          const selectedCentralThreat =
-            centralDefenseAllocation?.status === "known"
-              ? centralDefenseAllocation.evidence[
-                  centralDefenseAllocation.selectedServerId
-                ].threat
+          const targetCentralThreat =
+            centralDefenseAllocation?.status === "known" &&
+            (serverId === "hq" || serverId === "rd")
+              ? centralDefenseAllocation.evidence[serverId].threat
               : undefined;
           const targetCentralMissingCoverage =
             (serverId === "hq" || serverId === "rd") &&
@@ -7785,11 +7784,11 @@ function buildCorpDomain(
             );
           const centralPressure =
             serverId === "hq" || serverId === "rd"
-              ? selectedCentralThreat === "acute" ||
-                selectedCentralThreat === "terminal" ||
-                (selectedCentralThreat === "material" &&
+              ? targetCentralThreat === "acute" ||
+                targetCentralThreat === "terminal" ||
+                (targetCentralThreat === "material" &&
                   targetCentralMissingCoverage)
-                ? selectedCentralThreat
+                ? targetCentralThreat
                 : undefined
               : undefined;
           const visibleAgendaExposure =

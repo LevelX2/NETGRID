@@ -77,7 +77,7 @@ describe("plan-first live Corp central-defense allocation contract", () => {
     });
   });
 
-  it("funds and then installs the exact productive HQ fallback when allocated R&D is already protected", () => {
+  it("funds the exact HQ fallback at HQ's own priority when allocated R&D is already protected", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = centralDefenseInput({
       hqCards: [dataWall()],
@@ -176,7 +176,7 @@ describe("plan-first live Corp central-defense allocation contract", () => {
           kind: "parent_funding",
           gap: 1,
           parentPlanInstanceId: defenseParent?.instanceId,
-          parentPriorityClass: "P2",
+          parentPriorityClass: "P6",
           incrementalDefenseReserve: {
             targetCredits: 1,
             serverId: "hq",
