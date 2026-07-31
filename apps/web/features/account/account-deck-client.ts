@@ -33,8 +33,12 @@ export type AccountDeckQuota = {
 
 export function loadStandardDecks(
   fetcher: AccountFetch = fetch,
+  signal?: AbortSignal,
 ): Promise<{ catalog: { decks: StandardDeck[]; snapshots: DeckSnapshot[] } }> {
-  return accountRequest(fetcher, "/api/decks/standards", { method: "GET" });
+  return accountRequest(fetcher, "/api/decks/standards", {
+    method: "GET",
+    ...(signal ? { signal } : {}),
+  });
 }
 
 export function loadAccountDecks(

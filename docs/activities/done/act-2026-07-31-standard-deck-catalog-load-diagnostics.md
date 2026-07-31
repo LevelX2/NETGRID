@@ -1,19 +1,33 @@
 ---
 activityId: act-2026-07-31-standard-deck-catalog-load-diagnostics
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-31
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-31
+completedAt: 2026-07-31
+branch: codex/activities-worktree-20260731-213714
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/features/account/standard-deck-catalog-state.ts
+  - apps/web/features/account/standard-deck-catalog-state.test.ts
+  - apps/web/features/account/account-deck-client.ts
+  - apps/web/features/account/account-deck-client.test.ts
+  - apps/web/features/match-start/StandardDeckCatalogStatus.tsx
+  - apps/web/features/match-start/MatchHostConsole.tsx
+  - apps/web/app/page.tsx
+  - apps/web/app/globals.css
+checks:
+  - web-focused-8-tests-pass
+  - web-full-739-tests-pass
+  - web-typecheck-pass
+  - web-build-pass
+  - format-changed-pass
+  - git-diff-check-pass
 ---
 
 # Standarddeck-Katalogfehler sichtbar und behebbar machen
@@ -101,30 +115,30 @@ Startkonfiguration wiederholen.
 
 ## Akzeptanzkriterien
 
-- [ ] Ein erfolgreicher Katalog mit gültigen Runner- und Korp-Snapshots zeigt
-  die Standarddecks für Gäste und Accountnutzer wie bisher an.
-- [ ] Netzwerkfehler, HTTP-Fehler, Timeout und fachlich unbrauchbarer
-  Erfolgs-Payload erzeugen einen sichtbaren Katalogfehler statt einer
-  scheinbar regulär leeren Standarddeckliste.
-- [ ] Die Fehlermeldung steht im Match-Startbereich an den betroffenen
-  Deckauswahlen und bleibt von der allgemeinen Anzeige `Verbunden` eindeutig
-  getrennt.
-- [ ] `Standarddecks erneut laden` kann nach einem Fehler erfolgreich laden,
-  entfernt danach den Fehlerzustand und erhält die übrigen Startoptionen.
-- [ ] Ein später fehlgeschlagener Refresh löscht keinen zuvor erfolgreich
-  geladenen, weiterhin nutzbaren Katalog; der veraltete Stand und der
-  Refresh-Fehler werden unterscheidbar angezeigt.
-- [ ] Standard-/Zufallsstandard-Starts ohne Kandidaten werden mit konkreter
-  Begründung verhindert; zwei gültige persönliche Decks bleiben für
-  Accountnutzer nutzbar.
-- [ ] Diagnosedetails enthalten nur Server-Origin, Zeitpunkt,
-  Versuchszähler, Status und sanitizte Fehlerkategorie und leaken keine
-  Zugangsdaten oder Response-Inhalte.
-- [ ] Web-Regressionstests decken mindestens Gastfehler, Accountfehler mit
-  weiterhin sichtbaren persönlichen Decks, Timeout, erfolgreichen Retry,
-  Erhalt eines letzten gültigen Katalogs und die Startblockade ab.
-- [ ] Web-Typecheck, relevante Web-Tests, Web-Build und
-  `format:changed` sind erfolgreich.
+- [x] Ein erfolgreicher Katalog mit gültigen Runner- und Korp-Snapshots zeigt
+      die Standarddecks für Gäste und Accountnutzer wie bisher an.
+- [x] Netzwerkfehler, HTTP-Fehler, Timeout und fachlich unbrauchbarer
+      Erfolgs-Payload erzeugen einen sichtbaren Katalogfehler statt einer
+      scheinbar regulär leeren Standarddeckliste.
+- [x] Die Fehlermeldung steht im Match-Startbereich an den betroffenen
+      Deckauswahlen und bleibt von der allgemeinen Anzeige `Verbunden` eindeutig
+      getrennt.
+- [x] `Standarddecks erneut laden` kann nach einem Fehler erfolgreich laden,
+      entfernt danach den Fehlerzustand und erhält die übrigen Startoptionen.
+- [x] Ein später fehlgeschlagener Refresh löscht keinen zuvor erfolgreich
+      geladenen, weiterhin nutzbaren Katalog; der veraltete Stand und der
+      Refresh-Fehler werden unterscheidbar angezeigt.
+- [x] Standard-/Zufallsstandard-Starts ohne Kandidaten werden mit konkreter
+      Begründung verhindert; zwei gültige persönliche Decks bleiben für
+      Accountnutzer nutzbar.
+- [x] Diagnosedetails enthalten nur Server-Origin, Zeitpunkt,
+      Versuchszähler, Status und sanitizte Fehlerkategorie und leaken keine
+      Zugangsdaten oder Response-Inhalte.
+- [x] Web-Regressionstests decken mindestens Gastfehler, Accountfehler mit
+      weiterhin sichtbaren persönlichen Decks, Timeout, erfolgreichen Retry,
+      Erhalt eines letzten gültigen Katalogs und die Startblockade ab.
+- [x] Web-Typecheck, relevante Web-Tests, Web-Build und
+      `format:changed` sind erfolgreich.
 
 ## Umsetzungshinweise
 
@@ -145,4 +159,8 @@ Startkonfiguration wiederholen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der öffentliche Standarddeck-Katalog besitzt nun einen expliziten, getesteten
+Lade- und Fehlerzustand mit Timeout, Retry, Schutz vor veralteten Antworten und
+sanitizten Diagnosedaten. Ein letzter gültiger Katalog bleibt bei
+Refresh-Fehlern nutzbar; ohne Katalog werden nur standardabhängige Starts
+blockiert, während zwei persönliche Decks weiterhin verwendet werden können.

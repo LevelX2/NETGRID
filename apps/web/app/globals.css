@@ -749,6 +749,69 @@ select {
   gap: 10px;
 }
 
+.standardDeckCatalogStatus {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--focus), var(--line) 42%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--focus), var(--panel) 92%);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.standardDeckCatalogStatus.error {
+  border-color: color-mix(in srgb, var(--danger), var(--line) 35%);
+  background: color-mix(in srgb, var(--danger), var(--panel) 92%);
+}
+
+.standardDeckCatalogStatusHeading,
+.standardDeckCatalogStatusActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.standardDeckCatalogStatus p,
+.standardDeckCatalogStatus small {
+  margin: 0;
+  color: var(--muted);
+}
+
+.standardDeckCatalogStatus details {
+  min-width: min(100%, 280px);
+}
+
+.standardDeckCatalogStatus summary {
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.standardDeckCatalogStatus dl {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0 0;
+}
+
+.standardDeckCatalogStatus dl div {
+  display: grid;
+  grid-template-columns: minmax(90px, auto) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.standardDeckCatalogStatus dt {
+  color: var(--muted);
+}
+
+.standardDeckCatalogStatus dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .matchStartConsole {
   display: grid;
   gap: 14px;

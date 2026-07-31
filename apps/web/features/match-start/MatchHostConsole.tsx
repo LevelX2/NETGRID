@@ -23,12 +23,14 @@ import type {
   MatchStartPlayerClockMinutes,
   MatchStartPlayerClockMode,
 } from "../../app/match-start-storage";
+import type { StandardDeckCatalogState } from "../account/standard-deck-catalog-state";
 import {
   DeckMetadataLine,
   DeckSlotSelect,
 } from "../decks/DeckSelectionControls";
 import { MatchStartAdvancedOptions } from "./MatchStartAdvancedOptions";
 import { MatchStartChoiceSections } from "./MatchStartChoiceSections";
+import { StandardDeckCatalogStatus } from "./StandardDeckCatalogStatus";
 
 type AiDifficulty = "easy" | "normal" | "hard";
 type AiDeckPolicy =
@@ -66,6 +68,8 @@ export function MatchHostConsole({
   runnerSnapshots,
   corpSnapshots,
   localDecks,
+  standardDeckCatalogState,
+  standardDeckCatalogBlocksStart,
   runnerDeckSource,
   corpDeckSource,
   selectedRunnerSnapshotId,
@@ -108,6 +112,7 @@ export function MatchHostConsole({
   onSelectedCorpSnapshotId,
   onSelectedRunnerLocalDeckId,
   onSelectedCorpLocalDeckId,
+  onReloadStandardDeckCatalog,
   onCreateMatch,
   onHumanSideSelection,
   onCountdownSeconds,
@@ -141,6 +146,8 @@ export function MatchHostConsole({
   runnerSnapshots: MatchStartDeckSnapshot[];
   corpSnapshots: MatchStartDeckSnapshot[];
   localDecks: MatchStartLocalDeck[];
+  standardDeckCatalogState: StandardDeckCatalogState;
+  standardDeckCatalogBlocksStart: boolean;
   runnerDeckSource: DeckSlotSource;
   corpDeckSource: DeckSlotSource;
   selectedRunnerSnapshotId: string;
@@ -186,6 +193,7 @@ export function MatchHostConsole({
   onSelectedCorpSnapshotId(snapshotId: string): void;
   onSelectedRunnerLocalDeckId(deckId: string): void;
   onSelectedCorpLocalDeckId(deckId: string): void;
+  onReloadStandardDeckCatalog(): void;
   onCreateMatch(): void;
   onHumanSideSelection(selection: HumanSideSelection): void;
   onCountdownSeconds(seconds: 3 | 5 | 10): void;
@@ -305,6 +313,10 @@ export function MatchHostConsole({
       </div>
       {gameMode !== "ai_vs_ai" || aiDeckPolicyUsesPrimaryDeckSlots ? (
         <div className="deckSlotGrid">
+          <StandardDeckCatalogStatus
+            state={standardDeckCatalogState}
+            onRetry={onReloadStandardDeckCatalog}
+          />
           <DeckSlotSelect
             label={
               gameMode === "ai_vs_ai"
@@ -353,6 +365,12 @@ export function MatchHostConsole({
         className="button primary wide"
         onClick={onCreateMatch}
         data-testid="create-match"
+        disabled={standardDeckCatalogBlocksStart}
+        title={
+          standardDeckCatalogBlocksStart
+            ? "Standarddecks konnten nicht geladen werden. Wähle zwei persönliche Decks oder lade den Katalog erneut."
+            : undefined
+        }
       >
         {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
         {gameMode === "ai_vs_ai"
