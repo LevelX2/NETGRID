@@ -8,6 +8,7 @@ export const setupImplementation: CardImplementationDefinition = {
     {
       kind: "on_access",
       sourceZones: ["installed", "hq", "rd", "archives"],
+      installedSourceActivation: "any_rez_state",
       ignoreIfAccessedFrom: ["archives"],
       revealIfAccessedFrom: ["rd"],
       visibility: "hidden_info_barrier",

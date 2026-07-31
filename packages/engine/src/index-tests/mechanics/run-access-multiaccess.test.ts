@@ -795,7 +795,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
-  it("rezzes and accesses Setup! after the final jack-out decision", () => {
+  it("accesses unrezzed Setup! after the final jack-out decision", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("post-jack-out-setup"),
     );
@@ -834,10 +834,11 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_card" && action.payload?.cardId === setupId,
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass === true,
     );
 
-    expect(state.cardInstances[setupId]?.rezzed).toBe(true);
+    expect(state.cardInstances[setupId]?.rezzed).toBe(false);
     expect(state.timingPoint).toBe("access.resolve_card");
     expect(
       getLegalActions(state, "runner").map((action) => action.type),
@@ -854,6 +855,12 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
 
     expect(state.run?.accessedCardId).toBe(setupId);
     expect(state.runner.grip.length).toBe(Math.max(0, gripBefore - 2));
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 2,
+      cardsTrashed: 2,
+    });
     const replay = replayEvents(
       initial,
       state.eventLog.slice(initial.eventLog.length),

@@ -12,11 +12,14 @@ import {
 const DEFAULT_REZ_NODE_IDS = [
   "onr_v1_315_corprunners-shattered-remains",
   "onr_v1_323_experimental-ai",
-  "onr_v1_340_setup",
   "onr_v1_345_trap",
   "onr_v1_346_vacant-soulkiller",
   "onr_proteus_057_doppelganger-antibody",
   "onr_proteus_068_pattel-antibody",
+] as const satisfies readonly CardDefinitionId[];
+
+const ANY_REZ_STATE_NODE_IDS = [
+  "onr_v1_340_setup",
 ] as const satisfies readonly CardDefinitionId[];
 
 const NON_INSTALLED_NODE_IDS = [
@@ -29,6 +32,7 @@ const VIRUS_TEST_SITE_ID =
 
 const EXPECTED_NODE_ACCESS_IDS = [
   ...DEFAULT_REZ_NODE_IDS,
+  ...ANY_REZ_STATE_NODE_IDS,
   VIRUS_TEST_SITE_ID,
   ...NON_INSTALLED_NODE_IDS,
 ].sort();
@@ -68,6 +72,22 @@ describe("node access rez contract", () => {
           (effect) =>
             (effect.installedSourceActivation ?? "requires_rezzed") ===
             "requires_rezzed",
+        ),
+      ).toBe(true);
+    },
+  );
+
+  it.each(ANY_REZ_STATE_NODE_IDS)(
+    "allows every installed access effect on %s in either rez state",
+    (definitionId) => {
+      const installedEffects = accessEffects(definitionId).filter((effect) =>
+        effect.sourceZones.includes("installed"),
+      );
+
+      expect(installedEffects.length).toBeGreaterThan(0);
+      expect(
+        installedEffects.every(
+          (effect) => effect.installedSourceActivation === "any_rez_state",
         ),
       ).toBe(true);
     },
@@ -120,4 +140,3 @@ describe("node access rez contract", () => {
     },
   );
 });
-
