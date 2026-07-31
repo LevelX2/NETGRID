@@ -1,19 +1,29 @@
 ---
 activityId: act-2026-07-31-public-games-winner-and-victory-reason
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-31
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-31
+completedAt: 2026-07-31
+branch: codex/activities-worktree-20260731-215600
 releaseTarget: Current private playtest
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/features/games/public-games-model.ts
+  - apps/web/features/games/PublicGamesPanel.tsx
+  - apps/web/app/globals.css
+  - apps/web/features/games/public-games-model.test.ts
+  - apps/web/features/games/public-games-winner-display.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web test -- apps/web/features/games/public-games-model.test.ts apps/web/features/games/public-games-compact-view.test.ts apps/web/features/games/public-games-winner-display.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/web build
+  - corepack pnpm format:changed
+  - git diff --check
 ---
 
 # Spieleliste: Gewinner und konkreten Sieggrund hervorheben
@@ -130,38 +140,38 @@ mehr unter der unspezifischen Anzeige `Regulär beendet` verschwinden.
 
 ## Akzeptanzkriterien
 
-- [ ] Die ausführliche Darstellung eines Agenda-Siegs nennt Agenda-Punkte als
+- [x] Die ausführliche Darstellung eines Agenda-Siegs nennt Agenda-Punkte als
       Sieggrund und markiert genau den autoritativen Gewinnernamen.
-- [ ] Ein Korp-Sieg mit `reason: flatline` zeigt verständlich `Flatline` und
+- [x] Ein Korp-Sieg mit `reason: flatline` zeigt verständlich `Flatline` und
       markiert den Korp-Teilnehmer als Gewinner, unabhängig vom
       Agenda-Punktestand.
-- [ ] Ein Runner-Sieg mit `reason: corp_deck_empty` zeigt verständlich, dass
+- [x] Ein Runner-Sieg mit `reason: corp_deck_empty` zeigt verständlich, dass
       die Korp nicht mehr aus R&D ziehen konnte beziehungsweise R&D leer war,
       und markiert den Runner-Teilnehmer als Gewinner.
-- [ ] `bad_publicity_7`, `forfeit`, `time_expired`, `draw` und `unknown`
+- [x] `bad_publicity_7`, `forfeit`, `time_expired`, `draw` und `unknown`
       besitzen jeweils eine passende, nicht irreführende Darstellung.
-- [ ] Bei `human_vs_human` mit zwei individuellen Anzeigenamen wird der
+- [x] Bei `human_vs_human` mit zwei individuellen Anzeigenamen wird der
       richtige Name unabhängig von Runner-/Korp-Seite eindeutig als Gewinner
       hervorgehoben.
-- [ ] Zwei identische Anzeigenamen führen nicht zu zwei Gewinner-Markierungen;
+- [x] Zwei identische Anzeigenamen führen nicht zu zwei Gewinner-Markierungen;
       allein `winnerSide` beziehungsweise der autoritative Seitenfallback
       entscheidet.
-- [ ] Bei Unentschieden erhält kein Teilnehmer Krone, Trophäe,
+- [x] Bei Unentschieden erhält kein Teilnehmer Krone, Trophäe,
       Gewinner-Label oder Siegeranimation.
-- [ ] Die Gewinnerkennzeichnung ist per Text beziehungsweise ARIA-Semantik
+- [x] Die Gewinnerkennzeichnung ist per Text beziehungsweise ARIA-Semantik
       zugänglich und bleibt ohne Farbe sowie bei `prefers-reduced-motion`
       verständlich.
-- [ ] Der visuelle Effekt ist in mehreren abgeschlossenen Zeilen ruhig und
+- [x] Der visuelle Effekt ist in mehreren abgeschlossenen Zeilen ruhig und
       lesbar; Namen, Status, Punkte, Grund und Aktionen überdecken sich auf
       Desktop und schmalem Layout nicht.
-- [ ] Die kompakte Ansicht bleibt einzeilig und höhenstabil oder dokumentiert
+- [x] Die kompakte Ansicht bleibt einzeilig und höhenstabil oder dokumentiert
       bewusst, warum dort nur ein kurzer Sieggrund ohne Namensanimation
       erscheint.
-- [ ] Web-Regressionstests decken mindestens Agenda-Sieg, Flatline,
+- [x] Web-Regressionstests decken mindestens Agenda-Sieg, Flatline,
       `corp_deck_empty`, Bad Publicity, Aufgabe, Zeitablauf, Draw, unbekannten
       Abschluss, Mensch-gegen-Mensch mit individuellen Namen sowie
       Reduced-Motion-/Semantikklassen ab.
-- [ ] Web-Typecheck, fokussierte Webtests, Web-Build,
+- [x] Web-Typecheck, fokussierte Webtests, Web-Build,
       `corepack pnpm format:changed` und `git diff --check` sind erfolgreich.
 
 ## Umsetzungshinweise
@@ -186,4 +196,11 @@ mehr unter der unspezifischen Anzeige `Regulär beendet` verschwinden.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die öffentliche Spieleliste leitet nun sämtliche vorhandenen Ergebnisgründe
+exhaustiv aus `ApiGameResultReason` ab. Abgeschlossene Partien rendern Runner
+und Korp getrennt; ausschließlich die autoritative Gewinnerseite erhält eine
+zugängliche Gewinnerkennzeichnung, Krone, goldene Kontur und einen einmaligen
+Glanz. Draws bleiben neutral, Namensgleichheit beeinflusst die Auswertung
+nicht, historische Listeneinträge nutzen weiterhin den vorhandenen
+seitenbasierten Fallback. Die kompakte 38-Pixel-Zeile zeigt Kurzgründe und
+unterdrückt die Animation; Reduced Motion erhält alle statischen Signale.

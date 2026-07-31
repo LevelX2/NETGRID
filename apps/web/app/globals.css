@@ -1356,6 +1356,94 @@ select {
   gap: 8px;
 }
 
+.publicGameParticipants {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.publicGameParticipant {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+
+.publicGameParticipant small,
+.publicGameVersus {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.publicGameParticipant small {
+  position: relative;
+  z-index: 1;
+}
+
+.publicGameParticipantName {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.publicGameParticipant.winner {
+  border-color: rgb(247 194 66 / 0.65);
+  color: #ffe7a3;
+  background:
+    linear-gradient(115deg, rgb(247 194 66 / 0.16), transparent 62%),
+    rgb(247 194 66 / 0.05);
+  box-shadow:
+    0 0 0 1px rgb(247 194 66 / 0.08),
+    0 0 14px rgb(247 194 66 / 0.12);
+}
+
+.publicGameParticipant.winner::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: -2px auto -2px -45%;
+  width: 30%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 248 206 / 0.5),
+    transparent
+  );
+  transform: skewX(-18deg);
+  pointer-events: none;
+  animation: publicGameWinnerShine 800ms ease-out 180ms 1 both;
+}
+
+.publicGameWinnerCrown {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  color: #ffd76a;
+  filter: drop-shadow(0 0 3px rgb(247 194 66 / 0.45));
+}
+
+@keyframes publicGameWinnerShine {
+  from {
+    left: -45%;
+  }
+
+  to {
+    left: 120%;
+  }
+}
+
 .publicGameStatus {
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -1420,7 +1508,10 @@ select {
   white-space: nowrap;
 }
 
-.publicGameConclusion.regular {
+.publicGameConclusion.agenda_points,
+.publicGameConclusion.flatline,
+.publicGameConclusion.corp_deck_empty,
+.publicGameConclusion.bad_publicity_7 {
   color: var(--success);
 }
 
@@ -1480,6 +1571,20 @@ select {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.publicGameCard.compact .publicGameParticipants {
+  flex-wrap: nowrap;
+}
+
+.publicGameCard.compact .publicGameParticipant {
+  flex: 0 1 auto;
+  padding: 1px 5px;
+}
+
+.publicGameCard.compact .publicGameParticipant.winner::after {
+  display: none;
+  animation: none;
 }
 
 .publicGameCard.compact .publicGameStatus {
@@ -2594,6 +2699,23 @@ select {
 
 .deckStandardCopyToggle {
   border-color: color-mix(in srgb, var(--accent), var(--line) 45%);
+}
+
+.deckStandardCopyStatus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid color-mix(in srgb, var(--danger), var(--line) 55%);
+  border-radius: 8px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--section-bg), var(--danger) 6%);
+  font-size: 12px;
+}
+
+.deckStandardCopyStatus .button {
+  flex: 0 0 auto;
 }
 
 .deckImportInline .deckTextArea {
@@ -16333,6 +16455,10 @@ select,
     animation: none;
   }
   .lobbyCountdownDigit {
+    animation: none;
+  }
+  .publicGameParticipant.winner::after {
+    display: none;
     animation: none;
   }
 }

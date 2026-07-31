@@ -1465,6 +1465,50 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it.each(["continue_run", "decline_rez"] as const)(
+    "shows a single Schematics expose at HQ breach start for %s",
+    (actionType) => {
+      const item = formatChronicleEvent(
+        makeEvent(actionType, {
+          actor: actionType === "decline_rez" ? "corp" : "runner",
+          effectSide: "runner",
+          serverLabel: "HQ",
+          breachId: "run_1.breach",
+          hiddenZoneBarrier: true,
+          hiddenZoneAction:
+            "schematics_search_engine_expose_installed_cards_review",
+          publicRevealKind: "expose",
+          sourceDefinitionId: "onr_classic_032_schematics-search-engine",
+          sourceTitle: "Schematics Search Engine",
+          revealedCount: 2,
+          publicRevealDefinitionIds: "simple_barrier_ice,simple_economy_asset",
+          publicRevealTitles: "Simple Barrier ICE||Simple Economy Asset",
+          exposedServerLabels: "R&D ICE 1,Remote 1 Root 1",
+        }),
+        "runner",
+      );
+
+      expect(item.title).toBe(
+        "Du hast mit Schematics Search Engine 2 installierte Korp-Karten beim HQ-Breach aufgedeckt.",
+      );
+      expect(item.description).toBe(
+        "Aufgedeckt: Simple Barrier ICE, Simple Economy Asset. Die Ansicht bleibt offen, bis der Runner das Ansehen beendet.",
+      );
+      expect(item.category).toBe("run");
+      expect(item.cardDefinitionId).toBe(
+        "onr_classic_032_schematics-search-engine",
+      );
+      expect(item.chips).toEqual(
+        expect.arrayContaining([
+          "Schematics Search Engine",
+          "HQ-Breach",
+          "Expose",
+          "2 Karten",
+        ]),
+      );
+    },
+  );
+
   it("shows Schematics Search Engine expose review finish instead of a generic choice", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {

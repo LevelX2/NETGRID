@@ -784,8 +784,15 @@ export function createCorpZoneRuntimeHosts(
         hiddenZoneBarrier: true,
         hiddenZoneAction:
           "schematics_search_engine_expose_installed_cards_finish",
+        effectSide: "runner",
         sourceCardId,
         sourceDefinitionId,
+        ...(state.run?.breach?.serverId === "hq"
+          ? {
+              serverId: "hq",
+              breachId: state.run.breach.breachId,
+            }
+          : {}),
       };
       return;
     }

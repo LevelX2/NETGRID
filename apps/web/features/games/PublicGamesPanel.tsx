@@ -1,8 +1,16 @@
 "use client";
 
-import { Download, Eye, History, LogIn, RotateCcw, Users } from "lucide-react";
+import {
+  Crown,
+  Download,
+  Eye,
+  History,
+  LogIn,
+  RotateCcw,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 
 import type { PublicMatchEntry } from "../../lib/client-api";
 import {
@@ -17,6 +25,7 @@ import {
   publicGamesFilterLabel,
   publicGamesViewModeLabel,
   publicMatchConclusion,
+  publicMatchParticipants,
   publicMatchResultScore,
   type PublicGamesFilter,
   type PublicGamesViewMode,
@@ -171,6 +180,7 @@ function PublicGameCard({
   const gamebookTarget = publicGamebookTarget(entry);
   const resultScore = publicMatchResultScore(entry);
   const conclusion = publicMatchConclusion(entry);
+  const participants = publicMatchParticipants(entry);
   const ActionIcon =
     entry.status === "open" ? LogIn : entry.status === "active" ? Eye : History;
   return (
@@ -181,7 +191,53 @@ function PublicGameCard({
             <span className={`publicGameStatus ${entry.status}`}>
               {statusLabel(entry.status)}
             </span>
-            <strong>{publicMatchParticipantLabel(entry)}</strong>
+            {entry.status === "finished" ? (
+              <strong
+                className="publicGameParticipants"
+                aria-label={participants
+                  .map(
+                    (participant) =>
+                      `${participant.displayName}, ${sideLabel(participant.side)}${
+                        participant.isWinner ? ", Gewinner" : ""
+                      }`,
+                  )
+                  .join(" gegen ")}
+              >
+                {participants.map((participant, index) => (
+                  <Fragment key={participant.side}>
+                    {index > 0 ? (
+                      <span className="publicGameVersus" aria-hidden="true">
+                        vs
+                      </span>
+                    ) : null}
+                    <span
+                      className={`publicGameParticipant ${participant.side}${
+                        participant.isWinner ? " winner" : ""
+                      }`}
+                    >
+                      {participant.isWinner ? (
+                        <Crown
+                          className="publicGameWinnerCrown"
+                          size={14}
+                          aria-hidden="true"
+                        />
+                      ) : null}
+                      <span className="srOnly">
+                        {participant.isWinner ? "Gewinner: " : ""}
+                      </span>
+                      <span className="publicGameParticipantName">
+                        {participant.displayName}
+                      </span>
+                      <small aria-hidden="true">
+                        ({sideLabel(participant.side)})
+                      </small>
+                    </span>
+                  </Fragment>
+                ))}
+              </strong>
+            ) : (
+              <strong>{publicMatchParticipantLabel(entry)}</strong>
+            )}
           </div>
           <p className="publicGameMeta">
             {matchModeLabel(entry.matchMode)} ·{" "}
@@ -360,9 +416,13 @@ function cardPoolLabel(pool: PublicMatchEntry["cardPool"]): string {
 }
 
 function winnerLabel(entry: PublicMatchEntry): string {
-  if (entry.winner === "runner") return "Runner gewinnt";
-  if (entry.winner === "corp") return "Korp gewinnt";
-  if (entry.winner === "draw") return "Unentschieden";
+  const winner =
+    entry.result?.winnerSide ?? entry.result?.winner ?? entry.winner;
+  if (winner === "runner") return "Runner gewinnt";
+  if (winner === "corp") return "Korp gewinnt";
+  if (winner === "draw" || entry.result?.reason === "draw") {
+    return "Unentschieden";
+  }
   return "beendet";
 }
 

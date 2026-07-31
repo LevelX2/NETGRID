@@ -126,6 +126,8 @@ export function chronicleResolveChoiceBelongsToRunPayload(
     payload.runnerMemoryCheckpointResolved === true ||
     payload.hiddenZoneAction ===
       "proteus_breaker_strength_penalty_access_counters" ||
+    payload.hiddenZoneAction ===
+      "schematics_search_engine_expose_installed_cards_finish" ||
     payload.hiddenZoneAction === "successful_run_temporary_encounter" ||
     payload.hiddenZoneAction === "successful_run_intervention_declined" ||
     payload.counterType === "breaker_strength_penalty"

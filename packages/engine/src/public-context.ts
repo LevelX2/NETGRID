@@ -878,6 +878,24 @@ export function publicContextForAction(
   if (legalAction.payload?.hiddenZoneBarrier === true) {
     context.hiddenZoneBarrier = true;
     context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
+    if (
+      (legalAction.payload.hiddenZoneAction ===
+        "schematics_search_engine_expose_installed_cards_review" ||
+        legalAction.payload.hiddenZoneAction ===
+          "schematics_search_engine_expose_installed_cards_finish") &&
+      legalAction.payload.effectSide === "runner"
+    ) {
+      context.effectSide = "runner";
+    }
+    if (
+      (legalAction.payload.hiddenZoneAction ===
+        "schematics_search_engine_expose_installed_cards_review" ||
+        legalAction.payload.hiddenZoneAction ===
+          "schematics_search_engine_expose_installed_cards_finish") &&
+      typeof legalAction.payload.breachId === "string"
+    ) {
+      context.breachId = legalAction.payload.breachId;
+    }
     if (typeof legalAction.payload.searchedZone === "string")
       context.searchedZone = legalAction.payload.searchedZone;
     if (typeof legalAction.payload.selectedCount === "number")
