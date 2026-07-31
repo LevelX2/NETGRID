@@ -5,6 +5,7 @@ import {
   discardOptionInstanceId,
   stableDiscardChoiceOptionIds,
 } from "./discard-choice-option";
+import type { ProjectedHandDisposition } from "../plans/turn-projection";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -12,6 +13,7 @@ type PendingChoice = NonNullable<
 type PendingChoiceOption = PendingChoice["options"][number];
 type DiscardScore = {
   readonly total: number;
+  readonly planDisposition?: ProjectedHandDisposition;
 };
 
 export function selectedDiscardChoiceOptionIds(
@@ -78,10 +80,33 @@ function compareDiscardCandidates(
   right: { option: PendingChoiceOption; score: DiscardScore },
 ): number {
   return (
+    discardProtectionRank(left.score.planDisposition) -
+      discardProtectionRank(right.score.planDisposition) ||
     left.score.total - right.score.total ||
     left.option.label.localeCompare(right.option.label, "de") ||
     left.option.id.localeCompare(right.option.id)
   );
+}
+
+function discardProtectionRank(
+  disposition: ProjectedHandDisposition | undefined,
+): number {
+  switch (disposition) {
+    case "current_plan_route":
+      return 5;
+    case "support_for_need":
+    case "campaign_hold":
+      return 4;
+    case "blocked_but_developable":
+      return 2;
+    case "assessment_unknown":
+      return 1;
+    case "redundant":
+    case "currently_dead":
+    case "discard_candidate":
+    case undefined:
+      return 0;
+  }
 }
 
 function inputWithoutDiscardedCard(

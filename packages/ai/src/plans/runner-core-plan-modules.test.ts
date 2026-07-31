@@ -4,6 +4,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 import { instantiatePlanProposal } from "./plan-instance";
 import {
   createRunnerCorePlanModules,
+  runnerCoveragePlanHandDisposition,
   runnerDevelopmentCardAdmission,
   runnerFundingRouteCandidateIsMaterializable,
   type RunnerCorePlanDomain,
@@ -684,6 +685,99 @@ describe("Runner core plan modules", () => {
       ).toEqual([`install-${cardRole}`]);
     },
   );
+
+  it.each(["breaker_wall", "breaker_code_gate", "breaker_sentry"] as const)(
+    "lets one universal breaker provide concrete %s coverage",
+    (requiredRole) => {
+      const install = candidate(
+        "install-universal",
+        "install_card",
+        "install.card",
+        "universal-breaker",
+      );
+      const module = coreModule("runner.rig_and_coverage", () => [
+        "universal_breaker",
+      ]);
+      const runnerContext = context([install], {
+        coverageGaps: [
+          {
+            gapId: requiredRole,
+            requiredRole,
+            priorityClass: "P4",
+            evidenceCode: "test_universal_coverage",
+            deckHasAnswer: true,
+            answerInHand: true,
+            fundingActionIds: [],
+            directSearchActionIds: [],
+            searchEngineSetupActionIds: [],
+            drawForAnswerActionIds: [],
+          },
+        ],
+      });
+      const proposal = module.discover(runnerContext)[0]!;
+      const instance = instantiatePlanProposal(proposal, 10);
+      const materialized = module.materialize(
+        instance,
+        {} as never,
+        runnerContext,
+      );
+
+      expect(instance.phase).toBe("install_answer");
+      expect(materialized.step.capability.capabilityId).toBe(
+        `install_${requiredRole}`,
+      );
+      expect(
+        materialized.candidates.map((entry) => entry.candidate.actionId),
+      ).toEqual(["install-universal"]);
+    },
+  );
+
+  it("holds the sole reachable provider for a single-definition coverage dependency", () => {
+    const provider = {
+      instanceId: "sole-provider",
+      definitionId: "universal-breaker",
+      title: "Universal Breaker",
+      type: "program" as const,
+      known: true,
+    };
+    const input = {
+      side: "runner",
+      playerView: {
+        own: {
+          gripOrHq: [provider],
+          rig: [],
+        },
+        specialZones: { setAside: [] },
+      },
+      ownDeckStrategyProfile: {
+        runnerEngineDoctrine: {
+          providers: [
+            {
+              providerId: "provider:universal-breaker",
+              cardId: "universal-breaker",
+              capabilities: ["runner.coverage.breaker"],
+            },
+          ],
+          dependencies: [
+            {
+              dependencyId: "runner.dependency.breaker_coverage",
+              criticality: "single_definition",
+              providerIds: ["provider:universal-breaker"],
+            },
+          ],
+        },
+      },
+    } as unknown as AiDecisionInput;
+
+    expect(runnerCoveragePlanHandDisposition(input, provider)).toBe(
+      "support_for_need",
+    );
+    input.playerView.own.gripOrHq.push({
+      ...provider,
+      instanceId: "second-provider",
+    });
+    expect(runnerCoveragePlanHandDisposition(input, provider)).toBeUndefined();
+  });
 
   it("does not create a second Psychic Friend route after the gap is gone", () => {
     const module = coreModule("runner.rig_and_coverage", () => [

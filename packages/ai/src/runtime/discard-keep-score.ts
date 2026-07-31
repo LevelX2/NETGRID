@@ -15,6 +15,7 @@ import {
   corpHandDuplicateCount,
   corpHandPressureAssessment,
 } from "./corp-hand-inventory-facts";
+import type { ProjectedHandDisposition } from "../plans/turn-projection";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -23,6 +24,7 @@ export type DiscardCandidateScore = {
   baseValue: number;
   planFit: number;
   strategicFit: number;
+  planDisposition?: ProjectedHandDisposition;
   evidence: string[];
 };
 
@@ -42,6 +44,10 @@ export type DiscardKeepScoreDependencies = {
   ) => boolean;
   readonly isRunnerEconomyRole: (role: string) => boolean;
   readonly runnerCardLooksLikeCreditPayout: (card: VisibleCard) => boolean;
+  readonly runnerPlanHandDisposition?: (
+    input: AiDecisionInput,
+    card: VisibleCard,
+  ) => ProjectedHandDisposition | undefined;
 };
 
 export function discardKeepScore(
@@ -132,6 +138,10 @@ export function discardKeepScore(
     duplicateCount,
     installedSameDefinition,
   });
+  const runnerPlanDisposition =
+    input.side === "runner"
+      ? dependencies.runnerPlanHandDisposition?.(input, card)
+      : undefined;
   let baseValue = 100;
   const corpAdvancementBurstSupportsVisibleAgenda =
     input.side === "corp" &&
@@ -233,6 +243,9 @@ export function discardKeepScore(
     baseValue,
     planFit,
     strategicFit,
+    ...(runnerPlanDisposition
+      ? { planDisposition: runnerPlanDisposition }
+      : {}),
     evidence: sortedUnique([
       "discard_score:base",
       ...(corpAdvancementBurstSupportsVisibleAgenda
@@ -263,6 +276,9 @@ export function discardKeepScore(
         : []),
       ...(runnerMatchpointCloseoutBonus > 0
         ? ["discard_score:runner_matchpoint_closeout"]
+        : []),
+      ...(runnerPlanDisposition
+        ? [`discard_score:runner_plan_disposition:${runnerPlanDisposition}`]
         : []),
       ...corpConditionalPayoff.evidence,
       ...(planFit > 0 ? ["discard_score:planfit"] : []),

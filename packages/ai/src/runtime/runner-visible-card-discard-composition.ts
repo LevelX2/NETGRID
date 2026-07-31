@@ -1,6 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import { runnerCoveragePlanHandDisposition } from "../plans/runner-core-plan-modules";
 import { createDiscardKeepScore } from "./discard-keep-score";
 import { createRunnerVisibleCardContext } from "./runner-visible-card-context";
 import type { VisibleCardHeuristicDefinition } from "./visible-card-heuristics";
@@ -47,6 +48,7 @@ export function createRunnerVisibleCardDiscardComposition(
     runnerBadPublicityOrTraceTechCard,
     isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
     runnerCardLooksLikeCreditPayout,
+    runnerPlanHandDisposition: runnerCoveragePlanHandDisposition,
   });
 
   return {

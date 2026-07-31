@@ -22,9 +22,21 @@ describe("A36A postfix runner engine remediation checkpoints", () => {
 
   it("still permits the draw engine when enough cleanup capacity exists", () => {
     const checkpoint = mutateFixture(overflowBeforeCoverageJson, (result) => {
+      const installedCoverageId = "runner_onr_classic_031_rent-i-con_3";
       result.source.kind = "synthetic_companion";
       result.source.findingId = "A36A-POSTFIX-D45-ROOMY-HAND-CONTROL";
       result.engine.testOnlyGameState.runner.maxHandSize = 10;
+      result.engine.testOnlyGameState.runner.grip =
+        result.engine.testOnlyGameState.runner.grip.filter(
+          (cardId) => cardId !== installedCoverageId,
+        );
+      result.engine.testOnlyGameState.runner.rig.programs.push(
+        installedCoverageId,
+      );
+      result.engine.testOnlyGameState.runner.memoryUsed += 2;
+      result.engine.testOnlyGameState.cardInstances[
+        installedCoverageId
+      ]!.zone.zone = "rig";
       result.expectation = {
         acceptableActions: [
           {

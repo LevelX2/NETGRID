@@ -70,7 +70,7 @@ import {
 } from "../plans/corp-tactical-plan-modules";
 import {
   createRunnerCorePlanModules,
-  runnerCoverageRoleNeedles,
+  runnerRolesCoverCoverageGap,
   runnerDevelopmentCardAdmission,
   runnerExactBasicLiquidCreditCandidate,
   runnerFundingRouteCandidateIsMaterializable,
@@ -1344,6 +1344,40 @@ function runnerCandidateSourceDefinitionId(
   );
 }
 
+function runnerCoverageOwnedActionIds(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  coverageGaps: readonly RunnerPlanDomain["coverageGaps"][number][],
+): Set<string> {
+  return new Set(
+    coverageGaps.flatMap((gap) => {
+      if (!gap.answerInHand) {
+        return [
+          ...(gap.directSearchActionIds ?? []),
+          ...(gap.searchEngineSetupActionIds ?? []),
+          ...(gap.drawForAnswerActionIds ?? []),
+        ];
+      }
+      return candidates
+        .filter((candidate) => {
+          if (candidate.semanticActionType !== "install.card") return false;
+          const sourceDefinitionId = runnerCandidateSourceDefinitionId(
+            input,
+            candidate,
+          );
+          return (
+            sourceDefinitionId !== undefined &&
+            runnerRolesCoverCoverageGap(
+              rolesForDeckDoctrineCard(sourceDefinitionId),
+              gap.requiredRole,
+            )
+          );
+        })
+        .map((candidate) => candidate.actionId);
+    }),
+  );
+}
+
 function runnerProgramSearchRecentlyResolved(input: AiDecisionInput): boolean {
   return uniqueBy(
     [...input.playerView.publicEvents, ...input.eventTail],
@@ -1846,16 +1880,10 @@ export function runnerActionDispositions(
       );
     }
   }
-  const coverageOwnedActionIds = new Set(
-    domain.coverageGaps.flatMap((gap) =>
-      gap.answerInHand
-        ? []
-        : [
-            ...(gap.directSearchActionIds ?? []),
-            ...(gap.searchEngineSetupActionIds ?? []),
-            ...(gap.drawForAnswerActionIds ?? []),
-          ],
-    ),
+  const coverageOwnedActionIds = runnerCoverageOwnedActionIds(
+    input,
+    candidates,
+    domain.coverageGaps,
   );
   const coverageRejectedActionIds = new Set(
     domain.coverageGaps.flatMap((gap) => gap.rejectedSearchActionIds ?? []),
@@ -3671,16 +3699,10 @@ function buildRunnerDomain(
       ) {
         return [];
       }
-      const coverageOwnedActionIds = new Set(
-        coverageGaps.flatMap((gap) =>
-          gap.answerInHand
-            ? []
-            : [
-                ...gap.directSearchActionIds,
-                ...gap.searchEngineSetupActionIds,
-                ...gap.drawForAnswerActionIds,
-              ],
-        ),
+      const coverageOwnedActionIds = runnerCoverageOwnedActionIds(
+        input,
+        candidates,
+        coverageGaps,
       );
       if (
         candidate !== undefined &&
@@ -3705,9 +3727,9 @@ function buildRunnerDomain(
       const assignedCoveragePlanIds = evaluationDefinitionId
         ? coverageGaps
             .filter((gap) =>
-              rolesMatch(
+              runnerRolesCoverCoverageGap(
                 rolesForDeckDoctrineCard(evaluationDefinitionId),
-                runnerCoverageRoleNeedles(gap.requiredRole),
+                gap.requiredRole,
               ),
             )
             .map((gap) => `runner.rig_and_coverage:${gap.gapId}`)
@@ -4360,9 +4382,9 @@ function runnerGenericDrawDevelopmentSignals(
     throughputTendency !== undefined && coverageGaps.length > 0;
   const doctrineValue =
     throughputTendency?.strength === "high"
-      ? 120
+      ? 20
       : throughputTendency?.strength === "medium"
-        ? 70
+        ? 10
         : 0;
   return [
     {
@@ -4380,7 +4402,7 @@ function runnerGenericDrawDevelopmentSignals(
         ),
       ],
       actionIds: drawCandidates.map((candidate) => candidate.actionId),
-      priorityClass: doctrineThroughputActive ? "P5" : "P6",
+      priorityClass: "P6",
       value:
         10 +
         Math.min(5, handCapacityGap) +

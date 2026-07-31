@@ -6784,7 +6784,7 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["runner.rig_and_coverage"],
-      "acceptableCapabilities": ["install_breaker_coverage"]
+      "acceptableCapabilities": ["install_breaker_wall"]
     }
   }
 }

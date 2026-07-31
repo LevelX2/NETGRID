@@ -21,6 +21,7 @@ import {
   type ValidatedPlanAssessment,
 } from "./plan-assessment";
 import type { PlanRouteStep, SemanticContinuation } from "./plan-route";
+import { runnerCoveragePlanHandDisposition } from "./runner-core-plan-modules";
 import {
   buildRunnerTurnPlanningCoverageReport,
   runnerTurnPlanningModuleCoverage,
@@ -36,10 +37,13 @@ import {
   type TurnPlanningHeadCandidate,
 } from "./turn-planning-contracts";
 import {
+  applyCertifiedTurnProjectionDelta,
   assessTurnObservationBoundary,
   buildProjectedDecisionFrame,
+  certifiedTurnProjectionDeltaFromCandidate,
   type BoundaryActionAssessment,
   type ProjectedDecisionFrame,
+  type ProjectedHandDisposition,
 } from "./turn-projection";
 import {
   searchDeterministicRemainderTurnPlans,
@@ -98,10 +102,18 @@ export function buildRunnerTurnPlannerShadow(params: {
     registry: params.registry,
     portfolio: params.runtimeResult.portfolio,
   });
+  const entryFrame = buildProjectedDecisionFrame({
+    input,
+    rulesContext,
+    stateIdentity,
+    turnKey: params.context.turnKey,
+    handDispositions: runnerPlanHandDispositions(input),
+  });
   const rawRecords = enumeration.candidates.flatMap((route) =>
     headsForRoute({
       input,
       stateIdentity,
+      entryFrame,
       route,
       portfolio: params.runtimeResult.portfolio,
       moduleSelectedActionId: params.runtimeResult.route.head.actionId,
@@ -125,12 +137,6 @@ export function buildRunnerTurnPlannerShadow(params: {
     heads,
     dispositions,
     engineWindowActionIds: [],
-  });
-  const entryFrame = buildProjectedDecisionFrame({
-    input,
-    rulesContext,
-    stateIdentity,
-    turnKey: params.context.turnKey,
   });
   const urgentPriorityClass = highestUrgentPriorityClass(heads);
   const offers = offersForHeads({
@@ -234,6 +240,7 @@ function runnerCoverageDispositions(params: {
 function headsForRoute(params: {
   input: AiDecisionInput;
   stateIdentity: PlanningStateIdentity;
+  entryFrame: ProjectedDecisionFrame;
   route: PlanSchedulerPlanningRouteCandidate;
   portfolio: Extract<PlanSchedulerResult, { lane: "plan" }>["portfolio"];
   moduleSelectedActionId: string;
@@ -325,10 +332,16 @@ function headsForRoute(params: {
       evaluationValues: runnerEvaluationValues(
         params.route,
         action.actionId === params.moduleSelectedActionId,
+        params.entryFrame,
+        params.route.candidate,
       ),
       valueClaims: [],
       evidenceCodes: [
         "runner_current_plan_module_head",
+        ...runnerCandidateCleanupProjection(
+          params.entryFrame,
+          params.route.candidate,
+        ).evidenceCodes,
         `runner_vertical_slice:${moduleCoverage.ownerKind}`,
         ...(params.route.continuation
           ? [
@@ -382,9 +395,86 @@ function runnerCampaignQuote(params: {
   };
 }
 
+function runnerPlanHandDispositions(
+  input: AiDecisionInput,
+): ReadonlyMap<string, ProjectedHandDisposition> {
+  return new Map(
+    input.playerView.own.gripOrHq.flatMap((card) => {
+      const disposition = runnerCoveragePlanHandDisposition(input, card);
+      return disposition ? [[card.instanceId, disposition] as const] : [];
+    }),
+  );
+}
+
+function runnerCandidateCleanupProjection(
+  entryFrame: ProjectedDecisionFrame,
+  candidate: ActionSemanticCandidate,
+): {
+  requiredDiscards: number;
+  handQualityAdjustment: number;
+  evidenceCodes: string[];
+} {
+  try {
+    const delta = certifiedTurnProjectionDeltaFromCandidate({
+      frame: entryFrame,
+      candidate,
+    });
+    const projected = applyCertifiedTurnProjectionDelta(entryFrame, delta);
+    if (
+      projected.actionCapacityLedger.unrestricted.maximum > 0 ||
+      projected.actionCapacityLedger.restrictedTokens.some(
+        (token) => token.remaining > 0,
+      )
+    ) {
+      return {
+        requiredDiscards: 0,
+        handQualityAdjustment: 0,
+        evidenceCodes: [
+          "runner_cleanup_projection:future_action_capacity_remains",
+        ],
+      };
+    }
+    const requiredDiscards =
+      projected.projectedCleanup.requiredDiscardRange.minimum;
+    const protectedKnownCards = projected.ownHand.dispositions.filter(
+      (entry) =>
+        entry.disposition === "current_plan_route" ||
+        entry.disposition === "support_for_need" ||
+        entry.disposition === "campaign_hold",
+    ).length;
+    const unavoidableProtectedDiscards = Math.max(
+      0,
+      requiredDiscards -
+        Math.max(0, projected.ownHand.count.minimum - protectedKnownCards),
+    );
+    const handQualityAdjustment = -(
+      requiredDiscards * 500 +
+      unavoidableProtectedDiscards * 2_000
+    );
+    return {
+      requiredDiscards,
+      handQualityAdjustment,
+      evidenceCodes: [
+        "runner_cleanup_projection:certified_turn_end",
+        `runner_cleanup_projection:required_discards:${requiredDiscards}`,
+        `runner_cleanup_projection:protected_known_cards:${protectedKnownCards}`,
+        `runner_cleanup_projection:unavoidable_protected_discards:${unavoidableProtectedDiscards}`,
+      ],
+    };
+  } catch {
+    return {
+      requiredDiscards: 0,
+      handQualityAdjustment: 0,
+      evidenceCodes: ["runner_cleanup_projection:not_certified"],
+    };
+  }
+}
+
 function runnerEvaluationValues(
   route: PlanSchedulerPlanningRouteCandidate,
   moduleSelected: boolean,
+  entryFrame: ProjectedDecisionFrame,
+  candidate: ActionSemanticCandidate,
 ): Record<string, number> {
   const ownerKind = runnerTurnPlanningModuleCoverage(
     route.instance.moduleId,
@@ -400,11 +490,20 @@ function runnerEvaluationValues(
     resource: "flexibility",
     turn_completion: "flexibility",
   }[ownerKind ?? "turn_completion"];
+  const cleanupProjection = runnerCandidateCleanupProjection(
+    entryFrame,
+    candidate,
+  );
   return {
     [dimension]: boundedUtility(
       route.assessment.withinClassValue + route.stepValue,
     ),
-    ...(moduleSelected ? { continuity: 10_000 } : {}),
+    ...(cleanupProjection.handQualityAdjustment !== 0
+      ? { hand_quality: cleanupProjection.handQualityAdjustment }
+      : {}),
+    ...(moduleSelected && cleanupProjection.requiredDiscards === 0
+      ? { continuity: 10_000 }
+      : {}),
   };
 }
 
@@ -471,24 +570,16 @@ function offersForHeads(params: {
         .filter((head) => head.priorityClass === params.urgentPriorityClass)
         .map((head) => head.candidateId)
     : [];
-  const selectedHeadIds = params.heads
-    .filter(
-      (head) => head.currentBinding.actionId === params.moduleSelectedActionId,
-    )
-    .map((head) => head.candidateId);
   return params.heads.flatMap((head) => {
     const candidate = params.candidates.find(
       (entry) => entry.actionId === head.currentBinding.actionId,
     );
     if (!candidate) return [];
     const dependencyVariants =
-      selectedHeadIds.length > 0 &&
-      head.currentBinding.actionId !== params.moduleSelectedActionId
-        ? selectedHeadIds.map((candidateId) => [candidateId])
-        : params.urgentPriorityClass &&
-            head.priorityClass !== params.urgentPriorityClass
-          ? urgentHeadIds.map((candidateId) => [candidateId])
-          : [[]];
+      params.urgentPriorityClass &&
+      head.priorityClass !== params.urgentPriorityClass
+        ? urgentHeadIds.map((candidateId) => [candidateId])
+        : [[]];
     return dependencyVariants.map((dependencyCandidateIds) => {
       const priorityCoverage = priorityCoverageForHead(
         params.urgentPriorityClass,

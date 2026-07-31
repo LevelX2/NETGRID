@@ -30,6 +30,25 @@ describe("selectedDiscardChoiceOptionIds", () => {
 
     expect(selected).toEqual(["option-duplicate-1", "option-neutral-1"]);
   });
+
+  it("discards an unbound card before a plan-bound support provider regardless of numeric keep score", () => {
+    const support = card("support-1", "support");
+    const unbound = card("unbound-1", "unbound");
+    const input = discardInput([support, unbound], 1);
+    const choice = input.playerView.pendingChoice!;
+
+    const selected = selectedDiscardChoiceOptionIds(
+      input,
+      choice,
+      choice.options,
+      (_currentInput, candidate) =>
+        candidate.definitionId === "support"
+          ? { total: -1_000, planDisposition: "support_for_need" }
+          : { total: 1_000 },
+    );
+
+    expect(selected).toEqual(["option-unbound-1"]);
+  });
 });
 
 function card(instanceId: string, definitionId: string): VisibleCard {
@@ -42,7 +61,10 @@ function card(instanceId: string, definitionId: string): VisibleCard {
   } as VisibleCard;
 }
 
-function discardInput(cards: VisibleCard[]): AiDecisionInput {
+function discardInput(
+  cards: VisibleCard[],
+  selectionCount = 2,
+): AiDecisionInput {
   return {
     side: "corp",
     playerView: {
@@ -53,8 +75,8 @@ function discardInput(cards: VisibleCard[]): AiDecisionInput {
         choiceId: "discard-test",
         side: "corp",
         source: "discard_phase",
-        minSelections: 2,
-        maxSelections: 2,
+        minSelections: selectionCount,
+        maxSelections: selectionCount,
         options: cards.map((candidate) => ({
           id: `option-${candidate.instanceId}`,
           label: candidate.title,

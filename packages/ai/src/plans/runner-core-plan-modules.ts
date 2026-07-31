@@ -1,4 +1,7 @@
+import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
+import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
 import { rolesMatch } from "../runtime/role-match";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type {
@@ -23,6 +26,7 @@ import type {
   FundingRouteReliability,
   FundingRouteStatus,
 } from "./funding-route";
+import type { ProjectedHandDisposition } from "./turn-projection";
 
 export type RunnerFundingRouteAssessment = {
   stateVersion: number;
@@ -252,6 +256,51 @@ export type RunnerCorePlanDomain = {
 export type RunnerCorePlanDependencies = {
   rolesForDefinitionId?: (definitionId: string) => readonly string[];
 };
+
+export function runnerCoveragePlanHandDisposition(
+  input: AiDecisionInput,
+  card: VisibleCard,
+): ProjectedHandDisposition | undefined {
+  if (input.side !== "runner" || !card.definitionId) return undefined;
+  const strategyProfile = (
+    input as AiDecisionInput & {
+      ownDeckStrategyProfile?: AiDeckStrategyProfile;
+    }
+  ).ownDeckStrategyProfile;
+  const doctrine = strategyProfile?.runnerEngineDoctrine;
+  const dependency = doctrine?.dependencies.find(
+    (entry) =>
+      entry.dependencyId === "runner.dependency.breaker_coverage" &&
+      entry.criticality === "single_definition",
+  );
+  const provider = doctrine?.providers.find(
+    (entry) =>
+      entry.cardId === card.definitionId &&
+      entry.capabilities.includes("runner.coverage.breaker") &&
+      dependency?.providerIds.includes(entry.providerId),
+  );
+  if (!dependency || !provider) return undefined;
+  const providerDefinitionIds = new Set(
+    doctrine!.providers
+      .filter((entry) => dependency.providerIds.includes(entry.providerId))
+      .map((entry) => entry.cardId),
+  );
+  const installedProviderExists = (input.playerView.own.rig ?? []).some(
+    (entry) =>
+      entry.definitionId !== undefined &&
+      providerDefinitionIds.has(entry.definitionId),
+  );
+  if (installedProviderExists) return undefined;
+  const reachableProviderCount = [
+    ...input.playerView.own.gripOrHq,
+    ...(input.playerView.specialZones?.setAside ?? []),
+  ].filter(
+    (entry) =>
+      entry.definitionId !== undefined &&
+      providerDefinitionIds.has(entry.definitionId),
+  ).length;
+  return reachableProviderCount === 1 ? "support_for_need" : undefined;
+}
 
 export function runnerFundingRouteCandidateIsMaterializable(
   candidate: ActionSemanticCandidate,
@@ -1505,11 +1554,7 @@ function coverageInstallCandidates(
   rolesForDefinitionId: (definitionId: string) => readonly string[],
 ): PlanMaterialization["candidates"] {
   return context.actionCandidates.flatMap((candidate) => {
-    if (
-      candidate.semanticActionType !== "install.card" ||
-      !candidate.sourceDefinitionId
-    )
-      return [];
+    if (candidate.semanticActionType !== "install.card") return [];
     if (
       context.actionDispositions?.some(
         (disposition) =>
@@ -1552,8 +1597,13 @@ function coverageInstallCandidates(
     ) {
       return [];
     }
-    const roles = rolesForDefinitionId(candidate.sourceDefinitionId);
-    if (!rolesMatch(roles, runnerCoverageRoleNeedles(requiredRole))) return [];
+    const sourceDefinitionId = runnerInstallSourceDefinitionId(
+      context,
+      candidate,
+    );
+    if (!sourceDefinitionId) return [];
+    const roles = rolesForDefinitionId(sourceDefinitionId);
+    if (!runnerRolesCoverCoverageGap(roles, requiredRole)) return [];
     return [
       {
         candidate,
@@ -1581,6 +1631,22 @@ function runnerInstallSourceCardInstanceId(
     : undefined;
 }
 
+function runnerInstallSourceDefinitionId(
+  context: PlanSchedulerContext,
+  candidate: ActionSemanticCandidate,
+): string | undefined {
+  if (candidate.sourceDefinitionId) return candidate.sourceDefinitionId;
+  const sourceCardInstanceId = runnerInstallSourceCardInstanceId(
+    context,
+    candidate,
+  );
+  if (!sourceCardInstanceId) return undefined;
+  return [
+    ...context.input.playerView.own.gripOrHq,
+    ...(context.input.playerView.specialZones?.setAside ?? []),
+  ].find((card) => card.instanceId === sourceCardInstanceId)?.definitionId;
+}
+
 export function runnerCoverageRoleNeedles(
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
 ): readonly string[] {
@@ -1600,6 +1666,16 @@ export function runnerCoverageRoleNeedles(
   }
   const exhaustiveRole: never = requiredRole;
   return exhaustiveRole;
+}
+
+export function runnerRolesCoverCoverageGap(
+  roles: readonly string[],
+  requiredRole: RunnerCoverageGapSignal["requiredRole"],
+): boolean {
+  return (
+    rolesMatch(roles, runnerCoverageRoleNeedles(requiredRole)) ||
+    rolesMatch(roles, ["universal_breaker", "breaker_universal"])
+  );
 }
 
 function coverageDrawCandidates(
