@@ -207,6 +207,7 @@ import {
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
+  visibleRunnerRunPathCreditBudgetForRig,
   visibleDeflectorSubroutineCanResolve,
 } from "../visible-run-analysis";
 import { runnerRemoteHasKnownNoCurrentPayoff } from "./runner-known-access-payoff-context";
@@ -15885,6 +15886,49 @@ function corpExactCardRezSupportAssessment(
       value: 180,
       evidenceCode:
         "corp_rez_agenda_steal_tax_protects_visible_agenda_at_latest_relevant_window",
+    };
+  }
+  const disablesVisibleStealthCreditsOnExactFort =
+    hint?.quality?.hintReviewed === true &&
+    hint.side === "corp" &&
+    hint.effects?.some(
+      (effect) =>
+        effect.kind === "run_tax" &&
+        effect.scope === "fort" &&
+        effect.target === "run.corp_stealth_credit_lockout" &&
+        effect.timing === "during_run",
+    ) === true &&
+    hint.functionSignals?.includes("run.corp_stealth_credit_lockout") === true;
+  if (disablesVisibleStealthCreditsOnExactFort) {
+    const run = input.playerView.run;
+    if (!run || run.attackedServerId !== serverId) {
+      return {
+        productive: false,
+        serverId,
+        value: 0,
+        evidenceCode: run
+          ? "corp_rez_fort_stealth_credit_lockout_current_run_is_on_another_fort"
+          : "corp_rez_fort_stealth_credit_lockout_has_no_current_run",
+      };
+    }
+    const visibleCreditBudget = visibleRunnerRunPathCreditBudgetForRig(
+      input.playerView.opponent.rig ?? [],
+    );
+    const blockedCredits = visibleCreditBudget.stealthNonNoisyIcebreakerCredits;
+    if (blockedCredits <= 0) {
+      return {
+        productive: false,
+        serverId,
+        value: 0,
+        evidenceCode:
+          "corp_rez_fort_stealth_credit_lockout_has_no_visible_usable_stealth_credits",
+      };
+    }
+    return {
+      productive: true,
+      serverId,
+      value: 160,
+      evidenceCode: `corp_rez_fort_stealth_credit_lockout_blocks_visible_credits:${blockedCredits}`,
     };
   }
   if (candidate.sourceDefinitionId === "onr_v1_320_encoder-inc") {

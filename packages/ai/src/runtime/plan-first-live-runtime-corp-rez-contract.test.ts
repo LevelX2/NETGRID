@@ -447,6 +447,102 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
+  it("rezes a fort-bound stealth-credit lockout through the exact Defense-plan route", () => {
+    resetResidentPlanPortfolioMemory();
+    const lockout = corpUpgrade(
+      "fort-stealth-lockout",
+      "onr_v1_373_twenty-four-hour-surveillance",
+      "Fort Stealth Lockout",
+    );
+    const input = corpInput(
+      [rezAction(lockout, "rez-fort-stealth-lockout", 1), declineRez()],
+      "run.approach_ice",
+    );
+    input.playerView.own.credits = 13;
+    input.playerView.opponent.rig = [
+      runnerStealthCreditPool("stealth-pool", 6),
+    ];
+    input.playerView.run = activeRun("hq", 0);
+    input.playerView.servers = [
+      server(
+        "hq",
+        [corpIce("hq-ice", "onr_v1_237_data-wall", "Data Wall", true)],
+        [lockout],
+      ),
+      server("rd"),
+      server("archives"),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: "rez-fort-stealth-lockout",
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.defend_servers",
+        expect.stringContaining("plan_step_id:"),
+        "plan_assessment_evidence:corp_rez_fort_stealth_credit_lockout_blocks_visible_credits:6",
+      ]),
+    );
+  });
+
+  it.each([
+    {
+      label: "when the Runner has no visible usable stealth credits",
+      rig: [] as VisibleCard[],
+      runServerId: "hq" as const,
+    },
+    {
+      label: "when the current run attacks another fort",
+      rig: [runnerStealthCreditPool("stealth-pool", 6)],
+      runServerId: "remote_1" as const,
+    },
+  ])(
+    "declines a fort-bound stealth-credit lockout $label",
+    ({ rig, runServerId }) => {
+      resetResidentPlanPortfolioMemory();
+      const lockout = corpUpgrade(
+        "fort-stealth-lockout",
+        "onr_v1_373_twenty-four-hour-surveillance",
+        "Fort Stealth Lockout",
+      );
+      const input = corpInput(
+        [rezAction(lockout, "rez-fort-stealth-lockout", 1), declineRez()],
+        "run.approach_ice",
+      );
+      input.playerView.own.credits = 13;
+      input.playerView.opponent.rig = rig;
+      input.playerView.run = activeRun(runServerId, 0);
+      input.playerView.servers = [
+        server(
+          "hq",
+          [corpIce("hq-ice", "onr_v1_237_data-wall", "Data Wall", true)],
+          [lockout],
+        ),
+        server("rd"),
+        server("archives"),
+        ...(runServerId === "remote_1" ? [server("remote_1")] : []),
+      ];
+
+      const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+      expect(decision).toMatchObject({
+        actionId: "decline-rez",
+        reasonCode: "plan_first.corp.defend_servers",
+        fallbackUsed: false,
+      });
+      expect(decision.evidence).toEqual(
+        expect.arrayContaining([
+          "plan_module:corp.defend_servers",
+          "plan_scheduler:route:corp_window.decline_rez:plan:corp.defend_servers:server-defense-portfolio",
+        ]),
+      );
+    },
+  );
+
   it.each([
     {
       label: "during the Corp main phase",
@@ -1060,6 +1156,30 @@ function corpIce(
     definitionId,
     title,
     rezzed,
+  });
+}
+
+function runnerStealthCreditPool(
+  instanceId: string,
+  amount: number,
+): VisibleCard {
+  return visibleCard(instanceId, "runner", "program", {
+    definitionId: "onr_v1_011_cloak",
+    title: "Visible Stealth Credit Pool",
+    subtypes: ["stealth"],
+    counterDisplays: [
+      {
+        id: `${instanceId}-recurring`,
+        amount,
+        displayKind: "recurring_credit",
+        label: "Recurring credits",
+        ariaLabel: "Recurring credits",
+        creditPool: {
+          kind: "recurring_credit",
+          uses: ["using_icebreaker_during_run_non_noisy"],
+        },
+      },
+    ],
   });
 }
 

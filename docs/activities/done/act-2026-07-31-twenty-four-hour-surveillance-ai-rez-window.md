@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-07-31-twenty-four-hour-surveillance-ai-rez-window
-status: in_progress
+status: done
 kind: fix
 area: ai
 priority: high
@@ -8,16 +8,24 @@ primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-31
 startedAt: 2026-07-31
-completedAt:
+completedAt: 2026-07-31
 branch: codex/act-2026-07-31-twenty-four-hour-surveillance
 releaseTarget:
 blockedBy: []
 resultArtifacts:
   - docs/reviews/ai/match-4d7bd0eba9138d83-complete-ai-analysis-2026-07-31.md
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+  - packages/ai/src/runtime/plan-first-live-runtime-corp-rez-contract.test.ts
 checks:
   - match_4d7bd0eba9138d83 decision coverage 204/204
   - decision 177 checkpoint reproduced without warmup drift
   - deck hint consumer audit 34/34 unique Corp cards; four unrelated pre-existing blocking findings recorded
+  - focused Corp rez contract 43/43
+  - AI typecheck
+  - AI hint metadata and source structure gates
+  - card function abstraction gate
+  - AI shards 544/544 files and 4449/4449 tests
+  - Engine implementation, payment, replay and StateHash 79/79
 ---
 
 # Korp-KI nutzt das Rez-Fenster von Twenty-Four-Hour Surveillance
@@ -74,19 +82,19 @@ Rezzen deren Nutzung während des Runs regelwirksam verhindert.
 
 ## Akzeptanzkriterien
 
-- [ ] Der reproduzierte positive Fall bietet der Korp die exakte legale
+- [x] Der reproduzierte positive Fall bietet der Korp die exakte legale
       Rez-Action und die KI wählt sie vor der ersten relevanten
       Stealth-Zahlung.
-- [ ] Das gerezzte Upgrade sperrt ausschließlich Stealth-Quellen während Runs
+- [x] Das gerezzte Upgrade sperrt ausschließlich Stealth-Quellen während Runs
       auf seinem Server; andere legale Zahlungsquellen bleiben nutzbar.
-- [ ] Ohne sichtbare relevante Stealth-Quelle, auf einem anderen Server oder
+- [x] Ohne sichtbare relevante Stealth-Quelle, auf einem anderen Server oder
       ohne Rez-Credits entsteht kein künstlicher Rez-Zwang.
-- [ ] Zuständiger Plan, Planinstanz, Step/Route und Executor bleiben
+- [x] Zuständiger Plan, Planinstanz, Step/Route und Executor bleiben
       nachweisbar erhalten; ein Choice-Resolver ändert weder `actionId` noch
       die Strategieentscheidung.
-- [ ] Die KI bewertet ausschließlich vorhandene LegalActions und side-sichere
+- [x] Die KI bewertet ausschließlich vorhandene LegalActions und side-sichere
       PlayerView-/PublicContext-Informationen.
-- [ ] Engine-, KI-, Replay-, StateHash- und Hidden-Info-Regressionen für den
+- [x] Engine-, KI-, Replay-, StateHash- und Hidden-Info-Regressionen für den
       positiven Fall und die Gegenbeispiele sind grün.
 
 ## Umsetzungshinweise
@@ -114,7 +122,7 @@ Rezzen deren Nutzung während des Runs regelwirksam verhindert.
 - Im reproduzierten Zustand besitzt der Runner sichtbar sechs verwendbare
   Stealth-Bits: zwei aus `Invisibility`, zwei aus `Vewy Vewy Quiet` und zwei
   aus `Cortical Cybermodem`. Nach dem zuerst sinnvollen Rez von `Ball and
-  Chain` stehen der Corp noch 13 Credits für die Rez-Kosten 1 zur Verfügung.
+Chain` stehen der Corp noch 13 Credits für die Rez-Kosten 1 zur Verfügung.
 - Die Umsetzung soll den bereits aktiven Hint-Effekt `run_tax` mit Ziel
   `run.corp_stealth_credit_lockout`, Scope `fort` und Timing `during_run`
   konsumieren. Positiv wird die Route nur beim aktuellen Run auf genau diesem
@@ -125,4 +133,15 @@ Rezzen deren Nutzung während des Runs regelwirksam verhindert.
 
 ## Ergebnisnotiz
 
-Noch offen.
+`corp.defend_servers` erkennt nun die bereits vorhandene, geprüfte
+Effektsemantik einer fortgebundenen Stealth-Credit-Sperre. Eine produktive
+Rez-Route entsteht nur während eines Runs auf genau diesem Fort und nur bei
+einem positiven, sichtbaren und für nicht-laute Icebreaker nutzbaren
+Stealth-Credit-Pool. Die konkrete LegalAction, ihre Kosten und die vorhandene
+Score-Reserveprüfung bleiben unverändert verbindlich.
+
+Die Umsetzung enthält weder Karten-ID-/Titel-Heuristik noch einen neuen Plan,
+Resolver, Fallback oder Override. Der Regressionstest bindet die ausgewählte
+Action weiterhin an `corp.defend_servers`, dessen Planinstanz und dessen
+`allocate_server_defense`-Step. Gegenfälle ohne sichtbare Stealth-Credits und
+auf einem anderen Fort bleiben beim planinternen `decline_rez`.
