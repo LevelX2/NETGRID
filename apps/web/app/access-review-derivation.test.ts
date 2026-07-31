@@ -87,8 +87,7 @@ describe("Access outcome presentation", () => {
       ).toMatchObject({
         eventId: `evt_access_${accessOrigin}`,
         outcomeKind: "stolen",
-        outcomeStatus:
-          "Der Runner hat die Agenda Public Agenda erbeutet.",
+        outcomeStatus: "Der Runner hat die Agenda Public Agenda erbeutet.",
         dismissLabel: "Agenda bestätigen",
         actions: [],
         card: {
@@ -113,6 +112,8 @@ describe("Access outcome presentation", () => {
         title: "Root Upgrade",
         serverLabel: "HQ",
         accessOrigin: "central_root",
+        accessIndex: 0,
+        effectiveAccessCount: 4,
       }),
       details,
       [],
@@ -126,6 +127,8 @@ describe("Access outcome presentation", () => {
         title: "Central Card",
         serverLabel: "HQ",
         accessOrigin: "hq",
+        accessIndex: 3,
+        effectiveAccessCount: 4,
       }),
       details,
       [],
@@ -160,10 +163,14 @@ describe("Access outcome presentation", () => {
 
     expect(hqRoot).toMatchObject({
       serverTitleLabel: "HQ-Root",
+      accessSourceLabel: "Installiertes HQ-Upgrade",
+      hasMoreAccesses: true,
       description: "Du hast auf ein Root-Upgrade im HQ-Root zugegriffen.",
     });
     expect(hqCard).toMatchObject({
       serverTitleLabel: "HQ",
+      accessSourceLabel: "Zufällige HQ-Handkarte",
+      hasMoreAccesses: false,
       description: "Du hast auf eine Karte in HQ zugegriffen.",
     });
     expect(rdRoot?.serverTitleLabel).toBe("R&D-Root");
