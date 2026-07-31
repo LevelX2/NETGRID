@@ -1,8 +1,29 @@
 "use client";
 
-import { Cable, Check, ChevronDown, ChevronUp, CopyPlus, Download, ListFilter, Move, Play, Plus, Save, Search, SlidersHorizontal, Trash2, Upload, X } from "lucide-react";
+import {
+  Cable,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  CopyPlus,
+  Download,
+  ListFilter,
+  Move,
+  Play,
+  Plus,
+  Save,
+  Search,
+  SlidersHorizontal,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
-import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from "react";
+import type {
+  CSSProperties,
+  DragEvent as ReactDragEvent,
+  MouseEvent as ReactMouseEvent,
+} from "react";
 import type { DeckPublicMetadata, Side } from "@netgrid/shared";
 
 import { deckAgendaStatusForEditor } from "./deck-editor-model";
@@ -20,7 +41,7 @@ import {
   type CatalogRarityFilterKey,
   type CatalogSetFilterKey,
   type CatalogTypeFilterKey,
-  type CatalogTypeFilterState
+  type CatalogTypeFilterState,
 } from "../catalog/catalog-model";
 import { DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY } from "../../lib/storage-keys";
 import { readLocalStorage } from "../../lib/local-storage";
@@ -31,7 +52,7 @@ import {
   DeckBuilderPreview,
   DeckLibraryCard,
   DeckListCard,
-  DeckTableLibraryCard
+  DeckTableLibraryCard,
 } from "./DeckBuilderCards";
 import { DeckCardThumb } from "./DeckCardThumb";
 import { DeckCardTooltipTrigger } from "./DeckCardTooltipTrigger";
@@ -89,12 +110,23 @@ import {
   type DeckTablePileSortMode,
   type DeckTableSelectionEntry,
   type DeckTableViewSettings,
-  type EditableDeck
+  type EditableDeck,
 } from "./deck-table-model";
 
 type DeckSideFilter = Side | "all";
 
-type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemented" | "engine_supported" | "playable" | "human_playable" | "ai_supported" | "deck_legal" | "format_legal" | "blocked";
+type CatalogStatusKey =
+  | "imported"
+  | "validated"
+  | "catalog_ready"
+  | "implemented"
+  | "engine_supported"
+  | "playable"
+  | "human_playable"
+  | "ai_supported"
+  | "deck_legal"
+  | "format_legal"
+  | "blocked";
 
 type CatalogStatuses = Record<CatalogStatusKey, boolean>;
 
@@ -154,33 +186,44 @@ type DeckSnapshot = {
   deckHash: string;
 };
 
-const RUNNER_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
+const RUNNER_CATALOG_TYPE_FILTERS: Array<{
+  key: CatalogTypeFilterKey;
+  label: string;
+}> = [
   { key: "event", label: "Prep" },
   { key: "hardware", label: "Hardware" },
   { key: "resource", label: "Ressource" },
   { key: "program", label: "Programm" },
-  { key: "icebreaker", label: "Icebrecher" }
+  { key: "icebreaker", label: "Icebrecher" },
 ];
 
-const CORP_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
+const CORP_CATALOG_TYPE_FILTERS: Array<{
+  key: CatalogTypeFilterKey;
+  label: string;
+}> = [
   { key: "ice", label: "ICE" },
   { key: "agenda", label: "Agenda" },
   { key: "asset", label: "Asset" },
   { key: "upgrade", label: "Upgrade" },
-  { key: "operation", label: "Operation" }
+  { key: "operation", label: "Operation" },
 ];
 
-const CATALOG_TYPE_FILTER_GROUPS: Array<{ title: string; side: Side; filters: Array<{ key: CatalogTypeFilterKey; label: string }> }> = [
+const CATALOG_TYPE_FILTER_GROUPS: Array<{
+  title: string;
+  side: Side;
+  filters: Array<{ key: CatalogTypeFilterKey; label: string }>;
+}> = [
   { title: "Runner", side: "runner", filters: RUNNER_CATALOG_TYPE_FILTERS },
-  { title: "Korp", side: "corp", filters: CORP_CATALOG_TYPE_FILTERS }
+  { title: "Korp", side: "corp", filters: CORP_CATALOG_TYPE_FILTERS },
 ];
 
-const DECK_SOURCE_FILTERS: Array<{ key: CatalogSetFilterKey; label: string }> = [
-  { key: "all", label: "Alle Sets" },
-  { key: "original", label: "Original NetGrid Set" },
-  { key: "test", label: "Testkarten" },
-  { key: "other", label: "Andere Sets" }
-];
+const DECK_SOURCE_FILTERS: Array<{ key: CatalogSetFilterKey; label: string }> =
+  [
+    { key: "all", label: "Alle Sets" },
+    { key: "original", label: "Original NetGrid Set" },
+    { key: "test", label: "Testkarten" },
+    { key: "other", label: "Andere Sets" },
+  ];
 
 const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   event: true,
@@ -192,7 +235,7 @@ const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   agenda: true,
   asset: true,
   upgrade: true,
-  operation: true
+  operation: true,
 };
 
 const CATALOG_NUMERIC_LABELS: Record<string, string> = {
@@ -203,7 +246,7 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
   rezCost: "Rez",
   trashCost: "Trash",
   advancementRequirement: "Benötigt",
-  agendaPoints: "Agenda"
+  agendaPoints: "Agenda",
 };
 
 function formatCatalogTerm(value: string): string {
@@ -218,13 +261,19 @@ function formatCatalogTerm(value: string): string {
     .join(" ");
 }
 
-function formatCatalogTypeLine(card: Pick<CatalogCardSummary, "type" | "subtypes">): string {
+function formatCatalogTypeLine(
+  card: Pick<CatalogCardSummary, "type" | "subtypes">,
+): string {
   const type = formatCatalogTerm(card.type);
   const subtypes = card.subtypes.map(formatCatalogTerm).join(" / ");
   return [type, subtypes].filter(Boolean).join(" - ");
 }
 
-function catalogNumericLabel(key: string, label: string, value: number | null | undefined): string | null {
+function catalogNumericLabel(
+  key: string,
+  label: string,
+  value: number | null | undefined,
+): string | null {
   if (value === null || value === undefined) return null;
   if (key === "advancementRequirement") return neededDevelopmentLabel(value);
   return `${label} ${value}`;
@@ -232,7 +281,12 @@ function catalogNumericLabel(key: string, label: string, value: number | null | 
 
 function deckBuilderCardGroup(card: CatalogCardSummary | null): string {
   if (!card) return "Unbekannt";
-  return [formatCatalogTerm(card.type), card.subtypes.map(formatCatalogTerm).join(" / ")].filter(Boolean).join(" - ");
+  return [
+    formatCatalogTerm(card.type),
+    card.subtypes.map(formatCatalogTerm).join(" / "),
+  ]
+    .filter(Boolean)
+    .join(" - ");
 }
 
 function deckBuilderMetricLine(detail: CatalogCardDetail | undefined): string {
@@ -246,11 +300,25 @@ function deckBuilderMetricLine(detail: CatalogCardDetail | undefined): string {
     .join(" · ");
 }
 
-function deckBuilderCardTooltip(card: CatalogCardSummary, detail: CatalogCardDetail | undefined): string {
-  return [card.title, formatCatalogTypeLine(card), detail ? catalogSetDetailLabel(detail) : "", detail ? deckBuilderMetricLine(detail) : "", detail?.text ?? ""].filter(Boolean).join("\n");
+function deckBuilderCardTooltip(
+  card: CatalogCardSummary,
+  detail: CatalogCardDetail | undefined,
+): string {
+  return [
+    card.title,
+    formatCatalogTypeLine(card),
+    detail ? catalogSetDetailLabel(detail) : "",
+    detail ? deckBuilderMetricLine(detail) : "",
+    detail?.text ?? "",
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
-function catalogCardAllowedForDeckEditor(card: CatalogCardSummary, deck: EditableDeck | null): boolean {
+function catalogCardAllowedForDeckEditor(
+  card: CatalogCardSummary,
+  deck: EditableDeck | null,
+): boolean {
   if (!deck) return true;
   return card.side === deck.side;
 }
@@ -259,7 +327,10 @@ function sideLabel(side: Side): string {
   return side === "corp" ? "Korp" : "Runner";
 }
 
-function snapshotAllowedForMatchCardPool(snapshot: DeckSnapshot, matchCardPool: { kind: "latest" | "snapshot"; snapshotId?: string }): boolean {
+function snapshotAllowedForMatchCardPool(
+  snapshot: DeckSnapshot,
+  matchCardPool: { kind: "latest" | "snapshot"; snapshotId?: string },
+): boolean {
   if (matchCardPool.kind !== "snapshot") return true;
   return snapshot.cardPoolSnapshotId === matchCardPool.snapshotId;
 }
@@ -288,8 +359,11 @@ export function DeckEditorPanel({
   onImportText,
   onImport,
   standardDecks = [],
+  standardDeckCatalogPhase = "ready",
+  standardDeckCatalogRefreshing = false,
   standardCopyBusy = false,
   onCopyStandard,
+  onReloadStandardDecks,
 }: {
   localDecks: EditableDeck[];
   selectedDeck: EditableDeck | null;
@@ -315,30 +389,52 @@ export function DeckEditorPanel({
   onImportText(value: string): void;
   onImport(): void;
   standardDecks?: StandardDeck[];
+  standardDeckCatalogPhase?: "loading" | "ready" | "error";
+  standardDeckCatalogRefreshing?: boolean;
   standardCopyBusy?: boolean;
   onCopyStandard?(deck: StandardDeck, name: string): Promise<boolean>;
+  onReloadStandardDecks?(): void;
 }) {
   const [builderSearch, setBuilderSearch] = useState("");
-  const [builderTypeFilters, setBuilderTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
-  const [builderSetFilter, setBuilderSetFilter] = useState<CatalogSetFilterKey>("all");
-  const [builderRarityFilter, setBuilderRarityFilter] = useState<CatalogRarityFilterKey>("all");
+  const [builderTypeFilters, setBuilderTypeFilters] =
+    useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
+  const [builderSetFilter, setBuilderSetFilter] =
+    useState<CatalogSetFilterKey>("all");
+  const [builderRarityFilter, setBuilderRarityFilter] =
+    useState<CatalogRarityFilterKey>("all");
   const [builderOnlyInDeck, setBuilderOnlyInDeck] = useState(false);
   const [builderFiltersOpen, setBuilderFiltersOpen] = useState(false);
   const [deckDetailsOpen, setDeckDetailsOpen] = useState(true);
   const [deckPickerOpen, setDeckPickerOpen] = useState(true);
   const [deckEditorMode, setDeckEditorMode] = useState<DeckEditorMode>("list");
   const [tableCardMenuKey, setTableCardMenuKey] = useState<string | null>(null);
-  const [tableCardWidth, setTableCardWidth] = useState(DECK_TABLE_CARD_WIDTH_DEFAULT);
-  const [tableOverlapPercent, setTableOverlapPercent] = useState(DECK_TABLE_OVERLAP_DEFAULT);
-  const [tableLibraryWidth, setTableLibraryWidth] = useState(DECK_TABLE_LIBRARY_WIDTH_DEFAULT);
-  const [tableLibraryCardWidth, setTableLibraryCardWidth] = useState(DECK_TABLE_LIBRARY_CARD_WIDTH_DEFAULT);
-  const [tableLibraryOverlapPercent, setTableLibraryOverlapPercent] = useState(DECK_TABLE_LIBRARY_OVERLAP_DEFAULT);
+  const [tableCardWidth, setTableCardWidth] = useState(
+    DECK_TABLE_CARD_WIDTH_DEFAULT,
+  );
+  const [tableOverlapPercent, setTableOverlapPercent] = useState(
+    DECK_TABLE_OVERLAP_DEFAULT,
+  );
+  const [tableLibraryWidth, setTableLibraryWidth] = useState(
+    DECK_TABLE_LIBRARY_WIDTH_DEFAULT,
+  );
+  const [tableLibraryCardWidth, setTableLibraryCardWidth] = useState(
+    DECK_TABLE_LIBRARY_CARD_WIDTH_DEFAULT,
+  );
+  const [tableLibraryOverlapPercent, setTableLibraryOverlapPercent] = useState(
+    DECK_TABLE_LIBRARY_OVERLAP_DEFAULT,
+  );
   const [tableViewSettingsLoaded, setTableViewSettingsLoaded] = useState(false);
   const [tableControlsOpen, setTableControlsOpen] = useState(false);
-  const [tableLibraryControlsOpen, setTableLibraryControlsOpen] = useState(false);
+  const [tableLibraryControlsOpen, setTableLibraryControlsOpen] =
+    useState(false);
   const [tableSelectionMode, setTableSelectionMode] = useState(false);
-  const [selectedTableCardKeys, setSelectedTableCardKeys] = useState<string[]>([]);
-  const [tableSelectionAnchor, setTableSelectionAnchor] = useState<{ pileId: string; order: number } | null>(null);
+  const [selectedTableCardKeys, setSelectedTableCardKeys] = useState<string[]>(
+    [],
+  );
+  const [tableSelectionAnchor, setTableSelectionAnchor] = useState<{
+    pileId: string;
+    order: number;
+  } | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [standardCopyOpen, setStandardCopyOpen] = useState(false);
   const [standardCopySide, setStandardCopySide] = useState<Side>("runner");
@@ -346,21 +442,78 @@ export function DeckEditorPanel({
   const [standardCopyName, setStandardCopyName] = useState("");
   const [deckSideFilter, setDeckSideFilter] = useState<DeckSideFilter>("all");
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
-  const totalCards = selectedDeck?.cards.reduce((sum, entry) => sum + entry.quantity, 0) ?? 0;
-  const deckQuantities = useMemo(() => new Map(selectedDeck?.cards.map((entry) => [entry.cardId, entry.quantity]) ?? []), [selectedDeck?.cards]);
-  const cardLookup = useMemo(() => new Map(playableCards.map((card) => [card.catalogCardId, card])), [playableCards]);
-  const agendaStatus = useMemo(() => deckAgendaStatusForEditor(selectedDeck, cardDetailsById, cardLookup), [cardDetailsById, cardLookup, selectedDeck]);
-  const tableLayout = useMemo(() => (selectedDeck ? normalizeDeckTableLayout(selectedDeck, cardLookup, cardDetailsById) : null), [cardDetailsById, cardLookup, selectedDeck]);
-  const sourceFilteredPlayableCards = useMemo(() => filterCatalogCardsBySet(playableCards, builderSetFilter), [builderSetFilter, playableCards]);
-  const rarityFilteredPlayableCards = useMemo(() => filterCatalogCardsByRarity(sourceFilteredPlayableCards, builderRarityFilter), [builderRarityFilter, sourceFilteredPlayableCards]);
-  const builderSetCounts = useMemo(() => summarizeCatalogSetFilters(playableCards), [playableCards]);
-  const builderRarityCounts = useMemo(() => summarizeCatalogRarityFilters(sourceFilteredPlayableCards), [sourceFilteredPlayableCards]);
-  const builderTypeCounts = useMemo(() => summarizeCatalogTypeFilters(rarityFilteredPlayableCards), [rarityFilteredPlayableCards]);
-  const runnerDeckCount = localDecks.filter((deck) => deck.side === "runner").length;
-  const corpDeckCount = localDecks.filter((deck) => deck.side === "corp").length;
-  const filteredLocalDecks = useMemo(() => (deckSideFilter === "all" ? localDecks : localDecks.filter((deck) => deck.side === deckSideFilter)), [deckSideFilter, localDecks]);
-  const selectedDeckSelectValue = selectedDeck && filteredLocalDecks.some((deck) => deck.deckId === selectedDeck.deckId) ? selectedDeck.deckId : "";
-  const visibleTypeFilterGroups = selectedDeck ? CATALOG_TYPE_FILTER_GROUPS.filter((group) => group.side === selectedDeck.side) : CATALOG_TYPE_FILTER_GROUPS;
+  const totalCards =
+    selectedDeck?.cards.reduce((sum, entry) => sum + entry.quantity, 0) ?? 0;
+  const deckQuantities = useMemo(
+    () =>
+      new Map(
+        selectedDeck?.cards.map((entry) => [entry.cardId, entry.quantity]) ??
+          [],
+      ),
+    [selectedDeck?.cards],
+  );
+  const cardLookup = useMemo(
+    () => new Map(playableCards.map((card) => [card.catalogCardId, card])),
+    [playableCards],
+  );
+  const agendaStatus = useMemo(
+    () => deckAgendaStatusForEditor(selectedDeck, cardDetailsById, cardLookup),
+    [cardDetailsById, cardLookup, selectedDeck],
+  );
+  const tableLayout = useMemo(
+    () =>
+      selectedDeck
+        ? normalizeDeckTableLayout(selectedDeck, cardLookup, cardDetailsById)
+        : null,
+    [cardDetailsById, cardLookup, selectedDeck],
+  );
+  const sourceFilteredPlayableCards = useMemo(
+    () => filterCatalogCardsBySet(playableCards, builderSetFilter),
+    [builderSetFilter, playableCards],
+  );
+  const rarityFilteredPlayableCards = useMemo(
+    () =>
+      filterCatalogCardsByRarity(
+        sourceFilteredPlayableCards,
+        builderRarityFilter,
+      ),
+    [builderRarityFilter, sourceFilteredPlayableCards],
+  );
+  const builderSetCounts = useMemo(
+    () => summarizeCatalogSetFilters(playableCards),
+    [playableCards],
+  );
+  const builderRarityCounts = useMemo(
+    () => summarizeCatalogRarityFilters(sourceFilteredPlayableCards),
+    [sourceFilteredPlayableCards],
+  );
+  const builderTypeCounts = useMemo(
+    () => summarizeCatalogTypeFilters(rarityFilteredPlayableCards),
+    [rarityFilteredPlayableCards],
+  );
+  const runnerDeckCount = localDecks.filter(
+    (deck) => deck.side === "runner",
+  ).length;
+  const corpDeckCount = localDecks.filter(
+    (deck) => deck.side === "corp",
+  ).length;
+  const filteredLocalDecks = useMemo(
+    () =>
+      deckSideFilter === "all"
+        ? localDecks
+        : localDecks.filter((deck) => deck.side === deckSideFilter),
+    [deckSideFilter, localDecks],
+  );
+  const selectedDeckSelectValue =
+    selectedDeck &&
+    filteredLocalDecks.some((deck) => deck.deckId === selectedDeck.deckId)
+      ? selectedDeck.deckId
+      : "";
+  const visibleTypeFilterGroups = selectedDeck
+    ? CATALOG_TYPE_FILTER_GROUPS.filter(
+        (group) => group.side === selectedDeck.side,
+      )
+    : CATALOG_TYPE_FILTER_GROUPS;
   const standardCopyCandidates = useMemo(
     () => standardDecks.filter((deck) => deck.side === standardCopySide),
     [standardCopySide, standardDecks],
@@ -369,28 +522,82 @@ export function DeckEditorPanel({
     standardCopyCandidates.find(
       (deck) => deck.standardDeckId === standardCopyDeckId,
     ) ?? standardCopyCandidates[0];
+  const standardDeckCatalogLoading =
+    standardDecks.length === 0 &&
+    (standardDeckCatalogPhase === "loading" || standardDeckCatalogRefreshing);
+  const standardDeckCatalogUnavailable =
+    standardDecks.length === 0 && standardDeckCatalogPhase === "error";
+  const standardCopyToggleTitle = standardDeckCatalogLoading
+    ? "Standard-Decks werden geladen"
+    : standardDeckCatalogUnavailable
+      ? "Standard-Decks konnten nicht geladen werden"
+      : standardDecks.length === 0
+        ? "Keine Standard-Decks verfügbar"
+        : "Standard-Deck als persönliches Deck kopieren";
   const libraryCards = useMemo(() => {
     const search = builderSearch.trim().toLowerCase();
     return rarityFilteredPlayableCards
       .filter((card) => {
-        if (builderOnlyInDeck && !deckQuantities.has(card.catalogCardId)) return false;
-        if (!catalogCardMatchesTypeFilters(card, builderTypeFilters)) return false;
+        if (builderOnlyInDeck && !deckQuantities.has(card.catalogCardId))
+          return false;
+        if (!catalogCardMatchesTypeFilters(card, builderTypeFilters))
+          return false;
         if (!search) return true;
         const detail = cardDetailsById[card.catalogCardId];
-        return [card.title, card.type, card.faction, ...card.subtypes, detail?.text ?? ""].some((value) => value.toLowerCase().includes(search));
+        return [
+          card.title,
+          card.type,
+          card.faction,
+          ...card.subtypes,
+          detail?.text ?? "",
+        ].some((value) => value.toLowerCase().includes(search));
       })
-      .sort((left, right) => deckBuilderCardGroup(left).localeCompare(deckBuilderCardGroup(right)) || left.title.localeCompare(right.title));
-  }, [builderOnlyInDeck, builderSearch, builderTypeFilters, cardDetailsById, deckQuantities, rarityFilteredPlayableCards]);
+      .sort(
+        (left, right) =>
+          deckBuilderCardGroup(left).localeCompare(
+            deckBuilderCardGroup(right),
+          ) || left.title.localeCompare(right.title),
+      );
+  }, [
+    builderOnlyInDeck,
+    builderSearch,
+    builderTypeFilters,
+    cardDetailsById,
+    deckQuantities,
+    rarityFilteredPlayableCards,
+  ]);
   const deckRows = useMemo(
     () =>
       (selectedDeck?.cards ?? [])
         .map((entry) => ({ entry, card: cardLookup.get(entry.cardId) ?? null }))
-        .sort((left, right) => deckBuilderCardGroup(left.card).localeCompare(deckBuilderCardGroup(right.card)) || (left.card?.title ?? left.entry.cardId).localeCompare(right.card?.title ?? right.entry.cardId)),
-    [cardLookup, selectedDeck?.cards]
+        .sort(
+          (left, right) =>
+            deckBuilderCardGroup(left.card).localeCompare(
+              deckBuilderCardGroup(right.card),
+            ) ||
+            (left.card?.title ?? left.entry.cardId).localeCompare(
+              right.card?.title ?? right.entry.cardId,
+            ),
+        ),
+    [cardLookup, selectedDeck?.cards],
   );
-  const deckTableNumericDetailsReady = useMemo(() => (selectedDeck?.cards ?? []).every((entry) => Boolean(cardDetailsById[entry.cardId])), [cardDetailsById, selectedDeck?.cards]);
-  const tableLibraryColumnCount = Math.max(1, Math.floor((tableLibraryWidth - 18) / Math.max(70, tableLibraryCardWidth + 12)));
-  const selectedTableCardKeySet = useMemo(() => new Set(selectedTableCardKeys), [selectedTableCardKeys]);
+  const deckTableNumericDetailsReady = useMemo(
+    () =>
+      (selectedDeck?.cards ?? []).every((entry) =>
+        Boolean(cardDetailsById[entry.cardId]),
+      ),
+    [cardDetailsById, selectedDeck?.cards],
+  );
+  const tableLibraryColumnCount = Math.max(
+    1,
+    Math.floor(
+      (tableLibraryWidth - 18) / Math.max(70, tableLibraryCardWidth + 12),
+    ),
+  );
+  const selectedTableCardKeySet = useMemo(
+    () => new Set(selectedTableCardKeys),
+    [selectedTableCardKeys],
+  );
   const selectedTableCardIndexes = useMemo(() => {
     const indexes = new Map<string, number>();
     selectedTableCardKeys.forEach((key, index) => indexes.set(key, index + 1));
@@ -404,8 +611,16 @@ export function DeckEditorPanel({
       .flatMap((pile) =>
         [...pile.entries]
           .sort((left, right) => left.order - right.order)
-          .filter((entry) => selectedKeys.has(deckTableSelectionKey(pile.id, entry.cardId, entry.order)))
-          .map((entry) => ({ pileId: pile.id, cardId: entry.cardId, order: entry.order }))
+          .filter((entry) =>
+            selectedKeys.has(
+              deckTableSelectionKey(pile.id, entry.cardId, entry.order),
+            ),
+          )
+          .map((entry) => ({
+            pileId: pile.id,
+            cardId: entry.cardId,
+            order: entry.order,
+          })),
       );
   }, [selectedTableCardKeys, tableLayout]);
   const deckTableStyle = useMemo(
@@ -416,26 +631,45 @@ export function DeckEditorPanel({
         "--deck-table-overlap-offset": `-${Math.round(tableCardWidth * 1.4 * (tableOverlapPercent / 100))}px`,
         "--deck-table-library-card-width": `${tableLibraryCardWidth}px`,
         "--deck-table-library-columns": tableLibraryColumnCount,
-        "--deck-table-library-overlap-offset": `${6 - Math.round(tableLibraryCardWidth * 1.4 * (tableLibraryOverlapPercent / 100))}px`
+        "--deck-table-library-overlap-offset": `${6 - Math.round(tableLibraryCardWidth * 1.4 * (tableLibraryOverlapPercent / 100))}px`,
       }) as CSSProperties,
-    [tableCardWidth, tableLibraryCardWidth, tableLibraryColumnCount, tableLibraryOverlapPercent, tableLibraryWidth, tableOverlapPercent]
+    [
+      tableCardWidth,
+      tableLibraryCardWidth,
+      tableLibraryColumnCount,
+      tableLibraryOverlapPercent,
+      tableLibraryWidth,
+      tableOverlapPercent,
+    ],
   );
-  const tableWidthControlValue = DECK_TABLE_LIBRARY_WIDTH_MIN + DECK_TABLE_LIBRARY_WIDTH_MAX - tableLibraryWidth;
+  const tableWidthControlValue =
+    DECK_TABLE_LIBRARY_WIDTH_MIN +
+    DECK_TABLE_LIBRARY_WIDTH_MAX -
+    tableLibraryWidth;
   const currentTableViewSettings = (): DeckTableViewSettings => ({
     cardWidth: tableCardWidth,
     overlapPercent: tableOverlapPercent,
     libraryWidth: tableLibraryWidth,
     libraryCardWidth: tableLibraryCardWidth,
-    libraryOverlapPercent: tableLibraryOverlapPercent
+    libraryOverlapPercent: tableLibraryOverlapPercent,
   });
   const rememberTableViewSettings = (nextSettings: DeckTableViewSettings) => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY, JSON.stringify(nextSettings));
+    window.localStorage.setItem(
+      DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY,
+      JSON.stringify(nextSettings),
+    );
   };
   const updateTableCardWidthSetting = (value: number) => {
     const next = {
       ...currentTableViewSettings(),
-      cardWidth: normalizeSteppedNumber(value, DECK_TABLE_CARD_WIDTH_DEFAULT, DECK_TABLE_CARD_WIDTH_MIN, DECK_TABLE_CARD_WIDTH_MAX, DECK_TABLE_CARD_WIDTH_STEP)
+      cardWidth: normalizeSteppedNumber(
+        value,
+        DECK_TABLE_CARD_WIDTH_DEFAULT,
+        DECK_TABLE_CARD_WIDTH_MIN,
+        DECK_TABLE_CARD_WIDTH_MAX,
+        DECK_TABLE_CARD_WIDTH_STEP,
+      ),
     };
     setTableCardWidth(next.cardWidth);
     rememberTableViewSettings(next);
@@ -443,7 +677,13 @@ export function DeckEditorPanel({
   const updateTableOverlapSetting = (value: number) => {
     const next = {
       ...currentTableViewSettings(),
-      overlapPercent: normalizeSteppedNumber(value, DECK_TABLE_OVERLAP_DEFAULT, DECK_TABLE_OVERLAP_MIN, DECK_TABLE_OVERLAP_MAX, DECK_TABLE_OVERLAP_STEP)
+      overlapPercent: normalizeSteppedNumber(
+        value,
+        DECK_TABLE_OVERLAP_DEFAULT,
+        DECK_TABLE_OVERLAP_MIN,
+        DECK_TABLE_OVERLAP_MAX,
+        DECK_TABLE_OVERLAP_STEP,
+      ),
     };
     setTableOverlapPercent(next.overlapPercent);
     rememberTableViewSettings(next);
@@ -451,18 +691,32 @@ export function DeckEditorPanel({
   const updateTableLibraryWidthSetting = (value: number) => {
     const next = {
       ...currentTableViewSettings(),
-      libraryWidth: normalizeSteppedNumber(value, DECK_TABLE_LIBRARY_WIDTH_DEFAULT, DECK_TABLE_LIBRARY_WIDTH_MIN, DECK_TABLE_LIBRARY_WIDTH_MAX, DECK_TABLE_LIBRARY_WIDTH_STEP)
+      libraryWidth: normalizeSteppedNumber(
+        value,
+        DECK_TABLE_LIBRARY_WIDTH_DEFAULT,
+        DECK_TABLE_LIBRARY_WIDTH_MIN,
+        DECK_TABLE_LIBRARY_WIDTH_MAX,
+        DECK_TABLE_LIBRARY_WIDTH_STEP,
+      ),
     };
     setTableLibraryWidth(next.libraryWidth);
     rememberTableViewSettings(next);
   };
   const updateTableWidthSetting = (value: number) => {
-    updateTableLibraryWidthSetting(DECK_TABLE_LIBRARY_WIDTH_MIN + DECK_TABLE_LIBRARY_WIDTH_MAX - value);
+    updateTableLibraryWidthSetting(
+      DECK_TABLE_LIBRARY_WIDTH_MIN + DECK_TABLE_LIBRARY_WIDTH_MAX - value,
+    );
   };
   const updateTableLibraryCardWidthSetting = (value: number) => {
     const next = {
       ...currentTableViewSettings(),
-      libraryCardWidth: normalizeSteppedNumber(value, DECK_TABLE_LIBRARY_CARD_WIDTH_DEFAULT, DECK_TABLE_LIBRARY_CARD_WIDTH_MIN, DECK_TABLE_LIBRARY_CARD_WIDTH_MAX, DECK_TABLE_LIBRARY_CARD_WIDTH_STEP)
+      libraryCardWidth: normalizeSteppedNumber(
+        value,
+        DECK_TABLE_LIBRARY_CARD_WIDTH_DEFAULT,
+        DECK_TABLE_LIBRARY_CARD_WIDTH_MIN,
+        DECK_TABLE_LIBRARY_CARD_WIDTH_MAX,
+        DECK_TABLE_LIBRARY_CARD_WIDTH_STEP,
+      ),
     };
     setTableLibraryCardWidth(next.libraryCardWidth);
     rememberTableViewSettings(next);
@@ -470,16 +724,33 @@ export function DeckEditorPanel({
   const updateTableLibraryOverlapSetting = (value: number) => {
     const next = {
       ...currentTableViewSettings(),
-      libraryOverlapPercent: normalizeSteppedNumber(value, DECK_TABLE_LIBRARY_OVERLAP_DEFAULT, DECK_TABLE_LIBRARY_OVERLAP_MIN, DECK_TABLE_LIBRARY_OVERLAP_MAX, DECK_TABLE_LIBRARY_OVERLAP_STEP)
+      libraryOverlapPercent: normalizeSteppedNumber(
+        value,
+        DECK_TABLE_LIBRARY_OVERLAP_DEFAULT,
+        DECK_TABLE_LIBRARY_OVERLAP_MIN,
+        DECK_TABLE_LIBRARY_OVERLAP_MAX,
+        DECK_TABLE_LIBRARY_OVERLAP_STEP,
+      ),
     };
     setTableLibraryOverlapPercent(next.libraryOverlapPercent);
     rememberTableViewSettings(next);
   };
-  const previewCard = (previewCardId ? cardLookup.get(previewCardId) : null) ?? libraryCards[0] ?? deckRows[0]?.card ?? null;
-  const previewQuantity = previewCard ? deckQuantities.get(previewCard.catalogCardId) ?? 0 : 0;
-  const deckStrategyProfileKey = useMemo(() => (selectedDeck ? deckStrategyProfileFingerprint(selectedDeck) : ""), [selectedDeck]);
-  const [deckStrategyProfileResponse, setDeckStrategyProfileResponse] = useState<DeckStrategyProfileViewerResponse | null>(null);
-  const [deckStrategyProfileLoading, setDeckStrategyProfileLoading] = useState(false);
+  const previewCard =
+    (previewCardId ? cardLookup.get(previewCardId) : null) ??
+    libraryCards[0] ??
+    deckRows[0]?.card ??
+    null;
+  const previewQuantity = previewCard
+    ? (deckQuantities.get(previewCard.catalogCardId) ?? 0)
+    : 0;
+  const deckStrategyProfileKey = useMemo(
+    () => (selectedDeck ? deckStrategyProfileFingerprint(selectedDeck) : ""),
+    [selectedDeck],
+  );
+  const [deckStrategyProfileResponse, setDeckStrategyProfileResponse] =
+    useState<DeckStrategyProfileViewerResponse | null>(null);
+  const [deckStrategyProfileLoading, setDeckStrategyProfileLoading] =
+    useState(false);
   useEffect(() => {
     if (!selectedDeck) {
       setDeckStrategyProfileResponse(null);
@@ -492,9 +763,12 @@ export function DeckEditorPanel({
     void fetch("/api/decks/strategy-profile", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ deck: selectedDeck })
+      body: JSON.stringify({ deck: selectedDeck }),
     })
-      .then((response) => response.json() as Promise<DeckStrategyProfileViewerResponse>)
+      .then(
+        (response) =>
+          response.json() as Promise<DeckStrategyProfileViewerResponse>,
+      )
       .then((data) => {
         if (!cancelled) setDeckStrategyProfileResponse(data);
       })
@@ -509,8 +783,8 @@ export function DeckEditorPanel({
               deckId: selectedDeck.deckId,
               deckName: selectedDeck.name,
               side: selectedDeck.side,
-              cardCount: totalCards
-            }
+              cardCount: totalCards,
+            },
           });
         }
       })
@@ -522,15 +796,25 @@ export function DeckEditorPanel({
     };
   }, [deckStrategyProfileKey]);
   useEffect(() => {
-    if (!selectedDeck || deckSideFilter === "all" || selectedDeck.side === deckSideFilter) return;
+    if (
+      !selectedDeck ||
+      deckSideFilter === "all" ||
+      selectedDeck.side === deckSideFilter
+    )
+      return;
     setDeckSideFilter(selectedDeck.side);
   }, [deckSideFilter, selectedDeck?.side]);
   useEffect(() => {
-    if (builderSetFilter === "all" || builderSetCounts[builderSetFilter] > 0) return;
+    if (builderSetFilter === "all" || builderSetCounts[builderSetFilter] > 0)
+      return;
     setBuilderSetFilter("all");
   }, [builderSetCounts, builderSetFilter]);
   useEffect(() => {
-    if (builderRarityFilter === "all" || builderRarityCounts[builderRarityFilter] > 0) return;
+    if (
+      builderRarityFilter === "all" ||
+      builderRarityCounts[builderRarityFilter] > 0
+    )
+      return;
     setBuilderRarityFilter("all");
   }, [builderRarityCounts, builderRarityFilter]);
   useEffect(() => {
@@ -539,7 +823,9 @@ export function DeckEditorPanel({
     setTableSelectionAnchor(null);
   }, [deckEditorMode, selectedDeck?.deckId]);
   useEffect(() => {
-    const settings = parseDeckTableViewSettings(readLocalStorage(DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY));
+    const settings = parseDeckTableViewSettings(
+      readLocalStorage(DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY),
+    );
     setTableCardWidth(settings.cardWidth);
     setTableOverlapPercent(settings.overlapPercent);
     setTableLibraryWidth(settings.libraryWidth);
@@ -556,14 +842,28 @@ export function DeckEditorPanel({
         overlapPercent: tableOverlapPercent,
         libraryWidth: tableLibraryWidth,
         libraryCardWidth: tableLibraryCardWidth,
-        libraryOverlapPercent: tableLibraryOverlapPercent
-      })
+        libraryOverlapPercent: tableLibraryOverlapPercent,
+      }),
     );
-  }, [tableViewSettingsLoaded, tableCardWidth, tableOverlapPercent, tableLibraryWidth, tableLibraryCardWidth, tableLibraryOverlapPercent]);
+  }, [
+    tableViewSettingsLoaded,
+    tableCardWidth,
+    tableOverlapPercent,
+    tableLibraryWidth,
+    tableLibraryCardWidth,
+    tableLibraryOverlapPercent,
+  ]);
   const handleDeckSideFilter = (nextFilter: DeckSideFilter) => {
     setDeckSideFilter(nextFilter);
-    const candidates = nextFilter === "all" ? localDecks : localDecks.filter((deck) => deck.side === nextFilter);
-    if (selectedDeck && candidates.some((deck) => deck.deckId === selectedDeck.deckId)) return;
+    const candidates =
+      nextFilter === "all"
+        ? localDecks
+        : localDecks.filter((deck) => deck.side === nextFilter);
+    if (
+      selectedDeck &&
+      candidates.some((deck) => deck.deckId === selectedDeck.deckId)
+    )
+      return;
     onSelectDeck(candidates[0]?.deckId ?? "");
   };
   const createBlankDeck = (side: Side) => {
@@ -575,7 +875,8 @@ export function DeckEditorPanel({
       setStandardCopyOpen(false);
       return;
     }
-    const first = standardDecks.find((deck) => deck.side === "runner") ?? standardDecks[0];
+    const first =
+      standardDecks.find((deck) => deck.side === "runner") ?? standardDecks[0];
     if (!first) return;
     setStandardCopySide(first.side);
     setStandardCopyDeckId(first.standardDeckId);
@@ -596,7 +897,8 @@ export function DeckEditorPanel({
     if (deck) setStandardCopyName(`${deck.name} Kopie`);
   };
   const submitStandardCopy = () => {
-    if (!selectedStandardCopy || !onCopyStandard || !standardCopyName.trim()) return;
+    if (!selectedStandardCopy || !onCopyStandard || !standardCopyName.trim())
+      return;
     void onCopyStandard(selectedStandardCopy, standardCopyName.trim()).then(
       (copied) => {
         if (copied) setStandardCopyOpen(false);
@@ -620,38 +922,66 @@ export function DeckEditorPanel({
     if (tableSelectionMode) clearTableSelection();
     setTableSelectionMode((current) => !current);
   };
-  const toggleTableCardSelection = (pileId: string, entry: DeckTableLayoutEntry) => {
+  const toggleTableCardSelection = (
+    pileId: string,
+    entry: DeckTableLayoutEntry,
+  ) => {
     const key = deckTableSelectionKey(pileId, entry.cardId, entry.order);
-    setSelectedTableCardKeys((current) => (current.includes(key) ? current.filter((candidate) => candidate !== key) : [...current, key]));
+    setSelectedTableCardKeys((current) =>
+      current.includes(key)
+        ? current.filter((candidate) => candidate !== key)
+        : [...current, key],
+    );
     setTableSelectionAnchor({ pileId, order: entry.order });
   };
   const selectTableCardRange = (pileId: string, order: number) => {
     if (!tableLayout) return;
     const pile = tableLayout.piles.find((candidate) => candidate.id === pileId);
     if (!pile) return;
-    const anchorOrder = tableSelectionAnchor?.pileId === pileId ? tableSelectionAnchor.order : order;
+    const anchorOrder =
+      tableSelectionAnchor?.pileId === pileId
+        ? tableSelectionAnchor.order
+        : order;
     const lower = Math.min(anchorOrder, order);
     const upper = Math.max(anchorOrder, order);
     const rangeKeys = pile.entries
       .filter((entry) => entry.order >= lower && entry.order <= upper)
-      .map((entry) => deckTableSelectionKey(pile.id, entry.cardId, entry.order));
-    setSelectedTableCardKeys((current) => [...new Set([...current, ...rangeKeys])]);
+      .map((entry) =>
+        deckTableSelectionKey(pile.id, entry.cardId, entry.order),
+      );
+    setSelectedTableCardKeys((current) => [
+      ...new Set([...current, ...rangeKeys]),
+    ]);
     setTableSelectionAnchor({ pileId, order });
   };
   const toggleTablePileSelection = (pileId: string) => {
     if (!tableLayout) return;
     const pile = tableLayout.piles.find((candidate) => candidate.id === pileId);
     if (!pile) return;
-    const pileKeys = pile.entries.map((entry) => deckTableSelectionKey(pile.id, entry.cardId, entry.order));
+    const pileKeys = pile.entries.map((entry) =>
+      deckTableSelectionKey(pile.id, entry.cardId, entry.order),
+    );
     const selectedKeys = new Set(selectedTableCardKeys);
-    const allSelected = pileKeys.length > 0 && pileKeys.every((key) => selectedKeys.has(key));
+    const allSelected =
+      pileKeys.length > 0 && pileKeys.every((key) => selectedKeys.has(key));
     setTableSelectionMode(true);
-    setSelectedTableCardKeys((current) => (allSelected ? current.filter((key) => !pileKeys.includes(key)) : [...new Set([...current, ...pileKeys])]));
-    setTableSelectionAnchor(pile.entries[0] ? { pileId, order: pile.entries[0].order } : null);
+    setSelectedTableCardKeys((current) =>
+      allSelected
+        ? current.filter((key) => !pileKeys.includes(key))
+        : [...new Set([...current, ...pileKeys])],
+    );
+    setTableSelectionAnchor(
+      pile.entries[0] ? { pileId, order: pile.entries[0].order } : null,
+    );
   };
-  const handleTableCardClick = (event: ReactMouseEvent<HTMLElement>, pileId: string, entry: DeckTableLayoutEntry) => {
+  const handleTableCardClick = (
+    event: ReactMouseEvent<HTMLElement>,
+    pileId: string,
+    entry: DeckTableLayoutEntry,
+  ) => {
     event.stopPropagation();
-    const shouldSelect = tableSelectionMode || event.ctrlKey || event.metaKey || event.shiftKey;
+    const shouldSelect =
+      tableSelectionMode || event.ctrlKey || event.metaKey || event.shiftKey;
     if (!shouldSelect) {
       setPreviewCardId(entry.cardId);
       return;
@@ -667,27 +997,53 @@ export function DeckEditorPanel({
     onUpdateDeck({
       ...selectedDeck,
       tableLayout: nextLayout,
-      cards: deckCardsFromTableLayout(nextLayout)
+      cards: deckCardsFromTableLayout(nextLayout),
     });
   };
-  const addTableCardToPile = (cardId: string, pileId: string, targetOrder?: number) => {
+  const addTableCardToPile = (
+    cardId: string,
+    pileId: string,
+    targetOrder?: number,
+  ) => {
     if (!tableLayout) return;
-    if (deckTableCardTotal(tableLayout, cardId) >= DECK_TABLE_MAX_COPIES_PER_CARD) return;
+    if (
+      deckTableCardTotal(tableLayout, cardId) >= DECK_TABLE_MAX_COPIES_PER_CARD
+    )
+      return;
     clearTableSelection();
     const nextLayout: DeckTableLayout = {
       ...tableLayout,
       piles: tableLayout.piles.map((pile) => {
         if (pile.id !== pileId) return pile;
-        return applyDeckTablePileSort({ ...pile, entries: insertDeckTableEntry(pile.entries, { cardId, quantity: 1, order: pile.entries.length }, targetOrder) }, cardLookup, cardDetailsById);
-      })
+        return applyDeckTablePileSort(
+          {
+            ...pile,
+            entries: insertDeckTableEntry(
+              pile.entries,
+              { cardId, quantity: 1, order: pile.entries.length },
+              targetOrder,
+            ),
+          },
+          cardLookup,
+          cardDetailsById,
+        );
+      }),
     };
     updateTableLayout(nextLayout);
   };
-  const moveTableCardsToPile = (cards: DeckTableSelectionEntry[], targetPileId: string, targetOrder?: number) => {
+  const moveTableCardsToPile = (
+    cards: DeckTableSelectionEntry[],
+    targetPileId: string,
+    targetOrder?: number,
+  ) => {
     if (!tableLayout) return;
     const existingEntries = new Map<string, DeckTableLayoutEntry>();
     for (const pile of tableLayout.piles) {
-      for (const entry of pile.entries) existingEntries.set(deckTableSelectionKey(pile.id, entry.cardId, entry.order), entry);
+      for (const entry of pile.entries)
+        existingEntries.set(
+          deckTableSelectionKey(pile.id, entry.cardId, entry.order),
+          entry,
+        );
     }
     const seenKeys = new Set<string>();
     const movingEntries = cards
@@ -703,50 +1059,131 @@ export function DeckEditorPanel({
     const nextLayout: DeckTableLayout = {
       ...tableLayout,
       piles: tableLayout.piles.map((pile) => {
-        const entriesWithoutMoved = pile.entries.filter((entry) => !seenKeys.has(deckTableSelectionKey(pile.id, entry.cardId, entry.order)));
-        if (pile.id !== targetPileId) return applyDeckTablePileSort({ ...pile, entries: reorderDeckTableEntries(entriesWithoutMoved) }, cardLookup, cardDetailsById);
-        return applyDeckTablePileSort({ ...pile, entries: insertDeckTableEntries(entriesWithoutMoved, movingEntries, targetOrder) }, cardLookup, cardDetailsById);
-      })
+        const entriesWithoutMoved = pile.entries.filter(
+          (entry) =>
+            !seenKeys.has(
+              deckTableSelectionKey(pile.id, entry.cardId, entry.order),
+            ),
+        );
+        if (pile.id !== targetPileId)
+          return applyDeckTablePileSort(
+            { ...pile, entries: reorderDeckTableEntries(entriesWithoutMoved) },
+            cardLookup,
+            cardDetailsById,
+          );
+        return applyDeckTablePileSort(
+          {
+            ...pile,
+            entries: insertDeckTableEntries(
+              entriesWithoutMoved,
+              movingEntries,
+              targetOrder,
+            ),
+          },
+          cardLookup,
+          cardDetailsById,
+        );
+      }),
     };
     clearTableSelection();
     updateTableLayout(nextLayout);
   };
-  const moveTableCardToPile = (cardId: string, sourcePileId: string, targetPileId: string, quantity = 1, sourceOrder?: number, targetOrder?: number) => {
+  const moveTableCardToPile = (
+    cardId: string,
+    sourcePileId: string,
+    targetPileId: string,
+    quantity = 1,
+    sourceOrder?: number,
+    targetOrder?: number,
+  ) => {
     if (!tableLayout) return;
-    const sourcePile = tableLayout.piles.find((pile) => pile.id === sourcePileId);
-    const sourceEntryIndex = sourcePile?.entries.findIndex((entry) => entry.cardId === cardId && (sourceOrder === undefined || entry.order === sourceOrder)) ?? -1;
-    const sourceEntry = sourceEntryIndex >= 0 ? sourcePile?.entries[sourceEntryIndex] : undefined;
+    const sourcePile = tableLayout.piles.find(
+      (pile) => pile.id === sourcePileId,
+    );
+    const sourceEntryIndex =
+      sourcePile?.entries.findIndex(
+        (entry) =>
+          entry.cardId === cardId &&
+          (sourceOrder === undefined || entry.order === sourceOrder),
+      ) ?? -1;
+    const sourceEntry =
+      sourceEntryIndex >= 0 ? sourcePile?.entries[sourceEntryIndex] : undefined;
     if (!sourceEntry) return;
-    const moveQuantity = Math.min(sourceEntry.quantity, Math.max(1, Math.floor(quantity)));
-    if (sourcePileId === targetPileId && sourceEntry.order === targetOrder) return;
+    const moveQuantity = Math.min(
+      sourceEntry.quantity,
+      Math.max(1, Math.floor(quantity)),
+    );
+    if (sourcePileId === targetPileId && sourceEntry.order === targetOrder)
+      return;
     const nextLayout: DeckTableLayout = {
       ...tableLayout,
       piles: tableLayout.piles.map((pile) => {
         if (pile.id === sourcePileId) {
           const entriesWithoutMoved = pile.entries
-            .map((entry, index) => (index === sourceEntryIndex ? { ...entry, quantity: entry.quantity - moveQuantity } : entry))
+            .map((entry, index) =>
+              index === sourceEntryIndex
+                ? { ...entry, quantity: entry.quantity - moveQuantity }
+                : entry,
+            )
             .filter((entry) => entry.quantity > 0);
           if (sourcePileId === targetPileId) {
-            return applyDeckTablePileSort({ ...pile, entries: insertDeckTableEntry(entriesWithoutMoved, { ...sourceEntry, quantity: moveQuantity }, targetOrder) }, cardLookup, cardDetailsById);
+            return applyDeckTablePileSort(
+              {
+                ...pile,
+                entries: insertDeckTableEntry(
+                  entriesWithoutMoved,
+                  { ...sourceEntry, quantity: moveQuantity },
+                  targetOrder,
+                ),
+              },
+              cardLookup,
+              cardDetailsById,
+            );
           }
-          return applyDeckTablePileSort({
-            ...pile,
-            entries: reorderDeckTableEntries(entriesWithoutMoved)
-          }, cardLookup, cardDetailsById);
+          return applyDeckTablePileSort(
+            {
+              ...pile,
+              entries: reorderDeckTableEntries(entriesWithoutMoved),
+            },
+            cardLookup,
+            cardDetailsById,
+          );
         }
         if (pile.id === targetPileId) {
-          return applyDeckTablePileSort({ ...pile, entries: insertDeckTableEntry(pile.entries, { ...sourceEntry, quantity: moveQuantity }, targetOrder) }, cardLookup, cardDetailsById);
+          return applyDeckTablePileSort(
+            {
+              ...pile,
+              entries: insertDeckTableEntry(
+                pile.entries,
+                { ...sourceEntry, quantity: moveQuantity },
+                targetOrder,
+              ),
+            },
+            cardLookup,
+            cardDetailsById,
+          );
         }
         return pile;
-      })
+      }),
     };
     clearTableSelection();
     updateTableLayout(nextLayout);
   };
-  const duplicateTableCard = (pileId: string, cardId: string, sourceOrder: number, copiesToAdd: number) => {
+  const duplicateTableCard = (
+    pileId: string,
+    cardId: string,
+    sourceOrder: number,
+    copiesToAdd: number,
+  ) => {
     if (!tableLayout) return;
     const currentTotal = deckTableCardTotal(tableLayout, cardId);
-    const nextCopies = Math.max(0, Math.min(DECK_TABLE_MAX_COPIES_PER_CARD - currentTotal, Math.floor(copiesToAdd)));
+    const nextCopies = Math.max(
+      0,
+      Math.min(
+        DECK_TABLE_MAX_COPIES_PER_CARD - currentTotal,
+        Math.floor(copiesToAdd),
+      ),
+    );
     if (nextCopies <= 0) {
       setTableCardMenuKey(null);
       return;
@@ -756,30 +1193,65 @@ export function DeckEditorPanel({
       piles: tableLayout.piles.map((pile) => {
         if (pile.id !== pileId) return pile;
         let entries = pile.entries;
-        const sourceEntry = pile.entries.find((entry) => entry.cardId === cardId && entry.order === sourceOrder);
+        const sourceEntry = pile.entries.find(
+          (entry) => entry.cardId === cardId && entry.order === sourceOrder,
+        );
         if (!sourceEntry) return pile;
         for (let copy = 0; copy < nextCopies; copy += 1) {
-          entries = insertDeckTableEntry(entries, { ...sourceEntry, quantity: 1 }, sourceOrder + copy + 1);
+          entries = insertDeckTableEntry(
+            entries,
+            { ...sourceEntry, quantity: 1 },
+            sourceOrder + copy + 1,
+          );
         }
-        return applyDeckTablePileSort({ ...pile, entries }, cardLookup, cardDetailsById);
-      })
+        return applyDeckTablePileSort(
+          { ...pile, entries },
+          cardLookup,
+          cardDetailsById,
+        );
+      }),
     };
     setTableCardMenuKey(null);
     clearTableSelection();
     updateTableLayout(nextLayout);
   };
-  const removeTableCardFromPile = (pileId: string, cardId: string, sourceOrder: number) => {
+  const removeTableCardFromPile = (
+    pileId: string,
+    cardId: string,
+    sourceOrder: number,
+  ) => {
     if (!tableLayout) return;
     setTableCardMenuKey(null);
     clearTableSelection();
     updateTableLayout({
       ...tableLayout,
-      piles: tableLayout.piles.map((pile) => (pile.id === pileId ? applyDeckTablePileSort({ ...pile, entries: reorderDeckTableEntries(pile.entries.filter((entry) => !(entry.cardId === cardId && entry.order === sourceOrder))) }, cardLookup, cardDetailsById) : pile))
+      piles: tableLayout.piles.map((pile) =>
+        pile.id === pileId
+          ? applyDeckTablePileSort(
+              {
+                ...pile,
+                entries: reorderDeckTableEntries(
+                  pile.entries.filter(
+                    (entry) =>
+                      !(entry.cardId === cardId && entry.order === sourceOrder),
+                  ),
+                ),
+              },
+              cardLookup,
+              cardDetailsById,
+            )
+          : pile,
+      ),
     });
   };
   const renameTablePile = (pileId: string, name: string) => {
     if (!tableLayout) return;
-    updateTableLayout({ ...tableLayout, piles: tableLayout.piles.map((pile) => (pile.id === pileId ? { ...pile, name: name.slice(0, 40) } : pile)) });
+    updateTableLayout({
+      ...tableLayout,
+      piles: tableLayout.piles.map((pile) =>
+        pile.id === pileId ? { ...pile, name: name.slice(0, 40) } : pile,
+      ),
+    });
   };
   const setTablePileNamesVisible = (visible: boolean) => {
     if (!tableLayout) return;
@@ -787,67 +1259,112 @@ export function DeckEditorPanel({
   };
   const setTablePileCount = (pileCount: number) => {
     if (!tableLayout || !selectedDeck) return;
-    const nextCount = Math.min(MAX_DECK_TABLE_PILE_COUNT, Math.max(MIN_DECK_TABLE_PILE_COUNT, Math.floor(pileCount)));
+    const nextCount = Math.min(
+      MAX_DECK_TABLE_PILE_COUNT,
+      Math.max(MIN_DECK_TABLE_PILE_COUNT, Math.floor(pileCount)),
+    );
     if (nextCount === tableLayout.piles.length) return;
     clearTableSelection();
-    const orderedPiles = [...tableLayout.piles].sort((left, right) => left.order - right.order);
+    const orderedPiles = [...tableLayout.piles].sort(
+      (left, right) => left.order - right.order,
+    );
     let nextPiles: DeckTablePile[];
     if (nextCount > orderedPiles.length) {
       nextPiles = [
         ...orderedPiles,
-        ...Array.from({ length: nextCount - orderedPiles.length }, (_, offset) => {
-          const index = orderedPiles.length + offset;
-          return {
-            id: `pile-${index + 1}`,
-            name: defaultDeckTablePileName(selectedDeck.side, index),
-            order: index,
-            sortMode: "free" as DeckTablePileSortMode,
-            entries: []
-          };
-        })
+        ...Array.from(
+          { length: nextCount - orderedPiles.length },
+          (_, offset) => {
+            const index = orderedPiles.length + offset;
+            return {
+              id: `pile-${index + 1}`,
+              name: defaultDeckTablePileName(selectedDeck.side, index),
+              order: index,
+              sortMode: "free" as DeckTablePileSortMode,
+              entries: [],
+            };
+          },
+        ),
       ];
     } else {
       nextPiles = orderedPiles.slice(0, nextCount);
-      const removedEntries = orderedPiles.slice(nextCount).flatMap((pile) => pile.entries);
+      const removedEntries = orderedPiles
+        .slice(nextCount)
+        .flatMap((pile) => pile.entries);
       if (removedEntries.length > 0) {
         const targetPile = nextPiles[nextPiles.length - 1]!;
         nextPiles[nextPiles.length - 1] = {
           ...targetPile,
-          entries: reorderDeckTableEntries([...targetPile.entries, ...removedEntries])
+          entries: reorderDeckTableEntries([
+            ...targetPile.entries,
+            ...removedEntries,
+          ]),
         };
       }
     }
     updateTableLayout({
       ...tableLayout,
-      piles: nextPiles.map((pile, order) => applyDeckTablePileSort({ ...pile, order, entries: reorderDeckTableEntries(pile.entries) }, cardLookup, cardDetailsById))
+      piles: nextPiles.map((pile, order) =>
+        applyDeckTablePileSort(
+          { ...pile, order, entries: reorderDeckTableEntries(pile.entries) },
+          cardLookup,
+          cardDetailsById,
+        ),
+      ),
     });
   };
-  const setTablePileSortMode = (pileId: string, sortMode: DeckTablePileSortMode) => {
+  const setTablePileSortMode = (
+    pileId: string,
+    sortMode: DeckTablePileSortMode,
+  ) => {
     if (!tableLayout) return;
     clearTableSelection();
     updateTableLayout({
       ...tableLayout,
-      piles: tableLayout.piles.map((pile) => (pile.id === pileId ? applyDeckTablePileSort({ ...pile, sortMode }, cardLookup, cardDetailsById) : pile))
+      piles: tableLayout.piles.map((pile) =>
+        pile.id === pileId
+          ? applyDeckTablePileSort(
+              { ...pile, sortMode },
+              cardLookup,
+              cardDetailsById,
+            )
+          : pile,
+      ),
     });
   };
   const moveTablePile = (sourcePileId: string, targetPileId: string) => {
     if (!tableLayout || sourcePileId === targetPileId) return;
-    const orderedPiles = [...tableLayout.piles].sort((left, right) => left.order - right.order);
-    const sourceIndex = orderedPiles.findIndex((pile) => pile.id === sourcePileId);
-    const targetIndex = orderedPiles.findIndex((pile) => pile.id === targetPileId);
+    const orderedPiles = [...tableLayout.piles].sort(
+      (left, right) => left.order - right.order,
+    );
+    const sourceIndex = orderedPiles.findIndex(
+      (pile) => pile.id === sourcePileId,
+    );
+    const targetIndex = orderedPiles.findIndex(
+      (pile) => pile.id === targetPileId,
+    );
     if (sourceIndex < 0 || targetIndex < 0) return;
     const [movedPile] = orderedPiles.splice(sourceIndex, 1);
     if (!movedPile) return;
     orderedPiles.splice(targetIndex, 0, movedPile);
     updateTableLayout({
       ...tableLayout,
-      piles: orderedPiles.map((pile, order) => ({ ...pile, order }))
+      piles: orderedPiles.map((pile, order) => ({ ...pile, order })),
     });
   };
   const insertTablePileAt = (targetPileId: string) => {
-    if (!tableLayout || !selectedDeck || tableLayout.piles.length >= MAX_DECK_TABLE_PILE_COUNT) return;
-    const orderedPiles = [...tableLayout.piles].sort((left, right) => left.order - right.order);
-    const targetIndex = orderedPiles.findIndex((pile) => pile.id === targetPileId);
+    if (
+      !tableLayout ||
+      !selectedDeck ||
+      tableLayout.piles.length >= MAX_DECK_TABLE_PILE_COUNT
+    )
+      return;
+    const orderedPiles = [...tableLayout.piles].sort(
+      (left, right) => left.order - right.order,
+    );
+    const targetIndex = orderedPiles.findIndex(
+      (pile) => pile.id === targetPileId,
+    );
     if (targetIndex < 0) return;
     const existingPileIds = new Set(orderedPiles.map((pile) => pile.id));
     let nextPileNumber = orderedPiles.length + 1;
@@ -857,34 +1374,64 @@ export function DeckEditorPanel({
       name: "Freier Stapel",
       order: targetIndex,
       sortMode: "free",
-      entries: []
+      entries: [],
     });
     clearTableSelection();
     updateTableLayout({
       ...tableLayout,
-      piles: orderedPiles.map((pile, order) => ({ ...pile, order, entries: reorderDeckTableEntries(pile.entries) }))
+      piles: orderedPiles.map((pile, order) => ({
+        ...pile,
+        order,
+        entries: reorderDeckTableEntries(pile.entries),
+      })),
     });
   };
   const arrangeTableDeck = (mode: DeckTableArrangeMode) => {
     if (!tableLayout || !selectedDeck) return;
     clearTableSelection();
     if (mode === "type") {
-      updateTableLayout(distributeDeckTableByType(tableLayout, selectedDeck.side, cardLookup, cardDetailsById));
+      updateTableLayout(
+        distributeDeckTableByType(
+          tableLayout,
+          selectedDeck.side,
+          cardLookup,
+          cardDetailsById,
+        ),
+      );
       return;
     }
     if (mode === "install-piles") {
       if (!deckTableNumericDetailsReady) return;
-      updateTableLayout(distributeDeckTableByInstallCost(tableLayout, selectedDeck.side, cardLookup, cardDetailsById));
+      updateTableLayout(
+        distributeDeckTableByInstallCost(
+          tableLayout,
+          selectedDeck.side,
+          cardLookup,
+          cardDetailsById,
+        ),
+      );
       return;
     }
     updateTableLayout({
       ...tableLayout,
-      piles: tableLayout.piles.map((pile) => applyDeckTablePileSort({ ...pile, sortMode: mode }, cardLookup, cardDetailsById))
+      piles: tableLayout.piles.map((pile) =>
+        applyDeckTablePileSort(
+          { ...pile, sortMode: mode },
+          cardLookup,
+          cardDetailsById,
+        ),
+      ),
     });
   };
-  const handleTableDrop = (event: ReactDragEvent<HTMLElement>, pileId: string, targetOrder?: number) => {
+  const handleTableDrop = (
+    event: ReactDragEvent<HTMLElement>,
+    pileId: string,
+    targetOrder?: number,
+  ) => {
     event.preventDefault();
-    const pilePayloadText = event.dataTransfer.getData("application/x-netgrid-pile");
+    const pilePayloadText = event.dataTransfer.getData(
+      "application/x-netgrid-pile",
+    );
     if (pilePayloadText) {
       try {
         const payload = JSON.parse(pilePayloadText) as { pileId?: string };
@@ -894,13 +1441,31 @@ export function DeckEditorPanel({
       }
       return;
     }
-    const payloadText = event.dataTransfer.getData("application/x-netgrid-card");
+    const payloadText = event.dataTransfer.getData(
+      "application/x-netgrid-card",
+    );
     if (!payloadText) return;
     try {
-      const payload = JSON.parse(payloadText) as { cards?: DeckTableSelectionEntry[]; cardId?: string; sourcePileId?: string; quantity?: number; sourceOrder?: number };
-      if (payload.cards?.length) moveTableCardsToPile(payload.cards, pileId, targetOrder);
-      else if (payload.cardId && payload.sourcePileId) moveTableCardToPile(payload.cardId, payload.sourcePileId, pileId, payload.quantity, payload.sourceOrder, targetOrder);
-      else if (payload.cardId) addTableCardToPile(payload.cardId, pileId, targetOrder);
+      const payload = JSON.parse(payloadText) as {
+        cards?: DeckTableSelectionEntry[];
+        cardId?: string;
+        sourcePileId?: string;
+        quantity?: number;
+        sourceOrder?: number;
+      };
+      if (payload.cards?.length)
+        moveTableCardsToPile(payload.cards, pileId, targetOrder);
+      else if (payload.cardId && payload.sourcePileId)
+        moveTableCardToPile(
+          payload.cardId,
+          payload.sourcePileId,
+          pileId,
+          payload.quantity,
+          payload.sourceOrder,
+          targetOrder,
+        );
+      else if (payload.cardId)
+        addTableCardToPile(payload.cardId, pileId, targetOrder);
     } catch {
       return;
     }
@@ -911,15 +1476,20 @@ export function DeckEditorPanel({
         <div>
           <h3>Meine Decks</h3>
           <p className="meta">
-            {localDecks.length} gespeichert · Runner {runnerDeckCount} · Korp {corpDeckCount}
+            {localDecks.length} gespeichert · Runner {runnerDeckCount} · Korp{" "}
+            {corpDeckCount}
           </p>
         </div>
         <button
           className="button iconOnly"
           type="button"
           aria-expanded={deckPickerOpen}
-          aria-label={deckPickerOpen ? "Deckbereich einklappen" : "Deckbereich ausklappen"}
-          title={deckPickerOpen ? "Deckbereich einklappen" : "Deckbereich ausklappen"}
+          aria-label={
+            deckPickerOpen ? "Deckbereich einklappen" : "Deckbereich ausklappen"
+          }
+          title={
+            deckPickerOpen ? "Deckbereich einklappen" : "Deckbereich ausklappen"
+          }
           onClick={() => setDeckPickerOpen((current) => !current)}
         >
           {deckPickerOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -927,34 +1497,81 @@ export function DeckEditorPanel({
       </div>
       {deckPickerOpen ? (
         <>
-          <p className="meta deckStorageMeta" title={storagePath || "Deckspeicher"}>
+          <p
+            className="meta deckStorageMeta"
+            title={storagePath || "Deckspeicher"}
+          >
             Deckspeicher {storagePath ? "aktiv" : "wird geladen"}
           </p>
           <div className="deckCreateActions">
-            <button className="button deckRunner" onClick={() => createBlankDeck("runner")}>
+            <button
+              className="button deckRunner"
+              onClick={() => createBlankDeck("runner")}
+            >
               <Plus size={15} />
               Neues Runner-Deck
             </button>
-            <button className="button deckCorp" onClick={() => createBlankDeck("corp")}>
+            <button
+              className="button deckCorp"
+              onClick={() => createBlankDeck("corp")}
+            >
               <Plus size={15} />
               Neues Korp-Deck
             </button>
-            <button className={`button ${importOpen ? "primary" : ""}`} onClick={() => setImportOpen((current) => !current)} type="button" aria-expanded={importOpen}>
+            <button
+              className={`button ${importOpen ? "primary" : ""}`}
+              onClick={() => setImportOpen((current) => !current)}
+              type="button"
+              aria-expanded={importOpen}
+            >
               <Upload size={15} />
               Import
             </button>
-            {onCopyStandard && standardDecks.length > 0 ? (
-              <button className={`button deckStandardCopyToggle ${standardCopyOpen ? "primary" : ""}`} onClick={toggleStandardCopy} type="button" aria-expanded={standardCopyOpen}>
+            {onCopyStandard ? (
+              <button
+                className={`button deckStandardCopyToggle ${standardCopyOpen ? "primary" : ""}`}
+                onClick={toggleStandardCopy}
+                type="button"
+                aria-expanded={standardCopyOpen}
+                disabled={standardDecks.length === 0}
+                title={standardCopyToggleTitle}
+              >
                 <CopyPlus size={15} />
-                Standard-Deck kopieren
+                {standardDeckCatalogLoading
+                  ? "Standard-Decks werden geladen"
+                  : "Standard-Deck kopieren"}
               </button>
             ) : null}
           </div>
+          {onCopyStandard && standardDeckCatalogUnavailable ? (
+            <div className="deckStandardCopyStatus" role="status">
+              <span>Standard-Decks konnten nicht geladen werden.</span>
+              {onReloadStandardDecks ? (
+                <button
+                  className="button"
+                  type="button"
+                  onClick={onReloadStandardDecks}
+                  disabled={standardDeckCatalogRefreshing}
+                >
+                  Erneut laden
+                </button>
+              ) : null}
+            </div>
+          ) : null}
           {importOpen ? (
             <div className="deckImportBox deckImportInline">
               <h3>Deck importieren</h3>
-              <textarea className="deckTextArea" value={importText} onChange={(event) => onImportText(event.target.value)} placeholder='{"schemaVersion":"editable-deck-v0.6","deck":...}' />
-              <button className="button wide" onClick={onImport} disabled={!importText.trim()}>
+              <textarea
+                className="deckTextArea"
+                value={importText}
+                onChange={(event) => onImportText(event.target.value)}
+                placeholder='{"schemaVersion":"editable-deck-v0.6","deck":...}'
+              />
+              <button
+                className="button wide"
+                onClick={onImport}
+                disabled={!importText.trim()}
+              >
                 <Upload size={15} />
                 Importieren
               </button>
@@ -963,50 +1580,112 @@ export function DeckEditorPanel({
           {standardCopyOpen ? (
             <div className="deckImportBox deckImportInline deckStandardCopyInline">
               <h3>Standard-Deck kopieren</h3>
-              <p className="meta">Die Kopie wird als persönliches Deck gespeichert und kann danach bearbeitet werden.</p>
+              <p className="meta">
+                Die Kopie wird als persönliches Deck gespeichert und kann danach
+                bearbeitet werden.
+              </p>
               <div className="deckFormGrid">
                 <label>
                   Seite
-                  <select value={standardCopySide} onChange={(event) => selectStandardCopySide(event.target.value as Side)}>
+                  <select
+                    value={standardCopySide}
+                    onChange={(event) =>
+                      selectStandardCopySide(event.target.value as Side)
+                    }
+                  >
                     <option value="runner">Runner</option>
                     <option value="corp">Korp</option>
                   </select>
                 </label>
                 <label>
                   Standard-Deck
-                  <select value={selectedStandardCopy?.standardDeckId ?? ""} onChange={(event) => selectStandardCopyDeck(event.target.value)}>
+                  <select
+                    value={selectedStandardCopy?.standardDeckId ?? ""}
+                    onChange={(event) =>
+                      selectStandardCopyDeck(event.target.value)
+                    }
+                  >
                     {standardCopyCandidates.map((deck) => (
-                      <option key={deck.standardDeckId} value={deck.standardDeckId}>{deck.name}</option>
+                      <option
+                        key={deck.standardDeckId}
+                        value={deck.standardDeckId}
+                      >
+                        {deck.name}
+                      </option>
                     ))}
                   </select>
                 </label>
                 <label>
                   Name der Kopie
-                  <input value={standardCopyName} onChange={(event) => setStandardCopyName(event.target.value)} />
+                  <input
+                    value={standardCopyName}
+                    onChange={(event) =>
+                      setStandardCopyName(event.target.value)
+                    }
+                  />
                 </label>
               </div>
               <div className="deckActions">
-                <button className="button primary" onClick={submitStandardCopy} disabled={!selectedStandardCopy || !standardCopyName.trim() || standardCopyBusy} type="button">
+                <button
+                  className="button primary"
+                  onClick={submitStandardCopy}
+                  disabled={
+                    !selectedStandardCopy ||
+                    !standardCopyName.trim() ||
+                    standardCopyBusy
+                  }
+                  type="button"
+                >
                   <CopyPlus size={15} />
                   Kopieren
                 </button>
-                <button className="button" onClick={() => setStandardCopyOpen(false)} disabled={standardCopyBusy} type="button">Abbrechen</button>
+                <button
+                  className="button"
+                  onClick={() => setStandardCopyOpen(false)}
+                  disabled={standardCopyBusy}
+                  type="button"
+                >
+                  Abbrechen
+                </button>
               </div>
             </div>
           ) : null}
           <div className="deckDisplayRow">
             <div>
               <span className="settingsTitle">Anzeige</span>
-              <span className="meta">{filteredLocalDecks.length} Decks in dieser Auswahl</span>
+              <span className="meta">
+                {filteredLocalDecks.length} Decks in dieser Auswahl
+              </span>
             </div>
-            <div className="segmented deckSideFilter" role="group" aria-label="Deckseite anzeigen">
-              <button className={deckSideFilter === "all" ? "active" : ""} onClick={() => handleDeckSideFilter("all")} type="button" aria-pressed={deckSideFilter === "all"}>
+            <div
+              className="segmented deckSideFilter"
+              role="group"
+              aria-label="Deckseite anzeigen"
+            >
+              <button
+                className={deckSideFilter === "all" ? "active" : ""}
+                onClick={() => handleDeckSideFilter("all")}
+                type="button"
+                aria-pressed={deckSideFilter === "all"}
+              >
                 Alle
               </button>
-              <button className={deckSideFilter === "runner" ? "active runner" : "runner"} onClick={() => handleDeckSideFilter("runner")} type="button" aria-pressed={deckSideFilter === "runner"}>
+              <button
+                className={
+                  deckSideFilter === "runner" ? "active runner" : "runner"
+                }
+                onClick={() => handleDeckSideFilter("runner")}
+                type="button"
+                aria-pressed={deckSideFilter === "runner"}
+              >
                 Runner
               </button>
-              <button className={deckSideFilter === "corp" ? "active corp" : "corp"} onClick={() => handleDeckSideFilter("corp")} type="button" aria-pressed={deckSideFilter === "corp"}>
+              <button
+                className={deckSideFilter === "corp" ? "active corp" : "corp"}
+                onClick={() => handleDeckSideFilter("corp")}
+                type="button"
+                aria-pressed={deckSideFilter === "corp"}
+              >
                 Korp
               </button>
             </div>
@@ -1014,7 +1693,11 @@ export function DeckEditorPanel({
           <div className="deckSelectGrid">
             <label>
               Deck anzeigen
-              <select value={selectedDeckSelectValue} onChange={(event) => onSelectDeck(event.target.value)} disabled={filteredLocalDecks.length === 0}>
+              <select
+                value={selectedDeckSelectValue}
+                onChange={(event) => onSelectDeck(event.target.value)}
+                disabled={filteredLocalDecks.length === 0}
+              >
                 <option value="">Kein lokales Deck</option>
                 {filteredLocalDecks.map((deck) => (
                   <option value={deck.deckId} key={deck.deckId}>
@@ -1035,7 +1718,10 @@ export function DeckEditorPanel({
           {selectedDeck ? null : deckManagementPanel}
           {selectedDeck ? (
             <>
-              <div className={`deckBuilderGrid ${deckEditorMode === "table" ? "deckBuilderGridTableMode" : ""}`} style={deckEditorMode === "table" ? deckTableStyle : undefined}>
+              <div
+                className={`deckBuilderGrid ${deckEditorMode === "table" ? "deckBuilderGridTableMode" : ""}`}
+                style={deckEditorMode === "table" ? deckTableStyle : undefined}
+              >
                 {deckEditorMode === "table" ? null : (
                   <aside className="deckPreviewColumn">
                     {deckManagementPanel}
@@ -1044,30 +1730,60 @@ export function DeckEditorPanel({
                         card={previewCard}
                         detail={cardDetailsById[previewCard.catalogCardId]}
                         quantity={previewQuantity}
-                        onAdd={() => onUpdateQuantity(previewCard.catalogCardId, previewQuantity + 1)}
-                        onRemove={() => onUpdateQuantity(previewCard.catalogCardId, previewQuantity - 1)}
+                        onAdd={() =>
+                          onUpdateQuantity(
+                            previewCard.catalogCardId,
+                            previewQuantity + 1,
+                          )
+                        }
+                        onRemove={() =>
+                          onUpdateQuantity(
+                            previewCard.catalogCardId,
+                            previewQuantity - 1,
+                          )
+                        }
                       />
                     ) : (
-                      <p className="meta deckEmpty">Wähle eine Karte für die Vorschau.</p>
+                      <p className="meta deckEmpty">
+                        Wähle eine Karte für die Vorschau.
+                      </p>
                     )}
                   </aside>
                 )}
-                <section className={`deckLibraryPanel ${deckEditorMode === "table" ? "deckTableLibraryPanel" : ""}`}>
+                <section
+                  className={`deckLibraryPanel ${deckEditorMode === "table" ? "deckTableLibraryPanel" : ""}`}
+                >
                   <div className="deckBuilderPanelHeader">
                     <div>
                       <h3>Kartenbibliothek</h3>
                       <p className="meta">
-                        {libraryCards.length} von {rarityFilteredPlayableCards.length} sichtbaren gültigen {sideLabel(selectedDeck.side)}-Karten
+                        {libraryCards.length} von{" "}
+                        {rarityFilteredPlayableCards.length} sichtbaren gültigen{" "}
+                        {sideLabel(selectedDeck.side)}-Karten
                       </p>
                     </div>
                     <div className="deckLibraryHeaderActions">
                       {deckEditorMode === "table" ? (
-                        <button className={`deckLibraryFilterButton ${tableLibraryControlsOpen ? "active" : ""}`} type="button" onClick={() => setTableLibraryControlsOpen((current) => !current)} aria-expanded={tableLibraryControlsOpen}>
+                        <button
+                          className={`deckLibraryFilterButton ${tableLibraryControlsOpen ? "active" : ""}`}
+                          type="button"
+                          onClick={() =>
+                            setTableLibraryControlsOpen((current) => !current)
+                          }
+                          aria-expanded={tableLibraryControlsOpen}
+                        >
                           <SlidersHorizontal size={14} />
                           Ansicht
                         </button>
                       ) : null}
-                      <button className={`deckLibraryFilterButton ${builderFiltersOpen ? "active" : ""}`} type="button" onClick={() => setBuilderFiltersOpen((current) => !current)} aria-expanded={builderFiltersOpen}>
+                      <button
+                        className={`deckLibraryFilterButton ${builderFiltersOpen ? "active" : ""}`}
+                        type="button"
+                        onClick={() =>
+                          setBuilderFiltersOpen((current) => !current)
+                        }
+                        aria-expanded={builderFiltersOpen}
+                      >
                         <ListFilter size={14} />
                         Filter
                       </button>
@@ -1075,42 +1791,99 @@ export function DeckEditorPanel({
                   </div>
                   {builderFiltersOpen ? (
                     <div className="deckBuilderTypes">
-                      <div className="deckSourceFilter" role="group" aria-label="Kartenset anzeigen">
+                      <div
+                        className="deckSourceFilter"
+                        role="group"
+                        aria-label="Kartenset anzeigen"
+                      >
                         {DECK_SOURCE_FILTERS.map((filter) => (
-                          <button className={builderSetFilter === filter.key ? "active" : ""} disabled={builderSetCounts[filter.key] === 0} key={filter.key} onClick={() => setBuilderSetFilter(filter.key)} type="button" aria-pressed={builderSetFilter === filter.key}>
+                          <button
+                            className={
+                              builderSetFilter === filter.key ? "active" : ""
+                            }
+                            disabled={builderSetCounts[filter.key] === 0}
+                            key={filter.key}
+                            onClick={() => setBuilderSetFilter(filter.key)}
+                            type="button"
+                            aria-pressed={builderSetFilter === filter.key}
+                          >
                             <span>{filter.label}</span>
                             <small>{builderSetCounts[filter.key]}</small>
                           </button>
                         ))}
                       </div>
-                      <div className="deckSourceFilter deckRarityFilter" role="group" aria-label="Rarität anzeigen">
+                      <div
+                        className="deckSourceFilter deckRarityFilter"
+                        role="group"
+                        aria-label="Rarität anzeigen"
+                      >
                         {CATALOG_RARITY_FILTERS.map((filter) => (
-                          <button className={builderRarityFilter === filter.key ? "active" : ""} disabled={builderRarityCounts[filter.key] === 0} key={filter.key} onClick={() => setBuilderRarityFilter(filter.key)} type="button" aria-pressed={builderRarityFilter === filter.key}>
+                          <button
+                            className={
+                              builderRarityFilter === filter.key ? "active" : ""
+                            }
+                            disabled={builderRarityCounts[filter.key] === 0}
+                            key={filter.key}
+                            onClick={() => setBuilderRarityFilter(filter.key)}
+                            type="button"
+                            aria-pressed={builderRarityFilter === filter.key}
+                          >
                             <span>{filter.label}</span>
                             <small>{builderRarityCounts[filter.key]}</small>
                           </button>
                         ))}
                       </div>
-                      <label className={`deckBuilderToggle ${builderOnlyInDeck ? "checked" : ""}`}>
-                        <input checked={builderOnlyInDeck} onChange={(event) => setBuilderOnlyInDeck(event.target.checked)} type="checkbox" />
+                      <label
+                        className={`deckBuilderToggle ${builderOnlyInDeck ? "checked" : ""}`}
+                      >
+                        <input
+                          checked={builderOnlyInDeck}
+                          onChange={(event) =>
+                            setBuilderOnlyInDeck(event.target.checked)
+                          }
+                          type="checkbox"
+                        />
                         Nur im Deck
                       </label>
                       <div className="deckBuilderTypeActions">
-                        <button type="button" onClick={() => setVisibleBuilderTypes(true)}>
+                        <button
+                          type="button"
+                          onClick={() => setVisibleBuilderTypes(true)}
+                        >
                           Alle Typen
                         </button>
-                        <button type="button" onClick={() => setVisibleBuilderTypes(false)}>
+                        <button
+                          type="button"
+                          onClick={() => setVisibleBuilderTypes(false)}
+                        >
                           Keine Typen
                         </button>
                       </div>
                       {visibleTypeFilterGroups.map((group) => (
-                        <div className={`typeFilterGroup ${group.side}`} key={group.title}>
+                        <div
+                          className={`typeFilterGroup ${group.side}`}
+                          key={group.title}
+                        >
                           <div className="typeFilterGrid">
                             {group.filters.map((filter) => (
-                              <label className={`typeToggle ${group.side} ${builderTypeFilters[filter.key] ? "checked" : ""}`} key={filter.key}>
-                                <input checked={builderTypeFilters[filter.key]} onChange={(event) => setBuilderTypeFilters((current) => ({ ...current, [filter.key]: event.target.checked }))} type="checkbox" />
+                              <label
+                                className={`typeToggle ${group.side} ${builderTypeFilters[filter.key] ? "checked" : ""}`}
+                                key={filter.key}
+                              >
+                                <input
+                                  checked={builderTypeFilters[filter.key]}
+                                  onChange={(event) =>
+                                    setBuilderTypeFilters((current) => ({
+                                      ...current,
+                                      [filter.key]: event.target.checked,
+                                    }))
+                                  }
+                                  type="checkbox"
+                                />
                                 <span>{filter.label}</span>
-                                <small>{builderTypeCounts[filter.key] ?? 0}</small>
+                                <small>
+                                  {builderTypeCounts[filter.key] ?? 0}
+                                </small>
                               </label>
                             ))}
                           </div>
@@ -1121,28 +1894,64 @@ export function DeckEditorPanel({
                   <label className="deckBuilderSearch">
                     Suche
                     <span className="deckSearchInputWrap">
-                      <input value={builderSearch} onChange={(event) => setBuilderSearch(event.target.value)} placeholder="Titel, Regeltext, Typ, Subtyp" />
+                      <input
+                        value={builderSearch}
+                        onChange={(event) =>
+                          setBuilderSearch(event.target.value)
+                        }
+                        placeholder="Titel, Regeltext, Typ, Subtyp"
+                      />
                       {builderSearch ? (
-                        <button aria-label="Suche zurücksetzen" className="deckSearchClearButton" onClick={() => setBuilderSearch("")} type="button">
+                        <button
+                          aria-label="Suche zurücksetzen"
+                          className="deckSearchClearButton"
+                          onClick={() => setBuilderSearch("")}
+                          type="button"
+                        >
                           <X size={14} />
                         </button>
                       ) : null}
                     </span>
                   </label>
                   {deckEditorMode === "table" && tableLibraryControlsOpen ? (
-                    <div className="deckTableLibraryControls" aria-label="Bibliotheksdarstellung">
+                    <div
+                      className="deckTableLibraryControls"
+                      aria-label="Bibliotheksdarstellung"
+                    >
                       <label>
                         <span>Kartengröße</span>
-                        <input min={DECK_TABLE_LIBRARY_CARD_WIDTH_MIN} max={DECK_TABLE_LIBRARY_CARD_WIDTH_MAX} step={DECK_TABLE_LIBRARY_CARD_WIDTH_STEP} type="range" value={tableLibraryCardWidth} onChange={(event) => updateTableLibraryCardWidthSetting(Number(event.target.value))} />
+                        <input
+                          min={DECK_TABLE_LIBRARY_CARD_WIDTH_MIN}
+                          max={DECK_TABLE_LIBRARY_CARD_WIDTH_MAX}
+                          step={DECK_TABLE_LIBRARY_CARD_WIDTH_STEP}
+                          type="range"
+                          value={tableLibraryCardWidth}
+                          onChange={(event) =>
+                            updateTableLibraryCardWidthSetting(
+                              Number(event.target.value),
+                            )
+                          }
+                        />
                       </label>
                       <label>
                         <span>Überlappung</span>
-                        <input min={DECK_TABLE_LIBRARY_OVERLAP_MIN} max={DECK_TABLE_LIBRARY_OVERLAP_MAX} step={DECK_TABLE_LIBRARY_OVERLAP_STEP} type="range" value={tableLibraryOverlapPercent} onChange={(event) => updateTableLibraryOverlapSetting(Number(event.target.value))} />
+                        <input
+                          min={DECK_TABLE_LIBRARY_OVERLAP_MIN}
+                          max={DECK_TABLE_LIBRARY_OVERLAP_MAX}
+                          step={DECK_TABLE_LIBRARY_OVERLAP_STEP}
+                          type="range"
+                          value={tableLibraryOverlapPercent}
+                          onChange={(event) =>
+                            updateTableLibraryOverlapSetting(
+                              Number(event.target.value),
+                            )
+                          }
+                        />
                       </label>
                     </div>
                   ) : null}
                   <div className="deckLibraryList">
-                    {libraryCards.map((card, index) => (
+                    {libraryCards.map((card, index) =>
                       deckEditorMode === "table" ? (
                         <DeckTableLibraryCard
                           card={card}
@@ -1150,9 +1959,17 @@ export function DeckEditorPanel({
                           key={card.catalogCardId}
                           overlapped={index >= tableLibraryColumnCount}
                           quantity={deckQuantities.get(card.catalogCardId) ?? 0}
-                          selected={previewCard?.catalogCardId === card.catalogCardId}
+                          selected={
+                            previewCard?.catalogCardId === card.catalogCardId
+                          }
                           stackIndex={index + 1}
-                          onAddToFirstPile={() => tableLayout && addTableCardToPile(card.catalogCardId, tableLayout.piles[0]?.id ?? "pile-1")}
+                          onAddToFirstPile={() =>
+                            tableLayout &&
+                            addTableCardToPile(
+                              card.catalogCardId,
+                              tableLayout.piles[0]?.id ?? "pile-1",
+                            )
+                          }
                           onSelect={() => setPreviewCardId(card.catalogCardId)}
                         />
                       ) : (
@@ -1161,19 +1978,37 @@ export function DeckEditorPanel({
                           detail={cardDetailsById[card.catalogCardId]}
                           key={card.catalogCardId}
                           quantity={deckQuantities.get(card.catalogCardId) ?? 0}
-                          selected={previewCard?.catalogCardId === card.catalogCardId}
-                          onAdd={() => onUpdateQuantity(card.catalogCardId, (deckQuantities.get(card.catalogCardId) ?? 0) + 1)}
-                          onRemove={() => onUpdateQuantity(card.catalogCardId, (deckQuantities.get(card.catalogCardId) ?? 0) - 1)}
+                          selected={
+                            previewCard?.catalogCardId === card.catalogCardId
+                          }
+                          onAdd={() =>
+                            onUpdateQuantity(
+                              card.catalogCardId,
+                              (deckQuantities.get(card.catalogCardId) ?? 0) + 1,
+                            )
+                          }
+                          onRemove={() =>
+                            onUpdateQuantity(
+                              card.catalogCardId,
+                              (deckQuantities.get(card.catalogCardId) ?? 0) - 1,
+                            )
+                          }
                           onSelect={() => setPreviewCardId(card.catalogCardId)}
                         />
-                      )
-                    ))}
-                    {libraryCards.length === 0 ? <p className="meta deckEmpty">Keine passende Karte gefunden.</p> : null}
+                      ),
+                    )}
+                    {libraryCards.length === 0 ? (
+                      <p className="meta deckEmpty">
+                        Keine passende Karte gefunden.
+                      </p>
+                    ) : null}
                   </div>
                 </section>
                 <div className="deckListColumn">
                   {deckEditorMode === "table" ? null : (
-                    <section className={`deckDetailsPanel ${deckDetailsOpen ? "" : "collapsed"}`}>
+                    <section
+                      className={`deckDetailsPanel ${deckDetailsOpen ? "" : "collapsed"}`}
+                    >
                       <div className="deckDetailsHeader">
                         <div>
                           <h3>Deckdetails</h3>
@@ -1182,11 +2017,25 @@ export function DeckEditorPanel({
                           className="button iconOnly"
                           type="button"
                           aria-expanded={deckDetailsOpen}
-                          aria-label={deckDetailsOpen ? "Deckdetails einklappen" : "Deckdetails ausklappen"}
-                          title={deckDetailsOpen ? "Deckdetails einklappen" : "Deckdetails ausklappen"}
-                          onClick={() => setDeckDetailsOpen((current) => !current)}
+                          aria-label={
+                            deckDetailsOpen
+                              ? "Deckdetails einklappen"
+                              : "Deckdetails ausklappen"
+                          }
+                          title={
+                            deckDetailsOpen
+                              ? "Deckdetails einklappen"
+                              : "Deckdetails ausklappen"
+                          }
+                          onClick={() =>
+                            setDeckDetailsOpen((current) => !current)
+                          }
                         >
-                          {deckDetailsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          {deckDetailsOpen ? (
+                            <ChevronUp size={16} />
+                          ) : (
+                            <ChevronDown size={16} />
+                          )}
                         </button>
                       </div>
                       {deckDetailsOpen ? (
@@ -1194,20 +2043,39 @@ export function DeckEditorPanel({
                           <div className="deckSelectGrid">
                             <label>
                               Deckname ändern
-                              <input value={selectedDeck.name} onChange={(event) => onUpdateDeck({ ...selectedDeck, name: event.target.value })} />
+                              <input
+                                value={selectedDeck.name}
+                                onChange={(event) =>
+                                  onUpdateDeck({
+                                    ...selectedDeck,
+                                    name: event.target.value,
+                                  })
+                                }
+                              />
                             </label>
                           </div>
                           <div className="deckFormGrid">
                             <label>
                               Notiz
-                              <input value={selectedDeck.notes ?? ""} onChange={(event) => onUpdateDeck({ ...selectedDeck, notes: event.target.value })} />
+                              <input
+                                value={selectedDeck.notes ?? ""}
+                                onChange={(event) =>
+                                  onUpdateDeck({
+                                    ...selectedDeck,
+                                    notes: event.target.value,
+                                  })
+                                }
+                              />
                             </label>
                           </div>
                         </>
                       ) : null}
                     </section>
                   )}
-                  <DeckStrategyProfilePanel response={deckStrategyProfileResponse} loading={deckStrategyProfileLoading} />
+                  <DeckStrategyProfilePanel
+                    response={deckStrategyProfileResponse}
+                    loading={deckStrategyProfileLoading}
+                  />
                   {deckEditorMode === "table" && tableLayout ? (
                     <DeckTableBoard
                       layout={tableLayout}
@@ -1241,7 +2109,9 @@ export function DeckEditorPanel({
                       onSelectPile={toggleTablePileSelection}
                       onSetTableWidth={updateTableWidthSetting}
                       onSetCardWidth={updateTableCardWidthSetting}
-                      onToggleControls={() => setTableControlsOpen((current) => !current)}
+                      onToggleControls={() =>
+                        setTableControlsOpen((current) => !current)
+                      }
                       onSetOverlapPercent={updateTableOverlapSetting}
                       onSetPileCount={setTablePileCount}
                       onShowPileNames={setTablePileNamesVisible}
@@ -1253,10 +2123,16 @@ export function DeckEditorPanel({
                       <div className="deckBuilderPanelHeader">
                         <div>
                           <h3>Deckliste</h3>
-                          <p className="meta">{totalCards} Karten im aktuellen Entwurf</p>
+                          <p className="meta">
+                            {totalCards} Karten im aktuellen Entwurf
+                          </p>
                           <DeckAgendaStatusBadge status={agendaStatus} />
                         </div>
-                        <button className="button deckTableEnterButton" onClick={() => setDeckEditorMode("table")} type="button">
+                        <button
+                          className="button deckTableEnterButton"
+                          onClick={() => setDeckEditorMode("table")}
+                          type="button"
+                        >
                           <Move size={15} />
                           Auf Tisch bearbeiten
                         </button>
@@ -1264,68 +2140,124 @@ export function DeckEditorPanel({
                       <div className="deckCardList">
                         {deckRows.map((row, index) => {
                           const group = deckBuilderCardGroup(row.card);
-                          const previousGroup = index > 0 ? deckBuilderCardGroup(deckRows[index - 1]?.card ?? null) : "";
+                          const previousGroup =
+                            index > 0
+                              ? deckBuilderCardGroup(
+                                  deckRows[index - 1]?.card ?? null,
+                                )
+                              : "";
                           return (
                             <Fragment key={row.entry.cardId}>
-                              {group !== previousGroup ? <div className="deckCardGroup">{group}</div> : null}
+                              {group !== previousGroup ? (
+                                <div className="deckCardGroup">{group}</div>
+                              ) : null}
                               <DeckListCard
                                 card={row.card}
                                 cardId={row.entry.cardId}
-                                detail={row.card ? cardDetailsById[row.card.catalogCardId] : undefined}
+                                detail={
+                                  row.card
+                                    ? cardDetailsById[row.card.catalogCardId]
+                                    : undefined
+                                }
                                 quantity={row.entry.quantity}
-                                onIncrement={() => onUpdateQuantity(row.entry.cardId, row.entry.quantity + 1)}
-                                onDecrement={() => onUpdateQuantity(row.entry.cardId, row.entry.quantity - 1)}
-                                onRemove={() => onUpdateQuantity(row.entry.cardId, 0)}
-                                onSelect={() => setPreviewCardId(row.entry.cardId)}
+                                onIncrement={() =>
+                                  onUpdateQuantity(
+                                    row.entry.cardId,
+                                    row.entry.quantity + 1,
+                                  )
+                                }
+                                onDecrement={() =>
+                                  onUpdateQuantity(
+                                    row.entry.cardId,
+                                    row.entry.quantity - 1,
+                                  )
+                                }
+                                onRemove={() =>
+                                  onUpdateQuantity(row.entry.cardId, 0)
+                                }
+                                onSelect={() =>
+                                  setPreviewCardId(row.entry.cardId)
+                                }
                               />
                             </Fragment>
                           );
                         })}
-                        {deckRows.length === 0 ? <p className="meta deckEmpty">Dieses Deck ist noch leer.</p> : null}
+                        {deckRows.length === 0 ? (
+                          <p className="meta deckEmpty">
+                            Dieses Deck ist noch leer.
+                          </p>
+                        ) : null}
                       </div>
                     </section>
                   )}
                   {deckEditorMode === "table" ? null : (
-                  <section className="deckControlsPanel">
-                    <div className="deckActions">
-                      <button className="button primary" onClick={onSave} disabled={!selectedDeckDirty}>
-                        <Save size={15} />
-                        Speichern
-                      </button>
-                      <button className="button primary" onClick={onValidate}>
-                        <Check size={15} />
-                        Prüfen
-                      </button>
-                      <button className="button" onClick={onUseForMatch} disabled={!validatedSnapshot}>
-                        <Play size={15} />
-                        {useForMatchLabel}
-                      </button>
-                      <button className="button" onClick={onExport}>
-                        <Download size={15} />
-                        Export
-                      </button>
-                      <button className="button" onClick={onDuplicate}>
-                        <CopyPlus size={15} />
-                        Duplizieren
-                      </button>
-                      <button className="button" onClick={onDelete}>
-                        <Trash2 size={15} />
-                        Löschen
-                      </button>
-                    </div>
-                    <p className={`deckSaveStatus ${selectedDeckDirty ? "dirty" : validation?.ok ? "ok" : validation && !validation.ok ? "bad" : "ok"}`}>
-                      {selectedDeckDirty ? "Ungespeicherte Änderungen" : validation?.ok ? "Gespeichert · geprüft · matchstartfähig" : validation && !validation.ok ? "Gespeichert · geprüft · nicht matchstartfähig" : "Gespeichert"}
-                    </p>
-                    <DeckValidationSummary validation={validation} snapshot={validatedSnapshot} />
-                    {exportText ? <textarea className="deckTextArea" value={exportText} readOnly /> : null}
-                  </section>
+                    <section className="deckControlsPanel">
+                      <div className="deckActions">
+                        <button
+                          className="button primary"
+                          onClick={onSave}
+                          disabled={!selectedDeckDirty}
+                        >
+                          <Save size={15} />
+                          Speichern
+                        </button>
+                        <button className="button primary" onClick={onValidate}>
+                          <Check size={15} />
+                          Prüfen
+                        </button>
+                        <button
+                          className="button"
+                          onClick={onUseForMatch}
+                          disabled={!validatedSnapshot}
+                        >
+                          <Play size={15} />
+                          {useForMatchLabel}
+                        </button>
+                        <button className="button" onClick={onExport}>
+                          <Download size={15} />
+                          Export
+                        </button>
+                        <button className="button" onClick={onDuplicate}>
+                          <CopyPlus size={15} />
+                          Duplizieren
+                        </button>
+                        <button className="button" onClick={onDelete}>
+                          <Trash2 size={15} />
+                          Löschen
+                        </button>
+                      </div>
+                      <p
+                        className={`deckSaveStatus ${selectedDeckDirty ? "dirty" : validation?.ok ? "ok" : validation && !validation.ok ? "bad" : "ok"}`}
+                      >
+                        {selectedDeckDirty
+                          ? "Ungespeicherte Änderungen"
+                          : validation?.ok
+                            ? "Gespeichert · geprüft · matchstartfähig"
+                            : validation && !validation.ok
+                              ? "Gespeichert · geprüft · nicht matchstartfähig"
+                              : "Gespeichert"}
+                      </p>
+                      <DeckValidationSummary
+                        validation={validation}
+                        snapshot={validatedSnapshot}
+                      />
+                      {exportText ? (
+                        <textarea
+                          className="deckTextArea"
+                          value={exportText}
+                          readOnly
+                        />
+                      ) : null}
+                    </section>
                   )}
                 </div>
               </div>
             </>
           ) : (
             <p className="meta deckEmpty">
-              {localDecks.length === 0 ? "Erstelle ein neues Deck oder importiere ein lokales Deck." : "In dieser Auswahl ist noch kein Deck vorhanden."}
+              {localDecks.length === 0
+                ? "Erstelle ein neues Deck oder importiere ein lokales Deck."
+                : "In dieser Auswahl ist noch kein Deck vorhanden."}
             </p>
           )}
         </div>

@@ -6669,8 +6669,15 @@ export default function Page() {
                       standardDecks={
                         accountSession.account ? standardDecks : []
                       }
+                      standardDeckCatalogPhase={standardDeckCatalogState.phase}
+                      standardDeckCatalogRefreshing={
+                        standardDeckCatalogState.refreshing
+                      }
                       standardCopyBusy={accountDeckBusy}
-                      onCopyStandard={copyStandardToAccount}
+                      {...(accountSession.account
+                        ? { onCopyStandard: copyStandardToAccount }
+                        : {})}
+                      onReloadStandardDecks={reloadStandardDeckCatalog}
                     />
                   ) : null}
                   {entryTab === "recent" ? (
@@ -7459,8 +7466,14 @@ export default function Page() {
                   onImportText: setDeckImportText,
                   onImport: importLocalDeck,
                   standardDecks: accountSession.account ? standardDecks : [],
+                  standardDeckCatalogPhase: standardDeckCatalogState.phase,
+                  standardDeckCatalogRefreshing:
+                    standardDeckCatalogState.refreshing,
                   standardCopyBusy: accountDeckBusy,
-                  onCopyStandard: copyStandardToAccount,
+                  ...(accountSession.account
+                    ? { onCopyStandard: copyStandardToAccount }
+                    : {}),
+                  onReloadStandardDecks: reloadStandardDeckCatalog,
                 }}
                 publicGamesPanelProps={{
                   matches: openLanMatches,
