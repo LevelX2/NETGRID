@@ -30167,13 +30167,21 @@
       "cardType": "asset",
       "effects": [
         {
+          "amount": 3,
+          "amountKind": "fixed",
+          "economyMode": "bank_load",
           "kind": "finite_economy_pool",
+          "resource": "credits",
           "scope": "corp",
           "target": "economy.corp_charge_bank",
           "timing": "action"
         },
         {
-          "kind": "economy",
+          "amountKind": "all_available",
+          "economyMode": "bank_cashout",
+          "kind": "action_economy",
+          "repeatable": true,
+          "resource": "credits",
           "scope": "corp",
           "target": "economy.corp_action_charged_bank",
           "timing": "action"
@@ -30250,17 +30258,19 @@
         "economy.card",
         "effect_scope:corp",
         "effect_timing:action",
+        "effect:action_economy",
         "effect:counter_economy",
-        "effect:economy",
         "effect:finite_economy_pool"
       ],
       "functionSignals": [
         "economy.corp_action_charged_bank",
         "economy.corp_charge_bank",
         "economy.corp_counter_bank",
+        "economy.action",
         "economy.counter",
         "economy.finite_pool",
-        "economy.generic"
+        "economy.generic",
+        "economy.temporary_resource_bank"
       ]
     },
     {

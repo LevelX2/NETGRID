@@ -110,6 +110,27 @@ describe("economy card hint contracts", () => {
       effects.some((effect) => effect.kind === "finite_economy_pool"),
     ).toBe(false);
   });
+
+  it("matches Department of Truth Enhancement's hosted-credit load and all-cashout contract", () => {
+    const effects = hint("onr_v1_318_department-of-truth-enhancement").effects;
+    expect(effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          amount: 3,
+          amountKind: "fixed",
+          economyMode: "bank_load",
+          kind: "finite_economy_pool",
+          resource: "credits",
+        }),
+        expect.objectContaining({
+          amountKind: "all_available",
+          economyMode: "bank_cashout",
+          kind: "action_economy",
+          resource: "credits",
+        }),
+      ]),
+    );
+  });
 });
 
 function hint(cardId: string): EconomyHint {

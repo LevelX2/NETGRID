@@ -294,6 +294,21 @@ Umgesetzt und fokussiert verifiziert:
 - Keine Runtime- oder Planpriorität ändern.
 - Commit: `fix(ai): align Department of Truth credit hints`.
 
+Umgesetzt und fokussiert verifiziert:
+
+- Der deklarative Load-Effekt beschreibt jetzt exakt drei Credits mit
+  `amountKind: fixed` und `economyMode: bank_load`.
+- Der Cashout-Effekt beschreibt die vollständige Auszahlung mit
+  `amountKind: all_available` und `economyMode: bank_cashout`; die generischen
+  Funktionssignale für Action-Economy und temporäre Ressourcenbank sind
+  vollständig.
+- Weder Engineimplementierung noch Runtime, Planwahl oder Priorität wurden
+  geändert. Ein fokussierter Datenvertrag sichert die Übereinstimmung mit
+  `hostedCreditAddAbility(amount: 3)` und `hostedCreditTakeAbility(mode: all)`.
+- Grün: 123 fokussierte Hinttests, Hint-Metadatenvertrag, Hint-Qualitätsgate
+  sowie der vollständige 22-Karten-/45-Kopien-Consumer-Audit des
+  Rent-to-Own-Decksnapshots ohne Blocker oder Warnung.
+
 ### P7 – Breite Verifikation, Ergebnis und Integration
 
 - Alle neuen Checkpoints und fokussierten Plan-/Choice-/Quote-/Hinttests.
