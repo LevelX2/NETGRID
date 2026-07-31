@@ -210,7 +210,9 @@ import {
 import {
   preparedAiDecisionDebugMatchesState,
   preparedAiDecisionDebugTrace,
+  retainPreparedAiDecisionDebugTurnPlanTrace,
 } from "./ai-decision-debug-prepared-trace";
+import type { MaintenanceAiTraceDetail } from "./maintenance";
 import {
   ACTION_CUE_SETTINGS_STORAGE_KEY,
   ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
@@ -840,6 +842,8 @@ export default function Page() {
   ] = useState("");
   const [preparedAiDecisionDebug, setPreparedAiDecisionDebug] =
     useState<PreparedAiDecisionDebug | null>(null);
+  const [aiDecisionDebugTurnPlanTrace, setAiDecisionDebugTurnPlanTrace] =
+    useState<MaintenanceAiTraceDetail | null>(null);
   const [aiDecisionDebugPreview, setAiDecisionDebugPreview] =
     useState<AiDecisionPreview | null>(null);
   const [aiDecisionDebugPreviewError, setAiDecisionDebugPreviewError] =
@@ -3129,8 +3133,10 @@ export default function Page() {
       setAiDecisionDebugStatus("off");
       setAiDecisionDebugError("");
       setPreparedAiDecisionDebug(null);
+      setAiDecisionDebugTurnPlanTrace(null);
       return;
     }
+    setAiDecisionDebugTurnPlanTrace(null);
     setAiDecisionDebugStatus("waiting");
     setAiDecisionDebugError("");
   }, [aiDecisionDebugOverlayEnabled, aiDecisionDebugMatchId]);
@@ -3149,6 +3155,9 @@ export default function Page() {
       .then((prepared) => {
         if (!current) return;
         setPreparedAiDecisionDebug(prepared);
+        setAiDecisionDebugTurnPlanTrace((retained) =>
+          retainPreparedAiDecisionDebugTurnPlanTrace(retained, prepared),
+        );
         setAiDecisionDebugFailedPreparationKey("");
         setAiDecisionDebugStatus("live");
       })
@@ -6910,6 +6919,7 @@ export default function Page() {
                 status={aiDecisionDebugTrace ? "live" : aiDecisionDebugStatus}
                 error={aiDecisionDebugError}
                 trace={aiDecisionDebugTrace}
+                turnPlanTrace={aiDecisionDebugTurnPlanTrace}
                 traceCount={aiDecisionDebugTrace ? 1 : 0}
                 onPosition={setAiDecisionDebugOverlayPosition}
                 onClose={() => setAiDecisionDebugOverlayEnabled(false)}

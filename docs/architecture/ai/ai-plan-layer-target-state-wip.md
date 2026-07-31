@@ -4188,6 +4188,16 @@ Das Ranking erklärt:
 - welche Wechselmarge oder Hysterese wirkte;
 - warum wartende Pläne nicht ausführbar waren.
 
+Der private Betreiber-Debugvertrag hält zusätzlich die erste vollständige
+Restzugplanung eines KI-Zuges fest. Für jede tatsächlich vom bestehenden
+TurnPlanner betrachtete Linie werden Root-Plan, semantische Schrittfolge,
+Skalarwert, einzelne Bewertungskomponenten, Pflichtenbefund,
+Planungsgrenze und Evidence ausgegeben. Nur der erste, aktuell gebundene
+Schritt darf dabei eine `currentActionId` tragen; projizierte Folgeschritte
+bleiben reine Semantik. Diese Diagnose serialisiert das Ergebnis des
+zuständigen Restzug-Suchers und eröffnet weder eine zweite Linienwahl noch
+eine neue Plan-, Step-, Routen- oder Action-Autorität.
+
 ### 39.3 Step- und Routenranking
 
 Für den Executor:

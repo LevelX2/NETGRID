@@ -21,6 +21,7 @@ import {
   aiDecisionDebugDeckStrategySummary,
   aiDecisionDebugHqHandRows,
 } from "../../app/ai-decision-debug-ui";
+import { aiTurnPlanComparison } from "../../app/ai-turn-plan-comparison-ui";
 import { serializeAiPlanFirstDecisionVisibleJsonExport } from "../../app/ai-plan-first-decision-export";
 import {
   aiPlanFirstDispositionSummary,
@@ -70,6 +71,7 @@ export function FloatingAiDecisionDebugOverlay({
   status,
   error,
   trace,
+  turnPlanTrace,
   traceCount,
   onPosition,
   onClose,
@@ -78,6 +80,7 @@ export function FloatingAiDecisionDebugOverlay({
   status: AiDecisionDebugOverlayStatus;
   error: string;
   trace: MaintenanceAiTraceDetail | null;
+  turnPlanTrace: MaintenanceAiTraceDetail | null;
   traceCount: number;
   onPosition(position: RunOverlayPositionPreference): void;
   onClose(): void;
@@ -162,7 +165,7 @@ export function FloatingAiDecisionDebugOverlay({
           transform: "none",
         }
       : {};
-  const exportTrace = trace;
+  const exportTrace = trace ?? turnPlanTrace;
   const exportMode: "trace" = "trace";
   const statusText = exportTrace
     ? aiDecisionDebugWindowHeaderStatusLabel(exportTrace, exportMode)
@@ -265,6 +268,7 @@ export function FloatingAiDecisionDebugOverlay({
             status={status}
             error={error}
             trace={trace}
+            turnPlanTrace={turnPlanTrace}
           />
         </div>
       </section>
@@ -279,19 +283,45 @@ function AiDecisionDebugOverlayBody({
   status,
   error,
   trace,
+  turnPlanTrace,
 }: {
   status: AiDecisionDebugOverlayStatus;
   error: string;
   trace: MaintenanceAiTraceDetail | null;
+  turnPlanTrace: MaintenanceAiTraceDetail | null;
 }) {
   if (status === "error") {
+    if (turnPlanTrace) {
+      return (
+        <div className="aiDecisionDebugContent">
+          <AiDecisionDebugTurnPlanSnapshotView trace={turnPlanTrace} />
+          <p className="aiDecisionDebugNotice error" role="alert">
+            {error || "KI-Trace konnte nicht geladen werden."}
+          </p>
+        </div>
+      );
+    }
     return (
       <p className="aiDecisionDebugNotice error" role="alert">
         {error || "KI-Trace konnte nicht geladen werden."}
       </p>
     );
   }
-  if (trace) return <AiDecisionDebugTraceView trace={trace} />;
+  if (trace)
+    return (
+      <AiDecisionDebugTraceView trace={trace} turnPlanTrace={turnPlanTrace} />
+    );
+  if (turnPlanTrace) {
+    return (
+      <div className="aiDecisionDebugContent">
+        <AiDecisionDebugTurnPlanSnapshotView trace={turnPlanTrace} />
+        <p className="aiDecisionDebugNotice" role="status">
+          Der festgehaltene Zugbeginn-Plan bleibt zur Auswertung sichtbar. Warte
+          auf die nächste vorbereitete KI-Entscheidung.
+        </p>
+      </div>
+    );
+  }
   return (
     <p className="aiDecisionDebugNotice" role="status">
       Warte auf die vorbereitete nächste KI-Entscheidung.
@@ -339,9 +369,11 @@ function aiDecisionDebugWindowHeaderStatusLabel(
 
 function AiDecisionDebugTraceView({
   trace,
+  turnPlanTrace,
   mode = "trace",
 }: {
   trace: MaintenanceAiTraceDetail;
+  turnPlanTrace: MaintenanceAiTraceDetail | null;
   mode?: "trace" | "preview";
 }) {
   const decision = parseAiPlanFirstDecisionDebug(
@@ -377,6 +409,7 @@ function AiDecisionDebugTraceView({
   return (
     <AiDecisionDebugPlanFirstTraceView
       trace={trace}
+      turnPlanTrace={turnPlanTrace}
       mode={mode}
       decision={decision}
     />
@@ -385,10 +418,12 @@ function AiDecisionDebugTraceView({
 
 function AiDecisionDebugPlanFirstTraceView({
   trace,
+  turnPlanTrace,
   mode,
   decision,
 }: {
   trace: MaintenanceAiTraceDetail;
+  turnPlanTrace: MaintenanceAiTraceDetail | null;
   mode: "trace" | "preview";
   decision: AiPlanFirstDecisionDebug;
 }) {
@@ -397,15 +432,6 @@ function AiDecisionDebugPlanFirstTraceView({
   const selectedPlan = decision.selectedPlan;
   const priorityLabel = aiPlanFirstPriorityLabel(decision.priority);
   const dispositionSummary = aiPlanFirstDispositionSummary(decision);
-  const actionAlternativeLabels = new Map(
-    aiDecisionDebugRecordList(detail.actionAlternatives).flatMap(
-      (alternative) =>
-        typeof alternative.actionId === "string" &&
-        typeof alternative.label === "string"
-          ? [[alternative.actionId, alternative.label] as const]
-          : [],
-    ),
-  );
   const nextActionRows: Array<[string, string]> = [
     ["Gewählte Aktion", actionLabel],
     ...(trace.selectedActionId
@@ -494,6 +520,10 @@ function AiDecisionDebugPlanFirstTraceView({
 
   return (
     <div className="aiDecisionDebugContent">
+      {turnPlanTrace ? (
+        <AiDecisionDebugTurnPlanSnapshotView trace={turnPlanTrace} />
+      ) : null}
+
       <AiDecisionDebugCollapsibleSection
         title="Nächste Aktion"
         summary={actionLabel}
@@ -591,9 +621,9 @@ function AiDecisionDebugPlanFirstTraceView({
 
       {decision.turnPlanning ? (
         <AiDecisionDebugCollapsibleSection
-          title="Zugplanung"
+          title="Technische Zugplan-Diagnose"
           summary={`${decision.turnPlanning.selectedLine.phases.length} Phase(n) · ${aiTurnPlanningStopReasonLabel(decision.turnPlanning.selectedLine.stopReason)}`}
-          defaultOpen
+          defaultOpen={false}
         >
           <AiDecisionDebugRows
             rows={[
@@ -775,45 +805,6 @@ function AiDecisionDebugPlanFirstTraceView({
                     : "warning"
                 }
               />
-            </>
-          ) : null}
-          {decision.turnPlanning.consideredLines?.length ? (
-            <>
-              <h4>Verglichene Zuglinien</h4>
-              <div className="aiDecisionDebugCompactList">
-                {decision.turnPlanning.consideredLines.map((line) => {
-                  const selected =
-                    line.lineId === decision.turnPlanning?.selectedLine.lineId;
-                  return (
-                    <div
-                      className={selected ? "selected" : undefined}
-                      key={line.lineId}
-                    >
-                      <span>
-                        {actionAlternativeLabels.get(line.firstActionId) ??
-                          line.firstActionId}{" "}
-                        · {line.stepCount} Schritt(e)
-                      </span>
-                      <strong>
-                        {selected ? "Ausgewählt · " : ""}
-                        Wert {line.scalarValue} ·{" "}
-                        {aiTurnPlanningStopReasonLabel(line.stopReason)}
-                      </strong>
-                      <AiDecisionDebugRows
-                        rows={[
-                          ["Linien-ID", line.lineId],
-                          ["Erste Action-ID", line.firstActionId],
-                          ["Root", line.rootPlanInstanceId],
-                          [
-                            "Verletzte Pflichten",
-                            String(line.violatedObligationCount),
-                          ],
-                        ]}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
             </>
           ) : null}
           <div className="aiDecisionDebugCompactList">
@@ -1102,6 +1093,283 @@ function AiDecisionDebugPlanFirstTraceView({
         />
       </AiDecisionDebugCollapsibleSection>
     </div>
+  );
+}
+
+function AiDecisionDebugTurnPlanSnapshotView({
+  trace,
+}: {
+  trace: MaintenanceAiTraceDetail;
+}) {
+  const decision = parseAiPlanFirstDecisionDebug(
+    trace.detail.planFirstDecision,
+  );
+  if (!decision?.turnPlanning) return null;
+  const actionLabels = new Map(
+    aiDecisionDebugRecordList(trace.detail.actionAlternatives).flatMap(
+      (alternative) =>
+        typeof alternative.actionId === "string" &&
+        typeof alternative.label === "string"
+          ? [[alternative.actionId, alternative.label] as const]
+          : [],
+    ),
+  );
+  const comparison = aiTurnPlanComparison(decision, actionLabels);
+  if (!comparison) return null;
+  const selected =
+    comparison.cards.find((card) => card.selected) ?? comparison.cards[0];
+  const planning = decision.turnPlanning;
+
+  return (
+    <AiDecisionDebugCollapsibleSection
+      title="Zugplan am Zugbeginn"
+      summary={`${comparison.cards.length} Planoption(en) · ausgewählt: ${selected ? aiTracePlanLabel(selected.moduleId ?? selected.rootPlanInstanceId) : "nicht ausgewiesen"}`}
+      defaultOpen
+    >
+      <p className="aiDecisionDebugNotice">
+        Dieser Snapshot hält die erste vollständige Planung des KI-Zuges fest.
+        Die Planoptionen bleiben über spätere Aktionen dieses Zuges unverändert
+        vergleichbar.
+      </p>
+      <AiDecisionDebugRows
+        rows={[
+          ["Zug", comparison.turnKey],
+          [
+            "Ausgewählter Plan",
+            selected
+              ? aiTracePlanLabel(
+                  selected.moduleId ?? selected.rootPlanInstanceId,
+                )
+              : "nicht ausgewiesen",
+          ],
+          ["Erste Aktion", selected?.actionLabel ?? "nicht ausgewiesen"],
+          [
+            "Auswahlwert",
+            selected?.scalarValue !== undefined
+              ? String(selected.scalarValue)
+              : "nicht ausgewiesen",
+          ],
+          ["Auswahlgrund", comparison.selectionReason],
+          [
+            "Priorität/Kriterium",
+            decision.priority
+              ? `${decision.priority.effectiveClass} · ${decision.priority.reasonCode}`
+              : "kein Planprioritätsvertrag",
+          ],
+          [
+            "Planungsumfang",
+            planning.search
+              ? `${planning.search.lineCount} Linien · ${planning.search.expandedNodeCount} Suchknoten · Tiefe ${planning.search.maximumDepth}`
+              : `${comparison.cards.length} ausgewiesene Linien`,
+          ],
+          [
+            "Abdeckung",
+            planning.coverage
+              ? `${planning.coverage.coveragePercent}% · ${planning.coverage.status === "pass" ? "vollständig" : "mit Lücken"}`
+              : "nicht ausgewiesen",
+          ],
+        ]}
+      />
+      <div className="aiDecisionDebugPlanComparison">
+        {comparison.cards.map((card, index) => (
+          <AiDecisionDebugPersistentDetails
+            key={card.lineId}
+            disclosureId={`turn-plan:${comparison.turnKey}:${card.lineId}`}
+            className={`aiDecisionDebugPlanComparisonCard ${card.selected ? "selected" : ""}`}
+            defaultOpen={false}
+          >
+            <summary>
+              <span
+                className={`aiDecisionDebugPlanComparisonStatus ${card.selected ? "selected" : ""}`}
+              >
+                {card.selected ? "Ausgewählt" : `Alternative ${index}`}
+              </span>
+              <strong>
+                {aiTracePlanLabel(card.moduleId ?? card.rootPlanInstanceId)}
+              </strong>
+              <span className="aiDecisionDebugPlanComparisonAction">
+                {card.actionLabel}
+                {card.steps.length > 1
+                  ? ` → ${card.steps
+                      .slice(1)
+                      .map((step) => step.semanticActionType)
+                      .join(" → ")}`
+                  : ""}
+              </span>
+              <span className="aiDecisionDebugPlanComparisonMetric">
+                Wert {card.scalarValue ?? "–"}
+              </span>
+              <span className="aiDecisionDebugPlanComparisonMetric">
+                {card.stepCount} Schritt(e)
+              </span>
+              <span className="aiDecisionDebugPlanComparisonMetric">
+                {card.violatedObligationCount ?? "?"} Pflichtverletzung(en)
+              </span>
+            </summary>
+            <div className="aiDecisionDebugPlanComparisonDetails">
+              <AiDecisionDebugRows
+                rows={[
+                  ["Linien-ID", card.lineId],
+                  ["Root-Planinstanz", card.rootPlanInstanceId],
+                  ["Planmodul", card.moduleId ?? "nicht ausgewiesen"],
+                  ["Erste Action-ID", card.actionId],
+                  [
+                    "Geplante Folge",
+                    card.steps.length
+                      ? card.steps
+                          .map((step, stepIndex) =>
+                            stepIndex === 0
+                              ? card.actionLabel
+                              : step.semanticActionType,
+                          )
+                          .join(" → ")
+                      : "nicht ausgewiesen",
+                  ],
+                  [
+                    "Planungsende",
+                    aiTurnPlanningStopReasonLabel(card.stopReason),
+                  ],
+                  ...(card.head
+                    ? ([
+                        ["Planner-Head", card.head.candidateId],
+                        ["Semantische Aktion", card.head.semanticActionType],
+                        ["Invocation", card.head.invocationKey],
+                        [
+                          "Witness",
+                          card.head.witnessValid ? "gültig" : "ungültig",
+                        ],
+                      ] as Array<[string, string]>)
+                    : []),
+                  ...(card.plan
+                    ? ([
+                        ["Planstatus", card.plan.viability],
+                        [
+                          "Phase/Meilenstein",
+                          `${card.plan.phase} · ${card.plan.milestone}`,
+                        ],
+                        [
+                          "Offene Needs",
+                          card.plan.openNeedIds.length
+                            ? card.plan.openNeedIds.join(", ")
+                            : "keine",
+                        ],
+                        [
+                          "Blocker",
+                          card.plan.blockers.length
+                            ? card.plan.blockers.join(", ")
+                            : "keine",
+                        ],
+                        [
+                          "Ziel",
+                          card.plan.target
+                            ? `${card.plan.target.label ?? card.plan.target.kind} · ${card.plan.target.id}`
+                            : "nicht gebunden",
+                        ],
+                      ] as Array<[string, string]>)
+                    : []),
+                ]}
+              />
+              {Object.keys(card.evaluationValues).length ? (
+                <>
+                  <h4>Bewertungskomponenten</h4>
+                  <AiDecisionDebugRows
+                    rows={Object.entries(card.evaluationValues)
+                      .sort(([left], [right]) => left.localeCompare(right))
+                      .map(([criterion, value]) => [criterion, String(value)])}
+                  />
+                </>
+              ) : null}
+              {card.agendaLine ? (
+                <>
+                  <h4>Agenda-spezifische Bewertung</h4>
+                  <AiDecisionDebugRows
+                    rows={[
+                      [
+                        "Linienfamilie",
+                        aiAgendaLineFamilyLabel(card.agendaLine.family),
+                      ],
+                      ["Erwartungswert", String(card.agendaLine.expectedValue)],
+                      [
+                        "Worst-Case-Untergrenze",
+                        String(card.agendaLine.worstCaseFloor),
+                      ],
+                      [
+                        "Agenda/Defense/Economy",
+                        `${card.agendaLine.agendaProgress}/${card.agendaLine.defense}/${card.agendaLine.economy}`,
+                      ],
+                      ["Risiko", String(card.agendaLine.risk)],
+                    ]}
+                  />
+                </>
+              ) : null}
+              {card.defenseLine ? (
+                <>
+                  <h4>Defense-spezifische Bewertung</h4>
+                  <AiDecisionDebugRows
+                    rows={[
+                      ["Zielserver", card.defenseLine.targetServerId],
+                      [
+                        "Linientyp",
+                        aiDefenseLineDispositionLabel(
+                          card.defenseLine.disposition,
+                        ),
+                      ],
+                      ["Gesamtwert", String(card.defenseLine.totalValue)],
+                      [
+                        "Funding-Gap",
+                        `${card.defenseLine.fundingGapBefore} → ${card.defenseLine.fundingGapAfter}`,
+                      ],
+                      [
+                        "Danach rezbereit",
+                        card.defenseLine.rezReadyAfterLine ? "ja" : "nein",
+                      ],
+                      [
+                        "Defense/Economy/Bluff",
+                        `${card.defenseLine.defenseValue}/${card.defenseLine.economyValue}/${card.defenseLine.bluffValue}`,
+                      ],
+                    ]}
+                  />
+                </>
+              ) : null}
+              {card.selectedPhases.length ? (
+                <>
+                  <h4>Geplante Umsetzung</h4>
+                  <div className="aiDecisionDebugCompactList">
+                    {card.selectedPhases.map((phase, phaseIndex) => (
+                      <div key={phase.phaseId}>
+                        <span>
+                          Phase {phaseIndex + 1} ·{" "}
+                          {aiTracePlanLabel(phase.rootModuleId)}
+                        </span>
+                        <strong>
+                          {phase.nodes
+                            .map((node) => node.semanticActionType)
+                            .join(" → ")}
+                        </strong>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : null}
+              {card.plan?.evidenceCodes.length ? (
+                <AiDecisionDebugChips
+                  title="Planspezifische Evidence"
+                  items={card.plan.evidenceCodes}
+                  tone="muted"
+                />
+              ) : null}
+              {card.evidenceCodes.length ? (
+                <AiDecisionDebugChips
+                  title="Linien-Evidence"
+                  items={card.evidenceCodes}
+                  tone="muted"
+                />
+              ) : null}
+            </div>
+          </AiDecisionDebugPersistentDetails>
+        ))}
+      </div>
+    </AiDecisionDebugCollapsibleSection>
   );
 }
 

@@ -148,6 +148,10 @@
   Varianten, Commitment, Lease, Boundaries, Coverage und Kampagnenstatus. Die
   Hand des menschlichen Spielers bleibt aus dieser Anzeige ausgeschlossen. Für
   die KI-Daten dieser Ansicht gilt keine seitensichere Reduktion.
+- Der erste vollständige Zugplan-Snapshot bleibt pro KI-Zug für die
+  Betreiberprüfung erhalten. Jede betrachtete Linie weist ihre semantische
+  Schrittfolge, Bewertungskomponenten und Evidence aus; zukünftige Schritte
+  tragen keine Action-ID und erzeugen keine zweite Entscheidungsautorität.
 - PF15 ist mit Commit `4b0c459f6` als fail-closed Plan-first-Runtime-Cutover
   abgeschlossen. Die produktive Arbitration wählt zuerst eine residente
   `PlanInstance`, deren Step und aktuelle Route; eine Action besitzt außerhalb
