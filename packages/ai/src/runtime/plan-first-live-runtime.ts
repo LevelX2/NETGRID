@@ -10148,8 +10148,8 @@ function corpEconomyDevelopmentCampaigns(
           evidenceCode:
             "corp_engine_certified_immediate_root_rez_credit_conversion",
         });
+        return;
       }
-      return;
     }
     if (
       definition?.side !== "corp" ||

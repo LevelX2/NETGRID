@@ -29168,6 +29168,7 @@
         "economy.action",
         "economy.corp_installed_credit_pool",
         "economy.finite_pool",
+        "economy.temporary_resource_bank",
         "remote.asset_economy"
       ]
     },

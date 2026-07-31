@@ -12,7 +12,7 @@ import avoidUnfundedRdOverstackJson from "../../../../../data/scenarios/ai-decis
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
-describe("e6aca Corp remediation red decision checkpoints", () => {
+describe("e6aca Corp remediation decision checkpoints", () => {
   it.each([
     [
       "rejects declining a free effective ETR in the decoy remote",
@@ -42,26 +42,16 @@ describe("e6aca Corp remediation red decision checkpoints", () => {
       "does not drift away from the bound Venice score remote",
       preserveVeniceTargetJson,
     ],
-  ])("passes the corrected defense behavior: %s", (_label, json) => {
+    [
+      "activates installed BBS economy instead of drawing past it",
+      activateBbsEconomyJson,
+    ],
+  ])("passes the corrected Corp behavior: %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(
       structuredClone(json) as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-  });
-
-  it.each([
-    [
-      "activates installed BBS economy instead of drawing past it",
-      activateBbsEconomyJson,
-    ],
-  ])("captures the pre-fix behavior regression: %s", (_label, json) => {
-    const result = runAiDecisionCheckpoint(
-      structuredClone(json) as AiDecisionCheckpointV1,
-    );
-
-    expect(result.ok).toBe(false);
-    expect(result.code).toBe("behavior_regression");
   });
 
   it("still permits a funded fifth R&D layer", () => {

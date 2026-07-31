@@ -1525,6 +1525,13 @@ export function corpEconomyPriorityClass(
     signal.cadence.kind === "immediate_on_rez"
   )
     return "P3";
+  if (
+    signal.kind === "develop_campaign" &&
+    signal.phase === "rez" &&
+    (signal.cadence.kind === "finite_pool" ||
+      signal.cadence.kind === "automatic_start_of_turn")
+  )
+    return "P4";
   return "P5";
 }
 
