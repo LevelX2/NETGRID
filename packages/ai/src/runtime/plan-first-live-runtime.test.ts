@@ -6048,6 +6048,39 @@ describe("authoritative plan-first live runtime", () => {
       "new_remote",
     );
 
+    const blockedPreparedInput = structuredClone(input);
+    blockedPreparedInput.decisionId = "blocked-prepared-score-remote:1:corp";
+    blockedPreparedInput.legalActions =
+      blockedPreparedInput.legalActions.filter(
+        (action) => action.actionId !== "install-ice-existing",
+      );
+    blockedPreparedInput.playerView.legalActions =
+      blockedPreparedInput.legalActions;
+    resetResidentPlanPortfolioMemory();
+    const executableSiblingDecision = liveContext().chooseSemanticRuntimeAction(
+      blockedPreparedInput,
+      {},
+    );
+    expect(executableSiblingDecision).toMatchObject({
+      actionId: "install-ice-new",
+      reasonCode: "plan_first.corp.defend_servers",
+    });
+    expect(executableSiblingDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.defend_servers",
+        "plan_step_capability:develop_score_protection",
+      ]),
+    );
+    const siblingPortfolio = JSON.stringify(
+      residentPlanPortfolioSnapshot(blockedPreparedInput),
+    );
+    expect(siblingPortfolio).toContain(
+      '"parentInstanceId":"plan:corp.score_agenda:agenda%3Aagenda-1%3Anew_remote"',
+    );
+    expect(siblingPortfolio).not.toContain(
+      '"parentInstanceId":"plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1","effect":"progress"',
+    );
+
     const protectedInput = structuredClone(input);
     protectedInput.playerView.stateVersion = 2;
     protectedInput.decisionId = "prepared-score-remote:2:corp";

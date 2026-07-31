@@ -7242,6 +7242,34 @@ function buildCorpDomain(
       )
       .map((project) => project.agendaInstanceId!),
   );
+  const executableScoreProjectIds = new Set(
+    proposedScoreProjects
+      .filter(
+        (project) =>
+          project.phase === "install_agenda" &&
+          project.serverId !== undefined &&
+          project.agendaInstanceId !== undefined &&
+          agendaInstancesWithPreparedRemote.has(project.agendaInstanceId) &&
+          corpPreparedScoreProjectHasExecutableCurrentStep(
+            input,
+            candidates,
+            project,
+          ),
+      )
+      .map((project) => project.projectId),
+  );
+  const agendaInstancesWithExecutablePreparedRemote = new Set(
+    proposedScoreProjects
+      .filter(
+        (project) =>
+          project.phase === "install_agenda" &&
+          project.serverId !== undefined &&
+          project.serverId !== "new_remote" &&
+          project.agendaInstanceId !== undefined &&
+          executableScoreProjectIds.has(project.projectId),
+      )
+      .map((project) => project.agendaInstanceId!),
+  );
   const concreteScoreProjectsBeforeOpeningRush = uniqueScoreProjects(
     proposedScoreProjects.filter(
       (project) =>
@@ -7249,7 +7277,11 @@ function buildCorpDomain(
           project.phase === "install_agenda" &&
           project.serverId === "new_remote" &&
           project.agendaInstanceId !== undefined &&
-          agendaInstancesWithPreparedRemote.has(project.agendaInstanceId)
+          agendaInstancesWithPreparedRemote.has(project.agendaInstanceId) &&
+          (agendaInstancesWithExecutablePreparedRemote.has(
+            project.agendaInstanceId,
+          ) ||
+            !executableScoreProjectIds.has(project.projectId))
         ),
     ),
   );
@@ -9690,6 +9722,35 @@ function corpScoreProtectionStagingInstallSignal(
     sourceDefinitionId: candidate.sourceDefinitionId,
     evidenceCode: `score_protection_staging_install:${project.projectId}:${serverId}:bounded_deterrence`,
   };
+}
+
+function corpPreparedScoreProjectHasExecutableCurrentStep(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  project: CorpScoreProjectSignal,
+): boolean {
+  if (
+    project.feasible &&
+    project.actionIds?.some((actionId) =>
+      candidates.some((candidate) => candidate.actionId === actionId),
+    ) === true
+  ) {
+    return true;
+  }
+  if (!project.protectionNeed) return false;
+  const scan = corpScoreProtectionInstallRouteScan(input, candidates, project);
+  return (
+    scan.productiveRoutes.length > 0 ||
+    candidates.some(
+      (candidate) =>
+        corpScoreProtectionStagingInstallSignal(
+          input,
+          candidate,
+          project,
+          scan,
+        ) !== undefined,
+    )
+  );
 }
 
 function corpScoreProtectionStagingRezPortfolioIsNearTermFundable(

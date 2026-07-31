@@ -655,11 +655,9 @@ function contributeCorpActionDispositionForCandidate(
     facts.candidateIsVisibleCorpAgendaInstall(input, candidate) &&
     facts.candidateTargetIds(candidate).includes("new_remote") &&
     candidate.sourceCardInstanceId !== undefined &&
-    domain.scoreProjects.some(
-      (signal) =>
-        signal.agendaInstanceId === candidate.sourceCardInstanceId &&
-        signal.serverId !== undefined &&
-        signal.serverId !== "new_remote",
+    preparedScoreParentSuppressesSiblingRoute(
+      domain,
+      candidate.sourceCardInstanceId,
     ) &&
     !facts.corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)
   ) {
@@ -971,4 +969,24 @@ function contributeCorpActionDispositionForCandidate(
       "corp_card_action_has_no_exact_parent_need",
     );
   }
+}
+
+function preparedScoreParentSuppressesSiblingRoute(
+  domain: CorpPlanDomain,
+  agendaInstanceId: string,
+): boolean {
+  const preparedProjects = domain.scoreProjects.filter(
+    (project) =>
+      project.agendaInstanceId === agendaInstanceId &&
+      project.serverId !== undefined &&
+      project.serverId !== "new_remote",
+  );
+  if (preparedProjects.length === 0) return false;
+  const siblingWasAdmitted = domain.scoreProjects.some(
+    (project) =>
+      project.agendaInstanceId === agendaInstanceId &&
+      project.phase === "install_agenda" &&
+      project.serverId === "new_remote",
+  );
+  return !siblingWasAdmitted;
 }
