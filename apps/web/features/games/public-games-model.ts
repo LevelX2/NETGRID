@@ -1,4 +1,8 @@
-import type { ApiPublicMatchListEntry } from "@netgrid/shared";
+import type {
+  ApiGameResultReason,
+  ApiPublicMatchListEntry,
+  Side,
+} from "@netgrid/shared";
 
 export type PublicGamesFilter = "all" | "open" | "active" | "finished";
 export type PublicGamesViewMode = "detailed" | "compact";
@@ -9,9 +13,15 @@ export type PublicMatchResultScore = {
 };
 
 export type PublicMatchConclusion = {
-  kind: "regular" | "forfeit" | "time_expired" | "unknown";
+  kind: ApiGameResultReason;
   label: string;
   compactLabel: string;
+};
+
+export type PublicMatchParticipant = {
+  side: Side;
+  displayName: string;
+  isWinner: boolean;
 };
 
 const STATUS_PRIORITY: Record<ApiPublicMatchListEntry["status"], number> = {
@@ -108,19 +118,56 @@ export function publicMatchConclusion(
     };
   }
 
-  if (result.reason === "unknown") {
-    return {
+  const conclusions: Record<
+    Exclude<ApiGameResultReason, "forfeit" | "time_expired">,
+    PublicMatchConclusion
+  > = {
+    agenda_points: {
+      kind: "agenda_points",
+      label: "Sieg durch Agenda-Punkte",
+      compactLabel: "Agenda-Sieg",
+    },
+    flatline: {
+      kind: "flatline",
+      label: "Sieg durch Flatline des Runners",
+      compactLabel: "Flatline",
+    },
+    corp_deck_empty: {
+      kind: "corp_deck_empty",
+      label: "Sieg, weil die Korp nicht mehr aus R&D ziehen konnte",
+      compactLabel: "R&D leer",
+    },
+    bad_publicity_7: {
+      kind: "bad_publicity_7",
+      label: "Sieg durch 7 Bad Publicity der Korp",
+      compactLabel: "Bad Publicity",
+    },
+    draw: {
+      kind: "draw",
+      label: "Unentschieden",
+      compactLabel: "Unentschieden",
+    },
+    unknown: {
       kind: "unknown",
       label: "Abschlussart unbekannt",
       compactLabel: "Unbekannter Abschluss",
-    };
-  }
-
-  return {
-    kind: "regular",
-    label: "Regulär beendet",
-    compactLabel: "Regulär",
+    },
   };
+  return conclusions[result.reason];
+}
+
+export function publicMatchParticipants(
+  entry: ApiPublicMatchListEntry,
+): PublicMatchParticipant[] {
+  const authoritativeWinnerSide = publicMatchWinnerSide(entry);
+  return (["runner", "corp"] as const).map((side) => ({
+    side,
+    displayName:
+      entry.result?.[side].displayName.trim() ||
+      entry.participantNames[side]?.trim() ||
+      sideLabel(side),
+    isWinner: entry.status === "finished" && authoritativeWinnerSide === side,
+  }));
 }
 
 export function shouldRefreshPublicGames({
@@ -146,4 +193,17 @@ export function canRejoinPublicMatch(
 
 function sideLabel(side: "runner" | "corp"): string {
   return side === "runner" ? "Runner" : "Korp";
+}
+
+function publicMatchWinnerSide(
+  entry: ApiPublicMatchListEntry,
+): Side | undefined {
+  const result = entry.result;
+  if (result) {
+    if (result.winner === "draw" || result.reason === "draw") return undefined;
+    return result.winnerSide ?? result.winner;
+  }
+  return entry.winner === "runner" || entry.winner === "corp"
+    ? entry.winner
+    : undefined;
 }

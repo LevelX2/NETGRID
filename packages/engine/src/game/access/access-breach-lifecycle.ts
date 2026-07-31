@@ -61,7 +61,6 @@ export function accessCurrentCard(
     revealAccessedCard(host, cardId);
     resolveAmbushOnAccessFoundation(host, cardId, legalAction);
     host.effects.executeAccessEffects(cardId, legalAction);
-    applyHqAccessExposeInstalledCorpCards(host, breach.serverId, legalAction);
     const definition = host.cards.definitionFor(cardId);
     applyPrearrangedDropAgendaAccess(host, definition, legalAction);
     applyPromisesPromisesAgendaAccess(host, cardId, definition, legalAction);
@@ -281,19 +280,14 @@ export function applyHqAccessExposeInstalledCorpCards(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     runnerUtilityAbility: "hq_access_expose_all_installed_corp_cards",
+    effectSide: "runner",
     hiddenZoneBarrier: true,
     hiddenZoneAction: openedReviewChoice
       ? "schematics_search_engine_expose_installed_cards_review"
       : "schematics_search_engine_expose_installed_cards",
     publicRevealKind: "expose",
-    sourceDefinitionId:
-      typeof legalAction.payload?.sourceDefinitionId === "string"
-        ? legalAction.payload.sourceDefinitionId
-        : sourceDefinition.id,
-    sourceTitle:
-      typeof legalAction.payload?.sourceTitle === "string"
-        ? legalAction.payload.sourceTitle
-        : sourceDefinition.title,
+    sourceDefinitionId: sourceDefinition.id,
+    sourceTitle: sourceDefinition.title,
     revealedCount:
       Math.max(0, Math.floor(Number(legalAction.payload?.revealedCount ?? 0))) +
       exposedDefinitions.length,

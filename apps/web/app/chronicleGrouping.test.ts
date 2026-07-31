@@ -78,6 +78,17 @@ describe("groupChronicleEntriesForRender", () => {
     ).toBe(true);
   });
 
+  it("keeps the Schematics review finish inside its active HQ run", () => {
+    expect(
+      chronicleResolveChoiceBelongsToRunPayload({
+        hiddenZoneAction:
+          "schematics_search_engine_expose_installed_cards_finish",
+        breachId: "run_1.breach",
+        serverId: "hq",
+      }),
+    ).toBe(true);
+  });
+
   it("keeps Fall Guy tag avoidance eligible for the active run group", () => {
     expect(
       chronicleResolveChoiceBelongsToRunPayload({

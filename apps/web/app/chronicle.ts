@@ -2716,6 +2716,57 @@ export function formatChronicleEvent(
       }
       break;
     case "decline_rez":
+      if (
+        hiddenZoneAction ===
+        "schematics_search_engine_expose_installed_cards_review"
+      ) {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          "Schematics Search Engine";
+        const exposeSubject =
+          stringValue(payload.effectSide) === "runner"
+            ? subjectFor("runner", side, false)
+            : subject;
+        const revealedTitles = publicRevealTitleList(
+          payload.publicRevealTitles,
+        );
+        const revealedDefinitionCount = definitionIdsFromCsv(
+          stringValue(payload.publicRevealDefinitionIds),
+        ).length;
+        const exposedCount =
+          numberValue(payload.revealedCount) ??
+          (revealedTitles.length > 0
+            ? revealedTitles.length
+            : revealedDefinitionCount);
+        const exposedText =
+          exposedCount === 1
+            ? "eine installierte Korp-Karte"
+            : `${exposedCount} installierte Korp-Karten`;
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = sourceDefinitionId ?? cardDefinitionId;
+        cardTitle = source;
+        if (stringValue(payload.effectSide) === "runner") {
+          chips.splice(0, chips.length, ...baseChips("runner", false));
+        }
+        title = phrase(
+          exposeSubject,
+          `mit ${source} ${exposedText} beim HQ-Breach aufgedeckt`,
+        );
+        description =
+          revealedTitles.length > 0
+            ? `Aufgedeckt: ${revealedTitles.join(", ")}. Die Ansicht bleibt offen, bis der Runner das Ansehen beendet.`
+            : `${source} hat ${exposedText} aufgedeckt; die Ansicht bleibt offen, bis der Runner das Ansehen beendet.`;
+        chips.push(
+          source,
+          "HQ-Breach",
+          "Expose",
+          `${exposedCount} ${exposedCount === 1 ? "Karte" : "Karten"}`,
+        );
+        break;
+      }
       category = "run";
       title = phrase(subject, "nicht gerezzt. Der Run geht weiter");
       chips.push("Run", "Kein Rez");
@@ -2835,6 +2886,57 @@ export function formatChronicleEvent(
       }
       break;
     case "continue_run":
+      if (
+        hiddenZoneAction ===
+        "schematics_search_engine_expose_installed_cards_review"
+      ) {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          "Schematics Search Engine";
+        const exposeSubject =
+          stringValue(payload.effectSide) === "runner"
+            ? subjectFor("runner", side, false)
+            : subject;
+        const revealedTitles = publicRevealTitleList(
+          payload.publicRevealTitles,
+        );
+        const revealedDefinitionCount = definitionIdsFromCsv(
+          stringValue(payload.publicRevealDefinitionIds),
+        ).length;
+        const exposedCount =
+          numberValue(payload.revealedCount) ??
+          (revealedTitles.length > 0
+            ? revealedTitles.length
+            : revealedDefinitionCount);
+        const exposedText =
+          exposedCount === 1
+            ? "eine installierte Korp-Karte"
+            : `${exposedCount} installierte Korp-Karten`;
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = sourceDefinitionId ?? cardDefinitionId;
+        cardTitle = source;
+        if (stringValue(payload.effectSide) === "runner") {
+          chips.splice(0, chips.length, ...baseChips("runner", false));
+        }
+        title = phrase(
+          exposeSubject,
+          `mit ${source} ${exposedText} beim HQ-Breach aufgedeckt`,
+        );
+        description =
+          revealedTitles.length > 0
+            ? `Aufgedeckt: ${revealedTitles.join(", ")}. Die Ansicht bleibt offen, bis der Runner das Ansehen beendet.`
+            : `${source} hat ${exposedText} aufgedeckt; die Ansicht bleibt offen, bis der Runner das Ansehen beendet.`;
+        chips.push(
+          source,
+          "HQ-Breach",
+          "Expose",
+          `${exposedCount} ${exposedCount === 1 ? "Karte" : "Karten"}`,
+        );
+        break;
+      }
       if (
         payload.temporaryEncounterTrashed === true &&
         payload.successfulRunFinalizedAfterIntervention === true
