@@ -570,16 +570,33 @@ function offersForHeads(params: {
         .filter((head) => head.priorityClass === params.urgentPriorityClass)
         .map((head) => head.candidateId)
     : [];
+  const selectedHeadIds = params.heads
+    .filter(
+      (head) => head.currentBinding.actionId === params.moduleSelectedActionId,
+    )
+    .map((head) => head.candidateId);
+  const selectedHeadHasCertifiedCleanupHarm = params.heads.some(
+    (head) =>
+      head.currentBinding.actionId === params.moduleSelectedActionId &&
+      (head.evaluationValues.hand_quality ?? 0) < 0 &&
+      head.evidenceCodes.some((code) =>
+        /^runner_cleanup_projection:required_discards:[1-9]\d*$/.test(code),
+      ),
+  );
   return params.heads.flatMap((head) => {
     const candidate = params.candidates.find(
       (entry) => entry.actionId === head.currentBinding.actionId,
     );
     if (!candidate) return [];
     const dependencyVariants =
-      params.urgentPriorityClass &&
-      head.priorityClass !== params.urgentPriorityClass
-        ? urgentHeadIds.map((candidateId) => [candidateId])
-        : [[]];
+      selectedHeadIds.length > 0 &&
+      !selectedHeadHasCertifiedCleanupHarm &&
+      head.currentBinding.actionId !== params.moduleSelectedActionId
+        ? selectedHeadIds.map((candidateId) => [candidateId])
+        : params.urgentPriorityClass &&
+            head.priorityClass !== params.urgentPriorityClass
+          ? urgentHeadIds.map((candidateId) => [candidateId])
+          : [[]];
     return dependencyVariants.map((dependencyCandidateIds) => {
       const priorityCoverage = priorityCoverageForHead(
         params.urgentPriorityClass,
