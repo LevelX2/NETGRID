@@ -189,6 +189,29 @@ historical_evidence
   bleiben resident.
 - Commit: `fix(ai): keep score campaigns bound and executable`.
 
+Umgesetzt und fokussiert verifiziert:
+
+- Eine wirkungsvolle erste ICE-Schicht darf den konkreten Scoring-Remote auch
+  dann eröffnen, wenn ihre Rez-Kosten nicht bereits neben der gesamten
+  Agendareserve innerhalb eines Folgezugs finanzierbar sind. Weitere
+  bedingte Schichten brauchen weiterhin eine endliche Finanzierung oder eine
+  bereits etablierte gleichartige ICE-Rolle.
+- Vorhandene Zielremotes gehen bei sonst vergleichbarem Risiko einem neuen
+  Remote vor; danach entscheidet die Agenda-Ausbeute vor technischer ID.
+- Ein typkompatibler Breaker entwertet Trace-, Damage-, Trash- oder andere
+  Encounter-Wirkung nicht pauschal. Die vorhandene Effektsemantik bleibt Teil
+  der begrenzten Staging-Bewertung.
+- Voller HQ-Handdruck darf einen bereits begrenzt geschützten Remote in einen
+  Score-Start überführen, wenn kein weiteres ICE aus HQ legal installiert
+  werden kann. Dadurch wird kein zusätzlicher Draw erzeugt, der den
+  Agenda-Overflow selbst verschärft.
+- D88/D89 ist als echte zweistufige Continuation gesichert: Der Defense-Step
+  bleibt Kind derselben Tycho-/`remote_1`-Planinstanz; der Folgecheckpoint
+  erhält deren Resident-Portfolio statt eines künstlichen Neustarts ohne
+  Planbindung.
+- Grün: sieben Match-Checkpoints sowie 190 fokussierte Runtime-,
+  Continuity- und Allocation-Tests.
+
 ### P4 – F5: aktionsgebundene ICE-Rez-Projektion
 
 - Die Rezfenster 78 und 84 des langen Matches aktuell reproduzieren.

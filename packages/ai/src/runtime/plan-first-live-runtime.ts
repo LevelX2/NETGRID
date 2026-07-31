@@ -8799,11 +8799,33 @@ function scoreProjectForCandidate(
             deadlinePressure,
           )
         : undefined;
-    const boundedStagedScoreWindow =
+    const residentBoundedStagedScoreWindow =
       serverId !== undefined &&
       serverId !== "new_remote" &&
       candidate.sourceCardInstanceId === residentScoreAgendaInstanceId &&
       corpRemoteHasBoundedStagedIce(input, serverId, agendaPoints);
+    const handPressureBoundedStagedScoreWindow =
+      serverId !== undefined &&
+      serverId !== "new_remote" &&
+      input.playerView.own.gripOrHq.length >=
+        input.playerView.own.maxHandSize &&
+      !input.legalActions.some((action) => {
+        if (
+          action.side !== "corp" ||
+          action.type !== "install_card" ||
+          action.payload?.placement !== "ice" ||
+          !action.source
+        ) {
+          return false;
+        }
+        const source = input.playerView.own.gripOrHq.find(
+          (card) => card.instanceId === action.source,
+        );
+        return source?.known === true && source.type === "ice";
+      }) &&
+      corpRemoteHasBoundedStagedIce(input, serverId, agendaPoints);
+    const boundedStagedScoreWindow =
+      residentBoundedStagedScoreWindow || handPressureBoundedStagedScoreWindow;
     const developmentClickAvailable =
       input.playerView.own.clicks >= (boundedStagedScoreWindow ? 1 : 2) ||
       deadlinePressure;
@@ -9398,6 +9420,11 @@ function compareCorpScoreProtectionProjects(
     );
     if (comparison !== undefined && comparison !== 0) return comparison;
   }
+  const leftStartsNewRemote = left.serverId === "new_remote";
+  const rightStartsNewRemote = right.serverId === "new_remote";
+  if (leftStartsNewRemote !== rightStartsNewRemote) {
+    return leftStartsNewRemote ? 1 : -1;
+  }
   const leftBaseline = left.protectionNeed?.baseline;
   const rightBaseline = right.protectionNeed?.baseline;
   if (leftBaseline?.knowledge !== rightBaseline?.knowledge) {
@@ -9414,6 +9441,9 @@ function compareCorpScoreProtectionProjects(
     if (currentRiskComparison !== undefined && currentRiskComparison !== 0) {
       return currentRiskComparison;
     }
+  }
+  if (left.agendaPoints !== right.agendaPoints) {
+    return right.agendaPoints - left.agendaPoints;
   }
   return technicalIdCompare(left.projectId, right.projectId);
 }
@@ -9642,15 +9672,22 @@ function corpScoreProtectionStagingInstallSignal(
   );
   const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
   const sourceDefense = visibleCorpIceDefenseProfile(source);
-  const boundedNonEtrDeterrence =
+  const startsFirstScoreProtectionLayer =
+    serverId === "new_remote" || existingRemote?.ice.length === 0;
+  const reinforcesExistingIceRole =
+    corpHandDuplicateCount(input, candidate.sourceDefinitionId) > 1 ||
+    existingRemote?.ice.some(
+      (ice) => ice.definitionId === candidate.sourceDefinitionId,
+    ) === true;
+  const boundedConditionalDeterrence =
     source !== undefined &&
-    corpHandDuplicateCount(input, candidate.sourceDefinitionId) > 1 &&
+    (startsFirstScoreProtectionLayer || reinforcesExistingIceRole) &&
     (sourceDefense.hasMeaningfulTaxOrDamage ||
       sourceDefense.hasEncounterDisruption);
   if (
     source?.definitionId !== candidate.sourceDefinitionId ||
     definition?.type !== "ice" ||
-    (!sourceDefense.hasImmediateStop && !boundedNonEtrDeterrence)
+    (!sourceDefense.hasImmediateStop && !boundedConditionalDeterrence)
   ) {
     return undefined;
   }
@@ -9699,6 +9736,7 @@ function corpScoreProtectionStagingInstallSignal(
     return undefined;
   }
   if (
+    !startsFirstScoreProtectionLayer &&
     !corpScoreProtectionStagingRezPortfolioIsNearTermFundable(
       input,
       project,
@@ -9854,7 +9892,8 @@ function scoreProtectionStagingMayBackstopDirectRoute(
     need.baseline.knowledge === "known" &&
     need.baseline.protection.protectsScore === false &&
     scan.directInstallRouteState.knowledge === "known" &&
-    scan.directInstallRouteState.disposition === "effect_missing"
+    (scan.directInstallRouteState.disposition === "effect_missing" ||
+      scan.directInstallRouteState.disposition === "funding_only")
   );
 }
 
@@ -9913,8 +9952,11 @@ function corpRemoteHasBoundedStagedIce(
               .join(" "),
         }),
       );
+      const defense = visibleCorpIceDefenseProfile(ice);
       const answeredIceExceedsBoundedRushRisk =
         hasVisibleBreakerAnswer &&
+        !defense.hasMeaningfulTaxOrDamage &&
+        !defense.hasEncounterDisruption &&
         (exposedAgendaPoints > 1 ||
           input.playerView.opponent.agendaPoints + exposedAgendaPoints >=
             input.playerView.agendaPointsToWin);
