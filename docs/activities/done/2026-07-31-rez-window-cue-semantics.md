@@ -135,8 +135,8 @@ Die Rezfenster-Darstellung soll den tatsächlichen Regelablauf korrekt und ruhig
 - [x] Technische Rez-Pässe erzeugen kein großes Gegnerfenster.
 - [x] Tatsächlicher ICE-Rezverzicht bleibt sichtbar.
 - [x] Chronik, KI-Debug, Replay und Run-Fortsetzung bleiben vollständig.
-- [ ] Arbeitsbranch ist lokal in `main` integriert.
-- [ ] Arbeits-Worktree und gemergter Branch sind nachweislich entfernt.
+- [x] Arbeitsbranch ist lokal in `main` integriert.
+- [x] Arbeits-Worktree und gemergter Branch sind nachweislich entfernt.
 
 ## Ergebnisnotiz
 
@@ -147,4 +147,6 @@ Das große Gegner-Aktionsfenster unterdrückt Movement-, Fort- und
 Approach-Root-Rezpässe, während Chronik, Replay und KI-Debugspur vollständig
 bleiben. Sichtbare Effekte desselben Ereignisses werden weiterhin als eigene
 Meldung dargestellt. Vollständige Engine-/Webtests, Typechecks und Builds sind
-grün. Lokaler Merge und Cleanup folgen nach diesem Paketcommit.
+grün. Der Arbeitsbranch wurde per Fast-Forward lokal nach `main` integriert.
+Der Arbeits-Worktree wurde aus Git und Dateisystem entfernt; der vollständig
+gemergte Arbeitsbranch wurde anschließend gelöscht.
