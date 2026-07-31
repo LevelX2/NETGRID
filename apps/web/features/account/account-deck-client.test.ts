@@ -73,6 +73,7 @@ describe("account deck client", () => {
   });
 
   it("loads curated standards and their immutable snapshot descriptors without browser storage", async () => {
+    const controller = new AbortController();
     const fetcher = vi.fn(async () =>
       response({
         catalog: {
@@ -86,9 +87,13 @@ describe("account deck client", () => {
         },
       }),
     ) as unknown as typeof fetch;
-    const loaded = await loadStandardDecks(fetcher);
+    const loaded = await loadStandardDecks(fetcher, controller.signal);
     expect(loaded.catalog.decks).toHaveLength(1);
     expect(loaded.catalog.snapshots[0]).toMatchObject({ immutable: true });
+    expect(fetcher).toHaveBeenCalledWith(
+      expect.stringContaining("/api/decks/standards"),
+      expect.objectContaining({ signal: controller.signal }),
+    );
   });
 });
 

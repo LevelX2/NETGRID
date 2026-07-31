@@ -5,12 +5,13 @@ import type { VisibleCard } from "@netgrid/shared";
 
 import {
   cardCreditCounterVisual,
+  cardSpecificCounterDisplayBadgePresentation,
   counterDisplayTooltipText,
   counterDisplayUsesCreditBadge,
   counterDisplayUsesRefreshingCreditBadge,
   safeCounterDisplayAmount,
   type AdvancementCounterDisplay,
-  type IceModifierBadgeView
+  type IceModifierBadgeView,
 } from "../../app/action-board-ui";
 import { CounterHelpTooltipTrigger } from "../game-board/CounterHelpTooltip";
 import { SubroutineIcon } from "./CardTextRendering";
@@ -19,13 +20,21 @@ import {
   type DisplayVisibleCard,
 } from "./card-view-model";
 
-export function AdvancementGems({ card, display }: { card: DisplayVisibleCard; display: AdvancementCounterDisplay }) {
+export function AdvancementGems({
+  card,
+  display,
+}: {
+  card: DisplayVisibleCard;
+  display: AdvancementCounterDisplay;
+}) {
   if (display.overflowLabel) {
     return (
       <span className="advancementGems counted" aria-hidden="true">
         <span className="advancementGemCount">
           <span className="advancementGem advancementGemCountIcon" />
-          <span className="advancementGemCountAmount">{display.overflowLabel}</span>
+          <span className="advancementGemCountAmount">
+            {display.overflowLabel}
+          </span>
         </span>
       </span>
     );
@@ -34,29 +43,58 @@ export function AdvancementGems({ card, display }: { card: DisplayVisibleCard; d
   return (
     <span className="advancementGems iconsOnly" aria-hidden="true">
       {Array.from({ length: display.visibleGemCount }, (_, index) => (
-        <span className="advancementGem" key={`${card.instanceId}-development-${index}`} style={advancementGemStyle(card.instanceId, index, display.visibleGemCount)} />
+        <span
+          className="advancementGem"
+          key={`${card.instanceId}-development-${index}`}
+          style={advancementGemStyle(
+            card.instanceId,
+            index,
+            display.visibleGemCount,
+          )}
+        />
       ))}
     </span>
   );
 }
 
-export function IceModifierBadges({ badges }: { badges: IceModifierBadgeView[] }) {
-  const [tooltipBadge, setTooltipBadge] = useState<IceModifierBadgeView | null>(null);
+export function IceModifierBadges({
+  badges,
+}: {
+  badges: IceModifierBadgeView[];
+}) {
+  const [tooltipBadge, setTooltipBadge] = useState<IceModifierBadgeView | null>(
+    null,
+  );
   const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
-  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("above");
+  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">(
+    "above",
+  );
 
-  const showBadgeTooltip = (element: HTMLElement, badge: IceModifierBadgeView) => {
+  const showBadgeTooltip = (
+    element: HTMLElement,
+    badge: IceModifierBadgeView,
+  ) => {
     const rect = element.getBoundingClientRect();
     const width = Math.min(240, Math.max(160, window.innerWidth - 32));
     const margin = 16;
-    const left = Math.max(margin, Math.min(rect.left + rect.width / 2 - width / 2, window.innerWidth - width - margin));
+    const left = Math.max(
+      margin,
+      Math.min(
+        rect.left + rect.width / 2 - width / 2,
+        window.innerWidth - width - margin,
+      ),
+    );
     const estimatedHeight = 44;
     const above = rect.top > estimatedHeight + margin;
     setTooltipPlacement(above ? "above" : "below");
     setTooltipStyle(
       above
         ? { left: `${left}px`, top: `${rect.top - 8}px`, width: `${width}px` }
-        : { left: `${left}px`, top: `${rect.bottom + 8}px`, width: `${width}px` }
+        : {
+            left: `${left}px`,
+            top: `${rect.bottom + 8}px`,
+            width: `${width}px`,
+          },
     );
     setTooltipBadge(badge);
   };
@@ -68,7 +106,9 @@ export function IceModifierBadges({ badges }: { badges: IceModifierBadgeView[] }
           className={`iceModifierBadge${badge.tone ? ` ${badge.tone}` : ""}`}
           key={badge.key}
           data-testid={badge.testId}
-          onPointerEnter={(event) => showBadgeTooltip(event.currentTarget, badge)}
+          onPointerEnter={(event) =>
+            showBadgeTooltip(event.currentTarget, badge)
+          }
           onPointerLeave={() => setTooltipBadge(null)}
         >
           {badge.icon === "none" ? null : <SubroutineIcon />}
@@ -77,11 +117,15 @@ export function IceModifierBadges({ badges }: { badges: IceModifierBadgeView[] }
       ))}
       {tooltipBadge && typeof document !== "undefined"
         ? createPortal(
-            <span className={`cardTooltip iceModifierTooltip ${tooltipPlacement} visible`} role="tooltip" style={tooltipStyle}>
+            <span
+              className={`cardTooltip iceModifierTooltip ${tooltipPlacement} visible`}
+              role="tooltip"
+              style={tooltipStyle}
+            >
               <strong>{tooltipBadge.shortLabel}</strong>
               <span className="cardTooltipText">{tooltipBadge.tooltip}</span>
             </span>,
-            document.body
+            document.body,
           )
         : null}
     </span>
@@ -91,7 +135,11 @@ export function IceModifierBadges({ badges }: { badges: IceModifierBadgeView[] }
 export function StrengthModifierBadge({ amount }: { amount: number }) {
   const label = strengthModifierBadgeLabel(amount);
   return (
-    <span className="strengthBoostBadge" aria-label={label} data-testid="strength-modifier-badge">
+    <span
+      className="strengthBoostBadge"
+      aria-label={label}
+      data-testid="strength-modifier-badge"
+    >
       {label}
     </span>
   );
@@ -99,7 +147,11 @@ export function StrengthModifierBadge({ amount }: { amount: number }) {
 
 export function IceStrengthBadge({ strength }: { strength: number }) {
   return (
-    <span className="iceStrengthBadge" aria-hidden="true" data-testid="ice-strength-badge">
+    <span
+      className="iceStrengthBadge"
+      aria-hidden="true"
+      data-testid="ice-strength-badge"
+    >
       Stärke {strength}
     </span>
   );
@@ -133,8 +185,14 @@ export function CounterDisplayBadge({
       <CardCreditCounter
         amount={amount}
         ariaLabel={display.ariaLabel}
-        className={scoreState ? "scoredAgendaCreditsBadge" : "storedCreditsBadge brokerStoredCreditsBadge"}
-        testId={scoreState ? "scored-agenda-credits-badge" : "stored-credits-badge"}
+        className={
+          scoreState
+            ? "scoredAgendaCreditsBadge"
+            : "storedCreditsBadge brokerStoredCreditsBadge"
+        }
+        testId={
+          scoreState ? "scored-agenda-credits-badge" : "stored-credits-badge"
+        }
       />
     );
   }
@@ -179,36 +237,40 @@ export function CounterDisplayBadge({
       </CounterHelpTooltipTrigger>
     );
   }
+  const cardSpecificPresentation =
+    cardSpecificCounterDisplayBadgePresentation(display);
   const className =
-    display.id === "corporate_retreat_active"
+    cardSpecificPresentation?.className ??
+    (display.id === "corporate_retreat_active"
       ? "agendaActiveCounterBadge"
       : display.id === "project_venice_actions_per_turn"
         ? "projectVeniceActionCounterBadge"
-      : display.id === "project_zurich_credits_per_turn"
-        ? "projectZurichCreditCounterBadge"
-      : display.id === "ice_mark_modifier"
-        ? "iceMarkModifierCounterBadge"
-      : display.displayKind === "shell"
-      ? "shellCounterBadge"
-      : display.id === "trace_tag_counter"
-        ? "dataRavenCounterBadge"
-        : "ablativeCounterBadge";
+        : display.id === "project_zurich_credits_per_turn"
+          ? "projectZurichCreditCounterBadge"
+          : display.id === "ice_mark_modifier"
+            ? "iceMarkModifierCounterBadge"
+            : display.displayKind === "shell"
+              ? "shellCounterBadge"
+              : display.id === "trace_tag_counter"
+                ? "dataRavenCounterBadge"
+                : "ablativeCounterBadge");
   const testId =
-    display.id === "corporate_retreat_active"
+    cardSpecificPresentation?.testId ??
+    (display.id === "corporate_retreat_active"
       ? "corporate-retreat-active-badge"
       : display.id === "project_venice_actions_per_turn"
         ? "project-venice-action-badge"
-      : display.id === "project_zurich_credits_per_turn"
-        ? "project-zurich-credit-badge"
-      : display.id === "ice_mark_modifier"
-        ? "ice-mark-modifier-badge"
-      : display.displayKind === "shell"
-      ? "shell-counter-badge"
-      : display.id === "trace_tag_counter"
-        ? "data-raven-counter-badge"
-        : display.id === "ablative"
-          ? "ablative-counter-badge"
-          : "counter-display-badge";
+        : display.id === "project_zurich_credits_per_turn"
+          ? "project-zurich-credit-badge"
+          : display.id === "ice_mark_modifier"
+            ? "ice-mark-modifier-badge"
+            : display.displayKind === "shell"
+              ? "shell-counter-badge"
+              : display.id === "trace_tag_counter"
+                ? "data-raven-counter-badge"
+                : display.id === "ablative"
+                  ? "ablative-counter-badge"
+                  : "counter-display-badge");
   return (
     <CounterHelpTooltipTrigger
       className={className}
@@ -219,12 +281,16 @@ export function CounterDisplayBadge({
         ? { onVisibilityChange: onHelpTooltipVisibilityChange }
         : {})}
     >
-      {counterDisplayBadgeText(display, amount)}
+      {cardSpecificPresentation?.text ??
+        counterDisplayBadgeText(display, amount)}
     </CounterHelpTooltipTrigger>
   );
 }
 
-function counterDisplayBadgeText(display: NonNullable<VisibleCard["counterDisplays"]>[number], amount: number): string {
+function counterDisplayBadgeText(
+  display: NonNullable<VisibleCard["counterDisplays"]>[number],
+  amount: number,
+): string {
   if (display.id === "corporate_retreat_active") return "Aktiv";
   if (display.id === "project_venice_actions_per_turn")
     return `+${amount} ${amount === 1 ? "Aktion" : "Aktionen"}/Zug`;
@@ -236,22 +302,38 @@ function counterDisplayBadgeText(display: NonNullable<VisibleCard["counterDispla
   return `${amount} ${display.label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "")}`;
 }
 
-function CardCreditCounter({ amount, ariaLabel, className, testId }: { amount: number; ariaLabel: string; className: string; testId: string }) {
-  const { safeAmount, showCount, iconCount, iconColumns } = cardCreditCounterVisual(amount);
+function CardCreditCounter({
+  amount,
+  ariaLabel,
+  className,
+  testId,
+}: {
+  amount: number;
+  ariaLabel: string;
+  className: string;
+  testId: string;
+}) {
+  const { safeAmount, showCount, iconCount, iconColumns } =
+    cardCreditCounterVisual(amount);
   return (
     <span
       className={`${className} cardCreditCounterBadge ${showCount ? "counted" : "iconsOnly"}`}
       aria-label={ariaLabel}
       data-testid={testId}
     >
-      {showCount ? <span className="cardCreditCounterAmount">{safeAmount}</span> : null}
+      {showCount ? (
+        <span className="cardCreditCounterAmount">{safeAmount}</span>
+      ) : null}
       <span
         className="cardCreditCounterIcons"
         style={{ "--card-credit-columns": iconColumns } as CSSProperties}
         aria-hidden="true"
       >
         {Array.from({ length: iconCount }, (_, index) => (
-          <span className="cardCreditCounterIcon" key={`card-credit-counter-icon-${index}`} />
+          <span
+            className="cardCreditCounterIcon"
+            key={`card-credit-counter-icon-${index}`}
+          />
         ))}
       </span>
     </span>
@@ -267,10 +349,14 @@ const ADVANCEMENT_GEM_ANCHORS = [
   { x: 59, y: 50 },
   { x: 32, y: 69 },
   { x: 74, y: 65 },
-  { x: 49, y: 79 }
+  { x: 49, y: 79 },
 ];
 
-function advancementGemStyle(instanceId: string, index: number, count: number): CSSProperties {
+function advancementGemStyle(
+  instanceId: string,
+  index: number,
+  count: number,
+): CSSProperties {
   const orderSeed = hashString(`${instanceId}:advancement-order`);
   const anchor = advancementGemAnchor(orderSeed, index, count);
   const seed = hashString(`${instanceId}:advancement:${index}`);
@@ -279,18 +365,26 @@ function advancementGemStyle(instanceId: string, index: number, count: number): 
   const x = Math.max(12, Math.min(82, anchor.x + xJitter));
   const y = Math.max(12, Math.min(82, anchor.y + yJitter));
   const rotation = (Math.floor(seed / 17) % 42) - 21;
-  const scale = 0.9 + ((Math.floor(seed / 31) % 16) / 100);
+  const scale = 0.9 + (Math.floor(seed / 31) % 16) / 100;
   return {
     left: `${x}%`,
     top: `${y}%`,
-    transform: `rotate(${rotation}deg) scale(${scale})`
+    transform: `rotate(${rotation}deg) scale(${scale})`,
   };
 }
 
-function advancementGemAnchor(orderSeed: number, index: number, count: number): { x: number; y: number } {
+function advancementGemAnchor(
+  orderSeed: number,
+  index: number,
+  count: number,
+): { x: number; y: number } {
   const anchors = [...ADVANCEMENT_GEM_ANCHORS];
   const fallback = ADVANCEMENT_GEM_ANCHORS[0] ?? { x: 49, y: 50 };
-  anchors.sort((a, b) => hashString(`${orderSeed}:${a.x}:${a.y}`) - hashString(`${orderSeed}:${b.x}:${b.y}`));
+  anchors.sort(
+    (a, b) =>
+      hashString(`${orderSeed}:${a.x}:${a.y}`) -
+      hashString(`${orderSeed}:${b.x}:${b.y}`),
+  );
   if (count <= 3) return anchors[(index * 3) % anchors.length] ?? fallback;
   if (count <= 6) return anchors[(index * 2) % anchors.length] ?? fallback;
   return anchors[index % anchors.length] ?? fallback;
