@@ -65,6 +65,11 @@ export type ChronicleActionUse = {
   end: number;
 };
 
+export type ChronicleEventProjectionPlan = {
+  suppressedEventIds: ReadonlySet<string>;
+  actionUseByEventId: Record<string, ChronicleActionUse>;
+};
+
 export const CHRONICLE_CATEGORY_LABELS: Record<ChronicleCategory, string> = {
   turn: "Zug",
   economy: "Economy",
@@ -88,6 +93,7 @@ const BALL_AND_CHAIN_ID = "onr_v1_222_ball-and-chain";
 const VIRAL_15_ID = "onr_v1_276_viral-15";
 const PLAYFUL_AI_ID = "onr_v1_104_playful-ai";
 const GYPSY_SCHEDULE_ANALYZER_ID = "onr_classic_038_gypsytm-schedule-analyzer";
+const EMPTY_EVENT_ID_SET: ReadonlySet<string> = new Set();
 
 export function isISpySuccessfulRunFollowupPayload(
   payload: Record<string, unknown>,
@@ -1764,7 +1770,7 @@ export function formatChronicleEvent(
         cardTitle = exposedTitle;
         title = phrase(
           subject,
-          `mit ${source} ${exposedTitle}${location?.sentenceSuffix ?? ""} aufgedeckt`,
+          `mit ${source} ${exposedTitle}${location?.sentenceSuffix ?? ""} vorübergehend offengelegt`,
         );
         chips.push(source, "Expose", ...(location ? [location.chip] : []));
         break;
@@ -2109,7 +2115,7 @@ export function formatChronicleEvent(
         visibility = "public";
         title = phrase(
           subject,
-          `${cardTitle ?? "eine Korp-Karte"}${serverLabel ? ` in ${serverLabel}` : ""}${sourceTitle ? ` mit ${sourceTitle}` : ""} aufgedeckt`,
+          `${cardTitle ?? "eine Korp-Karte"}${serverLabel ? ` in ${serverLabel}` : ""}${sourceTitle ? ` mit ${sourceTitle}` : ""} vorübergehend offengelegt`,
         );
         chips.push(
           "Expose",
@@ -4383,7 +4389,9 @@ function traceHardwareWreckerChronicleItem(
 
 export function shouldSuppressChronicleEventItem(
   event: PublicGameEvent,
+  projectionSuppressedEventIds: ReadonlySet<string> = EMPTY_EVENT_ID_SET,
 ): boolean {
+  if (projectionSuppressedEventIds.has(event.eventId)) return true;
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
   if (actionType === "decline_rez") return true;
@@ -4554,6 +4562,67 @@ export function chronicleActionUseByEventId(
   }
 
   return result;
+}
+
+export function chronicleEventProjectionPlan(
+  events: PublicGameEvent[],
+): ChronicleEventProjectionPlan {
+  const actionUseByEventId = chronicleActionUseByEventId(events);
+  const pendingSingleExposeActivations = new Map<string, PublicGameEvent[]>();
+  const suppressedEventIds = new Set<string>();
+
+  for (const event of events) {
+    const activationKey = singleCardExposeSourceKey(
+      event,
+      "activated_card_ability",
+      "expose_installed_card_choice",
+    );
+    if (activationKey) {
+      const pending = pendingSingleExposeActivations.get(activationKey) ?? [];
+      pending.push(event);
+      pendingSingleExposeActivations.set(activationKey, pending);
+      continue;
+    }
+
+    const resultKey = singleCardExposeSourceKey(
+      event,
+      "resolve_choice",
+      "expose_installed_card_review",
+    );
+    if (!resultKey || event.publicPayload.publicRevealKind !== "expose") {
+      continue;
+    }
+    const pending = pendingSingleExposeActivations.get(resultKey);
+    const activation = pending?.pop();
+    if (!activation) continue;
+    const actionUse = actionUseByEventId[activation.eventId];
+    if (!actionUse) continue;
+    suppressedEventIds.add(activation.eventId);
+    actionUseByEventId[event.eventId] = actionUse;
+  }
+
+  return { suppressedEventIds, actionUseByEventId };
+}
+
+function singleCardExposeSourceKey(
+  event: PublicGameEvent,
+  expectedActionType: string,
+  expectedHiddenZoneAction: string,
+): string | undefined {
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  const actor = sideValue(payload.actor);
+  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  if (
+    actionType !== expectedActionType ||
+    actor !== "runner" ||
+    payload.hiddenZoneBarrier !== true ||
+    stringValue(payload.hiddenZoneAction) !== expectedHiddenZoneAction ||
+    !sourceDefinitionId
+  ) {
+    return undefined;
+  }
+  return `${actor}:${sourceDefinitionId}`;
 }
 
 function formatChronicleEffect(

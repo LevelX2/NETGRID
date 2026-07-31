@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
 
 import {
-  chronicleActionUseByEventId,
+  chronicleEventProjectionPlan,
   chronicleGroupLabel,
   chronicleRunGroupLabelFromEvent,
   chronicleStartTurnEffectGroupFromEvent,
@@ -187,7 +187,7 @@ export function chronicleContextByEventId(
 ): Record<string, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
   const turnSideByEventId = chronicleTurnSideByEventId(events);
-  const actionUseByEventId = chronicleActionUseByEventId(events);
+  const projectionPlan = chronicleEventProjectionPlan(events);
   const hasServerTurnContext = events.some((event) =>
     payloadPositiveInteger(event.publicPayload, "chronicleTurnNumber"),
   );
@@ -227,7 +227,7 @@ export function chronicleContextByEventId(
             payloadSide(event.publicPayload, "chronicleTurnSide") ??
             turnSideByEventId[event.eventId] ??
             null,
-          actionUse: actionUseByEventId[event.eventId] ?? null,
+          actionUse: projectionPlan.actionUseByEventId[event.eventId] ?? null,
         },
       ];
     }),
@@ -257,6 +257,7 @@ export function ChroniclePanel({
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     () => new Set(),
   );
+  const projectionPlan = chronicleEventProjectionPlan(turnContextEvents);
   const contextByEventId = chronicleContextByEventId(
     turnContextEvents,
     cardDetailsById,
@@ -268,6 +269,7 @@ export function ChroniclePanel({
       side,
       contextByEventId,
       cardDetailsById,
+      projectionPlan.suppressedEventIds,
     ).reverse(),
   );
   const groupedEntries = groupChronicleEntriesForRender(entries);
@@ -418,6 +420,7 @@ function chronicleEntriesWithRunGroups(
   side: Side,
   contextByEventId: Record<string, Omit<ChronicleContext, "side">>,
   cardDetailsById: Record<string, CatalogCardDetail>,
+  projectionSuppressedEventIds: ReadonlySet<string>,
 ): Array<{
   card: CatalogCardDetail | null;
   item: ChronicleItem;
@@ -472,7 +475,10 @@ function chronicleEntriesWithRunGroups(
       contextByEventId[event.eventId] ?? {},
     );
     const effectItems = formatChronicleEffectItems(event, side);
-    const items = shouldSuppressChronicleEventItem(event)
+    const items = shouldSuppressChronicleEventItem(
+      event,
+      projectionSuppressedEventIds,
+    )
       ? effectItems
       : [eventItem, ...effectItems];
     const followingEvent = events[eventIndex + 1];
