@@ -73,6 +73,10 @@ export type RunAccessTransitionHost = {
     advanceArchivesBreachPastNonDecisionCards: (
       legalAction?: LegalAction,
     ) => void;
+    applyHqAccessExposeInstalledCorpCards: (
+      serverId: Exclude<ServerId, "new_remote">,
+      legalAction: LegalAction,
+    ) => void;
     findPreAccessTopRdReorderSource: (
       run: ActiveRun,
     ) => CardInstanceId | undefined;
@@ -263,6 +267,8 @@ export function enterAccessFromSuccessfulRun(
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
+        serverId: breach.serverId,
+        breachId: breach.breachId,
         ...accessCountPayloadForBreach(host.breach, breach),
       };
     }
@@ -274,6 +280,12 @@ export function enterAccessFromSuccessfulRun(
       successful: true,
       breach,
     };
+    if (legalAction) {
+      host.access.applyHqAccessExposeInstalledCorpCards(
+        breach.serverId,
+        legalAction,
+      );
+    }
     host.access.advanceArchivesBreachPastNonDecisionCards(legalAction);
     if (!host.state.run)
       return {

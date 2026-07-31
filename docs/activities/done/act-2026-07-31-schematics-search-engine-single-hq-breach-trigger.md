@@ -1,19 +1,40 @@
 ---
 activityId: act-2026-07-31-schematics-search-engine-single-hq-breach-trigger
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-31
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-31
+completedAt: 2026-07-31
+branch: codex/activities-worktree-20260731-215600
 releaseTarget: Current private playtest
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/access/access-breach-lifecycle.ts
+  - packages/engine/src/game/run/run-access-transition.ts
+  - packages/engine/src/game/run/run-flow-hosts.ts
+  - packages/engine/src/game/engine-runtime-internal/corp-zone-runtime-hosts.ts
+  - packages/engine/src/public-context.ts
+  - packages/engine/src/game/run/run-access-transition.test.ts
+  - packages/engine/src/index-tests/originalset/schematics-hq-breach.test.ts
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+  - apps/web/app/chronicleGrouping.ts
+  - apps/web/app/chronicleGrouping.test.ts
+checks:
+  - engine-focused-37-tests-pass
+  - web-focused-206-tests-pass
+  - engine-full-1833-tests-pass
+  - web-full-743-tests-pass
+  - engine-typecheck-pass
+  - web-typecheck-pass
+  - engine-build-pass
+  - web-build-pass
+  - format-changed-pass
+  - git-diff-check-pass
 ---
 
 # Schematics Search Engine einmal pro HQ-Breach auslösen
@@ -36,11 +57,11 @@ Access-Kandidaten wiederholt.
   Review-Zyklus mehrfach.
 - Die Abschlussmeldung
   `Du hast das Ansehen der durch Schematics Search Engine aufgedeckten
-  installierten Korp-Karten beendet.` erschien außerhalb der Einrückung des
+installierten Korp-Karten beendet.` erschien außerhalb der Einrückung des
   zugehörigen `Run auf HQ`.
 - Gedruckter Kartentext in `docs/source/Classicspoiler.txt`:
   `Whenever you access cards from HQ, expose all of the Corp's installed
-  cards.`
+cards.`
 - Die historische Formulierung bezeichnet den HQ-Zugriffsvorgang und nicht
   jeden darin nacheinander aufgelösten Karten-Access. Als zusätzliche
   Terminologie-Evidence verwendet `HQ Interface` historisch denselben
@@ -113,35 +134,35 @@ Access-Kandidaten wiederholt.
 
 ## Akzeptanzkriterien
 
-- [ ] Ein HQ-Breach mit `Schematics Search Engine`, einem installierten
+- [x] Ein HQ-Breach mit `Schematics Search Engine`, einem installierten
       HQ-Root-Upgrade und mindestens einer HQ-Handkarte erzeugt genau einen
       Schematics-Expose-Event und genau einen Review-Choice.
-- [ ] Root-zuerst und HQ-Handkarte-zuerst führen zum selben einmaligen
+- [x] Root-zuerst und HQ-Handkarte-zuerst führen zum selben einmaligen
       Ergebnis; die Reihenfolge der Access-Kandidaten ändert die
       Triggeranzahl nicht.
-- [ ] Nach `Ansehen beenden` wird der nächste autoritative Access-Kandidat
+- [x] Nach `Ansehen beenden` wird der nächste autoritative Access-Kandidat
       normal fortgesetzt, ohne dass Schematics erneut auslöst.
-- [ ] Auch bei mehreren HQ-Handkarten beziehungsweise zusätzlichem
+- [x] Auch bei mehreren HQ-Handkarten beziehungsweise zusätzlichem
       Multiaccess bleibt es bei einem Schematics-Review pro Breach.
-- [ ] Ein Nicht-HQ-Breach und ein HQ-Breach ohne aktive
+- [x] Ein Nicht-HQ-Breach und ein HQ-Breach ohne aktive
       `Schematics Search Engine` erzeugen keinen Schematics-Expose- oder
       Review-Event.
-- [ ] Die Runner-PlayerView zeigt während des einen Review-Zyklus genau die
+- [x] Die Runner-PlayerView zeigt während des einen Review-Zyklus genau die
       regelgerecht exposed installierten Korp-Karten; nach dem Abschluss gilt
       wieder der bestehende Sichtbarkeitsvertrag.
-- [ ] Chronik und UI zeigen pro HQ-Breach genau eine Expose-Meldung und eine
+- [x] Chronik und UI zeigen pro HQ-Breach genau eine Expose-Meldung und eine
       Abschlussmeldung, beide eingerückt unter derselben konkreten
       `Run auf HQ`-Gruppe. Es entsteht kein doppelter oder außerhalb des Runs
       stehender Abschluss-Eintrag.
-- [ ] Der öffentliche Eventkontext enthält nur die bereits durch den Effekt
+- [x] Der öffentliche Eventkontext enthält nur die bereits durch den Effekt
       öffentlich exposed Karten und erforderliche Run-/Breach-Metadaten. HQ,
       private Payloads und noch nicht accessete Karten bleiben ausgeschlossen.
-- [ ] Falsche Side, stale `actionId`/`stateVersion` und eine nicht zur
+- [x] Falsche Side, stale `actionId`/`stateVersion` und eine nicht zur
       aktuellen PendingChoice oder Breach-Queue gehörende Action werden
       weiterhin von `applyAction` abgelehnt.
-- [ ] Replay und StateHash bleiben für den einmaligen Trigger, den Review-
+- [x] Replay und StateHash bleiben für den einmaligen Trigger, den Review-
       Abschluss und die anschließende Multiaccess-Fortsetzung deterministisch.
-- [ ] Fokussierte Engine- und Webtests, die betroffenen Package-Typechecks,
+- [x] Fokussierte Engine- und Webtests, die betroffenen Package-Typechecks,
       `corepack pnpm format:changed` und `git diff --check` sind erfolgreich.
 
 ## Umsetzungshinweise
@@ -167,4 +188,11 @@ Access-Kandidaten wiederholt.
 
 ## Ergebnisnotiz
 
-Noch offen.
+`Schematics Search Engine` löst nun einmal beim Aufbau des autoritativen
+HQ-Breach-State aus, bevor der erste Access-Kandidat aufgelöst wird. Der
+per-Karte-Trigger im Breach wurde entfernt; Root- und HQ-Handkarten sowie
+zusätzlicher HQ-Multiaccess öffnen daher keinen weiteren Review. Expose- und
+Abschluss-Event tragen denselben öffentlichen Breach-Kontext, bleiben ohne
+HQ-Handdaten und werden in der Chronik unter demselben konkreten HQ-Run
+gruppiert. PlayerView-, Side-/Stale-Validation-, Replay- und StateHash-
+Regressionen sichern den Ablauf ab.

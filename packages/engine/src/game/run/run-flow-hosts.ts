@@ -117,6 +117,7 @@ import {
 } from "./run-movement";
 import type { RunnerEncounterActionHost } from "./encounter-actions";
 import type { RunnerAccessActionHost } from "../access/access-actions";
+import { applyHqAccessExposeInstalledCorpCards } from "../access/access-breach-lifecycle";
 import type { RunFlowAdapters, RunFlowHost } from "./run-flow-contracts";
 
 export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
@@ -1070,6 +1071,12 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         advanceArchivesBreachPastNonDecisionCards: (legalAction) =>
           host.access.advanceArchivesBreachPastNonDecisionCards(
             host.access.accessFlowHost(state),
+            legalAction,
+          ),
+        applyHqAccessExposeInstalledCorpCards: (serverId, legalAction) =>
+          applyHqAccessExposeInstalledCorpCards(
+            host.access.accessFlowHost(state),
+            serverId,
             legalAction,
           ),
         findPreAccessTopRdReorderSource: (run) => {

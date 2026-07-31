@@ -44,16 +44,19 @@ function instance(
   } as unknown as CardInstance;
 }
 
-function makeHost(options: {
-  run?: GameState["run"];
-  corpCredits?: number;
-  runnerCredits?: number;
-  corpArchives?: string[];
-} = {}): {
+function makeHost(
+  options: {
+    run?: GameState["run"];
+    corpCredits?: number;
+    runnerCredits?: number;
+    corpArchives?: string[];
+  } = {},
+): {
   host: RunAccessTransitionHost;
   state: GameState;
   finishedRuns: boolean[];
   archivesAutoAdvanced: number;
+  hqExposeCalls: string[];
   privateLooks: Array<{ zone: string; count: number | "all" }>;
 } {
   const definitions = {
@@ -72,11 +75,11 @@ function makeHost(options: {
       side: "corp",
       zone: "rd",
     }),
-    remote_agenda: instance(
-      "remote_agenda",
-      "agenda_def",
-      { side: "corp", zone: "serverRoot", serverId: "remote_1" } as CardInstance["zone"],
-    ),
+    remote_agenda: instance("remote_agenda", "agenda_def", {
+      side: "corp",
+      zone: "serverRoot",
+      serverId: "remote_1",
+    } as CardInstance["zone"]),
     archive_face_up: instance(
       "archive_face_up",
       "operation_def",
@@ -104,7 +107,10 @@ function makeHost(options: {
       credits: options.corpCredits ?? 5,
       rd: ["rd_operation"],
       hq: [],
-      archives: options.corpArchives ?? ["archive_face_up", "archive_face_down"],
+      archives: options.corpArchives ?? [
+        "archive_face_up",
+        "archive_face_down",
+      ],
       servers,
     },
     cardInstances,
@@ -121,6 +127,7 @@ function makeHost(options: {
   } as unknown as GameState;
   const finishedRuns: boolean[] = [];
   let archivesAutoAdvanced = 0;
+  const hqExposeCalls: string[] = [];
   const privateLooks: Array<{ zone: string; count: number | "all" }> = [];
   const breachHost: BreachStateHost = {
     state,
@@ -131,7 +138,8 @@ function makeHost(options: {
         const found = Object.values(definitions).find(
           (candidate) => candidate.id === instance.definitionId,
         );
-        if (!found) throw new Error(`missing definition ${instance.definitionId}`);
+        if (!found)
+          throw new Error(`missing definition ${instance.definitionId}`);
         return found;
       },
       cardInstanceFor: (cardId) => cardInstances[cardId]!,
@@ -190,9 +198,17 @@ function makeHost(options: {
       advanceArchivesBreachPastNonDecisionCards: () => {
         archivesAutoAdvanced += 1;
       },
+      applyHqAccessExposeInstalledCorpCards: (serverId) => {
+        hqExposeCalls.push(serverId);
+      },
       findPreAccessTopRdReorderSource: () => undefined,
       isPreAccessTopRdReorderSource: () => false,
-      startRunnerPrivateLookChoice: (_sourceCardId, _sourceDefinitionId, zone, count) => {
+      startRunnerPrivateLookChoice: (
+        _sourceCardId,
+        _sourceDefinitionId,
+        zone,
+        count,
+      ) => {
         privateLooks.push({ zone, count });
         return true;
       },
@@ -209,8 +225,9 @@ function makeHost(options: {
     },
     choices: {
       selectedChoiceIds: (selectedChoices) => {
-        const raw = (selectedChoices as { selectedOptionIds?: unknown } | undefined)
-          ?.selectedOptionIds;
+        const raw = (
+          selectedChoices as { selectedOptionIds?: unknown } | undefined
+        )?.selectedOptionIds;
         return Array.isArray(raw)
           ? raw.filter((value): value is string => typeof value === "string")
           : [];
@@ -224,6 +241,7 @@ function makeHost(options: {
     get archivesAutoAdvanced() {
       return archivesAutoAdvanced;
     },
+    hqExposeCalls,
     privateLooks,
   };
 }
@@ -279,14 +297,43 @@ describe("run access transition", () => {
       stateChanged: true,
     });
     expect(fixture.state.run?.phase).toBe("access");
-    expect(fixture.state.run?.breach?.queue.map((entry) => entry.cardInstanceId)).toEqual([
-      "rd_operation",
-    ]);
+    expect(
+      fixture.state.run?.breach?.queue.map((entry) => entry.cardInstanceId),
+    ).toEqual(["rd_operation"]);
     expect(fixture.state.timingPoint).toBe("access.resolve_card");
     expect(fixture.state.activeSide).toBe("runner");
     expect(legalAction.payload).toMatchObject({
       baseAccessCount: 1,
       installedAccessBonus: 0,
+      effectiveAccessCount: 1,
+    });
+  });
+
+  it("opens the HQ expose hook once when the authoritative breach starts", () => {
+    const fixture = makeHost({
+      run: {
+        runId: "run_hq",
+        attackedServerId: "hq",
+        phase: "movement",
+        position: { kind: "server", serverId: "hq" },
+        successful: true,
+        accessCount: 1,
+      } as unknown as NonNullable<GameState["run"]>,
+    });
+    fixture.state.corp.rd = [];
+    fixture.state.corp.hq = ["rd_operation" as CardInstanceId];
+    fixture.state.cardInstances.rd_operation!.zone = {
+      side: "corp",
+      zone: "hq",
+    };
+    const legalAction = { payload: {} } as LegalAction;
+
+    enterAccessFromSuccessfulRun(fixture.host, legalAction);
+
+    expect(fixture.hqExposeCalls).toEqual(["hq"]);
+    expect(legalAction.payload).toMatchObject({
+      serverId: "hq",
+      breachId: "run_hq.breach",
       effectiveAccessCount: 1,
     });
   });
@@ -357,7 +404,9 @@ describe("run access transition", () => {
       accessSkipped: true,
       replacementApplied: "runner_spend_corp_lose_credits",
     });
-    expect(fixture.state.pendingChoice?.source).toContain("successful_run.credit_loss_spend");
+    expect(fixture.state.pendingChoice?.source).toContain(
+      "successful_run.credit_loss_spend",
+    );
     expect(startAction.payload).toMatchObject({
       accessReplacement: "runner_spend_corp_lose_credits",
       successfulRunCreditLossSpendChoiceOpened: true,
@@ -365,13 +414,9 @@ describe("run access transition", () => {
     });
 
     const resolveAction = { payload: {} } as LegalAction;
-    resolveSuccessfulRunCreditLossSpendChoice(
-      fixture.host,
-      resolveAction,
-      {
-        selectedChoices: { selectedOptionIds: ["pay_3"] },
-      } as unknown as PlayerAction,
-    );
+    resolveSuccessfulRunCreditLossSpendChoice(fixture.host, resolveAction, {
+      selectedChoices: { selectedOptionIds: ["pay_3"] },
+    } as unknown as PlayerAction);
 
     expect(fixture.state.runner.credits).toBe(3);
     expect(fixture.state.corp.credits).toBe(2);
