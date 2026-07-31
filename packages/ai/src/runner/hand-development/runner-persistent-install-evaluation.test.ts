@@ -731,6 +731,57 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     });
   });
 
+  it("prepares the first recovery provider for a coherent consumable-coverage engine", () => {
+    const junkyard = visibleCard("junkyard-doctrine", {
+      definitionId: "onr_v1_165_junkyard-bbs",
+      title: "Junkyard BBS",
+      type: "resource",
+      installCost: 0,
+      rulesText: "A, [1]: Bring the top card from your trash into your hand.",
+    });
+    const input = runnerInput({
+      credits: 5,
+      hand: [junkyard],
+      rig: [],
+      legalActions: [installAction("install-doctrine-junkyard", junkyard, 0)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent({
+          engineLineIds: ["runner.engine.consumption_recovery"],
+          engineProviders: [
+            {
+              providerId: "runner.provider:recovery",
+              cardId: "onr_v1_165_junkyard-bbs",
+              copies: 2,
+              capabilities: ["runner.recovery.program_or_hardware"],
+              supportCapabilities: [],
+              persistence: "persistent",
+              additivity: "redundant_by_default",
+              compatibleDemandIds: [],
+              evidence: [],
+            },
+          ],
+        }),
+      }),
+      "junkyard-doctrine",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "draw_or_search_engine",
+      currentNeed: "setup",
+      deferReason: "none",
+    });
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_engine_doctrine:prospective_recovery_infrastructure",
+        "runner_engine_owner:runner.develop_board_and_hand",
+      ]),
+    );
+  });
+
   it("allows recovery utility setup when the visible heap has a target", () => {
     const replacementJunkyard = visibleCard("junkyard-replacement", {
       definitionId: "onr_v1_165_junkyard-bbs",

@@ -13,6 +13,7 @@ import {
   type RunnerShellTradersPipelineSignal,
 } from "../plans/runner-core-plan-modules";
 import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/runner-hand-development-types";
+import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import { rolesMatch } from "./role-match";
 import { shellTradersTargetValue } from "./shell-traders-action";
 
@@ -23,6 +24,7 @@ export type BuildRunnerShellTradersPipelineSignalsInput = Readonly<{
   candidates: readonly ActionSemanticCandidate[];
   coverageGaps: readonly RunnerCoverageGapSignal[];
   handDevelopment: readonly RunnerHandDevelopmentEvaluation[];
+  strategicIntent?: RunnerStrategicIntentProfile;
 }>;
 
 export function buildRunnerShellTradersPipelineSignals({
@@ -30,6 +32,7 @@ export function buildRunnerShellTradersPipelineSignals({
   candidates,
   coverageGaps,
   handDevelopment,
+  strategicIntent,
 }: BuildRunnerShellTradersPipelineSignalsInput): RunnerShellTradersPipelineSignal[] {
   if (input.side !== "runner") return [];
   const installedSources = new Set(
@@ -81,6 +84,23 @@ export function buildRunnerShellTradersPipelineSignals({
     if (!targetDefinitionId) return [];
     const roles = rolesForDeckDoctrineCard(targetDefinitionId);
     const coverageBinding = bestCoverageBinding(coverageGaps, roles);
+    const doctrineStageBeforeOverflow =
+      ability === "set_aside_from_grip" &&
+      coverageBinding !== undefined &&
+      input.playerView.own.gripOrHq.length >=
+        Math.max(1, input.playerView.own.maxHandSize - 1) &&
+      strategicIntent?.developmentTendencies?.some(
+        (tendency) =>
+          tendency.tendencyId ===
+            "runner.development.stage_before_overflow_draw" &&
+          tendency.strength === "high" &&
+          tendency.ownerModuleId === "runner.shell_traders_pipeline",
+      ) === true &&
+      strategicIntent.engineProviders?.some(
+        (provider) =>
+          provider.cardId === targetDefinitionId &&
+          provider.capabilities.includes("runner.coverage.breaker"),
+      ) === true;
     const development = handDevelopment.find(
       (evaluation) =>
         evaluation.cardInstanceId === targetCardInstanceId &&
@@ -139,13 +159,16 @@ export function buildRunnerShellTradersPipelineSignals({
           : ("progress" as const);
     const priorityClass =
       coverageBinding?.priorityClass ??
-      (phase === "progress" && shellCountersBefore <= 1
+      (doctrineStageBeforeOverflow
         ? ("P4" as const)
-        : ("P5" as const));
+        : phase === "progress" && shellCountersBefore <= 1
+          ? ("P4" as const)
+          : ("P5" as const));
     const value = Math.max(
       0,
       targetValue +
         (coverageBinding ? 300 : 0) +
+        (doctrineStageBeforeOverflow ? 160 : 0) +
         (phase === "progress" ? 80 : 30) -
         shellCountersAfterAction * 8 -
         replacementAssessment.displacedValue,
@@ -169,6 +192,12 @@ export function buildRunnerShellTradersPipelineSignals({
         : []),
       ...(completionWouldBeHarmful
         ? ["runner_shell_traders_holds_harmful_completion"]
+        : []),
+      ...(doctrineStageBeforeOverflow
+        ? [
+            "runner_engine_doctrine:stage_before_overflow_draw",
+            "runner_engine_owner:runner.shell_traders_pipeline",
+          ]
         : []),
     ];
     return [

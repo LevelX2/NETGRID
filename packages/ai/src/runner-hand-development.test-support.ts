@@ -166,7 +166,14 @@ export function strategicIntent(
   overrides: Partial<
     Pick<
       RunnerStrategicIntentProfile,
-      "executionStyle" | "setupEngine" | "pressureVectors"
+      | "executionStyle"
+      | "setupEngine"
+      | "pressureVectors"
+      | "engineProviders"
+      | "engineDependencies"
+      | "engineLineIds"
+      | "developmentTendencies"
+      | "planContributions"
     >
   > = {},
 ): RunnerStrategicIntentProfile {
@@ -183,6 +190,21 @@ export function strategicIntent(
       ? { executionStyle: overrides.executionStyle }
       : {}),
     setupEngine: overrides.setupEngine ?? [],
+    ...(overrides.engineProviders
+      ? { engineProviders: overrides.engineProviders }
+      : {}),
+    ...(overrides.engineDependencies
+      ? { engineDependencies: overrides.engineDependencies }
+      : {}),
+    ...(overrides.engineLineIds
+      ? { engineLineIds: overrides.engineLineIds }
+      : {}),
+    ...(overrides.developmentTendencies
+      ? { developmentTendencies: overrides.developmentTendencies }
+      : {}),
+    ...(overrides.planContributions
+      ? { planContributions: overrides.planContributions }
+      : {}),
     pressureVectors: overrides.pressureVectors ?? [],
     riskProfile: [],
     rejectedIntents: [],

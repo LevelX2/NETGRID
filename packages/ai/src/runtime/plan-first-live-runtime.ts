@@ -2523,6 +2523,7 @@ function buildRunnerDomain(
     candidates,
     coverageGaps,
     handDevelopment,
+    strategicIntent,
   });
   const recurringEconomy = runnerRecurringEconomySignals(input, candidates);
   const resourceLifecycle = runnerResourceLifecycleSignals(input, candidates);
@@ -3916,7 +3917,12 @@ function buildRunnerDomain(
       coverageGaps,
       handDevelopment,
     ),
-    ...runnerGenericDrawDevelopmentSignals(input, candidates),
+    ...runnerGenericDrawDevelopmentSignals(
+      input,
+      candidates,
+      strategicIntent,
+      coverageGaps,
+    ),
   ];
   const hasRunWindowCandidate = candidates.some((candidate) =>
     isRunnerRunWindowCandidate(input, candidate),
@@ -4323,6 +4329,8 @@ function runnerProgramSearchStrategyDevelopmentSignals(
 function runnerGenericDrawDevelopmentSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
+  strategicIntent: RunnerStrategicIntentProfile,
+  coverageGaps: RunnerCorePlanDomain["coverageGaps"],
 ): RunnerPlanDomain["developments"] {
   const handCapacityGap =
     input.playerView.own.maxHandSize - input.playerView.own.gripOrHq.length;
@@ -4341,6 +4349,21 @@ function runnerGenericDrawDevelopmentSignals(
           Math.max(0, handCapacityGap)),
   );
   if (drawCandidates.length === 0) return [];
+  const throughputTendency = strategicIntent.developmentTendencies?.find(
+    (tendency) =>
+      tendency.tendencyId ===
+        "runner.development.throughput_until_dependency_ready" &&
+      tendency.ownerModuleId === "runner.develop_board_and_hand" &&
+      tendency.strength !== "low",
+  );
+  const doctrineThroughputActive =
+    throughputTendency !== undefined && coverageGaps.length > 0;
+  const doctrineValue =
+    throughputTendency?.strength === "high"
+      ? 120
+      : throughputTendency?.strength === "medium"
+        ? 70
+        : 0;
   return [
     {
       developmentId: "generic:draw-options",
@@ -4357,9 +4380,23 @@ function runnerGenericDrawDevelopmentSignals(
         ),
       ],
       actionIds: drawCandidates.map((candidate) => candidate.actionId),
-      priorityClass: "P6",
-      value: 10 + Math.min(5, handCapacityGap),
+      priorityClass: doctrineThroughputActive ? "P5" : "P6",
+      value:
+        10 +
+        Math.min(5, handCapacityGap) +
+        (doctrineThroughputActive ? doctrineValue : 0),
       evidenceCode: "runner_hand_capacity_accepts_immediate_option_development",
+      ...(doctrineThroughputActive
+        ? {
+            evidenceCodes: [
+              "runner_engine_doctrine:throughput_until_dependency_ready",
+              "runner_engine_owner:runner.develop_board_and_hand",
+              ...coverageGaps.map(
+                (gap) => `runner_engine_open_coverage_gap:${gap.gapId}`,
+              ),
+            ],
+          }
+        : {}),
     },
   ];
 }

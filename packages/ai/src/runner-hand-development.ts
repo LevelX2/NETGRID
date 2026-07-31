@@ -172,6 +172,8 @@ function evaluateHandCard(
   card: VisibleCard,
 ): RunnerHandDevelopmentEvaluation {
   const context = buildCardContext(params, card);
+  const prospectiveRecoveryInfrastructure =
+    doctrineSupportsProspectiveRecoveryInfrastructure(params, context);
   const initialDevelopmentRole = roleForCard(context);
   const initialAvailability = availabilityForCard(
     context,
@@ -293,7 +295,14 @@ function evaluateHandCard(
       liquidityTiming,
       ...(fundingNeed ? { fundingNeed } : {}),
       ...(persistentInstallEvaluation ? { persistentInstallEvaluation } : {}),
-    }),
+    }).concat(
+      prospectiveRecoveryInfrastructure
+        ? [
+            "runner_engine_doctrine:prospective_recovery_infrastructure",
+            "runner_engine_owner:runner.develop_board_and_hand",
+          ]
+        : [],
+    ),
   };
 }
 
@@ -468,7 +477,8 @@ function currentNeedForCard(
   const credits = params.input.playerView.own.credits;
   if (
     role === "draw_or_search_engine" &&
-    recoveryOnlySearchHasNoVisibleTarget(params.input, context)
+    recoveryOnlySearchHasNoVisibleTarget(params.input, context) &&
+    !doctrineSupportsProspectiveRecoveryInfrastructure(params, context)
   ) {
     return "none";
   }
@@ -528,6 +538,38 @@ function currentNeedForCard(
   }
 }
 
+function doctrineSupportsProspectiveRecoveryInfrastructure(
+  params: EvaluateRunnerHandDevelopmentParams,
+  context: CardContext,
+): boolean {
+  const definitionId = context.card.definitionId;
+  if (
+    !definitionId ||
+    !params.strategicIntent?.engineLineIds?.includes(
+      "runner.engine.consumption_recovery",
+    )
+  ) {
+    return false;
+  }
+  const provider = params.strategicIntent.engineProviders?.find(
+    (entry) =>
+      entry.cardId === definitionId &&
+      entry.capabilities.includes("runner.recovery.program_or_hardware") &&
+      entry.additivity === "redundant_by_default",
+  );
+  if (!provider) return false;
+  const installedProviderIds = new Set(
+    (params.input.playerView.own.rig ?? [])
+      .map((card) => card.definitionId)
+      .filter((entry): entry is string => entry !== undefined),
+  );
+  return !params.strategicIntent.engineProviders?.some(
+    (entry) =>
+      entry.capabilities.includes("runner.recovery.program_or_hardware") &&
+      installedProviderIds.has(entry.cardId),
+  );
+}
+
 function defenseSupportNeed(
   input: AiDecisionInput,
   context: CardContext,
@@ -535,9 +577,7 @@ function defenseSupportNeed(
   if (!visibleRunnerThreat(input)) return "none";
   const damage = runnerDamageThreatAssessment(input).flatlineRisk;
   const damagePrevention =
-    context.signals.effectTargets.some((target) =>
-      target.includes("damage"),
-    ) ||
+    context.signals.effectTargets.some((target) => target.includes("damage")) ||
     context.signals.text.includes("damage_prevention") ||
     (context.signals.text.includes("damage") &&
       context.signals.text.includes("prevent"));

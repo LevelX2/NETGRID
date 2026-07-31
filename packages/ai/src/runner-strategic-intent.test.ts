@@ -38,6 +38,48 @@ describe("Runner StrategicIntentProjection", () => {
       "runner.low_confidence_strategy_projection",
     );
   });
+
+  it("projects generic engine lines and keeps their existing plan owners", () => {
+    const intent = runnerStrategicIntentForSnapshot(
+      standardDeckSnapshot("Rent-I-Con: Das Shellspiel"),
+    );
+
+    expect(intent.engineLineIds).toEqual(
+      expect.arrayContaining([
+        "runner.engine.consumption_recovery",
+        "runner.engine.delayed_install",
+        "runner.engine.throughput_until_ready",
+      ]),
+    );
+    expect(intent.developmentTendencies).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          tendencyId: "runner.development.stage_before_overflow_draw",
+          ownerModuleId: "runner.shell_traders_pipeline",
+        }),
+        expect.objectContaining({
+          tendencyId: "runner.development.throughput_until_dependency_ready",
+          ownerModuleId: "runner.develop_board_and_hand",
+        }),
+      ]),
+    );
+    expect(intent.planContributions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          objective: "maintain_required_coverage",
+          ownerModuleId: "runner.rig_and_coverage",
+        }),
+      ]),
+    );
+    expect(intent.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("engine_lines:"),
+        expect.stringContaining("plan_contribution_owners:"),
+      ]),
+    );
+    expect(JSON.stringify(intent.evidence)).not.toMatch(/onr_v1_|Rent-I-Con/i);
+  });
+
   it("projects Blink Pressure Rig strategy signals into a generic Runner intent profile", () => {
     const snapshot = benchmarkSnapshotById(
       "local_realistic_runner_blink_pressure_rig_snapshot_v1",

@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { RunnerCoverageGapSignal } from "../plans/runner-core-plan-modules";
+import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import { buildRunnerShellTradersPipelineSignals } from "./shell-traders-plan-signals";
 
 describe("runner Shell Traders pipeline signals", () => {
@@ -155,11 +156,49 @@ describe("runner Shell Traders pipeline signals", () => {
       }),
     ]);
   });
+
+  it("adds doctrine evidence only for an exact required provider near overflow", () => {
+    const source = shellTraders();
+    const target = card("dwarf", "onr_v1_021_dwarf", "program", {
+      installCost: 3,
+      memoryCost: 1,
+    });
+    const action = shellAction("prepare-dwarf", source.instanceId, target, {
+      delayedInstallAbility: "set_aside_from_grip",
+      shellCounterAmount: 3,
+    });
+    const input = runnerInput([action], {
+      grip: [
+        target,
+        card("buffer-1", "test-buffer-1", "event"),
+        card("buffer-2", "test-buffer-2", "event"),
+        card("buffer-3", "test-buffer-3", "event"),
+      ],
+      rig: [source],
+    });
+
+    expect(
+      signals(
+        input,
+        [coverageGap("wall-gap", "breaker_wall")],
+        shellDoctrineIntent("onr_v1_021_dwarf"),
+      ),
+    ).toEqual([
+      expect.objectContaining({
+        phase: "prepare",
+        evidenceCodes: expect.arrayContaining([
+          "runner_engine_doctrine:stage_before_overflow_draw",
+          "runner_engine_owner:runner.shell_traders_pipeline",
+        ]),
+      }),
+    ]);
+  });
 });
 
 function signals(
   input: AiDecisionInput,
   coverageGaps: RunnerCoverageGapSignal[],
+  strategicIntent?: RunnerStrategicIntentProfile,
 ) {
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -174,7 +213,53 @@ function signals(
     candidates,
     coverageGaps,
     handDevelopment: [],
+    ...(strategicIntent ? { strategicIntent } : {}),
   });
+}
+
+function shellDoctrineIntent(
+  targetDefinitionId: string,
+): RunnerStrategicIntentProfile {
+  return {
+    schemaVersion: "runner-strategic-intent-profile-v1",
+    side: "runner",
+    source: {
+      deckStrategyProfile: "ai_internal_strategy_profile",
+      deckCapabilities: "ai_internal",
+      plannerEffect: "runtime_projection",
+    },
+    primaryWinIntent: "runner.steal_agendas_default",
+    setupEngine: ["runner.rig_first"],
+    engineProviders: [
+      {
+        providerId: `runner.provider:${targetDefinitionId}`,
+        cardId: targetDefinitionId,
+        copies: 1,
+        capabilities: ["runner.coverage.breaker"],
+        supportCapabilities: [],
+        persistence: "persistent",
+        additivity: "distinct_provider_first",
+        compatibleDemandIds: [],
+        evidence: [],
+      },
+    ],
+    engineLineIds: ["runner.engine.delayed_install"],
+    developmentTendencies: [
+      {
+        tendencyId: "runner.development.stage_before_overflow_draw",
+        strength: "high",
+        ownerModuleId: "runner.shell_traders_pipeline",
+        dependencyIds: ["runner.dependency.breaker_coverage"],
+        exitConditionIds: ["no_stageable_required_provider"],
+        evidence: [],
+      },
+    ],
+    pressureVectors: [],
+    riskProfile: [],
+    rejectedIntents: [],
+    confidence: "high",
+    evidence: [],
+  };
 }
 
 function coverageGap(
