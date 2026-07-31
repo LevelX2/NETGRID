@@ -3001,10 +3001,15 @@ function defenseResourceGaps(
   selectedBand: SelectedDefensePortfolioBand,
 ): ResourceGap[] {
   if (selectedBand.kind !== "generic") return [];
+  const selectedActionIds = new Set(
+    selectedBand.candidates.map(({ candidate }) => candidate.actionId),
+  );
   return selectedBand.eligibleSignals.flatMap((signal) => {
     if (
       signal.phase !== "install_ice" ||
-      signal.installRoute?.disposition !== "funding_only"
+      signal.installRoute?.disposition !== "funding_only" ||
+      (selectedActionIds.size > 0 &&
+        !signal.actionIds?.some((actionId) => selectedActionIds.has(actionId)))
     ) {
       return [];
     }

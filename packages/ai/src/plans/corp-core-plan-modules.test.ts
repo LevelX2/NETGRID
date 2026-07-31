@@ -1044,12 +1044,21 @@ describe("Corp core plan modules", () => {
       module.discover(corpContext)[0]!,
       10,
     );
+    const planAssessment = requireValidatedPlanAssessment(
+      module.assess(instance, corpContext, emptyPortfolio()),
+      CORP_PLAN_PRIORITY_POLICY,
+      10,
+    );
 
     expect(
       module
         .materialize(instance, {} as never, corpContext)
         .candidates.map((entry) => entry.candidate.actionId),
     ).toEqual(["install-productive"]);
+    expect(planAssessment).toMatchObject({
+      readiness: "executable_now",
+      resourceGaps: [],
+    });
   });
 
   it("rejects a no-progress staging bluff on an already protected unpressured central", () => {
