@@ -33,7 +33,9 @@ describe("applyTargetContextProjection", () => {
         source: "shell-traders-1",
         payload: {
           delayedInstallAbility: "set_aside_from_grip",
+          cardId: "shell-traders-1",
           targetCardId: "dwarf-1",
+          targetCardDefinitionId: "dwarf-definition",
         },
       },
       undefined,
@@ -46,6 +48,7 @@ describe("applyTargetContextProjection", () => {
           targetId: "dwarf-1",
           targetKind: "card",
           targetSide: "runner",
+          targetDefinitionId: "dwarf-definition",
         }),
       ]),
     );

@@ -347,7 +347,7 @@ function payloadTargetsForAction(action: LegalAction): LegalTargetSummary[] {
 
   const cardTarget = cardPayloadTargetForAction(
     action,
-    stringPayload(action, "cardId") ?? stringPayload(action, "targetCardId"),
+    stringPayload(action, "targetCardId") ?? stringPayload(action, "cardId"),
   );
   if (cardTarget !== undefined) targets.push(cardTarget);
 
@@ -409,10 +409,12 @@ function cardPayloadTargetForAction(
     action.type === "trigger_ability" &&
     typeof action.payload?.delayedInstallAbility === "string"
   ) {
+    const targetDefinitionId = stringPayload(action, "targetCardDefinitionId");
     return {
       targetId: cardId,
       targetKind: "card",
       targetSide: "runner",
+      ...(targetDefinitionId ? { targetDefinitionId } : {}),
       evidence: [`AI039 delayed install payload card target: ${cardId}`],
     };
   }

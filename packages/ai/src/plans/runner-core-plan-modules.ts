@@ -1467,7 +1467,7 @@ function shellTradersPipelineCandidates(
       (candidate) =>
         actionIds.has(candidate.actionId) &&
         candidate.actionType === "trigger_ability" &&
-        candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
+        shellTradersCandidateMatchesExactBinding(context, candidate, signal) &&
         !context.actionDispositions?.some(
           (disposition) =>
             disposition.actionId === candidate.actionId &&
@@ -1478,6 +1478,41 @@ function shellTradersPipelineCandidates(
       candidate,
       stepValue: signal.value,
     }));
+}
+
+function shellTradersCandidateMatchesExactBinding(
+  context: PlanSchedulerContext,
+  candidate: ActionSemanticCandidate,
+  signal: RunnerShellTradersPipelineSignal,
+): boolean {
+  if (
+    candidate.sourceCardInstanceId !== signal.sourceCardInstanceId ||
+    (candidate.sourceDefinitionId !== undefined &&
+      candidate.sourceDefinitionId !== signal.sourceDefinitionId)
+  ) {
+    return false;
+  }
+  const legalAction = context.input.legalActions.find(
+    (action) => action.actionId === candidate.actionId,
+  );
+  const payloadTargetCardId = legalAction?.payload?.targetCardId;
+  const payloadTargetDefinitionId =
+    legalAction?.payload?.targetCardDefinitionId;
+  if (typeof payloadTargetCardId === "string") {
+    return (
+      payloadTargetCardId === signal.targetCardInstanceId &&
+      (typeof payloadTargetDefinitionId !== "string" ||
+        payloadTargetDefinitionId === signal.targetDefinitionId)
+    );
+  }
+  const exactTarget = candidate.targetContext?.selectedTargets.find(
+    (target) => target.targetId === signal.targetCardInstanceId,
+  );
+  return (
+    exactTarget !== undefined &&
+    (exactTarget.targetDefinitionId === undefined ||
+      exactTarget.targetDefinitionId === signal.targetDefinitionId)
+  );
 }
 
 function bankCandidates(

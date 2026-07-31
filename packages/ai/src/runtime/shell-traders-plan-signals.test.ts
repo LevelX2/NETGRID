@@ -193,6 +193,46 @@ describe("runner Shell Traders pipeline signals", () => {
       }),
     ]);
   });
+
+  it("prepares a useful non-coverage target at full hand capacity", () => {
+    const source = shellTraders();
+    const target = card(
+      "rd-interface",
+      "onr_v1_139_r-and-d-interface",
+      "hardware",
+      { installCost: 4 },
+    );
+    const action = shellAction(
+      "prepare-rd-interface",
+      source.instanceId,
+      target,
+      {
+        delayedInstallAbility: "set_aside_from_grip",
+        shellCounterAmount: 4,
+      },
+    );
+    const input = runnerInput([action], {
+      grip: [
+        target,
+        card("buffer-1", "test-buffer-1", "event"),
+        card("buffer-2", "test-buffer-2", "event"),
+        card("buffer-3", "test-buffer-3", "event"),
+        card("buffer-4", "test-buffer-4", "event"),
+      ],
+      rig: [source],
+    });
+
+    expect(signals(input, [])).toEqual([
+      expect.objectContaining({
+        phase: "prepare",
+        priorityClass: "P4",
+        actionIds: ["prepare-rd-interface"],
+        evidenceCodes: expect.arrayContaining([
+          "runner_shell_traders_prepares_useful_target_at_hand_capacity",
+        ]),
+      }),
+    ]);
+  });
 });
 
 function signals(

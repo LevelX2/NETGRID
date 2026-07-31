@@ -8,13 +8,12 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { delayedInstallAbilityForAction } from "../actions/delayed-install-action";
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
 import {
-  runnerCoverageRoleNeedles,
+  runnerRolesCoverCoverageGap,
   type RunnerCoverageGapSignal,
   type RunnerShellTradersPipelineSignal,
 } from "../plans/runner-core-plan-modules";
 import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/runner-hand-development-types";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
-import { rolesMatch } from "./role-match";
 import { shellTradersTargetValue } from "./shell-traders-action";
 
 const SHELL_TRADERS_DEFINITION_ID = "onr_v1_176_the-shell-traders" as const;
@@ -146,6 +145,10 @@ export function buildRunnerShellTradersPipelineSignals({
       targetValue <= 0 ||
       redundantTarget ||
       development?.strategicFit === "blocked";
+    const handCapacityReliefPreparation =
+      ability === "set_aside_from_grip" &&
+      !targetRejected &&
+      input.playerView.own.gripOrHq.length >= input.playerView.own.maxHandSize;
     const completionWouldBeHarmful =
       ability === "remove_shell_counter" &&
       shellCountersBefore === 1 &&
@@ -159,7 +162,7 @@ export function buildRunnerShellTradersPipelineSignals({
           : ("progress" as const);
     const priorityClass =
       coverageBinding?.priorityClass ??
-      (doctrineStageBeforeOverflow
+      (doctrineStageBeforeOverflow || handCapacityReliefPreparation
         ? ("P4" as const)
         : phase === "progress" && shellCountersBefore <= 1
           ? ("P4" as const)
@@ -169,6 +172,7 @@ export function buildRunnerShellTradersPipelineSignals({
       targetValue +
         (coverageBinding ? 300 : 0) +
         (doctrineStageBeforeOverflow ? 160 : 0) +
+        (handCapacityReliefPreparation ? 80 : 0) +
         (phase === "progress" ? 80 : 30) -
         shellCountersAfterAction * 8 -
         replacementAssessment.displacedValue,
@@ -198,6 +202,9 @@ export function buildRunnerShellTradersPipelineSignals({
             "runner_engine_doctrine:stage_before_overflow_draw",
             "runner_engine_owner:runner.shell_traders_pipeline",
           ]
+        : []),
+      ...(handCapacityReliefPreparation
+        ? ["runner_shell_traders_prepares_useful_target_at_hand_capacity"]
         : []),
     ];
     return [
@@ -365,10 +372,7 @@ function rolesCoverGap(
   roles: readonly string[],
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
 ): boolean {
-  return (
-    roles.includes("breaker_universal") ||
-    rolesMatch([...roles], runnerCoverageRoleNeedles(requiredRole))
-  );
+  return runnerRolesCoverCoverageGap(roles, requiredRole);
 }
 
 function priorityRank(value: RunnerCoverageGapSignal["priorityClass"]): number {
