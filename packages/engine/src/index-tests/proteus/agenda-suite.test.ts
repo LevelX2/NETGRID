@@ -332,7 +332,12 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     fetal = apply(fetal, "runner", (action) => action.type === "access_card");
     expect(fetal.run?.accessedCardId).toBe(fetalId);
     expect(fetal.runner.heap).toHaveLength(heapBefore + 2);
-    expect(fetal.cardInstances[fetalId]?.faceup).toBe(true);
+    expect(fetal.cardInstances[fetalId]?.faceup).toBe(false);
+    expect(getPlayerView(fetal, "runner").run?.accessedCard).toMatchObject({
+      instanceId: fetalId,
+      known: true,
+      definitionId: FETAL_AI,
+    });
     expect(fetal.cardInstances["pro013_marked_hidden_rd"]?.faceup).toBe(false);
     expect(fetal.eventLog.at(-1)?.publicPayload).toMatchObject({
       damageType: "net",
@@ -382,7 +387,12 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     marked = accessTopCard(marked, "rd");
     expect(marked.run?.accessedCardId).toBe(markedId);
     expect(marked.runner.tags).toBe(1);
-    expect(marked.cardInstances[markedId]?.faceup).toBe(true);
+    expect(marked.cardInstances[markedId]?.faceup).toBe(false);
+    expect(getPlayerView(marked, "runner").run?.accessedCard).toMatchObject({
+      instanceId: markedId,
+      known: true,
+      definitionId: MARKED_ACCOUNTS,
+    });
     expect(marked.cardInstances["pro013_fetal_hidden_rd"]?.faceup).toBe(false);
     expect(marked.eventLog.at(-1)?.publicPayload).toMatchObject({
       tagsAdded: 1,
@@ -423,7 +433,12 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     expect(state.run?.accessedCardId).toBe(markedId);
     expect(state.runner.tags).toBe(0);
     expect(state.pendingChoice?.source).toContain("event_modification");
-    expect(state.cardInstances[markedId]?.faceup).toBe(true);
+    expect(state.cardInstances[markedId]?.faceup).toBe(false);
+    expect(getPlayerView(state, "runner").run?.accessedCard).toMatchObject({
+      instanceId: markedId,
+      known: true,
+      definitionId: MARKED_ACCOUNTS,
+    });
     expect(state.cardInstances["pro013_fetal_stays_hidden_rd"]?.faceup).toBe(
       false,
     );

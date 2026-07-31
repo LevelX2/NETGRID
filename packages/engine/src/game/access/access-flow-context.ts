@@ -144,8 +144,10 @@ export function revealAccessedCard(
   host: AccessFlowHost,
   cardId: CardInstanceId,
 ): void {
-  // Nur der finale Access-Schritt hebt die Hidden-Info-Barriere der konkreten
-  // Karte auf; Queue-Aufbau und Breach-Navigation dürfen dies nicht vorziehen.
+  // Archives cards remain public after they have been accessed. Cards in HQ,
+  // R&D, or an installed root are only visible to the Runner through the
+  // current access/breach projection and must not become permanently faceup.
+  if (!host.state.corp.archives.includes(cardId)) return;
   const instance = host.cards.cardInstanceFor(cardId);
   host.state.cardInstances[cardId] = { ...instance, faceup: true };
 }
