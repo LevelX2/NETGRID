@@ -235,11 +235,8 @@ import {
   definitionHasActionIceRezSupport,
 } from "./corp-defense-rez-support-facts";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
-import {
-  visibleBreakerCardCanAddressIce,
-  visibleBreakerRoles,
-} from "./runner-visible-breaker-coverage";
 import { corpRootRezTimingComponent } from "./corp-scoreline/semantic-runtime-corp-score-ice-components";
+import { scoringWindowAccessAssessment } from "./corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure";
 import {
   corpMissingConcreteDefenseDrawNeed,
   corpMissingConcreteScoreDefenseDrawNeed,
@@ -7661,6 +7658,7 @@ function buildCorpDomain(
           candidate,
           project,
           scan,
+          candidates,
         );
         if (!signal) return [];
         const action = input.legalActions.find(
@@ -7923,6 +7921,25 @@ function buildCorpDomain(
             input.playerView.servers.some(
               (server) => server.id === serverId && server.ice.length === 0,
             );
+          const selectedCentralServerId =
+            centralDefenseAllocation?.status === "known"
+              ? centralDefenseAllocation.selectedServerId
+              : undefined;
+          const selectedCentralServerHasNoRezzedIce =
+            selectedCentralServerId !== undefined &&
+            input.playerView.servers.some(
+              (server) =>
+                server.id === selectedCentralServerId &&
+                server.ice.every((ice) => ice.rezzed !== true),
+            );
+          const boundedFallbackCoveragePressure =
+            targetCentralMissingCoverage &&
+            selectedCentralServerId !== undefined &&
+            serverId !== selectedCentralServerId &&
+            centralDefenseAllocation?.status === "known" &&
+            centralDefenseAllocation.evidence[selectedCentralServerId]
+              .threat === "material" &&
+            selectedCentralServerHasNoRezzedIce;
           const centralPressure =
             serverId === "hq" || serverId === "rd"
               ? targetCentralThreat === "acute" ||
@@ -7930,10 +7947,20 @@ function buildCorpDomain(
                 (targetCentralThreat === "material" &&
                   targetCentralMissingCoverage)
                 ? targetCentralThreat
-                : undefined
+                : boundedFallbackCoveragePressure
+                  ? "material"
+                  : undefined
               : undefined;
           const visibleAgendaExposure =
             serverId === "archives" && archivesHasVisibleKnownAgenda(input);
+          const terminalCentralInstallIsImmediatelyRelevant =
+            centralPressure === "terminal" &&
+            (route.progressKind === "engine_certified_access" ||
+              (typeof route.rezFundingGap === "number" &&
+                route.rezFundingGap <= 3) ||
+              input.playerView.servers.some(
+                (server) => server.id === serverId && server.ice.length < 3,
+              ));
           return [
             {
               kind: "generic",
@@ -7942,7 +7969,9 @@ function buildCorpDomain(
               phase: "install_ice" as const,
               sourceDefinitionIds: [candidate.sourceDefinitionId],
               actionIds: [candidate.actionId],
-              urgent: centralPressure === "terminal" || visibleAgendaExposure,
+              urgent:
+                terminalCentralInstallIsImmediatelyRelevant ||
+                visibleAgendaExposure,
               ...(centralPressure ? { centralPressure } : {}),
               ...(centralPressure === undefined &&
               route.progressKind === "scoreline_central_tax_allocation"
@@ -9583,9 +9612,6 @@ function compareCorpScoreProtectionProjects(
       return currentRiskComparison;
     }
   }
-  if (left.agendaPoints !== right.agendaPoints) {
-    return right.agendaPoints - left.agendaPoints;
-  }
   return technicalIdCompare(left.projectId, right.projectId);
 }
 
@@ -9784,6 +9810,7 @@ function corpScoreProtectionStagingInstallSignal(
   candidate: ActionSemanticCandidate,
   project: CorpScoreProjectSignal,
   scan: CorpScoreProtectionInstallRouteScan,
+  allCandidates: readonly ActionSemanticCandidate[],
 ):
   | Extract<CorpDefenseSignal, { kind: "score_protection_staging_install" }>
   | undefined {
@@ -9876,8 +9903,26 @@ function corpScoreProtectionStagingInstallSignal(
   if (!corpScoreProtectionStagingPairFitsCurrentTurn(input, project, action)) {
     return undefined;
   }
+  const boundedFirstLayerWithoutCurrentFunding =
+    startsFirstScoreProtectionLayer &&
+    corpFirstScoreProtectionLayerCanPrecedeFunding(
+      input,
+      project,
+      action,
+      allCandidates,
+    );
   if (
-    !startsFirstScoreProtectionLayer &&
+    startsFirstScoreProtectionLayer &&
+    !boundedFirstLayerWithoutCurrentFunding &&
+    corpScoreProtectionHasMaterialImmediateLiquidityAlternative(
+      input,
+      allCandidates,
+    )
+  ) {
+    return undefined;
+  }
+  if (
+    !boundedFirstLayerWithoutCurrentFunding &&
     !corpScoreProtectionStagingRezPortfolioIsNearTermFundable(
       input,
       project,
@@ -9926,8 +9971,77 @@ function corpPreparedScoreProjectHasExecutableCurrentStep(
           candidate,
           project,
           scan,
+          candidates,
         ) !== undefined,
     )
+  );
+}
+
+function corpFirstScoreProtectionLayerCanPrecedeFunding(
+  input: AiDecisionInput,
+  project: CorpScoreProjectSignal,
+  action: LegalAction,
+  candidates: readonly ActionSemanticCandidate[],
+): boolean {
+  const agendaDefinition = project.agendaDefinitionId
+    ? CARD_DEFINITIONS_BY_ID[project.agendaDefinitionId]
+    : undefined;
+  const advancementRequirement = agendaDefinition?.advancementRequirement;
+  const centralsHaveInitialCoverage = ["hq", "rd"].every(
+    (serverId) =>
+      (input.playerView.servers.find((server) => server.id === serverId)?.ice
+        .length ?? 0) > 0,
+  );
+  const immediateLiquidAlternativeExists =
+    corpScoreProtectionHasMaterialImmediateLiquidityAlternative(
+      input,
+      candidates,
+    );
+  const installCredits = action.costs.reduce(
+    (sum, cost) => sum + (cost.credits ?? 0),
+    0,
+  );
+  const rezCredits = action.payload?.postInstallRezQuoteFinalCredits;
+  const firstLayerCanBeRezzedFromCurrentLiquidity =
+    project.terminalScore &&
+    Number.isSafeInteger(installCredits) &&
+    installCredits >= 0 &&
+    typeof rezCredits === "number" &&
+    Number.isSafeInteger(rezCredits) &&
+    rezCredits >= 0 &&
+    installCredits + rezCredits <= input.playerView.own.credits;
+  return (
+    firstLayerCanBeRezzedFromCurrentLiquidity ||
+    (typeof advancementRequirement === "number" &&
+      advancementRequirement >= 4 &&
+      input.playerView.own.credits >= 5 &&
+      input.playerView.own.stackOrRdCount > 1 &&
+      input.playerView.opponent.credits <= input.playerView.own.credits + 2 &&
+      centralsHaveInitialCoverage &&
+      !immediateLiquidAlternativeExists)
+  );
+}
+
+function corpScoreProtectionHasMaterialImmediateLiquidityAlternative(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+): boolean {
+  return (
+    corpImmediateOperationEconomyConversions(input, candidates).length > 0 ||
+    corpVisibleCardEconomyWithdrawals(input, candidates).length > 0 ||
+    candidates.some((candidate) => {
+      const projection = candidate.economyProjection;
+      return (
+        candidate.semanticActionType === "economy.gain_credit" &&
+        projection?.kind === "immediate_liquid" &&
+        projection.timing === "immediate" &&
+        projection.creditRestriction === "general" &&
+        projection.reliability === "guaranteed" &&
+        (projection.netLiquidCreditGain ?? 0) >= 2 &&
+        candidate.costProfile.additionalCosts.length === 0 &&
+        !candidate.hardGates.some((gate) => gate.status === "block")
+      );
+    })
   );
 }
 
@@ -10074,38 +10188,28 @@ function corpRemoteHasBoundedStagedIce(
       candidate.id === serverId &&
       !["hq", "rd", "archives"].includes(candidate.id),
   );
+  const access = scoringWindowAccessAssessment(input, server);
+  const visibleDefenseProfiles = (server?.ice ?? []).map((ice) =>
+    visibleCorpIceDefenseProfile(ice),
+  );
+  const answeredPureStopRouteExceedsBoundedRushRisk =
+    access.runnerCanReachAccessNow &&
+    visibleDefenseProfiles.length > 0 &&
+    visibleDefenseProfiles.every(
+      (defense) =>
+        !defense.hasMeaningfulTaxOrDamage && !defense.hasEncounterDisruption,
+    ) &&
+    (exposedAgendaPoints > 1 ||
+      input.playerView.opponent.agendaPoints + exposedAgendaPoints >=
+        input.playerView.agendaPointsToWin);
   return (
     server?.ice.some((ice) => {
       const quote = ice.effectiveRezCostQuote;
-      const hasVisibleBreakerAnswer = (
-        input.playerView.opponent.rig ?? []
-      ).some((breaker) =>
-        visibleBreakerCardCanAddressIce(breaker, ice, {
-          visibleBreakerRoles,
-          visibleCardText: (card) =>
-            [
-              card.title,
-              card.definitionId,
-              ...(card.subtypes ?? []),
-              card.rulesText,
-            ]
-              .filter(Boolean)
-              .join(" "),
-        }),
-      );
-      const defense = visibleCorpIceDefenseProfile(ice);
-      const answeredIceExceedsBoundedRushRisk =
-        hasVisibleBreakerAnswer &&
-        !defense.hasMeaningfulTaxOrDamage &&
-        !defense.hasEncounterDisruption &&
-        (exposedAgendaPoints > 1 ||
-          input.playerView.opponent.agendaPoints + exposedAgendaPoints >=
-            input.playerView.agendaPointsToWin);
       if (
         ice.rezzed === true ||
         ice.definitionId === undefined ||
         CARD_DEFINITIONS_BY_ID[ice.definitionId]?.type !== "ice" ||
-        answeredIceExceedsBoundedRushRisk ||
+        answeredPureStopRouteExceedsBoundedRushRisk ||
         quote?.context !== "installed" ||
         quote.cardId !== ice.instanceId ||
         quote.targetServerId !== serverId ||

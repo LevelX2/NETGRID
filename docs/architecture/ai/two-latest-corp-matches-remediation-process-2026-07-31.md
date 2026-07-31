@@ -322,6 +322,39 @@ Umgesetzt und fokussiert verifiziert:
 - Sauberen Worktree entfernen und vollständig gemergten Arbeitsbranch
   löschen. Kein Push ohne separaten Nutzerauftrag.
 
+Umgesetzt und vor der Main-Synchronisierung verifiziert:
+
+- Die zunächst zu breite Zulassung unfundierter Score-Remote-Schichten ist
+  auf generische, belegbare Fälle begrenzt. Eine erste Schicht darf vor der
+  Gesamtfinanzierung liegen, wenn sie selbst für einen terminalen Scorepfad
+  aktuell installier- und rezbar ist oder der eng begrenzte mehrzügige
+  Aufbauvertrag ohne bessere sofortige Liquiditätskonversion greift.
+- Ein sichtbar über einen verzögerten Installationspfad verfügbarer Breaker
+  fließt über die gemeinsame Scoring-Window-Zugriffsprojektion in die
+  Remote-Risikoprüfung ein. Rein beantwortbares ETR schützt eine hochwertige
+  Agenda dadurch nicht fälschlich; echte Tax-, Damage- und
+  Encounter-Wirkungen bleiben erhalten.
+- Unfinanzierbare tiefe zentrale ICE-Schichten erhalten keine P2-Dringlichkeit
+  allein aus einer terminalen Zentralbedrohung. Zweite und dritte Schichten
+  bleiben als begrenztes Staging möglich; eine vierte, fünfte oder sechste
+  Schicht verdrängt ohne unmittelbare Wirkung keine produktive Economy.
+- Die Auswahl konkurrierender Score-Eltern nutzt vorhandene Remote-Bindung,
+  Risiko und technische Stabilität, aber keine nachträgliche pauschale
+  Agendapunkte-Sortierung. Dadurch bleiben bestehende Planinstanzen und deren
+  Support-Owner stabil.
+- Die historischen Virus-Purge-Kontrollen prüfen wieder ausschließlich ihren
+  eigentlichen Vertrag: kein wirkungsloser Purge und keine Purge-Capability.
+  Sie schreiben der KI nicht mehr zusätzlich eine konkrete Basis-Credit-
+  Aktion vor, wenn inzwischen ein legitimer Scoreplan verfügbar ist.
+- Die alte synthetische Pflicht zu einer unfinanzierbaren sechsten HQ-Schicht
+  wurde als Widerspruch zur Schichtfinanzierung korrigiert. Der Gegenfall
+  verbietet diese Überstapelung und akzeptiert die bereits planbesessene
+  produktive Alternative.
+- Grün: 14 zuvor betroffene Regressionsdateien mit 81 Tests; anschließend
+  `check:ai`, der AI-Typecheck mit 8-GB-Node-Heap und der vollständige
+  Drei-Shard-Lauf mit 182/182, 182/182 und 181/181 Testdateien sowie
+  1523/1523, 1789/1789 und 1157/1157 Tests.
+
 ## Verifikationsregeln
 
 Nach jedem Paket:

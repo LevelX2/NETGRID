@@ -11142,22 +11142,12 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "gain_credit"
-      }
-    ],
     "forbiddenActions": [
       {
         "type": "purge_runner_virus_counters"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
-      "requiredAssessmentEvidence": [
-        "corp_engine_certified_basic_liquidity_development"
-      ],
       "forbiddenCapabilities": ["purge_visible_runner_viruses"]
     }
   }

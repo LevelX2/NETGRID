@@ -105,21 +105,28 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     );
   });
 
-  it("keeps HQ matchpoint defense when agenda points remain stealable", () => {
+  it("does not overstack an unfundable sixth HQ layer at matchpoint", () => {
     const liveAgendaInventory = mutateFixture(cp05Json, (current) => {
       restoreCorpScoredAgendaToHq(current);
       current.expectation = {
         acceptableActions: [
           {
+            type: "rez_card",
+            sourceDefinitionId: "onr_v1_313_city-surveillance",
+          },
+        ],
+        forbiddenActions: [
+          {
             type: "install_card",
             sourceDefinitionId: "onr_v1_279_wall-of-static",
+            targetServerId: "hq",
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.defend_servers"],
-          acceptableCapabilities: ["allocate_server_defense"],
+          acceptablePlanKinds: ["corp.punish_campaign"],
+          acceptableCapabilities: ["punish_prepare"],
           requiredAssessmentEvidence: [
-            "corp_agenda_capacity_defense_conversion:hq:corp.install_card.corp_onr_v1_279_wall-of-static_2.hq.corp_onr_v1_279_wall-of-static_2.5",
+            "tag_punish_ontology_prepare:onr_v1_313_city-surveillance",
           ],
         },
       };
@@ -129,7 +136,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
 
     expect(result.ok, diagnostic(result)).toBe(true);
     expect(result.decision?.decisionDebug?.planKind).toBe(
-      "corp.defend_servers",
+      "corp.punish_campaign",
     );
   });
 
