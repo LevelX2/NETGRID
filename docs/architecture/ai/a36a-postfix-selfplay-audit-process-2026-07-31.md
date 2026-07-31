@@ -265,3 +265,36 @@ festgelegten Ownership- und Safety-Invarianten abschwächen.
   behobene Fehler von verbleibenden qualitativen Beobachtungen.
 - Alle Pakete sind einzeln committed, lokal in `main` integriert und
   Worktree sowie Branch verifiziert entfernt.
+
+## Ist-Abschluss P1–P6
+
+Die fachlichen und technischen Gates sind erfüllt:
+
+- D45, D47 und Zustand 107 wurden zunächst spielgleich rot gesichert und
+  anschließend grün gemacht.
+- Doctrine, Planbeiträge, Handdisposition, Restzugprojektion und
+  Shell-Traders-Fortsetzung bleiben bei den oben festgelegten Ownern.
+- Im ersten Postfix-Selfplay wurden zusätzlich zwei generische Restursachen
+  gefunden und mit Gegenproben beseitigt:
+  - Vorbereitungen mit null Shell-Countern werden abgelehnt, weil kein
+    letztes Counter-Entfernungsereignis eintreten kann.
+  - Der generische Marker `action_gated_search` ersetzt nicht mehr die
+    spezifischen Utility-Familien Recovery, Programmsuche, Stacksuche oder
+    Hidden-Zone-Suche.
+- Das identische Abschluss-Selfplay
+  `a36a-postfix-selfplay-20260731-002` endet nach 109 Decisions mit 7:0 für
+  die Corp. Replay und StateHash sind konsistent; illegale Actions,
+  Fallbacks, Timeouts, Runtimefehler und harte Planfehler stehen jeweils bei
+  null.
+- Der geschlossene Decision-Nenner beträgt 109/109. Das vollständige Ledger
+  liegt in
+  `docs/reviews/ai/a36a-postfix-selfplay-final-audit-2026-07-31.md`.
+- `corepack pnpm test:ai:shards` besteht mit 542 Datei-Shards und 4432 Tests.
+  Der AI-Typecheck besteht mit `NODE_OPTIONS=--max-old-space-size=8192`.
+
+Als qualitative Restpunkte bleiben eine stärkere Bewertung der
+Wiederherstellungsdauer vor dem Konsum einer kritischen Single-Definition-
+Coverage, die serverübergreifende Remote-/Zentral-Allokation des
+Corp-Defense-Portfolios und ein zeilenübergreifenderes
+`scoreWindowMissed`-Messverfahren. Diese Punkte rechtfertigen keine lokalen
+Sonderboni oder eine neue Entscheidungsautorität.

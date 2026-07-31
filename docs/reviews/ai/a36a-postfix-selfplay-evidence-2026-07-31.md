@@ -434,3 +434,19 @@ folgende Maßnahmen einzeln freigegeben werden:
 3. Sequenzvergleich Probe-Run gegen Breaker-vor-Run;
 4. exakte Shell-Traders-Target-Bindung;
 5. vollständige plan-owned Why-not-Ausgabe.
+
+## Umsetzungsstatus 2026-07-31
+
+Die führenden Fehler D45, D47 und Zustand 107 wurden im Paketprozess
+umgesetzt und sind durch spielgleiche Checkpoints sowie Gegenproben
+abgesichert. Das identische Abschluss-Selfplay umfasst 109 replay-saubere
+Decisions ohne illegale Action, Fallback, Timeout, Runtime- oder
+Plan-Safety-Fehler.
+
+Die vollständige Nachanalyse ersetzt dieses Dokument nicht als
+Ausgangsevidence, sondern schließt den Vorher-/Nachher-Vergleich:
+`docs/reviews/ai/a36a-postfix-selfplay-final-audit-2026-07-31.md`.
+
+Die Why-not-Abdeckung blieb entsprechend dem Umsetzungsvertrag außerhalb
+dieses Slices, sofern kein bereits vorhandener plan-owned Blockergrund ohne
+neue Entscheidungslogik übernommen werden konnte.
