@@ -56,7 +56,7 @@ import {
   type CorpDefenseSignal,
   type CorpExactIceRezRouteProjection,
   type CorpEconomyImmediateOperationSignal,
-  type CorpEconomyInstalledAssetWithdrawalSignal,
+  type CorpEconomyVisibleCardWithdrawalSignal,
   type CorpEconomyOperationThresholdSignal,
   type CorpEconomyReserveSignal,
   type CorpScoreProjectSignal,
@@ -6951,7 +6951,7 @@ function corpOpenEconomyPlanOwnsAction(
       signal.actionIds.includes(actionId) &&
       (signal.kind === "develop_campaign" ||
         signal.kind === "convert_immediate_operation" ||
-        signal.kind === "convert_installed_asset_payout" ||
+        signal.kind === "convert_visible_card_payout" ||
         signal.kind === "prepare_immediate_operation" ||
         signal.gap > 0),
   );
@@ -8100,7 +8100,7 @@ function buildCorpDomain(
       ...(turnLiquidityDevelopment ? [turnLiquidityDevelopment] : []),
       ...operationThresholdPreparations,
       ...corpImmediateOperationEconomyConversions(input, candidates),
-      ...corpInstalledAssetEconomyWithdrawals(input, candidates),
+      ...corpVisibleCardEconomyWithdrawals(input, candidates),
       ...corpEconomyDevelopmentCampaigns(input, candidates),
     ],
     (signal) => signal.needId,
@@ -8110,7 +8110,7 @@ function buildCorpDomain(
       if (
         signal.kind === "develop_campaign" ||
         signal.kind === "convert_immediate_operation" ||
-        signal.kind === "convert_installed_asset_payout" ||
+        signal.kind === "convert_visible_card_payout" ||
         signal.kind === "prepare_immediate_operation" ||
         signal.kind === "develop_liquidity"
       )
@@ -10338,23 +10338,41 @@ function corpImmediateOperationEconomyConversions(
   return uniqueBy(signals, (signal) => signal.needId);
 }
 
-function corpInstalledAssetEconomyWithdrawals(
+function corpVisibleCardEconomyWithdrawals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
-): CorpEconomyInstalledAssetWithdrawalSignal[] {
-  const installedRootCardsById = new Map(
-    input.playerView.servers.flatMap((server) =>
-      server.root.map((card) => [card.instanceId, card] as const),
+): CorpEconomyVisibleCardWithdrawalSignal[] {
+  const visibleSourceCardsById = new Map<
+    string,
+    {
+      card: VisibleCard;
+      sourceZone: "installed_root" | "score_area";
+    }
+  >([
+    ...input.playerView.servers.flatMap((server) =>
+      server.root.map(
+        (card) =>
+          [
+            card.instanceId,
+            { card, sourceZone: "installed_root" as const },
+          ] as const,
+      ),
     ),
-  );
+    ...input.playerView.own.scoreArea.map(
+      (card) =>
+        [card.instanceId, { card, sourceZone: "score_area" as const }] as const,
+    ),
+  ]);
   const legalActionsById = new Map(
     input.legalActions.map((action) => [action.actionId, action]),
   );
   const signals = candidates.flatMap((candidate) => {
     const sourceInstanceId = candidate.sourceCardInstanceId;
-    const sourceCard = sourceInstanceId
-      ? installedRootCardsById.get(sourceInstanceId)
+    const visibleSource = sourceInstanceId
+      ? visibleSourceCardsById.get(sourceInstanceId)
       : undefined;
+    const sourceCard = visibleSource?.card;
+    const sourceZone = visibleSource?.sourceZone;
     const sourceDefinitionId =
       candidate.sourceDefinitionId ?? sourceCard?.definitionId;
     const action = legalActionsById.get(candidate.actionId);
@@ -10366,19 +10384,27 @@ function corpInstalledAssetEconomyWithdrawals(
     const hint = sourceDefinitionId
       ? AI_HINTS_BY_CARD.get(sourceDefinitionId)
       : undefined;
+    const sourceIsAdmitted =
+      sourceZone === "score_area"
+        ? sourceCard?.known === true &&
+          visibleKnownCardType(input, sourceCard) === "agenda"
+        : sourceZone === "installed_root" &&
+          sourceCard?.known === true &&
+          sourceCard.rezzed === true &&
+          visibleKnownCardType(input, sourceCard) === "asset" &&
+          hint?.planRoles?.includes("remote_asset_economy") === true &&
+          hint.quality?.hintReviewed === true &&
+          hint.quality.strategyCovered === true &&
+          hint.quality.confidence === "high";
     if (
       !sourceInstanceId ||
       !sourceDefinitionId ||
-      !sourceCard?.known ||
+      !sourceCard ||
+      !sourceZone ||
+      !sourceIsAdmitted ||
       sourceCard.definitionId !== sourceDefinitionId ||
       (candidate.sourceDefinitionId !== undefined &&
         candidate.sourceDefinitionId !== sourceDefinitionId) ||
-      sourceCard.rezzed !== true ||
-      visibleKnownCardType(input, sourceCard) !== "asset" ||
-      hint?.planRoles?.includes("remote_asset_economy") !== true ||
-      hint.quality?.hintReviewed !== true ||
-      hint.quality.strategyCovered !== true ||
-      hint.quality.confidence !== "high" ||
       action?.type !== "activated_card_ability" ||
       action.source !== sourceInstanceId ||
       action.payload?.cardId !== sourceInstanceId ||
@@ -10418,7 +10444,7 @@ function corpInstalledAssetEconomyWithdrawals(
       grossLiquidCreditGain !== hostedCreditTakeAmount ||
       typeof netLiquidCreditGain !== "number" ||
       !Number.isSafeInteger(netLiquidCreditGain) ||
-      netLiquidCreditGain <= 0 ||
+      netLiquidCreditGain <= projection.clickCost ||
       grossLiquidCreditGain - projection.creditCost !== netLiquidCreditGain ||
       input.playerView.own.credits < projection.creditCost ||
       input.playerView.own.clicks < projection.clickCost
@@ -10427,10 +10453,11 @@ function corpInstalledAssetEconomyWithdrawals(
     }
     return [
       {
-        kind: "convert_installed_asset_payout",
-        needId: `economy-installed-asset-payout:${sourceInstanceId}`,
+        kind: "convert_visible_card_payout",
+        needId: `economy-visible-card-payout:${sourceInstanceId}`,
         sourceInstanceId,
         sourceDefinitionId,
+        sourceZone,
         actionIds: [candidate.actionId],
         conversion: {
           clickCost: projection.clickCost,
@@ -10453,8 +10480,8 @@ function corpInstalledAssetEconomyWithdrawals(
           kind: "source_pool_revalidated",
         },
         urgentForScore: false,
-        evidenceCode: `corp_engine_certified_installed_asset_payout:${sourceDefinitionId}`,
-      } satisfies CorpEconomyInstalledAssetWithdrawalSignal,
+        evidenceCode: `corp_engine_certified_visible_card_payout:${sourceDefinitionId}`,
+      } satisfies CorpEconomyVisibleCardWithdrawalSignal,
     ];
   });
   return uniqueBy(signals, (signal) => signal.needId);
@@ -16997,7 +17024,7 @@ function corpCardDevelopmentSignals(
         (signal) =>
           (signal.kind === "develop_campaign" ||
             signal.kind === "convert_immediate_operation" ||
-            signal.kind === "convert_installed_asset_payout" ||
+            signal.kind === "convert_visible_card_payout" ||
             signal.kind === "prepare_immediate_operation") &&
           signal.actionIds.includes(candidate.actionId),
       );

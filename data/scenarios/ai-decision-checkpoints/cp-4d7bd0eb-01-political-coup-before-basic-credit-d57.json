@@ -11992,6 +11992,17 @@
       {
         "type": "gain_credit"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "corp.economy"
+      ],
+      "acceptableCapabilities": [
+        "develop_or_convert_corp_economy"
+      ],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_visible_card_payout:onr_v1_209_political-coup"
+      ]
+    }
   }
 }
