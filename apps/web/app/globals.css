@@ -2701,6 +2701,23 @@ select {
   border-color: color-mix(in srgb, var(--accent), var(--line) 45%);
 }
 
+.deckStandardCopyStatus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid color-mix(in srgb, var(--danger), var(--line) 55%);
+  border-radius: 8px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--section-bg), var(--danger) 6%);
+  font-size: 12px;
+}
+
+.deckStandardCopyStatus .button {
+  flex: 0 0 auto;
+}
+
 .deckImportInline .deckTextArea {
   min-height: 90px;
 }
