@@ -132,6 +132,15 @@ Wenn ein neuer Stand fachlich besser ist, darf der alte Stand ersetzt, gelöscht
 - Mehr als drei parallele AI-Shards oder mehr als ein Worker je Shard werden
   nicht ungeprüft aktiviert. Dafür sind zuerst Laufzeit, Spitzen-RAM,
   Determinismus und Stabilität zu messen und die neue Grenze zu dokumentieren.
+- Das äußere Prozesszeitfenster eines Agenten- oder Shell-Aufrufs ist vom
+  Vitest-`testTimeout` je Einzeltest zu unterscheiden. Für fokussierte
+  AI-Testdateien und thematische AI-Teilmengen wird mindestens ein äußeres
+  Zeitfenster von 180 Sekunden verwendet; für vollständige AI-Shards sowie
+  breite Workspace-Test-, Typecheck- oder Build-Gates mindestens 600 Sekunden.
+- Liefert das Ausführungswerkzeug für einen noch laufenden Test eine
+  fortsetzbare Prozess- oder Cell-ID zurück, wird dieser Lauf über kurze
+  Statusabfragen weiterverfolgt. Er wird nicht allein wegen des ersten kurzen
+  Ausgabe- oder Yield-Zeitfensters abgebrochen oder neu gestartet.
 
 ## Lokaler Start- und Serverbetrieb
 

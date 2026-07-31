@@ -351,6 +351,21 @@ feste Shards parallel und hält jeden Shard auf genau einem Vitest-Worker.
 `test:ai:shards:serial` ist nur der dokumentierte Fallback bei nachgewiesenem
 Speicherdruck oder Instabilität.
 
+Für kurze, thematisch fokussierte Diagnosezyklen stehen zusätzlich folgende
+optionalen Root-Befehle bereit:
+
+```text
+corepack pnpm test:ai:plans
+corepack pnpm test:ai:runtime
+corepack pnpm test:ai:checkpoints
+corepack pnpm test:ai:simulation
+```
+
+Sie führen ausschließlich die bereits vorhandenen Tests unter `src/plans`,
+`src/runtime`, `src/evaluation/decision-checkpoints` beziehungsweise
+`src/simulation` aus. Sie sind keine zusätzlichen Gates und ersetzen vor
+einem AI-Abschluss nicht den vollständigen Lauf `test:ai:shards`.
+
 Das Realitätsgate aus
 `docs/reviews/ai/ai-test-realism-audit-2026-07-12.md` und
 `packages/ai/src/evaluation/real-engine-live-runtime.test.ts` verbindet
