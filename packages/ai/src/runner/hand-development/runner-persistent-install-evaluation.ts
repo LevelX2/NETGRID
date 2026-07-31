@@ -327,12 +327,6 @@ export function persistentCoverageAlreadyPresent(
   existingFunctionalCoverage: readonly string[],
 ): boolean {
   const existingCoverage = new Set(existingFunctionalCoverage);
-  if (
-    coverage.startsWith("non_additive_utility:") &&
-    existingCoverage.has("non_additive_utility:action_gated_search")
-  ) {
-    return true;
-  }
   if (!coverage.startsWith("breaker:")) {
     return existingCoverage.has(coverage);
   }
@@ -353,7 +347,12 @@ export function persistentProfilesOverlap(
   candidate: PersistentFunctionalProfile,
   installed: PersistentFunctionalProfile,
 ): boolean {
-  if (nonAdditiveUtilityProfilesOverlap(candidate, installed)) return true;
+  if (
+    candidate.nonAdditiveUtilityFamilies.length > 0 &&
+    installed.nonAdditiveUtilityFamilies.length > 0
+  ) {
+    return nonAdditiveUtilityProfilesOverlap(candidate, installed);
+  }
   if (
     candidate.breakerCoverage.length > 0 &&
     installed.breakerCoverage.length > 0 &&
@@ -374,6 +373,24 @@ export function nonAdditiveUtilityProfilesOverlap(
   candidate: PersistentFunctionalProfile,
   installed: PersistentFunctionalProfile,
 ): boolean {
+  const genericFamily = "non_additive_utility:action_gated_search";
+  const candidateSpecificFamilies =
+    candidate.nonAdditiveUtilityFamilies.filter(
+      (family) => family !== genericFamily,
+    );
+  const installedSpecificFamilies = new Set(
+    installed.nonAdditiveUtilityFamilies.filter(
+      (family) => family !== genericFamily,
+    ),
+  );
+  if (
+    candidateSpecificFamilies.length > 0 &&
+    installedSpecificFamilies.size > 0
+  ) {
+    return candidateSpecificFamilies.some((family) =>
+      installedSpecificFamilies.has(family),
+    );
+  }
   const installedFamilies = new Set(installed.nonAdditiveUtilityFamilies);
   return candidate.nonAdditiveUtilityFamilies.some((family) =>
     installedFamilies.has(family),

@@ -141,9 +141,12 @@ export function buildRunnerShellTradersPipelineSignals({
     const redundantTarget =
       development?.persistentInstallEvaluation?.duplicateRole ===
         "redundant_duplicate" && coverageBinding === undefined;
+    const zeroCounterPreparation =
+      ability === "set_aside_from_grip" && shellCountersBefore === 0;
     const targetRejected =
       targetValue <= 0 ||
       redundantTarget ||
+      zeroCounterPreparation ||
       development?.strategicFit === "blocked";
     const handCapacityReliefPreparation =
       ability === "set_aside_from_grip" &&
@@ -193,6 +196,9 @@ export function buildRunnerShellTradersPipelineSignals({
         : []),
       ...(redundantTarget
         ? ["runner_shell_traders_rejected_redundant_target"]
+        : []),
+      ...(zeroCounterPreparation
+        ? ["runner_shell_traders_rejected_zero_counter_preparation"]
         : []),
       ...(completionWouldBeHarmful
         ? ["runner_shell_traders_holds_harmful_completion"]

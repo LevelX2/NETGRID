@@ -782,6 +782,62 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     );
   });
 
+  it("keeps recovery as new coverage when another action-gated search family is installed", () => {
+    const junkyard = visibleCard("junkyard-after-search", {
+      definitionId: "onr_v1_165_junkyard-bbs",
+      title: "Junkyard BBS",
+      type: "resource",
+      installCost: 1,
+      rulesText: "A, [1]: Bring the top card from your trash into your hand.",
+    });
+    const installedProgramSearch = visibleCard("installed-program-search", {
+      definitionId: "test-installed-program-search",
+      title: "Program Search",
+      type: "resource",
+      rulesText: "A: Search your stack for a program.",
+    });
+    const input = runnerInput({
+      credits: 1,
+      hand: [junkyard],
+      rig: [installedProgramSearch],
+      legalActions: [installAction("install-junkyard-after-search", junkyard, 1)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent({
+          engineLineIds: ["runner.engine.consumption_recovery"],
+          engineProviders: [
+            {
+              providerId: "runner.provider:recovery",
+              cardId: "onr_v1_165_junkyard-bbs",
+              copies: 1,
+              capabilities: ["runner.recovery.program_or_hardware"],
+              supportCapabilities: [],
+              persistence: "persistent",
+              additivity: "redundant_by_default",
+              compatibleDemandIds: [],
+              evidence: [],
+            },
+          ],
+        }),
+      }),
+      "junkyard-after-search",
+    );
+
+    expect(evaluation.persistentInstallEvaluation).toMatchObject({
+      capabilityDelta: "new_coverage",
+      duplicateRole: "none",
+      newFunctionalCoverage: expect.arrayContaining([
+        "non_additive_utility:recovery",
+      ]),
+    });
+    expect(evaluation.persistentInstallEvaluation?.evidence).not.toEqual(
+      expect.arrayContaining(["non_additive_utility_duplicate"]),
+    );
+  });
+
   it("allows recovery utility setup when the visible heap has a target", () => {
     const replacementJunkyard = visibleCard("junkyard-replacement", {
       definitionId: "onr_v1_165_junkyard-bbs",

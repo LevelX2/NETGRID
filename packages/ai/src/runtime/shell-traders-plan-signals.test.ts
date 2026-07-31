@@ -233,6 +233,43 @@ describe("runner Shell Traders pipeline signals", () => {
       }),
     ]);
   });
+
+  it("rejects a zero-counter preparation that can never reach a last-counter removal", () => {
+    const source = shellTraders();
+    const target = card(
+      "zero-cost-program",
+      "onr_v1_035_invisibility",
+      "program",
+      {
+        installCost: 0,
+        memoryCost: 1,
+      },
+    );
+    const action = shellAction(
+      "prepare-zero-cost-program",
+      source.instanceId,
+      target,
+      {
+        delayedInstallAbility: "set_aside_from_grip",
+        shellCounterAmount: 0,
+      },
+    );
+    const input = runnerInput([action], {
+      grip: [target],
+      rig: [source],
+    });
+
+    expect(signals(input, [])).toEqual([
+      expect.objectContaining({
+        phase: "hold",
+        actionIds: [],
+        rejectedActionIds: ["prepare-zero-cost-program"],
+        evidenceCodes: expect.arrayContaining([
+          "runner_shell_traders_rejected_zero_counter_preparation",
+        ]),
+      }),
+    ]);
+  });
 });
 
 function signals(
