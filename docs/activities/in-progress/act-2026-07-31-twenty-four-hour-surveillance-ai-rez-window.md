@@ -12,8 +12,12 @@ completedAt:
 branch: codex/act-2026-07-31-twenty-four-hour-surveillance
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/reviews/ai/match-4d7bd0eba9138d83-complete-ai-analysis-2026-07-31.md
+checks:
+  - match_4d7bd0eba9138d83 decision coverage 204/204
+  - decision 177 checkpoint reproduced without warmup drift
+  - deck hint consumer audit 34/34 unique Corp cards; four unrelated pre-existing blocking findings recorded
 ---
 
 # Korp-KI nutzt das Rez-Fenster von Twenty-Four-Hour Surveillance
@@ -96,6 +100,28 @@ Rezzen deren Nutzung während des Runs regelwirksam verhindert.
   korrekt existiert, die KI-Auswahl ändern.
 - Für Zahlungsgegenproben echte als Stealth klassifizierte Quellen verwenden,
   keine Titelheuristik.
+
+## Analysebefund vor Umsetzung
+
+- Die Engine bietet in Entscheidung 177 die exakte, bezahlbare
+  `rez_card`-LegalAction im HQ-Run korrekt an. Weder LegalAction-Erzeugung noch
+  Timingweiterleitung sind die Fehlerursache.
+- `corp.defend_servers` bleibt der fachliche Owner. Der Plan verwirft die
+  Action derzeit mit
+  `corp_root_rez_has_no_exact_engine_certified_economy_or_defense_route`, weil
+  `corpExactCardRezSupportAssessment` noch keine generische Wirkungsklasse für
+  fortgebundene Stealth-Zahlquellensperren konsumiert.
+- Im reproduzierten Zustand besitzt der Runner sichtbar sechs verwendbare
+  Stealth-Bits: zwei aus `Invisibility`, zwei aus `Vewy Vewy Quiet` und zwei
+  aus `Cortical Cybermodem`. Nach dem zuerst sinnvollen Rez von `Ball and
+  Chain` stehen der Corp noch 13 Credits für die Rez-Kosten 1 zur Verfügung.
+- Die Umsetzung soll den bereits aktiven Hint-Effekt `run_tax` mit Ziel
+  `run.corp_stealth_credit_lockout`, Scope `fort` und Timing `during_run`
+  konsumieren. Positiv wird die Route nur beim aktuellen Run auf genau diesem
+  Fort und bei einem positiven sichtbaren Stealth-Pool; Engine-Kostenquote und
+  bestehende Score-Reserveprüfung bleiben verbindlich.
+- Es entsteht kein neuer Plan, keine Karten-ID-Abzweigung, keine Resolverlogik
+  und keine pauschale Regel zum Rezzen günstiger Upgrades.
 
 ## Ergebnisnotiz
 
