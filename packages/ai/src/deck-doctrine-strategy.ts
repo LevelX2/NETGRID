@@ -3,6 +3,10 @@ import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import strategyGoalsData from "../../../data/ai/strategy-goals-v1.json";
 import { RUNTIME_CARDS } from "./ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
+import {
+  buildRunnerDeckEngineDoctrine,
+  type RunnerDeckEngineDoctrine,
+} from "./runner-deck-engine-doctrine";
 
 export type DeckStrategyConfidence = "low" | "medium" | "high";
 
@@ -158,6 +162,14 @@ export const DECK_STRATEGY_METADATA_CONSUMER_CONTRACT = {
     mode: "diagnostic_only",
     consumers: ["AI007 Runner profile viewer"],
   },
+  runnerEngineDoctrine: {
+    mode: "productive_and_diagnostic",
+    consumers: [
+      "RunnerStrategicIntent",
+      "RunnerPlanModules",
+      "AI007 strategy viewer",
+    ],
+  },
   "corpProfile.iceProfile": {
     mode: "diagnostic_only",
     consumers: ["AI007 Corp profile viewer"],
@@ -203,6 +215,7 @@ export type AiDeckStrategyProfile = {
   legacySignalCounts: Record<string, number>;
   warnings: string[];
   runnerProfile?: RunnerDeckStrategyProfiles;
+  runnerEngineDoctrine?: RunnerDeckEngineDoctrine;
   corpProfile?: CorpDeckStrategyProfiles;
   source: {
     mode: "ai_internal_strategy_profile";
@@ -509,7 +522,10 @@ export function buildDeckStrategyProfile(
     legacySignalCounts: sortRecord(stats.legacySignalCounts),
     warnings: deckWarnings(stats),
     ...(snapshot.side === "runner"
-      ? { runnerProfile: buildRunnerProfiles(stats, strategyScores) }
+      ? {
+          runnerProfile: buildRunnerProfiles(stats, strategyScores),
+          runnerEngineDoctrine: buildRunnerDeckEngineDoctrine(snapshot)!,
+        }
       : { corpProfile: buildCorpProfiles(stats, strategyScores) }),
     source: {
       mode: "ai_internal_strategy_profile",

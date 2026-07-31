@@ -40,6 +40,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       "functionSignalCounts",
       "legacySignalCounts",
       "primaryStrategies",
+      "runnerEngineDoctrine",
       "runnerProfile.coverageProfile",
       "runnerProfile.defenseProfile",
       "runnerProfile.economyProfile",

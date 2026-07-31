@@ -142,6 +142,13 @@ Recurring Credits zählen nur bei kompatibler Nachfrage; zusätzliche
 Shell-Kopien können additiv, redundante Recovery-Kopien nicht automatisch
 additiv sein.
 
+**Ist-Nachweis:** Das generische Provider-/Abhängigkeitsmodell unterscheidet
+Providerdefinitionen und Kopien, klassifiziert Rent-I-Con als einzige
+Breaker-Providerdefinition des geprüften Decks und hält Cortical Cybermodem,
+Cloak sowie Vewy Vewy Quiet korrekt als Breaker-Unterstützung. Die
+Doctrine-Gegenfälle und bestehenden Strategie-/Capability-Tests bestehen
+mit 58/58 Tests; der AI-Typecheck ist mit 8-GB-Heap grün.
+
 ### P3 – Doctrine-Verbrauch in bestehenden Plan-Ownern
 
 - Der bestehende Fluss bleibt

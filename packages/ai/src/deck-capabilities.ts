@@ -622,7 +622,12 @@ function breakerCoverageForRecord(
         "icebreaker",
       ]),
     ) ||
-      deckCapabilityTokensIncludeAny(tokens, ["icebreaker", "breaker"]))
+      [...record.roles, ...record.planRoles].some(
+        (role) =>
+          role === "icebreaker" ||
+          role === "universal_breaker" ||
+          role.startsWith("breaker_"),
+      ))
   ) {
     coverage.add("special");
   }

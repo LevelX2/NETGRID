@@ -146,6 +146,20 @@ export {
   buildDeckStrategyProfile,
   DECK_STRATEGY_METADATA_CONSUMER_CONTRACT,
 } from "./deck-doctrine-strategy";
+export {
+  buildRunnerDeckEngineDoctrine,
+  RUNNER_DECK_ENGINE_DOCTRINE_SCHEMA_VERSION,
+} from "./runner-deck-engine-doctrine";
+export type {
+  RunnerDeckEngineDoctrine,
+  RunnerDoctrineDependency,
+  RunnerDoctrineDevelopmentTendency,
+  RunnerDoctrineEngineLine,
+  RunnerDoctrinePlanContribution,
+  RunnerDoctrineProvider,
+  RunnerDoctrineProviderAdditivity,
+  RunnerDoctrineProviderPersistence,
+} from "./runner-deck-engine-doctrine";
 export type {
   AiDeckStrategyProfile,
   CorpDeckStrategyProfiles,

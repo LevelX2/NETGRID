@@ -674,6 +674,27 @@ describe("DeckCapabilityProfile", () => {
     ]);
   });
 
+  it("does not classify cards that only support icebreakers as breakers", () => {
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      deckSnapshot: runnerSnapshot([
+        ["onr_classic_031_rent-i-con", 3],
+        ["onr_proteus_134_cortical-cybermodem", 1],
+        ["onr_v1_011_cloak", 1],
+        ["onr_v1_071_vewy-vewy-quiet", 2],
+      ]),
+    });
+
+    expect(
+      profile.runner?.breakerInventory.map((entry) => entry.cardId),
+    ).toEqual(["onr_classic_031_rent-i-con"]);
+    expect(profile.runner?.breakerInventory[0]).toMatchObject({
+      coverage: ["subtype_limited", "universal"],
+      quantityKnownInDeck: 3,
+      confidence: "high",
+    });
+  });
+
   it("matches corp plan roles by bounded role terms", () => {
     setTestCardRoles("local_plan_a", {
       cardId: "local_plan_a",
