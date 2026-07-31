@@ -19,7 +19,10 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       "builds economy instead of exposing an agenda behind breakable staged ETR",
       minimizeAgendaRiskJson,
     ],
-    ["funds the matchpoint campaign before exposing it", startMatchpointJson],
+    [
+      "prepares an executable protected matchpoint sibling before exposing it",
+      startMatchpointJson,
+    ],
   ])("%s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
@@ -129,7 +132,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("does not force the same line when the agenda does not reach matchpoint", () => {
+  it("keeps the same safe remote preparation available below matchpoint", () => {
     const checkpoint = mutateFixture(startMatchpointJson, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       const scoredCardId = state.corp.scoreArea.find(
@@ -151,12 +154,17 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-B2-NO-MATCHPOINT-CONTROL";
       fixture.expectation = {
-        acceptableActions: [{ type: "gain_credit" }],
+        acceptableActions: [
+          {
+            actionId:
+              "corp.install_card.corp_onr_v1_245_fire-wall_2.new_remote.corp_onr_v1_245_fire-wall_2",
+          },
+        ],
         planExecution: {
-          acceptablePlanKinds: ["corp.economy"],
-          acceptableCapabilities: ["develop_or_convert_corp_economy"],
+          acceptablePlanKinds: ["corp.defend_servers"],
+          acceptableCapabilities: ["develop_score_protection"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_basic_liquidity_development",
+            "score_protection_staging_install:agenda:corp_onr_proteus_008_project-zurich_1:new_remote:new_remote:bounded_deterrence",
           ],
         },
       };

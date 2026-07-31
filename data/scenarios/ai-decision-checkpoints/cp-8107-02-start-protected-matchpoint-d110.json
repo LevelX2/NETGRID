@@ -10962,7 +10962,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "actionId": "corp.install_card.corp_onr_v1_245_fire-wall_2.new_remote.corp_onr_v1_245_fire-wall_2"
       }
     ],
     "forbiddenActions": [
@@ -10971,10 +10971,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["develop_score_protection"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_basic_liquidity_development"
+        "score_protection_staging_install:agenda:corp_onr_proteus_008_project-zurich_1:new_remote:new_remote:bounded_deterrence"
       ]
     }
   }
