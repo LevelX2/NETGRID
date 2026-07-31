@@ -32,6 +32,40 @@ describe("deriveOpponentActionCues", () => {
     expect(cues[0]?.actionType).toBe("decline_rez");
   });
 
+  it("keeps a visible effect cue emitted while a technical rez pass is suppressed", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_approach_root_pass_damage", "decline_rez", {
+          actor: "corp",
+          runApproachRootRezPass: true,
+          resolvedEffects: [
+            {
+              effectId: "test.encounter.damage",
+              kind: "damage",
+              visibility: "hidden_info_barrier",
+              side: "runner",
+              amount: 1,
+              damageType: "net",
+              cardsTrashed: 1,
+              reason: "access_effect",
+              sourceDefinitionId: "simple_damage_source",
+              sourceTitle: "Simple Damage Source",
+            },
+          ],
+        }),
+      ],
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]).toMatchObject({
+      eventId: "evt_approach_root_pass_damage",
+      source: "system",
+      title: "Du hast 1 Net Damage durch Simple Damage Source erlitten.",
+    });
+  });
+
   it("maps opponent AI events to stable cues without exposing raw reason codes", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "runner",

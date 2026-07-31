@@ -2719,6 +2719,14 @@ describe("MVP 0.1 runs, access and scoring", () => {
           action.payload?.runRootRezPass !== true,
       ),
     ).toBe(true);
+    expect(
+      getLegalActions(state, "corp").find(
+        (action) => action.type === "decline_rez",
+      ),
+    ).toMatchObject({
+      label: "Keine weitere Karte rezzen / Begegnung beginnen",
+      payload: { runApproachRootRezPass: true },
+    });
 
     state = apply(
       state,

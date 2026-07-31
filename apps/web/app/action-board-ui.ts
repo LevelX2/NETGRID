@@ -1138,7 +1138,7 @@ export function actionButtonLabel(action: LegalAction): string {
     case "jack_out":
       return "Run abbrechen (Jack-out)";
     case "decline_rez":
-      return "Nicht rezzen";
+      return normalizeVisibleTerms(action.label || "Nicht rezzen");
     case "continue_run":
       return normalizeVisibleTerms(action.label || "Run fortsetzen");
     case "access_card":

@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-07-31-rez-window-cue-semantics
-status: in_progress
+status: done
 kind: implementation
 area: engine-web-ui
 priority: high
@@ -8,12 +8,25 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-07-31
 startedAt: 2026-07-31
-completedAt:
+completedAt: 2026-07-31
 branch: codex/rez-window-cue-semantics
 releaseTarget: current-main
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/run/run-rez-window.ts
+  - packages/engine/src/public-context.ts
+  - apps/web/app/action-cues.ts
+  - apps/web/app/action-board-ui.ts
+checks:
+  - engine-focused-27-tests-pass
+  - web-focused-155-tests-pass
+  - engine-full-1827-tests-pass
+  - web-full-731-tests-pass
+  - engine-typecheck-pass
+  - web-typecheck-pass
+  - engine-build-pass
+  - web-build-pass
+  - git-diff-check-pass
 ---
 
 # Rezfenster-Pässe semantisch und ohne störende Doppelanzeige darstellen
@@ -118,13 +131,20 @@ Die Rezfenster-Darstellung soll den tatsächlichen Regelablauf korrekt und ruhig
 
 ## Abschlusskriterien
 
-- [ ] P1 bis P3 jeweils verifiziert und committed.
-- [ ] Technische Rez-Pässe erzeugen kein großes Gegnerfenster.
-- [ ] Tatsächlicher ICE-Rezverzicht bleibt sichtbar.
-- [ ] Chronik, KI-Debug, Replay und Run-Fortsetzung bleiben vollständig.
+- [x] P1 bis P3 jeweils verifiziert und committed.
+- [x] Technische Rez-Pässe erzeugen kein großes Gegnerfenster.
+- [x] Tatsächlicher ICE-Rezverzicht bleibt sichtbar.
+- [x] Chronik, KI-Debug, Replay und Run-Fortsetzung bleiben vollständig.
 - [ ] Arbeitsbranch ist lokal in `main` integriert.
 - [ ] Arbeits-Worktree und gemergter Branch sind nachweislich entfernt.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die Engine kennzeichnet den Abschluss des Approach-Rezfensters bei bereits
+gerezztem ICE explizit als `runApproachRootRezPass`; die tatsächliche
+Entscheidung gegen das Rezen eines ungerezzten ICE bleibt davon getrennt.
+Das große Gegner-Aktionsfenster unterdrückt Movement-, Fort- und
+Approach-Root-Rezpässe, während Chronik, Replay und KI-Debugspur vollständig
+bleiben. Sichtbare Effekte desselben Ereignisses werden weiterhin als eigene
+Meldung dargestellt. Vollständige Engine-/Webtests, Typechecks und Builds sind
+grün. Lokaler Merge und Cleanup folgen nach diesem Paketcommit.

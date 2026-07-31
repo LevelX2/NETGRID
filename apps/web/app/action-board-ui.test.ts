@@ -609,8 +609,19 @@ describe("V1.0.5 action board UI helpers", () => {
       { cardId: "ice_1" },
       "run.approach_ice",
     );
+    const approachRootPass = legalAction(
+      "corp",
+      "decline_rez",
+      "game_rule",
+      "Keine weitere Karte rezzen / Begegnung beginnen",
+      { runApproachRootRezPass: true },
+      "run.approach_ice",
+    );
 
     expect(isAutomaticCorpRunPassAction(decline)).toBe(true);
+    expect(actionButtonLabel(approachRootPass)).toBe(
+      "Keine weitere Karte rezzen / Begegnung beginnen",
+    );
     expect(automaticCorpRunPassAction(running, [rez, decline], "corp")).toBe(
       decline,
     );
