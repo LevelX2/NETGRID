@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-07-31-mouse-expose-chronicle-summary-and-wording
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-31
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-31
+completedAt: 2026-07-31
+branch: codex/activities-worktree-20260731-223738
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+  - apps/web/features/chronicle/ChroniclePanel.tsx
+checks:
+  - corepack pnpm --filter @netgrid/web test -- apps/web/app/chronicle.test.ts apps/web/app/chronicleGrouping.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/web build
+  - corepack pnpm format:changed
+  - git diff --check
 ---
 
 # Mouse-Expose in der Chronik zusammenfassen und zeitlich eindeutig benennen
@@ -81,34 +89,34 @@ gerezzed noch dauerhaft aufgedeckt bleibt.
   Verdichtung betrifft nur die Chronikprojektion.
 - Keine pauschale Umbenennung aller Reveal-, Access- oder dauerhaften
   Sichtbarkeitseffekte. Insbesondere Batch-Expose durch `Schematics Search
-  Engine`, Access-Reveals, Archives-Aufdeckung und anhaltende Sichtbarkeit
+Engine`, Access-Reveals, Archives-Aufdeckung und anhaltende Sichtbarkeit
   durch `I Spy` behalten ihre jeweils eigenen Verträge.
 - Kein Gruppieren unabhängiger Kartenaktionen, nur weil sie direkt
   hintereinander protokolliert wurden.
 
 ## Akzeptanzkriterien
 
-- [ ] Eine erfolgreich aufgelöste Mouse-Aktion erzeugt in der sichtbaren
+- [x] Eine erfolgreich aufgelöste Mouse-Aktion erzeugt in der sichtbaren
       Chronik genau eine inhaltlich vollständige Meldung statt der bisherigen
       Aktivierungs- und Ergebnismeldung als zwei Einträge.
-- [ ] Der Eintrag nennt Runner, Mouse, Zielkarte und öffentliche Position und
+- [x] Der Eintrag nennt Runner, Mouse, Zielkarte und öffentliche Position und
       trägt die richtige Aktionsnummer beziehungsweise den richtigen
       Aktionsverbrauch.
-- [ ] Die gewählte deutsche Expose-Formulierung macht den temporären Charakter
+- [x] Die gewählte deutsche Expose-Formulierung macht den temporären Charakter
       deutlich und behauptet weder Rez noch dauerhaftes Faceup; die
       Terminologieentscheidung ist im Regressionstest oder einem passenden
       UI-Terminologie-Helper verankert.
-- [ ] „angesehen/eingesehen“ wird nicht als allgemeiner Ersatz verwendet,
+- [x] „angesehen/eingesehen“ wird nicht als allgemeiner Ersatz verwendet,
       solange Expose regelgemäß allen Spielern zeigt; ein nur privater
       Look-Effekt bleibt terminologisch unterscheidbar.
-- [ ] Vergleichbare quellengebundene Einzelkarten-Expose-Meldungen verwenden
+- [x] Vergleichbare quellengebundene Einzelkarten-Expose-Meldungen verwenden
       dieselbe Terminologie oder eine ausdrücklich begründete Abweichung.
-- [ ] Fehlgeschlagene, abgebrochene oder noch nicht aufgelöste
+- [x] Fehlgeschlagene, abgebrochene oder noch nicht aufgelöste
       Aktivierungsversuche werden nicht fälschlich als erfolgreiches Expose
       zusammengefasst.
-- [ ] Unabhängige benachbarte Aktionen sowie Batch-, Access- und anhaltende
+- [x] Unabhängige benachbarte Aktionen sowie Batch-, Access- und anhaltende
       Sichtbarkeitseffekte bleiben getrennt und korrekt formuliert.
-- [ ] PublicEvents, Hidden-Info-Redaction, Reconnect, Replay und StateHash
+- [x] PublicEvents, Hidden-Info-Redaction, Reconnect, Replay und StateHash
       bleiben unverändert und side-sicher.
 
 ## Umsetzungshinweise
@@ -129,4 +137,15 @@ gerezzed noch dauerhaft aufgedeckt bleibt.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die Chronikprojektion verknüpft einen gestarteten und erfolgreich aufgelösten
+Einzelkarten-Expose nun über `hiddenZoneAction`, Runner-Akteur und
+`sourceDefinitionId`. Sie unterdrückt ausschließlich die zugehörige generische
+Aktivierung und überträgt deren Aktionsverbrauch auf das konkrete Ergebnis.
+Mouse erscheint dadurch einmal mit Quelle, Zielkarte, öffentlicher Position
+und Aktionsnummer. Offene beziehungsweise nicht passend aufgelöste Starts,
+andere Quellen sowie Batch-Expose bleiben unverändert getrennt. Mouse, SeeYa
+und der vorhandene quellengebundene Einzelkartenpfad verwenden die eindeutige
+Formulierung „vorübergehend offengelegt“. Die Änderung bleibt vollständig in
+der Webprojektion; Engine-, PublicEvent-, Replay- und State-Verträge wurden
+nicht verändert. Webtests (76 Dateien, 759 Tests), Typecheck, Build, Format-
+und Diff-Prüfung waren erfolgreich.
