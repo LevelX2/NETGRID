@@ -3,6 +3,35 @@ import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
 import { actionSoundCountForAction, actionSoundForActionType, cueHasHiddenLeak, damageAudioCueFromPublicPayload, deriveDamageImpactCues, deriveOpponentActionCues, eventsAfter, turnStartAudioCue } from "./action-cues";
 
 describe("deriveOpponentActionCues", () => {
+  it("suppresses technical rez-pass cues but keeps an actual ICE rez decline visible", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_movement_pass", "decline_rez", {
+          actor: "corp",
+          runRootRezPass: true,
+        }),
+        event("evt_fort_pass", "decline_rez", {
+          actor: "corp",
+          runFortPassPass: true,
+        }),
+        event("evt_approach_root_pass", "decline_rez", {
+          actor: "corp",
+          runApproachRootRezPass: true,
+        }),
+        event("evt_actual_ice_decline", "decline_rez", {
+          actor: "corp",
+        }),
+      ],
+    });
+
+    expect(cues.map((cue) => cue.eventId)).toEqual([
+      "evt_actual_ice_decline",
+    ]);
+    expect(cues[0]?.actionType).toBe("decline_rez");
+  });
+
   it("maps opponent AI events to stable cues without exposing raw reason codes", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "runner",

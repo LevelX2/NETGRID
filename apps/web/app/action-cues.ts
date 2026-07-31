@@ -311,10 +311,24 @@ export function deriveOpponentActionCues(
         };
       },
     );
-    return [cue, ...effectCues];
+    return technicalRezPassEvent(actionType, payload)
+      ? effectCues
+      : [cue, ...effectCues];
   });
 
   return cues;
+}
+
+function technicalRezPassEvent(
+  actionType: string,
+  payload: Record<string, unknown>,
+): boolean {
+  return (
+    actionType === "decline_rez" &&
+    (payload.runRootRezPass === true ||
+      payload.runFortPassPass === true ||
+      payload.runApproachRootRezPass === true)
+  );
 }
 
 export function deriveDamageImpactCues(
