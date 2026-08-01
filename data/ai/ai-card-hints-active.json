@@ -29260,6 +29260,20 @@
         "tag.source",
         "trace.source"
       ],
+      "targetProfiles": [
+        {
+          "avoid": [],
+          "hiddenInfoPolicy": "legal_targets_only",
+          "kind": "install_target",
+          "preferences": [
+            "protects_agenda_remote"
+          ],
+          "purpose": "establish_tag_source_in_protected_empty_remote",
+          "schemaVersion": "target-profile-v1",
+          "targetType": "server",
+          "timing": "on_install"
+        }
+      ],
       "valueHints": {
         "remoteRootValue": 3
       },
@@ -30057,7 +30071,7 @@
       "manualNotes": [
         "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
         "ASSET-V2: Target/Constraints: not_required.",
-        "ASSET-V2: Rationale: Static Wall scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        "AI-GENERIC: Wall scope is published as a hard structured target-profile constraint; subtype data remains card data and is not mirrored as a tactic signal."
       ],
       "planRoles": [
         "protect_rnd",
@@ -30109,7 +30123,7 @@
             "ice.corp_strength_support",
             "tax.ice"
           ],
-          "rationale": "Static Wall scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+          "rationale": "Wall scope is a hard structured target-profile constraint; subtype data remains card data and is not mirrored as a tactic signal.",
           "role": "tax_tool",
           "roleDetail": "ice_tax_support",
           "strategyId": "corp.ice_tax_glacier"
@@ -30133,7 +30147,11 @@
             "protects_agenda_remote"
           ],
           "purpose": "rez_best_defensive_ice",
+          "requiredSubtypes": [
+            "wall"
+          ],
           "schemaVersion": "target-profile-v1",
+          "serverScope": "any_visible_server",
           "targetType": "installed_ice",
           "timing": "corp_rez_window"
         }
@@ -30379,7 +30397,7 @@
       "manualNotes": [
         "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
         "ASSET-V2: Target/Constraints: not_required.",
-        "ASSET-V2: Rationale: Static Code-Gate scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        "AI-GENERIC: Code-Gate scope is published as a hard structured target-profile constraint; subtype data remains card data and is not mirrored as a tactic signal."
       ],
       "planRoles": [
         "protect_rnd",
@@ -30431,7 +30449,7 @@
             "ice.corp_subroutine_support",
             "tax.ice"
           ],
-          "rationale": "Static Code-Gate scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+          "rationale": "Code-Gate scope is a hard structured target-profile constraint; subtype data remains card data and is not mirrored as a tactic signal.",
           "role": "tax_tool",
           "roleDetail": "ice_tax_support",
           "strategyId": "corp.ice_tax_glacier"
@@ -30455,7 +30473,11 @@
             "protects_agenda_remote"
           ],
           "purpose": "rez_best_defensive_ice",
+          "requiredSubtypes": [
+            "code_gate"
+          ],
           "schemaVersion": "target-profile-v1",
+          "serverScope": "any_visible_server",
           "targetType": "installed_ice",
           "timing": "corp_rez_window"
         }
@@ -30966,6 +30988,20 @@
       ],
       "tacticSignals": [
         "trace.corp_credit_support"
+      ],
+      "targetProfiles": [
+        {
+          "avoid": [],
+          "hiddenInfoPolicy": "legal_targets_only",
+          "kind": "install_target",
+          "preferences": [
+            "protects_agenda_remote"
+          ],
+          "purpose": "establish_fort_trace_support",
+          "schemaVersion": "target-profile-v1",
+          "targetType": "server",
+          "timing": "on_install"
+        }
       ],
       "valueHints": {
         "remoteRootValue": 1
@@ -36356,7 +36392,10 @@
           "kind": "use_target",
           "preferences": [],
           "purpose": "add_etr_subroutine_to_fort_ice",
+          "activeRunConstraint": "same_fort_upcoming_ice_when_active",
+          "minimumTargetCount": 1,
           "schemaVersion": "target-profile-v1",
+          "serverScope": "source_fort",
           "targetType": "installed_ice",
           "timing": "during_ice_encounter"
         }

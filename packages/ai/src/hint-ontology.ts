@@ -713,6 +713,10 @@ export type AiHintTargetProfileV1 = {
   preferences?: KnownHintTargetProfilePreference[];
   avoid?: KnownHintTargetProfileAvoid[];
   hiddenInfoPolicy: KnownHintTargetProfileHiddenInfoPolicy;
+  requiredSubtypes?: string[];
+  serverScope?: "any_visible_server" | "source_fort";
+  minimumTargetCount?: number;
+  activeRunConstraint?: "same_fort_upcoming_ice_when_active";
 };
 
 export type AiHintOpponentSignal = {
@@ -1482,6 +1486,42 @@ function validateTargetProfileV1(
     "unknown_target_profile_hidden_info_policy",
     issues,
     true,
+  );
+  if (targetProfile.requiredSubtypes !== undefined) {
+    if (
+      !Array.isArray(targetProfile.requiredSubtypes) ||
+      targetProfile.requiredSubtypes.length === 0 ||
+      targetProfile.requiredSubtypes.some(
+        (subtype) => typeof subtype !== "string" || subtype.length === 0,
+      )
+    ) {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${path}.requiredSubtypes`,
+        "Expected a non-empty array of subtype identifiers.",
+      );
+    }
+  }
+  validateOptionalKnown(
+    targetProfile.serverScope,
+    ["any_visible_server", "source_fort"] as const,
+    `${path}.serverScope`,
+    "invalid_shape",
+    issues,
+  );
+  validateOptionalNumber(
+    targetProfile.minimumTargetCount,
+    `${path}.minimumTargetCount`,
+    issues,
+  );
+  validateOptionalKnown(
+    targetProfile.activeRunConstraint,
+    ["same_fort_upcoming_ice_when_active"] as const,
+    `${path}.activeRunConstraint`,
+    "invalid_shape",
+    issues,
   );
 }
 

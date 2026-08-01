@@ -12031,9 +12031,12 @@ function legacyPunishSignals(
     if (!legalAction || !actionIsCurrentlyAffordable(input, legalAction))
       return [];
     if (
-      candidate.sourceDefinitionId === "onr_v1_310_blood-cat" &&
+      corpInstallTargetProfileHasPurpose(
+        candidate,
+        "establish_tag_source_in_protected_empty_remote",
+      ) &&
       candidate.semanticActionType === "install.card" &&
-      !corpExactBloodCatInstallPlacementIsPreferred(input, candidate)
+      !corpProtectedEmptyRemoteTagSourcePlacementIsPreferred(input, candidate)
     ) {
       return [];
     }
@@ -12062,9 +12065,12 @@ function legacyPunishSignals(
       corpTraceSupportTargetHasVisibleTraceSource(input, candidate);
     if (
       targetBoundTraceSupport &&
-      candidate.sourceDefinitionId === "onr_v1_365_paris-city-grid" &&
+      corpInstallTargetProfileHasPurpose(
+        candidate,
+        "establish_fort_trace_support",
+      ) &&
       candidate.semanticActionType === "install.card" &&
-      !corpExactParisCityGridPlacementIsPreferred(input, candidate)
+      !corpFortTraceSupportPlacementIsPreferred(input, candidate)
     ) {
       return [];
     }
@@ -12157,7 +12163,25 @@ function legacyPunishSignals(
   });
 }
 
-function corpExactParisCityGridPlacementIsPreferred(
+function corpInstallTargetProfileHasPurpose(
+  candidate: ActionSemanticCandidate,
+  purpose: string,
+): boolean {
+  if (!candidate.sourceDefinitionId) return false;
+  return (
+    AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId)?.targetProfiles?.some(
+      (profile) =>
+        "schemaVersion" in profile &&
+        profile.schemaVersion === "target-profile-v1" &&
+        profile.kind === "install_target" &&
+        profile.targetType === "server" &&
+        profile.timing === "on_install" &&
+        profile.purpose === purpose,
+    ) === true
+  );
+}
+
+function corpFortTraceSupportPlacementIsPreferred(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
@@ -12187,7 +12211,7 @@ function corpExactParisCityGridPlacementIsPreferred(
   return targetServerId === (protectedEmptyTraceRemote?.id ?? targetServerId);
 }
 
-function corpExactBloodCatInstallPlacementIsPreferred(
+function corpProtectedEmptyRemoteTagSourcePlacementIsPreferred(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
@@ -12240,7 +12264,19 @@ function corpStrategicFundingPhaseBlocksPreparation(
     intent.primaryStrategy.strategyId === "corp.tag_trace_punish" &&
     intent.targetVector.kind === "tag" &&
     candidate.semanticActionType === "corp_window.rez" &&
-    candidate.sourceDefinitionId === "onr_v1_313_city-surveillance" &&
+    candidate.cardContextFunctionalEffects?.some(
+      (effect) =>
+        effect.kind === "tag_source" &&
+        effect.scope === "runner" &&
+        effect.timing === "runner_turn",
+    ) === true &&
+    candidate.cardContextFunctionalEffects.some(
+      (effect) =>
+        effect.kind === "remote_tax" &&
+        effect.scope === "runner" &&
+        effect.resource === "credits" &&
+        effect.timing === "runner_turn",
+    ) &&
     candidate.sourceCardInstanceId !== undefined &&
     serverForInstalledCard(input, candidate.sourceCardInstanceId) !== undefined;
   if (exactFundedPunishEngineActivation) return false;
@@ -16619,99 +16655,12 @@ function corpExactCardRezSupportAssessment(
       evidenceCode: `corp_rez_fort_stealth_credit_lockout_blocks_visible_credits:${blockedCredits}`,
     };
   }
-  if (candidate.sourceDefinitionId === "onr_v1_320_encoder-inc") {
-    const installedCodeGateIds = input.playerView.servers.flatMap((server) =>
-      server.ice.flatMap((ice) => {
-        const definition = ice.definitionId
-          ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
-          : undefined;
-        return definition?.subtypes.includes("code_gate")
-          ? [ice.instanceId]
-          : [];
-      }),
-    );
-    return installedCodeGateIds.length > 0
-      ? {
-          productive: true,
-          serverId,
-          value: 120,
-          evidenceCode: `corp_rez_encoder_inc_supports_visible_code_gates:${installedCodeGateIds.join(",")}`,
-        }
-      : {
-          productive: false,
-          serverId,
-          value: 0,
-          evidenceCode:
-            "corp_rez_encoder_inc_has_no_visible_installed_code_gate",
-        };
-  }
-  if (candidate.sourceDefinitionId === "onr_v1_317_data-masons") {
-    const installedWallIds = input.playerView.servers.flatMap((server) =>
-      server.ice.flatMap((ice) => {
-        const definition = ice.definitionId
-          ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
-          : undefined;
-        return definition?.subtypes.includes("wall") ? [ice.instanceId] : [];
-      }),
-    );
-    return installedWallIds.length > 0
-      ? {
-          productive: true,
-          serverId,
-          value: 120,
-          evidenceCode: `corp_rez_data_masons_supports_visible_installed_walls:${installedWallIds.join(",")}`,
-        }
-      : {
-          productive: false,
-          serverId,
-          value: 0,
-          evidenceCode: "corp_rez_data_masons_has_no_visible_installed_wall",
-        };
-  }
-  if (
-    candidate.sourceDefinitionId === "onr_v1_370_tesseract-fort-construction"
-  ) {
-    const server = input.playerView.servers.find(
-      (candidateServer) => candidateServer.id === serverId,
-    );
-    if (!server || server.ice.length === 0) {
-      return {
-        productive: false,
-        serverId,
-        value: 0,
-        evidenceCode: "corp_rez_tesseract_has_no_ice_on_exact_installed_fort",
-      };
-    }
-    const run = input.playerView.run;
-    if (!run) {
-      return {
-        productive: true,
-        serverId,
-        value: 120,
-        evidenceCode:
-          "corp_rez_tesseract_establishes_persistent_exact_fort_ice_support",
-      };
-    }
-    const exactUpcomingEncounter =
-      run.attackedServerId === serverId && run.position?.kind === "ice";
-    return exactUpcomingEncounter
-      ? {
-          productive: true,
-          serverId,
-          value: 160,
-          evidenceCode:
-            "corp_rez_tesseract_supports_current_exact_fort_ice_encounter",
-        }
-      : {
-          productive: false,
-          serverId,
-          value: 0,
-          evidenceCode:
-            run.attackedServerId === serverId
-              ? "corp_rez_tesseract_current_run_has_no_upcoming_ice_encounter"
-              : "corp_rez_tesseract_current_run_is_on_another_fort",
-        };
-  }
+  const structuredIceSupport = corpStructuredIceSupportAssessment(
+    input,
+    serverId,
+    hint,
+  );
+  if (structuredIceSupport) return structuredIceSupport;
   const establishesFortWideIceStrengthSupport =
     hint?.effects?.some(
       (effect) =>
@@ -16763,6 +16712,95 @@ function corpExactCardRezSupportAssessment(
         };
   }
   return undefined;
+}
+
+function corpStructuredIceSupportAssessment(
+  input: AiDecisionInput,
+  sourceServerId: string,
+  hint: ReturnType<(typeof AI_HINTS_BY_CARD)["get"]>,
+):
+  | {
+      productive: boolean;
+      serverId: string;
+      value: number;
+      evidenceCode: string;
+    }
+  | undefined {
+  const profile = hint?.targetProfiles?.find(
+    (candidateProfile) =>
+      "schemaVersion" in candidateProfile &&
+      candidateProfile.schemaVersion === "target-profile-v1" &&
+      candidateProfile.targetType === "installed_ice" &&
+      (candidateProfile.requiredSubtypes !== undefined ||
+        candidateProfile.serverScope !== undefined ||
+        candidateProfile.activeRunConstraint !== undefined),
+  );
+  if (!profile || !("schemaVersion" in profile)) return undefined;
+
+  const sourceServer = input.playerView.servers.find(
+    (server) => server.id === sourceServerId,
+  );
+  const servers =
+    profile.serverScope === "source_fort"
+      ? sourceServer
+        ? [sourceServer]
+        : []
+      : input.playerView.servers;
+  const requiredSubtypes = profile.requiredSubtypes ?? [];
+  const matchingIceIds = servers.flatMap((server) =>
+    server.ice.flatMap((ice) => {
+      const definition = ice.definitionId
+        ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
+        : undefined;
+      const matchesSubtypes = requiredSubtypes.every((subtype) =>
+        definition?.subtypes.includes(subtype),
+      );
+      return matchesSubtypes ? [ice.instanceId] : [];
+    }),
+  );
+  const minimumTargetCount = Math.max(1, profile.minimumTargetCount ?? 1);
+  if (matchingIceIds.length < minimumTargetCount) {
+    return {
+      productive: false,
+      serverId: sourceServerId,
+      value: 0,
+      evidenceCode: `corp_rez_structured_ice_support_missing_targets:${requiredSubtypes.join("+") || "ice"}:${profile.serverScope ?? "any_visible_server"}`,
+    };
+  }
+
+  if (
+    profile.activeRunConstraint ===
+      "same_fort_upcoming_ice_when_active" &&
+    input.playerView.run
+  ) {
+    const run = input.playerView.run;
+    const exactUpcomingEncounter =
+      run.attackedServerId === sourceServerId && run.position?.kind === "ice";
+    return exactUpcomingEncounter
+      ? {
+          productive: true,
+          serverId: sourceServerId,
+          value: 160,
+          evidenceCode:
+            "corp_rez_structured_ice_support_current_same_fort_encounter",
+        }
+      : {
+          productive: false,
+          serverId: sourceServerId,
+          value: 0,
+          evidenceCode:
+            run.attackedServerId === sourceServerId
+              ? "corp_rez_structured_ice_support_no_upcoming_same_fort_encounter"
+              : "corp_rez_structured_ice_support_current_run_on_other_fort",
+        };
+  }
+
+  return {
+    productive: true,
+    serverId: sourceServerId,
+    value: 120,
+    evidenceCode: `corp_rez_structured_ice_support_matches:${matchingIceIds.join(",")}`,
+  };
 }
 
 function corpConditionalRezSupportWithoutCurrentRouteEvidence(
