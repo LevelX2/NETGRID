@@ -363,7 +363,7 @@ function actionBoundFunctionalEffects(
     candidate.actionType === "play_event" ||
     candidate.actionType === "play_operation"
   ) {
-    return effects.filter((effect) => effect.timing === "action");
+    return effects;
   }
   if (candidate.actionType === "install_card") {
     return effects.filter(

@@ -502,9 +502,25 @@ function centralPressureModule(): PlanModule {
                 ),
               ),
             ],
-            ...((current.signal.routePreparation === "develop_payoff" ||
-              current.signal.routePreparation === "targeted_bypass") &&
-            current.signal.sourceDefinitionIds
+            ...(current.signal.routePreparation === "targeted_bypass"
+              ? {
+                  requiredFunctionalEffects: [
+                    {
+                      kind: "future_run_effect" as const,
+                      timing: "action" as const,
+                      scope: "server" as const,
+                      target: "make_run",
+                    },
+                    {
+                      kind: "future_encounter_effect" as const,
+                      timing: "during_run" as const,
+                      scope: "ice" as const,
+                      target: "bypass_chosen_ice",
+                    },
+                  ],
+                }
+              : current.signal.routePreparation === "develop_payoff" &&
+                  current.signal.sourceDefinitionIds
               ? {
                   requiredSourceDefinitionIds:
                     current.signal.sourceDefinitionIds,

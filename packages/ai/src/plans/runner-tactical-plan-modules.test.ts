@@ -112,6 +112,20 @@ describe("Runner tactical plan modules", () => {
       sourceKind: "card" as const,
       sourceDefinitionId: "onr_v1_111_social-engineering",
       sourceCardInstanceId: "social-card",
+      functionalEffects: [
+        {
+          kind: "future_run_effect" as const,
+          timing: "action" as const,
+          scope: "server" as const,
+          target: "make_run",
+        },
+        {
+          kind: "future_encounter_effect" as const,
+          timing: "during_run" as const,
+          scope: "ice" as const,
+          target: "bypass_chosen_ice",
+        },
+      ],
     };
     const module = tacticalModule("runner.pressure_central");
     const runnerContext = context([social], {
@@ -155,6 +169,27 @@ describe("Runner tactical plan modules", () => {
       module.discover(runnerContext)[0]!,
       10,
     );
+
+    expect(
+      module.materialize(instance, {} as never, runnerContext).step.capability,
+    ).toMatchObject({
+      requiredFunctionalEffects: [
+        { kind: "future_run_effect", target: "make_run" },
+        { kind: "future_encounter_effect", target: "bypass_chosen_ice" },
+      ],
+    });
+    expect(
+      module.materialize(instance, {} as never, runnerContext).step.capability,
+    ).not.toHaveProperty("requiredSourceDefinitionIds");
+    expect(
+      bindBestCurrentPlanRoute({
+        side: "runner",
+        stateVersion: 10,
+        timingPoint: "runner.action",
+        planInstanceId: instance.instanceId,
+        ...module.materialize(instance, {} as never, runnerContext),
+      }).head.actionId,
+    ).toBe("play-social");
 
     expect(
       module.assess(instance, runnerContext, emptyPortfolio()),

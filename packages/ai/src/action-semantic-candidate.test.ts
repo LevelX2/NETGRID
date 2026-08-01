@@ -737,6 +737,52 @@ describe("buildActionSemanticCandidates", () => {
     );
   });
 
+  it("binds delayed effects caused by a played event to that play action", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("play_event", 0, {
+          source: "generic-bypass-event-instance",
+          payload: { sourceDefinitionId: "generic-bypass-event" },
+        }),
+      ],
+      cardSemanticProfilesByDefinitionId: {
+        "generic-bypass-event": {
+          cardId: "generic-bypass-event",
+          tacticSignals: [],
+          functionalEffects: [
+            {
+              kind: "future_run_effect",
+              timing: "action",
+              scope: "server",
+              target: "make_run",
+            },
+            {
+              kind: "future_encounter_effect",
+              timing: "during_run",
+              scope: "ice",
+              target: "bypass_chosen_ice",
+            },
+          ],
+        },
+      },
+    });
+
+    expect(candidate?.functionalEffects).toEqual([
+      {
+        kind: "future_run_effect",
+        timing: "action",
+        scope: "server",
+        target: "make_run",
+      },
+      {
+        kind: "future_encounter_effect",
+        timing: "during_run",
+        scope: "ice",
+        target: "bypass_chosen_ice",
+      },
+    ]);
+  });
+
   it("keeps multi-ability card effects as context until the action effect is exactly bound", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [
@@ -1751,7 +1797,7 @@ describe("buildActionSemanticCandidates", () => {
     ]);
   });
 
-  it("projects activated CardImplementation tag cleanup as tag removal from visible source definition", () => {
+  it("projects activated tag cleanup from the exact LegalAction payload", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [
         legalAction("activated_card_ability", 0, {
@@ -1760,6 +1806,9 @@ describe("buildActionSemanticCandidates", () => {
             cardImplementationAbility: "activated",
             cardImplementationAbilityIndex: 0,
             cardImplementationTrashSourceCost: true,
+            cardImplementationEffectKind: "remove_tags",
+            cardImplementationTagMode: "up_to_amount",
+            cardImplementationTagAmount: 3,
           },
         }),
       ],
@@ -1777,7 +1826,7 @@ describe("buildActionSemanticCandidates", () => {
       amount: 3,
       currentTagReduction: 3,
       acuteTagRemoval: true,
-      source: "card_implementation",
+      source: "legal_action_payload",
     });
     expect(candidate.projectionIssues).not.toContain("ability_unresolved");
     expect(candidate.actionTacticSignals).toContain("tag.remove");
@@ -1788,12 +1837,17 @@ describe("buildActionSemanticCandidates", () => {
     expect(JSON.stringify(candidate)).not.toContain("hiddenHqCards");
   });
 
-  it("projects another activated tag cleanup resource through the same descriptor path", () => {
+  it("projects another activated tag cleanup through the same payload contract", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [
         legalAction("activated_card_ability", 0, {
           source: "nomad-instance",
           costs: [{ clicks: 1 }, { credits: 1 }],
+          payload: {
+            cardImplementationEffectKind: "remove_tags",
+            cardImplementationTagMode: "amount",
+            cardImplementationTagAmount: 1,
+          },
         }),
       ],
       visibleSourceDefinitionsByInstanceId: {
@@ -1815,7 +1869,7 @@ describe("buildActionSemanticCandidates", () => {
     });
   });
 
-  it("keeps tag avoidance sources support-only instead of acute tag removal", () => {
+  it("does not infer tag semantics from a source definition alone", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [
         legalAction("trigger_ability", 0, {
@@ -1829,11 +1883,8 @@ describe("buildActionSemanticCandidates", () => {
 
     if (!candidate) throw new Error("Expected Fall Guy candidate");
     expect(candidate.semanticActionType).toBe("card_ability.trigger");
-    expect(candidate.tagEffectProfile).toMatchObject({
-      kind: "avoid_tag",
-      acuteTagRemoval: false,
-    });
-    expect(candidate.actionTacticSignals).toContain("tag.avoid_tag");
+    expect(candidate.tagEffectProfile).toBeUndefined();
+    expect(candidate.actionTacticSignals).not.toContain("tag.avoid_tag");
   });
 
   it("keeps basic remove_tag projected through the existing tag removal path", () => {

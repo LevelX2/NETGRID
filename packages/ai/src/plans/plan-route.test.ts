@@ -237,6 +237,92 @@ describe("plan route binding", () => {
     ).toBe("rez-outer");
   });
 
+  it("matches a plan step by the complete required functional effect", () => {
+    const bypass = {
+      ...candidate("generic-bypass", "play_event", "play.runner_event"),
+      functionalEffects: [
+        {
+          kind: "future_encounter_effect" as const,
+          timing: "during_run" as const,
+          scope: "ice" as const,
+          target: "bypass_chosen_ice",
+          repeatable: false,
+          finite: true,
+        },
+      ],
+    };
+    const step: PlanRouteStep = {
+      stepId: "prepare_targeted_bypass",
+      capability: {
+        capabilityId: "targeted_bypass",
+        semanticActionTypes: ["play.runner_event"],
+        requiredFunctionalEffects: [
+          {
+            kind: "future_encounter_effect",
+            timing: "during_run",
+            scope: "ice",
+            target: "bypass_chosen_ice",
+            repeatable: false,
+            finite: true,
+          },
+        ],
+      },
+      purpose: "Prepare an exact targeted bypass effect.",
+    };
+
+    expect(matchPlanStepCandidate(step, bypass, [], 12)).toEqual({
+      status: "compatible",
+    });
+    expect(
+      matchPlanStepCandidate(
+        step,
+        {
+          ...bypass,
+          functionalEffects: [
+            {
+              ...bypass.functionalEffects[0]!,
+              target: "bypass_first_ice",
+            },
+          ],
+        },
+        [],
+        12,
+      ),
+    ).toEqual({
+      status: "incompatible",
+      code: "step_capability_mismatch",
+    });
+  });
+
+  it("does not satisfy a plan capability from card-context effects alone", () => {
+    const step: PlanRouteStep = {
+      stepId: "remove_tags_now",
+      capability: {
+        capabilityId: "remove_tags",
+        semanticActionTypes: ["play.runner_event"],
+        requiredFunctionalEffects: [
+          { kind: "tag_prevention", timing: "action", scope: "runner" },
+        ],
+      },
+      purpose: "Remove tags with the selected action.",
+    };
+    const contextualOnly = {
+      ...candidate("context-only", "play_event", "play.runner_event"),
+      cardContextFunctionalEffects: [
+        {
+          kind: "tag_prevention" as const,
+          timing: "action" as const,
+          scope: "runner" as const,
+        },
+      ],
+    };
+
+    expect(matchPlanStepCandidate(step, contextualOnly, [], 12)).toEqual({
+      status: "incompatible",
+      code: "step_capability_mismatch",
+    });
+  });
+
   it("rejects an unprojected candidate as missing action semantics", () => {
     expect(() =>
       bindBestCurrentPlanRoute({
