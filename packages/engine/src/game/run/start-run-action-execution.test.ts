@@ -90,8 +90,6 @@ function hostFor(
         gameState.runnerTurnFlags as NonNullable<GameState["runnerTurnFlags"]>,
     },
     run: {
-      validateActivityGatedFortRun: (serverId) =>
-        calls.push(`validate:${serverId}`),
       startRun: (serverId, legalAction) => {
         calls.push(`start:${serverId}:${legalAction.type}`);
         gameState.run = {
@@ -149,12 +147,7 @@ describe("start-run-action-execution", () => {
     expect(result.handled).toBe(true);
     expect(gameState.runner.clicks).toBe(2);
     expect(gameState.run?.attackedServerId).toBe("rd");
-    expect(calls).toEqual([
-      "validate:rd",
-      "pay_tax:0",
-      "spend_click",
-      "start:rd:start_run",
-    ]);
+    expect(calls).toEqual(["pay_tax:0", "spend_click", "start:rd:start_run"]);
   });
 
   it.each([
@@ -197,7 +190,7 @@ describe("start-run-action-execution", () => {
     expect(gameState.runnerTurnFlags?.successfulRunExtraRunUsedThisTurn).toBe(
       true,
     );
-    expect(calls).toEqual(["validate:hq", "pay_tax:0", "start:hq:start_run"]);
+    expect(calls).toEqual(["pay_tax:0", "start:hq:start_run"]);
   });
 
   it("rejects normal or foreign runs while the immediate Bodyweight window is open", () => {
@@ -279,12 +272,7 @@ describe("start-run-action-execution", () => {
       limit: 3,
       spent: 0,
     });
-    expect(calls).toEqual([
-      "validate:hq",
-      "pay_tax:0",
-      "spend_click",
-      "start:hq:start_run",
-    ]);
+    expect(calls).toEqual(["pay_tax:0", "spend_click", "start:hq:start_run"]);
   });
 
   it("preserves run-only source exhaustion and run-start-tax delegation", () => {

@@ -19,9 +19,12 @@ export const rovingSubmarineImplementation: CardImplementationDefinition = {
   ],
   fortRunWindows: [
     {
-      kind: "can_run_fort_only_if_last_corp_turn_activity_on_fort",
+      kind: "server_run_start_restriction",
+      abilityKey: "fort_activity_gate",
       timing: "run_start_legal",
-      activity: "corp_installed_or_advanced_inside_or_on_fort_during_last_turn",
+      target: "source_fort",
+      condition:
+        "corp_installed_or_advanced_on_target_server_during_latest_corp_turn",
       visibility: "public",
     },
   ],

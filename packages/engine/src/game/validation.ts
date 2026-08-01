@@ -529,6 +529,22 @@ export function validateGameState(state: GameState): ValidationResult {
         "corpTurnFlags.edgerunnerTempsInstallActionsRemaining must be an integer from 0 to 3.",
       );
   }
+  if (state.corpTurnFlags?.fortActivityServerIdsSinceCorpTurnStart) {
+    const activityServerIds =
+      state.corpTurnFlags.fortActivityServerIdsSinceCorpTurnStart;
+    const knownServerIds = new Set(
+      state.corp.servers.map((server) => server.id),
+    );
+    if (
+      activityServerIds.some((serverId) => !knownServerIds.has(serverId)) ||
+      new Set(activityServerIds).size !== activityServerIds.length ||
+      activityServerIds.join("\0") !==
+        activityServerIds.slice().sort().join("\0")
+    )
+      errors.push(
+        "corpTurnFlags.fortActivityServerIdsSinceCorpTurnStart must contain unique, sorted existing server ids.",
+      );
+  }
   validateRestrictedActionGrants(
     errors,
     "runnerTurnFlags.restrictedActionGrants",

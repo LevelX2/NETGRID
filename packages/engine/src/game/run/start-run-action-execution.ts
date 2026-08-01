@@ -8,7 +8,7 @@ import type {
 import type { StartRunOptions } from "./run-core-execution";
 import type { RunTaxPaymentResult } from "./run-duration-payment";
 import { BODYWEIGHT_DATA_CRECHE_ID } from "../../compatibility/runtime-compatibility";
-import { assertRunnerCanStartRun } from "./run-start-lock";
+import { assertRunStartEligible } from "./run-start-eligibility";
 
 export type StartRunActionExecutionHost = {
   state: GameState;
@@ -20,9 +20,6 @@ export type StartRunActionExecutionHost = {
     ensureRunnerTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
   };
   run: {
-    validateActivityGatedFortRun: (
-      serverId: Exclude<ServerId, "new_remote">,
-    ) => void;
     startRun: (
       serverId: Exclude<ServerId, "new_remote">,
       legalAction: LegalAction,
@@ -49,11 +46,11 @@ export function executeStartRunAction(
   host: StartRunActionExecutionHost,
   legalAction: LegalAction,
 ): void {
-  assertRunnerCanStartRun(host.state);
   const serverId = String(legalAction.payload?.serverId) as Exclude<
     ServerId,
     "new_remote"
   >;
+  assertRunStartEligible(host.state, serverId);
   const flags = host.turn.ensureRunnerTurnFlags();
   const pendingSequence = nextMultiServerSuccessSequence(flags);
   const nextSequenceServerId = pendingSequence?.pendingServerIds[0];
@@ -86,7 +83,6 @@ export function executeStartRunAction(
   } else if (legalAction.payload?.multiServerSuccessSequenceRun === true) {
     throw new Error("Es ist keine passende Run-Sequenz offen.");
   }
-  host.run.validateActivityGatedFortRun(serverId);
   let runOnlyActionSourceCardId: CardInstanceId | undefined;
   if (legalAction.payload?.runOnlyAction === true) {
     const explicitSourceCardId = String(

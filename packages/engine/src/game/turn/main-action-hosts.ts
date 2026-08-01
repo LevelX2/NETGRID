@@ -110,14 +110,14 @@ export function createMainActionHostComposition(
       },
       corp: {
         corpActionDebtPending: corp.corpActionDebtPending,
-        activeObligationCount:
-          corp.activeObligationCount,
+        activeObligationCount: corp.activeObligationCount,
         canPlayCorpOperation: corp.canPlayCorpOperation,
         cardImplementationOperationLegalActions:
           corp.cardImplementationOperationLegalActions,
         corpUtilityImplementationForDefinition:
           corp.corpUtilityImplementationForDefinition,
-        hardwareTrashByCounterLegalActions: corp.hardwareTrashByCounterLegalActions,
+        hardwareTrashByCounterLegalActions:
+          corp.hardwareTrashByCounterLegalActions,
         advancementPlacementLegalActions: corp.advancementPlacementLegalActions,
         corpAgendaPointTotal: corp.corpAgendaPointTotal,
         hasCorpUtilityKind: corp.hasCorpUtilityKind,
@@ -241,8 +241,6 @@ export function createMainActionHostComposition(
         activeRunActionSpendingCapSourceIds:
           run.activeRunActionSpendingCapSourceIds,
         runDurationPaymentHost: run.runDurationPaymentHost,
-        isActivityGatedFortRunBlocked: run.isActivityGatedFortRunBlocked,
-        fortRunSideFamiliesHostForState: run.fortRunSideFamiliesHostForState,
         runStartTaxForServerUpgrades: run.runStartTaxForServerUpgrades,
         runStartTaxForCorpRootAssets: run.runStartTaxForCorpRootAssets,
       },
@@ -277,7 +275,8 @@ export function createMainActionHostComposition(
         runnerInstallableProgramIdsForValuPak:
           specialZones.runnerInstallableProgramIdsForValuPak,
         specialZoneHarnessActions: specialZones.specialZoneHarnessActions,
-        delayedInstallPrepareTargetIds: specialZones.delayedInstallPrepareTargetIds,
+        delayedInstallPrepareTargetIds:
+          specialZones.delayedInstallPrepareTargetIds,
         delayedInstallCounterCost: specialZones.delayedInstallCounterCost,
         delayedInstallPreparedTargetIds:
           specialZones.delayedInstallPreparedTargetIds,

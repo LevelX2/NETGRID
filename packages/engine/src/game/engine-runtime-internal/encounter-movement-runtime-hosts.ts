@@ -451,7 +451,6 @@ import {
   shouldOpenAardvarkInterception,
   spendFortTraceBitPool,
   startAardvarkInterceptionChoice,
-  validateActivityGatedFortRun,
   type FortRunSideFamiliesHost,
 } from "../run/fort-run-side-families";
 import {
@@ -1023,11 +1022,6 @@ export function createEncounterMovementRuntimeHosts(
         ensureRunnerTurnFlags: () => ensureRunnerTurnFlags(state),
       },
       run: {
-        validateActivityGatedFortRun: (serverId) =>
-          validateActivityGatedFortRun(
-            fortRunSideFamiliesHostForState(state),
-            serverId,
-          ),
         startRun: (serverId, legalAction, options) =>
           runtime.startRun(state, serverId, undefined, 1, options, legalAction),
         activeRunActionSpendingCapSourceIds: () =>

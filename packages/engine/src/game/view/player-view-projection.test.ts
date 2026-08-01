@@ -267,7 +267,7 @@ describe("PlayerView projection", () => {
     );
   });
 
-  it("projects Roving Submarine as locked only while its rezzed run gate is closed", () => {
+  it("projects a source-bound run restriction on the affected server", () => {
     const state = createGameAfterSetup({
       seed: "roving-submarine-run-lock-view",
       runnerDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
@@ -279,33 +279,37 @@ describe("PlayerView projection", () => {
     roving.faceup = true;
     roving.counters = {};
 
-    const lockedRunnerCard = getPlayerView(state, "runner")
-      .servers.find((server) => server.id === "remote_1")
-      ?.root.find((card) => card.instanceId === rovingId);
-    const lockedCorpCard = getPlayerView(state, "corp")
-      .servers.find((server) => server.id === "remote_1")
-      ?.root.find((card) => card.instanceId === rovingId);
-    expect(lockedRunnerCard?.counterDisplays).toEqual([
+    const lockedRunnerServer = getPlayerView(state, "runner").servers.find(
+      (server) => server.id === "remote_1",
+    );
+    const lockedCorpServer = getPlayerView(state, "corp").servers.find(
+      (server) => server.id === "remote_1",
+    );
+    expect(lockedRunnerServer?.runStartRestrictions).toEqual([
       {
-        id: "roving_submarine_run_locked",
-        amount: 1,
-        displayKind: "generic_counter",
-        label: "Fort gesperrt",
-        ariaLabel:
-          "Roving Submarine: Dieses Fort ist derzeit gesperrt, weil die Korp im maßgeblichen letzten Korpzug keine Karte in oder vor diesem Fort installiert und dort keine Karte entwickelt hat.",
-        usageHint: "status_marker",
+        id: `run_start_restriction:remote_1:${rovingId}:fort_activity_gate`,
+        kind: "run_prohibited",
+        scope: "target_server",
+        reason: "required_corp_activity_during_latest_corp_turn_missing",
+        targetServerId: "remote_1",
+        sourceCardInstanceId: rovingId,
+        sourceAbilityId: "fort_activity_gate",
+        sourceTitle: "Roving Submarine",
       },
     ]);
-    expect(lockedCorpCard?.counterDisplays).toEqual(
-      lockedRunnerCard?.counterDisplays,
+    expect(lockedCorpServer?.runStartRestrictions).toEqual(
+      lockedRunnerServer?.runStartRestrictions,
     );
 
-    roving.counters = { mark: 1 };
-    const allowedRunnerCard = getPlayerView(state, "runner")
-      .servers.find((server) => server.id === "remote_1")
-      ?.root.find((card) => card.instanceId === rovingId);
-    expect(allowedRunnerCard?.counterDisplays).toBeUndefined();
-    expect(JSON.stringify(allowedRunnerCard)).not.toContain("1 Mark");
+    state.corpTurnFlags = {
+      scoredBlackOpsAgendaThisTurn: false,
+      scoredBlackOpsAgendaLastTurn: false,
+      fortActivityServerIdsSinceCorpTurnStart: ["remote_1"],
+    };
+    const allowedRunnerServer = getPlayerView(state, "runner").servers.find(
+      (server) => server.id === "remote_1",
+    );
+    expect(allowedRunnerServer?.runStartRestrictions).toBeUndefined();
 
     roving.rezzed = false;
     roving.faceup = false;
@@ -315,7 +319,11 @@ describe("PlayerView projection", () => {
       ?.root.at(0);
     expect(hiddenRunnerCard).toMatchObject({ known: false, rezzed: false });
     expect(hiddenRunnerCard).not.toHaveProperty("title");
-    expect(hiddenRunnerCard).not.toHaveProperty("counterDisplays");
+    expect(
+      getPlayerView(state, "runner").servers.find(
+        (server) => server.id === "remote_1",
+      )?.runStartRestrictions,
+    ).toBeUndefined();
   });
 
   it.each([

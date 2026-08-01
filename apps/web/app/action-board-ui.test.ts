@@ -5,6 +5,7 @@ import type {
   PublicGameEvent,
   Side,
   VisibleCard,
+  VisibleServerRunStartRestriction,
 } from "@netgrid/shared";
 import {
   DEFAULT_CUE_POSITION,
@@ -34,7 +35,6 @@ import {
   cardChoiceIsReadonlyPrivateLook,
   cardChoiceReadonlyConfirmationOptionId,
   cardCreditCounterVisual,
-  cardSpecificCounterDisplayBadgePresentation,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   choiceInteractionAmbience,
@@ -98,6 +98,8 @@ import {
   runnerRigMemorySummary,
   serverBoardRows,
   serverCounterChipsForDisplays,
+  serverRunRestrictionChips,
+  serverRunRestrictionTooltip,
   variableIceSubtypeBadgeForCard,
   serverDisplayLabel,
   serverTargetIdForAction,
@@ -3030,25 +3032,29 @@ describe("V1.0.6 resource and card-display helpers", () => {
     );
   });
 
-  it("maps the Roving Submarine run lock to a dedicated readable badge", () => {
-    const display = {
-      id: "roving_submarine_run_locked",
-      amount: 1,
-      displayKind: "generic_counter" as const,
-      label: "Fort gesperrt",
-      ariaLabel:
-        "Roving Submarine: Dieses Fort ist derzeit gesperrt, weil die Korp im maßgeblichen letzten Korpzug keine Karte in oder vor diesem Fort installiert und dort keine Karte entwickelt hat.",
-      usageHint: "status_marker" as const,
+  it("maps source-bound run restrictions to generic server chips", () => {
+    const restriction: VisibleServerRunStartRestriction = {
+      id: "run_start_restriction:remote_1:card_7:fort_activity_gate",
+      kind: "run_prohibited",
+      scope: "target_server",
+      reason: "required_corp_activity_during_latest_corp_turn_missing",
+      targetServerId: "remote_1",
+      sourceCardInstanceId: "card_7",
+      sourceAbilityId: "fort_activity_gate",
+      sourceTitle: "Öffentliche Sperrquelle",
     };
 
-    expect(cardSpecificCounterDisplayBadgePresentation(display)).toEqual({
-      className: "rovingSubmarineRunLockedBadge",
-      testId: "roving-submarine-run-locked-badge",
-      text: "Fort gesperrt",
-    });
-    expect(counterDisplayTooltipText(display)).toBe(
-      "Roving Submarine: Dieses Fort ist derzeit gesperrt, weil die Korp im maßgeblichen letzten Korpzug keine Karte in oder vor diesem Fort installiert und dort keine Karte entwickelt hat. Nach einer passenden Installation oder Entwicklung im relevanten Korpzug ist der Run wieder erlaubt und der Badge verschwindet.",
-    );
+    const tooltip =
+      "Öffentliche Sperrquelle: Runs auf diesen Server sind derzeit gesperrt, weil die Korp im maßgeblichen Korpzug keine Karte in oder vor diesem Server installiert und dort keine Karte entwickelt hat. Nach einer passenden Installation oder Entwicklung ist der Run wieder erlaubt.";
+    expect(serverRunRestrictionTooltip(restriction)).toBe(tooltip);
+    expect(serverRunRestrictionChips([restriction])).toEqual([
+      {
+        key: restriction.id,
+        label: "Run gesperrt",
+        ariaLabel: tooltip,
+        tooltip,
+      },
+    ]);
   });
 
   it("keeps advancement counters as separate gems until ten counters", () => {

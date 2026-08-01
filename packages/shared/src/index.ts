@@ -1837,6 +1837,9 @@ export type GameState = {
     counterPreventionUsedSourceIdsThisTurn?: CardInstanceId[];
     scoredAgendaStartDrawChoiceResolvedSourceIds?: CardInstanceId[];
     pdcaUsedSourceIdsThisTurn?: CardInstanceId[];
+    fortActivityServerIdsSinceCorpTurnStart?: Array<
+      Exclude<ServerId, "new_remote">
+    >;
   };
   ambushHarness?: {
     enabled: boolean;
@@ -2229,6 +2232,17 @@ export type CounterDisplay = {
   counterType?: CounterType;
   usageHint?: CounterUsageHint;
   creditPool?: CounterCreditPool;
+};
+
+export type VisibleServerRunStartRestriction = {
+  id: string;
+  kind: "run_prohibited";
+  scope: "target_server";
+  reason: "required_corp_activity_during_latest_corp_turn_missing";
+  targetServerId: Exclude<ServerId, "new_remote">;
+  sourceCardInstanceId: CardInstanceId;
+  sourceAbilityId: string;
+  sourceTitle: string;
 };
 
 export type VisibleEffectiveSubroutine = {
@@ -2873,6 +2887,7 @@ export type PlayerView = {
     ice: VisibleCard[];
     root: VisibleCard[];
     counterDisplays?: CounterDisplay[];
+    runStartRestrictions?: VisibleServerRunStartRestriction[];
   }>;
   specialZones?: {
     setAside: VisibleCard[];

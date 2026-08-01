@@ -1081,7 +1081,10 @@ describe("CardImplementation coverage and registry invariants", () => {
         ?.fortRunWindows,
     ).toContainEqual(
       expect.objectContaining({
-        kind: "can_run_fort_only_if_last_corp_turn_activity_on_fort",
+        kind: "server_run_start_restriction",
+        target: "source_fort",
+        condition:
+          "corp_installed_or_advanced_on_target_server_during_latest_corp_turn",
       }),
     );
     expect(

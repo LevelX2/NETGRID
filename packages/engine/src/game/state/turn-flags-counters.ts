@@ -187,5 +187,6 @@ export function ensureCorpTurnFlags(
   flags.edgerunnerTempsInstallActionsRemaining ??= 0;
   flags.counterPreventionUsedSourceIdsThisTurn ??= [];
   flags.scoredAgendaStartDrawChoiceResolvedSourceIds ??= [];
+  flags.fortActivityServerIdsSinceCorpTurnStart ??= [];
   return flags;
 }
