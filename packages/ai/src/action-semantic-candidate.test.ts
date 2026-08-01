@@ -783,6 +783,53 @@ describe("buildActionSemanticCandidates", () => {
     ]);
   });
 
+  it("projects a complete Engine fort-run follow-up quote onto the exact action", () => {
+    const action = legalAction("rez_card", 1, {
+      actionId: "rez-generic-fort-support",
+      source: "generic-fort-support-instance",
+      costs: [{ credits: 1 }],
+      payload: {
+        sourceDefinitionId: "generic-fort-support",
+        cardImplementationFortRunRezSupportQuoteSchemaVersion:
+          "corp-fort-run-rez-support-quote-v1",
+        cardImplementationFortRunRezSupportQuoteKind:
+          "install_hq_ice_innermost_after_successful_run",
+        cardImplementationFortRunRezSupportQuoteComplete: true,
+        cardImplementationFortRunRezSupportQuoteSourceCardInstanceId:
+          "generic-fort-support-instance",
+        cardImplementationFortRunRezSupportQuoteTargetServerId: "remote_1",
+        cardImplementationFortRunRezSupportQuoteStateVersion: 43,
+        cardImplementationFortRunRezSupportQuoteActionId:
+          "rez-generic-fort-support",
+        cardImplementationFortRunRezSupportQuoteRezCredits: 1,
+        cardImplementationFortRunRezSupportQuoteFollowupCredits: 2,
+        cardImplementationFortRunRezSupportQuoteInstallCredits: 2,
+        cardImplementationFortRunRezSupportQuoteTotalCredits: 3,
+        cardImplementationFortRunRezSupportQuoteTotalCreditsPayable: true,
+        cardImplementationFortRunRezSupportQuoteHasOwnHqIce: true,
+      },
+    });
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [action],
+      stateVersion: 43,
+      visibleSourceDefinitionsByInstanceId: {
+        "generic-fort-support-instance": "generic-fort-support",
+      },
+    });
+
+    expect(candidate?.conditionalDefenseFollowupQuote).toMatchObject({
+      schemaVersion: "conditional-defense-followup-quote-v1",
+      sourceCardInstanceId: "generic-fort-support-instance",
+      targetServerId: "remote_1",
+      actionId: "rez-generic-fort-support",
+      stateVersion: 43,
+      rezCredits: 1,
+      followupCredits: 2,
+      totalCredits: 3,
+      totalCreditsPayable: true,
+    });
+  });
+
   it("keeps multi-ability card effects as context until the action effect is exactly bound", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [

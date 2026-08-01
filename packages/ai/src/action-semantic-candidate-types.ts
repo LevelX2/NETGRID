@@ -446,6 +446,23 @@ export type ActionTagEffectProfile = {
   evidence: string[];
 };
 
+export type ConditionalDefenseFollowupQuote = {
+  schemaVersion: "conditional-defense-followup-quote-v1";
+  kind:
+    | "install_hq_ice_innermost_after_successful_run"
+    | "temporary_hq_ice_encounter_after_successful_run";
+  sourceCardInstanceId: CardInstanceId;
+  targetServerId: string;
+  stateVersion: number;
+  actionId: string;
+  rezCredits: number;
+  followupCredits: number;
+  totalCredits: number;
+  totalCreditsPayable: boolean;
+  hasOwnHqIce: boolean;
+  evidence: string[];
+};
+
 export type BoardContextSummary = {
   source: "ai_decision_input" | "player_view" | "not_projected";
   sideSafe: boolean;
@@ -524,6 +541,7 @@ export type ActionSemanticCandidate = {
   randomBadPublicityModel?: ActionRandomBadPublicityModel;
   hiddenResourceVirusModel?: ActionHiddenResourceVirusModel;
   tagEffectProfile?: ActionTagEffectProfile;
+  conditionalDefenseFollowupQuote?: ConditionalDefenseFollowupQuote;
   boardContext: BoardContextSummary;
   confidence: ActionSemanticConfidence;
   primaryProjectionStatus: ActionPrimaryProjectionStatus;

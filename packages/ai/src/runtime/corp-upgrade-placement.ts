@@ -127,8 +127,13 @@ export function corpUpgradeInstallPlacementComponent(
   }
 
   if (
-    params.actionSemanticCandidate?.sourceDefinitionId ===
-    "onr_v1_358_dr-dreff"
+    params.actionSemanticCandidate?.cardContextFunctionalEffects?.some(
+      (effect) =>
+        effect.kind === "future_encounter_effect" &&
+        effect.scope === "run_path" &&
+        effect.target === "ice.corp_hq_runpath_insert" &&
+        effect.timing === "successful_run",
+    ) === true
   ) {
     return {
       key: "corp_upgrade_install_placement_defer",
@@ -136,7 +141,7 @@ export function corpUpgradeInstallPlacementComponent(
       value: -900,
       reason: [
         ...evidence,
-        "defer_reason:dr_dreff_requires_engine_certified_future_encounter_route",
+        "defer_reason:future_encounter_support_requires_engine_certified_route",
       ].join("|"),
     };
   }

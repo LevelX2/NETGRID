@@ -148,7 +148,7 @@ describe("Corp upgrade placement signal contract", () => {
         key: "corp_upgrade_install_placement_defer",
         value: -900,
         reason: expect.stringContaining(
-          "defer_reason:dr_dreff_requires_engine_certified_future_encounter_route",
+          "defer_reason:future_encounter_support_requires_engine_certified_route",
         ),
       }),
     );

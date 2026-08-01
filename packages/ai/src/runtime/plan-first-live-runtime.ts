@@ -3,9 +3,7 @@ import {
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
   AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
   CARD_DEFINITIONS_BY_ID,
-  CORP_FORT_RUN_REZ_SUPPORT_KIND,
   CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND,
-  CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
   type AiDecision,
@@ -23,6 +21,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 import type { BuildActionSemanticCandidatesParams } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import { rootRezCreditOutcomeProjectionStatus } from "../actions/action-economy-projection";
+import { actionHasConditionalDefenseFollowupQuotePayload } from "../actions/conditional-defense-followup-quote";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
 import { getStructuredTagPunishProfileForCard } from "../tag-punish-ontology-consumer";
@@ -16346,7 +16345,10 @@ function corpFutureEncounterRezSupportAssessment(
       removalCondition:
         "Bind the future-encounter rez assessment to the current exact LegalAction.",
     });
-  if (hasCorpFortRunRezSupportQuotePayload(legalAction.payload)) {
+  if (
+    candidate.conditionalDefenseFollowupQuote ||
+    actionHasConditionalDefenseFollowupQuotePayload(candidate)
+  ) {
     return corpFortRunRezSupportAssessment(input, candidate, serverId);
   }
   if (!candidate.sourceDefinitionId) return undefined;
@@ -16390,30 +16392,6 @@ function corpFutureEncounterRezSupportAssessment(
   };
 }
 
-const CORP_FORT_RUN_REZ_SUPPORT_QUOTE_PAYLOAD_FIELDS = [
-  "cardImplementationFortRunRezSupportQuoteSchemaVersion",
-  "cardImplementationFortRunRezSupportQuoteKind",
-  "cardImplementationFortRunRezSupportQuoteComplete",
-  "cardImplementationFortRunRezSupportQuoteSourceCardInstanceId",
-  "cardImplementationFortRunRezSupportQuoteTargetServerId",
-  "cardImplementationFortRunRezSupportQuoteStateVersion",
-  "cardImplementationFortRunRezSupportQuoteActionId",
-  "cardImplementationFortRunRezSupportQuoteRezCredits",
-  "cardImplementationFortRunRezSupportQuoteFollowupCredits",
-  "cardImplementationFortRunRezSupportQuoteInstallCredits",
-  "cardImplementationFortRunRezSupportQuoteTotalCredits",
-  "cardImplementationFortRunRezSupportQuoteTotalCreditsPayable",
-  "cardImplementationFortRunRezSupportQuoteHasOwnHqIce",
-] as const;
-
-function hasCorpFortRunRezSupportQuotePayload(
-  payload: LegalAction["payload"],
-): boolean {
-  return CORP_FORT_RUN_REZ_SUPPORT_QUOTE_PAYLOAD_FIELDS.some(
-    (field) => payload?.[field] !== undefined,
-  );
-}
-
 function corpFortRunRezSupportAssessment(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
@@ -16443,15 +16421,7 @@ function corpFortRunRezSupportAssessment(
       removalCondition:
         "Bind the fort-run rez-support assessment to the current exact LegalAction.",
     });
-  const payload = legalAction.payload;
-  const rezCredits =
-    payload?.cardImplementationFortRunRezSupportQuoteRezCredits;
-  const followupCredits =
-    payload?.cardImplementationFortRunRezSupportQuoteFollowupCredits;
-  const installCredits =
-    payload?.cardImplementationFortRunRezSupportQuoteInstallCredits;
-  const totalCredits =
-    payload?.cardImplementationFortRunRezSupportQuoteTotalCredits;
+  const quote = candidate.conditionalDefenseFollowupQuote;
   const currentCredits = input.playerView.own.credits;
   const listedRezCredits = legalAction.costs.reduce(
     (sum, cost) => (cost.credits === undefined ? sum : sum + cost.credits),
@@ -16462,46 +16432,19 @@ function corpFortRunRezSupportAssessment(
     candidate.legalActionRef.actionType !== legalAction.type ||
     candidate.stateVersion !== input.playerView.stateVersion ||
     legalAction.source !== candidate.sourceCardInstanceId ||
-    payload?.cardImplementationFortRunRezSupportQuoteSchemaVersion !==
-      CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION ||
-    (payload.cardImplementationFortRunRezSupportQuoteKind !==
-      CORP_FORT_RUN_REZ_SUPPORT_KIND &&
-      payload.cardImplementationFortRunRezSupportQuoteKind !==
-        CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND) ||
-    payload.cardImplementationFortRunRezSupportQuoteComplete !== true ||
-    payload.cardImplementationFortRunRezSupportQuoteSourceCardInstanceId !==
-      candidate.sourceCardInstanceId ||
-    payload.cardImplementationFortRunRezSupportQuoteTargetServerId !==
-      serverId ||
-    payload.cardImplementationFortRunRezSupportQuoteStateVersion !==
-      input.playerView.stateVersion ||
-    payload.cardImplementationFortRunRezSupportQuoteActionId !==
-      candidate.actionId ||
-    !isFiniteNonNegativeInteger(rezCredits) ||
-    !isFiniteNonNegativeInteger(followupCredits) ||
-    !isFiniteNonNegativeInteger(installCredits) ||
-    !isFiniteNonNegativeInteger(totalCredits) ||
+    quote === undefined ||
+    quote.sourceCardInstanceId !== candidate.sourceCardInstanceId ||
+    quote.targetServerId !== serverId ||
+    quote.stateVersion !== input.playerView.stateVersion ||
+    quote.actionId !== candidate.actionId ||
     !isFiniteNonNegativeInteger(currentCredits) ||
     legalAction.costs.some(
       (cost) =>
         cost.credits !== undefined && !isFiniteNonNegativeInteger(cost.credits),
     ) ||
     !Number.isSafeInteger(listedRezCredits) ||
-    rezCredits !== listedRezCredits ||
-    (payload.cardImplementationFortRunRezSupportQuoteKind ===
-      CORP_FORT_RUN_REZ_SUPPORT_KIND &&
-      followupCredits !== installCredits) ||
-    (payload.cardImplementationFortRunRezSupportQuoteKind ===
-      CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND &&
-      installCredits !== 0) ||
-    !Number.isSafeInteger(rezCredits + followupCredits) ||
-    totalCredits !== rezCredits + followupCredits ||
-    typeof payload.cardImplementationFortRunRezSupportQuoteTotalCreditsPayable !==
-      "boolean" ||
-    payload.cardImplementationFortRunRezSupportQuoteTotalCreditsPayable !==
-      currentCredits >= totalCredits ||
-    typeof payload.cardImplementationFortRunRezSupportQuoteHasOwnHqIce !==
-      "boolean"
+    quote.rezCredits !== listedRezCredits ||
+    quote.totalCreditsPayable !== currentCredits >= quote.totalCredits
   ) {
     return {
       productive: false,
@@ -16509,13 +16452,13 @@ function corpFortRunRezSupportAssessment(
         "corp_rez_fort_run_support_has_no_complete_consistent_engine_quote",
     };
   }
-  if (!payload.cardImplementationFortRunRezSupportQuoteHasOwnHqIce) {
+  if (!quote.hasOwnHqIce) {
     return {
       productive: false,
       evidenceCode: "corp_rez_fort_run_support_engine_quote_has_no_hq_ice",
     };
   }
-  if (!payload.cardImplementationFortRunRezSupportQuoteTotalCreditsPayable) {
+  if (!quote.totalCreditsPayable) {
     return {
       productive: false,
       evidenceCode:
@@ -16525,7 +16468,7 @@ function corpFortRunRezSupportAssessment(
   return {
     productive: true,
     evidenceCode:
-      payload.cardImplementationFortRunRezSupportQuoteKind ===
+      quote.kind ===
       CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND
         ? "corp_rez_fort_run_support_same_fort_run_with_affordable_temporary_hq_ice_encounter"
         : "corp_rez_fort_run_support_same_fort_run_with_affordable_hq_ice_install",
@@ -16838,9 +16781,16 @@ function corpConditionalRezSupportWithoutCurrentRouteEvidence(
   const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
   if (definition?.mechanics.includes("ice_install_cost_mod_server"))
     return "corp_rez_fort_ice_discount_has_no_same_fort_install_route";
-  if (candidate.sourceDefinitionId === "onr_v1_324_fortress-architects")
-    return "corp_rez_ice_install_discount_has_no_engine_certified_post_rez_install_quote";
   const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
+  if (
+    hint?.effects?.some(
+      (effect) =>
+        effect.kind === "install_discount" &&
+        effect.scope === "ice" &&
+        effect.timing === "persistent",
+    ) === true
+  )
+    return "corp_rez_ice_install_discount_has_no_engine_certified_post_rez_install_quote";
   if (
     hint?.effects?.some(
       (effect) =>
