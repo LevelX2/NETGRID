@@ -1,7 +1,7 @@
 # Corp-Findings d249/9475 – checkpoint-getriebener Umsetzungsprozess
 
 Stand: 2026-08-01  
-Status: freigegeben, Umsetzung läuft  
+Status: Umsetzung und Verifikation grün, Main-Integration läuft  
 Branch: `codex/ai-d249-9475-remediation`  
 Worktree: `C:\Projekte\NETGRID_AI_D249_9475_REMEDIATION`
 
@@ -188,6 +188,24 @@ Umgesetzt und fokussiert verifiziert:
 - Evidence-Bericht und Prozessstatus mit Rot-/Grün-Entscheiden aktualisieren.
 - Aktuelles `main` integrieren, Gates wiederholen, lokal nach `main` mergen.
 - Worktree und Branch nach grünem Main-Gate entfernen.
+
+Verifikationsstand vor dem Main-Abgleich:
+
+- alle drei normalen AI-Shards sind parallel grün: `547/547` Testdateien,
+  `4479/4479` Tests, Gesamtdauer des Wrappers `185,6 s`;
+- vollständiger Engine-Lauf grün: `211/211` Testdateien und `1835/1835`
+  Tests;
+- rekursiver Workspace-Typecheck für Shared, Catalog, Engine, Decks, AI,
+  Server und Web grün;
+- `check:ai`, AI-Source-Struktur, Package-Boundaries,
+  Engine-Source-Struktur und Engine-Credit-Gain-Boundary grün;
+- `check:card-function-abstraction` meldet identisch auf unverändertem
+  `main` zwei bereits vorhandene Roving-Submarine-Fingerprints gegenüber der
+  alten Review-Baseline. Diese fremde Baseline-Abweichung wurde weder
+  übernommen noch verdeckt und ist kein Befund dieses Branches;
+- der erste Volltest fand drei zu breite qualitative Defense-Routen. Nach der
+  generischen Prioritätskorrektur ist der unveränderte zweite Volltest
+  vollständig grün.
 
 ## Abschlusskriterien
 
