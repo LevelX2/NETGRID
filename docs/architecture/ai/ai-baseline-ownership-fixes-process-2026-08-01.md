@@ -1,6 +1,6 @@
 # AI-Baseline-Ownership-Fixes – Paketprozess
 
-Status: P3 abgeschlossen, lokale Integration ausstehend
+Status: Integrationsprüfung abgeschlossen, lokaler Merge nach main ausstehend
 Datum: 2026-08-01  
 Quelle: roter AI-Behavior-Baseline-Lauf `b87549867` mit zwei deterministischen
 `missing_plan_module_coverage`-Abbrüchen in 60 Spielen
@@ -275,6 +275,18 @@ Damit ist der Ownership-Done-Gate erfüllt. Der Report übernimmt den
 Action-Limit-Restpunkt ausdrücklich; eine Schwellen- oder Runner-Strategie-
 Änderung wäre ein separates Paket und wurde nicht still in diesen Prozess
 aufgenommen.
+
+### Evidence nach Integration des aktuellen main
+
+Der inzwischen auf `f8a4e6f67` fortgeschrittene lokale `main` wurde
+konfliktfrei in den Arbeitsbranch integriert. Auf dem Merge-Stand
+`14a23de94` sind 4.492/4.492 AI-Tests im seriellen Drei-Shard-Pfad,
+1.844/1.844 Engine-Tests, Workspace-Typecheck, Struktur-/Boundary-Gates und
+182 fokussierte AI- sowie 29 fokussierte Engine-Regressionsprüfungen grün.
+Der erneut erzeugte 60-Spiele-Lauf bestätigt null IllegalActions und null
+Runtimefehler; derselbe klassifizierte Seed-06-Tail endet im 650er-Kontrolllauf
+erneut nach 485 Aktionen regulär. Aktuelle Evidence:
+`docs/reviews/ai/ai-behavior-baseline-v1-current-14a23de94-2026-08-01.md`.
 
 ## Worktree-, Git- und Integrationsvertrag
 
