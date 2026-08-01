@@ -5306,7 +5306,7 @@ describe("authoritative plan-first live runtime", () => {
     ).not.toContain("missing_action_semantics");
   });
 
-  it("continues an unknown score-protection assessment with a near-term-fundable additional ICE layer", () => {
+  it("continues a certified score-protection assessment with a near-term-fundable additional ICE layer", () => {
     const stateVersion = 1;
     const installAgenda = legalAction(
       "install-agenda-staged",
@@ -5436,7 +5436,7 @@ describe("authoritative plan-first live runtime", () => {
       expect.arrayContaining([
         "plan_module:corp.defend_servers",
         "plan_step_capability:develop_score_protection",
-        "plan_assessment_evidence:score_protection_staging_install:agenda:agenda-staged:remote_1:remote_1:bounded_deterrence",
+        "plan_assessment_evidence:score_protection_progress:agenda:agenda-staged:remote_1:remote_1",
       ]),
     );
 
@@ -5455,6 +5455,18 @@ describe("authoritative plan-first live runtime", () => {
     resetResidentPlanPortfolioMemory();
     expect(
       liveContext().chooseSemanticRuntimeAction(overextended, {}),
+    ).toMatchObject({
+      actionId: "install-additional-ice",
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+
+    const unknownBaseline = structuredClone(input);
+    unknownBaseline.decisionId = "score-protection-staging-unknown-baseline";
+    unknownBaseline.playerView.servers[3]!.ice[0]!.rezzed = true;
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(unknownBaseline, {}),
     ).toMatchObject({
       actionId: "credit",
       reasonCode: "plan_first.corp.economy",

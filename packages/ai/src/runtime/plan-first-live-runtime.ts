@@ -236,7 +236,6 @@ import {
 } from "./corp-defense-rez-support-facts";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 import { corpRootRezTimingComponent } from "./corp-scoreline/semantic-runtime-corp-score-ice-components";
-import { scoringWindowAccessAssessment } from "./corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure";
 import {
   corpMissingConcreteDefenseDrawNeed,
   corpMissingConcreteScoreDefenseDrawNeed,
@@ -253,6 +252,7 @@ import {
 } from "./corp-funded-score-protection";
 import { compareExactProbabilities } from "./corp-score-protection-assessment";
 import { projectExactCorpIceRezRoute } from "./corp-exact-ice-rez-route";
+import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
 import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
 import {
   runnerRunLockReleaseProjection,
@@ -7526,6 +7526,7 @@ function buildCorpDomain(
             input,
             project.serverId,
             project.agendaPoints,
+            corpScoreRemainingAdvancementClicks(input, project),
           )
         ) &&
         !(
@@ -8925,6 +8926,15 @@ function corpNextTurnScoreContinuationProjects(
           sameTurnCloseout: false,
           ...(quote.terminalScore ? { deadlinePressure: true } : {}),
           terminalScore: quote.terminalScore,
+          conversion: corpScoreConversionFacts({
+            input,
+            agenda,
+            serverId: server.id,
+            remainingAdvancementClicks: quote.remainingAdvancementCounters,
+            remainingScoreCredits: quote.creditsRequiredBeforeNextCorpTurn,
+            residentParent: true,
+            realizedStrategySupportCount: 0,
+          }),
           feasible: true,
           continuationReserve: {
             agendaCardId: quote.agendaCardId,
@@ -9023,7 +9033,12 @@ function scoreProjectForCandidate(
       serverId !== undefined &&
       serverId !== "new_remote" &&
       candidate.sourceCardInstanceId === residentScoreAgendaInstanceId &&
-      corpRemoteHasBoundedStagedIce(input, serverId, agendaPoints);
+      corpRemoteHasBoundedStagedIce(
+        input,
+        serverId,
+        agendaPoints,
+        requireVisibleAgendaAdvancementRequirement(input, agenda),
+      );
     const handPressureBoundedStagedScoreWindow =
       serverId !== undefined &&
       serverId !== "new_remote" &&
@@ -9043,7 +9058,12 @@ function scoreProjectForCandidate(
         );
         return source?.known === true && source.type === "ice";
       }) &&
-      corpRemoteHasBoundedStagedIce(input, serverId, agendaPoints);
+      corpRemoteHasBoundedStagedIce(
+        input,
+        serverId,
+        agendaPoints,
+        requireVisibleAgendaAdvancementRequirement(input, agenda),
+      );
     const boundedStagedScoreWindow =
       residentBoundedStagedScoreWindow || handPressureBoundedStagedScoreWindow;
     const developmentClickAvailable =
@@ -9085,6 +9105,21 @@ function scoreProjectForCandidate(
         deadlinePressure,
         ...(protectionNeed ? { protectionNeed } : {}),
         terminalScore: matchpointTarget,
+        conversion: corpScoreConversionFacts({
+          input,
+          agenda,
+          serverId,
+          remainingAdvancementClicks:
+            requireVisibleAgendaAdvancementRequirement(input, agenda),
+          remainingScoreCredits: remainingAgendaAdvancementCreditsAfterAction(
+            input,
+            candidate,
+            agenda,
+          ),
+          residentParent:
+            candidate.sourceCardInstanceId === residentScoreAgendaInstanceId,
+          realizedStrategySupportCount: candidate.strategySupport.length,
+        }),
         ...(fundingGap !== undefined && fundingGap > 0 ? { fundingGap } : {}),
         feasible,
         evidenceCode:
@@ -9209,6 +9244,33 @@ function scoreProjectForCandidate(
         deadlinePressure,
         ...(protectionNeed ? { protectionNeed } : {}),
         terminalScore: matchpointTarget,
+        conversion: corpScoreConversionFacts({
+          input,
+          agenda: installedCard,
+          serverId,
+          remainingAdvancementClicks:
+            candidate.semanticActionType === "score.agenda"
+              ? 0
+              : Math.max(
+                  0,
+                  requireVisibleAgendaAdvancementRequirement(
+                    input,
+                    installedCard,
+                  ) -
+                    Math.max(0, installedCard.advancementCounters ?? 0) -
+                    1,
+                ),
+          remainingScoreCredits:
+            candidate.semanticActionType === "score.agenda"
+              ? 0
+              : remainingAgendaAdvancementCreditsAfterAction(
+                  input,
+                  candidate,
+                  installedCard,
+                ),
+          residentParent: target === residentScoreAgendaInstanceId,
+          realizedStrategySupportCount: candidate.strategySupport.length,
+        }),
         ...(fundingGap !== undefined && fundingGap > 0 ? { fundingGap } : {}),
         feasible,
         evidenceCode:
@@ -9279,6 +9341,15 @@ function sameTurnScoreConversionProjectForCandidate(
       terminalScore:
         input.playerView.own.agendaPoints + path.agendaPoints >=
         input.playerView.agendaPointsToWin,
+      conversion: corpScoreConversionFacts({
+        input,
+        agenda,
+        serverId: path.targetServerId,
+        remainingAdvancementClicks: 0,
+        remainingScoreCredits: 0,
+        residentParent: false,
+        realizedStrategySupportCount: candidate.strategySupport.length,
+      }),
       ...(preventsTerminalSteal ? { preventsTerminalSteal: true } : {}),
       feasible: true,
       evidenceCode: preventsTerminalSteal
@@ -9368,6 +9439,43 @@ function visibleOwnCardByInstanceId(
       ...server.ice,
     ]),
   ].find((card) => card.instanceId === instanceId);
+}
+
+function corpScoreConversionFacts(params: {
+  input: AiDecisionInput;
+  agenda: VisibleCard;
+  serverId: string | undefined;
+  remainingAdvancementClicks: number;
+  remainingScoreCredits: number;
+  residentParent: boolean;
+  realizedStrategySupportCount: number;
+}): NonNullable<CorpScoreProjectSignal["conversion"]> {
+  const {
+    input,
+    agenda,
+    serverId,
+    remainingAdvancementClicks,
+    remainingScoreCredits,
+    residentParent,
+    realizedStrategySupportCount,
+  } = params;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  const agendaPoints = requireVisibleAgendaPoints(input, agenda);
+  return {
+    remainingAdvancementClicks: Math.max(0, remainingAdvancementClicks),
+    remainingScoreCredits: Math.max(0, remainingScoreCredits),
+    existingRemoteIceCount: server?.ice.length ?? 0,
+    existingRemoteRezzedIceCount:
+      server?.ice.filter((ice) => ice.rezzed === true).length ?? 0,
+    residentParent,
+    runnerStealPoints: agendaPoints,
+    runnerStealIsMatchpoint:
+      input.playerView.opponent.agendaPoints + agendaPoints >=
+      input.playerView.agendaPointsToWin,
+    realizedStrategySupportCount: Math.max(0, realizedStrategySupportCount),
+  };
 }
 
 function visibleAgendaAdvanceCanCloseThisTurn(
@@ -9629,6 +9737,21 @@ function compareCorpScoreProtectionProjects(
   const leftInstalled = left.phase !== "install_agenda";
   const rightInstalled = right.phase !== "install_agenda";
   if (leftInstalled !== rightInstalled) return leftInstalled ? -1 : 1;
+  const leftConversion = left.conversion;
+  const rightConversion = right.conversion;
+  if (
+    !leftInstalled &&
+    !rightInstalled &&
+    leftConversion?.runnerStealIsMatchpoint !==
+      rightConversion?.runnerStealIsMatchpoint
+  ) {
+    return leftConversion?.runnerStealIsMatchpoint ? 1 : -1;
+  }
+  if (
+    leftConversion?.residentParent !== rightConversion?.residentParent
+  ) {
+    return leftConversion?.residentParent ? -1 : 1;
+  }
   const leftProbability =
     left.protectionNeed?.objective.maximumRunnerAccessSuccessProbability;
   const rightProbability =
@@ -9661,6 +9784,31 @@ function compareCorpScoreProtectionProjects(
     if (currentRiskComparison !== undefined && currentRiskComparison !== 0) {
       return currentRiskComparison;
     }
+  }
+  if (leftConversion && rightConversion) {
+    const remainingClicksComparison =
+      leftConversion.remainingAdvancementClicks -
+      rightConversion.remainingAdvancementClicks;
+    if (remainingClicksComparison !== 0) return remainingClicksComparison;
+    const remainingCreditsComparison =
+      leftConversion.remainingScoreCredits -
+      rightConversion.remainingScoreCredits;
+    if (remainingCreditsComparison !== 0) return remainingCreditsComparison;
+    const rezzedInvestmentComparison =
+      rightConversion.existingRemoteRezzedIceCount -
+      leftConversion.existingRemoteRezzedIceCount;
+    if (rezzedInvestmentComparison !== 0) return rezzedInvestmentComparison;
+    const remoteInvestmentComparison =
+      rightConversion.existingRemoteIceCount -
+      leftConversion.existingRemoteIceCount;
+    if (remoteInvestmentComparison !== 0) return remoteInvestmentComparison;
+    const strategySupportComparison =
+      rightConversion.realizedStrategySupportCount -
+      leftConversion.realizedStrategySupportCount;
+    if (strategySupportComparison !== 0) return strategySupportComparison;
+    const agendaPointComparison =
+      right.agendaPoints - left.agendaPoints;
+    if (agendaPointComparison !== 0) return agendaPointComparison;
   }
   return technicalIdCompare(left.projectId, right.projectId);
 }
@@ -9982,6 +10130,29 @@ function corpScoreProtectionStagingInstallSignal(
   ) {
     return undefined;
   }
+  const remainingAdvancementClicks = corpScoreRemainingAdvancementClicks(
+    input,
+    project,
+  );
+  if (remainingAdvancementClicks === undefined || !source) return undefined;
+  const projectedServer = {
+    id: serverId,
+    ice: [
+      ...(existingRemote?.ice ?? []),
+      {
+        ...source,
+        rezzed: true,
+      },
+    ],
+    root: existingRemote?.root ?? [],
+  };
+  const rushRisk = assessCorpScoreRushRisk({
+    input,
+    server: projectedServer,
+    agendaPoints: project.agendaPoints,
+    remainingAdvancementClicks,
+  });
+  if (rushRisk.admission !== "accepted") return undefined;
   return {
     kind: "score_protection_staging_install",
     defenseId: `score-protection-staging-install:${project.projectId}:${candidate.actionId}`,
@@ -9993,8 +10164,26 @@ function corpScoreProtectionStagingInstallSignal(
     actionId: candidate.actionId,
     sourceCardInstanceId: candidate.sourceCardInstanceId,
     sourceDefinitionId: candidate.sourceDefinitionId,
-    evidenceCode: `score_protection_staging_install:${project.projectId}:${serverId}:bounded_deterrence`,
+    evidenceCode: `score_protection_staging_install:${project.projectId}:${serverId}:rush_risk_${rushRisk.reason}`,
   };
+}
+
+function corpScoreRemainingAdvancementClicks(
+  input: AiDecisionInput,
+  project: CorpScoreProjectSignal,
+): number | undefined {
+  if (project.continuationReserve) {
+    return project.continuationReserve.remainingAdvancementCounters;
+  }
+  if (!project.agendaInstanceId) return undefined;
+  const agenda = visibleOwnCardByInstanceId(input, project.agendaInstanceId);
+  if (!agenda || !visibleCardIsAgenda(input, agenda)) return undefined;
+  const requirement = requireVisibleAgendaAdvancementRequirement(input, agenda);
+  const current =
+    project.phase === "install_agenda"
+      ? 0
+      : Math.max(0, agenda.advancementCounters ?? 0);
+  return Math.max(0, requirement - current);
 }
 
 function corpPreparedScoreProjectHasExecutableCurrentStep(
@@ -10179,20 +10368,6 @@ function scoreProtectionStagingMayBackstopDirectRoute(
   scan: CorpScoreProtectionInstallRouteScan,
 ): boolean {
   if (scan.productiveRoutes.length > 0) return false;
-  if (
-    need.baseline.knowledge === "unknown" &&
-    need.baseline.unknownReason === "subset_assessment_unknown" &&
-    scan.directInstallRouteState.knowledge === "unknown"
-  ) {
-    return true;
-  }
-  if (
-    need.baseline.knowledge === "known" &&
-    !need.baseline.protection.protectsScore &&
-    scan.directInstallRouteState.knowledge === "unknown"
-  ) {
-    return true;
-  }
   return (
     need.baseline.knowledge === "known" &&
     need.baseline.protection.protectsScore === false &&
@@ -10232,34 +10407,20 @@ function corpRemoteHasBoundedStagedIce(
   input: AiDecisionInput,
   serverId: string,
   exposedAgendaPoints: number,
+  remainingAdvancementClicks: number | undefined,
 ): boolean {
   const server = input.playerView.servers.find(
     (candidate) =>
       candidate.id === serverId &&
       !["hq", "rd", "archives"].includes(candidate.id),
   );
-  const access = scoringWindowAccessAssessment(input, server);
-  const visibleDefenseProfiles = (server?.ice ?? []).map((ice) =>
-    visibleCorpIceDefenseProfile(ice),
-  );
-  const answeredPureStopRouteExceedsBoundedRushRisk =
-    access.runnerCanReachAccessNow &&
-    visibleDefenseProfiles.length > 0 &&
-    visibleDefenseProfiles.every(
-      (defense) =>
-        !defense.hasMeaningfulTaxOrDamage && !defense.hasEncounterDisruption,
-    ) &&
-    (exposedAgendaPoints > 1 ||
-      input.playerView.opponent.agendaPoints + exposedAgendaPoints >=
-        input.playerView.agendaPointsToWin);
-  return (
-    server?.ice.some((ice) => {
+  if (!server || remainingAdvancementClicks === undefined) return false;
+  const hasNearTermFundableStagedIce = server.ice.some((ice) => {
       const quote = ice.effectiveRezCostQuote;
       if (
         ice.rezzed === true ||
         ice.definitionId === undefined ||
         CARD_DEFINITIONS_BY_ID[ice.definitionId]?.type !== "ice" ||
-        answeredPureStopRouteExceedsBoundedRushRisk ||
         quote?.context !== "installed" ||
         quote.cardId !== ice.instanceId ||
         quote.targetServerId !== serverId ||
@@ -10273,7 +10434,15 @@ function corpRemoteHasBoundedStagedIce(
       return (
         Math.max(0, quote.finalCredits - input.playerView.own.credits) <= 3
       );
-    }) === true
+    });
+  if (!hasNearTermFundableStagedIce) return false;
+  return (
+    assessCorpScoreRushRisk({
+      input,
+      server,
+      agendaPoints: exposedAgendaPoints,
+      remainingAdvancementClicks,
+    }).admission === "accepted"
   );
 }
 

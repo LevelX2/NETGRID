@@ -75,6 +75,16 @@ export type CorpScoreProjectSignal = {
     currentActionScope: "exact_install_only";
   };
   fundingGap?: number;
+  conversion?: {
+    remainingAdvancementClicks: number;
+    remainingScoreCredits: number;
+    existingRemoteIceCount: number;
+    existingRemoteRezzedIceCount: number;
+    residentParent: boolean;
+    runnerStealPoints: number;
+    runnerStealIsMatchpoint: boolean;
+    realizedStrategySupportCount: number;
+  };
   /**
    * Published only by corp.score_agenda from an Engine continuation quote.
    * corp.defend_servers may preserve this request but must never reconstruct it.
@@ -780,11 +790,22 @@ export function corpScorePriorityClass(
 
 function scoreAssessmentValue(signal: CorpScoreProjectSignal): number {
   const agendaPointValue = Math.max(1, signal.agendaPoints) * 20;
-  if (signal.terminalScore) return 1_000 + agendaPointValue;
-  if (signal.preventsTerminalSteal) return 2_000 + agendaPointValue;
-  if (signal.deadlinePressure) return 700 + agendaPointValue;
-  if (signal.sameTurnCloseout) return 500 + agendaPointValue;
-  return 100 + agendaPointValue;
+  const conversionValue = signal.conversion
+    ? signal.conversion.existingRemoteRezzedIceCount * 12 +
+      signal.conversion.existingRemoteIceCount * 4 +
+      signal.conversion.realizedStrategySupportCount * 4 -
+      signal.conversion.remainingAdvancementClicks * 8 -
+      signal.conversion.remainingScoreCredits * 2 +
+      (signal.conversion.residentParent ? 40 : 0)
+    : 0;
+  if (signal.terminalScore) return 1_000 + agendaPointValue + conversionValue;
+  if (signal.preventsTerminalSteal)
+    return 2_000 + agendaPointValue + conversionValue;
+  if (signal.deadlinePressure)
+    return 700 + agendaPointValue + conversionValue;
+  if (signal.sameTurnCloseout)
+    return 500 + agendaPointValue + conversionValue;
+  return 100 + agendaPointValue + conversionValue;
 }
 
 function scoreBlockerCode(signal: CorpScoreProjectSignal): string | undefined {
