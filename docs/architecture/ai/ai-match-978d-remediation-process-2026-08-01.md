@@ -1,7 +1,6 @@
 # Match 978d – generischer Corp-Scoring- und Defense-Remediation-Prozess
 
-Status: Umsetzung und Worktree-Abnahme abgeschlossen; lokaler Main-Fast-Forward
-ausstehend
+Status: abgeschlossen und lokal nach `main` integriert
 
 Quelle: vollständiges 104/104-Entscheidungsaudit von
 `match_978da70c2bd72e61` und anschließende Freigabe aller acht Maßnahmen durch

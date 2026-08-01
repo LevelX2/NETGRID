@@ -1,6 +1,6 @@
 # Match 978d – Final Review der Corp-KI-Remediation
 
-Status: Worktree-Abnahme grün; bereit für den lokalen Fast-Forward nach `main`
+Status: abgeschlossen und lokal nach `main` integriert
 
 Quelle: vollständiges Audit aller 104 KI-Entscheidungen in
 `match_978da70c2bd72e61` sowie die vom Projektbetreiber freigegebenen
@@ -61,6 +61,10 @@ gebunden.
 - `check:ai`, `check:ai-source-structure`,
   `check:proteus-ai-readiness` und `check:ai-deck-doctrine-strategy`: grün.
 - `git diff --check` und Debug-Marker-Prüfung: grün.
+
+Nach dem Fast-Forward auf `main` wurden der saubere Git-Stand, `check:ai`,
+drei zentrale KI-Testdateien mit 9 Tests sowie der betroffene Engine-Test mit
+6 Tests nochmals erfolgreich geprüft.
 
 Der erste breite Regressionslauf hat zu aggressive ICE-Staffelung und mehrere
 veraltete, technisch übergenaue Checkpointerwartungen sichtbar gemacht. Die
