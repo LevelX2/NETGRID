@@ -1,7 +1,8 @@
 # Serie 82b2 – vollständige KI-Analyse und Remediation
 
-Status: `red_checkpoints_complete`; sechs spielgleiche Decision-Checkpoints
-und der rote Broker-Deck-Consumervertrag sind vor dem ersten Codepatch gesichert
+Status: `broad_verification_complete`; alle fünf Activities und zwölf
+historischen Checkpoint-Proben sind grün, die breite Verifikation ist
+abgeschlossen und die lokale Main-Integration folgt
 
 Quelle/Vorgabe: Nutzerauftrag vom 01.08.2026, beide abgeschlossenen Spiele der
 Serie `series_82b2d391315f055b` vollständig zu analysieren, bestehende
@@ -123,6 +124,12 @@ Aktueller Stand vom 01.08.2026:
 - Red-Evidence:
   `docs/reviews/ai/series-82b2-red-evidence-2026-08-01.md`; alle sechs
   Zielassertionen sind `behavior_regression`, alle Fixture-Gegenproben grün.
+- Alle fünf Pakete der Activity-Schleife sind einzeln abgeschlossen und nach
+  `docs/activities/done/` verschoben.
+- 3/3 AI-Testshards mit 549 Testdateien und 4.506 Tests, `check:ai`,
+  AI-Typecheck sowie beide Deck-Consumer-Audits sind grün.
+- Abschlussreview:
+  `docs/reviews/ai/series-82b2-remediation-final-review-2026-08-01.md`.
 
 ## Paketfolge
 

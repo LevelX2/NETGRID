@@ -251,6 +251,11 @@
   abgeschlossene Migration von sieben kartenspezifischen
   Erkennungsfamilien auf actiongebundene Funktionseffekte, TargetProfiles und
   Engine-Quotes einschließlich klassifiziertem Restinventar.
+- `series-82b2-final-analysis-remediation-process-2026-08-01.md` und
+  `docs/reviews/ai/series-82b2-remediation-final-review-2026-08-01.md`:
+  vollständiges 267-Decision-Audit einer Hin-/Rückspielserie mit behobener
+  Bonus-Run-Zielwahl, reifem Broker-Cashout, mehrschichtiger Zentral-Rezquote,
+  Vapor-Ops-Zweckübergabe und generischem Hosted-Credit-Auditvertrag.
 - `taktiksignale-strategieanker-guide-2026-06-02-v3.md`: aktuelle Begriffe für
   Taktiksignale, Strategieanker, TargetProfiles, Conditions und Constraints.
 - `ai-play-strength-development-placement-guide-2026-06-13.md`: zulässige

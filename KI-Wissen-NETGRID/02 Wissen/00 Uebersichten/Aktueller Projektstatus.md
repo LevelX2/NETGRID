@@ -348,10 +348,22 @@ Stand: 2026-07-30
   quellenunabhängig im tiefsten `startRun`-Pfad. Fang, All-Nighter, Private LDL
   Access, Bodyweight Synthetic Blood und TKO 2.0 sind von der Hintquelle bis
   zu ihren produktiven Consumern korrigiert. Die getrennte Broker-Analyse
-  bestätigt Optimierungsbedarf bei letztem Lade-Klick, Mehrkopien-
-  Amortisation, Quellenwahl und einem frühen Cashout; Broker-Code wurde dafür
-  noch nicht geändert. Führend ist
-  `docs/reviews/ai/match-ecfe3ce-engine-hints-remediation-final-2026-07-16.md`.
+  bestätigte Optimierungsbedarf bei letztem Lade-Klick, Mehrkopien-
+  Amortisation, Quellenwahl und einem frühen Cashout. Die nachfolgende
+  Serie-82b2-Remediation schließt den reifen Cashout jetzt im bestehenden
+  `runner.credit_bank`-Owner: Ein bei 12 Credits liegender Broker ersetzt eine
+  konkret gebundene Mehrklick-Finanzierung, bleibt ohne solchen Bedarf aber
+  unangetastet. Führend sind
+  `docs/reviews/ai/match-ecfe3ce-engine-hints-remediation-final-2026-07-16.md`
+  und
+  `docs/reviews/ai/series-82b2-remediation-final-review-2026-08-01.md`.
+- Die vollständige Hin-/Rückspielanalyse der Serie 82b2 umfasst 267/267
+  KI-Entscheidungen. All-Nighter rankt gebundene Bonusziele, gestaffelte
+  Zentral-ICE werden über ihren gemeinsamen Engine-Tax bewertet, und eine
+  rezzte Vapor-Ops-Score-Decoy-Instanz beendet ihren alten Bluffzweck. Beide
+  Deck-Consumer-Audits melden null Findings und null Warnungen; 4.506 AI-Tests
+  in drei Shards sind grün. Führend ist
+  `docs/reviews/ai/series-82b2-remediation-final-review-2026-08-01.md`.
 - Die zwei zuletzt abgeschlossenen Corp-KI-Spiele vom 17.07.2026 sind mit
   192/192 Decisions analysiert und behoben. Geschützte Scorelines können
   spekulative Punish-Pläne konvertieren, Score-Remote-Roots bleiben für
