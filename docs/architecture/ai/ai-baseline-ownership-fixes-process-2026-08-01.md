@@ -1,6 +1,6 @@
 # AI-Baseline-Ownership-Fixes – Paketprozess
 
-Status: in Bearbeitung  
+Status: P3 abgeschlossen, lokale Integration ausstehend
 Datum: 2026-08-01  
 Quelle: roter AI-Behavior-Baseline-Lauf `b87549867` mit zwei deterministischen
 `missing_plan_module_coverage`-Abbrüchen in 60 Spielen
@@ -251,6 +251,30 @@ git diff --check
 ### Commit
 
 `docs(ai): verify baseline ownership fixes`
+
+### Ausführungsergebnis
+
+- Die beiden Repros sind über ihre früheren Abbruchstellen hinaus grün; der
+  60-Spiele-Lauf enthält null IllegalActions und null Runtimefehler.
+- AI: 4.481/4.481 Tests im seriellen Drei-Shard-Stabilitätspfad grün. Der
+  parallele Standardpfad hatte ausschließlich einen lastabhängigen
+  30-Sekunden-Timeout bei 4.480/4.481 bestandenen Tests; der fokussierte Test
+  und der serielle Shard waren grün.
+- Engine: 1.838/1.838 Tests grün; die neue zentrale Invariante deckte neben
+  Singapore weitere fehlende side-sichere Variantenfelder auf. `targetServerId`,
+  `counterType` und `decision` sind nun ebenfalls ID-Diskriminatoren.
+- Workspace-Typecheck, Package-Boundaries, AI-Hint-Metadaten, AI-/Engine-
+  Source-Structure und Diff-Gate sind grün.
+- Der Standardlauf bleibt wegen eines klassifizierten 480-Aktionen-Tails
+  `attention_required`. Der isolierte 650-Aktionen-Kontrolllauf endet nach
+  485 Aktionen regulär durch Corp-Deckout und enthält keine technischen
+  Fehler. Die bekannte Klasse `runner_late_gain_credit_real_reserve` bleibt
+  außerhalb der beiden Ownership-Fixes ein eigener Spielstärke-Restpunkt.
+
+Damit ist der Ownership-Done-Gate erfüllt. Der Report übernimmt den
+Action-Limit-Restpunkt ausdrücklich; eine Schwellen- oder Runner-Strategie-
+Änderung wäre ein separates Paket und wurde nicht still in diesen Prozess
+aufgenommen.
 
 ## Worktree-, Git- und Integrationsvertrag
 

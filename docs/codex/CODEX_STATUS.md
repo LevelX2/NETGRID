@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-30
+Stand: 2026-08-01
 
 ## Einstieg
 
@@ -100,6 +100,17 @@ und Entwicklung durch Economy behandelt; Halten, Verlassen und
 Zahlungs-/Verlustrisiko gehören nach der Installation in einen
 `runner.resource_lifecycle`-Child der exakten Karteninstanz. Unbekannte
 Engine-Zahlungsquotes bleiben blockiert und werden nicht geschätzt.
+
+Der Ownership-Fixstand `5094632ca` schließt zwei deterministische
+Baseline-Abbrüche: Singapore-City-Grid-Swaps und weitere öffentliche
+LegalAction-Varianten besitzen eindeutige side-sichere IDs; Empty-R&D-
+Draw-Payloads können keine Economy-/Defense-Funding-Heads mehr bilden.
+Defense bleibt der Root-Owner und bindet die exakte Economy-Supportinstanz
+samt Parent-Need in der `PlanExecutionOrigin`. Der 60-Spiele-Nachlauf enthält
+null IllegalActions und null Runtimefehler. Er bleibt wegen eines bekannten,
+klassifizierten 480-Aktionen-Tails `attention_required`; der isolierte Lauf
+endet nach 485 Aktionen regulär durch Corp-Deckout. Führend ist
+`docs/reviews/ai/ai-behavior-baseline-v1-current-5094632ca-2026-08-01.md`.
 
 Die verifizierte PF15-Code-Freeze-Baseline umfasst 60 Spiele und 11.012
 Entscheidungen. Sie wurde im vollständigen dirty PF15-Arbeitsbaum auf Parent
