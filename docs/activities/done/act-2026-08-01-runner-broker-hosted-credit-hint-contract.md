@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-08-01-runner-broker-hosted-credit-hint-contract
-status: inbox
+status: done
 kind: fix
 area: ai-data
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-01
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-01
+completedAt: 2026-08-01
+branch: codex/ai-series-82b2-final-remediation
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - scripts/audit-ai-deck-hint-consumers.ts
+  - packages/ai/src/economy-card-hint-contract.test.ts
+  - data/local/series-82b2-runner-deck-audit-report-fixed.json
+checks:
+  - unveränderter Runner-Deck-Consumer-Audit 22 Definitionen / 45 Karten grün, 0 Findings, 0 Warnungen
+  - 35 fokussierte Hint-/Capability-Regressionen grün
+  - check:ai-economy und check:ai-hint-metadata-contracts grün
+  - AI-Typecheck mit 6144 MB Heap grün
+  - check:ai-action-capacity-hints scheitert identisch bereits auf main an einer repositoryweiten Normalisierungsabweichung
 ---
 
 # Runner-KI: Broker-Hint an generischen Hosted-Credit-Vertrag angleichen
@@ -61,15 +69,15 @@ LegalAction liefern.
 
 ## Akzeptanzkriterien
 
-- [ ] Der bisher rote Runner-Deck-Consumer-Audit ist mit demselben Deck und
+- [x] Der bisher rote Runner-Deck-Consumer-Audit ist mit demselben Deck und
       Behavior-Checkpoint grün.
-- [ ] Broker weist für die Hosted-Credit-Aufladung Engine- und Hint-Menge 3
+- [x] Broker weist für die Hosted-Credit-Aufladung Engine- und Hint-Menge 3
       aus; `hosted_credit_add_hint_mismatch` verschwindet ohne Audit-Ausnahme.
-- [ ] Bestehende Bank-Load-/Cashout-Semantik und Economy-Vertragstests bleiben
+- [x] Bestehende Bank-Load-/Cashout-Semantik und Economy-Vertragstests bleiben
       grün.
-- [ ] Keine Planinstanz, Route, `PlanExecutionOrigin`, Actionwahl oder
+- [x] Keine Planinstanz, Route, `PlanExecutionOrigin`, Actionwahl oder
       Choice-Payload ändert sich durch den Datenfix.
-- [ ] Hint-Schema-/Coverage-Gates, AI-Typecheck und `git diff --check` sind
+- [x] Hint-Schema-/Coverage-Gates, AI-Typecheck und `git diff --check` sind
       grün.
 
 ## Umsetzungshinweise
@@ -81,4 +89,17 @@ LegalAction liefern.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die Detailprüfung hat die Ursache gegenüber der ersten Diagnose präzisiert:
+Der aktive Broker-Hint enthielt die korrekte 3-Credit-Menge bereits als
+`counter_economy`/`bank_load`. Der generische Audit akzeptierte jedoch nur
+`finite_economy_pool` und erzeugte damit einen falschen Widerspruch. Der
+Consumer versteht nun beide kanonischen Hosted-Credit-Dialekte: einen
+endlichen Pool oder eine wiederaufladbare Bank. Broker bleibt ausdrücklich
+kein endlicher Pool; dadurch entstehen weder doppelte Economy-Effekte noch
+eine Verhaltensänderung. Der unveränderte historische Deck-/Behavior-
+Checkpoint läuft danach mit 0 Findings und 0 Warnungen durch.
+
+Das themenfremde Gate `check:ai-action-capacity-hints` ist weiterhin rot,
+scheitert aber bytegleich auch im unveränderten primären `main`-Checkout. Es
+wurde deshalb nicht durch eine repositoryweite Normalisierung in dieses Paket
+gezogen.

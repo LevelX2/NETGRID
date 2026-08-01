@@ -350,21 +350,41 @@ function inspectImplementationContract(
     const amounts = addHostedEffects
       .map((effect) => effect.amount)
       .filter((amount): amount is number => typeof amount === "number");
-    const hintPoolAmounts = hintEffects
-      .filter((effect) => effect.kind === "finite_economy_pool")
+    const finitePoolEffects = hintEffects.filter(
+      (effect) => effect.kind === "finite_economy_pool",
+    );
+    const bankLoadEffects = hintEffects.filter(
+      (effect) =>
+        effect.kind === "counter_economy" &&
+        effect.economyMode === "bank_load" &&
+        effect.resource === "credits",
+    );
+    const hintHostedCreditAddAmounts = [
+      ...finitePoolEffects,
+      ...bankLoadEffects,
+    ]
       .map((effect) => effect.amount)
       .filter((amount): amount is number => typeof amount === "number");
+    const hasFinitePoolContract =
+      finitePoolEffects.length > 0 &&
+      hintFunctionSignals.has("economy.finite_pool") &&
+      hintEffectKinds.has("finite_economy_pool");
+    const hasBankLoadContract =
+      bankLoadEffects.length > 0 &&
+      hintFunctionSignals.has("economy.counter") &&
+      hintEffectKinds.has("counter_economy");
     if (
       !hintFunctionSignals.has("economy.temporary_resource_bank") ||
-      !hintFunctionSignals.has("economy.finite_pool") ||
-      !hintEffectKinds.has("finite_economy_pool") ||
-      !amounts.every((amount) => hintPoolAmounts.includes(amount))
+      (!hasFinitePoolContract && !hasBankLoadContract) ||
+      !amounts.every((amount) =>
+        hintHostedCreditAddAmounts.includes(amount),
+      )
     ) {
       findings.push({
         cardId,
         kind: "hosted_credit_add_hint_mismatch",
         engineAmounts: amounts,
-        hintPoolAmounts,
+        hintHostedCreditAddAmounts,
       });
     }
   }

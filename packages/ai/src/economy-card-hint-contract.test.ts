@@ -16,6 +16,7 @@ type EconomyEffect = {
 type EconomyHint = {
   cardId: string;
   effects?: EconomyEffect[];
+  functionSignals?: string[];
 };
 
 const hints = activeHints.cards as EconomyHint[];
@@ -89,7 +90,8 @@ describe("economy card hint contracts", () => {
   });
 
   it("models Broker as a voluntary bank rather than a finite pool", () => {
-    const effects = hint("onr_v1_154_broker").effects ?? [];
+    const broker = hint("onr_v1_154_broker");
+    const effects = broker.effects ?? [];
     expect(effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -109,6 +111,22 @@ describe("economy card hint contracts", () => {
     expect(
       effects.some((effect) => effect.kind === "finite_economy_pool"),
     ).toBe(false);
+    expect(broker.functionSignals).toEqual(
+      expect.arrayContaining([
+        "economy.counter",
+        "economy.temporary_resource_bank",
+      ]),
+    );
+    expect(
+      effects
+        .filter(
+          (effect) =>
+            effect.kind === "counter_economy" &&
+            effect.economyMode === "bank_load" &&
+            effect.resource === "credits",
+        )
+        .map((effect) => effect.amount),
+    ).toEqual([3]);
   });
 
   it("matches Department of Truth Enhancement's hosted-credit load and all-cashout contract", () => {
