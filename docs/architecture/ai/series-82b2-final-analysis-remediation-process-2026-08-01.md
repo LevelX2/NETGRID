@@ -1,8 +1,8 @@
 # Serie 82b2 – vollständige KI-Analyse und Remediation
 
-Status: `broad_verification_complete`; alle fünf Activities und zwölf
-historischen Checkpoint-Proben sind grün, die breite Verifikation ist
-abgeschlossen und die lokale Main-Integration folgt
+Status: `complete`; alle fünf Activities und zwölf historischen
+Checkpoint-Proben sind grün, der Branch ist lokal nach `main` integriert und
+Worktree sowie gemergter Branch sind verifiziert entfernt
 
 Quelle/Vorgabe: Nutzerauftrag vom 01.08.2026, beide abgeschlossenen Spiele der
 Serie `series_82b2d391315f055b` vollständig zu analysieren, bestehende
@@ -130,6 +130,11 @@ Aktueller Stand vom 01.08.2026:
   AI-Typecheck sowie beide Deck-Consumer-Audits sind grün.
 - Abschlussreview:
   `docs/reviews/ai/series-82b2-remediation-final-review-2026-08-01.md`.
+- Fast-forward-Integration nach `main` bei `827e14ecc`; anschließende
+  Main-Smokes für alle zwölf Serienproben, `check:ai` und AI-Typecheck grün.
+- Worktree `C:\Projekte\NETGRID_AI_SERIES_82B2_FINAL` und Branch
+  `codex/ai-series-82b2-final-remediation` verifiziert entfernt; der fremde
+  Baseline-Worktree blieb unangetastet.
 
 ## Paketfolge
 
