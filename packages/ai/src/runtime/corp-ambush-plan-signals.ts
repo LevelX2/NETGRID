@@ -433,6 +433,15 @@ function continuedAmbushSignals(params: {
         `Resident ambush ${signal.sourceInstanceId} moved away from its committed server ${signal.serverId}.`,
       );
     }
+    // Rezzing a score decoy publicly ends its bluff purpose. In particular,
+    // the score plan may have rezzed a counter bank for a one-time emergency
+    // liquidation. Keeping the old decoy resident after that handoff lets the
+    // ambush owner buy the same counter back forever. Retire only this exact
+    // cross-owner commitment; ordinary rezzed ambushes still keep their
+    // trigger route below.
+    if (signal.patternKind === "score_decoy" && location.card.rezzed === true) {
+      return [];
+    }
 
     const triggerCandidates = params.candidates.filter(
       (candidate) =>

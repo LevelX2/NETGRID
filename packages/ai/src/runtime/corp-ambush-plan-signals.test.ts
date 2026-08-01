@@ -5,6 +5,7 @@ import {
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
+import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import {
   aiInput,
   legalAction,
@@ -12,7 +13,10 @@ import {
   visibleCard,
 } from "../semantic-ai-runtime-cutover.test-support";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
-import { buildCorpAmbushPlanSignals } from "./corp-ambush-plan-signals";
+import {
+  buildCorpAmbushPlanSignals,
+  CORP_AMBUSH_COMMITMENT_VERSION,
+} from "./corp-ambush-plan-signals";
 
 describe("Corp ambush plan signal duplicate scope", () => {
   it("counts only same-definition copies in active remote roots as installed duplicates", () => {
@@ -188,6 +192,71 @@ describe("Corp ambush plan signal duplicate scope", () => {
         serverId: "remote_1",
         actionIds: [install.actionId],
         plannedAdvancementTarget: 1,
+      }),
+    );
+  });
+
+  it("retires a score decoy after rez instead of re-advancing a liquidated counter bank", () => {
+    const source = visibleCard(
+      "synthetic-counter-bank-1",
+      "corp",
+      "asset",
+      {
+        definitionId: "synthetic_counter_bank",
+        advancementCounters: 0,
+        rezzed: true,
+      },
+    );
+    const input = aiInput("corp", []);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [source]),
+    ];
+    const previous = {
+      instances: [
+        {
+          instanceId: "plan:corp.ambush_and_bluff:score-decoy",
+          moduleId: "corp.ambush_and_bluff",
+          moduleState: {
+            kind: "ambush",
+            signal: {
+              commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
+              ambushId: "score-decoy:synthetic-counter-bank-1:remote_1:agenda-1",
+              sourceDefinitionId: "synthetic_counter_bank",
+              sourceInstanceId: source.instanceId,
+              actionIds: [],
+              serverId: "remote_1",
+              phase: "advance",
+              patternKind: "score_decoy",
+              followupAgendaInstanceId: "agenda-1",
+              purposeCode: "test_score_decoy",
+              assignedDomainPlanIds: ["corp.ambush_bluff"],
+              duplicateAlreadyInstalled: false,
+              affordableOrSupportable: true,
+              plannedAtStateVersion: input.playerView.stateVersion,
+              plannedAdvancementTarget: 1,
+              value: 300,
+              evidenceCode: "test_score_decoy",
+            },
+          },
+        },
+      ],
+    } as unknown as ResidentPlanPortfolio;
+
+    expect(
+      buildCorpAmbushPlanSignals({ input, candidates: [], previous }),
+    ).toEqual([]);
+
+    source.rezzed = false;
+    expect(
+      buildCorpAmbushPlanSignals({ input, candidates: [], previous }),
+    ).toContainEqual(
+      expect.objectContaining({
+        sourceInstanceId: source.instanceId,
+        phase: "advance",
+        patternKind: "score_decoy",
       }),
     );
   });

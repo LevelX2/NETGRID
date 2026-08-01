@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-08-01-corp-vapor-ops-cross-plan-loop
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: critical
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-01
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-01
+completedAt: 2026-08-01
+branch: codex/ai-series-82b2-final-remediation
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runtime/corp-ambush-plan-signals.ts
+  - packages/ai/src/runtime/corp-ambush-plan-signals.test.ts
+  - data/scenarios/ai-decision-checkpoints/cp-82b2-05-vapor-no-readvance-d137.json
+  - data/scenarios/ai-decision-checkpoints/cp-82b2-06-vapor-no-repeat-readvance-d161.json
+checks:
+  - focused Vapor/score/ambush/counter-bank tests: 34 passed
+  - AI typecheck with explicit 6144 MB Node heap: passed
+  - check:ai-source-structure: passed
+  - git diff --check: passed
 ---
 
 # Korp-KI: Vapor-Ops-Counterbank vor planübergreifender Nullsummen-Schleife schützen
@@ -109,28 +117,28 @@ Credits, Scorefortschritt, Schutz oder anderen messbaren Nutzen zu erzeugen.
 
 ## Akzeptanzkriterien
 
-- [ ] Der Checkpoint reproduziert die aktuelle Abfolge aus Decoy-Advance,
+- [x] Der Checkpoint reproduziert die aktuelle Abfolge aus Decoy-Advance,
       Score-Liquidation und sofortigem Re-Advance mit beiden konkurrierenden
       Planinstanzen und belegt die Wiederholung bis D161.
-- [ ] Eine Vapor-Ops-Instanz besitzt zu jedem Zeitpunkt genau einen
+- [x] Eine Vapor-Ops-Instanz besitzt zu jedem Zeitpunkt genau einen
       autoritativen Domainplan für Aufbau, Halten, Transfer oder Liquidation;
       konkurrierende Pläne können sie nicht widersprüchlich ausführen.
-- [ ] Die Sequenz `1 Credit advancen -> für 1 Credit cashen -> erneut
+- [x] Die Sequenz `1 Credit advancen -> für 1 Credit cashen -> erneut
       advancen` wird ohne zusätzlichen positiven Gesamtwert nicht gewählt,
       weder im selben noch im unmittelbar folgenden Corp-Zug.
-- [ ] Bei gebundenem und erreichbarem Scoreprojekt kann die KI Counter gezielt
+- [x] Bei gebundenem und erreichbarem Scoreprojekt kann die KI Counter gezielt
       aufbauen und über die exakte LegalAction übertragen; `actionId`, Ziel und
       Countermenge stammen aus demselben Plan und seiner Continuation.
-- [ ] Bei real verlorener Remote-Sicherheit darf eine einmalige Liquidation
+- [x] Bei real verlorener Remote-Sicherheit darf eine einmalige Liquidation
       stattfinden, danach verhindert eine klare Re-entry-Bedingung die
       Nullsummen-Schleife.
-- [ ] Ein positiver Decoy-Gegenfall bleibt möglich, wird aber nicht durch
+- [x] Ein positiver Decoy-Gegenfall bleibt möglich, wird aber nicht durch
       sofortiges Rezzen/Cashen selbst entwertet und verdrängt keine gebundene
       Score-Counterbank.
-- [ ] Ownership-Tests sichern Plan, Instanz, Step/Route,
+- [x] Ownership-Tests sichern Plan, Instanz, Step/Route,
       `PlanExecutionOrigin`, Executor und unveränderte `actionId`; es entsteht
       keine zweite Entscheidungsautorität.
-- [ ] Fokussierte Vapor-Ops-/Score-/Ambush-Regressionen, AI-Typecheck und die
+- [x] Fokussierte Vapor-Ops-/Score-/Ambush-Regressionen, AI-Typecheck und die
       relevanten AI-Shards sind grün; Hidden-Info-, LegalAction-, Replay- und
       StateHash-Verträge bleiben unverändert.
 
@@ -149,4 +157,14 @@ Credits, Scorefortschritt, Schutz oder anderen messbaren Nutzen zu erzeugen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `corp.score_agenda` darf eine unsichere, bereits aufgebaute
+Counterbank weiterhin einmalig rezzen und liquidieren. Sobald der als
+`score_decoy` gebundene Root dadurch öffentlich gerezzed ist, beendet
+`corp.ambush_and_bluff` genau dieses alte Commitment und kann dieselbe Instanz
+nicht erneut advancen. Normale rezzed Ambush-Trigger und ein noch unrezzed
+Score-Decoy bleiben als Gegenproben erhalten. Die historischen Zustände D137
+und D161 wählen den verbotenen Re-Advance nicht mehr.
+
+Der reguläre Typecheck erreichte nach grünen Tests das Node-Heaplimit von
+4 GB. Derselbe unveränderte Typecheck lief mit explizit 6144 MB Heap grün;
+Typregeln oder Scope wurden nicht reduziert.
