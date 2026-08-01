@@ -1,19 +1,26 @@
 ---
 activityId: act-2026-08-01-runner-all-nighter-bonus-run-target-ranking
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-01
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-01
+completedAt: 2026-08-01
+branch: codex/ai-series-82b2-final-remediation
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+  - packages/ai/src/runtime/plan-first-live-runtime-restricted-run-contract.test.ts
+  - data/scenarios/ai-decision-checkpoints/cp-82b2-01-all-nighter-rd-bonus-d5.json
+checks:
+  - focused restricted-run and Runner plan tests: 38 passed
+  - AI typecheck with explicit 6144 MB Node heap: passed
+  - check:ai-source-structure: passed
+  - git diff --check: passed
 ---
 
 # Runner-KI: All-Nighter-Bonus-Run nach Zielwert statt Aktionsreihenfolge wählen
@@ -76,16 +83,16 @@ Bonus-Run-Aktionen im Fortsetzungsplan denselben Pauschalwert erhalten.
 
 ## Akzeptanzkriterien
 
-- [ ] Der Checkpoint aus Entscheidung 5 reproduziert die bisherige Wahl oder
+- [x] Der Checkpoint aus Entscheidung 5 reproduziert die bisherige Wahl oder
       dokumentiert nachvollziehbar eine bereits wirksame Korrektur.
-- [ ] Bei legalem Bonus-Run auf frisches R&D und bekannt ertraglosem Archives
+- [x] Bei legalem Bonus-Run auf frisches R&D und bekannt ertraglosem Archives
       wählt die KI R&D; Zielscore und Auswahlgrund sind im Debug sichtbar.
-- [ ] Ein sichtbar wertvolles oder informationsfrisches Archives kann
+- [x] Ein sichtbar wertvolles oder informationsfrisches Archives kann
       weiterhin korrekt als Bonusziel gewinnen.
-- [ ] Planinstanz, Step, Executor und exakte Bonus-Run-`actionId` bleiben an
+- [x] Planinstanz, Step, Executor und exakte Bonus-Run-`actionId` bleiben an
       `runner.convert_run_window` gebunden; nur das Ziel innerhalb der legalen
       Fortsetzungsaktionen ändert sich.
-- [ ] Hidden-Info-, LegalAction-, Replay- und StateHash-Grenzen bleiben
+- [x] Hidden-Info-, LegalAction-, Replay- und StateHash-Grenzen bleiben
       unverändert; passende fokussierte KI-Regressionen und AI-Typecheck sind
       grün.
 
@@ -103,4 +110,10 @@ Bonus-Run-Aktionen im Fortsetzungsplan denselben Pauschalwert erhalten.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Die bestehende `runner.convert_run_window`-Continuation übernimmt
+jetzt den bereits vorhandenen side-sicheren RunTarget-Score der exakten
+Restricted-Run-LegalAction. Damit schlägt im historischen D5-Zustand der
+frische R&D-Bonus-Run das bekannte schwächere Archives. Planinstanz,
+Capability, Executor und Actionbindung bleiben unverändert; nur der Server-
+Wert innerhalb desselben Owners unterscheidet die Ziele. Eine Gegenprobe dreht
+die sichtbaren Scores um und lässt weiterhin Archives gewinnen.

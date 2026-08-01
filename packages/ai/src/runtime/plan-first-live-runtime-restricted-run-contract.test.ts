@@ -17,6 +17,60 @@ import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decisio
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
 describe("plan-first Engine-restricted run contract", () => {
+  it("ranks cost-free restricted targets by the existing side-safe run evaluation", () => {
+    resetResidentPlanPortfolioMemory();
+    const archivesRun = restrictedRun("archives");
+    const rdRun = restrictedRun("rd");
+    const input = aiInput("runner", [archivesRun, rdRun]);
+    input.playerView.own.clicks = 2;
+    input.playerView.opponent.deckCount = 10;
+    const archivesNoPayoff = {
+      ...safeRuntimeRunTarget(archivesRun.actionId, "archives"),
+      recommendation: "do_not_run_now" as const,
+      knownAccessState: "known_no_current_payoff" as const,
+      score: -420,
+    };
+    const freshRd = {
+      ...safeRuntimeRunTarget(rdRun.actionId, "rd"),
+      recommendation: "run_now" as const,
+      knownAccessState: "fresh" as const,
+      score: 300,
+    };
+
+    const rdDecision = liveContext({
+      evaluateRunnerRunTargets: () => [archivesNoPayoff, freshRd],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(rdDecision).toMatchObject({
+      actionId: rdRun.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+    });
+    expect(rdDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_action_assessment_evidence:runner_restricted_run_sequence_target_score:300",
+        "plan_action_assessment_evidence:runner_restricted_run_sequence_target_recommendation:run_now",
+      ]),
+    );
+
+    resetResidentPlanPortfolioMemory();
+    const valuableArchives = {
+      ...archivesNoPayoff,
+      recommendation: "run_now" as const,
+      knownAccessState: "fresh" as const,
+      score: 420,
+    };
+    const archivesDecision = liveContext({
+      evaluateRunnerRunTargets: () => [valuableArchives, freshRd],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(archivesDecision).toMatchObject({
+      actionId: archivesRun.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+    });
+  });
+
   it("prefers the cost-free restricted run over a click-costing run to the same server", () => {
     resetResidentPlanPortfolioMemory();
     const ordinaryRun = legalAction(
@@ -232,6 +286,26 @@ function wilsonRun(serverId: "hq" | "remote_1"): LegalAction {
         restrictedActionGrantRemainingActions: 1,
         cardId: sourceId,
         runnerAbility: "gain_run_only_action",
+      },
+    },
+  );
+}
+
+function restrictedRun(serverId: "archives" | "rd"): LegalAction {
+  return legalAction(
+    `runner.start_run.${serverId}.restricted`,
+    "runner",
+    "start_run",
+    `Restricted run ${serverId}`,
+    { credits: 0, clicks: 0 },
+    {
+      source: "engine_restricted_action",
+      payload: {
+        serverId,
+        effectKind: "run",
+        restrictedActionGrantActionType: "start_run",
+        restrictedActionGrantCostProfile: "no_click",
+        restrictedActionGrantRemainingActions: 1,
       },
     },
   );

@@ -1197,6 +1197,7 @@ function runnerContext(
   const runWindowActionAssessments = runnerRunWindowActionAssessments(
     input,
     candidates,
+    runTargets,
     dependencies,
     activeRunRoot,
   );
@@ -15553,6 +15554,7 @@ function currentRunAbortAssessment(
 function runnerRunWindowActionAssessments(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
+  runTargets: readonly RunnerRunTargetEvaluation[],
   dependencies: PlanFirstLiveDependencies,
   runOrigin:
     | {
@@ -15583,6 +15585,7 @@ function runnerRunWindowActionAssessments(
       input,
       candidate,
       action,
+      runTargets,
       dependencies,
       runOrigin,
     );
@@ -15594,6 +15597,7 @@ function runnerRunWindowActionAssessment(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   action: AiDecisionInput["legalActions"][number],
+  runTargets: readonly RunnerRunTargetEvaluation[],
   dependencies: PlanFirstLiveDependencies,
   runOrigin:
     | {
@@ -15625,14 +15629,29 @@ function runnerRunWindowActionAssessment(
         restrictedRunSequenceAction.costs.every(
           (cost) => (cost.clicks ?? 0) === 0,
         );
+      const targetEvaluation = runTargets.find(
+        (evaluation) =>
+          evaluation.actionId === restrictedRunSequenceAction.actionId,
+      );
       return {
         admissible: typeof serverId === "string" && serverId.length > 0,
-        ...(costFree ? { value: 250 } : {}),
+        ...(costFree
+          ? { value: targetEvaluation?.score ?? 250 }
+          : targetEvaluation
+            ? { value: targetEvaluation.score }
+            : {}),
         evidenceCodes: [
           "runner_engine_restricted_run_sequence_continuation",
           `runner_restricted_run_sequence_action:${restrictedRunSequenceAction.actionId}`,
           `runner_restricted_run_sequence_target:${typeof serverId === "string" ? serverId : "unknown"}`,
           `runner_restricted_run_sequence_remaining:${Number(restrictedRunSequenceAction.payload?.restrictedActionGrantRemainingActions)}`,
+          ...(targetEvaluation
+            ? [
+                `runner_restricted_run_sequence_target_score:${targetEvaluation.score}`,
+                `runner_restricted_run_sequence_target_recommendation:${targetEvaluation.recommendation}`,
+                `runner_restricted_run_sequence_known_access_state:${targetEvaluation.knownAccessState}`,
+              ]
+            : ["runner_restricted_run_sequence_target_evaluation_unavailable"]),
           ...(costFree
             ? [
                 "runner_restricted_run_sequence_cost_profile:no_click",
