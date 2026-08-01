@@ -67,7 +67,7 @@ export type SemanticRuntimeActionExclusionDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => RunnerRunTargetEvaluation | undefined;
-  runnerBlinkRunExclusion: (
+  runnerRandomBreakOrDamageRunExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => SemanticRuntimeExclusion | undefined;
@@ -278,8 +278,9 @@ export function semanticRuntimeActionExclusion(
       ].join("|"),
     };
   }
-  const blinkRunExclusion = dependencies.runnerBlinkRunExclusion(input, action);
-  if (blinkRunExclusion) return blinkRunExclusion;
+  const randomBreakRunExclusion =
+    dependencies.runnerRandomBreakOrDamageRunExclusion(input, action);
+  if (randomBreakRunExclusion) return randomBreakRunExclusion;
   if (
     runTargetEvaluation?.runActionProjection.accessReplacement &&
     runTargetEvaluation.knownAccessState === "known_no_current_payoff"

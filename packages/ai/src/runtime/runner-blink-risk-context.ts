@@ -1,31 +1,35 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
-  runnerBlinkRiskEvidenceForAction,
-  runnerBlinkRunExclusion,
-  type RunnerBlinkRiskEvidenceDependencies,
-  type RunnerBlinkRunExclusionDependencies,
+  runnerRandomBreakOrDamageRiskEvidenceForAction,
+  runnerRandomBreakOrDamageRunExclusion,
+  type RunnerRandomBreakOrDamageRiskEvidenceDependencies,
+  type RunnerRandomBreakOrDamageRunExclusionDependencies,
 } from "./runner-blink-run-exclusion";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
-export type RunnerBlinkRiskContext = {
-  runnerBlinkRiskEvidenceForAction: (
+export type RunnerRandomBreakOrDamageRiskContext = {
+  runnerRandomBreakOrDamageRiskEvidenceForAction: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => string[];
-  runnerBlinkRunExclusion: (
+  runnerRandomBreakOrDamageRunExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => SemanticRuntimeExclusion | undefined;
 };
 
-export function createRunnerBlinkRiskContext(
-  dependencies: RunnerBlinkRiskEvidenceDependencies &
-    Pick<RunnerBlinkRunExclusionDependencies, "shouldAvoidRun">,
-): RunnerBlinkRiskContext {
+export function createRunnerRandomBreakOrDamageRiskContext(
+  dependencies: RunnerRandomBreakOrDamageRiskEvidenceDependencies &
+    Pick<RunnerRandomBreakOrDamageRunExclusionDependencies, "shouldAvoidRun">,
+): RunnerRandomBreakOrDamageRiskContext {
   return {
-    runnerBlinkRiskEvidenceForAction: (input, action) =>
-      runnerBlinkRiskEvidenceForAction(input, action, dependencies),
-    runnerBlinkRunExclusion: (input, action) =>
-      runnerBlinkRunExclusion(input, action, dependencies),
+    runnerRandomBreakOrDamageRiskEvidenceForAction: (input, action) =>
+      runnerRandomBreakOrDamageRiskEvidenceForAction(
+        input,
+        action,
+        dependencies,
+      ),
+    runnerRandomBreakOrDamageRunExclusion: (input, action) =>
+      runnerRandomBreakOrDamageRunExclusion(input, action, dependencies),
   };
 }

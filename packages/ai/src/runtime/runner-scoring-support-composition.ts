@@ -68,7 +68,7 @@ export type RunnerScoringSupportCompositionDependencies = Parameters<
     ) => RunnerScoringKnownPathAssessment;
     recoveryCommitment: Omit<
       RunnerScoreComponentsDependencies["recoveryCommitment"],
-      | "blinkRecoveryScoreComponent"
+      | "randomBreakOrDamageRecoveryScoreComponent"
       | "junkyardRecoveryScoreComponent"
       | "lowValueRecoveryRepeatScoreComponent"
       | "lateNoFundingCreditRepeatScoreComponent"
@@ -157,13 +157,13 @@ export function createRunnerScoringSupportComposition(
   });
 
   const {
-    runnerBlinkRecoveryScoreComponent,
+    runnerRandomBreakOrDamageRecoveryScoreComponent,
     runnerLowValueRecoveryRepeatScoreComponent,
     runnerLateNoFundingCreditRepeatScoreComponent,
     runnerJunkyardBbsRecoveryScoreComponent,
   } = createRunnerRecoveryContext({
     targetServerId: dependencies.targetServerId,
-    blinkAssessment: dependencies.blinkAssessment,
+    randomBreakRecoveryAssessment: dependencies.randomBreakRecoveryAssessment,
     rolesForAction: dependencies.rolesForAction,
     sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     recentBasicCreditActions: semanticRuntimeRecentRunnerBasicCreditActions,
@@ -209,7 +209,8 @@ export function createRunnerScoringSupportComposition(
     goalFit: dependencies.goalFit,
     recoveryCommitment: {
       ...dependencies.recoveryCommitment,
-      blinkRecoveryScoreComponent: runnerBlinkRecoveryScoreComponent,
+      randomBreakOrDamageRecoveryScoreComponent:
+        runnerRandomBreakOrDamageRecoveryScoreComponent,
       junkyardRecoveryScoreComponent: runnerJunkyardBbsRecoveryScoreComponent,
       lowValueRecoveryRepeatScoreComponent:
         runnerLowValueRecoveryRepeatScoreComponent,

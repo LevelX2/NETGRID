@@ -1,7 +1,7 @@
-import type { BlinkRiskAssessment } from "../runner-run-target-evaluation";
+import type { RandomBreakOrDamageRiskAssessment } from "../runner-run-target-evaluation";
 import {
-  createRunnerBlinkBreakExclusionContext,
-  type RunnerBlinkBreakExclusionDependencies,
+  createRunnerRandomBreakOrDamageBreakExclusionContext,
+  type RunnerRandomBreakOrDamageBreakExclusionDependencies,
 } from "./runner-blink-break-exclusion";
 import {
   createRunnerEncounterActionExclusionContext,
@@ -43,8 +43,11 @@ export type SemanticRuntimeActionExclusionCompositionDependencies = Omit<
 > &
   RunnerSimpleExclusionsContextDependencies &
   Omit<RunnerSelfDamageContextDependencies, "hintEffectsForCard"> &
-  Omit<RunnerBlinkBreakExclusionDependencies, "shouldAvoidRun"> &
-  Omit<RunnerEncounterActionExclusionDependencies, "blinkBreakExclusion"> &
+  Omit<RunnerRandomBreakOrDamageBreakExclusionDependencies, "shouldAvoidRun"> &
+  Omit<
+    RunnerEncounterActionExclusionDependencies,
+    "randomBreakOrDamageBreakExclusion"
+  > &
   Omit<
     SemanticRuntimeActionExclusionDependencies,
     | "runnerEncounterActionExclusion"
@@ -53,8 +56,8 @@ export type SemanticRuntimeActionExclusionCompositionDependencies = Omit<
     | "runnerArchivesExclusion"
     | "runnerEmptyRemoteExclusion"
   > & {
-    shouldAvoidBlinkRiskAssessment: (
-      assessment: BlinkRiskAssessment | undefined,
+    shouldAvoidRandomBreakOrDamageRisk: (
+      assessment: RandomBreakOrDamageRiskAssessment | undefined,
     ) => boolean;
     runtimeDefinition: (
       definitionId: string,
@@ -98,18 +101,19 @@ export function createSemanticRuntimeActionExclusionComposition(
     definitionType: dependencies.definitionType,
   });
 
-  const { semanticRuntimeRunnerBlinkBreakExclusion } =
-    createRunnerBlinkBreakExclusionContext({
+  const { semanticRuntimeRunnerRandomBreakOrDamageBreakExclusion } =
+    createRunnerRandomBreakOrDamageBreakExclusionContext({
       riskAssessment: dependencies.riskAssessment,
       shouldAvoidRun: (assessment) =>
-        dependencies.shouldAvoidBlinkRiskAssessment(
-          assessment as BlinkRiskAssessment | undefined,
+        dependencies.shouldAvoidRandomBreakOrDamageRisk(
+          assessment as RandomBreakOrDamageRiskAssessment | undefined,
         ),
     });
 
   const { runnerEncounterActionExclusion } =
     createRunnerEncounterActionExclusionContext({
-      blinkBreakExclusion: semanticRuntimeRunnerBlinkBreakExclusion,
+      randomBreakOrDamageBreakExclusion:
+        semanticRuntimeRunnerRandomBreakOrDamageBreakExclusion,
       pumpViabilityAssessment: dependencies.pumpViabilityAssessment,
       breakAccessPathAssessment: dependencies.breakAccessPathAssessment,
     });
@@ -149,7 +153,8 @@ export function createSemanticRuntimeActionExclusionComposition(
       runnerMultiRunEventExclusion: dependencies.runnerMultiRunEventExclusion,
       runnerRunTargetEvaluationForAction:
         dependencies.runnerRunTargetEvaluationForAction,
-      runnerBlinkRunExclusion: dependencies.runnerBlinkRunExclusion,
+      runnerRandomBreakOrDamageRunExclusion:
+        dependencies.runnerRandomBreakOrDamageRunExclusion,
       knownCentralPayoffExclusion: semanticRuntimeKnownCentralPayoffExclusion,
       runnerArchivesExclusion: semanticRuntimeRunnerArchivesExclusion,
       runnerEmptyRemoteExclusion: semanticRuntimeRunnerEmptyRemoteExclusion,

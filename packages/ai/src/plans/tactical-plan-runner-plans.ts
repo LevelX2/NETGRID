@@ -922,7 +922,7 @@ function runNeedsStableBreakerCoverage(
   const evaluation = runnerRunTargetEvaluationForAction(context, action);
   if (
     evaluation?.pathPassability === "reachable" ||
-    evaluation?.pathPassability === "blocked_by_blink_hand_buffer"
+    evaluation?.pathPassability === "blocked_by_random_break_damage_hand_buffer"
   ) {
     return false;
   }

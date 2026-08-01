@@ -36,12 +36,17 @@ describe("DecisionSnapshotSuite", () => {
         },
       ],
     });
-    const snapshot = snapshotFor("runner-low-credits", "runner", [
-      "economy_starvation",
-      "unsafe_run",
-      "illegal_action",
-      "hidden_info_dependency",
-    ], ["economy"]);
+    const snapshot = snapshotFor(
+      "runner-low-credits",
+      "runner",
+      [
+        "economy_starvation",
+        "unsafe_run",
+        "illegal_action",
+        "hidden_info_dependency",
+      ],
+      ["economy"],
+    );
 
     const evaluation = evaluateDecisionSnapshot({
       snapshot,
@@ -79,12 +84,15 @@ describe("DecisionSnapshotSuite", () => {
     });
 
     expect(evaluation.passed).toBe(false);
-    expect(evaluation.observedMistakes.map((mistake) => mistake.mistakeClass))
-      .toContain("target_choice_unavailable");
+    expect(
+      evaluation.observedMistakes.map((mistake) => mistake.mistakeClass),
+    ).toContain("target_choice_unavailable");
   });
 
   it("detects illegal ranked actions", () => {
-    const input = inputFor("runner", [legalAction("gain-1", "gain_credit", "runner")]);
+    const input = inputFor("runner", [
+      legalAction("gain-1", "gain_credit", "runner"),
+    ]);
     const frame = buildSemanticDecisionFrame({ input });
     const trace: SemanticDecisionTrace = {
       schemaVersion: "semantic-decision-trace-v1",
@@ -118,7 +126,9 @@ describe("DecisionSnapshotSuite", () => {
   });
 
   it("detects forbidden semantic markers in trace string values", () => {
-    const input = inputFor("runner", [legalAction("gain-1", "gain_credit", "runner")]);
+    const input = inputFor("runner", [
+      legalAction("gain-1", "gain_credit", "runner"),
+    ]);
     const frame = buildSemanticDecisionFrame({ input });
     const trace: SemanticDecisionTrace = {
       schemaVersion: "semantic-decision-trace-v1",
@@ -308,7 +318,7 @@ function playStrengthSnapshotCorpus(): DecisionSnapshot[] {
               accessPayoff: "unknown",
               recommendation: "draw_for_damage_buffer",
               pathPassability: "reachable",
-              blinkRiskAssessment: { riskSeverity: "high" },
+              randomBreakOrDamageRiskAssessment: { riskSeverity: "high" },
             }),
           ],
         },
@@ -488,7 +498,8 @@ function inputFor(
     playerView: {
       side,
       stateVersion: 1,
-      timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
+      timingPoint:
+        side === "runner" ? "runner_action.main" : "corp_action.main",
       activeSide: side,
       phase: side === "runner" ? "runner_action_phase" : "corp_action_phase",
       own: {

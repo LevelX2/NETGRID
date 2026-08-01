@@ -31,7 +31,7 @@ export type SemanticRuntimeRunnerEvidenceDependencies = {
     action: LegalAction,
     actionSemanticCandidate: ActionSemanticCandidate | undefined,
   ) => EvidenceAssessment | undefined;
-  blinkRiskEvidenceForAction: (
+  randomBreakOrDamageRiskEvidenceForAction: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => string[];
@@ -62,8 +62,10 @@ export function semanticRuntimeRunnerEvidence(
     input,
     action,
   );
-  const bankCommitmentEvidence =
-    dependencies.bankInvestmentCommitmentEvidence(input, action);
+  const bankCommitmentEvidence = dependencies.bankInvestmentCommitmentEvidence(
+    input,
+    action,
+  );
   const noRunEconomyCommitmentEvidence =
     dependencies.noRunEconomyCommitmentEvidence(input, action);
   const selfDamageSurvivalEvidence =
@@ -72,10 +74,8 @@ export function semanticRuntimeRunnerEvidence(
       action,
       actionSemanticCandidate,
     )?.evidence ?? [];
-  const blinkRiskEvidence = dependencies.blinkRiskEvidenceForAction(
-    input,
-    action,
-  );
+  const randomBreakOrDamageRiskEvidence =
+    dependencies.randomBreakOrDamageRiskEvidenceForAction(input, action);
   const loanLiabilityEvidence =
     dependencies.loanLiabilityAssessment(input, action)?.evidence ?? [];
   const persistentInstallEvidence =
@@ -88,7 +88,7 @@ export function semanticRuntimeRunnerEvidence(
       ...bankCommitmentEvidence,
       ...noRunEconomyCommitmentEvidence,
       ...selfDamageSurvivalEvidence,
-      ...blinkRiskEvidence,
+      ...randomBreakOrDamageRiskEvidence,
       ...loanLiabilityEvidence,
       ...persistentInstallEvidence,
     ];
@@ -98,7 +98,7 @@ export function semanticRuntimeRunnerEvidence(
     bankCommitmentEvidence.length > 0 ||
     noRunEconomyCommitmentEvidence.length > 0 ||
     selfDamageSurvivalEvidence.length > 0 ||
-    blinkRiskEvidence.length > 0 ||
+    randomBreakOrDamageRiskEvidence.length > 0 ||
     loanLiabilityEvidence.length > 0 ||
     persistentInstallEvidence.length > 0
   ) {
@@ -107,7 +107,7 @@ export function semanticRuntimeRunnerEvidence(
       ...bankCommitmentEvidence,
       ...noRunEconomyCommitmentEvidence,
       ...selfDamageSurvivalEvidence,
-      ...blinkRiskEvidence,
+      ...randomBreakOrDamageRiskEvidence,
       ...loanLiabilityEvidence,
       ...persistentInstallEvidence,
     ];

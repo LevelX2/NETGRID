@@ -685,6 +685,12 @@ export type AiHintBreakerProfile = {
   hostedStrengthPenalty?: boolean;
   sideEffects?: KnownHintBreakerSideEffect[];
   restrictions?: string[];
+  randomOutcome?: {
+    kind: "random_break_or_damage";
+    successProbabilityPerAttempt: number;
+    failureDamageType: "net" | "meat" | "brain";
+    maxSingleFailureDamage: number;
+  };
 };
 
 export type AiHintRemoteRole = {
@@ -1275,6 +1281,65 @@ function validateBreakerProfile(
       `${path}.restrictions`,
       "Expected string array.",
     );
+  if (breakerProfile.randomOutcome !== undefined) {
+    if (!isRecord(breakerProfile.randomOutcome)) {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${path}.randomOutcome`,
+        "Expected object.",
+      );
+    } else {
+      requireKnownField(
+        breakerProfile.randomOutcome.kind,
+        ["random_break_or_damage"] as const,
+        `${path}.randomOutcome.kind`,
+        "invalid_shape",
+        issues,
+        true,
+      );
+      requireKnownField(
+        breakerProfile.randomOutcome.failureDamageType,
+        ["net", "meat", "brain"] as const,
+        `${path}.randomOutcome.failureDamageType`,
+        "invalid_shape",
+        issues,
+        true,
+      );
+      const successProbabilityPerAttempt =
+        breakerProfile.randomOutcome.successProbabilityPerAttempt;
+      if (
+        typeof successProbabilityPerAttempt !== "number" ||
+        !Number.isFinite(successProbabilityPerAttempt) ||
+        successProbabilityPerAttempt <= 0 ||
+        successProbabilityPerAttempt > 1
+      ) {
+        addIssue(
+          issues,
+          "error",
+          "invalid_shape",
+          `${path}.randomOutcome.successProbabilityPerAttempt`,
+          "Expected a finite probability greater than 0 and at most 1.",
+        );
+      }
+      const maxSingleFailureDamage =
+        breakerProfile.randomOutcome.maxSingleFailureDamage;
+      if (
+        typeof maxSingleFailureDamage !== "number" ||
+        !Number.isInteger(maxSingleFailureDamage) ||
+        maxSingleFailureDamage <= 0
+      ) {
+        addIssue(
+          issues,
+          "error",
+          "invalid_shape",
+          `${path}.randomOutcome.maxSingleFailureDamage`,
+          "Expected a positive integer.",
+        );
+      }
+    }
+  }
 }
 
 function validateRemoteRole(

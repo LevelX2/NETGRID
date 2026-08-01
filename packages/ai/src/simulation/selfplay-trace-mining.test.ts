@@ -534,26 +534,26 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("self-damage-positive");
   });
 
-  it("bounds blink hand-buffer signals to structured entries", () => {
+  it("bounds random-break damage hand-buffer signals to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {
-        selectedActionId: "blink-positive",
-        debugFacts: ["blinkRiskSeverity:lethal"],
+        selectedActionId: "random-break-positive",
+        debugFacts: ["randomBreakDamageRiskSeverity:lethal"],
       }),
     ]);
     const noise = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {
-        selectedActionId: "blink-noise",
-        debugFacts: ["blinkRiskSeverity:lethalish"],
+        selectedActionId: "random-break-noise",
+        debugFacts: ["randomBreakDamageRiskSeverity:lethalish"],
       }),
     ]);
 
     const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
-      detectorIds: ["blink_low_hand_buffer_run"],
+      detectorIds: ["random_break_damage_low_hand_buffer_run"],
     });
 
     expect(findings).toHaveLength(1);
-    expect(findings[0]?.selectedActionId).toBe("blink-positive");
+    expect(findings[0]?.selectedActionId).toBe("random-break-positive");
   });
 
   it("bounds recovery loop entry signals to text tokens", () => {
@@ -716,9 +716,7 @@ describe("SelfplayTraceMining", () => {
     );
 
     expect(findings).toHaveLength(1);
-    expect(findings[0]?.selectedActionId).toBe(
-      "unsupported-buffer-draw-2",
-    );
+    expect(findings[0]?.selectedActionId).toBe("unsupported-buffer-draw-2");
   });
 
   it("accepts a server-bound run event materialized by a pressure plan", () => {

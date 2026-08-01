@@ -1,4 +1,7 @@
-import type { SemanticDecisionFrame, TacticalGoalLike } from "./semantic-decision-frame";
+import type {
+  SemanticDecisionFrame,
+  TacticalGoalLike,
+} from "./semantic-decision-frame";
 import { buildCorpTacticalGoals } from "./corp-tactical-goals";
 
 export function synthesizeNeutralTacticalGoals(
@@ -24,26 +27,35 @@ function synthesizeRunnerNeutralGoals(
     runTargets.some(
       (target) =>
         target.recommendation === "draw_for_damage_buffer" ||
-        target.blinkRiskAssessment?.riskSeverity === "high" ||
-        target.blinkRiskAssessment?.riskSeverity === "lethal",
+        target.randomBreakOrDamageRiskAssessment?.riskSeverity === "high" ||
+        target.randomBreakOrDamageRiskAssessment?.riskSeverity === "lethal",
     )
   ) {
-    goals.push(goal("runner.neutral.survival_risk", "risk_control", 960, [
-      "neutral_goal:survival_risk",
-      "run_target:flatline_or_damage_buffer",
-    ]));
+    goals.push(
+      goal("runner.neutral.survival_risk", "risk_control", 960, [
+        "neutral_goal:survival_risk",
+        "run_target:flatline_or_damage_buffer",
+      ]),
+    );
   }
-  if (semantics.has("economy.gain_credit") || frame.economyContext?.creditPressure === "high") {
-    goals.push(goal("runner.neutral.economy", "economy", 720, [
-      "neutral_goal:economy",
-      `credit_pressure:${frame.economyContext?.creditPressure ?? "unknown"}`,
-    ]));
+  if (
+    semantics.has("economy.gain_credit") ||
+    frame.economyContext?.creditPressure === "high"
+  ) {
+    goals.push(
+      goal("runner.neutral.economy", "economy", 720, [
+        "neutral_goal:economy",
+        `credit_pressure:${frame.economyContext?.creditPressure ?? "unknown"}`,
+      ]),
+    );
   }
   if (semantics.has("draw.card") || semantics.has("install.card")) {
-    goals.push(goal("runner.neutral.setup", "setup", 620, [
-      "neutral_goal:setup",
-      "candidate_semantic:draw_or_install",
-    ]));
+    goals.push(
+      goal("runner.neutral.setup", "setup", 620, [
+        "neutral_goal:setup",
+        "candidate_semantic:draw_or_install",
+      ]),
+    );
   }
   if (
     runTargets.some(
@@ -53,47 +65,61 @@ function synthesizeRunnerNeutralGoals(
         target.pathPassability === "reachable",
     )
   ) {
-    goals.push(goal("runner.neutral.safe_run_access", "pressure", 760, [
-      "neutral_goal:safe_run_access",
-      "run_target:reachable_central",
-    ]));
+    goals.push(
+      goal("runner.neutral.safe_run_access", "pressure", 760, [
+        "neutral_goal:safe_run_access",
+        "run_target:reachable_central",
+      ]),
+    );
   }
   if (
     runTargets.some(
       (target) => target.targetKind === "remote" && target.scoreThreat,
     )
   ) {
-    goals.push(goal("runner.neutral.remote_contest_if_score_threat", "remote_contest", 820, [
-      "neutral_goal:remote_contest",
-      "run_target:remote_score_threat",
-    ]));
+    goals.push(
+      goal(
+        "runner.neutral.remote_contest_if_score_threat",
+        "remote_contest",
+        820,
+        ["neutral_goal:remote_contest", "run_target:remote_score_threat"],
+      ),
+    );
   }
   if (
-    runTargets.some((target) =>
-      target.pathPassability === "blocked_missing_coverage",
+    runTargets.some(
+      (target) => target.pathPassability === "blocked_missing_coverage",
     )
   ) {
-    goals.push(goal("runner.neutral.coverage", "coverage", 700, [
-      "neutral_goal:coverage",
-      "run_target:missing_coverage",
-    ]));
+    goals.push(
+      goal("runner.neutral.coverage", "coverage", 700, [
+        "neutral_goal:coverage",
+        "run_target:missing_coverage",
+      ]),
+    );
   }
   if (semantics.has("tag.remove")) {
-    goals.push(goal("runner.neutral.cleanup", "cleanup", 680, [
-      "neutral_goal:cleanup",
-      "candidate_semantic:tag.remove",
-    ]));
+    goals.push(
+      goal("runner.neutral.cleanup", "cleanup", 680, [
+        "neutral_goal:cleanup",
+        "candidate_semantic:tag.remove",
+      ]),
+    );
   }
   if (semantics.has("counter.remove_trace_tag")) {
-    goals.push(goal("runner.neutral.persistent_trace_counter", "cleanup", 980, [
-      "neutral_goal:persistent_trace_counter",
-      "candidate_semantic:counter.remove_trace_tag",
-    ]));
+    goals.push(
+      goal("runner.neutral.persistent_trace_counter", "cleanup", 980, [
+        "neutral_goal:persistent_trace_counter",
+        "candidate_semantic:counter.remove_trace_tag",
+      ]),
+    );
   }
   if (goals.length === 0) {
-    goals.push(goal("runner.neutral.survival", "risk_control", 500, [
-      "neutral_goal:survival",
-    ]));
+    goals.push(
+      goal("runner.neutral.survival", "risk_control", 500, [
+        "neutral_goal:survival",
+      ]),
+    );
   }
   return goals;
 }

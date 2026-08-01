@@ -521,11 +521,11 @@ function centralPressureModule(): PlanModule {
                 }
               : current.signal.routePreparation === "develop_payoff" &&
                   current.signal.sourceDefinitionIds
-              ? {
-                  requiredSourceDefinitionIds:
-                    current.signal.sourceDefinitionIds,
-                }
-              : {}),
+                ? {
+                    requiredSourceDefinitionIds:
+                      current.signal.sourceDefinitionIds,
+                  }
+                : {}),
           },
           ...(current.signal.routePreparation
             ? {}

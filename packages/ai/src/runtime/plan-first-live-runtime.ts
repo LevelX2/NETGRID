@@ -2601,11 +2601,13 @@ function buildRunnerDomain(
     runTargets.some(
       (evaluation) =>
         evaluation.recommendation === "draw_for_damage_buffer" ||
-        evaluation.pathPassability === "blocked_by_blink_hand_buffer" ||
+        evaluation.pathPassability ===
+          "blocked_by_random_break_damage_hand_buffer" ||
         (evaluation.riskyUniversalCoverage && handSize < 3) ||
-        evaluation.blinkRiskAssessment?.blockedByHandBuffer === true ||
-        evaluation.blinkRiskAssessment?.riskSeverity === "high" ||
-        evaluation.blinkRiskAssessment?.riskSeverity === "lethal",
+        evaluation.randomBreakOrDamageRiskAssessment?.blockedByHandBuffer ===
+          true ||
+        evaluation.randomBreakOrDamageRiskAssessment?.riskSeverity === "high" ||
+        evaluation.randomBreakOrDamageRiskAssessment?.riskSeverity === "lethal",
     ) ||
     (handSize < 3 &&
       input.playerView.servers.some((server) =>
@@ -2658,9 +2660,10 @@ function buildRunnerDomain(
       noUnrezzedIceVisible &&
       (evaluation.unavoidableVisibleIceHazardCount ?? 0) === 0 &&
       evaluation.visibleTraceTagHazardUnavoidable !== true &&
-      evaluation.blinkRiskAssessment?.blockedByHandBuffer !== true &&
-      evaluation.blinkRiskAssessment?.riskSeverity !== "high" &&
-      evaluation.blinkRiskAssessment?.riskSeverity !== "lethal"
+      evaluation.randomBreakOrDamageRiskAssessment?.blockedByHandBuffer !==
+        true &&
+      evaluation.randomBreakOrDamageRiskAssessment?.riskSeverity !== "high" &&
+      evaluation.randomBreakOrDamageRiskAssessment?.riskSeverity !== "lethal"
     );
   });
   const forgoUnsafeRunCapacity =
@@ -3407,7 +3410,7 @@ function buildRunnerDomain(
           evaluation,
         );
         const irrecoverableScoreThreatContest =
-          runnerIrrecoverableBlinkScoreThreatContest(
+          runnerIrrecoverableRandomBreakScoreThreatContest(
             input,
             candidates,
             evaluation,
@@ -3455,7 +3458,7 @@ function buildRunnerDomain(
           evaluation,
         );
         const irrecoverableScoreThreatContest =
-          runnerIrrecoverableBlinkScoreThreatContest(
+          runnerIrrecoverableRandomBreakScoreThreatContest(
             input,
             candidates,
             evaluation,
@@ -3488,7 +3491,7 @@ function buildRunnerDomain(
             : safetyBlocked
               ? recentSafetyAbort.evidenceCode
               : irrecoverableScoreThreatContest
-                ? `runner_irrecoverable_blink_score_threat_contest:${evaluation.targetServerId}`
+                ? `runner_irrecoverable_random_break_damage_score_threat_contest:${evaluation.targetServerId}`
                 : fundingSupport
                   ? fundingSupport.evidenceCode
                   : directRunCanConvertNow
@@ -5016,19 +5019,20 @@ function runnerRemoteInformationPreparationSignals(
   ];
 }
 
-function runnerIrrecoverableBlinkScoreThreatContest(
+function runnerIrrecoverableRandomBreakScoreThreatContest(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   evaluation: RunnerRunTargetEvaluation,
 ): boolean {
-  const blinkRisk = evaluation.blinkRiskAssessment;
+  const randomBreakRisk = evaluation.randomBreakOrDamageRiskAssessment;
   if (
     evaluation.targetKind !== "remote" ||
     evaluation.scoreThreat !== true ||
-    evaluation.pathPassability !== "blocked_by_blink_hand_buffer" ||
-    blinkRisk?.blockedByHandBuffer !== true ||
-    blinkRisk.stableCoverageAvailable === true ||
-    blinkRisk.currentHandCount > 0
+    evaluation.pathPassability !==
+      "blocked_by_random_break_damage_hand_buffer" ||
+    randomBreakRisk?.blockedByHandBuffer !== true ||
+    randomBreakRisk.stableCoverageAvailable === true ||
+    randomBreakRisk.currentHandCount > 0
   ) {
     return false;
   }
@@ -15060,7 +15064,11 @@ function bindRunnerRemoteRunActionAssessments(
       evaluation,
     );
     const irrecoverableScoreThreatContest =
-      runnerIrrecoverableBlinkScoreThreatContest(input, candidates, evaluation);
+      runnerIrrecoverableRandomBreakScoreThreatContest(
+        input,
+        candidates,
+        evaluation,
+      );
     const directRunRouteReady =
       evaluation.recommendation === "run_now" ||
       evaluation.recommendation === "run_if_free" ||
@@ -16468,8 +16476,7 @@ function corpFortRunRezSupportAssessment(
   return {
     productive: true,
     evidenceCode:
-      quote.kind ===
-      CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND
+      quote.kind === CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND
         ? "corp_rez_fort_run_support_same_fort_run_with_affordable_temporary_hq_ice_encounter"
         : "corp_rez_fort_run_support_same_fort_run_with_affordable_hq_ice_install",
   };
@@ -16712,8 +16719,7 @@ function corpStructuredIceSupportAssessment(
   }
 
   if (
-    profile.activeRunConstraint ===
-      "same_fort_upcoming_ice_when_active" &&
+    profile.activeRunConstraint === "same_fort_upcoming_ice_when_active" &&
     input.playerView.run
   ) {
     const run = input.playerView.run;

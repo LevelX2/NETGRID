@@ -23,7 +23,7 @@ export type AiSelfplayTraceMiningDetectorId =
   | "repeatable_action_no_progress_loop"
   | "runner_survival_no_progress_loop"
   | "risky_self_damage_action"
-  | "blink_low_hand_buffer_run"
+  | "random_break_damage_low_hand_buffer_run"
   | "duplicate_low_delta_install"
   | "clearly_dominated_plan_choice"
   | "overdraw_without_urgency"
@@ -229,7 +229,7 @@ export const DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS: AiSelfplayTraceMiningDetec
     "repeatable_action_no_progress_loop",
     "runner_survival_no_progress_loop",
     "risky_self_damage_action",
-    "blink_low_hand_buffer_run",
+    "random_break_damage_low_hand_buffer_run",
     "duplicate_low_delta_install",
     "clearly_dominated_plan_choice",
     "overdraw_without_urgency",
@@ -371,8 +371,7 @@ export function summarizeSelfplayActionLimitClusters(
     SELFPLAY_ACTION_LIMIT_CLUSTER_IDS.map((cluster) => [cluster, 0]),
   ) as Record<AiSelfplayActionLimitClusterId, number>;
   for (const summary of summaries) {
-    if (summary.terminationKind !== "action_limit")
-      continue;
+    if (summary.terminationKind !== "action_limit") continue;
     counts[classifySelfplayActionLimitCluster(summary)] += 1;
   }
   return counts;
@@ -385,8 +384,7 @@ export function summarizeSelfplayActionLimitSubclusters(
     SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS.map((subcluster) => [subcluster, 0]),
   ) as Record<AiSelfplayActionLimitSubclusterId, number>;
   for (const summary of summaries) {
-    if (summary.terminationKind !== "action_limit")
-      continue;
+    if (summary.terminationKind !== "action_limit") continue;
     counts[classifySelfplayActionLimitSubcluster(summary)] += 1;
   }
   return counts;
@@ -1540,14 +1538,14 @@ function selfplayEntryDetectorFindings(
     );
   }
   if (
-    enabled.has("blink_low_hand_buffer_run") &&
+    enabled.has("random_break_damage_low_hand_buffer_run") &&
     entry.side === "runner" &&
     (entry.actionType === "start_run" ||
       entry.actionType === "trigger_ability") &&
     selfplayEntryHasStructuredSignal(entry, [
-      "blocked_by_blink_hand_buffer:true",
-      "blinkriskseverity:lethal",
-      "blink_break_self_net_damage_risk",
+      "blocked_by_random_break_damage_hand_buffer:true",
+      "randombreakdamageriskseverity:lethal",
+      "random_break_damage_self_damage_risk",
     ])
   ) {
     findings.push(
@@ -1555,9 +1553,9 @@ function selfplayEntryDetectorFindings(
         summary,
         summaryIndex,
         actionIndex,
-        "blink_low_hand_buffer_run",
+        "random_break_damage_low_hand_buffer_run",
         "high",
-        "Runner selected a Blink-dependent action with low hand-buffer risk signals.",
+        "Runner selected a random-break-or-damage-dependent action with low hand-buffer risk signals.",
       ),
     );
   }
@@ -1681,8 +1679,7 @@ function repeatedRunDecisionStateIsStable(
           current.runnerArchivesVisibleFingerprint &&
         previous.runnerArchivesUnknownCardCount ===
           current.runnerArchivesUnknownCardCount &&
-        previous.runnerArchivesKnownAgenda ===
-          current.runnerArchivesKnownAgenda
+        previous.runnerArchivesKnownAgenda === current.runnerArchivesKnownAgenda
       );
     }
     if (
@@ -1692,8 +1689,7 @@ function repeatedRunDecisionStateIsStable(
       return (
         previous.runnerArchivesUnknownCardCount ===
           current.runnerArchivesUnknownCardCount &&
-        previous.runnerArchivesKnownAgenda ===
-          current.runnerArchivesKnownAgenda
+        previous.runnerArchivesKnownAgenda === current.runnerArchivesKnownAgenda
       );
     }
   }
@@ -2018,9 +2014,9 @@ function recoveryLowValueLoopContext(
         ? "search_or_draw_recovery"
         : survivalBufferNeed
           ? "survival_buffer_recovery"
-        : pressureSkipped
-          ? "recovery_over_pressure"
-          : "low_value_repeat_no_funding_need";
+          : pressureSkipped
+            ? "recovery_over_pressure"
+            : "low_value_repeat_no_funding_need";
   return {
     category,
     facts: [

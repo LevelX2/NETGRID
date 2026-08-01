@@ -5,24 +5,24 @@ import type {
 } from "@netgrid/shared";
 import { rolesHaveBreakerRole } from "./breaker-role-match";
 
-type RunnerBlinkRecoveryScoreAssessment = {
+type RunnerRandomBreakOrDamageRecoveryScoreAssessment = {
   active: boolean;
   evidence: string[];
 };
 
-export type RunnerBlinkRecoveryScoreDependencies = {
+export type RunnerRandomBreakOrDamageRecoveryScoreDependencies = {
   targetServerId: (action: LegalAction) => string | undefined;
   assessment: (
     input: AiDecisionInput,
     targetServerId: string | undefined,
-  ) => RunnerBlinkRecoveryScoreAssessment | undefined;
+  ) => RunnerRandomBreakOrDamageRecoveryScoreAssessment | undefined;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
 };
 
-export function runnerBlinkRecoveryScoreComponent(
+export function runnerRandomBreakOrDamageRecoveryScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: RunnerBlinkRecoveryScoreDependencies,
+  dependencies: RunnerRandomBreakOrDamageRecoveryScoreDependencies,
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
   const targetServerId =
@@ -34,12 +34,12 @@ export function runnerBlinkRecoveryScoreComponent(
 
   if (action.type === "draw_card") {
     return {
-      key: "runner_blink_damage_buffer_recovery",
-      label: "Blink-Schadenspuffer",
+      key: "runner_random_break_damage_buffer_recovery",
+      label: "Zufallsbruch-Schadenspuffer",
       value: 1700,
       reason: sortedUnique([
         ...assessment.evidence,
-        "blink_recovery_action:draw_card",
+        "random_break_damage_recovery_action:draw_card",
       ]).join("|"),
     };
   }
@@ -48,12 +48,12 @@ export function runnerBlinkRecoveryScoreComponent(
     const roles = dependencies.rolesForAction(input, action);
     if (rolesHaveBreakerRole(roles)) {
       return {
-        key: "runner_blink_stable_coverage_recovery",
+        key: "runner_random_break_damage_stable_coverage_recovery",
         label: "Stabile Breaker-Abdeckung",
         value: 850,
         reason: sortedUnique([
           ...assessment.evidence,
-          "blink_recovery_action:stable_breaker_install",
+          "random_break_damage_recovery_action:stable_breaker_install",
         ]).join("|"),
       };
     }

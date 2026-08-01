@@ -5,7 +5,7 @@ import type {
   PublicGameEvent,
   VisibleCard,
 } from "@netgrid/shared";
-import { runnerBlinkRecoveryScoreComponent } from "./runner-blink-recovery-score";
+import { runnerRandomBreakOrDamageRecoveryScoreComponent } from "./runner-blink-recovery-score";
 import { runnerJunkyardBbsRecoveryScoreComponent } from "./runner-junkyard-bbs-recovery-score";
 import {
   runnerJunkyardBbsRecoveryAction,
@@ -23,7 +23,7 @@ import {
   runnerRecentRecoveryActions,
 } from "./runner-recovery-history";
 
-type RunnerBlinkRecoveryAssessment = {
+type RunnerRandomBreakRecoveryAssessment = {
   active: boolean;
   evidence: string[];
 };
@@ -35,10 +35,10 @@ type RunnerSafeProgressTarget = {
 
 export type RunnerRecoveryContextDependencies = {
   targetServerId: (action: LegalAction) => string | undefined;
-  blinkAssessment: (
+  randomBreakRecoveryAssessment: (
     input: AiDecisionInput,
     targetServerId: string | undefined,
-  ) => RunnerBlinkRecoveryAssessment | undefined;
+  ) => RunnerRandomBreakRecoveryAssessment | undefined;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
@@ -73,7 +73,7 @@ export type RunnerRecoveryContextDependencies = {
 };
 
 export type RunnerRecoveryContext = {
-  runnerBlinkRecoveryScoreComponent: (
+  runnerRandomBreakOrDamageRecoveryScoreComponent: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => AiDecisionScoreComponent | undefined;
@@ -180,10 +180,10 @@ export function createRunnerRecoveryContext(
   }
 
   return {
-    runnerBlinkRecoveryScoreComponent: (input, action) =>
-      runnerBlinkRecoveryScoreComponent(input, action, {
+    runnerRandomBreakOrDamageRecoveryScoreComponent: (input, action) =>
+      runnerRandomBreakOrDamageRecoveryScoreComponent(input, action, {
         targetServerId: dependencies.targetServerId,
-        assessment: dependencies.blinkAssessment,
+        assessment: dependencies.randomBreakRecoveryAssessment,
         rolesForAction: dependencies.rolesForAction,
       }),
     runnerLowValueRecoveryRepeatScoreComponent: (input, action) =>

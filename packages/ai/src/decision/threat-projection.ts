@@ -56,14 +56,14 @@ export function buildAiThreatProjections(
     }
     if (
       target.recommendation === "draw_for_damage_buffer" ||
-      target.blinkRiskAssessment?.riskSeverity === "high" ||
-      target.blinkRiskAssessment?.riskSeverity === "lethal"
+      target.randomBreakOrDamageRiskAssessment?.riskSeverity === "high" ||
+      target.randomBreakOrDamageRiskAssessment?.riskSeverity === "lethal"
     ) {
       projections.push(
         runTargetThreat(
           target,
           "runner_flatline_risk",
-          target.blinkRiskAssessment?.riskSeverity === "lethal"
+          target.randomBreakOrDamageRiskAssessment?.riskSeverity === "lethal"
             ? "critical"
             : "high",
         ),
@@ -134,7 +134,10 @@ function dedupeThreats(
   for (const projection of projections) {
     const key = `${projection.threat}:${projection.targetId ?? ""}`;
     const existing = byKey.get(key);
-    if (!existing || severityRank(projection.severity) > severityRank(existing.severity)) {
+    if (
+      !existing ||
+      severityRank(projection.severity) > severityRank(existing.severity)
+    ) {
       byKey.set(key, projection);
     }
   }

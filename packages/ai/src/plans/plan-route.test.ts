@@ -13,7 +13,10 @@ describe("plan route binding", () => {
     const route = bindBestCurrentPlanRoute({
       ...baseParams(),
       candidates: [
-        routeCandidate(candidate("credit", "gain_credit", "economy.gain_credit"), 4),
+        routeCandidate(
+          candidate("credit", "gain_credit", "economy.gain_credit"),
+          4,
+        ),
         routeCandidate(candidate("draw", "draw_card", "draw.card"), 20),
       ],
     });
@@ -142,15 +145,18 @@ describe("plan route binding", () => {
           target: { kind: "server", id: "rd" },
         },
         candidates: [
-          routeCandidate({
-            ...candidate("run-hq", "start_run", "run.start"),
-            runProjectionSummary: {
-              serverId: "hq",
-              serverKind: "hq",
-              source: "legal_action_payload",
-              evidence: [],
+          routeCandidate(
+            {
+              ...candidate("run-hq", "start_run", "run.start"),
+              runProjectionSummary: {
+                serverId: "hq",
+                serverKind: "hq",
+                source: "legal_action_payload",
+                evidence: [],
+              },
             },
-          }, 50),
+            50,
+          ),
         ],
       }),
     ).toThrow(expect.objectContaining({ code: "step_target_mismatch" }));
@@ -328,11 +334,14 @@ describe("plan route binding", () => {
       bindBestCurrentPlanRoute({
         ...baseParams(),
         candidates: [
-          routeCandidate({
-            ...candidate("opaque"),
-            semanticActionType: "unknown",
-            primaryProjectionStatus: "neutral_projected",
-          }, 999),
+          routeCandidate(
+            {
+              ...candidate("opaque"),
+              semanticActionType: "unknown",
+              primaryProjectionStatus: "neutral_projected",
+            },
+            999,
+          ),
         ],
       }),
     ).toThrow(expect.objectContaining({ code: "missing_action_semantics" }));

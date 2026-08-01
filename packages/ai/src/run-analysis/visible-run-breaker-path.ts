@@ -818,9 +818,7 @@ export function visibleRunCardDefinition(
 export function breakerCarriesStrengthAcrossIce(
   definition: CardDefinition,
 ): boolean {
-  return (definition.mechanics ?? []).includes(
-    "run_remainder_strength_bonus",
-  );
+  return (definition.mechanics ?? []).includes("run_remainder_strength_bonus");
 }
 
 export function hasSubtype(

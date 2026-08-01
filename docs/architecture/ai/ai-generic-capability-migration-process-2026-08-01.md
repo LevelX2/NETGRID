@@ -148,17 +148,17 @@ package_active/package_verifying
 
 ## Paketfolge
 
-| Paket | Schwerpunkt | Hauptowner |
-| --- | --- | --- |
-| GC00 | Prozessartefakt und Ausgangsinventar | Prozess |
-| GC01 | Strukturierte Hint-Effekte | Action-Semantik |
-| GC02 | Exakte Action-/Ability-Bindung | Action-Semantik |
-| GC03 | Eindeutige Legacy-Fallbacks | bestehende Domainowner |
-| GC04 | Typisierte Plan-Step-Fähigkeiten | Plan-Kernel |
-| GC05 | Corp-Placement-/Defense-Profile | `corp.defend_servers` |
-| GC06 | Engine-gequotete Folgekontrakte | Engine + `corp.defend_servers` |
-| GC07 | Generische Zufalls-Break-/Schadensverträge | Run-Analyse + Engine |
-| GC08 | Finaler Abgleich, Wissenspflege und Integration | Prozess |
+| Paket | Schwerpunkt                                     | Hauptowner                     |
+| ----- | ----------------------------------------------- | ------------------------------ |
+| GC00  | Prozessartefakt und Ausgangsinventar            | Prozess                        |
+| GC01  | Strukturierte Hint-Effekte                      | Action-Semantik                |
+| GC02  | Exakte Action-/Ability-Bindung                  | Action-Semantik                |
+| GC03  | Eindeutige Legacy-Fallbacks                     | bestehende Domainowner         |
+| GC04  | Typisierte Plan-Step-Fähigkeiten                | Plan-Kernel                    |
+| GC05  | Corp-Placement-/Defense-Profile                 | `corp.defend_servers`          |
+| GC06  | Engine-gequotete Folgekontrakte                 | Engine + `corp.defend_servers` |
+| GC07  | Generische Zufalls-Break-/Schadensverträge      | Run-Analyse + Engine           |
+| GC08  | Finaler Abgleich, Wissenspflege und Integration | Prozess                        |
 
 ## GC00 – Prozessartefakt und Ausgangsinventar
 

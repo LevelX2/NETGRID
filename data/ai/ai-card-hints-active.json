@@ -534,17 +534,23 @@
     },
     {
       "aiSupportStatus": "ai_supported",
-      "breakerProfile": {
-        "baseStrength": 5,
-        "breakCost": 0,
+    "breakerProfile": {
+      "baseStrength": 5,
+      "breakCost": 0,
         "coverage": [
           "universal"
         ],
-        "sideEffects": [
-          "random_failure",
-          "once_per_subroutine"
-        ]
-      },
+      "sideEffects": [
+        "random_failure",
+        "once_per_subroutine"
+      ],
+      "randomOutcome": {
+        "failureDamageType": "net",
+        "kind": "random_break_or_damage",
+        "maxSingleFailureDamage": 3,
+        "successProbabilityPerAttempt": 0.5
+      }
+    },
       "cardId": "onr_v1_007_blink",
       "cardType": "program",
       "costProfile": {

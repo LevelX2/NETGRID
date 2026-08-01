@@ -1,65 +1,65 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
-export type RunnerBlinkBreakRiskAssessment = {
+export type RunnerRandomBreakOrDamageBreakRiskAssessment = {
   stableCoverageAvailable: boolean;
   evidence: string[];
 };
 
-export type RunnerBlinkBreakExclusionDependencies = {
+export type RunnerRandomBreakOrDamageBreakExclusionDependencies = {
   riskAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => RunnerBlinkBreakRiskAssessment | undefined;
+  ) => RunnerRandomBreakOrDamageBreakRiskAssessment | undefined;
   shouldAvoidRun: (
-    assessment: RunnerBlinkBreakRiskAssessment | undefined,
+    assessment: RunnerRandomBreakOrDamageBreakRiskAssessment | undefined,
   ) => boolean;
 };
 
-export type RunnerBlinkBreakExclusionContext = {
-  semanticRuntimeRunnerBlinkBreakExclusion: (
+export type RunnerRandomBreakOrDamageBreakExclusionContext = {
+  semanticRuntimeRunnerRandomBreakOrDamageBreakExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => SemanticRuntimeExclusion | undefined;
 };
 
-export function createRunnerBlinkBreakExclusionContext(
-  dependencies: RunnerBlinkBreakExclusionDependencies,
-): RunnerBlinkBreakExclusionContext {
-  function semanticRuntimeRunnerBlinkBreakExclusion(
+export function createRunnerRandomBreakOrDamageBreakExclusionContext(
+  dependencies: RunnerRandomBreakOrDamageBreakExclusionDependencies,
+): RunnerRandomBreakOrDamageBreakExclusionContext {
+  function semanticRuntimeRunnerRandomBreakOrDamageBreakExclusion(
     input: AiDecisionInput,
     action: LegalAction,
   ): SemanticRuntimeExclusion | undefined {
-    return runnerBlinkBreakExclusion(input, action, dependencies);
+    return runnerRandomBreakOrDamageBreakExclusion(input, action, dependencies);
   }
 
-  return { semanticRuntimeRunnerBlinkBreakExclusion };
+  return { semanticRuntimeRunnerRandomBreakOrDamageBreakExclusion };
 }
 
-export function runnerBlinkBreakExclusion(
+export function runnerRandomBreakOrDamageBreakExclusion(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: RunnerBlinkBreakExclusionDependencies,
+  dependencies: RunnerRandomBreakOrDamageBreakExclusionDependencies,
 ): SemanticRuntimeExclusion | undefined {
   const assessment = dependencies.riskAssessment(input, action);
   if (!assessment) return undefined;
   if (assessment.stableCoverageAvailable) {
     return {
-      key: "blink_break_stable_alternative_available",
-      label: "Stabiler Breaker statt Blink",
+      key: "random_break_damage_stable_alternative_available",
+      label: "Stabiler Breaker statt Zufallsbruch",
       reason: sortedUnique([
         ...assessment.evidence,
-        "why_blink_break_blocked:stable_breaker_available",
+        "why_random_break_damage_blocked:stable_breaker_available",
       ]).join("|"),
     };
   }
   if (!dependencies.shouldAvoidRun(assessment)) return undefined;
   return {
-    key: "blink_break_self_net_damage_risk",
-    label: "Blink-Break mit Self-Net-Damage-Risiko",
+    key: "random_break_damage_self_damage_risk",
+    label: "Zufallsbruch mit Eigenschaden-Risiko",
     reason: sortedUnique([
       ...assessment.evidence,
-      "why_blink_break_blocked:self_net_damage_buffer_too_low",
+      "why_random_break_damage_blocked:self_damage_buffer_too_low",
     ]).join("|"),
   };
 }

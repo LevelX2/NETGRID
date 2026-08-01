@@ -1,50 +1,49 @@
 import {
-  createRunnerBlinkEncounterBreakContext,
-  type RunnerBlinkEncounterBreakContextDependencies,
+  createRunnerRandomBreakOrDamageEncounterContext,
+  type RunnerRandomBreakOrDamageEncounterContextDependencies,
 } from "./runner-blink-encounter-break-context";
 import {
-  createRunnerBlinkRiskContext,
-  type RunnerBlinkRiskContext,
+  createRunnerRandomBreakOrDamageRiskContext,
+  type RunnerRandomBreakOrDamageRiskContext,
 } from "./runner-blink-risk-context";
-import type { RunnerBlinkRiskEvidenceDependencies } from "./runner-blink-run-exclusion";
+import type { RunnerRandomBreakOrDamageRiskEvidenceDependencies } from "./runner-blink-run-exclusion";
 import {
   createRunnerMultiRunContext,
   type RunnerMultiRunContext,
   type RunnerMultiRunContextDependencies,
 } from "./runner-multi-run-context";
 import { currentEncounteredIceCard } from "./current-encounter";
-import type { BlinkRiskAssessment } from "../runner-run-target-evaluation";
+import type { RandomBreakOrDamageRiskAssessment } from "../runner-run-target-evaluation";
 
-export type RunnerBlinkRiskCompositionDependencies<
+export type RunnerRandomBreakOrDamageRiskCompositionDependencies<
   TDeckCapabilities,
   TStrategicIntent,
-> =
+> = Omit<
+  RunnerRandomBreakOrDamageEncounterContextDependencies,
+  "encounteredSubroutines"
+> &
+  RunnerMultiRunContextDependencies<TDeckCapabilities, TStrategicIntent> &
   Omit<
-    RunnerBlinkEncounterBreakContextDependencies,
-    "encounteredSubroutines"
-  > &
-    RunnerMultiRunContextDependencies<TDeckCapabilities, TStrategicIntent> &
-    Omit<
-      RunnerBlinkRiskEvidenceDependencies,
-      "breakRiskAssessment" | "multiRunTargetEvaluation" | "shouldAvoidRun"
-    > & {
-      shouldAvoidBlinkRiskAssessment: (
-        assessment: BlinkRiskAssessment | undefined,
-      ) => boolean;
-    };
+    RunnerRandomBreakOrDamageRiskEvidenceDependencies,
+    "breakRiskAssessment" | "multiRunTargetEvaluation" | "shouldAvoidRun"
+  > & {
+    shouldAvoidRandomBreakOrDamageRisk: (
+      assessment: RandomBreakOrDamageRiskAssessment | undefined,
+    ) => boolean;
+  };
 
-export function createRunnerBlinkRiskComposition<
+export function createRunnerRandomBreakOrDamageRiskComposition<
   TDeckCapabilities,
   TStrategicIntent,
 >(
-  dependencies: RunnerBlinkRiskCompositionDependencies<
+  dependencies: RunnerRandomBreakOrDamageRiskCompositionDependencies<
     TDeckCapabilities,
     TStrategicIntent
   >,
-): RunnerBlinkRiskContext & {
-  blinkRiskAssessmentForEncounterBreak: ReturnType<
-    typeof createRunnerBlinkEncounterBreakContext
-  >["blinkRiskAssessmentForEncounterBreak"];
+): RunnerRandomBreakOrDamageRiskContext & {
+  randomBreakOrDamageRiskAssessmentForEncounterBreak: ReturnType<
+    typeof createRunnerRandomBreakOrDamageEncounterContext
+  >["randomBreakOrDamageRiskAssessmentForEncounterBreak"];
 } & RunnerMultiRunContext {
   const multiRunContext = createRunnerMultiRunContext({
     allNighterDefinitionId: dependencies.allNighterDefinitionId,
@@ -58,8 +57,8 @@ export function createRunnerBlinkRiskComposition<
     runTargets: dependencies.runTargets,
   });
 
-  const { blinkRiskAssessmentForEncounterBreak } =
-    createRunnerBlinkEncounterBreakContext({
+  const { randomBreakOrDamageRiskAssessmentForEncounterBreak } =
+    createRunnerRandomBreakOrDamageEncounterContext({
       sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
       randomBreakOrDamageRiskProfileForDefinitionId:
         dependencies.randomBreakOrDamageRiskProfileForDefinitionId,
@@ -67,29 +66,31 @@ export function createRunnerBlinkRiskComposition<
         dependencies.breakSubroutineIndexesForAction,
       encounteredSubroutines: (input) =>
         currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines ?? [],
-      buildBlinkRiskAssessment: dependencies.buildBlinkRiskAssessment,
+      buildRandomBreakOrDamageRiskAssessment:
+        dependencies.buildRandomBreakOrDamageRiskAssessment,
       isImmediateSafetyThreatSubroutine:
         dependencies.isImmediateSafetyThreatSubroutine,
       isRemoteServerTarget: dependencies.isRemoteServerTarget,
       visibleRootIsKnownAgenda: dependencies.visibleRootIsKnownAgenda,
     });
 
-  const { runnerBlinkRiskEvidenceForAction, runnerBlinkRunExclusion } =
-    createRunnerBlinkRiskContext({
-      multiRunTargetEvaluation:
-        multiRunContext.runnerMultiRunTargetEvaluation,
-      runRiskAssessment: dependencies.runRiskAssessment,
-      breakRiskAssessment: blinkRiskAssessmentForEncounterBreak,
-      shouldAvoidRun: (assessment) =>
-        dependencies.shouldAvoidBlinkRiskAssessment(
-          assessment as BlinkRiskAssessment | undefined,
-        ),
-    });
+  const {
+    runnerRandomBreakOrDamageRiskEvidenceForAction,
+    runnerRandomBreakOrDamageRunExclusion,
+  } = createRunnerRandomBreakOrDamageRiskContext({
+    multiRunTargetEvaluation: multiRunContext.runnerMultiRunTargetEvaluation,
+    runRiskAssessment: dependencies.runRiskAssessment,
+    breakRiskAssessment: randomBreakOrDamageRiskAssessmentForEncounterBreak,
+    shouldAvoidRun: (assessment) =>
+      dependencies.shouldAvoidRandomBreakOrDamageRisk(
+        assessment as RandomBreakOrDamageRiskAssessment | undefined,
+      ),
+  });
 
   return {
     ...multiRunContext,
-    blinkRiskAssessmentForEncounterBreak,
-    runnerBlinkRiskEvidenceForAction,
-    runnerBlinkRunExclusion,
+    randomBreakOrDamageRiskAssessmentForEncounterBreak,
+    runnerRandomBreakOrDamageRiskEvidenceForAction,
+    runnerRandomBreakOrDamageRunExclusion,
   };
 }

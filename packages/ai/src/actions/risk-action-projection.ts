@@ -8,62 +8,67 @@ import {
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../visible-run-analysis";
 import type {
-  BlinkRiskAssessment,
-  BlinkRiskPayoffOverride,
-  BlinkRiskSeverity,
+  RandomBreakOrDamageRiskAssessment,
+  RandomBreakOrDamageRiskPayoffOverride,
+  RandomBreakOrDamageRiskSeverity,
   RunnerAccessPayoff,
-  RunnerBlinkRecoveryAssessment,
+  RunnerRandomBreakRecoveryAssessment,
 } from "../run-analysis/runner-run-target-types";
-
-export const BLINK_CARD_ID = "onr_v1_007_blink";
+import { AI_HINTS_BY_CARD, type AiCardHint } from "../ai-hints";
 
 export type RandomBreakOrDamageRiskProfile = {
   kind: "random_break_or_damage";
-  profileId: "blink";
-  definitionIds: readonly string[];
+  profileId: string;
   successProbabilityPerAttempt: number;
-  failureDamageType: "net";
+  failureDamageType: "net" | "meat" | "brain";
   maxSingleFailureDamage: number;
 };
 
-export const BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE: RandomBreakOrDamageRiskProfile =
+export const DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE: RandomBreakOrDamageRiskProfile =
   {
     kind: "random_break_or_damage",
-    profileId: "blink",
-    definitionIds: [BLINK_CARD_ID],
+    profileId: "random_break_or_damage:net:0.5:3",
     successProbabilityPerAttempt: 0.5,
     failureDamageType: "net",
     maxSingleFailureDamage: 3,
   };
 
-const RANDOM_BREAK_OR_DAMAGE_RISK_PROFILES = [
-  BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
-] as const;
-
 export function randomBreakOrDamageRiskProfileForDefinitionId(
   definitionId: string | undefined,
 ): RandomBreakOrDamageRiskProfile | undefined {
   if (!definitionId) return undefined;
-  return RANDOM_BREAK_OR_DAMAGE_RISK_PROFILES.find((profile) => {
-    const definitionIdSet = new Set(profile.definitionIds);
-    return definitionIdSet.has(definitionId);
-  });
+  return randomBreakOrDamageRiskProfileForHint(
+    AI_HINTS_BY_CARD.get(definitionId),
+  );
 }
 
-export function buildBlinkRiskAssessment(params: {
+export function randomBreakOrDamageRiskProfileForHint(
+  hint: AiCardHint | undefined,
+): RandomBreakOrDamageRiskProfile | undefined {
+  const outcome = hint?.breakerProfile?.randomOutcome;
+  if (!outcome || outcome.kind !== "random_break_or_damage") return undefined;
+  return {
+    kind: outcome.kind,
+    profileId: `${outcome.kind}:${outcome.failureDamageType}:${outcome.successProbabilityPerAttempt}:${outcome.maxSingleFailureDamage}`,
+    successProbabilityPerAttempt: outcome.successProbabilityPerAttempt,
+    failureDamageType: outcome.failureDamageType,
+    maxSingleFailureDamage: outcome.maxSingleFailureDamage,
+  };
+}
+
+export function buildRandomBreakOrDamageRiskAssessment(params: {
   currentHandCount: number;
   handAfterActionCost: number;
-  blinkUsesLikely: number;
+  randomBreakUsesLikely: number;
   visibleSubroutinesLikely: number;
-  payoffOverride: BlinkRiskPayoffOverride;
+  payoffOverride: RandomBreakOrDamageRiskPayoffOverride;
   stableCoverageAvailable: boolean;
   context: "run_path" | "encounter_break";
-  riskProfile?: RandomBreakOrDamageRiskProfile;
+  riskProfile: RandomBreakOrDamageRiskProfile;
   targetServerId?: string;
   evidence?: readonly string[];
-}): BlinkRiskAssessment {
-  const riskProfile =
-    params.riskProfile ?? BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE;
+}): RandomBreakOrDamageRiskAssessment {
+  const riskProfile = params.riskProfile;
   const maxSingleFailureDamage = Math.max(
     1,
     Math.floor(riskProfile.maxSingleFailureDamage),
@@ -73,52 +78,60 @@ export function buildBlinkRiskAssessment(params: {
     0,
     Math.floor(params.handAfterActionCost),
   );
-  const blinkUsesLikely = Math.max(1, Math.floor(params.blinkUsesLikely));
+  const randomBreakUsesLikely = Math.max(
+    1,
+    Math.floor(params.randomBreakUsesLikely),
+  );
   const visibleSubroutinesLikely = Math.max(
     1,
     Math.floor(params.visibleSubroutinesLikely),
   );
-  const worstCaseDamageEstimate = blinkUsesLikely * maxSingleFailureDamage;
+  const worstCaseDamageEstimate =
+    randomBreakUsesLikely * maxSingleFailureDamage;
   const lethalOnAnyFailure = handAfterActionCost <= 0;
   const lethalOnHighFailure = handAfterActionCost <= 2;
-  const survivesOneFailedBlinkUse =
-    handAfterActionCost >= maxSingleFailureDamage;
-  const riskSeverity = blinkRiskSeverityFor({
+  const survivesOneFailedUse = handAfterActionCost >= maxSingleFailureDamage;
+  const riskSeverity = randomBreakOrDamageRiskSeverityFor({
     handAfterActionCost,
     worstCaseDamageEstimate,
     lethalOnAnyFailure,
     lethalOnHighFailure,
   });
-  const lethalBlinkFailureRisk = lethalOnAnyFailure || lethalOnHighFailure;
-  const pathDependsOnBlink = !params.stableCoverageAvailable;
+  const lethalRandomBreakDamageFailureRisk =
+    lethalOnAnyFailure || lethalOnHighFailure;
+  const pathDependsOnRandomBreakOrDamage = !params.stableCoverageAvailable;
   const breakWouldBeExcludedInEncounter =
-    pathDependsOnBlink && blinkRiskShouldAvoidRunSeverity(riskSeverity);
+    pathDependsOnRandomBreakOrDamage &&
+    randomBreakOrDamageRiskShouldAvoidRunSeverity(riskSeverity);
   const blockedByHandBuffer =
-    pathDependsOnBlink &&
+    pathDependsOnRandomBreakOrDamage &&
     breakWouldBeExcludedInEncounter &&
     params.context === "run_path";
   const noProgressRunExpected =
     blockedByHandBuffer && params.visibleSubroutinesLikely > 0;
   const expectedEtrUnbroken = noProgressRunExpected;
   const recent = params.targetServerId
-    ? recentBlinkFailureForServer(params.targetServerId, params.evidence ?? [])
+    ? recentRandomBreakFailureForServer(
+        params.targetServerId,
+        params.evidence ?? [],
+      )
     : { recentFailure: false, recentDamageAmount: 0 };
   const sameServerRepeatedRiskPenalty =
     recent.recentFailure && noProgressRunExpected ? -900 : 0;
   const disposition = blockedByHandBuffer
-    ? "why_blink_run_deferred_for_hand_buffer:self_net_damage_buffer_too_low"
+    ? "why_random_break_damage_run_deferred_for_hand_buffer:self_damage_buffer_too_low"
     : params.payoffOverride !== "none"
-      ? `why_blink_run_allowed_despite_risk:${params.payoffOverride}`
-      : blinkRiskShouldAvoidRunSeverity(riskSeverity)
-        ? `why_blink_run_blocked:${riskSeverity}`
-        : "why_blink_run_allowed_despite_risk:hand_buffer";
+      ? `why_random_break_damage_run_allowed_despite_risk:${params.payoffOverride}`
+      : randomBreakOrDamageRiskShouldAvoidRunSeverity(riskSeverity)
+        ? `why_random_break_damage_run_blocked:${riskSeverity}`
+        : "why_random_break_damage_run_allowed_despite_risk:hand_buffer";
   const evidence = [
-    "blinkRiskApplied:true",
-    `blinkRiskContext:${params.context}`,
+    "randomBreakDamageRiskApplied:true",
+    `randomBreakDamageRiskContext:${params.context}`,
     `currentHandCount:${currentHandCount}`,
     `handAfterActionCost:${handAfterActionCost}`,
-    `blinkHandBuffer:${handAfterActionCost}`,
-    `blinkUsesLikely:${blinkUsesLikely}`,
+    `randomBreakDamageHandBuffer:${handAfterActionCost}`,
+    `randomBreakDamageUsesLikely:${randomBreakUsesLikely}`,
     `visibleSubroutinesLikely:${visibleSubroutinesLikely}`,
     `randomBreakOrDamageRiskProfile:${riskProfile.profileId}`,
     `randomBreakOrDamageFailureDamageType:${riskProfile.failureDamageType}`,
@@ -126,30 +139,30 @@ export function buildBlinkRiskAssessment(params: {
     `worstCaseDamageEstimate:${worstCaseDamageEstimate}`,
     `lethalOnAnyFailure:${lethalOnAnyFailure}`,
     `lethalOnHighFailure:${lethalOnHighFailure}`,
-    `survivesOneFailedBlinkUse:${survivesOneFailedBlinkUse}`,
-    `blinkRiskSeverity:${riskSeverity}`,
+    `survivesOneFailedRandomBreakUse:${survivesOneFailedUse}`,
+    `randomBreakDamageRiskSeverity:${riskSeverity}`,
     `payoffOverride:${params.payoffOverride}`,
     `stableCoverageAvailable:${params.stableCoverageAvailable}`,
-    `lethalBlinkFailureRisk:${lethalBlinkFailureRisk}`,
-    `blinkPreRunRiskApplied:${params.context === "run_path"}`,
-    `blinkPathDependsOnBlink:${pathDependsOnBlink}`,
-    `blinkBreakWouldBeExcludedInEncounter:${breakWouldBeExcludedInEncounter}`,
-    `blocked_by_blink_hand_buffer:${blockedByHandBuffer}`,
-    `blink_no_progress_run:${noProgressRunExpected}`,
+    `lethalRandomBreakDamageFailureRisk:${lethalRandomBreakDamageFailureRisk}`,
+    `randomBreakDamagePreRunRiskApplied:${params.context === "run_path"}`,
+    `pathDependsOnRandomBreakDamage:${pathDependsOnRandomBreakOrDamage}`,
+    `randomBreakDamageExcludedInEncounter:${breakWouldBeExcludedInEncounter}`,
+    `blocked_by_random_break_damage_hand_buffer:${blockedByHandBuffer}`,
+    `random_break_damage_no_progress_run:${noProgressRunExpected}`,
     `expected_etr_unbroken:${expectedEtrUnbroken}`,
-    `recentBlinkFailure:${recent.recentFailure}`,
-    `recentBlinkDamageAmount:${recent.recentDamageAmount}`,
-    `sameServerRepeatedBlinkRiskPenalty:${sameServerRepeatedRiskPenalty}`,
+    `recentRandomBreakDamageFailure:${recent.recentFailure}`,
+    `recentRandomBreakDamageAmount:${recent.recentDamageAmount}`,
+    `sameServerRepeatedRandomBreakDamageRiskPenalty:${sameServerRepeatedRiskPenalty}`,
     disposition,
     ...(blockedByHandBuffer
       ? [
-          "blink_break_unusable_due_to_hand_buffer:true",
+          "random_break_damage_unusable_due_to_hand_buffer:true",
           "recommendation:draw_for_damage_buffer",
           "recommendation:find_stable_breaker_first",
         ]
       : []),
     ...(sameServerRepeatedRiskPenalty < 0
-      ? ["repeated_no_progress_blink_run:true"]
+      ? ["repeated_no_progress_random_break_damage_run:true"]
       : []),
     ...(params.evidence ?? []),
   ];
@@ -157,17 +170,17 @@ export function buildBlinkRiskAssessment(params: {
   return {
     currentHandCount,
     handAfterActionCost,
-    blinkUsesLikely,
+    randomBreakUsesLikely,
     visibleSubroutinesLikely,
     maxSingleFailureDamage,
     worstCaseDamageEstimate,
     lethalOnAnyFailure,
     lethalOnHighFailure,
-    survivesOneFailedBlinkUse,
+    survivesOneFailedUse,
     riskSeverity,
     payoffOverride: params.payoffOverride,
     stableCoverageAvailable: params.stableCoverageAvailable,
-    pathDependsOnBlink,
+    pathDependsOnRandomBreakOrDamage,
     breakWouldBeExcludedInEncounter,
     blockedByHandBuffer,
     noProgressRunExpected,
@@ -179,11 +192,11 @@ export function buildBlinkRiskAssessment(params: {
   };
 }
 
-export function assessBlinkRiskForRunAction(
+export function assessRandomBreakOrDamageRiskForRunAction(
   input: AiDecisionInput,
   action: LegalAction,
   params: { accessPayoff?: RunnerAccessPayoff; scoreThreat?: boolean } = {},
-): BlinkRiskAssessment | undefined {
+): RandomBreakOrDamageRiskAssessment | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
   if (action.type !== "start_run") return undefined;
   const targetServerId = concretePayloadServerId(action);
@@ -208,10 +221,10 @@ export function assessBlinkRiskForRunAction(
   const visibleEndRunSubroutineCount = visibleEndRunSubroutineCountForPath(
     server.ice,
   );
-  const blinkCanAttemptVisibleEtrPath = visibleEndRunSubroutineCount > 0;
+  const randomBreakCanAttemptVisibleEtrPath = visibleEndRunSubroutineCount > 0;
   if (
     fullPath.assessedKnownIceCount <= 0 ||
-    (!fullPath.canReachAccess && !blinkCanAttemptVisibleEtrPath)
+    (!fullPath.canReachAccess && !randomBreakCanAttemptVisibleEtrPath)
   ) {
     return undefined;
   }
@@ -236,15 +249,15 @@ export function assessBlinkRiskForRunAction(
   const handAfterActionCost =
     currentHandCount - (actionConsumesKnownOwnHandCard(input, action) ? 1 : 0);
   const visibleSubroutinesLikely = Math.max(1, visibleEndRunSubroutineCount);
-  const payoffOverride = blinkRiskPayoffOverride(
+  const payoffOverride = randomBreakOrDamageRiskPayoffOverride(
     params.accessPayoff,
     params.scoreThreat,
   );
 
-  return buildBlinkRiskAssessment({
+  return buildRandomBreakOrDamageRiskAssessment({
     currentHandCount,
     handAfterActionCost,
-    blinkUsesLikely: visibleSubroutinesLikely,
+    randomBreakUsesLikely: visibleSubroutinesLikely,
     visibleSubroutinesLikely,
     payoffOverride,
     stableCoverageAvailable,
@@ -252,44 +265,46 @@ export function assessBlinkRiskForRunAction(
     riskProfile,
     targetServerId,
     evidence: [
-      `blinkRunTarget:${targetServerId}`,
-      `blinkRiskStablePathReachable:${stablePath.canReachAccess}`,
-      `blinkRiskFullPathReachable:${fullPath.canReachAccess}`,
-      `blinkRiskKnownIceCount:${fullPath.assessedKnownIceCount}`,
-      `blinkRiskPathCost:${fullPath.visibleBreakCost ?? 0}`,
-      ...recentBlinkFailureEvidence(input, targetServerId),
+      `randomBreakDamageRunTarget:${targetServerId}`,
+      `randomBreakDamageStablePathReachable:${stablePath.canReachAccess}`,
+      `randomBreakDamageFullPathReachable:${fullPath.canReachAccess}`,
+      `randomBreakDamageKnownIceCount:${fullPath.assessedKnownIceCount}`,
+      `randomBreakDamagePathCost:${fullPath.visibleBreakCost ?? 0}`,
+      ...recentRandomBreakFailureEvidence(input, targetServerId),
       ...(params.accessPayoff
-        ? [`blinkRiskAccessPayoff:${params.accessPayoff}`]
+        ? [`randomBreakDamageAccessPayoff:${params.accessPayoff}`]
         : []),
       ...(params.scoreThreat !== undefined
-        ? [`blinkRiskScoreThreat:${params.scoreThreat}`]
+        ? [`randomBreakDamageScoreThreat:${params.scoreThreat}`]
         : []),
     ],
   });
 }
 
-export function blinkRiskShouldAvoidRun(
-  assessment: BlinkRiskAssessment | undefined,
+export function randomBreakOrDamageRiskShouldAvoidRun(
+  assessment: RandomBreakOrDamageRiskAssessment | undefined,
 ): boolean {
   if (!assessment) return false;
   if (
     assessment.blockedByHandBuffer &&
-    !blinkRiskHandBufferOverrideAllowed(assessment.payoffOverride)
+    !randomBreakOrDamageRiskHandBufferOverrideAllowed(assessment.payoffOverride)
   ) {
     return true;
   }
   if (assessment.payoffOverride !== "none") return false;
-  return blinkRiskShouldAvoidRunSeverity(assessment.riskSeverity);
+  return randomBreakOrDamageRiskShouldAvoidRunSeverity(assessment.riskSeverity);
 }
 
-export function blinkRiskScorePenalty(
-  assessment: BlinkRiskAssessment | undefined,
+export function randomBreakOrDamageRiskScorePenalty(
+  assessment: RandomBreakOrDamageRiskAssessment | undefined,
 ): number {
   if (!assessment) return 0;
   const overrideMultiplier =
     assessment.payoffOverride === "none" ||
     (assessment.blockedByHandBuffer &&
-      !blinkRiskHandBufferOverrideAllowed(assessment.payoffOverride))
+      !randomBreakOrDamageRiskHandBufferOverrideAllowed(
+        assessment.payoffOverride,
+      ))
       ? 1
       : 0.25;
   const noProgressPenalty = assessment.noProgressRunExpected ? -1700 : 0;
@@ -321,45 +336,45 @@ export function blinkRiskScorePenalty(
   }
 }
 
-function blinkRiskHandBufferOverrideAllowed(
-  payoffOverride: BlinkRiskPayoffOverride,
+function randomBreakOrDamageRiskHandBufferOverrideAllowed(
+  payoffOverride: RandomBreakOrDamageRiskPayoffOverride,
 ): boolean {
   return (
     payoffOverride === "known_agenda" || payoffOverride === "immediate_win"
   );
 }
 
-function recentBlinkFailureEvidence(
+function recentRandomBreakFailureEvidence(
   input: AiDecisionInput,
   targetServerId: string,
 ): string[] {
-  const recent = recentBlinkFailureFromEvents(input, targetServerId);
+  const recent = recentRandomBreakFailureFromEvents(input, targetServerId);
   return [
-    `recentBlinkFailure:${recent.recentFailure}`,
-    `recentBlinkDamageAmount:${recent.recentDamageAmount}`,
+    `recentRandomBreakDamageFailure:${recent.recentFailure}`,
+    `recentRandomBreakDamageAmount:${recent.recentDamageAmount}`,
     ...(recent.targetServerId
-      ? [`recentBlinkFailureTarget:${recent.targetServerId}`]
+      ? [`recentRandomBreakDamageFailureTarget:${recent.targetServerId}`]
       : []),
   ];
 }
 
-function recentBlinkFailureForServer(
+function recentRandomBreakFailureForServer(
   targetServerId: string,
   evidence: readonly string[],
 ): { recentFailure: boolean; recentDamageAmount: number } {
   const evidenceSet = new Set(evidence);
   const recentFailure =
-    evidenceSet.has("recentBlinkFailure:true") &&
-    evidenceSet.has(`recentBlinkFailureTarget:${targetServerId}`);
+    evidenceSet.has("recentRandomBreakDamageFailure:true") &&
+    evidenceSet.has(`recentRandomBreakDamageFailureTarget:${targetServerId}`);
   return {
     recentFailure,
     recentDamageAmount: recentFailure
-      ? numberEvidenceValue(evidence, "recentBlinkDamageAmount")
+      ? numberEvidenceValue(evidence, "recentRandomBreakDamageAmount")
       : 0,
   };
 }
 
-function recentBlinkFailureFromEvents(
+function recentRandomBreakFailureFromEvents(
   input: AiDecisionInput,
   targetServerId?: string,
 ): {
@@ -385,19 +400,18 @@ function recentBlinkFailureFromEvents(
     if (actionType === "end_turn" || actor === "corp") break;
     if (actionType !== "break_subroutine") continue;
     const damageAmount =
-      typeof payload.blinkDamageAmount === "number"
-        ? payload.blinkDamageAmount
+      typeof payload.randomBreakOutcomeDamageAmount === "number"
+        ? payload.randomBreakOutcomeDamageAmount
         : typeof payload.damageAmount === "number"
           ? payload.damageAmount
           : typeof payload.amount === "number"
             ? payload.amount
             : 0;
-    const blinkFailure =
-      payload.blinkBreakSuccess === false ||
-      (payload.sourceDefinitionId === BLINK_CARD_ID &&
-        payload.damageType === "net" &&
-        damageAmount > 0);
-    if (!blinkFailure) continue;
+    const randomBreakFailure =
+      payload.randomBreakOutcomeKind === "random_break_or_damage" &&
+      payload.randomBreakOutcomeSuccess === false &&
+      damageAmount > 0;
+    if (!randomBreakFailure) continue;
     const failureServerId =
       serverId ?? activeRunServerId ?? nearestPriorRunServer(history, index);
     if (
@@ -466,16 +480,19 @@ function numberEvidenceValue(evidence: readonly string[], key: string): number {
   return Number.isFinite(value) ? value : 0;
 }
 
-export function runnerBlinkRecoveryAssessment(
+export function runnerRandomBreakRecoveryAssessment(
   input: AiDecisionInput,
   targetServerId?: string,
-): RunnerBlinkRecoveryAssessment | undefined {
+): RunnerRandomBreakRecoveryAssessment | undefined {
   if (input.side !== "runner") return undefined;
-  const riskProfile = BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE;
+  const riskProfile = randomBreakOrDamageRiskProfilesForRig(
+    input.playerView.own.rig ?? [],
+  )[0];
+  if (!riskProfile) return undefined;
   const currentHandCount = input.playerView.own.gripOrHq.length;
   const recent = targetServerId
-    ? recentBlinkFailureFromEvents(input, targetServerId)
-    : recentBlinkFailureFromEvents(input);
+    ? recentRandomBreakFailureFromEvents(input, targetServerId)
+    : recentRandomBreakFailureFromEvents(input);
   const handBufferTooLow =
     currentHandCount < riskProfile.maxSingleFailureDamage;
   const active = recent.recentFailure && handBufferTooLow;
@@ -493,24 +510,26 @@ export function runnerBlinkRecoveryAssessment(
     recentDamageAmount: recent.recentDamageAmount,
     sameServerRepeatedRiskPenalty,
     evidence: [
-      `recentBlinkFailure:${recent.recentFailure}`,
-      `recentBlinkDamageAmount:${recent.recentDamageAmount}`,
+      `recentRandomBreakDamageFailure:${recent.recentFailure}`,
+      `recentRandomBreakDamageAmount:${recent.recentDamageAmount}`,
       `randomBreakOrDamageRiskProfile:${riskProfile.profileId}`,
-      `blinkRecoveryHandCount:${currentHandCount}`,
-      `blinkRecoveryHandBufferTooLow:${handBufferTooLow}`,
-      `sameServerRepeatedBlinkRiskPenalty:${sameServerRepeatedRiskPenalty}`,
-      ...(targetServerId ? [`blinkRecoveryTarget:${targetServerId}`] : []),
+      `randomBreakDamageRecoveryHandCount:${currentHandCount}`,
+      `randomBreakDamageRecoveryHandBufferTooLow:${handBufferTooLow}`,
+      `sameServerRepeatedRandomBreakDamageRiskPenalty:${sameServerRepeatedRiskPenalty}`,
+      ...(targetServerId
+        ? [`randomBreakDamageRecoveryTarget:${targetServerId}`]
+        : []),
       ...(recent.targetServerId
-        ? [`blinkRecoveryRecentTarget:${recent.targetServerId}`]
+        ? [`randomBreakDamageRecoveryRecentTarget:${recent.targetServerId}`]
         : []),
       ...(active
         ? [
-            "why_draw_for_damage_buffer_over_remote_run:recent_blink_damage",
-            "why_blink_run_deferred_for_hand_buffer:recent_blink_damage",
+            "why_draw_for_damage_buffer_over_remote_run:recent_random_break_damage",
+            "why_random_break_damage_run_deferred_for_hand_buffer:recent_random_break_damage",
           ]
         : []),
       ...(sameServerRepeatedRiskPenalty < 0
-        ? ["repeated_no_progress_blink_run:true"]
+        ? ["repeated_no_progress_random_break_damage_run:true"]
         : []),
     ],
   };
@@ -577,10 +596,10 @@ function visibleEndRunSubroutineCountForIce(ice: VisibleServerIce): number {
   );
 }
 
-function blinkRiskPayoffOverride(
+function randomBreakOrDamageRiskPayoffOverride(
   accessPayoff: RunnerAccessPayoff | undefined,
   scoreThreat: boolean | undefined,
-): BlinkRiskPayoffOverride {
+): RandomBreakOrDamageRiskPayoffOverride {
   if (accessPayoff === "agenda") return "known_agenda";
   if (scoreThreat === true || accessPayoff === "score_threat") {
     return "remote_score_threat";
@@ -588,12 +607,12 @@ function blinkRiskPayoffOverride(
   return "none";
 }
 
-function blinkRiskSeverityFor(params: {
+function randomBreakOrDamageRiskSeverityFor(params: {
   handAfterActionCost: number;
   worstCaseDamageEstimate: number;
   lethalOnAnyFailure: boolean;
   lethalOnHighFailure: boolean;
-}): BlinkRiskSeverity {
+}): RandomBreakOrDamageRiskSeverity {
   if (params.lethalOnAnyFailure) return "lethal";
   if (params.lethalOnHighFailure) return "high";
   if (params.handAfterActionCost < params.worstCaseDamageEstimate) {
@@ -602,8 +621,8 @@ function blinkRiskSeverityFor(params: {
   return params.worstCaseDamageEstimate > 0 ? "low" : "none";
 }
 
-function blinkRiskShouldAvoidRunSeverity(
-  riskSeverity: BlinkRiskSeverity,
+function randomBreakOrDamageRiskShouldAvoidRunSeverity(
+  riskSeverity: RandomBreakOrDamageRiskSeverity,
 ): boolean {
   return riskSeverity === "lethal" || riskSeverity === "high";
 }

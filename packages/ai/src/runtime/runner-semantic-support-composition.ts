@@ -5,8 +5,8 @@ import {
   type RunnerBaselineSupportCompositionDependencies,
 } from "./runner-baseline-support-composition";
 import {
-  createRunnerBlinkRiskComposition,
-  type RunnerBlinkRiskCompositionDependencies,
+  createRunnerRandomBreakOrDamageRiskComposition,
+  type RunnerRandomBreakOrDamageRiskCompositionDependencies,
 } from "./runner-blink-risk-composition";
 import {
   createRunnerDevelopmentSupportComposition,
@@ -16,7 +16,7 @@ import {
 export type RunnerSemanticSupportCompositionDependencies =
   RunnerBaselineSupportCompositionDependencies &
     Omit<
-      RunnerBlinkRiskCompositionDependencies<
+      RunnerRandomBreakOrDamageRiskCompositionDependencies<
         DeckCapabilityProfile,
         RunnerStrategicIntentProfile
       >,
@@ -39,29 +39,30 @@ export function createRunnerSemanticSupportComposition(
 ) {
   const baseline = createRunnerBaselineSupportComposition(dependencies);
 
-  const blinkRisk = createRunnerBlinkRiskComposition({
-    ...dependencies,
-    deckCapabilitiesForInput: baseline.deckCapabilitiesForInput,
-    strategicIntentForInput: baseline.runnerStrategicIntentForInput,
-  });
+  const randomBreakOrDamageRisk =
+    createRunnerRandomBreakOrDamageRiskComposition({
+      ...dependencies,
+      deckCapabilitiesForInput: baseline.deckCapabilitiesForInput,
+      strategicIntentForInput: baseline.runnerStrategicIntentForInput,
+    });
 
   const development = createRunnerDevelopmentSupportComposition({
     ...dependencies,
     deckCapabilitiesForInput: baseline.deckCapabilitiesForInput,
     strategicIntentForInput: baseline.runnerStrategicIntentForInput,
-    visibleCardPlayOrInstallCost:
-      baseline.visibleCardPlayOrInstallCostForAi,
+    visibleCardPlayOrInstallCost: baseline.visibleCardPlayOrInstallCostForAi,
     cardAddressesVisibleBreakerNeed:
       baseline.runnerCardAddressesVisibleBreakerNeed,
     isVisibleIcebreakerProgram: baseline.isVisibleIcebreakerProgram,
     cardLooksLikeCreditPayout: baseline.runnerCardLooksLikeCreditPayout,
     badPublicityOrTraceTechCard: baseline.runnerBadPublicityOrTraceTechCard,
-    runnerRunTargetEvaluation: blinkRisk.runnerMultiRunTargetEvaluation,
+    runnerRunTargetEvaluation:
+      randomBreakOrDamageRisk.runnerMultiRunTargetEvaluation,
   });
 
   return {
     ...baseline,
-    ...blinkRisk,
+    ...randomBreakOrDamageRisk,
     ...development,
   };
 }

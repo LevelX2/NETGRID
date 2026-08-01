@@ -157,8 +157,10 @@ function projectActionSemanticCandidate(
     tagEffectCandidate,
     action,
   );
-  const implementationEffectCandidate =
-    applyCardImplementationEffectSemantics(traceCounterCandidate, action);
+  const implementationEffectCandidate = applyCardImplementationEffectSemantics(
+    traceCounterCandidate,
+    action,
+  );
   const cardSemanticCandidate = applyCardSemanticJoin(
     implementationEffectCandidate,
     cardSemanticProfilesByDefinitionId,

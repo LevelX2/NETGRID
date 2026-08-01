@@ -108,9 +108,7 @@ export function bindBestCurrentPlanRoute(
   }));
   const compatible = matches
     .filter(
-      (
-        item,
-      ): item is typeof item & { match: { status: "compatible" } } =>
+      (item): item is typeof item & { match: { status: "compatible" } } =>
         item.match.status === "compatible",
     )
     .map((item) => item.entry)
@@ -300,8 +298,8 @@ function candidateMatchesTarget(
     );
   }
   if (
-    (candidate.sourceCardInstanceId === target.id ||
-      candidate.sourceDefinitionId === target.id)
+    candidate.sourceCardInstanceId === target.id ||
+    candidate.sourceDefinitionId === target.id
   ) {
     return true;
   }
@@ -326,7 +324,9 @@ function allRequiredPresent(
   required: readonly string[] | undefined,
   actual: readonly string[],
 ): boolean {
-  return required === undefined || required.every((value) => actual.includes(value));
+  return (
+    required === undefined || required.every((value) => actual.includes(value))
+  );
 }
 
 function compareRouteCandidates(
@@ -345,9 +345,7 @@ function mostSpecificFailureCode(
   if (matches.length === 0) return "no_current_route_head";
   const codes = matches
     .filter(
-      (
-        match,
-      ): match is Extract<MatchResult, { status: "incompatible" }> =>
+      (match): match is Extract<MatchResult, { status: "incompatible" }> =>
         match.status === "incompatible",
     )
     .map((match) => match.code);

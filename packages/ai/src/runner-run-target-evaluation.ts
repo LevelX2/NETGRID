@@ -33,9 +33,9 @@ import {
 } from "./visible-run-analysis";
 import { buildRunnerEconomyPosture } from "./runner-economy-posture";
 import {
-  assessBlinkRiskForRunAction,
-  blinkRiskScorePenalty,
-  blinkRiskShouldAvoidRun,
+  assessRandomBreakOrDamageRiskForRunAction,
+  randomBreakOrDamageRiskScorePenalty,
+  randomBreakOrDamageRiskShouldAvoidRun,
 } from "./actions/risk-action-projection";
 import {
   projectInternalRunnerRunActions,
@@ -46,11 +46,11 @@ import {
   RUNNER_CREDIT_BASE_PLAN_SCHEMA_VERSION,
   RUNNER_ECONOMY_POSTURE_SCHEMA_VERSION,
   RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION,
-  type BlinkRiskAssessment,
+  type RandomBreakOrDamageRiskAssessment,
   type EvaluateRunnerRunTargetsParams,
   type RunActionProjection,
   type RunnerAccessPayoff,
-  type RunnerBlinkRecoveryAssessment,
+  type RunnerRandomBreakRecoveryAssessment,
   type RunnerCreditBaseHandCandidate,
   type RunnerCreditBasePlan,
   type RunnerCreditBasePlanRecommendation,
@@ -76,14 +76,13 @@ export * from "./run-analysis/runner-run-target-types";
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 const INSTALLED_RUN_PAYOFF_SCORE_CAP = 180;
 export {
-  BLINK_CARD_ID,
-  BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
-  assessBlinkRiskForRunAction,
-  blinkRiskScorePenalty,
-  blinkRiskShouldAvoidRun,
-  buildBlinkRiskAssessment,
+  DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
+  assessRandomBreakOrDamageRiskForRunAction,
+  randomBreakOrDamageRiskScorePenalty,
+  randomBreakOrDamageRiskShouldAvoidRun,
+  buildRandomBreakOrDamageRiskAssessment,
   randomBreakOrDamageRiskProfileForDefinitionId,
-  runnerBlinkRecoveryAssessment,
+  runnerRandomBreakRecoveryAssessment,
 } from "./actions/risk-action-projection";
 export type { RandomBreakOrDamageRiskProfile } from "./actions/risk-action-projection";
 
@@ -210,11 +209,11 @@ function evaluateRunnerRunTarget(
   const accessOutcomeMemory =
     params.accessOutcomeMemory ??
     deriveObservedRemoteNoProgressAccessMemory(params.input, accessServerId);
-  const blinkRiskAssessment = assessBlinkRiskForRunAction(
-    params.input,
-    projection.action,
-    { accessPayoff, scoreThreat },
-  );
+  const randomBreakOrDamageRiskAssessment =
+    assessRandomBreakOrDamageRiskForRunAction(params.input, projection.action, {
+      accessPayoff,
+      scoreThreat,
+    });
   const riskyUniversalCoverage =
     hasRiskyUniversalPressure(params) && (server?.ice.length ?? 0) > 0;
   const basePathPassability = pathPassabilityFor(path);
@@ -222,12 +221,12 @@ function evaluateRunnerRunTarget(
     projection.spendLimit !== undefined &&
     (path.visibleBreakCost ?? 0) > projection.spendLimit;
   const probabilisticUniversalPathReachable = Boolean(
-    blinkRiskAssessment?.pathDependsOnBlink &&
-    !blinkRiskAssessment.blockedByHandBuffer &&
-    !blinkRiskAssessment.breakWouldBeExcludedInEncounter,
+    randomBreakOrDamageRiskAssessment?.pathDependsOnRandomBreakOrDamage &&
+    !randomBreakOrDamageRiskAssessment.blockedByHandBuffer &&
+    !randomBreakOrDamageRiskAssessment.breakWouldBeExcludedInEncounter,
   );
-  const pathPassability = blinkRiskAssessment?.blockedByHandBuffer
-    ? "blocked_by_blink_hand_buffer"
+  const pathPassability = randomBreakOrDamageRiskAssessment?.blockedByHandBuffer
+    ? "blocked_by_random_break_damage_hand_buffer"
     : probabilisticUniversalPathReachable
       ? "reachable"
       : spendLimitBlocksPath
@@ -319,7 +318,9 @@ function evaluateRunnerRunTarget(
     unrezzedIceRiskUnderfunded,
     ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
     ...(rankedAccessTarget ? { rankedAccessTarget } : {}),
-    ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
+    ...(randomBreakOrDamageRiskAssessment
+      ? { randomBreakOrDamageRiskAssessment }
+      : {}),
   });
   const score = scoreRunTargetEvaluation({
     targetKind: accessTargetKind,
@@ -335,7 +336,9 @@ function evaluateRunnerRunTarget(
     accessPayoffScoreAdjustment: payoff.scoreAdjustment,
     visibleIceHazardPenalty,
     ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
-    ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
+    ...(randomBreakOrDamageRiskAssessment
+      ? { randomBreakOrDamageRiskAssessment }
+      : {}),
   });
   const publicProjection = publicRunActionProjection(projection);
   return {
@@ -375,7 +378,9 @@ function evaluateRunnerRunTarget(
     runActionProjection: publicProjection,
     bypassedFirstIce,
     riskyUniversalCoverage,
-    ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
+    ...(randomBreakOrDamageRiskAssessment
+      ? { randomBreakOrDamageRiskAssessment }
+      : {}),
     scoreThreat,
     recommendation,
     score,
@@ -459,7 +464,7 @@ function evaluateRunnerRunTarget(
       `run_action_projection_bypassed_first_ice:${bypassedFirstIce}`,
       `risky_universal_coverage:${riskyUniversalCoverage}`,
       `probabilistic_universal_path_reachable:${probabilisticUniversalPathReachable}`,
-      ...(blinkRiskAssessment?.evidence ?? []),
+      ...(randomBreakOrDamageRiskAssessment?.evidence ?? []),
       `unproductive_visible_run_path:${unproductiveVisibleRunPath}`,
       `visible_trace_end_run_lock_unavoidable:${visibleTraceEndRunLockUnavoidable}`,
       ...(path.hardUnbrokenRunEffects?.length
@@ -857,8 +862,7 @@ function accessReplacementPayoffForTarget(
   const priorPrivateLookStillCurrent =
     rdPrivateLookHasNoProvenStateInvalidation(params.input);
   const addsNewInformation =
-    !priorPrivateLookStillCurrent &&
-    knownSequence.length < effectiveLookCount;
+    !priorPrivateLookStillCurrent && knownSequence.length < effectiveLookCount;
   const evidence = [
     "central_target:rd",
     "central_access_replacement:private_look_top_rd",
@@ -896,9 +900,7 @@ function rdPrivateLookHasNoProvenStateInvalidation(
     if (isRunnerRdPrivateLook(events[index]!)) latestPrivateLookIndex = index;
   }
   if (latestPrivateLookIndex < 0) return false;
-  return !events
-    .slice(latestPrivateLookIndex + 1)
-    .some(rdTopMayHaveChanged);
+  return !events.slice(latestPrivateLookIndex + 1).some(rdTopMayHaveChanged);
 }
 
 function aiVisibleEvents(input: AiDecisionInput): PublicGameEvent[] {
@@ -1054,26 +1056,30 @@ function recommendationForRunTarget(params: {
   unrezzedIceRiskUnderfunded: boolean;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
   rankedAccessTarget?: RankedKnownRemoteAccessCandidate;
-  blinkRiskAssessment?: BlinkRiskAssessment;
+  randomBreakOrDamageRiskAssessment?: RandomBreakOrDamageRiskAssessment;
 }): RunnerRunTargetRecommendation {
-  if (params.pathPassability === "blocked_by_blink_hand_buffer") {
+  if (params.pathPassability === "blocked_by_random_break_damage_hand_buffer") {
     return "draw_for_damage_buffer";
   }
-  if (blinkRiskShouldAvoidRun(params.blinkRiskAssessment)) {
+  if (
+    randomBreakOrDamageRiskShouldAvoidRun(
+      params.randomBreakOrDamageRiskAssessment,
+    )
+  ) {
     return "do_not_run_now";
   }
   if (
-    params.blinkRiskAssessment &&
-    params.blinkRiskAssessment.payoffOverride === "none" &&
-    params.blinkRiskAssessment.riskSeverity === "medium" &&
+    params.randomBreakOrDamageRiskAssessment &&
+    params.randomBreakOrDamageRiskAssessment.payoffOverride === "none" &&
+    params.randomBreakOrDamageRiskAssessment.riskSeverity === "medium" &&
     params.knownAccessState === "known_no_current_payoff"
   ) {
     return "do_not_run_now";
   }
   if (
-    params.blinkRiskAssessment &&
-    params.blinkRiskAssessment.payoffOverride === "none" &&
-    params.blinkRiskAssessment.riskSeverity === "medium"
+    params.randomBreakOrDamageRiskAssessment &&
+    params.randomBreakOrDamageRiskAssessment.payoffOverride === "none" &&
+    params.randomBreakOrDamageRiskAssessment.riskSeverity === "medium"
   ) {
     return "setup_first";
   }
@@ -1184,9 +1190,7 @@ function recommendationForRunTarget(params: {
     return "run_now";
   }
   if (highValuePayoff(params.accessPayoff)) return "run_now";
-  if (
-    params.targetFundingNeed.reason !== "none"
-  ) {
+  if (params.targetFundingNeed.reason !== "none") {
     return "gain_credits_first";
   }
   if (
@@ -1242,13 +1246,13 @@ function scoreRunTargetEvaluation(params: {
   accessPayoffScoreAdjustment: number;
   visibleIceHazardPenalty: number;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
-  blinkRiskAssessment?: BlinkRiskAssessment;
+  randomBreakOrDamageRiskAssessment?: RandomBreakOrDamageRiskAssessment;
 }): number {
   const payoffScore = scoreForPayoff(params.accessPayoff);
   const pathPenalty =
     params.pathPassability === "reachable"
       ? 0
-      : params.pathPassability === "blocked_by_blink_hand_buffer"
+      : params.pathPassability === "blocked_by_random_break_damage_hand_buffer"
         ? -1200
         : -420;
   const reservePenalty =
@@ -1263,7 +1267,9 @@ function scoreRunTargetEvaluation(params: {
   const scoreThreatBonus = params.scoreThreat ? 180 : 0;
   const recommendationScore = recommendationRank(params.recommendation) * 20;
   const visibleIceHazardPenalty = -Math.max(0, params.visibleIceHazardPenalty);
-  const blinkRiskPenalty = blinkRiskScorePenalty(params.blinkRiskAssessment);
+  const randomBreakOrDamageRiskPenalty = randomBreakOrDamageRiskScorePenalty(
+    params.randomBreakOrDamageRiskAssessment,
+  );
   const accessOutcomeMemoryPenalty =
     params.targetKind === "remote" &&
     accessOutcomeMemorySuppressesCurrentPayoff(params)
@@ -1278,7 +1284,7 @@ function scoreRunTargetEvaluation(params: {
     scoreThreatBonus +
     params.accessPayoffScoreAdjustment +
     visibleIceHazardPenalty +
-    blinkRiskPenalty +
+    randomBreakOrDamageRiskPenalty +
     accessOutcomeMemoryPenalty +
     recommendationScore
   );

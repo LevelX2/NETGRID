@@ -140,10 +140,7 @@ describe("Threat and Opportunity projections", () => {
         observerSide: "corp",
         stateVersion: 3,
       }),
-      evidence: [
-        "corp_score_windowish_noise",
-        "not_rez_value_window_noise",
-      ],
+      evidence: ["corp_score_windowish_noise", "not_rez_value_window_noise"],
     });
 
     const opportunities = buildAiOpportunityProjections(frame).map(
@@ -185,7 +182,9 @@ describe("Threat and Opportunity projections", () => {
 
   it("projects runner economy starvation from economy posture", () => {
     const frame = buildSemanticDecisionFrame({
-      input: inputFor("runner", [legalAction("gain-1", "gain_credit", "runner")]),
+      input: inputFor("runner", [
+        legalAction("gain-1", "gain_credit", "runner"),
+      ]),
       runner: {
         economyPosture: economyPosture({ fundingNeed: true }),
       },
@@ -226,7 +225,7 @@ function runTarget(params: {
   pathPassability?: RunnerRunTargetEvaluation["pathPassability"];
   scoreThreat?: boolean;
   blinkRiskSeverity?: NonNullable<
-    RunnerRunTargetEvaluation["blinkRiskAssessment"]
+    RunnerRunTargetEvaluation["randomBreakOrDamageRiskAssessment"]
   >["riskSeverity"];
 }): RunnerRunTargetEvaluation {
   const pathPassability = params.pathPassability ?? "reachable";
@@ -238,7 +237,8 @@ function runTarget(params: {
     accessTargetKind: params.targetKind,
     actionId: "run-1",
     accessPayoff: params.accessPayoff,
-    knownAccessState: params.accessPayoff === "agenda" ? "known_payoff" : "unknown",
+    knownAccessState:
+      params.accessPayoff === "agenda" ? "known_payoff" : "unknown",
     multiaccessAvailable: false,
     pathPassability,
     pathCost: 1,
@@ -266,20 +266,20 @@ function runTarget(params: {
     riskyUniversalCoverage: false,
     ...(params.blinkRiskSeverity
       ? {
-          blinkRiskAssessment: {
+          randomBreakOrDamageRiskAssessment: {
             currentHandCount: 1,
             handAfterActionCost: 1,
-            blinkUsesLikely: 1,
+            randomBreakUsesLikely: 1,
             visibleSubroutinesLikely: 1,
             maxSingleFailureDamage: 2,
             worstCaseDamageEstimate: 2,
             lethalOnAnyFailure: params.blinkRiskSeverity === "lethal",
             lethalOnHighFailure: params.blinkRiskSeverity === "lethal",
-            survivesOneFailedBlinkUse: params.blinkRiskSeverity !== "lethal",
+            survivesOneFailedUse: params.blinkRiskSeverity !== "lethal",
             riskSeverity: params.blinkRiskSeverity,
             payoffOverride: "none",
             stableCoverageAvailable: false,
-            pathDependsOnBlink: true,
+            pathDependsOnRandomBreakOrDamage: true,
             breakWouldBeExcludedInEncounter: false,
             blockedByHandBuffer: params.blinkRiskSeverity === "lethal",
             noProgressRunExpected: false,
@@ -311,7 +311,9 @@ function payoff() {
   };
 }
 
-function economyPosture(params: { fundingNeed: boolean }): RunnerEconomyPosture {
+function economyPosture(params: {
+  fundingNeed: boolean;
+}): RunnerEconomyPosture {
   return {
     schemaVersion: "runner-economy-posture-v1",
     minimumCreditFloor: 2,
@@ -361,7 +363,9 @@ function economyPosture(params: { fundingNeed: boolean }): RunnerEconomyPosture 
       fundingNeed: params.fundingNeed,
       usefulHandCardsBlockedByCredits: params.fundingNeed ? 1 : 0,
       usefulHandCardsAffordableNow: 0,
-      recommendation: params.fundingNeed ? "build_credit_base" : "allow_pressure",
+      recommendation: params.fundingNeed
+        ? "build_credit_base"
+        : "allow_pressure",
       economyPriority: params.fundingNeed ? "high" : "medium",
       evidence: ["test_credit_base"],
     },
@@ -383,7 +387,8 @@ function inputFor(
     playerView: {
       side,
       stateVersion: 3,
-      timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
+      timingPoint:
+        side === "runner" ? "runner_action.main" : "corp_action.main",
       activeSide: side,
       phase: side === "runner" ? "runner_action_phase" : "corp_action_phase",
       own: {

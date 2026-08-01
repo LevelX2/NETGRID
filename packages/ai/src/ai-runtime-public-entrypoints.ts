@@ -7,13 +7,13 @@ import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff"
 import { buildObservedFacts } from "./observed-facts-public";
 import { evaluateRunnerHandDevelopment } from "./runner-hand-development";
 import {
-  assessBlinkRiskForRunAction,
-  blinkRiskShouldAvoidRun,
-  buildBlinkRiskAssessment,
+  assessRandomBreakOrDamageRiskForRunAction,
+  randomBreakOrDamageRiskShouldAvoidRun,
+  buildRandomBreakOrDamageRiskAssessment,
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
   randomBreakOrDamageRiskProfileForDefinitionId,
-  runnerBlinkRecoveryAssessment,
+  runnerRandomBreakRecoveryAssessment,
 } from "./runner-run-target-evaluation";
 import {
   runnerRunTargetHighPayoff,
@@ -46,9 +46,7 @@ import {
   serverIdFromEvent as aiServerIdFromEvent,
   mergedPublicHistory as mergedAiPublicHistory,
 } from "./runtime/public-event-history";
-import {
-  semanticRuntimeActionTypeIsReactive,
-} from "./runtime/reactive-action";
+import { semanticRuntimeActionTypeIsReactive } from "./runtime/reactive-action";
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
 import { corpVisibleRunnerHardwarePayoffEvidence } from "./runtime/runner-hardware-payoff-evidence";
 import { staleKnownHqRepeatRunPenalty } from "./runtime/runner-hq-repeat-run-score";
@@ -189,7 +187,7 @@ export const aiLiveRuntimeDependencies = {
   randomBreakOrDamageRiskProfileForDefinitionId,
   breakSubroutineIndexesForAction,
   currentEncounteredIceCard,
-  buildBlinkRiskAssessment,
+  buildRandomBreakOrDamageRiskAssessment,
   isImmediateSafetyThreatSubroutine,
   encounterRunRemainderEffectAssessment,
   encounterHasImmediateUnbrokenThreat,
@@ -208,7 +206,7 @@ export const aiLiveRuntimeDependencies = {
   runnerSetupChosenFamilyForEntry,
   runnerStrategicBreakerTargetForMetrics,
   visibleRootIsKnownAgenda: visibleRootIsKnownAgendaForMetrics,
-  runRiskAssessment: assessBlinkRiskForRunAction,
+  runRiskAssessment: assessRandomBreakOrDamageRiskForRunAction,
   highRiskLoanDefinitionId: LOAN_FROM_CHIBA_CARD_ID,
   projectedCreditGainForAction: runnerProjectedCreditGainForAction,
   handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
@@ -243,7 +241,7 @@ export const aiLiveRuntimeDependencies = {
   applyTagPunishOntologyDiagnostics,
   applyCorpVisibleTagPunishTakenWindowDiagnostics,
   scoreFromComponents: semanticRuntimeScoreFromComponents,
-  shouldAvoidBlinkRiskAssessment: blinkRiskShouldAvoidRun,
+  shouldAvoidRandomBreakOrDamageRisk: randomBreakOrDamageRiskShouldAvoidRun,
   fakedHitCardId: FAKED_HIT_CARD_ID,
   badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
   guidanceValue: runnerRunTargetSemanticGuidanceValue,
@@ -256,7 +254,7 @@ export const aiLiveRuntimeDependencies = {
   serverIdFromEvent: aiServerIdFromEvent,
   rootTrashCost: remoteRootTrashCostForMetrics,
   targetServerId: semanticRuntimeServerId,
-  blinkAssessment: runnerBlinkRecoveryAssessment,
+  randomBreakRecoveryAssessment: runnerRandomBreakRecoveryAssessment,
   findVisibleCard,
   isRunnerPressureRole,
   isRunnerEconomyRole,

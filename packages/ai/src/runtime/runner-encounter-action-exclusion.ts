@@ -15,7 +15,7 @@ export type RunnerEncounterBreakAccessAssessment = {
 };
 
 export type RunnerEncounterActionExclusionDependencies = {
-  blinkBreakExclusion: (
+  randomBreakOrDamageBreakExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => SemanticRuntimeExclusion | undefined;
@@ -76,8 +76,11 @@ export function runnerEncounterActionExclusion(
     };
   }
   if (action.type === "break_subroutine") {
-    const blinkExclusion = dependencies.blinkBreakExclusion(input, action);
-    if (blinkExclusion) return blinkExclusion;
+    const randomBreakExclusion = dependencies.randomBreakOrDamageBreakExclusion(
+      input,
+      action,
+    );
+    if (randomBreakExclusion) return randomBreakExclusion;
     if (breakMissesAvailableImmediateSafetyThreat(input, action)) {
       return {
         key: "break_does_not_mitigate_visible_safety_threat",

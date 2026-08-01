@@ -231,8 +231,10 @@ function actionCapacityHintMatchesProjection(
   if (profile.restriction !== projection.restriction) return false;
   if (
     profile.reliability !== projection.reliability &&
-    !(profile.reliability === "mandatory" &&
-      projection.reliability === "guaranteed")
+    !(
+      profile.reliability === "mandatory" &&
+      projection.reliability === "guaranteed"
+    )
   ) {
     return false;
   }

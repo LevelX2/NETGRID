@@ -2,9 +2,9 @@ import type { LegalAction, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import {
-  BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
-  blinkRiskShouldAvoidRun,
-  buildBlinkRiskAssessment,
+  DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
+  randomBreakOrDamageRiskShouldAvoidRun,
+  buildRandomBreakOrDamageRiskAssessment,
 } from "../actions/risk-action-projection";
 import {
   aiInput,
@@ -12,7 +12,7 @@ import {
   server,
   visibleCard,
 } from "../semantic-ai-runtime-cutover.test-support";
-import { createRunnerBlinkEncounterBreakContext } from "./runner-blink-encounter-break-context";
+import { createRunnerRandomBreakOrDamageEncounterContext } from "./runner-blink-encounter-break-context";
 
 describe("runner Blink encounter break context", () => {
   it("preserves a public advanced-remote score threat for a hidden root card", () => {
@@ -24,9 +24,9 @@ describe("runner Blink encounter break context", () => {
 
     expect(assessment?.payoffOverride).toBe("remote_score_threat");
     expect(assessment?.evidence).toContain(
-      "blinkBreakPayoffOverride:remote_score_threat",
+      "randomBreakDamagePayoffOverride:remote_score_threat",
     );
-    expect(blinkRiskShouldAvoidRun(assessment)).toBe(false);
+    expect(randomBreakOrDamageRiskShouldAvoidRun(assessment)).toBe(false);
   });
 
   it("does not invent a score threat for a hidden root card without counters", () => {
@@ -37,7 +37,7 @@ describe("runner Blink encounter break context", () => {
     });
 
     expect(assessment?.payoffOverride).toBe("none");
-    expect(blinkRiskShouldAvoidRun(assessment)).toBe(true);
+    expect(randomBreakOrDamageRiskShouldAvoidRun(assessment)).toBe(true);
   });
 
   it("keeps the stronger known-agenda payoff classification", () => {
@@ -70,21 +70,21 @@ function assessmentForRootCard(rootCard: VisibleCard) {
     successful: false,
   };
 
-  return createRunnerBlinkEncounterBreakContext({
+  return createRunnerRandomBreakOrDamageEncounterContext({
     sourceDefinitionIdForAction: () => "onr_v1_007_blink",
     randomBreakOrDamageRiskProfileForDefinitionId: () =>
-      BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
+      DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
     breakSubroutineIndexesForAction: () => new Set([1]),
     encounteredSubroutines: () => [
       { id: "filter-sub-0", type: "do_damage", damageType: "net" },
       { id: "filter-sub-1", type: "end_the_run" },
     ],
-    buildBlinkRiskAssessment,
+    buildRandomBreakOrDamageRiskAssessment,
     isImmediateSafetyThreatSubroutine: () => false,
     isRemoteServerTarget: (serverId) =>
       serverId?.startsWith("remote_") ?? false,
     visibleRootIsKnownAgenda: (card) => card.known && card.type === "agenda",
-  }).blinkRiskAssessmentForEncounterBreak(input, action);
+  }).randomBreakOrDamageRiskAssessmentForEncounterBreak(input, action);
 }
 
 function blinkBreakAction(): LegalAction {

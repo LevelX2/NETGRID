@@ -364,9 +364,10 @@ export function publicContextForAction(
       "breakSubroutineTotalCost",
       "breakAllMatchingSubroutines",
       "breakerEndsRunAfterBreak",
-      "blinkDieRoll",
-      "blinkBreakSuccess",
-      "blinkDamageAmount",
+      "randomBreakOutcomeKind",
+      "randomBreakOutcomeRoll",
+      "randomBreakOutcomeSuccess",
+      "randomBreakOutcomeDamageAmount",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;

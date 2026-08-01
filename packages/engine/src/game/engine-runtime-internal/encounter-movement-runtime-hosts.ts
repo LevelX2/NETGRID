@@ -730,15 +730,19 @@ export function createEncounterMovementRuntimeHosts(
       state,
       `${BLINK_ID}.break.${run.runId}.${encounteredIceId}.${breakerId}.${subroutineIndex}`,
     );
-    legalAction.payload = { ...(legalAction.payload ?? {}), blinkDieRoll: die };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      randomBreakOutcomeKind: "random_break_or_damage",
+      randomBreakOutcomeRoll: die,
+    };
     if (die >= 4) {
       deps.executeEffectCommands(state, [
         { type: "break_subroutine", subroutineIndex },
       ]);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        blinkBreakSuccess: true,
-        blinkDamageAmount: 0,
+        randomBreakOutcomeSuccess: true,
+        randomBreakOutcomeDamageAmount: 0,
       };
       return;
     }
@@ -752,8 +756,8 @@ export function createEncounterMovementRuntimeHosts(
     setDamagePayload(legalAction, damageSummary);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      blinkBreakSuccess: false,
-      blinkDamageAmount: die,
+      randomBreakOutcomeSuccess: false,
+      randomBreakOutcomeDamageAmount: die,
     };
   }
 

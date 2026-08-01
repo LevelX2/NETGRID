@@ -50,8 +50,7 @@ describe("deterministic on-play action-capacity payload", () => {
   });
 
   it("publishes exact on-play advancement distribution", () => {
-    const definition =
-      CARD_DEFINITIONS_BY_ID["onr_v1_305_team-restructuring"];
+    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_305_team-restructuring"];
 
     expect(
       deterministicOnPlayResourcePayload(definition!, "corp"),

@@ -6,9 +6,7 @@ import {
   createRunnerSemanticSupportComposition,
   type RunnerSemanticSupportCompositionDependencies,
 } from "../runtime/runner-semantic-support-composition";
-import {
-  createAiContextDiagnosticsComposition,
-} from "../runtime/ai-context-diagnostics-composition";
+import { createAiContextDiagnosticsComposition } from "../runtime/ai-context-diagnostics-composition";
 import {
   createSemanticRuntimeCorpScoringComposition,
   type SemanticRuntimeCorpScoringCompositionDependencies,
@@ -28,7 +26,7 @@ type RuntimeRunnerSupportDependencyKeys =
   | "bankHasConcreteFundingNeed"
   | "bankInvestmentCommitmentEvidence"
   | "bankInvestmentCommitmentScoreComponents"
-  | "blinkRiskEvidenceForAction"
+  | "randomBreakOrDamageRiskEvidenceForAction"
   | "cardAddressesVisibleBreakerNeed"
   | "evaluationForAction"
   | "handFundingTarget"
@@ -103,13 +101,12 @@ function createRuntimeComposedDependencies(
 export function createAiRuntimeSimulationComposition(
   dependencies: AiRuntimeSimulationCompositionDependencies,
 ) {
-  const contextDiagnostics = createAiContextDiagnosticsComposition(dependencies);
-  const runnerSupport = createRunnerSemanticSupportComposition(
-    {
-      ...createRuntimeComposedDependencies(dependencies, contextDiagnostics),
-      previousPlan: () => undefined,
-    },
-  );
+  const contextDiagnostics =
+    createAiContextDiagnosticsComposition(dependencies);
+  const runnerSupport = createRunnerSemanticSupportComposition({
+    ...createRuntimeComposedDependencies(dependencies, contextDiagnostics),
+    previousPlan: () => undefined,
+  });
   const corpScoring = createSemanticRuntimeCorpScoringComposition(
     createRuntimeComposedDependencies(dependencies, contextDiagnostics),
   );

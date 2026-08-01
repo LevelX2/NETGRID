@@ -268,8 +268,7 @@ describe("buildActionSemanticCandidates", () => {
           payload: {
             cardId: "armageddon-instance",
             serverId: "rd",
-            proteusRunnerVirusFollowup:
-              "doom_counter_instead_of_rd_access",
+            proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
             counterType: "doom",
             counterDelta: 1,
           },

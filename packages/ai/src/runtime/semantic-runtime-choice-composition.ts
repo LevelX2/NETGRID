@@ -1,14 +1,8 @@
-import {
-  createSemanticRuntimeChoiceBuilderContext,
-} from "./semantic-runtime-choice-builder-context";
+import { createSemanticRuntimeChoiceBuilderContext } from "./semantic-runtime-choice-builder-context";
 import type { SemanticRuntimeChoiceBuilderDependencies } from "./semantic-runtime-choice-builder";
-import {
-  createSemanticRuntimeEvidenceContext,
-} from "./semantic-runtime-evidence-context";
+import { createSemanticRuntimeEvidenceContext } from "./semantic-runtime-evidence-context";
 import type { SemanticRuntimeEvidenceDependencies } from "./semantic-runtime-evidence";
-import {
-  createSemanticRuntimeRunnerEvidenceComposition,
-} from "./semantic-runtime-runner-evidence-composition";
+import { createSemanticRuntimeRunnerEvidenceComposition } from "./semantic-runtime-runner-evidence-composition";
 import type { SemanticRuntimeRunnerEvidenceDependencies } from "./semantic-runtime-runner-evidence";
 import {
   createSemanticRuntimeScoreBreakdownContext,
@@ -47,9 +41,9 @@ export function createSemanticRuntimeChoiceComposition(
         dependencies.bankInvestmentCommitmentEvidence,
       noRunEconomyCommitmentEvidence:
         dependencies.noRunEconomyCommitmentEvidence,
-      selfDamageSurvivalAssessment:
-        dependencies.selfDamageSurvivalAssessment,
-      blinkRiskEvidenceForAction: dependencies.blinkRiskEvidenceForAction,
+      selfDamageSurvivalAssessment: dependencies.selfDamageSurvivalAssessment,
+      randomBreakOrDamageRiskEvidenceForAction:
+        dependencies.randomBreakOrDamageRiskEvidenceForAction,
       loanLiabilityAssessment: dependencies.loanLiabilityAssessment,
       persistentInstallEvidenceForAction:
         dependencies.persistentInstallEvidenceForAction,
