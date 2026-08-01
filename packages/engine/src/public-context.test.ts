@@ -4,6 +4,36 @@ import { eventVisibilityForAction } from "./game/events/build-event";
 import { publicContextForAction } from "./public-context";
 
 describe("publicContextForAction", () => {
+  it("publishes the aggregate Runner agenda total after a steal", () => {
+    const state = {
+      corp: { servers: [], scoreArea: [] },
+      runner: { scoreArea: ["previous-agenda", "stolen-agenda"] },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "runner",
+      type: "steal_agenda",
+      payload: { cardId: "stolen-agenda" },
+    } as unknown as LegalAction;
+    const points = new Map([
+      ["previous-agenda", 2],
+      ["stolen-agenda", 3],
+    ]);
+
+    expect(
+      publicContextForAction(state, action, {
+        agendaPointsForScoredCard: (_state, cardId) => points.get(cardId) ?? 0,
+        cardCounter: () => 0,
+        cardStrengthModifier: () => 0,
+        creditCostForAction: () => 0,
+        definitionFor: () => ({ type: "agenda", agendaPoints: 3 }) as never,
+        pumpAmountForLegalAction: () => 0,
+        runnerHqAccessBonus: () => 0,
+        v1915InstalledAccessBonus: () => 0,
+      }),
+    ).toMatchObject({ agendaPoints: 3, totalAgendaPoints: 5 });
+  });
+
   it("publishes the structured server id for start-run history", () => {
     const state = {
       run: { attackedServerId: "rd", accessCount: 1 },

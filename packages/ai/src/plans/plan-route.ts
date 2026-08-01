@@ -112,7 +112,7 @@ export function bindBestCurrentPlanRoute(
         item.match.status === "compatible",
     )
     .map((item) => item.entry)
-    .sort(compareRouteCandidates);
+    .sort(comparePlanRouteCandidates);
 
   const selected = compatible[0];
   if (!selected) {
@@ -329,13 +329,36 @@ function allRequiredPresent(
   );
 }
 
-function compareRouteCandidates(
+export function comparePlanRouteCandidates(
   left: PlanRouteCandidate,
   right: PlanRouteCandidate,
 ): number {
+  const valueComparison = right.stepValue - left.stepValue;
+  if (valueComparison !== 0) return valueComparison;
+  if (semanticallyEquivalentCardCopies(left.candidate, right.candidate)) {
+    const sourceComparison = left.candidate.sourceCardInstanceId!.localeCompare(
+      right.candidate.sourceCardInstanceId!,
+    );
+    if (sourceComparison !== 0) return sourceComparison;
+  }
+  return left.candidate.actionId.localeCompare(right.candidate.actionId);
+}
+
+function semanticallyEquivalentCardCopies(
+  left: ActionSemanticCandidate,
+  right: ActionSemanticCandidate,
+): boolean {
   return (
-    right.stepValue - left.stepValue ||
-    left.candidate.actionId.localeCompare(right.candidate.actionId)
+    left.sourceCardInstanceId !== undefined &&
+    right.sourceCardInstanceId !== undefined &&
+    left.sourceDefinitionId !== undefined &&
+    left.sourceDefinitionId === right.sourceDefinitionId &&
+    left.actionType === right.actionType &&
+    left.semanticActionType === right.semanticActionType &&
+    left.abilityId === right.abilityId &&
+    left.abilityKey === right.abilityKey &&
+    JSON.stringify(left.costProfile) === JSON.stringify(right.costProfile) &&
+    JSON.stringify(left.targetContext) === JSON.stringify(right.targetContext)
   );
 }
 

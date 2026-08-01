@@ -22,6 +22,7 @@ import {
 } from "./resident-plan-portfolio";
 import {
   bindBestCurrentPlanRoute,
+  comparePlanRouteCandidates,
   matchPlanStepCandidate,
   type PlanRoute,
   type PlanRouteCandidate,
@@ -427,11 +428,7 @@ export function enumerateCurrentPlanSchedulerRoutes(params: {
             context.input.playerView.stateVersion,
           ).status === "compatible",
       )
-      .sort(
-        (left, right) =>
-          right.stepValue - left.stepValue ||
-          left.candidate.actionId.localeCompare(right.candidate.actionId),
-      );
+      .sort((left, right) => comparePlanRouteCandidates(left, right));
     if (compatible.length === 0) {
       issues.push({
         instanceId: instance.instanceId,
@@ -459,8 +456,7 @@ export function enumerateCurrentPlanSchedulerRoutes(params: {
       (left, right) =>
         compareValidatedPlanAssessments(left.assessment, right.assessment) ||
         left.instance.instanceId.localeCompare(right.instance.instanceId) ||
-        right.stepValue - left.stepValue ||
-        left.candidate.actionId.localeCompare(right.candidate.actionId),
+        comparePlanRouteCandidates(left, right),
     ),
     issues: issues.sort(
       (left, right) =>

@@ -115,6 +115,59 @@ describe("shared plan scheduler", () => {
     expect(result.portfolio).toEqual(portfolioBefore);
   });
 
+  it("binds equivalent duplicate card actions to the same canonical instance regardless of input order", () => {
+    const copyA = {
+      ...candidate("action-z", "corp"),
+      actionType: "play_operation",
+      semanticActionType: "play.operation",
+      sourceKind: "card" as const,
+      sourceCardInstanceId: "copy-a",
+      sourceDefinitionId: "same-operation",
+    };
+    const copyB = {
+      ...copyA,
+      actionId: "action-a",
+      legalActionRef: { ...copyA.legalActionRef, actionId: "action-a" },
+      sourceCardInstanceId: "copy-b",
+    };
+    const choose = (actions: ActionSemanticCandidate[]) => {
+      const economy = module("corp", "corp.economy", "P5", actions[0]!);
+      economy.materialize = () => ({
+        step: {
+          stepId: "play-equivalent-operation",
+          capability: {
+            capabilityId: "play-equivalent-operation",
+            semanticActionTypes: ["play.operation"],
+          },
+          purpose: "test canonical duplicate binding",
+        },
+        candidates: actions.map((candidate) => ({ candidate, stepValue: 10 })),
+      });
+      const result = runPlanScheduler({
+        context: context("corp", actions),
+        registry: createSidePlanRegistry({
+          side: "corp",
+          priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+          modules: [economy],
+        }),
+        resolveEngineWindow: () => undefined,
+      });
+      if (result.lane !== "plan") throw new Error("Expected plan lane.");
+      return {
+        actionId: result.route.head.actionId,
+        executor: result.portfolio.executorInstanceId,
+        capability: result.route.step.capability.capabilityId,
+      };
+    };
+
+    expect(choose([copyB, copyA])).toEqual({
+      actionId: "action-z",
+      executor: "plan:corp.economy:general",
+      capability: "play-equivalent-operation",
+    });
+    expect(choose([copyA, copyB])).toEqual(choose([copyB, copyA]));
+  });
+
   it("makes a current exact goal signal available to discovery and uses it to authorize only its bound tactical assessment", () => {
     const action = candidate("run-remote");
     const schedulerContext = context("runner", [action]);

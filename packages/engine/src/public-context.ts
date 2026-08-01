@@ -2261,9 +2261,12 @@ export function publicContextForAction(
       context.agendaPoints = definition.agendaPoints ?? 0;
       const bonusAgendaPoints = deps.cardCounter(state, agendaId, "agenda");
       if (bonusAgendaPoints > 0) context.agendaPointBonus = bonusAgendaPoints;
-      context.totalAgendaPoints = deps.agendaPointsForScoredCard(
-        state,
-        agendaId,
+      const scoredSide =
+        legalAction.type === "score_agenda" ? "corp" : "runner";
+      context.totalAgendaPoints = state[scoredSide].scoreArea.reduce(
+        (sum, scoredAgendaId) =>
+          sum + deps.agendaPointsForScoredCard(state, scoredAgendaId),
+        0,
       );
     }
   }
