@@ -1,6 +1,6 @@
 # Generische Run-Start-Eligibility und serverbezogene Runsperren
 
-Status: aktiv in Umsetzung
+Status: umgesetzt und verifiziert
 
 Quelle/Vorgabe: Playtest- und Architekturprüfung der Runsperre von Roving Submarine am 1. August 2026. Die Sperre betrifft den Zielserver, während die auslösende Karte nur Quelle und fachliche Begründung ist. Der vollständige lokale Kartenpool enthält aktuell keine zweite zielserverbezogene Run-Start-Sperre, aber globale Run-Locks, Run-Umleitungen, Run-Startkosten und Einschränkungen während eines Runs müssen klar abgegrenzt bleiben.
 
@@ -127,3 +127,14 @@ Korpzug beginnt
 - LegalActions, `applyAction`-naher Ausführungspfad und PlayerView stimmen überein.
 - Fokussierte Regressionstests, Guard und vereinbarte breite Gates sind grün.
 - Arbeitsbranch ist nach `main` integriert; Worktree und Branch sind verifiziert entfernt.
+
+## Umsetzungsergebnis
+
+- Roving Submarine deklariert die allgemeine Fähigkeit `server_run_start_restriction` mit eigener Quellenfähigkeit und `source_fort`-Zielbindung.
+- Korp-Installation und -Entwicklung markieren die Aktivität des betroffenen Servers in `corpTurnFlags.fortActivityServerIdsSinceCorpTurnStart`; beim Beginn des nächsten Korpzugs wird die Menge geleert und beim Entfernen leerer Remotes bereinigt.
+- `evaluateRunStartEligibility` verbindet globale Runner-Run-Locks mit quellengebundenen Zielservereinschränkungen, ohne beide Mechanikarten gleichzusetzen.
+- LegalAction-Erzeugung sowie beide Run-Ausführungspfade verwenden diese kanonische Eligibility.
+- Die PlayerView projiziert `runStartRestrictions` am Server. Der Webclient rendert daraus einen allgemeinen Serverchip und ermittelt den Tooltip aus Sperrgrund und öffentlicher Quellenangabe.
+- Die früheren Karten-ID-, Badge-ID-, Kartenname- und CSS-Sonderfälle für Roving Submarine wurden entfernt.
+
+Verifiziert wurden 1.838 Engine-, 759 Web-, 215 Server-, 16 Shared- und 20 Catalog-Tests, alle Workspace-Typechecks einschließlich des isoliert mit 8 GB Heap ausgeführten AI-Typechecks, der Web-Produktionsbuild sowie der Card-Function-Abstraktionsguard. Der normale rekursive Typecheck erreichte im großen AI-TypeScript-Prozess zunächst das 4-GB-Heaplimit; derselbe Compilerlauf bestand isoliert mit erweitertem Heap.

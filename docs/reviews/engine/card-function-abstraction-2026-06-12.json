@@ -146,7 +146,9 @@
         "questForCattekinPermanentActionGain"
       ],
       "targetKind": "start_turn_random_effect_table",
-      "targetState": ["runnerTurnFlags.persistentModifiers[]"],
+      "targetState": [
+        "runnerTurnFlags.persistentModifiers[]"
+      ],
       "params": {
         "dieFaces": 6,
         "outcomes": [
@@ -168,7 +170,9 @@
         "multiServerSuccessSequenceRun"
       ],
       "targetKind": "multi_server_success_sequence",
-      "targetState": ["runnerTurnFlags.pendingSequences[]"],
+      "targetState": [
+        "runnerTurnFlags.pendingSequences[]"
+      ],
       "params": {
         "sequence": "run_each_data_fort",
         "advanceOnSuccessfulRun": true,
@@ -185,7 +189,10 @@
         "delayedAccessEffects"
       ],
       "targetKind": "delayed_agenda_access_replacement",
-      "targetState": ["runDurationEffects[]", "delayedAccessEffects[]"],
+      "targetState": [
+        "runDurationEffects[]",
+        "delayedAccessEffects[]"
+      ],
       "params": {
         "replacementWindow": "agenda_access",
         "delay": "after_current_access_sequence"
@@ -200,7 +207,9 @@
         "codeViralCachePurgePreserveTargets"
       ],
       "targetKind": "purge_replacement_with_runner_virus_counter_cleanup",
-      "targetState": ["replacementEffects[]"],
+      "targetState": [
+        "replacementEffects[]"
+      ],
       "params": {
         "interruptedEvent": "corp_purge_virus_counters",
         "runnerVirusCounterCleanup": true
@@ -233,7 +242,9 @@
         "spendRecurringTraceCreditPool"
       ],
       "targetKind": "recurring_trace_credit_pool",
-      "targetState": ["recurringCreditPools[]"],
+      "targetState": [
+        "recurringCreditPools[]"
+      ],
       "params": {
         "amount": 1,
         "spendWindow": "trace",
@@ -249,7 +260,9 @@
         "runStartInterventions"
       ],
       "targetKind": "start_run_redirect_to_source_fort",
-      "targetState": ["runStartInterventions[]"],
+      "targetState": [
+        "runStartInterventions[]"
+      ],
       "params": {
         "redirectTarget": "source_fort",
         "triggerWindow": "run_start"
@@ -264,7 +277,9 @@
         "overadvance_bonus_agenda_points"
       ],
       "targetKind": "score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points",
-      "targetState": ["scoredAgendaAbilities[]"],
+      "targetState": [
+        "scoredAgendaAbilities[]"
+      ],
       "params": {
         "triggerWindow": "agenda_scored",
         "conditionSource": "agenda_params"
@@ -968,7 +983,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts",
-      "line": 622,
+      "line": 621,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1111,7 +1126,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/encounter-movement-runtime-hosts.ts",
-      "line": 609,
+      "line": 608,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1419,7 +1434,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.test.ts",
-      "line": 481,
+      "line": 479,
       "column": 32,
       "token": "quest_for_cattekin",
       "cardTitle": "Quest for Cattekin",
@@ -1430,7 +1445,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.test.ts",
-      "line": 484,
+      "line": 482,
       "column": 26,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
