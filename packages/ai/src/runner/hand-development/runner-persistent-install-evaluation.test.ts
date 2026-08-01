@@ -800,7 +800,9 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       credits: 1,
       hand: [junkyard],
       rig: [installedProgramSearch],
-      legalActions: [installAction("install-junkyard-after-search", junkyard, 1)],
+      legalActions: [
+        installAction("install-junkyard-after-search", junkyard, 1),
+      ],
     });
 
     const evaluation = findByInstance(

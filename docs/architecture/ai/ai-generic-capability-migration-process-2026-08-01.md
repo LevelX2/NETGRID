@@ -1,6 +1,6 @@
 # Generische KI-Fähigkeitsmigration – sequenzieller Umsetzungsprozess
 
-Status: **in Umsetzung**
+Status: **abgeschlossen**
 
 Quelle: Architekturreview der produktiven KI vom 01.08.2026 und
 anschließender Nutzerauftrag, die sieben priorisierten Korrekturschritte
@@ -159,6 +159,20 @@ package_active/package_verifying
 | GC06  | Engine-gequotete Folgekontrakte                 | Engine + `corp.defend_servers` |
 | GC07  | Generische Zufalls-Break-/Schadensverträge      | Run-Analyse + Engine           |
 | GC08  | Finaler Abgleich, Wissenspflege und Integration | Prozess                        |
+
+## Umsetzungsstand
+
+| Paket | Status        | Commit                 |
+| ----- | ------------- | ---------------------- |
+| GC00  | abgeschlossen | `de6e43e3e`            |
+| GC01  | abgeschlossen | `3aac85c5c`            |
+| GC02  | abgeschlossen | `2a352d13c`            |
+| GC03  | abgeschlossen | `ce3d9045e`            |
+| GC04  | abgeschlossen | `80463675a`            |
+| GC05  | abgeschlossen | `b0d6e6294`            |
+| GC06  | abgeschlossen | `ede351ed0`            |
+| GC07  | abgeschlossen | `64a97667a`            |
+| GC08  | abgeschlossen | dieser Abschlusscommit |
 
 ## GC00 – Prozessartefakt und Ausgangsinventar
 
