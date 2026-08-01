@@ -90,6 +90,23 @@ Runtime-Sonderregeln ersetzen.
 - Jeden Vertrag gegen eine nahe negative Kontrolle abgrenzen.
 - Commit: `test(ai): capture d249 and 9475 decision regressions`.
 
+Aktueller Nachweis auf dem unveränderten Code vor dem ersten Fix:
+
+- alle fünf Captures wurden mit `warmup-policy=strict` ab Entscheidung 1
+  erstellt; `warmupDriftCount=0` in allen Fällen;
+- **bereits grün:** 9475 D9 setzt den bestehenden
+  `corp.score_agenda`-Plan mit der Installation von Executive Extraction
+  fort. F2 erhält deshalb weder neue Logik noch einen zusätzlichen
+  Ausnahmepfad;
+- **behavior_regression:** d249 D7 wählt `decline_rez` statt Asp-Rez;
+- **behavior_regression:** 9475 D43 und D47 wählen ungebundene Grundkredite
+  statt R&D-Härtung oder einer qualifizierten Folgeentwicklung des bereits
+  installierten Counter-Assets;
+- **behavior_regression:** 9475 D52 wählt `decline_rez` statt Data-Wall-Rez;
+- vier bestehende enge Gegenproben-Dateien für wirkungslose Rezfenster,
+  bereits qualifizierte Rezrouten, Defense-Restzugplanung und endliche
+  Corp-Economy bleiben mit `35/35` Tests grün.
+
 ### P2 – Rote Defense-Verträge
 
 - Ausschließlich rote Rez- oder Allokationsverträge in
