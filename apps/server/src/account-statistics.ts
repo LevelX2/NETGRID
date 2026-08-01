@@ -575,6 +575,18 @@ export class AccountMatchStatisticsService {
     }
   }
 
+  async reconcileSeriesNextParticipantBindings(
+    record: StoredMatch,
+  ): Promise<void> {
+    const nextMatchId = record.match.series?.nextMatchId;
+    if (!nextMatchId) return;
+    await this.inheritMatchParticipants({
+      sourceMatchId: record.match.matchId,
+      targetMatchId: nextMatchId,
+      bindingSource: "inherited_series_next",
+    });
+  }
+
   bindingsForMatch(matchId: string): Promise<AccountMatchParticipantBinding[]> {
     return this.storage.listMatchParticipants(matchId);
   }
@@ -592,7 +604,12 @@ export class AccountMatchStatisticsService {
     );
     if (bindings.length === 0) return;
     const recordedAt =
-      record.lifecycleResult?.occurredAt ?? record.match.updatedAt;
+      record.lifecycleResult?.occurredAt ??
+      record.resultSnapshot?.finishedAt ??
+      record.match.series?.results.find(
+        (result) => result.matchId === record.match.matchId,
+      )?.finishedAt ??
+      record.match.updatedAt;
     const selfPlayAccounts = selfPlayAccountIds(bindings);
     for (const binding of bindings) {
       const projected = gameResultFor(
@@ -793,7 +810,7 @@ function gameResultFor(
           gameNumber: record.match.series.gameNumber,
         }
       : {}),
-    completedAt: record.lifecycleResult?.occurredAt ?? record.match.updatedAt,
+    completedAt: recordedAt,
     side,
     outcome,
     finishKind: finishKindFor(record),

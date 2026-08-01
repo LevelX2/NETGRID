@@ -28,6 +28,7 @@ import {
   type LobbyPayload,
   type ServicePayload,
   type SidePayload,
+  type StoredMatch,
   type SubmitActionResult,
   type UndoResult,
 } from "./multiplayer";
@@ -881,16 +882,18 @@ export function createNetgridHttpServer(
   const accountDecks = options.accountDecks;
   const accountMatchStartPreferences = options.accountMatchStartPreferences;
   const accountStatistics = options.accountStatistics;
-  const removeAccountStatisticsObserver = accountStatistics
-    ? activeService.addPersistenceObserver((record) =>
-        accountStatistics.recordTerminalMatch(record),
-      )
+  const observeAccountStatistics = accountStatistics
+    ? async (record: StoredMatch) => {
+        await accountStatistics.recordTerminalMatch(record);
+        await accountStatistics.reconcileSeriesNextParticipantBindings(record);
+      }
     : undefined;
-  const accountStatisticsReady = accountStatistics
+  const removeAccountStatisticsObserver = observeAccountStatistics
+    ? activeService.addPersistenceObserver(observeAccountStatistics)
+    : undefined;
+  const accountStatisticsReady = observeAccountStatistics
     ? activeService
-        .reconcilePersistedMatches((record) =>
-          accountStatistics.recordTerminalMatch(record),
-        )
+        .reconcilePersistedMatches(observeAccountStatistics)
         .then(() => undefined)
     : Promise.resolve();
   const realtime = new NetgridRealtimeServer(

@@ -27,7 +27,17 @@ describe("AccountMatchStatisticsService participant binding", () => {
     })).rejects.toMatchObject({ code: "account_match_binding_conflict" });
 
     await service.inheritMatchParticipants({ sourceMatchId: "match_a", targetMatchId: "match_b", bindingSource: "inherited_series_next" });
+    await service.reconcileSeriesNextParticipantBindings({
+      match: {
+        matchId: "match_a",
+        series: { nextMatchId: "match_c" },
+      },
+    } as never);
     expect(await service.bindingsForMatch("match_b")).toEqual([
+      expect.objectContaining({ participantSlot: "player_a", accountId: "account_a", bindingSource: "inherited_series_next" }),
+      expect.objectContaining({ participantSlot: "player_b", accountId: "account_a", bindingSource: "inherited_series_next" }),
+    ]);
+    expect(await service.bindingsForMatch("match_c")).toEqual([
       expect.objectContaining({ participantSlot: "player_a", accountId: "account_a", bindingSource: "inherited_series_next" }),
       expect.objectContaining({ participantSlot: "player_b", accountId: "account_a", bindingSource: "inherited_series_next" }),
     ]);
@@ -83,6 +93,48 @@ describe("AccountMatchStatisticsService participant binding", () => {
 
     expect(await matches.reconcilePersistedMatches((record) => statistics.recordTerminalMatch(record))).toBe(1);
     expect(await statistics.gameResultsForAccount("account_reconcile")).toHaveLength(1);
+  });
+
+  it("keeps a terminal result idempotent when a later series transition updates the match timestamp", async () => {
+    const matchStorage = new InMemoryMatchStorage();
+    const matches = new MultiplayerService(matchStorage, {
+      tokenSalt: "account-statistics-stable-finished-at",
+    });
+    const statistics = new AccountMatchStatisticsService(
+      new InMemoryAccountStatisticsStorage(),
+    );
+    const created = await matches.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      humanSide: "runner",
+      identityKind: "account",
+      seed: "statistics-stable-finished-at",
+    });
+    await statistics.bindAuthenticatedParticipant({
+      matchId: created.matchId,
+      participantSlot: "player_a",
+      accountId: "account_stable_finished_at",
+      bindingSource: "authenticated_create",
+    });
+    const stored = (await matchStorage.load(created.matchId))!;
+    stored.match.status = "finished";
+    stored.gameState.winner = "runner";
+    stored.match.updatedAt = "2026-08-01T08:00:00.000Z";
+    stored.resultSnapshot = {
+      finishedAt: "2026-08-01T08:00:00.000Z",
+    } as never;
+
+    await statistics.recordTerminalMatch(stored);
+    stored.match.updatedAt = "2026-08-01T08:01:00.000Z";
+    await expect(statistics.recordTerminalMatch(stored)).resolves.toBeUndefined();
+    expect(
+      await statistics.gameResultsForAccount("account_stable_finished_at"),
+    ).toEqual([
+      expect.objectContaining({
+        completedAt: "2026-08-01T08:00:00.000Z",
+        recordedAt: "2026-08-01T08:00:00.000Z",
+      }),
+    ]);
   });
 
   it("aggregates owner-scoped filters and paginates the private history", async () => {

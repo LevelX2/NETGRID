@@ -8981,10 +8981,29 @@ describe("MVP 0.2 multiplayer service", () => {
       side: match.runner.side,
       sessionToken: match.runner.sessionToken,
     });
-    expect("error" in duplicate).toBe(true);
-    if (!("error" in duplicate))
-      throw new Error("Expected duplicate series-next rejection");
-    expect(duplicate.error.code).toBe("series_next_exists");
+    expect("error" in duplicate).toBe(false);
+    if ("error" in duplicate) throw new Error(duplicate.error.message);
+    expect(duplicate.matchId).toBe(next.matchId);
+    expect(duplicate.hostSide).toBe(next.hostSide);
+    expect(duplicate.hostSessionToken).not.toBe(next.hostSessionToken);
+    expect(duplicate.hostReconnectToken).not.toBe(next.hostReconnectToken);
+    expect(duplicate.joinUrl).toBeTruthy();
+    expect(
+      await match.service.bootstrap(
+        duplicate.matchId,
+        duplicate.hostSide,
+        duplicate.hostSessionToken,
+        { allowLobby: true },
+      ),
+    ).not.toHaveProperty("error");
+    expect(
+      await match.service.bootstrap(
+        next.matchId,
+        next.hostSide,
+        next.hostSessionToken,
+        { allowLobby: true },
+      ),
+    ).toMatchObject({ error: { code: "unauthorized" } });
   });
 
   it.each([

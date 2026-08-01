@@ -1468,7 +1468,16 @@ export class MultiplayerService {
           ),
         };
       }
+      const requesterPlayer = seriesPlayerForSide(series, input.side);
       if (series.nextMatchId) {
+        const resumed = await this.resumeExistingNextSeriesGame({
+          previousMatchId: record.match.matchId,
+          nextMatchId: series.nextMatchId,
+          seriesId: series.seriesId,
+          requesterPlayer,
+          displayName: input.displayName ?? session.displayName,
+        });
+        if (resumed) return resumed;
         await this.persist(record);
         return {
           error: safeError(
@@ -1478,7 +1487,6 @@ export class MultiplayerService {
         };
       }
 
-      const requesterPlayer = seriesPlayerForSide(series, input.side);
       const opponentPlayer = oppositeSeriesPlayer(requesterPlayer);
       const nextHostSide =
         record.match.mode === "ai_vs_ai" ? "runner" : opposite(input.side);
@@ -1548,6 +1556,146 @@ export class MultiplayerService {
       await this.persist(record);
       return next;
     });
+  }
+
+  private async resumeExistingNextSeriesGame(input: {
+    previousMatchId: string;
+    nextMatchId: string;
+    seriesId: string;
+    requesterPlayer: SeriesPlayerSlot;
+    displayName: string;
+  }): Promise<CreateMatchResult | undefined> {
+    const record = await this.mustLoad(input.nextMatchId);
+    const series = record?.match.series;
+    if (
+      !record ||
+      !series ||
+      series.seriesId !== input.seriesId ||
+      series.previousMatchId !== input.previousMatchId ||
+      isTerminalStatus(record.match.status)
+    ) {
+      return undefined;
+    }
+    const side =
+      record.match.mode === "ai_vs_ai"
+        ? record.sessions[0]?.side
+        : sideForPlayerSlot(record, input.requesterPlayer);
+    const session = record.sessions.find(
+      (candidate) => candidate.side === side,
+    );
+    if (!side || !session) return undefined;
+
+    const now = this.now();
+    const sessionToken = generateToken();
+    const reconnectToken = generateToken();
+    this.revokeTokenByHash(record, "session", session.sessionTokenHash, now);
+    this.revokeTokenByHash(
+      record,
+      "reconnect",
+      session.reconnectTokenHash,
+      now,
+    );
+    record.sessions = record.sessions.map((candidate) =>
+      candidate.sessionId === session.sessionId
+        ? {
+            ...candidate,
+            displayName: input.displayName.trim() || candidate.displayName,
+            sessionTokenHash: this.hashToken(sessionToken),
+            reconnectTokenHash: this.hashToken(reconnectToken),
+            lastSeenAt: now,
+          }
+        : candidate,
+    );
+    record.tokens.push(
+      this.tokenRecord(
+        record.match.matchId,
+        side,
+        "session",
+        sessionToken,
+        now,
+      ),
+      this.tokenRecord(
+        record.match.matchId,
+        side,
+        "reconnect",
+        reconnectToken,
+        now,
+      ),
+    );
+
+    const joinSide = opposite(side);
+    let joinToken: string | undefined;
+    if (
+      record.match.mode === "human_vs_human" &&
+      !record.sessions.some((candidate) => candidate.side === joinSide)
+    ) {
+      record.tokens = record.tokens.map((candidate) =>
+        candidate.kind === "join" &&
+        candidate.allowedSide === joinSide &&
+        !candidate.usedAt &&
+        !candidate.revokedAt
+          ? { ...candidate, revokedAt: now }
+          : candidate,
+      );
+      joinToken = generateToken();
+      record.tokens.push(
+        this.tokenRecord(
+          record.match.matchId,
+          joinSide,
+          "join",
+          joinToken,
+          now,
+        ),
+      );
+    }
+
+    this.syncPlayerClock(record, now);
+    record.match.matchVersion += 1;
+    record.match.updatedAt = now;
+    await this.persist(record);
+    const payload = this.shouldUseLobbyPayload(record)
+      ? this.lobbyPayloadFor(record, side)
+      : this.payloadFor(record, side);
+    return {
+      matchId: record.match.matchId,
+      matchStatus: record.match.status,
+      isPublic: record.match.isPublic,
+      hostSide: side,
+      hostSessionToken: sessionToken,
+      hostReconnectToken: reconnectToken,
+      ...(joinToken
+        ? {
+            joinUrl: `${this.webBaseUrl}/?matchId=${encodeURIComponent(record.match.matchId)}&joinToken=${encodeURIComponent(joinToken)}`,
+          }
+        : {}),
+      webSocketUrl: this.webSocketUrl(),
+      mode: record.match.mode,
+      baseline: record.match.baseline,
+      playerView: isSidePayload(payload)
+        ? payload.playerView
+        : (undefined as unknown as PlayerView),
+      legalActions: isSidePayload(payload) ? payload.legalActions : [],
+      matchVersion: record.match.matchVersion,
+      ...(!isSidePayload(payload) && payload.startLobby
+        ? { lobby: payload.startLobby }
+        : {}),
+      ...(isSidePayload(payload) && payload.pendingChoice
+        ? { pendingChoice: payload.pendingChoice }
+        : {}),
+      ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
+      ...(isSidePayload(payload) && payload.aiTurnPresentation
+        ? { aiTurnPresentation: payload.aiTurnPresentation }
+        : {}),
+      ...(isSidePayload(payload) && payload.winner
+        ? { winner: payload.winner }
+        : {}),
+      ...(isSidePayload(payload) && payload.finalStateHash
+        ? { finalStateHash: payload.finalStateHash }
+        : {}),
+      ...(isSidePayload(payload) && payload.resultSummary
+        ? { resultSummary: payload.resultSummary }
+        : {}),
+    };
   }
 
   async getJoinInfo(
