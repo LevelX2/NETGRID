@@ -225,10 +225,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "missing_wall_coverage",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["missing_wall_coverage", "weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -723,15 +720,10 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "missing_wall_coverage",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["missing_wall_coverage", "weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:missing_wall_coverage"
-          ]
+          "runtimeBlockers": ["hard_support_gap:missing_wall_coverage"]
         },
         "runner.rnd_pressure": {
           "anchorScore": 0,
@@ -901,10 +893,7 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "missing_wall_coverage",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["missing_wall_coverage", "weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -1025,10 +1014,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "missing_wall_coverage",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["missing_wall_coverage", "weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -1205,9 +1191,7 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "missing_wall_coverage"
-          ],
+          "supportGaps": ["missing_wall_coverage"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -1347,6 +1331,389 @@
           "programTrash": "unknown"
         }
       },
+      "runnerEngineDoctrine": {
+        "schemaVersion": "runner-deck-engine-doctrine-v1",
+        "providers": [
+          {
+            "providerId": "runner.provider:onr_v1_006_black-dahlia",
+            "cardId": "onr_v1_006_black-dahlia",
+            "copies": 1,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": [],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_006_black-dahlia",
+              "provider_copies:1",
+              "provides:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_016_cyfermaster",
+            "cardId": "onr_v1_016_cyfermaster",
+            "copies": 1,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": [],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_016_cyfermaster",
+              "provider_copies:1",
+              "provides:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_040_loony-goon",
+            "cardId": "onr_v1_040_loony-goon",
+            "copies": 1,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": [],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_040_loony-goon",
+              "provider_copies:1",
+              "provides:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_052_raffles",
+            "cardId": "onr_v1_052_raffles",
+            "copies": 1,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": [],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_052_raffles",
+              "provider_copies:1",
+              "provides:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_054_raptor",
+            "cardId": "onr_v1_054_raptor",
+            "copies": 1,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": [],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_054_raptor",
+              "provider_copies:1",
+              "provides:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_060_shaka",
+            "cardId": "onr_v1_060_shaka",
+            "copies": 1,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": [],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_060_shaka",
+              "provider_copies:1",
+              "provides:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_070_tinweasel",
+            "cardId": "onr_v1_070_tinweasel",
+            "copies": 1,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": [],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_070_tinweasel",
+              "provider_copies:1",
+              "provides:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_072_wild-card",
+            "cardId": "onr_v1_072_wild-card",
+            "copies": 1,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": [],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_072_wild-card",
+              "provider_copies:1",
+              "provides:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_073_wizards-book",
+            "cardId": "onr_v1_073_wizards-book",
+            "copies": 2,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": [],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_073_wizards-book",
+              "provider_copies:2",
+              "provides:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_079_bodyweight-synthetic-blood",
+            "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+            "copies": 2,
+            "capabilities": ["runner.throughput.draw"],
+            "supportCapabilities": [],
+            "persistence": "one_shot",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_079_bodyweight-synthetic-blood",
+              "provider_copies:2",
+              "provides:runner.throughput.draw"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_095_jack-n-joe",
+            "cardId": "onr_v1_095_jack-n-joe",
+            "copies": 2,
+            "capabilities": ["runner.throughput.draw"],
+            "supportCapabilities": [],
+            "persistence": "one_shot",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_095_jack-n-joe",
+              "provider_copies:2",
+              "provides:runner.throughput.draw"
+            ]
+          }
+        ],
+        "dependencies": [
+          {
+            "dependencyId": "runner.dependency.breaker_coverage",
+            "requiredCapabilityIds": ["runner.coverage.breaker"],
+            "providerIds": [
+              "runner.provider:onr_v1_006_black-dahlia",
+              "runner.provider:onr_v1_016_cyfermaster",
+              "runner.provider:onr_v1_040_loony-goon",
+              "runner.provider:onr_v1_052_raffles",
+              "runner.provider:onr_v1_054_raptor",
+              "runner.provider:onr_v1_060_shaka",
+              "runner.provider:onr_v1_070_tinweasel",
+              "runner.provider:onr_v1_072_wild-card",
+              "runner.provider:onr_v1_073_wizards-book"
+            ],
+            "supportProviderIds": [],
+            "distinctProviderDefinitions": 9,
+            "providerCopies": 10,
+            "criticality": "multiple_definitions",
+            "evidence": [
+              "dependency:runner.dependency.breaker_coverage",
+              "distinct_provider_definitions:9",
+              "provider_copies:10"
+            ]
+          }
+        ],
+        "engineLines": [
+          {
+            "lineId": "runner.engine.persistent_rig",
+            "status": "coherent",
+            "providerIds": [
+              "runner.provider:onr_v1_006_black-dahlia",
+              "runner.provider:onr_v1_016_cyfermaster",
+              "runner.provider:onr_v1_040_loony-goon",
+              "runner.provider:onr_v1_052_raffles",
+              "runner.provider:onr_v1_054_raptor",
+              "runner.provider:onr_v1_060_shaka",
+              "runner.provider:onr_v1_070_tinweasel",
+              "runner.provider:onr_v1_072_wild-card",
+              "runner.provider:onr_v1_073_wizards-book"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["coverage_dependency_open"],
+            "exitConditionIds": ["required_coverage_installed"],
+            "evidence": [
+              "engine_line:runner.engine.persistent_rig",
+              "provider_count:9",
+              "coherent:true"
+            ]
+          },
+          {
+            "lineId": "runner.engine.consumption_recovery",
+            "status": "unsupported",
+            "providerIds": [],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["consumable_coverage_provider_present"],
+            "exitConditionIds": ["coverage_provider_recoverable_or_replaced"],
+            "evidence": [
+              "engine_line:runner.engine.consumption_recovery",
+              "provider_count:0",
+              "coherent:false"
+            ]
+          },
+          {
+            "lineId": "runner.engine.delayed_install",
+            "status": "supported",
+            "providerIds": [
+              "runner.provider:onr_v1_006_black-dahlia",
+              "runner.provider:onr_v1_016_cyfermaster",
+              "runner.provider:onr_v1_040_loony-goon",
+              "runner.provider:onr_v1_052_raffles",
+              "runner.provider:onr_v1_054_raptor",
+              "runner.provider:onr_v1_060_shaka",
+              "runner.provider:onr_v1_070_tinweasel",
+              "runner.provider:onr_v1_072_wild-card",
+              "runner.provider:onr_v1_073_wizards-book"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["stageable_required_provider_visible"],
+            "exitConditionIds": [
+              "staged_provider_installed_or_no_longer_required"
+            ],
+            "evidence": [
+              "engine_line:runner.engine.delayed_install",
+              "provider_count:9",
+              "coherent:false"
+            ]
+          },
+          {
+            "lineId": "runner.engine.compatible_recurring_economy",
+            "status": "supported",
+            "providerIds": [
+              "runner.provider:onr_v1_006_black-dahlia",
+              "runner.provider:onr_v1_016_cyfermaster",
+              "runner.provider:onr_v1_040_loony-goon",
+              "runner.provider:onr_v1_052_raffles",
+              "runner.provider:onr_v1_054_raptor",
+              "runner.provider:onr_v1_060_shaka",
+              "runner.provider:onr_v1_070_tinweasel",
+              "runner.provider:onr_v1_072_wild-card",
+              "runner.provider:onr_v1_073_wizards-book"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["compatible_breaker_credit_demand_present"],
+            "exitConditionIds": [
+              "compatible_recurring_supply_meets_useful_demand"
+            ],
+            "evidence": [
+              "engine_line:runner.engine.compatible_recurring_economy",
+              "provider_count:9",
+              "coherent:false"
+            ]
+          },
+          {
+            "lineId": "runner.engine.throughput_until_ready",
+            "status": "coherent",
+            "providerIds": [
+              "runner.provider:onr_v1_079_bodyweight-synthetic-blood",
+              "runner.provider:onr_v1_095_jack-n-joe"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["required_dependency_not_ready"],
+            "exitConditionIds": ["required_dependency_ready"],
+            "evidence": [
+              "engine_line:runner.engine.throughput_until_ready",
+              "provider_count:2",
+              "coherent:true"
+            ]
+          }
+        ],
+        "developmentTendencies": [
+          {
+            "tendencyId": "runner.development.install_persistent_provider",
+            "strength": "high",
+            "ownerModuleId": "runner.rig_and_coverage",
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["required_coverage_installed"],
+            "evidence": [
+              "development_tendency:runner.development.install_persistent_provider",
+              "active:true",
+              "owner:runner.rig_and_coverage"
+            ]
+          },
+          {
+            "tendencyId": "runner.development.recover_consumed_provider",
+            "strength": "low",
+            "ownerModuleId": "runner.rig_and_coverage",
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["coverage_provider_recoverable_or_replaced"],
+            "evidence": [
+              "development_tendency:runner.development.recover_consumed_provider",
+              "active:false",
+              "owner:runner.rig_and_coverage"
+            ]
+          },
+          {
+            "tendencyId": "runner.development.stage_before_overflow_draw",
+            "strength": "low",
+            "ownerModuleId": "runner.shell_traders_pipeline",
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["no_stageable_required_provider"],
+            "evidence": [
+              "development_tendency:runner.development.stage_before_overflow_draw",
+              "active:false",
+              "owner:runner.shell_traders_pipeline"
+            ]
+          },
+          {
+            "tendencyId": "runner.development.throughput_until_dependency_ready",
+            "strength": "high",
+            "ownerModuleId": "runner.develop_board_and_hand",
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["required_dependency_ready"],
+            "evidence": [
+              "development_tendency:runner.development.throughput_until_dependency_ready",
+              "active:true",
+              "owner:runner.develop_board_and_hand"
+            ]
+          }
+        ],
+        "planContributions": [
+          {
+            "contributionId": "runner.contribution.maintain_breaker_coverage",
+            "ownerModuleId": "runner.rig_and_coverage",
+            "objective": "maintain_required_coverage",
+            "capabilityIds": ["runner.coverage.breaker"],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "activationConditionIds": ["coverage_dependency_open"],
+            "exitConditionIds": ["required_coverage_installed"],
+            "evidence": ["contribution_from:runner.engine.persistent_rig"]
+          },
+          {
+            "contributionId": "runner.contribution.throughput_until_ready",
+            "ownerModuleId": "runner.develop_board_and_hand",
+            "objective": "increase_throughput_until_ready",
+            "capabilityIds": [
+              "runner.throughput.draw",
+              "runner.throughput.search"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "activationConditionIds": ["required_dependency_not_ready"],
+            "exitConditionIds": ["required_dependency_ready"],
+            "evidence": [
+              "contribution_from:runner.engine.throughput_until_ready"
+            ]
+          }
+        ],
+        "evidence": [
+          "runner_engine_doctrine:own_deck_snapshot_only",
+          "provider_definitions:11",
+          "provider_copies:14",
+          "coherent_engine_lines:2"
+        ]
+      },
       "source": {
         "mode": "ai_internal_strategy_profile",
         "strategyGoals": "data/ai/strategy-goals-v1.json",
@@ -1445,10 +1812,7 @@
               "reason": "support:pressurePayoff"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -1568,15 +1932,10 @@
               "reason": "support:searchOrDraw"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:low_economy_support"
-          ]
+          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
         },
         "runner.interface_closeout": {
           "anchorScore": 77,
@@ -1718,15 +2077,10 @@
               "reason": "support:centralAccess"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:low_economy_support"
-          ]
+          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
         },
         "runner.remote_contest": {
           "anchorScore": 0,
@@ -1888,9 +2242,7 @@
               "reason": "support:remoteAccess"
             }
           ],
-          "supportGaps": [
-            "low_economy_support"
-          ],
+          "supportGaps": ["low_economy_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -2011,15 +2363,10 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:low_economy_support"
-          ]
+          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
         },
         "runner.rnd_pressure": {
           "anchorScore": 55,
@@ -2157,15 +2504,10 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:low_economy_support"
-          ]
+          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
         },
         "runner.run_event_tempo": {
           "anchorScore": 68,
@@ -2275,15 +2617,10 @@
               "reason": "support:eventDensity"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:low_economy_support"
-          ]
+          "runtimeBlockers": ["hard_support_gap:low_economy_support"]
         },
         "runner.search.breaker": {
           "anchorScore": 0,
@@ -2397,9 +2734,7 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "low_economy_support"
-          ],
+          "supportGaps": ["low_economy_support"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -2450,10 +2785,7 @@
               "reason": "support:pressurePayoff"
             }
           ],
-          "supportGaps": [
-            "low_economy_support",
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["low_economy_support", "weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -2562,6 +2894,341 @@
           "programTrash": "unknown"
         }
       },
+      "runnerEngineDoctrine": {
+        "schemaVersion": "runner-deck-engine-doctrine-v1",
+        "providers": [
+          {
+            "providerId": "runner.provider:onr_v1_014_codecracker",
+            "cardId": "onr_v1_014_codecracker",
+            "copies": 1,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": ["runner.coverage.breaker"],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_014_codecracker",
+              "provider_copies:1",
+              "provides:runner.coverage.breaker",
+              "supports:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_015_codeslinger",
+            "cardId": "onr_v1_015_codeslinger",
+            "copies": 1,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": [],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_015_codeslinger",
+              "provider_copies:1",
+              "provides:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_021_dwarf",
+            "cardId": "onr_v1_021_dwarf",
+            "copies": 2,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": ["runner.coverage.breaker"],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_021_dwarf",
+              "provider_copies:2",
+              "provides:runner.coverage.breaker",
+              "supports:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_039_krash",
+            "cardId": "onr_v1_039_krash",
+            "copies": 2,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": [],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_039_krash",
+              "provider_copies:2",
+              "provides:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_066_snowball",
+            "cardId": "onr_v1_066_snowball",
+            "copies": 2,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": ["runner.coverage.breaker"],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_066_snowball",
+              "provider_copies:2",
+              "provides:runner.coverage.breaker",
+              "supports:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_074_worm",
+            "cardId": "onr_v1_074_worm",
+            "copies": 2,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": ["runner.coverage.breaker"],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_074_worm",
+              "provider_copies:2",
+              "provides:runner.coverage.breaker",
+              "supports:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_095_jack-n-joe",
+            "cardId": "onr_v1_095_jack-n-joe",
+            "copies": 2,
+            "capabilities": ["runner.throughput.draw"],
+            "supportCapabilities": [],
+            "persistence": "one_shot",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_095_jack-n-joe",
+              "provider_copies:2",
+              "provides:runner.throughput.draw"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_101_mit-west-tier",
+            "cardId": "onr_v1_101_mit-west-tier",
+            "copies": 2,
+            "capabilities": ["runner.throughput.draw"],
+            "supportCapabilities": [],
+            "persistence": "one_shot",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_101_mit-west-tier",
+              "provider_copies:2",
+              "provides:runner.throughput.draw"
+            ]
+          }
+        ],
+        "dependencies": [
+          {
+            "dependencyId": "runner.dependency.breaker_coverage",
+            "requiredCapabilityIds": ["runner.coverage.breaker"],
+            "providerIds": [
+              "runner.provider:onr_v1_014_codecracker",
+              "runner.provider:onr_v1_015_codeslinger",
+              "runner.provider:onr_v1_021_dwarf",
+              "runner.provider:onr_v1_039_krash",
+              "runner.provider:onr_v1_066_snowball",
+              "runner.provider:onr_v1_074_worm"
+            ],
+            "supportProviderIds": [
+              "runner.provider:onr_v1_014_codecracker",
+              "runner.provider:onr_v1_021_dwarf",
+              "runner.provider:onr_v1_066_snowball",
+              "runner.provider:onr_v1_074_worm"
+            ],
+            "distinctProviderDefinitions": 6,
+            "providerCopies": 10,
+            "criticality": "multiple_definitions",
+            "evidence": [
+              "dependency:runner.dependency.breaker_coverage",
+              "distinct_provider_definitions:6",
+              "provider_copies:10"
+            ]
+          }
+        ],
+        "engineLines": [
+          {
+            "lineId": "runner.engine.persistent_rig",
+            "status": "coherent",
+            "providerIds": [
+              "runner.provider:onr_v1_014_codecracker",
+              "runner.provider:onr_v1_015_codeslinger",
+              "runner.provider:onr_v1_021_dwarf",
+              "runner.provider:onr_v1_039_krash",
+              "runner.provider:onr_v1_066_snowball",
+              "runner.provider:onr_v1_074_worm"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["coverage_dependency_open"],
+            "exitConditionIds": ["required_coverage_installed"],
+            "evidence": [
+              "engine_line:runner.engine.persistent_rig",
+              "provider_count:6",
+              "coherent:true"
+            ]
+          },
+          {
+            "lineId": "runner.engine.consumption_recovery",
+            "status": "unsupported",
+            "providerIds": [],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["consumable_coverage_provider_present"],
+            "exitConditionIds": ["coverage_provider_recoverable_or_replaced"],
+            "evidence": [
+              "engine_line:runner.engine.consumption_recovery",
+              "provider_count:0",
+              "coherent:false"
+            ]
+          },
+          {
+            "lineId": "runner.engine.delayed_install",
+            "status": "supported",
+            "providerIds": [
+              "runner.provider:onr_v1_014_codecracker",
+              "runner.provider:onr_v1_015_codeslinger",
+              "runner.provider:onr_v1_021_dwarf",
+              "runner.provider:onr_v1_039_krash",
+              "runner.provider:onr_v1_066_snowball",
+              "runner.provider:onr_v1_074_worm"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["stageable_required_provider_visible"],
+            "exitConditionIds": [
+              "staged_provider_installed_or_no_longer_required"
+            ],
+            "evidence": [
+              "engine_line:runner.engine.delayed_install",
+              "provider_count:6",
+              "coherent:false"
+            ]
+          },
+          {
+            "lineId": "runner.engine.compatible_recurring_economy",
+            "status": "supported",
+            "providerIds": [
+              "runner.provider:onr_v1_014_codecracker",
+              "runner.provider:onr_v1_015_codeslinger",
+              "runner.provider:onr_v1_021_dwarf",
+              "runner.provider:onr_v1_039_krash",
+              "runner.provider:onr_v1_066_snowball",
+              "runner.provider:onr_v1_074_worm"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["compatible_breaker_credit_demand_present"],
+            "exitConditionIds": [
+              "compatible_recurring_supply_meets_useful_demand"
+            ],
+            "evidence": [
+              "engine_line:runner.engine.compatible_recurring_economy",
+              "provider_count:6",
+              "coherent:false"
+            ]
+          },
+          {
+            "lineId": "runner.engine.throughput_until_ready",
+            "status": "coherent",
+            "providerIds": [
+              "runner.provider:onr_v1_095_jack-n-joe",
+              "runner.provider:onr_v1_101_mit-west-tier"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["required_dependency_not_ready"],
+            "exitConditionIds": ["required_dependency_ready"],
+            "evidence": [
+              "engine_line:runner.engine.throughput_until_ready",
+              "provider_count:2",
+              "coherent:true"
+            ]
+          }
+        ],
+        "developmentTendencies": [
+          {
+            "tendencyId": "runner.development.install_persistent_provider",
+            "strength": "high",
+            "ownerModuleId": "runner.rig_and_coverage",
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["required_coverage_installed"],
+            "evidence": [
+              "development_tendency:runner.development.install_persistent_provider",
+              "active:true",
+              "owner:runner.rig_and_coverage"
+            ]
+          },
+          {
+            "tendencyId": "runner.development.recover_consumed_provider",
+            "strength": "low",
+            "ownerModuleId": "runner.rig_and_coverage",
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["coverage_provider_recoverable_or_replaced"],
+            "evidence": [
+              "development_tendency:runner.development.recover_consumed_provider",
+              "active:false",
+              "owner:runner.rig_and_coverage"
+            ]
+          },
+          {
+            "tendencyId": "runner.development.stage_before_overflow_draw",
+            "strength": "low",
+            "ownerModuleId": "runner.shell_traders_pipeline",
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["no_stageable_required_provider"],
+            "evidence": [
+              "development_tendency:runner.development.stage_before_overflow_draw",
+              "active:false",
+              "owner:runner.shell_traders_pipeline"
+            ]
+          },
+          {
+            "tendencyId": "runner.development.throughput_until_dependency_ready",
+            "strength": "high",
+            "ownerModuleId": "runner.develop_board_and_hand",
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["required_dependency_ready"],
+            "evidence": [
+              "development_tendency:runner.development.throughput_until_dependency_ready",
+              "active:true",
+              "owner:runner.develop_board_and_hand"
+            ]
+          }
+        ],
+        "planContributions": [
+          {
+            "contributionId": "runner.contribution.maintain_breaker_coverage",
+            "ownerModuleId": "runner.rig_and_coverage",
+            "objective": "maintain_required_coverage",
+            "capabilityIds": ["runner.coverage.breaker"],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "activationConditionIds": ["coverage_dependency_open"],
+            "exitConditionIds": ["required_coverage_installed"],
+            "evidence": ["contribution_from:runner.engine.persistent_rig"]
+          },
+          {
+            "contributionId": "runner.contribution.throughput_until_ready",
+            "ownerModuleId": "runner.develop_board_and_hand",
+            "objective": "increase_throughput_until_ready",
+            "capabilityIds": [
+              "runner.throughput.draw",
+              "runner.throughput.search"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "activationConditionIds": ["required_dependency_not_ready"],
+            "exitConditionIds": ["required_dependency_ready"],
+            "evidence": [
+              "contribution_from:runner.engine.throughput_until_ready"
+            ]
+          }
+        ],
+        "evidence": [
+          "runner_engine_doctrine:own_deck_snapshot_only",
+          "provider_definitions:8",
+          "provider_copies:14",
+          "coherent_engine_lines:2"
+        ]
+      },
       "source": {
         "mode": "ai_internal_strategy_profile",
         "strategyGoals": "data/ai/strategy-goals-v1.json",
@@ -2653,14 +3320,10 @@
               "reason": "support:pressurePayoff"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "supporting",
-          "runtimeBlockers": [
-            "supporting_only:runner.economy_first"
-          ]
+          "runtimeBlockers": ["supporting_only:runner.economy_first"]
         },
         "runner.hq_pressure": {
           "anchorScore": 67,
@@ -2779,9 +3442,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -2873,9 +3534,7 @@
               "reason": "support:centralAccess"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -3158,9 +3817,7 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -3277,9 +3934,7 @@
               "reason": "support:memory"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -3378,9 +4033,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -3557,9 +4210,7 @@
               "reason": "support:pressurePayoff"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -3674,6 +4325,301 @@
           "damage": 0,
           "programTrash": "unknown"
         }
+      },
+      "runnerEngineDoctrine": {
+        "schemaVersion": "runner-deck-engine-doctrine-v1",
+        "providers": [
+          {
+            "providerId": "runner.provider:onr_v1_021_dwarf",
+            "cardId": "onr_v1_021_dwarf",
+            "copies": 2,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": ["runner.coverage.breaker"],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_021_dwarf",
+              "provider_copies:2",
+              "provides:runner.coverage.breaker",
+              "supports:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_039_krash",
+            "cardId": "onr_v1_039_krash",
+            "copies": 2,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": [],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_039_krash",
+              "provider_copies:2",
+              "provides:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_066_snowball",
+            "cardId": "onr_v1_066_snowball",
+            "copies": 2,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": ["runner.coverage.breaker"],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_066_snowball",
+              "provider_copies:2",
+              "provides:runner.coverage.breaker",
+              "supports:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_074_worm",
+            "cardId": "onr_v1_074_worm",
+            "copies": 2,
+            "capabilities": ["runner.coverage.breaker"],
+            "supportCapabilities": ["runner.coverage.breaker"],
+            "persistence": "persistent",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_074_worm",
+              "provider_copies:2",
+              "provides:runner.coverage.breaker",
+              "supports:runner.coverage.breaker"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_095_jack-n-joe",
+            "cardId": "onr_v1_095_jack-n-joe",
+            "copies": 3,
+            "capabilities": ["runner.throughput.draw"],
+            "supportCapabilities": [],
+            "persistence": "one_shot",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_095_jack-n-joe",
+              "provider_copies:3",
+              "provides:runner.throughput.draw"
+            ]
+          },
+          {
+            "providerId": "runner.provider:onr_v1_101_mit-west-tier",
+            "cardId": "onr_v1_101_mit-west-tier",
+            "copies": 1,
+            "capabilities": ["runner.throughput.draw"],
+            "supportCapabilities": [],
+            "persistence": "one_shot",
+            "additivity": "distinct_provider_first",
+            "compatibleDemandIds": [],
+            "evidence": [
+              "provider_card:onr_v1_101_mit-west-tier",
+              "provider_copies:1",
+              "provides:runner.throughput.draw"
+            ]
+          }
+        ],
+        "dependencies": [
+          {
+            "dependencyId": "runner.dependency.breaker_coverage",
+            "requiredCapabilityIds": ["runner.coverage.breaker"],
+            "providerIds": [
+              "runner.provider:onr_v1_021_dwarf",
+              "runner.provider:onr_v1_039_krash",
+              "runner.provider:onr_v1_066_snowball",
+              "runner.provider:onr_v1_074_worm"
+            ],
+            "supportProviderIds": [
+              "runner.provider:onr_v1_021_dwarf",
+              "runner.provider:onr_v1_066_snowball",
+              "runner.provider:onr_v1_074_worm"
+            ],
+            "distinctProviderDefinitions": 4,
+            "providerCopies": 8,
+            "criticality": "multiple_definitions",
+            "evidence": [
+              "dependency:runner.dependency.breaker_coverage",
+              "distinct_provider_definitions:4",
+              "provider_copies:8"
+            ]
+          }
+        ],
+        "engineLines": [
+          {
+            "lineId": "runner.engine.persistent_rig",
+            "status": "coherent",
+            "providerIds": [
+              "runner.provider:onr_v1_021_dwarf",
+              "runner.provider:onr_v1_039_krash",
+              "runner.provider:onr_v1_066_snowball",
+              "runner.provider:onr_v1_074_worm"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["coverage_dependency_open"],
+            "exitConditionIds": ["required_coverage_installed"],
+            "evidence": [
+              "engine_line:runner.engine.persistent_rig",
+              "provider_count:4",
+              "coherent:true"
+            ]
+          },
+          {
+            "lineId": "runner.engine.consumption_recovery",
+            "status": "unsupported",
+            "providerIds": [],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["consumable_coverage_provider_present"],
+            "exitConditionIds": ["coverage_provider_recoverable_or_replaced"],
+            "evidence": [
+              "engine_line:runner.engine.consumption_recovery",
+              "provider_count:0",
+              "coherent:false"
+            ]
+          },
+          {
+            "lineId": "runner.engine.delayed_install",
+            "status": "supported",
+            "providerIds": [
+              "runner.provider:onr_v1_021_dwarf",
+              "runner.provider:onr_v1_039_krash",
+              "runner.provider:onr_v1_066_snowball",
+              "runner.provider:onr_v1_074_worm"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["stageable_required_provider_visible"],
+            "exitConditionIds": [
+              "staged_provider_installed_or_no_longer_required"
+            ],
+            "evidence": [
+              "engine_line:runner.engine.delayed_install",
+              "provider_count:4",
+              "coherent:false"
+            ]
+          },
+          {
+            "lineId": "runner.engine.compatible_recurring_economy",
+            "status": "supported",
+            "providerIds": [
+              "runner.provider:onr_v1_021_dwarf",
+              "runner.provider:onr_v1_039_krash",
+              "runner.provider:onr_v1_066_snowball",
+              "runner.provider:onr_v1_074_worm"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["compatible_breaker_credit_demand_present"],
+            "exitConditionIds": [
+              "compatible_recurring_supply_meets_useful_demand"
+            ],
+            "evidence": [
+              "engine_line:runner.engine.compatible_recurring_economy",
+              "provider_count:4",
+              "coherent:false"
+            ]
+          },
+          {
+            "lineId": "runner.engine.throughput_until_ready",
+            "status": "coherent",
+            "providerIds": [
+              "runner.provider:onr_v1_095_jack-n-joe",
+              "runner.provider:onr_v1_101_mit-west-tier"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["required_dependency_not_ready"],
+            "exitConditionIds": ["required_dependency_ready"],
+            "evidence": [
+              "engine_line:runner.engine.throughput_until_ready",
+              "provider_count:2",
+              "coherent:true"
+            ]
+          }
+        ],
+        "developmentTendencies": [
+          {
+            "tendencyId": "runner.development.install_persistent_provider",
+            "strength": "high",
+            "ownerModuleId": "runner.rig_and_coverage",
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["required_coverage_installed"],
+            "evidence": [
+              "development_tendency:runner.development.install_persistent_provider",
+              "active:true",
+              "owner:runner.rig_and_coverage"
+            ]
+          },
+          {
+            "tendencyId": "runner.development.recover_consumed_provider",
+            "strength": "low",
+            "ownerModuleId": "runner.rig_and_coverage",
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["coverage_provider_recoverable_or_replaced"],
+            "evidence": [
+              "development_tendency:runner.development.recover_consumed_provider",
+              "active:false",
+              "owner:runner.rig_and_coverage"
+            ]
+          },
+          {
+            "tendencyId": "runner.development.stage_before_overflow_draw",
+            "strength": "low",
+            "ownerModuleId": "runner.shell_traders_pipeline",
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["no_stageable_required_provider"],
+            "evidence": [
+              "development_tendency:runner.development.stage_before_overflow_draw",
+              "active:false",
+              "owner:runner.shell_traders_pipeline"
+            ]
+          },
+          {
+            "tendencyId": "runner.development.throughput_until_dependency_ready",
+            "strength": "high",
+            "ownerModuleId": "runner.develop_board_and_hand",
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["required_dependency_ready"],
+            "evidence": [
+              "development_tendency:runner.development.throughput_until_dependency_ready",
+              "active:true",
+              "owner:runner.develop_board_and_hand"
+            ]
+          }
+        ],
+        "planContributions": [
+          {
+            "contributionId": "runner.contribution.maintain_breaker_coverage",
+            "ownerModuleId": "runner.rig_and_coverage",
+            "objective": "maintain_required_coverage",
+            "capabilityIds": ["runner.coverage.breaker"],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "activationConditionIds": ["coverage_dependency_open"],
+            "exitConditionIds": ["required_coverage_installed"],
+            "evidence": ["contribution_from:runner.engine.persistent_rig"]
+          },
+          {
+            "contributionId": "runner.contribution.throughput_until_ready",
+            "ownerModuleId": "runner.develop_board_and_hand",
+            "objective": "increase_throughput_until_ready",
+            "capabilityIds": [
+              "runner.throughput.draw",
+              "runner.throughput.search"
+            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "activationConditionIds": ["required_dependency_not_ready"],
+            "exitConditionIds": ["required_dependency_ready"],
+            "evidence": [
+              "contribution_from:runner.engine.throughput_until_ready"
+            ]
+          }
+        ],
+        "evidence": [
+          "runner_engine_doctrine:own_deck_snapshot_only",
+          "provider_definitions:6",
+          "provider_copies:12",
+          "coherent_engine_lines:2"
+        ]
       },
       "source": {
         "mode": "ai_internal_strategy_profile",
@@ -3808,9 +4754,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -3881,9 +4825,7 @@
               "reason": "support:remoteSlots"
             }
           ],
-          "supportGaps": [
-            "low_ambush_support"
-          ],
+          "supportGaps": ["low_ambush_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -4107,9 +5049,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["weak_remote_protection"],
           "confidence": "medium",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -4176,15 +5116,10 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_ambush_support",
-            "low_tagOrTrace_support"
-          ],
+          "supportGaps": ["low_ambush_support", "low_tagOrTrace_support"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "below_productive_score_threshold"
-          ]
+          "runtimeBlockers": ["below_productive_score_threshold"]
         },
         "corp.deck_recycle_engine": {
           "anchorScore": 0,
@@ -4256,9 +5191,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "missing_recycle_source"
-          ],
+          "supportGaps": ["missing_recycle_source"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -4379,9 +5312,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -4524,9 +5455,7 @@
               "reason": "support:rezReserve"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -4659,9 +5588,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scoreAcceleration_support"
-          ],
+          "supportGaps": ["low_scoreAcceleration_support"],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -4923,14 +5850,10 @@
               "reason": "support:rezReserve"
             }
           ],
-          "supportGaps": [
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["weak_remote_protection"],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:weak_remote_protection"
-          ]
+          "runtimeBlockers": ["hard_support_gap:weak_remote_protection"]
         },
         "corp.overadvance_value": {
           "anchorScore": 38,
@@ -5033,17 +5956,17 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "medium",
-          "runtimeStatus": "productive",
-          "runtimeBlockers": []
+          "runtimeStatus": "supporting",
+          "runtimeBlockers": [
+            "supporting_only:singleton_post_score_anchor_requires_score_conversion"
+          ]
         },
         "corp.remote_scoring": {
           "anchorScore": 0,
           "supportScore": 100,
-          "finalScore": 40,
+          "finalScore": 65,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -5223,12 +6146,9 @@
             }
           ],
           "supportGaps": [],
-          "confidence": "medium",
-          "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "below_productive_score_threshold",
-            "missing_strategy_anchor"
-          ]
+          "confidence": "high",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         },
         "corp.rush_score": {
           "anchorScore": 0,
@@ -5478,10 +6398,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_tag_sources",
-            "low_traceSupport_support"
-          ],
+          "supportGaps": ["low_tag_sources", "low_traceSupport_support"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -5492,12 +6409,10 @@
       },
       "primaryStrategies": [
         "corp.economy_rez_reserve",
-        "corp.rush_score",
-        "corp.overadvance_value"
+        "corp.remote_scoring",
+        "corp.rush_score"
       ],
-      "secondaryStrategies": [
-        "corp.fast_advance"
-      ],
+      "secondaryStrategies": ["corp.fast_advance"],
       "functionSignalCounts": {
         "action.corp_extra_action_burst": 2,
         "action.corp_extra_action_support": 2,
@@ -5769,9 +6684,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -5849,9 +6762,7 @@
               "reason": "support:remoteSlots"
             }
           ],
-          "supportGaps": [
-            "low_ambush_support"
-          ],
+          "supportGaps": ["low_ambush_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -6159,9 +7070,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["weak_remote_protection"],
           "confidence": "medium",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -6253,10 +7162,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_ambush_support",
-            "low_punish_payoff_density"
-          ],
+          "supportGaps": ["low_ambush_support", "low_punish_payoff_density"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -6335,9 +7241,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "missing_recycle_source"
-          ],
+          "supportGaps": ["missing_recycle_source"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -6500,9 +7404,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -6694,9 +7596,7 @@
               "reason": "support:rezReserve"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -6864,9 +7764,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scoreAcceleration_support"
-          ],
+          "supportGaps": ["low_scoreAcceleration_support"],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -7205,14 +8103,10 @@
               "reason": "support:rezReserve"
             }
           ],
-          "supportGaps": [
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["weak_remote_protection"],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:weak_remote_protection"
-          ]
+          "runtimeBlockers": ["hard_support_gap:weak_remote_protection"]
         },
         "corp.overadvance_value": {
           "anchorScore": 0,
@@ -7292,7 +8186,7 @@
         "corp.remote_scoring": {
           "anchorScore": 0,
           "supportScore": 100,
-          "finalScore": 40,
+          "finalScore": 65,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -7542,12 +8436,9 @@
             }
           ],
           "supportGaps": [],
-          "confidence": "medium",
-          "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "below_productive_score_threshold",
-            "missing_strategy_anchor"
-          ]
+          "confidence": "high",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         },
         "corp.rush_score": {
           "anchorScore": 0,
@@ -7925,11 +8816,10 @@
       "primaryStrategies": [
         "corp.tag_trace_punish",
         "corp.economy_rez_reserve",
+        "corp.remote_scoring",
         "corp.rush_score"
       ],
-      "secondaryStrategies": [
-        "corp.fast_advance"
-      ],
+      "secondaryStrategies": ["corp.fast_advance"],
       "functionSignalCounts": {
         "action.corp_extra_action_burst": 2,
         "action.corp_extra_action_support": 2,
@@ -8052,7 +8942,7 @@
     ],
     "primaryStrategyCounts": {
       "corp.economy_rez_reserve": 2,
-      "corp.overadvance_value": 1,
+      "corp.remote_scoring": 2,
       "corp.rush_score": 2,
       "corp.tag_trace_punish": 1,
       "runner.hq_pressure": 1,
@@ -8060,6 +8950,6 @@
       "runner.rig_first": 1
     },
     "warningCounts": {},
-    "contentSha256": "b12a2533ec9c83ec7ed9a886fca803b50af2621afedcff9266e277063464a4a6"
+    "contentSha256": "74a7917cba0d5d90b747c18da26360a8d1f6daca645c5e39aac347538c3a47dd"
   }
 }

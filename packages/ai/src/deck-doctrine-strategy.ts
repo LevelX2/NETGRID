@@ -469,6 +469,7 @@ export function buildDeckStrategyProfile(
     );
     const runtimeReadiness = strategyRuntimeReadiness(
       goal,
+      stats,
       anchorScore,
       support.score,
       finalScore,
@@ -1906,6 +1907,7 @@ function scoreFinal(
 
 function strategyRuntimeReadiness(
   goal: StrategyGoal,
+  stats: DeckStrategyStats,
   anchorScore: number,
   supportScore: number,
   finalScore: number,
@@ -1914,6 +1916,7 @@ function strategyRuntimeReadiness(
 ): { status: DeckStrategyRuntimeStatus; blockers: string[] } {
   const blockers = strategyRuntimeBlockers(
     goal,
+    stats,
     anchorScore,
     supportScore,
     finalScore,
@@ -1935,6 +1938,7 @@ function strategyRuntimeReadiness(
 
 function strategyRuntimeBlockers(
   goal: StrategyGoal,
+  stats: DeckStrategyStats,
   anchorScore: number,
   supportScore: number,
   finalScore: number,
@@ -1942,6 +1946,25 @@ function strategyRuntimeBlockers(
   anchorEvidence: readonly DeckStrategyEvidence[],
 ): string[] {
   const blockers: string[] = [];
+  const anchorCardIds = new Set(anchorEvidence.map((entry) => entry.cardId));
+  const anchorCards = stats.cards.filter((card) =>
+    anchorCardIds.has(card.cardId),
+  );
+  const anchorCopyCount = anchorCards.reduce(
+    (sum, card) => sum + card.quantity,
+    0,
+  );
+  if (
+    anchorCards.length > 0 &&
+    anchorCards.every((card) => card.cardType === "agenda") &&
+    anchorCopyCount === 1 &&
+    goal.strategyId !== "corp.remote_scoring" &&
+    goal.strategyId !== "corp.rush_score"
+  ) {
+    blockers.push(
+      "supporting_only:singleton_post_score_anchor_requires_score_conversion",
+    );
+  }
   if (finalScore < 45) blockers.push("below_productive_score_threshold");
   if (
     (goal.detectionMode === "engine_anchor" ||

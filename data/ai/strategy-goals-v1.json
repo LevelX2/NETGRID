@@ -63,10 +63,7 @@
       "side": "runner",
       "description": "Use search, draw, recovery, or tutor-like support to assemble missing breaker coverage. Renamed in AI018 from runner.breaker_search to keep the search family action-based and extensible.",
       "detectionMode": "engine_anchor",
-      "anchorSignals": [
-        "setup.search",
-        "setup.recovery"
-      ],
+      "anchorSignals": ["setup.search", "setup.recovery"],
       "requiredSupport": {
         "breakerCoverage": "required",
         "economy": "required",
@@ -122,11 +119,7 @@
       "side": "runner",
       "description": "Pressure HQ with direct HQ access payoff, HQ information, or repeatable HQ pressure anchors.",
       "detectionMode": "payoff_anchor",
-      "anchorSignals": [
-        "access.hq_multiaccess",
-        "pressure.hq",
-        "info.hq"
-      ],
+      "anchorSignals": ["access.hq_multiaccess", "pressure.hq", "info.hq"],
       "requiredSupport": {
         "breakerCoverage": "required",
         "economy": "required",
@@ -151,10 +144,7 @@
       "side": "runner",
       "description": "Contest remote scoring servers and deny visible score windows. This is distinct from trashing economy assets.",
       "detectionMode": "engine_anchor",
-      "anchorSignals": [
-        "pressure.remote",
-        "remote.scoring_pressure"
-      ],
+      "anchorSignals": ["pressure.remote", "remote.scoring_pressure"],
       "requiredSupport": {
         "breakerCoverage": "required",
         "economy": "required",
@@ -268,11 +258,7 @@
       "side": "runner",
       "description": "Convert event, bonus-run, and run-start tempo into short-horizon access pressure.",
       "detectionMode": "engine_anchor",
-      "anchorSignals": [
-        "run.event_tempo",
-        "run.extra_action",
-        "run.lock"
-      ],
+      "anchorSignals": ["run.event_tempo", "run.extra_action", "run.lock"],
       "requiredSupport": {
         "economy": "required",
         "breakerCoverage": "recommended",
@@ -296,7 +282,7 @@
       "strategyId": "corp.remote_scoring",
       "side": "corp",
       "description": "Build and protect a remote server that can convert agendas through install, advance, and score windows.",
-      "detectionMode": "engine_anchor",
+      "detectionMode": "structural_density",
       "anchorSignals": [
         "remote.scoring_protection",
         "score.remote_conversion",
@@ -355,11 +341,7 @@
       "side": "corp",
       "description": "Use ICE density, end-the-run coverage, and taxing encounters to slow the Runner and preserve scoring windows.",
       "detectionMode": "structural_density",
-      "anchorSignals": [
-        "tax.ice",
-        "ice.etr",
-        "ice.future_pressure"
-      ],
+      "anchorSignals": ["tax.ice", "ice.etr", "ice.future_pressure"],
       "requiredSupport": {
         "ice": "required",
         "economy": "required",
@@ -446,11 +428,7 @@
       "side": "corp",
       "description": "Pair visible tag or trace sources with payoff cards that punish tagged Runners.",
       "detectionMode": "payoff_anchor",
-      "anchorSignals": [
-        "tag.source",
-        "tag.payoff",
-        "trace.source"
-      ],
+      "anchorSignals": ["tag.source", "tag.payoff", "trace.source"],
       "requiredSupport": {
         "tagSource": "required",
         "punishPayoff": "required",
@@ -475,11 +453,7 @@
       "side": "corp",
       "description": "Convert damage, hand-size pressure, or lethal payoff into a flatline threat.",
       "detectionMode": "payoff_anchor",
-      "anchorSignals": [
-        "damage.payoff",
-        "damage.kill",
-        "harm.hand_size"
-      ],
+      "anchorSignals": ["damage.payoff", "damage.kill", "harm.hand_size"],
       "requiredSupport": {
         "damagePayoff": "required",
         "economy": "required",
@@ -504,11 +478,7 @@
       "side": "corp",
       "description": "Use ambush, access punishment, and remote bluff pressure to make remote access costly or uncertain.",
       "detectionMode": "engine_anchor",
-      "anchorSignals": [
-        "remote.ambush",
-        "access.punish",
-        "remote.bait"
-      ],
+      "anchorSignals": ["remote.ambush", "access.punish", "remote.bait"],
       "requiredSupport": {
         "ambush": "required",
         "remoteSlots": "recommended",

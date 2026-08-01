@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
+import match978dCheckpoint from "../../../data/scenarios/ai-decision-checkpoints/cp-978d-01-matchpoint-wall-rez-d80.json";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import {
   buildDeckDoctrineV2Diagnostic,
@@ -28,6 +29,24 @@ const realDoctrineSnapshotIds = [
 ] as const;
 
 describe("DeckDoctrine strategy aggregation diagnostics", () => {
+  it("derives a material score route before post-score-only engines for match 978d", () => {
+    const profile = buildDeckStrategyProfile(
+      match978dCheckpoint.deckSnapshot as AiDeckStrategyDeckSnapshot,
+    );
+
+    expect(profile.primaryStrategies).toContain("corp.remote_scoring");
+    expect(profile.strategyScores["corp.remote_scoring"]?.runtimeStatus).toBe(
+      "productive",
+    );
+    expect(profile.primaryStrategies).not.toContain("corp.fast_advance");
+    expect(profile.primaryStrategies).not.toContain("corp.deck_recycle_engine");
+    expect(profile.strategyScores["corp.fast_advance"]?.runtimeStatus).toBe(
+      "supporting",
+    );
+    expect(
+      profile.strategyScores["corp.deck_recycle_engine"]?.runtimeStatus,
+    ).toBe("supporting");
+  });
   it("classifies every derived public metadata group by consumer mode", () => {
     expect(
       Object.keys(DECK_STRATEGY_METADATA_CONSUMER_CONTRACT).sort(),
