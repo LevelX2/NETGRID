@@ -29,8 +29,6 @@ import type {
   VisibleDeflectorContext,
 } from "./visible-run-analysis-contracts";
 
-const RUN_REMAINDER_STRENGTH_BREAKER_IDS = new Set(["onr_v1_030_grubb"]);
-
 export function projectIceForRunPathEffects(
   ice: IceCardLike,
   effects: RunPathProjectionEffect[],
@@ -820,9 +818,8 @@ export function visibleRunCardDefinition(
 export function breakerCarriesStrengthAcrossIce(
   definition: CardDefinition,
 ): boolean {
-  return (
-    RUN_REMAINDER_STRENGTH_BREAKER_IDS.has(definition.id) ||
-    (definition.mechanics ?? []).includes("run_remainder_strength_bonus")
+  return (definition.mechanics ?? []).includes(
+    "run_remainder_strength_bonus",
   );
 }
 

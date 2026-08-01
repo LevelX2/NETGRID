@@ -159,6 +159,31 @@ describe("activatedAbilityPayload advancement semantics", () => {
     });
   });
 
+  it("publishes exact tag-removal semantics for an activated ability", () => {
+    const ability: ActivatedCardAbilityImplementation = {
+      kind: "activated",
+      timing: "runner_main",
+      costs: [{ kind: "action", amount: 1 }],
+      effects: [
+        {
+          kind: "remove_tags",
+          recipient: "runner",
+          mode: "up_to_amount",
+          amount: 3,
+          visibility: "public",
+        },
+      ],
+    };
+
+    expect(
+      activatedAbilityPayload("source" as never, ability, 0),
+    ).toMatchObject({
+      cardImplementationEffectKind: "remove_tags",
+      cardImplementationTagMode: "up_to_amount",
+      cardImplementationTagAmount: 3,
+    });
+  });
+
   it("publishes scoring the visible source as an agenda", () => {
     const ability: ActivatedCardAbilityImplementation = {
       kind: "activated",

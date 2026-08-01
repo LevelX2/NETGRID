@@ -78,7 +78,6 @@ import {
   JUNKYARD_BBS_CARD_ID,
   JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY,
   LOAN_FROM_CHIBA_CARD_ID,
-  TEAM_RESTRUCTURING_CARD_ID,
 } from "./runtime/runner-semantic-card-ids";
 import {
   visibleBreakerRoleCounts as visibleBreakerRoleCountsForAi,
@@ -243,7 +242,6 @@ export const aiLiveRuntimeDependencies = {
   runnerSurvivalCounterContextForInput,
   applyTagPunishOntologyDiagnostics,
   applyCorpVisibleTagPunishTakenWindowDiagnostics,
-  teamRestructuringCardId: TEAM_RESTRUCTURING_CARD_ID,
   scoreFromComponents: semanticRuntimeScoreFromComponents,
   shouldAvoidBlinkRiskAssessment: blinkRiskShouldAvoidRun,
   fakedHitCardId: FAKED_HIT_CARD_ID,

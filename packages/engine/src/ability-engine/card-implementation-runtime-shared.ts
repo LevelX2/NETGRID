@@ -50,10 +50,8 @@ export function printedCostOnPlayImplementation(
 export function deterministicOnPlayResourcePayload(
   definition: CardDefinition,
   controller: "corp" | "runner",
-): {
-  gainCreditsAmount?: number;
-  drawCardsAmount?: number;
-} & ActionCapacityLegalActionPayload {
+): ActionCapacityLegalActionPayload &
+  Record<string, string | number | boolean> {
   const cardImplementation = cardImplementationForDefinitionId(definition.id);
   const implementation = printedCostOnPlayImplementation(definition);
 
@@ -77,6 +75,12 @@ export function deterministicOnPlayResourcePayload(
         controller,
       )
     : {};
+  const removeTagsEffect = implementation?.effects.find(
+    (effect) => effect.kind === "remove_tags",
+  );
+  const advancementDistribution = implementation?.effects.find(
+    (effect) => effect.kind === "distribute_advancement_counters",
+  );
   const utility = cardImplementation?.corpUtility;
   const restrictedCorpInstallPayload =
     controller === "corp" &&
@@ -95,6 +99,28 @@ export function deterministicOnPlayResourcePayload(
   return {
     ...(gainCreditsAmount > 0 ? { gainCreditsAmount } : {}),
     ...(drawCardsAmount > 0 ? { drawCardsAmount } : {}),
+    ...(removeTagsEffect
+      ? {
+          cardImplementationEffectKind: "remove_tags",
+          cardImplementationTagMode: removeTagsEffect.mode,
+          cardImplementationTagAmount:
+            removeTagsEffect.mode === "all"
+              ? ("all" as const)
+              : (removeTagsEffect.amount ?? 1),
+        }
+      : {}),
+    ...(advancementDistribution
+      ? {
+          cardImplementationEffectKind: "distribute_advancement_counters",
+          advancementCounterAmount: advancementDistribution.amount,
+          advancementCounterChoiceMode: advancementDistribution.distribution,
+          scoreConversionCapability: "place_advancement",
+          scoreConversionAdvancementAmount: advancementDistribution.amount,
+          scoreConversionAdvancementMode: advancementDistribution.distribution,
+          scoreConversionTargetMode: advancementDistribution.target,
+          scoreConversionTiming: "immediate",
+        }
+      : {}),
     ...actionCapacityPayload,
     ...restrictedCorpInstallPayload,
   };

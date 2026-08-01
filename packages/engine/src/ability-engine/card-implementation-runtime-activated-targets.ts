@@ -92,6 +92,9 @@ export function activatedAbilityPayload(
   const stackToGripSearchEffect = ability.effects.find(
     (effect) => effect.kind === "search_stack_to_grip",
   );
+  const removeTagsEffect = ability.effects.find(
+    (effect) => effect.kind === "remove_tags",
+  );
   return {
     cardId,
     cardImplementationAbility: "activated",
@@ -191,6 +194,16 @@ export function activatedAbilityPayload(
       ? {
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: stackToGripSearchEffect.filter,
+        }
+      : {}),
+    ...(removeTagsEffect?.kind === "remove_tags"
+      ? {
+          cardImplementationEffectKind: "remove_tags",
+          cardImplementationTagMode: removeTagsEffect.mode,
+          cardImplementationTagAmount:
+            removeTagsEffect.mode === "all"
+              ? ("all" as const)
+              : (removeTagsEffect.amount ?? 1),
         }
       : {}),
     ...scoreConversionPayload,

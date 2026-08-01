@@ -166,6 +166,7 @@ export type ActionEconomyProjection = {
   cardsConsumed: number;
   netHandDelta: number;
   payoutMode?: "fixed" | "all_available";
+  sourcePool?: "finite" | "renewable" | "unknown";
   repeatable: boolean | "unknown";
   reliability: "guaranteed" | "conditional" | "unknown";
   source: ActionEconomyProjectionSource;

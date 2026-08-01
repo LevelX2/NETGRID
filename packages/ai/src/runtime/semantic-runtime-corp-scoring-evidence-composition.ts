@@ -65,7 +65,6 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
       ...(dependencies.hintForDefinitionId
         ? { hintForDefinitionId: dependencies.hintForDefinitionId }
         : {}),
-      teamRestructuringCardId: dependencies.teamRestructuringCardId,
     });
 
   const { semanticRuntimeCorpPassiveScoreLinePenalty } =

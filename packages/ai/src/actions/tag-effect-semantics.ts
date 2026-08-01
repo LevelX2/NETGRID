@@ -1,101 +1,8 @@
-import type { CardDefinitionId, LegalAction } from "@netgrid/shared";
+import type { LegalAction } from "@netgrid/shared";
 import type {
   ActionTagEffectProfile,
   ActionSemanticCandidate,
 } from "../action-semantic-candidate-types";
-
-type TagEffectDescriptor = Omit<
-  ActionTagEffectProfile,
-  "recipient" | "source" | "evidence"
-> & {
-  actionTypes: readonly LegalAction["type"][];
-  evidence: readonly string[];
-};
-
-const TAG_EFFECT_DESCRIPTORS_BY_DEFINITION_ID: Readonly<
-  Record<CardDefinitionId, TagEffectDescriptor>
-> = {
-  "onr_v1_158_danshis-second-id": {
-    kind: "remove_tags",
-    mode: "up_to_amount",
-    amount: 3,
-    acuteTagRemoval: true,
-    actionTypes: ["activated_card_ability"],
-    evidence: ["CardImplementation ability effect remove_tags up_to_amount 3"],
-  },
-  "onr_v1_170_nomad-allies": {
-    kind: "remove_tags",
-    mode: "amount",
-    amount: 1,
-    acuteTagRemoval: true,
-    actionTypes: ["activated_card_ability"],
-    evidence: ["CardImplementation ability effect remove_tags amount 1"],
-  },
-  "onr_v1_102_open-ended-mileage-program": {
-    kind: "remove_tags",
-    mode: "amount",
-    amount: 1,
-    acuteTagRemoval: true,
-    actionTypes: ["play_event"],
-    evidence: ["CardImplementation on-play effect remove_tags amount 1"],
-  },
-  "onr_v1_116_total-genetic-retrofit": {
-    kind: "remove_tags",
-    mode: "all",
-    amount: "all",
-    acuteTagRemoval: true,
-    actionTypes: ["play_event"],
-    evidence: ["CardImplementation on-play effect remove_tags all"],
-  },
-  "onr_v1_120_armadillo-armored-road-home": {
-    kind: "tag_clear_support",
-    mode: "support_only",
-    amount: "unknown",
-    acuteTagRemoval: false,
-    actionTypes: ["install_card", "trigger_ability", "activated_card_ability"],
-    evidence: ['Restricted hosted credits usableFor ["remove_tags"]'],
-  },
-  "onr_v1_126_drifter-mobile-environment": {
-    kind: "tag_clear_support",
-    mode: "support_only",
-    amount: "unknown",
-    acuteTagRemoval: false,
-    actionTypes: ["install_card", "trigger_ability", "activated_card_ability"],
-    evidence: ['Restricted hosted credits usableFor ["remove_tags"]'],
-  },
-  "onr_v1_161_fall-guy": {
-    kind: "avoid_tag",
-    mode: "support_only",
-    amount: 1,
-    acuteTagRemoval: false,
-    actionTypes: ["trigger_ability", "activated_card_ability"],
-    evidence: ["CardImplementation tagPreventionSources avoid_tag"],
-  },
-  "onr_v1_135_nasuko-cycle": {
-    kind: "avoid_tag",
-    mode: "support_only",
-    amount: 1,
-    acuteTagRemoval: false,
-    actionTypes: ["trigger_ability", "activated_card_ability"],
-    evidence: ["CardImplementation tagPreventionSources avoid_tag"],
-  },
-  "onr_v1_167_leland-corporate-bodyguard": {
-    kind: "avoid_tag",
-    mode: "support_only",
-    amount: 1,
-    acuteTagRemoval: false,
-    actionTypes: ["trigger_ability", "activated_card_ability"],
-    evidence: ["CardImplementation tagPreventionSources avoid_tag"],
-  },
-  "onr_v1_187_wilson-weeflerunner-apprentice": {
-    kind: "avoid_tag",
-    mode: "support_only",
-    amount: 1,
-    acuteTagRemoval: false,
-    actionTypes: ["trigger_ability", "activated_card_ability"],
-    evidence: ["CardImplementation tagPreventionSources avoid_tag"],
-  },
-};
 
 export function applyTagEffectSemantics(
   candidate: ActionSemanticCandidate,
@@ -117,27 +24,7 @@ export function applyTagEffectSemantics(
   const payloadProfile = tagEffectProfileFromPayload(action);
   if (payloadProfile) return withTagEffectProfile(candidate, payloadProfile);
 
-  const descriptor =
-    candidate.sourceDefinitionId !== undefined
-      ? TAG_EFFECT_DESCRIPTORS_BY_DEFINITION_ID[candidate.sourceDefinitionId]
-      : undefined;
-  const descriptorActionTypeSet = new Set(descriptor?.actionTypes ?? []);
-  if (!descriptor || !descriptorActionTypeSet.has(action.type)) {
-    return candidate;
-  }
-
-  return withTagEffectProfile(candidate, {
-    kind: descriptor.kind,
-    recipient: "runner",
-    ...(descriptor.mode !== undefined ? { mode: descriptor.mode } : {}),
-    ...(descriptor.amount !== undefined ? { amount: descriptor.amount } : {}),
-    ...(descriptor.acuteTagRemoval
-      ? { currentTagReduction: descriptor.amount ?? "unknown" }
-      : {}),
-    acuteTagRemoval: descriptor.acuteTagRemoval,
-    source: "card_implementation",
-    evidence: [...descriptor.evidence],
-  });
+  return candidate;
 }
 
 function tagEffectProfileFromPayload(

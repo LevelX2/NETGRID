@@ -1438,18 +1438,15 @@ function runnerCandidateIsCardAbility(
 }
 
 function runnerCandidateIsExposeAbility(
-  input: AiDecisionInput,
+  _input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
-  const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-    input,
-    candidate,
-  );
   return (
     runnerCandidateIsCardAbility(candidate) &&
     (candidate.actionTacticSignals.includes("effect:expose_info") ||
-      sourceDefinitionId === "onr_v1_058_seeya" ||
-      sourceDefinitionId === "onr_v1_151_seeya")
+      candidate.functionalEffects?.some(
+        (effect) => effect.kind === "expose_info",
+      ) === true)
   );
 }
 
