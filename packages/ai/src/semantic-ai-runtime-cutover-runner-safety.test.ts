@@ -797,7 +797,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     expect(decision.actionId).toBe("run-remote");
     expect(decision.reasonCode).toBe("plan_first.runner.contest_remote");
     expect(decision.evidence).toContain(
-      "plan_assessment_evidence:runner_irrecoverable_blink_score_threat_contest:remote_1",
+      "plan_assessment_evidence:runner_irrecoverable_random_break_damage_score_threat_contest:remote_1",
     );
     expect(decision.evidence).not.toContain(
       "fallback_reason:missing_module_coverage",
