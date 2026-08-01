@@ -41,6 +41,9 @@ Bonus-Run-Aktionen im Fortsetzungsplan denselben Pauschalwert erhalten.
   bei der Auswahl verloren.
 - Verwandter erledigter Vertrag:
   `docs/activities/done/act-2026-05-17-runner-ai-repeat-rd-run.md`.
+- Vollständige Serien-Evidence:
+  `docs/reviews/ai/series-82b2-final-full-decision-audit-2026-08-01.md`, F1
+  und Decision-Coverage D2–D5.
 
 ## Scope
 

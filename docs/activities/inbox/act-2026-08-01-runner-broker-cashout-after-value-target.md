@@ -45,6 +45,9 @@ gegen weiteres Halten vergleichen und bei ausreichendem Nutzen cashen.
   - `docs/activities/done/act-2026-05-22-runner-ai-broker-pool-horizon.md`
   - `docs/reviews/ai/runner-plan-debug-payload-broker-final-2026-07-08.md`
   - `docs/reviews/ai/runner-economy-rig-focus-final-report-2026-07-07.md`
+- Vollständige Serien-Evidence:
+  `docs/reviews/ai/series-82b2-final-full-decision-audit-2026-08-01.md`, F2
+  und die 14 markierten Fundingentscheidungen D53–D101.
 
 ## Scope
 
@@ -55,6 +58,9 @@ gegen weiteres Halten vergleichen und bei ausreichendem Nutzen cashen.
 - Einen endlichen Hold-/Cashout-Vertrag ergänzen, der mindestens gespeicherten
   Wert, aktuelle liquide Credits, konkreten FundingNeed, verbleibende Klicks,
   absehbare Run-/Installkosten und alternative Credit-Aktionen berücksichtigt.
+- Den späteren D99-Zustand ausdrücklich sichern: Der Plan finanziert einen
+  zweiten Broker mit Basic Credits, obwohl die erste Instanz 12 Credits hält
+  und ihre Cashout-LegalAction verfügbar ist.
 - Verhindern, dass `comfortable_value` gleichzeitig jede weitere Aufladung
   und jede Auszahlung blockiert, obwohl ein anderer Plan Liquidität durch
   wiederholte Basic-Credits aufbaut.

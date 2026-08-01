@@ -44,6 +44,9 @@ Credits, Scorefortschritt, Schutz oder anderen messbaren Nutzen zu erzeugen.
   - D142–D146 / SV355–359: Die Folge `Counter für 1 Credit ausgeben -> wieder
     advancen -> Economy-Operation -> wieder ausgeben -> wieder advancen`
     wiederholt sich im nächsten Corp-Zug.
+  - D149/D151, D156/D157 und D159/D161: Dasselbe Cashout-/Re-Advance-Pendel
+    setzt sich bis zum letzten Corp-Zug fort; insgesamt betrifft der Befund
+    fünf Corp-Züge und dieselbe Karteninstanz.
 - Jeder direkte Zyklus `advancen -> Counter für 1 Credit ausgeben` kostet
   einen Credit und einen Klick für das Advance und gewinnt einen Credit bei
   einem weiteren Klick zurück. Ohne weiteren Payoff ist das ökonomisch null
@@ -58,10 +61,13 @@ Credits, Scorefortschritt, Schutz oder anderen messbaren Nutzen zu erzeugen.
   - `docs/reviews/ai/corp-asset-node-domain-pilot-review-2026-07-28.md`
   - `docs/architecture/ai/match-a36a9664-corp-plan-remediation-process-2026-07-30.md`
   - `docs/reviews/ai/match-a36a9664-corp-plan-remediation-final-review-2026-07-30.md`
+  - `docs/reviews/ai/series-82b2-final-full-decision-audit-2026-08-01.md`, F4
+    und Decision-Coverage D133–D161
 
 ## Scope
 
-- Die zusammenhängenden Sequenzen D133–D137 und D142–D146 als aktuellen
+- Die zusammenhängenden Sequenzen D133–D137, D142–D151 und D156–D161 als
+  aktuellen
   Plan-first-Checkpoint reproduzieren und die jeweilige
   `PlanExecutionOrigin`, Karteninstanz, Remote-Bindung und beabsichtigte
   Zielagenda sichtbar machen.
@@ -105,7 +111,7 @@ Credits, Scorefortschritt, Schutz oder anderen messbaren Nutzen zu erzeugen.
 
 - [ ] Der Checkpoint reproduziert die aktuelle Abfolge aus Decoy-Advance,
       Score-Liquidation und sofortigem Re-Advance mit beiden konkurrierenden
-      Planinstanzen.
+      Planinstanzen und belegt die Wiederholung bis D161.
 - [ ] Eine Vapor-Ops-Instanz besitzt zu jedem Zeitpunkt genau einen
       autoritativen Domainplan für Aufbau, Halten, Transfer oder Liquidation;
       konkurrierende Pläne können sie nicht widersprüchlich ausführen.

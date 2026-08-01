@@ -1,7 +1,7 @@
 # Serie 82b2 – vollständige KI-Analyse und Remediation
 
-Status: `audit_complete`; vollständige Matchanalyse und Deck-Consumer-Audits
-abgeschlossen, Activity-Scope wird finalisiert
+Status: `findings_and_activities_complete`; fünf Findings besitzen genau ein
+ausführbares Activity-Paket, Red-Checkpoints werden vorbereitet
 
 Quelle/Vorgabe: Nutzerauftrag vom 01.08.2026, beide abgeschlossenen Spiele der
 Serie `series_82b2d391315f055b` vollständig zu analysieren, bestehende
@@ -171,7 +171,7 @@ Startreihenfolge nach aktuellem Board:
 2. `act-2026-08-01-runner-all-nighter-bonus-run-target-ranking` (`high`)
 3. `act-2026-08-01-runner-broker-cashout-after-value-target` (`high`)
 4. `act-2026-08-01-corp-rd-layered-rez-sequence` (`high`)
-5. weitere aus P1/P2 hervorgegangene Pakete in Priority-/Datumsreihenfolge
+5. `act-2026-08-01-runner-broker-hosted-credit-hint-contract` (`high`)
 
 Für jede Activity einzeln:
 

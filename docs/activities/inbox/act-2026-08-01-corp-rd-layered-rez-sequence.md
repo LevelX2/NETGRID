@@ -35,6 +35,10 @@ sichtbaren Runner-Rig einen produktiven Schutz- oder Tax-Pfad bildet.
   Beobachtungszeitpunkt war die Liquidität bereits knapper.
 - Entscheidung 77 / StateVersion 153 installiert `Fire Wall` als zweite
   Schicht vor R&D.
+- Frühere gleichartige Evidence: Entscheidung 54 / StateVersion 103 rezzt
+  `Keeper` als äußere R&D-Schicht bei 13 Credits. Entscheidung 57 /
+  StateVersion 113 lehnt anschließend die innere `Data Wall` bei 9 Credits
+  mit derselben threatlosen Einzelbewertung ab.
 - Entscheidung 92 / StateVersion 193, Runner-Zug 28: Die exakte legale
   `Fire Wall rezzen`-Action wird unter `corp.defend_servers` mit
   `corp_ice_rez_resource_exchange_unknown` ausgeschlossen. Der Plan meldet
@@ -47,10 +51,14 @@ sichtbaren Runner-Rig einen produktiven Schutz- oder Tax-Pfad bildet.
   F3 und F4 zu zusätzlicher R&D-Verteidigung und unvollständiger Rezquote.
 - Verwandte erledigte Activity:
   `docs/activities/done/act-2026-05-17-corp-remote-rez-reserve-plan.md`.
+- Vollständige Serien-Evidence:
+  `docs/reviews/ai/series-82b2-final-full-decision-audit-2026-08-01.md`, F3
+  und Decision-Coverage D54–D57 sowie D77/D92–D93.
 
 ## Scope
 
-- Die Entscheidungen 92 und 93 gemeinsam als aktuellen, mehrschichtigen
+- Die Entscheidungen 54/57 und 92/93 jeweils gemeinsam als aktuelle,
+  mehrschichtige
   Defense-Checkpoint reproduzieren; nicht als zwei isolierte Einzel-ICE-
   Bewertungen behandeln.
 - Belegen, welche Credits, sichtbaren Breaker, Break-/Trace-Kosten,
@@ -81,9 +89,9 @@ sichtbaren Runner-Rig einen produktiven Schutz- oder Tax-Pfad bildet.
 
 ## Akzeptanzkriterien
 
-- [ ] Die Checkpoints 92/93 reproduzieren die unterschiedliche Bewertung von
-      äußerer Fire Wall und innerer Data Wall mit vollständiger side-sicherer
-      Quote.
+- [ ] Die Checkpoints 54/57 und 92/93 reproduzieren die unterschiedliche
+      Bewertung von Keeper/Data Wall beziehungsweise äußerer Fire Wall und
+      innerer Data Wall mit vollständiger side-sicherer Quote.
 - [ ] Eine bezahlbare äußere Schicht gewinnt gegen `decline_rez`, wenn ihr
       exakter eigener oder kombinierter Schutz-/Tax-Wert den Zugriffspfad
       relevant verschlechtert und die verbleibende Reserve ausreicht.
