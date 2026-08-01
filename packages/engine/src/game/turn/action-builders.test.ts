@@ -68,4 +68,73 @@ describe("turn action builders", () => {
     );
     expect(bonusRun).not.toBe(normalRun);
   });
+
+  it("distinguishes side-safe target-server variants", () => {
+    const hqTarget = makeActionId(
+      "trigger_ability",
+      "corp",
+      {
+        cardId: "source_ice",
+        serverId: "rd",
+        targetServerId: "hq",
+        sourceIceIndex: 0,
+        targetIceIndex: 0,
+      },
+      "source_ice",
+    );
+    const archivesTarget = makeActionId(
+      "trigger_ability",
+      "corp",
+      {
+        cardId: "source_ice",
+        serverId: "rd",
+        targetServerId: "archives",
+        sourceIceIndex: 0,
+        targetIceIndex: 0,
+      },
+      "source_ice",
+    );
+
+    expect(hqTarget).not.toBe(archivesTarget);
+    expect(hqTarget).toContain(".hq.");
+    expect(archivesTarget).toContain(".archives.");
+  });
+
+  it("distinguishes side-safe counter and decision variants", () => {
+    const traceCounter = makeActionId(
+      "trigger_ability",
+      "runner",
+      {
+        cardId: "runner_identity",
+        counterType: "trace_tag_counter",
+        runnerAbility: "remove_runner_trace_counter",
+      },
+      "runner_identity",
+    );
+    const mastiffCounter = makeActionId(
+      "trigger_ability",
+      "runner",
+      {
+        cardId: "runner_identity",
+        counterType: "mastiff",
+        runnerAbility: "remove_runner_trace_counter",
+      },
+      "runner_identity",
+    );
+    const pay = makeActionId(
+      "continue_run",
+      "runner",
+      { serverId: "rd", decision: "pay" },
+      "game_rule",
+    );
+    const endRun = makeActionId(
+      "continue_run",
+      "runner",
+      { serverId: "rd", decision: "end_run" },
+      "game_rule",
+    );
+
+    expect(traceCounter).not.toBe(mastiffCounter);
+    expect(pay).not.toBe(endRun);
+  });
 });

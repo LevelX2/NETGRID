@@ -93,9 +93,11 @@ export function makeActionId(
   if (payload?.bonusRunSource)
     parts.push("bonus_run", String(payload.bonusRunSource));
   if (payload?.selectedServerId) parts.push(String(payload.selectedServerId));
+  if (payload?.targetServerId) parts.push(String(payload.targetServerId));
   if (payload?.selectedCardId) parts.push(String(payload.selectedCardId));
   if (payload?.selectedSubtype) parts.push(String(payload.selectedSubtype));
   if (payload?.cardId) parts.push(String(payload.cardId));
+  if (payload?.counterType) parts.push(String(payload.counterType));
   if (payload?.hostOnCardId) parts.push(String(payload.hostOnCardId));
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   if (payload?.runnerProgramTrashBeforeInstall)
@@ -152,6 +154,7 @@ export function makeActionId(
     parts.push(String(payload.payOrEndRunSubroutineIndexes));
   if (payload?.payOrEndRunSubroutinePayment !== undefined)
     parts.push(String(payload.payOrEndRunSubroutinePayment));
+  if (payload?.decision) parts.push(String(payload.decision));
   for (const entry of abilityPayloadDiscriminatorEntries(
     payload,
     ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,

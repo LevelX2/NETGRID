@@ -310,7 +310,6 @@ function headsForRoute(params: {
       side: "runner" as const,
       moduleId: params.route.instance.moduleId,
       rootPlanInstanceId,
-      executorPlanInstanceId: params.route.instance.instanceId,
       nextMilestoneId,
       stepFingerprint,
       horizonCapability: moduleCoverage.horizonCapability,

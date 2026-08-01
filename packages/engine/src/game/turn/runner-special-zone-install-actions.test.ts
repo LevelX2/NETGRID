@@ -134,7 +134,7 @@ describe("runner special zone install action builders", () => {
 
     expect(setAside).toMatchObject({
       actionId:
-        "runner.trigger_ability.shell_traders_source.shell_traders_source.shell_traders_target.set_aside_from_grip.shell_traders_target",
+        "runner.trigger_ability.shell_traders_source.shell_traders_source.shell.shell_traders_target.set_aside_from_grip.shell_traders_target",
       side: "runner",
       type: "trigger_ability",
       label: "The Shell Traders: Prepared Program vorbereiten",
@@ -167,7 +167,7 @@ describe("runner special zone install action builders", () => {
     });
     expect(removeCounter).toMatchObject({
       actionId:
-        "runner.trigger_ability.shell_traders_source.shell_traders_source.shell_traders_target.remove_shell_counter.shell_traders_target",
+        "runner.trigger_ability.shell_traders_source.shell_traders_source.shell.shell_traders_target.remove_shell_counter.shell_traders_target",
       side: "runner",
       type: "trigger_ability",
       label: "The Shell Traders: Shell-Counter entfernen",

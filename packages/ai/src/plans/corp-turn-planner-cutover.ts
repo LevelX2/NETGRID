@@ -325,8 +325,7 @@ function turnPlanFromLine(params: {
     const rootInstance = params.portfolio.instances.find(
       (instance) => instance.instanceId === first.rootPlanInstanceId,
     );
-    const rootModuleId =
-      first.rootPlanModuleId ?? rootInstance?.moduleId ?? first.moduleId;
+    const rootModuleId = first.rootPlanModuleId ?? first.moduleId;
     const supportLeaves = [
       ...group.heads
         .filter(

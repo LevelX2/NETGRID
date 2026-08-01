@@ -580,6 +580,9 @@ describe("runner encounter action generation", () => {
       encounterContinue: true,
       encounterWillEndRun: true,
     });
+    expect(result.legalActions[0]!.actionId).not.toBe(
+      result.legalActions[1]!.actionId,
+    );
   });
 
   it("keeps movement jack-out and continue actions stable", () => {
