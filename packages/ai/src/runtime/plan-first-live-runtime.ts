@@ -13939,18 +13939,28 @@ function runnerCreditBankSignals(
     const convertibleDevelopmentFundingNeed =
       developmentCashOutAdmission.admitted &&
       materializedDevelopmentCashOutActionIds.length > 0;
+    const matureBankDevelopmentFundingRoute =
+      runnerMatureCreditBankDevelopmentFundingRoute({
+        input,
+        handDevelopment,
+        currentStoredCredits,
+        estimatedPayout,
+      });
+    const matureBankDevelopmentFundingNeed =
+      matureBankDevelopmentFundingRoute !== undefined;
     const urgentCreditFloor =
       input.playerView.own.credits <= 2 ||
       input.playerView.own.credits < economy.minimumCreditFloor;
-    // A card-bound development cashout is materialized by that development
-    // plan's funding step. The bank plan may only cash out for an exact,
-    // consuming run-funding route; low liquid credits or a static bank value
-    // target do not create a conversion need by themselves.
+    // The bank remains the sole action owner. Development plans contribute a
+    // typed, visible funding route; they never execute the cashout themselves.
+    // A mature bank may also replace a repeated basic-credit funding sequence
+    // even when the eventual install remains deferred by another guard.
     const shouldCashOut =
       tool.cashOutActionLegal &&
       estimatedPayout > 0 &&
-      !convertibleDevelopmentFundingNeed &&
-      convertibleRunFundingNeed;
+      (convertibleRunFundingNeed ||
+        convertibleDevelopmentFundingNeed ||
+        matureBankDevelopmentFundingNeed);
     if (shouldCashOut) {
       return [
         {
@@ -13964,7 +13974,13 @@ function runnerCreditBankSignals(
           estimatedPayout,
           value: 1_200 + estimatedPayout,
           evidenceCodes: [
-            "runner_credit_bank_cashout_for_run_funding",
+            ...(convertibleRunFundingNeed
+              ? ["runner_credit_bank_cashout_for_run_funding"]
+              : []),
+            ...(convertibleDevelopmentFundingNeed
+              ? ["runner_credit_bank_cashout_for_development_funding"]
+              : []),
+            ...(matureBankDevelopmentFundingRoute?.evidenceCodes ?? []),
             ...tool.evidence,
             ...(convertibleRunFundingRoute?.evidenceCodes ?? []),
             ...(developmentCashOutAdmission.route?.evidenceCodes ?? []),
@@ -14064,6 +14080,72 @@ function runnerDevelopmentCashOutTargetCanMaterialize(
       (prerequisite) => prerequisite.kind === "same_turn_access",
     )
   );
+}
+
+function runnerMatureCreditBankDevelopmentFundingRoute(params: {
+  input: AiDecisionInput;
+  handDevelopment: readonly RunnerHandDevelopmentEvaluation[];
+  currentStoredCredits: number;
+  estimatedPayout: number;
+}): { evidenceCodes: string[] } | undefined {
+  if (
+    params.currentStoredCredits < 12 ||
+    params.estimatedPayout <= 0 ||
+    params.input.playerView.own.clicks < 2
+  ) {
+    return undefined;
+  }
+  const basicCreditActionIds = new Set(
+    params.input.legalActions
+      .filter(
+        (action) =>
+          action.side === "runner" &&
+          action.type === "gain_credit" &&
+          action.source === "basic_action",
+      )
+      .map((action) => action.actionId),
+  );
+  if (basicCreditActionIds.size === 0) return undefined;
+  const basicFundingClickBudget = Math.max(
+    0,
+    params.input.playerView.own.clicks - 1,
+  );
+
+  for (const evaluation of [...params.handDevelopment].sort(
+    (left, right) =>
+      right.priority - left.priority ||
+      left.cardInstanceId.localeCompare(right.cardInstanceId),
+  )) {
+    const fundingNeed = evaluation.fundingNeed;
+    if (
+      evaluation.availability !== "missing_credits" ||
+      evaluation.deferReason !== "missing_credits" ||
+      !evaluation.evidence.includes("duplicate_installed:false") ||
+      evaluation.currentNeed === "none" ||
+      evaluation.currentNeed === "later" ||
+      evaluation.developmentRole === "unknown" ||
+      evaluation.developmentRole === "duplicate_or_low_value" ||
+      evaluation.activationPrerequisites.some(
+        (prerequisite) => !prerequisite.satisfied,
+      ) ||
+      !fundingNeed ||
+      fundingNeed.missingCredits < 2 ||
+      fundingNeed.missingCredits > params.estimatedPayout ||
+      fundingNeed.missingCredits > basicFundingClickBudget
+    ) {
+      continue;
+    }
+    return {
+      evidenceCodes: [
+        "runner_credit_bank_cashout_for_mature_development_funding",
+        `runner_credit_bank_funding_target:${evaluation.cardInstanceId}`,
+        `runner_credit_bank_funding_missing_credits:${fundingNeed.missingCredits}`,
+        `runner_credit_bank_value_target_reached:${params.currentStoredCredits}`,
+        `runner_credit_bank_replaced_basic_credit_clicks:${fundingNeed.missingCredits}`,
+      ],
+    };
+  }
+  return undefined;
 }
 
 function runnerCreditBankRunFundingRoute(params: {

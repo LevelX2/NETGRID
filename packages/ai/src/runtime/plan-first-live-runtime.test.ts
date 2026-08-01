@@ -1356,7 +1356,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("binds an admitted Broker cashout to the exact same-turn development plan", () => {
+  it("keeps an admitted development-funded Broker cashout owned by the bank plan", () => {
     resetResidentPlanPortfolioMemory();
     const build = legalAction(
       "broker-build",
@@ -1482,24 +1482,18 @@ describe("authoritative plan-first live runtime", () => {
 
     expect(decision).toMatchObject({
       actionId: "broker-cash",
-      reasonCode: "plan_first.runner.develop_board_and_hand",
+      reasonCode: "plan_first.runner.credit_bank",
       fallbackUsed: false,
       decisionDebug: {
-        planKind: "runner.develop_board_and_hand",
-        planId: expect.stringContaining(
-          "runner.develop_board_and_hand:card%3Atarget-program",
-        ),
+        planKind: "runner.credit_bank",
+        planId: expect.stringContaining("runner.credit_bank"),
         planFirstDecision: {
           schemaVersion: "ai-plan-first-decision-debug-v1",
           selectionAuthority: "turn_plan_commitment",
-          rootPlanInstanceId: expect.stringContaining(
-            "runner.develop_board_and_hand:card%3Atarget-program",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "runner.develop_board_and_hand:card%3Atarget-program",
-          ),
+          rootPlanInstanceId: expect.stringContaining("runner.credit_bank"),
+          leafExecutorInstanceId: expect.stringContaining("runner.credit_bank"),
           selectedPlan: {
-            moduleId: "runner.develop_board_and_hand",
+            moduleId: "runner.credit_bank",
             executionState: "executor",
           },
           route: {
@@ -1513,7 +1507,7 @@ describe("authoritative plan-first live runtime", () => {
         detailSections: expect.arrayContaining([
           expect.objectContaining({
             id: "plan_execution",
-            items: expect.arrayContaining(["capability:fund_onr_v1_007_blink"]),
+            items: expect.arrayContaining(["capability:credit_bank_cash_out"]),
           }),
         ]),
       },

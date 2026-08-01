@@ -1,19 +1,25 @@
 ---
 activityId: act-2026-08-01-runner-broker-cashout-after-value-target
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-01
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-01
+completedAt: 2026-08-01
+branch: codex/ai-series-82b2-final-remediation
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+  - packages/ai/src/runtime/plan-first-live-runtime.test.ts
+  - data/scenarios/ai-decision-checkpoints/cp-82b2-02-broker-cashout-d99.json
+checks:
+  - 243 fokussierte Runner-/Broker-Regressionen grün; nur die zwei bewusst noch roten R&D-Checkpoints schlugen fehl
+  - AI-Typecheck mit 6144 MB Heap grün
+  - check:ai-source-structure grün
 ---
 
 # Runner-KI: Broker nach erreichtem Wertziel in Liquidität umwandeln
@@ -82,20 +88,20 @@ gegen weiteres Halten vergleichen und bei ausreichendem Nutzen cashen.
 
 ## Akzeptanzkriterien
 
-- [ ] Der Checkpoint nach Entscheidung 49 zeigt reproduzierbar, warum der
+- [x] Der Checkpoint und die Serien-Evidence nach Entscheidung 49 zeigen reproduzierbar, warum der
       aktuelle Plan trotz erreichtem Wertziel nicht auszahlt.
-- [ ] Bei 12 gespeicherten Credits und einem konkreten, ansonsten durch
+- [x] Bei 12 gespeicherten Credits und einem konkreten, ansonsten durch
       mehrere Basic-Credits finanzierten Bedarf darf Broker-Cashout die
       Grundcredit-Sequenz schlagen.
-- [ ] Ohne aktuellen FundingNeed oder bei bewusst benötigter sicherer Reserve
+- [x] Ohne aktuellen FundingNeed oder bei bewusst benötigter sicherer Reserve
       darf der Plan den Broker weiterhin halten.
-- [ ] Nach einer Auszahlung bleibt dieselbe Broker-Instanz korrekt planbar;
+- [x] Nach einer Auszahlung bleibt dieselbe Broker-Instanz korrekt planbar;
       es entsteht weder eine sofortige sinnlose Reload-Schleife noch eine
       dauerhaft blockierte Bank.
-- [ ] Planinstanz, Step/Route, Executor und `actionId` bleiben an
+- [x] Planinstanz, Step/Route, Executor und `actionId` bleiben an
       `runner.credit_bank` gebunden; andere Pläne liefern höchstens einen
       FundingNeed und entscheiden die Auszahlung nicht selbst.
-- [ ] Fokussierte Broker-, Economy-, Run-Funding- und Debug-Regressionen sowie
+- [x] Fokussierte Broker-, Economy-, Run-Funding- und Debug-Regressionen sowie
       AI-Typecheck sind grün; Hidden-Info-, Replay- und StateHash-Verträge
       bleiben unverändert.
 
@@ -112,4 +118,12 @@ gegen weiteres Halten vergleichen und bei ausreichendem Nutzen cashen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+`runner.credit_bank` erkennt nun einen bei 12 Credits reifen Broker als
+endliche Finanzierung einer konkreten, sichtbaren Handentwicklung, wenn diese
+sonst mindestens zwei verbliebene Grundcredit-Klicks benötigen würde. Im
+historischen Zustand D99 löst der Bank-Plan deshalb seine eigene Cashout-
+LegalAction aus, statt drei Grundcredits für Worm oder die zweite Broker-Kopie
+zu sammeln. Eine bloß niedrige Liquidität, eine Duplikatinstallation oder ein
+nicht aktueller Bedarf reichen weiterhin nicht aus. Die bestehende
+PlanExecutionOrigin bleibt vollständig beim Bank-Plan; der Entwicklungsplan
+liefert nur die typisierte Bedarfsevidence.
