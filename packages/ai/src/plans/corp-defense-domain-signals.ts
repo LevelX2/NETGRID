@@ -30,6 +30,11 @@ export type CorpDefenseDomainSignalFacts = Readonly<{
   archivesHasVisibleKnownAgenda: (input: AiDecisionInput) => boolean;
 }>;
 
+export type CorpLayeredIceStagingParent = Readonly<{
+  kind: "score" | "remote";
+  parentProjectId: string;
+}>;
+
 export function corpIceInstallHasCurrentCompleteRezQuote(
   input: AiDecisionInput,
   action: LegalAction,
@@ -163,6 +168,7 @@ export function corpQualitativeIceStagingSignal(
   serverId: string,
   centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
   facts: CorpDefenseDomainSignalFacts,
+  layeredParent?: CorpLayeredIceStagingParent,
 ): CorpDefenseSignal | undefined {
   const isCentral = serverId === "hq" || serverId === "rd";
   const isExistingRemote = serverId.startsWith("remote_");
@@ -179,7 +185,11 @@ export function corpQualitativeIceStagingSignal(
       input,
       serverId: serverId as "hq" | "rd",
     })?.threat === "terminal";
-  if (server.ice.length > 0 && !terminalCentralAdditionalLayer) {
+  if (
+    server.ice.length > 0 &&
+    !terminalCentralAdditionalLayer &&
+    !(isExistingRemote && layeredParent)
+  ) {
     return undefined;
   }
   const bothCentralsEmpty = ["hq", "rd"].every(
@@ -206,7 +216,10 @@ export function corpQualitativeIceStagingSignal(
           (candidateServer) => candidateServer.id === centralServerId,
         )?.ice.length ?? 0) > 0,
     );
-    if (!handOverflow || server.root.length === 0 || !bothCentralsCovered) {
+    if (
+      !layeredParent &&
+      (!handOverflow || server.root.length === 0 || !bothCentralsCovered)
+    ) {
       return undefined;
     }
   }
@@ -250,6 +263,19 @@ export function corpQualitativeIceStagingSignal(
     input.playerView.own.credits - candidate.costProfile.creditCost;
   const rezFundingGap = Math.max(0, rezCredits - creditsAfterInstall);
   if (rezFundingGap > 3) return undefined;
+  const unrezzedLayerCount = server.ice.filter(
+    (ice) => ice.rezzed !== true,
+  ).length;
+  const layeredRemoteValue = layeredParent
+    ? (sourceDefense.hasImmediateStop ? 12 : 9) +
+      6 -
+      server.ice.length * 2 -
+      unrezzedLayerCount * 2 -
+      rezFundingGap
+    : undefined;
+  if (layeredRemoteValue !== undefined && layeredRemoteValue <= 0) {
+    return undefined;
+  }
   const centralPressure = terminalCentralAdditionalLayer
     ? "terminal"
     : isCentral && centralAllocation?.status === "known"
@@ -269,12 +295,16 @@ export function corpQualitativeIceStagingSignal(
     immediateInstallSupport: true,
     value: terminalCentralAdditionalLayer
       ? 18
+      : layeredRemoteValue !== undefined
+        ? layeredRemoteValue
       : sourceDefense.hasImmediateStop
         ? 11
         : 9,
     evidenceCode: terminalCentralAdditionalLayer
       ? `corp_terminal_central_additional_layer_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`
-      : `corp_qualitative_ice_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`,
+      : layeredParent
+        ? `corp_layered_remote_ice_staging:${layeredParent.kind}:${layeredParent.parentProjectId}:${serverId}:${candidate.actionId}:layers_${server.ice.length}:unrezzed_${unrezzedLayerCount}:rez_gap_${rezFundingGap}`
+        : `corp_qualitative_ice_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`,
   };
 }
 

@@ -119,6 +119,7 @@ import {
   corpGlobalDefenseInstallRouteAssessment,
   corpIceInstallHasCurrentCompleteRezQuote,
   corpQualitativeIceStagingSignal,
+  type CorpLayeredIceStagingParent,
   knownInstallRouteHasUsefulEffectBlockedByFunding,
   type CorpDefenseDomainSignalFacts,
 } from "../plans/corp-defense-domain-signals";
@@ -7844,6 +7845,7 @@ function buildCorpDomain(
         : [],
     ),
   );
+  const remoteProjects: CorpCorePlanDomain["remoteProjects"] = [];
   const mergedDefenseNeeds: CorpCorePlanDomain["defenseNeeds"] =
     mergeDefenseSignals([
       ...candidates.flatMap((candidate): CorpDefenseSignal[] => {
@@ -7885,12 +7887,18 @@ function buildCorpDomain(
             return [];
           }
           if (!route) {
+            const layeredRemoteParent = corpLayeredIceStagingParent(
+              scoreProjects,
+              remoteProjects,
+              serverId,
+            );
             const coherentScorePlanPrecedesQualitativeStaging =
               (serverId === "hq" || serverId === "rd") &&
               scorePlanPrecedesRedundantCapacityDefense(serverId);
             const boundScoreProtectionPrecedesQualitativeStaging =
               selectedScoreProtectionSignals.length > 0;
             const protectedScoreProjectPrecedesQualitativeStaging =
+              layeredRemoteParent === undefined &&
               scoreProjects.some(
                 (project) =>
                   project.feasible &&
@@ -7941,7 +7949,8 @@ function buildCorpDomain(
               });
             const qualitativeStaging =
               exactAlternativeExists ||
-              exactBoundDefenseAlternativeExists ||
+              (exactBoundDefenseAlternativeExists &&
+                layeredRemoteParent === undefined) ||
               coherentScorePlanPrecedesQualitativeStaging ||
               boundScoreProtectionPrecedesQualitativeStaging ||
               protectedScoreProjectPrecedesQualitativeStaging
@@ -7952,6 +7961,7 @@ function buildCorpDomain(
                     serverId,
                     centralDefenseAllocation,
                     CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
+                    layeredRemoteParent,
                   );
             return qualitativeStaging ? [qualitativeStaging] : [];
           }
@@ -8316,7 +8326,6 @@ function buildCorpDomain(
           }
         : signal,
     );
-  const remoteProjects: CorpCorePlanDomain["remoteProjects"] = [];
   const immediateFundingActionIds = candidates
     .filter(
       (candidate) =>
@@ -8543,6 +8552,42 @@ function corpDrawCandidatePreservesHandCapacity(
     input.playerView.own.gripOrHq.length + netHandDelta <=
       input.playerView.own.maxHandSize
   );
+}
+
+function corpLayeredIceStagingParent(
+  scoreProjects: readonly CorpScoreProjectSignal[],
+  remoteProjects: CorpCorePlanDomain["remoteProjects"],
+  serverId: string,
+): CorpLayeredIceStagingParent | undefined {
+  if (!serverId.startsWith("remote_")) return undefined;
+  const scoreParent = scoreProjects
+    .filter(
+      (project) =>
+        project.serverId === serverId &&
+        project.agendaInstanceId !== undefined &&
+        (project.protectionNeed?.baseline.knowledge === "known" ||
+          (project.protectionNeed === undefined && project.feasible)),
+    )
+    .sort((left, right) => {
+      const leftResident = left.phase === "install_agenda" ? 0 : 1;
+      const rightResident = right.phase === "install_agenda" ? 0 : 1;
+      return (
+        rightResident - leftResident ||
+        technicalIdCompare(left.projectId, right.projectId)
+      );
+    })[0];
+  if (scoreParent) {
+    return { kind: "score", parentProjectId: scoreParent.projectId };
+  }
+  const remoteParent = remoteProjects
+    .filter(
+      (project) =>
+        project.serverId === serverId && project.purpose === "scoring_remote",
+    )
+    .sort((left, right) => technicalIdCompare(left.projectId, right.projectId))[0];
+  return remoteParent
+    ? { kind: "remote", parentProjectId: remoteParent.projectId }
+    : undefined;
 }
 
 function exactCurrentBasicCorpDrawCandidate(
