@@ -7908,8 +7908,37 @@ function buildCorpDomain(
                   CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
                 ) !== undefined,
             );
+            const exactBoundDefenseAlternativeExists =
+              input.playerView.servers.some(
+                (candidateServer) =>
+                  candidateServer.id === serverId &&
+                  candidateServer.ice.length > 0,
+              ) &&
+              candidates.some((alternative) => {
+                if (
+                  alternative.actionId === candidate.actionId ||
+                  !candidateIsVisibleCorpIceInstall(input, alternative)
+                ) {
+                  return false;
+                }
+                const alternativeServerId = candidateTargetIds(
+                  alternative,
+                ).find(isCorpInstallServerId);
+                return (
+                  alternativeServerId !== undefined &&
+                  alternativeServerId !== serverId &&
+                  corpGlobalDefenseInstallRoute(
+                    input,
+                    alternative,
+                    alternativeServerId,
+                    centralDefenseAllocation,
+                    CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
+                  ) !== undefined
+                );
+              });
             const qualitativeStaging =
               exactAlternativeExists ||
+              exactBoundDefenseAlternativeExists ||
               coherentScorePlanPrecedesQualitativeStaging ||
               boundScoreProtectionPrecedesQualitativeStaging ||
               protectedScoreProjectPrecedesQualitativeStaging

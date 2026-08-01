@@ -171,6 +171,12 @@ export function projectExactCorpIceRezRoute(params: {
     input,
     targetServerId,
   );
+  if (
+    !assessmentsKnown &&
+    !resourceExchange &&
+    marginalDefenseThreat !== "visible_agenda_remote"
+  )
+    return undefined;
   if (assessmentsKnown && probabilityComparison === undefined) return undefined;
   const freePersistentDefense =
     probabilityComparison === 0 &&
@@ -199,7 +205,8 @@ export function projectExactCorpIceRezRoute(params: {
       : undefined;
   const qualitativeEncounterDefense =
     (probabilityComparison === 0 ||
-      (!assessmentsKnown && marginalDefenseThreat !== undefined)) &&
+      (!assessmentsKnown &&
+        marginalDefenseThreat === "visible_agenda_remote")) &&
     !resourceExchange &&
     !freePersistentDefense &&
     knownAccessPathTax === undefined &&
@@ -208,8 +215,6 @@ export function projectExactCorpIceRezRoute(params: {
       sourceCard,
       targetServerId,
     });
-  if (!assessmentsKnown && !resourceExchange && !qualitativeEncounterDefense)
-    return undefined;
   if (
     probabilityComparison !== -1 &&
     !resourceExchange &&
