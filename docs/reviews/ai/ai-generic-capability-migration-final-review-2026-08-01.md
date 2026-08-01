@@ -89,12 +89,18 @@ Final nach Integration des aktuellen `main` bestanden:
 - `@netgrid/shared`, `@netgrid/engine` und `@netgrid/ai` Typecheck;
 - `check:ai-source-structure`: 755 produktive Dateien, keine Runtime- oder
   Typzyklen;
-- `check:package-boundaries`: 1.996 geprüfte Dateien;
+- `check:package-boundaries`: 1.998 geprüfte Dateien;
 - `check:ai`: Hint-Metadatenvertrag ohne Hard Error und Source-Structure grün;
 - `test:ai:shards`: 548 Testdateien und 4.490 Tests grün;
-- vollständiger Engine-Test: 211 Testdateien und 1.838 Tests grün;
+- vollständiger Engine-Test: 212 Testdateien und 1.841 Tests grün;
 - vollständiger Shared-Test: eine Testdatei und 16 Tests grün;
 - `format:changed` und `git diff --check` grün.
+
+Unmittelbar vor der lokalen Integration wurde der zwischenzeitlich auf
+`main` hinzugekommene Run-Start-Eligibility-Vertrag (`e0071801e`) erneut in
+den Arbeitsbranch gemergt. Der einzige manuelle Konflikt betraf das gemeinsam
+ergänzte August-Wissenslog; beide Einträge wurden vollständig erhalten. Alle
+oben genannten Gates wurden auf diesem finalen Merge-Stand wiederholt.
 
 Der erste AI-Typecheck mit dem Node-Standardheap endete bei etwa 4 GB mit
 Speichermangel. Derselbe unveränderte Paket-Typecheck bestand anschließend mit
