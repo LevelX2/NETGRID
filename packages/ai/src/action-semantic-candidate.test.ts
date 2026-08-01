@@ -732,6 +732,98 @@ describe("buildActionSemanticCandidates", () => {
         repeatable: true,
       },
     ]);
+    expect(candidate?.cardContextFunctionalEffects).toEqual(
+      candidate?.functionalEffects,
+    );
+  });
+
+  it("keeps multi-ability card effects as context until the action effect is exactly bound", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("activated_card_ability", 0, {
+          source: "multi-ability-card-instance",
+          payload: {
+            sourceDefinitionId: "multi-ability-card",
+          },
+        }),
+      ],
+      cardSemanticProfilesByDefinitionId: {
+        "multi-ability-card": {
+          cardId: "multi-ability-card",
+          tacticSignals: [],
+          functionalEffects: [
+            {
+              kind: "damage",
+              timing: "action",
+              scope: "runner",
+              resource: "net_damage",
+              amount: 2,
+            },
+          ],
+          abilitySemantics: [
+            { abilityId: "multi-ability-card:first", tacticSignals: [] },
+            { abilityId: "multi-ability-card:second", tacticSignals: [] },
+          ],
+        },
+      },
+    });
+
+    expect(candidate?.abilityBindingMethod).toBe("unresolved");
+    expect(candidate?.functionalEffects).toBeUndefined();
+    expect(candidate?.cardContextFunctionalEffects).toEqual([
+      {
+        kind: "damage",
+        timing: "action",
+        scope: "runner",
+        resource: "net_damage",
+        amount: 2,
+      },
+    ]);
+  });
+
+  it("binds only the functional effects declared for the exact engine ability", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("activated_card_ability", 0, {
+          source: "bound-multi-ability-instance",
+          payload: {
+            sourceDefinitionId: "bound-multi-ability-card",
+            abilityId: "bound-multi-ability-card:draw",
+          },
+        }),
+      ],
+      cardSemanticProfilesByDefinitionId: {
+        "bound-multi-ability-card": {
+          cardId: "bound-multi-ability-card",
+          tacticSignals: [],
+          functionalEffects: [
+            { kind: "draw", timing: "action", scope: "runner" },
+            { kind: "damage", timing: "action", scope: "runner" },
+          ],
+          abilitySemantics: [
+            {
+              abilityId: "bound-multi-ability-card:draw",
+              tacticSignals: [],
+              functionalEffects: [
+                { kind: "draw", timing: "action", scope: "runner" },
+              ],
+            },
+            {
+              abilityId: "bound-multi-ability-card:damage",
+              tacticSignals: [],
+              functionalEffects: [
+                { kind: "damage", timing: "action", scope: "runner" },
+              ],
+            },
+          ],
+        },
+      },
+    });
+
+    expect(candidate?.abilityBindingMethod).toBe("engine_payload");
+    expect(candidate?.functionalEffects).toEqual([
+      { kind: "draw", timing: "action", scope: "runner" },
+    ]);
   });
 
   it("projects target context only from selected or engine-provided targets", () => {

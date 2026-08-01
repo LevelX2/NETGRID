@@ -490,11 +490,16 @@ export type ActionSemanticCandidate = {
   abilityBindingMethod: ActionAbilityBindingMethod;
   semanticActionType: string;
   /**
-   * Typed strategic effect classification retained directly from the active
-   * card-hint source. It never creates legality or supplies an unknown current
-   * amount; those facts remain bound to the Engine LegalAction projection.
+   * Typed strategic effects that are bound to this exact current action.
+   * They never create legality or supply an unknown current amount; those
+   * facts remain bound to the Engine LegalAction projection.
    */
   functionalEffects?: readonly AiHintStructuredEffect[];
+  /**
+   * Card-wide strategic context from the active hint. This is intentionally
+   * not action authority and must not satisfy a PlanStep capability by itself.
+   */
+  cardContextFunctionalEffects?: readonly AiHintStructuredEffect[];
   /**
    * Structured effect destinations retained from side-safe card hints. These
    * keep timing-relevant distinctions such as immediate, installment and
@@ -574,6 +579,7 @@ export type SideSafeActionAbilityBinding = {
 export type ActionCardAbilitySemanticProfile = {
   abilityId: string;
   tacticSignals: readonly string[];
+  functionalEffects?: readonly AiHintStructuredEffect[];
   compatibilitySignals?: readonly string[];
   strategySupport?: readonly StrategySupportPair[];
   conditions?: readonly SemanticCondition[];
