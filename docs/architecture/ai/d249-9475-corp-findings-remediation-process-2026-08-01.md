@@ -1,7 +1,7 @@
 # Corp-Findings d249/9475 – checkpoint-getriebener Umsetzungsprozess
 
 Stand: 2026-08-01  
-Status: Umsetzung und Verifikation grün, Main-Integration läuft  
+Status: abgeschlossen und lokal nach `main` integriert  
 Branch: `codex/ai-d249-9475-remediation`  
 Worktree: `C:\Projekte\NETGRID_AI_D249_9475_REMEDIATION`
 
@@ -206,6 +206,10 @@ Verifikationsstand vor dem Main-Abgleich:
 - der erste Volltest fand drei zu breite qualitative Defense-Routen. Nach der
   generischen Prioritätskorrektur ist der unveränderte zweite Volltest
   vollständig grün.
+- der Branch wurde per Fast-forward nach `main` integriert; auf dem
+  integrierten Stand sind die sechs entscheidenden Checkpoint-/Gegenproben mit
+  `36/36` Tests sowie der AI-Typecheck grün. Arbeits-Worktree und Arbeitsbranch
+  wurden anschließend entfernt.
 
 ## Abschlusskriterien
 
