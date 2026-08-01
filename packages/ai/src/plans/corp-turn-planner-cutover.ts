@@ -325,6 +325,47 @@ function turnPlanFromLine(params: {
     const rootInstance = params.portfolio.instances.find(
       (instance) => instance.instanceId === first.rootPlanInstanceId,
     );
+    const rootModuleId =
+      first.rootPlanModuleId ?? rootInstance?.moduleId ?? first.moduleId;
+    const supportLeaves = [
+      ...group.heads
+        .filter(
+          (head) =>
+            head.executorPlanInstanceId !== undefined &&
+            head.executorPlanInstanceId !== head.rootPlanInstanceId,
+        )
+        .reduce((leaves, head) => {
+          if (
+            !head.executorPlanInstanceId ||
+            head.executorParentPlanInstanceId !== head.rootPlanInstanceId ||
+            !head.executorParentNeedId
+          ) {
+            throw cutoverFailure(
+              params.input,
+              `TurnPlanner support head ${head.candidateId} must retain its exact executor, root parent and parent need.`,
+            );
+          }
+          const key = `${head.executorPlanInstanceId}:${head.executorParentNeedId}`;
+          if (!leaves.has(key)) {
+            leaves.set(key, {
+              planInstanceId: head.executorPlanInstanceId,
+              moduleId: head.moduleId,
+              parentNeedId: head.executorParentNeedId,
+              assignmentId: turnPlanningFingerprint(
+                "cutover-support-assignment",
+                {
+                  rootPlanInstanceId: head.rootPlanInstanceId,
+                  planInstanceId: head.executorPlanInstanceId,
+                  parentNeedId: head.executorParentNeedId,
+                  lineId: params.line.lineId,
+                },
+              ),
+            });
+          }
+          return leaves;
+        }, new Map<string, TurnPlan["phases"][number]["supportLeaves"][number]>())
+        .values(),
+    ];
     const phaseId = turnPlanningFingerprint("cutover-turn-phase", {
       lineId: params.line.lineId,
       phaseIndex,
@@ -341,9 +382,12 @@ function turnPlanFromLine(params: {
       phaseId,
       root: {
         planInstanceId: first.rootPlanInstanceId,
-        moduleId: first.moduleId,
+        moduleId: rootModuleId,
         milestoneId: first.nextMilestoneId,
-        provenance: "resident" as const,
+        provenance:
+          supportLeaves.length > 0
+            ? ("admitted_support" as const)
+            : ("resident" as const),
       },
       ...(rootInstance?.commitmentId
         ? { hardPlanCommitmentId: rootInstance.commitmentId }
@@ -354,7 +398,7 @@ function turnPlanFromLine(params: {
       completionCondition: {
         code: `turn_plan_milestone:${first.nextMilestoneId}`,
       },
-      supportLeaves: [],
+      supportLeaves,
       nodes: group.heads.map((head, nodeIndex) => ({
         nodeId: turnPlanningFingerprint("cutover-turn-node", {
           lineId: params.line.lineId,
@@ -372,7 +416,11 @@ function turnPlanFromLine(params: {
           : {}),
       })),
       protectedValueClaimIds: params.line.valueClaims
-        .filter((claim) => claim.ownerModuleId === first.moduleId)
+        .filter(
+          (claim) =>
+            claim.ownerModuleId === rootModuleId ||
+            supportLeaves.some((leaf) => leaf.moduleId === claim.ownerModuleId),
+        )
         .map((claim) => claim.claimId),
       transition: nextGroup
         ? {
@@ -433,7 +481,13 @@ function turnPlanFromLine(params: {
     campaignValueClaims: structuredClone(
       params.line.valueClaims.filter(
         (claim) =>
-          phases.some((phase) => phase.root.moduleId === claim.ownerModuleId) &&
+          phases.some(
+            (phase) =>
+              phase.root.moduleId === claim.ownerModuleId ||
+              phase.supportLeaves.some(
+                (leaf) => leaf.moduleId === claim.ownerModuleId,
+              ),
+          ) &&
           params.portfolio.campaigns?.some(
             (campaign) =>
               campaign.campaignId === claim.campaignId &&

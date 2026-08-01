@@ -4669,7 +4669,7 @@ function economyCandidates(
                     corpExactBasicLiquidCreditCandidate(candidate)
                   : candidate.actionId === exactFundingHead &&
                     immediateCorpLiquidCreditGain(candidate) > 0) &&
-        economyCandidateHasExecutablePayload(context, candidate),
+        corpEconomyCandidateHasExecutablePayload(context.input, candidate),
     )
     .map((candidate) => ({
       candidate,
@@ -4752,7 +4752,8 @@ export function assessCorpEconomyFundingRoute(
     (candidate) =>
       signal.actionIds.includes(candidate.actionId) &&
       immediateCorpLiquidCreditGain(candidate) > 0 &&
-      candidate.economyProjection?.reliability === "guaranteed",
+      candidate.economyProjection?.reliability === "guaranteed" &&
+      corpEconomyCandidateHasExecutablePayload(context.input, candidate),
   );
   const currentCredits = context.input.playerView.own.credits;
   const demandForTarget = (
@@ -4921,17 +4922,15 @@ export function immediateCorpLiquidCreditGain(
     : 0;
 }
 
-function economyCandidateHasExecutablePayload(
-  context: PlanSchedulerContext,
+export function corpEconomyCandidateHasExecutablePayload(
+  input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
-  const action = context.input.legalActions.find(
+  const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
   const drawCardsAmount = Number(action?.payload?.drawCardsAmount ?? 0);
-  return !(
-    drawCardsAmount > 0 && context.input.playerView.own.stackOrRdCount <= 0
-  );
+  return !(drawCardsAmount > 0 && input.playerView.own.stackOrRdCount <= 0);
 }
 
 function economyDevelopmentStepValue(

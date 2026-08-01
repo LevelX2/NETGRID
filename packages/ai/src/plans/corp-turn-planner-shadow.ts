@@ -470,13 +470,16 @@ function includeSpecializedCurrentRoutes(params: {
     actionId: string,
     moduleId: PlanModuleId,
     projectId?: string,
+    exactPlanInstanceId?: string,
   ): void => {
     if (
       routes.some(
         (route) =>
           route.instance.moduleId === moduleId &&
           route.candidate.actionId === actionId &&
-          (projectId === undefined || route.instance.dedupeKey === projectId),
+          (projectId === undefined || route.instance.dedupeKey === projectId) &&
+          (exactPlanInstanceId === undefined ||
+            route.instance.instanceId === exactPlanInstanceId),
       )
     ) {
       return;
@@ -487,7 +490,9 @@ function includeSpecializedCurrentRoutes(params: {
     const base = params.routes.find(
       (route) =>
         route.instance.moduleId === moduleId &&
-        (projectId === undefined || route.instance.dedupeKey === projectId),
+        (projectId === undefined || route.instance.dedupeKey === projectId) &&
+        (exactPlanInstanceId === undefined ||
+          route.instance.instanceId === exactPlanInstanceId),
     );
     if (!candidate || !base) return;
     routes.push({
@@ -505,13 +510,20 @@ function includeSpecializedCurrentRoutes(params: {
     }
   }
   for (const line of params.defenseSlice?.lines ?? []) {
-    const ownerModuleId = line.nodes[0]?.ownerModuleId;
+    const currentNode = line.nodes[0];
+    const ownerModuleId = currentNode?.ownerModuleId;
     if (
+      currentNode &&
       line.currentActionId &&
       (ownerModuleId === "corp.defend_servers" ||
         ownerModuleId === "corp.economy")
     ) {
-      addRoute(line.currentActionId, ownerModuleId);
+      addRoute(
+        line.currentActionId,
+        ownerModuleId,
+        undefined,
+        currentNode.planInstanceId,
+      );
     }
   }
 
@@ -603,6 +615,10 @@ function headsForRoute(params: {
     params.route.instance.instanceId,
     params.portfolio,
   );
+  const rootPlanModuleId =
+    params.portfolio.instances.find(
+      (instance) => instance.instanceId === rootPlanInstanceId,
+    )?.moduleId ?? params.route.instance.moduleId;
   const semanticActionSetFingerprint = buildSemanticActionSetFingerprint(
     params.input.legalActions,
   );
@@ -628,6 +644,17 @@ function headsForRoute(params: {
       side: "corp",
       moduleId: params.route.instance.moduleId,
       rootPlanInstanceId,
+      rootPlanModuleId,
+      executorPlanInstanceId: params.route.instance.instanceId,
+      ...(params.route.instance.parentInstanceId
+        ? {
+            executorParentPlanInstanceId:
+              params.route.instance.parentInstanceId,
+          }
+        : {}),
+      ...(params.route.instance.parentNeedId
+        ? { executorParentNeedId: params.route.instance.parentNeedId }
+        : {}),
       nextMilestoneId: variant.nextMilestoneId,
       stepFingerprint,
       horizonCapability: moduleCoverage.horizonCapability,
@@ -717,7 +744,8 @@ function specializedVariants(
         .filter(
           (line) =>
             line.currentActionId === route.candidate.actionId &&
-            line.nodes[0]?.ownerModuleId === route.instance.moduleId,
+            line.nodes[0]?.ownerModuleId === route.instance.moduleId &&
+            line.nodes[0]?.planInstanceId === route.instance.instanceId,
         )
         .map((line) => defenseVariant(line, route)) ?? []
     );
@@ -1349,6 +1377,9 @@ function debugForShadow(params: {
       candidateId: head.candidateId,
       moduleId: head.moduleId,
       rootPlanInstanceId: head.rootPlanInstanceId,
+      ...(head.executorPlanInstanceId
+        ? { executorPlanInstanceId: head.executorPlanInstanceId }
+        : {}),
       actionId: head.currentBinding.actionId,
       semanticActionType: head.invocation.semanticActionType,
       invocationKey: head.invocation.invocationKey,
@@ -1697,34 +1728,22 @@ function debugPhases(
     const firstHead = heads.find(
       (head) => head.candidateId === group.steps[0]?.candidateId,
     );
-    const leafInstances = group.steps
+    const phaseHeads = group.steps
       .map((step) =>
         heads.find((head) => head.candidateId === step.candidateId),
       )
-      .filter((head): head is TurnPlanningHeadCandidate => head !== undefined)
-      .map((head) =>
-        portfolio.instances.find(
-          (instance) =>
-            instance.moduleId === head.moduleId &&
-            findRootPlanInstanceId(instance.instanceId, portfolio) ===
-              group.rootPlanInstanceId,
-        ),
-      )
-      .filter(
-        (instance): instance is NonNullable<typeof instance> =>
-          instance !== undefined,
-      );
-    const supportBindings = leafInstances.flatMap((instance) =>
-      instance.parentNeedId
+      .filter((head): head is TurnPlanningHeadCandidate => head !== undefined);
+    const supportBindings = phaseHeads.flatMap((head) =>
+      head.executorPlanInstanceId && head.executorParentNeedId
         ? [
             {
-              planInstanceId: instance.instanceId,
-              parentNeedId: instance.parentNeedId,
+              planInstanceId: head.executorPlanInstanceId,
+              parentNeedId: head.executorParentNeedId,
               assignmentId: turnPlanningFingerprint(
                 "shadow-support-assignment",
                 {
-                  planInstanceId: instance.instanceId,
-                  parentNeedId: instance.parentNeedId,
+                  planInstanceId: head.executorPlanInstanceId,
+                  parentNeedId: head.executorParentNeedId,
                   lineId: line.lineId,
                 },
               ),
@@ -1739,6 +1758,7 @@ function debugPhases(
       candidateIds: group.steps.map((step) => step.candidateId),
     });
     const rootModuleId =
+      firstHead?.rootPlanModuleId ??
       portfolio.instances.find(
         (instance) => instance.instanceId === group.rootPlanInstanceId,
       )?.moduleId ??
@@ -1748,11 +1768,8 @@ function debugPhases(
       phaseId,
       rootPlanInstanceId: group.rootPlanInstanceId,
       rootModuleId,
-      rootProvenance: leafInstances.some(
-        (instance) => instance.parentNeedId !== undefined,
-      )
-        ? "admitted_support"
-        : "resident",
+      rootProvenance:
+        supportBindings.length > 0 ? "admitted_support" : "resident",
       entryFrameKey:
         phaseIndex === 0
           ? entryFrameKey

@@ -4274,6 +4274,66 @@ describe("Corp core plan modules", () => {
     ).toEqual(["fast-credit"]);
   });
 
+  it("excludes an empty-R&D draw operation from funding while keeping Basic Credit executable", () => {
+    const economy = corpModule("corp.economy");
+    const basicCredit = candidate(
+      "basic-credit",
+      "gain_credit",
+      "economy.gain_credit",
+    );
+    const nightShift = candidate(
+      "night-shift",
+      "play_operation",
+      "economy.gain_credit",
+    );
+    nightShift.sourceKind = "card";
+    nightShift.sourceCardInstanceId = "night-shift-card";
+    nightShift.sourceDefinitionId = "onr_v1_295_night-shift";
+    nightShift.economyProjection = {
+      ...nightShift.economyProjection!,
+      grossLiquidCreditGain: 2,
+      netLiquidCreditGain: 2,
+      cardsDrawn: 1,
+      cardsConsumed: 1,
+      netHandDelta: 0,
+      repeatable: false,
+      source: "legal_action_payload",
+    };
+    const fundingNeed = {
+      kind: "parent_funding" as const,
+      needId: "empty-rd-funding",
+      gap: 2,
+      actionIds: [basicCredit.actionId, nightShift.actionId],
+      urgentForScore: false,
+      evidenceCode: "empty_rd_funding_test",
+    };
+    const corpContext = context(
+      [basicCredit, nightShift],
+      { economyNeeds: [fundingNeed] },
+      { credits: 0, clicks: 2 },
+    );
+    corpContext.input.playerView.own.stackOrRdCount = 0;
+    corpContext.input.legalActions.find(
+      (action) => action.actionId === nightShift.actionId,
+    )!.payload = { gainCreditsAmount: 2, drawCardsAmount: 1 };
+    const route = assessCorpEconomyFundingRoute(corpContext, fundingNeed);
+    const instance = instantiatePlanProposal(
+      economy.discover(corpContext)[0]!,
+      10,
+    );
+
+    expect(route).toMatchObject({
+      status: "covered_guaranteed",
+      reliability: "guaranteed",
+      headActionId: "basic-credit",
+    });
+    expect(
+      economy
+        .materialize(instance, {} as never, corpContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["basic-credit"]);
+  });
+
   it("advances a finite reserve by its best guaranteed one-action tranche when the final target is not reachable this turn", () => {
     const economy = corpModule("corp.economy");
     const basicCredit = candidate(

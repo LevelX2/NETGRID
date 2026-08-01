@@ -59,11 +59,85 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       "corp.economy",
       "corp.defend_servers",
     ]);
+    expect(line.nodes.map((node) => node.planInstanceId)).toEqual([
+      "plan:corp.economy:defense-reserve%3Ard%3Aice-1",
+      "plan:corp.defend_servers:server-defense-portfolio",
+    ]);
+    expect(line.evidenceCodes).toContain(
+      "defense_funding_support_instance:plan:corp.economy:defense-reserve%3Ard%3Aice-1",
+    );
     expect(
       line.valueClaims.filter(
         (claim) => claim.ownerModuleId === "corp.defend_servers",
       ),
     ).toHaveLength(1);
+  });
+
+  it("does not create a Defense funding head from a draw operation when R&D is empty", () => {
+    const input = decisionInput();
+    input.playerView.own.stackOrRdCount = 0;
+    input.legalActions = [
+      {
+        actionId: "gain-credits",
+        side: "corp",
+        type: "play_operation",
+        label: "Night Shift",
+        source: "night-shift-card",
+        timingPoint: "corp_action.main",
+        costs: [{ clicks: 1 }],
+        targetRequirements: [],
+        choiceRequirements: [],
+        visibility: "private_to_actor",
+        expiresAtStateVersion: 30,
+        payload: { gainCreditsAmount: 2, drawCardsAmount: 1 },
+      },
+    ];
+    input.playerView.legalActions = structuredClone(input.legalActions);
+    const defense = defenseSignal({
+      disposition: "funding_only",
+      effect: "progress",
+      fundingGap: 2,
+    });
+    const economy: CorpEconomyNeedSignal = {
+      kind: "parent_funding",
+      needId: "defense-reserve:rd:ice-1",
+      gap: 2,
+      actionIds: ["gain-credits"],
+      immediateDefenseConversion: true,
+      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentNeedId: defense.defenseId,
+      incrementalDefenseReserve: {
+        targetCredits: 7,
+        serverId: "rd",
+        iceInstanceId: "ice-1",
+      },
+      urgentForScore: false,
+      evidenceCode: defense.evidenceCode,
+    };
+    const nightShift = economyCandidate(2);
+    nightShift.actionType = "play_operation";
+    nightShift.economyProjection = {
+      ...nightShift.economyProjection!,
+      cardsDrawn: 1,
+      cardsConsumed: 1,
+      netHandDelta: 0,
+    };
+
+    const slice = buildSlice(
+      input,
+      [defense],
+      [economy],
+      [nightShift, installCandidate("install-rd", "ice-1", "rd")],
+    );
+
+    expect(
+      slice.lines.some((line) => line.currentActionId === "gain-credits"),
+    ).toBe(false);
+    expect(
+      slice.lines
+        .flatMap((line) => line.nodes)
+        .some((node) => node.ownerModuleId === "corp.economy"),
+    ).toBe(false);
   });
 
   it("admits a capped bluff on an empty central only with a credible later-rez horizon", () => {

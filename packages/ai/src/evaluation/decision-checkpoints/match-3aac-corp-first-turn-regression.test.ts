@@ -72,6 +72,33 @@ describe("match 3aac Corp regression evidence", () => {
         `plan_assessment_evidence:corp_defense_exact_route_funding_required:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0`,
       ]),
     );
+    expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
+      selectionAuthority: "turn_plan_commitment",
+      rootPlanInstanceId: defenseRootInstanceId,
+      leafExecutorInstanceId: fundingLeafInstanceId,
+      route: {
+        planInstanceId: fundingLeafInstanceId,
+        actionId: result.selectedAction?.actionId,
+      },
+      turnPlanning: {
+        mode: "cutover",
+        selectedLine: {
+          phases: [
+            expect.objectContaining({
+              rootPlanInstanceId: defenseRootInstanceId,
+              rootModuleId: "corp.defend_servers",
+              rootProvenance: "admitted_support",
+              supportBindings: [
+                expect.objectContaining({
+                  planInstanceId: fundingLeafInstanceId,
+                  parentNeedId: defenseNeedId,
+                }),
+              ],
+            }),
+          ],
+        },
+      },
+    });
   });
 
   it("rejects a three-action purge for one visible virus counter", () => {

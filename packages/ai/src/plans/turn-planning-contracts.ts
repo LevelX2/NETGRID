@@ -168,6 +168,10 @@ export type TurnPlanningHeadCandidate = {
   side: Side;
   moduleId: PlanModuleId;
   rootPlanInstanceId: string;
+  rootPlanModuleId?: PlanModuleId;
+  executorPlanInstanceId?: string;
+  executorParentPlanInstanceId?: string;
+  executorParentNeedId?: string;
   nextMilestoneId: string;
   stepFingerprint: string;
   horizonCapability: PlanModuleHorizonCapability;

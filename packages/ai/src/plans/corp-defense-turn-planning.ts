@@ -9,7 +9,9 @@ import type {
   CorpScoreProtectionInstallSignal,
   CorpScoreProtectionStagingInstallSignal,
 } from "./corp-core-plan-modules";
+import { corpEconomyCandidateHasExecutablePayload } from "./corp-core-plan-modules";
 import type { PriorityClass } from "./plan-assessment";
+import { planInstanceIdForProposal } from "./plan-instance";
 import { assessFundingOnlyIceStaging } from "../runtime/corp-defense-staging-policy";
 export { assessFundingOnlyIceStaging } from "../runtime/corp-defense-staging-policy";
 import {
@@ -40,6 +42,7 @@ export type CorpDefenseTurnPlanningLine = {
   nodes: Array<{
     nodeId: string;
     ownerModuleId: "corp.defend_servers" | "corp.economy";
+    planInstanceId: string;
     invocation: CanonicalLegalActionInvocation;
     projectedOnly: boolean;
   }>;
@@ -125,22 +128,17 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
     }
 
     const fundingNeed = exactFundingNeed(
+      params.input,
       signal,
       params.economyNeeds,
       params.candidates,
     );
     if (fundingNeed) {
       return [
-        createDefenseLine(
-          params,
-          signal,
-          installCandidate,
-          fundingNeed.candidate,
-          {
-            disposition: "fund_then_install",
-            bluffValue: 0,
-          },
-        ),
+        createDefenseLine(params, signal, installCandidate, fundingNeed, {
+          disposition: "fund_then_install",
+          bluffValue: 0,
+        }),
       ];
     }
     const staging = assessFundingOnlyIceStaging({
@@ -148,6 +146,7 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
       signal,
       productiveAlternativeExists: productiveExists,
       fundingAlternativeExists: hasExactFundingAlternative(
+        params.input,
         signal,
         params.economyNeeds,
         params.candidates,
@@ -294,6 +293,7 @@ function exactInstallCandidate(
 }
 
 function exactFundingNeed(
+  input: AiDecisionInput,
   signal: CorpGenericDefenseSignal,
   economyNeeds: readonly CorpEconomyNeedSignal[],
   candidates: readonly ActionSemanticCandidate[],
@@ -334,6 +334,7 @@ function exactFundingNeed(
         entry.economyProjection?.kind === "immediate_liquid" &&
         entry.economyProjection.timing === "immediate" &&
         entry.economyProjection.creditRestriction === "general" &&
+        corpEconomyCandidateHasExecutablePayload(input, entry) &&
         (entry.economyProjection?.netLiquidCreditGain ?? 0) >= funding.gap,
     )
     .sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
@@ -341,6 +342,7 @@ function exactFundingNeed(
 }
 
 function hasExactFundingAlternative(
+  input: AiDecisionInput,
   signal: CorpGenericDefenseSignal,
   economyNeeds: readonly CorpEconomyNeedSignal[],
   candidates: readonly ActionSemanticCandidate[],
@@ -373,6 +375,7 @@ function hasExactFundingAlternative(
           candidate.economyProjection?.kind === "immediate_liquid" &&
           candidate.economyProjection.timing === "immediate" &&
           candidate.economyProjection.creditRestriction === "general" &&
+          corpEconomyCandidateHasExecutablePayload(input, candidate) &&
           (candidate.economyProjection.netLiquidCreditGain ?? 0) > 0,
       ),
     ) === true
@@ -386,19 +389,39 @@ function createDefenseLine(
   },
   signal: CorpGenericDefenseSignal,
   install: ActionSemanticCandidate,
-  funding: ActionSemanticCandidate | undefined,
+  funding:
+    | {
+        signal: Extract<CorpEconomyNeedSignal, { kind: "parent_funding" }>;
+        candidate: ActionSemanticCandidate;
+      }
+    | undefined,
   classification: {
     disposition: CorpDefenseLineDisposition;
     bluffValue: number;
   },
 ): CorpDefenseTurnPlanningLine {
   const route = signal.installRoute!;
-  const ordered = funding ? [funding, install] : [install];
+  const fundingCandidate = funding?.candidate;
+  const ordered = fundingCandidate ? [fundingCandidate, install] : [install];
+  const defensePlanInstanceId = planInstanceIdForProposal({
+    moduleId: "corp.defend_servers",
+    dedupeKey: "server-defense-portfolio",
+  });
+  const fundingPlanInstanceId = funding
+    ? planInstanceIdForProposal({
+        moduleId: "corp.economy",
+        dedupeKey: funding.signal.needId,
+      })
+    : undefined;
   const nodes = ordered.map((candidate, index) => {
     const ownerModuleId =
-      candidate === funding
+      candidate === fundingCandidate
         ? ("corp.economy" as const)
         : ("corp.defend_servers" as const);
+    const planInstanceId =
+      candidate === fundingCandidate
+        ? fundingPlanInstanceId!
+        : defensePlanInstanceId;
     const invocation = invocationFor(params.stateIdentity, candidate);
     return {
       nodeId: turnPlanningFingerprint("defense-line-node", {
@@ -407,11 +430,13 @@ function createDefenseLine(
         invocationKey: invocation.invocationKey,
       }),
       ownerModuleId,
+      planInstanceId,
       invocation,
       projectedOnly: index > 0,
     };
   });
-  const fundingGain = funding?.economyProjection?.netLiquidCreditGain ?? 0;
+  const fundingGain =
+    fundingCandidate?.economyProjection?.netLiquidCreditGain ?? 0;
   const fundingGapBefore =
     route.projection.after.minimumAdditionalCreditsToSatisfy ??
     route.rezFundingGap ??
@@ -542,6 +567,9 @@ function createDefenseLine(
       ...(route.progressKind
         ? [`defense_progress_kind:${route.progressKind}`]
         : []),
+      ...(fundingPlanInstanceId
+        ? [`defense_funding_support_instance:${fundingPlanInstanceId}`]
+        : []),
       "ice_decision_owned_by_corp_defend_servers",
     ],
   };
@@ -662,6 +690,10 @@ function createScoreProtectionStagingLine(
       {
         nodeId,
         ownerModuleId: "corp.defend_servers",
+        planInstanceId: planInstanceIdForProposal({
+          moduleId: "corp.defend_servers",
+          dedupeKey: "server-defense-portfolio",
+        }),
         invocation,
         projectedOnly: false,
       },
@@ -818,6 +850,10 @@ function createScoreProtectionDrawLine(
       {
         nodeId,
         ownerModuleId: "corp.defend_servers",
+        planInstanceId: planInstanceIdForProposal({
+          moduleId: "corp.defend_servers",
+          dedupeKey: "server-defense-portfolio",
+        }),
         invocation,
         projectedOnly: false,
       },

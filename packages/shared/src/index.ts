@@ -3128,6 +3128,7 @@ export type AiTurnPlanningDebug = {
     candidateId: string;
     moduleId: string;
     rootPlanInstanceId: string;
+    executorPlanInstanceId?: string;
     actionId: string;
     semanticActionType: string;
     invocationKey: string;

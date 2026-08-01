@@ -50,6 +50,7 @@ import {
   corpGenericDefensePriorityClass,
   corpEconomyPriorityClass,
   corpEconomyActionIsOwned,
+  corpEconomyCandidateHasExecutablePayload,
   createCorpCorePlanModules,
   immediateCorpLiquidCreditGain,
   type CorpCorePlanDomain,
@@ -7183,7 +7184,7 @@ function corpEmptyRdDrawOperationDispositionEvidence(
   candidate: ActionSemanticCandidate,
 ): string | undefined {
   if (
-    input.playerView.own.stackOrRdCount > 0 ||
+    corpEconomyCandidateHasExecutablePayload(input, candidate) ||
     candidate.actionType !== "play_operation" ||
     !candidate.sourceDefinitionId ||
     CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId]?.type !== "operation"
@@ -8312,7 +8313,11 @@ function buildCorpDomain(
     );
   const remoteProjects: CorpCorePlanDomain["remoteProjects"] = [];
   const immediateFundingActionIds = candidates
-    .filter(corpEconomyActionIsOwned)
+    .filter(
+      (candidate) =>
+        corpEconomyActionIsOwned(candidate) &&
+        corpEconomyCandidateHasExecutablePayload(input, candidate),
+    )
     .map((candidate) => candidate.actionId);
   const punishCampaigns = uniqueBy(
     punishSignals(input, candidates, scorelineFeasibility, previous),
