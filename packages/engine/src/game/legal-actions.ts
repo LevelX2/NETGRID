@@ -138,7 +138,7 @@ function buildRunnerActionsForCostPenaltySupportWindow(
   return [];
 }
 
-export function buildLegalActions(
+function buildLegalActionsUnchecked(
   host: LegalActionGenerationHost,
   side: Side,
 ): LegalAction[] {
@@ -296,4 +296,24 @@ export function buildLegalActions(
           .legalActions
       : [];
   return [];
+}
+
+export function buildLegalActions(
+  host: LegalActionGenerationHost,
+  side: Side,
+): LegalAction[] {
+  const actions = buildLegalActionsUnchecked(host, side);
+  const seenActionIds = new Set<string>();
+  const duplicateActionIds = new Set<string>();
+  for (const action of actions) {
+    if (seenActionIds.has(action.actionId))
+      duplicateActionIds.add(action.actionId);
+    seenActionIds.add(action.actionId);
+  }
+  if (duplicateActionIds.size > 0) {
+    throw new Error(
+      `Doppelte LegalAction-ID fuer ${side} bei StateVersion ${host.state.stateVersion}: ${[...duplicateActionIds].sort().join(", ")}`,
+    );
+  }
+  return actions;
 }

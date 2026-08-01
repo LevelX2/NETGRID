@@ -140,6 +140,7 @@ export function buildHqIceSwapRunActions(
             targetIceId,
             serverId: server.id,
             iceIndex,
+            targetIceIndex: iceIndex,
             v1918UpgradeAbility: "hq_ice_swap",
             hiddenZoneBarrier: true,
             hiddenZoneAction: "hq_ice_swap_choice",
@@ -638,7 +639,8 @@ export function startHqIceSwapChoice(
   const targetIceId = String(
     legalAction.payload?.targetIceId ?? "",
   ) as CardInstanceId;
-  const iceIndex = Number(legalAction.payload?.iceIndex ?? -1);
+  const iceIndex = Number(legalAction.payload?.targetIceIndex ?? -1);
+  const legacyIceIndex = Number(legalAction.payload?.iceIndex ?? -1);
   if (serverId !== run.attackedServerId)
     throw new Error("HQ Ice Swap ist nicht an diesen Run gebunden.");
   const server = host.servers.mustServer(serverId);
@@ -652,6 +654,7 @@ export function startHqIceSwapChoice(
   if (
     !Number.isInteger(iceIndex) ||
     iceIndex < 0 ||
+    legacyIceIndex !== iceIndex ||
     server.ice[iceIndex] !== targetIceId
   )
     throw new Error("Das HQ-Ice-Swap-ICE-Ziel ist ungueltig.");

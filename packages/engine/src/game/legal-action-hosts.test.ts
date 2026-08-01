@@ -167,7 +167,9 @@ describe("legal-action-hosts", () => {
       timingWindowId: "purge_window_1",
       timingFamily: "corp_start_of_turn_between_effects",
     });
-    expect(composition.buildCorpForgoActionDebtAction(currentState)).toMatchObject({
+    expect(
+      composition.buildCorpForgoActionDebtAction(currentState),
+    ).toMatchObject({
       type: "forgo_action",
       costs: [{ clicks: 1 }],
       payload: {
@@ -180,9 +182,38 @@ describe("legal-action-hosts", () => {
   it("configures the LegalActions facade with the generated host", () => {
     configureLegalActionHostComposition(hostFor());
 
-    expect(getLegalActions(state(), "corp").map((action) => action.type)).toEqual([
-      "mandatory_draw",
-    ]);
+    expect(
+      getLegalActions(state(), "corp").map((action) => action.type),
+    ).toEqual(["mandatory_draw"]);
+  });
+
+  it("fails closed when the central LegalActions boundary receives duplicate action IDs", () => {
+    const currentState = {
+      ...state(),
+      activeSide: "runner",
+      phase: "action",
+      timingPoint: "runner_action.main",
+    } as unknown as GameState;
+    const duplicateAction = {
+      ...legalAction("trigger_ability"),
+      actionId: "corp.duplicate_action",
+      timingPoint: "runner_action.main",
+    } as LegalAction;
+    const host = hostFor();
+    host.actions.corpRunnerActionPaidWindowActions = () => [
+      duplicateAction,
+      { ...duplicateAction, label: "duplicate variant" },
+    ];
+    const composition = createLegalActionHostComposition(host);
+
+    expect(() =>
+      buildLegalActions(
+        composition.legalActionGenerationHost(currentState),
+        "corp",
+      ),
+    ).toThrow(
+      "Doppelte LegalAction-ID fuer corp bei StateVersion 4: corp.duplicate_action",
+    );
   });
 
   it("fails clearly when a required host group is missing", () => {
