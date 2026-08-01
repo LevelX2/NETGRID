@@ -2432,6 +2432,14 @@ export type VisibleCorpIceRezResourceExchangeQuote =
           kind: "trash_at_run_end_after_break";
           evidenceSource: "engine_icebreaker_ability";
         }>;
+        randomConsequences?: Array<{
+          cardId: CardInstanceId;
+          definitionId: CardDefinitionId;
+          kind: "post_encounter_self_trash_check";
+          numerator: number;
+          denominator: number;
+          evidenceSource: "engine_icebreaker_ability";
+        }>;
       };
     };
 

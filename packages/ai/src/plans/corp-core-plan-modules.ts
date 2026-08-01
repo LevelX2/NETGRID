@@ -4316,7 +4316,29 @@ function validExactIceRezRoute(value: unknown): boolean {
     knownNonNegativeInteger(resourceExchange.runnerBreakCredits) &&
     knownNonNegativeInteger(resourceExchange.runnerBreakUses) &&
     nonEmptyString(resourceExchange.runnerBreakerInstanceId) &&
-    nonEmptyString(resourceExchange.runnerBreakerDefinitionId);
+    nonEmptyString(resourceExchange.runnerBreakerDefinitionId) &&
+    Array.isArray(resourceExchange.runnerConsumedCardInstanceIds) &&
+    resourceExchange.runnerConsumedCardInstanceIds.every(nonEmptyString) &&
+    (resourceExchange.runnerRandomConsequences === undefined ||
+      (Array.isArray(resourceExchange.runnerRandomConsequences) &&
+        resourceExchange.runnerRandomConsequences.every((entry) => {
+          if (!entry || typeof entry !== "object") return false;
+          const consequence = entry as Record<string, unknown>;
+          return (
+            consequence.kind === "post_encounter_self_trash_check" &&
+            nonEmptyString(consequence.cardId) &&
+            nonEmptyString(consequence.definitionId) &&
+            knownNonNegativeInteger(consequence.numerator) &&
+            (consequence.numerator as number) > 0 &&
+            knownNonNegativeInteger(consequence.denominator) &&
+            (consequence.denominator as number) >=
+              (consequence.numerator as number)
+          );
+        })));
+  const hasExactMarginalDefenseThreat =
+    route.routeKind === "qualitative_encounter_defense" &&
+    (route.marginalDefenseThreat === "visible_agenda_remote" ||
+      route.marginalDefenseThreat === "terminal_central_access");
   return (
     nonEmptyString(route.actionId) &&
     nonEmptyString(route.sourceCardInstanceId) &&
@@ -4328,7 +4350,9 @@ function validExactIceRezRoute(value: unknown): boolean {
     quote.targetServerId === route.targetServerId &&
     knownNonNegativeInteger(quote.expiresAtStateVersion) &&
     knownNonNegativeInteger(quote.finalCredits) &&
-    (hasKnownHolisticAssessment || hasExactResourceExchange) &&
+    (hasKnownHolisticAssessment ||
+      hasExactResourceExchange ||
+      hasExactMarginalDefenseThreat) &&
     (route.effect === "progress" || route.effect === "satisfied") &&
     knownNonNegativeInteger(route.totalRezCredits) &&
     quote.finalCredits === route.totalRezCredits

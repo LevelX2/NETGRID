@@ -19,7 +19,11 @@ export type RuntimeIcebreakerSpecialEffect =
       maxFailureDamage: 3;
       oncePerSubroutinePerEncounter: true;
     }
-  | { kind: "post_encounter_self_trash_check" }
+  | {
+      kind: "post_encounter_self_trash_check";
+      trashDieResults: readonly [1];
+      dieSides: 6;
+    }
   | { kind: "strength_bonus_per_successful_break_this_run" }
   | { kind: "run_end_add_counter_if_used_on_last_fort" }
   | { kind: "once_per_run_break_tag_and_all_stealth_loss" }
@@ -51,7 +55,10 @@ function breakMatcherFields(
   matcher: CardIcebreakerBreakMatcherImplementation,
 ): Pick<
   RuntimeIcebreakerAbility,
-  "iceSubtype" | "iceSubtypes" | "selectedIceSubtypeFromBreaker" | "subroutineBreakTags"
+  | "iceSubtype"
+  | "iceSubtypes"
+  | "selectedIceSubtypeFromBreaker"
+  | "subroutineBreakTags"
 > {
   if (matcher.kind === "any") return {};
   if (matcher.kind === "ice_subtype") return { iceSubtype: matcher.subtype };
@@ -80,7 +87,13 @@ function specialEffectsForImplementation(
         },
       ];
     case "bartmoss_post_encounter_self_trash_check":
-      return [{ kind: "post_encounter_self_trash_check" }];
+      return [
+        {
+          kind: "post_encounter_self_trash_check",
+          trashDieResults: [1],
+          dieSides: 6,
+        },
+      ];
     case "snowball_run_strength_per_successful_break":
       return [{ kind: "strength_bonus_per_successful_break_this_run" }];
     case "dupre_strength_counter_and_last_fort":
@@ -100,7 +113,9 @@ export function icebreakerAbilityHasSpecialEffect(
   ability: RuntimeIcebreakerAbility | undefined,
   kind: RuntimeIcebreakerSpecialEffect["kind"],
 ): boolean {
-  return ability?.specialEffects?.some((effect) => effect.kind === kind) ?? false;
+  return (
+    ability?.specialEffects?.some((effect) => effect.kind === kind) ?? false
+  );
 }
 
 function abilityForImplementation(
@@ -137,7 +152,7 @@ function abilityForImplementation(
     count:
       ability.breakTarget === "all_matching_subroutines"
         ? Number.MAX_SAFE_INTEGER
-        : ability.count ?? 1,
+        : (ability.count ?? 1),
     timingPoint: "run.encounter_ice",
     ...(ability.breakTarget === "all_matching_subroutines"
       ? { breakAllMatchingSubroutines: true }
@@ -161,8 +176,9 @@ function abilityForImplementation(
 export function icebreakerAbilitiesForDefinition(
   definition: CardDefinition,
 ): readonly RuntimeIcebreakerAbility[] {
-  const implementation =
-    cardImplementationForDefinitionId(definition.id)?.icebreakerAbilities;
+  const implementation = cardImplementationForDefinitionId(
+    definition.id,
+  )?.icebreakerAbilities;
   if (implementation?.length)
     return implementation.map((ability, index) =>
       abilityForImplementation(definition, ability, index),

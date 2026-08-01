@@ -1653,6 +1653,18 @@ function sanitizeInstalledCorpIceRezResourceExchangeQuote(
         card.evidenceSource !== "engine_icebreaker_ability" ||
         card.cardId !== quote.runnerBreak.breakerCardId ||
         card.definitionId !== quote.runnerBreak.breakerDefinitionId,
+    ) ||
+    (quote.runnerBreak.randomConsequences ?? []).some(
+      (consequence) =>
+        consequence.kind !== "post_encounter_self_trash_check" ||
+        consequence.evidenceSource !== "engine_icebreaker_ability" ||
+        consequence.cardId !== quote.runnerBreak.breakerCardId ||
+        consequence.definitionId !== quote.runnerBreak.breakerDefinitionId ||
+        !isNonNegativeSafeInteger(consequence.numerator) ||
+        consequence.numerator <= 0 ||
+        !isNonNegativeSafeInteger(consequence.denominator) ||
+        consequence.denominator <= 0 ||
+        consequence.numerator > consequence.denominator,
     )
   ) {
     return { ...binding, complete: false };
@@ -1677,6 +1689,20 @@ function sanitizeInstalledCorpIceRezResourceExchangeQuote(
         kind: "trash_at_run_end_after_break" as const,
         evidenceSource: "engine_icebreaker_ability" as const,
       })),
+      ...((quote.runnerBreak.randomConsequences?.length ?? 0) > 0
+        ? {
+            randomConsequences: quote.runnerBreak.randomConsequences!.map(
+              (consequence) => ({
+                cardId: consequence.cardId,
+                definitionId: consequence.definitionId,
+                kind: "post_encounter_self_trash_check" as const,
+                numerator: consequence.numerator,
+                denominator: consequence.denominator,
+                evidenceSource: "engine_icebreaker_ability" as const,
+              }),
+            ),
+          }
+        : {}),
     },
   };
 }

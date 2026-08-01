@@ -5,6 +5,7 @@ import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-e
 
 const FILTER = "onr_v1_244_filter";
 const RENT_I_CON = "onr_classic_031_rent-i-con";
+const BARTMOSS = "onr_v1_005_bartmoss-memorial-icebreaker";
 const VEWY_VEWY_QUIET = "onr_v1_071_vewy-vewy-quiet";
 const CHIBA_BANK_ACCOUNT = "onr_proteus_133_chiba-bank-account";
 const FILTER_ID = "resource_exchange_filter" as CardInstanceId;
@@ -59,6 +60,32 @@ describe("visible Corp ICE rez resource exchange quote", () => {
     expect(
       visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),
     ).toMatchObject({ complete: true });
+  });
+
+  it("certifies a deterministic break cost with a separately quoted random breaker consequence", () => {
+    const { state, visibleIce } = resourceExchangeState();
+    state.cardInstances[RENT_I_CON_ID]!.definitionId = BARTMOSS;
+
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),
+    ).toMatchObject({
+      complete: true,
+      runnerBreak: {
+        breakerCardId: RENT_I_CON_ID,
+        breakerDefinitionId: BARTMOSS,
+        requiredCredits: 1,
+        randomConsequences: [
+          {
+            cardId: RENT_I_CON_ID,
+            definitionId: BARTMOSS,
+            kind: "post_encounter_self_trash_check",
+            numerator: 1,
+            denominator: 6,
+            evidenceSource: "engine_icebreaker_ability",
+          },
+        ],
+      },
+    });
   });
 
   it("fails closed when the requested ICE is not the exact approached layer", () => {

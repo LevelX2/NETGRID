@@ -9,6 +9,7 @@ import {
   compareExactProbabilities,
   type KnownCorpScoreProtectionAssessment,
 } from "./corp-score-protection-assessment";
+import { readKnownCorpCentralAgendaThreat } from "./corp-central-defense-facts-adapter";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 
 export type CorpExactIceRezRouteProjection = Readonly<{
@@ -25,6 +26,7 @@ export type CorpExactIceRezRouteProjection = Readonly<{
     | "known_access_path_tax"
     | "free_persistent_defense"
     | "qualitative_encounter_defense";
+  marginalDefenseThreat?: "visible_agenda_remote" | "terminal_central_access";
   knownAccessPathTax?: number;
   resourceExchange?: Readonly<{
     runnerRequiredCredits: number;
@@ -37,6 +39,13 @@ export type CorpExactIceRezRouteProjection = Readonly<{
     runnerBreakerInstanceId: string;
     runnerBreakerDefinitionId: string;
     runnerConsumedCardInstanceIds: readonly string[];
+    runnerRandomConsequences?: readonly Readonly<{
+      cardId: string;
+      definitionId: string;
+      kind: "post_encounter_self_trash_check";
+      numerator: number;
+      denominator: number;
+    }>[];
   }>;
   effect: "progress" | "satisfied";
   totalRezCredits: number;
@@ -158,7 +167,10 @@ export function projectExactCorpIceRezRoute(params: {
     ...(assessmentsKnown ? { before: knownBefore, after: knownAfter } : {}),
     totalRezCredits,
   });
-  if (!assessmentsKnown && !resourceExchange) return undefined;
+  const marginalDefenseThreat = currentRunMarginalDefenseThreat(
+    input,
+    targetServerId,
+  );
   if (assessmentsKnown && probabilityComparison === undefined) return undefined;
   const freePersistentDefense =
     probabilityComparison === 0 &&
@@ -186,7 +198,8 @@ export function projectExactCorpIceRezRoute(params: {
         })
       : undefined;
   const qualitativeEncounterDefense =
-    probabilityComparison === 0 &&
+    (probabilityComparison === 0 ||
+      (!assessmentsKnown && marginalDefenseThreat !== undefined)) &&
     !resourceExchange &&
     !freePersistentDefense &&
     knownAccessPathTax === undefined &&
@@ -195,6 +208,8 @@ export function projectExactCorpIceRezRoute(params: {
       sourceCard,
       targetServerId,
     });
+  if (!assessmentsKnown && !resourceExchange && !qualitativeEncounterDefense)
+    return undefined;
   if (
     probabilityComparison !== -1 &&
     !resourceExchange &&
@@ -210,6 +225,7 @@ export function projectExactCorpIceRezRoute(params: {
     sourceDefinitionId: sourceCard.definitionId!,
     targetServerId,
     quote,
+    ...(marginalDefenseThreat ? { marginalDefenseThreat } : {}),
     ...(assessmentsKnown ? { before: knownBefore, after: knownAfter } : {}),
     routeKind: resourceExchange
       ? "exact_resource_exchange"
@@ -353,7 +369,9 @@ function readExactCurrentRunResourceExchange(params: {
         quote.runnerBreak.requiredCredits < totalRezCredits ||
         (quote.runnerBreak.requiredCredits === totalRezCredits &&
           quote.runnerBreak.requiredCredits <
-            input.playerView.opponent.credits)))
+            input.playerView.opponent.credits &&
+          currentRunMarginalDefenseThreat(input, targetServerId) ===
+            undefined)))
   ) {
     return undefined;
   }
@@ -387,6 +405,23 @@ function readExactCurrentRunResourceExchange(params: {
     }
     consumedCardInstanceIds.push(consumed.cardId);
   }
+  const randomConsequences = quote.runnerBreak.randomConsequences ?? [];
+  if (
+    randomConsequences.some(
+      (consequence) =>
+        consequence.kind !== "post_encounter_self_trash_check" ||
+        consequence.evidenceSource !== "engine_icebreaker_ability" ||
+        consequence.cardId !== quote.runnerBreak.breakerCardId ||
+        consequence.definitionId !== quote.runnerBreak.breakerDefinitionId ||
+        !nonNegativeSafeInteger(consequence.numerator) ||
+        consequence.numerator <= 0 ||
+        !nonNegativeSafeInteger(consequence.denominator) ||
+        consequence.denominator <= 0 ||
+        consequence.numerator > consequence.denominator,
+    )
+  ) {
+    return undefined;
+  }
   return {
     runnerRequiredCredits: quote.runnerBreak.requiredCredits,
     runnerPumpCredits: quote.runnerBreak.pumpCredits,
@@ -399,7 +434,42 @@ function readExactCurrentRunResourceExchange(params: {
     runnerBreakerInstanceId: quote.runnerBreak.breakerCardId,
     runnerBreakerDefinitionId: quote.runnerBreak.breakerDefinitionId,
     runnerConsumedCardInstanceIds: consumedCardInstanceIds,
+    runnerRandomConsequences: randomConsequences.map((consequence) => ({
+      cardId: consequence.cardId,
+      definitionId: consequence.definitionId,
+      kind: consequence.kind,
+      numerator: consequence.numerator,
+      denominator: consequence.denominator,
+    })),
   };
+}
+
+/**
+ * A marginal but exact current-run defense becomes material when the access
+ * itself can immediately convert a visible agenda remote or a central
+ * matchpoint exposure. This remains server- and state-bound; it does not
+ * promote ordinary equal-cost exchanges elsewhere.
+ */
+function currentRunMarginalDefenseThreat(
+  input: AiDecisionInput,
+  targetServerId: string,
+): "visible_agenda_remote" | "terminal_central_access" | undefined {
+  if (input.playerView.run?.attackedServerId !== targetServerId)
+    return undefined;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  if (!server) return undefined;
+  if (targetServerId.startsWith("remote_")) {
+    return server.root.some((card) => card.known && card.type === "agenda")
+      ? "visible_agenda_remote"
+      : undefined;
+  }
+  if (targetServerId !== "hq" && targetServerId !== "rd") return undefined;
+  return readKnownCorpCentralAgendaThreat({ input, serverId: targetServerId })
+    ?.threat === "terminal"
+    ? "terminal_central_access"
+    : undefined;
 }
 
 export function readExactInstalledCorpIceRezQuote(params: {

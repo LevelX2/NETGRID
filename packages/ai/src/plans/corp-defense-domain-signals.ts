@@ -171,15 +171,15 @@ export function corpQualitativeIceStagingSignal(
     (candidateServer) => candidateServer.id === serverId,
   );
   if (!server) return undefined;
-  const unknownAllocationTerminalSecondLayer =
-    serverId === "rd" &&
-    centralAllocation?.status !== "known" &&
-    server.ice.length === 1 &&
+  const terminalCentralAdditionalLayer =
+    isCentral &&
+    server.ice.length >= 1 &&
+    server.ice.length < 3 &&
     readKnownCorpCentralAgendaThreat({
       input,
       serverId: serverId as "hq" | "rd",
     })?.threat === "terminal";
-  if (server.ice.length > 0 && !unknownAllocationTerminalSecondLayer) {
+  if (server.ice.length > 0 && !terminalCentralAdditionalLayer) {
     return undefined;
   }
   const bothCentralsEmpty = ["hq", "rd"].every(
@@ -190,7 +190,7 @@ export function corpQualitativeIceStagingSignal(
   );
   if (isCentral) {
     if (
-      !unknownAllocationTerminalSecondLayer &&
+      !terminalCentralAdditionalLayer &&
       (centralAllocation?.status === "known"
         ? centralAllocation.selectedServerId !== serverId
         : !bothCentralsEmpty)
@@ -250,7 +250,7 @@ export function corpQualitativeIceStagingSignal(
     input.playerView.own.credits - candidate.costProfile.creditCost;
   const rezFundingGap = Math.max(0, rezCredits - creditsAfterInstall);
   if (rezFundingGap > 3) return undefined;
-  const centralPressure = unknownAllocationTerminalSecondLayer
+  const centralPressure = terminalCentralAdditionalLayer
     ? "terminal"
     : isCentral && centralAllocation?.status === "known"
       ? centralAllocation.evidence[serverId].threat
@@ -267,13 +267,13 @@ export function corpQualitativeIceStagingSignal(
       ? { centralPressure }
       : {}),
     immediateInstallSupport: true,
-    value: unknownAllocationTerminalSecondLayer
+    value: terminalCentralAdditionalLayer
       ? 18
       : sourceDefense.hasImmediateStop
         ? 11
         : 9,
-    evidenceCode: unknownAllocationTerminalSecondLayer
-      ? `corp_terminal_central_second_layer_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`
+    evidenceCode: terminalCentralAdditionalLayer
+      ? `corp_terminal_central_additional_layer_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`
       : `corp_qualitative_ice_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`,
   };
 }

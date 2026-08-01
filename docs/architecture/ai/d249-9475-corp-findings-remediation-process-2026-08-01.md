@@ -115,6 +115,24 @@ Aktueller Nachweis auf dem unveränderten Code vor dem ersten Fix:
   nur Schutz-, Effekt-, Quote-, Rig-, Exposure- und Ressourcenfacts.
 - Commit: `fix(ai): improve quoted defense conversion`.
 
+Umgesetzt und fokussiert verifiziert:
+
+- ein erstes bis drittes Central-ICE kann bei einer engine-zertifizierten
+  terminalen Zugriffsexposition als zusätzliche Schicht gestaged werden;
+  tiefere Schichten, normale nichtterminale Situationen und fehlende
+  Effekt-/Kostenquotes bleiben ausgeschlossen;
+- ein exakter aktueller Breaker-Creditbedarf kann getrennt von einem
+  bekannten zufälligen Post-Encounter-Nachteil quotiert werden. Die Quote
+  stammt aus der deklarativen Breaker-Effektsemantik der Engine und enthält
+  Wahrscheinlichkeit und betroffene sichtbare Instanz;
+- ein marginaler exakter Reztausch wird nur für ein aktuell angegriffenes
+  sichtbares Agenda-Remote oder terminal exponiertes HQ/R&D aufgewertet.
+  Der bestehende Gegenfall mit verbleibenden Runner-Credits außerhalb dieser
+  Threats bleibt abgelehnt;
+- d249 D7, 9475 D43/D47 und 9475 D52 sind unverändert grün; der ausgewählte
+  Owner bleibt `corp.defend_servers` mit `allocate_server_defense`;
+- fokussiert grün: `68/68` Tests sowie Shared-, Engine- und AI-Typecheck.
+
 ### P3 – Rote Score-Fortsetzung
 
 - Ausschließlich bei rotem D9-Vertrag die vorhandene

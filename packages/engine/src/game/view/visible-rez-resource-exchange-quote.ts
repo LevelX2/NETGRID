@@ -262,7 +262,9 @@ function quoteBreakAbility(params: {
     ability.onUseEndRun ||
     ability.postBreakStealthLoss !== undefined ||
     ability.specialEffects?.some(
-      (effect) => effect.kind !== "run_end_trash_source_if_used",
+      (effect) =>
+        effect.kind !== "run_end_trash_source_if_used" &&
+        effect.kind !== "post_encounter_self_trash_check",
     ) ||
     !validCreditCost(ability.cost.credits) ||
     !nonNegativeSafeInteger(breakCount) ||
@@ -323,6 +325,24 @@ function quoteBreakAbility(params: {
             },
           ]
         : [],
+      ...(ability.specialEffects?.some(
+        (effect) => effect.kind === "post_encounter_self_trash_check",
+      )
+        ? {
+            randomConsequences: ability.specialEffects
+              .filter(
+                (effect) => effect.kind === "post_encounter_self_trash_check",
+              )
+              .map((effect) => ({
+                cardId: breaker.instanceId,
+                definitionId: breaker.definitionId!,
+                kind: effect.kind,
+                numerator: effect.trashDieResults.length,
+                denominator: effect.dieSides,
+                evidenceSource: "engine_icebreaker_ability" as const,
+              })),
+          }
+        : {}),
     },
   };
 }
