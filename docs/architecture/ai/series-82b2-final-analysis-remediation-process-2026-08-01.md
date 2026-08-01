@@ -1,7 +1,7 @@
 # Serie 82b2 – vollständige KI-Analyse und Remediation
 
-Status: vorbereitet; vollständige Matchanalyse wartet auf das Live-SQLite-
-Risikogate
+Status: `audit_complete`; vollständige Matchanalyse und Deck-Consumer-Audits
+abgeschlossen, Activity-Scope wird finalisiert
 
 Quelle/Vorgabe: Nutzerauftrag vom 01.08.2026, beide abgeschlossenen Spiele der
 Serie `series_82b2d391315f055b` vollständig zu analysieren, bestehende
@@ -110,6 +110,16 @@ prepared
 ```
 
 Genau ein Paket ist aktiv. Kein Zustand wird übersprungen.
+
+Aktueller Stand vom 01.08.2026:
+
+- Live-Read ausdrücklich freigegeben und ausschließlich read-only erfolgt;
+- 267/267 KI-Entscheidungen ohne fehlende, verwaiste oder doppelte Traces
+  klassifiziert;
+- vier Nutzerfindings bestätigt;
+- ein zusätzlicher Broker-Hint-/Consumer-Befund als F5 identifiziert;
+- vollständige Evidence:
+  `docs/reviews/ai/series-82b2-final-full-decision-audit-2026-08-01.md`.
 
 ## Paketfolge
 
