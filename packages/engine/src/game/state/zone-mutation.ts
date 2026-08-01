@@ -4,10 +4,7 @@ import {
   type GameState,
   type SpecialZoneState,
 } from "@netgrid/shared";
-import {
-  mustInstance,
-  runnerInstalledCardIds,
-} from "./card-server-lookup";
+import { mustInstance, runnerInstalledCardIds } from "./card-server-lookup";
 import { nextCanonicalRemoteServerId } from "./remote-server-id";
 import { clearCardCounters } from "./turn-flags-counters";
 
@@ -134,4 +131,13 @@ export function cleanupEmptyRemotes(state: GameState): void {
       server.root.length > 0 ||
       state.run?.attackedServerId === server.id,
   );
+  if (state.corpTurnFlags?.fortActivityServerIdsSinceCorpTurnStart) {
+    const remainingServerIds = new Set(
+      state.corp.servers.map((server) => server.id),
+    );
+    state.corpTurnFlags.fortActivityServerIdsSinceCorpTurnStart =
+      state.corpTurnFlags.fortActivityServerIdsSinceCorpTurnStart.filter(
+        (serverId) => remainingServerIds.has(serverId),
+      );
+  }
 }

@@ -443,7 +443,6 @@ import {
 import {
   applyPostBreakStealthLoss,
   clearActivityGatedFortRunMarkers,
-  isActivityGatedFortRunBlocked,
   isFortTraceBitPoolSource,
   markFortActivityForRunGate,
   fortTraceBitPoolSource,
@@ -825,9 +824,6 @@ export function configureActionRuntimeBootstrap({
     run: {
       activeRunActionSpendingCapSourceIds,
       runDurationPaymentHost,
-      isActivityGatedFortRunBlocked,
-      fortRunSideFamiliesHostForState:
-        runtimePorts.fortRunSideFamiliesHostForState,
       runStartTaxForServerUpgrades: runtimePorts.runStartTaxForServerUpgrades,
       runStartTaxForCorpRootAssets: runtimePorts.runStartTaxForCorpRootAssets,
     },

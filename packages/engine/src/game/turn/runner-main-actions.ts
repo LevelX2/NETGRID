@@ -14,6 +14,7 @@ import {
 import { expandRunnerProgramInstallPaymentActions } from "../install/runner-program-install-payment";
 import { fixedPlayCostCredits } from "../payment/play-cost";
 import { restrictedHostedCredits } from "../run/run-duration-payment";
+import { evaluateRunStartEligibility } from "../run/run-start-eligibility";
 import { runnerCanStartRun } from "../run/run-start-lock";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
@@ -62,8 +63,6 @@ export type RunnerMainActionGenerationHost = {
   run: {
     activeRunActionSpendingCapSourceIds: HostFn<string[]>;
     runDurationPaymentHost: HostFn<unknown>;
-    isActivityGatedFortRunBlocked: HostFn<boolean>;
-    fortRunSideFamiliesHostForState: HostFn<unknown>;
     runStartTaxForServerUpgrades: HostFn<{
       amount: number;
       sourceDefinitionIds: string[];
@@ -238,9 +237,6 @@ export function buildRunnerMainActions(
   const activeRunActionSpendingCapSourceIds =
     host.run.activeRunActionSpendingCapSourceIds;
   const runDurationPaymentHost = host.run.runDurationPaymentHost;
-  const isActivityGatedFortRunBlocked = host.run.isActivityGatedFortRunBlocked;
-  const fortRunSideFamiliesHostForState =
-    host.run.fortRunSideFamiliesHostForState;
   const runStartTaxForServerUpgrades = host.run.runStartTaxForServerUpgrades;
   const runStartTaxForCorpRootAssets = host.run.runStartTaxForCorpRootAssets;
   const shouldOfferRunnerProgramTrashBeforeInstall =
@@ -1188,10 +1184,10 @@ export function buildRunnerMainActions(
     }
   }
   for (const server of state.corp.servers) {
-    const rovingRunBlocked = isActivityGatedFortRunBlocked(
-      fortRunSideFamiliesHostForState(state),
+    const serverRunAllowed = evaluateRunStartEligibility(
+      state,
       server.id,
-    );
+    ).allowed;
     const upgradeRunStartTax = runStartTaxForServerUpgrades(state, server.id);
     const rootAssetRunTax = runStartTaxForCorpRootAssets(state);
     const runStartTaxCredits =
@@ -1216,7 +1212,7 @@ export function buildRunnerMainActions(
           }
         : {}),
     };
-    if (hasClicks && canStartRun && !rovingRunBlocked) {
+    if (hasClicks && serverRunAllowed) {
       if (
         runStartTaxCredits === 0 ||
         availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
@@ -1238,8 +1234,7 @@ export function buildRunnerMainActions(
     for (const sourceCardId of unusedRunOnlyActionSourceIds) {
       const sourceDefinition = definitionFor(state, sourceCardId);
       if (
-        canStartRun &&
-        !rovingRunBlocked &&
+        serverRunAllowed &&
         (runStartTaxCredits === 0 ||
           availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
             runStartTaxCredits)
@@ -1276,10 +1271,9 @@ export function buildRunnerMainActions(
       }
     }
     if (
-      canStartRun &&
+      serverRunAllowed &&
       bonusRunPending &&
       (!nextSequenceServerId || nextSequenceServerId === server.id) &&
-      !rovingRunBlocked &&
       (runStartTaxCredits === 0 ||
         availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
           runStartTaxCredits)
@@ -1400,18 +1394,11 @@ function buildMultiServerSuccessSequenceForcedRunActions(
   },
 ): LegalAction[] {
   const state = host.state;
-  if (!runnerCanStartRun(state)) return [];
   const server = state.corp.servers.find(
     (candidate) => candidate.id === input.nextSequenceServerId,
   );
   if (!server) return [];
-  if (
-    host.run.isActivityGatedFortRunBlocked(
-      host.run.fortRunSideFamiliesHostForState(state),
-      server.id,
-    )
-  )
-    return [];
+  if (!evaluateRunStartEligibility(state, server.id).allowed) return [];
   const upgradeRunStartTax = host.run.runStartTaxForServerUpgrades(
     state,
     server.id,

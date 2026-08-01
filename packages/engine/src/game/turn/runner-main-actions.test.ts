@@ -418,8 +418,6 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
     run: {
       activeRunActionSpendingCapSourceIds: () => [],
       runDurationPaymentHost: () => ({}),
-      isActivityGatedFortRunBlocked: () => false,
-      fortRunSideFamiliesHostForState: () => ({}),
       runStartTaxForServerUpgrades: () => ({
         amount: 0,
         sourceDefinitionIds: [],
