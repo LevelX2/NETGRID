@@ -690,6 +690,50 @@ describe("buildActionSemanticCandidates", () => {
     );
   });
 
+  it("retains typed functional effects when joining card semantics", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("play_event", 0, {
+          source: "structured-economy-event",
+          payload: {
+            sourceDefinitionId: "structured-economy-event",
+          },
+        }),
+      ],
+      cardSemanticProfilesByDefinitionId: {
+        "structured-economy-event": {
+          cardId: "structured-economy-event",
+          tacticSignals: ["economy.card"],
+          functionalEffects: [
+            {
+              kind: "finite_economy_pool",
+              timing: "action",
+              scope: "runner",
+              resource: "credits",
+              amountKind: "all_available",
+              economyMode: "fixed_pool",
+              finite: true,
+              repeatable: true,
+            },
+          ],
+        },
+      },
+    });
+
+    expect(candidate?.functionalEffects).toEqual([
+      {
+        kind: "finite_economy_pool",
+        timing: "action",
+        scope: "runner",
+        resource: "credits",
+        amountKind: "all_available",
+        economyMode: "fixed_pool",
+        finite: true,
+        repeatable: true,
+      },
+    ]);
+  });
+
   it("projects target context only from selected or engine-provided targets", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [

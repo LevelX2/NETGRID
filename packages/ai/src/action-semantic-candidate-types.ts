@@ -3,7 +3,10 @@ import type {
   CardInstanceId,
   LegalAction,
 } from "@netgrid/shared";
-import type { AiHintActionCapacityProfile } from "./hint-ontology";
+import type {
+  AiHintActionCapacityProfile,
+  AiHintStructuredEffect,
+} from "./hint-ontology";
 
 export type ActionSemanticVisibilityScope =
   | "actor_private"
@@ -487,6 +490,12 @@ export type ActionSemanticCandidate = {
   abilityBindingMethod: ActionAbilityBindingMethod;
   semanticActionType: string;
   /**
+   * Typed strategic effect classification retained directly from the active
+   * card-hint source. It never creates legality or supplies an unknown current
+   * amount; those facts remain bound to the Engine LegalAction projection.
+   */
+  functionalEffects?: readonly AiHintStructuredEffect[];
+  /**
    * Structured effect destinations retained from side-safe card hints. These
    * keep timing-relevant distinctions such as immediate, installment and
    * turn-start credits out of lossy free-text inference.
@@ -577,6 +586,7 @@ export type ActionCardAbilitySemanticProfile = {
 export type ActionCardSemanticProfile = {
   cardId: CardDefinitionId;
   tacticSignals: readonly string[];
+  functionalEffects?: readonly AiHintStructuredEffect[];
   effectTargets?: readonly string[];
   compatibilitySignals?: readonly string[];
   strategySupport?: readonly StrategySupportPair[];

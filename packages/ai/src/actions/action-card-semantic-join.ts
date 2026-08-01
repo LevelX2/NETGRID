@@ -6,6 +6,7 @@ import type {
   TargetProfileMatch,
 } from "../action-semantic-candidate-types";
 import type { AiHintActionCapacityProfile } from "../hint-ontology";
+import type { AiHintStructuredEffect } from "../hint-ontology";
 
 export function applyCardSemanticJoin(
   candidate: ActionSemanticCandidate,
@@ -119,6 +120,10 @@ export function applyCardSemanticJoin(
     ...(candidate.effectTargets ?? []),
     ...(profile.effectTargets ?? []),
   ]);
+  const functionalEffects = uniqueFunctionalEffects([
+    ...(candidate.functionalEffects ?? []),
+    ...(profile.functionalEffects ?? []),
+  ]);
   const actionCapacityProjection = actionCapacityProjectionWithHintContract(
     candidate,
     profile.actionCapacityProfiles,
@@ -130,6 +135,7 @@ export function applyCardSemanticJoin(
       ? { actionCapacityProjection }
       : {}),
     costProfile,
+    ...(functionalEffects.length > 0 ? { functionalEffects } : {}),
     ...(effectTargets.length > 0 ? { effectTargets } : {}),
     cardContextSignals,
     actionTacticSignals,
@@ -297,4 +303,26 @@ function targetContextWithSemanticMatches(
 
 function uniqueStrings(values: readonly string[]): string[] {
   return [...new Set(values)];
+}
+
+function uniqueFunctionalEffects(
+  effects: readonly AiHintStructuredEffect[],
+): AiHintStructuredEffect[] {
+  const bySignature = new Map<string, AiHintStructuredEffect>();
+  for (const effect of effects) {
+    const signature = JSON.stringify([
+      effect.kind,
+      effect.timing,
+      effect.scope,
+      effect.resource ?? null,
+      effect.amount ?? null,
+      effect.amountKind ?? null,
+      effect.economyMode ?? null,
+      effect.target ?? null,
+      effect.repeatable ?? null,
+      effect.finite ?? null,
+    ]);
+    if (!bySignature.has(signature)) bySignature.set(signature, { ...effect });
+  }
+  return [...bySignature.values()];
 }
