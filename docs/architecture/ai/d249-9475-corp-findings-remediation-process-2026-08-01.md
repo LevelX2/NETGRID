@@ -161,6 +161,26 @@ Abgeschlossen ohne Verhaltensänderung:
   vorrangiger Parentbedarf und Karten ohne passende Effektsemantik.
 - Commit: `fix(ai): plan finite counter economy routes`.
 
+Umgesetzt und fokussiert verifiziert:
+
+- `corp.economy` erkennt eine Counter-Cashout-Familie ausschließlich über
+  geprüfte strukturierte Hintsemantik; Kartenname und Karten-ID sind keine
+  produktive Auswahlbedingung;
+- die Entwicklung ist endlich: ohne Counter wird genau ein rentabler Counter
+  geplant, mit vorhandenem Counter folgt Rez statt weiterem Advance;
+- der Cashout wird erst mit einer aktuellen, vollständigen Engine-Quote über
+  sichtbare Counterzahl, Betrag je Counter und Gesamtgutschrift ausgeführt;
+  unvollständige Quotes bleiben ein harter Coverage-Fehler und erzeugen
+  keinen Automatismus oder Fallback;
+- Engine, DTO, Planmaterialisierung und TurnPlanner erhalten dieselbe exakt
+  gebundene Aktionssemantik; `corp.hand_and_agenda_management` klassifiziert
+  nur weiterhin ungebundene Asset-Advances als unproduktiv;
+- eine bereits ausführbare, gebundene Score-Fortsetzung bleibt vor einer
+  redundanten weiteren Central-Schicht. Die vorhandene Tycho-Gegenprobe hat
+  damit einen zunächst zu breiten Defense-Übergriff abgefangen;
+- fokussiert grün: `423/423` AI-Tests, `24/24` Engine-Tests sowie Shared-,
+  Engine- und AI-Typecheck.
+
 ### P5 – Gesamtverifikation, Review und Integration
 
 - Alle neuen Checkpoints und Gegenproben, paketnahe Tests, AI-Typecheck,

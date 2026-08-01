@@ -8,6 +8,39 @@ import type {
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO score-conversion contract", () => {
+  it("preserves an exact advancement-counter economy quote", () => {
+    const action = conversionAction();
+    action.type = "activated_card_ability";
+    action.source = "cashout-source";
+    action.payload = {
+      cardId: "cashout-source",
+      cardImplementationEconomyKind:
+        "gain_credits_per_advancement_counter_on_source",
+      cardImplementationAmountPerAdvancementCounter: 4,
+      advancementCounterCount: 2,
+      gainCreditsAmount: 8,
+    };
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: playerView(action),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "counter-cashout-dto",
+      decisionId: "counter-cashout-dto:corp:1",
+      actionNumber: 1,
+      profileId: "counter-cashout-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      cardImplementationEconomyKind:
+        "gain_credits_per_advancement_counter_on_source",
+      cardImplementationAmountPerAdvancementCounter: 4,
+      advancementCounterCount: 2,
+      gainCreditsAmount: 8,
+    });
+  });
+
   it("preserves only a current Corp-bound counter-bank preparation quote", () => {
     const action = conversionAction();
     const view = playerView(action);

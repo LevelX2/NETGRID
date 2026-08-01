@@ -29,6 +29,19 @@ export function activatedAbilityPayload(
 ): Record<string, string | number | boolean> {
   const advancementCounterCreditPayout =
     gainCreditsPerAdvancementCounterOnSourceEffect(ability);
+  const visibleAdvancementCounterCount =
+    state?.cardInstances[cardId]?.advancementCounters;
+  const advancementCounterCreditGain =
+    advancementCounterCreditPayout &&
+    Number.isSafeInteger(visibleAdvancementCounterCount) &&
+    (visibleAdvancementCounterCount as number) >= 0 &&
+    Number.isSafeInteger(
+      (visibleAdvancementCounterCount as number) *
+        advancementCounterCreditPayout.amountPerCounter,
+    )
+      ? (visibleAdvancementCounterCount as number) *
+        advancementCounterCreditPayout.amountPerCounter
+      : undefined;
   const hostedCreditAddAmount =
     hostedCreditAddAmountForActivatedAbility(ability);
   const hostedCreditTakeEffect =
@@ -85,8 +98,16 @@ export function activatedAbilityPayload(
     cardImplementationAbilityIndex: abilityIndex,
     cardImplementationAbilityTiming: ability.timing,
     ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
-    ...(hostedCreditTakeAmount + directCreditGain > 0
-      ? { gainCreditsAmount: hostedCreditTakeAmount + directCreditGain }
+    ...(hostedCreditTakeAmount +
+      directCreditGain +
+      (advancementCounterCreditGain ?? 0) >
+    0
+      ? {
+          gainCreditsAmount:
+            hostedCreditTakeAmount +
+            directCreditGain +
+            (advancementCounterCreditGain ?? 0),
+        }
       : {}),
     ...(directCardDraw > 0 ? { drawCardsAmount: directCardDraw } : {}),
     ...(hostedCreditAddAmount > 0
@@ -129,6 +150,12 @@ export function activatedAbilityPayload(
             "gain_credits_per_advancement_counter_on_source",
           cardImplementationAmountPerAdvancementCounter:
             advancementCounterCreditPayout.amountPerCounter,
+          ...(advancementCounterCreditGain !== undefined
+            ? {
+                advancementCounterCount:
+                  visibleAdvancementCounterCount as number,
+              }
+            : {}),
           cardImplementationTrashesSource:
             hasTrashSourceEffectForActivatedAbility(ability),
         }

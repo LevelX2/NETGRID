@@ -91,6 +91,7 @@ export const CORP_TURN_PLANNING_MODULE_COVERAGE: readonly CorpTurnPlanningModule
         "play.corp_operation",
         "corp_window.rez",
         "card_ability.*",
+        "score.advance_card",
         "score_conversion.gain_action_capacity",
         "turn_flow.stop_restricted_action_sequence",
       ],

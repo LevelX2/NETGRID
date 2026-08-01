@@ -164,6 +164,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "sourceDefinitionId",
   "cardImplementationEconomyKind",
   "cardImplementationAmountPerAdvancementCounter",
+  "advancementCounterCount",
   "cardImplementationTrashesSource",
   "cardImplementationAdvancementCounterCost",
   "cardImplementationAddsHostedCredits",

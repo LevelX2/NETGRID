@@ -873,6 +873,7 @@ function contributeCorpActionDispositionForCandidate(
   if (
     candidate.actionType === "advance_card" &&
     visibleSource?.type === "asset" &&
+    !facts.corpOpenEconomyPlanOwnsAction(domain, candidate.actionId) &&
     !domain.ambushes.some(
       (signal) => signal.sourceInstanceId === candidate.sourceCardInstanceId,
     )

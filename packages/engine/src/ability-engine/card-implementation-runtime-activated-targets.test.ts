@@ -66,6 +66,42 @@ describe("activatedAbilityPayload advancement semantics", () => {
     });
   });
 
+  it("publishes an exact visible advancement-counter cashout", () => {
+    const ability: ActivatedCardAbilityImplementation = {
+      kind: "activated",
+      timing: "corp_main",
+      costs: [{ kind: "action", amount: 1 }],
+      effects: [
+        {
+          kind: "gain_credits_per_advancement_counter_on_source",
+          recipient: "corp",
+          amountPerCounter: 4,
+          visibility: "public",
+        },
+        {
+          kind: "trash_source",
+          visibility: "public",
+        },
+      ],
+    };
+    const state = {
+      cardInstances: {
+        source: { controller: "corp", advancementCounters: 2 },
+      },
+    } as unknown as GameState;
+
+    expect(
+      activatedAbilityPayload("source" as never, ability, 0, state),
+    ).toMatchObject({
+      gainCreditsAmount: 8,
+      advancementCounterCount: 2,
+      cardImplementationEconomyKind:
+        "gain_credits_per_advancement_counter_on_source",
+      cardImplementationAmountPerAdvancementCounter: 4,
+      cardImplementationTrashesSource: true,
+    });
+  });
+
   it("publishes a side-safe run projection for declarative run abilities", () => {
     const ability: ActivatedCardAbilityImplementation = {
       kind: "activated",

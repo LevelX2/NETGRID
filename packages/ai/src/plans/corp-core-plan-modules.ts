@@ -299,10 +299,14 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
   kind: "develop_campaign";
   sourceInstanceId: string;
   sourceDefinitionId: string;
-  phase: "install" | "rez";
+  phase: "install" | "advance" | "rez";
   actionIds: string[];
   cadence: {
-    kind: "finite_pool" | "automatic_start_of_turn" | "immediate_on_rez";
+    kind:
+      | "finite_pool"
+      | "automatic_start_of_turn"
+      | "immediate_on_rez"
+      | "counter_cashout_development";
     maximumSetupExecutions: 1;
   };
   payback: {
@@ -313,7 +317,16 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
   };
   completion: {
     kind: "source_phase_reached";
-    expectedState: "installed_unrezzed" | "installed_rezzed";
+    expectedState:
+      | "installed_unrezzed"
+      | "advancement_counter_added"
+      | "installed_rezzed";
+  };
+  counterCashout?: {
+    currentAdvancementCounters: number;
+    targetAdvancementCounters: number;
+    creditsPerCounter: number;
+    projectedCashoutCredits: number;
   };
 };
 
@@ -360,7 +373,8 @@ export type CorpEconomyVisibleCardWithdrawalSignal = CorpEconomySignalBase & {
     payoutMode: "fixed";
     reliability: "guaranteed";
     source: "legal_action_payload";
-    hostedCreditTakeMode: "up_to_amount_if_available" | "all";
+    payoutSource: "hosted_credit_pool" | "advancement_counter_cashout";
+    hostedCreditTakeMode?: "up_to_amount_if_available" | "all";
   };
   cadence: {
     kind: "single_action_revalidate";
@@ -1530,6 +1544,12 @@ export function corpEconomyPriorityClass(
     signal.phase === "rez" &&
     (signal.cadence.kind === "finite_pool" ||
       signal.cadence.kind === "automatic_start_of_turn")
+  )
+    return "P4";
+  if (
+    signal.kind === "develop_campaign" &&
+    signal.phase === "rez" &&
+    signal.cadence.kind === "counter_cashout_development"
   )
     return "P4";
   return "P5";
@@ -4630,7 +4650,9 @@ function economyCandidates(
             candidate.semanticActionType ===
               (signal.phase === "install"
                 ? "install.card"
-                : "corp_window.rez") &&
+                : signal.phase === "advance"
+                  ? "score.advance_card"
+                  : "corp_window.rez") &&
             (signal.cadence.kind !== "immediate_on_rez" ||
               certifiedImmediateRootRezCampaignCandidate(candidate, signal))
           : signal.kind === "convert_immediate_operation"
@@ -4917,6 +4939,8 @@ function economyDevelopmentStepValue(
   candidate: ActionSemanticCandidate,
   signal: CorpEconomyDevelopmentSignal,
 ): number {
+  if (signal.cadence.kind === "counter_cashout_development")
+    return Math.max(1, signal.payback.projectedNetCredits * 10);
   if (signal.phase === "rez")
     return Math.max(1, signal.payback.projectedNetCredits * 10);
 
@@ -4961,7 +4985,7 @@ function economyMaterialization(
           : signal.kind === "convert_immediate_operation"
             ? `Convert the Engine-certified immediate ${signal.sourceDefinitionId} operation once, consuming its exact HQ source.`
             : signal.kind === "convert_visible_card_payout"
-              ? `Take the exact currently quoted hosted-credit payout from ${signal.sourceDefinitionId}, then revalidate the remaining source pool.`
+              ? `Take the exact currently quoted visible-card payout from ${signal.sourceDefinitionId}, then revalidate the source.`
               : signal.kind === "prepare_immediate_operation"
                 ? `Take the exact Engine-certified Basic Credit once to make the reviewed ${signal.sourceDefinitionId} operation legal, then revalidate its new LegalAction.`
                 : signal.kind === "develop_liquidity"

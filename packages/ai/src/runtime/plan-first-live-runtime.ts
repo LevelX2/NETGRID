@@ -7582,10 +7582,22 @@ function buildCorpDomain(
           );
         }) === true,
     );
+  const exactExecutableScoreProjectAvailable = scoreProjects.some(
+    (project) =>
+      project.feasible &&
+      project.actionIds?.some((actionId) =>
+        input.legalActions.some(
+          (action) =>
+            action.actionId === actionId &&
+            action.expiresAtStateVersion === input.playerView.stateVersion,
+        ),
+      ) === true,
+  );
   const scorePlanPrecedesRedundantCapacityDefense = (
     serverId: "hq" | "rd",
   ): boolean =>
-    coherentScoreHandConversionAvailable &&
+    (coherentScoreHandConversionAvailable ||
+      exactExecutableScoreProjectAvailable) &&
     (input.playerView.servers.find((server) => server.id === serverId)?.ice
       .length ?? 0) > 0;
   const agendaCapacityDefenseConversionAvailable = candidates.some(
@@ -10560,6 +10572,131 @@ function corpEconomyDevelopmentCampaigns(
         return;
       }
     }
+    const counterCashout = corpCounterCashoutProfile(card.definitionId);
+    if (phase === "rez" && counterCashout) {
+      const currentAdvancementCounters = card.advancementCounters ?? 0;
+      const rezCandidate = candidates.find(
+        (candidate) =>
+          candidate.sourceCardInstanceId === card.instanceId &&
+          candidate.sourceDefinitionId === card.definitionId &&
+          candidate.semanticActionType === "corp_window.rez" &&
+          candidate.costProfile.costKnownStatus === "known" &&
+          Number.isSafeInteger(candidate.costProfile.creditCost) &&
+          (candidate.costProfile.creditCost as number) >= 0 &&
+          typeof candidate.costProfile.clickCost === "number" &&
+          Number.isSafeInteger(candidate.costProfile.clickCost) &&
+          candidate.costProfile.additionalCosts.length === 0,
+      );
+      const rezCreditCost = rezCandidate?.costProfile.creditCost;
+      if (currentAdvancementCounters === 0) {
+        const advanceCandidate = candidates.find(
+          (candidate) =>
+            candidate.sourceCardInstanceId === card.instanceId &&
+            candidate.sourceDefinitionId === card.definitionId &&
+            candidate.semanticActionType === "score.advance_card" &&
+            candidate.costProfile.costKnownStatus === "known" &&
+            Number.isSafeInteger(candidate.costProfile.creditCost) &&
+            (candidate.costProfile.creditCost as number) >= 0 &&
+            typeof candidate.costProfile.clickCost === "number" &&
+            Number.isSafeInteger(candidate.costProfile.clickCost) &&
+            candidate.costProfile.clickCost > 0 &&
+            candidate.costProfile.additionalCosts.length === 0,
+        );
+        const advanceCreditCost = advanceCandidate?.costProfile.creditCost;
+        const advanceClickCost = advanceCandidate?.costProfile.clickCost;
+        const setupCreditCost =
+          typeof advanceCreditCost === "number" &&
+          typeof rezCreditCost === "number"
+            ? advanceCreditCost + rezCreditCost
+            : undefined;
+        const projectedNetCredits =
+          setupCreditCost === undefined
+            ? undefined
+            : counterCashout.creditsPerCounter - setupCreditCost;
+        if (
+          advanceCandidate &&
+          typeof advanceClickCost === "number" &&
+          setupCreditCost !== undefined &&
+          projectedNetCredits !== undefined &&
+          projectedNetCredits >= 2 &&
+          input.playerView.own.credits >= setupCreditCost &&
+          input.playerView.own.clicks >= advanceClickCost
+        ) {
+          signals.push({
+            kind: "develop_campaign",
+            needId: `economy-counter-cashout:${card.instanceId}:advance`,
+            sourceInstanceId: card.instanceId,
+            sourceDefinitionId: card.definitionId,
+            phase: "advance",
+            actionIds: [advanceCandidate.actionId],
+            cadence: {
+              kind: "counter_cashout_development",
+              maximumSetupExecutions: 1,
+            },
+            payback: {
+              projectedCredits: counterCashout.creditsPerCounter,
+              setupCreditCost,
+              projectedNetCredits,
+              horizonTurns: 0,
+            },
+            completion: {
+              kind: "source_phase_reached",
+              expectedState: "advancement_counter_added",
+            },
+            counterCashout: {
+              currentAdvancementCounters,
+              targetAdvancementCounters: 1,
+              creditsPerCounter: counterCashout.creditsPerCounter,
+              projectedCashoutCredits: counterCashout.creditsPerCounter,
+            },
+            urgentForScore: false,
+            evidenceCode: "corp_reviewed_counter_cashout_development:advance",
+          });
+          return;
+        }
+      } else if (rezCandidate && typeof rezCreditCost === "number") {
+        const projectedCredits =
+          currentAdvancementCounters * counterCashout.creditsPerCounter;
+        const projectedNetCredits = projectedCredits - rezCreditCost;
+        if (
+          Number.isSafeInteger(projectedCredits) &&
+          projectedNetCredits > 0 &&
+          input.playerView.own.credits >= rezCreditCost
+        ) {
+          signals.push({
+            kind: "develop_campaign",
+            needId: `economy-counter-cashout:${card.instanceId}:rez`,
+            sourceInstanceId: card.instanceId,
+            sourceDefinitionId: card.definitionId,
+            phase: "rez",
+            actionIds: [rezCandidate.actionId],
+            cadence: {
+              kind: "counter_cashout_development",
+              maximumSetupExecutions: 1,
+            },
+            payback: {
+              projectedCredits,
+              setupCreditCost: rezCreditCost,
+              projectedNetCredits,
+              horizonTurns: 0,
+            },
+            completion: {
+              kind: "source_phase_reached",
+              expectedState: "installed_rezzed",
+            },
+            counterCashout: {
+              currentAdvancementCounters,
+              targetAdvancementCounters: currentAdvancementCounters,
+              creditsPerCounter: counterCashout.creditsPerCounter,
+              projectedCashoutCredits: projectedCredits,
+            },
+            urgentForScore: false,
+            evidenceCode: "corp_reviewed_counter_cashout_development:rez",
+          });
+          return;
+        }
+      }
+    }
     if (
       definition?.side !== "corp" ||
       definition.type !== "asset" ||
@@ -10665,6 +10802,48 @@ function corpEconomyDevelopmentCampaigns(
     }
   }
   return uniqueBy(signals, (signal) => signal.needId);
+}
+
+function corpCounterCashoutProfile(
+  definitionId: string,
+): { creditsPerCounter: number } | undefined {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  if (
+    hint?.planRoles?.includes("remote_asset_economy") !== true ||
+    hint.quality?.hintReviewed !== true ||
+    hint.quality.strategyCovered !== true ||
+    hint.quality.confidence !== "high" ||
+    hint.conditions?.some(
+      (condition) => condition.kind === "requires_advancement_counter",
+    ) !== true ||
+    hint.effects?.some(
+      (effect) =>
+        effect.kind === "economy" &&
+        effect.timing === "action" &&
+        effect.scope === "corp" &&
+        effect.target === "economy.corp_counter_cashout",
+    ) !== true ||
+    hint.effects?.some(
+      (effect) =>
+        effect.kind === "advanceable_economy" &&
+        effect.timing === "action" &&
+        effect.scope === "remote" &&
+        effect.resource === "advancement_counters",
+    ) !== true
+  ) {
+    return undefined;
+  }
+  const creditEffects = (hint.effects ?? []).filter(
+    (effect) =>
+      effect.kind === "advanceable_economy" &&
+      effect.timing === "action" &&
+      effect.scope === "remote" &&
+      effect.resource === "credits" &&
+      Number.isSafeInteger(effect.amount) &&
+      (effect.amount as number) > 0,
+  );
+  if (creditEffects.length !== 1) return undefined;
+  return { creditsPerCounter: creditEffects[0]!.amount as number };
 }
 
 function corpImmediateOperationEconomyConversions(
@@ -10815,6 +10994,9 @@ function corpVisibleCardEconomyWithdrawals(
     const projection = candidate.economyProjection;
     const hostedCreditTakeMode = action?.payload?.hostedCreditTakeMode;
     const hostedCreditTakeAmount = action?.payload?.hostedCreditTakeAmount;
+    const advancementCounterCount = action?.payload?.advancementCounterCount;
+    const amountPerAdvancementCounter =
+      action?.payload?.cardImplementationAmountPerAdvancementCounter;
     const grossLiquidCreditGain = projection?.grossLiquidCreditGain;
     const netLiquidCreditGain = projection?.netLiquidCreditGain;
     const hint = sourceDefinitionId
@@ -10832,6 +11014,42 @@ function corpVisibleCardEconomyWithdrawals(
           hint.quality?.hintReviewed === true &&
           hint.quality.strategyCovered === true &&
           hint.quality.confidence === "high";
+    const hostedCreditPayout =
+      action?.payload?.cardImplementationTakesHostedCredits === true &&
+      (hostedCreditTakeMode === "up_to_amount_if_available" ||
+        hostedCreditTakeMode === "all") &&
+      typeof hostedCreditTakeAmount === "number" &&
+      Number.isSafeInteger(hostedCreditTakeAmount) &&
+      hostedCreditTakeAmount > 0
+        ? {
+            payoutSource: "hosted_credit_pool" as const,
+            expectedGrossCreditGain: hostedCreditTakeAmount,
+          }
+        : undefined;
+    const advancementCounterPayout =
+      sourceZone === "installed_root" &&
+      sourceCard?.rezzed === true &&
+      sourceDefinitionId !== undefined &&
+      corpCounterCashoutProfile(sourceDefinitionId) !== undefined &&
+      action?.payload?.cardImplementationEconomyKind ===
+        "gain_credits_per_advancement_counter_on_source" &&
+      typeof advancementCounterCount === "number" &&
+      Number.isSafeInteger(advancementCounterCount) &&
+      advancementCounterCount > 0 &&
+      advancementCounterCount === (sourceCard.advancementCounters ?? 0) &&
+      typeof amountPerAdvancementCounter === "number" &&
+      Number.isSafeInteger(amountPerAdvancementCounter) &&
+      amountPerAdvancementCounter > 0 &&
+      Number.isSafeInteger(
+        advancementCounterCount * amountPerAdvancementCounter,
+      )
+        ? {
+            payoutSource: "advancement_counter_cashout" as const,
+            expectedGrossCreditGain:
+              advancementCounterCount * amountPerAdvancementCounter,
+          }
+        : undefined;
+    const admittedPayout = hostedCreditPayout ?? advancementCounterPayout;
     if (
       !sourceInstanceId ||
       !sourceDefinitionId ||
@@ -10844,12 +11062,7 @@ function corpVisibleCardEconomyWithdrawals(
       action?.type !== "activated_card_ability" ||
       action.source !== sourceInstanceId ||
       action.payload?.cardId !== sourceInstanceId ||
-      action.payload?.cardImplementationTakesHostedCredits !== true ||
-      (hostedCreditTakeMode !== "up_to_amount_if_available" &&
-        hostedCreditTakeMode !== "all") ||
-      typeof hostedCreditTakeAmount !== "number" ||
-      !Number.isSafeInteger(hostedCreditTakeAmount) ||
-      hostedCreditTakeAmount <= 0 ||
+      !admittedPayout ||
       candidate.sourceKind !== "card" ||
       candidate.semanticActionType !== "economy.gain_credit" ||
       candidate.costProfile.costKnownStatus !== "known" ||
@@ -10877,7 +11090,7 @@ function corpVisibleCardEconomyWithdrawals(
       projection.creditCost < 0 ||
       typeof grossLiquidCreditGain !== "number" ||
       !Number.isSafeInteger(grossLiquidCreditGain) ||
-      grossLiquidCreditGain !== hostedCreditTakeAmount ||
+      grossLiquidCreditGain !== admittedPayout.expectedGrossCreditGain ||
       typeof netLiquidCreditGain !== "number" ||
       !Number.isSafeInteger(netLiquidCreditGain) ||
       netLiquidCreditGain <= projection.clickCost ||
@@ -10906,7 +11119,14 @@ function corpVisibleCardEconomyWithdrawals(
           payoutMode: "fixed",
           reliability: "guaranteed",
           source: "legal_action_payload",
-          hostedCreditTakeMode,
+          payoutSource: admittedPayout.payoutSource,
+          ...(admittedPayout.payoutSource === "hosted_credit_pool"
+            ? {
+                hostedCreditTakeMode: hostedCreditTakeMode as
+                  | "up_to_amount_if_available"
+                  | "all",
+              }
+            : {}),
         },
         cadence: {
           kind: "single_action_revalidate",
