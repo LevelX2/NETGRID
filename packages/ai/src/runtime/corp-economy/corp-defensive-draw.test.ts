@@ -250,7 +250,7 @@ describe("Corp defensive draw context", () => {
     });
   });
 
-  it("defers an unknown install branch while keeping the exact current draw head", () => {
+  it("keeps an unknown install branch fail-closed instead of turning it into a draw effect gap", () => {
     const setup = targetedScoreDefenseDrawSetup();
 
     expect(
@@ -258,12 +258,7 @@ describe("Corp defensive draw context", () => {
         ...setup.args,
         directInstallRouteState: { knowledge: "unknown" },
       }),
-    ).toMatchObject({
-      parentProjectId: setup.need.parentProjectId,
-      evidence: expect.arrayContaining([
-        "direct_install_route_disposition:unknown_deferred",
-      ]),
-    });
+    ).toBeUndefined();
   });
 
   it("fails closed when a productive direct install route is already known", () => {
@@ -294,7 +289,7 @@ describe("Corp defensive draw context", () => {
     ).toBeUndefined();
   });
 
-  it("fails closed unless the current unsatisfied baseline is known or only its later subset route is unknown", () => {
+  it("fails closed unless the current unsatisfied baseline is known", () => {
     const setup = targetedScoreDefenseDrawSetup();
     const protectedBaseline: KnownCorpFundedScoreProtectionAssessment = {
       ...setup.need.baseline,
@@ -359,12 +354,7 @@ describe("Corp defensive draw context", () => {
           },
         },
       }),
-    ).toMatchObject({
-      parentProjectId: setup.need.parentProjectId,
-      evidence: expect.arrayContaining([
-        "funded_protection_baseline:subset_unknown_deferred",
-      ]),
-    });
+    ).toBeUndefined();
   });
 
   it("requires an identity-bound exact draw projection", () => {
@@ -424,7 +414,7 @@ describe("Corp defensive draw context", () => {
     });
   });
 
-  it("allows a capacity-safe last-click draw as multi-turn progress but not under a hard same-turn reserve", () => {
+  it("rejects a last-click draw for an exposed agenda but keeps safe pre-install multi-turn discovery", () => {
     const setup = targetedScoreDefenseDrawSetup();
     setup.input.playerView.own.clicks = 1;
     const lastClickNeed: CorpFundedRemoteAccessRiskNeed = {
@@ -439,11 +429,28 @@ describe("Corp defensive draw context", () => {
         ...setup.args,
         protectionNeed: lastClickNeed,
       }),
+    ).toBeUndefined();
+
+    const preInstallSetup = targetedScoreDefenseDrawSetup();
+    preInstallSetup.input.playerView.own.clicks = 1;
+    preInstallSetup.input.playerView.servers[0]!.root = [];
+    const preInstallNeed: CorpFundedRemoteAccessRiskNeed = {
+      ...preInstallSetup.need,
+      baseline: {
+        ...preInstallSetup.need.baseline,
+        availableCorpClicks: 1,
+      },
+    };
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...preInstallSetup.args,
+        protectionNeed: preInstallNeed,
+      }),
     ).toMatchObject({
       cleanupReplacementDraw: false,
       evidence: expect.arrayContaining([
+        "score_defense_exposed_agenda_parent:false",
         "score_defense_draw_followup_horizon:multi_turn_progress",
-        "projected_hand_after_draw:4",
       ]),
     });
 

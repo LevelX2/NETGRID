@@ -102,11 +102,10 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
     input.side !== "corp" ||
     !input.legalActions.includes(action) ||
     protectionNeed.observedAtStateVersion !== stateVersion ||
-    (protectionNeed.baseline.knowledge === "unknown" &&
-      protectionNeed.baseline.unknownReason !== "subset_assessment_unknown") ||
+    protectionNeed.baseline.knowledge !== "known" ||
     protectionNeed.baseline.fundedProtection ||
-    (directInstallRouteState.knowledge === "known" &&
-      directInstallRouteState.disposition !== "effect_missing") ||
+    directInstallRouteState.knowledge !== "known" ||
+    directInstallRouteState.disposition !== "effect_missing" ||
     drawActionProjection.knowledge !== "known" ||
     drawActionProjection.actionId !== action.actionId ||
     drawActionProjection.observedAtStateVersion !== stateVersion ||
@@ -174,7 +173,15 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
   const sameTurnFollowupAvailable =
     clicks >= drawActionProjection.clickCost + 1 + hardClickReserve &&
     projectedHandAfterDrawAndInstall <= maxHandSize;
+  const targetServer = input.playerView.servers.find(
+    (server) => server.id === protectionNeed.targetServerId,
+  );
+  const exposedAgendaParent =
+    targetServer?.root.some(
+      (card) => card.known === true && card.type === "agenda",
+    ) === true;
   const safeMultiTurnProgressAvailable =
+    !exposedAgendaParent &&
     hardClickReserve === 0 &&
     clicks >= drawActionProjection.clickCost &&
     projectedHandAfterDraw <= maxHandSize;
@@ -206,12 +213,9 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
       `protection_need:${protectionNeed.needId}`,
       `parent_project:${protectionNeed.parentProjectId}`,
       `target_server:${protectionNeed.targetServerId}`,
-      protectionNeed.baseline.knowledge === "known"
-        ? "funded_protection_baseline:known_unprotected"
-        : "funded_protection_baseline:subset_unknown_deferred",
-      directInstallRouteState.knowledge === "known"
-        ? "direct_install_route_disposition:effect_missing"
-        : "direct_install_route_disposition:unknown_deferred",
+      "funded_protection_baseline:known_unprotected",
+      "direct_install_route_disposition:effect_missing",
+      `score_defense_exposed_agenda_parent:${exposedAgendaParent}`,
       `score_defense_cleanup_replacement_draw:${cleanupReplacementDraw}`,
       `score_defense_draw_followup_horizon:${
         sameTurnFollowupAvailable ? "same_turn" : "multi_turn_progress"
@@ -253,8 +257,7 @@ function corpScoreDefenseEffectSuitableIceDensity(
   if (
     snapshot?.side !== "corp" ||
     !positiveSafeInteger(remainingDeckCount) ||
-    (need.baseline.knowledge === "unknown" &&
-      need.baseline.unknownReason !== "subset_assessment_unknown") ||
+    need.baseline.knowledge !== "known" ||
     !Array.isArray(input.playerView.opponent.rig)
   ) {
     return unknownScoreDefenseDensity(
@@ -302,12 +305,6 @@ function corpScoreDefenseEffectSuitableIceDensity(
     if (!resolvedDefinitionId) continue;
     const definition = CARD_DEFINITIONS_BY_ID[resolvedDefinitionId];
     if (definition?.type !== "ice") continue;
-    if (need.baseline.knowledge === "unknown") {
-      if (!definition.mechanics?.includes("end_the_run")) continue;
-      remainingSuitableIceCount += remainingCopies;
-      suitableDefinitionIds.push(entry.cardId);
-      continue;
-    }
     const after = assessCorpScoreProtection({
       serverIce: [
         ...currentFundedIce,
