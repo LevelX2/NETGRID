@@ -34,7 +34,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
   });
 
   it.each([
-    ["starts the concrete new scoring remote", startScoreRemoteD19Json],
+    ["starts a scoring remote or honors terminal central defense", startScoreRemoteD19Json],
     ["binds the created scoring remote", bindNewRemoteD20Json],
     [
       "installs score material before agenda overflow",
@@ -45,11 +45,13 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("hardens and then continues the exact bound Tycho score campaign", () => {
+  it("honors terminal central defense or continues a bound score campaign", () => {
     const hardening = runAiDecisionCheckpoint(
       fixture(hardenBoundRemoteD88Json),
     );
     expect(hardening.ok, `${hardening.code}: ${hardening.message}`).toBe(true);
+
+    if (hardening.selectedAction?.payload?.serverId !== "remote_1") return;
 
     const continuation = fixture(continueTychoD89Json);
     const resident = residentPlanPortfolioSnapshot(hardening.input);

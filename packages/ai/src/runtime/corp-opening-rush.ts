@@ -100,7 +100,7 @@ export function assessCorpOpeningRush(params: {
     }
     return blocked("outside_opening_window", [
       `turn_serial:${turnSerial}`,
-      "opening_corp_turn_ceiling:3",
+      `opening_corp_turn_ceiling:${CORP_OPENING_LAST_TURN_SERIAL}`,
     ]);
   }
   if (
@@ -175,7 +175,13 @@ export function assessCorpOpeningRush(params: {
       `public_staged_breakers:${publicStagedBreakerInstanceIds.join(",")}`,
     ]);
   }
-  if (centralThreatIsAcute(centralDefenseAllocation)) {
+  if (
+    acuteCentralDefenseIsUnfunded(
+      input,
+      centralDefenseAllocation,
+      baseline.creditsAfterDefense,
+    )
+  ) {
     return blocked("acute_central_threat", [
       "central_threat:acute_or_terminal",
     ]);
@@ -281,16 +287,36 @@ function visiblePublicStagedBreakers(input: AiDecisionInput): string[] {
     .sort();
 }
 
-function centralThreatIsAcute(
+function acuteCentralDefenseIsUnfunded(
+  input: AiDecisionInput,
   allocation: CorpCentralDefenseAllocation,
+  availableCredits: number,
 ): boolean {
-  return (
-    allocation.status === "known" &&
-    Object.values(allocation.evidence).some(
-      (evidence) =>
-        evidence.threat === "acute" || evidence.threat === "terminal",
-    )
-  );
+  if (allocation.status !== "known") return false;
+  let requiredCredits = 0;
+  for (const serverId of ["hq", "rd"] as const) {
+    const threat = allocation.evidence[serverId].threat;
+    if (threat !== "acute" && threat !== "terminal") continue;
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
+    if (!server) return true;
+    if (server.ice.some((ice) => ice.rezzed === true)) continue;
+    const exactRezCosts = server.ice.flatMap((ice) => {
+      const quote = ice.effectiveRezCostQuote;
+      return quote?.complete === true &&
+        quote.cardId === ice.instanceId &&
+        quote.targetServerId === serverId &&
+        quote.expiresAtStateVersion === input.playerView.stateVersion &&
+        Number.isSafeInteger(quote.finalCredits) &&
+        quote.finalCredits >= 0
+        ? [quote.finalCredits]
+        : [];
+    });
+    if (exactRezCosts.length === 0) return true;
+    requiredCredits += Math.min(...exactRezCosts);
+  }
+  return requiredCredits > availableCredits;
 }
 
 function blocked(

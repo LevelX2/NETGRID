@@ -20,7 +20,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       minimizeAgendaRiskJson,
     ],
     [
-      "prepares an executable protected matchpoint sibling before exposing it",
+      "prepares a protected matchpoint sibling or honors terminal central defense",
       startMatchpointJson,
     ],
   ])("%s", (_label, json) => {
@@ -132,7 +132,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("keeps the same safe remote preparation available below matchpoint", () => {
+  it("keeps remote preparation available below matchpoint unless central defense is terminal", () => {
     const checkpoint = mutateFixture(startMatchpointJson, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       const scoredCardId = state.corp.scoreArea.find(
@@ -159,12 +159,16 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
             actionId:
               "corp.install_card.corp_onr_v1_245_fire-wall_2.new_remote.corp_onr_v1_245_fire-wall_2",
           },
+          {
+            type: "install_card",
+            targetServerId: "hq",
+          },
         ],
         planExecution: {
           acceptablePlanKinds: ["corp.defend_servers"],
-          acceptableCapabilities: ["develop_score_protection"],
-          requiredAssessmentEvidence: [
-            "score_protection_staging_install:agenda:corp_onr_proteus_008_project-zurich_1:new_remote:new_remote:bounded_deterrence",
+          acceptableCapabilities: [
+            "develop_score_protection",
+            "allocate_server_defense",
           ],
         },
       };

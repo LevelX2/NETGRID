@@ -13,7 +13,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
       scoredOnlyTimingJson,
       [
         "plan_priority_class:P4",
-        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_213_private-cybernet-police_1%3Aremote_1",
+        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_217_strike-force-kali_1%3Aremote_1",
       ],
     ],
     [
@@ -21,7 +21,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
       realisticScoreHorizonJson,
       [
         "plan_priority_class:P3",
-        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_213_private-cybernet-police_1%3Aremote_1",
+        "plan_module:corp.score_agenda",
       ],
     ],
   ] as const)("%s", (_label, json, requiredDecisionEvidence) => {

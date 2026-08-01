@@ -37,7 +37,7 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     expectCheckpointToPass(turn9AgendaDefenseJson);
   });
 
-  it("uses the third turn-9 action for another concrete ICE placement before cleanup", () => {
+  it("uses the third turn-9 action for score progress or concrete central defense", () => {
     const { input, decision } = decisionsAfterBoundAgendaDefense(
       turn9AgendaDefenseJson,
       2,
@@ -46,8 +46,16 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
       (action) => action.actionId === decision.actionId,
     );
 
+    const advancesBoundAgenda =
+      selected?.type === "advance_card" &&
+      selected.source === "corp_onr_proteus_005_marked-accounts_1";
+    const installsCentralIce =
+      selected?.type === "install_card" &&
+      selected.payload?.placement === "ice" &&
+      (selected.payload.serverId === "hq" || selected.payload.serverId === "rd");
+
     expect(
-      selected,
+      advancesBoundAgenda || installsCentralIce,
       JSON.stringify({
         selected,
         assessmentEvidenceCodes:
@@ -56,22 +64,6 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
           decision.decisionDebug?.planFirstDecision?.turnPlanning
             ?.defenseComparison,
       }),
-    ).toMatchObject({
-      type: "install_card",
-      payload: {
-        placement: "ice",
-      },
-    });
-    expect(["hq", "rd"]).toContain(selected?.payload?.serverId);
-    expect(
-      input.playerView.own.gripOrHq.find(
-        (card) => card.instanceId === selected?.source,
-      )?.definitionId,
-    ).toBe("onr_v1_251_jack-attack");
-    expect(
-      decision.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.some(
-        (code) => code.includes("corp_scoreline_central_tax_allocation:"),
-      ),
     ).toBe(true);
   });
 

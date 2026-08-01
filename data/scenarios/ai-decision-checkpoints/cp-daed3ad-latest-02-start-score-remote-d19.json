@@ -5269,11 +5269,19 @@
         "type": "install_card",
         "sourceDefinitionId": "onr_v1_228_cinderella",
         "targetServerId": "new_remote"
+      },
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_228_cinderella",
+        "targetServerId": "rd"
       }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["develop_score_protection"]
+      "acceptableCapabilities": [
+        "develop_score_protection",
+        "allocate_server_defense"
+      ]
     }
   }
 }

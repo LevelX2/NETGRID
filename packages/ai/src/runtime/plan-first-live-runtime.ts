@@ -7516,6 +7516,9 @@ function buildCorpDomain(
   const scoreProtectionProjects = scoreProjects
     .filter(
       (project) =>
+        !project.evidenceCode.startsWith(
+          "corp_resident_score_parent_dominates_sibling_route:",
+        ) &&
         project.protectionNeed !== undefined &&
         !corpScoreProtectionIsSatisfied(input, project) &&
         !(
@@ -7879,18 +7882,50 @@ function buildCorpDomain(
             centralDefenseAllocation,
             CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
           );
+          const selectedScoreProtectionPrecedesAdditionalCentralLayer =
+            (serverId === "hq" || serverId === "rd") &&
+            selectedScoreProtectionSignals.length > 0 &&
+            (input.playerView.servers.find(
+              (server) => server.id === serverId,
+            )?.ice.length ?? 0) > 0 &&
+            centralDefenseAllocation?.status === "known" &&
+            centralDefenseAllocation.evidence[serverId].threat !== "acute" &&
+            centralDefenseAllocation.evidence[serverId].threat !== "terminal";
+          const targetCentralServer =
+            serverId === "hq" || serverId === "rd"
+              ? input.playerView.servers.find(
+                  (server) => server.id === serverId,
+                )
+              : undefined;
+          const unrealizedCentralStackPrecedesNoScoreDevelopment =
+            targetCentralServer !== undefined &&
+            scoreProtectionProjects.length > 0 &&
+            targetCentralServer.ice.length >= 3 &&
+            targetCentralServer.ice.every((ice) => ice.rezzed !== true) &&
+            centralDefenseAllocation?.status === "known" &&
+            centralDefenseAllocation.evidence[serverId as "hq" | "rd"]
+              .threat !== "acute" &&
+            centralDefenseAllocation.evidence[serverId as "hq" | "rd"]
+              .threat !== "terminal";
           if (
             (serverId === "hq" || serverId === "rd") &&
-            scorePlanPrecedesRedundantCapacityDefense(serverId) &&
-            route?.progressKind === "agenda_capacity_defense_conversion"
+            ((scorePlanPrecedesRedundantCapacityDefense(serverId) &&
+              route?.progressKind === "agenda_capacity_defense_conversion") ||
+              selectedScoreProtectionPrecedesAdditionalCentralLayer ||
+              unrealizedCentralStackPrecedesNoScoreDevelopment)
           ) {
             return [];
           }
           if (!route) {
             const layeredRemoteParent = corpLayeredIceStagingParent(
-              scoreProjects,
+              scoreProtectionProjects,
               remoteProjects,
               serverId,
+              corpScoreProtectionHasMaterialImmediateLiquidityAlternative(
+                input,
+                candidates,
+              ),
+              exactExecutableScoreProjectAvailable,
             );
             const coherentScorePlanPrecedesQualitativeStaging =
               (serverId === "hq" || serverId === "rd") &&
@@ -8558,25 +8593,26 @@ function corpLayeredIceStagingParent(
   scoreProjects: readonly CorpScoreProjectSignal[],
   remoteProjects: CorpCorePlanDomain["remoteProjects"],
   serverId: string,
+  materialImmediateLiquidityAlternativeExists: boolean,
+  exactExecutableScoreProjectAvailable: boolean,
 ): CorpLayeredIceStagingParent | undefined {
-  if (!serverId.startsWith("remote_")) return undefined;
-  const scoreParent = scoreProjects
-    .filter(
-      (project) =>
-        project.serverId === serverId &&
-        project.agendaInstanceId !== undefined &&
-        (project.protectionNeed?.baseline.knowledge === "known" ||
-          (project.protectionNeed === undefined && project.feasible)),
-    )
-    .sort((left, right) => {
-      const leftResident = left.phase === "install_agenda" ? 0 : 1;
-      const rightResident = right.phase === "install_agenda" ? 0 : 1;
-      return (
-        rightResident - leftResident ||
-        technicalIdCompare(left.projectId, right.projectId)
-      );
-    })[0];
-  if (scoreParent) {
+  if (
+    !serverId.startsWith("remote_") ||
+    materialImmediateLiquidityAlternativeExists ||
+    exactExecutableScoreProjectAvailable
+  ) {
+    return undefined;
+  }
+  const scoreParent = scoreProjects.find(
+    (project) => project.serverId === serverId,
+  );
+  const selectedScoreParentMatches =
+    scoreParent?.serverId === serverId &&
+    scoreParent.agendaInstanceId !== undefined &&
+    (scoreParent.fundingGap ?? 0) === 0 &&
+    scoreParent.protectionNeed?.baseline.knowledge === "known" &&
+    scoreParent.protectionNeed.baseline.protection.protectsScore === false;
+  if (scoreParent && selectedScoreParentMatches) {
     return { kind: "score", parentProjectId: scoreParent.projectId };
   }
   const remoteParent = remoteProjects
@@ -10197,7 +10233,6 @@ function corpScoreProtectionStagingInstallSignal(
     agendaPoints: project.agendaPoints,
     remainingAdvancementClicks,
   });
-  if (rushRisk.admission !== "accepted") return undefined;
   return {
     kind: "score_protection_staging_install",
     defenseId: `score-protection-staging-install:${project.projectId}:${candidate.actionId}`,
@@ -10209,7 +10244,7 @@ function corpScoreProtectionStagingInstallSignal(
     actionId: candidate.actionId,
     sourceCardInstanceId: candidate.sourceCardInstanceId,
     sourceDefinitionId: candidate.sourceDefinitionId,
-    evidenceCode: `score_protection_staging_install:${project.projectId}:${serverId}:rush_risk_${rushRisk.reason}`,
+    evidenceCode: `score_protection_staging_install:${project.projectId}:${serverId}:development_risk_${rushRisk.reason}`,
   };
 }
 

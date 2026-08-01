@@ -13226,10 +13226,10 @@
   },
   "expectation": {
     "acceptableActions": [
-      {
-        "type": "install_card",
-        "targetServerId": "remote_1"
-      }
+    {
+      "type": "install_card",
+      "sourceDefinitionId": "onr_v1_220_tycho-extension"
+    }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.score_agenda"],

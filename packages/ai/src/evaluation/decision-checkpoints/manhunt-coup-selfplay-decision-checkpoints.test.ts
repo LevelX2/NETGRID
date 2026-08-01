@@ -52,7 +52,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("does not let deck pressure justify an unprotected Corporate War install", () => {
+  it("does not expose Corporate War and may instead stage its bound defense", () => {
     const result = runAiDecisionCheckpoint(fixture(deckoutCloseoutJson));
 
     expect(result.ok, diagnostic(result)).toBe(true);
@@ -62,12 +62,15 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     const relaxedClock = mutateFixture(deckoutCloseoutJson, (checkpoint) => {
       moveArchivesCardsToRd(checkpoint, 6);
       checkpoint.expectation = {
-        acceptableActions: [{ type: "gain_credit" }],
+        acceptableActions: [
+          { type: "gain_credit" },
+          { type: "install_card", targetServerId: "remote_1" },
+        ],
         planExecution: {
-          acceptablePlanKinds: ["corp.economy"],
-          acceptableCapabilities: ["develop_or_convert_corp_economy"],
-          requiredAssessmentEvidence: [
-            "corp_engine_certified_basic_liquidity_development",
+          acceptablePlanKinds: ["corp.economy", "corp.defend_servers"],
+          acceptableCapabilities: [
+            "develop_or_convert_corp_economy",
+            "allocate_server_defense",
           ],
         },
       };

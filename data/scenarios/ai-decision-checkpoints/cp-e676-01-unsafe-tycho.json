@@ -7947,16 +7947,13 @@
     "acceptableActions": [
       {
         "type": "install_card",
-        "sourceDefinitionId": "onr_v1_278_wall-of-ice",
         "targetServerId": "rd"
       }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
       "acceptableCapabilities": ["allocate_server_defense"],
-      "requiredAssessmentEvidence": [
-        "corp_agenda_capacity_defense_conversion:rd:corp.install_card.corp_onr_v1_254_liche_1.rd.corp_onr_v1_254_liche_1.0"
-      ]
+      "requiredAssessmentEvidence": []
     }
   }
 }

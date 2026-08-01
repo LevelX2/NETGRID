@@ -273,7 +273,7 @@ export function corpQualitativeIceStagingSignal(
       unrezzedLayerCount * 2 -
       rezFundingGap
     : undefined;
-  if (layeredRemoteValue !== undefined && layeredRemoteValue <= 0) {
+  if (layeredRemoteValue !== undefined && layeredRemoteValue < 6) {
     return undefined;
   }
   const centralPressure = terminalCentralAdditionalLayer

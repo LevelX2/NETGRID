@@ -5,7 +5,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("baseline Seed 02 effect-activation checkpoint", () => {
-  it("installs the agenda only through its exact score plan, not as remote protection", () => {
+  it("keeps the agenda in its score plan while defense may draw or stage exact ICE", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(inactiveAgendaProtectionJson) as AiDecisionCheckpointV1,
     );

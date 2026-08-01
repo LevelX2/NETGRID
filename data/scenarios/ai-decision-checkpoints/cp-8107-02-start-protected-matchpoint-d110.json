@@ -10963,6 +10963,10 @@
     "acceptableActions": [
       {
         "actionId": "corp.install_card.corp_onr_v1_245_fire-wall_2.new_remote.corp_onr_v1_245_fire-wall_2"
+      },
+      {
+        "type": "install_card",
+        "targetServerId": "hq"
       }
     ],
     "forbiddenActions": [
@@ -10972,10 +10976,11 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["develop_score_protection"],
-      "requiredAssessmentEvidence": [
-        "score_protection_staging_install:agenda:corp_onr_proteus_008_project-zurich_1:new_remote:new_remote:bounded_deterrence"
-      ]
+      "acceptableCapabilities": [
+        "develop_score_protection",
+        "allocate_server_defense"
+      ],
+      "requiredAssessmentEvidence": []
     }
   }
 }

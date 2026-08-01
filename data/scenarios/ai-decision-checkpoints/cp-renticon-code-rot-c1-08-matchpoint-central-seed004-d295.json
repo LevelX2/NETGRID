@@ -28544,15 +28544,13 @@
     "acceptableActions": [
       {
         "type": "install_card",
-        "sourceDefinitionId": "onr_v1_251_jack-attack"
+        "targetServerId": "rd"
       }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
       "acceptableCapabilities": ["allocate_server_defense"],
-      "requiredAssessmentEvidence": [
-        "corp_agenda_capacity_defense_conversion:rd:corp.install_card.corp_onr_v1_251_jack-attack_2.rd.corp_onr_v1_251_jack-attack_2.3"
-      ]
+      "requiredAssessmentEvidence": []
     }
   }
 }

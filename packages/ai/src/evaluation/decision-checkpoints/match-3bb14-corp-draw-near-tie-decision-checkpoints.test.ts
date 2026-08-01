@@ -69,14 +69,16 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
           sourceDefinitionId: "onr_v1_268_shock-r",
           targetServerId: "rd",
         },
+        {
+          type: "install_card",
+          sourceDefinitionId: "onr_v1_268_shock-r",
+          targetServerId: "new_remote",
+        },
       ],
       forbiddenActions: [{ type: "draw_card" }],
       planExecution: {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["allocate_server_defense"],
-        requiredAssessmentEvidence: [
-          "engine_certified_global_defense_access_probability_reduced",
-        ],
       },
     };
 

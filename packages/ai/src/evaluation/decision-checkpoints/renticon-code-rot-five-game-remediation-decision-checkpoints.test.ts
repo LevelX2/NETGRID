@@ -41,7 +41,7 @@ const BEHAVIOR_FIXTURES = [
     scorelineSeed004D247Json,
   ],
   [
-    "does not invent central protection and takes exact basic liquidity at Seed 004 matchpoint",
+    "allocates exact matchpoint central defense without exposing score material in Seed 004",
     matchpointSeed004Json,
   ],
 ] as const;

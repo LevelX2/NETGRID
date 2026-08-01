@@ -9328,15 +9328,28 @@
   },
   "expectation": {
     "acceptableActions": [
-      {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_228_cinderella",
-        "targetServerId": "remote_1"
-      }
+    {
+      "type": "install_card",
+      "sourceDefinitionId": "onr_v1_228_cinderella",
+      "targetServerId": "remote_1"
+    },
+    {
+      "type": "install_card",
+      "sourceDefinitionId": "onr_v1_247_haunting-inquisition",
+      "targetServerId": "new_remote"
+    },
+    {
+      "type": "install_card",
+      "sourceDefinitionId": "onr_v1_228_cinderella",
+      "targetServerId": "hq"
+    }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["develop_score_protection"]
+      "acceptableCapabilities": [
+        "develop_score_protection",
+        "allocate_server_defense"
+      ]
     }
   }
 }

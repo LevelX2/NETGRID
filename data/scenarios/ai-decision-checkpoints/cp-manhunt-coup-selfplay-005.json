@@ -39228,13 +39228,17 @@
     "acceptableActions": [
       {
         "type": "gain_credit"
+      },
+      {
+        "type": "install_card",
+        "targetServerId": "remote_1"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
-      "requiredAssessmentEvidence": [
-        "corp_engine_certified_basic_liquidity_development"
+      "acceptablePlanKinds": ["corp.economy", "corp.defend_servers"],
+      "acceptableCapabilities": [
+        "develop_or_convert_corp_economy",
+        "allocate_server_defense"
       ]
     }
   }

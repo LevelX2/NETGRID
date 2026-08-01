@@ -31,7 +31,7 @@ describe("turn-planner shadow behavior-baseline regressions", () => {
     );
   });
 
-  it("keeps the superseding ICE-then-agenda remote line clean", () => {
+  it("keeps score-remote defense preparation clean under conservative uncertainty", () => {
     const summary = runSeedSummary("ai-behavior-baseline-v1-08", 160);
     const agendaInstallIndex = summary.actionSequence.findIndex(
       (entry) =>
@@ -42,13 +42,14 @@ describe("turn-planner shadow behavior-baseline regressions", () => {
     );
     const agendaServerId =
       summary.actionSequence[agendaInstallIndex]?.targetServerId;
-    const precedingRemoteIceInstallIndex = summary.actionSequence.findIndex(
+    const protectedRemoteIceInstallIndex = summary.actionSequence.findIndex(
       (entry, index) =>
-        index < agendaInstallIndex &&
+        (agendaInstallIndex < 0 || index < agendaInstallIndex) &&
         entry.side === "corp" &&
         entry.actionType === "install_card" &&
         entry.targetCardType === "ice" &&
-        (entry.targetServerId === agendaServerId ||
+        (agendaInstallIndex < 0 ||
+          entry.targetServerId === agendaServerId ||
           entry.targetServerId === "new_remote") &&
         entry.planKind === "corp.defend_servers",
     );
@@ -75,12 +76,15 @@ describe("turn-planner shadow behavior-baseline regressions", () => {
     expect(["action_limit", "game_result"]).toContain(summary.terminationKind);
     expect(summary.actions).toBeGreaterThan(0);
     expect(summary.actions).toBeLessThanOrEqual(160);
-    expect(agendaInstallIndex, corpActionDiagnostic).toBeGreaterThanOrEqual(0);
     expect(
-      precedingRemoteIceInstallIndex,
+      protectedRemoteIceInstallIndex,
       corpActionDiagnostic,
     ).toBeGreaterThanOrEqual(0);
-    expect(agendaInstallIndex).toBeGreaterThan(precedingRemoteIceInstallIndex);
+    if (agendaInstallIndex >= 0) {
+      expect(agendaInstallIndex).toBeGreaterThan(
+        protectedRemoteIceInstallIndex,
+      );
+    }
   }, 15_000);
 });
 

@@ -7163,7 +7163,7 @@
       "acceptablePlanKinds": ["corp.defend_servers"],
       "acceptableCapabilities": ["develop_score_protection"],
       "requiredAssessmentEvidence": [
-        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_193_corporate-coup_1:remote_1:remote_1"
+        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_203_hostile-takeover_1:remote_1:remote_1"
       ]
     }
   }

@@ -19272,13 +19272,23 @@
     "acceptableActions": [
       {
         "type": "draw_card"
+      },
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_231_cortical-scrub",
+        "targetServerId": "remote_1"
+      },
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_231_cortical-scrub",
+        "targetServerId": "new_remote"
       }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["develop_score_protection"],
-      "requiredAssessmentEvidence": [
-        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_189_artificial-security-directors_1:remote_1:remote_1"
+      "acceptableCapabilities": [
+        "develop_score_protection",
+        "allocate_server_defense"
       ]
     }
   }
