@@ -8238,7 +8238,10 @@ function buildCorpDomain(
                   ? `engine_certified_ice_rez_access_reduction:${rezServerId}:${candidate.actionId}`
                   : productiveIceRezRoute.routeKind ===
                       "exact_resource_exchange"
-                    ? `engine_certified_ice_rez_exact_resource_exchange:${rezServerId}:${candidate.actionId}`
+                    ? productiveIceRezRoute.resourceExchange
+                        ?.layeredCentralPathTax === true
+                      ? `engine_certified_ice_rez_layered_central_path_tax:${rezServerId}:tax_${productiveIceRezRoute.resourceExchange.runnerNormalCreditsLostOnAccessPath}:other_rezzed_${productiveIceRezRoute.resourceExchange.otherRezzedIceCount ?? 0}:${candidate.actionId}`
+                      : `engine_certified_ice_rez_exact_resource_exchange:${rezServerId}:${candidate.actionId}`
                     : productiveIceRezRoute.routeKind ===
                         "free_persistent_defense"
                       ? `engine_certified_ice_rez_free_persistent_defense:${rezServerId}:${candidate.actionId}`

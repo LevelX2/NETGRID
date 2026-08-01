@@ -39,6 +39,8 @@ export type CorpExactIceRezRouteProjection = Readonly<{
     runnerBreakerInstanceId: string;
     runnerBreakerDefinitionId: string;
     runnerConsumedCardInstanceIds: readonly string[];
+    layeredCentralPathTax?: true;
+    otherRezzedIceCount?: number;
     runnerRandomConsequences?: readonly Readonly<{
       cardId: string;
       definitionId: string;
@@ -162,6 +164,7 @@ export function projectExactCorpIceRezRoute(params: {
     : undefined;
   const resourceExchange = readExactCurrentRunResourceExchange({
     input,
+    candidate,
     sourceCard,
     targetServerId,
     ...(assessmentsKnown ? { before: knownBefore, after: knownAfter } : {}),
@@ -336,6 +339,7 @@ function isFreePersistentDefenseOnWorthwhileCurrentServer(params: {
 
 function readExactCurrentRunResourceExchange(params: {
   input: AiDecisionInput;
+  candidate: ActionSemanticCandidate;
   sourceCard: VisibleCard;
   targetServerId: string;
   before?: KnownCorpScoreProtectionAssessment;
@@ -344,8 +348,15 @@ function readExactCurrentRunResourceExchange(params: {
 }):
   | NonNullable<CorpExactIceRezRouteProjection["resourceExchange"]>
   | undefined {
-  const { input, sourceCard, targetServerId, before, after, totalRezCredits } =
-    params;
+  const {
+    input,
+    candidate,
+    sourceCard,
+    targetServerId,
+    before,
+    after,
+    totalRezCredits,
+  } = params;
   const quote = sourceCard.effectiveRezResourceExchangeQuote;
   if (
     quote?.context !== "installed" ||
@@ -368,15 +379,7 @@ function readExactCurrentRunResourceExchange(params: {
         quote.runnerBreak.nonNormalRunCreditsApplied ||
     quote.runnerBreak.canPayFromCurrentCredits !== true ||
     quote.runnerBreak.paymentEvidenceSource !== "engine_icebreaker_ability" ||
-    !nonNegativeSafeInteger(input.playerView.opponent.credits) ||
-    (quote.runnerBreak.consumedCards.length === 0 &&
-      (quote.runnerBreak.requiredCredits === 0 ||
-        quote.runnerBreak.requiredCredits < totalRezCredits ||
-        (quote.runnerBreak.requiredCredits === totalRezCredits &&
-          quote.runnerBreak.requiredCredits <
-            input.playerView.opponent.credits &&
-          currentRunMarginalDefenseThreat(input, targetServerId) ===
-            undefined)))
+    !nonNegativeSafeInteger(input.playerView.opponent.credits)
   ) {
     return undefined;
   }
@@ -394,6 +397,44 @@ function readExactCurrentRunResourceExchange(params: {
     !nonNegativeSafeInteger(runnerNormalCreditsLostOnAccessPath) ||
     runnerNormalCreditsLostOnAccessPath > quote.runnerBreak.requiredCredits
   ) {
+    return undefined;
+  }
+  const ordinaryResourceExchangeIsWorthwhile =
+    quote.runnerBreak.consumedCards.length > 0 ||
+    (quote.runnerBreak.requiredCredits > 0 &&
+      (quote.runnerBreak.requiredCredits > totalRezCredits ||
+        (quote.runnerBreak.requiredCredits === totalRezCredits &&
+          (quote.runnerBreak.requiredCredits >=
+            input.playerView.opponent.credits ||
+            currentRunMarginalDefenseThreat(input, targetServerId) !==
+              undefined))));
+  const otherRezzedIceCount =
+    input.playerView.servers
+      .find((server) => server.id === targetServerId)
+      ?.ice.filter(
+        (ice) => ice.instanceId !== sourceCard.instanceId && ice.rezzed === true,
+      ).length ?? 0;
+  const currentRezAction = input.legalActions.find(
+    (action) => action.actionId === candidate.actionId,
+  );
+  const layeredCentralPathTax =
+    (targetServerId === "hq" || targetServerId === "rd") &&
+    input.playerView.run?.attackedServerId === targetServerId &&
+    input.playerView.run.phase === "approach_ice" &&
+    input.playerView.run.position?.kind === "ice" &&
+    input.playerView.run.position.serverId === targetServerId &&
+    input.playerView.servers
+      .find((server) => server.id === targetServerId)
+      ?.ice[input.playerView.run.position.iceIndex]?.instanceId ===
+      sourceCard.instanceId &&
+    currentRezAction?.payload?.temporaryDerezAfterRun !== true &&
+    otherRezzedIceCount > 0 &&
+    quote.runnerBreak.requiredCredits > 0 &&
+    runnerNormalCreditsLostOnAccessPath > 0 &&
+    (runnerNormalCreditsLostOnAccessPath >= totalRezCredits ||
+      currentRunMarginalDefenseThreat(input, targetServerId) ===
+        "terminal_central_access");
+  if (!ordinaryResourceExchangeIsWorthwhile && !layeredCentralPathTax) {
     return undefined;
   }
   const consumedCardInstanceIds: string[] = [];
@@ -439,6 +480,9 @@ function readExactCurrentRunResourceExchange(params: {
     runnerBreakerInstanceId: quote.runnerBreak.breakerCardId,
     runnerBreakerDefinitionId: quote.runnerBreak.breakerDefinitionId,
     runnerConsumedCardInstanceIds: consumedCardInstanceIds,
+    ...(layeredCentralPathTax
+      ? { layeredCentralPathTax: true as const, otherRezzedIceCount }
+      : {}),
     runnerRandomConsequences: randomConsequences.map((consequence) => ({
       cardId: consequence.cardId,
       definitionId: consequence.definitionId,
@@ -736,6 +780,8 @@ function exactResourceExchangesEqual(
     left.runnerBreakUses === right.runnerBreakUses &&
     left.runnerBreakerInstanceId === right.runnerBreakerInstanceId &&
     left.runnerBreakerDefinitionId === right.runnerBreakerDefinitionId &&
+    left.layeredCentralPathTax === right.layeredCentralPathTax &&
+    left.otherRezzedIceCount === right.otherRezzedIceCount &&
     left.runnerConsumedCardInstanceIds.length ===
       right.runnerConsumedCardInstanceIds.length &&
     left.runnerConsumedCardInstanceIds.every(

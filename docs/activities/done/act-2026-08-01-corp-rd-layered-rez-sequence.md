@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-08-01-corp-rd-layered-rez-sequence
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-01
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-01
+completedAt: 2026-08-01
+branch: codex/ai-series-82b2-final-remediation
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runtime/corp-exact-ice-rez-route.ts
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+  - packages/ai/src/plans/corp-core-plan-modules.ts
+  - data/scenarios/ai-decision-checkpoints/cp-82b2-03-rd-data-wall-rez-d57.json
+  - data/scenarios/ai-decision-checkpoints/cp-82b2-04-rd-fire-wall-rez-d92.json
+checks:
+  - 227 fokussierte Rez-/Defense-Regressionen grün
+  - alle 12 Serien-Checkpoint-Proben grün
+  - AI-Typecheck mit 6144 MB Heap grün
+  - check:ai-source-structure grün
 ---
 
 # Korp-KI: Mehrschichtige R&D-Verteidigung im Run sinnvoll rezzen
@@ -89,21 +98,21 @@ sichtbaren Runner-Rig einen produktiven Schutz- oder Tax-Pfad bildet.
 
 ## Akzeptanzkriterien
 
-- [ ] Die Checkpoints 54/57 und 92/93 reproduzieren die unterschiedliche
+- [x] Die Checkpoints 54/57 und 92/93 reproduzieren die unterschiedliche
       Bewertung von Keeper/Data Wall beziehungsweise äußerer Fire Wall und
       innerer Data Wall mit vollständiger side-sicherer Quote.
-- [ ] Eine bezahlbare äußere Schicht gewinnt gegen `decline_rez`, wenn ihr
+- [x] Eine bezahlbare äußere Schicht gewinnt gegen `decline_rez`, wenn ihr
       exakter eigener oder kombinierter Schutz-/Tax-Wert den Zugriffspfad
       relevant verschlechtert und die verbleibende Reserve ausreicht.
-- [ ] Unfinanzierbare oder gegen das sichtbare Rig wirkungslose Schichten
+- [x] Unfinanzierbare oder gegen das sichtbare Rig wirkungslose Schichten
       dürfen weiterhin abgelehnt werden; es gibt keinen pauschalen
       Mehrschicht-Rezzwang.
-- [ ] Die Debugspur erklärt Credits, Rez-/Breakkosten, relevanten Serverwert,
+- [x] Die Debugspur erklärt Credits, Rez-/Breakkosten, relevanten Serverwert,
       Schichtposition, inneren Folgepfad und Reservewirkung statt
       `resource_exchange_unknown`.
-- [ ] Zuständiger Plan, Planinstanz, Step/Route, Executor und exakte
+- [x] Zuständiger Plan, Planinstanz, Step/Route, Executor und exakte
       `rez_ice`-Action bleiben unverändert gebunden.
-- [ ] Fokussierte Defense-/Rezfenster-Regressionen, AI-Typecheck sowie
+- [x] Fokussierte Defense-/Rezfenster-Regressionen, AI-Typecheck sowie
       relevante Replay-, StateHash- und Hidden-Info-Gates sind grün.
 
 ## Umsetzungshinweise
@@ -120,4 +129,13 @@ sichtbaren Runner-Rig einen produktiven Schutz- oder Tax-Pfad bildet.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die exakte ICE-Rezprojektion erkennt nun einen positiven, Engine-zertifizierten
+Tax auf einem bereits mehrschichtigen zentralen Zugriffspfad. Bei gewöhnlicher
+Zentralbedrohung muss der Pfad-Tax mindestens den Rezaufwand erreichen; bei
+einem sichtbaren terminalen Zentralzugriff darf der bestehende Defense-Owner
+auch eine teurere, dauerhaft bleibende Schicht aktivieren. Der historische
+Data-Wall-Pfad weist 1 Tax bei 1 Rezcredit und einer bereits rezzten Schicht
+aus; Fire Wall weist am terminalen R&D-Fenster 2 Tax, 5 Rezcredits und eine
+bereits rezzte Schicht aus. Score-Reserven werden weiterhin separat geprüft,
+temporäre Rezzes und kostenlose wirkungslose Breaks fallen nicht in den neuen
+Vertrag. Action, Executor und Planinstanz bleiben bei `corp.defend_servers`.

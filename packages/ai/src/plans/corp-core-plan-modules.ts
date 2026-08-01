@@ -4339,6 +4339,10 @@ function validExactIceRezRoute(value: unknown): boolean {
     nonEmptyString(resourceExchange.runnerBreakerDefinitionId) &&
     Array.isArray(resourceExchange.runnerConsumedCardInstanceIds) &&
     resourceExchange.runnerConsumedCardInstanceIds.every(nonEmptyString) &&
+    (resourceExchange.layeredCentralPathTax === undefined ||
+      (resourceExchange.layeredCentralPathTax === true &&
+        knownNonNegativeInteger(resourceExchange.otherRezzedIceCount) &&
+        (resourceExchange.otherRezzedIceCount as number) > 0)) &&
     (resourceExchange.runnerRandomConsequences === undefined ||
       (Array.isArray(resourceExchange.runnerRandomConsequences) &&
         resourceExchange.runnerRandomConsequences.every((entry) => {
