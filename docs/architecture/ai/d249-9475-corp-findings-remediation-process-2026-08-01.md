@@ -141,6 +141,17 @@ Umgesetzt und fokussiert verifiziert:
 - Keine Overtime-spezifische Auswahl und keine zukünftigen Action-IDs.
 - Commit: `fix(ai): preserve action-capacity score continuation`.
 
+Abgeschlossen ohne Verhaltensänderung:
+
+- der strikte historische D9-Checkpoint wählt auf dem Ausgangsstand und nach
+  P2 weiterhin Executive Extraction unter `corp.score_agenda` und
+  `install_score_agenda`;
+- die residente Overtime-Continuation bindet bereits Agenda-Instanz,
+  `new_remote`, aktuelle Installationsaction und verbleibende
+  Same-Turn-Scorelinie;
+- gemäß Grün-Gate entsteht weder eine Overtime-Sonderregel noch eine weitere
+  TurnPlanner- oder Schedulerlogik.
+
 ### P4 – Rote counterbasierte Economy-Lücke
 
 - Nur wenn der historische/nachbarschaftliche Vertrag weiterhin rot bleibt,
