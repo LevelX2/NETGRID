@@ -401,6 +401,8 @@ export function assessBestFundedCorpScoreProtection(
   let bestProgress: EnumeratedAssessment | undefined;
   let bestPostInstallSourceProgress: EnumeratedAssessment | undefined;
   let minimumSatisfying: EnumeratedAssessment | undefined;
+  const unknownSubsetReasons = new Set<string>();
+  let unknownSubsetCount = 0;
   for (const selection of selections) {
     const selectedById = new Map(
       selection.map((candidate) => [candidate.ice.instanceId, candidate.ice]),
@@ -438,16 +440,13 @@ export function assessBestFundedCorpScoreProtection(
         input.maximumRunnerAccessSuccessProbability,
     });
     if (protection.knowledge === "unknown") {
-      return unknownFundedAssessment(
-        input,
-        "subset_assessment_unknown",
-        reserve.totalCredits,
-        [
-          "fundedScoreProtectionKnown:false",
-          "subsetAssessmentUnknown:true",
-          `protectionUnknownReason:${protection.unknownReason}`,
-        ],
-      );
+      // An unsupported optional sibling route must remain a visible blocker,
+      // but it must not erase an independently certified known subset. The
+      // selected route is allowed to use only known assessments; if every
+      // subset is unknown we still fail closed below.
+      unknownSubsetCount += 1;
+      unknownSubsetReasons.add(protection.unknownReason);
+      continue;
     }
     const assessment: EnumeratedAssessment = {
       protection,
@@ -493,7 +492,14 @@ export function assessBestFundedCorpScoreProtection(
       input,
       "subset_assessment_unknown",
       reserve.totalCredits,
-      ["fundedScoreProtectionKnown:false", "noEnumeratedAssessment:true"],
+      [
+        "fundedScoreProtectionKnown:false",
+        "noKnownEnumeratedAssessment:true",
+        `unknownSubsetCount:${unknownSubsetCount}`,
+        ...[...unknownSubsetReasons]
+          .sort()
+          .map((reason) => `protectionUnknownReason:${reason}`),
+      ],
     );
   }
 
@@ -564,6 +570,10 @@ export function assessBestFundedCorpScoreProtection(
             `minimumAdditionalClicksToSatisfy:${minimumAdditionalClicksToSatisfy}`,
           ]
         : []),
+      `unknownSubsetCount:${unknownSubsetCount}`,
+      ...[...unknownSubsetReasons]
+        .sort()
+        .map((reason) => `unknownSubsetReason:${reason}`),
     ],
   };
 }

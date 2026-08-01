@@ -399,15 +399,18 @@ function readExactCurrentRunResourceExchange(params: {
   ) {
     return undefined;
   }
+  const marginalDefenseThreat = currentRunMarginalDefenseThreat(
+    input,
+    targetServerId,
+  );
   const ordinaryResourceExchangeIsWorthwhile =
     quote.runnerBreak.consumedCards.length > 0 ||
     (quote.runnerBreak.requiredCredits > 0 &&
-      (quote.runnerBreak.requiredCredits > totalRezCredits ||
+      (marginalDefenseThreat !== undefined ||
+        quote.runnerBreak.requiredCredits > totalRezCredits ||
         (quote.runnerBreak.requiredCredits === totalRezCredits &&
-          (quote.runnerBreak.requiredCredits >=
-            input.playerView.opponent.credits ||
-            currentRunMarginalDefenseThreat(input, targetServerId) !==
-              undefined))));
+          quote.runnerBreak.requiredCredits >=
+            input.playerView.opponent.credits)));
   const otherRezzedIceCount =
     input.playerView.servers
       .find((server) => server.id === targetServerId)

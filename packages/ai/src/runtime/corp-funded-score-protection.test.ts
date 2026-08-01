@@ -116,6 +116,30 @@ describe("assessBestFundedCorpScoreProtection", () => {
     });
   });
 
+  it("preserves a certified protecting subset when an optional sibling subset is unknown", () => {
+    const assessment = fundedAssessment({
+      serverIce: [
+        fundedIce("data-wall", "onr_v1_238_data-wall-2-0", false),
+        fundedIce("cinderella", "onr_v1_228_cinderella", false),
+      ],
+      corpCredits: 10,
+      threshold: HALF,
+    });
+
+    expect(assessment).toMatchObject({
+      knowledge: "known",
+      fundedProtection: true,
+      selectedRezCosts: [{ iceInstanceId: "data-wall" }],
+      protection: {
+        runnerAccessSuccessProbability: HALF,
+      },
+    });
+    expect(assessment.evidence).toContain("unknownSubsetCount:2");
+    expect(assessment.evidence).toContain(
+      "unknownSubsetReason:unsupported_access_relevant_ice_effect",
+    );
+  });
+
   it("fails closed before enumerating a pathological number of rez subsets", () => {
     const assessment = fundedAssessment({
       serverIce: Array.from({ length: 13 }, (_, index) =>
