@@ -5,7 +5,6 @@ import type { VisibleCard } from "@netgrid/shared";
 
 import {
   cardCreditCounterVisual,
-  cardSpecificCounterDisplayBadgePresentation,
   counterDisplayTooltipText,
   counterDisplayUsesCreditBadge,
   counterDisplayUsesRefreshingCreditBadge,
@@ -237,11 +236,8 @@ export function CounterDisplayBadge({
       </CounterHelpTooltipTrigger>
     );
   }
-  const cardSpecificPresentation =
-    cardSpecificCounterDisplayBadgePresentation(display);
   const className =
-    cardSpecificPresentation?.className ??
-    (display.id === "corporate_retreat_active"
+    display.id === "corporate_retreat_active"
       ? "agendaActiveCounterBadge"
       : display.id === "project_venice_actions_per_turn"
         ? "projectVeniceActionCounterBadge"
@@ -253,10 +249,9 @@ export function CounterDisplayBadge({
               ? "shellCounterBadge"
               : display.id === "trace_tag_counter"
                 ? "dataRavenCounterBadge"
-                : "ablativeCounterBadge");
+                : "ablativeCounterBadge";
   const testId =
-    cardSpecificPresentation?.testId ??
-    (display.id === "corporate_retreat_active"
+    display.id === "corporate_retreat_active"
       ? "corporate-retreat-active-badge"
       : display.id === "project_venice_actions_per_turn"
         ? "project-venice-action-badge"
@@ -270,7 +265,7 @@ export function CounterDisplayBadge({
                 ? "data-raven-counter-badge"
                 : display.id === "ablative"
                   ? "ablative-counter-badge"
-                  : "counter-display-badge");
+                  : "counter-display-badge";
   return (
     <CounterHelpTooltipTrigger
       className={className}
@@ -281,8 +276,7 @@ export function CounterDisplayBadge({
         ? { onVisibilityChange: onHelpTooltipVisibilityChange }
         : {})}
     >
-      {cardSpecificPresentation?.text ??
-        counterDisplayBadgeText(display, amount)}
+      {counterDisplayBadgeText(display, amount)}
     </CounterHelpTooltipTrigger>
   );
 }

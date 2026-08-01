@@ -7311,6 +7311,37 @@ select {
   line-height: 1;
 }
 
+.serverRunRestrictionStrip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.serverRunRestrictionChip {
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid rgb(240 177 93 / 0.88);
+  border-radius: 999px;
+  color: #ffe8bd;
+  background: linear-gradient(
+    135deg,
+    rgb(112 52 24 / 0.96),
+    rgb(48 28 28 / 0.97)
+  );
+  box-shadow:
+    0 3px 8px rgb(0 0 0 / 0.3),
+    inset 0 1px 1px rgb(255 229 184 / 0.2);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: help;
+}
+
 .corpHqServer.serverCollapsed .serverLayout {
   width: auto;
 }
@@ -9838,36 +9869,6 @@ select {
   font-weight: 900;
   line-height: 1;
   text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
-  pointer-events: auto;
-  cursor: help;
-}
-
-.rovingSubmarineRunLockedBadge {
-  position: absolute;
-  right: 6px;
-  top: 54px;
-  z-index: 46;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  max-width: calc(100% - 12px);
-  min-height: 20px;
-  padding: 2px 7px;
-  border: 1px solid rgb(240 177 93 / 0.88);
-  border-radius: 999px;
-  background: linear-gradient(
-    135deg,
-    rgb(112 52 24 / 0.96),
-    rgb(48 28 28 / 0.97)
-  );
-  color: #ffe8bd;
-  box-shadow:
-    0 4px 9px rgb(0 0 0 / 0.36),
-    inset 0 1px 1px rgb(255 229 184 / 0.2);
-  font-size: 10px;
-  font-weight: 900;
-  line-height: 1;
-  text-shadow: 0 1px 1px rgb(0 0 0 / 0.58);
   pointer-events: auto;
   cursor: help;
 }
