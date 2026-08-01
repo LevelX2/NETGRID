@@ -248,6 +248,10 @@ describe("plan-first live authority structure", () => {
   });
 
   it("binds fort-run rez support only to the complete exact Engine quote", () => {
+    const quoteProjection = readSource(
+      "actions",
+      "conditional-defense-followup-quote.ts",
+    );
     const planFirstRuntime = readSource(
       "runtime",
       "plan-first-live-runtime.ts",
@@ -283,12 +287,19 @@ describe("plan-first live authority structure", () => {
     ];
 
     for (const field of requiredQuoteFields) {
-      expect(assessmentSource, field).toContain(field);
+      expect(quoteProjection, field).toContain(field);
     }
-    expect(assessmentSource).toContain(
+    expect(quoteProjection).toContain(
       "CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION",
     );
-    expect(assessmentSource).toContain("CORP_FORT_RUN_REZ_SUPPORT_KIND");
+    expect(quoteProjection).toContain("CORP_FORT_RUN_REZ_SUPPORT_KIND");
+    expect(quoteProjection).toContain("action.costs");
+    expect(assessmentSource).toContain("conditionalDefenseFollowupQuote");
+    expect(assessmentSource).toContain("quote.sourceCardInstanceId");
+    expect(assessmentSource).toContain("quote.targetServerId");
+    expect(assessmentSource).toContain("quote.stateVersion");
+    expect(assessmentSource).toContain("quote.actionId");
+    expect(assessmentSource).toContain("quote.totalCreditsPayable");
     expect(assessmentSource).toContain("legalAction.costs");
     expect(assessmentSource).not.toMatch(
       /\bgripOrHq\b|\bvisibleKnownCardType\b|\bserver\.ice\.length\b/,

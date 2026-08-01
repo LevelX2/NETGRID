@@ -4025,7 +4025,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     )?.id;
     expect(rovingServerId).toBeDefined();
     expect(state.cardInstances[rovingId]?.rezzed).toBe(true);
-    expect(cardCounterAmount(state, rovingId, "mark")).toBe(1);
+    expect(
+      state.corpTurnFlags?.fortActivityServerIdsSinceCorpTurnStart,
+    ).toContain(rovingServerId);
 
     state = toRunnerTurnFromCorpMain(state);
     expect(
@@ -4037,7 +4039,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     ).toBe(true);
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    expect(cardCounterAmount(state, rovingId, "mark")).toBe(0);
+    expect(
+      state.corpTurnFlags?.fortActivityServerIdsSinceCorpTurnStart,
+    ).toEqual([]);
     state = toRunnerTurnFromCorpMain(state);
     expect(
       getLegalActions(state, "runner").some(

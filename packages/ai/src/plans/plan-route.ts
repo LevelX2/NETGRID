@@ -1,10 +1,22 @@
 import type { Side } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { AiHintStructuredEffect } from "../hint-ontology";
 import type { PlanTargetRef } from "./plan-kernel-types";
 import {
   PlanResolutionFailure,
   type PlanResolutionFailureCode,
 } from "./plan-resolution-failure";
+
+export type FunctionalEffectRequirement = {
+  kind: AiHintStructuredEffect["kind"];
+  timing?: AiHintStructuredEffect["timing"];
+  scope?: AiHintStructuredEffect["scope"];
+  resource?: NonNullable<AiHintStructuredEffect["resource"]>;
+  target?: string;
+  economyMode?: NonNullable<AiHintStructuredEffect["economyMode"]>;
+  repeatable?: boolean;
+  finite?: boolean;
+};
 
 export type PlanStepCapability = {
   capabilityId: string;
@@ -12,6 +24,8 @@ export type PlanStepCapability = {
   legalActionTypes?: string[];
   requiredActionSignals?: string[];
   requiredCardSignals?: string[];
+  requiredFunctionalEffects?: FunctionalEffectRequirement[];
+  /** Exact source identity only; never use this field as a capability proxy. */
   requiredSourceDefinitionIds?: string[];
   requiredSourceRoles?: string[];
 };
@@ -94,9 +108,7 @@ export function bindBestCurrentPlanRoute(
   }));
   const compatible = matches
     .filter(
-      (
-        item,
-      ): item is typeof item & { match: { status: "compatible" } } =>
+      (item): item is typeof item & { match: { status: "compatible" } } =>
         item.match.status === "compatible",
     )
     .map((item) => item.entry)
@@ -205,6 +217,10 @@ export function matchPlanStepCandidate(
     capability.requiredCardSignals,
     candidate.cardContextSignals,
   );
+  const functionalEffectsMatch = allRequiredFunctionalEffectsPresent(
+    capability.requiredFunctionalEffects,
+    candidate.functionalEffects,
+  );
   const sourceDefinitionMatches =
     capability.requiredSourceDefinitionIds === undefined ||
     (candidate.sourceDefinitionId !== undefined &&
@@ -220,6 +236,7 @@ export function matchPlanStepCandidate(
     !semanticTypeMatches ||
     !actionSignalsMatch ||
     !cardSignalsMatch ||
+    !functionalEffectsMatch ||
     !sourceDefinitionMatches ||
     !sourceRolesMatch
   ) {
@@ -230,6 +247,40 @@ export function matchPlanStepCandidate(
     return { status: "incompatible", code: "step_target_mismatch" };
   }
   return { status: "compatible" };
+}
+
+function allRequiredFunctionalEffectsPresent(
+  requirements: readonly FunctionalEffectRequirement[] | undefined,
+  effects: readonly AiHintStructuredEffect[] | undefined,
+): boolean {
+  if (requirements === undefined) return true;
+  if (effects === undefined) return requirements.length === 0;
+  return requirements.every((requirement) =>
+    effects.some((effect) => functionalEffectMatches(effect, requirement)),
+  );
+}
+
+function functionalEffectMatches(
+  effect: AiHintStructuredEffect,
+  requirement: FunctionalEffectRequirement,
+): boolean {
+  return (
+    effect.kind === requirement.kind &&
+    optionalRequirementMatches(requirement.timing, effect.timing) &&
+    optionalRequirementMatches(requirement.scope, effect.scope) &&
+    optionalRequirementMatches(requirement.resource, effect.resource) &&
+    optionalRequirementMatches(requirement.target, effect.target) &&
+    optionalRequirementMatches(requirement.economyMode, effect.economyMode) &&
+    optionalRequirementMatches(requirement.repeatable, effect.repeatable) &&
+    optionalRequirementMatches(requirement.finite, effect.finite)
+  );
+}
+
+function optionalRequirementMatches<T>(
+  required: T | undefined,
+  actual: T | undefined,
+): boolean {
+  return required === undefined || required === actual;
 }
 
 function candidateMatchesTarget(
@@ -247,8 +298,8 @@ function candidateMatchesTarget(
     );
   }
   if (
-    (candidate.sourceCardInstanceId === target.id ||
-      candidate.sourceDefinitionId === target.id)
+    candidate.sourceCardInstanceId === target.id ||
+    candidate.sourceDefinitionId === target.id
   ) {
     return true;
   }
@@ -273,7 +324,9 @@ function allRequiredPresent(
   required: readonly string[] | undefined,
   actual: readonly string[],
 ): boolean {
-  return required === undefined || required.every((value) => actual.includes(value));
+  return (
+    required === undefined || required.every((value) => actual.includes(value))
+  );
 }
 
 function compareRouteCandidates(
@@ -292,9 +345,7 @@ function mostSpecificFailureCode(
   if (matches.length === 0) return "no_current_route_head";
   const codes = matches
     .filter(
-      (
-        match,
-      ): match is Extract<MatchResult, { status: "incompatible" }> =>
+      (match): match is Extract<MatchResult, { status: "incompatible" }> =>
         match.status === "incompatible",
     )
     .map((match) => match.code);

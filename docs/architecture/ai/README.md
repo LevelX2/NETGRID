@@ -91,6 +91,15 @@
   Coverage getrennt. Ihr Nutzen wird über Erfolgswahrscheinlichkeit und
   Handpuffer bewertet; die KI wartet nicht auf im eigenen Deck nicht
   vorhandene Standardbreaker und ignoriert kein letales Ausfallrisiko.
+- Wiederverwendbare Kartenfähigkeiten werden als actiongebundene,
+  strukturierte Funktionseffekte aus der aktiven Hint-Quelle projiziert.
+  Plan-Steps matchen Effektart, Timing, Scope, Ressource und Ziel gegen die
+  konkrete `LegalAction`; passive Karteninformation bleibt getrennt und eine
+  mehrdeutige Ability-Bindung scheitert fail-closed. Zustandsabhängige
+  Defense-Folgen benötigen zusätzlich einen an Action, Quelle, Fort und
+  `stateVersion` gebundenen Engine-Quote. Zufallsbruch mit Eigenschaden wird
+  über ein allgemeines `random_break_or_damage`-Profil bewertet und nicht
+  über Karten-ID, Kartenname oder Blink-spezifische PublicEvent-Felder.
 - `RemoteDoctrineProfile` leitet aus eigenem Deckstrategieprofil,
   DeckCapabilities und StrategicIntent ab, ob ein Deck keinen,
   opportunistischen, unterstützenden oder primären Remote-Bedarf besitzt.
@@ -237,6 +246,11 @@
   aktuelles Post-Optimization-Profil, entscheidungslokale Runner-Ableitungen,
   allokationsarme Markerprüfung und Paritäts-/Laufzeitnachweis.
 - `ai-hints-structure-decision-2026-05-15.md`: Struktur der aktiven AI-Hints.
+- `ai-generic-capability-migration-process-2026-08-01.md` und
+  `docs/reviews/ai/ai-generic-capability-migration-final-review-2026-08-01.md`:
+  abgeschlossene Migration von sieben kartenspezifischen
+  Erkennungsfamilien auf actiongebundene Funktionseffekte, TargetProfiles und
+  Engine-Quotes einschließlich klassifiziertem Restinventar.
 - `taktiksignale-strategieanker-guide-2026-06-02-v3.md`: aktuelle Begriffe für
   Taktiksignale, Strategieanker, TargetProfiles, Conditions und Constraints.
 - `ai-play-strength-development-placement-guide-2026-06-13.md`: zulässige

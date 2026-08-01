@@ -451,7 +451,6 @@ import {
   shouldOpenAardvarkInterception,
   spendFortTraceBitPool,
   startAardvarkInterceptionChoice,
-  validateActivityGatedFortRun,
   type FortRunSideFamiliesHost,
 } from "../run/fort-run-side-families";
 import {
@@ -730,15 +729,19 @@ export function createEncounterMovementRuntimeHosts(
       state,
       `${BLINK_ID}.break.${run.runId}.${encounteredIceId}.${breakerId}.${subroutineIndex}`,
     );
-    legalAction.payload = { ...(legalAction.payload ?? {}), blinkDieRoll: die };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      randomBreakOutcomeKind: "random_break_or_damage",
+      randomBreakOutcomeRoll: die,
+    };
     if (die >= 4) {
       deps.executeEffectCommands(state, [
         { type: "break_subroutine", subroutineIndex },
       ]);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        blinkBreakSuccess: true,
-        blinkDamageAmount: 0,
+        randomBreakOutcomeSuccess: true,
+        randomBreakOutcomeDamageAmount: 0,
       };
       return;
     }
@@ -752,8 +755,8 @@ export function createEncounterMovementRuntimeHosts(
     setDamagePayload(legalAction, damageSummary);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      blinkBreakSuccess: false,
-      blinkDamageAmount: die,
+      randomBreakOutcomeSuccess: false,
+      randomBreakOutcomeDamageAmount: die,
     };
   }
 
@@ -1019,11 +1022,6 @@ export function createEncounterMovementRuntimeHosts(
         ensureRunnerTurnFlags: () => ensureRunnerTurnFlags(state),
       },
       run: {
-        validateActivityGatedFortRun: (serverId) =>
-          validateActivityGatedFortRun(
-            fortRunSideFamiliesHostForState(state),
-            serverId,
-          ),
         startRun: (serverId, legalAction, options) =>
           runtime.startRun(state, serverId, undefined, 1, options, legalAction),
         activeRunActionSpendingCapSourceIds: () =>

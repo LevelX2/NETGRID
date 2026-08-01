@@ -9,6 +9,7 @@
 - `card-images/`: Kartenbild-Performance, Bildroute, Cache-/Thumbnail-Pfad und Anzeigegrenzen.
 - `card-rules/`: Regel-, Resolver-, Timing-, Trace- und Coverage-Artefakte.
 - `deck-library/`: lokale Deckbibliothek und Datei-/Storage-Konzept.
+- `engine/`: Engine-Verträge für Zustandsführung, LegalActions, Ausführungsvalidierung und PlayerView-Projektionen.
 - `live-match/`: Timer-, Audio-Cue- und Live-Match-Synchronisationskonzepte.
 
 ## Regeln

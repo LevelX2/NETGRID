@@ -39,6 +39,7 @@ import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
 import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continuation-quote";
 import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-bank-preparation-quote";
+import { serverRunStartRestrictions } from "../run/server-run-start-restrictions";
 
 export function buildPlayerViewProjection(
   state: GameState,
@@ -49,6 +50,7 @@ export function buildPlayerViewProjection(
   const corpCentralAccessQuotes =
     side === "corp" ? quoteCorpCentralAccesses(state) : undefined;
   const visibleServers = state.corp.servers.map((server) => {
+    const runStartRestrictions = serverRunStartRestrictions(state, server.id);
     const ice = server.ice.map((id) => {
       const visibleIce = visibleCorpCard(state, id, side, "ice");
       const effectiveRunQuote = visibleEffectiveIceRunQuote(
@@ -98,6 +100,7 @@ export function buildPlayerViewProjection(
                   : {}),
               };
             }),
+      ...(runStartRestrictions.length > 0 ? { runStartRestrictions } : {}),
       ...counterDisplaysField([
         ...(poxCounterDisplaysForServer(state, server.id) ?? []),
         ...(purgeableRunnerVirusCounterDisplaysForServer(state, server.id) ??

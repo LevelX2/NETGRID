@@ -428,9 +428,10 @@ describe("V1.9.0 Mechanikpaket I", () => {
         targetIceDefinitionId: "onr_v1_279_wall-of-static",
         targetIceTitle: "Wall of Static",
         subroutineIndex: 0,
-        blinkDieRoll: die,
-        blinkBreakSuccess: die >= 4,
-        blinkDamageAmount: die >= 4 ? 0 : die,
+        randomBreakOutcomeKind: "random_break_or_damage",
+        randomBreakOutcomeRoll: die,
+        randomBreakOutcomeSuccess: die >= 4,
+        randomBreakOutcomeDamageAmount: die >= 4 ? 0 : die,
       });
       expect(JSON.stringify(publicPayload)).not.toContain("privatePayload");
       expect(JSON.stringify(publicPayload)).not.toContain("cardInstances");

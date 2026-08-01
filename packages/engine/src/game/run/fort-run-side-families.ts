@@ -19,6 +19,12 @@ import {
   PILE_DRIVER_ID,
   RAMMING_PISTON_ID,
 } from "../../compatibility/runtime-compatibility";
+import {
+  clearFortActivitySinceCorpTurnStart,
+  markFortActivitySinceCorpTurnStart,
+  serverRunStartRestrictions,
+  serverRunStartRestrictionSources,
+} from "./server-run-start-restrictions";
 
 const DEFAULT_FORT_TRACE_BIT_POOL_BITS = 3;
 
@@ -302,7 +308,8 @@ export function resolveAardvarkInterceptionChoice(
     return {
       handled: true,
       sourceCardId: aardvarkId as CardInstanceId,
-      sourceDefinitionId: host.cards.definitionFor(aardvarkId as CardInstanceId).id,
+      sourceDefinitionId: host.cards.definitionFor(aardvarkId as CardInstanceId)
+        .id,
       serverId: run.attackedServerId,
       serverLabel: host.servers.publicServerLabel(run.attackedServerId),
       targetProgramId: breakerId as CardInstanceId,
@@ -339,7 +346,8 @@ export function resolveAardvarkInterceptionChoice(
   return {
     handled: true,
     sourceCardId: aardvarkId as CardInstanceId,
-    sourceDefinitionId: host.cards.definitionFor(aardvarkId as CardInstanceId).id,
+    sourceDefinitionId: host.cards.definitionFor(aardvarkId as CardInstanceId)
+      .id,
     serverId: run.attackedServerId,
     serverLabel: host.servers.publicServerLabel(run.attackedServerId),
     targetProgramId: breakerId as CardInstanceId,
@@ -352,37 +360,22 @@ export function activityGatedFortRunSourceIds(
   host: FortRunSideFamiliesHost,
   serverId: Exclude<ServerId, "new_remote">,
 ): CardInstanceId[] {
-  return host.servers
-    .mustServer(serverId)
-    .root.filter((cardId) => {
-      const instance = host.state.cardInstances[cardId];
-      return (
-        instance?.rezzed === true &&
-        isRovingRunRestrictionSource(host, cardId)
-      );
-    })
-    .sort();
+  return serverRunStartRestrictionSources(host.state, serverId).map(
+    (source) => source.sourceCardInstanceId,
+  );
 }
 
 export function isActivityGatedFortRunBlocked(
   host: FortRunSideFamiliesHost,
   serverId: Exclude<ServerId, "new_remote">,
 ): boolean {
-  const sourceIds = activityGatedFortRunSourceIds(host, serverId);
-  return (
-    sourceIds.length > 0 &&
-    !sourceIds.some((sourceId) => host.counters.cardCounter(sourceId, "mark") > 0)
-  );
+  return serverRunStartRestrictions(host.state, serverId).length > 0;
 }
 
 export function clearActivityGatedFortRunMarkers(
   host: FortRunSideFamiliesHost,
 ): void {
-  for (const server of host.state.corp.servers) {
-    for (const sourceId of activityGatedFortRunSourceIds(host, server.id)) {
-      host.counters.setCardCounter(sourceId, "mark", 0);
-    }
-  }
+  clearFortActivitySinceCorpTurnStart(host.state);
 }
 
 export function markFortActivityForRunGate(
@@ -390,9 +383,9 @@ export function markFortActivityForRunGate(
   serverId: Exclude<ServerId, "new_remote">,
   legalAction?: LegalAction,
 ): FortRunSideFamilyResult {
+  markFortActivitySinceCorpTurnStart(host.state, serverId);
   const sourceIds = activityGatedFortRunSourceIds(host, serverId);
-  if (sourceIds.length === 0) return { handled: false };
-  for (const sourceId of sourceIds) host.counters.setCardCounter(sourceId, "mark", 1);
+  if (sourceIds.length === 0) return { handled: false, stateChanged: true };
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -423,12 +416,9 @@ export function validateActivityGatedFortRun(
       serverId,
       serverLabel: host.servers.publicServerLabel(serverId),
     };
-  const hasActivity = sourceIds.some(
-    (sourceId) => host.counters.cardCounter(sourceId, "mark") > 0,
-  );
-  if (!hasActivity)
+  if (serverRunStartRestrictions(host.state, serverId).length > 0)
     throw new Error(
-      "Roving Submarine erlaubt Runs auf dieses Remote nur nach Korp-Aktivitaet im letzten Korpzug.",
+      "Eine aktive Servereinschränkung erlaubt den Run nur nach Korp-Aktivität im maßgeblichen Korpzug.",
     );
   return {
     handled: true,
@@ -493,7 +483,9 @@ export function isTokyoUnsuccessfulRunSource(
 
 export function fortTraceBitPoolSource(
   host: FortRunSideFamiliesHost,
-): { cardId: CardInstanceId; serverId: Exclude<ServerId, "new_remote"> } | undefined {
+):
+  | { cardId: CardInstanceId; serverId: Exclude<ServerId, "new_remote"> }
+  | undefined {
   const run = host.state.run;
   if (!run) return undefined;
   const server = host.servers.mustServer(run.attackedServerId);
@@ -511,9 +503,7 @@ export function fortTraceBitPoolSource(
   return cardId ? { cardId, serverId: server.id } : undefined;
 }
 
-export function fortTraceBitPoolTotal(
-  host: FortRunSideFamiliesHost,
-): number {
+export function fortTraceBitPoolTotal(host: FortRunSideFamiliesHost): number {
   const source = fortTraceBitPoolSource(host);
   return source ? host.counters.cardCounter(source.cardId, "bit") : 0;
 }
@@ -535,7 +525,9 @@ export function spendFortTraceBitPool(
     !host.state.run ||
     host.state.run.attackedServerId !== serverId
   ) {
-    throw new Error("Fort-Trace-Bit-Pool ist fuer diesen Trace nicht verfuegbar.");
+    throw new Error(
+      "Fort-Trace-Bit-Pool ist fuer diesen Trace nicht verfuegbar.",
+    );
   }
   if (host.counters.cardCounter(current.cardId, "bit") < amount)
     throw new Error("Fort-Trace-Bit-Pool hat nicht genug Bits.");
@@ -695,7 +687,9 @@ export function resolveHammerStealthLossChoice(
     throw new Error("Hammer-Stealth-Auswahl enthaelt doppelte Optionen.");
   const lossByCardId = new Map<CardInstanceId, number>();
   for (const optionId of selectedOptionIds) {
-    const option = choice.options.find((candidate) => candidate.id === optionId);
+    const option = choice.options.find(
+      (candidate) => candidate.id === optionId,
+    );
     const cardId =
       typeof option?.value === "string"
         ? (option.value as CardInstanceId)
@@ -734,7 +728,8 @@ function startHammerStealthLossChoice(
   requiredLoss: number,
   sources: { cardId: CardInstanceId; available: number }[],
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const options: ChoiceRequest["options"] = [];
   for (const source of sources) {
     const definition = host.cards.definitionFor(source.cardId);
@@ -769,17 +764,9 @@ function isWormBreaker(
   breakerId: CardInstanceId,
 ): boolean {
   const definition = host.cards.definitionFor(breakerId);
-  return definition.type === "program" && host.cards.cardHasSubtype(definition, "worm");
-}
-
-function isRovingRunRestrictionSource(
-  host: FortRunSideFamiliesHost,
-  cardId: CardInstanceId,
-): boolean {
-  return hasFortRunWindowKind(
-    host,
-    cardId,
-    "can_run_fort_only_if_last_corp_turn_activity_on_fort",
+  return (
+    definition.type === "program" &&
+    host.cards.cardHasSubtype(definition, "worm")
   );
 }
 

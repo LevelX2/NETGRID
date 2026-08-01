@@ -1,13 +1,13 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 import type {
-  BlinkRiskAssessment,
-  BlinkRiskPayoffOverride,
+  RandomBreakOrDamageRiskAssessment,
+  RandomBreakOrDamageRiskPayoffOverride,
   RandomBreakOrDamageRiskProfile,
 } from "../runner-run-target-evaluation";
 import type { VisibleEncounterSubroutine } from "./encounter-subroutine";
 
-export type RunnerBlinkEncounterBreakContextDependencies = {
+export type RunnerRandomBreakOrDamageEncounterContextDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -19,17 +19,17 @@ export type RunnerBlinkEncounterBreakContextDependencies = {
   encounteredSubroutines: (
     input: AiDecisionInput,
   ) => readonly VisibleEncounterSubroutine[];
-  buildBlinkRiskAssessment: (params: {
+  buildRandomBreakOrDamageRiskAssessment: (params: {
     currentHandCount: number;
     handAfterActionCost: number;
-    blinkUsesLikely: number;
+    randomBreakUsesLikely: number;
     visibleSubroutinesLikely: number;
-    payoffOverride: BlinkRiskPayoffOverride;
+    payoffOverride: RandomBreakOrDamageRiskPayoffOverride;
     stableCoverageAvailable: boolean;
     context: "encounter_break";
-    riskProfile?: RandomBreakOrDamageRiskProfile;
+    riskProfile: RandomBreakOrDamageRiskProfile;
     evidence?: readonly string[];
-  }) => BlinkRiskAssessment;
+  }) => RandomBreakOrDamageRiskAssessment;
   isImmediateSafetyThreatSubroutine: (
     subroutine: VisibleEncounterSubroutine,
   ) => boolean;
@@ -39,18 +39,18 @@ export type RunnerBlinkEncounterBreakContextDependencies = {
   ) => boolean;
 };
 
-export function createRunnerBlinkEncounterBreakContext(
-  dependencies: RunnerBlinkEncounterBreakContextDependencies,
+export function createRunnerRandomBreakOrDamageEncounterContext(
+  dependencies: RunnerRandomBreakOrDamageEncounterContextDependencies,
 ): {
-  blinkRiskAssessmentForEncounterBreak: (
+  randomBreakOrDamageRiskAssessmentForEncounterBreak: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => BlinkRiskAssessment | undefined;
+  ) => RandomBreakOrDamageRiskAssessment | undefined;
 } {
-  function blinkRiskAssessmentForEncounterBreak(
+  function randomBreakOrDamageRiskAssessmentForEncounterBreak(
     input: AiDecisionInput,
     action: LegalAction,
-  ): BlinkRiskAssessment | undefined {
+  ): RandomBreakOrDamageRiskAssessment | undefined {
     if (input.side !== "runner" || action.type !== "break_subroutine") {
       return undefined;
     }
@@ -71,37 +71,39 @@ export function createRunnerBlinkEncounterBreakContext(
       1,
       breakIndexes.size || targetSubroutines.length,
     );
-    const stableCoverageAvailable = stableBreakAlternativeForBlinkAction(
+    const stableCoverageAvailable = stableBreakAlternativeForRandomBreakAction(
       input,
       action,
     );
-    const payoffOverride = blinkEncounterPayoffOverride(
+    const payoffOverride = randomBreakEncounterPayoffOverride(
       input,
       targetSubroutines,
     );
 
-    return dependencies.buildBlinkRiskAssessment({
+    return dependencies.buildRandomBreakOrDamageRiskAssessment({
       currentHandCount,
       handAfterActionCost: currentHandCount,
-      blinkUsesLikely: visibleSubroutinesLikely,
+      randomBreakUsesLikely: visibleSubroutinesLikely,
       visibleSubroutinesLikely,
       payoffOverride,
       stableCoverageAvailable,
       context: "encounter_break",
       riskProfile,
       evidence: [
-        "blinkBreakAction:true",
-        `blinkBreakSubroutineCount:${visibleSubroutinesLikely}`,
-        `blinkBreakStableAlternative:${stableCoverageAvailable}`,
-        `blinkBreakPayoffOverride:${payoffOverride}`,
+        "randomBreakDamageAction:true",
+        `randomBreakDamageSubroutineCount:${visibleSubroutinesLikely}`,
+        `randomBreakDamageStableAlternative:${stableCoverageAvailable}`,
+        `randomBreakDamagePayoffOverride:${payoffOverride}`,
         ...(input.playerView.run?.position?.serverId
-          ? [`blinkBreakServer:${input.playerView.run.position.serverId}`]
+          ? [
+              `randomBreakDamageServer:${input.playerView.run.position.serverId}`,
+            ]
           : []),
       ],
     });
   }
 
-  function stableBreakAlternativeForBlinkAction(
+  function stableBreakAlternativeForRandomBreakAction(
     input: AiDecisionInput,
     action: LegalAction,
   ): boolean {
@@ -132,10 +134,10 @@ export function createRunnerBlinkEncounterBreakContext(
     });
   }
 
-  function blinkEncounterPayoffOverride(
+  function randomBreakEncounterPayoffOverride(
     input: AiDecisionInput,
     targetSubroutines: VisibleEncounterSubroutine[],
-  ): BlinkRiskPayoffOverride {
+  ): RandomBreakOrDamageRiskPayoffOverride {
     if (
       targetSubroutines.some(dependencies.isImmediateSafetyThreatSubroutine)
     ) {
@@ -157,5 +159,5 @@ export function createRunnerBlinkEncounterBreakContext(
     return "none";
   }
 
-  return { blinkRiskAssessmentForEncounterBreak };
+  return { randomBreakOrDamageRiskAssessmentForEncounterBreak };
 }

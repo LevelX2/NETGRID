@@ -122,7 +122,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     ).toBeGreaterThan(0);
     expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
       expect.arrayContaining([
-        "random_break_or_damage_profile:blink",
+        "random_break_or_damage_profile:random_break_or_damage:net:0.5:3",
         "random_break_attempts_before:1",
         "random_break_success_probability_before:0.5",
         "random_break_success_probability_after:0.75",
@@ -800,7 +800,9 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       credits: 1,
       hand: [junkyard],
       rig: [installedProgramSearch],
-      legalActions: [installAction("install-junkyard-after-search", junkyard, 1)],
+      legalActions: [
+        installAction("install-junkyard-after-search", junkyard, 1),
+      ],
     });
 
     const evaluation = findByInstance(

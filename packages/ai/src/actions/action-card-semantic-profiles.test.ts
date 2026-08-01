@@ -142,6 +142,25 @@ describe("ActionCardSemanticProfiles", () => {
       ]),
     );
   });
+
+  it("retains the complete structured effect contract from the active hint", () => {
+    const profiles = buildActionCardSemanticProfilesByDefinitionId();
+
+    expect(
+      profiles["onr_v1_309_bbs-whispering-campaign"]?.functionalEffects,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "finite_economy_pool",
+          timing: "action",
+          scope: "remote",
+          resource: "credits",
+          amount: 16,
+          economyMode: "fixed_pool",
+        }),
+      ]),
+    );
+  });
 });
 
 function legacyCompatibilitySignal(signal: string): boolean {

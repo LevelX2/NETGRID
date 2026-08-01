@@ -50,15 +50,6 @@ export type EconomyActionDominance = {
   evidence: string[];
 };
 
-const FIXED_POOL_SOURCE_IDS = new Set([
-  "onr_v1_193_corporate-coup",
-  "onr_v1_195_corporate-retreat",
-  "onr_v1_206_marine-arcology",
-  "onr_v1_209_political-coup",
-  "onr_v1_210_political-overthrow",
-  "onr_v1_309_bbs-whispering-campaign",
-]);
-
 export function economyCreditBaseValue(netLiquidCreditGain: number): number {
   const gain = wholeNonNegative(netLiquidCreditGain);
   if (gain < ECONOMY_CREDIT_BASE_CURVE.length) {
@@ -163,8 +154,10 @@ export function economyActionMode(
     return "strategic_bank_cashout";
   }
   if (
-    candidate.sourceDefinitionId &&
-    FIXED_POOL_SOURCE_IDS.has(candidate.sourceDefinitionId)
+    projection.sourcePool === "finite" ||
+    candidate.functionalEffects?.some(
+      (effect) => effect.economyMode === "fixed_pool",
+    ) === true
   ) {
     return "fixed_pool_payout";
   }

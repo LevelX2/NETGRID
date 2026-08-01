@@ -909,10 +909,10 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       targetServerId: "remote_1",
       accessPayoff: "score_threat",
       scoreThreat: true,
-      pathPassability: "blocked_by_blink_hand_buffer",
+      pathPassability: "blocked_by_random_break_damage_hand_buffer",
       recommendation: "draw_for_damage_buffer",
     });
-    expect(evaluation?.blinkRiskAssessment).toMatchObject({
+    expect(evaluation?.randomBreakOrDamageRiskAssessment).toMatchObject({
       blockedByHandBuffer: true,
       noProgressRunExpected: true,
       expectedEtrUnbroken: true,
@@ -920,14 +920,14 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
     expect(evaluation?.evidence).toEqual(
       expect.arrayContaining([
-        "blinkPreRunRiskApplied:true",
-        "blinkPathDependsOnBlink:true",
-        "blinkBreakWouldBeExcludedInEncounter:true",
-        "blocked_by_blink_hand_buffer:true",
-        "blink_no_progress_run:true",
+        "randomBreakDamagePreRunRiskApplied:true",
+        "pathDependsOnRandomBreakDamage:true",
+        "randomBreakDamageExcludedInEncounter:true",
+        "blocked_by_random_break_damage_hand_buffer:true",
+        "random_break_damage_no_progress_run:true",
         "expected_etr_unbroken:true",
         "recommendation:draw_for_damage_buffer",
-        "why_blink_run_deferred_for_hand_buffer:self_net_damage_buffer_too_low",
+        "why_random_break_damage_run_deferred_for_hand_buffer:self_damage_buffer_too_low",
       ]),
     );
   });
@@ -970,15 +970,15 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       pathPassability: "reachable",
       recommendation: "run_now",
     });
-    expect(evaluation?.blinkRiskAssessment).toMatchObject({
-      pathDependsOnBlink: true,
+    expect(evaluation?.randomBreakOrDamageRiskAssessment).toMatchObject({
+      pathDependsOnRandomBreakOrDamage: true,
       blockedByHandBuffer: false,
       payoffOverride: "remote_score_threat",
     });
     expect(evaluation?.evidence).toEqual(
       expect.arrayContaining([
         "probabilistic_universal_path_reachable:true",
-        "why_blink_run_allowed_despite_risk:remote_score_threat",
+        "why_random_break_damage_run_allowed_despite_risk:remote_score_threat",
       ]),
     );
   });
@@ -1024,7 +1024,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       pathPassability: "reachable",
       recommendation: "run_now",
     });
-    expect(evaluation?.blinkRiskAssessment).toBeUndefined();
+    expect(evaluation?.randomBreakOrDamageRiskAssessment).toBeUndefined();
   });
 
   it("adds repeated-risk evidence after recent Blink failure on the same server", () => {
@@ -1037,8 +1037,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       syntheticPublicEvent("blink-failed", 3, "break_subroutine", {
         actionType: "break_subroutine",
         actor: "runner",
-        blinkBreakSuccess: false,
-        blinkDamageAmount: 3,
+        randomBreakOutcomeKind: "random_break_or_damage",
+        randomBreakOutcomeSuccess: false,
+        randomBreakOutcomeDamageAmount: 3,
       }),
     ];
     const input = aiInput({
@@ -1069,18 +1070,18 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
-    expect(evaluation?.blinkRiskAssessment).toMatchObject({
+    expect(evaluation?.randomBreakOrDamageRiskAssessment).toMatchObject({
       recentFailure: true,
       recentDamageAmount: 3,
       sameServerRepeatedRiskPenalty: -900,
     });
     expect(evaluation?.evidence).toEqual(
       expect.arrayContaining([
-        "recentBlinkFailure:true",
-        "recentBlinkFailureTarget:remote_1",
-        "recentBlinkDamageAmount:3",
-        "sameServerRepeatedBlinkRiskPenalty:-900",
-        "repeated_no_progress_blink_run:true",
+        "recentRandomBreakDamageFailure:true",
+        "recentRandomBreakDamageFailureTarget:remote_1",
+        "recentRandomBreakDamageAmount:3",
+        "sameServerRepeatedRandomBreakDamageRiskPenalty:-900",
+        "repeated_no_progress_random_break_damage_run:true",
       ]),
     );
   });

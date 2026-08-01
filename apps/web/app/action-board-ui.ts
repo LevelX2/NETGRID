@@ -6,6 +6,7 @@ import {
   type Side,
   type VisibleCard,
   type VisibleChoiceOption,
+  type VisibleServerRunStartRestriction,
 } from "@netgrid/shared";
 import { actionHasAbility } from "./action-payload";
 export {
@@ -467,6 +468,13 @@ export type ServerCounterChipView = {
   tooltip: string;
 };
 
+export type ServerRunRestrictionChipView = {
+  key: string;
+  label: string;
+  ariaLabel: string;
+  tooltip: string;
+};
+
 export type RunnerProgramInstallTrashChoiceInfo = {
   title: string;
   question: string;
@@ -666,8 +674,6 @@ export function counterDisplayTooltipText(
 ): string {
   const amount = safeCounterDisplayAmount(display.amount);
   const countLabel = `${amount} ${counterDisplayShortLabel(display.label)}`;
-  if (display.id === "roving_submarine_run_locked")
-    return "Roving Submarine: Dieses Fort ist derzeit gesperrt, weil die Korp im maßgeblichen letzten Korpzug keine Karte in oder vor diesem Fort installiert und dort keine Karte entwickelt hat. Nach einer passenden Installation oder Entwicklung im relevanten Korpzug ist der Run wieder erlaubt und der Badge verschwindet.";
   if (display.id === "pattel")
     return `Pattel’s Virus: Jeder Pattel-Counter reduziert die Stärke dieses ICE um 1. Die Pattel-Counter gelten technisch als Virus-Counter und werden durch Virus-Purge entfernt.`;
   switch (display.counterType) {
@@ -749,17 +755,6 @@ export function counterDisplayTooltipText(
   }
 }
 
-export function cardSpecificCounterDisplayBadgePresentation(
-  display: NonNullable<VisibleCard["counterDisplays"]>[number],
-): { className: string; testId: string; text: string } | null {
-  if (display.id !== "roving_submarine_run_locked") return null;
-  return {
-    className: "rovingSubmarineRunLockedBadge",
-    testId: "roving-submarine-run-locked-badge",
-    text: "Fort gesperrt",
-  };
-}
-
 export function counterDisplaysForRendering(
   card: Pick<VisibleCard, "counterDisplays">,
 ): NonNullable<VisibleCard["counterDisplays"]> {
@@ -839,6 +834,29 @@ export function serverCounterChipsForDisplays(
       ariaLabel: display.ariaLabel,
       tooltip: counterDisplayTooltipText(display),
     }));
+}
+
+export function serverRunRestrictionChips(
+  restrictions: VisibleServerRunStartRestriction[] | undefined,
+): ServerRunRestrictionChipView[] {
+  return (restrictions ?? []).map((restriction) => {
+    const tooltip = serverRunRestrictionTooltip(restriction);
+    return {
+      key: restriction.id,
+      label: "Run gesperrt",
+      ariaLabel: tooltip,
+      tooltip,
+    };
+  });
+}
+
+export function serverRunRestrictionTooltip(
+  restriction: VisibleServerRunStartRestriction,
+): string {
+  switch (restriction.reason) {
+    case "required_corp_activity_during_latest_corp_turn_missing":
+      return `${restriction.sourceTitle}: Runs auf diesen Server sind derzeit gesperrt, weil die Korp im maßgeblichen Korpzug keine Karte in oder vor diesem Server installiert und dort keine Karte entwickelt hat. Nach einer passenden Installation oder Entwicklung ist der Run wieder erlaubt.`;
+  }
 }
 
 export function safeCounterDisplayAmount(amount: number): number {

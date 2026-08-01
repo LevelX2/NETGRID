@@ -3,9 +3,7 @@ import {
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
   AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
   CARD_DEFINITIONS_BY_ID,
-  CORP_FORT_RUN_REZ_SUPPORT_KIND,
   CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND,
-  CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
   type AiDecision,
@@ -23,6 +21,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 import type { BuildActionSemanticCandidatesParams } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import { rootRezCreditOutcomeProjectionStatus } from "../actions/action-economy-projection";
+import { actionHasConditionalDefenseFollowupQuotePayload } from "../actions/conditional-defense-followup-quote";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
 import { getStructuredTagPunishProfileForCard } from "../tag-punish-ontology-consumer";
@@ -1439,18 +1438,15 @@ function runnerCandidateIsCardAbility(
 }
 
 function runnerCandidateIsExposeAbility(
-  input: AiDecisionInput,
+  _input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
-  const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-    input,
-    candidate,
-  );
   return (
     runnerCandidateIsCardAbility(candidate) &&
     (candidate.actionTacticSignals.includes("effect:expose_info") ||
-      sourceDefinitionId === "onr_v1_058_seeya" ||
-      sourceDefinitionId === "onr_v1_151_seeya")
+      candidate.functionalEffects?.some(
+        (effect) => effect.kind === "expose_info",
+      ) === true)
   );
 }
 
@@ -2606,11 +2602,13 @@ function buildRunnerDomain(
     runTargets.some(
       (evaluation) =>
         evaluation.recommendation === "draw_for_damage_buffer" ||
-        evaluation.pathPassability === "blocked_by_blink_hand_buffer" ||
+        evaluation.pathPassability ===
+          "blocked_by_random_break_damage_hand_buffer" ||
         (evaluation.riskyUniversalCoverage && handSize < 3) ||
-        evaluation.blinkRiskAssessment?.blockedByHandBuffer === true ||
-        evaluation.blinkRiskAssessment?.riskSeverity === "high" ||
-        evaluation.blinkRiskAssessment?.riskSeverity === "lethal",
+        evaluation.randomBreakOrDamageRiskAssessment?.blockedByHandBuffer ===
+          true ||
+        evaluation.randomBreakOrDamageRiskAssessment?.riskSeverity === "high" ||
+        evaluation.randomBreakOrDamageRiskAssessment?.riskSeverity === "lethal",
     ) ||
     (handSize < 3 &&
       input.playerView.servers.some((server) =>
@@ -2663,9 +2661,10 @@ function buildRunnerDomain(
       noUnrezzedIceVisible &&
       (evaluation.unavoidableVisibleIceHazardCount ?? 0) === 0 &&
       evaluation.visibleTraceTagHazardUnavoidable !== true &&
-      evaluation.blinkRiskAssessment?.blockedByHandBuffer !== true &&
-      evaluation.blinkRiskAssessment?.riskSeverity !== "high" &&
-      evaluation.blinkRiskAssessment?.riskSeverity !== "lethal"
+      evaluation.randomBreakOrDamageRiskAssessment?.blockedByHandBuffer !==
+        true &&
+      evaluation.randomBreakOrDamageRiskAssessment?.riskSeverity !== "high" &&
+      evaluation.randomBreakOrDamageRiskAssessment?.riskSeverity !== "lethal"
     );
   });
   const forgoUnsafeRunCapacity =
@@ -3412,7 +3411,7 @@ function buildRunnerDomain(
           evaluation,
         );
         const irrecoverableScoreThreatContest =
-          runnerIrrecoverableBlinkScoreThreatContest(
+          runnerIrrecoverableRandomBreakScoreThreatContest(
             input,
             candidates,
             evaluation,
@@ -3460,7 +3459,7 @@ function buildRunnerDomain(
           evaluation,
         );
         const irrecoverableScoreThreatContest =
-          runnerIrrecoverableBlinkScoreThreatContest(
+          runnerIrrecoverableRandomBreakScoreThreatContest(
             input,
             candidates,
             evaluation,
@@ -3493,7 +3492,7 @@ function buildRunnerDomain(
             : safetyBlocked
               ? recentSafetyAbort.evidenceCode
               : irrecoverableScoreThreatContest
-                ? `runner_irrecoverable_blink_score_threat_contest:${evaluation.targetServerId}`
+                ? `runner_irrecoverable_random_break_damage_score_threat_contest:${evaluation.targetServerId}`
                 : fundingSupport
                   ? fundingSupport.evidenceCode
                   : directRunCanConvertNow
@@ -5021,19 +5020,20 @@ function runnerRemoteInformationPreparationSignals(
   ];
 }
 
-function runnerIrrecoverableBlinkScoreThreatContest(
+function runnerIrrecoverableRandomBreakScoreThreatContest(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   evaluation: RunnerRunTargetEvaluation,
 ): boolean {
-  const blinkRisk = evaluation.blinkRiskAssessment;
+  const randomBreakRisk = evaluation.randomBreakOrDamageRiskAssessment;
   if (
     evaluation.targetKind !== "remote" ||
     evaluation.scoreThreat !== true ||
-    evaluation.pathPassability !== "blocked_by_blink_hand_buffer" ||
-    blinkRisk?.blockedByHandBuffer !== true ||
-    blinkRisk.stableCoverageAvailable === true ||
-    blinkRisk.currentHandCount > 0
+    evaluation.pathPassability !==
+      "blocked_by_random_break_damage_hand_buffer" ||
+    randomBreakRisk?.blockedByHandBuffer !== true ||
+    randomBreakRisk.stableCoverageAvailable === true ||
+    randomBreakRisk.currentHandCount > 0
   ) {
     return false;
   }
@@ -12039,9 +12039,12 @@ function legacyPunishSignals(
     if (!legalAction || !actionIsCurrentlyAffordable(input, legalAction))
       return [];
     if (
-      candidate.sourceDefinitionId === "onr_v1_310_blood-cat" &&
+      corpInstallTargetProfileHasPurpose(
+        candidate,
+        "establish_tag_source_in_protected_empty_remote",
+      ) &&
       candidate.semanticActionType === "install.card" &&
-      !corpExactBloodCatInstallPlacementIsPreferred(input, candidate)
+      !corpProtectedEmptyRemoteTagSourcePlacementIsPreferred(input, candidate)
     ) {
       return [];
     }
@@ -12070,9 +12073,12 @@ function legacyPunishSignals(
       corpTraceSupportTargetHasVisibleTraceSource(input, candidate);
     if (
       targetBoundTraceSupport &&
-      candidate.sourceDefinitionId === "onr_v1_365_paris-city-grid" &&
+      corpInstallTargetProfileHasPurpose(
+        candidate,
+        "establish_fort_trace_support",
+      ) &&
       candidate.semanticActionType === "install.card" &&
-      !corpExactParisCityGridPlacementIsPreferred(input, candidate)
+      !corpFortTraceSupportPlacementIsPreferred(input, candidate)
     ) {
       return [];
     }
@@ -12165,7 +12171,25 @@ function legacyPunishSignals(
   });
 }
 
-function corpExactParisCityGridPlacementIsPreferred(
+function corpInstallTargetProfileHasPurpose(
+  candidate: ActionSemanticCandidate,
+  purpose: string,
+): boolean {
+  if (!candidate.sourceDefinitionId) return false;
+  return (
+    AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId)?.targetProfiles?.some(
+      (profile) =>
+        "schemaVersion" in profile &&
+        profile.schemaVersion === "target-profile-v1" &&
+        profile.kind === "install_target" &&
+        profile.targetType === "server" &&
+        profile.timing === "on_install" &&
+        profile.purpose === purpose,
+    ) === true
+  );
+}
+
+function corpFortTraceSupportPlacementIsPreferred(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
@@ -12195,7 +12219,7 @@ function corpExactParisCityGridPlacementIsPreferred(
   return targetServerId === (protectedEmptyTraceRemote?.id ?? targetServerId);
 }
 
-function corpExactBloodCatInstallPlacementIsPreferred(
+function corpProtectedEmptyRemoteTagSourcePlacementIsPreferred(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
@@ -12248,7 +12272,19 @@ function corpStrategicFundingPhaseBlocksPreparation(
     intent.primaryStrategy.strategyId === "corp.tag_trace_punish" &&
     intent.targetVector.kind === "tag" &&
     candidate.semanticActionType === "corp_window.rez" &&
-    candidate.sourceDefinitionId === "onr_v1_313_city-surveillance" &&
+    candidate.cardContextFunctionalEffects?.some(
+      (effect) =>
+        effect.kind === "tag_source" &&
+        effect.scope === "runner" &&
+        effect.timing === "runner_turn",
+    ) === true &&
+    candidate.cardContextFunctionalEffects.some(
+      (effect) =>
+        effect.kind === "remote_tax" &&
+        effect.scope === "runner" &&
+        effect.resource === "credits" &&
+        effect.timing === "runner_turn",
+    ) &&
     candidate.sourceCardInstanceId !== undefined &&
     serverForInstalledCard(input, candidate.sourceCardInstanceId) !== undefined;
   if (exactFundedPunishEngineActivation) return false;
@@ -15033,7 +15069,11 @@ function bindRunnerRemoteRunActionAssessments(
       evaluation,
     );
     const irrecoverableScoreThreatContest =
-      runnerIrrecoverableBlinkScoreThreatContest(input, candidates, evaluation);
+      runnerIrrecoverableRandomBreakScoreThreatContest(
+        input,
+        candidates,
+        evaluation,
+      );
     const directRunRouteReady =
       evaluation.recommendation === "run_now" ||
       evaluation.recommendation === "run_if_free" ||
@@ -16318,7 +16358,10 @@ function corpFutureEncounterRezSupportAssessment(
       removalCondition:
         "Bind the future-encounter rez assessment to the current exact LegalAction.",
     });
-  if (hasCorpFortRunRezSupportQuotePayload(legalAction.payload)) {
+  if (
+    candidate.conditionalDefenseFollowupQuote ||
+    actionHasConditionalDefenseFollowupQuotePayload(candidate)
+  ) {
     return corpFortRunRezSupportAssessment(input, candidate, serverId);
   }
   if (!candidate.sourceDefinitionId) return undefined;
@@ -16362,30 +16405,6 @@ function corpFutureEncounterRezSupportAssessment(
   };
 }
 
-const CORP_FORT_RUN_REZ_SUPPORT_QUOTE_PAYLOAD_FIELDS = [
-  "cardImplementationFortRunRezSupportQuoteSchemaVersion",
-  "cardImplementationFortRunRezSupportQuoteKind",
-  "cardImplementationFortRunRezSupportQuoteComplete",
-  "cardImplementationFortRunRezSupportQuoteSourceCardInstanceId",
-  "cardImplementationFortRunRezSupportQuoteTargetServerId",
-  "cardImplementationFortRunRezSupportQuoteStateVersion",
-  "cardImplementationFortRunRezSupportQuoteActionId",
-  "cardImplementationFortRunRezSupportQuoteRezCredits",
-  "cardImplementationFortRunRezSupportQuoteFollowupCredits",
-  "cardImplementationFortRunRezSupportQuoteInstallCredits",
-  "cardImplementationFortRunRezSupportQuoteTotalCredits",
-  "cardImplementationFortRunRezSupportQuoteTotalCreditsPayable",
-  "cardImplementationFortRunRezSupportQuoteHasOwnHqIce",
-] as const;
-
-function hasCorpFortRunRezSupportQuotePayload(
-  payload: LegalAction["payload"],
-): boolean {
-  return CORP_FORT_RUN_REZ_SUPPORT_QUOTE_PAYLOAD_FIELDS.some(
-    (field) => payload?.[field] !== undefined,
-  );
-}
-
 function corpFortRunRezSupportAssessment(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
@@ -16415,15 +16434,7 @@ function corpFortRunRezSupportAssessment(
       removalCondition:
         "Bind the fort-run rez-support assessment to the current exact LegalAction.",
     });
-  const payload = legalAction.payload;
-  const rezCredits =
-    payload?.cardImplementationFortRunRezSupportQuoteRezCredits;
-  const followupCredits =
-    payload?.cardImplementationFortRunRezSupportQuoteFollowupCredits;
-  const installCredits =
-    payload?.cardImplementationFortRunRezSupportQuoteInstallCredits;
-  const totalCredits =
-    payload?.cardImplementationFortRunRezSupportQuoteTotalCredits;
+  const quote = candidate.conditionalDefenseFollowupQuote;
   const currentCredits = input.playerView.own.credits;
   const listedRezCredits = legalAction.costs.reduce(
     (sum, cost) => (cost.credits === undefined ? sum : sum + cost.credits),
@@ -16434,46 +16445,19 @@ function corpFortRunRezSupportAssessment(
     candidate.legalActionRef.actionType !== legalAction.type ||
     candidate.stateVersion !== input.playerView.stateVersion ||
     legalAction.source !== candidate.sourceCardInstanceId ||
-    payload?.cardImplementationFortRunRezSupportQuoteSchemaVersion !==
-      CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION ||
-    (payload.cardImplementationFortRunRezSupportQuoteKind !==
-      CORP_FORT_RUN_REZ_SUPPORT_KIND &&
-      payload.cardImplementationFortRunRezSupportQuoteKind !==
-        CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND) ||
-    payload.cardImplementationFortRunRezSupportQuoteComplete !== true ||
-    payload.cardImplementationFortRunRezSupportQuoteSourceCardInstanceId !==
-      candidate.sourceCardInstanceId ||
-    payload.cardImplementationFortRunRezSupportQuoteTargetServerId !==
-      serverId ||
-    payload.cardImplementationFortRunRezSupportQuoteStateVersion !==
-      input.playerView.stateVersion ||
-    payload.cardImplementationFortRunRezSupportQuoteActionId !==
-      candidate.actionId ||
-    !isFiniteNonNegativeInteger(rezCredits) ||
-    !isFiniteNonNegativeInteger(followupCredits) ||
-    !isFiniteNonNegativeInteger(installCredits) ||
-    !isFiniteNonNegativeInteger(totalCredits) ||
+    quote === undefined ||
+    quote.sourceCardInstanceId !== candidate.sourceCardInstanceId ||
+    quote.targetServerId !== serverId ||
+    quote.stateVersion !== input.playerView.stateVersion ||
+    quote.actionId !== candidate.actionId ||
     !isFiniteNonNegativeInteger(currentCredits) ||
     legalAction.costs.some(
       (cost) =>
         cost.credits !== undefined && !isFiniteNonNegativeInteger(cost.credits),
     ) ||
     !Number.isSafeInteger(listedRezCredits) ||
-    rezCredits !== listedRezCredits ||
-    (payload.cardImplementationFortRunRezSupportQuoteKind ===
-      CORP_FORT_RUN_REZ_SUPPORT_KIND &&
-      followupCredits !== installCredits) ||
-    (payload.cardImplementationFortRunRezSupportQuoteKind ===
-      CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND &&
-      installCredits !== 0) ||
-    !Number.isSafeInteger(rezCredits + followupCredits) ||
-    totalCredits !== rezCredits + followupCredits ||
-    typeof payload.cardImplementationFortRunRezSupportQuoteTotalCreditsPayable !==
-      "boolean" ||
-    payload.cardImplementationFortRunRezSupportQuoteTotalCreditsPayable !==
-      currentCredits >= totalCredits ||
-    typeof payload.cardImplementationFortRunRezSupportQuoteHasOwnHqIce !==
-      "boolean"
+    quote.rezCredits !== listedRezCredits ||
+    quote.totalCreditsPayable !== currentCredits >= quote.totalCredits
   ) {
     return {
       productive: false,
@@ -16481,13 +16465,13 @@ function corpFortRunRezSupportAssessment(
         "corp_rez_fort_run_support_has_no_complete_consistent_engine_quote",
     };
   }
-  if (!payload.cardImplementationFortRunRezSupportQuoteHasOwnHqIce) {
+  if (!quote.hasOwnHqIce) {
     return {
       productive: false,
       evidenceCode: "corp_rez_fort_run_support_engine_quote_has_no_hq_ice",
     };
   }
-  if (!payload.cardImplementationFortRunRezSupportQuoteTotalCreditsPayable) {
+  if (!quote.totalCreditsPayable) {
     return {
       productive: false,
       evidenceCode:
@@ -16497,8 +16481,7 @@ function corpFortRunRezSupportAssessment(
   return {
     productive: true,
     evidenceCode:
-      payload.cardImplementationFortRunRezSupportQuoteKind ===
-      CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND
+      quote.kind === CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND
         ? "corp_rez_fort_run_support_same_fort_run_with_affordable_temporary_hq_ice_encounter"
         : "corp_rez_fort_run_support_same_fort_run_with_affordable_hq_ice_install",
   };
@@ -16627,99 +16610,12 @@ function corpExactCardRezSupportAssessment(
       evidenceCode: `corp_rez_fort_stealth_credit_lockout_blocks_visible_credits:${blockedCredits}`,
     };
   }
-  if (candidate.sourceDefinitionId === "onr_v1_320_encoder-inc") {
-    const installedCodeGateIds = input.playerView.servers.flatMap((server) =>
-      server.ice.flatMap((ice) => {
-        const definition = ice.definitionId
-          ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
-          : undefined;
-        return definition?.subtypes.includes("code_gate")
-          ? [ice.instanceId]
-          : [];
-      }),
-    );
-    return installedCodeGateIds.length > 0
-      ? {
-          productive: true,
-          serverId,
-          value: 120,
-          evidenceCode: `corp_rez_encoder_inc_supports_visible_code_gates:${installedCodeGateIds.join(",")}`,
-        }
-      : {
-          productive: false,
-          serverId,
-          value: 0,
-          evidenceCode:
-            "corp_rez_encoder_inc_has_no_visible_installed_code_gate",
-        };
-  }
-  if (candidate.sourceDefinitionId === "onr_v1_317_data-masons") {
-    const installedWallIds = input.playerView.servers.flatMap((server) =>
-      server.ice.flatMap((ice) => {
-        const definition = ice.definitionId
-          ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
-          : undefined;
-        return definition?.subtypes.includes("wall") ? [ice.instanceId] : [];
-      }),
-    );
-    return installedWallIds.length > 0
-      ? {
-          productive: true,
-          serverId,
-          value: 120,
-          evidenceCode: `corp_rez_data_masons_supports_visible_installed_walls:${installedWallIds.join(",")}`,
-        }
-      : {
-          productive: false,
-          serverId,
-          value: 0,
-          evidenceCode: "corp_rez_data_masons_has_no_visible_installed_wall",
-        };
-  }
-  if (
-    candidate.sourceDefinitionId === "onr_v1_370_tesseract-fort-construction"
-  ) {
-    const server = input.playerView.servers.find(
-      (candidateServer) => candidateServer.id === serverId,
-    );
-    if (!server || server.ice.length === 0) {
-      return {
-        productive: false,
-        serverId,
-        value: 0,
-        evidenceCode: "corp_rez_tesseract_has_no_ice_on_exact_installed_fort",
-      };
-    }
-    const run = input.playerView.run;
-    if (!run) {
-      return {
-        productive: true,
-        serverId,
-        value: 120,
-        evidenceCode:
-          "corp_rez_tesseract_establishes_persistent_exact_fort_ice_support",
-      };
-    }
-    const exactUpcomingEncounter =
-      run.attackedServerId === serverId && run.position?.kind === "ice";
-    return exactUpcomingEncounter
-      ? {
-          productive: true,
-          serverId,
-          value: 160,
-          evidenceCode:
-            "corp_rez_tesseract_supports_current_exact_fort_ice_encounter",
-        }
-      : {
-          productive: false,
-          serverId,
-          value: 0,
-          evidenceCode:
-            run.attackedServerId === serverId
-              ? "corp_rez_tesseract_current_run_has_no_upcoming_ice_encounter"
-              : "corp_rez_tesseract_current_run_is_on_another_fort",
-        };
-  }
+  const structuredIceSupport = corpStructuredIceSupportAssessment(
+    input,
+    serverId,
+    hint,
+  );
+  if (structuredIceSupport) return structuredIceSupport;
   const establishesFortWideIceStrengthSupport =
     hint?.effects?.some(
       (effect) =>
@@ -16773,6 +16669,94 @@ function corpExactCardRezSupportAssessment(
   return undefined;
 }
 
+function corpStructuredIceSupportAssessment(
+  input: AiDecisionInput,
+  sourceServerId: string,
+  hint: ReturnType<(typeof AI_HINTS_BY_CARD)["get"]>,
+):
+  | {
+      productive: boolean;
+      serverId: string;
+      value: number;
+      evidenceCode: string;
+    }
+  | undefined {
+  const profile = hint?.targetProfiles?.find(
+    (candidateProfile) =>
+      "schemaVersion" in candidateProfile &&
+      candidateProfile.schemaVersion === "target-profile-v1" &&
+      candidateProfile.targetType === "installed_ice" &&
+      (candidateProfile.requiredSubtypes !== undefined ||
+        candidateProfile.serverScope !== undefined ||
+        candidateProfile.activeRunConstraint !== undefined),
+  );
+  if (!profile || !("schemaVersion" in profile)) return undefined;
+
+  const sourceServer = input.playerView.servers.find(
+    (server) => server.id === sourceServerId,
+  );
+  const servers =
+    profile.serverScope === "source_fort"
+      ? sourceServer
+        ? [sourceServer]
+        : []
+      : input.playerView.servers;
+  const requiredSubtypes = profile.requiredSubtypes ?? [];
+  const matchingIceIds = servers.flatMap((server) =>
+    server.ice.flatMap((ice) => {
+      const definition = ice.definitionId
+        ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
+        : undefined;
+      const matchesSubtypes = requiredSubtypes.every((subtype) =>
+        definition?.subtypes.includes(subtype),
+      );
+      return matchesSubtypes ? [ice.instanceId] : [];
+    }),
+  );
+  const minimumTargetCount = Math.max(1, profile.minimumTargetCount ?? 1);
+  if (matchingIceIds.length < minimumTargetCount) {
+    return {
+      productive: false,
+      serverId: sourceServerId,
+      value: 0,
+      evidenceCode: `corp_rez_structured_ice_support_missing_targets:${requiredSubtypes.join("+") || "ice"}:${profile.serverScope ?? "any_visible_server"}`,
+    };
+  }
+
+  if (
+    profile.activeRunConstraint === "same_fort_upcoming_ice_when_active" &&
+    input.playerView.run
+  ) {
+    const run = input.playerView.run;
+    const exactUpcomingEncounter =
+      run.attackedServerId === sourceServerId && run.position?.kind === "ice";
+    return exactUpcomingEncounter
+      ? {
+          productive: true,
+          serverId: sourceServerId,
+          value: 160,
+          evidenceCode:
+            "corp_rez_structured_ice_support_current_same_fort_encounter",
+        }
+      : {
+          productive: false,
+          serverId: sourceServerId,
+          value: 0,
+          evidenceCode:
+            run.attackedServerId === sourceServerId
+              ? "corp_rez_structured_ice_support_no_upcoming_same_fort_encounter"
+              : "corp_rez_structured_ice_support_current_run_on_other_fort",
+        };
+  }
+
+  return {
+    productive: true,
+    serverId: sourceServerId,
+    value: 120,
+    evidenceCode: `corp_rez_structured_ice_support_matches:${matchingIceIds.join(",")}`,
+  };
+}
+
 function corpConditionalRezSupportWithoutCurrentRouteEvidence(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
@@ -16808,9 +16792,16 @@ function corpConditionalRezSupportWithoutCurrentRouteEvidence(
   const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
   if (definition?.mechanics.includes("ice_install_cost_mod_server"))
     return "corp_rez_fort_ice_discount_has_no_same_fort_install_route";
-  if (candidate.sourceDefinitionId === "onr_v1_324_fortress-architects")
-    return "corp_rez_ice_install_discount_has_no_engine_certified_post_rez_install_quote";
   const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
+  if (
+    hint?.effects?.some(
+      (effect) =>
+        effect.kind === "install_discount" &&
+        effect.scope === "ice" &&
+        effect.timing === "persistent",
+    ) === true
+  )
+    return "corp_rez_ice_install_discount_has_no_engine_certified_post_rez_install_quote";
   if (
     hint?.effects?.some(
       (effect) =>

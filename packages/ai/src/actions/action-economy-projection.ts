@@ -120,6 +120,10 @@ export function actionEconomyProjectionFor(
       : storedCreditsTaken !== undefined || grossLiquidCreditGain !== undefined
         ? "fixed"
         : undefined;
+  const sourcePool =
+    action.payload?.cardImplementationTakesHostedCredits === true
+      ? "finite"
+      : undefined;
   const evidence = [
     `kind:${kind}`,
     `click_cost:${clickCost}`,
@@ -141,6 +145,7 @@ export function actionEconomyProjectionFor(
       ? [`stored_credits_taken:${storedCreditsTaken}`]
       : []),
     ...(payoutMode !== undefined ? [`payout_mode:${payoutMode}`] : []),
+    ...(sourcePool !== undefined ? [`source_pool:${sourcePool}`] : []),
     ...(rootRezAction
       ? [`root_rez_credit_outcome:${rootRezOutcome.status}`]
       : []),
@@ -184,6 +189,7 @@ export function actionEconomyProjectionFor(
     cardsConsumed,
     netHandDelta,
     ...(payoutMode !== undefined ? { payoutMode } : {}),
+    ...(sourcePool !== undefined ? { sourcePool } : {}),
     repeatable:
       isBasicCreditAction(action) || isBasicDrawAction(action)
         ? true

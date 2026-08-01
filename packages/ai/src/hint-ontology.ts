@@ -685,6 +685,12 @@ export type AiHintBreakerProfile = {
   hostedStrengthPenalty?: boolean;
   sideEffects?: KnownHintBreakerSideEffect[];
   restrictions?: string[];
+  randomOutcome?: {
+    kind: "random_break_or_damage";
+    successProbabilityPerAttempt: number;
+    failureDamageType: "net" | "meat" | "brain";
+    maxSingleFailureDamage: number;
+  };
 };
 
 export type AiHintRemoteRole = {
@@ -713,6 +719,10 @@ export type AiHintTargetProfileV1 = {
   preferences?: KnownHintTargetProfilePreference[];
   avoid?: KnownHintTargetProfileAvoid[];
   hiddenInfoPolicy: KnownHintTargetProfileHiddenInfoPolicy;
+  requiredSubtypes?: string[];
+  serverScope?: "any_visible_server" | "source_fort";
+  minimumTargetCount?: number;
+  activeRunConstraint?: "same_fort_upcoming_ice_when_active";
 };
 
 export type AiHintOpponentSignal = {
@@ -1271,6 +1281,65 @@ function validateBreakerProfile(
       `${path}.restrictions`,
       "Expected string array.",
     );
+  if (breakerProfile.randomOutcome !== undefined) {
+    if (!isRecord(breakerProfile.randomOutcome)) {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${path}.randomOutcome`,
+        "Expected object.",
+      );
+    } else {
+      requireKnownField(
+        breakerProfile.randomOutcome.kind,
+        ["random_break_or_damage"] as const,
+        `${path}.randomOutcome.kind`,
+        "invalid_shape",
+        issues,
+        true,
+      );
+      requireKnownField(
+        breakerProfile.randomOutcome.failureDamageType,
+        ["net", "meat", "brain"] as const,
+        `${path}.randomOutcome.failureDamageType`,
+        "invalid_shape",
+        issues,
+        true,
+      );
+      const successProbabilityPerAttempt =
+        breakerProfile.randomOutcome.successProbabilityPerAttempt;
+      if (
+        typeof successProbabilityPerAttempt !== "number" ||
+        !Number.isFinite(successProbabilityPerAttempt) ||
+        successProbabilityPerAttempt <= 0 ||
+        successProbabilityPerAttempt > 1
+      ) {
+        addIssue(
+          issues,
+          "error",
+          "invalid_shape",
+          `${path}.randomOutcome.successProbabilityPerAttempt`,
+          "Expected a finite probability greater than 0 and at most 1.",
+        );
+      }
+      const maxSingleFailureDamage =
+        breakerProfile.randomOutcome.maxSingleFailureDamage;
+      if (
+        typeof maxSingleFailureDamage !== "number" ||
+        !Number.isInteger(maxSingleFailureDamage) ||
+        maxSingleFailureDamage <= 0
+      ) {
+        addIssue(
+          issues,
+          "error",
+          "invalid_shape",
+          `${path}.randomOutcome.maxSingleFailureDamage`,
+          "Expected a positive integer.",
+        );
+      }
+    }
+  }
 }
 
 function validateRemoteRole(
@@ -1482,6 +1551,42 @@ function validateTargetProfileV1(
     "unknown_target_profile_hidden_info_policy",
     issues,
     true,
+  );
+  if (targetProfile.requiredSubtypes !== undefined) {
+    if (
+      !Array.isArray(targetProfile.requiredSubtypes) ||
+      targetProfile.requiredSubtypes.length === 0 ||
+      targetProfile.requiredSubtypes.some(
+        (subtype) => typeof subtype !== "string" || subtype.length === 0,
+      )
+    ) {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${path}.requiredSubtypes`,
+        "Expected a non-empty array of subtype identifiers.",
+      );
+    }
+  }
+  validateOptionalKnown(
+    targetProfile.serverScope,
+    ["any_visible_server", "source_fort"] as const,
+    `${path}.serverScope`,
+    "invalid_shape",
+    issues,
+  );
+  validateOptionalNumber(
+    targetProfile.minimumTargetCount,
+    `${path}.minimumTargetCount`,
+    issues,
+  );
+  validateOptionalKnown(
+    targetProfile.activeRunConstraint,
+    ["same_fort_upcoming_ice_when_active"] as const,
+    `${path}.activeRunConstraint`,
+    "invalid_shape",
+    issues,
   );
 }
 

@@ -40,10 +40,9 @@ describe("SemanticShadowDecision", () => {
 
     const trace = buildSemanticShadowDecision(frame);
 
-    expect(trace.rankedActions.map((action) => action.actionId).sort()).toEqual([
-      "draw-1",
-      "gain-1",
-    ]);
+    expect(trace.rankedActions.map((action) => action.actionId).sort()).toEqual(
+      ["draw-1", "gain-1"],
+    );
     expect(
       trace.rankedActions.every((action) =>
         frame.legalActionIds.includes(action.actionId),
@@ -259,7 +258,8 @@ describe("SemanticShadowDecision", () => {
       ]),
     });
     expect(trace.rankedActions[0]?.score).toBeGreaterThan(
-      trace.rankedActions.find((action) => action.actionId === "run-rd")?.score ?? 0,
+      trace.rankedActions.find((action) => action.actionId === "run-rd")
+        ?.score ?? 0,
     );
   });
 
@@ -314,12 +314,16 @@ describe("SemanticShadowDecision", () => {
     expect(
       matchingTrace.rankedActions
         .find((action) => action.actionId === "install-survival")
-        ?.components.some((component) => component.component === "threat_response"),
+        ?.components.some(
+          (component) => component.component === "threat_response",
+        ),
     ).toBe(true);
     expect(
       noisyTrace.rankedActions
         .find((action) => action.actionId === "install-survival")
-        ?.components.some((component) => component.component === "threat_response"),
+        ?.components.some(
+          (component) => component.component === "threat_response",
+        ),
     ).not.toBe(true);
   });
 
@@ -489,7 +493,8 @@ describe("SemanticShadowDecision", () => {
       primaryGoalId: "corp.tactical.score_closeout",
     });
     expect(trace.rankedActions[0]?.score).toBeGreaterThan(
-      trace.rankedActions.find((action) => action.actionId === "gain-1")?.score ?? 0,
+      trace.rankedActions.find((action) => action.actionId === "gain-1")
+        ?.score ?? 0,
     );
   });
 
@@ -503,7 +508,9 @@ describe("SemanticShadowDecision", () => {
   });
 
   it("does not serialize forbidden private payload markers", () => {
-    const traceJson = JSON.stringify(buildSemanticShadowDecision(frameForEconomyChoice()));
+    const traceJson = JSON.stringify(
+      buildSemanticShadowDecision(frameForEconomyChoice()),
+    );
 
     expect(traceJson).not.toContain("privatePayload");
     expect(traceJson).not.toContain("cardInstances");
@@ -567,7 +574,9 @@ describe("SemanticShadowDecision", () => {
         "selected_targets_created:false",
       ]),
     });
-    expect(JSON.stringify(trace)).not.toMatch(/privatePayload|cardInstances|fullGameState/i);
+    expect(JSON.stringify(trace)).not.toMatch(
+      /privatePayload|cardInstances|fullGameState/i,
+    );
   });
 
   it("optionally includes diagnostic doctrine goals in the shadow trace", () => {
@@ -691,7 +700,8 @@ function inputFor(
     playerView: {
       side,
       stateVersion: 5,
-      timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
+      timingPoint:
+        side === "runner" ? "runner_action.main" : "corp_action.main",
       activeSide: side,
       phase: side === "runner" ? "runner_action_phase" : "corp_action_phase",
       own: {
@@ -873,7 +883,7 @@ function runTarget(params: {
   accessPayoff: RunnerRunTargetEvaluation["accessPayoff"];
   scoreThreat?: boolean;
   blinkRiskSeverity?: NonNullable<
-    RunnerRunTargetEvaluation["blinkRiskAssessment"]
+    RunnerRunTargetEvaluation["randomBreakOrDamageRiskAssessment"]
   >["riskSeverity"];
 }): RunnerRunTargetEvaluation {
   return {
@@ -912,7 +922,9 @@ function runTarget(params: {
     riskyUniversalCoverage: false,
     ...(params.blinkRiskSeverity
       ? {
-          blinkRiskAssessment: blinkRisk(params.blinkRiskSeverity),
+          randomBreakOrDamageRiskAssessment: blinkRisk(
+            params.blinkRiskSeverity,
+          ),
         }
       : {}),
     scoreThreat: params.scoreThreat ?? false,
@@ -940,23 +952,23 @@ function runPayoff(): RunnerRunTargetEvaluation["installedRunPayoff"] {
 
 function blinkRisk(
   riskSeverity: NonNullable<
-    RunnerRunTargetEvaluation["blinkRiskAssessment"]
+    RunnerRunTargetEvaluation["randomBreakOrDamageRiskAssessment"]
   >["riskSeverity"],
-): NonNullable<RunnerRunTargetEvaluation["blinkRiskAssessment"]> {
+): NonNullable<RunnerRunTargetEvaluation["randomBreakOrDamageRiskAssessment"]> {
   return {
     currentHandCount: 1,
     handAfterActionCost: 1,
-    blinkUsesLikely: 1,
+    randomBreakUsesLikely: 1,
     visibleSubroutinesLikely: 1,
     maxSingleFailureDamage: 2,
     worstCaseDamageEstimate: 2,
     lethalOnAnyFailure: riskSeverity === "lethal",
     lethalOnHighFailure: riskSeverity === "high" || riskSeverity === "lethal",
-    survivesOneFailedBlinkUse: false,
+    survivesOneFailedUse: false,
     riskSeverity,
     payoffOverride: "none",
     stableCoverageAvailable: false,
-    pathDependsOnBlink: true,
+    pathDependsOnRandomBreakOrDamage: true,
     breakWouldBeExcludedInEncounter: false,
     blockedByHandBuffer: riskSeverity === "high" || riskSeverity === "lethal",
     noProgressRunExpected: false,

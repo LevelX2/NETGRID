@@ -700,7 +700,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       expect.arrayContaining([
         "plan_priority_class:P5",
         expect.stringContaining(
-          "corp_rez_data_masons_supports_visible_installed_walls",
+          "corp_rez_structured_ice_support_matches:installed-wall",
         ),
       ]),
     );

@@ -16,7 +16,7 @@ import {
   type RunAccessTransitionHost,
 } from "./run-access-transition";
 import { approachOrEncounterIce, type RunMovementHost } from "./run-movement";
-import { assertRunnerCanStartRun } from "./run-start-lock";
+import { assertRunStartEligible } from "./run-start-eligibility";
 
 export type StartRunOptions = Pick<
   RunState,
@@ -102,7 +102,7 @@ export function startRun(
 ): void {
   assertRequiredHostGroups(host);
   const { state } = host;
-  assertRunnerCanStartRun(state);
+  assertRunStartEligible(state, serverId);
   const server = host.servers.mustServer(serverId);
   const flags = host.turn.ensureRunnerTurnFlags();
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;

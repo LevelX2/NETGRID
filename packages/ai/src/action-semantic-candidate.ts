@@ -6,6 +6,7 @@ import { applyActionCapacityProjection } from "./actions/action-capacity-project
 import { applyCardActionSourceBinding } from "./actions/action-source-binding";
 import { applyTagEffectSemantics } from "./actions/tag-effect-semantics";
 import { applyTargetContextProjection } from "./actions/action-target-context";
+import { applyConditionalDefenseFollowupQuote } from "./actions/conditional-defense-followup-quote";
 import { applyBasicActionSemantics } from "./actions/basic-action-semantics";
 import { applyRunAccessDecisionModel } from "./actions/run-access-decision-model";
 import { applyRandomBadPublicityModel } from "./actions/random-bad-publicity-model";
@@ -64,6 +65,7 @@ export type {
   ActionVirusCounterModel,
   ActionHiddenResourceVirusModel,
   ActionTagEffectProfile,
+  ConditionalDefenseFollowupQuote,
   BoardContextSummary,
   ActionSemanticCandidate,
   BuildActionSemanticCandidatesParams,
@@ -143,16 +145,22 @@ function projectActionSemanticCandidate(
     economyCandidate,
     action,
   );
-  const tagEffectCandidate = applyTagEffectSemantics(
+  const conditionalDefenseCandidate = applyConditionalDefenseFollowupQuote(
     actionCapacityCandidate,
+    action,
+  );
+  const tagEffectCandidate = applyTagEffectSemantics(
+    conditionalDefenseCandidate,
     action,
   );
   const traceCounterCandidate = applyRunnerHazardCounterSemantics(
     tagEffectCandidate,
     action,
   );
-  const implementationEffectCandidate =
-    applyCardImplementationEffectSemantics(traceCounterCandidate, action);
+  const implementationEffectCandidate = applyCardImplementationEffectSemantics(
+    traceCounterCandidate,
+    action,
+  );
   const cardSemanticCandidate = applyCardSemanticJoin(
     implementationEffectCandidate,
     cardSemanticProfilesByDefinitionId,

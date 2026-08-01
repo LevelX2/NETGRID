@@ -6,6 +6,7 @@ import type {
   TargetProfileMatch,
 } from "../action-semantic-candidate-types";
 import type { AiHintActionCapacityProfile } from "../hint-ontology";
+import type { AiHintStructuredEffect } from "../hint-ontology";
 
 export function applyCardSemanticJoin(
   candidate: ActionSemanticCandidate,
@@ -119,6 +120,14 @@ export function applyCardSemanticJoin(
     ...(candidate.effectTargets ?? []),
     ...(profile.effectTargets ?? []),
   ]);
+  const cardContextFunctionalEffects = uniqueFunctionalEffects([
+    ...(candidate.cardContextFunctionalEffects ?? []),
+    ...(profile.functionalEffects ?? []),
+  ]);
+  const functionalEffects = uniqueFunctionalEffects([
+    ...(candidate.functionalEffects ?? []),
+    ...actionBoundFunctionalEffects(candidate, profile, actionAbility),
+  ]);
   const actionCapacityProjection = actionCapacityProjectionWithHintContract(
     candidate,
     profile.actionCapacityProfiles,
@@ -130,6 +139,10 @@ export function applyCardSemanticJoin(
       ? { actionCapacityProjection }
       : {}),
     costProfile,
+    ...(functionalEffects.length > 0 ? { functionalEffects } : {}),
+    ...(cardContextFunctionalEffects.length > 0
+      ? { cardContextFunctionalEffects }
+      : {}),
     ...(effectTargets.length > 0 ? { effectTargets } : {}),
     cardContextSignals,
     actionTacticSignals,
@@ -218,8 +231,10 @@ function actionCapacityHintMatchesProjection(
   if (profile.restriction !== projection.restriction) return false;
   if (
     profile.reliability !== projection.reliability &&
-    !(profile.reliability === "mandatory" &&
-      projection.reliability === "guaranteed")
+    !(
+      profile.reliability === "mandatory" &&
+      projection.reliability === "guaranteed"
+    )
   ) {
     return false;
   }
@@ -297,4 +312,92 @@ function targetContextWithSemanticMatches(
 
 function uniqueStrings(values: readonly string[]): string[] {
   return [...new Set(values)];
+}
+
+function uniqueFunctionalEffects(
+  effects: readonly AiHintStructuredEffect[],
+): AiHintStructuredEffect[] {
+  const bySignature = new Map<string, AiHintStructuredEffect>();
+  for (const effect of effects) {
+    const signature = JSON.stringify([
+      effect.kind,
+      effect.timing,
+      effect.scope,
+      effect.resource ?? null,
+      effect.amount ?? null,
+      effect.amountKind ?? null,
+      effect.economyMode ?? null,
+      effect.target ?? null,
+      effect.repeatable ?? null,
+      effect.finite ?? null,
+    ]);
+    if (!bySignature.has(signature)) bySignature.set(signature, { ...effect });
+  }
+  return [...bySignature.values()];
+}
+
+function actionBoundFunctionalEffects(
+  candidate: ActionSemanticCandidate,
+  profile: ActionCardSemanticProfile,
+  actionAbility:
+    | NonNullable<ActionCardSemanticProfile["abilitySemantics"]>[number]
+    | undefined,
+): readonly AiHintStructuredEffect[] {
+  if (actionAbility?.functionalEffects?.length) {
+    return actionAbility.functionalEffects;
+  }
+
+  const effects = profile.functionalEffects ?? [];
+  if (effects.length === 0) return [];
+  const abilitySemantics = profile.abilitySemantics ?? [];
+  if (abilitySemantics.length > 1) return [];
+  if (abilitySemantics.length === 1) {
+    return actionAbility === undefined ? [] : effects;
+  }
+
+  if (candidate.effectKind !== undefined) {
+    return effects.filter((effect) =>
+      engineEffectKindMatchesHintEffect(candidate.effectKind!, effect.kind),
+    );
+  }
+
+  if (
+    candidate.actionType === "play_event" ||
+    candidate.actionType === "play_operation"
+  ) {
+    return effects;
+  }
+  if (candidate.actionType === "install_card") {
+    return effects.filter(
+      (effect) => effect.timing === "install" || effect.timing === "persistent",
+    );
+  }
+  if (
+    candidate.actionType === "rez_card" ||
+    candidate.semanticActionType === "corp_window.rez"
+  ) {
+    return effects.filter(
+      (effect) => effect.timing === "on_rez" || effect.timing === "persistent",
+    );
+  }
+  return [];
+}
+
+function engineEffectKindMatchesHintEffect(
+  engineEffectKind: string,
+  hintEffectKind: AiHintStructuredEffect["kind"],
+): boolean {
+  if (engineEffectKind === hintEffectKind) return true;
+  const mappedKinds: Readonly<Record<string, readonly string[]>> = {
+    search_stack_to_grip: ["search"],
+    make_run: ["future_run_effect"],
+    distribute_advancement_counters: [
+      "advance",
+      "advance_burst",
+      "score_acceleration",
+    ],
+    move_advancement_counters: ["advance", "score_acceleration"],
+    remove_tags: ["tag_prevention"],
+  };
+  return mappedKinds[engineEffectKind]?.includes(hintEffectKind) === true;
 }

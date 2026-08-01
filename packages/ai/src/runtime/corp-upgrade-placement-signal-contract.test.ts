@@ -83,21 +83,14 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("places an agenda-steal tax only beside a visible agenda", () => {
-    const active = placementComponent(
-      "onr_v1_366_red-herrings",
-      "remote_1",
-      {
-        remoteRoot: [
-          visibleCard("remote-agenda", "simple_agenda", "agenda", {
-            advancementRequirement: 3,
-          }),
-        ],
-      },
-    );
-    const empty = placementComponent(
-      "onr_v1_366_red-herrings",
-      "remote_1",
-    );
+    const active = placementComponent("onr_v1_366_red-herrings", "remote_1", {
+      remoteRoot: [
+        visibleCard("remote-agenda", "simple_agenda", "agenda", {
+          advancementRequirement: 3,
+        }),
+      ],
+    });
+    const empty = placementComponent("onr_v1_366_red-herrings", "remote_1");
 
     expect(active).toEqual(
       expect.objectContaining({
@@ -120,9 +113,7 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("keeps Panic Button as an HQ-only counterexample", () => {
-    expect(
-      placementComponent("onr_proteus_067_panic-button", "hq"),
-    ).toEqual(
+    expect(placementComponent("onr_proteus_067_panic-button", "hq")).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_fit",
         value: 1100,
@@ -141,23 +132,19 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("defers Dr. Dreff until the Engine certifies a concrete future encounter route", () => {
-    expect(
-      placementComponent("onr_v1_358_dr-dreff", "hq"),
-    ).toEqual(
+    expect(placementComponent("onr_v1_358_dr-dreff", "hq")).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_defer",
         value: -900,
         reason: expect.stringContaining(
-          "defer_reason:dr_dreff_requires_engine_certified_future_encounter_route",
+          "defer_reason:future_encounter_support_requires_engine_certified_route",
         ),
       }),
     );
   });
 
   it("keeps Simon Francisco on HQ or R&D as a central counterexample", () => {
-    expect(
-      placementComponent("onr_proteus_073_simon-francisco", "rd"),
-    ).toEqual(
+    expect(placementComponent("onr_proteus_073_simon-francisco", "rd")).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_fit",
         value: 1000,
@@ -176,10 +163,7 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("defers pass-ICE tax upgrades until their fort actually has ICE", () => {
-    const deferred = placementComponent(
-      "onr_proteus_070_rasmin-bridger",
-      "hq",
-    );
+    const deferred = placementComponent("onr_proteus_070_rasmin-bridger", "hq");
     expect(deferred).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_defer",

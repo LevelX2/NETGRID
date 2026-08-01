@@ -26,10 +26,7 @@ export function runnerRunTargetGuidanceScoreComponent(
   if (!evaluation) return undefined;
   const rawValue = dependencies.guidanceValue(evaluation);
   const value = normalizedRunTargetGuidanceValue(rawValue);
-  if (
-    value < 0 &&
-    dependencies.visibleHighPayoffRunOverride(input, action)
-  ) {
+  if (value < 0 && dependencies.visibleHighPayoffRunOverride(input, action)) {
     return undefined;
   }
   if (value === 0) return undefined;
@@ -56,7 +53,8 @@ export function runnerRunTargetGuidanceScoreComponent(
             entry.startsWith("unavoidable_visible_ice_hazard_count:"),
         )
         .slice(0, 24),
-      ...(evaluation.blinkRiskAssessment?.evidence.slice(0, 24) ?? []),
+      ...(evaluation.randomBreakOrDamageRiskAssessment?.evidence.slice(0, 24) ??
+        []),
     ].join("|"),
   };
 }

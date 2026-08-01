@@ -68,9 +68,11 @@ export function runnerRunReleaseForEvaluation(
     route.conditionalReasons.every(
       (reason) => reason === "probabilistic_breaker_route",
     ) &&
-    evaluation.blinkRiskAssessment?.pathDependsOnBlink === true &&
-    evaluation.blinkRiskAssessment.blockedByHandBuffer !== true &&
-    evaluation.blinkRiskAssessment.breakWouldBeExcludedInEncounter !== true;
+    evaluation.randomBreakOrDamageRiskAssessment
+      ?.pathDependsOnRandomBreakOrDamage === true &&
+    evaluation.randomBreakOrDamageRiskAssessment.blockedByHandBuffer !== true &&
+    evaluation.randomBreakOrDamageRiskAssessment
+      .breakWouldBeExcludedInEncounter !== true;
   if (!unknownOnlyProbe && !agendaRisk && !probabilisticBreakerRoute) {
     return blocked("conditional_route_not_accepted", baseEvidence);
   }

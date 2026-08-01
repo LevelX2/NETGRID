@@ -629,7 +629,7 @@ export function runnerRunTargetCurrentStep(
       desiredActionSemantics: ["draw.card"],
       rationale: [
         "probabilistic universal coverage needs a survivable hand buffer",
-        ...(evaluation.blinkRiskAssessment?.evidence ?? []),
+        ...(evaluation.randomBreakOrDamageRiskAssessment?.evidence ?? []),
       ],
     });
   }

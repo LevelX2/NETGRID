@@ -97,7 +97,6 @@ export type SemanticRuntimeCorpAdvancementCounterDependencies = {
   cardType: (card: VisibleCard) => string | undefined;
   cardAdvancementRequirement: (card: VisibleCard) => number | undefined;
   hintForDefinitionId?: (definitionId: string) => AiCardHint | undefined;
-  teamRestructuringCardId: string;
 };
 
 export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
@@ -385,50 +384,7 @@ function corpAdvancementCounterPlacementProfileForAction(
       transferSourceCardId: sourceCard.instanceId,
     };
   }
-  const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
-    input,
-    action,
-  );
-  if (!sourceDefinitionId) return undefined;
-  const text =
-    dependencies.normalizedRulesTextForDefinition(sourceDefinitionId);
-  if (
-    sourceDefinitionId === dependencies.teamRestructuringCardId ||
-    corpAdvancementTextAddsOneCounterToUpToTwoCards(text)
-  ) {
-    return {
-      totalCounters: 2,
-      maxTargets: 2,
-      counterPerTarget: 1,
-      distinctTargets: true,
-      effectOnly: true,
-      distribution: "up_to_distinct_targets_one_each",
-    };
-  }
   return undefined;
-}
-
-function corpAdvancementTextAddsOneCounterToUpToTwoCards(
-  text: string,
-): boolean {
-  return corpTokensIncludePhrase(corpRulesTextTokens(text), [
-    "add",
-    "one",
-    "advancement",
-    "counter",
-    "to",
-    "each",
-    "of",
-    "up",
-    "to",
-    "two",
-    "installed",
-    "cards",
-    "that",
-    "can",
-    "be",
-    "advanced",
-  ]);
 }
 
 function semanticRuntimeCorpBasicAdvanceEquivalentTargets(

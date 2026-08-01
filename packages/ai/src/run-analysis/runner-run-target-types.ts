@@ -96,7 +96,7 @@ export type RunnerKnownAccessState =
 export type RunnerPathPassability =
   | "reachable"
   | "blocked_missing_coverage"
-  | "blocked_by_blink_hand_buffer"
+  | "blocked_by_random_break_damage_hand_buffer"
   | "blocked_unpayable"
   | "blocked_unbreakable";
 
@@ -112,29 +112,34 @@ export type RunnerRunTargetRecommendation =
   | "declined_trash_memory_active"
   | "do_not_run_now";
 
-export type BlinkRiskSeverity = "none" | "low" | "medium" | "high" | "lethal";
+export type RandomBreakOrDamageRiskSeverity =
+  | "none"
+  | "low"
+  | "medium"
+  | "high"
+  | "lethal";
 
-export type BlinkRiskPayoffOverride =
+export type RandomBreakOrDamageRiskPayoffOverride =
   | "none"
   | "known_agenda"
   | "remote_score_threat"
   | "immediate_win"
   | "survival";
 
-export type BlinkRiskAssessment = {
+export type RandomBreakOrDamageRiskAssessment = {
   currentHandCount: number;
   handAfterActionCost: number;
-  blinkUsesLikely: number;
+  randomBreakUsesLikely: number;
   visibleSubroutinesLikely: number;
   maxSingleFailureDamage: number;
   worstCaseDamageEstimate: number;
   lethalOnAnyFailure: boolean;
   lethalOnHighFailure: boolean;
-  survivesOneFailedBlinkUse: boolean;
-  riskSeverity: BlinkRiskSeverity;
-  payoffOverride: BlinkRiskPayoffOverride;
+  survivesOneFailedUse: boolean;
+  riskSeverity: RandomBreakOrDamageRiskSeverity;
+  payoffOverride: RandomBreakOrDamageRiskPayoffOverride;
   stableCoverageAvailable: boolean;
-  pathDependsOnBlink: boolean;
+  pathDependsOnRandomBreakOrDamage: boolean;
   breakWouldBeExcludedInEncounter: boolean;
   blockedByHandBuffer: boolean;
   noProgressRunExpected: boolean;
@@ -145,7 +150,7 @@ export type BlinkRiskAssessment = {
   evidence: string[];
 };
 
-export type RunnerBlinkRecoveryAssessment = {
+export type RunnerRandomBreakRecoveryAssessment = {
   active: boolean;
   targetServerId?: string;
   currentHandCount: number;
@@ -289,7 +294,7 @@ export type RunnerRunTargetEvaluation = {
   runActionProjection: RunActionProjection;
   bypassedFirstIce?: boolean;
   riskyUniversalCoverage: boolean;
-  blinkRiskAssessment?: BlinkRiskAssessment;
+  randomBreakOrDamageRiskAssessment?: RandomBreakOrDamageRiskAssessment;
   scoreThreat: boolean;
   recommendation: RunnerRunTargetRecommendation;
   score: number;

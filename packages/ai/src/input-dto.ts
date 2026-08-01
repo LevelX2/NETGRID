@@ -373,9 +373,10 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "runnerCreditsAfter",
   "randomRoll",
   "dieRoll",
-  "blinkDieRoll",
-  "blinkBreakSuccess",
-  "blinkDamageAmount",
+  "randomBreakOutcomeKind",
+  "randomBreakOutcomeRoll",
+  "randomBreakOutcomeSuccess",
+  "randomBreakOutcomeDamageAmount",
   "randomCounterAfter",
   "returnedCount",
 ]);

@@ -69,7 +69,11 @@ export function corpUpgradePlacementAssessment(
   return placementAssessment({
     recommendation: "allow",
     reason: "placement_has_current_value",
-    candidateActiveUtility: activeUpgradeUtility(signals, params.serverId, server),
+    candidateActiveUtility: activeUpgradeUtility(
+      signals,
+      params.serverId,
+      server,
+    ),
     evidence: ["placement_contract:no_defer_condition"],
   });
 }
@@ -81,9 +85,10 @@ export function corpUpgradePlacementExclusion(
   if (!assessment || assessment.recommendation === "allow") return undefined;
   return {
     key: `corp_upgrade_${assessment.reason}`,
-    label: assessment.reason === "ice_support_without_ice"
-      ? "Upgrade benötigt zuerst ICE"
-      : "Regionsersatz ohne belegten Mehrwert",
+    label:
+      assessment.reason === "ice_support_without_ice"
+        ? "Upgrade benötigt zuerst ICE"
+        : "Regionsersatz ohne belegten Mehrwert",
     reason: assessment.evidence.join("|"),
   };
 }
@@ -116,7 +121,11 @@ export function corpUpgradeInstallPlacementComponent(
     hasSignal(signals, "remote.agenda_difficulty_discount") ||
     hasSignal(signals, "score.agenda_difficulty_discount")
   ) {
-    return agendaDifficultyPlacementComponent(params.serverId, server, evidence);
+    return agendaDifficultyPlacementComponent(
+      params.serverId,
+      server,
+      evidence,
+    );
   }
 
   if (
@@ -127,8 +136,13 @@ export function corpUpgradeInstallPlacementComponent(
   }
 
   if (
-    params.actionSemanticCandidate?.sourceDefinitionId ===
-    "onr_v1_358_dr-dreff"
+    params.actionSemanticCandidate?.cardContextFunctionalEffects?.some(
+      (effect) =>
+        effect.kind === "future_encounter_effect" &&
+        effect.scope === "run_path" &&
+        effect.target === "ice.corp_hq_runpath_insert" &&
+        effect.timing === "successful_run",
+    ) === true
   ) {
     return {
       key: "corp_upgrade_install_placement_defer",
@@ -136,7 +150,7 @@ export function corpUpgradeInstallPlacementComponent(
       value: -900,
       reason: [
         ...evidence,
-        "defer_reason:dr_dreff_requires_engine_certified_future_encounter_route",
+        "defer_reason:future_encounter_support_requires_engine_certified_route",
       ].join("|"),
     };
   }
@@ -219,16 +233,19 @@ function agendaStealTaxPlacementComponent(
 export function corpRegionReplacementComponent(
   params: CorpUpgradePlacementParams,
 ): AiDecisionScoreComponent | undefined {
-  if (params.action.payload?.regionReplacementWarning !== true) return undefined;
+  if (params.action.payload?.regionReplacementWarning !== true)
+    return undefined;
   const assessment = corpUpgradePlacementAssessment(params);
   if (!assessment) return undefined;
   return {
-    key: assessment.recommendation === "allow"
-      ? "corp_upgrade_region_replacement_value"
-      : "corp_upgrade_region_replacement_defer",
-    label: assessment.recommendation === "allow"
-      ? "Regionsersatz mit Mehrwert"
-      : "Regionsersatz vertagen",
+    key:
+      assessment.recommendation === "allow"
+        ? "corp_upgrade_region_replacement_value"
+        : "corp_upgrade_region_replacement_defer",
+    label:
+      assessment.recommendation === "allow"
+        ? "Regionsersatz mit Mehrwert"
+        : "Regionsersatz vertagen",
     value: 0,
     reason: assessment.evidence.join("|"),
   };
@@ -263,7 +280,11 @@ function agendaDifficultyPlacementComponent(
     };
   }
 
-  if (server !== undefined && server.root.length === 0 && server.ice.length > 0) {
+  if (
+    server !== undefined &&
+    server.root.length === 0 &&
+    server.ice.length > 0
+  ) {
     return {
       key: "corp_upgrade_install_placement_fit",
       label: "Upgrade-Zielserver passend",
@@ -341,7 +362,10 @@ function remoteCapacityPlacementComponent(
       reason: [...evidence, "mismatch:remote_capacity_on_central"].join("|"),
     };
   }
-  if (server !== undefined && (server.root.length > 0 || server.ice.length > 0)) {
+  if (
+    server !== undefined &&
+    (server.root.length > 0 || server.ice.length > 0)
+  ) {
     return {
       key: "corp_upgrade_install_placement_fit",
       label: "Upgrade-Zielserver passend",
@@ -378,9 +402,8 @@ function iceSupportPlacementComponent(
   }
   const requiresUnrezzedIce = hasRezSupportSignal(signals);
   const supportedIceCount =
-    server?.ice.filter(
-      (ice) => !requiresUnrezzedIce || ice.rezzed !== true,
-    ).length ?? 0;
+    server?.ice.filter((ice) => !requiresUnrezzedIce || ice.rezzed !== true)
+      .length ?? 0;
   if (supportedIceCount > 0) {
     return {
       key: "corp_upgrade_install_placement_fit",
@@ -413,8 +436,9 @@ function regionReplacementAssessment(
   candidateSignals: ReadonlySet<string>,
   server: VisibleCorpServer | undefined,
 ): CorpUpgradePlacementAssessment {
-  const replacedRegion = server?.root.find((card) =>
-    card.instanceId !== params.sourceCard?.instanceId && cardIsRegion(card),
+  const replacedRegion = server?.root.find(
+    (card) =>
+      card.instanceId !== params.sourceCard?.instanceId && cardIsRegion(card),
   );
   const candidateActiveUtility = activeUpgradeUtility(
     candidateSignals,
@@ -433,9 +457,10 @@ function regionReplacementAssessment(
   const recommendation = marginalUtility.length > 0 ? "allow" : "defer";
   return placementAssessment({
     recommendation,
-    reason: recommendation === "allow"
-      ? "region_replacement_adds_active_utility"
-      : "region_replacement_without_marginal_value",
+    reason:
+      recommendation === "allow"
+        ? "region_replacement_adds_active_utility"
+        : "region_replacement_without_marginal_value",
     candidateActiveUtility,
     replacedActiveUtility,
     marginalUtility,
@@ -478,8 +503,9 @@ function placementAssessment(params: {
 
 function cardIsRegion(card: VisibleCard): boolean {
   const definition = visibleCardDefinition(card);
-  return [...(card.subtypes ?? []), ...(definition?.subtypes ?? [])]
-    .some((subtype) => normalizedToken(subtype) === "region");
+  return [...(card.subtypes ?? []), ...(definition?.subtypes ?? [])].some(
+    (subtype) => normalizedToken(subtype) === "region",
+  );
 }
 
 function signalsForVisibleCard(card: VisibleCard | undefined): Set<string> {
@@ -509,22 +535,29 @@ function activeUpgradeUtility(
 ): string[] {
   if (!serverId || !server) return [];
   const utility = new Set<string>();
-  const agendas = server.root.filter((card) =>
-    card.known !== false &&
-    (card.type === "agenda" || visibleCardDefinition(card)?.type === "agenda"),
+  const agendas = server.root.filter(
+    (card) =>
+      card.known !== false &&
+      (card.type === "agenda" ||
+        visibleCardDefinition(card)?.type === "agenda"),
   );
   const agendaSubtypes = new Set(
-    agendas.flatMap((card) => [
-      ...(card.subtypes ?? []),
-      ...(visibleCardDefinition(card)?.subtypes ?? []),
-    ]).map(normalizedToken),
+    agendas
+      .flatMap((card) => [
+        ...(card.subtypes ?? []),
+        ...(visibleCardDefinition(card)?.subtypes ?? []),
+      ])
+      .map(normalizedToken),
   );
   const specificDifficultySignals = [...signals].filter((signal) => {
     const match = /^score\.([a-z0-9_]+)_difficulty_discount$/.exec(signal);
     return Boolean(match && match[1] !== "agenda");
   });
   for (const signal of specificDifficultySignals) {
-    const category = signal.slice("score.".length, -"_difficulty_discount".length);
+    const category = signal.slice(
+      "score.".length,
+      -"_difficulty_discount".length,
+    );
     if (agendas.length > 0 && agendaSubtypes.has(category)) utility.add(signal);
   }
   if (
@@ -555,11 +588,12 @@ function activeUpgradeUtility(
     server.ice.some(
       (ice) => !hasRezSupportSignal(signals) || ice.rezzed !== true,
     ) &&
-    [...signals].some((signal) =>
-      signal.startsWith("ice.corp_") ||
-      signal === "run.corp_pay_or_end_run" ||
-      signal.startsWith("tax.runner_") ||
-      signal === "remote.scoring_protection",
+    [...signals].some(
+      (signal) =>
+        signal.startsWith("ice.corp_") ||
+        signal === "run.corp_pay_or_end_run" ||
+        signal.startsWith("tax.runner_") ||
+        signal === "remote.scoring_protection",
     )
   ) {
     utility.add("ice_supported_run_defense");
@@ -581,7 +615,10 @@ function activeUpgradeUtility(
 }
 
 function normalizedToken(value: string): string {
-  return value.trim().toLocaleLowerCase("en-US").replace(/[^a-z0-9]+/g, "_")
+  return value
+    .trim()
+    .toLocaleLowerCase("en-US")
+    .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
 }
 
@@ -654,7 +691,9 @@ function isRemoteServerId(serverId: string | undefined): boolean {
   return serverId === "new_remote" || serverId?.startsWith("remote_") === true;
 }
 
-function serverHasScorelineRoot(server: VisibleCorpServer | undefined): boolean {
+function serverHasScorelineRoot(
+  server: VisibleCorpServer | undefined,
+): boolean {
   return (
     server?.root.some((card) => {
       if (card.known === false) return false;

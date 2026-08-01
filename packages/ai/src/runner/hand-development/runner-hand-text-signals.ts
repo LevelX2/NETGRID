@@ -1,7 +1,7 @@
 export function runnerHandTextHasRiskyBreakerSignal(text: string): boolean {
   const tokens = runnerHandTextTokens(text);
   return (
-    runnerHandTokensIncludeAny(tokens, ["blink", "random", "roll"]) ||
+    runnerHandTokensIncludeAny(tokens, ["random", "roll"]) ||
     runnerHandTokensIncludePhrase(tokens, ["self", "damage"]) ||
     runnerHandTokensIncludeInOrder(tokens, "suffer", "damage") ||
     runnerHandTokensIncludeInOrder(tokens, "take", "damage") ||

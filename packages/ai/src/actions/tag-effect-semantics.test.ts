@@ -5,23 +5,29 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { applyTagEffectSemantics } from "./tag-effect-semantics";
 
 describe("applyTagEffectSemantics", () => {
-  it("applies descriptor tag effects only for exact action types", () => {
-    const candidate = semanticCandidate(
-      "onr_v1_102_open-ended-mileage-program",
-    );
+  it("projects acute tag removal only from the current LegalAction payload", () => {
+    const candidate = semanticCandidate("different-card-id");
 
     expect(
-      applyTagEffectSemantics(candidate, action("play_event")),
+      applyTagEffectSemantics(
+        candidate,
+        action("play_event", {
+          cardImplementationEffectKind: "remove_tags",
+          cardImplementationTagMode: "all",
+          cardImplementationTagAmount: "all",
+        }),
+      ),
     ).toMatchObject({
       semanticActionType: "tag.remove",
       tagEffectProfile: {
         kind: "remove_tags",
-        amount: 1,
-        source: "card_implementation",
+        mode: "all",
+        amount: "all",
+        source: "legal_action_payload",
       },
     });
     expect(
-      applyTagEffectSemantics(candidate, action("install_card")),
+      applyTagEffectSemantics(candidate, action("play_event")),
     ).not.toHaveProperty("tagEffectProfile");
   });
 });
@@ -41,7 +47,10 @@ function semanticCandidate(
   } as unknown as ActionSemanticCandidate;
 }
 
-function action(type: LegalAction["type"]): LegalAction {
+function action(
+  type: LegalAction["type"],
+  payload?: NonNullable<LegalAction["payload"]>,
+): LegalAction {
   return {
     actionId: `test.${type}`,
     side: "runner",
@@ -53,5 +62,6 @@ function action(type: LegalAction["type"]): LegalAction {
     targetRequirements: [],
     visibility: "public",
     expiresAtStateVersion: 1,
+    ...(payload ? { payload } : {}),
   };
 }

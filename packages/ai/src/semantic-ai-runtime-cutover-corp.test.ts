@@ -275,6 +275,9 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
           payload: {
             cardImplementationAbility: "activated",
             cardImplementationAbilityIndex: 0,
+            cardImplementationEffectKind: "remove_tags",
+            cardImplementationTagMode: "up_to_amount",
+            cardImplementationTagAmount: 3,
             cardImplementationTrashSourceCost: true,
           },
         },
@@ -318,6 +321,9 @@ describe("Semantic AI runtime cutover — live and Corp contracts", () => {
           payload: {
             cardImplementationAbility: "activated",
             cardImplementationAbilityIndex: 0,
+            cardImplementationEffectKind: "remove_tags",
+            cardImplementationTagMode: "up_to_amount",
+            cardImplementationTagAmount: 3,
             cardImplementationTrashSourceCost: true,
           },
         },

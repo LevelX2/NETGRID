@@ -2,48 +2,50 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
-export type RunnerBlinkRiskAssessment = {
+export type RunnerRandomBreakRiskAssessment = {
   evidence: string[];
 };
 
-export type RunnerBlinkMultiRunEvaluation = {
-  blinkRiskAssessment?: RunnerBlinkRiskAssessment;
+export type RunnerRandomBreakMultiRunEvaluation = {
+  randomBreakOrDamageRiskAssessment?: RunnerRandomBreakRiskAssessment;
   evidence: string[];
 };
 
-export type RunnerBlinkRunExclusionDependencies = {
+export type RunnerRandomBreakOrDamageRunExclusionDependencies = {
   multiRunTargetEvaluation: (
     input: AiDecisionInput,
     action: LegalAction,
     targetServerId: string,
-  ) => RunnerBlinkMultiRunEvaluation | undefined;
+  ) => RunnerRandomBreakMultiRunEvaluation | undefined;
   runRiskAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => RunnerBlinkRiskAssessment | undefined;
-  shouldAvoidRun: (assessment: RunnerBlinkRiskAssessment | undefined) => boolean;
+  ) => RunnerRandomBreakRiskAssessment | undefined;
+  shouldAvoidRun: (
+    assessment: RunnerRandomBreakRiskAssessment | undefined,
+  ) => boolean;
 };
 
-export type RunnerBlinkRiskEvidenceDependencies = {
+export type RunnerRandomBreakOrDamageRiskEvidenceDependencies = {
   multiRunTargetEvaluation: (
     input: AiDecisionInput,
     action: LegalAction,
     targetServerId: string,
-  ) => RunnerBlinkMultiRunEvaluation | undefined;
+  ) => RunnerRandomBreakMultiRunEvaluation | undefined;
   runRiskAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => RunnerBlinkRiskAssessment | undefined;
+  ) => RunnerRandomBreakRiskAssessment | undefined;
   breakRiskAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => RunnerBlinkRiskAssessment | undefined;
+  ) => RunnerRandomBreakRiskAssessment | undefined;
 };
 
-export function runnerBlinkRunExclusion(
+export function runnerRandomBreakOrDamageRunExclusion(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: RunnerBlinkRunExclusionDependencies,
+  dependencies: RunnerRandomBreakOrDamageRunExclusionDependencies,
 ): SemanticRuntimeExclusion | undefined {
   if (input.side !== "runner" || action.type !== "start_run") {
     return undefined;
@@ -56,24 +58,24 @@ export function runnerBlinkRunExclusion(
     targetServerId,
   );
   const assessment =
-    evaluation?.blinkRiskAssessment ??
+    evaluation?.randomBreakOrDamageRiskAssessment ??
     dependencies.runRiskAssessment(input, action);
   if (!dependencies.shouldAvoidRun(assessment)) return undefined;
   return {
-    key: "blink_run_self_net_damage_risk",
-    label: "Blink-Run mit Self-Net-Damage-Risiko",
+    key: "random_break_damage_run_self_damage_risk",
+    label: "Run mit zufälligem Eigenschaden-Risiko",
     reason: sortedUnique([
       ...(assessment?.evidence ?? []),
       ...(evaluation?.evidence.slice(0, 16) ?? []),
-      "why_blink_run_blocked:self_net_damage_buffer_too_low",
+      "why_random_break_damage_run_blocked:self_damage_buffer_too_low",
     ]).join("|"),
   };
 }
 
-export function runnerBlinkRiskEvidenceForAction(
+export function runnerRandomBreakOrDamageRiskEvidenceForAction(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: RunnerBlinkRiskEvidenceDependencies,
+  dependencies: RunnerRandomBreakOrDamageRiskEvidenceDependencies,
 ): string[] {
   if (input.side !== "runner") return [];
   if (action.type === "start_run") {
@@ -85,7 +87,7 @@ export function runnerBlinkRiskEvidenceForAction(
       targetServerId,
     );
     return (
-      evaluation?.blinkRiskAssessment?.evidence ??
+      evaluation?.randomBreakOrDamageRiskAssessment?.evidence ??
       dependencies.runRiskAssessment(input, action)?.evidence ??
       []
     );

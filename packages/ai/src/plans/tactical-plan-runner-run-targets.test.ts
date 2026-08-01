@@ -448,7 +448,7 @@ describe("runnerPressureProbeAllowance", () => {
       accessPayoff: "score_threat",
       scoreThreat: true,
       score: -900,
-      pathPassability: "blocked_by_blink_hand_buffer",
+      pathPassability: "blocked_by_random_break_damage_hand_buffer",
     });
 
     expect(

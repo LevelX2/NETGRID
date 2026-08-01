@@ -185,9 +185,11 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
   return {
     state,
     cards: {
-      definitionFor: (cardId) => defs[state.cardInstances[cardId]!.definitionId]!,
+      definitionFor: (cardId) =>
+        defs[state.cardInstances[cardId]!.definitionId]!,
       cardInstanceFor: (cardId) => state.cardInstances[cardId]!,
-      cardHasSubtype: (card, subtype) => card.subtypes?.includes(subtype) ?? false,
+      cardHasSubtype: (card, subtype) =>
+        card.subtypes?.includes(subtype) ?? false,
       runnerInstalledCardIds: () => [
         ...state.runner.rig.hardware,
         ...state.runner.rig.programs,
@@ -196,7 +198,9 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
     },
     servers: {
       mustServer: (serverId) =>
-        state.corp.servers.find((server) => server.id === serverId) as CorpServer,
+        state.corp.servers.find(
+          (server) => server.id === serverId,
+        ) as CorpServer,
       publicServerLabel: (serverId) =>
         state.corp.servers.find((server) => server.id === serverId)?.label,
     },
@@ -205,7 +209,9 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
         Math.max(
           0,
           Math.floor(
-            state.cardInstances[cardId]?.counters?.[counterType as CounterType] ?? 0,
+            state.cardInstances[cardId]?.counters?.[
+              counterType as CounterType
+            ] ?? 0,
           ),
         ),
       setCardCounter: (cardId, counterType, amount) => {
@@ -229,7 +235,12 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
     },
     payment: {
       hostedPaymentCredits: (cardId) =>
-        Math.max(0, Math.floor(state.cardInstances[cardId]?.counters?.recurring_credit ?? 0)),
+        Math.max(
+          0,
+          Math.floor(
+            state.cardInstances[cardId]?.counters?.recurring_credit ?? 0,
+          ),
+        ),
       spendHostedPaymentCredits: (cardId, amount) => {
         const instance = state.cardInstances[cardId]!;
         instance.counters = {
@@ -240,27 +251,32 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
           ),
         };
       },
-      rezCostForCard: (cardId) => defs[state.cardInstances[cardId]!.definitionId]!.rezCost ?? 0,
+      rezCostForCard: (cardId) =>
+        defs[state.cardInstances[cardId]!.definitionId]!.rezCost ?? 0,
       spendCorpCredits: (amount) => {
         state.corp.credits -= amount;
       },
     },
     breaker: {
-      breakAbilityForLegalAction: () => ({
-        id: "ramming",
-        abilityId: "ramming",
-        type: "break_subroutine",
-        cost: { credits: 1 },
-        timingPoint: "encounter",
-        breakCost: 1,
-        count: 1,
-        postBreakStealthLoss: 2,
-      } as unknown as ReturnType<FortRunSideFamiliesHost["breaker"]["breakAbilityForLegalAction"]>),
+      breakAbilityForLegalAction: () =>
+        ({
+          id: "ramming",
+          abilityId: "ramming",
+          type: "break_subroutine",
+          cost: { credits: 1 },
+          timingPoint: "encounter",
+          breakCost: 1,
+          count: 1,
+          postBreakStealthLoss: 2,
+        }) as unknown as ReturnType<
+          FortRunSideFamiliesHost["breaker"]["breakAbilityForLegalAction"]
+        >,
     },
     effects: {
       executeEffectCommands: (commands) => {
-        (state as unknown as { lastEffectCommands?: unknown }).lastEffectCommands =
-          commands;
+        (
+          state as unknown as { lastEffectCommands?: unknown }
+        ).lastEffectCommands = commands;
       },
       trashRunnerInstalledProgram: (cardId) => {
         state.runner.rig.programs = state.runner.rig.programs.filter(
@@ -320,8 +336,7 @@ describe("fort run side families", () => {
 
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
-      source:
-        "v199.aardvark:aardvark_1:worm_1:ice_1:pump_breaker:none:1",
+      source: "v199.aardvark:aardvark_1:worm_1:ice_1:pump_breaker:none:1",
       kind: "select_option",
       visibility: "private_to_side",
     });
@@ -347,19 +362,21 @@ describe("fort run side families", () => {
     });
   });
 
-  it("keeps Roving Submarine run gate and activity markers stable", () => {
+  it("keeps server run restrictions and server activity stable", () => {
     const state = makeState();
     const host = hostFor(state);
     const action = { payload: {} } as LegalAction;
 
     expect(isActivityGatedFortRunBlocked(host, "rd")).toBe(true);
     expect(() => validateActivityGatedFortRun(host, "rd")).toThrow(
-      /Roving Submarine/,
+      /aktive Servereinschränkung/,
     );
 
     markFortActivityForRunGate(host, "rd", action);
 
-    expect(state.cardInstances.roving_1?.counters?.mark).toBe(1);
+    expect(
+      state.corpTurnFlags?.fortActivityServerIdsSinceCorpTurnStart,
+    ).toEqual(["rd"]);
     expect(action.payload).toMatchObject({
       fortRunGateActivityMarked: true,
       fortRunGateSourceCount: 1,
@@ -371,7 +388,10 @@ describe("fort run side families", () => {
     });
 
     clearActivityGatedFortRunMarkers(host);
-    expect(state.cardInstances.roving_1?.counters?.mark).toBe(0);
+    expect(
+      state.corpTurnFlags?.fortActivityServerIdsSinceCorpTurnStart,
+    ).toEqual([]);
+    expect(isActivityGatedFortRunBlocked(host, "rd")).toBe(true);
   });
 
   it("spends Paris City Grid trace-pool bits only for the active fort run", () => {
@@ -385,9 +405,9 @@ describe("fort run side families", () => {
     expect(fortTraceBitPoolTotal(host)).toBe(3);
     expect(spendFortTraceBitPool(host, "paris_1", "rd", 2)).toBe(2);
     expect(state.cardInstances.paris_1?.counters?.bit).toBe(1);
-    expect(() =>
-      spendFortTraceBitPool(host, "paris_1", "hq", 1),
-    ).toThrow(/Fort-Trace-Bit-Pool/);
+    expect(() => spendFortTraceBitPool(host, "paris_1", "hq", 1)).toThrow(
+      /Fort-Trace-Bit-Pool/,
+    );
   });
 
   it("applies post-break stealth loss through existing hosted-credit callbacks", () => {

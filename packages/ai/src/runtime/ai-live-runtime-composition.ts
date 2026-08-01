@@ -1,4 +1,4 @@
-import type { BlinkRiskAssessment } from "../runner-run-target-evaluation";
+import type { RandomBreakOrDamageRiskAssessment } from "../runner-run-target-evaluation";
 import {
   createRunnerBaselineSupportComposition,
   type RunnerBaselineSupportCompositionDependencies,
@@ -8,10 +8,10 @@ import {
   type AiContextDiagnosticsCompositionDependencies,
 } from "./ai-context-diagnostics-composition";
 import {
-  createRunnerBlinkEncounterBreakContext,
-  type RunnerBlinkEncounterBreakContextDependencies,
+  createRunnerRandomBreakOrDamageEncounterContext,
+  type RunnerRandomBreakOrDamageEncounterContextDependencies,
 } from "./runner-blink-encounter-break-context";
-import { createRunnerBlinkBreakExclusionContext } from "./runner-blink-break-exclusion";
+import { createRunnerRandomBreakOrDamageBreakExclusionContext } from "./runner-blink-break-exclusion";
 import { createRunnerEncounterActionExclusionContext } from "./runner-encounter-action-exclusion";
 import { currentEncounteredIceCard } from "./current-encounter";
 import {
@@ -45,15 +45,15 @@ export type AiLiveRuntimeCompositionDependencies =
       RuntimeContextDiagnosticsDependencyKeys
     > &
     Omit<
-      RunnerBlinkEncounterBreakContextDependencies,
+      RunnerRandomBreakOrDamageEncounterContextDependencies,
       "encounteredSubroutines"
     > &
     Pick<
       SemanticRuntimeOrchestrationCompositionDependencies,
       DirectPlanFirstDependencyKeys
     > & {
-      shouldAvoidBlinkRiskAssessment: (
-        assessment: BlinkRiskAssessment | undefined,
+      shouldAvoidRandomBreakOrDamageRisk: (
+        assessment: RandomBreakOrDamageRiskAssessment | undefined,
       ) => boolean;
     };
 
@@ -83,8 +83,8 @@ export function createAiLiveRuntimeComposition(
   const runnerBaseline = createRunnerBaselineSupportComposition(
     createRuntimeComposedDependencies(dependencies, contextDiagnostics),
   );
-  const { blinkRiskAssessmentForEncounterBreak } =
-    createRunnerBlinkEncounterBreakContext({
+  const { randomBreakOrDamageRiskAssessmentForEncounterBreak } =
+    createRunnerRandomBreakOrDamageEncounterContext({
       sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
       randomBreakOrDamageRiskProfileForDefinitionId:
         dependencies.randomBreakOrDamageRiskProfileForDefinitionId,
@@ -92,23 +92,25 @@ export function createAiLiveRuntimeComposition(
         dependencies.breakSubroutineIndexesForAction,
       encounteredSubroutines: (input) =>
         currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines ?? [],
-      buildBlinkRiskAssessment: dependencies.buildBlinkRiskAssessment,
+      buildRandomBreakOrDamageRiskAssessment:
+        dependencies.buildRandomBreakOrDamageRiskAssessment,
       isImmediateSafetyThreatSubroutine:
         dependencies.isImmediateSafetyThreatSubroutine,
       isRemoteServerTarget: dependencies.isRemoteServerTarget,
       visibleRootIsKnownAgenda: dependencies.visibleRootIsKnownAgenda,
     });
-  const { semanticRuntimeRunnerBlinkBreakExclusion } =
-    createRunnerBlinkBreakExclusionContext({
-      riskAssessment: blinkRiskAssessmentForEncounterBreak,
+  const { semanticRuntimeRunnerRandomBreakOrDamageBreakExclusion } =
+    createRunnerRandomBreakOrDamageBreakExclusionContext({
+      riskAssessment: randomBreakOrDamageRiskAssessmentForEncounterBreak,
       shouldAvoidRun: (assessment) =>
-        dependencies.shouldAvoidBlinkRiskAssessment(
-          assessment as BlinkRiskAssessment | undefined,
+        dependencies.shouldAvoidRandomBreakOrDamageRisk(
+          assessment as RandomBreakOrDamageRiskAssessment | undefined,
         ),
     });
   const { runnerEncounterActionExclusion } =
     createRunnerEncounterActionExclusionContext({
-      blinkBreakExclusion: semanticRuntimeRunnerBlinkBreakExclusion,
+      randomBreakOrDamageBreakExclusion:
+        semanticRuntimeRunnerRandomBreakOrDamageBreakExclusion,
       pumpViabilityAssessment: contextDiagnostics.pumpViabilityAssessment,
       breakAccessPathAssessment: contextDiagnostics.breakAccessPathAssessment,
     });

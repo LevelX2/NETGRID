@@ -3,7 +3,10 @@ import type {
   CardInstanceId,
   LegalAction,
 } from "@netgrid/shared";
-import type { AiHintActionCapacityProfile } from "./hint-ontology";
+import type {
+  AiHintActionCapacityProfile,
+  AiHintStructuredEffect,
+} from "./hint-ontology";
 
 export type ActionSemanticVisibilityScope =
   | "actor_private"
@@ -163,6 +166,7 @@ export type ActionEconomyProjection = {
   cardsConsumed: number;
   netHandDelta: number;
   payoutMode?: "fixed" | "all_available";
+  sourcePool?: "finite" | "renewable" | "unknown";
   repeatable: boolean | "unknown";
   reliability: "guaranteed" | "conditional" | "unknown";
   source: ActionEconomyProjectionSource;
@@ -442,6 +446,23 @@ export type ActionTagEffectProfile = {
   evidence: string[];
 };
 
+export type ConditionalDefenseFollowupQuote = {
+  schemaVersion: "conditional-defense-followup-quote-v1";
+  kind:
+    | "install_hq_ice_innermost_after_successful_run"
+    | "temporary_hq_ice_encounter_after_successful_run";
+  sourceCardInstanceId: CardInstanceId;
+  targetServerId: string;
+  stateVersion: number;
+  actionId: string;
+  rezCredits: number;
+  followupCredits: number;
+  totalCredits: number;
+  totalCreditsPayable: boolean;
+  hasOwnHqIce: boolean;
+  evidence: string[];
+};
+
 export type BoardContextSummary = {
   source: "ai_decision_input" | "player_view" | "not_projected";
   sideSafe: boolean;
@@ -487,6 +508,17 @@ export type ActionSemanticCandidate = {
   abilityBindingMethod: ActionAbilityBindingMethod;
   semanticActionType: string;
   /**
+   * Typed strategic effects that are bound to this exact current action.
+   * They never create legality or supply an unknown current amount; those
+   * facts remain bound to the Engine LegalAction projection.
+   */
+  functionalEffects?: readonly AiHintStructuredEffect[];
+  /**
+   * Card-wide strategic context from the active hint. This is intentionally
+   * not action authority and must not satisfy a PlanStep capability by itself.
+   */
+  cardContextFunctionalEffects?: readonly AiHintStructuredEffect[];
+  /**
    * Structured effect destinations retained from side-safe card hints. These
    * keep timing-relevant distinctions such as immediate, installment and
    * turn-start credits out of lossy free-text inference.
@@ -509,6 +541,7 @@ export type ActionSemanticCandidate = {
   randomBadPublicityModel?: ActionRandomBadPublicityModel;
   hiddenResourceVirusModel?: ActionHiddenResourceVirusModel;
   tagEffectProfile?: ActionTagEffectProfile;
+  conditionalDefenseFollowupQuote?: ConditionalDefenseFollowupQuote;
   boardContext: BoardContextSummary;
   confidence: ActionSemanticConfidence;
   primaryProjectionStatus: ActionPrimaryProjectionStatus;
@@ -565,6 +598,7 @@ export type SideSafeActionAbilityBinding = {
 export type ActionCardAbilitySemanticProfile = {
   abilityId: string;
   tacticSignals: readonly string[];
+  functionalEffects?: readonly AiHintStructuredEffect[];
   compatibilitySignals?: readonly string[];
   strategySupport?: readonly StrategySupportPair[];
   conditions?: readonly SemanticCondition[];
@@ -577,6 +611,7 @@ export type ActionCardAbilitySemanticProfile = {
 export type ActionCardSemanticProfile = {
   cardId: CardDefinitionId;
   tacticSignals: readonly string[];
+  functionalEffects?: readonly AiHintStructuredEffect[];
   effectTargets?: readonly string[];
   compatibilitySignals?: readonly string[];
   strategySupport?: readonly StrategySupportPair[];

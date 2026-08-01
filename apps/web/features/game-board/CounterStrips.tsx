@@ -1,15 +1,39 @@
-import type { Side, VisibleCard } from "@netgrid/shared";
+import type {
+  Side,
+  VisibleCard,
+  VisibleServerRunStartRestriction,
+} from "@netgrid/shared";
 
-import { identityCounterChipsForDisplays, serverCounterChipsForDisplays } from "../../app/action-board-ui";
+import {
+  identityCounterChipsForDisplays,
+  serverCounterChipsForDisplays,
+  serverRunRestrictionChips,
+} from "../../app/action-board-ui";
 import { CounterHelpTooltipTrigger } from "./CounterHelpTooltip";
 
-export function IdentityCounterStrip({ displays, side }: { displays: VisibleCard["counterDisplays"]; side: Side }) {
+export function IdentityCounterStrip({
+  displays,
+  side,
+}: {
+  displays: VisibleCard["counterDisplays"];
+  side: Side;
+}) {
   const chips = identityCounterChipsForDisplays(displays);
   if (chips.length === 0) return null;
   return (
-    <div className="identityCounterStrip" role="list" aria-label={`${sideLabel(side)}-Counter`}>
+    <div
+      className="identityCounterStrip"
+      role="list"
+      aria-label={`${sideLabel(side)}-Counter`}
+    >
       {chips.map((chip) => (
-        <CounterHelpTooltipTrigger className="identityCounterChip" role="listitem" key={chip.key} ariaLabel={chip.ariaLabel} tooltip={chip.tooltip}>
+        <CounterHelpTooltipTrigger
+          className="identityCounterChip"
+          role="listitem"
+          key={chip.key}
+          ariaLabel={chip.ariaLabel}
+          tooltip={chip.tooltip}
+        >
           <span className="identityCounterChipLabel">{chip.label}</span>
           <strong>{chip.amount}</strong>
         </CounterHelpTooltipTrigger>
@@ -18,15 +42,62 @@ export function IdentityCounterStrip({ displays, side }: { displays: VisibleCard
   );
 }
 
-export function ServerCounterStrip({ displays, serverLabel }: { displays: VisibleCard["counterDisplays"]; serverLabel: string }) {
+export function ServerCounterStrip({
+  displays,
+  serverLabel,
+}: {
+  displays: VisibleCard["counterDisplays"];
+  serverLabel: string;
+}) {
   const chips = serverCounterChipsForDisplays(displays);
   if (chips.length === 0) return null;
   return (
-    <div className="serverCounterStrip" role="list" aria-label={`${serverLabel}-Counter`}>
+    <div
+      className="serverCounterStrip"
+      role="list"
+      aria-label={`${serverLabel}-Counter`}
+    >
       {chips.map((chip) => (
-        <CounterHelpTooltipTrigger className="serverCounterChip" role="listitem" key={chip.key} ariaLabel={chip.ariaLabel} tooltip={chip.tooltip}>
+        <CounterHelpTooltipTrigger
+          className="serverCounterChip"
+          role="listitem"
+          key={chip.key}
+          ariaLabel={chip.ariaLabel}
+          tooltip={chip.tooltip}
+        >
           <span className="serverCounterChipLabel">{chip.label}</span>
           <strong>{chip.amount}</strong>
+        </CounterHelpTooltipTrigger>
+      ))}
+    </div>
+  );
+}
+
+export function ServerRunRestrictionStrip({
+  restrictions,
+  serverLabel,
+}: {
+  restrictions: VisibleServerRunStartRestriction[] | undefined;
+  serverLabel: string;
+}) {
+  const chips = serverRunRestrictionChips(restrictions);
+  if (chips.length === 0) return null;
+  return (
+    <div
+      className="serverRunRestrictionStrip"
+      role="list"
+      aria-label={`${serverLabel}-Runsperren`}
+    >
+      {chips.map((chip) => (
+        <CounterHelpTooltipTrigger
+          className="serverRunRestrictionChip"
+          role="listitem"
+          key={chip.key}
+          ariaLabel={chip.ariaLabel}
+          tooltip={chip.tooltip}
+          data-testid="server-run-restriction-chip"
+        >
+          {chip.label}
         </CounterHelpTooltipTrigger>
       ))}
     </div>

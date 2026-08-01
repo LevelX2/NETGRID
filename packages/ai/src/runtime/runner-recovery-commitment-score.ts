@@ -13,7 +13,7 @@ export type RunnerRecoveryCommitmentScoreDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => AiDecisionScoreComponent | undefined;
-  blinkRecoveryScoreComponent: (
+  randomBreakOrDamageRecoveryScoreComponent: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => AiDecisionScoreComponent | undefined;
@@ -58,11 +58,11 @@ export function runnerRecoveryCommitmentScoreComponents(
     action,
   );
   if (handBufferComponent) components.push(handBufferComponent);
-  const blinkRecoveryComponent = dependencies.blinkRecoveryScoreComponent(
-    input,
-    action,
-  );
-  if (blinkRecoveryComponent) components.push(blinkRecoveryComponent);
+  const randomBreakOrDamageRecoveryComponent =
+    dependencies.randomBreakOrDamageRecoveryScoreComponent(input, action);
+  if (randomBreakOrDamageRecoveryComponent) {
+    components.push(randomBreakOrDamageRecoveryComponent);
+  }
   const junkyardRecoveryComponent = dependencies.junkyardRecoveryScoreComponent(
     input,
     action,

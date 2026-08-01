@@ -140,7 +140,7 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
     );
   });
 
-  it("bounds advancement placement operation profile rules text tokens", () => {
+  it("rejects legacy operation rules text without structured placement semantics", () => {
     const assessment = assessmentForAssetRulesText(
       "This card can be advanced.",
       "add one advancement counterproductive to each of up to two installed cards that can be advanced",
@@ -421,7 +421,6 @@ function semanticPayloadDependencies(
     cardType: (card: VisibleCard) => card.type,
     cardAdvancementRequirement: (card: VisibleCard) =>
       card.advancementRequirement,
-    teamRestructuringCardId: "custom-team-restructuring",
   };
 }
 
@@ -450,7 +449,7 @@ function assessmentForAssetRulesText(
 function assessmentForTargetRulesText(
   targetRulesText: string,
   targetOverrides: Partial<VisibleCard>,
-  sourceRulesText = "add one advancement counter to each of up to two installed cards that can be advanced",
+  legacySourceRulesText?: string,
 ) {
   const target = corpCard("custom-advance-target", targetOverrides);
   const advanceAction = corpAction("advance_card", {
@@ -458,6 +457,13 @@ function assessmentForTargetRulesText(
   });
   const placementAction = corpAction("play_operation", {
     cardId: "custom-advancement-distribution",
+    ...(legacySourceRulesText === undefined
+      ? {
+          cardImplementationEffectKind: "distribute_advancement_counters",
+          advancementCounterAmount: 2,
+          advancementCounterChoiceMode: "up_to_distinct_targets_one_each",
+        }
+      : {}),
   });
   const input = corpInput({
     root: [target],
@@ -474,7 +480,7 @@ function assessmentForTargetRulesText(
           : undefined,
       normalizedRulesTextForDefinition: (definitionId) =>
         definitionId === "custom-advancement-distribution"
-          ? sourceRulesText
+          ? (legacySourceRulesText ?? "")
           : targetRulesText,
       actionCreditCost: () => 0,
       actionSourceCard: (_input, action) =>
@@ -493,7 +499,6 @@ function assessmentForTargetRulesText(
           : undefined,
       cardType: (card) => card.type,
       cardAdvancementRequirement: (card) => card.advancementRequirement,
-      teamRestructuringCardId: "custom-team-restructuring",
     },
   );
 }
@@ -575,7 +580,7 @@ function corpCard(
 
 function corpAction(
   type: string,
-  payload: Record<string, string> = {},
+  payload: Record<string, string | number | boolean> = {},
 ): LegalAction {
   return {
     actionId: `${type}-${payload.cardId ?? "action"}`,

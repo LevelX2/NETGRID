@@ -150,6 +150,19 @@ describe("common economy action score", () => {
     });
   });
 
+  it("classifies a finite source pool from action semantics instead of card id", () => {
+    const finite = candidate("generic-finite-pool", 2, {
+      sourceDefinitionId: "unseen-future-card",
+      sourcePool: "finite",
+    });
+    const ordinary = candidate("ordinary-payout", 2, {
+      sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+    });
+
+    expect(economyActionMode(finite)).toBe("fixed_pool_payout");
+    expect(economyActionMode(ordinary)).toBe("standard_liquid");
+  });
+
   it("compares draw-and-consume payouts by their net hand delta", () => {
     const pure = candidate("pure", 2);
     const drawAndConsume = candidate("draw-and-consume", 3, {

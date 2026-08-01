@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { isProtectionDefinitionId } from "./protection-definition";
 
 describe("protection definition", () => {
-  it("recognizes exact remote protection definition ids", () => {
+  it("recognizes remote protection from structured card effects", () => {
     expect(isProtectionDefinitionId("onr_v1_361_namatoki-plaza")).toBe(true);
     expect(isProtectionDefinitionId("onr_v1_366_red-herrings")).toBe(true);
     expect(
@@ -11,7 +11,7 @@ describe("protection definition", () => {
     ).toBe(true);
   });
 
-  it("ignores protection-like definition id text without an exact id match", () => {
+  it("does not infer protection from definition-id text", () => {
     expect(isProtectionDefinitionId("custom-red-herrings-proxy")).toBe(false);
     expect(isProtectionDefinitionId("test_tesseract_remote")).toBe(false);
     expect(isProtectionDefinitionId("namatoki_like_upgrade")).toBe(false);
