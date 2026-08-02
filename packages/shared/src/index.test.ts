@@ -370,6 +370,7 @@ describe("AI decision debug sanitizing", () => {
               candidateId: "head:corp.draw",
               moduleId: "corp.economy",
               rootPlanInstanceId: "plan:corp.score_agenda:general",
+              executorPlanInstanceId: "plan:corp.economy:score-material",
               actionId: "corp.draw",
               semanticActionType: "economy.draw",
               invocationKey: "invocation:test",
@@ -606,6 +607,12 @@ describe("AI decision debug sanitizing", () => {
         selectedLine: expect.objectContaining({
           stopReason: "observation_boundary",
         }),
+        heads: [
+          expect.objectContaining({
+            rootPlanInstanceId: "plan:corp.score_agenda:general",
+            executorPlanInstanceId: "plan:corp.economy:score-material",
+          }),
+        ],
         shadowComparison: expect.objectContaining({
           liveActionId: "corp.draw",
           comparisonClass: "two_step_changes_head",

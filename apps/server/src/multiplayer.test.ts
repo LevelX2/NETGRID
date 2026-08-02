@@ -7573,6 +7573,161 @@ describe("MVP 0.2 multiplayer service", () => {
     );
   });
 
+  it("accepts the current Corporate Shuffle PlayerView action and continues the full draw transaction", async () => {
+    const exactTwo = await joinedCorporateShuffleMatch(
+      "mp-corporate-shuffle-exact-two",
+      { clicks: 2, strategicPlanningGroup: false },
+    );
+    const beforeExactTwo = await bootstrap(
+      exactTwo.service,
+      exactTwo.matchId,
+      exactTwo.corp,
+    );
+    const exactTwoAction = mustAction(
+      beforeExactTwo,
+      (action) =>
+        action.type === "play_operation" &&
+        action.source === exactTwo.operationId,
+    );
+    expect(exactTwoAction).toMatchObject({
+      side: "corp",
+      source: exactTwo.operationId,
+      costs: [{ clicks: 2, credits: 0 }],
+      payload: { cardId: exactTwo.operationId },
+      expiresAtStateVersion: beforeExactTwo.playerView.stateVersion,
+    });
+
+    const exactTwoStarted = await exactTwo.service.submitAction({
+      matchId: exactTwo.matchId,
+      side: exactTwo.corp.side,
+      sessionToken: exactTwo.corp.sessionToken,
+      actionId: exactTwoAction.actionId,
+      clientKnownStateVersion: beforeExactTwo.playerView.stateVersion,
+      idempotencyKey: "corporate-shuffle-exact-two",
+    });
+    expect(exactTwoStarted.ok).toBe(true);
+    if (!exactTwoStarted.ok) throw new Error(exactTwoStarted.error.message);
+    expect(exactTwoStarted.actorPayload.pendingChoice?.source).toContain(
+      "classic.corporate_shuffle_hq_to_rd:",
+    );
+    expect(exactTwoStarted.publicEvent?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      actionCostClicks: 2,
+      drawnCards: 5,
+      hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
+    });
+    const exactTwoRecord = await exactTwo.service.loadForTest(exactTwo.matchId);
+    expect(exactTwoRecord?.gameState?.corp.clicks).toBe(0);
+    expect(exactTwoRecord?.gameState?.corp.hq.length).toBe(
+      exactTwo.hqBeforePlay - 1 + 5,
+    );
+
+    const withSpg = await joinedCorporateShuffleMatch(
+      "mp-corporate-shuffle-with-spg",
+      { clicks: 3, strategicPlanningGroup: true },
+    );
+    const beforeSpg = await bootstrap(
+      withSpg.service,
+      withSpg.matchId,
+      withSpg.corp,
+    );
+    const withSpgAction = mustAction(
+      beforeSpg,
+      (action) =>
+        action.type === "play_operation" &&
+        action.source === withSpg.operationId,
+    );
+    expect(withSpgAction.costs).toEqual([{ clicks: 2, credits: 0 }]);
+
+    const spgStarted = await withSpg.service.submitAction({
+      matchId: withSpg.matchId,
+      side: withSpg.corp.side,
+      sessionToken: withSpg.corp.sessionToken,
+      actionId: withSpgAction.actionId,
+      clientKnownStateVersion: beforeSpg.playerView.stateVersion,
+      idempotencyKey: "corporate-shuffle-with-spg",
+    });
+    expect(spgStarted.ok).toBe(true);
+    if (!spgStarted.ok) throw new Error(spgStarted.error.message);
+    expect(spgStarted.actorPayload.pendingChoice?.source).toContain(
+      "card_implementation.strategic_planning_group_draw:",
+    );
+    expect(spgStarted.actorPayload.pendingChoice?.options).toHaveLength(6);
+    expect(spgStarted.opponentPayload.pendingChoice).toBeUndefined();
+
+    const afterSpg = await submitFirstChoice(
+      withSpg.service,
+      withSpg.matchId,
+      withSpg.corp,
+      "corporate-shuffle-spg-bottom",
+    );
+    expect(afterSpg.pendingChoice?.source).toContain(
+      "classic.corporate_shuffle_hq_to_rd:",
+    );
+    expect(afterSpg.eventTail.at(-1)?.publicPayload).toMatchObject({
+      strategicPlanningGroupBaseDrawCount: 5,
+      strategicPlanningGroupAdditionalDrawCount: 1,
+      strategicPlanningGroupDrawnCardCount: 6,
+      strategicPlanningGroupNetDrawCount: 5,
+      bottomedCardCount: 1,
+    });
+    const afterSpgRecord = await withSpg.service.loadForTest(withSpg.matchId);
+    expect(afterSpgRecord?.gameState?.corp.clicks).toBe(1);
+    expect(afterSpgRecord?.gameState?.corp.hq.length).toBe(
+      withSpg.hqBeforePlay - 1 + 5,
+    );
+
+    const afterHqChoice = await submitFirstChoice(
+      withSpg.service,
+      withSpg.matchId,
+      withSpg.corp,
+      "corporate-shuffle-hq-to-rd",
+    );
+    expect(afterHqChoice.pendingChoice).toBeUndefined();
+    expect(afterHqChoice.eventTail.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
+      sourceDefinitionId: "onr_classic_017_corporate-shuffle",
+      movedCount: 1,
+    });
+    expect(
+      JSON.stringify(afterHqChoice.eventTail.at(-1)?.publicPayload),
+    ).not.toMatch(/movedCardId|selectedOptionIds|privatePayload/);
+
+    const staleMatch = await joinedCorporateShuffleMatch(
+      "mp-corporate-shuffle-stale",
+      { clicks: 3, strategicPlanningGroup: false },
+    );
+    const beforeStale = await bootstrap(
+      staleMatch.service,
+      staleMatch.matchId,
+      staleMatch.corp,
+    );
+    const staleOperation = mustAction(
+      beforeStale,
+      (action) =>
+        action.type === "play_operation" &&
+        action.source === staleMatch.operationId,
+    );
+    await submit(
+      staleMatch.service,
+      staleMatch.matchId,
+      staleMatch.corp,
+      (action) => action.type === "gain_credit",
+      "corporate-shuffle-stale-version-advance",
+    );
+    const stale = await staleMatch.service.submitAction({
+      matchId: staleMatch.matchId,
+      side: staleMatch.corp.side,
+      sessionToken: staleMatch.corp.sessionToken,
+      actionId: staleOperation.actionId,
+      clientKnownStateVersion: beforeStale.playerView.stateVersion,
+      idempotencyKey: "corporate-shuffle-stale-submit",
+    });
+    expect(stale.ok).toBe(false);
+    if (stale.ok) throw new Error("Expected stale Corporate Shuffle rejection");
+    expect(stale.error.code).toBe("stale_state");
+  });
+
   it("handles V0.98 Hidden-Zone Search through submit, idempotency, reconnect and undo barrier", async () => {
     const match = await joinedV098HiddenSearchMatch("mp-v098-hidden-search");
     const before = await bootstrap(match.service, match.matchId, match.runner);
@@ -12633,13 +12788,16 @@ describe("MVP 0.2 multiplayer service", () => {
     try {
       const storage = new InMemoryMatchStorage();
       const restoredBeforeChoice: boolean[] = [];
+      const portfolioBeforeChoice: Array<
+        ReturnType<typeof residentPlanPortfolioSnapshot>
+      > = [];
       const choose = (
         input: Parameters<typeof chooseRuntimeAiAction>[0],
         options?: Parameters<typeof chooseRuntimeAiAction>[1],
       ) => {
-        restoredBeforeChoice.push(
-          Boolean(residentPlanPortfolioSnapshot(input)),
-        );
+        const portfolio = residentPlanPortfolioSnapshot(input);
+        restoredBeforeChoice.push(Boolean(portfolio));
+        portfolioBeforeChoice.push(portfolio);
         return chooseRuntimeAiAction(input, options);
       };
       const service = new MultiplayerService(storage, {
@@ -12769,7 +12927,42 @@ describe("MVP 0.2 multiplayer service", () => {
         knownMatchVersion: current.matchVersion,
       });
       expect(afterRestart.ok).toBe(true);
+      if (!afterRestart.ok) throw new Error(afterRestart.error.message);
       expect(restoredBeforeChoice.at(-1)).toBe(true);
+      const restoredPortfolio = portfolioBeforeChoice.at(-1);
+      expect(restoredPortfolio?.instances).toEqual(
+        persisted.aiPlanRuntime?.residentPlanPortfolioBySide?.corp?.instances,
+      );
+      expect(restoredPortfolio?.turnPlanCommitment).toBeUndefined();
+      expect(restoredPortfolio?.turnPlanExecutionLease).toBeUndefined();
+      const afterRestartPlanFirst = afterRestart.prepared.detail
+        .planFirstDecision as AiPlanFirstDecisionDebug;
+      expect(afterRestart.prepared.actionId).toBe(first.prepared.actionId);
+      expect(afterRestartPlanFirst).toMatchObject({
+        selectionAuthority: "turn_plan_commitment",
+        rootPlanInstanceId: planFirstDecision.rootPlanInstanceId,
+        leafExecutorInstanceId: planFirstDecision.leafExecutorInstanceId,
+        selectedPlan: {
+          instanceId: planFirstDecision.selectedPlan?.instanceId,
+          moduleId: planFirstDecision.selectedPlan?.moduleId,
+        },
+        route: {
+          planInstanceId: planFirstDecision.route?.planInstanceId,
+          stepId: planFirstDecision.route?.stepId,
+          actionId: planFirstDecision.route?.actionId,
+        },
+        turnPlanning: {
+          schemaVersion: "ai-turn-planning-debug-v1",
+          mode: "cutover",
+          commitment: {
+            status: "active",
+            rematerialization: {
+              status: "executable",
+              actionId: first.prepared.actionId,
+            },
+          },
+        },
+      });
     } finally {
       resetResidentPlanPortfolioMemory();
     }
@@ -13821,6 +14014,22 @@ const V095_CORP_DECK: DeckDefinition = {
   ],
 };
 
+const CORPORATE_SHUFFLE_CORP_DECK: DeckDefinition = {
+  id: "server_corporate_shuffle_corp",
+  name: "Server Corporate Shuffle Integration Harness",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_economy_operation", quantity: 3 },
+    { id: "simple_economy_asset", quantity: 2 },
+    { id: "simple_tag_ice", quantity: 2 },
+    { id: "simple_barrier_ice", quantity: 2 },
+    { id: "onr_classic_017_corporate-shuffle", quantity: 1 },
+    { id: "onr_classic_025_strategic-planning-group", quantity: 1 },
+  ],
+};
+
 async function joinedMatch(
   seed = "service-test",
   settings?: Partial<MatchSettings>,
@@ -13866,6 +14075,92 @@ async function joinedMatch(
     matchId: created.matchId,
     corp,
     runner,
+  };
+}
+
+async function joinedCorporateShuffleMatch(
+  seed: string,
+  options: { clicks: 2 | 3; strategicPlanningGroup: boolean },
+) {
+  const storage = new InMemoryMatchStorage();
+  const service = new MultiplayerService(storage, {
+    tokenSalt: `test-salt-${seed}`,
+    publicWebBaseUrl: "http://127.0.0.1:3100",
+    publicServerBaseUrl: "http://127.0.0.1:8787",
+  });
+  const created = await service.createMatch({ hostSide: "corp", seed });
+  if (!created.joinUrl) throw new Error("Missing join URL");
+  const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  const joined = await service.joinMatch(created.matchId, {
+    token: joinToken,
+    displayName: "Runner",
+  });
+  expect("error" in joined).toBe(false);
+  if ("error" in joined) throw new Error(joined.error.message);
+
+  const record = await storage.load(created.matchId);
+  if (!record) throw new Error("Missing stored Corporate Shuffle match");
+  const gameState = createGameAfterSetup({
+    matchId: created.matchId,
+    seed,
+    runnerDeck: V095_RUNNER_DECK,
+    corpDeck: CORPORATE_SHUFFLE_CORP_DECK,
+    agendaPointsToWin: 7,
+  });
+  gameState.activeSide = "corp";
+  gameState.phase = "corp_action_phase";
+  gameState.timingPoint = "corp_action.main";
+  gameState.corp.clicks = options.clicks;
+  gameState.corp.credits = 5;
+  delete gameState.pendingChoice;
+  delete gameState.pendingCorpDraw;
+  const operationId = moveCorpCardToHqForTest(
+    gameState,
+    "onr_classic_017_corporate-shuffle",
+  );
+  if (options.strategicPlanningGroup) {
+    const strategicPlanningGroupId = putCorpRootInRemoteForTest(
+      gameState,
+      "onr_classic_025_strategic-planning-group",
+    );
+    gameState.cardInstances[strategicPlanningGroupId] = {
+      ...gameState.cardInstances[strategicPlanningGroupId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+  const hqBeforePlay = gameState.corp.hq.length;
+  record.gameState = gameState;
+  record.match.status = "active";
+  record.match.baseline = gameState.baseline;
+  record.match.settings.agendaPointsToWin = 7;
+  record.eventLog = gameState.eventLog.map((event) =>
+    toEventRecordForTest(created.matchId, event),
+  );
+  record.stateSnapshots = [
+    stateSnapshotForTest(
+      created.matchId,
+      gameState,
+      record.match.matchVersion,
+      "snap_corporate_shuffle_ready",
+    ),
+  ];
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  delete record.pendingUndo;
+  await storage.save(record);
+
+  return {
+    service,
+    matchId: created.matchId,
+    operationId,
+    hqBeforePlay,
+    corp: {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    },
   };
 }
 

@@ -177,6 +177,12 @@
   Zuggrenzen und öffentliche Gegneroutcomes resident bleiben. Ein
   Runtime-Neustart stellt das Portfolio wieder her, verwirft das alte
   Zugcommitment und plant aus dem aktuellen Zustand neu.
+- Die serverprivate Wiederherstellungsgrenze erkennt fehlendes
+  prozesslokales Portfolio als Runtime-Neustart. Sie übernimmt die residenten
+  Planinstanzen, entfernt aber das frühere `TurnPlanCommitment` und die
+  Execution Lease vor der frischen Rematerialisierung. Der side-sichere
+  Debug-Sanitizer führt `executorPlanInstanceId` als optionales typisiertes
+  Head-Feld; unbekannte Felder bleiben weiterhin fail-closed.
 - Corp und Runner besitzen getrennte vollständige Owner-, Horizon- und
   Coverage-Verträge. Produktiv gilt `cutover`; `legacy_compare` ist nur ein
   ausdrücklich gesetzter Diagnosemodus und kein Fallback.
