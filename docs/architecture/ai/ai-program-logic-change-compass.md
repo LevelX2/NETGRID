@@ -18,6 +18,28 @@ Bei Unklarheit oder einer Änderung am gemeinsamen Rahmen sind die betroffenen
 Abschnitte beider Gesamtdokumente selbst zu lesen. Dieses Konzentrat ersetzt
 sie nicht.
 
+## Gemeinsamer Pflegevertrag
+
+Dieses Dokument bildet mit folgenden beiden Gesamtdokumenten einen
+verbindlichen Dreierverbund:
+
+- `ki-zielbild-metaebene-2026-08-02-v6.md`;
+- `ai-plan-layer-target-state-wip.md`.
+
+Bei jeder inhaltlichen Änderung an einem der drei Dokumente muss geprüft
+werden, ob Begriffe, Haltung, Autoritätskette, Ownership, Planvertrag,
+Leitplanken oder Pflichtnachweise in den beiden anderen Dokumenten ebenfalls
+angepasst werden müssen. Eine Änderung gilt erst dann als dokumentarisch
+abgeschlossen, wenn entweder alle betroffenen Stellen synchronisiert sind
+oder ausdrücklich festgestellt wurde, dass die beiden anderen Dokumente
+inhaltlich unverändert gültig bleiben.
+
+Das allgemeine Zielbild erklärt das **Warum und die Gesamtarchitektur**, das
+Planebenen-Konzept den **detaillierten Plan- und Ausführungsvertrag**, dieser
+Kompass die **verbindliche Handlungsanweisung für Agenten**. Keines der drei
+Dokumente darf stillschweigend eine abweichende Entscheidungsautorität
+einführen.
+
 ## Die Haltung
 
 1. **Engine-Korrektheit zuerst.** Die Engine erzeugt LegalActions und bleibt
