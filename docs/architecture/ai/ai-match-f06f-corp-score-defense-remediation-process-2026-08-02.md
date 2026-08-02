@@ -1,6 +1,6 @@
 # Match f06f – Corp-Score-, Remote- und Defense-Remediation-Prozess
 
-Status: aktiv – P3 rote Decision-Checkpoints abgeschlossen
+Status: aktiv – P5 Vollverifikation abgeschlossen
 
 Quelle: vollständiges 123/123-Entscheidungsaudit von
 `match_f06f0fe345a11e0f` und Freigabe der Maßnahmen durch den
@@ -54,9 +54,11 @@ zusätzliche Central-Verteidigung weiterhin begründen.
 
 1. `corp.score_agenda` bleibt alleiniger Owner von Agenda, Zielremote,
    Install/Advance/Score, Scoring-Horizont und Same-Turn-Closeout.
-2. `corp.establish_scoring_remote` besitzt ausschließlich langfristige
-   Remote-Nutzbarkeit und veröffentlicht Schutzbedarf; es wählt kein ICE und
-   keine Rez-Action.
+2. Langfristige Remote-Nutzbarkeit bleibt im vorhandenen, an
+   `corp.score_agenda` gebundenen Protection-Need abgebildet. Das vorhandene
+   Modul `corp.establish_scoring_remote` wird nicht als paralleler
+   Action-Chooser aktiviert; es wählt insbesondere kein ICE und keine
+   Rez-Action.
 3. `corp.defend_servers` bleibt alleiniger Owner globaler ICE-Allokation,
    ICE-Installation, Schutzprojektion, Rezreserve und Rezentscheidung.
 4. `corp.economy` finanziert nur exakt gebundene Parent-Bedarfe und darf einen
@@ -129,9 +131,10 @@ Genau ein Paket ist aktiv. Jeder Paketübergang verlangt sein Done-Gate,
 
 - Ziel A: `corp.score_agenda` bindet vollständige Scorehorizonte. Der bereits
   grüne Same-Turn-Closeout wird unverändert als Gegenprobe erhalten.
-- Ziel B: der bestehende `corp.establish_scoring_remote`-Vertrag wird nur im
-  erforderlichen Umfang ownergerecht angeschlossen und delegiert jede
-  ICE-/Rezentscheidung an `corp.defend_servers`.
+- Ziel B: der bestehende parent-gebundene Score-Protection-Vertrag wird
+  erweitert. `corp.establish_scoring_remote` wird nach dem Architektur-
+  Preflight bewusst nicht als paralleler Action-Chooser angeschlossen;
+  jede konkrete ICE-/Rezentscheidung bleibt bei `corp.defend_servers`.
 - Ziel C: `corp.defend_servers` konsumiert vorhandene Central-Facts für
   Sättigung und Multiaccess-/Druckausnahmen, respektiert exakte Parentreserven
   und akzeptiert nicht jede minimale Zugriffssenkung ungeachtet ungerezzter
@@ -156,6 +159,33 @@ Genau ein Paket ist aktiv. Jeder Paketübergang verlangt sein Done-Gate,
 - Done-Gate: alle Pflichtchecks grün; Worktree sauber bis auf Review-Artefakt.
 - Commit: `test(ai): verify match f06f remediation`
 
+#### P5-Verifikationsergebnis
+
+- Fokussierte AI-Regression: 12 Testdateien, 361 Tests, vollständig grün.
+- Ambush-Ownership und Fetal-AI-Simulation: 2 Testdateien, 14 Tests,
+  vollständig grün.
+- Engine-Quote: 1 Testdatei, 5 Tests, vollständig grün.
+- Typechecks: `@netgrid/ai` mit 8-GB-Node-Heap und `@netgrid/engine` grün.
+- Statische Gates: `check:ai`, `check:proteus-ai-readiness` und
+  `check:ai-deck-doctrine-strategy` grün; darin insbesondere
+  `AI_SOURCE_STRUCTURE OK` und `AI_GENERIC_CARD_ID_GUARDS OK`.
+- Vollgate `corepack pnpm test:ai:shards`: alle drei Shards grün;
+  185/185 Testdateien je Shard und 1835 + 1551 + 1177 = 4563 Tests.
+- `git diff --check`: grün.
+
+Zwei ältere Erwartungen wurden bewusst als Anforderungsfortschreibung
+präzisiert, nicht als F06F-Zielcheckpoint umgeschrieben:
+
+1. Der ältere Overflow-Checkpoint
+   `cp-daed3ad-latest-04-install-score-before-overflow-d94` erwartet keine
+   Agenda-Exposition mehr, wenn der Zielremote keine zertifizierte
+   Protection besitzt. Fixture-Zustand und StateHash bleiben unverändert.
+2. Die längere Fetal-AI-Simulation verlangt unter konkurrierenden,
+   Engine-zertifizierten Score-/Economy-Routen weiterhin einen validierten
+   Ambush-Plan, aber keine sofortige Ambush-Installation im alten
+   Aktionshorizont. Der direkte Ownership-Vertrag, wonach ein exakt gewählter
+   Ambush-Plan seinen Install-Action behält, bleibt separat unverändert grün.
+
 ### P6 – Review, Wissenspflege, Integration und Cleanup
 
 - Ziel: Ergebnis, Testevidence und verbleibende Unsicherheiten festhalten;
@@ -172,8 +202,10 @@ Genau ein Paket ist aktiv. Jeder Paketübergang verlangt sein Done-Gate,
 
 - Fokussierte AI-Tests erhalten mindestens 180 Sekunden äußeres Zeitfenster.
 - Vollständige AI-Shards und breite Gates erhalten mindestens 600 Sekunden.
-- Checkpoint-Erwartungen werden nach dem Fix nicht an das neue Verhalten
-  angepasst.
+- Die matchbezogenen F06F-Checkpoint-Erwartungen werden nach dem Fix nicht an
+  das neue Verhalten angepasst. Ältere, der freigegebenen neuen
+  Schutzanforderung widersprechende Erwartungen dürfen mit dokumentierter
+  Begründung fortgeschrieben werden.
 - Verhaltenstests prüfen Ergebnis sowie Plan, Step, Route und Executor.
 - Umfangreiche Rohdaten bleiben unter `data/local/` und werden nicht
   versioniert.
