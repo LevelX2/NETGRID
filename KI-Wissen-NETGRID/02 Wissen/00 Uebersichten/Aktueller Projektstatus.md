@@ -98,6 +98,17 @@ Stand: 2026-07-30
 
 ## KI
 
+- Das allgemeine Zielbild ist in
+  `docs/architecture/ai/ki-zielbild-metaebene-2026-08-02-v6.md` auf den
+  produktiven Plan-first-Stand aktualisiert. Die durchgehende Kette reicht
+  von Engine-/Kartensemantik und ActionSemanticCandidates über
+  kompositionsabhängige DeckDoctrine, Strategic Intent und residente
+  Planinstanzen bis zum Restzugvergleich, Commitment, Lease und der erneuten
+  Enginevalidierung. Die frühere Metaebene v5 bleibt nur historische
+  Entwicklungsevidence. Für jeden KI-Codepatch ist diese Haltung im kurzen
+  `docs/architecture/ai/ai-program-logic-change-compass.md` als verbindlicher
+  erster Agentenvertrag zusammengefasst und in Root- sowie Package-`AGENTS.md`
+  verankert.
 - Das WIP-Zielkonzept
   `docs/architecture/ai/ai-plan-layer-target-state-wip.md` führt die
   verteilten Verträge für Deckstrategie, Strategic Intent, kurzlebige
@@ -128,6 +139,14 @@ Stand: 2026-07-30
   TacticalPlan-Memory- und TacticalPlan-Override-Abhängigkeiten bereinigt;
   historische Altverträge bleiben ausschließlich isolierte
   Test-/Evaluationsdiagnostik.
+- Version 1.2 des Planebenen-Zielkonzepts konsolidiert zusätzlich die
+  Erkenntnisse aus generischer Fähigkeitsmigration, Serie 82b2 und Match
+  978d: Doctrine verlangt ausführbare Komponentenkomposition; Known und
+  Unknown werden pfadweise getrennt; Draw braucht einen materialisierbaren
+  Folgeaktionshorizont; ICE-Staffelung wird als globale Opportunitätsfrage im
+  Defense-Plan bewertet; Score- und Defense-Ownership bleiben über
+  Parent-/Need-Bindung getrennt. Resolver erhalten keine eigene
+  Domainentscheidung.
 - Für Corp-Verteidigung existiert keine Legacy-Zentralreserve und kein
   eigenständiger zentraler Reserveplan. Finanzierung entsteht nur als
   Economy-Bedarf des exakten Defense-Parents; Schutzwirkung und Reserve

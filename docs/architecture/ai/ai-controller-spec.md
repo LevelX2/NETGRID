@@ -1,72 +1,92 @@
 # AI Controller Spec
 
-Status: frozen_for_implementation  
-Stand: 2026-05-03  
-Gilt für: MVP 0.3
+Status: **Current State**
+Stand: 2026-08-02
 
 ## Ziel
 
-Controller sind Eingabequellen. Die Engine bleibt die einzige Regelautorität. Human, AI und Replay dürfen nur `PlayerAction` einreichen, deren `actionId` aus aktuellen `LegalActions` stammt. `applyAction` validiert side, stateVersion, Timingpunkt, Kosten und Targets erneut.
+Controller sind Eingabequellen. Die Engine bleibt die einzige
+Regelautorität. Human, AI und Replay dürfen nur eine `PlayerAction` aus einer
+aktuellen `LegalAction` ableiten. `applyAction` validiert Seite, Action-ID,
+`stateVersion`, Timing, Kosten, Ziele und Choices erneut.
+
+Der AI-Controller verwendet ausschließlich den produktiven Plan-first-Weg.
+Er wählt zuerst Planinstanz, Step und Route und bindet erst danach die
+konkrete LegalAction. Eine Action besitzt außerhalb dieses Vertrags keine
+eigene Handlungsautorität.
 
 ## Controller-Typen
 
-```ts
-type PlayerController =
-  | { controllerId: string; side: Side; type: "human_local" | "human_remote"; displayName?: string }
-  | { controllerId: string; side: Side; type: "ai"; displayName?: string; profile?: AiProfile }
-  | { controllerId: string; side: Side; type: "replay"; displayName?: string };
-```
-
-MVP 0.3 verwendet `human_local`, `human_remote`, `ai` und `replay` als modellierte Typen. Die Engine wertet diese Typen nicht als Regelquelle aus.
+Human-, AI- und Replay-Controller bleiben für die Engine gleichartige
+Quellen von PlayerActions. Der Controller-Typ verändert keine Spielregel und
+gewährt keinen zusätzlichen Zugriff auf den vollständigen `GameState`.
 
 ## AI-Input
 
-Erlaubt:
+Erlaubt sind insbesondere:
 
-- `side`
-- `playerView`
-- `legalActions`
-- side-gefilterte `PublicGameEvent`-Taildaten
-- `difficulty`
-- `seed`
-- `decisionId`
-- `actionNumber`
-- `profileId`
+- `side`;
+- side-sichere `playerView`;
+- aktuelle `legalActions`;
+- side-gefilterte öffentliche Event-Taildaten;
+- Difficulty-, Seed-, Decision-, Action- und Profilidentität;
+- die eigene, serverseitig gebundene DeckDoctrine und daraus erlaubte
+  eigene Deckinformationen;
+- actor-private Matchbindung ausschließlich für Engine-zertifizierte
+  Commands.
 
-Verboten:
+Verboten sind insbesondere:
 
-- `GameState`
-- `cardInstances`
-- gegnerische Hand-/Deck-/R&D-/Stack-Reihenfolgen
-- unrezzed Corp-Kartentitel für Runner
-- Runner-Grip-/Stack-Titel für Corp
-- Session-, Token-, Storage- oder WebSocket-Interna
-- private Event-Payloads der Gegenseite
+- vollständiger `GameState`;
+- gegnerische Hand- oder Deckreihenfolge;
+- für die Seite unbekannte Kartenidentitäten;
+- private Events und Choices der Gegenseite;
+- Session-, Token-, Storage- oder WebSocket-Interna als Strategieinput.
 
 ## AI-Decision
 
-```ts
-type AiDecision = {
-  actionId: string;
-  reasonCode: string;
-  explanation: string;
-  consideredActionIds: string[];
-  fallbackUsed: boolean;
-  confidence?: number;
-}
-```
+Eine direkte Entscheidung bindet genau eine aktuelle `actionId` und
+gegebenenfalls `selectedChoices`. Eng zertifizierte Nahgleichstände dürfen
+stattdessen einen Engine-Command für eine atomare, seed- und replaygebundene
+Auswahl liefern. Reason, Evidence und `AiDecisionDebug.planFirstDecision`
+erklären die Plan-, Step-, Routen- und Zugplanbindung, erzeugen aber keine
+zweite Auswahlautorität.
 
-`reasonCode` ist stabil und testbar. `explanation` ist deterministisch, kurz und ausschließlich aus sichtbaren Daten abgeleitet.
+Choice-Resolver dürfen nur die Payload einer bereits gewählten und exakt
+gebundenen Action vervollständigen. Sie dürfen weder Action-ID noch Quelle,
+Server, Ziel, Ressourcenstrategie, Executor oder Planpriorität neu wählen.
 
-## Fallback
+## Fail-closed und Coverage
 
-Wenn eine Heuristik keine legale Action findet oder eine ungültige Action referenziert, wird deterministisch auf die erste stabile LegalAction zurückgefallen. Der Fallback muss markiert werden.
+Es gibt keinen beliebigen Fallback auf die erste stabile LegalAction. Jede
+freiwillige Action benötigt eine produktive Planroute oder eine eindeutige
+Disposition. Der enge Coverage-Restpfad darf nur vorher definierte sichere,
+nebenwirkungsarme Engine-Fortsetzungen behandeln. Fehlende Planabdeckung,
+mehrdeutige Bindung, veraltete StateVersion oder unvollständige Quotes bleiben
+sichtbare Fehler und werden nicht durch plausibel wirkende Ersatzaktionen
+kaschiert.
+
+`fallbackUsed` und `timeoutUsed` bleiben Observability-Felder; sie sind keine
+Erlaubnis für eine zweite Verhaltensheuristik.
 
 ## Server-Orchestrierung
 
-Der Server darf AI-Actions automatisch ausführen, wenn die aktive Seite als AI konfiguriert ist. Dabei gilt:
+Der Server darf AI-Actions automatisch ausführen, wenn die aktive Seite als
+AI konfiguriert ist. Dabei gilt:
 
 - AI-Actions laufen durch denselben `applyAction`-Pfad wie Human-Actions.
-- Nach jeder AI-Action werden EventLog, StateHash, MatchVersion und Payloads aktualisiert.
-- Der Loop stoppt bei Human-Turn, Winner, fehlenden LegalActions oder Action-Limit.
+- Nach jeder Action werden Events, StateHash, Matchversion und Payloads
+  aktualisiert.
+- Der Loop stoppt bei Human-Entscheidung, Spielende, fehlender legaler
+  Fortsetzung oder dem vorgesehenen Sicherheitslimit.
+- Runtime-Neustart verwirft ein altes Zugcommitment und plant aus dem
+  wiederhergestellten residenten Portfolio neu.
 - Standardpayloads bleiben side-gefiltert.
+
+## Debug-Ausnahme des lokalen Betreibers
+
+Die private Betreiber-Buganzeige ist kein normaler Controller- oder
+Spielerkanal. Sie darf die vollständige Hand der jeweils aktiven KI und deren
+vollständige Zugplanung zeigen, niemals jedoch die Hand des menschlichen
+Spielers. Diese Ausnahme erweitert weder AI-Input noch PlayerViews,
+PublicEvents, öffentliche Replays, normale Netzwerkpayloads oder Logs.

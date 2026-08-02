@@ -1,8 +1,8 @@
 # KI-Planebene – modulares Zielkonzept
 
-Status: **Work in Progress**
-Dokumentversion: `1.0`
-Stand: 2026-07-30
+Status: **Produktiver Kern umgesetzt; Work in Progress für Modulverfeinerung**
+Dokumentversion: `1.2`
+Stand: 2026-08-02
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
 
@@ -109,10 +109,11 @@ erfüllbar wäre:**
 
 ### 2.2 Abgleich mit dem abgeschlossenen Runtime-Cutover
 
-Version 0.9 ist der aktuelle fachliche Zielvertrag. PF00 bis PF16 sind
-committed; PF15 wurde mit Commit `4b0c459f6` und vollständig grünem Done-Gate
-abgeschlossen. PF16 wurde mit Commit `ec18fcb8f` abgeschlossen, lokal nach
-`main` integriert und der frühere Worktree
+Version 0.9 war der fachliche Cutover-Vertrag; Version 1.2 ist der aktuelle
+fortgeschriebene Zielvertrag. PF00 bis PF16 sind committed; PF15 wurde mit
+Commit `4b0c459f6` und vollständig grünem Done-Gate abgeschlossen. PF16 wurde
+mit Commit `ec18fcb8f` abgeschlossen, lokal nach `main` integriert und der
+frühere Worktree
 `C:\Projekte\NETGRID_AI_PLAN_FIRST_RUNTIME_CUTOVER` samt Arbeitsbranch
 entfernt. Die nachfolgende First-Turn-/EndTurn-Regressionshärtung wurde bis
 zum Integrationsstand `c64a14f8f` ebenfalls lokal nach `main` übernommen.
@@ -252,6 +253,66 @@ AI-Tests, fokussierten Integrationsläufen und einer akzeptierten
 60-Spiele-Baseline mit `13.309` Entscheidungen ohne harte Fehler belegt.
 Diese technische Evidence ersetzt nicht den menschlichen Playtest; sie macht
 den integrierten Stand wieder zu einem bewusst prüfbaren Inkrement.
+
+### 2.4 Konsolidierung aus Spielanalysen und Remediation bis 02.08.2026
+
+Die nachfolgenden vollständigen Spielaudits bestätigen den gemeinsamen
+Kernel, präzisieren aber mehrere Modul- und Linienverträge. Sie rechtfertigen
+keine neue Auswahlschicht:
+
+- **Kompositionsabhängige Doctrine:** Deckstrategie darf nicht aus einem
+  einzelnen Anker, Beschleuniger oder Payoff entstehen. Eine primäre Linie
+  verlangt die gemeinsam ausführbaren Rollen ihrer Komposition. Doctrine
+  liefert strategische Evidence; die konkrete Karten- oder Lifecycle-Sequenz
+  bleibt im zuständigen Planmodul.
+- **Planowner statt Resolver-Shortcut:** Kartenfähigkeiten werden über aktive
+  Hints, actiongebundene Funktionseffekte, TargetProfiles und Engine-Quotes
+  generisch erkannt. Ein Choice-Resolver darf ausschließlich die Payload des
+  bereits ausgewählten Steps vervollständigen. Benötigt die Choice eine
+  Server-, Ziel-, Quellen- oder Ressourcenentscheidung, muss diese vorher im
+  Plan getroffen und durch `PlanExecutionOrigin` gebunden sein.
+- **Known und Unknown getrennt aggregieren:** Ein unbekannter Geschwisterpfad
+  darf eine unabhängig exakt belegte Schutz- oder Rezroute nicht löschen.
+  Der unbekannte Pfad selbst bleibt fail-closed und darf weder Wirkung noch
+  Routenausschöpfung behaupten.
+- **Draw braucht einen materialisierbaren Horizont:** Ein Defense- oder
+  Scorematerial-Draw ist nur produktiv, wenn die gewonnenen Informationen
+  beziehungsweise Karten vor der relevanten Deadline noch durch einen
+  konkreten Step nutzbar werden können. Ein letzter-Klick-Draw vor dem
+  Runnerzug darf keinen nicht mehr ausführbaren Schutz vortäuschen.
+- **Globale ICE-Opportunitätskosten:** Unrezzte zweite und dritte Schichten
+  dürfen Staffelung, Bluff, Handentlastung oder vorbereitete Investition sein.
+  Sie werden jedoch gegen andere Server, bereits unrealisierte ICE-Schichten,
+  aktuelle Rezfinanzierung, Runner-Rig, Schutzwirkung und Scorefortschritt
+  verglichen. Es gibt weder ein hartes Layer-Limit noch einen blinden
+  Schichtbonus.
+- **Score-/Defense-Kohärenz:** `corp.score_agenda` besitzt Agenda,
+  Zielremote, Install/Advance/Score und Rush-Risiko. `corp.defend_servers`
+  besitzt jede ICE-Installation, globale Serverallokation und Rezroute. Ein
+  Scoreprojekt kann einen typisierten Schutzbedarf delegieren; der
+  Defense-Child darf weder Agenda noch Scoreentscheidung übernehmen.
+- **Rush als vollständige Linie:** Reiner Rush, kombinierter Rush und sicherer
+  Aufbau vergleichen Agenda-/Matchpointwert, Klick- und Creditdauer,
+  sichtbare Runnerressourcen, vorhandene Remoteinvestition, Zentralpflichten
+  und bis zur Deadline finanzierbare Schutzwirkung. Eine akute Zentrale
+  blockiert Rush nicht pauschal, wohl aber eine konkrete unfinanzierbare
+  P1-/P2-Pflicht.
+- **Geschwisterdrift vermeiden:** Eine resident ausgewählte und ausführbare
+  Score-/Defense-Route darf nicht durch ein technisch nahes, aber aktuell
+  unmaterialisierbares Geschwisterprojekt ersetzt werden. Technische IDs
+  bleiben nur stabiler letzter Tiebreak.
+- **Deterministische Instanzwahl:** Semantisch gleichwertige Kartenkopien
+  werden zustandsgebunden stabil gewählt. Zufall bleibt auf zertifizierte
+  planlokale Nahgleichstände oder die ausdrücklich erlaubte Rush-Neigung
+  begrenzt und wird atomar durch die Engine aufgezeichnet.
+- **Betreiberdiagnostik:** Die private Buganzeige zeigt bewusst die
+  vollständige Hand der aktiven KI und ihre gesamte Zugplanung. Sie zeigt
+  nicht die Menschenhand und erweitert keinen normalen side-sicheren Datenweg.
+
+Führende Evidence sind
+`docs/reviews/ai/ai-generic-capability-migration-final-review-2026-08-01.md`,
+`docs/reviews/ai/series-82b2-remediation-final-review-2026-08-01.md` und
+`docs/reviews/ai/ai-match-978d-remediation-final-review-2026-08-01.md`.
 
 ## 3. Ausgangsproblem
 
@@ -2114,8 +2175,12 @@ Allgemeine Same-Turn-Commitment-Reservierung
 - **Kernentscheidung:** Prioritätsklassen sind hart lexikografisch.
   Zahlenwerte oder geordnete Merkmale entscheiden nur innerhalb derselben
   Klasse.
-- **Offen:** Ob die Bewertung innerhalb einer Klasse als normalisierte
-  Zahlen, geordnete Merkmalsvektoren oder beides implementiert wird.
+- **Kernentscheidung:** P1 bis P3 werden als validierte lexikografische
+  Pflichten behandelt. Innerhalb zulässiger Linien werden P4 bis P6 über das
+  versionierte, begrenzte Bewertungsregister für terminalen Ausgang,
+  Agendafortschritt, Defense, Economy, Handqualität, Flexibilität,
+  Kontinuität und Risiko verglichen. Äquivalenz, Dominanz und technische
+  Tiebreaks bleiben davon getrennt.
 - **Blockierend offen:** Welcher ausdrücklich benannte NETGRID-Regelvertrag
   den Widerspruch zwischen konsolidiertem MVP-Konzept, aktueller Engine und
   Comprehensive Rules für EndTurn und Timingfenster auflöst.
@@ -4665,6 +4730,20 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 1.2 – 2026-08-02
+
+- allgemeinen Current-State nach Turn-/Campaign-Cutover, generischer
+  Fähigkeitsmigration und vollständigen Corp-Spielaudits konsolidiert;
+- Doctrine auf ausführbare Strategiekomposition statt Einzelanker
+  festgeschrieben;
+- Known-/Unknown-Teilmengen, materialisierbaren Draw-Horizont, globale
+  ICE-Opportunitätskosten und Score-/Defense-Parentkohärenz präzisiert;
+- die zuvor offene In-Class-Bewertung mit dem produktiven versionierten
+  Bewertungsregister, Pflichtabdeckung, Dominanz und Tiebreak-Vertrag
+  abgeglichen;
+- Resolvergrenze, stabile Instanzwahl und privilegierte Betreiberdiagnostik
+  an den aktuellen Architekturvertrag angepasst.
 
 ### 1.1 – 2026-07-30
 

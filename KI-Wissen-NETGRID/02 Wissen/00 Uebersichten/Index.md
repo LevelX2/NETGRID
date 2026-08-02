@@ -75,14 +75,23 @@
 ## KI
 
 - Die Semantic Runtime ist der einzige Live-Entscheidungsweg.
+- Das führende allgemeine KI-Zielbild liegt in
+  `docs/architecture/ai/ki-zielbild-metaebene-2026-08-02-v6.md`. Es verbindet
+  Kartensemantik, kompositionsabhängige DeckDoctrine, Strategic Intent,
+  Planportfolio, Zugplanung und Engine-Ausführung; die Metaebene v5 ist nur
+  noch historische Evidence.
 - [[../Architektur/KI-Aenderungen Architektur-Preflight]]:
-  verbindliche Ownership- und Plan-first-Prüfung vor jedem KI-Codepatch.
+  verbindliche Ownership- und Plan-first-Prüfung vor jedem KI-Codepatch. Das
+  vollständig zu lesende Agenten-Konzentrat liegt in
+  `docs/architecture/ai/ai-program-logic-change-compass.md`.
 - Das führende WIP-Zielbild für eine autoritative modulare
   Plan-first-Auswahl mit gemeinsamem Planrahmen, getrennten
   Runner-/Corp-Schedulern und verfeinerbaren Planmodulen liegt in
   `docs/architecture/ai/ai-plan-layer-target-state-wip.md`. Der gemeinsame
   TurnPlanner-, Commitment- und Kampagnenvertrag ist für beide Seiten
-  produktiv umgesetzt; führende Abnahme-Evidence ist
+  produktiv umgesetzt. Version 1.2 enthält den Current-State-Abgleich aus den
+  jüngsten Spielaudits und generischen Fähigkeitsmigrationen; führende
+  Abnahme-Evidence ist
   `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
 - Live-API: `@netgrid/ai`; Simulation: `@netgrid/ai/simulation`.
 - Current-State-Cleanup:

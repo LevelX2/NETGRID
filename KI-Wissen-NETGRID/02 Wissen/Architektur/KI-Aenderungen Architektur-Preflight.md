@@ -8,11 +8,20 @@ vor einem Codepatch die vorhandene Entscheidungsautorität gefunden wird.
 
 Führende Detailquellen:
 
+- verbindliches Agenten-Konzentrat:
+  `docs/architecture/ai/ai-program-logic-change-compass.md`
+- allgemeines KI-Gesamtkonzept:
+  `docs/architecture/ai/ki-zielbild-metaebene-2026-08-02-v6.md`
 - `docs/architecture/ai/README.md`
 - `docs/architecture/ai/ai-plan-layer-target-state-wip.md`
 - bei Plan-first-, Choice- und Ownership-Arbeit:
   `docs/architecture/ai/ai-plan-first-runtime-cutover-process-2026-07-23.md`
 - package-lokale Pflichtregeln: `packages/ai/AGENTS.md`
+
+Der Änderungskompass wird vor jedem KI-Codepatch vollständig gelesen. Die
+beiden Gesamtkonzepte werden zusätzlich herangezogen, wenn Owner,
+Schichtgrenze, Kernelvertrag oder langfristige Zielrichtung nicht bereits
+eindeutig sind.
 
 ## Pflichtfragen vor dem ersten Patch
 

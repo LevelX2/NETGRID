@@ -4,14 +4,19 @@
 
 Vor dem ersten Patch an produktivem KI-Verhalten vollständig lesen:
 
-1. `docs/architecture/ai/README.md`
-2. die einschlägigen Abschnitte in
+1. `docs/architecture/ai/ai-program-logic-change-compass.md`
+2. `docs/architecture/ai/README.md`
+3. die einschlägigen Abschnitte in
    `docs/architecture/ai/ai-plan-layer-target-state-wip.md`
-3. bei Plan-first-, Choice- oder Ownership-Arbeit zusätzlich
+4. bei Plan-first-, Choice- oder Ownership-Arbeit zusätzlich
    `docs/architecture/ai/ai-plan-first-runtime-cutover-process-2026-07-23.md`
 
-Die führenden Architekturverträge gehen lokalen Reparaturideen, der ersten
-auffindbaren Hilfsfunktion und einem kurzfristig grünen Einzeltest vor.
+Der Änderungskompass verdichtet das allgemeine KI-Zielbild und das
+Planebenen-Konzept zu Haltung, Autoritätskette, Schichtzuordnung und
+Pflichtnachweisen. Bei Unklarheit oder Änderungen am gemeinsamen Rahmen sind
+die dort verlinkten Gesamtdokumente selbst zu lesen. Die führenden
+Architekturverträge gehen lokalen Reparaturideen, der ersten auffindbaren
+Hilfsfunktion und einem kurzfristig grünen Einzeltest vor.
 
 ## Entscheidungsautorität und Ownership
 

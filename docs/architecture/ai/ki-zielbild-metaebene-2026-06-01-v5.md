@@ -1,5 +1,12 @@
 # NETGRID KI-Zielbild – Metaebene v5
 
+Status: **historischer Vorgänger**
+
+Diese Fassung wurde durch
+`ki-zielbild-metaebene-2026-08-02-v6.md` abgelöst. Sie bleibt als Evidence
+für die Entwicklung von Kartensemantik, Taktiksignalen und DeckDoctrine
+erhalten, ist aber kein führender Current-State-Vertrag mehr.
+
 ## Zweck
 
 Dieses Dokument beschreibt die große Linie der künftigen NETGRID-KI. Es ist kein Aufgabenprotokoll und keine technische Detailbeschreibung einzelner Umsetzungsschritte. Es hält fest, wie die KI grundsätzlich Karten, Decks, Spielsituationen und erlaubte Aktionen verstehen soll.

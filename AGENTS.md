@@ -77,9 +77,16 @@ Planung, Bewertung oder `packages/ai/` sind zusätzlich und vor dem ersten
 Codepatch zu lesen:
 
 1. `packages/ai/AGENTS.md`
-2. `docs/architecture/ai/README.md`
-3. die für den betroffenen Owner relevanten Abschnitte aus
+2. vollständig
+   `docs/architecture/ai/ai-program-logic-change-compass.md`
+3. `docs/architecture/ai/README.md`
+4. die für den betroffenen Owner relevanten Abschnitte aus
    `docs/architecture/ai/ai-plan-layer-target-state-wip.md`
+
+Der Änderungskompass ist das verbindliche Agenten-Konzentrat aus dem
+allgemeinen KI-Zielbild und dem detaillierten Planebenen-Konzept. Bei
+Unklarheit, Kerneländerungen oder neuen Modulgrenzen sind zusätzlich die dort
+verlinkten Gesamtdokumente selbst zu lesen.
 
 Vor der Implementierung muss feststehen:
 
