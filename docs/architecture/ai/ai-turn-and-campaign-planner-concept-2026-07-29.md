@@ -2,11 +2,11 @@
 
 Status: **Umgesetzt und mit ZK00 bis ZK14 abgenommen**
 
-Version: **0.5**
+Version: **0.6**
 
-Stand: 2026-07-30
+Stand: 2026-08-02
 
-Dokumentversion: `0.5`
+Dokumentversion: `0.6`
 
 Reviewstand:
 Das externe Konzeptfeedback vom 29.07.2026 ist punktweise gegen den
@@ -184,8 +184,44 @@ Weitere Reviewvorschläge werden bewusst nicht unverändert umgesetzt:
 - Der vollständige Engine-`StateHash` bleibt für Engine und Replay
   unverändert, ist aber **keine Planneridentität**.
 - Die private, privilegierte KI-Debuganzeige ist kein side-sicherer
-  Spielerkanal. Sie zeigt zur Playtestkontrolle ausdrücklich die
-  vollständigen Karten beider Seiten und die gesamte Zugplanung.
+  Spielerkanal. Sie zeigt zur Playtestkontrolle ausdrücklich die vollständige
+  Hand der jeweils aktiven KI und die gesamte Zugplanung, niemals jedoch die
+  Hand des menschlichen Spielers.
+
+### 1.5 Nachgelagerter Current-State-Abgleich
+
+Die Spielanalysen und Remediationsläufe bis 02.08.2026 bestätigen die
+Grundarchitektur. Die beobachteten Restfehler lagen nicht in einem fehlenden
+zweiten Dirigenten, sondern in zu engen oder unvollständigen Beiträgen der
+zuständigen Planmodule. Daraus gelten folgende Präzisierungen:
+
+- Der TurnPlanner vergleicht vollständige unterstützte Linien, erfindet aber
+  keine Fachlogik. Defense-, Score-, Economy-, Hand- und Runentscheidungen
+  bleiben bei ihren Ownern.
+- Ein Score-Parent darf Remote-Schutz an `corp.defend_servers` delegieren.
+  ICE-Installation und Rez bleiben Defense-Steps; Agenda, Zielremote und
+  Install/Advance/Score bleiben Score-Steps.
+- Known und Unknown werden pfadweise getrennt. Unknown blockiert den
+  unbewiesenen Pfad, aber keine unabhängige exakt belegte Route.
+- Draw, Zufall, neue private Information und gegnerische Reaktion beenden die
+  konkrete Vorplanung an einer Boundary. Ein letzter-Klick-Draw erhält keinen
+  Zukunftswert, wenn vor der Deadline kein Follow-up mehr materialisierbar
+  ist.
+- Zweite und dritte unrezzte ICE-Schichten sind zulässige Varianten, keine
+  Pflicht und kein harter Ausschluss. Der Defense-Plan vergleicht ihren
+  Grenzwert global gegen Rezfinanzierung, andere Server, bereits unrealisierten
+  Bestand und den Scorehorizont.
+- DeckDoctrine wird nur aus einer ausführbaren Rollenkomposition primär. Sie
+  beeinflusst Planbildung und Linienwerte, übernimmt aber weder aktuelle
+  Actionwahl noch planinterne Karten-/Targetlogik.
+- Technische IDs binden konkrete Instanzen und dienen zuletzt der stabilen
+  Reihenfolge. Sie begründen keine Strategie. Randomisierung bleibt auf
+  zertifizierte Nahgleichstände und die freigegebene Rush-Neigung begrenzt.
+
+Diese Präzisierungen sind im führenden
+`ai-plan-layer-target-state-wip.md`, Version 1.2, konsolidiert. Die
+ursprüngliche ZK00-bis-ZK14-Herleitung bleibt unverändert als
+Implementierungsevidence bestehen.
 
 ## 2. Ausgangsbefund
 
@@ -2618,13 +2654,13 @@ bereits vor dem Shadow-Cutover um die Zugplanung erweitert. Sie zeigt:
 - Kampagnenstatus über den Gegnerzug.
 
 Diese ausdrücklich privilegierte Betreiberanzeige darf und soll zur
-Playtest-Kontrolle die vollständigen Karten beider Seiten zusammen mit der
-Planung darstellen. Sie ist keine normale Spieler-, Spectator-,
-Public-Replay-, Log- oder Observability-Fläche. Ihre vollständigen
-Karteninformationen werden weder zum Plannerinput noch zu PublicEvents,
-normalen WebSocket-/Reconnect-Payloads, öffentlichen Replays, Logs oder
-Clientfehlern. Die Anzeige beeinflusst keine Entscheidung und reicht keine
-Aktion ein.
+Playtest-Kontrolle die vollständige Hand der jeweils aktiven KI zusammen mit
+deren Planung darstellen. Die Hand des menschlichen Spielers bleibt
+ausgeschlossen. Die Anzeige ist keine normale Spieler-, Spectator-,
+Public-Replay-, Log- oder Observability-Fläche. Ihre privilegierten
+KI-Informationen werden weder zum Plannerinput noch zu PublicEvents, normalen
+WebSocket-/Reconnect-Payloads, öffentlichen Replays, Logs oder Clientfehlern.
+Die Anzeige beeinflusst keine Entscheidung und reicht keine Aktion ein.
 
 Das minimale DTO und die erste Darstellung entstehen mit ZK04; mit ZK08
 kommen Commitment-Cursor und Replangründe hinzu, mit ZK10 Shadowvergleich

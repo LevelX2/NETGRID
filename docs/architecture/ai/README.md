@@ -2,6 +2,12 @@
 
 ## Current State
 
+- `ki-zielbild-metaebene-2026-08-02-v6.md` ist das führende allgemeine
+  KI-Konzept. Es verbindet Kartensemantik, ActionSemanticCandidates,
+  kompositionsabhängige DeckDoctrine, Strategic Intent, residente Pläne,
+  Restzugplanung, Commitment und Engine-Ausführung zu einer durchgehenden
+  Autoritätskette. Die Metaebene v5 ist historischer Vorgänger.
+
 - `@netgrid/ai` ist die produktive Live-Fassade.
 - `data/ai/ai-card-hints-active.json` ist die einzige statische
   Karten-Hint-Quelle. Runtime, Deckstrategie und Inspector greifen direkt auf
@@ -214,12 +220,18 @@
 
 ## Führende Artefakte
 
+- `ki-zielbild-metaebene-2026-08-02-v6.md`: führendes allgemeines Zielbild
+  und Current-State-Modell von Engine-/Kartensemantik bis Plan-first-
+  Ausführung, einschließlich Doctrine-, Boundary-, Ownership-, Unknown- und
+  Betreiberdiagnostikvertrag.
 - `ai-plan-layer-target-state-wip.md`: führendes fortlaufendes
   Zielzustandskonzept für die modulare Plan-first-KI mit gemeinsamem
   Planrahmen, getrennten Runner-/Corp-Schedulern, aktuellen und angestrebten
   Planmodulen, Zugausführung, Commitments, Diagnostik und Abnahme. Der
   gemeinsame TurnPlanner- und Kampagnencutover ist für beide Seiten
-  abgeschlossen; das Dokument bleibt für spätere Modulverfeinerungen WIP.
+  abgeschlossen; Version 1.2 konsolidiert zusätzlich die Erkenntnisse aus
+  generischer Fähigkeitsmigration, Serie 82b2 und Match 978d. Das Dokument
+  bleibt für spätere Modulverfeinerungen WIP.
 - `ai-turn-and-campaign-planner-concept-2026-07-29.md`,
   `ai-turn-and-campaign-planner-implementation-process-2026-07-29.md` und
   `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`:

@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-08-01
+Stand: 2026-08-02
 
 ## Einstieg
 
@@ -31,6 +31,13 @@ ausschließlich diesen Einstieg auf. Alte Planer, Shadow-/META-Runtime,
 historisch benannte Controllerprofile und stille Legacy-Fallbacks sind kein
 aktueller Vertrag. Der Coverage-Restpfad ist fail-closed und darf nur
 vorhandene sichere LegalActions auswählen.
+Das führende allgemeine Zielbild ist
+`docs/architecture/ai/ki-zielbild-metaebene-2026-08-02-v6.md`; die detaillierte
+Planarchitektur ist in Version 1.2 von
+`docs/architecture/ai/ai-plan-layer-target-state-wip.md` konsolidiert. Beide
+Dokumente bilden den produktiven TurnPlanner-, Commitment-, Campaign-,
+Ownership-, Known-/Unknown- und Doctrine-Vertrag ab; die frühere Metaebene v5
+ist nur noch historische Evidence.
 Der produktive Auswahlweg transportiert mit
 `AiDecisionDebug.planFirstDecision` einen side-sicheren, strukturierten
 Erklärvertrag für die autoritative Planinstanz, Root und Leaf-Executor,
