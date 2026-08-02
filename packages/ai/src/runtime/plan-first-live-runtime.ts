@@ -179,6 +179,7 @@ import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitio
 import { rolesMatch } from "./role-match";
 import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
 import { runnerTerminalContestThreat } from "./runner-terminal-contest-threat";
+import { semanticRuntimeDecisionDebugTopLevelWhyNot } from "../diagnostics/semantic-runtime-decision-debug";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import { withDecisionLocalCorpPunishRouteQuotes } from "./corp-punish-route-quote-input";
 import { corpPurgeHasVisibleStrategicPressure } from "./corp-purge-impact";
@@ -3418,6 +3419,8 @@ function buildRunnerDomain(
             candidates,
             evaluation,
           );
+        const terminalRemoteContestIsDirectlyMandatory =
+          runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
         return (
           evaluation.targetKind === "remote" &&
           ((evaluation.pathPassability === "reachable" &&
@@ -3426,6 +3429,7 @@ function buildRunnerDomain(
               evaluation.recommendation === "gain_credits_first" ||
               productiveProbeCanConvertNow) &&
             evaluation.score > 0) ||
+            terminalRemoteContestIsDirectlyMandatory ||
             irrecoverableScoreThreatContest ||
             runnerRunFundingSupport(
               input,
@@ -3466,6 +3470,8 @@ function buildRunnerDomain(
             candidates,
             evaluation,
           );
+        const terminalRemoteContestIsDirectlyMandatory =
+          runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
         const directRunRouteReady =
           evaluation.recommendation === "run_now" ||
           evaluation.recommendation === "run_if_free" ||
@@ -3479,31 +3485,36 @@ function buildRunnerDomain(
           reachable:
             !safetyBlocked &&
             !forgoUnsafeRunCapacity &&
-            (irrecoverableScoreThreatContest ||
+            (terminalRemoteContestIsDirectlyMandatory ||
+              irrecoverableScoreThreatContest ||
               (fundingSupport === undefined && directRunRouteReady)),
-          marginalValue: irrecoverableScoreThreatContest
-            ? 1_200
-            : fundingSupport
-              ? Math.max(1, evaluation.score)
-              : evaluation.recommendation === "run_now" ||
-                  productiveProbeCanConvertNow
-                ? evaluation.score
-                : Math.min(evaluation.score, 60),
+          marginalValue: terminalRemoteContestIsDirectlyMandatory
+            ? 1_400
+            : irrecoverableScoreThreatContest
+              ? 1_200
+              : fundingSupport
+                ? Math.max(1, evaluation.score)
+                : evaluation.recommendation === "run_now" ||
+                    productiveProbeCanConvertNow
+                  ? evaluation.score
+                  : Math.min(evaluation.score, 60),
           evidenceCode: forgoUnsafeRunCapacity
             ? "runner_restricted_run_capacity_below_required_hand_buffer"
             : safetyBlocked
               ? recentSafetyAbort.evidenceCode
-              : irrecoverableScoreThreatContest
-                ? `runner_irrecoverable_random_break_damage_score_threat_contest:${evaluation.targetServerId}`
-                : fundingSupport
-                  ? fundingSupport.evidenceCode
-                  : directRunCanConvertNow
-                    ? `runner_direct_run_converts_now:${evaluation.targetServerId}`
-                    : evaluation.recommendation === "gain_credits_first"
-                      ? `runner_remote_contest_waits_for_credit_reserve:${evaluation.targetServerId}`
-                      : productiveProbeCanConvertNow
-                        ? `runner_productive_remote_probe_converts_now:${evaluation.targetServerId}`
-                        : (evaluation.evidence[0] ?? "runner_remote_target"),
+              : terminalRemoteContestIsDirectlyMandatory
+                ? `runner_terminal_remote_contest_mandatory:${evaluation.targetServerId}:${evaluation.actionId}`
+                : irrecoverableScoreThreatContest
+                  ? `runner_irrecoverable_random_break_damage_score_threat_contest:${evaluation.targetServerId}`
+                  : fundingSupport
+                    ? fundingSupport.evidenceCode
+                    : directRunCanConvertNow
+                      ? `runner_direct_run_converts_now:${evaluation.targetServerId}`
+                      : evaluation.recommendation === "gain_credits_first"
+                        ? `runner_remote_contest_waits_for_credit_reserve:${evaluation.targetServerId}`
+                        : productiveProbeCanConvertNow
+                          ? `runner_productive_remote_probe_converts_now:${evaluation.targetServerId}`
+                          : (evaluation.evidence[0] ?? "runner_remote_target"),
           ...(fundingSupport ? { supportNeedId: fundingSupport.needId } : {}),
           preferredRunActionIds: [evaluation.actionId],
           ...(purpose === "information"
@@ -5281,11 +5292,13 @@ function runnerRunFundingSupport(
   runTargets: readonly RunnerRunTargetEvaluation[],
   candidates: readonly ActionSemanticCandidate[],
 ): RunnerRunFundingSupport | undefined {
+  const terminalVisibleHazardFundingGap =
+    runnerTerminalRemoteContestVisibleHazardFundingGap(input, evaluation);
   if (
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessTargetKind === "archives" ||
     input.playerView.own.clicks <= 1 ||
-    evaluation.score <= 0 ||
+    (evaluation.score <= 0 && terminalVisibleHazardFundingGap === undefined) ||
     evaluation.recommendation !== "gain_credits_first"
   ) {
     return undefined;
@@ -5307,8 +5320,10 @@ function runnerRunFundingSupport(
     urgentScoreThreat: urgentPayoff,
     ...(requiredPostRunReserve !== undefined ? { requiredPostRunReserve } : {}),
   });
-  if (!admission.admitted) return undefined;
-  const gap = admission.concreteFundingGap;
+  if (!admission.admitted && terminalVisibleHazardFundingGap === undefined) {
+    return undefined;
+  }
+  const gap = terminalVisibleHazardFundingGap ?? admission.concreteFundingGap;
   const remote = evaluation.accessTargetKind === "remote";
   const dedupeKey = remote
     ? `remote:${evaluation.targetServerId}`
@@ -5343,10 +5358,16 @@ function runnerRunFundingSupport(
     driver: {
       kind: remote ? "contest" : "run",
       targetId: evaluation.targetServerId,
-      reasonCode: admission.reasonCode,
+      reasonCode:
+        terminalVisibleHazardFundingGap !== undefined
+          ? "terminal_remote_visible_hazard_funding_gap"
+          : admission.reasonCode,
     },
     ...route,
-    evidenceCode: `runner_run_support_fund_concrete_gap:${evaluation.targetServerId}:${admission.reasonCode}`,
+    evidenceCode:
+      terminalVisibleHazardFundingGap !== undefined
+        ? `runner_run_support_terminal_visible_hazard_gap:${evaluation.targetServerId}:${terminalVisibleHazardFundingGap}:${evaluation.actionId}`
+        : `runner_run_support_fund_concrete_gap:${evaluation.targetServerId}:${admission.reasonCode}`,
   };
 }
 
@@ -7885,9 +7906,8 @@ function buildCorpDomain(
           const selectedScoreProtectionPrecedesAdditionalCentralLayer =
             (serverId === "hq" || serverId === "rd") &&
             selectedScoreProtectionSignals.length > 0 &&
-            (input.playerView.servers.find(
-              (server) => server.id === serverId,
-            )?.ice.length ?? 0) > 0 &&
+            (input.playerView.servers.find((server) => server.id === serverId)
+              ?.ice.length ?? 0) > 0 &&
             centralDefenseAllocation?.status === "known" &&
             centralDefenseAllocation.evidence[serverId].threat !== "acute" &&
             centralDefenseAllocation.evidence[serverId].threat !== "terminal";
@@ -8620,7 +8640,9 @@ function corpLayeredIceStagingParent(
       (project) =>
         project.serverId === serverId && project.purpose === "scoring_remote",
     )
-    .sort((left, right) => technicalIdCompare(left.projectId, right.projectId))[0];
+    .sort((left, right) =>
+      technicalIdCompare(left.projectId, right.projectId),
+    )[0];
   return remoteParent
     ? { kind: "remote", parentProjectId: remoteParent.projectId }
     : undefined;
@@ -9828,9 +9850,7 @@ function compareCorpScoreProtectionProjects(
   ) {
     return leftConversion?.runnerStealIsMatchpoint ? 1 : -1;
   }
-  if (
-    leftConversion?.residentParent !== rightConversion?.residentParent
-  ) {
+  if (leftConversion?.residentParent !== rightConversion?.residentParent) {
     return leftConversion?.residentParent ? -1 : 1;
   }
   const leftProbability =
@@ -9887,8 +9907,7 @@ function compareCorpScoreProtectionProjects(
       rightConversion.realizedStrategySupportCount -
       leftConversion.realizedStrategySupportCount;
     if (strategySupportComparison !== 0) return strategySupportComparison;
-    const agendaPointComparison =
-      right.agendaPoints - left.agendaPoints;
+    const agendaPointComparison = right.agendaPoints - left.agendaPoints;
     if (agendaPointComparison !== 0) return agendaPointComparison;
   }
   return technicalIdCompare(left.projectId, right.projectId);
@@ -10496,25 +10515,31 @@ function corpRemoteHasBoundedStagedIce(
   );
   if (!server || remainingAdvancementClicks === undefined) return false;
   const hasNearTermFundableStagedIce = server.ice.some((ice) => {
-      const quote = ice.effectiveRezCostQuote;
-      if (
-        ice.rezzed === true ||
-        ice.definitionId === undefined ||
-        CARD_DEFINITIONS_BY_ID[ice.definitionId]?.type !== "ice" ||
-        quote?.context !== "installed" ||
-        quote.cardId !== ice.instanceId ||
-        quote.targetServerId !== serverId ||
-        quote.projectedServerId !== serverId ||
-        quote.expiresAtStateVersion !== input.playerView.stateVersion ||
-        quote.complete !== true ||
-        quote.mandatoryAdditionalCosts.agendaPoints !== 0
-      ) {
-        return false;
-      }
-      return (
-        Math.max(0, quote.finalCredits - input.playerView.own.credits) <= 3
-      );
-    });
+    const quote = ice.effectiveRezCostQuote;
+    const definition = ice.definitionId
+      ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
+      : undefined;
+    if (
+      ice.rezzed === true ||
+      ice.definitionId === undefined ||
+      definition?.type !== "ice" ||
+      !definition.subroutines?.some(
+        (subroutine) =>
+          subroutine.type === "end_the_run" ||
+          subroutine.type === "end_the_run_and_trash_source_at_end_of_turn",
+      ) ||
+      quote?.context !== "installed" ||
+      quote.cardId !== ice.instanceId ||
+      quote.targetServerId !== serverId ||
+      quote.projectedServerId !== serverId ||
+      quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+      quote.complete !== true ||
+      quote.mandatoryAdditionalCosts.agendaPoints !== 0
+    ) {
+      return false;
+    }
+    return Math.max(0, quote.finalCredits - input.playerView.own.credits) <= 3;
+  });
   if (!hasNearTermFundableStagedIce) return false;
   return (
     assessCorpScoreRushRisk({
@@ -13678,6 +13703,18 @@ function decisionFromScheduler(
               }),
       };
     });
+  const topLevelWhyNot =
+    semanticRuntimeDecisionDebugTopLevelWhyNot(actionAlternatives);
+  const runtimeWhyNotSection =
+    topLevelWhyNot.length > 0
+      ? [
+          {
+            id: "runtime_why_not",
+            title: "Runtime why not",
+            items: topLevelWhyNot,
+          },
+        ]
+      : [];
   const corpHandInventoryFacts =
     input.side === "corp"
       ? (context.domain as CorpPlanDomain | undefined)?.handInventoryFacts
@@ -13782,6 +13819,7 @@ function decisionFromScheduler(
           },
           ...corpHandInventorySection,
           ...corpDrawArbitrationSection,
+          ...runtimeWhyNotSection,
         ]
       : [
           {
@@ -13791,6 +13829,7 @@ function decisionFromScheduler(
           },
           ...corpHandInventorySection,
           ...corpDrawArbitrationSection,
+          ...runtimeWhyNotSection,
         ];
   const planFirstDecision = planFirstDecisionDebug({
     input,
@@ -13830,6 +13869,7 @@ function decisionFromScheduler(
       confidence: 1,
       visibleReasons: evidence,
       actionAlternatives,
+      whyNot: topLevelWhyNot,
       detailSections,
       fallbackUsed: false,
       timeoutUsed: false,
@@ -14226,6 +14266,7 @@ function runnerCreditBankSignals(
           estimatedPayout,
           value: 1_200 + estimatedPayout,
           evidenceCodes: [
+            ...(convertibleRunFundingRoute?.evidenceCodes ?? []),
             ...(convertibleRunFundingNeed
               ? ["runner_credit_bank_cashout_for_run_funding"]
               : []),
@@ -14234,7 +14275,6 @@ function runnerCreditBankSignals(
               : []),
             ...(matureBankDevelopmentFundingRoute?.evidenceCodes ?? []),
             ...tool.evidence,
-            ...(convertibleRunFundingRoute?.evidenceCodes ?? []),
             ...(developmentCashOutAdmission.route?.evidenceCodes ?? []),
           ],
         },
@@ -14447,16 +14487,36 @@ function runnerCreditBankRunFundingRoute(params: {
         ? { requiredPostRunReserve }
         : {}),
     });
-    if (!admission.admitted) continue;
+    const terminalVisibleHazardFundingGap =
+      runnerTerminalRemoteContestVisibleHazardFundingGap(
+        params.input,
+        evaluation,
+      );
+    const directlySafeSameServerSibling = params.runTargets.some(
+      (candidate) =>
+        candidate.actionId !== evaluation.actionId &&
+        candidate.targetServerId === evaluation.targetServerId &&
+        runnerTerminalRemoteContestIsDirectlyMandatory(params.input, candidate),
+    );
+    if (
+      (!admission.admitted && terminalVisibleHazardFundingGap === undefined) ||
+      directlySafeSameServerSibling
+    ) {
+      continue;
+    }
     const exactUrgentConvertibleTarget =
       runnerRunHasExactUrgency(params.input, evaluation) &&
-      evaluation.score > 0 &&
+      (evaluation.score > 0 ||
+        (terminalVisibleHazardFundingGap !== undefined &&
+          terminalVisibleHazardFundingGap <= params.estimatedPayout)) &&
       evaluation.recommendation === "gain_credits_first";
     if (!exactUrgentConvertibleTarget) continue;
-    const conversionFundingGap = Math.max(
-      admission.routeFundingGap,
-      Math.max(0, -evaluation.creditsAfterRun),
-    );
+    const conversionFundingGap =
+      terminalVisibleHazardFundingGap ??
+      Math.max(
+        admission.routeFundingGap,
+        Math.max(0, -evaluation.creditsAfterRun),
+      );
     if (conversionFundingGap <= 0) continue;
     const demand = createRunnerCreditDemand({
       demandId: `run-support:${evaluation.actionId}`,
@@ -14472,6 +14532,7 @@ function runnerCreditBankRunFundingRoute(params: {
       targetCredits: params.input.playerView.own.credits + conversionFundingGap,
       evidence: [
         `run_funding_target:${evaluation.targetServerId}`,
+        `run_funding_action:${evaluation.actionId}`,
         `run_funding_gap:${conversionFundingGap}`,
       ],
     });
@@ -14491,12 +14552,19 @@ function runnerCreditBankRunFundingRoute(params: {
     if (route) {
       return {
         evidenceCodes: [
+          `runner_credit_bank_bound_run_action:${evaluation.actionId}`,
           `runner_credit_bank_bound_run_target:${evaluation.targetServerId}`,
           `runner_credit_bank_bound_funding_demand:${demand.demandId}`,
           `runner_credit_bank_bound_funding_route:${route.routeId}`,
           `runner_credit_bank_bound_funding_gap:${conversionFundingGap}`,
-          `runner_credit_bank_bound_admission_gap:${admission.concreteFundingGap}`,
-          ...admission.evidenceCodes,
+          ...(terminalVisibleHazardFundingGap !== undefined
+            ? [
+                `runner_credit_bank_terminal_visible_hazard_gap:${terminalVisibleHazardFundingGap}`,
+              ]
+            : [
+                `runner_credit_bank_bound_admission_gap:${admission.concreteFundingGap}`,
+                ...admission.evidenceCodes,
+              ]),
         ],
       };
     }
@@ -15077,6 +15145,51 @@ function runnerCoverageGapIsTerminalRemoteThreat(
   );
 }
 
+function runnerTerminalRemoteContestIsDirectlyMandatory(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  return (
+    runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) &&
+    evaluation.pathPassability === "reachable" &&
+    evaluation.creditsAfterRun >= 0 &&
+    evaluation.knownAccessState !== "known_no_current_payoff" &&
+    evaluation.accessPayoffContestable !== false &&
+    evaluation.visibleTraceTagHazardUnavoidable !== true &&
+    (evaluation.unavoidableVisibleIceHazardCount ?? 0) === 0
+  );
+}
+
+function runnerTerminalRemoteContestVisibleHazardFundingGap(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+): number | undefined {
+  if (
+    !runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) ||
+    evaluation.pathPassability !== "reachable" ||
+    evaluation.knownAccessState === "known_no_current_payoff" ||
+    evaluation.accessPayoffContestable === false ||
+    evaluation.recommendation !== "gain_credits_first" ||
+    evaluation.visibleTraceTagHazardUnavoidable !== true
+  ) {
+    return undefined;
+  }
+  const gap = Math.max(
+    0,
+    ...(evaluation.visibleIceRunHazards ?? []).map((hazard) =>
+      hazard.unavoidable &&
+      hazard.visibleCorpMaxTraceAvoidanceCost !== undefined
+        ? Math.max(
+            0,
+            hazard.visibleCorpMaxTraceAvoidanceCost -
+              hazard.runnerTraceCapacity,
+          )
+        : 0,
+    ),
+  );
+  return gap > 0 ? gap : undefined;
+}
+
 function runnerCoverageFundingActionIds(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -15409,6 +15522,8 @@ function bindRunnerRemoteRunActionAssessments(
         candidates,
         evaluation,
       );
+    const terminalRemoteContestIsDirectlyMandatory =
+      runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
     const directRunRouteReady =
       evaluation.recommendation === "run_now" ||
       evaluation.recommendation === "run_if_free" ||
@@ -15421,13 +15536,14 @@ function bindRunnerRemoteRunActionAssessments(
       signal.routePreparation === undefined &&
       signal.reachable &&
       signal.marginalValue > 0 &&
-      (specialRouteMembership
-        ? preferredActionIds.has(evaluation.actionId)
-        : irrecoverableScoreThreatContest ||
-          (evaluation.pathPassability === "reachable" &&
-            evaluation.score > 0 &&
-            fundingSupport === undefined &&
-            directRunRouteReady));
+      (terminalRemoteContestIsDirectlyMandatory ||
+        (specialRouteMembership
+          ? preferredActionIds.has(evaluation.actionId)
+          : irrecoverableScoreThreatContest ||
+            (evaluation.pathPassability === "reachable" &&
+              evaluation.score > 0 &&
+              fundingSupport === undefined &&
+              directRunRouteReady)));
     const evidenceCodes = executable
       ? [
           `runner_remote_run_variant_executable:${signal.serverId}:${evaluation.actionId}`,
@@ -15535,10 +15651,19 @@ function bestRunTargetsByServer(
     const previousConvertsNow =
       previous !== undefined &&
       runnerRunTargetCanConvertNow(input, economy, previous, candidates);
+    const evaluationIsMandatoryTerminalContest =
+      runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
+    const previousIsMandatoryTerminalContest =
+      previous !== undefined &&
+      runnerTerminalRemoteContestIsDirectlyMandatory(input, previous);
     if (
       !previous ||
+      (evaluationIsMandatoryTerminalContest &&
+        !previousIsMandatoryTerminalContest) ||
       (evaluationConvertsNow && !previousConvertsNow) ||
-      (evaluationConvertsNow === previousConvertsNow &&
+      (evaluationIsMandatoryTerminalContest ===
+        previousIsMandatoryTerminalContest &&
+        evaluationConvertsNow === previousConvertsNow &&
         evaluation.score > previous.score)
     ) {
       byServer.set(evaluation.targetServerId, evaluation);

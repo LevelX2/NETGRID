@@ -21124,6 +21124,9 @@
     "acceptableActions": [
       {
         "type": "gain_credit"
+      },
+      {
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [
@@ -21134,7 +21137,8 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": [
-        "corp.economy"
+        "corp.economy",
+        "corp.defend_servers"
       ]
     }
   }

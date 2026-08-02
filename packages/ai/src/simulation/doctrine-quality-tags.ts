@@ -141,7 +141,8 @@ export function qualityTagsForActionWithDependencies(
     input.side === "corp" &&
     action.type === "install_card" &&
     action.payload?.placement !== "ice" &&
-    sourceDefinition?.type === "agenda"
+    sourceDefinition?.type === "agenda" &&
+    !isCertifiedSameTurnAgendaScoreConversion(decision)
   ) {
     if (
       targetServerId === "new_remote" ||
@@ -185,6 +186,27 @@ export function qualityTagsForActionWithDependencies(
   if (decision.timeoutUsed) tags.push("timeout");
   if (decision.fallbackUsed) tags.push("fallback");
   return sortedUnique(tags);
+}
+
+function isCertifiedSameTurnAgendaScoreConversion(
+  decision: AiDecision,
+): boolean {
+  if (
+    decision.reasonCode !== "plan_first.corp.score_agenda" ||
+    decision.decisionDebug?.planKind !== "corp.score_agenda"
+  ) {
+    return false;
+  }
+  return [
+    ...(decision.evidence ?? []),
+    ...(decision.decisionDebug?.evidence ?? []),
+    ...(decision.decisionDebug?.visibleReasons ?? []),
+  ].some(
+    (entry) =>
+      entry.startsWith(
+        "plan_assessment_evidence:corp_same_turn_score_conversion:",
+      ) || entry.startsWith("corp_same_turn_score_conversion:"),
+  );
 }
 
 function roleListHasEconomyOrTempo(roles: readonly string[]): boolean {

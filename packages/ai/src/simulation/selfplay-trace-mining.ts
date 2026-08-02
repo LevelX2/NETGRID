@@ -2127,6 +2127,8 @@ function selfplayRunPlanCompatibleAction(
         "pressure_rd_information",
         "pressure_hq_information",
         "contest_remote",
+        "pressure_rd_multiaccess",
+        "pressure_hq_multiaccess",
       ]))
   );
 }

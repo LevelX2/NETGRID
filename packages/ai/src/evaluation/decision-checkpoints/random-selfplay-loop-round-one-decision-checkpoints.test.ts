@@ -24,6 +24,35 @@ describe("random standard selfplay loop round one", () => {
     const result = runAiDecisionCheckpoint(fixture(json));
 
     expect(result.ok, diagnostic(result)).toBe(true);
+    expect(result.decision?.decisionDebug?.whyNot?.length).toBeGreaterThan(0);
+    expect(
+      result.decision?.decisionDebug?.detailSections?.some(
+        (section) => section.id === "runtime_why_not",
+      ),
+    ).toBe(true);
+  });
+
+  it("binds the Broker cash-out to the exact terminal run action without changing its owner", () => {
+    const result = runAiDecisionCheckpoint(fixture(terminalBrokerFundingJson));
+    const evidence = [
+      ...(result.decision?.evidence ?? []),
+      ...(result.decision?.decisionDebug?.planFirstDecision
+        ?.assessmentEvidenceCodes ?? []),
+      ...(result.decision?.decisionDebug?.planFirstDecision?.selectedPlan
+        ?.evidenceCodes ?? []),
+    ];
+
+    expect(result.decision?.decisionDebug?.planKind).toBe("runner.credit_bank");
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.route?.capabilityId,
+    ).toBe("credit_bank_cash_out");
+    expect(
+      evidence.some(
+        (entry) =>
+          entry.includes("runner_credit_bank_bound_run_action:") &&
+          entry.includes("remote_1"),
+      ),
+    ).toBe(true);
   });
 });
 

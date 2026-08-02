@@ -14,6 +14,21 @@ describe("qualityTagsForActionWithDependencies", () => {
     expect(tagsForRoles(["microeconomy_noise"])).toContain("economy_stall");
     expect(tagsForRoles(["tempoish_noise"])).toContain("economy_stall");
   });
+
+  it("does not tag a plan-certified same-turn agenda conversion as naked", () => {
+    expect(
+      tagsForCorpAgendaInstall(corpScoreConversionDecision()),
+    ).not.toContain("naked_agenda_install");
+  });
+
+  it("keeps the naked-install tag without the exact score conversion contract", () => {
+    const noisyDecision = corpScoreConversionDecision();
+    noisyDecision.evidence = ["corp_same_turn_score_conversionish:install"];
+
+    expect(tagsForCorpAgendaInstall(noisyDecision)).toContain(
+      "naked_agenda_install",
+    );
+  });
 });
 
 describe("repeatedLowValueCentralRunTags", () => {
@@ -48,9 +63,7 @@ describe("repeatedLowValueCentralRunTags", () => {
 describe("isRedactionSafeCaseAnalysis", () => {
   it("rejects exact forbidden hidden-input field tokens", () => {
     expect(
-      isRedactionSafeCaseAnalysis(
-        caseAnalysisWithReasonCode("privatePayload"),
-      ),
+      isRedactionSafeCaseAnalysis(caseAnalysisWithReasonCode("privatePayload")),
     ).toBe(false);
   });
 
@@ -72,6 +85,70 @@ function tagsForRoles(roles: string[]): string[] {
     findVisibleCard: () => undefined,
     rolesForAction: () => roles,
   });
+}
+
+function tagsForCorpAgendaInstall(selectedDecision: AiDecision): string[] {
+  const corpInput = {
+    side: "corp",
+    legalActions: [],
+    playerView: {
+      side: "corp",
+      own: { credits: 3, gripOrHq: [], rig: [] },
+      opponent: { agendaPoints: 0 },
+      servers: [],
+      agendaPointsToWin: 7,
+    },
+  } as unknown as AiDecisionInput;
+  const installAction = {
+    actionId: "install-agenda",
+    side: "corp",
+    type: "install_card",
+    label: "Install agenda",
+    source: "agenda-instance",
+    timingPoint: "corp_action.main",
+    costs: [],
+    targetRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: 1,
+    payload: {
+      cardId: "agenda-instance",
+      serverId: "new_remote",
+      placement: "root",
+    },
+  } as LegalAction;
+  return qualityTagsForActionWithDependencies(
+    corpInput,
+    installAction,
+    selectedDecision,
+    {
+      extractFeatures: () => ({
+        serverFeaturesById: new Map(),
+        rigRoles: new Set(),
+      }),
+      findVisibleCard: () =>
+        ({
+          instanceId: "agenda-instance",
+          known: true,
+          definitionId: "onr_v1_203_hostile-takeover",
+          type: "agenda",
+        }) as never,
+      rolesForAction: () => [],
+    },
+  );
+}
+
+function corpScoreConversionDecision(): AiDecision {
+  return {
+    reasonCode: "plan_first.corp.score_agenda",
+    fallbackUsed: false,
+    timeoutUsed: false,
+    evidence: [
+      "plan_assessment_evidence:corp_same_turn_score_conversion:install_score_target",
+    ],
+    decisionDebug: {
+      planKind: "corp.score_agenda",
+    },
+  } as AiDecision;
 }
 
 function input(): AiDecisionInput {

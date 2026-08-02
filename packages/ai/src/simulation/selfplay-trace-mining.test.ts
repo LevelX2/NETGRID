@@ -736,6 +736,32 @@ describe("SelfplayTraceMining", () => {
     ).toEqual([]);
   });
 
+  it("accepts target-bound multiaccess events but not unrelated event noise", () => {
+    const multiaccess = selfplaySummary([
+      selfplayAction("runner", 1, "play_event", {
+        selectedActionId: "run-event-hq-multiaccess",
+        targetServerId: "hq",
+        planKind: "runner.pressure_central",
+        debugFacts: ["plan_step_capability:pressure_hq_multiaccess"],
+      }),
+    ]);
+    const unrelated = selfplaySummary([
+      selfplayAction("runner", 1, "play_event", {
+        selectedActionId: "unrelated-counterprobe",
+        planKind: "runner.pressure_central",
+        debugFacts: ["plan_step_capability:counterprobe"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions(
+      [multiaccess, unrelated],
+      { detectorIds: ["plan_step_action_mismatch"] },
+    );
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("unrelated-counterprobe");
+  });
+
   it("bounds recovery search signals to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "trigger_ability", {
