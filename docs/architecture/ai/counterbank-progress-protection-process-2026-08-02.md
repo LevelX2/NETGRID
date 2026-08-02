@@ -154,6 +154,14 @@ Paketstand:
   mit `NODE_OPTIONS=--max-old-space-size=6144` ist er grün. `check:ai`,
   `check:ai-deck-doctrine-strategy` und alle drei AI-Shards sind grün
   (184/184 Dateien je Shard; 1821, 1551 und 1169 Tests).
+- P4 ist abgeschlossen: Neun von zehn identischen Seeds bleiben bis zum
+  finalen StateHash unverändert. Nur Blink 05 divergiert an der fehlerhaften
+  Replacement-Entscheidung; die Corp installiert nun cross-remote,
+  transferiert drei Vapor-Counter und scoret sofort. Positive
+  Same-Root-Bank-Replacements fallen von eins auf null. Der vollständige
+  Vergleich einschließlich Nebenideen und zweier unveränderter, unabhängiger
+  Runner-Runtimefehler liegt in
+  `docs/reviews/ai/counterbank-progress-protection-ten-seed-final-review-2026-08-02.md`.
 
 ## Paketdetails
 
