@@ -841,6 +841,7 @@ function economyBankToolForRecord(
   params: BuildDeckCapabilityProfileParams,
   record: CardCapabilityRecord,
 ): EconomyBankTool | undefined {
+  if (recordHasRunOnlyEconomyPool(record)) return undefined;
   const text = normalizedRecordText(record);
   const signals = [...record.roles, ...record.planRoles]
     .join(" ")
@@ -900,6 +901,15 @@ function economyBankToolForRecord(
         : "bank_cashout_legal:false",
     ],
   };
+}
+
+function recordHasRunOnlyEconomyPool(record: CardCapabilityRecord): boolean {
+  return record.effects.some(
+    (effect) =>
+      effect.kind === "finite_economy_pool" &&
+      effect.timing === "during_run" &&
+      effect.target === "run_credit_pool",
+  );
 }
 
 function buildMemoryCapabilityProfile(

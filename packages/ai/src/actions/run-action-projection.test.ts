@@ -36,6 +36,30 @@ describe("projectRunnerRunActions", () => {
     ]);
   });
 
+  it("projects Lucidrine as a concrete run with expiring credits and post-run core damage", () => {
+    const lucidrine = action({
+      actionId: "lucidrine-rd",
+      type: "play_event",
+      source: "lucidrine-instance",
+      payload: {
+        cardId: "lucidrine-instance",
+        sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+        serverId: "rd",
+        runnerEventRun: true,
+      },
+    });
+
+    expect(projectRunnerRunActions({ input: input([lucidrine]) })).toEqual([
+      expect.objectContaining({
+        actionId: "lucidrine-rd",
+        targetServerId: "rd",
+        projectionStatus: "concrete_target",
+        temporaryRunCredits: 9,
+        postRunSelfDamage: 1,
+      }),
+    ]);
+  });
+
   it("uses structured run signals and ignores label-only run text", () => {
     const labelOnly = action({
       actionId: "label-only",

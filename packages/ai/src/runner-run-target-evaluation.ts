@@ -152,6 +152,8 @@ function evaluateRunnerRunTarget(
     0,
     params.input.playerView.own.credits - actionCreditCost,
   );
+  const temporaryRunCredits = Math.max(0, projection.temporaryRunCredits ?? 0);
+  const creditsAvailableDuringRun = creditsAfterAction + temporaryRunCredits;
   const visibleServerIce = server?.ice ?? [];
   const projectedServerIce = projection.bypassFirstIce
     ? visibleServerIce.slice(0, -1)
@@ -162,7 +164,7 @@ function evaluateRunnerRunTarget(
     projectedServerIce,
     params.input.playerView.own.rig ?? [],
     runnerRunPathCreditBudgetWithVisiblePools(
-      creditsAfterAction,
+      creditsAvailableDuringRun,
       params.input.playerView.own.rig ?? [],
     ),
     server?.root ?? [],
@@ -232,13 +234,17 @@ function evaluateRunnerRunTarget(
       : spendLimitBlocksPath
         ? "blocked_unpayable"
         : basePathPassability;
-  const creditsAfterRun = path.creditsAfterPath;
+  const creditsAfterRun = generalCreditsRemainingAfterRun(
+    creditsAfterAction,
+    temporaryRunCredits,
+    path.creditsAfterPath,
+  );
   const unknownUnrezzedIceCount = projectedServerIce.filter(
     (card) => card.rezzed !== true && card.known === false,
   ).length;
   const baseRouteQuote = quoteRunnerRunRoute({
     path,
-    availableCredits: creditsAfterAction,
+    availableCredits: creditsAvailableDuringRun,
     unknownIceCount: unknownUnrezzedIceCount,
     runnerGripCount: params.input.playerView.own.gripOrHq.length,
   });
@@ -280,7 +286,13 @@ function evaluateRunnerRunTarget(
   const visibleIceHazardPenalty = path.visibleIceHazardPenalty ?? 0;
   const visibleIceHazardAvoidanceCost = path.visibleIceHazardAvoidanceCost ?? 0;
   const creditsAfterAvoidingVisibleIceHazards =
-    path.creditsAfterAvoidingVisibleIceHazards ?? creditsAfterRun;
+    path.creditsAfterAvoidingVisibleIceHazards !== undefined
+      ? generalCreditsRemainingAfterRun(
+          creditsAfterAction,
+          temporaryRunCredits,
+          path.creditsAfterAvoidingVisibleIceHazards,
+        )
+      : creditsAfterRun;
   const expectedTagsFromVisibleIce = path.expectedTagsFromVisibleIce ?? 0;
   const unavoidableVisibleIceHazardCount =
     path.unavoidableVisibleIceHazardCount ?? 0;
@@ -403,6 +415,7 @@ function evaluateRunnerRunTarget(
       ...routeQuote.evidence,
       `run_action_credit_cost:${actionCreditCost}`,
       `credits_after_run_action:${creditsAfterAction}`,
+      `temporary_run_credits:${temporaryRunCredits}`,
       `credits_after_run:${creditsAfterRun}`,
       ...(economyPosture.creditReservePolicy.remotePressureReserveActive ===
       true
@@ -496,6 +509,20 @@ function evaluateRunnerRunTarget(
   };
 }
 
+function generalCreditsRemainingAfterRun(
+  creditsAfterAction: number,
+  temporaryRunCredits: number,
+  routeCreditsAfter: number,
+): number {
+  const availableDuringRun = creditsAfterAction + temporaryRunCredits;
+  const spentDuringRun = Math.min(
+    availableDuringRun,
+    Math.max(0, availableDuringRun - routeCreditsAfter),
+  );
+  const generalCreditsSpent = Math.max(0, spentDuringRun - temporaryRunCredits);
+  return Math.max(0, creditsAfterAction - generalCreditsSpent);
+}
+
 function runActionPayoffForTarget(
   projection: RunActionProjection,
   targetKind: RunnerRunTargetKind,
@@ -527,7 +554,12 @@ function runActionPayoffForTarget(
     values.futureSetupValue += 35;
     evidence.add(`run_action_payoff:${targetKind}:multi_run_sequence`);
   }
-  if (
+  if ((projection.postRunSelfDamage ?? 0) > 0) {
+    values.riskPenalty += 120 * projection.postRunSelfDamage!;
+    evidence.add(
+      `run_action_payoff:${targetKind}:post_run_self_damage:${projection.postRunSelfDamage}`,
+    );
+  } else if (
     projection.riskSignals.some(
       (signal) =>
         projectionSignalHasToken(signal, "tag") ||

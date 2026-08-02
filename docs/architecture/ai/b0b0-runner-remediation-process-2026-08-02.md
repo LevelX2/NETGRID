@@ -106,7 +106,7 @@ planned
 | ----- | ---------------------------------- | ------------------------------------------------------------------------------ |
 | B000  | Prozess und Ausgangsevidence       | verbindlicher Scope, Invarianten und Paketvertrag                              |
 | B001  | Draw-Tax-Quellenvertrag            | **abgeschlossen:** nur echte Ziehsteuern; sichere Multi-Draws bleiben erhalten |
-| B002  | Run-only-Economy-Routing           | D9 verwirft die wertlose Lucidrine-Archives-Linie                              |
+| B002  | Run-only-Economy-Routing           | **abgeschlossen:** D9 verwirft die wertlose Lucidrine-Archives-Linie            |
 | B003  | Plan-owned Emergency-Keep          | D65 behält Flatline-Prävention bei bestätigter Gefahr                          |
 | B004  | Gesamtverifikation und Integration | Final Review, breite Gates, Main-Merge und Cleanup                             |
 
@@ -219,6 +219,28 @@ D9 wählt eine produktive LegalAction, der falsche Owner verschwindet und eine
 gute Run-only-Economy-Linie bleibt möglich.
 
 Commit: `fix(ai): route run-only economy through concrete runs`
+
+### Ergebnis
+
+- Der strikte D9-Ausgangscheckpoint war vor dem Fix rot: Lucidrine wurde auf
+  Archive unter `runner.develop_board_and_hand` als `bank_tool:acute` gespielt.
+- Ein `during_run`-Pool mit Ziel `run_credit_pool` ist nun weder allgemeines
+  Deck-Bankwerkzeug noch generisches Handentwicklungs-Economytool.
+- Ein Runner-Event, dessen Engine-Payload den konkreten Run bestätigt, wird als
+  RunAction projiziert. Lucidrine bringt dort exakt neun temporäre Run-Credits
+  und einen anschließenden Core-Damage-Nachteil ein.
+- Generische Entwicklung darf einen solchen konkret servergebundenen Run nicht
+  besitzen; die Run-Pläne bleiben alleinige Autorität über profitable Linien.
+- Die positive Gegenprobe erreicht trotz null allgemeiner Credits einen
+  sichtbaren Wall-Pfad mit dem temporären Pool. Nach dem Run bleiben weiterhin
+  null allgemeine Credits.
+- D9 ist grün und wählt `runner.draw_card` über die bestehende residente
+  `runner.rig_and_coverage`-Planinstanz, Step-Capability
+  `draw_for_answer_breaker_code_gate`.
+- Sechs fokussierte Testdateien mit 142 Tests, AI-Typecheck mit 8-GB-Heap,
+  Hint-Metadaten, Source-Structure und Generic-Card-ID-Guard sind grün.
+- Der Deck-Hint-Consumer-Audit enthält die neue harte Invariante und meldet für
+  den D9-Decksnapshot 0 Blocker und 0 Warnungen.
 
 ## B003 – Plan-owned Emergency-Keep
 

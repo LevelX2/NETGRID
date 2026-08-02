@@ -63,6 +63,8 @@ export function projectInternalRunnerRunActions(
       signals,
     );
     const spendLimit = runSpendLimitForAction(action);
+    const temporaryRunCredits = temporaryRunCreditsForHint(hint);
+    const postRunSelfDamage = postRunSelfDamageForHint(hint);
     const accessReplacement = stringPayloadValue(
       action,
       "successfulRunAccessReplacement",
@@ -93,6 +95,8 @@ export function projectInternalRunnerRunActions(
         signals,
       ),
       riskSignals: riskSignalsForRunAction(candidate, hint),
+      ...(temporaryRunCredits > 0 ? { temporaryRunCredits } : {}),
+      ...(postRunSelfDamage > 0 ? { postRunSelfDamage } : {}),
       ...(spendLimit !== undefined ? { spendLimit } : {}),
       noNoisyBreakers: noNoisyBreakersForRunAction(action, signals),
       bypassFirstIce: bypassFirstIceForRunAction(action, signals),
@@ -223,6 +227,16 @@ function runActionProjectionEvidence(
       : []),
     `run_action_projection_no_noisy_breakers:${projection.noNoisyBreakers}`,
     `run_action_projection_bypass_first_ice:${projection.bypassFirstIce}`,
+    ...(projection.temporaryRunCredits !== undefined
+      ? [
+          `run_action_projection_temporary_run_credits:${projection.temporaryRunCredits}`,
+        ]
+      : []),
+    ...(projection.postRunSelfDamage !== undefined
+      ? [
+          `run_action_projection_post_run_self_damage:${projection.postRunSelfDamage}`,
+        ]
+      : []),
     ...projection.accessPayoffSignals
       .slice(0, 8)
       .map((signal) => `run_action_projection_access_signal:${signal}`),
@@ -240,6 +254,13 @@ function runActionRelevant(
   signals: readonly string[],
 ): boolean {
   if (action.type === "start_run") return true;
+  if (
+    action.type === "play_event" &&
+    concretePayloadServerId(action) &&
+    booleanPayloadValue(action, "runnerEventRun")
+  ) {
+    return true;
+  }
   if (
     action.type !== "play_event" &&
     action.type !== "activated_card_ability" &&
@@ -863,6 +884,34 @@ function riskSignalsForRunAction(
     ...riskTags,
     ...(candidate?.risks ?? []).map((risk) => `${risk.kind}:${risk.severity}`),
   ]);
+}
+
+function temporaryRunCreditsForHint(hint: AiCardHint | undefined): number {
+  return Math.max(
+    0,
+    ...(hint?.effects ?? [])
+      .filter(
+        (effect) =>
+          effect.kind === "finite_economy_pool" &&
+          effect.timing === "during_run" &&
+          effect.target === "run_credit_pool",
+      )
+      .map((effect) => effect.amount ?? 0),
+  );
+}
+
+function postRunSelfDamageForHint(hint: AiCardHint | undefined): number {
+  return Math.max(
+    0,
+    ...(hint?.effects ?? [])
+      .filter(
+        (effect) =>
+          effect.kind === "damage" &&
+          effect.scope === "runner" &&
+          effect.target?.startsWith("self_") === true,
+      )
+      .map((effect) => effect.amount ?? 0),
+  );
 }
 
 function runSpendLimitForAction(action: LegalAction): number | undefined {

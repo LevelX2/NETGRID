@@ -425,6 +425,21 @@ function validateBankBindings(
     ...(capabilityProfile.corp?.economyBankTools ?? []),
   ];
   for (const tool of tools) {
+    const hint = AI_HINTS_BY_CARD.get(tool.cardId) as JsonRecord | undefined;
+    const runOnlyEconomyPool = arrayValue(hint?.effects)
+      .filter(isJsonRecord)
+      .some(
+        (effect) =>
+          effect.kind === "finite_economy_pool" &&
+          effect.timing === "during_run" &&
+          effect.target === "run_credit_pool",
+      );
+    if (runOnlyEconomyPool) {
+      findings.push({
+        cardId: tool.cardId,
+        kind: "run_only_economy_pool_classified_as_bank",
+      });
+    }
     const visibleInstanceIds = new Set(
       visibleCards(input.playerView)
         .filter((card) => card.definitionId === tool.cardId)

@@ -62,7 +62,22 @@ export function runnerDefinitionRequiresTargetedBypassPlan(
 export function runnerGenericDevelopmentMayOwnAction(
   candidate: ActionSemanticCandidate,
 ): boolean {
-  return !runnerActionRequiresTargetedBypassPlan(candidate);
+  return (
+    !runnerActionRequiresTargetedBypassPlan(candidate) &&
+    !runnerCandidateStartsRun(candidate)
+  );
+}
+
+function runnerCandidateStartsRun(candidate: ActionSemanticCandidate): boolean {
+  return (
+    candidate.actorSide === "runner" &&
+    candidate.semanticActionType === "play.runner_event" &&
+    candidate.runProjectionSummary?.serverId !== undefined &&
+    (candidate.functionalEffects ?? []).some(
+      (effect) =>
+        effect.kind === "future_run_effect" && effect.target === "make_run",
+    )
+  );
 }
 
 export function runnerTargetedBypassPlanCommitment(params: {

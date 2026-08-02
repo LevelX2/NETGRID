@@ -8014,12 +8014,14 @@
           "timing": "action"
         },
         {
+          "amount": 9,
           "kind": "finite_economy_pool",
           "scope": "runner",
           "target": "run_credit_pool",
           "timing": "during_run"
         },
         {
+          "amount": 1,
           "kind": "damage",
           "scope": "runner",
           "target": "self_brain_damage",

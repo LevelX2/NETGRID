@@ -79,6 +79,8 @@ export type RunActionProjection = {
   accessReplacementLookCount?: number;
   constraintSignals: string[];
   riskSignals: string[];
+  temporaryRunCredits?: number;
+  postRunSelfDamage?: number;
   spendLimit?: number;
   noNoisyBreakers: boolean;
   bypassFirstIce: boolean;

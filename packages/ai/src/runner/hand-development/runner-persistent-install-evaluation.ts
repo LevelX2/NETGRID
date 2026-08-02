@@ -192,9 +192,12 @@ export function persistentFunctionalProfileForCard(
     runnerHandTextHasIceStrengthReductionSignal(text);
   const recurringBreakerEconomy =
     runnerHandTextHasRecurringBreakerEconomySignal(text);
-  const bankTool = looksLikeBankTool(text);
+  const runOnlyEconomyPool = cardHasRunOnlyEconomyPool(card);
+  const bankTool = !runOnlyEconomyPool && looksLikeBankTool(text);
   const economyTool =
-    breakerCoverage.length === 0 && looksLikeEconomyTool(text);
+    !runOnlyEconomyPool &&
+    breakerCoverage.length === 0 &&
+    looksLikeEconomyTool(text);
   const actionEconomy = runnerHandTextHasActionEconomySignal(text);
   const accessSupport = looksLikeAccessPayoff(text);
   const searchSupport = looksLikeDrawOrSearch(text);
@@ -252,6 +255,20 @@ export function persistentFunctionalProfileForCard(
     actionGatedUtility,
     absoluteNonStackable,
   };
+}
+
+function cardHasRunOnlyEconomyPool(card: VisibleCard): boolean {
+  const hint = card.definitionId
+    ? AI_HINTS_BY_CARD.get(card.definitionId)
+    : undefined;
+  return Boolean(
+    hint?.effects?.some(
+      (effect) =>
+        effect.kind === "finite_economy_pool" &&
+        effect.timing === "during_run" &&
+        effect.target === "run_credit_pool",
+    ),
+  );
 }
 
 export function structuredHintSignals(hint: {

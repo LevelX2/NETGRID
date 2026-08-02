@@ -44,6 +44,32 @@ describe("Runner targeted-bypass plan admission", () => {
     ).toBe(true);
   });
 
+  it("keeps concrete runner-event runs out of generic development ownership", () => {
+    const candidate = {
+      actionId: "runner.play.lucidrine-rd",
+      actionType: "play_event",
+      actorSide: "runner",
+      semanticActionType: "play.runner_event",
+      runProjectionSummary: {
+        serverId: "rd",
+        serverKind: "rd",
+        source: "legal_action_payload",
+        evidence: [],
+      },
+      functionalEffects: [
+        {
+          kind: "future_run_effect",
+          timing: "action",
+          scope: "server",
+          target: "make_run",
+        },
+      ],
+    } as unknown as ActionSemanticCandidate;
+
+    expect(runnerActionRequiresTargetedBypassPlan(candidate)).toBe(false);
+    expect(runnerGenericDevelopmentMayOwnAction(candidate)).toBe(false);
+  });
+
   it("admits only a material payoff whose exact bypass turns a proven blocked path into access", () => {
     const commitment = runnerTargetedBypassPlanCommitment({
       input: planningInput({

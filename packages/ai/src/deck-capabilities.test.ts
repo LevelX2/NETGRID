@@ -145,6 +145,22 @@ describe("DeckCapabilityProfile", () => {
     expect(profile.runner?.memoryProfile.memoryToolsKnown).toBe(1);
   });
 
+  it("does not classify run-only temporary credits as a persistent economy bank", () => {
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: playerView("runner"),
+      legalActions: [],
+      deckSnapshot: runnerSnapshot([
+        ["onr_v1_098_lucidrine-booster-drug", 1],
+        ["onr_v1_154_broker", 1],
+      ]),
+    });
+
+    expect(
+      profile.runner?.economyBankTools.map((tool) => tool.cardId),
+    ).toEqual(["onr_v1_154_broker"]);
+  });
+
   it("uses structured hosted-credit payloads and ignores label-only bank actions", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [

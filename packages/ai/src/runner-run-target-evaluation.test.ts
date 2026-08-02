@@ -73,6 +73,53 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("uses Lucidrine's temporary credits only inside its run quote", () => {
+    const lucidrine = {
+      ...runAction("lucidrine-rd", "rd"),
+      type: "play_event",
+      source: "lucidrine-instance",
+      costs: [{ clicks: 1 }],
+      payload: {
+        cardId: "lucidrine-instance",
+        sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+        serverId: "rd",
+        runnerEventRun: true,
+      },
+    } satisfies LegalAction;
+    const input = aiInput({
+      credits: 0,
+      servers: [server("rd", { ice: [wallOfStaticIce("rd-wall")] })],
+      legalActions: [lucidrine],
+      rig: [
+        visibleCard("runner-pile-driver", {
+          definitionId: "onr_v1_047_pile-driver",
+          title: "Pile Driver",
+          type: "program",
+          subtypes: ["icebreaker", "fracter", "noisy"],
+          strength: 7,
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      actionId: "lucidrine-rd",
+      pathPassability: "reachable",
+      creditsAfterRun: 0,
+      runActionProjection: {
+        temporaryRunCredits: 9,
+        postRunSelfDamage: 1,
+      },
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_action_projection_temporary_run_credits:9",
+        "run_action_projection_post_run_self_damage:1",
+      ]),
+    );
+  });
+
   it("evaluates a reachable activated R&D private-look run before selection", () => {
     const protocolRun = activatedPrivateLookRun("protocol-run-rd");
     const input = aiInput({
