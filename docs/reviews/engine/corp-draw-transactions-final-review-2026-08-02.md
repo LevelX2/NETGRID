@@ -116,6 +116,10 @@ a server restart` endet mit `ai_debug_contract_missing` und ist auf dem
 unveränderten aktuellen `main` isoliert identisch reproduzierbar. Er betrifft
 weder Corp-Draw-Transaktionen noch SPG-Choices, PlayerViews oder Reconnect und
 ist daher ein dokumentierter Bestandsfehler, aber kein Blocker dieses Reviews.
+Das nachgelagerte Activity-Paket
+`act-2026-08-02-server-restart-ai-debug-contract-missing` hat diesen
+Bestandsfehler geschlossen: Der vollständige Serverlauf ist nun mit 218 von
+218 Tests grün.
 
 Ein nachgezogener Multiplayer-Integrationstest sichert zusätzlich den zuvor
 offenen Corporate-Shuffle-Vertrag direkt aus der aktuellen PlayerView. Die

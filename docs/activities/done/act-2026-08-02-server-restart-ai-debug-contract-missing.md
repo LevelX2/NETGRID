@@ -1,19 +1,29 @@
 ---
 activityId: act-2026-08-02-server-restart-ai-debug-contract-missing
-status: inbox
+status: done
 kind: fix
 area: server-ai
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-08-02
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-02
+completedAt: 2026-08-02
+branch: codex/activities-worktree-20260802-182521
 releaseTarget: current-main
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/multiplayer.test.ts
+  - packages/shared/src/index.ts
+  - packages/shared/src/index.test.ts
+  - docs/architecture/ai/README.md
+checks:
+  - focused restart and shared sanitizer tests
+  - full server test suite
+  - server, shared and AI typechecks
+  - AI structure, card-ID and package-boundary gates
+  - format and diff checks
 ---
 
 # AI-Neustart: vollständigen Debug-Vertrag nach Wiederherstellung des residenten Planportfolios liefern
@@ -74,19 +84,35 @@ AI-Debug-Vertrag liefern wie eine Entscheidung ohne Neustart.
 
 ## Akzeptanzkriterien
 
-- [ ] Der isolierte Serverneustart-Test zur Wiederherstellung des residenten
+- [x] Der isolierte Serverneustart-Test zur Wiederherstellung des residenten
       Planportfolios ist grün.
-- [ ] Das residente Planportfolio wird vor der ersten KI-Entscheidung nach
+- [x] Das residente Planportfolio wird vor der ersten KI-Entscheidung nach
       dem Neustart vollständig und deterministisch wiederhergestellt.
-- [ ] Die vorbereitete Entscheidung enthält den vollständigen erwarteten
+- [x] Die vorbereitete Entscheidung enthält den vollständigen erwarteten
       AI-Debug-Vertrag; `ai_debug_contract_missing` tritt nicht mehr auf.
-- [ ] Planinstanz, zuständiger Plan/Step/Route, `PlanExecutionOrigin`,
+- [x] Planinstanz, zuständiger Plan/Step/Route, `PlanExecutionOrigin`,
       ActionId und Executor bleiben über den Neustart fachlich identisch; es
       entsteht keine zweite Entscheidungsautorität.
-- [ ] Die Debugprojektion bleibt side-sicher und verändert keine PlayerView-,
+- [x] Die Debugprojektion bleibt side-sicher und verändert keine PlayerView-,
       PublicEvent-, Replay- oder StateHash-Verträge.
-- [ ] Der vollständige `@netgrid/server`-Testlauf ist grün; Server- und
+- [x] Der vollständige `@netgrid/server`-Testlauf ist grün; Server- und
       AI-Typecheck sowie `git diff --check` sind grün.
+
+## Ergebnis
+
+Der TurnPlanner erzeugte bereits den vollständigen Plan-first-Debugvertrag,
+doch der gemeinsame side-sichere Sanitizer kannte das im Typvertrag reguläre
+optionale Head-Feld `executorPlanInstanceId` noch nicht und verwarf deshalb
+die gesamte Projektion. Die Allowlist und der Shared-Vertragstest führen das
+Feld nun typisiert; unbekannte Felder bleiben fail-closed.
+
+Die Servergrenze erkennt außerdem ein fehlendes prozesslokales Portfolio als
+Neustart. Sie stellt die persistenten Planinstanzen wieder her, entfernt aber
+das alte `TurnPlanCommitment` und die Execution Lease, sodass aus der
+aktuellen StateVersion frisch geplant wird. Der Regressionstest vergleicht
+vor und nach dem Neustart Root-Plan, Leaf-Executor, Planinstanz, Step, Route
+und Action-ID und weist gleichzeitig die entfernte alte Commitment-/Lease-
+Bindung nach. Es entsteht keine zweite Auswahl- oder Debugautorität.
 
 ## Reproduktion
 

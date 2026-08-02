@@ -12788,13 +12788,16 @@ describe("MVP 0.2 multiplayer service", () => {
     try {
       const storage = new InMemoryMatchStorage();
       const restoredBeforeChoice: boolean[] = [];
+      const portfolioBeforeChoice: Array<
+        ReturnType<typeof residentPlanPortfolioSnapshot>
+      > = [];
       const choose = (
         input: Parameters<typeof chooseRuntimeAiAction>[0],
         options?: Parameters<typeof chooseRuntimeAiAction>[1],
       ) => {
-        restoredBeforeChoice.push(
-          Boolean(residentPlanPortfolioSnapshot(input)),
-        );
+        const portfolio = residentPlanPortfolioSnapshot(input);
+        restoredBeforeChoice.push(Boolean(portfolio));
+        portfolioBeforeChoice.push(portfolio);
         return chooseRuntimeAiAction(input, options);
       };
       const service = new MultiplayerService(storage, {
@@ -12924,7 +12927,42 @@ describe("MVP 0.2 multiplayer service", () => {
         knownMatchVersion: current.matchVersion,
       });
       expect(afterRestart.ok).toBe(true);
+      if (!afterRestart.ok) throw new Error(afterRestart.error.message);
       expect(restoredBeforeChoice.at(-1)).toBe(true);
+      const restoredPortfolio = portfolioBeforeChoice.at(-1);
+      expect(restoredPortfolio?.instances).toEqual(
+        persisted.aiPlanRuntime?.residentPlanPortfolioBySide?.corp?.instances,
+      );
+      expect(restoredPortfolio?.turnPlanCommitment).toBeUndefined();
+      expect(restoredPortfolio?.turnPlanExecutionLease).toBeUndefined();
+      const afterRestartPlanFirst = afterRestart.prepared.detail
+        .planFirstDecision as AiPlanFirstDecisionDebug;
+      expect(afterRestart.prepared.actionId).toBe(first.prepared.actionId);
+      expect(afterRestartPlanFirst).toMatchObject({
+        selectionAuthority: "turn_plan_commitment",
+        rootPlanInstanceId: planFirstDecision.rootPlanInstanceId,
+        leafExecutorInstanceId: planFirstDecision.leafExecutorInstanceId,
+        selectedPlan: {
+          instanceId: planFirstDecision.selectedPlan?.instanceId,
+          moduleId: planFirstDecision.selectedPlan?.moduleId,
+        },
+        route: {
+          planInstanceId: planFirstDecision.route?.planInstanceId,
+          stepId: planFirstDecision.route?.stepId,
+          actionId: planFirstDecision.route?.actionId,
+        },
+        turnPlanning: {
+          schemaVersion: "ai-turn-planning-debug-v1",
+          mode: "cutover",
+          commitment: {
+            status: "active",
+            rematerialization: {
+              status: "executable",
+              actionId: first.prepared.actionId,
+            },
+          },
+        },
+      });
     } finally {
       resetResidentPlanPortfolioMemory();
     }

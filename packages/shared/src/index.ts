@@ -4626,6 +4626,7 @@ function isAiTurnPlanningDebugHead(value: unknown): boolean {
       "candidateId",
       "moduleId",
       "rootPlanInstanceId",
+      "executorPlanInstanceId",
       "actionId",
       "semanticActionType",
       "invocationKey",
@@ -4639,6 +4640,8 @@ function isAiTurnPlanningDebugHead(value: unknown): boolean {
       "semanticActionType",
       "invocationKey",
     ].every((field) => typeof candidate[field] === "string") &&
+    (candidate.executorPlanInstanceId === undefined ||
+      typeof candidate.executorPlanInstanceId === "string") &&
     typeof candidate.witnessValid === "boolean"
   );
 }

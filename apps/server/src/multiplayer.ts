@@ -928,7 +928,16 @@ export class MultiplayerService {
     const snapshot =
       record.aiPlanRuntime?.residentPlanPortfolioBySide?.[input.side];
     if (!snapshot) return;
-    restoreResidentPlanPortfolioMemorySnapshot(input, snapshot);
+    const runtimeRestarted = !residentPlanPortfolioSnapshot(input);
+    const restored = structuredClone(snapshot);
+    // A server restart restores the resident plans, but never reuses the
+    // previous process's turn commitment or execution lease. The current
+    // state must select and rematerialize a fresh authoritative route.
+    if (runtimeRestarted) {
+      delete restored.turnPlanCommitment;
+      delete restored.turnPlanExecutionLease;
+    }
+    restoreResidentPlanPortfolioMemorySnapshot(input, restored);
   }
 
   private captureResidentPlanPortfolioFor(
