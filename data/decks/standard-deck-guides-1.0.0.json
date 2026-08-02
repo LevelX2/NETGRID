@@ -3,5 +3,2599 @@
   "guideSetId": "netgrid-standard-deck-guides-1.0.0",
   "catalogId": "netgrid-standard-decks-1.0.0",
   "analyzedAt": "2026-08-02",
-  "guides": []
+  "guides": [
+    {
+      "standardDeckId": "standard_corp_cheap_bag_tricks",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:ece21485",
+      "sourceAnalysisHash": "deck-analysis:d99179dd",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ice_tax_glacier",
+          "corp.tag_trace_punish",
+          "corp.damage_kill"
+        ],
+        "secondaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.ambush_bluff",
+          "corp.asset_economy",
+          "corp.fast_advance",
+          "corp.economy_rez_reserve"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Cheap Bag of Tricks setzt vor allem auf taxierende ICE-Staffeln, Tag- und Trace-Bestrafung und konkreten Flatline-Druck. Ergänzend nutzt das Deck eine geschützte Remote-Scorelinie, unsichere Remotes mit Ambush-Druck, eine verteilte Asset-Economy, beschleunigtes Scoring und eine belastbare Rez- und Trace-Reserve.",
+        "deckIdea": "Cheap Bag of Tricks verbindet taxierende ICE-Staffeln, Tag- und Trace-Bestrafung und konkreten Flatline-Druck. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Ball and Chain und Netwatch Operations Office, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_222_ball-and-chain",
+            "title": "Ball and Chain",
+            "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_207_netwatch-operations-office",
+            "title": "Netwatch Operations Office",
+            "role": "Trägt Tag-/Trace-Bestrafung als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_190_bioweapons-engineering",
+            "title": "Bioweapons Engineering",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_312_chicago-branch",
+            "title": "Chicago Branch",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_315_corprunners-shattered-remains",
+            "title": "Corprunner's Shattered Remains",
+            "role": "Trägt Ambush und Bluff als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob ICE-Tax-Glacier noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Ball and Chain und Netwatch Operations Office aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_chrome_rush_bureau",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:07d16c96",
+      "sourceAnalysisHash": "deck-analysis:903d7e33",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.fast_advance",
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
+        "secondaryStrategyIds": [
+          "corp.economy_rez_reserve",
+          "corp.overadvance_value",
+          "corp.central_stabilize",
+          "corp.rush_score",
+          "corp.asset_economy"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Chrome Rush Bureau setzt vor allem auf beschleunigtes Scoring, taxierende ICE-Staffeln und eine geschützte Remote-Scorelinie. Ergänzend nutzt das Deck eine belastbare Rez- und Trace-Reserve, gezielten Overadvance-Wert, stabilen Schutz für HQ und R&D, frühe Rush-Scorefenster und eine verteilte Asset-Economy.",
+        "deckIdea": "Chrome Rush Bureau verbindet beschleunigtes Scoring, taxierende ICE-Staffeln und eine geschützte Remote-Scorelinie. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Executive Extraction und Crystal Wall, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_201_executive-extraction",
+            "title": "Executive Extraction",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_232_crystal-wall",
+            "title": "Crystal Wall",
+            "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_312_chicago-branch",
+            "title": "Chicago Branch",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_352_chester-mix",
+            "title": "Chester Mix",
+            "role": "Trägt Rez-Reserve als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_214_project-babylon",
+            "title": "Project Babylon",
+            "role": "Trägt Overadvance-Wert als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Fast Advance noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Executive Extraction und Crystal Wall aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_classic_corp_remote_lab_deflection_2026_07_01",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:e3da269c",
+      "sourceAnalysisHash": "deck-analysis:484e4bcd",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.economy_rez_reserve",
+          "corp.damage_kill"
+        ],
+        "secondaryStrategyIds": [
+          "corp.tag_trace_punish",
+          "corp.ambush_bluff",
+          "corp.draw_engine",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Classic Corp - Remote Lab Deflection setzt vor allem auf eine geschützte Remote-Scorelinie, eine belastbare Rez- und Trace-Reserve und konkreten Flatline-Druck. Ergänzend nutzt das Deck Tag- und Trace-Bestrafung, unsichere Remotes mit Ambush-Druck, eine wiederholbare Draw-Engine und frühe Rush-Scorefenster.",
+        "deckIdea": "Classic Corp - Remote Lab Deflection verbindet eine geschützte Remote-Scorelinie, eine belastbare Rez- und Trace-Reserve und konkreten Flatline-Druck. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Gib Credits nur aus, wenn danach noch genug Reserve für relevantes ICE, Traces oder den Scorezug bleibt. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Data Fort Remapping und Baskerville, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Gib Credits nur aus, wenn danach noch genug Reserve für relevantes ICE, Traces oder den Scorezug bleibt. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_classic_001_data-fort-remapping",
+            "title": "Data Fort Remapping",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_005_baskerville",
+            "title": "Baskerville",
+            "role": "Trägt Rez-Reserve als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_022_self-destruct",
+            "title": "Self-Destruct",
+            "role": "Trägt Ambush und Bluff als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_003_unlisted-research-lab",
+            "title": "Unlisted Research Lab",
+            "role": "Trägt Draw-Engine als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_004_theorem-proof",
+            "title": "Theorem Proof",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Remote Scoring noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Data Fort Remapping und Baskerville aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_classic_corp_superserum_control_grid_2026_07_01",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:e8cfbd14",
+      "sourceAnalysisHash": "deck-analysis:94a2c2bf",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.economy_rez_reserve",
+          "corp.tag_trace_punish"
+        ],
+        "secondaryStrategyIds": [
+          "corp.damage_kill",
+          "corp.draw_engine",
+          "corp.ambush_bluff",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Classic Corp - Superserum Control Grid setzt vor allem auf eine geschützte Remote-Scorelinie, eine belastbare Rez- und Trace-Reserve und Tag- und Trace-Bestrafung. Ergänzend nutzt das Deck konkreten Flatline-Druck, eine wiederholbare Draw-Engine, unsichere Remotes mit Ambush-Druck und frühe Rush-Scorefenster.",
+        "deckIdea": "Classic Corp - Superserum Control Grid verbindet eine geschützte Remote-Scorelinie, eine belastbare Rez- und Trace-Reserve und Tag- und Trace-Bestrafung. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Gib Credits nur aus, wenn danach noch genug Reserve für relevantes ICE, Traces oder den Scorezug bleibt. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Data Fort Remapping und Baskerville, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Gib Credits nur aus, wenn danach noch genug Reserve für relevantes ICE, Traces oder den Scorezug bleibt. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_classic_001_data-fort-remapping",
+            "title": "Data Fort Remapping",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_005_baskerville",
+            "title": "Baskerville",
+            "role": "Trägt Rez-Reserve als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_003_unlisted-research-lab",
+            "title": "Unlisted Research Lab",
+            "role": "Trägt Draw-Engine als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_022_self-destruct",
+            "title": "Self-Destruct",
+            "role": "Trägt Ambush und Bluff als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_004_theorem-proof",
+            "title": "Theorem Proof",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Remote Scoring noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Data Fort Remapping und Baskerville aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_code_rot_bitte_eintreten_2026_07_16",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:40dc908e",
+      "sourceAnalysisHash": "deck-analysis:1b2c8fe1",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.tag_trace_punish",
+          "corp.remote_scoring",
+          "corp.damage_kill"
+        ],
+        "secondaryStrategyIds": [
+          "corp.rush_score"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "CODE ROT: Bitte eintreten v2 setzt vor allem auf Tag- und Trace-Bestrafung, eine geschützte Remote-Scorelinie und konkreten Flatline-Druck. Ergänzend nutzt das Deck frühe Rush-Scorefenster.",
+        "deckIdea": "CODE ROT: Bitte eintreten v2 verbindet Tag- und Trace-Bestrafung, eine geschützte Remote-Scorelinie und konkreten Flatline-Druck. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Marked Accounts und Data Fort Reclamation, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_proteus_005_marked-accounts",
+            "title": "Marked Accounts",
+            "role": "Trägt Tag-/Trace-Bestrafung als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_197_data-fort-reclamation",
+            "title": "Data Fort Reclamation",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_055_cybertech-think-tank",
+            "title": "Cybertech Think Tank",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_302_scorched-earth",
+            "title": "Scorched Earth",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_358_dr-dreff",
+            "title": "Dr. Dreff",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Tag-/Trace-Bestrafung noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Marked Accounts und Data Fort Reclamation aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_mr96xg94",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:785f92db",
+      "sourceAnalysisHash": "deck-analysis:373a3ad0",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ice_tax_glacier",
+          "corp.fast_advance",
+          "corp.remote_scoring"
+        ],
+        "secondaryStrategyIds": [
+          "corp.overadvance_value",
+          "corp.ambush_bluff",
+          "corp.damage_kill",
+          "corp.rush_score",
+          "corp.asset_economy"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Fast Advance, Baby setzt vor allem auf taxierende ICE-Staffeln, beschleunigtes Scoring und eine geschützte Remote-Scorelinie. Ergänzend nutzt das Deck gezielten Overadvance-Wert, unsichere Remotes mit Ambush-Druck, konkreten Flatline-Druck, frühe Rush-Scorefenster und eine verteilte Asset-Economy.",
+        "deckIdea": "Fast Advance, Baby verbindet taxierende ICE-Staffeln, beschleunigtes Scoring und eine geschützte Remote-Scorelinie. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Caryatid und Lesley Major, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_proteus_013_caryatid",
+            "title": "Caryatid",
+            "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_062_lesley-major",
+            "title": "Lesley Major",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_007_project-venice",
+            "title": "Project Venice",
+            "role": "Trägt Overadvance-Wert als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_021_dog-pile",
+            "title": "Dog Pile",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_309_bbs-whispering-campaign",
+            "title": "BBS Whispering Campaign",
+            "role": "Trägt Asset-Economy als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob ICE-Tax-Glacier noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Caryatid und Lesley Major aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_ivory_bastion",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:853309c9",
+      "sourceAnalysisHash": "deck-analysis:c5f3c2e1",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring",
+          "corp.economy_rez_reserve"
+        ],
+        "secondaryStrategyIds": [
+          "corp.asset_economy",
+          "corp.rush_score",
+          "corp.fast_advance"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Ivory Bastion setzt vor allem auf taxierende ICE-Staffeln, eine geschützte Remote-Scorelinie und eine belastbare Rez- und Trace-Reserve. Ergänzend nutzt das Deck eine verteilte Asset-Economy, frühe Rush-Scorefenster und beschleunigtes Scoring.",
+        "deckIdea": "Ivory Bastion verbindet taxierende ICE-Staffeln, eine geschützte Remote-Scorelinie und eine belastbare Rez- und Trace-Reserve. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Gib Credits nur aus, wenn danach noch genug Reserve für relevantes ICE, Traces oder den Scorezug bleibt.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Priority Requisition und BBS Whispering Campaign, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Gib Credits nur aus, wenn danach noch genug Reserve für relevantes ICE, Traces oder den Scorezug bleibt.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_212_priority-requisition",
+            "title": "Priority Requisition",
+            "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_309_bbs-whispering-campaign",
+            "title": "BBS Whispering Campaign",
+            "role": "Trägt Asset-Economy als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_297_overtime-incentives",
+            "title": "Overtime Incentives",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_215_security-net-optimization",
+            "title": "Security Net Optimization",
+            "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_317_data-masons",
+            "title": "Data Masons",
+            "role": "Trägt Rez-Reserve als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob ICE-Tax-Glacier noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Priority Requisition und BBS Whispering Campaign aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_manhunt_pressure_bureau",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:3b7f48b0",
+      "sourceAnalysisHash": "deck-analysis:f850a270",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.tag_trace_punish",
+          "corp.damage_kill",
+          "corp.remote_scoring",
+          "corp.rush_score"
+        ],
+        "secondaryStrategyIds": [
+          "corp.fast_advance"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Manhunt Pressure Bureau setzt vor allem auf Tag- und Trace-Bestrafung, konkreten Flatline-Druck, eine geschützte Remote-Scorelinie und frühe Rush-Scorefenster. Ergänzend nutzt das Deck beschleunigtes Scoring.",
+        "deckIdea": "Manhunt Pressure Bureau verbindet Tag- und Trace-Bestrafung, konkreten Flatline-Druck, eine geschützte Remote-Scorelinie und frühe Rush-Scorefenster. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Audit of Call Records und Scorched Earth, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_283_audit-of-call-records",
+            "title": "Audit of Call Records",
+            "role": "Trägt Tag-/Trace-Bestrafung als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_302_scorched-earth",
+            "title": "Scorched Earth",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_304_systematic-layoffs",
+            "title": "Systematic Layoffs",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_284_chance-observation",
+            "title": "Chance Observation",
+            "role": "Trägt Tag-/Trace-Bestrafung als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_307_urban-renewal",
+            "title": "Urban Renewal",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Tag-/Trace-Bestrafung noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Audit of Call Records und Scorched Earth aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_mph465dv",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:48b0da32",
+      "sourceAnalysisHash": "deck-analysis:e534d789",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ice_tax_glacier",
+          "corp.fast_advance",
+          "corp.remote_scoring"
+        ],
+        "secondaryStrategyIds": [
+          "corp.asset_economy",
+          "corp.economy_rez_reserve",
+          "corp.ambush_bluff",
+          "corp.damage_kill",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Mumie setzt vor allem auf taxierende ICE-Staffeln, beschleunigtes Scoring und eine geschützte Remote-Scorelinie. Ergänzend nutzt das Deck eine verteilte Asset-Economy, eine belastbare Rez- und Trace-Reserve, unsichere Remotes mit Ambush-Druck, konkreten Flatline-Druck und frühe Rush-Scorefenster.",
+        "deckIdea": "Mumie verbindet taxierende ICE-Staffeln, beschleunigtes Scoring und eine geschützte Remote-Scorelinie. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Encryption Breakthrough und Genetics-Visionary Acquisition, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_200_encryption-breakthrough",
+            "title": "Encryption Breakthrough",
+            "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_202_genetics-visionary-acquisition",
+            "title": "Genetics-Visionary Acquisition",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_312_chicago-branch",
+            "title": "Chicago Branch",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_309_bbs-whispering-campaign",
+            "title": "BBS Whispering Campaign",
+            "role": "Trägt Asset-Economy als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_320_encoder-inc",
+            "title": "Encoder, Inc.",
+            "role": "Trägt Rez-Reserve als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob ICE-Tax-Glacier noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Encryption Breakthrough und Genetics-Visionary Acquisition aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_neon_guillotine",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:7032817b",
+      "sourceAnalysisHash": "deck-analysis:3ac4f5ac",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.tag_trace_punish",
+          "corp.damage_kill",
+          "corp.rush_score"
+        ],
+        "secondaryStrategyIds": [
+          "corp.remote_scoring"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Neon Guillotine setzt vor allem auf Tag- und Trace-Bestrafung, konkreten Flatline-Druck und frühe Rush-Scorefenster. Ergänzend nutzt das Deck eine geschützte Remote-Scorelinie.",
+        "deckIdea": "Neon Guillotine verbindet Tag- und Trace-Bestrafung, konkreten Flatline-Druck und frühe Rush-Scorefenster. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet. Nutze günstiges frühes ICE, bevor das Runner-Rig vollständig ist, und zwinge eine schnelle Antwort.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Netwatch Operations Office und Bioweapons Engineering, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet. Nutze günstiges frühes ICE, bevor das Runner-Rig vollständig ist, und zwinge eine schnelle Antwort.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_207_netwatch-operations-office",
+            "title": "Netwatch Operations Office",
+            "role": "Trägt Tag-/Trace-Bestrafung als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_190_bioweapons-engineering",
+            "title": "Bioweapons Engineering",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_208_on-call-solo-team",
+            "title": "On-Call Solo Team",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_217_strike-force-kali",
+            "title": "Strike Force Kali",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Tag-/Trace-Bestrafung noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Netwatch Operations Office und Bioweapons Engineering aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_neon_escrow",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:cefa12ef",
+      "sourceAnalysisHash": "deck-analysis:381a7796",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ice_tax_glacier",
+          "corp.fast_advance",
+          "corp.remote_scoring"
+        ],
+        "secondaryStrategyIds": [
+          "corp.overadvance_value",
+          "corp.central_stabilize",
+          "corp.ambush_bluff",
+          "corp.rush_score",
+          "corp.asset_economy"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Neon Escrow setzt vor allem auf taxierende ICE-Staffeln, beschleunigtes Scoring und eine geschützte Remote-Scorelinie. Ergänzend nutzt das Deck gezielten Overadvance-Wert, stabilen Schutz für HQ und R&D, unsichere Remotes mit Ambush-Druck, frühe Rush-Scorefenster und eine verteilte Asset-Economy.",
+        "deckIdea": "Neon Escrow verbindet taxierende ICE-Staffeln, beschleunigtes Scoring und eine geschützte Remote-Scorelinie. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Data Wall und Falsified-Transactions Expert, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_237_data-wall",
+            "title": "Data Wall",
+            "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_291_falsified-transactions-expert",
+            "title": "Falsified-Transactions Expert",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_312_chicago-branch",
+            "title": "Chicago Branch",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_008_project-zurich",
+            "title": "Project Zurich",
+            "role": "Trägt Overadvance-Wert als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_194_corporate-downsizing",
+            "title": "Corporate Downsizing",
+            "role": "Trägt Zentralenschutz als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob ICE-Tax-Glacier noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Data Wall und Falsified-Transactions Expert aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_original_speed_v10",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:e2e748fd",
+      "sourceAnalysisHash": "deck-analysis:1400be06",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring",
+          "corp.fast_advance"
+        ],
+        "secondaryStrategyIds": [
+          "corp.economy_rez_reserve",
+          "corp.draw_engine",
+          "corp.overadvance_value",
+          "corp.ambush_bluff",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Original Speed v1.0 setzt vor allem auf taxierende ICE-Staffeln, eine geschützte Remote-Scorelinie und beschleunigtes Scoring. Ergänzend nutzt das Deck eine belastbare Rez- und Trace-Reserve, eine wiederholbare Draw-Engine, gezielten Overadvance-Wert, unsichere Remotes mit Ambush-Druck und frühe Rush-Scorefenster.",
+        "deckIdea": "Original Speed v1.0 verbindet taxierende ICE-Staffeln, eine geschützte Remote-Scorelinie und beschleunigtes Scoring. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Canis Major und Encoder, Inc., ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_225_canis-major",
+            "title": "Canis Major",
+            "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_320_encoder-inc",
+            "title": "Encoder, Inc.",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_304_systematic-layoffs",
+            "title": "Systematic Layoffs",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_199_employee-empowerment",
+            "title": "Employee Empowerment",
+            "role": "Trägt Draw-Engine als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_214_project-babylon",
+            "title": "Project Babylon",
+            "role": "Trägt Overadvance-Wert als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob ICE-Tax-Glacier noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Canis Major und Encoder, Inc. aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_proteus_corp_hidden_node_control_2026_05_25",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:0cf1c94a",
+      "sourceAnalysisHash": "deck-analysis:1bd110a6",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ice_tax_glacier",
+          "corp.ambush_bluff",
+          "corp.remote_scoring"
+        ],
+        "secondaryStrategyIds": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish",
+          "corp.economy_rez_reserve",
+          "corp.rush_score",
+          "corp.asset_economy"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Proteus Korp - Hidden Node & Region Trap setzt vor allem auf taxierende ICE-Staffeln, unsichere Remotes mit Ambush-Druck und eine geschützte Remote-Scorelinie. Ergänzend nutzt das Deck konkreten Flatline-Druck, Tag- und Trace-Bestrafung, eine belastbare Rez- und Trace-Reserve, frühe Rush-Scorefenster und eine verteilte Asset-Economy.",
+        "deckIdea": "Proteus Korp - Hidden Node & Region Trap verbindet taxierende ICE-Staffeln, unsichere Remotes mit Ambush-Druck und eine geschützte Remote-Scorelinie. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Nutze ähnliche Installationsmuster für Agendas, Assets und Fallen, damit der Runner deine Remotes nicht sicher lesen kann. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Bug Zapper und Fetal AI, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Nutze ähnliche Installationsmuster für Agendas, Assets und Fallen, damit der Runner deine Remotes nicht sicher lesen kann. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_proteus_012_bug-zapper",
+            "title": "Bug Zapper",
+            "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_004_fetal-ai",
+            "title": "Fetal AI",
+            "role": "Trägt Ambush und Bluff als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_065_networked-center",
+            "title": "Networked Center",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_003_corporate-headhunters",
+            "title": "Corporate Headhunters",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_059_government-contract",
+            "title": "Government Contract",
+            "role": "Trägt Rez-Reserve als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob ICE-Tax-Glacier noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Bug Zapper und Fetal AI aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_proteus_corp_variable_ice_gauntlet_2026_05_25",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:6a06a588",
+      "sourceAnalysisHash": "deck-analysis:cce73416",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.damage_kill",
+          "corp.remote_scoring",
+          "corp.tag_trace_punish"
+        ],
+        "secondaryStrategyIds": [
+          "corp.overadvance_value",
+          "corp.action_tempo",
+          "corp.rush_score",
+          "corp.ambush_bluff",
+          "corp.fast_advance"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Proteus Korp - Variable ICE Gauntlet setzt vor allem auf konkreten Flatline-Druck, eine geschützte Remote-Scorelinie und Tag- und Trace-Bestrafung. Ergänzend nutzt das Deck gezielten Overadvance-Wert, zusätzliches Aktionstempo, frühe Rush-Scorefenster, unsichere Remotes mit Ambush-Druck und beschleunigtes Scoring.",
+        "deckIdea": "Proteus Korp - Variable ICE Gauntlet verbindet konkreten Flatline-Druck, eine geschützte Remote-Scorelinie und Tag- und Trace-Bestrafung. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Brain Wash und Lesley Major, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_proteus_011_brain-wash",
+            "title": "Brain Wash",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_062_lesley-major",
+            "title": "Lesley Major",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_005_marked-accounts",
+            "title": "Marked Accounts",
+            "role": "Trägt Tag-/Trace-Bestrafung als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_007_project-venice",
+            "title": "Project Venice",
+            "role": "Trägt Overadvance-Wert als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_006_please-dont-choke-anyone",
+            "title": "Please Don't Choke Anyone",
+            "role": "Trägt Aktionstempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Schadensdruck noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Brain Wash und Lesley Major aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_rent_to_own_war_engine",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:75627d4c",
+      "sourceAnalysisHash": "deck-analysis:db5d89e9",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.tag_trace_punish",
+          "corp.fast_advance",
+          "corp.economy_rez_reserve"
+        ],
+        "secondaryStrategyIds": [
+          "corp.damage_kill",
+          "corp.rush_score",
+          "corp.remote_scoring"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Rent to Own War Engine setzt vor allem auf Tag- und Trace-Bestrafung, beschleunigtes Scoring und eine belastbare Rez- und Trace-Reserve. Ergänzend nutzt das Deck konkreten Flatline-Druck, frühe Rush-Scorefenster und eine geschützte Remote-Scorelinie.",
+        "deckIdea": "Rent to Own War Engine verbindet Tag- und Trace-Bestrafung, beschleunigtes Scoring und eine belastbare Rez- und Trace-Reserve. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen. Gib Credits nur aus, wenn danach noch genug Reserve für relevantes ICE, Traces oder den Scorezug bleibt.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Fetch 4.0.1 und Project Consultants, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen. Gib Credits nur aus, wenn danach noch genug Reserve für relevantes ICE, Traces oder den Scorezug bleibt.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_243_fetch-4-0-1",
+            "title": "Fetch 4.0.1",
+            "role": "Trägt Tag-/Trace-Bestrafung als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_300_project-consultants",
+            "title": "Project Consultants",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_352_chester-mix",
+            "title": "Chester Mix",
+            "role": "Trägt Rez-Reserve als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_254_liche",
+            "title": "Liche",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_313_city-surveillance",
+            "title": "City Surveillance",
+            "role": "Trägt Tag-/Trace-Bestrafung als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Tag-/Trace-Bestrafung noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Fetch 4.0.1 und Project Consultants aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_shadoe_tag_bag",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:b87e535a",
+      "sourceAnalysisHash": "deck-analysis:2c9cd38e",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.tag_trace_punish",
+          "corp.damage_kill",
+          "corp.remote_scoring"
+        ],
+        "secondaryStrategyIds": [
+          "corp.action_tempo",
+          "corp.fast_advance",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Shadoe Tag & Bag setzt vor allem auf Tag- und Trace-Bestrafung, konkreten Flatline-Druck und eine geschützte Remote-Scorelinie. Ergänzend nutzt das Deck zusätzliches Aktionstempo, beschleunigtes Scoring und frühe Rush-Scorefenster.",
+        "deckIdea": "Shadoe Tag & Bag verbindet Tag- und Trace-Bestrafung, konkreten Flatline-Druck und eine geschützte Remote-Scorelinie. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Netwatch Operations Office und Punitive Counterstrike, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_207_netwatch-operations-office",
+            "title": "Netwatch Operations Office",
+            "role": "Trägt Tag-/Trace-Bestrafung als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_301_punitive-counterstrike",
+            "title": "Punitive Counterstrike",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_197_data-fort-reclamation",
+            "title": "Data Fort Reclamation",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_192_corporate-boon",
+            "title": "Corporate Boon",
+            "role": "Trägt Aktionstempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_297_overtime-incentives",
+            "title": "Overtime Incentives",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Tag-/Trace-Bestrafung noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Netwatch Operations Office und Punitive Counterstrike aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_siren_fortress",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:887219db",
+      "sourceAnalysisHash": "deck-analysis:d0c724b2",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.asset_economy",
+          "corp.damage_kill"
+        ],
+        "secondaryStrategyIds": [
+          "corp.deck_recycle_engine",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Siren Fortress setzt vor allem auf eine geschützte Remote-Scorelinie, eine verteilte Asset-Economy und konkreten Flatline-Druck. Ergänzend nutzt das Deck wiederholbares Deck-Recycling und frühe Rush-Scorefenster.",
+        "deckIdea": "Siren Fortress verbindet eine geschützte Remote-Scorelinie, eine verteilte Asset-Economy und konkreten Flatline-Druck. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Entwickle Economy-Assets so, dass der Runner zwischen Tempoverlust und deinem wachsenden Einkommen wählen muss. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Olivia Salazar und BBS Whispering Campaign, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Entwickle Economy-Assets so, dass der Runner zwischen Tempoverlust und deinem wachsenden Einkommen wählen muss. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_363_olivia-salazar",
+            "title": "Olivia Salazar",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_309_bbs-whispering-campaign",
+            "title": "BBS Whispering Campaign",
+            "role": "Trägt Asset-Economy als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_228_cinderella",
+            "title": "Cinderella",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_188_ai-chief-financial-officer",
+            "title": "AI Chief Financial Officer",
+            "role": "Trägt Deck-Recycling als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
+            "title": "Rio de Janeiro City Grid",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Remote Scoring noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Olivia Salazar und BBS Whispering Campaign aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_syds_ice_pfandhaus_2026_07_09",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:37313c78",
+      "sourceAnalysisHash": "deck-analysis:16c02794",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.economy_rez_reserve",
+          "corp.asset_economy"
+        ],
+        "secondaryStrategyIds": [
+          "corp.rush_score",
+          "corp.damage_kill"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Syds ICE-Pfandhaus setzt vor allem auf eine geschützte Remote-Scorelinie, eine belastbare Rez- und Trace-Reserve und eine verteilte Asset-Economy. Ergänzend nutzt das Deck frühe Rush-Scorefenster und konkreten Flatline-Druck.",
+        "deckIdea": "Syds ICE-Pfandhaus verbindet eine geschützte Remote-Scorelinie, eine belastbare Rez- und Trace-Reserve und eine verteilte Asset-Economy. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Gib Credits nur aus, wenn danach noch genug Reserve für relevantes ICE, Traces oder den Scorezug bleibt. Entwickle Economy-Assets so, dass der Runner zwischen Tempoverlust und deinem wachsenden Einkommen wählen muss.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Data Fort Reclamation und Executive Boot Camp, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Gib Credits nur aus, wenn danach noch genug Reserve für relevantes ICE, Traces oder den Scorezug bleibt. Entwickle Economy-Assets so, dass der Runner zwischen Tempoverlust und deinem wachsenden Einkommen wählen muss.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_197_data-fort-reclamation",
+            "title": "Data Fort Reclamation",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_058_executive-boot-camp",
+            "title": "Executive Boot Camp",
+            "role": "Trägt Rez-Reserve als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_076_syd-meyer-superstores",
+            "title": "Syd Meyer Superstores",
+            "role": "Trägt Asset-Economy als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_012_bug-zapper",
+            "title": "Bug Zapper",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_358_dr-dreff",
+            "title": "Dr. Dreff",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Remote Scoring noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Data Fort Reclamation und Executive Boot Camp aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_mp1ddh7c",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:74ae2903",
+      "sourceAnalysisHash": "deck-analysis:89e01d0c",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.tag_trace_punish",
+          "corp.remote_scoring",
+          "corp.fast_advance"
+        ],
+        "secondaryStrategyIds": [
+          "corp.damage_kill",
+          "corp.ambush_bluff",
+          "corp.rush_score",
+          "corp.asset_economy"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "The Korp Master setzt vor allem auf Tag- und Trace-Bestrafung, eine geschützte Remote-Scorelinie und beschleunigtes Scoring. Ergänzend nutzt das Deck konkreten Flatline-Druck, unsichere Remotes mit Ambush-Druck, frühe Rush-Scorefenster und eine verteilte Asset-Economy.",
+        "deckIdea": "The Korp Master verbindet Tag- und Trace-Bestrafung, eine geschützte Remote-Scorelinie und beschleunigtes Scoring. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Netwatch Operations Office und Priority Requisition, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_207_netwatch-operations-office",
+            "title": "Netwatch Operations Office",
+            "role": "Trägt Tag-/Trace-Bestrafung als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_212_priority-requisition",
+            "title": "Priority Requisition",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_201_executive-extraction",
+            "title": "Executive Extraction",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_208_on-call-solo-team",
+            "title": "On-Call Solo Team",
+            "role": "Trägt Schadensdruck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_323_experimental-ai",
+            "title": "Experimental AI",
+            "role": "Trägt Ambush und Bluff als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Tag-/Trace-Bestrafung noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Netwatch Operations Office und Priority Requisition aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_tycho_ice_stack",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:035ca74a",
+      "sourceAnalysisHash": "deck-analysis:a390211d",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring",
+          "corp.asset_economy"
+        ],
+        "secondaryStrategyIds": [
+          "corp.fast_advance",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Tycho Ice Stack setzt vor allem auf taxierende ICE-Staffeln, eine geschützte Remote-Scorelinie und eine verteilte Asset-Economy. Ergänzend nutzt das Deck beschleunigtes Scoring und frühe Rush-Scorefenster.",
+        "deckIdea": "Tycho Ice Stack verbindet taxierende ICE-Staffeln, eine geschützte Remote-Scorelinie und eine verteilte Asset-Economy. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Entwickle Economy-Assets so, dass der Runner zwischen Tempoverlust und deinem wachsenden Einkommen wählen muss.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Crystal Wall und Roving Submarine, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Entwickle Economy-Assets so, dass der Runner zwischen Tempoverlust und deinem wachsenden Einkommen wählen muss.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_232_crystal-wall",
+            "title": "Crystal Wall",
+            "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_368_roving-submarine",
+            "title": "Roving Submarine",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_308_acme-savings-and-loan",
+            "title": "ACME Savings and Loan",
+            "role": "Trägt Asset-Economy als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_300_project-consultants",
+            "title": "Project Consultants",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_237_data-wall",
+            "title": "Data Wall",
+            "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob ICE-Tax-Glacier noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Crystal Wall und Roving Submarine aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_mp6g9eku",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:20bd266d",
+      "sourceAnalysisHash": "deck-analysis:5922b1c0",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.rush_score"
+        ],
+        "secondaryStrategyIds": [],
+        "reviewStatus": "observe"
+      },
+      "content": {
+        "summary": "Vom Tablet setzt vor allem auf eine geschützte Remote-Scorelinie und frühe Rush-Scorefenster.",
+        "deckIdea": "Vom Tablet verbindet eine geschützte Remote-Scorelinie und frühe Rush-Scorefenster. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Nutze günstiges frühes ICE, bevor das Runner-Rig vollständig ist, und zwinge eine schnelle Antwort.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Prüfe in der Starthand vor allem Economy, grundlegende Deckfunktion und eine umsetzbare erste Linie.",
+          "midgame": "Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Nutze günstiges frühes ICE, bevor das Runner-Rig vollständig ist, und zwinge eine schnelle Antwort.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [],
+        "noDistinctKeyCardsReason": "Die aktuelle Analyse erkennt keine einzelnen stabilen Strategieanker; die Deckfunktion entsteht aus der Gesamtkombination.",
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Remote Scoring noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Die Analyse erkennt eine Strategie, aber keine einzelnen dominanten Schlüsselkarten; dadurch hängt die Umsetzung stärker von der Gesamthand ab.",
+          "Ein zu früh offengelegter Plan gibt dem Runner Zeit, gezielt die passende Gegenstruktur aufzubauen."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_bit_denial_lock",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:23264db8",
+      "sourceAnalysisHash": "deck-analysis:14bf09d2",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.hq_pressure",
+          "runner.rig_first",
+          "runner.remote_contest"
+        ],
+        "secondaryStrategyIds": [],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Bit-Denial Lock setzt vor allem auf gezielten HQ-Druck, einen verlässlichen Rig-Aufbau und konsequenten Remote Contest.",
+        "deckIdea": "Bit-Denial Lock verbindet gezielten HQ-Druck, einen verlässlichen Rig-Aufbau und konsequenten Remote Contest. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Stelle erst eine belastbare Programmbasis her, bevor du dich auf teure Runs festlegst. Bestreite verdächtige Scoring-Remotes, ohne jeden Köder ungeprüft anzulaufen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Edited Shipping Manifests und Restrictive Net Zoning, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Stelle erst eine belastbare Programmbasis her, bevor du dich auf teure Runs festlegst. Bestreite verdächtige Scoring-Remotes, ohne jeden Köder ungeprüft anzulaufen.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_084_edited-shipping-manifests",
+            "title": "Edited Shipping Manifests",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_173_restrictive-net-zoning",
+            "title": "Restrictive Net Zoning",
+            "role": "Trägt Remote Contest als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_105_priority-wreck",
+            "title": "Priority Wreck",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob HQ-Druck noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Edited Shipping Manifests und Restrictive Net Zoning aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_blink_pressure_rig",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:5c3b8987",
+      "sourceAnalysisHash": "deck-analysis:33225db5",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.run_event_tempo",
+          "runner.search.breaker",
+          "runner.survival_defense"
+        ],
+        "secondaryStrategyIds": [
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Blink Pressure Rig setzt vor allem auf kurze Run-Event-Tempolinien, gezielte Breaker-Suche und Schutz gegen Tags, Traces und Schaden. Ergänzend nutzt das Deck einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "Blink Pressure Rig verbindet kurze Run-Event-Tempolinien, gezielte Breaker-Suche und Schutz gegen Tags, Traces und Schaden. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Halte genügend Handkarten, Credits oder Schutz bereit, damit ein erfolgreicher Run nicht in Bestrafung endet.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf All-Nighter und Temple Microcode Outlet, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Halte genügend Handkarten, Credits oder Schutz bereit, damit ein erfolgreicher Run nicht in Bestrafung endet.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_076_all-nighter",
+            "title": "All-Nighter",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_114_temple-microcode-outlet",
+            "title": "Temple Microcode Outlet",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
+            "title": "Wilson, Weeflerunner Apprentice",
+            "role": "Trägt Überlebensschutz als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_094_inside-job",
+            "title": "Inside Job",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_177_the-short-circuit",
+            "title": "The Short Circuit",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Run-Event-Tempo noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen All-Nighter und Temple Microcode Outlet aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_classic_runner_cybernetics_risk_rig_2026_07_01",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:afcb633a",
+      "sourceAnalysisHash": "deck-analysis:c00ad8b3",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.run_event_tempo",
+          "runner.hq_pressure",
+          "runner.rnd_pressure"
+        ],
+        "secondaryStrategyIds": [
+          "runner.survival_defense",
+          "runner.interface_closeout",
+          "runner.remote_contest",
+          "runner.search.breaker",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Classic Runner - Cybernetics Risk Rig setzt vor allem auf kurze Run-Event-Tempolinien, gezielten HQ-Druck und wiederholten R&D-Druck. Ergänzend nutzt das Deck Schutz gegen Tags, Traces und Schaden, einen Multiaccess-Abschluss, konsequenten Remote Contest, gezielte Breaker-Suche und einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "Classic Runner - Cybernetics Risk Rig verbindet kurze Run-Event-Tempolinien, gezielten HQ-Druck und wiederholten R&D-Druck. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Gypsy™ Schedule Analyzer und Schematics Search Engine, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+            "title": "Gypsy™ Schedule Analyzer",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_032_schematics-search-engine",
+            "title": "Schematics Search Engine",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_040_meat-upgrade",
+            "title": "Meat Upgrade",
+            "role": "Trägt Überlebensschutz als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_039_library-search",
+            "title": "Library Search",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_043_running-interference",
+            "title": "Running Interference",
+            "role": "Trägt Remote Contest als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Run-Event-Tempo noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Gypsy™ Schedule Analyzer und Schematics Search Engine aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_classic_runner_prep_economy_pressure_2026_07_01",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:34b312ba",
+      "sourceAnalysisHash": "deck-analysis:1aef2dad",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.hq_pressure",
+          "runner.run_event_tempo",
+          "runner.rnd_pressure"
+        ],
+        "secondaryStrategyIds": [
+          "runner.interface_closeout",
+          "runner.survival_defense",
+          "runner.remote_contest",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Classic Runner - Prep Economy Pressure setzt vor allem auf gezielten HQ-Druck, kurze Run-Event-Tempolinien und wiederholten R&D-Druck. Ergänzend nutzt das Deck einen Multiaccess-Abschluss, Schutz gegen Tags, Traces und Schaden, konsequenten Remote Contest und einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "Classic Runner - Prep Economy Pressure verbindet gezielten HQ-Druck, kurze Run-Event-Tempolinien und wiederholten R&D-Druck. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Schematics Search Engine und Gypsy™ Schedule Analyzer, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_classic_032_schematics-search-engine",
+            "title": "Schematics Search Engine",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+            "title": "Gypsy™ Schedule Analyzer",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_039_library-search",
+            "title": "Library Search",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_040_meat-upgrade",
+            "title": "Meat Upgrade",
+            "role": "Trägt Überlebensschutz als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_043_running-interference",
+            "title": "Running Interference",
+            "role": "Trägt Remote Contest als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob HQ-Druck noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Schematics Search Engine und Gypsy™ Schedule Analyzer aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_deep_market_engine",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:82157891",
+      "sourceAnalysisHash": "deck-analysis:d502bcf3",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.search.breaker",
+          "runner.rig_first"
+        ],
+        "secondaryStrategyIds": [],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Deep Market Engine setzt vor allem auf gezielte Breaker-Suche und einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "Deep Market Engine verbindet gezielte Breaker-Suche und einen verlässlichen Rig-Aufbau. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Stelle erst eine belastbare Programmbasis her, bevor du dich auf teure Runs festlegst.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Self-Modifying Code und Forgotten Backup Chip, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Stelle erst eine belastbare Programmbasis her, bevor du dich auf teure Runs festlegst.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_059_self-modifying-code",
+            "title": "Self-Modifying Code",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_087_forgotten-backup-chip",
+            "title": "Forgotten Backup Chip",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Breaker-Suche noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Self-Modifying Code und Forgotten Backup Chip aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Zu frühe, teure Runs können Economy und Rig gleichzeitig zurückwerfen."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_ghost_circuit",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:458584a6",
+      "sourceAnalysisHash": "deck-analysis:bb97fc4f",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [],
+        "secondaryStrategyIds": [],
+        "reviewStatus": "observe"
+      },
+      "content": {
+        "summary": "Ghost Circuit ist ein flexibles Deck ohne derzeit eindeutig erkannte Primärstrategie.",
+        "deckIdea": "Ghost Circuit besitzt derzeit keine eindeutig abgeleitete Primärstrategie. Spiele es als flexibles Erkundungsdeck, beobachte die gezogenen Komponenten und lege die Druckrichtung erst nach dem Aufbau fest.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Prüfe in der Starthand vor allem Economy, grundlegende Deckfunktion und eine umsetzbare erste Linie.",
+          "midgame": "Lies Board und Hand neu, bevor du dich auf eine Druck- oder Scoringlinie festlegst.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [],
+        "noDistinctKeyCardsReason": "Die aktuelle Analyse erkennt keine einzelnen stabilen Strategieanker; die Deckfunktion entsteht aus der Gesamtkombination.",
+        "pilotingTips": [
+          "Lege dich nicht zu früh fest; nutze die ersten Züge, um die tatsächlich verfügbare Linie zu erkennen.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Die aktuelle Deckanalyse erkennt keine belastbare Primärlinie. Das macht Prioritäten und Mulliganentscheidungen weniger eindeutig.",
+          "Beobachte in Playtests besonders tote Hände, fehlende Breaker-Coverage und Karten, die selten in eine Folgeaktion umgewandelt werden."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_ice_destruction_runner",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:3bf13a4c",
+      "sourceAnalysisHash": "deck-analysis:ab35b1eb",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.run_event_tempo",
+          "runner.survival_defense",
+          "runner.hq_pressure"
+        ],
+        "secondaryStrategyIds": [
+          "runner.rig_first",
+          "runner.remote_contest"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Ice Destruction Runner setzt vor allem auf kurze Run-Event-Tempolinien, Schutz gegen Tags, Traces und Schaden und gezielten HQ-Druck. Ergänzend nutzt das Deck einen verlässlichen Rig-Aufbau und konsequenten Remote Contest.",
+        "deckIdea": "Ice Destruction Runner verbindet kurze Run-Event-Tempolinien, Schutz gegen Tags, Traces und Schaden und gezielten HQ-Druck. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Halte genügend Handkarten, Credits oder Schutz bereit, damit ein erfolgreicher Run nicht in Bestrafung endet. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Inside Job und Wilson, Weeflerunner Apprentice, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Halte genügend Handkarten, Credits oder Schutz bereit, damit ein erfolgreicher Run nicht in Bestrafung endet. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_094_inside-job",
+            "title": "Inside Job",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
+            "title": "Wilson, Weeflerunner Apprentice",
+            "role": "Trägt Überlebensschutz als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_062_shredder-uplink-protocol",
+            "title": "Shredder Uplink Protocol",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_173_restrictive-net-zoning",
+            "title": "Restrictive Net Zoning",
+            "role": "Trägt Remote Contest als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_111_social-engineering",
+            "title": "Social Engineering",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Run-Event-Tempo noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Inside Job und Wilson, Weeflerunner Apprentice aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_inside_forgery_loop",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:618f5760",
+      "sourceAnalysisHash": "deck-analysis:74fff054",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.run_event_tempo",
+          "runner.rig_first"
+        ],
+        "secondaryStrategyIds": [],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Inside Forgery Loop setzt vor allem auf kurze Run-Event-Tempolinien und einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "Inside Forgery Loop verbindet kurze Run-Event-Tempolinien und einen verlässlichen Rig-Aufbau. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Stelle erst eine belastbare Programmbasis her, bevor du dich auf teure Runs festlegst.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Inside Job, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Stelle erst eine belastbare Programmbasis her, bevor du dich auf teure Runs festlegst.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_094_inside-job",
+            "title": "Inside Job",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Run-Event-Tempo noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Inside Job aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Zu frühe, teure Runs können Economy und Rig gleichzeitig zurückwerfen."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_adb10896",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:d8fb54e8",
+      "sourceAnalysisHash": "deck-analysis:4ba9aa96",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.run_event_tempo",
+          "runner.rnd_pressure",
+          "runner.hq_pressure"
+        ],
+        "secondaryStrategyIds": [
+          "runner.interface_closeout",
+          "runner.search.breaker",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "King of the Road setzt vor allem auf kurze Run-Event-Tempolinien, wiederholten R&D-Druck und gezielten HQ-Druck. Ergänzend nutzt das Deck einen Multiaccess-Abschluss, gezielte Breaker-Suche und einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "King of the Road verbindet kurze Run-Event-Tempolinien, wiederholten R&D-Druck und gezielten HQ-Druck. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf All-Nighter und Custodial Position, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_076_all-nighter",
+            "title": "All-Nighter",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_081_custodial-position",
+            "title": "Custodial Position",
+            "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_084_edited-shipping-manifests",
+            "title": "Edited Shipping Manifests",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_114_temple-microcode-outlet",
+            "title": "Temple Microcode Outlet",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_085_executive-wiretaps",
+            "title": "Executive Wiretaps",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Run-Event-Tempo noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen All-Nighter und Custodial Position aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:99165f80",
+      "sourceAnalysisHash": "deck-analysis:da809283",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.search.breaker",
+          "runner.run_event_tempo",
+          "runner.rig_first"
+        ],
+        "secondaryStrategyIds": [],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Krashkurs: Clown-Kreditmaschine setzt vor allem auf gezielte Breaker-Suche, kurze Run-Event-Tempolinien und einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "Krashkurs: Clown-Kreditmaschine verbindet gezielte Breaker-Suche, kurze Run-Event-Tempolinien und einen verlässlichen Rig-Aufbau. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Stelle erst eine belastbare Programmbasis her, bevor du dich auf teure Runs festlegst.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Temple Microcode Outlet und Disgruntled Ice Technician, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Stelle erst eine belastbare Programmbasis her, bevor du dich auf teure Runs festlegst.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_114_temple-microcode-outlet",
+            "title": "Temple Microcode Outlet",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_106_disgruntled-ice-technician",
+            "title": "Disgruntled Ice Technician",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_177_the-short-circuit",
+            "title": "The Short Circuit",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Breaker-Suche noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Temple Microcode Outlet und Disgruntled Ice Technician aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_lucidrine_shell_traders",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:7214803a",
+      "sourceAnalysisHash": "deck-analysis:787b3a27",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.run_event_tempo",
+          "runner.rnd_pressure",
+          "runner.interface_closeout"
+        ],
+        "secondaryStrategyIds": [
+          "runner.survival_defense",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Lucidrine Shell Traders setzt vor allem auf kurze Run-Event-Tempolinien, wiederholten R&D-Druck und einen Multiaccess-Abschluss. Ergänzend nutzt das Deck Schutz gegen Tags, Traces und Schaden und einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "Lucidrine Shell Traders verbindet kurze Run-Event-Tempolinien, wiederholten R&D-Druck und einen Multiaccess-Abschluss. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Lucidrine™ Booster Drug und R&D Interface, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_098_lucidrine-booster-drug",
+            "title": "Lucidrine™ Booster Drug",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_139_r-and-d-interface",
+            "title": "R&D Interface",
+            "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_078_arasaka-owns-you",
+            "title": "Arasaka Owns You",
+            "role": "Trägt Überlebensschutz als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_171_preying-mantis",
+            "title": "Preying Mantis",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Run-Event-Tempo noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Lucidrine™ Booster Drug und R&D Interface aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_mit_ansage_der_perfekte_coup_2026_07_09",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:50f16c85",
+      "sourceAnalysisHash": "deck-analysis:eae9469f",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.interface_closeout",
+          "runner.rnd_pressure",
+          "runner.run_event_tempo"
+        ],
+        "secondaryStrategyIds": [
+          "runner.hq_pressure",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Mit Ansage: Der perfekte Coup setzt vor allem auf einen Multiaccess-Abschluss, wiederholten R&D-Druck und kurze Run-Event-Tempolinien. Ergänzend nutzt das Deck gezielten HQ-Druck und einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "Mit Ansage: Der perfekte Coup verbindet einen Multiaccess-Abschluss, wiederholten R&D-Druck und kurze Run-Event-Tempolinien. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf All-Hands und Gypsy™ Schedule Analyzer, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_proteus_101_all-hands",
+            "title": "All-Hands",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+            "title": "Gypsy™ Schedule Analyzer",
+            "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_119_promises-promises",
+            "title": "Promises, Promises",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_122_rush-hour",
+            "title": "Rush Hour",
+            "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_142_hq-mole",
+            "title": "HQ Mole",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Interface-Abschluss noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen All-Hands und Gypsy™ Schedule Analyzer aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_proteus_runner_breaker_lab_2026_05_25",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:3c6d47c9",
+      "sourceAnalysisHash": "deck-analysis:18dbb334",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.interface_closeout",
+          "runner.run_event_tempo",
+          "runner.hq_pressure"
+        ],
+        "secondaryStrategyIds": [
+          "runner.rnd_pressure",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Proteus Runner - Breaker Lab & Virus Pressure setzt vor allem auf einen Multiaccess-Abschluss, kurze Run-Event-Tempolinien und gezielten HQ-Druck. Ergänzend nutzt das Deck wiederholten R&D-Druck und einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "Proteus Runner - Breaker Lab & Virus Pressure verbindet einen Multiaccess-Abschluss, kurze Run-Event-Tempolinien und gezielten HQ-Druck. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Highlighter und Disintegrator, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_proteus_090_highlighter",
+            "title": "Highlighter",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_085_disintegrator",
+            "title": "Disintegrator",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_084_crumble",
+            "title": "Crumble",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_089_garbage-in",
+            "title": "Garbage In",
+            "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_101_all-hands",
+            "title": "All-Hands",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Interface-Abschluss noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Highlighter und Disintegrator aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_proteus_runner_hidden_sabotage_2026_05_25",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:2d97ff8d",
+      "sourceAnalysisHash": "deck-analysis:5d2db97f",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.interface_closeout",
+          "runner.hq_pressure",
+          "runner.run_event_tempo"
+        ],
+        "secondaryStrategyIds": [
+          "runner.rnd_pressure",
+          "runner.remote_trash",
+          "runner.remote_contest",
+          "runner.search.breaker",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Proteus Runner - Hidden Backdoor Sabotage setzt vor allem auf einen Multiaccess-Abschluss, gezielten HQ-Druck und kurze Run-Event-Tempolinien. Ergänzend nutzt das Deck wiederholten R&D-Druck, wirtschaftlichen Remote-Trash-Druck, konsequenten Remote Contest, gezielte Breaker-Suche und einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "Proteus Runner - Hidden Backdoor Sabotage verbindet einen Multiaccess-Abschluss, gezielten HQ-Druck und kurze Run-Event-Tempolinien. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Highlighter und Crumble, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_proteus_090_highlighter",
+            "title": "Highlighter",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_084_crumble",
+            "title": "Crumble",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_104_decoy-signal",
+            "title": "Decoy Signal",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_089_garbage-in",
+            "title": "Garbage In",
+            "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_137_death-from-above",
+            "title": "Death from Above",
+            "role": "Trägt Remote-Trash-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Interface-Abschluss noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Highlighter und Crumble aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_rnd_interface_dig",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:be046044",
+      "sourceAnalysisHash": "deck-analysis:75c9ea1a",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.rnd_pressure",
+          "runner.search.breaker",
+          "runner.interface_closeout"
+        ],
+        "secondaryStrategyIds": [
+          "runner.run_event_tempo",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "R&D Interface Dig setzt vor allem auf wiederholten R&D-Druck, gezielte Breaker-Suche und einen Multiaccess-Abschluss. Ergänzend nutzt das Deck kurze Run-Event-Tempolinien und einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "R&D Interface Dig verbindet wiederholten R&D-Druck, gezielte Breaker-Suche und einen Multiaccess-Abschluss. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf R&D-Protocol Files und Self-Modifying Code, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_050_r-and-d-protocol-files",
+            "title": "R&D-Protocol Files",
+            "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_059_self-modifying-code",
+            "title": "Self-Modifying Code",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_139_r-and-d-interface",
+            "title": "R&D Interface",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_094_inside-job",
+            "title": "Inside Job",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_106_private-ldl-access",
+            "title": "Private LDL Access",
+            "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob R&D-Druck noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen R&D-Protocol Files und Self-Modifying Code aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_redline_riot",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:30933717",
+      "sourceAnalysisHash": "deck-analysis:e5edcf12",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.interface_closeout",
+          "runner.run_event_tempo",
+          "runner.hq_pressure"
+        ],
+        "secondaryStrategyIds": [
+          "runner.rnd_pressure",
+          "runner.rig_first",
+          "runner.search.breaker"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Redline Riot setzt vor allem auf einen Multiaccess-Abschluss, kurze Run-Event-Tempolinien und gezielten HQ-Druck. Ergänzend nutzt das Deck wiederholten R&D-Druck, einen verlässlichen Rig-Aufbau und gezielte Breaker-Suche.",
+        "deckIdea": "Redline Riot verbindet einen Multiaccess-Abschluss, kurze Run-Event-Tempolinien und gezielten HQ-Druck. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Custodial Position und All-Nighter, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_081_custodial-position",
+            "title": "Custodial Position",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_076_all-nighter",
+            "title": "All-Nighter",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_085_executive-wiretaps",
+            "title": "Executive Wiretaps",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_114_temple-microcode-outlet",
+            "title": "Temple Microcode Outlet",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_107_romp-through-hq",
+            "title": "Romp through HQ",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Interface-Abschluss noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Custodial Position und All-Nighter aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_rent_i_con_shellspiel_2026_07_17",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:0697af2f",
+      "sourceAnalysisHash": "deck-analysis:f1fac74e",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.search.breaker",
+          "runner.run_event_tempo",
+          "runner.rnd_pressure"
+        ],
+        "secondaryStrategyIds": [
+          "runner.rig_first",
+          "runner.remote_contest",
+          "runner.interface_closeout"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Rent-I-Con: Das Shellspiel setzt vor allem auf gezielte Breaker-Suche, kurze Run-Event-Tempolinien und wiederholten R&D-Druck. Ergänzend nutzt das Deck einen verlässlichen Rig-Aufbau, konsequenten Remote Contest und einen Multiaccess-Abschluss.",
+        "deckIdea": "Rent-I-Con: Das Shellspiel verbindet gezielte Breaker-Suche, kurze Run-Event-Tempolinien und wiederholten R&D-Druck. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Airport Locker und Running Interference, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_proteus_128_airport-locker",
+            "title": "Airport Locker",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_classic_043_running-interference",
+            "title": "Running Interference",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_139_r-and-d-interface",
+            "title": "R&D Interface",
+            "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_087_forgotten-backup-chip",
+            "title": "Forgotten Backup Chip",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_106_disgruntled-ice-technician",
+            "title": "Disgruntled Ice Technician",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Breaker-Suche noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Airport Locker und Running Interference aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_mp48400s",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:d01806fd",
+      "sourceAnalysisHash": "deck-analysis:fb9ee060",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.hq_pressure",
+          "runner.interface_closeout",
+          "runner.search.breaker"
+        ],
+        "secondaryStrategyIds": [
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Run til End setzt vor allem auf gezielten HQ-Druck, einen Multiaccess-Abschluss und gezielte Breaker-Suche. Ergänzend nutzt das Deck einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "Run til End verbindet gezielten HQ-Druck, einen Multiaccess-Abschluss und gezielte Breaker-Suche. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Expert Schedule Analyzer und HQ Interface, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_024_expert-schedule-analyzer",
+            "title": "Expert Schedule Analyzer",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_129_hq-interface",
+            "title": "HQ Interface",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_114_temple-microcode-outlet",
+            "title": "Temple Microcode Outlet",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob HQ-Druck noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Expert Schedule Analyzer und HQ Interface aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_skivviss_mill_pressure",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:5e6fbf64",
+      "sourceAnalysisHash": "deck-analysis:b742c015",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.hq_pressure",
+          "runner.search.breaker",
+          "runner.survival_defense"
+        ],
+        "secondaryStrategyIds": [
+          "runner.rig_first",
+          "runner.run_event_tempo",
+          "runner.interface_closeout"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Skivviss Mill Pressure setzt vor allem auf gezielten HQ-Druck, gezielte Breaker-Suche und Schutz gegen Tags, Traces und Schaden. Ergänzend nutzt das Deck einen verlässlichen Rig-Aufbau, kurze Run-Event-Tempolinien und einen Multiaccess-Abschluss.",
+        "deckIdea": "Skivviss Mill Pressure verbindet gezielten HQ-Druck, gezielte Breaker-Suche und Schutz gegen Tags, Traces und Schaden. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Halte genügend Handkarten, Credits oder Schutz bereit, damit ein erfolgreicher Run nicht in Bestrafung endet.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Priority Wreck und If You Want It Done Right..., ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen. Halte genügend Handkarten, Credits oder Schutz bereit, damit ein erfolgreicher Run nicht in Bestrafung endet.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_105_priority-wreck",
+            "title": "Priority Wreck",
+            "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_093_if-you-want-it-done-right",
+            "title": "If You Want It Done Right...",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_023_evil-twin",
+            "title": "Evil Twin",
+            "role": "Trägt Überlebensschutz als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_098_lucidrine-booster-drug",
+            "title": "Lucidrine™ Booster Drug",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_129_hq-interface",
+            "title": "HQ Interface",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob HQ-Druck noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Priority Wreck und If You Want It Done Right... aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_stealth_interface_starter",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:a657c8a8",
+      "sourceAnalysisHash": "deck-analysis:55ed24eb",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.interface_closeout",
+          "runner.hq_pressure",
+          "runner.search.breaker"
+        ],
+        "secondaryStrategyIds": [
+          "runner.rnd_pressure",
+          "runner.run_event_tempo",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Stealth Interface Starter setzt vor allem auf einen Multiaccess-Abschluss, gezielten HQ-Druck und gezielte Breaker-Suche. Ergänzend nutzt das Deck wiederholten R&D-Druck, kurze Run-Event-Tempolinien und einen verlässlichen Rig-Aufbau.",
+        "deckIdea": "Stealth Interface Starter verbindet einen Multiaccess-Abschluss, gezielten HQ-Druck und gezielte Breaker-Suche. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Executive Wiretaps und If You Want It Done Right..., ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet. Nutze Suche, Draw und Rückholung, um fehlende ICE-Coverage gezielt zu schließen.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_085_executive-wiretaps",
+            "title": "Executive Wiretaps",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_093_if-you-want-it-done-right",
+            "title": "If You Want It Done Right...",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_139_r-and-d-interface",
+            "title": "R&D Interface",
+            "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_177_the-short-circuit",
+            "title": "The Short Circuit",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_129_hq-interface",
+            "title": "HQ Interface",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Interface-Abschluss noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Executive Wiretaps und If You Want It Done Right... aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_purge_window",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:6b7eca0c",
+      "sourceAnalysisHash": "deck-analysis:b0357dc0",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.rnd_pressure",
+          "runner.interface_closeout",
+          "runner.run_event_tempo"
+        ],
+        "secondaryStrategyIds": [
+          "runner.rig_first",
+          "runner.search.breaker"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Purge Window setzt vor allem auf wiederholten R&D-Druck, einen Multiaccess-Abschluss und kurze Run-Event-Tempolinien. Ergänzend nutzt das Deck einen verlässlichen Rig-Aufbau und gezielte Breaker-Suche.",
+        "deckIdea": "Purge Window verbindet wiederholten R&D-Druck, einen Multiaccess-Abschluss und kurze Run-Event-Tempolinien. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Garbage In und Highlighter, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug.",
+          "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_proteus_089_garbage-in",
+            "title": "Garbage In",
+            "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_proteus_090_highlighter",
+            "title": "Highlighter",
+            "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_094_inside-job",
+            "title": "Inside Job",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_177_the-short-circuit",
+            "title": "The Short Circuit",
+            "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_111_social-engineering",
+            "title": "Social Engineering",
+            "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob R&D-Druck noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+        ],
+        "weaknesses": [
+          "Fallen Garbage In und Highlighter aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_universal_fast_advance",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:df5fee5f",
+      "sourceAnalysisHash": "deck-analysis:92cee394",
+      "reviewedAt": "2026-08-02",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.fast_advance",
+          "corp.remote_scoring",
+          "corp.rush_score"
+        ],
+        "secondaryStrategyIds": [],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Universal Fast Advance setzt vor allem auf beschleunigtes Scoring, eine geschützte Remote-Scorelinie und frühe Rush-Scorefenster.",
+        "deckIdea": "Universal Fast Advance verbindet beschleunigtes Scoring, eine geschützte Remote-Scorelinie und frühe Rush-Scorefenster. Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Nutze günstiges frühes ICE, bevor das Runner-Rig vollständig ist, und zwinge eine schnelle Antwort.",
+        "gamePlan": {
+          "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Management Shake-Up und Chicago Branch, ohne dafür eine unausgewogene Starthand zu behalten.",
+          "midgame": "Bewahre Advance-Tempo für ein konkretes Scorefenster auf, statt es ohne Abschlusslinie zu verteilen. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Nutze günstiges frühes ICE, bevor das Runner-Rig vollständig ist, und zwinge eine schnelle Antwort.",
+          "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_292_management-shake-up",
+            "title": "Management Shake-Up",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_312_chicago-branch",
+            "title": "Chicago Branch",
+            "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_297_overtime-incentives",
+            "title": "Overtime Incentives",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          },
+          {
+            "cardId": "onr_v1_304_systematic-layoffs",
+            "title": "Systematic Layoffs",
+            "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+          }
+        ],
+        "pilotingTips": [
+          "Prüfe vor jedem Zug, ob Fast Advance noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
+          "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
+        ],
+        "weaknesses": [
+          "Fallen Management Shake-Up und Chicago Branch aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+          "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    }
+  ]
 }
