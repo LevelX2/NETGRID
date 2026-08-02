@@ -1,6 +1,6 @@
 # Disgruntled-Runfenster: Planmodulabdeckung – sequenzieller Paketprozess
 
-Status: **aktiv – P0 abgeschlossen**
+Status: **aktiv – P1 abgeschlossen**
 Datum: 2026-08-02
 Primärer Agent: `card-enablement-ai-knowledge-agent`
 Worktree: `C:\Projekte\NETGRID_AI_DISGRUNTLED_RUN_WINDOW_COVERAGE`
@@ -121,6 +121,11 @@ P0 Prozessvertrag
 | P3 | Regressionen | Positivfall, bewusster Verzicht, unvollständige Bindung und Ownership sind grün | `test(ai): verify disgruntled run-window ownership` |
 | P4 | Breite Verifikation | fokussierte Tests, AI-Typecheck, aktive AI-Gates, drei AI-Shards und Rent 02/04 grün | `test(ai): verify disgruntled run-window coverage fix` |
 | P5 | Abschluss | Review und Wissensstand aktuell, `main` integriert, Worktree und Branch entfernt | `docs(ai): close disgruntled run-window coverage process` |
+
+Aktueller Paketstand: P0 und P1 sind abgeschlossen. Die beiden Originalseeds
+reproduzieren den Fehler deterministisch; der spielgleiche Checkpoint belegt
+als fehlende Stufe die Quellenkartendefinition der Engine-LegalAction. P2 ist
+als nächstes Paket freigegeben.
 
 ## Paketdetails
 
