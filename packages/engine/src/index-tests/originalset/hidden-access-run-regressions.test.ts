@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -238,7 +234,10 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       ambushDefinitionId: "onr_v1_348_virus-test-site",
       damageAmount: 1,
     });
-    const replay = replayEvents(initial, remoteState.eventLog.slice(replayStart));
+    const replay = replayEvents(
+      initial,
+      remoteState.eventLog.slice(replayStart),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(remoteState));
 
@@ -262,8 +261,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       rezzedRemoteState,
       "runner",
       (action) =>
-        action.type === "start_run" &&
-        action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     rezzedRemoteState = apply(
       rezzedRemoteState,
@@ -278,8 +276,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
         sourceDefinition(rezzedRemoteState, action) ===
           "onr_v1_348_virus-test-site",
     );
-    rezzedRemoteState =
-      passRootRezWindowBeforeAccessIfOpen(rezzedRemoteState);
+    rezzedRemoteState = passRootRezWindowBeforeAccessIfOpen(rezzedRemoteState);
     rezzedRemoteState = apply(
       rezzedRemoteState,
       "runner",
@@ -304,9 +301,14 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     rdState = apply(
       rdState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
-    rdState = apply(rdState, "runner", (action) => action.type === "access_card");
+    rdState = apply(
+      rdState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     expect(rdState.run?.accessedCardId).toBe(rdVirusTestSiteId);
     expect(rdState.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_348_virus-test-site",
@@ -346,7 +348,9 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
   });
 
   it("keeps Setup! at two net damage and skips its Archives access", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-setup-archives"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-setup-archives"),
+    );
     state.runner.credits = 10;
     const setupId = moveCorpCardToArchives(state, "onr_v1_340_setup", false);
     keepOnlyCorpArchivesCards(state, [setupId]);
@@ -388,9 +392,14 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     rdState = apply(
       rdState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
-    rdState = apply(rdState, "runner", (action) => action.type === "access_card");
+    rdState = apply(
+      rdState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     expect(rdState.pendingChoice?.source).toContain("p3_35.access_payment");
     rdState = applyChoice(rdState, "corp", "pay");
 
@@ -536,7 +545,10 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"corp_[a-z0-9_-]+_\d+"/,
     );
-    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
@@ -558,13 +570,15 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
         sourceDefinition(state, action) === "onr_v1_047_pile-driver",
     );
     const pileDriverId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_047_pile-driver",
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_047_pile-driver",
     );
     putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
@@ -652,7 +666,8 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     nonBlackRunState = apply(
       nonBlackRunState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
     const nonBlackRez = mustAction(
       nonBlackRunState,
@@ -671,11 +686,17 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     /"privatePayload"|"cardInstances"|"hq"|"rd"|"grip"|"stack"/;
 
   it("hardens Fortress Respecification and Ice and Data's Guide hidden-zone payloads", () => {
-    let exposeState = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-fortress"));
+    let exposeState = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-fortress"),
+    );
     exposeState.runner.credits = 20;
     moveRunnerCardToGrip(exposeState, "onr_v1_088_fortress-respecification");
     putCorpRootInRemote(exposeState, "simple_upgrade");
-    const firstIceId = putCorpIceOnServer(exposeState, "remote_1", "simple_barrier_ice");
+    const firstIceId = putCorpIceOnServer(
+      exposeState,
+      "remote_1",
+      "simple_barrier_ice",
+    );
     const secondIceId = putCorpIceOnServer(
       exposeState,
       "remote_1",
@@ -744,7 +765,9 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     });
     expect(
       JSON.stringify(exposeState.eventLog.at(-1)?.publicPayload),
-    ).not.toMatch(/simple_barrier_ice|simple_code_gate_ice|Simple Barrier ICE|Simple Code Gate ICE|cardInstances/);
+    ).not.toMatch(
+      /simple_barrier_ice|simple_code_gate_ice|Simple Barrier ICE|Simple Code Gate ICE|cardInstances/,
+    );
     const exposeReplay = replayEvents(
       exposeInitial,
       exposeState.eventLog.slice(exposeReplayStart),
@@ -752,7 +775,9 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     expect(exposeReplay.ok).toBe(true);
     expect(hashState(exposeReplay.state)).toBe(hashState(exposeState));
 
-    let revealState = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-ice-data"));
+    let revealState = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-ice-data"),
+    );
     revealState.runner.credits = 20;
     moveRunnerCardToGrip(
       revealState,
@@ -809,9 +834,9 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     ).not.toMatch(
       /simple_code_gate_ice|Simple Code Gate ICE|"stack"|"rd"|"cardInstances"/,
     );
-    expect(
-      JSON.stringify(getPlayerView(revealState, "runner")),
-    ).not.toContain("simple_code_gate_ice");
+    expect(JSON.stringify(getPlayerView(revealState, "runner"))).not.toContain(
+      "simple_code_gate_ice",
+    );
     const revealReplay = replayEvents(
       revealInitial,
       revealState.eventLog.slice(revealReplayStart),
@@ -819,7 +844,9 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     expect(revealReplay.ok).toBe(true);
     expect(hashState(revealReplay.state)).toBe(hashState(revealState));
 
-    let noIceState = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-ice-data-no-ice"));
+    let noIceState = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-ice-data-no-ice"),
+    );
     noIceState.runner.credits = 20;
     moveRunnerCardToGrip(
       noIceState,
@@ -862,7 +889,11 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       attackedServerId: "hq",
       accessServerOverride: "rd",
     });
-    ldlState = apply(ldlState, "runner", (action) => action.type === "access_card");
+    ldlState = apply(
+      ldlState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     expect(ldlState.corp.hq).toContain(hqHiddenCard);
     expect(ldlState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
@@ -870,12 +901,8 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       cardDefinitionId: "onr_v1_203_hostile-takeover",
     });
     expect(
-      JSON.stringify(
-        ldlState.eventLog.map((event) => event.publicPayload),
-      ),
-    ).not.toMatch(
-      /simple_economy_operation|Simple Economy Operation/,
-    );
+      JSON.stringify(ldlState.eventLog.map((event) => event.publicPayload)),
+    ).not.toMatch(/simple_economy_operation|Simple Economy Operation/);
     const ldlReplay = replayEvents(
       ldlInitial,
       ldlState.eventLog.slice(ldlReplayStart),
@@ -912,7 +939,8 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     hqState = apply(
       hqState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
     expect(hqState.run?.breach?.queue).toHaveLength(3);
     expect(hqState.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -922,9 +950,9 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       installedAccessBonus: 2,
       effectiveAccessCount: 3,
     });
-    expect(
-      JSON.stringify(hqState.eventLog.at(-1)?.publicPayload),
-    ).not.toMatch(/simple_economy_operation|onr_v1_295_night-shift|Hostile Takeover/);
+    expect(JSON.stringify(hqState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /simple_economy_operation|onr_v1_295_night-shift|Hostile Takeover/,
+    );
     const hqReplay = replayEvents(
       hqInitial,
       hqState.eventLog.slice(hqReplayStart),
@@ -956,8 +984,16 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
           "onr_v1_173_restrictive-net-zoning" &&
         action.payload?.selectedServerId === "rd",
     );
-    zoningState = apply(zoningState, "runner", (action) => action.type === "end_turn");
-    zoningState = apply(zoningState, "corp", (action) => action.type === "mandatory_draw");
+    zoningState = apply(
+      zoningState,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    zoningState = apply(
+      zoningState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     zoningState.corp.credits = 20;
     zoningState.corp.clicks = 3;
     moveCorpCardToHq(zoningState, "simple_barrier_ice");
@@ -977,13 +1013,25 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     expect(
       getPlayerView(zoningState, "runner").servers.find(
         (server) => server.id === "rd",
-      )?.counterDisplays,
+      )?.statuses,
     ).toEqual([
       expect.objectContaining({
-        id: "corp_ice_install_cost_modifier_rd",
-        amount: 4,
-        label: "Install +",
-        counterType: "install_cost_modifier",
+        kind: "cost_modifier",
+        costKind: "corp_ice_install",
+        operation: "increase",
+        amount: 2,
+        targetServerId: "rd",
+        sourceTitle: "Restrictive Net Zoning",
+        sourceSide: "runner",
+      }),
+      expect.objectContaining({
+        kind: "cost_modifier",
+        costKind: "corp_ice_install",
+        operation: "increase",
+        amount: 2,
+        targetServerId: "rd",
+        sourceTitle: "Restrictive Net Zoning",
+        sourceSide: "runner",
       }),
     ]);
 
@@ -1083,7 +1131,8 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     nagaState = apply(
       nagaState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     nagaState = apply(
       nagaState,
@@ -1113,9 +1162,9 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       trashedCardType: "program",
       trashedCount: 1,
     });
-    expect(JSON.stringify(nagaState.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      hiddenLeakPattern,
-    );
+    expect(
+      JSON.stringify(nagaState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(hiddenLeakPattern);
     const nagaReplay = replayEvents(
       nagaInitial,
       nagaState.eventLog.slice(nagaReplayStart),
@@ -1127,14 +1176,17 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
   it("keeps Vacuum Link and Pacifica Regional AI deterministic and revalidated", () => {
     let rewound = false;
     let notRewound = false;
-    for (let attempt = 0; attempt < 260 && (!rewound || !notRewound); attempt += 1) {
-      let state = toRunnerTurn(v190CardReleaseGame(`spotcheck-vacuum-${attempt}`));
+    for (
+      let attempt = 0;
+      attempt < 260 && (!rewound || !notRewound);
+      attempt += 1
+    ) {
+      let state = toRunnerTurn(
+        v190CardReleaseGame(`spotcheck-vacuum-${attempt}`),
+      );
       state.runner.credits = 40;
       state.corp.credits = 20;
-      moveRunnerCardToGrip(
-        state,
-        "onr_v1_005_bartmoss-memorial-icebreaker",
-      );
+      moveRunnerCardToGrip(state, "onr_v1_005_bartmoss-memorial-icebreaker");
       state = apply(
         state,
         "runner",
@@ -1154,7 +1206,8 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       state = apply(
         state,
         "runner",
-        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
       );
       state = apply(
         state,
@@ -1179,8 +1232,16 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
           action.type === "break_subroutine" &&
           String(action.payload?.breakerId) === bartmossId,
       );
-      state = apply(state, "runner", (action) => action.type === "continue_run");
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
       state = apply(
         state,
         "corp",
@@ -1190,7 +1251,11 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       );
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
       for (
         let step = 0;
         step < 5 &&
@@ -1270,7 +1335,9 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       (action) => action.actionId === pacificaAction.actionId,
     );
     expect(pacificaState.corp.clicks).toBe(clicksBefore + 1);
-    expect(pacificaState.cardInstances[pacificaId]?.advancementCounters).toBe(0);
+    expect(pacificaState.cardInstances[pacificaId]?.advancementCounters).toBe(
+      0,
+    );
     expect(pacificaState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
       sourceDefinitionId: "onr_v1_334_pacifica-regional-ai",
@@ -1319,14 +1386,21 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     state.corp.maxHandSize = 1;
     state = apply(state, "corp", (action) => action.type === "end_turn");
 
-    const resolve = mustAction(state, "corp", (action) => action.type === "resolve_choice");
+    const resolve = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "resolve_choice",
+    );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
       actionId: resolve.actionId,
       clientKnownStateVersion: state.stateVersion,
       idempotencyKey: "spotcheck-cockroach-wrong-side",
-      selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds: [state.pendingChoice?.options[0]?.id ?? ""] },
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [state.pendingChoice?.options[0]?.id ?? ""],
+      },
     });
     expect(wrongSide.ok).toBe(false);
     if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
@@ -1336,36 +1410,74 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       actionId: resolve.actionId,
       clientKnownStateVersion: state.stateVersion - 1,
       idempotencyKey: "spotcheck-cockroach-stale",
-      selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds: [state.pendingChoice?.options[0]?.id ?? ""] },
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [state.pendingChoice?.options[0]?.id ?? ""],
+      },
     });
     expect(stale.ok).toBe(false);
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
 
-    state = applyChoice(state, "corp", state.pendingChoice?.options[0]?.id ?? "");
+    state = applyChoice(
+      state,
+      "corp",
+      state.pendingChoice?.options[0]?.id ?? "",
+    );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       randomizedByCockroach: true,
       cockroachCounterTotal: 2,
       hiddenZoneBarrier: true,
       hiddenZoneAction: "discard_phase",
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/simple_economy|wall-of-static|privatePayload|cardInstances/);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /simple_economy|wall-of-static|privatePayload|cardInstances/,
+    );
   });
 
   it("uses Access through Alpha as the single base-link source for trace bidding", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.programSubtypeHosting("spotcheck-access-alpha-link"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.programSubtypeHosting("spotcheck-access-alpha-link"),
+    );
     state.runner.credits = 12;
     state.corp.credits = 8;
     moveRunnerCardToGrip(state, "onr_v1_003_baedekers-net-map");
     moveRunnerCardToGrip(state, "onr_v1_148_access-through-alpha");
-    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_003_baedekers-net-map");
-    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_148_access-through-alpha");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_003_baedekers-net-map",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_148_access-through-alpha",
+    );
     putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
-    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm",
+    );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", "bid_1");
 
-    expect(state.trace).toMatchObject({ status: "base_link", traceStrength: 5, runnerLink: 0 });
+    expect(state.trace).toMatchObject({
+      status: "base_link",
+      traceStrength: 5,
+      runnerLink: 0,
+    });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       runnerLink: 0,
       traceStrength: 5,
@@ -1397,7 +1509,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       ["onr_v1_153_back-door-to-orbital-air", 2, 1, 2],
     ] as const;
 
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_148_access-through-alpha"]).toMatchObject({
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_148_access-through-alpha"],
+    ).toMatchObject({
       installCost: 9,
     });
 
@@ -1444,7 +1558,8 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state = apply(
         state,
         "runner",
-        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
       );
       state = apply(
         state,
@@ -1453,14 +1568,22 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
           action.type === "rez_ice" &&
           sourceDefinition(state, action) === "onr_v1_243_fetch-4-0-1",
       );
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
       state = applyChoice(state, "corp", "bid_0");
       expect(state.trace).toMatchObject({ status: "base_link", runnerLink: 0 });
       const beforeBase = state.runner.credits;
       state = applyChoice(
         state,
         "runner",
-        traceChoiceOptionIdForDefinition(state, definitionId, "trace_base_link_"),
+        traceChoiceOptionIdForDefinition(
+          state,
+          definitionId,
+          "trace_base_link_",
+        ),
       );
       expect(state.runner.credits).toBe(beforeBase - baseCost);
       expect(state.trace).toMatchObject({
@@ -1491,19 +1614,48 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("rejects a stale second base link card in the same trace attempt", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.programSubtypeHosting("p331-one-base-link-stale"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.programSubtypeHosting("p331-one-base-link-stale"),
+    );
     state.runner.credits = 20;
     state.corp.credits = 8;
     moveRunnerCardToGrip(state, "onr_v1_003_baedekers-net-map");
     moveRunnerCardToGrip(state, "onr_v1_148_access-through-alpha");
-    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_003_baedekers-net-map");
-    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_148_access-through-alpha");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_003_baedekers-net-map",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_148_access-through-alpha",
+    );
     putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
-    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm",
+    );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", "bid_0");
-    const baseChoiceAction = mustAction(state, "runner", (action) => action.type === "resolve_choice");
+    const baseChoiceAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "resolve_choice",
+    );
     const baseChoiceId = state.pendingChoice?.choiceId;
     const baedekerOption = traceChoiceOptionIdForDefinition(
       state,
@@ -1559,18 +1711,55 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("lets Replicator break only trace subroutines and revalidates the current encounter", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags("spotcheck-replicator-trace-break"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("spotcheck-replicator-trace-break"),
+    );
     state.runner.credits = 10;
     state.corp.credits = 8;
     moveRunnerCardToGrip(state, "onr_v1_056_replicator");
-    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_056_replicator");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_056_replicator",
+    );
     putCorpIceOnServer(state, "rd", "onr_v1_221_asp");
-    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_221_asp");
-    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_056_replicator");
-    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_056_replicator");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_221_asp",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(state, action) === "onr_v1_056_replicator",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(state, action) === "onr_v1_056_replicator",
+    );
 
-    const breakTrace = mustAction(state, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_056_replicator");
+    const breakTrace = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_056_replicator",
+    );
     expect(breakTrace.payload).toMatchObject({
       targetIceDefinitionId: "onr_v1_221_asp",
       subroutineIndex: 0,
@@ -1584,23 +1773,52 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     });
     expect(stale.ok).toBe(false);
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
-    state = apply(state, "runner", (action) => action.actionId === breakTrace.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === breakTrace.actionId,
+    );
     expect(state.run?.brokenSubroutineIndexes).toContain(0);
 
-    let wallState = toRunnerTurn(createGameAfterSetup({
-      seed: "spotcheck-replicator-wall-negative",
-      baseline: CURRENT_RULES_BASELINE,
-      runnerDeck: MECHANIC_SMOKE_DECKS.traceTags.runner,
-      corpDeck: ONR_V1_0_6K_CORP_DECK,
-      agendaPointsToWin: 7,
-    }));
+    let wallState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-replicator-wall-negative",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.traceTags.runner,
+        corpDeck: ONR_V1_0_6K_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
     wallState.runner.credits = 10;
     moveRunnerCardToGrip(wallState, "onr_v1_056_replicator");
-    wallState = apply(wallState, "runner", (action) => action.type === "install_card" && sourceDefinition(wallState, action) === "onr_v1_056_replicator");
+    wallState = apply(
+      wallState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(wallState, action) === "onr_v1_056_replicator",
+    );
     putCorpIceOnServer(wallState, "rd", "onr_v1_245_fire-wall");
-    wallState = apply(wallState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    wallState = apply(wallState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(wallState, action) === "onr_v1_245_fire-wall");
-    expect(getLegalActions(wallState, "runner").some((action) => action.type === "break_subroutine" && sourceDefinition(wallState, action) === "onr_v1_056_replicator")).toBe(false);
+    wallState = apply(
+      wallState,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    wallState = apply(
+      wallState,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(wallState, action) === "onr_v1_245_fire-wall",
+    );
+    expect(
+      getLegalActions(wallState, "runner").some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          sourceDefinition(wallState, action) === "onr_v1_056_replicator",
+      ),
+    ).toBe(false);
   });
 
   it("spends Scatter Shot recurring credits only for accessed upgrade trash costs", () => {
@@ -1608,62 +1826,123 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       id: "spotcheck_scatter_runner",
       name: "Spotcheck Scatter Runner",
-      cards: [{ id: "onr_v1_057_scatter-shot", quantity: 1 }, ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards],
+      cards: [
+        { id: "onr_v1_057_scatter-shot", quantity: 1 },
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+      ],
     };
-    let state = toRunnerTurn(createGameAfterSetup({
-      seed: "spotcheck-scatter-shot",
-      baseline: CURRENT_RULES_BASELINE,
-      runnerDeck,
-      corpDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
-      agendaPointsToWin: 7,
-    }));
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-scatter-shot",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck,
+        corpDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
     state.runner.credits = 0;
     state.corp.credits = 10;
     moveRunnerCardToGrip(state, "onr_v1_057_scatter-shot");
-    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_057_scatter-shot");
-    const scatterId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_057_scatter-shot");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_057_scatter-shot",
+    );
+    const scatterId = state.runner.rig.programs.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_057_scatter-shot",
+    );
     expect(scatterId && state.cardInstances[scatterId]?.counters?.bit).toBe(2);
     const redHerringsId = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
-    state.cardInstances[redHerringsId] = { ...state.cardInstances[redHerringsId]!, faceup: true, rezzed: true };
+    state.cardInstances[redHerringsId] = {
+      ...state.cardInstances[redHerringsId]!,
+      faceup: true,
+      rezzed: true,
+    };
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
     state = apply(state, "runner", (action) => action.type === "access_card");
-    const trash = mustAction(state, "runner", (action) => action.type === "trash_accessed_card");
+    const trash = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "trash_accessed_card",
+    );
     expect(trash.payload).toMatchObject({
       v1922RunnerProgramAbility: "upgrade_trash_recurring_credit",
       upgradeTrashRecurringCreditsAvailable: 2,
     });
-    state = apply(state, "runner", (action) => action.actionId === trash.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === trash.actionId,
+    );
     expect(scatterId && state.cardInstances[scatterId]?.counters?.bit).toBe(1);
     expect(state.runner.credits).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       upgradeTrashRecurringCreditsSpent: 1,
       runnerCreditsSpent: 0,
     });
-    expect(replayEvents(initial, state.eventLog.slice(replayStart)).ok).toBe(true);
+    expect(replayEvents(initial, state.eventLog.slice(replayStart)).ok).toBe(
+      true,
+    );
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.maxHandSize = 100;
     state = apply(state, "corp", (action) => action.type === "end_turn");
     expect(scatterId && state.cardInstances[scatterId]?.counters?.bit).toBe(2);
 
-    let assetState = toRunnerTurn(createGameAfterSetup({
-      seed: "spotcheck-scatter-asset-negative",
-      baseline: CURRENT_RULES_BASELINE,
-      runnerDeck,
-      corpDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
-      agendaPointsToWin: 7,
-    }));
+    let assetState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-scatter-asset-negative",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck,
+        corpDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
     assetState.runner.credits = 0;
     assetState.corp.credits = 10;
     moveRunnerCardToGrip(assetState, "onr_v1_057_scatter-shot");
-    assetState = apply(assetState, "runner", (action) => action.type === "install_card" && sourceDefinition(assetState, action) === "onr_v1_057_scatter-shot");
-    const assetId = putCorpRootInRemote(assetState, "onr_v1_344_spinn-public-relations");
-    assetState.cardInstances[assetId] = { ...assetState.cardInstances[assetId]!, faceup: true, rezzed: true };
-    assetState = apply(assetState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
-    assetState = apply(assetState, "runner", (action) => action.type === "access_card");
-    expect(getLegalActions(assetState, "runner").some((action) => action.type === "trash_accessed_card")).toBe(false);
+    assetState = apply(
+      assetState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(assetState, action) === "onr_v1_057_scatter-shot",
+    );
+    const assetId = putCorpRootInRemote(
+      assetState,
+      "onr_v1_344_spinn-public-relations",
+    );
+    assetState.cardInstances[assetId] = {
+      ...assetState.cardInstances[assetId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    assetState = apply(
+      assetState,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    assetState = apply(
+      assetState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    expect(
+      getLegalActions(assetState, "runner").some(
+        (action) => action.type === "trash_accessed_card",
+      ),
+    ).toBe(false);
   });
 
   it("spends Poltergeist recurring credits only for accessed node trash costs", () => {
@@ -1676,23 +1955,25 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
       ],
     };
-    let state = toRunnerTurn(createGameAfterSetup({
-      seed: "spotcheck-poltergeist-node-trash",
-      baseline: CURRENT_RULES_BASELINE,
-      runnerDeck,
-      corpDeck: {
-        ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
-        cards: [
-          { id: "simple_economy_asset", quantity: 1 },
-          { id: "simple_upgrade", quantity: 1 },
-          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.filter(
-            (card) =>
-              !["simple_economy_asset", "simple_upgrade"].includes(card.id),
-          ),
-        ],
-      },
-      agendaPointsToWin: 7,
-    }));
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-poltergeist-node-trash",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+          cards: [
+            { id: "simple_economy_asset", quantity: 1 },
+            { id: "simple_upgrade", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.filter(
+              (card) =>
+                !["simple_economy_asset", "simple_upgrade"].includes(card.id),
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
     state.runner.credits = 1;
     moveRunnerCardToGrip(state, "onr_v1_048_poltergeist");
     state = apply(
@@ -1703,9 +1984,12 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         sourceDefinition(state, action) === "onr_v1_048_poltergeist",
     );
     const poltergeistId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_048_poltergeist",
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_048_poltergeist",
     );
-    expect(poltergeistId && cardCounterAmount(state, poltergeistId, "bit")).toBe(2);
+    expect(
+      poltergeistId && cardCounterAmount(state, poltergeistId, "bit"),
+    ).toBe(2);
     putCorpRootInRemote(state, "simple_economy_asset");
 
     const initial = structuredClone(state);
@@ -1718,13 +2002,23 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
-    const trash = mustAction(state, "runner", (action) => action.type === "trash_accessed_card");
+    const trash = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "trash_accessed_card",
+    );
     expect(trash.payload).toMatchObject({
       v1922RunnerProgramAbility: "poltergeist_node_trash_recurring_credit",
       poltergeistRecurringCreditsAvailable: 2,
     });
-    state = apply(state, "runner", (action) => action.actionId === trash.actionId);
-    expect(poltergeistId && cardCounterAmount(state, poltergeistId, "bit")).toBe(0);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === trash.actionId,
+    );
+    expect(
+      poltergeistId && cardCounterAmount(state, poltergeistId, "bit"),
+    ).toBe(0);
     expect(state.runner.credits).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       poltergeistRecurringCreditsSpent: 2,
@@ -1734,23 +2028,25 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
-    let upgradeState = toRunnerTurn(createGameAfterSetup({
-      seed: "spotcheck-poltergeist-upgrade-negative",
-      baseline: CURRENT_RULES_BASELINE,
-      runnerDeck,
-      corpDeck: {
-        ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
-        cards: [
-          { id: "simple_economy_asset", quantity: 1 },
-          { id: "simple_upgrade", quantity: 1 },
-          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.filter(
-            (card) =>
-              !["simple_economy_asset", "simple_upgrade"].includes(card.id),
-          ),
-        ],
-      },
-      agendaPointsToWin: 7,
-    }));
+    let upgradeState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-poltergeist-upgrade-negative",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+          cards: [
+            { id: "simple_economy_asset", quantity: 1 },
+            { id: "simple_upgrade", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.filter(
+              (card) =>
+                !["simple_economy_asset", "simple_upgrade"].includes(card.id),
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
     upgradeState.runner.credits = 0;
     moveRunnerCardToGrip(upgradeState, "onr_v1_048_poltergeist");
     upgradeState = apply(
@@ -1768,7 +2064,11 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     upgradeState = passRootRezWindowBeforeAccessIfOpen(upgradeState);
-    upgradeState = apply(upgradeState, "runner", (action) => action.type === "access_card");
+    upgradeState = apply(
+      upgradeState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     expect(
       getLegalActions(upgradeState, "runner").some(
         (action) => action.type === "trash_accessed_card",
@@ -1788,21 +2088,23 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         ),
       ],
     };
-    let state = toRunnerTurn(createGameAfterSetup({
-      seed: "spotcheck-pk-trace-link",
-      baseline: CURRENT_RULES_BASELINE,
-      runnerDeck,
-      corpDeck: {
-        ...MECHANIC_SMOKE_DECKS.traceTags.corp,
-        cards: [
-          { id: "onr_v1_246_fragmentation-storm", quantity: 1 },
-          ...MECHANIC_SMOKE_DECKS.traceTags.corp.cards.filter(
-            (card) => card.id !== "onr_v1_246_fragmentation-storm",
-          ),
-        ],
-      },
-      agendaPointsToWin: 7,
-    }));
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-pk-trace-link",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.traceTags.corp,
+          cards: [
+            { id: "onr_v1_246_fragmentation-storm", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.traceTags.corp.cards.filter(
+              (card) => card.id !== "onr_v1_246_fragmentation-storm",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
     state.runner.credits = 4;
     state.corp.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_138_pk-6089a");
@@ -1828,9 +2130,16 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     state = encounterIce(state, "rd", "onr_v1_246_fragmentation-storm");
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", "bid_0");
-    expect(state.pendingChoice?.options.some((option) => option.id === "bid_3")).toBe(true);
-    expect(state.pendingChoice?.prompt).toContain("0 Credits + 3 Link-Bits verfügbar");
-    expect(state.pendingChoice?.options.find((option) => option.id === "bid_3")?.label).toBe("3 Gesamtbid");
+    expect(
+      state.pendingChoice?.options.some((option) => option.id === "bid_3"),
+    ).toBe(true);
+    expect(state.pendingChoice?.prompt).toContain(
+      "0 Credits + 3 Link-Bits verfügbar",
+    );
+    expect(
+      state.pendingChoice?.options.find((option) => option.id === "bid_3")
+        ?.label,
+    ).toBe("3 Gesamtbid");
     state = applyChoice(state, "runner", "bid_3");
     expect(pkId && cardCounterAmount(state, pkId, "bit")).toBe(0);
     expect(state.runner.credits).toBe(0);
@@ -1845,10 +2154,22 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
     let refreshState = structuredClone(initial);
     if (pkId) setCardCounterForTest(refreshState, pkId, "bit", 0);
-    refreshState = apply(refreshState, "runner", (action) => action.type === "end_turn");
+    refreshState = apply(
+      refreshState,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
     refreshState.corp.maxHandSize = 100;
-    refreshState = apply(refreshState, "corp", (action) => action.type === "mandatory_draw");
-    refreshState = apply(refreshState, "corp", (action) => action.type === "end_turn");
+    refreshState = apply(
+      refreshState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    refreshState = apply(
+      refreshState,
+      "corp",
+      (action) => action.type === "end_turn",
+    );
     expect(pkId && cardCounterAmount(refreshState, pkId, "bit")).toBe(3);
   });
 
@@ -1898,10 +2219,15 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("loads Braindance Campaign with 12 public bits and drains 2 at Corp turn start", () => {
-    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-braindance-bits");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "spotcheck-braindance-bits",
+    );
     state.corp.credits = 20;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const braindanceId = moveCorpCardToHq(state, "onr_v1_311_braindance-campaign");
+    const braindanceId = moveCorpCardToHq(
+      state,
+      "onr_v1_311_braindance-campaign",
+    );
     state = apply(
       state,
       "corp",
@@ -2046,12 +2372,14 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       virusCard,
       fridgeCard,
       runnerView.own.identity,
-    ].flatMap((card) => card?.counterDisplays?.map((display) => display.id) ?? []);
+    ].flatMap(
+      (card) => card?.counterDisplays?.map((display) => display.id) ?? [],
+    );
     expect(new Set(projectedDisplayIds).size).toBe(projectedDisplayIds.length);
 
-    expect(recurringCard?.counterDisplays?.map((display) => display.id)).toEqual([
-      "recurring_credit",
-    ]);
+    expect(
+      recurringCard?.counterDisplays?.map((display) => display.id),
+    ).toEqual(["recurring_credit"]);
     expect(recurringCard?.counterDisplays).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -2070,9 +2398,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         }),
       ]),
     );
-    expect(restrictedCard?.counterDisplays?.map((display) => display.id)).toEqual([
-      "restricted_pool",
-    ]);
+    expect(
+      restrictedCard?.counterDisplays?.map((display) => display.id),
+    ).toEqual(["restricted_pool"]);
     expect(restrictedCard?.counterDisplays).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -2117,13 +2445,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         }),
       ]),
     );
-    expect(runnerView.own.identity.counterDisplays?.map((display) => display.id)).toEqual([
-      "trauma",
-      "trace_tag_counter",
-      "cerberus",
-      "mastiff",
-      "crying",
-    ]);
+    expect(
+      runnerView.own.identity.counterDisplays?.map((display) => display.id),
+    ).toEqual(["trauma", "trace_tag_counter", "cerberus", "mastiff", "crying"]);
     expect(runnerView.own.identity.counterDisplays).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -2172,9 +2496,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       ]),
     );
     expect(hashState(state)).toBe(hashBeforeView);
-    expect(getLegalActions(state, "runner").map((action) => action.actionId)).toEqual(
-      legalActionIdsBeforeView,
-    );
+    expect(
+      getLegalActions(state, "runner").map((action) => action.actionId),
+    ).toEqual(legalActionIdsBeforeView);
   });
 
   it("grants Remote Facility's action immediately when it is rezzed", () => {
@@ -2190,10 +2514,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (action) => action.type === "mandatory_draw",
     );
     state.corp.credits = 5;
-    const remoteId = putCorpRootInRemote(
-      state,
-      "onr_v1_335_remote-facility",
-    );
+    const remoteId = putCorpRootInRemote(state, "onr_v1_335_remote-facility");
     const clicksBeforeRez = state.corp.clicks;
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -2277,7 +2598,11 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     const replayStart = corpState.eventLog.length;
 
     corpState = toRunnerTurnFromCorpMain(corpState);
-    corpState = apply(corpState, "runner", (action) => action.type === "end_turn");
+    corpState = apply(
+      corpState,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
 
     expect(corpState.corp.credits).toBe(6);
     expect(corpState.corp.clicks).toBe(5);
@@ -2467,7 +2792,8 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     expect(state.runner.rig.resources).not.toContain(topRunnersId);
     expect(state.runner.heap).toContain(topRunnersId);
@@ -2484,38 +2810,40 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("applies Data Darts damage and next-ICE no-break only to the next encounter", () => {
-    let state = toRunnerTurn(createGameAfterSetup({
-      seed: "spotcheck-data-darts-next-ice",
-      baseline: CURRENT_RULES_BASELINE,
-      runnerDeck: {
-        ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-        cards: [
-          { id: "onr_v1_072_wild-card", quantity: 1 },
-          { id: "simple_decoder", quantity: 1 },
-          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
-            (card) =>
-              !["onr_v1_072_wild-card", "simple_decoder"].includes(card.id),
-          ),
-        ],
-      },
-      corpDeck: {
-        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
-        cards: [
-          { id: "onr_v1_234_data-darts", quantity: 1 },
-          { id: "simple_code_gate_ice", quantity: 1 },
-          { id: "simple_economy_operation", quantity: 3 },
-          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
-            (card) =>
-              ![
-                "onr_v1_234_data-darts",
-                "simple_code_gate_ice",
-                "simple_economy_operation",
-              ].includes(card.id),
-          ),
-        ],
-      },
-      agendaPointsToWin: 7,
-    }));
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-data-darts-next-ice",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          cards: [
+            { id: "onr_v1_072_wild-card", quantity: 1 },
+            { id: "simple_decoder", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+              (card) =>
+                !["onr_v1_072_wild-card", "simple_decoder"].includes(card.id),
+            ),
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          cards: [
+            { id: "onr_v1_234_data-darts", quantity: 1 },
+            { id: "simple_code_gate_ice", quantity: 1 },
+            { id: "simple_economy_operation", quantity: 3 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+              (card) =>
+                ![
+                  "onr_v1_234_data-darts",
+                  "simple_code_gate_ice",
+                  "simple_economy_operation",
+                ].includes(card.id),
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
     state.runner.credits = 30;
     state.corp.credits = 30;
     installRunnerProgramForTest(state, "onr_v1_072_wild-card");
@@ -2585,9 +2913,16 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("hardens Detroit Police Contract, Off-Site Backups and Urban Renewal revalidation", () => {
-    let detroit = apply(MECHANIC_SMOKE_GAMES.counterRecurring("spotcheck-detroit-negative"), "corp", (action) => action.type === "mandatory_draw");
+    let detroit = apply(
+      MECHANIC_SMOKE_GAMES.counterRecurring("spotcheck-detroit-negative"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     detroit.corp.credits = 5;
-    const detroitId = scoreCorpAgendaForTest(detroit, "onr_v1_198_detroit-police-contract");
+    const detroitId = scoreCorpAgendaForTest(
+      detroit,
+      "onr_v1_198_detroit-police-contract",
+    );
     setCardCounterForTest(detroit, detroitId, "bit", 1);
     expect(
       getLegalActions(detroit, "corp").some(
@@ -2607,24 +2942,47 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "spotcheck_offsite_empty_corp",
       name: "Spotcheck Offsite Empty Corp",
-      cards: [{ id: "onr_v1_296_off-site-backups", quantity: 1 }, ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards],
+      cards: [
+        { id: "onr_v1_296_off-site-backups", quantity: 1 },
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+      ],
     };
-    let offsite = apply(createGameAfterSetup({
-      seed: "spotcheck-offsite-empty",
-      baseline: CURRENT_RULES_BASELINE,
-      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-      corpDeck: offsiteCorpDeck,
-      agendaPointsToWin: 7,
-    }), "corp", (action) => action.type === "mandatory_draw");
+    let offsite = apply(
+      createGameAfterSetup({
+        seed: "spotcheck-offsite-empty",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: offsiteCorpDeck,
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     offsite.corp.credits = 5;
     moveCorpCardToHq(offsite, "onr_v1_296_off-site-backups");
-    expect(getLegalActions(offsite, "corp").some((action) => action.type === "play_operation" && sourceDefinition(offsite, action) === "onr_v1_296_off-site-backups")).toBe(false);
+    expect(
+      getLegalActions(offsite, "corp").some(
+        (action) =>
+          action.type === "play_operation" &&
+          sourceDefinition(offsite, action) === "onr_v1_296_off-site-backups",
+      ),
+    ).toBe(false);
 
-    let urban = apply(v106kCardReleaseGame("spotcheck-urban-tag-drift"), "corp", (action) => action.type === "mandatory_draw");
+    let urban = apply(
+      v106kCardReleaseGame("spotcheck-urban-tag-drift"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     urban.corp.credits = 10;
     urban.runner.tags = 1;
     moveCorpCardToHq(urban, "onr_v1_307_urban-renewal");
-    const urbanAction = mustAction(urban, "corp", (action) => action.type === "play_operation" && sourceDefinition(urban, action) === "onr_v1_307_urban-renewal");
+    const urbanAction = mustAction(
+      urban,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(urban, action) === "onr_v1_307_urban-renewal",
+    );
     urban.runner.tags = 0;
     const tagDrift = applyAction(urban, {
       matchId: urban.matchId,
@@ -2638,16 +2996,31 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("keeps Red Herrings steal tax active after Runner trashes it during the same run", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-red-herrings-trash-run"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-red-herrings-trash-run"),
+    );
     state.runner.credits = 6;
     const redHerringsId = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
     const agendaId = putCorpRootInRemote(state, "simple_agenda");
-    state.cardInstances[redHerringsId] = { ...state.cardInstances[redHerringsId]!, faceup: true, rezzed: true };
+    state.cardInstances[redHerringsId] = {
+      ...state.cardInstances[redHerringsId]!,
+      faceup: true,
+      rezzed: true,
+    };
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
     state = apply(state, "runner", (action) => action.type === "access_card");
-    state = apply(state, "runner", (action) => action.type === "trash_accessed_card");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "trash_accessed_card",
+    );
     expect(state.runner.heap).not.toContain(redHerringsId);
     expect(state.corp.archives).toContain(redHerringsId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -2656,7 +3029,11 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       stealCostSourceTitles: "Red Herrings",
     });
     state = apply(state, "runner", (action) => action.type === "access_card");
-    const steal = mustAction(state, "runner", (action) => action.type === "steal_agenda");
+    const steal = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "steal_agenda",
+    );
     expect(steal.costs).toEqual([{ credits: 5 }]);
     expect(steal.payload).toMatchObject({
       stealCost: 5,
@@ -2664,7 +3041,11 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       stealCostPersistedForCurrentAccess: true,
       stealCostSourceDefinitionIds: "onr_v1_366_red-herrings",
     });
-    state = apply(state, "runner", (action) => action.actionId === steal.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === steal.actionId,
+    );
     expect(state.runner.scoreArea).toContain(agendaId);
     expect(state.runner.credits).toBe(0);
     expect(validateGameState(state).ok).toBe(true);
@@ -2709,8 +3090,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     const vewyId = state.runner.rig.programs.find(
       (id) =>
-        state.cardInstances[id]?.definitionId ===
-        "onr_v1_071_vewy-vewy-quiet",
+        state.cardInstances[id]?.definitionId === "onr_v1_071_vewy-vewy-quiet",
     );
     expect(vewyId).toBeDefined();
     if (!vewyId) throw new Error("Missing Vewy Vewy Quiet");
@@ -2754,13 +3134,21 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
       state = encounterIce(state, "rd", definitionId);
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         damageResolved: true,
         damageType: "net",
         damageAmount: expectedDamage,
       });
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
       state = apply(
         state,
         "corp",
@@ -2771,7 +3159,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       const runnerActions = getLegalActions(state, "runner");
       expect(state.run?.noBreakSubroutinesActive).toBe(true);
       expect(state.run?.jackOutLockedUntilEncounterEnds ?? false).toBe(false);
-      expect(runnerActions.some((action) => action.type === "break_subroutine")).toBe(false);
+      expect(
+        runnerActions.some((action) => action.type === "break_subroutine"),
+      ).toBe(false);
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
@@ -2847,11 +3237,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         action.type === "break_subroutine" &&
         sourceDefinition(state, action) === "onr_v1_072_wild-card",
     );
-    expect(breakActions.map((action) => action.payload?.subroutineIndex)).toEqual([
-      0,
-      1,
-      2,
-    ]);
+    expect(
+      breakActions.map((action) => action.payload?.subroutineIndex),
+    ).toEqual([0, 1, 2]);
     expect(breakActions.map((action) => action.costs)).toEqual([
       [{ credits: 1 }],
       [{ credits: 1 }],
@@ -2911,7 +3299,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("applies Fang trace success as a pay-to-run lock instead of a tag", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags("spotcheck-fang-run-lock"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("spotcheck-fang-run-lock"),
+    );
     state.runner.credits = 20;
     state.corp.credits = 20;
     putCorpIceOnServer(state, "rd", "onr_v1_240_fang");
@@ -2928,7 +3318,11 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(state.run).toBeUndefined();
     expect(state.runner.tags).toBe(0);
     expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(2);
-    expect(getLegalActions(state, "runner").some((action) => action.type === "start_run")).toBe(false);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "start_run",
+      ),
+    ).toBe(false);
     state = apply(
       state,
       "runner",
@@ -2937,7 +3331,11 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         action.payload?.runnerRunLockCreditCost === 2,
     );
     expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(0);
-    expect(getLegalActions(state, "runner").some((action) => action.type === "start_run")).toBe(true);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "start_run",
+      ),
+    ).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -2951,7 +3349,10 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         ),
       );
       state.runner.credits = 20;
-      const vacantId = putCorpRootInRemote(state, "onr_v1_346_vacant-soulkiller");
+      const vacantId = putCorpRootInRemote(
+        state,
+        "onr_v1_346_vacant-soulkiller",
+      );
       state.cardInstances[vacantId] = {
         ...state.cardInstances[vacantId]!,
         advancementCounters,
@@ -2962,7 +3363,8 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         state,
         "runner",
         (action) =>
-          action.type === "start_run" && action.payload?.serverId === "remote_1",
+          action.type === "start_run" &&
+          action.payload?.serverId === "remote_1",
       );
       state = apply(
         state,
@@ -3010,10 +3412,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     state.runner.credits = 20;
     installRunnerHardwareForTest(state, "onr_v1_130_lifesaver-nanosurgeons");
-    const vacantId = putCorpRootInRemote(
-      state,
-      "onr_v1_346_vacant-soulkiller",
-    );
+    const vacantId = putCorpRootInRemote(state, "onr_v1_346_vacant-soulkiller");
     state.cardInstances[vacantId] = {
       ...state.cardInstances[vacantId]!,
       advancementCounters: 2,
@@ -3028,11 +3427,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    state = apply(
-      state,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(
       state,
       "corp",
@@ -3082,10 +3477,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         "spotcheck-vacant-soulkiller-unrezzed",
       ),
     );
-    const vacantId = putCorpRootInRemote(
-      state,
-      "onr_v1_346_vacant-soulkiller",
-    );
+    const vacantId = putCorpRootInRemote(state, "onr_v1_346_vacant-soulkiller");
     state.cardInstances[vacantId] = {
       ...state.cardInstances[vacantId]!,
       advancementCounters: 3,
@@ -3166,7 +3558,11 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     installRunnerHardwareForTest(damageState, "onr_v1_132_microtech-trode-set");
     putCorpIceOnServer(damageState, "rd", "onr_v1_224_bolter-cluster");
     damageState = encounterIce(damageState, "rd", "onr_v1_224_bolter-cluster");
-    damageState = apply(damageState, "runner", (action) => action.type === "continue_run");
+    damageState = apply(
+      damageState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(damageState.eventLog.at(-1)?.publicPayload).toMatchObject({
       runnerHardwareAbility: "runner_hardware_ap_net_damage_reduction",
       printedDamageAmount: 4,
@@ -3175,7 +3571,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("hardens Corporate Ally for deterministic multi-agenda spend and payload redaction", () => {
-    let state = toRunnerTurn(v180CardReleaseGame("spotcheck-corporate-ally-hardening"));
+    let state = toRunnerTurn(
+      v180CardReleaseGame("spotcheck-corporate-ally-hardening"),
+    );
     state.runner.credits = 30;
     state.runner.clicks = 10;
     const firstAgendaId = scoreRunnerAgendaForTest(
@@ -3208,10 +3606,16 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     });
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    state = apply(state, "runner", (action) => action.actionId === install.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === install.actionId,
+    );
     expect(state.runner.scoreArea).toContain(firstAgendaId);
     expect(state.runner.scoreArea).toContain(secondAgendaId);
-    expect(state.specialZones?.removedFromGame ?? []).not.toContain(expectedSpendId);
+    expect(state.specialZones?.removedFromGame ?? []).not.toContain(
+      expectedSpendId,
+    );
     expect(state.cardInstances[expectedSpendId]?.agendaPointsSpent).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
@@ -3235,7 +3639,8 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       getLegalActions(noAgendaState, "runner").some(
         (action) =>
           action.type === "install_card" &&
-          sourceDefinition(noAgendaState, action) === "onr_v1_156_corporate-ally",
+          sourceDefinition(noAgendaState, action) ===
+            "onr_v1_156_corporate-ally",
       ),
     ).toBe(false);
   });
@@ -3260,7 +3665,8 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         sourceDefinition(state, action) === "onr_v1_028_force-shield",
     );
     const shieldId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_028_force-shield",
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_028_force-shield",
     );
     expect(shieldId).toBeDefined();
     if (!shieldId) throw new Error("Missing Force Shield");
@@ -3362,7 +3768,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("hardens Jack Attack jack-out lock, trace payload and run-end cleanup", () => {
-    let state = toRunnerTurn(v193CardReleaseGame("spotcheck-jack-attack-hardening"));
+    let state = toRunnerTurn(
+      v193CardReleaseGame("spotcheck-jack-attack-hardening"),
+    );
     state.runner.credits = 20;
     state.corp.credits = 20;
     putCorpCardOnTopOfRd(state, "simple_economy_operation");
@@ -3394,14 +3802,17 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(
-      getLegalActions(state, "runner").some((action) => action.type === "jack_out"),
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "jack_out",
+      ),
     ).toBe(false);
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.run).toBeUndefined();
     expect(
       getLegalActions(state, "runner").some(
-        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
       ),
     ).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -3467,8 +3878,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       "corp",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.v1918UpgradeAbility ===
-          "hq_ice_swap",
+        action.payload?.v1918UpgradeAbility === "hq_ice_swap",
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -3525,7 +3935,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
 
     state = applyChoice(state, "corp", `card_${hqIceId}`);
-    const remote = state.corp.servers.find((server) => server.id === "remote_1");
+    const remote = state.corp.servers.find(
+      (server) => server.id === "remote_1",
+    );
     expect(remote?.ice[0]).toBe(hqIceId);
     expect(state.corp.hq).toContain(installedIceId);
     expect(state.corp.hq).not.toContain(hqIceId);
@@ -3558,9 +3970,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     expect(
       getLegalActions(state, "corp").some(
-        (action) =>
-          action.payload?.v1918UpgradeAbility ===
-          "hq_ice_swap",
+        (action) => action.payload?.v1918UpgradeAbility === "hq_ice_swap",
       ),
     ).toBe(false);
     expect(validateGameState(state).ok).toBe(true);
@@ -3621,7 +4031,8 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     expect(
       getLegalActions(state, "corp").some(
-        (action) => action.payload?.v1918UpgradeAbility === "tag_condition_credit",
+        (action) =>
+          action.payload?.v1918UpgradeAbility === "tag_condition_credit",
       ),
     ).toBe(false);
     const swapAction = mustAction(
@@ -3629,18 +4040,23 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       "corp",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.v1918UpgradeAbility ===
-          "hq_ice_swap" &&
+        action.payload?.v1918UpgradeAbility === "hq_ice_swap" &&
         action.payload?.cardId === omniId,
     );
-    state = apply(state, "corp", (action) => action.actionId === swapAction.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === swapAction.actionId,
+    );
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "simple_code_gate_ice",
     );
 
     state = applyChoice(state, "corp", `card_${hqIceId}`);
-    const remote = state.corp.servers.find((server) => server.id === "remote_1");
+    const remote = state.corp.servers.find(
+      (server) => server.id === "remote_1",
+    );
     expect(remote?.ice[0]).toBe(hqIceId);
     expect(state.corp.hq).toContain(installedIceId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -3670,7 +4086,11 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     putCorpIceOnServer(state, "rd", "onr_v1_272_too-many-doors");
 
     state = encounterIce(state, "rd", "onr_v1_272_too-many-doors");
-    const opened = apply(state, "runner", (action) => action.type === "continue_run");
+    const opened = apply(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(opened.pendingChoice?.source).toContain(
       "card_implementation.secret_spend_compare",
     );
@@ -3685,8 +4105,11 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     const runnerResolve = applyAction(opened, {
       matchId: opened.matchId,
       side: "runner",
-      actionId: mustAction(opened, "corp", (action) => action.type === "resolve_choice")
-        .actionId,
+      actionId: mustAction(
+        opened,
+        "corp",
+        (action) => action.type === "resolve_choice",
+      ).actionId,
       clientKnownStateVersion: opened.stateVersion,
       selectedChoices: {
         choiceId: opened.pendingChoice?.choiceId,
@@ -3746,7 +4169,9 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     expect(brokenState.corp.rd).toEqual(rdBeforeBroken);
 
     let losingBidState = toRunnerTurn(
-      originalsetReorderCounterRunlockGame("spotcheck-too-many-doors-losing-bid"),
+      originalsetReorderCounterRunlockGame(
+        "spotcheck-too-many-doors-losing-bid",
+      ),
     );
     losingBidState.runner.credits = 30;
     losingBidState.corp.credits = 30;
@@ -3797,7 +4222,8 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       state,
       "runner",
       (action) =>
-        action.type === "install_card" && String(action.payload?.cardId) === iSpyId,
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === iSpyId,
     );
 
     const initial = structuredClone(state);
@@ -3817,7 +4243,9 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
       "simple_fracter",
     );
-    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(hiddenBelowId);
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      hiddenBelowId,
+    );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -3849,7 +4277,11 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     putCorpIceOnServer(fatalState, "rd", "onr_v1_242_fatal-attractor");
     fatalState = encounterIce(fatalState, "rd", "onr_v1_242_fatal-attractor");
     fatalState = breakCurrentSubroutine(fatalState, "onr_v1_023_evil-twin", 0);
-    fatalState = apply(fatalState, "runner", (action) => action.type === "continue_run");
+    fatalState = apply(
+      fatalState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(fatalState.run?.nextEncounterFatalDamage ?? 0).toBe(0);
 
     let clearedState = toRunnerTurn(
@@ -3859,10 +4291,22 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     clearedState.corp.credits = 30;
     putCorpIceOnServer(clearedState, "rd", "simple_barrier_ice");
     putCorpIceOnServer(clearedState, "rd", "onr_v1_242_fatal-attractor");
-    clearedState = encounterIce(clearedState, "rd", "onr_v1_242_fatal-attractor");
-    clearedState = apply(clearedState, "runner", (action) => action.type === "continue_run");
+    clearedState = encounterIce(
+      clearedState,
+      "rd",
+      "onr_v1_242_fatal-attractor",
+    );
+    clearedState = apply(
+      clearedState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(clearedState.run?.nextEncounterFatalDamage).toBe(3);
-    clearedState = apply(clearedState, "runner", (action) => action.type === "jack_out");
+    clearedState = apply(
+      clearedState,
+      "runner",
+      (action) => action.type === "jack_out",
+    );
     expect(clearedState.run).toBeUndefined();
 
     let shockState = toRunnerTurn(
@@ -3874,14 +4318,22 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     putCorpIceOnServer(shockState, "rd", "simple_code_gate_ice");
     putCorpIceOnServer(shockState, "rd", "onr_v1_268_shock-r");
     shockState = encounterIce(shockState, "rd", "onr_v1_268_shock-r");
-    shockState = apply(shockState, "runner", (action) => action.type === "continue_run");
+    shockState = apply(
+      shockState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(shockState.run?.nextEncounterJackOutLock).toBe(true);
     expect(
       getLegalActions(shockState, "runner").some(
         (action) => action.type === "jack_out",
       ),
     ).toBe(false);
-    shockState = apply(shockState, "runner", (action) => action.type === "continue_run");
+    shockState = apply(
+      shockState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     shockState = apply(
       shockState,
       "corp",
@@ -3895,9 +4347,15 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
         (action) => action.type === "break_subroutine",
       ),
     ).toBe(false);
-    shockState = apply(shockState, "runner", (action) => action.type === "continue_run");
+    shockState = apply(
+      shockState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(shockState.run?.noBreakSubroutinesActive ?? false).toBe(false);
-    expect(shockState.run?.jackOutLockedUntilEncounterEnds ?? false).toBe(false);
+    expect(shockState.run?.jackOutLockedUntilEncounterEnds ?? false).toBe(
+      false,
+    );
   });
 
   it("keeps D'Arc Knight, Razor Wire and Liche subroutines independently breakable and redacted", () => {
@@ -3906,12 +4364,19 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     );
     dArcState.runner.credits = 50;
     dArcState.corp.credits = 50;
-    const dArcTargetId = installRunnerProgramForTest(dArcState, "simple_decoder");
+    const dArcTargetId = installRunnerProgramForTest(
+      dArcState,
+      "simple_decoder",
+    );
     installRunnerProgramForTest(dArcState, "onr_v1_023_evil-twin");
     putCorpIceOnServer(dArcState, "rd", "onr_v1_233_d-arc-knight");
     dArcState = encounterIce(dArcState, "rd", "onr_v1_233_d-arc-knight");
     dArcState = breakCurrentSubroutine(dArcState, "onr_v1_023_evil-twin", 0);
-    dArcState = apply(dArcState, "runner", (action) => action.type === "continue_run");
+    dArcState = apply(
+      dArcState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(dArcState.runner.heap).not.toContain(dArcTargetId);
     expect(dArcState.run).toBeUndefined();
 
@@ -3927,7 +4392,11 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     razorState = breakCurrentSubroutine(razorState, "onr_v1_021_dwarf", 1);
     const initial = structuredClone(razorState);
     const replayStart = razorState.eventLog.length;
-    razorState = apply(razorState, "runner", (action) => action.type === "continue_run");
+    razorState = apply(
+      razorState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(razorState.runner.grip.length).toBe(gripBeforeRazor - 2);
     expect(razorState.run).toBeDefined();
     expect(razorState.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -3935,10 +4404,13 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       damageType: "net",
       damageAmount: 2,
     });
-    expect(JSON.stringify(razorState.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"grip"|"privatePayload"|"cardInstances"/,
+    expect(
+      JSON.stringify(razorState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/"grip"|"privatePayload"|"cardInstances"/);
+    const replay = replayEvents(
+      initial,
+      razorState.eventLog.slice(replayStart),
     );
-    const replay = replayEvents(initial, razorState.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(razorState));
 
@@ -3950,10 +4422,22 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     installRunnerProgramForTest(licheState, "onr_v1_006_black-dahlia");
     putCorpIceOnServer(licheState, "rd", "onr_v1_254_liche");
     licheState = encounterIce(licheState, "rd", "onr_v1_254_liche");
-    licheState = breakCurrentSubroutine(licheState, "onr_v1_006_black-dahlia", 1);
-    licheState = breakCurrentSubroutine(licheState, "onr_v1_006_black-dahlia", 3);
+    licheState = breakCurrentSubroutine(
+      licheState,
+      "onr_v1_006_black-dahlia",
+      1,
+    );
+    licheState = breakCurrentSubroutine(
+      licheState,
+      "onr_v1_006_black-dahlia",
+      3,
+    );
     const coreBefore = licheState.runner.coreDamage;
-    licheState = apply(licheState, "runner", (action) => action.type === "continue_run");
+    licheState = apply(
+      licheState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(licheState.runner.coreDamage).toBe(coreBefore + 2);
     expect(licheState.run).toBeDefined();
     expect(licheState.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -4182,7 +4666,8 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       state,
       "corp",
       (action) =>
-        action.type === "rez_card" && String(action.payload?.cardId) === vaporId,
+        action.type === "rez_card" &&
+        String(action.payload?.cardId) === vaporId,
     );
     state = apply(
       state,
@@ -4199,14 +4684,18 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       gainedCredits: 1,
     });
 
-    const retreatId = scoreCorpAgendaForTest(state, "onr_v1_195_corporate-retreat");
+    const retreatId = scoreCorpAgendaForTest(
+      state,
+      "onr_v1_195_corporate-retreat",
+    );
     setCardCounterForTest(state, retreatId, "mark", 1);
     const retreatAction = mustAction(
       state,
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez",
+        action.payload?.agendaAbility ===
+          "scored_agenda_credit_until_install_or_rez",
     );
     const stolenState = structuredClone(state);
     stolenState.corp.scoreArea = stolenState.corp.scoreArea.filter(
@@ -4249,7 +4738,8 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       state,
       "corp",
       (action) =>
-        action.type === "rez_card" && String(action.payload?.cardId) === vaporId,
+        action.type === "rez_card" &&
+        String(action.payload?.cardId) === vaporId,
     );
 
     const moveAction = mustAction(
@@ -4271,9 +4761,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
 
     const corpChoice = getPlayerView(state, "corp").pendingChoice;
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
-    expect(corpChoice?.prompt).toBe(
-      "Vapor Ops: Advancement-Counter bewegen",
-    );
+    expect(corpChoice?.prompt).toBe("Vapor Ops: Advancement-Counter bewegen");
     expect(runnerChoice).toBeUndefined();
     const labels = corpChoice?.options.map((option) => option.label) ?? [];
     expect(new Set(labels).size).toBe(labels.length);
@@ -4300,9 +4788,9 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     ]);
     expect(state.cardInstances[vaporId]?.advancementCounters).toBe(0);
     expect(state.cardInstances[simpleAgendaId]?.advancementCounters).toBe(0);
-    expect(
-      state.cardInstances[geneticsVisionaryId]?.advancementCounters,
-    ).toBe(3);
+    expect(state.cardInstances[geneticsVisionaryId]?.advancementCounters).toBe(
+      3,
+    );
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /Simple Agenda|Genetics-Visionary Acquisition|privatePayload|cardInstances/,
     );
