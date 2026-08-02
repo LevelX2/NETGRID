@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  BookOpen,
   Cable,
   Check,
   ChevronDown,
@@ -57,6 +58,8 @@ import {
 import { DeckCardThumb } from "./DeckCardThumb";
 import { DeckCardTooltipTrigger } from "./DeckCardTooltipTrigger";
 import { DeckMetadataLine } from "./DeckSelectionControls";
+import { StandardDeckGuideDialog } from "./StandardDeckGuideDialog";
+import { standardDeckGuideControlState } from "./standard-deck-guide-ui";
 import { DeckStrategyProfilePanel } from "./DeckStrategyProfilePanel";
 import { DeckTableBoard } from "./DeckTableBoard";
 import { DeckValidationSummary } from "./DeckValidationSummary";
@@ -437,6 +440,7 @@ export function DeckEditorPanel({
   } | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [standardCopyOpen, setStandardCopyOpen] = useState(false);
+  const [standardCopyGuideOpen, setStandardCopyGuideOpen] = useState(false);
   const [standardCopySide, setStandardCopySide] = useState<Side>("runner");
   const [standardCopyDeckId, setStandardCopyDeckId] = useState("");
   const [standardCopyName, setStandardCopyName] = useState("");
@@ -522,6 +526,20 @@ export function DeckEditorPanel({
     standardCopyCandidates.find(
       (deck) => deck.standardDeckId === standardCopyDeckId,
     ) ?? standardCopyCandidates[0];
+  const standardCopyGuideControl = selectedStandardCopy
+    ? standardDeckGuideControlState({
+        source: "snapshot",
+        snapshot: {
+          deckSnapshotId: selectedStandardCopy.standardDeckId,
+          sourceDeckId: selectedStandardCopy.standardDeckId,
+          name: selectedStandardCopy.name,
+          guideStatus: selectedStandardCopy.guideStatus,
+          ...(selectedStandardCopy.guide
+            ? { guide: selectedStandardCopy.guide }
+            : {}),
+        },
+      })
+    : null;
   const standardDeckCatalogLoading =
     standardDecks.length === 0 &&
     (standardDeckCatalogPhase === "loading" || standardDeckCatalogRefreshing);
@@ -873,6 +891,7 @@ export function DeckEditorPanel({
   const toggleStandardCopy = () => {
     if (standardCopyOpen) {
       setStandardCopyOpen(false);
+      setStandardCopyGuideOpen(false);
       return;
     }
     const first =
@@ -888,6 +907,7 @@ export function DeckEditorPanel({
     setStandardCopySide(side);
     setStandardCopyDeckId(first?.standardDeckId ?? "");
     setStandardCopyName(first ? `${first.name} Kopie` : "");
+    setStandardCopyGuideOpen(false);
   };
   const selectStandardCopyDeck = (deckId: string) => {
     const deck = standardCopyCandidates.find(
@@ -895,13 +915,17 @@ export function DeckEditorPanel({
     );
     setStandardCopyDeckId(deckId);
     if (deck) setStandardCopyName(`${deck.name} Kopie`);
+    setStandardCopyGuideOpen(false);
   };
   const submitStandardCopy = () => {
     if (!selectedStandardCopy || !onCopyStandard || !standardCopyName.trim())
       return;
     void onCopyStandard(selectedStandardCopy, standardCopyName.trim()).then(
       (copied) => {
-        if (copied) setStandardCopyOpen(false);
+        if (copied) {
+          setStandardCopyOpen(false);
+          setStandardCopyGuideOpen(false);
+        }
       },
     );
   };
@@ -1626,6 +1650,18 @@ export function DeckEditorPanel({
                 </label>
               </div>
               <div className="deckActions">
+                {standardCopyGuideControl ? (
+                  <button
+                    className={`button deckGuideButton status-${standardCopyGuideControl.status}`}
+                    type="button"
+                    disabled={standardCopyGuideControl.disabled}
+                    title={standardCopyGuideControl.label}
+                    onClick={() => setStandardCopyGuideOpen(true)}
+                  >
+                    <BookOpen size={15} />
+                    {standardCopyGuideControl.label}
+                  </button>
+                ) : null}
                 <button
                   className="button primary"
                   onClick={submitStandardCopy}
@@ -1641,13 +1677,26 @@ export function DeckEditorPanel({
                 </button>
                 <button
                   className="button"
-                  onClick={() => setStandardCopyOpen(false)}
+                  onClick={() => {
+                    setStandardCopyOpen(false);
+                    setStandardCopyGuideOpen(false);
+                  }}
                   disabled={standardCopyBusy}
                   type="button"
                 >
                   Abbrechen
                 </button>
               </div>
+              {standardCopyGuideOpen &&
+              standardCopyGuideControl?.guide &&
+              selectedStandardCopy ? (
+                <StandardDeckGuideDialog
+                  deckName={selectedStandardCopy.name}
+                  side={selectedStandardCopy.side}
+                  guide={standardCopyGuideControl.guide}
+                  onDismiss={() => setStandardCopyGuideOpen(false)}
+                />
+              ) : null}
             </div>
           ) : null}
           <div className="deckDisplayRow">

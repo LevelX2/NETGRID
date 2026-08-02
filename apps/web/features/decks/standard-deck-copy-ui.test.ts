@@ -39,4 +39,12 @@ describe("standard deck copy UI contract", () => {
       2,
     );
   });
+
+  it("reuses the selected standard guide and its maintenance state in the copy flow", () => {
+    expect(panelSource).toContain("standardDeckGuideControlState");
+    expect(panelSource).toContain("selectedStandardCopy.guideStatus");
+    expect(panelSource).toContain("<StandardDeckGuideDialog");
+    expect(panelSource).toContain("standardCopyGuideControl.label");
+    expect(panelSource).toContain("setStandardCopyGuideOpen(false)");
+  });
 });
