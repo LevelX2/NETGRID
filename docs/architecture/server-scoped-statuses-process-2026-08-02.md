@@ -1,6 +1,6 @@
 # Prozess: Serverbezogene Regelzustände
 
-Status: in Umsetzung
+Status: SSP-01 bis SSP-04 verifiziert; lokale Integration und Cleanup ausstehend
 
 Arbeitsbranch: `codex/server-scoped-statuses`
 
