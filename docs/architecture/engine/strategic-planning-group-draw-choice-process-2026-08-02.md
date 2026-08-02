@@ -1,10 +1,19 @@
 # Strategic Planning Group – Draw-Choice-Fix
 
-Status: **completed**
+Status: **completed – superseded by the generic Corp-draw transaction contract**
 Quelle/Vorgabe: Playtest-Fund vom 02.08.2026
 Primärer Agent: `release-implementation-agent`
 Branch: `codex/spg-draw-choice`
 Worktree: `C:\Projekte\NETGRID_SPG_DRAW_CHOICE`
+
+Current-State-Hinweis: Dieses Dokument bleibt als Evidence des ersten engen
+SPG-Fixes erhalten. Der heute führende Vertrag steht in
+`docs/architecture/engine/corp-draw-transactions-process-2026-08-02.md`.
+Er ersetzt insbesondere die damalige Nicht-Ziel-Grenze „kein allgemeiner
+Umbau aller Corp-Draw-Aufrufer“ durch atomare Corp-Draw-Transaktionen,
+serialisierbare Fortsetzungen und einen aggregierten Pflichtzug. Gezogene
+Karten liegen bis zur SPG-Auflösung Corp-privat in `setAside`, nicht bereits
+in HQ.
 
 ## Zielprüfung
 
@@ -62,7 +71,8 @@ die verdeckt unter R&D gelegt wird. Die nicht gewählten Karten bleiben in HQ.
 ## Automatische Fehlerbehandlung
 
 - Fehlende oder stale Choice-/Action-/Optionsbindung scheitert fail-closed.
-- Eine gewählte Karte muss zum aktuellen Draw gehören und noch in HQ liegen.
+- Eine gewählte Karte muss zum aktuellen Draw gehören und noch in der
+  Corp-privaten Set-aside-Zone liegen.
 - Eine bereits offene Choice verhindert das Erzeugen einer zweiten Choice.
 - Rote Tests werden im aktiven Paket eng behoben; kein Folgepaket beginnt vor
   bestandenem Done-Gate.

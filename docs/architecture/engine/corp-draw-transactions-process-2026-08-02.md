@@ -1,6 +1,6 @@
 # Einheitliche Corporation-Draw-Transaktionen
 
-Status: **in progress**
+Status: **completed**
 Quelle/Vorgabe: Nutzerfreigabe vom 02.08.2026 nach systemischer Analyse von
 `Strategic Planning Group` und Mehrfach-Draws
 Primärer Agent: `release-implementation-agent`
@@ -117,13 +117,13 @@ planned
 
 ## Fortschritt
 
-| Paket   | Status    | Verification                                                                                                         |
-| ------- | --------- | -------------------------------------------------------------------------------------------------------------------- |
-| DRAW-01 | completed | 212 Engine-Testdateien / 1.848 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün                       |
-| DRAW-02 | completed | 212 Engine-Testdateien / 1.851 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün                       |
-| DRAW-03 | completed | 212 Engine-Testdateien / 1.852 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün                       |
-| DRAW-04 | completed | 120 Engine-, 325 Web-, 3 Reconnect-/Server- und 248 KI-Fokustests; alle Paket-Typechecks und Architekturgrenzen grün |
-| DRAW-05 | pending   | –                                                                                                                    |
+| Paket   | Status    | Verification                                                                                                            |
+| ------- | --------- | ----------------------------------------------------------------------------------------------------------------------- |
+| DRAW-01 | completed | 212 Engine-Testdateien / 1.848 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün                          |
+| DRAW-02 | completed | 212 Engine-Testdateien / 1.851 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün                          |
+| DRAW-03 | completed | 212 Engine-Testdateien / 1.852 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün                          |
+| DRAW-04 | completed | 120 Engine-, 325 Web-, 3 Reconnect-/Server- und 248 KI-Fokustests; alle Paket-Typechecks und Architekturgrenzen grün    |
+| DRAW-05 | completed | Engine 1.858, Web 762 und KI-Shards 4.538 Tests; Workspace-Typecheck, Verträge, Struktur, Grenzen, Format und Diff grün |
 
 ## Paketdetails
 
@@ -300,6 +300,24 @@ Done-Gate:
 - alle Abschlussgates sind grün oder ein echter Blocker ist mit Removal
   Condition dokumentiert;
 - Arbeitsbranch ist sauber und lokal nach `main` integrierbar.
+
+Abschlussstand:
+
+- vollständige Engine-Suite: 212 Dateien, 1.858 Tests, grün;
+- vollständige Web-Suite: 76 Dateien, 762 Tests, grün;
+- drei verbindliche KI-Shards: 552 Dateiläufe, 4.538 Tests, grün;
+- Workspace-Typecheck für Shared, Catalog, Engine, Decks, AI, Server und Web,
+  Vertrags- und Test-Discovery-Gates, Engine- und AI-Strukturprüfungen,
+  CardImplementation-Zielarchitektur, generische Kartenwächter,
+  Package-Boundaries, Format und Diff: grün;
+- fokussierter Server-/Reconnect-Test des geänderten privaten
+  Draw-Choice-Pfads: 3 Tests, grün;
+- der ergänzend ausgeführte vollständige Serverlauf hat einen bereits auf
+  unverändertem `main` identisch reproduzierbaren Bestandsfehler in
+  `restores the resident plan portfolio before preparing an AI decision after
+a server restart` (`ai_debug_contract_missing`). Er gehört nicht zum
+  geänderten Draw-, Choice- oder Reconnect-Pfad und ist deshalb kein
+  Removal-Blocker dieses Pakets.
 
 ## Verifikationsregeln
 
