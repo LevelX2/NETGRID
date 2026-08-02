@@ -1886,11 +1886,48 @@ function planBoundCorpDefenseChoices(
             kind?: unknown;
             choiceId?: unknown;
             sourceStateVersion?: unknown;
+            selectedOptionId?: unknown;
+            disposition?: unknown;
+            selectedServerId?: unknown;
             targets?: Array<{ optionId?: unknown }>;
           };
         }>;
       }
     | undefined;
+  const redirectSignal = moduleState?.signals?.find(
+    (candidate) =>
+      candidate.kind === "generic" &&
+      candidate.phase === "resolve_run_redirect" &&
+      Array.isArray(candidate.actionIds) &&
+      candidate.actionIds.length === 1 &&
+      candidate.actionIds[0] === action.actionId &&
+      candidate.choiceResolution?.kind === "classic_deflector_redirect",
+  );
+  const redirectResolution = redirectSignal?.choiceResolution;
+  const redirectRequirement = action.choiceRequirements?.[0];
+  const redirectOptionId = redirectResolution?.selectedOptionId;
+  const redirectChoiceIsExact =
+    moduleState?.kind === "defense" &&
+    redirectResolution?.sourceStateVersion === input.playerView.stateVersion &&
+    typeof redirectResolution.choiceId === "string" &&
+    action.choiceRequirements?.length === 1 &&
+    redirectRequirement?.choiceId === redirectResolution.choiceId &&
+    redirectRequirement.minSelections === 1 &&
+    redirectRequirement.maxSelections === 1 &&
+    typeof redirectOptionId === "string" &&
+    redirectRequirement.optionIds.includes(redirectOptionId) &&
+    ((redirectResolution.disposition === "decline" &&
+      redirectResolution.selectedServerId === undefined &&
+      redirectOptionId === "decline") ||
+      (redirectResolution.disposition === "redirect" &&
+        typeof redirectResolution.selectedServerId === "string" &&
+        redirectOptionId === `server_${redirectResolution.selectedServerId}`));
+  if (redirectChoiceIsExact) {
+    return {
+      choiceId: redirectResolution.choiceId as string,
+      selectedOptionIds: [redirectOptionId],
+    };
+  }
   const signal = moduleState?.signals?.find(
     (candidate) =>
       candidate.kind === "generic" &&

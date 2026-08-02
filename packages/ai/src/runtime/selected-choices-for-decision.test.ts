@@ -585,6 +585,124 @@ describe("selectedChoicesForDecision", () => {
     ).toThrowError("window_origin_missing");
   });
 
+  it("completes only the Classic Deflector option bound by corp.defend_servers", () => {
+    const input = inputWithChoice({
+      kind: "select_option",
+      source:
+        "card_implementation.classic_deflector:run_8:deflector_ice:0:generic_deflector:generic_deflector.subroutine.1.deflect_run:any_data_fort:2:0",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        { id: "decline", label: "Nicht zahlen", value: "decline" },
+        { id: "server_hq", label: "HQ", value: "hq" },
+        { id: "server_rd", label: "R&D", value: "rd" },
+        { id: "server_archives", label: "Archives", value: "archives" },
+      ],
+    });
+    input.playerView.pendingChoice!.visibility = "public";
+    rememberClassicDeflectorDefenseChoice(input, {
+      selectedOptionId: "server_archives",
+      selectedServerId: "archives",
+      disposition: "redirect",
+    });
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["server_archives"],
+    });
+  });
+
+  it("passes an unquoted installed-card liquidation only through runner.economy", () => {
+    const sourceResourceInstanceId = "liquidation-source";
+    const sourceResourceDefinitionId = "generic-liquidation-resource";
+    const targetInstanceId = "installed-target";
+    const input = inputWithChoice(
+      {
+        kind: "select_option",
+        source: `runner.installed_resource_trash_for_credits:${sourceResourceInstanceId}:7`,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          { id: "pass", label: "No" },
+          {
+            id: `card_${targetInstanceId}`,
+            label: "Target",
+            value: targetInstanceId,
+          },
+        ],
+      },
+      {
+        side: "runner",
+        rig: [
+          {
+            instanceId: sourceResourceInstanceId,
+            definitionId: sourceResourceDefinitionId,
+            known: true,
+            type: "resource",
+          },
+          {
+            instanceId: targetInstanceId,
+            definitionId: "generic-installed-target",
+            known: true,
+            type: "hardware",
+          },
+        ],
+      },
+    );
+    input.playerView.pendingChoice!.visibility = "public";
+    rememberRunnerInstalledCardLiquidationChoice(input, {
+      sourceResourceInstanceId,
+      sourceResourceDefinitionId,
+    });
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["pass"],
+    });
+  });
+
+  it("recognizes the current Engine source for the existing random-dice split resolver", () => {
+    const input = inputWithChoice(
+      {
+        kind: "select_option",
+        source:
+          "card_implementation.random_dice_split:generic-source:3:0:1:0:7",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [0, 1, 2, 3].map((gainedCredits) => ({
+          id: `gain_${gainedCredits}_set_aside_${3 - gainedCredits}`,
+          label: `${gainedCredits} credits`,
+          value: gainedCredits,
+        })),
+      },
+      { side: "runner" },
+    );
+    input.playerView.pendingChoice!.visibility = "public";
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["gain_3_set_aside_0"],
+    });
+  });
+
   it("assigns each Security Purge ICE to one visible server", () => {
     const input = inputWithChoice(
       {
@@ -1668,6 +1786,99 @@ function rememberAgendaPurgeDefenseChoice(
               },
             },
           ],
+        },
+      },
+    ],
+    completionHistory: [],
+    transitions: [],
+  } as never);
+}
+
+function rememberClassicDeflectorDefenseChoice(
+  input: AiDecisionInput,
+  selection:
+    | {
+        selectedOptionId: string;
+        selectedServerId: string;
+        disposition: "redirect";
+      }
+    | { selectedOptionId: "decline"; disposition: "decline" },
+): void {
+  rememberResidentPlanPortfolio(input, {
+    schemaVersion: "resident-plan-portfolio-v2",
+    side: "corp",
+    stateVersion: input.playerView.stateVersion,
+    rootForegroundInstanceId:
+      "plan:corp.defend_servers:server-defense-portfolio",
+    executorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    instances: [
+      {
+        instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        moduleId: "corp.defend_servers",
+        executionState: "executor",
+        moduleState: {
+          kind: "defense",
+          signals: [
+            {
+              kind: "generic",
+              phase: "resolve_run_redirect",
+              actionIds: ["corp.resolve_choice"],
+              choiceResolution: {
+                kind: "classic_deflector_redirect",
+                choiceId: "choice_multi",
+                sourceStateVersion: input.playerView.stateVersion,
+                runId: "run_8",
+                sourceIceInstanceId: "deflector_ice",
+                sourceDefinitionId: "generic_deflector",
+                subroutineIndex: 0,
+                subroutineId: "generic_deflector.subroutine.1.deflect_run",
+                targetProfile: "any_data_fort",
+                creditCost: 2,
+                autoBreakIfNoTarget: false,
+                ...selection,
+              },
+            },
+          ],
+        },
+      },
+    ],
+    completionHistory: [],
+    transitions: [],
+  } as never);
+}
+
+function rememberRunnerInstalledCardLiquidationChoice(
+  input: AiDecisionInput,
+  source: {
+    sourceResourceInstanceId: string;
+    sourceResourceDefinitionId: string;
+  },
+): void {
+  rememberResidentPlanPortfolio(input, {
+    schemaVersion: "resident-plan-portfolio-v2",
+    side: "runner",
+    stateVersion: input.playerView.stateVersion,
+    rootForegroundInstanceId:
+      "plan:runner.economy:installed-card-liquidation%3Achoice_multi",
+    executorInstanceId:
+      "plan:runner.economy:installed-card-liquidation%3Achoice_multi",
+    instances: [
+      {
+        instanceId:
+          "plan:runner.economy:installed-card-liquidation%3Achoice_multi",
+        moduleId: "runner.economy",
+        executionState: "executor",
+        moduleState: {
+          kind: "installed_card_liquidation_choice",
+          signal: {
+            conversionId: "installed-card-liquidation:choice_multi",
+            ...source,
+            actionId: "runner.resolve_choice",
+            choiceId: "choice_multi",
+            sourceStateVersion: input.playerView.stateVersion,
+            selectedOptionId: "pass",
+            disposition: "decline_unpriced_conversion",
+          },
         },
       },
     ],

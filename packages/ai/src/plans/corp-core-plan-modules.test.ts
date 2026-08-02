@@ -13,6 +13,7 @@ import {
 import {
   CORP_CORE_ACTION_OWNERSHIP,
   corpAgendaPurgeDefenseChoiceSignal,
+  corpClassicDeflectorDefenseChoiceSignal,
   corpCoreActionOwner,
   corpDefenseActionDispositions,
   corpDefensePortfolioHasExecutableRoute,
@@ -166,6 +167,179 @@ describe("Corp core plan modules", () => {
             optionId: "agenda_purge_razor-wire-1_rd",
           },
         ],
+      },
+    });
+  });
+
+  it("assigns a paid Classic Deflector redirect through corp.defend_servers", () => {
+    const choiceId = "classic_deflector_11";
+    const actionId = "corp.resolve_choice";
+    const sourceIceId = "deflector-ice";
+    const sourceDefinitionId = "generic-deflector";
+    const subroutineId = "generic-deflector.subroutine.1.deflect_run";
+    const options = [
+      { id: "decline", label: "Nicht zahlen", value: "decline" },
+      { id: "server_hq", label: "HQ", value: "hq" },
+      { id: "server_rd", label: "R&D", value: "rd" },
+      { id: "server_archives", label: "Archives", value: "archives" },
+      { id: "server_remote_1", label: "Remote 1", value: "remote_1" },
+    ];
+    const input = {
+      side: "corp",
+      legalActions: [
+        {
+          actionId,
+          side: "corp",
+          type: "resolve_choice",
+          source: "game_rule",
+          timingPoint: "run.encounter_ice",
+          expiresAtStateVersion: 11,
+          choiceRequirements: [
+            {
+              choiceId,
+              minSelections: 1,
+              maxSelections: 1,
+              optionIds: options.map((option) => option.id),
+            },
+          ],
+          targetRequirements: [],
+          costs: [],
+        },
+      ],
+      playerView: {
+        stateVersion: 11,
+        timingPoint: "run.encounter_ice",
+        pendingChoice: {
+          choiceId,
+          side: "corp",
+          kind: "select_option",
+          visibility: "public",
+          source: `card_implementation.classic_deflector:run_8:${sourceIceId}:0:${sourceDefinitionId}:${subroutineId}:any_data_fort:2:0`,
+          stateVersion: 11,
+          minSelections: 1,
+          maxSelections: 1,
+          options,
+        },
+        own: {
+          credits: 3,
+          gripOrHq: [],
+          heapOrArchives: [],
+        },
+        run: {
+          attackedServerId: "rd",
+          phase: "encounter_ice",
+          position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+          encounteredIce: {
+            instanceId: sourceIceId,
+            definitionId: sourceDefinitionId,
+            type: "ice",
+            known: true,
+            rezzed: true,
+          },
+        },
+        servers: [
+          { id: "hq", label: "HQ", ice: [], root: [] },
+          {
+            id: "rd",
+            label: "R&D",
+            ice: [
+              {
+                instanceId: sourceIceId,
+                definitionId: sourceDefinitionId,
+                type: "ice",
+                known: true,
+                rezzed: true,
+                effectiveRunQuote: {
+                  iceInstanceId: sourceIceId,
+                  iceDefinitionId: sourceDefinitionId,
+                  effectiveStrength: 4,
+                  subroutines: [
+                    {
+                      id: subroutineId,
+                      type: "deflect_run",
+                      deflectorTarget: "any_data_fort",
+                      deflectorCost: 2,
+                    },
+                  ],
+                },
+              },
+            ],
+            root: [],
+          },
+          { id: "archives", label: "Archives", ice: [], root: [] },
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [],
+            root: [{ instanceId: "asset", type: "asset", known: true }],
+          },
+        ],
+      },
+    } as unknown as AiDecisionInput;
+
+    expect(
+      corpClassicDeflectorDefenseChoiceSignal(
+        input,
+        [candidate(actionId, "resolve_choice", "choice.resolve")],
+        knownCentralAllocation("rd"),
+        0,
+      ),
+    ).toMatchObject({
+      kind: "generic",
+      phase: "resolve_run_redirect",
+      actionIds: [actionId],
+      serverId: "archives",
+      evidenceCode: "classic_deflector_redirect_owned_by_corp_defend_servers",
+      choiceResolution: {
+        kind: "classic_deflector_redirect",
+        choiceId,
+        sourceIceInstanceId: sourceIceId,
+        sourceDefinitionId,
+        subroutineId,
+        selectedOptionId: "server_archives",
+        selectedServerId: "archives",
+        disposition: "redirect",
+      },
+    });
+
+    expect(
+      corpClassicDeflectorDefenseChoiceSignal(
+        input,
+        [candidate(actionId, "resolve_choice", "choice.resolve")],
+        knownCentralAllocation("rd"),
+        2,
+      ),
+    ).toMatchObject({
+      phase: "resolve_run_redirect",
+      serverId: "rd",
+      choiceResolution: {
+        kind: "classic_deflector_redirect",
+        selectedOptionId: "decline",
+        disposition: "decline",
+      },
+    });
+
+    const mandatoryOptions = options.filter(
+      (option) => option.id !== "decline",
+    );
+    input.playerView.pendingChoice!.source = `card_implementation.classic_deflector:run_8:${sourceIceId}:0:${sourceDefinitionId}:${subroutineId}:any_data_fort:0:0`;
+    input.playerView.pendingChoice!.options = mandatoryOptions;
+    input.legalActions[0]!.choiceRequirements![0]!.optionIds =
+      mandatoryOptions.map((option) => option.id);
+    input.playerView.servers[1]!.ice[0]!.effectiveRunQuote!.subroutines[0]!.deflectorCost = 0;
+    expect(
+      corpClassicDeflectorDefenseChoiceSignal(
+        input,
+        [candidate(actionId, "resolve_choice", "choice.resolve")],
+        knownCentralAllocation("rd"),
+        3,
+      ),
+    ).toMatchObject({
+      phase: "resolve_run_redirect",
+      serverId: "archives",
+      choiceResolution: {
+        selectedOptionId: "server_archives",
+        disposition: "redirect",
       },
     });
   });

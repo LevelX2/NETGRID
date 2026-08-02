@@ -41,6 +41,7 @@ import {
 import {
   assessCorpEconomyFundingRoute,
   corpAgendaPurgeDefenseChoiceSignal,
+  corpClassicDeflectorDefenseChoiceSignal,
   corpScorePriorityClass,
   corpScorePlanTarget,
   corpDefenseActionDispositions,
@@ -75,6 +76,7 @@ import {
   runnerDevelopmentCardAdmission,
   runnerExactBasicLiquidCreditCandidate,
   runnerFundingRouteCandidateIsMaterializable,
+  runnerInstalledCardLiquidationChoiceSignal,
   type RunnerCorePlanDomain,
   type RunnerFundingNeedSignal,
   type RunnerFundingRouteAssessment,
@@ -2474,6 +2476,8 @@ function buildRunnerDomain(
 ): RunnerPlanDomain {
   const currentCredits = input.playerView.own.credits;
   const remainingClicks = input.playerView.own.clicks;
+  const installedCardLiquidationChoice =
+    runnerInstalledCardLiquidationChoiceSignal(input, candidates);
   const exactBasicCreditActionIds = uniqueBy(
     candidates
       .filter(runnerExactBasicLiquidCreditCandidate)
@@ -4071,6 +4075,9 @@ function buildRunnerDomain(
     coverageGaps,
     creditBanks,
     recurringEconomy,
+    installedCardLiquidationChoices: installedCardLiquidationChoice
+      ? [installedCardLiquidationChoice]
+      : [],
     resourceLifecycle,
     installedAgendaScores,
     shellTradersPipelines,
@@ -7529,6 +7536,19 @@ function buildCorpDomain(
         ]
       : []),
   ];
+  const requiredScoreCreditFloor = Math.max(
+    0,
+    ...scoreProjects.map(
+      (project) =>
+        project.continuationReserve?.requiredCreditsBeforeNextCorpTurn ?? 0,
+    ),
+  );
+  const classicDeflectorDefenseChoice = corpClassicDeflectorDefenseChoiceSignal(
+    input,
+    candidates,
+    centralDefenseAllocation,
+    requiredScoreCreditFloor,
+  );
   const ambushes: CorpPlanDomain["ambushes"] = buildCorpAmbushPlanSignals({
     input,
     candidates,
@@ -8360,6 +8380,7 @@ function buildCorpDomain(
       ...defenseDrawSignals,
       ...consumedDefenseDrawSignals,
       ...(agendaPurgeDefenseChoice ? [agendaPurgeDefenseChoice] : []),
+      ...(classicDeflectorDefenseChoice ? [classicDeflectorDefenseChoice] : []),
     ]);
   const genuineCurrentDefenseThreat = mergedDefenseNeeds.some(
     (signal) =>
@@ -12765,6 +12786,20 @@ function resolveEngineWindow(
   if (
     context.input.playerView.pendingChoice?.source.startsWith(
       "card_implementation.agenda_purge_install_targets:",
+    )
+  ) {
+    return undefined;
+  }
+  if (
+    context.input.playerView.pendingChoice?.source.startsWith(
+      "card_implementation.classic_deflector:",
+    )
+  ) {
+    return undefined;
+  }
+  if (
+    context.input.playerView.pendingChoice?.source.startsWith(
+      "runner.installed_resource_trash_for_credits:",
     )
   ) {
     return undefined;

@@ -182,6 +182,20 @@ export type RunnerRecurringEconomySignal = {
   evidenceCodes: string[];
 };
 
+export type RunnerInstalledCardLiquidationChoiceSignal = {
+  conversionId: string;
+  sourceResourceInstanceId: string;
+  sourceResourceDefinitionId: string;
+  actionId: string;
+  choiceId: string;
+  sourceStateVersion: number;
+  selectedOptionId: "pass";
+  disposition: "decline_unpriced_conversion";
+  priorityClass: "P4";
+  value: number;
+  evidenceCodes: string[];
+};
+
 export type RunnerInstalledAgendaScoreSignal = {
   opportunityId: string;
   sourceCardInstanceId: string;
@@ -248,6 +262,7 @@ export type RunnerCorePlanDomain = {
   defense: RunnerDefenseSignals;
   creditBanks: RunnerCreditBankSignal[];
   recurringEconomy?: RunnerRecurringEconomySignal[];
+  installedCardLiquidationChoices?: RunnerInstalledCardLiquidationChoiceSignal[];
   installedAgendaScores?: RunnerInstalledAgendaScoreSignal[];
   resourceLifecycle?: RunnerResourceLifecycleSignal[];
   shellTradersPipelines?: RunnerShellTradersPipelineSignal[];
@@ -325,7 +340,118 @@ export function runnerFundingRouteCandidateIsMaterializable(
   );
 }
 
-type EconomyState = { kind: "economy"; need: RunnerFundingNeedSignal };
+export function runnerInstalledCardLiquidationChoiceSignal(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+): RunnerInstalledCardLiquidationChoiceSignal | undefined {
+  const choice = input.playerView.pendingChoice;
+  if (
+    input.side !== "runner" ||
+    choice?.side !== "runner" ||
+    choice.kind !== "select_option" ||
+    choice.visibility !== "public" ||
+    choice.stateVersion !== input.playerView.stateVersion ||
+    choice.minSelections !== 1 ||
+    choice.maxSelections !== 1
+  ) {
+    return undefined;
+  }
+  const sourceMatch =
+    /^runner\.installed_resource_trash_for_credits:([^:]+):([0-9]+)$/.exec(
+      choice.source,
+    );
+  const sourceResourceInstanceId = sourceMatch?.[1];
+  const sourceStateVersion = Number(sourceMatch?.[2]);
+  const rig = input.playerView.own.rig ?? [];
+  const sourceResource = sourceResourceInstanceId
+    ? rig.find(
+        (card) =>
+          card.instanceId === sourceResourceInstanceId &&
+          card.known &&
+          card.type === "resource" &&
+          typeof card.definitionId === "string" &&
+          card.definitionId.length > 0,
+      )
+    : undefined;
+  const action = input.legalActions.find(
+    (legalAction) =>
+      legalAction.side === "runner" &&
+      legalAction.type === "resolve_choice" &&
+      legalAction.source === "game_rule" &&
+      legalAction.timingPoint === input.playerView.timingPoint &&
+      legalAction.expiresAtStateVersion === input.playerView.stateVersion &&
+      legalAction.choiceRequirements?.length === 1 &&
+      legalAction.choiceRequirements[0]?.choiceId === choice.choiceId,
+  );
+  const candidate = action
+    ? candidates.find(
+        (entry) =>
+          entry.actionId === action.actionId &&
+          entry.semanticActionType === "choice.resolve",
+      )
+    : undefined;
+  const requirement = action?.choiceRequirements?.[0];
+  const choiceOptionIds = choice.options.map((option) => option.id);
+  const exactActionBinding =
+    requirement !== undefined &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === choiceOptionIds.length &&
+    choiceOptionIds.every((optionId) =>
+      requirement.optionIds.includes(optionId),
+    );
+  const eligibleCards = rig.filter(
+    (card) => card.instanceId !== sourceResourceInstanceId,
+  );
+  const optionById = new Map(
+    choice.options.map((option) => [option.id, option]),
+  );
+  const passOption = optionById.get("pass");
+  const exactOptionMatrix =
+    choice.options.length === eligibleCards.length + 1 &&
+    passOption !== undefined &&
+    passOption.selectable !== false &&
+    passOption.value === undefined &&
+    eligibleCards.every((card) => {
+      const option = optionById.get(`card_${card.instanceId}`);
+      return option?.selectable !== false && option?.value === card.instanceId;
+    });
+  if (
+    !sourceResourceInstanceId ||
+    !sourceResource?.definitionId ||
+    sourceStateVersion !== input.playerView.stateVersion ||
+    !action ||
+    !candidate ||
+    !exactActionBinding ||
+    !exactOptionMatrix ||
+    eligibleCards.length === 0
+  ) {
+    return undefined;
+  }
+  return {
+    conversionId: `installed-card-liquidation:${choice.choiceId}`,
+    sourceResourceInstanceId,
+    sourceResourceDefinitionId: sourceResource.definitionId,
+    actionId: action.actionId,
+    choiceId: choice.choiceId,
+    sourceStateVersion,
+    selectedOptionId: "pass",
+    disposition: "decline_unpriced_conversion",
+    priorityClass: "P4",
+    value: 1_000,
+    evidenceCodes: [
+      "runner_installed_card_liquidation_choice_owned_by_economy",
+      "runner_installed_card_liquidation_declined_without_exact_target_value_quote",
+    ],
+  };
+}
+
+type EconomyState =
+  | { kind: "economy"; need: RunnerFundingNeedSignal }
+  | {
+      kind: "installed_card_liquidation_choice";
+      signal: RunnerInstalledCardLiquidationChoiceSignal;
+    };
 type CoverageState = {
   kind: "coverage";
   gap: RunnerCoverageGapSignal;
@@ -757,8 +883,8 @@ function economyModule(): PlanModule {
   return {
     moduleId: "runner.economy",
     side: "runner",
-    discover: (context) =>
-      domain(context)
+    discover: (context) => [
+      ...domain(context)
         .fundingNeeds.filter((need) => need.gap > 0)
         .map((need) => {
           const validSupportContract = validRunnerFundingNeedContract(
@@ -789,8 +915,42 @@ function economyModule(): PlanModule {
               : {}),
           });
         }),
+      ...(domain(context).installedCardLiquidationChoices ?? []).map((signal) =>
+        proposal({
+          moduleId: "runner.economy",
+          dedupeKey: signal.conversionId,
+          moduleState: {
+            kind: "installed_card_liquidation_choice",
+            signal,
+          } satisfies EconomyState,
+          priorityClass: signal.priorityClass,
+          target: {
+            kind: "card",
+            id: signal.sourceResourceDefinitionId,
+          },
+          routeExists:
+            installedCardLiquidationChoiceCandidates(context, signal).length >
+            0,
+          blockerCode: "installed_card_liquidation_choice_unavailable",
+          evidenceCode:
+            signal.evidenceCodes[0] ??
+            "runner_installed_card_liquidation_choice_owned_by_economy",
+        }),
+      ),
+    ],
     assess: (instance, context, portfolio) => {
-      const need = state<EconomyState>(instance).need;
+      const economyState = state<EconomyState>(instance);
+      if (economyState.kind === "installed_card_liquidation_choice") {
+        const signal = economyState.signal;
+        return assessment(
+          instance,
+          signal.priorityClass,
+          installedCardLiquidationChoiceCandidates(context, signal).length > 0,
+          signal.value,
+          portfolio.executorInstanceId,
+        );
+      }
+      const need = economyState.need;
       const parentIsResidentAndMaterial =
         need.kind === "portfolio_reserve" ||
         need.kind === "develop_liquidity" ||
@@ -834,7 +994,27 @@ function economyModule(): PlanModule {
       return result;
     },
     materialize: (instance, _assessment, context) => {
-      const need = state<EconomyState>(instance).need;
+      const economyState = state<EconomyState>(instance);
+      if (economyState.kind === "installed_card_liquidation_choice") {
+        const signal = economyState.signal;
+        const candidates = installedCardLiquidationChoiceCandidates(
+          context,
+          signal,
+        );
+        return {
+          step: {
+            stepId: `${instance.instanceId}:resolve_optional_liquidation`,
+            capability: {
+              capabilityId: "resolve_optional_installed_card_liquidation",
+              semanticActionTypes: ["choice.resolve"],
+            },
+            purpose:
+              "Resolve the current optional installed-card liquidation without inventing an unquoted target valuation.",
+          },
+          candidates,
+        };
+      }
+      const need = economyState.need;
       const candidates = economyCandidates(context, need);
       return {
         step: {
@@ -856,6 +1036,30 @@ function economyModule(): PlanModule {
       };
     },
   };
+}
+
+function installedCardLiquidationChoiceCandidates(
+  context: PlanSchedulerContext,
+  signal: RunnerInstalledCardLiquidationChoiceSignal,
+): PlanMaterialization["candidates"] {
+  return context.actionCandidates
+    .filter(
+      (candidate) =>
+        candidate.actionId === signal.actionId &&
+        candidate.semanticActionType === "choice.resolve" &&
+        context.input.legalActions.some(
+          (action) =>
+            action.actionId === candidate.actionId &&
+            action.side === "runner" &&
+            action.type === "resolve_choice" &&
+            action.timingPoint === context.input.playerView.timingPoint &&
+            action.expiresAtStateVersion ===
+              context.input.playerView.stateVersion &&
+            action.choiceRequirements?.length === 1 &&
+            action.choiceRequirements[0]?.choiceId === signal.choiceId,
+        ),
+    )
+    .map((candidate) => ({ candidate, stepValue: signal.value }));
 }
 
 function coverageModule(

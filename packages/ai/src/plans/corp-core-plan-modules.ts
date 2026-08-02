@@ -146,6 +146,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     | "install_ice"
     | "install_defense_support"
     | "resolve_install_targets"
+    | "resolve_run_redirect"
     | "draw_for_ice"
     | "rez_response"
     | "activate_run_defense"
@@ -173,18 +174,35 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
   }>;
   rezRoute?: CorpExactIceRezRouteProjection;
   value: number;
-  choiceResolution?: {
-    kind: "agenda_purge_install_targets";
-    choiceId: string;
-    sourceAgendaId: string;
-    sourceStateVersion: number;
-    revealedCardIds: string[];
-    targets: Array<{
-      cardId: string;
-      serverId: string;
-      optionId: string;
-    }>;
-  };
+  choiceResolution?:
+    | {
+        kind: "agenda_purge_install_targets";
+        choiceId: string;
+        sourceAgendaId: string;
+        sourceStateVersion: number;
+        revealedCardIds: string[];
+        targets: Array<{
+          cardId: string;
+          serverId: string;
+          optionId: string;
+        }>;
+      }
+    | {
+        kind: "classic_deflector_redirect";
+        choiceId: string;
+        sourceStateVersion: number;
+        runId: string;
+        sourceIceInstanceId: string;
+        sourceDefinitionId: string;
+        subroutineIndex: number;
+        subroutineId: string;
+        targetProfile: "archives" | "any_data_fort" | "subsidiary_data_fort";
+        creditCost: number;
+        autoBreakIfNoTarget: boolean;
+        selectedOptionId: string;
+        disposition: "redirect" | "decline";
+        selectedServerId?: string;
+      };
   drawAttemptState?: {
     turnKey: string;
     remainingAttempts: 0 | 1;
@@ -640,6 +658,282 @@ export function corpAgendaPurgeDefenseChoiceSignal(
   };
 }
 
+type ClassicDeflectorChoiceContext = Readonly<{
+  runId: string;
+  sourceIceInstanceId: string;
+  subroutineIndex: number;
+  sourceDefinitionId: string;
+  subroutineId: string;
+  targetProfile: "archives" | "any_data_fort" | "subsidiary_data_fort";
+  creditCost: number;
+  autoBreakIfNoTarget: boolean;
+}>;
+
+export function corpClassicDeflectorDefenseChoiceSignal(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  centralAllocation: CorpCentralDefenseAllocation | undefined,
+  requiredCreditFloor: number,
+): CorpGenericDefenseSignal | undefined {
+  const choice = input.playerView.pendingChoice;
+  const context = choice
+    ? parseClassicDeflectorChoiceContext(choice.source)
+    : undefined;
+  if (
+    input.side !== "corp" ||
+    choice?.side !== "corp" ||
+    choice.kind !== "select_option" ||
+    choice.visibility !== "public" ||
+    choice.stateVersion !== input.playerView.stateVersion ||
+    choice.minSelections !== 1 ||
+    choice.maxSelections !== 1 ||
+    !context ||
+    !knownNonNegativeInteger(requiredCreditFloor)
+  ) {
+    return undefined;
+  }
+  const action = input.legalActions.find(
+    (legalAction) =>
+      legalAction.side === "corp" &&
+      legalAction.type === "resolve_choice" &&
+      legalAction.source === "game_rule" &&
+      legalAction.timingPoint === input.playerView.timingPoint &&
+      legalAction.expiresAtStateVersion === input.playerView.stateVersion &&
+      legalAction.choiceRequirements?.length === 1 &&
+      legalAction.choiceRequirements[0]?.choiceId === choice.choiceId,
+  );
+  const candidate = action
+    ? candidates.find(
+        (entry) =>
+          entry.actionId === action.actionId &&
+          entry.semanticActionType === "choice.resolve",
+      )
+    : undefined;
+  const requirement = action?.choiceRequirements?.[0];
+  const choiceOptionIds = choice.options.map((option) => option.id);
+  const exactActionBinding =
+    requirement !== undefined &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === choiceOptionIds.length &&
+    choiceOptionIds.every((optionId) =>
+      requirement.optionIds.includes(optionId),
+    );
+  const run = input.playerView.run;
+  const sourceServer = run
+    ? input.playerView.servers.find(
+        (server) =>
+          server.id === run.position?.serverId &&
+          run.position.kind === "ice" &&
+          server.ice[run.position.iceIndex]?.instanceId ===
+            context.sourceIceInstanceId,
+      )
+    : undefined;
+  const sourceIce = sourceServer?.ice.find(
+    (ice) => ice.instanceId === context.sourceIceInstanceId,
+  );
+  const quotedSubroutine =
+    sourceIce?.effectiveRunQuote?.subroutines[context.subroutineIndex];
+  if (
+    !action ||
+    !candidate ||
+    !exactActionBinding ||
+    !run ||
+    run.phase !== "encounter_ice" ||
+    run.encounteredIce?.instanceId !== context.sourceIceInstanceId ||
+    sourceIce?.definitionId !== context.sourceDefinitionId ||
+    sourceIce.rezzed !== true ||
+    sourceIce.effectiveRunQuote?.iceInstanceId !==
+      context.sourceIceInstanceId ||
+    sourceIce.effectiveRunQuote.iceDefinitionId !==
+      context.sourceDefinitionId ||
+    quotedSubroutine?.id !== context.subroutineId ||
+    quotedSubroutine.type !== "deflect_run" ||
+    quotedSubroutine.deflectorTarget !== context.targetProfile ||
+    (quotedSubroutine.deflectorCost ?? 0) !== context.creditCost ||
+    (quotedSubroutine.deflectorAutoBreakIfNoTarget === true) !==
+      context.autoBreakIfNoTarget
+  ) {
+    return undefined;
+  }
+
+  const eligibleServerIds = input.playerView.servers
+    .filter((server) =>
+      context.targetProfile === "archives"
+        ? server.id === "archives"
+        : context.targetProfile === "subsidiary_data_fort"
+          ? server.id.startsWith("remote_")
+          : true,
+    )
+    .map((server) => server.id);
+  const eligibleServerIdSet = new Set<string>(eligibleServerIds);
+  const optionsByServerId = new Map<string, string>();
+  let declineOptionId: string | undefined;
+  for (const option of choice.options) {
+    if (option.selectable === false || typeof option.value !== "string") {
+      return undefined;
+    }
+    if (option.value === "decline") {
+      if (declineOptionId || option.id !== "decline") return undefined;
+      declineOptionId = option.id;
+      continue;
+    }
+    if (
+      !eligibleServerIdSet.has(option.value) ||
+      option.id !== `server_${option.value}` ||
+      optionsByServerId.has(option.value)
+    ) {
+      return undefined;
+    }
+    optionsByServerId.set(option.value, option.id);
+  }
+  if (
+    optionsByServerId.size !== eligibleServerIds.length ||
+    eligibleServerIds.some((serverId) => !optionsByServerId.has(serverId)) ||
+    context.creditCost > 0 !== (declineOptionId !== undefined)
+  ) {
+    return undefined;
+  }
+
+  const redirectTargets = eligibleServerIds
+    .filter((serverId) => serverId !== run.attackedServerId)
+    .sort((left, right) => {
+      const difference =
+        classicDeflectorServerExposure(input, left, centralAllocation) -
+        classicDeflectorServerExposure(input, right, centralAllocation);
+      return difference || technicalCompare(left, right);
+    });
+  const selectedServerId = redirectTargets[0];
+  const sourceExposure =
+    classicDeflectorServerExposure(
+      input,
+      run.attackedServerId,
+      centralAllocation,
+    ) + 1_000;
+  const targetExposure = selectedServerId
+    ? classicDeflectorServerExposure(input, selectedServerId, centralAllocation)
+    : Number.POSITIVE_INFINITY;
+  const canPay =
+    input.playerView.own.credits - context.creditCost >= requiredCreditFloor;
+  const redirectIsProductive =
+    selectedServerId !== undefined &&
+    (context.creditCost === 0 ||
+      (canPay && sourceExposure - targetExposure > context.creditCost * 250));
+  const selectedOptionId = redirectIsProductive
+    ? optionsByServerId.get(selectedServerId!)
+    : declineOptionId;
+  if (!selectedOptionId) return undefined;
+
+  return {
+    kind: "generic",
+    defenseId: `classic-deflector:${choice.choiceId}`,
+    serverId: redirectIsProductive ? selectedServerId! : run.attackedServerId,
+    phase: "resolve_run_redirect",
+    sourceDefinitionIds: [context.sourceDefinitionId],
+    actionIds: [action.actionId],
+    urgent: true,
+    value: 1_000 + Math.max(0, sourceExposure - targetExposure),
+    evidenceCode: "classic_deflector_redirect_owned_by_corp_defend_servers",
+    choiceResolution: {
+      kind: "classic_deflector_redirect",
+      choiceId: choice.choiceId,
+      sourceStateVersion: input.playerView.stateVersion,
+      runId: context.runId,
+      sourceIceInstanceId: context.sourceIceInstanceId,
+      sourceDefinitionId: context.sourceDefinitionId,
+      subroutineIndex: context.subroutineIndex,
+      subroutineId: context.subroutineId,
+      targetProfile: context.targetProfile,
+      creditCost: context.creditCost,
+      autoBreakIfNoTarget: context.autoBreakIfNoTarget,
+      selectedOptionId,
+      disposition: redirectIsProductive ? "redirect" : "decline",
+      ...(redirectIsProductive ? { selectedServerId } : {}),
+    },
+  };
+}
+
+function parseClassicDeflectorChoiceContext(
+  source: string,
+): ClassicDeflectorChoiceContext | undefined {
+  const parts = source.split(":");
+  if (
+    parts.length !== 9 ||
+    parts[0] !== "card_implementation.classic_deflector" ||
+    !parts[1] ||
+    !parts[2] ||
+    !parts[4] ||
+    !parts[5] ||
+    (parts[6] !== "archives" &&
+      parts[6] !== "any_data_fort" &&
+      parts[6] !== "subsidiary_data_fort")
+  ) {
+    return undefined;
+  }
+  const subroutineIndex = Number(parts[3]);
+  const creditCost = Number(parts[7]);
+  if (
+    !knownNonNegativeInteger(subroutineIndex) ||
+    !knownNonNegativeInteger(creditCost) ||
+    (parts[8] !== "0" && parts[8] !== "1")
+  ) {
+    return undefined;
+  }
+  try {
+    return {
+      runId: decodeURIComponent(parts[1]),
+      sourceIceInstanceId: decodeURIComponent(parts[2]),
+      subroutineIndex,
+      sourceDefinitionId: decodeURIComponent(parts[4]),
+      subroutineId: decodeURIComponent(parts[5]),
+      targetProfile: parts[6],
+      creditCost,
+      autoBreakIfNoTarget: parts[8] === "1",
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+function classicDeflectorServerExposure(
+  input: AiDecisionInput,
+  serverId: string,
+  centralAllocation: CorpCentralDefenseAllocation | undefined,
+): number {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) return Number.POSITIVE_INFINITY;
+  const ownAgendaCount =
+    serverId === "hq"
+      ? input.playerView.own.gripOrHq.filter((card) => card.type === "agenda")
+          .length
+      : serverId === "archives"
+        ? input.playerView.own.heapOrArchives.filter(
+            (card) => card.type === "agenda",
+          ).length
+        : server.root.filter((card) => card.known && card.type === "agenda")
+            .length;
+  const centralBase = serverId === "rd" ? 1_500 : serverId === "hq" ? 1_000 : 0;
+  const allocationPressure =
+    centralAllocation?.status === "known" &&
+    centralAllocation.selectedServerId === serverId
+      ? 2_000
+      : 0;
+  const visibleRootValue = server.root.length * 250;
+  const outermostRezzedIce = [...server.ice]
+    .reverse()
+    .find((ice) => ice.rezzed === true);
+  const rezzedIceProtection = outermostRezzedIce ? 1_000 : 0;
+  return (
+    ownAgendaCount * 5_000 +
+    centralBase +
+    allocationPressure +
+    visibleRootValue -
+    rezzedIceProtection
+  );
+}
+
 function corpAgendaPurgeDefenseTargetValue(
   input: AiDecisionInput,
   serverId: string,
@@ -801,10 +1095,8 @@ function scoreAssessmentValue(signal: CorpScoreProjectSignal): number {
   if (signal.terminalScore) return 1_000 + agendaPointValue + conversionValue;
   if (signal.preventsTerminalSteal)
     return 2_000 + agendaPointValue + conversionValue;
-  if (signal.deadlinePressure)
-    return 700 + agendaPointValue + conversionValue;
-  if (signal.sameTurnCloseout)
-    return 500 + agendaPointValue + conversionValue;
+  if (signal.deadlinePressure) return 700 + agendaPointValue + conversionValue;
+  if (signal.sameTurnCloseout) return 500 + agendaPointValue + conversionValue;
   return 100 + agendaPointValue + conversionValue;
 }
 
@@ -1152,6 +1444,7 @@ export function corpGenericDefensePriorityClass(
         (signal.phase === "install_ice" ||
           signal.phase === "install_defense_support" ||
           signal.phase === "resolve_install_targets" ||
+          signal.phase === "resolve_run_redirect" ||
           signal.phase === "activate_run_defense" ||
           (signal.phase === "rez_response" &&
             signal.rezWindowVerdict === "productive")),
@@ -2126,7 +2419,11 @@ function defenseCandidates(
       )
       .map((candidate) => ({ candidate, stepValue: 1 }));
   }
-  if (signal.phase === "resolve_install_targets" && signal.choiceResolution) {
+  if (
+    (signal.phase === "resolve_install_targets" ||
+      signal.phase === "resolve_run_redirect") &&
+    signal.choiceResolution
+  ) {
     const resolution = signal.choiceResolution;
     return context.actionCandidates
       .filter(
@@ -4098,6 +4395,11 @@ function isValidDefenseSignal(
           validAgendaPurgeDefenseChoiceResolution(
             value.choiceResolution,
             value,
+          )) ||
+        (value.phase === "resolve_run_redirect" &&
+          validClassicDeflectorDefenseChoiceResolution(
+            value.choiceResolution,
+            value,
           ))) &&
       (value.rezRoute === undefined ||
         (value.phase === "rez_response" &&
@@ -4233,6 +4535,62 @@ function validAgendaPurgeDefenseChoiceResolution(
   );
 }
 
+function validClassicDeflectorDefenseChoiceResolution(
+  resolutionValue: unknown,
+  signalValue: Record<string, unknown>,
+): boolean {
+  if (!resolutionValue || typeof resolutionValue !== "object") return false;
+  const resolution = resolutionValue as Record<string, unknown>;
+  const actionIds = signalValue.actionIds;
+  const disposition = resolution.disposition;
+  const selectedServerId = resolution.selectedServerId;
+  return (
+    hasOnlyKeys(
+      resolution,
+      new Set([
+        "kind",
+        "choiceId",
+        "sourceStateVersion",
+        "runId",
+        "sourceIceInstanceId",
+        "sourceDefinitionId",
+        "subroutineIndex",
+        "subroutineId",
+        "targetProfile",
+        "creditCost",
+        "autoBreakIfNoTarget",
+        "selectedOptionId",
+        "disposition",
+        "selectedServerId",
+      ]),
+    ) &&
+    resolution.kind === "classic_deflector_redirect" &&
+    nonEmptyString(resolution.choiceId) &&
+    knownNonNegativeInteger(resolution.sourceStateVersion) &&
+    nonEmptyString(resolution.runId) &&
+    nonEmptyString(resolution.sourceIceInstanceId) &&
+    nonEmptyString(resolution.sourceDefinitionId) &&
+    knownNonNegativeInteger(resolution.subroutineIndex) &&
+    nonEmptyString(resolution.subroutineId) &&
+    (resolution.targetProfile === "archives" ||
+      resolution.targetProfile === "any_data_fort" ||
+      resolution.targetProfile === "subsidiary_data_fort") &&
+    knownNonNegativeInteger(resolution.creditCost) &&
+    typeof resolution.autoBreakIfNoTarget === "boolean" &&
+    nonEmptyString(resolution.selectedOptionId) &&
+    (disposition === "redirect" || disposition === "decline") &&
+    (disposition === "redirect"
+      ? nonEmptyString(selectedServerId) &&
+        resolution.selectedOptionId === `server_${selectedServerId}` &&
+        signalValue.serverId === selectedServerId
+      : selectedServerId === undefined &&
+        resolution.selectedOptionId === "decline") &&
+    Array.isArray(actionIds) &&
+    actionIds.length === 1 &&
+    nonEmptyString(actionIds[0])
+  );
+}
+
 function isGenericDefenseSignal(
   signal: CorpDefenseSignal,
 ): signal is CorpGenericDefenseSignal {
@@ -4264,6 +4622,7 @@ function genericDefensePhase(
     value === "install_ice" ||
     value === "install_defense_support" ||
     value === "resolve_install_targets" ||
+    value === "resolve_run_redirect" ||
     value === "draw_for_ice" ||
     value === "rez_response" ||
     value === "activate_run_defense" ||

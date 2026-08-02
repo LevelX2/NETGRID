@@ -4,6 +4,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 import { instantiatePlanProposal } from "./plan-instance";
 import {
   createRunnerCorePlanModules,
+  runnerInstalledCardLiquidationChoiceSignal,
   runnerCoveragePlanHandDisposition,
   runnerDevelopmentCardAdmission,
   runnerFundingRouteCandidateIsMaterializable,
@@ -27,6 +28,94 @@ describe("Runner core plan modules", () => {
       "runner.rig_and_coverage",
       "runner.defense_and_recovery",
     ]);
+  });
+
+  it("binds an optional installed-card liquidation conservatively to runner.economy", () => {
+    const actionId = "runner.resolve_choice";
+    const choiceId = "runner_liquidation_42";
+    const sourceResourceInstanceId = "liquidation-source";
+    const sourceResourceDefinitionId = "generic-liquidation-resource";
+    const targetInstanceId = "installed-target";
+    const input = {
+      side: "runner",
+      legalActions: [
+        {
+          actionId,
+          side: "runner",
+          type: "resolve_choice",
+          source: "game_rule",
+          timingPoint: "runner_action.main",
+          expiresAtStateVersion: 42,
+          costs: [],
+          targetRequirements: [],
+          choiceRequirements: [
+            {
+              choiceId,
+              minSelections: 1,
+              maxSelections: 1,
+              optionIds: ["pass", `card_${targetInstanceId}`],
+            },
+          ],
+        },
+      ],
+      playerView: {
+        stateVersion: 42,
+        timingPoint: "runner_action.main",
+        pendingChoice: {
+          choiceId,
+          side: "runner",
+          source: `runner.installed_resource_trash_for_credits:${sourceResourceInstanceId}:42`,
+          kind: "select_option",
+          visibility: "public",
+          stateVersion: 42,
+          minSelections: 1,
+          maxSelections: 1,
+          options: [
+            { id: "pass", label: "No" },
+            {
+              id: `card_${targetInstanceId}`,
+              label: "Target",
+              value: targetInstanceId,
+            },
+          ],
+        },
+        own: {
+          rig: [
+            {
+              instanceId: sourceResourceInstanceId,
+              definitionId: sourceResourceDefinitionId,
+              known: true,
+              type: "resource",
+            },
+            {
+              instanceId: targetInstanceId,
+              definitionId: "generic-installed-target",
+              known: true,
+              type: "hardware",
+            },
+          ],
+        },
+      },
+    } as unknown as AiDecisionInput;
+
+    expect(
+      runnerInstalledCardLiquidationChoiceSignal(input, [
+        candidate(actionId, "resolve_choice", "choice.resolve"),
+      ]),
+    ).toMatchObject({
+      conversionId: `installed-card-liquidation:${choiceId}`,
+      sourceResourceInstanceId,
+      sourceResourceDefinitionId,
+      actionId,
+      choiceId,
+      selectedOptionId: "pass",
+      disposition: "decline_unpriced_conversion",
+      priorityClass: "P4",
+      evidenceCodes: [
+        "runner_installed_card_liquidation_choice_owned_by_economy",
+        "runner_installed_card_liquidation_declined_without_exact_target_value_quote",
+      ],
+    });
   });
 
   it("binds a Shell Traders pipeline to its exact source, target, and action", () => {

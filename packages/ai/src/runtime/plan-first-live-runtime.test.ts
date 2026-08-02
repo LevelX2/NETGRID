@@ -24,6 +24,7 @@ import {
 } from "../plans/resident-plan-portfolio-memory";
 import { instantiatePlanProposal } from "../plans/plan-instance";
 import type { PlanInstance } from "../plans/plan-kernel-types";
+import { corpClassicDeflectorDefenseChoiceSignal } from "../plans/corp-core-plan-modules";
 import type { RunnerRestrictedProgramInstallSequenceCommitment } from "../plans/runner-tactical-plan-modules";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { runnerCentralPressureHasExecutableEventRun } from "./plan-first-live-runtime";
@@ -410,6 +411,125 @@ describe("authoritative plan-first live runtime", () => {
       ).toBe(false);
     },
   );
+
+  it("routes a non-forced Classic Deflector choice through corp.defend_servers", () => {
+    resetResidentPlanPortfolioMemory();
+    const choiceId = "classic_deflector_1";
+    const sourceIceId = "deflector-ice";
+    const sourceDefinitionId = "generic-deflector";
+    const subroutineId = "generic-deflector.subroutine.1.deflect_run";
+    const action = legalAction(
+      "corp.resolve_choice",
+      "corp",
+      "resolve_choice",
+      "Deflector-Ziel wählen",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("corp", [action]);
+    const options = [
+      { id: "decline", label: "Nicht zahlen", value: "decline" },
+      { id: "server_hq", label: "HQ", value: "hq" },
+      { id: "server_rd", label: "R&D", value: "rd" },
+      { id: "server_archives", label: "Archives", value: "archives" },
+    ];
+    action.timingPoint = "run.encounter_ice";
+    action.choiceRequirements = [
+      {
+        choiceId,
+        minSelections: 1,
+        maxSelections: 1,
+        optionIds: options.map((option) => option.id),
+      },
+    ];
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.phase = "run";
+    input.playerView.own.credits = 3;
+    input.playerView.pendingChoice = {
+      choiceId,
+      side: "corp",
+      source: `card_implementation.classic_deflector:run_1:${sourceIceId}:0:${sourceDefinitionId}:${subroutineId}:any_data_fort:2:0`,
+      prompt: "Deflector-Ziel wählen",
+      kind: "select_option",
+      options,
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: input.playerView.stateVersion,
+      visibility: "public",
+    };
+    const deflector = visibleCard(sourceIceId, "corp", "ice", {
+      definitionId: sourceDefinitionId,
+      rezzed: true,
+      effectiveRunQuote: {
+        iceInstanceId: sourceIceId,
+        iceDefinitionId: sourceDefinitionId,
+        effectiveStrength: 4,
+        subroutines: [
+          {
+            id: subroutineId,
+            type: "deflect_run",
+            deflectorTarget: "any_data_fort",
+            deflectorCost: 2,
+          },
+        ],
+      },
+    });
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      encounteredIce: deflector,
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [deflector]),
+      server("archives"),
+    ];
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+
+    expect(
+      corpClassicDeflectorDefenseChoiceSignal(
+        input,
+        buildActionSemanticCandidates(input),
+        undefined,
+        0,
+      ),
+    ).toBeDefined();
+
+    const decision = liveContext({
+      selectedChoicesForDecision,
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: "corp.resolve_choice",
+      selectedChoices: {
+        choiceId,
+        selectedOptionIds: ["server_archives"],
+      },
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.defend_servers",
+        planFirstDecision: {
+          selectedPlan: {
+            instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+            target: {
+              id: "allocate_server_defense",
+            },
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_lane:plan",
+        "plan_module:corp.defend_servers",
+      ]),
+    );
+  });
 
   it("selects a blocked payoff Social Engineering route through central pressure and persists its exact continuation", () => {
     resetResidentPlanPortfolioMemory();

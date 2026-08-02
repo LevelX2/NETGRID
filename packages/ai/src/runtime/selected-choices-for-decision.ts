@@ -237,6 +237,22 @@ export function selectedChoicesForDecision(
     );
   }
   if (
+    input.side === "runner" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith("runner.installed_resource_trash_for_credits:")
+  ) {
+    return resolved(
+      selectedRunnerInstalledCardLiquidationOptionId(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "runner_installed_card_liquidation",
+    );
+  }
+  if (
     input.side === "corp" &&
     (choice.continuation?.family === "corp_advancement_counter" ||
       choice.source.startsWith("p3_34.distribute_advancement:") ||
@@ -288,6 +304,22 @@ export function selectedChoicesForDecision(
         ),
       ],
       "corp_scored_agenda_start_draw",
+    );
+  }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith("card_implementation.classic_deflector:")
+  ) {
+    return resolved(
+      selectedCorpClassicDeflectorOptionId(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "corp_classic_deflector_redirect",
     );
   }
   if (
@@ -466,7 +498,10 @@ export function selectedChoicesForDecision(
       return resolved(searchSelected, "search_choice");
     }
   }
-  if (choice.source.startsWith("v1921.playful_ai")) {
+  if (
+    choice.source.startsWith("v1921.playful_ai") ||
+    choice.source.startsWith("card_implementation.random_dice_split:")
+  ) {
     const selectedOptionId = selectedPlayfulAiChoiceOptionId(choice);
     return resolved(
       selectedOptionId !== undefined ? [selectedOptionId] : [],
@@ -567,6 +602,243 @@ export function selectedChoicesForDecision(
     action,
     "Register a complete domain resolver or preserve an exact resident-plan continuation for this non-forced choice.",
   );
+}
+
+function selectedRunnerInstalledCardLiquidationOptionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const sourceMatch =
+    /^runner\.installed_resource_trash_for_credits:([^:]+):([0-9]+)$/.exec(
+      choice.source,
+    );
+  const sourceResourceInstanceId = sourceMatch?.[1];
+  const sourceStateVersion = Number(sourceMatch?.[2]);
+  const sourceResource = (input.playerView.own.rig ?? []).find(
+    (card) =>
+      card.instanceId === sourceResourceInstanceId &&
+      card.known &&
+      card.type === "resource" &&
+      typeof card.definitionId === "string",
+  );
+  const requirement = action.choiceRequirements?.[0];
+  const choiceOptionIds = choice.options.map((option) => option.id);
+  const exactChoiceAndAction =
+    sourceResourceInstanceId !== undefined &&
+    sourceStateVersion === input.playerView.stateVersion &&
+    sourceResource?.definitionId !== undefined &&
+    choice.side === "runner" &&
+    choice.kind === "select_option" &&
+    choice.visibility === "public" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === choiceOptionIds.length &&
+    choiceOptionIds.every((optionId) =>
+      requirement.optionIds.includes(optionId),
+    );
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "runner.economy" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signal?: {
+          conversionId?: unknown;
+          sourceResourceInstanceId?: unknown;
+          sourceResourceDefinitionId?: unknown;
+          actionId?: unknown;
+          choiceId?: unknown;
+          sourceStateVersion?: unknown;
+          selectedOptionId?: unknown;
+          disposition?: unknown;
+        };
+      }
+    | undefined;
+  const signal = moduleState?.signal;
+  const passOption = selectableOptions.find((option) => option.id === "pass");
+  const exactPlanBinding =
+    exactChoiceAndAction &&
+    portfolio?.side === "runner" &&
+    portfolio.stateVersion === input.playerView.stateVersion &&
+    executor !== undefined &&
+    moduleState?.kind === "installed_card_liquidation_choice" &&
+    signal?.conversionId === `installed-card-liquidation:${choice.choiceId}` &&
+    signal.sourceResourceInstanceId === sourceResourceInstanceId &&
+    signal.sourceResourceDefinitionId === sourceResource?.definitionId &&
+    signal.actionId === action.actionId &&
+    signal.choiceId === choice.choiceId &&
+    signal.sourceStateVersion === input.playerView.stateVersion &&
+    signal.selectedOptionId === "pass" &&
+    signal.disposition === "decline_unpriced_conversion" &&
+    passOption !== undefined &&
+    passOption.value === undefined;
+  if (!exactPlanBinding) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Materialize an optional installed-card liquidation only from the current runner.economy executor and its exact conservative pass binding.",
+    );
+  }
+  return ["pass"];
+}
+
+function selectedCorpClassicDeflectorOptionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const sourceParts = choice.source.split(":");
+  const subroutineIndex = Number(sourceParts[3]);
+  const creditCost = Number(sourceParts[7]);
+  let decoded:
+    | {
+        runId: string;
+        sourceIceInstanceId: string;
+        sourceDefinitionId: string;
+        subroutineId: string;
+      }
+    | undefined;
+  if (
+    sourceParts.length === 9 &&
+    sourceParts[0] === "card_implementation.classic_deflector" &&
+    sourceParts[1] &&
+    sourceParts[2] &&
+    sourceParts[4] &&
+    sourceParts[5]
+  ) {
+    try {
+      decoded = {
+        runId: decodeURIComponent(sourceParts[1]),
+        sourceIceInstanceId: decodeURIComponent(sourceParts[2]),
+        sourceDefinitionId: decodeURIComponent(sourceParts[4]),
+        subroutineId: decodeURIComponent(sourceParts[5]),
+      };
+    } catch {
+      decoded = undefined;
+    }
+  }
+  const targetProfile = sourceParts[6];
+  const autoBreakIfNoTarget = sourceParts[8] === "1";
+  const requirement = action.choiceRequirements?.[0];
+  const choiceOptionIds = choice.options.map((option) => option.id);
+  const exactChoiceAndAction =
+    decoded !== undefined &&
+    Number.isSafeInteger(subroutineIndex) &&
+    subroutineIndex >= 0 &&
+    Number.isSafeInteger(creditCost) &&
+    creditCost >= 0 &&
+    (targetProfile === "archives" ||
+      targetProfile === "any_data_fort" ||
+      targetProfile === "subsidiary_data_fort") &&
+    (sourceParts[8] === "0" || sourceParts[8] === "1") &&
+    choice.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.visibility === "public" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === choiceOptionIds.length &&
+    choiceOptionIds.every((optionId) =>
+      requirement.optionIds.includes(optionId),
+    );
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "corp.defend_servers" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signals?: Array<{
+          kind?: unknown;
+          phase?: unknown;
+          actionIds?: unknown;
+          choiceResolution?: Record<string, unknown>;
+        }>;
+      }
+    | undefined;
+  const signal = moduleState?.signals?.find(
+    (candidate) =>
+      candidate.kind === "generic" &&
+      candidate.phase === "resolve_run_redirect" &&
+      Array.isArray(candidate.actionIds) &&
+      candidate.actionIds.length === 1 &&
+      candidate.actionIds[0] === action.actionId &&
+      candidate.choiceResolution?.kind === "classic_deflector_redirect" &&
+      candidate.choiceResolution.choiceId === choice.choiceId,
+  );
+  const resolution = signal?.choiceResolution;
+  const selectedOptionId = resolution?.selectedOptionId;
+  const selectedOption = selectableOptions.find(
+    (option) => option.id === selectedOptionId,
+  );
+  const disposition = resolution?.disposition;
+  const selectedServerId = resolution?.selectedServerId;
+  const exactSelection =
+    (disposition === "decline" &&
+      selectedServerId === undefined &&
+      selectedOptionId === "decline" &&
+      selectedOption?.value === "decline" &&
+      creditCost > 0) ||
+    (disposition === "redirect" &&
+      typeof selectedServerId === "string" &&
+      selectedOptionId === `server_${selectedServerId}` &&
+      selectedOption?.value === selectedServerId);
+  const exactPlanBinding =
+    exactChoiceAndAction &&
+    portfolio?.side === "corp" &&
+    portfolio.stateVersion === input.playerView.stateVersion &&
+    executor !== undefined &&
+    moduleState?.kind === "defense" &&
+    resolution !== undefined &&
+    resolution.sourceStateVersion === input.playerView.stateVersion &&
+    resolution.runId === decoded?.runId &&
+    resolution.sourceIceInstanceId === decoded?.sourceIceInstanceId &&
+    resolution.sourceDefinitionId === decoded?.sourceDefinitionId &&
+    resolution.subroutineIndex === subroutineIndex &&
+    resolution.subroutineId === decoded?.subroutineId &&
+    resolution.targetProfile === targetProfile &&
+    resolution.creditCost === creditCost &&
+    resolution.autoBreakIfNoTarget === autoBreakIfNoTarget &&
+    exactSelection;
+  if (!exactPlanBinding || typeof selectedOptionId !== "string") {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Materialize a Classic Deflector payload only from the current corp.defend_servers executor and its exact plan-bound redirect or decline choice.",
+    );
+  }
+  return [selectedOptionId];
 }
 
 function selectedRunnerOptionalChoiceOptionId(
