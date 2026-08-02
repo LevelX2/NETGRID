@@ -10658,6 +10658,79 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("keeps post-pass derez and access continuation as exclusive run-plan routes at the server", () => {
+    resetResidentPlanPortfolioMemory();
+    const derez = legalAction(
+      "runner.trigger_ability.post-pass-at-server",
+      "runner",
+      "trigger_ability",
+      "Derez the passed ICE and end the run",
+      { credits: 0, clicks: 0 },
+      {
+        source: "disgruntled-event",
+        payload: {
+          cardId: "disgruntled-event",
+          sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          abilityId: "derez_fully_broken_passed_ice_and_end_run",
+          targetIceId: "data-wall",
+          targetIceDefinitionId: "onr_v1_237_data-wall",
+          paymentAmount: 0,
+        },
+      },
+    );
+    const continueRun = legalAction(
+      "runner.continue_run.post-pass-at-server",
+      "runner",
+      "continue_run",
+      "Continue to R&D access",
+      { credits: 0, clicks: 0 },
+    );
+    const input = aiInput("runner", [derez, continueRun]);
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "server", serverId: "rd" },
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("data-wall", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          rezzed: true,
+        }),
+      ]),
+      server("archives"),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(decision).toMatchObject({
+      actionId: derez.actionId,
+      fallbackUsed: false,
+      reasonCode: "plan_first.runner.convert_run_window",
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          route: {
+            actionId: derez.actionId,
+            stepId: expect.any(String),
+          },
+          turnPlanning: {
+            coverage: { status: "pass", coveragePercent: 100 },
+          },
+        },
+      },
+    });
+    expect(
+      decision.decisionDebug?.planFirstDecision?.dispositions,
+    ).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ actionId: derez.actionId }),
+      ]),
+    );
+  });
+
   it("owns a generic run-remainder strength boost without knowing its card definition", () => {
     resetResidentPlanPortfolioMemory();
     const boost = legalAction(

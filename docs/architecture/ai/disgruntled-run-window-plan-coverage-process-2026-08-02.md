@@ -1,6 +1,6 @@
 # Disgruntled-Runfenster: Planmodulabdeckung – sequenzieller Paketprozess
 
-Status: **aktiv – P3 abgeschlossen**
+Status: **aktiv – P4 abgeschlossen**
 Datum: 2026-08-02
 Primärer Agent: `card-enablement-ai-knowledge-agent`
 Worktree: `C:\Projekte\NETGRID_AI_DISGRUNTLED_RUN_WINDOW_COVERAGE`
@@ -122,7 +122,7 @@ P0 Prozessvertrag
 | P4 | Breite Verifikation | fokussierte Tests, AI-Typecheck, aktive AI-Gates, drei AI-Shards und Rent 02/04 grün | `test(ai): verify disgruntled run-window coverage fix` |
 | P5 | Abschluss | Review und Wissensstand aktuell, `main` integriert, Worktree und Branch entfernt | `docs(ai): close disgruntled run-window coverage process` |
 
-Aktueller Paketstand: P0 bis P2 sind abgeschlossen. Die Engine-LegalAction
+Aktueller Paketstand: P0 bis P4 sind abgeschlossen. Die Engine-LegalAction
 transportiert für die funktionsbasierte Post-Pass-Derez-und-End-Run-Familie
 nun Quellenkartendefinition, generische `abilityId` und exakte Zielbindung.
 Die positive AI-Input-Allowlist erhält diese side-sicheren Fakten. Der
@@ -136,6 +136,27 @@ Zieldefinition, StateVersion, Root-/Leaf-Executor, Step und Route. Der
 bekannte Agenda-Gegenfall bleibt beim selben Runfensterowner und setzt den
 Trigger ausdrücklich nicht ein. Eine Triggeraction ohne funktionale
 Fähigkeitsbindung bleibt mit `missing_plan_module_coverage` fail-closed.
+
+P4 schließt zusätzlich die exakte Serverpositionsroute des vorhandenen
+`runner.convert_run_window`-Owners: Access-Fortsetzung und produktiver
+Post-Pass-Trigger werden dort gemeinsam und exklusiv vom Runplan
+klassifiziert. Im Nachlauf von Seed 04 wurde nach der behobenen
+Technician-Entscheidung ein unabhängiger Engine-Legalitätsfehler sichtbar:
+Airport Locker war bei sechs Credits legal, obwohl nach seinen fünf
+Aktivierungskosten kein bezahlbares Suchziel übrig blieb. Als
+IllegalAction-Sicherheitsblocker wurde dieser enge Kosten-vor-Ziel-Vertrag in
+der Engine korrigiert und separat regressionsgesichert; keine Airport-Locker-
+Strategie wurde in den Technician-Plan aufgenommen.
+
+Die finalen Rent-I-Con-Nachläufe enden beide als vollständige Spiele:
+
+- Seed 02: Corp-Sieg, 327 Aktionen, 42 Züge, Hash `fnv1a:e30663ba`;
+- Seed 04: Corp-Sieg, 196 Aktionen, 28 Züge, Hash `fnv1a:28708942`.
+
+Beide haben null Runtimefehler, null Illegal Actions, null Fallbacks, null
+Timeouts und ein grünes Replay. Engine-/AI-Typecheck, beide aktive AI-Gates
+und alle drei AI-Shards sind grün; der isolierte AI-Typecheck benötigte wegen
+nachgewiesenen Speicherdrucks eine 8-GB-Node-Heapgrenze.
 
 ## Paketdetails
 

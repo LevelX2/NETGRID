@@ -352,6 +352,26 @@ describe("PRO011 hidden resource timing hardening", () => {
     });
     expectReplayStable(before, state);
 
+    const lowFunds = runnerState("pro011-airport-locker-low-funds");
+    const lowFundsLockerId = installHiddenResource(
+      lowFunds,
+      "onr_proteus_128_airport-locker",
+      "pro011_airport_locker_low_funds",
+    );
+    addRunnerStackCard(
+      lowFunds,
+      "onr_v1_014_codecracker",
+      "pro011_airport_locker_low_funds_program",
+    );
+    lowFunds.runner.credits = 6;
+    expect(
+      getLegalActions(lowFunds, "runner").find(
+        (candidate) =>
+          candidate.payload?.cardId === lowFundsLockerId &&
+          candidate.payload?.cardImplementationAbilityTiming === "runner_main",
+      ),
+    ).toBeUndefined();
+
     const encounter = runnerState("pro011-airport-locker-encounter");
     const encounterLockerId = installHiddenResource(
       encounter,

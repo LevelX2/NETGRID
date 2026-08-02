@@ -16631,7 +16631,11 @@ function runnerExactRunWindowPhaseActionIds(
   }
   if (run.phase === "movement" && run.position?.kind === "server") {
     return admissibleRunWindowCandidates
-      .filter((candidate) => candidate.actionType === "continue_run")
+      .filter(
+        (candidate) =>
+          candidate.actionType === "continue_run" ||
+          runnerPostPassDerezAndEndRunAction(input, candidate) !== undefined,
+      )
       .map((candidate) => candidate.actionId);
   }
   return [];

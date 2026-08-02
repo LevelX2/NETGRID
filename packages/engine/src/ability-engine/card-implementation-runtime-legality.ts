@@ -16,6 +16,7 @@ import {
   ownRezzedIceTargetIds,
   sameFortSubroutineTargets,
 } from "./card-implementation-runtime-activated-targets";
+import { creditCostForActivatedAbility } from "./card-implementation-runtime-activated-costs";
 import type {
   ActivatedCardAbilityImplementation,
   OnPlayCardAbilityImplementation,
@@ -119,6 +120,11 @@ export function canResolveActivatedCardImplementationAbility(
     )
   )
     return false;
+  const effectLegalityState = activatedEffectLegalityState(
+    state,
+    ability,
+    sourceCardId,
+  );
   return ability.effects.every((effect) => {
     if (effect.kind === "search_trash_to_grip")
       return deps.searchTrashToGripTargetCount(state, effect.filter) > 0;
@@ -129,7 +135,7 @@ export function canResolveActivatedCardImplementationAbility(
     if (effect.kind === "search_stack_install")
       return (
         deps.searchStackInstallTargetCount(
-          state,
+          effectLegalityState,
           effect.filter,
           effect.installCost,
         ) > 0
@@ -168,6 +174,33 @@ export function canResolveActivatedCardImplementationAbility(
       );
     return true;
   });
+}
+
+function activatedEffectLegalityState(
+  state: GameState,
+  ability: ActivatedCardAbilityImplementation,
+  sourceCardId: CardInstanceId | undefined,
+): GameState {
+  const creditCost = creditCostForActivatedAbility(ability);
+  const controller = sourceCardId
+    ? state.cardInstances[sourceCardId]?.controller
+    : undefined;
+  if (creditCost <= 0 || controller === undefined) return state;
+  return controller === "runner"
+    ? {
+        ...state,
+        runner: {
+          ...state.runner,
+          credits: Math.max(0, state.runner.credits - creditCost),
+        },
+      }
+    : {
+        ...state,
+        corp: {
+          ...state.corp,
+          credits: Math.max(0, state.corp.credits - creditCost),
+        },
+      };
 }
 
 export function canPlayPrintedCostOnPlayImplementation(
