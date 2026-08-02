@@ -129,6 +129,27 @@ describe("economy card hint contracts", () => {
     ).toEqual([3]);
   });
 
+  it.each([
+    "onr_v1_193_corporate-coup",
+    "onr_v1_209_political-coup",
+  ])("marks the scored hosted-credit pool on %s as temporary", (cardId) => {
+    const card = hint(cardId);
+
+    expect(card.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "finite_economy_pool" }),
+        expect.objectContaining({ kind: "action_economy" }),
+      ]),
+    );
+    expect(card.functionSignals).toEqual(
+      expect.arrayContaining([
+        "economy.action",
+        "economy.finite_pool",
+        "economy.temporary_resource_bank",
+      ]),
+    );
+  });
+
   it("matches Department of Truth Enhancement's hosted-credit load and all-cashout contract", () => {
     const effects = hint("onr_v1_318_department-of-truth-enhancement").effects;
     expect(effects).toEqual(

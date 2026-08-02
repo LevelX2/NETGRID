@@ -18193,6 +18193,7 @@
         "economy.corp_counter_cashout_action",
         "economy.action",
         "economy.finite_pool",
+        "economy.temporary_resource_bank",
         "score.agenda_action",
         "score.economy_counter_bank"
       ]
