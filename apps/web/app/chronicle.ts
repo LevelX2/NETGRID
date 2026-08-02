@@ -228,6 +228,31 @@ export function formatChronicleEvent(
       chips.push("Spielstart");
       break;
     case "resolve_choice":
+      {
+        const citySurveillanceDetails = citySurveillanceChronicleDetails(
+          payload,
+          side,
+        );
+        if (citySurveillanceDetails) {
+          category =
+            citySurveillanceDetails.tagsAdded > 0 ? "danger" : "economy";
+          importance =
+            citySurveillanceDetails.tagsAdded > 0 ? "important" : "normal";
+          visibility = "public";
+          cardDefinitionId =
+            cardDefinitionId ??
+            sourceDefinitionId ??
+            "onr_v1_313_city-surveillance";
+          cardTitle = "City Surveillance";
+          title = phrase(
+            subject,
+            citySurveillanceDetails.creditsPaid > 0
+              ? `${creditText(citySurveillanceDetails.creditsPaid)} für City Surveillance bezahlt`
+              : `durch City Surveillance ${tagCountText(citySurveillanceDetails.tagsAdded)} erhalten`,
+          );
+          break;
+        }
+      }
       if (payload.strategicPlanningGroupChoiceResolved === true) {
         const source =
           stringValue(payload.drawReplacementSourceTitle) ??
@@ -4019,9 +4044,11 @@ export function formatChronicleEvent(
     side,
   );
   if (citySurveillanceDetails) {
-    description = description
-      ? `${description} ${citySurveillanceDetails.sentence}`
-      : citySurveillanceDetails.sentence;
+    if (actionType !== "resolve_choice") {
+      description = description
+        ? `${description} ${citySurveillanceDetails.sentence}`
+        : citySurveillanceDetails.sentence;
+    }
     chips.push(...citySurveillanceDetails.chips);
     if (citySurveillanceDetails.tagsAdded > 0 && importance === "normal")
       importance = "important";
@@ -6163,13 +6190,28 @@ function cardResolverPlayEffectPart(
 function citySurveillanceChronicleDetails(
   payload: Record<string, unknown>,
   side: Side,
-): { sentence: string; chips: string[]; tagsAdded: number } | undefined {
-  const sourceCount = numberValue(payload.citySurveillanceSourceCount) ?? 0;
+):
+  | {
+      sentence: string;
+      chips: string[];
+      creditsPaid: number;
+      tagsAdded: number;
+    }
+  | undefined {
+  const sourceCount =
+    numberValue(payload.citySurveillanceSourceCount) ??
+    numberValue(payload.drawTaxSourceCount) ??
+    0;
   if (sourceCount <= 0) return undefined;
-  const creditsPaid = numberValue(payload.citySurveillanceCreditsPaid) ?? 0;
+  const creditsPaid =
+    numberValue(payload.citySurveillanceCreditsPaid) ??
+    numberValue(payload.drawTaxCreditsPaid) ??
+    0;
   const tagsAdded =
     numberValue(payload.citySurveillanceTagsAdded) ??
     numberValue(payload.citySurveillanceTags) ??
+    numberValue(payload.drawTaxTagsAdded) ??
+    numberValue(payload.drawTaxTags) ??
     0;
   if (creditsPaid <= 0 && tagsAdded <= 0) return undefined;
 
@@ -6191,6 +6233,7 @@ function citySurveillanceChronicleDetails(
         ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`]
         : ["Kein Tag"]),
     ],
+    creditsPaid,
     tagsAdded,
   };
 }

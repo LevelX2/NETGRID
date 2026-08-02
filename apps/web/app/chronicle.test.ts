@@ -5230,6 +5230,61 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("keeps actual City Surveillance payment and tag choices as concrete chronicle entries", () => {
+    const paidEvent = makeEvent("resolve_choice", {
+      actor: "runner",
+      aiReasonCode: "runner.draw_tax.pay",
+      sourceDefinitionId: "onr_v1_313_city-surveillance",
+      drawTaxDecision: "pay",
+      drawTaxSourceCount: 1,
+      drawTaxCreditsPaid: 1,
+      drawTaxTagsAdded: 0,
+      drawTaxTags: 0,
+      runnerCreditsAfter: 2,
+      runnerTagsAfter: 0,
+    });
+    const tagEvent = makeEvent("resolve_choice", {
+      actor: "runner",
+      aiReasonCode: "runner.draw_tax.tag",
+      sourceDefinitionId: "onr_v1_313_city-surveillance",
+      drawTaxDecision: "tag",
+      drawTaxSourceCount: 1,
+      drawTaxCreditsPaid: 0,
+      drawTaxTagsAdded: 1,
+      drawTaxTags: 1,
+      runnerCreditsAfter: 2,
+      runnerTagsAfter: 1,
+    });
+
+    const paid = formatChronicleEvent(paidEvent, "corp");
+    const tagged = formatChronicleEvent(tagEvent, "corp");
+
+    expect(paid).toMatchObject({
+      title: "Die Runner-KI hat 1 Credit für City Surveillance bezahlt.",
+      category: "economy",
+      visibility: "public",
+      cardDefinitionId: "onr_v1_313_city-surveillance",
+      cardTitle: "City Surveillance",
+    });
+    expect(paid.chips).toEqual(
+      expect.arrayContaining(["City Surveillance", "-1 Credit", "Kein Tag"]),
+    );
+    expect(shouldSuppressChronicleEventItem(paidEvent)).toBe(false);
+
+    expect(tagged).toMatchObject({
+      title: "Die Runner-KI hat durch City Surveillance 1 Tag erhalten.",
+      category: "danger",
+      importance: "important",
+      visibility: "public",
+      cardDefinitionId: "onr_v1_313_city-surveillance",
+      cardTitle: "City Surveillance",
+    });
+    expect(tagged.chips).toEqual(
+      expect.arrayContaining(["City Surveillance", "+1 Tag"]),
+    );
+    expect(shouldSuppressChronicleEventItem(tagEvent)).toBe(false);
+  });
+
   it("merges activated card implementation credit effects with card context", () => {
     const event = makeEvent("activated_card_ability", {
       actor: "runner",
