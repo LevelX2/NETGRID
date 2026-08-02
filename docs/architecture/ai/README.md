@@ -89,6 +89,13 @@
   `v120.event_modification.avoid` bevorzugen eine vorhandene legale
   Präventionsquelle gegenüber `pass`. Ohne konkrete Quelle entsteht keine
   künstliche Choice.
+- Der residente Runner-Coverage-Plan bewertet Draw-for-Answer-Routen vor der
+  Draw-Grenze gegen sichtbare gerezzte Draw-Tax-Quellen. Die konservative
+  Projektion kombiniert ausschließlich die aktuelle Engine-LegalAction
+  (Draw-Anzahl und Kosten), verfügbare Credits und den side-sicheren
+  Boardzustand. Eine Multi-Draw-Route mit unvermeidbaren Tags darf dadurch
+  zugunsten eines sicheren gebundenen Basic Draws entfallen; die spätere
+  Einzelkarten-Choice und Tagprävention bleiben reine Engine-Fortsetzungen.
 - Runner-Trace-Bids vergleichen einen sichtbaren Tag-Erfolg mit den Kosten und
   Click-Opportunitäten einer legal möglichen Bereinigung. Ein gewonnener Trace
   darf weiterhin bezahlt werden, wenn Restpfad, Reserve, sichtbarer Tag-Punish
