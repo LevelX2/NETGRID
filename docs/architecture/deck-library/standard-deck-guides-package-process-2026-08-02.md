@@ -1,6 +1,6 @@
 # Standarddeck-Anleitungen – Paketprozess
 
-Status: aktiv  
+Status: abgeschlossen
 Quelle: Nutzerfreigabe vom 2. August 2026
 
 ## Zielprüfung
@@ -242,3 +242,18 @@ Build, Serverstart, Deckauswahl und Spielbetrieb niemals blockieren.`
 - Arbeitsbranch ist lokal nach `main` integriert.
 - Hauptcheckout ist sauber.
 - Arbeitsworktree und gemergter Branch sind nachweislich entfernt.
+
+## Abschlussstand vom 2. August 2026
+
+- P01 bis P06 wurden sequenziell umgesetzt und jeweils separat committed.
+- Der Bestand steht bei 43 aktuellen Anleitungen für 43 aktive Standarddecks.
+- Ghost Circuit und Vom Tablet bleiben dokumentierte Beobachtungsfälle; es
+  besteht kein offener Release- oder Laufzeitblocker.
+- Der tolerante Serververtrag und die UI-Zustände für `missing`, `stale` und
+  `invalid` sind automatisiert geprüft. Guideinhalte gelangen nicht in
+  DeckSnapshot, Match-State, Replay oder StateHash.
+- Paket-, Contract-, AI-Shard-, Typecheck- und Build-Gates sowie die
+  Firefox-Prüfung auf Desktop- und 393-px-Gerätebreite sind grün.
+- Das Abschlussreview ist unter
+  `docs/reviews/deck-library/standard-deck-guides-final-review-2026-08-02.md`
+  abgelegt.

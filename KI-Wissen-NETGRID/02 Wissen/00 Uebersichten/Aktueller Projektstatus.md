@@ -268,9 +268,9 @@ Stand: 2026-08-02
   und
   `docs/reviews/ai/ai-behavior-baseline-v1-action-capacity-routes-2026-07-22.md`.
 
-- Die Deckstrategie-Ableitung ist für 40 aktive Standarddecks, 21 versionierte
-  Snapshots und alle 24 Strategy-IDs vollständig gegatet. 39 aktive Decks
-  besitzen eine produktive Primärstrategie; Ghost Circuit bleibt wegen zwei
+- Die Deckstrategie-Ableitung ist für 43 aktive Standarddecks und alle
+  produktiven Strategy-IDs vollständig gegatet. 42 aktive Decks besitzen eine
+  produktive Primärstrategie; Ghost Circuit bleibt wegen zwei
   realer Breaker-Coverage-Lücken bewusst neutral. Runtime-, Target-/Reserve-,
   Goal-, Action-Fit- und Metadaten-Consumerverträge sind geschlossen; ein
   Deckstrategie-Run kann eine ausdrücklich höher bewertete begonnene
@@ -567,6 +567,15 @@ Stand: 2026-08-02
   Snapshots. Führend sind
   `docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`
   und `docs/runbooks/account-alpha-operations.md`.
+- Alle 43 aktiven Standard-Decks besitzen eine versionierte deutsche
+  Deck-Anleitung mit Deckidee, Spielphasen, Schlüsselkarten, Tipps und Risiken.
+  Feste Standarddeck-Auswahlen und der Kopierdialog öffnen dieselbe Anleitung;
+  Zufallsauswahlen und persönliche Decks erhalten keine. Neue oder geänderte
+  Standards bleiben auch ohne aktuellen Text vollständig spielbar und zeigen
+  stattdessen „Anleitung fehlt noch“ oder „Anleitung muss aktualisiert werden“.
+  Der eigenständige Pflegecheck ist bewusst kein Build- oder Start-Gate.
+  Führend ist
+  `docs/reviews/deck-library/standard-deck-guides-final-review-2026-08-02.md`.
 - Der einmalige JSON-/Alt-SQLite-Import wurde am 2026-05-06 abgeschlossen und
   ist seit dem Current-State-Projekt-Cleanup kein Start-/CLI-/Health-Vertrag
   mehr.

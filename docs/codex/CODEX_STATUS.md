@@ -255,6 +255,14 @@ StateHash und KI. Führend sind
 `docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`
 und `docs/runbooks/account-alpha-operations.md`.
 
+Alle 43 aktiven Standard-Decks besitzen außerdem eine versionierte deutsche
+Anleitung aus der deterministischen Deckstrategie-Ableitung. Die gemeinsame
+UI zeigt Deckidee, Spielphasen, Schlüsselkarten, Tipps und Risiken in Auswahl-
+und Kopierabläufen. Fehlende oder nach Deckänderungen veraltete Inhalte werden
+sichtbar als Pflegezustand markiert, blockieren aber weder Build, Start,
+Deckauswahl noch Spiel. Führend ist
+`docs/reviews/deck-library/standard-deck-guides-final-review-2026-08-02.md`.
+
 Angemeldete Accounts besitzen außerdem eine private Matchstatistik mit
 sicherer, rein serverseitiger Teilnehmerbindung, idempotentem Spiel- und
 Serienledger, Runner-/Korp- und Gegnerart-Aufschlüsselung sowie paginierter
