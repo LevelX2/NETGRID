@@ -1390,6 +1390,8 @@ export function publicContextForAction(
     "drawReplacementSourceTitle",
     "drawReplacementExtraDrawn",
     "strategicPlanningGroupChoiceResolved",
+    "strategicPlanningGroupBaseDrawCount",
+    "strategicPlanningGroupAdditionalDrawCount",
     "strategicPlanningGroupDrawnCardCount",
     "bottomedCardCount",
     "crashEverettChoiceOpened",

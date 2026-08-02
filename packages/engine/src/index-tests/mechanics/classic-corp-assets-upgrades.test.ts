@@ -13,6 +13,7 @@ import {
 } from "../../index";
 import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { drawCorpCards } from "../../game/state/draw-random";
 import {
   addInstalledRunnerProgramForTest,
   addRezzedCorpIceForTest,
@@ -610,11 +611,29 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       ),
     ).toBe(true);
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
-    expect(state.corp.hq).toEqual(
+    expect(state.corp.hq).not.toEqual(
       expect.arrayContaining([baseDrawId, extraDrawId]),
     );
-    expect(state.corp.hq.length).toBe(hqBefore + 2);
+    expect(state.corp.hq.length).toBe(hqBefore);
     expect(state.corp.rd.length).toBe(rdBefore - 2);
+    expect(state.specialZones?.setAside).toEqual(
+      expect.arrayContaining([baseDrawId, extraDrawId]),
+    );
+    expect(state.pendingCorpDraw).toMatchObject({
+      baseDrawCount: 1,
+      replacementDrawCount: 1,
+      drawnCardIds: expect.arrayContaining([baseDrawId, extraDrawId]),
+    });
+    expect(
+      getPlayerView(state, "corp").specialZones?.setAside.every(
+        (card) => card.known === true,
+      ),
+    ).toBe(true);
+    expect(
+      getPlayerView(state, "runner").specialZones?.setAside.every(
+        (card) => card.known === false,
+      ),
+    ).toBe(true);
 
     const baseOptionId = state.pendingChoice?.options.find(
       (option) => option.value === baseDrawId,
@@ -639,6 +658,8 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       actionType: "resolve_choice",
       drawReplacementSourceTitle: "Strategic Planning Group",
       strategicPlanningGroupChoiceResolved: true,
+      strategicPlanningGroupBaseDrawCount: 1,
+      strategicPlanningGroupAdditionalDrawCount: 1,
       strategicPlanningGroupDrawnCardCount: 2,
       bottomedCardCount: 1,
       destinationZone: "rd_bottom",
@@ -691,6 +712,82 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expect(state.corp.rd.at(-1)).toBe(firstDrawId);
     expect(state.corp.hq).toContain(secondDrawId);
     expect(state.pendingChoice).toBeUndefined();
+    expectValid(state);
+  });
+
+  it("treats a multi-card Corp draw as one Strategic Planning Group transaction", () => {
+    let state = corpMainClassic08Game("classic-08-strategic-multi-draw");
+    addRezzedCorpRootForTest(
+      state,
+      STRATEGIC_PLANNING_GROUP,
+      "remote_1",
+      "strategic",
+    );
+    const hqBefore = state.corp.hq.length;
+    const drawnIds = [
+      putCorpCardOnTopOfRd(state, "simple_agenda"),
+      putCorpCardOnTopOfRd(state, "simple_economy_operation"),
+      putCorpCardOnTopOfRd(state, "simple_barrier_ice"),
+    ];
+
+    drawCorpCards(state, 3);
+
+    expect(state.pendingCorpDraw).toMatchObject({
+      baseDrawCount: 3,
+      replacementDrawCount: 1,
+    });
+    expect(state.pendingCorpDraw?.drawnCardIds).toHaveLength(4);
+    expect(state.pendingChoice?.options).toHaveLength(4);
+    expect(state.corp.hq).toHaveLength(hqBefore);
+    expect(state.specialZones?.setAside).toEqual(
+      expect.arrayContaining(drawnIds),
+    );
+
+    state.stateVersion = state.pendingChoice!.stateVersion;
+    const selectedOptionId = state.pendingChoice?.options[0]?.id;
+    state = applyChoice(state, "corp", String(selectedOptionId));
+
+    expect(state.pendingCorpDraw).toBeUndefined();
+    expect(state.specialZones?.setAside).toEqual([]);
+    expect(state.corp.hq).toHaveLength(hqBefore + 3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      strategicPlanningGroupBaseDrawCount: 3,
+      strategicPlanningGroupAdditionalDrawCount: 1,
+      strategicPlanningGroupDrawnCardCount: 4,
+      bottomedCardCount: 1,
+    });
+    expectValid(state);
+  });
+
+  it("ends the game without an orphaned draw transaction when the SPG extra draw decks out", () => {
+    const state = corpMainClassic08Game("classic-08-strategic-extra-deckout");
+    addRezzedCorpRootForTest(
+      state,
+      STRATEGIC_PLANNING_GROUP,
+      "remote_1",
+      "strategic",
+    );
+    const onlyCardId = putCorpCardOnTopOfRd(state, "simple_agenda");
+    const movedToArchives = state.corp.rd.filter(
+      (cardId) => cardId !== onlyCardId,
+    );
+    state.corp.rd = [onlyCardId];
+    state.corp.archives.push(...movedToArchives);
+    for (const cardId of movedToArchives) {
+      state.cardInstances[cardId] = {
+        ...state.cardInstances[cardId]!,
+        zone: { side: "corp", zone: "archives" },
+      };
+    }
+
+    drawCorpCards(state, 1);
+
+    expect(state.winner).toBe("runner");
+    expect(state.gameEndReason).toBe("corp_deck_empty");
+    expect(state.pendingCorpDraw).toBeUndefined();
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.specialZones?.setAside).toEqual([]);
+    expect(state.corp.hq).toContain(onlyCardId);
     expectValid(state);
   });
 

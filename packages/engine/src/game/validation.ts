@@ -101,6 +101,52 @@ export function validateGameState(state: GameState): ValidationResult {
     }
   }
 
+  if (state.pendingCorpDraw) {
+    const transaction = state.pendingCorpDraw;
+    if (!transaction.transactionId)
+      errors.push("Pending Corp draw requires a transactionId.");
+    if (
+      !Number.isInteger(transaction.baseDrawCount) ||
+      transaction.baseDrawCount <= 0
+    )
+      errors.push("Pending Corp draw baseDrawCount must be positive.");
+    if (
+      !Number.isInteger(transaction.replacementDrawCount) ||
+      transaction.replacementDrawCount < 0
+    )
+      errors.push(
+        "Pending Corp draw replacementDrawCount must be non-negative.",
+      );
+    if (
+      transaction.baseDrawCount + transaction.replacementDrawCount !==
+      transaction.drawnCardIds.length
+    )
+      errors.push("Pending Corp draw counts must match its drawn cards.");
+    if (
+      new Set(transaction.drawnCardIds).size !== transaction.drawnCardIds.length
+    )
+      errors.push("Pending Corp draw cards must be unique.");
+    for (const cardId of transaction.drawnCardIds) {
+      const instance = state.cardInstances[cardId];
+      if (!(state.specialZones?.setAside ?? []).includes(cardId))
+        errors.push(`Pending Corp draw card ${cardId} must be set aside.`);
+      if (
+        !instance ||
+        instance.owner !== "corp" ||
+        instance.controller !== "corp" ||
+        instance.zone.side !== "special" ||
+        instance.zone.zone !== "set_aside" ||
+        instance.zone.visibility !== "side_private" ||
+        instance.zone.visibilitySide !== "corp" ||
+        instance.zone.returnZone?.side !== "corp" ||
+        instance.zone.returnZone.zone !== "hq"
+      )
+        errors.push(
+          `Pending Corp draw card ${cardId} must use the private Corp draw zone.`,
+        );
+    }
+  }
+
   if (state.corp.credits < 0 || state.runner.credits < 0)
     errors.push("Credits must not be negative.");
   if (state.corp.clicks < 0 || state.runner.clicks < 0)

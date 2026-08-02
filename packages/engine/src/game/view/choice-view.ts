@@ -330,7 +330,8 @@ export function visibleChoiceCardForOption(
     if (
       !instance ||
       instance.owner !== "corp" ||
-      !state.corp.hq.includes(cardId)
+      !state.pendingCorpDraw?.drawnCardIds.includes(cardId) ||
+      !(state.specialZones?.setAside ?? []).includes(cardId)
     )
       return undefined;
     return visibleOwnCard(state, cardId);

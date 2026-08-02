@@ -107,13 +107,23 @@ planned
 
 ## Paketfolge
 
-| Paket | Ziel | Commit-Vorschlag |
-| --- | --- | --- |
-| DRAW-01 | Generischer Corp-Draw-Transaktionsvertrag | `refactor(engine): add corp draw transactions` |
-| DRAW-02 | Fortsetzungen und fehlerhafte Mehrfach-Draw-Aufrufer | `fix(engine): resume effects after corp draw choices` |
-| DRAW-03 | Einheitlicher Corp-Pflichtzug | `fix(engine): aggregate corp mandatory draw modifiers` |
-| DRAW-04 | Kartenmatrix, Chronicle, UI und KI-Integration | `test(cards): cover strategic planning group draw transactions` |
-| DRAW-05 | Dokumentation, Gesamtgates und Abschluss | `docs(engine): finalize corp draw transaction contract` |
+| Paket   | Ziel                                                 | Commit-Vorschlag                                                |
+| ------- | ---------------------------------------------------- | --------------------------------------------------------------- |
+| DRAW-01 | Generischer Corp-Draw-Transaktionsvertrag            | `refactor(engine): add corp draw transactions`                  |
+| DRAW-02 | Fortsetzungen und fehlerhafte Mehrfach-Draw-Aufrufer | `fix(engine): resume effects after corp draw choices`           |
+| DRAW-03 | Einheitlicher Corp-Pflichtzug                        | `fix(engine): aggregate corp mandatory draw modifiers`          |
+| DRAW-04 | Kartenmatrix, Chronicle, UI und KI-Integration       | `test(cards): cover strategic planning group draw transactions` |
+| DRAW-05 | Dokumentation, Gesamtgates und Abschluss             | `docs(engine): finalize corp draw transaction contract`         |
+
+## Fortschritt
+
+| Paket   | Status    | Verification                                                                                   |
+| ------- | --------- | ---------------------------------------------------------------------------------------------- |
+| DRAW-01 | completed | 212 Engine-Testdateien / 1.848 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün |
+| DRAW-02 | pending   | –                                                                                              |
+| DRAW-03 | pending   | –                                                                                              |
+| DRAW-04 | pending   | –                                                                                              |
+| DRAW-05 | pending   | –                                                                                              |
 
 ## Paketdetails
 

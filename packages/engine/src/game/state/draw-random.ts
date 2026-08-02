@@ -12,7 +12,7 @@ export function mustArrayValue<T>(
   return value;
 }
 
-function drawCorpCardRaw(state: GameState): CardInstanceId | undefined {
+function setAsideCorpCardFromRd(state: GameState): CardInstanceId | undefined {
   const cardId = state.corp.rd.shift();
   if (!cardId) {
     state.winner = "runner";
@@ -21,10 +21,19 @@ function drawCorpCardRaw(state: GameState): CardInstanceId | undefined {
     state.timingPoint = "game.checkpoint";
     return undefined;
   }
-  state.corp.hq.push(cardId);
+  state.specialZones ??= { setAside: [], removedFromGame: [] };
+  state.specialZones.setAside.push(cardId);
   state.cardInstances[cardId] = {
     ...mustInstance(state.cardInstances, cardId),
-    zone: { side: "corp", zone: "hq" },
+    faceup: false,
+    rezzed: false,
+    zone: {
+      side: "special",
+      zone: "set_aside",
+      visibility: "side_private",
+      visibilitySide: "corp",
+      returnZone: { side: "corp", zone: "hq" },
+    },
   };
   return cardId;
 }
@@ -34,14 +43,68 @@ export function drawCorpCard(state: GameState): void {
 }
 
 export function drawCorpCards(state: GameState, amount: number): void {
+  if (!Number.isInteger(amount) || amount < 0)
+    throw new Error(
+      "Die Corp-Draw-Menge muss eine nichtnegative Ganzzahl sein.",
+    );
+  if (state.pendingCorpDraw)
+    throw new Error("Es ist bereits ein Corp-Draw-Vorgang offen.");
   const drawnCardIds: CardInstanceId[] = [];
   for (let index = 0; index < amount; index += 1) {
-    const cardId = drawCorpCardRaw(state);
+    const cardId = setAsideCorpCardFromRd(state);
     if (cardId) drawnCardIds.push(cardId);
-    if (state.winner) return;
+    if (state.winner) {
+      addSetAsideCorpCardsToHq(state, drawnCardIds);
+      return;
+    }
   }
-  if (drawnCardIds.length > 0)
-    applyCorpDrawReplacementAfterDraw(state, drawnCardIds, drawCorpCardRaw);
+  if (drawnCardIds.length === 0) return;
+  state.pendingCorpDraw = {
+    transactionId: `corp_draw_${state.stateVersion + 1}_${drawnCardIds[0]}`,
+    baseDrawCount: drawnCardIds.length,
+    replacementDrawCount: 0,
+    drawnCardIds,
+  };
+  const choiceOpened = applyCorpDrawReplacementAfterDraw(
+    state,
+    setAsideCorpCardFromRd,
+  );
+  if (!choiceOpened) completeCorpDrawWithoutReplacementChoice(state);
+}
+
+export function completeCorpDrawWithoutReplacementChoice(
+  state: GameState,
+): void {
+  const transaction = state.pendingCorpDraw;
+  if (!transaction) return;
+  addSetAsideCorpCardsToHq(state, transaction.drawnCardIds);
+  delete state.pendingCorpDraw;
+}
+
+export function addSetAsideCorpCardsToHq(
+  state: GameState,
+  cardIds: CardInstanceId[],
+): void {
+  const moved = new Set(cardIds);
+  if (moved.size !== cardIds.length)
+    throw new Error("Der Corp-Draw enthält eine Karte mehrfach.");
+  state.specialZones ??= { setAside: [], removedFromGame: [] };
+  for (const cardId of cardIds) {
+    if (!state.specialZones.setAside.includes(cardId))
+      throw new Error("Eine gezogene Corp-Karte ist nicht beiseitegelegt.");
+  }
+  state.specialZones.setAside = state.specialZones.setAside.filter(
+    (cardId) => !moved.has(cardId),
+  );
+  for (const cardId of cardIds) {
+    state.corp.hq.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "hq" },
+    };
+  }
 }
 
 export function randomHqAccess(state: GameState): CardInstanceId | undefined {

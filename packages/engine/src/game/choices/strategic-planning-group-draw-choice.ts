@@ -11,34 +11,39 @@ import { mustInstance } from "../state/card-server-lookup";
 
 export function applyCorpDrawReplacementAfterDraw(
   state: GameState,
-  drawnCardIds: CardInstanceId[],
   drawAdditionalCorpCard: (state: GameState) => CardInstanceId | undefined,
-): void {
+): boolean {
+  const transaction = state.pendingCorpDraw;
+  if (!transaction)
+    throw new Error(
+      "Strategic Planning Group braucht einen Corp-Draw-Vorgang.",
+    );
   const sourceId = strategicPlanningGroupSourceIds(state)[0];
-  if (!sourceId) return;
+  if (!sourceId) return false;
   const sourceDefinitionId = mustInstance(state.cardInstances, sourceId)
     .definitionId as CardDefinitionId;
   const implementation =
     cardImplementationForDefinitionId(sourceDefinitionId)?.corpUtility;
-  if (implementation?.kind !== "corp_draw_extra_then_bottom_one") return;
+  if (implementation?.kind !== "corp_draw_extra_then_bottom_one") return false;
   for (let index = 0; index < implementation.extraDraw; index += 1) {
     const extraCardId = drawAdditionalCorpCard(state);
-    if (!extraCardId || state.winner) return;
-    drawnCardIds.push(extraCardId);
+    if (!extraCardId || state.winner) return false;
+    transaction.drawnCardIds.push(extraCardId);
+    transaction.replacementDrawCount += 1;
   }
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  transaction.replacementSourceCardInstanceId = sourceId;
+  transaction.replacementSourceDefinitionId = sourceDefinitionId;
   state.pendingChoice = {
     choiceId: `classic_spg_draw_${state.stateVersion + 1}`,
     side: "corp",
-    source: `card_implementation.strategic_planning_group_draw:${sourceId}:${drawnCardIds.join(",")}:${
-      state.stateVersion + 1
-    }`,
+    source: `card_implementation.strategic_planning_group_draw:${sourceId}:${transaction.transactionId}`,
     sourceCardInstanceId: sourceId,
     sourceCardDefinitionId: sourceDefinitionId,
     prompt:
       "Strategic Planning Group: Welche gezogene Karte soll unter R&D gelegt werden?",
     kind: "select_cards",
-    options: drawnCardIds.map((cardId) => ({
+    options: transaction.drawnCardIds.map((cardId) => ({
       id: `bottom_${cardId}`,
       label: `${CARD_DEFINITIONS_BY_ID[mustInstance(state.cardInstances, cardId).definitionId]?.title ?? "Gezogene Karte"} unter R&D legen`,
       publicLabel: "Gezogene Karte unter R&D legen",
@@ -49,6 +54,7 @@ export function applyCorpDrawReplacementAfterDraw(
     stateVersion: state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };
+  return true;
 }
 
 export function resolveStrategicPlanningGroupDrawChoice(
@@ -66,9 +72,13 @@ export function resolveStrategicPlanningGroupDrawChoice(
     throw new Error("Es ist keine Strategic-Planning-Group-Choice offen.");
   if (choice.side !== "corp" || legalAction.side !== "corp")
     throw new Error("Nur die Corporation darf diese Karte auswählen.");
-  const [, sourceId = "", drawnList = ""] = choice.source.split(":");
+  const transaction = state.pendingCorpDraw;
+  if (!transaction) throw new Error("Der Strategic-Planning-Group-Draw fehlt.");
+  const [, sourceId = "", transactionId = ""] = choice.source.split(":");
   if (
+    transaction.transactionId !== transactionId ||
     choice.sourceCardInstanceId !== sourceId ||
+    transaction.replacementSourceCardInstanceId !== sourceId ||
     !strategicPlanningGroupSourceIds(state).includes(sourceId as CardInstanceId)
   )
     throw new Error("Strategic Planning Group ist nicht mehr aktiv.");
@@ -79,13 +89,14 @@ export function resolveStrategicPlanningGroupDrawChoice(
     (candidate) => candidate.id === selectedOptionId,
   );
   const cardId = option?.value;
-  const drawnCardIds = new Set(drawnList.split(",").filter(Boolean));
+  const drawnCardIds = new Set(transaction.drawnCardIds);
   if (typeof cardId !== "string" || !drawnCardIds.has(cardId))
     throw new Error("Die gewählte Karte wurde nicht in diesem Draw gezogen.");
-  if (!state.corp.hq.includes(cardId as CardInstanceId))
-    throw new Error("Die gewählte Karte ist nicht mehr in HQ.");
-  bottomCorpHqCard(state, cardId as CardInstanceId);
+  if (!(state.specialZones?.setAside ?? []).includes(cardId as CardInstanceId))
+    throw new Error("Die gewählte Karte ist nicht mehr beiseitegelegt.");
+  completeStrategicPlanningGroupDraw(state, cardId as CardInstanceId);
   delete state.pendingChoice;
+  delete state.pendingCorpDraw;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     choiceVisibility: "hidden_info_barrier",
@@ -94,7 +105,9 @@ export function resolveStrategicPlanningGroupDrawChoice(
       ? { sourceDefinitionId: choice.sourceCardDefinitionId }
       : {}),
     strategicPlanningGroupChoiceResolved: true,
-    strategicPlanningGroupDrawnCardCount: drawnCardIds.size,
+    strategicPlanningGroupBaseDrawCount: transaction.baseDrawCount,
+    strategicPlanningGroupAdditionalDrawCount: transaction.replacementDrawCount,
+    strategicPlanningGroupDrawnCardCount: transaction.drawnCardIds.length,
     bottomedCardCount: 1,
     destinationZone: "rd_bottom",
   };
@@ -136,13 +149,38 @@ function strategicPlanningGroupSourceIds(state: GameState): CardInstanceId[] {
     .sort();
 }
 
-function bottomCorpHqCard(state: GameState, cardId: CardInstanceId): void {
-  state.corp.hq = state.corp.hq.filter((candidate) => candidate !== cardId);
-  state.corp.rd.push(cardId);
-  state.cardInstances[cardId] = {
-    ...mustInstance(state.cardInstances, cardId),
-    faceup: false,
-    rezzed: false,
-    zone: { side: "corp", zone: "rd" },
-  };
+function completeStrategicPlanningGroupDraw(
+  state: GameState,
+  bottomedCardId: CardInstanceId,
+): void {
+  const transaction = state.pendingCorpDraw;
+  if (!transaction) throw new Error("Der Strategic-Planning-Group-Draw fehlt.");
+  const drawnSet = new Set(transaction.drawnCardIds);
+  if (drawnSet.size !== transaction.drawnCardIds.length)
+    throw new Error("Der Strategic-Planning-Group-Draw enthält Duplikate.");
+  const setAside = state.specialZones?.setAside ?? [];
+  if (transaction.drawnCardIds.some((cardId) => !setAside.includes(cardId)))
+    throw new Error("Nicht alle gezogenen Karten sind beiseitegelegt.");
+  state.specialZones!.setAside = setAside.filter(
+    (cardId) => !drawnSet.has(cardId),
+  );
+  for (const cardId of transaction.drawnCardIds) {
+    if (cardId === bottomedCardId) {
+      state.corp.rd.push(cardId);
+      state.cardInstances[cardId] = {
+        ...mustInstance(state.cardInstances, cardId),
+        faceup: false,
+        rezzed: false,
+        zone: { side: "corp", zone: "rd" },
+      };
+      continue;
+    }
+    state.corp.hq.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "hq" },
+    };
+  }
 }

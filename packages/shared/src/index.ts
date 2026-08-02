@@ -1560,6 +1560,15 @@ export type RunnerDrawSequence = {
   crashEverettSourceCardId?: CardInstanceId;
 };
 
+export type CorpDrawTransaction = {
+  transactionId: string;
+  baseDrawCount: number;
+  replacementDrawCount: number;
+  drawnCardIds: CardInstanceId[];
+  replacementSourceCardInstanceId?: CardInstanceId;
+  replacementSourceDefinitionId?: CardDefinitionId;
+};
+
 export type PendingAddTagContinuation =
   | {
       kind: "terminal";
@@ -1662,6 +1671,7 @@ export type GameState = {
   pendingChoice?: PendingChoice;
   hqInstallRezSequence?: HqInstallRezSequenceState;
   pendingAddTagContinuation?: PendingAddTagContinuation;
+  pendingCorpDraw?: CorpDrawTransaction;
   runnerDrawSequence?: RunnerDrawSequence;
   imminentEvent?: ImminentEvent;
   temporaryProgramInstallReturns?: TemporaryProgramInstallReturn[];
