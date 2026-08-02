@@ -297,9 +297,9 @@ export function corpQualitativeIceStagingSignal(
       ? 18
       : layeredRemoteValue !== undefined
         ? layeredRemoteValue
-      : sourceDefense.hasImmediateStop
-        ? 11
-        : 9,
+        : sourceDefense.hasImmediateStop
+          ? 11
+          : 9,
     evidenceCode: terminalCentralAdditionalLayer
       ? `corp_terminal_central_additional_layer_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`
       : layeredParent
@@ -502,6 +502,24 @@ export function corpGlobalDefenseInstallRouteAssessment(
       ? { effectiveRezCostQuote: ice.effectiveRezCostQuote }
       : {}),
   }));
+  const unrealizedCentralLayersLackObservedPressure =
+    (serverId === "hq" || serverId === "rd") &&
+    serverIce.length >= 3 &&
+    serverIce.every((ice) => ice.rezzed !== true) &&
+    centralAllocation?.status === "known" &&
+    centralAllocation.evidence[serverId].isMultiaccess === false &&
+    centralAllocation.evidence[serverId].recentRunOrAccessEvents === 0 &&
+    centralAllocation.evidence[serverId].recentSuccessfulAccessRunnerTurns ===
+      0 &&
+    centralAllocation.evidence[serverId].serverBoundEffectIds.length === 0;
+  if (unrealizedCentralLayersLackObservedPressure) {
+    return {
+      knowledge: "known",
+      disposition: "effect_missing",
+      evidenceCode:
+        "corp_central_unrealized_layers_require_observed_access_pressure",
+    };
+  }
   const maximumRunnerAccessSuccessProbability = {
     numerator: 1,
     denominator: 2,

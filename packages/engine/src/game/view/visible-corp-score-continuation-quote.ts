@@ -57,13 +57,8 @@ export function visibleCorpScoreContinuationQuote(
     0,
     requirement - Math.max(0, Math.floor(instance.advancementCounters)),
   );
-  const nextCorpTurnGuaranteedFlexibleClicks = Math.max(
-    0,
-    STANDARD_CORP_TURN_CLICKS +
-      unrestrictedFutureCorpActionGrants(state) +
-      unrestrictedScoredAgendaActionGrants(state) -
-      Math.max(0, Math.floor(state.corpActionDebt?.forgoActionsPending ?? 0)),
-  );
+  const nextCorpTurnGuaranteedFlexibleClicks =
+    guaranteedNextCorpTurnFlexibleClicks(state);
   if (remainingAdvancementCounters > nextCorpTurnGuaranteedFlexibleClicks) {
     return {
       ...binding,
@@ -101,6 +96,16 @@ export function visibleCorpScoreContinuationQuote(
         (definition.agendaPoints ?? 0) >=
       state.agendaPointsToWin,
   };
+}
+
+export function guaranteedNextCorpTurnFlexibleClicks(state: GameState): number {
+  return Math.max(
+    0,
+    STANDARD_CORP_TURN_CLICKS +
+      unrestrictedFutureCorpActionGrants(state) +
+      unrestrictedScoredAgendaActionGrants(state) -
+      Math.max(0, Math.floor(state.corpActionDebt?.forgoActionsPending ?? 0)),
+  );
 }
 
 function unrestrictedFutureCorpActionGrants(state: GameState): number {

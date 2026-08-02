@@ -55,9 +55,26 @@ describe("match f06f Corp score and defense remediation checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("still permits a fully funded additional R&D layer", () => {
+  it("still permits a funded additional R&D layer against visible multiaccess", () => {
     const checkpoint = mutateFixture(fundedRdLayerJson, (value) => {
-      value.engine.testOnlyGameState.corp.credits = 20;
+      const state = value.engine.testOnlyGameState;
+      state.corp.credits = 20;
+      const interfaceId = state.runner.stack.find(
+        (cardId) =>
+          state.cardInstances[cardId]?.definitionId ===
+          "onr_v1_139_r-and-d-interface",
+      );
+      if (!interfaceId) throw new Error("Missing R&D Interface control card");
+      state.runner.stack = state.runner.stack.filter(
+        (cardId) => cardId !== interfaceId,
+      );
+      state.runner.rig.hardware.push(interfaceId);
+      state.cardInstances[interfaceId] = {
+        ...state.cardInstances[interfaceId]!,
+        zone: { side: "runner", zone: "rig" },
+        faceup: true,
+        rezzed: false,
+      };
       value.expectation = {
         acceptableActions: [
           {

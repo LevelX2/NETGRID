@@ -3,6 +3,7 @@ import {
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
   AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
   CARD_DEFINITIONS_BY_ID,
+  CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
   CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
@@ -7766,7 +7767,8 @@ function buildCorpDomain(
           "corp_resident_score_parent_dominates_sibling_route:",
         ) &&
         project.protectionNeed !== undefined &&
-        !corpScoreProtectionIsSatisfied(input, project) &&
+        (!corpScoreProtectionIsSatisfied(input, project) ||
+          corpScoreProjectNeedsProtectionMaturity(project)) &&
         !(
           project.phase === "install_agenda" &&
           project.agendaInstanceId === residentScoreAgendaInstanceId &&
@@ -8136,28 +8138,11 @@ function buildCorpDomain(
             centralDefenseAllocation?.status === "known" &&
             centralDefenseAllocation.evidence[serverId].threat !== "acute" &&
             centralDefenseAllocation.evidence[serverId].threat !== "terminal";
-          const targetCentralServer =
-            serverId === "hq" || serverId === "rd"
-              ? input.playerView.servers.find(
-                  (server) => server.id === serverId,
-                )
-              : undefined;
-          const unrealizedCentralStackPrecedesNoScoreDevelopment =
-            targetCentralServer !== undefined &&
-            scoreProtectionProjects.length > 0 &&
-            targetCentralServer.ice.length >= 3 &&
-            targetCentralServer.ice.every((ice) => ice.rezzed !== true) &&
-            centralDefenseAllocation?.status === "known" &&
-            centralDefenseAllocation.evidence[serverId as "hq" | "rd"]
-              .threat !== "acute" &&
-            centralDefenseAllocation.evidence[serverId as "hq" | "rd"]
-              .threat !== "terminal";
           if (
             (serverId === "hq" || serverId === "rd") &&
             ((scorePlanPrecedesRedundantCapacityDefense(serverId) &&
               route?.progressKind === "agenda_capacity_defense_conversion") ||
-              selectedScoreProtectionPrecedesAdditionalCentralLayer ||
-              unrealizedCentralStackPrecedesNoScoreDevelopment)
+              selectedScoreProtectionPrecedesAdditionalCentralLayer)
           ) {
             return [];
           }
@@ -9395,6 +9380,33 @@ function scoreProjectForCandidate(
       );
     const boundedStagedScoreWindow =
       residentBoundedStagedScoreWindow || handPressureBoundedStagedScoreWindow;
+    const certifiedNearTermScoreHorizon =
+      sameTurnCloseout ||
+      corpAgendaInstallHasCertifiedNearTermScoreHorizon(
+        input,
+        candidate,
+        serverId,
+      );
+    const certifiedMatureRemoteScoreHorizon =
+      !sameTurnCloseout &&
+      corpFundedProtectionSupportsExtendedScoreHorizon(
+        input,
+        candidate,
+        protectionNeed,
+        serverId,
+      );
+    const boundedScoreHorizon =
+      certifiedNearTermScoreHorizon ||
+      certifiedMatureRemoteScoreHorizon ||
+      boundedStagedScoreWindow;
+    const remoteRequiresNearMatchpointMaturity =
+      !sameTurnCloseout &&
+      serverId !== undefined &&
+      serverId !== "new_remote" &&
+      input.playerView.opponent.agendaPoints + agendaPoints >=
+        input.playerView.agendaPointsToWin - 1 &&
+      (input.playerView.servers.find((server) => server.id === serverId)?.ice
+        .length ?? 0) < 2;
     const developmentClickAvailable =
       input.playerView.own.clicks >= (boundedStagedScoreWindow ? 1 : 2) ||
       deadlinePressure;
@@ -9416,6 +9428,8 @@ function scoreProjectForCandidate(
       (scorelineFeasibility?.deadline !== "current_turn_only" &&
         scorelineFeasibility?.feasible !== false &&
         scoreActionSemanticsKnown &&
+        boundedScoreHorizon &&
+        !remoteRequiresNearMatchpointMaturity &&
         developmentClickAvailable &&
         protectedScoreWindow &&
         (fundingGap ?? 0) === 0);
@@ -9463,11 +9477,17 @@ function scoreProjectForCandidate(
                   ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
                   : fundingGap !== undefined && fundingGap > 0
                     ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                    : boundedStagedScoreWindow
-                      ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
-                      : protectedScoreWindow
-                        ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
-                        : `corp_score_protection_required:${serverId ?? "unbound"}`,
+                    : remoteRequiresNearMatchpointMaturity
+                      ? `corp_near_matchpoint_remote_maturity_required:${serverId ?? "unbound"}`
+                      : boundedStagedScoreWindow
+                        ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
+                        : !protectedScoreWindow
+                          ? `corp_score_protection_required:${serverId ?? "unbound"}`
+                          : !boundedScoreHorizon
+                            ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
+                            : protectedScoreWindow
+                              ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
+                              : `corp_score_protection_required:${serverId ?? "unbound"}`,
       },
     ];
   }
@@ -9621,6 +9641,121 @@ function scoreProjectForCandidate(
     ];
   }
   return [];
+}
+
+function corpAgendaInstallHasCertifiedNearTermScoreHorizon(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  serverId: string | undefined,
+): boolean {
+  if (!serverId || !candidate.sourceCardInstanceId) return false;
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  const payload = action?.payload;
+  const requirement =
+    payload?.agendaInstallScoreHorizonQuoteAdvancementRequirement;
+  const maximumCurrentTurnAdvances =
+    payload?.agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances;
+  const remainingAdvancesAfterCurrentTurn =
+    payload?.agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn;
+  const nextCorpTurnGuaranteedFlexibleClicks =
+    payload?.agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks;
+  return (
+    action?.side === "corp" &&
+    action.type === "install_card" &&
+    action.payload?.placement === "root" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    payload?.agendaInstallScoreHorizonQuoteSchemaVersion ===
+      CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION &&
+    payload.agendaInstallScoreHorizonQuoteComplete === true &&
+    payload.agendaInstallScoreHorizonQuoteCardId ===
+      candidate.sourceCardInstanceId &&
+    payload.agendaInstallScoreHorizonQuoteTargetServerId === serverId &&
+    payload.agendaInstallScoreHorizonQuoteExpiresAtStateVersion ===
+      input.playerView.stateVersion &&
+    isFiniteNonNegativeInteger(requirement) &&
+    isFiniteNonNegativeInteger(maximumCurrentTurnAdvances) &&
+    maximumCurrentTurnAdvances <= requirement &&
+    isFiniteNonNegativeInteger(remainingAdvancesAfterCurrentTurn) &&
+    remainingAdvancesAfterCurrentTurn ===
+      requirement - maximumCurrentTurnAdvances &&
+    isFiniteNonNegativeInteger(nextCorpTurnGuaranteedFlexibleClicks) &&
+    remainingAdvancesAfterCurrentTurn <= nextCorpTurnGuaranteedFlexibleClicks
+  );
+}
+
+function corpFundedProtectionSupportsExtendedScoreHorizon(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  need: CorpFundedRemoteAccessRiskNeed | undefined,
+  serverId: string | undefined,
+): boolean {
+  if (!need || !serverId || serverId === "new_remote") return false;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  const baseline = need.baseline;
+  if (
+    !server ||
+    baseline.knowledge !== "known" ||
+    baseline.fundedProtection !== true ||
+    baseline.preservesScoreCreditReserve !== true ||
+    baseline.preservesHardClickReserve !== true ||
+    baseline.protection.protectsScore !== true
+  ) {
+    return false;
+  }
+  const fundedRezIds = new Set(
+    baseline.selectedRezCosts.map((entry) => entry.iceInstanceId),
+  );
+  const independentlyFundedProtectionLayers = server.ice.filter(
+    (ice) => ice.rezzed === true || fundedRezIds.has(ice.instanceId),
+  ).length;
+  if (independentlyFundedProtectionLayers >= 2) return true;
+  const horizonShortfall = corpAgendaInstallScoreHorizonShortfall(
+    input,
+    candidate,
+    serverId,
+  );
+  return (
+    horizonShortfall !== undefined &&
+    horizonShortfall <= 1 &&
+    compareExactProbabilities(
+      baseline.protection.runnerAccessSuccessProbability,
+      { numerator: 0, denominator: 1 },
+    ) === 0
+  );
+}
+
+function corpAgendaInstallScoreHorizonShortfall(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  serverId: string,
+): number | undefined {
+  if (!candidate.sourceCardInstanceId) return undefined;
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  const payload = action?.payload;
+  const remaining =
+    payload?.agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn;
+  const nextClicks =
+    payload?.agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks;
+  if (
+    payload?.agendaInstallScoreHorizonQuoteSchemaVersion !==
+      CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION ||
+    payload.agendaInstallScoreHorizonQuoteCardId !==
+      candidate.sourceCardInstanceId ||
+    payload.agendaInstallScoreHorizonQuoteTargetServerId !== serverId ||
+    payload.agendaInstallScoreHorizonQuoteExpiresAtStateVersion !==
+      input.playerView.stateVersion ||
+    !isFiniteNonNegativeInteger(remaining) ||
+    !isFiniteNonNegativeInteger(nextClicks)
+  ) {
+    return undefined;
+  }
+  return Math.max(0, remaining - nextClicks);
 }
 
 function sameTurnScoreConversionProjectForCandidate(
@@ -9926,7 +10061,7 @@ function corpFundedScoreProtectionNeed(
   terminalScore: boolean,
   reserveClicksThisTurn: boolean,
 ): CorpFundedRemoteAccessRiskNeed {
-  const policy = corpScoreProtectionPolicy(input, agenda);
+  const policy = corpScoreProtectionPolicy(input, agenda, serverId);
   const scoreReserve = corpScoreReserveForCandidate(
     input,
     candidate,
@@ -10179,7 +10314,11 @@ function corpScoreProtectionInstallRouteScan(
   project: CorpScoreProjectSignal,
 ): CorpScoreProtectionInstallRouteScan {
   const need = project.protectionNeed;
-  if (!need || corpScoreProtectionIsSatisfied(input, project)) {
+  if (
+    !need ||
+    (corpScoreProtectionIsSatisfied(input, project) &&
+      !corpScoreProjectNeedsProtectionMaturity(project))
+  ) {
     return {
       productiveRoutes: [],
       directInstallRouteState: {
@@ -10350,7 +10489,7 @@ function corpScoreProtectionStagingInstallSignal(
     (serverId !== "new_remote" && !serverId.startsWith("remote_")) ||
     (serverId !== "new_remote" && existingRemote === undefined) ||
     need.targetServerId !== serverId ||
-    !scoreProtectionStagingMayBackstopDirectRoute(need, scan) ||
+    !scoreProtectionStagingMayBackstopDirectRoute(project, need, scan) ||
     !candidateIsVisibleCorpIceInstall(input, candidate) ||
     !candidate.sourceCardInstanceId ||
     !candidate.sourceDefinitionId ||
@@ -10689,16 +10828,29 @@ function corpScoreProtectionStagingRezPortfolioIsNearTermFundable(
 }
 
 function scoreProtectionStagingMayBackstopDirectRoute(
+  project: CorpScoreProjectSignal,
   need: CorpFundedRemoteAccessRiskNeed,
   scan: CorpScoreProtectionInstallRouteScan,
 ): boolean {
   if (scan.productiveRoutes.length > 0) return false;
   return (
     need.baseline.knowledge === "known" &&
-    need.baseline.protection.protectsScore === false &&
+    (need.baseline.protection.protectsScore === false ||
+      corpScoreProjectNeedsProtectionMaturity(project)) &&
     scan.directInstallRouteState.knowledge === "known" &&
     (scan.directInstallRouteState.disposition === "effect_missing" ||
       scan.directInstallRouteState.disposition === "funding_only")
+  );
+}
+
+function corpScoreProjectNeedsProtectionMaturity(
+  project: CorpScoreProjectSignal,
+): boolean {
+  return (
+    project.evidenceCode.startsWith("corp_score_horizon_unbounded:") ||
+    project.evidenceCode.startsWith(
+      "corp_near_matchpoint_remote_maturity_required:",
+    )
   );
 }
 
@@ -10898,6 +11050,7 @@ function corpConditionalScoreCreditReserve(
 function corpScoreProtectionPolicy(
   input: AiDecisionInput,
   agenda: VisibleCard,
+  serverId: string,
 ): {
   maximumRunnerAccessSuccessProbability: {
     numerator: number;
@@ -10911,14 +11064,38 @@ function corpScoreProtectionPolicy(
     input.playerView.agendaPointsToWin;
   const urgentRushPressure =
     input.playerView.opponent.agendaPoints >=
-    input.playerView.agendaPointsToWin - 3;
-  if (!terminalStealRisk && urgentRushPressure) {
+      input.playerView.agendaPointsToWin - 3 ||
+    input.playerView.opponent.agendaPoints + agendaPoints >=
+      input.playerView.agendaPointsToWin - 2;
+  const establishedRemoteLayerCount =
+    serverId === "new_remote"
+      ? 0
+      : (input.playerView.servers.find((server) => server.id === serverId)?.ice
+          .length ?? 0);
+  if (
+    !terminalStealRisk &&
+    urgentRushPressure &&
+    establishedRemoteLayerCount < 2
+  ) {
+    return {
+      maximumRunnerAccessSuccessProbability: {
+        numerator: 0,
+        denominator: 1,
+      },
+      policySource: "corp_thin_remote_rush_zero_access_risk",
+    };
+  }
+  if (
+    !terminalStealRisk &&
+    urgentRushPressure &&
+    establishedRemoteLayerCount >= 2
+  ) {
     return {
       maximumRunnerAccessSuccessProbability: {
         numerator: 1,
         denominator: 2,
       },
-      policySource: "corp_score_rush_moderate_access_risk",
+      policySource: "corp_established_remote_rush_moderate_access_risk",
     };
   }
   return {

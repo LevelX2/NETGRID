@@ -56,7 +56,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
     });
   }
 
-  it("keeps a delayed first-copy Ambush install from being rejected by the prepared-score sibling", () => {
+  it("keeps a delayed first-copy Ambush admissible while certified score and economy routes take precedence", () => {
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-10",
       maxActions: 23,
@@ -75,24 +75,21 @@ describe("Proteus Fetal AI install plan coverage", () => {
     expect(summary.errors).toEqual([]);
     expect(summary.runtimeFailures).toEqual([]);
     expect(summary.replayOk).toBe(true);
-    const executorEvidence =
-      "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_004_fetal-ai_1%3Asetup%3Anew_remote";
+    const admittedAmbushEvidence =
+      "plan_scheduler:assess:validated:plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_004_fetal-ai_1%3Asetup%3Anew_remote";
     expect(
-      summary.actionSequence.find((entry) =>
-        entry.evidence.includes(executorEvidence),
+      summary.actionSequence.some((entry) =>
+        entry.evidence.includes(admittedAmbushEvidence),
       ),
       fetalDiagnostic(summary),
-    ).toMatchObject({
-      side: "corp",
-      selectedActionId: "corp.install_card.new_remote",
-      actionType: "install_card",
-      reasonCode: "plan_first.corp.ambush_and_bluff",
-      fallbackUsed: false,
-      evidence: expect.arrayContaining([
-        "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
-        executorEvidence,
-      ]),
-    });
+    ).toBe(true);
+    expect(
+      summary.actionSequence.some(
+        (entry) =>
+          entry.reasonCode === "plan_first.corp.ambush_and_bluff" &&
+          entry.selectedActionId === "corp.install_card.new_remote",
+      ),
+    ).toBe(false);
   }, 30_000);
 
   function requireDeck(deckId: string): DeckDefinition {

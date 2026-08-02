@@ -34,14 +34,33 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
   });
 
   it.each([
-    ["starts a scoring remote or honors terminal central defense", startScoreRemoteD19Json],
-    ["binds the created scoring remote", bindNewRemoteD20Json],
     [
-      "installs score material before agenda overflow",
-      installBeforeOverflowD94Json,
+      "starts a scoring remote or honors terminal central defense",
+      startScoreRemoteD19Json,
     ],
+    ["binds the created scoring remote", bindNewRemoteD20Json],
   ])("%s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  });
+
+  it("keeps score material in HQ when the overflow remote has no certified protection", () => {
+    const checkpoint = fixture(installBeforeOverflowD94Json);
+    checkpoint.expectation = {
+      contractKind: "correctness",
+      acceptableActions: [{ type: "gain_credit" }],
+      forbiddenActions: [
+        {
+          type: "install_card",
+          sourceDefinitionId: "onr_v1_220_tycho-extension",
+        },
+      ],
+      planExecution: {
+        acceptablePlanKinds: ["corp.economy"],
+        acceptableCapabilities: ["develop_or_convert_corp_economy"],
+      },
+    };
+    const result = runAiDecisionCheckpoint(checkpoint);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 

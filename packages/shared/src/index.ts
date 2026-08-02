@@ -2564,6 +2564,40 @@ export type VisibleCorpScoreContinuationQuote =
       terminalScore: boolean;
     };
 
+export const CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION =
+  "corp-agenda-install-score-horizon-quote-v1" as const;
+
+/**
+ * Actor-private, Engine-certified click horizon attached to one exact agenda
+ * install LegalAction. The score plan may use this only to decide whether the
+ * exposed agenda can be completed no later than the next Corp turn; it still
+ * owns protection and credit reserves separately.
+ */
+export type CorpAgendaInstallScoreHorizonPayload =
+  | {
+      agendaInstallScoreHorizonQuoteSchemaVersion: typeof CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION;
+      agendaInstallScoreHorizonQuoteComplete: false;
+      agendaInstallScoreHorizonQuoteReason: "not_completable_by_next_corp_turn";
+      agendaInstallScoreHorizonQuoteCardId: CardInstanceId;
+      agendaInstallScoreHorizonQuoteTargetServerId: ServerId;
+      agendaInstallScoreHorizonQuoteExpiresAtStateVersion: number;
+      agendaInstallScoreHorizonQuoteAdvancementRequirement: number;
+      agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: number;
+      agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn: number;
+      agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks: number;
+    }
+  | {
+      agendaInstallScoreHorizonQuoteSchemaVersion: typeof CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION;
+      agendaInstallScoreHorizonQuoteComplete: true;
+      agendaInstallScoreHorizonQuoteCardId: CardInstanceId;
+      agendaInstallScoreHorizonQuoteTargetServerId: ServerId;
+      agendaInstallScoreHorizonQuoteExpiresAtStateVersion: number;
+      agendaInstallScoreHorizonQuoteAdvancementRequirement: number;
+      agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: number;
+      agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn: number;
+      agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks: number;
+    };
+
 /**
  * Corp-private, Engine-certified capability evidence for a card that can bank
  * its own advancement counters, cash them out, and later move them to one

@@ -1,4 +1,8 @@
-import type { CardInstanceId } from "@netgrid/shared";
+import {
+  CARD_DEFINITIONS_BY_ID,
+  CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
+  type CardInstanceId,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import {
@@ -79,16 +83,18 @@ describe("corp install main actions", () => {
     });
     const cardId = "corp_root_test" as CardInstanceId;
 
-    expect(buildCorpNewRemoteRootInstallAction(state, cardId, 3)).toMatchObject({
-      actionId: "corp.install_card.corp_root_test.new_remote.corp_root_test",
-      side: "corp",
-      type: "install_card",
-      label: "Karte in neuem Remote installieren",
-      source: cardId,
-      costs: [{ clicks: 1, credits: 3 }],
-      payload: { cardId, serverId: "new_remote", placement: "root" },
-      visibility: "private_to_actor",
-    });
+    expect(buildCorpNewRemoteRootInstallAction(state, cardId, 3)).toMatchObject(
+      {
+        actionId: "corp.install_card.corp_root_test.new_remote.corp_root_test",
+        side: "corp",
+        type: "install_card",
+        label: "Karte in neuem Remote installieren",
+        source: cardId,
+        costs: [{ clicks: 1, credits: 3 }],
+        payload: { cardId, serverId: "new_remote", placement: "root" },
+        visibility: "private_to_actor",
+      },
+    );
   });
 
   it("builds an existing-server root install action with replacement markers", () => {
@@ -121,6 +127,70 @@ describe("corp install main actions", () => {
         regionReplacementWarning: true,
       },
       visibility: "private_to_actor",
+    });
+  });
+
+  it("certifies the exact post-install agenda score click horizon", () => {
+    const state = createGame({
+      seed: "corp-agenda-install-score-horizon",
+      setupMode: "completed",
+    });
+    const agendaId = Object.values(state.cardInstances).find((instance) => {
+      const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
+      return (
+        instance.owner === "corp" &&
+        definition?.type === "agenda" &&
+        (definition.advancementRequirement ?? 0) > 0
+      );
+    })?.instanceId;
+    if (!agendaId) throw new Error("Expected a Corp agenda");
+    const requirement =
+      CARD_DEFINITIONS_BY_ID[state.cardInstances[agendaId]!.definitionId]!
+        .advancementRequirement!;
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    });
+    state.corp.clicks = 1;
+    const previousActionDebt = state.corpActionDebt;
+    state.corpActionDebt = { forgoActionsPending: 3, entries: [] };
+
+    const unbounded = buildCorpServerRootInstallAction(
+      state,
+      agendaId,
+      { id: "remote_1", label: "Remote 1" },
+      0,
+    );
+    expect(unbounded.payload).toMatchObject({
+      agendaInstallScoreHorizonQuoteSchemaVersion:
+        CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
+      agendaInstallScoreHorizonQuoteComplete: false,
+      agendaInstallScoreHorizonQuoteCardId: agendaId,
+      agendaInstallScoreHorizonQuoteTargetServerId: "remote_1",
+      agendaInstallScoreHorizonQuoteAdvancementRequirement: requirement,
+      agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: 0,
+      agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn:
+        requirement,
+      agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks: 0,
+    });
+
+    if (previousActionDebt) state.corpActionDebt = previousActionDebt;
+    else delete state.corpActionDebt;
+    state.corp.clicks = requirement + 1;
+    const bounded = buildCorpServerRootInstallAction(
+      state,
+      agendaId,
+      { id: "remote_1", label: "Remote 1" },
+      0,
+    );
+    expect(bounded.payload).toMatchObject({
+      agendaInstallScoreHorizonQuoteComplete: true,
+      agendaInstallScoreHorizonQuoteAdvancementRequirement: requirement,
+      agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: requirement,
+      agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn: 0,
     });
   });
 });
