@@ -1,7 +1,7 @@
 # Corp-Draw-Transaktionen – Final Review
 
 Datum: 2026-08-02
-Status: **technisch freigegeben; manueller Corporate-Shuffle-Pfad blockiert**
+Status: **technisch freigegeben; LegalAction-Integrationsblocker geschlossen**
 Primärer Agent: `release-implementation-agent`
 Prozess:
 `docs/architecture/engine/corp-draw-transactions-process-2026-08-02.md`
@@ -117,11 +117,21 @@ unveränderten aktuellen `main` isoliert identisch reproduzierbar. Er betrifft
 weder Corp-Draw-Transaktionen noch SPG-Choices, PlayerViews oder Reconnect und
 ist daher ein dokumentierter Bestandsfehler, aber kein Blocker dieses Reviews.
 
+Ein nachgezogener Multiplayer-Integrationstest sichert zusätzlich den zuvor
+offenen Corporate-Shuffle-Vertrag direkt aus der aktuellen PlayerView. Die
+unveränderte `play_operation`-Action wird bei exakt zwei und bei drei
+verfügbaren Aktionen mit ihrer ActionId, Quelle, StateVersion, Payload und
+ihren Kosten akzeptiert. Ohne SPG setzt die Engine den Fünf-Karten-Draw in die
+HQ-zu-R&D-Choice fort; mit SPG öffnet sie zuerst eine private Sechs-Karten-
+Choice, übernimmt fünf Karten netto nach HQ und öffnet anschließend genau eine
+HQ-zu-R&D-Choice. Eine veraltete Action bleibt mit `stale_state` fail-closed.
+Die öffentlichen Events enthalten dabei nur die vorgesehenen Counts und keine
+Kartenidentitäten.
+
 ## Manueller Firefox-Playtest
 
-Der Human-vs-AI-Playtest vom 02.08.2026 auf dem lokalen `main`-Stand
-`2b14ee427` und Build `6498-dev` bestätigt den normalen und den
-Pflichtzugpfad:
+Der Human-vs-AI-Nachtest vom 02.08.2026 auf der frisch gestarteten lokalen
+Hauptinstanz mit Build `6535` bestätigt den normalen und den Pflichtzugpfad:
 
 - Eine gerezzte Strategic Planning Group erweitert einen normalen
   Ein-Karten-Draw auf genau zwei lesbare Corp-Choice-Karten. Nach der Auswahl
@@ -136,15 +146,20 @@ Pflichtzugpfad:
   stellt dieselbe Choice mit denselben beiden Karten wieder her; die Auswahl
   kann anschließend korrekt abgeschlossen werden.
 
-Der geplante Corporate-Shuffle-Gegenlauf konnte nicht bis zum
-Sechs-Karten-Dialog gelangen. Die aktuelle PlayerView bietet Corporate
-Shuffle bei zwei und bei drei verfügbaren Aktionen als exakte
-`play_operation`-LegalAction mit zwei Aktionskosten an. Das UI zeigt dieselbe
-Aktion als `Spielen · Kosten: 2 Aktionen`, lehnt sie beim Einreichen aber mit
-`Diese Aktion ist nicht legal` ab. Aktionen, StateVersion und Karte bleiben
-unverändert. Der Befund ist als eigenes Activity-Paket erfasst und liegt vor
-der SPG-Draw-Auflösung; die automatisierten Engine-Tests des sechs Karten
-umfassenden Draws bleiben davon getrennte Evidence.
+Auch drei weitere normale Ein-Karten-Draws öffneten mit gerezzter SPG jeweils
+genau eine lesbare Zwei-Karten-Auswahl und erzeugten die count-korrekte eigene
+SPG-Chronikmeldung. Das ursprüngliche Verhalten des älteren Builds `6498-dev`
+ließ sich auf der frisch gestarteten Hauptinstanz damit nicht als allgemeine
+LegalAction- oder Draw-Störung bestätigen; der Befund wird als Laufzeitdrift
+des damaligen lokalen Stands eingeordnet.
+
+Corporate Shuffle selbst erschien im zufälligen manuellen Spiel nicht in HQ.
+Der exakte Klickpfad wurde deshalb nicht erneut im Browser erzwungen. Die
+zuvor blockierende PlayerView-/Server-Grenze und die vollständige Fortsetzung
+mit und ohne SPG sind stattdessen durch den deterministischen Multiplayer-
+Integrationstest abgedeckt. Der Test verwendet dieselbe aktuelle
+PlayerView-Action wie der Webclient und sichert zusätzlich den fail-closed-
+Fall einer veralteten Action.
 
 ## Risiken und Restpunkte
 
@@ -156,6 +171,7 @@ umfassenden Draws bleiben davon getrennte Evidence.
 - Kombinierte Pflichtzugquellen wie Unlisted Research Lab und Skivviss sind
   weiterhin nur automatisiert, noch nicht in einem menschlichen Playtest
   bestätigt.
-- Der manuelle Corporate-Shuffle-SPG-Pfad bleibt bis zur Behebung der
-  LegalAction-Diskrepanz blockiert; anschließend sind Sechs-Karten-Auswahl,
-  nachgelagerte HQ-zu-R&D-Choice und beide Chronikmeldungen nachzutesten.
+- Der exakte Corporate-Shuffle-Klickpfad wurde im manuellen Zufallsspiel nicht
+  erneut erreicht. Seine PlayerView-/Server-Grenze, Sechs-Karten-Auswahl,
+  nachgelagerte HQ-zu-R&D-Choice und side-sicheren Events sind deterministisch
+  im Multiplayer-Integrationstest abgesichert.

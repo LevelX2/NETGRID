@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-08-02-corporate-shuffle-legal-action-rejected
-status: inbox
+status: done
 kind: fix
 area: engine-web-server
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-08-02
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-02
+completedAt: 2026-08-02
+branch: codex/activities-worktree-20260802-182521
 releaseTarget: current-main
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/multiplayer.test.ts
+  - docs/reviews/engine/corp-draw-transactions-final-review-2026-08-02.md
+checks:
+  - focused engine Corporate Shuffle tests
+  - focused server PlayerView integration test
+  - affected typechecks and diff check
 ---
 
 # Corporate Shuffle: angebotene LegalAction darf beim Einreichen nicht als illegal abgewiesen werden
@@ -85,24 +90,41 @@ und als illegal ablehnen.
 
 ## Akzeptanzkriterien
 
-- [ ] Corporate Shuffle lässt sich bei exakt zwei verfügbaren Corp-Aktionen
+- [x] Corporate Shuffle lässt sich bei exakt zwei verfügbaren Corp-Aktionen
       über die angebotene Webclient-Aktion spielen und verbraucht genau zwei
       Aktionen sowie die gedruckten Creditkosten.
-- [ ] Derselbe Fluss funktioniert bei mindestens drei verfügbaren Aktionen;
+- [x] Derselbe Fluss funktioniert bei mindestens drei verfügbaren Aktionen;
       eine tatsächlich nicht mehr gültige oder veraltete Action wird dagegen
       weiterhin fail-closed abgelehnt.
-- [ ] Ein Integrationstest belegt, dass die aus der aktuellen PlayerView
+- [x] Ein Integrationstest belegt, dass die aus der aktuellen PlayerView
       ausgewählte ActionId mit unveränderter Quelle, StateVersion, Kosten und
       Payload von `applyAction` akzeptiert wird.
-- [ ] Ohne SPG werden fünf Karten als eine Draw-Einheit behandelt und danach
+- [x] Ohne SPG werden fünf Karten als eine Draw-Einheit behandelt und danach
       genau eine HQ-zu-R&D-Choice geöffnet.
-- [ ] Mit gerezzter SPG werden sechs lesbare Corp-Choice-Karten angeboten;
+- [x] Mit gerezzter SPG werden sechs lesbare Corp-Choice-Karten angeboten;
       nach der Auswahl gehen fünf netto nach HQ und genau eine unter R&D,
       anschließend folgt genau eine HQ-zu-R&D-Choice.
-- [ ] Die Chronik enthält getrennte, count-korrekte SPG- und
+- [x] Die Chronik enthält getrennte, count-korrekte SPG- und
       Corporate-Shuffle-Meldungen ohne Kartenidentitäts-Leak.
-- [ ] Fokussierte Engine-, Web- und Servertests, die betroffenen Typechecks
+- [x] Fokussierte Engine-, Web- und Servertests, die betroffenen Typechecks
       und `git diff --check` sind grün.
+
+## Ergebnis
+
+Die aktuelle Corporate-Shuffle-Action aus der Corp-PlayerView wird mit exakt
+zwei wie auch mit drei verfügbaren Aktionen unverändert vom Server angenommen.
+Der neue Multiplayer-Integrationstest sichert ActionId, Quelle, StateVersion,
+Kosten und Payload sowie die vollständige Fortsetzung ohne SPG und mit der
+privaten Sechs-Karten-SPG-Auswahl bis zur HQ-zu-R&D-Choice. Veraltete Actions
+bleiben mit `stale_state` fail-closed; öffentliche Events enthalten nur
+Counts.
+
+Auf der frisch gestarteten Hauptinstanz ließ sich der ursprüngliche Fehler des
+älteren lokalen Builds nicht wiederholen. Pflichtzug und mehrere normale Draws
+mit SPG funktionierten im Firefox-Nachtest samt privater Auswahl und getrennter
+Chronikmeldung. Corporate Shuffle erschien im zufälligen Decklauf nicht in HQ;
+der exakte UI-Klickpfad ist deshalb durch den deterministischen Server-
+Integrationstest statt durch einen erzwungenen Browserzustand belegt.
 
 ## Manueller Nachtest
 
