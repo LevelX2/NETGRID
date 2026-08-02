@@ -1,6 +1,6 @@
 # Disgruntled-Runfenster: Planmodulabdeckung – sequenzieller Paketprozess
 
-Status: **P5 fachlich abgeschlossen – lokale Integration und Cleanup folgen**
+Status: **abgeschlossen**
 Datum: 2026-08-02
 Primärer Agent: `card-enablement-ai-knowledge-agent`
 Worktree: `C:\Projekte\NETGRID_AI_DISGRUNTLED_RUN_WINDOW_COVERAGE`
@@ -160,9 +160,10 @@ nachgewiesenen Speicherdrucks eine 8-GB-Node-Heapgrenze.
 
 P5 führt Ursache, Architektururteil, Seedmetriken und Gateergebnisse im
 Abschlussreview zusammen. AI-Architekturindex, Projektstatus und Monatslog
-verweisen auf den neuen Current-State-Vertrag. Der Arbeitsbranch ist damit
-für den defensiven Main-Abgleich, lokalen Fast-Forward-Merge und verifizierten
-Worktree-/Branch-Cleanup bereit.
+verweisen auf den neuen Current-State-Vertrag. Der Arbeitsbranch wurde nach
+defensivem Main-Abgleich über Integrationsstand `e801c5991` lokal nach `main`
+übernommen. Der Arbeits-Worktree ist in Git und Dateisystem verifiziert
+entfernt; der vollständig gemergte Arbeitsbranch ist gelöscht.
 
 ## Paketdetails
 
