@@ -147,6 +147,15 @@ function isCorpRdArrangeChoice(choice: ChoiceRequest): boolean {
   );
 }
 
+function isStrategicPlanningGroupDrawChoice(choice: ChoiceRequest): boolean {
+  return (
+    choice.kind === "select_cards" &&
+    choice.source.startsWith(
+      "card_implementation.strategic_planning_group_draw:",
+    )
+  );
+}
+
 function stackSearchResolutionForChoice(
   choice: ChoiceRequest,
 ): ChoiceRequest["stackSearchResolution"] | undefined {
@@ -259,6 +268,7 @@ export function visibleChoiceCardForOption(
   const isStackChoice = isRunnerStackSearchChoice(choice);
   const isRunnerArrangeChoice = isRunnerStackArrangeChoice(choice);
   const isCorpArrangeChoice = isCorpRdArrangeChoice(choice);
+  const isCorpDrawChoice = isStrategicPlanningGroupDrawChoice(choice);
   const isTemporaryHeapInstallChoice =
     choice.source.startsWith("v1911.temporary_program_install_heap_install") ||
     (choice.source.startsWith("p3_38.stack_or_trash_program_install") &&
@@ -273,6 +283,7 @@ export function visibleChoiceCardForOption(
     !isStackChoice &&
     !isRunnerArrangeChoice &&
     !isCorpArrangeChoice &&
+    !isCorpDrawChoice &&
     !isTemporaryHeapInstallChoice &&
     !isScoredAgendaFreeRezChoice &&
     !isP333PrivateLookChoice
@@ -313,6 +324,15 @@ export function visibleChoiceCardForOption(
   const instance = state.cardInstances[cardId];
   if (isCorpArrangeChoice) {
     if (!instance || instance.owner !== "corp") return undefined;
+    return visibleOwnCard(state, cardId);
+  }
+  if (isCorpDrawChoice) {
+    if (
+      !instance ||
+      instance.owner !== "corp" ||
+      !state.corp.hq.includes(cardId)
+    )
+      return undefined;
     return visibleOwnCard(state, cardId);
   }
   if (!instance || instance.owner !== "runner") return undefined;

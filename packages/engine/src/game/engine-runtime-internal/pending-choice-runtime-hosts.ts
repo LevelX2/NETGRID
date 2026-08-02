@@ -32,6 +32,7 @@ import {
 } from "./runtime-port-bindings";
 import { resolveAccessProgramInstallMemoryChoice } from "../access/access-flow";
 import { resolveRunnerMemoryCheckpointChoice } from "../checkpoints/runner-memory-checkpoint";
+import { resolveStrategicPlanningGroupDrawChoice } from "../state/draw-random";
 
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,
@@ -597,6 +598,7 @@ export function createPendingChoiceRuntimeHosts(
         resolveExposePreventionChoice,
         resolveCorpInstalledEconomyCreditChoice:
           deps.resolveCorpInstalledEconomyCreditChoice,
+        resolveStrategicPlanningGroupDrawChoice,
         resolveCrashEverettDrawChoice: deps.resolveCrashEverettDrawChoice,
         resolveRunnerDrawSequenceChoice: deps.resolveRunnerDrawSequenceChoice,
         resolveHardwareTrashByCounterChoice:
