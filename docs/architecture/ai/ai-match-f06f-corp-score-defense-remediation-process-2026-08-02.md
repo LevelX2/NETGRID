@@ -1,6 +1,6 @@
 # Match f06f – Corp-Score-, Remote- und Defense-Remediation-Prozess
 
-Status: aktiv – P5 Vollverifikation abgeschlossen
+Status: P6-Review abgeschlossen – lokale Integration freigegeben
 
 Quelle: vollständiges 123/123-Entscheidungsaudit von
 `match_f06f0fe345a11e0f` und Freigabe der Maßnahmen durch den

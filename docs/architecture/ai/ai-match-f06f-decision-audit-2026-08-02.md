@@ -1,6 +1,6 @@
 # Match f06f – vollständiger Corp-KI-Entscheidungsaudit
 
-Status: freigegebene Remediation-Evidence
+Status: Remediation umgesetzt und voll verifiziert
 
 ## Match und Provenienz
 
@@ -196,3 +196,59 @@ Warmup-Drifts. Decisions 26, 52 und 102 reproduzieren ausschließlich als
 `behavior_regression`; Decision 41 ist bereits grün. Die Gegenproben für
 verantwortbares Same-Turn-Rush-Scoring und eine vollständig finanzierte
 zusätzliche R&D-Schicht sind vor dem Fix grün.
+
+## Umgesetzte Korrektur
+
+### Score-Owner und Engine-Horizont
+
+Die Engine ergänzt jede exakte Agenda-Install-LegalAction um einen
+actor-privaten, StateVersion-gebundenen Quote. Er enthält ausschließlich den
+regelkorrekt berechneten Fortschritt bis zum Ende des aktuellen Corp-Zugs und
+die garantiert flexiblen Klicks des nächsten Corp-Zugs. `corp.score_agenda`
+verwendet diesen Quote fail-closed; die KI rechnet keine zukünftigen Klicks
+parallel nach.
+
+Ein längerer Scorehorizont ist nur zulässig, wenn ein bestehender Remote eine
+exakt finanzierte Schutzroute mit Score-/Klickreserve besitzt. Zwei
+unabhängig finanzierte beziehungsweise bereits gerezzte Schutzschichten
+tragen die reguläre längere Linie. Eine einzelne Schicht reicht nur bei
+höchstens einem fehlenden Horizontklick und Engine-zertifizierter
+Zugriffswahrscheinlichkeit null. Nahe am Runner-Matchpoint verlangt ein
+dünner Remote vor der Agenda-Installation zusätzliche Reife.
+
+Damit bleiben Decisions 26 und 52 in HQ. Decision 41 behält denselben
+residenten `corp.score_agenda`-Owner und avanciert weiter statt freie Credits
+zu nehmen. Frühes, im selben Zug vollständig ausführbares Rush-Scoring bleibt
+als grüne Gegenprobe erhalten.
+
+### Bestehender Defend-Owner
+
+`corp.defend_servers` wurde in seiner vorhandenen globalen
+Allokations-/Installroute angepasst. Eine weitere Central-Schicht wird
+abgelehnt, wenn bereits mindestens drei ICE liegen, alle ungerezzed sind und
+keine der vorhandenen Druckevidenzen greift:
+
+- sichtbarer Multiaccess,
+- aktuelle oder wiederholte Runs/Accesses auf den Server,
+- jüngste erfolgreiche Zugriffe oder
+- servergebundene Effekte, die zusätzliche Verteidigung begründen.
+
+Das ist kein hartes Drei-ICE-Maximum. Die vorhandene Multiaccess-Gegenprobe
+mit sichtbarem R&D Interface und vollständig finanzierter zusätzlicher
+Schicht bleibt grün. Decision 102 nimmt deshalb BBS-/Basis-Economy und kauft
+nicht die siebte R&D-Schicht.
+
+Der Score-Parent darf bei fehlender Remote-Reife weiterhin den vorhandenen
+Protection-Need veröffentlichen; nur `corp.defend_servers` wählt daraus die
+konkrete ICE-/Rezroute. `corp.establish_scoring_remote` wurde nicht als
+zusätzlicher Live-Action-Chooser aktiviert. Choice-Resolver, Rez-Chooser,
+Kartenhints und Spielregeln blieben unverändert.
+
+## Verifikationsurteil
+
+Alle vier F06F-Checkpoints sowie Rush- und Multiaccess-Gegenproben sind grün.
+Die fokussierte Regression umfasst 361 AI-Tests; der vollständige Lauf umfasst
+4563 AI-Tests in drei grünen Shards. Engine-Quote-Test, AI-/Engine-Typechecks,
+AI-Strukturgates, Proteus-Readiness und Deck-Doctrine-Strategie-Gate sind
+ebenfalls grün. Es verbleibt aus diesem Match kein freigegebenes rotes
+Finding.
