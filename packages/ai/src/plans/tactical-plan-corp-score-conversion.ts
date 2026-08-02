@@ -12,6 +12,7 @@ import {
   type ActionCapacityActionCandidate,
 } from "./action-capacity-route";
 import { createCorpActionDemand } from "./action-demand";
+import { readCorpCounterBankPreparationQuote } from "./corp-counter-bank-preparation-quote";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -191,11 +192,76 @@ function conversionPathForDesiredTarget(
       desiredCounters,
       initialCounters,
       onCandidate: (candidate) => {
+        if (replacementRouteDestroysPlanProgress(input, candidate)) return;
         if (!best || comparePaths(candidate, best) < 0) best = candidate;
       },
     });
   }
   return best;
+}
+
+function replacementRouteDestroysPlanProgress(
+  input: AiDecisionInput,
+  path: CandidatePath,
+): boolean {
+  const installIndex = path.steps.findIndex(
+    (step) => step.kind === "install_score_target",
+  );
+  const installStep = path.steps[installIndex];
+  if (!installStep?.actionId) return false;
+  const installAction = input.legalActions.find(
+    (action) => action.actionId === installStep.actionId,
+  );
+  if (
+    installAction?.side !== "corp" ||
+    installAction.type !== "install_card" ||
+    installAction.payload?.rootReplacement !== "asset_to_agenda"
+  ) {
+    return false;
+  }
+  const serverId = stringPayload(installAction, "serverId");
+  if (!serverId) return false;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) return false;
+
+  const laterSourceIds = new Set(
+    path.steps
+      .slice(installIndex + 1)
+      .map((step) => step.sourceCardId)
+      .filter((cardId): cardId is string => cardId !== undefined),
+  );
+  if (server.root.some((card) => laterSourceIds.has(card.instanceId))) {
+    return true;
+  }
+
+  const replacesProductiveCounterBank = server.root.some((card) => {
+    const quote = readCorpCounterBankPreparationQuote(
+      input,
+      card,
+      "installed_root",
+      serverId,
+    );
+    return quote !== undefined && quote.advancementCounters > 0;
+  });
+  return (
+    replacesProductiveCounterBank &&
+    !isTerminalMatchScoreReplacement(input, path, installIndex)
+  );
+}
+
+function isTerminalMatchScoreReplacement(
+  input: AiDecisionInput,
+  path: CandidatePath,
+  installIndex: number,
+): boolean {
+  return (
+    installIndex === 0 &&
+    path.steps.at(-1)?.kind === "score_ready" &&
+    input.playerView.own.agendaPoints + path.agendaPoints >=
+      input.playerView.agendaPointsToWin
+  );
 }
 
 function visitCapabilityCombinations(params: {

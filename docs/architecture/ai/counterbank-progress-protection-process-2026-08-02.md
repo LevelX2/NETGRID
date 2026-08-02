@@ -135,11 +135,19 @@ P0 Prozessvertrag
 | P4    | Nachpanel und Review         | identische zehn Konfigurationen ausgewertet; harte Gates und Kartenereignisse dokumentiert | `docs(ai): review counterbank ten-seed comparison`         |
 | P5    | Integration und Cleanup      | aktuelles `main` integriert, final geprüft, lokal gemergt, Worktree und Branch entfernt    | `docs(ai): close counterbank progress protection process`  |
 
-Aktiver Paketstand: P0 ist mit `b7bdbbfdc` abgeschlossen. P1 hat die
-spielgleiche Solver- und Runtime-Regression rot bestätigt und das feste
-Zehn-Seed-Vorherpanel unter `data/local/` erfasst. Die versionierte Evidence
-liegt in
-`docs/reviews/ai/counterbank-progress-protection-red-evidence-2026-08-02.md`.
+Paketstand:
+
+- P0 ist mit `b7bdbbfdc` abgeschlossen.
+- P1 ist mit `1f61166e7` abgeschlossen: spielgleiche Solver- und
+  Runtime-Regression rot, festes Zehn-Seed-Vorherpanel unter `data/local/`
+  erfasst und versionierte Evidence unter
+  `docs/reviews/ai/counterbank-progress-protection-red-evidence-2026-08-02.md`.
+- P2 ist implementiert und fokussiert grün: Der Conversion-Solver verwirft
+  Replacement-Routen, die eine später benötigte Quelle zerstören, und schützt
+  gültig gequotete positive Counterbanken. Null-Counter, gewöhnliche Assets
+  und ein echter matchentscheidender Same-Turn-Score bleiben als enge
+  Gegenproben zulässig. Der Quote-Reader wurde als reiner Vertragsleser
+  extrahiert; Entscheidungsowner bleibt `corp.score_agenda`.
 
 ## Paketdetails
 
