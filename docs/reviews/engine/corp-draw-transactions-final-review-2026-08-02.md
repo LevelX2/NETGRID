@@ -1,7 +1,7 @@
 # Corp-Draw-Transaktionen – Final Review
 
 Datum: 2026-08-02
-Status: **technisch freigegeben**
+Status: **technisch freigegeben; manueller Corporate-Shuffle-Pfad blockiert**
 Primärer Agent: `release-implementation-agent`
 Prozess:
 `docs/architecture/engine/corp-draw-transactions-process-2026-08-02.md`
@@ -117,6 +117,35 @@ unveränderten aktuellen `main` isoliert identisch reproduzierbar. Er betrifft
 weder Corp-Draw-Transaktionen noch SPG-Choices, PlayerViews oder Reconnect und
 ist daher ein dokumentierter Bestandsfehler, aber kein Blocker dieses Reviews.
 
+## Manueller Firefox-Playtest
+
+Der Human-vs-AI-Playtest vom 02.08.2026 auf dem lokalen `main`-Stand
+`2b14ee427` und Build `6498-dev` bestätigt den normalen und den
+Pflichtzugpfad:
+
+- Eine gerezzte Strategic Planning Group erweitert einen normalen
+  Ein-Karten-Draw auf genau zwei lesbare Corp-Choice-Karten. Nach der Auswahl
+  bleibt genau eine Karte netto in HQ und eine Karte liegt unten in R&D.
+- Die Spielchronik zeigt die normale Draw-Meldung und danach die eigene
+  SPG-Meldung mit `1 Basiskarte`, `+1 durch Strategic Planning Group`,
+  `2 gezogen`, `1 nach HQ` und `1 unter R&D`.
+- Der Pflichtzug erzeugt dieselbe private Zwei-Karten-Auswahl. Nach der
+  Auflösung stehen die Pflichtzugmeldung und die separate SPG-Meldung in der
+  richtigen Reihenfolge in der Chronik.
+- Ein vollständiges Neuladen während der offenen Pflichtzug-SPG-Auswahl
+  stellt dieselbe Choice mit denselben beiden Karten wieder her; die Auswahl
+  kann anschließend korrekt abgeschlossen werden.
+
+Der geplante Corporate-Shuffle-Gegenlauf konnte nicht bis zum
+Sechs-Karten-Dialog gelangen. Die aktuelle PlayerView bietet Corporate
+Shuffle bei zwei und bei drei verfügbaren Aktionen als exakte
+`play_operation`-LegalAction mit zwei Aktionskosten an. Das UI zeigt dieselbe
+Aktion als `Spielen · Kosten: 2 Aktionen`, lehnt sie beim Einreichen aber mit
+`Diese Aktion ist nicht legal` ab. Aktionen, StateVersion und Karte bleiben
+unverändert. Der Befund ist als eigenes Activity-Paket erfasst und liegt vor
+der SPG-Draw-Auflösung; die automatisierten Engine-Tests des sechs Karten
+umfassenden Draws bleiben davon getrennte Evidence.
+
 ## Risiken und Restpunkte
 
 - Laufende Version-0-Replays aus dem früheren Zwischenzustand werden nicht
@@ -124,6 +153,9 @@ ist daher ein dokumentierter Bestandsfehler, aber kein Blocker dieses Reviews.
 - Andere Replacement-Karten sind nicht Teil dieses Changes. Neue
   Corp-Draw-Replacements müssen denselben Transaktions- und
   Hidden-Info-Vertrag verwenden.
-- Die technische Verifikation ersetzt nicht den nächsten menschlichen
-  Playtest mit Strategic Planning Group, kombinierten Pflichtzugquellen und
-  Corporate Shuffle.
+- Kombinierte Pflichtzugquellen wie Unlisted Research Lab und Skivviss sind
+  weiterhin nur automatisiert, noch nicht in einem menschlichen Playtest
+  bestätigt.
+- Der manuelle Corporate-Shuffle-SPG-Pfad bleibt bis zur Behebung der
+  LegalAction-Diskrepanz blockiert; anschließend sind Sechs-Karten-Auswahl,
+  nachgelagerte HQ-zu-R&D-Choice und beide Chronikmeldungen nachzutesten.
