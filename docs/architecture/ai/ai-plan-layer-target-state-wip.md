@@ -4710,6 +4710,20 @@ Vor dem Schneiden des Umsetzungsprozesses sind mindestens zu reviewen:
 
 ## 44. Pflege dieses WIP-Dokuments
 
+Dieses Planebenen-Konzept bildet einen verbindlichen Dreierverbund mit:
+
+- `ki-zielbild-metaebene-2026-08-02-v6.md` als allgemeinem KI-Zielbild;
+- `ai-program-logic-change-compass.md` als verbindlichem Agenten-Konzentrat.
+
+Bei jeder inhaltlichen Änderung an einem der drei Dokumente muss geprüft
+werden, ob die beiden anderen Dokumente durch neue Begriffe, Haltung,
+Autoritätsgrenzen, Ownership, Planverträge, Leitplanken oder Pflichtnachweise
+ebenfalls betroffen sind. Der Dokumentationsschritt ist erst abgeschlossen,
+wenn alle betroffenen Stellen synchronisiert sind oder ausdrücklich
+festgestellt wurde, dass die beiden anderen Dokumente unverändert gültig
+bleiben. Das WIP darf keine Detailentscheidung einführen, die dem allgemeinen
+Zielbild oder dem Agenten-Kompass widerspricht.
+
 Neue Spielanalysen werden wie folgt eingearbeitet:
 
 1. Beobachtung und Match-Evidence benennen;
@@ -4743,7 +4757,10 @@ Rahmen nicht verändert. Beispiele:
   Bewertungsregister, Pflichtabdeckung, Dominanz und Tiebreak-Vertrag
   abgeglichen;
 - Resolvergrenze, stabile Instanzwahl und privilegierte Betreiberdiagnostik
-  an den aktuellen Architekturvertrag angepasst.
+  an den aktuellen Architekturvertrag angepasst;
+- wechselseitigen Pflegevertrag mit allgemeinem Zielbild und Agenten-Kompass
+  ergänzt: Änderungen müssen auf Auswirkungen auf alle drei Dokumente geprüft
+  und bei Bedarf synchron nachgezogen werden.
 
 ### 1.1 – 2026-07-30
 
