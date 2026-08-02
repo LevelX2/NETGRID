@@ -142,6 +142,7 @@ export type RunnerDefenseSignals = {
   drawAllowed: boolean;
   handBufferActionIds?: string[];
   forgoUnsafeRunCapacity: boolean;
+  discardChoiceBinding?: RunnerDiscardChoiceBinding;
   reactionReserveNeed?: {
     needId: "runner-defense-reaction-reserve";
     parentPlanInstanceId: "plan:runner.defense_and_recovery:runner";
@@ -156,6 +157,17 @@ export type RunnerDefenseSignals = {
     evidenceCode: string;
   };
   handBufferPriorityClass: "P3" | "P4" | "P5";
+  evidenceCodes: string[];
+};
+
+export type RunnerDiscardChoiceBinding = {
+  actionId: string;
+  choiceId: string;
+  observedAtStateVersion: number;
+  selectedOptionIds: string[];
+  discardedCardInstanceIds: string[];
+  retainedCardInstanceIds: string[];
+  emergencyKeepCardInstanceIds: string[];
   evidenceCodes: string[];
 };
 
@@ -472,6 +484,7 @@ type DefenseState = {
     | "prevent_damage"
     | "build_hand_buffer"
     | "build_reaction_reserve"
+    | "discard_window"
     | "forgo_unsafe_run";
   signals: RunnerDefenseSignals;
 };
@@ -1991,6 +2004,7 @@ function defensePhase(
   signals: RunnerDefenseSignals,
 ): DefenseState["phase"] | undefined {
   const openPhases: DefenseState["phase"][] = [];
+  if (signals.discardChoiceBinding) openPhases.push("discard_window");
   if (signals.pendingDamage > 0 && signals.damagePreventionNeeded)
     openPhases.push("prevent_damage");
   if (signals.activeTags > 0) openPhases.push("clear_tags");
@@ -2034,6 +2048,8 @@ function defenseCandidates(
   const handBufferActionIds = new Set(signals.handBufferActionIds ?? []);
   return context.actionCandidates
     .filter((candidate) => {
+      if (phase === "discard_window")
+        return signals.discardChoiceBinding?.actionId === candidate.actionId;
       if (phase === "forgo_unsafe_run")
         return (
           candidate.semanticActionType === "turn_flow.end_turn" &&
@@ -2084,6 +2100,11 @@ function defenseCapability(
   phase: DefenseState["phase"],
   candidates: PlanMaterialization["candidates"],
 ): PlanRouteStepCapability {
+  if (phase === "discard_window")
+    return {
+      capabilityId: "resolve_plan_bound_runner_discard",
+      semanticActionTypes: ["choice.resolve"],
+    };
   if (phase === "clear_tags")
     return {
       capabilityId: "remove_active_tags",
@@ -2134,6 +2155,7 @@ function defensePhaseValue(
   phase: DefenseState["phase"],
   signals: RunnerDefenseSignals,
 ): number {
+  if (phase === "discard_window") return 1_000;
   if (phase === "prevent_damage") return 100;
   if (phase === "clear_tags") return 80;
   if (phase === "clear_persistent_hazard_counter") return 90;
@@ -2145,6 +2167,7 @@ function defensePhaseValue(
 function defensePriorityClass(
   signals: RunnerDefenseSignals,
 ): "P2" | "P3" | "P4" | "P5" {
+  if (signals.discardChoiceBinding) return "P2";
   if (
     signals.pendingDamage > 0 ||
     (signals.activeTags > 0 && signals.visibleTagPunish) ||

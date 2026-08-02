@@ -35,6 +35,7 @@ import type {
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../actions/risk-action-projection";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import { runnerDrawTaxLiabilityProjection } from "./runner-draw-tax-liability-score";
+import { runnerDiscardChoicePlanBinding } from "./runner-discard-choice-plan";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import {
   CORP_PLAN_PRIORITY_POLICY,
@@ -80,6 +81,7 @@ import {
   runnerFundingRouteCandidateIsMaterializable,
   runnerInstalledCardLiquidationChoiceSignal,
   type RunnerCorePlanDomain,
+  type RunnerDiscardChoiceBinding,
   type RunnerFundingNeedSignal,
   type RunnerFundingRouteAssessment,
 } from "../plans/runner-core-plan-modules";
@@ -1208,6 +1210,13 @@ function runnerContext(
     dependencies,
     activeRunRoot,
   );
+  const discardChoiceBinding = runnerDiscardChoicePlanBinding({
+    input,
+    candidates,
+    ...(dependencies.discardKeepScore
+      ? { discardKeepScore: dependencies.discardKeepScore }
+      : {}),
+  });
   const domain = buildRunnerDomain(
     input,
     candidates,
@@ -1219,6 +1228,7 @@ function runnerContext(
     runWindowActionAssessments,
     activeRunRoot,
     previous,
+    discardChoiceBinding,
   );
   const actionDispositions = runnerActionDispositions(
     input,
@@ -1276,6 +1286,7 @@ function runnerTransientPlanSignals(
     defense.damagePreventionNeeded ||
     defense.handSize < defense.minimumHandBuffer ||
     defense.forgoUnsafeRunCapacity ||
+    defense.discardChoiceBinding !== undefined ||
     defense.reactionReserveNeed !== undefined;
   const survivalSignals: TransientPlanSignal[] = survivalNeedOpen
     ? [
@@ -2505,6 +2516,7 @@ function buildRunnerDomain(
       }
     | undefined,
   previous: ResidentPlanPortfolio | undefined,
+  discardChoiceBinding: RunnerDiscardChoiceBinding | undefined,
 ): RunnerPlanDomain {
   const currentCredits = input.playerView.own.credits;
   const remainingClicks = input.playerView.own.clicks;
@@ -2794,6 +2806,7 @@ function buildRunnerDomain(
       )
       .map((candidate) => candidate.actionId),
     forgoUnsafeRunCapacity,
+    ...(discardChoiceBinding ? { discardChoiceBinding } : {}),
     ...(reactionReserveNeed ? { reactionReserveNeed } : {}),
     handBufferPriorityClass:
       riskAdjustedHandBufferOpen && riskAdjustedHandBuffer.minimumHandBuffer > 3
@@ -2819,6 +2832,7 @@ function buildRunnerDomain(
       ...(reactionReserveNeed
         ? ["runner_damage_locked_hand_reaction_reserve"]
         : []),
+      ...(discardChoiceBinding?.evidenceCodes ?? []),
       ...(riskAdjustedHandBufferOpen
         ? [
             volatileBreakerHandFloor === minimumHandBuffer
@@ -13159,6 +13173,13 @@ function actionIsCurrentlyAffordable(
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
+  if (
+    context.input.side === "runner" &&
+    context.input.playerView.pendingChoice?.kind === "select_cards" &&
+    context.input.playerView.pendingChoice.source === "discard_phase"
+  ) {
+    return undefined;
+  }
   if (
     context.input.side === "corp" &&
     context.input.playerView.pendingChoice?.kind === "select_cards" &&

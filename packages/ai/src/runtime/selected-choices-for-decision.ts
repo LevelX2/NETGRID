@@ -14,10 +14,7 @@ import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement
 import { selectedCorpAccessPaymentChoiceOptionId } from "./corp-access-payment-choice";
 import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
-import {
-  selectedDiscardChoiceOptionIds,
-  type DiscardChoiceKeepScore,
-} from "./discard-choice-selection";
+import type { DiscardChoiceKeepScore } from "./discard-choice-selection";
 import type { CorpHandManagementSignal } from "../plans/corp-tactical-plan-modules";
 import {
   runnerDamagePreventionChoiceResolution,
@@ -109,6 +106,48 @@ function selectedCorpDiscardOptionIdsFromResidentHandPlan(
       input,
       action,
       "The Corp hand plan must bind the exact discard choice and legal action before the resolver completes its payload.",
+    );
+  }
+  return [...binding.selectedOptionIds];
+}
+
+function selectedRunnerDiscardOptionIdsFromResidentDefensePlan(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) => instance.instanceId === portfolio.executorInstanceId,
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        phase?: unknown;
+        signals?: {
+          discardChoiceBinding?: {
+            actionId: string;
+            choiceId: string;
+            observedAtStateVersion: number;
+            selectedOptionIds: string[];
+          };
+        };
+      }
+    | undefined;
+  const binding = moduleState?.signals?.discardChoiceBinding;
+  if (
+    executor?.moduleId !== "runner.defense_and_recovery" ||
+    moduleState?.kind !== "defense" ||
+    moduleState.phase !== "discard_window" ||
+    binding?.actionId !== action.actionId ||
+    binding.choiceId !== choice.choiceId ||
+    binding.observedAtStateVersion !== input.playerView.stateVersion
+  ) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The Runner defense plan must bind the exact discard choice and LegalAction before the resolver completes its payload.",
     );
   }
   return [...binding.selectedOptionIds];
@@ -255,13 +294,15 @@ export function selectedChoicesForDecision(
         "resident_corp_hand_discard",
       );
     }
-    const selected = selectedDiscardChoiceOptionIds(
-      input,
-      choice,
-      selectableOptions,
-      dependencies.discardKeepScore,
+    return resolved(
+      selectedRunnerDiscardOptionIdsFromResidentDefensePlan(
+        input,
+        action,
+        choice,
+        currentPortfolio,
+      ),
+      "resident_runner_defense_discard",
     );
-    return resolved(selected, "discard_phase");
   }
   if (
     choice.kind === "select_cards" &&

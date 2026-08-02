@@ -107,7 +107,7 @@ planned
 | B000  | Prozess und Ausgangsevidence       | verbindlicher Scope, Invarianten und Paketvertrag                              |
 | B001  | Draw-Tax-Quellenvertrag            | **abgeschlossen:** nur echte Ziehsteuern; sichere Multi-Draws bleiben erhalten |
 | B002  | Run-only-Economy-Routing           | **abgeschlossen:** D9 verwirft die wertlose Lucidrine-Archives-Linie            |
-| B003  | Plan-owned Emergency-Keep          | D65 behält Flatline-Prävention bei bestätigter Gefahr                          |
+| B003  | Plan-owned Emergency-Keep          | **abgeschlossen:** D65 behält Flatline-Prävention bei bestätigter Gefahr        |
 | B004  | Gesamtverifikation und Integration | Final Review, breite Gates, Main-Merge und Cleanup                             |
 
 ## B000 – Prozess und Ausgangsevidence
@@ -273,6 +273,26 @@ Die gefährliche Choice behält Notfallprävention, die harmlose Gegenprobe blei
 flexibel und es entsteht keine zweite Entscheidungsautorität.
 
 Commit: `fix(ai): bind emergency discard keep priorities`
+
+### Ergebnis
+
+- Der strikte D65-Ausgangscheckpoint war vor dem Fix rot: Der allgemeine
+  Runner-Discard warf `Arasaka Owns You` trotz vier Tags und bestätigtem
+  Flatline-Risiko ab.
+- Der bereits vorhandene Owner `runner.defense_and_recovery` bindet nun die
+  exakte aktuelle `runner.resolve_choice`-LegalAction, Choice-ID, StateVersion
+  und vier ausgewählten Optionen in seiner Phase `discard_window`.
+- Nur bei `confirmed` oder `critical` schützt der Plan eine über strukturierte
+  Hints belegte `flatline_prevention`. Bei `none` und `suspected` bleibt die
+  Karte der normalen Abwurfbewertung unterworfen.
+- Der Choice-Resolver trifft keine Karten- oder Survival-Entscheidung mehr; er
+  validiert und übernimmt ausschließlich die bereits planseitig gebundene
+  Payload. Ohne exakte Executor-Bindung schlägt er geschlossen fehl.
+- D65 behält `Arasaka Owns You` und wirft stattdessen beide sichtbaren
+  `R&D Interface`, `Tycho Mem Chip` und `The Shell Traders` ab. Action-ID,
+  Choice-ID und StateVersion bleiben unverändert.
+- Sechs fokussierte Testdateien mit 295 Tests, AI-Typecheck mit 8-GB-Heap,
+  Hint-Metadaten, Source-Structure und Generic-Card-ID-Guard sind grün.
 
 ## B004 – Gesamtverifikation und Integration
 

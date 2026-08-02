@@ -1625,7 +1625,7 @@ describe("selectedChoicesForDecision", () => {
     ).toThrowError("window_origin_missing");
   });
 
-  it("keeps Runner discard ranking independent from the Corp hand-plan owner", () => {
+  it("completes Runner discard only from the exact executor defense-plan binding", () => {
     const input = inputWithChoice(
       {
         kind: "select_cards",
@@ -1652,18 +1652,42 @@ describe("selectedChoicesForDecision", () => {
       },
     );
     const action = resolveChoiceActionForInput(input);
+    rememberResidentRunnerDiscardBinding(input, action.actionId, [
+      "discard_low",
+    ]);
 
     expect(
-      selectedChoicesForDecision(input, action, {
-        ...unusedDependencies(),
-        discardKeepScore: (_input, card) => ({
-          total: card.instanceId === "runner_low" ? 0 : 100,
-        }),
-      }),
+      selectedChoicesForDecision(input, action, unusedDependencies()),
     ).toEqual({
       choiceId: "choice_multi",
       selectedOptionIds: ["discard_low"],
     });
+  });
+
+  it("fails closed when Runner discard has no executor defense-plan binding", () => {
+    const input = inputWithChoice(
+      {
+        kind: "select_cards",
+        source: "discard_phase",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [{ id: "discard_low", label: "Low", value: "runner_low" }],
+      },
+      {
+        side: "runner",
+        gripOrHq: [
+          { ...visibleCard("runner_low", "asset"), definitionId: "low" },
+        ],
+      },
+    );
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
   });
 });
 
@@ -2036,6 +2060,42 @@ function rememberResidentCorpDiscardBinding(
               discardedCardInstanceIds: ["corp_low"],
               retainedCardInstanceIds: ["corp_high"],
               evidenceCodes: ["test_exact_binding"],
+            },
+          },
+        },
+      },
+    ],
+    completionHistory: [],
+    transitions: [],
+  } as never);
+}
+
+function rememberResidentRunnerDiscardBinding(
+  input: AiDecisionInput,
+  actionId: string,
+  selectedOptionIds: string[],
+): void {
+  const instanceId = "plan:runner.defense_and_recovery:runner";
+  rememberResidentPlanPortfolio(input, {
+    schemaVersion: "resident-plan-portfolio-v2",
+    side: "runner",
+    stateVersion: input.playerView.stateVersion,
+    rootForegroundInstanceId: instanceId,
+    executorInstanceId: instanceId,
+    instances: [
+      {
+        instanceId,
+        moduleId: "runner.defense_and_recovery",
+        executionState: "executor",
+        moduleState: {
+          kind: "defense",
+          phase: "discard_window",
+          signals: {
+            discardChoiceBinding: {
+              actionId,
+              choiceId: "choice_multi",
+              observedAtStateVersion: input.playerView.stateVersion,
+              selectedOptionIds,
             },
           },
         },
