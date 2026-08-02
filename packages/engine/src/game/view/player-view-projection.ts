@@ -2,11 +2,9 @@
 // This module creates no LegalActions, executes no actions, and mutates no
 // GameState. The host passes LegalActions in from the game legal-actions facade.
 import {
-  type CounterDisplay,
   type GameState,
   type LegalAction,
   type PlayerView,
-  type ServerId,
   type Side,
 } from "@netgrid/shared";
 import {
@@ -14,10 +12,6 @@ import {
   runnerMemoryLimit,
 } from "../../ability-engine/effective-values";
 import { projectInstalledCorpIceRezCost } from "../payment";
-import {
-  activeCardImplementationModifiersForRunnerInstalled,
-  isPublicRunnerInstalledModifier,
-} from "../../ability-engine/card-implementation-modifiers";
 import {
   agendaPoints,
   counterDisplaysField,
@@ -39,7 +33,7 @@ import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
 import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continuation-quote";
 import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-bank-preparation-quote";
-import { serverRunStartRestrictions } from "../run/server-run-start-restrictions";
+import { visibleServerStatuses } from "./server-status-view";
 
 export function buildPlayerViewProjection(
   state: GameState,
@@ -50,7 +44,7 @@ export function buildPlayerViewProjection(
   const corpCentralAccessQuotes =
     side === "corp" ? quoteCorpCentralAccesses(state) : undefined;
   const visibleServers = state.corp.servers.map((server) => {
-    const runStartRestrictions = serverRunStartRestrictions(state, server.id);
+    const statuses = visibleServerStatuses(state, server.id);
     const ice = server.ice.map((id) => {
       const visibleIce = visibleCorpCard(state, id, side, "ice");
       const effectiveRunQuote = visibleEffectiveIceRunQuote(
@@ -100,17 +94,12 @@ export function buildPlayerViewProjection(
                   : {}),
               };
             }),
-      ...(runStartRestrictions.length > 0 ? { runStartRestrictions } : {}),
+      ...(statuses.length > 0 ? { statuses } : {}),
       ...counterDisplaysField([
         ...(poxCounterDisplaysForServer(state, server.id) ?? []),
         ...(purgeableRunnerVirusCounterDisplaysForServer(state, server.id) ??
           []),
         ...(spyCounterDisplaysForServer(state, server.id) ?? []),
-        ...(corpIceInstallCostModifierCounterDisplaysForServer(
-          state,
-          server.id,
-          server.label,
-        ) ?? []),
       ]),
     };
   });
@@ -300,42 +289,4 @@ export function buildPlayerViewProjection(
     agendaPointsToWin: state.agendaPointsToWin,
     ...(state.gameEndReason ? { gameEndReason: state.gameEndReason } : {}),
   };
-}
-
-function corpIceInstallCostModifierCounterDisplaysForServer(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-  serverLabel: string,
-): CounterDisplay[] | undefined {
-  const amount = activeCardImplementationModifiersForRunnerInstalled(
-    state,
-    "install_cost",
-  ).reduce((sum, active) => {
-    const modifier = active.modifier;
-    const source = state.cardInstances[active.sourceCardInstanceId];
-    if (
-      !source ||
-      source.faceup === false ||
-      !isPublicRunnerInstalledModifier(modifier) ||
-      modifier.operation !== "increase" ||
-      modifier.appliesTo.side !== "corp" ||
-      modifier.appliesTo.cardType !== "ice" ||
-      modifier.appliesTo.selectedServerAsSource !== true ||
-      source.selectedServerId !== serverId
-    )
-      return sum;
-    return sum + modifier.amount;
-  }, 0);
-  if (amount <= 0) return undefined;
-  return [
-    {
-      id: `corp_ice_install_cost_modifier_${serverId}`,
-      amount,
-      displayKind: "generic_counter",
-      label: "Install +",
-      ariaLabel: `${serverLabel}: ICE-Installationskosten +${amount} durch Runner-Effekt.`,
-      counterType: "install_cost_modifier",
-      usageHint: "status_marker",
-    },
-  ];
 }

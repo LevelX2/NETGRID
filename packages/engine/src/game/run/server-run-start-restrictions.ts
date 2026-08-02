@@ -4,7 +4,7 @@ import {
   type CardInstanceId,
   type GameState,
   type ServerId,
-  type VisibleServerRunStartRestriction,
+  type VisibleServerRunProhibitedStatus,
 } from "@netgrid/shared";
 import type { CardFortRunWindowImplementation } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
@@ -62,7 +62,7 @@ export function serverRunStartRestrictionSources(
 export function serverRunStartRestrictions(
   state: GameState,
   targetServerId: Exclude<ServerId, "new_remote">,
-): VisibleServerRunStartRestriction[] {
+): VisibleServerRunProhibitedStatus[] {
   return serverRunStartRestrictionSources(state, targetServerId)
     .filter(
       ({ implementation }) =>
@@ -71,7 +71,7 @@ export function serverRunStartRestrictions(
         !hasFortActivitySinceCorpTurnStart(state, targetServerId),
     )
     .map(({ sourceCardInstanceId, sourceTitle, implementation }) => ({
-      id: `run_start_restriction:${targetServerId}:${sourceCardInstanceId}:${implementation.abilityKey}`,
+      id: `server_status:${targetServerId}:run_prohibited:${sourceCardInstanceId}:${implementation.abilityKey}`,
       kind: "run_prohibited",
       scope: "target_server",
       reason: "required_corp_activity_during_latest_corp_turn_missing",
@@ -79,6 +79,7 @@ export function serverRunStartRestrictions(
       sourceCardInstanceId,
       sourceAbilityId: implementation.abilityKey,
       sourceTitle,
+      sourceSide: "corp",
     }));
 }
 

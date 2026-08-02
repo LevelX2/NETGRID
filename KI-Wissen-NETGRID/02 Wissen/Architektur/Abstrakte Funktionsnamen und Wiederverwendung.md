@@ -71,3 +71,18 @@ Der Grundsatz unterstützt die zentralen NETGRID-Invarianten:
 Für KI-Bewertungen gilt besonders: Die KI soll keine Karte "kennen müssen", um einen sichtbaren Zustand funktional zu bewerten. Ein sichtbarer ICE-Pfad wird daher nach Subtypen, Breaker-Coverage, Kosten, LegalActions, sichtbaren Subroutinen, `unbrokenRunEffect`-Markern und Risikoklassen bewertet. Konkrete Kartentitel dürfen in Diagnoseausgaben erscheinen, dürfen aber nicht die Bedingung sein, warum eine Bewertung blockiert oder erlaubt wird.
 
 Wenn eine konkrete Karte einen neuen Fall sichtbar macht, wird daraus ein funktionaler Vertrag geschnitten. Beispiel: Ein einzelner Playtest-Fund mit einer bestimmten ICE-Kombination soll zu einer allgemeinen Prüfung für schädliche ungebrochene Run-Effekte führen, nicht zu einer Sonderregel für diese Kartenkombination.
+
+## Anwendung auf serverbezogene Anzeigen
+
+Zustände am Server werden nach ihrer öffentlichen Regelwirkung modelliert,
+nicht nach der ersten Karte, die sie auslöst. Der gemeinsame
+`VisibleServerStatus`-Vertrag trägt aktuell servergenaue Run-Sperren sowie
+Erhöhungen und Ermäßigungen der ICE-Installationskosten. Typen, Funktionen,
+Status-IDs und UI-Komponenten bleiben dabei kartennamensfrei.
+
+Die sichtbare und side-sichere Kartenquelle darf im Tooltip erklären, wodurch
+der Zustand entsteht. Sie ist jedoch weder Statusart noch Regelautorität. Nur
+aktuelle, öffentliche Effekte mit eindeutiger Bindung an genau einen Server
+werden in diese Statusfläche aufgenommen. Globale Modifier bleiben draußen;
+echte Fort-Counter wie Pox-, Spy- oder Virus-Counter bleiben weiterhin
+Counter und werden nicht zu Statusobjekten umgedeutet.

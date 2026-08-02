@@ -6,7 +6,7 @@ import {
   type Side,
   type VisibleCard,
   type VisibleChoiceOption,
-  type VisibleServerRunStartRestriction,
+  type VisibleServerStatus,
 } from "@netgrid/shared";
 import { actionHasAbility } from "./action-payload";
 export {
@@ -468,11 +468,12 @@ export type ServerCounterChipView = {
   tooltip: string;
 };
 
-export type ServerRunRestrictionChipView = {
+export type ServerStatusChipView = {
   key: string;
   label: string;
   ariaLabel: string;
   tooltip: string;
+  tone: "blocking" | "cost_increase" | "cost_reduction";
 };
 
 export type RunnerProgramInstallTrashChoiceInfo = {
@@ -740,9 +741,6 @@ export function counterDisplayTooltipText(
     case "bad_publicity":
       return `Bad Publicity: Jede Bad Publicity gibt dem Runner zu Beginn eines Runs 1 temporären Credit. Bei 7 Bad Publicity verliert die Korp.`;
     case "install_cost_modifier":
-      if (display.id.startsWith("restrictive_net_zoning_install_cost_")) {
-        return `Restrictive Net Zoning: Die Korp muss ${amount} zusätzliche ${amount === 1 ? "Credit" : "Credits"} zahlen, um ICE vor diesem Fort zu installieren.`;
-      }
       return display.ariaLabel;
     default:
       if (display.id === "pox")
@@ -836,27 +834,43 @@ export function serverCounterChipsForDisplays(
     }));
 }
 
-export function serverRunRestrictionChips(
-  restrictions: VisibleServerRunStartRestriction[] | undefined,
-): ServerRunRestrictionChipView[] {
-  return (restrictions ?? []).map((restriction) => {
-    const tooltip = serverRunRestrictionTooltip(restriction);
+export function serverStatusChips(
+  statuses: VisibleServerStatus[] | undefined,
+): ServerStatusChipView[] {
+  return (statuses ?? []).map((status) => {
+    const tooltip = serverStatusTooltip(status);
     return {
-      key: restriction.id,
-      label: "Run gesperrt",
+      key: status.id,
+      label: serverStatusLabel(status),
       ariaLabel: tooltip,
       tooltip,
+      tone:
+        status.kind === "run_prohibited"
+          ? "blocking"
+          : status.operation === "increase"
+            ? "cost_increase"
+            : "cost_reduction",
     };
   });
 }
 
-export function serverRunRestrictionTooltip(
-  restriction: VisibleServerRunStartRestriction,
-): string {
-  switch (restriction.reason) {
-    case "required_corp_activity_during_latest_corp_turn_missing":
-      return `${restriction.sourceTitle}: Runs auf diesen Server sind derzeit gesperrt, weil die Korp im maßgeblichen Korpzug keine Karte in oder vor diesem Server installiert und dort keine Karte entwickelt hat. Nach einer passenden Installation oder Entwicklung ist der Run wieder erlaubt.`;
+export function serverStatusTooltip(status: VisibleServerStatus): string {
+  switch (status.kind) {
+    case "run_prohibited":
+      switch (status.reason) {
+        case "required_corp_activity_during_latest_corp_turn_missing":
+          return `${status.sourceTitle}: Runs auf diesen Server sind derzeit gesperrt, weil die Korp im maßgeblichen Korpzug keine Karte in oder vor diesem Server installiert und dort keine Karte entwickelt hat. Nach einer passenden Installation oder Entwicklung ist der Run wieder erlaubt.`;
+      }
+    case "cost_modifier":
+      return status.operation === "increase"
+        ? `${status.sourceTitle}: Die Korp muss ${status.amount} zusätzliche ${status.amount === 1 ? "Credit" : "Credits"} zahlen, um ICE vor diesem Server zu installieren.`
+        : `${status.sourceTitle}: Die Kosten der Korp, ICE vor diesem Server zu installieren, sind um ${status.amount} ${status.amount === 1 ? "Credit" : "Credits"} reduziert.`;
   }
+}
+
+function serverStatusLabel(status: VisibleServerStatus): string {
+  if (status.kind === "run_prohibited") return "Run gesperrt";
+  return `ICE-Install ${status.operation === "increase" ? "+" : "−"}${status.amount}`;
 }
 
 export function safeCounterDisplayAmount(amount: number): number {

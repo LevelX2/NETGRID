@@ -5,7 +5,7 @@ import type {
   PublicGameEvent,
   Side,
   VisibleCard,
-  VisibleServerRunStartRestriction,
+  VisibleServerStatus,
 } from "@netgrid/shared";
 import {
   DEFAULT_CUE_POSITION,
@@ -98,8 +98,8 @@ import {
   runnerRigMemorySummary,
   serverBoardRows,
   serverCounterChipsForDisplays,
-  serverRunRestrictionChips,
-  serverRunRestrictionTooltip,
+  serverStatusChips,
+  serverStatusTooltip,
   variableIceSubtypeBadgeForCard,
   serverDisplayLabel,
   serverTargetIdForAction,
@@ -2943,30 +2943,6 @@ describe("V1.0.6 resource and card-display helpers", () => {
       "Cascade: Je 2 Cascade-Counter zwingen die Korp zu Beginn ihres Zugs, 1 offene Karte aus R&D ins Archiv zu legen. Aktuell sind das 1 Karte. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen.",
     );
     expect(
-      serverCounterChipsForDisplays([
-        {
-          id: "restrictive_net_zoning_install_cost_rd",
-          amount: 2,
-          displayKind: "generic_counter",
-          label: "Install +",
-          ariaLabel:
-            "R&D: ICE-Installationskosten +2 durch Restrictive Net Zoning.",
-          counterType: "install_cost_modifier",
-          usageHint: "status_marker",
-        },
-      ]),
-    ).toEqual([
-      {
-        key: "restrictive_net_zoning_install_cost_rd",
-        amount: 2,
-        label: "Install +",
-        ariaLabel:
-          "R&D: ICE-Installationskosten +2 durch Restrictive Net Zoning.",
-        tooltip:
-          "Restrictive Net Zoning: Die Korp muss 2 zusätzliche Credits zahlen, um ICE vor diesem Fort zu installieren.",
-      },
-    ]);
-    expect(
       counterDisplayTooltipText({
         id: "runner_virus_corp_vienna",
         amount: 2,
@@ -3059,27 +3035,73 @@ describe("V1.0.6 resource and card-display helpers", () => {
     );
   });
 
-  it("maps source-bound run restrictions to generic server chips", () => {
-    const restriction: VisibleServerRunStartRestriction = {
-      id: "run_start_restriction:remote_1:card_7:fort_activity_gate",
-      kind: "run_prohibited",
-      scope: "target_server",
-      reason: "required_corp_activity_during_latest_corp_turn_missing",
-      targetServerId: "remote_1",
-      sourceCardInstanceId: "card_7",
-      sourceAbilityId: "fort_activity_gate",
-      sourceTitle: "Öffentliche Sperrquelle",
-    };
-
-    const tooltip =
-      "Öffentliche Sperrquelle: Runs auf diesen Server sind derzeit gesperrt, weil die Korp im maßgeblichen Korpzug keine Karte in oder vor diesem Server installiert und dort keine Karte entwickelt hat. Nach einer passenden Installation oder Entwicklung ist der Run wieder erlaubt.";
-    expect(serverRunRestrictionTooltip(restriction)).toBe(tooltip);
-    expect(serverRunRestrictionChips([restriction])).toEqual([
+  it("maps source-bound effects to generic server status chips", () => {
+    const statuses: VisibleServerStatus[] = [
       {
-        key: restriction.id,
+        id: "server_status:remote_1:run_prohibited:card_7:fort_activity_gate",
+        kind: "run_prohibited",
+        scope: "target_server",
+        reason: "required_corp_activity_during_latest_corp_turn_missing",
+        targetServerId: "remote_1",
+        sourceCardInstanceId: "card_7",
+        sourceAbilityId: "fort_activity_gate",
+        sourceTitle: "Öffentliche Sperrquelle",
+        sourceSide: "corp",
+      },
+      {
+        id: "server_status:rd:corp_ice_install:increase:card_8:0",
+        kind: "cost_modifier",
+        scope: "target_server",
+        costKind: "corp_ice_install",
+        operation: "increase",
+        amount: 2,
+        targetServerId: "rd",
+        sourceCardInstanceId: "card_8",
+        sourceTitle: "Öffentliche Runner-Kostenquelle",
+        sourceSide: "runner",
+      },
+      {
+        id: "server_status:remote_1:corp_ice_install:reduce:card_9:0",
+        kind: "cost_modifier",
+        scope: "target_server",
+        costKind: "corp_ice_install",
+        operation: "reduce",
+        amount: 1,
+        targetServerId: "remote_1",
+        sourceCardInstanceId: "card_9",
+        sourceTitle: "Öffentliche Korp-Kostenquelle",
+        sourceSide: "corp",
+      },
+    ];
+
+    const runTooltip =
+      "Öffentliche Sperrquelle: Runs auf diesen Server sind derzeit gesperrt, weil die Korp im maßgeblichen Korpzug keine Karte in oder vor diesem Server installiert und dort keine Karte entwickelt hat. Nach einer passenden Installation oder Entwicklung ist der Run wieder erlaubt.";
+    expect(serverStatusTooltip(statuses[0]!)).toBe(runTooltip);
+    expect(serverStatusChips(statuses)).toEqual([
+      {
+        key: statuses[0]!.id,
         label: "Run gesperrt",
-        ariaLabel: tooltip,
-        tooltip,
+        ariaLabel: runTooltip,
+        tooltip: runTooltip,
+        tone: "blocking",
+      },
+      {
+        key: statuses[1]!.id,
+        label: "ICE-Install +2",
+        ariaLabel:
+          "Öffentliche Runner-Kostenquelle: Die Korp muss 2 zusätzliche Credits zahlen, um ICE vor diesem Server zu installieren.",
+        tooltip:
+          "Öffentliche Runner-Kostenquelle: Die Korp muss 2 zusätzliche Credits zahlen, um ICE vor diesem Server zu installieren.",
+        tone: "cost_increase",
+      },
+      {
+        key: statuses[2]!.id,
+        label: "ICE-Install −1",
+        ariaLabel:
+          "Öffentliche Korp-Kostenquelle: Die Kosten der Korp, ICE vor diesem Server zu installieren, sind um 1 Credit reduziert.",
+        tooltip:
+          "Öffentliche Korp-Kostenquelle: Die Kosten der Korp, ICE vor diesem Server zu installieren, sind um 1 Credit reduziert.",
+        tone: "cost_reduction",
       },
     ]);
   });

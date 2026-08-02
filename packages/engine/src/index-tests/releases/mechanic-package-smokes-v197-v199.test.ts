@@ -769,6 +769,26 @@ describe("V1.9.9 Mechanikpaket R", () => {
       iceInstallTotalCost: 0,
       iceInstallReductionSourceDefinitionIds: "onr_v1_324_fortress-architects",
     });
+    expect(
+      getPlayerView(state, "corp").servers.find(
+        (server) => server.id === "remote_1",
+      )?.statuses,
+    ).toEqual([
+      expect.objectContaining({
+        kind: "cost_modifier",
+        costKind: "corp_ice_install",
+        operation: "reduce",
+        amount: 2,
+        targetServerId: "remote_1",
+        sourceCardInstanceId: chesterId,
+        sourceTitle: "Chester Mix",
+        sourceSide: "corp",
+      }),
+    ]);
+    expect(
+      getPlayerView(state, "corp").servers.find((server) => server.id === "rd")
+        ?.statuses,
+    ).toBeUndefined();
 
     const stale = structuredClone(state);
     stale.cardInstances[chesterId] = {
