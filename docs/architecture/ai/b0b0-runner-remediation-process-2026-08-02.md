@@ -108,7 +108,7 @@ planned
 | B001  | Draw-Tax-Quellenvertrag            | **abgeschlossen:** nur echte Ziehsteuern; sichere Multi-Draws bleiben erhalten |
 | B002  | Run-only-Economy-Routing           | **abgeschlossen:** D9 verwirft die wertlose Lucidrine-Archives-Linie           |
 | B003  | Plan-owned Emergency-Keep          | **abgeschlossen:** D65 behält Flatline-Prävention bei bestätigter Gefahr       |
-| B004  | Gesamtverifikation und Integration | **verifiziert:** Final Review und breite Gates grün; Integration folgt         |
+| B004  | Gesamtverifikation und Integration | **abgeschlossen:** Gates, Main-Integration und Cleanup verifiziert             |
 
 ## B000 – Prozess und Ausgangsevidence
 
@@ -313,7 +313,7 @@ nach `main` integrieren.
 - bevorzugt Fast-Forward nach `main` mergen;
 - Main prüfen, Worktree verifiziert entfernen und gemergten Branch löschen.
 
-### Ergebnis vor Main-Integration
+### Ergebnis
 
 - Das Final Review liegt unter
   `docs/reviews/ai/match-b0b0bffec6715028-runner-remediation-final-review-2026-08-02.md`.
@@ -326,6 +326,13 @@ nach `main` integrieren.
   Consumer-Audits sind ebenfalls grün.
 - AI-Architekturindex, aktueller Projektstatus und Monatslog enthalten die
   dauerhaft neuen Run-only-Economy- und Runner-Discard-Ownership-Verträge.
+- Der Arbeitsbranch wurde per Fast-Forward bis `9c87e8f4a` in den lokalen
+  `main` integriert. Dort sind die drei B0B0-Checkpoints und der AI-Typecheck
+  erneut grün.
+- Der registrierte Worktree
+  `C:\Projekte\NETGRID_AI_B0B0_RUNNER_REMEDIATION`, sein ausschließlich aus
+  Paketmanager-Abhängigkeiten bestehender Verzeichnisrest und der vollständig
+  gemergte Branch `codex/b0b0-runner-remediation` sind verifiziert entfernt.
 
 ### Done-Gate und Commit
 

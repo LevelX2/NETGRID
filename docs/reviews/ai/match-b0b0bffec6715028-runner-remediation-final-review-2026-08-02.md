@@ -92,6 +92,11 @@ sind grün.
 - `805f89a2d` – Prozess und Ausgangsevidence;
 - `fd55fe6c9` – draw-spezifischer Quellenvertrag;
 - `e59462ce5` – Run-only-Economy-Routing;
-- `e9d9e4695` – planseitige Emergency-Discard-Bindung.
+- `e9d9e4695` – planseitige Emergency-Discard-Bindung;
+- `9c87e8f4a` – Final Review, Wissenspflege und breite Abschlusskorrektur.
+
+Der Branch wurde bis `9c87e8f4a` per Fast-Forward lokal nach `main`
+integriert. Die drei B0B0-Checkpoints und der AI-Typecheck sind auf `main`
+erneut grün. Arbeitsworktree und gemergter Arbeitsbranch sind entfernt.
 
 Es verbleibt kein fachlicher Restpunkt aus den drei freigegebenen Befunden.
