@@ -228,6 +228,31 @@ export function formatChronicleEvent(
       chips.push("Spielstart");
       break;
     case "resolve_choice":
+      if (payload.strategicPlanningGroupChoiceResolved === true) {
+        const source =
+          stringValue(payload.drawReplacementSourceTitle) ??
+          titleForDefinitionId(sourceDefinitionId) ??
+          "die Draw-Fähigkeit";
+        const drawnCount = Math.max(
+          2,
+          numberValue(payload.strategicPlanningGroupDrawnCardCount) ?? 2,
+        );
+        const drawnSelectionText =
+          drawnCount === 2
+            ? "beiden gezogenen Karten"
+            : `${drawnCount} gezogenen Karten`;
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `mit ${source} eine zusätzliche Karte gezogen und eine der ${drawnSelectionText} unter R&D gelegt`,
+        );
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = source;
+        chips.push(source, "Zusätzliche Karte", "R&D");
+        break;
+      }
       if (
         hiddenZoneAction === "expose_installed_cards_single_fort" &&
         stringValue(payload.publicRevealKind) === "expose"
