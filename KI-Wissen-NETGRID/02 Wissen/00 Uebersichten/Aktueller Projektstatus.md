@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-30
+Stand: 2026-08-02
 
 ## Führender Produktstand
 
@@ -97,6 +97,16 @@ Stand: 2026-07-30
   `docs/reviews/engine/city-surveillance-draw-sequence-final-review-2026-07-14.md`.
 
 ## KI
+
+- Disgruntled Ice Technician ist im `run.jack_out_window` vollständig an den
+  bestehenden Planowner `runner.convert_run_window` gebunden. Die Engine
+  projiziert generische Quellen-, Fähigkeits-, Ziel- und Zahlungsfakten; die
+  AI übernimmt dieselbe Action-ID und dasselbe Ziel auch in der
+  Serverposition. Unvollständige Bindung bleibt fail-closed, ein
+  höherwertiger Access-Payoff darf den Trigger bewusst verwerfen. Die beiden
+  ursprünglichen Rent-I-Con-Seeds enden vollständig und replay-stabil ohne
+  Runtimefehler, Illegal Action, Fallback oder Timeout. Führend ist
+  `docs/reviews/ai/disgruntled-run-window-plan-coverage-final-review-2026-08-02.md`.
 
 - Das allgemeine Zielbild ist in
   `docs/architecture/ai/ki-zielbild-metaebene-2026-08-02-v6.md` auf den

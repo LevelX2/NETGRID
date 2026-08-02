@@ -74,6 +74,11 @@
   Zentraldruck und Zielplan-Fit gelten für projizierte HQ-/R&D-Runs nur, wenn
   ihr eigener sichtbarer Pfad `run_now` trägt; Archives-, Remote- und
   Bezahlbarkeitsausschlüsse bleiben wirksam.
+- Optionale Post-Pass-Fähigkeiten im `run.jack_out_window` transportieren
+  Quellenkartendefinition, generische Fähigkeit, Ziel-ICE und Zahlung aus der
+  Engine in den side-sicheren AI-Input. Der vorhandene Owner
+  `runner.convert_run_window` klassifiziert Trigger und Runfortsetzung auch
+  in der Serverposition exklusiv; unvollständige Bindung bleibt fail-closed.
 - Eine aktionsspezifisch erreichbare RunTargetEvaluation bleibt für Bypass,
   Restpfad und ICE-Kosten führend; generische Serverprüfungen dürfen sie nicht
   ohne Action-Kontext erneut blockieren. Ein akuter gleichzieliger
@@ -318,6 +323,11 @@
   abgeschlossener generischer Fortschrittsschutz gegen selbstzerstörende
   Same-Root-Conversion-Routen einschließlich identischem Zehn-Seed-
   Vorher-/Nachherpanel.
+- `disgruntled-run-window-plan-coverage-process-2026-08-02.md` und
+  `docs/reviews/ai/disgruntled-run-window-plan-coverage-final-review-2026-08-02.md`:
+  spielgleiche Quellen-, Fähigkeits-, Ziel- und Ownership-Abdeckung für
+  optionale Post-Pass-Derez-und-End-Run-Actions unter dem bestehenden
+  `runner.convert_run_window`-Owner.
 - `ai-planportfolio-remote-doctrine-contract.md` und
   `docs/reviews/ai/ai-planportfolio-remote-doctrine-final-review-2026-07-12.md`:
   aktueller Vertrag für kurze Plansequenzen, wiederkehrende Zyklen,
