@@ -1,4 +1,9 @@
-import type { GameState, LegalAction, PlayerAction } from "@netgrid/shared";
+import type {
+  CorpDrawContinuation,
+  GameState,
+  LegalAction,
+  PlayerAction,
+} from "@netgrid/shared";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -12,6 +17,7 @@ export type PendingChoiceResolutionHost = {
     resolveReplacementChoice: HostFn<void>;
     resolveEventModificationChoice: HostFn<void>;
     resumeAddTagContinuation: HostFn<void>;
+    resumeCorpDrawContinuation: HostFn<void>;
     resolvePdcaDamageReplacementChoice: HostFn<void>;
   };
   trace: {
@@ -121,6 +127,8 @@ export function resolvePendingChoice(
   const resolveEventModificationChoice =
     host.replacement.resolveEventModificationChoice;
   const resumeAddTagContinuation = host.replacement.resumeAddTagContinuation;
+  const resumeCorpDrawContinuation =
+    host.replacement.resumeCorpDrawContinuation;
   const resolvePdcaDamageReplacementChoice =
     host.replacement.resolvePdcaDamageReplacementChoice;
   const resolveTraceChoice = host.trace.resolveTraceChoice;
@@ -432,7 +440,11 @@ export function resolvePendingChoice(
       "card_implementation.strategic_planning_group_draw:",
     )
   ) {
+    const continuation: CorpDrawContinuation | undefined =
+      state.pendingCorpDraw?.continuation;
     resolveStrategicPlanningGroupDrawChoice(state, legalAction, playerAction);
+    if (continuation)
+      resumeCorpDrawContinuation(state, legalAction, continuation);
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_61.crash_draw")) {

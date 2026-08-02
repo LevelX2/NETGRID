@@ -79,7 +79,6 @@ import {
   unrezzedRootCardIdOnServer,
 } from "../state/card-server-lookup";
 import {
-  drawCorpCard,
   drawCorpCards,
   randomHqAccess,
   rollDeterministicDie,
@@ -804,7 +803,8 @@ export function createPlayBoardRuntimeHosts(
         rezCostForCard: (cardId) => rezCostForCard(state, cardId),
       },
       corp: {
-        drawCorpCard: () => drawCorpCard(state),
+        drawCorpCards: (amount, continuation) =>
+          drawCorpCards(state, amount, continuation),
         ensureTurnFlags: () => ensureCorpTurnFlags(state),
         runnerStoleAgendaLastTurn: () => deps.runnerStoleAgendaLastTurn(state),
         runnerStolenAgendaAdvancementCountersLastTurn: () =>

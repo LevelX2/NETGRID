@@ -1,4 +1,8 @@
-import { type CardInstanceId, type GameState } from "@netgrid/shared";
+import {
+  type CardInstanceId,
+  type CorpDrawContinuation,
+  type GameState,
+} from "@netgrid/shared";
 import { applyCorpDrawReplacementAfterDraw } from "../choices/strategic-planning-group-draw-choice";
 import { mustInstance } from "./card-server-lookup";
 
@@ -42,7 +46,11 @@ export function drawCorpCard(state: GameState): void {
   drawCorpCards(state, 1);
 }
 
-export function drawCorpCards(state: GameState, amount: number): void {
+export function drawCorpCards(
+  state: GameState,
+  amount: number,
+  continuation?: CorpDrawContinuation,
+): void {
   if (!Number.isInteger(amount) || amount < 0)
     throw new Error(
       "Die Corp-Draw-Menge muss eine nichtnegative Ganzzahl sein.",
@@ -64,6 +72,7 @@ export function drawCorpCards(state: GameState, amount: number): void {
     baseDrawCount: drawnCardIds.length,
     replacementDrawCount: 0,
     drawnCardIds,
+    ...(continuation ? { continuation } : {}),
   };
   const choiceOpened = applyCorpDrawReplacementAfterDraw(
     state,

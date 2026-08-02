@@ -126,6 +126,24 @@ export function validateGameState(state: GameState): ValidationResult {
       new Set(transaction.drawnCardIds).size !== transaction.drawnCardIds.length
     )
       errors.push("Pending Corp draw cards must be unique.");
+    if (
+      transaction.continuation?.kind === "effect_commands" &&
+      transaction.continuation.remainingCommands.length === 0
+    )
+      errors.push(
+        "Pending Corp draw effect-command continuation must not be empty.",
+      );
+    if (
+      transaction.continuation?.kind === "card_effect_on_play" ||
+      transaction.continuation?.kind === "card_effect_activated"
+    ) {
+      if (
+        transaction.continuation.nextEffectIndex !==
+          transaction.continuation.drawEffectIndex + 1 ||
+        transaction.continuation.creditGainOrdinal < 0
+      )
+        errors.push("Pending Corp draw card-effect continuation is invalid.");
+    }
     for (const cardId of transaction.drawnCardIds) {
       const instance = state.cardInstances[cardId];
       if (!(state.specialZones?.setAside ?? []).includes(cardId))

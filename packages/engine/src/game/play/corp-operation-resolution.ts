@@ -2,6 +2,7 @@ import type {
   CardDefinition,
   CardDefinitionId,
   CardInstanceId,
+  CorpDrawContinuation,
   DamageType,
   GameState,
   LegalAction,
@@ -68,7 +69,10 @@ export type CorpOperationResolutionHost = {
     rezCostForCard?: (cardId: CardInstanceId) => number;
   };
   corp: {
-    drawCorpCard: () => void;
+    drawCorpCards: (
+      amount: number,
+      continuation?: CorpDrawContinuation,
+    ) => void;
     ensureTurnFlags: () => NonNullable<GameState["corpTurnFlags"]>;
     runnerStoleAgendaLastTurn: () => boolean;
     runnerStolenAgendaAdvancementCountersLastTurn: () => number;
@@ -181,8 +185,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   simple_draw_operation: {
     name: "corp_operation_draw_2",
     resolve: (host) => {
-      host.corp.drawCorpCard();
-      host.corp.drawCorpCard();
+      host.corp.drawCorpCards(2);
     },
   },
   simple_tag_punishment_operation: {
@@ -203,9 +206,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   v08_archive_planning_operation: {
     name: "corp_operation_draw_3",
     resolve: (host) => {
-      host.corp.drawCorpCard();
-      host.corp.drawCorpCard();
-      host.corp.drawCorpCard();
+      host.corp.drawCorpCards(3);
     },
   },
   v098_hq_rd_swap_operation: {
@@ -617,19 +618,22 @@ export function resolveCorpUtilityOperation(
       )
         throw new Error("Corporate Shuffle fehlt als Quelle.");
       const rdBefore = host.state.corp.rd.length;
-      for (let index = 0; index < utility.drawCount; index += 1) {
-        if (host.state.phase === "game_over") break;
-        host.corp.drawCorpCard();
-      }
-      const drawnCards = rdBefore - host.state.corp.rd.length;
+      host.corp.drawCorpCards(utility.drawCount, {
+        kind: "corporate_shuffle_hq_to_rd",
+        sourceCardId,
+        sourceDefinitionId: definition.id,
+      });
+      const drawnCards = Math.min(utility.drawCount, rdBefore);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         hiddenZoneBarrier: true,
         hiddenZoneAction: "classic_corporate_shuffle_draw_then_hq_to_rd",
         drawnCards,
-        corpHqAfterDraw: host.state.corp.hq.length,
+        corpHqAfterDraw:
+          host.state.corp.hq.length +
+          (host.state.pendingCorpDraw ? drawnCards : 0),
       };
-      if (host.state.phase !== "game_over")
+      if (host.state.phase !== "game_over" && !host.state.pendingCorpDraw)
         host.hiddenZone.startCorpHqCardToRdChoice(legalAction, sourceCardId);
       return;
     }

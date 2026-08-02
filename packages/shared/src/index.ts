@@ -1560,6 +1560,35 @@ export type RunnerDrawSequence = {
   crashEverettSourceCardId?: CardInstanceId;
 };
 
+export type CorpDrawContinuation =
+  | {
+      kind: "card_effect_on_play";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      drawEffectIndex: number;
+      nextEffectIndex: number;
+      creditGainOrdinal: number;
+    }
+  | {
+      kind: "card_effect_activated";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      abilityIndex: number;
+      drawEffectIndex: number;
+      nextEffectIndex: number;
+      creditGainOrdinal: number;
+      originalActionPayload: LegalActionPayload;
+    }
+  | {
+      kind: "corporate_shuffle_hq_to_rd";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+    }
+  | {
+      kind: "effect_commands";
+      remainingCommands: EffectCommand[];
+    };
+
 export type CorpDrawTransaction = {
   transactionId: string;
   baseDrawCount: number;
@@ -1567,6 +1596,7 @@ export type CorpDrawTransaction = {
   drawnCardIds: CardInstanceId[];
   replacementSourceCardInstanceId?: CardInstanceId;
   replacementSourceDefinitionId?: CardDefinitionId;
+  continuation?: CorpDrawContinuation;
 };
 
 export type PendingAddTagContinuation =

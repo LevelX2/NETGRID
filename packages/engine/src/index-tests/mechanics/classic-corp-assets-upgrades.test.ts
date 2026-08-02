@@ -13,8 +13,10 @@ import {
 } from "../../index";
 import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { executeEffectCommands } from "../../game/engine-runtime-internal/runtime-port-bindings";
 import { drawCorpCards } from "../../game/state/draw-random";
 import {
+  addCorpCardToHqForTest,
   addInstalledRunnerProgramForTest,
   addRezzedCorpIceForTest,
   addRezzedCorpRootForTest,
@@ -41,6 +43,8 @@ const SELF_DESTRUCT = "onr_classic_022_self-destruct";
 const SHOCK_TREATMENT = "onr_classic_023_shock-treatment";
 const STERDROID = "onr_classic_024_sterdroid";
 const STRATEGIC_PLANNING_GROUP = "onr_classic_025_strategic-planning-group";
+const CORPORATE_SHUFFLE = "onr_classic_017_corporate-shuffle";
+const DAY_SHIFT = "onr_v1_288_day-shift";
 const STREET_ENFORCER = "onr_classic_026_street-enforcer";
 const FALL_GUY = "onr_v1_161_fall-guy";
 
@@ -755,6 +759,158 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       strategicPlanningGroupAdditionalDrawCount: 1,
       strategicPlanningGroupDrawnCardCount: 4,
       bottomedCardCount: 1,
+    });
+    expectValid(state);
+  });
+
+  it("continues Corporate Shuffle only after the Strategic Planning Group choice", () => {
+    let state = corpMainClassic08Game("classic-08-strategic-corporate-shuffle");
+    addRezzedCorpRootForTest(
+      state,
+      STRATEGIC_PLANNING_GROUP,
+      "remote_1",
+      "spg_corporate_shuffle",
+    );
+    const operationId = addCorpCardToHqForTest(
+      state,
+      CORPORATE_SHUFFLE,
+      "corporate_shuffle",
+    );
+    for (const definitionId of [
+      "simple_agenda",
+      "simple_barrier_ice",
+      "onr_v1_237_data-wall",
+      "onr_v1_232_crystal-wall",
+      "simple_upgrade",
+      "simple_economy_asset",
+    ])
+      putCorpCardOnTopOfRd(state, definitionId);
+    const hqBeforePlay = state.corp.hq.length;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" && action.source === operationId,
+    );
+
+    expect(state.pendingCorpDraw?.continuation).toMatchObject({
+      kind: "corporate_shuffle_hq_to_rd",
+      sourceCardId: operationId,
+      sourceDefinitionId: CORPORATE_SHUFFLE,
+    });
+    expect(state.pendingChoice?.source).toContain(
+      "card_implementation.strategic_planning_group_draw:",
+    );
+    expect(state.pendingChoice?.options).toHaveLength(6);
+    expect(state.corp.hq.length).toBe(hqBeforePlay - 1);
+
+    state = applyChoice(
+      state,
+      "corp",
+      String(state.pendingChoice?.options[0]?.id),
+    );
+
+    expect(state.pendingCorpDraw).toBeUndefined();
+    expect(state.corp.hq.length).toBe(hqBeforePlay - 1 + 5);
+    expect(state.pendingChoice?.source).toContain(
+      "classic.corporate_shuffle_hq_to_rd:",
+    );
+    expect(state.pendingChoice?.options).toHaveLength(state.corp.hq.length);
+    expectValid(state);
+  });
+
+  it("batches EffectCommand draw amounts and resumes remaining commands after SPG", () => {
+    let state = corpMainClassic08Game("classic-08-strategic-effect-commands");
+    addRezzedCorpRootForTest(
+      state,
+      STRATEGIC_PLANNING_GROUP,
+      "remote_1",
+      "spg_effect_commands",
+    );
+    for (const definitionId of [
+      "simple_agenda",
+      "simple_barrier_ice",
+      "simple_upgrade",
+    ])
+      putCorpCardOnTopOfRd(state, definitionId);
+    const creditsBefore = state.corp.credits;
+
+    executeEffectCommands(state, [
+      { type: "draw_card", side: "corp", amount: 2 },
+      { type: "gain_credits", side: "corp", amount: 3 },
+    ]);
+
+    expect(state.pendingCorpDraw).toMatchObject({
+      baseDrawCount: 2,
+      replacementDrawCount: 1,
+      continuation: {
+        kind: "effect_commands",
+        remainingCommands: [{ type: "gain_credits", side: "corp", amount: 3 }],
+      },
+    });
+    expect(state.pendingChoice?.options).toHaveLength(3);
+    expect(state.corp.credits).toBe(creditsBefore);
+
+    state.stateVersion = state.pendingChoice!.stateVersion;
+    state = applyChoice(
+      state,
+      "corp",
+      String(state.pendingChoice?.options[0]?.id),
+    );
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.corp.credits).toBe(creditsBefore + 3);
+    expectValid(state);
+  });
+
+  it("resumes Day Shift's credit gain after its complete Strategic Planning Group draw", () => {
+    let state = corpMainClassic08Game("classic-08-strategic-day-shift");
+    addRezzedCorpRootForTest(
+      state,
+      STRATEGIC_PLANNING_GROUP,
+      "remote_1",
+      "spg_day_shift",
+    );
+    const operationId = addCorpCardToHqForTest(state, DAY_SHIFT, "day_shift");
+    for (const definitionId of [
+      "simple_agenda",
+      "simple_barrier_ice",
+      "simple_upgrade",
+    ])
+      putCorpCardOnTopOfRd(state, definitionId);
+    const hqBeforePlay = state.corp.hq.length;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" && action.source === operationId,
+    );
+
+    const creditsBeforeChoice = state.corp.credits;
+    expect(state.pendingCorpDraw?.continuation).toMatchObject({
+      kind: "card_effect_on_play",
+      sourceCardId: operationId,
+      sourceDefinitionId: DAY_SHIFT,
+      drawEffectIndex: 0,
+      nextEffectIndex: 1,
+    });
+    expect(state.corp.hq.length).toBe(hqBeforePlay - 1);
+
+    state = applyChoice(
+      state,
+      "corp",
+      String(state.pendingChoice?.options[0]?.id),
+    );
+
+    expect(state.corp.credits).toBe(creditsBeforeChoice + 1);
+    expect(state.corp.hq.length).toBe(hqBeforePlay - 1 + 2);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      strategicPlanningGroupChoiceResolved: true,
+      gainedCredits: 1,
     });
     expectValid(state);
   });

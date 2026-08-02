@@ -14,7 +14,12 @@ type HiddenZonePayload = Record<string, string | number | boolean>;
 export type CorpZoneChoiceHandlerHost = {
   state: Pick<
     GameState,
-    "corp" | "cardInstances" | "pendingChoice" | "stateVersion" | "randomCounter"
+    | "corp"
+    | "cardInstances"
+    | "pendingChoice"
+    | "pendingCorpDraw"
+    | "stateVersion"
+    | "randomCounter"
   >;
   legalAction: LegalAction;
   playerAction?: PlayerAction;
@@ -243,7 +248,9 @@ export function resolveHqArchivesShuffleDraw(
   const drawAmount = host.cards.scoredAgendaDrawCount(agendaId);
   const beforeDraw = host.state.corp.hq.length;
   host.draw.drawCorpCards(drawAmount);
-  const drawnCardsCount = host.state.corp.hq.length - beforeDraw;
+  const drawnCardsCount =
+    host.state.pendingCorpDraw?.baseDrawCount ??
+    host.state.corp.hq.length - beforeDraw;
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     cardId: agendaId,
@@ -269,7 +276,10 @@ export function resolveHqArchivesShuffleDraw(
 function resolveCorpHqAgendaRevealChoice(
   host: CorpZoneChoiceHandlerHost,
 ): CorpZoneChoiceHandlerResult {
-  const choice = requireChoice(host, "Es ist keine HQ-Agenda-Reveal-Choice offen.");
+  const choice = requireChoice(
+    host,
+    "Es ist keine HQ-Agenda-Reveal-Choice offen.",
+  );
   const sourceText = choice.source.split(":")[1] ?? "";
   const sourceIds = sourceText.split(",").filter(Boolean) as CardInstanceId[];
   if (
@@ -283,7 +293,11 @@ function resolveCorpHqAgendaRevealChoice(
   )
     throw new Error("Die HQ-Agenda-Reveal-Quelle ist nicht mehr aktiv.");
   const selectedIds = selectedChoiceCardIds(host, choice);
-  assertSelectedHqAgendas(host, selectedIds, "Die HQ-Agenda-Reveal-Choice darf nur HQ-Agenden zeigen.");
+  assertSelectedHqAgendas(
+    host,
+    selectedIds,
+    "Die HQ-Agenda-Reveal-Choice darf nur HQ-Agenden zeigen.",
+  );
   const sourceDefinition = host.cards.definitionFor(sourceIds[0]!);
   const revealedDefinitions = selectedIds.map((cardId) =>
     host.cards.definitionFor(cardId),
@@ -301,13 +315,21 @@ function resolveCorpHqAgendaRevealChoice(
     gainedCredits: selectedIds.length,
     corpCreditsAfter: host.state.corp.credits,
   };
-  return revealChoiceResult(host, selectedIds, revealedDefinitions, selectedIds.length);
+  return revealChoiceResult(
+    host,
+    selectedIds,
+    revealedDefinitions,
+    selectedIds.length,
+  );
 }
 
 function resolveShowHqAgendasForCreditsChoice(
   host: CorpZoneChoiceHandlerHost,
 ): CorpZoneChoiceHandlerResult {
-  const choice = requireChoice(host, "Es ist keine HQ-Agenda-Show-Choice offen.");
+  const choice = requireChoice(
+    host,
+    "Es ist keine HQ-Agenda-Show-Choice offen.",
+  );
   const [
     ,
     sourceCardId = "",
@@ -317,7 +339,9 @@ function resolveShowHqAgendasForCreditsChoice(
   const creditPerAgenda = Number(creditPerAgendaRaw);
   if (
     !sourceCardId ||
-    !host.zones.rezzedCorpRootCardIds().includes(sourceCardId as CardInstanceId) ||
+    !host.zones
+      .rezzedCorpRootCardIds()
+      .includes(sourceCardId as CardInstanceId) ||
     host.cards.definitionFor(sourceCardId as CardInstanceId).id !==
       sourceDefinitionId ||
     !Number.isInteger(creditPerAgenda) ||
@@ -325,8 +349,14 @@ function resolveShowHqAgendasForCreditsChoice(
   )
     throw new Error("Die HQ-Agenda-Reveal-Quelle ist nicht mehr aktiv.");
   const selectedIds = selectedChoiceCardIds(host, choice);
-  assertSelectedHqAgendas(host, selectedIds, "Die HQ-Agenda-Reveal-Choice darf nur HQ-Agenden zeigen.");
-  const sourceDefinition = host.cards.definitionFor(sourceCardId as CardInstanceId);
+  assertSelectedHqAgendas(
+    host,
+    selectedIds,
+    "Die HQ-Agenda-Reveal-Choice darf nur HQ-Agenden zeigen.",
+  );
+  const sourceDefinition = host.cards.definitionFor(
+    sourceCardId as CardInstanceId,
+  );
   const revealedDefinitions = selectedIds.map((cardId) =>
     host.cards.definitionFor(cardId),
   );
@@ -345,7 +375,12 @@ function resolveShowHqAgendasForCreditsChoice(
     gainedCredits,
     corpCreditsAfter: host.state.corp.credits,
   };
-  return revealChoiceResult(host, selectedIds, revealedDefinitions, gainedCredits);
+  return revealChoiceResult(
+    host,
+    selectedIds,
+    revealedDefinitions,
+    gainedCredits,
+  );
 }
 
 function resolveScoredAgendaHqShuffleCreditsChoice(
@@ -374,7 +409,9 @@ function resolveScoredAgendaHqShuffleCreditsChoice(
     "Diese Scored Agenda darf nur HQ-Agenden zeigen.",
   );
   const selectedSet = new Set(selectedIds);
-  const sourceDefinition = host.cards.definitionFor(sourceCardId as CardInstanceId);
+  const sourceDefinition = host.cards.definitionFor(
+    sourceCardId as CardInstanceId,
+  );
   const revealedDefinitions = selectedIds.map((cardId) =>
     host.cards.definitionFor(cardId),
   );
@@ -485,7 +522,9 @@ function revealedDefinitionsPayload(
     publicRevealDefinitionIds: definitions
       .map((definition) => definition.id)
       .join(","),
-    publicRevealTitles: definitions.map((definition) => definition.title).join("||"),
+    publicRevealTitles: definitions
+      .map((definition) => definition.title)
+      .join("||"),
     revealedAgendaDefinitionIds: definitions
       .map((definition) => definition.id)
       .join(","),
@@ -531,12 +570,16 @@ function selectedChoiceCardIds(
   choice: ChoiceRequest,
 ): CardInstanceId[] {
   if (!host.playerAction) throw new Error("Diese Choice hat keine Auswahl.");
-  return selectedChoiceIds(host.playerAction.selectedChoices).map((optionId) => {
-    const option = choice.options.find((candidate) => candidate.id === optionId);
-    if (typeof option?.value !== "string")
-      throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
-    return option.value;
-  });
+  return selectedChoiceIds(host.playerAction.selectedChoices).map(
+    (optionId) => {
+      const option = choice.options.find(
+        (candidate) => candidate.id === optionId,
+      );
+      if (typeof option?.value !== "string")
+        throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
+      return option.value;
+    },
+  );
 }
 
 function selectedChoiceIds(

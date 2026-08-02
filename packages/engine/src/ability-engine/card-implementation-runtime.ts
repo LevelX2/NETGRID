@@ -25,8 +25,12 @@ export {
   pushActivatedCardImplementationActions,
   pushActivatedCardImplementationActionsForTiming,
 } from "./card-implementation-runtime-activated-actions";
-export { resolveActivatedCardImplementationAbility } from "./card-implementation-runtime-activated-resolve";
+export {
+  resolveActivatedCardImplementationAbility,
+  resumeActivatedCardImplementationAfterCorpDraw,
+} from "./card-implementation-runtime-activated-resolve";
 export {
   executeOnPlayCardImplementationAbility,
+  resumeOnPlayCardImplementationAfterCorpDraw,
   resumeOnPlayCardImplementationAfterTagPrevention,
 } from "./card-implementation-runtime-onplay";

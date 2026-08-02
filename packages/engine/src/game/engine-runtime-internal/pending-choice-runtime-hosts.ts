@@ -19,10 +19,16 @@ import type {
   ServerId,
   Side,
 } from "./runtime-shared";
+import type { CorpDrawContinuation } from "@netgrid/shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 import { resolveClassicDeflectorChoice as resolveClassicDeflectorChoiceInRunModule } from "../run/encounter-printed-nontrace-effects";
 import { resumeAccessEffectAfterTagPrevention } from "../access/access-effect-handlers";
-import { resumeOnPlayCardImplementationAfterTagPrevention } from "../../ability-engine/card-implementation-runtime";
+import {
+  resumeActivatedCardImplementationAfterCorpDraw,
+  resumeOnPlayCardImplementationAfterCorpDraw,
+  resumeOnPlayCardImplementationAfterTagPrevention,
+} from "../../ability-engine/card-implementation-runtime";
+import { startCorpHqCardToRdChoice } from "../hidden-zone/nonsearch-choice-handlers";
 import { resumeSuccessfulRunAccessReplacementAfterTagPrevention } from "../run/run-access-transition";
 import { resumeRunEndCleanupAfterTagPrevention } from "../run/run-end-cleanup";
 import {
@@ -557,6 +563,44 @@ export function createPendingChoiceRuntimeHosts(
     }
   }
 
+  function resumeCorpDrawContinuation(
+    state: GameState,
+    legalAction: LegalAction,
+    continuation: CorpDrawContinuation,
+  ): void {
+    switch (continuation.kind) {
+      case "card_effect_on_play":
+        resumeOnPlayCardImplementationAfterCorpDraw(
+          deps.cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+          continuation,
+        );
+        return;
+      case "card_effect_activated":
+        resumeActivatedCardImplementationAfterCorpDraw(
+          deps.cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+          continuation,
+        );
+        return;
+      case "corporate_shuffle_hq_to_rd": {
+        const definition = deps.definitionFor(state, continuation.sourceCardId);
+        if (definition.id !== continuation.sourceDefinitionId)
+          throw new Error("Die Corporate-Shuffle-Quelle ist veraltet.");
+        startCorpHqCardToRdChoice(
+          deps.hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+          continuation.sourceCardId,
+        );
+        return;
+      }
+      case "effect_commands":
+        deps.executeEffectCommands(state, continuation.remainingCommands);
+        return;
+    }
+  }
+
   function pendingChoiceResolutionHost(
     state: GameState,
   ): PendingChoiceResolutionHost {
@@ -570,6 +614,7 @@ export function createPendingChoiceRuntimeHosts(
         resolveReplacementChoice: deps.resolveReplacementChoice,
         resolveEventModificationChoice: deps.resolveEventModificationChoice,
         resumeAddTagContinuation,
+        resumeCorpDrawContinuation,
         resolvePdcaDamageReplacementChoice:
           deps.resolvePdcaDamageReplacementChoice,
       },

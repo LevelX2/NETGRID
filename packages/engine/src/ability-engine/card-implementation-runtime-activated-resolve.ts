@@ -1,9 +1,11 @@
 import type {
   CardInstanceId,
+  CorpDrawContinuation,
   GameState,
   LegalAction,
   ServerId,
 } from "@netgrid/shared";
+import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import { executeCardImplementationEffects } from "./effect-interpreter";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import { payActivatedCardImplementationCosts } from "./card-implementation-runtime-activated-costs";
@@ -25,33 +27,53 @@ export function resolveActivatedCardImplementationAbility(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   legalAction: LegalAction,
+  continuation?: Extract<
+    CorpDrawContinuation,
+    { kind: "card_effect_activated" }
+  >,
 ): boolean {
-  const match = activatedAbilityForLegalAction(deps, state, legalAction);
-  if (!match) return false;
-  validateActivatedCardImplementationAbility(deps, state, legalAction, match);
-  const costPublicPayload = payActivatedCardImplementationCosts(
-    deps,
-    state,
-    legalAction,
-    legalAction.side,
-    match.cardId,
-    match.ability,
-  );
+  const initialMatch = continuation
+    ? undefined
+    : activatedAbilityForLegalAction(deps, state, legalAction);
+  if (!continuation && !initialMatch) return false;
+  const match = continuation
+    ? activatedMatchForCorpDrawContinuation(deps, state, continuation)
+    : initialMatch!;
+  const effectPayload = continuation
+    ? continuation.originalActionPayload
+    : { ...(legalAction.payload ?? {}) };
+  const costPublicPayload: Record<string, string | number | boolean> = {};
+  if (!continuation) {
+    validateActivatedCardImplementationAbility(deps, state, legalAction, match);
+    Object.assign(
+      costPublicPayload,
+      payActivatedCardImplementationCosts(
+        deps,
+        state,
+        legalAction,
+        legalAction.side,
+        match.cardId,
+        match.ability,
+      ),
+    );
+  }
+  const startEffectIndex = continuation?.nextEffectIndex ?? 0;
   const result = executeCardImplementationEffects(
     state,
     {
       sourceCardId: match.cardId,
       sourceDefinitionId: match.definition.id,
       sourceTitle: match.definition.title,
-      ...(typeof legalAction.payload?.targetCardId === "string"
-        ? { targetCardId: legalAction.payload.targetCardId as CardInstanceId }
+      ...(typeof effectPayload.targetCardId === "string"
+        ? { targetCardId: effectPayload.targetCardId as CardInstanceId }
         : {}),
-      xValue: Math.floor(Number(legalAction.payload?.xValue ?? 0)),
-      targetRezCost: Math.floor(
-        Number(legalAction.payload?.targetRezCost ?? 0),
-      ),
+      xValue: Math.floor(Number(effectPayload.xValue ?? 0)),
+      targetRezCost: Math.floor(Number(effectPayload.targetRezCost ?? 0)),
       controller: deps.mustInstance(state.cardInstances, match.cardId)
         .controller,
+      effectIndexOffset: startEffectIndex,
+      creditGainOrdinalOffset: continuation?.creditGainOrdinal ?? 0,
+      isEffectSuspended: () => Boolean(state.pendingCorpDraw),
       gainCredits: (side, amount, gainOrdinal, kind) =>
         deps.gainCredits(state, {
           side,
@@ -93,10 +115,7 @@ export function resolveActivatedCardImplementationAbility(
         deps.startRun(state, legalAction, serverId, options),
       endRun: (successful) => deps.finishRun(state, legalAction, successful),
       chosenRunServerId: () =>
-        String(legalAction.payload?.serverId ?? "") as Exclude<
-          ServerId,
-          "new_remote"
-        >,
+        String(effectPayload.serverId ?? "") as Exclude<ServerId, "new_remote">,
       startPrivateLook: (zone, count) =>
         deps.startPrivateLook(
           state,
@@ -108,7 +127,7 @@ export function resolveActivatedCardImplementationAbility(
         ),
       exposeInstalledCard: (scope) => {
         const targetId = String(
-          legalAction.payload?.cardImplementationExposeTargetId ?? "",
+          effectPayload.cardImplementationExposeTargetId ?? "",
         );
         return targetId
           ? deps.exposeInstalledCorpCard(
@@ -344,9 +363,9 @@ export function resolveActivatedCardImplementationAbility(
           maxStrength,
         ),
     },
-    match.ability.effects,
+    match.ability.effects.slice(startEffectIndex),
   );
-  if (match.ability.limit)
+  if (!continuation && match.ability.limit)
     markCardImplementationAbilityLimitUsed(
       deps.abilityLimits,
       state,
@@ -366,5 +385,65 @@ export function resolveActivatedCardImplementationAbility(
     ...result.publicPayload,
   };
   deps.appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
+  if (
+    result.suspendedAtEffectIndex !== undefined &&
+    state.pendingCorpDraw &&
+    result.suspendedAtEffectIndex + 1 < match.ability.effects.length
+  )
+    state.pendingCorpDraw.continuation = {
+      kind: "card_effect_activated",
+      sourceCardId: match.cardId,
+      sourceDefinitionId: match.definition.id,
+      abilityIndex: match.abilityIndex,
+      drawEffectIndex: result.suspendedAtEffectIndex,
+      nextEffectIndex: result.suspendedAtEffectIndex + 1,
+      creditGainOrdinal: result.creditGainOrdinal,
+      originalActionPayload: effectPayload,
+    };
   return true;
+}
+
+function activatedMatchForCorpDrawContinuation(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  continuation: Extract<
+    CorpDrawContinuation,
+    { kind: "card_effect_activated" }
+  >,
+) {
+  const definition = deps.definitionFor(state, continuation.sourceCardId);
+  if (definition.id !== continuation.sourceDefinitionId)
+    throw new Error("Die aktivierte Draw-Quelle ist veraltet.");
+  const ability = cardImplementationForDefinitionId(definition.id)?.abilities?.[
+    continuation.abilityIndex
+  ];
+  if (ability?.kind !== "activated")
+    throw new Error("Die aktivierte Draw-Fortsetzung passt nicht zur Karte.");
+  if (ability.effects[continuation.drawEffectIndex]?.kind !== "draw_cards")
+    throw new Error("Die aktivierte Draw-Fortsetzung hat keinen Draw-Effekt.");
+  return {
+    cardId: continuation.sourceCardId,
+    definition,
+    ability,
+    abilityIndex: continuation.abilityIndex,
+  };
+}
+
+export function resumeActivatedCardImplementationAfterCorpDraw(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  legalAction: LegalAction,
+  continuation: Extract<
+    CorpDrawContinuation,
+    { kind: "card_effect_activated" }
+  >,
+): void {
+  if (state.pendingChoice || state.pendingCorpDraw)
+    throw new Error("Der Corp-Draw ist noch nicht abgeschlossen.");
+  resolveActivatedCardImplementationAbility(
+    deps,
+    state,
+    legalAction,
+    continuation,
+  );
 }

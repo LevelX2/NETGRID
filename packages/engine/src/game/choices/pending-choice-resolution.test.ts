@@ -237,6 +237,7 @@ function pendingChoiceHost(
         "resolveEventModificationChoice",
       ),
       resumeAddTagContinuation: unexpected("resumeAddTagContinuation"),
+      resumeCorpDrawContinuation: unexpected("resumeCorpDrawContinuation"),
       resolvePdcaDamageReplacementChoice: unexpected(
         "resolvePdcaDamageReplacementChoice",
       ),

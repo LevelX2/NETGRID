@@ -148,7 +148,7 @@ function hostFor(
         cardDefinition.side === "corp" && cardDefinition.type === "asset",
     },
     corp: {
-      drawCorpCard: () => calls.push("drawCorpCard"),
+      drawCorpCards: (amount) => calls.push(`drawCorpCards:${amount}`),
       ensureTurnFlags: () =>
         (targetState.corpTurnFlags ??= {
           scoredBlackOpsAgendaThisTurn: false,
@@ -255,6 +255,7 @@ describe("corp-operation-resolution", () => {
     expect(source).not.toContain("../../index");
     expect(source).not.toContain("PublicPayload");
     expect(source).not.toContain("BuildEvent");
+    expect(source).not.toMatch(/drawCorpCard(?!s)/);
   });
 
   it("resolves simple credit, draw, damage and tag operations through the boundary", () => {
@@ -283,8 +284,7 @@ describe("corp-operation-resolution", () => {
 
     expect(calls).toEqual([
       "gainCorpCredits:4",
-      "drawCorpCard",
-      "drawCorpCard",
+      "drawCorpCards:2",
       "damage:core:1:v111_core_damage_operation",
     ]);
     expect(targetState.runner.credits).toBe(3);

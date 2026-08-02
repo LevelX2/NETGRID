@@ -117,7 +117,8 @@ export function createCardImplementationEffectAdapters(
     if (side === "corp") {
       const rdBefore = state.corp.rd.length;
       host.drawCorpCards(state, amount);
-      const drawnCount = rdBefore - state.corp.rd.length;
+      const drawnCount =
+        state.pendingCorpDraw?.baseDrawCount ?? rdBefore - state.corp.rd.length;
       return {
         drawnCount,
         publicPayload: drawnCount > 0 ? { drawnCards: drawnCount } : {},

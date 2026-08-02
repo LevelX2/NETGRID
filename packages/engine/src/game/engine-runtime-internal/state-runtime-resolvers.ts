@@ -88,7 +88,6 @@ import {
   unrezzedRootCardIdOnServer,
 } from "../state/card-server-lookup";
 import {
-  drawCorpCard,
   drawCorpCards,
   randomHqAccess,
   rollDeterministicDie,
@@ -849,7 +848,7 @@ export function createStateRuntimeResolvers(
     state: GameState,
     commands: EffectCommand[],
   ): void {
-    for (const command of commands) {
+    for (const [commandIndex, command] of commands.entries()) {
       switch (command.type) {
         case "gain_credits":
           assertNonNegativeAmount(command.amount);
@@ -868,8 +867,15 @@ export function createStateRuntimeResolvers(
           break;
         case "draw_card":
           if (command.side === "corp") {
-            for (let count = 0; count < (command.amount ?? 1); count += 1)
-              drawCorpCard(state);
+            drawCorpCards(state, command.amount ?? 1);
+            const remainingCommands = commands.slice(commandIndex + 1);
+            if (state.pendingCorpDraw && remainingCommands.length > 0) {
+              state.pendingCorpDraw.continuation = {
+                kind: "effect_commands",
+                remainingCommands,
+              };
+              return;
+            }
           } else {
             deps.drawRunnerCards(state, command.amount ?? 1);
           }

@@ -1,6 +1,7 @@
 import type {
   CardDefinition,
   CardInstanceId,
+  CorpDrawContinuation,
   GameState,
   LegalAction,
   ServerId,
@@ -66,7 +67,8 @@ export function executeOnPlayCardImplementationAbility(
         );
         return effectSuspended;
       },
-      isEffectSuspended: () => effectSuspended,
+      isEffectSuspended: () =>
+        effectSuspended || Boolean(state.pendingCorpDraw),
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
         deps.damageRunner(
@@ -361,16 +363,61 @@ export function executeOnPlayCardImplementationAbility(
   };
   deps.appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
   if (result.suspendedAtEffectIndex !== undefined) {
-    state.pendingAddTagContinuation = {
-      kind: "card_effect_on_play",
-      sourceCardId: cardId,
-      sourceDefinitionId: definition.id,
-      tagEffectIndex: result.suspendedAtEffectIndex,
-      nextEffectIndex: result.suspendedAtEffectIndex + 1,
-      creditGainOrdinal: result.creditGainOrdinal,
-      runnerTagsBefore: runnerTagsBeforeSuspendedEffect,
-    };
+    if (effectSuspended) {
+      state.pendingAddTagContinuation = {
+        kind: "card_effect_on_play",
+        sourceCardId: cardId,
+        sourceDefinitionId: definition.id,
+        tagEffectIndex: result.suspendedAtEffectIndex,
+        nextEffectIndex: result.suspendedAtEffectIndex + 1,
+        creditGainOrdinal: result.creditGainOrdinal,
+        runnerTagsBefore: runnerTagsBeforeSuspendedEffect,
+      };
+      return;
+    }
+    if (
+      state.pendingCorpDraw &&
+      result.suspendedAtEffectIndex + 1 < ability.effects.length
+    )
+      state.pendingCorpDraw.continuation = {
+        kind: "card_effect_on_play",
+        sourceCardId: cardId,
+        sourceDefinitionId: definition.id,
+        drawEffectIndex: result.suspendedAtEffectIndex,
+        nextEffectIndex: result.suspendedAtEffectIndex + 1,
+        creditGainOrdinal: result.creditGainOrdinal,
+      };
   }
+}
+
+export function resumeOnPlayCardImplementationAfterCorpDraw(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  legalAction: LegalAction,
+  continuation: Extract<CorpDrawContinuation, { kind: "card_effect_on_play" }>,
+): void {
+  if (state.pendingChoice || state.pendingCorpDraw)
+    throw new Error("Der Corp-Draw ist noch nicht abgeschlossen.");
+  const definition = deps.definitionFor(state, continuation.sourceCardId);
+  if (definition.id !== continuation.sourceDefinitionId)
+    throw new Error("Die On-Play-Draw-Quelle ist veraltet.");
+  const ability = printedCostOnPlayImplementation(definition);
+  const drawEffect = ability?.effects[continuation.drawEffectIndex];
+  if (!ability || drawEffect?.kind !== "draw_cards")
+    throw new Error("Die On-Play-Draw-Fortsetzung passt nicht zur Karte.");
+
+  executeOnPlayCardImplementationAbility(
+    deps,
+    state,
+    legalAction,
+    definition,
+    continuation.sourceCardId,
+    {
+      startEffectIndex: continuation.nextEffectIndex,
+      creditGainOrdinal: continuation.creditGainOrdinal,
+      skipLegalityCheck: true,
+    },
+  );
 }
 
 export function resumeOnPlayCardImplementationAfterTagPrevention(
