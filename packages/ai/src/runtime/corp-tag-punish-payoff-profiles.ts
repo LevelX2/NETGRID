@@ -9,10 +9,6 @@ import type { CorpTaggedRunnerPayoffActionProfile } from "./corp-scoring-assessm
 
 export type CorpTagPunishPayoffProfileDependencies = {
   installedEconomyCreditAmount: (action: LegalAction) => number;
-  sourceDefinitionIdForAction: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => string | undefined;
   actionSourceCard: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -46,18 +42,18 @@ export function createCorpTagPunishPayoffProfileContext(
       return undefined;
     const creditAmount = dependencies.installedEconomyCreditAmount(action);
     if (!Number.isFinite(creditAmount) || creditAmount <= 0) return undefined;
-    const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
-      input,
-      action,
-    );
-    if (sourceDefinitionId !== "onr_v1_309_bbs-whispering-campaign")
-      return undefined;
     const sourceCard = dependencies.actionSourceCard(input, action);
-    const storedCredits = sourceCard
-      ? dependencies.visibleCardStoredCredits(sourceCard)
-      : 0;
-    const immediateGain =
-      storedCredits > 0 ? Math.min(creditAmount, storedCredits) : creditAmount;
+    if (
+      !sourceCard ||
+      !sourceCard.known ||
+      sourceCard.owner !== "corp" ||
+      sourceCard.controller !== "corp"
+    ) {
+      return undefined;
+    }
+    const storedCredits = dependencies.visibleCardStoredCredits(sourceCard);
+    if (!Number.isFinite(storedCredits) || storedCredits <= 0) return undefined;
+    const immediateGain = Math.min(creditAmount, storedCredits);
     if (immediateGain <= 0) return undefined;
     return {
       kind: "installed_economy",

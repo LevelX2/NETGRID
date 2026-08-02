@@ -61,7 +61,7 @@ describe("runnerPersistentInstallEvaluationForAction", () => {
       visibility: "private_to_actor",
       expiresAtStateVersion: 2,
       payload: {
-        shellTradersAbility: "set_aside_from_grip",
+        delayedInstallAbility: "set_aside_from_grip",
         targetCardId: "dwarf-hand",
       },
     } as LegalAction;

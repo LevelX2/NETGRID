@@ -1,4 +1,3 @@
-import { type LegalAction } from "@netgrid/shared";
 import { rolesHaveBreakerRole } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 
@@ -13,16 +12,4 @@ export function shellTradersTargetValue(
   if (rolesMatch(roles, ["economy", "tempo"])) value += 20;
   value += Math.min(60, Math.max(0, shellCounters) * 10);
   return value;
-}
-
-export function shellTradersAbility(
-  action: LegalAction,
-): string | undefined {
-  const payload = action.payload;
-  if (!payload) return undefined;
-  return typeof payload.delayedInstallAbility === "string"
-    ? payload.delayedInstallAbility
-    : typeof payload.shellTradersAbility === "string"
-      ? payload.shellTradersAbility
-      : undefined;
 }

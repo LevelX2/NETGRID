@@ -6,11 +6,11 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { runnerRandomBreakOrDamageRecoveryScoreComponent } from "./runner-blink-recovery-score";
-import { runnerJunkyardBbsRecoveryScoreComponent } from "./runner-junkyard-bbs-recovery-score";
+import { runnerTopTrashRecoveryScoreComponent } from "./runner-junkyard-bbs-recovery-score";
 import {
-  runnerJunkyardBbsRecoveryAction,
-  runnerJunkyardBbsRecoveryTarget,
-  runnerJunkyardBbsRecoveryTargetAssessment,
+  runnerTopTrashRecoveryAction,
+  runnerTopTrashRecoveryTarget,
+  runnerTopTrashRecoveryTargetAssessment,
 } from "./runner-junkyard-bbs-recovery-target";
 import { runnerRecoveryFundingNeedContext } from "./runner-recovery-funding-need";
 import type { RunnerRecoveryFundingNeedContext } from "./runner-recovery-funding-need";
@@ -68,8 +68,6 @@ export type RunnerRecoveryContextDependencies = {
   ) => boolean;
   actionClickCost: (action: LegalAction) => number;
   actionCreditCost: (action: LegalAction) => number;
-  junkyardBbsDefinitionId: string;
-  junkyardBbsReturnTopHeapAbility: string;
 };
 
 export type RunnerRecoveryContext = {
@@ -85,7 +83,7 @@ export type RunnerRecoveryContext = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => AiDecisionScoreComponent | undefined;
-  runnerJunkyardBbsRecoveryScoreComponent: (
+  runnerTopTrashRecoveryScoreComponent: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => AiDecisionScoreComponent | undefined;
@@ -137,33 +135,26 @@ export function createRunnerRecoveryContext(
     });
   }
 
-  function junkyardBbsRecoveryAction(
-    input: AiDecisionInput,
-    action: LegalAction,
-  ): boolean {
-    return runnerJunkyardBbsRecoveryAction(input, action, {
-      junkyardBbsDefinitionId: dependencies.junkyardBbsDefinitionId,
-      returnTopHeapAbility: dependencies.junkyardBbsReturnTopHeapAbility,
-      sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
-    });
+  function topTrashRecoveryAction(action: LegalAction): boolean {
+    return runnerTopTrashRecoveryAction(action);
   }
 
-  function junkyardBbsRecoveryTarget(
+  function topTrashRecoveryTarget(
     input: AiDecisionInput,
     action: LegalAction,
   ): VisibleCard | undefined {
-    return runnerJunkyardBbsRecoveryTarget(input, action, {
+    return runnerTopTrashRecoveryTarget(input, action, {
       findVisibleCard: dependencies.findVisibleCard,
     });
   }
 
-  function junkyardBbsRecoveryTargetAssessment(
+  function topTrashRecoveryTargetAssessment(
     input: AiDecisionInput,
     target: VisibleCard | undefined,
     targetDefinitionId: string | undefined,
     targetRoles: readonly string[],
   ): { value: number; evidence: string[] } {
-    return runnerJunkyardBbsRecoveryTargetAssessment(
+    return runnerTopTrashRecoveryTargetAssessment(
       input,
       target,
       targetDefinitionId,
@@ -199,12 +190,13 @@ export function createRunnerRecoveryContext(
         fundingNeedContext,
         safeProgressTargets: dependencies.safeProgressTargets,
       }),
-    runnerJunkyardBbsRecoveryScoreComponent: (input, action) =>
-      runnerJunkyardBbsRecoveryScoreComponent(input, action, {
-        isRecoveryAction: junkyardBbsRecoveryAction,
-        target: junkyardBbsRecoveryTarget,
+    runnerTopTrashRecoveryScoreComponent: (input, action) =>
+      runnerTopTrashRecoveryScoreComponent(input, action, {
+        isRecoveryAction: (_runtimeInput, runtimeAction) =>
+          topTrashRecoveryAction(runtimeAction),
+        target: topTrashRecoveryTarget,
         rolesForCardId: dependencies.rolesForCardId,
-        targetAssessment: junkyardBbsRecoveryTargetAssessment,
+        targetAssessment: topTrashRecoveryTargetAssessment,
         actionClickCost: dependencies.actionClickCost,
         actionCreditCost: dependencies.actionCreditCost,
       }),

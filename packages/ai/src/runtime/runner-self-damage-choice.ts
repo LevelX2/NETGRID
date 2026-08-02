@@ -43,7 +43,6 @@ export type RunnerSelfDamageSurvivalAssessmentDependencies = {
     action: LegalAction,
   ) => string | undefined;
   hintEffectsForCard: (definitionId: string) => readonly unknown[] | undefined;
-  fakedHitCardId: string;
   badPublicityLossThreshold: number;
   cardAddressesVisibleBreakerNeed: (
     input: AiDecisionInput,
@@ -230,22 +229,6 @@ function selfDamageEvidenceForAction(
       evidence: [
         "self_damage_contract:action_cost_profile",
         `self_damage_candidate:${actionSemanticCandidate.actionId}`,
-      ],
-    };
-  }
-
-  if (
-    sourceDefinitionId === dependencies.fakedHitCardId &&
-    action.type === "play_event"
-  ) {
-    return {
-      amount: 2,
-      type: "core",
-      preventable: false,
-      badPublicityAdded: 1,
-      evidence: [
-        "self_damage_contract:faked_hit",
-        "self_damage_evidence:docs/reviews/ai/faked-hit-self-damage-semantics-review-2026-06-08.md",
       ],
     };
   }

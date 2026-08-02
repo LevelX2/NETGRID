@@ -47265,8 +47265,10 @@
         {
           "amount": 2,
           "kind": "damage",
+          "preventable": false,
           "resource": "damage",
           "scope": "runner",
+          "target": "self_inflicted",
           "timing": "action"
         }
       ],

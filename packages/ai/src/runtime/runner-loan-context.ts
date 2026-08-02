@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import type { AiCardHint } from "../ai-hints";
 import {
   runnerLoanLiabilityAssessment,
@@ -51,7 +55,6 @@ export type RunnerLoanContextDependencies<
   >,
   "runFundingContext"
 > & {
-  highRiskLoanDefinitionId: string;
   hintForDefinitionId: (definitionId: string) => AiCardHint | undefined;
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
@@ -95,24 +98,19 @@ export function createRunnerLoanContext<
     action: LegalAction,
   ): string | undefined {
     return runnerLoanDefinitionIdForAction(input, action, {
-      highRiskLoanDefinitionId: dependencies.highRiskLoanDefinitionId,
       hintForDefinitionId: dependencies.hintForDefinitionId,
       sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     });
   }
 
-  function definitionIsHighRiskLoan(
-    definitionId: string | undefined,
-  ): boolean {
+  function definitionIsHighRiskLoan(definitionId: string | undefined): boolean {
     return runnerDefinitionIsHighRiskLoan(definitionId, {
-      highRiskLoanDefinitionId: dependencies.highRiskLoanDefinitionId,
       hintForDefinitionId: dependencies.hintForDefinitionId,
     });
   }
 
   function installedLoanCards(input: AiDecisionInput): VisibleCard[] {
     return runnerInstalledLoanCards(input, {
-      highRiskLoanDefinitionId: dependencies.highRiskLoanDefinitionId,
       hintForDefinitionId: dependencies.hintForDefinitionId,
     });
   }
@@ -144,8 +142,7 @@ export function createRunnerLoanContext<
           runnerLoanRuntimeContext(input, creditsAfterLoan, {
             deckCapabilitiesForInput: dependencies.deckCapabilitiesForInput,
             strategicIntentForInput: dependencies.strategicIntentForInput,
-            handDevelopmentEvaluations:
-              dependencies.handDevelopmentEvaluations,
+            handDevelopmentEvaluations: dependencies.handDevelopmentEvaluations,
             economyPosture: dependencies.economyPosture,
             runTargets: dependencies.runTargets,
             runFundingContext: runnerLoanRunFundingContext,

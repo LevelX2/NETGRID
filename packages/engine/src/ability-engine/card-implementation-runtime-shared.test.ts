@@ -63,4 +63,29 @@ describe("deterministic on-play action-capacity payload", () => {
       scoreConversionTargetMode: "installed_advanceable_cards",
     });
   });
+
+  it("publishes exact deterministic bad-publicity and self-damage effects", () => {
+    const definition =
+      CARD_DEFINITIONS_BY_ID["onr_proteus_108_faked-hit"];
+
+    expect(
+      deterministicOnPlayResourcePayload(definition!, "runner"),
+    ).toMatchObject({
+      badPublicityAdded: 1,
+      damageAmount: 2,
+      damageType: "core",
+      preventableDamage: false,
+      unpreventableDamage: true,
+    });
+  });
+
+  it("publishes an optional follow-up run as an action-bound fact", () => {
+    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_076_all-nighter"];
+
+    expect(
+      deterministicOnPlayResourcePayload(definition!, "runner"),
+    ).toMatchObject({
+      followupRunOnEnd: "optional",
+    });
+  });
 });

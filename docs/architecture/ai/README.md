@@ -28,6 +28,13 @@
   darf stattdessen ein bezahlbares Stop-ICE oder dosiert eine sichtbare
   Steuer-/Disruptionswirkung als gestuften Schutz akzeptieren; dies bleibt
   vollständig im Score-/Defense-Plan und wird im nächsten Zug neu bewertet.
+- Same-Turn-Conversion-Routen dürfen eine durch einen späteren Schritt
+  benötigte Quelle nicht per Root-Replacement selbst zerstören. Eine aktuell
+  Engine-gequotete Counterbank mit positivem Advancement-Fortschritt bleibt
+  außerdem vor normalen Agenda-Replacements geschützt; zulässig bleiben
+  Null-Counter, gewöhnliche Assets und der enge matchentscheidende
+  Same-Turn-Score. Owner bleibt `corp.score_agenda`, Choices ergänzen nur die
+  bereits gebundene Action-Payload.
 - Corp-Entscheidungsfenster bewerten Rez-Kosten gegen sichtbaren marginalen
   Tax und Stop-Wirkung, Mehrkarten-Draw getrennt vom kontextuellen ersten Draw
   und Basic Credits gegen eine konkrete Überschussgrenze. Wiederholter
@@ -130,9 +137,12 @@
   den real erreichbaren Entscheidungsgraphen und überspringt Tests, Simulation,
   Evaluation, Reports und Diagnosecode. Exakte Karten-IDs benötigen dort eine
   zentrale Klassifikation samt Begründung und stabiler Vorkommenszahl; neue,
-  verschobene oder ungeklärte Vorkommen brechen das Gate. Die Kategorie
-  `review_required` hält bekannte Generalisierungsreststellen sichtbar und ist
-  keine fachliche Freigabe für neue Sonderlogik.
+  verschobene oder ungeklärte Vorkommen brechen das Gate. Der geprüfte Stand
+  enthält nur drei Vorkommen der Kategorie `individual_plan_model`: zwei
+  Bindungen des dedizierten Shell-Traders-Plans und die Sourcebindung des
+  Social-Engineering-Secret-Bid-Plans. `review_required` enthält keine aktive
+  Freigabe. Historische kartenspezifische Messklassen liegen ausschließlich im
+  Simulationsbereich und sind keine Entscheidungsautorität.
 - Volatile Entscheidungsfamilien besitzen fachliche Modulgruppen:
   Choice-Overrides unter `runtime/choice-ranking/`, Corp-Scoreline unter
   `runtime/corp-scoreline/`, sichtbare Run-Projektion unter `run-analysis/`
@@ -303,6 +313,11 @@
 - `corp-score-conversion-capability-contract.md` und
   `corp-score-conversion-plan-process-2026-07-10.md`: Engine-/Hint-/Planvertrag
   für generische Fast-Advance- und Countertransfer-Scorepfade.
+- `counterbank-progress-protection-process-2026-08-02.md` und
+  `docs/reviews/ai/counterbank-progress-protection-ten-seed-final-review-2026-08-02.md`:
+  abgeschlossener generischer Fortschrittsschutz gegen selbstzerstörende
+  Same-Root-Conversion-Routen einschließlich identischem Zehn-Seed-
+  Vorher-/Nachherpanel.
 - `ai-planportfolio-remote-doctrine-contract.md` und
   `docs/reviews/ai/ai-planportfolio-remote-doctrine-final-review-2026-07-12.md`:
   aktueller Vertrag für kurze Plansequenzen, wiederkehrende Zyklen,

@@ -818,8 +818,8 @@ describe("successful run interventions", () => {
     );
     const armageddonAction = actions.find(
       (action) =>
-        action.payload?.proteusRunnerVirusFollowup ===
-        "doom_counter_instead_of_rd_access",
+        action.payload?.successfulRunAccessReplacement ===
+        "skip_access_add_purgeable_runner_virus_counter",
     );
 
     expect(armageddonAction).toMatchObject({
@@ -844,8 +844,8 @@ describe("successful run interventions", () => {
         fixture.state.run as NonNullable<GameState["run"]>,
       ).some(
         (action) =>
-          action.payload?.proteusRunnerVirusFollowup ===
-          "doom_counter_instead_of_rd_access",
+          action.payload?.successfulRunAccessReplacement ===
+          "skip_access_add_purgeable_runner_virus_counter",
       ),
     ).toBe(false);
     delete fixture.state.run.accessedCardId;
@@ -874,7 +874,9 @@ describe("successful run interventions", () => {
     expect(fixture.finishedRuns).toEqual([true]);
     expect(fixture.state.run).toBeUndefined();
     expect(armageddonAction.payload).toMatchObject({
-      proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
+      successfulRunAccessReplacement:
+        "skip_access_add_purgeable_runner_virus_counter",
+      counterSide: "corp",
       counterType: "doom",
       counterDelta: 1,
       counterTotalAfter: 1,

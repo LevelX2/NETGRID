@@ -17,7 +17,6 @@ export type RunnerMultiRunContextDependencies<
   TDeckCapabilities,
   TStrategicIntent,
 > = {
-  allNighterDefinitionId: string;
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -116,7 +115,6 @@ export function createRunnerMultiRunContext<
     action: LegalAction,
   ): RunnerMultiRunEventAssessment | undefined {
     return runnerMultiRunEventAssessment(input, action, {
-      allNighterDefinitionId: dependencies.allNighterDefinitionId,
       sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
       targetServerId: dependencies.targetServerId,
       targetEvaluation: runnerMultiRunTargetEvaluation,

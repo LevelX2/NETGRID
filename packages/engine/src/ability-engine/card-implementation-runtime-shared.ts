@@ -57,7 +57,22 @@ export function deterministicOnPlayResourcePayload(
 
   let gainCreditsAmount = 0;
   let drawCardsAmount = 0;
+  let badPublicityAdded = 0;
+  const selfDamageEffects = [] as Extract<
+    NonNullable<typeof implementation>["effects"][number],
+    { kind: "damage" }
+  >[];
   for (const effect of implementation?.effects ?? []) {
+    if (effect.kind === "add_bad_publicity") {
+      badPublicityAdded += Math.max(0, effect.amount);
+    }
+    if (
+      controller === "runner" &&
+      effect.kind === "damage" &&
+      effect.recipient === "runner"
+    ) {
+      selfDamageEffects.push(effect);
+    }
     const recipientMatchesController =
       "recipient" in effect &&
       (effect.recipient === "controller" || effect.recipient === controller);
@@ -81,6 +96,9 @@ export function deterministicOnPlayResourcePayload(
   const advancementDistribution = implementation?.effects.find(
     (effect) => effect.kind === "distribute_advancement_counters",
   );
+  const makeRunEffect = implementation?.effects.find(
+    (effect) => effect.kind === "make_run",
+  );
   const utility = cardImplementation?.corpUtility;
   const restrictedCorpInstallPayload =
     controller === "corp" &&
@@ -95,10 +113,29 @@ export function deterministicOnPlayResourcePayload(
           actionCapacityExpiresAt: "side_turn_end" as const,
         }
       : {};
+  const selfDamage =
+    selfDamageEffects.length > 0 &&
+    selfDamageEffects.every(
+      (effect) =>
+        effect.damageType === selfDamageEffects[0]!.damageType &&
+        effect.preventable === selfDamageEffects[0]!.preventable,
+    )
+      ? {
+          damageAmount: selfDamageEffects.reduce(
+            (sum, effect) => sum + Math.max(0, effect.amount),
+            0,
+          ),
+          damageType: selfDamageEffects[0]!.damageType,
+          preventableDamage: selfDamageEffects[0]!.preventable,
+          unpreventableDamage: selfDamageEffects[0]!.preventable === false,
+        }
+      : undefined;
 
   return {
     ...(gainCreditsAmount > 0 ? { gainCreditsAmount } : {}),
     ...(drawCardsAmount > 0 ? { drawCardsAmount } : {}),
+    ...(badPublicityAdded > 0 ? { badPublicityAdded } : {}),
+    ...(selfDamage?.damageAmount ? selfDamage : {}),
     ...(removeTagsEffect
       ? {
           cardImplementationEffectKind: "remove_tags",
@@ -120,6 +157,10 @@ export function deterministicOnPlayResourcePayload(
           scoreConversionTargetMode: advancementDistribution.target,
           scoreConversionTiming: "immediate",
         }
+      : {}),
+    ...(makeRunEffect?.kind === "make_run" &&
+    makeRunEffect.followupRunOnEnd === "optional"
+      ? { followupRunOnEnd: "optional" }
       : {}),
     ...actionCapacityPayload,
     ...restrictedCorpInstallPayload,

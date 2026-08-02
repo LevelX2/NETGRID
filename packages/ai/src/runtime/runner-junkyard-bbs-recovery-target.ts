@@ -3,45 +3,34 @@ import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared"
 import { rolesHaveBreakerRole } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 
-export type RunnerJunkyardBbsRecoveryActionDependencies = {
-  junkyardBbsDefinitionId: string;
-  returnTopHeapAbility: string;
-  sourceDefinitionIdForAction: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => string | undefined;
-};
-
-export function runnerJunkyardBbsRecoveryAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-  dependencies: RunnerJunkyardBbsRecoveryActionDependencies,
-): boolean {
-  const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
-    input,
-    action,
-  );
+export function runnerTopTrashRecoveryAction(action: LegalAction): boolean {
   if (action.type === "activated_card_ability") {
-    return sourceDefinitionId === dependencies.junkyardBbsDefinitionId;
+    return (
+      action.payload?.cardImplementationEffectKind ===
+        "move_top_trash_to_grip" &&
+      typeof action.payload?.cardImplementationTopTrashTargetId === "string"
+    );
   }
   return (
     action.type === "trigger_ability" &&
-    action.payload?.resourceAbility === dependencies.returnTopHeapAbility &&
-    sourceDefinitionId === dependencies.junkyardBbsDefinitionId
+    action.payload?.resourceAbility === "return_top_heap_card" &&
+    action.payload?.sourceZone === "heap" &&
+    action.payload?.destinationZone === "grip" &&
+    typeof action.payload?.targetCardId === "string"
   );
 }
 
-export type RunnerJunkyardBbsRecoveryTargetDependencies = {
+export type RunnerTopTrashRecoveryTargetDependencies = {
   findVisibleCard: (
     input: AiDecisionInput,
     instanceId: string,
   ) => VisibleCard | undefined;
 };
 
-export function runnerJunkyardBbsRecoveryTarget(
+export function runnerTopTrashRecoveryTarget(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: RunnerJunkyardBbsRecoveryTargetDependencies,
+  dependencies: RunnerTopTrashRecoveryTargetDependencies,
 ): VisibleCard | undefined {
   const targetCardId =
     typeof action.payload?.targetCardId === "string"
@@ -56,7 +45,7 @@ type RunnerRecoveryFundingNeedContext = {
   reason: string;
 };
 
-export type RunnerJunkyardBbsRecoveryTargetAssessmentDependencies = {
+export type RunnerTopTrashRecoveryTargetAssessmentDependencies = {
   cardAddressesVisibleBreakerNeed: (
     input: AiDecisionInput,
     target: VisibleCard,
@@ -70,12 +59,12 @@ export type RunnerJunkyardBbsRecoveryTargetAssessmentDependencies = {
   ) => boolean;
 };
 
-export function runnerJunkyardBbsRecoveryTargetAssessment(
+export function runnerTopTrashRecoveryTargetAssessment(
   input: AiDecisionInput,
   target: VisibleCard | undefined,
   targetDefinitionId: string | undefined,
   targetRoles: readonly string[],
-  dependencies: RunnerJunkyardBbsRecoveryTargetAssessmentDependencies,
+  dependencies: RunnerTopTrashRecoveryTargetAssessmentDependencies,
 ): { value: number; evidence: string[] } {
   if (!targetDefinitionId) {
     return { value: 0, evidence: ["target_class:unknown"] };
@@ -129,7 +118,7 @@ export function runnerJunkyardBbsRecoveryTargetAssessment(
     });
   }
 
-  const duplicatePenalty = runnerJunkyardBbsRecoveredDefinitionAlreadyHeld(
+  const duplicatePenalty = runnerRecoveredDefinitionAlreadyHeld(
     input,
     targetDefinitionId,
   )
@@ -151,7 +140,7 @@ export function runnerJunkyardBbsRecoveryTargetAssessment(
   };
 }
 
-function runnerJunkyardBbsRecoveredDefinitionAlreadyHeld(
+function runnerRecoveredDefinitionAlreadyHeld(
   input: AiDecisionInput,
   targetDefinitionId: string,
 ): boolean {

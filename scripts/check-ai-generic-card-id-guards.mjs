@@ -20,119 +20,11 @@ const allowedCategories = new Set([
 
 const allowedCardIdUses = createAllowances([
   {
-    relativePath: "actions/run-access-decision-model.ts",
-    cardId: "onr_proteus_078_armageddon",
-    category: "review_required",
-    reason:
-      "The access replacement is still guarded by one definition ID and should move to a generic effect contract.",
-  },
-  {
     relativePath: "plans/runner-core-plan-modules.ts",
     cardId: "onr_v1_176_the-shell-traders",
     category: "individual_plan_model",
     reason:
       "The definition ID identifies the exact source of a dedicated card plan.",
-  },
-  {
-    relativePath: "plans/runner-turn-planner-shadow.ts",
-    cardId: "onr_v1_176_the-shell-traders",
-    category: "individual_plan_model",
-    reason:
-      "The definition ID binds the shadow signal to its dedicated card plan.",
-  },
-  ...[
-    "onr_v1_222_ball-and-chain",
-    "onr_v1_224_bolter-cluster",
-    "onr_v1_225_canis-major",
-    "onr_v1_226_canis-minor",
-    "onr_v1_234_data-darts",
-    "onr_v1_242_fatal-attractor",
-    "onr_v1_274_tutor",
-    "onr_v1_276_viral-15",
-    "onr_v1_277_virizz",
-  ].map((cardId) => ({
-    relativePath: "runtime/corp-ice-placement/corp-ice-placement.ts",
-    cardId,
-    category: "review_required",
-    reason:
-      "The legacy future-run ICE table remains an explicit card-family registry pending semantic hint or engine-quote migration.",
-  })),
-  ...[
-    "onr_proteus_048_data-sifters",
-    "onr_v1_301_punitive-counterstrike",
-    "onr_v1_302_scorched-earth",
-    "onr_v1_285_closed-accounts",
-  ].map((cardId) => ({
-    relativePath: "runtime/corp-punish-route-quote-input.ts",
-    cardId,
-    category: "engine_quote_source",
-    reason:
-      "The exact ID selects the card-specific source whose engine quote is evaluated by the generic punish route.",
-  })),
-  {
-    relativePath: "runtime/corp-tag-punish-payoff-profiles.ts",
-    cardId: "onr_v1_309_bbs-whispering-campaign",
-    category: "review_required",
-    reason:
-      "The economy payoff profile still contains a one-card branch that should be expressed by generic installed-economy semantics.",
-  },
-  ...[
-    "onr_proteus_118_prearranged-drop",
-    "onr_proteus_119_promises-promises",
-  ].map((cardId) => ({
-    relativePath: "runtime/plan-first-live-runtime.ts",
-    cardId,
-    category: "individual_plan_model",
-    reason:
-      "The exact source is part of a dedicated, multi-step same-turn access plan.",
-  })),
-  {
-    relativePath: "runtime/plan-first-live-runtime.ts",
-    cardId: "onr_classic_039_library-search",
-    category: "review_required",
-    reason:
-      "The pressure route still recognizes one card directly instead of consuming a generic active-pressure signal.",
-  },
-  {
-    relativePath: "runtime/plan-first-live-runtime.ts",
-    cardId: "onr_v1_176_the-shell-traders",
-    category: "individual_plan_model",
-    reason:
-      "The definition ID binds execution to the dedicated delayed card plan.",
-  },
-  {
-    relativePath: "runtime/plan-first-live-runtime.ts",
-    cardId: "onr_v1_168_loan-from-chiba",
-    category: "lifecycle_binding",
-    reason:
-      "The exact source instance is required to bind, retain, and retire the card-specific lifecycle.",
-    expectedCount: 3,
-  },
-  {
-    relativePath: "runtime/plan-first-live-runtime.ts",
-    cardId: "onr_proteus_091_lockjaw",
-    category: "review_required",
-    reason:
-      "The run window already has a semantic effect payload, but two exact-ID guards remain.",
-    expectedCount: 2,
-  },
-  ...[
-    "onr_v1_076_all-nighter",
-    "onr_proteus_108_faked-hit",
-    "onr_v1_165_junkyard-bbs",
-  ].map((cardId) => ({
-    relativePath: "runtime/runner-semantic-card-ids.ts",
-    cardId,
-    category: "individual_plan_model",
-    reason:
-      "The constant names the exact source owned by a dedicated semantic card model.",
-  })),
-  {
-    relativePath: "runtime/runner-semantic-card-ids.ts",
-    cardId: "onr_v1_168_loan-from-chiba",
-    category: "lifecycle_binding",
-    reason:
-      "The constant binds the exact source of the dedicated lifecycle model.",
   },
   {
     relativePath: "runtime/runner-targeted-bypass-plan.ts",

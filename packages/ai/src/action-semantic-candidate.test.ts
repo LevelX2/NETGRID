@@ -268,7 +268,9 @@ describe("buildActionSemanticCandidates", () => {
           payload: {
             cardId: "armageddon-instance",
             serverId: "rd",
-            proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
+            successfulRunAccessReplacement:
+              "skip_access_add_purgeable_runner_virus_counter",
+            counterSide: "corp",
             counterType: "doom",
             counterDelta: 1,
           },
@@ -282,7 +284,7 @@ describe("buildActionSemanticCandidates", () => {
     });
 
     expect(candidate).toMatchObject({
-      semanticActionType: "runner.armageddon_doom_counter",
+      semanticActionType: "runner.access_replacement_counter",
       actionTacticSignals: expect.arrayContaining([
         "access_replacement",
         "successful_run",
@@ -300,6 +302,60 @@ describe("buildActionSemanticCandidates", () => {
       },
     });
     expect(JSON.stringify(candidate)).not.toContain("hidden_rnd_card");
+  });
+
+  it("projects the same structured counter access replacement without a known card definition", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("trigger_ability", 1, {
+          side: "runner",
+          source: "generic-counter-source",
+          timingPoint: "access.resolve_card",
+          payload: {
+            cardId: "generic-counter-source",
+            serverId: "rd",
+            successfulRunAccessReplacement:
+              "skip_access_add_purgeable_runner_virus_counter",
+            counterSide: "corp",
+            counterType: "pressure",
+            counterDelta: 1,
+          },
+        }),
+      ],
+      observerSide: "runner",
+      stateVersion: 8,
+    });
+
+    expect(candidate).toMatchObject({
+      sourceCardInstanceId: "generic-counter-source",
+      semanticActionType: "runner.access_replacement_counter",
+      runAccessDecisionModel: {
+        serverId: "rd",
+        modifiers: expect.arrayContaining(["access_replacement"]),
+      },
+    });
+  });
+
+  it("does not infer a counter access replacement from ordinary counter fields", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("trigger_ability", 1, {
+          side: "runner",
+          source: "ordinary-counter-source",
+          payload: {
+            cardId: "ordinary-counter-source",
+            serverId: "rd",
+            counterSide: "corp",
+            counterType: "doom",
+            counterDelta: 1,
+          },
+        }),
+      ],
+    });
+
+    expect(candidate?.semanticActionType).not.toBe(
+      "runner.access_replacement_counter",
+    );
   });
 
   it("does not classify scored hidden-zone reveal agenda actions as credit economy", () => {

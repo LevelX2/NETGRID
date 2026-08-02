@@ -90,12 +90,12 @@ export function buildRunnerAccessActions(
   }
   const successfulRunActions = host.callbacks.successfulRunProgramActions(run);
   if (successfulRunActions.length > 0) {
-    const armageddonAccessReplacement = successfulRunActions.some(
+    const counterAccessReplacement = successfulRunActions.some(
       (action) =>
-        action.payload?.proteusRunnerVirusFollowup ===
-        "doom_counter_instead_of_rd_access",
+        action.payload?.successfulRunAccessReplacement ===
+        "skip_access_add_purgeable_runner_virus_counter",
     );
-    if (armageddonAccessReplacement && !run.accessedCardId) {
+    if (counterAccessReplacement && !run.accessedCardId) {
       return {
         handled: true,
         legalActions: [

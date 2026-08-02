@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type {
-  AiDecisionInput,
-  LegalAction,
-  VisibleCard,
+import {
+  CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
+  type AiDecisionInput,
+  type LegalAction,
+  type VisibleCard,
 } from "@netgrid/shared";
 import {
   bestCorpSameTurnScoreConversionPath,
@@ -53,6 +54,176 @@ describe("Corp same-turn score conversion", () => {
       "move_advancement",
       "score_ready",
     ]);
+  });
+
+  it("rejects a same-root install that destroys its reserved counter source", () => {
+    const agenda = card("agenda", "agenda", {
+      advancementRequirement: 3,
+    });
+    const vapor = counterBank("vapor", 2);
+    const input = corpInput({
+      clicks: 3,
+      credits: 3,
+      hq: [agenda],
+      root: [vapor],
+      actions: [
+        action("install-new-remote", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        action("replace-vapor", "install_card", agenda.instanceId, {
+          serverId: "remote_1",
+          placement: "root",
+          rootReplacement: "asset_to_agenda",
+        }),
+        action("transfer", "activated_card_ability", vapor.instanceId, {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: "all",
+          scoreConversionSourceMode: "source_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
+        action("advance", "advance_card", agenda.instanceId, {
+          serverId: "new_remote",
+        }),
+      ],
+    });
+
+    expect(
+      corpSameTurnScoreConversionPaths(input).map((path) => ({
+        targetServerId: path.targetServerId,
+        installActionId: path.steps.find(
+          (step) => step.kind === "install_score_target",
+        )?.actionId,
+        reservedAdvancementCounters: path.reservedAdvancementCounters,
+      })),
+    ).toEqual([
+      {
+        targetServerId: "new_remote",
+        installActionId: "install-new-remote",
+        reservedAdvancementCounters: { vapor: 2 },
+      },
+    ]);
+  });
+
+  it("protects a positive counter bank from a non-terminal basic-advance route", () => {
+    const agenda = card("agenda", "agenda", {
+      advancementRequirement: 1,
+    });
+    const input = corpInput({
+      clicks: 2,
+      credits: 1,
+      hq: [agenda],
+      root: [counterBank("bank", 2)],
+      actions: [
+        action("replace-bank", "install_card", agenda.instanceId, {
+          serverId: "remote_1",
+          placement: "root",
+          rootReplacement: "asset_to_agenda",
+        }),
+        action("advance", "advance_card", agenda.instanceId, {
+          serverId: "remote_1",
+        }),
+      ],
+    });
+
+    expect(corpSameTurnScoreConversionPaths(input)).toEqual([]);
+  });
+
+  it("allows replacement of a quoted counter bank with no counters", () => {
+    const agenda = card("agenda", "agenda", {
+      advancementRequirement: 1,
+    });
+    const input = corpInput({
+      clicks: 2,
+      credits: 1,
+      hq: [agenda],
+      root: [counterBank("empty-bank", 0)],
+      actions: [
+        action("replace-empty-bank", "install_card", agenda.instanceId, {
+          serverId: "remote_1",
+          placement: "root",
+          rootReplacement: "asset_to_agenda",
+        }),
+        action("advance", "advance_card", agenda.instanceId, {
+          serverId: "remote_1",
+        }),
+      ],
+    });
+
+    expect(bestCorpSameTurnScoreConversionPath(input)).toMatchObject({
+      targetServerId: "remote_1",
+      steps: [
+        expect.objectContaining({
+          kind: "install_score_target",
+          actionId: "replace-empty-bank",
+        }),
+        expect.objectContaining({ kind: "basic_advance" }),
+        expect.objectContaining({ kind: "score_ready" }),
+      ],
+    });
+  });
+
+  it("allows replacement of an ordinary advanced asset", () => {
+    const agenda = card("agenda", "agenda", {
+      advancementRequirement: 1,
+    });
+    const input = corpInput({
+      clicks: 2,
+      credits: 1,
+      hq: [agenda],
+      root: [card("ordinary-asset", "asset", { advancementCounters: 2 })],
+      actions: [
+        action("replace-ordinary-asset", "install_card", agenda.instanceId, {
+          serverId: "remote_1",
+          placement: "root",
+          rootReplacement: "asset_to_agenda",
+        }),
+        action("advance", "advance_card", agenda.instanceId, {
+          serverId: "remote_1",
+        }),
+      ],
+    });
+
+    expect(bestCorpSameTurnScoreConversionPath(input)?.steps[0]).toMatchObject({
+      kind: "install_score_target",
+      actionId: "replace-ordinary-asset",
+    });
+  });
+
+  it("allows the narrow terminal match-winning replacement", () => {
+    const agenda = card("match-winning-agenda", "agenda", {
+      advancementRequirement: 1,
+    });
+    const input = corpInput({
+      clicks: 2,
+      credits: 1,
+      agendaPoints: 5,
+      hq: [agenda],
+      root: [counterBank("terminal-bank", 2)],
+      actions: [
+        action("terminal-replacement", "install_card", agenda.instanceId, {
+          serverId: "remote_1",
+          placement: "root",
+          rootReplacement: "asset_to_agenda",
+        }),
+        action("terminal-advance", "advance_card", agenda.instanceId, {
+          serverId: "remote_1",
+        }),
+      ],
+    });
+
+    expect(bestCorpSameTurnScoreConversionPath(input)).toMatchObject({
+      targetServerId: "remote_1",
+      steps: [
+        expect.objectContaining({
+          kind: "install_score_target",
+          actionId: "terminal-replacement",
+        }),
+        expect.objectContaining({ kind: "basic_advance" }),
+        expect.objectContaining({ kind: "score_ready" }),
+      ],
+    });
   });
 
   it("prefers a visible transfer into an installed agenda over paid basic advances", () => {
@@ -610,6 +781,7 @@ describe("Corp same-turn score conversion", () => {
 function corpInput(params: {
   clicks: number;
   credits: number;
+  agendaPoints?: number;
   hq: VisibleCard[];
   root?: VisibleCard[];
   actions: LegalAction[];
@@ -626,7 +798,7 @@ function corpInput(params: {
         identity: card("corp-id", "identity"),
         credits: params.credits,
         clicks: params.clicks,
-        agendaPoints: 0,
+        agendaPoints: params.agendaPoints ?? 0,
         gripOrHq: params.hq,
         stackOrRdCount: 20,
         heapOrArchives: [],
@@ -687,6 +859,36 @@ function card(
     controller: "corp",
     ...overrides,
   };
+}
+
+function counterBank(instanceId: string, advancementCounters: number) {
+  return card(instanceId, "asset", {
+    definitionId: "synthetic-counter-bank",
+    advancementCounters,
+    rezzed: true,
+    counterBankPreparationQuote: {
+      schemaVersion: CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
+      context: "corp_counter_bank_preparation",
+      sourceCardId: instanceId,
+      expiresAtStateVersion: 1,
+      location: { kind: "installed_root", serverId: "remote_1" },
+      advancementCounters,
+      advanceableBeforeRez: true,
+      activatedAbilitiesRequireRez: true,
+      cashout: {
+        advancementCounterCost: 1,
+        creditGain: 1,
+        actionCost: 0,
+      },
+      transfer: {
+        actionCost: 1,
+        minimumSourceCounters: 1,
+        source: "source_card",
+        target: "chosen_installed_advanceable_card",
+        maximum: "all",
+      },
+    },
+  });
 }
 
 function placement(actionId: string, amount: number): LegalAction {

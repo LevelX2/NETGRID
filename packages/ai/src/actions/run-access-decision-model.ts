@@ -21,13 +21,13 @@ export function applyRunAccessDecisionModel(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
 ): ActionSemanticCandidate {
-  const armageddonCandidate = isArmageddonDoomCounterReplacement(
+  const accessReplacementCandidate = isSuccessfulRunCounterAccessReplacement(
     candidate,
     action,
   )
     ? {
         ...candidate,
-        semanticActionType: "runner.armageddon_doom_counter",
+        semanticActionType: "runner.access_replacement_counter",
         actionTacticSignals: unique([
           ...candidate.actionTacticSignals,
           "run_pressure",
@@ -39,14 +39,17 @@ export function applyRunAccessDecisionModel(
         ]),
         evidence: [
           ...candidate.evidence,
-          "Armageddon structured R&D access replacement",
+          "engine_structured_counter_access_replacement",
         ],
       }
     : candidate;
-  const model = projectRunAccessDecisionModel(armageddonCandidate, action);
+  const model = projectRunAccessDecisionModel(
+    accessReplacementCandidate,
+    action,
+  );
   return model
-    ? { ...armageddonCandidate, runAccessDecisionModel: model }
-    : armageddonCandidate;
+    ? { ...accessReplacementCandidate, runAccessDecisionModel: model }
+    : accessReplacementCandidate;
 }
 
 export function projectRunAccessDecisionModel(
@@ -226,16 +229,20 @@ function stringPayload(action: LegalAction, key: string): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-function isArmageddonDoomCounterReplacement(
+function isSuccessfulRunCounterAccessReplacement(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
 ): boolean {
   return (
     action.side === "runner" &&
     action.type === "trigger_ability" &&
-    candidate.sourceDefinitionId === "onr_proteus_078_armageddon" &&
+    candidate.sourceCardInstanceId === action.source &&
+    action.payload?.successfulRunAccessReplacement ===
+      "skip_access_add_purgeable_runner_virus_counter" &&
     action.payload?.serverId === "rd" &&
-    action.payload?.counterType === "doom" &&
+    action.payload?.counterSide === "corp" &&
+    typeof action.payload?.counterType === "string" &&
+    Number(action.payload?.counterDelta) > 0 &&
     action.payload?.cardId === action.source
   );
 }

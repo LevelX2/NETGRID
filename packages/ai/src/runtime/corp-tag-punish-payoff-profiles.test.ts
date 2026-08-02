@@ -6,6 +6,44 @@ import {
 } from "./corp-tag-punish-payoff-profiles";
 
 describe("createCorpTagPunishPayoffProfileContext", () => {
+  it("values an exact installed finite-pool payout without a card-id contract", () => {
+    const source = corpCard("generic-finite-pool", { type: "asset" });
+    const context = testContext({
+      installedEconomyCreditAmount: () => 2,
+      actionSourceCard: () => source,
+      visibleCardStoredCredits: () => 5,
+    });
+
+    expect(
+      context.corpInstalledEconomyActionProfile(
+        corpInput({ credits: 3, runnerTags: 0, gripOrHq: [] }),
+        activatedAbilityAction(),
+      ),
+    ).toMatchObject({
+      kind: "installed_economy",
+      evidence: expect.arrayContaining([
+        "installed_corp_economy_immediate_gain:2",
+        "installed_corp_economy_stored_credits:5",
+      ]),
+    });
+  });
+
+  it("fails closed without a visible positive stored-credit pool", () => {
+    const source = corpCard("generic-credit-ability", { type: "asset" });
+    const context = testContext({
+      installedEconomyCreditAmount: () => 2,
+      actionSourceCard: () => source,
+      visibleCardStoredCredits: () => 0,
+    });
+
+    expect(
+      context.corpInstalledEconomyActionProfile(
+        corpInput({ credits: 3, runnerTags: 0, gripOrHq: [] }),
+        activatedAbilityAction(),
+      ),
+    ).toBeUndefined();
+  });
+
   it("values basic credit when it reaches a visible tagged payoff cost", () => {
     const payoff = corpCard("tagged-payoff", {
       playCost: { kind: "fixed", credits: 1 },
@@ -145,15 +183,19 @@ describe("createCorpTagPunishPayoffProfileContext", () => {
   });
 });
 
-function testContext() {
+function testContext(
+  overrides: Partial<
+    Parameters<typeof createCorpTagPunishPayoffProfileContext>[0]
+  > = {},
+) {
   return createCorpTagPunishPayoffProfileContext({
     installedEconomyCreditAmount: () => 0,
-    sourceDefinitionIdForAction: () => undefined,
     actionSourceCard: () => undefined,
     visibleCardStoredCredits: () => 0,
     visibleMeatDamagePayoff: () => false,
     payoffProfileForDefinition: (definitionId) =>
       definitionId === "tagged-payoff" ? {} : undefined,
+    ...overrides,
   });
 }
 
@@ -184,6 +226,21 @@ function gainCreditAction(): LegalAction {
     source: "basic_action",
     label: "Gain 1",
     costs: [],
+  } as unknown as LegalAction;
+}
+
+function activatedAbilityAction(): LegalAction {
+  return {
+    actionId: "installed-economy-payout",
+    side: "corp",
+    type: "activated_card_ability",
+    source: "generic-finite-pool-instance",
+    label: "Take credits",
+    costs: [{ clicks: 1 }],
+    payload: {
+      cardId: "generic-finite-pool-instance",
+      gainCreditsAmount: 2,
+    },
   } as unknown as LegalAction;
 }
 

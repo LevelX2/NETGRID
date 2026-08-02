@@ -65,17 +65,10 @@ export type {
   AiDecisionSideSelection,
 } from "./runtime/ai-decision-input";
 export {
-  assessCorpIcePlacementForDiagnostics,
   buildCorpIceCardFacts,
-  classifyCorpFutureRunIcePlacementProfile,
   corpIcePlacementPostInstallRezCostFact,
 } from "./runtime/corp-ice-placement/corp-ice-placement";
-export type {
-  CorpFutureRunIceClass,
-  CorpIceCardFacts,
-  CorpIcePlacementDiagnosticsAssessment,
-  CorpIcePlacementResultingPosition,
-} from "./runtime/corp-ice-placement/corp-ice-placement";
+export type { CorpIceCardFacts } from "./runtime/corp-ice-placement/corp-ice-placement";
 export { buildCorpIceDensityProfile } from "./runtime/corp-economy/corp-ice-density";
 export type { CorpIceDensityProfile } from "./runtime/corp-economy/corp-ice-density";
 export {

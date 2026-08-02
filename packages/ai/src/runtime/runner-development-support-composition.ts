@@ -1,6 +1,4 @@
-import {
-  createRunnerHandFundingContext,
-} from "./runner-hand-funding-context";
+import { createRunnerHandFundingContext } from "./runner-hand-funding-context";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
@@ -63,29 +61,24 @@ export function createRunnerDevelopmentSupportComposition(
   dependencies: RunnerDevelopmentSupportCompositionDependencies,
 ) {
   const { runnerLoanLiabilityAssessment } = createRunnerLoanContext({
-    highRiskLoanDefinitionId: dependencies.highRiskLoanDefinitionId,
     hintForDefinitionId: dependencies.hintForDefinitionId,
     sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
-    projectedCreditGainForAction:
-      dependencies.projectedCreditGainForAction,
+    projectedCreditGainForAction: dependencies.projectedCreditGainForAction,
     actionCreditCost: dependencies.actionCreditCost,
     actionClickCost: dependencies.actionClickCost,
     deckCapabilitiesForInput: dependencies.deckCapabilitiesForInput,
     strategicIntentForInput: dependencies.strategicIntentForInput,
-    handDevelopmentEvaluations:
-      dependencies.handDevelopmentEvaluations,
+    handDevelopmentEvaluations: dependencies.handDevelopmentEvaluations,
     economyPosture: dependencies.economyPosture,
     runTargets: dependencies.runTargets,
-    visibleCardPlayOrInstallCost:
-      dependencies.visibleCardPlayOrInstallCost,
+    visibleCardPlayOrInstallCost: dependencies.visibleCardPlayOrInstallCost,
     rolesForCardId: dependencies.rolesForCardId,
     cardAddressesVisibleBreakerNeed:
       dependencies.cardAddressesVisibleBreakerNeed,
     isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
     isRunnerPressureRole: dependencies.isRunnerPressureRole,
     rolesForAction: dependencies.rolesForAction,
-    hasKnownUnaffordableLegalRun:
-      dependencies.hasKnownUnaffordableLegalRun,
+    hasKnownUnaffordableLegalRun: dependencies.hasKnownUnaffordableLegalRun,
   });
 
   const { runnerViral15JackOutScoreComponent } =
@@ -96,14 +89,12 @@ export function createRunnerDevelopmentSupportComposition(
 
   const { runnerHandFundingTarget } = createRunnerHandFundingContext({
     rolesForCardId: dependencies.rolesForCardId,
-    visibleCardPlayOrInstallCost:
-      dependencies.visibleCardPlayOrInstallCost,
+    visibleCardPlayOrInstallCost: dependencies.visibleCardPlayOrInstallCost,
     cardAddressesVisibleBreakerNeed:
       dependencies.cardAddressesVisibleBreakerNeed,
     isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
     cardLooksLikeCreditPayout: dependencies.cardLooksLikeCreditPayout,
-    badPublicityOrTraceTechCard:
-      dependencies.badPublicityOrTraceTechCard,
+    badPublicityOrTraceTechCard: dependencies.badPublicityOrTraceTechCard,
     rolesMatch: (roles, needles) => rolesMatch([...roles], [...needles]),
   });
 
@@ -115,8 +106,7 @@ export function createRunnerDevelopmentSupportComposition(
   } = createRunnerPersistentInstallContext({
     deckCapabilities: dependencies.deckCapabilitiesForInput,
     strategicIntent: dependencies.strategicIntentForInput,
-    handDevelopmentEvaluations:
-      dependencies.handDevelopmentEvaluations,
+    handDevelopmentEvaluations: dependencies.handDevelopmentEvaluations,
   });
 
   const {

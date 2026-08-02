@@ -149,6 +149,7 @@ import {
 } from "../plans/corp-turn-planner-cutover";
 import { assertRunnerTurnPlanningModuleRegistry } from "../plans/runner-turn-planning-coverage";
 import { buildRunnerTurnPlannerShadow } from "../plans/runner-turn-planner-shadow";
+import { runnerDelayedInstallReplanningBoundary } from "../plans/runner-delayed-install-replanning-boundary";
 import {
   buildCanonicalLegalActionInvocation,
   buildPlanningStateIdentity,
@@ -1465,19 +1466,39 @@ function runnerCandidateIsCentralInformationAbility(
   return undefined;
 }
 
-function runnerSameTurnAccessPreparationDefinitionId(
+function runnerSameTurnAccessPreparationSourceDefinitionId(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): string | undefined {
   if (candidate.actionType !== "play_event") return undefined;
-  const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-    input,
-    candidate,
+  const createsSameTurnAccessPayoff = candidate.functionalEffects?.some(
+    (effect) =>
+      effect.scope === "runner" &&
+      effect.timing === "on_access" &&
+      (effect.kind === "scored_agenda_action" ||
+        effect.kind === "access_replacement" ||
+        (effect.kind === "economy" &&
+          typeof effect.target === "string" &&
+          effect.target.startsWith("next_agenda"))),
   );
-  return sourceDefinitionId === "onr_proteus_118_prearranged-drop" ||
-    sourceDefinitionId === "onr_proteus_119_promises-promises"
-    ? sourceDefinitionId
+  return createsSameTurnAccessPayoff
+    ? runnerCandidateSourceDefinitionId(input, candidate)
     : undefined;
+}
+
+function runnerCandidateStartsBoundCentralRun(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  return (
+    candidate.actionType === "play_event" &&
+    candidate.functionalEffects?.some(
+      (effect) =>
+        effect.kind === "future_run_effect" &&
+        effect.scope === "runner" &&
+        effect.target === "make_hq_or_rnd_run" &&
+        effect.timing === "action",
+    ) === true
+  );
 }
 
 function runnerUnrepresentedProgramDevelopmentTargets(
@@ -1635,6 +1656,18 @@ export function runnerActionDispositions(
   }
   const delegatedFundingActionIds = runnerDelegatedFundingActionIds(domain);
   for (const candidate of candidates) {
+    if (
+      candidate.semanticActionType === "turn_flow.end_turn" &&
+      candidate.sourceKind === "card" &&
+      !specializedEconomyActionIds.has(candidate.actionId)
+    ) {
+      add(
+        candidate.actionId,
+        "runner.resource_lifecycle",
+        "runner_card_scoped_end_turn_missing_bound_lifecycle_contract",
+      );
+      continue;
+    }
     if (
       candidate.sourceKind === "basic_action" &&
       candidate.actionType === "gain_credit" &&
@@ -1992,10 +2025,7 @@ export function runnerActionDispositions(
       input,
       candidate,
     );
-    if (
-      sourceDefinitionId === "onr_classic_039_library-search" &&
-      candidate.actionType === "play_event"
-    ) {
+    if (runnerCandidateStartsBoundCentralRun(candidate)) {
       const evaluations = runTargets
         .filter((evaluation) => evaluation.actionId === candidate.actionId)
         .sort(
@@ -2009,8 +2039,8 @@ export function runnerActionDispositions(
           candidate.actionId,
           "runner.pressure_central",
           bestEvaluation
-            ? `runner_library_search_not_active_pressure_route:${bestEvaluation.targetServerId}:${bestEvaluation.pathPassability}:${bestEvaluation.recommendation}`
-            : "runner_library_search_missing_exact_run_target_projection",
+            ? `runner_bound_central_run_not_active_pressure_route:${bestEvaluation.targetServerId}:${bestEvaluation.pathPassability}:${bestEvaluation.recommendation}`
+            : "runner_bound_central_run_missing_exact_target_projection",
         );
         continue;
       }
@@ -2074,7 +2104,7 @@ export function runnerActionDispositions(
       continue;
     }
     const sameTurnAccessDefinitionId =
-      runnerSameTurnAccessPreparationDefinitionId(input, candidate);
+      runnerSameTurnAccessPreparationSourceDefinitionId(input, candidate);
     if (
       sameTurnAccessDefinitionId &&
       !centralPreparationActionIds.has(candidate.actionId) &&
@@ -4643,7 +4673,7 @@ function runnerSameTurnAccessCentralPreparationSignals(
     candidates
       .flatMap((candidate) => {
         if (runnerActionRequiresTargetedBypassPlan(candidate)) return [];
-        const definitionId = runnerSameTurnAccessPreparationDefinitionId(
+        const definitionId = runnerSameTurnAccessPreparationSourceDefinitionId(
           input,
           candidate,
         );
@@ -4739,7 +4769,7 @@ function runnerSameTurnAccessRemotePreparationSignals(
     candidates
       .flatMap((candidate) => {
         if (runnerActionRequiresTargetedBypassPlan(candidate)) return [];
-        const definitionId = runnerSameTurnAccessPreparationDefinitionId(
+        const definitionId = runnerSameTurnAccessPreparationSourceDefinitionId(
           input,
           candidate,
         );
@@ -13308,8 +13338,6 @@ function turnPlanningProjectionDebug(params: {
     candidate.actionType === "draw_card" ||
     (candidate.economyProjection?.cardsDrawn !== undefined &&
       candidate.economyProjection.cardsDrawn > 0);
-  const isShellTradersBoundary =
-    candidate.sourceDefinitionId === "onr_v1_176_the-shell-traders";
   const remainingCapacity = {
     minimum: Math.max(
       0,
@@ -13331,21 +13359,11 @@ function turnPlanningProjectionDebug(params: {
         uncertainty: [{ code: "post_draw_replanning_required" }],
         assumptionIds: ["current_legal_action_remains_executable"],
       })
-    : isShellTradersBoundary
-      ? assessTurnObservationBoundary({
-          boundaryKind: "projected_plan_discovery_required",
-          remainingActionCapacity: remainingCapacity,
-          residualTurnValueBasis: "public_outcome_distribution",
-          immediateOutcomeCodes: [
-            "shell_counter_or_set_aside_state_changed",
-            "free_install_or_memory_choice_may_open",
-          ],
-          uncertainty: [
-            { code: "shell_traders_post_resolution_replanning_required" },
-          ],
-          assumptionIds: ["shell_traders_action_revalidated_by_engine"],
-        })
-      : undefined;
+    : runnerDelayedInstallReplanningBoundary(
+        params.input,
+        candidate,
+        remainingCapacity,
+      );
   const projectedCandidate = {
     ...candidate,
     stateVersion: stateIdentity.stateVersion,
@@ -14966,25 +14984,31 @@ function runnerResourceLifecycleSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
 ): NonNullable<RunnerCorePlanDomain["resourceLifecycle"]> {
-  const loanFromChibaActions = candidates.filter(
-    (candidate) =>
-      candidate.semanticActionType === "turn_flow.end_turn" &&
-      candidate.sourceKind === "card" &&
-      candidate.sourceDefinitionId === "onr_v1_168_loan-from-chiba",
+  const leavePlayPaymentActions = candidates.filter((candidate) =>
+    runnerCandidateIsLeavePlayPaymentLifecycleAction(input, candidate),
   );
-  if (loanFromChibaActions.length === 0) return [];
+  if (leavePlayPaymentActions.length === 0) return [];
   const visibleRemainingRunnerTurnCeiling = input.playerView.opponent.deckCount;
   const actionsBySourceInstance = new Map<string, ActionSemanticCandidate[]>();
-  for (const candidate of loanFromChibaActions) {
+  for (const candidate of leavePlayPaymentActions) {
     const sourceCardInstanceId = candidate.sourceCardInstanceId;
     if (sourceCardInstanceId === undefined) continue;
     const actions = actionsBySourceInstance.get(sourceCardInstanceId) ?? [];
     actions.push(candidate);
     actionsBySourceInstance.set(sourceCardInstanceId, actions);
   }
-  return [...actionsBySourceInstance.entries()].map(
-    ([sourceCardInstanceId, actions]) => {
-      const lifecycleId = `onr_v1_168_loan-from-chiba:${sourceCardInstanceId}`;
+  return [...actionsBySourceInstance.entries()]
+    .map(([sourceCardInstanceId, actions]) => {
+      const definitionId = actions[0]?.sourceDefinitionId;
+      if (
+        definitionId === undefined ||
+        actions.some(
+          (candidate) => candidate.sourceDefinitionId !== definitionId,
+        )
+      ) {
+        return undefined;
+      }
+      const lifecycleId = `${definitionId}:${sourceCardInstanceId}`;
       const quote = runnerLifecycleLeavePlayPaymentQuote(
         input,
         sourceCardInstanceId,
@@ -15036,22 +15060,22 @@ function runnerResourceLifecycleSignals(
         leavePlayEconomicallyProductive;
       const evidenceCode =
         quote === undefined
-          ? "runner_loan_from_chiba_leave_payment_quote_unknown"
+          ? "runner_resource_leave_payment_quote_unknown"
           : !leavePlayEconomicallyProductive
-            ? `runner_loan_from_chiba_leave_cost_not_recovered_within_visible_horizon:${visibleRemainingRunnerTurnCeiling}`
+            ? `runner_resource_leave_cost_not_recovered_within_visible_horizon:${visibleRemainingRunnerTurnCeiling}`
             : quote.status === "payable"
               ? capacitySpent
-                ? `runner_loan_from_chiba_leave_avoids_visible_long_horizon_liability:${visibleRemainingRunnerTurnCeiling}`
-                : "runner_loan_from_chiba_leave_deferred_until_capacity_spent"
+                ? `runner_resource_leave_avoids_visible_long_horizon_liability:${visibleRemainingRunnerTurnCeiling}`
+                : "runner_resource_leave_deferred_until_capacity_spent"
               : capacitySpent
-                ? "runner_loan_from_chiba_leave_unpayable_without_action_capacity"
+                ? "runner_resource_leave_unpayable_without_action_capacity"
                 : fullFundingRouteExists
-                  ? "runner_loan_from_chiba_waiting_for_exact_funding_support"
-                  : "runner_loan_from_chiba_exact_funding_route_unavailable";
+                  ? "runner_resource_waiting_for_exact_funding_support"
+                  : "runner_resource_exact_funding_route_unavailable";
       return {
         lifecycleId,
         sourceCardInstanceId,
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId,
         phase: leavePlayNow ? "leave_play" : "retain",
         actionIds: leavePlayNow
           ? actions.map((candidate) => candidate.actionId)
@@ -15077,13 +15101,44 @@ function runnerResourceLifecycleSignals(
           evidenceCode,
           ...(quote
             ? [
-                `runner_loan_from_chiba_leave_play_payment_amount:${quote.amount}`,
-                `runner_loan_from_chiba_leave_play_payment_status:${quote.status}`,
+                `runner_resource_leave_play_payment_amount:${quote.amount}`,
+                `runner_resource_leave_play_payment_status:${quote.status}`,
               ]
             : []),
         ],
       };
-    },
+    })
+    .filter(
+      (
+        signal,
+      ): signal is NonNullable<
+        RunnerCorePlanDomain["resourceLifecycle"]
+      >[number] => signal !== undefined,
+    );
+}
+
+function runnerCandidateIsLeavePlayPaymentLifecycleAction(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  if (
+    candidate.semanticActionType !== "turn_flow.end_turn" ||
+    candidate.sourceKind !== "card" ||
+    candidate.sourceCardInstanceId === undefined ||
+    candidate.sourceDefinitionId === undefined
+  ) {
+    return false;
+  }
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  return (
+    action?.side === "runner" &&
+    action.type === "end_turn" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.source === candidate.sourceCardInstanceId &&
+    action.payload?.cardId === candidate.sourceCardInstanceId &&
+    action.payload?.cardImplementationLifecycleAction === "end_of_runner_turn"
   );
 }
 
@@ -16127,10 +16182,27 @@ function isRunnerRunWindowCandidate(
     runnerCandidateHasVisibleAdditionalAccessEffect(candidate) ||
     runnerRestrictedRunSequenceAction(input, candidate) !== undefined ||
     runnerPostPassDerezAndEndRunAction(input, candidate) !== undefined ||
-    (candidate.sourceDefinitionId === "onr_proteus_091_lockjaw" &&
-      runnerCandidateIsCardAbility(candidate) &&
-      (input.playerView.timingPoint === "run.encounter_ice" ||
-        input.playerView.timingPoint === "run.jack_out_window"))
+    runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined
+  );
+}
+
+function runnerRunRemainderStrengthBoostAction(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): LegalAction | undefined {
+  if (!runnerCandidateIsCardAbility(candidate)) return undefined;
+  if (
+    input.playerView.timingPoint !== "run.encounter_ice" &&
+    input.playerView.timingPoint !== "run.jack_out_window"
+  )
+    return undefined;
+  return input.legalActions.find(
+    (action) =>
+      action.actionId === candidate.actionId &&
+      action.type === "trigger_ability" &&
+      action.source === candidate.sourceCardInstanceId &&
+      action.payload?.runnerAbility === "boost_icebreaker_for_run" &&
+      typeof action.payload?.targetCardId === "string",
   );
 }
 
@@ -16395,10 +16467,7 @@ function runnerRunWindowActionAssessment(
     candidate.semanticActionType === "breaker.boost_strength" ||
     candidate.semanticActionType === "breaker.break_subroutine" ||
     postPassDerezAndEndRun !== undefined ||
-    (candidate.sourceDefinitionId === "onr_proteus_091_lockjaw" &&
-      runnerCandidateIsCardAbility(candidate) &&
-      (input.playerView.timingPoint === "run.encounter_ice" ||
-        input.playerView.timingPoint === "run.jack_out_window"));
+    runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined;
   if (!supportedRunAction) {
     return {
       admissible: false,

@@ -41,7 +41,6 @@ export function createCorpTagPunishWindowComposition(
     corpTagPunishPayoffFundingProfile,
   } = createCorpTagPunishPayoffProfileContext({
     installedEconomyCreditAmount: dependencies.installedEconomyCreditAmount,
-    sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     actionSourceCard: dependencies.actionSourceCard,
     visibleCardStoredCredits: dependencies.visibleCardStoredCredits,
     visibleMeatDamagePayoff: dependencies.visibleMeatDamagePayoff,

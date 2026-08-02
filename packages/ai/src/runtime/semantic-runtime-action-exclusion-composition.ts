@@ -126,7 +126,6 @@ export function createSemanticRuntimeActionExclusionComposition(
     sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     hintEffectsForCard: (definitionId) =>
       dependencies.hintForDefinitionId(definitionId)?.effects,
-    fakedHitCardId: dependencies.fakedHitCardId,
     badPublicityLossThreshold: dependencies.badPublicityLossThreshold,
     cardAddressesVisibleBreakerNeed:
       dependencies.cardAddressesVisibleBreakerNeed,

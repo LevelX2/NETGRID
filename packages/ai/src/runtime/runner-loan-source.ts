@@ -1,8 +1,11 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import type { AiCardHint } from "../ai-hints";
 
 export type RunnerLoanSourceDependencies = {
-  highRiskLoanDefinitionId: string;
   hintForDefinitionId: (definitionId: string) => AiCardHint | undefined;
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
@@ -24,13 +27,9 @@ export function runnerLoanDefinitionIdForAction(
 
 export function runnerDefinitionIsHighRiskLoan(
   definitionId: string | undefined,
-  dependencies: Pick<
-    RunnerLoanSourceDependencies,
-    "highRiskLoanDefinitionId" | "hintForDefinitionId"
-  >,
+  dependencies: Pick<RunnerLoanSourceDependencies, "hintForDefinitionId">,
 ): boolean {
   if (!definitionId) return false;
-  if (definitionId === dependencies.highRiskLoanDefinitionId) return true;
   const hint = dependencies.hintForDefinitionId(definitionId);
   const targets = new Set(
     (hint?.effects ?? [])
@@ -49,10 +48,7 @@ export function runnerDefinitionIsHighRiskLoan(
 
 export function runnerInstalledLoanCards(
   input: AiDecisionInput,
-  dependencies: Pick<
-    RunnerLoanSourceDependencies,
-    "highRiskLoanDefinitionId" | "hintForDefinitionId"
-  >,
+  dependencies: Pick<RunnerLoanSourceDependencies, "hintForDefinitionId">,
 ): VisibleCard[] {
   return (input.playerView.own.rig ?? []).filter((card) =>
     runnerDefinitionIsHighRiskLoan(card.definitionId, dependencies),
@@ -112,7 +108,5 @@ function stringRecordValue(value: unknown, key: string): string | undefined {
 }
 
 function sortedUnique(values: string[]): string[] {
-  return [...new Set(values)].sort((left, right) =>
-    left.localeCompare(right),
-  );
+  return [...new Set(values)].sort((left, right) => left.localeCompare(right));
 }
