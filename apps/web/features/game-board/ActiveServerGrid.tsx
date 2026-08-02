@@ -25,7 +25,7 @@ import { scoreCardStateBadges } from "../cards/ScoredAgendaState";
 import type { CardDisplayMode } from "../settings/settings-model";
 import { ArchivesDualStackLane } from "./ArchivesDualStackLane";
 import type { FieldChoiceCardProps } from "./RunnerBoardStrips";
-import { ServerCounterStrip, ServerRunRestrictionStrip } from "./CounterStrips";
+import { ServerCounterStrip, ServerStatusStrip } from "./CounterStrips";
 import {
   HandCardsRow,
   ZoneCollapseButton,
@@ -324,8 +324,8 @@ export function ActiveServerGrid({
                           displays={server.counterDisplays}
                           serverLabel={serverDisplayLabel(server.id)}
                         />
-                        <ServerRunRestrictionStrip
-                          restrictions={server.runStartRestrictions}
+                        <ServerStatusStrip
+                          statuses={server.statuses}
                           serverLabel={serverDisplayLabel(server.id)}
                         />
                         <div

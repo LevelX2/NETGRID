@@ -7311,7 +7311,7 @@ select {
   line-height: 1;
 }
 
-.serverRunRestrictionStrip {
+.serverStatusStrip {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -7320,7 +7320,7 @@ select {
   max-width: 100%;
 }
 
-.serverRunRestrictionChip {
+.serverStatusChip {
   min-height: 22px;
   display: inline-flex;
   align-items: center;
@@ -7340,6 +7340,16 @@ select {
   font-weight: 900;
   line-height: 1;
   cursor: help;
+}
+
+.serverStatusChip--cost_reduction {
+  border-color: rgb(130 215 166 / 0.82);
+  color: #d8ffe5;
+  background: linear-gradient(
+    135deg,
+    rgb(31 96 64 / 0.96),
+    rgb(24 48 39 / 0.97)
+  );
 }
 
 .corpHqServer.serverCollapsed .serverLayout {

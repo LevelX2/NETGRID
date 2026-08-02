@@ -1,13 +1,9 @@
-import type {
-  Side,
-  VisibleCard,
-  VisibleServerRunStartRestriction,
-} from "@netgrid/shared";
+import type { Side, VisibleCard, VisibleServerStatus } from "@netgrid/shared";
 
 import {
   identityCounterChipsForDisplays,
   serverCounterChipsForDisplays,
-  serverRunRestrictionChips,
+  serverStatusChips,
 } from "../../app/action-board-ui";
 import { CounterHelpTooltipTrigger } from "./CounterHelpTooltip";
 
@@ -73,29 +69,29 @@ export function ServerCounterStrip({
   );
 }
 
-export function ServerRunRestrictionStrip({
-  restrictions,
+export function ServerStatusStrip({
+  statuses,
   serverLabel,
 }: {
-  restrictions: VisibleServerRunStartRestriction[] | undefined;
+  statuses: VisibleServerStatus[] | undefined;
   serverLabel: string;
 }) {
-  const chips = serverRunRestrictionChips(restrictions);
+  const chips = serverStatusChips(statuses);
   if (chips.length === 0) return null;
   return (
     <div
-      className="serverRunRestrictionStrip"
+      className="serverStatusStrip"
       role="list"
-      aria-label={`${serverLabel}-Runsperren`}
+      aria-label={`${serverLabel}-Status`}
     >
       {chips.map((chip) => (
         <CounterHelpTooltipTrigger
-          className="serverRunRestrictionChip"
+          className={`serverStatusChip serverStatusChip--${chip.tone}`}
           role="listitem"
           key={chip.key}
           ariaLabel={chip.ariaLabel}
           tooltip={chip.tooltip}
-          data-testid="server-run-restriction-chip"
+          data-testid="server-status-chip"
         >
           {chip.label}
         </CounterHelpTooltipTrigger>
