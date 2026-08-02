@@ -25,12 +25,6 @@ type PunishComponentAdapter = {
     "tag" | "trace_tag" | "meat_damage" | "hardware_trash" | "other_punish"
   >;
   definitionId: string;
-  hintFamily:
-    | "direct_tag"
-    | "trace_tag"
-    | "fixed_meat_damage"
-    | "tagged_runner_hardware_trash"
-    | "tagged_runner_credit_denial";
   routeOrder: number;
   sourceCapabilityId:
     | typeof ON_PLAY_CAPABILITY_ID
@@ -38,51 +32,10 @@ type PunishComponentAdapter = {
 };
 
 /**
- * Narrow Vertical-Slice adapter. An entry only states which Engine capability
- * may be probed; it never supplies costs, damage totals or condition outcomes.
- * New cards require an explicit adapter and matching hint-family validation.
+ * A semantic adapter only states which visible Engine capability may be
+ * probed. It never supplies costs, damage totals or condition outcomes; those
+ * remain state-bound Engine-quote facts.
  */
-const PUNISH_COMPONENT_ADAPTER_LIST: readonly PunishComponentAdapter[] = [
-  {
-    definitionId: "onr_proteus_048_data-sifters",
-    kind: "tag",
-    hintFamily: "direct_tag",
-    routeOrder: 0,
-    sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
-  },
-  {
-    definitionId: "onr_v1_301_punitive-counterstrike",
-    kind: "meat_damage",
-    hintFamily: "fixed_meat_damage",
-    routeOrder: 20,
-    sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
-  },
-  {
-    definitionId: "onr_v1_302_scorched-earth",
-    kind: "meat_damage",
-    hintFamily: "fixed_meat_damage",
-    routeOrder: 10,
-    sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
-  },
-  {
-    definitionId: "onr_v1_285_closed-accounts",
-    kind: "other_punish",
-    hintFamily: "tagged_runner_credit_denial",
-    routeOrder: 5,
-    sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
-  },
-];
-
-const PUNISH_COMPONENT_ADAPTERS: ReadonlyMap<string, PunishComponentAdapter> =
-  new Map(
-    PUNISH_COMPONENT_ADAPTER_LIST.map(
-      (adapter): readonly [string, PunishComponentAdapter] => [
-        adapter.definitionId,
-        adapter,
-      ],
-    ),
-  );
-
 type VisiblePunishComponent = {
   card: VisibleCard;
   adapter: PunishComponentAdapter;
@@ -259,12 +212,21 @@ function visiblePunishComponent(
   ) {
     return undefined;
   }
-  const adapter =
-    PUNISH_COMPONENT_ADAPTERS.get(card.definitionId) ??
-    structuredTraceTagAdapter(card.definitionId) ??
-    structuredHardwareTrashAdapter(card.definitionId);
-  if (!adapter || !hintMatchesAdapter(adapter)) return undefined;
+  const adapter = structuredPunishComponentAdapter(card.definitionId);
+  if (!adapter) return undefined;
   return { card, adapter };
+}
+
+function structuredPunishComponentAdapter(
+  definitionId: string,
+): PunishComponentAdapter | undefined {
+  return (
+    structuredTraceTagAdapter(definitionId) ??
+    structuredHardwareTrashAdapter(definitionId) ??
+    structuredDirectTagAdapter(definitionId) ??
+    structuredTaggedCreditDenialAdapter(definitionId) ??
+    structuredTaggedDamageAdapter(definitionId)
+  );
 }
 
 /**
@@ -305,7 +267,6 @@ function structuredTraceTagAdapter(
   return {
     definitionId,
     kind: "trace_tag",
-    hintFamily: "trace_tag",
     routeOrder: 1,
     sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
   };
@@ -352,54 +313,73 @@ function structuredHardwareTrashAdapter(
   return {
     definitionId,
     kind: "hardware_trash",
-    hintFamily: "tagged_runner_hardware_trash",
     routeOrder: 6,
     sourceCapabilityId: CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   };
 }
 
-function hintMatchesAdapter(adapter: PunishComponentAdapter): boolean {
-  const hint = AI_HINTS_BY_CARD.get(adapter.definitionId);
+function structuredDirectTagAdapter(
+  definitionId: string,
+): PunishComponentAdapter | undefined {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
   if (!hint || hint.side !== "corp" || hint.cardType !== "operation")
-    return false;
-  // `amount` proves that this is a reviewed finite role family only. Route
-  // ordering never reads the number; all actual effects and costs come solely
-  // from the state-bound Engine quote.
-  if (adapter.hintFamily === "direct_tag") {
-    return (
-      hint.effects?.some(
-        (effect) =>
-          effect.kind === "tag_source" &&
-          effect.scope === "runner" &&
-          effect.timing === "action" &&
-          effect.finite === true &&
-          Number.isSafeInteger(effect.amount) &&
-          Number(effect.amount) > 0,
-      ) === true && hint.effects.every((effect) => effect.kind !== "trace")
-    );
-  }
-  if (adapter.hintFamily === "trace_tag") {
-    return structuredTraceTagAdapter(adapter.definitionId) !== undefined;
-  }
-  if (adapter.hintFamily === "tagged_runner_credit_denial") {
-    return (
-      hint.conditions?.some(
-        (condition) => condition.kind === "requires_runner_tagged",
-      ) === true &&
-      hint.effects?.some(
-        (effect) =>
-          effect.kind === "tag_punish_payoff" &&
-          effect.scope === "runner" &&
-          effect.timing === "action" &&
-          effect.finite === true &&
-          effect.resource === "credits",
-      ) === true
-    );
-  }
-  if (adapter.hintFamily === "tagged_runner_hardware_trash") {
-    return structuredHardwareTrashAdapter(adapter.definitionId) !== undefined;
-  }
-  return (
+    return undefined;
+  const matches =
+    hint.effects?.some(
+      (effect) =>
+        effect.kind === "tag_source" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        effect.finite === true &&
+        Number.isSafeInteger(effect.amount) &&
+        Number(effect.amount) > 0,
+    ) === true && hint.effects.every((effect) => effect.kind !== "trace");
+  return matches
+    ? {
+        definitionId,
+        kind: "tag",
+        routeOrder: 0,
+        sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
+      }
+    : undefined;
+}
+
+function structuredTaggedCreditDenialAdapter(
+  definitionId: string,
+): PunishComponentAdapter | undefined {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  const matches =
+    hint?.side === "corp" &&
+    hint.cardType === "operation" &&
+    hint.conditions?.some(
+      (condition) => condition.kind === "requires_runner_tagged",
+    ) === true &&
+    hint.effects?.some(
+      (effect) =>
+        effect.kind === "tag_punish_payoff" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        effect.finite === true &&
+        effect.resource === "credits",
+    ) === true;
+  return matches
+    ? {
+        definitionId,
+        kind: "other_punish",
+        routeOrder: 5,
+        sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
+      }
+    : undefined;
+}
+
+function structuredTaggedDamageAdapter(
+  definitionId: string,
+): PunishComponentAdapter | undefined {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  const matches =
+    hint?.side === "corp" &&
+    hint.cardType === "operation" &&
+    hint.tacticSignals?.includes("damage.corp_meat_source") === true &&
     hint.conditions?.some(
       (condition) => condition.kind === "requires_runner_tagged",
     ) === true &&
@@ -411,20 +391,35 @@ function hintMatchesAdapter(adapter: PunishComponentAdapter): boolean {
         effect.finite === true &&
         Number.isSafeInteger(effect.amount) &&
         Number(effect.amount) > 0,
-    ) === true
-  );
+    ) === true &&
+    hint.effects.some(
+      (effect) =>
+        effect.kind === "tag_punish_payoff" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        effect.finite === true &&
+        effect.resource === "damage",
+    );
+  return matches
+    ? {
+        definitionId,
+        kind: "meat_damage",
+        routeOrder: 10,
+        sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
+      }
+    : undefined;
 }
 
 function boundedDamageCombinations(
   damage: readonly VisiblePunishComponent[],
   maximumSteps: number,
 ): VisiblePunishComponent[][] {
-  const combinations = damage
-    .slice(0, MAX_PUNISH_ROUTES - 1)
-    .map((component) => [component]);
-  const longestLength = Math.min(maximumSteps, damage.length);
+  const boundedDamage = damage.slice(0, MAX_PUNISH_ROUTES - 1);
+  const combinations = boundedDamage.map((component) => [component]);
+  const longestLength = Math.min(maximumSteps, boundedDamage.length);
   for (let length = 2; length <= longestLength; length += 1) {
-    combinations.push(damage.slice(0, length));
+    const forward = boundedDamage.slice(0, length);
+    combinations.push(forward, forward.slice().reverse());
   }
   return selectBoundedRoutes(combinations);
 }

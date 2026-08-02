@@ -81,8 +81,8 @@ erreichbaren KI-Quelldateien. Die geprüften Familien sind:
 | GP00 | abgeschlossen | `959ec9210` |
 | GP01 | abgeschlossen | `fcc94df13` |
 | GP02 | abgeschlossen | `7e9dffec1` |
-| GP03 | abgeschlossen | dieser Paketcommit |
-| GP04 | offen | – |
+| GP03 | abgeschlossen | `ddc83e9f7` |
+| GP04 | abgeschlossen | dieser Paketcommit |
 | GP05 | offen | – |
 | GP06 | offen | – |
 | Abschluss | offen | – |
@@ -161,6 +161,15 @@ ID-Vorkommen.
 
 Done: keine feste Kartenliste zur Capability-Entdeckung; Corp-Economy und
 Corp-Punish bleiben getrennte Owner.
+
+Ergebnis: Installierte Economy wird nur bei einer aktuellen positiven
+Auszahlung und einem sichtbaren positiven Stored-Credit-Pool bewertet. Die
+Punish-Quotequellen entstehen ausschließlich aus überprüften strukturierten
+Tag-, Trace-, Damage-, Credit-Denial- und Hardware-Trash-Hints. Bei
+reihenfolgeabhängigen Damage-Sequenzen fragt der begrenzte Adapter beide
+Reihenfolgen an, statt eine Wirkung aus Hint-Mengen zu schätzen; der
+Punish-Plan entscheidet anhand der Engine-Quotes. Das Strukturgate sank von 23
+auf 18 produktive ID-Vorkommen.
 
 ### GP05 – Lifecycle und Replan-Boundary
 

@@ -50,25 +50,6 @@ const allowedCardIdUses = createAllowances([
     reason:
       "The legacy future-run ICE table remains an explicit card-family registry pending semantic hint or engine-quote migration.",
   })),
-  ...[
-    "onr_proteus_048_data-sifters",
-    "onr_v1_301_punitive-counterstrike",
-    "onr_v1_302_scorched-earth",
-    "onr_v1_285_closed-accounts",
-  ].map((cardId) => ({
-    relativePath: "runtime/corp-punish-route-quote-input.ts",
-    cardId,
-    category: "engine_quote_source",
-    reason:
-      "The exact ID selects the card-specific source whose engine quote is evaluated by the generic punish route.",
-  })),
-  {
-    relativePath: "runtime/corp-tag-punish-payoff-profiles.ts",
-    cardId: "onr_v1_309_bbs-whispering-campaign",
-    category: "review_required",
-    reason:
-      "The economy payoff profile still contains a one-card branch that should be expressed by generic installed-economy semantics.",
-  },
   {
     relativePath: "runtime/plan-first-live-runtime.ts",
     cardId: "onr_v1_176_the-shell-traders",

@@ -175,7 +175,7 @@ describe("decision-local Corp punish route quote input", () => {
     expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([]);
   });
 
-  it("uses only known own visible explicitly adapted components", () => {
+  it("uses only known own visible components with reviewed structured hints", () => {
     const input = punishInput({ runnerTags: 0, runnerHandCount: 3 });
     input.playerView.own.gripOrHq = [
       hiddenCard("hidden-data-sifters", DATA_SIFTERS),
@@ -282,12 +282,13 @@ describe("decision-local Corp punish route quote input", () => {
     ({ runnerHandCount, expectedDamageSources }) => {
       const input = punishInput({ runnerTags: 0, runnerHandCount });
       const before = structuredClone(input);
-      const expectedRoute = buildBoundedCorpPunishRouteRequests(input).find(
+      const expectedRoutes = buildBoundedCorpPunishRouteRequests(input).filter(
         (request) =>
           request.steps
             .filter((step) => step.kind === "meat_damage")
             .map((step) => step.sourceCardInstanceId)
-            .join(",") === expectedDamageSources.join(","),
+            .sort()
+            .join(",") === expectedDamageSources.slice().sort().join(","),
       );
       const callback = vi.fn((request: CorpPunishRouteQuoteRequest) =>
         completeQuote(input, request),
@@ -307,9 +308,13 @@ describe("decision-local Corp punish route quote input", () => {
       expect(first.actionId).toBe("play-data-sifters");
       expect(second).toEqual(first);
       expect(first.fallbackUsed).toBe(false);
-      expect(first.evidence).toContain(
-        `plan_assessment_evidence:corp_punish_route_selected:${expectedRoute?.routeId}`,
-      );
+      expect(
+        expectedRoutes.some((route) =>
+          first.evidence?.includes(
+            `plan_assessment_evidence:corp_punish_route_selected:${route.routeId}`,
+          ) === true,
+        ),
+      ).toBe(true);
       expect(input).toEqual(before);
       expect(input.playerView.corpPunishRouteQuoteSet).toBeUndefined();
     },
