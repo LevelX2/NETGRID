@@ -12,7 +12,10 @@ import type {
   MatchStartPlayerClockMinutes,
   MatchStartPlayerClockMode,
 } from "../../app/match-start-storage";
-import { DeckSlotSelect } from "../decks/DeckSelectionControls";
+import {
+  DeckSlotSelect,
+  type DeckSlotSnapshot,
+} from "../decks/DeckSelectionControls";
 
 type AiDifficulty = "easy" | "normal" | "hard";
 type AiDeckPolicy =
@@ -22,11 +25,6 @@ type AiDeckPolicy =
   | "same_as_participant_a";
 type AiTraceStartMode = "off" | "detailed";
 type DeckSlotSource = "snapshot" | "local" | "random_standard";
-
-type MatchStartDeckSnapshot = {
-  deckSnapshotId: string;
-  name: string;
-};
 
 type MatchStartLocalDeck = {
   deckId: string;
@@ -101,8 +99,8 @@ export function MatchStartAdvancedOptions({
   runnerDifficulty: AiDifficulty;
   corpDifficulty: AiDifficulty;
   aiDeckPolicy: AiDeckPolicy;
-  runnerSnapshots: MatchStartDeckSnapshot[];
-  corpSnapshots: MatchStartDeckSnapshot[];
+  runnerSnapshots: DeckSlotSnapshot[];
+  corpSnapshots: DeckSlotSnapshot[];
   localDecks: MatchStartLocalDeck[];
   participantBRunnerDeckSource: DeckSlotSource;
   participantBCorpDeckSource: DeckSlotSource;

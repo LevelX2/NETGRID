@@ -2,14 +2,12 @@
 
 import { BadgeCheck, Keyboard, Link2, UserRound } from "lucide-react";
 
-import { DeckSlotSelect } from "../decks/DeckSelectionControls";
+import {
+  DeckSlotSelect,
+  type DeckSlotSnapshot,
+} from "../decks/DeckSelectionControls";
 
 type DeckSlotSource = "snapshot" | "local" | "random_standard";
-
-type JoinDeckSnapshot = {
-  deckSnapshotId: string;
-  name: string;
-};
 
 type JoinLocalDeck = {
   deckId: string;
@@ -52,8 +50,8 @@ export function MatchJoinConsole({
   joinLinkInput: string;
   displayName: string;
   identityKind: "account" | "guest";
-  runnerSnapshots: JoinDeckSnapshot[];
-  corpSnapshots: JoinDeckSnapshot[];
+  runnerSnapshots: DeckSlotSnapshot[];
+  corpSnapshots: DeckSlotSnapshot[];
   localDecks: JoinLocalDeck[];
   participantBRunnerDeckSource: DeckSlotSource;
   participantBCorpDeckSource: DeckSlotSource;

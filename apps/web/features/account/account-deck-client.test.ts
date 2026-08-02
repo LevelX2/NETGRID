@@ -77,7 +77,13 @@ describe("account deck client", () => {
     const fetcher = vi.fn(async () =>
       response({
         catalog: {
-          decks: [{ standardDeckId: "standard_runner", status: "active" }],
+          decks: [
+            {
+              standardDeckId: "standard_runner",
+              status: "active",
+              guideStatus: "missing",
+            },
+          ],
           snapshots: [
             {
               deckSnapshotId: "standard_standard_runner_1.0.0",

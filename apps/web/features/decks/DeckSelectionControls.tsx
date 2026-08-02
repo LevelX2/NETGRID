@@ -1,20 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
-import { Building2, Cable } from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { BookOpen, Building2, Cable } from "lucide-react";
 
 import {
   RANDOM_STANDARD_DECK_SOURCE,
   resolveDeckSlotSelection,
   type DeckSlotSource,
 } from "./deck-slot-selection";
+import { StandardDeckGuideDialog } from "./StandardDeckGuideDialog";
+import {
+  standardDeckGuideControlState,
+  type DeckSlotSnapshot,
+} from "./standard-deck-guide-ui";
+
+export type { DeckSlotSnapshot } from "./standard-deck-guide-ui";
 
 export type DeckSlotSide = "runner" | "corp";
-
-type DeckSlotSnapshot = {
-  deckSnapshotId: string;
-  name: string;
-};
 
 type DeckSlotLocalDeck = {
   deckId: string;
@@ -53,6 +55,9 @@ export function DeckSlotSelect({
   const SideIcon = side === "runner" ? Cable : Building2;
   const sideLabel = side === "runner" ? "Runner" : "Korp";
   const optionMark = side === "runner" ? "⌁" : "▦";
+  const selectId = useId();
+  const guideButtonRef = useRef<HTMLButtonElement>(null);
+  const [guideOpen, setGuideOpen] = useState(false);
   const resolvedSelection = resolveDeckSlotSelection({
     source,
     selectedSnapshotId,
@@ -60,6 +65,23 @@ export function DeckSlotSelect({
     snapshots,
     localDecks,
   });
+  const selectedStandardSnapshot =
+    resolvedSelection?.source === "snapshot"
+      ? snapshots.find(
+          (snapshot) =>
+            snapshot.deckSnapshotId === resolvedSelection.snapshotId,
+        )
+      : undefined;
+  const guideControl = standardDeckGuideControlState({
+    source: resolvedSelection?.source ?? source,
+    ...(selectedStandardSnapshot
+      ? { snapshot: selectedStandardSnapshot }
+      : {}),
+  });
+  const dismissGuide = useCallback(() => {
+    setGuideOpen(false);
+    window.setTimeout(() => guideButtonRef.current?.focus(), 0);
+  }, []);
 
   useEffect(() => {
     if (!resolvedSelection) return;
@@ -83,9 +105,18 @@ export function DeckSlotSelect({
     source,
   ]);
 
+  useEffect(() => {
+    setGuideOpen(false);
+  }, [
+    resolvedSelection?.source,
+    resolvedSelection?.source === "snapshot"
+      ? resolvedSelection.snapshotId
+      : undefined,
+  ]);
+
   return (
-    <label className={`deckSlotSelect ${side}`}>
-      <span className="deckSlotHeading">
+    <div className={`deckSlotSelect ${side}`}>
+      <label className="deckSlotHeading" htmlFor={selectId}>
         <span className="deckSlotSideIcon" aria-hidden="true">
           <SideIcon size={17} strokeWidth={1.9} />
         </span>
@@ -93,55 +124,79 @@ export function DeckSlotSelect({
           <small>{sideLabel}-Bereich</small>
           <span>{label}</span>
         </span>
-      </span>
-      <span className="deckSlotControl">
-        <SideIcon
-          className="deckSlotControlIcon"
-          size={16}
-          strokeWidth={1.9}
-          aria-hidden="true"
-        />
-        <select
-          value={
-            resolvedSelection?.source === RANDOM_STANDARD_DECK_SOURCE
-              ? "random:standard"
-              : resolvedSelection?.source === "local"
-                ? `local:${resolvedSelection.localDeckId}`
-                : (resolvedSelection?.snapshotId ?? "")
-          }
-          disabled={disabled}
-          aria-label={label}
-          onChange={(event) => {
-            if (event.target.value === "random:standard") {
-              onSource(RANDOM_STANDARD_DECK_SOURCE);
-            } else if (event.target.value.startsWith("local:")) {
-              onSource("local");
-              onLocalDeck(event.target.value.slice("local:".length));
-            } else {
-              onSource("snapshot");
-              onSnapshot(event.target.value);
+      </label>
+      <div className="deckSlotControlRow">
+        <span className="deckSlotControl">
+          <SideIcon
+            className="deckSlotControlIcon"
+            size={16}
+            strokeWidth={1.9}
+            aria-hidden="true"
+          />
+          <select
+            id={selectId}
+            value={
+              resolvedSelection?.source === RANDOM_STANDARD_DECK_SOURCE
+                ? "random:standard"
+                : resolvedSelection?.source === "local"
+                  ? `local:${resolvedSelection.localDeckId}`
+                  : (resolvedSelection?.snapshotId ?? "")
             }
-          }}
-        >
-          <option value="random:standard">
-            🎲 {sideLabel} · Zufälliges Standard-Deck
-          </option>
-          {snapshots.map((snapshot) => (
-            <option
-              value={snapshot.deckSnapshotId}
-              key={snapshot.deckSnapshotId}
-            >
-              {optionMark} {sideLabel} · Standard-Deck · {snapshot.name}
+            disabled={disabled}
+            aria-label={label}
+            onChange={(event) => {
+              if (event.target.value === "random:standard") {
+                onSource(RANDOM_STANDARD_DECK_SOURCE);
+              } else if (event.target.value.startsWith("local:")) {
+                onSource("local");
+                onLocalDeck(event.target.value.slice("local:".length));
+              } else {
+                onSource("snapshot");
+                onSnapshot(event.target.value);
+              }
+            }}
+          >
+            <option value="random:standard">
+              🎲 {sideLabel} · Zufälliges Standard-Deck
             </option>
-          ))}
-          {localDecks.map((deck) => (
-            <option value={`local:${deck.deckId}`} key={deck.deckId}>
-              {optionMark} {sideLabel} · Mein Deck · {deck.name}
-            </option>
-          ))}
-        </select>
-      </span>
-    </label>
+            {snapshots.map((snapshot) => (
+              <option
+                value={snapshot.deckSnapshotId}
+                key={snapshot.deckSnapshotId}
+              >
+                {optionMark} {sideLabel} · Standard-Deck · {snapshot.name}
+              </option>
+            ))}
+            {localDecks.map((deck) => (
+              <option value={`local:${deck.deckId}`} key={deck.deckId}>
+                {optionMark} {sideLabel} · Mein Deck · {deck.name}
+              </option>
+            ))}
+          </select>
+        </span>
+        {guideControl ? (
+          <button
+            ref={guideButtonRef}
+            className={`button deckGuideButton status-${guideControl.status}`}
+            type="button"
+            disabled={disabled || guideControl.disabled}
+            title={guideControl.label}
+            onClick={() => setGuideOpen(true)}
+          >
+            <BookOpen size={15} aria-hidden="true" />
+            {guideControl.label}
+          </button>
+        ) : null}
+      </div>
+      {guideOpen && guideControl?.guide && selectedStandardSnapshot ? (
+        <StandardDeckGuideDialog
+          deckName={selectedStandardSnapshot.name}
+          side={side}
+          guide={guideControl.guide}
+          onDismiss={dismissGuide}
+        />
+      ) : null}
+    </div>
   );
 }
 

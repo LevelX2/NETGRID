@@ -326,6 +326,7 @@ import {
   resolveDeckSlotSelection,
   type DeckSlotSource,
 } from "../features/decks/deck-slot-selection";
+import { attachStandardDeckGuides } from "../features/decks/standard-deck-guide-ui";
 import {
   enrichVisibleCard,
   visibleCardFromCatalogDetail,
@@ -1967,6 +1968,14 @@ export default function Page() {
       snapshot.side === "corp" &&
       snapshot.validation.ok &&
       snapshotAllowedForMatchCardPool(snapshot, matchCardPool),
+  );
+  const runnerDeckSlotSnapshots = attachStandardDeckGuides(
+    runnerSnapshots,
+    standardDecks,
+  );
+  const corpDeckSlotSnapshots = attachStandardDeckGuides(
+    corpSnapshots,
+    standardDecks,
   );
   const matchStartLocalDecks = localDecks.filter((deck) =>
     editableDeckAllowedForMatchCardPool(deck, matchCardPool),
@@ -6432,8 +6441,8 @@ export default function Page() {
                             aiDeckPolicyUsesPrimaryDeckSlots={
                               aiDeckPolicyUsesPrimaryDeckSlots
                             }
-                            runnerSnapshots={runnerSnapshots}
-                            corpSnapshots={corpSnapshots}
+                            runnerSnapshots={runnerDeckSlotSnapshots}
+                            corpSnapshots={corpDeckSlotSnapshots}
                             localDecks={matchStartLocalDecks}
                             standardDeckCatalogState={standardDeckCatalogState}
                             standardDeckCatalogBlocksStart={
@@ -6574,8 +6583,8 @@ export default function Page() {
                           identityKind={
                             accountSession.account ? "account" : "guest"
                           }
-                          runnerSnapshots={runnerSnapshots}
-                          corpSnapshots={corpSnapshots}
+                          runnerSnapshots={runnerDeckSlotSnapshots}
+                          corpSnapshots={corpDeckSlotSnapshots}
                           localDecks={matchStartLocalDecks}
                           participantBRunnerDeckSource={
                             participantBRunnerDeckSource

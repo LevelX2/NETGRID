@@ -1,3 +1,7 @@
+import type {
+  StandardDeckGuideEntry,
+  StandardDeckGuideStatus,
+} from "@netgrid/decks";
 import type { DeckSnapshot } from "../decks/deck-api-types";
 import type { EditableDeck } from "../decks/deck-table-model";
 import { accountRequest, type AccountFetch } from "./account-client";
@@ -14,6 +18,8 @@ export type StandardDeck = {
   formatProfileId: string;
   formatProfileVersion?: string;
   cards: Array<{ cardId: string; quantity: number }>;
+  guideStatus: StandardDeckGuideStatus;
+  guide?: StandardDeckGuideEntry;
 };
 
 export type AccountDeck = {

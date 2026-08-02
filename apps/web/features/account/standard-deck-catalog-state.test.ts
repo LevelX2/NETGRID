@@ -176,6 +176,7 @@ function catalogPayload(): StandardDeckCatalogPayload {
           cardPoolSnapshotId: "card-snapshot-0.8",
           formatProfileId: "netgrid_private_local_v1",
           cards: [],
+          guideStatus: "missing",
         },
       ],
       snapshots: [

@@ -27,6 +27,7 @@ import type { StandardDeckCatalogState } from "../account/standard-deck-catalog-
 import {
   DeckMetadataLine,
   DeckSlotSelect,
+  type DeckSlotSnapshot,
 } from "../decks/DeckSelectionControls";
 import { MatchStartAdvancedOptions } from "./MatchStartAdvancedOptions";
 import { MatchStartChoiceSections } from "./MatchStartChoiceSections";
@@ -40,11 +41,6 @@ type AiDeckPolicy =
   | "same_as_participant_a";
 type AiTraceStartMode = "off" | "detailed";
 type DeckSlotSource = "snapshot" | "local" | "random_standard";
-
-type MatchStartDeckSnapshot = {
-  deckSnapshotId: string;
-  name: string;
-};
 
 type MatchStartLocalDeck = {
   deckId: string;
@@ -143,8 +139,8 @@ export function MatchHostConsole({
   runnerDifficulty: AiDifficulty;
   corpDifficulty: AiDifficulty;
   aiDeckPolicyUsesPrimaryDeckSlots: boolean;
-  runnerSnapshots: MatchStartDeckSnapshot[];
-  corpSnapshots: MatchStartDeckSnapshot[];
+  runnerSnapshots: DeckSlotSnapshot[];
+  corpSnapshots: DeckSlotSnapshot[];
   localDecks: MatchStartLocalDeck[];
   standardDeckCatalogState: StandardDeckCatalogState;
   standardDeckCatalogBlocksStart: boolean;
