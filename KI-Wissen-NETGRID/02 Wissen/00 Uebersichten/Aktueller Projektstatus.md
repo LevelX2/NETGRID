@@ -551,7 +551,7 @@ Stand: 2026-07-30
   stabil an die einzelne Session gebunden; Session-Restore, Reload und mehrere
   Tabs invalidieren einander nicht.
 - Ein Account kann bis zu 50 ownergebundene persönliche Server-Decks halten.
-  40 kuratierte Standard-Decks sind direkt spielbar oder kopierbar; interne
+  43 kuratierte Standard-Decks sind direkt spielbar oder kopierbar; interne
   KI-, Test- und ausgemusterte Decks sind in der normalen UI unsichtbar.
   Matchstarts erzeugen weiterhin ausschließlich neu validierte immutable
   Snapshots. Führend sind
