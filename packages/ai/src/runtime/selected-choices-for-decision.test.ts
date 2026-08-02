@@ -1571,6 +1571,33 @@ describe("selectedChoicesForDecision", () => {
     ).toThrowError("window_origin_missing");
   });
 
+  it("completes a Strategic Planning Group choice only from the exact executor hand-plan binding", () => {
+    const input = corpStrategicPlanningGroupChoiceInput();
+    const action = resolveChoiceActionForInput(input);
+    rememberResidentCorpDrawFilterBinding(input, action.actionId, [
+      "bottom_low",
+    ]);
+
+    expect(
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["bottom_low"],
+    });
+  });
+
+  it("fails closed when a Strategic Planning Group choice is bound to a different LegalAction", () => {
+    const input = corpStrategicPlanningGroupChoiceInput();
+    const action = resolveChoiceActionForInput(input);
+    rememberResidentCorpDrawFilterBinding(input, "different-action", [
+      "bottom_low",
+    ]);
+
+    expect(() =>
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toThrowError("window_origin_missing");
+  });
+
   it("keeps Runner discard ranking independent from the Corp hand-plan owner", () => {
     const input = inputWithChoice(
       {
@@ -1909,6 +1936,28 @@ function corpDiscardChoiceInput(): AiDecisionInput {
   );
 }
 
+function corpStrategicPlanningGroupChoiceInput(): AiDecisionInput {
+  return inputWithChoice(
+    {
+      kind: "select_cards",
+      source: "card_implementation.strategic_planning_group_draw:spg-instance",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        { id: "bottom_low", label: "Low", value: "corp_low" },
+        { id: "retain_high", label: "High", value: "corp_high" },
+      ],
+    },
+    {
+      side: "corp",
+      gripOrHq: [
+        { ...visibleCard("corp_low", "asset"), definitionId: "low" },
+        { ...visibleCard("corp_high", "agenda"), definitionId: "high" },
+      ],
+    },
+  );
+}
+
 function rememberResidentCorpDiscardBinding(
   input: AiDecisionInput,
   actionId: string,
@@ -1936,6 +1985,45 @@ function rememberResidentCorpDiscardBinding(
               observedAtStateVersion: input.playerView.stateVersion,
               selectedOptionIds,
               discardedCardInstanceIds: ["corp_low"],
+              retainedCardInstanceIds: ["corp_high"],
+              evidenceCodes: ["test_exact_binding"],
+            },
+          },
+        },
+      },
+    ],
+    completionHistory: [],
+    transitions: [],
+  } as never);
+}
+
+function rememberResidentCorpDrawFilterBinding(
+  input: AiDecisionInput,
+  actionId: string,
+  selectedOptionIds: string[],
+): void {
+  const instanceId = "plan:corp.hand_and_agenda_management:spg-draw-filter";
+  rememberResidentPlanPortfolio(input, {
+    schemaVersion: "resident-plan-portfolio-v2",
+    side: "corp",
+    stateVersion: input.playerView.stateVersion,
+    rootForegroundInstanceId: instanceId,
+    executorInstanceId: instanceId,
+    instances: [
+      {
+        instanceId,
+        moduleId: "corp.hand_and_agenda_management",
+        executionState: "executor",
+        moduleState: {
+          kind: "hand",
+          signal: {
+            phase: "draw_filter_window",
+            drawFilterChoiceBinding: {
+              actionId,
+              choiceId: "choice_multi",
+              observedAtStateVersion: input.playerView.stateVersion,
+              selectedOptionIds,
+              bottomedCardInstanceIds: ["corp_low"],
               retainedCardInstanceIds: ["corp_high"],
               evidenceCodes: ["test_exact_binding"],
             },

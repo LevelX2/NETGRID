@@ -632,6 +632,144 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("keeps Strategic Planning Group selection inside the exact Corp hand-plan route", () => {
+    resetResidentPlanPortfolioMemory();
+    const choiceId = "spg-draw-choice";
+    const action = legalAction(
+      "corp.resolve-spg-draw-choice",
+      "corp",
+      "resolve_choice",
+      "Eine Karte unter R&D legen",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("corp", [action]);
+    const lowValueCard = visibleCard("drawn-operation", "corp", "operation", {
+      definitionId: "onr_v1_284_chance-observation",
+    });
+    const retainedAgenda = visibleCard("drawn-agenda", "corp", "agenda", {
+      definitionId: "simple_agenda",
+    });
+    const options = [
+      {
+        id: "bottom-operation",
+        label: "Chance Observation",
+        value: lowValueCard.instanceId,
+        card: lowValueCard,
+      },
+      {
+        id: "bottom-agenda",
+        label: "Agenda",
+        value: retainedAgenda.instanceId,
+        card: retainedAgenda,
+      },
+    ];
+    action.choiceRequirements = [
+      {
+        choiceId,
+        minSelections: 1,
+        maxSelections: 1,
+        optionIds: options.map((option) => option.id),
+      },
+    ];
+    input.playerView.own.gripOrHq = [lowValueCard, retainedAgenda];
+    input.playerView.pendingChoice = {
+      choiceId,
+      side: "corp",
+      source: "card_implementation.strategic_planning_group_draw:spg-instance",
+      prompt: "Eine Karte unter R&D legen",
+      kind: "select_cards",
+      options,
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: input.playerView.stateVersion,
+      visibility: "hidden_info_barrier",
+    };
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+
+    const discardKeepScore = (
+      _decisionInput: unknown,
+      card: { instanceId: string },
+    ) => ({ total: card.instanceId === lowValueCard.instanceId ? 0 : 100 });
+    const decision = liveContext({
+      discardKeepScore,
+      selectedChoicesForDecision: (
+        decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+        selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
+        portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+      ) =>
+        selectedChoicesForDecision(
+          decisionInput,
+          selectedAction,
+          {
+            evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+            evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+            discardKeepScore,
+            selectedRunnerProgramInstallTrashOptionIds: () => [],
+            selectedRunnerForcedProgramTrashOptionIds: () => [],
+            selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+            extractAiFeatures: () => ({
+              credits: 0,
+              memoryRemaining: 4,
+              rigRoles: new Set(),
+              rigDefinitionIds: new Set(),
+            }),
+            rolesForCardId: () => [],
+          } as Parameters<typeof selectedChoicesForDecision>[2],
+          portfolio,
+        ),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: action.actionId,
+      selectedChoices: {
+        choiceId,
+        selectedOptionIds: ["bottom-operation"],
+      },
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.hand_and_agenda_management",
+        planFirstDecision: {
+          selectedPlan: {
+            target: { id: "corp" },
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_lane:plan",
+        "plan_module:corp.hand_and_agenda_management",
+        "plan_step_capability:draw_filter_window",
+      ]),
+    );
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    const executor = portfolio?.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+    expect(executor).toMatchObject({
+      moduleId: "corp.hand_and_agenda_management",
+      moduleState: {
+        kind: "hand",
+        signal: {
+          phase: "draw_filter_window",
+          actionIds: [action.actionId],
+          drawFilterChoiceBinding: {
+            actionId: action.actionId,
+            choiceId,
+            observedAtStateVersion: input.playerView.stateVersion,
+            selectedOptionIds: ["bottom-operation"],
+            bottomedCardInstanceIds: [lowValueCard.instanceId],
+            retainedCardInstanceIds: [retainedAgenda.instanceId],
+          },
+        },
+      },
+    });
+  });
+
   it("keeps a coerced sole run continuation in the automatic Engine-window lane", () => {
     resetResidentPlanPortfolioMemory();
     const continueRun = legalAction(
