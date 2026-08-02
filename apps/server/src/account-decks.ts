@@ -1,13 +1,17 @@
 import standardDeckCatalogData from "../../../data/decks/standard-deck-catalog-1.0.0.json";
+import standardDeckGuideData from "../../../data/decks/standard-deck-guides-1.0.0.json";
 import profilesData from "../../../data/decks/deck-format-profiles-0.8.json";
 import profilesData130 from "../../../data/decks/deck-format-profiles-1.3.0.json";
 import { randomBytes } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { buildDeckStrategyProfile } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import {
+  computeStandardDeckGuideAnalysisHash,
   createDeckSnapshot,
+  resolveStandardDeckGuide,
   validateEditableDeck,
   type DeckCardEntry,
   type DeckFormatProfile,
@@ -16,6 +20,8 @@ import {
   type DeckTableLayout,
   type DeckValidationContext,
   type EditableDeck,
+  type StandardDeckGuideEntry,
+  type StandardDeckGuideStatus,
 } from "@netgrid/decks";
 import {
   configureSqliteConnection,
@@ -60,7 +66,7 @@ export type AccountDeckList = {
   quota: AccountDeckQuota;
 };
 
-export type StandardDeckCatalogEntry = {
+export type StandardDeckCatalogSourceEntry = {
   standardDeckId: string;
   version: string;
   status: "active";
@@ -72,6 +78,11 @@ export type StandardDeckCatalogEntry = {
   formatProfileId: string;
   formatProfileVersion?: string;
   cards: DeckCardEntry[];
+};
+
+export type StandardDeckCatalogEntry = StandardDeckCatalogSourceEntry & {
+  guideStatus: StandardDeckGuideStatus;
+  guide?: StandardDeckGuideEntry;
 };
 
 export type AccountDeckStorage = {
@@ -350,7 +361,11 @@ export class AccountDeckService {
 
   constructor(
     private readonly storage: AccountDeckStorage,
-    options: { limit?: number; now?: () => string } = {},
+    options: {
+      limit?: number;
+      now?: () => string;
+      standardDeckGuideManifest?: unknown;
+    } = {},
   ) {
     this.limit = validLimit(
       options.limit ??
@@ -359,11 +374,17 @@ export class AccountDeckService {
         ),
     );
     this.now = options.now ?? (() => new Date().toISOString());
+    const guideManifest = Object.prototype.hasOwnProperty.call(
+      options,
+      "standardDeckGuideManifest",
+    )
+      ? options.standardDeckGuideManifest
+      : standardDeckGuideData;
     this.standards = (
-      standardDeckCatalogData.decks as StandardDeckCatalogEntry[]
+      standardDeckCatalogData.decks as StandardDeckCatalogSourceEntry[]
     )
       .filter((deck) => deck.status === "active")
-      .map(clone);
+      .map((deck) => standardDeckWithGuide(deck, guideManifest));
   }
 
   listStandards(): StandardDeckCatalogEntry[] {
@@ -619,6 +640,34 @@ function standardAsEditable(
   now: string,
 ): EditableDeck {
   return editableFromInput(standard.standardDeckId, 1, standard, now, now);
+}
+
+function standardDeckWithGuide(
+  deck: StandardDeckCatalogSourceEntry,
+  manifest: unknown,
+): StandardDeckCatalogEntry {
+  try {
+    const profile = buildDeckStrategyProfile({
+      deckSnapshotId: `standard_${deck.standardDeckId}_${deck.version}`,
+      side: deck.side,
+      cards: deck.cards,
+    });
+    const resolution = resolveStandardDeckGuide({
+      deck,
+      manifest,
+      currentAnalysisHash: computeStandardDeckGuideAnalysisHash(profile),
+    });
+    if (resolution.status === "available" && resolution.guide) {
+      return {
+        ...clone(deck),
+        guideStatus: "available",
+        guide: clone(resolution.guide),
+      };
+    }
+    return { ...clone(deck), guideStatus: resolution.status };
+  } catch {
+    return { ...clone(deck), guideStatus: "invalid" };
+  }
 }
 
 function validName(value: string): string {

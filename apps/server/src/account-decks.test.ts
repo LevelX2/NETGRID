@@ -16,12 +16,48 @@ describe("AccountDeckService", () => {
     const standards = service.listStandards();
     expect(standards).toHaveLength(43);
     expect(standards.every((deck) => deck.status === "active" && deck.standardDeckId.startsWith("standard_"))).toBe(true);
+    expect(standards.every((deck) => deck.guideStatus === "available" && deck.guide?.standardDeckId === deck.standardDeckId)).toBe(true);
     for (const standard of standards) {
       const snapshot = service.standardSnapshot(standard.standardDeckId);
       expect(snapshot).toMatchObject({ immutable: true, side: standard.side, validation: { ok: true } });
       expect(service.standardSnapshot(standard.standardDeckId).deckHash).toBe(snapshot.deckHash);
-      expect(JSON.stringify(snapshot)).not.toMatch(/internal_ai|test_fixture|retire|ownerAccountId|cloudDeckId/);
+      expect(JSON.stringify(snapshot)).not.toMatch(/internal_ai|test_fixture|retire|ownerAccountId|cloudDeckId|guideStatus|deckIdea/);
     }
+  });
+
+  it("keeps standards and snapshots available when guides are missing or damaged", () => {
+    const storage = new InMemoryAccountDeckStorage();
+    const healthy = new AccountDeckService(storage);
+    const expectedSnapshot = healthy.standardSnapshot(
+      healthy.listStandards()[0]!.standardDeckId,
+    );
+    const missing = new AccountDeckService(storage, {
+      standardDeckGuideManifest: {
+        schemaVersion: "netgrid-standard-deck-guides-v1",
+        guideSetId: "missing-fixture",
+        catalogId: "netgrid-standard-decks-1.0.0",
+        analyzedAt: "2026-08-02",
+        guides: [],
+      },
+    });
+    expect(missing.listStandards()).toHaveLength(43);
+    expect(
+      missing.listStandards().every((deck) => deck.guideStatus === "missing"),
+    ).toBe(true);
+    expect(
+      missing.standardSnapshot(expectedSnapshot.sourceDeckId).deckHash,
+    ).toBe(expectedSnapshot.deckHash);
+
+    const damaged = new AccountDeckService(storage, {
+      standardDeckGuideManifest: null,
+    });
+    expect(damaged.listStandards()).toHaveLength(43);
+    expect(
+      damaged.listStandards().every((deck) => deck.guideStatus === "invalid"),
+    ).toBe(true);
+    expect(
+      damaged.standardSnapshot(expectedSnapshot.sourceDeckId).deckHash,
+    ).toBe(expectedSnapshot.deckHash);
   });
 
   it("enforces owner isolation, quota, optimistic versions, copy and immutable snapshots", async () => {

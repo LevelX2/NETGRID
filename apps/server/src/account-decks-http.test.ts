@@ -25,8 +25,10 @@ describe("account deck HTTP API", () => {
     try {
       const standardsResponse = await fetch(`${baseUrl}/api/decks/standards`);
       const standardsText = await standardsResponse.text();
-      const standardsPayload = JSON.parse(standardsText) as { catalog: { decks: Array<{ standardDeckId: string; side: string }> } };
+      const standardsPayload = JSON.parse(standardsText) as { catalog: { decks: Array<{ standardDeckId: string; side: string; guideStatus: string; guide?: { standardDeckId: string } }>; snapshots: unknown[] } };
       expect(standardsPayload.catalog.decks).toHaveLength(43);
+      expect(standardsPayload.catalog.decks.every((deck) => deck.guideStatus === "available" && deck.guide?.standardDeckId === deck.standardDeckId)).toBe(true);
+      expect(JSON.stringify(standardsPayload.catalog.snapshots)).not.toMatch(/guideStatus|deckIdea/);
       expect(standardsText).not.toMatch(/internal_ai|test_fixture|retire|ownerAccountId/);
 
       const alpha = await login(baseUrl, "alpha", PASSWORD_A);
