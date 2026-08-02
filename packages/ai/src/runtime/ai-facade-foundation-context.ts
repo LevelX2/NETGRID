@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import { createAiHintsByCard } from "../ai-hints";
 import { createCorpTagCreationDiagnosticsContext } from "../simulation/corp-tag-creation-diagnostics";
@@ -23,9 +27,7 @@ export type AiFacadeFoundationContextDependencies = {
   buildObservedFacts: (input: AiDecisionInput) => {
     eventCounts: Record<string, number>;
   };
-  buildServerFeatures: (
-    input: AiDecisionInput,
-  ) => Map<string, ServerFeatures>;
+  buildServerFeatures: (input: AiDecisionInput) => Map<string, ServerFeatures>;
   assessKnownRezzedIcePath: (
     ice: VisibleCard[],
     rig: VisibleCard[],
@@ -36,7 +38,7 @@ export type AiFacadeFoundationContextDependencies = {
     ice: VisibleCard | undefined,
     rigDefinitionIds: Set<string>,
   ) => boolean;
-  visibleCitySurveillanceSourceCount: (input: AiDecisionInput) => number;
+  visibleRunnerDrawTaxSourceCount: (input: AiDecisionInput) => number;
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -60,8 +62,8 @@ export function createAiFacadeFoundationContext(
     buildServerFeatures: dependencies.buildServerFeatures,
     assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
     isBlockedByKnownRezzedIce: dependencies.isBlockedByKnownRezzedIce,
-    visibleCitySurveillanceSourceCount:
-      dependencies.visibleCitySurveillanceSourceCount,
+    visibleRunnerDrawTaxSourceCount:
+      dependencies.visibleRunnerDrawTaxSourceCount,
   });
 
   const {

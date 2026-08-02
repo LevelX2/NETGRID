@@ -102,13 +102,13 @@ planned
 
 ## Paketfolge
 
-| Paket | Titel | Ergebnis |
-| --- | --- | --- |
-| B000 | Prozess und Ausgangsevidence | verbindlicher Scope, Invarianten und Paketvertrag |
-| B001 | Draw-Tax-Quellenvertrag | D57-Fix erkennt nur echte Ziehsteuern und erhält sichere Multi-Draws |
-| B002 | Run-only-Economy-Routing | D9 verwirft die wertlose Lucidrine-Archives-Linie |
-| B003 | Plan-owned Emergency-Keep | D65 behält Flatline-Prävention bei bestätigter Gefahr |
-| B004 | Gesamtverifikation und Integration | Final Review, breite Gates, Main-Merge und Cleanup |
+| Paket | Titel                              | Ergebnis                                                                       |
+| ----- | ---------------------------------- | ------------------------------------------------------------------------------ |
+| B000  | Prozess und Ausgangsevidence       | verbindlicher Scope, Invarianten und Paketvertrag                              |
+| B001  | Draw-Tax-Quellenvertrag            | **abgeschlossen:** nur echte Ziehsteuern; sichere Multi-Draws bleiben erhalten |
+| B002  | Run-only-Economy-Routing           | D9 verwirft die wertlose Lucidrine-Archives-Linie                              |
+| B003  | Plan-owned Emergency-Keep          | D65 behält Flatline-Prävention bei bestätigter Gefahr                          |
+| B004  | Gesamtverifikation und Integration | Final Review, breite Gates, Main-Merge und Cleanup                             |
 
 ## B000 – Prozess und Ausgangsevidence
 
@@ -163,6 +163,26 @@ Draw-Tax-Quellen und verwirft keinen vollständig bezahlbaren Multi-Draw.
 
 Kein Nicht-Draw-Tag-Source wird als Ziehsteuer gezählt, bezahlbare Multi-Draws
 bleiben verfügbar und D57 bleibt grün.
+
+### Ergebnis
+
+- Der Ausgangstest belegte die Lücke: `Omniscience Foundation` wurde sowohl im
+  Server-Feature als auch in der Draw-Tax-Liability fälschlich als fünf
+  Ziehsteuern behandelt.
+- `City Surveillance` besitzt nun zusätzlich die bereits vorhandene
+  strukturierte Condition `requires_runner_draw`. Der Consumer verlangt für
+  eine bezahlbare Draw-Tag-Steuer sowohl `requires_runner_draw` als auch
+  `requires_runner_pay_or_take_tag`.
+- Der öffentliche Feature-Name wurde von der Kartenbezeichnung auf
+  `runnerDrawTaxSourceCount` verallgemeinert.
+- Die Nicht-Draw-Tagquelle wird ignoriert; ein Fünf-Karten-Draw mit sieben
+  Credits und zwei Eventkosten bleibt ohne Tag-Liability.
+- Der D57-Checkpoint bleibt grün und wählt weiter `runner.draw_card` unter der
+  residenten `runner.rig_and_coverage`-Planinstanz.
+- Fünf fokussierte Testdateien mit 35 Tests, AI-Typecheck mit 8-GB-Heap,
+  Hint-Metadaten, Source-Structure und Generic-Card-ID-Guard sind grün.
+- Der Deck-Hint-Consumer-Audit prüfte 20 eindeutige Karten beziehungsweise 45
+  Deckkarten: 0 Blocker, 0 Warnungen.
 
 Commit: `fix(ai): narrow visible draw-tax source projection`
 

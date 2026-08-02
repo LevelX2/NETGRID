@@ -1,27 +1,28 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { visibleCitySurveillanceSourceCount } from "./ai-feature-server";
+import { visibleRunnerDrawTaxSourceCount } from "./ai-feature-server";
 
-describe("visibleCitySurveillanceSourceCount", () => {
-  it("counts known rezzed root tag sources by ontology profile", () => {
+describe("visibleRunnerDrawTaxSourceCount", () => {
+  it("counts a known rezzed draw-linked tag source by ontology profile", () => {
     expect(
-      visibleCitySurveillanceSourceCount(
+      visibleRunnerDrawTaxSourceCount(
         inputWithRemoteRoot([
-          rootCard("onr_v1_333_omniscience-foundation", { rezzed: true }),
+          rootCard("onr_v1_313_city-surveillance", { rezzed: true }),
         ]),
       ),
     ).toBe(1);
   });
 
-  it("ignores unknown, unrezzed, or non-tag-source roots", () => {
+  it("ignores unknown, unrezzed, non-tag-source, or non-draw tag-source roots", () => {
     expect(
-      visibleCitySurveillanceSourceCount(
+      visibleRunnerDrawTaxSourceCount(
         inputWithRemoteRoot([
-          rootCard("onr_v1_333_omniscience-foundation", {
+          rootCard("onr_v1_313_city-surveillance", {
             known: false,
             rezzed: true,
           }),
-          rootCard("onr_v1_333_omniscience-foundation", { rezzed: false }),
+          rootCard("onr_v1_313_city-surveillance", { rezzed: false }),
+          rootCard("onr_v1_333_omniscience-foundation", { rezzed: true }),
           rootCard("custom-blank-asset", { rezzed: true }),
         ]),
       ),

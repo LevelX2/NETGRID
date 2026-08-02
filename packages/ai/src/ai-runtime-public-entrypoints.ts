@@ -26,7 +26,7 @@ import { delayedInstallAbilityForAction } from "./actions/delayed-install-action
 import { compareAction } from "./runtime/action-order";
 import {
   buildServerFeatures,
-  visibleCitySurveillanceSourceCount,
+  visibleRunnerDrawTaxSourceCount,
 } from "./runtime/ai-feature-server";
 import { createAiLiveRuntimeComposition } from "./runtime/ai-live-runtime-composition";
 import {
@@ -153,7 +153,7 @@ export const aiLiveRuntimeDependencies = {
   buildServerFeatures,
   assessKnownRezzedIcePath,
   isBlockedByKnownRezzedIce,
-  visibleCitySurveillanceSourceCount,
+  visibleRunnerDrawTaxSourceCount,
   sourceDefinitionIdForAction,
   runnerKnownPathAssessmentIsKnownNoAccess,
   runnerKnownPathAssessmentIsUnbreakableNoAccess,

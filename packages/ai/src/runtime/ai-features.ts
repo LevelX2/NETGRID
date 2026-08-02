@@ -1,4 +1,8 @@
-import { type AiDecisionInput, type VisibleCard, type Side } from "@netgrid/shared";
+import {
+  type AiDecisionInput,
+  type VisibleCard,
+  type Side,
+} from "@netgrid/shared";
 
 import { type ServerFeatures } from "./ai-feature-server";
 
@@ -17,7 +21,7 @@ export type AiFeatures = {
   credits: number;
   clicks: number;
   tags: number;
-  citySurveillanceSourceCount: number;
+  runnerDrawTaxSourceCount: number;
   opponentCredits: number;
   opponentTags: number;
   memoryRemaining: number;
@@ -48,9 +52,7 @@ export type AiFeaturesDependencies = {
     ice: VisibleCard | undefined,
     rigDefinitionIds: Set<string>,
   ) => boolean;
-  readonly visibleCitySurveillanceSourceCount: (
-    input: AiDecisionInput,
-  ) => number;
+  readonly visibleRunnerDrawTaxSourceCount: (input: AiDecisionInput) => number;
 };
 
 export function extractAiFeatures(
@@ -119,8 +121,8 @@ export function extractAiFeatures(
     credits: input.playerView.own.credits,
     clicks: input.playerView.own.clicks,
     tags: input.playerView.own.tags,
-    citySurveillanceSourceCount:
-      dependencies.visibleCitySurveillanceSourceCount(input),
+    runnerDrawTaxSourceCount:
+      dependencies.visibleRunnerDrawTaxSourceCount(input),
     opponentCredits: input.playerView.opponent.credits,
     opponentTags: input.playerView.opponent.tags,
     memoryRemaining:

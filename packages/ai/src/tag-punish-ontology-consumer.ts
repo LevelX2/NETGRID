@@ -150,13 +150,14 @@ export function tagPunishOntologyConflictWithLegacy(
 ): boolean {
   if (!profile) return false;
   const legacyRoleSet = new Set(legacyRoles);
-  const legacyClaimsTag = rolesMatch(legacyRoles, [
-    "tag_source",
-    "tag_enabler",
-    "trace_tag",
-    "trace_ice",
-    "tag_ice",
-  ]) || legacyRoleSet.has("trace");
+  const legacyClaimsTag =
+    rolesMatch(legacyRoles, [
+      "tag_source",
+      "tag_enabler",
+      "trace_tag",
+      "trace_ice",
+      "tag_ice",
+    ]) || legacyRoleSet.has("trace");
   const legacyClaimsPayoff = rolesMatch(legacyRoles, [
     "tag_punishment",
     "damage_operation",
@@ -268,7 +269,12 @@ function isTagPunishRelevantEffectKind(
 function isTagPunishRelevantConditionKind(
   kind: KnownHintConditionKind,
 ): kind is KnownHintConditionKind {
-  return kind === "requires_runner_tagged" || kind === "requires_trace_success";
+  return (
+    kind === "requires_runner_tagged" ||
+    kind === "requires_trace_success" ||
+    kind === "requires_runner_draw" ||
+    kind === "requires_runner_pay_or_take_tag"
+  );
 }
 
 function payoffKindForEffect(

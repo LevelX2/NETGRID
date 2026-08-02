@@ -28,7 +28,7 @@ export function buildServerFeatures(
   );
 }
 
-export function visibleCitySurveillanceSourceCount(
+export function visibleRunnerDrawTaxSourceCount(
   input: AiDecisionInput,
 ): number {
   return input.playerView.servers.reduce(
@@ -38,8 +38,16 @@ export function visibleCitySurveillanceSourceCount(
         (card) =>
           card.known &&
           card.rezzed === true &&
-          Boolean(classifyTagSourceFromOntology(card.definitionId)),
+          drawTaxProfileMatches(card.definitionId),
       ).length,
     0,
+  );
+}
+
+function drawTaxProfileMatches(definitionId: string | undefined): boolean {
+  const profile = classifyTagSourceFromOntology(definitionId);
+  return Boolean(
+    profile?.conditionKinds.includes("requires_runner_draw") &&
+    profile.conditionKinds.includes("requires_runner_pay_or_take_tag"),
   );
 }

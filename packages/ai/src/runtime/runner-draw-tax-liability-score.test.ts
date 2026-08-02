@@ -53,6 +53,40 @@ describe("runnerDrawTaxLiabilityScoreComponent", () => {
       reason: "projected_tags:5;projected_credits_paid:0;current_tags:0",
     });
   });
+
+  it("does not treat a different visible tag source as a per-card draw tax", () => {
+    const multiDraw = action({ drawCardsAmount: 5 });
+    multiDraw.type = "play_event";
+    multiDraw.source = "runner-multi-draw";
+    multiDraw.costs = [{ clicks: 1, credits: 2 }];
+
+    expect(
+      runnerDrawTaxLiabilityScoreComponent(
+        input(0, {
+          credits: 2,
+          visibleTagSourceDefinitionId: "onr_v1_333_omniscience-foundation",
+        }),
+        multiDraw,
+      ),
+    ).toBeUndefined();
+  });
+
+  it("keeps a five-card draw when every visible draw tax is affordable", () => {
+    const multiDraw = action({ drawCardsAmount: 5 });
+    multiDraw.type = "play_event";
+    multiDraw.source = "runner-multi-draw";
+    multiDraw.costs = [{ clicks: 1, credits: 2 }];
+
+    expect(
+      runnerDrawTaxLiabilityScoreComponent(
+        input(0, {
+          credits: 7,
+          visibleTagSourceDefinitionId: "onr_v1_313_city-surveillance",
+        }),
+        multiDraw,
+      ),
+    ).toBeUndefined();
+  });
 });
 
 function input(

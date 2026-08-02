@@ -29608,6 +29608,9 @@
       "conditions": [
         {
           "kind": "requires_runner_pay_or_take_tag"
+        },
+        {
+          "kind": "requires_runner_draw"
         }
       ],
       "effects": [
