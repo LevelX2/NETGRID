@@ -1182,33 +1182,45 @@ describe("V1.8.1 Mechanikpaket H", () => {
     expect(
       getPlayerView(state, "runner").servers.find(
         (server) => server.id === "rd",
-      )?.counterDisplays,
+      )?.statuses,
     ).toEqual([
       expect.objectContaining({
-        id: "corp_ice_install_cost_modifier_rd",
+        kind: "cost_modifier",
+        costKind: "corp_ice_install",
+        operation: "increase",
         amount: 2,
-        label: "Install +",
-        ariaLabel: "R&D: ICE-Installationskosten +2 durch Runner-Effekt.",
-        counterType: "install_cost_modifier",
+        targetServerId: "rd",
+        sourceCardInstanceId: restrictiveCardId,
+        sourceTitle: "Restrictive Net Zoning",
+        sourceSide: "runner",
       }),
     ]);
     expect(
       getPlayerView(state, "corp").servers.find((server) => server.id === "rd")
-        ?.counterDisplays,
+        ?.statuses,
     ).toEqual([
       expect.objectContaining({
-        id: "corp_ice_install_cost_modifier_rd",
+        kind: "cost_modifier",
+        costKind: "corp_ice_install",
+        operation: "increase",
         amount: 2,
-        label: "Install +",
-        ariaLabel: "R&D: ICE-Installationskosten +2 durch Runner-Effekt.",
-        counterType: "install_cost_modifier",
+        targetServerId: "rd",
+        sourceCardInstanceId: restrictiveCardId,
+        sourceTitle: "Restrictive Net Zoning",
+        sourceSide: "runner",
       }),
     ]);
     expect(
       getPlayerView(state, "runner").servers.find(
         (server) => server.id === "hq",
-      )?.counterDisplays,
+      )?.statuses,
     ).toBeUndefined();
+    state.cardInstances[restrictiveCardId]!.faceup = false;
+    expect(
+      getPlayerView(state, "corp").servers.find((server) => server.id === "rd")
+        ?.statuses,
+    ).toBeUndefined();
+    state.cardInstances[restrictiveCardId]!.faceup = true;
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
       selectedServerId: "rd",

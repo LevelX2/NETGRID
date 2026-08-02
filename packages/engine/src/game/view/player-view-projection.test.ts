@@ -285,9 +285,9 @@ describe("PlayerView projection", () => {
     const lockedCorpServer = getPlayerView(state, "corp").servers.find(
       (server) => server.id === "remote_1",
     );
-    expect(lockedRunnerServer?.runStartRestrictions).toEqual([
+    expect(lockedRunnerServer?.statuses).toEqual([
       {
-        id: `run_start_restriction:remote_1:${rovingId}:fort_activity_gate`,
+        id: `server_status:remote_1:run_prohibited:${rovingId}:fort_activity_gate`,
         kind: "run_prohibited",
         scope: "target_server",
         reason: "required_corp_activity_during_latest_corp_turn_missing",
@@ -295,11 +295,10 @@ describe("PlayerView projection", () => {
         sourceCardInstanceId: rovingId,
         sourceAbilityId: "fort_activity_gate",
         sourceTitle: "Roving Submarine",
+        sourceSide: "corp",
       },
     ]);
-    expect(lockedCorpServer?.runStartRestrictions).toEqual(
-      lockedRunnerServer?.runStartRestrictions,
-    );
+    expect(lockedCorpServer?.statuses).toEqual(lockedRunnerServer?.statuses);
 
     state.corpTurnFlags = {
       scoredBlackOpsAgendaThisTurn: false,
@@ -309,7 +308,7 @@ describe("PlayerView projection", () => {
     const allowedRunnerServer = getPlayerView(state, "runner").servers.find(
       (server) => server.id === "remote_1",
     );
-    expect(allowedRunnerServer?.runStartRestrictions).toBeUndefined();
+    expect(allowedRunnerServer?.statuses).toBeUndefined();
 
     roving.rezzed = false;
     roving.faceup = false;
@@ -322,7 +321,7 @@ describe("PlayerView projection", () => {
     expect(
       getPlayerView(state, "runner").servers.find(
         (server) => server.id === "remote_1",
-      )?.runStartRestrictions,
+      )?.statuses,
     ).toBeUndefined();
   });
 

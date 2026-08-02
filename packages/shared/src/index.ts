@@ -2234,7 +2234,7 @@ export type CounterDisplay = {
   creditPool?: CounterCreditPool;
 };
 
-export type VisibleServerRunStartRestriction = {
+export type VisibleServerRunProhibitedStatus = {
   id: string;
   kind: "run_prohibited";
   scope: "target_server";
@@ -2243,7 +2243,25 @@ export type VisibleServerRunStartRestriction = {
   sourceCardInstanceId: CardInstanceId;
   sourceAbilityId: string;
   sourceTitle: string;
+  sourceSide: "corp";
 };
+
+export type VisibleServerCostModifierStatus = {
+  id: string;
+  kind: "cost_modifier";
+  scope: "target_server";
+  costKind: "corp_ice_install";
+  operation: "increase" | "reduce";
+  amount: number;
+  targetServerId: Exclude<ServerId, "new_remote">;
+  sourceCardInstanceId: CardInstanceId;
+  sourceTitle: string;
+  sourceSide: Side;
+};
+
+export type VisibleServerStatus =
+  | VisibleServerRunProhibitedStatus
+  | VisibleServerCostModifierStatus;
 
 export type VisibleEffectiveSubroutine = {
   id: string;
@@ -2887,7 +2905,7 @@ export type PlayerView = {
     ice: VisibleCard[];
     root: VisibleCard[];
     counterDisplays?: CounterDisplay[];
-    runStartRestrictions?: VisibleServerRunStartRestriction[];
+    statuses?: VisibleServerStatus[];
   }>;
   specialZones?: {
     setAside: VisibleCard[];
