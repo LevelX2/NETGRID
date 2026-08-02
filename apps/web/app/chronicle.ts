@@ -239,10 +239,7 @@ export function formatChronicleEvent(
           importance =
             citySurveillanceDetails.tagsAdded > 0 ? "important" : "normal";
           visibility = "public";
-          cardDefinitionId =
-            cardDefinitionId ??
-            sourceDefinitionId ??
-            "onr_v1_313_city-surveillance";
+          cardDefinitionId = "onr_v1_313_city-surveillance";
           cardTitle = "City Surveillance";
           title = phrase(
             subject,
@@ -250,6 +247,7 @@ export function formatChronicleEvent(
               ? `${creditText(citySurveillanceDetails.creditsPaid)} für City Surveillance bezahlt`
               : `durch City Surveillance ${tagCountText(citySurveillanceDetails.tagsAdded)} erhalten`,
           );
+          chips.push(...citySurveillanceDetails.chips);
           break;
         }
       }
@@ -1121,17 +1119,29 @@ export function formatChronicleEvent(
         const preventedTags =
           numberValue(payload.preventedTags) ??
           Math.max(0, originalTags - finalTags);
+        const trashedCardDefinitionId = stringValue(
+          payload.trashedCardDefinitionId,
+        );
+        const preventionSourceDefinitionId =
+          payload.sourceTrashed === true && trashedCardDefinitionId
+            ? trashedCardDefinitionId
+            : sourceDefinitionId;
         const preventionSource =
-          titleForDefinitionId(sourceDefinitionId) ?? sourceTitle ?? cardTitle;
+          titleForDefinitionId(preventionSourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle;
         const tagSourceDefinitionId =
           stringValue(payload.accessEffectSourceDefinitionId) ??
-          stringValue(payload.ambushDefinitionId);
+          stringValue(payload.ambushDefinitionId) ??
+          (sourceDefinitionId !== preventionSourceDefinitionId
+            ? sourceDefinitionId
+            : undefined);
         const tagSource = titleForDefinitionId(tagSourceDefinitionId);
         category = "danger";
         importance = "important";
         visibility = "public";
-        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
-        if (preventionSource) cardTitle = cardTitle ?? preventionSource;
+        cardDefinitionId = cardDefinitionId ?? preventionSourceDefinitionId;
+        if (preventionSource) cardTitle = preventionSource;
         if (
           payload.eventModificationDecision === "apply" &&
           preventedTags > 0
@@ -2655,6 +2665,16 @@ export function formatChronicleEvent(
         subject,
         `${cardTitle ?? playEffect.sourceTitle ?? "eine Karte"} gespielt${playEffect.suffix ? ` und ${playEffect.suffix}` : ""}`,
       );
+      if (payload.flatline === true && payload.damageResolved === true) {
+        const damageAmount = numberValue(payload.damageAmount) ?? 0;
+        title = phrase(
+          subject,
+          `${cardTitle ?? playEffect.sourceTitle ?? "eine Karte"} gespielt und den Runner mit ${damageAmount} ${damageTypeLabel(stringValue(payload.damageType))} flatlined`,
+        );
+        category = "danger";
+        importance = "critical";
+        chips.push("Flatline");
+      }
       chips.push(
         actionType === "play_event" ? "Event" : "Operation",
         ...playEffect.chips,
@@ -4048,8 +4068,8 @@ export function formatChronicleEvent(
       description = description
         ? `${description} ${citySurveillanceDetails.sentence}`
         : citySurveillanceDetails.sentence;
+      chips.push(...citySurveillanceDetails.chips);
     }
-    chips.push(...citySurveillanceDetails.chips);
     if (citySurveillanceDetails.tagsAdded > 0 && importance === "normal")
       importance = "important";
   }
@@ -4317,6 +4337,12 @@ function tagGainChronicleItem(
   const payload = event.publicPayload ?? {};
   const tagsAdded = tagGainAmountFromPublicPayload(payload);
   if (tagsAdded <= 0) return undefined;
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  if (
+    actionType === "resolve_choice" &&
+    citySurveillanceChronicleDetails(payload, side)
+  )
+    return undefined;
   const hasSeparateResolvedTagItem = effects.some(
     (effect) =>
       effect.kind === "add_tags" &&
@@ -6087,9 +6113,19 @@ function mergedCardResolverEventEffect(
     effects.map((effect) => sideValue(effect.side)).filter(Boolean),
   );
   const includeSideForGainCredits = effectSides.size > 1;
+  const drawEffectCount = effects.filter(
+    (effect) => effect.kind === "draw_cards",
+  ).length;
+  const requestedDrawCount =
+    drawEffectCount === 1
+      ? numberValue(event.publicPayload.drawCardsAmount)
+      : undefined;
   const parts = effects
     .map((effect) =>
-      cardResolverPlayEffectPart(effect, { includeSideForGainCredits }),
+      cardResolverPlayEffectPart(effect, {
+        includeSideForGainCredits,
+        ...(requestedDrawCount !== undefined ? { requestedDrawCount } : {}),
+      }),
     )
     .filter((part): part is EffectSummary => Boolean(part));
   if (parts.length !== effects.length) return undefined;
@@ -6115,9 +6151,15 @@ function mergedCardResolverEventEffect(
 
 function cardResolverPlayEffectPart(
   effect: ResolvedGameEffect,
-  options: { includeSideForGainCredits?: boolean } = {},
+  options: {
+    includeSideForGainCredits?: boolean;
+    requestedDrawCount?: number;
+  } = {},
 ): EffectSummary | undefined {
-  const amount = numberValue(effect.amount) ?? 0;
+  const amount =
+    effect.kind === "draw_cards" && options.requestedDrawCount !== undefined
+      ? Math.max(numberValue(effect.amount) ?? 0, options.requestedDrawCount)
+      : (numberValue(effect.amount) ?? 0);
   if (effect.kind === "draw_cards")
     return {
       category: "card",

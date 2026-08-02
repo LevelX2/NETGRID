@@ -5230,59 +5230,146 @@ describe("formatChronicleEvent", () => {
     );
   });
 
-  it("keeps actual City Surveillance payment and tag choices as concrete chronicle entries", () => {
-    const paidEvent = makeEvent("resolve_choice", {
+  it("formats the actual City Surveillance Bodyweight sequence without duplicates or source confusion", () => {
+    const bodyweight = makeEvent("play_event", {
       actor: "runner",
-      aiReasonCode: "runner.draw_tax.pay",
-      sourceDefinitionId: "onr_v1_313_city-surveillance",
-      drawTaxDecision: "pay",
+      cardDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+      title: "Bodyweight™ Synthetic Blood",
+      drawCardsAmount: 5,
+      drawnCount: 1,
       drawTaxSourceCount: 1,
+      drawTaxCreditsPaid: 0,
+      drawTaxTagsAdded: 0,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "runner",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+          sourceTitle: "Bodyweight™ Synthetic Blood",
+          reason: "card_resolver",
+        },
+      ],
+    });
+    const paid = makeEvent("resolve_choice", {
+      actor: "runner",
+      aiReasonCode: "plan_first.engine_window",
+      sourceDefinitionId: "onr_v1_313_city-surveillance",
+      drawTaxSourceCount: 1,
+      drawTaxDecision: "pay",
       drawTaxCreditsPaid: 1,
       drawTaxTagsAdded: 0,
-      drawTaxTags: 0,
       runnerCreditsAfter: 2,
       runnerTagsAfter: 0,
     });
-    const tagEvent = makeEvent("resolve_choice", {
+    const prevented = makeEvent("resolve_choice", {
       actor: "runner",
-      aiReasonCode: "runner.draw_tax.tag",
+      aiReasonCode: "plan_first.engine_window",
+      eventModificationDecision: "apply",
+      eventModificationOutcome: "avoided",
+      imminentEventType: "add_tag",
+      originalAmount: 1,
+      preventedTags: 1,
+      finalAmount: 0,
       sourceDefinitionId: "onr_v1_313_city-surveillance",
-      drawTaxDecision: "tag",
+      sourceTrashed: true,
+      trashedCardDefinitionId: "onr_v1_161_fall-guy",
       drawTaxSourceCount: 1,
+      drawTaxDecision: "tag",
+      drawTaxCreditsPaid: 0,
+      drawTaxTagsAdded: 0,
+    });
+    const preventionOpened = makeEvent("resolve_choice", {
+      actor: "runner",
+      aiReasonCode: "plan_first.engine_window",
+      sourceDefinitionId: "onr_v1_313_city-surveillance",
+      imminentEventType: "add_tag",
+      eventModificationWindowOpened: true,
+      candidateCount: 1,
+      drawTaxSourceCount: 1,
+      drawTaxDecision: "tag",
+      drawTaxCreditsPaid: 0,
+      drawTaxTagsAdded: 0,
+    });
+    const tagged = makeEvent("resolve_choice", {
+      actor: "runner",
+      aiReasonCode: "plan_first.engine_window",
+      sourceDefinitionId: "onr_v1_313_city-surveillance",
+      tagsAdded: 1,
+      runnerTagsAfter: 1,
+      drawTaxSourceCount: 1,
+      drawTaxDecision: "tag",
       drawTaxCreditsPaid: 0,
       drawTaxTagsAdded: 1,
       drawTaxTags: 1,
-      runnerCreditsAfter: 2,
-      runnerTagsAfter: 1,
     });
 
-    const paid = formatChronicleEvent(paidEvent, "corp");
-    const tagged = formatChronicleEvent(tagEvent, "corp");
-
-    expect(paid).toMatchObject({
+    expect(formatChronicleEvent(bodyweight, "corp").title).toBe(
+      "Der Runner hat Bodyweight™ Synthetic Blood gespielt und 5 Karten gezogen.",
+    );
+    expect(formatChronicleEffectItems(bodyweight, "corp")).toEqual([]);
+    expect(formatChronicleEvent(paid, "corp")).toMatchObject({
       title: "Die Runner-KI hat 1 Credit für City Surveillance bezahlt.",
-      category: "economy",
-      visibility: "public",
       cardDefinitionId: "onr_v1_313_city-surveillance",
       cardTitle: "City Surveillance",
     });
-    expect(paid.chips).toEqual(
-      expect.arrayContaining(["City Surveillance", "-1 Credit", "Kein Tag"]),
-    );
-    expect(shouldSuppressChronicleEventItem(paidEvent)).toBe(false);
-
-    expect(tagged).toMatchObject({
+    expect(formatChronicleEffectItems(paid, "corp")).toEqual([]);
+    expect(shouldSuppressChronicleEventItem(preventionOpened)).toBe(true);
+    expect(formatChronicleEvent(prevented, "corp")).toMatchObject({
+      title:
+        "Die Runner-KI hat Fall Guy getrasht und 1 Tag durch City Surveillance verhindert.",
+      cardDefinitionId: "onr_v1_161_fall-guy",
+      cardTitle: "Fall Guy",
+    });
+    expect(formatChronicleEvent(tagged, "corp")).toMatchObject({
       title: "Die Runner-KI hat durch City Surveillance 1 Tag erhalten.",
-      category: "danger",
-      importance: "important",
-      visibility: "public",
       cardDefinitionId: "onr_v1_313_city-surveillance",
       cardTitle: "City Surveillance",
     });
-    expect(tagged.chips).toEqual(
-      expect.arrayContaining(["City Surveillance", "+1 Tag"]),
-    );
-    expect(shouldSuppressChronicleEventItem(tagEvent)).toBe(false);
+    expect(formatChronicleEffectItems(tagged, "corp")).toEqual([]);
+    expect(shouldSuppressChronicleEventItem(paid)).toBe(false);
+    expect(shouldSuppressChronicleEventItem(prevented)).toBe(false);
+    expect(shouldSuppressChronicleEventItem(tagged)).toBe(false);
+  });
+
+  it("names a lethal damage operation as the resulting flatline", () => {
+    const event = makeEvent("play_operation", {
+      actor: "corp",
+      cardDefinitionId: "onr_v1_302_scorched-earth",
+      title: "Scorched Earth",
+      damageResolved: true,
+      damageType: "meat",
+      damageAmount: 4,
+      cardsTrashed: 0,
+      flatline: true,
+      runnerGripBefore: 3,
+      runnerGripAfter: 0,
+      gameEndReason: "flatline",
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_302_scorched-earth.effect.0.damage",
+          kind: "damage",
+          visibility: "public",
+          side: "runner",
+          amount: 4,
+          damageType: "meat",
+          cardsTrashed: 0,
+          sourceDefinitionId: "onr_v1_302_scorched-earth",
+          sourceTitle: "Scorched Earth",
+          reason: "card_resolver",
+        },
+      ],
+    });
+
+    expect(formatChronicleEvent(event, "corp")).toMatchObject({
+      title:
+        "Du hast Scorched Earth gespielt und den Runner mit 4 Meat Damage flatlined.",
+      category: "danger",
+      importance: "critical",
+    });
+    expect(formatChronicleEvent(event, "corp").chips).toContain("Flatline");
   });
 
   it("merges activated card implementation credit effects with card context", () => {

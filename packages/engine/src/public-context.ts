@@ -1386,6 +1386,7 @@ export function publicContextForAction(
     "shortTermContractTrashed",
     "gainCreditsAmount",
     "removePowerCounterAmount",
+    "drawCardsAmount",
     "drawnCount",
     "drawReplacementSourceTitle",
     "drawReplacementExtraDrawn",

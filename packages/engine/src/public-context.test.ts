@@ -64,6 +64,41 @@ describe("publicContextForAction", () => {
     });
   });
 
+  it("publishes the requested public draw count for suspended draw sequences", () => {
+    const state = {
+      corp: { servers: [] },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "runner",
+      type: "play_event",
+      payload: {
+        drawCardsAmount: 5,
+        drawnCount: 1,
+        drawTaxSourceCount: 1,
+      },
+    } as unknown as LegalAction;
+
+    expect(
+      publicContextForAction(state, action, {
+        agendaPointsForScoredCard: () => 0,
+        cardCounter: () => 0,
+        cardStrengthModifier: () => 0,
+        creditCostForAction: () => 0,
+        definitionFor: () => {
+          throw new Error("not needed");
+        },
+        pumpAmountForLegalAction: () => 0,
+        runnerHqAccessBonus: () => 0,
+        v1915InstalledAccessBonus: () => 0,
+      }),
+    ).toMatchObject({
+      drawCardsAmount: 5,
+      drawnCount: 1,
+      drawTaxSourceCount: 1,
+    });
+  });
+
   it("forwards Corp install placement without exposing hidden card identity", () => {
     const state = {
       corp: { servers: [] },

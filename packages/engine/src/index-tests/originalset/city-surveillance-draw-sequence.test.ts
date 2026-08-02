@@ -186,6 +186,12 @@ describe("City Surveillance per-draw decisions", () => {
       (action) =>
         action.type === "play_event" && action.payload?.cardId === bodyweightId,
     );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      drawCardsAmount: 5,
+      drawnCount: 1,
+      drawTaxSourceCount: 1,
+    });
     const creditsAfterPlay = state.runner.credits;
 
     const decisions = [
