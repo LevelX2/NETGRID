@@ -81,7 +81,9 @@
   Planportfolio, Zugplanung und Engine-Ausführung; die Metaebene v5 ist nur
   noch historische Evidence.
 - [[../Architektur/KI-Aenderungen Architektur-Preflight]]:
-  verbindliche Ownership- und Plan-first-Prüfung vor jedem KI-Codepatch.
+  verbindliche Ownership- und Plan-first-Prüfung vor jedem KI-Codepatch. Das
+  vollständig zu lesende Agenten-Konzentrat liegt in
+  `docs/architecture/ai/ai-program-logic-change-compass.md`.
 - Das führende WIP-Zielbild für eine autoritative modulare
   Plan-first-Auswahl mit gemeinsamem Planrahmen, getrennten
   Runner-/Corp-Schedulern und verfeinerbaren Planmodulen liegt in

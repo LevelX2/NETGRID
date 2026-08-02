@@ -220,6 +220,10 @@
 
 ## Führende Artefakte
 
+- `ai-program-logic-change-compass.md`: verbindliches, vollständig zu
+  lesendes Agenten-Konzentrat vor Änderungen an produktiver KI-Programmlogik.
+  Es verdichtet Haltung, Autoritätskette, Schichtzuordnung, No-Go-Muster und
+  Pflichtnachweise und verweist für Details auf die beiden Gesamtkonzepte.
 - `ki-zielbild-metaebene-2026-08-02-v6.md`: führendes allgemeines Zielbild
   und Current-State-Modell von Engine-/Kartensemantik bis Plan-first-
   Ausführung, einschließlich Doctrine-, Boundary-, Ownership-, Unknown- und
