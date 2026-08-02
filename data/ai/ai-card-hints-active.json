@@ -47257,9 +47257,7 @@
       "cardType": "event",
       "effects": [
         {
-          "amount": 1,
           "kind": "run_tax",
-          "resource": "bad_publicity",
           "scope": "corp",
           "target": "bad_publicity_pressure",
           "timing": "action"
@@ -47268,7 +47266,7 @@
           "amount": 2,
           "kind": "damage",
           "preventable": false,
-          "resource": "core_damage",
+          "resource": "damage",
           "scope": "runner",
           "target": "self_inflicted",
           "timing": "action"

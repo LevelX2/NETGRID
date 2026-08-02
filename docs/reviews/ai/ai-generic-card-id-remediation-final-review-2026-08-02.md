@@ -2,7 +2,7 @@
 
 Datum: 2026-08-02
 
-Status: **fachlich freigegeben; vollständige Abschlussgates und Main-Integration ausstehend**
+Status: **fachlich und technisch freigegeben; lokale Main-Integration ausstehend**
 
 ## Review-Ergebnis
 
@@ -13,7 +13,8 @@ Engine-Quotes entdeckt. Die bestehenden Planowner, Routen, Executorbindungen
 und `PlanExecutionOrigin`-Verträge bleiben erhalten; es entstand kein zweiter
 Chooser, Override, Resolver oder Fallback-Plan.
 
-Das ausführbare AST-/Importgraph-Gate prüft 305 produktiv erreichbare
+Das ausführbare AST-/Importgraph-Gate prüft nach dem Abgleich mit aktuellem
+`main` 306 produktiv erreichbare
 KI-Quelldateien. Von anfänglich 32 direkten Karten-ID-Vorkommen verbleiben drei
 zentral begründete Bindungen in individuellen Planmodellen. Ungeklärte
 `review_required`-Vorkommen verbleiben nicht.
@@ -40,13 +41,27 @@ Engine-Kostenverträge.
 
 ## Paketverifikation
 
-- AI-Typecheck grün.
+- Shared-, Engine- und AI-Typecheck grün.
 - Fokussierte Plan-, Ownership-, Action-Binding-, Engine- und Simulationstests
   aller Migrationspakete grün.
-- Karten-ID-Gate grün: 305 Dateien, 3 Vorkommen, 3 Allowances,
+- `check:ai-source-structure` grün: 759 produktive Dateien, keine Laufzeit- oder
+  Typzyklen.
+- `check:package-boundaries` grün: 2.004 Dateien.
+- Kombiniertes `check:ai` einschließlich Hint-Metadatenvertrag grün.
+- Karten-ID-Gate grün: 306 Dateien, 3 Vorkommen, 3 Allowances,
   `individual_plan_model:3`, 0 Verstöße.
+- Vollständige AI-Shards grün: 553 Testdateien, 4.551 Tests, drei Shards mit je
+  einem Worker.
 - `git diff --check` grün.
 
-Die vollständigen AI-Shards, Source-Structure-, Paketgrenzen- und kombinierten
-AI-Gates werden vor der lokalen Main-Integration nochmals ausgeführt und danach
-in diesem Review ergänzt.
+## Befunde des Main-Abgleichs
+
+Der vollständige erste Shard-Lauf deckte vier Integrationsabweichungen auf und
+brach korrekt rot ab. Geschlossen wurden zwei nicht registrierte
+Faked-Hit-Hint-Ressourcen, ein unzulässiger Simulations-Reexport über den
+Default-Paketfacade sowie die veraltete Erwartung eines Real-Game-Checkpoints,
+der nun korrekt die Engine-gequotete Top-Trash-Recovery für den fehlenden
+Breaker wählt. Der zuständige Owner bleibt `runner.rig_and_coverage`, die
+Capability `search_answer_breaker_ap` und die exakte LegalAction-Bindung sind
+im Checkpoint gesichert. Die vier fokussierten Regressionstests und danach alle
+drei vollständigen Shards sind grün.

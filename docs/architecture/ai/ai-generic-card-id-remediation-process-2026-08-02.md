@@ -1,6 +1,6 @@
 # Generische KI-Karten-ID-Bereinigung – sequenzieller Umsetzungsprozess
 
-Status: **in Arbeit**
+Status: **Abschlussgates grün; lokale Main-Integration ausstehend**
 
 Quelle: Architekturprüfung der produktiven KI vom 02.08.2026 und
 anschließender Nutzerauftrag zur sorgfältigen Umsetzung der notwendigen
@@ -84,8 +84,8 @@ erreichbaren KI-Quelldateien. Die geprüften Familien sind:
 | GP03      | abgeschlossen | `ddc83e9f7`        |
 | GP04      | abgeschlossen | `c0bfdaf2a`        |
 | GP05      | abgeschlossen | `8de9211fc`        |
-| GP06      | abgeschlossen | dieser Paketcommit |
-| Abschluss | offen         | –                  |
+| GP06      | abgeschlossen | `8d98632ec`        |
+| Abschluss | verifiziert   | Integration ausstehend |
 
 ## Paketregeln
 

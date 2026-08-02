@@ -69,15 +69,6 @@ export {
   corpIcePlacementPostInstallRezCostFact,
 } from "./runtime/corp-ice-placement/corp-ice-placement";
 export type { CorpIceCardFacts } from "./runtime/corp-ice-placement/corp-ice-placement";
-export {
-  assessCorpIcePlacementForDiagnostics,
-  classifyCorpFutureRunIcePlacementProfile,
-} from "./simulation/corp-future-run-ice-placement-assessment";
-export type {
-  CorpFutureRunIceClass,
-  CorpIcePlacementDiagnosticsAssessment,
-  CorpIcePlacementResultingPosition,
-} from "./simulation/corp-future-run-ice-placement-assessment";
 export { buildCorpIceDensityProfile } from "./runtime/corp-economy/corp-ice-density";
 export type { CorpIceDensityProfile } from "./runtime/corp-economy/corp-ice-density";
 export {

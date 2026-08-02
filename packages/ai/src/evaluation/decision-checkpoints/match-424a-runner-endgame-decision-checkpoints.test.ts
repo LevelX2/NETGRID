@@ -115,10 +115,10 @@ describe("match 424A runner endgame decision checkpoints", () => {
       checkpoint.source.findingId = "424A-F06-MISSING-COVERAGE-CONTROL";
       delete checkpoint.expectation.runTargets;
       checkpoint.expectation = {
-        acceptableActions: [{ type: "draw_card" }],
+        acceptableActions: [{ type: "activated_card_ability" }],
         planExecution: {
           acceptablePlanKinds: ["runner.rig_and_coverage"],
-          acceptableCapabilities: ["draw_for_answer_breaker_ap"],
+          acceptableCapabilities: ["search_answer_breaker_ap"],
           requiredAssessmentEvidence: ["terminal_remote_coverage:remote_1"],
         },
       };
