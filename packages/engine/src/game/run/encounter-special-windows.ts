@@ -449,6 +449,8 @@ export function fullyBrokenPassedIcePostPassActions(
         amount > 0 ? [{ credits: amount }] : [],
         {
           cardId: sourceCardId,
+          sourceDefinitionId: sourceDefinition.id,
+          abilityId: "derez_fully_broken_passed_ice_and_end_run",
           targetIceId,
           targetIceDefinitionId: targetDefinition.id,
           runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",

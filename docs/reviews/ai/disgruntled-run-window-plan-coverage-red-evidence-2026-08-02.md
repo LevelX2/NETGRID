@@ -1,6 +1,6 @@
 # Disgruntled-Runfenster: Red Evidence
 
-Datum: 2026-08-02  
+Datum: 2026-08-02
 Status: reproduziert, P1 abgeschlossen
 
 ## Befund
@@ -44,12 +44,19 @@ Der neue Checkpointtest fordert dieselbe Action unter dem vorhandenen Owner
 ## Binding-Differenz und Ursache
 
 Die echte LegalAction trägt `cardId`, Ziel-ICE, Zieldefinition, Utility und
-Zahlbetrag, aber keine autoritative Quellenkartendefinition. Der daraus
-gebildete `ActionSemanticCandidate` bindet zwar die Quelleninstanz als
-`sourceKind: card`, bleibt jedoch bei
-`abilityBindingMethod: unresolved`, `confidence: low` und
-`projectionIssues: [ability_unresolved]`. Dadurch erkennt die generische
-Runfensterroute die produktive Triggeraktion nicht.
+Zahlbetrag, aber keine autoritative Quellenkartendefinition und keine
+generische `abilityId`. Der zunächst direkt aus der Engine-Action gebildete
+`ActionSemanticCandidate` bindet zwar die Quelleninstanz als
+`sourceKind: card`, bleibt jedoch bei `abilityBindingMethod: unresolved`,
+`confidence: low` und `projectionIssues: [ability_unresolved]`.
+
+Zusätzlich filtert die positive AI-Input-Allowlist die bisherigen
+Sonderfelder `runnerUtilityAbility`, `targetIceId`,
+`targetIceDefinitionId` und `paymentAmount`. Im tatsächlich produktiven
+AI-Input fehlen dem Runfensterplan daher sowohl die funktionsbasierte
+Fähigkeitskennung als auch die exakte Zielbindung. Das erklärt, warum eine
+isolierte Ergänzung der rohen Engine-LegalAction die Coverage-Lücke nicht
+vollständig schließt.
 
 Der bereits grüne synthetische Runtime-Test enthält dagegen zusätzlich
 `sourceDefinitionId: onr_proteus_106_disgruntled-ice-technician`. Er belegt
@@ -59,9 +66,11 @@ Bindungslücke.
 
 ## Fixgrenze für P2
 
-Die Engine kennt Definition und Quelleninstanz beim Erzeugen der LegalAction
-bereits. P2 darf diese bestehende, side-sichere Tatsache an der LegalAction
-transportieren. Danach soll die vorhandene Funktionssemantik den Trigger ohne
-Karten-ID-Chooser dem bestehenden `runner.convert_run_window` zuordnen.
+Die Engine kennt Definition, Quelleninstanz, Funktionsfamilie und Ziel beim
+Erzeugen der LegalAction bereits. P2 darf diese bestehenden, side-sicheren
+Tatsachen als generische `abilityId` sowie Quellen-/Zielmetadaten
+transportieren und durch die positive AI-Input-Allowlist reichen. Danach soll
+die vorhandene Funktionssemantik den Trigger ohne Karten-ID-Chooser dem
+bestehenden `runner.convert_run_window` zuordnen.
 Kartentext, Timing, Kosten, Ziellegalität, Action-ID und Wirkung bleiben
 unverändert.

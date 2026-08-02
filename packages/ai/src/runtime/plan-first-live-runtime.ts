@@ -16215,7 +16215,7 @@ function runnerPostPassDerezAndEndRunAction(
     (action) =>
       action.actionId === candidate.actionId &&
       action.type === "trigger_ability" &&
-      action.payload?.runnerUtilityAbility ===
+      (action.payload?.abilityId ?? action.payload?.runnerUtilityAbility) ===
         "derez_fully_broken_passed_ice_and_end_run",
   );
 }

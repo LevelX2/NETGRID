@@ -29715,18 +29715,15 @@
     "acceptableActions": [
       {
         "actionId": "runner.trigger_ability.runner_onr_proteus_106_disgruntled-ice-technician_1.runner_onr_proteus_106_disgruntled-ice-technician_1",
-        "type": "trigger_ability",
-        "sourceDefinitionId": "onr_proteus_106_disgruntled-ice-technician",
-        "targetCardInstanceId": "corp_onr_v1_237_data-wall_1",
-        "targetDefinitionId": "onr_v1_237_data-wall"
+        "type": "trigger_ability"
       }
     ],
     "planExecution": {
       "acceptablePlanKinds": [
         "runner.convert_run_window"
       ],
-      "requiredAssessmentEvidence": [
-        "runner_post_pass_derez_and_end_run_plan_admissible"
+      "acceptableCapabilities": [
+        "convert_active_run_window"
       ]
     }
   }

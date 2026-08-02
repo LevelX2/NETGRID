@@ -934,6 +934,18 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
           "derez_fully_broken_passed_ice_and_end_run" &&
         action.payload?.cardId === eventId,
     );
+    expect(derez).toMatchObject({
+      source: eventId,
+      expiresAtStateVersion: state.stateVersion,
+      payload: {
+        cardId: eventId,
+        sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+        abilityId: "derez_fully_broken_passed_ice_and_end_run",
+        targetIceId: iceId,
+        targetIceDefinitionId: "onr_v1_232_crystal-wall",
+        runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
+      },
+    });
     state = apply(
       state,
       "runner",
