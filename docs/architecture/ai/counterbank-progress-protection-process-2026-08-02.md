@@ -148,6 +148,12 @@ Paketstand:
   und ein echter matchentscheidender Same-Turn-Score bleiben als enge
   Gegenproben zulässig. Der Quote-Reader wurde als reiner Vertragsleser
   extrahiert; Entscheidungsowner bleibt `corp.score_agenda`.
+- P3 ist abgeschlossen: 277 fokussierte und angrenzende Conversion-,
+  Counterbank-, Runtime-, Ambush- und Scoreline-Tests sind grün. Der normale
+  AI-Typecheck traf ausschließlich das reproduzierbare 4-GB-Node-Heaplimit;
+  mit `NODE_OPTIONS=--max-old-space-size=6144` ist er grün. `check:ai`,
+  `check:ai-deck-doctrine-strategy` und alle drei AI-Shards sind grün
+  (184/184 Dateien je Shard; 1821, 1551 und 1169 Tests).
 
 ## Paketdetails
 
