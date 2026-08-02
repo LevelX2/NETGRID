@@ -34,6 +34,7 @@ import type {
 } from "../runner-run-target-evaluation";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../actions/risk-action-projection";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
+import { runnerDrawTaxLiabilityProjection } from "./runner-draw-tax-liability-score";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import {
   CORP_PLAN_PRIORITY_POLICY,
@@ -15753,6 +15754,43 @@ function coverageSupportActionIds(
   const searchEngineSetupActionIds = new Set(
     searchEngineSetupCandidates.map((candidate) => candidate.actionId),
   );
+  const cardDrawForAnswerCandidates = candidates.filter(
+    (candidate) =>
+      !matchingSearchActionIds.has(candidate.actionId) &&
+      !searchEngineSetupActionIds.has(candidate.actionId) &&
+      candidate.sourceKind === "card" &&
+      (candidate.actionTacticSignals.includes("draw.card") ||
+        candidate.actionTacticSignals.includes("setup.draw") ||
+        (candidate.economyProjection?.cardsDrawn ?? 0) > 1),
+  );
+  const safeCardDrawForAnswerCandidates = cardDrawForAnswerCandidates.filter(
+    (candidate) => {
+      const action = input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      return (
+        action !== undefined &&
+        runnerDrawTaxLiabilityProjection(input, action, candidate)
+          .projectedTagsAdded === 0
+      );
+    },
+  );
+  const rejectedTaxedDrawExists =
+    safeCardDrawForAnswerCandidates.length < cardDrawForAnswerCandidates.length;
+  const safeBasicDrawSubstitutes = rejectedTaxedDrawExists
+    ? candidates.filter((candidate) => {
+        if (candidate.semanticActionType !== "draw.card") return false;
+        const action = input.legalActions.find(
+          (legalAction) => legalAction.actionId === candidate.actionId,
+        );
+        return (
+          action?.type === "draw_card" &&
+          action.source === "basic_action" &&
+          runnerDrawTaxLiabilityProjection(input, action, candidate)
+            .projectedTagsAdded === 0
+        );
+      })
+    : [];
   return {
     directSearchActionIds: directSearchCandidates.map(
       (candidate) => candidate.actionId,
@@ -15794,17 +15832,10 @@ function coverageSupportActionIds(
     searchEngineSetupActionIds: searchEngineSetupCandidates.map(
       (candidate) => candidate.actionId,
     ),
-    drawForAnswerActionIds: candidates
-      .filter(
-        (candidate) =>
-          !matchingSearchActionIds.has(candidate.actionId) &&
-          !searchEngineSetupActionIds.has(candidate.actionId) &&
-          candidate.sourceKind === "card" &&
-          (candidate.actionTacticSignals.includes("draw.card") ||
-            candidate.actionTacticSignals.includes("setup.draw") ||
-            (candidate.economyProjection?.cardsDrawn ?? 0) > 1),
-      )
-      .map((candidate) => candidate.actionId),
+    drawForAnswerActionIds: [
+      ...safeCardDrawForAnswerCandidates,
+      ...safeBasicDrawSubstitutes,
+    ].map((candidate) => candidate.actionId),
   };
 }
 

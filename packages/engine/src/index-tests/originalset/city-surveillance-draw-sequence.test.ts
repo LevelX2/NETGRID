@@ -532,10 +532,7 @@ function cityGameWithFallGuy(seed: string): GameState {
         ...ONR_V1_RUNNER_DECK,
         id: `${ONR_V1_RUNNER_DECK.id}_fall_guy`,
         name: `${ONR_V1_RUNNER_DECK.name} + Fall Guy`,
-        cards: [
-          ...ONR_V1_RUNNER_DECK.cards,
-          { id: FALL_GUY_ID, quantity: 1 },
-        ],
+        cards: [...ONR_V1_RUNNER_DECK.cards, { id: FALL_GUY_ID, quantity: 1 }],
       },
       corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
       agendaPointsToWin: 7,

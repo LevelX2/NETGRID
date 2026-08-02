@@ -154,7 +154,11 @@ export function runnerScoreComponents(
     tagCleanup,
   );
   if (tagCleanupFallback) components.push(tagCleanupFallback);
-  const drawTaxLiability = runnerDrawTaxLiabilityScoreComponent(input, action);
+  const drawTaxLiability = runnerDrawTaxLiabilityScoreComponent(
+    input,
+    action,
+    actionSemanticCandidate,
+  );
   if (drawTaxLiability) components.push(drawTaxLiability);
   const drawOverflow = runnerDrawOverflowScoreComponent(
     input,

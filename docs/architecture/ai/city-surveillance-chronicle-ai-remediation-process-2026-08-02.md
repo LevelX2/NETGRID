@@ -21,8 +21,9 @@ Chronik und Aktionshinweisen mit ihrem tatsächlichen Ergebnis dargestellt.
 Mehrkarten-Draws werden als zusammengehörige Sequenz verständlich, eine
 verwendete Präventionskarte wird nicht mit der Tagquelle verwechselt und eine
 Flatline wird eindeutig benannt. Der vorhandene Owner
-`runner.rig_and_coverage` berücksichtigt für seine Draw-/Search-Route die
-side-sicher sichtbare, Engine-zertifizierte Draw-Tax-Folgelast und wählt im
+`runner.rig_and_coverage` berücksichtigt für seine Draw-/Search-Route die aus
+side-sicher sichtbarem Board und aktueller Engine-LegalAction projizierte
+Draw-Tax-Folgelast und wählt im
 gespeicherten Entscheidungspunkt nicht mehr die ruinöse Fünf-Karten-Aktion.
 
 ## Annahmen
@@ -94,12 +95,12 @@ planned
 
 ## Paketfolge
 
-| Paket | Titel | Ergebnis |
-| --- | --- | --- |
-| CS00 | Prozess und Ausgangsevidence | verbindlicher Scope und Pakete |
-| CS01 | Chronicle-Echtspielkorrekturen | eindeutige, nicht doppelte Darstellung |
-| CS02 | Draw-Tax-Planvertrag | gespeicherter Checkpoint und KI-Korrektur |
-| CS03 | Gesamtverifikation und Abschluss | Reviews, Gates, Main-Integration |
+| Paket | Titel                            | Ergebnis                                  |
+| ----- | -------------------------------- | ----------------------------------------- |
+| CS00  | Prozess und Ausgangsevidence     | verbindlicher Scope und Pakete            |
+| CS01  | Chronicle-Echtspielkorrekturen   | eindeutige, nicht doppelte Darstellung    |
+| CS02  | Draw-Tax-Planvertrag             | gespeicherter Checkpoint und KI-Korrektur |
+| CS03  | Gesamtverifikation und Abschluss | Reviews, Gates, Main-Integration          |
 
 ## CS00 – Prozess und Ausgangsevidence
 
@@ -198,6 +199,26 @@ git diff --check
 - `runner.rig_and_coverage`, Planinstanz, Step und Executor bleiben Owner;
 - D58 bis D63 bleiben reine Engine-Fortsetzungen;
 - kein Kartenname und keine Karten-ID steuert die Entscheidung.
+
+### Ergebnis
+
+- Der Checkpoint `cp-b0b0-city-surveillance-bodyweight-d57` wurde mit
+  Strict-Warmup über alle 56 vorherigen Runner-KI-Entscheidungen ohne Drift
+  erfasst.
+- Vor dem Fix scheiterte er mit `behavior_regression`: Bodyweight war sowohl
+  verbotene als auch nicht akzeptable Action.
+- Nach dem Fix wählt dieselbe residente Planinstanz
+  `plan:runner.rig_and_coverage:coverage%3Abreaker_sentry` über denselben Step
+  `draw_for_answer_breaker_sentry` die gebundene Engine-LegalAction
+  `runner.draw_card`.
+- Die generische Projektion verwendet Draw-Anzahl, Aktionskosten, verfügbare
+  Credits und die Anzahl sichtbarer gerezzter Draw-Tax-Quellen. Sie verändert
+  weder LegalActions noch die spätere Engine-Choice-Auflösung.
+- Der Deck-Hint-Consumer-Audit prüfte 20 eindeutige Karten beziehungsweise 45
+  Deckkarten: `blockingFindingCount=0`, `warningCount=0`.
+- Fokussierte Checkpoint-/Projektions-Tests, AI-Typecheck mit erweitertem
+  Node-Heap, AI-Source-Structure, Generic-Card-ID-Guard, Format- und
+  Diff-Check sind grün.
 
 ### Commit
 

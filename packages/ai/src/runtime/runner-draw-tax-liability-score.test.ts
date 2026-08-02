@@ -32,16 +32,63 @@ describe("runnerDrawTaxLiabilityScoreComponent", () => {
       ),
     ).toBeUndefined();
   });
+
+  it("projects a visible per-card draw tax when the initiating action has no tax payload", () => {
+    const multiDraw = action({ drawCardsAmount: 5 });
+    multiDraw.type = "play_event";
+    multiDraw.source = "runner-multi-draw";
+    multiDraw.costs = [{ clicks: 1, credits: 2 }];
+
+    expect(
+      runnerDrawTaxLiabilityScoreComponent(
+        input(0, {
+          credits: 2,
+          visibleTagSourceDefinitionId: "onr_v1_313_city-surveillance",
+        }),
+        multiDraw,
+      ),
+    ).toMatchObject({
+      key: "runner_draw_tax_tag_liability",
+      value: -4500,
+      reason: "projected_tags:5;projected_credits_paid:0;current_tags:0",
+    });
+  });
 });
 
-function input(tags: number): AiDecisionInput {
+function input(
+  tags: number,
+  options: {
+    credits?: number;
+    visibleTagSourceDefinitionId?: string;
+  } = {},
+): AiDecisionInput {
   return {
     side: "runner",
-    playerView: { own: { tags } },
-  } as AiDecisionInput;
+    playerView: {
+      own: { tags, credits: options.credits ?? 0 },
+      servers: options.visibleTagSourceDefinitionId
+        ? [
+            {
+              id: "remote_1",
+              ice: [],
+              root: [
+                {
+                  instanceId: "visible-tag-source",
+                  definitionId: options.visibleTagSourceDefinitionId,
+                  known: true,
+                  rezzed: true,
+                },
+              ],
+            },
+          ]
+        : [],
+    },
+  } as unknown as AiDecisionInput;
 }
 
-function action(payload: Record<string, string | number | boolean>): LegalAction {
+function action(
+  payload: Record<string, string | number | boolean>,
+): LegalAction {
   return {
     actionId: "runner.draw-tax",
     side: "runner",
