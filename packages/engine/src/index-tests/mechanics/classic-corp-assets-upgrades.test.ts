@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type {
+  CardInstanceId,
   DeckDefinition,
   GameState,
   ResolvedGameEffect,
@@ -45,6 +46,9 @@ const STERDROID = "onr_classic_024_sterdroid";
 const STRATEGIC_PLANNING_GROUP = "onr_classic_025_strategic-planning-group";
 const CORPORATE_SHUFFLE = "onr_classic_017_corporate-shuffle";
 const DAY_SHIFT = "onr_v1_288_day-shift";
+const UNLISTED_RESEARCH_LAB = "onr_classic_003_unlisted-research-lab";
+const EMPLOYEE_EMPOWERMENT = "onr_v1_199_employee-empowerment";
+const SKIVVISS = "onr_v1_064_skivviss";
 const STREET_ENFORCER = "onr_classic_026_street-enforcer";
 const FALL_GUY = "onr_v1_161_fall-guy";
 
@@ -137,6 +141,23 @@ function corpMainClassic08FallGuyGame(seed: string): GameState {
   state.runner.clicks = 4;
   state.runner.memoryLimit = 8;
   return state;
+}
+
+function addScoredCorpAgendaForTest(
+  state: GameState,
+  definitionId: string,
+  suffix: string,
+): CardInstanceId {
+  const cardId = addCorpCardToHqForTest(state, definitionId, suffix);
+  state.corp.hq = state.corp.hq.filter((candidate) => candidate !== cardId);
+  state.corp.scoreArea.push(cardId);
+  state.cardInstances[cardId] = {
+    ...state.cardInstances[cardId]!,
+    zone: { side: "corp", zone: "scoreArea" },
+    faceup: true,
+    rezzed: true,
+  };
+  return cardId;
 }
 
 function toRunnerClassic08Game(seed: string): GameState {
@@ -704,7 +725,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
 
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
 
-    expect(state.timingPoint).toBe("corp_action.main");
+    expect(state.timingPoint).toBe("corp_draw.mandatory_draw");
     expect(
       state.pendingChoice?.options.map((option) => option.value).sort(),
     ).toEqual([firstDrawId, secondDrawId].sort());
@@ -716,7 +737,142 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expect(state.corp.rd.at(-1)).toBe(firstDrawId);
     expect(state.corp.hq).toContain(secondDrawId);
     expect(state.pendingChoice).toBeUndefined();
+    expect(state.timingPoint).toBe("corp_action.main");
     expectValid(state);
+  });
+
+  it("aggregates mandatory, scored-agenda, selected optional and Skivviss draws before SPG", () => {
+    let state = corpMainClassic08Game("classic-08-strategic-aggregate-start");
+    addRezzedCorpRootForTest(
+      state,
+      STRATEGIC_PLANNING_GROUP,
+      "remote_1",
+      "strategic_aggregate_start",
+    );
+    addScoredCorpAgendaForTest(
+      state,
+      UNLISTED_RESEARCH_LAB,
+      "unlisted_aggregate_start",
+    );
+    addScoredCorpAgendaForTest(
+      state,
+      EMPLOYEE_EMPOWERMENT,
+      "employee_aggregate_start",
+    );
+    const skivvissId = addInstalledRunnerProgramForTest(
+      state,
+      SKIVVISS,
+      "skivviss_aggregate_start",
+    );
+    state.cardInstances[skivvissId]!.counters = { virus: 2 };
+    state = toRunnerTurnFromCorpMain(state);
+    for (const definitionId of [
+      "simple_agenda",
+      "simple_barrier_ice",
+      "onr_v1_237_data-wall",
+      "onr_v1_232_crystal-wall",
+      "simple_upgrade",
+      "simple_economy_asset",
+    ])
+      putCorpCardOnTopOfRd(state, definitionId);
+    const hqBeforeMandatoryDraw = state.corp.hq.length;
+    const startState = apply(
+      state,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+
+    expect(startState.pendingChoice?.source).toContain(
+      "scored_agenda.start_draw_choice",
+    );
+    expect(startState.corp.hq.length).toBe(hqBeforeMandatoryDraw);
+
+    let selected = applyChoice(structuredClone(startState), "corp", "draw");
+    expect(selected.corp.hq.length).toBe(hqBeforeMandatoryDraw);
+    selected = apply(
+      selected,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    expect(selected.pendingCorpDraw).toMatchObject({
+      baseDrawCount: 5,
+      replacementDrawCount: 1,
+      continuation: {
+        kind: "corp_mandatory_draw",
+        mandatoryCardCount: 1,
+        mandatoryAgendaCardCount: 1,
+        optionalAgendaCardCount: 1,
+        skivvissCardCount: 2,
+        additionalCardCount: 4,
+        totalBaseDrawCount: 5,
+      },
+    });
+    expect(selected.pendingChoice?.options).toHaveLength(6);
+    expect(selected.timingPoint).toBe("corp_draw.mandatory_draw");
+    selected = applyChoice(
+      selected,
+      "corp",
+      String(selected.pendingChoice?.options[0]?.id),
+    );
+    expect(selected.corp.hq.length).toBe(hqBeforeMandatoryDraw + 5);
+    expect(selected.timingPoint).toBe("corp_action.main");
+    expect(selected.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      corpMandatoryDrawCompleted: true,
+      corpMandatoryCardCount: 1,
+      corpMandatoryAdditionalCardCount: 4,
+      corpMandatoryTotalBaseDrawCount: 5,
+      corpMandatoryAgendaCardCount: 1,
+      corpMandatoryOptionalAgendaCardCount: 1,
+      corpMandatorySkivvissCardCount: 2,
+      strategicPlanningGroupDrawnCardCount: 6,
+    });
+
+    let skipped = applyChoice(structuredClone(startState), "corp", "skip");
+    skipped = apply(
+      skipped,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    expect(skipped.pendingCorpDraw).toMatchObject({
+      baseDrawCount: 4,
+      replacementDrawCount: 1,
+      continuation: {
+        kind: "corp_mandatory_draw",
+        optionalAgendaCardCount: 0,
+        totalBaseDrawCount: 4,
+      },
+    });
+    expect(skipped.pendingChoice?.options).toHaveLength(5);
+    skipped = applyChoice(
+      skipped,
+      "corp",
+      String(skipped.pendingChoice?.options[0]?.id),
+    );
+    expect(skipped.corp.hq.length).toBe(hqBeforeMandatoryDraw + 4);
+    expect(skipped.timingPoint).toBe("corp_action.main");
+
+    let deckout = applyChoice(structuredClone(startState), "corp", "draw");
+    const removedFromRd = deckout.corp.rd.slice(4);
+    deckout.corp.rd = deckout.corp.rd.slice(0, 4);
+    deckout.corp.archives.push(...removedFromRd);
+    for (const cardId of removedFromRd)
+      deckout.cardInstances[cardId] = {
+        ...deckout.cardInstances[cardId]!,
+        zone: { side: "corp", zone: "archives" },
+      };
+    deckout = apply(
+      deckout,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    expect(deckout.winner).toBe("runner");
+    expect(deckout.gameEndReason).toBe("corp_deck_empty");
+    expect(deckout.pendingCorpDraw).toBeUndefined();
+    expect(deckout.pendingChoice).toBeUndefined();
+    expectValid(selected);
+    expectValid(skipped);
+    expectValid(deckout);
   });
 
   it("treats a multi-card Corp draw as one Strategic Planning Group transaction", () => {

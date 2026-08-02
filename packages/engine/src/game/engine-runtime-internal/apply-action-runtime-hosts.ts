@@ -695,6 +695,7 @@ export function createApplyActionRuntimeHosts(
       state,
       draw: {
         drawCorpCard,
+        resolveCorpMandatoryDraw: deps.resolveCorpMandatoryDraw,
         drawRunnerCards: deps.drawRunnerCards,
         applyRunnerDrawSummaryPayload: deps.applyRunnerDrawSummaryPayload,
       },

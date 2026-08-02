@@ -715,7 +715,7 @@ export function createScoredEconomyRuntimeHosts(
         quote.regularCreditsRequired !==
           quote.finalCredits - quote.temporaryCreditsApplied ||
         quote.creditPayable !==
-          (state.corp.credits >= quote.regularCreditsRequired) ||
+          state.corp.credits >= quote.regularCreditsRequired ||
         !quote.creditPayable ||
         !quote.additionalCostsPayable ||
         !quote.affordable
@@ -894,8 +894,7 @@ export function createScoredEconomyRuntimeHosts(
                 cardId,
                 temporaryCreditsRemaining,
               );
-            temporaryCreditsRemaining =
-              payment.temporaryCreditsRemaining;
+            temporaryCreditsRemaining = payment.temporaryCreditsRemaining;
             if (deps.isRegionUpgrade(definition))
               deps.trashOlderRegionUpgradesInServer(
                 previewState,
@@ -992,6 +991,13 @@ export function createScoredEconomyRuntimeHosts(
           const flags = ensureCorpTurnFlags(state);
           flags.scoredAgendaStartDrawChoiceResolvedSourceIds = [
             ...(flags.scoredAgendaStartDrawChoiceResolvedSourceIds ?? []),
+            cardId,
+          ];
+        },
+        markScoredAgendaStartDrawChoiceSelected: (cardId) => {
+          const flags = ensureCorpTurnFlags(state);
+          flags.scoredAgendaStartDrawChoiceSelectedSourceIds = [
+            ...(flags.scoredAgendaStartDrawChoiceSelectedSourceIds ?? []),
             cardId,
           ];
         },

@@ -407,10 +407,11 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     const hqBeforeCorpTurn = state.corp.hq.length;
     state.corp.maxHandSize = 100;
     state = apply(state, "runner", (action) => action.type === "end_turn");
-    expect(state.corp.hq.length).toBe(hqBeforeCorpTurn + 1);
+    expect(state.corp.hq.length).toBe(hqBeforeCorpTurn);
     expect(state.phase).toBe("corp_draw_phase");
     expect(state.timingPoint).toBe("corp_draw.mandatory_draw");
     expect(state.corp.clicks).toBe(3);
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
       expect.objectContaining({
         kind: "draw_cards",
@@ -420,8 +421,12 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         sourceTitle: "Skivviss",
       }),
     );
-    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     expect(state.corp.hq.length).toBe(hqBeforeCorpTurn + 2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      corpMandatoryCardCount: 1,
+      corpMandatorySkivvissCardCount: 1,
+      corpMandatoryTotalBaseDrawCount: 2,
+    });
     expect(state.phase).toBe("corp_action_phase");
     expect(state.timingPoint).toBe("corp_action.main");
     expect(state.corp.clicks).toBe(3);

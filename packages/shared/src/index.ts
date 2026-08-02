@@ -1587,6 +1587,16 @@ export type CorpDrawContinuation =
   | {
       kind: "effect_commands";
       remainingCommands: EffectCommand[];
+    }
+  | {
+      kind: "corp_mandatory_draw";
+      mandatoryCardCount: 1;
+      additionalCardCount: number;
+      totalBaseDrawCount: number;
+      mandatoryAgendaCardCount: number;
+      optionalAgendaCardCount: number;
+      skivvissCardCount: number;
+      additionalSourceDefinitionIds: CardDefinitionId[];
     };
 
 export type CorpDrawTransaction = {
@@ -1876,6 +1886,7 @@ export type GameState = {
     edgerunnerTempsInstallActionsRemaining?: number;
     counterPreventionUsedSourceIdsThisTurn?: CardInstanceId[];
     scoredAgendaStartDrawChoiceResolvedSourceIds?: CardInstanceId[];
+    scoredAgendaStartDrawChoiceSelectedSourceIds?: CardInstanceId[];
     pdcaUsedSourceIdsThisTurn?: CardInstanceId[];
     fortActivityServerIdsSinceCorpTurnStart?: Array<
       Exclude<ServerId, "new_remote">

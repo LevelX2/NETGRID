@@ -25,6 +25,10 @@ export type TurnBasicExecutionHost = {
   state: GameState;
   draw: {
     drawCorpCard: (state: GameState) => void;
+    resolveCorpMandatoryDraw: (
+      state: GameState,
+      legalAction: LegalAction,
+    ) => void;
     drawRunnerCards: (
       state: GameState,
       amount: number,
@@ -79,11 +83,7 @@ export function handleTurnBasicExecution(
   const { state } = host;
   switch (legalAction.type) {
     case "mandatory_draw":
-      host.draw.drawCorpCard(state);
-      if (state.winner) return handled(legalAction);
-      state.phase = "corp_action_phase";
-      state.timingPoint = "corp_action.main";
-      state.activeSide = "corp";
+      host.draw.resolveCorpMandatoryDraw(state, legalAction);
       return handled(legalAction);
     case "draw_card":
       host.turn.spendClick(state, legalAction.side);
@@ -134,7 +134,9 @@ export function handleTurnBasicExecution(
       return handled(legalAction);
     case "purge_virus_counters": {
       host.turn.spendClicks(state, "corp", 3);
-      if (host.callbacks.startVirusCounterPurgePreserveChoice(state, legalAction))
+      if (
+        host.callbacks.startVirusCounterPurgePreserveChoice(state, legalAction)
+      )
         return handled(legalAction);
       const purged = purgeVirusCounters(state);
       legalAction.payload = {

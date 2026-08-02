@@ -1,6 +1,7 @@
 import {
   type CardDefinitionId,
   type CardInstanceId,
+  type CorpDrawContinuation,
   type GameState,
   type LegalAction,
   type ResolvedGameEffect,
@@ -52,6 +53,8 @@ type TurnRuntimePort = import("./turn-runtime-port").TurnRuntimePort;
 type TurnCorpStartRuntimeResolvers = Pick<
   TurnRuntimePort,
   | "resolvePdcaCounterAction"
+  | "resolveCorpMandatoryDraw"
+  | "resumeCorpMandatoryDrawAfterChoice"
   | "startCorpTurn"
   | "applyInstalledIceCounterLifecycle"
   | "applyCorpStartOfTurnEffects"
@@ -62,6 +65,24 @@ type TurnCorpStartRuntimeResolvers = Pick<
   | "virusCounterCascadeTrashAtCorpStart"
   | "trashFaceupRdCardsForCascade"
 >;
+
+type CorpMandatoryDrawSummary = {
+  mandatoryCardCount: 1;
+  mandatoryAgendaSources: Array<{
+    cardId: CardInstanceId;
+    definitionId: CardDefinitionId;
+    count: number;
+  }>;
+  optionalAgendaSources: Array<{
+    cardId: CardInstanceId;
+    definitionId: CardDefinitionId;
+    count: number;
+  }>;
+  skivvissCardCount: number;
+  additionalCardCount: number;
+  totalBaseDrawCount: number;
+  additionalSourceDefinitionIds: CardDefinitionId[];
+};
 
 /**
  * Owns Corp turn-start sequencing and Corp-side recurring effects.
@@ -127,28 +148,191 @@ export function createTurnCorpStartRuntimeResolvers(
     }
   }
 
-  function applyScoredAgendaMandatoryDrawAtCorpStart(
+  function corpMandatoryDrawSummary(
     state: GameState,
-    effects?: AutomaticEffectCollector,
-  ): void {
+  ): CorpMandatoryDrawSummary {
+    const mandatoryAgendaSources: CorpMandatoryDrawSummary["mandatoryAgendaSources"] =
+      [];
     for (const cardId of state.corp.scoreArea.slice().sort()) {
       const definition = definitionFor(state, cardId);
       const implementation =
         deps.scoredAgendaImplementationForDefinition(definition);
       if (implementation?.kind !== "corp_start_turn_mandatory_draw") continue;
-      const rdBefore = state.corp.rd.length;
-      drawCorpCards(state, implementation.drawCount);
-      const drawnCount = rdBefore - state.corp.rd.length;
-      effects?.push(
-        links.automaticDrawCardsEffect(
-          `corp.start.scored_agenda.mandatory_draw.${cardId}`,
-          "corp",
-          drawnCount,
-          definition.id,
-        ),
-      );
-      if (state.winner) return;
+      mandatoryAgendaSources.push({
+        cardId,
+        definitionId: definition.id,
+        count: implementation.drawCount,
+      });
     }
+    const selectedOptionalIds = new Set(
+      ensureCorpTurnFlags(state).scoredAgendaStartDrawChoiceSelectedSourceIds ??
+        [],
+    );
+    const optionalAgendaSources: CorpMandatoryDrawSummary["optionalAgendaSources"] =
+      [];
+    for (const cardId of state.corp.scoreArea.slice().sort()) {
+      if (!selectedOptionalIds.has(cardId)) continue;
+      const definition = definitionFor(state, cardId);
+      const implementation =
+        deps.scoredAgendaImplementationForDefinition(definition);
+      if (implementation?.kind !== "corp_start_turn_optional_draw")
+        throw new Error("Die gewählte Start-Draw-Quelle ist veraltet.");
+      optionalAgendaSources.push({
+        cardId,
+        definitionId: definition.id,
+        count: implementation.drawCount,
+      });
+    }
+    const skivvissCardCount = virusCounterDrawsAtCorpStart(state);
+    const mandatoryAgendaCardCount = mandatoryAgendaSources.reduce(
+      (sum, source) => sum + source.count,
+      0,
+    );
+    const optionalAgendaCardCount = optionalAgendaSources.reduce(
+      (sum, source) => sum + source.count,
+      0,
+    );
+    const additionalCardCount =
+      mandatoryAgendaCardCount + optionalAgendaCardCount + skivvissCardCount;
+    return {
+      mandatoryCardCount: 1,
+      mandatoryAgendaSources,
+      optionalAgendaSources,
+      skivvissCardCount,
+      additionalCardCount,
+      totalBaseDrawCount: 1 + additionalCardCount,
+      additionalSourceDefinitionIds: [
+        ...mandatoryAgendaSources.map((source) => source.definitionId),
+        ...optionalAgendaSources.map((source) => source.definitionId),
+        ...(skivvissCardCount > 0 ? [SKIVVISS_ID] : []),
+      ],
+    };
+  }
+
+  function mandatoryDrawContinuation(
+    summary: CorpMandatoryDrawSummary,
+  ): Extract<CorpDrawContinuation, { kind: "corp_mandatory_draw" }> {
+    return {
+      kind: "corp_mandatory_draw",
+      mandatoryCardCount: 1,
+      additionalCardCount: summary.additionalCardCount,
+      totalBaseDrawCount: summary.totalBaseDrawCount,
+      mandatoryAgendaCardCount: summary.mandatoryAgendaSources.reduce(
+        (sum, source) => sum + source.count,
+        0,
+      ),
+      optionalAgendaCardCount: summary.optionalAgendaSources.reduce(
+        (sum, source) => sum + source.count,
+        0,
+      ),
+      skivvissCardCount: summary.skivvissCardCount,
+      additionalSourceDefinitionIds: summary.additionalSourceDefinitionIds,
+    };
+  }
+
+  function applyMandatoryDrawPayload(
+    legalAction: LegalAction,
+    continuation: Extract<
+      CorpDrawContinuation,
+      { kind: "corp_mandatory_draw" }
+    >,
+  ): void {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      corpMandatoryDraw: true,
+      corpMandatoryCardCount: continuation.mandatoryCardCount,
+      corpMandatoryAdditionalCardCount: continuation.additionalCardCount,
+      corpMandatoryTotalBaseDrawCount: continuation.totalBaseDrawCount,
+      corpMandatoryAgendaCardCount: continuation.mandatoryAgendaCardCount,
+      corpMandatoryOptionalAgendaCardCount:
+        continuation.optionalAgendaCardCount,
+      corpMandatorySkivvissCardCount: continuation.skivvissCardCount,
+      corpMandatoryAdditionalSourceCount:
+        continuation.additionalSourceDefinitionIds.length,
+      corpMandatoryAdditionalSourceDefinitionIds:
+        continuation.additionalSourceDefinitionIds.join(","),
+      drawnCards: continuation.totalBaseDrawCount,
+    };
+  }
+
+  function completeCorpMandatoryDraw(state: GameState): void {
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.activeSide = "corp";
+  }
+
+  function resolveCorpMandatoryDraw(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    if (
+      state.phase !== "corp_draw_phase" ||
+      state.timingPoint !== "corp_draw.mandatory_draw" ||
+      state.activeSide !== "corp"
+    )
+      throw new Error("Der Korp-Pflichtzug ist jetzt nicht zulässig.");
+    const summary = corpMandatoryDrawSummary(state);
+    const continuation = mandatoryDrawContinuation(summary);
+    const effects: ResolvedGameEffect[] = [
+      ...summary.mandatoryAgendaSources.map((source) =>
+        links.automaticDrawCardsEffect(
+          `corp.start.scored_agenda.mandatory_draw.${source.cardId}`,
+          "corp",
+          source.count,
+          source.definitionId,
+        ),
+      ),
+      ...summary.optionalAgendaSources.map((source) =>
+        links.automaticDrawCardsEffect(
+          `corp.start.scored_agenda.optional_draw.${source.cardId}`,
+          "corp",
+          source.count,
+          source.definitionId,
+        ),
+      ),
+      ...(summary.skivvissCardCount > 0
+        ? [
+            links.automaticDrawCardsEffect(
+              "corp.start.skivviss",
+              "corp",
+              summary.skivvissCardCount,
+              SKIVVISS_ID,
+            ),
+          ]
+        : []),
+    ];
+    applyMandatoryDrawPayload(legalAction, continuation);
+    links.appendResolvedEffectsToPayload(legalAction, effects);
+    drawCorpCards(state, summary.totalBaseDrawCount, continuation);
+    if (state.winner || state.pendingCorpDraw) return;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      corpMandatoryDrawCompleted: true,
+    };
+    completeCorpMandatoryDraw(state);
+  }
+
+  function resumeCorpMandatoryDrawAfterChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    continuation: Extract<
+      CorpDrawContinuation,
+      { kind: "corp_mandatory_draw" }
+    >,
+  ): void {
+    if (
+      state.pendingChoice ||
+      state.pendingCorpDraw ||
+      state.phase !== "corp_draw_phase" ||
+      state.timingPoint !== "corp_draw.mandatory_draw"
+    )
+      throw new Error("Der Korp-Pflichtzug ist noch nicht abgeschlossen.");
+    applyMandatoryDrawPayload(legalAction, continuation);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      corpMandatoryDrawCompleted: true,
+    };
+    completeCorpMandatoryDraw(state);
   }
 
   function resolvePdcaCounterAction(
@@ -213,6 +397,8 @@ export function createTurnCorpStartRuntimeResolvers(
       clearAbilityUsageSourceIds();
     ensureCorpTurnFlags(state).scoredAgendaStartDrawChoiceResolvedSourceIds =
       [];
+    ensureCorpTurnFlags(state).scoredAgendaStartDrawChoiceSelectedSourceIds =
+      [];
     ensureCorpTurnFlags(state).pdcaUsedSourceIdsThisTurn =
       clearAbilityUsageSourceIds();
     applyFutureExtraActionGrantsAtTurnStart(state, "corp", effects);
@@ -257,18 +443,6 @@ export function createTurnCorpStartRuntimeResolvers(
   ): boolean {
     if (!skipPreamble) {
       applyPurgeableRunnerVirusCorpStartEffects(state, effects);
-      const skivvissDraws = virusCounterDrawsAtCorpStart(state);
-      if (skivvissDraws > 0) {
-        drawCorpCards(state, skivvissDraws);
-        effects?.push(
-          links.automaticDrawCardsEffect(
-            "corp.start.skivviss",
-            "corp",
-            skivvissDraws,
-            SKIVVISS_ID,
-          ),
-        );
-      }
       const cascadeTrash = virusCounterCascadeTrashAtCorpStart(state);
       if (cascadeTrash.amount > 0) {
         if (!cascadeTrash.sourceDefinitionId)
@@ -450,8 +624,6 @@ export function createTurnCorpStartRuntimeResolvers(
         continue;
       }
     }
-    applyScoredAgendaMandatoryDrawAtCorpStart(state, effects);
-    if (state.winner) return false;
     if (!state.pendingChoice)
       startCorpHqAgendaRevealChoice(
         deps.corpZoneChoiceHandlerHost(state, {
@@ -655,6 +827,8 @@ export function createTurnCorpStartRuntimeResolvers(
 
   return {
     resolvePdcaCounterAction,
+    resolveCorpMandatoryDraw,
+    resumeCorpMandatoryDrawAfterChoice,
     startCorpTurn,
     applyInstalledIceCounterLifecycle,
     applyCorpStartOfTurnEffects,

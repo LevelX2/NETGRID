@@ -3274,13 +3274,25 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     );
     const hqBeforeOptionalDraw = nextTurnStart.corp.hq.length;
     const employeeDraw = applyChoice(nextTurnStart, "corp", "draw");
-    expect(employeeDraw.corp.hq.length).toBe(hqBeforeOptionalDraw + 1);
+    expect(employeeDraw.corp.hq.length).toBe(hqBeforeOptionalDraw);
     expect(employeeDraw.pendingChoice).toBeUndefined();
     expect(employeeDraw.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_199_employee-empowerment",
       scoredAgendaStartDrawDecision: "draw",
-      drawnCards: 1,
+      selectedAdditionalDrawCount: 1,
+    });
+    const employeeMandatoryDraw = apply(
+      employeeDraw,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    expect(employeeMandatoryDraw.corp.hq.length).toBe(hqBeforeOptionalDraw + 2);
+    expect(employeeMandatoryDraw.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "mandatory_draw",
+      corpMandatoryCardCount: 1,
+      corpMandatoryOptionalAgendaCardCount: 1,
+      corpMandatoryTotalBaseDrawCount: 2,
       resolvedEffects: [
         expect.objectContaining({
           kind: "draw_cards",
@@ -3292,10 +3304,12 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     });
     const employeeDrawReplay = replayEvents(
       nextTurnStart,
-      employeeDraw.eventLog.slice(nextTurnStart.eventLog.length),
+      employeeMandatoryDraw.eventLog.slice(nextTurnStart.eventLog.length),
     );
     expect(employeeDrawReplay.ok).toBe(true);
-    expect(hashState(employeeDrawReplay.state)).toBe(hashState(employeeDraw));
+    expect(hashState(employeeDrawReplay.state)).toBe(
+      hashState(employeeMandatoryDraw),
+    );
     const removedEmployee = structuredClone(nextTurnStart);
     removeEverywhere(removedEmployee, employeeId);
     const removedResult = applyAction(removedEmployee, {

@@ -219,6 +219,7 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       scoredAgendaStartDrawChoiceResolvedSourceIds: () => employeeResolved,
       markScoredAgendaStartDrawChoiceResolved: (cardId) =>
         employeeResolved.push(cardId),
+      markScoredAgendaStartDrawChoiceSelected: () => undefined,
     },
     effects: {
       executeOnScore: () => undefined,
@@ -547,7 +548,7 @@ describe("scored agenda flow", () => {
       choiceVisibility: "public",
       sourceDefinitionId: "employee_empowerment",
       scoredAgendaStartDrawDecision: "draw",
-      drawnCount: 1,
+      selectedAdditionalDrawCount: 1,
     });
   });
 });

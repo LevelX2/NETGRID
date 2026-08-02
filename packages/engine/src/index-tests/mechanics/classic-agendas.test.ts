@@ -16,7 +16,11 @@ import {
   removeEverywhere,
   toRunnerTurnFromCorpMain,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
-import type { CardDefinitionId, DeckDefinition, GameState } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  DeckDefinition,
+  GameState,
+} from "@netgrid/shared";
 
 const DATA_FORT_REMAPPING = "onr_classic_001_data-fort-remapping";
 const SUPERSERUM = "onr_classic_002_superserum";
@@ -75,8 +79,7 @@ function scoreClassicAgenda(
       state,
       "corp",
       (action) =>
-        action.type === "score_agenda" &&
-        action.payload?.cardId === agendaId,
+        action.type === "score_agenda" && action.payload?.cardId === agendaId,
     ),
   };
 }
@@ -108,7 +111,8 @@ describe("Classic Agenda Implementation Smokes", () => {
         action.payload?.cardId === scored.agendaId,
     );
     expect(runAbility).toBeDefined();
-    if (!runAbility) throw new Error("Missing Data Fort Remapping run ability.");
+    if (!runAbility)
+      throw new Error("Missing Data Fort Remapping run ability.");
 
     state = apply(
       state,
@@ -168,12 +172,21 @@ describe("Classic Agenda Implementation Smokes", () => {
     );
 
     expect(nextTurnStart.pendingChoice).toBeUndefined();
-    expect(nextTurnStart.corp.hq.length).toBe(hqBeforeTurnStart + 1);
+    expect(nextTurnStart.corp.hq.length).toBe(hqBeforeTurnStart);
     expect(
       getLegalActions(nextTurnStart, "corp").map((action) => action.type),
     ).toEqual(["mandatory_draw"]);
-    expect(nextTurnStart.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "end_turn",
+    const afterMandatoryDraw = apply(
+      nextTurnStart,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    expect(afterMandatoryDraw.corp.hq.length).toBe(hqBeforeTurnStart + 2);
+    expect(afterMandatoryDraw.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "mandatory_draw",
+      corpMandatoryCardCount: 1,
+      corpMandatoryAgendaCardCount: 1,
+      corpMandatoryTotalBaseDrawCount: 2,
       resolvedEffects: [
         expect.objectContaining({
           kind: "draw_cards",
@@ -185,10 +198,12 @@ describe("Classic Agenda Implementation Smokes", () => {
     });
     const startTurnReplay = replayEvents(
       startTurnInitial,
-      nextTurnStart.eventLog.slice(startTurnReplayStart),
+      afterMandatoryDraw.eventLog.slice(startTurnReplayStart),
     );
     expect(startTurnReplay.ok).toBe(true);
-    expect(hashState(startTurnReplay.state)).toBe(hashState(nextTurnStart));
+    expect(hashState(startTurnReplay.state)).toBe(
+      hashState(afterMandatoryDraw),
+    );
   });
 
   it("installs accessed Theorem Proof as a 2 MU program before the Runner scores it", () => {
@@ -213,14 +228,15 @@ describe("Classic Agenda Implementation Smokes", () => {
       (action) =>
         action.type === "steal_agenda" &&
         action.payload?.cardId === theoremId &&
-        action.payload?.agendaAccessReplacement ===
-          "install_as_runner_program",
+        action.payload?.agendaAccessReplacement === "install_as_runner_program",
     );
 
     expect(state.runner.scoreArea).not.toContain(theoremId);
     expect(state.runner.rig.programs).toContain(theoremId);
     expect(state.runner.memoryUsed).toBe(2);
-    expect(state.cardInstances[theoremId]?.installedAsRunnerProgram).toMatchObject({
+    expect(
+      state.cardInstances[theoremId]?.installedAsRunnerProgram,
+    ).toMatchObject({
       memoryCost: 2,
       scoreAsAgendaAction: true,
       removeFromGameOnLeavePlay: true,
@@ -237,7 +253,9 @@ describe("Classic Agenda Implementation Smokes", () => {
     expect(state.runner.rig.programs).not.toContain(theoremId);
     expect(state.runner.scoreArea).toContain(theoremId);
     expect(state.runner.memoryUsed).toBe(0);
-    expect(state.cardInstances[theoremId]?.installedAsRunnerProgram).toBeUndefined();
+    expect(
+      state.cardInstances[theoremId]?.installedAsRunnerProgram,
+    ).toBeUndefined();
     expect(agendaPoints(state, "runner")).toBe(3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
@@ -280,14 +298,16 @@ describe("Classic Agenda Implementation Smokes", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "steal_agenda" &&
-          action.payload?.agendaAccessReplacement === "install_as_runner_program",
+          action.payload?.agendaAccessReplacement ===
+            "install_as_runner_program",
       ),
     ).toBe(true);
     state = apply(
@@ -303,8 +323,8 @@ describe("Classic Agenda Implementation Smokes", () => {
     expect(state.runner.rig.programs).not.toContain(theoremId);
     const trashOptionIds = [firstProgram, secondProgram].map(
       (cardId) =>
-        state.pendingChoice?.options.find((option) => option.value === cardId)?.id ??
-        "",
+        state.pendingChoice?.options.find((option) => option.value === cardId)
+          ?.id ?? "",
     );
     expect(trashOptionIds.every(Boolean)).toBe(true);
     state = applyChoices(state, "runner", trashOptionIds);

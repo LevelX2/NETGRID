@@ -121,7 +121,7 @@ planned
 | ------- | --------- | ---------------------------------------------------------------------------------------------- |
 | DRAW-01 | completed | 212 Engine-Testdateien / 1.848 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün |
 | DRAW-02 | completed | 212 Engine-Testdateien / 1.851 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün |
-| DRAW-03 | pending   | –                                                                                              |
+| DRAW-03 | completed | 212 Engine-Testdateien / 1.852 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün |
 | DRAW-04 | pending   | –                                                                                              |
 | DRAW-05 | pending   | –                                                                                              |
 

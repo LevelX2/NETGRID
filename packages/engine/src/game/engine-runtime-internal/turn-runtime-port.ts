@@ -2,6 +2,7 @@
 import type {
   CardDefinitionId,
   CardInstanceId,
+  CorpDrawContinuation,
   CounterType,
   GameState,
   LegalAction,
@@ -133,6 +134,18 @@ export type TurnRuntimePort = {
   resolvePdcaCounterAction: (
     state: GameState,
     legalAction: LegalAction,
+  ) => void;
+  resolveCorpMandatoryDraw: (
+    state: GameState,
+    legalAction: LegalAction,
+  ) => void;
+  resumeCorpMandatoryDrawAfterChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    continuation: Extract<
+      CorpDrawContinuation,
+      { kind: "corp_mandatory_draw" }
+    >,
   ) => void;
   resolveForcedActionNotPossible: typeof resolveForcedActionNotPossible;
   startCorpTurn: (

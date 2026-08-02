@@ -144,6 +144,21 @@ export function validateGameState(state: GameState): ValidationResult {
       )
         errors.push("Pending Corp draw card-effect continuation is invalid.");
     }
+    if (transaction.continuation?.kind === "corp_mandatory_draw") {
+      const continuation = transaction.continuation;
+      if (
+        continuation.totalBaseDrawCount !== transaction.baseDrawCount ||
+        continuation.totalBaseDrawCount !==
+          continuation.mandatoryCardCount + continuation.additionalCardCount ||
+        continuation.additionalCardCount !==
+          continuation.mandatoryAgendaCardCount +
+            continuation.optionalAgendaCardCount +
+            continuation.skivvissCardCount ||
+        (continuation.additionalSourceDefinitionIds.length === 0 &&
+          continuation.additionalCardCount > 0)
+      )
+        errors.push("Pending Corp mandatory draw continuation is invalid.");
+    }
     for (const cardId of transaction.drawnCardIds) {
       const instance = state.cardInstances[cardId];
       if (!(state.specialZones?.setAside ?? []).includes(cardId))

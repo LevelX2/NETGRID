@@ -598,6 +598,13 @@ export function createPendingChoiceRuntimeHosts(
       case "effect_commands":
         deps.executeEffectCommands(state, continuation.remainingCommands);
         return;
+      case "corp_mandatory_draw":
+        deps.resumeCorpMandatoryDrawAfterChoice(
+          state,
+          legalAction,
+          continuation,
+        );
+        return;
     }
   }
 

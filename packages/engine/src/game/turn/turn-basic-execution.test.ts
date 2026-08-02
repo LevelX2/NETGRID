@@ -334,6 +334,13 @@ function testHost(
     state,
     draw: {
       drawCorpCard: drawCorpCardForTest,
+      resolveCorpMandatoryDraw: (targetState) => {
+        drawCorpCardForTest(targetState);
+        if (targetState.winner) return;
+        targetState.phase = "corp_action_phase";
+        targetState.timingPoint = "corp_action.main";
+        targetState.activeSide = "corp";
+      },
       drawRunnerCards: drawRunnerCardsForTest,
       applyRunnerDrawSummaryPayload: (_state, legalAction, summary) => {
         if (summary.drawnCount <= 0) return;

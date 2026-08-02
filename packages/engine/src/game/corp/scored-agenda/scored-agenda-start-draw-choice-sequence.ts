@@ -10,9 +10,7 @@ import type {
 } from "./scored-agenda-flow-host";
 import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 
-export function isScoredAgendaStartDrawChoiceSource(
-  source: string,
-): boolean {
+export function isScoredAgendaStartDrawChoiceSource(source: string): boolean {
   return source.startsWith("scored_agenda.start_draw_choice");
 }
 
@@ -63,7 +61,9 @@ export function resolveScoredAgendaStartDrawChoice(
   if (!choice || !isScoredAgendaStartDrawChoiceSource(choice.source))
     throw new Error("Es ist keine scored Agenda-Start-Draw-Choice offen.");
   if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf die scored Agenda-Start-Draw-Choice nutzen.");
+    throw new Error(
+      "Nur die Korp darf die scored Agenda-Start-Draw-Choice nutzen.",
+    );
   if (
     host.state.phase !== "corp_draw_phase" ||
     host.state.timingPoint !== "corp_draw.mandatory_draw"
@@ -90,43 +90,39 @@ export function resolveScoredAgendaStartDrawChoice(
 
   const selected = selectedChoiceIds(playerAction.selectedChoices)[0];
   const useDraw = selected === "draw";
-  host.flags.markScoredAgendaStartDrawChoiceResolved(sourceCardId as CardInstanceId);
+  host.flags.markScoredAgendaStartDrawChoiceResolved(
+    sourceCardId as CardInstanceId,
+  );
+  if (useDraw)
+    host.flags.markScoredAgendaStartDrawChoiceSelected(
+      sourceCardId as CardInstanceId,
+    );
   delete host.state.pendingChoice;
 
-  const rdBefore = host.state.corp.rd.length;
-  if (useDraw) host.draw.drawCorpCard();
-  const drawnCount = useDraw ? rdBefore - host.state.corp.rd.length : 0;
   applySequencePayloadPatch(legalAction, {
     choiceVisibility: "public",
     sourceDefinitionId: sourceDefinition.id,
     cardDefinitionId: sourceDefinition.id,
     scoredAgendaStartDrawDecision: useDraw ? "draw" : "skip",
-    ...(useDraw ? { drawnCards: drawnCount, drawnCount } : {}),
+    selectedAdditionalDrawCount: useDraw ? scoredAgenda.drawCount : 0,
   });
-  if (useDraw) {
-    host.effects.appendScoredAgendaStartDrawChoiceEffect(
-      sourceCardId as CardInstanceId,
-      sourceDefinition.id,
-      drawnCount,
-    );
-  }
-  if (!host.state.winner) startScoredAgendaStartDrawChoice(host);
+  startScoredAgendaStartDrawChoice(host);
 }
 
 function scoredAgendaStartDrawSourceIds(
   host: ScoredAgendaFlowHost,
 ): CardInstanceId[] {
-  const resolved = new Set(host.flags.scoredAgendaStartDrawChoiceResolvedSourceIds());
+  const resolved = new Set(
+    host.flags.scoredAgendaStartDrawChoiceResolvedSourceIds(),
+  );
   return host.state.corp.scoreArea
-    .filter(
-      (cardId) => {
-        const definition = host.cards.definitionFor(cardId);
-        return (
-          host.cards.scoredAgendaForDefinition(definition)?.kind ===
-            "corp_start_turn_optional_draw" && !resolved.has(cardId)
-        );
-      },
-    )
+    .filter((cardId) => {
+      const definition = host.cards.definitionFor(cardId);
+      return (
+        host.cards.scoredAgendaForDefinition(definition)?.kind ===
+          "corp_start_turn_optional_draw" && !resolved.has(cardId)
+      );
+    })
     .sort();
 }
 

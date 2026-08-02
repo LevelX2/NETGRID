@@ -68,6 +68,7 @@ export type ScoredAgendaFlowHost = {
     markScoredBlackOpsAgendaThisTurn: () => void;
     scoredAgendaStartDrawChoiceResolvedSourceIds: () => CardInstanceId[];
     markScoredAgendaStartDrawChoiceResolved: (cardId: CardInstanceId) => void;
+    markScoredAgendaStartDrawChoiceSelected: (cardId: CardInstanceId) => void;
   };
   effects: {
     executeOnScore: (
