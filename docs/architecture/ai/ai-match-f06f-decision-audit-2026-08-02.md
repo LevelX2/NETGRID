@@ -25,8 +25,11 @@ nicht als vorweggenommenes Wissen der früheren KI-Entscheidung.
 ## Gesamturteil
 
 Alle 123 gewählten Actions waren nach damaliger und aktueller Rekonstruktion
-legal. Vier Entscheidungen sind klare strategische Fehler; Decision 37 ist
-ein begründeter Vorläufer derselben Score-Closeout-Ursache wie Decision 41.
+legal. Historisch waren vier Entscheidungen klare strategische Fehler;
+Decision 37 ist ein begründeter Vorläufer derselben Score-Closeout-Ursache wie
+Decision 41. Der Strict-Warmup-Checkpoint zeigt jedoch, dass Decision 41 auf
+dem aktuellen Code bereits korrekt behandelt wird. Drei Findings bleiben als
+aktuelle `behavior_regression` rot.
 Die spätere Rez-Sequenz ist lokal plausibel und kein eigener Fixpunkt. Der
 Deck-Hint-/Consumer-Audit ist `ok`: 34/34 unterschiedliche und 45/45 gesamte
 Corp-Karten besitzen aktive, seiten- und typkorrekte, reviewte Hints sowie
@@ -116,6 +119,10 @@ Damit sind alle 123 Entscheidungen genau einer Klasse zugeordnet.
 - Owner: `corp.score_agenda`; Same-Turn-Erkennung, Prioritätsklasse,
   TurnPlanCommitment und Execution Lease müssen dieselbe residente
   Planinstanz erhalten
+- Aktueller Reproduktionsstatus: bereits grün. Der unveränderte aktuelle
+  Chooser wählt `advance_card` mit `corp.score_agenda`, Capability
+  `advance_score_agenda` und derselben residenten Planinstanz. Kein weiterer
+  Verhaltensfix ist zulässig; der Checkpoint bleibt als Regression erhalten.
 
 ### F06F-03 – Matchpoint-Agenda ohne rechtzeitigen Abschluss exponiert
 
@@ -184,7 +191,8 @@ Consumern:
 
 ## Checkpoint-Ziele
 
-P3 capturet Decisions 26, 41, 52 und 102 mit `strict`-Warmup. Nur Ziele mit
-`behavior_regression` werden umgesetzt. Jeder Zielcheckpoint erhält eine
-grüne Gegenprobe, die frühes verantwortbares Rush-Scoring, sichtbare
-Multiaccess-Übersteuerung beziehungsweise korrekte Parent-Ownership erhält.
+P3 capturete Decisions 26, 41, 52 und 102 mit `strict`-Warmup und jeweils null
+Warmup-Drifts. Decisions 26, 52 und 102 reproduzieren ausschließlich als
+`behavior_regression`; Decision 41 ist bereits grün. Die Gegenproben für
+verantwortbares Same-Turn-Rush-Scoring und eine vollständig finanzierte
+zusätzliche R&D-Schicht sind vor dem Fix grün.

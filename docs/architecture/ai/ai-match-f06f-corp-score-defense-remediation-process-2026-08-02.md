@@ -1,6 +1,6 @@
 # Match f06f – Corp-Score-, Remote- und Defense-Remediation-Prozess
 
-Status: aktiv – P1 Worktree-Preflight und Prozessvertrag
+Status: aktiv – P3 rote Decision-Checkpoints abgeschlossen
 
 Quelle: vollständiges 123/123-Entscheidungsaudit von
 `match_f06f0fe345a11e0f` und Freigabe der Maßnahmen durch den
@@ -113,18 +113,22 @@ Genau ein Paket ist aktiv. Jeder Paketübergang verlangt sein Done-Gate,
 
 ### P3 – Spielgleiche rote Decision-Checkpoints
 
-- Ziel: alle vier Zielzustände auf unverändertem aktuellem Code rot
-  reproduzieren; enge Gegenproben bleiben grün.
+- Ziel: alle vier Zielzustände auf unverändertem aktuellem Code prüfen;
+  ausschließlich weiterhin fehlerhafte Ziele rot reproduzieren und enge
+  Gegenproben grün halten.
 - Arbeit: Strict-Warmup-Captures für Decisions 26, 41, 52 und 102; Fixture-
   und Runtime-State-Validierung; Tests prüfen Verhalten und Ownership.
-- Done-Gate: ausschließlich bestätigte `behavior_regression`-Fälle werden in
-  P4 übernommen; Fixtures, Tests und Red-Evidence sind separat committed.
+- Ergebnis: Decisions 26, 52 und 102 sind `behavior_regression`; Decision 41
+  ist auf aktuellem Code bereits mit korrekter Score-Ownership grün.
+- Done-Gate: ausschließlich die drei bestätigten `behavior_regression`-Fälle
+  werden in P4 übernommen; Fixtures, Tests und Red-Evidence sind separat
+  committed.
 - Commit: `test(ai): capture match f06f behavior regressions`
 
 ### P4 – Bestehende Owner korrigieren
 
-- Ziel A: `corp.score_agenda` bindet vollständige Scorehorizonte und einen
-  sicheren Same-Turn-Closeout, ohne freie Economy dazwischenzulassen.
+- Ziel A: `corp.score_agenda` bindet vollständige Scorehorizonte. Der bereits
+  grüne Same-Turn-Closeout wird unverändert als Gegenprobe erhalten.
 - Ziel B: der bestehende `corp.establish_scoring_remote`-Vertrag wird nur im
   erforderlichen Umfang ownergerecht angeschlossen und delegiert jede
   ICE-/Rezentscheidung an `corp.defend_servers`.
