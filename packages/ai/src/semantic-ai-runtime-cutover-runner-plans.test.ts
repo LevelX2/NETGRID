@@ -892,6 +892,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         {
           source: "shell-traders-installed",
           payload: {
+            cardId: "shell-traders-installed",
             sourceDefinitionId: "onr_v1_176_the-shell-traders",
             delayedInstallAbility: "set_aside_from_grip",
             targetCardId: dwarf.instanceId,
@@ -948,6 +949,31 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         replanReason: "scheduled_information_boundary",
       },
     });
+
+    const mismatchedInput = structuredClone(input);
+    const mismatchedAction = mismatchedInput.legalActions.find(
+      (action) => action.actionId === "prepare-dwarf",
+    );
+    if (!mismatchedAction?.payload) {
+      throw new Error("expected delayed-install action payload");
+    }
+    mismatchedAction.payload.cardId = "different-source";
+
+    const mismatchedDecision = chooseRunnerAction(mismatchedInput, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expectPlanDecision(mismatchedDecision, {
+      actionId: "prepare-dwarf",
+      planKind: "runner.shell_traders_pipeline",
+      capability: "shell_traders_prepare",
+      priorityClass: "P2",
+      assessmentEvidence: "runner_shell_traders_source:shell-traders-installed",
+    });
+    expect(
+      mismatchedDecision.decisionDebug?.planFirstDecision?.turnPlanning
+        ?.boundary?.kind,
+    ).not.toBe("projected_plan_discovery_required");
   });
 
   it("keeps Bodyweight event plan display data as play-not-install fallback", () => {

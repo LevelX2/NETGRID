@@ -23,6 +23,7 @@ import {
 } from "./plan-assessment";
 import type { PlanRouteStep, SemanticContinuation } from "./plan-route";
 import { runnerCoveragePlanHandDisposition } from "./runner-core-plan-modules";
+import { runnerDelayedInstallReplanningBoundary } from "./runner-delayed-install-replanning-boundary";
 import {
   buildRunnerTurnPlanningCoverageReport,
   runnerTurnPlanningModuleCoverage,
@@ -695,21 +696,12 @@ function boundaryForRunnerCandidate(
       assumptionIds: ["runner_run_plan_context_current"],
     });
   }
-  if (candidate.sourceDefinitionId === "onr_v1_176_the-shell-traders") {
-    return assessTurnObservationBoundary({
-      boundaryKind: "projected_plan_discovery_required",
-      remainingActionCapacity,
-      residualTurnValueBasis: "public_outcome_distribution",
-      immediateOutcomeCodes: [
-        "shell_counter_or_set_aside_state_changed",
-        "free_install_or_memory_choice_may_open",
-      ],
-      uncertainty: [
-        { code: "shell_traders_post_resolution_replanning_required" },
-      ],
-      assumptionIds: ["shell_traders_action_revalidated_by_engine"],
-    });
-  }
+  const delayedInstallBoundary = runnerDelayedInstallReplanningBoundary(
+    input,
+    candidate,
+    remainingActionCapacity,
+  );
+  if (delayedInstallBoundary) return delayedInstallBoundary;
   if (
     candidate.randomBadPublicityModel?.randomOutcome ||
     candidate.actionCapacityProjection?.reliability === "random"

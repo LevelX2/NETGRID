@@ -26,13 +26,6 @@ const allowedCardIdUses = createAllowances([
     reason:
       "The definition ID identifies the exact source of a dedicated card plan.",
   },
-  {
-    relativePath: "plans/runner-turn-planner-shadow.ts",
-    cardId: "onr_v1_176_the-shell-traders",
-    category: "individual_plan_model",
-    reason:
-      "The definition ID binds the shadow signal to its dedicated card plan.",
-  },
   ...[
     "onr_v1_222_ball-and-chain",
     "onr_v1_224_bolter-cluster",
@@ -50,28 +43,6 @@ const allowedCardIdUses = createAllowances([
     reason:
       "The legacy future-run ICE table remains an explicit card-family registry pending semantic hint or engine-quote migration.",
   })),
-  {
-    relativePath: "runtime/plan-first-live-runtime.ts",
-    cardId: "onr_v1_176_the-shell-traders",
-    category: "individual_plan_model",
-    reason:
-      "The definition ID binds execution to the dedicated delayed card plan.",
-  },
-  {
-    relativePath: "runtime/plan-first-live-runtime.ts",
-    cardId: "onr_v1_168_loan-from-chiba",
-    category: "lifecycle_binding",
-    reason:
-      "The exact source instance is required to bind, retain, and retire the card-specific lifecycle.",
-    expectedCount: 3,
-  },
-  {
-    relativePath: "runtime/runner-semantic-card-ids.ts",
-    cardId: "onr_v1_168_loan-from-chiba",
-    category: "lifecycle_binding",
-    reason:
-      "The constant binds the exact source of the dedicated lifecycle model.",
-  },
   {
     relativePath: "runtime/runner-targeted-bypass-plan.ts",
     cardId: "onr_v1_111_social-engineering",

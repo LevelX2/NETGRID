@@ -6853,7 +6853,7 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.runner.complete_turn",
     });
     expect(decision.evidence).toContain(
-      "plan_assessment_evidence:runner_loan_from_chiba_leave_unpayable_without_action_capacity",
+      "plan_assessment_evidence:runner_resource_leave_unpayable_without_action_capacity",
     );
   });
 
@@ -6999,7 +6999,7 @@ describe("authoritative plan-first live runtime", () => {
       "resource-lifecycle-support:loan-1",
     );
     expect(decision.evidence).toContain(
-      "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1:runner_loan_from_chiba_exact_funding_route_unavailable",
+      "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1:runner_resource_exact_funding_route_unavailable",
     );
   });
 
@@ -7053,7 +7053,7 @@ describe("authoritative plan-first live runtime", () => {
       "resource-lifecycle-support:loan-1",
     );
     expect(decision.evidence).toContain(
-      "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1:runner_loan_from_chiba_leave_payment_quote_unknown",
+      "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1:runner_resource_leave_payment_quote_unknown",
     );
   });
 
@@ -7149,7 +7149,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.reasonCode).toBe("plan_first.runner.economy");
     expect(decision.actionId).not.toBe(loanEnd.actionId);
     expect(decision.evidence).toContain(
-      "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1:runner_loan_from_chiba_leave_deferred_until_capacity_spent",
+      "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1:runner_resource_leave_deferred_until_capacity_spent",
     );
   });
 

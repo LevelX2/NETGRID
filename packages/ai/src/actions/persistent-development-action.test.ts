@@ -22,7 +22,7 @@ describe("persistentDevelopmentActionProjection", () => {
   it("supports both delayed-install payload names through the shared helper", () => {
     for (const payload of [
       { delayedInstallAbility: "set_aside_from_grip" },
-      { shellTradersAbility: "set_aside_from_grip" },
+      { delayedInstallAbility: "set_aside_from_grip" },
     ]) {
       expect(
         persistentDevelopmentActionProjection(

@@ -45,47 +45,47 @@ Lifecycle, Engine-Dispatch oder ein begründetes individuelles Planmodell.
 Das produktive Karten-ID-Gate erfasst zu Beginn 32 Literalvorkommen in 304
 erreichbaren KI-Quelldateien. Die geprüften Familien sind:
 
-| Familie | Ausgangslage | Zielowner und Zielvertrag |
-| --- | --- | --- |
-| Armageddon | Definition-ID erkennt R&D-Access-Ersatz | Run-/Access-Semantik; actiongebundener Access-Replacement-Effekt |
-| Lockjaw | zwei Definition-ID-Guards öffnen Runfenster | auslösender Runplan; actiongebundener Strength-/Run-Remainder-Effekt |
-| Faked Hit | Definition-ID ergänzt Eigenschaden und Bad Publicity | Runner-Self-Damage beziehungsweise Bad-Publicity-Relevanz; exakte Action-/Engine-Wirkung |
-| Library Search | Definition-ID erzwingt aktive Zentraldruckroute | zuständiger Run-/Pressure-Plan; funktionaler Future-Run-Effekt plus konkrete RunTargetEvaluation |
-| Prearranged Drop / Promises, Promises | Definition-ID-Fallback für Same-Turn-Access | Runner-Handentwicklung; actiongebundene Access-Prerequisite |
-| All Nighter | Definition-ID erkennt initiale Mehrfachrunroute | auslösender Runplan; funktionaler Follow-up-Run-Effekt |
-| Junkyard BBS | Definition-ID erkennt Recovery-Ability | Runner-Recovery; Engine-Ability-/Funktionseffekt |
-| BBS Whispering Campaign | Definition-ID erkennt installierte Economy | `corp.economy`; actiongebundene endliche Economy-Semantik |
-| vier Corp-Punish-Adapter | feste Definition-ID-Liste entdeckt Quotequellen | `corp.punish`; strukturierte Tag-, Damage- und Credit-Denial-Fähigkeiten, Engine-Quote bleibt autoritativ |
-| Loan from Chiba | Definition-ID erkennt und bindet Lifecycle | `runner.resource_lifecycle`; generische High-Risk-Loan-Semantik, danach exakte Sourceinstanz und Engine-Quote |
-| Shell Traders | individuelles Modell plus Definition-ID-Boundary-Guards | individuelles `runner.shell_traders_pipeline` bleibt; TurnPlanner reagiert nur auf typisierte Replan-Boundary |
-| Social Engineering | individuelles Hidden-Bid-/Bypass-Modell | bleibt begründetes individuelles Modell mit exakter Sourcebindung |
-| neun Future-Run-ICE-Diagnosewerte | Definition-ID-Tabelle im Diagnosepfad | generische ICE-Facts beziehungsweise ausschließlich Simulation/Diagnostik |
+| Familie                               | Ausgangslage                                            | Zielowner und Zielvertrag                                                                                     |
+| ------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Armageddon                            | Definition-ID erkennt R&D-Access-Ersatz                 | Run-/Access-Semantik; actiongebundener Access-Replacement-Effekt                                              |
+| Lockjaw                               | zwei Definition-ID-Guards öffnen Runfenster             | auslösender Runplan; actiongebundener Strength-/Run-Remainder-Effekt                                          |
+| Faked Hit                             | Definition-ID ergänzt Eigenschaden und Bad Publicity    | Runner-Self-Damage beziehungsweise Bad-Publicity-Relevanz; exakte Action-/Engine-Wirkung                      |
+| Library Search                        | Definition-ID erzwingt aktive Zentraldruckroute         | zuständiger Run-/Pressure-Plan; funktionaler Future-Run-Effekt plus konkrete RunTargetEvaluation              |
+| Prearranged Drop / Promises, Promises | Definition-ID-Fallback für Same-Turn-Access             | Runner-Handentwicklung; actiongebundene Access-Prerequisite                                                   |
+| All Nighter                           | Definition-ID erkennt initiale Mehrfachrunroute         | auslösender Runplan; funktionaler Follow-up-Run-Effekt                                                        |
+| Junkyard BBS                          | Definition-ID erkennt Recovery-Ability                  | Runner-Recovery; Engine-Ability-/Funktionseffekt                                                              |
+| BBS Whispering Campaign               | Definition-ID erkennt installierte Economy              | `corp.economy`; actiongebundene endliche Economy-Semantik                                                     |
+| vier Corp-Punish-Adapter              | feste Definition-ID-Liste entdeckt Quotequellen         | `corp.punish`; strukturierte Tag-, Damage- und Credit-Denial-Fähigkeiten, Engine-Quote bleibt autoritativ     |
+| Loan from Chiba                       | Definition-ID erkennt und bindet Lifecycle              | `runner.resource_lifecycle`; generische High-Risk-Loan-Semantik, danach exakte Sourceinstanz und Engine-Quote |
+| Shell Traders                         | individuelles Modell plus Definition-ID-Boundary-Guards | individuelles `runner.shell_traders_pipeline` bleibt; TurnPlanner reagiert nur auf typisierte Replan-Boundary |
+| Social Engineering                    | individuelles Hidden-Bid-/Bypass-Modell                 | bleibt begründetes individuelles Modell mit exakter Sourcebindung                                             |
+| neun Future-Run-ICE-Diagnosewerte     | Definition-ID-Tabelle im Diagnosepfad                   | generische ICE-Facts beziehungsweise ausschließlich Simulation/Diagnostik                                     |
 
 ## Paketfolge
 
-| Paket | Schwerpunkt | Fachlicher Owner |
-| --- | --- | --- |
-| GP00 | Prozess, Ausgangsinventar und Karten-ID-Strukturgate | Prozess / Architekturgate |
-| GP01 | Armageddon und Lockjaw | Runner Run-/Access-Pläne |
-| GP02 | Faked Hit | Self-Damage und Bad-Publicity-Relevanz |
-| GP03 | Library Search, Prearranged Drop, Promises, All Nighter, Junkyard BBS | Runner-Handentwicklung, Runfolge und Recovery |
-| GP04 | Whispering Campaign und Corp-Punish-Adapter | `corp.economy` und `corp.punish` |
-| GP05 | Loan from Chiba und Shell-Traders-Boundaries | Resource-Lifecycle und TurnPlanner-Boundary |
-| GP06 | Diagnosebereinigung, Ausnahmeklassifikation und Wissenspflege | Diagnostik / Architekturreview |
-| Abschluss | Main-Abgleich, vollständige Gates, Integration und Cleanup | Prozess |
+| Paket     | Schwerpunkt                                                           | Fachlicher Owner                              |
+| --------- | --------------------------------------------------------------------- | --------------------------------------------- |
+| GP00      | Prozess, Ausgangsinventar und Karten-ID-Strukturgate                  | Prozess / Architekturgate                     |
+| GP01      | Armageddon und Lockjaw                                                | Runner Run-/Access-Pläne                      |
+| GP02      | Faked Hit                                                             | Self-Damage und Bad-Publicity-Relevanz        |
+| GP03      | Library Search, Prearranged Drop, Promises, All Nighter, Junkyard BBS | Runner-Handentwicklung, Runfolge und Recovery |
+| GP04      | Whispering Campaign und Corp-Punish-Adapter                           | `corp.economy` und `corp.punish`              |
+| GP05      | Loan from Chiba und Shell-Traders-Boundaries                          | Resource-Lifecycle und TurnPlanner-Boundary   |
+| GP06      | Diagnosebereinigung, Ausnahmeklassifikation und Wissenspflege         | Diagnostik / Architekturreview                |
+| Abschluss | Main-Abgleich, vollständige Gates, Integration und Cleanup            | Prozess                                       |
 
 ## Umsetzungsstand
 
-| Paket | Status | Commit |
-| --- | --- | --- |
-| GP00 | abgeschlossen | `959ec9210` |
-| GP01 | abgeschlossen | `fcc94df13` |
-| GP02 | abgeschlossen | `7e9dffec1` |
-| GP03 | abgeschlossen | `ddc83e9f7` |
-| GP04 | abgeschlossen | dieser Paketcommit |
-| GP05 | offen | – |
-| GP06 | offen | – |
-| Abschluss | offen | – |
+| Paket     | Status        | Commit             |
+| --------- | ------------- | ------------------ |
+| GP00      | abgeschlossen | `959ec9210`        |
+| GP01      | abgeschlossen | `fcc94df13`        |
+| GP02      | abgeschlossen | `7e9dffec1`        |
+| GP03      | abgeschlossen | `ddc83e9f7`        |
+| GP04      | abgeschlossen | `c0bfdaf2a`        |
+| GP05      | abgeschlossen | dieser Paketcommit |
+| GP06      | offen         | –                  |
+| Abschluss | offen         | –                  |
 
 ## Paketregeln
 
@@ -181,6 +181,16 @@ auf 18 produktive ID-Vorkommen.
 
 Done: keine querliegende Karten-ID-Entscheidung; Lifecycle-/Planidentität und
 `PlanExecutionOrigin` bleiben stabil.
+
+Ergebnis: Der Resource-Lifecycle wird über die exakt gebundene, aktuelle
+`LegalAction` mit `cardImplementationLifecycleAction` entdeckt. Definition und
+Sourceinstanz werden erst danach als Lifecycle-Identität übernommen; Betrag
+und Zahlungsstatus stammen weiterhin ausschließlich aus der Engine-Payload.
+Ein unvollständig gebundener kartenspezifischer `EndTurn` wird fail-closed
+verworfen. Die beiden allgemeinen TurnPlanner-Pfade reagieren über denselben
+typisierten Delayed-Install-Replanning-Vertrag statt über die Shell-Traders-ID;
+das individuelle `runner.shell_traders_pipeline` bleibt unverändert Owner.
+Das Strukturgate sank dadurch von 18 auf 12 produktive ID-Vorkommen.
 
 ### GP06 – Diagnostik, Ausnahmen und Wissenspflege
 

@@ -8,12 +8,8 @@ export function delayedInstallAbilityForAction(
   action: LegalAction,
 ): DelayedInstallAbility | undefined {
   const payload = action.payload;
-  const ability =
-    payload?.delayedInstallAbility ?? payload?.shellTradersAbility;
-  if (
-    ability === "set_aside_from_grip" ||
-    ability === "remove_shell_counter"
-  ) {
+  const ability = payload?.delayedInstallAbility;
+  if (ability === "set_aside_from_grip" || ability === "remove_shell_counter") {
     return ability;
   }
   return undefined;

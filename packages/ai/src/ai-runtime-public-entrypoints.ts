@@ -22,6 +22,7 @@ import {
   runnerRunTargetSemanticGuidanceValue,
 } from "./runner-run-target-guidance";
 import { actionClickCost, actionCreditCost } from "./runtime/action-cost";
+import { delayedInstallAbilityForAction } from "./actions/delayed-install-action";
 import { compareAction } from "./runtime/action-order";
 import {
   buildServerFeatures,
@@ -69,10 +70,7 @@ import {
 } from "./runtime/runner-role-classification";
 import { runnerRunActionSpendingCapAssessment } from "./runtime/runner-run-only-action-adjustment";
 import { encounterRunRemainderEffectAssessment } from "./runtime/runner-run-remainder-effect-assessment";
-import {
-  BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
-  LOAN_FROM_CHIBA_CARD_ID,
-} from "./runtime/runner-semantic-card-ids";
+import { BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI } from "./runtime/runner-semantic-card-ids";
 import {
   visibleBreakerRoleCounts as visibleBreakerRoleCountsForAi,
   visibleBreakerRoles as visibleBreakerRolesForAi,
@@ -85,7 +83,6 @@ import {
   semanticRuntimeScoreFromComponents,
 } from "./runtime/semantic-runtime-score-components";
 import { isRemoteServerTarget } from "./runtime/server-target";
-import { shellTradersAbility } from "./runtime/shell-traders-action";
 import { breakSubroutineIndexesForAction } from "./runtime/subroutine-indexes";
 import { corpVisibleCardStoredCredits } from "./runtime/visible-card-credit";
 import {
@@ -161,7 +158,7 @@ export const aiLiveRuntimeDependencies = {
   runnerKnownPathAssessmentIsKnownNoAccess,
   runnerKnownPathAssessmentIsUnbreakableNoAccess,
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
-  delayedInstallAbilityForAction: shellTradersAbility,
+  delayedInstallAbilityForAction,
   runnerHasInstalledPrograms,
   visibleBreakerRolesForAi,
   compareAction,
@@ -202,7 +199,6 @@ export const aiLiveRuntimeDependencies = {
   runnerStrategicBreakerTargetForMetrics,
   visibleRootIsKnownAgenda: visibleRootIsKnownAgendaForMetrics,
   runRiskAssessment: assessRandomBreakOrDamageRiskForRunAction,
-  highRiskLoanDefinitionId: LOAN_FROM_CHIBA_CARD_ID,
   projectedCreditGainForAction: runnerProjectedCreditGainForAction,
   handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
   economyPosture: buildRunnerEconomyPosture,

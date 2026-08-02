@@ -149,6 +149,7 @@ import {
 } from "../plans/corp-turn-planner-cutover";
 import { assertRunnerTurnPlanningModuleRegistry } from "../plans/runner-turn-planning-coverage";
 import { buildRunnerTurnPlannerShadow } from "../plans/runner-turn-planner-shadow";
+import { runnerDelayedInstallReplanningBoundary } from "../plans/runner-delayed-install-replanning-boundary";
 import {
   buildCanonicalLegalActionInvocation,
   buildPlanningStateIdentity,
@@ -1655,6 +1656,18 @@ export function runnerActionDispositions(
   }
   const delegatedFundingActionIds = runnerDelegatedFundingActionIds(domain);
   for (const candidate of candidates) {
+    if (
+      candidate.semanticActionType === "turn_flow.end_turn" &&
+      candidate.sourceKind === "card" &&
+      !specializedEconomyActionIds.has(candidate.actionId)
+    ) {
+      add(
+        candidate.actionId,
+        "runner.resource_lifecycle",
+        "runner_card_scoped_end_turn_missing_bound_lifecycle_contract",
+      );
+      continue;
+    }
     if (
       candidate.sourceKind === "basic_action" &&
       candidate.actionType === "gain_credit" &&
@@ -13132,8 +13145,6 @@ function turnPlanningProjectionDebug(params: {
     candidate.actionType === "draw_card" ||
     (candidate.economyProjection?.cardsDrawn !== undefined &&
       candidate.economyProjection.cardsDrawn > 0);
-  const isShellTradersBoundary =
-    candidate.sourceDefinitionId === "onr_v1_176_the-shell-traders";
   const remainingCapacity = {
     minimum: Math.max(
       0,
@@ -13155,21 +13166,11 @@ function turnPlanningProjectionDebug(params: {
         uncertainty: [{ code: "post_draw_replanning_required" }],
         assumptionIds: ["current_legal_action_remains_executable"],
       })
-    : isShellTradersBoundary
-      ? assessTurnObservationBoundary({
-          boundaryKind: "projected_plan_discovery_required",
-          remainingActionCapacity: remainingCapacity,
-          residualTurnValueBasis: "public_outcome_distribution",
-          immediateOutcomeCodes: [
-            "shell_counter_or_set_aside_state_changed",
-            "free_install_or_memory_choice_may_open",
-          ],
-          uncertainty: [
-            { code: "shell_traders_post_resolution_replanning_required" },
-          ],
-          assumptionIds: ["shell_traders_action_revalidated_by_engine"],
-        })
-      : undefined;
+    : runnerDelayedInstallReplanningBoundary(
+        params.input,
+        candidate,
+        remainingCapacity,
+      );
   const projectedCandidate = {
     ...candidate,
     stateVersion: stateIdentity.stateVersion,
@@ -14790,25 +14791,31 @@ function runnerResourceLifecycleSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
 ): NonNullable<RunnerCorePlanDomain["resourceLifecycle"]> {
-  const loanFromChibaActions = candidates.filter(
-    (candidate) =>
-      candidate.semanticActionType === "turn_flow.end_turn" &&
-      candidate.sourceKind === "card" &&
-      candidate.sourceDefinitionId === "onr_v1_168_loan-from-chiba",
+  const leavePlayPaymentActions = candidates.filter((candidate) =>
+    runnerCandidateIsLeavePlayPaymentLifecycleAction(input, candidate),
   );
-  if (loanFromChibaActions.length === 0) return [];
+  if (leavePlayPaymentActions.length === 0) return [];
   const visibleRemainingRunnerTurnCeiling = input.playerView.opponent.deckCount;
   const actionsBySourceInstance = new Map<string, ActionSemanticCandidate[]>();
-  for (const candidate of loanFromChibaActions) {
+  for (const candidate of leavePlayPaymentActions) {
     const sourceCardInstanceId = candidate.sourceCardInstanceId;
     if (sourceCardInstanceId === undefined) continue;
     const actions = actionsBySourceInstance.get(sourceCardInstanceId) ?? [];
     actions.push(candidate);
     actionsBySourceInstance.set(sourceCardInstanceId, actions);
   }
-  return [...actionsBySourceInstance.entries()].map(
-    ([sourceCardInstanceId, actions]) => {
-      const lifecycleId = `onr_v1_168_loan-from-chiba:${sourceCardInstanceId}`;
+  return [...actionsBySourceInstance.entries()]
+    .map(([sourceCardInstanceId, actions]) => {
+      const definitionId = actions[0]?.sourceDefinitionId;
+      if (
+        definitionId === undefined ||
+        actions.some(
+          (candidate) => candidate.sourceDefinitionId !== definitionId,
+        )
+      ) {
+        return undefined;
+      }
+      const lifecycleId = `${definitionId}:${sourceCardInstanceId}`;
       const quote = runnerLifecycleLeavePlayPaymentQuote(
         input,
         sourceCardInstanceId,
@@ -14860,22 +14867,22 @@ function runnerResourceLifecycleSignals(
         leavePlayEconomicallyProductive;
       const evidenceCode =
         quote === undefined
-          ? "runner_loan_from_chiba_leave_payment_quote_unknown"
+          ? "runner_resource_leave_payment_quote_unknown"
           : !leavePlayEconomicallyProductive
-            ? `runner_loan_from_chiba_leave_cost_not_recovered_within_visible_horizon:${visibleRemainingRunnerTurnCeiling}`
+            ? `runner_resource_leave_cost_not_recovered_within_visible_horizon:${visibleRemainingRunnerTurnCeiling}`
             : quote.status === "payable"
               ? capacitySpent
-                ? `runner_loan_from_chiba_leave_avoids_visible_long_horizon_liability:${visibleRemainingRunnerTurnCeiling}`
-                : "runner_loan_from_chiba_leave_deferred_until_capacity_spent"
+                ? `runner_resource_leave_avoids_visible_long_horizon_liability:${visibleRemainingRunnerTurnCeiling}`
+                : "runner_resource_leave_deferred_until_capacity_spent"
               : capacitySpent
-                ? "runner_loan_from_chiba_leave_unpayable_without_action_capacity"
+                ? "runner_resource_leave_unpayable_without_action_capacity"
                 : fullFundingRouteExists
-                  ? "runner_loan_from_chiba_waiting_for_exact_funding_support"
-                  : "runner_loan_from_chiba_exact_funding_route_unavailable";
+                  ? "runner_resource_waiting_for_exact_funding_support"
+                  : "runner_resource_exact_funding_route_unavailable";
       return {
         lifecycleId,
         sourceCardInstanceId,
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId,
         phase: leavePlayNow ? "leave_play" : "retain",
         actionIds: leavePlayNow
           ? actions.map((candidate) => candidate.actionId)
@@ -14901,13 +14908,44 @@ function runnerResourceLifecycleSignals(
           evidenceCode,
           ...(quote
             ? [
-                `runner_loan_from_chiba_leave_play_payment_amount:${quote.amount}`,
-                `runner_loan_from_chiba_leave_play_payment_status:${quote.status}`,
+                `runner_resource_leave_play_payment_amount:${quote.amount}`,
+                `runner_resource_leave_play_payment_status:${quote.status}`,
               ]
             : []),
         ],
       };
-    },
+    })
+    .filter(
+      (
+        signal,
+      ): signal is NonNullable<
+        RunnerCorePlanDomain["resourceLifecycle"]
+      >[number] => signal !== undefined,
+    );
+}
+
+function runnerCandidateIsLeavePlayPaymentLifecycleAction(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  if (
+    candidate.semanticActionType !== "turn_flow.end_turn" ||
+    candidate.sourceKind !== "card" ||
+    candidate.sourceCardInstanceId === undefined ||
+    candidate.sourceDefinitionId === undefined
+  ) {
+    return false;
+  }
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  return (
+    action?.side === "runner" &&
+    action.type === "end_turn" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.source === candidate.sourceCardInstanceId &&
+    action.payload?.cardId === candidate.sourceCardInstanceId &&
+    action.payload?.cardImplementationLifecycleAction === "end_of_runner_turn"
   );
 }
 
