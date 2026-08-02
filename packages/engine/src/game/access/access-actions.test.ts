@@ -265,7 +265,9 @@ describe("access action generation", () => {
         {
           cardId: "armageddon",
           serverId: "rd",
-          proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
+          successfulRunAccessReplacement:
+            "skip_access_add_purgeable_runner_virus_counter",
+          counterSide: "corp",
           counterType: "doom",
           counterDelta: 1,
         },
@@ -276,7 +278,8 @@ describe("access action generation", () => {
       {
         type: "trigger_ability",
         payload: {
-          proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
+          successfulRunAccessReplacement:
+            "skip_access_add_purgeable_runner_virus_counter",
         },
       },
       {

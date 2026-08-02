@@ -10294,6 +10294,58 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("owns a generic run-remainder strength boost without knowing its card definition", () => {
+    resetResidentPlanPortfolioMemory();
+    const boost = legalAction(
+      "runner.trigger_ability.generic-run-strength-boost",
+      "runner",
+      "trigger_ability",
+      "Run support: breaker +2",
+      { credits: 0, clicks: 0 },
+      {
+        source: "generic-run-support",
+        payload: {
+          cardId: "generic-run-support",
+          targetCardId: "generic-breaker",
+          runnerAbility: "boost_icebreaker_for_run",
+        },
+      },
+    );
+    const input = aiInput("runner", [boost]);
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      successful: false,
+    };
+    input.playerView.own.rig = [
+      visibleCard("generic-run-support", "runner", "program", {
+        definitionId: "test-generic-run-support",
+      }),
+      visibleCard("generic-breaker", "runner", "program", {
+        definitionId: "test-generic-breaker",
+        subtypes: ["icebreaker"],
+      }),
+    ];
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: boost.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          leafExecutorInstanceId: expect.any(String),
+          route: {
+            actionId: boost.actionId,
+            stepId: expect.any(String),
+          },
+        },
+      },
+    });
+  });
+
   it("explicitly rejects post-pass derez when it would abandon a visible agenda", () => {
     resetResidentPlanPortfolioMemory();
     const derez = legalAction(

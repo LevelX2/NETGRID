@@ -15934,10 +15934,27 @@ function isRunnerRunWindowCandidate(
     runnerCandidateHasVisibleAdditionalAccessEffect(candidate) ||
     runnerRestrictedRunSequenceAction(input, candidate) !== undefined ||
     runnerPostPassDerezAndEndRunAction(input, candidate) !== undefined ||
-    (candidate.sourceDefinitionId === "onr_proteus_091_lockjaw" &&
-      runnerCandidateIsCardAbility(candidate) &&
-      (input.playerView.timingPoint === "run.encounter_ice" ||
-        input.playerView.timingPoint === "run.jack_out_window"))
+    runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined
+  );
+}
+
+function runnerRunRemainderStrengthBoostAction(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): LegalAction | undefined {
+  if (!runnerCandidateIsCardAbility(candidate)) return undefined;
+  if (
+    input.playerView.timingPoint !== "run.encounter_ice" &&
+    input.playerView.timingPoint !== "run.jack_out_window"
+  )
+    return undefined;
+  return input.legalActions.find(
+    (action) =>
+      action.actionId === candidate.actionId &&
+      action.type === "trigger_ability" &&
+      action.source === candidate.sourceCardInstanceId &&
+      action.payload?.runnerAbility === "boost_icebreaker_for_run" &&
+      typeof action.payload?.targetCardId === "string",
   );
 }
 
@@ -16202,10 +16219,7 @@ function runnerRunWindowActionAssessment(
     candidate.semanticActionType === "breaker.boost_strength" ||
     candidate.semanticActionType === "breaker.break_subroutine" ||
     postPassDerezAndEndRun !== undefined ||
-    (candidate.sourceDefinitionId === "onr_proteus_091_lockjaw" &&
-      runnerCandidateIsCardAbility(candidate) &&
-      (input.playerView.timingPoint === "run.encounter_ice" ||
-        input.playerView.timingPoint === "run.jack_out_window"));
+    runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined;
   if (!supportedRunAction) {
     return {
       admissible: false,

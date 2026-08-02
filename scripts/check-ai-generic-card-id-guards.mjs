@@ -20,13 +20,6 @@ const allowedCategories = new Set([
 
 const allowedCardIdUses = createAllowances([
   {
-    relativePath: "actions/run-access-decision-model.ts",
-    cardId: "onr_proteus_078_armageddon",
-    category: "review_required",
-    reason:
-      "The access replacement is still guarded by one definition ID and should move to a generic effect contract.",
-  },
-  {
     relativePath: "plans/runner-core-plan-modules.ts",
     cardId: "onr_v1_176_the-shell-traders",
     category: "individual_plan_model",
@@ -107,14 +100,6 @@ const allowedCardIdUses = createAllowances([
     reason:
       "The exact source instance is required to bind, retain, and retire the card-specific lifecycle.",
     expectedCount: 3,
-  },
-  {
-    relativePath: "runtime/plan-first-live-runtime.ts",
-    cardId: "onr_proteus_091_lockjaw",
-    category: "review_required",
-    reason:
-      "The run window already has a semantic effect payload, but two exact-ID guards remain.",
-    expectedCount: 2,
   },
   ...[
     "onr_v1_076_all-nighter",

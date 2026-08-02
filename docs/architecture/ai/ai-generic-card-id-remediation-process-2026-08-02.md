@@ -74,6 +74,19 @@ erreichbaren KI-Quelldateien. Die geprüften Familien sind:
 | GP06 | Diagnosebereinigung, Ausnahmeklassifikation und Wissenspflege | Diagnostik / Architekturreview |
 | Abschluss | Main-Abgleich, vollständige Gates, Integration und Cleanup | Prozess |
 
+## Umsetzungsstand
+
+| Paket | Status | Commit |
+| --- | --- | --- |
+| GP00 | abgeschlossen | `959ec9210` |
+| GP01 | abgeschlossen | dieser Paketcommit |
+| GP02 | offen | – |
+| GP03 | offen | – |
+| GP04 | offen | – |
+| GP05 | offen | – |
+| GP06 | offen | – |
+| Abschluss | offen | – |
+
 ## Paketregeln
 
 - Genau ein Paket ist aktiv; kein Paket wird übersprungen.

@@ -195,7 +195,9 @@ export function buildSuccessfulRunFollowupActions(
           {
             cardId: sourceCardId,
             serverId: run.attackedServerId,
-            proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
+            successfulRunAccessReplacement:
+              "skip_access_add_purgeable_runner_virus_counter",
+            counterSide: "corp",
             counterType: "doom",
             counterDelta: 1,
           },
@@ -360,8 +362,8 @@ export function resolveSuccessfulRunFollowupAbility(
   )
     return resolveSuccessfulRunFortCounterExpose(host, legalAction);
   if (
-    legalAction.payload?.proteusRunnerVirusFollowup ===
-    "doom_counter_instead_of_rd_access"
+    legalAction.payload?.successfulRunAccessReplacement ===
+    "skip_access_add_purgeable_runner_virus_counter"
   )
     return resolveArmageddonDoomCounterInsteadOfAccess(host, legalAction);
   if (
@@ -613,7 +615,9 @@ export function resolveArmageddonDoomCounterInsteadOfAccess(
   host.access.finishSuccessfulRun(legalAction);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
+    successfulRunAccessReplacement:
+      "skip_access_add_purgeable_runner_virus_counter",
+    counterSide: "corp",
     counterType: "doom",
     counterDelta: 1,
     counterTotalAfter: before + 1,
