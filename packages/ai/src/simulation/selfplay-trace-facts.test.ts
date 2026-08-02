@@ -21,6 +21,34 @@ describe("selfplayTraceFactsForDecision", () => {
     expect(JSON.stringify(facts)).not.toContain("privatePayload");
   });
 
+  it("preserves a redaction-safe why-not marker when only the owner detail is filtered", () => {
+    const selected = decision();
+    selected.decisionDebug!.actionAlternatives = [
+      {
+        rank: 1,
+        actionId: "install-hidden-card",
+        actionType: "install_card",
+        label: "Install",
+        source: "privatePayload:card",
+        selected: false,
+        excluded: true,
+        whyNot: ["privatePayload:owner_reason"],
+      },
+    ];
+    const facts = selfplayTraceFactsForDecision(selected, {
+      sanitizeAiDecisionDebug: (debug) => debug,
+      safeSelfplayFacts: (items) =>
+        items
+          .filter((item): item is string => typeof item === "string")
+          .filter((item) => !item.includes("privatePayload")),
+    });
+
+    expect(facts.actionAlternatives?.[0]?.whyNot).toEqual([
+      "runtime_why_not_redacted:alternative:install_card:1:owner_reason_withheld",
+    ]);
+    expect(JSON.stringify(facts)).not.toContain("privatePayload");
+  });
+
   it("retains strategic Corp intent facts beyond the generic detail item cap", () => {
     const facts = selfplayTraceFactsForDecision(strategyDecision(), {
       sanitizeAiDecisionDebug: (debug) => debug,

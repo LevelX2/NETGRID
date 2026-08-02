@@ -36,7 +36,9 @@ export function selfplayTraceFactsForDecision(
   decision: AiDecision,
   dependencies: SelfplayTraceFactsDependencies,
 ): SelfplayTraceFacts {
-  const safeDebug = dependencies.sanitizeAiDecisionDebug(decision.decisionDebug);
+  const safeDebug = dependencies.sanitizeAiDecisionDebug(
+    decision.decisionDebug,
+  );
   if (!safeDebug) return {};
   const debugFacts = dependencies.safeSelfplayFacts([
     ...(safeDebug.planKind ? [`planKind:${safeDebug.planKind}`] : []),
@@ -71,18 +73,27 @@ function safeSelfplayActionAlternative(
 ): AiDecisionActionAlternative {
   const actionType =
     safeSelfplayText(alternative.actionType, dependencies) ?? "redacted";
+  const safeWhyNot = dependencies.safeSelfplayFacts(alternative.whyNot ?? []);
   const result: AiDecisionActionAlternative = {
     rank: alternative.rank,
     actionId: `selfplay_action:${actionType}:${alternative.rank}`,
     actionType,
     selected: alternative.selected,
     whyChosen: dependencies.safeSelfplayFacts(alternative.whyChosen ?? []),
-    whyNot: dependencies.safeSelfplayFacts(alternative.whyNot ?? []),
+    whyNot:
+      !alternative.selected &&
+      safeWhyNot.length === 0 &&
+      (alternative.whyNot?.length ?? 0) > 0
+        ? [
+            `runtime_why_not_redacted:alternative:${actionType}:${alternative.rank}:owner_reason_withheld`,
+          ]
+        : safeWhyNot,
   };
   if (alternative.excluded !== undefined)
     result.excluded = alternative.excluded;
   if (alternative.score !== undefined) result.score = alternative.score;
-  if (alternative.priority !== undefined) result.priority = alternative.priority;
+  if (alternative.priority !== undefined)
+    result.priority = alternative.priority;
   const scoreBreakdown = alternative.scoreBreakdown
     ?.map((component) => {
       const key = safeSelfplayText(component.key, dependencies);
@@ -109,7 +120,10 @@ function safeSelfplayActionAlternative(
       dependencies,
     );
     if (economyKind) {
-      const ability = safeSelfplayText(alternative.economy.ability, dependencies);
+      const ability = safeSelfplayText(
+        alternative.economy.ability,
+        dependencies,
+      );
       const economyNeed = safeSelfplayText(
         alternative.economy.economyNeed,
         dependencies,
