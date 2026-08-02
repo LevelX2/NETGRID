@@ -1840,6 +1840,16 @@ describe("V1.0.5 action board UI helpers", () => {
           value: "drawn_operation",
           card: card("drawn_operation", "Operation", "operation"),
         },
+        ...Array.from({ length: 4 }, (_, index) => ({
+          id: `bottom_drawn_extra_${index + 1}`,
+          label: `Gezogene Karte ${index + 3}`,
+          value: `drawn_extra_${index + 1}`,
+          card: card(
+            `drawn_extra_${index + 1}`,
+            `Gezogene Karte ${index + 3}`,
+            "asset",
+          ),
+        })),
       ],
     };
     const stackTopFiveChoice: NonNullable<PlayerView["pendingChoice"]> = {
@@ -1970,6 +1980,7 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseCardChoicePanel(heapSearchChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(offSiteBackupsChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(strategicPlanningGroupChoice)).toBe(true);
+    expect(strategicPlanningGroupChoice.options).toHaveLength(6);
     expect(shouldUseCardChoicePanel(stackTopFiveChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(technicianPrivateLookChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(protocolFilesPrivateLookChoice)).toBe(true);

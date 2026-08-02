@@ -108,6 +108,7 @@ export function resolveStrategicPlanningGroupDrawChoice(
     strategicPlanningGroupBaseDrawCount: transaction.baseDrawCount,
     strategicPlanningGroupAdditionalDrawCount: transaction.replacementDrawCount,
     strategicPlanningGroupDrawnCardCount: transaction.drawnCardIds.length,
+    strategicPlanningGroupNetDrawCount: transaction.drawnCardIds.length - 1,
     bottomedCardCount: 1,
     destinationZone: "rd_bottom",
   };

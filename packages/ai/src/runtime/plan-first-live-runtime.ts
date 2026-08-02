@@ -6511,6 +6511,11 @@ function corpContext(
       sourceBoundCandidates,
       discardKeepScore,
     ) ??
+    corpCorporateShuffleHqChoiceSignal(
+      input,
+      sourceBoundCandidates,
+      discardKeepScore,
+    ) ??
     corpDiscardWindowSignal(input, sourceBoundCandidates, discardKeepScore);
   const baseDomain: CorpPlanDomain = forcedHandChoiceSignal
     ? {
@@ -6658,11 +6663,60 @@ function corpStrategicPlanningGroupDrawChoiceSignal(
   };
 }
 
+function corpCorporateShuffleHqChoiceSignal(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
+): CorpHandManagementSignal | undefined {
+  const selection = corpHandChoiceSelection(
+    input,
+    candidates,
+    discardKeepScore,
+    "corporate_shuffle",
+  );
+  if (!selection) return undefined;
+  const { choice, resolveAction } = selection;
+  return {
+    handPlanId: `corporate-shuffle-hq:${choice.choiceId}:${input.playerView.stateVersion}`,
+    phase: "hq_shuffle_window",
+    actionIds: [resolveAction.actionId],
+    exactActionRoute: true,
+    agendaCount: input.playerView.own.gripOrHq.filter(
+      (card) =>
+        card.known &&
+        (card.type === "agenda" ||
+          (card.definitionId !== undefined &&
+            CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === "agenda")),
+    ).length,
+    handSize: input.playerView.own.gripOrHq.length,
+    maximumHandSize: input.playerView.own.maxHandSize,
+    concretePurposeCode:
+      "Complete Corporate Shuffle by returning the lowest keep-value HQ card to R&D.",
+    priorityClass: "P5",
+    routeAllowed: true,
+    hqShuffleChoiceBinding: {
+      actionId: resolveAction.actionId,
+      choiceId: choice.choiceId,
+      observedAtStateVersion: input.playerView.stateVersion,
+      selectedOptionIds: selection.selectedOptionIds,
+      shuffledCardInstanceIds: selection.selectedCardInstanceIds,
+      retainedCardInstanceIds: selection.retainedCardInstanceIds,
+      evidenceCodes: [
+        "corp_corporate_shuffle_hq_owned_by_hand_plan",
+        "corp_corporate_shuffle_hq_bound_to_current_choice",
+        "corp_corporate_shuffle_hq_ranked_by_generic_keep_value",
+      ],
+    },
+    value: 1_000,
+    evidenceCode: "corp_corporate_shuffle_hq_owned_by_hand_plan",
+  };
+}
+
 function corpHandChoiceSelection(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
-  kind: "discard" | "strategic_planning_group",
+  kind: "discard" | "strategic_planning_group" | "corporate_shuffle",
 ):
   | {
       choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
@@ -6676,9 +6730,12 @@ function corpHandChoiceSelection(
   const sourceMatches =
     kind === "discard"
       ? choice?.source === "discard_phase"
-      : choice?.source.startsWith(
-          "card_implementation.strategic_planning_group_draw:",
-        ) === true;
+      : kind === "strategic_planning_group"
+        ? choice?.source.startsWith(
+            "card_implementation.strategic_planning_group_draw:",
+          ) === true
+        : choice?.source.startsWith("classic.corporate_shuffle_hq_to_rd:") ===
+          true;
   if (
     input.side !== "corp" ||
     choice?.kind !== "select_cards" ||
@@ -6696,7 +6753,12 @@ function corpHandChoiceSelection(
           candidate.semanticActionType === "choice.resolve",
       )
     : undefined;
-  const label = kind === "discard" ? "discard" : "Strategic Planning Group";
+  const label =
+    kind === "discard"
+      ? "discard"
+      : kind === "strategic_planning_group"
+        ? "Strategic Planning Group"
+        : "Corporate Shuffle";
   if (!resolveAction || !exactCandidate || !discardKeepScore) {
     throw new PlanResolutionFailure("missing_plan_module_coverage", {
       side: input.side,
@@ -6709,8 +6771,35 @@ function corpHandChoiceSelection(
     });
   }
   const selectableOptions = selectableChoiceOptions(choice.options);
+  const choiceCards =
+    kind === "strategic_planning_group"
+      ? selectableOptions.flatMap((option) =>
+          option.card?.known && option.card.definitionId ? [option.card] : [],
+        )
+      : [];
+  const scoringInput =
+    kind === "strategic_planning_group"
+      ? {
+          ...input,
+          playerView: {
+            ...input.playerView,
+            own: {
+              ...input.playerView.own,
+              gripOrHq: [
+                ...input.playerView.own.gripOrHq,
+                ...choiceCards.filter(
+                  (card) =>
+                    !input.playerView.own.gripOrHq.some(
+                      (handCard) => handCard.instanceId === card.instanceId,
+                    ),
+                ),
+              ],
+            },
+          },
+        }
+      : input;
   const knownHandByInstanceId = new Map(
-    input.playerView.own.gripOrHq
+    scoringInput.playerView.own.gripOrHq
       .filter((card) => card.known && card.definitionId)
       .map((card) => [card.instanceId, card]),
   );
@@ -6727,11 +6816,11 @@ function corpHandChoiceSelection(
       legalActionTypes: input.legalActions.map((action) => action.type),
       unresolvedActionIds: [resolveAction.actionId],
       owner: "plan_module",
-      removalCondition: `Bind a Corp ${label} choice only when every selectable option maps to a known card in the current HQ PlayerView.`,
+      removalCondition: `Bind a Corp ${label} choice only when every selectable option maps to a known card in the exact current choice or HQ PlayerView.`,
     });
   }
   const selectedOptionIds = selectedDiscardChoiceOptionIds(
-    input,
+    scoringInput,
     choice,
     selectableOptions,
     discardKeepScore,
@@ -12866,6 +12955,15 @@ function resolveEngineWindow(
     context.input.side === "corp" &&
     context.input.playerView.pendingChoice?.kind === "select_cards" &&
     context.input.playerView.pendingChoice.source === "discard_phase"
+  ) {
+    return undefined;
+  }
+  if (
+    context.input.side === "corp" &&
+    context.input.playerView.pendingChoice?.kind === "select_cards" &&
+    context.input.playerView.pendingChoice.source.startsWith(
+      "classic.corporate_shuffle_hq_to_rd:",
+    )
   ) {
     return undefined;
   }

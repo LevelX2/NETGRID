@@ -30,6 +30,7 @@ const DEPARTMENT = "onr_proteus_056_department-of-misinformation";
 const GOVERNMENT_CONTRACT = "onr_proteus_059_government-contract";
 const LDL = "onr_proteus_061_ldl-traffic-analyzers";
 const PANIC_BUTTON = "onr_proteus_067_panic-button";
+const STRATEGIC_PLANNING_GROUP = "onr_classic_025_strategic-planning-group";
 const RAYMOND = "onr_proteus_071_raymond-ellison";
 const SIREN = "onr_proteus_074_siren";
 const SYD = "onr_proteus_076_syd-meyer-superstores";
@@ -657,7 +658,9 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
     let hqRun = baseState("pro014-panic-run-hq");
     const panicId = addCorpRoot(hqRun, PANIC_BUTTON, "panic_1", "hq", true);
+    addCorpRoot(hqRun, STRATEGIC_PLANNING_GROUP, "panic_spg", "remote_1", true);
     addCorpRd(hqRun, WALL, "rd_draw");
+    addCorpRd(hqRun, "simple_economy_operation", "rd_spg_extra");
     hqRun = apply(
       hqRun,
       "runner",
@@ -674,6 +677,13 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     const beforeHq = hqRun.corp.hq.length;
     hqRun = applyLegal(hqRun, "corp", hqAction.actionId);
     expect(hqRun.corp.credits).toBe(19);
+    expect(hqRun.corp.hq.length).toBe(beforeHq);
+    expect(hqRun.pendingChoice?.options).toHaveLength(2);
+    hqRun = applyChoice(
+      hqRun,
+      "corp",
+      String(hqRun.pendingChoice?.options[0]?.id),
+    );
     expect(hqRun.corp.hq.length).toBe(beforeHq + 1);
 
     let rdRun = baseState("pro014-panic-run-rd");

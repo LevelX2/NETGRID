@@ -105,7 +105,8 @@ export type CorpHandManagementSignal = {
     | "resolve_hq_overflow"
     | "agenda_flood_relief"
     | "discard_window"
-    | "draw_filter_window";
+    | "draw_filter_window"
+    | "hq_shuffle_window";
   sourceDefinitionIds?: string[];
   sourceInstanceId?: string;
   actionIds?: string[];
@@ -149,6 +150,15 @@ export type CorpHandManagementSignal = {
     observedAtStateVersion: number;
     selectedOptionIds: string[];
     bottomedCardInstanceIds: string[];
+    retainedCardInstanceIds: string[];
+    evidenceCodes: string[];
+  };
+  hqShuffleChoiceBinding?: {
+    actionId: string;
+    choiceId: string;
+    observedAtStateVersion: number;
+    selectedOptionIds: string[];
+    shuffledCardInstanceIds: string[];
     retainedCardInstanceIds: string[];
     evidenceCodes: string[];
   };
@@ -717,7 +727,8 @@ function handModule(): PlanModule {
             signal.parentPlanInstanceId && signal.parentNeedId
               ? "flexible_support"
               : signal.phase === "discard_window" ||
-                  signal.phase === "draw_filter_window"
+                  signal.phase === "draw_filter_window" ||
+                  signal.phase === "hq_shuffle_window"
                 ? "locked_sequence"
                 : "sticky_goal",
             signal.parentPlanInstanceId,

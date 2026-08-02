@@ -686,6 +686,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       strategicPlanningGroupBaseDrawCount: 1,
       strategicPlanningGroupAdditionalDrawCount: 1,
       strategicPlanningGroupDrawnCardCount: 2,
+      strategicPlanningGroupNetDrawCount: 1,
       bottomedCardCount: 1,
       destinationZone: "rd_bottom",
     });
@@ -826,6 +827,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       corpMandatoryOptionalAgendaCardCount: 1,
       corpMandatorySkivvissCardCount: 2,
       strategicPlanningGroupDrawnCardCount: 6,
+      strategicPlanningGroupNetDrawCount: 5,
     });
 
     let skipped = applyChoice(structuredClone(startState), "corp", "skip");
@@ -914,10 +916,114 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       strategicPlanningGroupBaseDrawCount: 3,
       strategicPlanningGroupAdditionalDrawCount: 1,
       strategicPlanningGroupDrawnCardCount: 4,
+      strategicPlanningGroupNetDrawCount: 3,
       bottomedCardCount: 1,
     });
     expectValid(state);
   });
+
+  it.each([
+    {
+      title: "Annual Reviews",
+      definitionId: "onr_v1_282_annual-reviews",
+      sourceZone: "hq",
+      drawCount: 3,
+    },
+    {
+      title: "Night Shift",
+      definitionId: "onr_v1_295_night-shift",
+      sourceZone: "hq",
+      drawCount: 1,
+    },
+    {
+      title: "Employee Empowerment",
+      definitionId: EMPLOYEE_EMPOWERMENT,
+      sourceZone: "scoreArea",
+      drawCount: 2,
+    },
+    {
+      title: "ESA Contract",
+      definitionId: "onr_v1_321_esa-contract",
+      sourceZone: "serverRoot",
+      drawCount: 2,
+    },
+    {
+      title: "Euromarket Consortium",
+      definitionId: "onr_v1_322_euromarket-consortium",
+      sourceZone: "serverRoot",
+      drawCount: 2,
+    },
+  ] as const)(
+    "batches $title into one complete Strategic Planning Group choice",
+    ({ definitionId, sourceZone, drawCount }) => {
+      let state = corpMainClassic08Game(
+        `classic-08-strategic-card-matrix-${definitionId}`,
+      );
+      addRezzedCorpRootForTest(
+        state,
+        STRATEGIC_PLANNING_GROUP,
+        "remote_1",
+        `spg_matrix_${definitionId}`,
+      );
+      const sourceId =
+        sourceZone === "hq"
+          ? addCorpCardToHqForTest(
+              state,
+              definitionId,
+              `matrix_${definitionId}`,
+            )
+          : sourceZone === "scoreArea"
+            ? addScoredCorpAgendaForTest(
+                state,
+                definitionId,
+                `matrix_${definitionId}`,
+              )
+            : addRezzedCorpRootForTest(
+                state,
+                definitionId,
+                "remote_2",
+                `matrix_${definitionId}`,
+              );
+      const hqBefore = state.corp.hq.length;
+
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          (sourceZone === "hq"
+            ? action.type === "play_operation"
+            : action.type === "activated_card_ability") &&
+          action.source === sourceId,
+      );
+
+      expect(state.pendingCorpDraw).toMatchObject({
+        baseDrawCount: drawCount,
+        replacementDrawCount: 1,
+      });
+      expect(state.pendingChoice?.options).toHaveLength(drawCount + 1);
+      expect(getPlayerView(state, "corp").pendingChoice?.options).toHaveLength(
+        drawCount + 1,
+      );
+      expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+
+      state = applyChoice(
+        state,
+        "corp",
+        String(state.pendingChoice?.options[0]?.id),
+      );
+      expect(state.corp.hq.length).toBe(
+        hqBefore + drawCount - (sourceZone === "hq" ? 1 : 0),
+      );
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        strategicPlanningGroupBaseDrawCount: drawCount,
+        strategicPlanningGroupAdditionalDrawCount: 1,
+        strategicPlanningGroupDrawnCardCount: drawCount + 1,
+        strategicPlanningGroupNetDrawCount: drawCount,
+        bottomedCardCount: 1,
+      });
+      expectValid(state);
+    },
+  );
 
   it("continues Corporate Shuffle only after the Strategic Planning Group choice", () => {
     let state = corpMainClassic08Game("classic-08-strategic-corporate-shuffle");

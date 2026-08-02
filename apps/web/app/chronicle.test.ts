@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import type { PublicGameEvent, Side } from "@netgrid/shared";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+} from "@netgrid/engine";
+import type {
+  CardInstanceId,
+  GameState,
+  LegalAction,
+  PublicGameEvent,
+  Side,
+} from "@netgrid/shared";
 import {
   chronicleActionUseByEventId,
   chronicleEventProjectionPlan,
@@ -150,7 +161,10 @@ describe("formatChronicleEvent", () => {
       sourceDefinitionId: "onr_classic_025_strategic-planning-group",
       drawReplacementSourceTitle: "Strategic Planning Group",
       strategicPlanningGroupChoiceResolved: true,
+      strategicPlanningGroupBaseDrawCount: 1,
+      strategicPlanningGroupAdditionalDrawCount: 1,
       strategicPlanningGroupDrawnCardCount: 2,
+      strategicPlanningGroupNetDrawCount: 1,
       bottomedCardCount: 1,
       destinationZone: "rd_bottom",
       selectedCardId: "must-not-appear",
@@ -174,8 +188,11 @@ describe("formatChronicleEvent", () => {
     expect(corpItem.chips).toEqual(
       expect.arrayContaining([
         "Strategic Planning Group",
-        "Zusätzliche Karte",
-        "R&D",
+        "1 Basiskarte",
+        "+1 durch Strategic Planning Group",
+        "2 gezogen",
+        "1 nach HQ",
+        "1 unter R&D",
       ]),
     );
     expect(JSON.stringify(corpItem)).not.toContain("must-not-appear");
@@ -188,7 +205,10 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         drawReplacementSourceTitle: "Strategic Planning Group",
         strategicPlanningGroupChoiceResolved: true,
+        strategicPlanningGroupBaseDrawCount: 3,
+        strategicPlanningGroupAdditionalDrawCount: 1,
         strategicPlanningGroupDrawnCardCount: 4,
+        strategicPlanningGroupNetDrawCount: 3,
         bottomedCardCount: 1,
         destinationZone: "rd_bottom",
       }),
@@ -197,6 +217,40 @@ describe("formatChronicleEvent", () => {
 
     expect(item.title).toBe(
       "Die Korp hat mit Strategic Planning Group eine zusätzliche Karte gezogen und eine der 4 gezogenen Karten unter R&D gelegt.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "3 Basiskarten",
+        "+1 durch Strategic Planning Group",
+        "4 gezogen",
+        "3 nach HQ",
+        "1 unter R&D",
+      ]),
+    );
+  });
+
+  it("formats the real Corporate Shuffle sequence as separate SPG and HQ-shuffle entries", () => {
+    const [spgEvent, hqShuffleEvent] = realCorporateShuffleEvents();
+    const spgItem = formatChronicleEvent(spgEvent, "runner");
+    const hqShuffleItem = formatChronicleEvent(hqShuffleEvent, "runner");
+
+    expect(spgItem.title).toBe(
+      "Die Korp hat mit Strategic Planning Group eine zusätzliche Karte gezogen und eine der 6 gezogenen Karten unter R&D gelegt.",
+    );
+    expect(spgItem.chips).toEqual(
+      expect.arrayContaining([
+        "5 Basiskarten",
+        "+1 durch Strategic Planning Group",
+        "6 gezogen",
+        "5 nach HQ",
+        "1 unter R&D",
+      ]),
+    );
+    expect(hqShuffleItem.title).toBe(
+      "Die Korp hat mit Corporate Shuffle eine verdeckte HQ-Karte in R&D gemischt.",
+    );
+    expect(JSON.stringify([spgEvent, hqShuffleEvent])).not.toContain(
+      "selectedCardId",
     );
   });
 
@@ -8411,6 +8465,94 @@ function makeEvent(
       ...payloadWithoutEventId,
     },
   };
+}
+
+function realCorporateShuffleEvents(): [PublicGameEvent, PublicGameEvent] {
+  let state = createGameAfterSetup({
+    seed: "chronicle-real-corporate-shuffle-spg",
+    agendaPointsToWin: 99,
+  });
+  state = applyEngineAction(
+    state,
+    "corp",
+    (action) => action.type === "mandatory_draw",
+  );
+  state.corp.credits = 20;
+  state.corp.clicks = 10;
+  state.corp.maxHandSize = 100;
+  const operationId = state.corp.hq[0];
+  if (!operationId) throw new Error("Corporate-Shuffle-Testquelle fehlt.");
+  state.cardInstances[operationId] = {
+    ...state.cardInstances[operationId]!,
+    definitionId: "onr_classic_017_corporate-shuffle",
+  };
+  const spgId = "chronicle-real-spg" as CardInstanceId;
+  state.corp.servers.push({
+    id: "remote_1",
+    kind: "remote",
+    label: "Remote 1",
+    ice: [],
+    root: [spgId],
+  });
+  state.cardInstances[spgId] = {
+    instanceId: spgId,
+    definitionId: "onr_classic_025_strategic-planning-group",
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    faceup: true,
+    rezzed: true,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+
+  state = applyEngineAction(
+    state,
+    "corp",
+    (action) =>
+      action.type === "play_operation" && action.source === operationId,
+  );
+  state = applyEngineAction(
+    state,
+    "corp",
+    (action) => action.type === "resolve_choice",
+  );
+  const spgEvent = state.eventLog.at(-1);
+  state = applyEngineAction(
+    state,
+    "corp",
+    (action) => action.type === "resolve_choice",
+  );
+  const hqShuffleEvent = state.eventLog.at(-1);
+  if (!spgEvent || !hqShuffleEvent)
+    throw new Error("Corporate-Shuffle-Chronikereignisse fehlen.");
+  return [spgEvent, hqShuffleEvent];
+}
+
+function applyEngineAction(
+  state: GameState,
+  side: Side,
+  predicate: (action: LegalAction) => boolean,
+): GameState {
+  const action = getLegalActions(state, side).find(predicate);
+  if (!action) throw new Error(`Engine-Testaktion für ${side} fehlt.`);
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    ...(action.type === "resolve_choice" && state.pendingChoice
+      ? {
+          selectedChoices: {
+            choiceId: state.pendingChoice.choiceId,
+            selectedOptionIds: [String(state.pendingChoice.options[0]?.id)],
+          },
+        }
+      : {}),
+    idempotencyKey: `chronicle:${side}:${state.stateVersion}:${action.actionId}`,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
 }
 
 function sideValue(value: unknown): Side | undefined {

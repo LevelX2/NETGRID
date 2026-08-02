@@ -650,6 +650,11 @@ describe("authoritative plan-first live runtime", () => {
     const retainedAgenda = visibleCard("drawn-agenda", "corp", "agenda", {
       definitionId: "simple_agenda",
     });
+    const additionalCards = Array.from({ length: 4 }, (_, index) =>
+      visibleCard(`drawn-additional-${index + 1}`, "corp", "asset", {
+        definitionId: "simple_economy_asset",
+      }),
+    );
     const options = [
       {
         id: "bottom-operation",
@@ -663,6 +668,12 @@ describe("authoritative plan-first live runtime", () => {
         value: retainedAgenda.instanceId,
         card: retainedAgenda,
       },
+      ...additionalCards.map((card, index) => ({
+        id: `bottom-additional-${index + 1}`,
+        label: `Additional ${index + 1}`,
+        value: card.instanceId,
+        card,
+      })),
     ];
     action.choiceRequirements = [
       {
@@ -672,7 +683,11 @@ describe("authoritative plan-first live runtime", () => {
         optionIds: options.map((option) => option.id),
       },
     ];
-    input.playerView.own.gripOrHq = [lowValueCard, retainedAgenda];
+    input.playerView.own.gripOrHq = [
+      lowValueCard,
+      retainedAgenda,
+      ...additionalCards,
+    ];
     input.playerView.pendingChoice = {
       choiceId,
       side: "corp",
@@ -739,6 +754,7 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
+    expect(input.playerView.pendingChoice.options).toHaveLength(6);
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_first_lane:plan",
@@ -763,7 +779,10 @@ describe("authoritative plan-first live runtime", () => {
             observedAtStateVersion: input.playerView.stateVersion,
             selectedOptionIds: ["bottom-operation"],
             bottomedCardInstanceIds: [lowValueCard.instanceId],
-            retainedCardInstanceIds: [retainedAgenda.instanceId],
+            retainedCardInstanceIds: [
+              retainedAgenda.instanceId,
+              ...additionalCards.map((card) => card.instanceId),
+            ],
           },
         },
       },

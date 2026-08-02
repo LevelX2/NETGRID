@@ -2817,12 +2817,18 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       state,
       "onr_v1_188_ai-chief-financial-officer",
     );
+    addRezzedCorpRootForTest(
+      state,
+      "onr_classic_025_strategic-planning-group",
+      "remote_1",
+      "ai_cfo_spg",
+    );
     keepOnlyCorpHqCards(state, [
       moveCorpCardToHq(state, "simple_agenda"),
       moveCorpCardToHq(state, "onr_v1_203_hostile-takeover"),
     ]);
     keepOnlyCorpArchivesCards(state, []);
-    while (state.corp.rd.length > 3) {
+    while (state.corp.rd.length > 4) {
       const id = state.corp.rd.pop();
       if (id) {
         removeEverywhere(state, id);
@@ -2860,7 +2866,12 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       "corp",
       (action) => action.actionId === legal.actionId,
     );
-    expect(state.corp.hq.length).toBeLessThanOrEqual(5);
+    expect(state.corp.hq).toHaveLength(0);
+    expect(state.pendingCorpDraw).toMatchObject({
+      baseDrawCount: 5,
+      replacementDrawCount: 1,
+    });
+    expect(state.pendingChoice?.options).toHaveLength(6);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       abilityId: "hq_archives_shuffle_draw",
       cardDefinitionId: "onr_v1_188_ai-chief-financial-officer",
@@ -2873,6 +2884,18 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     expect(state.corp.scoreArea).toEqual(
       expect.arrayContaining([firstCfo, secondCfo]),
     );
+    state = applyChoice(
+      state,
+      "corp",
+      String(state.pendingChoice?.options[0]?.id),
+    );
+    expect(state.corp.hq).toHaveLength(5);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      strategicPlanningGroupBaseDrawCount: 5,
+      strategicPlanningGroupAdditionalDrawCount: 1,
+      strategicPlanningGroupDrawnCardCount: 6,
+      strategicPlanningGroupNetDrawCount: 5,
+    });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));

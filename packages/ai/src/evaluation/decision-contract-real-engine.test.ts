@@ -258,6 +258,92 @@ describe("hardened decision contracts on real Engine inputs", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
+  it("keeps the Corporate Shuffle draw filter and follow-up HQ choice in the exact Corp hand-plan sequence", () => {
+    let state = createGameAfterSetup({
+      seed: "contract-strategic-planning-group-corporate-shuffle",
+      agendaPointsToWin: 7,
+      corpDeck: CORP_DECK,
+    });
+    RealEngineFixtureBuilder.forState(state).withCorpCardInHq(
+      "onr_classic_017_corporate-shuffle",
+    );
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot(
+      "remote_1",
+      "onr_classic_025_strategic-planning-group",
+      0,
+      { faceup: true, rezzed: true },
+    );
+    state.corp.maxHandSize = 100;
+    const corporateShuffleId = state.corp.hq.find(
+      (cardId) =>
+        state.cardInstances[cardId]?.definitionId ===
+        "onr_classic_017_corporate-shuffle",
+    );
+    expect(corporateShuffleId).toBeDefined();
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        action.source === corporateShuffleId,
+    );
+    const drawFilterInput = decisionInput(state, "corp", CORP_DECK);
+    expect(drawFilterInput.playerView.pendingChoice).toMatchObject({
+      source: expect.stringMatching(
+        /^card_implementation\.strategic_planning_group_draw:/,
+      ),
+    });
+    expect(drawFilterInput.playerView.pendingChoice?.options).toHaveLength(6);
+
+    const drawFilterDecision = chooseCorpAction(drawFilterInput);
+    expect(drawFilterDecision).toMatchObject({
+      actionId: drawFilterInput.legalActions[0]?.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+    expect(drawFilterDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.hand_and_agenda_management",
+        "plan_step_capability:draw_filter_window",
+      ]),
+    );
+    expect(
+      drawFilterDecision.decisionDebug?.planFirstDecision?.selectedPlan,
+    ).toMatchObject({
+      moduleId: "corp.hand_and_agenda_management",
+      executionState: "executor",
+    });
+
+    state = applyDecision(state, "corp", drawFilterDecision);
+    const hqShuffleInput = decisionInput(state, "corp", CORP_DECK);
+    expect(hqShuffleInput.playerView.pendingChoice?.source).toMatch(
+      /^classic\.corporate_shuffle_hq_to_rd:/,
+    );
+    const hqShuffleDecision = chooseCorpAction(hqShuffleInput);
+    expect(hqShuffleDecision).toMatchObject({
+      actionId: hqShuffleInput.legalActions[0]?.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+    expect(hqShuffleDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.hand_and_agenda_management",
+        "plan_step_capability:hq_shuffle_window",
+      ]),
+    );
+    expect(
+      hqShuffleDecision.decisionDebug?.planFirstDecision?.selectedPlan,
+    ).toMatchObject({
+      moduleId: "corp.hand_and_agenda_management",
+      executionState: "executor",
+    });
+
+    state = applyDecision(state, "corp", hqShuffleDecision);
+    expect(state.pendingChoice).toBeUndefined();
+  });
+
   it("installs missing Code Gate coverage before a second Wall-breaker variant", () => {
     const state = runnerTurnState("contract-breaker-variant");
     RealEngineFixtureBuilder.forState(state)
@@ -288,6 +374,7 @@ const CORP_DECK = deck(DEMO_DECKS.demo_corp_001, "contract-corp-deck", [
   "onr_v1_302_scorched-earth",
   "onr_v1_304_systematic-layoffs",
   "onr_classic_025_strategic-planning-group",
+  "onr_classic_017_corporate-shuffle",
 ]);
 const RUNNER_DECK = deck(DEMO_DECKS.demo_runner_001, "contract-runner-deck", [
   "onr_v1_047_pile-driver",

@@ -145,6 +145,37 @@ function selectedCorpDrawFilterOptionIdsFromResidentHandPlan(
   return [...binding.selectedOptionIds];
 }
 
+function selectedCorpHqShuffleOptionIdsFromResidentHandPlan(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) => instance.instanceId === portfolio.executorInstanceId,
+  );
+  const moduleState = executor?.moduleState as
+    | { kind?: unknown; signal?: CorpHandManagementSignal }
+    | undefined;
+  const binding = moduleState?.signal?.hqShuffleChoiceBinding;
+  if (
+    executor?.moduleId !== "corp.hand_and_agenda_management" ||
+    moduleState?.kind !== "hand" ||
+    moduleState.signal?.phase !== "hq_shuffle_window" ||
+    binding?.actionId !== action.actionId ||
+    binding.choiceId !== choice.choiceId ||
+    binding.observedAtStateVersion !== input.playerView.stateVersion
+  ) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The Corp hand plan must bind the exact Corporate Shuffle HQ choice and legal action before the resolver completes its payload.",
+    );
+  }
+  return [...binding.selectedOptionIds];
+}
+
 export function selectedChoicesForDecision(
   input: AiDecisionInput,
   action: LegalAction,
@@ -195,6 +226,21 @@ export function selectedChoicesForDecision(
         currentPortfolio,
       ),
       "resident_corp_spg_draw_filter",
+    );
+  }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_cards" &&
+    choice.source.startsWith("classic.corporate_shuffle_hq_to_rd:")
+  ) {
+    return resolved(
+      selectedCorpHqShuffleOptionIdsFromResidentHandPlan(
+        input,
+        action,
+        choice,
+        currentPortfolio,
+      ),
+      "resident_corp_corporate_shuffle_hq",
     );
   }
   if (choice.kind === "select_cards" && choice.source === "discard_phase") {

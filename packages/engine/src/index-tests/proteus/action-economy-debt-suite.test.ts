@@ -17,6 +17,7 @@ import {
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import {
   addRezzedCorpIceForTest,
+  addRezzedCorpRootForTest,
   enterEncounterFromMovementWindow,
 } from "../../test-fixtures/index-test-helpers";
 import {
@@ -30,6 +31,7 @@ import {
 } from "@netgrid/shared";
 
 const AI_BOARD_MEMBER = "onr_proteus_001_ai-board-member";
+const STRATEGIC_PLANNING_GROUP = "onr_classic_025_strategic-planning-group";
 const PDCA = "onr_proteus_006_please-dont-choke-anyone";
 const PROJECT_VENICE = "onr_proteus_007_project-venice";
 const CORPORATE_HEADHUNTERS = "onr_proteus_003_corporate-headhunters";
@@ -424,6 +426,36 @@ describe("Proteus PRO017 action economy and debt suite", () => {
         [...filteredTypes].filter((type) => type !== "end_turn").sort(),
       ).toEqual(testCase.expected);
     }
+  });
+
+  it("keeps AI Board Member's restricted basic draw as one-card SPG input", () => {
+    let state = aiBoardStateForRoll(4);
+    addRezzedCorpRootForTest(
+      state,
+      STRATEGIC_PLANNING_GROUP,
+      "remote_1",
+      "ai_board_spg",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.payload?.actionEconomyAbility === "accept_extra_action_offer",
+    );
+    state.corp.clicks = 1;
+    state = apply(state, "corp", (action) => action.type === "draw_card");
+
+    expect(state.pendingCorpDraw).toMatchObject({
+      baseDrawCount: 1,
+      replacementDrawCount: 1,
+    });
+    expect(state.pendingChoice?.options).toHaveLength(2);
+    state = applyChoice(
+      state,
+      "corp",
+      String(state.pendingChoice?.options[0]?.id),
+    );
+    expect(state.pendingChoice).toBeUndefined();
   });
 
   it("Please Don't Choke Anyone opens a Corp choice instead of auto-replacing damage", () => {

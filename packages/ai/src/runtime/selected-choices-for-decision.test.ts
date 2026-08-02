@@ -1598,6 +1598,33 @@ describe("selectedChoicesForDecision", () => {
     ).toThrowError("window_origin_missing");
   });
 
+  it("completes Corporate Shuffle only from the exact executor hand-plan binding", () => {
+    const input = corpCorporateShuffleChoiceInput();
+    const action = resolveChoiceActionForInput(input);
+    rememberResidentCorpHqShuffleBinding(input, action.actionId, [
+      "shuffle_low",
+    ]);
+
+    expect(
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["shuffle_low"],
+    });
+  });
+
+  it("fails closed when Corporate Shuffle is bound to a different LegalAction", () => {
+    const input = corpCorporateShuffleChoiceInput();
+    const action = resolveChoiceActionForInput(input);
+    rememberResidentCorpHqShuffleBinding(input, "different-action", [
+      "shuffle_low",
+    ]);
+
+    expect(() =>
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toThrowError("window_origin_missing");
+  });
+
   it("keeps Runner discard ranking independent from the Corp hand-plan owner", () => {
     const input = inputWithChoice(
       {
@@ -1958,6 +1985,28 @@ function corpStrategicPlanningGroupChoiceInput(): AiDecisionInput {
   );
 }
 
+function corpCorporateShuffleChoiceInput(): AiDecisionInput {
+  return inputWithChoice(
+    {
+      kind: "select_cards",
+      source: "classic.corporate_shuffle_hq_to_rd:corporate-shuffle-instance:1",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        { id: "shuffle_low", label: "Low", value: "corp_low" },
+        { id: "retain_high", label: "High", value: "corp_high" },
+      ],
+    },
+    {
+      side: "corp",
+      gripOrHq: [
+        { ...visibleCard("corp_low", "asset"), definitionId: "low" },
+        { ...visibleCard("corp_high", "agenda"), definitionId: "high" },
+      ],
+    },
+  );
+}
+
 function rememberResidentCorpDiscardBinding(
   input: AiDecisionInput,
   actionId: string,
@@ -2024,6 +2073,45 @@ function rememberResidentCorpDrawFilterBinding(
               observedAtStateVersion: input.playerView.stateVersion,
               selectedOptionIds,
               bottomedCardInstanceIds: ["corp_low"],
+              retainedCardInstanceIds: ["corp_high"],
+              evidenceCodes: ["test_exact_binding"],
+            },
+          },
+        },
+      },
+    ],
+    completionHistory: [],
+    transitions: [],
+  } as never);
+}
+
+function rememberResidentCorpHqShuffleBinding(
+  input: AiDecisionInput,
+  actionId: string,
+  selectedOptionIds: string[],
+): void {
+  const instanceId = "plan:corp.hand_and_agenda_management:hq-shuffle";
+  rememberResidentPlanPortfolio(input, {
+    schemaVersion: "resident-plan-portfolio-v2",
+    side: "corp",
+    stateVersion: input.playerView.stateVersion,
+    rootForegroundInstanceId: instanceId,
+    executorInstanceId: instanceId,
+    instances: [
+      {
+        instanceId,
+        moduleId: "corp.hand_and_agenda_management",
+        executionState: "executor",
+        moduleState: {
+          kind: "hand",
+          signal: {
+            phase: "hq_shuffle_window",
+            hqShuffleChoiceBinding: {
+              actionId,
+              choiceId: "choice_multi",
+              observedAtStateVersion: input.playerView.stateVersion,
+              selectedOptionIds,
+              shuffledCardInstanceIds: ["corp_low"],
               retainedCardInstanceIds: ["corp_high"],
               evidenceCodes: ["test_exact_binding"],
             },

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createGame } from "@netgrid/engine";
+import {
+  applyAction,
+  createGame,
+  createGameAfterSetup,
+  getLegalActions,
+} from "@netgrid/engine";
 import {
   CURRENT_RULES_BASELINE,
   type CardInstanceId,
@@ -135,7 +140,92 @@ describe("multiplayer side payload projection", () => {
     );
     expect(JSON.stringify(runnerPayload)).not.toContain(iceId);
   });
+
+  it("reconnects an open multi-card SPG choice only to the Corp", () => {
+    const record = storedMatchWithEvents(0);
+    let state = createGameAfterSetup({
+      seed: "payload-spg-reconnect",
+      agendaPointsToWin: 99,
+    });
+    state = applyFixtureAction(
+      state,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    const spgId = "payload-spg" as CardInstanceId;
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [spgId],
+    });
+    state.cardInstances[spgId] = {
+      instanceId: spgId,
+      definitionId: "onr_classic_025_strategic-planning-group",
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+    state.corp.clicks = 3;
+    state = applyFixtureAction(
+      state,
+      "corp",
+      (action) => action.type === "draw_card",
+    );
+    record.gameState = state;
+    const deps = {
+      isAiSide: () => false,
+      safeDisplayNameFor: () => "Gegenüber",
+      aiTurnPresentationFor: () => undefined,
+      resultSummaryFor: () => undefined,
+      retentionProtectionPayload: { retentionProtected: false },
+    };
+
+    const corpPayload = buildSidePayload(record, "corp", deps);
+    const runnerPayload = buildSidePayload(record, "runner", deps);
+    expect(corpPayload.pendingChoice?.options).toHaveLength(2);
+    expect(
+      corpPayload.pendingChoice?.options.every(
+        (option) => option.card?.known === true,
+      ),
+    ).toBe(true);
+    expect(runnerPayload.pendingChoice).toBeUndefined();
+    expect(
+      runnerPayload.playerView.specialZones?.setAside.every(
+        (card) => card.known === false,
+      ),
+    ).toBe(true);
+    for (const option of corpPayload.pendingChoice?.options ?? []) {
+      if (option.card?.definitionId)
+        expect(JSON.stringify(runnerPayload)).not.toContain(
+          option.card.definitionId,
+        );
+    }
+  });
 });
+
+function applyFixtureAction(
+  state: StoredMatch["gameState"],
+  side: Side,
+  predicate: (action: ReturnType<typeof getLegalActions>[number]) => boolean,
+): StoredMatch["gameState"] {
+  const action = getLegalActions(state, side).find(predicate);
+  if (!action) throw new Error(`Missing ${side} fixture action`);
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey: `payload:${side}:${state.stateVersion}:${action.actionId}`,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
+}
 
 function removeCorpCardFromZones(
   state: StoredMatch["gameState"],

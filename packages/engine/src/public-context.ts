@@ -1393,6 +1393,7 @@ export function publicContextForAction(
     "strategicPlanningGroupBaseDrawCount",
     "strategicPlanningGroupAdditionalDrawCount",
     "strategicPlanningGroupDrawnCardCount",
+    "strategicPlanningGroupNetDrawCount",
     "bottomedCardCount",
     "corpMandatoryDraw",
     "corpMandatoryDrawCompleted",

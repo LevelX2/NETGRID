@@ -237,6 +237,20 @@ export function formatChronicleEvent(
           2,
           numberValue(payload.strategicPlanningGroupDrawnCardCount) ?? 2,
         );
+        const baseDrawCount = Math.max(
+          1,
+          numberValue(payload.strategicPlanningGroupBaseDrawCount) ??
+            drawnCount - 1,
+        );
+        const additionalDrawCount = Math.max(
+          1,
+          numberValue(payload.strategicPlanningGroupAdditionalDrawCount) ?? 1,
+        );
+        const netDrawCount = Math.max(
+          1,
+          numberValue(payload.strategicPlanningGroupNetDrawCount) ??
+            drawnCount - 1,
+        );
         const drawnSelectionText =
           drawnCount === 2
             ? "beiden gezogenen Karten"
@@ -250,7 +264,14 @@ export function formatChronicleEvent(
         );
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         cardTitle = source;
-        chips.push(source, "Zusätzliche Karte", "R&D");
+        chips.push(
+          source,
+          `${baseDrawCount} ${baseDrawCount === 1 ? "Basiskarte" : "Basiskarten"}`,
+          `+${additionalDrawCount} durch ${source}`,
+          `${drawnCount} gezogen`,
+          `${netDrawCount} nach HQ`,
+          "1 unter R&D",
+        );
         break;
       }
       if (

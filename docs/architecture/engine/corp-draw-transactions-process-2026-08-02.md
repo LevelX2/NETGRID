@@ -117,13 +117,13 @@ planned
 
 ## Fortschritt
 
-| Paket   | Status    | Verification                                                                                   |
-| ------- | --------- | ---------------------------------------------------------------------------------------------- |
-| DRAW-01 | completed | 212 Engine-Testdateien / 1.848 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün |
-| DRAW-02 | completed | 212 Engine-Testdateien / 1.851 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün |
-| DRAW-03 | completed | 212 Engine-Testdateien / 1.852 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün |
-| DRAW-04 | pending   | –                                                                                              |
-| DRAW-05 | pending   | –                                                                                              |
+| Paket   | Status    | Verification                                                                                                         |
+| ------- | --------- | -------------------------------------------------------------------------------------------------------------------- |
+| DRAW-01 | completed | 212 Engine-Testdateien / 1.848 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün                       |
+| DRAW-02 | completed | 212 Engine-Testdateien / 1.851 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün                       |
+| DRAW-03 | completed | 212 Engine-Testdateien / 1.852 Tests, Shared- und Engine-Typecheck, Format- und Diffcheck grün                       |
+| DRAW-04 | completed | 120 Engine-, 325 Web-, 3 Reconnect-/Server- und 248 KI-Fokustests; alle Paket-Typechecks und Architekturgrenzen grün |
+| DRAW-05 | pending   | –                                                                                                                    |
 
 ## Paketdetails
 
@@ -242,6 +242,40 @@ Done-Gate:
 - Chronicle zeigt korrekte Counts in getrennten Meldungen;
 - KI behält Action-ID, Step, Route und Executor;
 - fokussierte Engine-/Web-/AI-Tests und Typechecks bestehen.
+
+Umgesetzte Kartenmatrix:
+
+| Quelle                               |                                  Basis-Draw |     SPG-Auswahl | Gesicherte Fortsetzung                           |
+| ------------------------------------ | ------------------------------------------: | --------------: | ------------------------------------------------ |
+| Annual Reviews                       |                                           3 |        4 Karten | Operation abgeschlossen                          |
+| Employee Empowerment (Startzug)      |           Teil des aggregierten Pflichtzugs | Gesamtbasis + 1 | Pflichtzugphase erst nach SPG                    |
+| Employee Empowerment (Agenda-Aktion) |                                           2 |        3 Karten | aktivierte Agenda-Aktion abgeschlossen           |
+| ESA Contract                         |                                           2 |        3 Karten | aktivierte Asset-Aktion abgeschlossen            |
+| Euromarket Consortium                |                                           2 |        3 Karten | aktivierte Asset-Aktion abgeschlossen            |
+| AI Chief Financial Officer           |                 5 nach HQ-/Archives-Shuffle |        6 Karten | keine verwaiste Hidden-Zone-Auflösung            |
+| Rescheduler                          |                          vorherige HQ-Größe |    HQ-Größe + 1 | deterministischer Shuffle bleibt replaybar       |
+| Night Shift                          |                                           1 |        2 Karten | Credit-Effekt und Draw-Reaktion bleiben geordnet |
+| Panic Button                         |                                           1 |        2 Karten | laufendes HQ-Runfenster bleibt erhalten          |
+| AI Board Member                      | 1 über die eingeschränkte Basic-Draw-Aktion |        2 Karten | Action-Economy-Grant bleibt gebunden             |
+| Corporate Shuffle                    |                                           5 |        6 Karten | anschließend exakt eine HQ-zu-R&D-Choice         |
+
+Zusätzlicher Integrationsstand:
+
+- `strategicPlanningGroupBaseDrawCount`,
+  `strategicPlanningGroupAdditionalDrawCount`,
+  `strategicPlanningGroupDrawnCardCount` und
+  `strategicPlanningGroupNetDrawCount` bilden Basis, Zusatz, Gesamt und Netto
+  side-sicher ab; `bottomedCardCount` bleibt separat.
+- Die Chronicle zeigt zwei getrennte reale Ereignisse: zuerst die
+  SPG-Auswahl mit vollständigen Counts, danach gegebenenfalls die
+  kartenidentitätsfreie Corporate-Shuffle-HQ-Mischung.
+- Human-UI und Corp-Reconnect tragen auch sechs lesbare Choice-Karten; Runner-
+  View und Runner-Reconnect erhalten weder Choice noch Kartenidentitäten.
+- Die KI bewertet SPG-Set-aside-Karten ausschließlich aus der Corp-privaten
+  Choice-Projektion. SPG und die nachgelagerte Corporate-Shuffle-HQ-Choice
+  bleiben exakt an ihre jeweilige LegalAction und den Executor
+  `corp.hand_and_agenda_management` gebunden; stale oder fremde Bindungen
+  scheitern mit `window_origin_missing`.
 
 ### DRAW-05 – Dokumentation und Gesamtgates
 

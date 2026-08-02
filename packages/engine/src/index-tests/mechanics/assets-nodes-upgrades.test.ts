@@ -1191,6 +1191,12 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         action.type === "rez_card" &&
         sourceDefinition(reorderState, action) === "onr_v1_336_rescheduler",
     );
+    addRezzedCorpRootForTest(
+      reorderState,
+      "onr_classic_025_strategic-planning-group",
+      "remote_2",
+      "rescheduler_spg",
+    );
     const hqAgendaId = moveCorpCardToHq(reorderState, "simple_agenda");
     const hqOperationId = moveCorpCardToHq(
       reorderState,
@@ -1208,7 +1214,12 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         action.payload?.v1917AssetAbility === "rescheduler_hq_shuffle_draw",
     );
 
-    expect(reorderState.corp.hq.length).toBe(hqCount);
+    expect(reorderState.corp.hq.length).toBe(0);
+    expect(reorderState.pendingCorpDraw).toMatchObject({
+      baseDrawCount: hqCount,
+      replacementDrawCount: 1,
+    });
+    expect(reorderState.pendingChoice?.options).toHaveLength(hqCount + 1);
     expect(reorderState.corp.hq).not.toEqual(
       expect.arrayContaining([hqAgendaId, hqOperationId]),
     );
@@ -1217,6 +1228,17 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       hiddenZoneAction: "v1917_rescheduler_hq_shuffle_draw",
       hqCardCount: hqCount,
       drawnCount: hqCount,
+    });
+    reorderState = applyChoice(
+      reorderState,
+      "corp",
+      String(reorderState.pendingChoice?.options[0]?.id),
+    );
+    expect(reorderState.corp.hq.length).toBe(hqCount);
+    expect(reorderState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      strategicPlanningGroupBaseDrawCount: hqCount,
+      strategicPlanningGroupAdditionalDrawCount: 1,
+      strategicPlanningGroupNetDrawCount: hqCount,
     });
     const replay = replayEvents(
       initial,
