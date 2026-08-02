@@ -2,7 +2,7 @@
 
 Stand: 2026-08-02
 
-Status: in Umsetzung
+Status: Runde 1 abgeschlossen; nächste Zufallsrunde folgt nach Integration
 
 ## Ziel
 
