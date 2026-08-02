@@ -42,6 +42,7 @@
     "check:test-discovery": "node scripts/check-vitest-discovery.mjs",
     "check:ai-hint-quality": "node scripts/check-ai-hint-quality.mjs --write-report",
     "check:ai-deck-doctrine-strategy": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-ai-deck-doctrine-strategy.ts",
+    "check:standard-deck-guides": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-standard-deck-guides.ts",
     "benchmark:ai-behavior": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/run-ai-behavior-baseline.ts",
     "storage:backup": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts backup",
     "storage:restore": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts restore",

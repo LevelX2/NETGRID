@@ -1,5 +1,20 @@
 import type { CatalogCard, CatalogStatusKey } from "@netgrid/catalog";
 
+export {
+  STANDARD_DECK_GUIDE_SCHEMA_VERSION,
+  computeStandardDeckGuideAnalysisHash,
+  computeStandardDeckGuideSourceHash,
+  resolveStandardDeckGuide,
+  validateStandardDeckGuideEntry,
+  type StandardDeckGuideContent,
+  type StandardDeckGuideDeckSource,
+  type StandardDeckGuideEntry,
+  type StandardDeckGuideKeyCard,
+  type StandardDeckGuideManifest,
+  type StandardDeckGuideResolution,
+  type StandardDeckGuideStatus,
+} from "./standard-deck-guides";
+
 export type DeckSide = "runner" | "corp";
 
 export type DeckCardEntry = {
