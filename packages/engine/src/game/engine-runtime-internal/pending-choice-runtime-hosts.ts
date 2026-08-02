@@ -32,7 +32,7 @@ import {
 } from "./runtime-port-bindings";
 import { resolveAccessProgramInstallMemoryChoice } from "../access/access-flow";
 import { resolveRunnerMemoryCheckpointChoice } from "../checkpoints/runner-memory-checkpoint";
-import { resolveStrategicPlanningGroupDrawChoice } from "../state/draw-random";
+import { resolveStrategicPlanningGroupDrawChoice } from "../choices/strategic-planning-group-draw-choice";
 
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,

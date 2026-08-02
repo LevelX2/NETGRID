@@ -1819,6 +1819,29 @@ describe("V1.0.5 action board UI helpers", () => {
         },
       ],
     };
+    const strategicPlanningGroupChoice: NonNullable<
+      PlayerView["pendingChoice"]
+    > = {
+      ...exactSingleChoice,
+      choiceId: "strategic_planning_group_draw_7",
+      side: "corp",
+      source: "card_implementation.strategic_planning_group_draw:spg-instance",
+      prompt: "Eine der gezogenen Karten unter R&D legen",
+      options: [
+        {
+          id: "bottom_drawn_agenda",
+          label: "Agenda",
+          value: "drawn_agenda",
+          card: card("drawn_agenda", "Agenda", "agenda"),
+        },
+        {
+          id: "bottom_drawn_operation",
+          label: "Operation",
+          value: "drawn_operation",
+          card: card("drawn_operation", "Operation", "operation"),
+        },
+      ],
+    };
     const stackTopFiveChoice: NonNullable<PlayerView["pendingChoice"]> = {
       ...organDonorChoice,
       choiceId: "p3_37_runner_stack_top5_7",
@@ -1946,6 +1969,7 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseCardChoicePanel(forgottenBackupChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(heapSearchChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(offSiteBackupsChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(strategicPlanningGroupChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(stackTopFiveChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(technicianPrivateLookChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(protocolFilesPrivateLookChoice)).toBe(true);
@@ -1957,6 +1981,9 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(cardChoiceUsesReadableCards(forgottenBackupChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(heapSearchChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(stackTopFiveChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(strategicPlanningGroupChoice)).toBe(
+      true,
+    );
     expect(cardChoiceUsesReadableCards(technicianPrivateLookChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(mysteryBoxCorpReviewChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(securityPurgeRunnerReviewChoice)).toBe(

@@ -146,9 +146,7 @@
         "questForCattekinPermanentActionGain"
       ],
       "targetKind": "start_turn_random_effect_table",
-      "targetState": [
-        "runnerTurnFlags.persistentModifiers[]"
-      ],
+      "targetState": ["runnerTurnFlags.persistentModifiers[]"],
       "params": {
         "dieFaces": 6,
         "outcomes": [
@@ -170,9 +168,7 @@
         "multiServerSuccessSequenceRun"
       ],
       "targetKind": "multi_server_success_sequence",
-      "targetState": [
-        "runnerTurnFlags.pendingSequences[]"
-      ],
+      "targetState": ["runnerTurnFlags.pendingSequences[]"],
       "params": {
         "sequence": "run_each_data_fort",
         "advanceOnSuccessfulRun": true,
@@ -189,10 +185,7 @@
         "delayedAccessEffects"
       ],
       "targetKind": "delayed_agenda_access_replacement",
-      "targetState": [
-        "runDurationEffects[]",
-        "delayedAccessEffects[]"
-      ],
+      "targetState": ["runDurationEffects[]", "delayedAccessEffects[]"],
       "params": {
         "replacementWindow": "agenda_access",
         "delay": "after_current_access_sequence"
@@ -207,9 +200,7 @@
         "codeViralCachePurgePreserveTargets"
       ],
       "targetKind": "purge_replacement_with_runner_virus_counter_cleanup",
-      "targetState": [
-        "replacementEffects[]"
-      ],
+      "targetState": ["replacementEffects[]"],
       "params": {
         "interruptedEvent": "corp_purge_virus_counters",
         "runnerVirusCounterCleanup": true
@@ -242,9 +233,7 @@
         "spendRecurringTraceCreditPool"
       ],
       "targetKind": "recurring_trace_credit_pool",
-      "targetState": [
-        "recurringCreditPools[]"
-      ],
+      "targetState": ["recurringCreditPools[]"],
       "params": {
         "amount": 1,
         "spendWindow": "trace",
@@ -260,9 +249,7 @@
         "runStartInterventions"
       ],
       "targetKind": "start_run_redirect_to_source_fort",
-      "targetState": [
-        "runStartInterventions[]"
-      ],
+      "targetState": ["runStartInterventions[]"],
       "params": {
         "redirectTarget": "source_fort",
         "triggerWindow": "run_start"
@@ -277,9 +264,7 @@
         "overadvance_bonus_agenda_points"
       ],
       "targetKind": "score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points",
-      "targetState": [
-        "scoredAgendaAbilities[]"
-      ],
+      "targetState": ["scoredAgendaAbilities[]"],
       "params": {
         "triggerWindow": "agenda_scored",
         "conditionSource": "agenda_params"
@@ -1485,7 +1470,7 @@
       "tokenSource": "known_watch_token",
       "category": "test_only_card_name",
       "targetAbstraction": "delayed_install_sequence",
-      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell_traders_target.set_aside_from_grip.shell_traders_target\","
+      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell.shell_traders_target.set_aside_from_grip.shell_traders_target\","
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
@@ -1496,29 +1481,29 @@
       "tokenSource": "known_watch_token",
       "category": "test_only_card_name",
       "targetAbstraction": "delayed_install_sequence",
-      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell_traders_target.set_aside_from_grip.shell_traders_target\","
+      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell.shell_traders_target.set_aside_from_grip.shell_traders_target\","
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
       "line": 137,
-      "column": 75,
+      "column": 81,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
       "tokenSource": "known_watch_token",
       "category": "test_only_card_name",
       "targetAbstraction": "delayed_install_sequence",
-      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell_traders_target.set_aside_from_grip.shell_traders_target\","
+      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell.shell_traders_target.set_aside_from_grip.shell_traders_target\","
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
       "line": 137,
-      "column": 116,
+      "column": 122,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
       "tokenSource": "known_watch_token",
       "category": "test_only_card_name",
       "targetAbstraction": "delayed_install_sequence",
-      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell_traders_target.set_aside_from_grip.shell_traders_target\","
+      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell.shell_traders_target.set_aside_from_grip.shell_traders_target\","
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
@@ -1529,7 +1514,7 @@
       "tokenSource": "known_watch_token",
       "category": "test_only_card_name",
       "targetAbstraction": "delayed_install_sequence",
-      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell_traders_target.remove_shell_counter.shell_traders_target\","
+      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell.shell_traders_target.remove_shell_counter.shell_traders_target\","
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
@@ -1540,29 +1525,29 @@
       "tokenSource": "known_watch_token",
       "category": "test_only_card_name",
       "targetAbstraction": "delayed_install_sequence",
-      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell_traders_target.remove_shell_counter.shell_traders_target\","
+      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell.shell_traders_target.remove_shell_counter.shell_traders_target\","
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
       "line": 170,
-      "column": 75,
+      "column": 81,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
       "tokenSource": "known_watch_token",
       "category": "test_only_card_name",
       "targetAbstraction": "delayed_install_sequence",
-      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell_traders_target.remove_shell_counter.shell_traders_target\","
+      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell.shell_traders_target.remove_shell_counter.shell_traders_target\","
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
       "line": 170,
-      "column": 117,
+      "column": 123,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
       "tokenSource": "known_watch_token",
       "category": "test_only_card_name",
       "targetAbstraction": "delayed_install_sequence",
-      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell_traders_target.remove_shell_counter.shell_traders_target\","
+      "snippet": "\"runner.trigger_ability.shell_traders_source.shell_traders_source.shell.shell_traders_target.remove_shell_counter.shell_traders_target\","
     },
     {
       "path": "scripts/check-engine-cardimplementation-architecture-target.mjs",

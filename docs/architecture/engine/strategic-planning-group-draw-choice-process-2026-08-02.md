@@ -1,6 +1,6 @@
 # Strategic Planning Group – Draw-Choice-Fix
 
-Status: **active**
+Status: **implementation_complete – lokale Integration und Cleanup ausstehend**
 Quelle/Vorgabe: Playtest-Fund vom 02.08.2026
 Primärer Agent: `release-implementation-agent`
 Branch: `codex/spg-draw-choice`
@@ -200,3 +200,20 @@ verifiziert.
 - lokal nach `main` integriert;
 - Worktree und Arbeitsbranch nachweislich entfernt;
 - `/Goal` als complete markiert.
+
+## Implementierungsstand und Verification
+
+- SPG-01: Engine-Vertrag in `d5939cd8c`; die Draw-Schicht delegiert den
+  Replacement-Effekt an
+  `game/choices/strategic-planning-group-draw-choice.ts`, damit
+  `draw-random.ts` frei von Choice- und Public-Payload-Logik bleibt.
+- SPG-02: Plan-first-Ownership in `e04e2d0ff`; Executor ist
+  `corp.hand_and_agenda_management`, Capability `draw_filter_window`.
+- SPG-03: Human-Kartenpanel, echte Engine-zu-KI-Fortsetzung,
+  Regelentscheidung und Betriebslog sind ergänzt.
+- Vollständiger Engine-Lauf: 212 Dateien / 1.846 Tests grün.
+- Vollständiger Web-Lauf: 76 Dateien / 759 Tests grün.
+- AI-Shards: 552 Dateien / 4.535 Tests grün.
+- Engine-, AI- und Web-Typecheck sowie AI-, Engine-Source-,
+  CardImplementation-, Card-Abstraction-, Paketgrenzen-, Format- und
+  Diff-Gates sind grün.

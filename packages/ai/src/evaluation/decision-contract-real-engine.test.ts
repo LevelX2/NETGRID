@@ -192,6 +192,72 @@ describe("hardened decision contracts on real Engine inputs", () => {
     ).toBe(true);
   });
 
+  it("resolves the mandatory-draw Strategic Planning Group choice through the Corp hand plan", () => {
+    let state = createGameAfterSetup({
+      seed: "contract-strategic-planning-group-mandatory-draw",
+      agendaPointsToWin: 7,
+      corpDeck: CORP_DECK,
+    });
+    RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot(
+      "remote_1",
+      "onr_classic_025_strategic-planning-group",
+      0,
+      { faceup: true, rezzed: true },
+    );
+    const retainedAgendaId = putCorpCardOnTopOfRd(state, "simple_agenda");
+    const drawnOperationId = putCorpCardOnTopOfRd(
+      state,
+      "simple_economy_operation",
+    );
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const input = decisionInput(state, "corp", CORP_DECK);
+
+    expect(input.playerView.pendingChoice).toMatchObject({
+      side: "corp",
+      kind: "select_cards",
+      source: expect.stringMatching(
+        /^card_implementation\.strategic_planning_group_draw:/,
+      ),
+    });
+    expect(
+      input.playerView.pendingChoice?.options.map((option) => option.value),
+    ).toEqual(expect.arrayContaining([retainedAgendaId, drawnOperationId]));
+
+    const decision = chooseCorpAction(input);
+    expect(decision).toMatchObject({
+      actionId: input.legalActions[0]?.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.hand_and_agenda_management",
+        "plan_step_capability:draw_filter_window",
+      ]),
+    );
+    const selectedOptionIds = Array.isArray(
+      decision.selectedChoices?.selectedOptionIds,
+    )
+      ? decision.selectedChoices.selectedOptionIds.filter(
+          (value): value is string => typeof value === "string",
+        )
+      : [];
+    const selectedOption = input.playerView.pendingChoice?.options.find(
+      (option) => selectedOptionIds.includes(option.id),
+    );
+    expect([retainedAgendaId, drawnOperationId]).toContain(
+      selectedOption?.value,
+    );
+    const selectedCardId = String(selectedOption?.value);
+    const retainedCardId =
+      selectedCardId === retainedAgendaId ? drawnOperationId : retainedAgendaId;
+
+    state = applyDecision(state, "corp", decision);
+    expect(state.corp.rd.at(-1)).toBe(selectedCardId);
+    expect(state.corp.hq).toContain(retainedCardId);
+    expect(state.pendingChoice).toBeUndefined();
+  });
+
   it("installs missing Code Gate coverage before a second Wall-breaker variant", () => {
     const state = runnerTurnState("contract-breaker-variant");
     RealEngineFixtureBuilder.forState(state)
@@ -221,6 +287,7 @@ const CORP_DECK = deck(DEMO_DECKS.demo_corp_001, "contract-corp-deck", [
   "onr_v1_283_audit-of-call-records",
   "onr_v1_302_scorched-earth",
   "onr_v1_304_systematic-layoffs",
+  "onr_classic_025_strategic-planning-group",
 ]);
 const RUNNER_DECK = deck(DEMO_DECKS.demo_runner_001, "contract-runner-deck", [
   "onr_v1_047_pile-driver",
@@ -338,6 +405,50 @@ function apply(
   });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;
+}
+
+function applyDecision(
+  state: GameState,
+  side: Side,
+  decision: ReturnType<typeof chooseCorpAction>,
+): GameState {
+  if (!decision.actionId) throw new Error("AI decision has no actionId");
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: decision.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    ...(decision.selectedChoices
+      ? { selectedChoices: decision.selectedChoices }
+      : {}),
+    idempotencyKey: `${side}:${state.stateVersion}:${decision.actionId}:ai`,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
+}
+
+function putCorpCardOnTopOfRd(state: GameState, definitionId: string): string {
+  const entry = Object.entries(state.cardInstances).find(
+    ([, card]) => card.definitionId === definitionId,
+  );
+  if (!entry) throw new Error(`Missing ${definitionId}`);
+  const [id, card] = entry;
+  state.corp.hq = state.corp.hq.filter((cardId) => cardId !== id);
+  state.corp.rd = state.corp.rd.filter((cardId) => cardId !== id);
+  state.corp.archives = state.corp.archives.filter((cardId) => cardId !== id);
+  state.corp.scoreArea = state.corp.scoreArea.filter((cardId) => cardId !== id);
+  for (const server of state.corp.servers) {
+    server.ice = server.ice.filter((cardId) => cardId !== id);
+    server.root = server.root.filter((cardId) => cardId !== id);
+  }
+  state.corp.rd.unshift(id);
+  state.cardInstances[id] = {
+    ...card,
+    zone: { side: "corp", zone: "rd" },
+    faceup: false,
+    rezzed: false,
+  };
+  return id;
 }
 
 function deck(
