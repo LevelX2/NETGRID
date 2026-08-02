@@ -28,6 +28,13 @@
   darf stattdessen ein bezahlbares Stop-ICE oder dosiert eine sichtbare
   Steuer-/Disruptionswirkung als gestuften Schutz akzeptieren; dies bleibt
   vollständig im Score-/Defense-Plan und wird im nächsten Zug neu bewertet.
+- Same-Turn-Conversion-Routen dürfen eine durch einen späteren Schritt
+  benötigte Quelle nicht per Root-Replacement selbst zerstören. Eine aktuell
+  Engine-gequotete Counterbank mit positivem Advancement-Fortschritt bleibt
+  außerdem vor normalen Agenda-Replacements geschützt; zulässig bleiben
+  Null-Counter, gewöhnliche Assets und der enge matchentscheidende
+  Same-Turn-Score. Owner bleibt `corp.score_agenda`, Choices ergänzen nur die
+  bereits gebundene Action-Payload.
 - Corp-Entscheidungsfenster bewerten Rez-Kosten gegen sichtbaren marginalen
   Tax und Stop-Wirkung, Mehrkarten-Draw getrennt vom kontextuellen ersten Draw
   und Basic Credits gegen eine konkrete Überschussgrenze. Wiederholter
@@ -303,6 +310,11 @@
 - `corp-score-conversion-capability-contract.md` und
   `corp-score-conversion-plan-process-2026-07-10.md`: Engine-/Hint-/Planvertrag
   für generische Fast-Advance- und Countertransfer-Scorepfade.
+- `counterbank-progress-protection-process-2026-08-02.md` und
+  `docs/reviews/ai/counterbank-progress-protection-ten-seed-final-review-2026-08-02.md`:
+  abgeschlossener generischer Fortschrittsschutz gegen selbstzerstörende
+  Same-Root-Conversion-Routen einschließlich identischem Zehn-Seed-
+  Vorher-/Nachherpanel.
 - `ai-planportfolio-remote-doctrine-contract.md` und
   `docs/reviews/ai/ai-planportfolio-remote-doctrine-final-review-2026-07-12.md`:
   aktueller Vertrag für kurze Plansequenzen, wiederkehrende Zyklen,

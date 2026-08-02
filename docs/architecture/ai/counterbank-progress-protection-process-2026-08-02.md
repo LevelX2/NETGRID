@@ -1,6 +1,6 @@
 # Counterbank-Fortschrittsschutz: Umsetzungsprozess
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 Datum: 2026-08-02
 
@@ -162,6 +162,13 @@ Paketstand:
   Vergleich einschließlich Nebenideen und zweier unveränderter, unabhängiger
   Runner-Runtimefehler liegt in
   `docs/reviews/ai/counterbank-progress-protection-ten-seed-final-review-2026-08-02.md`.
+- P5 ist fachlich abgeschlossen: aktuelles `main` wurde konfliktfrei mit
+  Mergecommit `690d28a42` integriert. Architekturindex und Monatslog führen
+  den generischen Schutzvertrag. Auf diesem integrierten Stand sind neun
+  fokussierte Tests, AI-Typecheck mit 6-GB-Heap, `check:ai` einschließlich
+  Generic-Card-ID-Guard, `check:ai-deck-doctrine-strategy` und
+  `git diff --check` grün. Es folgen nur noch lokaler Fast-Forward nach
+  `main` und verifizierter Cleanup.
 
 ## Paketdetails
 
