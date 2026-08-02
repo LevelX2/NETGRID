@@ -95,6 +95,7 @@ export function activatedAbilityPayload(
   const removeTagsEffect = ability.effects.find(
     (effect) => effect.kind === "remove_tags",
   );
+  const moveTopTrashEffect = moveTopTrashToGripEffect(ability);
   return {
     cardId,
     cardImplementationAbility: "activated",
@@ -205,6 +206,9 @@ export function activatedAbilityPayload(
               ? ("all" as const)
               : (removeTagsEffect.amount ?? 1),
         }
+      : {}),
+    ...(moveTopTrashEffect
+      ? { cardImplementationEffectKind: "move_top_trash_to_grip" }
       : {}),
     ...scoreConversionPayload,
     ...actionCapacityPayload,

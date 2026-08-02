@@ -46,7 +46,6 @@ export function createRunnerRandomBreakOrDamageRiskComposition<
   >["randomBreakOrDamageRiskAssessmentForEncounterBreak"];
 } & RunnerMultiRunContext {
   const multiRunContext = createRunnerMultiRunContext({
-    allNighterDefinitionId: dependencies.allNighterDefinitionId,
     sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     targetServerId: dependencies.targetServerId,
     payoffClass: dependencies.payoffClass,

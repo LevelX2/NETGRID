@@ -13,7 +13,6 @@ export type RunnerMultiRunEventAssessment = {
 };
 
 export type RunnerMultiRunEventAssessmentDependencies = {
-  allNighterDefinitionId: string;
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -43,14 +42,15 @@ export function runnerMultiRunEventAssessment(
     input,
     action,
   );
-  const isAllNighterPlay =
+  const isMultiRunEventPlay =
     action.type === "play_event" &&
-    sourceDefinitionId === dependencies.allNighterDefinitionId;
-  const isAllNighterFollowup =
+    action.payload?.runnerEventRun === true &&
+    action.payload?.followupRunOnEnd === "optional";
+  const isMultiRunEventFollowup =
     action.type === "start_run" && action.payload?.bonusRunNoClick === true;
-  if (!isAllNighterPlay && !isAllNighterFollowup) return undefined;
+  if (!isMultiRunEventPlay && !isMultiRunEventFollowup) return undefined;
 
-  const phase = isAllNighterFollowup ? "followup_run" : "first_run";
+  const phase = isMultiRunEventFollowup ? "followup_run" : "first_run";
   const targetServerId = dependencies.targetServerId(action) ?? "unknown";
   const evaluation =
     targetServerId === "unknown"

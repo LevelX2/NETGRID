@@ -70,10 +70,7 @@ import {
 import { runnerRunActionSpendingCapAssessment } from "./runtime/runner-run-only-action-adjustment";
 import { encounterRunRemainderEffectAssessment } from "./runtime/runner-run-remainder-effect-assessment";
 import {
-  ALL_NIGHTER_CARD_ID,
   BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
-  JUNKYARD_BBS_CARD_ID,
-  JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY,
   LOAN_FROM_CHIBA_CARD_ID,
 } from "./runtime/runner-semantic-card-ids";
 import {
@@ -179,7 +176,6 @@ export const aiLiveRuntimeDependencies = {
   visibleInstallCost: visibleInstallCostForAi,
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
-  allNighterDefinitionId: ALL_NIGHTER_CARD_ID,
   payoffClass: runnerRunTargetMultiRunPayoffClass,
   canTakeRun: runnerRunTargetPlausibleForMultiRun,
   scoreValue: runnerMultiRunEventScoreValue,
@@ -258,8 +254,6 @@ export const aiLiveRuntimeDependencies = {
   isRunnerEconomyRole,
   actionClickCost,
   actionCreditCost,
-  junkyardBbsDefinitionId: JUNKYARD_BBS_CARD_ID,
-  junkyardBbsReturnTopHeapAbility: JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY,
   scrubEvidence,
   isRemoteServerTarget,
   knownIcePathReason: semanticRuntimeKnownIcePathReason,

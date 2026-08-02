@@ -5,12 +5,12 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 
-type RunnerJunkyardBbsRecoveryTargetAssessment = {
+type RunnerTopTrashRecoveryTargetAssessment = {
   value: number;
   evidence: string[];
 };
 
-export type RunnerJunkyardBbsRecoveryScoreDependencies = {
+export type RunnerTopTrashRecoveryScoreDependencies = {
   isRecoveryAction: (input: AiDecisionInput, action: LegalAction) => boolean;
   target: (
     input: AiDecisionInput,
@@ -22,15 +22,15 @@ export type RunnerJunkyardBbsRecoveryScoreDependencies = {
     target: VisibleCard | undefined,
     targetDefinitionId: string | undefined,
     targetRoles: readonly string[],
-  ) => RunnerJunkyardBbsRecoveryTargetAssessment;
+  ) => RunnerTopTrashRecoveryTargetAssessment;
   actionClickCost: (action: LegalAction) => number;
   actionCreditCost: (action: LegalAction) => number;
 };
 
-export function runnerJunkyardBbsRecoveryScoreComponent(
+export function runnerTopTrashRecoveryScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: RunnerJunkyardBbsRecoveryScoreDependencies,
+  dependencies: RunnerTopTrashRecoveryScoreDependencies,
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
   if (!dependencies.isRecoveryAction(input, action)) return undefined;
@@ -49,8 +49,8 @@ export function runnerJunkyardBbsRecoveryScoreComponent(
   const actionOpportunityCost = 700 + clickCost * 130 + creditCost * 110;
   const value = targetAssessment.value - actionOpportunityCost;
   return {
-    key: "runner_junkyard_bbs_recovery_target",
-    label: "Junkyard-BBS-Zielwert",
+    key: "runner_top_trash_recovery_target",
+    label: "Top-Trash-Rückholungsziel",
     value,
     reason: sortedUnique([
       `target:${targetDefinitionId ?? "unknown"}`,

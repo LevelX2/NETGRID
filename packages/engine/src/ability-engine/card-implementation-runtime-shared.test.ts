@@ -78,4 +78,14 @@ describe("deterministic on-play action-capacity payload", () => {
       unpreventableDamage: true,
     });
   });
+
+  it("publishes an optional follow-up run as an action-bound fact", () => {
+    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_076_all-nighter"];
+
+    expect(
+      deterministicOnPlayResourcePayload(definition!, "runner"),
+    ).toMatchObject({
+      followupRunOnEnd: "optional",
+    });
+  });
 });

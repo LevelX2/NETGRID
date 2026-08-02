@@ -96,6 +96,9 @@ export function deterministicOnPlayResourcePayload(
   const advancementDistribution = implementation?.effects.find(
     (effect) => effect.kind === "distribute_advancement_counters",
   );
+  const makeRunEffect = implementation?.effects.find(
+    (effect) => effect.kind === "make_run",
+  );
   const utility = cardImplementation?.corpUtility;
   const restrictedCorpInstallPayload =
     controller === "corp" &&
@@ -154,6 +157,10 @@ export function deterministicOnPlayResourcePayload(
           scoreConversionTargetMode: advancementDistribution.target,
           scoreConversionTiming: "immediate",
         }
+      : {}),
+    ...(makeRunEffect?.kind === "make_run" &&
+    makeRunEffect.followupRunOnEnd === "optional"
+      ? { followupRunOnEnd: "optional" }
       : {}),
     ...actionCapacityPayload,
     ...restrictedCorpInstallPayload,

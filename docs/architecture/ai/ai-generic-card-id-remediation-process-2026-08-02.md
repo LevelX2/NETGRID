@@ -80,8 +80,8 @@ erreichbaren KI-Quelldateien. Die geprüften Familien sind:
 | --- | --- | --- |
 | GP00 | abgeschlossen | `959ec9210` |
 | GP01 | abgeschlossen | `fcc94df13` |
-| GP02 | abgeschlossen | dieser Paketcommit |
-| GP03 | offen | – |
+| GP02 | abgeschlossen | `7e9dffec1` |
+| GP03 | abgeschlossen | dieser Paketcommit |
 | GP04 | offen | – |
 | GP05 | offen | – |
 | GP06 | offen | – |
@@ -144,6 +144,13 @@ fail-closed, Plan- und Actionwahl unverändert.
 
 Done: jede Familie besitzt Positiv- und Gegenfallnachweis ohne
 Definition-ID-Erkennung.
+
+Ergebnis: Library Search sowie die Same-Turn-Access-Vorbereitung werden aus
+aktionsgebundenen `functionalEffects` erkannt. Die Engine projiziert den
+optionalen Folge-Run und die exakt gebundene Top-Trash-Rückholung in die
+jeweilige `LegalAction`; die vorhandenen Run- und Recovery-Owner konsumieren
+nur diese Fakten. Das Strukturgate sank dadurch von 28 auf 23 produktive
+ID-Vorkommen.
 
 ### GP04 – Corp-Economy und Punish
 

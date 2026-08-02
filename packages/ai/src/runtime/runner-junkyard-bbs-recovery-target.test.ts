@@ -1,11 +1,58 @@
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput } from "@netgrid/shared";
 
-import { runnerJunkyardBbsRecoveryTargetAssessment } from "./runner-junkyard-bbs-recovery-target";
+import {
+  runnerTopTrashRecoveryAction,
+  runnerTopTrashRecoveryTargetAssessment,
+} from "./runner-junkyard-bbs-recovery-target";
 
-describe("runnerJunkyardBbsRecoveryTargetAssessment", () => {
+function action(
+  payload: Record<string, string | number | boolean>,
+): LegalAction {
+  return {
+    actionId: "top-trash-recovery",
+    side: "runner",
+    stateVersion: 1,
+    timingPoint: "runner_action.main",
+    type: "activated_card_ability",
+    label: "Recover top trash card",
+    source: "recovery-source",
+    costs: [{ clicks: 1 }, { credits: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 1,
+    payload,
+  } as unknown as LegalAction;
+}
+
+describe("generic top-trash recovery action recognition", () => {
+  it("recognizes the exact declarative effect and bound target", () => {
+    expect(
+      runnerTopTrashRecoveryAction(
+        action({
+          cardImplementationEffectKind: "move_top_trash_to_grip",
+          cardImplementationTopTrashTargetId: "top-trash-card",
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it("fails closed when the exact target binding is absent", () => {
+    expect(
+      runnerTopTrashRecoveryAction(
+        action({
+          cardImplementationEffectKind: "move_top_trash_to_grip",
+        }),
+      ),
+    ).toBe(false);
+  });
+});
+
+describe("runnerTopTrashRecoveryTargetAssessment", () => {
   it("classifies structured recovery target roles", () => {
-    expect(assessment(["setup"]).evidence[0]).toBe("target_class:setup:rig_size:0");
+    expect(assessment(["setup"]).evidence[0]).toBe(
+      "target_class:setup:rig_size:0",
+    );
     expect(assessment(["build_rig"]).evidence[0]).toBe(
       "target_class:setup:rig_size:0",
     );
@@ -31,7 +78,7 @@ describe("runnerJunkyardBbsRecoveryTargetAssessment", () => {
 });
 
 function assessment(targetRoles: readonly string[]) {
-  return runnerJunkyardBbsRecoveryTargetAssessment(
+  return runnerTopTrashRecoveryTargetAssessment(
     {
       playerView: {
         own: {

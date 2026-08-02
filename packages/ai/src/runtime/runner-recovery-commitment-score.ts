@@ -17,7 +17,7 @@ export type RunnerRecoveryCommitmentScoreDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => AiDecisionScoreComponent | undefined;
-  junkyardRecoveryScoreComponent: (
+  topTrashRecoveryScoreComponent: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => AiDecisionScoreComponent | undefined;
@@ -63,11 +63,11 @@ export function runnerRecoveryCommitmentScoreComponents(
   if (randomBreakOrDamageRecoveryComponent) {
     components.push(randomBreakOrDamageRecoveryComponent);
   }
-  const junkyardRecoveryComponent = dependencies.junkyardRecoveryScoreComponent(
+  const topTrashRecoveryComponent = dependencies.topTrashRecoveryScoreComponent(
     input,
     action,
   );
-  if (junkyardRecoveryComponent) components.push(junkyardRecoveryComponent);
+  if (topTrashRecoveryComponent) components.push(topTrashRecoveryComponent);
   const lowValueRecoveryRepeatComponent =
     dependencies.lowValueRecoveryRepeatScoreComponent(input, action);
   if (lowValueRecoveryRepeatComponent) {

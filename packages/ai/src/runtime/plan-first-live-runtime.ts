@@ -1465,19 +1465,39 @@ function runnerCandidateIsCentralInformationAbility(
   return undefined;
 }
 
-function runnerSameTurnAccessPreparationDefinitionId(
+function runnerSameTurnAccessPreparationSourceDefinitionId(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): string | undefined {
   if (candidate.actionType !== "play_event") return undefined;
-  const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-    input,
-    candidate,
+  const createsSameTurnAccessPayoff = candidate.functionalEffects?.some(
+    (effect) =>
+      effect.scope === "runner" &&
+      effect.timing === "on_access" &&
+      (effect.kind === "scored_agenda_action" ||
+        effect.kind === "access_replacement" ||
+        (effect.kind === "economy" &&
+          typeof effect.target === "string" &&
+          effect.target.startsWith("next_agenda"))),
   );
-  return sourceDefinitionId === "onr_proteus_118_prearranged-drop" ||
-    sourceDefinitionId === "onr_proteus_119_promises-promises"
-    ? sourceDefinitionId
+  return createsSameTurnAccessPayoff
+    ? runnerCandidateSourceDefinitionId(input, candidate)
     : undefined;
+}
+
+function runnerCandidateStartsBoundCentralRun(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  return (
+    candidate.actionType === "play_event" &&
+    candidate.functionalEffects?.some(
+      (effect) =>
+        effect.kind === "future_run_effect" &&
+        effect.scope === "runner" &&
+        effect.target === "make_hq_or_rnd_run" &&
+        effect.timing === "action",
+    ) === true
+  );
 }
 
 function runnerUnrepresentedProgramDevelopmentTargets(
@@ -1992,10 +2012,7 @@ export function runnerActionDispositions(
       input,
       candidate,
     );
-    if (
-      sourceDefinitionId === "onr_classic_039_library-search" &&
-      candidate.actionType === "play_event"
-    ) {
+    if (runnerCandidateStartsBoundCentralRun(candidate)) {
       const evaluations = runTargets
         .filter((evaluation) => evaluation.actionId === candidate.actionId)
         .sort(
@@ -2009,8 +2026,8 @@ export function runnerActionDispositions(
           candidate.actionId,
           "runner.pressure_central",
           bestEvaluation
-            ? `runner_library_search_not_active_pressure_route:${bestEvaluation.targetServerId}:${bestEvaluation.pathPassability}:${bestEvaluation.recommendation}`
-            : "runner_library_search_missing_exact_run_target_projection",
+            ? `runner_bound_central_run_not_active_pressure_route:${bestEvaluation.targetServerId}:${bestEvaluation.pathPassability}:${bestEvaluation.recommendation}`
+            : "runner_bound_central_run_missing_exact_target_projection",
         );
         continue;
       }
@@ -2074,7 +2091,7 @@ export function runnerActionDispositions(
       continue;
     }
     const sameTurnAccessDefinitionId =
-      runnerSameTurnAccessPreparationDefinitionId(input, candidate);
+      runnerSameTurnAccessPreparationSourceDefinitionId(input, candidate);
     if (
       sameTurnAccessDefinitionId &&
       !centralPreparationActionIds.has(candidate.actionId) &&
@@ -4643,7 +4660,7 @@ function runnerSameTurnAccessCentralPreparationSignals(
     candidates
       .flatMap((candidate) => {
         if (runnerActionRequiresTargetedBypassPlan(candidate)) return [];
-        const definitionId = runnerSameTurnAccessPreparationDefinitionId(
+        const definitionId = runnerSameTurnAccessPreparationSourceDefinitionId(
           input,
           candidate,
         );
@@ -4739,7 +4756,7 @@ function runnerSameTurnAccessRemotePreparationSignals(
     candidates
       .flatMap((candidate) => {
         if (runnerActionRequiresTargetedBypassPlan(candidate)) return [];
-        const definitionId = runnerSameTurnAccessPreparationDefinitionId(
+        const definitionId = runnerSameTurnAccessPreparationSourceDefinitionId(
           input,
           candidate,
         );

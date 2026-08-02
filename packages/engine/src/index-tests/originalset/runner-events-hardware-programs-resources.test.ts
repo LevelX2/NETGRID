@@ -2528,6 +2528,11 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
         action.payload?.cardImplementationTopTrashTargetId === topHeapId,
     );
     expect(junkyardAction.costs).toEqual([{ clicks: 1, credits: 1 }]);
+    expect(junkyardAction.payload).toMatchObject({
+      cardImplementationEffectKind: "move_top_trash_to_grip",
+      cardImplementationTopTrashTargetId: topHeapId,
+      targetCardId: topHeapId,
+    });
 
     expect(
       applyAction(state, {

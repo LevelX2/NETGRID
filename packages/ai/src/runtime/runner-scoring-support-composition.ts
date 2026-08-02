@@ -69,7 +69,7 @@ export type RunnerScoringSupportCompositionDependencies = Parameters<
     recoveryCommitment: Omit<
       RunnerScoreComponentsDependencies["recoveryCommitment"],
       | "randomBreakOrDamageRecoveryScoreComponent"
-      | "junkyardRecoveryScoreComponent"
+      | "topTrashRecoveryScoreComponent"
       | "lowValueRecoveryRepeatScoreComponent"
       | "lateNoFundingCreditRepeatScoreComponent"
     >;
@@ -160,7 +160,7 @@ export function createRunnerScoringSupportComposition(
     runnerRandomBreakOrDamageRecoveryScoreComponent,
     runnerLowValueRecoveryRepeatScoreComponent,
     runnerLateNoFundingCreditRepeatScoreComponent,
-    runnerJunkyardBbsRecoveryScoreComponent,
+    runnerTopTrashRecoveryScoreComponent,
   } = createRunnerRecoveryContext({
     targetServerId: dependencies.targetServerId,
     randomBreakRecoveryAssessment: dependencies.randomBreakRecoveryAssessment,
@@ -182,9 +182,6 @@ export function createRunnerScoringSupportComposition(
     badPublicityOrTraceTechCard: dependencies.badPublicityOrTraceTechCard,
     actionClickCost: dependencies.actionClickCost,
     actionCreditCost: dependencies.actionCreditCost,
-    junkyardBbsDefinitionId: dependencies.junkyardBbsDefinitionId,
-    junkyardBbsReturnTopHeapAbility:
-      dependencies.junkyardBbsReturnTopHeapAbility,
   });
 
   const { runnerBadPublicityRelevanceScoreComponent } =
@@ -211,7 +208,7 @@ export function createRunnerScoringSupportComposition(
       ...dependencies.recoveryCommitment,
       randomBreakOrDamageRecoveryScoreComponent:
         runnerRandomBreakOrDamageRecoveryScoreComponent,
-      junkyardRecoveryScoreComponent: runnerJunkyardBbsRecoveryScoreComponent,
+      topTrashRecoveryScoreComponent: runnerTopTrashRecoveryScoreComponent,
       lowValueRecoveryRepeatScoreComponent:
         runnerLowValueRecoveryRepeatScoreComponent,
       lateNoFundingCreditRepeatScoreComponent:

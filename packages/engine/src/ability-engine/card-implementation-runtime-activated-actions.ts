@@ -154,6 +154,7 @@ export function pushActivatedCardImplementationActionsForTiming(
           {
             ...activatedAbilityPayload(sourceCardId, ability, index),
             cardImplementationTopTrashTargetId: targetCardId,
+            targetCardId,
             targetDefinitionId: targetDefinition.id,
           },
         ),

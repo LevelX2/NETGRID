@@ -11531,6 +11531,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "junkyard-bbs",
           sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+          cardImplementationEffectKind: "move_top_trash_to_grip",
           targetCardId: "rent-i-con-top",
           targetCardDefinitionId: "onr_classic_031_rent-i-con",
           cardImplementationTopTrashTargetId: "rent-i-con-top",
@@ -11633,6 +11634,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "junkyard-bbs",
           sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+          cardImplementationEffectKind: "move_top_trash_to_grip",
           targetCardId: "rent-i-con-top",
           targetCardDefinitionId: "onr_classic_031_rent-i-con",
           cardImplementationTopTrashTargetId: "rent-i-con-top",

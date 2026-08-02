@@ -69,23 +69,6 @@ const allowedCardIdUses = createAllowances([
     reason:
       "The economy payoff profile still contains a one-card branch that should be expressed by generic installed-economy semantics.",
   },
-  ...[
-    "onr_proteus_118_prearranged-drop",
-    "onr_proteus_119_promises-promises",
-  ].map((cardId) => ({
-    relativePath: "runtime/plan-first-live-runtime.ts",
-    cardId,
-    category: "individual_plan_model",
-    reason:
-      "The exact source is part of a dedicated, multi-step same-turn access plan.",
-  })),
-  {
-    relativePath: "runtime/plan-first-live-runtime.ts",
-    cardId: "onr_classic_039_library-search",
-    category: "review_required",
-    reason:
-      "The pressure route still recognizes one card directly instead of consuming a generic active-pressure signal.",
-  },
   {
     relativePath: "runtime/plan-first-live-runtime.ts",
     cardId: "onr_v1_176_the-shell-traders",
@@ -101,16 +84,6 @@ const allowedCardIdUses = createAllowances([
       "The exact source instance is required to bind, retain, and retire the card-specific lifecycle.",
     expectedCount: 3,
   },
-  ...[
-    "onr_v1_076_all-nighter",
-    "onr_v1_165_junkyard-bbs",
-  ].map((cardId) => ({
-    relativePath: "runtime/runner-semantic-card-ids.ts",
-    cardId,
-    category: "individual_plan_model",
-    reason:
-      "The constant names the exact source owned by a dedicated semantic card model.",
-  })),
   {
     relativePath: "runtime/runner-semantic-card-ids.ts",
     cardId: "onr_v1_168_loan-from-chiba",
