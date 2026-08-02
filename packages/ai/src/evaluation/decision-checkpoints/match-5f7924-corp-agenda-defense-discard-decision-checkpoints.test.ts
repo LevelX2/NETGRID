@@ -29,15 +29,15 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     expectCheckpointToPass(turn7AgendaDefenseJson);
   });
 
-  it("continues the turn-7 defense staging head by installing the agenda with the remaining click", () => {
-    expectBoundAgendaDefenseContinuation(turn7AgendaDefenseJson);
+  it("keeps the turn-7 agenda in HQ when the staged ICE cannot stop access", () => {
+    expectEffectiveScoreProtectionContinuation(turn7AgendaDefenseJson);
   });
 
   it("starts the bound agenda-defense line instead of taking three neutral credits", () => {
     expectCheckpointToPass(turn9AgendaDefenseJson);
   });
 
-  it("uses the third turn-9 action for score progress or concrete central defense", () => {
+  it("uses the third turn-9 action to find access-stopping score protection", () => {
     const { input, decision } = decisionsAfterBoundAgendaDefense(
       turn9AgendaDefenseJson,
       2,
@@ -46,24 +46,15 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
       (action) => action.actionId === decision.actionId,
     );
 
-    const advancesBoundAgenda =
-      selected?.type === "advance_card" &&
-      selected.source === "corp_onr_proteus_005_marked-accounts_1";
-    const installsCentralIce =
-      selected?.type === "install_card" &&
-      selected.payload?.placement === "ice" &&
-      (selected.payload.serverId === "hq" || selected.payload.serverId === "rd");
-
+    expect(selected?.type).toBe("draw_card");
+    expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
+    expect(decision.decisionDebug?.planFirstDecision?.route?.capabilityId).toBe(
+      "develop_score_protection",
+    );
     expect(
-      advancesBoundAgenda || installsCentralIce,
-      JSON.stringify({
-        selected,
-        assessmentEvidenceCodes:
-          decision.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes,
-        defenseComparison:
-          decision.decisionDebug?.planFirstDecision?.turnPlanning
-            ?.defenseComparison,
-      }),
+      decision.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.some(
+        (entry) => entry.includes("score_plan_requires_effective_ice_draw"),
+      ),
     ).toBe(true);
   });
 
@@ -85,7 +76,7 @@ function expectCheckpointToPass(value: unknown): void {
   expect(result.ok, diagnostic(result)).toBe(true);
 }
 
-function expectBoundAgendaDefenseContinuation(value: unknown): void {
+function expectEffectiveScoreProtectionContinuation(value: unknown): void {
   const checkpoint = fixture(value);
   const first = runAiDecisionCheckpoint(checkpoint);
   expect(first.ok, diagnostic(first)).toBe(true);
@@ -97,15 +88,6 @@ function expectBoundAgendaDefenseContinuation(value: unknown): void {
   const selected = input.legalActions.find(
     (action) => action.actionId === second.actionId,
   );
-  const firstRootPlan =
-    first.decision?.decisionDebug?.planFirstDecision?.rootPlanInstanceId ?? "";
-  const expectedAgendaSource = firstRootPlan.includes(
-    "corp_onr_proteus_005_marked-accounts_1",
-  )
-    ? "corp_onr_proteus_005_marked-accounts_1"
-    : firstRootPlan.includes("corp_onr_v1_207_netwatch-operations-office_1")
-      ? "corp_onr_v1_207_netwatch-operations-office_1"
-      : undefined;
 
   expect(
     selected,
@@ -121,14 +103,18 @@ function expectBoundAgendaDefenseContinuation(value: unknown): void {
             entry.actionId.includes("jack-attack"),
         ),
     }),
-  ).toMatchObject({
-    type: "install_card",
-    payload: {
-      placement: "root",
-    },
-  });
-  expect(expectedAgendaSource).toBeDefined();
-  expect(selected?.source).toBe(expectedAgendaSource);
+  ).toMatchObject({ type: "draw_card" });
+  expect(second.decisionDebug?.planKind).toBe("corp.defend_servers");
+  expect(second.decisionDebug?.planFirstDecision?.route?.capabilityId).toBe(
+    "develop_score_protection",
+  );
+  expect(
+    second.decisionDebug?.planFirstDecision?.dispositions.some(
+      (entry) =>
+        entry.actionId.includes("marked-accounts") &&
+        entry.evidenceCode.includes("last_click_score_install_deferred"),
+    ),
+  ).toBe(true);
 }
 
 function decisionsAfterBoundAgendaDefense(
