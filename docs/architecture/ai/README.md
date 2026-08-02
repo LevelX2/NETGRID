@@ -126,6 +126,13 @@
 - Der produktive AI-Importgraph ist frei von Laufzeit- und Typzyklen. Das
   ausführbare Source-Structure-Gate schützt diese Nullbaseline und qualitative
   Modulgrenzen. Datei-, Zeilen-, Testgrößen- und Fanout-Ratchets sind entfernt.
+- Das ausführbare Karten-ID-Gate verfolgt ab dem produktiven AI-Einstiegspunkt
+  den real erreichbaren Entscheidungsgraphen und überspringt Tests, Simulation,
+  Evaluation, Reports und Diagnosecode. Exakte Karten-IDs benötigen dort eine
+  zentrale Klassifikation samt Begründung und stabiler Vorkommenszahl; neue,
+  verschobene oder ungeklärte Vorkommen brechen das Gate. Die Kategorie
+  `review_required` hält bekannte Generalisierungsreststellen sichtbar und ist
+  keine fachliche Freigabe für neue Sonderlogik.
 - Volatile Entscheidungsfamilien besitzen fachliche Modulgruppen:
   Choice-Overrides unter `runtime/choice-ranking/`, Corp-Scoreline unter
   `runtime/corp-scoreline/`, sichtbare Run-Projektion unter `run-analysis/`
@@ -375,6 +382,7 @@
 ```text
 corepack pnpm check:ai
 corepack pnpm check:ai-source-structure
+corepack pnpm check:ai-generic-card-id-guards
 corepack pnpm check:proteus-ai-readiness
 corepack pnpm check:ai-deck-doctrine-strategy
 corepack pnpm --filter @netgrid/ai typecheck

@@ -10,7 +10,7 @@
   "scripts": {
     "e2e": "node scripts/run-e2e.mjs",
     "test:e2e": "node scripts/run-e2e.mjs",
-    "check:ai": "corepack pnpm check:ai-hint-metadata-contracts && corepack pnpm check:ai-source-structure",
+    "check:ai": "corepack pnpm check:ai-hint-metadata-contracts && corepack pnpm check:ai-source-structure && corepack pnpm check:ai-generic-card-id-guards",
     "build:proteus-ai-readiness-inventory": "node scripts/build-proteus-ai-readiness-inventory.mjs --write",
     "build:proteus-ai-family-scenarios": "node scripts/build-proteus-ai-family-scenarios.mjs --write",
     "build:proteus-ai-selected-pilot": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/run-proteus-ai-selected-pilot.ts --write",
@@ -24,6 +24,8 @@
     "check:ai-hint-metadata-contracts": "node scripts/check-ai-hint-metadata-contracts.mjs",
     "check:ai-source-structure": "node scripts/check-ai-source-structure.mjs",
     "check:ai-source-structure:selftest": "node scripts/check-ai-source-structure.mjs --self-test",
+    "check:ai-generic-card-id-guards": "node scripts/check-ai-generic-card-id-guards.mjs",
+    "check:ai-generic-card-id-guards:selftest": "node scripts/check-ai-generic-card-id-guards.mjs --self-test",
     "check:proteus-ai-readiness": "node scripts/check-proteus-ai-readiness.mjs",
     "check:proteus-ai-readiness-inventory": "node scripts/build-proteus-ai-readiness-inventory.mjs --check",
     "check:proteus-ai-family-scenarios": "node scripts/build-proteus-ai-family-scenarios.mjs --check",
