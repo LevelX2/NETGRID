@@ -10557,6 +10557,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "disgruntled-event",
           sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          abilityId: "derez_fully_broken_passed_ice_and_end_run",
           targetIceId: "banpei",
           targetIceDefinitionId: "onr_v1_223_banpei",
           runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
@@ -10590,6 +10591,12 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
+          rootPlanInstanceId: expect.any(String),
+          leafExecutorInstanceId: expect.any(String),
+          route: {
+            actionId: derez.actionId,
+            stepId: expect.any(String),
+          },
           turnPlanning: {
             coverage: {
               status: "pass",
@@ -10599,6 +10606,56 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
+  });
+
+  it("fails closed when a post-pass trigger has no bound functional ability", () => {
+    resetResidentPlanPortfolioMemory();
+    const incompleteDerez = legalAction(
+      "runner.trigger_ability.incomplete-post-pass-derez",
+      "runner",
+      "trigger_ability",
+      "Post-pass derez without ability binding",
+      { credits: 0, clicks: 0 },
+      {
+        source: "incomplete-event",
+        payload: {
+          cardId: "incomplete-event",
+          sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          targetIceId: "banpei",
+          targetIceDefinitionId: "onr_v1_223_banpei",
+          paymentAmount: 0,
+        },
+      },
+    );
+    const continueRun = legalAction(
+      "runner.continue_run.incomplete-post-pass-control",
+      "runner",
+      "continue_run",
+      "Continue",
+      { credits: 0, clicks: 0 },
+    );
+    const input = aiInput("runner", [incompleteDerez, continueRun]);
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("banpei", "corp", "ice", {
+          definitionId: "onr_v1_223_banpei",
+          rezzed: true,
+        }),
+      ]),
+      server("archives"),
+    ];
+
+    expect(() => liveContext().chooseSemanticRuntimeAction(input, {})).toThrow(
+      expect.objectContaining({ code: "missing_plan_module_coverage" }),
+    );
   });
 
   it("owns a generic run-remainder strength boost without knowing its card definition", () => {
@@ -10666,6 +10723,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "disgruntled-event",
           sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          abilityId: "derez_fully_broken_passed_ice_and_end_run",
           targetIceId: "banpei",
           targetIceDefinitionId: "onr_v1_223_banpei",
           runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
